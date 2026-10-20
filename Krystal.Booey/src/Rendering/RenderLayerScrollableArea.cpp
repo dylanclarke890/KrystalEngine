@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -1086,5 +1087,135 @@ namespace krys::boo
                         ->LocalToAbsoluteQuad(FloatQuad(FloatRect(localExposeRectScrolled)),
                                               MapCoordinatesMode::UseTransforms)
                         .BoundingBox());
+  }
+
+  void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context, const IntPoint &paintOffset,
+                                                        const IntRect &damageRect) noexcept
+  {
+    // Don't do anything if we have no overflow.
+    auto &renderer = _layer.Renderer();
+    if (!renderer.HasNonVisibleOverflow())
+    {
+      return;
+    }
+
+    if (!ShowsOverflowControls())
+    {
+      return;
+    }
+
+    // FIXME: Overlay scrollbars paint in a second pass through the layer tree, once there are overlay
+    // scrollbars.
+
+    // Move the scrollbar widgets if necessary. We normally move and resize widgets during layout, but
+    // sometimes widgets can move without layout occurring (most notably when you scroll a document that
+    // contains fixed positioned elements).
+    (void)PositionOverflowControls(ToIntSize(paintOffset));
+
+    // Now that we're sure the scrollbars are in the right place, paint them.
+    if (RefPtr<Scrollbar> hBar = _hBar)
+    {
+      hBar->Paint(context, damageRect);
+    }
+    if (RefPtr<Scrollbar> vBar = _vBar)
+    {
+      vBar->Paint(context, damageRect);
+    }
+
+    // We fill our scroll corner with white if we have a scrollbar that doesn't run all the way up to the edge
+    // of the box.
+    PaintScrollCorner(context, paintOffset, damageRect);
+
+    // FIXME: Paint our resizer last, since it sits on top of the scroll corner, once there are resizers.
+  }
+
+  void RenderLayerScrollableArea::PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
+                                                    const IntRect &damageRect) noexcept
+  {
+    IntRect absRect = ScrollCornerRect();
+    absRect.MoveBy(paintOffset);
+    if (!absRect.Intersects(damageRect))
+    {
+      return;
+    }
+
+    // FIXME: Custom scroll corners (::-webkit-scrollbar-corner, dropped as non-standard).
+
+    // We don't want to paint a corner if we have overlay scrollbars, since we need to see what is behind it.
+    if (!HasOverlayScrollbars())
+    {
+      ScrollbarTheme::Theme().PaintScrollCorner(*this, context, absRect);
+    }
+  }
+
+  bool RenderLayerScrollableArea::HitTestOverflowControls(HitTestResult &result,
+                                                          const IntPoint &localPoint) noexcept
+  {
+    // FIXME: Resizers (canResize), once there are resizers.
+    if (!_hBar && !_vBar)
+    {
+      return false;
+    }
+
+    auto rects = OverflowControlsRects();
+
+    // FIXME: We should hit test the scroll corner and pass it back through the result.
+    if (RefPtr<Scrollbar> vBar = _vBar; vBar && vBar->ShouldParticipateInHitTesting())
+    {
+      if (rects.VerticalScrollbar.Contains(localPoint))
+      {
+        result.SetScrollbar(krys::move(vBar));
+        return true;
+      }
+    }
+
+    if (RefPtr<Scrollbar> hBar = _hBar; hBar && hBar->ShouldParticipateInHitTesting())
+    {
+      if (rects.HorizontalScrollbar.Contains(localPoint))
+      {
+        result.SetScrollbar(krys::move(hBar));
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  IntPoint RenderLayerScrollableArea::ConvertFromContainingViewToScrollbar(
+    const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept
+  {
+    auto &renderer = _layer.Renderer();
+    // LocalFrameView::convertFromContainingViewToRenderer: from the view's coordinates into page ("absolute")
+    // coordinates, then the renderer's.
+    auto &view = renderer.View().FrameView();
+    IntPoint absolutePoint = parentPoint + IntSize(view.ScrollX(), view.ScrollY());
+    IntPoint point = RoundedIntPoint(
+      renderer.AbsoluteToLocal(FloatPoint(absolutePoint), {MapCoordinatesMode::UseTransforms}));
+    point.Move(-ScrollbarOffset(scrollbar));
+    return point;
+  }
+
+  OverscrollBehavior RenderLayerScrollableArea::HorizontalOverscrollBehavior() const noexcept
+  {
+    if (_layer.GetRenderBox())
+    {
+      return _layer.Renderer().Style().OverscrollBehaviorX();
+    }
+    return OverscrollBehavior::Auto;
+  }
+
+  OverscrollBehavior RenderLayerScrollableArea::VerticalOverscrollBehavior() const noexcept
+  {
+    if (_layer.GetRenderBox())
+    {
+      return _layer.Renderer().Style().OverscrollBehaviorY();
+    }
+    return OverscrollBehavior::Auto;
+  }
+
+  bool RenderLayerScrollableArea::IsScrollableOrRubberbandable() const noexcept
+  {
+    auto *box = _layer.GetRenderBox();
+    return box && box->CanBeScrolledAndHasScrollableArea();
   }
 }

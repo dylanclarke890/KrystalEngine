@@ -1,10 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -15,6 +19,7 @@ namespace krys::boo::dom
 {
   class Element;
   class KeyboardEvent;
+  class WheelEvent;
   class Node;
 }
 
@@ -25,15 +30,17 @@ namespace krys::boo
   class LocalFrame;
   class LocalFrameView;
   class MouseEventWithHitTestResults;
+  class ScrollableArea;
+  class Scrollbar;
 
   /// @brief Turns the host's mouse and keyboard input into DOM events for a frame: `mousemove`, `mousedown`
   /// and `mouseup` at the element under the mouse; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as
   /// that element changes; `click`, `auxclick` and `dblclick`; the hover and active state; the cursor to
-  /// show; and `keydown`, `keypress` and `keyup` at the focused element, with Tab and Shift+Tab moving the
-  /// focus.
-  // FIXME: The rest of the event handler: the keyboard's other default actions, wheel scrolling, drag and
-  // drop, selection, context menus, scrollbars, resizers, subframes, autoscroll, pointer lock, touch and
-  // pointer events.
+  /// show; the scrollbars under the mouse; `wheel`, which scrolls; and `keydown`, `keypress` and `keyup` at
+  /// the focused element, with Tab and Shift+Tab moving the focus and the arrows, Page Up and Page Down,
+  /// Home, End and Space scrolling.
+  // FIXME: The rest of the event handler: the keyboard's other default actions, drag and drop, selection,
+  // context menus, resizers, subframes, autoscroll, pointer lock, touch and pointer events.
   class EventHandler
   {
     KRYS_NON_COPY_MOVABLE(EventHandler);
@@ -50,6 +57,12 @@ namespace krys::boo
       Yes
     };
 
+    enum class SetOrClearLastScrollbar : bool
+    {
+      Clear,
+      Set
+    };
+
   private:
     LocalFrame &_frame;
 
@@ -61,6 +74,8 @@ namespace krys::boo
     List<RefPtr<dom::Element>> _ancestorsOfLastElementUnderMouse;
     RefPtr<dom::Element> _mouseMoveTargetOverride;
 
+    RefPtr<Scrollbar> _lastScrollbarUnderMouse;
+
     Cursor _currentMouseCursor;
 
     RefPtr<dom::Node> _clickNode;
@@ -70,6 +85,7 @@ namespace krys::boo
     Maybe<DoublePoint> _lastKnownMousePosition;
     Maybe<DoublePoint> _lastKnownMouseGlobalPosition;
     MonotonicTime::duration _mouseDownTimestamp {};
+    bool _isHandlingWheelEvent {false};
     PlatformMouseEvent _lastPlatformMouseEvent;
 
   public:
@@ -135,16 +151,54 @@ namespace krys::boo
     /// @return Whether the event was cancelled.
     bool KeyEvent(const PlatformKeyboardEvent &keyEvent) noexcept;
 
+    /// @brief Handles a turn of the mouse wheel: `wheel` at the element under the mouse, then, unless it's
+    /// cancelled, a scroll of the nearest box that can scroll that way, or else the view.
+    /// @return Whether the event was cancelled or scrolled something.
+    // FIXME: Latching, the delta filter, scroll snapping, gesture states and asynchronous scrolling come with
+    // touchpad gestures, scroll snapping and a scrolling thread.
+    bool HandleWheelEvent(const PlatformWheelEvent &event) noexcept;
+    /// @brief The default action of a `wheel` event at @p startNode: scrolls the nearest enclosing box that
+    /// can scroll by the event's deltas, passing over boxes at their end unless `overscroll-behavior` stops
+    /// it.
+    /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
+    bool DefaultWheelEventHandler(dom::Node *startNode, dom::WheelEvent &wheelEvent) noexcept;
+    KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
+    {
+      return _isHandlingWheelEvent;
+    }
+
     /// @brief Queues a `scroll` event at the document, after the view scrolled.
     void ScheduleScrollEvent() noexcept;
 
-  private:
-    bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
     /// @brief The default actions of a keyboard event that wasn't cancelled: Tab and Shift+Tab move the
-    /// focus.
+    /// focus; the arrows scroll by a line, Page Up and Page Down by a page, and Home and End to the start or
+    /// end, and a `keypress` of Space (Shift+Space) a page down (up).
     /// @return Whether the event was handled.
     bool DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+
+    /// @brief Scrolls the box of @p startingNode (the focused element, or else the last pressed node, if
+    /// null), or else its nearest containing block that scrolls, by a step of @p granularity.
+    /// @return Whether it scrolled.
+    bool ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
+                        dom::Node *startingNode = nullptr) noexcept;
+    bool LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                               dom::Node *startingNode = nullptr) noexcept;
+    /// @brief As `ScrollOverflow`, or else scrolls the view.
+    // FIXME: Then the parent frame, once there are subframes.
+    bool ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
+                           dom::Node *startingNode = nullptr) noexcept;
+    bool LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                  dom::Node *startingNode = nullptr) noexcept;
+
+  private:
+    bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
     bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &event, ScrollLogicalDirection direction,
+                                           ScrollGranularity granularity) noexcept;
+    bool DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultArrowEventHandler(dom::FocusDirection focusDirection, dom::KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;
@@ -168,6 +222,22 @@ namespace krys::boo
     void UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept;
     KRYS_NODISCARD Maybe<Cursor> SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept;
     KRYS_NODISCARD bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept;
+
+    bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
+    bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept;
+    bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const dom::WheelEvent &wheelEvent,
+                                                   const FloatSize &filteredPlatformDelta) noexcept;
+    KRYS_NODISCARD static bool ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,
+                                                            ScrollableArea &scrollableArea) noexcept;
+    bool HandleWheelEventInScrollableArea(const PlatformWheelEvent &wheelEvent,
+                                          ScrollableArea &scrollableArea) noexcept;
+
+    bool PassMousePressEventToScrollbar(MouseEventWithHitTestResults &mouseEvent,
+                                        Scrollbar *scrollbar) noexcept;
+    /// @brief Sends `MouseExited` to the last scrollbar under the mouse if @p scrollbar is a different one,
+    /// and `MouseEntered` to @p scrollbar if it's set as the new one.
+    void UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar, SetOrClearLastScrollbar setOrClear) noexcept;
+    KRYS_NODISCARD bool IsInsideScrollbar(const IntPoint &windowPoint) const noexcept;
 
     // FIXME: Selection: handleMousePressEvent and handleMouseReleaseEvent for a hit test, which select text.
   };

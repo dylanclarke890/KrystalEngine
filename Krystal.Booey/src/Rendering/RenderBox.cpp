@@ -3891,6 +3891,78 @@ namespace krys::boo
     return false;
   }
 
+  bool RenderBox::ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
+                              dom::Element **stopElement) noexcept
+  {
+    auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr;
+    if (scrollableArea && scrollableArea->Scroll(direction, granularity, stepCount))
+    {
+      if (stopElement)
+      {
+        *stopElement = GetElement();
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  bool RenderBox::Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
+                         dom::Element **stopElement) noexcept
+  {
+    if (ScrollLayer(direction, granularity, stepCount, stopElement))
+    {
+      return true;
+    }
+
+    if (stopElement && *stopElement && *stopElement == GetElement())
+    {
+      return true;
+    }
+
+    // FIXME: Autoscrolling near the edge of a box (the start box and the wheel event's point), once there's
+    // autoscrolling.
+    RenderBlock *nextScrollBlock = ContainingBlock();
+
+    if (nextScrollBlock && !nextScrollBlock->IsRenderView())
+    {
+      return nextScrollBlock->Scroll(direction, granularity, stepCount, stopElement);
+    }
+
+    return false;
+  }
+
+  bool RenderBox::LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                uint32 stepCount, dom::Element **stopElement) noexcept
+  {
+    if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
+    {
+      if (scrollableArea->Scroll(
+            LogicalToPhysical(direction, IsHorizontalWritingMode(), GetWritingMode().IsBlockFlipped()),
+            granularity, stepCount))
+      {
+        if (stopElement)
+        {
+          *stopElement = GetElement();
+        }
+        return true;
+      }
+    }
+
+    if (stopElement && *stopElement && *stopElement == GetElement())
+    {
+      return true;
+    }
+
+    RenderBlock *b = ContainingBlock();
+    if (b && !b->IsRenderView())
+    {
+      return b->LogicalScroll(direction, granularity, stepCount, stopElement);
+    }
+    return false;
+  }
+
   bool RenderBox::CanBeScrolledAndHasScrollableArea() const noexcept
   {
     return CanBeProgramaticallyScrolled() && (HasHorizontalOverflow() || HasVerticalOverflow());

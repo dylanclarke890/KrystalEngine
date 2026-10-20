@@ -74,11 +74,13 @@ layer at (8,291) size 784x10
 
     SECTION("The view's size")
     {
+      // The document (309 pixels tall) overflows the view, which takes a vertical scrollbar (21 pixels wide).
       fixture.Frame->View()->Resize({400, 300});
       (void)fixture.Document->UpdateLayout();
-      CHECK(fixture.Document->GetRenderView()->Size() == LayoutSize(400, 300));
-      CHECK(BoxOf(fixture, u8"d").Width() == 192_lu);
-      CHECK(BoxOf(fixture, u8"d").X() == 96_lu);
+      CHECK(fixture.Frame->View()->VerticalScrollbar());
+      CHECK(fixture.Document->GetRenderView()->Size() == LayoutSize(379, 300));
+      CHECK(BoxOf(fixture, u8"d").Width() == LayoutUnit(181.5f));
+      CHECK(BoxOf(fixture, u8"d").X() == LayoutUnit(90.75f));
     }
   }
 
@@ -118,9 +120,9 @@ layer at (0,0) size 800x311
       RenderBlock {P} at (0,277) size 800x18
         RenderText {#text} at (0,0) size 26x17
           text run at (0,0) width 26: "text"
-layer at (0,186) size 800x40 clip at (0,186) size 785x25 scrollHeight 100
-  RenderBlock {DIV} at (0,186) size 800x40 id="s" (layout overflow 0,0 785x100)
-    RenderBlock {DIV} at (0,0) size 785x100
+layer at (0,186) size 800x40 clip at (0,186) size 779x19 scrollHeight 100
+  RenderBlock {DIV} at (0,186) size 800x40 id="s" (layout overflow 0,0 779x100)
+    RenderBlock {DIV} at (0,0) size 779x100
 )");
   }
 

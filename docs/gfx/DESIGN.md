@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5) is in progress: G5a, the viewport scrolls, is done; see *G5 plan*.
+Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*.
 
 ## Why
 
@@ -300,7 +300,7 @@ All done in G1 (2026-10-17) unless noted.
 | T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
-| G5 | Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In three parts (see *G5 plan*). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
+| G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
 
 ### G2 parts
 
@@ -569,7 +569,7 @@ Two parts (decided by the user). Booey has `UIEventWithKeyState` (G4f2) and the 
 
 ### G5 plan (decided 2026-10-19)
 
-Three parts (decided by the user). Booey's overflow boxes scroll (L5): `RenderLayerScrollableArea` keeps a scroll position, and painting, hit testing, the coordinate mapping, the CSSOM View scroll APIs and `scrollIntoView()` follow it; layout reserves scrollbar space with a placeholder theme of a fixed thickness. The frame view doesn't scroll (`WindowToContents` is the identity, the scrolling element's scroll APIs do nothing), there are no wheel events, the keyboard's scrolling defaults are FIXMEs, and no scrollbar is drawn.
+Three parts (decided by the user); revised the same day after G5a: G5b and G5c are one part, G5b (decided by the user), as upstream's keyboard scrolling takes its steps from scrollbars, which the viewport only gets with them. Booey's overflow boxes scroll (L5): `RenderLayerScrollableArea` keeps a scroll position, and painting, hit testing, the coordinate mapping, the CSSOM View scroll APIs and `scrollIntoView()` follow it; layout reserves scrollbar space with a placeholder theme of a fixed thickness. The frame view doesn't scroll (`WindowToContents` is the identity, the scrolling element's scroll APIs do nothing), there are no wheel events, the keyboard's scrolling defaults are FIXMEs, and no scrollbar is drawn.
 
 - **G5a, the viewport scrolls** (Booey and Krystal.UI):
   - **Booey:** the scrolling half of upstream's `ScrollView` and `ScrollableArea` for `LocalFrameView`, trimmed: a scroll position clamped to the contents size, the scrollable axes from the root's or the body's `overflow`, the visible content rect, the window and contents conversions. Painting translates the contents by the scroll position, with fixed-position boxes staying put; hit testing and mouse events take the scroll into account; the scrolling element's `scrollTop`, `scrollLeft` and `scrollTo()` scroll the viewport, as do `scrollIntoView()` and focusing (so Tab brings what it focuses into view). `scroll` events at scrolled boxes and the document, in the view's rendering update (the specification's scroll steps).
@@ -578,9 +578,9 @@ Three parts (decided by the user). Booey's overflow boxes scroll (L5): `RenderLa
 - **G5b, wheel and keyboard scrolling** (Booey, Krystal.UI and Krystal.PAL):
   - **Booey:** `PlatformWheelEvent`, `WheelEvent` and `WheelEventInit`; the wheel half of `EventHandler`: `wheel` at the element under the mouse, then, unless cancelled, the nearest box that can scroll that way, then the viewport, chaining past boxes at their edge unless `overscroll-behavior` stops it. The keyboard's scrolling defaults: the arrows (upstream's 40 pixel line step), Page Up and Page Down (a page less the overlap), Home and End, Space and Shift+Space, for the focused element's nearest scrolling box or the viewport.
   - **Krystal.PAL:** the horizontal wheel (`WM_MOUSEHWHEEL`), fractional deltas (touchpads), modifiers and the position on wheel events, the system's lines per notch; the wheel reported once (raw input and `WM_MOUSEWHEEL` both report it now).
-  - **Krystal.UI:** `View::MouseWheel`; a notch is the system's lines (usually 3) times 40 pixels, as browsers on Windows (decided).
+  - **Krystal.UI:** `View::MouseWheel`; a notch is the system's lines (usually 3) times 100/3 pixels (upstream's `cScrollbarPixelsPerLine`, as Chrome; corrected from the 40 pixels decided, which is the arrow keys' line step), and Shift turns the vertical wheel horizontal, as upstream's Windows port.
   - **Editor:** the wheel and the keys scroll the page; a card has a scrolling box, and the page is taller than the window.
-- **G5c, scrollbars** (Booey):
+- **G5c, scrollbars** (Booey; merged into G5b):
   - **Theme** (decided): upstream's `ScrollbarThemeComposite` and Adwaita theme (`ScrollbarThemeAdwaita`, drawn through `GraphicsContext`, so platform independent), classic: always shown, taking layout space, with a rounded thumb and no buttons. Layout's scrollbar space becomes the theme's.
   - **Booey:** `Scrollbar`s for scrolling boxes and the viewport, painted in the layers' overflow controls phase with the scroll corner; hit testing finds them; the mouse drags the thumb and pages from the track, with the arrow cursor; `scrollbar-width`, `scrollbar-color` and `scrollbar-gutter`.
   - **Tests:** scrollbar geometry, hit testing and dragging; a page golden of scrollbars (Chrome's only reported: its Windows scrollbars differ).
@@ -887,6 +887,20 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Out (FIXMEs):** scrollbars (G5c), the scrollable axes (G5b), smooth scrolling, scroll snapping and anchoring, the visual and layout viewports, page scale, rubber-banding, a fake mouse move after a scroll (the hovered element doesn't follow the content under a still mouse until it moves), frames.
 - **Editor:** unchanged; wheel and key scrolling come with G5b.
 - **Tests:** Booey tests the scroll range, the scrolling element's APIs, hit testing and coordinates, fixed boxes, scrolled painting, scrolling into view and the scroll events (6 cases); Krystal.UI tests scrolling a view and its recording, and its painting is now clipped to the visible contents. No golden: nothing new paints.
+
+### G5b as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Scrollbars, wheel and keyboard scrolling* in `docs/booey/PORTING.md`):
+  - **Scrollbars:** upstream's `ScrollbarThemeComposite` and Adwaita theme (classic: always shown and taking layout space; 21 pixels, a rounded thumb of at least 40, no buttons; no track, border or painted corner, decided by the user: the box's background, or the page's, shows under them) behind a virtual `ScrollbarTheme`; `Scrollbar`s for the view (the scrollbars half of `ScrollView`, folded into `LocalFrameView`: modes from the root's or the body's `overflow`, `UpdateScrollbars` with its passes) and for scrolling boxes, painted after the contents (the view) or in the block background phases (boxes), with the scroll corner. Layout's scrollbar space is the theme's. A view that can show scrollbars lays out at once on a resize, as upstream.
+  - **Mouse:** hit testing finds scrollbars (`HitTestResult::GetScrollbar`; the view's through `Document::HitTest`); the event handler sends presses, moves and releases to the scrollbar under the mouse: the thumb drags (on past the scrollbar), the track pages, parts hover, and the cursor is the arrow. Pressing the view's scrollbar leaves the focus alone.
+  - **Wheel:** `PlatformWheelEvent`, `WheelEvent`; `wheel` at the element under the mouse, then, unless cancelled, the nearest enclosing box that can scroll that way, then the view, passing boxes at their end unless `overscroll-behavior` stops it. Immediate (no animation).
+  - **Keyboard:** the arrows scroll by a line (40 pixels), Page Up and Page Down by a page (four fifths of what's in view), Home and End to the ends, and Space (Shift+Space) a page down (up), for the focused element's nearest scrolling box, or else the view.
+- **Krystal.PAL:** wheel events carry both axes (`WM_MOUSEHWHEEL` too) in fractional notches, the cursor's position and the modifiers; the dead raw input wheel branch is gone; `GetWheelScrollSettings` reads the system's lines and characters per notch.
+- **Krystal.UI:** `View::MouseWheel`: a notch is the system's lines (or a page) at 100/3 pixels a line, and Shift turns the vertical wheel horizontal, as upstream's Windows port.
+- **Editor:** the wheel scrolls the page view; a fifth row of cards has two scrolling lists (one with `overscroll-behavior: contain`) and a strip that scrolls sideways, so the page is taller than the window.
+- **Changed from the plan:** G5c (scrollbars) is part of G5b (decided by the user), and so is the scrollable axes' work moved from G5a. `scrollbar-color` has no effect, as with upstream's Adwaita theme (it doesn't read it); `scrollbar-gutter` reserves space as layout already did. A wheel event of page granularity pages by the visible size, not upstream's contents size (a bug).
+- **Out (FIXMEs):** smooth and animated scrolling, momentum and touchpad gestures, latching, scroll snapping, overlay scrollbars and their fading, autoscrolling's timers (a pressed track pages once), resizers, spatial navigation, `position: sticky`, frames.
+- **Tests:** Booey tests the scrollbars under the mouse (the view's and a box's), the wheel, the keyboard and `WheelEvent` (6 new cases), and the tests that measured the view are updated for its scrollbars; Krystal.UI tests `View::MouseWheel` and a page golden, `scrollbars` (the view's scrollbars and corner, a box with both, a scrolled box, a box without any). It has no Chrome golden: Chrome's captures hide scrollbars, and its Windows scrollbars aren't the theme's.
 
 ## Open decisions
 

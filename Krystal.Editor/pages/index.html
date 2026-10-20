@@ -39,6 +39,14 @@
   /* The first stage's boxes are focusable by clicking (tabindex -1): the stage shows when one has focus. */
   .stage:focus-within { box-shadow: inset 0 0 0 3px #118ab2; }
   tr:hover td { text-decoration: underline; }
+
+  /* Scrolling boxes, with the theme's scrollbars. */
+  .list { height: 100%; overflow: auto; border-radius: 8px; background: #f7f8fb; }
+  .list p { margin: 0; padding: 4px 10px; border-bottom: 1px solid #e3e7ef; }
+  .list p:hover { background: #dfe5ff; }
+  .strip { height: 100%; overflow-x: auto; overflow-y: hidden; white-space: nowrap; border-radius: 8px;
+           background: #f7f8fb; }
+  .strip div { display: inline-block; width: 90px; height: 90px; margin: 8px 4px; border-radius: 12px; }
 </style>
 </head>
 <body>
@@ -187,6 +195,72 @@
         <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Keys</td><td id="last-key" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Press a key</td></tr>
         <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Tab through the cards</td></tr>
       </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Scrolling: the wheel scrolls the box under the mouse, then the page once the box reaches its end
+         (Shift turns the wheel sideways); the arrows, Page Up and Page Down, Home, End and Space scroll the
+         focused box, or else the page; the scrollbars' thumbs drag and their tracks page. -->
+    <div class="card" tabindex="0">
+      <div class="list" tabindex="0">
+        <p>Item 1</p>
+        <p>Item 2</p>
+        <p>Item 3</p>
+        <p>Item 4</p>
+        <p>Item 5</p>
+        <p>Item 6</p>
+        <p>Item 7</p>
+        <p>Item 8</p>
+        <p>Item 9</p>
+        <p>Item 10</p>
+        <p>Item 11</p>
+        <p>Item 12</p>
+        <p>Item 13</p>
+        <p>Item 14</p>
+        <p>Item 15</p>
+        <p>Item 16</p>
+        <p>Item 17</p>
+        <p>Item 18</p>
+        <p>Item 19</p>
+        <p>Item 20</p>
+      </div>
+    </div>
+
+    <!-- overscroll-behavior: contain keeps the wheel in the box at its ends. -->
+    <div class="card" tabindex="0">
+      <div class="list" tabindex="0" style="overscroll-behavior: contain">
+        <p>Contained 1</p>
+        <p>Contained 2</p>
+        <p>Contained 3</p>
+        <p>Contained 4</p>
+        <p>Contained 5</p>
+        <p>Contained 6</p>
+        <p>Contained 7</p>
+        <p>Contained 8</p>
+        <p>Contained 9</p>
+        <p>Contained 10</p>
+        <p>Contained 11</p>
+        <p>Contained 12</p>
+      </div>
+    </div>
+
+    <!-- A strip that scrolls sideways. -->
+    <div class="card" tabindex="0" style="flex: 2">
+      <div class="strip" tabindex="0">
+        <div style="background: #ef476f"></div>
+        <div style="background: #ffd166"></div>
+        <div style="background: #06d6a0"></div>
+        <div style="background: #118ab2"></div>
+        <div style="background: #073b4c"></div>
+        <div style="background: #8338ec"></div>
+        <div style="background: #ef476f"></div>
+        <div style="background: #ffd166"></div>
+        <div style="background: #06d6a0"></div>
+        <div style="background: #118ab2"></div>
+        <div style="background: #073b4c"></div>
+        <div style="background: #8338ec"></div>
+      </div>
     </div>
   </div>
 </body>

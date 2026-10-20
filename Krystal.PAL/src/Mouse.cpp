@@ -27,6 +27,11 @@ namespace krys::pal
     return _scrollDelta;
   }
 
+  KRYS_NODISCARD float Mouse::HorizontalScrollDelta() const noexcept
+  {
+    return _horizontalScrollDelta;
+  }
+
   KRYS_NODISCARD bool Mouse::IsButtonPressed(MouseButton button) const noexcept
   {
     return (_pressed & button) == button;

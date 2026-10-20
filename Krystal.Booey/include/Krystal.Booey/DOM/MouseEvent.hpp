@@ -20,7 +20,7 @@ namespace krys::boo::dom
   KRYS_NODISCARD bool IsAnyClick(const Event &event) noexcept;
 
   /// @brief An event from a pointing device: `mousedown`, `mouseup`, `mousemove`, `mouseover`, `mouseout`,
-  /// `mouseenter`, `mouseleave`, `click`, `auxclick` and `dblclick`.
+  /// `mouseenter`, `mouseleave`, `click`, `auxclick` and `dblclick`; `wheel` is a `WheelEvent`.
   /// @see https://w3c.github.io/uievents/#interface-mouseevent
   // FIXME: Force, synthetic clicks, and coalesced and predicted events come with pointer events.
   class MouseEvent : public MouseRelatedEvent
@@ -108,7 +108,6 @@ namespace krys::boo::dom
       _relatedTarget = ShareRefPtr(relatedTarget);
     }
 
-  private:
     MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
                const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
                double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,

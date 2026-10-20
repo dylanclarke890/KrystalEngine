@@ -8,13 +8,13 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Settings** — `Page/Settings.hpp` holds the experimental and embedder flags and the font size values; the other values upstream reads from `Settings` (`textAreasAreResizable`, `hiddenUntilFoundEnabled`, `coreMathMLEnabled`, ...) are upstream's defaults in code. The media text track display quirk is never set (no document quirks).
 - **Resource loading** — `<link rel=stylesheet>`, `@import`, `@font-face` sources and images aren't fetched (`CSS/Rules/ImportRule.hpp`, `CSS/Values/ImageValue.hpp`, `src/HTML/HTMLLinkElement.cpp`). https://html.spec.whatwg.org/#link-type-stylesheet
 - **Fonts** — the host registers fonts (`Graphics/FontDatabase.hpp`) and sets generic families in `Settings`; no web fonts: `@font-face`, `FontFace`/`FontFaceSet` and the `CSSFontFace*` headers are unbuilt (`CSS/Font/`, FIXMEs in `src/CSS/CSSFontSelector.cpp`); text is measured and shaped, but not drawn. https://drafts.csswg.org/css-font-loading/
-- **Painting** — pages paint into display lists that Krystal.UI replays, and hit test (G4, `docs/gfx/DESIGN.md`); images, `filter` and `backdrop-filter`, `mask-image`, scrollbars, selection and carets, SVG and form controls aren't drawn, and any change repaints the whole page (FIXMEs; *G4 plan*).
-- **Frames** — `LocalFrame` has no page, loader, navigation, frame tree (no iframes), window, scripting or printing; `LocalFrameView` scrolls (G5a) but has no scrollbars or visual viewport (`Page/LocalFrame.hpp`, `Page/LocalFrameView.hpp`).
+- **Painting** — pages paint into display lists that Krystal.UI replays, and hit test (G4, `docs/gfx/DESIGN.md`); images, `filter` and `backdrop-filter`, `mask-image`, selection and carets, SVG and form controls aren't drawn, and any change repaints the whole page (FIXMEs; *G4 plan*).
+- **Frames** — `LocalFrame` has no page, loader, navigation, frame tree (no iframes), window, scripting or printing; `LocalFrameView` scrolls, with scrollbars (G5a, G5b), but has no visual viewport (`Page/LocalFrame.hpp`, `Page/LocalFrameView.hpp`).
 - **Logging** — no channel for exceptions thrown by event listeners or for parse errors (`src/DOM/Algorithms/EventDispatcher.cpp`, `src/HTML/Parser/HTMLTreeBuilder.cpp`).
 
 ## Style
 
-- **Input events** — mouse, keyboard and focus events, clicks, hover and active state and cursors are done (G4f to G4h, `docs/gfx/DESIGN.md`); pointer, touch and wheel events, drag and drop, selection, context menus, access keys and text input aren't (`src/Page/EventHandler.cpp`). https://w3c.github.io/uievents/
+- **Input events** — mouse, keyboard and focus events, clicks, hover and active state and cursors are done (G4f to G4h, `docs/gfx/DESIGN.md`); wheel events and keyboard scrolling are done too (G5b); pointer and touch events, smooth and momentum scrolling, drag and drop, selection, context menus, access keys and text input aren't (`src/Page/EventHandler.cpp`). https://w3c.github.io/uievents/
 - **Focus navigation** — Tab order is done (G4h2); spatial navigation, popovers as focus navigation scopes and frames aren't (`src/HTML/Algorithms/FocusAlgorithms.cpp`). https://html.spec.whatwg.org/#sequential-focus-navigation
 - **Autofocus and focus fixup** — autofocus candidates aren't flushed and the focused element isn't refocused when it stops being focusable (both run in the rendering update) (`src/HTML/Algorithms/FocusAlgorithms.cpp`). https://html.spec.whatwg.org/#flush-autofocus-candidates
 - **Animations and transitions** — keyframe styles, interpolation and the tree resolver's animated updates aren't ported; `animation`/`transition` compute but nothing animates (`PORTING.md`, *Open*).
@@ -24,7 +24,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Document language** — no default language from a `Content-Language` pragma or header (`EffectiveLang`). https://html.spec.whatwg.org/#pragma-set-default-language
 - **Typed OM** — `styleMap`, `attributeStyleMap`, `computedStyleMap()` and `css/typedom` aren't ported; needs `DOMMatrix` and `ParseTransformRaw` first (`CSS/Properties/Consumers/Transform.hpp`). https://drafts.css-houdini.org/css-typed-om/
 - **CSSOM** — async `CSSStyleSheet.replace()` (promises); `getComputedStyle` is a free function until there's a window (`CSS/CSSComputedStyleDeclaration.hpp`).
-- **Layout** — block, inline, flex, grid and table layout are done, and style reads layout (size container queries and container units); the CSSOM View geometry and scrolling APIs are done. There's no anchor positioning; the viewport scrolls since G5a (`PORTING.md` *Open*, *The viewport scrolls*).
+- **Layout** — block, inline, flex, grid and table layout are done, and style reads layout (size container queries and container units); the CSSOM View geometry and scrolling APIs are done. There's no anchor positioning; the viewport scrolls since G5a, with scrollbars, the wheel and the keyboard since G5b (`PORTING.md` *Open*, *The viewport scrolls*).
 
 ## DOM
 

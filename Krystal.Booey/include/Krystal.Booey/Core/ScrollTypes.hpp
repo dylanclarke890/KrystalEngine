@@ -5,8 +5,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
 
-// FIXME: The wheel, keyboard, rubber-banding and snapping types, and the scrollbar parts, come with scrolling
-// input and painting.
+// FIXME: The rubber-banding and snapping types come with rubber-banding and scroll snapping.
 
 namespace krys::boo
 {
@@ -174,4 +173,107 @@ namespace krys::boo
     krys_debug_assert(false);
     return 0;
   }
+
+  enum ScrollLogicalDirection : uint8
+  {
+    ScrollBlockDirectionBackward,
+    ScrollBlockDirectionForward,
+    ScrollInlineDirectionBackward,
+    ScrollInlineDirectionForward
+  };
+
+  KRYS_NODISCARD constexpr ScrollDirection LogicalToPhysical(ScrollLogicalDirection direction,
+                                                             bool isVertical, bool isFlipped) noexcept
+  {
+    switch (direction)
+    {
+      case ScrollBlockDirectionBackward:
+      {
+        if (isVertical)
+        {
+          return !isFlipped ? ScrollDirection::ScrollUp : ScrollDirection::ScrollDown;
+        }
+        return !isFlipped ? ScrollDirection::ScrollLeft : ScrollDirection::ScrollRight;
+      }
+      case ScrollBlockDirectionForward:
+      {
+        if (isVertical)
+        {
+          return !isFlipped ? ScrollDirection::ScrollDown : ScrollDirection::ScrollUp;
+        }
+        return !isFlipped ? ScrollDirection::ScrollRight : ScrollDirection::ScrollLeft;
+      }
+      case ScrollInlineDirectionBackward:
+      {
+        if (isVertical)
+        {
+          return !isFlipped ? ScrollDirection::ScrollLeft : ScrollDirection::ScrollRight;
+        }
+        return !isFlipped ? ScrollDirection::ScrollUp : ScrollDirection::ScrollDown;
+      }
+      case ScrollInlineDirectionForward:
+      {
+        if (isVertical)
+        {
+          return !isFlipped ? ScrollDirection::ScrollRight : ScrollDirection::ScrollLeft;
+        }
+        return !isFlipped ? ScrollDirection::ScrollDown : ScrollDirection::ScrollUp;
+      }
+    }
+    return ScrollDirection::ScrollUp;
+  }
+
+  enum class ScrollEventAxis : uint8
+  {
+    Horizontal,
+    Vertical
+  };
+
+  KRYS_NODISCARD constexpr ScrollEventAxis AxisFromDirection(ScrollDirection direction) noexcept
+  {
+    switch (direction)
+    {
+      case ScrollDirection::ScrollUp:    return ScrollEventAxis::Vertical;
+      case ScrollDirection::ScrollDown:  return ScrollEventAxis::Vertical;
+      case ScrollDirection::ScrollLeft:  return ScrollEventAxis::Horizontal;
+      case ScrollDirection::ScrollRight: return ScrollEventAxis::Horizontal;
+    }
+    return ScrollEventAxis::Vertical;
+  }
+
+  /// @brief The parts of a scrollbar, as a bit set (`ScrollbarControlPartMask`).
+  enum ScrollbarPart : uint32
+  {
+    NoPart = 0,
+    BackButtonStartPart = 1,
+    ForwardButtonStartPart = 1 << 1,
+    BackTrackPart = 1 << 2,
+    ThumbPart = 1 << 3,
+    ForwardTrackPart = 1 << 4,
+    BackButtonEndPart = 1 << 5,
+    ForwardButtonEndPart = 1 << 6,
+    ScrollbarBGPart = 1 << 7,
+    TrackBGPart = 1 << 8,
+    AllParts = 0xff'ff'ff'ff
+  };
+
+  using ScrollbarControlPartMask = uint32;
+
+  enum ScrollbarButtonsPlacement : uint8
+  {
+    ScrollbarButtonsNone,
+    ScrollbarButtonsSingle,
+    ScrollbarButtonsDoubleStart,
+    ScrollbarButtonsDoubleEnd,
+    ScrollbarButtonsDoubleBoth
+  };
+
+  /// @brief What pressing a scrollbar part does.
+  enum class ScrollbarButtonPressAction : uint8
+  {
+    None,
+    CenterOnThumb,
+    StartDrag,
+    Scroll
+  };
 }

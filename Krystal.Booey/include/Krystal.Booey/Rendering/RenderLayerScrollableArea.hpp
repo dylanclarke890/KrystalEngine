@@ -184,6 +184,23 @@ namespace krys::boo
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+    KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
+
+    /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.
+    // FIXME: Overlay scrollbars' second pass and the resizer (paintResizer), once there are overlay
+    // scrollbars and resizers.
+    void PaintOverflowControls(GraphicsContext &context, const IntPoint &paintOffset,
+                               const IntRect &damageRect) noexcept;
+    void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
+                           const IntRect &damageRect) noexcept;
+    /// @brief Whether @p localPoint (in the box's coordinates) is over a scrollbar, which @p result then
+    /// names.
+    bool HitTestOverflowControls(HitTestResult &result, const IntPoint &localPoint) noexcept;
+
+    KRYS_NODISCARD IntPoint ConvertFromContainingViewToScrollbar(
+      const Scrollbar &scrollbar, const IntPoint &parentPoint) const noexcept override;
+    KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
+    KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 
     KRYS_NODISCARD IntSize ScrollbarOffset(const Scrollbar &scrollbar) const noexcept;
 

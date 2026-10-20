@@ -384,4 +384,33 @@ namespace krys::ui::tests
   (x 0.00)
   (y -400.00)))"));
   }
+
+  TEST_CASE("View: the wheel scrolls", "[UI]")
+  {
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 }</style><div style='width: 400px; height: 500px'></div>");
+    view.UpdateRendering();
+    pal::WheelScrollSettings threeLines {.Lines = 3u, .Chars = 3};
+
+    // A notch towards the user is three lines down, at 100 pixels per three lines.
+    CHECK(view.MouseWheel({50, 50}, 0, -1, {}, threeLines));
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 100));
+    // Fractions of a notch, from touchpads.
+    CHECK(view.MouseWheel({50, 50}, 0, 0.5f, {}, threeLines));
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 50));
+
+    // The horizontal wheel, and the vertical one with Shift, scroll sideways.
+    CHECK(view.MouseWheel({50, 50}, 0.5f, 0, {}, threeLines));
+    CHECK(view.ScrollPosition() == boo::IntPoint(50, 50));
+    CHECK(view.MouseWheel({50, 50}, 0, -0.5f, pal::KeyModifiers {pal::KeyModifier::Shift}, threeLines));
+    CHECK(view.ScrollPosition() == boo::IntPoint(100, 50));
+
+    // A page per notch: four fifths of the 79 pixels in view, less the horizontal scrollbar.
+    CHECK(view.MouseWheel({50, 50}, 0, -1, {}, {.Lines = null, .Chars = 3}));
+    CHECK(view.ScrollPosition() == boo::IntPoint(100, 113));
+
+    // No turn, no event.
+    CHECK_FALSE(view.MouseWheel({50, 50}, 0, 0, {}, threeLines));
+  }
 }

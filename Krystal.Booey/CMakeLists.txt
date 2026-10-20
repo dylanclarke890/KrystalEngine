@@ -1455,6 +1455,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/KeyboardEvent.hpp
   include/Krystal.Booey/Platform/PlatformKeyboardEvent.hpp
   include/Krystal.Booey/Platform/WindowsKeyboardCodes.hpp
+
+  # Scrollbars, wheel and keyboard scrolling (G5b)
+  include/Krystal.Booey/DOM/Dicts/WheelEventInit.hpp
+  include/Krystal.Booey/DOM/WheelEvent.hpp
+  include/Krystal.Booey/Platform/PlatformWheelEvent.hpp
+  include/Krystal.Booey/Platform/ScrollbarThemeAdwaita.hpp
+  include/Krystal.Booey/Platform/ScrollbarThemeComposite.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2413,6 +2420,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Keyboard events (G4h1)
   src/DOM/KeyboardEvent.cpp
+
+  # Scrollbars, wheel and keyboard scrolling (G5b)
+  src/DOM/WheelEvent.cpp
+  src/Platform/ScrollbarThemeAdwaita.cpp
+  src/Platform/ScrollbarThemeComposite.cpp
 )
 
 target_precompile_headers(Krystal.Booey

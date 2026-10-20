@@ -267,6 +267,20 @@ namespace krys::boo
     return element && Is<html::HTMLFieldSetElement>(*element);
   }
 
+  RenderBox &RenderObject::EnclosingBox() const noexcept
+  {
+    for (const RenderObject *renderer = this; renderer; renderer = renderer->Parent())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(*renderer))
+      {
+        return const_cast<RenderBox &>(*box);
+      }
+    }
+    // The render view is a box, so every renderer in the tree has one.
+    krys_assert(false);
+    std::unreachable();
+  }
+
   RenderLayer *RenderObject::EnclosingLayer() const noexcept
   {
     for (const RenderObject *renderer = this; renderer; renderer = renderer->Parent())

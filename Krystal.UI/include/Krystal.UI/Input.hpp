@@ -3,11 +3,13 @@
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Platform.hpp"
 
 /// @brief Conversions between the platform layer's input and cursors and Booey's.
 namespace krys::ui::input
@@ -42,6 +44,13 @@ namespace krys::ui::input
                                                           pal::KeyModifiers modifiers,
                                                           const pal::KeyText &text, bool isAutoRepeat,
                                                           utf8_stringview releasedKeyValue = {}) noexcept;
+
+  /// @brief A turn of the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user,
+  /// or to the right), scrolling @p settings' lines (or a page) per notch, at 100 pixels per three lines;
+  /// with Shift, the vertical wheel scrolls sideways.
+  KRYS_NODISCARD boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, float notchesX,
+                                                    float notchesY, pal::KeyModifiers modifiers,
+                                                    const pal::WheelScrollSettings &settings) noexcept;
 
   /// @brief The system cursor nearest to a Booey cursor.
   KRYS_NODISCARD pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept;

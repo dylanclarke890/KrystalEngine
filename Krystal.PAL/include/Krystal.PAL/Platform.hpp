@@ -28,4 +28,16 @@ namespace krys::pal
 
   /// @brief Sleep for the specified number of milliseconds.
   void Sleep(milliseconds duration) noexcept;
+
+  /// @brief How far the user's system settings say a notch of the mouse wheel scrolls.
+  struct WheelScrollSettings
+  {
+    /// @brief Lines per notch of the wheel, or none to scroll a page per notch.
+    Maybe<uint32> Lines {3};
+    /// @brief Characters per notch of the horizontal wheel.
+    uint32 Chars {3};
+  };
+
+  /// @brief Gets the system's wheel scroll settings, read when the user last changed them.
+  KRYS_NODISCARD WheelScrollSettings GetWheelScrollSettings() noexcept;
 }

@@ -43,5 +43,10 @@ namespace krys::boo
     {
       return _hitTestResult.TargetNode();
     }
+
+    KRYS_NODISCARD Scrollbar *GetScrollbar() const noexcept
+    {
+      return _hitTestResult.GetScrollbar();
+    }
   };
 }

@@ -237,11 +237,14 @@ namespace krys::boo::style::tests
   {
     RunTasks();
 
-    auto document = Parse(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}</style>"
-                          u8"<style>@media screen { .screen {} }</style>");
+    // The root hides the view's scrollbars, so a resize doesn't lay the document out (and evaluate the media
+    // queries) at once to fit them.
+    auto document = Parse(u8"<!DOCTYPE html><style>@media (min-width: 1000px) { .wide {} } .always {}"
+                          u8"html { overflow: hidden }</style><style>@media screen { .screen {} }</style>");
     auto frame = LocalFrame::Create();
     frame->CreateView({800, 600});
     frame->SetDocument(ShareRefPtr<dom::Document>(document.get()));
+    (void)document->UpdateLayout();
     auto &scope = document->StyleScope();
     scope.FlushPendingUpdate();
     auto &resolver = scope.GetResolver();

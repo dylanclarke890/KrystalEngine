@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/BoxSides.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
@@ -8,15 +10,17 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
+  class PlatformWheelEvent;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars.
-  // FIXME: The scroll animator and scrollbars controller, keyboard, wheel and touch scrolling, scroll
-  // snapping, scroll anchoring, rubber-banding, overscroll propagation, compositing layers and scrolling into
-  // view come with scrolling input, animations and compositing.
+  // FIXME: The scroll animator and scrollbars controller, touch scrolling, scroll snapping, scroll anchoring,
+  // rubber-banding and compositing layers come with animations, touch, snapping and compositing: scrolls are
+  // immediate.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);
@@ -69,6 +73,22 @@ namespace krys::boo
                                           ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
     void ScrollToOffsetWithoutAnimation(const IntPoint &offset,
                                         ScrollClamping clamping = ScrollClamping::Clamped) noexcept;
+    void ScrollToOffsetWithoutAnimation(ScrollbarOrientation orientation, float offset) noexcept;
+
+    /// @brief Scrolls by @p stepCount steps of @p granularity (a line, a page, the document or a pixel of the
+    /// scrollbar in @p direction).
+    /// @return Whether it scrolled: false without a scrollbar in that direction, or at its end.
+    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity,
+                        uint32 stepCount = 1) noexcept;
+    /// @brief Scrolls by @p delta pixels on @p axis, as a user scroll.
+    /// @return Whether it scrolled.
+    bool SingleAxisScroll(ScrollEventAxis axis, float delta) noexcept;
+
+    /// @brief Scrolls by @p wheelEvent's deltas, as a user scroll.
+    /// @return Whether it scrolled: false if it can't scroll, or is at its end in the event's direction.
+    // FIXME: Animated scrolling, rubber-banding, momentum and scroll snapping, once there are those.
+    virtual bool HandleWheelEventForScrolling(const PlatformWheelEvent &wheelEvent) noexcept;
+    KRYS_NODISCARD virtual bool IsScrollableOrRubberbandable() const noexcept = 0;
 
     // Should be called when the scroll position changes externally, for example if the scroll layer position
     // is updated on the scrolling thread and we need to notify the main thread.
@@ -279,6 +299,66 @@ namespace krys::boo
     KRYS_NODISCARD virtual ScrollableArea *EnclosingScrollableArea() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept = 0;
+
+    KRYS_NODISCARD virtual bool UseDarkAppearanceForScrollbars() const noexcept
+    {
+      return false;
+    }
+
+    // The scrollbars tell the scrollable area what the mouse does to them.
+    // FIXME: The scrollbars controller (overlay scrollbars, hover feedback), once there is one.
+    virtual void MouseEnteredScrollbar(Scrollbar *) const noexcept
+    {
+    }
+    virtual void MouseExitedScrollbar(Scrollbar *) const noexcept
+    {
+    }
+    virtual void MouseIsDownInScrollbar(Scrollbar *, bool) const noexcept
+    {
+    }
+
+    /// @brief Repaints @p rect of @p scrollbar.
+    // FIXME: Repaint tracking: the whole page repaints after every change.
+    virtual void InvalidateScrollbar(Scrollbar &, const IntRect &) noexcept
+    {
+    }
+
+    /// @brief Converts a point in the view that contains the scrollbars (for the frame view, the window) to
+    /// @p scrollbar's coordinates.
+    KRYS_NODISCARD virtual IntPoint
+      ConvertFromContainingViewToScrollbar(const Scrollbar &scrollbar,
+                                           const IntPoint &parentPoint) const noexcept;
+
+    /// @brief The vertical step of a page scroll, less what fixed content covers.
+    KRYS_NODISCARD virtual float AdjustVerticalPageScrollStepForFixedContent(float step) noexcept
+    {
+      return step;
+    }
+
+    /// @brief Whether the scroll position is at @p side's end, or the area can't scroll that way.
+    KRYS_NODISCARD bool IsPinnedOnSide(BoxSide side) const noexcept;
+    KRYS_NODISCARD static Maybe<BoxSide> TargetSideForScrollDelta(FloatSize delta,
+                                                                  ScrollEventAxis axis) noexcept;
+
+    KRYS_NODISCARD virtual OverscrollBehavior HorizontalOverscrollBehavior() const noexcept
+    {
+      return OverscrollBehavior::Auto;
+    }
+    KRYS_NODISCARD virtual OverscrollBehavior VerticalOverscrollBehavior() const noexcept
+    {
+      return OverscrollBehavior::Auto;
+    }
+    KRYS_NODISCARD bool HorizontalOverscrollBehaviorPreventsPropagation() const noexcept
+    {
+      return HorizontalOverscrollBehavior() != OverscrollBehavior::Auto;
+    }
+    KRYS_NODISCARD bool VerticalOverscrollBehaviorPreventsPropagation() const noexcept
+    {
+      return VerticalOverscrollBehavior() != OverscrollBehavior::Auto;
+    }
+    /// @brief @p biasedDelta, less the axes `overscroll-behavior` stops from scrolling past the area.
+    KRYS_NODISCARD FloatSize DeltaForPropagation(const FloatSize &biasedDelta) const noexcept;
+    KRYS_NODISCARD bool ShouldBlockScrollPropagation(const FloatSize &biasedDelta) const noexcept;
 
     KRYS_NODISCARD virtual bool IsHorizontalWritingMode() const noexcept
     {

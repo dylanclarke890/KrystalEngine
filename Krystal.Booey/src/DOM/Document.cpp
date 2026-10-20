@@ -54,6 +54,8 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -853,8 +855,23 @@ namespace krys::boo::dom
 
     bool resultLayer = GetRenderView()->Layer()->HitTest(request, location, result);
 
-    // FIXME: The frame view's scrollbars (allowsFrameScrollbars, scrollbarAtPoint) come with frame view
-    // scrolling.
+    // The frame view's scrollbars are not the layer scrollbars tested by
+    // RenderLayerScrollableArea::HitTestOverflowControls, so we need to test them separately here. In case of
+    // using overlay scrollbars, the layer hit test will always work so we need to check the frame view's
+    // scrollbars in that case too.
+    if (!resultLayer || ScrollbarTheme::Theme().UsesOverlayScrollbars())
+    {
+      if (request.AllowsFrameScrollbars())
+      {
+        RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+        IntPoint windowPoint = frameView->ContentsToWindow(location.RoundedPoint());
+        if (RefPtr<Scrollbar> frameScrollbar = ShareRefPtr(frameView->ScrollbarAtPoint(windowPoint)))
+        {
+          result.SetScrollbar(krys::move(frameScrollbar));
+          return true;
+        }
+      }
+    }
     return resultLayer;
   }
 
@@ -1164,7 +1181,10 @@ namespace krys::boo::dom
     {
       bool bubbles = Is<Document>(*target);
       auto eventName = type == ScrollEventType::Scroll ? EventNames::Scroll : EventNames::ScrollEnd;
-      EventIDLInitializer<Event> initialize = [bubbles](Event &event) { event._bubbles = bubbles; };
+      EventIDLInitializer<Event> initialize = [bubbles](Event &event)
+      {
+        event._bubbles = bubbles;
+      };
       (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target, krys::move(initialize));
     }
 

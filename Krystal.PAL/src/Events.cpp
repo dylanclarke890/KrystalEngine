@@ -1,7 +1,7 @@
 ﻿#include "Krystal.PAL/Events.hpp"
-#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 
@@ -126,14 +126,37 @@ namespace krys::pal
 
 #pragma region MouseScrollEvent
 
-  MouseScrollEvent::MouseScrollEvent(WindowHandle window, const float delta) noexcept
-      : Event(), _window(window), _delta(delta)
+  MouseScrollEvent::MouseScrollEvent(WindowHandle window, const float deltaX, const float deltaY,
+                                     const float clientX, const float clientY,
+                                     const KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
+        _modifiers(modifiers)
   {
   }
 
-  float MouseScrollEvent::Delta() const noexcept
+  float MouseScrollEvent::DeltaX() const noexcept
   {
-    return _delta;
+    return _deltaX;
+  }
+
+  float MouseScrollEvent::DeltaY() const noexcept
+  {
+    return _deltaY;
+  }
+
+  float MouseScrollEvent::ClientX() const noexcept
+  {
+    return _clientX;
+  }
+
+  float MouseScrollEvent::ClientY() const noexcept
+  {
+    return _clientY;
+  }
+
+  KeyModifiers MouseScrollEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
   }
 
   WindowHandle MouseScrollEvent::GetWindowHandle() const noexcept

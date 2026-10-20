@@ -6,13 +6,18 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
@@ -96,6 +101,40 @@ namespace krys::boo
       return nullptr;
     }
 
+    KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const dom::DOMString &keyIdentifier) noexcept
+    {
+      if (keyIdentifier == u8"Down")
+      {
+        return dom::FocusDirection::Down;
+      }
+      if (keyIdentifier == u8"Up")
+      {
+        return dom::FocusDirection::Up;
+      }
+      if (keyIdentifier == u8"Left")
+      {
+        return dom::FocusDirection::Left;
+      }
+      if (keyIdentifier == u8"Right")
+      {
+        return dom::FocusDirection::Right;
+      }
+      return dom::FocusDirection::None;
+    }
+
+    KRYS_NODISCARD Scrollbar *ScrollbarForMouseEvent(const MouseEventWithHitTestResults &mouseEvent,
+                                                     LocalFrameView *view) noexcept
+    {
+      if (view)
+      {
+        if (auto *scrollbar = view->ScrollbarAtPoint(FlooredIntPoint(mouseEvent.Event().Position())))
+        {
+          return scrollbar;
+        }
+      }
+      return mouseEvent.GetScrollbar();
+    }
+
     KRYS_NODISCARD RefPtr<dom::Element> GetElementOrAncestorElementForNode(dom::Node *targetNode) noexcept
     {
       while (targetNode)
@@ -122,6 +161,7 @@ namespace krys::boo
     _lastElementUnderMouse = nullptr;
     _ancestorsOfLastElementUnderMouse.clear();
     _mouseMoveTargetOverride = nullptr;
+    _lastScrollbarUnderMouse = nullptr;
     _clickCount = 0;
     _clickNode = nullptr;
     _lastKnownMousePosition = null;
@@ -207,7 +247,11 @@ namespace krys::boo
     _mousePressNode = ShareRefPtr(mouseEvent.TargetNode());
     document->SetSequentialFocusNavigationStartingPoint(mouseEvent.TargetNode());
 
-    // FIXME: Scrollbars, subframes and pan scrolling.
+    RefPtr<Scrollbar> scrollbar = ShareRefPtr(ScrollbarForMouseEvent(mouseEvent, frame->View()));
+    UpdateLastScrollbarUnderMouse(scrollbar.get(), SetOrClearLastScrollbar::Set);
+    bool passedToScrollbar = scrollbar && PassMousePressEventToScrollbar(mouseEvent, scrollbar.get());
+
+    // FIXME: Subframes and pan scrolling.
 
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
@@ -217,6 +261,24 @@ namespace krys::boo
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), targetNode.get(),
                                             _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
+
+    // If the hit testing originally determined the event was in a scrollbar, refetch the
+    // MouseEventWithHitTestResults in case the scrollbar widget was destroyed when the mouse event was
+    // handled.
+    if (mouseEvent.GetScrollbar())
+    {
+      const bool wasLastScrollBar = mouseEvent.GetScrollbar() == _lastScrollbarUnderMouse.get();
+      mouseEvent = document->PrepareMouseEvent(HitTestRequest(), documentPoint, platformMouseEvent);
+      if (wasLastScrollBar && mouseEvent.GetScrollbar() != _lastScrollbarUnderMouse.get())
+      {
+        _lastScrollbarUnderMouse = nullptr;
+      }
+    }
+
+    if (!swallowEvent && passedToScrollbar)
+    {
+      return true;
+    }
 
     // The press sets the sequential focus navigation starting point again, after the focus change reset it
     // to the focused element.
@@ -245,10 +307,17 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Synthetic touch events, pointer lock, hover timers, fake mouse moves, SVG panning, frame set
-    // resizing and scrollbars.
+    // FIXME: Synthetic touch events, pointer lock, hover timers, fake mouse moves, SVG panning and frame set
+    // resizing.
 
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
+
+    // Send events right to a scrollbar if the mouse is pressed.
+    if (RefPtr<Scrollbar> lastScrollbarUnderMouse = _lastScrollbarUnderMouse;
+        lastScrollbarUnderMouse && _mousePressed)
+    {
+      return lastScrollbarUnderMouse->MouseMoved(platformMouseEvent);
+    }
 
     EnumSet<HitTestRequest::Type> hitType {HitTestRequest::Type::Move,
                                            HitTestRequest::Type::DisallowUserAgentShadowContent,
@@ -264,7 +333,20 @@ namespace krys::boo
       *hitTestResult = mouseEvent.GetHitTestResult();
     }
 
-    // FIXME: Resizers, subframes and remote frames.
+    // FIXME: Resizers.
+    {
+      RefPtr<Scrollbar> scrollbar = ShareRefPtr(mouseEvent.GetScrollbar());
+      UpdateLastScrollbarUnderMouse(scrollbar.get(), _mousePressed ? SetOrClearLastScrollbar::Clear
+                                                                   : SetOrClearLastScrollbar::Set);
+
+      // Handle hover effects on platforms that support visual feedback on scrollbar hovering.
+      if (!_mousePressed && scrollbar)
+      {
+        (void)scrollbar->MouseMoved(platformMouseEvent);
+      }
+    }
+
+    // FIXME: Subframes and remote frames.
 
     if (auto *view = frame->View())
     {
@@ -336,7 +418,16 @@ namespace krys::boo
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
 
-    // FIXME: SVG panning, frame set resizing, immediate actions and scrollbars.
+    // FIXME: SVG panning, frame set resizing and immediate actions.
+
+    if (RefPtr<Scrollbar> lastScrollbarUnderMouse = _lastScrollbarUnderMouse)
+    {
+      InvalidateClick();
+      (void)lastScrollbarUnderMouse->MouseUp(platformMouseEvent);
+      RefPtr<dom::Element> lastElementUnderMouse = _lastElementUnderMouse;
+      return !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseUp), lastElementUnderMouse.get(),
+                                 _clickCount, platformMouseEvent, FireMouseOverOut::No);
+    }
 
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
       HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
@@ -537,20 +628,38 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Clicking a frame scrollbar doesn't change the focus, once there are scrollbars.
+    // If clicking on a frame scrollbar, do not make any change to which element is focused.
+    if (auto *view = _frame.View();
+        view && view->ScrollbarAtPoint(FlooredIntPoint(platformMouseEvent.Position())))
+    {
+      return true;
+    }
 
     // Walk up the tree from the element under the mouse to an element to focus, or focus the viewport if
     // there's none.
     // FIXME: A press inside a selected range in the focused element doesn't move the focus, once there's a
     // selection; form controls that aren't mouse focusable still set the latest focus trigger, once there are
     // form controls.
-    if (RefPtr<dom::Element> element = _elementUnderMouse)
+    RefPtr<dom::Element> element;
+    if (RefPtr<dom::Element> pressedElement = _elementUnderMouse)
     {
-      html::FocusAlgorithms::FocusForClick(*element);
+      element = ShareRefPtr(html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*pressedElement));
+    }
+
+    // Only change the focus when clicking scrollbars if it can be transferred to a mouse focusable node.
+    if (!element && IsInsideScrollbar(FlooredIntPoint(platformMouseEvent.Position())))
+    {
+      return false;
+    }
+
+    dom::FocusOptions options {.Trigger = dom::FocusTrigger::Click};
+    if (element)
+    {
+      html::FocusAlgorithms::FocusingSteps(*element, nullptr, options);
     }
     else if (RefPtr<dom::Document> document = ShareRefPtr(_frame.Document()))
     {
-      html::FocusAlgorithms::FocusingSteps(*document, nullptr, {.Trigger = dom::FocusTrigger::Click});
+      html::FocusAlgorithms::FocusingSteps(*document, nullptr, options);
     }
     // FIXME: Selecting the contents of a shadow host's focus delegate (findTargetAndUpdateFocusAppearance).
     return true;
@@ -591,7 +700,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: User gestures, typing gestures and access keys (handleAccessKey), keyboard scrolling.
+    // FIXME: User gestures, typing gestures and access keys (handleAccessKey).
 
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.GetType() == Type::KeyUp || initialKeyEvent.GetType() == Type::Char)
@@ -659,25 +768,221 @@ namespace krys::boo
     // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), once there are text fields.
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
-    return keydownResult || keypress->DefaultPrevented();
+    return keydownResult || keypress->DefaultPrevented() || DefaultKeyboardEventHandler(*keypress);
   }
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    // FIXME: The default handling of keyup (keyboard scrolling) and keypress (Space scrolling), and the
-    // editor's (handleKeyboardEvent), once there's scrolling and editing.
-    if (event.Type() != EventNames::KeyDown)
+    // FIXME: The editor's handling (handleKeyboardEvent), once there's editing; keyup stops animated
+    // keyboard scrolls, once there are any.
+
+    if (event.Type() == EventNames::KeyDown)
+    {
+      // FIXME: Escape (close watchers, modal dialogs and popovers) and Backspace (history navigation), once
+      // there are dialogs, popovers and navigation.
+      if (event.KeyIdentifier() == u8"U+0009")
+      {
+        return DefaultTabEventHandler(event);
+      }
+      if (event.KeyIdentifier() == u8"PageDown" || event.KeyIdentifier() == u8"PageUp")
+      {
+        return DefaultPageUpDownEventHandler(event);
+      }
+      if (event.KeyIdentifier() == u8"Home" || event.KeyIdentifier() == u8"End")
+      {
+        return DefaultHomeEndEventHandler(event);
+      }
+      dom::FocusDirection direction = FocusDirectionForKey(event.KeyIdentifier());
+      if (direction != dom::FocusDirection::None)
+      {
+        return DefaultArrowEventHandler(direction, event);
+      }
+      return false;
+    }
+    if (event.Type() == EventNames::KeyPress)
+    {
+      if (event.CharCode() == ' ')
+      {
+        return DefaultSpaceEventHandler(event);
+      }
+    }
+    return false;
+  }
+
+  bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
+                                                       ScrollGranularity granularity) noexcept
+  {
+    // FIXME: Animated keyboard scrolling (keyboardScrollRecursively), once there are animations.
+    return LogicalScrollRecursively(direction, granularity);
+  }
+
+  bool EventHandler::DefaultPageUpDownEventHandler(dom::KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(event.Type() == EventNames::KeyDown);
+
+    if (event.CtrlKey() || event.MetaKey() || event.AltKey() || event.ShiftKey())
     {
       return false;
     }
 
-    // FIXME: Escape (close watchers, modal dialogs and popovers), Backspace, Page Up and Page Down, Home and
-    // End, and the arrows (spatial navigation and scrolling), once there are dialogs, popovers and scrolling.
-    if (event.KeyIdentifier() == u8"U+0009")
+    ScrollLogicalDirection direction = event.KeyIdentifier() == u8"PageUp"
+                                         ? ScrollLogicalDirection::ScrollBlockDirectionBackward
+                                         : ScrollLogicalDirection::ScrollBlockDirectionForward;
+    return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Page);
+  }
+
+  bool EventHandler::DefaultHomeEndEventHandler(dom::KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(event.Type() == EventNames::KeyDown);
+
+    if (event.CtrlKey() || event.MetaKey() || event.AltKey() || event.ShiftKey())
     {
-      return DefaultTabEventHandler(event);
+      return false;
     }
+
+    ScrollLogicalDirection direction = event.KeyIdentifier() == u8"Home"
+                                         ? ScrollLogicalDirection::ScrollBlockDirectionBackward
+                                         : ScrollLogicalDirection::ScrollBlockDirectionForward;
+    return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Document);
+  }
+
+  bool EventHandler::DefaultSpaceEventHandler(dom::KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(event.Type() == EventNames::KeyPress);
+
+    if (event.CtrlKey() || event.MetaKey() || event.AltKey())
+    {
+      return false;
+    }
+
+    ScrollLogicalDirection direction = event.ShiftKey() ? ScrollLogicalDirection::ScrollBlockDirectionBackward
+                                                        : ScrollLogicalDirection::ScrollBlockDirectionForward;
+    if (LogicalScrollOverflow(direction, ScrollGranularity::Page))
+    {
+      return true;
+    }
+
+    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+    if (!view)
+    {
+      return false;
+    }
+
+    // FIXME: Animated keyboard scrolling (keyboardScroll), once there are animations.
+    return view->LogicalScroll(direction, ScrollGranularity::Page);
+  }
+
+  bool EventHandler::DefaultArrowEventHandler(dom::FocusDirection focusDirection,
+                                              dom::KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(event.Type() == EventNames::KeyDown);
+
+    // FIXME: Spatial navigation (advanceFocus in the arrow's direction), once the host can turn it on.
+    ScrollLogicalDirection direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
+    switch (focusDirection)
+    {
+      case dom::FocusDirection::Down: direction = ScrollLogicalDirection::ScrollBlockDirectionForward; break;
+      case dom::FocusDirection::Right:
+        direction = ScrollLogicalDirection::ScrollInlineDirectionForward;
+        break;
+      case dom::FocusDirection::Up: direction = ScrollLogicalDirection::ScrollBlockDirectionBackward; break;
+      case dom::FocusDirection::Left:
+        direction = ScrollLogicalDirection::ScrollInlineDirectionBackward;
+        break;
+      case dom::FocusDirection::None:
+      case dom::FocusDirection::Backward:
+      case dom::FocusDirection::Forward:  krys_assert(false); break;
+    }
+    return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Line);
+  }
+
+  bool EventHandler::ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,
+                                    dom::Node *startingNode) noexcept
+  {
+    RefPtr<dom::Node> node = ShareRefPtr(startingNode);
+
+    if (!node)
+    {
+      node = ShareRefPtr(_frame.Document()->FocusedElement());
+    }
+
+    if (!node)
+    {
+      node = _mousePressNode;
+    }
+
+    if (node)
+    {
+      // FIXME: List boxes, which scroll themselves, once there are list boxes.
+      auto *r = node->Renderer();
+      if (r && r->EnclosingBox().Scroll(direction, granularity))
+      {
+        // FIXME: Whether the user scrolled the frame (setFrameWasScrolledByUser), with scroll restoration.
+        return true;
+      }
+    }
+
     return false;
+  }
+
+  bool EventHandler::LogicalScrollOverflow(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                           dom::Node *startingNode) noexcept
+  {
+    RefPtr<dom::Node> node = ShareRefPtr(startingNode);
+
+    if (!node)
+    {
+      node = ShareRefPtr(_frame.Document()->FocusedElement());
+    }
+
+    if (!node)
+    {
+      node = _mousePressNode;
+    }
+
+    if (node)
+    {
+      auto *r = node->Renderer();
+      if (r && r->EnclosingBox().LogicalScroll(direction, granularity))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool EventHandler::ScrollRecursively(ScrollDirection direction, ScrollGranularity granularity,
+                                       dom::Node *startingNode) noexcept
+  {
+    // The layout needs to be up to date to determine if we can scroll. We may be
+    // here because of an onLoad event, in which case the final layout hasn't been performed yet.
+    Ref frame = ShareRef(_frame);
+    (void)frame->Document()->UpdateLayout();
+    if (ScrollOverflow(direction, granularity, startingNode))
+    {
+      return true;
+    }
+
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    return view && view->Scroll(direction, granularity);
+  }
+
+  bool EventHandler::LogicalScrollRecursively(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                                              dom::Node *startingNode) noexcept
+  {
+    Ref frame = ShareRef(_frame);
+
+    // The layout needs to be up to date to determine if we can scroll. We may be
+    // here because of an onLoad event, in which case the final layout hasn't been performed yet.
+    (void)frame->Document()->UpdateLayout();
+    if (LogicalScrollOverflow(direction, granularity, startingNode))
+    {
+      return true;
+    }
+
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    return view && view->LogicalScroll(direction, granularity);
   }
 
   bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
@@ -758,7 +1063,13 @@ namespace krys::boo
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept
   {
-    // FIXME: Resizing layers, pan scrolling, scrollbars (always the pointer) and auto-hiding cursors.
+    // FIXME: Resizing layers, pan scrolling and auto-hiding cursors.
+
+    // Use always pointer cursor for scrollbars.
+    if (result.GetScrollbar())
+    {
+      return Cursor(Cursor::Type::Pointer);
+    }
 
     dom::Node *node = result.TargetNode();
     if (!node)
@@ -843,5 +1154,240 @@ namespace krys::boo
       case CursorType::ZoomOut:      return Cursor(Cursor::Type::ZoomOut);
     }
     return Cursor(Cursor::Type::Pointer);
+  }
+
+  bool EventHandler::PassMousePressEventToScrollbar(MouseEventWithHitTestResults &mouseEvent,
+                                                    Scrollbar *scrollbar) noexcept
+  {
+    if (!scrollbar || !scrollbar->Enabled())
+    {
+      return false;
+    }
+    return scrollbar->MouseDown(mouseEvent.Event());
+  }
+
+  void EventHandler::UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar,
+                                                   SetOrClearLastScrollbar setOrClear) noexcept
+  {
+    if (_lastScrollbarUnderMouse.get() != scrollbar)
+    {
+      // Send mouse exited to the old scrollbar.
+      if (RefPtr<Scrollbar> lastScrollbarUnderMouse = _lastScrollbarUnderMouse)
+      {
+        (void)lastScrollbarUnderMouse->MouseExited();
+      }
+
+      // Send mouse entered if we're setting a new scrollbar.
+      if (scrollbar && setOrClear == SetOrClearLastScrollbar::Set)
+      {
+        scrollbar->MouseEntered();
+        _lastScrollbarUnderMouse = ShareRefPtr(scrollbar);
+      }
+      else
+      {
+        _lastScrollbarUnderMouse = nullptr;
+      }
+    }
+  }
+
+  bool EventHandler::IsInsideScrollbar(const IntPoint &windowPoint) const noexcept
+  {
+    if (RefPtr<dom::Document> document = ShareRefPtr(_frame.Document()))
+    {
+      HitTestResult result {LayoutPoint(windowPoint)};
+      (void)document->HitTest(
+        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
+                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
+        result);
+      return result.GetScrollbar();
+    }
+    return false;
+  }
+
+  bool EventHandler::HandleWheelEvent(const PlatformWheelEvent &event) noexcept
+  {
+    EnumSet<EventHandling> handling;
+    return HandleWheelEventInternal(event, handling);
+  }
+
+  bool EventHandler::HandleWheelEventInternal(const PlatformWheelEvent &event,
+                                              EnumSet<EventHandling> &handling) noexcept
+  {
+    Ref frame = ShareRef(_frame);
+    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    if (!document)
+    {
+      return false;
+    }
+
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    if (!view)
+    {
+      return false;
+    }
+
+    // FIXME: Pointer lock, which sends the wheel to the locked element, once there's pointer lock.
+
+    _isHandlingWheelEvent = true;
+
+    // FIXME: Whether the user scrolled the frame (setFrameWasScrolledByUser), latching and the wheel delta
+    // filter, once there are scroll restoration, latching and touchpad gestures.
+    SetLastKnownMousePosition(DoublePoint(event.Position().X(), event.Position().Y()),
+                              DoublePoint(event.GlobalPosition().X(), event.GlobalPosition().Y()));
+
+    HitTestRequest request;
+    HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
+    (void)document->HitTest(request, result);
+
+    RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
+
+    // FIXME: Widgets and subframes (isOverWidget, passWheelEventToWidget), once there are subframes.
+
+    if (element)
+    {
+      if (!element->DispatchWheelEvent(event, handling))
+      {
+        _isHandlingWheelEvent = false;
+        // FIXME: Scroll snapping (processWheelEventForScrollSnap), once there's scroll snapping.
+        return true;
+      }
+    }
+
+    // Event handling may have disconnected the frame.
+    view = ShareRefPtr(frame->View());
+    if (!view)
+    {
+      _isHandlingWheelEvent = false;
+      return false;
+    }
+
+    auto filteredDelta = view->DeltaForPropagation(event.Delta());
+    if (view->ShouldBlockScrollPropagation(filteredDelta))
+    {
+      _isHandlingWheelEvent = false;
+      return true;
+    }
+
+    return ProcessWheelEventForScrolling(event.CopyWithDelta(filteredDelta));
+  }
+
+  bool EventHandler::ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept
+  {
+    // We do another check on the frame view because the event handler can run JS which results in the frame
+    // getting destroyed.
+    RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
+
+    bool didHandleEvent = view ? HandleWheelEventInScrollableArea(event, *view) : false;
+    _isHandlingWheelEvent = false;
+    return didHandleEvent;
+  }
+
+  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(
+    dom::Node *startNode, const dom::WheelEvent &wheelEvent, const FloatSize &filteredPlatformDelta) noexcept
+  {
+    bool shouldHandleEvent = wheelEvent.DeltaX() || wheelEvent.DeltaY();
+    if (!startNode->Renderer())
+    {
+      return false;
+    }
+
+    if (!shouldHandleEvent)
+    {
+      return false;
+    }
+
+    // FIXME: List boxes, which are scrollable areas of their own, once there are list boxes.
+    auto scrollableAreaForBox = [](RenderBox &box) -> ScrollableArea *
+    {
+      if (box.HasLayer())
+      {
+        return box.Layer()->GetScrollableArea();
+      }
+      return nullptr;
+    };
+
+    RenderBox *currentEnclosingBox = &startNode->Renderer()->EnclosingBox();
+    auto biasedDelta =
+      FloatSize(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY()));
+
+    while (currentEnclosingBox)
+    {
+      if (auto *boxScrollableArea = scrollableAreaForBox(*currentEnclosingBox))
+      {
+        // Script-made wheel events don't scroll (scrollViaNonPlatformEvent).
+        auto &platformEvent = wheelEvent.UnderlyingPlatformEvent();
+        if (!platformEvent)
+        {
+          return false;
+        }
+        auto copiedEvent = platformEvent->CopyWithDelta(filteredPlatformDelta);
+        bool scrollingWasHandled = ScrollableAreaCanHandleEvent(copiedEvent, *boxScrollableArea)
+                                   && HandleWheelEventInScrollableArea(copiedEvent, *boxScrollableArea);
+        if (scrollingWasHandled)
+        {
+          return true;
+        }
+
+        biasedDelta = boxScrollableArea->DeltaForPropagation(biasedDelta);
+        if (boxScrollableArea->ShouldBlockScrollPropagation(biasedDelta))
+        {
+          return true;
+        }
+      }
+
+      currentEnclosingBox = currentEnclosingBox->ContainingBlock();
+      if (!currentEnclosingBox || currentEnclosingBox->IsRenderView())
+      {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  bool EventHandler::ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,
+                                                  ScrollableArea &scrollableArea) noexcept
+  {
+    auto biasedDelta = wheelEvent.Delta();
+
+    auto verticalSide = ScrollableArea::TargetSideForScrollDelta(-biasedDelta, ScrollEventAxis::Vertical);
+    if (verticalSide && !scrollableArea.IsPinnedOnSide(*verticalSide))
+    {
+      return true;
+    }
+
+    auto horizontalSide = ScrollableArea::TargetSideForScrollDelta(-biasedDelta, ScrollEventAxis::Horizontal);
+    if (horizontalSide && !scrollableArea.IsPinnedOnSide(*horizontalSide))
+    {
+      return true;
+    }
+    // FIXME: A scroll that overscroll-behavior blocks rubber-bands (overscrollBehaviorAllowsRubberBand), once
+    // there's rubber-banding.
+
+    return false;
+  }
+
+  bool EventHandler::HandleWheelEventInScrollableArea(const PlatformWheelEvent &wheelEvent,
+                                                      ScrollableArea &scrollableArea) noexcept
+  {
+    // FIXME: Gesture states (updateWheelGestureState), with touchpad gestures.
+    return scrollableArea.HandleWheelEventForScrolling(wheelEvent);
+  }
+
+  bool EventHandler::DefaultWheelEventHandler(dom::Node *startNode, dom::WheelEvent &wheelEvent) noexcept
+  {
+    if (!startNode)
+    {
+      return false;
+    }
+
+    FloatSize filteredPlatformDelta(static_cast<float>(wheelEvent.DeltaX()),
+                                    static_cast<float>(wheelEvent.DeltaY()));
+    if (auto &platformEvent = wheelEvent.UnderlyingPlatformEvent())
+    {
+      filteredPlatformDelta = platformEvent->Delta();
+    }
+
+    // FIXME: The wheel delta filter and latching, once there are touchpad gestures.
+    return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
 }

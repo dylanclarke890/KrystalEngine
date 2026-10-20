@@ -33,9 +33,9 @@ namespace krys::boo
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
   /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
   /// position within the document (the scrolling half of a scroll view).
-  /// @note FIXME: No scrollbars, obscured insets, visual viewport, auto-sizing, repaint rects or compositing,
-  /// and views aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is
-  /// the frame rect's size at the scroll position.
+  /// @note FIXME: No obscured insets, visual viewport, auto-sizing, repaint rects or compositing, and views
+  /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
+  /// rect's size, less its scrollbars, at the scroll position.
   class LocalFrameView final : public RefCounted<LocalFrameView>,
                                public CanMakeWeakPtr<LocalFrameView>,
                                public ScrollableArea
@@ -72,6 +72,15 @@ namespace krys::boo
     ScrollPosition _scrollPosition;
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
+    RefPtr<Scrollbar> _horizontalScrollbar;
+    RefPtr<Scrollbar> _verticalScrollbar;
+    ScrollbarMode _horizontalScrollbarMode {ScrollbarMode::Auto};
+    ScrollbarMode _verticalScrollbarMode {ScrollbarMode::Auto};
+    bool _horizontalScrollbarLock {false};
+    bool _verticalScrollbarLock {false};
+    bool _canHaveScrollbars {true};
+    uint32 _updateScrollbarsPass {0};
+    IntSize _lastUsedSizeForLayout;
 
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
@@ -158,15 +167,15 @@ namespace krys::boo
 
     void SetUseFixedLayout(bool enable) noexcept;
 
-    /// @brief The part of the visible content (`VisibleContentRect`, the view's size at the scroll position)
-    /// that isn't covered by the host's interface: all of it.
-    KRYS_NODISCARD IntRect UnobscuredContentRect() const noexcept;
+    /// @brief The part of the visible content (`VisibleContentRect`, the view's size less its scrollbars at
+    /// the scroll position) that isn't covered by the host's interface: all of it.
+    KRYS_NODISCARD IntRect UnobscuredContentRect(VisibleContentRectIncludesScrollbars scrollbarInclusion =
+                                                   VisibleContentRectIncludesScrollbars::No) const noexcept;
 
-    /// @brief The size of the visible content.
-    KRYS_NODISCARD IntSize SizeForVisibleContent() const noexcept
-    {
-      return VisibleContentRect().Size();
-    }
+    /// @brief The size of the visible content: the view's, less its scrollbars unless @p scrollbarInclusion
+    /// says otherwise.
+    KRYS_NODISCARD IntSize SizeForVisibleContent(VisibleContentRectIncludesScrollbars scrollbarInclusion =
+                                                   VisibleContentRectIncludesScrollbars::No) const noexcept;
 
     /// @brief The document's scroll position relative to the view's origin: the scroll position (there are no
     /// headers, insets or left scrollbars).
@@ -278,13 +287,81 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept override
     {
-      return false;
+      return !ScrollCornerRect().IsEmpty();
     }
 
-    KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept override
+    /// @brief The corner between the scrollbars, in the view's coordinates (empty without both, or with
+    /// overlay scrollbars).
+    KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept override;
+
+    KRYS_NODISCARD Scrollbar *HorizontalScrollbar() const noexcept override
     {
-      return {};
+      return _horizontalScrollbar.get();
     }
+
+    KRYS_NODISCARD Scrollbar *VerticalScrollbar() const noexcept override
+    {
+      return _verticalScrollbar.get();
+    }
+
+    KRYS_NODISCARD ScrollbarMode HorizontalScrollbarMode() const noexcept override
+    {
+      return _horizontalScrollbarMode;
+    }
+
+    KRYS_NODISCARD ScrollbarMode VerticalScrollbarMode() const noexcept override
+    {
+      return _verticalScrollbarMode;
+    }
+
+    /// @brief Sets when the view shows each scrollbar (and so whether the user can scroll on that axis), and
+    /// adds or removes the scrollbars to match.
+    void SetScrollbarModes(ScrollbarMode horizontalMode, ScrollbarMode verticalMode,
+                           bool horizontalLock = false, bool verticalLock = false) noexcept;
+    void SetHorizontalScrollbarMode(ScrollbarMode mode, bool lock = false) noexcept
+    {
+      SetScrollbarModes(mode, VerticalScrollbarMode(), lock, _verticalScrollbarLock);
+    }
+    void SetVerticalScrollbarMode(ScrollbarMode mode, bool lock = false) noexcept
+    {
+      SetScrollbarModes(HorizontalScrollbarMode(), mode, _horizontalScrollbarLock, lock);
+    }
+
+    enum class ScrollbarModesCalculationStrategy : bool
+    {
+      RulesFromWebContentOnly,
+      AnyRule
+    };
+
+    /// @brief The scrollbar modes the root's (or the body's) `overflow` asks for.
+    void CalculateScrollbarModesForLayout(
+      ScrollbarMode &hMode, ScrollbarMode &vMode,
+      ScrollbarModesCalculationStrategy strategy = ScrollbarModesCalculationStrategy::AnyRule) const noexcept;
+
+    /// @brief Gets the view ready for a layout of @p layoutRoot: its scrollbar modes, and marking the root
+    /// (or the body) for layout if the size content is laid out at changed.
+    void WillDoLayout(const RenderElement &layoutRoot) noexcept;
+
+    /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
+    KRYS_NODISCARD bool IsScrollable() const noexcept;
+    /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
+    /// mode.
+    /// @return Whether it scrolled.
+    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity) noexcept;
+    /// @brief Whether the root's writing mode is horizontal (its blocks stack vertically).
+    KRYS_NODISCARD bool IsVerticalDocument() const noexcept;
+    KRYS_NODISCARD bool IsFlippedDocument() const noexcept;
+    KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override
+    {
+      return IsScrollable();
+    }
+
+    /// @brief The view's scrollbar at @p windowPoint, if any.
+    KRYS_NODISCARD Scrollbar *ScrollbarAtPoint(const IntPoint &windowPoint) const noexcept;
+
+    KRYS_NODISCARD ScrollbarWidth ScrollbarWidthStyle() const noexcept override;
+    KRYS_NODISCARD OverscrollBehavior HorizontalOverscrollBehavior() const noexcept override;
+    KRYS_NODISCARD OverscrollBehavior VerticalOverscrollBehavior() const noexcept override;
 
     /// @brief The scrollable area enclosing the view: none, as there are no frames.
     KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept override
@@ -434,8 +511,27 @@ namespace krys::boo
     KRYS_NODISCARD IntRect ContentsToWindow(const IntRect &rect) const noexcept;
     KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
 
+    void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept override;
+
   private:
-    void AvailableContentSizeChanged() noexcept;
+    bool SetHasHorizontalScrollbar(bool hasBar, bool *contentSizeAffected = nullptr) noexcept;
+    bool SetHasVerticalScrollbar(bool hasBar, bool *contentSizeAffected = nullptr) noexcept;
+    bool SetHasScrollbarInternal(RefPtr<Scrollbar> &scrollbar, ScrollbarOrientation orientation, bool hasBar,
+                                 bool *contentSizeAffected) noexcept;
+    KRYS_NODISCARD Ref<Scrollbar> CreateScrollbar(ScrollbarOrientation orientation) noexcept;
+    void UpdateScrollbarSteps() noexcept;
+    /// @brief Lays the view out again if adding or removing a scrollbar changed the size content is laid out
+    /// at.
+    void UpdateContentsSize() noexcept;
+    void ApplyOverflowToViewport(const RenderElement &renderer, ScrollbarMode &hMode,
+                                 ScrollbarMode &vMode) const noexcept;
+    void AdjustScrollbarsForLayout(bool isFirstLayout) noexcept;
+    void MarkRootOrBodyRendererDirty() const noexcept;
+    void PaintScrollbars(GraphicsContext &context, const IntRect &rect) noexcept;
+    /// @brief Fills the scrollbars' area and the scroll corner with the root's background colour, over the
+    /// base background colour, so the page's background runs on under the scrollbars, which have no track.
+    void PaintScrollbarsBackground(GraphicsContext &context) noexcept;
+    void PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept;
 
     KRYS_NODISCARD IntRect VisibleContentRectInternal(
       VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept override;

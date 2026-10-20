@@ -5,10 +5,18 @@
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/Cursor.hpp"
+#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
+#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -71,6 +79,83 @@ namespace krys::boo::tests
     };
 
     using Strings = List<std::string>;
+
+    KRYS_NODISCARD PlatformMouseEvent MouseEvent(PlatformEvent::Type type, IntPoint position,
+                                                 MouseButton button = MouseButton::Left) noexcept
+    {
+      DoublePoint point(position.X(), position.Y());
+      int32 clickCount = type == PlatformEvent::Type::MousePressed ? 1 : 0;
+      return PlatformMouseEvent(point, point,
+                                type == PlatformEvent::Type::MouseMoved ? MouseButton::None : button, type,
+                                clickCount, {}, MonotonicTime::Now());
+    }
+
+    void Move(EventHandler &handler, IntPoint position) noexcept
+    {
+      (void)handler.MouseMoved(MouseEvent(PlatformEvent::Type::MouseMoved, position));
+    }
+
+    void Press(EventHandler &handler, IntPoint position) noexcept
+    {
+      (void)handler.HandleMousePressEvent(MouseEvent(PlatformEvent::Type::MousePressed, position));
+    }
+
+    void Release(EventHandler &handler, IntPoint position) noexcept
+    {
+      (void)handler.HandleMouseReleaseEvent(MouseEvent(PlatformEvent::Type::MouseReleased, position));
+    }
+
+    /// @brief A wheel event at @p position scrolling by @p delta pixels (the DOM's sense: positive is down
+    /// and right).
+    KRYS_NODISCARD bool Wheel(EventHandler &handler, IntPoint position, FloatSize delta,
+                              PlatformWheelEventGranularity granularity =
+                                PlatformWheelEventGranularity::ScrollByPixelWheelEvent) noexcept
+    {
+      return handler.HandleWheelEvent(PlatformWheelEvent(position, position, -delta.Width(), -delta.Height(),
+                                                         0, delta.Height() > 0 ? -1.0f : 1.0f, granularity,
+                                                         {}, MonotonicTime::Now()));
+    }
+
+    /// @brief A press of the key named @p key (with the legacy identifier @p keyIdentifier) that types @p
+    /// text.
+    KRYS_NODISCARD bool Key(EventHandler &handler, utf8_string key, utf8_string keyIdentifier, int32 keyCode,
+                            utf8_string text = {}, EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+    {
+      return handler.KeyEvent(PlatformKeyboardEvent(PlatformEvent::Type::KeyDown, text, text, krys::move(key),
+                                                    u8"", krys::move(keyIdentifier), keyCode, false, false,
+                                                    false, modifiers, MonotonicTime::Now()));
+    }
+
+    /// @brief Cancels the events it handles, keeping the last one's vertical delta.
+    struct WheelCanceller : public dom::EventListenerCallback
+    {
+      double DeltaY {0};
+
+      void HandleEvent(dom::Event &event) noexcept override
+      {
+        if (event.IsWheelEvent())
+        {
+          DeltaY = static_cast<dom::WheelEvent &>(event).DeltaY();
+        }
+        event.PreventDefault();
+      }
+    };
+
+    /// @brief The middle of @p scrollbar's thumb, in its coordinates along its length.
+    KRYS_NODISCARD int32 ThumbCenter(Scrollbar &scrollbar) noexcept
+    {
+      auto &theme = ScrollbarTheme::Theme();
+      return theme.TrackPosition(scrollbar) + theme.ThumbPosition(scrollbar)
+             + theme.ThumbLength(scrollbar) / 2;
+    }
+
+    /// @brief How far the content scrolls for each pixel @p scrollbar's thumb moves.
+    KRYS_NODISCARD float ScrollPerThumbPixel(Scrollbar &scrollbar) noexcept
+    {
+      auto &theme = ScrollbarTheme::Theme();
+      return static_cast<float>(scrollbar.Maximum())
+             / static_cast<float>(theme.TrackLength(scrollbar) - theme.ThumbLength(scrollbar));
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the scroll position and its range",
@@ -79,21 +164,24 @@ namespace krys::boo::tests
     ScrollFixture fixture {TallPage};
     auto &view = fixture.View();
 
-    // The contents are the document's size; the range is what doesn't fit in the view.
+    // The contents are the document's size; the range is what doesn't fit in the view, less its scrollbars
+    // (21 pixels each, as the document overflows both ways).
     CHECK(view.ContentsSize() == IntSize(400, 600));
+    REQUIRE(view.HorizontalScrollbar());
+    REQUIRE(view.VerticalScrollbar());
     CHECK(view.MinimumScrollPosition() == ScrollPosition());
-    CHECK(view.MaximumScrollPosition() == ScrollPosition(200, 500));
+    CHECK(view.MaximumScrollPosition() == ScrollPosition(221, 521));
     CHECK(view.GetScrollPosition() == ScrollPosition());
 
     view.SetScrollPosition({50, 120});
     CHECK(view.GetScrollPosition() == ScrollPosition(50, 120));
-    CHECK(view.VisibleContentRect() == IntRect(50, 120, 200, 100));
+    CHECK(view.VisibleContentRect() == IntRect(50, 120, 179, 79));
     CHECK(view.WindowToContents(IntPoint(10, 10)) == IntPoint(60, 130));
     CHECK(view.ContentsToWindow(IntPoint(60, 130)) == IntPoint(10, 10));
 
     // Clamped to the range.
     view.SetScrollPosition({1'000, -10});
-    CHECK(view.GetScrollPosition() == ScrollPosition(200, 0));
+    CHECK(view.GetScrollPosition() == ScrollPosition(221, 0));
 
     SECTION("a layout that shrinks the document moves the scroll position back")
     {
@@ -102,20 +190,21 @@ namespace krys::boo::tests
       REQUIRE_FALSE(fixture.ById(u8"page").SetAttribute(u8"style", u8"height:150px").HasException());
       (void)fixture.Document->UpdateLayout();
       CHECK(view.ContentsSize() == IntSize(400, 150));
-      CHECK(view.GetScrollPosition() == ScrollPosition(0, 50));
+      // The view still scrolls horizontally, so its horizontal scrollbar stays: 150 less 79.
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 71));
     }
 
     SECTION("the scrolling element's scroll APIs scroll the view")
     {
       auto &root = *fixture.Document->ScrollingElement();
       CHECK(&root == dom::TreeQueries::DocumentElement(*fixture.Document));
-      CHECK(root.ScrollLeft() == 200);
+      CHECK(root.ScrollLeft() == 221);
       CHECK(root.ScrollTop() == 0);
       CHECK(root.ScrollWidth() == 400);
       CHECK(root.ScrollHeight() == 600);
 
       root.SetScrollTop(300);
-      CHECK(view.GetScrollPosition() == ScrollPosition(200, 300));
+      CHECK(view.GetScrollPosition() == ScrollPosition(221, 300));
       root.SetScrollLeft(20);
       CHECK(view.GetScrollPosition() == ScrollPosition(20, 300));
       root.ScrollTo(10, 20);
@@ -173,7 +262,7 @@ namespace krys::boo::tests
   (x -30.00)
   (y -40.00))
 (clip
-  (rect at (30,40) size 200x100)))"));
+  (rect at (30,40) size 179x79)))"));
     CHECK(painted.ends_with(u8"(restore)"));
   }
 
@@ -235,5 +324,261 @@ namespace krys::boo::tests
     fixture.ById(u8"box").SetScrollTop(30);
     fixture.Document->RunScrollSteps();
     CHECK(records == Strings {"scroll:box", "scrollend:box"});
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the view's scrollbars follow the mouse",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {utf8_string(TallPage) + u8"<input id=field>"};
+    auto &view = fixture.View();
+    auto &handler = fixture.Frame->GetEventHandler();
+    REQUIRE(view.VerticalScrollbar());
+    auto &vBar = *view.VerticalScrollbar();
+    // The vertical scrollbar runs down the right of the view, above the horizontal one.
+    CHECK(vBar.FrameRect() == IntRect(179, 0, 21, 79));
+    CHECK(view.ScrollbarAtPoint({190, 10}) == &vBar);
+    CHECK(view.ScrollbarAtPoint({170, 10}) == nullptr);
+
+    SECTION("moving over a scrollbar hovers its parts and shows the pointer")
+    {
+      Move(handler, {190, ThumbCenter(vBar)});
+      CHECK(vBar.HoveredPart() == ThumbPart);
+      CHECK(handler.CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
+      Move(handler, {190, 75});
+      CHECK(vBar.HoveredPart() == ForwardTrackPart);
+      Move(handler, {100, 10});
+      CHECK(vBar.HoveredPart() == NoPart);
+    }
+
+    SECTION("dragging the thumb scrolls in proportion")
+    {
+      int32 thumb = ThumbCenter(vBar);
+      Press(handler, {190, thumb});
+      CHECK(vBar.PressedPart() == ThumbPart);
+      // The drag carries on outside the scrollbar.
+      Move(handler, {100, thumb + 10});
+      CHECK(view.GetScrollPosition().Y() == static_cast<int32>(10 * ScrollPerThumbPixel(vBar)));
+      Release(handler, {100, thumb + 10});
+      CHECK(vBar.PressedPart() == NoPart);
+
+      // Released, the mouse moves the thumb no more.
+      auto scrolled = view.GetScrollPosition();
+      Move(handler, {100, thumb + 20});
+      CHECK(view.GetScrollPosition() == scrolled);
+    }
+
+    SECTION("pressing the track scrolls by a page")
+    {
+      Press(handler, {190, 75});
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, vBar.PageStep()));
+      // Four fifths of the 79 pixels in view.
+      CHECK(vBar.PageStep() == 63);
+      Release(handler, {190, 75});
+    }
+
+    SECTION("pressing a scrollbar leaves the focus alone")
+    {
+      auto &field = fixture.ById(u8"field");
+      Downcast<html::HTMLElement>(field).Focus();
+      REQUIRE(fixture.Document->FocusedElement() == &field);
+      Press(handler, {190, 75});
+      Release(handler, {190, 75});
+      CHECK(fixture.Document->FocusedElement() == &field);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a box's scrollbars follow the mouse",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style>"
+      u8"<div id=box style=position:absolute;top:0;width:100px;height:90px;overflow:scroll>"
+      u8"<div style=height:300px></div></div><input id=field style=position:absolute;left:120px;top:0>"};
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto &box = fixture.ById(u8"box");
+    CHECK_FALSE(fixture.View().VerticalScrollbar());
+
+    // The box's vertical scrollbar is on its right, 21 pixels wide; over it is the pointer.
+    Move(handler, {90, 60});
+    CHECK(handler.CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
+
+    SECTION("pressing the track scrolls by a page")
+    {
+      Press(handler, {90, 60});
+      Release(handler, {90, 60});
+      // Four fifths of the 69 pixels in view.
+      CHECK(box.ScrollTop() == 55);
+    }
+
+    SECTION("pressing a scrollbar doesn't move the focus to the viewport")
+    {
+      auto &field = fixture.ById(u8"field");
+      Downcast<html::HTMLElement>(field).Focus();
+      Press(handler, {90, 60});
+      Release(handler, {90, 60});
+      CHECK(fixture.Document->FocusedElement() == &field);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the wheel scrolls",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
+    ScrollFixture fixture {utf8_string(TallPage)
+                           + u8"<div id=box style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
+                             u8"<div style=height:200px></div></div>"};
+    auto &view = fixture.View();
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto &box = fixture.ById(u8"box");
+
+    SECTION("the box under the mouse scrolls, then the view once it reaches its end")
+    {
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(box.ScrollTop() == 100);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+      // Only 50 pixels are left.
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(box.ScrollTop() == 150);
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(box.ScrollTop() == 150);
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 100));
+
+      // Back up: the box scrolls first again.
+      CHECK(Wheel(handler, {20, 20}, {0, -100}));
+      CHECK(box.ScrollTop() == 50);
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 100));
+    }
+
+    SECTION("elsewhere the view scrolls, either way, to its ends")
+    {
+      CHECK(Wheel(handler, {150, 70}, {0, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 100));
+      CHECK(Wheel(handler, {150, 70}, {50, 0}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(50, 100));
+      CHECK(Wheel(handler, {150, 70}, {0, -1'000}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(50, 0));
+      // At the top, nothing scrolls.
+      CHECK_FALSE(Wheel(handler, {150, 70}, {0, -100}));
+    }
+
+    SECTION("a page at a time")
+    {
+      CHECK(Wheel(handler, {150, 70}, {0, 1}, PlatformWheelEventGranularity::ScrollByPageWheelEvent));
+      // Four fifths of the 79 pixels in view.
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
+    }
+
+    SECTION("overscroll-behavior stops the scroll at the box's end")
+    {
+      REQUIRE_FALSE(box
+                      .SetAttribute(u8"style", u8"position:fixed;top:0;width:100px;height:50px;overflow:auto;"
+                                               u8"overscroll-behavior:contain")
+                      .HasException());
+      (void)fixture.Document->UpdateLayout();
+      box.SetScrollTop(150);
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+
+      // On the view, it stops nothing: there's nothing beyond it.
+      CHECK(Wheel(handler, {150, 70}, {0, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 100));
+    }
+
+    SECTION("a cancelled wheel event scrolls nothing")
+    {
+      auto canceller = CreateRef<WheelCanceller>();
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
+                                         Ref<dom::EventListenerCallback> {canceller}, false);
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(canceller->DeltaY == 100);
+      CHECK(box.ScrollTop() == 0);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the keyboard scrolls",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    ScrollFixture fixture {
+      utf8_string(TallPage)
+      + u8"<div id=box tabindex=0 style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
+        u8"<div style=height:200px></div></div>"};
+    auto &view = fixture.View();
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto down = [&]
+    {
+      return Key(handler, u8"ArrowDown", u8"Down", vk::Down);
+    };
+
+    SECTION("the view, by lines, pages and to its ends")
+    {
+      // A line is 40 pixels.
+      CHECK(down());
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 40));
+      CHECK(Key(handler, u8"ArrowRight", u8"Right", vk::Right));
+      CHECK(view.GetScrollPosition() == ScrollPosition(40, 40));
+      CHECK(Key(handler, u8"ArrowLeft", u8"Left", vk::Left));
+      CHECK(Key(handler, u8"ArrowUp", u8"Up", vk::Up));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+
+      // A page is four fifths of the 79 pixels in view.
+      CHECK(Key(handler, u8"PageDown", u8"PageDown", vk::Next));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
+      CHECK(Key(handler, u8"PageUp", u8"PageUp", vk::Prior));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+
+      CHECK(Key(handler, u8"End", u8"End", vk::End));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 521));
+      CHECK(Key(handler, u8"Home", u8"Home", vk::Home));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+
+      // At the top, Up does nothing.
+      CHECK_FALSE(Key(handler, u8"ArrowUp", u8"Up", vk::Up));
+
+      // With modifiers, the page keys do nothing.
+      CHECK_FALSE(
+        Key(handler, u8"PageDown", u8"PageDown", vk::Next, {}, {PlatformEvent::Modifier::ShiftKey}));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+
+    SECTION("Space pages down, and Shift+Space up")
+    {
+      CHECK(Key(handler, u8" ", u8"U+0020", vk::Space, u8" "));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
+      CHECK(Key(handler, u8" ", u8"U+0020", vk::Space, u8" ", {PlatformEvent::Modifier::ShiftKey}));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+
+    SECTION("the focused box scrolls first, then the view")
+    {
+      auto &box = fixture.ById(u8"box");
+      Downcast<html::HTMLElement>(box).Focus();
+      CHECK(down());
+      CHECK(box.ScrollTop() == 40);
+      CHECK(Key(handler, u8"End", u8"End", vk::End));
+      CHECK(box.ScrollTop() == 150);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+      CHECK(down());
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 40));
+    }
+
+    SECTION("a cancelled keydown scrolls nothing")
+    {
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"keydown"),
+                                         Ref<dom::EventListenerCallback> {CreateRef<WheelCanceller>()},
+                                         false);
+      CHECK(down());
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+
+    SECTION("a view whose root hides overflow doesn't scroll")
+    {
+      REQUIRE_FALSE(dom::TreeQueries::DocumentElement(*fixture.Document)
+                      ->SetAttribute(u8"style", u8"overflow:hidden")
+                      .HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK_FALSE(down());
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
   }
 }

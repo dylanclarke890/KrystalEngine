@@ -314,6 +314,23 @@ namespace krys
           return true;
         });
 
+      // The wheel scrolls the page view: the box under the mouse, or else the page.
+      _context->Events->On<MouseScrollEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView || _view != EditorView::Page)
+          {
+            return true;
+          }
+          boo::IntPoint point(static_cast<int32>(event.ClientX()),
+                              static_cast<int32>(event.ClientY() - HeaderHeight));
+          if (point.Y() >= 0)
+          {
+            (void)_pageView->MouseWheel(point, event.DeltaX(), event.DeltaY(), event.Modifiers());
+          }
+          return true;
+        });
+
       _context->Events->On<WindowCloseEvent>(
         [&](const auto &)
         {

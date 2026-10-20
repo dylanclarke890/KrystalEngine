@@ -204,6 +204,17 @@ namespace krys::ui
     MouseMoved(boo::IntPoint(-1, -1));
   }
 
+  bool View::MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
+                        pal::KeyModifiers modifiers, const pal::WheelScrollSettings &settings) noexcept
+  {
+    if (!notchesX && !notchesY)
+    {
+      return false;
+    }
+    return _frame->GetEventHandler().HandleWheelEvent(
+      input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
+  }
+
   pal::CursorShape View::CurrentCursor() const noexcept
   {
     return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
@@ -27,9 +28,9 @@ namespace krys::boo
 
   /// @brief What a hit test found: the innermost node under the point, the link element it's in, the point in
   /// its renderer's coordinates, and for list-based tests every node hit.
-  /// FIXME: Scrollbars and widgets (scrollbar, isOverWidget's widgets), and the queries about what was hit
-  /// (selection, spelling, titles, images, media, links' URLs and targets, editability, dictation) come with
-  /// scrollbars, editing, images, media and navigation.
+  /// FIXME: Widgets (isOverWidget's widgets), and the queries about what was hit (selection, spelling,
+  /// titles, images, media, links' URLs and targets, editability, dictation) come with widgets, editing,
+  /// images, media and navigation.
   class HitTestResult
   {
   public:
@@ -46,6 +47,7 @@ namespace krys::boo
     // determine where inside the renderer we hit on subsequent operations.
     LayoutPoint _localPoint;
     RefPtr<dom::Element> _innerURLElement;
+    RefPtr<Scrollbar> _scrollbar;
     // Returns true if we are over a widget (and not in the border/padding area of a RenderWidget for
     // example).
     bool _isOverWidget {false};
@@ -54,6 +56,16 @@ namespace krys::boo
     mutable UniquePtr<NodeSet> _listBasedTestResult;
 
   public:
+    /// @brief The scrollbar hit, if any.
+    KRYS_NODISCARD Scrollbar *GetScrollbar() const noexcept
+    {
+      return _scrollbar.get();
+    }
+    void SetScrollbar(RefPtr<Scrollbar> &&scrollbar) noexcept
+    {
+      _scrollbar = krys::move(scrollbar);
+    }
+
     HitTestResult() noexcept;
     explicit HitTestResult(const LayoutPoint &point) noexcept;
     explicit HitTestResult(const LayoutRect &rect) noexcept;

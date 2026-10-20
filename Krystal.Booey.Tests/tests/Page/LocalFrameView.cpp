@@ -184,6 +184,7 @@ namespace krys::boo::tests
       #s { width: 10svw; height: 10lvh }
       #m { width: 10vmin; height: 10dvh }
       #f { width: 10px }
+      html { overflow: hidden }
     </style><div id=d></div><div id=s></div><div id=m></div><div id=f></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
@@ -198,6 +199,9 @@ namespace krys::boo::tests
 
     SECTION("Resizing the view invalidates the styles that use viewport units")
     {
+      // The root hides the view's scrollbars (as of a layout), so a resize doesn't lay the document out at once
+      // to fit them.
+      document.UpdateLayout();
       fixture.View().Resize({1'000, 500});
       CHECK(fixture.ById(u8"d").NeedsStyleRecalc());
       CHECK_FALSE(fixture.ById(u8"f").NeedsStyleRecalc());
@@ -259,8 +263,10 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: layout re-evaluates media queries",
                    "[Page][LocalFrameView]")
   {
+    // The root hides the view's scrollbars, so a resize doesn't lay the document out at once to fit them.
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (min-width: 1000px) { p { color: rgb(0, 0, 255) } }
+      html { overflow: hidden }
     </style><p id=p>x</p>)"};
     auto &document = *fixture.Document;
     auto &layoutContext = fixture.View().LayoutContext();
@@ -282,6 +288,17 @@ namespace krys::boo::tests
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
 
     CHECK(document.UpdateLayout() == dom::Document::UpdateLayoutResult::NoChange);
+
+    SECTION("A view that can show scrollbars lays out at once on a resize, to fit them")
+    {
+      FrameFixture scrolling {u8R"(<!DOCTYPE html><style>
+        @media (min-width: 1000px) { p { color: rgb(0, 0, 255) } }
+      </style><p id=p>x</p>)"};
+      scrolling.Document->UpdateLayout();
+      scrolling.View().Resize({1'200, 600});
+      CHECK_FALSE(scrolling.View().LayoutContext().IsLayoutPending());
+      CHECK(scrolling.Rendered(u8"p").GetColor() == Blue);
+    }
 
     SECTION("Layout isn't scheduled before there's a body")
     {

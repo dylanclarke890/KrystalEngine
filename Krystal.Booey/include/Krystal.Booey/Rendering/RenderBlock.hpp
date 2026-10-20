@@ -279,6 +279,11 @@ namespace krys::boo
 
 #pragma region Hit testing
 
+    /// @brief Whether @p locationInContainer is over one of the block's scrollbars, which @p result then
+    /// names.
+    bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
+                                  const LayoutPoint &accumulatedOffset) noexcept;
+
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction hitTestAction) noexcept override;

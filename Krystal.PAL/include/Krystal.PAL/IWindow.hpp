@@ -59,7 +59,10 @@ namespace krys::pal
   {
     using MouseMoveHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
     using MouseButtonHandler = Func<void(WindowHandle, MouseButton, MouseButtonState, KeyModifiers)>;
-    using MouseScrollHandler = Func<void(WindowHandle, float)>;
+    /// @brief The wheel's turn in notches (fractions of one from touchpads and smooth wheels): positive is
+    /// away from the user, or to the right; then the cursor's position in client space and the modifiers
+    /// held.
+    using MouseScrollHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
     using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
     using CloseHandler = Func<void(WindowHandle)>;
     using ResizeHandler = Func<void(WindowHandle, int, int)>;

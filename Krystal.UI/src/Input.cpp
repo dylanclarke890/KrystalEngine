@@ -253,4 +253,55 @@ namespace krys::ui::input
       default:                             return pal::CursorShape::Arrow;
     }
   }
+
+  boo::PlatformWheelEvent WheelEvent(const boo::IntPoint &point, float notchesX, float notchesY,
+                                     pal::KeyModifiers palModifiers,
+                                     const pal::WheelScrollSettings &settings) noexcept
+  {
+    // As a Windows wheel message: one wheel at a time, the horizontal one if it turned.
+    auto modifiers = ToBooey(palModifiers);
+    bool isHorizontalWheel = notchesX != 0;
+    float delta = isHorizontalWheel ? notchesX : notchesY;
+
+    float wheelTicksX = 0;
+    float wheelTicksY = 0;
+    if (isHorizontalWheel)
+    {
+      // Windows is <-- -/+ -->, Booey wants <-- +/- -->, so we negate |delta| after saving the original value
+      // on the wheel tick member.
+      wheelTicksX = delta;
+      delta = -delta;
+    }
+    else
+    {
+      // Even though we use shift + vertical wheel to scroll horizontally, we still note it as a vertical
+      // scroll on the wheel tick member, so that the DOM event we later construct will match the real
+      // hardware event better.
+      wheelTicksY = delta;
+    }
+
+    float deltaX = 0;
+    float deltaY = 0;
+    auto granularity = boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent;
+    if (isHorizontalWheel || modifiers.Contains(boo::PlatformEvent::Modifier::ShiftKey))
+    {
+      deltaX = delta * static_cast<float>(settings.Chars) * boo::ScrollbarPixelsPerLine;
+    }
+    else
+    {
+      deltaY = delta;
+      if (settings.Lines)
+      {
+        deltaY *= static_cast<float>(*settings.Lines) * boo::ScrollbarPixelsPerLine;
+      }
+      else
+      {
+        granularity = boo::PlatformWheelEventGranularity::ScrollByPageWheelEvent;
+      }
+    }
+
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    return boo::PlatformWheelEvent(point, point, deltaX, deltaY, wheelTicksX, wheelTicksY, granularity,
+                                   modifiers, MonotonicTime::Now());
+  }
 }

@@ -1,28 +1,35 @@
 ﻿#include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/ScrollbarThemeAdwaita.hpp"
 
 namespace krys::boo
 {
   ScrollbarTheme &ScrollbarTheme::Theme() noexcept
   {
-    static ScrollbarTheme theme;
+    // FIXME: Mock scrollbars (mockScrollbarsEnabled), if they're ever wanted.
+    static ScrollbarThemeAdwaita theme;
     return theme;
   }
 
-  int32 ScrollbarTheme::ScrollbarThickness(ScrollbarWidth width,
-                                           OverlayScrollbarSizeRelevancy relevancy) const noexcept
+  void ScrollbarTheme::DefaultPaintScrollCorner(ScrollableArea &, GraphicsContext &context,
+                                                const IntRect &cornerRect) noexcept
   {
-    if (UsesOverlayScrollbars() && relevancy == OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize)
-    {
-      return 0;
-    }
+    context.FillRect(FloatRect(cornerRect), Color::white);
+  }
 
-    switch (width)
+  ScrollbarButtonPressAction ScrollbarTheme::HandleMousePressEvent(Scrollbar &,
+                                                                   const PlatformMouseEvent &event,
+                                                                   ScrollbarPart pressedPart) noexcept
+  {
+    if (event.Button() == MouseButton::Right)
     {
-      case ScrollbarWidth::Auto: return 15;
-      case ScrollbarWidth::Thin: return 11;
-      case ScrollbarWidth::None: return 0;
+      return ScrollbarButtonPressAction::None;
     }
-    krys_debug_assert(false);
-    return 15;
+    if (pressedPart == ThumbPart)
+    {
+      return ScrollbarButtonPressAction::StartDrag;
+    }
+    return ScrollbarButtonPressAction::Scroll;
   }
 }

@@ -708,6 +708,16 @@ namespace krys::boo
     KRYS_NODISCARD bool HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept;
     KRYS_NODISCARD bool CanBeProgramaticallyScrolled() const noexcept;
     KRYS_NODISCARD bool CanBeScrolledAndHasScrollableArea() const noexcept;
+    /// @brief Scrolls the box, or else its nearest containing block that scrolls, by @p stepCount steps of
+    /// @p granularity in @p direction; the render view's isn't one.
+    /// @param stopElement If given and set, the scroll goes no further than that element; it's set to the
+    /// element of the box that scrolled.
+    /// @return Whether something scrolled.
+    bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
+                dom::Element **stopElement = nullptr) noexcept;
+    /// @brief As `Scroll`, in a direction relative to the box's writing mode.
+    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
+                       dom::Element **stopElement = nullptr) noexcept;
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
     KRYS_NODISCARD int32 ScrollLeft() const noexcept;
     KRYS_NODISCARD int32 ScrollTop() const noexcept;
@@ -999,6 +1009,9 @@ namespace krys::boo
     void ComputeOutOfFlowPositionedLogicalWidth(LogicalExtentComputedValues &computedValues) const noexcept;
 
   private:
+    bool ScrollLayer(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount,
+                     dom::Element **stopElement) noexcept;
+
     void AddOverflowWithRendererOffset(const RenderBox &renderer, LayoutSize offsetFromThis,
                                        EnumSet<ComputeOverflowOptions> options = {}) noexcept;
 

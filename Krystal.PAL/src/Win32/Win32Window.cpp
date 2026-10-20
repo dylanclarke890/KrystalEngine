@@ -7,6 +7,7 @@
 #include <hidusage.h>
 #include <string>
 #include <windows.h>
+#include <windowsx.h>
 
 #ifdef CreateWindow
   #undef CreateWindow
@@ -561,11 +562,22 @@ namespace krys::pal
           break;
         }
         case WM_MOUSEWHEEL:
+        case WM_MOUSEHWHEEL:
         {
           if (_callbacks.OnMouseScroll)
           {
+            // In notches, which smooth wheels and touchpads report fractions of. Windows is forward and right
+            // positive, as the callback.
             const auto delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
-            _callbacks.OnMouseScroll(handle, delta);
+            const bool horizontal = message == WM_MOUSEHWHEEL;
+
+            // The position is in screen coordinates.
+            POINT point {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+            ::ScreenToClient(window, &point);
+
+            _callbacks.OnMouseScroll(handle, horizontal ? delta : 0, horizontal ? 0 : delta,
+                                     static_cast<float>(point.x), static_cast<float>(point.y),
+                                     CurrentModifiers());
           }
           break;
         }
@@ -599,14 +611,8 @@ namespace krys::pal
               clientY = static_cast<float>(point.y);
             }
 
+            // The wheel comes as WM_MOUSEWHEEL and WM_MOUSEHWHEEL, with the cursor's position.
             _callbacks.OnMouseMove(handle, x, y, clientX, clientY, CurrentModifiers());
-          }
-          else if ((raw.data.mouse.usButtonFlags & RI_MOUSE_WHEEL) == RI_MOUSE_WHEEL)
-          {
-            if (!_callbacks.OnMouseScroll)
-              return 0; // no mouse scroll callback registered, ignore
-            const auto delta = static_cast<float>(static_cast<uint16>(raw.data.mouse.usButtonData));
-            _callbacks.OnMouseScroll(handle, delta);
           }
           break;
         }

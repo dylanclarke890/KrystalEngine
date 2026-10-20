@@ -125,24 +125,46 @@ namespace krys::pal
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
 
-  /// @brief Represents a user interaction with a mouse scroll wheel.
+  /// @brief Represents a user interaction with a mouse scroll wheel (or a touchpad's scrolling).
   class MouseScrollEvent : public Event
   {
   private:
     WindowHandle _window;
-    float _delta;
+    float _deltaX, _deltaY;
+    float _clientX, _clientY;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-scroll-event")
 
-    /// @brief Constructs a `ScrollWheelEvent`.
-    /// @param delta The amount the scroll wheel has moved since the last event. Positive values MUST indicate
+    /// @brief Constructs a `MouseScrollEvent`.
+    /// @param deltaX How far the wheel turned sideways since the last event, in notches. Positive values MUST
+    /// indicate scrolling right.
+    /// @param deltaY How far the wheel turned since the last event, in notches. Positive values MUST indicate
     /// scrolling forward and negative values MUST indicate scrolling backwards.
-    MouseScrollEvent(WindowHandle window, const float delta) noexcept;
+    /// @param clientX The x-coordinate of the cursor in client space.
+    /// @param clientY The y-coordinate of the cursor in client space.
+    /// @param modifiers The modifier keys held.
+    MouseScrollEvent(WindowHandle window, const float deltaX, const float deltaY, const float clientX,
+                     const float clientY, const KeyModifiers modifiers = {}) noexcept;
 
-    /// @brief Gets the scroll delta since the last event. Positive values indicate scrolling forward (away
-    /// from the user), and negative values indicate scrolling backward (toward the user).
-    KRYS_NODISCARD float Delta() const noexcept;
+    /// @brief Gets the sideways turn since the last event, in notches. Positive values indicate scrolling
+    /// right.
+    KRYS_NODISCARD float DeltaX() const noexcept;
+
+    /// @brief Gets the turn since the last event, in notches. Positive values indicate scrolling forward
+    /// (away from the user), and negative values indicate scrolling backward (toward the user).
+    /// @note A notch is usually a whole step; touchpads and smooth wheels report fractions of one.
+    KRYS_NODISCARD float DeltaY() const noexcept;
+
+    /// @brief Gets the x-coordinate of the cursor in client space.
+    KRYS_NODISCARD float ClientX() const noexcept;
+
+    /// @brief Gets the y-coordinate of the cursor in client space.
+    KRYS_NODISCARD float ClientY() const noexcept;
+
+    /// @brief Gets the modifier keys held during the scroll.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

@@ -71,4 +71,29 @@ namespace krys::pal
   {
     ::Sleep(static_cast<unsigned long>(duration.count()));
   }
+
+  WheelScrollSettings GetWheelScrollSettings() noexcept
+  {
+    WheelScrollSettings settings;
+
+    UINT lines = 0;
+    if (::SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines, 0))
+    {
+      if (lines == WHEEL_PAGESCROLL)
+      {
+        settings.Lines = null;
+      }
+      else
+      {
+        settings.Lines = static_cast<uint32>(lines);
+      }
+    }
+
+    UINT chars = 0;
+    if (::SystemParametersInfoW(SPI_GETWHEELSCROLLCHARS, 0, &chars, 0))
+    {
+      settings.Chars = static_cast<uint32>(chars);
+    }
+    return settings;
+  }
 }

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -2095,8 +2096,35 @@ namespace krys::boo
       PopContentsClip(paintInfo, phase, adjustedPaintOffset);
     }
 
-    // FIXME: Scrollbars (paintOverflowControls, painted over the background and border in the block
-    // background phases) come with scrollbars.
+    // Our scrollbar widgets paint exactly when we tell them to, so that they work properly with z-index. We
+    // paint after we painted the background/border, so that the scrollbars will sit above the
+    // background/border.
+    if (phase == PaintPhase::BlockBackground || phase == PaintPhase::ChildBlockBackground)
+    {
+      auto *layer = Layer();
+      if (HasNonVisibleOverflow() && layer && layer->GetScrollableArea()
+          && Style().UsedVisibility() == Visibility::Visible && paintInfo.ShouldPaintWithinRoot(*this)
+          && !paintInfo.PaintRootBackgroundOnly())
+      {
+        layer->GetScrollableArea()->PaintOverflowControls(
+          paintInfo.Context(), RoundedIntPoint(adjustedPaintOffset), SnappedIntRect(paintInfo.Rect));
+      }
+    }
+  }
+
+  bool RenderBlock::IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
+                                             const LayoutPoint &accumulatedOffset) noexcept
+  {
+    if (!ScrollsOverflow())
+    {
+      return false;
+    }
+    if (auto *scrollableArea = Layer() ? Layer()->GetScrollableArea() : nullptr)
+    {
+      return scrollableArea->HitTestOverflowControls(
+        result, RoundedIntPoint(locationInContainer - ToLayoutSize(accumulatedOffset)));
+    }
+    return false;
   }
 
   PaintInfo RenderBlock::PaintInfoForBlockChildren(const PaintInfo &paintInfo) const noexcept
@@ -2333,7 +2361,19 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Scrollbars and resizers (isPointInOverflowControl) come with scrollbars.
+    if ((hitTestAction == HitTestAction::HitTestBlockBackground
+         || hitTestAction == HitTestAction::HitTestChildBlockBackground)
+        && VisibleToHitTesting(&request)
+        && IsPointInOverflowControl(result, locationInContainer.Point(), adjustedLocation))
+    {
+      UpdateHitTestResult(result, locationInContainer.Point() - localOffset);
+      // FIXME: isPointInOverflowControl() doesn't handle rect-based tests yet.
+      if (result.AddNodeToListBasedTestResult(NodeForHitTest(), request, locationInContainer)
+          == HitTestProgress::Stop)
+      {
+        return true;
+      }
+    }
 
     if (!HitTestClipPath(locationInContainer, accumulatedOffset))
     {

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -40,8 +41,8 @@ namespace krys::boo
       : _hitTestLocation(other._hitTestLocation), _innerNode(ShareRefPtr(other.InnerNode())),
         _innerNonSharedNode(ShareRefPtr(other.InnerNonSharedNode())),
         _doublePointInInnerNodeFrame(other._doublePointInInnerNodeFrame), _localPoint(other.LocalPoint()),
-        _innerURLElement(ShareRefPtr(other.URLElement())), _isOverWidget(other.IsOverWidget()),
-        _pseudoElementIdentifier(other.GetPseudoElementIdentifier())
+        _innerURLElement(ShareRefPtr(other.URLElement())), _scrollbar(ShareRefPtr(other.GetScrollbar())),
+        _isOverWidget(other.IsOverWidget()), _pseudoElementIdentifier(other.GetPseudoElementIdentifier())
   {
     // Only copy the NodeSet in case of list hit test.
     if (other._listBasedTestResult)
@@ -65,6 +66,7 @@ namespace krys::boo
     _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
     _localPoint = other.LocalPoint();
     _innerURLElement = other._innerURLElement;
+    _scrollbar = other._scrollbar;
     _isOverWidget = other.IsOverWidget();
     _pseudoElementIdentifier = other.GetPseudoElementIdentifier();
 
@@ -198,6 +200,7 @@ namespace krys::boo
       _localPoint = other.LocalPoint();
       _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
       _innerURLElement = other._innerURLElement;
+      _scrollbar = other._scrollbar;
       _isOverWidget = other.IsOverWidget();
     }
 

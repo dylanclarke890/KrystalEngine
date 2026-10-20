@@ -39,6 +39,7 @@ namespace krys::boo
   class LayoutRect;
   class LayoutSize;
   class RenderBlock;
+  class RenderBox;
   class RenderElement;
   class RenderLayer;
   class RenderLayerModelObject;
@@ -741,6 +742,8 @@ namespace krys::boo
     KRYS_NODISCARD bool IsTransformed() const noexcept;
 
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
+    /// @brief The nearest box that is this renderer or one of its ancestors.
+    KRYS_NODISCARD RenderBox &EnclosingBox() const noexcept;
 
     KRYS_NODISCARD bool IsSkippedContent() const noexcept;
 

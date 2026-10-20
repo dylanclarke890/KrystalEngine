@@ -167,4 +167,17 @@ namespace krys::ui::tests
     // draws a fixed 2 pixel ring in the outline colour, so only its own golden is checked.
     CheckPage("focus", 360u, 200u, true, [](View &view) { (void)view.KeyPressed(pal::Key::Tab); });
   }
+
+  TEST_CASE("Golden: scrollbars", "[UI][GPU][Golden]")
+  {
+    // Chrome's captures hide scrollbars (and its Windows scrollbars aren't the theme's), so there's no Chrome
+    // golden.
+    CheckPage("scrollbars", 360u, 240u, true,
+              [](View &view)
+              {
+                view.ScrollTo({20, 40});
+                view.Document().GetElementById(u8"scrolled")->SetScrollTop(90);
+                view.UpdateRendering();
+              });
+  }
 }

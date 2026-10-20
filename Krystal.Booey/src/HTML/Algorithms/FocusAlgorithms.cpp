@@ -530,17 +530,26 @@ namespace krys::boo::html
 
   void FocusAlgorithms::FocusForClick(dom::Element &element) noexcept
   {
-    element.NodeDocument().UpdateStyleIfNeeded();
     dom::FocusOptions options {.Trigger = dom::FocusTrigger::Click};
+    if (auto *candidate = ClickFocusableInclusiveAncestor(element))
+    {
+      FocusingSteps(*candidate, nullptr, options);
+      return;
+    }
+    FocusingSteps(element.NodeDocument(), nullptr, options);
+  }
+
+  dom::Element *FocusAlgorithms::ClickFocusableInclusiveAncestor(dom::Element &element) noexcept
+  {
+    element.NodeDocument().UpdateStyleIfNeeded();
     for (auto *candidate = &element; candidate; candidate = candidate->ParentElementInComposedTree())
     {
       if (IsFocusableArea(*candidate) && IsClickFocusable(*candidate))
       {
-        FocusingSteps(*candidate, nullptr, options);
-        return;
+        return candidate;
       }
     }
-    FocusingSteps(element.NodeDocument(), nullptr, options);
+    return nullptr;
   }
 
   bool FocusAlgorithms::IsFocusNavigationScopeOwner(const dom::Node &node) noexcept

@@ -30,11 +30,13 @@
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
+#include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
@@ -665,14 +667,67 @@ namespace krys::boo::dom
     return {didNotSwallowEvent ? EventIsDispatched::Yes : EventIsDispatched::No, eventIsDefaultPrevented};
   }
 
+  bool Element::DispatchWheelEvent(const PlatformWheelEvent &platformEvent,
+                                   EnumSet<EventHandling> &processing, bool isCancelable) noexcept
+  {
+    Ref<WheelEvent> event =
+      WheelEvent::Create(platformEvent, NodeDocument().View(),
+                         isCancelable ? WheelEvent::IsCancelable::Yes : WheelEvent::IsCancelable::No);
+
+    // Events with no deltas are important because they convey platform information about scroll gestures
+    // and momentum beginning or ending. However, those events should not be sent to the DOM since some
+    // websites will break. They need to be dispatched because dispatching them will call into the default
+    // event handler, and our platform code will correctly handle the phase changes. Calling stopPropagation()
+    // will prevent the event from being sent to the DOM, but will still call the default event handler.
+    if (platformEvent.Delta().IsZero())
+    {
+      event->StopPropagation();
+    }
+    else
+    {
+      processing.Add(EventHandling::DispatchedToDOM);
+    }
+
+    Ref protectedThis = ShareRef(*this);
+    (void)EventDispatcher::DispatchToTarget(*event, this);
+
+    if (event->DefaultPrevented())
+    {
+      processing.Add(EventHandling::DefaultPrevented);
+      return false;
+    }
+
+    // The default action: if we don't have a renderer, send the wheel event to the first node we find with a
+    // renderer. This is needed for <option> and <optgroup> elements so that <select>s get a wheel scroll.
+    Node *startNode = this;
+    while (startNode && !startNode->Renderer())
+    {
+      startNode = TreeQueries::ParentOrShadowHostElement(*startNode);
+    }
+    if (startNode)
+    {
+      if (auto *frame = NodeDocument().Frame();
+          frame && frame->GetEventHandler().DefaultWheelEventHandler(startNode, *event))
+      {
+        processing.Add(EventHandling::DefaultHandled);
+        return false;
+      }
+    }
+    return true;
+  }
+
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
     Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent);
     // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
     // accessibility.
     (void)EventDispatcher::DispatchToTarget(*event, this);
-    // FIXME: And not handled (defaultHandled), once default event handlers can handle events.
-    return !event->DefaultPrevented();
+    if (event->DefaultPrevented())
+    {
+      return false;
+    }
+    auto *frame = NodeDocument().Frame();
+    return !frame || !frame->GetEventHandler().DefaultKeyboardEventHandler(*event);
   }
 
   bool Element::IsUserActionElementHovered() const noexcept

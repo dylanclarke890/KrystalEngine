@@ -15,6 +15,7 @@
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Platform.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include <chrono>
@@ -106,6 +107,14 @@ namespace krys::ui
                        pal::KeyModifiers modifiers = {}) noexcept;
     /// @brief The mouse left the page: it leaves the element it was over, and nothing is `:hover`.
     void MouseLeft() noexcept;
+    /// @brief Turns the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user, or
+    /// to the right): `wheel` fires at the element under the mouse, then, unless it's cancelled, the nearest
+    /// box that can scroll that way scrolls, or else the viewport. A notch is @p settings' lines (or a page),
+    /// at 100 pixels per three lines; with Shift, the vertical wheel scrolls sideways.
+    /// @return Whether the page cancelled the wheel or scrolled.
+    bool MouseWheel(const boo::IntPoint &point, float notchesX, float notchesY,
+                    pal::KeyModifiers modifiers = {},
+                    const pal::WheelScrollSettings &settings = pal::GetWheelScrollSettings()) noexcept;
 
     /// @brief The cursor the page wants over it, as of the last mouse move.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;

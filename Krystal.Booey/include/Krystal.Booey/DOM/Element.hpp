@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
+#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -753,6 +754,17 @@ namespace krys::boo::dom
     DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
                                                 DOMStringAtom eventType, int32 detail = 0,
                                                 Element *relatedTarget = nullptr) noexcept;
+
+#pragma endregion
+
+#pragma region Wheel Events
+
+    /// @brief Dispatches a trusted `wheel` event from @p platformEvent at this element, then, unless it's
+    /// cancelled, scrolls (the event's default action).
+    /// @param processing Gains whether the event reached the DOM, and whether it was cancelled or handled.
+    /// @return Whether the event was neither cancelled nor handled.
+    bool DispatchWheelEvent(const PlatformWheelEvent &platformEvent, EnumSet<EventHandling> &processing,
+                            bool isCancelable = true) noexcept;
 
 #pragma endregion
 

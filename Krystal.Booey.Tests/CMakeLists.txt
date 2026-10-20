@@ -367,6 +367,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/HitTestResult.cpp
 		tests/DOM/KeyboardEvent.cpp
 		tests/DOM/MouseEvent.cpp
+		tests/DOM/WheelEvent.cpp
 		tests/Page/EventHandler.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/BorderPainter.cpp

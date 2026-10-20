@@ -24,13 +24,14 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("RenderLayerScrollableArea: the classic scrollbar theme",
+  TEST_CASE("RenderLayerScrollableArea: the Adwaita scrollbar theme",
             "[Rendering][RenderLayerScrollableArea]")
   {
     auto &theme = ScrollbarTheme::Theme();
     CHECK_FALSE(theme.UsesOverlayScrollbars());
-    CHECK(theme.ScrollbarThickness() == 15);
-    CHECK(theme.ScrollbarThickness(ScrollbarWidth::Thin) == 11);
+    // Classic Adwaita scrollbars are 21 pixels thick, thin or not.
+    CHECK(theme.ScrollbarThickness() == 21);
+    CHECK(theme.ScrollbarThickness(ScrollbarWidth::Thin) == 21);
     CHECK(theme.ScrollbarThickness(ScrollbarWidth::None) == 0);
   }
 
@@ -80,8 +81,8 @@ namespace krys::boo::tests
       CHECK(scrollableArea.HasOverflowControls());
 
       auto &box = BoxOf(fixture, u8"scroll");
-      CHECK(box.VerticalScrollbarWidth() == 15);
-      CHECK(box.HorizontalScrollbarHeight() == 15);
+      CHECK(box.VerticalScrollbarWidth() == 21);
+      CHECK(box.HorizontalScrollbarHeight() == 21);
       CHECK(box.HasAlwaysPresentScrollbar(ScrollbarOrientation::Vertical));
       CHECK_FALSE(box.HasAutoScrollbar(ScrollbarOrientation::Vertical));
       // The corner between the two scrollbars.
@@ -94,7 +95,7 @@ namespace krys::boo::tests
       CHECK(scrollableArea.HorizontalScrollbar());
       CHECK_FALSE(scrollableArea.VerticalScrollbar());
       CHECK(BoxOf(fixture, u8"scrollx").VerticalScrollbarWidth() == 0);
-      CHECK(BoxOf(fixture, u8"scrollx").HorizontalScrollbarHeight() == 15);
+      CHECK(BoxOf(fixture, u8"scrollx").HorizontalScrollbarHeight() == 21);
       CHECK_FALSE(scrollableArea.IsScrollCornerVisible());
     }
 
@@ -109,12 +110,12 @@ namespace krys::boo::tests
     SECTION("scrollbar-gutter: stable reserves the vertical scrollbar's space")
     {
       CHECK_FALSE(ScrollableAreaOf(fixture, u8"gutter")->HasScrollbars());
-      CHECK(BoxOf(fixture, u8"gutter").VerticalScrollbarWidth() == 15);
+      CHECK(BoxOf(fixture, u8"gutter").VerticalScrollbarWidth() == 21);
     }
 
     SECTION("scrollbar-width")
     {
-      CHECK(BoxOf(fixture, u8"thin").VerticalScrollbarWidth() == 11);
+      CHECK(BoxOf(fixture, u8"thin").VerticalScrollbarWidth() == 21);
       CHECK(BoxOf(fixture, u8"none").VerticalScrollbarWidth() == 0);
     }
 

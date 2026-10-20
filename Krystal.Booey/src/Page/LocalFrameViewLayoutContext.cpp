@@ -117,6 +117,7 @@ namespace krys::boo
                                                      : static_cast<RenderElement *>(GetRenderView()));
       // FIXME: Printing repaints everything too, once there's printing.
       _needsFullRepaint = Is<RenderView>(*layoutRoot) && _firstLayout;
+      _frameView.WillDoLayout(*layoutRoot);
       _firstLayout = false;
     }
 

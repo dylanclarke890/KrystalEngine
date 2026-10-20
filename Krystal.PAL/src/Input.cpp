@@ -21,6 +21,7 @@ namespace krys::pal
     _mouse._deltaX = 0;
     _mouse._deltaY = 0;
     _mouse._scrollDelta = 0;
+    _mouse._horizontalScrollDelta = 0;
     _mouse._held |= _mouse._pressed;
     _mouse._held &= ~_mouse._released;
     _mouse._pressed = MouseButton::None;
@@ -72,9 +73,13 @@ namespace krys::pal
     _events->Enqueue(CreateUnique<MouseMoveEvent>(window, dx, dy, clientX, clientY, modifiers));
   }
 
-  void Input::OnMouseScrollEvent(WindowHandle window, float delta) noexcept
+  void Input::OnMouseScrollEvent(WindowHandle window, float deltaX, float deltaY, float clientX,
+                                 float clientY, KeyModifiers modifiers) noexcept
   {
-    _mouse._scrollDelta += delta;
-    _events->Enqueue(CreateUnique<MouseScrollEvent>(window, delta));
+    _mouse._scrollDelta += deltaY;
+    _mouse._horizontalScrollDelta += deltaX;
+    _mouse._clientX = clientX;
+    _mouse._clientY = clientY;
+    _events->Enqueue(CreateUnique<MouseScrollEvent>(window, deltaX, deltaY, clientX, clientY, modifiers));
   }
 }

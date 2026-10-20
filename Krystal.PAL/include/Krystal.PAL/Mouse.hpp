@@ -20,6 +20,7 @@ namespace krys::pal
     float _clientX {0}, _clientY {0};
     float _deltaX {0}, _deltaY {0};
     float _scrollDelta {0};
+    float _horizontalScrollDelta {0};
     MouseButton _pressed {MouseButton::None}, _released {MouseButton::None}, _held {MouseButton::None};
 
   public:
@@ -40,8 +41,12 @@ namespace krys::pal
     /// @brief Gets the amount the cursor has moved along the y-axis since the last frame.
     KRYS_NODISCARD float DeltaY() const noexcept;
 
-    /// @brief Gets the amount the scroll wheel has changed since the last frame.
+    /// @brief Gets the amount the scroll wheel has changed since the last frame, in notches.
     KRYS_NODISCARD float ScrollDelta() const noexcept;
+
+    /// @brief Gets the amount the scroll wheel has turned sideways since the last frame, in notches; positive
+    /// is to the right.
+    KRYS_NODISCARD float HorizontalScrollDelta() const noexcept;
 
     /// @brief Checks if a button was pressed this frame.
     /// @param button The button to check.
