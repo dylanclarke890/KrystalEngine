@@ -26,7 +26,7 @@ namespace krys::boo
   Scrollbar::Scrollbar(ScrollableArea &scrollableArea, ScrollbarOrientation orientation,
                        ScrollbarWidth widthStyle) noexcept
       : _scrollableArea(CreateWeakPtr(&scrollableArea)), _orientation(orientation), _widthStyle(widthStyle),
-        _theme(ScrollbarTheme::Theme())
+        _theme(ScrollbarTheme::Theme()), _scrollTimer(*this, &Scrollbar::AutoscrollTimerFired)
   {
     // FIXME: This is ugly and would not be necessary if we fix cross-platform code to actually query for
     // scrollbar thickness and use it when sizing scrollbars (rather than leaving one dimension of the
@@ -148,7 +148,12 @@ namespace krys::boo
     return PressedPos() >= thumbPos && PressedPos() < thumbPos + thumbLength;
   }
 
-  void Scrollbar::AutoscrollPressedPart() noexcept
+  void Scrollbar::AutoscrollTimerFired() noexcept
+  {
+    AutoscrollPressedPart(Theme().AutoscrollTimerDelay());
+  }
+
+  void Scrollbar::AutoscrollPressedPart(MonotonicTime::duration delay) noexcept
   {
     // Don't do anything for the thumb or if nothing was pressed.
     if (_pressedPart == ThumbPart || _pressedPart == NoPart)
@@ -165,8 +170,55 @@ namespace krys::boo
     }
 
     // Handle the arrows and track.
-    // FIXME: Repeating while the part is pressed (startTimerIfNeeded), once there are timers.
-    (void)GetScrollableArea().Scroll(PressedPartScrollDirection(), PressedPartScrollGranularity());
+    if (GetScrollableArea().Scroll(PressedPartScrollDirection(), PressedPartScrollGranularity()))
+    {
+      StartTimerIfNeeded(delay);
+    }
+  }
+
+  void Scrollbar::StartTimerIfNeeded(MonotonicTime::duration delay) noexcept
+  {
+    // Don't do anything for the thumb.
+    if (_pressedPart == ThumbPart)
+    {
+      return;
+    }
+
+    // Handle the track.  We halt track scrolling once the thumb is level
+    // with us.
+    if ((_pressedPart == BackTrackPart || _pressedPart == ForwardTrackPart) && ThumbUnderMouse())
+    {
+      Theme().InvalidatePart(*this, _pressedPart);
+      SetHoveredPart(ThumbPart);
+      return;
+    }
+
+    // We can't scroll if we've hit the beginning or end.
+    ScrollDirection dir = PressedPartScrollDirection();
+    if (dir == ScrollDirection::ScrollUp || dir == ScrollDirection::ScrollLeft)
+    {
+      if (_currentPos == 0)
+      {
+        return;
+      }
+    }
+    else
+    {
+      if (_currentPos == static_cast<float>(Maximum()))
+      {
+        return;
+      }
+    }
+
+    _scrollTimer.StartOneShot(delay);
+  }
+
+  void Scrollbar::StopTimerIfNeeded() noexcept
+  {
+    if (_scrollTimer.IsActive())
+    {
+      _scrollTimer.Stop();
+    }
   }
 
   ScrollDirection Scrollbar::PressedPartScrollDirection() const noexcept
@@ -324,12 +376,13 @@ namespace krys::boo
         if (part == _pressedPart)
         {
           // The mouse is moving back over the pressed part. We need to start up the timer action again.
-          // FIXME: The autoscroll timer, once there are timers.
+          StartTimerIfNeeded(Theme().AutoscrollTimerDelay());
           Theme().InvalidatePart(*this, _pressedPart);
         }
         else if (_hoveredPart == _pressedPart)
         {
           // The mouse is leaving the pressed part. Kill our timer if needed.
+          StopTimerIfNeeded();
           Theme().InvalidatePart(*this, _pressedPart);
         }
       }
@@ -357,6 +410,7 @@ namespace krys::boo
     SetPressedPart(NoPart);
     _pressedPos = 0;
     _draggingDocument = false;
+    StopTimerIfNeeded();
 
     auto &scrollableArea = GetScrollableArea();
     scrollableArea.MouseIsDownInScrollbar(this, false);
@@ -409,7 +463,7 @@ namespace krys::boo
 
     if (action == ScrollbarButtonPressAction::Scroll)
     {
-      AutoscrollPressedPart();
+      AutoscrollPressedPart(Theme().InitialAutoscrollTimerDelay());
     }
 
     return true;

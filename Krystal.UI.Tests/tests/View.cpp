@@ -4,6 +4,8 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.UI/Input.hpp"
 #include <filesystem>
@@ -412,5 +414,52 @@ namespace krys::ui::tests
 
     // No turn, no event.
     CHECK_FALSE(view.MouseWheel({50, 50}, 0, 0, {}, threeLines));
+  }
+
+  TEST_CASE("View: Update runs the event loop with the host's time", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    View view({200, 100});
+    view.LoadHTML(u8"<!DOCTYPE html><div id=box style='width: 10px; height: 10px'></div>");
+    auto start = boo::html::EventLoop::Current().Now() + 1s;
+    view.Update(start);
+
+    // Style and layout run on their timers.
+    auto box = view.Document().GetElementById(u8"box");
+    REQUIRE_FALSE(box->SetAttribute(u8"style", u8"width: 20px; height: 10px").HasException());
+    CHECK(view.Document().HasPendingStyleRecalc());
+    view.Update(start);
+    CHECK_FALSE(view.Document().HasPendingStyleRecalc());
+
+    // Timers follow the time the host passes.
+    int32 fired = 0;
+    boo::Timer timer([&] { ++fired; });
+    timer.StartOneShot(100ms);
+    view.Update(start + 99ms);
+    CHECK(fired == 0);
+    view.Update(start + 100ms);
+    CHECK(fired == 1);
+
+    // Input is followed by a microtask checkpoint.
+    struct MicrotaskQueuer : boo::dom::EventListenerCallback
+    {
+      int32 &Ran;
+
+      explicit MicrotaskQueuer(int32 &ran) noexcept : Ran(ran)
+      {
+      }
+
+      void HandleEvent(boo::dom::Event &) noexcept override
+      {
+        boo::html::EventLoop::Current().QueueMicrotask([this] { ++Ran; });
+      }
+    };
+    int32 ran = 0;
+    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"mousedown"),
+                                     Ref<boo::dom::EventListenerCallback> {CreateRef<MicrotaskQueuer>(ran)},
+                                     false);
+    view.MousePressed({5, 5}, pal::MouseButton::Left);
+    CHECK(ran == 1);
+    view.MouseReleased({5, 5}, pal::MouseButton::Left);
   }
 }

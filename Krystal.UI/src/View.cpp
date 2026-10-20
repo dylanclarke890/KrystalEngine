@@ -90,6 +90,18 @@ namespace krys::ui
     return view ? boo::IntSize(view->Width(), view->Height()) : boo::IntSize();
   }
 
+  void View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
+  {
+    boo::html::EventLoop::Current().Run(now, budget);
+  }
+
+  void View::PerformMicrotaskCheckpoint() noexcept
+  {
+    // Input is dispatched as a task would be, so a microtask checkpoint follows it.
+    // https://html.spec.whatwg.org/#event-loop-processing-model
+    boo::html::EventLoop::Current().PerformMicrotaskCheckpoint();
+  }
+
   void View::UpdateRendering() noexcept
   {
     // The scroll steps come before style and layout in the rendering update.
@@ -156,6 +168,7 @@ namespace krys::ui
   {
     (void)_frame->GetEventHandler().MouseMoved(MouseEvent(
       boo::PlatformEvent::Type::MouseMoved, point, boo::MouseButton::None, 0, input::ToBooey(modifiers)));
+    PerformMicrotaskCheckpoint();
   }
 
   void View::MousePressed(const boo::IntPoint &point, pal::MouseButton palButton,
@@ -181,6 +194,7 @@ namespace krys::ui
     _buttons |= ButtonsBit(button);
     (void)_frame->GetEventHandler().HandleMousePressEvent(MouseEvent(
       boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, input::ToBooey(modifiers)));
+    PerformMicrotaskCheckpoint();
   }
 
   void View::MouseReleased(const boo::IntPoint &point, pal::MouseButton palButton,
@@ -195,6 +209,7 @@ namespace krys::ui
     _buttons &= static_cast<uint16>(~ButtonsBit(button));
     (void)_frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
       boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input::ToBooey(modifiers)));
+    PerformMicrotaskCheckpoint();
   }
 
   void View::MouseLeft() noexcept
@@ -211,8 +226,10 @@ namespace krys::ui
     {
       return false;
     }
-    return _frame->GetEventHandler().HandleWheelEvent(
+    bool handled = _frame->GetEventHandler().HandleWheelEvent(
       input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
+    PerformMicrotaskCheckpoint();
+    return handled;
   }
 
   pal::CursorShape View::CurrentCursor() const noexcept
@@ -225,7 +242,9 @@ namespace krys::ui
   {
     auto event = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, key, modifiers, text, isAutoRepeat);
     _heldKeyValues.insert_or_assign(key, event.Key());
-    return _frame->GetEventHandler().KeyEvent(event);
+    bool handled = _frame->GetEventHandler().KeyEvent(event);
+    PerformMicrotaskCheckpoint();
+    return handled;
   }
 
   bool View::KeyReleased(pal::Key key, pal::KeyModifiers modifiers) noexcept
@@ -236,14 +255,17 @@ namespace krys::ui
       keyValue = krys::move(held->second);
       _heldKeyValues.erase(held);
     }
-    return _frame->GetEventHandler().KeyEvent(
+    bool handled = _frame->GetEventHandler().KeyEvent(
       input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, key, modifiers, {}, false, keyValue));
+    PerformMicrotaskCheckpoint();
+    return handled;
   }
 
   void View::SetFocused(bool focused) noexcept
   {
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);
+    PerformMicrotaskCheckpoint();
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

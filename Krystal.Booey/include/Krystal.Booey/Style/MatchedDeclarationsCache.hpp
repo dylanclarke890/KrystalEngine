@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -46,8 +47,8 @@ namespace krys::boo::style
   private:
     WeakPtr<const Resolver> _owner;
     HashMap<uint32, List<Entry>> _entries;
-    bool _isSweepQueued {false};
     uint32 _additionsSinceLastSweep {0};
+    Timer _sweepTimer;
 
   public:
     explicit MatchedDeclarationsCache(const Resolver &) noexcept;

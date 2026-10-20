@@ -368,6 +368,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/KeyboardEvent.cpp
 		tests/DOM/MouseEvent.cpp
 		tests/DOM/WheelEvent.cpp
+		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/BorderPainter.cpp
@@ -404,6 +405,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderTable.cpp
 		tests/Rendering/RenderObject.cpp
 		tests/Platform/ScrollAlignment.cpp
+		tests/Platform/Timer.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

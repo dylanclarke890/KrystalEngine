@@ -2,7 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -199,8 +201,8 @@ namespace krys::boo::tests
 
     SECTION("Resizing the view invalidates the styles that use viewport units")
     {
-      // The root hides the view's scrollbars (as of a layout), so a resize doesn't lay the document out at once
-      // to fit them.
+      // The root hides the view's scrollbars (as of a layout), so a resize doesn't lay the document out at
+      // once to fit them.
       document.UpdateLayout();
       fixture.View().Resize({1'000, 500});
       CHECK(fixture.ById(u8"d").NeedsStyleRecalc());
@@ -368,5 +370,34 @@ namespace krys::boo::tests
 
     document.EvaluateMediaQueriesAndReportChanges();
     CHECK(hiDPI->Matches());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the style recalc and layout timers",
+                   "[Page][LocalFrameView][Timer]")
+  {
+    FrameFixture fixture {u8"<!DOCTYPE html><div id=box style=width:10px;height:10px></div>"};
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    REQUIRE_FALSE(fixture.Document->HasPendingStyleRecalc());
+    REQUIRE_FALSE(fixture.View().LayoutContext().NeedsLayout());
+
+    // A change schedules a style recalc, which schedules a layout; both run when the loop does.
+    auto &box = fixture.ById(u8"box");
+    REQUIRE_FALSE(box.SetAttribute(u8"style", u8"width:20px;height:10px").HasException());
+    CHECK(fixture.Document->HasPendingStyleRecalc());
+    loop.RunUntilIdle();
+    CHECK_FALSE(fixture.Document->HasPendingStyleRecalc());
+    CHECK_FALSE(fixture.View().LayoutContext().NeedsLayout());
+    auto *renderer = DynamicDowncast<RenderBox>(box.Renderer());
+    REQUIRE(renderer);
+    CHECK(renderer->Width() == 20_lu);
+
+    SECTION("a document taken out of its frame stops its style recalc timer")
+    {
+      REQUIRE_FALSE(box.SetAttribute(u8"style", u8"width:30px").HasException());
+      fixture.Frame->SetDocument(nullptr);
+      loop.RunUntilIdle();
+      CHECK(fixture.Document->HasPendingStyleRecalc());
+    }
   }
 }

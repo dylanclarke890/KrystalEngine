@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -30,9 +31,7 @@ namespace krys::boo
   class RenderView;
 
   /// @brief Schedules and runs a view's layout: the style updates layout needs first, then the layout of the
-  /// render tree.
-  /// @note FIXME: There's no layout timer: a scheduled layout is pending until the host runs it (`Layout()`
-  /// or `Document::UpdateLayout()`).
+  /// render tree. A scheduled layout runs on the layout timer, when the host next runs the event loop.
   class LocalFrameViewLayoutContext final
   {
     friend class LayoutStateMaintainer;
@@ -79,8 +78,7 @@ namespace krys::boo
     LocalFrameView &_frameView;
     LayoutPhase _layoutPhase {LayoutPhase::OutsideLayout};
     LayoutNestedState _layoutNestedState {LayoutNestedState::NotInLayout};
-    // Stands in for the layout timer: whether a layout is scheduled.
-    bool _layoutPending {false};
+    Timer _layoutTimer;
     bool _layoutSchedulingIsEnabled {true};
     bool _firstLayout {true};
     bool _setNeedsLayoutWasDeferred {false};
@@ -189,7 +187,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsLayoutPending() const noexcept
     {
-      return _layoutPending;
+      return _layoutTimer.IsActive();
     }
 
     KRYS_NODISCARD bool IsInLayout() const noexcept
@@ -232,6 +230,8 @@ namespace krys::boo
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
 
   private:
+    void LayoutTimerFired() noexcept;
+
     // These functions may only be accessed by LayoutStateMaintainer.
     // Subtree push
     void PushLayoutState(RenderElement &root) noexcept;

@@ -1462,6 +1462,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/PlatformWheelEvent.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeAdwaita.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeComposite.hpp
+
+  # The event and rendering loops (G6)
+  include/Krystal.Booey/Platform/ThreadTimers.hpp
+  include/Krystal.Booey/Platform/Timer.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2425,6 +2429,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/WheelEvent.cpp
   src/Platform/ScrollbarThemeAdwaita.cpp
   src/Platform/ScrollbarThemeComposite.cpp
+
+  # The event and rendering loops (G6)
+  src/Platform/ThreadTimers.cpp
+  src/Platform/Timer.cpp
 )
 
 target_precompile_headers(Krystal.Booey

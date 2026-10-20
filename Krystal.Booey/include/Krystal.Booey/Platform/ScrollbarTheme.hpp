@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include <limits>
 
 namespace krys::boo
@@ -63,6 +64,16 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool InvalidateOnMouseEnterExit() const noexcept
     {
       return false;
+    }
+
+    /// @brief How long a press on the track or a button waits before it repeats, and then between repeats.
+    KRYS_NODISCARD virtual MonotonicTime::duration InitialAutoscrollTimerDelay() const noexcept
+    {
+      return std::chrono::milliseconds(250);
+    }
+    KRYS_NODISCARD virtual MonotonicTime::duration AutoscrollTimerDelay() const noexcept
+    {
+      return std::chrono::milliseconds(50);
     }
 
     void InvalidateParts(Scrollbar &scrollbar, ScrollbarControlPartMask mask) noexcept

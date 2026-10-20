@@ -33,7 +33,8 @@ namespace krys::boo
   }
 
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
-      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(ScreenAtom()), _layoutContext(*this)
+      : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(ScreenAtom()), _layoutContext(*this),
+        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
   {
   }
 
@@ -1563,6 +1564,30 @@ namespace krys::boo
       return;
     }
 
+    _selectionRevealModeForFocusedElement = selectionRevealMode;
+    if (_shouldScrollToFocusedElement)
+    {
+      return;
+    }
+    _shouldScrollToFocusedElement = true;
+    _delayedScrollToFocusedElementTimer.StartOneShot({});
+  }
+
+  void LocalFrameView::CancelScheduledScrolls() noexcept
+  {
+    // FIXME: Scrolls to a fragment's anchor, once there's navigation.
+    _shouldScrollToFocusedElement = false;
+    _delayedScrollToFocusedElementTimer.Stop();
+  }
+
+  void LocalFrameView::ScrollToFocusedElementTimerFired() noexcept
+  {
+    ScrollToFocusedElementInternal();
+  }
+
+  void LocalFrameView::ScrollToFocusedElementInternal() noexcept
+  {
+    krys_assert(_shouldScrollToFocusedElement);
     auto *document = Frame().Document();
     if (!document)
     {
@@ -1570,6 +1595,12 @@ namespace krys::boo
     }
 
     document->UpdateLayoutIgnorePendingStylesheets();
+    if (!_shouldScrollToFocusedElement || _delayedScrollToFocusedElementTimer.IsActive())
+    {
+      return; // Updating the layout may have ran scripts.
+    }
+
+    _shouldScrollToFocusedElement = false;
 
     auto *focusedElement = document->FocusedElement();
     if (!focusedElement)
@@ -1590,7 +1621,7 @@ namespace krys::boo
     auto [anchorRectWithScrollMargin, anchorRect] =
       renderer->AbsoluteAnchorRectWithScrollMargin(&insideFixed);
     ScrollRectToVisibleOptions options;
-    options.RevealMode = selectionRevealMode;
+    options.RevealMode = _selectionRevealModeForFocusedElement;
     options.VisibilityCheckRect = anchorRect;
     ScrollRectToVisible(anchorRectWithScrollMargin, *renderer, insideFixed, options);
   }

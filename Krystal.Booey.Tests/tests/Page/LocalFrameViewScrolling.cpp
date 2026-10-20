@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -281,10 +282,12 @@ namespace krys::boo::tests
 
     SECTION("focusing")
     {
-      // Tab focuses the link, below the view, and scrolls it into view.
+      // Tab focuses the link, below the view, and scrolls it into view on a zero-delay timer.
       REQUIRE(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, dom::FocusDirection::Forward));
       auto &link = fixture.ById(u8"link");
       REQUIRE(fixture.Document->FocusedElement() == &link);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+      html::EventLoop::Current().RunUntilIdle();
       auto rect = link.GetBoundingClientRect();
       CHECK(rect->Y() >= 0);
       CHECK(rect->Y() + rect->Height() <= 100);
@@ -373,7 +376,19 @@ namespace krys::boo::tests
       CHECK(view.GetScrollPosition() == ScrollPosition(0, vBar.PageStep()));
       // Four fifths of the 79 pixels in view.
       CHECK(vBar.PageStep() == 63);
+
+      // Held, it pages again after a quarter of a second, then every 50 milliseconds, until the thumb reaches
+      // the mouse; the release stops it.
+      auto &loop = html::EventLoop::Current();
+      loop.Run(loop.Now() + std::chrono::milliseconds(249));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 63));
+      loop.Run(loop.Now() + std::chrono::milliseconds(1));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 126));
+      loop.Run(loop.Now() + std::chrono::milliseconds(50));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 189));
       Release(handler, {190, 75});
+      loop.Run(loop.Now() + std::chrono::seconds(1));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 189));
     }
 
     SECTION("pressing a scrollbar leaves the focus alone")

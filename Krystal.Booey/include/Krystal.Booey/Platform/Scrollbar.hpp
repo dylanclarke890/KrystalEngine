@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -19,7 +20,7 @@ namespace krys::boo
 
   /// @brief A scrollbar of a scrollable area: its frame, its range (the visible and total sizes), its
   /// position, the parts the mouse is over and pressing, and painting through its theme.
-  // FIXME: Repeating a press on the track or a button (the autoscroll timer), once there are timers; the
+  // FIXME: The
   // widget tree (Widget: the frame rect is in the scrollable area's coordinates) and custom scrollbars.
   class Scrollbar : public RefCounted<Scrollbar>
   {
@@ -46,6 +47,7 @@ namespace krys::boo
     int32 _documentDragPos {0};
     bool _enabled {true};
     float _opacity {1};
+    Timer _scrollTimer;
 
   public:
     KRYS_NODISCARD static Ref<Scrollbar> CreateNativeScrollbar(ScrollableArea &scrollableArea,
@@ -264,7 +266,10 @@ namespace krys::boo
 
   private:
     void UpdateThumb() noexcept;
-    void AutoscrollPressedPart() noexcept;
+    void AutoscrollTimerFired() noexcept;
+    void AutoscrollPressedPart(MonotonicTime::duration delay) noexcept;
+    void StartTimerIfNeeded(MonotonicTime::duration delay) noexcept;
+    void StopTimerIfNeeded() noexcept;
     KRYS_NODISCARD ScrollDirection PressedPartScrollDirection() const noexcept;
     KRYS_NODISCARD ScrollGranularity PressedPartScrollGranularity() const noexcept;
     KRYS_NODISCARD bool ThumbUnderMouse() const noexcept;

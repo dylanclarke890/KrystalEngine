@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::dom::tests
@@ -199,12 +200,15 @@ namespace krys::boo::dom::tests
       options.PreventScroll = true;
       html.Focus(options);
       CHECK(fixture.Document->FocusedElement() == &target);
+      html::EventLoop::Current().RunUntilIdle();
       CHECK(s.ScrollTop() == 0);
       CHECK(s.ScrollLeft() == 0);
 
-      // Focusing centres a hidden element.
+      // Focusing centres a hidden element, on a zero-delay timer.
       html.Blur();
       html.Focus();
+      CHECK(s.ScrollTop() == 0);
+      html::EventLoop::Current().RunUntilIdle();
       CHECK(s.ScrollTop() == 130);
       CHECK(s.ScrollLeft() == 80);
     }

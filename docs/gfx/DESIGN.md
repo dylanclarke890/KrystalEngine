@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*.
+Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6) are in progress: G6a, timers and running the loop, is done; see *G6 plan*.
 
 ## Why
 
@@ -301,6 +301,7 @@ All done in G1 (2026-10-17) unless noted.
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 | G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
+| G6 | The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
 
 ### G2 parts
 
@@ -585,6 +586,22 @@ Three parts (decided by the user); revised the same day after G5a: G5b and G5c a
   - **Booey:** `Scrollbar`s for scrolling boxes and the viewport, painted in the layers' overflow controls phase with the scroll corner; hit testing finds them; the mouse drags the thumb and pages from the track, with the arrow cursor; `scrollbar-width`, `scrollbar-color` and `scrollbar-gutter`.
   - **Tests:** scrollbar geometry, hit testing and dragging; a page golden of scrollbars (Chrome's only reported: its Windows scrollbars differ).
 - **Out (FIXMEs):** smooth scrolling (`scroll-behavior: smooth`, animated wheel scrolling; with animations), momentum, scroll snapping, wheel latching, overlay scrollbars and their fading (with animations), `position: sticky`, `scrollend`, autoscrolling, resizers, frames.
+
+### G6 plan (decided 2026-10-19)
+
+The event and rendering loops. Spec and upstream behaviour live in Booey; Krystal.UI only sets them up and triggers them at the right time in the host's frame. Three parts, in order (decided by the user). Booey's `html::EventLoop` is a minimal process-wide loop (one task queue, one microtask queue) run by `RunUntilIdle()`; there are no timers (the style recalc, layout, scroll-to-focus, scrollbar autoscroll, cache sweep and font purge timers and `AbortSignal.timeout()` are FIXMEs) and no rendering update (`View::UpdateRendering` runs the scroll steps and layout by hand).
+
+- **Time** (decided): the host passes the current time through (`View::Update(now)` to `EventLoop::Run(now)`); Booey's timers never read the clock, so the engine can pause or scale UI time and tests drive time without test-only hooks.
+- **G6a, timers and running the loop** (Booey, Krystal.UI):
+  - **Booey:** upstream's `TimerBase` and `Timer` (one-shot and repeating; stopped when destroyed), in a heap the event loop owns (upstream's `ThreadTimers`, without threads or a shared OS timer); timed tasks (`ScheduleTask(delay, source, steps)`, as `EventLoopTaskGroup::scheduleTask`); `Run(now, budget)` fires the due timers and runs tasks, each followed by a microtask checkpoint, until the budget runs out; `NextWakeTime()`. The timer FIXMEs become timers: the style recalc and layout timers (0 seconds, as upstream), scrolling to the focused element, the scrollbar's autoscroll repeat, the matched declarations cache sweep, the font cache purge, `AbortSignal.timeout()`.
+  - **Krystal.UI:** `View::Update(now)` runs the loop once a frame; the input methods perform a microtask checkpoint after dispatching.
+- **G6b, the rendering update** (Booey, Krystal.UI):
+  - **Booey:** a minimal port of upstream's `Page`: it owns the main frame and schedules and runs the rendering update (`ScheduleRenderingUpdate`, `IsRenderingUpdateScheduled`, `UpdateRendering`), with the steps of the specification's "update the rendering" and upstream's `Page::updateRendering` that Booey can run, in their order: flushing autofocus candidates, the resize steps (FIXME: `resize` fires at the window), the scroll steps, media query evaluation, animations (a FIXME hook), animation frame callbacks (FIXME: no script), layout, focus fixup, and the cursor update (`updateCursorIfNeeded`, whose fake mouse move makes hover follow the content under a still mouse after a scroll).
+  - **Krystal.UI:** `View` creates a `Page`; `View::Update(now)` runs the rendering update at its rendering opportunity, once a frame before painting; recording and painting only make sure layout is current; `View::NeedsRendering()` for hosts that cache frames.
+- **G6c, microtask users** (Booey): queueing a mutation observer microtask and notifying mutation observers (records are delivered at the checkpoint), transient registered observers, and signalling slot change (`slotchange`).
+- **Editor:** calls `View::Update(now)` every frame; a clock card updated by a timer once a second; a held scrollbar track repeats.
+- **Tests:** timer order, repeating, stopping and destroying active timers; timed tasks and the budget; the style and layout timers; the rendering update's steps and focus fixup; hover following a scroll; mutation observer delivery and `slotchange`; Krystal.UI's frame update.
+- **Out (FIXMEs):** idle periods and `requestIdleCallback`, `setTimeout`, `setInterval` and `requestAnimationFrame` (no script; the timers and the rendering update are their hooks), animations (the next slice), several agents and event loops.
 
 ### G2a as built (2026-10-18)
 
@@ -901,6 +918,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** G5c (scrollbars) is part of G5b (decided by the user), and so is the scrollable axes' work moved from G5a. `scrollbar-color` has no effect, as with upstream's Adwaita theme (it doesn't read it); `scrollbar-gutter` reserves space as layout already did. A wheel event of page granularity pages by the visible size, not upstream's contents size (a bug).
 - **Out (FIXMEs):** smooth and animated scrolling, momentum and touchpad gestures, latching, scroll snapping, overlay scrollbars and their fading, autoscrolling's timers (a pressed track pages once), resizers, spatial navigation, `position: sticky`, frames.
 - **Tests:** Booey tests the scrollbars under the mouse (the view's and a box's), the wheel, the keyboard and `WheelEvent` (6 new cases), and the tests that measured the view are updated for its scrollbars; Krystal.UI tests `View::MouseWheel` and a page golden, `scrollbars` (the view's scrollbars and corner, a box with both, a scrolled box, a box without any). It has no Chrome golden: Chrome's captures hide scrollbars, and its Windows scrollbars aren't the theme's.
+
+### G6a as built (2026-10-19)
+
+- **Booey** (the ledger entry is *Timers and running the event loop* in `docs/booey/PORTING.md`): upstream's `TimerBase` and `Timer` (one-shot and repeating, stopped when destroyed) in `ThreadTimers`' heap, which keeps the host's current time; `html::EventLoop::Run(now, budget)` fires the due timers, then runs tasks with a microtask checkpoint after each until the budget (real time) runs out; `ScheduleTask(timeout, source, steps)`, `Now()`, `NextWakeTime()`. Timers started while timers fire wait for the next run, so a zero-delay timer can't spin. The timer FIXMEs are timers: the style recalc and layout timers (0 seconds; style and layout no longer wait for the host), scrolling to the focused element (zero delay), the scrollbar's autoscroll repeat (250 then 50 milliseconds), the matched declarations cache sweep (a minute), the font cache purge, and `AbortSignal.timeout()`.
+- **Krystal.UI:** `View::Update(now, budget)` runs the loop; the input methods (mouse, wheel, keys, focus) perform a microtask checkpoint after dispatching.
+- **Editor:** runs the page on its own time (the frame deltas summed, so it stops when the editor does) through `View::Update` each frame; a timer counts the seconds the page has been open in the table's new "Timers" row.
+- **Changed from the plan:** `View`'s document parsing still runs the loop until idle first (harmless; it goes with G6b's `Page`).
+- **Tests:** Booey tests timers, the loop's timed tasks, budget and wake time, the style and layout timers, the scrollbar repeat, the focus scroll and `AbortSignal.timeout()` (7 new cases); Krystal.UI tests `View::Update` (timers, style and layout on the host's time, the checkpoint after input). No golden: nothing new paints.
 
 ## Open decisions
 

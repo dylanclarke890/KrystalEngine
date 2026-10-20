@@ -19,7 +19,16 @@ namespace krys::boo
     return Hash::Combine(FontDescriptionKeyHash {}(key.DescriptionKey), key.Family.Hash());
   }
 
-  FontCache::FontCache() noexcept = default;
+  namespace
+  {
+    // FIXME: The smaller limits under memory pressure, once the host reports it.
+    constexpr uint32 MaxInactiveFontData = 225;
+    constexpr uint32 TargetInactiveFontData = 200;
+  }
+
+  FontCache::FontCache() noexcept : _purgeTimer(*this, &FontCache::PurgeInactiveFontDataIfNeeded)
+  {
+  }
 
   FontCache::~FontCache() noexcept = default;
 
@@ -104,7 +113,11 @@ namespace krys::boo
   RefPtr<Font> FontCache::FontForFamily(const FontDescription &description, const StringAtom &family,
                                         EnumSet<FontLookupOptions> options) noexcept
   {
-    // FIXME: Purge inactive fonts on a timer, once there's an event loop.
+    if (!_purgeTimer.IsActive())
+    {
+      _purgeTimer.StartOneShot({});
+    }
+
     if (auto *platformData = CachedFontPlatformData(description, family, options))
     {
       return FontForPlatformData(*platformData);
@@ -151,6 +164,21 @@ namespace krys::boo
   {
     PurgeInactiveFontData();
     _fontCascadeCache.ClearWidthCaches();
+  }
+
+  void FontCache::PurgeInactiveFontDataIfNeeded() noexcept
+  {
+    if (_data.size() < MaxInactiveFontData)
+    {
+      return;
+    }
+    size_t inactiveCount = InactiveFontCount();
+    if (inactiveCount <= MaxInactiveFontData)
+    {
+      return;
+    }
+
+    PurgeInactiveFontData(static_cast<uint32>(inactiveCount - TargetInactiveFontData));
   }
 
   void FontCache::PurgeInactiveFontData(uint32 purgeCount) noexcept

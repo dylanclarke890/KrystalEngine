@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
@@ -100,6 +101,11 @@ namespace krys
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
     UniquePtr<ui::View> _pageView {};
+    /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
+    MonotonicTime::duration _pageTime {};
+    /// @brief Counts the seconds the page has been open in its `#clock` element.
+    boo::Timer _clockTimer {[this] { TickClock(); }};
+    uint32 _secondsOpen {0};
     bool _focused {true};
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
@@ -342,6 +348,13 @@ namespace krys
     void OnUpdate(seconds dt) noexcept override
     {
       _time += static_cast<float>(dt.count());
+
+      // Booey's event loop runs on the page's time: timers, then tasks and microtasks.
+      _pageTime += std::chrono::duration_cast<MonotonicTime::duration>(dt);
+      if (_pageView)
+      {
+        _pageView->Update(_pageTime);
+      }
     }
 
     void OnRender(gfx::CommandBuffer &commands) noexcept override
@@ -402,6 +415,21 @@ namespace krys
       _pageView->Document().AddEventListener(boo::dom::DOMStringAtom(u8"keydown"), CreateRef<KeyLogger>(),
                                              false);
       _context->Logger->Info("Loaded {}", path.string());
+
+      _secondsOpen = 0;
+      _clockTimer.StartRepeating(std::chrono::seconds(1));
+    }
+
+    /// @brief Shows how long the page has been open, once a second.
+    void TickClock() noexcept
+    {
+      ++_secondsOpen;
+      if (auto clock = _pageView ? _pageView->Document().GetElementById(u8"clock") : nullptr)
+      {
+        auto text = std::format("Open for {}:{:02}", _secondsOpen / 60, _secondsOpen % 60);
+        (void)clock->TextContent(
+          boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      }
     }
 
     /// @brief Shows the page's cursor over the page view, and the arrow everywhere else.

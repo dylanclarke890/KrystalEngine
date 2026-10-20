@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
@@ -193,6 +194,7 @@ namespace krys::boo::dom
     mutable RefPtr<css::calc::RandomCachingKeyMap> _randomCachingKeyMap;
     bool _hasStyleWithViewportUnits {false};
 
+    Timer _styleRecalcTimer;
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};

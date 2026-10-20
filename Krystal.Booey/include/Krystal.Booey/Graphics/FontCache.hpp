@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/FontCascadeCache.hpp"
 #include "Krystal.Booey/Graphics/FontPlatformData.hpp"
 #include "Krystal.Booey/Graphics/SystemFallbackFontCache.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -79,6 +80,7 @@ namespace krys::boo
     List<WeakPtr<FontSelector>> _clients;
     HashSet<utf8_string> _familiesUsingBackslashAsYenSign;
     uint16 _generation {0};
+    Timer _purgeTimer;
 
   public:
     FontCache() noexcept;
@@ -123,6 +125,8 @@ namespace krys::boo
     KRYS_NODISCARD size_t FontCount() const noexcept;
     KRYS_NODISCARD size_t InactiveFontCount() const noexcept;
     void PurgeInactiveFontData(uint32 count = UINT32_MAX) noexcept;
+    /// @brief Purges inactive fonts once there are more than a limit, down to a target.
+    void PurgeInactiveFontDataIfNeeded() noexcept;
     /// @brief Purges the inactive fonts and clears the width caches.
     void ReleaseNoncriticalMemory() noexcept;
 

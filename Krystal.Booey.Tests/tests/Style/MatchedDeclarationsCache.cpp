@@ -30,8 +30,7 @@ namespace krys::boo::style::tests
       {
         auto result = MatchResult::Create();
         result->AuthorDeclarations.push_back(
-          MatchedProperties {.Properties = css::tests::ParseDeclarations(css),
-                             .IsCacheable = isCacheable});
+          MatchedProperties {.Properties = css::tests::ParseDeclarations(css), .IsCacheable = isCacheable});
         return result;
       }
     };
@@ -186,8 +185,11 @@ namespace krys::boo::style::tests
     }
     CHECK(cache.Find(1, *released, customProperties, *parentStyle));
 
-    // The 100th addition queues a sweep.
-    html::EventLoop::Current().RunUntilIdle();
+    // The 100th addition starts a sweep, a minute later.
+    auto &loop = html::EventLoop::Current();
+    loop.Run(loop.Now() + std::chrono::seconds(59));
+    CHECK(cache.Find(1, *released, customProperties, *parentStyle));
+    loop.Run(loop.Now() + std::chrono::seconds(1));
     CHECK(cache.Find(2, *kept, customProperties, *parentStyle));
     CHECK_FALSE(cache.Find(1, *released, customProperties, *parentStyle));
   }

@@ -2,7 +2,6 @@
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
@@ -15,7 +14,7 @@
 namespace krys::boo::style
 {
   MatchedDeclarationsCache::MatchedDeclarationsCache(const Resolver &owner) noexcept
-      : _owner(WeakPtr<const Resolver>::WithRef(owner))
+      : _owner(WeakPtr<const Resolver>::WithRef(owner)), _sweepTimer(*this, &MatchedDeclarationsCache::Sweep)
   {
   }
 
@@ -171,19 +170,10 @@ namespace krys::boo::style
                                      const MatchResult &matchResult) noexcept
   {
     constexpr uint32 additionsBetweenSweeps = 100;
-    if (++_additionsSinceLastSweep >= additionsBetweenSweeps && !_isSweepQueued)
+    if (++_additionsSinceLastSweep >= additionsBetweenSweeps && !_sweepTimer.IsActive())
     {
-      // FIXME: Upstream sweeps a minute later, on a timer. There are no timers, so the sweep is a task.
-      _isSweepQueued = true;
-      // The cache lives as long as its owner.
-      html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
-                                           [owner = _owner, cache = this]
-                                           {
-                                             if (owner)
-                                             {
-                                               cache->Sweep();
-                                             }
-                                           });
+      constexpr auto sweepDelay = std::chrono::minutes(1);
+      _sweepTimer.StartOneShot(sweepDelay);
     }
 
     krys_debug_assert(hash);
@@ -253,6 +243,5 @@ namespace krys::boo::style
       });
 
     _additionsSinceLastSweep = 0;
-    _isSweepQueued = false;
   }
 }

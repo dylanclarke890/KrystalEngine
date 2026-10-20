@@ -91,7 +91,8 @@ namespace krys::boo::dom
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode),
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
         _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default())),
-        _userActionElements(CreateUnique<UserActionElementSet>())
+        _userActionElements(CreateUnique<UserActionElementSet>()),
+        _styleRecalcTimer([this] { (void)ShareRef(*this)->UpdateStyleIfNeeded(); })
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
@@ -1351,6 +1352,7 @@ namespace krys::boo::dom
       DestroyRenderTree();
     }
 
+    _styleRecalcTimer.Stop();
     _frame = nullptr;
   }
 
@@ -1474,16 +1476,22 @@ namespace krys::boo::dom
 
   void Document::ScheduleStyleRecalc() noexcept
   {
+    // FIXME: Not in the back/forward cache, once there's navigation.
+    if (_styleRecalcTimer.IsActive())
+    {
+      return;
+    }
+
     krys_debug_assert(ChildNeedsStyleRecalc() || _needsFullStyleRebuild);
 
-    // FIXME: Start the style recalc timer, once there's an event loop. Until then the host resolves style
-    // (UpdateStyleIfNeeded) when it needs it.
+    _styleRecalcTimer.StartOneShot({});
   }
 
   void Document::UnscheduleStyleRecalc() noexcept
   {
     krys_debug_assert(!ChildNeedsStyleRecalc());
 
+    _styleRecalcTimer.Stop();
     _needsFullStyleRebuild = false;
   }
 

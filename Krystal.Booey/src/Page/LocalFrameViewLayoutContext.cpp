@@ -14,7 +14,7 @@
 namespace krys::boo
 {
   LocalFrameViewLayoutContext::LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept
-      : _frameView(frameView)
+      : _frameView(frameView), _layoutTimer(*this, &LocalFrameViewLayoutContext::LayoutTimerFired)
   {
   }
 
@@ -92,7 +92,7 @@ namespace krys::boo
                                                   : LayoutNestedState::Nested);
     SetForScope schedulingIsEnabled(_layoutSchedulingIsEnabled, false);
 
-    _layoutPending = false;
+    _layoutTimer.Stop();
     _setNeedsLayoutWasDeferred = false;
 
     {
@@ -227,14 +227,17 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Start the layout timer, once there's an event loop. Until then the host runs the pending layout
-    // (Layout or Document::UpdateLayout).
-    _layoutPending = true;
+    _layoutTimer.StartOneShot({});
+  }
+
+  void LocalFrameViewLayoutContext::LayoutTimerFired() noexcept
+  {
+    Layout();
   }
 
   void LocalFrameViewLayoutContext::UnscheduleLayout() noexcept
   {
-    _layoutPending = false;
+    _layoutTimer.Stop();
   }
 
   bool LocalFrameViewLayoutContext::CanPerformLayout() const noexcept
@@ -286,8 +289,7 @@ namespace krys::boo
       krys_debug_assert(!layoutRoot.Container() || Is<RenderView>(layoutRoot.Container())
                         || !layoutRoot.Container()->NeedsLayout());
       SetSubtreeLayoutRoot(layoutRoot);
-      // FIXME: Start the layout timer, once there's an event loop.
-      _layoutPending = true;
+      _layoutTimer.StartOneShot({});
       return;
     }
 

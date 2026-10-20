@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollableArea.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/Pagination.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -70,6 +71,9 @@ namespace krys::boo
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
+    Timer _delayedScrollToFocusedElementTimer;
+    SelectionRevealMode _selectionRevealModeForFocusedElement {SelectionRevealMode::DoNotReveal};
+    bool _shouldScrollToFocusedElement {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
     RefPtr<Scrollbar> _horizontalScrollbar;
@@ -488,9 +492,10 @@ namespace krys::boo
     static bool ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
                                     bool insideFixed, const ScrollRectToVisibleOptions &options) noexcept;
 
-    /// @brief Scrolls the document's focused element into view.
-    // FIXME: This scrolls right away rather than on a zero-delay timer, since there's no event loop.
+    /// @brief Scrolls the document's focused element into view, on a zero-delay timer.
     void ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept;
+    /// @brief Cancels a scroll to the focused element that hasn't happened yet.
+    void CancelScheduledScrolls() noexcept;
 
     /// @brief The scale from document coordinates to absolute ones: @p usedZoom (which already includes the
     /// page zoom) if given, or else the page zoom.
@@ -556,5 +561,9 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatSize
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
+
+  private:
+    void ScrollToFocusedElementTimerFired() noexcept;
+    void ScrollToFocusedElementInternal() noexcept;
   };
 }

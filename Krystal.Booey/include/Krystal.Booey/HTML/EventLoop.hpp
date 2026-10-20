@@ -3,12 +3,22 @@
 #include "Krystal.Booey/HTML/Enums/TaskSource.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo
+{
+  class Timer;
+}
 
 namespace krys::boo::html
 {
-  /// @brief A minimal event loop: one queue of tasks and a microtask queue, run by the host.
+  /// @brief A minimal event loop: one queue of tasks and a microtask queue, with the timers, run by the host
+  /// with its current time.
   /// @note There's no rendering step, no task document (every document is fully active) and no
   /// scripting, so a microtask checkpoint only runs microtasks.
   /// @see https://html.spec.whatwg.org/#event-loops
@@ -37,8 +47,12 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#performing-a-microtask-checkpoint
     bool _performingMicrotaskCheckpoint {false};
 
+    /// @brief The timers of the tasks queued after a timeout; fired ones are removed when the loop next runs.
+    List<UniquePtr<Timer>> _scheduledTasks;
+
   public:
-    EventLoop() noexcept = default;
+    EventLoop() noexcept;
+    ~EventLoop() noexcept;
 
     /// @brief The event loop of the surrounding agent.
     /// FIXME: process-wide until there are agents.
@@ -46,6 +60,12 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#queue-a-task
     void QueueTask(TaskSource source, Steps &&steps) noexcept;
+
+    /// @brief Queues a task on @p source after @p timeout of the host's time.
+    /// @see https://html.spec.whatwg.org/#run-steps-after-a-timeout
+    // FIXME: The ordering identifier (timeouts with the same one complete in order), once there are script
+    // timers.
+    void ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept;
 
     /// @see https://html.spec.whatwg.org/#queue-a-microtask
     void QueueMicrotask(Steps &&steps) noexcept;
@@ -59,8 +79,22 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#event-loop-processing-model
     bool RunNextTask() noexcept;
 
-    /// @brief Runs tasks, including the ones they queue, until there are none left.
+    /// @brief Runs tasks, including the ones they queue, and the timers due at the current time, until there
+    /// are none left.
     void RunUntilIdle() noexcept;
+
+    /// @brief Runs the loop at the host's time @p now: fires the timers that are due, then runs tasks (each
+    /// followed by a microtask checkpoint) until there are none left or @p budget (of real time) runs out.
+    /// @note The host calls this once a frame. Time never goes backwards: an earlier @p now than the last is
+    /// taken as the last.
+    void Run(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;
+
+    /// @brief The host's time, as of the last time it ran the loop.
+    KRYS_NODISCARD MonotonicTime::duration Now() const noexcept;
+
+    /// @brief When the loop next has work: now if a task is queued, or when the next timer fires; none if
+    /// it's idle.
+    KRYS_NODISCARD Maybe<MonotonicTime::duration> NextWakeTime() const noexcept;
 
     KRYS_NODISCARD bool HasPendingTasks() const noexcept
     {

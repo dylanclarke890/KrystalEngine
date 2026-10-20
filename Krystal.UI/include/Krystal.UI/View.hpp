@@ -10,6 +10,7 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
@@ -24,8 +25,9 @@
 namespace krys::ui
 {
   /// @brief Shows a Booey page: parses its document, shows it in a frame with a view of the viewport's size,
-  /// keeps its style and layout up to date, paints it into a `Renderer2D` through a display list, and turns
-  /// the platform layer's mouse and keyboard input into DOM events.
+  /// runs Booey's event loop with the host's time, keeps its style and layout up to date, paints it into a
+  /// `Renderer2D` through a display list, and turns the platform layer's mouse and keyboard input into DOM
+  /// events.
   class View
   {
     KRYS_NON_COPY_MOVABLE(View);
@@ -70,6 +72,12 @@ namespace krys::ui
     /// @brief Resizes the viewport; the document is laid out again at its next update.
     void Resize(const boo::IntSize &viewportSize) noexcept;
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;
+
+    /// @brief Runs Booey's event loop at the host's time @p now: the timers that are due (style, layout and
+    /// the rest), then the queued tasks, each followed by a microtask checkpoint. Call it once a frame,
+    /// before painting, with a time that only moves forwards (the engine may pause or scale it).
+    /// @param budget How long (in real time) tasks may run this frame, if limited.
+    void Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;
 
     /// @brief Runs the rendering update: the scroll steps (the pending `scroll` and `scrollend` events), then
     /// the document's style and layout.
@@ -152,6 +160,7 @@ namespace krys::ui
     KRYS_NODISCARD boo::PlatformMouseEvent
       MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point, boo::MouseButton button,
                  int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept;
+    static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
   };
