@@ -21,6 +21,7 @@ namespace krys::boo::dom
     friend class EventFactory;
     friend class ShadowRoot;
     friend class EventTarget;
+    friend class MutationObserverAlgorithms;
 
     using dictionary_type = EventInit;
 

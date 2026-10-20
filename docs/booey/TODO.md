@@ -4,7 +4,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## Infrastructure
 
-- **Event loop and rendering loop** — timers run on the host's time and the style recalc and layout timers schedule style and layout (G6a); `Page` runs the "update the rendering" steps once a frame (G6b); the microtask users (mutation observers, slot change; G6c) are next (*G6 plan* in `docs/gfx/DESIGN.md`). https://html.spec.whatwg.org/#event-loops
+- **Event loop and rendering loop** — timers run on the host's time and the style recalc and layout timers schedule style and layout (G6a); `Page` runs the "update the rendering" steps once a frame (G6b); mutation observers and `slotchange` are delivered at microtask checkpoints (G6c). Idle callbacks and script timers wait for scripting (*G6 plan* in `docs/gfx/DESIGN.md`). https://html.spec.whatwg.org/#event-loops
 - **Settings** — `Page/Settings.hpp` holds the experimental and embedder flags and the font size values; the other values upstream reads from `Settings` (`textAreasAreResizable`, `hiddenUntilFoundEnabled`, `coreMathMLEnabled`, ...) are upstream's defaults in code. The media text track display quirk is never set (no document quirks).
 - **Resource loading** — `<link rel=stylesheet>`, `@import`, `@font-face` sources and images aren't fetched (`CSS/Rules/ImportRule.hpp`, `CSS/Values/ImageValue.hpp`, `src/HTML/HTMLLinkElement.cpp`). https://html.spec.whatwg.org/#link-type-stylesheet
 - **Fonts** — the host registers fonts (`Graphics/FontDatabase.hpp`) and sets generic families in `Settings`; no web fonts: `@font-face`, `FontFace`/`FontFaceSet` and the `CSSFontFace*` headers are unbuilt (`CSS/Font/`, FIXMEs in `src/CSS/CSSFontSelector.cpp`); text is measured and shaped, but not drawn. https://drafts.csswg.org/css-font-loading/
@@ -27,14 +27,13 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## DOM
 
-- **Mutation observers** — records are queued but never delivered (no microtasks); transient registered observers aren't added on removal (`src/DOM/Algorithms/MutationObserverAlgorithms.cpp`, `src/DOM/Algorithms/MutationAlgorithms.cpp`). https://dom.spec.whatwg.org/#notify-mutation-observers
 - **Custom elements** — creation, upgrades and callback reactions are TODOs throughout the mutation, attribute and parser algorithms (`TODO(impl): CUSTOM-ELEMENTS`). https://html.spec.whatwg.org/#custom-elements
 - **Event handler attributes** — no `EventHandler` IDL attributes (`onabort`, `onslotchange`, the global `on*` handlers) (`DOM/AbortSignal.hpp`, `DOM/ShadowRoot.hpp`). https://html.spec.whatwg.org/#event-handler-attributes
 - **Event listeners** — awkward to add and remove with lambdas (need a comparable wrapper like `AbortAlgorithmCallback`). https://dom.spec.whatwg.org/#add-an-event-listener
 - **`createEvent()`** — always returns a plain `Event` (no event factory) (`src/DOM/Document.cpp`). https://dom.spec.whatwg.org/#dom-document-createevent
 - **Dependent abort signals** — `CreateDependentAbortSignal` keeps its source signals in a vector with messy de-duplication, and the garbage collection rule (keep a dependent signal alive while it has sources and listeners) isn't implemented (`src/DOM/Algorithms/AbortAlgorithms.cpp`). https://dom.spec.whatwg.org/#abortsignal-garbage-collection
 - **`NodeFilter`** — works but is clunky to use from C++ (`DOM/NodeIterator.hpp`, `DOM/TreeWalker.hpp`). https://dom.spec.whatwg.org/#interface-nodefilter
-- **Slot change signalling** — signal slots and the mutation observer microtask aren't implemented; moved nodes aren't assigned a slot (`TODO(impl): SLOTTABLES` in `src/DOM/Algorithms/MutationAlgorithms.cpp`). https://dom.spec.whatwg.org/#signaling-slot-change
+- **Slot assignment on insertion** — inserted and moved nodes aren't assigned a slot by the insertion steps' own rules (`TODO(impl): SLOTTABLES` in `src/DOM/Algorithms/MutationAlgorithms.cpp`); `slotchange` is signalled (G6c). https://dom.spec.whatwg.org/#concept-node-insert
 - **Document encoding** — not set on creation or passed to clones; `characterSet` is always UTF-8 (`src/DOM/Document.cpp`, `src/DOM/Algorithms/NodeAlgorithms.cpp`). https://dom.spec.whatwg.org/#concept-document-encoding
 - **Memory** — documents are never freed (nodes hold their document; containers don't release children). (`PORTING.md`, *Open*)
 - **ID lookups** — `getElementById` and the selector ID fast paths walk the tree (no ID map per tree scope) (`DOM/Mixins/NonElementParentNode.hpp`, `src/DOM/SelectorQuery.cpp`).

@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -9,5 +10,6 @@ namespace krys::boo::dom
   class MutationObserver;
 
   /// @see https://dom.spec.whatwg.org/#callbackdef-mutationcallback
-  using MutationCallback = Func<void(const List<MutationRecord> &records, MutationObserver &observer)>;
+  /// @see https://dom.spec.whatwg.org/#callbackdef-mutationcallback
+  using MutationCallback = Func<void(const List<Ref<MutationRecord>> &records, MutationObserver &observer)>;
 }

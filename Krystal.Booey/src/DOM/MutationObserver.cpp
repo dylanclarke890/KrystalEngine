@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Internals/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -79,6 +80,9 @@ namespace krys::boo::dom
       if (auto node = n.lock())
       {
         std::erase_if(node->RegisteredObservers(), [self = this](Ref<RegisteredObserver> &observer)
+                      { return observer->Observer() == self; });
+        std::erase_if(node->TransientRegisteredObservers(),
+                      [self = this](Ref<TransientRegisteredObserver> &observer)
                       { return observer->Observer() == self; });
       }
     }

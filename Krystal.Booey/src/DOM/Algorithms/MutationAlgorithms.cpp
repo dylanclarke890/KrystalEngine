@@ -859,11 +859,11 @@ namespace krys::boo::dom
       }
     }
 
-    // TODO(impl): MUTATION-OBSERVERS
     // For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
-    // inclusiveAncestor’s registered observer list, if registered’s options["subtree"] is true, then append a
-    // new transient registered observer whose observer is registered’s observer, options is registered’s
-    // options, and source is registered to node’s registered observer list.
+    // inclusiveAncestor's registered observer list, if registered's options["subtree"] is true, then append a
+    // new transient registered observer whose observer is registered's observer, options is registered's
+    // options, and source is registered to node's registered observer list.
+    MutationObserverAlgorithms::AddTransientRegisteredObservers(node, parent);
 
     if (!suppressObservers)
     {

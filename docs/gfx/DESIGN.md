@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6) are in progress: G6a, timers and running the loop, and G6b, the rendering update, are done; see *G6 plan*.
+Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*.
 
 ## Why
 
@@ -301,7 +301,7 @@ All done in G1 (2026-10-17) unless noted.
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 | G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
-| G6 | The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
+| G6 | Done (2026-10-20). The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*): done (2026-10-20). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
 
 ### G2 parts
 
@@ -934,6 +934,13 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** `View::NeedsRendering()` became `View::Update`'s result (whether the rendering update ran). The parse-time `RunUntilIdle` left from G6a is gone.
 - **Editor:** unchanged; it already calls `View::Update` every frame.
 - **Tests:** Booey tests the page's scheduling, its steps, autofocus, focus fixup, the cursor update and hover after a scroll (6 cases); Krystal.UI tests `View::Update`'s rendering update and autofocus through `LoadHTML`. No golden: nothing new paints.
+
+### G6c as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Mutation observers and slot change* in `docs/booey/PORTING.md`): queueing a mutation record appends the observer to the agent's pending mutation observers and queues the mutation observer microtask, which notifies them at the next checkpoint: each gets its queued records in one callback, and its transient registered observers go. Removing a node gives it transient registered observers for the subtree observers above it; `disconnect()` removes them too. Signalling a slot change fires a bubbling `slotchange` at the slot when observers are next notified.
+- **Fixed on the way:** the callback took a list of the abstract `MutationRecord` (it takes references now); transient observers copy their options; queueing records sees the transient observers.
+- **Krystal.UI and the editor:** unchanged; the checkpoints after input and tasks (G6a) deliver the records.
+- **Tests:** Booey tests delivery, batching, `takeRecords()`, `disconnect()`, transient observers and `slotchange` (3 new cases).
 
 ## Open decisions
 

@@ -63,7 +63,8 @@ namespace krys::boo::dom::tests
       Ref<MutationObserver> Observer;
 
       explicit Observed(Node &target)
-          : Observer(CreateRef<MutationObserver>([](const List<MutationRecord> &, MutationObserver &) {}))
+          : Observer(
+              CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {}))
       {
         REQUIRE_FALSE(
           Observer->Observe(target, MutationObserverInit {.Attributes = true, .AttributeOldValue = true})

@@ -665,7 +665,7 @@ namespace krys::boo::dom::tests
   TEST_CASE("Element attribute mutation records", "[HTML][Element]")
   {
     CommonTestData data;
-    auto observer = CreateRef<MutationObserver>([](const List<MutationRecord> &, MutationObserver &) {});
+    auto observer = CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
     REQUIRE_FALSE(
       observer->Observe(*data.Node, MutationObserverInit {.Attributes = true, .AttributeOldValue = true})
         .HasException());

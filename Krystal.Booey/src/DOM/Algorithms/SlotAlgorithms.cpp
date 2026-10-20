@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -321,9 +322,11 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::SignalSlotChange(html::HTMLSlotElement &slot) noexcept
   {
-    (void)slot;
-    // TODO(impl): SLOTTABLES - Append slot to slot’s relevant agent’s signal slots
-    // TODO(impl): MUTATION-OBSERVERS - Queue a mutation observer microtask.
+    // 1. Append slot to slot's relevant agent's signal slots.
+    MutationObserverAlgorithms::AppendSignalSlot(slot);
+
+    // 2. Queue a mutation observer microtask.
+    MutationObserverAlgorithms::QueueMutationObserverMicrotask();
   }
 
 #pragma endregion
