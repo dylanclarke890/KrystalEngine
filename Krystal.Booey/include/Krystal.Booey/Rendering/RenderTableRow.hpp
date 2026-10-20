@@ -13,7 +13,7 @@ namespace krys::boo
   struct BorderValue;
 
   /// @brief A table row.
-  // FIXME: Repaints (clippedOverflowRect, rectsForRepaintingAfterLayout, imageChanged), once there are those.
+  // FIXME: Repaints (clippedOverflowRect, rectsForRepaintingAfterLayout), once there are those.
   class RenderTableRow final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableRow);
@@ -74,6 +74,8 @@ namespace krys::boo
     {
       return (IsAnonymous() || IsPseudoElement()) ? u8"RenderTableRow (anonymous)" : u8"RenderTableRow";
     }
+
+    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
 
   private:
     void WillBeRemovedFromTree() noexcept override;

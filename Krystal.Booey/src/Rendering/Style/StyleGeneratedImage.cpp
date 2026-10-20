@@ -11,6 +11,36 @@ namespace krys::boo
 
   StyleGeneratedImage::~StyleGeneratedImage() noexcept = default;
 
+  // MARK: Client support.
+
+  void StyleGeneratedImage::AddClient(RenderElement &renderer) noexcept
+  {
+    ++_clients[&renderer];
+
+    DidAddClient(renderer);
+  }
+
+  void StyleGeneratedImage::RemoveClient(RenderElement &renderer) noexcept
+  {
+    auto found = _clients.find(&renderer);
+    krys_debug_assert(found != _clients.end());
+    if (found == _clients.end())
+    {
+      return;
+    }
+    if (!--found->second)
+    {
+      _clients.erase(found);
+    }
+
+    DidRemoveClient(renderer);
+  }
+
+  bool StyleGeneratedImage::HasClient(RenderElement &renderer) const noexcept
+  {
+    return _clients.contains(&renderer);
+  }
+
   FloatSize StyleGeneratedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
   {
     if (!_fixedSize)

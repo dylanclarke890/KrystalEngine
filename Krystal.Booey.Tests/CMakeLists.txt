@@ -410,6 +410,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
+		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Loader/Cache/CachedResourceLoader.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

@@ -33,6 +33,8 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
+    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final;
     KRYS_NODISCARD LayoutUnit MarginRight() const noexcept final;
     KRYS_NODISCARD LayoutUnit MarginTop() const noexcept final;

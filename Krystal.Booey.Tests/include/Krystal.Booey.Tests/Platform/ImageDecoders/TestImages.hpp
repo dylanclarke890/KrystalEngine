@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/String.hpp"
 
 // Generated with Pillow: the PNG, WebP (lossless), GIF and BMP hold 3x2 pixels: red, green, blue, then
 // white, black and red at half alpha (transparent in the GIF, opaque in the BMP). The JPEGs are 16x8, red on
@@ -174,4 +175,7 @@ namespace krys::boo::tests::images
     0x00, 0xff, 0xff, 0x00, 0x00, 0xff,
   };
   inline constexpr Span<const uint8> BMPIcon {BMPIconBytes};
+
+  // The PNG, base64-encoded, for data: URLs.
+  inline constexpr utf8_stringview PNGBase64 = u8"iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAYAAACddGYaAAAAHUlEQVR4nGP4z8DwHwwZ/v9nYvj/n4GBESTC2AgAizMJfdgIPYwAAAAASUVORK5CYII=";
 }

@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo
 {
   /// @brief An image generated from its CSS description rather than loaded.
-  /// FIXME: The clients come with the resource loader; generated images are made again for each paint rather
-  /// than kept per size for a few seconds (`cachedImageForSize`).
+  /// FIXME: Generated images are made again for each paint rather than kept per size for a few seconds
+  /// (`cachedImageForSize`).
   class StyleGeneratedImage : public StyleImage
   {
   protected:
@@ -14,6 +15,8 @@ namespace krys::boo
 
   private:
     bool _fixedSize;
+    // Counted: a renderer can use an image more than once.
+    HashMap<RenderElement *, uint32> _clients;
 
   protected:
     StyleGeneratedImage(StyleImage::Type, bool fixedSize) noexcept;
@@ -42,6 +45,20 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
+
+    void AddClient(RenderElement &) noexcept final;
+    void RemoveClient(RenderElement &) noexcept final;
+    KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
+    KRYS_NODISCARD const HashMap<RenderElement *, uint32> &Clients() const noexcept
+    {
+      return _clients;
+    }
+    virtual void DidAddClient(RenderElement &) noexcept
+    {
+    }
+    virtual void DidRemoveClient(RenderElement &) noexcept
+    {
+    }
     void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
                                     FloatSize &intrinsicRatio) noexcept final;
     void SetContainerContextForRenderer(const RenderElement &, const FloatSize &containerSize,

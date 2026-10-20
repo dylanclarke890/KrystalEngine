@@ -9,14 +9,23 @@ namespace krys::boo
 {
   namespace
   {
-    // FIXME: Ask the image decoder which types it supports, once there is one. Until then, these are the
-    // formats every image decoder is expected to handle.
+    // The types the image decoders support (PNG, JPEG, GIF, WebP, BMP and ICO).
+    // FIXME: A MIME type registry (MIMETypeRegistry::isSupportedImageMIMEType), and SVG and AVIF images once
+    // they're supported.
     KRYS_NODISCARD bool IsSupportedImageMIMEType(const css::CSSOMString &mimeType) noexcept
     {
       constexpr utf8_stringview supportedTypes[] = {
-        u8"image/png",  u8"image/jpeg",    u8"image/jpg",    u8"image/pjpeg",
-        u8"image/gif",  u8"image/bmp",     u8"image/x-bmp",  u8"image/webp",
-        u8"image/avif", u8"image/svg+xml", u8"image/x-icon", u8"image/vnd.microsoft.icon",
+        u8"image/png",
+        u8"image/apng",
+        u8"image/jpeg",
+        u8"image/jpg",
+        u8"image/pjpeg",
+        u8"image/gif",
+        u8"image/bmp",
+        u8"image/x-bmp",
+        u8"image/webp",
+        u8"image/x-icon",
+        u8"image/vnd.microsoft.icon",
       };
       return std::ranges::any_of(supportedTypes,
                                  [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });

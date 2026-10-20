@@ -5908,4 +5908,82 @@ namespace krys::boo
 
     return RenderBoxModelObject::NodeAtPoint(request, result, locationInContainer, accumulatedOffset, action);
   }
+
+  void RenderBox::ImageChanged(WrappedImagePtr image, const IntRect *) noexcept
+  {
+    if (auto source = Style().GetBorderImageSource().TryStyleImage(); source && source->Data() == image)
+    {
+      if (Parent())
+      {
+        Repaint();
+      }
+      return;
+    }
+
+    if (auto source = Style().GetMaskBorderSource().TryStyleImage(); source && source->Data() == image)
+    {
+      if (Parent())
+      {
+        Repaint();
+      }
+      return;
+    }
+
+    if (!View().FrameView().LayoutContext().IsInRenderTreeLayout() && IsFloating())
+    {
+      if (auto shapeOutsideImage = Style().GetShapeOutside().GetImage();
+          shapeOutsideImage && shapeOutsideImage->Data() == image)
+      {
+        EnsureShapeOutsideInfo().MarkShapeAsDirty();
+        MarkShapeOutsideDependentsForLayout();
+      }
+    }
+
+    bool didFullRepaint = false;
+
+    auto repaintForBackgroundAndMask = [&](const RenderStyle &style)
+    {
+      if (!Parent())
+      {
+        return;
+      }
+
+      if (!didFullRepaint)
+      {
+        didFullRepaint = RepaintLayerRectsForImage(image, style.GetBackgroundLayers());
+      }
+      if (!didFullRepaint)
+      {
+        didFullRepaint = RepaintLayerRectsForImage(image, style.GetMaskLayers());
+      }
+    };
+
+    repaintForBackgroundAndMask(Style());
+
+    if (auto *firstLineStyle = Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}))
+    {
+      repaintForBackgroundAndMask(*firstLineStyle);
+    }
+
+    // FIXME: The visually non-empty pixel count and the document's image load milestones (didLoadImage), and
+    // the composited layers' content changes, once there are those.
+  }
+
+  template <typename TLayers>
+  bool RenderBox::RepaintLayerRectsForImage(WrappedImagePtr image, const TLayers &layers) noexcept
+  {
+    for (auto &layer : layers.UsedValues())
+    {
+      if (auto layerImage = layer.GetImage().TryStyleImage();
+          layerImage && layerImage->Data() == image
+          && (layerImage->IsLoaded(this) || layerImage->CanRender(this, Style().UsedZoom())))
+      {
+        // FIXME: Repaint only the rect the layer paints the image in (its geometry, the root background's
+        // extended rect), once there's repaint tracking.
+        Repaint();
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7) are in progress: G7a, decoding and drawing, is done; see *G7 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7) are in progress: G7a, decoding and drawing, and G7b, loading and CSS images, are done; see *G7 plan*.
 
 ## Why
 
@@ -969,6 +969,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Out (FIXMEs):** loading (G7b), `<img>` (G7c), animation (G7d), colour profiles and HDR, subsampling, density-corrected sizes in pre-transformed images, luminance mask patterns.
 - **Editor:** unchanged: no page can show an image until G7b loads them.
 - **Tests:** Booey tests every decoder (on images generated with Pillow and held as bytes), `BitmapImage`'s metadata, orientation, recorded draws and patterns and its observer (15 new cases); Krystal.UI tests replaying native images, oriented images, unpremultiplied pixels and native image patterns. No golden: no page shows an image yet.
+
+### G7b as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Loading and CSS images* in `docs/booey/PORTING.md`): a trimmed port of upstream's loader cache: `CachedResource` and `CachedImage` with their clients and handles, `MemoryCache` (by URL, with capacities and pruning), a `CachedResourceLoader` per document (`Document::GetCachedResourceLoader`), over the host's `LoaderStrategy` (upstream's platform strategy, set through `PlatformStrategies`), whose completions run as networking tasks; `data:` URLs decode in Booey (with Krystal.Core's new `Base64Decode`). Styles load their pending images when renderers get them (`style::LoadPendingResources`: backgrounds, generated content, cursors, list markers, border images, masks, `shape-outside`); renderers are the images' clients, so a load repaints (by scheduling a rendering update) or lays out what uses it; `StyleCachedImage` sizes and draws its cached image, and image sets and cursors forward to the image they select.
+- **Krystal.UI:** `FileLoaderStrategy` reads `file:` URLs (the type from the extension); the first `View` makes it Booey's loader unless the host set one; `View::LoadFile` gives the document its file's URL, so relative `url()`s resolve against it; `View::LoadHTML` takes an optional URL.
+- **Editor:** a sixth row: PNG tiles, a JPEG covering its box, translucent WebP tiles, GIF tiles, a border image and image list markers, from `pages/images`; the status table's new "Images" row.
+- **Changed from the plan:** the host interface is upstream's `LoaderStrategy` rather than a new one; list markers' image sizes, `shape-outside` image validity and `imagesAreLoaded` came along.
+- **Out (FIXMEs):** streamed responses, cancellation, redirects and HTTP (revalidation, CORS, credentials), style sheets and fonts loading, image shapes (`shape-outside: url()` needs pixels; image buffers record display lists), crossfade and filter images following their inputs, custom cursors, the broken image (G7c), animation (G7d).
+- **Tests:** Booey tests loading, the memory cache, failures, `data:` URLs, the rendering update, pruning and list markers (8 cases) and the data URL decoder (2); Krystal.Core tests `Base64Decode` (3); Krystal.UI tests a file page's relative image and the file loader's types, and a page golden, `images` (tiles, sizes, WebP, GIF, a data URL, an EXIF-turned JPEG, a missing image, a border image and list markers), checked against Chrome (mean difference 0.17).
 
 ## Open decisions
 

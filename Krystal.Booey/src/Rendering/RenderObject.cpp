@@ -868,6 +868,81 @@ namespace krys::boo
     return GetDocument().RenderTreeBeingDestroyed();
   }
 
+  CachedImageClient &RenderObject::GetCachedImageClient() const noexcept
+  {
+    if (!_cachedImageClient)
+    {
+      _cachedImageClient = CreateUnique<CachedImageListener>(*const_cast<RenderObject *>(this));
+    }
+    return *_cachedImageClient;
+  }
+
+  void RenderObject::CachedImageListener::NotifyFinished(CachedResource &resource) noexcept
+  {
+    _renderer.NotifyFinished(resource);
+  }
+
+  void RenderObject::CachedImageListener::ImageChanged(CachedImage *image, const IntRect *rect) noexcept
+  {
+    _renderer.ImageChanged(static_cast<WrappedImagePtr>(image), rect);
+  }
+
+  bool RenderObject::CachedImageListener::AllowsAnimation() const noexcept
+  {
+    return _renderer.AllowsAnimation();
+  }
+
+  bool RenderObject::CachedImageListener::CanDestroyDecodedData() const noexcept
+  {
+    return _renderer.CanDestroyDecodedData();
+  }
+
+  VisibleInViewportState RenderObject::CachedImageListener::ImageFrameAvailable(CachedImage &image,
+                                                                                ImageAnimatingState state,
+                                                                                const IntRect *rect) noexcept
+  {
+    return _renderer.ImageFrameAvailable(image, state, rect);
+  }
+
+  VisibleInViewportState
+    RenderObject::CachedImageListener::ImageVisibleInViewport(const dom::Document &document) const noexcept
+  {
+    return _renderer.ImageVisibleInViewport(document);
+  }
+
+  void RenderObject::CachedImageListener::DidRemoveCachedImageClient(CachedImage &image) noexcept
+  {
+    _renderer.DidRemoveCachedImageClient(image);
+  }
+
+  void RenderObject::CachedImageListener::ImageContentChanged(CachedImage &image) noexcept
+  {
+    _renderer.ImageContentChanged(image);
+  }
+
+  void RenderObject::CachedImageListener::ScheduleRenderingUpdateForImage(CachedImage &image) noexcept
+  {
+    _renderer.ScheduleRenderingUpdateForImage(image);
+  }
+
+  VisibleInViewportState RenderObject::ImageFrameAvailable(CachedImage &image, ImageAnimatingState,
+                                                           const IntRect *changeRect) noexcept
+  {
+    ImageChanged(static_cast<WrappedImagePtr>(&image), changeRect);
+    return VisibleInViewportState::No;
+  }
+
+  void RenderObject::Repaint() const noexcept
+  {
+    // Don't repaint if we're unrooted (note that view() still returns the view when unrooted)
+    if (!IsRooted())
+    {
+      return;
+    }
+
+    GetDocument().ScheduleRenderingUpdate({});
+  }
+
   void RenderObject::WillBeDestroyed() noexcept
   {
     krys_debug_assert(!_parent);

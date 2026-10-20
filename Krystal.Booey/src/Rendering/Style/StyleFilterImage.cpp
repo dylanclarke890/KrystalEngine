@@ -38,6 +38,17 @@ namespace krys::boo
       style::ConvertToCSS(_filter, style));
   }
 
+  void StyleFilterImage::Load(CachedResourceLoader &cachedResourceLoader,
+                              const ResourceLoaderOptions &options) noexcept
+  {
+    // FIXME: Follow the input image's cached image as its client (imageChanged), and load the reference
+    // filters' external documents.
+    if (_image && _image->IsPending())
+    {
+      _image->Load(cachedResourceLoader, options);
+    }
+  }
+
   bool StyleFilterImage::IsPending() const noexcept
   {
     return _image && _image->IsPending();

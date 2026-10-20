@@ -60,6 +60,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Colour/ColourUtilities.cpp
 
   # Text
+	PRIVATE tests/Text/Base64.cpp
 	PRIVATE tests/Text/CodePointIterator.cpp
 	PRIVATE tests/Text/StringBuilder.cpp
 	PRIVATE tests/Text/TextStream.cpp

@@ -3,6 +3,11 @@
 #include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 
+namespace krys::boo
+{
+  struct ResourceLoaderOptions;
+}
+
 namespace krys::boo::css
 {
   // <cross-origin-modifier> = cross-origin( anonymous | use-credentials )
@@ -56,7 +61,9 @@ namespace krys::boo::css
     }
   }
 
-  // FIXME: Port applyModifiersToLoaderOptions with the resource loader (ResourceLoaderOptions).
+  /// @brief Applies the URL request modifier steps of @p modifiers to @p loaderOptions.
+  void ApplyModifiersToLoaderOptions(const URLModifiers &modifiers,
+                                     ResourceLoaderOptions &loaderOptions) noexcept;
 }
 
 DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::URLModifiers, 3uz)

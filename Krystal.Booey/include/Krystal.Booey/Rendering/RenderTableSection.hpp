@@ -266,6 +266,8 @@ namespace krys::boo
                                                   : u8"RenderTableSection";
     }
 
+    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+
   private:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
     void WillBeRemovedFromTree() noexcept override;

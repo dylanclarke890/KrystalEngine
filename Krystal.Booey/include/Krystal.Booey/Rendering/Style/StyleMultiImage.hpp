@@ -26,8 +26,6 @@ namespace krys::boo
   };
 
   /// @brief An image that selects one of several candidates when it loads.
-  /// FIXME: `load` (which selects the image) and the forwarding of the renderer-facing members to the
-  /// selected image come with the resource loader and the renderer.
   class StyleMultiImage : public StyleImage
   {
   private:
@@ -47,12 +45,25 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD WrappedImagePtr Data() const noexcept final;
+    void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
+    KRYS_NODISCARD bool CanRender(const RenderElement *, float multiplier) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
+    KRYS_NODISCARD bool IsLoaded(const RenderElement *) const noexcept final;
     KRYS_NODISCARD bool ErrorOccurred() const noexcept final;
+    KRYS_NODISCARD FloatSize ImageSize(const RenderElement *, float multiplier) const noexcept final;
     KRYS_NODISCARD bool ImageHasRelativeWidth() const noexcept final;
     KRYS_NODISCARD bool ImageHasRelativeHeight() const noexcept final;
+    void ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth, float &intrinsicHeight,
+                                    FloatSize &intrinsicRatio) noexcept final;
     KRYS_NODISCARD bool UsesImageContainerSize() const noexcept final;
+    void SetContainerContextForRenderer(const RenderElement &, const FloatSize &, float) noexcept final;
+    void AddClient(RenderElement &) noexcept final;
+    void RemoveClient(RenderElement &) noexcept final;
+    KRYS_NODISCARD bool HasClient(RenderElement &) const noexcept final;
+    KRYS_NODISCARD RefPtr<Image> GetImage(const RenderElement *, const FloatSize &, const GraphicsContext &,
+                                          bool isForFirstLine) const noexcept final;
     KRYS_NODISCARD float ImageScaleFactor() const noexcept final;
+    KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &) const noexcept final;
 
     KRYS_NODISCARD const StyleImage *SelectedImage() const noexcept final
     {

@@ -1499,6 +1499,26 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
   include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
   include/Krystal.Booey/Platform/SharedBuffer.hpp
+
+  # Loading (G7b)
+  include/Krystal.Booey/Loader/Cache/CachedImage.hpp
+  include/Krystal.Booey/Loader/Cache/CachedImageClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResource.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResourceClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResourceClientWalker.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp
+  include/Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp
+  include/Krystal.Booey/Loader/Cache/MemoryCache.hpp
+  include/Krystal.Booey/Loader/FetchOptions.hpp
+  include/Krystal.Booey/Loader/LoaderStrategy.hpp
+  include/Krystal.Booey/Loader/ResourceLoaderOptions.hpp
+  include/Krystal.Booey/Platform/Network/DataURLDecoder.hpp
+  include/Krystal.Booey/Platform/Network/ResourceError.hpp
+  include/Krystal.Booey/Platform/Network/ResourceRequest.hpp
+  include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
+  include/Krystal.Booey/Platform/PlatformStrategies.hpp
+  include/Krystal.Booey/Style/PendingResources.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2487,6 +2507,16 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/ImageDecoders/ScalableImageDecoder.cpp
   src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
   src/Platform/ImageDecoders/WEBPImageDecoder.cpp
+
+  # Loading (G7b)
+  src/Loader/Cache/CachedImage.cpp
+  src/Loader/Cache/CachedResource.cpp
+  src/Loader/Cache/CachedResourceLoader.cpp
+  src/Loader/Cache/MemoryCache.cpp
+  src/Platform/Network/DataURLDecoder.cpp
+  src/Platform/PlatformStrategies.cpp
+  src/CSS/Values/Primitives/URLModifiers.cpp
+  src/Style/PendingResources.cpp
 )
 
 target_precompile_headers(Krystal.Booey

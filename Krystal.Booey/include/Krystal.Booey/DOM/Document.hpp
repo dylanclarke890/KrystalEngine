@@ -33,6 +33,7 @@
 
 namespace krys::boo
 {
+  class CachedResourceLoader;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -180,6 +181,7 @@ namespace krys::boo::dom
     RefPtr<css::StyleSheetList> _styleSheetList;
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
     mutable RefPtr<FontSelector> _fontSelector;
+    mutable RefPtr<CachedResourceLoader> _cachedResourceLoader;
 
     WeakPtr<LocalFrame> _frame;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
@@ -706,6 +708,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
     /// @brief The page of the document's frame, if any.
     KRYS_NODISCARD boo::Page *GetPage() const noexcept;
+    /// @brief The loader of the document's subresources (images), made on first use.
+    KRYS_NODISCARD CachedResourceLoader &GetCachedResourceLoader() const noexcept;
     /// @brief Asks the page for a rendering update that runs @p requestedSteps, if the document is in one.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept;
 

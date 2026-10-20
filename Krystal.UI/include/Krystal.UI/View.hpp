@@ -29,6 +29,8 @@ namespace krys::ui
   /// size; runs Booey's event loop with the host's time and the page's rendering update once a frame; paints
   /// it into a `Renderer2D` through a display list; and turns the platform layer's mouse and keyboard input
   /// into DOM events.
+  /// @note The first view makes Krystal.UI's `FileLoaderStrategy` Booey's loader, unless the host set one, so
+  /// pages load `file:` images.
   class View
   {
     KRYS_NON_COPY_MOVABLE(View);
@@ -61,9 +63,10 @@ namespace krys::ui
     explicit View(const boo::IntSize &viewportSize) noexcept;
     ~View() noexcept;
 
-    /// @brief Replaces the document with one parsed from @p markup.
-    void LoadHTML(utf8_string &&markup) noexcept;
-    /// @brief Replaces the document with one parsed from the UTF-8 file at @p path.
+    /// @brief Replaces the document with one parsed from @p markup, at @p url (which relative URLs resolve
+    /// against); `about:blank` if it's null.
+    void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {}) noexcept;
+    /// @brief Replaces the document with one parsed from the UTF-8 file at @p path, at the file's URL.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so

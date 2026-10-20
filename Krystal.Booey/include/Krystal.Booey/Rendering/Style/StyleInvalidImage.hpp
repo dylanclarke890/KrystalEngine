@@ -25,6 +25,9 @@ namespace krys::boo
   private:
     StyleInvalidImage() noexcept;
 
+    void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final
+    {
+    }
     KRYS_NODISCARD bool IsPending() const noexcept final
     {
       return false;

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
 #include <filesystem>
 #include <fstream>
@@ -482,5 +483,48 @@ namespace krys::ui::tests
     REQUIRE_FALSE(box->SetAttribute(u8"style", u8"width: 20px; height: 10px").HasException());
     CHECK(view.Update(now));
     CHECK_FALSE(view.Update(now));
+  }
+
+  TEST_CASE("View: loads file images relative to the page's file", "[UI]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-image-test";
+    std::filesystem::create_directories(directory / "images");
+    {
+      // A 2x1 24-bit BMP: red, then green.
+      const unsigned char bmp[] = {
+        // File header: the signature, the file's size and the offset of the pixels.
+        'B', 'M', 62, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0,
+        // Info header: its size, 2x1 pixels, one plane, 24 bits a pixel, no compression, 8 bytes of pixels.
+        40, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0,
+        // The row, blue-green-red, padded to 4 bytes.
+        0, 0, 255, 0, 255, 0, 0, 0};
+      std::ofstream image(directory / "images" / "pair.bmp", std::ios::binary);
+      image.write(reinterpret_cast<const char *>(bmp), sizeof(bmp));
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><style>body { margin: 0 }</style>"
+              "<div id=box style='width: 40px; height: 20px; background: url(images/pair.bmp)'></div>";
+    }
+
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    CHECK(view.Document().GetURL().ProtocolIsFile());
+    view.UpdateRendering();
+    CHECK(view.Record()->AsText({}).find(u8"native-image") == utf8_string::npos);
+
+    // The load completes as a networking task, which asks for a rendering update.
+    auto now = boo::html::EventLoop::Current().Now();
+    CHECK(view.Update(now));
+    CHECK(view.Record()->AsText({}).find(u8"draw-pattern-native-image") != utf8_string::npos);
+
+    std::filesystem::remove_all(directory);
+  }
+
+  TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
+  {
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".jpeg") == u8"image/jpeg");
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".webp") == u8"image/webp");
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".unknown").empty());
   }
 }

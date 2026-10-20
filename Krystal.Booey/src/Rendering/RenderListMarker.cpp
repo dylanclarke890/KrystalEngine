@@ -131,7 +131,10 @@ namespace krys::boo
 
   void RenderListMarker::WillBeDestroyed() noexcept
   {
-    // FIXME: Stop being the image's client, once there's image loading.
+    if (_image)
+    {
+      _image->RemoveClient(*this);
+    }
     RenderBox::WillBeDestroyed();
   }
 
@@ -150,8 +153,15 @@ namespace krys::boo
 
     if (auto newImage = Style().ListStyleImage().TryStyleImage(); _image != newImage)
     {
-      // FIXME: Stop being the old image's client and become the new one's, once there's image loading.
+      if (_image)
+      {
+        _image->RemoveClient(*this);
+      }
       _image = krys::move(newImage);
+      if (_image)
+      {
+        _image->AddClient(*this);
+      }
     }
   }
 
@@ -317,9 +327,9 @@ namespace krys::boo
     if (IsImage())
     {
       UpdateInlineMarginsAndContent();
-      // FIXME: The image's size, once there's image loading.
-      SetWidth(0_lu);
-      SetHeight(0_lu);
+      auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+      SetWidth(LayoutUnit(imageSize.Width()));
+      SetHeight(LayoutUnit(imageSize.Height()));
       _layoutBounds = {Height().ToFloat(), 0.f};
     }
     else
@@ -359,8 +369,12 @@ namespace krys::boo
   {
     if (IsImage())
     {
-      // FIXME: The image's container size (a default bullet of half the ascent, or the image's intrinsic
-      // size), once there's image loading.
+      // FIXME: This is a somewhat arbitrary width.
+      LayoutUnit bulletWidth = LayoutUnit(Style().MetricsOfPrimaryFont().IntAscent()) / 2;
+      LayoutSize defaultBulletSize(bulletWidth, bulletWidth);
+      LayoutSize imageSize =
+        CalculateImageIntrinsicDimensions(_image.get(), defaultBulletSize, ScaleByUsedZoom::No);
+      _image->SetContainerContextForRenderer(*this, FloatSize(imageSize), Style().UsedZoom());
       _textContent = {
         .TextWithSuffix = {},
         .TextWithoutSuffixLength = 0,
@@ -411,8 +425,9 @@ namespace krys::boo
 
     if (IsImage())
     {
-      // FIXME: The image's size, once there's image loading.
-      _minPreferredLogicalWidth = _maxPreferredLogicalWidth = 0_lu;
+      LayoutSize imageSize = LayoutSize(_image->ImageSize(this, Style().UsedZoom()));
+      _minPreferredLogicalWidth = _maxPreferredLogicalWidth =
+        GetWritingMode().IsHorizontal() ? imageSize.Width() : imageSize.Height();
       ClearNeedsPreferredWidthsUpdate();
       UpdateInlineMargins();
       return;
@@ -574,5 +589,26 @@ namespace krys::boo
                        / 2.f;
     return {Snap(primaryFontAscentAndDescent.first + halfLeading, SnapDirection::Floor),
             Snap(primaryFontAscentAndDescent.second + halfLeading, SnapDirection::Ceil)};
+  }
+
+  void RenderListMarker::ImageChanged(WrappedImagePtr o, const IntRect *rect) noexcept
+  {
+    if (Parent())
+    {
+      if (_image && o == _image->Data())
+      {
+        auto imageSize = _image->ImageSize(this, Style().UsedZoom());
+        if (Width() != LayoutUnit(imageSize.Width()) || Height() != LayoutUnit(imageSize.Height())
+            || _image->ErrorOccurred())
+        {
+          SetNeedsLayoutAndPreferredWidthsUpdate();
+        }
+        else
+        {
+          Repaint();
+        }
+      }
+    }
+    RenderBox::ImageChanged(o, rect);
   }
 }

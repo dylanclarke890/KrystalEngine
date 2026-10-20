@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Values/Shapes/ShapeOutside.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 
 #include "Krystal.Booey/CSS/Values/BasicShapeValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
@@ -15,8 +16,8 @@ namespace krys::boo::style
     const auto &styleImage = Value.Value;
     if (styleImage->HasCachedImage())
     {
-      // FIXME: Also require the cached image to have loaded an image, once the resource loader is ported.
-      return styleImage->GetCachedImage() != nullptr;
+      auto *cachedImage = styleImage->GetCachedImage();
+      return cachedImage && cachedImage->HasImage();
     }
     return styleImage->IsGeneratedImage();
   }

@@ -16,7 +16,7 @@ namespace krys::boo
   namespace style
   {
     // Utilities for working with the BackgroundLayers and MaskLayers types.
-    // FIXME: `imagesAreLoaded` and `hasHDRContent` come with the resource loader.
+    // FIXME: `hasHDRContent`, once there's HDR.
 
     template <typename T>
     concept FillLayer = CoordinatedValueListValue<T> && requires(T value) {
@@ -37,6 +37,18 @@ namespace krys::boo
         computedClipMax = ClipMax(computedClipMax, layer.GetClip());
         layer.SetClipMax(computedClipMax);
       }
+    }
+
+    template <FillLayer T>
+    KRYS_NODISCARD bool ImagesAreLoaded(const CoordinatedValueList<T> &list,
+                                        const RenderElement &renderer) noexcept
+    {
+      return std::ranges::all_of(list.UsedValues(),
+                                 [&renderer](auto &layer)
+                                 {
+                                   auto image = layer.GetImage().TryStyleImage();
+                                   return !image || image->IsLoaded(&renderer);
+                                 });
     }
 
     template <FillLayer T>

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -177,6 +178,17 @@ namespace krys::ui::tests
               {
                 view.ScrollTo({20, 40});
                 view.Document().GetElementById(u8"scrolled")->SetScrollTop(90);
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: images", "[UI][GPU][Golden]")
+  {
+    // The page's images load from files as networking tasks, which the event loop runs before it's painted.
+    CheckPage("images", 360u, 320u, false,
+              [](View &view)
+              {
+                boo::html::EventLoop::Current().RunUntilIdle();
                 view.UpdateRendering();
               });
   }

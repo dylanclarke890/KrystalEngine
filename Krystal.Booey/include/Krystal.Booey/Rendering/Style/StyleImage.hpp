@@ -12,7 +12,9 @@
 namespace krys::boo
 {
   class CachedImage;
+  class CachedResourceLoader;
   class GraphicsContext;
+  struct ResourceLoaderOptions;
   class RenderElement;
   class RenderStyle;
 
@@ -20,9 +22,8 @@ namespace krys::boo
   using WrappedImagePtr = const void *;
 
   /// @brief The computed value of an `<image>`.
-  /// FIXME: Loading (`load`) and clients (`addClient`, `removeClient`, `hasClient`) come with the resource
-  /// loader. Sizing against a renderer and drawing are pure upstream; here they default to an image of no
-  /// size that draws nothing, until loaded images implement them.
+  /// @note Sizing against a renderer and drawing default to an image of no size that draws nothing, for the
+  /// images that don't draw yet.
   class StyleImage : public RefCounted<StyleImage>, public CanMakeWeakPtr<StyleImage>
   {
   protected:
@@ -61,6 +62,7 @@ namespace krys::boo
 
     // Loading.
     KRYS_NODISCARD virtual bool IsPending() const noexcept = 0;
+    virtual void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept = 0;
     KRYS_NODISCARD virtual bool ErrorOccurred() const noexcept
     {
       return false;
@@ -77,6 +79,11 @@ namespace krys::boo
     {
       return {};
     }
+
+    // Clients.
+    virtual void AddClient(RenderElement &) noexcept = 0;
+    virtual void RemoveClient(RenderElement &) noexcept = 0;
+    KRYS_NODISCARD virtual bool HasClient(RenderElement &) const noexcept = 0;
 
     // Size / scale.
     KRYS_NODISCARD virtual bool UsesImageContainerSize() const noexcept = 0;

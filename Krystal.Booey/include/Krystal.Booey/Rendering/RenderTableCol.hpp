@@ -12,7 +12,7 @@ namespace krys::boo
   struct BorderValue;
 
   /// @brief A table column or column group.
-  // FIXME: Repaints (clippedOverflowRect, rectsForRepaintingAfterLayout, imageChanged), once there are those.
+  // FIXME: Repaints (clippedOverflowRect, rectsForRepaintingAfterLayout), once there are those.
   class RenderTableCol final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCol);
@@ -90,6 +90,8 @@ namespace krys::boo
     {
       return u8"RenderTableCol";
     }
+
+    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
 
   private:
     void ComputePreferredLogicalWidths() noexcept override

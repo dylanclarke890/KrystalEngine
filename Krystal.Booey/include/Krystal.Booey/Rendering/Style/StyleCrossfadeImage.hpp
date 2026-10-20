@@ -39,6 +39,7 @@ namespace krys::boo
 
     KRYS_NODISCARD Ref<css::Value> ComputedStyleValue(const RenderStyle &) const noexcept final;
     KRYS_NODISCARD bool IsPending() const noexcept final;
+    void Load(CachedResourceLoader &, const ResourceLoaderOptions &) noexcept final;
   };
 }
 

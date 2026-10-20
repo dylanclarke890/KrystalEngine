@@ -39,9 +39,11 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
+#include "Krystal.Booey/Style/PendingResources.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
 
 namespace krys::boo
@@ -198,9 +200,14 @@ namespace krys::boo
     return htmlElement && Is<html::HTMLMarqueeElement>(*htmlElement);
   }
 
+  boo::ImageOrientation RenderElement::GetImageOrientation() const noexcept
+  {
+    return style::ToPlatform<style::ImageOrientation> {}(Style().GetImageOrientation());
+  }
+
   void RenderElement::InitializeStyle() noexcept
   {
-    // FIXME: Pending resources (Style::loadPendingResources), once there's resource loading.
+    style::LoadPendingResources(_style, GetDocument(), GetElement());
 
     StyleWillChange(style::DifferenceResult::NewStyle, Style());
     _hasInitializedStyle = true;
@@ -226,8 +233,9 @@ namespace krys::boo
     diff.Result = std::max(diff.Result, minimalStyleDifference);
     diff = AdjustStyleDifference(diff);
 
-    // FIXME: Pending resources and the repaint before the change, once there are resource loading and
-    // painting.
+    style::LoadPendingResources(style, GetDocument(), GetElement());
+
+    // FIXME: The repaint before the change, once there's repaint tracking.
     StyleWillChange(diff, style);
     auto oldStyle = krys::move(_style);
     _style = krys::move(style);
@@ -375,14 +383,154 @@ namespace krys::boo
       return nullptr;
     }
 
-    // FIXME: Load the style's pending resources, once there's resource loading.
+    style::LoadPendingResources(*resolvedStyle->Style, GetDocument(), element.get());
 
     return krys::move(resolvedStyle->Style);
   }
 
+  template <typename TFillLayers>
+  void RenderElement::UpdateFillImages(const TFillLayers *oldLayers, const TFillLayers *newLayers) noexcept
+  {
+    auto fillImagesAreIdentical = [](const TFillLayers *layers1, const TFillLayers *layers2) -> bool
+    {
+      if (layers1 == layers2)
+      {
+        return true;
+      }
+      if (!layers1 || !layers2)
+      {
+        return false;
+      }
+      if (layers1->UsedLength() != layers2->UsedLength())
+      {
+        return false;
+      }
+
+      auto values1 = layers1->UsedValues();
+      auto values2 = layers2->UsedValues();
+      auto it2 = values2.begin();
+      for (auto it1 = values1.begin(); it1 != values1.end(); ++it1, ++it2)
+      {
+        if (it1->GetImage() != it2->GetImage())
+        {
+          return false;
+        }
+        if (auto image = it1->GetImage().TryStyleImage();
+            image && (image->ErrorOccurred() || !image->HasImage() || image->UsesDataProtocol()))
+        {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    auto isRegisteredWithNewFillImages = [&]() -> bool
+    {
+      if (!newLayers)
+      {
+        return true;
+      }
+      for (auto &layer : newLayers->UsedValues())
+      {
+        if (auto image = layer.GetImage().TryStyleImage(); image && !image->HasClient(*this))
+        {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    // If images have the same characteristics and this element is already registered as a
+    // client to the new images, there is nothing to do.
+    if (fillImagesAreIdentical(oldLayers, newLayers) && isRegisteredWithNewFillImages())
+    {
+      return;
+    }
+
+    // Add before removing, to avoid removing all clients of an image that is in both sets.
+    if (newLayers)
+    {
+      for (auto &layer : newLayers->UsedValues())
+      {
+        if (auto image = layer.GetImage().TryStyleImage())
+        {
+          image->AddClient(*this);
+        }
+      }
+    }
+    if (oldLayers)
+    {
+      for (auto &layer : oldLayers->UsedValues())
+      {
+        if (auto image = layer.GetImage().TryStyleImage())
+        {
+          image->RemoveClient(*this);
+        }
+      }
+    }
+  }
+
+  void RenderElement::UpdateImage(StyleImage *oldImage, StyleImage *newImage) noexcept
+  {
+    if (oldImage == newImage)
+    {
+      return;
+    }
+    if (oldImage)
+    {
+      oldImage->RemoveClient(*this);
+    }
+    if (newImage)
+    {
+      newImage->AddClient(*this);
+    }
+  }
+
+  void RenderElement::UpdateShapeImage(const style::ShapeOutside *oldShapeValue,
+                                       const style::ShapeOutside *newShapeValue) noexcept
+  {
+    if (oldShapeValue || newShapeValue)
+    {
+      UpdateImage(oldShapeValue ? oldShapeValue->GetImage().get() : nullptr,
+                  newShapeValue ? newShapeValue->GetImage().get() : nullptr);
+    }
+  }
+
   void RenderElement::StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
-    // FIXME: Images and SVG resources, once there are any.
+    auto registerImages = [this](const RenderStyle *style, const RenderStyle *oldStyle)
+    {
+      if (!style && !oldStyle)
+      {
+        return;
+      }
+      if ((style && style::HasImageInAnyLayer(style->GetBackgroundLayers()))
+          || (oldStyle && style::HasImageInAnyLayer(oldStyle->GetBackgroundLayers())))
+      {
+        UpdateFillImages(oldStyle ? &oldStyle->GetBackgroundLayers() : nullptr,
+                         style ? &style->GetBackgroundLayers() : nullptr);
+      }
+      if ((style && style::HasImageInAnyLayer(style->GetMaskLayers()))
+          || (oldStyle && style::HasImageInAnyLayer(oldStyle->GetMaskLayers())))
+      {
+        UpdateFillImages(oldStyle ? &oldStyle->GetMaskLayers() : nullptr,
+                         style ? &style->GetMaskLayers() : nullptr);
+      }
+      UpdateImage(oldStyle ? oldStyle->GetBorderImageSource().TryStyleImage().get() : nullptr,
+                  style ? style->GetBorderImageSource().TryStyleImage().get() : nullptr);
+      UpdateImage(oldStyle ? oldStyle->GetMaskBorderSource().TryStyleImage().get() : nullptr,
+                  style ? style->GetMaskBorderSource().TryStyleImage().get() : nullptr);
+      UpdateShapeImage(oldStyle ? &oldStyle->GetShapeOutside() : nullptr,
+                       style ? &style->GetShapeOutside() : nullptr);
+    };
+
+    registerImages(&Style(), oldStyle);
+
+    // Are there other pseudo-elements that need the resources to be registered?
+    registerImages(Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}),
+                   oldStyle ? oldStyle->GetCachedPseudoStyle({PseudoElementType::FirstLine}) : nullptr);
+
+    // FIXME: SVG resources, once there are any.
 
     if (!Parent())
     {
@@ -1204,9 +1352,43 @@ namespace krys::boo
       RenderCounter::DestroyCounterNodes(*this);
     }
 
-    // FIXME: The subtree layout root, image clients, outlines, paused image animations and the other upstream
-    // clean-up, once there are any.
     RenderObject::WillBeDestroyed();
+
+    // FIXME: The subtree layout root, outlines, paused image animations and the other upstream clean-up, once
+    // there are any.
+
+    auto unregisterImage = [this](StyleImage *image)
+    {
+      if (image)
+      {
+        image->RemoveClient(*this);
+      }
+    };
+
+    auto unregisterImages = [&](const RenderStyle &style)
+    {
+      for (auto &backgroundLayer : style.GetBackgroundLayers().UsedValues())
+      {
+        unregisterImage(backgroundLayer.GetImage().TryStyleImage().get());
+      }
+      for (auto &maskLayer : style.GetMaskLayers().UsedValues())
+      {
+        unregisterImage(maskLayer.GetImage().TryStyleImage().get());
+      }
+      unregisterImage(style.GetBorderImageSource().TryStyleImage().get());
+      unregisterImage(style.GetMaskBorderSource().TryStyleImage().get());
+      unregisterImage(style.GetShapeOutside().GetImage().get());
+    };
+
+    if (HasInitializedStyle())
+    {
+      unregisterImages(_style);
+
+      if (auto *firstLineStyle = Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}))
+      {
+        unregisterImages(*firstLineStyle);
+      }
+    }
   }
 
 #pragma region Painting

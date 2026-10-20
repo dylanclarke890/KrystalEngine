@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
+#include "Krystal.Booey/Graphics/ImageOrientation.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -176,6 +177,11 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;
 
+    /// @brief How images drawn for the renderer are oriented: its `image-orientation`.
+    // FIXME: An image element that doesn't allow the orientation to be overridden draws its image's
+    // (allowsOrientationOverride, G7c).
+    KRYS_NODISCARD boo::ImageOrientation GetImageOrientation() const noexcept;
+
     KRYS_NODISCARD const RenderStyle &FirstLineStyle() const noexcept;
 
     /// @brief Paints this renderer's @p paintInfo phase, at @p paintOffset (its container's position in the
@@ -332,6 +338,12 @@ namespace krys::boo
     // outlines, scroll anchoring, line layout) comes with layout and painting.
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
+
+    template <typename TFillLayers>
+    void UpdateFillImages(const TFillLayers *oldLayers, const TFillLayers *newLayers) noexcept;
+    void UpdateImage(StyleImage *oldImage, StyleImage *newImage) noexcept;
+    void UpdateShapeImage(const style::ShapeOutside *oldShapeValue,
+                          const style::ShapeOutside *newShapeValue) noexcept;
 
     enum class StylePropagationType
     {

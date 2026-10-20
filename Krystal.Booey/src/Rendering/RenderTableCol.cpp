@@ -241,4 +241,14 @@ namespace krys::boo
   {
     return Table()->OffsetHeightForColumn(*this);
   }
+
+  void RenderTableCol::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  {
+    // FIXME: Repaint only the rect the image paints in.
+    if (!Parent())
+    {
+      return;
+    }
+    Repaint();
+  }
 }

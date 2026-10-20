@@ -436,4 +436,17 @@ namespace krys::boo
       result.SetLocalPoint(localPoint);
     }
   }
+
+  void RenderInline::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  {
+    if (!Parent())
+    {
+      return;
+    }
+
+    // FIXME: Tell the document an image loaded (didLoadImage), once there are paint milestones.
+
+    // FIXME: We can do better.
+    Repaint();
+  }
 }

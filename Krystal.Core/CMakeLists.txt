@@ -203,6 +203,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/Encodings/UTF.hpp
       include/Krystal.Core/Text/Encodings/Windows.hpp
       include/Krystal.Core/Text/ASCII.hpp
+      include/Krystal.Core/Text/Base64.hpp
       include/Krystal.Core/Text/CodePointIterator.hpp
       include/Krystal.Core/Text/EncodingRegistry.hpp
       include/Krystal.Core/Text/HexNumber.hpp
@@ -311,5 +312,6 @@ target_sources(Krystal.Core
 
     # Text
     src/Text/StringBuilder.cpp
+    src/Text/Base64.cpp
     src/Text/TextStream.cpp
 )

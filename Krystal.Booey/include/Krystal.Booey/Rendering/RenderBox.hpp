@@ -906,6 +906,10 @@ namespace krys::boo
 
     void AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept;
 
+    void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+    template <typename TLayers>
+    bool RepaintLayerRectsForImage(WrappedImagePtr, const TLayers &) noexcept;
+
   protected:
     void WillBeDestroyed() noexcept override;
 

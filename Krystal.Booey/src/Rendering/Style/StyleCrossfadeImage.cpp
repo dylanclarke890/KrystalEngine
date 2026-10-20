@@ -51,6 +51,21 @@ namespace krys::boo
                                        css::PrimitiveValue::Create(_percentage), _isPrefixed);
   }
 
+  void StyleCrossfadeImage::Load(CachedResourceLoader &loader, const ResourceLoaderOptions &options) noexcept
+  {
+    // FIXME: Follow the input images' cached images as their client (imageChanged), and blend once they're
+    // ready.
+    if (_from && _from->IsPending())
+    {
+      _from->Load(loader, options);
+    }
+
+    if (_to && _to->IsPending())
+    {
+      _to->Load(loader, options);
+    }
+  }
+
   bool StyleCrossfadeImage::IsPending() const noexcept
   {
     if (_from && _from->IsPending())

@@ -2152,4 +2152,14 @@ namespace krys::boo
 
     return false;
   }
+
+  void RenderTableSection::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
+  {
+    // FIXME: Examine cells and repaint only the rect the image paints in.
+    if (!Parent())
+    {
+      return;
+    }
+    Repaint();
+  }
 }

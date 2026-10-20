@@ -50,6 +50,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
@@ -1175,6 +1176,15 @@ namespace krys::boo::dom
   {
     auto *frame = Frame();
     return frame ? frame->GetPage() : nullptr;
+  }
+
+  CachedResourceLoader &Document::GetCachedResourceLoader() const noexcept
+  {
+    if (!_cachedResourceLoader)
+    {
+      _cachedResourceLoader = CachedResourceLoader::Create(const_cast<Document *>(this));
+    }
+    return *_cachedResourceLoader;
   }
 
   void Document::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept

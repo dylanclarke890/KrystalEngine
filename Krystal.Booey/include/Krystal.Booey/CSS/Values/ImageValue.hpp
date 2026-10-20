@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -27,8 +28,9 @@ namespace krys::boo::css
   {
   private:
     CSSURL _location;
-    // FIXME: add the cached image (Maybe<CachedResourceHandle<CachedImage>>) once the resource loader is
-    // ported.
+    CachedResourceHandle<CachedImage> _cachedImage;
+    // Set once the image is asked for, even if it couldn't be (a null handle).
+    bool _didRequestImage {false};
     CSSOMStringAtom _initiatorType {CSSOMStringAtom::Null()};
     RefPtr<ImageValue> _unresolvedValue;
     bool _isInvalid {false};
@@ -37,6 +39,8 @@ namespace krys::boo::css
     ImageValue(CSSURL &&location, CSSOMStringAtom &&initiatorType) noexcept;
 
   public:
+    ~ImageValue() noexcept;
+
     KRYS_NODISCARD static Ref<ImageValue> Create() noexcept;
     KRYS_NODISCARD static Ref<ImageValue>
       Create(CSSURL location, CSSOMStringAtom initiatorType = CSSOMStringAtom::Null()) noexcept;
@@ -45,12 +49,9 @@ namespace krys::boo::css
 
     KRYS_NODISCARD Ref<ImageValue> CopyForComputedStyle(const CSSURL &resolvedURL) const noexcept;
 
-    // FIXME: not defined until the resource loader is ported.
     KRYS_NODISCARD bool IsPending() const noexcept;
-    // FIXME: not defined until the resource loader is ported.
     KRYS_NODISCARD CachedImage *LoadImage(CachedResourceLoader &loader,
                                           const ResourceLoaderOptions &options) noexcept;
-    // FIXME: not defined until the resource loader is ported.
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
 
     // Take care when using this, and read https://drafts.csswg.org/css-values/#relative-urls
@@ -64,7 +65,6 @@ namespace krys::boo::css
       KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept;
     KRYS_NODISCARD bool CustomMayDependOnBaseUrl() const noexcept;
     KRYS_NODISCARD bool Equals(const ImageValue &other) const noexcept;
-    // FIXME: not defined until the resource loader and RenderElement are ported.
     KRYS_NODISCARD bool KnownToBeOpaque(const RenderElement &renderer) const noexcept;
 
     KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;

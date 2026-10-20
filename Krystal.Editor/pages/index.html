@@ -194,6 +194,7 @@
         <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Focus</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
         <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Keys</td><td id="last-key" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Press a key</td></tr>
         <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Timers</td><td id="clock" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Open for 0:00</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Images</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">CSS done, img next</td></tr>
         <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Tab through the cards</td></tr>
       </table>
     </div>
@@ -261,6 +262,29 @@
         <div style="background: #118ab2"></div>
         <div style="background: #073b4c"></div>
         <div style="background: #8338ec"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- CSS images, loaded from images/ beside this page: PNG tiles, a JPEG covering its box, translucent WebP
+         tiles over a colour, and GIF tiles along a row. -->
+    <div class="card" tabindex="0" style="flex: 2">
+      <div class="boxes">
+        <div style="background: url(images/checker.png)"></div>
+        <div style="background: url(images/photo.jpg) center / cover"></div>
+        <div style="background: url(images/disc.webp), #118ab2"></div>
+        <div style="background: #ffd166 url(images/diamond.gif) repeat-x 0 50%"></div>
+      </div>
+    </div>
+
+    <!-- A border image, and image list markers. -->
+    <div class="card" tabindex="0">
+      <div style="height: 100%; box-sizing: border-box; border: 10px solid; border-image: url(images/frame.png) 10 / 10px stretch">
+        <ul style="margin: 4px 0; padding-left: 24px; list-style: url(images/marker.bmp)">
+          <li>Loaded from files</li>
+          <li>As networking tasks</li>
+        </ul>
       </div>
     </div>
   </div>

@@ -31,6 +31,7 @@ target_sources(Krystal.UI
     BASE_DIRS
       include
     FILES
+      include/Krystal.UI/FileLoaderStrategy.hpp
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
@@ -39,6 +40,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/View.hpp
 
   PRIVATE
+    src/FileLoaderStrategy.cpp
     src/FontFaceCache.cpp
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp

@@ -7,7 +7,9 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/Input.hpp"
 #include <cstdlib>
@@ -23,17 +25,28 @@ namespace krys::ui
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
 
+    auto &strategies = boo::PlatformStrategies::Singleton();
+    if (!strategies.GetLoaderStrategy())
+    {
+      static FileLoaderStrategy fileLoader;
+      strategies.SetLoaderStrategy(&fileLoader);
+    }
+
     _frame->CreateView(viewportSize);
     LoadHTML(u8"<!DOCTYPE html>");
   }
 
   View::~View() noexcept = default;
 
-  void View::LoadHTML(utf8_string &&markup) noexcept
+  void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url) noexcept
   {
     // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
     // inserted (autofocus candidates need that).
     _document = CreateRef<boo::dom::HTMLDocument>();
+    if (!url.IsNull())
+    {
+      _document->SetURL(krys::move(url));
+    }
     _document->SetFocusedAndActive(_focused);
     _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
 
@@ -56,7 +69,8 @@ namespace krys::ui
     {
       bytes.erase(0, 3);
     }
-    LoadHTML(utf8_string(bytes.begin(), bytes.end()));
+    auto absolutePath = std::filesystem::absolute(path).generic_u8string();
+    LoadHTML(utf8_string(bytes.begin(), bytes.end()), boo::url::URL::FileURLWithFileSystemPath(absolutePath));
     return {};
   }
 

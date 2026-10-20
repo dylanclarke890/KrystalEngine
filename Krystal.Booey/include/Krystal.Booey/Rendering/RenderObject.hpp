@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -168,6 +169,9 @@ namespace krys::boo
   /// @brief A node of the render tree: the box, text or other object a node (or, for anonymous objects, the
   /// document) is rendered as.
   /// @note FIXME: There's no render tree yet: renderers have no parent, children, layout or painting.
+  /// @brief An opaque pointer identifying the image data behind a style image.
+  using WrappedImagePtr = const void *;
+
   class RenderObject : public CanMakeWeakPtr<RenderObject>, public CanMakeCheckedPtr<RenderObject>
   {
     KRYS_NON_COPY_MOVABLE(RenderObject);
@@ -366,9 +370,80 @@ namespace krys::boo
       MayBeVisible,
     };
 
+#pragma region CachedImageClient emulation
+
+    virtual void NotifyFinished(CachedResource &) noexcept
+    {
+    }
+    virtual void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept
+    {
+    }
+    KRYS_NODISCARD virtual bool AllowsAnimation() const noexcept
+    {
+      return true;
+    }
+    KRYS_NODISCARD virtual bool CanDestroyDecodedData() const noexcept
+    {
+      return true;
+    }
+    virtual VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
+                                                       const IntRect *) noexcept;
+    KRYS_NODISCARD virtual VisibleInViewportState ImageVisibleInViewport(const dom::Document &) const noexcept
+    {
+      return VisibleInViewportState::No;
+    }
+    virtual void DidRemoveCachedImageClient(CachedImage &) noexcept
+    {
+    }
+    virtual void ImageContentChanged(CachedImage &) noexcept
+    {
+    }
+    virtual void ScheduleRenderingUpdateForImage(CachedImage &) noexcept
+    {
+    }
+    /// @brief The client the renderer is to the cached images it uses.
+    KRYS_NODISCARD CachedImageClient &GetCachedImageClient() const noexcept;
+
+#pragma endregion
+
+    /// @brief Asks for the renderer to be painted again.
+    /// FIXME: Repaint rects (only what changed), once there's repaint tracking: any change repaints the whole
+    /// page, so this schedules a rendering update.
+    void Repaint() const noexcept;
+
   private:
     friend class RenderElement;
     friend class RenderTreeBuilder;
+
+    // This class is to avoid making RenderObject a client itself.
+    class CachedImageListener final : public CachedImageClient
+    {
+    private:
+      RenderObject &_renderer;
+
+    public:
+      explicit CachedImageListener(RenderObject &renderer) noexcept : _renderer(renderer)
+      {
+      }
+
+    private:
+      // CachedResourceClient.
+      void NotifyFinished(CachedResource &) noexcept final;
+
+      // CachedImageClient.
+      void ImageChanged(CachedImage *, const IntRect * = nullptr) noexcept final;
+      KRYS_NODISCARD bool AllowsAnimation() const noexcept final;
+      KRYS_NODISCARD bool CanDestroyDecodedData() const noexcept final;
+      VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
+                                                 const IntRect *) noexcept final;
+      KRYS_NODISCARD VisibleInViewportState
+        ImageVisibleInViewport(const dom::Document &) const noexcept final;
+      void DidRemoveCachedImageClient(CachedImage &) noexcept final;
+      void ImageContentChanged(CachedImage &) noexcept final;
+      void ScheduleRenderingUpdateForImage(CachedImage &) noexcept final;
+    };
+
+    mutable UniquePtr<CachedImageListener> _cachedImageClient;
 
     enum class PositionedState : uint8
     {
