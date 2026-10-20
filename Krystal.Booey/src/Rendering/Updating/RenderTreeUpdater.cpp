@@ -10,11 +10,13 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderListItem.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 
@@ -455,8 +457,8 @@ namespace krys::boo
       }
 
       // display:none cancels animations.
-      // FIXME: Unless display is affected by animations, once there are animations.
-      auto teardownType = elementUpdate.Style->Display() == DisplayType::None
+      auto teardownType = !elementUpdate.Style->HasDisplayAffectedByAnimations()
+                              && elementUpdate.Style->Display() == DisplayType::None
                             ? TeardownType::RendererUpdateCancelingAnimations
                             : TeardownType::RendererUpdate;
 
@@ -892,24 +894,46 @@ namespace krys::boo
           TearDownLeftoverChildrenOfComposedTree(element, builder);
         }
 
-        // FIXME: Animations (willChangeRenderer, cancelStyleOriginatedAnimations), once there are animations.
+        auto styleable = style::Styleable::FromElement(element);
+
         switch (teardownType)
         {
           case TeardownType::FullAfterSlotOrShadowRootChange:
-            if (&element != &root)
+            if (&element == &root)
             {
-              element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+              // Keep animations going on the host.
+              styleable.WillChangeRenderer();
+              break;
             }
+            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
             break;
-          case TeardownType::Full:                              element.ClearHoverAndActiveStatusBeforeDetachingRenderer(); break;
+          case TeardownType::Full:
+            styleable.CancelStyleOriginatedAnimations();
+            element.ClearHoverAndActiveStatusBeforeDetachingRenderer();
+            break;
           case TeardownType::RendererUpdateCancelingAnimations:
-          case TeardownType::RendererUpdate:                    break;
+            styleable.CancelStyleOriginatedAnimations();
+            break;
+          case TeardownType::RendererUpdate: styleable.WillChangeRenderer(); break;
         }
 
         GeneratedContent::RemoveBeforePseudoElement(element, builder);
         GeneratedContent::RemoveAfterPseudoElement(element, builder);
 
-        // FIXME: The ::marker's animations, once there are animations.
+        if (!Is<dom::PseudoElement>(element))
+        {
+          // ::before and ::after cannot have a ::marker pseudo-element addressable via CSS selectors, and as
+          // such cannot possibly have animations on them. Additionally, we cannot create a Styleable with a
+          // PseudoElement.
+          if (auto *renderListItem = DynamicDowncast<RenderListItem>(element.Renderer()))
+          {
+            if (renderListItem->MarkerRenderer())
+            {
+              style::Styleable(element, style::PseudoElementIdentifier {PseudoElementType::Marker})
+                .CancelStyleOriginatedAnimations();
+            }
+          }
+        }
 
         if (auto *renderer = element.Renderer())
         {

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
@@ -989,6 +990,189 @@ namespace krys::boo::dom
   void Element::SetChildIndex(uint32 index) noexcept
   {
     EnsureElementRareData().SetChildIndex(index);
+  }
+
+#pragma endregion
+
+#pragma region Animations
+
+  bool Element::MayHaveKeyframeEffects() const noexcept
+  {
+    return _elementRareData && _elementRareData->HasAnimationRareData();
+  }
+
+  ElementAnimationRareData *Element::AnimationRareData(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    return _elementRareData ? _elementRareData->AnimationRareData(pseudoElementIdentifier) : nullptr;
+  }
+
+  ElementAnimationRareData &Element::EnsureAnimationRareData(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureElementRareData().EnsureAnimationRareData(pseudoElementIdentifier);
+  }
+
+  KeyframeEffectStack *Element::GetKeyframeEffectStack(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return animationData->KeyframeEffectStack();
+    }
+    return nullptr;
+  }
+
+  KeyframeEffectStack &Element::EnsureKeyframeEffectStack(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureAnimationRareData(pseudoElementIdentifier).EnsureKeyframeEffectStack();
+  }
+
+  bool Element::HasKeyframeEffects(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      if (auto *keyframeEffectStack = animationData->KeyframeEffectStack())
+      {
+        return keyframeEffectStack->HasEffects();
+      }
+    }
+    return false;
+  }
+
+  const AnimationCollection *
+    Element::Animations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return &animationData->Animations();
+    }
+    return nullptr;
+  }
+
+  AnimationCollection &
+    Element::EnsureAnimations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureAnimationRareData(pseudoElementIdentifier).Animations();
+  }
+
+  bool Element::HasCompletedTransitionForProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+    const AnimatableCSSProperty &property) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return animationData->CompletedTransitionsByProperty().contains(property);
+    }
+    return false;
+  }
+
+  bool Element::HasRunningTransitionForProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+    const AnimatableCSSProperty &property) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return animationData->RunningTransitionsByProperty().contains(property);
+    }
+    return false;
+  }
+
+  bool Element::HasRunningTransitions(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return !animationData->RunningTransitionsByProperty().empty();
+    }
+    return false;
+  }
+
+  const AnimatableCSSPropertyToTransitionMap *Element::CompletedTransitionsByProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return &animationData->CompletedTransitionsByProperty();
+    }
+    return nullptr;
+  }
+
+  const AnimatableCSSPropertyToTransitionMap *Element::RunningTransitionsByProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return &animationData->RunningTransitionsByProperty();
+    }
+    return nullptr;
+  }
+
+  AnimatableCSSPropertyToTransitionMap &Element::EnsureCompletedTransitionsByProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureAnimationRareData(pseudoElementIdentifier).CompletedTransitionsByProperty();
+  }
+
+  AnimatableCSSPropertyToTransitionMap &Element::EnsureRunningTransitionsByProperty(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureAnimationRareData(pseudoElementIdentifier).RunningTransitionsByProperty();
+  }
+
+  const RenderStyle *Element::LastStyleChangeEventStyle(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return animationData->LastStyleChangeEventStyle();
+    }
+    return nullptr;
+  }
+
+  void Element::SetLastStyleChangeEventStyle(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+    UniquePtr<const RenderStyle> &&style) noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      animationData->SetLastStyleChangeEventStyle(krys::move(style));
+    }
+    else if (style)
+    {
+      EnsureAnimationRareData(pseudoElementIdentifier).SetLastStyleChangeEventStyle(krys::move(style));
+    }
+  }
+
+  bool Element::HasPropertiesOverridenAfterAnimation(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      return animationData->HasPropertiesOverridenAfterAnimation();
+    }
+    return false;
+  }
+
+  void Element::SetHasPropertiesOverridenAfterAnimation(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier, bool value) noexcept
+  {
+    if (auto *animationData = AnimationRareData(pseudoElementIdentifier))
+    {
+      animationData->SetHasPropertiesOverridenAfterAnimation(value);
+      return;
+    }
+    if (value)
+    {
+      EnsureAnimationRareData(pseudoElementIdentifier).SetHasPropertiesOverridenAfterAnimation(true);
+    }
+  }
+
+  void Element::InvalidateStyleForAnimation() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::AnimationInvalid);
   }
 
 #pragma endregion

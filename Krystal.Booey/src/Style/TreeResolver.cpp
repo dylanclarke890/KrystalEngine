@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
+#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -14,9 +16,12 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
+#include "Krystal.Booey/Style/Builder.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include <ranges>
 
 namespace krys::boo::style
@@ -101,9 +106,11 @@ namespace krys::boo::style
                                                 const ResolutionContext &resolutionContext,
                                                 const RenderStyle *existingStyle) noexcept
   {
-    // FIXME: The animation-only resolution (the last style change event style), with animations. Nothing
-    // makes a style animation-invalid yet.
-    krys_debug_assert(resolutionType != ResolutionType::AnimationOnly);
+    if (resolutionType == ResolutionType::AnimationOnly && styleable.LastStyleChangeEventStyle()
+        && !styleable.HasPropertiesOverridenAfterAnimation())
+    {
+      return {RenderStyle::ClonePtr(*styleable.LastStyleChangeEventStyle())};
+    }
 
     auto &element = styleable.Element;
 
@@ -792,17 +799,116 @@ namespace krys::boo::style
   ElementUpdate TreeResolver::CreateAnimatedElementUpdate(ResolvedStyle &&resolvedStyle,
                                                           const Styleable &styleable,
                                                           EnumSet<Change> parentChanges,
-                                                          const ResolutionContext &,
+                                                          const ResolutionContext &resolutionContext,
                                                           style::IsInDisplayNoneTree) noexcept
   {
     auto &element = styleable.Element;
     auto *currentStyle = element.RenderOrDisplayContentsStyle(styleable.PseudoElementIdentifier);
 
-    // FIXME: Updating and applying the element's CSS animations, transitions, and scroll and view timelines
-    // (against the before-resolution or starting style), with animations. The resolved style is the new
-    // style.
-    (void)BeforeResolutionStyle(element, styleable.PseudoElementIdentifier);
-    auto newStyle = krys::move(resolvedStyle.Style);
+    UniquePtr<RenderStyle> startingStyle;
+
+    auto *oldStyle = [&]() -> const RenderStyle *
+    {
+      if (auto *styleBefore = BeforeResolutionStyle(element, styleable.PseudoElementIdentifier))
+      {
+        return styleBefore;
+      }
+
+      if (resolvedStyle.Style->HasTransitions())
+      {
+        // https://drafts.csswg.org/css-transitions-2/#at-ruledef-starting-style
+        // "If an element does not have a before-change style for a given style change event, the starting
+        // style is used instead."
+        startingStyle = ResolveStartingStyle(resolvedStyle, styleable, resolutionContext);
+        return startingStyle.get();
+      }
+
+      return nullptr;
+    }();
+
+    auto unanimatedDisplay = resolvedStyle.Style->Display();
+
+    WeakStyleOriginatedAnimations newStyleOriginatedAnimations;
+
+    auto updateAnimations = [&]
+    {
+      // FIXME: Not updating animations in the back/forward cache, while printing or with an unresolved anchor
+      // position, once there are those.
+      if (oldStyle && (oldStyle->HasTransitions() || resolvedStyle.Style->HasTransitions()))
+      {
+        styleable.UpdateCSSTransitions(*oldStyle, *resolvedStyle.Style, newStyleOriginatedAnimations);
+      }
+
+      // FIXME: Scroll and view timelines and timeline scopes, once there are those.
+
+      // The order in which CSS Transitions and CSS Animations are updated matters since CSS Transitions
+      // define the after-change style to use CSS Animations as defined in the previous style change event. As
+      // such, we update CSS Animations after CSS Transitions such that when CSS Transitions are updated the
+      // CSS Animations data is the same as during the previous style change event.
+      // FIXME: CSS animations, once there are CSS animations.
+    };
+
+    auto applyAnimations = [&]() -> Pair<UniquePtr<RenderStyle>, EnumSet<AnimationImpact>>
+    {
+      if (!styleable.HasKeyframeEffects())
+      {
+        // FIXME: Push after-change style into parent stack instead.
+        styleable.SetLastStyleChangeEventStyle(
+          ResolveAfterChangeStyleForNonAnimated(resolvedStyle, styleable, resolutionContext));
+        styleable.SetHasPropertiesOverridenAfterAnimation(false);
+        return {krys::move(resolvedStyle.Style), EnumSet<AnimationImpact> {}};
+      }
+
+      auto previousLastStyleChangeEventStyle =
+        styleable.LastStyleChangeEventStyle() ? RenderStyle::ClonePtr(*styleable.LastStyleChangeEventStyle())
+                                              : nullptr;
+
+      // Record the style prior to applying animations for this style change event.
+      styleable.SetLastStyleChangeEventStyle(RenderStyle::ClonePtr(*resolvedStyle.Style));
+
+      // Apply all keyframe effects to the new style.
+      AnimatableCSSPropertySet animatedProperties;
+      auto animatedStyle = RenderStyle::ClonePtr(*resolvedStyle.Style);
+
+      auto animationImpact = styleable.ApplyKeyframeEffects(
+        *animatedStyle, animatedProperties, previousLastStyleChangeEventStyle.get(), resolutionContext);
+
+      if (*resolvedStyle.Style == *animatedStyle && animationImpact.IsEmpty()
+          && previousLastStyleChangeEventStyle)
+      {
+        return {krys::move(resolvedStyle.Style), animationImpact};
+      }
+
+      if (resolvedStyle.MatchResult)
+      {
+        // The cascade may override animated properties and have dependencies to them.
+        // FIXME: This is wrong if there are both transitions and animations running on the same element.
+        auto overriddenAnimatedProperties =
+          ApplyCascadeAfterAnimation(*animatedStyle, animatedProperties, styleable.HasRunningTransitions(),
+                                     *resolvedStyle.MatchResult, element, resolutionContext);
+        // FIXME: Telling the keyframe effect stack which accelerated properties the cascade overrode, once
+        // there are accelerated animations.
+        styleable.SetHasPropertiesOverridenAfterAnimation(!overriddenAnimatedProperties.empty());
+      }
+
+      Adjuster adjuster(*_document, *resolutionContext.ParentStyle, resolutionContext.ParentBoxStyle,
+                        !styleable.PseudoElementIdentifier ? &styleable.Element : nullptr);
+      adjuster.AdjustAnimatedStyle(*animatedStyle, animationImpact);
+
+      return {krys::move(animatedStyle), animationImpact};
+    };
+
+    // FIXME: Something like this is also needed for viewport units.
+    // FIXME: Telling the element's animations its query container changed (queryContainerDidChange), once
+    // there are CSS animations.
+
+    // First, we need to make sure that any new CSS animation occuring on this element has a matching
+    // WebAnimation on the document timeline.
+    updateAnimations();
+
+    // Now we can update all Web animations, which will include CSS Animations as well as animations created
+    // via the JS API.
+    auto [newStyle, animationImpact] = applyAnimations();
 
     // Deduplication speeds up equality comparisons as the properties inherit to descendants.
     // FIXME: There should be a more general mechanism for this.
@@ -821,7 +927,45 @@ namespace krys::boo::style
 
     // FIXME: Collecting changed anchor names, with anchor positioning.
 
-    bool shouldRecompositeLayer = element.StyleResolutionShouldRecompositeLayer();
+    auto animationsAffectedDisplay = [&, animatedDisplay = newStyle->Display()]()
+    {
+      auto *keyframeEffectStack = styleable.GetKeyframeEffectStack();
+      if (!keyframeEffectStack)
+      {
+        return false;
+      }
+      if (unanimatedDisplay != animatedDisplay)
+      {
+        return true;
+      }
+      return keyframeEffectStack->ContainsProperty(css::PropertyId::Display);
+    }();
+
+    if (!AffectsRenderedSubtree(styleable.Element, *newStyle) && !animationsAffectedDisplay)
+    {
+      // If after updating animations we end up not rendering this element or its subtree and the update did
+      // not change the "display" value then we should cancel all style-originated animations while ensuring
+      // that the new ones are canceled silently, as if they hadn't been created.
+      styleable.CancelStyleOriginatedAnimations(newStyleOriginatedAnimations);
+    }
+    else if (!newStyleOriginatedAnimations.empty())
+    {
+      // If style-originated animations were not canceled, then we should make sure that the creation of new
+      // style-originated animations during this update is known to the document's timeline as animation
+      // scheduling was paused for any animation created during this update.
+      if (auto *timeline = _document->ExistingTimeline())
+      {
+        timeline->StyleOriginatedAnimationsWereCreated();
+      }
+    }
+
+    if (animationsAffectedDisplay)
+    {
+      newStyle->SetHasDisplayAffectedByAnimations();
+    }
+
+    bool shouldRecompositeLayer = animationImpact.Contains(AnimationImpact::RequiresRecomposite)
+                                  || element.StyleResolutionShouldRecompositeLayer();
 
     auto mayNeedRebuildRoot = [&, newStyle = newStyle.get()]
     {
@@ -839,6 +983,139 @@ namespace krys::boo::style
     }();
 
     return {krys::move(newStyle), changes, shouldRecompositeLayer, mayNeedRebuildRoot};
+  }
+
+  UniquePtr<RenderStyle>
+    TreeResolver::ResolveStartingStyle(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                       const ResolutionContext &resolutionContext) noexcept
+  {
+    if (!resolvedStyle.MatchResult
+        || !resolvedStyle.MatchResult->UsedRuleTypes.Contains(UsedRuleType::StartingStyle))
+    {
+      return nullptr;
+    }
+
+    // "Starting style inherits from the parent’s after-change style just like after-change style does."
+    const auto &parentStyle = ParentAfterChangeStyle(styleable, resolutionContext);
+
+    // We now resolve the starting style by applying all rules (including @starting-style ones) again. We
+    // could compute it along with the primary style and include it in MatchedPropertiesCache but it is not
+    // clear this would be benefitial as it is typically only used once.
+    return ResolveAgainInDifferentContext(resolvedStyle, styleable, parentStyle,
+                                          PropertyCascade::StartingStylePropertyTypes(), resolutionContext);
+  }
+
+  UniquePtr<RenderStyle>
+    TreeResolver::ResolveAfterChangeStyleForNonAnimated(const ResolvedStyle &resolvedStyle,
+                                                        const Styleable &styleable,
+                                                        const ResolutionContext &resolutionContext) noexcept
+  {
+    // Element may have after-change style differing from the current style in case they are inheriting from a
+    // transitioning element. We need after-change style for non-animating elements only in case there
+    // @starting-style rules in the subtree.
+    if (!GetScope().Resolver->UsesStartingStyleRules())
+    {
+      return nullptr;
+    }
+
+    if (!resolvedStyle.MatchResult)
+    {
+      return nullptr;
+    }
+
+    if (styleable.PseudoElementIdentifier)
+    {
+      return nullptr;
+    }
+
+    if (!GetParent().Element || !GetParent().Element->LastStyleChangeEventStyle(null))
+    {
+      return nullptr;
+    }
+
+    // "Likewise, define the after-change style as.. and inheriting from the after-change style of the
+    // parent."
+    const auto &parentStyle = ParentAfterChangeStyle(styleable, resolutionContext);
+
+    return ResolveAgainInDifferentContext(resolvedStyle, styleable, parentStyle,
+                                          PropertyCascade::NormalPropertyTypes(), resolutionContext);
+  }
+
+  UniquePtr<RenderStyle> TreeResolver::ResolveAgainInDifferentContext(
+    const ResolvedStyle &resolvedStyle, const Styleable &styleable, const RenderStyle &parentStyle,
+    EnumSet<PropertyCascade::PropertyType> properties, const ResolutionContext &resolutionContext) noexcept
+  {
+    krys_debug_assert(resolvedStyle.MatchResult);
+
+    auto newStyle = RenderStyle::CreatePtr();
+    newStyle->InheritFrom(parentStyle);
+    newStyle->SetPseudoElementIdentifier(resolvedStyle.Style->GetPseudoElementIdentifier());
+    newStyle->CopyPseudoElementBitsFrom(*resolvedStyle.Style);
+
+    // FIXME: The tree resolution state and the position-try fallback, with anchor positioning.
+    auto builderContext = BuilderContext {
+      .Document = ShareRefPtr<const dom::Document>(_document.get()),
+      .ParentStyle = &parentStyle,
+      .RootElementStyle = resolutionContext.DocumentElementStyle,
+      .Element = ShareRefPtr<const dom::Element>(&styleable.Element),
+    };
+
+    auto styleBuilder =
+      Builder {*newStyle, krys::move(builderContext), *resolvedStyle.MatchResult, {properties}};
+
+    styleBuilder.ApplyAllProperties();
+
+    if (newStyle->Display() == DisplayType::None)
+    {
+      return nullptr;
+    }
+
+    Adjuster adjuster(*_document, parentStyle, resolutionContext.ParentBoxStyle,
+                      !styleable.PseudoElementIdentifier ? &styleable.Element : nullptr);
+    adjuster.Adjust(*newStyle);
+
+    return newStyle;
+  }
+
+  const RenderStyle &
+    TreeResolver::ParentAfterChangeStyle(const Styleable &styleable,
+                                         const ResolutionContext &resolutionContext) const noexcept
+  {
+    if (auto *parentElement = !styleable.PseudoElementIdentifier ? GetParent().Element : &styleable.Element)
+    {
+      if (auto *afterChangeStyle = parentElement->LastStyleChangeEventStyle(null))
+      {
+        return *afterChangeStyle;
+      }
+    }
+    return *resolutionContext.ParentStyle;
+  }
+
+  HashSet<AnimatableCSSProperty> TreeResolver::ApplyCascadeAfterAnimation(
+    RenderStyle &animatedStyle, const AnimatableCSSPropertySet &animatedProperties, bool isTransition,
+    const MatchResult &matchResult, const dom::Element &element,
+    const ResolutionContext &resolutionContext) noexcept
+  {
+    // FIXME: The tree resolution state, with anchor positioning.
+    auto builderContext = BuilderContext {
+      .Document = ShareRefPtr<const dom::Document>(_document.get()),
+      .ParentStyle = resolutionContext.ParentStyle,
+      .RootElementStyle = resolutionContext.DocumentElementStyle,
+      .Element = ShareRefPtr(&element),
+    };
+
+    HashSet<AnimatableCSSProperty> properties(animatedProperties.begin(), animatedProperties.end());
+
+    auto styleBuilder = Builder {animatedStyle,
+                                 krys::move(builderContext),
+                                 matchResult,
+                                 {isTransition ? PropertyCascade::PropertyType::AfterTransition
+                                               : PropertyCascade::PropertyType::AfterAnimation},
+                                 &properties};
+
+    styleBuilder.ApplyAllProperties();
+
+    return styleBuilder.OverriddenAnimatedProperties();
   }
 
   void TreeResolver::PushParent(dom::Element &element, const RenderStyle &style, EnumSet<Change> changes,
@@ -880,8 +1157,11 @@ namespace krys::boo::style
     parentElement.SetHasValidStyle();
     parentElement.ClearChildNeedsStyleRecalc();
 
-    // FIXME: Clear the last style change event style unless the element has keyframe effects, with
-    // animations.
+    // FIXME: Push after-change style into parent stack instead.
+    if (!parentElement.HasKeyframeEffects(null))
+    {
+      parentElement.SetLastStyleChangeEventStyle(null, nullptr);
+    }
 
     if (GetParent().DidPushScope)
     {

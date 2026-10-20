@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::dom
 {
@@ -109,6 +110,7 @@ namespace krys::boo::dom
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
+      style::Styleable::FromElement(*element).ElementWasRemoved();
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);
       element->SetSavedLayerScrollPosition({});
       element->ClearBeforePseudoElement();

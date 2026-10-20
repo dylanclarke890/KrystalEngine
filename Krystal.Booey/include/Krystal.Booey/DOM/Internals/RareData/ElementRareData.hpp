@@ -11,6 +11,7 @@
 
 namespace krys::boo
 {
+  class ElementAnimationRareData;
   class RenderStyle;
 }
 
@@ -38,6 +39,9 @@ namespace krys::boo::dom
     HashMap<Maybe<style::PseudoElementIdentifier>, Ref<css::calc::RandomCachingKeyMap>,
             PseudoElementIdentifierHash>
       _randomCachingKeyMaps;
+    HashMap<Maybe<style::PseudoElementIdentifier>, UniquePtr<ElementAnimationRareData>,
+            PseudoElementIdentifierHash>
+      _animationRareData;
 
   public:
     ElementRareData() noexcept;
@@ -111,5 +115,15 @@ namespace krys::boo::dom
     {
       return !_randomCachingKeyMaps.empty();
     }
+
+    KRYS_NODISCARD bool HasAnimationRareData() const noexcept
+    {
+      return !_animationRareData.empty();
+    }
+    /// @brief The animation state of the element (or one of its pseudo-elements), if it has any.
+    KRYS_NODISCARD ElementAnimationRareData *
+      AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD ElementAnimationRareData &
+      EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
   };
 }

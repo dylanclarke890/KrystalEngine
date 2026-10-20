@@ -376,6 +376,24 @@ namespace krys::boo::style
     style.SetEffectiveDisplay(DisplayType::Inline);
   }
 
+  void Adjuster::AdjustAnimatedStyle(RenderStyle &style, EnumSet<AnimationImpact> impact) const noexcept
+  {
+    Adjust(style);
+
+    // Set an explicit used z-index in two cases:
+    // 1. When the element respects z-index, and the style has an explicit z-index set (for example, the
+    // animation
+    //    itself may animate z-index).
+    // 2. When we want the stacking context side-effets of explicit z-index, via forceStackingContext.
+    // It's important to not clobber an existing used z-index, since an earlier animation may have set it, but
+    // we may still need to update the used z-index value from the specified value.
+
+    if (style.UsedZIndex().IsAuto() && impact.Contains(AnimationImpact::ForcesStackingContext))
+    {
+      style.SetUsedZIndex(0);
+    }
+  }
+
   void Adjuster::Adjust(RenderStyle &style) const noexcept
   {
     if (style.Display() == DisplayType::Contents)

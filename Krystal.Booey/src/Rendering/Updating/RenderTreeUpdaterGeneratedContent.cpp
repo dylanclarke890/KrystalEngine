@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
@@ -11,6 +12,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 
 namespace krys::boo
@@ -111,6 +113,30 @@ namespace krys::boo
     return contentRenderer;
   }
 
+  static KeyframeEffectStack *
+    KeyframeEffectStackForPseudoElement(const dom::Element &element,
+                                        PseudoElementType pseudoElementType) noexcept
+  {
+    if (!element.MayHaveKeyframeEffects())
+    {
+      return nullptr;
+    }
+
+    return element.GetKeyframeEffectStack(style::PseudoElementIdentifier {pseudoElementType});
+  }
+
+  static bool NeedsPseudoElementForAnimation(const dom::Element &element,
+                                             PseudoElementType pseudoElementType) noexcept
+  {
+    auto *stack = KeyframeEffectStackForPseudoElement(element, pseudoElementType);
+    if (!stack)
+    {
+      return false;
+    }
+
+    return stack->RequiresPseudoElement() || stack->ContainsProperty(css::PropertyId::Display);
+  }
+
   static void CreateContentRenderers(RenderTreeBuilder &builder, RenderElement &pseudoRenderer,
                                      const RenderStyle &style) noexcept
   {
@@ -131,8 +157,8 @@ namespace krys::boo
                        });
       }
     }
-    // FIXME: Assert that without content, the pseudo-element is only here for animations, once there are
-    // animations.
+    // FIXME: Assert that without content, the pseudo-element is only here for animations that require it,
+    // once scripts can create animations.
   }
 
   static void UpdateStyleForContentRenderers(RenderElement &pseudoRenderer, const RenderStyle &style) noexcept
@@ -166,12 +192,17 @@ namespace krys::boo
     auto *updateStyle =
       elementUpdate.Style ? elementUpdate.Style->GetCachedPseudoStyle({pseudoElementType}) : nullptr;
 
-    // FIXME: If we end up losing a previous pseudo because the style got removed, cancel any animations that
-    // were on it (cancelStyleOriginatedAnimations), and keep pseudo-elements that animations need
-    // (needsPseudoElementForAnimation), once there are animations.
+    // If we end up losing a previous pseudo because the style got removed we need to cancel any animations
+    // that were on it so we do not end up thinking we need to keep the renderer around. We cannot completely
+    // rely on NeedsPseudoElement because we may need to animate a box with display: none.
+    if (!updateStyle)
+    {
+      style::Styleable {current, style::PseudoElementIdentifier {pseudoElementType}}
+        .CancelStyleOriginatedAnimations();
+    }
 
     krys_debug_assert(!Is<dom::PseudoElement>(current));
-    if (!NeedsPseudoElement(updateStyle))
+    if (!NeedsPseudoElement(updateStyle) && !NeedsPseudoElementForAnimation(current, pseudoElementType))
     {
       if (pseudoElement)
       {

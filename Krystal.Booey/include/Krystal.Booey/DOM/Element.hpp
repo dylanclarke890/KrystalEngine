@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
@@ -734,6 +735,59 @@ namespace krys::boo::dom
     }
 
     void SetChildIndex(uint32 index) noexcept;
+
+#pragma endregion
+
+#pragma region Animations
+
+    /// @brief Whether the element, or one of its pseudo-elements, may have keyframe effects.
+    KRYS_NODISCARD bool MayHaveKeyframeEffects() const noexcept;
+    KRYS_NODISCARD ElementAnimationRareData *
+      AnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD ElementAnimationRareData &
+      EnsureAnimationRareData(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
+    KRYS_NODISCARD boo::KeyframeEffectStack *GetKeyframeEffectStack(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD boo::KeyframeEffectStack &EnsureKeyframeEffectStack(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+    KRYS_NODISCARD bool
+      HasKeyframeEffects(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
+    KRYS_NODISCARD const AnimationCollection *
+      Animations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD AnimationCollection &
+      EnsureAnimations(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
+    KRYS_NODISCARD bool
+      HasCompletedTransitionForProperty(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                                        const AnimatableCSSProperty &property) const noexcept;
+    KRYS_NODISCARD bool
+      HasRunningTransitionForProperty(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                                      const AnimatableCSSProperty &property) const noexcept;
+    KRYS_NODISCARD bool HasRunningTransitions(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD const AnimatableCSSPropertyToTransitionMap *CompletedTransitionsByProperty(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD const AnimatableCSSPropertyToTransitionMap *RunningTransitionsByProperty(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureCompletedTransitionsByProperty(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+    KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &EnsureRunningTransitionsByProperty(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
+    KRYS_NODISCARD const RenderStyle *LastStyleChangeEventStyle(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    void SetLastStyleChangeEventStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                                      UniquePtr<const RenderStyle> &&style) noexcept;
+
+    KRYS_NODISCARD bool HasPropertiesOverridenAfterAnimation(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    void SetHasPropertiesOverridenAfterAnimation(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier, bool value) noexcept;
+
+    /// @brief Invalidates the element's style because one of its animations changed.
+    void InvalidateStyleForAnimation() noexcept;
 
 #pragma endregion
 

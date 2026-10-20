@@ -32,10 +32,17 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview Wheel = u8"wheel";
   constexpr utf8_stringview MouseWheel = u8"mousewheel";
   constexpr utf8_stringview BeforeUnload = u8"beforeunload";
+  constexpr utf8_stringview AnimationCancel = u8"animationcancel";
   constexpr utf8_stringview AnimationEnd = u8"animationend";
   constexpr utf8_stringview AnimationIteration = u8"animationiteration";
   constexpr utf8_stringview AnimationStart = u8"animationstart";
+  constexpr utf8_stringview TransitionCancel = u8"transitioncancel";
   constexpr utf8_stringview TransitionEnd = u8"transitionend";
+  constexpr utf8_stringview TransitionRun = u8"transitionrun";
+  constexpr utf8_stringview TransitionStart = u8"transitionstart";
+  constexpr utf8_stringview Cancel = u8"cancel";
+  constexpr utf8_stringview Finish = u8"finish";
+  constexpr utf8_stringview Remove = u8"remove";
 
   namespace Legacy
   {

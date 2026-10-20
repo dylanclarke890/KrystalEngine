@@ -34,7 +34,9 @@
 
 namespace krys::boo
 {
+  class AnimationTimelinesController;
   class CachedResourceLoader;
+  class DocumentTimeline;
   class FontLoadRequest;
   class HitTestLocation;
   class HitTestRequest;
@@ -187,6 +189,8 @@ namespace krys::boo::dom
     mutable RefPtr<FontSelector> _fontSelector;
     mutable RefPtr<CachedResourceLoader> _cachedResourceLoader;
     mutable UniquePtr<DocumentFontLoader> _fontLoader;
+    UniquePtr<AnimationTimelinesController> _timelinesController;
+    RefPtr<DocumentTimeline> _timeline;
 
     WeakPtr<LocalFrame> _frame;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
@@ -845,6 +849,18 @@ namespace krys::boo::dom
     void FontsNeedUpdate(FontSelector &selector) noexcept override;
 
     void InvalidateMatchedPropertiesCacheAndForceStyleRecalc() noexcept;
+
+    /// @brief The document's default timeline, made on first use.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-document-timeline
+    KRYS_NODISCARD DocumentTimeline &Timeline() noexcept;
+    KRYS_NODISCARD DocumentTimeline *ExistingTimeline() const noexcept;
+    KRYS_NODISCARD AnimationTimelinesController *TimelinesController() const noexcept
+    {
+      return _timelinesController.get();
+    }
+    KRYS_NODISCARD AnimationTimelinesController &EnsureTimelinesController() noexcept;
+    /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
+    void UpdateAnimationsAndSendEvents() noexcept;
 
     /// @brief Determines whether links are visited, for `:visited` and the link styles.
     KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;

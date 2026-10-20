@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::dom
@@ -33,15 +35,27 @@ namespace krys::boo::dom
 
   void PseudoElement::ClearHostElement() noexcept
   {
-    // FIXME: Tell the element's animations it was removed (Styleable::elementWasRemoved), once there are
-    // animations.
+    style::Styleable::FromElement(*this).ElementWasRemoved();
+
     _hostElement = nullptr;
   }
 
   bool PseudoElement::RendererIsNeeded(const RenderStyle &style) noexcept
   {
-    // FIXME: Animations that need the pseudo-element (KeyframeEffectStack::requiresPseudoElement), once there
-    // are animations.
-    return PseudoElementRendererIsNeeded(&style);
+    if (PseudoElementRendererIsNeeded(&style))
+    {
+      return true;
+    }
+
+    if (RefPtr element = ShareRefPtr(_hostElement.get()))
+    {
+      if (auto *stack =
+            element->GetKeyframeEffectStack(style::PseudoElementIdentifier {GetPseudoElementType()}))
+      {
+        return stack->RequiresPseudoElement();
+      }
+    }
+
+    return false;
   }
 }

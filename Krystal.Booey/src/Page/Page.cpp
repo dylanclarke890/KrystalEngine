@@ -87,9 +87,9 @@ namespace krys::boo
     RunProcessingStep(RenderingUpdateStep::MediaQueryEvaluation,
                       [](dom::Document &document) { document.EvaluateMediaQueriesAndReportChanges(); });
 
-    // FIXME: Updating animations and sending their events (updateAnimationsAndSendEvents), and fullscreen
-    // events, once there are animations and fullscreen.
-    RunProcessingStep(RenderingUpdateStep::Animations, [](dom::Document &) {});
+    // FIXME: Fullscreen events, once there's fullscreen.
+    RunProcessingStep(RenderingUpdateStep::Animations,
+                      [](dom::Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
     // FIXME: Running the animation frame callbacks (requestAnimationFrame), once there's scripting.
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks, [](dom::Document &) {});

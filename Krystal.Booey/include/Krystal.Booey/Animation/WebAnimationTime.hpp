@@ -14,6 +14,9 @@ namespace krys::boo
   /// @brief The precision animation times are compared with: a microsecond.
   constexpr Seconds TimeEpsilon {0.000001};
 
+  /// @brief The interval between rendering updates when animations run at full speed.
+  constexpr Seconds FullSpeedAnimationInterval {0.015};
+
   /// @brief An animation time: a time (for time-based timelines) or a percentage (for progress-based
   /// timelines).
   // FIXME: Conversions to and from `CSSNumberish`, for the Web Animations interfaces, once there's scripting.

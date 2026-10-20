@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -43,6 +44,7 @@ namespace krys::boo::style
 
     static void AdjustFromBuilder(RenderStyle &style) noexcept;
     void Adjust(RenderStyle &style) const noexcept;
+    void AdjustAnimatedStyle(RenderStyle &style, EnumSet<AnimationImpact> impact) const noexcept;
 
     static void AdjustFirstLetterStyle(RenderStyle &style) noexcept;
     static void AdjustFirstLineStyle(RenderStyle &style) noexcept;

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
+#include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
@@ -32,5 +33,24 @@ namespace krys::boo::dom
   {
     krys_debug_assert(!_afterPseudoElement || !pseudoElement);
     _afterPseudoElement = krys::move(pseudoElement);
+  }
+
+  ElementAnimationRareData *ElementRareData::AnimationRareData(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    auto it = _animationRareData.find(pseudoElementIdentifier);
+    return it == _animationRareData.end() ? nullptr : it->second.get();
+  }
+
+  ElementAnimationRareData &ElementRareData::EnsureAnimationRareData(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    auto it = _animationRareData.find(pseudoElementIdentifier);
+    if (it == _animationRareData.end())
+    {
+      it =
+        _animationRareData.emplace(pseudoElementIdentifier, CreateUnique<ElementAnimationRareData>()).first;
+    }
+    return *it->second;
   }
 }

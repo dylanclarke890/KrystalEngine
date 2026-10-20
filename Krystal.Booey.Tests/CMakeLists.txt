@@ -358,8 +358,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontCache.cpp
 		tests/Graphics/ComplexTextController.cpp
 		tests/Graphics/FontCascade.cpp
+		tests/Animation/AnimationEffectTiming.cpp
 		tests/Animation/BlendingKeyframes.cpp
+		tests/Animation/CSSTransition.cpp
 		tests/Animation/KeyframeInterpolation.cpp
+		tests/Animation/WebAnimation.cpp
 		tests/CSS/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/FontDatabase.cpp

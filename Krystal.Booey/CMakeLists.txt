@@ -1579,6 +1579,26 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/KeyframeInterpolation.hpp
   include/Krystal.Booey/Animation/BlendingKeyframes.hpp
   include/Krystal.Booey/Animation/CompositeOperation.hpp
+  include/Krystal.Booey/Animation/AnimationEffectPhase.hpp
+  include/Krystal.Booey/Animation/AnimationEffectTiming.hpp
+  include/Krystal.Booey/Animation/BasicEffectTiming.hpp
+  include/Krystal.Booey/Animation/ComputedEffectTiming.hpp
+  include/Krystal.Booey/Animation/FillMode.hpp
+  include/Krystal.Booey/Animation/PlaybackDirection.hpp
+  include/Krystal.Booey/Animation/AnimationEventBase.hpp
+  include/Krystal.Booey/Animation/AnimationPlaybackEvent.hpp
+  include/Krystal.Booey/Animation/StyleOriginatedAnimationEvent.hpp
+  include/Krystal.Booey/Animation/CSSTransitionEvent.hpp
+  include/Krystal.Booey/Animation/AnimationEffect.hpp
+  include/Krystal.Booey/Animation/AnimationTimeline.hpp
+  include/Krystal.Booey/Animation/DocumentTimeline.hpp
+  include/Krystal.Booey/Animation/AnimationTimelinesController.hpp
+  include/Krystal.Booey/Animation/WebAnimation.hpp
+  include/Krystal.Booey/Animation/KeyframeEffect.hpp
+  include/Krystal.Booey/Animation/KeyframeEffectStack.hpp
+  include/Krystal.Booey/Animation/ElementAnimationRareData.hpp
+  include/Krystal.Booey/Animation/StyleOriginatedAnimation.hpp
+  include/Krystal.Booey/Animation/CSSTransition.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2607,6 +2627,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/KeyframeInterpolation.cpp
   src/Animation/BlendingKeyframes.cpp
   src/Animation/CompositeOperation.cpp
+  src/Animation/AnimationEffectTiming.cpp
+  src/Animation/AnimationEventBase.cpp
+  src/Animation/AnimationPlaybackEvent.cpp
+  src/Animation/StyleOriginatedAnimationEvent.cpp
+  src/Animation/CSSTransitionEvent.cpp
+  src/Animation/AnimationEffect.cpp
+  src/Animation/AnimationTimeline.cpp
+  src/Animation/DocumentTimeline.cpp
+  src/Animation/AnimationTimelinesController.cpp
+  src/Animation/WebAnimation.cpp
+  src/Animation/WebAnimationUtilities.cpp
+  src/Animation/KeyframeEffect.cpp
+  src/Animation/KeyframeEffectStack.cpp
+  src/Animation/ElementAnimationRareData.cpp
+  src/Animation/StyleOriginatedAnimation.cpp
+  src/Animation/CSSTransition.cpp
 )
 
 target_precompile_headers(Krystal.Booey

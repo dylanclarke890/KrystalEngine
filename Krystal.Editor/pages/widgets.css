@@ -33,3 +33,9 @@ tr:hover td { text-decoration: underline; }
 @font-face { font-family: Blocks; src: url(fonts/Ahem.woff2) format("woff2"); unicode-range: U+30-39; }
 .display { margin: 0 0 8px; font: italic 700 30px/36px Display, "Liberation Sans"; color: #ef476f; }
 .blocks { font-family: Blocks, "Liberation Sans"; color: #118ab2; }
+
+/* Transitions: the bars transition their width, colour and corners when the card is hovered. */
+.bar { width: 60px; height: 24px; margin: 8px 0; border-radius: 4px; background-color: #118ab2;
+       transition: width 400ms ease-in-out, background-color 400ms, border-radius 400ms; }
+.bar.slow { transition-duration: 1.2s; transition-delay: 150ms; }
+.card:hover .bar { width: 180px; border-radius: 12px; background-color: #ef476f; }

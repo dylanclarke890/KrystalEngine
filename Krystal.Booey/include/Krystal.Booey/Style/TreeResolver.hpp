@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
@@ -168,6 +169,24 @@ namespace krys::boo::style
       ResolvedStyle &&resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
       const ResolutionContext &resolutionContext,
       style::IsInDisplayNoneTree isInDisplayNoneTree = style::IsInDisplayNoneTree::No) noexcept;
+
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveStartingStyle(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                           const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveAfterChangeStyleForNonAnimated(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                            const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle> ResolveAgainInDifferentContext(
+      const ResolvedStyle &resolvedStyle, const Styleable &styleable, const RenderStyle &parentStyle,
+      EnumSet<PropertyCascade::PropertyType> properties, const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD const RenderStyle &
+      ParentAfterChangeStyle(const Styleable &styleable,
+                             const ResolutionContext &resolutionContext) const noexcept;
+    KRYS_NODISCARD HashSet<AnimatableCSSProperty>
+      ApplyCascadeAfterAnimation(RenderStyle &animatedStyle,
+                                 const AnimatableCSSPropertySet &animatedProperties, bool isTransition,
+                                 const MatchResult &matchResult, const dom::Element &element,
+                                 const ResolutionContext &resolutionContext) noexcept;
 
     KRYS_NODISCARD Maybe<ElementUpdate>
       ResolvePseudoElement(dom::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,

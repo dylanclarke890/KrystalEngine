@@ -2,6 +2,8 @@
 
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Enum.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 #include <bitset>
@@ -11,6 +13,37 @@ namespace krys::boo
 {
   /// @brief A property that can be animated: a property id, or a custom property's name.
   using AnimatableCSSProperty = Variant<css::PropertyId, css::CSSOMStringAtom>;
+
+  enum class AnimationImpact : uint8
+  {
+    RequiresRecomposite,
+    ForcesStackingContext
+  };
+
+  enum class UseAcceleratedAction : bool
+  {
+    No,
+    Yes
+  };
+
+  enum class UseCachedCurrentTime : bool
+  {
+    No,
+    Yes
+  };
+
+  enum class EndpointInclusiveActiveInterval : bool
+  {
+    No,
+    Yes
+  };
+
+  enum class WebAnimationType : uint8
+  {
+    CSSAnimation,
+    CSSTransition,
+    WebAnimation
+  };
 
   /// @brief A property an accelerated effect animates.
   enum class AcceleratedEffectProperty : uint16
@@ -43,6 +76,9 @@ namespace krys::boo
     }
   };
 
+  /// @brief A set of animatable properties.
+  using AnimatableCSSPropertySet = HashSet<AnimatableCSSProperty, AnimatableCSSPropertyHash>;
+
   /// @brief A set of property ids.
   struct CSSPropertiesBitSet
   {
@@ -67,3 +103,5 @@ namespace krys::boo
     }
   };
 }
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::AnimationImpact, 2uz);

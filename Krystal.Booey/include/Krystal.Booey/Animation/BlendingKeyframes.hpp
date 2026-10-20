@@ -16,8 +16,6 @@ namespace krys::boo
     class StyleProperties;
   }
 
-  using AnimatableCSSPropertySet = HashSet<AnimatableCSSProperty, AnimatableCSSPropertyHash>;
-
   /// @brief A keyframe of an animation, with the style it gives the properties it sets.
   class BlendingKeyframe final : public KeyframeInterpolation::Keyframe
   {
@@ -119,8 +117,8 @@ namespace krys::boo
   using KeyframesIdentifier = Variant<StringAtom, uint64>;
 
   /// @brief An animation's keyframes, kept sorted by offset, with what they animate and depend on.
-  // FIXME: `fillImplicitKeyframes` and the accelerated animation name, with the keyframe effect and
-  // accelerated animations.
+  // FIXME: `fillImplicitKeyframes` and the accelerated animation name, once there are keyframes from scripts
+  // and accelerated animations.
   class BlendingKeyframes
   {
   private:

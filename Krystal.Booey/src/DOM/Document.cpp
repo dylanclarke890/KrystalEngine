@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
+#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
@@ -56,6 +58,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
@@ -119,6 +122,10 @@ namespace krys::boo::dom
     {
       _fontSelector->UnregisterForInvalidationCallbacks(*this);
       static_cast<css::CSSFontSelector &>(*_fontSelector).ClearFonts();
+    }
+    if (_timelinesController)
+    {
+      _timelinesController->DetachFromDocument();
     }
   }
 
@@ -1389,7 +1396,53 @@ namespace krys::boo::dom
     }
 
     _styleRecalcTimer.Stop();
+
+    if (_timelinesController)
+    {
+      _timelinesController->DetachFromDocument();
+    }
+    _timeline = nullptr;
+
     _frame = nullptr;
+  }
+
+  DocumentTimeline &Document::Timeline() noexcept
+  {
+    if (!_timeline)
+    {
+      _timeline = DocumentTimeline::Create(*this);
+    }
+    return *_timeline;
+  }
+
+  DocumentTimeline *Document::ExistingTimeline() const noexcept
+  {
+    return _timeline.get();
+  }
+
+  AnimationTimelinesController &Document::EnsureTimelinesController() noexcept
+  {
+    if (!_timelinesController)
+    {
+      _timelinesController = CreateUnique<AnimationTimelinesController>(*this);
+    }
+    return *_timelinesController;
+  }
+
+  void Document::UpdateAnimationsAndSendEvents() noexcept
+  {
+    // FIXME: The window's frozen timestamp, once there's a window; the rendering update's timestamp stands
+    // in.
+    auto *page = GetPage();
+    if (!page)
+    {
+      return;
+    }
+
+    if (auto *timelinesController = TimelinesController())
+    {
+      timelinesController->UpdateAnimationsAndSendEvents(Seconds {page->LastRenderingUpdateTimestamp()});
+    }
   }
 
   float Document::DeviceScaleFactor() const noexcept

@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*. CSS animations and transitions (G9) are in progress: G9a, interpolation and keyframe styles, is done; see *G9 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*. CSS animations and transitions (G9) are in progress: G9a, interpolation and keyframe styles, and G9b, the animation model and transitions, are done; see *G9 plan*.
 
 ## Why
 
@@ -1062,6 +1062,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** `KeyframeInterpolation` and `WebAnimationTime` came along, since `BlendingKeyframe` is a keyframe of the interpolation; `fillImplicitKeyframes` waits for the keyframe effect (G9b).
 - **Out (FIXMEs):** accelerated animations (the accelerated property list and animation names), `CSSNumberish`.
 - **Tests:** Booey tests interpolation by property kind (5 cases), keyframe styles and blending keyframes (2) and the keyframe interpolation procedure with animation times (3).
+
+### G9b as built (2026-10-20)
+
+- **Booey** (the ledger entry is *The animation model and transitions* in `docs/booey/PORTING.md`): the effect timing model (`AnimationEffectTiming`, `AnimationEffect`), `WebAnimation` without its script API (no promises: whether the finished promise is resolved is a flag), `AnimationTimeline`, `DocumentTimeline` and `AnimationTimelinesController` on the host's time, the playback and transition events, `KeyframeEffect` and `KeyframeEffectStack` for style-originated animations, `StyleOriginatedAnimation`, `CSSTransition`, `Styleable`'s animation half (starting, reversing and canceling transitions), the element's animation data, and the tree resolver's animated updates (after-change styles, `@starting-style`, the cascade after animations, animation-only resolution). The page's animations step runs "update animations and send events".
+- **Krystal.UI:** nothing to add: a view already runs a rendering update on each frame one is scheduled, and the document timeline schedules one while animations run.
+- **Changed from the plan:** `fillImplicitKeyframes` stays deferred: only keyframes from scripts and accelerated animations use it.
+- **Out (FIXMEs):** the Web Animations interfaces (promises, `commitStyles()`, `updateTiming()`, keyframes from scripts), scroll and view timelines and ranges, accelerated animations and frame rates, page visibility suspension.
+- **Tests:** Booey tests the timing model (3 cases), animations on the document timeline (4) and transitions (8). **Editor:** a card whose bars transition their width, colour and corners on hover, one slower and delayed. No golden: nothing new paints.
 
 ## Open decisions
 
