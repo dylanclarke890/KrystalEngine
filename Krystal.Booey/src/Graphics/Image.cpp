@@ -1,47 +1,64 @@
 ﻿#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <cmath>
 
 namespace krys::boo
 {
-  namespace
+  Image::Image(ImageObserver *observer) noexcept : _imageObserver(WeakPtr<ImageObserver>::WithRef(observer))
   {
-    /// @brief An image of no size, which draws nothing.
-    class EmptyImage final : public Image
-    {
-    public:
-      KRYS_NODISCARD bool CurrentFrameKnownToBeOpaque() const noexcept override
-      {
-        return false;
-      }
-      KRYS_NODISCARD bool CurrentFrameIsComplete() const noexcept override
-      {
-        return true;
-      }
-      KRYS_NODISCARD FloatSize Size(ImageOrientation) const noexcept override
-      {
-        return {};
-      }
-
-    protected:
-      ImageDrawResult Draw(GraphicsContext &, const FloatRect &, const FloatRect &,
-                           ImagePaintingOptions) noexcept override
-      {
-        return ImageDrawResult::DidNothing;
-      }
-    };
   }
-
-  Image::Image() noexcept = default;
 
   Image::~Image() noexcept = default;
 
+  RefPtr<ImageObserver> Image::GetImageObserver() const noexcept
+  {
+    return ShareRefPtr(_imageObserver.get());
+  }
+
+  void Image::SetImageObserver(RefPtr<ImageObserver> &&observer) noexcept
+  {
+    _imageObserver = observer;
+  }
+
   Image &Image::NullImage() noexcept
   {
-    static Image &nullImage = *new EmptyImage();
+    static Image &nullImage = *BitmapImage::Create().release();
     return nullImage;
+  }
+
+  EncodedDataStatus Image::SetData(RefPtr<SharedBuffer> &&data, bool allDataReceived) noexcept
+  {
+    _encodedImageData = krys::move(data);
+
+    // Don't do anything; it is an empty image.
+    if (!_encodedImageData || !_encodedImageData->Size())
+    {
+      return EncodedDataStatus::Complete;
+    }
+
+    return DataChanged(allDataReceived);
+  }
+
+  url::URL Image::SourceURL() const noexcept
+  {
+    auto observer = GetImageObserver();
+    return observer ? observer->SourceUrl() : url::URL();
+  }
+
+  utf8_string Image::MimeType() const noexcept
+  {
+    auto observer = GetImageObserver();
+    return observer ? observer->MimeType() : utf8_string();
+  }
+
+  int64 Image::ExpectedContentLength() const noexcept
+  {
+    auto observer = GetImageObserver();
+    return observer ? observer->ExpectedContentLength() : 0;
   }
 
   void Image::FillWithSolidColor(GraphicsContext &ctxt, const FloatRect &dstRect, const Color &color,
@@ -162,10 +179,42 @@ namespace krys::boo
     return ImageDrawResult::DidDraw;
   }
 
-  void Image::DrawPattern(GraphicsContext &, const FloatRect &, const FloatRect &, const AffineTransform &,
-                          const FloatPoint &, const FloatSize &, ImagePaintingOptions) noexcept
+  RefPtr<NativeImage> Image::GetNativeImage() noexcept
   {
-    // FIXME: Bitmap images draw their current frame as a pattern (`drawPattern` with a native image).
+    return nullptr;
+  }
+
+  RefPtr<NativeImage> Image::NativeImageAtIndex(uint32) noexcept
+  {
+    return GetNativeImage();
+  }
+
+  RefPtr<NativeImage> Image::CurrentNativeImage() noexcept
+  {
+    return GetNativeImage();
+  }
+
+  RefPtr<NativeImage> Image::CurrentPreTransformedNativeImage(ImageOrientation) noexcept
+  {
+    return CurrentNativeImage();
+  }
+
+  void Image::DrawPattern(GraphicsContext &ctxt, const FloatRect &destRect, const FloatRect &tileRect,
+                          const AffineTransform &patternTransform, const FloatPoint &phase,
+                          const FloatSize &spacing, ImagePaintingOptions options) noexcept
+  {
+    RefPtr<NativeImage> tileImage = CurrentPreTransformedNativeImage(options.Orientation());
+    if (!tileImage)
+    {
+      return;
+    }
+
+    ctxt.DrawPattern(*tileImage, destRect, tileRect, patternTransform, phase, spacing, options);
+
+    if (auto observer = GetImageObserver())
+    {
+      observer->DidDraw(*this);
+    }
   }
 
   ImageDrawResult Image::DrawTiled(GraphicsContext &ctxt, const FloatRect &destRect,
@@ -279,6 +328,11 @@ namespace krys::boo
 
   void Image::Dump(TextStream &ts) const noexcept
   {
+    if (IsAnimated())
+    {
+      ts.DumpProperty(u8"animated", IsAnimated());
+    }
+
     if (IsNull())
     {
       ts.DumpProperty(u8"is-null-image", true);

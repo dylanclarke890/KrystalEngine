@@ -175,6 +175,22 @@ namespace krys::boo::display_list
     _items.push_back(display_list::DrawDisplayList(ShareRef(displayList)));
   }
 
+  void RecorderImpl::DrawNativeImage(NativeImage &image, const FloatRect &destRect, const FloatRect &srcRect,
+                                     ImagePaintingOptions options) noexcept
+  {
+    AppendStateChangeItemIfNecessary();
+    _items.push_back(display_list::DrawNativeImage(image, destRect, srcRect, options));
+  }
+
+  void RecorderImpl::DrawPattern(NativeImage &image, const FloatRect &destRect, const FloatRect &tileRect,
+                                 const AffineTransform &patternTransform, const FloatPoint &phase,
+                                 const FloatSize &spacing, ImagePaintingOptions options) noexcept
+  {
+    AppendStateChangeItemIfNecessary();
+    _items.push_back(display_list::DrawPatternNativeImage(image, destRect, tileRect, patternTransform, phase,
+                                                          spacing, options));
+  }
+
   void RecorderImpl::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,
                                      const FloatRect &srcRect, ImagePaintingOptions options) noexcept
   {

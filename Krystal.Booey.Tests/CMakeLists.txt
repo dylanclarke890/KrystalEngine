@@ -81,6 +81,7 @@ target_sources(Krystal.Booey.Tests
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
+		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
@@ -310,6 +311,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/RoundedRect.cpp
 		tests/Graphics/Path.cpp
 		tests/Graphics/DisplayLists/DisplayListRecorder.cpp
+		tests/Graphics/BitmapImage.cpp
 		tests/Graphics/GraphicsContext.cpp
 		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Style/Values/Masking/Masking.cpp
@@ -407,6 +409,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderObject.cpp
 		tests/Platform/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
+		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

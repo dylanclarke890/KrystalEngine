@@ -44,7 +44,8 @@ namespace krys::ui
 
   public:
     /// @param bounds The target's rect, in its pixels, the initial clip bounds.
-    /// @param imageBuffers Renders the image buffers drawn; without it, they draw nothing.
+    /// @param imageBuffers Renders the image buffers and uploads the native images drawn; without it, they
+    /// draw nothing.
     GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts, const boo::FloatRect &bounds,
                             ImageBufferTextures *imageBuffers = nullptr) noexcept;
     ~GraphicsContextRender2D() noexcept override;
@@ -109,6 +110,11 @@ namespace krys::ui
     void BeginTransparencyLayer(boo::CompositeOperator, boo::BlendMode = BlendMode::Normal) noexcept override;
     void EndTransparencyLayer() noexcept override;
 
+    void DrawNativeImage(boo::NativeImage &, const boo::FloatRect &destRect, const boo::FloatRect &srcRect,
+                         boo::ImagePaintingOptions = {}) noexcept override;
+    void DrawPattern(boo::NativeImage &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
+                     const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
+                     const boo::FloatSize &spacing, boo::ImagePaintingOptions = {}) noexcept override;
     void DrawImageBuffer(boo::ImageBuffer &, const boo::FloatRect &destination, const boo::FloatRect &source,
                          boo::ImagePaintingOptions = {}) noexcept override;
     void DrawPattern(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
@@ -147,6 +153,16 @@ namespace krys::ui
 
     /// @brief How images are sampled at the context's interpolation quality, as Skia's sampling options.
     KRYS_NODISCARD gfx::SamplerFilter ImageFilter() const noexcept;
+
+    /// @brief Draws @p source of @p texture into @p destination, as an image is drawn.
+    void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
+                     const boo::FloatRect &destination, boo::ImagePaintingOptions options) noexcept;
+    /// @brief Fills @p destRect with @p tileRect of @p texture (of @p size), repeated, as an image pattern.
+    void DrawTexturePattern(gfx::TextureHandle texture, const boo::FloatSize &size,
+                            const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
+                            const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
+                            const boo::FloatSize &spacing, boo::ImagePaintingOptions options,
+                            gfx::CommandBuffer &commands) noexcept;
 
     /// @brief Brings the renderer's blend mode and drop shadow up to date with the context's state.
     void PrepareDraw(bool shadow = true) noexcept;

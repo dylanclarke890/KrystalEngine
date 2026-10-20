@@ -242,14 +242,14 @@ namespace krys::boo
   void GraphicsContext::DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
                                         ImagePaintingOptions) noexcept
   {
-    // FIXME: Native images (nativeImageForDrawing, drawNativeImage) come with bitmap images.
+    // FIXME: Draw the buffer's native image (nativeImageForDrawing), once buffers have pixels.
   }
 
   void GraphicsContext::DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &,
                                     const AffineTransform &, const FloatPoint &, const FloatSize &,
                                     ImagePaintingOptions) noexcept
   {
-    // FIXME: Native images (nativeImageForDrawing, the native image drawPattern) come with bitmap images.
+    // FIXME: Draw the buffer's native image as a pattern (nativeImageForDrawing), once buffers have pixels.
   }
 
   ImageDrawResult GraphicsContext::DrawTiledImage(Image &image, const FloatRect &destination,

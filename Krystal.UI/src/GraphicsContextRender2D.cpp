@@ -1,7 +1,9 @@
 ﻿#include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
@@ -682,6 +684,78 @@ namespace krys::ui
              : gfx::SamplerFilter::Linear;
   }
 
+  void GraphicsContextRender2D::DrawNativeImage(boo::NativeImage &image, const boo::FloatRect &destRect,
+                                                const boo::FloatRect &srcRect,
+                                                boo::ImagePaintingOptions options) noexcept
+  {
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands)
+    {
+      return;
+    }
+
+    auto orientation = options.Orientation();
+    auto imageSize = boo::FloatSize(image.Size());
+    if (orientation.UsesWidthAsHeight())
+    {
+      imageSize = imageSize.TransposedSize();
+    }
+    auto normalizedSrcRect = boo::NormaliseRect(srcRect);
+    if (!boo::FloatRect({}, imageSize).Intersects(normalizedSrcRect))
+    {
+      return;
+    }
+    if (orientation.UsesWidthAsHeight())
+    {
+      normalizedSrcRect = normalizedSrcRect.TransposedRect();
+    }
+
+    const auto texture = _imageBuffers->Upload(image);
+    if (!texture.IsValid())
+    {
+      return;
+    }
+
+    auto normalizedDestRect = boo::NormaliseRect(destRect);
+    boo::GraphicsContextStateSaver stateSaver(*this, orientation != boo::ImageOrientation::Orientation::None);
+    if (orientation != boo::ImageOrientation::Orientation::None)
+    {
+      // ImageOrientation expects the origin to be at (0, 0).
+      Translate(normalizedDestRect.X(), normalizedDestRect.Y());
+      normalizedDestRect.SetLocation(boo::FloatPoint());
+      ConcatCTM(orientation.TransformFromDefault(normalizedDestRect.Size()));
+
+      if (orientation.UsesWidthAsHeight())
+      {
+        // The destination rectangle will have its width and height already reversed for the orientation of
+        // the image, as it was needed for page layout, so we need to reverse it back here.
+        normalizedDestRect.SetSize(normalizedDestRect.Size().TransposedSize());
+      }
+    }
+
+    DrawTexture(texture, normalizedSrcRect, normalizedDestRect, options);
+  }
+
+  void GraphicsContextRender2D::DrawPattern(boo::NativeImage &image, const boo::FloatRect &destRect,
+                                            const boo::FloatRect &tileRect,
+                                            const boo::AffineTransform &patternTransform,
+                                            const boo::FloatPoint &phase, const boo::FloatSize &spacing,
+                                            boo::ImagePaintingOptions options) noexcept
+  {
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands || !patternTransform.IsInvertible() || tileRect.IsEmpty())
+    {
+      return;
+    }
+    const auto texture = _imageBuffers->Upload(image);
+    if (!texture.IsValid())
+    {
+      return;
+    }
+    DrawTexturePattern(texture, boo::FloatSize(image.Size()), destRect, tileRect, patternTransform, phase,
+                       spacing, options, *commands);
+  }
+
   void GraphicsContextRender2D::DrawImageBuffer(boo::ImageBuffer &image, const boo::FloatRect &destination,
                                                 const boo::FloatRect &source,
                                                 boo::ImagePaintingOptions options) noexcept
@@ -697,18 +771,9 @@ namespace krys::ui
       return;
     }
 
-    boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
-                                                                         options.GetInterpolationQuality());
     boo::FloatRect sourceScaled = source;
     sourceScaled.Scale(image.ResolutionScale());
-
-    // FIXME: Compositing operators other than source-over draw as source-over.
-    PrepareDraw();
-    _renderer.Save();
-    _renderer.SetBlendMode(options.GetBlendMode());
-    _renderer.DrawImage(texture, ToRect2D(sourceScaled), ToRect2D(destination),
-                        {.Filter = ImageFilter(), .Opacity = Alpha()});
-    _renderer.Restore();
+    DrawTexture(texture, sourceScaled, destination, options);
   }
 
   void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const boo::FloatRect &destRect,
@@ -727,7 +792,31 @@ namespace krys::ui
     {
       return;
     }
+    DrawTexturePattern(texture, boo::FloatSize(image.BackendSize()), destRect, tileRect, patternTransform,
+                       phase, spacing, options, *commands);
+  }
 
+  void GraphicsContextRender2D::DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
+                                            const boo::FloatRect &destination,
+                                            boo::ImagePaintingOptions options) noexcept
+  {
+    boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
+                                                                         options.GetInterpolationQuality());
+    // FIXME: Compositing operators other than source-over draw as source-over.
+    PrepareDraw();
+    _renderer.Save();
+    _renderer.SetBlendMode(options.GetBlendMode());
+    _renderer.DrawImage(texture, ToRect2D(source), ToRect2D(destination),
+                        {.Filter = ImageFilter(), .Opacity = Alpha()});
+    _renderer.Restore();
+  }
+
+  void GraphicsContextRender2D::DrawTexturePattern(
+    gfx::TextureHandle texture, const boo::FloatSize &size, const boo::FloatRect &destRect,
+    const boo::FloatRect &tileRect, const boo::AffineTransform &patternTransform,
+    const boo::FloatPoint &phase, const boo::FloatSize &spacing, boo::ImagePaintingOptions options,
+    gfx::CommandBuffer &commands) noexcept
+  {
     // As Skia's: the shader places the tile at the phase, moved by the tile's place in the image under the
     // pattern transform's scale. The tile is the whole texture, so a tile that's part of the image (or has
     // spacing after it) is copied into a texture of its own, its size rounded out to whole texels.
@@ -737,7 +826,6 @@ namespace krys::ui
     const auto shaderMatrix =
       gfx::Transform2D::Translation(phaseOffset.X(), phaseOffset.Y()) * ToTransform2D(patternTransform);
 
-    const auto size = boo::FloatSize(image.BackendSize());
     auto tileTexture = texture;
     bool repeatX = true;
     bool repeatY = true;
@@ -770,7 +858,7 @@ namespace krys::ui
     {
       const auto enclosing = boo::EnclosingIntRect(tileRect);
       tileTexture = _imageBuffers->Copy(texture, ToRect2D(tileRect), static_cast<uint32>(enclosing.Width()),
-                                        static_cast<uint32>(enclosing.Height()), *commands);
+                                        static_cast<uint32>(enclosing.Height()), commands);
       if (!tileTexture.IsValid())
       {
         return;

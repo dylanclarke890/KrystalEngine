@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 
@@ -563,6 +564,96 @@ namespace krys::boo::display_list
     KRYS_NODISCARD FloatRect DestinationRect() const noexcept
     {
       return _destinationRect;
+    }
+    KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
+    {
+      return _options;
+    }
+
+    void Apply(GraphicsContext &) const noexcept;
+    void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
+  };
+
+  class DrawNativeImage
+  {
+  private:
+    Ref<NativeImage> _image;
+    FloatRect _destinationRect;
+    FloatRect _srcRect;
+    ImagePaintingOptions _options;
+
+  public:
+    static constexpr std::string_view Name = "draw-native-image";
+
+    DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
+                    ImagePaintingOptions) noexcept;
+    DrawNativeImage(const DrawNativeImage &) noexcept;
+    DrawNativeImage(DrawNativeImage &&) noexcept;
+    DrawNativeImage &operator=(const DrawNativeImage &) noexcept;
+    DrawNativeImage &operator=(DrawNativeImage &&) noexcept;
+    ~DrawNativeImage() noexcept;
+
+    KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
+    KRYS_NODISCARD FloatRect DestinationRect() const noexcept
+    {
+      return _destinationRect;
+    }
+    KRYS_NODISCARD FloatRect Source() const noexcept
+    {
+      return _srcRect;
+    }
+    KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
+    {
+      return _options;
+    }
+
+    void Apply(GraphicsContext &) const noexcept;
+    void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
+  };
+
+  class DrawPatternNativeImage
+  {
+  private:
+    Ref<NativeImage> _image;
+    FloatRect _destination;
+    FloatRect _tileRect;
+    AffineTransform _patternTransform;
+    FloatPoint _phase;
+    FloatSize _spacing;
+    ImagePaintingOptions _options;
+
+  public:
+    static constexpr std::string_view Name = "draw-pattern-native-image";
+
+    DrawPatternNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
+                           const AffineTransform &patternTransform, const FloatPoint &phase,
+                           const FloatSize &spacing, ImagePaintingOptions) noexcept;
+    DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept;
+    DrawPatternNativeImage(DrawPatternNativeImage &&) noexcept;
+    DrawPatternNativeImage &operator=(const DrawPatternNativeImage &) noexcept;
+    DrawPatternNativeImage &operator=(DrawPatternNativeImage &&) noexcept;
+    ~DrawPatternNativeImage() noexcept;
+
+    KRYS_NODISCARD NativeImage &GetNativeImage() const noexcept;
+    KRYS_NODISCARD FloatRect DestRect() const noexcept
+    {
+      return _destination;
+    }
+    KRYS_NODISCARD FloatRect TileRect() const noexcept
+    {
+      return _tileRect;
+    }
+    KRYS_NODISCARD const AffineTransform &PatternTransform() const noexcept
+    {
+      return _patternTransform;
+    }
+    KRYS_NODISCARD FloatPoint Phase() const noexcept
+    {
+      return _phase;
+    }
+    KRYS_NODISCARD FloatSize Spacing() const noexcept
+    {
+      return _spacing;
     }
     KRYS_NODISCARD ImagePaintingOptions Options() const noexcept
     {

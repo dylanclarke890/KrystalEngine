@@ -1,6 +1,9 @@
 ﻿#include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 
 namespace krys::ui
@@ -16,6 +19,10 @@ namespace krys::ui
     for (const auto &pooled : _pool)
     {
       _device.Destroy(pooled.Texture);
+    }
+    for (const auto &[identifier, uploaded] : _uploaded)
+    {
+      _device.Destroy(uploaded.Texture);
     }
   }
 
@@ -83,6 +90,51 @@ namespace krys::ui
     return copy;
   }
 
+  gfx::TextureHandle ImageBufferTextures::Upload(boo::NativeImage &image) noexcept
+  {
+    const auto identifier = image.GetRenderingResourceIdentifier().ToUInt64();
+    if (const auto found = _uploaded.find(identifier); found != _uploaded.end())
+    {
+      return found->second.Texture;
+    }
+
+    const auto &platformImage = image.GetPlatformImage();
+    if (!platformImage || platformImage->Size().IsEmpty())
+    {
+      return {};
+    }
+    const auto width = static_cast<uint32>(platformImage->Size().Width());
+    const auto height = static_cast<uint32>(platformImage->Size().Height());
+    auto texture = _device.CreateTexture({.Format = gfx::TextureFormat::BGRA8Unorm,
+                                          .Width = width,
+                                          .Height = height,
+                                          .Usage = gfx::TextureUsage::Sampled,
+                                          .DebugName = u8"UI.NativeImage"});
+    if (!texture)
+    {
+      return {};
+    }
+
+    // ARGB in a 32-bit value is BGRA in memory. The renderer blends premultiplied colours.
+    auto pixels = platformImage->Pixels();
+    List<uint32> premultiplied;
+    if (!platformImage->PremultipliedAlpha())
+    {
+      premultiplied.reserve(pixels.size());
+      for (const auto pixel : pixels)
+      {
+        premultiplied.push_back(
+          PackedColour::ARGB {PremultipliedFlooring(AsSRGBA(PackedColour::ARGB {pixel}))}.Value);
+      }
+      pixels = premultiplied;
+    }
+    _device.WriteTexture(*texture, gfx::TextureRegion::Whole2D(width, height),
+                         {reinterpret_cast<const byte *>(pixels.data()), pixels.size_bytes()});
+
+    _uploaded[identifier] = {.Image = WeakPtr<boo::NativeImage>::WithRef(image), .Texture = *texture};
+    return *texture;
+  }
+
   void ImageBufferTextures::Release() noexcept
   {
     for (auto &pooled : _pool)
@@ -90,6 +142,19 @@ namespace krys::ui
       pooled.InUse = false;
     }
     _rendered.clear();
+
+    for (auto it = _uploaded.begin(); it != _uploaded.end();)
+    {
+      if (!it->second.Image)
+      {
+        _device.Destroy(it->second.Texture);
+        it = _uploaded.erase(it);
+      }
+      else
+      {
+        ++it;
+      }
+    }
   }
 
   gfx::TextureHandle ImageBufferTextures::Acquire(uint32 width, uint32 height) noexcept

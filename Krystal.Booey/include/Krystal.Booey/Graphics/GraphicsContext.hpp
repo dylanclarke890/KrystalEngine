@@ -38,10 +38,9 @@ namespace krys::boo
 
   /// @brief Where painting goes: state (brushes, shadows, compositing, transforms, clips) and the drawing
   /// operations, implemented by display list recorders and drawing backends.
-  /// FIXME: Bitmap images, filters, system images, video frames and form controls (`drawNativeImage`,
-  /// `drawConsumingImageBuffer`, `drawFilteredImageBuffer`, `drawPattern` of native images,
-  /// `drawSystemImage`, `drawVideoFrame`, `drawControlPart`, `clipToImageBuffer` and the fill and stroke
-  /// patterns) come with images.
+  /// FIXME: Filters, system images, video frames and form controls (`drawConsumingImageBuffer`,
+  /// `drawFilteredImageBuffer`, `drawSystemImage`, `drawVideoFrame`, `drawControlPart`, `clipToImageBuffer`
+  /// and the fill and stroke patterns).
   /// FIXME: Bidirectional text runs (`drawBidiText`) need a bidi resolver over text runs.
   class GraphicsContext
   {
@@ -441,6 +440,17 @@ namespace krys::boo
                                            const FloatSize &tileSize, const FloatSize &spacing,
                                            ImagePaintingOptions = {}) noexcept;
 
+    // Native images
+
+    /// @brief Draws @p srcRect of the image into @p destRect, oriented by the options' orientation.
+    virtual void DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
+                                 ImagePaintingOptions = {}) noexcept = 0;
+    /// @brief Fills @p destRect with @p tileRect of the image, repeated: tiles are mapped by @p
+    /// patternTransform, start at @p phase (where the image's origin goes) and are @p spacing apart.
+    virtual void DrawPattern(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
+                             const AffineTransform &patternTransform, const FloatPoint &phase,
+                             const FloatSize &spacing, ImagePaintingOptions = {}) noexcept = 0;
+
     // Image buffers
 
     KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateImageBuffer(const FloatSize &,
@@ -454,15 +464,15 @@ namespace krys::boo
     void DrawImageBuffer(ImageBuffer &, const FloatPoint &destination, ImagePaintingOptions = {}) noexcept;
     void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, ImagePaintingOptions = {}) noexcept;
     /// @brief Draws @p source of the buffer into @p destination.
-    /// FIXME: Without native images, the base draws nothing; display list recorders record the draw and
-    /// drawing backends render the buffer.
+    /// FIXME: Buffers record display lists rather than pixels, so the base draws nothing (rather than the
+    /// buffer's native image); display list recorders record the draw and drawing backends render the buffer.
     virtual void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, const FloatRect &source,
                                  ImagePaintingOptions = {}) noexcept;
 
     /// @brief Fills @p destRect with @p tileRect of the buffer, repeated: tiles are mapped by @p
     /// patternTransform, start at @p phase (where the buffer's origin goes) and are @p spacing apart.
-    /// FIXME: Without native images, the base draws nothing; display list recorders record the draw and
-    /// drawing backends render the buffer.
+    /// FIXME: Buffers record display lists rather than pixels, so the base draws nothing (rather than the
+    /// buffer's native image); display list recorders record the draw and drawing backends render the buffer.
     virtual void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
                              const AffineTransform &patternTransform, const FloatPoint &phase,
                              const FloatSize &spacing, ImagePaintingOptions = {}) noexcept;

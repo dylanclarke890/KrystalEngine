@@ -41,6 +41,12 @@ target_link_libraries(Krystal.Booey PRIVATE Freetype::Freetype)
 find_package(harfbuzz CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE harfbuzz::harfbuzz)
 
+# Third-party - image decoders (PNG, JPEG and WebP; GIF, BMP and ICO are decoded in-tree)
+find_package(PNG REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(WebP CONFIG REQUIRED)
+target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
+
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
@@ -1467,6 +1473,32 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Platform/ThreadTimers.hpp
   include/Krystal.Booey/Platform/Timer.hpp
+
+  # Images (G7)
+  include/Krystal.Booey/Graphics/BitmapImage.hpp
+  include/Krystal.Booey/Graphics/BitmapImageDescriptor.hpp
+  include/Krystal.Booey/Graphics/BitmapImageSource.hpp
+  include/Krystal.Booey/Graphics/DecodingOptions.hpp
+  include/Krystal.Booey/Graphics/ImageBackingStore.hpp
+  include/Krystal.Booey/Graphics/ImageDecoder.hpp
+  include/Krystal.Booey/Graphics/ImageFrame.hpp
+  include/Krystal.Booey/Graphics/ImageObserver.hpp
+  include/Krystal.Booey/Graphics/ImageSource.hpp
+  include/Krystal.Booey/Graphics/ImageTypes.hpp
+  include/Krystal.Booey/Graphics/NativeImage.hpp
+  include/Krystal.Booey/Graphics/NativeImageSource.hpp
+  include/Krystal.Booey/Graphics/PlatformImage.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/BMPImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/BMPImageReader.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/GIFImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/GIFImageReader.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/ICOImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/JPEGImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/PNGImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoder.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/ScalableImageDecoderFrame.hpp
+  include/Krystal.Booey/Platform/ImageDecoders/WEBPImageDecoder.hpp
+  include/Krystal.Booey/Platform/SharedBuffer.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2435,6 +2467,26 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/Page.cpp
   src/Platform/ThreadTimers.cpp
   src/Platform/Timer.cpp
+
+  # Images (G7)
+  src/Graphics/BitmapImage.cpp
+  src/Graphics/BitmapImageDescriptor.cpp
+  src/Graphics/BitmapImageSource.cpp
+  src/Graphics/ImageDecoder.cpp
+  src/Graphics/ImageFrame.cpp
+  src/Graphics/ImageSource.cpp
+  src/Graphics/NativeImage.cpp
+  src/Graphics/NativeImageSource.cpp
+  src/Platform/ImageDecoders/BMPImageDecoder.cpp
+  src/Platform/ImageDecoders/BMPImageReader.cpp
+  src/Platform/ImageDecoders/GIFImageDecoder.cpp
+  src/Platform/ImageDecoders/GIFImageReader.cpp
+  src/Platform/ImageDecoders/ICOImageDecoder.cpp
+  src/Platform/ImageDecoders/JPEGImageDecoder.cpp
+  src/Platform/ImageDecoders/PNGImageDecoder.cpp
+  src/Platform/ImageDecoders/ScalableImageDecoder.cpp
+  src/Platform/ImageDecoders/ScalableImageDecoderFrame.cpp
+  src/Platform/ImageDecoders/WEBPImageDecoder.cpp
 )
 
 target_precompile_headers(Krystal.Booey

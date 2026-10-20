@@ -3,11 +3,13 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 
 namespace krys::boo
 {
   class ImageBuffer;
+  class NativeImage;
 }
 
 namespace krys::ui
@@ -19,6 +21,7 @@ namespace krys::ui
   /// replay's command buffer ahead of its passes.
   /// @note Textures are pooled by size and reused by later replays: the device runs its commands in order, so
   /// a texture drawn in one replay is done with before the next draws into it again (OpenGL).
+  /// @note Also uploads native images (decoded pixels) into textures, kept for as long as the images live.
   class ImageBufferTextures
   {
     KRYS_NON_COPY_MOVABLE(ImageBufferTextures);
@@ -41,6 +44,14 @@ namespace krys::ui
     /// @brief The buffers rendered in this replay, by rendering resource identifier.
     HashMap<uint64, gfx::TextureHandle> _rendered;
 
+    struct UploadedImage
+    {
+      WeakPtr<boo::NativeImage> Image;
+      gfx::TextureHandle Texture {};
+    };
+    /// @brief The native images uploaded, by rendering resource identifier.
+    HashMap<uint64, UploadedImage> _uploaded;
+
   public:
     ImageBufferTextures(gfx::Device &device, FontFaceCache &fonts) noexcept;
     ~ImageBufferTextures() noexcept;
@@ -55,7 +66,12 @@ namespace krys::ui
                                            uint32 width, uint32 height,
                                            gfx::CommandBuffer &commands) noexcept;
 
-    /// @brief Ends a replay: its textures can be reused by the next.
+    /// @brief A texture holding @p image's pixels (premultiplied), uploaded on first use and kept until a
+    /// replay ends after the image is gone; invalid if it can't be.
+    KRYS_NODISCARD gfx::TextureHandle Upload(boo::NativeImage &image) noexcept;
+
+    /// @brief Ends a replay: its textures can be reused by the next, and the textures of native images that
+    /// are gone are destroyed.
     void Release() noexcept;
 
   private:

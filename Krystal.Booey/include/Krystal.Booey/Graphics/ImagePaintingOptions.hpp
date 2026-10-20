@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/DecodingOptions.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/ImageOrientation.hpp"
+#include "Krystal.Booey/Graphics/ImageTypes.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
 
 namespace krys::boo
@@ -14,22 +16,26 @@ namespace krys::boo
     DidDraw
   };
 
-  /// @brief How an image is drawn: its compositing, blend mode, orientation and interpolation, set from any
-  /// of those in any order.
-  /// FIXME: The decoding mode, subsampling, debug background and HDR options come with bitmap images.
+  /// @brief How an image is drawn: its compositing, blend mode, decoding, orientation, interpolation,
+  /// subsampling and debug background, set from any of those in any order.
+  /// FIXME: The HDR options, once there's HDR.
   struct ImagePaintingOptions
   {
     template <typename Type>
     static constexpr bool IsOptionType =
       std::is_same_v<Type, CompositeOperator> || std::is_same_v<Type, boo::BlendMode>
       || std::is_same_v<Type, ImageOrientation> || std::is_same_v<Type, ImageOrientation::Orientation>
-      || std::is_same_v<Type, boo::InterpolationQuality>;
+      || std::is_same_v<Type, boo::InterpolationQuality> || std::is_same_v<Type, DecodingMode>
+      || std::is_same_v<Type, AllowImageSubsampling> || std::is_same_v<Type, ShowDebugBackground>;
 
   private:
     CompositeOperator _compositeOperator {CompositeOperator::SourceOver};
     boo::BlendMode _blendMode {boo::BlendMode::Normal};
+    boo::DecodingMode _decodingMode {boo::DecodingMode::Synchronous};
     ImageOrientation _orientation {ImageOrientation::Orientation::None};
     boo::InterpolationQuality _interpolationQuality {boo::InterpolationQuality::Default};
+    boo::AllowImageSubsampling _allowImageSubsampling {boo::AllowImageSubsampling::No};
+    boo::ShowDebugBackground _showDebugBackground {boo::ShowDebugBackground::No};
 
   public:
     ImagePaintingOptions() noexcept = default;
@@ -68,6 +74,10 @@ namespace krys::boo
     {
       return _blendMode;
     }
+    KRYS_NODISCARD boo::DecodingMode GetDecodingMode() const noexcept
+    {
+      return _decodingMode;
+    }
     KRYS_NODISCARD ImageOrientation Orientation() const noexcept
     {
       return _orientation;
@@ -75,6 +85,14 @@ namespace krys::boo
     KRYS_NODISCARD boo::InterpolationQuality GetInterpolationQuality() const noexcept
     {
       return _interpolationQuality;
+    }
+    KRYS_NODISCARD boo::AllowImageSubsampling GetAllowImageSubsampling() const noexcept
+    {
+      return _allowImageSubsampling;
+    }
+    KRYS_NODISCARD boo::ShowDebugBackground GetShowDebugBackground() const noexcept
+    {
+      return _showDebugBackground;
     }
 
   private:
@@ -97,6 +115,18 @@ namespace krys::boo
     void SetOption(boo::InterpolationQuality interpolationQuality) noexcept
     {
       _interpolationQuality = interpolationQuality;
+    }
+    void SetOption(boo::DecodingMode decodingMode) noexcept
+    {
+      _decodingMode = decodingMode;
+    }
+    void SetOption(boo::AllowImageSubsampling allowImageSubsampling) noexcept
+    {
+      _allowImageSubsampling = allowImageSubsampling;
+    }
+    void SetOption(boo::ShowDebugBackground showDebugBackground) noexcept
+    {
+      _showDebugBackground = showDebugBackground;
     }
   };
 }

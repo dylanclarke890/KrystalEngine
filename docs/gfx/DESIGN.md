@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7) are in progress: G7a, decoding and drawing, is done; see *G7 plan*.
 
 ## Why
 
@@ -302,6 +302,7 @@ All done in G1 (2026-10-17) unless noted.
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 | G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
 | G6 | Done (2026-10-20). The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*): done (2026-10-20). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
+| G7 | Images: decoding and drawing, loading (through the host) and CSS images, `<img>`, animated images. In four parts (see *G7 plan*). | Pages show PNG, JPEG, GIF and WebP images, in `<img>` and CSS, loaded through the host. |
 
 ### G2 parts
 
@@ -602,6 +603,24 @@ The event and rendering loops. Spec and upstream behaviour live in Booey; Krysta
 - **Editor:** calls `View::Update(now)` every frame; a clock card updated by a timer once a second; a held scrollbar track repeats.
 - **Tests:** timer order, repeating, stopping and destroying active timers; timed tasks and the budget; the style and layout timers; the rendering update's steps and focus fixup; hover following a scroll; mutation observer delivery and `slotchange`; Krystal.UI's frame update.
 - **Out (FIXMEs):** idle periods and `requestIdleCallback`, `setTimeout`, `setInterval` and `requestAnimationFrame` (no script; the timers and the rendering update are their hooks), animations (the next slice), several agents and event loops.
+
+### G7 plan (decided 2026-10-20)
+
+Images: decoding, drawing, loading, `<img>` and animated images. Booey has the CSS and style half (`url()`, `image-set()`, `StyleCachedImage`, `StyleImage`, border images; `url()` images stay pending), gradients and image buffers paint (G4c3), and `HTMLImageElement` has its attributes; there's no resource loading, no decoder, no `BitmapImage`/`NativeImage`, no native image drawing and no `RenderImage`. Four parts, in order (decided by the user).
+
+- **Decoders** (decided): upstream's, as the GTK and WPE ports build them: `ScalableImageDecoder` with the PNG (vcpkg `libpng`), JPEG (`libjpeg-turbo`) and WebP (`libwebp`) decoders, and upstream's own GIF, BMP and ICO decoders. No AVIF or JPEG XL.
+- **Loading** (decided): Booey defines a loader interface the host implements (load a URL, then call back with the bytes or an error); completions arrive as networking tasks. Krystal.UI implements `file:` URLs; an asset system can implement the same interface later. Booey never reads files itself.
+- **G7a, decoding and drawing images** (Booey, Krystal.UI):
+  - **Booey:** `ImageDecoder`, `ScalableImageDecoder` and the decoders, `ImageFrame`, `BitmapImageSource` and `BitmapImage` (still images), `NativeImage` (decoded, premultiplied RGBA in memory), EXIF orientation (`image-orientation`); `GraphicsContext::drawNativeImage` and `drawImage`, and their display list items.
+  - **Krystal.UI:** replay uploads a native image to a texture once and caches it, as it does image buffers; Render2D's `DrawImage` draws it.
+  - **Tests:** decoding small images held as bytes in the tests, orientation, the recorded display lists.
+- **G7b, loading and CSS images** (Booey, Krystal.UI):
+  - **Booey:** a trimmed port of upstream's loader cache: a `CachedResourceLoader` per document, `CachedResource` and `CachedImage` with `CachedImageClient`, a memory cache by URL, over the host's loader. `url()` images load and stop being pending wherever CSS uses them (`background-image`, `border-image`, `list-style-image`, `content`, `cursor`, `mask-image` sources); a load lays out and repaints what uses it.
+  - **Krystal.UI:** the loader for `file:` URLs, resolved against the document's base URL (`View::LoadFile` sets it).
+  - **Tests:** a test loader feeding bytes; pending, loaded and failed images; a background image painting.
+- **G7c, `<img>`** (Booey): `ImageLoader` and `HTMLImageLoader`; `HTMLImageElement`'s `src`, `srcset` and `sizes`, `<picture>` and `<source>`, `complete`, `naturalWidth` and `naturalHeight`, `load` and `error`; `RenderImage` and `RenderImageResource`: intrinsic sizes (with the `width` and `height` attributes as the aspect ratio), `object-fit` and `object-position`, alt text when an image fails. **Editor:** a card of images (PNG, JPEG, WebP, transparency, a broken one). **Golden:** an images scene, checked against Chrome too.
+- **G7d, animated images** (Booey): GIF, APNG and animated WebP through upstream's `ImageFrameAnimator`, on G6's timers, scheduling rendering updates for new frames; animations pause while an image isn't visible.
+- **Out (FIXMEs):** SVG images (no SVG rendering), AVIF and JPEG XL, lazy loading (intersection observers), `decode()` (promises), CORS and `crossorigin`, network URLs (the interface allows them; only `file:` is implemented), canvas.
 
 ### G2a as built (2026-10-18)
 
@@ -941,6 +960,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Fixed on the way:** the callback took a list of the abstract `MutationRecord` (it takes references now); transient observers copy their options; queueing records sees the transient observers.
 - **Krystal.UI and the editor:** unchanged; the checkpoints after input and tasks (G6a) deliver the records.
 - **Tests:** Booey tests delivery, batching, `takeRecords()`, `disconnect()`, transient observers and `slotchange` (3 new cases).
+
+### G7a as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Decoding and drawing images* in `docs/booey/PORTING.md`): upstream's `ScalableImageDecoder` and its PNG (`libpng`), JPEG (`libjpeg-turbo`), WebP (`libwebp`), GIF, BMP and ICO decoders, over a contiguous `SharedBuffer`; decoded frames are `PlatformImage`s, Booey's in-memory ARGB pixels. `BitmapImage` takes encoded data (`Image::SetData`), sniffs the format, and decodes its frame when it's drawn or asked for, caching the `NativeImage` with its metadata (`BitmapImageDescriptor`, `BitmapImageSource`) and telling its `ImageObserver` about the data, decoded sizes and draws; a `BitmapImage` can also be made from a native image. EXIF orientation sizes the image and orients its drawing and patterns. `GraphicsContext::DrawNativeImage` and `DrawPattern` of a native image, with their display list items, are what bitmap images draw with.
+- **Krystal.UI:** `ImageBufferTextures::Upload` puts a native image's pixels in a `BGRA8Unorm` texture once (premultiplying them if they aren't), keyed by its rendering resource identifier, and destroys the texture at the end of the first replay after the image is gone. `GraphicsContextRender2D` draws native images and their patterns as it draws image buffers (the two share `DrawTexture` and `DrawTexturePattern`), applying an orientation as upstream's Skia context does.
+- **Changed from the plan:** decoding is synchronous (no decoding work queue): asynchronous requests decode at once. Image buffers still don't draw as native images, since they record display lists rather than pixels.
+- **Out (FIXMEs):** loading (G7b), `<img>` (G7c), animation (G7d), colour profiles and HDR, subsampling, density-corrected sizes in pre-transformed images, luminance mask patterns.
+- **Editor:** unchanged: no page can show an image until G7b loads them.
+- **Tests:** Booey tests every decoder (on images generated with Pillow and held as bytes), `BitmapImage`'s metadata, orientation, recorded draws and patterns and its observer (15 new cases); Krystal.UI tests replaying native images, oriented images, unpremultiplied pixels and native image patterns. No golden: no page shows an image yet.
 
 ## Open decisions
 

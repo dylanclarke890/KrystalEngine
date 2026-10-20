@@ -7,6 +7,9 @@
     "spdlog",
     "brigand",
     "harfbuzz",
-    "icu"
+    "icu",
+    "libjpeg-turbo",
+    "libpng",
+    "libwebp"
   ]
 }

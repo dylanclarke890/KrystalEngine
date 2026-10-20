@@ -199,6 +199,14 @@ namespace krys::boo
     {
       return ImageDrawResult::DidNothing;
     }
+    void DrawNativeImage(NativeImage &, const FloatRect &, const FloatRect &,
+                         ImagePaintingOptions = {}) noexcept final
+    {
+    }
+    void DrawPattern(NativeImage &, const FloatRect &, const FloatRect &, const AffineTransform &,
+                     const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final
+    {
+    }
     void DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,
                          ImagePaintingOptions = {}) noexcept final
     {

@@ -545,6 +545,78 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"dest-rect", DestinationRect());
   }
 
+  DrawNativeImage::DrawNativeImage(NativeImage &image, const FloatRect &destRect, const FloatRect &srcRect,
+                                   ImagePaintingOptions options) noexcept
+      : _image(ShareRef(image)), _destinationRect(destRect), _srcRect(srcRect), _options(options)
+  {
+  }
+
+  DrawNativeImage::DrawNativeImage(const DrawNativeImage &) noexcept = default;
+  DrawNativeImage::DrawNativeImage(DrawNativeImage &&) noexcept = default;
+  DrawNativeImage &DrawNativeImage::operator=(const DrawNativeImage &) noexcept = default;
+  DrawNativeImage &DrawNativeImage::operator=(DrawNativeImage &&) noexcept = default;
+  DrawNativeImage::~DrawNativeImage() noexcept = default;
+
+  NativeImage &DrawNativeImage::GetNativeImage() const noexcept
+  {
+    return *_image;
+  }
+
+  void DrawNativeImage::Apply(GraphicsContext &context) const noexcept
+  {
+    context.DrawNativeImage(*_image, _destinationRect, _srcRect, _options);
+  }
+
+  void DrawNativeImage::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      ts.DumpProperty(u8"image-identifier", _image->GetRenderingResourceIdentifier());
+    }
+    ts.DumpProperty(u8"source-rect", Source());
+    ts.DumpProperty(u8"dest-rect", DestinationRect());
+  }
+
+  DrawPatternNativeImage::DrawPatternNativeImage(NativeImage &image, const FloatRect &destRect,
+                                                 const FloatRect &tileRect,
+                                                 const AffineTransform &patternTransform,
+                                                 const FloatPoint &phase, const FloatSize &spacing,
+                                                 ImagePaintingOptions options) noexcept
+      : _image(ShareRef(image)), _destination(destRect), _tileRect(tileRect),
+        _patternTransform(patternTransform), _phase(phase), _spacing(spacing), _options(options)
+  {
+  }
+
+  DrawPatternNativeImage::DrawPatternNativeImage(const DrawPatternNativeImage &) noexcept = default;
+  DrawPatternNativeImage::DrawPatternNativeImage(DrawPatternNativeImage &&) noexcept = default;
+  DrawPatternNativeImage &
+    DrawPatternNativeImage::operator=(const DrawPatternNativeImage &) noexcept = default;
+  DrawPatternNativeImage &DrawPatternNativeImage::operator=(DrawPatternNativeImage &&) noexcept = default;
+  DrawPatternNativeImage::~DrawPatternNativeImage() noexcept = default;
+
+  NativeImage &DrawPatternNativeImage::GetNativeImage() const noexcept
+  {
+    return *_image;
+  }
+
+  void DrawPatternNativeImage::Apply(GraphicsContext &context) const noexcept
+  {
+    context.DrawPattern(*_image, _destination, _tileRect, _patternTransform, _phase, _spacing, _options);
+  }
+
+  void DrawPatternNativeImage::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      ts.DumpProperty(u8"image-identifier", _image->GetRenderingResourceIdentifier());
+    }
+    ts.DumpProperty(u8"pattern-transform", PatternTransform());
+    ts.DumpProperty(u8"tile-rect", TileRect());
+    ts.DumpProperty(u8"dest-rect", DestRect());
+    ts.DumpProperty(u8"phase", Phase());
+    ts.DumpProperty(u8"spacing", Spacing());
+  }
+
   DrawPatternImageBuffer::DrawPatternImageBuffer(ImageBuffer &image, const FloatRect &destRect,
                                                  const FloatRect &tileRect,
                                                  const AffineTransform &patternTransform,

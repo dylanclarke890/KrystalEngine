@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
@@ -525,6 +526,91 @@ namespace krys::ui::tests
                    context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
                    context.DrawPattern(buffer, {0, 0, 12, 2}, {2, 0, 2, 2}, {}, {-1, 0}, {1, 0});
                  });
+        });
+      CHECK(replayed[0][3] == 0u);
+      CHECK(replayed[1] == blue);
+      CHECK(replayed[2] == blue);
+      CHECK(replayed[3][3] == 0u);
+      CHECK(replayed[4] == blue);
+      CHECK(replayed[Width + 5] == blue);
+    }
+  }
+
+  TEST_CASE_METHOD(ReplayFixture,
+                   "GraphicsContextRender2D: draws native images, oriented, and their patterns", "[UI][GPU]")
+  {
+    constexpr uint32 argbRed = 0xFF'FF'00'00u;
+    constexpr uint32 argbBlue = 0xFF'00'00'FFu;
+    auto makeImage = [](const boo::IntSize &size, List<uint32> &&pixels, bool premultiplied)
+    {
+      auto data = AdoptRef(*new boo::PixelData(krys::move(pixels)));
+      auto image =
+        boo::NativeImage::Create(AdoptRef(*new boo::PlatformImage(size, krys::move(data), premultiplied)));
+      REQUIRE(image);
+      return image;
+    };
+    // A 4 by 2 image, red on its left half and blue on its right.
+    auto image =
+      makeImage({4, 2}, {argbRed, argbRed, argbBlue, argbBlue, argbRed, argbRed, argbBlue, argbBlue}, true);
+    constexpr Pixel red {255, 0, 0, 255};
+    constexpr Pixel blue {0, 0, 255, 255};
+
+    SECTION("An image draws its pixels")
+    {
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+          context.DrawNativeImage(*image, {0, 0, 8, 4}, {0, 0, 4, 2});
+        });
+      CHECK(replayed[0] == red);
+      CHECK(replayed[3 * Width + 3] == red);
+      CHECK(replayed[4] == blue);
+      CHECK(replayed[3 * Width + 7] == blue);
+      CHECK(replayed[4 * Width][3] == 0u);
+    }
+
+    SECTION("An orientation turns the image")
+    {
+      // Turned clockwise, red is on top and blue below; the destination and source are in the turned image's
+      // units.
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+          context.DrawNativeImage(
+            *image, {0, 0, 4, 8}, {0, 0, 2, 4},
+            boo::ImagePaintingOptions {boo::ImageOrientation::Orientation::OriginRightTop});
+        });
+      CHECK(replayed[0] == red);
+      CHECK(replayed[3 * Width + 3] == red);
+      CHECK(replayed[4 * Width] == blue);
+      CHECK(replayed[7 * Width + 3] == blue);
+      CHECK(replayed[4][3] == 0u);
+    }
+
+    SECTION("Unpremultiplied pixels are premultiplied")
+    {
+      auto translucent = makeImage({2, 1}, {0x80'FF'FF'FFu, argbRed}, false);
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+          context.DrawNativeImage(*translucent, {0, 0, 2, 1}, {0, 0, 2, 1});
+        });
+      CHECK(replayed[0][3] >= 127u);
+      CHECK(replayed[0][3] <= 129u);
+      CHECK(replayed[1] == red);
+    }
+
+    SECTION("A pattern repeats a tile of it from the phase, with spacing")
+    {
+      // The image's right half as the tile, two units wide, a unit apart, from x = 1.
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+          context.DrawPattern(*image, {0, 0, 12, 2}, {2, 0, 2, 2}, {}, {-1, 0}, {1, 0});
         });
       CHECK(replayed[0][3] == 0u);
       CHECK(replayed[1] == blue);
