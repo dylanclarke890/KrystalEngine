@@ -16,6 +16,7 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#event
   class Event : public RefCounted<Event>
   {
+    friend class Document;
     friend class EventDispatcher;
     friend class EventFactory;
     friend class ShadowRoot;

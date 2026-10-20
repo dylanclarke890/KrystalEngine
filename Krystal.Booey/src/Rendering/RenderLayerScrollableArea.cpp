@@ -177,8 +177,28 @@ namespace krys::boo
       // FIXME: The compositing layers, rendering-dependent regions and debug overlays, once there are any.
     }
 
-    // FIXME: The caret rect, the fake mouse move, repaint, the scroll events and the frame view's scroll
-    // offset and viewport notifications, once there are selection, input, painting and scroll events.
+    // FIXME: The caret rect, the fake mouse move, repaint and the frame view's scroll offset and viewport
+    // notifications, once there are selection, fake mouse moves and repaint tracking.
+
+    // Schedule the scroll and scroll-related DOM events.
+    if (auto *element = renderer.GetElement())
+    {
+      SetIsAwaitingScrollend(true);
+      element->NodeDocument().AddPendingScrollEventTarget(*element, dom::ScrollEventType::Scroll);
+    }
+  }
+
+  void RenderLayerScrollableArea::ScrollDidEnd() noexcept
+  {
+    if (!IsAwaitingScrollend())
+    {
+      return;
+    }
+    SetIsAwaitingScrollend(false);
+    if (auto *element = _layer.Renderer().GetElement())
+    {
+      element->NodeDocument().AddPendingScrollEventTarget(*element, dom::ScrollEventType::Scrollend);
+    }
   }
 
   int32 RenderLayerScrollableArea::ScrollWidth() const noexcept

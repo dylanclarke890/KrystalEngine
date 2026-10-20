@@ -182,6 +182,9 @@ namespace krys::boo
     // NOTE: This should only be called by the overridden setScrollOffset from ScrollableArea.
     void ScrollTo(const ScrollPosition &position) noexcept;
 
+    /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
+    void ScrollDidEnd() noexcept override;
+
     KRYS_NODISCARD IntSize ScrollbarOffset(const Scrollbar &scrollbar) const noexcept;
 
   private:

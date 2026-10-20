@@ -100,6 +100,13 @@ namespace krys::boo::dom
   class VisitedLinkState;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
+  /// @brief The event a scroll fires at what scrolled.
+  enum class ScrollEventType : bool
+  {
+    Scroll,
+    Scrollend
+  };
+
   class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
@@ -160,6 +167,8 @@ namespace krys::boo::dom
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
     FocusTrigger _latestFocusTrigger {FocusTrigger::Other};
+    // The scroll events to fire at the next scroll steps, in the order they were queued.
+    List<std::pair<Ref<ContainerNode>, ScrollEventType>> _pendingScrollEventTargets;
     // Where sequential focus navigation starts from when it's inside the focused area: unset if null.
     RefPtr<Node> _sequentialFocusNavigationStartingPoint;
     SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
@@ -556,6 +565,22 @@ namespace krys::boo::dom
     }
 
     void SetFocusedAndActive(bool flag) noexcept;
+
+#pragma endregion
+
+#pragma region Scrolling
+
+    /// @brief Queues a `scroll` or `scrollend` event at @p originalTarget (an element, or the document for
+    /// the viewport) for the next scroll steps, once per target and type.
+    // FIXME: A text control's inner text element's events go to its shadow host, once there are text
+    // controls; scheduling a rendering update (scheduleRenderingUpdate), once there's a rendering loop: the
+    // host runs the scroll steps.
+    void AddPendingScrollEventTarget(ContainerNode &originalTarget, ScrollEventType eventType) noexcept;
+
+    /// @brief Fires the pending scroll events, in the order they were queued: at elements without bubbling,
+    /// and at the document bubbling.
+    /// @see https://drafts.csswg.org/cssom-view/#run-the-scroll-steps
+    void RunScrollSteps() noexcept;
 
 #pragma endregion
 

@@ -2201,11 +2201,13 @@ namespace krys::boo
     const auto &renderer = layer->Renderer();
     auto position = renderer.Style().GetPosition();
 
-    // FIXME: Fixed positioned boxes whose container is the root add the view's offset (localToAbsolute), once
-    // there's geometry mapping.
+    // FIXME: Positioning of out-of-flow(fixed, absolute) elements collected in a RenderFragmentedFlow
+    // may need to be revisited in a future patch.
     if (position == PositionType::Fixed && (!ancestorLayer || ancestorLayer == renderer.View().Layer()))
     {
-      location.MoveBy(layer->Location());
+      // If the fixed layer's container is the root, just add in the offset of the view. We can obtain this by
+      // calling localToAbsolute() on the RenderView.
+      location.MoveBy(LayoutPoint(renderer.LocalToAbsolute({}, {MapCoordinatesMode::IsFixed})));
       return ancestorLayer;
     }
 
@@ -2499,8 +2501,10 @@ namespace krys::boo
 
       auto offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
 
-      // FIXME: Fixed clips relative to the view move by the view's scroll position for fixed positioning,
-      // once there's scrolling.
+      if (clipRects.Fixed() && &clipRectsContext.RootLayer->Renderer() == &Renderer().View())
+      {
+        offset -= ToLayoutSize(Renderer().View().FrameView().ScrollPositionForFixedPosition());
+      }
 
       if (Renderer().HasNonVisibleOverflow())
       {
@@ -2597,8 +2601,14 @@ namespace krys::boo
       return backgroundClipRect;
     }
     backgroundClipRect = BackgroundClipRectForPosition(*parentRects, Renderer().Style().GetPosition());
-    // FIXME: Fixed clips relative to the view move by the view's scroll position for fixed positioning, once
-    // there's scrolling.
+    RenderView &view = Renderer().View();
+    // Note: infinite clipRects should not be scrolled here, otherwise they will accidentally no longer be
+    // considered infinite.
+    if (parentRects->Fixed() && &clipRectsContext.RootLayer->Renderer() == &view
+        && !backgroundClipRect.IsInfinite())
+    {
+      backgroundClipRect.MoveBy(view.FrameView().ScrollPositionForFixedPosition());
+    }
     return backgroundClipRect;
   }
 

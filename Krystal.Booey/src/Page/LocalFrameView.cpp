@@ -1,7 +1,11 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
@@ -109,14 +113,15 @@ namespace krys::boo
     }
   }
 
-  IntRect LocalFrameView::VisibleContentRect() const noexcept
+  IntRect LocalFrameView::VisibleContentRectInternal(VisibleContentRectIncludesScrollbars) const noexcept
   {
+    // FIXME: Without the scrollbars, once there are scrollbars.
     return UnobscuredContentRect();
   }
 
   IntRect LocalFrameView::UnobscuredContentRect() const noexcept
   {
-    return IntRect(IntPoint(), Size().ExpandedTo(IntSize()));
+    return IntRect(_scrollPosition, Size().ExpandedTo(IntSize()));
   }
 
   void LocalFrameView::SetTransparent(bool isTransparent) noexcept
@@ -134,6 +139,35 @@ namespace krys::boo
   void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
   {
     _baseBackgroundColor = backgroundColor.IsValid() ? backgroundColor : boo::Color(boo::Color::white);
+  }
+
+  void LocalFrameView::Paint(GraphicsContext &context, const IntRect &rect) noexcept
+  {
+    // FIXME: Painting disabled contexts and region contexts, once there are those.
+    IntRect documentDirtyRect = rect;
+    // FIXME: Painting the entire contents (paintsEntireContents), once something asks for it.
+    IntRect visibleAreaWithoutScrollbars(FrameRect().Location(), VisibleContentRect().Size());
+    documentDirtyRect.Intersect(visibleAreaWithoutScrollbars);
+
+    if (!documentDirtyRect.IsEmpty())
+    {
+      GraphicsContextStateSaver stateSaver(context);
+
+      IntPoint locationOfContents = FrameRect().Location();
+      context.Translate(static_cast<float>(locationOfContents.X()),
+                        static_cast<float>(locationOfContents.Y()));
+      documentDirtyRect.MoveBy(-locationOfContents);
+
+      context.Translate(static_cast<float>(-ScrollX()), static_cast<float>(-ScrollY()));
+      documentDirtyRect.MoveBy(_scrollPosition);
+
+      context.Clip(FloatRect(VisibleContentRect()));
+
+      PaintContents(context, documentDirtyRect);
+    }
+
+    // FIXME: The overhang areas, the scrollbars and the pan scroll icon, once there are rubber-banding,
+    // scrollbars and pan scrolling.
   }
 
   void LocalFrameView::PaintContents(GraphicsContext &context, const IntRect &dirtyRect) noexcept
@@ -398,7 +432,7 @@ namespace krys::boo
   }
 
   bool LocalFrameView::ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
-                                           KRYS_MAYBE_UNUSED bool insideFixed,
+                                           bool insideFixed,
                                            const ScrollRectToVisibleOptions &options) noexcept
   {
     if (options.RevealMode == SelectionRevealMode::DoNotReveal)
@@ -421,6 +455,8 @@ namespace krys::boo
     // overflow:hidden layers.
     auto adjustedRect = absoluteRect;
     auto adjustedOptions = options;
+    EnumSet<BoxAxis> isFixed =
+      insideFixed ? EnumSet<BoxAxis> {BoxAxis::Horizontal, BoxAxis::Vertical} : EnumSet<BoxAxis> {};
 
     for (; layer; layer = layer->EnclosingContainingBlockLayer(CrossFrameBoundaries::No))
     {
@@ -437,9 +473,356 @@ namespace krys::boo
       // there's anchor positioning.
     }
 
-    // FIXME: Scroll the frame itself (scrollRectToVisibleInTopLevelView, scrollRectToVisibleInChildView),
-    // once the frame view scrolls.
+    // FIXME: Scroll a child frame's view and then its owner (scrollRectToVisibleInChildView), once there are
+    // frames.
+    renderer.View().FrameView().ScrollRectToVisibleInTopLevelView(adjustedRect, isFixed, adjustedOptions);
     return true;
+  }
+
+  void LocalFrameView::ScrollRectToVisibleInTopLevelView(const LayoutRect &absoluteRect,
+                                                         EnumSet<BoxAxis> isFixed,
+                                                         const ScrollRectToVisibleOptions &options) noexcept
+  {
+    // FIXME: Revealing up to the main frame only and delegating the main frame's scroll to the client
+    // (RevealUpToMainFrame, DelegateMainFrameScroll), once there are frames and a client; the view is the
+    // main frame's.
+    if (options.RevealMode == SelectionRevealMode::RevealUpToMainFrame)
+    {
+      return;
+    }
+
+    auto minScrollPosition = MinimumScrollPosition();
+    auto maxScrollPosition = MaximumScrollPosition();
+
+    auto viewRect = LayoutRect(VisibleContentRect());
+
+    // Move the target rect into "scrollView contents" coordinates.
+    auto targetRect = absoluteRect;
+    targetRect.Move(0, HeaderHeight());
+
+    // scroll-padding applies to the scroll container, but expand the rectangle that we want to expose in
+    // order simulate padding the scroll container. This rectangle is passed up the tree of scrolling elements
+    // to ensure that the padding on this scroll container is maintained.
+    auto *document = Frame().Document();
+    auto *element = document ? dom::TreeQueries::DocumentElement(*document) : nullptr;
+    if (auto *renderBox = element ? DynamicDowncast<RenderBox>(element->Renderer()) : nullptr)
+    {
+      targetRect.Expand(renderBox->ScrollPaddingForViewportRect(viewRect));
+    }
+
+    LayoutRect revealRect =
+      GetPossiblyFixedRectToExpose(viewRect, targetRect, isFixed, options.AlignX, options.AlignY);
+
+    // Avoid scrolling to the rounded value of revealRect.location() if we don't actually need to scroll
+    // FIXME: Only scrolling forward (OnlyAllowForwardScrolling), once there's find-in-page; smooth scrolling
+    // (useSmoothScrolling), once there are scroll animations.
+    if (revealRect != viewRect)
+    {
+      ScrollOffset clampedScrollPosition =
+        RoundedIntPoint(revealRect.Location()).ConstrainedBetween(minScrollPosition, maxScrollPosition);
+      SetScrollPosition(clampedScrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
+    }
+
+    // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect), once
+    // there's a client.
+  }
+
+  LayoutRect LocalFrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                          const LayoutRect &exposeRect,
+                                                          EnumSet<BoxAxis> isFixed,
+                                                          const ScrollAlignment &alignX,
+                                                          const ScrollAlignment &alignY) const noexcept
+  {
+    if (!isFixed.ContainsAny({BoxAxis::Horizontal, BoxAxis::Vertical}))
+    {
+      return GetPossiblyFixedRectToExpose(visibleRect, exposeRect, false, alignX, alignY);
+    }
+    if (isFixed.ContainsAll({BoxAxis::Horizontal, BoxAxis::Vertical}))
+    {
+      return GetPossiblyFixedRectToExpose(visibleRect, exposeRect, true, alignX, alignY);
+    }
+
+    auto fixedRect = GetPossiblyFixedRectToExpose(visibleRect, exposeRect, true, alignX, alignY);
+    auto scrollRect = GetPossiblyFixedRectToExpose(visibleRect, exposeRect, false, alignX, alignY);
+    if (isFixed.Contains(BoxAxis::Horizontal))
+    {
+      return {fixedRect.X(), scrollRect.Y(), fixedRect.Width(), scrollRect.Height()};
+    }
+    return {scrollRect.X(), fixedRect.Y(), scrollRect.Width(), fixedRect.Height()};
+  }
+
+  LayoutRect LocalFrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                          const LayoutRect &exposeRect, bool isFixed,
+                                                          const ScrollAlignment &alignX,
+                                                          const ScrollAlignment &alignY) const noexcept
+  {
+    if (!isFixed)
+    {
+      return GetRectToExposeForScrollIntoView(visibleRect, exposeRect, alignX, alignY);
+    }
+
+    // If the element is inside position:fixed and we're not scaled, no amount of scrolling is going to move
+    // things around.
+    // FIXME: The scaled cases, once frames can be scaled.
+    return visibleRect;
+  }
+
+  ScrollPosition LocalFrameView::MaximumScrollPosition() const noexcept
+  {
+    ScrollPosition maximumPosition = ScrollableArea::MaximumScrollPosition();
+    // FIXME: can this be moved into the base class?
+    maximumPosition.ClampNegativeToZero();
+    return maximumPosition;
+  }
+
+  ScrollPosition
+    LocalFrameView::AdjustScrollPositionWithinRange(const ScrollPosition &scrollPosition) const noexcept
+  {
+    if (GetScrollClamping() == ScrollClamping::Unclamped)
+    {
+      return scrollPosition;
+    }
+
+    return scrollPosition.ConstrainedBetween(MinimumScrollPosition(), MaximumScrollPosition());
+  }
+
+  void LocalFrameView::SetContentsSize(const IntSize &newSize) noexcept
+  {
+    if (ContentsSize() == newSize)
+    {
+      return;
+    }
+    _contentsSize = newSize;
+    UpdateScrollbars(GetScrollPosition());
+    // FIXME: The overhang areas, once there's rubber-banding.
+  }
+
+  void LocalFrameView::AdjustViewSize() noexcept
+  {
+    auto *renderView = GetRenderView();
+    if (!renderView)
+    {
+      return;
+    }
+
+    const IntRect rect = renderView->DocumentRect();
+    const IntSize &size = rect.Size();
+
+    // A new scroll origin moves the scroll position at once if the contents size isn't changing too.
+    IntPoint scrollOrigin(-rect.X(), -rect.Y());
+    if (scrollOrigin != ScrollOrigin())
+    {
+      SetScrollOrigin(scrollOrigin);
+      if (size == ContentsSize())
+      {
+        UpdateScrollbars(GetScrollPosition());
+      }
+    }
+
+    SetContentsSize(size);
+  }
+
+  void LocalFrameView::SetScrollPosition(const ScrollPosition &scrollPosition,
+                                         const ScrollPositionChangeOptions &options) noexcept
+  {
+    SetScrollOffsetWithOptions(ScrollOffsetFromPosition(scrollPosition), options);
+  }
+
+  void LocalFrameView::SetScrollOffsetWithOptions(Maybe<int32> x, Maybe<int32> y,
+                                                  const ScrollPositionChangeOptions &options) noexcept
+  {
+    if (x && y)
+    {
+      SetScrollOffsetWithOptions(ScrollOffset(*x, *y), options);
+      return;
+    }
+
+    auto offset = ScrollOffsetFromPosition(GetScrollPosition());
+
+    if (x)
+    {
+      offset.SetX(*x);
+    }
+
+    if (y)
+    {
+      offset.SetY(*y);
+    }
+
+    SetScrollOffsetWithOptions(offset, options);
+  }
+
+  void LocalFrameView::SetScrollOffsetWithOptions(const ScrollOffset &scrollOffset,
+                                                  const ScrollPositionChangeOptions &options) noexcept
+  {
+    auto oldScrollType = CurrentScrollType();
+    SetCurrentScrollType(options.Type);
+
+    // FIXME: The scroll position anchor and the scheduled scrolls (the focused element's scroll and the text
+    // fragment indicator) are cleared, once they're kept; snapping, once there's scroll snapping; animated
+    // scrolls (scrollToPositionWithAnimation), once there are scroll animations.
+    auto position = ScrollPositionFromOffset(scrollOffset);
+
+    // ScrollView::setScrollPosition.
+    // FIXME: Prohibiting scrolling and stopping scroll animations, once there are those.
+    auto newScrollPosition =
+      options.Clamping == ScrollClamping::Clamped ? AdjustScrollPositionWithinRange(position) : position;
+    bool scrollPositionChanged = newScrollPosition != GetScrollPosition();
+
+    if (CurrentScrollType() != ScrollType::User || scrollPositionChanged)
+    {
+      if (!RequestScrollToPosition(newScrollPosition, options))
+      {
+        UpdateScrollbars(newScrollPosition);
+      }
+    }
+
+    SetCurrentScrollType(oldScrollType);
+  }
+
+  void LocalFrameView::UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept
+  {
+    // FIXME: Prohibiting scrolling, once something can.
+    if (_inUpdateScrollbars)
+    {
+      return;
+    }
+
+    // FIXME: Not while rubber-banding, once there's rubber-banding.
+    auto adjustedScrollPosition = AdjustScrollPositionWithinRange(desiredPosition);
+    if (adjustedScrollPosition != GetScrollPosition() || ScrollOriginChanged())
+    {
+      (void)ScrollToPositionWithoutAnimation(adjustedScrollPosition);
+      ResetScrollOriginChanged();
+    }
+  }
+
+  void LocalFrameView::SetScrollOffset(const ScrollOffset &offset) noexcept
+  {
+    auto constrainedOffset = offset;
+    if (GetScrollClamping() == ScrollClamping::Clamped)
+    {
+      constrainedOffset = constrainedOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
+    }
+
+    ScrollTo(ScrollPositionFromOffset(constrainedOffset));
+  }
+
+  void LocalFrameView::ScrollTo(const ScrollPosition &newPosition) noexcept
+  {
+    IntPoint oldPosition = GetScrollPosition();
+    IntSize scrollDelta = newPosition - _scrollPosition;
+    if (scrollDelta.IsZero())
+    {
+      return;
+    }
+
+    _scrollPosition = newPosition;
+
+    // FIXME: Suppressed scrollbars and deferring the update while the contents size changes, once there are
+    // scrollbars.
+
+    // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position.
+    // FIXME: Repainting the scrolled contents (scrollContents), once repaints are tracked (the whole page
+    // repaints), and the compositing layers, once there's compositing.
+    if (!LayoutContext().IsInRenderTreeLayout())
+    {
+      if (auto *renderView = const_cast<RenderView *>(GetRenderView()); renderView && renderView->Layer())
+      {
+        renderView->Layer()->UpdateLayerPositionsAfterDocumentScroll();
+      }
+    }
+
+    if (oldPosition != GetScrollPosition())
+    {
+      ScrollPositionChanged(oldPosition, GetScrollPosition());
+    }
+
+    // FIXME: Telling the page overlays, the inspector and the client (didChangeScrollOffset), once there are
+    // those.
+  }
+
+  void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
+  {
+    // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
+    ScheduleScrollEvent();
+
+    // FIXME: The compositor, the layout viewport (updateLayoutViewport, with visual viewports), what's
+    // relevant to the viewport (viewportContentsChanged: content visibility, lazy loading, intersection
+    // observers) and the editor, once there are those.
+  }
+
+  void LocalFrameView::ScheduleScrollEvent() noexcept
+  {
+    SetIsAwaitingScrollend(true);
+    Frame().GetEventHandler().ScheduleScrollEvent();
+    // FIXME: A fake mouse move soon (dispatchFakeMouseMoveEventSoon), so the hovered element follows the
+    // content under a still mouse.
+  }
+
+  void LocalFrameView::ScrollDidEnd() noexcept
+  {
+    if (!IsAwaitingScrollend())
+    {
+      return;
+    }
+    SetIsAwaitingScrollend(false);
+    if (auto *document = Frame().Document())
+    {
+      document->AddPendingScrollEventTarget(*document, dom::ScrollEventType::Scrollend);
+    }
+  }
+
+  LayoutPoint LocalFrameView::ScrollPositionForFixedPosition() const noexcept
+  {
+    // FIXME: The layout viewport's origin (visualViewportEnabled), the scroll position constrained to the
+    // document for rubber-banding, the header and footer and the frame scale factor (the drag factors), once
+    // there are visual viewports, rubber-banding, headers and page scaling.
+    return LayoutPoint(GetScrollPosition());
+  }
+
+  LayoutRect LocalFrameView::RectForFixedPositionLayout() const noexcept
+  {
+    // FIXME: The layout viewport (visualViewportEnabled), once there are visual viewports.
+    return LayoutRect(VisibleContentRect());
+  }
+
+  bool LocalFrameView::ShouldPlaceVerticalScrollbarOnLeft() const noexcept
+  {
+    auto *renderView = GetRenderView();
+    return renderView && renderView->Style().ShouldPlaceVerticalScrollbarOnLeft();
+  }
+
+  IntPoint LocalFrameView::ViewToContents(const IntPoint &point) const noexcept
+  {
+    return point + ToIntSize(DocumentScrollPositionRelativeToViewOrigin());
+  }
+
+  IntPoint LocalFrameView::ContentsToView(const IntPoint &point) const noexcept
+  {
+    return point - ToIntSize(DocumentScrollPositionRelativeToViewOrigin());
+  }
+
+  FloatPoint LocalFrameView::ViewToContents(const FloatPoint &point) const noexcept
+  {
+    return point + FloatSize(ToIntSize(DocumentScrollPositionRelativeToViewOrigin()));
+  }
+
+  FloatPoint LocalFrameView::ContentsToView(const FloatPoint &point) const noexcept
+  {
+    return point - FloatSize(ToIntSize(DocumentScrollPositionRelativeToViewOrigin()));
+  }
+
+  IntRect LocalFrameView::ViewToContents(IntRect rect) const noexcept
+  {
+    rect.Move(ToIntSize(DocumentScrollPositionRelativeToViewOrigin()));
+    return rect;
+  }
+
+  IntRect LocalFrameView::ContentsToView(IntRect rect) const noexcept
+  {
+    rect.Move(-ToIntSize(DocumentScrollPositionRelativeToViewOrigin()));
+    return rect;
   }
 
   void LocalFrameView::ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept
@@ -524,10 +907,26 @@ namespace krys::boo
     return point + DoubleSize(DocumentToClientOffset());
   }
 
+  // The window is the view's own coordinates: it's the root of its (absent) widget tree, at the origin.
+  // FIXME: The conversions through the root view (rootViewToContents), once views are widgets in a tree.
+
   DoublePoint LocalFrameView::WindowToContents(const DoublePoint &point) const noexcept
   {
-    // FIXME: The scroll position, once the frame view scrolls; until then the view and its contents share an
-    // origin.
-    return point;
+    return point + DoubleSize(ToIntSize(DocumentScrollPositionRelativeToViewOrigin()));
+  }
+
+  IntPoint LocalFrameView::WindowToContents(const IntPoint &point) const noexcept
+  {
+    return ViewToContents(point);
+  }
+
+  IntPoint LocalFrameView::ContentsToWindow(const IntPoint &point) const noexcept
+  {
+    return ContentsToView(point);
+  }
+
+  IntRect LocalFrameView::ContentsToWindow(const IntRect &rect) const noexcept
+  {
+    return ContentsToView(rect);
   }
 }

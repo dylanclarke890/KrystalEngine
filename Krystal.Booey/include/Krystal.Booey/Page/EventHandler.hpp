@@ -135,6 +135,9 @@ namespace krys::boo
     /// @return Whether the event was cancelled.
     bool KeyEvent(const PlatformKeyboardEvent &keyEvent) noexcept;
 
+    /// @brief Queues a `scroll` event at the document, after the view scrolled.
+    void ScheduleScrollEvent() noexcept;
+
   private:
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
     /// @brief The default actions of a keyboard event that wasn't cancelled: Tab and Shift+Tab move the

@@ -454,8 +454,10 @@ namespace krys::boo
     krys_debug_assert(!ancestorContainer || ancestorContainer == this);
     krys_debug_assert(!wasFixed || *wasFixed == mode.Contains(MapCoordinatesMode::IsFixed));
 
-    // FIXME: Fixed boxes move with the view's scroll position (scrollPositionRespectingCustomFixedPosition),
-    // once the frame view scrolls.
+    if (mode.Contains(MapCoordinatesMode::IsFixed))
+    {
+      transformState.Move(ToLayoutSize(FrameView().ScrollPositionRespectingCustomFixedPosition()));
+    }
 
     if (!ancestorContainer && mode.Contains(MapCoordinatesMode::UseTransforms)
         && ShouldUseTransformFromContainer(nullptr))
@@ -476,7 +478,10 @@ namespace krys::boo
       transformState.ApplyTransform(t);
     }
 
-    // FIXME: Fixed boxes move with the view's scroll position, once the frame view scrolls.
+    if (mode.Contains(MapCoordinatesMode::IsFixed))
+    {
+      transformState.Move(ToLayoutSize(FrameView().ScrollPositionRespectingCustomFixedPosition()));
+    }
   }
 
   void RenderView::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept

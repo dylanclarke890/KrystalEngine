@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
@@ -1130,6 +1132,43 @@ namespace krys::boo::dom
     {
       _activeElement = ShareRefPtr(_activeElement->ParentElement());
     }
+  }
+
+  void Document::AddPendingScrollEventTarget(ContainerNode &originalTarget,
+                                             ScrollEventType eventType) noexcept
+  {
+    auto found =
+      std::ranges::find_if(_pendingScrollEventTargets, [&](const auto &pair)
+                           { return pair.first.get() == &originalTarget && pair.second == eventType; });
+    if (found != _pendingScrollEventTargets.end())
+    {
+      return;
+    }
+
+    _pendingScrollEventTargets.emplace_back(ShareRef(originalTarget), eventType);
+  }
+
+  void Document::RunScrollSteps() noexcept
+  {
+    // FIXME: Deferring the scroll events (shouldDeferScrollEvents), servicing scroll animations and scroll
+    // anchoring, once there are those.
+
+    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
+    if (_pendingScrollEventTargets.empty())
+    {
+      return;
+    }
+
+    auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
+    for (auto &[target, type] : currentTargets)
+    {
+      bool bubbles = Is<Document>(*target);
+      auto eventName = type == ScrollEventType::Scroll ? EventNames::Scroll : EventNames::ScrollEnd;
+      EventIDLInitializer<Event> initialize = [bubbles](Event &event) { event._bubbles = bubbles; };
+      (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target, krys::move(initialize));
+    }
+
+    // FIXME: The visual viewport's scroll events, once there's a visual viewport.
   }
 
   void Document::SetSequentialFocusNavigationStartingPoint(Node *node) noexcept

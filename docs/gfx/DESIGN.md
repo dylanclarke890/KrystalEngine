@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, G4f1, hit testing, hover and active, G4f2, mouse events, clicks and cursors, G4g, focus and blur, G4h1, keyboard events, and G4h2, sequential focus navigation, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5) is in progress: G5a, the viewport scrolls, is done; see *G5 plan*.
 
 ## Why
 
@@ -296,10 +296,11 @@ All done in G1 (2026-10-17) unless noted.
 |---|---|---|
 | C0 | Done (2026-10-17). Move the colour types from Booey to `Krystal.Core/Colour/`, renamed to "Colour" in `krys`. | Booey and its tests build and pass against the moved types. |
 | G1 | Done (2026-10-17), as one part. The RHI: `Device`, `Pool` and handles, buffers, textures, samplers, shaders, pipelines, command buffers, swapchains, transient memory; the OpenGL backend. The editor moves onto it; Gfx's old colour headers go with the registries. | The editor clears its window and draws a triangle through the RHI. The old registries are gone. |
-| G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
+| G2 | Done (2026-10-18), in parts G2a to G2k. Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
 | T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
+| G5 | Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In three parts (see *G5 plan*). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
 
 ### G2 parts
 
@@ -565,6 +566,25 @@ Two parts (decided by the user). Booey has `UIEventWithKeyState` (G4f2) and the 
   - **Out (FIXMEs):** frames, spatial navigation, keyboard focusability that differs from focusability (`tabsToLinks`, form controls), moving the focus out to the host, `autofocus`.
   - **Tests:** the navigation order (positive `tabindex`, tree order, `-1`, shadow trees and slots, wrapping, Shift+Tab), the starting point after a click, focus visible after Tab; a page golden of a focus ring.
   - **Editor:** Tab moves through the cards with a focus ring.
+
+### G5 plan (decided 2026-10-19)
+
+Three parts (decided by the user). Booey's overflow boxes scroll (L5): `RenderLayerScrollableArea` keeps a scroll position, and painting, hit testing, the coordinate mapping, the CSSOM View scroll APIs and `scrollIntoView()` follow it; layout reserves scrollbar space with a placeholder theme of a fixed thickness. The frame view doesn't scroll (`WindowToContents` is the identity, the scrolling element's scroll APIs do nothing), there are no wheel events, the keyboard's scrolling defaults are FIXMEs, and no scrollbar is drawn.
+
+- **G5a, the viewport scrolls** (Booey and Krystal.UI):
+  - **Booey:** the scrolling half of upstream's `ScrollView` and `ScrollableArea` for `LocalFrameView`, trimmed: a scroll position clamped to the contents size, the scrollable axes from the root's or the body's `overflow`, the visible content rect, the window and contents conversions. Painting translates the contents by the scroll position, with fixed-position boxes staying put; hit testing and mouse events take the scroll into account; the scrolling element's `scrollTop`, `scrollLeft` and `scrollTo()` scroll the viewport, as do `scrollIntoView()` and focusing (so Tab brings what it focuses into view). `scroll` events at scrolled boxes and the document, in the view's rendering update (the specification's scroll steps).
+  - **Krystal.UI:** `View::ScrollPosition` and `ScrollTo`; the rendering update runs the scroll steps.
+  - **Tests:** painting and hit testing a scrolled view, fixed boxes, the scrolling element's APIs, `scrollIntoView()` and focus reaching the viewport, `scroll` events.
+- **G5b, wheel and keyboard scrolling** (Booey, Krystal.UI and Krystal.PAL):
+  - **Booey:** `PlatformWheelEvent`, `WheelEvent` and `WheelEventInit`; the wheel half of `EventHandler`: `wheel` at the element under the mouse, then, unless cancelled, the nearest box that can scroll that way, then the viewport, chaining past boxes at their edge unless `overscroll-behavior` stops it. The keyboard's scrolling defaults: the arrows (upstream's 40 pixel line step), Page Up and Page Down (a page less the overlap), Home and End, Space and Shift+Space, for the focused element's nearest scrolling box or the viewport.
+  - **Krystal.PAL:** the horizontal wheel (`WM_MOUSEHWHEEL`), fractional deltas (touchpads), modifiers and the position on wheel events, the system's lines per notch; the wheel reported once (raw input and `WM_MOUSEWHEEL` both report it now).
+  - **Krystal.UI:** `View::MouseWheel`; a notch is the system's lines (usually 3) times 40 pixels, as browsers on Windows (decided).
+  - **Editor:** the wheel and the keys scroll the page; a card has a scrolling box, and the page is taller than the window.
+- **G5c, scrollbars** (Booey):
+  - **Theme** (decided): upstream's `ScrollbarThemeComposite` and Adwaita theme (`ScrollbarThemeAdwaita`, drawn through `GraphicsContext`, so platform independent), classic: always shown, taking layout space, with a rounded thumb and no buttons. Layout's scrollbar space becomes the theme's.
+  - **Booey:** `Scrollbar`s for scrolling boxes and the viewport, painted in the layers' overflow controls phase with the scroll corner; hit testing finds them; the mouse drags the thumb and pages from the track, with the arrow cursor; `scrollbar-width`, `scrollbar-color` and `scrollbar-gutter`.
+  - **Tests:** scrollbar geometry, hit testing and dragging; a page golden of scrollbars (Chrome's only reported: its Windows scrollbars differ).
+- **Out (FIXMEs):** smooth scrolling (`scroll-behavior: smooth`, animated wheel scrolling; with animations), momentum, scroll snapping, wheel latching, overlay scrollbars and their fading (with animations), `position: sticky`, `scrollend`, autoscrolling, resizers, frames.
 
 ### G2a as built (2026-10-18)
 
@@ -859,13 +879,22 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Editor:** Tab moves through the cards with the user agent's focus ring; a click focus keeps the author's outline (`:focus:not(:focus-visible)`); the status table says to Tab through the cards.
 - **Tests:** Booey tests the navigation order, navigation, the starting point and its removal, Tab through the event handler and `NextShadowIncluding`; Krystal.UI tests Tab through `View`, and a page golden, `focus`, paints a focus ring after a Tab and author `outline: auto` rings. Its Chrome golden is only reported: both follow rounded corners, but Chrome draws its own ring, where replay draws a fixed 2 pixel ring in the outline colour.
 
+### G5a as built (2026-10-19)
+
+- **Booey** (the ledger entry is *The viewport scrolls* in `docs/booey/PORTING.md`): `LocalFrameView` is a `ScrollableArea` with the scrolling half of upstream's `ScrollView` folded in (Booey has no widgets): a scroll position clamped to the contents size, which layout sets from the document's rect (`AdjustViewSize`); `SetScrollPosition` and `SetScrollOffsetWithOptions`; the visible content rect at the scroll position; the window and contents conversions; and `Paint`, which translates the contents by the scroll position and clips them to the visible rect. Fixed boxes move with the scroll position (`RenderView`'s mapping, fixed layers' offsets and clips). Hit testing, `elementFromPoint` and mouse events take the scroll into account; the scrolling element's `scrollTop`, `scrollLeft`, `scrollTo()`, `scrollBy()`, `scrollWidth` and `scrollHeight` are the view's; `scrollIntoView()`, `focus()` and Tab scroll the view. `scroll` and `scrollend` are queued at scrolled boxes and the document and fired by `Document::RunScrollSteps`.
+- **Krystal.UI:** `View::ScrollPosition` and `ScrollTo`; the rendering update runs the scroll steps before style and layout; recording paints through `LocalFrameView::Paint`.
+- **Changed from the plan:** the scrollable axes (the scrollbar modes from the root's or the body's `overflow`) move to G5b, where user scrolling needs them; `scrollend` is in (it fires right after an instant scroll, as upstream).
+- **Out (FIXMEs):** scrollbars (G5c), the scrollable axes (G5b), smooth scrolling, scroll snapping and anchoring, the visual and layout viewports, page scale, rubber-banding, a fake mouse move after a scroll (the hovered element doesn't follow the content under a still mouse until it moves), frames.
+- **Editor:** unchanged; wheel and key scrolling come with G5b.
+- **Tests:** Booey tests the scroll range, the scrolling element's APIs, hit testing and coordinates, fixed boxes, scrolled painting, scrolling into view and the scroll events (6 cases); Krystal.UI tests scrolling a view and its recording, and its painting is now clipped to the visible contents. No golden: nothing new paints.
+
 ## Open decisions
 
 Decided (2026-10-17): a virtual `Device` chosen at run time; the Vulkan and D3D11 stubs, the LearnOpenGL scenes and the editor's assets deleted; backends as subdirectories of Krystal.Gfx.
 
 Decided (2026-10-18): the 2D renderer lives in Krystal.Gfx, as `Render2D/` (namespace `krys::gfx`), not in its own module.
 
-1. **Module names:** Krystal.UI, Krystal.Assets.
+1. **Module names:** decided (2026-10-18): Krystal.UI, which hosts Booey pages (`View`, renamed from `Page` in G4h1) and will have its own UI concepts; Krystal.Assets waits for Layer 4.
 2. **Shaders:** GLSL with explicit binding slots now. Later, possibly SPIR-V compiled offline, which a Vulkan backend would need.
 3. **Text:** decided (2026-10-18): FreeType's 8-bit greyscale bitmaps, with hinting; MSDF is dropped (see *G3 plan*).
 4. **Blending space:** decided (2026-10-18): encoded values everywhere, as browsers blend, with unorm targets and an `RGBA8Unorm` window (see *G2h2 plan*). Before, Render2D blended in linear light on sRGB targets and as encoded on other targets.

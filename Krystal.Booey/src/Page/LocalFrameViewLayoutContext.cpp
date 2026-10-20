@@ -131,7 +131,14 @@ namespace krys::boo
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InViewSizeAdjust);
-      // FIXME: Adjust the view's size to the document's (adjustViewSize), once there are scroll views.
+      // FIXME: Not while printing, once there's printing.
+      if (Is<RenderView>(*layoutRoot))
+      {
+        // This is to protect _needsFullRepaint's value when layout() is getting re-entered through
+        // adjustViewSize().
+        SetForScope needsFullRepaint(_needsFullRepaint);
+        _frameView.AdjustViewSize();
+      }
     }
 
     {

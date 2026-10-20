@@ -131,13 +131,19 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 }</style>"
                   u8"<div style='width: 40px; height: 20px; background: red'></div>");
     const auto displayList = view.Record();
-    // The view's base colour, the root's background over the canvas and the box's background.
-    REQUIRE(displayList->Items().size() == 5u);
+    // The view's base colour, the root's background over the canvas and the box's background, clipped to the
+    // visible contents.
+    REQUIRE(displayList->Items().size() == 8u);
+    CHECK(displayList->AsText({}).starts_with(u8R"(
+(save)
+(clip
+  (rect at (0,0) size 200x100)))"));
     CHECK(displayList->AsText({}).ends_with(u8R"((fill-composited-rect
   (rect at (0,0) size 40x20)
   (color #FF0000)
   (composite-operation source-over)
-  (blend-mode normal)))"));
+  (blend-mode normal))
+(restore))"));
   }
 
   TEST_CASE("View: hit tests, hovers and activates", "[UI]")
@@ -343,5 +349,39 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::Tab, {pal::KeyModifier::Shift}));
     CHECK(view.Document().FocusedElement() == a.get());
     CHECK_FALSE(view.KeyReleased(pal::Key::Tab));
+  }
+
+  TEST_CASE("View: scrolling", "[UI]")
+  {
+    View view({200, 100});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 }</style><div style='height: 500px'></div>");
+    view.UpdateRendering();
+    struct ScrollCounter : boo::dom::EventListenerCallback
+    {
+      int32 Count {0};
+
+      void HandleEvent(boo::dom::Event &) noexcept override
+      {
+        ++Count;
+      }
+    };
+    Ref<ScrollCounter> counter = CreateRef<ScrollCounter>();
+    view.Document().AddEventListener(boo::dom::DOMStringAtom(u8"scroll"),
+                                     Ref<boo::dom::EventListenerCallback> {counter}, false);
+
+    CHECK(view.ScrollPosition() == boo::IntPoint());
+    view.ScrollTo({0, 150});
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 150));
+    // Clamped to the document, and `scroll` fires at the next rendering update.
+    view.ScrollTo({0, 1'000});
+    CHECK(view.ScrollPosition() == boo::IntPoint(0, 400));
+    CHECK(counter->Count == 0);
+    view.UpdateRendering();
+    CHECK(counter->Count == 1);
+
+    // The recording is scrolled.
+    CHECK(view.Record()->AsText({}).contains(u8R"((translate
+  (x 0.00)
+  (y -400.00)))"));
   }
 }

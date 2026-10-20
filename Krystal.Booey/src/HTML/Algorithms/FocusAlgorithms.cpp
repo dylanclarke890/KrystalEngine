@@ -11,6 +11,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -760,6 +761,11 @@ namespace krys::boo::html
     }
 
     FocusingSteps(*candidate, nullptr, {.Direction = direction, .Visibility = dom::FocusVisibility::Visible});
+    // What navigation focuses is scrolled into view, as `focus()` scrolls it.
+    if (auto *view = document.View())
+    {
+      view->ScheduleScrollToFocusedElement(SelectionRevealMode::Reveal);
+    }
     return true;
   }
 

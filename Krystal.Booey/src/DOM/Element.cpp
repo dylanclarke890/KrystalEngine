@@ -1610,6 +1610,65 @@ namespace krys::boo::dom
 
   namespace
   {
+    /// @brief The frame showing @p document, if it has a view.
+    KRYS_NODISCARD LocalFrame *DocumentFrameWithNonNullView(Document &document) noexcept
+    {
+      auto *frame = document.Frame();
+      return frame && frame->View() ? frame : nullptr;
+    }
+
+    KRYS_NODISCARD int32 AdjustContentsScrollPositionOrSizeForZoom(int32 value,
+                                                                   const LocalFrame &frame) noexcept
+    {
+      // FIXME: The frame scale factor (frameScaleFactor), once frames can be scaled.
+      double zoomFactor = frame.PageZoomFactor();
+      if (zoomFactor == 1)
+      {
+        return value;
+      }
+      // FIXME (webkit.org/b/189397): Why can't we just ceil/floor?
+      // Needed because of truncation (rather than rounding) when scaling up.
+      if (zoomFactor > 1)
+      {
+        value++;
+      }
+      return static_cast<int32>(value / zoomFactor);
+    }
+
+    /// @brief Scrolls @p document's view as the window's `scrollTo()` does.
+    // FIXME: Through the Window (LocalDOMWindow::scrollTo), once there's a Window.
+    void ScrollWindowTo(Document &document, const ScrollToOptions &options) noexcept
+    {
+      auto *frame = DocumentFrameWithNonNullView(document);
+      if (!frame)
+      {
+        return;
+      }
+      auto &view = *frame->View();
+
+      ScrollToOptions scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(
+        options, view.ContentsScrollPosition().X(), view.ContentsScrollPosition().Y());
+
+      // This is an optimization for the common case of scrolling to (0, 0) when the scroller is already at
+      // the origin. If an animated scroll is in progress, this optimization is skipped to ensure that the
+      // animated scroll is really stopped.
+      if (view.GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating && !*scrollToOptions.Left
+          && !*scrollToOptions.Top && view.ContentsScrollPosition().IsZero())
+      {
+        return;
+      }
+
+      // FIXME: Cancelling the scheduled scrolls (cancelScheduledScrolls), once they're scheduled.
+      document.UpdateLayoutIgnorePendingStylesheets();
+
+      // The frame scale factor is 1 (FIXME: once frames can be scaled).
+      IntPoint layoutPos(static_cast<int32>(*scrollToOptions.Left * frame->PageZoomFactor()),
+                         static_cast<int32>(*scrollToOptions.Top * frame->PageZoomFactor()));
+
+      // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
+      view.SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammatic());
+    }
+
     KRYS_NODISCARD ScrollAlignment ToScrollAlignmentForInlineDirection(Maybe<ScrollLogicalPosition> position,
                                                                        WritingMode writingMode) noexcept
     {
@@ -1940,7 +1999,7 @@ namespace krys::boo::dom
     {
       // If the element is the scrolling element and is not potentially scrollable,
       // invoke scroll() on window with options as the only argument, and terminate these steps.
-      // FIXME: Scroll the window, once the frame view scrolls.
+      ScrollWindowTo(document, options);
       return;
     }
 
@@ -2196,7 +2255,10 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: The frame view's scroll position, once it scrolls.
+      if (auto *frame = DocumentFrameWithNonNullView(document))
+      {
+        return AdjustContentsScrollPositionOrSizeForZoom(frame->View()->ContentsScrollPosition().X(), *frame);
+      }
       return 0;
     }
 
@@ -2214,7 +2276,10 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: The frame view's scroll position, once it scrolls.
+      if (auto *frame = DocumentFrameWithNonNullView(document))
+      {
+        return AdjustContentsScrollPositionOrSizeForZoom(frame->View()->ContentsScrollPosition().Y(), *frame);
+      }
       return 0;
     }
 
@@ -2235,7 +2300,11 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: Scroll the frame view, once it scrolls.
+      if (auto *frame = DocumentFrameWithNonNullView(document))
+      {
+        IntPoint position(static_cast<int32>(newLeft * frame->PageZoomFactor()), frame->View()->ScrollY());
+        frame->View()->SetScrollPosition(position, options);
+      }
       return;
     }
 
@@ -2258,7 +2327,11 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: Scroll the frame view, once it scrolls.
+      if (auto *frame = DocumentFrameWithNonNullView(document))
+      {
+        IntPoint position(frame->View()->ScrollX(), static_cast<int32>(newTop * frame->PageZoomFactor()));
+        frame->View()->SetScrollPosition(position, options);
+      }
       return;
     }
 
@@ -2278,10 +2351,9 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: The frame view's contents width, once it scrolls; until then, the render view's.
-      if (auto *renderView = document.GetRenderView())
+      if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        return AdjustForAbsoluteZoom(renderView->ScrollWidth(), renderView->Style());
+        return AdjustContentsScrollPositionOrSizeForZoom(frame->View()->ContentsSize().Width(), *frame);
       }
       return 0;
     }
@@ -2300,10 +2372,9 @@ namespace krys::boo::dom
 
     if (document.ScrollingElement() == this)
     {
-      // FIXME: The frame view's contents height, once it scrolls; until then, the render view's.
-      if (auto *renderView = document.GetRenderView())
+      if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        return AdjustForAbsoluteZoom(renderView->ScrollHeight(), renderView->Style());
+        return AdjustContentsScrollPositionOrSizeForZoom(frame->View()->ContentsSize().Height(), *frame);
       }
       return 0;
     }

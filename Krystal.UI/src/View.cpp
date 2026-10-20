@@ -92,7 +92,25 @@ namespace krys::ui
 
   void View::UpdateRendering() noexcept
   {
+    // The scroll steps come before style and layout in the rendering update.
+    // https://html.spec.whatwg.org/#update-the-rendering
+    _document->RunScrollSteps();
     (void)_document->UpdateLayout();
+  }
+
+  boo::IntPoint View::ScrollPosition() const noexcept
+  {
+    auto *view = _frame->View();
+    return view ? view->GetScrollPosition() : boo::IntPoint();
+  }
+
+  void View::ScrollTo(const boo::IntPoint &position) noexcept
+  {
+    (void)_document->UpdateLayout();
+    if (auto *view = _frame->View())
+    {
+      view->SetScrollPosition(position);
+    }
   }
 
   Ref<const boo::display_list::DisplayList> View::Record() noexcept
@@ -103,7 +121,7 @@ namespace krys::ui
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
     if (auto *view = _frame->View())
     {
-      view->PaintContents(recorder, boo::IntRect(0, 0, size.Width(), size.Height()));
+      view->Paint(recorder, boo::IntRect(0, 0, size.Width(), size.Height()));
     }
     return recorder.TakeDisplayList();
   }

@@ -358,6 +358,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontDatabase.cpp
 		tests/Graphics/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
+		tests/Page/LocalFrameViewScrolling.cpp
 		tests/Rendering/RenderBox.cpp
 		tests/Rendering/RenderElement.cpp
 		tests/Rendering/RenderIterator.cpp

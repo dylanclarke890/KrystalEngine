@@ -126,7 +126,7 @@ namespace krys::boo::dom
 
       LayoutPoint absolutePoint = clientPoint;
       absolutePoint.Scale(scaleFactor);
-      // FIXME: The contents' scroll position (contentsScrollPosition) comes with frame view scrolling.
+      absolutePoint.MoveBy(view->ContentsScrollPosition());
 
       LayoutRect visibleRect = view->VisibleContentRect();
       if (visibleRect.Contains(absolutePoint))

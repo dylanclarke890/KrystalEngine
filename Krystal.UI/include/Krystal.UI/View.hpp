@@ -70,8 +70,15 @@ namespace krys::ui
     void Resize(const boo::IntSize &viewportSize) noexcept;
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;
 
-    /// @brief Brings the document's style and layout up to date.
+    /// @brief Runs the rendering update: the scroll steps (the pending `scroll` and `scrollend` events), then
+    /// the document's style and layout.
     void UpdateRendering() noexcept;
+
+    /// @brief How far the viewport is scrolled into the document, in pixels.
+    KRYS_NODISCARD boo::IntPoint ScrollPosition() const noexcept;
+    /// @brief Scrolls the viewport to @p position (in pixels), within the document; `scroll` fires at the
+    /// next rendering update.
+    void ScrollTo(const boo::IntPoint &position) noexcept;
 
     /// @brief Paints the page, up to date, into a display list.
     KRYS_NODISCARD Ref<const boo::display_list::DisplayList> Record() noexcept;

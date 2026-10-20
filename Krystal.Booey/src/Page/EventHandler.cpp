@@ -556,6 +556,19 @@ namespace krys::boo
     return true;
   }
 
+  void EventHandler::ScheduleScrollEvent() noexcept
+  {
+    // FIXME: Noting the frame was scrolled by the user (setFrameWasScrolledByUser), once that's kept.
+    if (!_frame.View())
+    {
+      return;
+    }
+    if (auto *document = _frame.Document())
+    {
+      document->AddPendingScrollEventTarget(*document, dom::ScrollEventType::Scroll);
+    }
+  }
+
   bool EventHandler::KeyEvent(const PlatformKeyboardEvent &keyEvent) noexcept
   {
     // FIXME: Not treating an unhandled key event as user interaction (userDidInteractWithPage, the last

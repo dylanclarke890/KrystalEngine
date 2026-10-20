@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/BoxSides.hpp"
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
@@ -8,6 +10,7 @@
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Platform/ScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Pagination.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -16,6 +19,7 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -27,13 +31,17 @@ namespace krys::boo
   class RenderView;
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
-  /// media type, pagination, the sizes viewport units resolve against, and the layout context.
-  /// @note FIXME: No scrolling, scrollbars, obscured insets, visual viewport, auto-sizing, repaint rects or
-  /// compositing, and views aren't widgets in a widget tree: the visible content is the whole frame rect, at
-  /// the origin.
-  class LocalFrameView final : public RefCounted<LocalFrameView>, public CanMakeWeakPtr<LocalFrameView>
+  /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
+  /// position within the document (the scrolling half of a scroll view).
+  /// @note FIXME: No scrollbars, obscured insets, visual viewport, auto-sizing, repaint rects or compositing,
+  /// and views aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is
+  /// the frame rect's size at the scroll position.
+  class LocalFrameView final : public RefCounted<LocalFrameView>,
+                               public CanMakeWeakPtr<LocalFrameView>,
+                               public ScrollableArea
   {
     KRYS_NON_COPY_MOVABLE(LocalFrameView);
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LocalFrameView);
 
   public:
     struct OverrideViewportSize
@@ -61,6 +69,9 @@ namespace krys::boo
     bool _isPainting {false};
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
+    ScrollPosition _scrollPosition;
+    IntSize _contentsSize;
+    bool _inUpdateScrollbars {false};
 
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
@@ -147,10 +158,8 @@ namespace krys::boo
 
     void SetUseFixedLayout(bool enable) noexcept;
 
-    /// @brief The part of the content that's visible: the view's size, at the origin (there's no scrolling).
-    KRYS_NODISCARD IntRect VisibleContentRect() const noexcept;
-
-    /// @brief The part of the visible content that isn't covered by the host's interface: all of it.
+    /// @brief The part of the visible content (`VisibleContentRect`, the view's size at the scroll position)
+    /// that isn't covered by the host's interface: all of it.
     KRYS_NODISCARD IntRect UnobscuredContentRect() const noexcept;
 
     /// @brief The size of the visible content.
@@ -159,11 +168,11 @@ namespace krys::boo
       return VisibleContentRect().Size();
     }
 
-    /// @brief The document's scroll position relative to the view's origin: none, as the view doesn't scroll.
-    /// FIXME: Comes with scrolling the viewport.
+    /// @brief The document's scroll position relative to the view's origin: the scroll position (there are no
+    /// headers, insets or left scrollbars).
     KRYS_NODISCARD IntPoint DocumentScrollPositionRelativeToViewOrigin() const noexcept
     {
-      return {};
+      return _scrollPosition;
     }
 
     /// @brief The scale of the frame's content: none, as there's no page scaling.
@@ -183,9 +192,131 @@ namespace krys::boo
       return {};
     }
 
+#pragma region Scrolling
+
+    KRYS_NODISCARD bool IsScrollView() const noexcept override
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept override
+    {
+      return _scrollPosition;
+    }
+
+    KRYS_NODISCARD int32 ScrollX() const noexcept
+    {
+      return _scrollPosition.X();
+    }
+
+    KRYS_NODISCARD int32 ScrollY() const noexcept
+    {
+      return _scrollPosition.Y();
+    }
+
+    /// @brief The largest scroll position: the contents' size less the visible size, and not negative.
+    KRYS_NODISCARD ScrollPosition MaximumScrollPosition() const noexcept override;
+
+    /// @brief The size of the visible content: the view's size (there are no scrollbars).
+    KRYS_NODISCARD IntSize VisibleSize() const noexcept override
+    {
+      return SizeForVisibleContent();
+    }
+
+    /// @brief The size of the document, as of the last layout.
+    KRYS_NODISCARD IntSize ContentsSize() const noexcept override
+    {
+      return _contentsSize;
+    }
+
+    /// @brief Sets the size of the document, and moves the scroll position back within it.
+    void SetContentsSize(const IntSize &newSize) noexcept;
+
+    /// @brief Fits the contents size and the scroll origin to the document's rect, after a layout.
+    void AdjustViewSize() noexcept;
+
+    /// @brief The scroll position, as the contents (and the scrolling element's scroll APIs) see it.
+    KRYS_NODISCARD ScrollPosition ContentsScrollPosition() const noexcept
+    {
+      return _scrollPosition;
+    }
+
+    void SetContentsScrollPosition(
+      const ScrollPosition &position,
+      const ScrollPositionChangeOptions &options = ScrollPositionChangeOptions::CreateProgrammatic()) noexcept
+    {
+      SetScrollPosition(position, options);
+    }
+
+    /// @brief Scrolls to @p scrollPosition, clamped to the scroll range unless @p options say otherwise.
+    void SetScrollPosition(const ScrollPosition &scrollPosition,
+                           const ScrollPositionChangeOptions &options =
+                             ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    void SetScrollOffsetWithOptions(Maybe<int32> x, Maybe<int32> y,
+                                    const ScrollPositionChangeOptions &options) noexcept;
+    void SetScrollOffsetWithOptions(const ScrollOffset &scrollOffset,
+                                    const ScrollPositionChangeOptions &options) noexcept;
+
+    KRYS_NODISCARD ScrollPosition
+      AdjustScrollPositionWithinRange(const ScrollPosition &scrollPosition) const noexcept;
+
+    /// @brief The scroll position fixed-position boxes are placed relative to: the scroll position (there's
+    /// no visual viewport, page scale, header or rubber-banding).
+    KRYS_NODISCARD LayoutPoint ScrollPositionForFixedPosition() const noexcept;
+    KRYS_NODISCARD LayoutPoint ScrollPositionRespectingCustomFixedPosition() const noexcept
+    {
+      return ScrollPositionForFixedPosition();
+    }
+
+    /// @brief The rect fixed-position boxes are laid out in: the visible content.
+    KRYS_NODISCARD LayoutRect RectForFixedPositionLayout() const noexcept;
+
+    /// @brief Scrolls the view so @p absoluteRect (in the contents' coordinates) is visible as asked, unless
+    /// it's fixed on both axes.
+    void ScrollRectToVisibleInTopLevelView(const LayoutRect &absoluteRect, EnumSet<BoxAxis> isFixed,
+                                           const ScrollRectToVisibleOptions &options) noexcept;
+
+    KRYS_NODISCARD bool IsScrollCornerVisible() const noexcept override
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD IntRect ScrollCornerRect() const noexcept override
+    {
+      return {};
+    }
+
+    /// @brief The scrollable area enclosing the view: none, as there are no frames.
+    KRYS_NODISCARD ScrollableArea *EnclosingScrollableArea() const noexcept override
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD bool ShouldPlaceVerticalScrollbarOnLeft() const noexcept override;
+
+    /// @brief Fires `scrollend` at the document after a scroll it fired `scroll` for.
+    void ScrollDidEnd() noexcept override;
+
+    // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
+    // the contents'.
+    KRYS_NODISCARD IntPoint ViewToContents(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD IntPoint ContentsToView(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD FloatPoint ViewToContents(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD FloatPoint ContentsToView(const FloatPoint &point) const noexcept;
+    KRYS_NODISCARD IntRect ViewToContents(IntRect rect) const noexcept;
+    KRYS_NODISCARD IntRect ContentsToView(IntRect rect) const noexcept;
+
+#pragma endregion
+
     // Painting
 
-    /// @brief Paints the document's render view over @p dirtyRect, in the view's coordinates.
+    /// @brief Paints the view's part of @p rect (in the view's coordinates): its visible contents, scrolled
+    /// by the scroll position.
+    // FIXME: The overhang areas, scrollbars and pan scroll icon, once there's rubber-banding, scrollbars and
+    // pan scrolling.
+    void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
+
+    /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates.
     /// FIXME: The overlay scrollbars and painting a single node (`setNodeToDraw`) aren't ported.
     void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
 
@@ -298,10 +429,34 @@ namespace krys::boo
     KRYS_NODISCARD DoublePoint DocumentToClientPoint(DoublePoint point) const noexcept;
     /// @brief Converts a point in the view's coordinates to the contents' (absolute) coordinates.
     KRYS_NODISCARD DoublePoint WindowToContents(const DoublePoint &point) const noexcept;
+    KRYS_NODISCARD IntPoint WindowToContents(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD IntPoint ContentsToWindow(const IntPoint &point) const noexcept;
+    KRYS_NODISCARD IntRect ContentsToWindow(const IntRect &rect) const noexcept;
     KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
 
   private:
     void AvailableContentSizeChanged() noexcept;
+
+    KRYS_NODISCARD IntRect VisibleContentRectInternal(
+      VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept override;
+    void SetScrollOffset(const ScrollOffset &offset) noexcept override;
+    /// @brief Moves the scroll position to @p newPosition, then updates what follows it (the layers, the
+    /// scroll events).
+    void ScrollTo(const ScrollPosition &newPosition) noexcept;
+    void ScrollPositionChanged(const ScrollPosition &oldPosition, const ScrollPosition &newPosition) noexcept;
+    /// @brief Scrolls to @p desiredPosition, within the scroll range.
+    // FIXME: Adding and removing scrollbars, once there are scrollbars.
+    void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
+    void ScheduleScrollEvent() noexcept;
+    KRYS_NODISCARD LayoutRect GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                           const LayoutRect &exposeRect,
+                                                           EnumSet<BoxAxis> isFixed,
+                                                           const ScrollAlignment &alignX,
+                                                           const ScrollAlignment &alignY) const noexcept;
+    KRYS_NODISCARD LayoutRect GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
+                                                           const LayoutRect &exposeRect, bool isFixed,
+                                                           const ScrollAlignment &alignX,
+                                                           const ScrollAlignment &alignY) const noexcept;
 
     KRYS_NODISCARD FloatSize
       CalculateSizeForCSSViewportUnitsOverride(Maybe<OverrideViewportSize> override) const noexcept;
