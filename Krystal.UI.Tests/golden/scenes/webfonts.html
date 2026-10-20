@@ -1,0 +1,38 @@
+﻿<!doctype html>
+<!-- The "webfonts" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); }
+  /* A display face, by weight and style. */
+  @font-face { font-family: Display; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf") format("truetype"); font-weight: 600 900; }
+  @font-face { font-family: Display; src: url("../../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf") format("truetype"); font-weight: 600 900; font-style: italic; }
+  /* Ahem, whose glyphs are boxes, in each format. */
+  @font-face { font-family: AhemWoff2; src: url("fonts/missing.woff2") format("woff2"), url("fonts/Ahem.woff2") format("woff2"); }
+  @font-face { font-family: AhemWoff; src: url("fonts/Ahem.woff") format("woff"); }
+  @font-face { font-family: AhemOtf; src: url("fonts/AhemCFF.otf") format("opentype"); }
+  /* Digits from Ahem, the rest from the next family. */
+  @font-face { font-family: Digits; src: url("fonts/Ahem.woff2") format("woff2"); unicode-range: U+30-39; }
+  /* No source loads: the next family is used. */
+  @font-face { font-family: Missing; src: url("fonts/missing.ttf"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 14px/20px "Liberation Sans"; color: #222222; }
+  h1 { margin: 0 0 8px; font: 800 24px/28px Display, "Liberation Sans"; color: #4f6df5; }
+  h1 i { color: #ef476f; }
+  p { margin: 0 0 6px; }
+  .ahem { font-size: 12px; line-height: 16px; }
+  .woff2 { font-family: AhemWoff2; color: #118ab2; }
+  .woff { font-family: AhemWoff; color: #06d6a0; }
+  .otf { font-family: AhemOtf; color: #ef476f; }
+  .digits { font-family: Digits, "Liberation Sans"; font-size: 18px; line-height: 24px; }
+  .missing { font-family: Missing, "Liberation Sans"; font-style: italic; }
+</style>
+</head>
+<body>
+  <h1>Web fonts <i>load</i></h1>
+  <p class="ahem"><span class="woff2">WOFF2 É</span> <span class="woff">WOFF</span> <span class="otf">OTF p</span></p>
+  <p class="digits">Room 101, floor 4</p>
+  <p class="missing">A missing font falls back</p>
+</body>
+</html>

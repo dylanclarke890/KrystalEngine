@@ -1,14 +1,24 @@
 ﻿#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/Font/FontFaceSet.hpp"
+#include "Krystal.Booey/CSS/Font/SegmentedFontFace.hpp"
+#include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+#include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDescription.hpp"
+#include "Krystal.Booey/Graphics/FontFeatureValues.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 
 namespace krys::boo::css
@@ -25,8 +35,14 @@ namespace krys::boo::css
     return AdoptRef(*new CSSFontSelector(document));
   }
 
+  size_t CSSFontSelector::PaletteKeyHash::operator()(const PaletteKey &key) const noexcept
+  {
+    return Hash::Combine(std::hash<StringAtom> {}(key.Family), std::hash<StringAtom> {}(key.Name));
+  }
+
   CSSFontSelector::CSSFontSelector(dom::Document &document) noexcept
-      : _document(WeakPtr<dom::Document>::WithRef(document)), _uniqueId(++FontSelectorId)
+      : _document(WeakPtr<dom::Document>::WithRef(document)), _cssFontFaceSet(CSSFontFaceSet::Create(this)),
+        _fontFaceClient(*this), _uniqueId(++FontSelectorId)
   {
     FontCache::Singleton().AddClient(*this);
   }
@@ -39,15 +55,33 @@ namespace krys::boo::css
 
   bool CSSFontSelector::IsEmpty() const noexcept
   {
-    // FIXME: Whether there are any @font-face rules, once there's a font face set.
-    return true;
+    return !_cssFontFaceSet->FaceCount();
+  }
+
+  void CSSFontSelector::EmptyCaches() noexcept
+  {
+    _cssFontFaceSet->EmptyCaches();
   }
 
   void CSSFontSelector::BuildStarted() noexcept
   {
     _buildIsUnderway = true;
+    _cssFontFaceSet->Purge();
     ++_version;
-    // FIXME: Purge the font face set and note the faces from rules, once there are @font-face rules.
+
+    krys_debug_assert(_cssConnectionsPossiblyToRemove.empty());
+    krys_debug_assert(_cssConnectionsEncounteredDuringBuild.empty());
+    krys_debug_assert(_stagingArea.empty());
+    for (size_t i = 0; i < _cssFontFaceSet->FaceCount(); ++i)
+    {
+      auto &face = (*_cssFontFaceSet)[i];
+      if (face.CssConnection())
+      {
+        _cssConnectionsPossiblyToRemove.push_back(ShareRef(face));
+      }
+    }
+
+    _paletteMap.clear();
   }
 
   void CSSFontSelector::BuildCompleted() noexcept
@@ -58,7 +92,153 @@ namespace krys::boo::css
     }
 
     _buildIsUnderway = false;
-    // FIXME: Remove the faces whose rules are gone and add the staged @font-face rules, once there are any.
+
+    // Some font faces weren't re-added during the build process.
+    for (auto &face : _cssConnectionsPossiblyToRemove)
+    {
+      auto *connection = face->CssConnection();
+      krys_debug_assert(connection);
+      if (!_cssConnectionsEncounteredDuringBuild.contains(connection))
+      {
+        _cssFontFaceSet->Remove(*face);
+      }
+    }
+
+    auto stagingArea = krys::move(_stagingArea);
+    _stagingArea.clear();
+    for (auto &item : stagingArea)
+    {
+      AddFontFaceRule(*item.StyleRuleFontFace, item.IsInitiatingElementInUserAgentShadowTree);
+    }
+    _cssConnectionsEncounteredDuringBuild.clear();
+    _cssConnectionsPossiblyToRemove.clear();
+  }
+
+  void CSSFontSelector::AddFontFaceRule(FontFaceRule &fontFaceRule,
+                                        bool isInitiatingElementInUserAgentShadowTree) noexcept
+  {
+    if (_buildIsUnderway)
+    {
+      _cssConnectionsEncounteredDuringBuild.insert(&fontFaceRule);
+      _stagingArea.push_back({ShareRef(fontFaceRule), isInitiatingElementInUserAgentShadowTree});
+      return;
+    }
+
+    const auto &style = fontFaceRule.Properties();
+    auto fontFamily = style.GetPropertyCSSValue(PropertyId::FontFamily);
+    auto fontStyle = style.GetPropertyCSSValue(PropertyId::FontStyle);
+    auto fontWeight = style.GetPropertyCSSValue(PropertyId::FontWeight);
+    auto fontWidth = style.GetPropertyCSSValue(PropertyId::FontWidth);
+    auto src = style.GetPropertyCSSValue(PropertyId::Src);
+    auto *srcList = DynamicDowncast<ValueList>(src.get());
+    auto unicodeRange = style.GetPropertyCSSValue(PropertyId::UnicodeRange);
+    auto *rangeList = DynamicDowncast<ValueList>(unicodeRange.get());
+    auto featureSettings = style.GetPropertyCSSValue(PropertyId::FontFeatureSettings);
+    auto display = style.GetPropertyCSSValue(PropertyId::FontDisplay);
+    auto sizeAdjust = style.GetPropertyCSSValue(PropertyId::SizeAdjust);
+    if (!fontFamily || !srcList || (unicodeRange && !rangeList))
+    {
+      return;
+    }
+
+    if (!srcList->Length())
+    {
+      return;
+    }
+
+    SetForScope creatingFont(_creatingFont, true);
+    auto fontFace = CSSFontFace::Create(*this, &fontFaceRule);
+
+    fontFace->SetFamily(*fontFamily);
+    if (fontStyle)
+    {
+      fontFace->SetStyle(*fontStyle);
+    }
+    if (fontWeight)
+    {
+      fontFace->SetWeight(*fontWeight);
+    }
+    if (fontWidth)
+    {
+      fontFace->SetWidth(*fontWidth);
+    }
+    if (rangeList)
+    {
+      fontFace->SetUnicodeRange(*rangeList);
+    }
+    if (featureSettings)
+    {
+      fontFace->SetFeatureSettings(*featureSettings);
+    }
+    if (display)
+    {
+      fontFace->SetDisplay(Downcast<PrimitiveValue>(*display));
+    }
+    if (sizeAdjust)
+    {
+      fontFace->SetSizeAdjust(*sizeAdjust);
+    }
+
+    CSSFontFace::AppendSources(*fontFace, *srcList, _document.get(), isInitiatingElementInUserAgentShadowTree);
+
+    if (RefPtr<CSSFontFace> existingFace = ShareRefPtr(_cssFontFaceSet->LookUpByCSSConnection(fontFaceRule)))
+    {
+      // This adoption is fairly subtle. Script can trigger a purge of _cssFontFaceSet at any time,
+      // which will cause us to just rely on the memory cache to retain the bytes of the file the next
+      // time we build up the CSSFontFaceSet. However, when the CSS Font Loading API is involved,
+      // the FontFace and FontFaceSet objects need to retain state. We create the new CSSFontFace object
+      // while the old one is still in scope so that the memory cache will be forced to retain the bytes
+      // of the resource. This means that the CachedFont will temporarily have two clients (until the
+      // old CSSFontFace goes out of scope, which should happen at the end of this "if" block). Because
+      // the CSSFontFaceSource objects will inspect their CachedFonts, the new CSSFontFace is smart enough
+      // to enter the correct state() during the next pump(). This approach of making a new CSSFontFace is
+      // simpler than computing and applying a diff of the StyleProperties.
+      // FIXME: Pass the old face's `FontFace` wrapper to the new face, once there's one.
+      _cssFontFaceSet->Remove(*existingFace);
+    }
+
+    _cssFontFaceSet->Add(*fontFace);
+    ++_version;
+  }
+
+  void CSSFontSelector::AddFontPaletteValuesRule(const FontPaletteValuesRule &fontPaletteValuesRule) noexcept
+  {
+    const auto &name = fontPaletteValuesRule.Name();
+    krys_debug_assert(name != StringAtom::Null());
+
+    const auto &fontFamilies = fontPaletteValuesRule.FontFamilies();
+    if (fontFamilies.empty())
+    {
+      return;
+    }
+
+    for (const auto &fontFamily : fontFamilies)
+    {
+      _paletteMap.insert_or_assign(PaletteKey {fontFamily, name}, fontPaletteValuesRule.FontPaletteValues());
+    }
+
+    ++_version;
+  }
+
+  void CSSFontSelector::AddFontFeatureValuesRule(const FontFeatureValuesRule &fontFeatureValuesRule) noexcept
+  {
+    Ref<FontFeatureValues> fontFeatureValues = fontFeatureValuesRule.Value();
+
+    for (const auto &fontFamily : fontFeatureValuesRule.FontFamilies())
+    {
+      // https://www.w3.org/TR/css-fonts-3/#font-family-casing
+      auto lowercased = text::ToASCIILower(fontFamily.View());
+      if (auto existing = _featureValues.find(lowercased); existing != _featureValues.end())
+      {
+        existing->second->UpdateOrInsert(*fontFeatureValues);
+      }
+      else
+      {
+        _featureValues.insert_or_assign(krys::move(lowercased), fontFeatureValues);
+      }
+    }
+
+    ++_version;
   }
 
   void CSSFontSelector::RegisterForInvalidationCallbacks(FontSelectorClient &client) noexcept
@@ -88,10 +268,42 @@ namespace krys::boo::css
     }
   }
 
-  void CSSFontSelector::OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &,
-                                                                 const StringAtom &) noexcept
+  void CSSFontSelector::OpportunisticallyStartFontDataURLLoading(const FontCascadeDescription &description,
+                                                                 const StringAtom &familyName) noexcept
   {
-    // FIXME: Start loading the data: URLs of the family's @font-face rules, once there are any.
+    auto *segmentedFontFace = _cssFontFaceSet->GetFontFace(description.GetFontSelectionRequest(), familyName);
+    if (!segmentedFontFace)
+    {
+      return;
+    }
+
+    if (!_document)
+    {
+      return;
+    }
+
+    for (auto &face : segmentedFontFace->ConstituentFaces())
+    {
+      face->OpportunisticallyStartFontDataURLLoading();
+    }
+  }
+
+  void CSSFontSelector::FontFaceClientImpl::FontLoaded(CSSFontFace &) noexcept
+  {
+    _owner.DispatchInvalidationCallbacks();
+  }
+
+  void CSSFontSelector::FontModified() noexcept
+  {
+    if (!_creatingFont && !_buildIsUnderway)
+    {
+      DispatchInvalidationCallbacks();
+    }
+  }
+
+  void CSSFontSelector::FontFaceClientImpl::UpdateStyleIfNeeded(CSSFontFace &) noexcept
+  {
+    _owner.UpdateStyleIfNeeded();
   }
 
   void CSSFontSelector::UpdateStyleIfNeeded() noexcept
@@ -138,6 +350,41 @@ namespace krys::boo::css
     }
 
     return null;
+  }
+
+  const FontPaletteValues &
+    CSSFontSelector::LookupFontPaletteValues(const StringAtom &familyName,
+                                             const FontDescription &description) const noexcept
+  {
+    static const NeverDestroyed<FontPaletteValues> emptyFontPaletteValues;
+    if (description.GetFontPalette().PaletteType != FontPalette::Type::Custom)
+    {
+      return emptyFontPaletteValues.get();
+    }
+
+    const StringAtom &paletteName = description.GetFontPalette().Identifier;
+
+    auto iterator = _paletteMap.find(PaletteKey {familyName, paletteName});
+    if (iterator == _paletteMap.end())
+    {
+      return emptyFontPaletteValues.get();
+    }
+
+    return iterator->second;
+  }
+
+  RefPtr<FontFeatureValues>
+    CSSFontSelector::LookupFontFeatureValues(const StringAtom &familyName) const noexcept
+  {
+    // https://www.w3.org/TR/css-fonts-3/#font-family-casing
+    auto lowercased = text::ToASCIILower(familyName.View());
+    auto iterator = _featureValues.find(lowercased);
+    if (iterator == _featureValues.end())
+    {
+      return nullptr;
+    }
+
+    return iterator->second;
   }
 
   // Fonts with appropriate Unicode coverage and OpenType features are required for good math
@@ -198,6 +445,10 @@ namespace krys::boo::css
     // If this ASSERT() fires, it usually means you forgot a document.updateStyleIfNeeded() somewhere.
     krys_debug_assert(!_buildIsUnderway || _computingRootStyleFontCount);
 
+    // FIXME: The spec (and Firefox) says user specified generic families (sans-serif etc.) should be resolved
+    // before the @font-face lookup too.
+    bool resolveGenericFamilyFirst = family == StandardFamily();
+
     StringAtom familyForLookup = family;
     auto isGenericFontFamily = IsGenericFontFamily::No;
     auto resolveAndAssignGenericFamily = [&]
@@ -208,6 +459,9 @@ namespace krys::boo::css
         isGenericFontFamily = IsGenericFontFamily::Yes;
       }
     };
+
+    const auto &fontPaletteValues = LookupFontPaletteValues(family, description);
+    auto fontFeatureValues = LookupFontFeatureValues(family);
 
     // Handle the generic math font family a bit differently.
     if (family == MathFamily() && _document)
@@ -235,10 +489,23 @@ namespace krys::boo::css
       }
     }
 
-    // FIXME: Look the family up in the @font-face rules (resolving the standard family first), once there are
-    // any.
-    resolveAndAssignGenericFamily();
+    if (resolveGenericFamilyFirst)
+    {
+      resolveAndAssignGenericFamily();
+    }
+    if (auto *face = _cssFontFaceSet->GetFontFace(description.GetFontSelectionRequest(), familyForLookup))
+    {
+      Ref<CSSSegmentedFontFace> protectedFace = ShareRef(*face);
+      return {protectedFace->GetFontRanges(description, fontPaletteValues, fontFeatureValues),
+              isGenericFontFamily};
+    }
 
+    if (!resolveGenericFamilyFirst)
+    {
+      resolveAndAssignGenericFamily();
+    }
+
+    // FIXME: The palette and feature values, once the font cache takes them.
     auto font = FontCache::Singleton().FontForFamily(description, familyForLookup);
     return {FontRanges {krys::move(font)}, isGenericFontFamily};
   }
@@ -246,6 +513,7 @@ namespace krys::boo::css
   void CSSFontSelector::ClearFonts() noexcept
   {
     _isStopped = true;
+    _cssFontFaceSet->Clear();
     _clients.clear();
   }
 
@@ -297,8 +565,12 @@ namespace krys::boo::css
       }
     }
 
-    // FIXME: Pending @font-face rules, faces, feature values and palettes make it complex, once there are
-    // any.
-    return true;
+    // font face rules still pending
+    if (!_stagingArea.empty())
+    {
+      return false;
+    }
+
+    return !_cssFontFaceSet->FaceCount() && _featureValues.empty() && _paletteMap.empty();
   }
 }

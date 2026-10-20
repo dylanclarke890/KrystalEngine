@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
@@ -12,6 +13,9 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include <filesystem>
+#include <fstream>
+#include <iterator>
 
 namespace krys::boo::tests
 {
@@ -21,6 +25,7 @@ namespace krys::boo::tests
   {
   private:
     List<UniquePtr<utf8_string>> _texts;
+    List<UniquePtr<List<uint8>>> _files;
 
   public:
     HashMap<utf8_string, Span<const uint8>> Resources;
@@ -47,6 +52,17 @@ namespace krys::boo::tests
       auto &stored = *_texts.emplace_back(CreateUnique<utf8_string>(text));
       Resources[utf8_string(url)] =
         Span<const uint8>(reinterpret_cast<const uint8 *>(stored.data()), stored.size());
+      MimeTypes[utf8_string(url)] = utf8_string(mimeType);
+    }
+
+    /// @brief Serves the bytes of the file at @p path at @p url as @p mimeType.
+    void AddFile(utf8_stringview url, const std::filesystem::path &path, utf8_stringview mimeType) noexcept
+    {
+      std::ifstream stream(path, std::ios::binary);
+      REQUIRE(stream);
+      auto &stored = *_files.emplace_back(
+        CreateUnique<List<uint8>>(std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()));
+      Resources[utf8_string(url)] = Span<const uint8>(stored.data(), stored.size());
       MimeTypes[utf8_string(url)] = utf8_string(mimeType);
     }
 

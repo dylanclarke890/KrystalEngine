@@ -1,126 +1,96 @@
-/*
- * Copyright (C) 2007-2021 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "FontLoadRequest.h"
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/Loader/FontLoadRequest.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
-#include "TrustedFonts.h"
-#include <JavaScriptCore/ArrayBufferView.h>
 
-namespace krys::boo::css
+namespace krys::boo
 {
-
-  class CSSFontFace;
-  class CSSFontSelector;
-  class SharedBuffer;
-  class Document;
   class Font;
   class FontCreationContext;
   class FontDescription;
-  class SVGFontFaceElement;
-  class WeakPtrImplWithEventTargetData;
 
-  struct FontCustomPlatformData;
+  namespace dom
+  {
+    class Document;
+  }
+}
 
-  DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(CSSFontFaceSource);
+namespace krys::boo::css
+{
+  class CSSFontFace;
+  class CSSFontSelector;
+
+  /// @brief One source of a font face: an installed font (`local()`) or a web font file (`url()`).
+  /// @note Owned by its font face, which it shares its reference count with.
+  // FIXME: SVG fonts (`<font-face>` elements) and fonts from array buffers (the `FontFace` interface), once
+  // there are those.
   class CSSFontFaceSource final : public FontLoadRequestClient
   {
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED_WITH_HEAP_IDENTIFIER(CSSFontFaceSource, CSSFontFaceSource);
+    KRYS_NON_COPY_MOVABLE(CSSFontFaceSource);
 
   public:
-    CSSFontFaceSource(CSSFontFace &owner, CSSOMStringAtom fontFaceName);
-    CSSFontFaceSource(CSSFontFace &owner, CSSOMStringAtom fontFaceName, SVGFontFaceElement &);
-    CSSFontFaceSource(CSSFontFace &owner, CSSFontSelector &, Ref<FontLoadRequest> &&);
-    CSSFontFaceSource(CSSFontFace &owner, Ref<JSC::ArrayBufferView> &&);
-    virtual ~CSSFontFaceSource();
-
-    // FontLoadRequestClient.
-    void ref() const final;
-    void deref() const final;
-
-    // => Success
-    // //
+    // clang-format off
+    //                      => Success
+    //                    //
     // Pending => Loading
-    // \\.
-    // => Failure
-    enum class Status
+    //                    \\.
+    //                      => Failure
+    // clang-format on
+    enum class Status : uint8
     {
       Pending,
       Loading,
       Success,
       Failure
     };
-    Status status() const
-    {
-      return m_status;
-    }
-
-    void opportunisticallyStartFontDataURLLoading(DownloadableBinaryFontTrustedTypes);
-
-    void load(DownloadableBinaryFontTrustedTypes, Document * = nullptr);
-    RefPtr<Font> font(const FontDescription &, bool syntheticBold, bool syntheticItalic,
-                      const FontCreationContext &);
-
-    FontLoadRequest *fontLoadRequest() const
-    {
-      return m_fontRequest.get();
-    }
-    bool requiresExternalResource() const
-    {
-      return m_fontRequest.get();
-    }
-
-    bool isSVGFontFaceSource() const;
 
   private:
-    bool shouldIgnoreFontLoadCompletions() const;
+    StringAtom _fontFaceName {StringAtom::Null()}; // Font name for local fonts
+    CSSFontFace &_owningCSSFontFace;
+    WeakPtr<CSSFontSelector> _fontSelector;     // For remote fonts, to orchestrate loading.
+    const RefPtr<FontLoadRequest> _fontRequest; // Also for remote fonts, a pointer to the resource request.
 
-    void fontLoaded(FontLoadRequest &) override;
+    Status _status {Status::Pending};
 
-    void setStatus(Status);
+  public:
+    CSSFontFaceSource(CSSFontFace &owner, StringAtom fontFaceName) noexcept;
+    CSSFontFaceSource(CSSFontFace &owner, CSSFontSelector &fontSelector,
+                      Ref<FontLoadRequest> &&request) noexcept;
+    ~CSSFontFaceSource() noexcept override;
 
-    Ref<CSSFontFace> protectedCSSFontFace() const;
+    // FontLoadRequestClient.
+    void AddRef() const noexcept final;
+    void SubRef() const noexcept final;
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final;
 
-    RefPtr<FontCustomPlatformData> loadCustomFont(SharedBuffer &, DownloadableBinaryFontTrustedTypes);
+    KRYS_NODISCARD Status GetStatus() const noexcept
+    {
+      return _status;
+    }
 
-    CSSOMStringAtom m_fontFaceName;              // Font name for local fonts
-    WeakRef<CSSFontFace> m_owningCSSFontFace;    // Our owning font face.
-    WeakPtr<CSSFontSelector> m_fontSelector;     // For remote fonts, to orchestrate loading.
-    const RefPtr<FontLoadRequest> m_fontRequest; // Also for remote fonts, a pointer to the resource request.
+    void OpportunisticallyStartFontDataURLLoading() noexcept;
 
-    RefPtr<SharedBuffer> m_generatedOTFBuffer;
-    RefPtr<JSC::ArrayBufferView> m_immediateSource;
-    RefPtr<FontCustomPlatformData> m_immediateFontCustomPlatformData;
+    void Load(dom::Document *document = nullptr) noexcept;
+    KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
+                                        bool syntheticItalic,
+                                        const FontCreationContext &fontCreationContext) noexcept;
 
-    WeakPtr<SVGFontFaceElement, WeakPtrImplWithEventTargetData> m_svgFontFaceElement;
-    RefPtr<FontCustomPlatformData> m_inDocumentCustomPlatformData;
+    KRYS_NODISCARD FontLoadRequest *GetFontLoadRequest() const noexcept
+    {
+      return _fontRequest.get();
+    }
+    KRYS_NODISCARD bool RequiresExternalResource() const noexcept
+    {
+      return _fontRequest.get();
+    }
 
-    Status m_status {Status::Pending};
-    bool m_hasSVGFontFaceElement {false};
+  private:
+    KRYS_NODISCARD bool ShouldIgnoreFontLoadCompletions() const noexcept;
+
+    void FontLoaded(FontLoadRequest &fontRequest) noexcept override;
+
+    void SetStatus(Status newStatus) noexcept;
   };
-
-} // namespace krys::boo::css
+}

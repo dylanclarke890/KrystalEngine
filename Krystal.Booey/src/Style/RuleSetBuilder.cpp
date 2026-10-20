@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/RuleSetBuilder.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
@@ -623,10 +624,21 @@ namespace krys::boo::style
       }
 
       auto &rule = *collectedRule.Rule;
-      if (Is<css::FontFaceRule>(rule) || Is<css::FontPaletteValuesRule>(rule)
-          || Is<css::FontFeatureValuesRule>(rule))
+      if (auto *styleRuleFontFace = DynamicDowncast<css::FontFaceRule>(rule))
       {
-        // FIXME: Add the rule to the document's font selector, once there are fonts.
+        _resolver->Document().GetFontSelector().AddFontFaceRule(*styleRuleFontFace, false);
+        _resolver->InvalidateMatchedDeclarationsCache();
+        continue;
+      }
+      if (auto *styleRuleFontPaletteValues = DynamicDowncast<css::FontPaletteValuesRule>(rule))
+      {
+        _resolver->Document().GetFontSelector().AddFontPaletteValuesRule(*styleRuleFontPaletteValues);
+        _resolver->InvalidateMatchedDeclarationsCache();
+        continue;
+      }
+      if (auto *styleRuleFontFeatureValues = DynamicDowncast<css::FontFeatureValuesRule>(rule))
+      {
+        _resolver->Document().GetFontSelector().AddFontFeatureValuesRule(*styleRuleFontFeatureValues);
         _resolver->InvalidateMatchedDeclarationsCache();
         continue;
       }

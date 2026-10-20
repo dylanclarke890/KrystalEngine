@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Text/Encodings/Base.hpp"
+#include <algorithm>
 
 namespace krys::text
 {
@@ -93,7 +94,7 @@ namespace krys::text
 
     if constexpr (Policy.CheckByteOrderMark && HasByteOrderMark<TEncoding>)
     {
-      if (std::ranges::equal(TEncoding::BOM, std::ranges::subrange(current, last)))
+      if (std::ranges::starts_with(std::ranges::subrange(current, last), TEncoding::BOM))
       {
         std::ranges::advance(current, TEncoding::BOM.size());
         result.CodeUnitsConsumed += TEncoding::BOM.size();

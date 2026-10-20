@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
+#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
@@ -34,6 +35,7 @@
 namespace krys::boo
 {
   class CachedResourceLoader;
+  class FontLoadRequest;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -110,6 +112,8 @@ namespace krys::boo::dom
     Scrollend
   };
 
+  class DocumentFontLoader;
+
   class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
@@ -182,6 +186,7 @@ namespace krys::boo::dom
     RefPtr<css::MediaQueryMatcher> _mediaQueryMatcher;
     mutable RefPtr<FontSelector> _fontSelector;
     mutable RefPtr<CachedResourceLoader> _cachedResourceLoader;
+    mutable UniquePtr<DocumentFontLoader> _fontLoader;
 
     WeakPtr<LocalFrame> _frame;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
@@ -824,6 +829,17 @@ namespace krys::boo::dom
 
     /// @brief The document's font selector, which resolves the families its styles name.
     KRYS_NODISCARD css::CSSFontSelector &GetFontSelector() const noexcept;
+    KRYS_NODISCARD css::CSSFontSelector *FontSelectorIfExists() const noexcept;
+
+    /// @brief The loader of the document's web fonts, made on first use.
+    KRYS_NODISCARD DocumentFontLoader &GetFontLoader() const noexcept;
+    /// @brief A request for the web font file at @p url (resolved against the document), or null if it can't
+    /// be requested. The file doesn't load until `BeginLoadingFontSoon`.
+    KRYS_NODISCARD RefPtr<FontLoadRequest>
+      GetFontLoadRequest(utf8_stringview url, bool isSVG, bool isInitiatingElementInUserAgentShadowTree,
+                         LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept;
+    void BeginLoadingFontSoon(FontLoadRequest &request) noexcept;
+    void SuspendFontLoading() noexcept;
 
     /// @brief Restyles the document after the fonts its font selector provides changed.
     void FontsNeedUpdate(FontSelector &selector) noexcept override;

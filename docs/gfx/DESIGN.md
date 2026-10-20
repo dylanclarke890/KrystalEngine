@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8) are in progress: G8a, style sheets, is done; see *G8 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*.
 
 ## Why
 
@@ -1031,6 +1031,16 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** the cache policy came along, so the editor shows edited sheets and images when it reloads.
 - **Out (FIXMEs):** encodings other than UTF-8, HTTP status and `nosniff` checks, integrity, CORS, preloads, icons and manifests, alternate sheet sets chosen by script, a frame loader.
 - **Tests:** Booey tests links and imports (5 cases) and cache policies (1); Krystal.UI tests a file page's linked sheet with an import, and reloading it after an edit.
+
+### G8b as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Web fonts* in `docs/booey/PORTING.md`): upstream's `CachedFont` and font load requests, `DocumentFontLoader`, `CSSFontFace`, `CSSFontFaceSource`, `CSSSegmentedFontFace` and `CSSFontFaceSet`, and `@font-face`, `@font-palette-values` and `@font-feature-values` in `CSSFontSelector`. A font loads when laying text out first needs it; until it arrives its text is laid out in the fallback, invisible for the block period and visible after it, as `font-display` says (on G6's timers); then the selector invalidates the document's fonts and the page is laid out again. `url()` and `local()` sources, `format()` and `tech()`, weight, style and width ranges, `unicode-range`, `size-adjust` and failures falling through to the next source and family.
+- **Fonts from bytes:** `FontCustomPlatformData` makes a FreeType face from the file (Krystal.Text already made faces from memory); WOFF 2 is decoded with the `woff2` vcpkg port (with `brotli`) and WOFF 1 with `zlib`, in Booey's `Graphics/WOFFFileFormat` as upstream.
+- **Krystal.UI:** `FileLoaderStrategy` knows `.ttf`, `.otf`, `.ttc`, `.woff` and `.woff2`.
+- **Editor:** a card with a heading in a face loaded from its TrueType file and digits from Ahem's WOFF 2 (by `unicode-range`); `widgets.css` (imported) now applies, after the byte order mark fix below.
+- **Changed from the plan:** WOFF 1 came along (zlib was at hand), and the WOFF decoding lives in Booey rather than Krystal.Text, as upstream. Krystal.Core's `text::Decode` only stripped a byte order mark from an input that was nothing else; fixed (style sheets from the repository, which have one, lost their first rule).
+- **Out (FIXMEs):** the `FontFace` and `FontFaceSet` interfaces, SVG fonts, font collections, features, palettes and variations on fonts, a safe font parser, the load event's request count.
+- **Tests:** Booey tests faces loading in each format, source order and failures, matching, `font-display` periods and faces following their rules (6 cases), `CachedFont` (2) and the WOFF conversion (2). Krystal.UI adds the `webfonts` page golden (Chrome's is reported only: its rasteriser hints Ahem's boxes differently); the golden harness now runs the event loop before painting, so pages' resources and fonts are in, and the text goldens are unchanged with their `@font-face` rules loading.
 
 ## Open decisions
 

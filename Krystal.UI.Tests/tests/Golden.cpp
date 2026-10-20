@@ -28,6 +28,14 @@ namespace krys::ui::tests
       (void)fonts;
       View view({static_cast<int32>(width), static_cast<int32>(height)});
       REQUIRE(view.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
+      // Let the page's resources load, as Chrome's capture does: its images and style sheets load as
+      // networking tasks, and its web fonts once laying text out asks for them (their text is invisible
+      // until then).
+      for (int32 pass = 0; pass < 4; ++pass)
+      {
+        view.UpdateRendering();
+        boo::html::EventLoop::Current().RunUntilIdle();
+      }
       if (setup)
       {
         view.UpdateRendering();
@@ -155,6 +163,12 @@ namespace krys::ui::tests
   {
     // Text, so Chrome's golden is only reported (see "Golden: text").
     CheckPage("decorations", 360u, 240u, true);
+  }
+
+  TEST_CASE("Golden: web fonts", "[UI][GPU][Golden]")
+  {
+    // Text, so Chrome's golden is only reported (see "Golden: text"); Ahem's boxes match it.
+    CheckPage("webfonts", 360u, 240u, true);
   }
 
   TEST_CASE("Golden: tables", "[UI][GPU][Golden]")

@@ -1,82 +1,76 @@
-/*
- * Copyright (C) 2008-2021 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "CSSFontFace.h"
-#include "FontCache.h"
-#include <wtf/HashMap.h>
-#include <wtf/RefCounted.h>
-#include <wtf/SmallList.h>
+#include "Krystal.Booey/CSS/Font/FontFace.hpp"
+#include "Krystal.Booey/Graphics/FontCascadeCache.hpp"
+#include "Krystal.Booey/Graphics/FontPaletteValues.hpp"
+#include "Krystal.Booey/Graphics/FontRanges.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 
 namespace krys::boo::css
 {
-
-  class CSSFontSelector;
-  class FontCreationContext;
-  class FontDescription;
-  class FontPaletteValues;
-  class FontRanges;
-
-  DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(CSSSegmentedFontFace);
+  /// @brief The font faces of a family that match a font selection request, best first, each covering its
+  /// `unicode-range`.
   class CSSSegmentedFontFace final : public RefCounted<CSSSegmentedFontFace>, public CSSFontFaceClient
   {
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED_WITH_HEAP_IDENTIFIER(CSSSegmentedFontFace, CSSSegmentedFontFace);
+    KRYS_NON_COPY_MOVABLE(CSSSegmentedFontFace);
+
+  private:
+    struct CacheKey
+    {
+      FontDescriptionKey DescriptionKey;
+      FontPaletteValues PaletteValues;
+
+      KRYS_NODISCARD bool operator==(const CacheKey &) const noexcept = default;
+    };
+
+    struct CacheKeyHash
+    {
+      KRYS_NODISCARD size_t operator()(const CacheKey &key) const noexcept
+      {
+        return FontDescriptionKeyHash {}(key.DescriptionKey);
+      }
+    };
+
+    // FIXME: Add support for font-feature-values in the key for this cache.
+    HashMap<CacheKey, FontRanges, CacheKeyHash> _cache;
+    SmallList<Ref<CSSFontFace>, 1> _fontFaces;
+
+    CSSSegmentedFontFace() noexcept = default;
 
   public:
-    void ref() const final
+    KRYS_NODISCARD static Ref<CSSSegmentedFontFace> Create() noexcept
     {
-      RefCounted::ref();
-    }
-    void deref() const final
-    {
-      RefCounted::deref();
+      return AdoptRef(*new CSSSegmentedFontFace());
     }
 
-    static Ref<CSSSegmentedFontFace> create()
+    ~CSSSegmentedFontFace() noexcept override;
+
+    void AddRef() const noexcept final
     {
-      return adoptRef(*new CSSSegmentedFontFace());
+      RefCounted::AddRef();
     }
-    ~CSSSegmentedFontFace();
-
-    void appendFontFace(Ref<CSSFontFace> &&);
-
-    FontRanges fontRanges(const FontDescription &, const FontPaletteValues &, RefPtr<FontFeatureValues>);
-
-    SmallList<Ref<CSSFontFace>, 1> &constituentFaces()
+    void SubRef() const noexcept final
     {
-      return m_fontFaces;
+      RefCounted::SubRef();
+    }
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return RefCounted::GetRefCount();
+    }
+
+    void AppendFontFace(Ref<CSSFontFace> &&fontFace) noexcept;
+
+    KRYS_NODISCARD FontRanges GetFontRanges(const FontDescription &fontDescription,
+                                            const FontPaletteValues &fontPaletteValues,
+                                            RefPtr<FontFeatureValues> fontFeatureValues) noexcept;
+
+    KRYS_NODISCARD SmallList<Ref<CSSFontFace>, 1> &ConstituentFaces() noexcept
+    {
+      return _fontFaces;
     }
 
   private:
-    CSSSegmentedFontFace();
-    void fontLoaded(CSSFontFace &) final;
-
-    // FIXME: Add support for font-feature-values in the key for this cache.
-    HashMap<std::tuple<FontDescriptionKey, FontPaletteValues>, FontRanges> m_cache;
-    SmallList<Ref<CSSFontFace>, 1> m_fontFaces;
+    void FontLoaded(CSSFontFace &fontFace) noexcept final;
   };
-
-} // namespace krys::boo::css
+}

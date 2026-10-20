@@ -47,6 +47,21 @@ find_package(JPEG REQUIRED)
 find_package(WebP CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
 
+# WOFF fonts: WOFF 2 with google/woff2 (static libraries without a CMake package) over Brotli, WOFF 1 with zlib.
+find_package(ZLIB REQUIRED)
+find_package(unofficial-brotli CONFIG REQUIRED)
+find_path(WOFF2_INCLUDE_DIR woff2/decode.h REQUIRED)
+find_library(WOFF2_DEC_LIBRARY_RELEASE woff2dec PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib" NO_DEFAULT_PATH REQUIRED)
+find_library(WOFF2_DEC_LIBRARY_DEBUG woff2dec PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib" NO_DEFAULT_PATH REQUIRED)
+find_library(WOFF2_COMMON_LIBRARY_RELEASE woff2common PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib" NO_DEFAULT_PATH REQUIRED)
+find_library(WOFF2_COMMON_LIBRARY_DEBUG woff2common PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib" NO_DEFAULT_PATH REQUIRED)
+target_include_directories(Krystal.Booey PRIVATE "${WOFF2_INCLUDE_DIR}")
+target_link_libraries(Krystal.Booey PRIVATE
+  ZLIB::ZLIB
+  optimized "${WOFF2_DEC_LIBRARY_RELEASE}" debug "${WOFF2_DEC_LIBRARY_DEBUG}"
+  optimized "${WOFF2_COMMON_LIBRARY_RELEASE}" debug "${WOFF2_COMMON_LIBRARY_DEBUG}"
+  unofficial::brotli::brotlidec)
+
 # Custom build step for python codegen scripts
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
@@ -1534,6 +1549,18 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp
   include/Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp
   include/Krystal.Booey/Loader/Cache/CachePolicy.hpp
+  include/Krystal.Booey/Graphics/WOFFFileFormat.hpp
+  include/Krystal.Booey/Graphics/FontCreationContext.hpp
+  include/Krystal.Booey/Loader/FontLoadRequest.hpp
+  include/Krystal.Booey/Loader/Cache/CachedFontClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedFont.hpp
+  include/Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp
+  include/Krystal.Booey/DOM/DocumentFontLoader.hpp
+  include/Krystal.Booey/Style/ResolveForFont.hpp
+  include/Krystal.Booey/CSS/Font/FontFace.hpp
+  include/Krystal.Booey/CSS/Font/FontFaceSource.hpp
+  include/Krystal.Booey/CSS/Font/SegmentedFontFace.hpp
+  include/Krystal.Booey/CSS/Font/FontFaceSet.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2544,6 +2571,14 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/MIMETypeRegistry.cpp
   src/Graphics/ImageFrameAnimator.cpp
   src/Loader/Cache/CachedCSSStyleSheet.cpp
+  src/Graphics/WOFFFileFormat.cpp
+  src/Loader/Cache/CachedFont.cpp
+  src/DOM/DocumentFontLoader.cpp
+  src/Style/ResolveForFont.cpp
+  src/CSS/Font/FontFace.cpp
+  src/CSS/Font/FontFaceSource.cpp
+  src/CSS/Font/SegmentedFontFace.cpp
+  src/CSS/Font/FontFaceSet.cpp
 )
 
 target_precompile_headers(Krystal.Booey

@@ -1,6 +1,11 @@
 ﻿#include "Krystal.Booey/CSS/Values/FontFaceSrcValue.hpp"
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/FontCustomPlatformData.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
@@ -36,6 +41,8 @@ namespace krys::boo::css
   {
   }
 
+  FontFaceSrcResourceValue::~FontFaceSrcResourceValue() noexcept = default;
+
   Ref<FontFaceSrcResourceValue> FontFaceSrcResourceValue::Create(CSSURL location, CSSOMString format,
                                                                  List<FontTechnology> &&technologies) noexcept
   {
@@ -43,11 +50,62 @@ namespace krys::boo::css
       *new FontFaceSrcResourceValue(krys::move(location), krys::move(format), krys::move(technologies)));
   }
 
-  bool FontFaceSrcResourceValue::CustomTraverseSubresources(
-    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &) const noexcept
+  RefPtr<FontLoadRequest>
+    FontFaceSrcResourceValue::GetFontLoadRequest(dom::Document &context,
+                                                 bool isInitiatingElementInUserAgentShadowTree) noexcept
   {
-    // FIXME: return `_cachedFont && handler(*_cachedFont)` once the resource loader is ported.
-    return false;
+    if (_cachedFont)
+    {
+      return CachedFontLoadRequest::Create(*_cachedFont);
+    }
+
+    bool isFormatSVG;
+    if (_format.empty())
+    {
+      // In order to avoid conflicts with the old WinIE style of font-face, if there is no format specified,
+      // we check to see if the URL ends with .eot. We will not try to load those.
+      auto lastPathComponent = _location.Resolved.LastPathComponent();
+      constexpr utf8_stringview eot = u8".eot";
+      if (lastPathComponent.size() >= eot.size()
+          && text::IsASCIICaselessEqual(lastPathComponent.substr(lastPathComponent.size() - eot.size()), eot)
+          && !_location.Resolved.ProtocolIsData())
+      {
+        return nullptr;
+      }
+      isFormatSVG = false;
+    }
+    else
+    {
+      isFormatSVG = text::IsASCIICaselessEqual(_format, utf8_stringview(u8"svg"));
+      if (!FontCustomPlatformData::SupportsFormat(_format))
+      {
+        return nullptr;
+      }
+    }
+
+    for (auto technology : _technologies)
+    {
+      if (!FontCustomPlatformData::SupportsTechnology(technology))
+      {
+        return nullptr;
+      }
+    }
+
+    RefPtr<FontLoadRequest> request = context.GetFontLoadRequest(_location.Resolved.String(), isFormatSVG,
+                                                                 isInitiatingElementInUserAgentShadowTree,
+                                                                 _location.Modifiers.LoadedFromOpaqueSource);
+    if (auto *cachedRequest = DynamicDowncast<CachedFontLoadRequest>(request.get()))
+    {
+      _cachedFont = &cachedRequest->GetCachedFont();
+    }
+
+    return request;
+  }
+
+  bool FontFaceSrcResourceValue::CustomTraverseSubresources(
+    KRYS_NOESCAPE const Func<bool(const CachedResource &)> &handler) const noexcept
+  {
+    return _cachedFont && handler(*_cachedFont);
   }
 
   bool FontFaceSrcResourceValue::CustomMayDependOnBaseUrl() const noexcept

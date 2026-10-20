@@ -25,3 +25,11 @@ tr:hover td { text-decoration: underline; }
 .strip { height: 100%; overflow-x: auto; overflow-y: hidden; white-space: nowrap; border-radius: 8px;
          background: #f7f8fb; }
 .strip div { display: inline-block; width: 90px; height: 90px; margin: 8px 4px; border-radius: 12px; }
+
+/* Web fonts: a heading in a face loaded from its TrueType file, and digits from Ahem's WOFF 2 (its glyphs
+   are boxes), chosen by unicode-range. */
+@font-face { font-family: Display; src: url(../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf)
+             format("truetype"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: Blocks; src: url(fonts/Ahem.woff2) format("woff2"); unicode-range: U+30-39; }
+.display { margin: 0 0 8px; font: italic 700 30px/36px Display, "Liberation Sans"; color: #ef476f; }
+.blocks { font-family: Blocks, "Liberation Sans"; color: #118ab2; }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedFont.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
@@ -36,7 +37,7 @@ namespace krys::boo
   // The CachedResourceLoader provides a per-context interface to the MemoryCache
   // and enforces a bunch of security checks and rules for resource revalidation.
   /// @note One per document, which creates it; it loads through the document's frame.
-  // FIXME: Style sheets, fonts, scripts and the other resource types; preloads, request counting for the
+  // FIXME: Scripts and the other resource types; preloads, request counting for the
   // load event, resource timing, security checks and revalidation, once there are those.
   class CachedResourceLoader : public RefCounted<CachedResourceLoader>,
                                public CanMakeWeakPtr<CachedResourceLoader>
@@ -75,6 +76,8 @@ namespace krys::boo
       RequestImage(CachedResourceRequest &&, ImageLoading = ImageLoading::Immediate) noexcept;
     ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
       RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
+    ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&,
+                                                                  bool isSVG) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;

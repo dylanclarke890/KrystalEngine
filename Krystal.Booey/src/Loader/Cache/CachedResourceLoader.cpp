@@ -23,6 +23,11 @@ namespace krys::boo
           Ref<CachedResource> resource = AdoptRef(*new CachedCSSStyleSheet(krys::move(request)));
           return CachedResourceHandle<CachedResource>(resource.get());
         }
+        case CachedResource::Type::FontResource:
+        {
+          Ref<CachedResource> resource = AdoptRef(*new CachedFont(krys::move(request)));
+          return CachedResourceHandle<CachedResource>(resource.get());
+        }
         default:
           // FIXME: The other resource types, once they're loaded.
           krys_assert_msg(false, "Not reached");
@@ -95,6 +100,23 @@ namespace krys::boo
       return Unexpected(resource.error());
     }
     return CachedResourceHandle<CachedCSSStyleSheet>(Downcast<CachedCSSStyleSheet>(resource->get()));
+  }
+
+  ResourceErrorOr<CachedResourceHandle<CachedFont>>
+    CachedResourceLoader::RequestFont(CachedResourceRequest &&request, bool isSVG) noexcept
+  {
+    // FIXME: SVG fonts, once they're loaded.
+    if (isSVG)
+    {
+      return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0,
+                                      request.GetResourceRequest().URL(), u8"SVG fonts aren't supported"));
+    }
+    auto resource = RequestResource(CachedResource::Type::FontResource, krys::move(request));
+    if (!resource)
+    {
+      return Unexpected(resource.error());
+    }
+    return CachedResourceHandle<CachedFont>(Downcast<CachedFont>(resource->get()));
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedResource>>

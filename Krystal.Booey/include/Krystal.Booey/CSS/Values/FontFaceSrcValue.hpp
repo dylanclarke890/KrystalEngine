@@ -3,14 +3,24 @@
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo
+{
+  class CachedFont;
+  class FontLoadRequest;
+
+  namespace dom
+  {
+    class Document;
+  }
+}
+
 namespace krys::boo::css
 {
-  class FontLoadRequest;
   class SVGFontFaceElement;
-  class ScriptExecutionContext;
 
   /// @brief A `local(<family-name>)` source in an `@font-face` rule's `src` descriptor.
   class FontFaceSrcLocalValue final : public Value
@@ -86,12 +96,14 @@ namespace krys::boo::css
     CSSURL _location;
     CSSOMString _format;
     List<FontTechnology> _technologies;
-    // FIXME: add the cached font (CachedResourceHandle<CachedFont>) once the resource loader is ported.
+    CachedResourceHandle<CachedFont> _cachedFont;
 
     FontFaceSrcResourceValue(CSSURL &&location, CSSOMString &&format,
                              List<FontTechnology> &&technologies) noexcept;
 
   public:
+    ~FontFaceSrcResourceValue() noexcept;
+
     KRYS_NODISCARD static Ref<FontFaceSrcResourceValue> Create(CSSURL location, CSSOMString format,
                                                                List<FontTechnology> &&technologies) noexcept;
 
@@ -100,10 +112,9 @@ namespace krys::boo::css
       return _location.Specified.empty();
     }
 
-    // FIXME: not defined until the resource loader is ported.
+    /// @brief A request for the source's font file, or null if its format or technologies aren't supported.
     KRYS_NODISCARD RefPtr<FontLoadRequest>
-      GetFontLoadRequest(ScriptExecutionContext &context,
-                         bool isInitiatingElementInUserAgentShadowTree) noexcept;
+      GetFontLoadRequest(dom::Document &context, bool isInitiatingElementInUserAgentShadowTree) noexcept;
 
     KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
     KRYS_NODISCARD bool CustomTraverseSubresources(

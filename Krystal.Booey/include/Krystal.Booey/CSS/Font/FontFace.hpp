@@ -1,94 +1,50 @@
-/*
- * Copyright (C) 2007-2022 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "FontSelectionAlgorithm.h"
-#include "FontTaggedSettings.h"
-#include "RenderStyleConstants.h"
-#include "Settings.h"
-#include "TextFlags.h"
-#include "TrustedFonts.h"
-#include <memory>
-#include <wtf/AbstractRefCountedAndCanMakeWeakPtr.h>
-
+#include "Krystal.Booey/Graphics/FontSelectionAlgorithm.hpp"
+#include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
-#include <wtf/HashSet.h>
-#include <wtf/RefCountedAndCanMakeWeakPtr.h>
-#include <wtf/WeakHashSet.h>
+
+namespace krys::boo
+{
+  class Font;
+  class FontDescription;
+  class FontFeatureValues;
+  class FontPaletteValues;
+  enum class ExternalResourceDownloadPolicy : bool;
+
+  namespace dom
+  {
+    class Document;
+  }
+}
 
 namespace krys::boo::css
 {
-
   class CSSFontFaceClient;
   class CSSFontFaceSource;
   class CSSFontSelector;
-  class CSSPrimitiveValue;
-  class Value;
-  class CSSValueList;
-  class Document;
-  class Font;
-  class FontDescription;
-  class FontFace;
-  class FontFeatureValues;
-  class FontPaletteValues;
+  class FontFaceRule;
   class MutableStyleProperties;
-  class ScriptExecutionContext;
   class StyleProperties;
-  class StyleRuleFontFace;
+  class Value;
+  class ValueList;
 
-  enum class ExternalResourceDownloadPolicy : bool;
-
-  DECLARE_ALLOCATOR_WITH_HEAP_IDENTIFIER(CSSFontFace);
-  class CSSFontFace final : public RefCountedAndCanMakeWeakPtr<CSSFontFace>
+  /// @brief A font face from an `@font-face` rule (or a face of an installed family that shares its name
+  /// with one): its descriptors, its sources in order, and its loading state.
+  // FIXME: The `FontFace` wrapper, once there's scripting.
+  class CSSFontFace final : public RefCounted<CSSFontFace>, public CanMakeWeakPtr<CSSFontFace>
   {
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED_WITH_HEAP_IDENTIFIER(CSSFontFace, CSSFontFace);
+    KRYS_NON_COPY_MOVABLE(CSSFontFace);
 
   public:
-    static Ref<CSSFontFace> create(CSSFontSelector &, StyleRuleFontFace *cssConnection = nullptr,
-                                   FontFace *wrapper = nullptr, bool isLocalFallback = false);
-    ~CSSFontFace();
-
-    void setFamily(Value &);
-    void setStyle(Value &);
-    void setWeight(Value &);
-    void setWidth(Value &);
-    void setSizeAdjust(Value &);
-    void setUnicodeRange(CSSValueList &);
-    void setFeatureSettings(Value &);
-    void setDisplay(Value &);
-
-    String family() const;
-    String style() const;
-    String weight() const;
-    String width() const;
-    String unicodeRange() const;
-    String featureSettings() const;
-    String display() const;
-    String sizeAdjust() const;
-
     // Pending => Loading  => TimedOut
     //              ||  \\    //  ||
     //              ||   \\  //   ||
@@ -98,7 +54,7 @@ namespace krys::boo::css
     //              ||   //  \\   ||
     //              \/  \/    \/  \/
     //             Success    Failure
-    enum class Status : uint8_t
+    enum class Status : uint8
     {
       Pending,
       Loading,
@@ -109,157 +65,168 @@ namespace krys::boo::css
 
     struct UnicodeRange
     {
-      char32_t from;
-      char32_t to;
+      char32 From;
+      char32 To;
 
-      bool operator==(const UnicodeRange &) const = default;
+      KRYS_NODISCARD bool operator==(const UnicodeRange &) const noexcept = default;
     };
-
-    std::span<const UnicodeRange> ranges() const noexcept
-    {
-      ASSERT(m_status != Status::Failure);
-      return m_ranges.span();
-    }
-
-    RefPtr<Value> familyCSSValue() const;
-
-    void setFontSelectionCapabilities(FontSelectionCapabilities capabilities)
-    {
-      m_fontSelectionCapabilities = capabilities;
-    }
-    FontSelectionCapabilities fontSelectionCapabilities() const
-    {
-      ASSERT(m_status != Status::Failure);
-      return m_fontSelectionCapabilities.computeFontSelectionCapabilities();
-    }
-
-    bool isLocalFallback() const
-    {
-      return m_isLocalFallback;
-    }
-    Status status() const
-    {
-      return m_status;
-    }
-    StyleRuleFontFace *cssConnection() const;
-
-    void addClient(CSSFontFaceClient &);
-    void removeClient(CSSFontFaceClient &);
-
-    bool computeFailureState() const;
-
-    void opportunisticallyStartFontDataURLLoading(DownloadableBinaryFontTrustedTypes);
-
-    void adoptSource(std::unique_ptr<CSSFontFaceSource>);
-    void sourcesPopulated()
-    {
-      m_sourcesPopulated = true;
-    }
-    size_t sourceCount() const
-    {
-      return m_sources.size();
-    }
-
-    void fontLoaded(CSSFontFaceSource &);
-
-    void load();
-
-    RefPtr<Font> font(const FontDescription &, bool syntheticBold, bool syntheticItalic,
-                      ExternalResourceDownloadPolicy, const FontPaletteValues &, RefPtr<FontFeatureValues>);
-
-    static void appendSources(CSSFontFace &, CSSValueList &, ScriptExecutionContext *,
-                              bool isInitiatingElementInUserAgentShadowTree);
-
-    bool rangesMatchCodePoint(char32_t) const;
-
-    // We don't guarantee that the FontFace wrapper will be the same every time you ask for it.
-    Ref<FontFace> wrapper(ScriptExecutionContext *);
-    void setWrapper(FontFace &);
-    FontFace *existingWrapper();
 
     struct FontLoadTiming
     {
-      Seconds blockPeriod;
-      Seconds swapPeriod;
+      /// @brief `MonotonicTime::duration::max()` is an infinite period.
+      MonotonicTime::duration BlockPeriod;
+      MonotonicTime::duration SwapPeriod;
     };
-    FontLoadTiming fontLoadTiming() const;
-    bool shouldIgnoreFontLoadCompletions() const
-    {
-      return m_shouldIgnoreFontLoadCompletions;
-    }
-
-    bool purgeable() const;
-
-    AllowUserInstalledFonts allowUserInstalledFonts() const
-    {
-      return m_allowUserInstalledFonts;
-    }
-
-    void updateStyleIfNeeded();
-
-    bool hasSVGFontFaceSource() const;
-    void setErrorState();
 
   private:
-    CSSFontFace(const SettingsValues *, StyleRuleFontFace *, FontFace *, bool isLocalFallback);
+    RefPtr<FontFaceRule> _cssConnection;
+    // The descriptors of a face without a rule.
+    RefPtr<MutableStyleProperties> _properties;
+    RefPtr<Value> _family;
+    List<UnicodeRange> _ranges;
 
-    size_t pump(ExternalResourceDownloadPolicy);
-    void setStatus(Status);
-    void notifyClientsOfFontPropertyChange();
+    FontFeatureSettings _featureSettings;
+    FontLoadingBehavior _loadingBehavior {FontLoadingBehavior::Auto};
 
-    void initializeWrapper();
+    float _sizeAdjust {1.0f};
 
-    void fontLoadEventOccurred();
-    void timeoutFired();
+    List<UniquePtr<CSSFontFaceSource>> _sources;
+    List<WeakPtr<CSSFontFaceClient>> _clients;
+    FontSelectionSpecifiedCapabilities _fontSelectionCapabilities;
 
-    const StyleProperties &properties() const;
-    MutableStyleProperties &mutableProperties();
+    Status _status {Status::Pending};
+    bool _isLocalFallback {false};
+    bool _sourcesPopulated {false};
+    bool _mayBePurged {true};
 
-    RefPtr<Document> protectedDocument();
+    Timer _timeoutTimer;
 
-    const Variant<Ref<MutableStyleProperties>, Ref<StyleRuleFontFace>> m_propertiesOrCSSConnection;
-    RefPtr<Value> m_family;
-    SmallList<UnicodeRange> m_ranges;
+    CSSFontFace(FontFaceRule *connection, bool isLocalFallback) noexcept;
 
-    FontFeatureSettings m_featureSettings;
-    FontLoadingBehavior m_loadingBehavior {FontLoadingBehavior::Auto};
+  public:
+    ~CSSFontFace() noexcept;
 
-    float m_sizeAdjust {1.0};
+    KRYS_NODISCARD static Ref<CSSFontFace> Create(CSSFontSelector &fontSelector,
+                                                  FontFaceRule *cssConnection = nullptr,
+                                                  bool isLocalFallback = false) noexcept;
 
-    SmallList<std::unique_ptr<CSSFontFaceSource>, 0, CrashOnOverflow, 0> m_sources;
-    WeakHashSet<CSSFontFaceClient> m_clients;
-    WeakPtr<FontFace> m_wrapper;
-    FontSelectionSpecifiedCapabilities m_fontSelectionCapabilities;
+    void SetFamily(Value &family) noexcept;
+    void SetStyle(Value &style) noexcept;
+    void SetWeight(Value &weight) noexcept;
+    void SetWidth(Value &width) noexcept;
+    void SetSizeAdjust(Value &sizeAdjust) noexcept;
+    void SetUnicodeRange(ValueList &list) noexcept;
+    void SetFeatureSettings(Value &featureSettings) noexcept;
+    void SetDisplay(Value &loadingBehaviorValue) noexcept;
 
-    Status m_status {Status::Pending};
-    bool m_isLocalFallback : 1 {false};
-    bool m_sourcesPopulated : 1 {false};
-    bool m_mayBePurged : 1 {true};
-    bool m_shouldIgnoreFontLoadCompletions : 1 {false};
-    FontLoadTimingOverride m_fontLoadTimingOverride {FontLoadTimingOverride::None};
-    AllowUserInstalledFonts m_allowUserInstalledFonts {AllowUserInstalledFonts::Yes};
-    DownloadableBinaryFontTrustedTypes m_trustedType {DownloadableBinaryFontTrustedTypes::Any};
+    KRYS_NODISCARD Span<const UnicodeRange> Ranges() const noexcept KRYS_LIFETIME_BOUND
+    {
+      krys_debug_assert(_status != Status::Failure);
+      return _ranges;
+    }
 
-    Timer m_timeoutTimer;
+    KRYS_NODISCARD RefPtr<Value> FamilyCSSValue() const noexcept;
+
+    void SetFontSelectionCapabilities(FontSelectionCapabilities capabilities) noexcept
+    {
+      _fontSelectionCapabilities = capabilities;
+    }
+    KRYS_NODISCARD FontSelectionCapabilities GetFontSelectionCapabilities() const noexcept
+    {
+      krys_debug_assert(_status != Status::Failure);
+      return _fontSelectionCapabilities.ComputeFontSelectionCapabilities();
+    }
+
+    KRYS_NODISCARD bool IsLocalFallback() const noexcept
+    {
+      return _isLocalFallback;
+    }
+    KRYS_NODISCARD Status GetStatus() const noexcept
+    {
+      return _status;
+    }
+    KRYS_NODISCARD FontFaceRule *CssConnection() const noexcept;
+
+    void AddClient(CSSFontFaceClient &client) noexcept;
+    void RemoveClient(CSSFontFaceClient &client) noexcept;
+
+    KRYS_NODISCARD bool ComputeFailureState() const noexcept;
+
+    void OpportunisticallyStartFontDataURLLoading() noexcept;
+
+    void AdoptSource(UniquePtr<CSSFontFaceSource> &&source) noexcept;
+    void SourcesPopulated() noexcept
+    {
+      _sourcesPopulated = true;
+    }
+    KRYS_NODISCARD size_t SourceCount() const noexcept
+    {
+      return _sources.size();
+    }
+
+    void FontLoaded(CSSFontFaceSource &source) noexcept;
+
+    void Load() noexcept;
+
+    KRYS_NODISCARD RefPtr<Font> GetFont(const FontDescription &fontDescription, bool syntheticBold,
+                                        bool syntheticItalic, ExternalResourceDownloadPolicy policy,
+                                        const FontPaletteValues &fontPaletteValues,
+                                        RefPtr<FontFeatureValues> fontFeatureValues) noexcept;
+
+    static void AppendSources(CSSFontFace &fontFace, ValueList &srcList, dom::Document *context,
+                              bool isInitiatingElementInUserAgentShadowTree) noexcept;
+
+    KRYS_NODISCARD bool RangesMatchCodePoint(char32 character) const noexcept;
+
+    KRYS_NODISCARD FontLoadTiming GetFontLoadTiming() const noexcept;
+    KRYS_NODISCARD bool ShouldIgnoreFontLoadCompletions() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool Purgeable() const noexcept;
+
+    KRYS_NODISCARD AllowUserInstalledFonts GetAllowUserInstalledFonts() const noexcept
+    {
+      return AllowUserInstalledFonts::Yes;
+    }
+
+    void UpdateStyleIfNeeded() noexcept;
+
+    void SetErrorState() noexcept;
+
+  private:
+    size_t Pump(ExternalResourceDownloadPolicy policy) noexcept;
+    void SetStatus(Status newStatus) noexcept;
+
+    void FontLoadEventOccurred() noexcept;
+    void TimeoutFired() noexcept;
+
+    KRYS_NODISCARD const StyleProperties &Properties() const noexcept;
+    KRYS_NODISCARD MutableStyleProperties &MutableProperties() noexcept;
+
+    template <typename TFunc>
+    void IterateClients(TFunc &&callback) noexcept;
   };
 
+  /// @brief Something told when a font face loads, changes state or has its descriptors changed.
   class CSSFontFaceClient : public AbstractRefCountedAndCanMakeWeakPtr<CSSFontFaceClient>
   {
   public:
-    virtual ~CSSFontFaceClient() = default;
-    virtual void fontLoaded(CSSFontFace &)
+    ~CSSFontFaceClient() noexcept override = default;
+
+    virtual void FontLoaded(CSSFontFace &) noexcept
     {
     }
-    virtual void fontStateChanged(CSSFontFace &, CSSFontFace::Status /*oldState*/,
-                                  CSSFontFace::Status /*newState*/)
+    virtual void FontStateChanged(CSSFontFace &, CSSFontFace::Status /* oldState */,
+                                  CSSFontFace::Status /* newState */) noexcept
     {
     }
-    virtual void fontPropertyChanged(CSSFontFace &, Value * /*oldFamily*/ = nullptr)
+    virtual void FontPropertyChanged(CSSFontFace &, Value * /* oldFamily */ = nullptr) noexcept
     {
     }
-    virtual void updateStyleIfNeeded(CSSFontFace &)
+    virtual void UpdateStyleIfNeeded(CSSFontFace &) noexcept
     {
     }
   };
-
 }

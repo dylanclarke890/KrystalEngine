@@ -598,6 +598,8 @@ namespace krys::ui::tests
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".jpeg") == u8"image/jpeg");
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".webp") == u8"image/webp");
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".woff2") == u8"font/woff2");
+    CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".TTF") == u8"font/ttf");
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".unknown").empty());
   }
 }

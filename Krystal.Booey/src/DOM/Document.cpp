@@ -18,6 +18,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
+#include "Krystal.Booey/DOM/DocumentFontLoader.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
@@ -50,6 +51,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -108,6 +110,10 @@ namespace krys::boo::dom
     if (_mediaQueryMatcher)
     {
       _mediaQueryMatcher->DocumentDestroyed();
+    }
+    if (_fontLoader)
+    {
+      _fontLoader->StopLoadingAndClearFonts();
     }
     if (_fontSelector)
     {
@@ -1475,6 +1481,47 @@ namespace krys::boo::dom
     return result;
   }
 
+  css::CSSFontSelector *Document::FontSelectorIfExists() const noexcept
+  {
+    return static_cast<css::CSSFontSelector *>(_fontSelector.get());
+  }
+
+  DocumentFontLoader &Document::GetFontLoader() const noexcept
+  {
+    if (!_fontLoader)
+    {
+      _fontLoader = UniquePtr<DocumentFontLoader>(new DocumentFontLoader(const_cast<Document &>(*this)));
+    }
+    return *_fontLoader;
+  }
+
+  RefPtr<FontLoadRequest> Document::GetFontLoadRequest(utf8_stringview url, bool isSVG,
+                                                       bool isInitiatingElementInUserAgentShadowTree,
+                                                       LoadedFromOpaqueSource loadedFromOpaqueSource) noexcept
+  {
+    CachedResourceHandle<CachedFont> cachedFont = GetFontLoader().GetCachedFont(
+      CompleteURL(url), isSVG, isInitiatingElementInUserAgentShadowTree, loadedFromOpaqueSource);
+    if (!cachedFont)
+    {
+      return nullptr;
+    }
+    return CachedFontLoadRequest::Create(*cachedFont);
+  }
+
+  void Document::BeginLoadingFontSoon(FontLoadRequest &request) noexcept
+  {
+    CachedResourceHandle<CachedFont> font = &Downcast<CachedFontLoadRequest>(request).GetCachedFont();
+    GetFontLoader().BeginLoadingFontSoon(*font);
+  }
+
+  void Document::SuspendFontLoading() noexcept
+  {
+    if (_fontLoader)
+    {
+      _fontLoader->SuspendFontLoading();
+    }
+  }
+
   css::CSSFontSelector &Document::GetFontSelector() const noexcept
   {
     if (!_fontSelector)
@@ -1658,6 +1705,11 @@ namespace krys::boo::dom
         UnscheduleStyleRecalc();
 
         _inStyleRecalc = false;
+
+        if (_fontLoader)
+        {
+          _fontLoader->LoadPendingFonts();
+        }
 
         if (styleUpdate)
         {

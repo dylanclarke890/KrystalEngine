@@ -94,6 +94,20 @@ namespace krys::boo::html::tests
     CHECK(fixture.RendererSize(u8"box") == IntSize(42, 10));
   }
 
+  TEST_CASE("HTMLLinkElement: a sheet's byte order mark is dropped", "[HTML][HTMLLinkElement]")
+  {
+    LoaderFixture loader;
+    // Its first rule is an import, which must still come first.
+    loader.Strategy.AddText(u8"file:///css/a.css", u8"\uFEFF@import url(b.css); #box { height: 10px }");
+    loader.Strategy.AddText(u8"file:///css/b.css", u8"\uFEFF#box { width: 40px }");
+
+    PageInFrameFixture fixture(u8"<head><link rel=stylesheet href='file:///css/a.css'></head>"
+                               u8"<body><div id=box style='display: inline-block'></div></body>");
+    RunNetworkingTasks();
+
+    CHECK(fixture.RendererSize(u8"box") == IntSize(40, 10));
+  }
+
   TEST_CASE("HTMLLinkElement: a cycle of imports ends", "[HTML][HTMLLinkElement]")
   {
     LoaderFixture loader;

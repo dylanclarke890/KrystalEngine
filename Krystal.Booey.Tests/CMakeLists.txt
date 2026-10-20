@@ -295,6 +295,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/StyleSheetContents.cpp
 
 		# Graphics
+		tests/Graphics/WOFFFileFormat.cpp
 		tests/Graphics/DoublePoint.cpp
 		tests/Graphics/FloatPoint.cpp
 		tests/Graphics/FloatPoint3D.cpp
@@ -357,6 +358,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/ComplexTextController.cpp
 		tests/Graphics/FontCascade.cpp
 		tests/CSS/CSSFontSelector.cpp
+		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/FontDatabase.cpp
 		tests/Graphics/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
@@ -411,6 +413,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Timer.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
+		tests/Loader/Cache/CachedFont.cpp
 		tests/Loader/Cache/CachedResourceLoader.cpp
 		tests/HTML/Parser/HTMLSrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp

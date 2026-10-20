@@ -111,6 +111,11 @@ namespace krys::boo
     /// @brief The names of every registered family.
     KRYS_NODISCARD List<utf8_string> SystemFontFamilies() const noexcept;
 
+    /// @brief The capabilities of each registered face of @p familyName; empty if there's no such family.
+    KRYS_NODISCARD List<FontSelectionCapabilities>
+      GetFontSelectionCapabilitiesInFamily(const StringAtom &familyName,
+                                           AllowUserInstalledFonts allowUserInstalledFonts) const noexcept;
+
     void AddClient(FontSelector &client) noexcept;
     void RemoveClient(FontSelector &client) noexcept;
 

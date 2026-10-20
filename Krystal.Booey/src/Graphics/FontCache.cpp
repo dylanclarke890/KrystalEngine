@@ -400,6 +400,20 @@ namespace krys::boo
     return FontForPlatformData(PlatformDataForFace(*face, description, {}));
   }
 
+  List<FontSelectionCapabilities> FontCache::GetFontSelectionCapabilitiesInFamily(
+    const StringAtom &familyName, AllowUserInstalledFonts allowUserInstalledFonts) const noexcept
+  {
+    // Every registered font is the host's, so none is installed by the user.
+    (void)allowUserInstalledFonts;
+
+    List<FontSelectionCapabilities> result;
+    for (auto &face : FontDatabase::Singleton().FacesInFamily(familyName.View()))
+    {
+      result.push_back(CapabilitiesOfFace(*face));
+    }
+    return result;
+  }
+
   List<utf8_string> FontCache::SystemFontFamilies() const noexcept
   {
     return FontDatabase::Singleton().Families();

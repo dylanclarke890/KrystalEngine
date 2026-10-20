@@ -1,182 +1,134 @@
-/*
- * Copyright (C) 2016-2017 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "CSSFontFace.h"
-#include <wtf/AbstractRefCountedAndCanMakeWeakPtr.h>
-#include <wtf/HashMap.h>
-#include <wtf/Observer.h>
-#include <wtf/SmallList.h>
-#include <wtf/text/StringHash.h>
-#include <wtf/WeakHashSet.h>
+#include "Krystal.Booey/CSS/Font/FontFace.hpp"
+#include "Krystal.Booey/Graphics/FontCascadeCache.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 
 namespace krys::boo::css
 {
-
-  class CSSPrimitiveValue;
   class CSSSegmentedFontFace;
-  class FontFaceSet;
+  class PrimitiveValue;
 
-  template <typename>
-  class ExceptionOr;
-
-  struct FontEventClient : public AbstractRefCountedAndCanMakeWeakPtr<FontEventClient>
-  {
-    virtual ~FontEventClient() = default;
-    virtual void faceFinished(CSSFontFace &, CSSFontFace::Status) = 0;
-    virtual void startedLoading() = 0;
-    virtual void completedLoading() = 0;
-  };
-
+  /// @brief A document's font faces, looked up by family and by the `@font-face` rule they came from, with
+  /// the faces of installed families that share a name with one.
+  // FIXME: Font event clients, `check` and the matching faces, for the `FontFaceSet` interface
+  // (`document.fonts`), once there's scripting.
   class CSSFontFaceSet final : public RefCounted<CSSFontFaceSet>, public CSSFontFaceClient
   {
+    KRYS_NON_COPY_MOVABLE(CSSFontFaceSet);
+
   public:
-    void ref() const final
-    {
-      RefCounted::ref();
-    }
-    void deref() const final
-    {
-      RefCounted::deref();
-    }
-
-    static Ref<CSSFontFaceSet> create(CSSFontSelector *owningFontSelector = nullptr)
-    {
-      return adoptRef(*new CSSFontFaceSet(owningFontSelector));
-    }
-    ~CSSFontFaceSet();
-
-    using FontModifiedObserver = Observer<void()>;
-    void addFontModifiedObserver(const FontModifiedObserver &);
-
-    void addFontEventClient(const FontEventClient &);
-
-    // Calling updateStyleIfNeeded() might delete |this|.
-    void updateStyleIfNeeded();
-
-    bool hasFace(const CSSFontFace &) const;
-    size_t faceCount() const
-    {
-      return m_faces.size();
-    }
-    void add(CSSFontFace &);
-    void remove(const CSSFontFace &);
-    void purge();
-    void emptyCaches();
-    void clear();
-    CSSFontFace &operator[](size_t i);
-
-    CSSFontFace *lookUpByCSSConnection(StyleRuleFontFace &);
-
-    ExceptionOr<bool> check(ScriptExecutionContext &, const String &font, const String &text);
-
-    CSSSegmentedFontFace *fontFace(FontSelectionRequest, const CSSOMStringAtom &family);
-
-    enum class Status
+    enum class Status : uint8
     {
       Loading,
       Loaded
     };
-    Status status() const
+
+  private:
+    struct FontFamilyNameHash
     {
-      return m_status;
+      KRYS_NODISCARD size_t operator()(const FontFamilyName &name) const noexcept
+      {
+        return name.Hash();
+      }
+    };
+
+    struct FontSelectionRequestHash
+    {
+      KRYS_NODISCARD size_t operator()(const FontSelectionRequest &request) const noexcept;
+    };
+
+    using FontSelectionHashMap =
+      HashMap<FontSelectionRequest, RefPtr<CSSSegmentedFontFace>, FontSelectionRequestHash>;
+
+    // _faces should hold all the same fonts as the ones inside inside _facesLookupTable.
+    List<Ref<CSSFontFace>> _faces;
+    HashMap<FontFamilyName, List<Ref<CSSFontFace>>, FontFamilyNameHash> _facesLookupTable;
+    HashMap<FontFamilyName, List<Ref<CSSFontFace>>, FontFamilyNameHash> _locallyInstalledFacesLookupTable;
+    HashMap<FontFamilyName, FontSelectionHashMap, FontFamilyNameHash> _cache;
+    HashMap<FontFaceRule *, CSSFontFace *> _constituentCSSConnections;
+    size_t _facesPartitionIndex {0}; // All entries in _faces before this index are CSS-connected.
+    Status _status {Status::Loaded};
+    WeakPtr<CSSFontSelector> _owningFontSelector;
+    uint32 _activeCount {0};
+
+    explicit CSSFontFaceSet(CSSFontSelector *owningFontSelector) noexcept;
+
+  public:
+    KRYS_NODISCARD static Ref<CSSFontFaceSet> Create(CSSFontSelector *owningFontSelector = nullptr) noexcept
+    {
+      return AdoptRef(*new CSSFontFaceSet(owningFontSelector));
     }
 
-    bool hasActiveFontFaces()
+    ~CSSFontFaceSet() noexcept override;
+
+    void AddRef() const noexcept final
     {
-      return status() == Status::Loading;
+      RefCounted::AddRef();
+    }
+    void SubRef() const noexcept final
+    {
+      RefCounted::SubRef();
+    }
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return RefCounted::GetRefCount();
     }
 
-    size_t facesPartitionIndex() const
+    // Calling updateStyleIfNeeded() might delete |this|.
+    void UpdateStyleIfNeeded() noexcept;
+
+    KRYS_NODISCARD bool HasFace(const CSSFontFace &face) const noexcept;
+    KRYS_NODISCARD size_t FaceCount() const noexcept
     {
-      return m_facesPartitionIndex;
+      return _faces.size();
+    }
+    void Add(CSSFontFace &face) noexcept;
+    void Remove(const CSSFontFace &face) noexcept;
+    void Purge() noexcept;
+    void EmptyCaches() noexcept;
+    void Clear() noexcept;
+    KRYS_NODISCARD CSSFontFace &operator[](size_t i) noexcept;
+
+    KRYS_NODISCARD CSSFontFace *LookUpByCSSConnection(FontFaceRule &target) noexcept;
+
+    /// @brief The faces of @p family for @p request, best first, or null if no `@font-face` rule names it.
+    KRYS_NODISCARD CSSSegmentedFontFace *GetFontFace(FontSelectionRequest request,
+                                                     const StringAtom &family) noexcept;
+
+    KRYS_NODISCARD Status GetStatus() const noexcept
+    {
+      return _status;
+    }
+    KRYS_NODISCARD bool HasActiveFontFaces() const noexcept
+    {
+      return GetStatus() == Status::Loading;
     }
 
-    ExceptionOr<SmallList<std::reference_wrapper<CSSFontFace>>>
-      matchingFacesExcludingPreinstalledFonts(ScriptExecutionContext &, const String &font,
-                                              const String &text);
+    KRYS_NODISCARD size_t FacesPartitionIndex() const noexcept
+    {
+      return _facesPartitionIndex;
+    }
 
     // FIXME: Should this be implemented?
-    void updateStyleIfNeeded(CSSFontFace &) final
+    void UpdateStyleIfNeeded(CSSFontFace &) noexcept final
     {
     }
 
   private:
-    CSSFontFaceSet(CSSFontSelector *);
+    void RemoveFromFacesLookupTable(const CSSFontFace &face, const Value &familyToSearchFor) noexcept;
+    void AddToFacesLookupTable(CSSFontFace &face) noexcept;
 
-    void removeFromFacesLookupTable(const CSSFontFace &, const Value &familyToSearchFor);
-    void addToFacesLookupTable(CSSFontFace &);
+    void IncrementActiveCount() noexcept;
+    void DecrementActiveCount() noexcept;
 
-    void incrementActiveCount();
-    void decrementActiveCount();
+    void FontStateChanged(CSSFontFace &face, CSSFontFace::Status oldState,
+                          CSSFontFace::Status newState) noexcept final;
+    void FontPropertyChanged(CSSFontFace &face, Value *oldFamily = nullptr) noexcept final;
 
-    void fontStateChanged(CSSFontFace &, CSSFontFace::Status oldState, CSSFontFace::Status newState) final;
-    void fontPropertyChanged(CSSFontFace &, Value *oldFamily = nullptr) final;
+    void EnsureLocalFontFacesForFamilyRegistered(const StringAtom &familyName) noexcept;
+    void NotifyFontModified() noexcept;
 
-    void ensureLocalFontFacesForFamilyRegistered(const CSSOMStringAtom &);
-
-    static String familyNameFromPrimitive(const CSSPrimitiveValue &);
-
-    using FontSelectionKey = std::optional<FontSelectionRequest>;
-    struct FontSelectionKeyHash : WTF::HasherBasedHash<FontSelectionKey>
-    {
-      static const bool safeToCompareToEmptyOrDeleted = true;
-    };
-    struct FontSelectionKeyHashTraits : SimpleClassHashTraits<FontSelectionKey>
-    {
-      static const bool emptyValueIsZero = false;
-      static FontSelectionKey emptyValue()
-      {
-        return FontSelectionRequest {};
-      }
-      static void constructDeletedValue(FontSelectionKey &slot)
-      {
-        slot = std::nullopt;
-      }
-      static bool isDeletedValue(const FontSelectionKey &value)
-      {
-        return !value;
-      }
-    };
-    using FontSelectionHashMap = HashMap<FontSelectionKey, RefPtr<CSSSegmentedFontFace>, FontSelectionKeyHash,
-                                         FontSelectionKeyHashTraits>;
-
-    // m_faces should hold all the same fonts as the ones inside inside m_facesLookupTable.
-    SmallList<Ref<CSSFontFace>> m_faces; // We should investigate moving m_faces to FontFaceSet and making it
-                                         // reference FontFaces. This may clean up the font loading design.
-    HashMap<String, SmallList<Ref<CSSFontFace>>, ASCIICaseInsensitiveHash> m_facesLookupTable;
-    HashMap<String, SmallList<Ref<CSSFontFace>>, ASCIICaseInsensitiveHash> m_locallyInstalledFacesLookupTable;
-    HashMap<String, FontSelectionHashMap, ASCIICaseInsensitiveHash> m_cache;
-    HashMap<StyleRuleFontFace *, CSSFontFace *> m_constituentCSSConnections;
-    size_t m_facesPartitionIndex {0}; // All entries in m_faces before this index are CSS-connected.
-    Status m_status {Status::Loaded};
-    WeakHashSet<FontModifiedObserver> m_fontModifiedObservers;
-    WeakHashSet<FontEventClient> m_fontEventClients;
-    WeakPtr<CSSFontSelector> m_owningFontSelector;
-    unsigned m_activeCount {0};
+    KRYS_NODISCARD static StringAtom FamilyNameFromPrimitive(const PrimitiveValue &value) noexcept;
   };
-
 }
