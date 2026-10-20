@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
@@ -74,11 +75,50 @@ namespace krys::boo
     krys_debug_assert(!_firstChild);
   }
 
+  static RefPtr<StyleImage> MinimallySupportedContentDataImage(const style::Content &content) noexcept
+  {
+    // Minimal support for content properties replacing an entire element.
+    // Works only if we have exactly one piece of content and it's a URL.
+    // Otherwise acts as if we didn't support this feature.
+    auto *data = content.TryData();
+    if (!data)
+    {
+      return nullptr;
+    }
+    if (data->List.size() != 1)
+    {
+      return nullptr;
+    }
+    auto *image = std::get_if<style::Content::Image>(&data->List[0]);
+    if (!image)
+    {
+      return nullptr;
+    }
+    return ShareRefPtr(image->Value.Value.get());
+  }
+
+  bool RenderElement::IsContentDataSupported(const style::Content &content) noexcept
+  {
+    return MinimallySupportedContentDataImage(content) != nullptr;
+  }
+
   RenderPtr<RenderElement>
     RenderElement::CreateFor(dom::Element &element, RenderStyle &&style,
                              EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride) noexcept
   {
-    // FIXME: Generated content images (`content: url(...)`) when there's no override, once there are images.
+    if (rendererTypeOverride.IsEmpty())
+    {
+      if (RefPtr styleImage = MinimallySupportedContentDataImage(style.GetContent());
+          styleImage && !Is<dom::PseudoElement>(element))
+      {
+        style::LoadPendingResources(style, element.NodeDocument(), &element);
+        auto image = CreateRenderer<RenderImage>(Type::Image, element, krys::move(style), styleImage.get());
+        image->SetIsGeneratedContent();
+        image->UpdateAltText();
+        return image;
+      }
+    }
+
     switch (style.Display())
     {
       case DisplayType::None:
@@ -1104,6 +1144,11 @@ namespace krys::boo
   bool RenderElement::HasMask() const noexcept
   {
     return Style().HasMask();
+  }
+
+  bool RenderElement::HasShapeOutside() const noexcept
+  {
+    return !Style().GetShapeOutside().IsNone();
   }
 
   bool RenderElement::HasBackdropFilter() const noexcept

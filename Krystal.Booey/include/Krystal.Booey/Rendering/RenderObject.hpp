@@ -598,6 +598,10 @@ namespace krys::boo
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::Replaced;
     }
+    KRYS_NODISCARD bool IsRenderImage() const noexcept
+    {
+      return IsRenderReplaced() && _typeSpecificFlags.ReplacedFlags().Contains(ReplacedFlag::IsImage);
+    }
     KRYS_NODISCARD bool IsRenderBlockFlow() const noexcept
     {
       return _typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::BlockFlow;

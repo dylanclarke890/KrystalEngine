@@ -3,35 +3,11 @@
 #include "Krystal.Booey/CSS/Values/ImageSetValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo
 {
-  namespace
-  {
-    // The types the image decoders support (PNG, JPEG, GIF, WebP, BMP and ICO).
-    // FIXME: A MIME type registry (MIMETypeRegistry::isSupportedImageMIMEType), and SVG and AVIF images once
-    // they're supported.
-    KRYS_NODISCARD bool IsSupportedImageMIMEType(const css::CSSOMString &mimeType) noexcept
-    {
-      constexpr utf8_stringview supportedTypes[] = {
-        u8"image/png",
-        u8"image/apng",
-        u8"image/jpeg",
-        u8"image/jpg",
-        u8"image/pjpeg",
-        u8"image/gif",
-        u8"image/bmp",
-        u8"image/x-bmp",
-        u8"image/webp",
-        u8"image/x-icon",
-        u8"image/vnd.microsoft.icon",
-      };
-      return std::ranges::any_of(supportedTypes,
-                                 [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
-    }
-  }
-
   Ref<StyleImageSet> StyleImageSet::Create(List<ImageWithScale> &&images,
                                            List<size_t> &&sortedIndices) noexcept
   {
@@ -97,7 +73,7 @@ namespace krys::boo
     for (auto index : _sortedIndices)
     {
       const auto &image = _images[index];
-      if (image.MimeType && !IsSupportedImageMIMEType(*image.MimeType))
+      if (image.MimeType && !MIMETypeRegistry::IsSupportedImageMIMEType(*image.MimeType))
       {
         continue;
       }

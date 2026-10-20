@@ -4,6 +4,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include <charconv>
+#include <cmath>
 
 namespace krys::boo::html
 {
@@ -121,6 +122,51 @@ namespace krys::boo::html
       }
 
       return {.Value = positive ? result.Value : -result.Value};
+    }
+
+    /// @brief Parses @p input only if all of it is a valid non-negative integer: one or more ASCII digits.
+    /// @see https://html.spec.whatwg.org/#valid-non-negative-integer
+    KRYS_NODISCARD static MicroParserResult<uint64>
+      ParseValidNonNegativeInteger(dom::DOMStringView input) noexcept
+    {
+      if (input.empty())
+      {
+        return {.Error = MicroParserError::UnexpectedEndOfInput};
+      }
+      for (auto c : input)
+      {
+        if (!krys::text::IsASCIIDigit(c))
+        {
+          return {.Error = MicroParserError::InvalidCharacter};
+        }
+      }
+      position_variable position = input.begin();
+      return ParseNumber<uint64>(position, input);
+    }
+
+    /// @brief Parses @p input only if all of it is a valid floating-point number: no leading `+`, no trailing
+    /// `.`, and finite.
+    /// @see https://html.spec.whatwg.org/#valid-floating-point-number
+    KRYS_NODISCARD static MicroParserResult<double> ParseValidFloatingPoint(dom::DOMStringView input) noexcept
+    {
+      if (input.empty())
+      {
+        return {.Error = MicroParserError::UnexpectedEndOfInput};
+      }
+      if (input.front() == '+' || input.back() == '.')
+      {
+        return {.Error = MicroParserError::InvalidCharacter};
+      }
+
+      double value {};
+      auto from = reinterpret_cast<const char *>(input.data());
+      auto to = from + input.size();
+      auto result = std::from_chars(from, to, value);
+      if (result.ec != std::errc {} || result.ptr != to || !std::isfinite(value))
+      {
+        return {.Error = MicroParserError::InvalidCharacter};
+      }
+      return {.Value = value};
     }
 
     template <Number T>

@@ -564,7 +564,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Pre;
+      return _interface == HTMLElementInterface::Picture;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept

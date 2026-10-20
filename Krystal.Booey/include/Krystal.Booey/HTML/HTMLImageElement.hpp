@@ -2,16 +2,43 @@
 
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Loader/ImageLoader.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class CachedImage;
+  class Image;
+}
 
 namespace krys::boo::html
 {
+  class HTMLImageLoader;
+  class HTMLPictureElement;
+  class HTMLSourceElement;
+  struct ImageCandidate;
+
   /// @see https://html.spec.whatwg.org/#htmlimageelement
+  // FIXME: Forms (form association), image maps (usemap), lazy loading, decode(), the legacy Image()
+  // constructor, and re-selecting the source when the media queries it depends on change.
   class HTMLImageElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLImageElement);
+    friend class HTMLPictureElement;
+
+  private:
+    UniquePtr<HTMLImageLoader> _imageLoader;
+    dom::DOMString _bestFitImageURL;
+    url::URL _currentURL;
+    float _imageDevicePixelRatio {1.0f};
+    WeakPtr<HTMLPictureElement> _pictureElement;
+    // The source element that was selected to provide the source URL.
+    WeakPtr<HTMLSourceElement> _sourceElement;
 
   public:
     HTMLImageElement(dom::Document &document) noexcept;
+    ~HTMLImageElement() noexcept override;
 
 #pragma region HTMLImageElement - https://html.spec.whatwg.org/#htmlimageelement
 
@@ -163,6 +190,49 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle *style = nullptr) const noexcept override;
 
+    /// @brief The URL of the selected source, resolved against the document.
+    KRYS_NODISCARD const url::URL &CurrentURL() const noexcept
+    {
+      return _currentURL;
+    }
+
+    /// @brief The `alt` attribute, or else the `title` attribute, or null if it has neither.
+    KRYS_NODISCARD Maybe<dom::DOMString> AltText() const noexcept;
+
+    KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
+    KRYS_NODISCARD Image *GetImage() const noexcept;
+    KRYS_NODISCARD ImageLoader &GetImageLoader() const noexcept;
+
+    /// @brief The selected source: the best fitting candidate of a `<picture>`'s sources, or else of `srcset`
+    /// and `src`.
+    KRYS_NODISCARD Maybe<dom::DOMString> ImageSourceURL() const noexcept override;
+
+    KRYS_NODISCARD HTMLPictureElement *PictureElement() const noexcept;
+    KRYS_NODISCARD bool UsesSrcsetOrPicture() const noexcept;
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+    void DidAttachRenderers() noexcept override;
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnAdopt(dom::Document &oldDocument) noexcept override;
+
+  private:
+    void SetPictureElement(HTMLPictureElement *pictureElement) noexcept;
+    KRYS_NODISCARD HTMLSourceElement *SourceElement() const noexcept;
+    void SetSourceElement(HTMLSourceElement *sourceElement) noexcept;
+    void InvalidateAttributeMapping() noexcept;
+
+    void SelectImageSource(RelevantMutation relevantMutation) noexcept;
+    KRYS_NODISCARD ImageCandidate BestFitSourceFromPictureElement() noexcept;
+    void SetBestFitURLAndDPRFromImageCandidate(const ImageCandidate &candidate) noexcept;
+    KRYS_NODISCARD float EffectiveImageDevicePixelRatio() const noexcept;
+    void UpdatePictureElement() noexcept;
+
   protected:
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
@@ -178,5 +248,10 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLImageElement)
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLImageElement();
+  }
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    return element && element->IsHTMLImageElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

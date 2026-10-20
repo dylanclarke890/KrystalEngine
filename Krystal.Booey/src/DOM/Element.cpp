@@ -424,6 +424,11 @@ namespace krys::boo::dom
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
   }
 
+  Maybe<DOMString> Element::ImageSourceURL() const noexcept
+  {
+    return GetAttribute(u8"src");
+  }
+
   RenderElement *Element::Renderer() const noexcept
   {
     return static_cast<RenderElement *>(Node::Renderer());

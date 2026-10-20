@@ -8,7 +8,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Settings** — `Page/Settings.hpp` holds the experimental and embedder flags and the font size values; the other values upstream reads from `Settings` (`textAreasAreResizable`, `hiddenUntilFoundEnabled`, `coreMathMLEnabled`, ...) are upstream's defaults in code. The media text track display quirk is never set (no document quirks).
 - **Resource loading** — `<link rel=stylesheet>`, `@import` and `@font-face` sources aren't fetched (`CSS/Rules/ImportRule.hpp`, `src/HTML/HTMLLinkElement.cpp`); images are (G7b), through the host's `LoaderStrategy`. https://html.spec.whatwg.org/#link-type-stylesheet
 - **Fonts** — the host registers fonts (`Graphics/FontDatabase.hpp`) and sets generic families in `Settings`; no web fonts: `@font-face`, `FontFace`/`FontFaceSet` and the `CSSFontFace*` headers are unbuilt (`CSS/Font/`, FIXMEs in `src/CSS/CSSFontSelector.cpp`); text is measured and shaped, but not drawn. https://drafts.csswg.org/css-font-loading/
-- **Painting** — pages paint into display lists that Krystal.UI replays, and hit test (G4, `docs/gfx/DESIGN.md`); CSS images load and paint (G7b, `<img>` in G7c), and `filter` and `backdrop-filter`, `mask-image`, selection and carets, SVG and form controls aren't drawn, and any change repaints the whole page (FIXMEs; *G4 plan*).
+- **Painting** — pages paint into display lists that Krystal.UI replays, and hit test (G4, `docs/gfx/DESIGN.md`); CSS images and `<img>` load and paint (G7b, G7c; no broken image icon), and `filter` and `backdrop-filter`, `mask-image`, selection and carets, SVG and form controls aren't drawn, and any change repaints the whole page (FIXMEs; *G4 plan*).
 - **Frames** — `LocalFrame` has no page, loader, navigation, frame tree (no iframes), window, scripting or printing; `LocalFrameView` scrolls, with scrollbars (G5a, G5b), but has no visual viewport (`Page/LocalFrame.hpp`, `Page/LocalFrameView.hpp`).
 - **Logging** — no channel for exceptions thrown by event listeners or for parse errors (`src/DOM/Algorithms/EventDispatcher.cpp`, `src/HTML/Parser/HTMLTreeBuilder.cpp`).
 
@@ -64,7 +64,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Document readiness** — load timing info for parser documents; `about:srcdoc` (`src/DOM/Algorithms/DocumentAlgorithms.cpp`). https://html.spec.whatwg.org/#current-document-readiness
 - **Interactive elements** — `<details>`, `<dialog>`, popovers and the command API. https://html.spec.whatwg.org/#interactive-elements
 - **Hyperlinks** — `HyperlinkElementUtils`/`HTMLHyperlinkElementUtils` and activation behaviour for `<a>`/`<area>`; `<map>` `areas`. https://html.spec.whatwg.org/#api-for-hyperlink-elements
-- **Embedded content** — image `naturalWidth`/`naturalHeight`, `complete`, `currentSrc`, `decode()`, source selection in `<picture>`; media, video, track, iframe and object APIs (`src/HTML/HTMLImageElement.cpp`, `HTML/HTMLMediaElement.hpp`). https://html.spec.whatwg.org/#embedded-content
+- **Embedded content** — image `currentSrc` (`USVString` holds no string), `decode()`, lazy loading, image maps (`usemap`), forms and re-selecting sources when media queries change (G7c did the rest of `<img>` and `<picture>`); media, video, track, iframe and object APIs (`src/HTML/HTMLImageElement.cpp`, `HTML/HTMLMediaElement.hpp`). https://html.spec.whatwg.org/#embedded-content
 - **`<script>`** — `text` attribute and `HTMLScriptElement.supports()` (`src/HTML/HTMLScriptElement.cpp`).
 
 ## HTML parser

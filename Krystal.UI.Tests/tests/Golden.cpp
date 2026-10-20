@@ -192,4 +192,14 @@ namespace krys::ui::tests
                 view.UpdateRendering();
               });
   }
+
+  TEST_CASE("Golden: img", "[UI][GPU][Golden]")
+  {
+    CheckPage("img", 360u, 240u, false,
+              [](View &view)
+              {
+                boo::html::EventLoop::Current().RunUntilIdle();
+                view.UpdateRendering();
+              });
+  }
 }

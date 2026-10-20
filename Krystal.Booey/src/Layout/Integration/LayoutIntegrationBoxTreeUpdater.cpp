@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
@@ -48,10 +49,10 @@ namespace krys::boo::layout_integration
           return layout::Box::NodeType::ListMarker;
         }
 
-        // FIXME: Images (NodeType::Image), once there's RenderImage.
         if (Is<RenderReplaced>(renderer))
         {
-          return layout::Box::NodeType::ReplacedElement;
+          return Is<RenderImage>(renderer) ? layout::Box::NodeType::Image
+                                           : layout::Box::NodeType::ReplacedElement;
         }
 
         // FIXME: Buttons, menu lists, text control inner containers, sliders and slider containers

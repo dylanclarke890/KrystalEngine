@@ -80,6 +80,9 @@ namespace krys::boo
       CreateFor(dom::Element &element, RenderStyle &&style,
                 EnumSet<ConstructBlockLevelRendererFor> rendererTypeOverride = {}) noexcept;
 
+    /// @brief Whether @p content replaces an element's content with an image: it's exactly one image.
+    KRYS_NODISCARD static bool IsContentDataSupported(const style::Content &content) noexcept;
+
     KRYS_NODISCARD const RenderStyle &Style() const noexcept
     {
       return _style;
@@ -287,6 +290,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasClipPath() const noexcept;
     KRYS_NODISCARD bool HasFilter() const noexcept;
     KRYS_NODISCARD bool HasMask() const noexcept;
+    KRYS_NODISCARD bool HasShapeOutside() const noexcept;
     KRYS_NODISCARD bool HasBackdropFilter() const noexcept;
     KRYS_NODISCARD bool HasBlendMode() const noexcept;
     KRYS_NODISCARD bool IsTransparent() const noexcept;

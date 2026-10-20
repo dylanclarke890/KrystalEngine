@@ -555,6 +555,15 @@ namespace krys::boo::dom
       return true;
     }
 
+    /// @brief Called by the render tree updater after the element's renderer (and its descendants') was
+    /// created or replaced.
+    virtual void DidAttachRenderers() noexcept
+    {
+    }
+
+    /// @brief The URL of the image the element shows: its `src` attribute, or null if it has none.
+    KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
+
     /// @brief The element's renderer, or null if it isn't rendered.
     KRYS_NODISCARD RenderElement *Renderer() const noexcept;
 

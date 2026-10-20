@@ -1,9 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -17,6 +19,23 @@ namespace krys::boo
   {
     constexpr int32 DefaultWidth = 300;
     constexpr int32 DefaultHeight = 150;
+
+    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
+    {
+      auto *element = renderer.GetElement();
+      return element && IsSkippedContentRoot(renderer.Style(), *element);
+    }
+
+    KRYS_NODISCARD bool ShouldRepaintOnSizeChange(RenderReplaced &renderer) noexcept
+    {
+      // FIXME: Canvases, and excluding media, once they have renderers.
+      if (auto *renderImage = DynamicDowncast<RenderImage>(renderer);
+          renderImage && !renderImage->IsShowingMissingOrImageError())
+      {
+        return true;
+      }
+      return false;
+    }
   }
 
   RenderReplaced::RenderReplaced(Type type, dom::Element &element, RenderStyle &&style,
@@ -93,8 +112,154 @@ namespace krys::boo
     if (ReplacedContentRect() != oldContentRect)
     {
       SetNeedsPreferredWidthsUpdate();
-      // FIXME: Repaint canvases and images whose size changed, once there's painting.
+      if (ShouldRepaintOnSizeChange(*this))
+      {
+        Repaint();
+      }
     }
+  }
+
+  void RenderReplaced::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (!ShouldPaint(paintInfo, paintOffset))
+    {
+      return;
+    }
+
+    LayoutPoint adjustedPaintOffset = paintOffset + Location();
+
+    if (paintInfo.Phase == PaintPhase::EventRegion)
+    {
+      // FIXME: Event regions come with event regions.
+      return;
+    }
+
+    if (paintInfo.Phase == PaintPhase::Accessibility)
+    {
+      // FIXME: Accessibility bounds come with accessibility.
+      return;
+    }
+
+    // FIXME: Dragged and transparent content markers (setAlpha), once there are document markers.
+
+    if (HasVisibleBoxDecorations() && paintInfo.Phase == PaintPhase::Foreground)
+    {
+      PaintBoxDecorations(paintInfo, adjustedPaintOffset);
+    }
+
+    if (paintInfo.Phase == PaintPhase::Mask)
+    {
+      PaintMask(paintInfo, adjustedPaintOffset);
+      return;
+    }
+
+    if (paintInfo.Phase == PaintPhase::ClippingMask && Style().UsedVisibility() == Visibility::Visible)
+    {
+      PaintClippingMask(paintInfo, adjustedPaintOffset);
+      return;
+    }
+
+    LayoutRect paintRect = LayoutRect(adjustedPaintOffset, Size());
+    if (paintInfo.Phase == PaintPhase::Outline || paintInfo.Phase == PaintPhase::SelfOutline)
+    {
+      if (HasOutline())
+      {
+        PaintOutline(paintInfo, paintRect);
+      }
+      return;
+    }
+
+    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Selection)
+    {
+      return;
+    }
+
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return;
+    }
+
+    // FIXME: The highlight colour and the selection tint, once there's selection.
+    if (paintInfo.Phase == PaintPhase::Selection)
+    {
+      return;
+    }
+
+    bool completelyClippedOut = false;
+    if (Style().HasBorderRadius())
+    {
+      completelyClippedOut = Size().IsEmpty();
+      if (!completelyClippedOut)
+      {
+        // Push a clip if we have a border radius, since we want to round the foreground content that gets
+        // painted.
+        paintInfo.Context().Save();
+        ClipToContentBoxShape(paintInfo.Context(), adjustedPaintOffset, GetDocument().DeviceScaleFactor());
+      }
+    }
+
+    if (!completelyClippedOut)
+    {
+      if (!IsSkippedContentRoot(*this))
+      {
+        PaintReplaced(paintInfo, adjustedPaintOffset);
+      }
+
+      if (Style().HasBorderRadius())
+      {
+        paintInfo.Context().Restore();
+      }
+    }
+  }
+
+  bool RenderReplaced::ShouldPaint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    // FIXME: Excluding selected replaced content (PaintBehavior::ExcludeSelection), once there's selection.
+
+    if (paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeReplacedContentExceptForIFrames))
+    {
+      // FIXME: Except iframes, once they have renderers.
+      return false;
+    }
+
+    if (paintInfo.Phase != PaintPhase::Foreground && paintInfo.Phase != PaintPhase::Outline
+        && paintInfo.Phase != PaintPhase::SelfOutline && paintInfo.Phase != PaintPhase::Selection
+        && paintInfo.Phase != PaintPhase::Mask && paintInfo.Phase != PaintPhase::ClippingMask
+        && paintInfo.Phase != PaintPhase::EventRegion && paintInfo.Phase != PaintPhase::Accessibility)
+    {
+      return false;
+    }
+
+    if (!paintInfo.ShouldPaintWithinRoot(*this))
+    {
+      return false;
+    }
+
+    // if we're invisible or haven't received a layout yet, then just bail.
+    if (Style().UsedVisibility() != Visibility::Visible)
+    {
+      return false;
+    }
+
+    LayoutRect paintRect(VisualOverflowRect());
+    paintRect.MoveBy(paintOffset + Location());
+
+    // Early exit if the element touches the edges.
+    LayoutUnit top = paintRect.Y();
+    LayoutUnit bottom = paintRect.MaxY();
+
+    LayoutRect localRepaintRect = paintInfo.Rect;
+    if (paintRect.X() >= localRepaintRect.MaxX() || paintRect.MaxX() <= localRepaintRect.X())
+    {
+      return false;
+    }
+
+    if (top >= localRepaintRect.MaxY() || bottom <= localRepaintRect.Y())
+    {
+      return false;
+    }
+
+    return true;
   }
 
   void RenderReplaced::IntrinsicSizeChanged() noexcept
@@ -185,7 +350,10 @@ namespace krys::boo
       // Handle zoom & vertical writing modes here, as the embedded document doesn't know about them.
       intrinsicSize.Scale(Style().UsedZoom());
 
-      // FIXME: Scale by the image's device pixel ratio, once there are images.
+      if (auto *image = DynamicDowncast<RenderImage>(*this))
+      {
+        intrinsicSize.Scale(image->ImageDevicePixelRatio());
+      }
 
       // Update our intrinsic size to match what the content renderer has computed, so that when we
       // constrain the size below, the correct intrinsic size will be obtained for comparison against

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
@@ -485,7 +486,7 @@ namespace krys::ui::tests
     CHECK_FALSE(view.Update(now));
   }
 
-  TEST_CASE("View: loads file images relative to the page's file", "[UI]")
+  TEST_CASE("View: loads file images relative to the page's file, in CSS and <img>", "[UI]")
   {
     const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-image-test";
     std::filesystem::create_directories(directory / "images");
@@ -503,7 +504,8 @@ namespace krys::ui::tests
       image.write(reinterpret_cast<const char *>(bmp), sizeof(bmp));
       std::ofstream page(directory / "page.html", std::ios::binary);
       page << "<!DOCTYPE html><style>body { margin: 0 }</style>"
-              "<div id=box style='width: 40px; height: 20px; background: url(images/pair.bmp)'></div>";
+              "<div id=box style='width: 40px; height: 20px; background: url(images/pair.bmp)'></div>"
+              "<img id=img src=images/pair.bmp>";
     }
 
     View view({200, 100});
@@ -516,6 +518,11 @@ namespace krys::ui::tests
     auto now = boo::html::EventLoop::Current().Now();
     CHECK(view.Update(now));
     CHECK(view.Record()->AsText({}).find(u8"draw-pattern-native-image") != utf8_string::npos);
+    // The <img> loads the same file, from the memory cache.
+    CHECK(view.Record()->AsText({}).find(u8"(draw-native-image") != utf8_string::npos);
+    auto &image = Downcast<boo::html::HTMLImageElement>(*view.Document().GetElementById(u8"img"));
+    CHECK(image.Complete());
+    CHECK(image.NaturalWidth() == 2u);
 
     std::filesystem::remove_all(directory);
   }

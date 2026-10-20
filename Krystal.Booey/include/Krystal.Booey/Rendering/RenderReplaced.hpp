@@ -16,8 +16,7 @@ namespace krys::boo
   };
 
   /// @brief A box whose content is outside CSS: images, media, frames, form controls.
-  // FIXME: Selection, hit testing and painting come with painting; images, media and the other replaced
-  // elements come with their renderers.
+  // FIXME: Selection and hit testing; media and the other replaced elements come with their renderers.
   class RenderReplaced : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderReplaced);
@@ -27,10 +26,7 @@ namespace krys::boo
     mutable LayoutSize _intrinsicSize;
 
   public:
-    void Paint(PaintInfo &, const LayoutPoint &) noexcept override
-    {
-      // FIXME: Replaced content (images, media, controls) comes with their renderers.
-    }
+    void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
 
     ~RenderReplaced() noexcept override;
 
@@ -95,6 +91,14 @@ namespace krys::boo
                    EnumSet<ReplacedFlag> flags = {}) noexcept;
 
     void Layout() noexcept override;
+
+    KRYS_NODISCARD bool ShouldPaint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
+    /// @brief Paints the replaced content, in the foreground and selection phases, inside the box's rounded
+    /// content box.
+    virtual void PaintReplaced(PaintInfo &, const LayoutPoint &) noexcept
+    {
+    }
 
     void ComputeIntrinsicLogicalWidths(LayoutUnit &minLogicalWidth,
                                        LayoutUnit &maxLogicalWidth) const noexcept final;

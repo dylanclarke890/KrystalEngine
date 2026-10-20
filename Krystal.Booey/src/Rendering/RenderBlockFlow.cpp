@@ -4138,9 +4138,7 @@ namespace krys::boo
           previousFloat = box;
         }
 
-        // FIXME: Images never break when allowImagesToBreak is off, once there are images.
-        bool canBreakReplacedElement = true;
-        (void)allowImagesToBreak;
+        bool canBreakReplacedElement = !box->IsRenderImage() || allowImagesToBreak;
         if (((canBreakReplacedElement && (autoWrap || oldAutoWrap)
               && (!isPrevChildInlineFlow || shouldBreakLineAfterText))
              || clearPreviousFloat))

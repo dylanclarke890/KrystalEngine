@@ -2,6 +2,7 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::html
 {
@@ -12,8 +13,11 @@ namespace krys::boo::html
 
   RenderPtr<RenderElement> HTMLBRElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: Content data (a renderer from RenderElement::CreateFor when the style's content is supported),
-    // once there's generated content for elements.
+    if (RenderElement::IsContentDataSupported(style.GetContent()))
+    {
+      return RenderElement::CreateFor(*this, krys::move(style));
+    }
+
     return CreateRenderer<RenderLineBreak>(*this, krys::move(style));
   }
 

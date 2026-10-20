@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
@@ -3079,8 +3080,18 @@ namespace krys::boo
     {
       // FIXME: The CSS sizing spec is considering changing what min-content/max-content should resolve to.
       // If that happens, this code will have to change.
-      // FIXME: Images with a fixed logical width and no aspect ratio use their intrinsic ratio, once there
-      // are images.
+      if (auto *renderImage = DynamicDowncast<RenderImage>(this))
+      {
+        auto computedFixedLogicalWidth = Style().LogicalWidth().TryFixed();
+        if (computedFixedLogicalWidth && !Style().HasAspectRatio())
+        {
+          auto intrinsicRatio = renderImage->IntrinsicRatio();
+          return ResolveHeightForRatio(
+            BorderAndPaddingLogicalWidth(), BorderAndPaddingLogicalHeight(),
+            LayoutUnit {computedFixedLogicalWidth->ResolveZoom(Style().UsedZoomForLength())},
+            intrinsicRatio.TransposedSize().AspectRatio(), BoxSizing::ContentBox);
+        }
+      }
       return intrinsic();
     };
 
@@ -3802,8 +3813,8 @@ namespace krys::boo
 
   bool RenderBox::HasIntrinsicAspectRatio() const noexcept
   {
-    // FIXME: Images, video, canvas and view transition captures, once there are any.
-    return false;
+    // FIXME: Video, canvas and view transition captures, once they have renderers.
+    return IsBlockLevelReplacedOrAtomicInline() && IsRenderImage();
   }
 
 #pragma endregion

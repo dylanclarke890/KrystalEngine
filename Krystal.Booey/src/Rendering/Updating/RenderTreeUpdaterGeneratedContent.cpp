@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderQuote.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -81,11 +82,16 @@ namespace krys::boo
     return contentRenderer;
   }
 
-  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Image &, const utf8_string &,
-                                                       dom::Document &, const RenderStyle &) noexcept
+  static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Image &value,
+                                                       const utf8_string &altText, dom::Document &document,
+                                                       const RenderStyle &pseudoStyle) noexcept
   {
-    // FIXME: A RenderImage for the image, once there are images.
-    return {};
+    auto contentRenderer = CreateRenderer<RenderImage>(
+      RenderObject::Type::Image, document, RenderStyle::CreateStyleInheritingFromPseudoStyle(pseudoStyle),
+      value.Value.Value.get());
+    contentRenderer->InitializeStyle();
+    contentRenderer->SetAltText(altText);
+    return contentRenderer;
   }
 
   static RenderPtr<RenderObject> CreateContentRenderer(const style::Content::Counter &value,
@@ -134,8 +140,7 @@ namespace krys::boo
     for (auto &contentRenderer : DescendantsOfType<RenderElement>(pseudoRenderer))
     {
       // We only manage the style for the generated content which must be images or text.
-      // FIXME: Images, once there are images.
-      if (!Is<RenderQuote>(contentRenderer))
+      if (!Is<RenderImage>(contentRenderer) && !Is<RenderQuote>(contentRenderer))
       {
         continue;
       }

@@ -418,7 +418,10 @@ namespace krys::boo
 
     _builder->UpdateAfterDescendants(*renderer);
 
-    // FIXME: Custom style resolve callbacks (didAttachRenderers), once there are any.
+    if (update && update->Changes.Contains(style::Change::Renderer))
+    {
+      element.DidAttachRenderers();
+    }
   }
 
   void RenderTreeUpdater::UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,

@@ -412,6 +412,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
 		tests/Loader/Cache/CachedResourceLoader.cpp
+		tests/HTML/Parser/HTMLSrcsetParser.cpp
+		tests/CSS/Parser/SizesAttributeParser.cpp
+		tests/HTML/HTMLImageElement.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp
