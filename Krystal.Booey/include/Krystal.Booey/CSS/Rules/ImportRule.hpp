@@ -2,12 +2,14 @@
 
 #include "Krystal.Booey/CSS/Queries/MediaQuery.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp"
 
 namespace krys::boo::css
 {
   /// @brief `@import`.
-  // FIXME: Loading the imported sheet (RequestStyleSheet, the cached sheet and its client) comes with the
-  // resource loader; until then StyleSheet() stays null.
+  // FIXME: User style sheets' imports (requestUserCSSStyleSheet), once there are user style sheets.
   class ImportRule final : public Rule
   {
   public:
@@ -18,18 +20,43 @@ namespace krys::boo::css
     };
 
   private:
+    // NOTE: We put the CachedStyleSheetClient in a member instead of inheriting from it
+    // to avoid adding a vptr to ImportRule.
+    class ImportedStyleSheetClient final : public CachedStyleSheetClient
+    {
+    private:
+      ImportRule &_ownerRule;
+
+    public:
+      explicit ImportedStyleSheetClient(ImportRule &ownerRule) noexcept : _ownerRule(ownerRule)
+      {
+      }
+
+      void SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+                            const CachedCSSStyleSheet *sheet) noexcept final
+      {
+        _ownerRule.SetCSSStyleSheet(href, baseURL, charset, sheet);
+      }
+    };
+    friend class ImportedStyleSheetClient;
+
     StyleSheetContents *_parentStyleSheet {nullptr};
+    ImportedStyleSheetClient _styleSheetClient;
 
     CSSOMString _href;
     mq::MediaQueryList _mediaQueries;
     RefPtr<StyleSheetContents> _styleSheet;
     Maybe<CascadeLayerName> _cascadeLayerName;
+    CachedResourceHandle<CachedCSSStyleSheet> _cachedSheet;
     bool _loading {false};
     ImportRule::SupportsCondition _supportsCondition;
 
     ImportRule(const CSSOMString &href, mq::MediaQueryList &&mediaQueries,
                Maybe<CascadeLayerName> &&cascadeLayerName,
                ImportRule::SupportsCondition &&supportsCondition) noexcept;
+
+    void SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL, utf8_stringview charset,
+                          const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
 
   public:
     ~ImportRule() noexcept;
@@ -82,6 +109,10 @@ namespace krys::boo::css
     }
 
     void RequestStyleSheet() noexcept;
+    KRYS_NODISCARD const CachedCSSStyleSheet *CachedStyleSheet() const noexcept
+    {
+      return _cachedSheet.get();
+    }
 
     KRYS_NODISCARD const Maybe<CascadeLayerName> &GetCascadeLayerName() const noexcept
     {

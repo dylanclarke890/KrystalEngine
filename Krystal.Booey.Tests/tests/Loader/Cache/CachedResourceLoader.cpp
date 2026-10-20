@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
@@ -220,5 +221,34 @@ namespace krys::boo::tests
     CHECK(Contains(painted, u8"draw-native-image"));
     CHECK(Contains(painted, u8"(dest-rect at (48,"));
     CHECK(Contains(painted, u8"size 3x2)"));
+  }
+
+  TEST_CASE("CachedResourceLoader: the frame's cache policy reloads cached resources once per document",
+            "[Loader][CachedResourceLoader]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 10px }");
+    constexpr utf8_stringview markup = u8"<link rel=stylesheet href='file:///a.css'>"
+                                       u8"<style>@import 'file:///a.css';</style><div id=box></div>";
+
+    {
+      PageInFrameFixture first {utf8_string(markup)};
+      RunNetworkingTasks();
+      CHECK(first.RendererSize(u8"box") == IntSize(10, 0));
+    }
+    // A document uses what's in the memory cache.
+    {
+      PageInFrameFixture second {utf8_string(markup)};
+      RunNetworkingTasks();
+      CHECK(loader.Strategy.Requests.size() == 1u);
+    }
+    // Revalidating loads it again (a file has no validators), once for the document.
+    loader.Strategy.AddText(u8"file:///a.css", u8"#box { width: 20px }");
+    {
+      PageInFrameFixture reloaded {utf8_string(markup), {200, 100}, CachePolicy::Revalidate};
+      RunNetworkingTasks();
+      CHECK(loader.Strategy.Requests.size() == 2u);
+      CHECK(reloaded.RendererSize(u8"box") == IntSize(20, 0));
+    }
   }
 }

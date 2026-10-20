@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8) are in progress: G8a, style sheets, is done; see *G8 plan*.
 
 ## Why
 
@@ -302,7 +302,8 @@ All done in G1 (2026-10-17) unless noted.
 | G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (done, 2026-10-19). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 | G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
 | G6 | Done (2026-10-20). The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*): done (2026-10-20). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
-| G7 | Images: decoding and drawing, loading (through the host) and CSS images, `<img>`, animated images. In four parts (see *G7 plan*). | Pages show PNG, JPEG, GIF and WebP images, in `<img>` and CSS, loaded through the host. |
+| G7 | Done (2026-10-20). Images: decoding and drawing, loading (through the host) and CSS images, `<img>`, animated images. In four parts (see *G7 plan*). | Pages show PNG, JPEG, GIF and WebP images, in `<img>` and CSS, loaded through the host. |
+| G8 | Style sheets and web fonts: `<link rel=stylesheet>` and `@import` loading through the host, `@font-face` with TTF, OTF and WOFF2. In two parts (see *G8 plan*). | Pages use external style sheets and their own fonts, loaded through the host, without a flash of unstyled content. |
 
 ### G2 parts
 
@@ -631,6 +632,21 @@ Images: decoding, drawing, loading, `<img>` and animated images. Booey has the C
     - **Pausing:** upstream's `RenderElement::imageFrameAvailable` with `isVisibleInViewport`; renderers whose animations paused are kept on the `RenderView` and resume (repaint and start) when the viewport's contents change: `LocalFrameView::ViewportContentsChanged` after layout, scrolling (the view's and scrolling boxes') and resizing. Without repaint rects, a renderer's rect is its absolute visual overflow, unclipped by its ancestors.
     - **Tests:** decoding animated GIF, APNG and WebP frames; an `<img>` and a CSS background advancing frames with the host's time and stopping after their loops; an image scrolled out of view pausing and resuming. **Editor:** an animated GIF in the images card.
 - **Out (FIXMEs):** SVG images (no SVG rendering), AVIF and JPEG XL, lazy loading (intersection observers), `decode()` (promises), CORS and `crossorigin`, network URLs (the interface allows them; only `file:` is implemented), canvas.
+
+### G8 plan (decided 2026-10-20)
+
+Style sheets and web fonts, loaded through G7b's `CachedResourceLoader` and the host's `LoaderStrategy`. Booey parses sheets and `@font-face` rules and selects fonts from the host's registered files; nothing loads a sheet or a font file. Two parts, in order (decided by the user).
+
+- **G8a, style sheets** (Booey, Krystal.UI):
+  - **Booey:** upstream's `CachedCSSStyleSheet` and the loader half of `StyleSheetContents` (`parseAuthorStyleSheet`, `notifyLoadedSheet`, `isLoadingSubresources`, `subresourcesAllowReuse`, the import traversal); `HTMLLinkElement` loads `rel=stylesheet` (with `media`, `disabled` and the `title` of an alternate sheet left out), fires `load` and `error`, and its sheet joins the style scope; `StyleRuleImport` and `CSSImportRule` load imported sheets (nested, with media conditions and `supports()`), and an import's sheet joins its parent. Pending sheets hold back rendering, as upstream: the style scope counts the sheets the document waits for (render-blocking `<link>`s in the head), the rendering update skips painting until they're in, and style resolves again when one arrives.
+  - **Krystal.UI:** `FileLoaderStrategy` knows `.css`.
+  - **Tests:** a test loader feeding sheets: linked, imported (nested and with media), failing, disabled, added and removed by script-free DOM changes, and rendering held back until they arrive. **Editor:** the page's styles move to `pages/editor.css`, with an `@import`.
+- **G8b, web fonts** (Booey, Krystal.Text, Krystal.UI):
+  - **Booey:** upstream's `CachedFont`, `CSSFontFace`, `CSSFontFaceSource`, `CSSSegmentedFontFace` and `@font-face` registration in `CSSFontSelector` (`src` with `url()` and `local()`, `format()` and `tech()`, `unicode-range`, `font-weight`, `font-style`, `font-stretch` ranges, `font-display`); the fallback and swap periods on G6's timers; a font that arrives invalidates the fonts that used it and lays the page out again. Fonts become `FontCustomPlatformData` from their bytes.
+  - **Krystal.Text:** faces made from bytes in memory; WOFF2 decoded with the `woff2` vcpkg port (and `brotli`). No WOFF 1.
+  - **Krystal.UI:** `FileLoaderStrategy` knows `.ttf`, `.otf` and `.woff2`.
+  - **Tests:** loading TTF, OTF and WOFF2 faces, matching by weight, style and `unicode-range`, `font-display` periods, failures falling back. **Golden:** a web fonts scene, checked against Chrome as the text goldens are (reported only: glyph rasterisation differs). **Editor:** a card in a web font.
+- **Out (FIXMEs):** the `FontFace` and `FontFaceSet` (`document.fonts`) interfaces (no scripting), preloads (`rel=preload`), CORS and `crossorigin`, `integrity`, alternate and title-named sheets, `<style>` imports from other origins, SVG fonts, WOFF 1, font variations from `font-variation-settings` descriptors.
 
 ### G2a as built (2026-10-18)
 
@@ -1006,6 +1022,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** the current frame decodes before its animation starts (decoding is synchronous), so its duration is known.
 - **Out (FIXMEs):** the decoding work queue (frames decode as they're drawn), animation controls (`allowsAnimation`), clipping by ancestors in the visibility test (no repaint rects), SVG image animations, subframes.
 - **Tests:** Booey tests animated decoding (1 case), frames advancing and stopping (2) and `<img>` and CSS animations with pausing and resuming (2); Krystal.UI tests the rendering updates of an animated page. No golden: a still frame is G7c's.
+
+### G8a as built (2026-10-20)
+
+- **Booey** (the ledger entry is *Style sheets* in `docs/booey/PORTING.md`): upstream's `CachedCSSStyleSheet` and `CachedStyleSheetClient`, `CachedResourceLoader::RequestCSSStyleSheet`, the loading half of `StyleSheetContents`, `@import` loading in `ImportRule` (relative to its sheet, nested, cycles stopped) and `<link rel=stylesheet>` loading in `HTMLLinkElement` (media, `disabled`, `load` and `error`, added and removed links, the parsed sheet reused from the memory cache). Pending head sheets hold back rendering through the tree resolver, which was already ported. The frame's subresource cache policy (upstream's `CachePolicy`) lets a host reload a page's resources; a document never loads a URL twice.
+- **Krystal.UI:** `View::LoadFile` and `LoadHTML` take a cache policy.
+- **Editor:** the page's styles moved to `pages/editor.css`, which imports `pages/widgets.css`; F5 reloads them (and the images) with `CachePolicy::Revalidate`.
+- **Changed from the plan:** the cache policy came along, so the editor shows edited sheets and images when it reloads.
+- **Out (FIXMEs):** encodings other than UTF-8, HTTP status and `nosniff` checks, integrity, CORS, preloads, icons and manifests, alternate sheet sets chosen by script, a frame loader.
+- **Tests:** Booey tests links and imports (5 cases) and cache policies (1); Krystal.UI tests a file page's linked sheet with an import, and reloading it after an edit.
 
 ## Open decisions
 

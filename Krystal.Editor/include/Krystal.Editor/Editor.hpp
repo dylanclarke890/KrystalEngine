@@ -228,7 +228,8 @@ namespace krys
 
           if (event.Key() == pal::Key::F5 && event.State() == pal::KeyState::Pressed)
           {
-            LoadPage();
+            // Reloading loads the page's style sheets and images again, so edits to them show.
+            LoadPage(boo::CachePolicy::Revalidate);
           }
 
           if (event.Key() == pal::Key::Escape)
@@ -398,14 +399,14 @@ namespace krys
     }
 
     /// @brief Loads (or reloads) the page view's HTML file.
-    void LoadPage() noexcept
+    void LoadPage(boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept
     {
       if (!_pageView)
       {
         return;
       }
       const auto path = std::filesystem::path {KRYS_EDITOR_PAGES_DIR} / "index.html";
-      if (auto loaded = _pageView->LoadFile(path); !loaded)
+      if (auto loaded = _pageView->LoadFile(path, cachePolicy); !loaded)
       {
         _context->Logger->Error("{}", loaded.error());
         return;

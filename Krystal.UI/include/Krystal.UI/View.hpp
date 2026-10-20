@@ -65,9 +65,14 @@ namespace krys::ui
 
     /// @brief Replaces the document with one parsed from @p markup, at @p url (which relative URLs resolve
     /// against); `about:blank` if it's null.
-    void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {}) noexcept;
+    /// @param cachePolicy How its style sheets, images and other resources use the memory cache: `Revalidate`
+    /// (or `Reload`) loads them again, as reloading a page does.
+    void LoadHTML(utf8_string &&markup, boo::url::URL &&url = {},
+                  boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
     /// @brief Replaces the document with one parsed from the UTF-8 file at @p path, at the file's URL.
-    KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path) noexcept;
+    /// @param cachePolicy As for `LoadHTML`.
+    KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path,
+                                           boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
     /// `font-family` finds them by name; documents already loaded pick them up at their next update.

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 
@@ -15,6 +16,11 @@ namespace krys::boo
         case CachedResource::Type::ImageResource:
         {
           Ref<CachedResource> resource = AdoptRef(*new CachedImage(krys::move(request)));
+          return CachedResourceHandle<CachedResource>(resource.get());
+        }
+        case CachedResource::Type::CSSStyleSheet:
+        {
+          Ref<CachedResource> resource = AdoptRef(*new CachedCSSStyleSheet(krys::move(request)));
           return CachedResourceHandle<CachedResource>(resource.get());
         }
         default:
@@ -78,6 +84,17 @@ namespace krys::boo
       return Unexpected(resource.error());
     }
     return CachedResourceHandle<CachedImage>(Downcast<CachedImage>(resource->get()));
+  }
+
+  ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
+    CachedResourceLoader::RequestCSSStyleSheet(CachedResourceRequest &&request) noexcept
+  {
+    auto resource = RequestResource(CachedResource::Type::CSSStyleSheet, krys::move(request));
+    if (!resource)
+    {
+      return Unexpected(resource.error());
+    }
+    return CachedResourceHandle<CachedCSSStyleSheet>(Downcast<CachedCSSStyleSheet>(resource->get()));
   }
 
   ResourceErrorOr<CachedResourceHandle<CachedResource>>
@@ -147,6 +164,12 @@ namespace krys::boo
       }
     }
 
+    // FIXME: Clear the validated URLs when the document's load event finishes, once there's one.
+    if (!url.ProtocolIsData())
+    {
+      _validatedURLs.insert(url.String());
+    }
+
     krys_debug_assert(resource->URL() == url);
     // FIXME: Collect the document's resources when its loads are done (loadDone), once loads are counted.
     if (!_garbageCollectDocumentResourcesTimer.IsActive())
@@ -203,6 +226,21 @@ namespace krys::boo
       return Reload;
     }
 
+    // Avoid loading the same resource multiple times for a single document, even if the cache policies would
+    // tell us to.
+    if (_validatedURLs.contains(existingResource->URL().String()))
+    {
+      return Use;
+    }
+
+    auto cachePolicy = GetCachePolicy(type);
+
+    // CachePolicy::Reload always reloads
+    if (cachePolicy == CachePolicy::Reload)
+    {
+      return Reload;
+    }
+
     // We'll try to reload the resource if it failed last time.
     if (existingResource->ErrorOccurred())
     {
@@ -221,8 +259,27 @@ namespace krys::boo
       return Use;
     }
 
-    // FIXME: Revalidate expired resources (HTTP freshness, cache validators), once there are network loads.
+    // Revalidating a resource without cache validators reloads it.
+    // FIXME: Expired resources (HTTP freshness), and revalidating with ETag and Last-Modified validators,
+    // once there are network loads.
+    if (cachePolicy == CachePolicy::Revalidate)
+    {
+      return Reload;
+    }
     return Use;
+  }
+
+  CachePolicy CachedResourceLoader::GetCachePolicy(CachedResource::Type type) const noexcept
+  {
+    auto *frame = Frame();
+    if (!frame)
+    {
+      return CachePolicy::Verify;
+    }
+
+    // FIXME: Main resources' policy from the frame loader's load type, once there's a frame loader.
+    (void)type;
+    return frame->SubresourceCachePolicy();
   }
 
   void CachedResourceLoader::SetAutoLoadImages(bool enable) noexcept

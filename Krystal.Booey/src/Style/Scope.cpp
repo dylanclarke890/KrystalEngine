@@ -485,12 +485,23 @@ namespace krys::boo::style
       if (linkElement)
       {
         // <LINK> element
-        if (linkElement->Disabled())
+        if (linkElement->IsDisabled())
         {
           continue;
         }
-        // FIXME: enabledViaScript (a script setting the sheet's disabled to false) and the loading branch
-        // come with the resource loader.
+        enabledViaScript = linkElement->IsEnabledViaScript();
+        if (linkElement->StyleSheetIsLoading())
+        {
+          // it is loading but we should still decide which style sheet set to use
+          if (!enabledViaScript && !title.empty() && _preferredStylesheetSetName.empty())
+          {
+            if (!ContainsAlternate(element->GetAttribute(u8"rel")))
+            {
+              _preferredStylesheetSetName = title;
+            }
+          }
+          continue;
+        }
         if (!linkElement->Sheet())
         {
           title = {};

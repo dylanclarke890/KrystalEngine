@@ -563,6 +563,36 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: loads a file page's linked and imported sheets, and reloads them", "[UI]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-sheet-test";
+    std::filesystem::create_directories(directory / "css");
+    auto write = [&](const std::filesystem::path &path, std::string_view text)
+    {
+      std::ofstream file(directory / path, std::ios::binary);
+      file << text;
+    };
+    write("page.html", "<!DOCTYPE html><link rel=stylesheet href=css/page.css><div id=box></div>");
+    write("css/page.css", "@import url(sizes.css); #box { height: 10px }");
+    write("css/sizes.css", "#box { width: 30px }");
+
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+    CHECK(WidthOf(view, u8"box") == 30);
+
+    // Loading the page again uses the cached sheets; revalidating loads the edited one.
+    write("css/sizes.css", "#box { width: 50px }");
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+    CHECK(WidthOf(view, u8"box") == 30);
+    REQUIRE(view.LoadFile(directory / "page.html", boo::CachePolicy::Revalidate).has_value());
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+    CHECK(WidthOf(view, u8"box") == 50);
+
+    std::filesystem::remove_all(directory);
+  }
+
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
   {
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");

@@ -38,8 +38,9 @@ namespace krys::ui
 
   View::~View() noexcept = default;
 
-  void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url) noexcept
+  void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
+    _frame->SetSubresourceCachePolicy(cachePolicy);
     // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
     // inserted (autofocus candidates need that).
     _document = CreateRef<boo::dom::HTMLDocument>();
@@ -56,7 +57,7 @@ namespace krys::ui
     _document->StyleScope().FlushPendingUpdate();
   }
 
-  Expected<void> View::LoadFile(const std::filesystem::path &path) noexcept
+  Expected<void> View::LoadFile(const std::filesystem::path &path, boo::CachePolicy cachePolicy) noexcept
   {
     std::ifstream file(path, std::ios::binary);
     if (!file)
@@ -70,7 +71,8 @@ namespace krys::ui
       bytes.erase(0, 3);
     }
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
-    LoadHTML(utf8_string(bytes.begin(), bytes.end()), boo::url::URL::FileURLWithFileSystemPath(absolutePath));
+    LoadHTML(utf8_string(bytes.begin(), bytes.end()), boo::url::URL::FileURLWithFileSystemPath(absolutePath),
+             cachePolicy);
     return {};
   }
 

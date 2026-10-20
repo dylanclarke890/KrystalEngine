@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -33,6 +34,7 @@ namespace krys::boo
     css::mq::MediaEnvironment _mediaEnvironment;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
+    CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
     bool _documentIsBeingReplaced {false};
 
     explicit LocalFrame(Page *page) noexcept;
@@ -42,6 +44,19 @@ namespace krys::boo
 
     /// @brief A frame, the main frame of @p page if given.
     KRYS_NODISCARD static Ref<LocalFrame> Create(Page *page = nullptr) noexcept;
+
+    /// @brief How the document's subresources use the memory cache: the host sets `Revalidate` when it
+    /// reloads a page, so edited files load again.
+    // FIXME: The frame loader's load types (reloads, back and forward), and going back to `Verify` once the
+    // document has loaded, once there's a frame loader.
+    KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept
+    {
+      return _subresourceCachePolicy;
+    }
+    void SetSubresourceCachePolicy(CachePolicy policy) noexcept
+    {
+      _subresourceCachePolicy = policy;
+    }
 
     /// @brief The page the frame is in, if any.
     KRYS_NODISCARD Page *GetPage() const noexcept

@@ -11,14 +11,20 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::tests
 {
-  /// @brief Serves images from a map by URL, and records what's asked for; can hold completions back.
+  /// @brief Serves resources from a map by URL (images, unless given another type), and records what's asked
+  /// for; can hold completions back.
   class TestLoaderStrategy final : public LoaderStrategy
   {
+  private:
+    List<UniquePtr<utf8_string>> _texts;
+
   public:
     HashMap<utf8_string, Span<const uint8>> Resources;
+    HashMap<utf8_string, utf8_string> MimeTypes;
     List<utf8_string> Requests;
     bool Defer {false};
     List<Pair<url::URL, Func<void(LoadResult &&)>>> Deferred;
@@ -33,6 +39,15 @@ namespace krys::boo::tests
         return;
       }
       Complete(request.URL(), completionHandler);
+    }
+
+    /// @brief Serves @p text at @p url as @p mimeType.
+    void AddText(utf8_stringview url, utf8_stringview text, utf8_stringview mimeType = u8"text/css") noexcept
+    {
+      auto &stored = *_texts.emplace_back(CreateUnique<utf8_string>(text));
+      Resources[utf8_string(url)] =
+        Span<const uint8>(reinterpret_cast<const uint8 *>(stored.data()), stored.size());
+      MimeTypes[utf8_string(url)] = utf8_string(mimeType);
     }
 
     void CompleteDeferred() noexcept
@@ -54,8 +69,11 @@ namespace krys::boo::tests
         completionHandler(Unexpected(ResourceError(u8"Test", 404, url, u8"Not found")));
         return;
       }
+      auto mimeType = MimeTypes.find(url.String());
       completionHandler(LoadedResource {
-        .Response = ResourceResponse(url, u8"image/png", static_cast<int64>(found->second.size())),
+        .Response =
+          ResourceResponse(url, mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),
+                           static_cast<int64>(found->second.size())),
         .Data = SharedBuffer::Create(found->second)});
     }
   };

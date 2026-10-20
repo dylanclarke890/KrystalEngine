@@ -1519,7 +1519,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/Network/ResourceResponse.hpp
   include/Krystal.Booey/Platform/PlatformStrategies.hpp
   include/Krystal.Booey/Style/PendingResources.hpp
-  # <img> and animated images (G7c, G7d)
+  # Images, style sheets and fonts (G7c, G7d, G8)
   include/Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp
   include/Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp
   include/Krystal.Booey/CSS/Parser/SizesCalcParser.hpp
@@ -1531,6 +1531,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderImage.hpp
   include/Krystal.Booey/Platform/MIMETypeRegistry.hpp
   include/Krystal.Booey/Graphics/ImageFrameAnimator.hpp
+  include/Krystal.Booey/Loader/Cache/CachedStyleSheetClient.hpp
+  include/Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp
+  include/Krystal.Booey/Loader/Cache/CachePolicy.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2529,7 +2532,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/PlatformStrategies.cpp
   src/CSS/Values/Primitives/URLModifiers.cpp
   src/Style/PendingResources.cpp
-  # <img> and animated images (G7c, G7d)
+  # Images, style sheets and fonts (G7c, G7d, G8)
   src/HTML/Parser/HTMLSrcsetParser.cpp
   src/CSS/Parser/SizesAttributeParser.cpp
   src/CSS/Parser/SizesCalcParser.cpp
@@ -2540,6 +2543,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderImage.cpp
   src/Platform/MIMETypeRegistry.cpp
   src/Graphics/ImageFrameAnimator.cpp
+  src/Loader/Cache/CachedCSSStyleSheet.cpp
 )
 
 target_precompile_headers(Krystal.Booey

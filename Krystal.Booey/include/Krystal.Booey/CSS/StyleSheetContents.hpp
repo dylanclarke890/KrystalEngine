@@ -16,6 +16,7 @@
 
 namespace krys::boo
 {
+  class CachedCSSStyleSheet;
   class CachedResource;
 }
 
@@ -35,8 +36,6 @@ namespace krys::boo::css
 
   /// @brief The parsed contents of a style sheet: its rules and namespaces, shared between the CSSStyleSheet
   /// objects that use it.
-  // FIXME: Loading (ParseAuthorStyleSheet, NotifyLoadedSheet, SubresourcesAllowReuse, IsLoadingSubresources)
-  // comes with the resource loader.
   class StyleSheetContents final : public RefCounted<StyleSheetContents>,
                                    public CanMakeWeakPtr<StyleSheetContents>
   {
@@ -99,6 +98,15 @@ namespace krys::boo::css
 
     /// @brief Parses @p sheetText into this sheet.
     bool ParseString(const CSSOMString &sheetText) noexcept;
+
+    /// @brief Parses the text of a loaded sheet into this sheet.
+    /// @return False if the sheet can't be used (a load error, or a type that isn't CSS).
+    bool ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept;
+    void NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept;
+    /// @brief Whether a parsed sheet can be used again: none of its subresources failed.
+    // FIXME: Subresources that need revalidating, once there's HTTP caching.
+    KRYS_NODISCARD bool SubresourcesAllowReuse() const noexcept;
+    KRYS_NODISCARD bool IsLoadingSubresources() const noexcept;
 
     KRYS_NODISCARD bool IsCacheable() const noexcept;
     KRYS_NODISCARD bool IsCacheableWithNoBaseURLDependency() const noexcept;

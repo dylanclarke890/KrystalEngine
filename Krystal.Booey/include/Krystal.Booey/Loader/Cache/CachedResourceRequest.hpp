@@ -16,14 +16,14 @@ namespace krys::boo
   };
 
   /// @brief A request for a cached resource: the resource request, how to load it and who asked.
-  // FIXME: Priorities, preloads, the origin, charsets and access control updates, once there are network
-  // loads.
+  // FIXME: Priorities, preloads, the origin and access control updates, once there are network loads.
   class CachedResourceRequest
   {
   private:
     ResourceRequest _resourceRequest;
     ResourceLoaderOptions _options;
     utf8_string _initiatorType;
+    utf8_string _charset;
     bool _ignoreForRequestCount {false};
 
   public:
@@ -63,6 +63,16 @@ namespace krys::boo
     void SetInitiatorType(utf8_stringview initiatorType) noexcept
     {
       _initiatorType = utf8_string(initiatorType);
+    }
+
+    /// @brief The encoding a text resource is decoded from unless the resource says otherwise.
+    KRYS_NODISCARD const utf8_string &Charset() const noexcept
+    {
+      return _charset;
+    }
+    void SetCharset(utf8_string charset) noexcept
+    {
+      _charset = krys::move(charset);
     }
 
     KRYS_NODISCARD bool IgnoreForRequestCount() const noexcept

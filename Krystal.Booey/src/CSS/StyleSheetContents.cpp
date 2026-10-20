@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Rules/ImportRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Style/RuleData.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
@@ -512,6 +513,54 @@ namespace krys::boo::css
     return true;
   }
 
+  bool StyleSheetContents::ParseAuthorStyleSheet(const CachedCSSStyleSheet *cachedStyleSheet) noexcept
+  {
+    // FIXME: Lax type checks for same-origin requests in quirks mode, once there are security origins (file:
+    // URLs are each their own origin, so their requests are cross-origin).
+    auto mimeTypeCheckHint = CachedCSSStyleSheet::MIMETypeCheckHint::Strict;
+    bool hasValidMIMEType = true;
+    bool hasHTTPStatusOK = true;
+    auto sheetText = cachedStyleSheet->SheetText(mimeTypeCheckHint, &hasValidMIMEType, &hasHTTPStatusOK);
+
+    if (!hasHTTPStatusOK)
+    {
+      krys_debug_assert(!sheetText);
+      return false;
+    }
+    if (!hasValidMIMEType)
+    {
+      krys_debug_assert(!sheetText);
+      // FIXME: Log that the sheet wasn't parsed because its type isn't CSS, once there's a console.
+      return false;
+    }
+    if (!sheetText)
+    {
+      return false;
+    }
+
+    Parser::ParseStyleSheet(*sheetText, GetParserContext(), *this);
+    return true;
+  }
+
+  void StyleSheetContents::NotifyLoadedSheet(const CachedCSSStyleSheet *sheet) noexcept
+  {
+    krys_debug_assert(sheet);
+    _didLoadErrorOccur |= sheet->ErrorOccurred();
+    _didLoadErrorOccur |= !sheet->MimeTypeAllowedByNosniff();
+  }
+
+  bool StyleSheetContents::SubresourcesAllowReuse() const noexcept
+  {
+    bool hasFailedOrExpiredResources =
+      TraverseSubresources([](const CachedResource &resource) { return resource.LoadFailedOrCanceled(); });
+    return !hasFailedOrExpiredResources;
+  }
+
+  bool StyleSheetContents::IsLoadingSubresources() const noexcept
+  {
+    return TraverseSubresources([](const CachedResource &resource) { return resource.IsLoading(); });
+  }
+
   bool StyleSheetContents::IsLoading() const noexcept
   {
     return std::ranges::any_of(_importRules, [](const auto &importRule) { return importRule->IsLoading(); });
@@ -640,7 +689,10 @@ namespace krys::boo::css
           }
           case RuleType::Import:
           {
-            // FIXME: Visit the import's cached style sheet once the resource loader exists.
+            if (auto *cachedResource = Downcast<ImportRule>(rule).CachedStyleSheet())
+            {
+              return handler(*cachedResource);
+            }
             return false;
           }
           case RuleType::CounterStyle:

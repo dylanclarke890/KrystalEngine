@@ -1,0 +1,27 @@
+﻿/* The styles of the cards' contents, imported by editor.css. */
+
+.boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
+.boxes div { background: #f7f8fb; }
+.boxes div { cursor: crosshair; }
+.boxes div:hover { background: #dfe5ff; }
+
+.swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; height: 100%; }
+.swatches div { border-radius: 10px; cursor: pointer; }
+.swatches div:hover { transform: scale(1.1); }
+
+.gradient { border-radius: 12px; height: 100%; }
+
+.stage { position: relative; height: 100%; overflow: hidden; border-radius: 12px; background: #e9ecf2; }
+.stage div { position: absolute; width: 64px; height: 64px; border-radius: 12px; cursor: move; }
+.stage div:hover { outline: 3px solid #073b4c; }
+/* The first stage's boxes are focusable by clicking (tabindex -1): the stage shows when one has focus. */
+.stage:focus-within { box-shadow: inset 0 0 0 3px #118ab2; }
+tr:hover td { text-decoration: underline; }
+
+/* Scrolling boxes, with the theme's scrollbars. */
+.list { height: 100%; overflow: auto; border-radius: 8px; background: #f7f8fb; }
+.list p { margin: 0; padding: 4px 10px; border-bottom: 1px solid #e3e7ef; }
+.list p:hover { background: #dfe5ff; }
+.strip { height: 100%; overflow-x: auto; overflow-y: hidden; white-space: nowrap; border-radius: 8px;
+         background: #f7f8fb; }
+.strip div { display: inline-block; width: 90px; height: 90px; margin: 8px 4px; border-radius: 12px; }

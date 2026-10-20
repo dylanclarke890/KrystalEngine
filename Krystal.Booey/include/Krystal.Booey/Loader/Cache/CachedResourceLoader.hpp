@@ -1,15 +1,18 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
+#include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
@@ -53,6 +56,8 @@ namespace krys::boo
     };
 
     mutable DocumentResourceMap _documentResources;
+    // The URLs the document has loaded or validated, which it doesn't load again whatever the cache policy.
+    HashSet<utf8_string> _validatedURLs;
     WeakPtr<dom::Document> _document;
     int32 _requestCount {0};
     Timer _garbageCollectDocumentResourcesTimer;
@@ -68,6 +73,8 @@ namespace krys::boo
 
     ResourceErrorOr<CachedResourceHandle<CachedImage>>
       RequestImage(CachedResourceRequest &&, ImageLoading = ImageLoading::Immediate) noexcept;
+    ResourceErrorOr<CachedResourceHandle<CachedCSSStyleSheet>>
+      RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;
@@ -115,6 +122,7 @@ namespace krys::boo
     CachedResourceHandle<boo::CachedResource> LoadResource(boo::CachedResource::Type,
                                                            CachedResourceRequest &&) noexcept;
 
+    KRYS_NODISCARD CachePolicy GetCachePolicy(boo::CachedResource::Type type) const noexcept;
     KRYS_NODISCARD RevalidationPolicy DetermineRevalidationPolicy(boo::CachedResource::Type,
                                                                   CachedResourceRequest &,
                                                                   boo::CachedResource *existingResource,
