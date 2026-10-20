@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo::dom
 {
@@ -122,6 +123,9 @@ namespace krys::boo
     KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect) noexcept;
     KRYS_NODISCARD static Ref<WebAnimation> Create(dom::Document &document, AnimationEffect *effect,
                                                    AnimationTimeline *timeline) noexcept;
+
+    /// @brief Every animation that exists.
+    KRYS_NODISCARD static HashSet<WebAnimation *> &Instances() noexcept;
 
     KRYS_NODISCARD virtual bool IsStyleOriginatedAnimation() const noexcept
     {

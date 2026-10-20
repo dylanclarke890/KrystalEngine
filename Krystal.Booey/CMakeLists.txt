@@ -1599,6 +1599,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/ElementAnimationRareData.hpp
   include/Krystal.Booey/Animation/StyleOriginatedAnimation.hpp
   include/Krystal.Booey/Animation/CSSTransition.hpp
+  include/Krystal.Booey/Animation/CSSAnimation.hpp
+  include/Krystal.Booey/Animation/CSSAnimationEvent.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2643,6 +2645,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/ElementAnimationRareData.cpp
   src/Animation/StyleOriginatedAnimation.cpp
   src/Animation/CSSTransition.cpp
+  src/Animation/CSSAnimation.cpp
+  src/Animation/CSSAnimationEvent.cpp
 )
 
 target_precompile_headers(Krystal.Booey

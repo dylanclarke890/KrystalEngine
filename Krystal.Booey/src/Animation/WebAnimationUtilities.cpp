@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Animation/AnimationPlaybackEvent.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParser.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -123,6 +126,46 @@ namespace krys::boo
       return a.TransitionProperty().View() < b.TransitionProperty().View();
     }
 
+    KRYS_NODISCARD bool CompareCSSAnimations(const CSSAnimation &a, const CSSAnimation &b) noexcept
+    {
+      // https://drafts.csswg.org/css-animations-2/#animation-composite-order
+      auto aOwningElement = a.OwningElement();
+      auto bOwningElement = b.OwningElement();
+      krys_debug_assert(aOwningElement);
+      krys_debug_assert(bOwningElement);
+
+      // If the owning element of A and B differs, sort A and B by tree order of their corresponding owning
+      // elements.
+      if (*aOwningElement != *bOwningElement)
+      {
+        return CompareStyleOriginatedAnimationOwningElementPositionsInDocumentTreeOrder(*aOwningElement,
+                                                                                        *bOwningElement);
+      }
+
+      // Sort A and B based on their position in the computed value of the animation-name property of the
+      // (common) owning element.
+      const auto &cssAnimationList = aOwningElement->EnsureKeyframeEffectStack().CSSAnimationList();
+      krys_debug_assert(cssAnimationList);
+      krys_debug_assert(!cssAnimationList->IsInitial());
+
+      const auto &aBackingAnimation = a.BackingStyleAnimation();
+      const auto &bBackingAnimation = b.BackingStyleAnimation();
+      for (const auto &animation : cssAnimationList->UsedValues())
+      {
+        if (animation.SortingIdentity() == aBackingAnimation.SortingIdentity())
+        {
+          return true;
+        }
+        if (animation.SortingIdentity() == bBackingAnimation.SortingIdentity())
+        {
+          return false;
+        }
+      }
+
+      // We should have found either of those CSS animations in the CSS animations list.
+      krys_unreachable();
+    }
+
     template <typename T>
     KRYS_NODISCARD Maybe<bool> CompareStyleOriginatedAnimationEvents(const AnimationEventBase &a,
                                                                      const AnimationEventBase &b) noexcept
@@ -153,10 +196,12 @@ namespace krys::boo
         return false;
       }
 
-      auto aStyleable = style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(aTarget.get())),
-                                         aAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
-      auto bStyleable = style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(bTarget.get())),
-                                         bAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
+      auto aStyleable =
+        style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(aTarget.get())),
+                         aAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
+      auto bStyleable =
+        style::Styleable(*DynamicDowncast<dom::Element>(DynamicDowncast<dom::Node>(bTarget.get())),
+                         bAsStyleOriginatedAnimationEvent->PseudoElementIdentifier());
       return CompareStyleOriginatedAnimationOwningElementPositionsInDocumentTreeOrder(aStyleable, bStyleable);
     }
   }
@@ -186,8 +231,16 @@ namespace krys::boo
     }
 
     // CSS Animations sort next.
-    // FIXME: Comparing CSS animations by their position in their owning element's `animation-name`, once
-    // there are CSS animations.
+    auto *aAsCSSAnimation = aHasOwningElement ? DynamicDowncast<CSSAnimation>(&a) : nullptr;
+    auto *bAsCSSAnimation = bHasOwningElement ? DynamicDowncast<CSSAnimation>(&b) : nullptr;
+    if (aAsCSSAnimation || bAsCSSAnimation)
+    {
+      if (!!aAsCSSAnimation == !!bAsCSSAnimation)
+      {
+        return CompareCSSAnimations(*aAsCSSAnimation, *bAsCSSAnimation);
+      }
+      return !bAsCSSAnimation;
+    }
 
     // JS-originated animations sort last based on their position in the global animation list.
     // https://drafts.csswg.org/web-animations-1/#animation-composite-order
@@ -275,7 +328,10 @@ namespace krys::boo
     }
 
     // CSSAnimationEvent instances sort last.
-    // FIXME: Comparing CSS animation events, once there are CSS animations.
+    if (auto sorted = CompareStyleOriginatedAnimationEvents<CSSAnimationEvent>(a, b))
+    {
+      return *sorted;
+    }
 
     return false;
   }

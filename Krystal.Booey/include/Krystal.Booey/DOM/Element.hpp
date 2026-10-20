@@ -786,6 +786,17 @@ namespace krys::boo::dom
     void SetHasPropertiesOverridenAfterAnimation(
       const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier, bool value) noexcept;
 
+    KRYS_NODISCARD CSSAnimationCollection &AnimationsCreatedByMarkup(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+    void SetAnimationsCreatedByMarkup(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+                                      CSSAnimationCollection &&animations) noexcept;
+    void
+      CSSAnimationsDidUpdate(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+    void
+      KeyframesRuleDidChange(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+    KRYS_NODISCARD bool HasPendingKeyframesUpdate(
+      const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+
     /// @brief Invalidates the element's style because one of its animations changed.
     void InvalidateStyleForAnimation() noexcept;
 

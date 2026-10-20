@@ -50,8 +50,7 @@
 //   - `RenderTheme` (focus ring metrics): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
-//   - the `Document*` security and keyframes functions: `dom::Document` (upstream members) once it has a
-//     security origin and runs animations.
+//   - the `Document*` security function: `dom::Document` (upstream member) once it has a security origin.
 // A few members collapse an upstream call chain whose types aren't ported yet; they're marked below.
 
 namespace krys::boo::dom
@@ -128,10 +127,6 @@ namespace krys::boo
   /// @brief Collapses `document.protectedSecurityOrigin()->canRequest(url, ...)`. There's no security origin
   /// or loader yet, so every URL can be requested.
   KRYS_NODISCARD bool DocumentCanRequest(const dom::Document &, const url::URL &) noexcept;
-
-  /// @brief Collapses `document.keyframesRuleDidChange(name)`. Nothing runs animations yet, so it does
-  /// nothing.
-  void DocumentKeyframesRuleDidChange(dom::Document &, const css::CSSOMString &name) noexcept;
 }
 
 namespace krys::boo::style

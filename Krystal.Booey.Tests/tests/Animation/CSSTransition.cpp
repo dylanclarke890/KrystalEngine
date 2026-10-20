@@ -1,20 +1,13 @@
 ﻿#include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
 #include "Krystal.Booey/Animation/CSSTransitionEvent.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
-#include "Krystal.Booey/Page/LocalFrame.hpp"
-#include "Krystal.Booey/Page/Page.hpp"
-#include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::tests
@@ -23,68 +16,10 @@ namespace krys::boo::tests
   {
     using namespace std::chrono_literals;
 
-    /// @brief A page with a 200x100 view, and @p markup parsed into its main frame's document.
-    struct TransitionFixture
+    /// @brief A page to run transitions on.
+    struct TransitionFixture : AnimationPageFixture
     {
-      Ref<Page> TestPage {Page::Create()};
-      RefPtr<dom::HTMLDocument> Document;
-
-      explicit TransitionFixture(utf8_string &&markup) noexcept
-      {
-        auto &frame = TestPage->MainFrame();
-        frame.CreateView({200, 100});
-        Document = CreateRef<dom::HTMLDocument>();
-        frame.SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        auto parser = CreateRef<html::HTMLDocumentParser>(*Document);
-        parser->InputStream().Append(krys::move(markup), IsEOF(true));
-        parser->PumpTokenizer();
-        Document->StyleScope().FlushPendingUpdate();
-        TestPage->UpdateRendering();
-      }
-
-      ~TransitionFixture() noexcept
-      {
-        TestPage->MainFrame().SetDocument(nullptr);
-      }
-
-      KRYS_NODISCARD dom::Element &ById(dom::DOMStringView id) noexcept
-      {
-        auto element = Document->GetElementById(id);
-        REQUIRE(element);
-        return *element;
-      }
-
-      void SetStyle(dom::DOMStringView id, utf8_stringview style) noexcept
-      {
-        REQUIRE_FALSE(ById(id).SetAttribute(u8"style", dom::DOMString {style}).HasException());
-      }
-
-      /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is
-      /// scheduled.
-      void Frame(MonotonicTime::duration delta = {}) noexcept
-      {
-        auto &loop = html::EventLoop::Current();
-        loop.Run(loop.Now() + delta);
-        if (TestPage->IsRenderingUpdateScheduled())
-        {
-          TestPage->UpdateRendering();
-        }
-      }
-
-      /// @brief Runs frames until the animations created by a style change are ready: their start time is the
-      /// time of the frame after the change.
-      void StartAnimations() noexcept
-      {
-        Frame();
-        Frame();
-      }
-
-      KRYS_NODISCARD float Opacity(dom::DOMStringView id) noexcept
-      {
-        auto *renderer = ById(id).Renderer();
-        REQUIRE(renderer);
-        return renderer->Style().GetOpacity().Value.Value;
-      }
+      using AnimationPageFixture::AnimationPageFixture;
 
       KRYS_NODISCARD CSSTransition *RunningTransition(dom::DOMStringView id,
                                                       css::PropertyId property) noexcept
@@ -99,33 +34,8 @@ namespace krys::boo::tests
       }
     };
 
-    /// @brief Records the transition events fired at an element.
-    struct TransitionRecorder : dom::EventListenerCallback
-    {
-      List<std::string> Records;
-
-      void HandleEvent(dom::Event &event) noexcept override
-      {
-        auto type = event.Type().View();
-        std::string record(type.begin(), type.end());
-        if (auto *transitionEvent = dynamic_cast<CSSTransitionEvent *>(&event))
-        {
-          auto property = transitionEvent->PropertyName();
-          record += ' ';
-          record.append(property.begin(), property.end());
-        }
-        Records.push_back(krys::move(record));
-      }
-
-      void Listen(dom::Element &element) noexcept
-      {
-        for (auto type : {u8"transitionrun", u8"transitionstart", u8"transitionend", u8"transitioncancel"})
-        {
-          element.AddEventListener(dom::DOMStringAtom(type), ShareRef<dom::EventListenerCallback>(*this),
-                                   false);
-        }
-      }
-    };
+    constexpr std::initializer_list<const char8_t *> TransitionEvents {
+      u8"transitionrun", u8"transitionstart", u8"transitionend", u8"transitioncancel"};
 
     constexpr utf8_stringview FadingBox =
       u8"<!DOCTYPE html><style>#box{opacity:0;transition:opacity 1s linear}</style><div id=box></div>";
@@ -177,8 +87,8 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "CSSTransition: transition events", "[Animation][CSSTransition]")
   {
     TransitionFixture fixture {utf8_string(FadingBox)};
-    auto recorder = CreateRef<TransitionRecorder>();
-    recorder->Listen(fixture.ById(u8"box"));
+    auto recorder = CreateRef<AnimationEventRecorder>();
+    recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
 
     fixture.SetStyle(u8"box", u8"opacity:1");
     fixture.Frame();
@@ -196,8 +106,8 @@ namespace krys::boo::tests
   {
     TransitionFixture fixture {
       u8"<!DOCTYPE html><style>#box{opacity:0;transition:opacity 1s linear 500ms}</style><div id=box></div>"};
-    auto recorder = CreateRef<TransitionRecorder>();
-    recorder->Listen(fixture.ById(u8"box"));
+    auto recorder = CreateRef<AnimationEventRecorder>();
+    recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
 
     fixture.SetStyle(u8"box", u8"opacity:1");
     fixture.Frame();
@@ -266,8 +176,8 @@ namespace krys::boo::tests
                    "[Animation][CSSTransition]")
   {
     TransitionFixture fixture {utf8_string(FadingBox)};
-    auto recorder = CreateRef<TransitionRecorder>();
-    recorder->Listen(fixture.ById(u8"box"));
+    auto recorder = CreateRef<AnimationEventRecorder>();
+    recorder->Listen(fixture.ById(u8"box"), TransitionEvents);
     fixture.SetStyle(u8"box", u8"opacity:1");
     fixture.Frame();
     fixture.StartAnimations();

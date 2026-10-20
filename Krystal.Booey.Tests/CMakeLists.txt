@@ -83,6 +83,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
+		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
@@ -360,6 +361,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontCascade.cpp
 		tests/Animation/AnimationEffectTiming.cpp
 		tests/Animation/BlendingKeyframes.cpp
+		tests/Animation/CSSAnimation.cpp
 		tests/Animation/CSSTransition.cpp
 		tests/Animation/KeyframeInterpolation.cpp
 		tests/Animation/WebAnimation.cpp

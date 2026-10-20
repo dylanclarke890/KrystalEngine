@@ -796,11 +796,9 @@ namespace krys::boo::style
     }
   }
 
-  ElementUpdate TreeResolver::CreateAnimatedElementUpdate(ResolvedStyle &&resolvedStyle,
-                                                          const Styleable &styleable,
-                                                          EnumSet<Change> parentChanges,
-                                                          const ResolutionContext &resolutionContext,
-                                                          style::IsInDisplayNoneTree) noexcept
+  ElementUpdate TreeResolver::CreateAnimatedElementUpdate(
+    ResolvedStyle &&resolvedStyle, const Styleable &styleable, EnumSet<Change> parentChanges,
+    const ResolutionContext &resolutionContext, style::IsInDisplayNoneTree isInDisplayNoneTree) noexcept
   {
     auto &element = styleable.Element;
     auto *currentStyle = element.RenderOrDisplayContentsStyle(styleable.PseudoElementIdentifier);
@@ -845,7 +843,11 @@ namespace krys::boo::style
       // define the after-change style to use CSS Animations as defined in the previous style change event. As
       // such, we update CSS Animations after CSS Transitions such that when CSS Transitions are updated the
       // CSS Animations data is the same as during the previous style change event.
-      // FIXME: CSS animations, once there are CSS animations.
+      if ((oldStyle && oldStyle->HasAnimations()) || resolvedStyle.Style->HasAnimations())
+      {
+        styleable.UpdateCSSAnimations(oldStyle, *resolvedStyle.Style, resolutionContext,
+                                      newStyleOriginatedAnimations, isInDisplayNoneTree);
+      }
     };
 
     auto applyAnimations = [&]() -> Pair<UniquePtr<RenderStyle>, EnumSet<AnimationImpact>>
@@ -899,8 +901,10 @@ namespace krys::boo::style
     };
 
     // FIXME: Something like this is also needed for viewport units.
-    // FIXME: Telling the element's animations its query container changed (queryContainerDidChange), once
-    // there are CSS animations.
+    if (currentStyle && GetParent().NeedsUpdateQueryContainerDependentStyle)
+    {
+      styleable.QueryContainerDidChange();
+    }
 
     // First, we need to make sure that any new CSS animation occuring on this element has a matching
     // WebAnimation on the document timeline.

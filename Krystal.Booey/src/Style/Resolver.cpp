@@ -217,7 +217,7 @@ namespace krys::boo::style
   {
     const auto animationName = rule->Name();
     _keyframesRuleMap.insert_or_assign(animationName, RefPtr<css::KeyframesRule> {krys::move(rule)});
-    DocumentKeyframesRuleDidChange(Document(), css::CSSOMString(animationName.View()));
+    Document().KeyframesRuleDidChange(css::CSSOMString(animationName.View()));
   }
 
   auto Resolver::InitializeStateAndStyle(const dom::Element &element, const ResolutionContext &context,

@@ -31,6 +31,10 @@ namespace krys::boo
     List<WeakPtr<WebAnimation>> _pendingAnimations;
     dom::Document &_document;
     Maybe<Seconds> _cachedCurrentTime;
+    /// @brief The last time cached, which the clearance timer doesn't clear: the pending animations' start
+    /// time. The host runs the event loop once per frame, timers first, so the cache is usually cleared by
+    /// the time the task processing the pending animations runs.
+    Maybe<Seconds> _lastCachedCurrentTime;
     /// @brief Identifies the queued task processing pending animations; changing it cancels the task.
     uint64 _pendingAnimationsProcessingTaskIdentifier {0};
     bool _pendingAnimationsProcessingTaskIsQueued {false};

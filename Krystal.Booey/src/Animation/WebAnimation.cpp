@@ -12,6 +12,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -40,11 +41,22 @@ namespace krys::boo
     return result;
   }
 
-  WebAnimation::WebAnimation(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  HashSet<WebAnimation *> &WebAnimation::Instances() noexcept
   {
+    static NeverDestroyed<HashSet<WebAnimation *>> instances;
+    return instances;
   }
 
-  WebAnimation::~WebAnimation() noexcept = default;
+  WebAnimation::WebAnimation(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  {
+    Instances().insert(this);
+  }
+
+  WebAnimation::~WebAnimation() noexcept
+  {
+    krys_debug_assert(Instances().contains(this));
+    Instances().erase(this);
+  }
 
   void WebAnimation::Remove() noexcept
   {
@@ -881,7 +893,8 @@ namespace krys::boo
                                            [event = krys::move(event)]
                                            {
                                              RefPtr target = event->Target();
-                                             (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
+                                             (void)dom::EventDispatcher::DispatchToTarget(*event,
+                                                                                          target.get());
                                            });
     }
   }

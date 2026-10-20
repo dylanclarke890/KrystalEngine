@@ -88,10 +88,6 @@ namespace krys::boo
   {
     return true;
   }
-
-  void DocumentKeyframesRuleDidChange(dom::Document &, const css::CSSOMString &) noexcept
-  {
-  }
 }
 
 namespace krys::boo::style

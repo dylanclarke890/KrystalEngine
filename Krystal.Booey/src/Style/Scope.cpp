@@ -302,6 +302,36 @@ namespace krys::boo::style
     _matchResultCache = nullptr;
   }
 
+  Scope *Scope::ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept
+  {
+    if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+    {
+      return pseudoElement->HostElement() ? ForOrdinal(*pseudoElement->HostElement(), ordinal) : nullptr;
+    }
+
+    if (ordinal == ScopeOrdinal::Element)
+    {
+      return &ForNode(element);
+    }
+    if (ordinal == ScopeOrdinal::Shadow)
+    {
+      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      return shadowRoot ? &shadowRoot->StyleScope() : nullptr;
+    }
+    if (ordinal <= ScopeOrdinal::ContainingHost)
+    {
+      auto *host = HostForScopeOrdinal(element, ordinal);
+      return host ? &ForNode(*host) : nullptr;
+    }
+    auto *slot = AssignedSlotForScopeOrdinal(element, ordinal);
+    return slot ? &ForNode(*slot) : nullptr;
+  }
+
+  const Scope *Scope::ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept
+  {
+    return ForOrdinal(const_cast<dom::Element &>(element), ordinal);
+  }
+
   Scope &Scope::ForNode(dom::Node &node) noexcept
   {
     if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(dom::TreeQueries::Root(node)))

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.UI/View.hpp"
+#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
@@ -8,6 +10,7 @@
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
 #include <filesystem>
@@ -601,5 +604,50 @@ namespace krys::ui::tests
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".woff2") == u8"font/woff2");
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".TTF") == u8"font/ttf");
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".unknown").empty());
+  }
+
+  TEST_CASE("View: animations run on the host's frames", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    // As a host's page: its style sheet loads from a file, as a networking task.
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-animation-test";
+    std::filesystem::create_directories(directory);
+    {
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><link rel=stylesheet href=page.css><div id=box></div>";
+      std::ofstream sheet(directory / "page.css", std::ios::binary);
+      sheet << "@keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
+               "#box { width: 10px; height: 10px; animation: fade 1s linear infinite }";
+    }
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    auto opacity = [&]
+    {
+      auto box = view.Document().GetElementById(u8"box");
+      REQUIRE(box);
+      REQUIRE(box->Renderer());
+      return box->Renderer()->Style().GetOpacity().Value.Value;
+    };
+
+    // Frames at 60 Hz, longer than the timelines controller keeps its cached time: the animation still gets
+    // its start time and runs.
+    constexpr auto frame =
+      std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::microseconds {16'667});
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    for (int32 i = 0; i < 4; ++i)
+    {
+      time += frame;
+      (void)view.Update(time);
+    }
+    auto &animation = *view.Document().GetElementById(u8"box")->Animations(null)->first();
+    CHECK_FALSE(animation.Pending());
+    auto before = opacity();
+    for (int32 i = 0; i < 15; ++i)
+    {
+      time += frame;
+      CHECK(view.Update(time));
+    }
+    CHECK(opacity() == Catch::Approx(before + 0.25f).margin(0.02f));
+    std::filesystem::remove_all(directory);
   }
 }

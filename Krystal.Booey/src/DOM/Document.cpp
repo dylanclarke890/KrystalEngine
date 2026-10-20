@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
@@ -1427,6 +1428,32 @@ namespace krys::boo::dom
       _timelinesController = CreateUnique<AnimationTimelinesController>(*this);
     }
     return *_timelinesController;
+  }
+
+  void Document::KeyframesRuleDidChange(const css::CSSOMString &name) noexcept
+  {
+    for (auto *animation : WebAnimation::Instances())
+    {
+      auto *cssAnimation = DynamicDowncast<CSSAnimation>(animation);
+      if (!cssAnimation || !cssAnimation->IsRelevant())
+      {
+        continue;
+      }
+
+      if (cssAnimation->AnimationName().View() != name)
+      {
+        continue;
+      }
+
+      auto owningElement = cssAnimation->OwningElement();
+      if (!owningElement || !owningElement->Element.IsConnected()
+          || &owningElement->Element.NodeDocument() != this)
+      {
+        continue;
+      }
+
+      cssAnimation->KeyframesRuleDidChange();
+    }
   }
 
   void Document::UpdateAnimationsAndSendEvents() noexcept

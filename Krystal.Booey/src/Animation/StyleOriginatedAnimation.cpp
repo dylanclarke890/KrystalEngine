@@ -298,8 +298,49 @@ namespace krys::boo
 
     if (IsCSSAnimation())
     {
-      // FIXME: The events of CSS animations, once there are CSS animations.
-      (void)wasBefore;
+      // https://drafts.csswg.org/css-animations-2/#events
+      if ((wasIdle || wasBefore) && isActive)
+      {
+        EnqueueDOMEvent(EventNames::AnimationStart, intervalStart, EffectTimeAtStart());
+      }
+      else if ((wasIdle || wasBefore) && isAfter)
+      {
+        EnqueueDOMEvent(EventNames::AnimationStart, intervalStart, EffectTimeAtStart());
+        EnqueueDOMEvent(EventNames::AnimationEnd, intervalEnd, EffectTimeAtEnd());
+      }
+      else if (wasActive && isBefore)
+      {
+        EnqueueDOMEvent(EventNames::AnimationEnd, intervalStart, EffectTimeAtEnd());
+      }
+      else if (wasActive && isActive && _previousIteration != iteration)
+      {
+        auto iterationBoundary = iteration;
+        if (_previousIteration > iteration)
+        {
+          iterationBoundary++;
+        }
+        auto elapsedTime = animationEffect ? animationEffect->IterationDuration()
+                                               * (iterationBoundary - animationEffect->IterationStart())
+                                           : ZeroTime();
+        EnqueueDOMEvent(EventNames::AnimationIteration, elapsedTime, EffectTimeAtIteration(iteration));
+      }
+      else if (wasActive && isAfter)
+      {
+        EnqueueDOMEvent(EventNames::AnimationEnd, intervalEnd, EffectTimeAtEnd());
+      }
+      else if (wasAfter && isActive)
+      {
+        EnqueueDOMEvent(EventNames::AnimationStart, intervalEnd, EffectTimeAtStart());
+      }
+      else if (wasAfter && isBefore)
+      {
+        EnqueueDOMEvent(EventNames::AnimationStart, intervalEnd, EffectTimeAtStart());
+        EnqueueDOMEvent(EventNames::AnimationEnd, intervalStart, EffectTimeAtEnd());
+      }
+      else if ((!wasIdle && !wasAfter) && isIdle)
+      {
+        EnqueueDOMEvent(EventNames::AnimationCancel, cancelationTime, cancelationTime);
+      }
     }
     else if (IsCSSTransition())
     {

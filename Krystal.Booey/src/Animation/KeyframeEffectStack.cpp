@@ -90,6 +90,14 @@ namespace krys::boo
     return _effects;
   }
 
+  void KeyframeEffectStack::SetCSSAnimationList(Maybe<style::Animations> &&cssAnimationList) noexcept
+  {
+    _cssAnimationList = krys::move(cssAnimationList);
+    // Since the list of animation names has changed, the sorting order of the animation effects may have changed
+    // as well.
+    _isSorted = false;
+  }
+
   EnumSet<AnimationImpact>
     KeyframeEffectStack::ApplyKeyframeEffects(RenderStyle &targetStyle,
                                               AnimatableCSSPropertySet &affectedProperties,
@@ -143,5 +151,25 @@ namespace krys::boo
     }
 
     return impact;
+  }
+
+  void KeyframeEffectStack::ClearInvalidCSSAnimationNames() noexcept
+  {
+    _invalidCSSAnimationNames.clear();
+  }
+
+  bool KeyframeEffectStack::HasInvalidCSSAnimationNames() const noexcept
+  {
+    return !_invalidCSSAnimationNames.empty();
+  }
+
+  bool KeyframeEffectStack::ContainsInvalidCSSAnimationName(const css::CSSOMString &name) const noexcept
+  {
+    return _invalidCSSAnimationNames.contains(name);
+  }
+
+  void KeyframeEffectStack::AddInvalidCSSAnimationName(const css::CSSOMString &name) noexcept
+  {
+    _invalidCSSAnimationNames.insert(name);
   }
 }

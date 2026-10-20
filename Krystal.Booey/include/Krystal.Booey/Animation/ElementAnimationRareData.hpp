@@ -8,16 +8,16 @@
 
 namespace krys::boo
 {
+  class CSSAnimation;
   class CSSTransition;
   class KeyframeEffectStack;
   class RenderStyle;
 
+  using CSSAnimationCollection = ListHashSet<Ref<CSSAnimation>>;
   using AnimatableCSSPropertyToTransitionMap =
     HashMap<AnimatableCSSProperty, Ref<CSSTransition>, AnimatableCSSPropertyHash>;
 
   /// @brief The animation state of an element, or of one of its pseudo-elements.
-  // FIXME: The CSS animations created by markup and their pending keyframes updates, once there are CSS
-  // animations.
   class ElementAnimationRareData
   {
     KRYS_NON_COPY_MOVABLE(ElementAnimationRareData);
@@ -26,8 +26,10 @@ namespace krys::boo
     UniquePtr<boo::KeyframeEffectStack> _keyframeEffectStack;
     UniquePtr<const RenderStyle> _lastStyleChangeEventStyle;
     AnimationCollection _animations;
+    CSSAnimationCollection _animationsCreatedByMarkup;
     AnimatableCSSPropertyToTransitionMap _completedTransitionsByProperty;
     AnimatableCSSPropertyToTransitionMap _runningTransitionsByProperty;
+    bool _hasPendingKeyframesUpdate {false};
     bool _hasPropertiesOverridenAfterAnimation {false};
 
   public:
@@ -45,6 +47,13 @@ namespace krys::boo
       return _animations;
     }
 
+    /// @brief The CSS animations the element's `animation` properties created.
+    KRYS_NODISCARD CSSAnimationCollection &AnimationsCreatedByMarkup() noexcept
+    {
+      return _animationsCreatedByMarkup;
+    }
+    void SetAnimationsCreatedByMarkup(CSSAnimationCollection &&animations) noexcept;
+
     KRYS_NODISCARD AnimatableCSSPropertyToTransitionMap &CompletedTransitionsByProperty() noexcept
     {
       return _completedTransitionsByProperty;
@@ -61,6 +70,19 @@ namespace krys::boo
       return _lastStyleChangeEventStyle.get();
     }
     void SetLastStyleChangeEventStyle(UniquePtr<const RenderStyle> &&style) noexcept;
+
+    void CSSAnimationsDidUpdate() noexcept
+    {
+      _hasPendingKeyframesUpdate = false;
+    }
+    void KeyframesRuleDidChange() noexcept
+    {
+      _hasPendingKeyframesUpdate = true;
+    }
+    KRYS_NODISCARD bool HasPendingKeyframesUpdate() const noexcept
+    {
+      return _hasPendingKeyframesUpdate;
+    }
 
     KRYS_NODISCARD bool HasPropertiesOverridenAfterAnimation() const noexcept
     {

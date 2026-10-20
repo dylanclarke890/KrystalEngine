@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
@@ -14,6 +15,8 @@
 #include "Krystal.Booey/Style/ChangedAnimatableProperties.hpp"
 #include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/TreeResolver.hpp"
 
 namespace krys::boo::style
 {
@@ -179,8 +182,196 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Clearing the CSS animation list and the animations created by markup, once there are CSS
-    // animations.
+    if (auto *effectStack = GetKeyframeEffectStack())
+    {
+      effectStack->SetCSSAnimationList(null);
+    }
+    SetAnimationsCreatedByMarkup({});
+  }
+
+  namespace
+  {
+    bool KeyframesRuleExistsForAnimation(dom::Element &element, const ScopedName &animationName) noexcept
+    {
+      return Scope::ResolveTreeScopedReference(
+        element, animationName,
+        [](const Scope &scope, const css::CSSOMStringAtom &name) -> bool
+        {
+          if (auto *resolver = scope.ResolverIfExists())
+          {
+            return resolver->IsAnimationNameValid(css::CSSOMString {name.View()});
+          }
+          return false;
+        });
+    }
+  }
+
+  bool Styleable::AnimationListContainsNewlyValidAnimation(const style::Animations &animations) const noexcept
+  {
+    auto &keyframeEffectStack = EnsureKeyframeEffectStack();
+    if (!keyframeEffectStack.HasInvalidCSSAnimationNames())
+    {
+      return false;
+    }
+
+    for (const auto &currentAnimation : animations.UsedValues())
+    {
+      if (auto keyframesName = currentAnimation.GetName().TryKeyframesName();
+          keyframesName && !keyframesName->Name.View().empty()
+          && keyframeEffectStack.ContainsInvalidCSSAnimationName(
+            css::CSSOMString {keyframesName->Name.View()})
+          && KeyframesRuleExistsForAnimation(Element, *keyframesName))
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void Styleable::UpdateCSSAnimations(const RenderStyle *currentStyle, const RenderStyle &newStyle,
+                                      const ResolutionContext &resolutionContext,
+                                      WeakStyleOriginatedAnimations &newStyleOriginatedAnimations,
+                                      IsInDisplayNoneTree isInDisplayNoneTree) const noexcept
+  {
+    auto &keyframeEffectStack = EnsureKeyframeEffectStack();
+
+    // In case this element is newly getting a "display: none" we need to cancel all of its animations and
+    // disregard new ones.
+    if ((!currentStyle || currentStyle->Display() != DisplayType::None)
+        && newStyle.Display() == DisplayType::None)
+    {
+      List<Ref<CSSAnimation>> animationsToCancel(AnimationsCreatedByMarkup().begin(),
+                                                 AnimationsCreatedByMarkup().end());
+      for (auto &cssAnimation : animationsToCancel)
+      {
+        cssAnimation->CancelFromStyle();
+      }
+      keyframeEffectStack.SetCSSAnimationList(null);
+      SetAnimationsCreatedByMarkup({});
+      return;
+    }
+
+    const auto &currentAnimationList = newStyle.GetAnimations();
+    const auto &previousAnimationList = keyframeEffectStack.CSSAnimationList();
+    if (!Element.HasPendingKeyframesUpdate(PseudoElementIdentifier) && previousAnimationList
+        && !previousAnimationList->IsInitial() && newStyle.HasAnimations()
+        && *previousAnimationList == newStyle.GetAnimations()
+        && !AnimationListContainsNewlyValidAnimation(newStyle.GetAnimations()))
+    {
+      return;
+    }
+
+    CSSAnimationCollection newAnimations;
+    auto &previousAnimations = AnimationsCreatedByMarkup();
+
+    keyframeEffectStack.ClearInvalidCSSAnimationNames();
+
+    // https://www.w3.org/TR/css-animations-1/#animations
+    // The same @keyframes rule name may be repeated within an animation-name. Changes to the animation-name
+    // update existing animations by iterating over the new list of animations from last to first, and, for
+    // each animation, finding the last matching animation in the list of existing animations. If a match is
+    // found, the existing animation is updated using the animation properties corresponding to its position
+    // in the new list of animations, whilst maintaining its current playback time as described above. The
+    // matching animation is removed from the existing list of animations such that it will not match twice.
+    // If a match is not found, a new animation is created. As a result, updating animation-name from ‘a’ to
+    // ‘a, a’ will cause the existing animation for ‘a’ to become the second animation in the list and a new
+    // animation will be created for the first item in the list.
+    if (!currentAnimationList.IsInitial())
+    {
+      auto usedValues = currentAnimationList.UsedValues();
+      for (auto it = usedValues.rbegin(); it != usedValues.rend(); ++it)
+      {
+        const auto &currentAnimation = *it;
+        auto keyframesName = currentAnimation.GetName().TryKeyframesName();
+        if (!keyframesName || keyframesName->Name.View().empty())
+        {
+          continue;
+        }
+
+        if (!KeyframesRuleExistsForAnimation(Element, *keyframesName))
+        {
+          keyframeEffectStack.AddInvalidCSSAnimationName(css::CSSOMString {keyframesName->Name.View()});
+          continue;
+        }
+
+        const auto &currentAnimationName = keyframesName->Name;
+        bool foundMatchingAnimation = false;
+        for (const auto &previousAnimation : previousAnimations)
+        {
+          if (previousAnimation->AnimationName() == currentAnimationName)
+          {
+            Ref matchingAnimation = previousAnimation;
+            // Timing properties or play state may have changed so we need to update the backing animation
+            // with the Animation found in the current style.
+            matchingAnimation->SetBackingStyleAnimation(currentAnimation);
+            // Keyframes may have been cleared if the @keyframes rules was changed since the last style
+            // update, so we must ensure keyframes are picked up.
+            matchingAnimation->UpdateKeyframesIfNeeded(currentStyle, newStyle, resolutionContext);
+            newStyleOriginatedAnimations.push_back(
+              CreateWeakPtr<StyleOriginatedAnimation>(matchingAnimation.get()));
+            (void)newAnimations.add(matchingAnimation);
+            // Remove the matched animation from the list of previous animations so we may not match it again.
+            (void)previousAnimations.remove(matchingAnimation);
+            foundMatchingAnimation = true;
+            break;
+          }
+        }
+
+        if (!foundMatchingAnimation && isInDisplayNoneTree == IsInDisplayNoneTree::No)
+        {
+          auto cssAnimation = CSSAnimation::Create(*this, Animation {currentAnimation}, currentStyle,
+                                                   newStyle, resolutionContext);
+          newStyleOriginatedAnimations.push_back(CreateWeakPtr<StyleOriginatedAnimation>(cssAnimation.get()));
+          (void)newAnimations.add(krys::move(cssAnimation));
+        }
+      }
+    }
+
+    // Any animation found in previousAnimations but not found in newAnimations is not longer current and
+    // should be canceled.
+    List<Ref<CSSAnimation>> remainingAnimations(previousAnimations.begin(), previousAnimations.end());
+    for (auto &previousAnimation : remainingAnimations)
+    {
+      if (!newAnimations.contains(previousAnimation))
+      {
+        if (previousAnimation->OwningElement())
+        {
+          previousAnimation->CancelFromStyle();
+        }
+      }
+    }
+
+    SetAnimationsCreatedByMarkup(krys::move(newAnimations));
+
+    keyframeEffectStack.SetCSSAnimationList(style::Animations {currentAnimationList});
+    Element.CSSAnimationsDidUpdate(PseudoElementIdentifier);
+  }
+
+  void Styleable::QueryContainerDidChange() const noexcept
+  {
+    auto *animations = Animations();
+    if (!animations)
+    {
+      return;
+    }
+
+    List<Ref<WebAnimation>> protectedAnimations(animations->begin(), animations->end());
+    for (auto &animation : protectedAnimations)
+    {
+      RefPtr keyframeEffect = ShareRefPtr(animation->GetKeyframeEffect());
+      if (keyframeEffect && keyframeEffect->GetBlendingKeyframes().UsesContainerUnits())
+      {
+        if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(animation.get()))
+        {
+          cssAnimation->KeyframesRuleDidChange();
+        }
+        else
+        {
+          keyframeEffect->RecomputeKeyframesAtNextOpportunity();
+        }
+      }
+    }
   }
 
   namespace
@@ -398,8 +589,16 @@ namespace krys::boo::style
       // the computation, and inheriting from the after-change style of the parent. Note that this means the
       // after-change style does not differ from the before-change style due to newly created or canceled CSS
       // Animations.
-      // FIXME: Applying a relevant CSS animation to the after-change style, once there are CSS animations.
-      auto afterChangeStyle = RenderStyle::Clone(newStyle);
+      auto afterChangeStyle = [&]() -> RenderStyle
+      {
+        if (animation && Is<CSSAnimation>(*animation) && animation->IsRelevant())
+        {
+          auto animatedStyle = RenderStyle::Clone(newStyle);
+          (void)animation->Resolve(animatedStyle, {nullptr});
+          return animatedStyle;
+        }
+        return RenderStyle::Clone(newStyle);
+      }();
 
       auto allowsDiscreteTransitions =
         matchingTransition && matchingTransition->GetBehavior() == TransitionBehavior::AllowDiscrete;

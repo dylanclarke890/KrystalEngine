@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/Style/PendingResources.hpp"
 #include "Krystal.Booey/Style/PropertyAllowlist.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
 #include <cmath>
@@ -116,16 +119,63 @@ namespace krys::boo
   }
 
   void KeyframeEffect::ComputeStyleOriginatedAnimationBlendingKeyframes(
-    const RenderStyle *oldStyle, const RenderStyle &newStyle, const style::ResolutionContext &) noexcept
+    const RenderStyle *oldStyle, const RenderStyle &newStyle,
+    const style::ResolutionContext &resolutionContext) noexcept
   {
     krys_debug_assert(Animation() && Is<StyleOriginatedAnimation>(*Animation()));
 
-    // FIXME: The keyframes of CSS animations, once there are CSS animations.
-    if (Animation() && Is<CSSTransition>(*Animation()))
+    if (Animation() && Is<CSSAnimation>(*Animation()))
+    {
+      ComputeCSSAnimationBlendingKeyframes(newStyle, resolutionContext);
+    }
+    else if (Animation() && Is<CSSTransition>(*Animation()))
     {
       krys_debug_assert(oldStyle);
       ComputeCSSTransitionBlendingKeyframes(*oldStyle, newStyle);
     }
+  }
+
+  void KeyframeEffect::ComputeCSSAnimationBlendingKeyframes(
+    const RenderStyle &unanimatedStyle, const style::ResolutionContext &resolutionContext) noexcept
+  {
+    krys_debug_assert(Document());
+
+    const auto &backingStyleAnimation = DynamicDowncast<CSSAnimation>(Animation())->BackingStyleAnimation();
+
+    // NOTE: A CSSAnimation is always constructed with a backing style::Animation that has a valid, non-none,
+    // name.
+    auto backingStyleAnimationName = backingStyleAnimation.GetName().TryKeyframesName();
+    BlendingKeyframes blendingKeyframes(KeyframesIdentifier {backingStyleAnimationName->Name});
+    if (_target)
+    {
+      (void)style::Scope::ResolveTreeScopedReference(
+        *_target, *backingStyleAnimationName,
+        [&](const style::Scope &scope, const css::CSSOMStringAtom &)
+        {
+          krys_debug_assert(scope.ResolverIfExists());
+          return scope.ResolverIfExists()->KeyframeStylesForAnimation(
+            *_target, unanimatedStyle, resolutionContext, blendingKeyframes,
+            backingStyleAnimation.GetTimingFunction().Value.get());
+        });
+
+      // Ensure resource loads for all the frames.
+      for (const auto &keyframe : blendingKeyframes)
+      {
+        if (auto *style = const_cast<RenderStyle *>(keyframe.Style()))
+        {
+          style::LoadPendingResources(*style, *Document(), _target.get());
+        }
+      }
+    }
+
+    _animationType = WebAnimationType::CSSAnimation;
+    SetBlendingKeyframes(krys::move(blendingKeyframes));
+  }
+
+  void KeyframeEffect::RecomputeKeyframesAtNextOpportunity() noexcept
+  {
+    ClearBlendingKeyframes();
+    Invalidate();
   }
 
   void KeyframeEffect::ComputeCSSTransitionBlendingKeyframes(const RenderStyle &oldStyle,
@@ -351,8 +401,39 @@ namespace krys::boo
     _someKeyframesUseStepsTimingFunction = false;
     _someKeyframesUseLinearTimingFunctionWithPoints = false;
 
-    // FIXME: Accounting for the default steps() or linear() timing function of CSS animations, once there are
-    // CSS animations.
+    // If we're dealing with a CSS Animation and it specifies a default steps() or linear() timing function,
+    // we need to check that any of the specified keyframes either does not have an explicit timing function
+    // or specifies an explicit steps() or linear() timing function.
+    if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(Animation()))
+    {
+      auto *defaultTimingFunction = cssAnimation->BackingStyleAnimation().GetTimingFunction().Value.get();
+      auto defaultTimingFunctionIsSteps = Is<StepsTimingFunction>(*defaultTimingFunction);
+      auto defaultTimingFunctionIsLinearWithPoints = IsLinearTimingFunctionWithPoints(defaultTimingFunction);
+      if (defaultTimingFunctionIsSteps || defaultTimingFunctionIsLinearWithPoints)
+      {
+        for (const auto &keyframe : _blendingKeyframes)
+        {
+          auto *timingFunction = keyframe.GetTimingFunction();
+          if (defaultTimingFunctionIsSteps && !_someKeyframesUseStepsTimingFunction)
+          {
+            _someKeyframesUseStepsTimingFunction =
+              !timingFunction || Is<StepsTimingFunction>(*timingFunction);
+          }
+          else if (defaultTimingFunctionIsLinearWithPoints
+                   && !_someKeyframesUseLinearTimingFunctionWithPoints)
+          {
+            _someKeyframesUseLinearTimingFunctionWithPoints =
+              !timingFunction || IsLinearTimingFunctionWithPoints(timingFunction);
+          }
+          if (defaultTimingFunctionIsSteps == _someKeyframesUseStepsTimingFunction
+              && defaultTimingFunctionIsLinearWithPoints == _someKeyframesUseLinearTimingFunctionWithPoints)
+          {
+            break;
+          }
+        }
+        return;
+      }
+    }
 
     // For any other type of animation, we just need to check whether any of the keyframes specify an explicit
     // steps() or linear() timing function.
@@ -587,7 +668,7 @@ namespace krys::boo
   Maybe<KeyframeEffect::RecomputationReason>
     KeyframeEffect::RecomputeKeyframesIfNecessary(const RenderStyle *previousUnanimatedStyle,
                                                   const RenderStyle &unanimatedStyle,
-                                                  const style::ResolutionContext &) noexcept
+                                                  const style::ResolutionContext &resolutionContext) noexcept
   {
     if (_animationType == WebAnimationType::CSSTransition)
     {
@@ -659,7 +740,7 @@ namespace krys::boo
       {
         case WebAnimationType::CSSTransition: krys_debug_assert(false); break;
         case WebAnimationType::CSSAnimation:
-          // FIXME: Recomputing the keyframes of CSS animations, once there are CSS animations.
+          ComputeCSSAnimationBlendingKeyframes(unanimatedStyle, resolutionContext);
           break;
         case WebAnimationType::WebAnimation: ClearBlendingKeyframes(); break;
       }
@@ -769,9 +850,13 @@ namespace krys::boo
       // In case we're on the first keyframe, then this means we are dealing with an implicit 0% keyframe.
       // This will be a linear timing function unless we're dealing with a CSS Animation which might have the
       // default timing function for its keyframes defined on its backing Animation object.
-      // FIXME: The default timing function of CSS animations, once there are CSS animations.
       if (!i)
       {
+        if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(Animation()))
+        {
+          return progressUntilNextStepInInterval(
+            0, intervalEndProgress, cssAnimation->BackingStyleAnimation().GetTimingFunction().Value.get());
+        }
         return null;
       }
 
@@ -781,8 +866,16 @@ namespace krys::boo
 
     // If we end up here, then this means we are dealing with an implicit 100% keyframe. This will be a linear
     // timing function unless we're dealing with a CSS Animation which might have the default timing function
-    // for its keyframes defined on its backing Animation object. In any other case, we are not dealing with
-    // an interval with a steps() timing function.
+    // for its keyframes defined on its backing Animation object.
+    const auto &lastExplicitKeyframe = _blendingKeyframes[_blendingKeyframes.Size() - 1];
+    if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(Animation()))
+    {
+      return progressUntilNextStepInInterval(
+        lastExplicitKeyframe.Offset(), 1,
+        cssAnimation->BackingStyleAnimation().GetTimingFunction().Value.get());
+    }
+
+    // In any other case, we are not dealing with an interval with a steps() timing function.
     return null;
   }
 
@@ -811,8 +904,18 @@ namespace krys::boo
 
   Seconds KeyframeEffect::TimeToNextTick(const BasicEffectTiming &timing) noexcept
   {
-    // FIXME: Waiting for the next iteration of CSS animations with `animationiteration` listeners, once there
-    // are CSS animations.
+    // CSS Animations need to trigger "animationiteration" events even if there is no need to update styles
+    // while animating, so if we're dealing with one we must wait until the next iteration.
+    // FIXME: Only when the document has `animationiteration` listeners (hasListenerType), once documents
+    // track their listener types.
+    if (timing.Phase == AnimationEffectPhase::Active && Animation() && Is<CSSAnimation>(*Animation())
+        && !TicksContinuouslyWhileActive())
+    {
+      if (auto iterationProgress = GetComputedTiming().SimpleIterationProgress)
+      {
+        return static_cast<Seconds>(IterationDuration() * (1 - *iterationProgress));
+      }
+    }
     return AnimationEffect::TimeToNextTick(timing);
   }
 

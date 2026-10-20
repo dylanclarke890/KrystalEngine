@@ -271,7 +271,7 @@ namespace krys::boo::css
         {
           if (auto *ownerDocument = OwnerDocument())
           {
-            DocumentKeyframesRuleDidChange(*ownerDocument, modifiedKeyframesRuleName);
+            ownerDocument->KeyframesRuleDidChange(modifiedKeyframesRuleName);
           }
         }
 

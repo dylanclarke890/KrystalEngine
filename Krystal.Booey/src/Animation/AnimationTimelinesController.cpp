@@ -196,7 +196,8 @@ namespace krys::boo
     // removed from the list of completed transitions otherwise.
     for (auto &completedTransition : completedTransitions)
     {
-      if (RefPtr documentTimeline = ShareRefPtr(DynamicDowncast<DocumentTimeline>(completedTransition->Timeline())))
+      if (RefPtr documentTimeline =
+            ShareRefPtr(DynamicDowncast<DocumentTimeline>(completedTransition->Timeline())))
       {
         documentTimeline->TransitionDidComplete(krys::move(completedTransition));
       }
@@ -298,6 +299,7 @@ namespace krys::boo
     }
 
     _cachedCurrentTime = newCurrentTime;
+    _lastCachedCurrentTime = newCurrentTime;
 
     // As we've advanced to a new current time, we want all animations created during this run loop to have
     // this newly-cached current time as their start time. To that end, we schedule a task to set that current
@@ -348,7 +350,7 @@ namespace krys::boo
 
   void AnimationTimelinesController::ProcessPendingAnimations() noexcept
   {
-    if (_isSuspended || !_cachedCurrentTime)
+    if (_isSuspended || !_lastCachedCurrentTime)
     {
       return;
     }
@@ -365,7 +367,7 @@ namespace krys::boo
       }
       if (pendingAnimation->Timeline() && pendingAnimation->Timeline()->IsMonotonic())
       {
-        pendingAnimation->SetPendingStartTime(WebAnimationTime {*_cachedCurrentTime});
+        pendingAnimation->SetPendingStartTime(WebAnimationTime {*_lastCachedCurrentTime});
       }
     }
   }

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
@@ -1168,6 +1169,42 @@ namespace krys::boo::dom
     {
       EnsureAnimationRareData(pseudoElementIdentifier).SetHasPropertiesOverridenAfterAnimation(true);
     }
+  }
+
+  CSSAnimationCollection &Element::AnimationsCreatedByMarkup(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    return EnsureAnimationRareData(pseudoElementIdentifier).AnimationsCreatedByMarkup();
+  }
+
+  void Element::SetAnimationsCreatedByMarkup(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
+    CSSAnimationCollection &&animations) noexcept
+  {
+    if (animations.isEmpty() && !AnimationRareData(pseudoElementIdentifier))
+    {
+      return;
+    }
+    EnsureAnimationRareData(pseudoElementIdentifier).SetAnimationsCreatedByMarkup(krys::move(animations));
+  }
+
+  void Element::CSSAnimationsDidUpdate(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    EnsureAnimationRareData(pseudoElementIdentifier).CSSAnimationsDidUpdate();
+  }
+
+  void Element::KeyframesRuleDidChange(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    EnsureAnimationRareData(pseudoElementIdentifier).KeyframesRuleDidChange();
+  }
+
+  bool Element::HasPendingKeyframesUpdate(
+    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
+  {
+    auto *data = AnimationRareData(pseudoElementIdentifier);
+    return data && data->HasPendingKeyframesUpdate();
   }
 
   void Element::InvalidateStyleForAnimation() noexcept

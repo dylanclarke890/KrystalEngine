@@ -165,6 +165,12 @@ namespace krys::ui::tests
     CheckPage("decorations", 360u, 240u, true);
   }
 
+  TEST_CASE("Golden: animations", "[UI][GPU][Golden]")
+  {
+    // Each animation is paused partway through by a negative delay, so neither capture depends on the time.
+    CheckPage("animations", 360u, 240u);
+  }
+
   TEST_CASE("Golden: web fonts", "[UI][GPU][Golden]")
   {
     // Text, so Chrome's golden is only reported (see "Golden: text"); Ahem's boxes match it.

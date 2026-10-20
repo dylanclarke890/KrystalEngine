@@ -861,6 +861,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD AnimationTimelinesController &EnsureTimelinesController() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents() noexcept;
+    /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.
+    void KeyframesRuleDidChange(const css::CSSOMString &name) noexcept;
 
     /// @brief Determines whether links are visited, for `:visited` and the link styles.
     KRYS_NODISCARD VisitedLinkState &GetVisitedLinkState() const noexcept;

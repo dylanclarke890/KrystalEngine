@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/Style/Values/Animations/Animations.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -15,12 +16,12 @@ namespace krys::boo
 namespace krys::boo::style
 {
   struct ResolutionContext;
+  enum class IsInDisplayNoneTree : bool;
 
   using WeakStyleOriginatedAnimations = List<WeakPtr<StyleOriginatedAnimation>>;
 
   /// @brief An element, or one of its pseudo-elements: something that is styled.
-  // FIXME: CSS animations, scroll and view timelines, accelerated animations and view transitions, once there
-  // are any.
+  // FIXME: Scroll and view timelines, accelerated animations and view transitions, once there are any.
   struct Styleable
   {
     dom::Element &Element;
@@ -120,6 +121,25 @@ namespace krys::boo::style
       Element.SetHasPropertiesOverridenAfterAnimation(PseudoElementIdentifier, value);
     }
 
+    KRYS_NODISCARD CSSAnimationCollection &AnimationsCreatedByMarkup() const noexcept
+    {
+      return Element.AnimationsCreatedByMarkup(PseudoElementIdentifier);
+    }
+    void SetAnimationsCreatedByMarkup(CSSAnimationCollection &&collection) const noexcept
+    {
+      Element.SetAnimationsCreatedByMarkup(PseudoElementIdentifier, krys::move(collection));
+    }
+    void KeyframesRuleDidChange() const noexcept
+    {
+      Element.KeyframesRuleDidChange(PseudoElementIdentifier);
+    }
+
+    /// @brief Recomputes the keyframes that use container units, since the element's query container changed.
+    void QueryContainerDidChange() const noexcept;
+    /// @brief Whether @p animations names an `@keyframes` rule that didn't exist when the CSS animations were
+    /// last updated.
+    KRYS_NODISCARD bool AnimationListContainsNewlyValidAnimation(const style::Animations &animations) const noexcept;
+
     void ElementWasRemoved() const noexcept;
     void WillChangeRenderer() const noexcept;
 
@@ -132,6 +152,12 @@ namespace krys::boo::style
     void AnimationWasRemoved(WebAnimation &animation) const noexcept;
     void RemoveStyleOriginatedAnimationFromListsForOwningElement(WebAnimation &animation) const noexcept;
 
+    /// @brief Creates, updates and cancels the CSS animations of a style change event.
+    /// @see https://drafts.csswg.org/css-animations-1/#animations
+    void UpdateCSSAnimations(const RenderStyle *currentStyle, const RenderStyle &afterChangeStyle,
+                             const ResolutionContext &resolutionContext,
+                             WeakStyleOriginatedAnimations &newStyleOriginatedAnimations,
+                             IsInDisplayNoneTree isInDisplayNoneTree) const noexcept;
     /// @brief Starts, reverses and cancels the CSS transitions of a style change event.
     /// @see https://drafts.csswg.org/css-transitions-1/#starting
     void UpdateCSSTransitions(const RenderStyle &currentStyle, const RenderStyle &newStyle,

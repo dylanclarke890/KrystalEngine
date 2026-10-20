@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Style/ScopedName.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -263,6 +264,18 @@ namespace krys::boo::style
     /// @brief The scope of the shadow root `node` is in, or else of its document.
     KRYS_NODISCARD static Scope &ForNode(dom::Node &node) noexcept;
     KRYS_NODISCARD static const Scope &ForNode(const dom::Node &node) noexcept;
+    /// @brief The scope @p ordinal names from @p element (its own, its shadow root's, a host's or a slot's),
+    /// if any.
+    KRYS_NODISCARD static Scope *ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept;
+    KRYS_NODISCARD static const Scope *ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept;
+
+    /// @brief Dereferences the tree-scoped name @p reference: calls @p function with the scope it's from,
+    /// then with each scope of the hosts above, until it returns a truthy result.
+    /// @see https://drafts.csswg.org/css-scoping-1/#shadow-names
+    template <typename TFunction>
+    KRYS_NODISCARD static auto ResolveTreeScopedReference(const dom::Element &element,
+                                                          const ScopedName &reference,
+                                                          const TFunction &function) noexcept;
 
     /// @brief Invalidates the styles that depend on the last layout.
     /// @return Whether anything was invalidated, so the document needs another style update and layout.
@@ -309,6 +322,40 @@ namespace krys::boo::style
     KRYS_NODISCARD static MediaQueryViewportState
       MediaQueryViewportStateForDocument(const dom::Document &document) noexcept;
   };
+
+  template <typename TFunction>
+  auto Scope::ResolveTreeScopedReference(const dom::Element &element, const ScopedName &reference,
+                                         const TFunction &function) noexcept
+  {
+    using ReturnType = std::invoke_result_t<TFunction, const Scope &, const css::CSSOMStringAtom &>;
+
+    // https://drafts.csswg.org/css-scoping-1/#shadow-names
+    // "Whenever a tree-scoped reference is dereferenced to find the CSS construct it is referencing, first
+    // search only the tree-scoped names associated with the same root as the tree-scoped reference must be
+    // searched."
+    const auto *firstScope = Scope::ForOrdinal(element, reference.ScopeOrdinal);
+    if (!firstScope)
+    {
+      return ReturnType {};
+    }
+
+    if (auto result = function(*firstScope, reference.Name))
+    {
+      return result;
+    }
+
+    // "If no relevant tree-scoped name is found, and the root is a shadow root, then repeat this search in
+    // the root’s host’s node tree."
+    for (const auto *hostScope = firstScope->HostScope(); hostScope; hostScope = hostScope->HostScope())
+    {
+      if (auto result = function(*hostScope, reference.Name))
+      {
+        return result;
+      }
+    }
+
+    return ReturnType {};
+  }
 
   /// @return The slot @p scopeOrdinal slots up the assignment chain from @p element, if any.
   KRYS_NODISCARD html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,

@@ -107,6 +107,8 @@ namespace krys::boo
                                     const style::ResolutionContext &resolutionContext) noexcept;
 
     void WillChangeRenderer() noexcept;
+    /// @brief Clears the keyframes, so they're computed again when the effect is next applied.
+    void RecomputeKeyframesAtNextOpportunity() noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept final;
     KRYS_NODISCARD RenderElement *Renderer() const noexcept final;
@@ -152,6 +154,8 @@ namespace krys::boo
     void ComputeStackingContextImpact() noexcept;
     void ComputeSomeKeyframesUseStepsOrLinearTimingFunctionWithPoints() noexcept;
     void ClearBlendingKeyframes() noexcept;
+    void ComputeCSSAnimationBlendingKeyframes(const RenderStyle &unanimatedStyle,
+                                              const style::ResolutionContext &resolutionContext) noexcept;
     void ComputeCSSTransitionBlendingKeyframes(const RenderStyle &oldStyle,
                                                const RenderStyle &newStyle) noexcept;
     void SetBlendingKeyframes(BlendingKeyframes &&blendingKeyframes) noexcept;
