@@ -38,60 +38,92 @@ namespace
     return ::DefWindowProcW(handle, message, wParam, lParam);
   }
 
-  static krys::pal::Key KeyCodeToEngineKey(const WPARAM keyCode) noexcept
+  /// @brief The engine key for a key message's virtual key code and `lParam` (its scan code and extended
+  /// bit, which tell the left and right modifiers and the keypad's Enter apart).
+  // FIXME: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key, once the engine has
+  // keys for them.
+  static krys::pal::Key KeyCodeToEngineKey(const WPARAM keyCode, const LPARAM lParam) noexcept
   {
     using krys::pal::Key;
+    const bool extended = (HIWORD(lParam) & KF_EXTENDED) != 0;
     switch (keyCode)
     {
-      case 0x30:           return Key::Num0;
-      case 0x31:           return Key::Num1;
-      case 0x32:           return Key::Num2;
-      case 0x33:           return Key::Num3;
-      case 0x34:           return Key::Num4;
-      case 0x35:           return Key::Num5;
-      case 0x36:           return Key::Num6;
-      case 0x37:           return Key::Num7;
-      case 0x38:           return Key::Num8;
-      case 0x39:           return Key::Num9;
-      case 0x41:           return Key::A;
-      case 0x42:           return Key::B;
-      case 0x43:           return Key::C;
-      case 0x44:           return Key::D;
-      case 0x45:           return Key::E;
-      case 0x46:           return Key::F;
-      case 0x47:           return Key::G;
-      case 0x48:           return Key::H;
-      case 0x49:           return Key::I;
-      case 0x4a:           return Key::J;
-      case 0x4b:           return Key::K;
-      case 0x4c:           return Key::L;
-      case 0x4d:           return Key::M;
-      case 0x4e:           return Key::N;
-      case 0x4f:           return Key::O;
-      case 0x50:           return Key::P;
-      case 0x51:           return Key::Q;
-      case 0x52:           return Key::R;
-      case 0x53:           return Key::S;
-      case 0x54:           return Key::T;
-      case 0x55:           return Key::U;
-      case 0x56:           return Key::V;
-      case 0x57:           return Key::W;
-      case 0x58:           return Key::X;
-      case 0x59:           return Key::Y;
-      case 0x5a:           return Key::Z;
-      case VK_TAB:         return Key::Tab;
-      case VK_SPACE:       return Key::Space;
-      case VK_ESCAPE:      return Key::Escape;
+      case 0x30:          return Key::Num0;
+      case 0x31:          return Key::Num1;
+      case 0x32:          return Key::Num2;
+      case 0x33:          return Key::Num3;
+      case 0x34:          return Key::Num4;
+      case 0x35:          return Key::Num5;
+      case 0x36:          return Key::Num6;
+      case 0x37:          return Key::Num7;
+      case 0x38:          return Key::Num8;
+      case 0x39:          return Key::Num9;
+      case 0x41:          return Key::A;
+      case 0x42:          return Key::B;
+      case 0x43:          return Key::C;
+      case 0x44:          return Key::D;
+      case 0x45:          return Key::E;
+      case 0x46:          return Key::F;
+      case 0x47:          return Key::G;
+      case 0x48:          return Key::H;
+      case 0x49:          return Key::I;
+      case 0x4a:          return Key::J;
+      case 0x4b:          return Key::K;
+      case 0x4c:          return Key::L;
+      case 0x4d:          return Key::M;
+      case 0x4e:          return Key::N;
+      case 0x4f:          return Key::O;
+      case 0x50:          return Key::P;
+      case 0x51:          return Key::Q;
+      case 0x52:          return Key::R;
+      case 0x53:          return Key::S;
+      case 0x54:          return Key::T;
+      case 0x55:          return Key::U;
+      case 0x56:          return Key::V;
+      case 0x57:          return Key::W;
+      case 0x58:          return Key::X;
+      case 0x59:          return Key::Y;
+      case 0x5a:          return Key::Z;
+      case VK_OEM_PLUS:   return Key::Equal;
+      case VK_OEM_MINUS:  return Key::Minus;
+      case VK_OEM_6:      return Key::RightBracket;
+      case VK_OEM_4:      return Key::LeftBracket;
+      case VK_OEM_7:      return Key::Quote;
+      case VK_OEM_1:      return Key::SemiColon;
+      case VK_OEM_5:      return Key::Backslash;
+      case VK_OEM_COMMA:  return Key::Comma;
+      case VK_OEM_2:      return Key::Slash;
+      case VK_OEM_PERIOD: return Key::Period;
+      case VK_OEM_3:      return Key::Grave;
+      case VK_TAB:        return Key::Tab;
+      case VK_SPACE:      return Key::Space;
+      case VK_BACK:       return Key::Del;
+      case VK_DELETE:     return Key::ForwardDelete;
+      case VK_ESCAPE:     return Key::Escape;
+      case VK_CAPITAL:    return Key::CapsLock;
+      case VK_SHIFT:
+        // The right Shift has its own scan code rather than the extended bit.
+        return ::MapVirtualKeyW((lParam >> 16) & 0xff, MAPVK_VSC_TO_VK_EX) == VK_RSHIFT ? Key::RightShift
+                                                                                        : Key::Shift;
       case VK_LSHIFT:      return Key::Shift;
       case VK_RSHIFT:      return Key::RightShift;
+      case VK_CONTROL:     return extended ? Key::RightControl : Key::Control;
+      case VK_LCONTROL:    return Key::Control;
+      case VK_RCONTROL:    return Key::RightControl;
+      case VK_MENU:        return extended ? Key::RightOption : Key::Option;
+      case VK_LMENU:       return Key::Option;
+      case VK_RMENU:       return Key::RightOption;
+      case VK_LWIN:
+      case VK_RWIN:        return Key::Command;
       case VK_VOLUME_UP:   return Key::VolumeUp;
       case VK_VOLUME_DOWN: return Key::VolumeDown;
       case VK_VOLUME_MUTE: return Key::Mute;
       case VK_MULTIPLY:    return Key::KeypadMultiply;
       case VK_DIVIDE:      return Key::KeypadDivide;
-      case VK_OEM_MINUS:   return Key::KeypadMinus;
-      case VK_OEM_PLUS:    return Key::KeypadPlus;
+      case VK_SUBTRACT:    return Key::KeypadMinus;
+      case VK_ADD:         return Key::KeypadPlus;
       case VK_DECIMAL:     return Key::KeypadDecimal;
+      case VK_CLEAR:       return Key::KeypadClear;
       case VK_NUMPAD0:     return Key::Keypad0;
       case VK_NUMPAD1:     return Key::Keypad1;
       case VK_NUMPAD2:     return Key::Keypad2;
@@ -125,14 +157,101 @@ namespace
       case VK_HELP:        return Key::Help;
       case VK_HOME:        return Key::Home;
       case VK_END:         return Key::End;
-
+      case VK_PRIOR:       return Key::PageUp;
+      case VK_NEXT:        return Key::PageDown;
       case VK_LEFT:        return Key::LeftArrow;
       case VK_RIGHT:       return Key::RightArrow;
       case VK_DOWN:        return Key::DownArrow;
       case VK_UP:          return Key::UpArrow;
-      case VK_RETURN:      return Key::Enter;
+      case VK_RETURN:      return extended ? Key::KeypadEnter : Key::Enter;
       default:             return Key::UNKNOWN;
     }
+  }
+
+  /// @brief The modifier keys held as the current message was sent.
+  static krys::pal::KeyModifiers CurrentModifiers() noexcept
+  {
+    using krys::pal::KeyModifier;
+    krys::pal::KeyModifiers modifiers;
+    auto isDown = [](int key)
+    {
+      return (::GetKeyState(key) & 0x8000) != 0;
+    };
+    if (isDown(VK_SHIFT))
+    {
+      modifiers.Add(KeyModifier::Shift);
+    }
+    if (isDown(VK_CONTROL))
+    {
+      modifiers.Add(KeyModifier::Control);
+    }
+    if (isDown(VK_MENU))
+    {
+      modifiers.Add(KeyModifier::Alt);
+    }
+    if (isDown(VK_LWIN) || isDown(VK_RWIN))
+    {
+      modifiers.Add(KeyModifier::Meta);
+    }
+    if ((::GetKeyState(VK_CAPITAL) & 1) != 0)
+    {
+      modifiers.Add(KeyModifier::CapsLock);
+    }
+    return modifiers;
+  }
+
+  /// @brief The characters @p keyCode types with the keyboard @p state, without control characters except the
+  /// carriage return, and without changing the layout's dead key state.
+  static krys::utf8_string TypedText(const WPARAM keyCode, const LPARAM lParam, const BYTE *state) noexcept
+  {
+    // Don't change the keyboard state (Windows 10 1607 and later), so dead keys still combine with the next
+    // key in the messages the system translates.
+    constexpr UINT DontChangeKeyboardState = 1u << 2;
+    wchar_t buffer[8] {};
+    const int count =
+      ::ToUnicodeEx(static_cast<UINT>(keyCode), (lParam >> 16) & 0xff, state, buffer,
+                    static_cast<int>(std::size(buffer)), DontChangeKeyboardState, ::GetKeyboardLayout(0));
+    if (count <= 0)
+    {
+      return {};
+    }
+
+    std::wstring text;
+    for (int i = 0; i < count; ++i)
+    {
+      if (buffer[i] >= 0x20 && buffer[i] != 0x7f || buffer[i] == L'\r')
+      {
+        text.push_back(buffer[i]);
+      }
+    }
+    if (text.empty())
+    {
+      return {};
+    }
+    const int size =
+      ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), NULL, 0, NULL, NULL);
+    krys::utf8_string result(static_cast<size_t>(size), u8'\0');
+    ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()),
+                          reinterpret_cast<char *>(result.data()), size, NULL, NULL);
+    return result;
+  }
+
+  /// @brief The text a key press types, with the modifiers held and with only Shift and Caps Lock.
+  static krys::pal::KeyText KeyTextFor(const WPARAM keyCode, const LPARAM lParam) noexcept
+  {
+    BYTE state[256] {};
+    if (!::GetKeyboardState(state))
+    {
+      return {};
+    }
+    krys::pal::KeyText text;
+    text.Text = TypedText(keyCode, lParam, state);
+    for (int key : {VK_CONTROL, VK_LCONTROL, VK_RCONTROL, VK_MENU, VK_LMENU, VK_RMENU})
+    {
+      state[key] = 0;
+    }
+    text.UnmodifiedText = TypedText(keyCode, lParam, state);
+    return text;
   }
 
   static LPCWSTR CursorShapeToResource(const krys::pal::CursorShape cursor) noexcept
@@ -310,25 +429,48 @@ namespace krys::pal
           break;
         }
 #pragma region Input Messages
+        // Alt combinations (and F10) come as system keys; they still go on to DefWindowProc, for Alt+F4.
         case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
         {
           if (_callbacks.OnKey)
           {
-            const auto key = KeyCodeToEngineKey(wParam);
+            const auto key = KeyCodeToEngineKey(wParam, lParam);
             const auto state = _pressedKeys.contains(wParam) ? KeyState::Held : KeyState::Pressed;
-            _callbacks.OnKey(handle, key, state);
+            _callbacks.OnKey(handle, key, state, CurrentModifiers(), KeyTextFor(wParam, lParam));
             _pressedKeys.emplace(wParam);
           }
           break;
         }
         case WM_KEYUP:
+        case WM_SYSKEYUP:
         {
           if (_callbacks.OnKey)
           {
-            const auto key = KeyCodeToEngineKey(wParam);
+            const auto key = KeyCodeToEngineKey(wParam, lParam);
             const auto state = KeyState::Released;
-            _callbacks.OnKey(handle, key, state);
+            _callbacks.OnKey(handle, key, state, CurrentModifiers(), {});
             _pressedKeys.erase(wParam);
+          }
+          break;
+        }
+        // The character of an Alt combination: DefWindowProc would look for a menu mnemonic and beep when
+        // there isn't one, so only Alt+Space (the window menu) goes on to it.
+        case WM_SYSCHAR:
+        {
+          if (wParam == L' ')
+          {
+            break;
+          }
+          return 0;
+        }
+        // Alt or F10 alone would enter menu mode, which a window without a menu has no use for, and which
+        // eats the next key. Mnemonics (lParam is the character) still go on, for Alt+Space.
+        case WM_SYSCOMMAND:
+        {
+          if ((wParam & 0xfff0) == SC_KEYMENU && lParam == 0)
+          {
+            return 0;
           }
           break;
         }
@@ -342,7 +484,7 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Left, Pressed)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -351,7 +493,7 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Left, Released)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -360,7 +502,7 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Right, Pressed)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -369,7 +511,7 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Right, Released)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -378,7 +520,7 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Middle, Pressed)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -387,12 +529,12 @@ namespace krys::pal
           if (_callbacks.OnMouseButton)
           {
             BUTTON_STATE(Middle, Released)
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
 
-#undef BTN_STATE
+#undef BUTTON_STATE
 
         case WM_XBUTTONDOWN:
         {
@@ -402,7 +544,7 @@ namespace krys::pal
               GET_XBUTTON_WPARAM(wParam) & XBUTTON1 ? MouseButton::Thumb1 : MouseButton::Thumb2;
             const auto state = MouseButtonState::Pressed;
 
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -414,7 +556,7 @@ namespace krys::pal
               GET_XBUTTON_WPARAM(wParam) & XBUTTON1 ? MouseButton::Thumb1 : MouseButton::Thumb2;
             const auto state = MouseButtonState::Released;
 
-            _callbacks.OnMouseButton(handle, button, state);
+            _callbacks.OnMouseButton(handle, button, state, CurrentModifiers());
           }
           break;
         }
@@ -457,7 +599,7 @@ namespace krys::pal
               clientY = static_cast<float>(point.y);
             }
 
-            _callbacks.OnMouseMove(handle, x, y, clientX, clientY);
+            _callbacks.OnMouseMove(handle, x, y, clientX, clientY, CurrentModifiers());
           }
           else if ((raw.data.mouse.usButtonFlags & RI_MOUSE_WHEEL) == RI_MOUSE_WHEEL)
           {

@@ -9,7 +9,12 @@
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/KeyModifiers.hpp"
+#include "Krystal.PAL/Keys.hpp"
+#include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include <chrono>
@@ -17,11 +22,12 @@
 
 namespace krys::ui
 {
-  /// @brief Hosts a Booey document: parses it, shows it in a frame with a view of the viewport's size, keeps
-  /// its style and layout up to date, and paints it into a `Renderer2D` through a display list.
-  class Page
+  /// @brief Shows a Booey page: parses its document, shows it in a frame with a view of the viewport's size,
+  /// keeps its style and layout up to date, paints it into a `Renderer2D` through a display list, and turns
+  /// the platform layer's mouse and keyboard input into DOM events.
+  class View
   {
-    KRYS_NON_COPY_MOVABLE(Page);
+    KRYS_NON_COPY_MOVABLE(View);
 
   private:
     Ref<boo::LocalFrame> _frame;
@@ -38,15 +44,17 @@ namespace krys::ui
     boo::IntPoint _lastClickPosition;
     /// @brief Whether the window showing the page has system focus.
     bool _focused {true};
+    /// @brief The `key` of each key held, which its release reports too.
+    HashMap<pal::Key, utf8_string> _heldKeyValues;
 
     // FIXME: The system's double click time and distance, once the host reports them.
     static constexpr std::chrono::milliseconds DoubleClickTime {500};
     static constexpr int32 DoubleClickDistance {2};
 
   public:
-    /// @brief A page with an empty document and a view of @p viewportSize.
-    explicit Page(const boo::IntSize &viewportSize) noexcept;
-    ~Page() noexcept;
+    /// @brief A view of an empty document, with a viewport of @p viewportSize.
+    explicit View(const boo::IntSize &viewportSize) noexcept;
+    ~View() noexcept;
 
     /// @brief Replaces the document with one parsed from @p markup.
     void LoadHTML(utf8_string &&markup) noexcept;
@@ -79,22 +87,31 @@ namespace krys::ui
 
     /// @brief Moves the mouse to @p point (in viewport coordinates): mouse events fire at the elements it
     /// leaves and enters, the elements under it become `:hover`, and the cursor follows.
-    void MouseMoved(const boo::IntPoint &point,
-                    EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    void MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers = {}) noexcept;
     /// @brief Presses @p button at @p point: `mousedown` fires, and the element under the mouse and its
     /// ancestors become `:active` until the release. A press soon after the last and near it is a double
     /// click.
-    void MousePressed(const boo::IntPoint &point, boo::MouseButton button,
-                      EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    void MousePressed(const boo::IntPoint &point, pal::MouseButton button,
+                      pal::KeyModifiers modifiers = {}) noexcept;
     /// @brief Releases @p button at @p point: `mouseup` fires, then `click` (`auxclick` for other buttons)
     /// and `dblclick` for a double click, and `:active` is cleared.
-    void MouseReleased(const boo::IntPoint &point, boo::MouseButton button,
-                       EnumSet<boo::PlatformEvent::Modifier> modifiers = {}) noexcept;
+    void MouseReleased(const boo::IntPoint &point, pal::MouseButton button,
+                       pal::KeyModifiers modifiers = {}) noexcept;
     /// @brief The mouse left the page: it leaves the element it was over, and nothing is `:hover`.
     void MouseLeft() noexcept;
 
     /// @brief The cursor the page wants over it, as of the last mouse move.
-    KRYS_NODISCARD boo::Cursor CurrentCursor() const noexcept;
+    KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
+
+    /// @brief Presses @p key (again, if @p isAutoRepeat): `keydown` fires at the focused element (or the
+    /// body), then `keypress` if it isn't cancelled and the key types text; the focused element becomes focus
+    /// visible.
+    /// @return Whether the page cancelled the key.
+    bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers = {}, const pal::KeyText &text = {},
+                    bool isAutoRepeat = false) noexcept;
+    /// @brief Releases @p key: `keyup` fires at the focused element (or the body).
+    /// @return Whether the page cancelled the key.
+    bool KeyReleased(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
 
     /// @brief The window showing the page gained (true) or lost (false) system focus: `:focus` matches only
     /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.

@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, G4f1, hit testing, hover and active, G4f2, mouse events, clicks and cursors, and G4g, focus and blur, are done; see *G4 plan*).
+Status (2026-10-19): C0 (the colour types) and G1 (the RHI and its OpenGL backend) are done; Render2D (G2) is in progress (G2a, solid rects, G2b, rounded rects and antialiasing, G2c, transforms and rect clips, G2d, images, G2e, paths, masks and rounded holes, G2f, strokes, G2g, clips, G2h, layers and blend modes, G2i, gradients, and G2j, shadows, and G2k, golden image tests, are done); Krystal.Text (T1) and text (G3) are done; the Booey integration (G4) is in progress (G4a, the graphics context and display lists, G4b, Krystal.UI and replay, G4c1, the paint plumbing, layers and backgrounds, G4c2, borders, shadows and outlines, G4c3, image buffers and patterns, G4d1, text and inline boxes, G4d2, decorations, markers and ellipses, G4e, table painting, G4f1, hit testing, hover and active, G4f2, mouse events, clicks and cursors, G4g, focus and blur, and G4h1, keyboard events, are done; see *G4 plan*).
 
 ## Why
 
@@ -299,7 +299,7 @@ All done in G1 (2026-10-17) unless noted.
 | G2 | Render2D: the analytic fast path, transforms, images, paths and coverage masks, strokes, clips, layers, gradients, shadows. Reviewed one part at a time (see *G2 parts*). | A test app draws a UI-like scene; golden image tests pass. |
 | T1 | Done (2026-10-18). `Krystal.Text`: font files and faces move down from Booey, shared by Booey and Gfx (see *T1 plan*). | Booey and its tests build and pass on the moved faces; Krystal.Text has its own tests. |
 | G3 | Done (2026-10-18). Text: the glyph atlas (R8 pages, RGBA pages for colour glyphs), `DrawGlyphs`, FreeType rasterisation. It doesn't depend on G2e's mask atlas. In two parts (see *G3 plan*): done (2026-10-18). | Text renders crisply at several sizes and scales. |
-| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*). | The vertical slice: a page loads, renders, resizes and responds to a click. |
+| G4 | Booey: `GraphicsContext`, the display list recorder, painting (paint order, backgrounds, borders, text), hit testing; Krystal.UI replays it. Done (2026-10-19), in parts G4a to G4g (see *G4 plan*); G4h, keyboard events and focus navigation, extends it (in progress). | The vertical slice: a page loads, renders, resizes and responds to a click. |
 
 ### G2 parts
 
@@ -435,6 +435,7 @@ Booey has layout (block, inline, flex, grid, table), the layer tree, fonts holdi
   - **G4f1, hit testing, hover and active** (Booey and Krystal.UI): `HitTestLocation`, `HitTestResult`, `RenderLayer::hitTest`, `nodeAtPoint` for boxes, inline content, flex, grid and tables, `clip-path` and radii; hover and active state.
   - **G4f2, mouse events and clicks** (Booey, Krystal.UI and Krystal.PAL): `MouseEvent`, the mouse half of `EventHandler`, click counting, cursors; Krystal.UI routes the window's mouse to the page.
   - **G4g, focus and blur** (Booey, Krystal.UI and Krystal.PAL): focus on click, the window's focus (see *G4g plan*).
+  - **G4h1, keyboard events, and G4h2, sequential focus navigation** (Booey, Krystal.UI and Krystal.PAL; see *G4h plan*).
 - **Tests:** the Booey parts compare display list dumps of small documents (as layout compares render tree dumps); the whole pipeline is checked with page goldens, HTML drawn through Krystal.UI and compared with Chrome's rendering (`tools/golden/capture_chrome.py`, extended to pages): strictly for boxes, loosely for text. The Booey parts follow the porting checklist and get ledger entries in `docs/booey/PORTING.md`.
 
 ### G4b plan (decided 2026-10-18)
@@ -546,6 +547,24 @@ One part (decided by the user); keyboard events and sequential focus navigation 
 - **Out (FIXMEs):** keyboard events and sequential navigation (G4h), the focus navigation starting point, focus visible after keyboard use, `autofocus`, events at the `Window`, text fields and form controls.
 - **Tests:** Booey: the order and targets of the mouse and focus events, focus moving to the nearest focusable ancestor, a press on nothing focusable clearing it, a cancelled `mousedown`, `:focus` restyling and `:focus-visible` staying off after a click, the window losing and regaining focus; Krystal.UI: a click focus and `SetFocused` through `Page`. No golden: nothing new paints.
 - **Editor:** the cards take a `tabindex` and a `:focus` style, the stage a `:focus-within` style; the window's focus reaches the page.
+
+### G4h plan (decided 2026-10-19)
+
+Two parts (decided by the user). Booey has `UIEventWithKeyState` (G4f2) and the focus processing model (`FocusAlgorithms`, with `TabIndexValue`); it has no `KeyboardEvent`, `PlatformKeyboardEvent`, keyboard half of the event handler or sequential focus navigation. Krystal.PAL reports a `Key` and its state, without modifiers or the text the key types, and no Alt combinations (`WM_SYSKEYDOWN`); its mouse events have no modifiers either.
+
+- **Krystal.UI's `Page` becomes `View`** (decided by the user): Krystal.UI will have its own concepts, closer to a game engine's UI, and a view shows a Booey page. Krystal.UI depends on Krystal.PAL (decided by the user) and takes its input types: a view maps `pal::Key` to the DOM's `code`, `key` and Windows key code, takes `pal::MouseButton` (the editor's `ToBooeyButton` goes) and gives its cursor as a `pal::CursorShape` (the editor's `ToCursorShape` goes).
+- **G4h1, keyboard events:**
+  - **Booey:** `PlatformKeyboardEvent` (raw key down, char and key up, with the text, `key`, `code`, the Windows key code, auto repeat, keypad and modifiers); `KeyboardEvent` and `KeyboardEventInit` (`key`, `code`, `location`, `repeat`, the modifiers, the legacy `keyCode`, `charCode` and `which`); the keyboard half of `EventHandler`: `keydown`, then `keypress` for keys that type text, then `keyup`, at the focused element or the body; a cancelled `keydown` suppresses `keypress`. A key press makes the focused element focus visible, as upstream.
+  - **Krystal.PAL:** modifiers captured when a message arrives, on the key and mouse callbacks and events; the text a key types, from `ToUnicodeEx` on key down without changing the dead key state; `WM_SYSKEYDOWN` and `WM_SYSKEYUP`.
+  - **Krystal.UI:** `View::KeyPressed` and `KeyReleased` from PAL's key events; the mouse calls take PAL's buttons and modifiers.
+  - **Out (FIXMEs):** text editing and input events, IME and composition, access keys, the menu and context menu keys, activation by Space and Enter (links and form controls).
+  - **Tests:** Booey: `KeyboardEvent` from a dictionary and from the platform; the order and targets of `keydown`, `keypress` and `keyup`, cancelling, focus visible after a key. Krystal.UI: key events and the key mapping through `View`.
+  - **Editor:** forwards PAL's events to the view; a native key listener shows the last key pressed on the page; Escape still quits.
+- **G4h2, sequential focus navigation:**
+  - **Booey:** Tab and Shift+Tab move the focus as the default action of a `keydown` that isn't cancelled, in the specification's sequential navigation order, written from the specification in `FocusAlgorithms` (decided), with upstream's `FocusController` as the reference for what the specification leaves to user agents: tabindex-ordered focus navigation scopes (positive `tabindex` first, then tree order, `-1` skipped; shadow hosts, slots and, once there are popovers, open popovers as scopes; a shadow host without `tabindex` counts as 0); the focus navigation starting point, which a click sets; focus visible when moved by keyboard, so `outline: auto` rings show; wrapping at the end of the document (upstream, with no chrome to take the focus). No port of `FocusController`: it belongs to a `Page` (Booey has none yet) and duplicates the focusing steps.
+  - **Out (FIXMEs):** frames, spatial navigation, keyboard focusability that differs from focusability (`tabsToLinks`, form controls), moving the focus out to the host, `autofocus`.
+  - **Tests:** the navigation order (positive `tabindex`, tree order, `-1`, shadow trees and slots, wrapping, Shift+Tab), the starting point after a click, focus visible after Tab; a page golden of a focus ring.
+  - **Editor:** Tab moves through the cards with a focus ring.
 
 ### G2a as built (2026-10-18)
 
@@ -822,6 +841,15 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Out (FIXMEs):** keyboard events and sequential navigation (G4h), the focus navigation starting point, focus visible after keyboard use, `autofocus`, events at the `Window`, scrollbars, selection, text fields and form controls.
 - **Editor:** the cards take `tabindex=0` and show an outline when focused; the first stage's boxes take `tabindex=-1` and the stage shows `:focus-within`; the window's focus reaches the page; the status table shows clicks done and focus now.
 - **Tests:** Booey tests a press focusing (the order and targets of the events, the nearest focusable ancestor, the viewport, a cancelled press, `:focus` restyling, no focus visible) and the window's focus; Krystal.UI tests a click focus, `SetFocused` and loading while unfocused through `Page`. No golden: nothing new paints.
+
+### G4h1 as built (2026-10-19)
+
+- **Krystal.UI:** `Page` is now `View` (`Krystal.UI/View.hpp`), and Krystal.UI depends on Krystal.PAL. `Krystal.UI/Input.hpp` converts the platform layer's input: `input::Describe` gives a `pal::Key`'s DOM `code`, its name if it doesn't type text, its legacy key identifier and its Windows key code (with the side for modifiers); `input::KeyboardEvent` builds Booey's platform key events (a press's `key` is the key's name, else the text it types, else its text with only Shift for shortcuts such as Ctrl+A; a release reports its press's); `ToBooey` converts buttons and modifiers; `ToCursorShape` moved from the editor. `View::KeyPressed` and `KeyReleased` (returning whether the page cancelled the key); the mouse calls take `pal::MouseButton` and `pal::KeyModifiers`, and `CurrentCursor` is a `pal::CursorShape`.
+- **Booey** (the ledger entry is *Keyboard events* in `docs/booey/PORTING.md`): `PlatformKeyboardEvent`, the Windows key codes, `KeyboardEvent` and `KeyboardEventInit`, `Element::DispatchKeyEvent` and the keyboard half of `EventHandler`: `keydown`, then `keypress` for keys that type text unless `keydown` is cancelled, then `keyup`, at the focused element or the body; a key press (not a modifier alone) makes the focused element focus visible.
+- **Krystal.PAL:** `KeyModifier`, `KeyModifiers` and `KeyText` (`KeyModifiers.hpp`); the key, mouse button and mouse move callbacks and events carry the modifiers held, and key presses the text they type (from `ToUnicodeEx` without changing the dead key state, without control characters except Enter's carriage return) and the text with only Shift and Caps Lock; Alt combinations (`WM_SYSKEYDOWN`, `WM_SYSKEYUP`) are reported and still reach `DefWindowProc`, for Alt+F4; as browsers do, `WM_SYSCHAR` doesn't (it would look for a menu mnemonic and beep), except for Alt+Space (the window menu), and Alt or F10 alone doesn't enter menu mode (`SC_KEYMENU` from the keyboard). The Win32 key mapping was fixed (see the ledger entry).
+- **Out (FIXMEs):** the keyboard's default actions (Tab is G4h2), text editing and input events, input methods and composition, dead keys, access keys, the menu and context menu keys (and Insert, Print Screen, Pause, Scroll Lock and Num Lock, which the platform layer has no keys for), activation by Space and Enter.
+- **Editor:** forwards key events to the view in the page view (except F2, F5 and Escape, which still quits); views switch with F2 rather than Tab, which G4h2 gives to the page; mouse events carry their modifiers; a native `keydown` listener shows the last key's value in the status table, which shows focus done and Tab next.
+- **Tests:** Booey tests `KeyboardEvent` (2 cases) and the event handler's keys (1 case); Krystal.UI tests keys through `View` (values, codes, locations, legacy codes, shortcuts, named keys that type text, cancelling) and the input conversions. No golden: nothing new paints.
 
 ## Open decisions
 

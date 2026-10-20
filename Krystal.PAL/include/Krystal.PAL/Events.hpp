@@ -3,6 +3,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.PAL/IWindow.hpp"
+#include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 
@@ -15,20 +16,31 @@ namespace krys::pal
     WindowHandle _window;
     Key _key;
     KeyState _state;
+    KeyModifiers _modifiers;
+    KeyText _text;
 
   public:
     KRYS_EVENT_CLASS_TYPE("keyboard-event")
 
     /// @brief Constructs a `KeyboardEvent`.
-    /// @param button The key involved in the interaction.
+    /// @param key The key involved in the interaction.
     /// @param state The key's state during the interaction.
-    KeyboardEvent(WindowHandle window, const Key key, const KeyState state) noexcept;
+    /// @param modifiers The modifier keys held.
+    /// @param text The text the key types, for presses.
+    KeyboardEvent(WindowHandle window, const Key key, const KeyState state, const KeyModifiers modifiers = {},
+                  KeyText text = {}) noexcept;
 
     /// @brief Gets the key involved in the interaction.
     KRYS_NODISCARD Key Key() const noexcept;
 
     /// @brief Gets the state of the key.
     KRYS_NODISCARD KeyState State() const noexcept;
+
+    /// @brief Gets the modifier keys held during the interaction.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
+    /// @brief Gets the text the key types (empty for releases).
+    KRYS_NODISCARD const KeyText &Text() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
@@ -40,6 +52,7 @@ namespace krys::pal
     WindowHandle _window;
     MouseButton _button;
     MouseButtonState _state;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-button-event")
@@ -47,13 +60,18 @@ namespace krys::pal
     /// @brief Constructs a `MouseButtonEvent`.
     /// @param button The mouse button involved in the interaction.
     /// @param state The button's state during the interaction.
-    MouseButtonEvent(WindowHandle window, const MouseButton button, const MouseButtonState state) noexcept;
+    /// @param modifiers The modifier keys held.
+    MouseButtonEvent(WindowHandle window, const MouseButton button, const MouseButtonState state,
+                     const KeyModifiers modifiers = {}) noexcept;
 
     /// @brief Gets the mouse button involved in the interaction.
     KRYS_NODISCARD MouseButton Button() const noexcept;
 
     /// @brief Gets the state of the mouse button.
     KRYS_NODISCARD MouseButtonState State() const noexcept;
+
+    /// @brief Gets the modifier keys held during the interaction.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
 
     /// @brief Checks if the button is pressed.
     /// @returns `true` if the button is in the state `MouseButtonState::Pressed`.
@@ -73,6 +91,7 @@ namespace krys::pal
     WindowHandle _window;
     float _deltaX, _deltaY;
     float _clientX, _clientY;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-move-event")
@@ -82,8 +101,9 @@ namespace krys::pal
     /// @param deltaY The amount the cursor moved along the y-axis since the last event.
     /// @param clientX The x-coordinate of the cursor in client space.
     /// @param clientY The y-coordinate of the cursor in client space.
+    /// @param modifiers The modifier keys held.
     MouseMoveEvent(WindowHandle window, const float deltaX, const float deltaY, const float clientX,
-                   const float clientY) noexcept;
+                   const float clientY, const KeyModifiers modifiers = {}) noexcept;
 
     /// @brief Gets the amount the cursor has moved along the x-axis since the last event.
     KRYS_NODISCARD float DeltaX() const noexcept;
@@ -98,6 +118,9 @@ namespace krys::pal
     /// @brief Gets the y-coordinate of the cursor in client space.
     /// @note The origin is the top-left corner of the window, minus the title bar.
     KRYS_NODISCARD float ClientY() const noexcept;
+
+    /// @brief Gets the modifier keys held during the movement.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

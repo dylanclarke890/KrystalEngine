@@ -16,6 +16,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -662,6 +663,16 @@ namespace krys::boo::dom
       }
     }
     return {didNotSwallowEvent ? EventIsDispatched::Yes : EventIsDispatched::No, eventIsDefaultPrevented};
+  }
+
+  bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
+  {
+    Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent);
+    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
+    // accessibility.
+    (void)EventDispatcher::DispatchToTarget(*event, this);
+    // FIXME: And not handled (defaultHandled), once default event handlers can handle events.
+    return !event->DefaultPrevented();
   }
 
   bool Element::IsUserActionElementHovered() const noexcept

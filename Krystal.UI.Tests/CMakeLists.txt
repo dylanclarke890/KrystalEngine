@@ -45,6 +45,6 @@ target_sources(Krystal.UI.Tests
 
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
-    tests/Page.cpp
+    tests/View.cpp
     tests/Render2DConversions.cpp
 )

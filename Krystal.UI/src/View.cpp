@@ -1,4 +1,4 @@
-﻿#include "Krystal.UI/Page.hpp"
+﻿#include "Krystal.UI/View.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
+#include "Krystal.UI/Input.hpp"
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
@@ -30,7 +31,7 @@ namespace krys::ui
     }
   }
 
-  Page::Page(const boo::IntSize &viewportSize) noexcept : _frame(boo::LocalFrame::Create())
+  View::View(const boo::IntSize &viewportSize) noexcept : _frame(boo::LocalFrame::Create())
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
@@ -39,16 +40,16 @@ namespace krys::ui
     LoadHTML(u8"<!DOCTYPE html>");
   }
 
-  Page::~Page() noexcept = default;
+  View::~View() noexcept = default;
 
-  void Page::LoadHTML(utf8_string &&markup) noexcept
+  void View::LoadHTML(utf8_string &&markup) noexcept
   {
     _document = Parse(krys::move(markup));
     _document->SetFocusedAndActive(_focused);
     _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
   }
 
-  Expected<void> Page::LoadFile(const std::filesystem::path &path) noexcept
+  Expected<void> View::LoadFile(const std::filesystem::path &path) noexcept
   {
     std::ifstream file(path, std::ios::binary);
     if (!file)
@@ -65,7 +66,7 @@ namespace krys::ui
     return {};
   }
 
-  uint32 Page::AddFontDirectory(const std::filesystem::path &directory)
+  uint32 View::AddFontDirectory(const std::filesystem::path &directory)
   {
     auto count = boo::FontDatabase::Singleton().AddFontDirectory(directory);
     if (count)
@@ -75,7 +76,7 @@ namespace krys::ui
     return count;
   }
 
-  void Page::Resize(const boo::IntSize &viewportSize) noexcept
+  void View::Resize(const boo::IntSize &viewportSize) noexcept
   {
     if (auto *view = _frame->View())
     {
@@ -83,18 +84,18 @@ namespace krys::ui
     }
   }
 
-  boo::IntSize Page::ViewportSize() const noexcept
+  boo::IntSize View::ViewportSize() const noexcept
   {
     auto *view = _frame->View();
     return view ? boo::IntSize(view->Width(), view->Height()) : boo::IntSize();
   }
 
-  void Page::UpdateRendering() noexcept
+  void View::UpdateRendering() noexcept
   {
     (void)_document->UpdateLayout();
   }
 
-  Ref<const boo::display_list::DisplayList> Page::Record() noexcept
+  Ref<const boo::display_list::DisplayList> View::Record() noexcept
   {
     UpdateRendering();
     const auto size = ViewportSize();
@@ -107,12 +108,12 @@ namespace krys::ui
     return recorder.TakeDisplayList();
   }
 
-  void Page::Paint(gfx::Renderer2D &renderer) noexcept
+  void View::Paint(gfx::Renderer2D &renderer) noexcept
   {
     Replay(*Record(), renderer);
   }
 
-  void Page::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept
+  void View::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept
   {
     const auto size = ViewportSize();
     if (!_imageBuffers)
@@ -128,20 +129,26 @@ namespace krys::ui
     _imageBuffers->Release();
   }
 
-  boo::dom::Element *Page::HitTest(const boo::IntPoint &point) noexcept
+  boo::dom::Element *View::HitTest(const boo::IntPoint &point) noexcept
   {
     return _document->ElementFromPoint(point.X(), point.Y()).get();
   }
 
-  void Page::MouseMoved(const boo::IntPoint &point, EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
+  void View::MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
   {
-    (void)_frame->GetEventHandler().MouseMoved(
-      MouseEvent(boo::PlatformEvent::Type::MouseMoved, point, boo::MouseButton::None, 0, modifiers));
+    (void)_frame->GetEventHandler().MouseMoved(MouseEvent(
+      boo::PlatformEvent::Type::MouseMoved, point, boo::MouseButton::None, 0, input::ToBooey(modifiers)));
   }
 
-  void Page::MousePressed(const boo::IntPoint &point, boo::MouseButton button,
-                          EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
+  void View::MousePressed(const boo::IntPoint &point, pal::MouseButton palButton,
+                          pal::KeyModifiers modifiers) noexcept
   {
+    auto button = input::ToBooey(palButton);
+    if (button == boo::MouseButton::None)
+    {
+      return;
+    }
+
     // A press soon after the last, near it and with the same button, counts on from it.
     auto now = MonotonicTime::Now();
     bool continuesClicks = _clickCount > 0 && button == _lastClickButton
@@ -154,37 +161,63 @@ namespace krys::ui
     _lastClickPosition = point;
 
     _buttons |= ButtonsBit(button);
-    (void)_frame->GetEventHandler().HandleMousePressEvent(
-      MouseEvent(boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, modifiers));
+    (void)_frame->GetEventHandler().HandleMousePressEvent(MouseEvent(
+      boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, input::ToBooey(modifiers)));
   }
 
-  void Page::MouseReleased(const boo::IntPoint &point, boo::MouseButton button,
-                           EnumSet<boo::PlatformEvent::Modifier> modifiers) noexcept
+  void View::MouseReleased(const boo::IntPoint &point, pal::MouseButton palButton,
+                           pal::KeyModifiers modifiers) noexcept
   {
+    auto button = input::ToBooey(palButton);
+    if (button == boo::MouseButton::None)
+    {
+      return;
+    }
+
     _buttons &= static_cast<uint16>(~ButtonsBit(button));
-    (void)_frame->GetEventHandler().HandleMouseReleaseEvent(
-      MouseEvent(boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, modifiers));
+    (void)_frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
+      boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input::ToBooey(modifiers)));
   }
 
-  void Page::MouseLeft() noexcept
+  void View::MouseLeft() noexcept
   {
     // A move outside the viewport hits nothing, so the element under the mouse is left and nothing is
     // hovered.
     MouseMoved(boo::IntPoint(-1, -1));
   }
 
-  boo::Cursor Page::CurrentCursor() const noexcept
+  pal::CursorShape View::CurrentCursor() const noexcept
   {
-    return _frame->GetEventHandler().CurrentMouseCursor();
+    return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());
   }
 
-  void Page::SetFocused(bool focused) noexcept
+  bool View::KeyPressed(pal::Key key, pal::KeyModifiers modifiers, const pal::KeyText &text,
+                        bool isAutoRepeat) noexcept
+  {
+    auto event = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, key, modifiers, text, isAutoRepeat);
+    _heldKeyValues.insert_or_assign(key, event.Key());
+    return _frame->GetEventHandler().KeyEvent(event);
+  }
+
+  bool View::KeyReleased(pal::Key key, pal::KeyModifiers modifiers) noexcept
+  {
+    utf8_string keyValue;
+    if (auto held = _heldKeyValues.find(key); held != _heldKeyValues.end())
+    {
+      keyValue = krys::move(held->second);
+      _heldKeyValues.erase(held);
+    }
+    return _frame->GetEventHandler().KeyEvent(
+      input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, key, modifiers, {}, false, keyValue));
+  }
+
+  void View::SetFocused(bool focused) noexcept
   {
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);
   }
 
-  boo::PlatformMouseEvent Page::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,
+  boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,
                                            boo::MouseButton button, int32 clickCount,
                                            EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept
   {
@@ -193,7 +226,7 @@ namespace krys::ui
                                    modifiers, MonotonicTime::Now(), _buttons);
   }
 
-  uint16 Page::ButtonsBit(boo::MouseButton button) noexcept
+  uint16 View::ButtonsBit(boo::MouseButton button) noexcept
   {
     // The DOM's buttons: https://w3c.github.io/uievents/#dom-mouseevent-buttons
     switch (button)

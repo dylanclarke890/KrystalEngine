@@ -34,11 +34,14 @@ namespace krys::pal
     const Mouse &GetMouse() const noexcept;
 
   private:
-    void OnKeyboardEvent(WindowHandle window, Key key, KeyState state) noexcept;
+    void OnKeyboardEvent(WindowHandle window, Key key, KeyState state, KeyModifiers modifiers,
+                         const KeyText &text) noexcept;
 
-    void OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state) noexcept;
+    void OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state,
+                            KeyModifiers modifiers) noexcept;
 
-    void OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY) noexcept;
+    void OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY,
+                          KeyModifiers modifiers) noexcept;
 
     void OnMouseScrollEvent(WindowHandle window, float delta) noexcept;
   };

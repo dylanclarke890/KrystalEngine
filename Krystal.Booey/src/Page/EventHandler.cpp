@@ -1,8 +1,11 @@
 ﻿#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -19,6 +22,22 @@ namespace krys::boo
 {
   namespace
   {
+    /// @brief The element key events go to in @p document: its focused element, or its body.
+    // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
+    KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
+    {
+      if (!document)
+      {
+        return nullptr;
+      }
+      dom::Element *element = document->FocusedElement();
+      if (!element && Is<dom::HTMLDocument>(*document))
+      {
+        element = document->BodyOrFrameset();
+      }
+      return element;
+    }
+
     KRYS_NODISCARD DoublePoint DocumentPointForWindowPoint(LocalFrame &frame,
                                                            const DoublePoint &windowPoint) noexcept
     {
@@ -529,6 +548,100 @@ namespace krys::boo
     }
     // FIXME: Selecting the contents of a shadow host's focus delegate (findTargetAndUpdateFocusAppearance).
     return true;
+  }
+
+  bool EventHandler::KeyEvent(const PlatformKeyboardEvent &keyEvent) noexcept
+  {
+    // FIXME: Not treating an unhandled key event as user interaction (userDidInteractWithPage, the last
+    // handled user gesture), once there are user gestures.
+    return InternalKeyEvent(keyEvent);
+  }
+
+  bool EventHandler::InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept
+  {
+    using Type = PlatformEvent::Type;
+
+    // FIXME: Escape unlocking the pointer, hiding validation messages and leaving fullscreen; the caps lock
+    // state of text fields; pan scrolling.
+
+    // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
+    // the location bar.
+    RefPtr<dom::Element> element = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
+    if (!element)
+    {
+      return false;
+    }
+
+    // FIXME: User gestures, typing gestures and access keys (handleAccessKey), keyboard scrolling.
+
+    // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
+    if (initialKeyEvent.GetType() == Type::KeyUp || initialKeyEvent.GetType() == Type::Char)
+    {
+      return !element->DispatchKeyEvent(initialKeyEvent);
+    }
+
+    PlatformKeyboardEvent keyDownEvent = initialKeyEvent;
+    if (keyDownEvent.GetType() != Type::RawKeyDown)
+    {
+      keyDownEvent.DisambiguateKeyDownEvent(Type::RawKeyDown);
+    }
+    Ref<dom::KeyboardEvent> keydown = dom::KeyboardEvent::Create(keyDownEvent);
+
+    auto setHasFocusVisibleIfNeeded = [&](dom::Element &element)
+    {
+      // If the user interacts with the page via the keyboard, the currently focused element should match
+      // :focus-visible. Just typing a modifier key is not considered user interaction with the page, but
+      // Shift + a (or Caps Lock + a) is considered an interaction.
+      bool userHasInteractedViaKeyword =
+        keydown->ModifierKeys().IsEmpty()
+        || ((keydown->ShiftKey() || keydown->CapsLockKey()) && !initialKeyEvent.Text().empty());
+
+      if (element.Focused() && userHasInteractedViaKeyword)
+      {
+        element.SetHasFocusVisible(true);
+      }
+    };
+    setHasFocusVisibleIfNeeded(*element);
+
+    if (initialKeyEvent.GetType() == Type::RawKeyDown)
+    {
+      (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
+      // FIXME: Also when it's handled (defaultHandled), or the focused frame changed, once there are default
+      // handlers and subframes.
+      return keydown->DefaultPrevented();
+    }
+
+    // FIXME: Input methods (handleInputMethodKeydown), which run before the keydown is dispatched, and
+    // accessibility stopping the propagation.
+    (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
+
+    // FIXME: Also when it's handled (defaultHandled), or the focused frame changed, once there are default
+    // handlers and subframes; the backward compatibility mode, which dispatches a cancelled keypress anyway.
+    bool keydownResult = keydown->DefaultPrevented();
+    if (keydownResult)
+    {
+      return keydownResult;
+    }
+
+    // Focus may have changed during keydown handling, so refetch element.
+    element = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
+    if (!element)
+    {
+      return false;
+    }
+    setHasFocusVisibleIfNeeded(*element);
+
+    PlatformKeyboardEvent keyPressEvent = initialKeyEvent;
+    keyPressEvent.DisambiguateKeyDownEvent(Type::Char);
+    if (keyPressEvent.Text().empty())
+    {
+      return keydownResult;
+    }
+    Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent);
+    // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), once there are text fields.
+    (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
+
+    return keydownResult || keypress->DefaultPrevented();
   }
 
   void EventHandler::UpdateCursor() noexcept

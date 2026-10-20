@@ -7,6 +7,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 
@@ -56,10 +57,10 @@ namespace krys::pal
 
   struct WindowCallbacks
   {
-    using MouseMoveHandler = Func<void(WindowHandle, float, float, float, float)>;
-    using MouseButtonHandler = Func<void(WindowHandle, MouseButton, MouseButtonState)>;
+    using MouseMoveHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
+    using MouseButtonHandler = Func<void(WindowHandle, MouseButton, MouseButtonState, KeyModifiers)>;
     using MouseScrollHandler = Func<void(WindowHandle, float)>;
-    using KeyHandler = Func<void(WindowHandle, Key, KeyState)>;
+    using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
     using CloseHandler = Func<void(WindowHandle)>;
     using ResizeHandler = Func<void(WindowHandle, int, int)>;
     using MinimiseHandler = Func<void(WindowHandle)>;

@@ -30,6 +30,7 @@ namespace krys::boo
 
 namespace krys::boo
 {
+  class PlatformKeyboardEvent;
   class PlatformMouseEvent;
 }
 
@@ -752,6 +753,14 @@ namespace krys::boo::dom
     DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
                                                 DOMStringAtom eventType, int32 detail = 0,
                                                 Element *relatedTarget = nullptr) noexcept;
+
+#pragma endregion
+
+#pragma region Keyboard Events
+
+    /// @brief Dispatches a trusted keyboard event from @p platformEvent (a char or key up) at this element.
+    /// @return Whether the event was neither cancelled nor handled.
+    bool DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept;
 
 #pragma endregion
 

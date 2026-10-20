@@ -1449,6 +1449,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/Cursor.hpp
   include/Krystal.Booey/Platform/PlatformEvent.hpp
   include/Krystal.Booey/Platform/PlatformMouseEvent.hpp
+
+  # Keyboard events (G4h1)
+  include/Krystal.Booey/DOM/Dicts/KeyboardEventInit.hpp
+  include/Krystal.Booey/DOM/KeyboardEvent.hpp
+  include/Krystal.Booey/Platform/PlatformKeyboardEvent.hpp
+  include/Krystal.Booey/Platform/WindowsKeyboardCodes.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2404,6 +2410,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/MouseEvent.cpp
   src/DOM/MouseRelatedEvent.cpp
   src/Page/EventHandler.cpp
+
+  # Keyboard events (G4h1)
+  src/DOM/KeyboardEvent.cpp
 )
 
 target_precompile_headers(Krystal.Booey

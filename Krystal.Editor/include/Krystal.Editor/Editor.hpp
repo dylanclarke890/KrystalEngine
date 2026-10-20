@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
@@ -22,7 +23,7 @@
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
-#include "Krystal.UI/Page.hpp"
+#include "Krystal.UI/View.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -32,7 +33,7 @@
 
 namespace krys
 {
-  /// @brief What the editor shows below its header; Tab moves to the next.
+  /// @brief What the editor shows below its header; F2 moves to the next.
   enum class EditorView : uint8
   {
     // An HTML page from `Krystal.Editor/pages`, painted by Booey.
@@ -62,6 +63,29 @@ namespace krys
     }
   };
 
+  /// @brief Shows the `key` of each key pressed on the page in its `#last-key` element.
+  struct KeyLogger final : boo::dom::EventListenerCallback
+  {
+    void HandleEvent(boo::dom::Event &event) noexcept override
+    {
+      if (!event.IsKeyboardEvent())
+      {
+        return;
+      }
+      auto &keyboardEvent = static_cast<boo::dom::KeyboardEvent &>(event);
+      auto *node = DynamicDowncast<boo::dom::Node>(event.CurrentTarget().get());
+      if (!node)
+      {
+        return;
+      }
+      if (auto label = node->NodeDocument().GetElementById(u8"last-key"))
+      {
+        auto key = keyboardEvent.Key() == u8" " ? boo::dom::DOMString(u8"Space") : keyboardEvent.Key();
+        (void)label->TextContent(krys::move(key));
+      }
+    }
+  };
+
   class Editor : public Application
   {
   private:
@@ -75,7 +99,7 @@ namespace krys
     gfx::TextureHandle _image {};
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
-    UniquePtr<ui::Page> _page {};
+    UniquePtr<ui::View> _pageView {};
     bool _focused {true};
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
@@ -109,7 +133,7 @@ namespace krys
 
     void OnShutdown() noexcept override
     {
-      _page = nullptr;
+      _pageView = nullptr;
       _booeyFonts = {};
       _renderer = nullptr;
       _boldFont = nullptr;
@@ -191,7 +215,7 @@ namespace krys
             _context->Logger->Info("Key Pressed '{}'", event.Key());
           }
 
-          if (event.Key() == pal::Key::Tab && event.State() == pal::KeyState::Pressed)
+          if (event.Key() == pal::Key::F2 && event.State() == pal::KeyState::Pressed)
           {
             _view = static_cast<EditorView>((static_cast<uint8>(_view) + 1u) % 3u);
           }
@@ -205,6 +229,22 @@ namespace krys
           {
             _context->Logger->Info("ESC key pressed, quitting application...");
             Stop();
+            return true;
+          }
+
+          // The other keys go to the page view's focused element.
+          if (_pageView && _view == EditorView::Page && event.Key() != pal::Key::F2
+              && event.Key() != pal::Key::F5)
+          {
+            if (event.State() == pal::KeyState::Released)
+            {
+              (void)_pageView->KeyReleased(event.Key(), event.Modifiers());
+            }
+            else
+            {
+              (void)_pageView->KeyPressed(event.Key(), event.Modifiers(), event.Text(),
+                                          event.State() == pal::KeyState::Held);
+            }
           }
           return true;
         });
@@ -214,9 +254,9 @@ namespace krys
         {
           _width = event.Width();
           _height = event.Height();
-          if (_page)
+          if (_pageView)
           {
-            _page->Resize(PageSize());
+            _pageView->Resize(PageSize());
           }
           return true;
         });
@@ -227,9 +267,9 @@ namespace krys
         [&](const auto &event)
         {
           _focused = event.Focused();
-          if (_page)
+          if (_pageView)
           {
-            _page->SetFocused(_focused);
+            _pageView->SetFocused(_focused);
           }
           return true;
         });
@@ -240,15 +280,15 @@ namespace krys
         {
           _pointer = boo::IntPoint(static_cast<int32>(event.ClientX()),
                                    static_cast<int32>(event.ClientY() - HeaderHeight));
-          if (_page && _view == EditorView::Page)
+          if (_pageView && _view == EditorView::Page)
           {
             if (_pointer.Y() < 0)
             {
-              _page->MouseLeft();
+              _pageView->MouseLeft();
             }
             else
             {
-              _page->MouseMoved(_pointer);
+              _pageView->MouseMoved(_pointer, event.Modifiers());
             }
           }
           UpdateCursor();
@@ -258,18 +298,17 @@ namespace krys
       _context->Events->On<MouseButtonEvent>(
         [&](const auto &event)
         {
-          auto button = ToBooeyButton(event.Button());
-          if (!_page || _view != EditorView::Page || button == boo::MouseButton::None)
+          if (!_pageView || _view != EditorView::Page)
           {
             return true;
           }
           if (event.IsPressed() && _pointer.Y() >= 0)
           {
-            _page->MousePressed(_pointer, button);
+            _pageView->MousePressed(_pointer, event.Button(), event.Modifiers());
           }
           else if (event.WasReleased())
           {
-            _page->MouseReleased(_pointer, button);
+            _pageView->MouseReleased(_pointer, event.Button(), event.Modifiers());
           }
           UpdateCursor();
           return true;
@@ -331,85 +370,37 @@ namespace krys
     /// @brief Loads (or reloads) the page view's HTML file.
     void LoadPage() noexcept
     {
-      if (!_page)
+      if (!_pageView)
       {
         return;
       }
       const auto path = std::filesystem::path {KRYS_EDITOR_PAGES_DIR} / "index.html";
-      if (auto loaded = _page->LoadFile(path); !loaded)
+      if (auto loaded = _pageView->LoadFile(path); !loaded)
       {
         _context->Logger->Error("{}", loaded.error());
         return;
       }
-      _page->Document().AddEventListener(boo::dom::DOMStringAtom(u8"click"), CreateRef<CardPicker>(), false);
+      _pageView->Document().AddEventListener(boo::dom::DOMStringAtom(u8"click"), CreateRef<CardPicker>(),
+                                             false);
+      _pageView->Document().AddEventListener(boo::dom::DOMStringAtom(u8"keydown"), CreateRef<KeyLogger>(),
+                                             false);
       _context->Logger->Info("Loaded {}", path.string());
     }
 
     /// @brief Shows the page's cursor over the page view, and the arrow everywhere else.
     void UpdateCursor() noexcept
     {
-      bool overPage = _page && _view == EditorView::Page && _pointer.Y() >= 0;
-      _context->Window->SetCursor(overPage ? ToCursorShape(_page->CurrentCursor()) : pal::CursorShape::Arrow);
-    }
-
-    KRYS_NODISCARD static boo::MouseButton ToBooeyButton(pal::MouseButton button) noexcept
-    {
-      switch (button)
-      {
-        case pal::MouseButton::Left:   return boo::MouseButton::Left;
-        case pal::MouseButton::Right:  return boo::MouseButton::Right;
-        case pal::MouseButton::Middle: return boo::MouseButton::Middle;
-        case pal::MouseButton::Thumb1: return boo::MouseButton::Back;
-        case pal::MouseButton::Thumb2: return boo::MouseButton::Forward;
-        default:                       return boo::MouseButton::None;
-      }
-    }
-
-    /// @brief The system cursor nearest to a Booey cursor.
-    KRYS_NODISCARD static pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept
-    {
-      using Type = boo::Cursor::Type;
-      switch (cursor.GetType())
-      {
-        case Type::Hand:
-        case Type::Grab:
-        case Type::Grabbing:                 return pal::CursorShape::Hand;
-        case Type::IBeam:
-        case Type::VerticalText:             return pal::CursorShape::IBeam;
-        case Type::Cross:
-        case Type::Cell:                     return pal::CursorShape::Crosshair;
-        case Type::Wait:                     return pal::CursorShape::Wait;
-        case Type::Progress:                 return pal::CursorShape::Progress;
-        case Type::Help:                     return pal::CursorShape::Help;
-        case Type::NoDrop:
-        case Type::NotAllowed:               return pal::CursorShape::NotAllowed;
-        case Type::Move:                     return pal::CursorShape::Move;
-        case Type::NorthResize:
-        case Type::SouthResize:
-        case Type::NorthSouthResize:
-        case Type::RowResize:                return pal::CursorShape::ResizeNS;
-        case Type::EastResize:
-        case Type::WestResize:
-        case Type::EastWestResize:
-        case Type::ColumnResize:             return pal::CursorShape::ResizeEW;
-        case Type::NorthEastResize:
-        case Type::SouthWestResize:
-        case Type::NorthEastSouthWestResize: return pal::CursorShape::ResizeNESW;
-        case Type::NorthWestResize:
-        case Type::SouthEastResize:
-        case Type::NorthWestSouthEastResize: return pal::CursorShape::ResizeNWSE;
-        case Type::None:                     return pal::CursorShape::Hidden;
-        default:                             return pal::CursorShape::Arrow;
-      }
+      bool overPage = _pageView && _view == EditorView::Page && _pointer.Y() >= 0;
+      _context->Window->SetCursor(overPage ? _pageView->CurrentCursor() : pal::CursorShape::Arrow);
     }
 
     /// @brief The page shown in the page view, which Booey's drawing is also replayed through, and Liberation
     /// Sans as Booey's fonts.
     void CreatePage() noexcept
     {
-      (void)ui::Page::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
-      _page = CreateUnique<ui::Page>(PageSize());
-      _page->SetFocused(_focused);
+      (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
+      _pageView = CreateUnique<ui::View>(PageSize());
+      _pageView->SetFocused(_focused);
       LoadPage();
       auto &database = boo::FontDatabase::Singleton();
       auto faces = database.FacesInFamily(u8"Liberation Sans");
@@ -426,13 +417,13 @@ namespace krys
     /// @brief The page view: the page laid out and painted by Booey, below the header.
     void DrawPage() noexcept
     {
-      if (!_page)
+      if (!_pageView)
       {
         return;
       }
       _renderer->Save();
       _renderer->Translate(0.f, HeaderHeight);
-      _page->Paint(*_renderer);
+      _pageView->Paint(*_renderer);
       _renderer->Restore();
     }
 
@@ -440,14 +431,14 @@ namespace krys
     /// list and replayed into Render2D.
     void DrawBooey() noexcept
     {
-      if (!_page)
+      if (!_pageView)
       {
         return;
       }
       boo::display_list::RecorderImpl recorder(
         boo::FloatSize(static_cast<float>(_width), static_cast<float>(_height)));
       editor::BooeyScene(recorder, _booeyFonts, _time).Draw();
-      _page->Replay(*recorder.TakeDisplayList(), *_renderer);
+      _pageView->Replay(*recorder.TakeDisplayList(), *_renderer);
     }
 
     KRYS_NODISCARD static gfx::RoundedRect2D Rounded(float x, float y, float width, float height,
@@ -555,7 +546,7 @@ namespace krys
         DrawText(links[i], 170.f + static_cast<float>(i) * 96.f, 34.f, 15.f,
                  Rgb(0xffffff, active ? 255 : 150), active);
       }
-      DrawText(U"Tab switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
+      DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
     }
 
     void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept

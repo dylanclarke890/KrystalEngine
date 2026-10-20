@@ -2,7 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
-#include "Krystal.UI/Page.hpp"
+#include "Krystal.UI/View.hpp"
 #include <string>
 
 namespace krys::ui::tests
@@ -16,15 +16,15 @@ namespace krys::ui::tests
     /// @brief Chrome antialiases, blurs and dithers a little differently, so its golden is checked loosely.
     constexpr uint32 ChromeTolerance = 24u;
 
-    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `Page` of its size.
+    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size.
     KRYS_NODISCARD GoldenImage Render(gfx::Device &device, gfx::Renderer2D &renderer, const std::string &name,
                                       uint32 width, uint32 height)
     {
       // Liberation Sans, as the scenes name it.
-      static const auto fonts = Page::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+      static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
       (void)fonts;
-      Page page({static_cast<int32>(width), static_cast<int32>(height)});
-      REQUIRE(page.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
+      View view({static_cast<int32>(width), static_cast<int32>(height)});
+      REQUIRE(view.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
 
       auto target =
         device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
@@ -40,7 +40,7 @@ namespace krys::ui::tests
                                 .Height = height,
                                 .Format = gfx::TextureFormat::RGBA8Unorm,
                                 .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
-      page.Paint(renderer);
+      view.Paint(renderer);
       renderer.End();
       device.Submit(commands);
       device.EndFrame();

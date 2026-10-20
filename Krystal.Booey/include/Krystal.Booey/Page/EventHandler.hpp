@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
+#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -24,11 +25,13 @@ namespace krys::boo
   class LocalFrameView;
   class MouseEventWithHitTestResults;
 
-  /// @brief Turns the host's mouse input into DOM events for a frame: `mousemove`, `mousedown` and `mouseup`
-  /// at the element under the mouse; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as that element
-  /// changes; `click`, `auxclick` and `dblclick`; the hover and active state; and the cursor to show.
-  // FIXME: The rest of the event handler: keyboard events, wheel scrolling, drag and drop, selection, context
-  // menus, scrollbars, resizers, subframes, autoscroll, pointer lock, touch and pointer events.
+  /// @brief Turns the host's mouse and keyboard input into DOM events for a frame: `mousemove`, `mousedown`
+  /// and `mouseup` at the element under the mouse; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as
+  /// that element changes; `click`, `auxclick` and `dblclick`; the hover and active state; the cursor to
+  /// show; and `keydown`, `keypress` and `keyup` at the focused element.
+  // FIXME: The rest of the event handler: the keyboard's default actions, wheel scrolling, drag and drop,
+  // selection, context menus, scrollbars, resizers, subframes, autoscroll, pointer lock, touch and pointer
+  // events.
   class EventHandler
   {
     KRYS_NON_COPY_MOVABLE(EventHandler);
@@ -123,7 +126,16 @@ namespace krys::boo
     /// still mouse.
     void UpdateCursor() noexcept;
 
+    /// @brief Handles a key event: a key up becomes `keyup` and a char `keypress`; a raw key down becomes
+    /// `keydown`, and a combined key down `keydown` then, unless it's cancelled and if the key types text,
+    /// `keypress`. They go to the focused element, or the body. A key press makes the focused element focus
+    /// visible.
+    /// @return Whether the event was cancelled.
+    bool KeyEvent(const PlatformKeyboardEvent &keyEvent) noexcept;
+
   private:
+    bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
+
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;
 

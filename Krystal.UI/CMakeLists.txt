@@ -5,6 +5,7 @@ target_link_libraries(Krystal.UI
     Krystal.Core
     Krystal.Booey
     Krystal.Gfx
+    Krystal.PAL
 )
 
 set_target_properties(Krystal.UI
@@ -33,13 +34,15 @@ target_sources(Krystal.UI
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
-      include/Krystal.UI/Page.hpp
+      include/Krystal.UI/Input.hpp
       include/Krystal.UI/Render2DConversions.hpp
+      include/Krystal.UI/View.hpp
 
   PRIVATE
     src/FontFaceCache.cpp
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp
-    src/Page.cpp
+    src/Input.cpp
     src/Render2DConversions.cpp
+    src/View.cpp
 )

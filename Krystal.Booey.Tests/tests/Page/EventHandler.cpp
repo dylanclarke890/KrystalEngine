@@ -5,9 +5,11 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <string>
 
 namespace krys::boo::tests
@@ -143,6 +145,34 @@ namespace krys::boo::tests
     }
 
     using Strings = List<std::string>;
+
+    /// @brief Records the keyboard events it handles as `type:target/key/keyCode/charCode`.
+    struct KeyRecorder : public dom::EventListenerCallback
+    {
+      List<std::string> &Records;
+
+      explicit KeyRecorder(List<std::string> &records) noexcept : Records(records)
+      {
+      }
+
+      void HandleEvent(dom::Event &event) noexcept override
+      {
+        auto &key = static_cast<dom::KeyboardEvent &>(event);
+        auto type = std::string(key.Type().View().begin(), key.Type().View().end());
+        Records.push_back(type + ":" + Name(event.Target().get()) + "/"
+                          + std::string(key.Key().begin(), key.Key().end()) + "/"
+                          + std::to_string(key.KeyCode()) + "/" + std::to_string(key.CharCode()));
+      }
+    };
+
+    /// @brief A key event of @p type for a key with the value @p key that types @p text.
+    KRYS_NODISCARD PlatformKeyboardEvent KeyEvent(PlatformEvent::Type type, utf8_string key, utf8_string text,
+                                                  int32 keyCode,
+                                                  EnumSet<PlatformEvent::Modifier> modifiers = {}) noexcept
+    {
+      return PlatformKeyboardEvent(type, text, text, krys::move(key), u8"", u8"", keyCode, false, false,
+                                   false, modifiers, MonotonicTime::Now());
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: moves fire over, out, enter and leave",
@@ -329,6 +359,76 @@ namespace krys::boo::tests
       CHECK(fixture.Take() == Strings {"focus:outer(null)"});
       (void)fixture.Document->UpdateLayout();
       CHECK(outer.OffsetWidth() == 100);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: keys", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=box tabindex=0 style=height:20px></div><div id=other tabindex=0></div>"};
+    Ref<dom::EventListenerCallback> recorder = CreateRef<KeyRecorder>(fixture.Records);
+    for (auto type : {u8"keydown", u8"keypress", u8"keyup"})
+    {
+      fixture.Document->AddEventListener(dom::DOMStringAtom(type), Ref {recorder}, true);
+    }
+    auto &handler = fixture.Handler();
+    auto &box = fixture.ById(u8"box");
+    using Type = PlatformEvent::Type;
+
+    SECTION("a key that types text goes to the body when nothing is focused")
+    {
+      CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
+      CHECK_FALSE(handler.KeyEvent(KeyEvent(Type::KeyUp, u8"a", u8"", 'A')));
+      CHECK(fixture.Take() == Strings {"keydown:body/a/65/0", "keypress:body/a/97/97", "keyup:body/a/65/0"});
+    }
+
+    SECTION("a key that types nothing has no keypress")
+    {
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"ArrowLeft", u8"", 0x25));
+      CHECK(fixture.Take() == Strings {"keydown:body/ArrowLeft/37/0"});
+    }
+
+    SECTION("raw key downs and chars are dispatched as they are")
+    {
+      (void)handler.KeyEvent(KeyEvent(Type::RawKeyDown, u8"b", u8"b", 'B'));
+      (void)handler.KeyEvent(KeyEvent(Type::Char, u8"b", u8"b", 'B'));
+      CHECK(fixture.Take() == Strings {"keydown:body/b/66/0", "keypress:body/b/98/98"});
+    }
+
+    SECTION("a cancelled keydown has no keypress")
+    {
+      Listen(*fixture.Document, u8"keydown", [](dom::Event &event) { event.PreventDefault(); });
+      CHECK(handler.KeyEvent(KeyEvent(Type::KeyDown, u8"a", u8"a", 'A')));
+      CHECK(fixture.Take() == Strings {"keydown:body/a/65/0"});
+    }
+
+    SECTION("the focused element gets the keys and becomes focus visible")
+    {
+      (void)fixture.Move(5, 5);
+      (void)fixture.Press(5, 5);
+      (void)fixture.Release(5, 5);
+      REQUIRE(box.Focused());
+      CHECK_FALSE(box.HasFocusVisible());
+      (void)fixture.Take();
+
+      // Only a modifier isn't an interaction.
+      (void)handler.KeyEvent(
+        KeyEvent(Type::KeyDown, u8"Shift", u8"", vk::LShift, {PlatformEvent::Modifier::ShiftKey}));
+      CHECK_FALSE(box.HasFocusVisible());
+      // Shift and a key that types text is.
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"A", u8"A", 'A', {PlatformEvent::Modifier::ShiftKey}));
+      CHECK(box.HasFocusVisible());
+      CHECK(fixture.Take()
+            == Strings {"keydown:box/Shift/16/0", "keydown:box/A/65/0", "keypress:box/A/65/65"});
+    }
+
+    SECTION("a keydown that moves the focus sends the keypress to the new focused element")
+    {
+      auto &other = fixture.ById(u8"other");
+      Listen(*fixture.Document, u8"keydown",
+             [&](dom::Event &) { html::FocusAlgorithms::FocusingSteps(other); });
+      (void)handler.KeyEvent(KeyEvent(Type::KeyDown, u8"x", u8"x", 'X'));
+      CHECK(fixture.Take() == Strings {"keydown:body/x/88/0", "keypress:other/x/120/120"});
+      CHECK(other.HasFocusVisible());
     }
   }
 

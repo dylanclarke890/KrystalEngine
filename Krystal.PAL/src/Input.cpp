@@ -36,7 +36,8 @@ namespace krys::pal
     _keyboard._released.clear();
   }
 
-  void Input::OnKeyboardEvent(WindowHandle window, Key key, KeyState state) noexcept
+  void Input::OnKeyboardEvent(WindowHandle window, Key key, KeyState state, KeyModifiers modifiers,
+                              const KeyText &text) noexcept
   {
     switch (state)
     {
@@ -45,10 +46,11 @@ namespace krys::pal
       case KeyState::Released: _keyboard._released.emplace(key); break;
     }
 
-    _events->Enqueue(CreateUnique<KeyboardEvent>(window, key, state));
+    _events->Enqueue(CreateUnique<KeyboardEvent>(window, key, state, modifiers, text));
   }
 
-  void Input::OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state) noexcept
+  void Input::OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state,
+                                 KeyModifiers modifiers) noexcept
   {
     switch (state)
     {
@@ -56,17 +58,18 @@ namespace krys::pal
       case MouseButtonState::Released: _mouse._released |= btn; break;
     }
 
-    _events->Enqueue(CreateUnique<MouseButtonEvent>(window, btn, state));
+    _events->Enqueue(CreateUnique<MouseButtonEvent>(window, btn, state, modifiers));
   }
 
-  void Input::OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY) noexcept
+  void Input::OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY,
+                               KeyModifiers modifiers) noexcept
   {
     _mouse._deltaX += dx;
     _mouse._deltaY += dy;
     _mouse._clientX = clientX;
     _mouse._clientY = clientY;
 
-    _events->Enqueue(CreateUnique<MouseMoveEvent>(window, dx, dy, clientX, clientY));
+    _events->Enqueue(CreateUnique<MouseMoveEvent>(window, dx, dy, clientX, clientY, modifiers));
   }
 
   void Input::OnMouseScrollEvent(WindowHandle window, float delta) noexcept

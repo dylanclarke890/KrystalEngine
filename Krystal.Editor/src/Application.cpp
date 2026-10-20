@@ -179,18 +179,20 @@ namespace krys
     using namespace pal;
 
     return {
-      .OnMouseMove =
-        [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY) noexcept
-      { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY); },
+      .OnMouseMove = [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY,
+                         KeyModifiers modifiers) noexcept
+      { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY, modifiers); },
 
-      .OnMouseButton = [&](WindowHandle window, MouseButton button, MouseButtonState state) noexcept
-      { _context->Input->OnMouseButtonEvent(window, button, state); },
+      .OnMouseButton =
+        [&](WindowHandle window, MouseButton button, MouseButtonState state, KeyModifiers modifiers) noexcept
+      { _context->Input->OnMouseButtonEvent(window, button, state, modifiers); },
 
       .OnMouseScroll = [&](WindowHandle window, float delta) noexcept
       { _context->Input->OnMouseScrollEvent(window, delta); },
 
-      .OnKey = [&](WindowHandle window, Key key, KeyState state) noexcept
-      { _context->Input->OnKeyboardEvent(window, key, state); },
+      .OnKey = [&](WindowHandle window, Key key, KeyState state, KeyModifiers modifiers,
+                   const KeyText &text) noexcept
+      { _context->Input->OnKeyboardEvent(window, key, state, modifiers, text); },
 
       .OnClose = [&](WindowHandle window) noexcept
       { _context->Events->Enqueue(CreateUnique<WindowCloseEvent>(window)); },

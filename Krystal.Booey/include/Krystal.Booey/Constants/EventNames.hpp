@@ -21,6 +21,9 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview MouseEnter = u8"mouseenter";
   constexpr utf8_stringview MouseLeave = u8"mouseleave";
   constexpr utf8_stringview PointerMove = u8"pointermove";
+  constexpr utf8_stringview KeyDown = u8"keydown";
+  constexpr utf8_stringview KeyPress = u8"keypress";
+  constexpr utf8_stringview KeyUp = u8"keyup";
   constexpr utf8_stringview TouchStart = u8"touchstart";
   constexpr utf8_stringview TouchMove = u8"touchmove";
   constexpr utf8_stringview Wheel = u8"wheel";
