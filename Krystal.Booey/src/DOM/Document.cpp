@@ -1163,7 +1163,27 @@ namespace krys::boo::dom
       return;
     }
 
+    if (_pendingScrollEventTargets.empty())
+    {
+      ScheduleRenderingUpdate({RenderingUpdateStep::Scroll});
+    }
+
     _pendingScrollEventTargets.emplace_back(ShareRef(originalTarget), eventType);
+  }
+
+  boo::Page *Document::GetPage() const noexcept
+  {
+    auto *frame = Frame();
+    return frame ? frame->GetPage() : nullptr;
+  }
+
+  void Document::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept
+  {
+    // FIXME: The initial update of intersection observers, once there are any.
+    if (auto *page = GetPage())
+    {
+      page->ScheduleRenderingUpdate(requestedSteps);
+    }
   }
 
   void Document::RunScrollSteps() noexcept
@@ -1485,6 +1505,10 @@ namespace krys::boo::dom
     krys_debug_assert(ChildNeedsStyleRecalc() || _needsFullStyleRebuild);
 
     _styleRecalcTimer.StartOneShot({});
+
+    // Any change repaints the whole page, so a style change needs a rendering update to paint it.
+    // FIXME: Scheduled by the repaints instead (the layer flush), once there's repaint tracking.
+    ScheduleRenderingUpdate({});
   }
 
   void Document::UnscheduleStyleRecalc() noexcept
@@ -1837,7 +1861,6 @@ namespace krys::boo::dom
 
   void Document::EvaluateMediaQueriesAndReportChanges() noexcept
   {
-    // FIXME: Run this from the "update the rendering" steps once there's a rendering loop.
     if (!_mediaQueryMatcher)
     {
       return;

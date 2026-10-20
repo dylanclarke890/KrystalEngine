@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
@@ -279,6 +280,8 @@ namespace krys::boo::html
 
     void OnInsert() noexcept override
     {
+      FocusAlgorithms::AutofocusInsertionSteps(*this);
+
       // TODO(HTMLELEMENT): Implement the insertion steps for an HTMLElement.
       // If insertedNode is a form-associated element or the ancestor of a form-associated element:
       // - If the form-associated element's parser inserted flag is set, then return.

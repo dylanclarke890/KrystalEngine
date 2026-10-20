@@ -1,13 +1,16 @@
 ﻿#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo
 {
-  LocalFrame::LocalFrame() noexcept : _eventHandler(CreateUnique<EventHandler>(*this))
+  LocalFrame::LocalFrame(Page *page) noexcept
+      : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
+        _eventHandler(CreateUnique<EventHandler>(*this))
   {
   }
 
@@ -19,9 +22,9 @@ namespace krys::boo
     }
   }
 
-  Ref<LocalFrame> LocalFrame::Create() noexcept
+  Ref<LocalFrame> LocalFrame::Create(Page *page) noexcept
   {
-    return AdoptRef(*new LocalFrame);
+    return AdoptRef(*new LocalFrame(page));
   }
 
   void LocalFrame::SetView(RefPtr<LocalFrameView> &&view) noexcept

@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
@@ -195,6 +196,8 @@ namespace krys::boo::dom
     bool _hasStyleWithViewportUnits {false};
 
     Timer _styleRecalcTimer;
+    List<WeakPtr<Element>> _autofocusCandidates;
+    bool _autofocusProcessed {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
     bool _inStyleRecalc {false};
@@ -701,6 +704,25 @@ namespace krys::boo::dom
 
     /// @brief The frame the document is shown in, if any.
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
+    /// @brief The page of the document's frame, if any.
+    KRYS_NODISCARD boo::Page *GetPage() const noexcept;
+    /// @brief Asks the page for a rendering update that runs @p requestedSteps, if the document is in one.
+    void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#autofocus-candidates
+    KRYS_NODISCARD List<WeakPtr<Element>> &AutofocusCandidates() noexcept
+    {
+      return _autofocusCandidates;
+    }
+    /// @see https://html.spec.whatwg.org/#autofocus-processed-flag
+    KRYS_NODISCARD bool AutofocusProcessed() const noexcept
+    {
+      return _autofocusProcessed;
+    }
+    void SetAutofocusProcessed() noexcept
+    {
+      _autofocusProcessed = true;
+    }
 
     /// @brief The view the document is laid out in: its frame's, if any.
     KRYS_NODISCARD LocalFrameView *View() const noexcept;

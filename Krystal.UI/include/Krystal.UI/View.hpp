@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
@@ -24,15 +25,16 @@
 
 namespace krys::ui
 {
-  /// @brief Shows a Booey page: parses its document, shows it in a frame with a view of the viewport's size,
-  /// runs Booey's event loop with the host's time, keeps its style and layout up to date, paints it into a
-  /// `Renderer2D` through a display list, and turns the platform layer's mouse and keyboard input into DOM
-  /// events.
+  /// @brief Shows a Booey page: parses its document into the page's main frame, with a view of the viewport's
+  /// size; runs Booey's event loop with the host's time and the page's rendering update once a frame; paints
+  /// it into a `Renderer2D` through a display list; and turns the platform layer's mouse and keyboard input
+  /// into DOM events.
   class View
   {
     KRYS_NON_COPY_MOVABLE(View);
 
   private:
+    Ref<boo::Page> _page;
     Ref<boo::LocalFrame> _frame;
     RefPtr<boo::dom::HTMLDocument> _document;
     FontFaceCache _fonts;
@@ -73,14 +75,16 @@ namespace krys::ui
     void Resize(const boo::IntSize &viewportSize) noexcept;
     KRYS_NODISCARD boo::IntSize ViewportSize() const noexcept;
 
-    /// @brief Runs Booey's event loop at the host's time @p now: the timers that are due (style, layout and
-    /// the rest), then the queued tasks, each followed by a microtask checkpoint. Call it once a frame,
-    /// before painting, with a time that only moves forwards (the engine may pause or scale it).
+    /// @brief Runs a frame of the page at the host's time @p now: Booey's event loop (the timers that are
+    /// due, such as style and layout, then the queued tasks, each followed by a microtask checkpoint), then
+    /// the page's rendering update if something scheduled one. Call it once a frame, before painting, with a
+    /// time that only moves forwards (the engine may pause or scale it).
     /// @param budget How long (in real time) tasks may run this frame, if limited.
-    void Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;
+    /// @return Whether the rendering update ran: the page may look different, so a host that keeps its last
+    /// frame paints again.
+    bool Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget = null) noexcept;
 
-    /// @brief Runs the rendering update: the scroll steps (the pending `scroll` and `scrollend` events), then
-    /// the document's style and layout.
+    /// @brief Runs the page's rendering update now, whether or not one was scheduled.
     void UpdateRendering() noexcept;
 
     /// @brief How far the viewport is scrolled into the document, in pixels.
@@ -149,6 +153,11 @@ namespace krys::ui
     KRYS_NODISCARD boo::LocalFrame &Frame() const noexcept
     {
       return *_frame;
+    }
+
+    KRYS_NODISCARD boo::Page &GetPage() const noexcept
+    {
+      return *_page;
     }
 
     KRYS_NODISCARD FontFaceCache &Fonts() noexcept

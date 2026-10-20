@@ -7,10 +7,12 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
@@ -149,7 +151,8 @@ namespace krys::boo
     }
   }
 
-  EventHandler::EventHandler(LocalFrame &frame) noexcept : _frame(frame)
+  EventHandler::EventHandler(LocalFrame &frame) noexcept
+      : _frame(frame), _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired)
   {
   }
 
@@ -168,6 +171,8 @@ namespace krys::boo
     _lastKnownMouseGlobalPosition = null;
     _mousePressNode = nullptr;
     _mousePressed = false;
+    _maxMouseMovedDuration = {};
+    CancelFakeMouseMoveEvent();
   }
 
   void EventHandler::NodeWillBeRemoved(dom::Node &nodeToBeRemoved) noexcept
@@ -296,9 +301,15 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
+    // The longest a move took to handle.
+    auto start = MonotonicTime::Now();
+
     // FIXME: Page overlays, and telling the chrome the mouse moved over an element.
     HitTestResult hitTestResult;
-    return HandleMouseMoveEvent(event, &hitTestResult);
+    bool result = HandleMouseMoveEvent(event, &hitTestResult);
+
+    _maxMouseMovedDuration = std::max(_maxMouseMovedDuration, MonotonicTime::Now() - start);
+    return result;
   }
 
   bool EventHandler::HandleMouseMoveEvent(const PlatformMouseEvent &platformMouseEvent,
@@ -1005,6 +1016,103 @@ namespace krys::boo
     // through elements (tabKeyCyclesThroughElements), once the host can say.
     return html::FocusAlgorithms::SequentialNavigation(
       *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
+  }
+
+  void EventHandler::ScheduleCursorUpdate() noexcept
+  {
+    if (_hasScheduledCursorUpdate)
+    {
+      return;
+    }
+
+    auto *page = _frame.GetPage();
+    if (!page)
+    {
+      return;
+    }
+
+    // FIXME: Whether the chrome sets cursors (supportsSettingCursor), once there's a chrome client.
+    _hasScheduledCursorUpdate = true;
+    page->ScheduleRenderingUpdate({RenderingUpdateStep::CursorUpdate});
+  }
+
+  void EventHandler::UpdateCursorIfNeeded() noexcept
+  {
+    if (std::exchange(_hasScheduledCursorUpdate, false))
+    {
+      UpdateCursor();
+    }
+  }
+
+  void EventHandler::DispatchFakeMouseMoveEventSoon() noexcept
+  {
+    if (_mousePressed)
+    {
+      return;
+    }
+
+    if (!_lastKnownMousePosition)
+    {
+      return;
+    }
+
+    // FIXME: Whether the chrome wants fake mouse moves (shouldDispatchFakeMouseMoveEvents), once there's a
+    // chrome client.
+
+    // If the content has ever taken longer than fakeMouseMoveShortInterval we
+    // reschedule the timer and use a longer time. This will cause the content
+    // to receive these moves only after the user is done scrolling, reducing
+    // pauses during the scroll.
+    constexpr auto fakeMouseMoveDurationThreshold = std::chrono::milliseconds(10);
+    constexpr auto fakeMouseMoveShortInterval = std::chrono::milliseconds(100);
+    constexpr auto fakeMouseMoveLongInterval = std::chrono::milliseconds(250);
+    if (_fakeMouseMoveEventTimer.IsActive())
+    {
+      _fakeMouseMoveEventTimer.Stop();
+    }
+    _fakeMouseMoveEventTimer.StartOneShot(_maxMouseMovedDuration > fakeMouseMoveDurationThreshold
+                                            ? fakeMouseMoveLongInterval
+                                            : fakeMouseMoveShortInterval);
+  }
+
+  void EventHandler::DispatchFakeMouseMoveEventSoonInQuad(const FloatQuad &quad) noexcept
+  {
+    auto *view = _frame.View();
+    if (!view || !_lastKnownMousePosition)
+    {
+      return;
+    }
+
+    if (!quad.ContainsPoint(FloatPoint(view->WindowToContents(*_lastKnownMousePosition))))
+    {
+      return;
+    }
+
+    DispatchFakeMouseMoveEventSoon();
+  }
+
+  void EventHandler::CancelFakeMouseMoveEvent() noexcept
+  {
+    _fakeMouseMoveEventTimer.Stop();
+  }
+
+  void EventHandler::FakeMouseMoveEventTimerFired() noexcept
+  {
+    krys_debug_assert(!_mousePressed);
+
+    Ref frame = ShareRef(_frame);
+    if (!frame->View())
+    {
+      return;
+    }
+
+    // FIXME: Not while the page is hidden or its focus controller inactive, once there are those; the current
+    // state of the modifier keys rather than the last mouse event's, once the host reports it.
+    PlatformMouseEvent fakeMouseMoveEvent(*_lastKnownMousePosition,
+                                          _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
+                                          MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
+                                          _lastPlatformMouseEvent.Modifiers(), MonotonicTime::Now());
+    (void)MouseMoved(fakeMouseMoveEvent);
   }
 
   void EventHandler::UpdateCursor() noexcept

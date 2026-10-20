@@ -12,6 +12,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -526,6 +527,126 @@ namespace krys::boo::html
     // FIXME: Nested navigables, once there are any; a document is its top-level traversable's active
     // document.
     return target.IsFocusedAndActive();
+  }
+
+  void FocusAlgorithms::AutofocusInsertionSteps(dom::Element &element) noexcept
+  {
+    if (!element.HasAttribute(u8"autofocus"))
+    {
+      return;
+    }
+
+    // NOTE: "inserted into a document" means into a document tree.
+    if (!element.IsConnected() || element.IsInShadowTree())
+    {
+      return;
+    }
+
+    // 1. If the user has indicated (for example, by starting to type in a form control) that they do not wish
+    // focus to be changed, then optionally return.
+
+    // 2. Let target be the element's node document.
+    auto &target = element.NodeDocument();
+
+    // 3. If target is not fully active, then return.
+    // NOTE: a document is fully active while it's shown in a frame.
+    if (!target.Frame())
+    {
+      return;
+    }
+
+    // FIXME: 4. The sandboxed automatic features browsing context flag, and 5. the ancestor navigables'
+    // origins, once there are sandboxes and frames.
+
+    // 6. Let topDocument be target's node navigable's top-level traversable's active document.
+    // FIXME: The main frame's document, once there are frames.
+    auto &topDocument = target;
+
+    // 7. If topDocument's autofocus processed flag is false, then remove the element from topDocument's
+    // autofocus candidates, and append the element to topDocument's autofocus candidates.
+    if (topDocument.AutofocusProcessed())
+    {
+      return;
+    }
+    auto &candidates = topDocument.AutofocusCandidates();
+    std::erase_if(candidates,
+                  [&](const WeakPtr<dom::Element> &candidate) { return candidate.get() == &element; });
+    candidates.push_back(WeakPtr<dom::Element>::WithRef(element));
+    topDocument.ScheduleRenderingUpdate({RenderingUpdateStep::FlushAutofocusCandidates});
+  }
+
+  void FocusAlgorithms::FlushAutofocusCandidates(dom::Document &topDocument) noexcept
+  {
+    // 1. If topDocument's autofocus processed flag is true, then return.
+    if (topDocument.AutofocusProcessed())
+    {
+      return;
+    }
+
+    // 2. Let candidates be topDocument's autofocus candidates.
+    auto &candidates = topDocument.AutofocusCandidates();
+
+    // 3. If candidates is empty, then return.
+    if (candidates.empty())
+    {
+      return;
+    }
+
+    // 4. If topDocument's focused area is not topDocument itself, or topDocument has non-null target element,
+    // then: empty candidates, set topDocument's autofocus processed flag to true, and return.
+    // FIXME: The target element, once there are fragments.
+    if (topDocument.FocusedElement())
+    {
+      candidates.clear();
+      topDocument.SetAutofocusProcessed();
+      return;
+    }
+
+    // 5. While candidates is not empty:
+    while (!candidates.empty())
+    {
+      // 1. Let element be candidates[0].
+      RefPtr<dom::Element> element = ShareRefPtr(candidates.front().get());
+
+      // 2. Let doc be element's node document.
+      // 3. If doc is not fully active, then remove element from candidates, and continue.
+      if (!element || !element->NodeDocument().Frame())
+      {
+        candidates.erase(candidates.begin());
+        continue;
+      }
+
+      // 4. If doc's node navigable's top-level traversable is not the same as topDocument's node navigable,
+      // then remove element from candidates, and continue.
+      if (&element->NodeDocument() != &topDocument)
+      {
+        candidates.erase(candidates.begin());
+        continue;
+      }
+
+      // 5. If doc's script-blocking style sheet set is not empty, then return.
+      // FIXME: Once style sheets load.
+
+      // 6. Remove element from candidates.
+      candidates.erase(candidates.begin());
+
+      // FIXME: 7. The inclusive ancestor documents' target elements, once there are fragments.
+
+      // 8. Let target be element.
+      // 9. If target is not a focusable area, then set target to the result of getting the focusable area for
+      // target.
+      // FIXME: Getting the focusable area of an element that isn't one, as upstream doesn't yet.
+      // 10. If target is not null, then: empty candidates, set topDocument's autofocus processed flag to
+      // true, and run the focusing steps for target.
+      element->NodeDocument().UpdateStyleIfNeeded();
+      if (IsFocusableArea(*element))
+      {
+        candidates.clear();
+        topDocument.SetAutofocusProcessed();
+        FocusingSteps(*element);
+        return;
+      }
+    }
   }
 
   void FocusAlgorithms::FocusForClick(dom::Element &element) noexcept

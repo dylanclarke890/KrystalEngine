@@ -370,6 +370,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/WheelEvent.cpp
 		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
+		tests/Page/Page.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/BorderPainter.cpp
 		tests/Rendering/InlineBoxPainter.cpp

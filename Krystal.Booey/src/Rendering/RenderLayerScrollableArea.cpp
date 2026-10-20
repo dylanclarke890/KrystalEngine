@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
@@ -178,8 +179,19 @@ namespace krys::boo
       // FIXME: The compositing layers, rendering-dependent regions and debug overlays, once there are any.
     }
 
-    // FIXME: The caret rect, the fake mouse move, repaint and the frame view's scroll offset and viewport
-    // notifications, once there are selection, fake mouse moves and repaint tracking.
+    // FIXME: The caret rect, repaint and the frame view's scroll offset and viewport notifications, once
+    // there are selection and repaint tracking.
+
+    // A mouse over the box moves soon, so the hover state follows the scrolled content.
+    // FIXME: The rect for repaint (clippedOverflowRectForRepaint) rather than the border box, once there's
+    // repaint tracking.
+    if (auto *scrolledBox = _layer.GetRenderBox())
+    {
+      FloatQuad quadForFakeMouseMoveEvent =
+        scrolledBox->LocalToAbsoluteQuad(FloatQuad(FloatRect(scrolledBox->BorderBoxRect())));
+      view.FrameView().Frame().GetEventHandler().DispatchFakeMouseMoveEventSoonInQuad(
+        quadForFakeMouseMoveEvent);
+    }
 
     // Schedule the scroll and scroll-related DOM events.
     if (auto *element = renderer.GetElement())

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/OutlinePainter.hpp"
@@ -415,8 +416,15 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Out-of-flow static positions, cursors, outline-auto ancestors and scroll anchoring, once there
-    // are any.
+    if (oldStyle && oldStyle->GetCursor() != _style.GetCursor())
+    {
+      if (auto *frame = GetDocument().Frame())
+      {
+        frame->GetEventHandler().ScheduleCursorUpdate();
+      }
+    }
+
+    // FIXME: Outline-auto ancestors and scroll anchoring, once there are any.
 
     // FIXME: First line change on the block comes in as equal on inline boxes.
     auto needsLayoutBoxStyleUpdate =

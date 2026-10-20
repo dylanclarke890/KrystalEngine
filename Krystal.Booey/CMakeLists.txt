@@ -1464,6 +1464,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/ScrollbarThemeComposite.hpp
 
   # The event and rendering loops (G6)
+  include/Krystal.Booey/Page/Page.hpp
   include/Krystal.Booey/Platform/ThreadTimers.hpp
   include/Krystal.Booey/Platform/Timer.hpp
 )
@@ -2431,6 +2432,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/ScrollbarThemeComposite.cpp
 
   # The event and rendering loops (G6)
+  src/Page/Page.cpp
   src/Platform/ThreadTimers.cpp
   src/Platform/Timer.cpp
 )

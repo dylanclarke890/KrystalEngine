@@ -17,21 +17,8 @@
 
 namespace krys::ui
 {
-  namespace
-  {
-    KRYS_NODISCARD Ref<boo::dom::HTMLDocument> Parse(utf8_string &&markup) noexcept
-    {
-      boo::html::EventLoop::Current().RunUntilIdle();
-      auto document = CreateRef<boo::dom::HTMLDocument>();
-      auto parser = CreateRef<boo::html::HTMLDocumentParser>(*document);
-      parser->InputStream().Append(krys::move(markup), boo::IsEOF(true));
-      parser->PumpTokenizer();
-      document->StyleScope().FlushPendingUpdate();
-      return document;
-    }
-  }
-
-  View::View(const boo::IntSize &viewportSize) noexcept : _frame(boo::LocalFrame::Create())
+  View::View(const boo::IntSize &viewportSize) noexcept
+      : _page(boo::Page::Create()), _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
@@ -44,9 +31,16 @@ namespace krys::ui
 
   void View::LoadHTML(utf8_string &&markup) noexcept
   {
-    _document = Parse(krys::move(markup));
+    // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
+    // inserted (autofocus candidates need that).
+    _document = CreateRef<boo::dom::HTMLDocument>();
     _document->SetFocusedAndActive(_focused);
     _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
+
+    auto parser = CreateRef<boo::html::HTMLDocumentParser>(*_document);
+    parser->InputStream().Append(krys::move(markup), boo::IsEOF(true));
+    parser->PumpTokenizer();
+    _document->StyleScope().FlushPendingUpdate();
   }
 
   Expected<void> View::LoadFile(const std::filesystem::path &path) noexcept
@@ -90,9 +84,17 @@ namespace krys::ui
     return view ? boo::IntSize(view->Width(), view->Height()) : boo::IntSize();
   }
 
-  void View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
+  bool View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
   {
     boo::html::EventLoop::Current().Run(now, budget);
+
+    // Each frame is a rendering opportunity.
+    if (!_page->IsRenderingUpdateScheduled())
+    {
+      return false;
+    }
+    _page->UpdateRendering();
+    return true;
   }
 
   void View::PerformMicrotaskCheckpoint() noexcept
@@ -104,10 +106,7 @@ namespace krys::ui
 
   void View::UpdateRendering() noexcept
   {
-    // The scroll steps come before style and layout in the rendering update.
-    // https://html.spec.whatwg.org/#update-the-rendering
-    _document->RunScrollSteps();
-    (void)_document->UpdateLayout();
+    _page->UpdateRendering();
   }
 
   boo::IntPoint View::ScrollPosition() const noexcept
@@ -127,7 +126,8 @@ namespace krys::ui
 
   Ref<const boo::display_list::DisplayList> View::Record() noexcept
   {
-    UpdateRendering();
+    // The rendering update runs in Update; painting only needs the layout.
+    (void)_document->UpdateLayout();
     const auto size = ViewportSize();
     boo::display_list::RecorderImpl recorder(
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));

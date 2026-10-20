@@ -61,6 +61,16 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#focus-chain
     KRYS_NODISCARD static FocusChain GetFocusChain(dom::Node &subject) noexcept;
 
+    /// @brief Run when an element with the `autofocus` attribute is inserted into a document: it becomes one
+    /// of the top-level document's autofocus candidates, unless autofocus was processed.
+    /// @see https://html.spec.whatwg.org/#the-autofocus-attribute
+    static void AutofocusInsertionSteps(dom::Element &element) noexcept;
+
+    /// @brief Focuses the first of @p topDocument's autofocus candidates that's focusable, in the rendering
+    /// update.
+    /// @see https://html.spec.whatwg.org/#flush-autofocus-candidates
+    static void FlushAutofocusCandidates(dom::Document &topDocument) noexcept;
+
     /// @see https://html.spec.whatwg.org/#focusing-steps
     static void FocusingSteps(dom::Node &newFocusTarget, dom::Node *fallbackTarget = nullptr,
                               const dom::FocusOptions &options = {}) noexcept;

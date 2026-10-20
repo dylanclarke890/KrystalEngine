@@ -1488,8 +1488,7 @@ namespace krys::boo
   {
     SetIsAwaitingScrollend(true);
     Frame().GetEventHandler().ScheduleScrollEvent();
-    // FIXME: A fake mouse move soon (dispatchFakeMouseMoveEventSoon), so the hovered element follows the
-    // content under a still mouse.
+    Frame().GetEventHandler().DispatchFakeMouseMoveEventSoon();
   }
 
   void LocalFrameView::ScrollDidEnd() noexcept

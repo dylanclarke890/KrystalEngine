@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -25,6 +26,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class FloatQuad;
   class HitTestRequest;
   class HitTestResult;
   class LocalFrame;
@@ -85,6 +87,11 @@ namespace krys::boo
     Maybe<DoublePoint> _lastKnownMousePosition;
     Maybe<DoublePoint> _lastKnownMouseGlobalPosition;
     MonotonicTime::duration _mouseDownTimestamp {};
+    /// @brief How long the longest mouse move took to handle (real time), which picks the fake mouse move
+    /// interval.
+    MonotonicTime::duration _maxMouseMovedDuration {};
+    Timer _fakeMouseMoveEventTimer;
+    bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
     PlatformMouseEvent _lastPlatformMouseEvent;
 
@@ -143,6 +150,18 @@ namespace krys::boo
     /// @brief Chooses the cursor again for the last known mouse position, as after the page changes under a
     /// still mouse.
     void UpdateCursor() noexcept;
+    /// @brief Asks for the cursor to be chosen again in the next rendering update, as after a style change.
+    void ScheduleCursorUpdate() noexcept;
+    /// @brief Chooses the cursor again if an update was scheduled (the rendering update's cursor step).
+    void UpdateCursorIfNeeded() noexcept;
+
+    /// @brief Moves the mouse where it is, soon (after 100 milliseconds, or 250 if moves are slow to handle),
+    /// so the hover state, the element under the mouse and the cursor follow content that moved under it, as
+    /// after a scroll.
+    void DispatchFakeMouseMoveEventSoon() noexcept;
+    /// @brief As `DispatchFakeMouseMoveEventSoon`, if the mouse is in @p quad (in absolute coordinates).
+    void DispatchFakeMouseMoveEventSoonInQuad(const FloatQuad &quad) noexcept;
+    void CancelFakeMouseMoveEvent() noexcept;
 
     /// @brief Handles a key event: a key up becomes `keyup` and a char `keypress`; a raw key down becomes
     /// `keydown`, and a combined key down `keydown` then, unless it's cancelled and if the key types text,
@@ -222,6 +241,8 @@ namespace krys::boo
     void UpdateCursor(LocalFrameView &view, const HitTestResult &result, bool shiftKey) noexcept;
     KRYS_NODISCARD Maybe<Cursor> SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept;
     KRYS_NODISCARD bool UseHandCursor(dom::Node *node, bool isOverLink, bool shiftKey) const noexcept;
+
+    void FakeMouseMoveEventTimerFired() noexcept;
 
     bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
     bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept;

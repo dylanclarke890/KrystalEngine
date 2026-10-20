@@ -462,4 +462,25 @@ namespace krys::ui::tests
     CHECK(ran == 1);
     view.MouseReleased({5, 5}, pal::MouseButton::Left);
   }
+
+  TEST_CASE("View: Update runs the rendering update when the page changes", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><div id=box autofocus tabindex=0 style='width: 10px; height: 10px'></div>");
+    auto now = boo::html::EventLoop::Current().Now() + 1s;
+
+    // The new document needs one, which focuses the autofocus candidate.
+    CHECK(view.Update(now));
+    auto box = view.Document().GetElementById(u8"box");
+    CHECK(view.Document().FocusedElement() == box.get());
+
+    // Nothing changed, so nothing to update.
+    CHECK_FALSE(view.Update(now));
+
+    REQUIRE_FALSE(box->SetAttribute(u8"style", u8"width: 20px; height: 10px").HasException());
+    CHECK(view.Update(now));
+    CHECK_FALSE(view.Update(now));
+  }
 }

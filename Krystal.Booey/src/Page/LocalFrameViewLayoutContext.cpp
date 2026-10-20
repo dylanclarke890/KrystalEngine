@@ -228,6 +228,8 @@ namespace krys::boo
     }
 
     _layoutTimer.StartOneShot({});
+    // FIXME: Scheduled by the repaints instead (the layer flush), once there's repaint tracking.
+    document->ScheduleRenderingUpdate({});
   }
 
   void LocalFrameViewLayoutContext::LayoutTimerFired() noexcept
@@ -290,6 +292,10 @@ namespace krys::boo
                         || !layoutRoot.Container()->NeedsLayout());
       SetSubtreeLayoutRoot(layoutRoot);
       _layoutTimer.StartOneShot({});
+      if (auto *document = Document())
+      {
+        document->ScheduleRenderingUpdate({});
+      }
       return;
     }
 

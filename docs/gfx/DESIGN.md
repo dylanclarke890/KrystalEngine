@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6) are in progress: G6a, timers and running the loop, is done; see *G6 plan*.
+Status (2026-10-19): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6) are in progress: G6a, timers and running the loop, and G6b, the rendering update, are done; see *G6 plan*.
 
 ## Why
 
@@ -926,6 +926,14 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Editor:** runs the page on its own time (the frame deltas summed, so it stops when the editor does) through `View::Update` each frame; a timer counts the seconds the page has been open in the table's new "Timers" row.
 - **Changed from the plan:** `View`'s document parsing still runs the loop until idle first (harmless; it goes with G6b's `Page`).
 - **Tests:** Booey tests timers, the loop's timed tasks, budget and wake time, the style and layout timers, the scrollbar repeat, the focus scroll and `AbortSignal.timeout()` (7 new cases); Krystal.UI tests `View::Update` (timers, style and layout on the host's time, the checkpoint after input). No golden: nothing new paints.
+
+### G6b as built (2026-10-20)
+
+- **Booey** (the ledger entry is *The rendering update* in `docs/booey/PORTING.md`): `Page` owns the main frame (`LocalFrame::GetPage`) and runs the rendering update in the specification's order: flushing autofocus candidates, the resize steps (a FIXME without a window), the scroll steps, media query evaluation, animations and animation frame callbacks (FIXME hooks), layout, focus fixup, then the cursor update. Something that changes what the page shows schedules an update (`Page::ScheduleRenderingUpdate`: the style recalc and layout timers, pending scroll events, autofocus candidates, cursor changes); steps asked for during an update after they ran go to the next one. Autofocus candidates are kept per the specification and focused in the update; focus fixup moves the focus to the viewport when the focused element stops being focusable; after a scroll, a fake mouse move (100 or 250 milliseconds later) makes hover and the cursor follow the content under a still mouse.
+- **Krystal.UI:** `View` creates a `Page` and parses documents in its main frame (so autofocus works); `View::Update(now)` runs the event loop, then the rendering update if one is scheduled, and returns whether it ran; `View::UpdateRendering` forwards to the page; recording and painting only update layout.
+- **Changed from the plan:** `View::NeedsRendering()` became `View::Update`'s result (whether the rendering update ran). The parse-time `RunUntilIdle` left from G6a is gone.
+- **Editor:** unchanged; it already calls `View::Update` every frame.
+- **Tests:** Booey tests the page's scheduling, its steps, autofocus, focus fixup, the cursor update and hover after a scroll (6 cases); Krystal.UI tests `View::Update`'s rendering update and autofocus through `LoadHTML`. No golden: nothing new paints.
 
 ## Open decisions
 
