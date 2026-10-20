@@ -326,4 +326,22 @@ namespace krys::ui::tests
     CHECK_FALSE(modifiers.Contains(boo::PlatformEvent::Modifier::ShiftKey));
     CHECK(input::ToCursorShape(boo::Cursor(boo::Cursor::Type::Grab)) == pal::CursorShape::Hand);
   }
+
+  TEST_CASE("View: Tab moves the focus", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><button id=a></button><button id=b></button>");
+    view.UpdateRendering();
+    auto a = view.Document().GetElementById(u8"a");
+    auto b = view.Document().GetElementById(u8"b");
+
+    CHECK(view.KeyPressed(pal::Key::Tab));
+    CHECK(view.Document().FocusedElement() == a.get());
+    CHECK(a->HasFocusVisible());
+    CHECK(view.KeyPressed(pal::Key::Tab));
+    CHECK(view.Document().FocusedElement() == b.get());
+    CHECK(view.KeyPressed(pal::Key::Tab, {pal::KeyModifier::Shift}));
+    CHECK(view.Document().FocusedElement() == a.get());
+    CHECK_FALSE(view.KeyReleased(pal::Key::Tab));
+  }
 }

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/View.hpp"
@@ -16,15 +17,21 @@ namespace krys::ui::tests
     /// @brief Chrome antialiases, blurs and dithers a little differently, so its golden is checked loosely.
     constexpr uint32 ChromeTolerance = 24u;
 
-    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size.
+    /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size, after @p setup
+    /// (input, say) if given.
     KRYS_NODISCARD GoldenImage Render(gfx::Device &device, gfx::Renderer2D &renderer, const std::string &name,
-                                      uint32 width, uint32 height)
+                                      uint32 width, uint32 height, const Func<void(View &)> &setup)
     {
       // Liberation Sans, as the scenes name it.
       static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
       (void)fonts;
       View view({static_cast<int32>(width), static_cast<int32>(height)});
       REQUIRE(view.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
+      if (setup)
+      {
+        view.UpdateRendering();
+        setup(view);
+      }
 
       auto target =
         device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
@@ -57,14 +64,16 @@ namespace krys::ui::tests
     /// Chrome's, writing the actual image and the differences to the output directory either way.
     /// @param chromeReportOnly Whether Chrome's golden is only reported, not checked: where Chrome's
     /// rendering follows its own algorithm rather than the one ported (border image tiling).
-    void CheckPage(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly = false)
+    /// @param setup Run on the view before it's painted, if given.
+    void CheckPage(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly = false,
+                   const Func<void(View &)> &setup = {})
     {
       // Pages draw in many small batches (a tile, a clip, a gradient each), so they get a full frame's
       // memory.
       auto device = CreateTestDevice(gfx::DeviceDesc {}.TransientMemoryPerFrame);
       auto renderer = gfx::Renderer2D::Create(*device);
       REQUIRE(renderer.has_value());
-      const auto actual = Render(*device, **renderer, name, width, height);
+      const auto actual = Render(*device, **renderer, name, width, height, setup);
       const auto output = GoldenOutputDirectory();
       CHECK(SavePng(output / (name + ".actual.png"), actual));
 
@@ -150,5 +159,12 @@ namespace krys::ui::tests
   TEST_CASE("Golden: tables", "[UI][GPU][Golden]")
   {
     CheckPage("tables", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: focus rings", "[UI][GPU][Golden]")
+  {
+    // Both follow rounded corners, but Chrome draws its own ring (its width and placement), while the page
+    // draws a fixed 2 pixel ring in the outline colour, so only its own golden is checked.
+    CheckPage("focus", 360u, 200u, true, [](View &view) { (void)view.KeyPressed(pal::Key::Tab); });
   }
 }

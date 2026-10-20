@@ -205,7 +205,7 @@ namespace krys::boo
     }
 
     _mousePressNode = ShareRefPtr(mouseEvent.TargetNode());
-    // FIXME: The focus navigation starting point, with focus on click.
+    document->SetSequentialFocusNavigationStartingPoint(mouseEvent.TargetNode());
 
     // FIXME: Scrollbars, subframes and pan scrolling.
 
@@ -218,8 +218,14 @@ namespace krys::boo
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), targetNode.get(),
                                             _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
 
+    // The press sets the sequential focus navigation starting point again, after the focus change reset it
+    // to the focused element.
     // FIXME: Selection (handleMousePressEvent for the hit test, after refetching the target if it was
-    // removed).
+    // removed), which does this.
+    if (!swallowEvent && targetNode->IsConnected())
+    {
+      document->SetSequentialFocusNavigationStartingPoint(targetNode.get());
+    }
     return swallowEvent;
   }
 
@@ -606,18 +612,17 @@ namespace krys::boo
     if (initialKeyEvent.GetType() == Type::RawKeyDown)
     {
       (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
-      // FIXME: Also when it's handled (defaultHandled), or the focused frame changed, once there are default
-      // handlers and subframes.
-      return keydown->DefaultPrevented();
+      // FIXME: Also when the focused frame changed, once there are subframes.
+      return keydown->DefaultPrevented() || DefaultKeyboardEventHandler(*keydown);
     }
 
     // FIXME: Input methods (handleInputMethodKeydown), which run before the keydown is dispatched, and
     // accessibility stopping the propagation.
     (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
 
-    // FIXME: Also when it's handled (defaultHandled), or the focused frame changed, once there are default
-    // handlers and subframes; the backward compatibility mode, which dispatches a cancelled keypress anyway.
-    bool keydownResult = keydown->DefaultPrevented();
+    // FIXME: Also when the focused frame changed, once there are subframes; the backward compatibility mode,
+    // which dispatches a cancelled keypress anyway.
+    bool keydownResult = keydown->DefaultPrevented() || DefaultKeyboardEventHandler(*keydown);
     if (keydownResult)
     {
       return keydownResult;
@@ -642,6 +647,46 @@ namespace krys::boo
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
     return keydownResult || keypress->DefaultPrevented();
+  }
+
+  bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
+  {
+    // FIXME: The default handling of keyup (keyboard scrolling) and keypress (Space scrolling), and the
+    // editor's (handleKeyboardEvent), once there's scrolling and editing.
+    if (event.Type() != EventNames::KeyDown)
+    {
+      return false;
+    }
+
+    // FIXME: Escape (close watchers, modal dialogs and popovers), Backspace, Page Up and Page Down, Home and
+    // End, and the arrows (spatial navigation and scrolling), once there are dialogs, popovers and scrolling.
+    if (event.KeyIdentifier() == u8"U+0009")
+    {
+      return DefaultTabEventHandler(event);
+    }
+    return false;
+  }
+
+  bool EventHandler::DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept
+  {
+    krys_debug_assert(event.Type() == EventNames::KeyDown);
+
+    // We should only advance focus on tabs if no special modifier keys are held down.
+    if (event.CtrlKey() || event.MetaKey())
+    {
+      return false;
+    }
+
+    auto *document = _frame.Document();
+    if (!document)
+    {
+      return false;
+    }
+
+    // FIXME: Tabs can be used in design mode editing, once there's editing; whether the page lets Tab cycle
+    // through elements (tabKeyCyclesThroughElements), once the host can say.
+    return html::FocusAlgorithms::SequentialNavigation(
+      *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
   }
 
   void EventHandler::UpdateCursor() noexcept

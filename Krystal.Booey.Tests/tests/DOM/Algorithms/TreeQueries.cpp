@@ -632,6 +632,43 @@ namespace krys::boo::dom::tests
     REQUIRE((host->ShadowRoot().get() == shadow.get()) == (mode == ShadowRootMode::Open));
   }
 
+  TEST_CASE("TreeQueries::NextShadowIncluding", "[HTML][TreeQueries]")
+  {
+    // <div host>[shadow: <b inside>] <span light/></div> <i after/>, with the host in a container.
+    auto doc = CreateRef<HTMLDocument>();
+    auto container = doc->CreateElement(u8"div").ReleaseValue();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto inside = doc->CreateElement(u8"b").ReleaseValue();
+    auto light = doc->CreateElement(u8"span").ReleaseValue();
+    auto after = doc->CreateElement(u8"i").ReleaseValue();
+    REQUIRE_FALSE(container->AppendChild(*host).HasException());
+    REQUIRE_FALSE(container->AppendChild(*after).HasException());
+    REQUIRE_FALSE(host->AppendChild(*light).HasException());
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inside).HasException());
+
+    // The shadow tree comes just after its host, before the host's children.
+    List<Node *> order;
+    for (Node *node = container.get(); node; node = TreeQueries::NextShadowIncluding(*node))
+    {
+      order.push_back(node);
+    }
+    CHECK(
+      order
+      == List<Node *> {container.get(), host.get(), shadow.get(), inside.get(), light.get(), after.get()});
+
+    // Staying within the host: its shadow tree and children.
+    order.clear();
+    for (Node *node = host.get(); node; node = TreeQueries::NextShadowIncluding(*node, host.get()))
+    {
+      order.push_back(node);
+    }
+    CHECK(order == List<Node *> {host.get(), shadow.get(), inside.get(), light.get()});
+
+    // Staying within the shadow root.
+    CHECK(TreeQueries::NextShadowIncluding(*inside, shadow.get()) == nullptr);
+  }
+
   TEST_CASE("TreeQueries::ParentOrShadowHostElement", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<HTMLDocument>();

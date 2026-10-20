@@ -1,16 +1,19 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include <algorithm>
 #include <limits>
 
@@ -255,10 +258,9 @@ namespace krys::boo::html
         continue;
       }
       // A dialog takes its first sequentially focusable descendant, anything else its first focusable area.
-      // FIXME: Sequential focusability, once there's sequential focus navigation; until then every focusable
-      // area is sequentially focusable, so dialogs take the first focusable area too.
       dom::Node *focusableArea = nullptr;
-      if (IsFocusableArea(*descendant))
+      if (IsHTMLElement(focusTarget, TagName::dialog) ? IsSequentiallyFocusable(*descendant)
+                                                      : IsFocusableArea(*descendant))
       {
         focusableArea = descendant;
       }
@@ -540,6 +542,227 @@ namespace krys::boo::html
     FocusingSteps(element.NodeDocument(), nullptr, options);
   }
 
+  bool FocusAlgorithms::IsFocusNavigationScopeOwner(const dom::Node &node) noexcept
+  {
+    if (Is<dom::Document>(node))
+    {
+      return true;
+    }
+    auto *element = DynamicDowncast<dom::Element>(node);
+    return element && (dom::TreeQueries::IsShadowHost(*element) || Is<HTMLSlotElement>(*element));
+  }
+
+  dom::Node *FocusAlgorithms::AssociatedFocusNavigationOwner(const dom::Element &element) noexcept
+  {
+    auto *parent = element.ParentNode();
+    if (!parent)
+    {
+      return nullptr;
+    }
+    if (dom::TreeQueries::IsShadowHost(*parent))
+    {
+      return dom::SlotAlgorithms::GetAssignedSlot(element);
+    }
+    if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(*parent))
+    {
+      return shadowRoot->Host();
+    }
+    if (parent == dom::TreeQueries::DocumentElement(element.NodeDocument()))
+    {
+      return &element.NodeDocument();
+    }
+    // The document element itself (the specification doesn't say), or an element outside a document.
+    if (Is<dom::Document>(*parent))
+    {
+      return parent;
+    }
+    auto *parentElement = DynamicDowncast<dom::Element>(*parent);
+    return parentElement ? AssociatedFocusNavigationOwner(*parentElement) : nullptr;
+  }
+
+  bool FocusAlgorithms::IsSequentiallyFocusable(const dom::Element &element) noexcept
+  {
+    return IsFocusableArea(element) && TabIndexValue(element).value_or(0) >= 0;
+  }
+
+  List<dom::Element *> FocusAlgorithms::SequentialFocusNavigationOrder(dom::Document &document) noexcept
+  {
+    // Each focus navigation scope's elements, in shadow-including tree order.
+    HashMap<const dom::Node *, List<dom::Element *>> scopes;
+    for (auto *node = dom::TreeQueries::NextShadowIncluding(document); node;
+         node = dom::TreeQueries::NextShadowIncluding(*node))
+    {
+      if (auto *element = DynamicDowncast<dom::Element>(*node))
+      {
+        if (auto *owner = AssociatedFocusNavigationOwner(*element))
+        {
+          scopes[owner].push_back(element);
+        }
+      }
+    }
+
+    List<dom::Element *> result;
+    auto appendFlattenedScope = [&](this auto &self, const dom::Node &owner) -> void
+    {
+      auto scope = scopes.find(&owner);
+      if (scope == scopes.end())
+      {
+        return;
+      }
+
+      // The tabindex-ordered focus navigation scope: the scope owners and focusable areas in the scope,
+      // without those with negative tabindex values; positive values first, ascending, then zero and omitted
+      // values (owners without one count as zero), each in shadow-including tree order.
+      auto orderingKey = [](const dom::Element &element)
+      {
+        auto value = TabIndexValue(element).value_or(0);
+        return value > 0 ? value : std::numeric_limits<int32>::max();
+      };
+      List<dom::Element *> ordered;
+      for (auto *element : scope->second)
+      {
+        if ((IsFocusNavigationScopeOwner(*element) || IsFocusableArea(*element))
+            && TabIndexValue(*element).value_or(0) >= 0)
+        {
+          ordered.push_back(element);
+        }
+      }
+      std::ranges::stable_sort(ordered, [&](const dom::Element *a, const dom::Element *b)
+                               { return orderingKey(*a) < orderingKey(*b); });
+
+      // Flattened: a scope owner is followed by its own flattened scope, or replaced by it if it isn't a
+      // focusable area.
+      for (auto *item : ordered)
+      {
+        if (!IsFocusNavigationScopeOwner(*item) || IsFocusableArea(*item))
+        {
+          result.push_back(item);
+        }
+        if (IsFocusNavigationScopeOwner(*item))
+        {
+          self(*item);
+        }
+      }
+    };
+    appendFlattenedScope(document);
+    return result;
+  }
+
+  bool FocusAlgorithms::SequentialNavigation(dom::Document &document, dom::FocusDirection direction) noexcept
+  {
+    krys_debug_assert(direction == dom::FocusDirection::Forward
+                      || direction == dom::FocusDirection::Backward);
+    bool forward = direction == dom::FocusDirection::Forward;
+
+    // Focusability depends on style.
+    document.UpdateStyleIfNeeded();
+    auto order = SequentialFocusNavigationOrder(document);
+
+    // The starting point is the focused area (the document standing for its viewport), or the sequential
+    // focus navigation starting point if it's inside it.
+    using Position = dom::SequentialFocusNavigationStartingPointPosition;
+    dom::Node *startingPoint = document.FocusedElement();
+    if (!startingPoint)
+    {
+      startingPoint = &document;
+    }
+    auto position = Position::At;
+    if (auto *point = document._sequentialFocusNavigationStartingPoint.get();
+        point && point->IsConnected()
+        && dom::TreeQueries::IsShadowIncludingInclusiveAncestor(*startingPoint, *point))
+    {
+      startingPoint = point;
+      position = document._sequentialFocusNavigationStartingPointPosition;
+    }
+
+    // The sequential navigation search algorithm.
+    dom::Element *candidate = nullptr;
+    auto inOrder = std::ranges::find(order, startingPoint);
+    if (startingPoint == &document && position == Position::At)
+    {
+      // The navigable: its first or last area.
+      if (!order.empty())
+      {
+        candidate = forward ? order.front() : order.back();
+      }
+    }
+    else if (position == Position::At && inOrder != order.end())
+    {
+      // Sequential: the area after or before the starting point in the order.
+      if (forward && std::next(inOrder) != order.end())
+      {
+        candidate = *std::next(inOrder);
+      }
+      else if (!forward && inOrder != order.begin())
+      {
+        candidate = *std::prev(inOrder);
+      }
+    }
+    else
+    {
+      // DOM: the nearest suitable area after or before the starting point in shadow-including tree order.
+      List<dom::Node *> nodes;
+      for (dom::Node *node = &document; node; node = dom::TreeQueries::NextShadowIncluding(*node))
+      {
+        nodes.push_back(node);
+      }
+      auto start = std::ranges::find(nodes, startingPoint);
+      if (start != nodes.end())
+      {
+        auto index = static_cast<size_t>(start - nodes.begin());
+        // The first node after and the last node before the starting point.
+        size_t after = index + 1;
+        size_t before = index;
+        if (position == Position::After)
+        {
+          while (after < nodes.size()
+                 && dom::TreeQueries::IsShadowIncludingDescendant(*nodes[after], *startingPoint))
+          {
+            ++after;
+          }
+          before = after;
+        }
+        else if (position == Position::Inside)
+        {
+          before = index + 1;
+        }
+        auto isCandidate = [&](dom::Node *node)
+        {
+          return std::ranges::find(order, node) != order.end();
+        };
+        if (forward)
+        {
+          for (size_t i = after; i < nodes.size() && !candidate; ++i)
+          {
+            candidate = isCandidate(nodes[i]) ? static_cast<dom::Element *>(nodes[i]) : nullptr;
+          }
+        }
+        else
+        {
+          for (size_t i = before; i-- > 0 && !candidate;)
+          {
+            candidate = isCandidate(nodes[i]) ? static_cast<dom::Element *>(nodes[i]) : nullptr;
+          }
+        }
+      }
+    }
+
+    if (!candidate)
+    {
+      document._sequentialFocusNavigationStartingPoint = nullptr;
+      // There are no user agent controls to move the focus to, so it wraps around to the first or last area,
+      // as from the viewport.
+      if (order.empty())
+      {
+        return false;
+      }
+      candidate = forward ? order.front() : order.back();
+    }
+
+    FocusingSteps(*candidate, nullptr, {.Direction = direction, .Visibility = dom::FocusVisibility::Visible});
+    return true;
+  }
+
   void FocusAlgorithms::SystemFocusChanged(dom::Document &document, bool focused) noexcept
   {
     if (document.IsFocusedAndActive() == focused)
@@ -569,13 +792,17 @@ namespace krys::boo::html
   void FocusAlgorithms::DesignateFocusedArea(dom::Document &document, dom::Element *element,
                                              dom::FocusVisibility visibility) noexcept
   {
+    // The sequential focus navigation starting point follows the focused element, so navigation continues
+    // from it (as other engines do; the specification only uses the starting point inside the focused area).
     RefPtr<dom::Element> oldFocusedElement = std::exchange(document._focusedElement, ShareRefPtr(element));
     if (oldFocusedElement)
     {
       oldFocusedElement->SetFocus(false);
+      document.SetSequentialFocusNavigationStartingPoint(nullptr);
     }
     if (element)
     {
+      document.SetSequentialFocusNavigationStartingPoint(element);
       element->SetFocus(true, visibility);
     }
   }

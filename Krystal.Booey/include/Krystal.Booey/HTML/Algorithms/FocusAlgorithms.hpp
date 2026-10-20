@@ -85,6 +85,35 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#click-focusable
     static void FocusForClick(dom::Element &element) noexcept;
 
+    /// @see https://html.spec.whatwg.org/#focus-navigation-scope-owner
+    // FIXME: Elements in the popover showing state with a popover trigger, once there are popovers.
+    KRYS_NODISCARD static bool IsFocusNavigationScopeOwner(const dom::Node &node) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#associated-focus-navigation-owner
+    KRYS_NODISCARD static dom::Node *AssociatedFocusNavigationOwner(const dom::Element &element) noexcept;
+
+    /// @brief Whether @p element is a focusable area with a non-negative tabindex value (an omitted one
+    /// counts as 0 for the elements that are focusable by default).
+    /// @note Areas in a focus navigation scope whose owner has a negative tabindex value are sequentially
+    /// focusable by this test but missing from the sequential focus navigation order.
+    /// @see https://html.spec.whatwg.org/#sequentially-focusable
+    KRYS_NODISCARD static bool IsSequentiallyFocusable(const dom::Element &element) noexcept;
+
+    /// @brief The document's flattened tabindex-ordered focus navigation scope: its sequentially focusable
+    /// areas, those with positive tabindex values first (ascending), then the rest in shadow-including tree
+    /// order, each scope (shadow trees, slots) navigated as a whole.
+    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-order
+    KRYS_NODISCARD static List<dom::Element *>
+      SequentialFocusNavigationOrder(dom::Document &document) noexcept;
+
+    /// @brief Moves the focus to the next (@p direction `Forward`) or previous (`Backward`) suitable
+    /// sequentially focusable area, from the focused area or the sequential focus navigation starting point
+    /// inside it, wrapping around at the end of the document. The new focused element is focus visible.
+    /// @return Whether there was an area to move to.
+    /// @see https://html.spec.whatwg.org/#sequential-navigation
+    // FIXME: Navigables (frames), and moving the focus out to the host, once it can take it.
+    static bool SequentialNavigation(dom::Document &document, dom::FocusDirection direction) noexcept;
+
     /// @brief Updates @p document when its window gains or loses system focus: its focused and active flag,
     /// and a `focus` or `blur` event at its focused element, which stays focused.
     static void SystemFocusChanged(dom::Document &document, bool focused) noexcept;

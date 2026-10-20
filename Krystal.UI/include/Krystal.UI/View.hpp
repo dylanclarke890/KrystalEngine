@@ -106,7 +106,7 @@ namespace krys::ui
     /// @brief Presses @p key (again, if @p isAutoRepeat): `keydown` fires at the focused element (or the
     /// body), then `keypress` if it isn't cancelled and the key types text; the focused element becomes focus
     /// visible.
-    /// @return Whether the page cancelled the key.
+    /// @return Whether the page cancelled the key or handled it (Tab and Shift+Tab move the focus).
     bool KeyPressed(pal::Key key, pal::KeyModifiers modifiers = {}, const pal::KeyText &text = {},
                     bool isAutoRepeat = false) noexcept;
     /// @brief Releases @p key: `keyup` fires at the focused element (or the body).

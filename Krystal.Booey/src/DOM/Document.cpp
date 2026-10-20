@@ -1070,6 +1070,30 @@ namespace krys::boo::dom
       focusedElement->SetFocus(false);
     }
 
+    // A removed sequential focus navigation starting point moves to where the node was, so navigation
+    // continues from there: after its previous sibling, or at the start of its parent.
+    // The specification doesn't say what happens; this follows other engines.
+    if (_sequentialFocusNavigationStartingPoint
+        && TreeQueries::IsShadowIncludingInclusiveAncestor(node, *_sequentialFocusNavigationStartingPoint))
+    {
+      if (auto *previousSibling = node.PreviousSibling())
+      {
+        _sequentialFocusNavigationStartingPoint = ShareRefPtr(previousSibling);
+        _sequentialFocusNavigationStartingPointPosition =
+          SequentialFocusNavigationStartingPointPosition::After;
+      }
+      else if (auto *parent = node.ParentNode(); parent && parent != this)
+      {
+        _sequentialFocusNavigationStartingPoint = ShareRefPtr<Node>(parent);
+        _sequentialFocusNavigationStartingPointPosition =
+          SequentialFocusNavigationStartingPointPosition::Inside;
+      }
+      else
+      {
+        _sequentialFocusNavigationStartingPoint = nullptr;
+      }
+    }
+
     // The removed subtree's renderers go after it's removed, so the hovered element and the active chain move
     // to the nearest ancestor outside it with a renderer now (upstream: as its renderers are torn down,
     // before the removal).
@@ -1106,6 +1130,19 @@ namespace krys::boo::dom
     {
       _activeElement = ShareRefPtr(_activeElement->ParentElement());
     }
+  }
+
+  void Document::SetSequentialFocusNavigationStartingPoint(Node *node) noexcept
+  {
+    _sequentialFocusNavigationStartingPointPosition = SequentialFocusNavigationStartingPointPosition::At;
+    // Setting the starting point to the document or its document element means navigation starts from the
+    // start of the document.
+    if (!node || node == this || node == TreeQueries::DocumentElement(*this))
+    {
+      _sequentialFocusNavigationStartingPoint = nullptr;
+      return;
+    }
+    _sequentialFocusNavigationStartingPoint = ShareRefPtr(node);
   }
 
   void Document::SetFocusedAndActive(bool flag) noexcept

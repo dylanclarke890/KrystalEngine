@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -286,6 +287,144 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(second->SetAttribute(u8"autofocus", u8"").HasException());
       host.Focus();
       CHECK(document.FocusedElement() == second.get());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FocusAlgorithms: sequential focus navigation", "[HTML][Focus]")
+  {
+    ResolverFixture fixture {
+      u8R"(<!DOCTYPE html><body><button id=a></button><div id=b tabindex=2></div><a id=c href=x></a>)"
+      u8R"(<div id=d tabindex=-1></div><div id=e tabindex=1></div><div id=host><button id=slotted></button></div>)"
+      u8R"(<button id=f></button><div id=negative tabindex=-1></div><button id=g disabled></button>)"
+      u8R"(<p id=wrap><span id=first></span><button id=h></button></p></body>)"};
+    auto &document = *fixture.Document;
+
+    // The host's shadow tree: a button, a slot for the host's button and a button with a positive tabindex,
+    // which comes first in the host's scope.
+    auto shadow = HTML(fixture.ById(u8"host")).AttachShadow({}).ReleaseValue();
+    auto append = [&](dom::ContainerNode &parent, dom::DOMStringView tagName, dom::DOMStringView id,
+                      dom::DOMStringView tabIndex = {})
+    {
+      auto element = document.CreateElement(tagName).ReleaseValue();
+      REQUIRE_FALSE(element->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+      if (!tabIndex.empty())
+      {
+        REQUIRE_FALSE(element->SetAttribute(u8"tabindex", dom::DOMString(tabIndex)).HasException());
+      }
+      REQUIRE_FALSE(parent.AppendChild(*element).HasException());
+      return element;
+    };
+    auto s1 = append(*shadow, u8"button", u8"s1");
+    (void)append(*shadow, u8"slot", u8"slot");
+    auto s2 = append(*shadow, u8"button", u8"s2", u8"1");
+    // A shadow host with a negative tabindex is left out with its scope.
+    auto negativeShadow = HTML(fixture.ById(u8"negative")).AttachShadow({}).ReleaseValue();
+    (void)append(*negativeShadow, u8"button", u8"skipped");
+    document.UpdateStyleIfNeeded();
+
+    auto ids = [](const List<dom::Element *> &elements)
+    {
+      List<std::string> result;
+      for (auto *element : elements)
+      {
+        result.push_back(Id(element));
+      }
+      return result;
+    };
+    auto focused = [&]
+    {
+      return Id(document.FocusedElement());
+    };
+    auto next = [&]
+    {
+      CHECK(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Forward));
+      return focused();
+    };
+    auto previous = [&]
+    {
+      CHECK(FocusAlgorithms::SequentialNavigation(document, dom::FocusDirection::Backward));
+      return focused();
+    };
+
+    SECTION("the order")
+    {
+      // Positive tabindex values first, then tree order; the host's scope as a whole, its positive tabindex
+      // first, with the slot's scope in place of the slot.
+      CHECK(ids(FocusAlgorithms::SequentialFocusNavigationOrder(document))
+            == List<std::string> {"e", "b", "a", "c", "s2", "s1", "slotted", "f", "h"});
+      CHECK(FocusAlgorithms::IsFocusNavigationScopeOwner(document));
+      CHECK(FocusAlgorithms::IsFocusNavigationScopeOwner(fixture.ById(u8"host")));
+      CHECK_FALSE(FocusAlgorithms::IsFocusNavigationScopeOwner(fixture.ById(u8"a")));
+      CHECK(FocusAlgorithms::AssociatedFocusNavigationOwner(*s1) == &fixture.ById(u8"host"));
+      CHECK(FocusAlgorithms::AssociatedFocusNavigationOwner(fixture.ById(u8"a")) == &document);
+      CHECK(Id(FocusAlgorithms::AssociatedFocusNavigationOwner(fixture.ById(u8"slotted"))) == "slot");
+      CHECK(FocusAlgorithms::IsSequentiallyFocusable(fixture.ById(u8"c")));
+      CHECK_FALSE(FocusAlgorithms::IsSequentiallyFocusable(fixture.ById(u8"d")));
+      CHECK_FALSE(FocusAlgorithms::IsSequentiallyFocusable(fixture.ById(u8"g")));
+    }
+
+    SECTION("forward and backward, wrapping around")
+    {
+      // From the viewport: the first area, or the last.
+      CHECK(next() == "e");
+      CHECK(next() == "b");
+      CHECK(fixture.ById(u8"b").HasFocusVisible());
+      CHECK(previous() == "e");
+      CHECK(previous() == "h");
+      CHECK(next() == "e");
+      for (auto expected : {"b", "a", "c", "s2", "s1", "slotted", "f", "h", "e"})
+      {
+        CHECK(next() == expected);
+      }
+    }
+
+    SECTION("from an element that isn't sequentially focusable, in tree order")
+    {
+      HTML(fixture.ById(u8"d")).Focus();
+      REQUIRE(focused() == "d");
+      CHECK(next() == "e");
+      HTML(fixture.ById(u8"d")).Focus();
+      CHECK(previous() == "c");
+    }
+
+    SECTION("from the starting point inside the focused area")
+    {
+      // With the viewport focused, the starting point (where the user clicked) is inside it.
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"d"));
+      CHECK(next() == "e");
+      // It follows the focused element.
+      CHECK(document.SequentialFocusNavigationStartingPoint() == &fixture.ById(u8"e"));
+      HTML(fixture.ById(u8"e")).Blur();
+      CHECK(document.SequentialFocusNavigationStartingPoint() == nullptr);
+      HTML(fixture.ById(u8"e")).Focus();
+
+      // A starting point outside the focused area is ignored.
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"wrap"));
+      CHECK(next() == "b");
+
+      // The document element unsets it.
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"d"));
+      document.SetSequentialFocusNavigationStartingPoint(dom::TreeQueries::DocumentElement(document));
+      CHECK(document.SequentialFocusNavigationStartingPoint() == nullptr);
+    }
+
+    SECTION("a removed starting point")
+    {
+      // After its previous sibling.
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"d"));
+      REQUIRE_FALSE(fixture.ById(u8"d").Remove().HasException());
+      CHECK(document.SequentialFocusNavigationStartingPoint() == &fixture.ById(u8"c"));
+      CHECK(next() == "e");
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"e"));
+      REQUIRE_FALSE(fixture.ById(u8"e").Remove().HasException());
+      CHECK(previous() == "c");
+      HTML(fixture.ById(u8"c")).Blur();
+
+      // At the start of its parent.
+      document.SetSequentialFocusNavigationStartingPoint(&fixture.ById(u8"first"));
+      REQUIRE_FALSE(fixture.ById(u8"first").Remove().HasException());
+      CHECK(document.SequentialFocusNavigationStartingPoint() == &fixture.ById(u8"wrap"));
+      CHECK(next() == "h");
     }
   }
 }

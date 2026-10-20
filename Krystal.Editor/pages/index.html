@@ -18,9 +18,9 @@
   .card:hover { box-shadow: 0 0 0 2px #4f6df5, 0 16px 40px rgba(26, 34, 64, 0.22); }
   .card:active { box-shadow: 0 0 0 2px #ef476f, 0 2px 6px rgba(26, 34, 64, 0.1); }
   .card.picked { background: #fff4d1; }
-  /* Clicking a card focuses it (each takes a tabindex); a click focus isn't focus visible, so there's no focus
-     ring, only this style. */
-  .card:focus { outline: 3px solid #118ab2; outline-offset: 4px; }
+  /* Clicking a card focuses it (each takes a tabindex); a click focus isn't focus visible, so it gets this
+     outline, while Tab (focus visible) gets the user agent's focus ring. */
+  .card:focus:not(:focus-visible) { outline: 3px solid #118ab2; outline-offset: 4px; }
 
   .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
   .boxes div { background: #f7f8fb; }
@@ -185,7 +185,7 @@
         <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Clicks</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
         <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Focus</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
         <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Keys</td><td id="last-key" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Press a key</td></tr>
-        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Tab next</td></tr>
+        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Tab through the cards</td></tr>
       </table>
     </div>
   </div>

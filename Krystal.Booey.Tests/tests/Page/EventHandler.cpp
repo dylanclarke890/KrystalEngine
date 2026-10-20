@@ -421,6 +421,79 @@ namespace krys::boo::tests
             == Strings {"keydown:box/Shift/16/0", "keydown:box/A/65/0", "keypress:box/A/65/65"});
     }
 
+    SECTION("Tab and Shift+Tab move the focus")
+    {
+      auto tab = [&](EnumSet<PlatformEvent::Modifier> modifiers = {})
+      {
+        return handler.KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab", u8"U+0009",
+                                                      vk::Tab, false, false, false, modifiers,
+                                                      MonotonicTime::Now()));
+      };
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &box);
+      CHECK(box.HasFocusVisible());
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &fixture.ById(u8"other"));
+      CHECK(tab({PlatformEvent::Modifier::ShiftKey}));
+      CHECK(fixture.Document->FocusedElement() == &box);
+
+      // Not with Ctrl or Meta, nor when the keydown is cancelled.
+      CHECK_FALSE(tab({PlatformEvent::Modifier::ControlKey}));
+      CHECK(fixture.Document->FocusedElement() == &box);
+      Listen(*fixture.Document, u8"keydown", [](dom::Event &event) { event.PreventDefault(); });
+      CHECK(tab());
+      CHECK(fixture.Document->FocusedElement() == &box);
+    }
+
+    SECTION("a press sets where Tab moves on from")
+    {
+      MouseFixture clicks {u8"<style>button{display:block;height:20px}</style><button id=one></button><div "
+                           u8"id=plain style=height:20px></div>"
+                           u8"<button id=two></button>"};
+      // Pressing the plain element focuses the viewport, and Tab moves on from the press.
+      (void)clicks.Move(100, 30);
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      REQUIRE(Name(clicks.Handler().ElementUnderMouse()) == "plain");
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"plain"));
+      CHECK(clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
+                                                            u8"U+0009", vk::Tab, false, false, false, {},
+                                                            MonotonicTime::Now())));
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"two"));
+    }
+
+    SECTION("a press inside the focused element, and a focus change after it")
+    {
+      MouseFixture clicks {
+        u8"<style>button{display:block;height:20px}p{margin:0;height:20px}</style>"
+        u8"<div id=card tabindex=0><button id=one></button><p id=text></p><button id=two></button>"
+        u8"</div><button id=other></button>"};
+      auto pressTab = [&]
+      {
+        return clicks.Handler().KeyEvent(PlatformKeyboardEvent(Type::KeyDown, u8"", u8"", u8"Tab", u8"Tab",
+                                                               u8"U+0009", vk::Tab, false, false, false, {},
+                                                               MonotonicTime::Now()));
+      };
+      auto &card = clicks.ById(u8"card");
+      // Pressing the paragraph focuses the card, and Tab moves on from the paragraph.
+      (void)clicks.Move(100, 30);
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      REQUIRE(clicks.Document->FocusedElement() == &card);
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &clicks.ById(u8"text"));
+      CHECK(pressTab());
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"two"));
+
+      // Focus moved away and back starts from the card again.
+      (void)clicks.Press(100, 30);
+      (void)clicks.Release(100, 30);
+      html::FocusAlgorithms::FocusingSteps(clicks.ById(u8"other"));
+      html::FocusAlgorithms::FocusingSteps(card);
+      CHECK(clicks.Document->SequentialFocusNavigationStartingPoint() == &card);
+      CHECK(pressTab());
+      CHECK(clicks.Document->FocusedElement() == &clicks.ById(u8"one"));
+    }
+
     SECTION("a keydown that moves the focus sends the keypress to the new focused element")
     {
       auto &other = fixture.ById(u8"other");

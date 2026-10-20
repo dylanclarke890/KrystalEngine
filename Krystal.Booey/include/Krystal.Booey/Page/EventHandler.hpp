@@ -14,6 +14,7 @@
 namespace krys::boo::dom
 {
   class Element;
+  class KeyboardEvent;
   class Node;
 }
 
@@ -28,10 +29,11 @@ namespace krys::boo
   /// @brief Turns the host's mouse and keyboard input into DOM events for a frame: `mousemove`, `mousedown`
   /// and `mouseup` at the element under the mouse; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as
   /// that element changes; `click`, `auxclick` and `dblclick`; the hover and active state; the cursor to
-  /// show; and `keydown`, `keypress` and `keyup` at the focused element.
-  // FIXME: The rest of the event handler: the keyboard's default actions, wheel scrolling, drag and drop,
-  // selection, context menus, scrollbars, resizers, subframes, autoscroll, pointer lock, touch and pointer
-  // events.
+  /// show; and `keydown`, `keypress` and `keyup` at the focused element, with Tab and Shift+Tab moving the
+  /// focus.
+  // FIXME: The rest of the event handler: the keyboard's other default actions, wheel scrolling, drag and
+  // drop, selection, context menus, scrollbars, resizers, subframes, autoscroll, pointer lock, touch and
+  // pointer events.
   class EventHandler
   {
     KRYS_NON_COPY_MOVABLE(EventHandler);
@@ -135,6 +137,11 @@ namespace krys::boo
 
   private:
     bool InternalKeyEvent(const PlatformKeyboardEvent &initialKeyEvent) noexcept;
+    /// @brief The default actions of a keyboard event that wasn't cancelled: Tab and Shift+Tab move the
+    /// focus.
+    /// @return Whether the event was handled.
+    bool DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+    bool DefaultTabEventHandler(dom::KeyboardEvent &event) noexcept;
 
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;

@@ -24,9 +24,15 @@ namespace krys::boo
       return renderer.GetDocument().DeviceScaleFactor();
     }
 
-    // `outline-style: auto` is drawn in the outline colour around the rects, as on platforms other than
-    // Cocoa, GTK and WPE (usePlatformFocusRingColorForOutlineStyleAuto and
-    // useShrinkWrappedFocusRingForOutlineStyleAuto are false).
+    // `outline-style: auto` is drawn in the outline colour, as on platforms other than Cocoa, GTK and WPE
+    // (usePlatformFocusRingColorForOutlineStyleAuto is false), and shrink-wrapped around rounded boxes, as on
+    // Cocoa, GTK and WPE (useShrinkWrappedFocusRingForOutlineStyleAuto is true).
+    void DrawFocusRing(GraphicsContext &context, const Path &path, const RenderStyle &style,
+                       const Color &color) noexcept
+    {
+      context.DrawFocusRing(path, style::Evaluate<float>(style.OutlineWidth(), style::ZoomNeeded {}), color);
+    }
+
     void DrawFocusRing(GraphicsContext &context, const List<FloatRect> &rects, const RenderStyle &style,
                        const Color &color) noexcept
     {
@@ -242,7 +248,23 @@ namespace krys::boo
       pixelSnappedFocusRingRects.push_back(SnapRectToDevicePixels(rect, deviceScaleFactor));
     }
     auto focusRingColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor);
-    DrawFocusRing(_paintInfo.Context(), pixelSnappedFocusRingRects, style, focusRingColor);
+    if (style.HasBorderRadius())
+    {
+      auto path = PathWithShrinkWrappedRects(pixelSnappedFocusRingRects, style.BorderRadii(), outlineOffset,
+                                             style.GetWritingMode(), deviceScaleFactor);
+      if (path.IsEmpty())
+      {
+        for (auto rect : pixelSnappedFocusRingRects)
+        {
+          path.AddRect(rect);
+        }
+      }
+      DrawFocusRing(_paintInfo.Context(), path, style, focusRingColor);
+    }
+    else
+    {
+      DrawFocusRing(_paintInfo.Context(), pixelSnappedFocusRingRects, style, focusRingColor);
+    }
   }
 
   List<LayoutRect>

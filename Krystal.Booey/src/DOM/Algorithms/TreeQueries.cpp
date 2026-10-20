@@ -391,47 +391,12 @@ namespace krys::boo::dom
 
   Node *TreeQueries::NextShadowIncluding(const Node &current) noexcept
   {
-    if (auto *child = current.FirstChild())
-    {
-      return child;
-    }
-
-    if (auto *host = DynamicDowncast<Element>(current))
-    {
-      if (auto *shadowRoot = GetShadowRoot(*host))
-      {
-        return shadowRoot;
-      }
-    }
-
-    for (const Node *node = &current; node; node = node->ParentNode())
-    {
-      if (auto *sibling = node->NextSibling())
-      {
-        return sibling;
-      }
-
-      // If climbing out of a shadow tree, continue from the host.
-      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
-      {
-        node = shadowRoot->Host();
-        if (auto *sibling = node->NextSibling())
-        {
-          return sibling;
-        }
-      }
-    }
-
-    return nullptr;
+    return NextShadowIncluding(current, nullptr);
   }
 
   Node *TreeQueries::NextShadowIncluding(const Node &current, const Node *stayWithin) noexcept
   {
-    if (auto *child = current.FirstChild())
-    {
-      return child;
-    }
-
+    // A shadow host's shadow tree comes just after it, before its children.
     if (auto *host = DynamicDowncast<Element>(current))
     {
       if (auto *shadowRoot = GetShadowRoot(*host))
@@ -440,7 +405,12 @@ namespace krys::boo::dom
       }
     }
 
-    for (const Node *node = &current; node; node = node->ParentNode())
+    if (auto *child = current.FirstChild())
+    {
+      return child;
+    }
+
+    for (const Node *node = &current; node;)
     {
       if (node == stayWithin)
       {
@@ -452,22 +422,21 @@ namespace krys::boo::dom
         return sibling;
       }
 
-      // If climbing out of a shadow tree, continue from the host.
+      // Climbing out of a shadow tree continues with the host's children, then what follows the host.
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
       {
-        node = shadowRoot->Host();
-
-        if (node == stayWithin)
+        auto *host = shadowRoot->Host();
+        if (auto *child = host->FirstChild())
         {
-          return nullptr;
+          return child;
         }
-
-        if (auto *sibling = node->NextSibling())
-        {
-          return sibling;
-        }
+        node = host;
+        continue;
       }
+
+      node = node->ParentNode();
     }
+
     return nullptr;
   }
 

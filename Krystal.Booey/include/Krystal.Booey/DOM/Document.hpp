@@ -160,6 +160,10 @@ namespace krys::boo::dom
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
     FocusTrigger _latestFocusTrigger {FocusTrigger::Other};
+    // Where sequential focus navigation starts from when it's inside the focused area: unset if null.
+    RefPtr<Node> _sequentialFocusNavigationStartingPoint;
+    SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
+      SequentialFocusNavigationStartingPointPosition::At};
 
     List<WeakPtr<ShadowRoot>> _inDocumentShadowRoots;
     RefPtr<css::StyleSheetList> _styleSheetList;
@@ -566,6 +570,17 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/#dom-document-hasfocus
     KRYS_NODISCARD bool HasFocus() const noexcept;
+
+    /// @brief Sets the sequential focus navigation starting point to @p node (as when the user clicks it), or
+    /// unsets it if @p node is null, the document or its document element (navigation then starts from the
+    /// start of the document).
+    /// @see https://html.spec.whatwg.org/#sequential-focus-navigation-starting-point
+    void SetSequentialFocusNavigationStartingPoint(Node *node) noexcept;
+
+    KRYS_NODISCARD Node *SequentialFocusNavigationStartingPoint() const noexcept
+    {
+      return _sequentialFocusNavigationStartingPoint.get();
+    }
 
     /// @brief Whether the latest focus change the user made was by clicking.
     KRYS_NODISCARD bool WasLastFocusByClick() const noexcept
