@@ -7,6 +7,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/StringAtom.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include <cmath>
 #include <limits>
 
 namespace krys::boo
@@ -15,6 +16,8 @@ namespace krys::boo
   {
     class StyleProperties;
   }
+
+  class KeyframeEffect;
 
   /// @brief A keyframe of an animation, with the style it gives the properties it sets.
   class BlendingKeyframe final : public KeyframeInterpolation::Keyframe
@@ -79,6 +82,10 @@ namespace krys::boo
       _computedOffset = offset;
     }
     KRYS_NODISCARD bool UsesRangeOffset() const noexcept;
+    KRYS_NODISCARD bool HasResolvedOffset() const noexcept
+    {
+      return !std::isnan(_computedOffset);
+    }
 
     KRYS_NODISCARD const RenderStyle *Style() const noexcept
     {
@@ -117,12 +124,11 @@ namespace krys::boo
   using KeyframesIdentifier = Variant<StringAtom, uint64>;
 
   /// @brief An animation's keyframes, kept sorted by offset, with what they animate and depend on.
-  // FIXME: `fillImplicitKeyframes` and the accelerated animation name, once there are keyframes from scripts
-  // and accelerated animations.
   class BlendingKeyframes
   {
   private:
     KeyframesIdentifier _identifier;
+    mutable utf8_string _acceleratedAnimationName;
     List<BlendingKeyframe> _keyframes;    // Kept sorted by key.
     AnimatableCSSPropertySet _properties; // The properties being animated.
     AnimatableCSSPropertySet
@@ -161,6 +167,8 @@ namespace krys::boo
       return _identifier;
     }
     KRYS_NODISCARD const StringAtom &KeyframesName() const noexcept;
+    /// @brief The name the keyframes' animation has on a graphics layer.
+    KRYS_NODISCARD const utf8_string &AcceleratedAnimationName() const noexcept;
 
     void Insert(BlendingKeyframe &&keyframe) noexcept;
 
@@ -190,6 +198,8 @@ namespace krys::boo
     void CopyKeyframes(const BlendingKeyframes &other) noexcept;
     KRYS_NODISCARD bool HasImplicitKeyframes() const noexcept;
     KRYS_NODISCARD bool HasImplicitKeyframeForProperty(const AnimatableCSSProperty &property) const noexcept;
+    /// @brief Adds the 0% and 100% keyframes the properties without one there take from @p underlyingStyle.
+    void FillImplicitKeyframes(const KeyframeEffect &effect, const RenderStyle &underlyingStyle) noexcept;
 
     KRYS_NODISCARD auto begin() const noexcept KRYS_LIFETIME_BOUND
     {

@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
@@ -226,6 +228,52 @@ namespace krys::boo
   }
 
   // Every renderer is pixel snapped: there are no layer-aware SVG renderers.
+  bool RenderLayerModelObject::StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
+                                              const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return false;
+    }
+    return Layer()->Backing()->StartAnimation(timeOffset, animation, keyframes);
+  }
+
+  void RenderLayerModelObject::AnimationPaused(double timeOffset, const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->AnimationPaused(timeOffset, keyframes.AcceleratedAnimationName());
+  }
+
+  void RenderLayerModelObject::AnimationFinished(const BlendingKeyframes &keyframes) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->AnimationFinished(keyframes.AcceleratedAnimationName());
+  }
+
+  void RenderLayerModelObject::TransformRelatedPropertyDidChange() noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->TransformRelatedPropertyDidChange();
+  }
+
+  void RenderLayerModelObject::SuspendAnimations(MonotonicTime::duration time) noexcept
+  {
+    if (!Layer() || !Layer()->Backing())
+    {
+      return;
+    }
+    Layer()->Backing()->SuspendAnimations(time);
+  }
+
   FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
                                            const RenderLayerModelObject &renderer) noexcept
   {

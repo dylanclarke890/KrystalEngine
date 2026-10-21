@@ -47,6 +47,7 @@
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
 
@@ -190,24 +191,45 @@ namespace krys::boo
 
   style::Difference RenderElement::AdjustStyleDifference(style::Difference diff) const noexcept
   {
-    // FIXME: The composited cases (recompositing a composited layer's transform, opacity and filter changes
-    // without repainting it) and the layer status changes of plug-ins, iframes and canvas.
+    auto *layer = HasLayer() ? Downcast<RenderLayerModelObject>(*this).Layer() : nullptr;
+    bool isComposited = layer && layer->IsComposited();
 
     // If transform changed, and we are not composited, need to do a layout.
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Transform))
     {
       // FIXME: when transforms are taken into account for overflow, we will need to do a layout.
-      diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
+      if (!isComposited)
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
+      }
+      else
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
+      }
     }
 
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Opacity))
     {
-      diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+      if (!isComposited)
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+      }
+      else
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
+      }
     }
 
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::ClipPath))
     {
-      diff.Result = std::max(diff.Result, style::DifferenceResult::Repaint);
+      if (layer && layer->WillCompositeClipPath())
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
+      }
+      else
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::Repaint);
+      }
     }
 
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::WillChange))
@@ -218,15 +240,35 @@ namespace krys::boo
       }
     }
 
-    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Filter)
-        && HasLayer())
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Filter) && layer)
     {
-      diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+      if (!isComposited || layer->ShouldPaintWithFilters())
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+      }
+      else
+      {
+        diff.Result = std::max(diff.Result, style::DifferenceResult::RecompositeLayer);
+      }
     }
 
     if (IsHTMLMarquee())
     {
       diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
+    }
+
+    // The answer to requiresLayer() for plugins, iframes, and canvas can change without the actual
+    // style changing, since it depends on whether we decide to composite these elements. When the
+    // layer status of one of these elements changes, we need to force a layout.
+    if (diff < style::DifferenceResult::Layout)
+    {
+      if (auto *modelObject = DynamicDowncast<RenderLayerModelObject>(*this))
+      {
+        if (HasLayer() != modelObject->RequiresLayer())
+        {
+          diff.Result = style::DifferenceResult::Layout;
+        }
+      }
     }
 
     // If we have no layer(), just treat a RepaintLayer hint as a normal Repaint.
@@ -236,6 +278,23 @@ namespace krys::boo
     }
 
     return diff;
+  }
+
+  UniquePtr<RenderStyle> RenderElement::AnimatedStyle() const noexcept
+  {
+    UniquePtr<RenderStyle> result;
+
+    if (auto styleable = style::Styleable::FromRenderer(*this))
+    {
+      result = styleable->ComputeAnimatedStyle();
+    }
+
+    if (!result)
+    {
+      result = RenderStyle::ClonePtr(Style());
+    }
+
+    return result;
   }
 
   bool RenderElement::IsHTMLMarquee() const noexcept
@@ -1981,7 +2040,13 @@ namespace krys::boo
       image->StartAnimation();
     }
 
-    // FIXME: Tell compositing layers the image changed (contentChanged), once there are layers.
+    // For directly-composited animated GIFs it does not suffice to call repaint() to resume animation. We
+    // need to mark the image as changed.
+    if (auto *modelObject = DynamicDowncast<RenderBoxModelObject>(*this))
+    {
+      modelObject->ContentChanged(ContentChangeType::Image);
+    }
+
     return true;
   }
 

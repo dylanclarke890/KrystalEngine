@@ -261,6 +261,9 @@ namespace krys::boo
     }
 
     void SetSuspended(bool isSuspended) noexcept;
+    /// @brief Tells the timeline the effect's accelerated actions changed, to apply them at the rendering
+    /// update.
+    void AcceleratedStateDidChange() noexcept;
     KRYS_NODISCARD bool IsSuspended() const noexcept
     {
       return _isSuspended;

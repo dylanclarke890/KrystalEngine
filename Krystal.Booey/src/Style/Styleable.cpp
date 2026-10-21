@@ -20,6 +20,150 @@
 
 namespace krys::boo::style
 {
+  Maybe<Styleable> Styleable::FromRenderer(const RenderElement &renderer) noexcept
+  {
+    auto pseudoElementType = renderer.Style().GetPseudoElementType();
+    if (!pseudoElementType)
+    {
+      if (auto *element = renderer.GetElement())
+      {
+        return FromElement(*element);
+      }
+      return null;
+    }
+
+    switch (*pseudoElementType)
+    {
+      case PseudoElementType::Marker:
+      {
+        auto *ancestor = renderer.Parent();
+        while (ancestor)
+        {
+          auto *renderListItem = DynamicDowncast<RenderListItem>(ancestor);
+          if (renderListItem && ancestor->GetElement() && renderListItem->MarkerRenderer() == &renderer)
+          {
+            return Styleable(*ancestor->GetElement(),
+                             style::PseudoElementIdentifier {PseudoElementType::Marker});
+          }
+          ancestor = ancestor->Parent();
+        }
+        break;
+      }
+      case PseudoElementType::After:
+      case PseudoElementType::Before:
+        if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(renderer.GetElement()))
+        {
+          if (auto *host = pseudoElement->HostElement())
+          {
+            return Styleable(*host, style::PseudoElementIdentifier {*pseudoElementType});
+          }
+        }
+        break;
+      default:
+        // FIXME: The ::backdrop renderer and the view transition pseudo-elements' renderers, once there are
+        // those.
+        return null;
+    }
+
+    return null;
+  }
+
+  bool Styleable::ComputeAnimationExtent(LayoutRect &bounds) const noexcept
+  {
+    const auto *animations = Animations();
+    if (!animations)
+    {
+      return false;
+    }
+
+    RefPtr<KeyframeEffect> matchingEffect;
+    for (const auto &animation : *animations)
+    {
+      if (auto *keyframeEffect = animation->GetKeyframeEffect())
+      {
+        if (AnimatablePropertiesContainTransformRelatedProperty(
+              keyframeEffect->GetBlendingKeyframes().Properties()))
+        {
+          matchingEffect = ShareRefPtr(keyframeEffect);
+        }
+      }
+    }
+
+    if (matchingEffect)
+    {
+      return matchingEffect->ComputeExtentOfTransformAnimation(bounds);
+    }
+
+    return true;
+  }
+
+  bool Styleable::MayHaveNonZeroOpacity() const noexcept
+  {
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return false;
+    }
+
+    if (!renderer->Style().GetOpacity().IsTransparent())
+    {
+      return true;
+    }
+
+    if (renderer->Style().GetWillChange().ContainsProperty(css::PropertyId::Opacity))
+    {
+      return true;
+    }
+
+    auto *effectStack = GetKeyframeEffectStack();
+    return effectStack && effectStack->ContainsProperty(css::PropertyId::Opacity);
+  }
+
+  bool Styleable::IsRunningAcceleratedAnimationOfProperty(css::PropertyId property) const noexcept
+  {
+    auto *effectStack = GetKeyframeEffectStack();
+    return effectStack
+           && effectStack->HasMatchingEffect(
+             [property](const KeyframeEffect &effect)
+             { return effect.IsCurrentlyAffectingProperty(property, KeyframeEffect::Accelerated::Yes); });
+  }
+
+  bool Styleable::IsRunningAcceleratedTransformRelatedAnimation() const noexcept
+  {
+    auto *effectStack = GetKeyframeEffectStack();
+    return effectStack
+           && effectStack->HasMatchingEffect(
+             [](const KeyframeEffect &effect)
+             { return effect.IsRunningAcceleratedTransformRelatedAnimation(); });
+  }
+
+  bool Styleable::HasRunningAcceleratedAnimations() const noexcept
+  {
+    if (auto *effectStack = GetKeyframeEffectStack())
+    {
+      if (effectStack->HasAcceleratedEffects(Element.NodeDocument().GetSettings()))
+      {
+        return true;
+      }
+    }
+
+    if (const auto *animations = Animations())
+    {
+      for (const auto &animation : *animations)
+      {
+        if (auto *keyframeEffect = animation->GetKeyframeEffect())
+        {
+          if (keyframeEffect->IsRunningAccelerated())
+          {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   RenderElement *Styleable::Renderer() const noexcept
   {
     if (!PseudoElementIdentifier)

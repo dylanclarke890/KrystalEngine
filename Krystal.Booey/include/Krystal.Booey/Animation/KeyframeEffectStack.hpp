@@ -9,6 +9,11 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::style
 {
   struct ResolutionContext;
@@ -18,11 +23,12 @@ namespace krys::boo
 {
   class KeyframeEffect;
   class RenderStyle;
+  struct Settings;
 
   /// @brief The relevant keyframe effects targeting an element, or one of its pseudo-elements, sorted by
   /// composite order when they're applied.
   /// @see https://drafts.csswg.org/web-animations-1/#the-effect-stack
-  // FIXME: Accelerated animations, once there are any.
+  // FIXME: Accelerated effects (threaded animations), once there are any.
   class KeyframeEffectStack
   {
     KRYS_NON_COPY_MOVABLE(KeyframeEffectStack);
@@ -30,6 +36,7 @@ namespace krys::boo
   private:
     List<WeakPtr<KeyframeEffect>> _effects;
     HashSet<css::CSSOMString> _invalidCSSAnimationNames;
+    AnimatableCSSPropertySet _acceleratedPropertiesOverriddenByCascade;
     Maybe<style::Animations> _cssAnimationList;
     bool _isSorted {true};
 
@@ -69,5 +76,28 @@ namespace krys::boo
     KRYS_NODISCARD bool HasInvalidCSSAnimationNames() const noexcept;
     KRYS_NODISCARD bool ContainsInvalidCSSAnimationName(const css::CSSOMString &name) const noexcept;
     void AddInvalidCSSAnimationName(const css::CSSOMString &name) noexcept;
+
+    void EffectAbilityToBeAcceleratedDidChange(const KeyframeEffect &effect) noexcept;
+    /// @brief Whether the effects can run accelerated: none prevents it, and no two animate the same
+    /// accelerated property where one has an implicit keyframe for it.
+    KRYS_NODISCARD bool AllowsAcceleration() const noexcept;
+
+    void LastStyleChangeEventStyleDidChange(const RenderStyle *previousStyle,
+                                            const RenderStyle *currentStyle) noexcept;
+    void CascadeDidOverrideProperties(const AnimatableCSSPropertySet &overriddenProperties,
+                                      const dom::Document &document) noexcept;
+
+    KRYS_NODISCARD const AnimatableCSSPropertySet &AcceleratedPropertiesOverriddenByCascade() const noexcept
+    {
+      return _acceleratedPropertiesOverriddenByCascade;
+    }
+
+    void ApplyPendingAcceleratedActions() const noexcept;
+
+    KRYS_NODISCARD bool HasAcceleratedEffects(const Settings &settings) const noexcept;
+
+  private:
+    void StartAcceleratedAnimationsIfPossible() noexcept;
+    void StopAcceleratedAnimations() noexcept;
   };
 }

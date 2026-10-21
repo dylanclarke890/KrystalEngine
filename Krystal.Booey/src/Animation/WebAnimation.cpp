@@ -1678,6 +1678,14 @@ namespace krys::boo
     }
   }
 
+  void WebAnimation::AcceleratedStateDidChange() noexcept
+  {
+    if (auto *documentTimeline = DynamicDowncast<DocumentTimeline>(_timeline.get()))
+    {
+      documentTimeline->AnimationAcceleratedRunningStateDidChange(*this);
+    }
+  }
+
   void WebAnimation::UpdateRelevance() noexcept
   {
     auto wasRelevant = std::exchange(_isRelevant, ComputeRelevance());

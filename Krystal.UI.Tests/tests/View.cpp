@@ -585,12 +585,13 @@ namespace krys::ui::tests
     }
     View view({200, 100});
     REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    // The animation runs on the box's layer, so its value is the renderer's animated style.
     auto opacity = [&]
     {
       auto box = view.Document().GetElementById(u8"box");
       REQUIRE(box);
       REQUIRE(box->Renderer());
-      return box->Renderer()->Style().GetOpacity().Value.Value;
+      return box->Renderer()->AnimatedStyle()->GetOpacity().Value.Value;
     };
 
     // Frames at 60 Hz, longer than the timelines controller keeps its cached time: the animation still gets
@@ -609,7 +610,8 @@ namespace krys::ui::tests
     for (int32 i = 0; i < 15; ++i)
     {
       time += frame;
-      CHECK(view.Update(time));
+      // The page's style doesn't change while the animation runs on its layer.
+      CHECK_FALSE(view.Update(time));
     }
     CHECK(opacity() == Catch::Approx(before + 0.25f).margin(0.02f));
     std::filesystem::remove_all(directory);

@@ -19,13 +19,14 @@ namespace krys::boo
 
   /// @brief The default timeline of a document: its time is the host's time since the document's time origin.
   /// @see https://drafts.csswg.org/web-animations-1/#the-documents-default-timeline
-  // FIXME: Accelerated animations and their running state, frame rates and the `DocumentTimeline()`
+  // FIXME: Accelerated timelines (threaded animations), frame rates and the `DocumentTimeline()`
   // constructor's origin time, once there are any.
   class DocumentTimeline final : public AnimationTimeline
   {
   private:
     Timer _tickScheduleTimer;
     AnimationEvents _pendingAnimationEvents;
+    HashSet<RefPtr<WebAnimation>> _acceleratedAnimationsPendingRunningStateChange;
     WeakPtr<dom::Document> _document;
     Seconds _originTime;
     bool _animationResolutionScheduled {false};
@@ -49,6 +50,7 @@ namespace krys::boo
     void AnimationTimingDidChange(WebAnimation &animation) noexcept override;
     void RemoveAnimation(WebAnimation &animation) noexcept override;
     void TransitionDidComplete(Ref<CSSTransition> &&transition) noexcept;
+    void AnimationAcceleratedRunningStateDidChange(WebAnimation &animation) noexcept;
 
     void DetachFromDocument() noexcept override;
 
@@ -83,6 +85,7 @@ namespace krys::boo
     void ScheduleAnimationResolution() noexcept;
     void ClearTickScheduleTimer() noexcept;
     void ScheduleNextTick() noexcept;
+    void ApplyPendingAcceleratedAnimations() noexcept;
     KRYS_NODISCARD bool AnimationCanBeRemoved(WebAnimation &animation) noexcept;
     KRYS_NODISCARD bool ShouldRunUpdateAnimationsAndSendEventsIgnoringSuspensionState() const noexcept;
   };

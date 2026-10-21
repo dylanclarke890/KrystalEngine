@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/Difference.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -43,6 +44,8 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderElementConstructBlockLevelRe
 
 namespace krys::boo
 {
+  class BlendingKeyframes;
+  class GraphicsLayerAnimation;
   class RenderBlock;
   class RenderBoxModelObject;
   class RenderLayer;
@@ -201,6 +204,29 @@ namespace krys::boo
 
     /// @brief Whether the images of the renderer may animate.
     KRYS_NODISCARD bool AllowsAnimation() const noexcept;
+
+    /// @brief The renderer's style with its animations applied at their current time.
+    KRYS_NODISCARD UniquePtr<RenderStyle> AnimatedStyle() const noexcept;
+
+    /// @brief Starts @p keyframes' animation on the renderer's composited layer, @p timeOffset seconds in.
+    /// @return Whether the layer runs it.
+    virtual bool StartAnimation(double /*timeOffset*/, const GraphicsLayerAnimation &,
+                                const BlendingKeyframes &) noexcept
+    {
+      return false;
+    }
+    virtual void AnimationPaused(double /*timeOffset*/, const BlendingKeyframes &) noexcept
+    {
+    }
+    virtual void AnimationFinished(const BlendingKeyframes &) noexcept
+    {
+    }
+    virtual void TransformRelatedPropertyDidChange() noexcept
+    {
+    }
+    virtual void SuspendAnimations(MonotonicTime::duration = {}) noexcept
+    {
+    }
 
     /// @brief Repaints the renderer and starts its paused @p cachedImage's animation if it's now visible in
     /// @p visibleRect.

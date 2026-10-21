@@ -21,7 +21,7 @@ namespace krys::boo::style
   using WeakStyleOriginatedAnimations = List<WeakPtr<StyleOriginatedAnimation>>;
 
   /// @brief An element, or one of its pseudo-elements: something that is styled.
-  // FIXME: Scroll and view timelines, accelerated animations and view transitions, once there are any.
+  // FIXME: Scroll and view timelines and view transitions, once there are any.
   struct Styleable
   {
     dom::Element &Element;
@@ -37,6 +37,8 @@ namespace krys::boo::style
     {
       return Styleable(element, null);
     }
+    /// @brief The element, or pseudo-element of an element, @p renderer renders.
+    KRYS_NODISCARD static Maybe<Styleable> FromRenderer(const RenderElement &renderer) noexcept;
 
     KRYS_NODISCARD bool operator==(const Styleable &other) const noexcept
     {
@@ -63,6 +65,14 @@ namespace krys::boo::style
     {
       return Element.EnsureKeyframeEffectStack(PseudoElementIdentifier);
     }
+    KRYS_NODISCARD bool IsRunningAcceleratedAnimationOfProperty(css::PropertyId property) const noexcept;
+    KRYS_NODISCARD bool IsRunningAcceleratedTransformRelatedAnimation() const noexcept;
+    KRYS_NODISCARD bool HasRunningAcceleratedAnimations() const noexcept;
+    /// @brief Grows @p bounds to cover where the transform animations move them.
+    /// @return False if the extent can't be computed.
+    KRYS_NODISCARD bool ComputeAnimationExtent(LayoutRect &bounds) const noexcept;
+    KRYS_NODISCARD bool MayHaveNonZeroOpacity() const noexcept;
+
     KRYS_NODISCARD bool HasKeyframeEffects() const noexcept
     {
       return Element.HasKeyframeEffects(PseudoElementIdentifier);
@@ -138,7 +148,8 @@ namespace krys::boo::style
     void QueryContainerDidChange() const noexcept;
     /// @brief Whether @p animations names an `@keyframes` rule that didn't exist when the CSS animations were
     /// last updated.
-    KRYS_NODISCARD bool AnimationListContainsNewlyValidAnimation(const style::Animations &animations) const noexcept;
+    KRYS_NODISCARD bool
+      AnimationListContainsNewlyValidAnimation(const style::Animations &animations) const noexcept;
 
     void ElementWasRemoved() const noexcept;
     void WillChangeRenderer() const noexcept;

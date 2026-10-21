@@ -1,5 +1,12 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -19,9 +26,24 @@ namespace krys::ui::tests
       double Update {0};
       double Paint {0};
       double Submit {0};
-      /// @brief How many of the frames measured had something to repaint.
+      /// @brief How many of the frames measured composited the page.
+      int32 Composited {0};
+      /// @brief How many of the frames measured repainted part of a layer.
       int32 Repainted {0};
     };
+
+    /// @brief Whether any of the page's layers repainted since @p compositor's tracked repaints were reset.
+    KRYS_NODISCARD bool LayersRepainted(View &view, boo::RenderLayerCompositor &compositor) noexcept
+    {
+      auto *root = view.Frame().View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer();
+      while (root->Parent())
+      {
+        root = root->Parent();
+      }
+      auto text = root->LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects});
+      compositor.ResetTrackedRepaintRects();
+      return text.find(u8"(repaint rects") != utf8_string::npos;
+    }
 
     /// @brief How a frame paints the page.
     enum class Painting : uint8
@@ -101,12 +123,19 @@ namespace krys::ui::tests
           device->Submit(commands);
           device->EndFrame();
           const auto submitted = steady_clock::now();
+          auto &compositor = view.Frame().View()->GetRenderViewForUpdate()->Compositor();
+          if (i == 9)
+          {
+            compositor.SetTracksRepaints(true);
+            compositor.ResetTrackedRepaintRects();
+          }
           if (i >= 10)
           {
             costs.Update += duration<double, std::milli>(updated - start).count() / frames;
             costs.Paint += duration<double, std::milli>(painted - updated).count() / frames;
             costs.Submit += duration<double, std::milli>(submitted - painted).count() / frames;
-            costs.Repainted += needsPaint ? 1 : 0;
+            costs.Composited += needsPaint ? 1 : 0;
+            costs.Repainted += LayersRepainted(view, compositor) ? 1 : 0;
           }
         }
       }
@@ -118,7 +147,8 @@ namespace krys::ui::tests
     {
       WARN(name << ": update " << costs.Update << " ms, paint " << costs.Paint << " ms, submit "
                 << costs.Submit << " ms, total " << costs.Update + costs.Paint + costs.Submit
-                << " ms a frame; repainted " << costs.Repainted << " frames");
+                << " ms a frame; composited " << costs.Composited << " frames, repainted layers in "
+                << costs.Repainted);
     }
   }
 

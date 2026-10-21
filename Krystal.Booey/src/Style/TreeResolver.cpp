@@ -888,8 +888,10 @@ namespace krys::boo::style
         auto overriddenAnimatedProperties =
           ApplyCascadeAfterAnimation(*animatedStyle, animatedProperties, styleable.HasRunningTransitions(),
                                      *resolvedStyle.MatchResult, element, resolutionContext);
-        // FIXME: Telling the keyframe effect stack which accelerated properties the cascade overrode, once
-        // there are accelerated animations.
+        krys_debug_assert(styleable.GetKeyframeEffectStack());
+        styleable.GetKeyframeEffectStack()->CascadeDidOverrideProperties(
+          AnimatableCSSPropertySet(overriddenAnimatedProperties.begin(), overriddenAnimatedProperties.end()),
+          *_document);
         styleable.SetHasPropertiesOverridenAfterAnimation(!overriddenAnimatedProperties.empty());
       }
 

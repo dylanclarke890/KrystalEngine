@@ -273,8 +273,18 @@ namespace krys::boo
 
     void UpdateDebugIndicators(bool showBorder, bool showRepaintCounter) noexcept;
 
+    bool StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
+                        const BlendingKeyframes &keyframes) noexcept;
+    void AnimationPaused(double timeOffset, const utf8_string &animationName) noexcept;
+    void AnimationFinished(const utf8_string &animationName) noexcept;
+    void TransformRelatedPropertyDidChange() noexcept;
+    void SuspendAnimations(MonotonicTime::duration time = {}) noexcept;
+    void ResumeAnimations() noexcept;
+
     // GraphicsLayerClient interface
     void TiledBackingUsageChanged(const GraphicsLayer *, bool usingTiledBacking) noexcept override;
+    void NotifyAnimationStarted(const GraphicsLayer *, const utf8_string &,
+                                MonotonicTime::duration) noexcept override;
     void NotifyFlushRequired(const GraphicsLayer *layer) noexcept override;
     void NotifySubsequentFlushRequired(const GraphicsLayer *layer) noexcept override;
 

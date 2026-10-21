@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -517,6 +518,15 @@ namespace krys::boo
     }
 
     Layer()->ContentChanged(changeType, dirtyRect);
+  }
+
+  bool RenderBoxModelObject::HasRunningAcceleratedAnimations() const noexcept
+  {
+    if (auto styleable = style::Styleable::FromRenderer(*this))
+    {
+      return styleable->HasRunningAcceleratedAnimations();
+    }
+    return false;
   }
 
   bool RenderBoxModelObject::HasAcceleratedCompositing() const noexcept

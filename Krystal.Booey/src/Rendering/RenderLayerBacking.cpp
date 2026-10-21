@@ -1,8 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
@@ -17,8 +22,13 @@
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Rotate.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Scale.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Translate.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
@@ -1295,9 +1305,9 @@ namespace krys::boo
     const RenderStyle &style = Renderer().Style();
     const auto deviceScaleFactor = DeviceScaleFactor();
 
-    // FIXME: Accelerated transform animations (isRunningAcceleratedTransformRelatedAnimation), once there are
-    // any.
-    bool isRunningAcceleratedTransformAnimation = false;
+    auto styleable = style::Styleable::FromRenderer(Renderer());
+    bool isRunningAcceleratedTransformAnimation =
+      styleable && styleable->IsRunningAcceleratedTransformRelatedAnimation();
 
     UpdateTransform(style);
     UpdateOpacity(style);
@@ -3098,8 +3108,15 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Animations that may make the opacity non-zero (mayHaveNonZeroOpacity), once there are
-    // accelerated animations; video and canvases composited as layer contents, once there are any.
+    if (auto styleable = style::Styleable::FromRenderer(Renderer()))
+    {
+      if (!styleable->MayHaveNonZeroOpacity())
+      {
+        return false;
+      }
+    }
+
+    // FIXME: Video and canvases composited as layer contents, once there are any.
 
     return true;
   }
@@ -3832,6 +3849,180 @@ namespace krys::boo
     }
 
     return true;
+  }
+
+  bool RenderLayerBacking::StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
+                                          const BlendingKeyframes &keyframes) noexcept
+  {
+    // FIXME: Renderers captured in a view transition, once there are view transitions.
+
+    // FIXME: SVG renderers that are layer aware, once there's SVG.
+    bool shouldApplyAnimationsToTargetRenderer = Renderer().IsRenderBox();
+
+    bool hasOpacity = keyframes.ContainsProperty(css::PropertyId::Opacity);
+    bool hasRotate =
+      shouldApplyAnimationsToTargetRenderer && keyframes.ContainsProperty(css::PropertyId::Rotate);
+    bool hasScale =
+      shouldApplyAnimationsToTargetRenderer && keyframes.ContainsProperty(css::PropertyId::Scale);
+    bool hasTranslate =
+      shouldApplyAnimationsToTargetRenderer && keyframes.ContainsProperty(css::PropertyId::Translate);
+    bool hasTransform =
+      shouldApplyAnimationsToTargetRenderer && keyframes.ContainsProperty(css::PropertyId::Transform);
+    bool hasFilter = keyframes.ContainsProperty(css::PropertyId::Filter);
+
+    bool hasBackdropFilter = keyframes.ContainsProperty(css::PropertyId::BackdropFilter);
+
+    if (!hasOpacity && !hasRotate && !hasScale && !hasTranslate && !hasTransform && !hasFilter
+        && !hasBackdropFilter)
+    {
+      return false;
+    }
+
+    auto referenceBoxRect = Renderer().TransformReferenceBoxRect(Renderer().Style());
+    referenceBoxRect = FloatRect(SnappedIntRect(LayoutRect(referenceBoxRect)));
+
+    GraphicsLayerKeyframeValueList rotateVector(AnimatedProperty::Rotate);
+    GraphicsLayerKeyframeValueList scaleVector(AnimatedProperty::Scale);
+    GraphicsLayerKeyframeValueList translateVector(AnimatedProperty::Translate);
+    GraphicsLayerKeyframeValueList transformVector(AnimatedProperty::Transform);
+    GraphicsLayerKeyframeValueList opacityVector(AnimatedProperty::Opacity);
+    GraphicsLayerKeyframeValueList filterVector(AnimatedProperty::Filter);
+    GraphicsLayerKeyframeValueList backdropFilterVector(AnimatedProperty::WebkitBackdropFilter);
+
+    for (const auto &currentKeyframe : keyframes)
+    {
+      const RenderStyle *keyframeStyle = currentKeyframe.Style();
+      double offset = currentKeyframe.Offset();
+
+      if (!keyframeStyle)
+      {
+        continue;
+      }
+
+      auto *tf = currentKeyframe.GetTimingFunction();
+      auto size = referenceBoxRect.Size();
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Rotate))
+      {
+        rotateVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
+          offset, style::ToPlatform<style::Rotate> {}(keyframeStyle->GetRotate(), size).get(), tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Scale))
+      {
+        scaleVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
+          offset, style::ToPlatform<style::Scale> {}(keyframeStyle->GetScale(), size).get(), tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Translate))
+      {
+        translateVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
+          offset, style::ToPlatform<style::Translate> {}(keyframeStyle->GetTranslate(), size).get(), tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Transform))
+      {
+        transformVector.Insert(CreateUnique<GraphicsLayerTransformAnimationValue>(
+          offset, style::ToPlatform<style::Transform> {}(keyframeStyle->GetTransform(), size), tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Opacity))
+      {
+        opacityVector.Insert(CreateUnique<GraphicsLayerFloatAnimationValue>(
+          offset, keyframeStyle->GetOpacity().Value.Value, tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::Filter))
+      {
+        filterVector.Insert(CreateUnique<GraphicsLayerFilterAnimationValue>(
+          offset, style::ToPlatform<style::Filter> {}(keyframeStyle->GetFilter()), tf));
+      }
+
+      if (currentKeyframe.AnimatesProperty(css::PropertyId::BackdropFilter))
+      {
+        backdropFilterVector.Insert(CreateUnique<GraphicsLayerFilterAnimationValue>(
+          offset, style::ToPlatform<style::Filter> {}(keyframeStyle->BackdropFilter()), tf));
+      }
+    }
+
+    bool didAnimate = false;
+    const auto &name = keyframes.AcceleratedAnimationName();
+
+    if (hasRotate && _graphicsLayer->AddAnimation(rotateVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasScale && _graphicsLayer->AddAnimation(scaleVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasTranslate && _graphicsLayer->AddAnimation(translateVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasTransform && _graphicsLayer->AddAnimation(transformVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasOpacity && _graphicsLayer->AddAnimation(opacityVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasFilter && _graphicsLayer->AddAnimation(filterVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (hasBackdropFilter && _graphicsLayer->AddAnimation(backdropFilterVector, &animation, name, timeOffset))
+    {
+      didAnimate = true;
+    }
+
+    if (didAnimate)
+    {
+      _owningLayer.SetNeedsPostLayoutCompositingUpdate();
+      _owningLayer.SetNeedsCompositingGeometryUpdate();
+    }
+
+    return didAnimate;
+  }
+
+  void RenderLayerBacking::AnimationPaused(double timeOffset, const utf8_string &animationName) noexcept
+  {
+    _graphicsLayer->PauseAnimation(animationName, timeOffset);
+  }
+
+  void RenderLayerBacking::AnimationFinished(const utf8_string &animationName) noexcept
+  {
+    _graphicsLayer->RemoveAnimation(animationName, null);
+    _owningLayer.SetNeedsPostLayoutCompositingUpdate();
+    _owningLayer.SetNeedsCompositingGeometryUpdate();
+  }
+
+  void RenderLayerBacking::TransformRelatedPropertyDidChange() noexcept
+  {
+    _graphicsLayer->TransformRelatedPropertyDidChange();
+  }
+
+  void RenderLayerBacking::NotifyAnimationStarted(const GraphicsLayer *, const utf8_string &,
+                                                  MonotonicTime::duration) noexcept
+  {
+  }
+
+  // This is used for the 'freeze' API, for testing only.
+  void RenderLayerBacking::SuspendAnimations(MonotonicTime::duration time) noexcept
+  {
+    _graphicsLayer->SuspendAnimations(time);
+  }
+
+  void RenderLayerBacking::ResumeAnimations() noexcept
+  {
+    _graphicsLayer->ResumeAnimations();
   }
 
   void RenderLayerBacking::NotifyFlushRequired(const GraphicsLayer *layer) noexcept

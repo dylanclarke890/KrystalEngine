@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
@@ -415,8 +416,16 @@ namespace krys::boo
 
     bounds = CalculateLayerBounds(this, LayoutSize(), boundsFlags);
 
-    // FIXME: The extent of transform animations (computeAnimationExtent), once there are accelerated
-    // animations.
+    LayoutRect animatedBounds = bounds;
+    if (auto styleable = style::Styleable::FromRenderer(Renderer()))
+    {
+      if (styleable->ComputeAnimationExtent(animatedBounds))
+      {
+        bounds = animatedBounds;
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -2825,11 +2834,17 @@ namespace krys::boo
     // m_transform includes transform-origin and is affected by the choice of the transform-box.
     // Therefore we can only use the cached m_transform, if the animation doesn't alter transform-box or
     // excludes transform-origin.
-    // FIXME: Running accelerated transform animations use the animated style, once there are animations.
-    if (!options.Contains(style::TransformResolverOption::TransformOrigin))
+
+    // Query the animatedStyle() to obtain the current transformation, when accelerated transform animations
+    // are running.
+    auto styleable = style::Styleable::FromRenderer(Renderer());
+    if ((styleable && styleable->IsRunningAcceleratedTransformRelatedAnimation())
+        || !options.Contains(style::TransformResolverOption::TransformOrigin))
     {
+      auto animatedStyle = Renderer().AnimatedStyle();
+
       TransformationMatrix transform;
-      UpdateTransformFromStyle(transform, Renderer().Style(), options);
+      UpdateTransformFromStyle(transform, *animatedStyle, options);
       return transform;
     }
 
@@ -3009,6 +3024,26 @@ namespace krys::boo
   bool RenderLayer::HasBackdropFilter() const noexcept
   {
     return Renderer().HasBackdropFilter();
+  }
+
+  bool RenderLayer::WillCompositeClipPath() const noexcept
+  {
+    if (!IsComposited())
+    {
+      return false;
+    }
+
+    if (!Renderer().Style().HasClipPath())
+    {
+      return false;
+    }
+
+    if (Renderer().HasMask())
+    {
+      return false;
+    }
+
+    return GraphicsLayer::SupportsLayerType(GraphicsLayer::Type::Shape);
   }
 
   bool RenderLayer::ShouldPaintWithFilters(EnumSet<PaintBehavior> paintBehavior) const noexcept

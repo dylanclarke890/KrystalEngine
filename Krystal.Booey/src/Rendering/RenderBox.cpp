@@ -5768,9 +5768,9 @@ namespace krys::boo
 
   bool RenderBox::RequiresLayer() const noexcept
   {
-    // FIXME: Running accelerated animations too, once there are any.
     return RenderBoxModelObject::RequiresLayer() || HasNonVisibleOverflow() || Style().SpecifiesColumns()
-           || Style().UsedContain().Contains(style::ContainValue::Layout) || !Style().UsedZIndex().IsAuto();
+           || Style().UsedContain().Contains(style::ContainValue::Layout) || !Style().UsedZIndex().IsAuto()
+           || HasRunningAcceleratedAnimations();
   }
 
   void RenderBox::ApplyTransform(TransformationMatrix &t, const RenderStyle &style,

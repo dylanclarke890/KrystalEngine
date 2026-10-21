@@ -50,4 +50,5 @@ target_sources(Krystal.UI.Tests
     tests/View.cpp
     tests/Render2DConversions.cpp
     tests/Repaint.cpp
+    tests/TextureMapperAnimation.cpp
 )

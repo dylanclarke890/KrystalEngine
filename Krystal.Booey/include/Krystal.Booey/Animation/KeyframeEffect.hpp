@@ -28,8 +28,8 @@ namespace krys::boo
   /// through keyframes.
   /// @see https://drafts.csswg.org/web-animations-1/#keyframe-effects
   // FIXME: Keyframes from scripts (the parsed keyframes, `getKeyframes()` and `setKeyframes()`), the
-  // `KeyframeEffect` interface, accelerated animations and view timeline keyframe offsets, once there are
-  // scripting, accelerated animations and view timelines.
+  // `KeyframeEffect` interface, accelerated effects (threaded animations) and view timeline keyframe offsets,
+  // once there are scripting, threaded animations and view timelines.
   class KeyframeEffect final : public AnimationEffect,
                                public style::interpolation::Client,
                                public KeyframeInterpolation
@@ -41,20 +41,76 @@ namespace krys::boo
       Other
     };
 
+    enum class Accelerated : bool
+    {
+      No,
+      Yes
+    };
+
   private:
+    enum class AcceleratedAction : uint8
+    {
+      Play,
+      Pause,
+      UpdateProperties,
+      TransformChange,
+      Stop
+    };
+    enum class AcceleratedPropertiesState : uint8
+    {
+      None,
+      Some,
+      All
+    };
+    enum class RunningAccelerated : uint8
+    {
+      NotStarted,
+      Yes,
+      Prevented,
+      Failed
+    };
+
+    /// @brief Tells the effect stack when the effect's ability to run accelerated changed in its scope.
+    class CanBeAcceleratedMutationScope
+    {
+      KRYS_NON_COPYABLE(CanBeAcceleratedMutationScope);
+
+    private:
+      KeyframeEffect *_effect;
+      bool _couldOriginallyPreventAcceleration;
+
+    public:
+      explicit CanBeAcceleratedMutationScope(KeyframeEffect *effect) noexcept;
+      ~CanBeAcceleratedMutationScope() noexcept;
+    };
+
     WeakPtr<dom::Document> _document;
     BlendingKeyframes _blendingKeyframes;
     AnimatableCSSPropertySet _animatedProperties;
+    AnimatableCSSPropertySet _acceleratedProperties;
+    AnimatableCSSPropertySet _acceleratedPropertiesWithImplicitKeyframe;
+    List<AcceleratedAction> _pendingAcceleratedActions;
     RefPtr<dom::Element> _target;
     Maybe<style::PseudoElementIdentifier> _pseudoElementIdentifier;
     WebAnimationType _animationType {WebAnimationType::WebAnimation};
     boo::IterationCompositeOperation _iterationCompositeOperation {boo::IterationCompositeOperation::Replace};
     boo::CompositeOperation _compositeOperation {boo::CompositeOperation::Replace};
     AnimationEffectPhase _phaseAtLastApplication {AnimationEffectPhase::Idle};
+    AcceleratedAction _lastRecordedAcceleratedAction {AcceleratedAction::Stop};
+    AcceleratedPropertiesState _acceleratedPropertiesState {AcceleratedPropertiesState::None};
+    RunningAccelerated _runningAccelerated {RunningAccelerated::NotStarted};
+    uint32 _transformFunctionListsMatchPrefix {0};
+    bool _needsForcedLayout {false};
     bool _triggersStackingContext {false};
     bool _inTargetEffectStack {false};
     bool _someKeyframesUseLinearTimingFunctionWithPoints {false};
     bool _someKeyframesUseStepsTimingFunction {false};
+    bool _hasImplicitKeyframeForAcceleratedProperty {false};
+    bool _hasKeyframeComposingAcceleratedProperty {false};
+    bool _hasAcceleratedPropertyOverriddenByCascadeProperty {false};
+    bool _hasReferenceFilter {false};
+    bool _animatesSizeAndSizeDependentTransform {false};
+    bool _isAssociatedWithProgressBasedTimeline {false};
 
     KeyframeEffect(dom::Element *target,
                    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
@@ -132,7 +188,54 @@ namespace krys::boo
     KRYS_NODISCARD const AnimatableCSSPropertySet &AnimatedProperties() noexcept;
     KRYS_NODISCARD bool AnimatesProperty(const AnimatableCSSProperty &property) const noexcept;
 
-    KRYS_NODISCARD bool IsCurrentlyAffectingProperty(css::PropertyId property) const noexcept;
+    KRYS_NODISCARD bool
+      IsCurrentlyAffectingProperty(css::PropertyId property,
+                                   Accelerated accelerated = Accelerated::No) const noexcept;
+    KRYS_NODISCARD bool IsRunningAcceleratedAnimationForProperty(css::PropertyId property) const noexcept;
+    KRYS_NODISCARD bool IsRunningAcceleratedTransformRelatedAnimation() const noexcept;
+
+    void ApplyPendingAcceleratedActions() noexcept;
+    void ApplyPendingAcceleratedActionsOrUpdateTimingProperties() noexcept;
+
+    KRYS_NODISCARD bool IsRunningAccelerated() const noexcept;
+    // FIXME: These ignore the fact that some timing functions can prevent acceleration.
+    KRYS_NODISCARD bool IsAboutToRunAccelerated() const noexcept
+    {
+      return _acceleratedPropertiesState != AcceleratedPropertiesState::None
+             && _lastRecordedAcceleratedAction != AcceleratedAction::Stop;
+    }
+
+    KRYS_NODISCARD const AnimatableCSSPropertySet &AcceleratedProperties() const noexcept
+    {
+      return _acceleratedProperties;
+    }
+    KRYS_NODISCARD const AnimatableCSSPropertySet &AcceleratedPropertiesWithImplicitKeyframe() const noexcept
+    {
+      return _acceleratedPropertiesWithImplicitKeyframe;
+    }
+
+    KRYS_NODISCARD bool CanBeAccelerated() const noexcept;
+    KRYS_NODISCARD bool AccelerationWasPrevented() const noexcept
+    {
+      return _runningAccelerated == RunningAccelerated::Prevented;
+    }
+    KRYS_NODISCARD bool PreventsAcceleration() const noexcept;
+    void EffectStackNoLongerPreventsAcceleration() noexcept;
+    void EffectStackNoLongerAllowsAcceleration() noexcept;
+    void EffectStackNoLongerAllowsAccelerationDuringAcceleratedActionApplication() noexcept;
+
+    void LastStyleChangeEventStyleDidChange(const RenderStyle *previousStyle,
+                                            const RenderStyle *currentStyle) noexcept;
+    void AcceleratedPropertiesOverriddenByCascadeDidChange() noexcept;
+    void TransformRelatedPropertyDidChange() noexcept;
+
+    /// @brief Lays out the document when the keyframes depend on the target's size, before accelerated
+    /// actions are applied.
+    bool ForceLayoutIfNeeded() noexcept;
+
+    /// @brief Grows @p bounds to cover each keyframe's transform of them.
+    /// @return False if a keyframe's transform isn't affine or can't be decomposed.
+    KRYS_NODISCARD bool ComputeExtentOfTransformAnimation(LayoutRect &bounds) const noexcept;
     KRYS_NODISCARD bool RequiresPseudoElement() const noexcept;
 
     void WasAddedToEffectStack() noexcept;
@@ -144,6 +247,27 @@ namespace krys::boo
     }
 
   private:
+    void AddPendingAcceleratedAction(AcceleratedAction action) noexcept;
+    KRYS_NODISCARD bool IsCompletelyAccelerated() const noexcept
+    {
+      return _acceleratedPropertiesState == AcceleratedPropertiesState::All;
+    }
+    void UpdateAcceleratedActions() noexcept;
+    KRYS_NODISCARD Ref<const GraphicsLayerAnimation> BackingAnimationForCompositedRenderer() noexcept;
+    void ComputeAcceleratedPropertiesState() noexcept;
+    void ComputeHasImplicitKeyframeForAcceleratedProperty() noexcept;
+    void ComputeHasKeyframeComposingAcceleratedProperty() noexcept;
+    void ComputeHasAcceleratedPropertyOverriddenByCascadeProperty() noexcept;
+    void ComputeHasReferenceFilter() noexcept;
+    void ComputeHasSizeDependentTransform() noexcept;
+    void ComputedNeedsForcedLayout() noexcept;
+    void AnalyzeAcceleratedProperties() noexcept;
+    void CheckForMatchingTransformFunctionLists() noexcept;
+    void AbilityToBeAcceleratedDidChange() noexcept;
+    void UpdateAcceleratedAnimationIfNecessary() noexcept;
+    void UpdateIsAssociatedWithProgressBasedTimeline() noexcept;
+    KRYS_NODISCARD bool AnimatesMotionPath() const noexcept;
+
     void UpdateEffectStackMembership() noexcept;
     void DidChangeTargetStyleable(const Maybe<style::Styleable> &previousTargetStyleable) noexcept;
     void SetAnimatedPropertiesInStyle(RenderStyle &targetStyle,
@@ -167,6 +291,9 @@ namespace krys::boo
     }
     void AnimationDidTick() noexcept final;
     void AnimationDidChangeTimingProperties() noexcept final;
+    void AnimationWasCanceled() noexcept final;
+    void AnimationSuspensionStateDidChange(bool animationIsSuspended) noexcept final;
+    void AnimationPlaybackRateDidChange() noexcept final;
     void AnimationTimelineDidChange() noexcept final;
     void SetAnimation(WebAnimation *animation) noexcept final;
     KRYS_NODISCARD Seconds TimeToNextTick(const BasicEffectTiming &timing) noexcept final;

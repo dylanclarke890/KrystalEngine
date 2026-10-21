@@ -35,6 +35,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/Compositing/BitmapTexturePool.hpp
       include/Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp
       include/Krystal.UI/Compositing/TextureMapper.hpp
+      include/Krystal.UI/Compositing/TextureMapperAnimation.hpp
       include/Krystal.UI/Compositing/TextureMapperBackingStore.hpp
       include/Krystal.UI/Compositing/TextureMapperLayer.hpp
       include/Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp
@@ -53,6 +54,7 @@ target_sources(Krystal.UI
     src/Compositing/BitmapTexturePool.cpp
     src/Compositing/GraphicsLayerTextureMapper.cpp
     src/Compositing/TextureMapper.cpp
+    src/Compositing/TextureMapperAnimation.cpp
     src/Compositing/TextureMapperBackingStore.cpp
     src/Compositing/TextureMapperLayer.cpp
     src/Compositing/TextureMapperTile.cpp

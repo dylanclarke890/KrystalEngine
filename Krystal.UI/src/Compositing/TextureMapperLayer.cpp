@@ -539,6 +539,22 @@ namespace krys::ui
     _backingStore = backingStore;
   }
 
+  void TextureMapperLayer::SetAnimations(const TextureMapperAnimations &animations) noexcept
+  {
+    _animations = animations;
+  }
+
+  bool TextureMapperLayer::DescendantsOrSelfHaveRunningAnimations() const noexcept
+  {
+    if (_animations.HasRunningAnimations())
+    {
+      return true;
+    }
+
+    return std::ranges::any_of(_children, [](TextureMapperLayer *child)
+                               { return child->DescendantsOrSelfHaveRunningAnimations(); });
+  }
+
   bool TextureMapperLayer::ApplyAnimationsRecursively(MonotonicTime::duration time) noexcept
   {
     bool hasRunningAnimations = SyncAnimations(time);
@@ -557,13 +573,16 @@ namespace krys::ui
     return hasRunningAnimations;
   }
 
-  bool TextureMapperLayer::SyncAnimations(MonotonicTime::duration) noexcept
+  bool TextureMapperLayer::SyncAnimations(MonotonicTime::duration time) noexcept
   {
-    // FIXME: Animations, once layers animate: until then, the layer's state is its current value.
-    _layerTransforms.LocalTransform = _state.Transform;
-    _currentOpacity = _state.Opacity;
-    _currentFilters = _state.Filters;
-    return false;
+    TextureMapperAnimation::ApplicationResult applicationResults;
+    _animations.Apply(applicationResults, time);
+
+    _layerTransforms.LocalTransform = applicationResults.Transform.value_or(_state.Transform);
+    _currentOpacity = static_cast<float>(applicationResults.Opacity.value_or(_state.Opacity));
+    _currentFilters = applicationResults.Filters.value_or(_state.Filters);
+
+    return applicationResults.HasRunningAnimations;
   }
 
   boo::FloatRect TextureMapperLayer::EffectiveLayerRect() const noexcept

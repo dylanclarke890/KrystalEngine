@@ -247,10 +247,15 @@ namespace krys::ui
       return;
     }
 
+    // Layers that animate are composited at the frame's time, and ask for the next frame while they run.
+    (void)root->Layer().ApplyAnimationsRecursively(boo::html::EventLoop::Current().Now());
+
     _textureMapper->BeginPainting(renderer, boo::IntRect(0, 0, size.Width(), size.Height()));
     root->UpdateBackingStoreIncludingSubLayers(*_textureMapper);
     root->Layer().Paint(*_textureMapper);
     _textureMapper->EndPainting();
+
+    _needsPaint = root->Layer().DescendantsOrSelfHaveRunningAnimations();
   }
 
   void View::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept

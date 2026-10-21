@@ -608,9 +608,8 @@ namespace krys::boo
 
   bool RenderInline::RequiresLayer() const noexcept
   {
-    // FIXME: Running accelerated animations too, once there are any.
     return IsInFlowPositioned() || CreatesGroup() || HasClipPath()
-           || Style().GetWillChange().CanCreateStackingContext()
+           || Style().GetWillChange().CanCreateStackingContext() || HasRunningAcceleratedAnimations()
            || RequiresRenderingConsolidationForViewTransition();
   }
 

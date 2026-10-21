@@ -1,10 +1,16 @@
 ﻿#include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+#include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Values/CustomPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Interpolation.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include <algorithm>
 
@@ -297,6 +303,211 @@ namespace krys::boo
     }
 
     std::ranges::stable_sort(_keyframes, {}, &BlendingKeyframe::Offset);
+  }
+
+  const utf8_string &BlendingKeyframes::AcceleratedAnimationName() const noexcept
+  {
+    if (_acceleratedAnimationName.empty())
+    {
+      if (const auto *name = std::get_if<StringAtom>(&_identifier))
+      {
+        _acceleratedAnimationName = utf8_string(name->View());
+      }
+      else
+      {
+        auto numericName = std::format("keyframe-effect-{}", std::get<uint64>(_identifier));
+        _acceleratedAnimationName = utf8_string(numericName.begin(), numericName.end());
+      }
+    }
+    return _acceleratedAnimationName;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD const css::KeyframeRule &ZeroPercentKeyframe() noexcept
+    {
+      static NeverDestroyed<Ref<css::KeyframeRule>> rule {
+        []
+        {
+          auto keyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
+          keyframe->SetKey({css::ValueId::Invalid, 0});
+          return keyframe;
+        }()};
+      return *rule.get().get();
+    }
+
+    KRYS_NODISCARD const css::KeyframeRule &HundredPercentKeyframe() noexcept
+    {
+      static NeverDestroyed<Ref<css::KeyframeRule>> rule {
+        []
+        {
+          auto keyframe = css::KeyframeRule::Create(css::MutableStyleProperties::Create());
+          keyframe->SetKey({css::ValueId::Invalid, 1});
+          return keyframe;
+        }()};
+      return *rule.get().get();
+    }
+  }
+
+  void BlendingKeyframes::FillImplicitKeyframes(const KeyframeEffect &effect,
+                                                const RenderStyle &underlyingStyle) noexcept
+  {
+    if (IsEmpty())
+    {
+      return;
+    }
+
+    krys_debug_assert(effect.Target());
+    auto element = ShareRef(*effect.Target());
+    if (!element->IsConnected())
+    {
+      return;
+    }
+
+    auto &styleResolver = element->StyleResolver();
+
+    // We need to establish which properties are implicit for 0% and 100%.
+    // We start each list off with the full list of properties, and see if
+    // any 0% and 100% keyframes specify them.
+    AnimatableCSSPropertySet expectedExplicitProperties;
+    AnimatableCSSPropertySet zeroKeyframeExplicitProperties;
+
+    BlendingKeyframe *implicitZeroKeyframe = nullptr;
+
+    auto isSuitableKeyframeForImplicitValues = [&](const BlendingKeyframe &keyframe)
+    {
+      if (keyframe.UsesRangeOffset())
+      {
+        return false;
+      }
+
+      auto *timingFunction = keyframe.GetTimingFunction();
+
+      // If there is no timing function set on the keyframe, then it uses the element's
+      // timing function, which makes this keyframe suitable.
+      if (!timingFunction)
+      {
+        return true;
+      }
+
+      if (auto *cssAnimation = DynamicDowncast<CSSAnimation>(effect.Animation()))
+      {
+        const auto &animationWideTimingFunction =
+          cssAnimation->BackingStyleAnimation().DefaultTimingFunctionForKeyframes();
+        // If we're dealing with a CSS Animation and if that CSS Animation's backing animation
+        // has a default timing function set, then if that keyframe's timing function matches,
+        // that keyframe is suitable.
+        if (animationWideTimingFunction)
+        {
+          return timingFunction == animationWideTimingFunction->Value.get();
+        }
+        // Otherwise, the keyframe will be suitable if its timing function matches the default.
+        return timingFunction == &CubicBezierTimingFunction::DefaultTimingFunction();
+      }
+
+      return false;
+    };
+
+    for (auto &keyframe : _keyframes)
+    {
+      if (keyframe.Offset() <= 0)
+      {
+        for (const auto &property : keyframe.Properties())
+        {
+          zeroKeyframeExplicitProperties.insert(property);
+        }
+        if (!implicitZeroKeyframe && isSuitableKeyframeForImplicitValues(keyframe))
+        {
+          implicitZeroKeyframe = &keyframe;
+        }
+      }
+      if (keyframe.HasResolvedOffset())
+      {
+        expectedExplicitProperties.insert(keyframe.Properties().begin(), keyframe.Properties().end());
+      }
+    }
+
+    auto addImplicitKeyframe = [&](double key, const AnimatableCSSPropertySet &implicitProperties,
+                                   const css::KeyframeRule &keyframeRule,
+                                   BlendingKeyframe *existingImplicitBlendingKeyframe)
+    {
+      // If we're provided an existing implicit keyframe, we need to add all the styles for the implicit
+      // properties.
+      if (existingImplicitBlendingKeyframe)
+      {
+        krys_debug_assert(existingImplicitBlendingKeyframe->Style());
+        auto keyframeStyle = RenderStyle::ClonePtr(*existingImplicitBlendingKeyframe->Style());
+        for (const auto &property : implicitProperties)
+        {
+          style::interpolation::Interpolate(property, *keyframeStyle, underlyingStyle, underlyingStyle, 1,
+                                            boo::CompositeOperation::Replace, effect);
+          existingImplicitBlendingKeyframe->AddProperty(property);
+        }
+        existingImplicitBlendingKeyframe->SetStyle(krys::move(keyframeStyle));
+        return;
+      }
+
+      // Otherwise we create a new keyframe.
+      BlendingKeyframe blendingKeyframe(key, nullptr);
+      blendingKeyframe.SetStyle(
+        styleResolver.StyleForKeyframe(*element, underlyingStyle, {nullptr}, keyframeRule, blendingKeyframe));
+      for (const auto &property : implicitProperties)
+      {
+        blendingKeyframe.AddProperty(property);
+      }
+      // Step 2 of https://drafts.csswg.org/css-animations-2/#keyframes defines the
+      // default composite property as "replace" for CSS Animations.
+      if (effect.Animation() && Is<CSSAnimation>(*effect.Animation()))
+      {
+        blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Replace);
+      }
+      Insert(krys::move(blendingKeyframe));
+    };
+
+    auto differenceWith = [](const AnimatableCSSPropertySet &all, const AnimatableCSSPropertySet &excluded)
+    {
+      AnimatableCSSPropertySet difference;
+      for (const auto &property : all)
+      {
+        if (!excluded.contains(property))
+        {
+          difference.insert(property);
+        }
+      }
+      return difference;
+    };
+
+    auto zeroKeyframeImplicitProperties =
+      differenceWith(expectedExplicitProperties, zeroKeyframeExplicitProperties);
+    if (!zeroKeyframeImplicitProperties.empty())
+    {
+      addImplicitKeyframe(0, zeroKeyframeImplicitProperties, ZeroPercentKeyframe(), implicitZeroKeyframe);
+    }
+
+    AnimatableCSSPropertySet oneKeyframeExplicitProperties;
+    BlendingKeyframe *implicitOneKeyframe = nullptr;
+
+    for (auto &keyframe : _keyframes)
+    {
+      if (keyframe.Offset() >= 1)
+      {
+        for (const auto &property : keyframe.Properties())
+        {
+          oneKeyframeExplicitProperties.insert(property);
+        }
+        if (!implicitOneKeyframe && isSuitableKeyframeForImplicitValues(keyframe))
+        {
+          implicitOneKeyframe = &keyframe;
+        }
+      }
+    }
+
+    auto oneKeyframeImplicitProperties =
+      differenceWith(expectedExplicitProperties, oneKeyframeExplicitProperties);
+    if (!oneKeyframeImplicitProperties.empty())
+    {
+      addImplicitKeyframe(1, oneKeyframeImplicitProperties, HundredPercentKeyframe(), implicitOneKeyframe);
+    }
   }
 
   uint64 BlendingKeyframes::NextAnonymousIdentifier() noexcept

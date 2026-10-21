@@ -50,6 +50,7 @@ namespace krys::boo
   {
     AnimationTimeline::DetachFromDocument();
     _pendingAnimationEvents.clear();
+    _acceleratedAnimationsPendingRunningStateChange.clear();
     ClearTickScheduleTimer();
     _document = nullptr;
   }
@@ -67,6 +68,9 @@ namespace krys::boo
   void DocumentTimeline::SuspendAnimations() noexcept
   {
     AnimationTimeline::SuspendAnimations();
+
+    ApplyPendingAcceleratedAnimations();
+
     ClearTickScheduleTimer();
   }
 
@@ -131,7 +135,8 @@ namespace krys::boo
 
   bool DocumentTimeline::ShouldRunUpdateAnimationsAndSendEventsIgnoringSuspensionState() const noexcept
   {
-    return !_animations.isEmpty() || !_pendingAnimationEvents.empty();
+    return !_animations.isEmpty() || !_pendingAnimationEvents.empty()
+           || !_acceleratedAnimationsPendingRunningStateChange.empty();
   }
 
   AnimationTimeline::ShouldUpdateAnimationsAndSendEvents
@@ -157,8 +162,66 @@ namespace krys::boo
     return ShouldUpdateAnimationsAndSendEvents::Yes;
   }
 
+  void DocumentTimeline::AnimationAcceleratedRunningStateDidChange(WebAnimation &animation) noexcept
+  {
+    _acceleratedAnimationsPendingRunningStateChange.insert(ShareRefPtr(&animation));
+
+    if (ShouldRunUpdateAnimationsAndSendEventsIgnoringSuspensionState())
+    {
+      ScheduleAnimationResolution();
+    }
+    else
+    {
+      ClearTickScheduleTimer();
+    }
+  }
+
+  void DocumentTimeline::ApplyPendingAcceleratedAnimations() noexcept
+  {
+    auto acceleratedAnimationsPendingRunningStateChange =
+      std::exchange(_acceleratedAnimationsPendingRunningStateChange, {});
+
+    HashSet<KeyframeEffectStack *> keyframeEffectStacksToUpdate;
+
+    bool hasForcedLayout = false;
+    for (const auto &animation : acceleratedAnimationsPendingRunningStateChange)
+    {
+      if (RefPtr keyframeEffect = ShareRefPtr(animation->GetKeyframeEffect()))
+      {
+        if (!hasForcedLayout)
+        {
+          hasForcedLayout |= keyframeEffect->ForceLayoutIfNeeded();
+        }
+
+        // If the animation is no longer relevant, apply the pending accelerations in isolation.
+        if (!animation->IsRelevant())
+        {
+          keyframeEffect->ApplyPendingAcceleratedActions();
+          continue;
+        }
+
+        // Otherwise, this accelerated animation exists in the context of an effect stack and we must
+        // update all effects in that stack to ensure their sort order is respected.
+        if (auto target = keyframeEffect->TargetStyleable())
+        {
+          if (auto *keyframeEffectStack = target->GetKeyframeEffectStack())
+          {
+            keyframeEffectStacksToUpdate.insert(keyframeEffectStack);
+          }
+        }
+      }
+    }
+
+    for (auto *keyframeEffectStack : keyframeEffectStacksToUpdate)
+    {
+      keyframeEffectStack->ApplyPendingAcceleratedActions();
+    }
+  }
+
   void DocumentTimeline::DocumentDidUpdateAnimationsAndSendEvents() noexcept
   {
+    ApplyPendingAcceleratedAnimations();
+
     if (!_animationResolutionScheduled)
     {
       ScheduleNextTick();

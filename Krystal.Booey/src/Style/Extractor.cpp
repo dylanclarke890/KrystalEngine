@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/CustomProperty.hpp"
 #include "Krystal.Booey/Style/ExtractorGenerated.hpp"
+#include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
@@ -103,10 +104,18 @@ namespace krys::boo::style
     KRYS_NODISCARD const RenderStyle *
       ComputeRenderStyleForProperty(dom::Element &element,
                                     const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
-                                    css::PropertyId, UniquePtr<RenderStyle> &) noexcept
+                                    css::PropertyId propertyID, UniquePtr<RenderStyle> &ownedStyle) noexcept
     {
-      // FIXME: Animations. An accelerated animation of the property is read from the renderer's animated
-      // style.
+      if (style::interpolation::IsAccelerated(propertyID, element.NodeDocument().GetSettings()))
+      {
+        style::Styleable styleable(element, pseudoElementIdentifier);
+        if (styleable.Renderer() && styleable.IsRunningAcceleratedAnimationOfProperty(propertyID))
+        {
+          ownedStyle = styleable.Renderer()->AnimatedStyle();
+          return ownedStyle.get();
+        }
+      }
+
       return element.ComputedStyle(pseudoElementIdentifier);
     }
 

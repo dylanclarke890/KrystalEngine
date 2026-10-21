@@ -3,7 +3,9 @@
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/Interpolation.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -28,6 +30,11 @@ namespace krys::boo
     _effects.push_back(CreateWeakPtr(&effect));
     _isSorted = false;
 
+    if (_effects.size() > 1 && effect.PreventsAcceleration())
+    {
+      StopAcceleratedAnimations();
+    }
+
     effect.WasAddedToEffectStack();
 
     return true;
@@ -43,6 +50,16 @@ namespace krys::boo
 
     _effects.erase(it);
     effect.WasRemovedFromEffectStack();
+
+    if (_effects.empty())
+    {
+      return;
+    }
+
+    if (!effect.CanBeAccelerated())
+    {
+      StartAcceleratedAnimationsIfPossible();
+    }
   }
 
   bool
@@ -71,8 +88,12 @@ namespace krys::boo
 
   bool KeyframeEffectStack::IsCurrentlyAffectingProperty(css::PropertyId property) const noexcept
   {
-    return HasMatchingEffect([property](const KeyframeEffect &effect)
-                             { return effect.IsCurrentlyAffectingProperty(property); });
+    return HasMatchingEffect(
+      [property](const KeyframeEffect &effect)
+      {
+        return effect.IsCurrentlyAffectingProperty(property)
+               || effect.IsRunningAcceleratedAnimationForProperty(property);
+      });
   }
 
   const List<WeakPtr<KeyframeEffect>> &KeyframeEffectStack::SortedEffects() noexcept
@@ -93,8 +114,8 @@ namespace krys::boo
   void KeyframeEffectStack::SetCSSAnimationList(Maybe<style::Animations> &&cssAnimationList) noexcept
   {
     _cssAnimationList = krys::move(cssAnimationList);
-    // Since the list of animation names has changed, the sorting order of the animation effects may have changed
-    // as well.
+    // Since the list of animation names has changed, the sorting order of the animation effects may have
+    // changed as well.
     _isSorted = false;
   }
 
@@ -105,6 +126,14 @@ namespace krys::boo
                                               const style::ResolutionContext &resolutionContext) noexcept
   {
     EnumSet<AnimationImpact> impact;
+
+    const auto &previousStyle = previousLastStyleChangeEventStyle ? *previousLastStyleChangeEventStyle
+                                                                  : RenderStyle::DefaultStyleSingleton();
+
+    auto transformRelatedPropertyChanged = targetStyle.GetTranslate() != previousStyle.GetTranslate()
+                                           || targetStyle.GetScale() != previousStyle.GetScale()
+                                           || targetStyle.GetRotate() != previousStyle.GetRotate()
+                                           || targetStyle.GetTransform() != previousStyle.GetTransform();
 
     auto unanimatedStyle = RenderStyle::Clone(targetStyle);
 
@@ -125,12 +154,26 @@ namespace krys::boo
       auto keyframeRecomputationReason = effect->RecomputeKeyframesIfNecessary(
         previousLastStyleChangeEventStyle, unanimatedStyle, resolutionContext);
 
+      auto wasOrWasAboutToRunAccelerated =
+        effect->IsRunningAccelerated() || effect->IsAboutToRunAccelerated();
+
       Ref animation = ShareRef(*effect->Animation());
       impact.Add(animation->Resolve(targetStyle, resolutionContext));
+
+      if (!wasOrWasAboutToRunAccelerated
+          && (effect->IsRunningAccelerated() || effect->IsAboutToRunAccelerated()))
+      {
+        impact.Add(AnimationImpact::RequiresRecomposite);
+      }
 
       if (effect->TriggersStackingContext())
       {
         impact.Add(AnimationImpact::ForcesStackingContext);
+      }
+
+      if (transformRelatedPropertyChanged && effect->IsRunningAcceleratedTransformRelatedAnimation())
+      {
+        effect->TransformRelatedPropertyDidChange();
       }
 
       // If one of the effect's resolved property changed it could affect whether that effect's animation is
@@ -171,5 +214,152 @@ namespace krys::boo
   void KeyframeEffectStack::AddInvalidCSSAnimationName(const css::CSSOMString &name) noexcept
   {
     _invalidCSSAnimationNames.insert(name);
+  }
+
+  void KeyframeEffectStack::EffectAbilityToBeAcceleratedDidChange(const KeyframeEffect &effect) noexcept
+  {
+    krys_debug_assert(
+      std::ranges::any_of(_effects, [&](const auto &existing) { return existing.get() == &effect; }));
+    if (effect.PreventsAcceleration())
+    {
+      StopAcceleratedAnimations();
+    }
+    else
+    {
+      StartAcceleratedAnimationsIfPossible();
+    }
+  }
+
+  bool KeyframeEffectStack::AllowsAcceleration() const noexcept
+  {
+    // We could try and be a lot smarter here and do this on a per-property basis and
+    // account for fully replacing effects which could co-exist with effects that
+    // don't support acceleration lower in the stack, etc. But, if we are not able to run
+    // all effects that could support acceleration using acceleration, then we might
+    // as well not run any at all since we'll be updating effects for this stack
+    // for each animation frame. So for now, we simply return false if any effect in the
+    // stack is unable to be accelerated, or if we have more than one effect animating
+    // an accelerated property with an implicit keyframe.
+
+    AnimatableCSSPropertySet allAcceleratedProperties;
+
+    for (const auto &effect : _effects)
+    {
+      if (effect->PreventsAcceleration())
+      {
+        return false;
+      }
+      const auto &acceleratedProperties = effect->AcceleratedProperties();
+      if (!allAcceleratedProperties.empty())
+      {
+        for (const auto &property : acceleratedProperties)
+        {
+          if (allAcceleratedProperties.contains(property)
+              && effect->AcceleratedPropertiesWithImplicitKeyframe().contains(property))
+          {
+            return false;
+          }
+        }
+      }
+
+      allAcceleratedProperties.insert(acceleratedProperties.begin(), acceleratedProperties.end());
+    }
+
+    return true;
+  }
+
+  void KeyframeEffectStack::StartAcceleratedAnimationsIfPossible() noexcept
+  {
+    if (!AllowsAcceleration())
+    {
+      return;
+    }
+
+    for (const auto &effect : _effects)
+    {
+      effect->EffectStackNoLongerPreventsAcceleration();
+    }
+  }
+
+  void KeyframeEffectStack::StopAcceleratedAnimations() noexcept
+  {
+    for (const auto &effect : _effects)
+    {
+      effect->EffectStackNoLongerAllowsAcceleration();
+    }
+  }
+
+  void KeyframeEffectStack::LastStyleChangeEventStyleDidChange(const RenderStyle *previousStyle,
+                                                               const RenderStyle *currentStyle) noexcept
+  {
+    for (const auto &effect : _effects)
+    {
+      effect->LastStyleChangeEventStyleDidChange(previousStyle, currentStyle);
+    }
+  }
+
+  void KeyframeEffectStack::CascadeDidOverrideProperties(const AnimatableCSSPropertySet &overriddenProperties,
+                                                         const dom::Document &document) noexcept
+  {
+    AnimatableCSSPropertySet acceleratedPropertiesOverriddenByCascade;
+    for (const auto &animatedProperty : overriddenProperties)
+    {
+      if (style::interpolation::IsAccelerated(animatedProperty, document.GetSettings()))
+      {
+        acceleratedPropertiesOverriddenByCascade.insert(animatedProperty);
+      }
+    }
+
+    if (acceleratedPropertiesOverriddenByCascade == _acceleratedPropertiesOverriddenByCascade)
+    {
+      return;
+    }
+
+    _acceleratedPropertiesOverriddenByCascade = krys::move(acceleratedPropertiesOverriddenByCascade);
+
+    for (const auto &effect : _effects)
+    {
+      effect->AcceleratedPropertiesOverriddenByCascadeDidChange();
+    }
+  }
+
+  void KeyframeEffectStack::ApplyPendingAcceleratedActions() const noexcept
+  {
+    bool hasActiveAcceleratedEffect =
+      std::ranges::any_of(_effects,
+                          [](const auto &effect)
+                          {
+                            return effect->CanBeAccelerated()
+                                   && effect->Animation()->GetPlayState() == WebAnimation::PlayState::Running;
+                          });
+
+    auto accelerationWasPrevented = false;
+
+    for (const auto &effect : _effects)
+    {
+      if (hasActiveAcceleratedEffect)
+      {
+        effect->ApplyPendingAcceleratedActionsOrUpdateTimingProperties();
+      }
+      else
+      {
+        effect->ApplyPendingAcceleratedActions();
+      }
+      accelerationWasPrevented =
+        accelerationWasPrevented || effect->AccelerationWasPrevented() || effect->PreventsAcceleration();
+    }
+
+    if (accelerationWasPrevented)
+    {
+      for (const auto &effect : _effects)
+      {
+        effect->EffectStackNoLongerAllowsAccelerationDuringAcceleratedActionApplication();
+      }
+    }
+  }
+
+  bool KeyframeEffectStack::HasAcceleratedEffects(const Settings &) const noexcept
+  {
+    return HasMatchingEffect([](const auto &effect) { return effect.IsRunningAccelerated(); });
   }
 }

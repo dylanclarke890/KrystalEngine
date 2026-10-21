@@ -42,8 +42,14 @@ namespace krys::boo
 
   void ElementAnimationRareData::SetLastStyleChangeEventStyle(UniquePtr<const RenderStyle> &&style) noexcept
   {
-    // FIXME: Telling the keyframe effect stack the style changed, for accelerated animations, once there are
-    // accelerated animations.
+    if (_keyframeEffectStack && _lastStyleChangeEventStyle != style)
+    {
+      auto previousStyleChangeEventStyle = std::exchange(_lastStyleChangeEventStyle, krys::move(style));
+      _keyframeEffectStack->LastStyleChangeEventStyleDidChange(previousStyleChangeEventStyle.get(),
+                                                               _lastStyleChangeEventStyle.get());
+      return;
+    }
+
     _lastStyleChangeEventStyle = krys::move(style);
   }
 }

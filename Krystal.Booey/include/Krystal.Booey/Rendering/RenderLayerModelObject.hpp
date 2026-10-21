@@ -11,8 +11,8 @@
 namespace krys::boo
 {
   /// @brief A renderer that may have a layer.
-  // FIXME: Animations, viewport-constrained objects and SVG (transforms, resources, clipping) come with
-  // animations, scrolling and SVG.
+  // FIXME: Viewport-constrained objects and SVG (transforms, resources, clipping) come with scrolling and
+  // SVG.
   class RenderLayerModelObject : public RenderElement
   {
     KRYS_NON_COPY_MOVABLE(RenderLayerModelObject);
@@ -35,6 +35,13 @@ namespace krys::boo
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;
 
     KRYS_NODISCARD virtual bool RequiresLayer() const noexcept = 0;
+
+    bool StartAnimation(double timeOffset, const GraphicsLayerAnimation &animation,
+                        const BlendingKeyframes &keyframes) noexcept override;
+    void AnimationPaused(double timeOffset, const BlendingKeyframes &keyframes) noexcept override;
+    void AnimationFinished(const BlendingKeyframes &keyframes) noexcept override;
+    void TransformRelatedPropertyDidChange() noexcept override;
+    void SuspendAnimations(MonotonicTime::duration time = {}) noexcept override;
 
     KRYS_NODISCARD TransformationMatrix *LayerTransform() const noexcept;
 

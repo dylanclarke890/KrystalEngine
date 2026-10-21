@@ -1262,6 +1262,7 @@ namespace krys::boo
     KRYS_NODISCARD bool HasBackdropFilter() const noexcept;
 
     KRYS_NODISCARD bool ShouldPaintWithFilters(EnumSet<PaintBehavior> = {}) const noexcept;
+    KRYS_NODISCARD bool WillCompositeClipPath() const noexcept;
     KRYS_NODISCARD bool RequiresFullLayerImageForFilters() const noexcept;
     KRYS_NODISCARD RenderLayerFilters *Filters() const noexcept;
 

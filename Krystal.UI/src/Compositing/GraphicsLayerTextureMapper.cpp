@@ -1,8 +1,10 @@
 ﻿#include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 
 namespace krys::ui
@@ -344,14 +346,20 @@ namespace krys::ui
     if (image)
     {
       // Make the decision about whether the image has changed. This code makes the assumption that pointer
-      // equality on an image is a valid way to tell if the image is changed.
-      // FIXME: The image's current frame (currentNativeImage), once animated images are composited.
-      if (_compositedNativeImage.get() == image)
+      // equality on a native image is a valid way to tell if the image is changed: an animated image has a
+      // native image per frame.
+      auto newNativeImage = image->CurrentNativeImage();
+      if (!newNativeImage)
       {
         return;
       }
 
-      _compositedNativeImage = ShareRefPtr(image);
+      if (newNativeImage == _compositedNativeImage)
+      {
+        return;
+      }
+
+      _compositedNativeImage = krys::move(newNativeImage);
       if (!_compositedImage)
       {
         _compositedImage = TextureMapperTiledBackingStore::Create();
@@ -419,7 +427,7 @@ namespace krys::ui
   {
     PrepareBackingStoreIfNeeded();
     CommitLayerChanges();
-    _layer->SyncAnimations(MonotonicTime::Now());
+    _layer->SyncAnimations(boo::html::EventLoop::Current().Now());
   }
 
   void GraphicsLayerTextureMapper::PrepareBackingStoreIfNeeded() noexcept
@@ -605,6 +613,16 @@ namespace krys::ui
       _layer->SetContentsLayer(_contentsLayer);
     }
 
+    if (_changeMask & AnimationChange)
+    {
+      _layer->SetAnimations(_animations);
+    }
+
+    if (_changeMask & AnimationStarted)
+    {
+      GraphicsLayer::Client().NotifyAnimationStarted(this, {}, _animationStartTime);
+    }
+
     _changeMask = NoChanges;
   }
 
@@ -613,6 +631,8 @@ namespace krys::ui
     FlushCompositingStateForThisLayerOnly();
     UpdateVisibleRects(rect);
 
+    auto now = boo::html::EventLoop::Current().Now();
+
     if (MaskLayer())
     {
       MaskLayer()->FlushCompositingState(rect);
@@ -620,7 +640,9 @@ namespace krys::ui
     if (ReplicaLayer())
     {
       ReplicaLayer()->FlushCompositingState(rect);
+      Downcast<GraphicsLayerTextureMapper>(*ReplicaLayer()).Layer().ApplyAnimationsRecursively(now);
     }
+    // FIXME: Backdrop layers' animations, with backdrop-filter.
     for (auto &child : Children())
     {
       child->FlushCompositingState(rect);
@@ -716,6 +738,74 @@ namespace krys::ui
   bool GraphicsLayerTextureMapper::ShouldHaveBackingStore() const noexcept
   {
     return DrawsContent() && ContentsAreVisible() && !_size.IsEmpty();
+  }
+
+  bool GraphicsLayerTextureMapper::AddAnimation(const boo::GraphicsLayerKeyframeValueList &valueList,
+                                                const boo::GraphicsLayerAnimation *animation,
+                                                const utf8_string &keyframesName, double timeOffset) noexcept
+  {
+    krys_debug_assert(!keyframesName.empty());
+
+    if (!animation || animation->IsZeroDuration() || valueList.Size() < 2
+        || (valueList.Property() != boo::AnimatedProperty::Transform
+            && valueList.Property() != boo::AnimatedProperty::Opacity))
+    {
+      return false;
+    }
+
+    if (valueList.Property() == boo::AnimatedProperty::Filter)
+    {
+      int32 listIndex = ValidateFilterOperations(valueList);
+      if (listIndex < 0)
+      {
+        return false;
+      }
+
+      const auto &filters = static_cast<const boo::GraphicsLayerFilterAnimationValue &>(
+                              valueList.At(static_cast<size_t>(listIndex)))
+                              .Value();
+      // The animation of drop-shadow filter with currentColor isn't supported yet.
+      if (filters.HasFilterOfType<boo::FilterOperation::Type::DropShadowWithStyleColor>())
+      {
+        return false;
+      }
+      if (!FiltersCanBeComposited(filters))
+      {
+        return false;
+      }
+    }
+
+    const auto currentTime = boo::html::EventLoop::Current().Now();
+    const auto offset = std::chrono::duration_cast<MonotonicTime::duration>(boo::Seconds(timeOffset));
+    _animations.Add(TextureMapperAnimation(keyframesName, valueList, *animation, currentTime - offset, {},
+                                           TextureMapperAnimation::State::Playing));
+    // _animationStartTime is the time of the first real frame of animation, now or delayed by a negative
+    // offset.
+    if (timeOffset > 0)
+    {
+      _animationStartTime = currentTime;
+    }
+    else
+    {
+      _animationStartTime = currentTime - offset;
+    }
+    NotifyChange(AnimationChange);
+    NotifyChange(AnimationStarted);
+    return true;
+  }
+
+  void GraphicsLayerTextureMapper::PauseAnimation(const utf8_string &animationName,
+                                                  double timeOffset) noexcept
+  {
+    _animations.Pause(animationName, boo::Seconds(timeOffset));
+    NotifyChange(AnimationChange);
+  }
+
+  void GraphicsLayerTextureMapper::RemoveAnimation(const utf8_string &animationName,
+                                                   Maybe<boo::AnimatedProperty>) noexcept
+  {
+    _animations.Remove(animationName);
+    NotifyChange(AnimationChange);
   }
 
   bool GraphicsLayerTextureMapper::FiltersCanBeComposited(const boo::FilterOperations &filters) const noexcept

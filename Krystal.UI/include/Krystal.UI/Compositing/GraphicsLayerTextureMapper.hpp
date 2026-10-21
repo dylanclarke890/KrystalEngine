@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerTransform.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.UI/Compositing/TextureMapperLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp"
 #include "Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp"
@@ -14,8 +15,7 @@ namespace krys::ui
 
   /// @brief Krystal.UI's graphics layer: it commits its changes to its `TextureMapperLayer` when it's
   /// flushed, and paints its contents into tiles that cover what's visible of it.
-  // FIXME: Animations, once layers animate; backdrops, with backdrop-filter; contents display delegates
-  // (canvas and video).
+  // FIXME: Backdrops, with backdrop-filter; contents display delegates (canvas and video).
   class GraphicsLayerTextureMapper final : public boo::GraphicsLayer,
                                            public TextureMapperPlatformLayer::Client
   {
@@ -57,7 +57,7 @@ namespace krys::ui
 
     UniquePtr<TextureMapperLayer> _layer {CreateUnique<TextureMapperLayer>()};
     RefPtr<TextureMapperTiledBackingStore> _compositedImage;
-    RefPtr<boo::Image> _compositedNativeImage;
+    RefPtr<boo::NativeImage> _compositedNativeImage;
     RefPtr<TextureMapperTiledBackingStore> _backingStore;
 
     uint32 _changeMask {NoChanges};
@@ -67,6 +67,8 @@ namespace krys::ui
     float _debugBorderWidth {0};
     TextureMapperPlatformLayer *_contentsLayer {nullptr};
     boo::FloatRect _needsDisplayRect;
+    TextureMapperAnimations _animations;
+    MonotonicTime::duration _animationStartTime {};
 
     // What's visible of the layer, in its coordinates, as of its last flush: its tiles cover it.
     boo::GraphicsLayerTransform _layerTransform;
@@ -119,6 +121,12 @@ namespace krys::ui
     {
       return _contentsLayer != nullptr;
     }
+
+    bool AddAnimation(const boo::GraphicsLayerKeyframeValueList &valueList,
+                      const boo::GraphicsLayerAnimation *animation, const utf8_string &keyframesName,
+                      double timeOffset) noexcept override;
+    void PauseAnimation(const utf8_string &animationName, double timeOffset) noexcept override;
+    void RemoveAnimation(const utf8_string &animationName, Maybe<boo::AnimatedProperty>) noexcept override;
 
     void SetShowDebugBorder(bool show) noexcept override;
     void SetDebugBorder(const boo::Color &color, float width) noexcept override;

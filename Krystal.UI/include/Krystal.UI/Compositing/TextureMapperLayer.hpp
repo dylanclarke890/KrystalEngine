@@ -12,6 +12,7 @@
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.UI/Compositing/TextureMapperAnimation.hpp"
 
 namespace krys::ui
 {
@@ -23,8 +24,8 @@ namespace krys::ui
   /// @brief A layer of the composited tree as the compositor draws it: its state, committed from its graphics
   /// layer, its transforms, and how it paints its backing store, its contents and its children.
   // FIXME: Masks, once masks are composited; backdrops, with backdrop-filter; replicas (reflections); 3D
-  // rendering contexts and flattening (their layers draw flattened); animations, once layers animate; damage
-  // tracking (the whole tree is composited each frame).
+  // rendering contexts and flattening (their layers draw flattened); damage tracking (the whole tree is
+  // composited each frame).
   class TextureMapperLayer : public CanMakeWeakPtr<TextureMapperLayer>,
                              public CanMakeCheckedPtr<TextureMapperLayer>
   {
@@ -85,6 +86,7 @@ namespace krys::ui
     bool _isBackdrop {false};
     bool _isReplica {false};
     LayerTransforms _layerTransforms;
+    TextureMapperAnimations _animations;
 
   public:
     TextureMapperLayer() noexcept;
@@ -174,8 +176,10 @@ namespace krys::ui
     }
 
     void SetContentsLayer(TextureMapperPlatformLayer *platformLayer) noexcept;
+    void SetAnimations(const TextureMapperAnimations &animations) noexcept;
     void SetBackingStore(TextureMapperBackingStore *backingStore) noexcept;
 
+    KRYS_NODISCARD bool DescendantsOrSelfHaveRunningAnimations() const noexcept;
     bool ApplyAnimationsRecursively(MonotonicTime::duration time) noexcept;
     bool SyncAnimations(MonotonicTime::duration time) noexcept;
 

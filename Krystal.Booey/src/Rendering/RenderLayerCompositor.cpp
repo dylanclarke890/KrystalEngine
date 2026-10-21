@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -16,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Difference.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -3373,10 +3375,33 @@ namespace krys::boo
     return CanUseDescendantClippingLayer(layer);
   }
 
-  bool RenderLayerCompositor::RequiresCompositingForAnimation(const RenderLayerModelObject &) const noexcept
+  bool RenderLayerCompositor::RequiresCompositingForAnimation(
+    const RenderLayerModelObject &renderer) const noexcept
   {
-    // FIXME: Accelerated animations (opacity, filter, backdrop-filter, transforms and offset), once there are
-    // any.
+    // All compositing triggers are allowed, including animations and animated opacity.
+    if (auto styleable = style::Styleable::FromRenderer(renderer))
+    {
+      if (styleable->HasRunningAcceleratedAnimations())
+      {
+        return true;
+      }
+      if (auto *effectsStack = styleable->GetKeyframeEffectStack())
+      {
+        return effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Opacity)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Filter)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::BackdropFilter)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Translate)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Scale)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Rotate)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Transform)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::OffsetAnchor)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::OffsetDistance)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::OffsetPath)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::OffsetPosition)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::OffsetRotate);
+      }
+    }
+
     return false;
   }
 
@@ -3768,9 +3793,19 @@ namespace krys::boo
     return ScrollPositioningBehavior::None;
   }
 
-  bool RenderLayerCompositor::IsRunningTransformAnimation(const RenderLayerModelObject &) const noexcept
+  bool
+    RenderLayerCompositor::IsRunningTransformAnimation(const RenderLayerModelObject &renderer) const noexcept
   {
-    // FIXME: Accelerated transform animations, once there are any.
+    if (auto styleable = style::Styleable::FromRenderer(renderer))
+    {
+      if (auto *effectsStack = styleable->GetKeyframeEffectStack())
+      {
+        return effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Transform)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Rotate)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Scale)
+               || effectsStack->IsCurrentlyAffectingProperty(css::PropertyId::Translate);
+      }
+    }
     return false;
   }
 

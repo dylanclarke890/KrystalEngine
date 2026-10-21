@@ -57,10 +57,11 @@ tr:hover td { text-decoration: underline; }
 .filters:hover .fade { filter: grayscale(0); }
 .filters:hover .soft { filter: blur(0); }
 
-/* Layers: a blurred tile composites; the badge above it composites because it overlaps the tile. */
+/* Layers: a blurred tile composites; the badge above it composites because it overlaps the tile, and slides
+   with a transform transition, which runs on its layer. */
 .layer-stage { position: relative; height: 72px; }
 .layer-stage .blurred { position: absolute; left: 12px; top: 8px; width: 72px; height: 56px; border-radius: 6px;
                         background: linear-gradient(135deg, #4f6df5, #06d6a0); filter: blur(2px); }
 .layer-stage .badge { position: absolute; left: 60px; top: 0; padding: 2px 8px; border-radius: 8px;
-                      background: #ef476f; color: white; font-size: 12px; transition: left 400ms; }
-.layers:hover .badge { left: 180px; }
+                      background: #ef476f; color: white; font-size: 12px; transition: transform 400ms; }
+.layers:hover .badge { transform: translateX(120px); }

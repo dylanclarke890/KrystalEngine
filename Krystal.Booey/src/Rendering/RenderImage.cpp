@@ -322,7 +322,8 @@ namespace krys::boo
       RepaintRectangle(repaintRect);
     }
 
-    // FIXME: Tell compositing layers the image changed (contentChanged), once there are layers.
+    // Tell any potential compositing layers that the image needs updating.
+    ContentChanged(ContentChangeType::Image);
   }
 
   void RenderImage::NotifyFinished(CachedResource &newImage) noexcept
@@ -334,7 +335,12 @@ namespace krys::boo
 
     InvalidateBackgroundObscurationStatus();
 
-    // FIXME: Tell compositing layers the image is done (contentChanged), once there are layers.
+    if (&newImage == GetCachedImage())
+    {
+      // tell any potential compositing layers
+      // that the image is done and they can reference it directly.
+      ContentChanged(ContentChangeType::Image);
+    }
 
     RenderReplaced::NotifyFinished(newImage);
   }

@@ -1,4 +1,7 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
@@ -7,6 +10,7 @@
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
@@ -82,6 +86,18 @@ namespace krys::ui::tests
       /// @brief The whole page painted again.
       KRYS_NODISCARD GoldenImage Repainted(View &view)
       {
+        // Animations that run on layers don't update the page's style each frame: resolve it at the current
+        // time, so the whole page paints what the layers show.
+        if (auto *timeline = view.Document().ExistingTimeline())
+        {
+          for (const auto &animation : timeline->RelevantAnimations())
+          {
+            if (auto *effect = animation->GetKeyframeEffect())
+            {
+              effect->Invalidate();
+            }
+          }
+        }
         (void)view.Document().UpdateLayout();
         auto displayList = view.Record();
         return Draw([&] { view.Replay(*displayList, *_renderer); });
@@ -127,6 +143,19 @@ namespace krys::ui::tests
         (void)SavePng(GoldenOutputDirectory() / ("repaint." + step + ".repainted.png"), repainted);
       }
       CHECK(comparison.PixelsOver == 0u);
+    }
+
+    /// @brief Writes a 1x1 GIF of two frames, red then blue, 100ms each, repeating forever, to @p path.
+    void WriteAnimatedGif(const std::filesystem::path &path)
+    {
+      const unsigned char gif[] = {
+        71, 73,  70, 56, 57,  97, 1,  0,  1,  0,  129, 0,  0,  255, 0,  0,  0,  0, 0, 0, 0,   0,
+        0,  0,   0,  33, 255, 11, 78, 69, 84, 83, 67,  65, 80, 69,  50, 46, 48, 3, 1, 0, 0,   0,
+        33, 249, 4,  0,  10,  0,  0,  0,  44, 0,  0,   0,  0,  1,   0,  1,  0,  0, 8, 4, 0,   1,
+        4,  4,   0,  33, 249, 4,  1,  10, 0,  1,  0,   44, 0,  0,   0,  0,  1,  0, 1, 0, 129, 0,
+        0,  255, 0,  0,  0,   0,  0,  0,  0,  0,  0,   8,  4,  0,   1,  4,  4,  0, 59};
+      std::ofstream image(path, std::ios::binary);
+      image.write(reinterpret_cast<const char *>(gif), sizeof(gif));
     }
   }
 
@@ -392,6 +421,56 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: changes beside filters leave no stale pixels", "[UI][GPU]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-beside-filters-test";
+    std::filesystem::create_directories(directory);
+    WriteAnimatedGif(directory / "spin.gif");
+    {
+      // An animated image between a blurred box and a drop-shadowed one, and a box whose shadow, on hover,
+      // reaches over the blur.
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 } div, img { position: absolute }"
+              "#blurred { left: 20px; top: 20px; width: 60px; height: 40px; background: #073b4c; filter: "
+              "blur(4px) }"
+              "#shadowed { left: 120px; top: 20px; width: 60px; height: 40px; background: #118ab2;"
+              " filter: drop-shadow(6px 6px 4px #000a) }"
+              "#gif { left: 90px; top: 30px; width: 20px; height: 20px }"
+              "#hover { left: 40px; top: 70px; width: 40px; height: 20px; background: #ffd166 }"
+              "#hover:hover { box-shadow: 0 -20px 12px #ef476f }</style>"
+              "<div id=blurred></div><div id=shadowed></div><img id=gif src=spin.gif><div id=hover></div>";
+    }
+
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    auto time = boo::html::EventLoop::Current().Now();
+    auto frame = [&](MonotonicTime::duration delta)
+    {
+      time += delta;
+      (void)view.Update(time);
+      (void)fixture.Painted(view);
+    };
+    frame(16ms);
+    frame(16ms);
+    CheckNoStalePixels(fixture, view, "beside-filters-first");
+
+    for (int32 i = 0; i < 4; ++i)
+    {
+      frame(100ms);
+      CheckNoStalePixels(fixture, view, "beside-filters-image-" + std::to_string(i));
+    }
+
+    view.MouseMoved({60, 80});
+    frame(16ms);
+    CheckNoStalePixels(fixture, view, "beside-filters-hover");
+    view.MouseMoved({190, 90});
+    frame(16ms);
+    CheckNoStalePixels(fixture, view, "beside-filters-unhover");
+
+    std::filesystem::remove_all(directory);
+  }
+
   TEST_CASE("View: scrolling moves the painted page and leaves no stale pixels", "[UI][GPU]")
   {
     static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -490,11 +569,26 @@ namespace krys::ui::tests
         Compositor().ResetTrackedRepaintRects();
       }
 
+      /// @brief The graphics layer of the composited element @p id.
+      KRYS_NODISCARD boo::GraphicsLayer &LayerOf(utf8_stringview id) const noexcept
+      {
+        auto element = _view.Document().GetElementById(id);
+        auto *layer = krys::Downcast<boo::RenderLayerModelObject>(*element->Renderer()).Layer();
+        krys_assert(layer && layer->Backing());
+        return *layer->Backing()->GetGraphicsLayer();
+      }
+
       /// @brief The bounds of the view layer's repaints since the last reset, in the layer's coordinates.
       KRYS_NODISCARD boo::FloatRect Bounds() const noexcept
       {
-        auto text = ViewLayer().LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
-                                                 boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
+        return Bounds(ViewLayer());
+      }
+
+      /// @brief The bounds of @p layer's repaints since the last reset, in its coordinates.
+      KRYS_NODISCARD boo::FloatRect Bounds(boo::GraphicsLayer &layer) const noexcept
+      {
+        auto text = layer.LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
+                                           boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
         // Only the layer's own rects: its children's come after "(children".
         text = text.substr(0, text.find(u8"(children"));
         boo::FloatRect bounds;
@@ -579,15 +673,69 @@ namespace krys::ui::tests
     }
   }
 
-  TEST_CASE("View: an animation repaints the page each frame", "[UI][GPU]")
+  TEST_CASE("View: changing a composited layer's opacity, transform or filter repaints nothing", "[UI][GPU]")
   {
     RepaintFixture fixture(200u, 100u);
     View view({200, 100});
     view.LoadHTML(
-      u8"<!DOCTYPE html><style>body { margin: 0 } @keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
-      u8"#box { margin: 10px; width: 10px; height: 10px; background: teal; animation: fade 1s linear "
-      u8"infinite }"
-      u8"</style><div id=box></div>");
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }"
+      u8"#blurred { position: absolute; left: 30px; top: 20px; width: 40px; height: 40px;"
+      u8" background: #073b4c; filter: blur(2px); opacity: 0.9; transform: translateX(1px) }</style>"
+      u8"<p>Text beside it</p><div id=blurred></div>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      (void)fixture.Painted(view);
+    };
+    frame();
+    TrackedRepaints repaints(view);
+    repaints.Reset();
+
+    // Each change keeps the layer's stacking context and containing block, which would need a layout.
+    auto blurred = view.Document().GetElementById(u8"blurred");
+    auto change = [&](utf8_stringview style)
+    {
+      REQUIRE_FALSE(blurred->SetAttribute(u8"style", utf8_string(style)).HasException());
+      frame();
+      CHECK(repaints.Bounds().IsEmpty());
+      CHECK(repaints.Bounds(repaints.LayerOf(u8"blurred")).IsEmpty());
+      CheckNoStalePixels(fixture, view, "composited-change");
+    };
+
+    SECTION("opacity")
+    {
+      change(u8"opacity: 0.5");
+    }
+
+    SECTION("transform")
+    {
+      change(u8"transform: translateX(20px) rotate(10deg)");
+    }
+
+    SECTION("filter")
+    {
+      // The same blur, so the layer keeps its size.
+      change(u8"filter: blur(2px) sepia(1)");
+    }
+  }
+
+  TEST_CASE("View: animations of composited properties repaint nothing", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    auto load = [&](utf8_stringview animation)
+    {
+      utf8_string markup =
+        u8"<!DOCTYPE html><style>body { margin: 0 } @keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
+        u8"@keyframes spin { from { transform: rotate(0) } to { transform: rotate(90deg) } }"
+        u8"@keyframes tint { from { filter: grayscale(0) } to { filter: grayscale(1) } }"
+        u8"#box { margin: 20px; width: 30px; height: 20px; background: teal; animation: ";
+      markup += animation;
+      markup += u8" }</style><div id=box></div>";
+      view.LoadHTML(krys::move(markup));
+    };
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
     {
@@ -596,13 +744,64 @@ namespace krys::ui::tests
       (void)fixture.Painted(view);
       return updated;
     };
-    (void)frame();
-    TrackedRepaints repaints(view);
-    for (int32 i = 0; i < 3; ++i)
+    // Each frame of an animation running on the box's layer: no rendering update, no repaints, but a paint.
+    auto checkLayerAnimates = [&](const std::string &step)
     {
-      repaints.Reset();
-      CHECK(frame());
-      CHECK(repaints.Bounds() == boo::FloatRect(10, 10, 10, 10));
+      (void)frame();
+      (void)frame();
+      TrackedRepaints repaints(view);
+      REQUIRE(view.Document().GetElementById(u8"box")->Renderer()->IsComposited());
+      for (int32 i = 0; i < 3; ++i)
+      {
+        repaints.Reset();
+        CHECK_FALSE(frame());
+        CHECK(view.NeedsPaint());
+        CHECK(repaints.Bounds().IsEmpty());
+        CHECK(repaints.Bounds(repaints.LayerOf(u8"box")).IsEmpty());
+      }
+      // The composited frame shows the animated value (comparing resolves the page's style, so it comes
+      // last).
+      CheckNoStalePixels(fixture, view, step);
+    };
+
+    SECTION("opacity")
+    {
+      load(u8"fade 1s linear infinite");
+      checkLayerAnimates("layer-opacity");
+    }
+
+    SECTION("transform")
+    {
+      load(u8"spin 1s linear infinite");
+      checkLayerAnimates("layer-transform");
+    }
+
+    SECTION("a filter, which layers don't animate, recomposites")
+    {
+      load(u8"tint 1s linear infinite");
+      (void)frame();
+      (void)frame();
+      TrackedRepaints repaints(view);
+      REQUIRE(view.Document().GetElementById(u8"box")->Renderer()->IsComposited());
+      for (int32 i = 0; i < 3; ++i)
+      {
+        repaints.Reset();
+        CHECK(frame());
+        CHECK(repaints.Bounds().IsEmpty());
+        CHECK(repaints.Bounds(repaints.LayerOf(u8"box")).IsEmpty());
+        CheckNoStalePixels(fixture, view, "page-filter-" + std::to_string(i));
+      }
+    }
+
+    SECTION("it ends")
+    {
+      load(u8"fade 100ms linear");
+      for (int32 i = 0; i < 12; ++i)
+      {
+        (void)frame();
+      }
+      CHECK_FALSE(view.NeedsPaint());
+      CheckNoStalePixels(fixture, view, "layer-animation-ended");
     }
   }
 
@@ -611,15 +810,7 @@ namespace krys::ui::tests
     const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-animation-test";
     std::filesystem::create_directories(directory);
     {
-      // A 1x1 GIF of two frames, red then blue, 100ms each, repeating forever.
-      const unsigned char gif[] = {
-        71, 73,  70, 56, 57,  97, 1,  0,  1,  0,  129, 0,  0,  255, 0,  0,  0,  0, 0, 0, 0,   0,
-        0,  0,   0,  33, 255, 11, 78, 69, 84, 83, 67,  65, 80, 69,  50, 46, 48, 3, 1, 0, 0,   0,
-        33, 249, 4,  0,  10,  0,  0,  0,  44, 0,  0,   0,  0,  1,   0,  1,  0,  0, 8, 4, 0,   1,
-        4,  4,   0,  33, 249, 4,  1,  10, 0,  1,  0,   44, 0,  0,   0,  0,  1,  0, 1, 0, 129, 0,
-        0,  255, 0,  0,  0,   0,  0,  0,  0,  0,  0,   8,  4,  0,   1,  4,  4,  0, 59};
-      std::ofstream image(directory / "spin.gif", std::ios::binary);
-      image.write(reinterpret_cast<const char *>(gif), sizeof(gif));
+      WriteAnimatedGif(directory / "spin.gif");
       std::ofstream page(directory / "page.html", std::ios::binary);
       page << "<!DOCTYPE html><img id=img src=spin.gif>";
     }

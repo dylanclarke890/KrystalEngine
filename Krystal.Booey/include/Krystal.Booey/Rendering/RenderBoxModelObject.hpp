@@ -74,6 +74,7 @@ namespace krys::boo
 
     void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
     KRYS_NODISCARD bool HasAcceleratedCompositing() const noexcept;
+    KRYS_NODISCARD bool HasRunningAcceleratedAnimations() const noexcept;
     // FIXME: Sticky positioning (constrainingRectForStickyPosition, enclosingClippingBoxForStickyPosition,
     // computeStickyPositionConstraints, stickyPositionOffset), once there's scrolling.
     KRYS_NODISCARD LayoutSize OffsetForInFlowPosition() const noexcept;
