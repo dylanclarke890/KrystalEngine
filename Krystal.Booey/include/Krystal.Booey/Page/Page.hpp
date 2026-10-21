@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -17,6 +18,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class GraphicsContext;
   class LocalFrame;
 
   /// @brief The steps of the rendering update that something asked for.
@@ -76,6 +78,10 @@ namespace krys::boo
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;
+    /// @brief How the page's filters are applied when drawn into @p context: through the graphics context (there's
+    /// no software or accelerated filter rendering).
+    KRYS_NODISCARD EnumSet<FilterRenderingMode> PreferredFilterRenderingModes(const GraphicsContext &context) const noexcept;
+
     KRYS_NODISCARD bool IsRenderingUpdateScheduled() const noexcept
     {
       return _renderingUpdateIsScheduled;

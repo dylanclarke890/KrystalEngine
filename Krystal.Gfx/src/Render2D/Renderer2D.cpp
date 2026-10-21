@@ -147,6 +147,13 @@ layout(binding = 3, std140) uniform Pattern
 
 layout(binding = 3) uniform sampler2D u_Pattern;
 
+// The batch's colour matrix, a layer's filter: on straight-alpha colours, c' = matrix * c + offset.
+layout(binding = 4, std140) uniform ColourMatrix
+{
+  mat4 u_ColourMatrix;
+  vec4 u_ColourMatrixOffset;
+};
+
 layout(location = 0) out vec4 o_Colour;
 
 const uint Textured = 1u;
@@ -158,6 +165,7 @@ const uint GradientPaint = 32u;
 const uint Shadow = 64u;
 const uint AlphaMask = 128u;
 const uint PatternPaint = 8192u;
+const uint ColourMatrixFilter = 16384u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -602,7 +610,14 @@ void main()
   vec4 colour = v_Colour;
   if ((v_Flags & Textured) != 0u)
   {
-    colour *= SampleTexture(dx, dy);
+    vec4 texel = SampleTexture(dx, dy);
+    if ((v_Flags & ColourMatrixFilter) != 0u)
+    {
+      vec4 straight = vec4(texel.a > 0.0 ? texel.rgb / texel.a : vec3(0.0), texel.a);
+      vec4 filtered = clamp(u_ColourMatrix * straight + u_ColourMatrixOffset, 0.0, 1.0);
+      texel = vec4(filtered.rgb * filtered.a, filtered.a);
+    }
+    colour *= texel;
   }
   if ((v_Flags & GradientPaint) != 0u)
   {
@@ -631,6 +646,90 @@ void main()
   o_Colour = source;
 }
 )";
+
+    // Blurs a layer's texture along one axis: a Gaussian over the texels of the region, premultiplied. Texels
+    // outside the region are transparent.
+    constexpr const char8_t *BlurVertexSource = u8R"(#version 450
+layout(binding = 0, std140) uniform Blur
+{
+  vec4 u_Region;      // the texels written and read: x, y, width, height
+  vec2 u_TextureSize; // the destination's size
+  vec2 u_Direction;   // 1, 0 across; 0, 1 down
+  float u_Sigma;      // the standard deviation, in texels
+  int u_Reach;        // how many texels either side are read
+};
+
+layout(location = 0) out vec2 v_Texel;
+
+void main()
+{
+  vec2 corner = vec2(gl_VertexID & 1, gl_VertexID >> 1);
+  vec2 texel = u_Region.xy + corner * u_Region.zw;
+  vec2 ndc = texel / u_TextureSize * 2.0 - 1.0;
+  gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
+  v_Texel = texel;
+}
+)";
+
+    constexpr const char8_t *BlurFragmentSource = u8R"(#version 450
+layout(binding = 0, std140) uniform Blur
+{
+  vec4 u_Region;
+  vec2 u_TextureSize;
+  vec2 u_Direction;
+  float u_Sigma;
+  int u_Reach;
+};
+
+layout(binding = 0) uniform sampler2D u_Source;
+
+layout(location = 0) in vec2 v_Texel;
+layout(location = 0) out vec4 o_Colour;
+
+void main()
+{
+  ivec2 texel = ivec2(floor(v_Texel));
+  ivec2 low = ivec2(u_Region.xy);
+  ivec2 high = low + ivec2(u_Region.zw);
+  ivec2 step = ivec2(u_Direction);
+  float k = -0.5 / (u_Sigma * u_Sigma);
+  vec4 sum = vec4(0.0);
+  float total = 0.0;
+  for (int i = -u_Reach; i <= u_Reach; ++i)
+  {
+    float weight = exp(float(i * i) * k);
+    total += weight;
+    ivec2 at = texel + step * i;
+    if (all(greaterThanEqual(at, low)) && all(lessThan(at, high)))
+    {
+      sum += weight * texelFetch(u_Source, at, 0);
+    }
+  }
+  o_Colour = sum / total;
+}
+)";
+
+    /// @brief How far a blur of `sigma` reaches past what's drawn, in whole pixels: three standard
+    /// deviations, where it fades out.
+    KRYS_NODISCARD int32 BlurReach(float sigma) noexcept
+    {
+      // About three standard deviations of 85 pixels: the most texels either side of a pixel a blur reads.
+      constexpr int32 maxBlurReach = 256;
+      return sigma > 0.f ? std::min(static_cast<int32>(std::ceil(3.f * sigma)), maxBlurReach) : 0;
+    }
+
+    /// @brief The rect grown by `amount` pixels on every side.
+    KRYS_NODISCARD PixelRect2D Inflate(const PixelRect2D &rect, int32 amount) noexcept
+    {
+      if (rect.IsEmpty())
+      {
+        return rect;
+      }
+      return {.X = rect.X - amount,
+              .Y = rect.Y - amount,
+              .Width = rect.Width + 2u * static_cast<uint32>(amount),
+              .Height = rect.Height + 2u * static_cast<uint32>(amount)};
+    }
 
     /// @brief Clamps negative radii to zero and scales radii that don't fit down together, as CSS does.
     KRYS_NODISCARD CornerRadii2D ConstrainRadii(const Rect2D &rect, CornerRadii2D radii) noexcept
@@ -685,6 +784,17 @@ void main()
     {
       _device->Destroy(entry.Pipeline);
     }
+    for (const auto &entry : _blurPipelines)
+    {
+      _device->Destroy(entry.Pipeline);
+    }
+    for (auto shader : {_blurFragmentShader, _blurVertexShader})
+    {
+      if (shader.IsValid())
+      {
+        _device->Destroy(shader);
+      }
+    }
     if (_fragmentShader.IsValid())
     {
       _device->Destroy(_fragmentShader);
@@ -728,6 +838,22 @@ void main()
       return Unexpected<string>(fragmentShader.error());
     }
     _fragmentShader = *fragmentShader;
+
+    auto blurVertexShader = _device->CreateShader(
+      {.Stage = ShaderStage::Vertex, .Source = BlurVertexSource, .DebugName = u8"Render2D.Blur.vert"});
+    if (!blurVertexShader)
+    {
+      return Unexpected<string>(blurVertexShader.error());
+    }
+    _blurVertexShader = *blurVertexShader;
+
+    auto blurFragmentShader = _device->CreateShader(
+      {.Stage = ShaderStage::Fragment, .Source = BlurFragmentSource, .DebugName = u8"Render2D.Blur.frag"});
+    if (!blurFragmentShader)
+    {
+      return Unexpected<string>(blurFragmentShader.error());
+    }
+    _blurFragmentShader = *blurFragmentShader;
 
     auto linearSampler = _device->CreateSampler({.MinFilter = SamplerFilter::Linear,
                                                  .MagFilter = SamplerFilter::Linear,
@@ -872,6 +998,12 @@ void main()
     _state.Blend = BlendMode::Normal;
   }
 
+  void Renderer2D::BeginLayer(float opacity, BlendMode blend, const LayerFilter2D &filter) noexcept
+  {
+    BeginLayer(opacity, blend);
+    _layers[_currentLayer].Filter = filter;
+  }
+
   void Renderer2D::EndLayer() noexcept
   {
     krys_assert_msg(_currentLayer != NoLayer, "EndLayer without a matching BeginLayer.");
@@ -894,6 +1026,31 @@ void main()
       return;
     }
     auto &layer = _layers[index];
+    if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::DropShadow)
+    {
+      // The shadow is composited beneath the layer, from its own texture.
+      layer.ShadowBatch = static_cast<uint32>(_batches.size());
+      layer.ShadowInstance = static_cast<uint32>(_rects.size());
+      _batches.push_back({.FirstInstance = layer.ShadowInstance,
+                          .InstanceCount = 1u,
+                          .Scissor = _state.Clip,
+                          .Chain = NoChain,
+                          .Texture = {},
+                          .Sampler = {},
+                          .Layer = _currentLayer,
+                          .Composite = index,
+                          .Blend = layer.Blend,
+                          .Backdrop = {}});
+      _rects.push_back({.Rect = {},
+                        .Radii = {},
+                        .Linear = {1.f, 0.f, 0.f, 1.f},
+                        .Translation = {},
+                        .UV = {},
+                        .HoleRect = {},
+                        .HoleRadii = {},
+                        .Colour = {},
+                        .Flags = static_cast<uint32>(layer.Blend) << BlendModeShift});
+    }
     layer.CompositeBatch = static_cast<uint32>(_batches.size());
     layer.CompositeInstance = static_cast<uint32>(_rects.size());
     layer.HasComposite = true;
@@ -2038,6 +2195,19 @@ void main()
       {
         resources.Pipeline = *created;
         resources.AdditivePipeline = *createdAdditive;
+        if (std::ranges::any_of(
+              _layers, [](const Layer &layer)
+              { return layer.Filter && layer.Filter->Type != LayerFilter2D::Kind::ColourMatrix; }))
+        {
+          if (auto blur = GetBlurPipeline(_target.Format))
+          {
+            resources.BlurPipeline = *blur;
+          }
+          else
+          {
+            KRYS_LOG_ERROR("Render2D: {}", blur.error());
+          }
+        }
         std::memcpy(resources.Instances.Data.data(), _rects.data(), bytes);
       }
     }
@@ -2060,6 +2230,37 @@ void main()
          .OriginY = layer.Bounds.Y,
          .Layer = index},
         resources);
+
+      // A blur is two passes, across into a scratch texture and down: back into the layer's texture, or a
+      // shadow's into its own.
+      if (layer.Filter && layer.Filter->Type != LayerFilter2D::Kind::ColourMatrix)
+      {
+        const bool shadow = layer.Filter->Type == LayerFilter2D::Kind::DropShadow;
+        const float sigma = (shadow ? layer.Filter->Shadow.BlurRadius : layer.Filter->BlurRadius) / 2.f;
+        const auto destination = shadow ? layer.ShadowTexture : layer.Texture;
+        const PixelRect2D region {.X = 0, .Y = 0, .Width = layer.Bounds.Width, .Height = layer.Bounds.Height};
+        if (!destination.IsValid())
+        {
+          continue;
+        }
+        if (sigma <= 0.f)
+        {
+          // A sharp shadow is the layer's alpha as it is.
+          if (shadow)
+          {
+            const TextureRegion copied {.X = 0u, .Y = 0u, .Width = region.Width, .Height = region.Height};
+            commands.BlitTexture(layer.Texture, copied, destination, copied, SamplerFilter::Nearest);
+          }
+          continue;
+        }
+        const auto scratch = AcquireLayerTexture(region.Width, region.Height);
+        if (!scratch.IsValid())
+        {
+          continue;
+        }
+        RecordBlur(commands, resources, layer.Texture, scratch, region, {1.f, 0.f}, sigma);
+        RecordBlur(commands, resources, scratch, destination, region, {0.f, 1.f}, sigma);
+      }
     }
 
     ColourAttachment attachment {.Texture = _target.Texture, .Swapchain = _target.Swapchain};
@@ -2123,12 +2324,23 @@ void main()
     _gradients.clear();
     _gradientStops.clear();
     _patterns.clear();
+    _colourMatrices.clear();
   }
 
   void Renderer2D::FinishLayer(uint32 index) noexcept
   {
     auto &layer = _layers[index];
-    layer.Bounds = Intersect(layer.Bounds, layer.Clip);
+    // A blur or a shadow reaches past what's drawn, within the clip the layer began with.
+    float sigma = 0.f;
+    if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::Blur)
+    {
+      sigma = layer.Filter->BlurRadius / 2.f;
+    }
+    else if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::DropShadow)
+    {
+      sigma = layer.Filter->Shadow.BlurRadius / 2.f;
+    }
+    layer.Bounds = Intersect(Inflate(layer.Bounds, BlurReach(sigma)), layer.Clip);
     if (!layer.HasComposite || layer.Opacity <= 0.f || layer.Bounds.IsEmpty())
     {
       // Nothing to show: the composite, if any, stays an empty instance.
@@ -2160,11 +2372,57 @@ void main()
     {
       batch.Backdrop = Intersect(bounds, batch.Scissor);
     }
+    if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::ColourMatrix)
+    {
+      // feColorMatrix's rows, as the shader's column-major matrix and offset.
+      const auto &m = layer.Filter->Matrix;
+      ColourMatrixUniforms uniforms {};
+      for (uint32 row = 0u; row < 4u; ++row)
+      {
+        for (uint32 column = 0u; column < 4u; ++column)
+        {
+          uniforms.Matrix[column * 4u + row] = m[row * 5u + column];
+        }
+        uniforms.Offset[row] = m[row * 5u + 4u];
+      }
+      batch.ColourMatrix = static_cast<uint32>(_colourMatrices.size());
+      _colourMatrices.push_back(uniforms);
+      instance.Flags |= ColourMatrixFilter;
+    }
+
+    auto composited = bounds;
+    if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::DropShadow)
+    {
+      // The shadow is the layer's alpha, blurred, in the shadow's colour, moved by its offset.
+      layer.ShadowTexture = AcquireLayerTexture(bounds.Width, bounds.Height);
+      if (layer.ShadowTexture.IsValid())
+      {
+        const auto &shadow = layer.Filter->Shadow;
+        auto &cast = _rects[layer.ShadowInstance];
+        cast.Rect = {instance.Rect[0] + shadow.Offset[0], instance.Rect[1] + shadow.Offset[1],
+                     instance.Rect[2], instance.Rect[3]};
+        cast.UV = instance.UV;
+        const auto colour = shadow.Colour.Resolved();
+        cast.Colour = {colour.Red, colour.Green, colour.Blue,
+                       static_cast<uint8>(static_cast<float>(colour.Alpha) * layer.Opacity + 0.5f)};
+        cast.Flags = Textured | AlphaMask | static_cast<uint32>(layer.Blend) << BlendModeShift;
+        auto &shadowBatch = _batches[layer.ShadowBatch];
+        shadowBatch.Texture = layer.ShadowTexture;
+        shadowBatch.Sampler = _linearSampler;
+        const auto moved = ToPixelRect(cast.Rect[0], cast.Rect[1], cast.Rect[0] + cast.Rect[2] + 1.f,
+                                       cast.Rect[1] + cast.Rect[3] + 1.f);
+        if (CopiesBackdrop(layer.Blend))
+        {
+          shadowBatch.Backdrop = Intersect(moved, shadowBatch.Scissor);
+        }
+        composited = Union(composited, moved);
+      }
+    }
 
     if (layer.Parent != NoLayer)
     {
       auto &parent = _layers[layer.Parent];
-      parent.Bounds = Union(parent.Bounds, bounds);
+      parent.Bounds = Union(parent.Bounds, composited);
     }
   }
 
@@ -2420,6 +2678,18 @@ void main()
         boundPattern = batch.Pattern;
       }
 
+      // Only filtered composites read a colour matrix.
+      if (batch.ColourMatrix != NoColourMatrix)
+      {
+        auto block = _device->AllocateTransient(sizeof(ColourMatrixUniforms));
+        if (!block.IsValid())
+        {
+          break;
+        }
+        std::memcpy(block.Data.data(), &_colourMatrices[batch.ColourMatrix], sizeof(ColourMatrixUniforms));
+        commands.BindUniformBuffer(4u, block.Buffer, block.Offset, sizeof(ColourMatrixUniforms));
+      }
+
       // Untextured batches never sample, but drivers still check the sampler's texture at every draw, so
       // they get the white texture unless another one is already bound.
       const auto texture = batch.Texture.IsValid()  ? batch.Texture
@@ -2487,6 +2757,69 @@ void main()
     }
     _pipelines.push_back({.Format = format, .Additive = additive, .Pipeline = *pipeline});
     return *pipeline;
+  }
+
+  Expected<PipelineHandle> Renderer2D::GetBlurPipeline(TextureFormat format) noexcept
+  {
+    for (const auto &entry : _blurPipelines)
+    {
+      if (entry.Format == format)
+      {
+        return entry.Pipeline;
+      }
+    }
+
+    // The blur replaces what's in the destination: no blending, and the quad covers the region.
+    const PipelineDesc desc {
+      .VertexShader = _blurVertexShader,
+      .FragmentShader = _blurFragmentShader,
+      .Topology = PrimitiveTopology::TriangleStrip,
+      .Blend = {},
+      .Raster = {.ScissorTest = false},
+      .ColourFormats = {format},
+      .DebugName = u8"Render2D.Blur",
+    };
+    auto pipeline = _device->CreatePipeline(desc);
+    if (!pipeline)
+    {
+      return Unexpected<string>(pipeline.error());
+    }
+    _blurPipelines.push_back({.Format = format, .Additive = false, .Pipeline = *pipeline});
+    return *pipeline;
+  }
+
+  void Renderer2D::RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
+                              TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
+                              float sigma) noexcept
+  {
+    const auto desc = _device->GetTextureDesc(destination);
+    if (!resources.BlurPipeline.IsValid() || !desc || region.IsEmpty())
+    {
+      return;
+    }
+    auto block = _device->AllocateTransient(sizeof(BlurUniforms));
+    if (!block.IsValid())
+    {
+      return;
+    }
+    const BlurUniforms uniforms {
+      .Region = {static_cast<float>(region.X), static_cast<float>(region.Y), static_cast<float>(region.Width),
+                 static_cast<float>(region.Height)},
+      .TextureSize = {static_cast<float>(desc->Width), static_cast<float>(desc->Height)},
+      .Direction = direction,
+      .Sigma = sigma,
+      .Reach = BlurReach(sigma),
+      .Padding = {}};
+    std::memcpy(block.Data.data(), &uniforms, sizeof(uniforms));
+
+    commands.BeginRenderPass(RenderPassDesc::SingleColour(
+      {.Texture = destination, .Load = AttachmentLoadOp::Clear, .ClearColour = {}}));
+    commands.SetViewport(0.f, 0.f, static_cast<float>(desc->Width), static_cast<float>(desc->Height));
+    commands.BindPipeline(resources.BlurPipeline);
+    commands.BindUniformBuffer(0u, block.Buffer, block.Offset, sizeof(BlurUniforms));
+    commands.BindTexture(0u, source, _nearestSampler);
+    commands.Draw(4u);
+    commands.EndRenderPass();
   }
 
   PixelRect2D Renderer2D::ToPixelRect(float left, float top, float right, float bottom) noexcept

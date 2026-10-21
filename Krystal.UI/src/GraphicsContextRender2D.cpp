@@ -550,7 +550,35 @@ namespace krys::ui
     _layerStack.push_back({});
     _clipBoundsStack.push_back(_clipBounds);
     PrepareDraw(false);
-    _renderer.BeginLayer(opacity);
+
+    const auto &style = Style();
+    if (!style)
+    {
+      _renderer.BeginLayer(opacity);
+      return;
+    }
+
+    // The style filters the layer as it's composited, in target pixels; what's drawn inside isn't styled.
+    const auto ctm = GetCTM();
+    const float scale = static_cast<float>((ctm.XScale() + ctm.YScale()) / 2.);
+    const auto filter = krys::SwitchOn(
+      *style,
+      [](const boo::GraphicsColorMatrix &matrix) { return gfx::LayerFilter2D::ColourMatrix(matrix.Values); },
+      [&](const boo::GraphicsGaussianBlur &blur)
+      {
+        // A layer blurs evenly: an uneven blur uses the larger radius.
+        return gfx::LayerFilter2D::Blur(std::max(blur.Radius.Width(), blur.Radius.Height()) * scale);
+      },
+      [&](const boo::GraphicsDropShadow &shadow)
+      {
+        const auto offset = ctm.MapSize(shadow.Offset);
+        return gfx::LayerFilter2D::DropShadow(
+          {.Offset = {offset.Width(), offset.Height()},
+           .BlurRadius = shadow.Radius * scale,
+           .Colour = ToColour(shadow.Color.ColorWithAlphaMultipliedBy(shadow.Opacity))});
+      });
+    _renderer.BeginLayer(opacity, _renderer.GetBlendMode(), filter);
+    SetStyle(null);
   }
 
   void GraphicsContextRender2D::BeginTransparencyLayer(boo::CompositeOperator operation,

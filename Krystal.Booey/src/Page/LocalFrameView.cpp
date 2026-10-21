@@ -254,7 +254,12 @@ namespace krys::boo
         continue;
       }
 
-      // FIXME: A fixed layer with a filter's outsets on an ancestor can't be moved, once there are filters.
+      if (layer->HasAncestorWithFilterOutsets())
+      {
+        // If the fixed layer has a blur/drop-shadow filter applied on at least one of its parents, we cannot
+        // scroll using the fast path, otherwise the outsets of the filter will be moved around the page.
+        return false;
+      }
 
       // FIXME: use pixel snapping instead of enclosing when ScrollView has finished transitioning from
       // IntRect to Float/LayoutRect.

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <algorithm>
 #include <cmath>
@@ -26,6 +28,52 @@ namespace krys::boo
     }
   }
 
+  Ref<FEGaussianBlur> FEGaussianBlur::Create(float x, float y, EdgeModeType edgeMode) noexcept
+  {
+    return AdoptRef(*new FEGaussianBlur(x, y, edgeMode));
+  }
+
+  FEGaussianBlur::FEGaussianBlur(float x, float y, EdgeModeType edgeMode) noexcept
+      : FilterEffect(FilterEffect::Type::FEGaussianBlur), _stdX(x), _stdY(y), _edgeMode(edgeMode)
+  {
+  }
+
+  bool FEGaussianBlur::operator==(const FEGaussianBlur &other) const noexcept
+  {
+    return FilterEffect::operator==(other) && _stdX == other._stdX && _stdY == other._stdY
+           && _edgeMode == other._edgeMode;
+  }
+
+  bool FEGaussianBlur::SetStdDeviationX(float stdX) noexcept
+  {
+    if (_stdX == stdX)
+    {
+      return false;
+    }
+    _stdX = stdX;
+    return true;
+  }
+
+  bool FEGaussianBlur::SetStdDeviationY(float stdY) noexcept
+  {
+    if (_stdY == stdY)
+    {
+      return false;
+    }
+    _stdY = stdY;
+    return true;
+  }
+
+  bool FEGaussianBlur::SetEdgeMode(EdgeModeType edgeMode) noexcept
+  {
+    if (_edgeMode == edgeMode)
+    {
+      return false;
+    }
+    _edgeMode = edgeMode;
+    return true;
+  }
+
   IntSize FEGaussianBlur::CalculateUnscaledKernelSize(FloatSize stdDeviation) noexcept
   {
     krys_debug_assert(stdDeviation.Width() >= 0 && stdDeviation.Height() >= 0);
@@ -44,6 +92,12 @@ namespace krys::boo
     return kernelSize;
   }
 
+  IntSize FEGaussianBlur::CalculateKernelSize(const Filter &filter, FloatSize stdDeviation) noexcept
+  {
+    stdDeviation = filter.ResolvedSize(stdDeviation);
+    return CalculateUnscaledKernelSize(filter.ScaledByFilterScale(stdDeviation));
+  }
+
   IntSize FEGaussianBlur::CalculateOutsetSize(FloatSize stdDeviation) noexcept
   {
     auto kernelSize = CalculateUnscaledKernelSize(stdDeviation);
@@ -52,9 +106,59 @@ namespace krys::boo
     return {3 * kernelSize.Width() / 2, 3 * kernelSize.Height() / 2};
   }
 
+  FloatRect FEGaussianBlur::CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
+                                               const FloatRect &primitiveSubregion) const noexcept
+  {
+    auto imageRect = inputImageRects[0];
+
+    // Edge modes other than 'none' do not inflate the affected paint rect.
+    if (_edgeMode != EdgeModeType::None)
+    {
+      return FloatRect(EnclosingIntRect(imageRect));
+    }
+
+    auto kernelSize = CalculateUnscaledKernelSize(filter.ResolvedSize({_stdX, _stdY}));
+
+    // We take the half kernel size and multiply it with three, because we run box blur three times.
+    imageRect.InflateX(3 * static_cast<float>(kernelSize.Width()) * 0.5f);
+    imageRect.InflateY(3 * static_cast<float>(kernelSize.Height()) * 0.5f);
+
+    return filter.ClipToMaxEffectRect(imageRect, primitiveSubregion);
+  }
+
   IntOutsets FEGaussianBlur::CalculateOutsets(const FloatSize &stdDeviation) noexcept
   {
     IntSize outsetSize = CalculateOutsetSize(stdDeviation);
     return {outsetSize.Height(), outsetSize.Width(), outsetSize.Height(), outsetSize.Width()};
+  }
+
+  EnumSet<FilterRenderingMode>
+    FEGaussianBlur::SupportedFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
+  {
+    // The graphics context blurs by one standard deviation, the same along both axes.
+    EnumSet<FilterRenderingMode> modes;
+    if (_stdX == _stdY && _edgeMode == EdgeModeType::None)
+    {
+      modes.Add(FilterRenderingMode::GraphicsContext);
+    }
+    return modes & preferredFilterRenderingModes;
+  }
+
+  Maybe<GraphicsStyle> FEGaussianBlur::CreateGraphicsStyle(GraphicsContext &, const Filter &filter) const noexcept
+  {
+    // The blur radius, twice the standard deviation, as shadows have it.
+    auto stdDeviation = filter.ResolvedSize({_stdX, _stdY});
+    return GraphicsGaussianBlur {stdDeviation * 2.f};
+  }
+
+  TextStream &FEGaussianBlur::ExternalRepresentation(TextStream &ts, FilterRepresentation representation) const noexcept
+  {
+    ts << Indent << u8"[feGaussianBlur";
+    FilterEffect::ExternalRepresentation(ts, representation);
+
+    ts << u8" stdDeviation=\"" << _stdX << u8", " << _stdY << u8'"';
+
+    ts << u8"]\n";
+    return ts;
   }
 }

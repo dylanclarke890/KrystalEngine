@@ -277,5 +277,19 @@
       <div class="dots"><span></span><span></span><span></span></div>
     </div>
   </div>
+
+  <div class="row">
+    <!-- Filters on images: colour matrices, a blur and a drop shadow; hovering the card transitions the first
+         image's grayscale away and sharpens the blurred one. -->
+    <div class="card filters" tabindex="0" style="flex: 2">
+      <p>Filters: hover to colour and sharpen</p>
+      <img src="images/photo.jpg" class="fade">
+      <img src="images/photo.jpg" style="filter: sepia(1)">
+      <img src="images/photo.jpg" style="filter: hue-rotate(150deg) saturate(2)">
+      <img src="images/photo.jpg" class="soft">
+      <img src="images/photo.jpg" style="filter: invert(1) contrast(1.4)">
+      <img src="images/disc.webp" style="filter: drop-shadow(4px 6px 4px rgba(26, 34, 64, 0.5))">
+    </div>
+  </div>
 </body>
 </html>

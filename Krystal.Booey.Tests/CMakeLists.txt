@@ -384,6 +384,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/EventHandler.cpp
 		tests/Page/Page.cpp
 		tests/Rendering/BackgroundPainter.cpp
+		tests/Rendering/CSSFilterRenderer.cpp
 		tests/Rendering/BorderPainter.cpp
 		tests/Rendering/InlineBoxPainter.cpp
 		tests/Rendering/MarkedText.cpp

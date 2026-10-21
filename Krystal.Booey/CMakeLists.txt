@@ -1612,6 +1612,20 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/CSSTransition.hpp
   include/Krystal.Booey/Animation/CSSAnimation.hpp
   include/Krystal.Booey/Animation/CSSAnimationEvent.hpp
+
+  # Filters (G11a)
+  include/Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp
+  include/Krystal.Booey/Graphics/Filters/Filter.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterEffect.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterEffectGeometry.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterFunction.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterStyle.hpp
+  include/Krystal.Booey/Graphics/Filters/SourceGraphic.hpp
+  include/Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp
+  include/Krystal.Booey/Graphics/TransparencyLayerContextSwitcher.hpp
+  include/Krystal.Booey/Rendering/CSSFilterRenderer.hpp
+  include/Krystal.Booey/Rendering/RenderLayerFilters.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2659,6 +2673,17 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/CSSTransition.cpp
   src/Animation/CSSAnimation.cpp
   src/Animation/CSSAnimationEvent.cpp
+
+  # Filters (G11a)
+  src/Graphics/Filters/FEColorMatrix.cpp
+  src/Graphics/Filters/Filter.cpp
+  src/Graphics/Filters/FilterEffect.cpp
+  src/Graphics/Filters/FilterFunction.cpp
+  src/Graphics/Filters/SourceGraphic.cpp
+  src/Graphics/GraphicsContextSwitcher.cpp
+  src/Graphics/TransparencyLayerContextSwitcher.cpp
+  src/Rendering/CSSFilterRenderer.cpp
+  src/Rendering/RenderLayerFilters.cpp
 )
 
 target_precompile_headers(Krystal.Booey

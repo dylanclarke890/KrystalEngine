@@ -93,6 +93,104 @@ namespace krys::gfx::tests
       renderer.FillRoundedRect(wide, Rgb(0xffffff));
     }
 
+    /// @brief The colour matrices of CSS's filter functions (Filter Effects 1, section 13), as SVG's
+    /// `feColorMatrix` takes them.
+    namespace filter_matrices
+    {
+      KRYS_NODISCARD Array<float, 20> Rows(Array<float, 9> rgb, float alphaScale = 1.f,
+                                           Array<float, 3> offsets = {}) noexcept
+      {
+        return {rgb[0], rgb[1], rgb[2], 0.f, offsets[0], rgb[3], rgb[4], rgb[5], 0.f,        offsets[1],
+                rgb[6], rgb[7], rgb[8], 0.f, offsets[2], 0.f,    0.f,    0.f,    alphaScale, 0.f};
+      }
+
+      KRYS_NODISCARD Array<float, 20> Grayscale(float amount) noexcept
+      {
+        const float s = 1.f - amount;
+        return Rows({0.2126f + 0.7874f * s, 0.7152f - 0.7152f * s, 0.0722f - 0.0722f * s,
+                     0.2126f - 0.2126f * s, 0.7152f + 0.2848f * s, 0.0722f - 0.0722f * s,
+                     0.2126f - 0.2126f * s, 0.7152f - 0.7152f * s, 0.0722f + 0.9278f * s});
+      }
+
+      KRYS_NODISCARD Array<float, 20> Sepia(float amount) noexcept
+      {
+        const float s = 1.f - amount;
+        return Rows({0.393f + 0.607f * s, 0.769f - 0.769f * s, 0.189f - 0.189f * s, 0.349f - 0.349f * s,
+                     0.686f + 0.314f * s, 0.168f - 0.168f * s, 0.272f - 0.272f * s, 0.534f - 0.534f * s,
+                     0.131f + 0.869f * s});
+      }
+
+      KRYS_NODISCARD Array<float, 20> Saturate(float s) noexcept
+      {
+        return Rows({0.213f + 0.787f * s, 0.715f - 0.715f * s, 0.072f - 0.072f * s, 0.213f - 0.213f * s,
+                     0.715f + 0.285f * s, 0.072f - 0.072f * s, 0.213f - 0.213f * s, 0.715f - 0.715f * s,
+                     0.072f + 0.928f * s});
+      }
+
+      KRYS_NODISCARD Array<float, 20> HueRotate(float degrees) noexcept
+      {
+        const float radians = degrees * std::numbers::pi_v<float> / 180.f;
+        const float c = std::cos(radians);
+        const float s = std::sin(radians);
+        return Rows({0.213f + c * 0.787f - s * 0.213f, 0.715f - c * 0.715f - s * 0.715f,
+                     0.072f - c * 0.072f + s * 0.928f, 0.213f - c * 0.213f + s * 0.143f,
+                     0.715f + c * 0.285f + s * 0.140f, 0.072f - c * 0.072f - s * 0.283f,
+                     0.213f - c * 0.213f - s * 0.787f, 0.715f - c * 0.715f + s * 0.715f,
+                     0.072f + c * 0.928f + s * 0.072f});
+      }
+
+      /// @brief A per-channel linear function: `slope * c + intercept`, as `feComponentTransfer`'s.
+      KRYS_NODISCARD Array<float, 20> Linear(float slope, float intercept) noexcept
+      {
+        return Rows({slope, 0.f, 0.f, 0.f, slope, 0.f, 0.f, 0.f, slope}, 1.f,
+                    {intercept, intercept, intercept});
+      }
+    }
+
+    /// @brief `golden/scenes/filters.html`: a square and a circle through each of CSS's filter functions, a
+    /// partial invert, and a chain (a nested layer for each function, the first innermost).
+    void FiltersScene(Renderer2D &renderer)
+    {
+      using namespace filter_matrices;
+      renderer.FillRect({0.f, 0.f, 320.f, 240.f}, Rgb(0xe9ecf2));
+
+      auto content = [&](float x, float y)
+      {
+        renderer.FillRect({x + 14.f, y + 14.f, 36.f, 36.f}, Rgb(0xe04848));
+        renderer.FillRoundedRect(Box(x + 30.f, y + 30.f, 36.f, 36.f, 18.f), Rgb(0x3c64dc));
+      };
+      auto tile = [&](uint32 index, const LayerFilter2D &filter)
+      {
+        const float x = static_cast<float>(index % 4u) * 80.f;
+        const float y = static_cast<float>(index / 4u) * 80.f;
+        renderer.BeginLayer(1.f, BlendMode::Normal, filter);
+        content(x, y);
+        renderer.EndLayer();
+      };
+
+      tile(0u, LayerFilter2D::ColourMatrix(Grayscale(1.f)));
+      tile(1u, LayerFilter2D::ColourMatrix(Sepia(1.f)));
+      tile(2u, LayerFilter2D::ColourMatrix(Saturate(3.f)));
+      tile(3u, LayerFilter2D::ColourMatrix(HueRotate(90.f)));
+      tile(4u, LayerFilter2D::ColourMatrix(Linear(-1.f, 1.f)));
+      tile(5u, LayerFilter2D::ColourMatrix(Linear(1.5f, 0.f)));
+      tile(6u, LayerFilter2D::ColourMatrix(Linear(2.f, -0.5f)));
+      tile(7u, LayerFilter2D::ColourMatrix(Rows({1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f}, 0.5f)));
+      // blur(4px): a standard deviation of 4, a blur radius of 8.
+      tile(8u, LayerFilter2D::Blur(8.f));
+      // drop-shadow(4px 4px 3px ...): its third length is the standard deviation, a blur radius of 6.
+      tile(9u, LayerFilter2D::DropShadow(
+                 {.Offset = {4.f, 4.f}, .BlurRadius = 6.f, .Colour = Rgb(0x000000, 153)}));
+      tile(10u, LayerFilter2D::ColourMatrix(Linear(1.f - 2.f * 0.6f, 0.6f)));
+
+      // grayscale(1) blur(2px): the blur is applied last, so its layer is outermost.
+      renderer.BeginLayer(1.f, BlendMode::Normal, LayerFilter2D::Blur(4.f));
+      renderer.BeginLayer(1.f, BlendMode::Normal, LayerFilter2D::ColourMatrix(Grayscale(1.f)));
+      content(240.f, 160.f);
+      renderer.EndLayer();
+      renderer.EndLayer();
+    }
+
     /// @brief `golden/scenes/ui.html`: gradients, a bordered card, a clip, a group's opacity, a blend mode, a
     /// rotation and a stroked path.
     void UiScene(Renderer2D &renderer)
@@ -332,6 +430,11 @@ namespace krys::gfx::tests
   TEST_CASE("Golden: text", "[Gfx][Render2D][GPU][Golden]")
   {
     CheckScene({.Name = "text", .Width = 360u, .Height = 200u, .Draw = TextScene, .ChromeReportOnly = true});
+  }
+
+  TEST_CASE("Golden: layer filters", "[Gfx][Render2D][GPU][Golden]")
+  {
+    CheckScene({.Name = "filters", .Width = 320u, .Height = 240u, .Draw = FiltersScene});
   }
 
   TEST_CASE("Golden: a UI", "[Gfx][Render2D][GPU][Golden]")

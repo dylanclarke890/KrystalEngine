@@ -177,6 +177,11 @@ namespace krys::ui::tests
     CheckPage("webfonts", 360u, 240u, true);
   }
 
+  TEST_CASE("Golden: filters", "[UI][GPU][Golden]")
+  {
+    CheckPage("filters", 360u, 240u);
+  }
+
   TEST_CASE("Golden: tables", "[UI][GPU][Golden]")
   {
     CheckPage("tables", 360u, 240u);

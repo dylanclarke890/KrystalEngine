@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
@@ -12,6 +13,7 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerFilters.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
@@ -201,7 +203,8 @@ namespace krys::boo
   RenderLayer::~RenderLayer() noexcept
   {
     ClearLayerScrollableArea();
-    // FIXME: Filters, the clip path and the backing, once there are any.
+    // FIXME: The clip path and the backing, once there are any.
+    ClearLayerFilters();
 
     // Child layers will be deleted by their corresponding render objects, so
     // we don't need to delete them ourselves.
@@ -1233,6 +1236,12 @@ namespace krys::boo
     {
       _repaintRects = Renderer().RectsForRepaintingAfterLayout(repaintContainer, RepaintOutlineBounds::Yes);
       _repaintRectsValid = true;
+      // What a filter that moves pixels paints reaches past the overflow, so the layer repaints all of it
+      // when it moves or changes.
+      if (!repaintContainer && FilterMovesPixels())
+      {
+        _repaintRects.ClippedOverflowRect.Unite(AbsoluteFilterRepaintRect());
+      }
     }
 
     if (IsSubtreeVisibilityHiddenOrOpacityZero())
@@ -1870,12 +1879,13 @@ namespace krys::boo
 
     UpdateDescendantDependentFlags();
     UpdateBlendMode();
-    // FIXME: Filters, once there's painting.
+    UpdateFiltersAfterStyleChange(diff, oldStyle);
     ClearClipRects();
 
     // FIXME: Tell the compositor, once there is one.
 
     UpdateTransform();
+    UpdateFilterPaintingStrategy();
 
     if (oldStyle && oldStyle->HasViewportConstrainedPosition() != IsViewportConstrained())
     {
@@ -2142,6 +2152,231 @@ namespace krys::boo
   bool RenderLayer::HasBackdropFilter() const noexcept
   {
     return Renderer().HasBackdropFilter();
+  }
+
+  bool RenderLayer::ShouldPaintWithFilters(EnumSet<PaintBehavior>) const noexcept
+  {
+    const auto &filter = Renderer().Style().GetFilter();
+    if (filter.IsNone())
+    {
+      return false;
+    }
+
+    // FIXME: SVG roots with reference filters paint them themselves, once there's SVG.
+
+    if (RenderLayerFilters::IsIdentity(Renderer()))
+    {
+      return false;
+    }
+
+    // FIXME: Composited layers whose backing can composite the filters, once there's compositing.
+    return true;
+  }
+
+  bool RenderLayer::RequiresFullLayerImageForFilters() const noexcept
+  {
+    if (!ShouldPaintWithFilters())
+    {
+      return false;
+    }
+
+    return _filters && _filters->HasFilterThatMovesPixels();
+  }
+
+  RenderLayerFilters *RenderLayer::Filters() const noexcept
+  {
+    return _filters.get();
+  }
+
+  IntOutsets RenderLayer::FilterOutsets() const noexcept
+  {
+    if (_filters)
+    {
+      return _filters->CalculateOutsets(Renderer(), FloatRect(LocalBoundingBox()));
+    }
+    return Renderer().Style().GetFilter().Outsets();
+  }
+
+  bool RenderLayer::HasAncestorWithFilterOutsets() const noexcept
+  {
+    for (const RenderLayer *curr = this; curr; curr = curr->Parent())
+    {
+      if (curr->HasFilterOutsets())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool RenderLayer::FilterMovesPixels() const noexcept
+  {
+    return HasFilter() && Renderer().Style().GetFilter().HasFilterThatMovesPixels()
+           && ShouldPaintWithFilters();
+  }
+
+  LayoutRect RenderLayer::AbsoluteFilterRepaintRect() const noexcept
+  {
+    auto bounds = CalculateLayerBounds(
+      this, {}, {UseLocalClipRectIfPossible, IncludeFilterOutsets, UseFragmentBoxesExcludingCompositing});
+    return LayoutRect(Renderer().LocalToAbsoluteQuad(FloatQuad(FloatRect(bounds))).EnclosingBoundingBox());
+  }
+
+  RenderLayer *RenderLayer::EnclosingFilterLayer(IncludeSelfOrNot includeSelf) const noexcept
+  {
+    const RenderLayer *curr = (includeSelf == IncludeSelf) ? this : Parent();
+    for (; curr; curr = curr->Parent())
+    {
+      if (curr->RequiresFullLayerImageForFilters())
+      {
+        return const_cast<RenderLayer *>(curr);
+      }
+    }
+
+    return nullptr;
+  }
+
+  RenderLayer *RenderLayer::EnclosingFilterRepaintLayer() const noexcept
+  {
+    // FIXME: Layers composited with their own backing store, once there's compositing.
+    for (const RenderLayer *curr = this; curr; curr = curr->Parent())
+    {
+      if ((curr != this && curr->RequiresFullLayerImageForFilters()) || curr->IsRenderViewLayer())
+      {
+        return const_cast<RenderLayer *>(curr);
+      }
+    }
+    return nullptr;
+  }
+
+  // FIXME: This needs a better name.
+  void RenderLayer::SetFilterBackendNeedsRepaintingInRect(const LayoutRect &rect) noexcept
+  {
+    krys_debug_assert(RequiresFullLayerImageForFilters());
+    krys_debug_assert(_filters);
+
+    if (rect.IsEmpty())
+    {
+      return;
+    }
+
+    LayoutRect rectForRepaint = rect;
+    rectForRepaint.Expand(ToLayoutBoxExtent(FilterOutsets()));
+
+    _filters->ExpandDirtySourceRect(rectForRepaint);
+
+    RenderLayer *parentLayer = EnclosingFilterRepaintLayer();
+    krys_debug_assert(parentLayer);
+    FloatQuad repaintQuad(FloatRect {rectForRepaint});
+    LayoutRect parentLayerRect = LayoutRect(
+      Renderer().LocalToContainerQuad(repaintQuad, &parentLayer->Renderer()).EnclosingBoundingBox());
+
+    // FIXME: Composited parent layers repaint their backing, once there's compositing.
+
+    if (parentLayer->ShouldPaintWithFilters())
+    {
+      parentLayer->SetFilterBackendNeedsRepaintingInRect(parentLayerRect);
+      return;
+    }
+
+    if (parentLayer->IsRenderViewLayer())
+    {
+      Downcast<RenderView>(parentLayer->Renderer()).RepaintViewRectangle(parentLayerRect);
+      return;
+    }
+
+    krys_debug_assert(false);
+  }
+
+  RenderLayerFilters &RenderLayer::EnsureLayerFilters() noexcept
+  {
+    if (_filters)
+    {
+      return *_filters;
+    }
+
+    auto scale = Renderer().GetDocument().DeviceScaleFactor();
+    _filters = RenderLayerFilters::Create(*this, {scale, scale});
+    return *_filters;
+  }
+
+  void RenderLayer::ClearLayerFilters() noexcept
+  {
+    if (RefPtr filters = std::exchange(_filters, nullptr))
+    {
+      filters->DetachFromLayer();
+    }
+  }
+
+  void RenderLayer::UpdateFiltersAfterStyleChange(style::Difference diff,
+                                                  const RenderStyle *oldStyle) noexcept
+  {
+    if (Renderer().Style().GetFilter().HasReferenceFilter())
+    {
+      EnsureLayerFilters().UpdateReferenceFilterClients(Renderer().Style().GetFilter());
+    }
+    else if (!ShouldPaintWithFilters())
+    {
+      ClearLayerFilters();
+    }
+    else if (_filters)
+    {
+      _filters->RemoveReferenceFilterClients();
+    }
+
+    auto filterChanged = [&]
+    {
+      if (!_filters)
+      {
+        return false;
+      }
+      if (diff < style::DifferenceResult::RepaintLayer)
+      {
+        return false;
+      }
+      if (!oldStyle)
+      {
+        return false;
+      }
+      if (oldStyle->GetFilter() != Renderer().Style().GetFilter())
+      {
+        return true;
+      }
+      auto currentColorChanged = oldStyle->GetColor() != Renderer().Style().GetColor();
+      if (currentColorChanged && oldStyle->GetFilter().HasFilterThatRequiresRepaintForCurrentColorChange())
+      {
+        return true;
+      }
+      return false;
+    };
+    if (filterChanged())
+    {
+      ClearLayerFilters();
+    }
+  }
+
+  void RenderLayer::UpdateFilterPaintingStrategy() noexcept
+  {
+    // RenderLayerFilters is only used to render the filters in software mode, so we always need to run
+    // updateFilterPaintingStrategy() after the composited mode might have changed for this layer.
+    if (!ShouldPaintWithFilters())
+    {
+      // Don't delete the whole filter info here, because we might use it for loading SVG reference filter
+      // files.
+      if (_filters)
+      {
+        _filters->ClearFilter();
+      }
+
+      // Early-return only if we *don't* have reference filters. For reference filters, we still want the
+      // FilterEffect graph built for us, even if we're composited.
+      if (!Renderer().Style().GetFilter().HasReferenceFilter())
+      {
+        return;
+      }
+    }
+
+    EnsureLayerFilters();
   }
 
   // FIXME: Why ask the renderer this given we have m_blendMode?
@@ -2660,8 +2895,11 @@ namespace krys::boo
       return nullptr;
     }
 
-    // FIXME: Ancestor clipping inside filters is suppressed (m_suppressAncestorClippingInsideFilter), once
-    // there are filters.
+    if (clipRectsContext.Type == PaintingClipRects && _suppressAncestorClippingInsideFilter
+        && !clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter))
+    {
+      return nullptr;
+    }
 
     auto temporaryParentClipRects = [&](const ClipRectsContext &clipContext)
     {
@@ -2734,7 +2972,11 @@ namespace krys::boo
       backgroundClipRect = this->BackgroundClipRect(clipRectsContext);
     }
 
-    if (Renderer().HasClip())
+    bool shouldApplyClip = clipRectsContext.Type != PaintingClipRects
+                           || !_suppressAncestorClippingInsideFilter
+                           || clipRectsContext.Options.Contains(ClipRectsOption::OutsideFilter);
+
+    if (shouldApplyClip && Renderer().HasClip())
     {
       if (auto *box = DynamicDowncast<RenderBox>(Renderer()))
       {
@@ -3138,7 +3380,14 @@ namespace krys::boo
       computeLayersUnion(*childLayer);
     }
 
-    // FIXME: The filter outsets (IncludeFilterOutsets, IncludePaintedFilterOutsets), once there are filters.
+    if (flags.Contains(IncludeFilterOutsets)
+        || (flags.Contains(IncludePaintedFilterOutsets)
+            && ShouldPaintWithFilters(flags.Contains(IncludeCompositedDescendants)
+                                        ? EnumSet<PaintBehavior> {PaintBehavior::FlattenCompositingLayers}
+                                        : EnumSet<PaintBehavior> {})))
+    {
+      unionBounds.Expand(ToLayoutBoxExtent(FilterOutsets()));
+    }
 
     if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform())
     {
@@ -3577,7 +3826,7 @@ namespace krys::boo
         LayoutRect clipRect = layer.BoundingBox(&layer);
         ExpandClipRectForDescendantsAndReflection(clipRect, layer, &layer, transparencyBehavior,
                                                   paintBehavior, paintDirtyRect);
-        // FIXME: Filter outsets (filterOutsets) come with filters.
+        clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
         LayoutRect result = transform.MapRect(clipRect);
         if (paintDirtyRect)
         {
@@ -3594,7 +3843,7 @@ namespace krys::boo
       auto clipRect = layer.BoundingBox(rootLayer, layer.OffsetFromAncestor(rootLayer), flags);
       ExpandClipRectForDescendantsAndReflection(clipRect, layer, rootLayer, transparencyBehavior,
                                                 paintBehavior, paintDirtyRect);
-      // FIXME: Filter outsets (filterOutsets) come with filters.
+      clipRect.Expand(ToLayoutBoxExtent(layer.FilterOutsets()));
 
       if (paintDirtyRect)
       {
@@ -3882,7 +4131,10 @@ namespace krys::boo
         auto options = paintFlags.Contains(PaintLayerFlag::PaintingOverflowContents)
                          ? ClipRectOptionsForPaintingOverflowContents
                          : ClipRectDefaultOptions;
-        // FIXME: Clip rects outside filters (ClipRectsOption::OutsideFilter) come with filters.
+        if (ShouldHaveFiltersForPainting(context, paintFlags, paintingInfo.PaintBehavior))
+        {
+          options.Add(ClipRectsOption::OutsideFilter);
+        }
         if (paintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
         {
           options.Add(ClipRectsOption::Temporary);
@@ -3988,6 +4240,94 @@ namespace krys::boo
 
     // FIXME: SVG clip paths (`url()` references to <clipPath>, applied as path clips or clipping masks) come
     // with SVG.
+  }
+
+  bool RenderLayer::ShouldHaveFiltersForPainting(GraphicsContext &context, EnumSet<PaintLayerFlag> paintFlags,
+                                                 EnumSet<PaintBehavior> paintBehavior) const noexcept
+  {
+    if (context.PaintingDisabled())
+    {
+      return false;
+    }
+
+    if (paintFlags.Contains(PaintLayerFlag::PaintingOverlayScrollbars))
+    {
+      return false;
+    }
+
+    if (!ShouldPaintWithFilters(paintBehavior))
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  RenderLayerFilters *RenderLayer::FiltersForPainting(GraphicsContext &context,
+                                                      EnumSet<PaintLayerFlag> paintFlags,
+                                                      EnumSet<PaintBehavior> paintBehavior) noexcept
+  {
+    if (!ShouldHaveFiltersForPainting(context, paintFlags, paintBehavior))
+    {
+      return nullptr;
+    }
+
+    return &EnsureLayerFilters();
+  }
+
+  GraphicsContext *RenderLayer::SetupFilters(GraphicsContext &destinationContext,
+                                             LayerPaintingInfo &paintingInfo,
+                                             EnumSet<PaintLayerFlag> &paintFlags,
+                                             const LayoutSize &offsetFromRoot,
+                                             const ClipRect &backgroundRect) noexcept
+  {
+    auto *paintingFilters = FiltersForPainting(destinationContext, paintFlags, paintingInfo.PaintBehavior);
+    if (!paintingFilters)
+    {
+      return nullptr;
+    }
+
+    LayoutRect filterRepaintRect = paintingFilters->DirtySourceRect();
+    filterRepaintRect.Move(offsetFromRoot);
+
+    auto rootRelativeBounds =
+      CalculateLayerBounds(paintingInfo.RootLayer, offsetFromRoot, {RenderLayer::PreserveAncestorFlags});
+
+    GraphicsContext *filterContext = paintingFilters->BeginFilterEffect(
+      Renderer(), destinationContext, LayoutRect(EnclosingIntRect(rootRelativeBounds)),
+      LayoutRect(EnclosingIntRect(paintingInfo.PaintDirtyRect)),
+      LayoutRect(EnclosingIntRect(filterRepaintRect)), backgroundRect.Rect());
+    if (!filterContext)
+    {
+      return nullptr;
+    }
+
+    paintingInfo.PaintDirtyRect = paintingFilters->RepaintRect();
+    if (paintingFilters->HasFilterThatMovesPixels())
+    {
+      _suppressAncestorClippingInsideFilter = true;
+      paintFlags.Add(PaintLayerFlag::TemporaryClipRects);
+    }
+    paintingInfo.RequireSecurityOriginAccessForWidgets =
+      paintingFilters->HasFilterThatShouldBeRestrictedBySecurityOrigin();
+
+    return filterContext;
+  }
+
+  void RenderLayer::ApplyFilters(GraphicsContext &originalContext, const LayerPaintingInfo &paintingInfo,
+                                 EnumSet<PaintBehavior> behavior, const ClipRect &backgroundRect) noexcept
+  {
+    GraphicsContextStateSaver stateSaver(originalContext, false);
+    bool needsClipping = _filters->HasSourceImage();
+
+    _suppressAncestorClippingInsideFilter = false;
+
+    if (needsClipping)
+    {
+      ClipToRect(originalContext, stateSaver, paintingInfo, behavior, backgroundRect);
+    }
+
+    _filters->ApplyFilterEffect(originalContext);
   }
 
   void RenderLayer::PaintLayerContents(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
@@ -4223,10 +4563,47 @@ namespace krys::boo
     }();
 
     { // Scope for filter-related state changes.
-      // FIXME: Filters (the uncontaminated background rect, the filter context, applyFilters) come with
-      // filters.
+      ClipRect backgroundRect;
+
+      if (ShouldHaveFiltersForPainting(context, paintFlags, paintBehavior))
+      {
+        // When we called collectFragments() last time, paintDirtyRect was reset to represent the filter
+        // bounds. Now we need to compute the backgroundRect uncontaminated by filters, in order to clip the
+        // filtered result. Note that we also use paintingInfo here, not localPaintingInfo which filters also
+        // contaminated.
+        LayerFragments filterLayerFragments;
+        auto clipRectOptions =
+          isPaintingOverflowContents ? ClipRectOptionsForPaintingOverflowContents : ClipRectDefaultOptions;
+        clipRectOptions.Add(ClipRectsOption::OutsideFilter);
+        if (localPaintFlags.Contains(PaintLayerFlag::TemporaryClipRects))
+        {
+          clipRectOptions.Add(ClipRectsOption::Temporary);
+        }
+        CollectFragments(filterLayerFragments, paintingInfo.RootLayer, paintingInfo.PaintDirtyRect,
+                         PaintingClipRects, clipRectOptions, offsetFromRoot);
+        UpdatePaintingInfoForFragments(filterLayerFragments, paintingInfo, localPaintFlags,
+                                       shouldPaintContent, offsetFromRoot);
+
+        // FIXME: Handle more than one fragment.
+        backgroundRect = filterLayerFragments.empty() ? ClipRect() : filterLayerFragments[0].BackgroundRect();
+
+        if (haveTransparency)
+        {
+          // If we have a filter and transparency, we have to eagerly start a transparency layer here, rather
+          // than risk a child layer lazily starts one with the wrong context.
+          BeginTransparencyLayers(context, paintingInfo, paintingInfo.PaintDirtyRect);
+        }
+      }
+
       LayerPaintingInfo localPaintingInfo(paintingInfo);
-      GraphicsContext &currentContext = context;
+      GraphicsContext *filterContext =
+        SetupFilters(context, localPaintingInfo, localPaintFlags, columnAwareOffsetFromRoot, backgroundRect);
+      GraphicsContext &currentContext = filterContext ? *filterContext : context;
+
+      if (filterContext)
+      {
+        localPaintingInfo.PaintBehavior.Add(PaintBehavior::DontShowVisitedLinks);
+      }
 
       // If this layer's renderer is a child of the subtreePaintRoot, we render unconditionally, which
       // is done by passing a nil subtreePaintRoot down to our renderer (as if no subtreePaintRoot was ever
@@ -4298,6 +4675,14 @@ namespace krys::boo
       }
 
       // FIXME: Overlay scrollbars (paintOverflowControlsForFragments) come with scrollbars.
+
+      if (filterContext)
+      {
+        ApplyFilters(context, paintingInfo, paintBehavior, backgroundRect);
+        // Painting a snapshot might have temporarily overriden the filter painting strategy, make sure it
+        // gets reset.
+        UpdateFilterPaintingStrategy();
+      }
     }
 
     if (shouldPaintContent && !(selectionOnly || selectionAndBackgroundsOnly))

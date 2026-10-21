@@ -237,6 +237,83 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: changes inside filters leave no stale pixels", "[UI][GPU]")
+  {
+    RepaintFixture fixture(320u, 240u);
+    View view({320, 240});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>"
+      u8"body { margin: 0; background: #f4f4f4 }"
+      u8"div { position: absolute }"
+      u8"#blurred { left: 20px; top: 20px; width: 80px; height: 80px; background: #073b4c; filter: blur(4px) "
+      u8"}"
+      u8"#inner { left: 20px; top: 20px; width: 20px; height: 20px; background: #ffd166 }"
+      u8"#shadowed { left: 160px; top: 20px; width: 60px; height: 60px; background: #118ab2;"
+      u8" filter: drop-shadow(6px 6px 4px #000a) }"
+      u8"#tinted { left: 20px; top: 140px; width: 60px; height: 60px; background: #ef476f; filter: sepia(1) }"
+      u8"</style>"
+      u8"<div id=blurred><div id=inner></div></div><div id=shadowed></div><div id=tinted></div>");
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+    };
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-first");
+
+    auto &document = view.Document();
+    auto set = [&](utf8_stringview id, utf8_stringview style)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      REQUIRE_FALSE(element->SetAttribute(u8"style", utf8_string(style)).HasException());
+    };
+
+    // A change inside a blur repaints as far as the blur reaches.
+    set(u8"inner", u8"background: #ef476f");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-inside-blur");
+
+    set(u8"inner", u8"left: 50px; top: 50px");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-moved-inside-blur");
+
+    // Changing the filter itself, and the box it filters.
+    set(u8"blurred", u8"filter: blur(8px)");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-more-blur");
+
+    set(u8"shadowed", u8"left: 200px; top: 60px");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-shadow-moved");
+
+    set(u8"shadowed", u8"filter: drop-shadow(-10px 12px 2px #ef476f)");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-shadow-changed");
+
+    set(u8"tinted", u8"filter: none");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-removed");
+
+    set(u8"tinted", u8"filter: blur(3px) hue-rotate(90deg)");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-added");
+
+    set(u8"blurred", u8"filter: none");
+    frame();
+    CheckNoStalePixels(fixture, view, "filters-blur-removed");
+
+    // A filter animating.
+    set(u8"shadowed", u8"transition: filter 100ms linear; filter: drop-shadow(0 0 12px #073b4c) blur(2px)");
+    for (int32 i = 0; i < 8; ++i)
+    {
+      frame();
+      CheckNoStalePixels(fixture, view, "filters-animation-" + std::to_string(i));
+    }
+  }
+
   TEST_CASE("View: scrolling moves the painted page and leaves no stale pixels", "[UI][GPU]")
   {
     static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});

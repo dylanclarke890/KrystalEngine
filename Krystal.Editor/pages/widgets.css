@@ -49,3 +49,10 @@ tr:hover td { text-decoration: underline; }
              background: #ef476f; animation: pulse 1.2s ease-in-out infinite; }
 .dots span:nth-child(2) { animation-delay: 200ms; }
 .dots span:nth-child(3) { animation-delay: 400ms; }
+
+/* Filters: images 72 pixels wide; the first fades from grayscale and the fourth sharpens on hover. */
+.filters img { width: 72px; height: 48px; margin: 0 12px 12px 0; border-radius: 6px; transition: filter 300ms; }
+.filters .fade { filter: grayscale(1); }
+.filters .soft { filter: blur(3px); }
+.filters:hover .fade { filter: grayscale(0); }
+.filters:hover .soft { filter: blur(0); }

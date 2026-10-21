@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo::tests
 {
@@ -10,11 +11,21 @@ namespace krys::boo::tests
   struct PaintFixture : style::tests::ResolverFixture
   {
     IntSize ViewSize;
+    /// @brief The page whose main frame shows the document, if it has one (filters paint only in a page).
+    RefPtr<Page> TestPage;
 
-    explicit PaintFixture(utf8_string &&markup, IntSize viewSize = {200, 100}) noexcept
+    explicit PaintFixture(utf8_string &&markup, IntSize viewSize = {200, 100}, bool inPage = false) noexcept
         : ResolverFixture(krys::move(markup), style::tests::WithView::No), ViewSize(viewSize)
     {
-      Frame = LocalFrame::Create();
+      if (inPage)
+      {
+        TestPage = Page::Create();
+        Frame = ShareRefPtr(&TestPage->MainFrame());
+      }
+      else
+      {
+        Frame = LocalFrame::Create();
+      }
       Frame->CreateView(ViewSize);
       Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
     }

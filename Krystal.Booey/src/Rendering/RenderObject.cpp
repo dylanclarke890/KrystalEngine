@@ -936,9 +936,9 @@ namespace krys::boo
 
   auto RenderObject::ContainerForRepaint() const noexcept -> RepaintContainerStatus
   {
-    // FIXME: The enclosing compositing layer, the enclosing filter layer (for software filters) and the
-    // enclosing fragmented flow, once there are any: without them, repaints are in the render view's
-    // coordinates.
+    // FIXME: The enclosing compositing layer and the enclosing fragmented flow, once there are any: without
+    // them, repaints are in the render view's coordinates. Layers with filters aren't repaint containers:
+    // repaints inside them grow to what the filter paints (RepaintUsingContainer).
     return {};
   }
 
@@ -1005,13 +1005,20 @@ namespace krys::boo
 
     PropagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, rect);
 
-    // FIXME: Filters that need the full layer image, once there are layer filters.
-
     if (repaintContainer->IsRenderView())
     {
       krys_debug_assert(repaintContainer == &View());
       // FIXME: The composited render view's transform, once there's compositing.
-      View().RepaintViewRectangle(rect);
+      // A filter that moves pixels paints from all it filters, so a change inside it repaints all of it.
+      auto repaintRect = rect;
+      for (auto *layer = EnclosingLayer(); layer; layer = layer->Parent())
+      {
+        if (layer->FilterMovesPixels())
+        {
+          repaintRect.Unite(layer->AbsoluteFilterRepaintRect());
+        }
+      }
+      View().RepaintViewRectangle(repaintRect);
       return;
     }
 

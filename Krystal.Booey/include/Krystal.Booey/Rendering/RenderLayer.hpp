@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
@@ -47,6 +48,7 @@ namespace krys::boo
   class Path;
   class RenderObject;
   class RenderBox;
+  class RenderLayerFilters;
   class RenderLayerModelObject;
   class RenderLayerScrollableArea;
   class RenderStyle;
@@ -106,7 +108,7 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Compositing, filters, masks, SVG clip paths, reflections, resizing, scrollbars, selection
+  // FIXME: Compositing, masks, SVG clip paths, reflections, resizing, scrollbars, selection
   // gaps, event regions and fragmentation (paginated collectFragments) come with compositing, effects and
   // fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
@@ -324,6 +326,8 @@ namespace krys::boo
 
     bool _repaintRectsValid : 1 {false};
 
+    bool _suppressAncestorClippingInsideFilter : 1 {false};
+
 #if KRYS_DEBUG
     bool _layerListMutationAllowed : 1 {true};
 #endif
@@ -368,6 +372,8 @@ namespace krys::boo
     UniquePtr<TransformationMatrix> _transform;
 
     UniquePtr<RenderLayerScrollableArea> _scrollableArea;
+
+    RefPtr<RenderLayerFilters> _filters;
 
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
@@ -888,6 +894,27 @@ namespace krys::boo
     KRYS_NODISCARD bool HasFilter() const noexcept;
     KRYS_NODISCARD bool HasBackdropFilter() const noexcept;
 
+    KRYS_NODISCARD bool ShouldPaintWithFilters(EnumSet<PaintBehavior> = {}) const noexcept;
+    KRYS_NODISCARD bool RequiresFullLayerImageForFilters() const noexcept;
+    KRYS_NODISCARD RenderLayerFilters *Filters() const noexcept;
+
+    KRYS_NODISCARD IntOutsets FilterOutsets() const noexcept;
+    KRYS_NODISCARD bool HasFilterOutsets() const noexcept
+    {
+      return !FilterOutsets().IsZero();
+    }
+    KRYS_NODISCARD bool HasAncestorWithFilterOutsets() const noexcept;
+    /// @brief Whether the layer paints with a filter that moves pixels (a blur, a drop shadow).
+    KRYS_NODISCARD bool FilterMovesPixels() const noexcept;
+    /// @brief What the layer's filter paints, in absolute coordinates: the layer's bounds with its
+    /// descendants', grown by the filter's outsets.
+    KRYS_NODISCARD LayoutRect AbsoluteFilterRepaintRect() const noexcept;
+
+    // Gets the nearest enclosing layer that has a filter which needs the whole layer's image.
+    KRYS_NODISCARD RenderLayer *EnclosingFilterLayer(IncludeSelfOrNot = IncludeSelf) const noexcept;
+    KRYS_NODISCARD RenderLayer *EnclosingFilterRepaintLayer() const noexcept;
+    void SetFilterBackendNeedsRepaintingInRect(const LayoutRect &) noexcept;
+
     KRYS_NODISCARD bool HasBlendMode() const noexcept;
     KRYS_NODISCARD BlendMode GetBlendMode() const noexcept
     {
@@ -1196,6 +1223,21 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *TransparentPaintingAncestor(const LayerPaintingInfo &) noexcept;
     void BeginTransparencyLayers(GraphicsContext &, const LayerPaintingInfo &,
                                  const LayoutRect &dirtyRect) noexcept;
+
+    KRYS_NODISCARD bool ShouldHaveFiltersForPainting(GraphicsContext &, EnumSet<PaintLayerFlag>,
+                                                     EnumSet<PaintBehavior>) const noexcept;
+    RenderLayerFilters *FiltersForPainting(GraphicsContext &, EnumSet<PaintLayerFlag>,
+                                           EnumSet<PaintBehavior>) noexcept;
+    GraphicsContext *SetupFilters(GraphicsContext &destinationContext, LayerPaintingInfo &,
+                                  EnumSet<PaintLayerFlag> &, const LayoutSize &offsetFromRoot,
+                                  const ClipRect &backgroundRect) noexcept;
+    void ApplyFilters(GraphicsContext &originalContext, const LayerPaintingInfo &, EnumSet<PaintBehavior>,
+                      const ClipRect &backgroundRect) noexcept;
+
+    RenderLayerFilters &EnsureLayerFilters() noexcept;
+    void ClearLayerFilters() noexcept;
+    void UpdateFiltersAfterStyleChange(style::Difference, const RenderStyle *oldStyle) noexcept;
+    void UpdateFilterPaintingStrategy() noexcept;
 
 #pragma endregion
   };

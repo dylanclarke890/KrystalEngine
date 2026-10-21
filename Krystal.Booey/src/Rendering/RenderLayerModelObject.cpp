@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
@@ -82,6 +83,13 @@ namespace krys::boo
     {
       Layer()->ClearClipRectsIncludingDescendants();
     }
+    // What a filter that moves pixels paints reaches past the layer's repaint rects, so when the filter
+    // changes, all it painted is repainted, and all it paints after.
+    if (s_hadLayer && Parent() && oldStyle && oldStyle->GetFilter() != newStyle.GetFilter()
+        && Layer()->FilterMovesPixels())
+    {
+      View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
+    }
     RenderElement::StyleWillChange(diff, newStyle);
   }
 
@@ -89,6 +97,12 @@ namespace krys::boo
   {
     UpdateFromStyle();
     RenderElement::StyleDidChange(diff, oldStyle);
+
+    if (HasLayer() && Parent() && oldStyle && oldStyle->GetFilter() != Style().GetFilter()
+        && Layer()->FilterMovesPixels())
+    {
+      View().RepaintViewRectangle(Layer()->AbsoluteFilterRepaintRect());
+    }
 
     // When an out-of-flow-positioned element changes its display between block and inline-block,
     // then an incremental layout on the element's containing block lays out the element through

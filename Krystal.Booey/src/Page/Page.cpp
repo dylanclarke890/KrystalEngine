@@ -32,6 +32,12 @@ namespace krys::boo
     return page;
   }
 
+  EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) const noexcept
+  {
+    // FIXME: Software and accelerated filter rendering, once there's either.
+    return FilterRenderingMode::GraphicsContext;
+  }
+
   void Page::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept
   {
     if (!_renderingUpdateDepth)

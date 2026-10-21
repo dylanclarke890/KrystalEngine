@@ -68,6 +68,41 @@ namespace krys::gfx
     SRGBA<uint8> Colour {};
   };
 
+  /// @brief What a layer does to what's drawn in it when it's composited: a colour matrix, a Gaussian blur,
+  /// or a shadow cast beneath it.
+  struct LayerFilter2D
+  {
+    enum class Kind : uint8
+    {
+      ColourMatrix,
+      Blur,
+      DropShadow
+    };
+
+    Kind Type {Kind::ColourMatrix};
+    /// @brief For `ColourMatrix`: four rows of five, applied to straight-alpha colours from 0 to 1 as SVG's
+    /// `feColorMatrix` is: each row's last value is added. The result is clamped.
+    Array<float, 20> Matrix {1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f,
+                             0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f};
+    /// @brief For `Blur`: twice the standard deviation, as CSS's blur radius is, in target pixels.
+    float BlurRadius {0.f};
+    /// @brief For `DropShadow`: the shadow of what's drawn, its offset and blur in target pixels.
+    DropShadow2D Shadow {};
+
+    KRYS_NODISCARD static LayerFilter2D ColourMatrix(const Array<float, 20> &matrix) noexcept
+    {
+      return {.Type = Kind::ColourMatrix, .Matrix = matrix};
+    }
+    KRYS_NODISCARD static LayerFilter2D Blur(float blurRadius) noexcept
+    {
+      return {.Type = Kind::Blur, .BlurRadius = blurRadius};
+    }
+    KRYS_NODISCARD static LayerFilter2D DropShadow(const DropShadow2D &shadow) noexcept
+    {
+      return {.Type = Kind::DropShadow, .Shadow = shadow};
+    }
+  };
+
   struct Renderer2DDesc
   {
     /// @brief The atlas that caches the coverage masks of paths.
@@ -181,6 +216,8 @@ namespace krys::gfx
       AlphaMask = 1u << 7u,
       /// @brief The colour is multiplied by the batch's pattern (above the blend mode's bits).
       PatternPaint = 1u << 13u,
+      /// @brief The texel goes through the batch's colour matrix: a layer's filter.
+      ColourMatrixFilter = 1u << 14u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -197,6 +234,8 @@ namespace krys::gfx
     constexpr static uint32 NoGradient = ~0u;
     /// @brief A batch's state when it has no pattern.
     constexpr static uint32 NoPattern = ~0u;
+    /// @brief A batch's state when it has no colour matrix.
+    constexpr static uint32 NoColourMatrix = ~0u;
 
     struct DrawState
     {
@@ -393,6 +432,9 @@ namespace krys::gfx
       uint32 Gradient {NoGradient};
       /// @brief The pattern its pattern instances read, an index into the frame's patterns, or `NoPattern`.
       uint32 Pattern {NoPattern};
+      /// @brief The colour matrix its filtered instances apply, an index into the frame's colour matrices, or
+      /// `NoColourMatrix`.
+      uint32 ColourMatrix {NoColourMatrix};
     };
 
     struct Layer
@@ -412,6 +454,12 @@ namespace krys::gfx
       uint32 CompositeBatch {0u};
       bool HasComposite {false};
       TextureHandle Texture {};
+      /// @brief What it does to its contents as it's composited.
+      Maybe<LayerFilter2D> Filter {};
+      /// @brief A drop shadow's composite, before the layer's in the parent, and its blurred texture.
+      uint32 ShadowInstance {0u};
+      uint32 ShadowBatch {0u};
+      TextureHandle ShadowTexture {};
     };
 
     /// @brief A layer texture, reused by later frames.
@@ -437,6 +485,29 @@ namespace krys::gfx
       uint32 Layer {NoLayer};
     };
 
+    /// @brief A colour matrix as the shader reads it: c' = Matrix * c + Offset.
+    struct ColourMatrixUniforms
+    {
+      /// @brief Column-major.
+      Array<float, 16> Matrix;
+      Array<float, 4> Offset;
+    };
+    static_assert(sizeof(ColourMatrixUniforms) == 80u,
+                  "ColourMatrixUniforms mirrors the shader's std140 block.");
+
+    /// @brief One pass of a layer's blur: along one axis, from a texture into another.
+    struct BlurUniforms
+    {
+      /// @brief The texels written and read: x, y, width and height.
+      Array<float, 4> Region;
+      Array<float, 2> TextureSize;
+      Array<float, 2> Direction;
+      float Sigma;
+      int32 Reach;
+      Array<float, 2> Padding;
+    };
+    static_assert(sizeof(BlurUniforms) == 48u, "BlurUniforms mirrors the shader's std140 block.");
+
     struct FrameUniforms
     {
       Array<float, 2> ViewportSize;
@@ -456,6 +527,8 @@ namespace krys::gfx
       TransientAllocation Instances {};
       /// @brief Where blend modes copy what's beneath them, laid out as the pass they're in.
       TextureHandle Backdrop {};
+      /// @brief Blurs layers' textures, for their filters.
+      PipelineHandle BlurPipeline {};
     };
 
     struct TargetPipeline
@@ -470,6 +543,9 @@ namespace krys::gfx
     Device *_device;
     ShaderHandle _vertexShader {};
     ShaderHandle _fragmentShader {};
+    ShaderHandle _blurVertexShader {};
+    ShaderHandle _blurFragmentShader {};
+    SmallList<TargetPipeline, 2> _blurPipelines {};
     SamplerHandle _linearSampler {};
     SamplerHandle _nearestSampler {};
     /// @brief For patterns, whose textures repeat.
@@ -504,6 +580,7 @@ namespace krys::gfx
     List<detail::FlatGradientStop> _gradientStops {};
     List<detail::FlatGradientStop> _flattened {};
     List<PatternData> _patterns {};
+    List<ColourMatrixUniforms> _colourMatrices {};
 
   public:
     /// @brief Past this many target pixels per em, glyphs are filled as outlines, as Skia draws large text.
@@ -629,6 +706,10 @@ namespace krys::gfx
     void BeginLayer(float opacity) noexcept;
     /// @brief Starts a layer as `BeginLayer(opacity)` does, composited with `blend`.
     void BeginLayer(float opacity, BlendMode blend) noexcept;
+    /// @brief Starts a layer as `BeginLayer(opacity, blend)` does, whose contents go through `filter` as it's
+    /// composited. A blur or a shadow reaches past what's drawn by three standard deviations (and the
+    /// shadow's offset), within the clip the layer began with.
+    void BeginLayer(float opacity, BlendMode blend, const LayerFilter2D &filter) noexcept;
     /// @brief Composites the current layer into what's beneath it and restores the drawing state saved by
     /// `BeginLayer`.
     void EndLayer() noexcept;
@@ -641,6 +722,12 @@ namespace krys::gfx
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
     KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format, bool additive) noexcept;
+    KRYS_NODISCARD Expected<PipelineHandle> GetBlurPipeline(TextureFormat format) noexcept;
+    /// @brief Records one pass of a blur by `sigma` texels along `direction` (1, 0 or 0, 1), over `region` of
+    /// `source` into the same texels of `destination`; nothing outside `region` is read.
+    void RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
+                    TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
+                    float sigma) noexcept;
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
                         const Transform2D &transform) noexcept;

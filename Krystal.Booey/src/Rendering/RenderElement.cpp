@@ -189,8 +189,8 @@ namespace krys::boo
 
   style::Difference RenderElement::AdjustStyleDifference(style::Difference diff) const noexcept
   {
-    // FIXME: Renderers have no layers yet (hasLayer() is false), so the composited cases and the layer status
-    // changes of plug-ins, iframes and canvas don't apply.
+    // FIXME: There's no compositing, so the composited cases and the layer status changes of plug-ins,
+    // iframes and canvas don't apply.
 
     // If transform changed, and we are not composited, need to do a layout.
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Transform))
@@ -217,13 +217,19 @@ namespace krys::boo
       }
     }
 
+    if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Filter)
+        && HasLayer())
+    {
+      diff.Result = std::max(diff.Result, style::DifferenceResult::RepaintLayer);
+    }
+
     if (IsHTMLMarquee())
     {
       diff.Result = std::max(diff.Result, style::DifferenceResult::Layout);
     }
 
     // If we have no layer(), just treat a RepaintLayer hint as a normal Repaint.
-    if (diff == style::DifferenceResult::RepaintLayer)
+    if (diff == style::DifferenceResult::RepaintLayer && !HasLayer())
     {
       diff.Result = style::DifferenceResult::Repaint;
     }
