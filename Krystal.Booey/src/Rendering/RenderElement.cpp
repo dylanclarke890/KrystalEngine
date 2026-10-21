@@ -991,9 +991,27 @@ namespace krys::boo
       SetHasTransformRelatedProperty(false);
     }
 
-    // FIXME: Content visibility observation, outline counting, slow repaint objects and the extended
-    // background, once there are any.
-    (void)newStyle;
+    // FIXME: Content visibility observation and outline counting, once there are any.
+
+    // FIXME: A fixed root background composited on its own isn't slow, once there's compositing; and the
+    // setting for fixed backgrounds painting relative to the document, once there are settings for it.
+    bool newStyleSlowScroll =
+      style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
+
+    auto &frameView = View().FrameView();
+    if (frameView.HasSlowRepaintObject(*this))
+    {
+      if (!newStyleSlowScroll)
+      {
+        frameView.RemoveSlowRepaintObject(*this);
+      }
+    }
+    else if (newStyleSlowScroll)
+    {
+      frameView.AddSlowRepaintObject(*this);
+    }
+
+    // FIXME: The extended background, once there's rubber-banding.
   }
 
   const RenderStyle *
@@ -2147,7 +2165,8 @@ namespace krys::boo
 
   void RenderElement::WillBeDestroyed() noexcept
   {
-    // FIXME: Slow repaint objects and visibility callbacks, once there are any.
+    View().FrameView().RemoveSlowRepaintObject(*this);
+    // FIXME: Visibility callbacks, once there are any.
 
     if (HasCounterNodeMap())
     {

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 
@@ -37,7 +39,13 @@ namespace krys::boo
 
   void RenderLayerModelObject::WillBeDestroyed() noexcept
   {
-    // FIXME: Forget viewport-constrained positioned objects, once the frame view tracks them.
+    if (IsPositioned())
+    {
+      if (Style().HasViewportConstrainedPosition())
+      {
+        View().FrameView().RemoveViewportConstrainedObject(*this);
+      }
+    }
 
     DestroyLayer();
 
@@ -152,8 +160,21 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Viewport-constrained objects, scrollbar steps and scroll snap containers, once there's
-    // scrolling.
+    bool newStyleIsViewportConstrained = Style().HasViewportConstrainedPosition();
+    bool oldStyleIsViewportConstrained = oldStyle && oldStyle->HasViewportConstrainedPosition();
+    if (newStyleIsViewportConstrained != oldStyleIsViewportConstrained)
+    {
+      if (newStyleIsViewportConstrained && Layer())
+      {
+        View().FrameView().AddViewportConstrainedObject(*this);
+      }
+      else
+      {
+        View().FrameView().RemoveViewportConstrainedObject(*this);
+      }
+    }
+
+    // FIXME: Scrollbar steps and scroll snap containers, once there's scrolling.
   }
 
   bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,

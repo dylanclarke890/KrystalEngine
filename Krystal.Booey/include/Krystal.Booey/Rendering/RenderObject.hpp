@@ -453,6 +453,8 @@ namespace krys::boo
     };
     /// @brief Repaints @p repaintRect, in the renderer's coordinates.
     void RepaintRectangle(const LayoutRect &repaintRect, bool shouldClipToLayer = true) const noexcept;
+    /// @brief Repaints a renderer with a fixed background, which moves against the contents when they scroll.
+    void RepaintSlowRepaintObject() const noexcept;
     void RepaintRectangle(const LayoutRect &repaintRect, ClipRepaintToLayer shouldClipToLayer,
                           ForceRepaint forceRepaint,
                           Maybe<LayoutBoxExtent> additionalRepaintOutsets = null) const noexcept;

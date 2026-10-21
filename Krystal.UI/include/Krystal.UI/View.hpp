@@ -24,6 +24,11 @@
 #include <chrono>
 #include <filesystem>
 
+namespace krys::boo
+{
+  struct ScrolledContents;
+}
+
 namespace krys::ui
 {
   /// @brief Shows a Booey page: parses its document into the page's main frame, with a view of the viewport's
@@ -195,6 +200,8 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
+    /// @brief Moves the page texture's pixels as scrolling moved the painted contents.
+    void ScrollPageTexture(gfx::CommandBuffer &commands, const boo::ScrolledContents &scrolled) noexcept;
     /// @brief The rects to paint for @p damage, within @p viewRect: its rects, those close together merged.
     KRYS_NODISCARD static List<boo::IntRect> DamageRects(const boo::Region &damage,
                                                          const boo::IntRect &viewRect) noexcept;

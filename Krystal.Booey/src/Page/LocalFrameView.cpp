@@ -134,6 +134,210 @@ namespace krys::boo
     return std::exchange(_damage, Region {});
   }
 
+  Maybe<ScrolledContents> LocalFrameView::TakeScrolledContents() noexcept
+  {
+    return std::exchange(_scrolledContents, null);
+  }
+
+  void LocalFrameView::ScrollHostContents(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept
+  {
+    if (rectToScroll.IsEmpty())
+    {
+      return;
+    }
+
+    // Moves that haven't been painted yet add up, while they move the same rect; otherwise all of it is
+    // painted again.
+    if (_scrolledContents && _scrolledContents->Rect != rectToScroll)
+    {
+      _scrolledContents = null;
+      InvalidateRect(rectToScroll);
+      return;
+    }
+    if (_scrolledContents)
+    {
+      _scrolledContents->Delta += scrollDelta;
+    }
+    else
+    {
+      _scrolledContents = ScrolledContents {.Delta = scrollDelta, .Rect = rectToScroll};
+    }
+
+    // The damage in the rect moves with the contents.
+    Region moved = _damage;
+    moved.Intersect(Region(rectToScroll));
+    moved.Translate(scrollDelta);
+    moved.Intersect(Region(rectToScroll));
+    _damage.Subtract(Region(rectToScroll));
+    _damage.Unite(moved);
+
+    // What comes into view is painted.
+    Region exposed(rectToScroll);
+    exposed.Subtract(Region(IntRect(rectToScroll.Location() + scrollDelta, rectToScroll.Size())));
+    for (const auto &rect : exposed.Rects())
+    {
+      InvalidateRect(rect);
+    }
+    if (exposed.IsEmpty())
+    {
+      // Nothing came into view, but the contents still moved: the host has a frame to paint.
+      if (auto *frame = _frame.get())
+      {
+        if (auto *document = frame->Document())
+        {
+          document->ScheduleRenderingUpdate({});
+        }
+      }
+    }
+  }
+
+  IntRect LocalFrameView::RectToCopyOnScroll() const noexcept
+  {
+    IntRect scrollViewRect(0, 0, VisibleWidth(), VisibleHeight());
+    // FIXME: Overlay scrollbars, once there are any.
+    if (ShouldPlaceVerticalScrollbarOnLeft() && _verticalScrollbar)
+    {
+      scrollViewRect.Move(_verticalScrollbar->OccupiedWidth(), 0);
+    }
+    return scrollViewRect;
+  }
+
+  void LocalFrameView::ScrollContents(const IntSize &scrollDelta) noexcept
+  {
+    // FIXME: The pan scroll icon, once there's pan scrolling.
+    IntRect clipRect(IntPoint(), _frameRect.Size());
+    IntRect scrollViewRect = RectToCopyOnScroll();
+    IntRect updateRect = clipRect;
+    updateRect.Intersect(scrollViewRect);
+
+    if (!UseSlowRepaints())
+    {
+      if (!ScrollContentsFastPath(-scrollDelta, scrollViewRect))
+      {
+        ScrollContentsSlowPath(updateRect);
+      }
+    }
+    else
+    {
+      // We need to repaint the entire backing store.
+      ScrollContentsSlowPath(updateRect);
+    }
+
+    // FIXME: The overhang areas, once there's rubber-banding.
+  }
+
+  bool LocalFrameView::ScrollContentsFastPath(const IntSize &scrollDelta,
+                                              const IntRect &rectToScroll) noexcept
+  {
+    if (_viewportConstrainedObjects.empty())
+    {
+      ScrollHostContents(scrollDelta, rectToScroll);
+      return true;
+    }
+
+    // Get the rects of the fixed objects visible in the rectToScroll
+    Region regionToUpdate;
+    for (const auto *renderer : _viewportConstrainedObjects)
+    {
+      if (!renderer->Style().HasViewportConstrainedPosition())
+      {
+        continue;
+      }
+      // FIXME: Composited layers, and layers out of view or without visible content, which aren't repainted,
+      // once there's compositing.
+
+      // Fixed items should always have layers.
+      krys_debug_assert(renderer->HasLayer());
+      auto *layer = renderer->Layer();
+      if (!layer)
+      {
+        continue;
+      }
+
+      // FIXME: A fixed layer with a filter's outsets on an ancestor can't be moved, once there are filters.
+
+      // FIXME: use pixel snapping instead of enclosing when ScrollView has finished transitioning from
+      // IntRect to Float/LayoutRect.
+      IntRect updateRect = EnclosingIntRect(layer->RepaintRectIncludingNonCompositingDescendants());
+      updateRect = ContentsToView(updateRect);
+      updateRect.Intersect(rectToScroll);
+      if (!updateRect.IsEmpty())
+      {
+        regionToUpdate.Unite(Region(updateRect));
+      }
+    }
+
+    // 1) scroll
+    ScrollHostContents(scrollDelta, rectToScroll);
+
+    // 2) update the area of fixed objects that has been invalidated
+    for (auto updateRect : regionToUpdate.Rects())
+    {
+      IntRect scrolledRect = updateRect;
+      scrolledRect.Move(scrollDelta);
+      updateRect.Unite(scrolledRect);
+      updateRect.Intersect(rectToScroll);
+      InvalidateRect(updateRect);
+    }
+
+    return true;
+  }
+
+  void LocalFrameView::ScrollContentsSlowPath(const IntRect &updateRect) noexcept
+  {
+    RepaintSlowRepaintObjects();
+
+    // FIXME: A frame inside a compositing layer repaints its owner's box, once there are frames in frames.
+
+    InvalidateRect(updateRect);
+  }
+
+  void LocalFrameView::RepaintSlowRepaintObjects() noexcept
+  {
+    // Renderers with fixed backgrounds may be in compositing layers, so we need to explicitly
+    // repaint them after scrolling.
+    for (const auto *renderer : _slowRepaintObjects)
+    {
+      renderer->RepaintSlowRepaintObject();
+    }
+  }
+
+  bool LocalFrameView::UseSlowRepaints() const noexcept
+  {
+    // The host moves the page's own pixels, so the contents needn't be opaque, and there's no window to blit
+    // into (m_contentIsOpaque, m_cannotBlitToWindow, overlapping).
+    // FIXME: Frames in frames use their parent's, once there are any.
+    return HasSlowRepaintObjects();
+  }
+
+  void LocalFrameView::AddSlowRepaintObject(const RenderElement &renderer) noexcept
+  {
+    // FIXME: The enclosing layer's scrolling tree update, once there's a scrolling tree.
+    _slowRepaintObjects.insert(&renderer);
+  }
+
+  void LocalFrameView::RemoveSlowRepaintObject(const RenderElement &renderer) noexcept
+  {
+    _slowRepaintObjects.erase(&renderer);
+  }
+
+  bool LocalFrameView::HasSlowRepaintObject(const RenderElement &renderer) const noexcept
+  {
+    return _slowRepaintObjects.contains(&renderer);
+  }
+
+  void LocalFrameView::AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
+  {
+    // FIXME: The scrolling coordinator and anchor-positioned viewport-constrained objects, once there are
+    // any.
+    _viewportConstrainedObjects.insert(&object);
+  }
+
+  void LocalFrameView::RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
+  {
+    _viewportConstrainedObjects.erase(&object);
+  }
+
   IntSize LocalFrameView::GetLayoutSize() const noexcept
   {
     return _fixedLayoutSize.IsEmpty() || !_useFixedLayout ? UnobscuredContentRect().Size() : _fixedLayoutSize;
@@ -1499,10 +1703,8 @@ namespace krys::boo
     // FIXME: Suppressed scrollbars and deferring the update while the contents size changes, once there are
     // scrollbars.
 
-    // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position.
-    // FIXME: Moving the painted contents rather than repainting all of them (scrollContents), and the
-    // compositing layers, once there's compositing.
-    RepaintEntireView();
+    // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position, then the painted contents
+    // move.
     if (!LayoutContext().IsInRenderTreeLayout())
     {
       if (auto *renderView = const_cast<RenderView *>(GetRenderView()); renderView && renderView->Layer())
@@ -1510,6 +1712,8 @@ namespace krys::boo
         renderView->Layer()->UpdateLayerPositionsAfterDocumentScroll();
       }
     }
+    ScrollContents(scrollDelta);
+    // FIXME: The compositing layers, once there's compositing.
 
     if (oldPosition != GetScrollPosition())
     {

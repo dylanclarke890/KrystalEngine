@@ -194,7 +194,8 @@ namespace krys::ui
     }
 
     // A new viewport size needs new textures, all of the page painted.
-    if (!_pageTexture.IsValid() || _pageTextureSize != size)
+    bool newTextures = !_pageTexture.IsValid() || _pageTextureSize != size;
+    if (newTextures)
     {
       for (auto *texture : {&_pageTexture, &_damageTexture})
       {
@@ -233,6 +234,13 @@ namespace krys::ui
 
     // The rendering update runs in Update; painting only needs the layout, which can damage the page too.
     (void)_document->UpdateLayout();
+
+    // Scrolling moved the painted contents: their pixels move, and the damage is where they've moved to. New
+    // textures have nothing to move: all of them is painted.
+    if (auto scrolled = view->TakeScrolledContents(); scrolled && !newTextures)
+    {
+      ScrollPageTexture(*commands, *scrolled);
+    }
     if (view->HasDamage())
     {
       const boo::IntRect viewRect(0, 0, size.Width(), size.Height());
@@ -245,6 +253,34 @@ namespace krys::ui
 
     renderer.DrawImage(_pageTexture, gfx::Rect2D {0.f, 0.f, static_cast<float>(size.Width()),
                                                   static_cast<float>(size.Height())});
+  }
+
+  void View::ScrollPageTexture(gfx::CommandBuffer &commands, const boo::ScrolledContents &scrolled) noexcept
+  {
+    const auto size = ViewportSize();
+    auto rect = boo::Intersection(scrolled.Rect, boo::IntRect(0, 0, size.Width(), size.Height()));
+    // The pixels that stay in the rect: where they go, and where they come from.
+    auto destination = boo::Intersection(rect, boo::IntRect(rect.Location() + scrolled.Delta, rect.Size()));
+    if (destination.IsEmpty())
+    {
+      return;
+    }
+    auto source = destination;
+    source.Move(-scrolled.Delta);
+
+    auto region = [](const boo::IntRect &rect)
+    {
+      return gfx::TextureRegion {.X = static_cast<uint32>(rect.X()),
+                                 .Y = static_cast<uint32>(rect.Y()),
+                                 .Width = static_cast<uint32>(rect.Width()),
+                                 .Height = static_cast<uint32>(rect.Height())};
+    };
+    // A texture can't be copied onto itself where the two overlap, so the pixels go through the damage
+    // texture.
+    commands.BlitTexture(_pageTexture, region(source), _damageTexture, region(destination),
+                         gfx::SamplerFilter::Nearest);
+    commands.BlitTexture(_damageTexture, region(destination), _pageTexture, region(destination),
+                         gfx::SamplerFilter::Nearest);
   }
 
   List<boo::IntRect> View::DamageRects(const boo::Region &damage, const boo::IntRect &viewRect) noexcept

@@ -237,6 +237,69 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: scrolling moves the painted page and leaves no stale pixels", "[UI][GPU]")
+  {
+    static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+    (void)fonts;
+
+    RepaintFixture fixture(240u, 160u);
+    View view({240, 160});
+    bool fixedBackground = false;
+
+    SECTION("a fixed header and an animation")
+    {
+      view.LoadHTML(
+        u8"<!DOCTYPE html><style>"
+        u8"body { margin: 0; font: 14px 'Liberation Sans' }"
+        u8"#header { position: fixed; top: 0; left: 0; right: 0; height: 24px; background: #222c; color: "
+        u8"white }"
+        u8".row { height: 30px; border-bottom: 1px solid #888; background: linear-gradient(90deg, #fde, "
+        u8"#def) }"
+        u8"#spin { position: absolute; left: 150px; top: 100px; width: 30px; height: 30px; background: teal;"
+        u8" animation: turn 1s linear infinite }"
+        u8"@keyframes turn { to { transform: rotate(360deg) } }"
+        u8"</style><div id=header>Header</div>"
+        u8"<div class=row>1</div><div class=row>2</div><div class=row>3</div><div class=row>4</div>"
+        u8"<div class=row>5</div><div class=row>6</div><div class=row>7</div><div class=row>8</div>"
+        u8"<div class=row>9</div><div class=row>10</div><div class=row>11</div><div class=row>12</div>"
+        u8"<div id=spin></div>");
+    }
+
+    SECTION("a fixed background")
+    {
+      fixedBackground = true;
+      view.LoadHTML(u8"<!DOCTYPE html><style>"
+                    u8"body { margin: 0; height: 600px;"
+                    u8" background: linear-gradient(#f88, #88f) fixed }"
+                    u8"p { margin: 40px 10px; font: 14px 'Liberation Sans' }"
+                    u8"</style><p>One</p><p>Two</p><p>Three</p><p>Four</p><p>Five</p><p>Six</p>");
+    }
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+    };
+    frame();
+    CheckNoStalePixels(fixture, view, "scroll-first");
+    // A fixed background moves against the contents, so scrolling repaints all of them.
+    CHECK(view.Frame().View()->UseSlowRepaints() == fixedBackground);
+
+    for (int32 step = 1; step <= 6; ++step)
+    {
+      // Down in steps of different sizes, then back up; twice in one frame on the third step.
+      auto y = step <= 4 ? step * 23 : (8 - step) * 31;
+      view.ScrollTo({0, y});
+      if (step == 3)
+      {
+        view.ScrollTo({0, y + 7});
+      }
+      frame();
+      CheckNoStalePixels(fixture, view, "scroll-" + std::to_string(step));
+    }
+  }
+
   TEST_CASE("View: damage is the rect that changed", "[UI]")
   {
     View view({200, 100});
@@ -268,6 +331,23 @@ namespace krys::ui::tests
     {
       view.MouseMoved({10, 10});
       CHECK(frame().Bounds() == boo::IntRect(0, 0, 50, 50));
+    }
+
+    SECTION("scrolling moves the painted contents; only what comes into view is damaged")
+    {
+      auto tall = view.Document().GetElementById(u8"box");
+      REQUIRE_FALSE(tall->SetAttribute(u8"style", u8"height: 500px").HasException());
+      (void)frame();
+      view.ScrollTo({0, 30});
+      (void)view.Document().UpdateLayout();
+      auto scrolled = frameView.TakeScrolledContents();
+      REQUIRE(scrolled.has_value());
+      CHECK(scrolled->Delta == boo::IntSize(0, -30));
+      // The bottom 30 pixels come into view, and the scrollbar's thumb moves; what was in view isn't damaged.
+      auto damage = frameView.TakeDamage();
+      CHECK(damage.Contains(boo::Region(boo::IntRect(0, 70, 150, 30))));
+      CHECK_FALSE(damage.Contains(boo::IntPoint(10, 10)));
+      CHECK_FALSE(damage.Contains(boo::IntPoint(100, 60)));
     }
 
     SECTION("a transform")

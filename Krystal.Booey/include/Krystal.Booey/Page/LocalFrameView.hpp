@@ -22,6 +22,7 @@
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -38,6 +39,14 @@ namespace krys::boo
   /// @note FIXME: No obscured insets, visual viewport, auto-sizing or compositing, and views
   /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
   /// rect's size, less its scrollbars, at the scroll position.
+  /// @brief Painted contents that moved: the pixels in `Rect` (in the view's coordinates) move by `Delta`,
+  /// and what moves out of it is gone.
+  struct ScrolledContents
+  {
+    IntSize Delta;
+    IntRect Rect;
+  };
+
   class LocalFrameView final : public RefCounted<LocalFrameView>,
                                public CanMakeWeakPtr<LocalFrameView>,
                                public ScrollableArea
@@ -74,6 +83,14 @@ namespace krys::boo
     ScrollPosition _scrollPosition;
     /// @brief What needs painting again, in the view's coordinates, since the host last took it.
     Region _damage;
+    /// @brief The painted contents the host moves before it paints the damage, as scrolling moved them.
+    Maybe<ScrolledContents> _scrolledContents;
+    /// @brief Renderers that paint a background fixed to the viewport (`background-attachment: fixed`): the
+    /// contents can't be moved when the view scrolls. Keyed by address; renderers remove themselves.
+    HashSet<const RenderElement *> _slowRepaintObjects;
+    /// @brief Renderers fixed or sticky to the viewport, which stay put when the contents move. Keyed by
+    /// address; renderers remove themselves.
+    HashSet<const RenderLayerModelObject *> _viewportConstrainedObjects;
     Timer _delayedScrollToFocusedElementTimer;
     SelectionRevealMode _selectionRevealModeForFocusedElement {SelectionRevealMode::DoNotReveal};
     bool _shouldScrollToFocusedElement {false};
@@ -423,7 +440,28 @@ namespace krys::boo
       return !_damage.IsEmpty();
     }
     /// @brief What needs painting again, in the view's coordinates; the view then has no damage.
+    /// @note Take the scrolled contents first: the damage is where the contents are once they've moved.
     KRYS_NODISCARD Region TakeDamage() noexcept;
+    /// @brief How the painted contents moved since the host last took them: the host moves its pixels in the
+    /// rect to match before painting the damage. Null when nothing moved.
+    /// @see `HostWindow::scroll`.
+    KRYS_NODISCARD Maybe<ScrolledContents> TakeScrolledContents() noexcept;
+
+    void AddSlowRepaintObject(const RenderElement &renderer) noexcept;
+    void RemoveSlowRepaintObject(const RenderElement &renderer) noexcept;
+    KRYS_NODISCARD bool HasSlowRepaintObject(const RenderElement &renderer) const noexcept;
+    KRYS_NODISCARD bool HasSlowRepaintObjects() const noexcept
+    {
+      return !_slowRepaintObjects.empty();
+    }
+    void AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
+    void RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
+    KRYS_NODISCARD bool HasViewportConstrainedObjects() const noexcept
+    {
+      return !_viewportConstrainedObjects.empty();
+    }
+    /// @brief Whether scrolling repaints the whole view rather than moving the painted contents.
+    KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates.
     /// FIXME: The overlay scrollbars and painting a single node (`setNodeToDraw`) aren't ported.
@@ -573,6 +611,21 @@ namespace krys::boo
     /// scroll events).
     void ScrollTo(const ScrollPosition &newPosition) noexcept;
     void ScrollPositionChanged(const ScrollPosition &oldPosition, const ScrollPosition &newPosition) noexcept;
+    /// @brief Moves the painted contents by @p scrollDelta (the change in the scroll position), or repaints
+    /// them.
+    void ScrollContents(const IntSize &scrollDelta) noexcept;
+    /// @brief Moves the painted contents of @p rectToScroll by @p scrollDelta (the contents' move, the
+    /// opposite of the scroll position's), repainting the viewport-constrained objects; false when they can't
+    /// be moved.
+    bool ScrollContentsFastPath(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept;
+    void ScrollContentsSlowPath(const IntRect &updateRect) noexcept;
+    void RepaintSlowRepaintObjects() noexcept;
+    /// @brief The host window's half of the fast path: the contents of @p rectToScroll move by @p
+    /// scrollDelta, with the damage, and what comes into view is damaged.
+    void ScrollHostContents(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept;
+    /// @brief The part of the view whose painted contents move when it scrolls: the visible contents, without
+    /// the scrollbars.
+    KRYS_NODISCARD IntRect RectToCopyOnScroll() const noexcept;
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
     // FIXME: Adding and removing scrollbars, once there are scrollbars.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;

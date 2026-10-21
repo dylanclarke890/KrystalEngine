@@ -1090,6 +1090,33 @@ namespace krys::boo
     IssueRepaint(dirtyRect, shouldClipToLayer, forceRepaint, additionalRepaintOutsets);
   }
 
+  void RenderObject::RepaintSlowRepaintObject() const noexcept
+  {
+    if (!IsRooted())
+    {
+      return;
+    }
+    // FIXME: Nothing repaints while printing, once there's printing.
+
+    const auto *repaintContainer = ContainerForRepaint().Renderer;
+
+    bool shouldClipToLayer = true;
+    IntRect repaintRect;
+    // If this is the root background, we need to check if there is an extended background rect. If
+    // there is, then we should not allow painting to clip to the layer size.
+    if (IsDocumentElementRenderer() || IsBody())
+    {
+      shouldClipToLayer = !View().FrameView().HasExtendedBackgroundRectForPainting();
+      repaintRect = SnappedIntRect(View().BackgroundRect());
+    }
+    else
+    {
+      repaintRect = SnappedIntRect(ClippedOverflowRectForRepaint(repaintContainer));
+    }
+
+    RepaintUsingContainer(repaintContainer, LayoutRect(repaintRect), shouldClipToLayer);
+  }
+
   LayoutRect RenderObject::AbsoluteClippedOverflowRectForRepaint() const noexcept
   {
     return ClippedOverflowRect(nullptr, VisibleRectContextForRepaint());

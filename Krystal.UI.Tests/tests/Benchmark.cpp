@@ -35,9 +35,11 @@ namespace krys::ui::tests
     /// @brief Runs @p frames frames (after ten to warm up) of the page at @p path at 60 Hz, as a host would:
     /// `Update`, then paint into a target, then submit the frame.
     /// @param scrollTo Where the page is scrolled to, after its first frames.
+    /// @param scrollStep How far the page scrolls each measured frame, down and back up, as a wheel would.
     KRYS_NODISCARD FrameCosts Measure(const std::filesystem::path &path, uint32 width, uint32 height,
                                       Painting painting = Painting::Damage,
-                                      Maybe<boo::IntPoint> scrollTo = null, int32 frames = 60)
+                                      Maybe<boo::IntPoint> scrollTo = null, int32 scrollStep = 0,
+                                      int32 frames = 60)
     {
       using namespace std::chrono;
       static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -68,6 +70,13 @@ namespace krys::ui::tests
             view.ScrollTo(*scrollTo);
           }
           const auto start = steady_clock::now();
+          if (i >= 10 && scrollStep)
+          {
+            // Down for 20 frames, then back up.
+            const auto phase = (i - 10) % 40;
+            const auto y = (phase < 20 ? phase : 40 - phase) * scrollStep;
+            view.ScrollTo({0, (scrollTo ? scrollTo->Y() : 0) + y});
+          }
           (void)view.Update(time);
           const auto updated = steady_clock::now();
           const bool needsPaint = view.NeedsPaint();
@@ -125,6 +134,7 @@ namespace krys::ui::tests
     Report("editor page, animations, all repainted",
            Measure(editorPage, 1'280u, 800u, Painting::Whole, bottom));
     // A still page: after its first paint, nothing changes.
+    Report("editor page, scrolling", Measure(editorPage, 1'280u, 800u, Painting::Damage, null, 12));
     Report("still page", Measure(GoldenDirectory() / "scenes" / "text.html", 360u, 240u));
   }
 }

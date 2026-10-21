@@ -1258,6 +1258,21 @@ namespace krys::boo
     }
   }
 
+  LayoutRect RenderLayer::RepaintRectIncludingNonCompositingDescendants() const noexcept
+  {
+    LayoutRect repaintRect;
+    if (_repaintRectsValid)
+    {
+      repaintRect = _repaintRects.ClippedOverflowRect;
+    }
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      // FIXME: Composited child layers paint themselves, with a different origin, once there's compositing.
+      repaintRect.UniteIfNonZero(child->RepaintRectIncludingNonCompositingDescendants());
+    }
+    return repaintRect;
+  }
+
   void RenderLayer::RepaintIncludingDescendants() noexcept
   {
     Renderer().Repaint();

@@ -815,6 +815,8 @@ namespace krys::boo
       _repaintRectsValid = false;
     }
 
+    /// @brief The layer's repaint rect, with those of its descendant layers.
+    KRYS_NODISCARD LayoutRect RepaintRectIncludingNonCompositingDescendants() const noexcept;
     /// @brief Repaints the layer's renderer and those of its descendant layers.
     void RepaintIncludingDescendants() noexcept;
 
