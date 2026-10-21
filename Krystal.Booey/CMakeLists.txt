@@ -311,6 +311,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/Color/AbsoluteColorResolver.hpp
   include/Krystal.Booey/CSS/Values/Color/Color.hpp
   include/Krystal.Booey/CSS/Values/Color/ColorDescriptors.hpp
+  include/Krystal.Booey/CSS/Values/Color/CurrentColor.hpp
   include/Krystal.Booey/CSS/Values/Color/ColorLayers.hpp
   include/Krystal.Booey/CSS/Values/Color/ColorLayersResolver.hpp
   include/Krystal.Booey/CSS/Values/Color/ColorMix.hpp
@@ -446,6 +447,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/CSS/Values/FilterEffects/BrightnessFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/ContrastFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/DropShadowFunction.hpp
+  include/Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/GrayscaleFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/HueRotateFunction.hpp
   include/Krystal.Booey/CSS/Values/FilterEffects/InvertFunction.hpp
@@ -718,6 +720,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
 
   # Style resolution, layer f3a (computed style foundations)
   include/Krystal.Booey/Animation/ScrollAxis.hpp
+  include/Krystal.Booey/Animation/ScrollTimeline.hpp
+  include/Krystal.Booey/Animation/ViewTimeline.hpp
   include/Krystal.Booey/CSS/PrimitiveValueMappings.hpp
   include/Krystal.Booey/Core/ScrollTypes.hpp
   include/Krystal.Booey/Core/StyleAppearance.hpp
@@ -1158,7 +1162,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Values/ScrollAnimations/ProgressTimelineAxes.hpp
   include/Krystal.Booey/Style/Values/ScrollAnimations/ProgressTimelineName.hpp
   include/Krystal.Booey/Style/Values/ScrollAnimations/ScrollFunction.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ScrollTimelines.hpp
   include/Krystal.Booey/Style/Values/ScrollAnimations/ViewFunction.hpp
+  include/Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelines.hpp
   include/Krystal.Booey/Style/Values/ScrollAnimations/ViewTimelineInsets.hpp
   include/Krystal.Booey/Style/Values/Transitions/SingleTransitionDelay.hpp
   include/Krystal.Booey/Style/Values/Transitions/SingleTransitionDuration.hpp
@@ -1565,6 +1571,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/DocumentFontLoader.hpp
   include/Krystal.Booey/Style/ResolveForFont.hpp
   include/Krystal.Booey/CSS/Font/FontFace.hpp
+  include/Krystal.Booey/CSS/FontSelectionValueInlines.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSource.hpp
   include/Krystal.Booey/CSS/Font/SegmentedFontFace.hpp
   include/Krystal.Booey/CSS/Font/FontFaceSet.hpp
@@ -2726,6 +2733,8 @@ target_sources(Krystal.Booey
       # Core
       include/Krystal.Booey/Core/BoxSides.hpp
       include/Krystal.Booey/Core/BoxExtents.hpp
+      include/Krystal.Booey/Core/RectCorners.hpp
+      include/Krystal.Booey/Core/RectEdges.hpp
       include/Krystal.Booey/Core/EncodingRegistry.hpp
       include/Krystal.Booey/Core/FloatConversion.hpp
       include/Krystal.Booey/Core/IterationStatus.hpp
