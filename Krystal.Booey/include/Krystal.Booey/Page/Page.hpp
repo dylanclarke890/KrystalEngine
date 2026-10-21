@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -10,6 +12,7 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -24,7 +27,7 @@ namespace krys::boo
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
   // transitions, intersection and resize observations, content relevancy, paint and event timing, video
-  // frame callbacks, caret animations, validation messages and the layer and scrolling tree updates.
+  // frame callbacks, caret animations, validation messages and the scrolling tree update.
   enum class RenderingUpdateStep : uint8
   {
     FlushAutofocusCandidates,
@@ -35,10 +38,11 @@ namespace krys::boo
     AnimationFrameCallbacks,
     FocusFixup,
     CursorUpdate,
+    LayerFlush,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 8uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 9uz);
 
 namespace krys::boo
 {
@@ -46,13 +50,14 @@ namespace krys::boo
   /// before the host paints them (the specification's "update the rendering"). Something that changes what
   /// the page shows schedules a rendering update; the host runs it at its next rendering opportunity.
   /// @see https://html.spec.whatwg.org/#update-the-rendering
-  // FIXME: The rest of the page: settings, the focus controller, the chrome, the back/forward list, page
-  // overlays, frames other than the main frame.
+  // FIXME: The rest of the page: settings, the focus controller, the rest of the chrome, the back/forward
+  // list, page overlays, frames other than the main frame.
   class Page final : public RefCounted<Page>, public CanMakeWeakPtr<Page>
   {
     KRYS_NON_COPY_MOVABLE(Page);
 
   private:
+    UniquePtr<ChromeClient> _chromeClient;
     RefPtr<LocalFrame> _mainFrame;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
@@ -62,13 +67,19 @@ namespace krys::boo
     bool _renderingUpdateIsScheduled {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
-    Page() noexcept;
+    explicit Page(UniquePtr<ChromeClient> chromeClient) noexcept;
 
   public:
     ~Page() noexcept;
 
     /// @brief A page with a main frame, which has no view or document yet.
-    KRYS_NODISCARD static Ref<Page> Create() noexcept;
+    /// @param chromeClient The host's side of the page; without one, the page has an empty chrome client.
+    KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr) noexcept;
+
+    KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
+    {
+      return *_chromeClient;
+    }
 
     KRYS_NODISCARD LocalFrame &MainFrame() const noexcept
     {
@@ -78,9 +89,10 @@ namespace krys::boo
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;
-    /// @brief How the page's filters are applied when drawn into @p context: through the graphics context (there's
-    /// no software or accelerated filter rendering).
-    KRYS_NODISCARD EnumSet<FilterRenderingMode> PreferredFilterRenderingModes(const GraphicsContext &context) const noexcept;
+    /// @brief How the page's filters are applied when drawn into @p context: through the graphics context
+    /// (there's no software or accelerated filter rendering).
+    KRYS_NODISCARD EnumSet<FilterRenderingMode>
+      PreferredFilterRenderingModes(const GraphicsContext &context) const noexcept;
 
     KRYS_NODISCARD bool IsRenderingUpdateScheduled() const noexcept
     {
@@ -93,11 +105,11 @@ namespace krys::boo
     }
 
     /// @brief Runs the rendering update: the steps the page's documents need, in the specification's order,
-    /// with layout before and after the steps that read it.
+    /// with layout before and after the steps that read it, then flushes the composited layers' changes.
     void UpdateRendering() noexcept;
 
     /// @brief Brings the style and layout of the page's documents up to date.
-    void LayoutIfNeeded() noexcept;
+    void LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions = {}) noexcept;
 
     void ForEachDocument(const Func<void(dom::Document &)> &functor) const noexcept;
     /// @brief Calls @p functor for each document that's rendered.
@@ -109,6 +121,7 @@ namespace krys::boo
     void RunProcessingStep(RenderingUpdateStep step,
                            const Func<void(dom::Document &)> &perDocumentFunction) noexcept;
     void DoAfterUpdateRendering() noexcept;
+    void FinalizeRenderingUpdate() noexcept;
     void RenderingUpdateCompleted() noexcept;
   };
 }

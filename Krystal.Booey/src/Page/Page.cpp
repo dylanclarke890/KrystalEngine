@@ -2,8 +2,10 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -18,16 +20,23 @@ namespace krys::boo
       RenderingUpdateStep::Animations,
       RenderingUpdateStep::AnimationFrameCallbacks,
       RenderingUpdateStep::FocusFixup,
-      RenderingUpdateStep::CursorUpdate};
+      RenderingUpdateStep::CursorUpdate,
+      RenderingUpdateStep::LayerFlush};
   }
 
-  Page::Page() noexcept = default;
+  Page::Page(UniquePtr<ChromeClient> chromeClient) noexcept : _chromeClient(krys::move(chromeClient))
+  {
+    if (!_chromeClient)
+    {
+      _chromeClient = CreateUnique<EmptyChromeClient>();
+    }
+  }
 
   Page::~Page() noexcept = default;
 
-  Ref<Page> Page::Create() noexcept
+  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient) noexcept
   {
-    Ref<Page> page = AdoptRef(*new Page);
+    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient)));
     page->_mainFrame = LocalFrame::Create(page.get());
     return page;
   }
@@ -66,7 +75,7 @@ namespace krys::boo
     // This function is not reentrant, e.g. a requestAnimationFrame callback may force a rendering update.
     if (_renderingUpdateDepth)
     {
-      LayoutIfNeeded();
+      LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
       return;
     }
 
@@ -121,10 +130,27 @@ namespace krys::boo
 
     // FIXME: Content relevancy, view transitions and intersection observations, once there are any.
 
-    LayoutIfNeeded();
+    LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();
 
     --_renderingUpdateDepth;
+
+    // There's no drawing area to finalize the update after painting, so the update finalizes itself.
+    FinalizeRenderingUpdate();
+  }
+
+  void Page::FinalizeRenderingUpdate() noexcept
+  {
+    // FIXME: Images with asynchronous decodes, once there are any.
+    _renderingUpdateRemainingSteps.Remove(RenderingUpdateStep::LayerFlush);
+
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+    {
+      view->FlushCompositingStateIncludingSubframes();
+    }
+
+    // FIXME: The scrolling tree, once there's asynchronous scrolling.
+
     RenderingUpdateCompleted();
   }
 
@@ -154,12 +180,12 @@ namespace krys::boo
     }
   }
 
-  void Page::LayoutIfNeeded() noexcept
+  void Page::LayoutIfNeeded(EnumSet<dom::LayoutOptions> layoutOptions) noexcept
   {
     // FIXME: Child frames, once there are frames.
     if (RefPtr<dom::Document> document = ShareRefPtr(_mainFrame->Document()); document && _mainFrame->View())
     {
-      (void)document->UpdateLayout();
+      (void)document->UpdateLayout(layoutOptions);
     }
   }
 

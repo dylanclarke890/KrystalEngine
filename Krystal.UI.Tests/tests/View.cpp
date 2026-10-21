@@ -530,42 +530,6 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
-  TEST_CASE("View: an animated image asks for a rendering update for each frame", "[UI]")
-  {
-    using namespace std::chrono_literals;
-    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-animation-test";
-    std::filesystem::create_directories(directory);
-    {
-      // A 1x1 GIF of two frames, red then blue, 100ms each, repeating forever.
-      const unsigned char gif[] = {
-        71, 73,  70, 56, 57,  97, 1,  0,  1,  0,  129, 0,  0,  255, 0,  0,  0,  0, 0, 0, 0,   0,
-        0,  0,   0,  33, 255, 11, 78, 69, 84, 83, 67,  65, 80, 69,  50, 46, 48, 3, 1, 0, 0,   0,
-        33, 249, 4,  0,  10,  0,  0,  0,  44, 0,  0,   0,  0,  1,   0,  1,  0,  0, 8, 4, 0,   1,
-        4,  4,   0,  33, 249, 4,  1,  10, 0,  1,  0,   44, 0,  0,   0,  0,  1,  0, 1, 0, 129, 0,
-        0,  255, 0,  0,  0,   0,  0,  0,  0,  0,  0,   8,  4,  0,   1,  4,  4,  0, 59};
-      std::ofstream image(directory / "spin.gif", std::ios::binary);
-      image.write(reinterpret_cast<const char *>(gif), sizeof(gif));
-      std::ofstream page(directory / "page.html", std::ios::binary);
-      page << "<!DOCTYPE html><img id=img src=spin.gif>";
-    }
-
-    View view({200, 100});
-    REQUIRE(view.LoadFile(directory / "page.html").has_value());
-    view.UpdateRendering();
-    auto now = boo::html::EventLoop::Current().Now();
-    // The load completes; painting the image starts its animation.
-    CHECK(view.Update(now));
-    (void)view.Record();
-    CHECK_FALSE(view.Update(now + 50ms));
-    // Each new frame asks for a rendering update.
-    CHECK(view.Update(now + 100ms));
-    (void)view.Record();
-    CHECK_FALSE(view.Update(now + 150ms));
-    CHECK(view.Update(now + 200ms));
-
-    std::filesystem::remove_all(directory);
-  }
-
   TEST_CASE("View: loads a file page's linked and imported sheets, and reloads them", "[UI]")
   {
     const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-sheet-test";
@@ -649,86 +613,5 @@ namespace krys::ui::tests
     }
     CHECK(opacity() == Catch::Approx(before + 0.25f).margin(0.02f));
     std::filesystem::remove_all(directory);
-  }
-
-  TEST_CASE("View: damage", "[UI]")
-  {
-    using namespace std::chrono_literals;
-    View view({200, 100});
-    view.LoadHTML(
-      u8"<!DOCTYPE html><style>body { margin: 0 } #box { width: 50px; height: 50px; background: red }"
-      u8"#box:hover { background: blue } #tall { height: 500px }</style>"
-      u8"<div id=box></div><div id=tall></div>");
-    auto &frameView = *view.Frame().View();
-    auto time = boo::html::EventLoop::Current().Now() + 1s;
-
-    // Paints what changed: here, as the host's paint would, take the damage after each update.
-    auto paint = [&]
-    {
-      (void)view.Document().UpdateLayout();
-      return frameView.TakeDamage();
-    };
-    auto frame = [&]
-    {
-      time += 16ms;
-      (void)view.Update(time);
-      return paint();
-    };
-
-    // A new page is damaged; once painted, a still page isn't.
-    CHECK_FALSE(frame().IsEmpty());
-    CHECK(frame().IsEmpty());
-    CHECK(frame().IsEmpty());
-    CHECK_FALSE(frameView.HasDamage());
-
-    SECTION("a style change")
-    {
-      auto box = view.Document().GetElementById(u8"box");
-      REQUIRE_FALSE(box->SetAttribute(u8"style", u8"background: green").HasException());
-      CHECK_FALSE(frame().IsEmpty());
-      CHECK(frame().IsEmpty());
-    }
-
-    SECTION("hovering")
-    {
-      view.MouseMoved({10, 10});
-      CHECK_FALSE(frame().IsEmpty());
-      CHECK(frame().IsEmpty());
-    }
-
-    SECTION("scrolling")
-    {
-      view.ScrollTo({0, 100});
-      CHECK_FALSE(frame().IsEmpty());
-      CHECK(frame().IsEmpty());
-    }
-
-    SECTION("resizing")
-    {
-      view.Resize({300, 100});
-      auto damage = frame();
-      CHECK(damage.Bounds() == boo::IntRect(0, 0, 300, 100));
-    }
-  }
-
-  TEST_CASE("View: an animation damages the page each frame", "[UI]")
-  {
-    using namespace std::chrono_literals;
-    View view({200, 100});
-    view.LoadHTML(
-      u8"<!DOCTYPE html><style>@keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
-      u8"#box { width: 10px; height: 10px; animation: fade 1s linear infinite }</style><div id=box></div>");
-    auto &frameView = *view.Frame().View();
-    auto time = boo::html::EventLoop::Current().Now() + 1s;
-    for (int32 i = 0; i < 4; ++i)
-    {
-      time += 16ms;
-      (void)view.Update(time);
-      (void)view.Document().UpdateLayout();
-      (void)frameView.TakeDamage();
-    }
-    time += 16ms;
-    (void)view.Update(time);
-    CHECK(view.NeedsPaint());
   }
 }

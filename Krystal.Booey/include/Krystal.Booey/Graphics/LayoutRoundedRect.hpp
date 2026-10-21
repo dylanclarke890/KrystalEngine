@@ -4,6 +4,11 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include <algorithm>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   class FloatQuad;
@@ -189,4 +194,6 @@ namespace krys::boo
 
     KRYS_NODISCARD bool operator==(const LayoutRoundedRect &) const noexcept = default;
   };
+
+  TextStream &operator<<(TextStream &ts, const LayoutRoundedRect &roundedRect) noexcept;
 }

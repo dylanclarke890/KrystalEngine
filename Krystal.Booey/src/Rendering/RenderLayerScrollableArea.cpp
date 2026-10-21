@@ -284,6 +284,11 @@ namespace krys::boo
     return renderer && renderer->ScrollsOverflow();
   }
 
+  bool RenderLayerScrollableArea::UsesCompositedScrolling() const noexcept
+  {
+    return HasCompositedScrollableOverflow() && _layer.IsComposited();
+  }
+
   bool RenderLayerScrollableArea::CanUseCompositedScrolling() const noexcept
   {
     // FIXME: Asynchronous overflow scrolling (asyncOverflowScrollingEnabled), once there's compositing.

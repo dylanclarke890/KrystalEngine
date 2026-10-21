@@ -24,13 +24,14 @@ namespace krys::boo
   class RenderCounter;
 
   class Region;
+  class RenderLayerCompositor;
 
   /// @brief Counters whose text needs updating, keyed by address; the weak pointer tells whether the counter
   /// is still alive.
   using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Selection, printing and the compositing bookkeeping come with selection, printing and compositing.
+  // FIXME: Selection and printing come with selection and printing.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -49,6 +50,7 @@ namespace krys::boo
     // Renderers remove themselves when they're destroyed or stop being an image's client.
     HashMap<RenderElement *, List<CachedImage *>> _renderersWithPausedImageAnimation;
     mutable UniquePtr<Region> _accumulatedRepaintRegion;
+    UniquePtr<RenderLayerCompositor> _compositor;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -72,6 +74,12 @@ namespace krys::boo
     {
       return _frameView;
     }
+
+    KRYS_NODISCARD RenderLayerCompositor &Compositor() noexcept;
+    KRYS_NODISCARD bool RootBackgroundIsEntirelyFixed() const noexcept;
+    KRYS_NODISCARD bool UsesCompositing() const noexcept;
+
+    void SetIsInWindow(bool isInWindow) noexcept;
 
     KRYS_NODISCARD layout::InitialContainingBlock &GetInitialContainingBlock() noexcept
     {
@@ -188,6 +196,8 @@ namespace krys::boo
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                  TransformState &transformState) const noexcept override;
+    const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                RenderGeometryMap &geometryMap) const noexcept override;
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 

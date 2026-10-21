@@ -1335,6 +1335,8 @@ namespace krys::boo::dom
     _renderView = CreateRenderer<boo::RenderView>(*this, RenderStyle::Create());
     Node::SetRenderer(_renderView.get());
 
+    _renderView->SetIsInWindow(true);
+
     ResolveStyle(ResolveStyleType::Rebuild);
   }
 
@@ -1344,8 +1346,13 @@ namespace krys::boo::dom
 
     SetForScope change(_renderTreeBeingDestroyed, true);
 
-    // FIXME: The accessibility cache, the document becoming inactive and telling the view, once there are
-    // any.
+    // FIXME: The accessibility cache and telling the view, once there are any.
+
+    // documentWillBecomeInactive
+    if (auto *frameView = View())
+    {
+      frameView->SetIsInWindow(false);
+    }
 
     _pendingRenderTreeUpdate = nullptr;
     _initialContainingBlockStyle = nullptr;
@@ -1528,7 +1535,7 @@ namespace krys::boo::dom
     return UpdateLayout();
   }
 
-  Document::UpdateLayoutResult Document::UpdateLayout() noexcept
+  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<LayoutOptions> layoutOptions) noexcept
   {
     RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
     if (frameView && frameView->LayoutContext().IsInRenderTreeLayout())
@@ -1554,6 +1561,12 @@ namespace krys::boo::dom
       if (layoutContext.NeedsLayout())
       {
         layoutContext.Layout();
+        result = UpdateLayoutResult::ChangesDone;
+      }
+
+      if (layoutOptions.Contains(LayoutOptions::UpdateCompositingLayers)
+          && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
+      {
         result = UpdateLayoutResult::ChangesDone;
       }
     }
@@ -1717,6 +1730,10 @@ namespace krys::boo::dom
     // the time this comment was originally written caused several tests to crash.
 
     StyleScope().FlushPendingUpdate();
+    if (auto *frameView = View())
+    {
+      frameView->WillRecalcStyle();
+    }
 
     {
       style::PostResolutionCallbackDisabler disabler(*this);
@@ -1797,9 +1814,14 @@ namespace krys::boo::dom
         }
       }
 
-      if (auto *frameView = View(); frameView && _renderView && _renderView->NeedsLayout())
+      if (auto *frameView = View())
       {
-        frameView->LayoutContext().ScheduleLayout();
+        (void)frameView->LayoutContext().UpdateCompositingLayersAfterStyleChange();
+
+        if (_renderView && _renderView->NeedsLayout())
+        {
+          frameView->LayoutContext().ScheduleLayout();
+        }
       }
     }
   }

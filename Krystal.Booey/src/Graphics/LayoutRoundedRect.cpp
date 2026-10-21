@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -359,5 +360,15 @@ namespace krys::boo
     }
     krys_debug_assert(snappedRoundedRect.IsRenderable());
     return snappedRoundedRect;
+  }
+
+  TextStream &operator<<(TextStream &ts, const LayoutRoundedRect &roundedRect) noexcept
+  {
+    ts << roundedRect.Rect();
+    ts.DumpProperty(u8"top-left", roundedRect.GetRadii().TopLeft());
+    ts.DumpProperty(u8"top-right", roundedRect.GetRadii().TopRight());
+    ts.DumpProperty(u8"bottom-left", roundedRect.GetRadii().BottomLeft());
+    ts.DumpProperty(u8"bottom-right", roundedRect.GetRadii().BottomRight());
+    return ts;
   }
 }

@@ -179,6 +179,12 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetparent
     KRYS_NODISCARD RenderBoxModelObject *OffsetParent() const noexcept;
 
+    /// @brief Pushes the mapping from this renderer to its container (or @p ancestorToStopAt) onto
+    /// @p geometryMap.
+    /// @return The renderer the mapping is to, or null at the render view.
+    virtual const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                        RenderGeometryMap &geometryMap) const noexcept;
+
     KRYS_NODISCARD bool IsHTMLMarquee() const noexcept;
 
     /// @brief How images drawn for the renderer are oriented: its `image-orientation`.
@@ -373,6 +379,9 @@ namespace krys::boo
     KRYS_NODISCARD bool HasEligibleContainmentForSizeQuery() const noexcept;
 
   protected:
+    void PushOntoGeometryMap(RenderGeometryMap &geometryMap, const RenderLayerModelObject *repaintContainer,
+                             RenderElement *container, bool containerSkipped) const noexcept;
+
     RenderElement(Type type, dom::Element &element, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,
                   TypeSpecificFlags typeSpecificFlags) noexcept;
     RenderElement(Type type, dom::Document &document, RenderStyle &&style, EnumSet<TypeFlag> baseTypeFlags,

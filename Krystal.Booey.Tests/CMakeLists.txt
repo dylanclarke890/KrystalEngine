@@ -386,6 +386,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/Page.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/CSSFilterRenderer.cpp
+		tests/Rendering/LayerOverlapMap.cpp
+		tests/Rendering/RenderLayerCompositor.cpp
 		tests/Rendering/BorderPainter.cpp
 		tests/Rendering/InlineBoxPainter.cpp
 		tests/Rendering/MarkedText.cpp

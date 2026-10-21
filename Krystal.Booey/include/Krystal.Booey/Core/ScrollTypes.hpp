@@ -276,4 +276,12 @@ namespace krys::boo
     StartDrag,
     Scroll
   };
+
+  /// @brief How a composited layer moves when an ancestor scroller scrolls.
+  enum class ScrollPositioningBehavior : uint8
+  {
+    None,
+    Moves,
+    Stationary
+  };
 }

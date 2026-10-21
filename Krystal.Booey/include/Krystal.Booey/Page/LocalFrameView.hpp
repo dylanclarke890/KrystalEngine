@@ -30,13 +30,14 @@
 namespace krys::boo
 {
   class GraphicsContext;
+  class GraphicsLayer;
   class LocalFrame;
   class RenderView;
 
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
   /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
   /// position within the document (the scrolling half of a scroll view).
-  /// @note FIXME: No obscured insets, visual viewport, auto-sizing or compositing, and views
+  /// @note FIXME: No obscured insets, visual viewport or auto-sizing, and views
   /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
   /// rect's size, less its scrollbars, at the scroll position.
   /// @brief Painted contents that moved: the pixels in `Rect` (in the view's coordinates) move by `Delta`,
@@ -228,6 +229,62 @@ namespace krys::boo
 #pragma region Scrolling
 
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
+    void InvalidateScrollCorner(const IntRect &rect) noexcept;
+    void PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept;
+
+    KRYS_NODISCARD const HashSet<const RenderLayerModelObject *> &ViewportConstrainedObjects() const noexcept
+    {
+      return _viewportConstrainedObjects;
+    }
+
+#pragma region Compositing
+
+    void WillRecalcStyle() noexcept;
+    void SetIsInWindow(bool isInWindow) noexcept;
+
+    bool FlushCompositingStateForThisFrame(const LocalFrame &rootFrameForFlush) noexcept;
+    /// @brief Returns true if the flush was completed.
+    bool FlushCompositingStateIncludingSubframes() noexcept;
+
+    // Sometimes (for plug-ins) we need to eagerly go into compositing mode.
+    void EnterCompositingMode() noexcept;
+    KRYS_NODISCARD bool IsEnclosedInCompositingLayer() const noexcept;
+    /// @brief Whether the view's contents scroll in a composited layer (the render view's).
+    KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
+
+    void SetNeedsCompositingConfigurationUpdate() noexcept;
+    void SetNeedsCompositingGeometryUpdate() noexcept;
+    void SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept;
+
+    KRYS_NODISCARD GraphicsLayer *LayerForHorizontalScrollbar() const noexcept;
+    KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept;
+    KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
+    void PositionScrollbarLayers() noexcept;
+
+    KRYS_NODISCARD bool ManagesScrollbars() const noexcept
+    {
+      return true;
+    }
+
+    /// @brief The document's background colour (the root's and the body's, over the base background colour);
+    /// invalid when there isn't enough information.
+    KRYS_NODISCARD boo::Color DocumentBackgroundColor() const noexcept;
+
+    KRYS_NODISCARD int32 InsetForLeftScrollbarSpace() const noexcept;
+    KRYS_NODISCARD FloatPoint PositionForRootContentLayer() const noexcept;
+    KRYS_NODISCARD LayoutRect
+      FixedScrollableAreaBoundsInflatedForScrolling(const LayoutRect &uninflatedBounds) const noexcept;
+
+    void UpdateCompositingLayersAfterScrolling() noexcept;
+    void AddedOrRemovedScrollbar() noexcept;
+
+    /// @brief The render view, for the updates that change it (its compositor).
+    KRYS_NODISCARD RenderView *GetRenderViewForUpdate() const noexcept
+    {
+      return const_cast<RenderView *>(GetRenderView());
+    }
+
+#pragma endregion
 
     KRYS_NODISCARD bool IsScrollView() const noexcept override
     {
@@ -602,7 +659,6 @@ namespace krys::boo
     /// @brief Fills the scrollbars' area and the scroll corner with the root's background colour, over the
     /// base background colour, so the page's background runs on under the scrollbars, which have no track.
     void PaintScrollbarsBackground(GraphicsContext &context) noexcept;
-    void PaintScrollCorner(GraphicsContext &context, const IntRect &cornerRect) noexcept;
 
     KRYS_NODISCARD IntRect VisibleContentRectInternal(
       VisibleContentRectIncludesScrollbars scrollbarInclusion) const noexcept override;

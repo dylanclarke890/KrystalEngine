@@ -24,6 +24,7 @@
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -189,8 +190,8 @@ namespace krys::boo
 
   style::Difference RenderElement::AdjustStyleDifference(style::Difference diff) const noexcept
   {
-    // FIXME: There's no compositing, so the composited cases and the layer status changes of plug-ins,
-    // iframes and canvas don't apply.
+    // FIXME: The composited cases (recompositing a composited layer's transform, opacity and filter changes
+    // without repainting it) and the layer status changes of plug-ins, iframes and canvas.
 
     // If transform changed, and we are not composited, need to do a layout.
     if (diff.ContextSensitiveProperties.Contains(style::DifferenceContextSensitiveProperty::Transform))
@@ -1361,6 +1362,63 @@ namespace krys::boo
     }
 
     return Style();
+  }
+
+  void RenderElement::PushOntoGeometryMap(RenderGeometryMap &geometryMap,
+                                          const RenderLayerModelObject *repaintContainer,
+                                          RenderElement *container, bool containerSkipped) const noexcept
+  {
+    bool isFixedPos = IsFixedPositioned();
+    LayoutSize adjustmentForSkippedAncestor;
+    if (containerSkipped)
+    {
+      // There can't be a transform between repaintContainer and container, because transforms create
+      // containers, so it should be safe to just subtract the delta between the ancestor and container.
+      adjustmentForSkippedAncestor = -repaintContainer->OffsetFromAncestorContainer(*container);
+    }
+
+    bool offsetDependsOnPoint = false;
+    LayoutSize containerOffset = OffsetFromContainer(*container, LayoutPoint(), &offsetDependsOnPoint);
+
+    bool preserve3D = ParticipatesInPreserve3D();
+    if (ShouldUseTransformFromContainer(container)
+        && geometryMap.MapCoordinatesFlags().Contains(MapCoordinatesMode::UseTransforms))
+    {
+      TransformationMatrix t;
+      GetTransformFromContainer(containerOffset, t);
+      t.TranslateRight(adjustmentForSkippedAncestor.Width(), adjustmentForSkippedAncestor.Height());
+
+      geometryMap.Push(this, t, preserve3D, offsetDependsOnPoint, isFixedPos, IsTransformed());
+    }
+    else
+    {
+      containerOffset += adjustmentForSkippedAncestor;
+      geometryMap.Push(this, containerOffset, preserve3D, offsetDependsOnPoint, isFixedPos, IsTransformed());
+    }
+  }
+
+  const RenderElement *RenderElement::PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                             RenderGeometryMap &geometryMap) const noexcept
+  {
+    krys_debug_assert(ancestorToStopAt != this);
+    (void)ancestorToStopAt;
+
+    auto *container = Parent();
+    if (!container)
+    {
+      return nullptr;
+    }
+
+    // FIXME: this should call offsetFromContainer to share code, but I'm not sure it's ever called.
+    LayoutSize offset;
+    if (auto *box = DynamicDowncast<RenderBox>(*container))
+    {
+      offset = -ToLayoutSize(LayoutPoint(box->GetScrollPosition()));
+    }
+
+    geometryMap.Push(this, offset, false);
+
+    return container;
   }
 
   RenderBoxModelObject *RenderElement::OffsetParent() const noexcept

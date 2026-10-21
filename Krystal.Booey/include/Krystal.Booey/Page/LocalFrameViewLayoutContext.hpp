@@ -85,6 +85,7 @@ namespace krys::boo
     uint32 _disableSetNeedsLayoutCount {0};
     WeakPtr<RenderElement> _subtreeLayoutRoot;
     bool _needsFullRepaint {true};
+    bool _updateCompositingLayersIsPending {false};
     uint32 _paintOffsetCacheDisableCount {0};
     Maybe<TextBoxTrim> _textBoxTrim;
     Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
@@ -98,6 +99,10 @@ namespace krys::boo
     void Layout() noexcept;
     /// @brief Lays out between style updates, so container queries can read their containers' sizes.
     void InterleavedLayout() noexcept;
+
+    bool UpdateCompositingLayersAfterStyleChange() noexcept;
+    void UpdateCompositingLayersAfterLayout() noexcept;
+    bool UpdateCompositingLayersAfterLayoutIfNeeded() noexcept;
     KRYS_NODISCARD bool NeedsLayout() const noexcept;
 
     // We rely on the side-effects of layout, like compositing updates, to update state in various subsystems

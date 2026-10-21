@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
@@ -505,6 +506,22 @@ namespace krys::boo
     const style::MaximumSize &logicalHeight) const noexcept
   {
     return ContainingBlockForAutoHeightDetectionGeneric(logicalHeight);
+  }
+
+  void RenderBoxModelObject::ContentChanged(ContentChangeType changeType,
+                                            const Maybe<FloatRect> &dirtyRect) noexcept
+  {
+    if (!HasLayer())
+    {
+      return;
+    }
+
+    Layer()->ContentChanged(changeType, dirtyRect);
+  }
+
+  bool RenderBoxModelObject::HasAcceleratedCompositing() const noexcept
+  {
+    return View().Compositor().HasAcceleratedCompositing();
   }
 
   LayoutSize RenderBoxModelObject::RelativePositionOffset() const noexcept

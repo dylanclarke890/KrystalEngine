@@ -294,6 +294,11 @@ namespace krys::boo
     return nullptr;
   }
 
+  bool RenderObject::IsComposited() const noexcept
+  {
+    return HasLayer() && Downcast<RenderLayerModelObject>(*this).Layer()->IsComposited();
+  }
+
   bool RenderObject::IsSkippedContent() const noexcept
   {
     if (Is<RenderText>(*this))
@@ -934,12 +939,60 @@ namespace krys::boo
 
 #pragma region Repaint
 
+  namespace
+  {
+    KRYS_NODISCARD bool CanRelyOnAncestorLayerFullRepaint(const RenderObject &rendererToRepaint,
+                                                          const RenderLayer &ancestorLayer) noexcept
+    {
+      auto *renderElement = DynamicDowncast<RenderElement>(rendererToRepaint);
+      if (!renderElement || !renderElement->HasSelfPaintingLayer())
+      {
+        return true;
+      }
+      return ancestorLayer.Renderer().HasNonVisibleOverflow();
+    }
+
+    KRYS_NODISCARD bool FullRepaintIsScheduled(const RenderObject &renderer) noexcept
+    {
+      // FIXME: Documents in frames, once there are frames.
+      if (!renderer.View().UsesCompositing())
+      {
+        return false;
+      }
+      for (auto *ancestorLayer = renderer.EnclosingLayer(); ancestorLayer;
+           ancestorLayer = ancestorLayer->PaintOrderParent())
+      {
+        if (ancestorLayer->NeedsFullRepaint())
+        {
+          return CanRelyOnAncestorLayerFullRepaint(renderer, *ancestorLayer);
+        }
+      }
+      return false;
+    }
+  }
+
   auto RenderObject::ContainerForRepaint() const noexcept -> RepaintContainerStatus
   {
-    // FIXME: The enclosing compositing layer and the enclosing fragmented flow, once there are any: without
-    // them, repaints are in the render view's coordinates. Layers with filters aren't repaint containers:
-    // repaints inside them grow to what the filter paints (RepaintUsingContainer).
-    return {};
+    const RenderLayerModelObject *repaintContainer = nullptr;
+    auto fullRepaintAlreadyScheduled = false;
+
+    if (View().UsesCompositing())
+    {
+      if (auto *enclosingLayer = EnclosingLayer())
+      {
+        auto compLayerStatus = enclosingLayer->EnclosingCompositingLayerForRepaint();
+        if (compLayerStatus.Layer)
+        {
+          repaintContainer = &compLayerStatus.Layer->Renderer();
+          fullRepaintAlreadyScheduled = compLayerStatus.FullRepaintAlreadyScheduled
+                                        && CanRelyOnAncestorLayerFullRepaint(*this, *compLayerStatus.Layer);
+        }
+      }
+    }
+
+    // FIXME: The enclosing fragmented flow, once there are any. Layers with filters aren't repaint
+    // containers: repaints inside them grow to what the filter paints (RepaintUsingContainer).
+    return {fullRepaintAlreadyScheduled, repaintContainer};
   }
 
   void RenderObject::PropagateRepaintToParentWithOutlineAutoIfNeeded(
@@ -988,8 +1041,7 @@ namespace krys::boo
   }
 
   void RenderObject::RepaintUsingContainer(const RenderLayerModelObject *repaintContainer,
-                                           const LayoutRect &rect,
-                                           KRYS_MAYBE_UNUSED bool shouldClipToLayer) const noexcept
+                                           const LayoutRect &rect, bool shouldClipToLayer) const noexcept
   {
     if (rect.IsEmpty())
     {
@@ -1005,10 +1057,9 @@ namespace krys::boo
 
     PropagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, rect);
 
-    if (repaintContainer->IsRenderView())
+    if (repaintContainer->IsRenderView() && !View().IsComposited())
     {
       krys_debug_assert(repaintContainer == &View());
-      // FIXME: The composited render view's transform, once there's compositing.
       // A filter that moves pixels paints from all it filters, so a change inside it repaints all of it.
       auto repaintRect = rect;
       for (auto *layer = EnclosingLayer(); layer; layer = layer->Parent())
@@ -1022,8 +1073,16 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Repainting the compositing layer's backing (setBackingNeedsRepaintInRect, clipped to the layer
-    // when shouldClipToLayer), once there's compositing.
+    if (View().UsesCompositing())
+    {
+      krys_debug_assert(repaintContainer->IsComposited());
+      if (auto *layer = repaintContainer->Layer())
+      {
+        layer->SetBackingNeedsRepaintInRect(rect, shouldClipToLayer
+                                                    ? GraphicsLayerShouldClipToLayer::Clip
+                                                    : GraphicsLayerShouldClipToLayer::DoNotClip);
+      }
+    }
   }
 
   void RenderObject::IssueRepaint(Maybe<LayoutRect> partialRepaintRect,
@@ -1034,9 +1093,7 @@ namespace krys::boo
     auto repaintContainer = ContainerForRepaint();
     if (!repaintContainer.Renderer)
     {
-      // Without compositing or frames inside frames, a full repaint is never already scheduled
-      // (fullRepaintIsScheduled).
-      repaintContainer = {false, &View()};
+      repaintContainer = {FullRepaintIsScheduled(*this), &View()};
     }
 
     if (repaintContainer.FullRepaintIsScheduled && forceRepaint == ForceRepaint::No)

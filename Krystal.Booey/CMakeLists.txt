@@ -1642,6 +1642,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp
   include/Krystal.Booey/Graphics/LayerTreeAsTextOptions.hpp
   include/Krystal.Booey/Graphics/PlatformLayerIdentifier.hpp
+  include/Krystal.Booey/Rendering/LayerAncestorClippingStack.hpp
+  include/Krystal.Booey/Rendering/LayerOverlapMap.hpp
+  include/Krystal.Booey/Page/ChromeClient.hpp
+  include/Krystal.Booey/Rendering/RenderGeometryMap.hpp
+  include/Krystal.Booey/Rendering/RenderLayerBacking.hpp
+  include/Krystal.Booey/Rendering/RenderLayerCompositor.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2707,6 +2713,11 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/GraphicsLayerAnimation.cpp
   src/Graphics/GraphicsLayerKeyframeValueList.cpp
   src/Graphics/GraphicsLayerTransform.cpp
+  src/Rendering/LayerAncestorClippingStack.cpp
+  src/Rendering/LayerOverlapMap.cpp
+  src/Rendering/RenderGeometryMap.cpp
+  src/Rendering/RenderLayerBacking.cpp
+  src/Rendering/RenderLayerCompositor.cpp
 )
 
 target_precompile_headers(Krystal.Booey
@@ -2852,6 +2863,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Enums/EventTargetFlags.hpp
       include/Krystal.Booey/DOM/Enums/FilterResult.hpp
       include/Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp
+      include/Krystal.Booey/DOM/Enums/LayoutOptions.hpp
       include/Krystal.Booey/DOM/Enums/MutationRecordType.hpp
       include/Krystal.Booey/DOM/Enums/NodeFlags.hpp
       include/Krystal.Booey/DOM/Enums/NodeStyleFlags.hpp

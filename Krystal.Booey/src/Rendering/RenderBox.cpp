@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -904,6 +905,22 @@ namespace krys::boo
     mode.Remove(MapCoordinatesMode::ApplyContainerFlip);
 
     container->MapLocalToContainer(ancestorContainer, transformState, mode, wasFixed);
+  }
+
+  const RenderElement *RenderBox::PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                         RenderGeometryMap &geometryMap) const noexcept
+  {
+    krys_debug_assert(ancestorToStopAt != this);
+
+    bool ancestorSkipped;
+    RenderElement *container = this->Container(ancestorToStopAt, ancestorSkipped);
+    if (!container)
+    {
+      return nullptr;
+    }
+
+    PushOntoGeometryMap(geometryMap, ancestorToStopAt, container, ancestorSkipped);
+    return ancestorSkipped ? ancestorToStopAt : container;
   }
 
   void RenderBox::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,

@@ -112,6 +112,7 @@ namespace krys::ui
   {
     krys_debug_assert(!_renderer);
     _renderer = &renderer;
+    _baseTransform = renderer.GetTransform();
     _clipBounds = {bounds};
     _groupLayerCounts.clear();
     _texturePool.ReleaseUnusedTextures();
@@ -126,6 +127,11 @@ namespace krys::ui
     _clipBounds.clear();
   }
 
+  void TextureMapper::SetTransform(const boo::TransformationMatrix &matrix) noexcept
+  {
+    _renderer->SetTransform(_baseTransform * ToTransform2D(matrix));
+  }
+
   void TextureMapper::DrawBorder(const boo::Color &color, float width, const boo::FloatRect &targetRect,
                                  const boo::TransformationMatrix &modelViewMatrix) noexcept
   {
@@ -137,7 +143,7 @@ namespace krys::ui
     boo::Path path;
     path.AddRect(targetRect);
     _renderer->Save();
-    _renderer->SetTransform(ToTransform2D(modelViewMatrix));
+    SetTransform(modelViewMatrix);
     _renderer->StrokePath(ToPath2D(path), {.Width = width}, gfx::Paint2D(ToColour(color)));
     _renderer->Restore();
   }
@@ -159,7 +165,7 @@ namespace krys::ui
 
     // FIXME: Repeating textures (WrapMode::Repeat, the pattern transform), once contents layers are tiled.
     _renderer->Save();
-    _renderer->SetTransform(ToTransform2D(modelViewMatrix));
+    SetTransform(modelViewMatrix);
     _renderer->DrawImage(texture.Handle(), ToRect2D(targetRect), {.Opacity = opacity});
     _renderer->Restore();
   }
@@ -173,7 +179,7 @@ namespace krys::ui
     }
 
     _renderer->Save();
-    _renderer->SetTransform(ToTransform2D(matrix));
+    SetTransform(matrix);
     _renderer->FillRect(ToRect2D(rect), gfx::Paint2D(ToColour(color)));
     _renderer->Restore();
   }
@@ -182,10 +188,23 @@ namespace krys::ui
                                 const boo::FloatRoundedRect &targetRect) noexcept
   {
     _renderer->Save();
-    _renderer->SetTransform(ToTransform2D(modelViewMatrix));
+    SetTransform(modelViewMatrix);
     if (!targetRect.IsRounded())
     {
-      _renderer->ClipRect(ToRect2D(targetRect.Rect()));
+      // A rectilinear clip is a scissor around the pixels it touches, so a clip at a fractional position
+      // doesn't fade the edge it cuts.
+      auto quad = modelViewMatrix.ProjectQuad(boo::FloatQuad(targetRect.Rect()));
+      auto rect = quad.EnclosingBoundingBox();
+      if (modelViewMatrix.IsAffine() && quad.IsRectilinear() && !rect.IsEmpty())
+      {
+        SetTransform(boo::TransformationMatrix());
+        _renderer->ClipRect(ToRect2D(boo::FloatRect(rect)));
+        SetTransform(modelViewMatrix);
+      }
+      else
+      {
+        _renderer->ClipRect(ToRect2D(targetRect.Rect()));
+      }
     }
     else if (auto circular = ToCircularRoundedRect(targetRect))
     {

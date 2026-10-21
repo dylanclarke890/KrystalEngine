@@ -290,6 +290,13 @@
       <img src="images/photo.jpg" style="filter: invert(1) contrast(1.4)">
       <img src="images/disc.webp" style="filter: drop-shadow(4px 6px 4px rgba(26, 34, 64, 0.5))">
     </div>
+
+    <!-- Compositing: the blurred tile gets a layer of its own for its filter, and the badge gets one because it
+         overlaps the tile; hovering the card slides the badge across. -->
+    <div class="card layers" tabindex="0">
+      <p>Layers: hover to slide</p>
+      <div class="layer-stage"><div class="blurred"></div><div class="badge">Layer</div></div>
+    </div>
   </div>
 </body>
 </html>

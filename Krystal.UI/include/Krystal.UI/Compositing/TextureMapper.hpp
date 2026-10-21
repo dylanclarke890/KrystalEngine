@@ -53,6 +53,8 @@ namespace krys::ui
 
     /// @brief The frame's renderer, between `BeginPainting` and `EndPainting`.
     gfx::Renderer2D *_renderer {nullptr};
+    /// @brief The renderer's transform when painting began: where the host draws the view.
+    gfx::Transform2D _baseTransform;
     List<boo::IntRect> _clipBounds;
     /// @brief The Render2D layers each group began.
     List<uint32> _groupLayerCounts;
@@ -70,8 +72,8 @@ namespace krys::ui
       return _device;
     }
 
-    /// @brief Starts drawing into the frame `renderer` draws, whose clip is `bounds` (in its target's
-    /// pixels).
+    /// @brief Starts drawing into the frame `renderer` draws, whose clip is `bounds` (in the view's
+    /// coordinates). Layers are drawn under the renderer's current transform.
     void BeginPainting(gfx::Renderer2D &renderer, const boo::IntRect &bounds) noexcept;
     void EndPainting() noexcept;
 
@@ -122,6 +124,9 @@ namespace krys::ui
   private:
     TextureMapper(gfx::Device &device, FontFaceCache &fonts,
                   UniquePtr<gfx::Renderer2D> &&contentsRenderer) noexcept;
+
+    /// @brief Draws under `matrix`, from the view's coordinates, after the base transform.
+    void SetTransform(const boo::TransformationMatrix &matrix) noexcept;
 
     template <typename TPaint>
     void PaintIntoTexture(BitmapTexture &texture, const boo::IntRect &targetRect, TPaint &&paint) noexcept;

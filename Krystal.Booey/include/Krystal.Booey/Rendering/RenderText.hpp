@@ -144,6 +144,9 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ContainsOnlyCollapsibleWhitespace() const noexcept;
 
+    /// @brief Whether any of the text is laid out in a text box.
+    KRYS_NODISCARD bool HasRenderedText() const noexcept;
+
     KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
     {
       return _fontCodePath;

@@ -1514,6 +1514,18 @@ namespace krys::boo
     return std::max(width, 0.f);
   }
 
+  bool RenderText::HasRenderedText() const noexcept
+  {
+    for (auto &box : inline_iterator::TextBoxesFor(*this))
+    {
+      if (box.Length())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void RenderText::BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept
   {
     for (auto &run : inline_iterator::TextBoxesFor(*this))

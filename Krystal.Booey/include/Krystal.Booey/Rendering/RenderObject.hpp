@@ -48,6 +48,7 @@ namespace krys::boo
   class RenderLayerModelObject;
   class RenderTreeBuilder;
   class RenderView;
+  class RenderGeometryMap;
   class TransformState;
   class TransformationMatrix;
 
@@ -977,6 +978,8 @@ namespace krys::boo
     {
       _stateFlags.Set(StateFlag::ChildrenInline, b);
     }
+
+    KRYS_NODISCARD bool IsComposited() const noexcept;
 
     KRYS_NODISCARD bool HasLayer() const noexcept
     {

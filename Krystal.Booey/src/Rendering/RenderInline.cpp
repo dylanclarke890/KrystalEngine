@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
@@ -299,6 +300,23 @@ namespace krys::boo
     }
 
     return offset;
+  }
+
+  const RenderElement *RenderInline::PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                            RenderGeometryMap &geometryMap) const noexcept
+  {
+    krys_debug_assert(ancestorToStopAt != this);
+
+    bool ancestorSkipped;
+    RenderElement *container = this->Container(ancestorToStopAt, ancestorSkipped);
+    if (!container)
+    {
+      return nullptr;
+    }
+
+    PushOntoGeometryMap(geometryMap, ancestorToStopAt, container, ancestorSkipped);
+
+    return ancestorSkipped ? ancestorToStopAt : container;
   }
 
   void RenderInline::MapLocalToContainer(const RenderLayerModelObject *ancestorContainer,

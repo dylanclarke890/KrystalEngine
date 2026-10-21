@@ -71,6 +71,12 @@ namespace krys::boo
     {
     }
   };
+
+  /// @brief Snaps @p rect to device pixels, as every renderer is (there are no layer-aware SVG renderers).
+  KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                                          const RenderLayerModelObject &renderer) noexcept;
+  KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
+                                                          const RenderLayerModelObject &renderer) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::RenderLayerModelObject)

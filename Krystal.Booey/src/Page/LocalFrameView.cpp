@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -13,6 +14,8 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
@@ -81,6 +84,14 @@ namespace krys::boo
       AvailableContentSizeChanged(AvailableSizeChangeReason::AreaSizeChanged);
     }
 
+    if (auto *renderView = GetRenderViewForUpdate())
+    {
+      if (renderView->UsesCompositing())
+      {
+        renderView->Compositor().FrameViewDidChangeSize();
+      }
+    }
+
     ViewportContentsChanged();
 
     // FIXME: Tell the document its view changed size (resize events) and update the viewport-constrained
@@ -123,6 +134,25 @@ namespace krys::boo
 
   void LocalFrameView::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
   {
+    if (&scrollbar == _horizontalScrollbar.get())
+    {
+      if (GraphicsLayer *graphicsLayer = LayerForHorizontalScrollbar())
+      {
+        graphicsLayer->SetNeedsDisplay();
+        graphicsLayer->SetContentsNeedsDisplay();
+        return;
+      }
+    }
+    else if (&scrollbar == _verticalScrollbar.get())
+    {
+      if (GraphicsLayer *graphicsLayer = LayerForVerticalScrollbar())
+      {
+        graphicsLayer->SetNeedsDisplay();
+        graphicsLayer->SetContentsNeedsDisplay();
+        return;
+      }
+    }
+
     // The frame view's scrollbars are in its coordinates.
     auto damage = rect;
     damage.MoveBy(scrollbar.Location());
@@ -235,6 +265,8 @@ namespace krys::boo
       return true;
     }
 
+    bool isCompositedContentLayer = UsesCompositedScrolling();
+
     // Get the rects of the fixed objects visible in the rectToScroll
     Region regionToUpdate;
     for (const auto *renderer : _viewportConstrainedObjects)
@@ -243,14 +275,24 @@ namespace krys::boo
       {
         continue;
       }
-      // FIXME: Composited layers, and layers out of view or without visible content, which aren't repainted,
-      // once there's compositing.
+      if (renderer->IsComposited())
+      {
+        continue;
+      }
 
       // Fixed items should always have layers.
       krys_debug_assert(renderer->HasLayer());
       auto *layer = renderer->Layer();
       if (!layer)
       {
+        continue;
+      }
+
+      if (layer->GetViewportConstrainedNotCompositedReason() == RenderLayer::NotCompositedForBoundsOutOfView
+          || layer->GetViewportConstrainedNotCompositedReason()
+               == RenderLayer::NotCompositedForNoVisibleContent)
+      {
+        // Don't invalidate for invisible fixed layers.
         continue;
       }
 
@@ -265,7 +307,10 @@ namespace krys::boo
       // IntRect to Float/LayoutRect.
       IntRect updateRect = EnclosingIntRect(layer->RepaintRectIncludingNonCompositingDescendants());
       updateRect = ContentsToView(updateRect);
-      updateRect.Intersect(rectToScroll);
+      if (!isCompositedContentLayer)
+      {
+        updateRect.Intersect(rectToScroll);
+      }
       if (!updateRect.IsEmpty())
       {
         regionToUpdate.Unite(Region(updateRect));
@@ -281,12 +326,341 @@ namespace krys::boo
       IntRect scrolledRect = updateRect;
       scrolledRect.Move(scrollDelta);
       updateRect.Unite(scrolledRect);
+      if (isCompositedContentLayer)
+      {
+        updateRect = ViewToContents(updateRect);
+        krys_debug_assert(GetRenderView());
+        GetRenderViewForUpdate()->Layer()->SetBackingNeedsRepaintInRect(LayoutRect(updateRect));
+        continue;
+      }
       updateRect.Intersect(rectToScroll);
       InvalidateRect(updateRect);
     }
 
     return true;
   }
+
+#pragma region Compositing
+
+  void LocalFrameView::WillRecalcStyle() noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView)
+    {
+      return;
+    }
+
+    renderView->Compositor().WillRecalcStyle();
+  }
+
+  void LocalFrameView::SetIsInWindow(bool isInWindow) noexcept
+  {
+    // FIXME: Widgets (setParentVisible), once there are any.
+    if (auto *renderView = GetRenderViewForUpdate())
+    {
+      renderView->SetIsInWindow(isInWindow);
+    }
+  }
+
+  bool LocalFrameView::FlushCompositingStateForThisFrame(const LocalFrame &rootFrameForFlush) noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView)
+    {
+      return true; // We don't want to keep trying to update layers if we have no renderer.
+    }
+
+    // If we sync compositing layers when a layout is pending, we may cause painting of compositing layer
+    // content to occur before layout has happened, which will cause paintContents() to bail.
+    if (_layoutContext.NeedsLayout())
+    {
+      return false;
+    }
+
+    renderView->Compositor().FlushPendingLayerChanges(&rootFrameForFlush == &Frame());
+
+    return true;
+  }
+
+  bool LocalFrameView::FlushCompositingStateIncludingSubframes() noexcept
+  {
+    // FIXME: Subframes, once there are any.
+    return FlushCompositingStateForThisFrame(Frame());
+  }
+
+  void LocalFrameView::EnterCompositingMode() noexcept
+  {
+    if (auto *renderView = GetRenderViewForUpdate())
+    {
+      renderView->Compositor().EnableCompositingMode();
+      if (!_layoutContext.NeedsLayout())
+      {
+        renderView->Compositor().ScheduleCompositingLayerUpdate();
+      }
+    }
+  }
+
+  bool LocalFrameView::UsesCompositedScrolling() const noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (renderView && renderView->IsComposited())
+    {
+      GraphicsLayer *layer = renderView->Layer()->Backing()->GetGraphicsLayer();
+      if (layer && layer->DrawsContent())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool LocalFrameView::IsEnclosedInCompositingLayer() const noexcept
+  {
+    // FIXME: Frames inside frames (the owner renderer's repaint container), once there are any.
+    return false;
+  }
+
+  void LocalFrameView::SetNeedsCompositingConfigurationUpdate() noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (renderView && renderView->UsesCompositing())
+    {
+      if (auto *rootLayer = renderView->Layer())
+      {
+        rootLayer->SetNeedsCompositingConfigurationUpdate();
+      }
+      renderView->Compositor().ScheduleCompositingLayerUpdate();
+    }
+  }
+
+  void LocalFrameView::SetNeedsCompositingGeometryUpdate() noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (renderView && renderView->UsesCompositing())
+    {
+      if (auto *rootLayer = renderView->Layer())
+      {
+        rootLayer->SetNeedsCompositingGeometryUpdate();
+      }
+      renderView->Compositor().ScheduleCompositingLayerUpdate();
+    }
+  }
+
+  void LocalFrameView::SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (renderView && renderView->UsesCompositing())
+    {
+      if (auto *rootLayer = renderView->Layer())
+      {
+        rootLayer->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+      }
+      renderView->Compositor().ScheduleCompositingLayerUpdate();
+    }
+  }
+
+  GraphicsLayer *LocalFrameView::LayerForHorizontalScrollbar() const noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView || !renderView->UsesCompositing())
+    {
+      return nullptr;
+    }
+    return renderView->Compositor().LayerForHorizontalScrollbar();
+  }
+
+  GraphicsLayer *LocalFrameView::LayerForVerticalScrollbar() const noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView || !renderView->UsesCompositing())
+    {
+      return nullptr;
+    }
+    return renderView->Compositor().LayerForVerticalScrollbar();
+  }
+
+  GraphicsLayer *LocalFrameView::LayerForScrollCorner() const noexcept
+  {
+    auto *renderView = GetRenderViewForUpdate();
+    if (!renderView || !renderView->UsesCompositing())
+    {
+      return nullptr;
+    }
+    return renderView->Compositor().LayerForScrollCorner();
+  }
+
+  namespace
+  {
+    void PositionScrollbarLayer(GraphicsLayer *graphicsLayer, Scrollbar *scrollbar) noexcept
+    {
+      if (!graphicsLayer || !scrollbar)
+      {
+        return;
+      }
+
+      IntRect scrollbarRect = scrollbar->FrameRect();
+      graphicsLayer->SetPosition(FloatPoint(scrollbarRect.Location()));
+
+      if (FloatSize(scrollbarRect.Size()) == graphicsLayer->Size())
+      {
+        return;
+      }
+
+      graphicsLayer->SetSize(FloatSize(scrollbarRect.Size()));
+
+      if (graphicsLayer->UsesContentsLayer())
+      {
+        graphicsLayer->SetContentsRect(FloatRect(0, 0, static_cast<float>(scrollbarRect.Width()),
+                                                 static_cast<float>(scrollbarRect.Height())));
+        return;
+      }
+
+      graphicsLayer->SetDrawsContent(true);
+      graphicsLayer->SetNeedsDisplay();
+    }
+
+    void PositionScrollCornerLayer(GraphicsLayer *graphicsLayer, const IntRect &cornerRect) noexcept
+    {
+      if (!graphicsLayer)
+      {
+        return;
+      }
+      graphicsLayer->SetDrawsContent(!cornerRect.IsEmpty());
+      graphicsLayer->SetPosition(FloatPoint(cornerRect.Location()));
+      if (FloatSize(cornerRect.Size()) != graphicsLayer->Size())
+      {
+        graphicsLayer->SetNeedsDisplay();
+      }
+      graphicsLayer->SetSize(FloatSize(cornerRect.Size()));
+    }
+  }
+
+  void LocalFrameView::PositionScrollbarLayers() noexcept
+  {
+    PositionScrollbarLayer(LayerForHorizontalScrollbar(), _horizontalScrollbar.get());
+    PositionScrollbarLayer(LayerForVerticalScrollbar(), _verticalScrollbar.get());
+    PositionScrollCornerLayer(LayerForScrollCorner(), ScrollCornerRect());
+  }
+
+  void LocalFrameView::InvalidateScrollCorner(const IntRect &rect) noexcept
+  {
+    if (GraphicsLayer *graphicsLayer = LayerForScrollCorner())
+    {
+      graphicsLayer->SetNeedsDisplay();
+      return;
+    }
+
+    InvalidateRect(rect);
+  }
+
+  boo::Color LocalFrameView::DocumentBackgroundColor() const noexcept
+  {
+    // <https://bugs.webkit.org/show_bug.cgi?id=59540> We blend the background color of the document and the
+    // body against the base background color of the frame view. Background images are unfortunately
+    // impractical to include.
+
+    // Return invalid Color objects whenever there is insufficient information.
+    // FIXME: The fullscreen document and element, once there's fullscreen.
+    auto *backgroundDocument = Frame().Document();
+    if (!backgroundDocument)
+    {
+      return boo::Color();
+    }
+
+    auto *htmlElement = backgroundDocument->DocumentElement().get();
+    auto *bodyElement = backgroundDocument->BodyOrFrameset();
+
+    // Start with invalid colors.
+    boo::Color htmlBackgroundColor;
+    boo::Color bodyBackgroundColor;
+    if (htmlElement && htmlElement->Renderer())
+    {
+      htmlBackgroundColor = htmlElement->Renderer()->Style().VisitedDependentColorWithColorFilter(
+        css::PropertyId::BackgroundColor);
+    }
+    if (bodyElement && bodyElement->Renderer())
+    {
+      bodyBackgroundColor = bodyElement->Renderer()->Style().VisitedDependentColorWithColorFilter(
+        css::PropertyId::BackgroundColor);
+    }
+
+    if (!bodyBackgroundColor.IsValid())
+    {
+      if (!htmlBackgroundColor.IsValid())
+      {
+        return boo::Color();
+      }
+      return BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor);
+    }
+
+    if (!htmlBackgroundColor.IsValid())
+    {
+      return BlendSourceOver(BaseBackgroundColor(), bodyBackgroundColor);
+    }
+
+    // We take the aggregate of the base background color the <html> background color, and the <body>
+    // background color to find the document color. The addition of the base background color is not
+    // technically part of the document background, but it otherwise poses problems when the aggregate is not
+    // a fully opaque color.
+    return BlendSourceOver(BlendSourceOver(BaseBackgroundColor(), htmlBackgroundColor), bodyBackgroundColor);
+  }
+
+  int32 LocalFrameView::InsetForLeftScrollbarSpace() const noexcept
+  {
+    // FIXME: Stable scrollbar gutters on both edges (scrollbarGutterWidth), once there are scrollbar gutters.
+    if (ShouldPlaceVerticalScrollbarOnLeft())
+    {
+      return _verticalScrollbar ? _verticalScrollbar->OccupiedWidth() : 0;
+    }
+    return 0;
+  }
+
+  FloatPoint LocalFrameView::PositionForRootContentLayer() const noexcept
+  {
+    // FIXME: Obscured content insets and header layers, once there are any.
+    return FloatPoint(static_cast<float>(-ScrollOrigin().X()), static_cast<float>(-ScrollOrigin().Y()));
+  }
+
+  LayoutRect LocalFrameView::FixedScrollableAreaBoundsInflatedForScrolling(
+    const LayoutRect &uninflatedBounds) const noexcept
+  {
+    // FIXME: Visual viewports (layoutViewportRect, unscaledMinimumScrollPosition), once there are any.
+    LayoutPoint scrollPosition = ScrollPositionRespectingCustomFixedPosition();
+    LayoutSize topLeftExpansion = scrollPosition - LayoutPoint(MinimumScrollPosition());
+    LayoutSize bottomRightExpansion = LayoutPoint(MaximumScrollPosition()) - scrollPosition;
+
+    return LayoutRect(uninflatedBounds.Location() - topLeftExpansion,
+                      uninflatedBounds.Size() + topLeftExpansion + bottomRightExpansion);
+  }
+
+  void LocalFrameView::UpdateCompositingLayersAfterScrolling() noexcept
+  {
+    // FIXME: The scrolling thread updating the fixed elements (shouldUpdateCompositingLayersAfterScrolling),
+    // once there's async scrolling.
+    if (!_layoutContext.IsLayoutNested() && !_viewportConstrainedObjects.empty())
+    {
+      if (auto *renderView = GetRenderViewForUpdate())
+      {
+        renderView->Compositor().UpdateCompositingLayers(CompositingUpdateType::OnScroll);
+      }
+    }
+  }
+
+  void LocalFrameView::AddedOrRemovedScrollbar() noexcept
+  {
+    if (auto *renderView = GetRenderViewForUpdate())
+    {
+      if (renderView->UsesCompositing())
+      {
+        renderView->Compositor().FrameViewDidAddOrRemoveScrollbars();
+      }
+    }
+
+    // FIXME: Tiled backings' adaptive sizing and the inspector, once there are those.
+  }
+
+#pragma endregion
 
   void LocalFrameView::ScrollContentsSlowPath(const IntRect &updateRect) noexcept
   {
@@ -411,8 +785,8 @@ namespace krys::boo
     }
 
     _isTransparent = isTransparent;
-    // FIXME: Lay the view out again after the configuration change and update compositing, once there's
-    // compositing (setNeedsLayoutAfterViewConfigurationChange, setNeedsCompositingConfigurationUpdate).
+    _layoutContext.SetNeedsLayoutAfterViewConfigurationChange();
+    SetNeedsCompositingConfigurationUpdate();
   }
 
   void LocalFrameView::SetBaseBackgroundColor(const boo::Color &backgroundColor) noexcept
@@ -468,16 +842,21 @@ namespace krys::boo
 
   void LocalFrameView::PaintScrollbars(GraphicsContext &context, const IntRect &rect) noexcept
   {
-    if (_horizontalScrollbar)
+    // Flattened paints (snapshots) paint the scrollbars into the contents, though they have layers.
+    const bool flattening = _paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers);
+    if (_horizontalScrollbar && (flattening || !LayerForHorizontalScrollbar()))
     {
       _horizontalScrollbar->Paint(context, rect);
     }
-    if (_verticalScrollbar)
+    if (_verticalScrollbar && (flattening || !LayerForVerticalScrollbar()))
     {
       _verticalScrollbar->Paint(context, rect);
     }
 
-    PaintScrollCorner(context, ScrollCornerRect());
+    if (flattening || !LayerForScrollCorner())
+    {
+      PaintScrollCorner(context, ScrollCornerRect());
+    }
   }
 
   void LocalFrameView::PaintScrollbarsBackground(GraphicsContext &context) noexcept
@@ -1617,9 +1996,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Telling the compositor and the inspector a scrollbar was added or removed
-    // (addedOrRemovedScrollbar), once there are those.
-    (void)scrollbarAddedOrRemoved;
+    if (scrollbarAddedOrRemoved)
+    {
+      AddedOrRemovedScrollbar();
+    }
 
     // Set up the range (and page step/line step), but only do this if we're not in a nested call (to avoid
     // doing it multiple times).
@@ -1667,8 +2047,9 @@ namespace krys::boo
 
     UpdateScrollbarSteps();
 
-    // FIXME: Repositioning the scrollbar layers and repainting the scroll corner, once there are compositing
-    // layers and repaint tracking.
+    PositionScrollbarLayers();
+    // FIXME: Repainting the scroll corner when it changes (updateScrollCorner), once there are custom scroll
+    // corners.
 
     scrollToPosition(desiredPosition);
 
@@ -1718,7 +2099,7 @@ namespace krys::boo
       }
     }
     ScrollContents(scrollDelta);
-    // FIXME: The compositing layers, once there's compositing.
+    UpdateCompositingLayersAfterScrolling();
 
     if (oldPosition != GetScrollPosition())
     {
@@ -1734,8 +2115,16 @@ namespace krys::boo
     // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
     ScheduleScrollEvent();
 
-    // FIXME: The compositor, the layout viewport (updateLayoutViewport, with visual viewports) and the
-    // editor, once there are those.
+    if (auto *renderView = GetRenderViewForUpdate())
+    {
+      if (renderView->UsesCompositing())
+      {
+        renderView->Compositor().FrameViewDidScroll();
+      }
+    }
+
+    // FIXME: The layout viewport (updateLayoutViewport, with visual viewports) and the editor, once there are
+    // those.
     ViewportContentsChanged();
   }
 

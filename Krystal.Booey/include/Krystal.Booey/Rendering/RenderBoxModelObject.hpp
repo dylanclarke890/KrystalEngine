@@ -30,6 +30,19 @@ namespace krys::boo
     Vertical
   };
 
+  enum class ContentChangeType : uint8
+  {
+    Image,
+    HDRImage,
+    MaskImage,
+    BackgroundImage,
+    Canvas,
+    CanvasPixels,
+    Video,
+    FullScreen,
+    Model
+  };
+
   enum class BleedAvoidance : uint8
   {
     None,
@@ -58,6 +71,9 @@ namespace krys::boo
     using RenderLayerModelObject::ApplyTransform;
 
     KRYS_NODISCARD LayoutSize RelativePositionOffset() const noexcept;
+
+    void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
+    KRYS_NODISCARD bool HasAcceleratedCompositing() const noexcept;
     // FIXME: Sticky positioning (constrainingRectForStickyPosition, enclosingClippingBoxForStickyPosition,
     // computeStickyPositionConstraints, stickyPositionOffset), once there's scrolling.
     KRYS_NODISCARD LayoutSize OffsetForInFlowPosition() const noexcept;

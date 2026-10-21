@@ -2340,7 +2340,19 @@ void main()
     {
       sigma = layer.Filter->Shadow.BlurRadius / 2.f;
     }
-    layer.Bounds = Intersect(Inflate(layer.Bounds, BlurReach(sigma)), layer.Clip);
+    auto reachable = layer.Clip;
+    if (layer.Filter && layer.Filter->Type == LayerFilter2D::Kind::DropShadow && !layer.Clip.IsEmpty())
+    {
+      // A shadow is cast from what's drawn just outside the clip too, where it lands inside the clip once
+      // moved: its source reaches the clip moved back by the shadow's offset.
+      const auto &offset = layer.Filter->Shadow.Offset;
+      const auto &clip = layer.Clip;
+      reachable = Union(
+        clip, ToPixelRect(static_cast<float>(clip.X) - offset[0], static_cast<float>(clip.Y) - offset[1],
+                          static_cast<float>(clip.X + static_cast<int32>(clip.Width)) - offset[0],
+                          static_cast<float>(clip.Y + static_cast<int32>(clip.Height)) - offset[1]));
+    }
+    layer.Bounds = Intersect(Inflate(layer.Bounds, BlurReach(sigma)), reachable);
     if (!layer.HasComposite || layer.Opacity <= 0.f || layer.Bounds.IsEmpty())
     {
       // Nothing to show: the composite, if any, stays an empty instance.

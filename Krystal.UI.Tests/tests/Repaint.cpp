@@ -1,13 +1,21 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/View.hpp"
 #include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <string>
 
 namespace krys::ui::tests
@@ -18,7 +26,8 @@ namespace krys::ui::tests
   namespace
   {
     /// @brief Paints a view into a target of its size the way a host does each frame (`View::Paint`, which
-    /// repaints only the damage), and as a full repaint of the page (`Record` and `Replay`), to compare.
+    /// composites the page's layers, repainting only what changed in them), and as a full repaint of the page
+    /// (`Record` and `Replay`), to compare.
     class RepaintFixture
     {
       KRYS_NON_COPY_MOVABLE(RepaintFixture);
@@ -53,10 +62,21 @@ namespace krys::ui::tests
         _device->Destroy(_target);
       }
 
-      /// @brief The page as the host shows it: the page texture, repainted where it was damaged.
+      /// @brief The page as the host shows it: its layers composited.
       KRYS_NODISCARD GoldenImage Painted(View &view)
       {
         return Draw([&] { view.Paint(*_renderer); });
+      }
+
+      /// @brief The page composited where the host draws it: `offset` into the target.
+      KRYS_NODISCARD GoldenImage PaintedAt(View &view, Vec2f offset)
+      {
+        return Draw(
+          [&]
+          {
+            _renderer->Translate(offset.x, offset.y);
+            view.Paint(*_renderer);
+          });
       }
 
       /// @brief The whole page painted again.
@@ -314,6 +334,64 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: the page is composited where the host draws it", "[UI][GPU]")
+  {
+    RepaintFixture fixture(100u, 80u);
+    View view({100, 50});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; background: #e9ecf2 }"
+                  u8"div { position: absolute; left: 20px; top: 10px; width: 30px; height: 30px }</style>"
+                  u8"<div style='background: #073b4c; filter: blur(2px)'></div>");
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+
+    // Below a 30 pixel header: the page moves down with the host's transform, and nothing is drawn above it.
+    auto atTop = fixture.Painted(view);
+    auto belowHeader = fixture.PaintedAt(view, {0.f, 30.f});
+    uint32 moved = 0u;
+    uint32 aboveHeader = 0u;
+    for (uint32 y = 0u; y < 80u; ++y)
+    {
+      for (uint32 x = 0u; x < 100u; ++x)
+      {
+        const auto &pixel = belowHeader.Pixels[y * 100u + x];
+        if (y < 30u)
+        {
+          aboveHeader += pixel[3] != 0u ? 1u : 0u;
+        }
+        else if (pixel != atTop.Pixels[(y - 30u) * 100u + x])
+        {
+          ++moved;
+        }
+      }
+    }
+    CHECK(aboveHeader == 0u);
+    CHECK(moved == 0u);
+  }
+
+  TEST_CASE("View: composited images at fractional positions paint as the whole page does", "[UI][GPU]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-composited-images-test";
+    std::filesystem::create_directories(directory);
+    std::filesystem::copy_file(GoldenDirectory() / "scenes" / "images" / "photo.jpg", directory / "photo.jpg",
+                               std::filesystem::copy_options::overwrite_existing);
+    {
+      // Images with filters composite with the image as their layer's contents; the layers sit at whole
+      // pixels and the images 0.4 pixels into them.
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><style>body { margin: 0; background: white }"
+              "img { position: absolute; top: 10px; width: 20px; height: 20px; filter: saturate(2) }</style>"
+              "<img src=photo.jpg style='left: 10.4px'><img src=photo.jpg style='left: 40.4px; "
+              "border-radius: 6px'>";
+    }
+
+    RepaintFixture fixture(80u, 40u);
+    View view({80, 40});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+    CheckNoStalePixels(fixture, view, "fractional-images");
+
+    std::filesystem::remove_all(directory);
+  }
+
   TEST_CASE("View: scrolling moves the painted page and leaves no stale pixels", "[UI][GPU]")
   {
     static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -377,64 +455,190 @@ namespace krys::ui::tests
     }
   }
 
-  TEST_CASE("View: damage is the rect that changed", "[UI]")
+  namespace
   {
+    /// @brief The page as composited: tracks the repaints of the view's own layer (the render view's), which
+    /// holds what isn't composited by itself.
+    class TrackedRepaints
+    {
+    private:
+      View &_view;
+
+    public:
+      explicit TrackedRepaints(View &view) noexcept : _view(view)
+      {
+        Compositor().SetTracksRepaints(true);
+      }
+
+      ~TrackedRepaints() noexcept
+      {
+        Compositor().SetTracksRepaints(false);
+      }
+
+      KRYS_NODISCARD boo::RenderLayerCompositor &Compositor() const noexcept
+      {
+        return _view.Frame().View()->GetRenderViewForUpdate()->Compositor();
+      }
+
+      KRYS_NODISCARD boo::GraphicsLayer &ViewLayer() const noexcept
+      {
+        return *_view.Frame().View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer();
+      }
+
+      void Reset() noexcept
+      {
+        Compositor().ResetTrackedRepaintRects();
+      }
+
+      /// @brief The bounds of the view layer's repaints since the last reset, in the layer's coordinates.
+      KRYS_NODISCARD boo::FloatRect Bounds() const noexcept
+      {
+        auto text = ViewLayer().LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
+                                                 boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
+        // Only the layer's own rects: its children's come after "(children".
+        text = text.substr(0, text.find(u8"(children"));
+        boo::FloatRect bounds;
+        for (size_t at = text.find(u8"(rect "); at != utf8_string::npos; at = text.find(u8"(rect ", at + 1))
+        {
+          float x = 0;
+          float y = 0;
+          float width = 0;
+          float height = 0;
+          std::istringstream rect(std::string(reinterpret_cast<const char *>(text.c_str()) + at + 6));
+          rect >> x >> y >> width >> height;
+          REQUIRE(rect);
+          bounds.Unite(boo::FloatRect(x, y, width, height));
+        }
+        return bounds;
+      }
+    };
+  }
+
+  TEST_CASE("View: repaints the rect that changed", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 100u);
     View view({200, 100});
     view.LoadHTML(
       u8"<!DOCTYPE html><style>body { margin: 0 } #box { width: 50px; height: 50px; background: red }"
       u8"#box:hover { background: blue }"
       u8"#spin { position: absolute; left: 100px; top: 20px; width: 20px; height: 20px; background: teal }"
-      u8"</style><div id=box></div><div id=spin></div>");
-    auto &frameView = *view.Frame().View();
+      u8"#tall { height: 500px }</style><div id=box></div><div id=spin></div><div id=tall></div>");
     auto time = boo::html::EventLoop::Current().Now() + 1s;
+    // A frame as the host runs it: an update, then a paint if the page asks for one.
     auto frame = [&]
     {
       time += 16ms;
-      (void)view.Update(time);
-      (void)view.Document().UpdateLayout();
-      return frameView.TakeDamage();
+      bool updated = view.Update(time);
+      if (view.NeedsPaint())
+      {
+        (void)fixture.Painted(view);
+      }
+      return updated;
     };
     (void)frame();
-    REQUIRE(frame().IsEmpty());
+    (void)frame();
+    TrackedRepaints repaints(view);
+    repaints.Reset();
+
+    // A still page needs no update or paint, and repaints nothing.
+    CHECK_FALSE(frame());
+    CHECK_FALSE(view.NeedsPaint());
+    CHECK(repaints.Bounds().IsEmpty());
 
     SECTION("a colour")
     {
       auto box = view.Document().GetElementById(u8"box");
       REQUIRE_FALSE(box->SetAttribute(u8"style", u8"background: green").HasException());
-      CHECK(frame().Bounds() == boo::IntRect(0, 0, 50, 50));
+      CHECK(frame());
+      CHECK(repaints.Bounds() == boo::FloatRect(0, 0, 50, 50));
     }
 
     SECTION("hovering")
     {
       view.MouseMoved({10, 10});
-      CHECK(frame().Bounds() == boo::IntRect(0, 0, 50, 50));
+      CHECK(frame());
+      CHECK(repaints.Bounds() == boo::FloatRect(0, 0, 50, 50));
     }
 
-    SECTION("scrolling moves the painted contents; only what comes into view is damaged")
+    SECTION("scrolling moves the layers and repaints nothing")
     {
-      auto tall = view.Document().GetElementById(u8"box");
-      REQUIRE_FALSE(tall->SetAttribute(u8"style", u8"height: 500px").HasException());
-      (void)frame();
       view.ScrollTo({0, 30});
-      (void)view.Document().UpdateLayout();
-      auto scrolled = frameView.TakeScrolledContents();
-      REQUIRE(scrolled.has_value());
-      CHECK(scrolled->Delta == boo::IntSize(0, -30));
-      // The bottom 30 pixels come into view, and the scrollbar's thumb moves; what was in view isn't damaged.
-      auto damage = frameView.TakeDamage();
-      CHECK(damage.Contains(boo::Region(boo::IntRect(0, 70, 150, 30))));
-      CHECK_FALSE(damage.Contains(boo::IntPoint(10, 10)));
-      CHECK_FALSE(damage.Contains(boo::IntPoint(100, 60)));
+      (void)frame();
+      CHECK(repaints.Bounds().IsEmpty());
     }
 
     SECTION("a transform")
     {
       auto spin = view.Document().GetElementById(u8"spin");
       REQUIRE_FALSE(spin->SetAttribute(u8"style", u8"transform: rotate(45deg)").HasException());
-      auto damage = frame().Bounds();
+      CHECK(frame());
+      auto bounds = repaints.Bounds();
       // The box before and after turning: about 28 pixels across, around its centre (110, 30).
-      CHECK(boo::IntRect(94, 14, 32, 32).Contains(damage));
-      CHECK(damage.Contains(boo::IntRect(100, 20, 20, 20)));
+      CHECK(boo::FloatRect(94, 14, 32, 32).Contains(bounds));
+      CHECK(bounds.Contains(boo::FloatRect(100, 20, 20, 20)));
     }
+  }
+
+  TEST_CASE("View: an animation repaints the page each frame", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } @keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
+      u8"#box { margin: 10px; width: 10px; height: 10px; background: teal; animation: fade 1s linear "
+      u8"infinite }"
+      u8"</style><div id=box></div>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      bool updated = view.Update(time);
+      (void)fixture.Painted(view);
+      return updated;
+    };
+    (void)frame();
+    TrackedRepaints repaints(view);
+    for (int32 i = 0; i < 3; ++i)
+    {
+      repaints.Reset();
+      CHECK(frame());
+      CHECK(repaints.Bounds() == boo::FloatRect(10, 10, 10, 10));
+    }
+  }
+
+  TEST_CASE("View: an animated image asks for a rendering update for each frame", "[UI][GPU]")
+  {
+    const auto directory = std::filesystem::temp_directory_path() / "krystal-ui-animation-test";
+    std::filesystem::create_directories(directory);
+    {
+      // A 1x1 GIF of two frames, red then blue, 100ms each, repeating forever.
+      const unsigned char gif[] = {
+        71, 73,  70, 56, 57,  97, 1,  0,  1,  0,  129, 0,  0,  255, 0,  0,  0,  0, 0, 0, 0,   0,
+        0,  0,   0,  33, 255, 11, 78, 69, 84, 83, 67,  65, 80, 69,  50, 46, 48, 3, 1, 0, 0,   0,
+        33, 249, 4,  0,  10,  0,  0,  0,  44, 0,  0,   0,  0,  1,   0,  1,  0,  0, 8, 4, 0,   1,
+        4,  4,   0,  33, 249, 4,  1,  10, 0,  1,  0,   44, 0,  0,   0,  0,  1,  0, 1, 0, 129, 0,
+        0,  255, 0,  0,  0,   0,  0,  0,  0,  0,  0,   8,  4,  0,   1,  4,  4,  0, 59};
+      std::ofstream image(directory / "spin.gif", std::ios::binary);
+      image.write(reinterpret_cast<const char *>(gif), sizeof(gif));
+      std::ofstream page(directory / "page.html", std::ios::binary);
+      page << "<!DOCTYPE html><img id=img src=spin.gif>";
+    }
+
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    view.UpdateRendering();
+    auto now = boo::html::EventLoop::Current().Now();
+    // The load completes; painting the image starts its animation. The host paints after each update.
+    CHECK(view.Update(now));
+    (void)fixture.Painted(view);
+    CHECK_FALSE(view.Update(now + 50ms));
+    // Each new frame asks for a rendering update.
+    CHECK(view.Update(now + 100ms));
+    (void)fixture.Painted(view);
+    CHECK_FALSE(view.Update(now + 150ms));
+    CHECK(view.Update(now + 200ms));
+
+    std::filesystem::remove_all(directory);
   }
 }

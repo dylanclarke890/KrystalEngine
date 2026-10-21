@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
@@ -13,10 +14,14 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerFilters.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -25,6 +30,8 @@
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <algorithm>
@@ -156,12 +163,497 @@ namespace krys::boo
     }
   };
 
+#pragma region Compositing
+
+  RenderLayerCompositor &RenderLayer::Compositor() const noexcept
+  {
+    return Renderer().View().Compositor();
+  }
+
+  utf8_string RenderLayer::Name() const noexcept
+  {
+    return utf8_string {Renderer().RenderName()};
+  }
+
+  void RenderLayer::ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect) noexcept
+  {
+    if (changeType == ContentChangeType::Canvas || changeType == ContentChangeType::Video
+        || changeType == ContentChangeType::FullScreen || changeType == ContentChangeType::Model
+        || changeType == ContentChangeType::HDRImage)
+    {
+      SetNeedsPostLayoutCompositingUpdate();
+      SetNeedsCompositingConfigurationUpdate();
+    }
+
+    if (auto *backing = Backing())
+    {
+      backing->ContentChanged(changeType, dirtyRect);
+    }
+  }
+
+  void RenderLayer::SetAncestorsHaveCompositingDirtyFlag(Compositing flag) noexcept
+  {
+    for (auto *layer = PaintOrderParent(); layer; layer = layer->PaintOrderParent())
+    {
+      if (layer->_compositingDirtyBits.Contains(flag))
+      {
+        break;
+      }
+      layer->_compositingDirtyBits.Add(flag);
+    }
+  }
+
+  void RenderLayer::SetIntrinsicallyComposited(bool composited) noexcept
+  {
+    _intrinsicallyComposited = composited;
+    UpdateAlwaysIncludedInZOrderLists();
+  }
+
+  void RenderLayer::UpdateAlwaysIncludedInZOrderLists() noexcept
+  {
+    // FIXME: View transition names, once there are view transitions.
+    bool alwaysIncludedInZOrderLists = _intrinsicallyComposited;
+    if (_alwaysIncludedInZOrderLists != alwaysIncludedInZOrderLists)
+    {
+      _alwaysIncludedInZOrderLists = alwaysIncludedInZOrderLists;
+      if (alwaysIncludedInZOrderLists)
+      {
+        UpdateAncestorChainHasAlwaysIncludedInZOrderListsDescendants();
+      }
+      else
+      {
+        DirtyAncestorChainHasAlwaysIncludedInZOrderListsDescendants();
+      }
+      if (!HasVisibleContent() && !IsNormalFlowOnly())
+      {
+        DirtyHiddenStackingContextAncestorZOrderLists();
+      }
+    }
+  }
+
+  void RenderLayer::UpdateAncestorChainHasAlwaysIncludedInZOrderListsDescendants() noexcept
+  {
+    for (auto *layer = this; layer; layer = layer->Parent())
+    {
+      if (!layer->_hasAlwaysIncludedInZOrderListsDescendantsStatusDirty
+          && layer->_hasAlwaysIncludedInZOrderListsDescendants)
+      {
+        break;
+      }
+      layer->_hasAlwaysIncludedInZOrderListsDescendants = true;
+      layer->_hasAlwaysIncludedInZOrderListsDescendantsStatusDirty = false;
+    }
+  }
+
+  void RenderLayer::DirtyAncestorChainHasAlwaysIncludedInZOrderListsDescendants() noexcept
+  {
+    for (auto *layer = this; layer; layer = layer->Parent())
+    {
+      if (layer->_hasAlwaysIncludedInZOrderListsDescendantsStatusDirty)
+      {
+        break;
+      }
+
+      layer->_hasAlwaysIncludedInZOrderListsDescendantsStatusDirty = true;
+    }
+  }
+
+  // FIXME: This is terrible. Bring back a cached bit for this someday. This crawl is going to slow down all
+  // painting of content inside paginated layers.
+  bool RenderLayer::HasCompositedLayerInEnclosingPaginationChain() const noexcept
+  {
+    // No enclosing layer means no compositing in the chain.
+    if (!_enclosingPaginationLayer)
+    {
+      return false;
+    }
+
+    // If the enclosing layer is composited, we don't have to check anything in between us and that layer.
+    if (_enclosingPaginationLayer->IsComposited())
+    {
+      return true;
+    }
+
+    // If we are the enclosing pagination layer, then we can't be composited or we'd have passed the previous
+    // check.
+    if (_enclosingPaginationLayer.get() == this)
+    {
+      return false;
+    }
+
+    // The enclosing paginated layer is our ancestor and is not composited, so we have to check intermediate
+    // layers between us and the enclosing pagination layer. Start with our own layer.
+    if (IsComposited())
+    {
+      return true;
+    }
+
+    // For normal flow layers, we can recur up the layer tree.
+    if (IsNormalFlowOnly())
+    {
+      return Parent()->HasCompositedLayerInEnclosingPaginationChain();
+    }
+
+    // Otherwise we have to go up the containing block chain. Find the first enclosing containing block layer
+    // ancestor, and check that.
+    for (const auto *containingBlock = Renderer().ContainingBlock();
+         containingBlock && !Is<RenderView>(*containingBlock);
+         containingBlock = containingBlock->ContainingBlock())
+    {
+      if (containingBlock->HasLayer())
+      {
+        return containingBlock->Layer()->HasCompositedLayerInEnclosingPaginationChain();
+      }
+    }
+    return false;
+  }
+
+  void RenderLayer::SetBackingProviderLayer(RenderLayer *backingProvider,
+                                            EnumSet<UpdateBackingSharingFlags> flags) noexcept
+  {
+    if (backingProvider == _backingProviderLayer.get())
+    {
+      krys_debug_assert(flags.Contains(UpdateBackingSharingFlags::DuringCompositingUpdate)
+                        || backingProvider == _backingProviderLayerAtEndOfCompositingUpdate.get());
+      return;
+    }
+
+    if (!Renderer().RenderTreeBeingDestroyed())
+    {
+      ClearClipRectsIncludingDescendants();
+    }
+
+    _backingProviderLayer = CreateWeakPtr(backingProvider);
+    if (!flags.Contains(UpdateBackingSharingFlags::DuringCompositingUpdate))
+    {
+      _backingProviderLayerAtEndOfCompositingUpdate = CreateWeakPtr(backingProvider);
+    }
+  }
+
+  void RenderLayer::DisconnectFromBackingProviderLayer(EnumSet<UpdateBackingSharingFlags> flags) noexcept
+  {
+    if (!_backingProviderLayer)
+    {
+      return;
+    }
+
+    krys_debug_assert(_backingProviderLayer->IsComposited());
+    if (_backingProviderLayer->IsComposited())
+    {
+      _backingProviderLayer->Backing()->RemoveBackingSharingLayer(*this, flags);
+    }
+  }
+
+  RenderLayer *RenderLayer::EnclosingCompositingLayer(IncludeSelfOrNot includeSelf) const noexcept
+  {
+    if (includeSelf == IncludeSelf && IsComposited())
+    {
+      return const_cast<RenderLayer *>(this);
+    }
+
+    for (const RenderLayer *curr = PaintOrderParent(); curr; curr = curr->PaintOrderParent())
+    {
+      if (curr->IsComposited())
+      {
+        return const_cast<RenderLayer *>(curr);
+      }
+    }
+
+    return nullptr;
+  }
+
+  auto RenderLayer::EnclosingCompositingLayerForRepaint(IncludeSelfOrNot includeSelf) const noexcept
+    -> EnclosingCompositingLayerStatus
+  {
+    auto repaintTargetForLayer = [](const RenderLayer &layer) -> RenderLayer *
+    {
+      if (CompositedWithOwnBackingStore(layer))
+      {
+        return const_cast<RenderLayer *>(&layer);
+      }
+
+      if (layer.PaintsIntoProvidedBacking())
+      {
+        return layer.BackingProviderLayer();
+      }
+
+      return nullptr;
+    };
+    auto isEligibleForFullRepaintCheck = [&](const RenderLayer &layer)
+    {
+      return layer.IsSelfPaintingLayer() && !layer.Renderer().HasPotentiallyScrollableOverflow()
+             && !Is<RenderView>(layer.Renderer());
+    };
+
+    auto fullRepaintAlreadyScheduled = isEligibleForFullRepaintCheck(*this) && NeedsFullRepaint();
+    RenderLayer *repaintTarget = nullptr;
+    if (includeSelf == IncludeSelf && (repaintTarget = repaintTargetForLayer(*this)))
+    {
+      return {fullRepaintAlreadyScheduled, repaintTarget};
+    }
+
+    for (const RenderLayer *curr = PaintOrderParent(); curr; curr = curr->PaintOrderParent())
+    {
+      fullRepaintAlreadyScheduled =
+        fullRepaintAlreadyScheduled || (isEligibleForFullRepaintCheck(*curr) && curr->NeedsFullRepaint());
+      if ((repaintTarget = repaintTargetForLayer(*curr)))
+      {
+        return {fullRepaintAlreadyScheduled, repaintTarget};
+      }
+    }
+
+    return {};
+  }
+
+  bool RenderLayer::GetOverlapBoundsIncludingChildrenAccountingForTransformAnimations(
+    LayoutRect &bounds, EnumSet<CalculateLayerBoundsFlag> additionalFlags) const noexcept
+  {
+    // The animation will override the display transform, so don't include it.
+    auto boundsFlags = DefaultCalculateLayerBoundsFlags();
+    boundsFlags.Remove(IncludeSelfTransform);
+    boundsFlags.Add(additionalFlags);
+
+    bounds = CalculateLayerBounds(this, LayoutSize(), boundsFlags);
+
+    // FIXME: The extent of transform animations (computeAnimationExtent), once there are accelerated
+    // animations.
+    return false;
+  }
+
+  LayoutRect RenderLayer::OverlapBounds() const noexcept
+  {
+    if (OverlapBoundsIncludeChildren())
+    {
+      return CalculateLayerBounds(this, {},
+                                  {UseLocalClipRectExcludingCompositingIfPossible, IncludeFilterOutsets,
+                                   UseFragmentBoxesExcludingCompositing});
+    }
+
+    return LocalBoundingBox();
+  }
+
+  bool RenderLayer::OverlapBoundsIncludeChildren() const noexcept
+  {
+    return HasFilter() && Renderer().Style().GetFilter().HasFilterThatMovesPixels();
+  }
+
+  RenderLayerBacking *RenderLayer::EnsureBacking() noexcept
+  {
+    if (!_backing)
+    {
+      _backing = CreateUnique<RenderLayerBacking>(*this);
+      Compositor().LayerBecameComposited(*this);
+
+      UpdateFilterPaintingStrategy();
+    }
+    return _backing.get();
+  }
+
+  void RenderLayer::ClearBacking(EnumSet<UpdateBackingSharingFlags> flags, bool layerBeingDestroyed) noexcept
+  {
+    if (!_backing)
+    {
+      return;
+    }
+
+    if (!Renderer().RenderTreeBeingDestroyed())
+    {
+      Compositor().LayerBecameNonComposited(*this);
+    }
+
+    _backing->WillBeDestroyed(flags);
+    _backing = nullptr;
+
+    if (!layerBeingDestroyed)
+    {
+      UpdateFilterPaintingStrategy();
+    }
+  }
+
+  bool RenderLayer::HasCompositedMask() const noexcept
+  {
+    return _backing && _backing->HasMaskLayer();
+  }
+
+  namespace
+  {
+    void DetermineNonLayerDescendantsPaintedContent(const RenderElement &renderer, uint32 &renderersTraversed,
+                                                    RenderLayer::PaintedContentRequest &request) noexcept
+    {
+      // Constrain the depth and breadth of the search for performance.
+      static constexpr uint32 maxRendererTraversalCount = 200;
+
+      for (const auto &child : ChildrenOfType<RenderObject>(renderer))
+      {
+        if (++renderersTraversed > maxRendererTraversalCount)
+        {
+          if (!request.IsPaintedContentSatisfied())
+          {
+            request.MakePaintedContentUndetermined();
+          }
+          if (request.IsSatisfied())
+          {
+            return;
+          }
+        }
+
+        if (auto *renderText = DynamicDowncast<RenderText>(child))
+        {
+          if (!renderText->HasRenderedText())
+          {
+            continue;
+          }
+
+          if (renderer.Style().UsedUserSelect() != UserSelect::None)
+          {
+            request.SetHasPaintedContent();
+          }
+
+          if (!std::ranges::all_of(renderText->Text(), [](char8_t c) { return text::IsASCIIWhitespace(c); }))
+          {
+            request.SetHasPaintedContent();
+          }
+
+          if (request.IsSatisfied())
+          {
+            return;
+          }
+        }
+
+        auto *childRenderElement = DynamicDowncast<RenderElement>(child);
+        if (!childRenderElement)
+        {
+          continue;
+        }
+
+        if (auto *modelObject = DynamicDowncast<RenderLayerModelObject>(*childRenderElement);
+            modelObject && modelObject->HasSelfPaintingLayer())
+        {
+          continue;
+        }
+
+        if (childRenderElement->HasVisibleBoxDecorations() || childRenderElement->Style().HasOutline())
+        {
+          request.SetHasPaintedContent();
+          if (request.IsSatisfied())
+          {
+            return;
+          }
+        }
+
+        if (Is<RenderReplaced>(*childRenderElement))
+        {
+          request.SetHasPaintedContent();
+
+          if (request.IsSatisfied())
+          {
+            return;
+          }
+        }
+
+        // FIXME: HDR content, once there's HDR.
+
+        DetermineNonLayerDescendantsPaintedContent(*childRenderElement, renderersTraversed, request);
+        if (request.IsSatisfied())
+        {
+          return;
+        }
+      }
+    }
+  }
+
+  void RenderLayer::DetermineNonLayerDescendantsPaintedContent(PaintedContentRequest &request) const noexcept
+  {
+    uint32 renderersTraversed = 0;
+    boo::DetermineNonLayerDescendantsPaintedContent(Renderer(), renderersTraversed, request);
+  }
+
+  bool RenderLayer::IsVisuallyNonEmpty(PaintedContentRequest *request) const noexcept
+  {
+    krys_debug_assert(!_visibleContentStatusDirty);
+
+    if (!HasVisibleContent() || Renderer().Style().GetOpacity().IsTransparent())
+    {
+      return false;
+    }
+
+    if (Renderer().IsRenderReplaced() || (_scrollableArea && _scrollableArea->HasOverflowControls()))
+    {
+      if (!request)
+      {
+        return true;
+      }
+
+      request->SetHasPaintedContent();
+      if (request->IsSatisfied())
+      {
+        return true;
+      }
+    }
+
+    // FIXME: HDR content, once there's HDR.
+
+    if (HasVisibleBoxDecorationsOrBackground())
+    {
+      if (!request)
+      {
+        return true;
+      }
+
+      request->SetHasPaintedContent();
+      if (request->IsSatisfied())
+      {
+        return true;
+      }
+    }
+
+    PaintedContentRequest localRequest;
+    if (!request)
+    {
+      request = &localRequest;
+    }
+
+    DetermineNonLayerDescendantsPaintedContent(*request);
+    return request->ProbablyHasPaintedContent();
+  }
+
+#pragma endregion
+
+  bool CompositedWithOwnBackingStore(const RenderLayer &layer) noexcept
+  {
+    return layer.IsComposited() && !layer.Backing()->PaintsIntoCompositedAncestor();
+  }
+
+  TextStream &operator<<(TextStream &ts, IndirectCompositingReason reason) noexcept
+  {
+    switch (reason)
+    {
+      case IndirectCompositingReason::None:                      ts << u8"none"; break;
+      case IndirectCompositingReason::Clipping:                  ts << u8"clipping"; break;
+      case IndirectCompositingReason::Stacking:                  ts << u8"stacking"; break;
+      case IndirectCompositingReason::OverflowScrollPositioning: ts << u8"overflow positioning"; break;
+      case IndirectCompositingReason::Overlap:                   ts << u8"overlap"; break;
+      case IndirectCompositingReason::BackgroundLayer:           ts << u8"background layer"; break;
+      case IndirectCompositingReason::GraphicalEffect:           ts << u8"graphical effect"; break;
+      case IndirectCompositingReason::Perspective:               ts << u8"perspective"; break;
+      case IndirectCompositingReason::Preserve3D:                ts << u8"preserve-3d"; break;
+    }
+
+    return ts;
+  }
+
   void MakeMatrixRenderable(TransformationMatrix &matrix, bool has3DRendering) noexcept
   {
     if (!has3DRendering)
     {
       matrix.MakeAffine();
     }
+  }
+
+  static ScrollingScope NextScrollingScope() noexcept
+  {
+    static ScrollingScope currentScope = 0;
+    return ++currentScope;
   }
 
   RenderLayer::RenderLayer(RenderLayerModelObject &renderer) noexcept
@@ -171,9 +663,15 @@ namespace krys::boo
   {
     SetIsNormalFlowOnly(ShouldBeNormalFlowOnly());
     SetIsCSSStackingContext(ShouldBeCSSStackingContext());
+    SetCanBeBackdropRoot(ComputeCanBeBackdropRoot());
     SetNeedsPositionUpdate();
 
     _isSelfPaintingLayer = ShouldBeSelfPaintingLayer();
+
+    if (IsRenderViewLayer())
+    {
+      _boxScrollingScope = _contentsScrollingScope = NextScrollingScope();
+    }
 
     auto needsVisibleContentStatusUpdate = [&]()
     {
@@ -203,11 +701,13 @@ namespace krys::boo
   RenderLayer::~RenderLayer() noexcept
   {
     ClearLayerScrollableArea();
-    // FIXME: The clip path and the backing, once there are any.
+    // FIXME: The clip path, once there's an SVG clip path.
     ClearLayerFilters();
 
     // Child layers will be deleted by their corresponding render objects, so
     // we don't need to delete them ourselves.
+
+    ClearBacking({}, true);
 
     // Layer and all its children should be removed from the tree before destruction.
     krys_assert(Renderer().RenderTreeBeingDestroyed() || !Parent());
@@ -290,7 +790,23 @@ namespace krys::boo
       SetAncestorChainHasViewportConstrainedDescendant();
     }
 
-    // FIXME: The compositing dirty bits, once there's compositing.
+    if (Compositor().HasContentCompositingLayers())
+    {
+      SetDescendantsNeedCompositingRequirementsTraversal();
+    }
+
+    if (child.HasDescendantNeedingCompositingRequirementsTraversal()
+        || child.NeedsCompositingRequirementsTraversal())
+    {
+      child.SetAncestorsHaveCompositingDirtyFlag(Compositing::HasDescendantNeedingRequirementsTraversal);
+    }
+
+    if (child.HasDescendantNeedingUpdateBackingOrHierarchyTraversal()
+        || child.NeedsUpdateBackingOrHierarchyTraversal())
+    {
+      child.SetAncestorsHaveCompositingDirtyFlag(
+        Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
+    }
 
     if (child.HasBlendMode() || (child.HasNotIsolatedBlendingDescendants() && !child.IsolatesBlending()))
     {
@@ -300,7 +816,10 @@ namespace krys::boo
 
   void RenderLayer::RemoveChild(RenderLayer &oldChild) noexcept
   {
-    // FIXME: Tell the compositor, once there is one.
+    if (!Renderer().RenderTreeBeingDestroyed())
+    {
+      Compositor().LayerWillBeRemoved(*this, oldChild);
+    }
 
     // remove the child
     if (oldChild.PreviousSibling())
@@ -341,6 +860,11 @@ namespace krys::boo
     if (oldChild.IsViewportConstrained() || oldChild._hasViewportConstrainedDescendant)
     {
       DirtyAncestorChainHasViewportConstrainedDescendantStatus();
+    }
+
+    if (Compositor().HasContentCompositingLayers())
+    {
+      SetDescendantsNeedCompositingRequirementsTraversal();
     }
 
     if (oldChild.HasBlendMode()
@@ -403,7 +927,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Tell the compositor, once there is one.
+    Compositor().LayerWillBeRemoved(*_parent, *this);
 
     // Dirty the clip rects.
     ClearClipRectsIncludingDescendants();
@@ -464,6 +988,29 @@ namespace krys::boo
 #pragma endregion
 
 #pragma region Stacking contexts and z-order lists
+
+  bool RenderLayer::ComputeCanBeBackdropRoot() const noexcept
+  {
+    // In order to match other impls and not the spec, the document element should only be a backdrop root
+    // (and be isolated from the base background color) if another group rendering effect is present.
+    // https://github.com/w3c/fxtf-drafts/issues/557
+    return IsRenderViewLayer() || Renderer().IsTransparent() || Renderer().HasBackdropFilter()
+           || Renderer().HasClipPath() || Renderer().HasFilter() || Renderer().HasBlendMode()
+           || Renderer().HasMask()
+           || (Renderer().RequiresRenderingConsolidationForViewTransition()
+               && !Renderer().IsDocumentElementRenderer())
+           || Renderer().Style().GetWillChange().CanBeBackdropRoot();
+  }
+
+  bool RenderLayer::SetCanBeBackdropRoot(bool canBeBackdropRoot) noexcept
+  {
+    if (_canBeBackdropRoot == canBeBackdropRoot)
+    {
+      return false;
+    }
+    _canBeBackdropRoot = canBeBackdropRoot;
+    return true;
+  }
 
   static bool CanCreateStackingContext(const RenderLayer &layer) noexcept
   {
@@ -588,7 +1135,11 @@ namespace krys::boo
     }
     _zOrderListsDirty = true;
 
-    // FIXME: The compositing paint order children update, once there's compositing.
+    // FIXME: The top layer, once there's a top layer.
+    if (HasCompositingDescendant())
+    {
+      SetNeedsCompositingPaintOrderChildrenUpdate();
+    }
   }
 
   void RenderLayer::DirtyStackingContextZOrderLists() noexcept
@@ -623,7 +1174,10 @@ namespace krys::boo
     }
     _normalFlowListDirty = true;
 
-    // FIXME: The compositing paint order children update, once there's compositing.
+    if (HasCompositingDescendant())
+    {
+      SetNeedsCompositingPaintOrderChildrenUpdate();
+    }
   }
 
   void RenderLayer::UpdateNormalFlowList() noexcept
@@ -647,6 +1201,7 @@ namespace krys::boo
           _normalFlowList = CreateUnique<List<RenderLayer *>>();
         }
         _normalFlowList->push_back(child);
+        child->SetWasIncludedInZOrderTree();
       }
     }
 
@@ -693,24 +1248,49 @@ namespace krys::boo
 #endif
     krys_debug_assert(IsDirtyStackingContext());
 
-    RebuildZOrderLists(_posZOrderList, _negZOrderList);
+    EnumSet<Compositing> childDirtyFlags;
+    RebuildZOrderLists(_posZOrderList, _negZOrderList, childDirtyFlags);
     _zOrderListsDirty = false;
 
     bool hasNegativeZOrderList = _negZOrderList && _negZOrderList->size();
     // Having negative z-order lists affect whether a compositing layer needs a foreground layer.
+    // Ideally we'd only trigger this when having z-order children changes, but we blow away the old z-order
+    // lists on dirtying so we don't know the old state.
     if (hasNegativeZOrderList != _hadNegativeZOrderList)
     {
       _hadNegativeZOrderList = hasNegativeZOrderList;
-      // FIXME: The compositing configuration update, once there's compositing.
+      if (IsComposited())
+      {
+        SetNeedsCompositingConfigurationUpdate();
+      }
+    }
+
+    // Building lists may have added layers with dirty flags, so make sure we propagate dirty bits up the
+    // tree.
+    if (_compositingDirtyBits.ContainsAll({Compositing::DescendantsNeedRequirementsTraversal,
+                                           Compositing::DescendantsNeedBackingAndHierarchyTraversal}))
+    {
+      return;
+    }
+
+    if (childDirtyFlags.ContainsAny(ComputeCompositingRequirementsFlags()))
+    {
+      SetDescendantsNeedCompositingRequirementsTraversal();
+    }
+
+    if (childDirtyFlags.ContainsAny(UpdateBackingOrHierarchyFlags()))
+    {
+      SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
     }
   }
 
   void RenderLayer::RebuildZOrderLists(UniquePtr<List<RenderLayer *>> &posZOrderList,
-                                       UniquePtr<List<RenderLayer *>> &negZOrderList) noexcept
+                                       UniquePtr<List<RenderLayer *>> &negZOrderList,
+                                       EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     for (RenderLayer *child = FirstChild(); child; child = child->NextSibling())
     {
-      child->CollectLayers(posZOrderList, negZOrderList);
+      child->CollectLayers(posZOrderList, negZOrderList, accumulatedDirtyFlags);
     }
 
     auto compareZIndex = [](const RenderLayer *first, const RenderLayer *second) -> bool
@@ -735,15 +1315,61 @@ namespace krys::boo
     // there's a top layer and view transitions.
   }
 
+  void RenderLayer::RemoveSelfFromCompositor() noexcept
+  {
+    if (Parent())
+    {
+      Compositor().LayerWillBeRemoved(*Parent(), *this);
+    }
+    ClearBacking({});
+  }
+
+  void RenderLayer::RemoveDescendantsFromCompositor() noexcept
+  {
+    for (RenderLayer *child = FirstChild(); child; child = child->NextSibling())
+    {
+      child->RemoveSelfFromCompositor();
+      child->RemoveDescendantsFromCompositor();
+    }
+  }
+
+  void RenderLayer::SetWasOmittedFromZOrderTree() noexcept
+  {
+    if (_wasOmittedFromZOrderTree)
+    {
+      return;
+    }
+
+    krys_debug_assert(!IsNormalFlowOnly());
+    RemoveSelfFromCompositor();
+
+    // Omitting a stacking context removes the whole subtree, otherwise collectLayers will
+    // visit and omit/include descendants separately.
+    if (IsStackingContext())
+    {
+      RemoveDescendantsFromCompositor();
+    }
+
+    if (Compositor().HasContentCompositingLayers() && Parent())
+    {
+      Parent()->SetDescendantsNeedCompositingRequirementsTraversal();
+    }
+
+    _wasOmittedFromZOrderTree = true;
+  }
+
   void RenderLayer::CollectLayers(UniquePtr<List<RenderLayer *>> &positiveZOrderList,
-                                  UniquePtr<List<RenderLayer *>> &negativeZOrderList) noexcept
+                                  UniquePtr<List<RenderLayer *>> &negativeZOrderList,
+                                  EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     krys_debug_assert(!DescendantDependentFlagsAreDirty());
     // FIXME: Layers that establish the top layer and the view transition containing block are collected by
     // the view, once there are any.
 
     bool isStacking = IsStackingContext();
-    bool layerOrDescendantsAreVisible = _hasVisibleContent || _hasVisibleDescendant;
+    bool layerOrDescendantsAreVisible = _hasVisibleContent || _alwaysIncludedInZOrderLists
+                                        || _hasVisibleDescendant
+                                        || _hasAlwaysIncludedInZOrderListsDescendants;
     // Normal flow layers are just painted by their enclosing layers, so they don't get put in zorder lists.
     if (!IsNormalFlowOnly())
     {
@@ -755,8 +1381,13 @@ namespace krys::boo
           layerList = CreateUnique<List<RenderLayer *>>();
         }
         layerList->push_back(this);
+        accumulatedDirtyFlags.Add(_compositingDirtyBits);
+        SetWasIncludedInZOrderTree();
       }
-      // FIXME: Omitted layers leave the compositor (setWasOmittedFromZOrderTree), once there's compositing.
+      else
+      {
+        SetWasOmittedFromZOrderTree();
+      }
     }
 
     // Recur into our children to collect more layers, but only if we don't establish
@@ -765,7 +1396,7 @@ namespace krys::boo
     {
       for (RenderLayer *child = FirstChild(); child; child = child->NextSibling())
       {
-        child->CollectLayers(positiveZOrderList, negativeZOrderList);
+        child->CollectLayers(positiveZOrderList, negativeZOrderList, accumulatedDirtyFlags);
       }
     }
   }
@@ -1083,8 +1714,24 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The marquee position, the fixed layer's intersection with the viewport and the backing, once
-    // there are marquees and compositing.
+    // FIXME: The marquee position, once there are marquees.
+
+    if (Renderer().IsFixedPositioned() && Compositor().AcceleratedCompositingForFixedPositionEnabled())
+    {
+      bool intersectsViewport = Compositor().FixedLayerIntersectsViewport(*this);
+      if (intersectsViewport != _isFixedIntersectingViewport)
+      {
+        _isFixedIntersectingViewport = intersectsViewport;
+        SetNeedsPostLayoutCompositingUpdate();
+      }
+    }
+
+    if (IsComposited())
+    {
+      Backing()->UpdateAfterLayout(
+        flags.Contains(UpdateLayerPositionsFlag::ContainingClippingLayerChangedSize),
+        flags.Contains(UpdateLayerPositionsFlag::NeedsFullRepaintInBacking));
+    }
 
     ClearLayerPositionDirtyBits();
   }
@@ -1177,7 +1824,17 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The scrolling scopes, once there's composited scrolling.
+    if (HasCompositedScrollableOverflow())
+    {
+      if (!_contentsScrollingScope || _contentsScrollingScope == _boxScrollingScope)
+      {
+        _contentsScrollingScope = NextScrollingScope();
+      }
+    }
+    else if (!_contentsScrollingScope || _contentsScrollingScope != _boxScrollingScope)
+    {
+      _contentsScrollingScope = _boxScrollingScope;
+    }
 
     if (Renderer().IsInFlowPositioned())
     {
@@ -1193,7 +1850,20 @@ namespace krys::boo
     geometryChanged |= Location() != localPoint;
     SetLocation(localPoint);
 
-    // FIXME: The compositing geometry updates, once there's compositing.
+    if (geometryChanged && Compositor().HasContentCompositingLayers())
+    {
+      if (IsComposited())
+      {
+        SetNeedsCompositingGeometryUpdate();
+      }
+      // This layer's footprint can affect the location of a composited descendant (which may be a sibling in
+      // z-order), so trigger a descendant walk from the enclosing stacking context.
+      if (auto *sc = StackingContext())
+      {
+        sc->SetDescendantsNeedCompositingRequirementsTraversal();
+        sc->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+      }
+    }
 
     return geometryChanged;
   }
@@ -1210,8 +1880,7 @@ namespace krys::boo
     // Composited layers that were moved during a positioned movement only
     // layout, don't need to be repainted. They just need to be recomposited.
     krys_debug_assert(_repaintStatus == RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
-    // FIXME: Composited layers that don't paint into a composited ancestor, once there's compositing.
-    return true;
+    return !IsComposited() || Backing()->PaintsIntoCompositedAncestor();
   }
 
   Maybe<LayoutRect> RenderLayer::CachedClippedOverflowRect() const noexcept
@@ -1276,10 +1945,189 @@ namespace krys::boo
     }
     for (auto *child = FirstChild(); child; child = child->NextSibling())
     {
-      // FIXME: Composited child layers paint themselves, with a different origin, once there's compositing.
+      // Don't include repaint rects for composited child layers; they will paint themselves and have a
+      // different origin.
+      if (child->IsComposited())
+      {
+        continue;
+      }
+
       repaintRect.UniteIfNonZero(child->RepaintRectIncludingNonCompositingDescendants());
     }
     return repaintRect;
+  }
+
+  const RenderLayerModelObject *RenderLayer::RepaintContainer() const noexcept
+  {
+    return _repaintContainer.get();
+  }
+
+  bool RenderLayer::BackgroundIsKnownToBeOpaqueInRect(const LayoutRect &localRect) const noexcept
+  {
+    if (!IsSelfPaintingLayer() && !HasSelfPaintingLayerDescendant())
+    {
+      return false;
+    }
+
+    if (PaintsWithTransparency({}))
+    {
+      return false;
+    }
+
+    if (Renderer().IsDocumentElementRenderer())
+    {
+      // Normally the document element doens't have a layer. If it does have a layer, its background
+      // propagates to the RenderView so this layer doesn't draw it.
+      return false;
+    }
+
+    // We can't use hasVisibleContent(), because that will be true if our renderer is hidden, but some child
+    // is visible and that child doesn't cover the entire rect.
+    if (Renderer().Style().UsedVisibility() != Visibility::Visible)
+    {
+      return false;
+    }
+
+    if (ShouldPaintWithFilters() && Renderer().Style().GetFilter().HasFilterThatAffectsOpacity())
+    {
+      return false;
+    }
+
+    // FIXME: Handle simple transforms.
+    if (PaintsWithTransform({}))
+    {
+      return false;
+    }
+
+    // FIXME: Remove this check. This function should not be called when layer-lists are dirty. It is somehow
+    // getting triggered during style update.
+    if (ZOrderListsDirty() || NormalFlowListDirty())
+    {
+      return false;
+    }
+
+    // Table painting is special; a table paints its sections.
+    if (Renderer().IsTablePart())
+    {
+      return false;
+    }
+
+    // A fieldset with a legend will have an irregular shape, so can't be treated as opaque.
+    if (Renderer().IsFieldset())
+    {
+      return false;
+    }
+
+    // FIXME: The renderer's own background (RenderBox::backgroundIsKnownToBeOpaqueInRect), once boxes can
+    // tell.
+
+    // We can't consult child layers if we clip, since they might cover parts of the rect that are clipped
+    // out.
+    if (Renderer().HasNonVisibleOverflow())
+    {
+      return false;
+    }
+
+    return ListBackgroundIsKnownToBeOpaqueInRect(PositiveZOrderLayers(), localRect)
+           || ListBackgroundIsKnownToBeOpaqueInRect(NegativeZOrderLayers(), localRect)
+           || ListBackgroundIsKnownToBeOpaqueInRect(NormalFlowLayers(), localRect);
+  }
+
+  bool RenderLayer::ListBackgroundIsKnownToBeOpaqueInRect(const LayerList &list,
+                                                          const LayoutRect &localRect) const noexcept
+  {
+    if (list.begin() == list.end())
+    {
+      return false;
+    }
+
+    for (auto iter = list.end(); iter != list.begin();)
+    {
+      const auto *childLayer = *--iter;
+      if (childLayer->IsComposited())
+      {
+        continue;
+      }
+
+      if (!childLayer->CanUseOffsetFromAncestor())
+      {
+        continue;
+      }
+
+      LayoutRect childLocalRect(localRect);
+      childLocalRect.Move(-childLayer->OffsetFromAncestor(this));
+
+      if (childLayer->BackgroundIsKnownToBeOpaqueInRect(childLocalRect))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void RenderLayer::CompositingStatusChanged(LayoutUpToDate layoutUpToDate) noexcept
+  {
+    UpdateDescendantDependentFlags();
+    if (Parent() || IsRenderViewLayer())
+    {
+      ComputeRepaintRectsIncludingDescendants();
+    }
+    if (layoutUpToDate == LayoutUpToDate::No)
+    {
+      SetSelfAndDescendantsNeedPositionUpdate();
+    }
+  }
+
+  void RenderLayer::SetBackingNeedsRepaint(GraphicsLayerShouldClipToLayer shouldClip) noexcept
+  {
+    krys_debug_assert(IsComposited());
+    if (Backing()->PaintsIntoWindow())
+    {
+      // If we're trying to repaint the placeholder document layer, propagate the repaint to the native view
+      // system.
+      Renderer().View().RepaintViewRectangle(LayoutRect(AbsoluteBoundingBox()));
+    }
+    else
+    {
+      Backing()->SetContentsNeedDisplay(shouldClip);
+    }
+  }
+
+  void RenderLayer::SetBackingNeedsRepaintInRect(const LayoutRect &r,
+                                                 GraphicsLayerShouldClipToLayer shouldClip) noexcept
+  {
+    krys_debug_assert(IsComposited());
+    if (!IsComposited() || Backing()->PaintsIntoWindow())
+    {
+      // If we're trying to repaint the placeholder document layer, propagate the repaint to the native view
+      // system.
+      LayoutRect absRect(r);
+      absRect.Move(OffsetFromAncestor(Root()));
+
+      Renderer().View().RepaintViewRectangle(absRect);
+    }
+    else
+    {
+      Backing()->SetContentsNeedDisplayInRect(r, shouldClip);
+    }
+  }
+
+  // Since we're only painting non-composited layers, we know that they all share the same repaintContainer.
+  void RenderLayer::RepaintIncludingNonCompositingDescendants(
+    const RenderLayerModelObject *repaintContainer) noexcept
+  {
+    auto clippedOverflowRect = _repaintRectsValid
+                                 ? _repaintRects.ClippedOverflowRect
+                                 : Renderer().ClippedOverflowRectForRepaint(repaintContainer);
+    Renderer().RepaintUsingContainer(repaintContainer, clippedOverflowRect);
+
+    for (RenderLayer *curr = FirstChild(); curr; curr = curr->NextSibling())
+    {
+      if (!curr->IsComposited())
+      {
+        curr->RepaintIncludingNonCompositingDescendants(repaintContainer);
+      }
+    }
   }
 
   void RenderLayer::RepaintIncludingDescendants() noexcept
@@ -1539,11 +2387,14 @@ namespace krys::boo
   void RenderLayer::UpdateDescendantDependentFlags() noexcept
   {
     if (_visibleDescendantStatusDirty || _hasSelfPaintingLayerDescendantDirty
-        || HasNotIsolatedBlendingDescendantsStatusDirty() || _hasViewportConstrainedDescendantStatusDirty)
+        || HasNotIsolatedBlendingDescendantsStatusDirty()
+        || _hasAlwaysIncludedInZOrderListsDescendantsStatusDirty
+        || _hasViewportConstrainedDescendantStatusDirty)
     {
       bool hasVisibleDescendant = false;
       bool hasSelfPaintingLayerDescendant = false;
       bool hasNotIsolatedBlendingDescendants = false;
+      bool hasAlwaysIncludedInZOrderListsDescendants = false;
       bool hasViewportConstrainedDescendant = false;
 
       if (_hasNotIsolatedBlendingDescendantsStatusDirty)
@@ -1561,6 +2412,8 @@ namespace krys::boo
           child->IsSelfPaintingLayer() || child->HasSelfPaintingLayerDescendant();
         hasNotIsolatedBlendingDescendants |=
           child->HasBlendMode() || (child->HasNotIsolatedBlendingDescendants() && !child->IsolatesBlending());
+        hasAlwaysIncludedInZOrderListsDescendants |=
+          child->AlwaysIncludedInZOrderLists() || child->_hasAlwaysIncludedInZOrderListsDescendants;
         hasViewportConstrainedDescendant |=
           child->_hasViewportConstrainedDescendant || child->IsViewportConstrained();
       }
@@ -1573,6 +2426,9 @@ namespace krys::boo
       _hasViewportConstrainedDescendantStatusDirty = false;
 
       _hasNotIsolatedBlendingDescendants = hasNotIsolatedBlendingDescendants;
+
+      _hasAlwaysIncludedInZOrderListsDescendants = hasAlwaysIncludedInZOrderListsDescendants;
+      _hasAlwaysIncludedInZOrderListsDescendantsStatusDirty = false;
     }
 
     if (_visibleContentStatusDirty)
@@ -1788,6 +2644,7 @@ namespace krys::boo
   void RenderLayer::StyleChanged(style::Difference diff, const RenderStyle *oldStyle) noexcept
   {
     SetIsNormalFlowOnly(ShouldBeNormalFlowOnly());
+    SetCanBeBackdropRoot(ComputeCanBeBackdropRoot());
 
     if (SetIsCSSStackingContext(ShouldBeCSSStackingContext()))
     {
@@ -1882,7 +2739,7 @@ namespace krys::boo
     UpdateFiltersAfterStyleChange(diff, oldStyle);
     ClearClipRects();
 
-    // FIXME: Tell the compositor, once there is one.
+    Compositor().LayerStyleChanged(diff, *this, oldStyle);
 
     UpdateTransform();
     UpdateFilterPaintingStrategy();
@@ -2118,10 +2975,10 @@ namespace krys::boo
     return Renderer().Style().HasPerspective();
   }
 
-  bool RenderLayer::PaintsWithTransform() const noexcept
+  bool RenderLayer::PaintsWithTransform(EnumSet<PaintBehavior> paintBehavior) const noexcept
   {
-    // FIXME: Composited layers paint their transforms in the backing, once there's compositing.
-    return Transform();
+    bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
+    return Transform() && (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers) || paintsToWindow);
   }
 
   RenderLayer *RenderLayer::EnclosingTransformedAncestor() const noexcept
@@ -2154,7 +3011,7 @@ namespace krys::boo
     return Renderer().HasBackdropFilter();
   }
 
-  bool RenderLayer::ShouldPaintWithFilters(EnumSet<PaintBehavior>) const noexcept
+  bool RenderLayer::ShouldPaintWithFilters(EnumSet<PaintBehavior> paintBehavior) const noexcept
   {
     const auto &filter = Renderer().Style().GetFilter();
     if (filter.IsNone())
@@ -2169,7 +3026,16 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Composited layers whose backing can composite the filters, once there's compositing.
+    if (paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    {
+      return true;
+    }
+
+    if (IsComposited() && _backing->CanCompositeFilters())
+    {
+      return false;
+    }
+
     return true;
   }
 
@@ -2238,10 +3104,10 @@ namespace krys::boo
 
   RenderLayer *RenderLayer::EnclosingFilterRepaintLayer() const noexcept
   {
-    // FIXME: Layers composited with their own backing store, once there's compositing.
     for (const RenderLayer *curr = this; curr; curr = curr->Parent())
     {
-      if ((curr != this && curr->RequiresFullLayerImageForFilters()) || curr->IsRenderViewLayer())
+      if ((curr != this && curr->RequiresFullLayerImageForFilters()) || CompositedWithOwnBackingStore(*curr)
+          || curr->IsRenderViewLayer())
       {
         return const_cast<RenderLayer *>(curr);
       }
@@ -2271,7 +3137,18 @@ namespace krys::boo
     LayoutRect parentLayerRect = LayoutRect(
       Renderer().LocalToContainerQuad(repaintQuad, &parentLayer->Renderer()).EnclosingBoundingBox());
 
-    // FIXME: Composited parent layers repaint their backing, once there's compositing.
+    if (parentLayer->IsComposited())
+    {
+      if (!parentLayer->Backing()->PaintsIntoWindow())
+      {
+        parentLayer->SetBackingNeedsRepaintInRect(parentLayerRect);
+        return;
+      }
+      // If the painting goes to window, redirect the painting to the parent RenderView.
+      parentLayer = Renderer().View().Layer();
+      parentLayerRect = LayoutRect(
+        Renderer().LocalToContainerQuad(repaintQuad, &parentLayer->Renderer()).EnclosingBoundingBox());
+    }
 
     if (parentLayer->ShouldPaintWithFilters())
     {
@@ -2502,8 +3379,18 @@ namespace krys::boo
 
   RenderLayer *RenderLayer::ClippingRootForPainting() const noexcept
   {
-    // FIXME: Composited layers, layers that paint into a provided backing and hidden backfaces in preserve-3d
-    // contexts, once there's compositing.
+    if (IsComposited())
+    {
+      return const_cast<RenderLayer *>(this);
+    }
+
+    if (PaintsIntoProvidedBacking())
+    {
+      return BackingProviderLayer();
+    }
+
+    // FIXME: Hidden backfaces in preserve-3d contexts
+    // (css3DTransformBackfaceVisibilityInteroperabilityEnabled), once there are settings.
     const RenderLayer *current = this;
     while (current)
     {
@@ -2514,9 +3401,14 @@ namespace krys::boo
 
       current = current->PaintOrderParent();
       krys_debug_assert(current);
-      if (current->Transform())
+      if (current->Transform() || CompositedWithOwnBackingStore(*current))
       {
         return const_cast<RenderLayer *>(current);
+      }
+
+      if (current->PaintsIntoProvidedBacking())
+      {
+        return current->BackingProviderLayer();
       }
     }
 
@@ -2791,9 +3683,10 @@ namespace krys::boo
 
   bool RenderLayer::ClipCrossesPaintingBoundary() const noexcept
   {
-    // FIXME: The enclosing compositing layers differ too, once there's compositing.
     return Parent()->EnclosingPaginationLayer(IncludeCompositedPaginatedLayers)
-           != EnclosingPaginationLayer(IncludeCompositedPaginatedLayers);
+             != EnclosingPaginationLayer(IncludeCompositedPaginatedLayers)
+           || Parent()->EnclosingCompositingLayerForRepaint().Layer
+                != EnclosingCompositingLayerForRepaint().Layer;
   }
 
   void RenderLayer::CalculateClipRects(const ClipRectsContext &clipRectsContext,
@@ -3319,7 +4212,7 @@ namespace krys::boo
                                                  : LocalClipRectMode::IncludeCompositingState);
       if (!localClipRect.IsInfinite() && !clipExceedsBounds)
       {
-        if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform())
+        if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
         {
           localClipRect = Transform()->MapRect(localClipRect);
         }
@@ -3355,9 +4248,13 @@ namespace krys::boo
     LayerListMutationDetector mutationChecker(const_cast<RenderLayer &>(*this));
 #endif
 
-    auto computeLayersUnion = [this, &unionBounds, descendantFlags](const RenderLayer &childLayer)
+    auto computeLayersUnion = [this, &unionBounds, flags, descendantFlags](const RenderLayer &childLayer)
     {
-      // FIXME: Skip composited descendants unless IncludeCompositedDescendants, once there's compositing.
+      if (!flags.Contains(IncludeCompositedDescendants)
+          && (childLayer.IsComposited() || childLayer.PaintsIntoProvidedBacking()))
+      {
+        return;
+      }
       LayoutRect childBounds =
         childLayer.CalculateLayerBounds(this, childLayer.OffsetFromAncestor(this), descendantFlags);
       // Ignore child layer (and behave as if we had overflow: hidden) when it is positioned off the parent
@@ -3389,7 +4286,7 @@ namespace krys::boo
       unionBounds.Expand(ToLayoutBoxExtent(FilterOutsets()));
     }
 
-    if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform())
+    if (flags.Contains(IncludeSelfTransform) && PaintsWithTransform({}))
     {
       TransformationMatrix *affineTrans = Transform();
       boundingBoxRect = affineTrans->MapRect(boundingBoxRect);
@@ -3583,7 +4480,10 @@ namespace krys::boo
 
   bool RenderLayer::UsesCompositedScrolling() const noexcept
   {
-    // FIXME: Only composited layers scroll with compositing, once there's compositing.
+    if (_scrollableArea)
+    {
+      return _scrollableArea->UsesCompositedScrolling();
+    }
     return false;
   }
 
@@ -3743,18 +4643,6 @@ namespace krys::boo
       return renderer.Style().GetOpacity().Value.Value;
     }
 
-    // Every renderer is pixel snapped: there are no layer-aware SVG renderers.
-    KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
-                                                            const RenderLayerModelObject &renderer) noexcept
-    {
-      return SnapRectToDevicePixels(rect, renderer.GetDocument().DeviceScaleFactor());
-    }
-    KRYS_NODISCARD FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
-                                                            const RenderLayerModelObject &renderer) noexcept
-    {
-      return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
-    }
-
     enum TransparencyClipBoxBehavior
     {
       PaintingTransparencyClipBox,
@@ -3807,7 +4695,8 @@ namespace krys::boo
       // better to respect clips.
 
       if (rootLayer != &layer
-          && ((transparencyBehavior == PaintingTransparencyClipBox && layer.PaintsWithTransform())
+          && ((transparencyBehavior == PaintingTransparencyClipBox
+               && layer.PaintsWithTransform(paintBehavior))
               || (transparencyBehavior == HitTestingTransparencyClipBox && layer.IsTransformed())))
       {
         // The best we can do here is to use enclosed bounding boxes to establish a "fuzzy" enough clip to
@@ -3865,10 +4754,13 @@ namespace krys::boo
     PaintLayer(context, paintingInfo, paintFlags);
   }
 
-  bool RenderLayer::PaintsWithTransparency(EnumSet<PaintBehavior>) const noexcept
+  bool RenderLayer::PaintsWithTransparency(EnumSet<PaintBehavior> paintBehavior) const noexcept
   {
-    // FIXME: Composited layers paint their transparency in the backing, once there's compositing.
-    return Renderer().IsTransparent() || HasNonOpacityTransparency();
+    if (!Renderer().IsTransparent() && !HasNonOpacityTransparency())
+    {
+      return false;
+    }
+    return paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers) || !IsComposited();
   }
 
   bool RenderLayer::HasNonOpacityTransparency() const noexcept
@@ -3936,8 +4828,7 @@ namespace krys::boo
 
   RenderLayer *RenderLayer::TransparentPaintingAncestor(const LayerPaintingInfo &info) noexcept
   {
-    // FIXME: Composited layers and layers painting into provided backing, once there's compositing.
-    if (this == info.RootLayer)
+    if (this == info.RootLayer || IsComposited() || PaintsIntoProvidedBacking())
     {
       return nullptr;
     }
@@ -4008,7 +4899,7 @@ namespace krys::boo
   }
 
   void RenderLayer::ClipToRect(GraphicsContext &context, GraphicsContextStateSaver &stateSaver,
-                               const LayerPaintingInfo &paintingInfo, EnumSet<PaintBehavior>,
+                               const LayerPaintingInfo &paintingInfo, EnumSet<PaintBehavior> paintBehavior,
                                const ClipRect &clipRect, BorderRadiusClippingRule rule) noexcept
   {
     float deviceScaleFactor = Renderer().GetDocument().DeviceScaleFactor();
@@ -4031,11 +4922,15 @@ namespace krys::boo
       // If the clip rect has been tainted by a border radius, then we have to walk up our layer chain
       // applying the clips from any layers with overflow. The condition for being able to apply these clips
       // is that the overflow object be in our containing block chain so we check that also.
-      // FIXME: Composited overflow scrolling (CompositedOverflowScrollContent) stops the walk, once there's
-      // compositing.
       for (RenderLayer *layer = rule == IncludeSelfForBorderRadius ? this : Parent(); layer;
            layer = layer->Parent())
       {
+        if (paintBehavior.Contains(PaintBehavior::CompositedOverflowScrollContent)
+            && layer->UsesCompositedScrolling())
+        {
+          break;
+        }
+
         if (layer->Renderer().HasNonVisibleOverflow() && layer->Renderer().Style().HasBorderRadius()
             && AncestorLayerIsInContainingBlockChain(*layer))
         {
@@ -4063,11 +4958,63 @@ namespace krys::boo
     }
   }
 
+  static bool ShouldDoSoftwarePaint(const RenderLayer *layer, bool paintingReflection) noexcept
+  {
+    return paintingReflection && !layer->Has3DTransform();
+  }
+
+  static bool PaintForFixedRootBackground(const RenderLayer *layer,
+                                          EnumSet<RenderLayer::PaintLayerFlag> paintFlags) noexcept
+  {
+    return layer->Renderer().IsDocumentElementRenderer()
+           && paintFlags.Contains(RenderLayer::PaintLayerFlag::PaintingRootBackgroundOnly);
+  }
+
   void RenderLayer::PaintLayer(GraphicsContext &context, const LayerPaintingInfo &paintingInfo,
                                EnumSet<PaintLayerFlag> paintFlags) noexcept
   {
-    // FIXME: Layers painting into a different composited destination, and out-of-view viewport-constrained
-    // layers that aren't composited (NotCompositedForBoundsOutOfView), once there's compositing.
+    auto shouldContinuePaint = [&]()
+    {
+      return Backing()->PaintsIntoWindow() || Backing()->PaintsIntoCompositedAncestor()
+             || ShouldDoSoftwarePaint(this, paintFlags.Contains(PaintLayerFlag::PaintingReflection))
+             || PaintForFixedRootBackground(this, paintFlags);
+    };
+
+    auto paintsIntoDifferentCompositedDestination = [&]()
+    {
+      if (PaintsIntoProvidedBacking())
+      {
+        return true;
+      }
+
+      if (IsComposited() && !shouldContinuePaint())
+      {
+        return true;
+      }
+
+      return false;
+    };
+
+    if (paintsIntoDifferentCompositedDestination())
+    {
+      if (!context.PerformingPaintInvalidation()
+          && !paintingInfo.PaintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+      {
+        return;
+      }
+
+      paintFlags.Add(PaintLayerFlag::TemporaryClipRects);
+    }
+
+    if (GetViewportConstrainedNotCompositedReason() == NotCompositedForBoundsOutOfView
+        && !paintingInfo.PaintBehavior.Contains(PaintBehavior::Snapshotting))
+    {
+      // Don't paint out-of-view viewport constrained layers (when doing prepainting) because they will never
+      // be visible unless their position or viewport size is changed.
+      krys_debug_assert(Renderer().IsFixedPositioned());
+      return;
+    }
+
     PaintLayerWithEffects(context, paintingInfo, paintFlags);
   }
 
@@ -4097,7 +5044,8 @@ namespace krys::boo
     }
 
     // PaintLayerFlag::AppliedTransform is used in RenderReplica, to avoid applying the transform twice.
-    if (PaintsWithTransform() && !paintFlags.Contains(PaintLayerFlag::AppliedTransform))
+    if (PaintsWithTransform(paintingInfo.PaintBehavior)
+        && !paintFlags.Contains(PaintLayerFlag::AppliedTransform))
     {
       TransformationMatrix layerTransform = RenderableTransform(paintingInfo.PaintBehavior);
       // If the transform can't be inverted, then don't paint anything.

@@ -224,4 +224,17 @@ namespace krys::boo
     // FIXME: Shouldn't this be using Style::TransformResolver::individualTransformOperations?
     ApplyTransform(transform, style, boundingBox, style::TransformResolver::AllTransformOperations);
   }
+
+  // Every renderer is pixel snapped: there are no layer-aware SVG renderers.
+  FloatRect SnapRectToDevicePixelsIfNeeded(const LayoutRect &rect,
+                                           const RenderLayerModelObject &renderer) noexcept
+  {
+    return SnapRectToDevicePixels(rect, renderer.GetDocument().DeviceScaleFactor());
+  }
+
+  FloatRect SnapRectToDevicePixelsIfNeeded(const FloatRect &rect,
+                                           const RenderLayerModelObject &renderer) noexcept
+  {
+    return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
+  }
 }

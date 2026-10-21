@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
+#include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp"
@@ -812,7 +813,7 @@ namespace krys::boo::dom
                  HitTestResult &result) noexcept;
 
     /// @brief Updates style, then lays the document out if it needs it.
-    UpdateLayoutResult UpdateLayout() noexcept;
+    UpdateLayoutResult UpdateLayout(EnumSet<LayoutOptions> layoutOptions = {}) noexcept;
     UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets() noexcept;
 
     /// @brief The element that scrolls the viewport: the root element, or in quirks mode the body unless it's

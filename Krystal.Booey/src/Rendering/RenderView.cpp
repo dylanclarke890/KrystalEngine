@@ -15,8 +15,12 @@
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
+#include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
+#include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 
 namespace krys::boo
 {
@@ -172,8 +176,12 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Composited roots and SVG roots with a clip path (isComposited, isRenderOrLegacyRenderSVGRoot),
-      // once there are either.
+      if (rootElement.IsComposited())
+      {
+        return false;
+      }
+
+      // FIXME: SVG roots with a clip path (isRenderOrLegacyRenderSVGRoot), once there's SVG.
 
       auto *rendererForBackground = rootElement.View().RendererForRootBackground();
       if (!rendererForBackground)
@@ -223,6 +231,8 @@ namespace krys::boo
         rootObscuresBackground = RendererObscuresBackground(*rootRenderer);
       }
     }
+
+    Compositor().RootBackgroundColorOrTransparencyChanged();
 
     // FIXME: The page scale factor, once pages scale.
     float pageScaleFactor = 1;
@@ -469,6 +479,30 @@ namespace krys::boo
     }
   }
 
+  const RenderElement *RenderView::PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                          RenderGeometryMap &geometryMap) const noexcept
+  {
+    // If a container was specified, and was not nullptr or the RenderView, then we should have found it by
+    // now.
+    krys_debug_assert(!ancestorToStopAt || ancestorToStopAt == this);
+    (void)ancestorToStopAt;
+
+    LayoutPoint scrollPosition = FrameView().ScrollPositionRespectingCustomFixedPosition();
+
+    if (!ancestorToStopAt && ShouldUseTransformFromContainer(nullptr))
+    {
+      TransformationMatrix t;
+      GetTransformFromContainer(LayoutSize(), t);
+      geometryMap.PushView(this, ToLayoutSize(scrollPosition), &t);
+    }
+    else
+    {
+      geometryMap.PushView(this, ToLayoutSize(scrollPosition));
+    }
+
+    return nullptr;
+  }
+
   void RenderView::MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
                                            TransformState &transformState) const noexcept
   {
@@ -586,7 +620,11 @@ namespace krys::boo
 
   void RenderView::RepaintRootContents() noexcept
   {
-    // FIXME: A composited render view repaints its backing, once there's compositing.
+    if (Layer()->IsComposited())
+    {
+      Layer()->SetBackingNeedsRepaint(GraphicsLayerShouldClipToLayer::DoNotClip);
+      return;
+    }
 
     // Always use layoutOverflowRect() to fix rdar://problem/27182267.
     // This should be cleaned up via webkit.org/b/159913 and webkit.org/b/159914.
@@ -665,7 +703,43 @@ namespace krys::boo
   {
     RepaintRootContents();
 
-    // FIXME: The compositor repaints the composited layers, once there's compositing.
+    RenderLayerCompositor &compositor = Compositor();
+    if (compositor.UsesCompositing())
+    {
+      compositor.RepaintCompositedLayers();
+    }
+  }
+
+  bool RenderView::RootBackgroundIsEntirelyFixed() const noexcept
+  {
+    if (auto *rootBackgroundRenderer = RendererForRootBackground())
+    {
+      return style::HasEntirelyFixedBackground(rootBackgroundRenderer->Style().GetBackgroundLayers());
+    }
+    return false;
+  }
+
+  bool RenderView::UsesCompositing() const noexcept
+  {
+    return _compositor && _compositor->UsesCompositing();
+  }
+
+  RenderLayerCompositor &RenderView::Compositor() noexcept
+  {
+    if (!_compositor)
+    {
+      _compositor = CreateUnique<RenderLayerCompositor>(*this);
+    }
+
+    return *_compositor;
+  }
+
+  void RenderView::SetIsInWindow(bool isInWindow) noexcept
+  {
+    if (_compositor)
+    {
+      _compositor->SetIsInWindow(isInWindow);
+    }
   }
 
   LayoutRect RenderView::ViewRect() const noexcept

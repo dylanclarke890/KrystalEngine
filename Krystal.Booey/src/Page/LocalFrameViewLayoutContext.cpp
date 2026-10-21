@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -150,16 +151,61 @@ namespace krys::boo
       }
       krys_debug_assert(!layoutRoot->NeedsLayout());
       // FIXME: Defer the layer position update (canDeferUpdateLayerPositions), compare the repaint rect
-      // environment, update compositing and run the post-layout tasks, once there's painting and compositing.
+      // environment and run the post-layout tasks, once there are any.
       if (auto *renderView = GetRenderView(); renderView && renderView->Layer())
       {
         renderView->Layer()->UpdateLayerPositionsAfterLayout(NeedsFullRepaint(), false);
       }
+      _updateCompositingLayersIsPending = true;
       krys_debug_assert(_percentHeightIgnoreList.empty());
     }
 
     // The post-layout task that resumes the animations layout brought into view.
     _frameView.ViewportContentsChanged();
+  }
+
+  bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept
+  {
+    // If we expect to update compositing after an incipient layout, don't do so here.
+    auto *view = GetRenderView();
+    if (!view)
+    {
+      return false;
+    }
+
+    if (NeedsLayout() || IsInLayout())
+    {
+      return false;
+    }
+
+    // FIXME: The repaint rect environment (device scale factor, printing, fixed layout), once there's
+    // printing.
+    view->Layer()->UpdateLayerPositionsAfterStyleChange(false);
+
+    return view->Compositor().DidRecalcStyleWithNoPendingLayout();
+  }
+
+  void LocalFrameViewLayoutContext::UpdateCompositingLayersAfterLayout() noexcept
+  {
+    auto *renderView = GetRenderView();
+    if (!renderView)
+    {
+      return;
+    }
+
+    renderView->Compositor().UpdateCompositingLayers(CompositingUpdateType::AfterLayout);
+    _updateCompositingLayersIsPending = false;
+  }
+
+  bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterLayoutIfNeeded() noexcept
+  {
+    if (_updateCompositingLayersIsPending)
+    {
+      UpdateCompositingLayersAfterLayout();
+      return true;
+    }
+
+    return false;
   }
 
   bool LocalFrameViewLayoutContext::NeedsLayout() const noexcept

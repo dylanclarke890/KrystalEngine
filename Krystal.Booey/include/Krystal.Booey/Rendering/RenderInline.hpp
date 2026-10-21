@@ -73,6 +73,8 @@ namespace krys::boo
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,
                              EnumSet<MapCoordinatesMode> mode, bool *wasFixed) const noexcept override;
+    const RenderElement *PushMappingToContainer(const RenderLayerModelObject *ancestorToStopAt,
+                                                RenderGeometryMap &geometryMap) const noexcept override;
     KRYS_NODISCARD LayoutSize
       OffsetFromContainer(const RenderElement &container, const LayoutPoint &point,
                           bool *offsetDependsOnPoint = nullptr) const noexcept override;

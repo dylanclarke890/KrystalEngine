@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/FloatPoint3D.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerEnums.hpp"
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
@@ -30,6 +31,11 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   namespace style
@@ -48,6 +54,9 @@ namespace krys::boo
   class Path;
   class RenderObject;
   class RenderBox;
+  class RenderLayerBacking;
+  class RenderLayerCompositor;
+  enum class ContentChangeType : uint8;
   class RenderLayerFilters;
   class RenderLayerModelObject;
   class RenderLayerScrollableArea;
@@ -106,16 +115,46 @@ namespace krys::boo
     Yes
   };
 
+  enum class RequestState : uint8
+  {
+    Unknown,
+    DontCare,
+    False,
+    True,
+    Undetermined
+  };
+
+  enum class IndirectCompositingReason : uint8
+  {
+    None,
+    Clipping,
+    Stacking,
+    OverflowScrollPositioning,
+    Overlap,
+    BackgroundLayer,
+    GraphicalEffect, // opacity, mask, filter, transform etc.
+    Perspective,
+    Preserve3D
+  };
+
+  enum class UpdateBackingSharingFlags : uint8
+  {
+    DuringCompositingUpdate,
+  };
+
+  using ScrollingScope = uint64;
+
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Compositing, masks, SVG clip paths, reflections, resizing, scrollbars, selection
-  // gaps, event regions and fragmentation (paginated collectFragments) come with compositing, effects and
-  // fragmentation.
+  // FIXME: Masks, SVG clip paths, reflections, resizing, scrollbars, selection gaps, event regions and
+  // fragmentation (paginated collectFragments) come with effects and fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderLayer);
 
+    friend class RenderLayerBacking;
+    friend class RenderLayerCompositor;
     friend class RenderLayerScrollableArea;
 
   public:
@@ -275,12 +314,259 @@ namespace krys::boo
               UpdateLayerPositionsFlag::SubtreeNeedsUpdate, UpdateLayerPositionsFlag::EnvironmentChanged};
     }
 
+    // These flags propagate in paint order (z-order tree).
+    enum class Compositing : uint8
+    {
+      // Need to do the overlap-testing tree walk because hierarchy or geometry changed.
+      HasDescendantNeedingRequirementsTraversal,
+      // Need to update geometry, configuration and update the GraphicsLayer tree.
+      HasDescendantNeedingBackingOrHierarchyTraversal,
+
+      // Things that trigger HasDescendantNeedingRequirementsTraversal
+      // The paint order children of this layer changed (gained/lost child, order change).
+      NeedsPaintOrderChildrenUpdate,
+      // Needs compositing to be re-evaluated after layout (it depends on geometry).
+      NeedsPostLayoutUpdate,
+      // Something changed that forces computeCompositingRequirements to traverse all descendant layers.
+      DescendantsNeedRequirementsTraversal,
+      // Something changed that forces computeCompositingRequirements to traverse all layers later in paint
+      // order.
+      SubsequentLayersNeedRequirementsTraversal,
+
+      // Things that trigger HasDescendantNeedingBackingOrHierarchyTraversal
+      // This layer needs a geometry update.
+      NeedsGeometryUpdate,
+      // This layer needs a configuration update (updating its internal compositing hierarchy).
+      NeedsConfigurationUpdate,
+      // Something changed that requires this layer's scrolling tree node to be updated.
+      NeedsScrollingTreeUpdate,
+      // This layer needs hookup with its parents or children.
+      NeedsLayerConnection,
+      // This layer's composited children need a geometry update.
+      ChildrenNeedGeometryUpdate,
+      // Something changed that forces us to traverse all descendant layers in updateBackingAndHierarchy.
+      DescendantsNeedBackingAndHierarchyTraversal,
+    };
+
+    static constexpr EnumSet<Compositing> ComputeCompositingRequirementsFlags()
+    {
+      return {Compositing::NeedsPaintOrderChildrenUpdate, Compositing::NeedsPostLayoutUpdate,
+              Compositing::DescendantsNeedRequirementsTraversal,
+              Compositing::SubsequentLayersNeedRequirementsTraversal};
+    }
+
+    static constexpr EnumSet<Compositing> UpdateBackingOrHierarchyFlags()
+    {
+      return {
+        Compositing::NeedsLayerConnection,       Compositing::NeedsGeometryUpdate,
+        Compositing::NeedsConfigurationUpdate,   Compositing::NeedsScrollingTreeUpdate,
+        Compositing::ChildrenNeedGeometryUpdate, Compositing::DescendantsNeedBackingAndHierarchyTraversal};
+    }
+
+  public:
+    void SetAncestorsHaveCompositingDirtyFlag(Compositing flag) noexcept;
+
+    KRYS_NODISCARD bool HasDescendantNeedingCompositingRequirementsTraversal() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::HasDescendantNeedingRequirementsTraversal);
+    }
+    KRYS_NODISCARD bool HasDescendantNeedingUpdateBackingOrHierarchyTraversal() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
+    }
+
+    KRYS_NODISCARD bool NeedsCompositingPaintOrderChildrenUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsPaintOrderChildrenUpdate);
+    }
+    KRYS_NODISCARD bool NeedsPostLayoutCompositingUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsPostLayoutUpdate);
+    }
+    KRYS_NODISCARD bool DescendantsNeedCompositingRequirementsTraversal() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::DescendantsNeedRequirementsTraversal);
+    }
+    KRYS_NODISCARD bool SubsequentLayersNeedCompositingRequirementsTraversal() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::SubsequentLayersNeedRequirementsTraversal);
+    }
+
+    KRYS_NODISCARD bool NeedsCompositingLayerConnection() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsLayerConnection);
+    }
+    KRYS_NODISCARD bool NeedsCompositingGeometryUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsGeometryUpdate);
+    }
+    KRYS_NODISCARD bool NeedsCompositingConfigurationUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsConfigurationUpdate);
+    }
+    KRYS_NODISCARD bool NeedsScrollingTreeUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::NeedsScrollingTreeUpdate);
+    }
+    KRYS_NODISCARD bool ChildrenNeedCompositingGeometryUpdate() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::ChildrenNeedGeometryUpdate);
+    }
+    KRYS_NODISCARD bool DescendantsNeedUpdateBackingAndHierarchyTraversal() const noexcept
+    {
+      return _compositingDirtyBits.Contains(Compositing::DescendantsNeedBackingAndHierarchyTraversal);
+    }
+
+    template <Compositing V>
+    void SetRequirementsTraversalDirtyBit() noexcept
+    {
+      _compositingDirtyBits.Add(V);
+      SetAncestorsHaveCompositingDirtyFlag(Compositing::HasDescendantNeedingRequirementsTraversal);
+    }
+
+    void SetNeedsCompositingPaintOrderChildrenUpdate() noexcept
+    {
+      SetRequirementsTraversalDirtyBit<Compositing::NeedsPaintOrderChildrenUpdate>();
+    }
+    void SetNeedsPostLayoutCompositingUpdate() noexcept
+    {
+      SetRequirementsTraversalDirtyBit<Compositing::NeedsPostLayoutUpdate>();
+    }
+    void SetDescendantsNeedCompositingRequirementsTraversal() noexcept
+    {
+      SetRequirementsTraversalDirtyBit<Compositing::DescendantsNeedRequirementsTraversal>();
+    }
+    void SetSubsequentLayersNeedCompositingRequirementsTraversal() noexcept
+    {
+      SetRequirementsTraversalDirtyBit<Compositing::SubsequentLayersNeedRequirementsTraversal>();
+    }
+
+    void SetNeedsPostLayoutCompositingUpdateOnAncestors() noexcept
+    {
+      SetAncestorsHaveCompositingDirtyFlag(Compositing::NeedsPostLayoutUpdate);
+    }
+
+    template <Compositing V>
+    void SetBackingAndHierarchyTraversalDirtyBit() noexcept
+    {
+      _compositingDirtyBits.Add(V);
+      SetAncestorsHaveCompositingDirtyFlag(Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
+    }
+
+    void SetNeedsCompositingLayerConnection() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::NeedsLayerConnection>();
+    }
+    void SetNeedsCompositingGeometryUpdate() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::NeedsGeometryUpdate>();
+    }
+    void SetNeedsCompositingConfigurationUpdate() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::NeedsConfigurationUpdate>();
+    }
+    void SetNeedsScrollingTreeUpdate() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::NeedsScrollingTreeUpdate>();
+    }
+    void SetChildrenNeedCompositingGeometryUpdate() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::ChildrenNeedGeometryUpdate>();
+    }
+    void SetDescendantsNeedUpdateBackingAndHierarchyTraversal() noexcept
+    {
+      SetBackingAndHierarchyTraversalDirtyBit<Compositing::DescendantsNeedBackingAndHierarchyTraversal>();
+    }
+
+    void SetNeedsCompositingGeometryUpdateOnAncestors() noexcept
+    {
+      SetAncestorsHaveCompositingDirtyFlag(Compositing::NeedsGeometryUpdate);
+    }
+
+    KRYS_NODISCARD bool NeedsCompositingRequirementsTraversal() const noexcept
+    {
+      return _compositingDirtyBits.ContainsAny(ComputeCompositingRequirementsFlags());
+    }
+    void ClearCompositingRequirementsTraversalState() noexcept
+    {
+      _compositingDirtyBits.Remove(Compositing::HasDescendantNeedingRequirementsTraversal);
+      _compositingDirtyBits.Remove(ComputeCompositingRequirementsFlags());
+    }
+
+    KRYS_NODISCARD bool NeedsUpdateBackingOrHierarchyTraversal() const noexcept
+    {
+      return _compositingDirtyBits.ContainsAny(UpdateBackingOrHierarchyFlags());
+    }
+    void ClearUpdateBackingOrHierarchyTraversalState() noexcept
+    {
+      _compositingDirtyBits.Remove(Compositing::HasDescendantNeedingBackingOrHierarchyTraversal);
+      _compositingDirtyBits.Remove(UpdateBackingOrHierarchyFlags());
+    }
+
+    KRYS_NODISCARD bool NeedsAnyCompositingTraversal() const noexcept
+    {
+      return !_compositingDirtyBits.IsEmpty();
+    }
+    void ClearCompositingPaintOrderState() noexcept
+    {
+      _compositingDirtyBits = {};
+    }
+
+    enum ViewportConstrainedNotCompositedReason : uint8
+    {
+      NoNotCompositedReason,
+      NotCompositedForBoundsOutOfView,
+      NotCompositedForNonViewContainer,
+      NotCompositedForNoVisibleContent,
+    };
+
+    struct PaintedContentRequest
+    {
+      RequestState HasPaintedContent {RequestState::Unknown};
+
+      PaintedContentRequest() noexcept = default;
+
+      void SetHasPaintedContent() noexcept
+      {
+        HasPaintedContent = RequestState::True;
+      }
+      void MakePaintedContentUndetermined() noexcept
+      {
+        HasPaintedContent = RequestState::Undetermined;
+      }
+      KRYS_NODISCARD bool ProbablyHasPaintedContent() const noexcept
+      {
+        return HasPaintedContent == RequestState::True || HasPaintedContent == RequestState::Undetermined;
+      }
+      KRYS_NODISCARD bool IsPaintedContentSatisfied() const noexcept
+      {
+        return HasPaintedContent != RequestState::Unknown;
+      }
+
+      // FIXME: HDR content, once there's HDR.
+      KRYS_NODISCARD bool IsSatisfied() const noexcept
+      {
+        return IsPaintedContentSatisfied();
+      }
+    };
+
+    struct EnclosingCompositingLayerStatus
+    {
+      bool FullRepaintAlreadyScheduled {false};
+      RenderLayer *Layer {nullptr};
+    };
+
+  private:
+    EnumSet<Compositing> _compositingDirtyBits;
+
     EnumSet<LayerPositionUpdates> _layerPositionDirtyBits;
 
     const bool _isRenderViewLayer : 1;
     const bool _forcedStackingContext : 1;
 
     bool _isNormalFlowOnly : 1 {false};
+    bool _canBeBackdropRoot : 1 {false};
+    bool _hasBackdropFilterDescendantsWithoutRoot : 1 {false};
     bool _isCSSStackingContext : 1 {false};
     bool _isOpportunisticStackingContext : 1 {false};
 
@@ -316,6 +602,11 @@ namespace krys::boo
     bool _hasTransformedAncestor : 1 {false};
     bool _has3DTransformedAncestor : 1 {false};
 
+    bool _hasCompositingDescendant : 1 {false}; // In the z-order tree.
+    // Set when a layer has a composited descendant in z-order which is not a descendant in containing block
+    // order (e.g. opacity layer with an abspos descendant).
+    bool _hasCompositedNonContainedDescendants : 1 {false};
+
     bool _hasCompositedScrollingAncestor : 1 {false}; // In the layer-order tree.
 
     bool _hasStickyAncestor : 1 {false};
@@ -332,9 +623,22 @@ namespace krys::boo
     bool _layerListMutationAllowed : 1 {true};
 #endif
 
+    IndirectCompositingReason _indirectCompositingReason {IndirectCompositingReason::None};
+    ViewportConstrainedNotCompositedReason _viewportConstrainedNotCompositedReason {NoNotCompositedReason};
+
     BlendMode _blendMode {BlendMode::Normal};
+    bool _hasNotIsolatedCompositedBlendingDescendants : 1 {false};
     bool _hasNotIsolatedBlendingDescendants : 1 {false};
     bool _hasNotIsolatedBlendingDescendantsStatusDirty : 1 {false};
+
+    bool _intrinsicallyComposited : 1 {false};
+    bool _alwaysIncludedInZOrderLists : 1 {false};
+    bool _hasAlwaysIncludedInZOrderListsDescendants : 1 {false};
+    bool _hasAlwaysIncludedInZOrderListsDescendantsStatusDirty : 1 {true};
+
+    bool _wasOmittedFromZOrderTree : 1 {false};
+
+    bool _isFixedIntersectingViewport : 1 {false};
 
     // Whether this layer has begun its transparency layer during the current paint.
     bool _usedTransparency : 1 {false};
@@ -378,9 +682,17 @@ namespace krys::boo
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
 
+    WeakPtr<RenderLayer> _backingProviderLayer;
+    WeakPtr<RenderLayer> _backingProviderLayerAtEndOfCompositingUpdate;
+
     // Cached repaint rects. Used by layout.
     RenderObject::RepaintRects _repaintRects;
     WeakPtr<const RenderLayerModelObject> _repaintContainer;
+
+    Maybe<ScrollingScope> _boxScrollingScope;
+    Maybe<ScrollingScope> _contentsScrollingScope;
+
+    UniquePtr<RenderLayerBacking> _backing;
 
   public:
     explicit RenderLayer(RenderLayerModelObject &renderer) noexcept;
@@ -533,7 +845,8 @@ namespace krys::boo
     {
       return _visibleDescendantStatusDirty || _visibleContentStatusDirty
              || _hasSelfPaintingLayerDescendantDirty || _hasViewportConstrainedDescendantStatusDirty
-             || _hasNotIsolatedBlendingDescendantsStatusDirty;
+             || _hasNotIsolatedBlendingDescendantsStatusDirty
+             || _hasAlwaysIncludedInZOrderListsDescendantsStatusDirty;
     }
 
     void StyleChanged(style::Difference diff, const RenderStyle *oldStyle) noexcept;
@@ -588,10 +901,13 @@ namespace krys::boo
     void UpdateLayerPositionsAfterStyleChange(bool environmentChanged = false) noexcept;
     void UpdateLayerPositionsAfterLayout(bool didFullRepaint, bool environmentChanged) noexcept;
 
-    KRYS_NODISCARD RenderLayer *EnclosingPaginationLayer(PaginationInclusionMode) const noexcept
+    KRYS_NODISCARD bool HasCompositedLayerInEnclosingPaginationChain() const noexcept;
+    KRYS_NODISCARD RenderLayer *EnclosingPaginationLayer(PaginationInclusionMode mode) const noexcept
     {
-      // FIXME: Composited layers in the pagination chain (hasCompositedLayerInEnclosingPaginationChain), once
-      // there's compositing.
+      if (mode == ExcludeCompositedPaginatedLayers && HasCompositedLayerInEnclosingPaginationChain())
+      {
+        return nullptr;
+      }
       return _enclosingPaginationLayer.get();
     }
 
@@ -624,6 +940,10 @@ namespace krys::boo
     void DirtyVisibleContentStatus() noexcept;
 
     KRYS_NODISCARD bool HasVisibleBoxDecorationsOrBackground() const noexcept;
+
+    KRYS_NODISCARD bool BackgroundIsKnownToBeOpaqueInRect(const LayoutRect &localRect) const noexcept;
+    KRYS_NODISCARD bool ListBackgroundIsKnownToBeOpaqueInRect(const LayerList &list,
+                                                              const LayoutRect &localRect) const noexcept;
     KRYS_NODISCARD bool HasVisibleBoxDecorations() const noexcept;
 
     void SetBehavesAsFixed(bool behavesAsFixed) noexcept
@@ -637,6 +957,11 @@ namespace krys::boo
 
     KRYS_NODISCARD bool IsVisibilityHiddenOrOpacityZero() const noexcept;
     KRYS_NODISCARD bool IsSubtreeVisibilityHiddenOrOpacityZero() const noexcept;
+
+    // Returns true if this layer has visible content (ignoring any child layers).
+    KRYS_NODISCARD bool IsVisuallyNonEmpty(PaintedContentRequest *request = nullptr) const noexcept;
+    // True if this layer container renderers that paint.
+    void DetermineNonLayerDescendantsPaintedContent(PaintedContentRequest &request) const noexcept;
 
     KRYS_NODISCARD bool IsViewportConstrained() const noexcept;
 
@@ -664,6 +989,17 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *ClippingRootForPainting() const noexcept;
 
     KRYS_NODISCARD RenderLayer *EnclosingOverflowClipLayer(IncludeSelfOrNot includeSelf) const noexcept;
+
+    // Enclosing compositing layer; if includeSelf is true, may return this.
+    KRYS_NODISCARD RenderLayer *
+      EnclosingCompositingLayer(IncludeSelfOrNot includeSelf = IncludeSelf) const noexcept;
+    KRYS_NODISCARD EnclosingCompositingLayerStatus
+      EnclosingCompositingLayerForRepaint(IncludeSelfOrNot includeSelf = IncludeSelf) const noexcept;
+    // Ancestor compositing layer, excluding this.
+    KRYS_NODISCARD RenderLayer *AncestorCompositingLayer() const noexcept
+    {
+      return EnclosingCompositingLayer(ExcludeSelf);
+    }
 
     KRYS_NODISCARD bool CanUseOffsetFromAncestor() const noexcept;
     KRYS_NODISCARD bool CanUseOffsetFromAncestor(const RenderLayer &ancestor) const noexcept;
@@ -711,6 +1047,19 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect LocalBoundingBox(EnumSet<CalculateLayerBoundsFlag> flags = {}) const noexcept;
     // Deprecated: Pixel snapped bounding box relative to the root.
     KRYS_NODISCARD IntRect AbsoluteBoundingBox() const noexcept;
+
+    // Bounds used for layer overlap testing in RenderLayerCompositor.
+    KRYS_NODISCARD LayoutRect OverlapBounds() const noexcept;
+
+    // Takes transform animations into account, returning true if they could be cheaply computed.
+    // Unlike overlapBounds, these bounds include descendant layers.
+    KRYS_NODISCARD bool GetOverlapBoundsIncludingChildrenAccountingForTransformAnimations(
+      LayoutRect &bounds, EnumSet<CalculateLayerBoundsFlag> additionalFlags = {}) const noexcept;
+
+    // If true, this layer's children are included in its bounds for overlap testing.
+    // We can't rely on the children's positions if this layer has a filter that could have moved the
+    // children's pixels around.
+    KRYS_NODISCARD bool OverlapBoundsIncludeChildren() const noexcept;
 
     // Can pass offsetFromRoot if known.
     KRYS_NODISCARD LayoutRect CalculateLayerBounds(
@@ -821,10 +1170,28 @@ namespace krys::boo
       _repaintRectsValid = false;
     }
 
-    /// @brief The layer's repaint rect, with those of its descendant layers.
+    /// @brief The layer's repaint rect, with those of its descendant layers that aren't composited.
     KRYS_NODISCARD LayoutRect RepaintRectIncludingNonCompositingDescendants() const noexcept;
     /// @brief Repaints the layer's renderer and those of its descendant layers.
     void RepaintIncludingDescendants() noexcept;
+
+    // Indicate that the layer contents need to be repainted. Only has an effect if layer compositing is being
+    // used.
+    void SetBackingNeedsRepaint(
+      GraphicsLayerShouldClipToLayer shouldClip = GraphicsLayerShouldClipToLayer::Clip) noexcept;
+
+    // The rect is in the coordinate space of the layer's render object.
+    void SetBackingNeedsRepaintInRect(const LayoutRect &r, GraphicsLayerShouldClipToLayer shouldClip =
+                                                             GraphicsLayerShouldClipToLayer::Clip) noexcept;
+    void RepaintIncludingNonCompositingDescendants(const RenderLayerModelObject *repaintContainer) noexcept;
+
+    KRYS_NODISCARD const RenderLayerModelObject *RepaintContainer() const noexcept;
+    void ClearRepaintContainer() noexcept
+    {
+      _repaintContainer = nullptr;
+    }
+
+    void CompositingStatusChanged(LayoutUpToDate layoutUpToDate) noexcept;
 
     KRYS_NODISCARD LayoutUnit StaticInlinePosition() const noexcept
     {
@@ -921,6 +1288,38 @@ namespace krys::boo
       return _blendMode;
     }
 
+    KRYS_NODISCARD bool HasBackdropFilterDescendantsWithoutRoot() const noexcept
+    {
+      return _hasBackdropFilterDescendantsWithoutRoot;
+    }
+    void SetHasBackdropFilterDescendantsWithoutRoot(bool hasBackdropFilterDescendantsWithoutRoot) noexcept
+    {
+      _hasBackdropFilterDescendantsWithoutRoot = hasBackdropFilterDescendantsWithoutRoot;
+    }
+
+    KRYS_NODISCARD bool CanBeBackdropRoot() const noexcept
+    {
+      return _canBeBackdropRoot;
+    }
+    KRYS_NODISCARD bool IsBackdropRoot() const noexcept
+    {
+      return HasBackdropFilterDescendantsWithoutRoot() && CanBeBackdropRoot();
+    }
+
+    KRYS_NODISCARD bool IsolatesCompositedBlending() const noexcept
+    {
+      return _hasNotIsolatedCompositedBlendingDescendants && IsCSSStackingContext();
+    }
+    KRYS_NODISCARD bool HasNotIsolatedCompositedBlendingDescendants() const noexcept
+    {
+      return _hasNotIsolatedCompositedBlendingDescendants;
+    }
+    void SetHasNotIsolatedCompositedBlendingDescendants(
+      bool hasNotIsolatedCompositedBlendingDescendants) noexcept
+    {
+      _hasNotIsolatedCompositedBlendingDescendants = hasNotIsolatedCompositedBlendingDescendants;
+    }
+
     KRYS_NODISCARD bool IsolatesBlending() const noexcept
     {
       return HasNotIsolatedBlendingDescendants() && IsCSSStackingContext();
@@ -937,7 +1336,114 @@ namespace krys::boo
       return _hasNotIsolatedBlendingDescendantsStatusDirty;
     }
 
-    KRYS_NODISCARD bool PaintsWithTransform() const noexcept;
+    KRYS_NODISCARD bool PaintsWithTransform(EnumSet<PaintBehavior> paintBehavior) const noexcept;
+
+#pragma region Compositing
+
+    KRYS_NODISCARD RenderLayerCompositor &Compositor() const noexcept;
+
+    /// @brief A name for the layer in layer tree dumps: its renderer's.
+    KRYS_NODISCARD utf8_string Name() const noexcept;
+
+    void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
+
+    KRYS_NODISCARD bool IsComposited() const noexcept
+    {
+      return _backing != nullptr;
+    }
+    KRYS_NODISCARD bool HasCompositingDescendant() const noexcept
+    {
+      return _hasCompositingDescendant;
+    }
+    KRYS_NODISCARD bool HasCompositedMask() const noexcept;
+    KRYS_NODISCARD bool HasCompositedNonContainedDescendants() const noexcept
+    {
+      return _hasCompositedNonContainedDescendants;
+    }
+
+    // If non-null, a non-ancestor composited layer that this layer paints into (it is sharing its backing
+    // store with this layer).
+    KRYS_NODISCARD RenderLayer *BackingProviderLayer() const noexcept
+    {
+      return _backingProviderLayer.get();
+    }
+    void SetBackingProviderLayer(RenderLayer *backingProvider,
+                                 EnumSet<UpdateBackingSharingFlags> flags) noexcept;
+    void DisconnectFromBackingProviderLayer(EnumSet<UpdateBackingSharingFlags> flags) noexcept;
+
+    KRYS_NODISCARD bool PaintsIntoProvidedBacking() const noexcept
+    {
+      return _backingProviderLayer.get() != nullptr;
+    }
+
+    KRYS_NODISCARD RenderLayer *BackingProviderLayerAtEndOfCompositingUpdate() const noexcept
+    {
+      return _backingProviderLayerAtEndOfCompositingUpdate.get();
+    }
+    void SetBackingProviderLayerAtEndOfCompositingUpdate(RenderLayer *provider) noexcept
+    {
+      _backingProviderLayerAtEndOfCompositingUpdate = CreateWeakPtr(provider);
+    }
+
+    KRYS_NODISCARD RenderLayerBacking *Backing() const noexcept
+    {
+      return _backing.get();
+    }
+    RenderLayerBacking *EnsureBacking() noexcept;
+    void ClearBacking(EnumSet<UpdateBackingSharingFlags> flags, bool layerBeingDestroyed = false) noexcept;
+
+    KRYS_NODISCARD bool HasCompositedScrollingAncestor() const noexcept
+    {
+      return _hasCompositedScrollingAncestor;
+    }
+    void SetHasCompositedScrollingAncestor(bool hasCompositedScrollingAncestor) noexcept
+    {
+      _hasCompositedScrollingAncestor = hasCompositedScrollingAncestor;
+    }
+
+    // Layers with the same ScrollingScope are scrolled by some common ancestor scroller. Used for async
+    // scrolling.
+    KRYS_NODISCARD Maybe<ScrollingScope> BoxScrollingScope() const noexcept
+    {
+      return _boxScrollingScope;
+    }
+    KRYS_NODISCARD Maybe<ScrollingScope> ContentsScrollingScope() const noexcept
+    {
+      return _contentsScrollingScope;
+    }
+
+    void SetViewportConstrainedNotCompositedReason(ViewportConstrainedNotCompositedReason reason) noexcept
+    {
+      _viewportConstrainedNotCompositedReason = reason;
+    }
+    KRYS_NODISCARD ViewportConstrainedNotCompositedReason
+      GetViewportConstrainedNotCompositedReason() const noexcept
+    {
+      return _viewportConstrainedNotCompositedReason;
+    }
+
+    KRYS_NODISCARD IndirectCompositingReason GetIndirectCompositingReason() const noexcept
+    {
+      return _indirectCompositingReason;
+    }
+
+    KRYS_NODISCARD bool Has3DTransformedAncestor() const noexcept
+    {
+      return _has3DTransformedAncestor;
+    }
+
+    KRYS_NODISCARD bool AlwaysIncludedInZOrderLists() const noexcept
+    {
+      return _alwaysIncludedInZOrderLists;
+    }
+    KRYS_NODISCARD bool HasAlwaysIncludedInZOrderListsDescendants() const noexcept
+    {
+      return _hasAlwaysIncludedInZOrderListsDescendants;
+    }
+    void SetIntrinsicallyComposited(bool composited) noexcept;
+    void UpdateAlwaysIncludedInZOrderLists() noexcept;
+
+#pragma endregion
 
     KRYS_NODISCARD bool IsRenderFragmentedFlow() const noexcept;
 
@@ -994,6 +1500,9 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldBeNormalFlowOnly() const noexcept;
     KRYS_NODISCARD bool ShouldBeCSSStackingContext() const noexcept;
 
+    KRYS_NODISCARD bool ComputeCanBeBackdropRoot() const noexcept;
+    bool SetCanBeBackdropRoot(bool canBeBackdropRoot) noexcept;
+
     // Return true if changed.
     bool SetIsNormalFlowOnly(bool isNormalFlowOnly) noexcept;
 
@@ -1009,9 +1518,11 @@ namespace krys::boo
     void UpdateZOrderLists() noexcept;
     void RebuildZOrderLists() noexcept;
     void RebuildZOrderLists(UniquePtr<List<RenderLayer *>> &posZOrderList,
-                            UniquePtr<List<RenderLayer *>> &negZOrderList) noexcept;
+                            UniquePtr<List<RenderLayer *>> &negZOrderList,
+                            EnumSet<Compositing> &accumulatedDirtyFlags) noexcept;
     void CollectLayers(UniquePtr<List<RenderLayer *>> &positiveZOrderList,
-                       UniquePtr<List<RenderLayer *>> &negativeZOrderList) noexcept;
+                       UniquePtr<List<RenderLayer *>> &negativeZOrderList,
+                       EnumSet<Compositing> &accumulatedDirtyFlags) noexcept;
     void ClearZOrderLists() noexcept;
 
     void UpdateNormalFlowList() noexcept;
@@ -1085,6 +1596,35 @@ namespace krys::boo
 
     void UpdateAncestorChainHasBlendingDescendants() noexcept;
     void DirtyAncestorChainHasBlendingDescendants() noexcept;
+
+    void UpdateAncestorChainHasAlwaysIncludedInZOrderListsDescendants() noexcept;
+    void DirtyAncestorChainHasAlwaysIncludedInZOrderListsDescendants() noexcept;
+
+    void SetWasOmittedFromZOrderTree() noexcept;
+    void SetWasIncludedInZOrderTree() noexcept
+    {
+      _wasOmittedFromZOrderTree = false;
+    }
+    void RemoveSelfFromCompositor() noexcept;
+    void RemoveDescendantsFromCompositor() noexcept;
+
+    void SetHasCompositingDescendant(bool b) noexcept
+    {
+      _hasCompositingDescendant = b;
+    }
+    void SetHasCompositedNonContainedDescendants(bool value) noexcept
+    {
+      _hasCompositedNonContainedDescendants = value;
+    }
+
+    void SetIndirectCompositingReason(IndirectCompositingReason reason) noexcept
+    {
+      _indirectCompositingReason = reason;
+    }
+    KRYS_NODISCARD bool MustCompositeForIndirectReasons() const noexcept
+    {
+      return _indirectCompositingReason != IndirectCompositingReason::None;
+    }
 
     KRYS_NODISCARD RefPtr<ClipRects> ParentClipRects(const ClipRectsContext &clipRectsContext) const noexcept;
     KRYS_NODISCARD ClipRect BackgroundClipRect(const ClipRectsContext &clipRectsContext) const noexcept;
@@ -1265,4 +1805,8 @@ namespace krys::boo
 #endif
 
   void MakeMatrixRenderable(TransformationMatrix &matrix, bool has3DRendering) noexcept;
+
+  KRYS_NODISCARD bool CompositedWithOwnBackingStore(const RenderLayer &layer) noexcept;
+
+  TextStream &operator<<(TextStream &ts, IndirectCompositingReason reason) noexcept;
 }

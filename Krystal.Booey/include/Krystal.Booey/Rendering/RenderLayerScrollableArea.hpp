@@ -115,6 +115,7 @@ namespace krys::boo
     // Returns true when the layer could do touch scrolling, but doesn't look at whether there is actually
     // scrollable overflow.
     KRYS_NODISCARD bool CanUseCompositedScrolling() const noexcept;
+    KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
     // Returns true when there is actually scrollable overflow (requires layout to be up-to-date).
     KRYS_NODISCARD bool HasCompositedScrollableOverflow() const noexcept
     {
