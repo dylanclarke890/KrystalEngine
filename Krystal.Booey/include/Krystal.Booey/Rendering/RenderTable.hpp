@@ -281,6 +281,7 @@ namespace krys::boo
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction action) noexcept override;
     void PaintObject(PaintInfo &, const LayoutPoint &) noexcept override;
+    void PaintMask(PaintInfo &, const LayoutPoint &) noexcept override;
     void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept override;
     void AdjustBorderBoxRectForPainting(LayoutRect &) noexcept override;
 

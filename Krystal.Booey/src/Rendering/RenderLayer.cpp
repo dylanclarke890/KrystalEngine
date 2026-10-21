@@ -4147,9 +4147,16 @@ namespace krys::boo
     {
       RenderBox *box = GetRenderBox();
       krys_debug_assert(box);
-      // FIXME: The mask clip rect (maskClipRect) of boxes with a mask, unless DontConstrainForMask, once
-      // there's painting.
-      result = box->VisualOverflowRect();
+      if (!flags.Contains(DontConstrainForMask) && box->HasMask())
+      {
+        result = box->MaskClipRect(LayoutPoint());
+        // The mask clip rect is in physical coordinates, so we have to flip, since localBoundingBox is not.
+        box->FlipForWritingMode(result);
+      }
+      else
+      {
+        result = box->VisualOverflowRect();
+      }
 
       if (flags.Contains(IncludeRootBackgroundPaintingArea) && Renderer().IsDocumentElementRenderer())
       {
@@ -4831,16 +4838,39 @@ namespace krys::boo
     return *_transform;
   }
 
-  bool RenderLayer::ShouldPaintMask(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept
+  bool RenderLayer::ShouldPaintMask(EnumSet<PaintBehavior> paintBehavior,
+                                    EnumSet<PaintLayerFlag> paintFlags) const noexcept
   {
-    // Every layer paints into the window: there's no compositing.
-    return Renderer().HasMask();
+    if (!Renderer().HasMask())
+    {
+      return false;
+    }
+
+    bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
+    if (paintsToWindow || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    {
+      return true;
+    }
+
+    return paintFlags.Contains(PaintLayerFlag::PaintingCompositingMaskPhase);
   }
 
-  bool RenderLayer::ShouldApplyClipPath(EnumSet<PaintBehavior>, EnumSet<PaintLayerFlag>) const noexcept
+  bool RenderLayer::ShouldApplyClipPath(EnumSet<PaintBehavior> paintBehavior,
+                                        EnumSet<PaintLayerFlag> paintFlags) const noexcept
   {
-    // Every layer paints into the window: there's no compositing.
-    return Renderer().HasClipPath();
+    if (!Renderer().HasClipPath())
+    {
+      return false;
+    }
+
+    bool paintsToWindow = !IsComposited() || Backing()->PaintsIntoWindow();
+    if (paintsToWindow || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    {
+      return true;
+    }
+
+    return paintFlags.Contains(PaintLayerFlag::PaintingCompositingClipPathPhase)
+           || paintFlags.Contains(PaintLayerFlag::CollectingEventRegion);
   }
 
   FloatRect RenderLayer::ReferenceBoxRectForClipPath(CSSBoxType boxType, const LayoutSize &offsetFromRoot,

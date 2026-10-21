@@ -335,4 +335,13 @@ namespace krys::boo
     PaintNinePieceImage(ninePieceImage, graphicsContext, renderer, style, destination, source,
                         deviceScaleFactor, options);
   }
+
+  void NinePieceImagePainter::Paint(const style::MaskBorder &ninePieceImage, GraphicsContext &graphicsContext,
+                                    const RenderElement *renderer, const RenderStyle &style,
+                                    const LayoutRect &destination, const LayoutSize &source,
+                                    float deviceScaleFactor, ImagePaintingOptions options) noexcept
+  {
+    PaintNinePieceImage(ninePieceImage, graphicsContext, renderer, style, destination, source,
+                        deviceScaleFactor, options);
+  }
 }

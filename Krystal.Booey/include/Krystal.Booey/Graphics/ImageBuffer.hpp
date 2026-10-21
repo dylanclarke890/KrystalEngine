@@ -24,7 +24,7 @@ namespace krys::boo
   /// @brief An offscreen surface drawn into through a graphics context, then drawn (or tiled) as an image.
   /// FIXME: Rendering modes and purposes (every buffer records into a display list; there are no bitmap or
   /// accelerated backends), colour spaces and pixel formats, native images, pixel buffers, filters,
-  /// luminance masks, volatility, flushing, cloning, serialisation and data URLs come with bitmap images.
+  /// volatility, flushing, cloning, serialisation and data URLs come with bitmap images.
   class ImageBuffer final : public RefCounted<ImageBuffer>, public CanMakeWeakPtr<ImageBuffer>
   {
   public:
@@ -53,6 +53,9 @@ namespace krys::boo
     void FlushDrawingContext() noexcept;
 
     KRYS_NODISCARD IntSize BackendSize() const noexcept;
+
+    /// @brief Turns what's drawn into a luminance mask (for `mask-mode: luminance`).
+    void ConvertToLuminanceMask() noexcept;
 
     KRYS_NODISCARD RenderingResourceIdentifier GetRenderingResourceIdentifier() const noexcept
     {

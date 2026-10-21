@@ -2,11 +2,13 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <ranges>
 
@@ -51,7 +53,7 @@ namespace krys::boo
 
     if (_paintInfo.Phase == PaintPhase::Mask)
     {
-      // FIXME: Masks (paintMask) come with masks.
+      PaintMask();
       return;
     }
 
@@ -199,6 +201,98 @@ namespace krys::boo
     GraphicsContextStateSaver stateSaver(context);
     context.Clip(clipRect);
     borderPainter.PaintBorder(LayoutRect(stripX, stripY, stripWidth, stripHeight), styleToUse);
+  }
+
+  void InlineBoxPainter::PaintMask() noexcept
+  {
+    if (!_paintInfo.ShouldPaintWithinRoot(Renderer())
+        || Renderer().Style().UsedVisibility() != Visibility::Visible || _paintInfo.Phase != PaintPhase::Mask)
+    {
+      return;
+    }
+
+    // Move x/y to our coordinates.
+    auto localRect = LayoutRect {_inlineBox.VisualRect()};
+    LayoutPoint adjustedPaintOffset = _paintOffset + localRect.Location();
+
+    auto &maskBorder = Renderer().Style().GetMaskBorder();
+    auto maskBorderSource = maskBorder.Source.TryStyleImage();
+
+    // Figure out if we need to push a transparency layer to render our mask.
+    bool pushTransparencyLayer = false;
+    bool compositedMask = Renderer().HasLayer() && Renderer().Layer()->HasCompositedMask();
+    bool flattenCompositingLayers =
+      Renderer().View().FrameView().GetPaintBehavior().Contains(PaintBehavior::FlattenCompositingLayers);
+    CompositeOperator compositeOp = CompositeOperator::SourceOver;
+    if (!compositedMask || flattenCompositingLayers)
+    {
+      if ((maskBorderSource && style::HasImageInAnyLayer(Renderer().Style().GetMaskLayers()))
+          || Renderer().Style().GetMaskLayers().UsedLength() > 1)
+      {
+        pushTransparencyLayer = true;
+      }
+
+      compositeOp = CompositeOperator::DestinationIn;
+      if (pushTransparencyLayer)
+      {
+        _paintInfo.Context().SetCompositeOperation(CompositeOperator::DestinationIn);
+        _paintInfo.Context().BeginTransparencyLayer(1.0f);
+        compositeOp = CompositeOperator::SourceOver;
+      }
+    }
+
+    LayoutRect paintRect = LayoutRect(adjustedPaintOffset, localRect.Size());
+
+    PaintFillLayers(Color(), Renderer().Style().GetMaskLayers(), paintRect, compositeOp);
+
+    bool hasBoxImage =
+      maskBorderSource && maskBorderSource->CanRender(&Renderer(), Renderer().Style().UsedZoom());
+    if (!hasBoxImage || !maskBorderSource->IsLoaded(&Renderer()))
+    {
+      if (pushTransparencyLayer)
+      {
+        _paintInfo.Context().EndTransparencyLayer();
+      }
+      return; // Don't paint anything while we wait for the image to load.
+    }
+
+    BorderPainter borderPainter {Renderer(), _paintInfo};
+
+    if (!_inlineBox.IsSplit())
+    {
+      borderPainter.PaintNinePieceImage(LayoutRect(adjustedPaintOffset, localRect.Size()), Renderer().Style(),
+                                        maskBorder, compositeOp);
+    }
+    else
+    {
+      // We have a mask image that spans multiple lines.
+      // We need to adjust _tx and _ty by the width of all previous lines.
+      LayoutUnit logicalOffsetOnLine;
+      for (auto box = _inlineBox.NextInlineBoxLineLeftward(); box; box.TraverseInlineBoxLineLeftward())
+      {
+        logicalOffsetOnLine += box->LogicalWidth();
+      }
+      LayoutUnit totalLogicalWidth = logicalOffsetOnLine;
+      for (auto box = _inlineBox.Iterator(); box; box.TraverseInlineBoxLineRightward())
+      {
+        totalLogicalWidth += box->LogicalWidth();
+      }
+      LayoutUnit stripX = adjustedPaintOffset.X() - (IsHorizontal() ? logicalOffsetOnLine : 0_lu);
+      LayoutUnit stripY = adjustedPaintOffset.Y() - (IsHorizontal() ? 0_lu : logicalOffsetOnLine);
+      LayoutUnit stripWidth = IsHorizontal() ? totalLogicalWidth : localRect.Width();
+      LayoutUnit stripHeight = IsHorizontal() ? localRect.Height() : totalLogicalWidth;
+
+      LayoutRect clipRect = ClipRectForNinePieceImageStrip(_inlineBox, maskBorder, paintRect);
+      GraphicsContextStateSaver stateSaver(_paintInfo.Context());
+      _paintInfo.Context().Clip(clipRect);
+      borderPainter.PaintNinePieceImage(LayoutRect(stripX, stripY, stripWidth, stripHeight),
+                                        Renderer().Style(), maskBorder, compositeOp);
+    }
+
+    if (pushTransparencyLayer)
+    {
+      _paintInfo.Context().EndTransparencyLayer();
+    }
   }
 
   template <typename TLayers>

@@ -182,6 +182,22 @@ namespace krys::ui::tests
     CheckPage("filters", 360u, 240u);
   }
 
+  TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
+  {
+    CheckPage("backdrop", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: masks", "[UI][GPU][Golden]")
+  {
+    CheckPage("masks", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: mask borders", "[UI][GPU][Golden]")
+  {
+    // Chrome's golden is the scene with the prefixed -webkit-mask-box-image, which always keeps the middle.
+    CheckPage("mask-border", 240u, 120u, true);
+  }
+
   TEST_CASE("Golden: tables", "[UI][GPU][Golden]")
   {
     CheckPage("tables", 360u, 240u);

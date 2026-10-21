@@ -124,6 +124,14 @@ namespace krys::boo
     PaintFillLayersImpl(color, fillLayerList, rect, bleedAvoidance, op, backgroundObject);
   }
 
+  void BackgroundPainter::PaintFillLayers(const Color &color, const style::MaskLayers &fillLayerList,
+                                          const LayoutRect &rect, BleedAvoidance bleedAvoidance,
+                                          CompositeOperator op,
+                                          RenderElement *backgroundObject) const noexcept
+  {
+    PaintFillLayersImpl(color, fillLayerList, rect, bleedAvoidance, op, backgroundObject);
+  }
+
   template <typename TLayers>
   void BackgroundPainter::PaintFillLayersImpl(const Color &color, const TLayers &fillLayers,
                                               const LayoutRect &rect, BleedAvoidance bleedAvoidance,
@@ -206,6 +214,17 @@ namespace krys::boo
 
   void BackgroundPainter::PaintFillLayer(const Color &color,
                                          const FillLayerToPaint<style::BackgroundLayer> &layer,
+                                         const LayoutRect &rect, BleedAvoidance bleedAvoidance,
+                                         const inline_iterator::InlineBoxIterator &inlineBoxIterator,
+                                         const LayoutRect &backgroundImageStrip, CompositeOperator op,
+                                         RenderElement *backgroundObject,
+                                         BaseBackgroundColorUsage baseBgColorUsage) const noexcept
+  {
+    PaintFillLayerImpl(color, layer, rect, bleedAvoidance, inlineBoxIterator, backgroundImageStrip, op,
+                       backgroundObject, baseBgColorUsage);
+  }
+
+  void BackgroundPainter::PaintFillLayer(const Color &color, const FillLayerToPaint<style::MaskLayer> &layer,
                                          const LayoutRect &rect, BleedAvoidance bleedAvoidance,
                                          const inline_iterator::InlineBoxIterator &inlineBoxIterator,
                                          const LayoutRect &backgroundImageStrip, CompositeOperator op,
@@ -588,6 +607,15 @@ namespace krys::boo
   BackgroundImageGeometry BackgroundPainter::CalculateFillLayerImageGeometry(
     const RenderBoxModelObject &renderer, const RenderLayerModelObject *paintContainer,
     const style::BackgroundLayer &fillLayer, const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
+    Maybe<FillBox> overrideOrigin) noexcept
+  {
+    return CalculateFillLayerImageGeometryImpl(renderer, paintContainer, fillLayer, paintOffset,
+                                               borderBoxRect, overrideOrigin);
+  }
+
+  BackgroundImageGeometry BackgroundPainter::CalculateFillLayerImageGeometry(
+    const RenderBoxModelObject &renderer, const RenderLayerModelObject *paintContainer,
+    const style::MaskLayer &fillLayer, const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
     Maybe<FillBox> overrideOrigin) noexcept
   {
     return CalculateFillLayerImageGeometryImpl(renderer, paintContainer, fillLayer, paintOffset,

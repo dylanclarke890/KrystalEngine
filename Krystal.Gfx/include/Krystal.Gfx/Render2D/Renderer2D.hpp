@@ -68,6 +68,33 @@ namespace krys::gfx
     SRGBA<uint8> Colour {};
   };
 
+  /// @brief How a draw or a layer combines with what's beneath it: the Porter-Duff operators on premultiplied
+  /// colours, the source being what's drawn and the destination what's beneath.
+  enum class CompositeOperator2D : uint8
+  {
+    SourceOver,
+    Clear,
+    Copy,
+    SourceIn,
+    SourceOut,
+    SourceAtop,
+    DestinationOver,
+    DestinationIn,
+    DestinationOut,
+    DestinationAtop,
+    Xor,
+    PlusLighter
+  };
+
+  /// @brief What a layer's blur reads past the edges of what the layer holds.
+  enum class EdgeMode2D : uint8
+  {
+    /// @brief Transparent black, as SVG's `edgeMode="none"`: the blur fades out at the edges.
+    None,
+    /// @brief The nearest edge pixel, as SVG's `edgeMode="duplicate"`: the blur stays solid to the edges.
+    Duplicate
+  };
+
   /// @brief What a layer does to what's drawn in it when it's composited: a colour matrix, a Gaussian blur,
   /// or a shadow cast beneath it.
   struct LayerFilter2D
@@ -81,11 +108,15 @@ namespace krys::gfx
 
     Kind Type {Kind::ColourMatrix};
     /// @brief For `ColourMatrix`: four rows of five, applied to straight-alpha colours from 0 to 1 as SVG's
-    /// `feColorMatrix` is: each row's last value is added. The result is clamped.
+    /// `feColorMatrix` is: each row's last value is added. The result is clamped. With
+    /// `MatrixOnPremultiplied`, it's applied to the premultiplied colours and gives premultiplied colours.
     Array<float, 20> Matrix {1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f,
                              0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f};
     /// @brief For `Blur`: twice the standard deviation, as CSS's blur radius is, in target pixels.
+    bool MatrixOnPremultiplied {false};
     float BlurRadius {0.f};
+    /// @brief For `Blur`: what it reads past the edges of the layer, which are its clip when it has one.
+    EdgeMode2D BlurEdgeMode {EdgeMode2D::None};
     /// @brief For `DropShadow`: the shadow of what's drawn, its offset and blur in target pixels.
     DropShadow2D Shadow {};
 
@@ -93,9 +124,19 @@ namespace krys::gfx
     {
       return {.Type = Kind::ColourMatrix, .Matrix = matrix};
     }
-    KRYS_NODISCARD static LayerFilter2D Blur(float blurRadius) noexcept
+    /// @brief A luminance mask: alpha is the luminance of the premultiplied colour (so the luminance times
+    /// the alpha), and the colour is black, as Skia's luma colour filter.
+    KRYS_NODISCARD static LayerFilter2D LuminanceToAlpha() noexcept
     {
-      return {.Type = Kind::Blur, .BlurRadius = blurRadius};
+      return {.Type = Kind::ColourMatrix,
+              .Matrix = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f,     0.f,     0.f,     0.f, 0.f,
+                         0.f, 0.f, 0.f, 0.f, 0.f, 0.2125f, 0.7154f, 0.0721f, 0.f, 0.f},
+              .MatrixOnPremultiplied = true};
+    }
+    KRYS_NODISCARD static LayerFilter2D Blur(float blurRadius,
+                                             EdgeMode2D edgeMode = EdgeMode2D::None) noexcept
+    {
+      return {.Type = Kind::Blur, .BlurRadius = blurRadius, .BlurEdgeMode = edgeMode};
     }
     KRYS_NODISCARD static LayerFilter2D DropShadow(const DropShadow2D &shadow) noexcept
     {
@@ -218,6 +259,8 @@ namespace krys::gfx
       PatternPaint = 1u << 13u,
       /// @brief The texel goes through the batch's colour matrix: a layer's filter.
       ColourMatrixFilter = 1u << 14u,
+      /// @brief The colour matrix applies to the premultiplied texel.
+      PremultipliedMatrix = 1u << 15u,
     };
     /// @brief The instance's `BlendMode` is in the flags from this bit, for five bits.
     constexpr static uint32 BlendModeShift = 8u;
@@ -245,6 +288,7 @@ namespace krys::gfx
       /// @brief The shape clips in effect, an index into the frame's chains, or `NoChain`.
       uint32 Chain {NoChain};
       BlendMode Blend {BlendMode::Normal};
+      CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       Maybe<DropShadow2D> DropShadow {};
       /// @brief Whether shadows' offsets and blurs are in target pixels rather than the current coordinates.
       bool ShadowsIgnoreTransforms {false};
@@ -424,6 +468,7 @@ namespace krys::gfx
       /// @brief The layer this batch composites, whose texture is only known at `End`; or `NoLayer`.
       uint32 Composite {NoLayer};
       BlendMode Blend {BlendMode::Normal};
+      CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief For a blend mode that reads what's beneath: the target pixels its instances reach, copied
       /// before it's drawn.
       PixelRect2D Backdrop {};
@@ -443,6 +488,7 @@ namespace krys::gfx
       uint32 Parent {NoLayer};
       float Opacity {1.f};
       BlendMode Blend {BlendMode::Normal};
+      CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       /// @brief The clip when it began: nothing in it shows outside.
       PixelRect2D Clip {};
       /// @brief The target pixels its draws reach; at `End`, within the clip, its texture's extent.
@@ -504,7 +550,9 @@ namespace krys::gfx
       Array<float, 2> Direction;
       float Sigma;
       int32 Reach;
-      Array<float, 2> Padding;
+      /// @brief 1 when texels outside the region read the nearest edge texel (`EdgeMode2D::Duplicate`).
+      int32 Duplicate;
+      float Padding;
     };
     static_assert(sizeof(BlurUniforms) == 48u, "BlurUniforms mirrors the shader's std140 block.");
 
@@ -519,11 +567,15 @@ namespace krys::gfx
     };
 
     /// @brief What every pass of a frame draws with.
+    constexpr static size_t CompositeOperatorCount =
+      static_cast<size_t>(CompositeOperator2D::PlusLighter) + 1u;
+
     struct FrameResources
     {
+      /// @brief Source over, which each pass binds first.
       PipelineHandle Pipeline {};
-      /// @brief For `BlendMode::PlusLighter`.
-      PipelineHandle AdditivePipeline {};
+      /// @brief The pipeline of each operator the frame's batches draw with, by `CompositeOperator2D`.
+      Array<PipelineHandle, CompositeOperatorCount> Pipelines {};
       TransientAllocation Instances {};
       /// @brief Where blend modes copy what's beneath them, laid out as the pass they're in.
       TextureHandle Backdrop {};
@@ -534,8 +586,8 @@ namespace krys::gfx
     struct TargetPipeline
     {
       TextureFormat Format {TextureFormat::Undefined};
-      /// @brief Whether it adds colours rather than blending them over.
-      bool Additive {false};
+      /// @brief How it blends what it draws with what's beneath.
+      CompositeOperator2D Operator {CompositeOperator2D::SourceOver};
       PipelineHandle Pipeline {};
     };
 
@@ -701,8 +753,17 @@ namespace krys::gfx
     void SetBlendMode(BlendMode mode) noexcept;
     KRYS_NODISCARD BlendMode GetBlendMode() const noexcept;
 
+    /// @brief Sets the operator later draws, and layers begun after, combine with what's beneath by. On a
+    /// draw it's bounded: only the pixels the draw covers change, and antialiased edges blend over. A layer
+    /// composited with an operator covers its whole clip, so an operator that clears where the source is
+    /// transparent (`Copy`, `SourceIn`, `SourceOut`, `DestinationIn`, `DestinationAtop`, `Clear`) clears all
+    /// of the clip the layer doesn't draw. With a blend mode other than `Normal`, draws blend over.
+    void SetCompositeOperator(CompositeOperator2D op) noexcept;
+    KRYS_NODISCARD CompositeOperator2D GetCompositeOperator() const noexcept;
+
     /// @brief Saves the drawing state and starts drawing into a layer, composited by `EndLayer` at
-    /// `opacity` (from 0 to 1) with the current blend mode. Inside the layer, the blend mode is `Normal`.
+    /// `opacity` (from 0 to 1) with the current blend mode and operator. Inside the layer, the blend mode is
+    /// `Normal` and the operator `SourceOver`.
     void BeginLayer(float opacity) noexcept;
     /// @brief Starts a layer as `BeginLayer(opacity)` does, composited with `blend`.
     void BeginLayer(float opacity, BlendMode blend) noexcept;
@@ -721,13 +782,18 @@ namespace krys::gfx
 
   private:
     KRYS_NODISCARD Expected<void> Initialise() noexcept;
-    KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format, bool additive) noexcept;
+    KRYS_NODISCARD Expected<PipelineHandle> GetPipeline(TextureFormat format,
+                                                        CompositeOperator2D op) noexcept;
+    /// @brief The operator a batch's pipeline blends with: its blend mode's when that isn't `Normal`.
+    KRYS_NODISCARD static CompositeOperator2D PipelineOperator(const Batch &batch) noexcept;
+    /// @brief Whether @p op changes what's beneath where the source is transparent.
+    KRYS_NODISCARD static bool ClearsUncovered(CompositeOperator2D op) noexcept;
     KRYS_NODISCARD Expected<PipelineHandle> GetBlurPipeline(TextureFormat format) noexcept;
     /// @brief Records one pass of a blur by `sigma` texels along `direction` (1, 0 or 0, 1), over `region` of
     /// `source` into the same texels of `destination`; nothing outside `region` is read.
     void RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
                     TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
-                    float sigma) noexcept;
+                    float sigma, EdgeMode2D edgeMode) noexcept;
     /// @brief Adds a rounded rect in `transform`'s coordinates, its radii constrained.
     void AddRoundedRect(const RoundedRect2D &rect, const ResolvedPaint &paint,
                         const Transform2D &transform) noexcept;

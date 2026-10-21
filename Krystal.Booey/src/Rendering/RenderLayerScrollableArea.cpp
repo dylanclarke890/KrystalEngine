@@ -854,10 +854,20 @@ namespace krys::boo
 
     _layer.SetSelfAndDescendantsNeedPositionUpdate();
 
-    // FIXME: Dirty the compositing of the enclosing stacking context's descendants and tell the compositor,
-    // once there's compositing.
+    // Whether this layer does composited scrolling affects the configuration of descendant sticky layers. We
+    // have to dirty from the enclosing stacking context because overflow scroll doesn't create stacking
+    // context so those containing block descendants may not be paint-order descendants, and the compositing
+    // dirty bits on RenderLayer act in paint order.
+    if (auto *paintParent = _layer.StackingContext())
+    {
+      paintParent->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+    }
 
     _hasCompositedScrollableOverflow = hasCompositedScrollableOverflow;
+    if (_hasCompositedScrollableOverflow)
+    {
+      _layer.Compositor().LayerGainedCompositedScrollableOverflow(_layer);
+    }
   }
 
   bool RenderLayerScrollableArea::HasScrollableHorizontalOverflow() const noexcept

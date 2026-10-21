@@ -93,6 +93,15 @@ namespace krys::boo
                         RenderElement *backgroundObject = nullptr,
                         BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
 
+    void PaintFillLayers(const Color &, const style::MaskLayers &, const LayoutRect &, BleedAvoidance,
+                         CompositeOperator, RenderElement *backgroundObject = nullptr) const noexcept;
+    void PaintFillLayer(const Color &, const FillLayerToPaint<style::MaskLayer> &, const LayoutRect &,
+                        BleedAvoidance, const inline_iterator::InlineBoxIterator &,
+                        const LayoutRect &backgroundImageStrip = {},
+                        CompositeOperator = CompositeOperator::SourceOver,
+                        RenderElement *backgroundObject = nullptr,
+                        BaseBackgroundColorUsage = BaseBackgroundColorUse) const noexcept;
+
     void PaintBoxShadow(const LayoutRect &, const RenderStyle &, style::ShadowStyle,
                         RectEdges<bool> closedEdges = {true}) const noexcept;
 
@@ -102,6 +111,11 @@ namespace krys::boo
       const RenderBoxModelObject &, const RenderLayerModelObject *paintContainer,
       const style::BackgroundLayer &, const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
       Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
+    KRYS_NODISCARD static BackgroundImageGeometry
+      CalculateFillLayerImageGeometry(const RenderBoxModelObject &,
+                                      const RenderLayerModelObject *paintContainer, const style::MaskLayer &,
+                                      const LayoutPoint &paintOffset, const LayoutRect &borderBoxRect,
+                                      Maybe<FillBox> overrideOrigin = std::nullopt) noexcept;
 
     static void ClipRoundedInnerRect(GraphicsContext &, const FloatRoundedRect &clipRect) noexcept;
 

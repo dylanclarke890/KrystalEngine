@@ -503,6 +503,13 @@ namespace krys::boo
     return PaintNinePieceImageImpl(rect, style, borderImage, op);
   }
 
+  bool BorderPainter::PaintNinePieceImage(const LayoutRect &rect, const RenderStyle &style,
+                                          const style::MaskBorder &maskBorder,
+                                          CompositeOperator op) const noexcept
+  {
+    return PaintNinePieceImageImpl(rect, style, maskBorder, op);
+  }
+
   void BorderPainter::PaintTranslucentBorderSides(const BorderShape &borderShape, const Sides &sides,
                                                   EnumSet<BoxSide> edgesToDraw, bool antialias) const noexcept
   {

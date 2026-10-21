@@ -33,7 +33,8 @@ namespace krys::ui
     }
 
     /// @brief The layer filter `operation` is, if Render2D can apply it.
-    KRYS_NODISCARD Maybe<gfx::LayerFilter2D> LayerFilterFor(const boo::FilterOperation &operation) noexcept
+    KRYS_NODISCARD Maybe<gfx::LayerFilter2D> LayerFilterFor(const boo::FilterOperation &operation,
+                                                            gfx::EdgeMode2D blurEdgeMode) noexcept
     {
       using Type = boo::FilterOperation::Type;
       switch (operation.GetType())
@@ -74,7 +75,8 @@ namespace krys::ui
         case Type::Blur:
         {
           // A layer filter's blur radius is twice the standard deviation.
-          return gfx::LayerFilter2D::Blur(Downcast<boo::BlurFilterOperation>(operation).StdDeviation() * 2.f);
+          return gfx::LayerFilter2D::Blur(Downcast<boo::BlurFilterOperation>(operation).StdDeviation() * 2.f,
+                                          blurEdgeMode);
         }
         case Type::DropShadow:
         {
@@ -236,8 +238,14 @@ namespace krys::ui
     return _clipBounds.empty() ? boo::IntRect() : _clipBounds.back();
   }
 
-  void TextureMapper::BeginGroup(float opacity, BlendMode blendMode,
-                                 const boo::FilterOperations &filters) noexcept
+  void TextureMapper::SetMaskMode(bool maskMode) noexcept
+  {
+    _renderer->SetCompositeOperator(maskMode ? gfx::CompositeOperator2D::DestinationIn
+                                             : gfx::CompositeOperator2D::SourceOver);
+  }
+
+  void TextureMapper::BeginGroup(float opacity, BlendMode blendMode, const boo::FilterOperations &filters,
+                                 gfx::EdgeMode2D blurEdgeMode) noexcept
   {
     // The group is composited at its opacity after its filters: its layer is outermost, then a layer per
     // filter, the last outermost.
@@ -245,7 +253,7 @@ namespace krys::ui
     uint32 layers = 1u;
     for (auto it = filters.rbegin(); it != filters.rend(); ++it)
     {
-      if (auto filter = LayerFilterFor(**it))
+      if (auto filter = LayerFilterFor(**it, blurEdgeMode))
       {
         _renderer->BeginLayer(1.f, BlendMode::Normal, *filter);
         ++layers;

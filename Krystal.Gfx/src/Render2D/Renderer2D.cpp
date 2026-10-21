@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Visitor.hpp"
 #include "Krystal.Gfx/Render2D/Dashing.hpp"
@@ -166,6 +167,7 @@ const uint Shadow = 64u;
 const uint AlphaMask = 128u;
 const uint PatternPaint = 8192u;
 const uint ColourMatrixFilter = 16384u;
+const uint PremultipliedMatrix = 32768u;
 const uint BlendModeShift = 8u;
 
 const uint LinearShape = 1u;
@@ -606,12 +608,24 @@ void main()
     }
   }
   coverage *= ClipCoverage();
+  // What a draw doesn't cover (by less than half an 8-bit step) is left alone, whatever the operator: one
+  // that keeps nothing of the destination where the source is transparent would otherwise clear the quad's
+  // margins.
+  if (coverage < 0.5 / 255.0)
+  {
+    discard;
+  }
 
   vec4 colour = v_Colour;
   if ((v_Flags & Textured) != 0u)
   {
     vec4 texel = SampleTexture(dx, dy);
-    if ((v_Flags & ColourMatrixFilter) != 0u)
+    if ((v_Flags & ColourMatrixFilter) != 0u && (v_Flags & PremultipliedMatrix) != 0u)
+    {
+      vec4 filtered = clamp(u_ColourMatrix * texel + u_ColourMatrixOffset, 0.0, 1.0);
+      texel = vec4(min(filtered.rgb, vec3(filtered.a)), filtered.a);
+    }
+    else if ((v_Flags & ColourMatrixFilter) != 0u)
     {
       vec4 straight = vec4(texel.a > 0.0 ? texel.rgb / texel.a : vec3(0.0), texel.a);
       vec4 filtered = clamp(u_ColourMatrix * straight + u_ColourMatrixOffset, 0.0, 1.0);
@@ -648,7 +662,7 @@ void main()
 )";
 
     // Blurs a layer's texture along one axis: a Gaussian over the texels of the region, premultiplied. Texels
-    // outside the region are transparent.
+    // outside the region are transparent, or the nearest edge texel.
     constexpr const char8_t *BlurVertexSource = u8R"(#version 450
 layout(binding = 0, std140) uniform Blur
 {
@@ -657,6 +671,7 @@ layout(binding = 0, std140) uniform Blur
   vec2 u_Direction;   // 1, 0 across; 0, 1 down
   float u_Sigma;      // the standard deviation, in texels
   int u_Reach;        // how many texels either side are read
+  int u_Duplicate;    // 1 when texels outside the region read the nearest edge texel
 };
 
 layout(location = 0) out vec2 v_Texel;
@@ -679,6 +694,7 @@ layout(binding = 0, std140) uniform Blur
   vec2 u_Direction;
   float u_Sigma;
   int u_Reach;
+  int u_Duplicate;
 };
 
 layout(binding = 0) uniform sampler2D u_Source;
@@ -700,6 +716,10 @@ void main()
     float weight = exp(float(i * i) * k);
     total += weight;
     ivec2 at = texel + step * i;
+    if (u_Duplicate != 0)
+    {
+      at = clamp(at, low, high - 1);
+    }
     if (all(greaterThanEqual(at, low)) && all(lessThan(at, high)))
     {
       sum += weight * texelFetch(u_Source, at, 0);
@@ -978,6 +998,16 @@ void main()
     return _state.Blend;
   }
 
+  void Renderer2D::SetCompositeOperator(CompositeOperator2D op) noexcept
+  {
+    _state.Operator = op;
+  }
+
+  CompositeOperator2D Renderer2D::GetCompositeOperator() const noexcept
+  {
+    return _state.Operator;
+  }
+
   void Renderer2D::BeginLayer(float opacity) noexcept
   {
     BeginLayer(opacity, _state.Blend);
@@ -991,11 +1021,13 @@ void main()
     _layers.push_back({.Parent = _currentLayer,
                        .Opacity = std::isfinite(opacity) ? std::clamp(opacity, 0.f, 1.f) : 0.f,
                        .Blend = blend == BlendMode::PlusDarker ? BlendMode::Normal : blend,
+                       .Operator = _state.Operator,
                        .Clip = _state.Clip,
                        .Bounds = {},
                        .SaveDepth = _savedStates.size()});
     _currentLayer = static_cast<uint32>(_layers.size() - 1u);
     _state.Blend = BlendMode::Normal;
+    _state.Operator = CompositeOperator2D::SourceOver;
   }
 
   void Renderer2D::BeginLayer(float opacity, BlendMode blend, const LayerFilter2D &filter) noexcept
@@ -1040,6 +1072,7 @@ void main()
                           .Layer = _currentLayer,
                           .Composite = index,
                           .Blend = layer.Blend,
+                          .Operator = layer.Operator,
                           .Backdrop = {}});
       _rects.push_back({.Rect = {},
                         .Radii = {},
@@ -1063,6 +1096,7 @@ void main()
                         .Layer = _currentLayer,
                         .Composite = index,
                         .Blend = layer.Blend,
+                        .Operator = layer.Operator,
                         .Backdrop = {}});
     _rects.push_back({.Rect = {},
                       .Radii = {},
@@ -1773,7 +1807,7 @@ void main()
     {
       const bool batchTextured = batch.Texture.IsValid() || batch.Composite != NoLayer;
       return batch.Layer == _currentLayer && batch.Scissor == _state.Clip && batch.Chain == _state.Chain
-             && batch.Blend == _state.Blend
+             && batch.Blend == _state.Blend && batch.Operator == _state.Operator
              && (!textured || !batchTextured || (batch.Texture == texture && batch.Sampler == sampler))
              && (gradient == NoGradient || batch.Gradient == NoGradient || batch.Gradient == gradient)
              && (pattern == NoPattern || batch.Pattern == NoPattern || batch.Pattern == pattern)
@@ -1790,6 +1824,7 @@ void main()
                           .Layer = _currentLayer,
                           .Composite = NoLayer,
                           .Blend = _state.Blend,
+                          .Operator = _state.Operator,
                           .Backdrop = {}});
     }
 
@@ -2090,6 +2125,29 @@ void main()
     return mode != BlendMode::Normal && mode != BlendMode::PlusLighter && mode != BlendMode::PlusDarker;
   }
 
+  CompositeOperator2D Renderer2D::PipelineOperator(const Batch &batch) noexcept
+  {
+    if (batch.Blend == BlendMode::PlusLighter)
+    {
+      return CompositeOperator2D::PlusLighter;
+    }
+    return batch.Blend == BlendMode::Normal ? batch.Operator : CompositeOperator2D::SourceOver;
+  }
+
+  bool Renderer2D::ClearsUncovered(CompositeOperator2D op) noexcept
+  {
+    switch (op)
+    {
+      case CompositeOperator2D::Clear:
+      case CompositeOperator2D::Copy:
+      case CompositeOperator2D::SourceIn:
+      case CompositeOperator2D::SourceOut:
+      case CompositeOperator2D::DestinationIn:
+      case CompositeOperator2D::DestinationAtop: return true;
+      default:                                   return false;
+    }
+  }
+
   void Renderer2D::End() noexcept
   {
     krys_assert_msg(_commands != nullptr, "End without Begin.");
@@ -2112,10 +2170,10 @@ void main()
     uint32 backdropWidth = 0u;
     uint32 backdropHeight = 0u;
     bool targetCopies = false;
-    bool additive = false;
+    Array<bool, CompositeOperatorCount> usesOperator {};
     for (const auto &batch : _batches)
     {
-      additive = additive || batch.Blend == BlendMode::PlusLighter;
+      usesOperator[static_cast<size_t>(PipelineOperator(batch))] = true;
       if (!CopiesBackdrop(batch.Blend) || batch.Backdrop.IsEmpty())
       {
         continue;
@@ -2182,19 +2240,33 @@ void main()
     }
     if (!_rects.empty() && _target.Width > 0u && _target.Height > 0u)
     {
-      auto created = GetPipeline(_target.Format, false);
-      auto createdAdditive =
-        additive ? GetPipeline(_target.Format, true) : Expected<PipelineHandle> {PipelineHandle {}};
+      // Source over is always made: each pass binds it first.
+      usesOperator[static_cast<size_t>(CompositeOperator2D::SourceOver)] = true;
+      Maybe<string> failure;
+      for (size_t op = 0u; op < CompositeOperatorCount; ++op)
+      {
+        if (!usesOperator[op])
+        {
+          continue;
+        }
+        if (auto created = GetPipeline(_target.Format, static_cast<CompositeOperator2D>(op)))
+        {
+          resources.Pipelines[op] = *created;
+        }
+        else
+        {
+          failure = created.error();
+        }
+      }
       const uint64 bytes = _rects.size() * sizeof(RectInstance);
       resources.Instances = _device->AllocateTransient(bytes, alignof(RectInstance));
-      if (!created || !createdAdditive)
+      if (failure)
       {
-        KRYS_LOG_ERROR("Render2D: {}", !created ? created.error() : createdAdditive.error());
+        KRYS_LOG_ERROR("Render2D: {}", *failure);
       }
       else if (resources.Instances.IsValid())
       {
-        resources.Pipeline = *created;
-        resources.AdditivePipeline = *createdAdditive;
+        resources.Pipeline = resources.Pipelines[static_cast<size_t>(CompositeOperator2D::SourceOver)];
         if (std::ranges::any_of(
               _layers, [](const Layer &layer)
               { return layer.Filter && layer.Filter->Type != LayerFilter2D::Kind::ColourMatrix; }))
@@ -2258,8 +2330,9 @@ void main()
         {
           continue;
         }
-        RecordBlur(commands, resources, layer.Texture, scratch, region, {1.f, 0.f}, sigma);
-        RecordBlur(commands, resources, scratch, destination, region, {0.f, 1.f}, sigma);
+        const auto edgeMode = shadow ? EdgeMode2D::None : layer.Filter->BlurEdgeMode;
+        RecordBlur(commands, resources, layer.Texture, scratch, region, {1.f, 0.f}, sigma, edgeMode);
+        RecordBlur(commands, resources, scratch, destination, region, {0.f, 1.f}, sigma, edgeMode);
       }
     }
 
@@ -2353,7 +2426,14 @@ void main()
                           static_cast<float>(clip.Y + static_cast<int32>(clip.Height)) - offset[1]));
     }
     layer.Bounds = Intersect(Inflate(layer.Bounds, BlurReach(sigma)), reachable);
-    if (!layer.HasComposite || layer.Opacity <= 0.f || layer.Bounds.IsEmpty())
+    // An operator that clears where the source is transparent covers all of the clip, drawn or not, as a
+    // saved layer restored with it does.
+    const bool clears = ClearsUncovered(layer.Operator);
+    if (clears)
+    {
+      layer.Bounds = layer.Clip;
+    }
+    if (!layer.HasComposite || (layer.Opacity <= 0.f && !clears) || layer.Bounds.IsEmpty())
     {
       // Nothing to show: the composite, if any, stays an empty instance.
       return;
@@ -2400,6 +2480,10 @@ void main()
       batch.ColourMatrix = static_cast<uint32>(_colourMatrices.size());
       _colourMatrices.push_back(uniforms);
       instance.Flags |= ColourMatrixFilter;
+      if (layer.Filter->MatrixOnPremultiplied)
+      {
+        instance.Flags |= PremultipliedMatrix;
+      }
     }
 
     auto composited = bounds;
@@ -2591,8 +2675,7 @@ void main()
         bindFrame();
       }
 
-      const auto pipeline =
-        batch.Blend == BlendMode::PlusLighter ? resources.AdditivePipeline : resources.Pipeline;
+      const auto pipeline = resources.Pipelines[static_cast<size_t>(PipelineOperator(batch))];
       if (pipeline != boundPipeline)
       {
         commands.BindPipeline(pipeline);
@@ -2722,23 +2805,48 @@ void main()
     commands.EndRenderPass();
   }
 
-  Expected<PipelineHandle> Renderer2D::GetPipeline(TextureFormat format, bool additive) noexcept
+  Expected<PipelineHandle> Renderer2D::GetPipeline(TextureFormat format, CompositeOperator2D op) noexcept
   {
     for (const auto &entry : _pipelines)
     {
-      if (entry.Format == format && entry.Additive == additive)
+      if (entry.Format == format && entry.Operator == op)
       {
         return entry.Pipeline;
       }
     }
 
-    // Additive pipelines draw `BlendMode::PlusLighter`: the sum of the premultiplied colours, clamped.
-    const auto blend = additive ? BlendState {.Enabled = true,
-                                              .SourceColour = BlendFactor::One,
-                                              .DestinationColour = BlendFactor::One,
-                                              .SourceAlpha = BlendFactor::One,
-                                              .DestinationAlpha = BlendFactor::One}
-                                : BlendState::PremultipliedAlpha();
+    // The Porter-Duff operators on premultiplied colours: the source's and the destination's factors, the
+    // same for colour and alpha. Plus lighter is the sum of the premultiplied colours, clamped.
+    auto factors = [](CompositeOperator2D op) -> Pair<BlendFactor, BlendFactor>
+    {
+      switch (op)
+      {
+        case CompositeOperator2D::Clear:    return {BlendFactor::Zero, BlendFactor::Zero};
+        case CompositeOperator2D::Copy:     return {BlendFactor::One, BlendFactor::Zero};
+        case CompositeOperator2D::SourceIn: return {BlendFactor::DestinationAlpha, BlendFactor::Zero};
+        case CompositeOperator2D::SourceOut:
+          return {BlendFactor::OneMinusDestinationAlpha, BlendFactor::Zero};
+        case CompositeOperator2D::SourceAtop:
+          return {BlendFactor::DestinationAlpha, BlendFactor::OneMinusSourceAlpha};
+        case CompositeOperator2D::DestinationOver:
+          return {BlendFactor::OneMinusDestinationAlpha, BlendFactor::One};
+        case CompositeOperator2D::DestinationIn: return {BlendFactor::Zero, BlendFactor::SourceAlpha};
+        case CompositeOperator2D::DestinationOut:
+          return {BlendFactor::Zero, BlendFactor::OneMinusSourceAlpha};
+        case CompositeOperator2D::DestinationAtop:
+          return {BlendFactor::OneMinusDestinationAlpha, BlendFactor::SourceAlpha};
+        case CompositeOperator2D::Xor:
+          return {BlendFactor::OneMinusDestinationAlpha, BlendFactor::OneMinusSourceAlpha};
+        case CompositeOperator2D::PlusLighter: return {BlendFactor::One, BlendFactor::One};
+        default:                               return {BlendFactor::One, BlendFactor::OneMinusSourceAlpha};
+      }
+    };
+    const auto [source, destination] = factors(op);
+    const BlendState blend {.Enabled = true,
+                            .SourceColour = source,
+                            .DestinationColour = destination,
+                            .SourceAlpha = source,
+                            .DestinationAlpha = destination};
     PipelineDesc desc {
       .VertexShader = _vertexShader,
       .FragmentShader = _fragmentShader,
@@ -2746,7 +2854,7 @@ void main()
       .Blend = blend,
       .Raster = {.ScissorTest = true},
       .ColourFormats = {format},
-      .DebugName = additive ? u8"Render2D.Rect.Additive" : u8"Render2D.Rect",
+      .DebugName = u8"Render2D.Rect",
     };
     desc.VertexBuffers.push_back({
       .Stride = sizeof(RectInstance),
@@ -2767,7 +2875,7 @@ void main()
     {
       return Unexpected<string>(pipeline.error());
     }
-    _pipelines.push_back({.Format = format, .Additive = additive, .Pipeline = *pipeline});
+    _pipelines.push_back({.Format = format, .Operator = op, .Pipeline = *pipeline});
     return *pipeline;
   }
 
@@ -2796,13 +2904,13 @@ void main()
     {
       return Unexpected<string>(pipeline.error());
     }
-    _blurPipelines.push_back({.Format = format, .Additive = false, .Pipeline = *pipeline});
+    _blurPipelines.push_back({.Format = format, .Pipeline = *pipeline});
     return *pipeline;
   }
 
   void Renderer2D::RecordBlur(CommandBuffer &commands, const FrameResources &resources, TextureHandle source,
                               TextureHandle destination, const PixelRect2D &region, Array<float, 2> direction,
-                              float sigma) noexcept
+                              float sigma, EdgeMode2D edgeMode) noexcept
   {
     const auto desc = _device->GetTextureDesc(destination);
     if (!resources.BlurPipeline.IsValid() || !desc || region.IsEmpty())
@@ -2821,7 +2929,8 @@ void main()
       .Direction = direction,
       .Sigma = sigma,
       .Reach = BlurReach(sigma),
-      .Padding = {}};
+      .Duplicate = edgeMode == EdgeMode2D::Duplicate ? 1 : 0,
+      .Padding = 0.f};
     std::memcpy(block.Data.data(), &uniforms, sizeof(uniforms));
 
     commands.BeginRenderPass(RenderPassDesc::SingleColour(

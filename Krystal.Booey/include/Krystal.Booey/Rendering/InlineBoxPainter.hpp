@@ -52,6 +52,7 @@ namespace krys::boo
     InlineBoxPainter(const inline_iterator::InlineBox &inlineBox, PaintInfo &paintInfo,
                      const LayoutPoint &paintOffset) noexcept;
 
+    void PaintMask() noexcept;
     void PaintDecorations() noexcept;
     template <typename TLayers>
     void PaintFillLayers(const Color &color, const TLayers &fillLayers, const LayoutRect &paintRect,

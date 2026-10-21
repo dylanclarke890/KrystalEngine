@@ -15,7 +15,7 @@ namespace krys::ui
 
   /// @brief Krystal.UI's graphics layer: it commits its changes to its `TextureMapperLayer` when it's
   /// flushed, and paints its contents into tiles that cover what's visible of it.
-  // FIXME: Backdrops, with backdrop-filter; contents display delegates (canvas and video).
+  // FIXME: Contents display delegates (canvas and video).
   class GraphicsLayerTextureMapper final : public boo::GraphicsLayer,
                                            public TextureMapperPlatformLayer::Client
   {
@@ -57,6 +57,7 @@ namespace krys::ui
     };
 
     UniquePtr<TextureMapperLayer> _layer {CreateUnique<TextureMapperLayer>()};
+    UniquePtr<TextureMapperLayer> _backdropLayer;
     RefPtr<TextureMapperTiledBackingStore> _compositedImage;
     RefPtr<boo::NativeImage> _compositedNativeImage;
     RefPtr<TextureMapperTiledBackingStore> _backingStore;

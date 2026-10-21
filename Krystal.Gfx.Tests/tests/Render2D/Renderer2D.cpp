@@ -1434,6 +1434,146 @@ namespace krys::gfx::tests
     }
   }
 
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws with the Porter-Duff operators",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 1u);
+    const SRGBA<uint8> blue {0, 0, 255};
+    const SRGBA<uint8> halfRed {255, 0, 0, 128};
+
+    // The destination is opaque blue at 0 and 1; the source, half-transparent red, covers 1 and 2. Draws are
+    // bounded: 0, which the source doesn't cover, keeps the blue, and 3 stays clear.
+    struct Expected
+    {
+      CompositeOperator2D Operator;
+      Pixel OverBlue;
+      Pixel OverClear;
+    };
+    const Pixel source {128, 0, 0, 128};
+    const Pixel none {0, 0, 0, 0};
+    const Pixel opaqueBlue {0, 0, 255, 255};
+    const Pixel halfBlue {0, 0, 128, 128};
+    const Expected cases[] = {
+      {CompositeOperator2D::SourceOver, {128, 0, 128, 255}, source},
+      {CompositeOperator2D::Clear, none, none},
+      {CompositeOperator2D::Copy, source, source},
+      {CompositeOperator2D::SourceIn, source, none},
+      {CompositeOperator2D::SourceOut, none, source},
+      {CompositeOperator2D::SourceAtop, {128, 0, 128, 255}, none},
+      {CompositeOperator2D::DestinationOver, opaqueBlue, source},
+      {CompositeOperator2D::DestinationIn, halfBlue, none},
+      {CompositeOperator2D::DestinationOut, halfBlue, none},
+      {CompositeOperator2D::DestinationAtop, halfBlue, source},
+      {CompositeOperator2D::Xor, halfBlue, source},
+      {CompositeOperator2D::PlusLighter, {128, 0, 255, 255}, source},
+    };
+    for (const auto &expected : cases)
+    {
+      INFO("operator " << static_cast<int>(expected.Operator));
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 2.f, 1.f}, blue);
+          renderer.SetCompositeOperator(expected.Operator);
+          renderer.FillRect({1.f, 0.f, 2.f, 1.f}, halfRed);
+        });
+      auto pixels = Read();
+      CHECK(At(pixels, 0u, 0u) == opaqueBlue);
+      CHECK(Near(At(pixels, 1u, 0u), expected.OverBlue));
+      CHECK(Near(At(pixels, 2u, 0u), expected.OverClear));
+      CHECK(At(pixels, 3u, 0u) == Clear);
+    }
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: composites a layer with an operator over its clip",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(4u, 1u);
+    const SRGBA<uint8> blue {0, 0, 255};
+    const SRGBA<uint8> red {255, 0, 0};
+
+    // A mask: blue kept where the layer draws, and cleared where it doesn't, as far as the clip reaches.
+    auto mask = [&](bool clipped)
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.FillRect({0.f, 0.f, 4.f, 1.f}, blue);
+          if (clipped)
+          {
+            renderer.ClipRect({0.f, 0.f, 3.f, 1.f});
+          }
+          renderer.SetCompositeOperator(CompositeOperator2D::DestinationIn);
+          renderer.BeginLayer(1.f);
+          // Inside the layer, draws are source over again.
+          CHECK(renderer.GetCompositeOperator() == CompositeOperator2D::SourceOver);
+          renderer.FillRect({1.f, 0.f, 1.f, 1.f}, red);
+          renderer.EndLayer();
+        });
+      return Read();
+    };
+
+    auto whole = mask(false);
+    CHECK(At(whole, 0u, 0u) == Clear);
+    CHECK(At(whole, 1u, 0u) == Blue);
+    CHECK(At(whole, 2u, 0u) == Clear);
+    CHECK(At(whole, 3u, 0u) == Clear);
+
+    auto clipped = mask(true);
+    CHECK(At(clipped, 0u, 0u) == Clear);
+    CHECK(At(clipped, 1u, 0u) == Blue);
+    CHECK(At(clipped, 3u, 0u) == Blue);
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: turns a layer's luminance into alpha",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(2u, 1u);
+    Draw(
+      [&](Renderer2D &renderer)
+      {
+        renderer.BeginLayer(1.f, BlendMode::Normal, LayerFilter2D::LuminanceToAlpha());
+        renderer.FillRect({0.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {255, 255, 255, 128});
+        renderer.FillRect({1.f, 0.f, 1.f, 1.f}, SRGBA<uint8> {0, 255, 0});
+        renderer.EndLayer();
+      });
+
+    // Half-transparent white: luminance 1 times alpha one half. Opaque green: green's luminance weight.
+    auto pixels = Read();
+    CHECK(Near(At(pixels, 0u, 0u), {0, 0, 0, 128}));
+    CHECK(Near(At(pixels, 1u, 0u), {0, 0, 0, 182}));
+  }
+
+  TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: blurs a layer with duplicated edges",
+                   "[Gfx][Render2D][GPU]")
+  {
+    UseTarget(16u, 16u);
+    const SRGBA<uint8> red {255, 0, 0};
+
+    // A solid red layer, clipped to the middle and blurred: with transparent edges the blur fades towards the
+    // clip's edges, and with duplicated ones it stays solid up to them. Nothing shows outside the clip.
+    auto draw = [&](EdgeMode2D edgeMode)
+    {
+      Draw(
+        [&](Renderer2D &renderer)
+        {
+          renderer.ClipRect({4.f, 4.f, 8.f, 8.f});
+          renderer.BeginLayer(1.f, BlendMode::Normal, LayerFilter2D::Blur(4.f, edgeMode));
+          renderer.FillRect({0.f, 0.f, 16.f, 16.f}, red);
+          renderer.EndLayer();
+        });
+      return Read();
+    };
+
+    auto faded = draw(EdgeMode2D::None);
+    CHECK(At(faded, 4u, 4u)[3] < 200u);
+    auto solid = draw(EdgeMode2D::Duplicate);
+    CHECK(Near(At(solid, 4u, 4u), {255, 0, 0, 255}));
+    CHECK(Near(At(solid, 11u, 7u), {255, 0, 0, 255}));
+    CHECK(At(solid, 3u, 4u) == Clear);
+    CHECK(At(solid, 12u, 12u) == Clear);
+  }
+
   TEST_CASE_METHOD(Renderer2DFixture, "Renderer2D: draws the same through an opaque layer",
                    "[Gfx][Render2D][GPU]")
   {

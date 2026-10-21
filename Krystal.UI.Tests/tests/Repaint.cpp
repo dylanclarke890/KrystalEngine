@@ -700,7 +700,7 @@ namespace krys::ui::tests
       u8".row { height: 30px; border-bottom: 1px solid #888; background: linear-gradient(90deg, #fde, #def) }"
       u8"#blurred { margin: 10px; width: 40px; height: 20px; background: #073b4c; filter: blur(2px) }"
       u8"</style><div id=scroller><div class=row></div><div class=row></div><div id=blurred></div>"
-      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row id=changed></div><div class=row></div>"
       u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div>"
       u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div></div>");
     auto time = boo::html::EventLoop::Current().Now() + 1s;
@@ -729,6 +729,119 @@ namespace krys::ui::tests
       CHECK(repaints.Bounds(repaints.ScrolledContentsOf(u8"scroller")).IsEmpty());
       CheckNoStalePixels(fixture, view, "box-scroll-" + std::to_string(y));
     }
+
+    // A change inside the scrolled box repaints it where it is in the scrolled contents.
+    scroller->SetScrollTop(70);
+    frame();
+    auto changed = view.Document().GetElementById(u8"changed");
+    REQUIRE_FALSE(changed->SetAttribute(u8"style", u8"background: #06d6a0").HasException());
+    frame();
+    CheckNoStalePixels(fixture, view, "box-scroll-changed");
+  }
+
+  TEST_CASE("View: scrolling under a fixed backdrop repaints nothing", "[UI][GPU]")
+  {
+    const utf8_string page =
+      u8"<!DOCTYPE html><style>body { margin: 0; height: 600px;"
+      u8" background: repeating-linear-gradient(45deg, #073b4c 0 6px, #ffd166 6px 12px, #ef476f 12px 18px) }"
+      u8"#glass { position: fixed; left: 20px; top: 20px; width: 64px; height: 64px; border-radius: 12px;"
+      u8" background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px) saturate(1.5) }</style>"
+      u8"<div id=glass></div>";
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&](View &view, RepaintFixture &fixture)
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      return fixture.Painted(view);
+    };
+
+    RepaintFixture fixture(200u, 160u);
+    View view({200, 160});
+    view.LoadHTML(utf8_string(page));
+    (void)frame(view, fixture);
+    REQUIRE(view.Document().GetElementById(u8"glass")->Renderer()->IsComposited());
+    TrackedRepaints repaints(view);
+
+    for (int32 y : {7, 30, 95})
+    {
+      repaints.Reset();
+      view.ScrollTo({0, y});
+      auto painted = frame(view, fixture);
+      CHECK(repaints.Bounds().IsEmpty());
+      CHECK(repaints.Bounds(repaints.LayerOf(u8"glass")).IsEmpty());
+
+      // The whole repaint doesn't draw backdrops, so the frame is compared with a fresh view of the page at
+      // the same scroll position: the backdrop shows what's beneath it now.
+      View fresh({200, 160});
+      fresh.LoadHTML(utf8_string(page));
+      (void)frame(fresh, fixture);
+      fresh.ScrollTo({0, y});
+      auto expected = frame(fresh, fixture);
+      auto comparison = CompareImages(painted, expected, 2u);
+      INFO("scrolled to " << y << ": largest difference " << comparison.LargestDifference << ", "
+                          << comparison.PixelsOver << " pixels over 2");
+      CHECK(comparison.PixelsOver == 0u);
+    }
+  }
+
+  TEST_CASE("View: composited masks and clip paths paint as the whole page does", "[UI][GPU]")
+  {
+    RepaintFixture fixture(240u, 120u);
+    View view({240, 120});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }"
+      u8"div { position: absolute; width: 56px; height: 56px; will-change: transform;"
+      u8" background: linear-gradient(135deg, #ef476f, #ffd166 50%, #118ab2) }"
+      u8"div > div { left: 32px; top: 32px; width: 40px; height: 40px; background: #073b4c; will-change: "
+      u8"auto }"
+      u8"#masked { left: 16px; top: 24px; mask-image: linear-gradient(90deg, black 40%, transparent);"
+      u8" transform: translateX(0) }"
+      u8"#clipped { left: 96px; top: 24px; clip-path: circle(45%) }"
+      u8"#both { left: 168px; top: 24px; filter: blur(1px);"
+      u8" mask-image: radial-gradient(circle, black 50%, transparent 52%) }</style>"
+      u8"<div id=masked><div></div></div><div id=clipped><div></div></div><div id=both><div></div></div>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      (void)fixture.Painted(view);
+    };
+    frame();
+    frame();
+    for (auto id : {u8"masked", u8"clipped", u8"both"})
+    {
+      auto *renderer = view.Document().GetElementById(id)->Renderer();
+      REQUIRE(renderer->IsComposited());
+      CHECK(krys::Downcast<boo::RenderLayerModelObject>(*renderer).Layer()->HasCompositedMask());
+    }
+    // A mask layer's edges are antialiased as the mask image or clip path painted into it, then applied to
+    // the layer's (its edges' coverage counting again on a turned layer): edge pixels may differ a little
+    // from the whole repaint, nothing else.
+    auto checkMasked = [&](const std::string &step)
+    {
+      auto painted = fixture.Painted(view);
+      auto repainted = fixture.Repainted(view);
+      auto comparison = CompareImages(painted, repainted, 2u);
+      auto edges = CompareImages(painted, repainted, 80u);
+      INFO(step << ": largest difference " << comparison.LargestDifference << ", " << comparison.PixelsOver
+                << " pixels over 2");
+      CHECK(comparison.PixelsOver < 200u);
+      CHECK(edges.PixelsOver == 0u);
+    };
+    checkMasked("composited-masks");
+
+    // Moving a masked layer moves its mask with it, and repaints nothing (it had a transform, which keeps its
+    // layout).
+    TrackedRepaints repaints(view);
+    repaints.Reset();
+    auto masked = view.Document().GetElementById(u8"masked");
+    REQUIRE_FALSE(
+      masked->SetAttribute(u8"style", u8"transform: translate(4px, 10px) rotate(10deg)").HasException());
+    frame();
+    CHECK(repaints.Bounds().IsEmpty());
+    CHECK(repaints.Bounds(repaints.LayerOf(u8"masked")).IsEmpty());
+    checkMasked("composited-masks-moved");
   }
 
   TEST_CASE("View: changing a composited layer's opacity, transform or filter repaints nothing", "[UI][GPU]")

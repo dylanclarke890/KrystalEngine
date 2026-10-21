@@ -21,6 +21,9 @@ namespace krys::ui
     boo::TransformationMatrix Transform;
     float Opacity {1};
     TextureMapperLayer *BackdropLayer {nullptr};
+    /// @brief Whether painting a backdrop reached the layer it belongs to: what's painted after it is above
+    /// it.
+    bool ReachedBackdropTarget {false};
     TextureMapperLayer *ReplicaLayer {nullptr};
   };
 
@@ -202,8 +205,29 @@ namespace krys::ui
     }
   }
 
+  void TextureMapperLayer::PaintBackdrop(TextureMapperPaintOptions &options) noexcept
+  {
+    boo::TransformationMatrix clipTransform;
+    clipTransform.Multiply(options.Transform);
+    clipTransform.Multiply(_layerTransforms.Combined);
+    options.TextureMapper.BeginClip(clipTransform, _state.BackdropFiltersRect);
+    _state.BackdropLayer->PaintRecursive(options);
+    options.TextureMapper.EndClip();
+  }
+
   void TextureMapperLayer::PaintSelfAndChildren(TextureMapperPaintOptions &options) noexcept
   {
+    if (_state.BackdropLayer && _state.BackdropLayer.get() == options.BackdropLayer)
+    {
+      options.ReachedBackdropTarget = true;
+      return;
+    }
+
+    if (_state.BackdropLayer && !options.BackdropLayer)
+    {
+      PaintBackdrop(options);
+    }
+
     PaintSelf(options);
 
     if (_children.empty())
@@ -240,6 +264,10 @@ namespace krys::ui
     for (auto *child : _children)
     {
       child->PaintRecursive(options);
+      if (options.ReachedBackdropTarget)
+      {
+        break;
+      }
     }
 
     if (shouldClip)
@@ -285,16 +313,54 @@ namespace krys::ui
     PaintSelfAndChildren(options);
   }
 
+  void TextureMapperLayer::ApplyMask(TextureMapperPaintOptions &options) noexcept
+  {
+    options.TextureMapper.SetMaskMode(true);
+    PaintSelf(options);
+    options.TextureMapper.SetMaskMode(false);
+  }
+
   void TextureMapperLayer::PaintWithGroup(TextureMapperPaintOptions &options) noexcept
   {
-    // What the layer and its children draw is composited as one at the layer's opacity, through its filters.
-    options.TextureMapper.BeginGroup(options.Opacity, BlendMode::Normal, _currentFilters);
+    // What the layer and its children draw is composited as one at the layer's opacity, through its filters,
+    // and then its mask: with a mask, the filters' group is inside one that the mask is applied to.
+    // FIXME: Replica masks, once there are replicas.
+    const bool hasMask = HasMask();
+    if (hasMask)
+    {
+      // As the intermediate surface of a masked layer leaves out its filters' outsets, its group is clipped
+      // to the layer: the mask covers no more.
+      boo::TransformationMatrix clipTransform;
+      clipTransform.Multiply(options.Transform);
+      clipTransform.Multiply(_layerTransforms.Combined);
+      options.TextureMapper.BeginClip(clipTransform, boo::FloatRoundedRect(LayerRect()));
+      options.TextureMapper.BeginGroup(options.Opacity, BlendMode::Normal, {});
+    }
+    options.TextureMapper.BeginGroup(hasMask ? 1.f : options.Opacity, BlendMode::Normal, _currentFilters,
+                                     _isBackdrop ? gfx::EdgeMode2D::Duplicate : gfx::EdgeMode2D::None);
     {
       SetForScope scopedOpacity(options.Opacity, 1.f);
-      // FIXME: Masks, once masks are composited.
-      PaintSelfAndChildrenWithReplica(options);
+      if (_isBackdrop)
+      {
+        // What's beneath the layer the backdrop belongs to, from its backdrop root up to the layer.
+        SetForScope scopedReplicaLayer(options.ReplicaLayer, nullptr);
+        SetForScope scopedBackdropLayer(options.BackdropLayer, this);
+        SetForScope scopedReachedBackdropTarget(options.ReachedBackdropTarget, false);
+        BackdropRootLayer().PaintSelfAndChildren(options);
+      }
+      else
+      {
+        PaintSelfAndChildrenWithReplica(options);
+      }
     }
     options.TextureMapper.EndGroup();
+    if (hasMask)
+    {
+      SetForScope scopedOpacity(options.Opacity, 1.f);
+      _state.MaskLayer->ApplyMask(options);
+      options.TextureMapper.EndGroup();
+      options.TextureMapper.EndClip();
+    }
   }
 
   void TextureMapperLayer::PaintSelfChildrenReplicaFilterAndMask(TextureMapperPaintOptions &options) noexcept

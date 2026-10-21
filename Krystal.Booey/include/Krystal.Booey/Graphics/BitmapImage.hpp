@@ -173,6 +173,11 @@ namespace krys::boo
 
   private:
     BitmapImage(ImageObserver *, AlphaOption, GammaAndColorProfileOption) noexcept;
+
+    /// @brief Draws the pattern of the tile turned into a luminance mask.
+    void DrawLuminanceMaskPattern(GraphicsContext &, const FloatRect &destinationRect,
+                                  const FloatRect &tileRect, const AffineTransform &, const FloatPoint &phase,
+                                  const FloatSize &spacing, ImagePaintingOptions) noexcept;
     explicit BitmapImage(Ref<NativeImage> &&) noexcept;
 
     // Current NativeImage

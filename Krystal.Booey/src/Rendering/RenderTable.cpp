@@ -2098,6 +2098,19 @@ namespace krys::boo
     }
   }
 
+  void RenderTable::PaintMask(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (Style().UsedVisibility() != Visibility::Visible || paintInfo.Phase != PaintPhase::Mask)
+    {
+      return;
+    }
+
+    LayoutRect rect(paintOffset, Size());
+    AdjustBorderBoxRectForPainting(rect);
+
+    PaintMaskImages(paintInfo, rect);
+  }
+
   void RenderTable::PaintObject(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     PaintPhase paintPhase = paintInfo.Phase;
@@ -2109,7 +2122,7 @@ namespace krys::boo
 
     if (paintPhase == PaintPhase::Mask)
     {
-      // FIXME: Masks (paintMask) come with masks.
+      PaintMask(paintInfo, paintOffset);
       return;
     }
 

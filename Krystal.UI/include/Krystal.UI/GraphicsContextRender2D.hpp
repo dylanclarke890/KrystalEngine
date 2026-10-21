@@ -166,6 +166,8 @@ namespace krys::ui
 
     /// @brief Brings the renderer's blend mode and drop shadow up to date with the context's state.
     void PrepareDraw(bool shadow = true) noexcept;
+    /// @brief Sets an image draw's blend mode and operator from @p options.
+    void PrepareImageDraw(const boo::ImagePaintingOptions &options) noexcept;
 
     void FillShape(const gfx::Path2D &path, gfx::FillRule rule, const gfx::Paint2D &paint) noexcept;
     void IntersectClipBounds(const boo::FloatRect &rect) noexcept;

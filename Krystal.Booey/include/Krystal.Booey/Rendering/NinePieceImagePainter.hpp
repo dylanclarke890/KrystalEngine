@@ -14,15 +14,18 @@ namespace krys::boo
   namespace style
   {
     struct BorderImage;
+    struct MaskBorder;
   }
 
-  /// @brief Paints a nine-piece image (`border-image`): the image's corners, sides and middle sliced, scaled
-  /// and tiled into the border image area.
-  /// FIXME: `mask-border` comes with masks.
+  /// @brief Paints a nine-piece image (`border-image` or `mask-border`): the image's corners, sides and
+  /// middle sliced, scaled and tiled into the border image area.
   class NinePieceImagePainter
   {
   public:
     static void Paint(const style::BorderImage &, GraphicsContext &, const RenderElement *,
+                      const RenderStyle &, const LayoutRect &destination, const LayoutSize &source,
+                      float deviceScaleFactor, ImagePaintingOptions) noexcept;
+    static void Paint(const style::MaskBorder &, GraphicsContext &, const RenderElement *,
                       const RenderStyle &, const LayoutRect &destination, const LayoutSize &source,
                       float deviceScaleFactor, ImagePaintingOptions) noexcept;
   };

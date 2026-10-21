@@ -516,7 +516,28 @@ namespace krys::ui
       _layer->SetReplicaLayer(layer ? &layer->Layer() : nullptr);
     }
 
-    // FIXME: Backdrop layers (BackdropLayerChange), with backdrop-filter.
+    if (_changeMask & BackdropLayerChange)
+    {
+      if (NeedsBackdrop())
+      {
+        if (!_backdropLayer)
+        {
+          _backdropLayer = CreateUnique<TextureMapperLayer>();
+          _backdropLayer->SetAnchorPoint(boo::FloatPoint3D());
+          _backdropLayer->SetContentsVisible(true);
+          _backdropLayer->SetMasksToBounds(true);
+        }
+        _backdropLayer->SetFilters(BackdropFilters());
+        _backdropLayer->SetSize(BackdropFiltersRect().Rect().Size());
+        _backdropLayer->SetPosition(BackdropFiltersRect().Rect().Location());
+      }
+      else
+      {
+        _backdropLayer = nullptr;
+      }
+      _layer->SetBackdropLayer(_backdropLayer.get());
+      _layer->SetBackdropFiltersRect(BackdropFiltersRect());
+    }
 
     if (_changeMask & PositionChange)
     {
@@ -657,7 +678,10 @@ namespace krys::ui
       ReplicaLayer()->FlushCompositingState(rect);
       Downcast<GraphicsLayerTextureMapper>(*ReplicaLayer()).Layer().ApplyAnimationsRecursively(now);
     }
-    // FIXME: Backdrop layers' animations, with backdrop-filter.
+    if (_backdropLayer)
+    {
+      _backdropLayer->ApplyAnimationsRecursively(now);
+    }
     for (auto &child : Children())
     {
       child->FlushCompositingState(rect);

@@ -31,6 +31,7 @@
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
@@ -209,8 +210,11 @@ namespace krys::boo
       if (diff >= style::DifferenceResult::Repaint && (IsDocumentElementRenderer() || IsBody()))
       {
         View().RepaintRootContents();
-        // FIXME: The compositor's root layer configuration when the background becomes or stops being
-        // entirely fixed, once there's compositing.
+        if (style::HasEntirelyFixedBackground(oldStyle->GetBackgroundLayers())
+            != style::HasEntirelyFixedBackground(newStyle.GetBackgroundLayers()))
+        {
+          View().Compositor().RootLayerConfigurationChanged();
+        }
       }
 
       // When a layout hint happens and an object's position style changes, we have to do a layout
@@ -4462,17 +4466,27 @@ namespace krys::boo
     return LayoutSize(Layer()->Size());
   }
 
+  bool RenderBox::UsesCompositedScrolling() const noexcept
+  {
+    return HasNonVisibleOverflow() && HasLayer() && Layer()->UsesCompositedScrolling();
+  }
+
   bool RenderBox::ApplyCachedClipAndScrollPosition(RepaintRects &rects,
                                                    const RenderLayerModelObject *container,
                                                    VisibleRectContext context) const noexcept
   {
     FlipForWritingMode(rects);
 
-    // FIXME: Composited scrolling doesn't scroll the rects of its own contents, once there's compositing.
-    rects.MoveBy(-LayoutPoint(GetScrollPosition())); // For overflow:auto/scroll/hidden.
+    if (context.Options.Contains(VisibleRectContext::Option::ApplyCompositedContainerScrolls)
+        || this != container || !UsesCompositedScrolling())
+    {
+      rects.MoveBy(-LayoutPoint(GetScrollPosition())); // For overflow:auto/scroll/hidden.
+    }
 
     // Do not clip scroll layer contents to reduce the number of repaints while scrolling.
-    if (!context.Options.Contains(VisibleRectContext::Option::ApplyContainerClip) && this == container)
+    if ((!context.Options.Contains(VisibleRectContext::Option::ApplyCompositedClips)
+         && UsesCompositedScrolling())
+        || (!context.Options.Contains(VisibleRectContext::Option::ApplyContainerClip) && this == container))
     {
       FlipForWritingMode(rects);
       return true;
@@ -6023,7 +6037,7 @@ namespace krys::boo
     return false;
   }
 
-  void RenderBox::PaintMask(PaintInfo &paintInfo, const LayoutPoint &) noexcept
+  void RenderBox::PaintMask(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     if (!paintInfo.ShouldPaintWithinRoot(*this) || Style().UsedVisibility() != Visibility::Visible
         || paintInfo.Phase != PaintPhase::Mask || paintInfo.Context().PaintingDisabled())
@@ -6031,7 +6045,78 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Mask images (paintMaskImages) come with masks.
+    LayoutRect paintRect = LayoutRect(paintOffset, Size());
+    AdjustBorderBoxRectForPainting(paintRect);
+    PaintMaskImages(paintInfo, paintRect);
+  }
+
+  LayoutRect RenderBox::MaskClipRect(const LayoutPoint &paintOffset) noexcept
+  {
+    auto &maskBorder = Style().GetMaskBorder();
+    if (!maskBorder.Source.IsNone())
+    {
+      LayoutRect borderImageRect = BorderBoxRect();
+
+      // Apply outsets to the border box.
+      borderImageRect.Expand(Style().MaskBorderOutsets());
+      return borderImageRect;
+    }
+
+    LayoutRect result;
+    LayoutRect borderBox = BorderBoxRect();
+    for (auto &maskLayer : Style().GetMaskLayers().UsedValues())
+    {
+      if (maskLayer.HasImage())
+      {
+        // Masks should never have fixed attachment, so it's OK for paintContainer to be null.
+        result.Unite(BackgroundPainter::CalculateFillLayerImageGeometry(*this, nullptr, maskLayer,
+                                                                        paintOffset, borderBox)
+                       .DestinationRect);
+      }
+    }
+    return result;
+  }
+
+  void RenderBox::PaintMaskImages(const PaintInfo &paintInfo, const LayoutRect &paintRect) noexcept
+  {
+    // Figure out if we need to push a transparency layer to render our mask.
+    bool pushTransparencyLayer = false;
+    bool compositedMask = HasLayer() && Layer()->HasCompositedMask();
+    bool flattenCompositingLayers = paintInfo.PaintBehavior.Contains(PaintBehavior::FlattenCompositingLayers);
+    CompositeOperator compositeOp = CompositeOperator::SourceOver;
+
+    bool allMaskImagesLoaded = true;
+
+    if (!compositedMask || flattenCompositingLayers)
+    {
+      pushTransparencyLayer = true;
+
+      // Don't render a masked element until all the mask images have loaded, to prevent a flash of unmasked
+      // content.
+      if (RefPtr<StyleImage> maskBorder = Style().GetMaskBorderSource().TryStyleImage())
+      {
+        allMaskImagesLoaded &= maskBorder->IsLoaded(this);
+      }
+
+      allMaskImagesLoaded &= style::ImagesAreLoaded(Style().GetMaskLayers(), *this);
+
+      paintInfo.Context().SetCompositeOperation(CompositeOperator::DestinationIn);
+      paintInfo.Context().BeginTransparencyLayer(1);
+      compositeOp = CompositeOperator::SourceOver;
+    }
+
+    if (allMaskImagesLoaded)
+    {
+      BackgroundPainter {*this, paintInfo}.PaintFillLayers(Color(), Style().GetMaskLayers(), paintRect,
+                                                           BleedAvoidance::None, compositeOp);
+      BorderPainter {*this, paintInfo}.PaintNinePieceImage(paintRect, Style(), Style().GetMaskBorder(),
+                                                           compositeOp);
+    }
+
+    if (pushTransparencyLayer)
+    {
+      paintInfo.Context().EndTransparencyLayer();
+    }
   }
 
   void RenderBox::PaintClippingMask(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
@@ -6266,11 +6351,11 @@ namespace krys::boo
 
       if (!didFullRepaint)
       {
-        didFullRepaint = RepaintBackgroundLayerRectsForImage(image, style.GetBackgroundLayers());
+        didFullRepaint = RepaintLayerRectsForImage(image, style.GetBackgroundLayers(), true);
       }
       if (!didFullRepaint)
       {
-        didFullRepaint = RepaintLayerRectsForImage(image, style.GetMaskLayers());
+        didFullRepaint = RepaintLayerRectsForImage(image, style.GetMaskLayers(), false);
       }
     };
 
@@ -6281,12 +6366,31 @@ namespace krys::boo
       repaintForBackgroundAndMask(*firstLineStyle);
     }
 
-    // FIXME: The visually non-empty pixel count and the document's image load milestones (didLoadImage), and
-    // the composited layers' content changes, once there are those.
+    // FIXME: The visually non-empty pixel count and the document's image load milestones (didLoadImage), once
+    // there are those.
+    bool isNonEmpty = false;
+    RefPtr<StyleImage> styleImage =
+      style::FindLayerUsedImage(Style().GetBackgroundLayers(), image, isNonEmpty);
+
+    if (!IsComposited())
+    {
+      return;
+    }
+
+    if (Layer()->HasCompositedMask() && style::FindLayerUsedImage(Style().GetMaskLayers(), image, isNonEmpty))
+    {
+      Layer()->ContentChanged(ContentChangeType::MaskImage);
+    }
+
+    if (styleImage)
+    {
+      Layer()->ContentChanged(ContentChangeType::BackgroundImage);
+    }
   }
 
-  bool RenderBox::RepaintBackgroundLayerRectsForImage(WrappedImagePtr image,
-                                                      const style::BackgroundLayers &layers) noexcept
+  template <typename TLayers>
+  bool RenderBox::RepaintLayerRectsForImage(WrappedImagePtr image, const TLayers &layers,
+                                            bool drawingBackground) noexcept
   {
     LayoutRect rendererRect;
     RenderBox *layerRenderer = nullptr;
@@ -6299,8 +6403,9 @@ namespace krys::boo
       {
         // Now that we know this image is being used, compute the renderer and the rect if we haven't already.
         bool drawingRootBackground =
-          IsDocumentElementRenderer()
-          || (IsBody() && !GetDocument().DocumentElement()->Renderer()->HasBackground());
+          drawingBackground
+          && (IsDocumentElementRenderer()
+              || (IsBody() && !GetDocument().DocumentElement()->Renderer()->HasBackground()));
         if (!layerRenderer)
         {
           if (drawingRootBackground)
@@ -6321,8 +6426,14 @@ namespace krys::boo
                                   rh));
 
             // If we're drawing the root background, then we want to use the bounds of the view
-            // (since root backgrounds cover the canvas, not just the element).
-            // FIXME: A composited root element takes the repaint itself, once there's compositing.
+            // (since root backgrounds cover the canvas, not just the element). If the root element is
+            // composited though, we need to issue the repaint to that root element.
+            auto *documentElementRenderer = Downcast<RenderBox>(GetDocument().DocumentElement()->Renderer());
+            auto *rendererLayer = documentElementRenderer->Layer();
+            if (rendererLayer && rendererLayer->IsComposited())
+            {
+              layerRenderer = documentElementRenderer;
+            }
           }
           else
           {
@@ -6374,21 +6485,4 @@ namespace krys::boo
     return false;
   }
 
-  template <typename TLayers>
-  bool RenderBox::RepaintLayerRectsForImage(WrappedImagePtr image, const TLayers &layers) noexcept
-  {
-    for (auto &layer : layers.UsedValues())
-    {
-      if (auto layerImage = layer.GetImage().TryStyleImage();
-          layerImage && layerImage->Data() == image
-          && (layerImage->IsLoaded(this) || layerImage->CanRender(this, Style().UsedZoom())))
-      {
-        // FIXME: Repaint only the rect the mask layer paints the image in (calculateFillLayerImageGeometry),
-        // once mask images paint.
-        Repaint();
-        return true;
-      }
-    }
-    return false;
-  }
 }

@@ -20,6 +20,35 @@ namespace krys::ui
       return {transform.A, transform.B, transform.C, transform.D, transform.E, transform.F};
     }
 
+    /// @brief The operator Render2D draws @p op with, blending with @p blendMode as Skia does: a blend mode
+    /// other than normal blends over. Plus darker and difference aren't Porter-Duff operators: they draw
+    /// over.
+    KRYS_NODISCARD gfx::CompositeOperator2D ToCompositeOperator2D(boo::CompositeOperator op,
+                                                                  boo::BlendMode blendMode) noexcept
+    {
+      using Op = gfx::CompositeOperator2D;
+      if (blendMode != boo::BlendMode::Normal)
+      {
+        return Op::SourceOver;
+      }
+      switch (op)
+      {
+        case boo::CompositeOperator::Clear:           return Op::Clear;
+        case boo::CompositeOperator::Copy:            return Op::Copy;
+        case boo::CompositeOperator::SourceIn:        return Op::SourceIn;
+        case boo::CompositeOperator::SourceOut:       return Op::SourceOut;
+        case boo::CompositeOperator::SourceAtop:      return Op::SourceAtop;
+        case boo::CompositeOperator::DestinationOver: return Op::DestinationOver;
+        case boo::CompositeOperator::DestinationIn:   return Op::DestinationIn;
+        case boo::CompositeOperator::DestinationOut:  return Op::DestinationOut;
+        case boo::CompositeOperator::DestinationAtop: return Op::DestinationAtop;
+        case boo::CompositeOperator::XOR:             return Op::Xor;
+        case boo::CompositeOperator::PlusLighter:     return Op::PlusLighter;
+        // FIXME: Plus darker and difference as compositing operators, once Render2D has them.
+        default:                                      return Op::SourceOver;
+      }
+    }
+
     KRYS_NODISCARD bool IsValidDashArray(const boo::DashArray &dashArray) noexcept
     {
       // See 'dom-context-2d-setlinedash': if the array contains not finite or negative values, return.
@@ -587,6 +616,7 @@ namespace krys::ui
     GraphicsContext::BeginTransparencyLayer(operation, blendMode);
     _layerStack.push_back({boo::CompositeMode {operation, blendMode}});
     _clipBoundsStack.push_back(_clipBounds);
+    _renderer.SetCompositeOperator(ToCompositeOperator2D(operation, blendMode));
     _renderer.BeginLayer(1.f, blendMode);
     // When on transparency layer, we don't want to blend operations as when layer ends, we blend it as a
     // whole.
@@ -830,10 +860,9 @@ namespace krys::ui
   {
     boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
                                                                          options.GetInterpolationQuality());
-    // FIXME: Compositing operators other than source-over draw as source-over.
     PrepareDraw();
     _renderer.Save();
-    _renderer.SetBlendMode(options.GetBlendMode());
+    PrepareImageDraw(options);
     _renderer.DrawImage(texture, ToRect2D(source), ToRect2D(destination),
                         {.Filter = ImageFilter(), .Opacity = Alpha()});
     _renderer.Restore();
@@ -907,18 +936,24 @@ namespace krys::ui
       .RepeatX = repeatX,
       .RepeatY = repeatY};
 
-    // FIXME: Compositing operators other than source-over draw as source-over.
     PrepareDraw();
     _renderer.Save();
-    _renderer.SetBlendMode(options.GetBlendMode());
+    PrepareImageDraw(options);
     _renderer.FillRect(ToRect2D(destRect), pattern);
     _renderer.Restore();
   }
 
+  void GraphicsContextRender2D::PrepareImageDraw(const boo::ImagePaintingOptions &options) noexcept
+  {
+    _renderer.SetBlendMode(options.GetBlendMode());
+    _renderer.SetCompositeOperator(
+      ToCompositeOperator2D(options.GetCompositeOperator(), options.GetBlendMode()));
+  }
+
   void GraphicsContextRender2D::PrepareDraw(bool shadow) noexcept
   {
-    // FIXME: Compositing operators other than source-over draw as source-over.
     _renderer.SetBlendMode(GetBlendMode());
+    _renderer.SetCompositeOperator(ToCompositeOperator2D(CompositeOperation(), GetBlendMode()));
     _renderer.SetShadowsIgnoreTransforms(ShadowsIgnoreTransforms());
     if (shadow && HasDropShadow())
     {

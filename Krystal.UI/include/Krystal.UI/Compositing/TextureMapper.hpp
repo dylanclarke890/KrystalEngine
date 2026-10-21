@@ -94,8 +94,14 @@ namespace krys::ui
     KRYS_NODISCARD boo::IntRect ClipBounds() const noexcept;
 
     /// @brief Starts drawing into a group composited at `opacity` with `blendMode` through `filters` (the
-    /// last outermost), as an intermediate surface would be.
-    void BeginGroup(float opacity, BlendMode blendMode, const boo::FilterOperations &filters) noexcept;
+    /// last outermost), as an intermediate surface would be. Blurs read @p blurEdgeMode past the group's
+    /// clip: a backdrop's duplicate its edges, as a surface the size of the clip would.
+    /// @brief In mask mode, what's drawn masks what's beneath it (`destination-in`): a mask layer applied to
+    /// its layer's group.
+    void SetMaskMode(bool maskMode) noexcept;
+
+    void BeginGroup(float opacity, BlendMode blendMode, const boo::FilterOperations &filters,
+                    gfx::EdgeMode2D blurEdgeMode = gfx::EdgeMode2D::None) noexcept;
     void EndGroup() noexcept;
 
     KRYS_NODISCARD boo::IntSize MaxTextureSize() const noexcept;

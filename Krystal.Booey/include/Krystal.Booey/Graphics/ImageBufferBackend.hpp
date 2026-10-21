@@ -34,6 +34,7 @@ namespace krys::boo
 
   protected:
     Parameters _parameters;
+    bool _isLuminanceMask {false};
 
   public:
     virtual ~ImageBufferBackend() noexcept;
@@ -56,6 +57,17 @@ namespace krys::boo
     KRYS_NODISCARD const Parameters &GetParameters() const noexcept
     {
       return _parameters;
+    }
+
+    /// @brief Turns what's drawn into a luminance mask: alpha is the luminance times the alpha, the colour
+    /// black. The drawing backend applies it when it renders the buffer.
+    void ConvertToLuminanceMask() noexcept
+    {
+      _isLuminanceMask = true;
+    }
+    KRYS_NODISCARD bool IsLuminanceMask() const noexcept
+    {
+      return _isLuminanceMask;
     }
 
   protected:

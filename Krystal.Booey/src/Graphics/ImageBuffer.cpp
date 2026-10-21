@@ -106,6 +106,14 @@ namespace krys::boo
     }
   }
 
+  void ImageBuffer::ConvertToLuminanceMask() noexcept
+  {
+    if (_backend)
+    {
+      _backend->ConvertToLuminanceMask();
+    }
+  }
+
   IntSize ImageBuffer::BackendSize() const noexcept
   {
     return CalculateBackendSize(_parameters.LogicalSize, _parameters.ResolutionScale);

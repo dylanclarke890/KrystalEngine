@@ -302,6 +302,39 @@ namespace krys::ui::tests
       CHECK(replayed == direct);
     }
 
+    SECTION("Compositing operators on draws and transparency layers")
+    {
+      // A rect punched out of the yellow, then a mask: what's beneath kept only where the layer draws.
+      auto replayed = Replayed(
+        [](boo::GraphicsContext &context)
+        {
+          context.FillRect({0, 0, 60, 40}, boo::Color::yellow);
+          context.SetCompositeOperation(boo::CompositeOperator::DestinationOut);
+          context.FillRect({10, 10, 10, 10}, boo::Color::blue);
+          context.SetCompositeOperation(boo::CompositeOperator::DestinationIn);
+          context.BeginTransparencyLayer(1.f);
+          context.SetCompositeOperation(boo::CompositeOperator::SourceOver);
+          context.FillRect({5, 5, 40, 20}, boo::Color::black);
+          context.EndTransparencyLayer();
+        });
+      auto direct = Draw(
+        [](gfx::Renderer2D &renderer)
+        {
+          renderer.FillRect({0, 0, 60, 40}, SRGBA<uint8> {255, 255, 0, 255});
+          renderer.SetCompositeOperator(gfx::CompositeOperator2D::DestinationOut);
+          renderer.FillRect({10, 10, 10, 10}, SRGBA<uint8> {0, 0, 255, 255});
+          renderer.SetCompositeOperator(gfx::CompositeOperator2D::DestinationIn);
+          renderer.BeginLayer(1.f);
+          renderer.FillRect({5, 5, 40, 20}, SRGBA<uint8> {0, 0, 0, 255});
+          renderer.EndLayer();
+        });
+      CHECK(replayed == direct);
+      // The punched rect is clear, the yellow kept inside the mask, and cleared outside it.
+      CHECK(replayed[15 * Width + 15][3] == 0u);
+      CHECK(replayed[6 * Width + 6] == Pixel {255, 255, 0, 255});
+      CHECK(replayed[30 * Width + 30][3] == 0u);
+    }
+
     SECTION("Clip bounds are in the current coordinates")
     {
       (void)Draw(
@@ -512,6 +545,24 @@ namespace krys::ui::tests
       CHECK(replayed[4] == blue);
       CHECK(replayed[3 * Width + 7] == blue);
       CHECK(replayed[4 * Width][3] == 0u);
+    }
+
+    SECTION("A luminance mask buffer draws its luminance as alpha")
+    {
+      auto replayed = Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          record(context,
+                 [](boo::GraphicsContext &context, boo::ImageBuffer &buffer)
+                 {
+                   context.SetImageInterpolationQuality(boo::InterpolationQuality::DoNotInterpolate);
+                   buffer.ConvertToLuminanceMask();
+                   context.DrawImageBuffer(buffer, boo::FloatRect {0, 0, 4, 2});
+                 });
+        });
+      // Red's and blue's luminance weights, in black.
+      CHECK(replayed[0] == Pixel {0, 0, 0, 54});
+      CHECK(replayed[3] == Pixel {0, 0, 0, 18});
     }
 
     SECTION("A pattern repeats a tile of it from the phase, with spacing")

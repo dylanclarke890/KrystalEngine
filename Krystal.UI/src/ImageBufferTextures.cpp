@@ -58,10 +58,19 @@ namespace krys::ui
                                .Height = height,
                                .Format = gfx::TextureFormat::RGBA8Unorm,
                                .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+    // A luminance mask's drawing goes through a layer that turns its luminance into alpha.
+    if (backend->IsLuminanceMask())
+    {
+      renderer->BeginLayer(1.f, BlendMode::Normal, gfx::LayerFilter2D::LuminanceToAlpha());
+    }
     {
       GraphicsContextRender2D context(
         *renderer, _fonts, {0.f, 0.f, static_cast<float>(width), static_cast<float>(height)}, this);
       context.DrawDisplayList(*displayList);
+    }
+    if (backend->IsLuminanceMask())
+    {
+      renderer->EndLayer();
     }
     renderer->End();
     --_depth;

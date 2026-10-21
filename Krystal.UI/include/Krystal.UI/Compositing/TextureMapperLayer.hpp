@@ -202,6 +202,31 @@ namespace krys::ui
     void PaintSelf(TextureMapperPaintOptions &options) noexcept;
     void PaintSelfAndChildren(TextureMapperPaintOptions &options) noexcept;
     void PaintSelfAndChildrenWithReplica(TextureMapperPaintOptions &options) noexcept;
+    void PaintBackdrop(TextureMapperPaintOptions &options) noexcept;
+    /// @brief Paints this mask layer onto what its layer's group drew, keeping it only where the mask is.
+    void ApplyMask(TextureMapperPaintOptions &options) noexcept;
+
+    /// @brief The layer a backdrop is painted from: the nearest ancestor that draws its subtree as a group
+    /// (opacity, a mask or filters), else the root.
+    KRYS_NODISCARD TextureMapperLayer &BackdropRootLayer() const noexcept
+    {
+      if (_effectTarget)
+      {
+        return _effectTarget->BackdropRootLayer();
+      }
+      if (_parent)
+      {
+        // FIXME: Flattening leaves of 3D scenes (flattensAsLeafOf3DSceneOr3DPerspective), once there are 3D
+        // rendering contexts.
+        if (_parent->_state.Opacity < 1 || _parent->HasMask() || _parent->HasFilters())
+        {
+          return *_parent;
+        }
+
+        return _parent->BackdropRootLayer();
+      }
+      return const_cast<TextureMapperLayer &>(*this);
+    }
 
     KRYS_NODISCARD bool IsVisible() const noexcept;
     KRYS_NODISCARD bool ShouldBlend() const noexcept;

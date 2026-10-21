@@ -65,7 +65,10 @@ namespace krys::boo
       _cachedAdjustedSize = adjustedSize;
       _cachedScaleFactor = destContext.ScaleFactor();
 
-      // FIXME: Luminance masks (drawLuminanceMask, convertToLuminanceMask) come with masks.
+      if (destContext.DrawLuminanceMask())
+      {
+        imageBuffer->ConvertToLuminanceMask();
+      }
 
       _cachedImage = krys::move(imageBuffer);
       if (!_cachedImage)

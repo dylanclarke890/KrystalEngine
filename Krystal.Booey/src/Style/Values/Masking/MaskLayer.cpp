@@ -1,7 +1,25 @@
 ﻿#include "Krystal.Booey/Style/Values/Masking/MaskLayer.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 
 namespace krys::boo::style
 {
+  bool MaskLayer::HasOpaqueImage(const RenderElement &renderer) const noexcept
+  {
+    auto image = _image.TryStyleImage();
+    if (!image)
+    {
+      return false;
+    }
+
+    if (GetComposite() == CompositeOperator::Clear || GetComposite() == CompositeOperator::Copy)
+    {
+      return true;
+    }
+
+    return GetBlendMode() == BlendMode::Normal && GetComposite() == CompositeOperator::SourceOver
+           && image->KnownToBeOpaque(renderer);
+  }
+
   MaskLayer::MaskLayer() noexcept
       : _image(MaskLayer::InitialImage()), _positionX(MaskLayer::InitialPositionX()),
         _positionY(MaskLayer::InitialPositionY()), _size(MaskLayer::InitialSize()),

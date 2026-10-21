@@ -141,9 +141,49 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Luminance masks (drawLuminanceMask, convertToLuminanceMask) come with masks.
-    Image::DrawPattern(context, destinationRect, tileRect, transform, phase, spacing,
-                       {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+    // FIXME: HDR content for testing (hasHDRContentForTesting), once there's HDR.
+    if (context.DrawLuminanceMask())
+    {
+      DrawLuminanceMaskPattern(context, destinationRect, tileRect, transform, phase, spacing, options);
+    }
+    else
+    {
+      Image::DrawPattern(context, destinationRect, tileRect, transform, phase, spacing,
+                         {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+    }
+  }
+
+  void BitmapImage::DrawLuminanceMaskPattern(GraphicsContext &context, const FloatRect &destinationRect,
+                                             const FloatRect &tileRect, const AffineTransform &transform,
+                                             const FloatPoint &phase, const FloatSize &spacing,
+                                             ImagePaintingOptions options) noexcept
+  {
+    krys_debug_assert(!tileRect.IsEmpty());
+    krys_debug_assert(context.DrawLuminanceMask());
+
+    auto buffer = context.CreateImageBuffer(FloatSize(ExpandedIntSize(tileRect.Size())));
+    if (!buffer)
+    {
+      return;
+    }
+
+    auto observer = GetImageObserver();
+
+    // Temporarily reset image observer, we don't want to receive any changeInRect() calls due to this
+    // relayout.
+    SetImageObserver(nullptr);
+
+    auto bufferRect = FloatRect {{}, buffer->LogicalSize()};
+    (void)Draw(
+      buffer->Context(), bufferRect, tileRect,
+      {options, DecodingMode::Synchronous, ImageOrientation(ImageOrientation::Orientation::FromImage)});
+
+    SetImageObserver(krys::move(observer));
+    buffer->ConvertToLuminanceMask();
+
+    context.SetDrawLuminanceMask(false);
+    context.DrawPattern(*buffer, destinationRect, bufferRect, transform, phase, spacing,
+                        {options, ImageOrientation(ImageOrientation::Orientation::FromImage)});
   }
 
   void BitmapImage::Dump(TextStream &ts) const noexcept

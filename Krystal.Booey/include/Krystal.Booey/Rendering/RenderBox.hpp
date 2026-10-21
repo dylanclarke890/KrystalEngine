@@ -264,6 +264,8 @@ namespace krys::boo
     /// are its descendants).
     virtual void RepaintOverhangingFloats(bool paintAllDescendants) noexcept;
     void FlipForWritingMode(RepaintRects &rects) const noexcept;
+    /// @brief Whether the box scrolls its overflow on layers.
+    KRYS_NODISCARD bool UsesCompositedScrolling() const noexcept;
     bool ApplyCachedClipAndScrollPosition(RepaintRects &rects, const RenderLayerModelObject *container,
                                           VisibleRectContext context) const noexcept final;
     /// @brief The size the overflow clip clips to: the layer's, which stays as it was until layout finishes.
@@ -890,6 +892,12 @@ namespace krys::boo
     }
     virtual void PaintBoxDecorations(PaintInfo &, const LayoutPoint &) noexcept;
     virtual void PaintMask(PaintInfo &, const LayoutPoint &) noexcept;
+    /// @brief Paints the mask images and the mask border into @p paintRect: into a transparency layer that
+    /// masks what's beneath (`destination-in`), unless the mask is composited.
+    void PaintMaskImages(const PaintInfo &, const LayoutRect &paintRect) noexcept;
+    /// @brief What the mask paints into: the mask border's area with its outsets, or the union of the mask
+    /// images' destination rects.
+    KRYS_NODISCARD LayoutRect MaskClipRect(const LayoutPoint &paintOffset) noexcept;
     virtual void PaintClippingMask(PaintInfo &, const LayoutPoint &) noexcept;
 
     KRYS_NODISCARD BleedAvoidance DetermineBleedAvoidance(GraphicsContext &) const noexcept;
@@ -939,12 +947,11 @@ namespace krys::boo
     void AddOverflowFromFloatBox(const FloatingObject &floatBox) noexcept;
 
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
-    template <typename TLayers>
-    bool RepaintLayerRectsForImage(WrappedImagePtr, const TLayers &) noexcept;
-    /// @brief Repaints the rects @p layers paint @p image in.
+    /// @brief Repaints the rects @p layers paint @p image in; background layers of the root paint the view's.
     /// @return Whether that repainted the whole box.
-    bool RepaintBackgroundLayerRectsForImage(WrappedImagePtr image,
-                                             const style::BackgroundLayers &layers) noexcept;
+    template <typename TLayers>
+    bool RepaintLayerRectsForImage(WrappedImagePtr image, const TLayers &layers,
+                                   bool drawingBackground) noexcept;
 
   protected:
     void WillBeDestroyed() noexcept override;

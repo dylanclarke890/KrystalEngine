@@ -1,0 +1,20 @@
+﻿<!doctype html>
+<!-- The "mask-border" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. Chrome has only
+     the prefixed -webkit-mask-box-image: its golden was captured with mask-border renamed to that, which always
+     keeps the middle, so the first frame differs there and Chrome's golden is only reported. -->
+<html data-width="240" data-height="120">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; width: 96px; height: 80px;
+        background: linear-gradient(135deg, #ef476f, #ffd166 50%, #118ab2); }
+</style>
+</head>
+<body>
+  <!-- A frame: the border slices of a radial gradient, without the middle; then with it, and outsets. -->
+  <div style="left: 16px; top: 20px; mask-border: radial-gradient(circle, black 30%, transparent 70%) 30 / 20px stretch"></div>
+  <div style="left: 128px; top: 20px; mask-border: linear-gradient(black, transparent) 20 fill / 16px / 4px round"></div>
+</body>
+</html>
