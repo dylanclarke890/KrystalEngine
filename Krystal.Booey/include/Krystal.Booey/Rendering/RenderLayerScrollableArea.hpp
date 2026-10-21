@@ -185,14 +185,22 @@ namespace krys::boo
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+    /// @brief Updates the compositing layers a scroll moved, from the enclosing compositing layer of the
+    /// stacking context.
+    void UpdateCompositingLayersAfterScroll() noexcept;
+
+    /// @brief The backing's layers the scrollbars and scroll corner paint into, if they have their own.
+    KRYS_NODISCARD GraphicsLayer *LayerForHorizontalScrollbar() const noexcept;
+    KRYS_NODISCARD GraphicsLayer *LayerForVerticalScrollbar() const noexcept;
+    KRYS_NODISCARD GraphicsLayer *LayerForScrollCorner() const noexcept;
     void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
 
     /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.
     // FIXME: Overlay scrollbars' second pass and the resizer (paintResizer), once there are overlay
     // scrollbars and resizers.
-    void PaintOverflowControls(GraphicsContext &context, const IntPoint &paintOffset,
-                               const IntRect &damageRect) noexcept;
+    void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
+                               const IntPoint &paintOffset, const IntRect &damageRect) noexcept;
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
     /// @brief Whether @p localPoint (in the box's coordinates) is over a scrollbar, which @p result then

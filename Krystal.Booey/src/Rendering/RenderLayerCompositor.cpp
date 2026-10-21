@@ -617,6 +617,8 @@ namespace krys::boo
     _showDebugBorders = showDebugBorders;
     _showRepaintCounter = showRepaintCounter;
     _acceleratedDrawingEnabled = acceleratedDrawingEnabled;
+    // Fixed position layers composite whenever the page does, as the compositing drawing areas set it.
+    _acceleratedCompositingForFixedPositionEnabled = hasAcceleratedCompositing;
 
     // FIXME: The compositing policy under memory pressure (updateCompositingPolicy), once there's memory
     // pressure handling: it's always normal.

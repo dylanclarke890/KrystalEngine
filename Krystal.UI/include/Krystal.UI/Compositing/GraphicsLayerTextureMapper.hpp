@@ -53,6 +53,7 @@ namespace krys::ui
       AnimationStarted = (1u << 26),
       BackdropLayerChange = (1u << 27),
       SolidColorChange = (1u << 28),
+      BoundsOriginChange = (1u << 29),
     };
 
     UniquePtr<TextureMapperLayer> _layer {CreateUnique<TextureMapperLayer>()};
@@ -89,6 +90,7 @@ namespace krys::ui
     void SetMaskLayer(RefPtr<GraphicsLayer> &&value) noexcept override;
     void SetReplicatedByLayer(RefPtr<GraphicsLayer> &&value) noexcept override;
     void SetPosition(const boo::FloatPoint &value) noexcept override;
+    void SetBoundsOrigin(const boo::FloatPoint &value) noexcept override;
     void SetAnchorPoint(const boo::FloatPoint3D &value) noexcept override;
     void SetSize(const boo::FloatSize &value) noexcept override;
     void SetTransform(const boo::TransformationMatrix &value) noexcept override;

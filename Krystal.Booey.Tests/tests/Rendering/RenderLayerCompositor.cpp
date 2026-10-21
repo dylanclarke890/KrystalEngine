@@ -321,6 +321,83 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE("RenderLayerCompositor: boxes that scroll their overflow scroll on layers",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(
+      u8"<style>.box{width:100px;height:40px}.tall{height:200px;background:green}</style>"
+      u8"<div id=scroller class=box style='overflow:auto'><div class=tall></div></div>"
+      u8"<div id=short class=box style='overflow:auto'><div style='height:10px'></div></div>"
+      u8"<div id=hidden class=box style='overflow:hidden'><div class=tall></div></div>");
+    auto &scroller = fixture.LayerOf(u8"scroller");
+    REQUIRE(scroller.IsComposited());
+    CHECK(
+      fixture.Compositor().ReasonsForCompositing(scroller).Contains(CompositingReason::OverflowScrolling));
+    CHECK(scroller.UsesCompositedScrolling());
+    auto &backing = *scroller.Backing();
+    REQUIRE(backing.HasScrollingLayer());
+    REQUIRE(backing.ScrolledContentsLayer());
+    // The scrollbar paints into a layer of its own, above the scrolled contents.
+    CHECK(backing.LayerForVerticalScrollbar());
+    // Boxes without scrollable overflow, or that don't scroll it, don't.
+    CHECK_FALSE(fixture.LayerOf(u8"short").IsComposited());
+    CHECK_FALSE(fixture.LayerOf(u8"hidden").IsComposited());
+
+    // Scrolling moves the scrolled contents by the scroll container's bounds origin and repaints nothing.
+    auto &contents = static_cast<CompositingTestLayer &>(*backing.ScrolledContentsLayer());
+    auto &graphicsLayer = static_cast<CompositingTestLayer &>(*backing.GetGraphicsLayer());
+    contents.NeedsDisplayRects.clear();
+    graphicsLayer.NeedsDisplayRects.clear();
+    fixture.ById(u8"scroller").SetScrollTop(30);
+    fixture.TestPage->UpdateRendering();
+    CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == FloatPoint(0, 30));
+    CHECK(contents.NeedsDisplayRects.empty());
+    CHECK(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: fixed elements composite for their position",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    SECTION("a fixed header stays put as the view scrolls")
+    {
+      CompositingFixture fixture(
+        u8"<div id=header style='position:fixed;top:0;left:0;width:200px;height:20px;background:green'></div>"
+        u8"<div style='height:400px'></div>");
+      auto &header = fixture.LayerOf(u8"header");
+      REQUIRE(header.IsComposited());
+      CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionFixed));
+      auto &backing = *header.Backing();
+      REQUIRE(backing.ViewportAnchorLayer());
+
+      // Scrolling the view moves the header's anchor layer to keep it in place, and repaints nothing.
+      auto &graphicsLayer = static_cast<CompositingTestLayer &>(*backing.GetGraphicsLayer());
+      auto &viewLayer = static_cast<CompositingTestLayer &>(
+        *fixture.Frame->View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer());
+      graphicsLayer.NeedsDisplayRects.clear();
+      viewLayer.NeedsDisplayRects.clear();
+      fixture.Frame->View()->SetScrollPosition({0, 50});
+      fixture.TestPage->UpdateRendering();
+      CHECK(backing.ViewportAnchorLayer()->Position() == FloatPoint(0, 50));
+      CHECK(graphicsLayer.NeedsDisplayRects.empty());
+      CHECK(viewLayer.NeedsDisplayRects.empty());
+    }
+
+    SECTION("fixed elements with nothing to paint, or fixed to a transformed box, don't")
+    {
+      CompositingFixture fixture(
+        u8"<div id=empty style='position:fixed;top:30px;left:0'></div>"
+        u8"<div style='transform:translateX(1px)'>"
+        u8"<div id=inside style='position:fixed;top:40px;left:0;width:20px;height:20px;background:blue'>"
+        u8"</div></div><div style='height:400px'></div>");
+      CHECK_FALSE(fixture.LayerOf(u8"empty").IsComposited());
+      CHECK(fixture.LayerOf(u8"empty").GetViewportConstrainedNotCompositedReason()
+            == RenderLayer::NotCompositedForNoVisibleContent);
+      CHECK_FALSE(fixture.LayerOf(u8"inside").IsComposited());
+      CHECK(fixture.LayerOf(u8"inside").GetViewportConstrainedNotCompositedReason()
+            == RenderLayer::NotCompositedForNonViewContainer);
+    }
+  }
+
   TEST_CASE("RenderLayerCompositor: repaints go to the composited layer's backing",
             "[Rendering][RenderLayerCompositor]")
   {

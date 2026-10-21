@@ -26,16 +26,15 @@ namespace krys::boo
     }
 
     /// @brief A matrix's rows as `feColorMatrix` values.
-    template <size_t ColumnCount, size_t RowCount>
-    KRYS_NODISCARD List<float> ValuesOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
-    {
-      const auto &data = ColourMatrix<5, 4>(matrix).data();
-      return List<float>(data.begin(), data.end());
-    }
     KRYS_NODISCARD List<float> ValuesOf(const ColourMatrix<5, 4> &matrix) noexcept
     {
       const auto &data = matrix.data();
       return List<float>(data.begin(), data.end());
+    }
+    template <size_t ColumnCount, size_t RowCount>
+    KRYS_NODISCARD List<float> ValuesOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
+    {
+      return ValuesOf(ColourMatrix<5, 4>(matrix));
     }
 
     KRYS_NODISCARD RefPtr<FilterEffect> CreateBlurEffect(const BlurFilterOperation &blurOperation) noexcept

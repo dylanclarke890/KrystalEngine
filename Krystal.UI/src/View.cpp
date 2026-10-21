@@ -238,7 +238,6 @@ namespace krys::ui
     // What the view repaints is in its layers: the damage it tracks for a page that isn't composited is
     // dropped.
     (void)view->TakeDamage();
-    (void)view->TakeScrolledContents();
     _needsPaint = false;
 
     auto *root = _chromeClient->RootLayer();

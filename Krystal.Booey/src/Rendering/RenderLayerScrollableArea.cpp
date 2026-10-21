@@ -11,6 +11,8 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -154,7 +156,8 @@ namespace krys::boo
 
     if (_scrollPosition == newPosition && GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating)
     {
-      // FIXME: The composited scroll position reconciliation, once there's compositing.
+      // FIXME: Reconciling the composited scroll position at the end of a user scroll
+      // (requiresScrollPositionReconciliation), once there's async scrolling.
       return;
     }
 
@@ -176,7 +179,23 @@ namespace krys::boo
     {
       // If we're in the middle of layout, we'll just update layers once layout has finished.
       _layer.UpdateLayerPositionsAfterOverflowScroll();
-      // FIXME: The compositing layers, rendering-dependent regions and debug overlays, once there are any.
+
+      // FIXME: Not while a marquee updates its position (m_updatingMarqueePosition), once there are marquees.
+      if (UsesCompositedScrolling())
+      {
+        _layer.SetNeedsCompositingGeometryUpdate();
+
+        // Scroll position can affect the location of a composited descendant (which may be a sibling in
+        // z-order), so trigger a descendant walk from the stacking context.
+        if (auto *paintParent = _layer.StackingContext())
+        {
+          paintParent->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+        }
+      }
+
+      UpdateCompositingLayersAfterScroll();
+
+      // FIXME: Rendering-dependent regions and debug overlays, once there are any.
     }
 
     const auto *repaintContainer = renderer.ContainerForRepaint().Renderer;
@@ -193,11 +212,34 @@ namespace krys::boo
     view.FrameView().Frame().GetEventHandler().DispatchFakeMouseMoveEventSoonInQuad(
       quadForFakeMouseMoveEvent);
 
-    // FIXME: Composited scrolling repaints only when its backing needs it, and descendant composited layers
-    // with fixed backgrounds repaint too, once there's compositing.
+    bool requiresRepaint = true;
+    if (UsesCompositedScrolling())
+    {
+      _layer.SetNeedsCompositingGeometryUpdate();
+      _layer.SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+      requiresRepaint = _layer.Backing()->NeedsRepaintOnCompositedScroll();
+    }
 
     // Just schedule a full repaint of our object.
-    renderer.RepaintUsingContainer(repaintContainer, rectForRepaint);
+    if (requiresRepaint)
+    {
+      renderer.RepaintUsingContainer(repaintContainer, rectForRepaint);
+
+      auto isScrolledBy = [](const RenderElement &renderer, const RenderLayer &scrollableLayer)
+      {
+        auto *layer = renderer.EnclosingLayer();
+        return layer && layer->AncestorLayerIsInContainingBlockChain(scrollableLayer);
+      };
+
+      // We also have to repaint any descendant composited layers that have fixed backgrounds.
+      for (const auto *slowRepaintObject : view.FrameView().SlowRepaintObjects())
+      {
+        if (isScrolledBy(*slowRepaintObject, _layer))
+        {
+          slowRepaintObject->Repaint();
+        }
+      }
+    }
 
     // Schedule the scroll and scroll-related DOM events.
     if (auto *element = renderer.GetElement())
@@ -209,6 +251,44 @@ namespace krys::boo
     view.FrameView().ViewportContentsChanged();
   }
 
+  GraphicsLayer *RenderLayerScrollableArea::LayerForHorizontalScrollbar() const noexcept
+  {
+    return _layer.Backing() ? _layer.Backing()->LayerForHorizontalScrollbar() : nullptr;
+  }
+
+  GraphicsLayer *RenderLayerScrollableArea::LayerForVerticalScrollbar() const noexcept
+  {
+    return _layer.Backing() ? _layer.Backing()->LayerForVerticalScrollbar() : nullptr;
+  }
+
+  GraphicsLayer *RenderLayerScrollableArea::LayerForScrollCorner() const noexcept
+  {
+    return _layer.Backing() ? _layer.Backing()->LayerForScrollCorner() : nullptr;
+  }
+
+  void RenderLayerScrollableArea::UpdateCompositingLayersAfterScroll() noexcept
+  {
+    if (_layer.Compositor().HasContentCompositingLayers())
+    {
+      // Our stacking container is guaranteed to contain all of our descendants that may need repositioning,
+      // so update compositing layers from there.
+      if (RenderLayer *compositingAncestor = _layer.StackingContext()->EnclosingCompositingLayer())
+      {
+        if (UsesCompositedScrolling())
+        {
+          _layer.Compositor().UpdateCompositingLayers(CompositingUpdateType::OnCompositedScroll,
+                                                      compositingAncestor);
+        }
+        else
+        {
+          // FIXME: would be nice to only dirty layers whose positions were affected by scrolling.
+          compositingAncestor->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+          _layer.Compositor().UpdateCompositingLayers(CompositingUpdateType::OnScroll, compositingAncestor);
+        }
+      }
+    }
+  }
+
   void RenderLayerScrollableArea::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
   {
     if (!ShowsOverflowControls())
@@ -216,7 +296,22 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Scrollbars in their own compositing layers, once there's compositing.
+    if (&scrollbar == _vBar.get())
+    {
+      if (GraphicsLayer *layer = LayerForVerticalScrollbar())
+      {
+        layer->SetNeedsDisplayInRect(FloatRect(rect));
+        return;
+      }
+    }
+    else
+    {
+      if (GraphicsLayer *layer = LayerForHorizontalScrollbar())
+      {
+        layer->SetNeedsDisplayInRect(FloatRect(rect));
+        return;
+      }
+    }
 
     auto scrollRect = rect;
     RenderBox *box = _layer.GetRenderBox();
@@ -291,7 +386,16 @@ namespace krys::boo
 
   bool RenderLayerScrollableArea::CanUseCompositedScrolling() const noexcept
   {
-    // FIXME: Asynchronous overflow scrolling (asyncOverflowScrollingEnabled), once there's compositing.
+    // Overflow scrolls on layers whenever the page composites, as asyncOverflowScrollingEnabled has it for
+    // the compositing drawing areas.
+    // FIXME: Not inside SVG foreign objects, once there are any.
+    auto &renderer = _layer.Renderer();
+    bool isVisible = renderer.Style().UsedVisibility() == Visibility::Visible;
+    if (_layer.Compositor().HasAcceleratedCompositing())
+    {
+      return isVisible && ScrollsOverflow();
+    }
+
     return false;
   }
 
@@ -1148,7 +1252,9 @@ namespace krys::boo
                         .BoundingBox());
   }
 
-  void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context, const IntPoint &paintOffset,
+  void RenderLayerScrollableArea::PaintOverflowControls(GraphicsContext &context,
+                                                        EnumSet<PaintBehavior> paintBehavior,
+                                                        const IntPoint &paintOffset,
                                                         const IntRect &damageRect) noexcept
   {
     // Don't do anything if we have no overflow.
@@ -1172,13 +1278,23 @@ namespace krys::boo
     (void)PositionOverflowControls(ToIntSize(paintOffset));
 
     // Now that we're sure the scrollbars are in the right place, paint them.
-    if (RefPtr<Scrollbar> hBar = _hBar)
+    if (RefPtr<Scrollbar> hBar = _hBar;
+        hBar
+        && (!LayerForHorizontalScrollbar()
+            || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers)))
     {
       hBar->Paint(context, damageRect);
     }
-    if (RefPtr<Scrollbar> vBar = _vBar)
+    if (RefPtr<Scrollbar> vBar = _vBar;
+        vBar
+        && (!LayerForVerticalScrollbar() || paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers)))
     {
       vBar->Paint(context, damageRect);
+    }
+
+    if (LayerForScrollCorner() && !paintBehavior.Contains(PaintBehavior::FlattenCompositingLayers))
+    {
+      return;
     }
 
     // We fill our scroll corner with white if we have a scrollbar that doesn't run all the way up to the edge

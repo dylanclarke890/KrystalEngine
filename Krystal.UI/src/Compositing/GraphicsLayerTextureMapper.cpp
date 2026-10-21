@@ -163,6 +163,16 @@ namespace krys::ui
     NotifyChange(PositionChange);
   }
 
+  void GraphicsLayerTextureMapper::SetBoundsOrigin(const boo::FloatPoint &value) noexcept
+  {
+    if (value == BoundsOrigin())
+    {
+      return;
+    }
+    GraphicsLayer::SetBoundsOrigin(value);
+    NotifyChange(BoundsOriginChange);
+  }
+
   void GraphicsLayerTextureMapper::SetAnchorPoint(const boo::FloatPoint3D &value) noexcept
   {
     if (value == AnchorPoint())
@@ -511,6 +521,11 @@ namespace krys::ui
     if (_changeMask & PositionChange)
     {
       _layer->SetPosition(Position());
+    }
+
+    if (_changeMask & BoundsOriginChange)
+    {
+      _layer->SetBoundsOrigin(BoundsOrigin());
     }
 
     if (_changeMask & AnchorPointChange)

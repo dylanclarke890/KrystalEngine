@@ -176,6 +176,12 @@ namespace krys::boo
       return;
     }
 
+    // The compositor moves a composited page's contents: the host has nothing to move.
+    if (auto *renderView = GetRenderViewForUpdate(); renderView && renderView->UsesCompositing())
+    {
+      return;
+    }
+
     // Moves that haven't been painted yet add up, while they move the same rect; otherwise all of it is
     // painted again.
     if (_scrolledContents && _scrolledContents->Rect != rectToScroll)

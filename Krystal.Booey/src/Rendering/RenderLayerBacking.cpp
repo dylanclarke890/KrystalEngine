@@ -2191,9 +2191,8 @@ namespace krys::boo
 
   bool RenderLayerBacking::RequiresLayerForScrollbar(Scrollbar *scrollbar) const noexcept
   {
-    // FIXME: Asynchronous overflow scrolling (asyncOverflowScrollingEnabled), once there's composited
-    // overflow scrolling.
-    return scrollbar && scrollbar->IsOverlayScrollbar();
+    // Overflow scrolls on layers whenever the page composites (asyncOverflowScrollingEnabled).
+    return scrollbar && (scrollbar->IsOverlayScrollbar() || Compositor().HasAcceleratedCompositing());
   }
 
   bool RenderLayerBacking::RequiresHorizontalScrollbarLayer() const noexcept

@@ -2078,6 +2078,12 @@ namespace krys::boo
         return false;
       }
 
+      if (paintInfo.PaintBehavior.Contains(PaintBehavior::CompositedOverflowScrollContent) && HasLayer()
+          && Layer()->UsesCompositedScrolling())
+      {
+        return false;
+      }
+
       auto overflowBox = VisualOverflowRect();
       FlipForWritingMode(overflowBox);
       overflowBox.MoveBy(adjustedPaintOffset);
@@ -2106,8 +2112,9 @@ namespace krys::boo
           && Style().UsedVisibility() == Visibility::Visible && paintInfo.ShouldPaintWithinRoot(*this)
           && !paintInfo.PaintRootBackgroundOnly())
       {
-        layer->GetScrollableArea()->PaintOverflowControls(
-          paintInfo.Context(), RoundedIntPoint(adjustedPaintOffset), SnappedIntRect(paintInfo.Rect));
+        layer->GetScrollableArea()->PaintOverflowControls(paintInfo.Context(), paintInfo.PaintBehavior,
+                                                          RoundedIntPoint(adjustedPaintOffset),
+                                                          SnappedIntRect(paintInfo.Rect));
       }
     }
   }

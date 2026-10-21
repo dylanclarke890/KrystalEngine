@@ -471,6 +471,89 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  namespace
+  {
+    /// @brief The page as composited: tracks the repaints of the view's own layer (the render view's), which
+    /// holds what isn't composited by itself.
+    class TrackedRepaints
+    {
+    private:
+      View &_view;
+
+    public:
+      explicit TrackedRepaints(View &view) noexcept : _view(view)
+      {
+        Compositor().SetTracksRepaints(true);
+      }
+
+      ~TrackedRepaints() noexcept
+      {
+        Compositor().SetTracksRepaints(false);
+      }
+
+      KRYS_NODISCARD boo::RenderLayerCompositor &Compositor() const noexcept
+      {
+        return _view.Frame().View()->GetRenderViewForUpdate()->Compositor();
+      }
+
+      KRYS_NODISCARD boo::GraphicsLayer &ViewLayer() const noexcept
+      {
+        return *_view.Frame().View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer();
+      }
+
+      void Reset() noexcept
+      {
+        Compositor().ResetTrackedRepaintRects();
+      }
+
+      /// @brief The graphics layer of the composited element @p id.
+      KRYS_NODISCARD boo::GraphicsLayer &LayerOf(utf8_stringview id) const noexcept
+      {
+        auto element = _view.Document().GetElementById(id);
+        auto *layer = krys::Downcast<boo::RenderLayerModelObject>(*element->Renderer()).Layer();
+        krys_assert(layer && layer->Backing());
+        return *layer->Backing()->GetGraphicsLayer();
+      }
+
+      /// @brief The layer holding what the composited element @p id scrolls.
+      KRYS_NODISCARD boo::GraphicsLayer &ScrolledContentsOf(utf8_stringview id) const noexcept
+      {
+        auto element = _view.Document().GetElementById(id);
+        auto *layer = krys::Downcast<boo::RenderLayerModelObject>(*element->Renderer()).Layer();
+        krys_assert(layer && layer->Backing() && layer->Backing()->ScrolledContentsLayer());
+        return *layer->Backing()->ScrolledContentsLayer();
+      }
+
+      /// @brief The bounds of the view layer's repaints since the last reset, in the layer's coordinates.
+      KRYS_NODISCARD boo::FloatRect Bounds() const noexcept
+      {
+        return Bounds(ViewLayer());
+      }
+
+      /// @brief The bounds of @p layer's repaints since the last reset, in its coordinates.
+      KRYS_NODISCARD boo::FloatRect Bounds(boo::GraphicsLayer &layer) const noexcept
+      {
+        auto text = layer.LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
+                                           boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
+        // Only the layer's own rects: its children's come after "(children".
+        text = text.substr(0, text.find(u8"(children"));
+        boo::FloatRect bounds;
+        for (size_t at = text.find(u8"(rect "); at != utf8_string::npos; at = text.find(u8"(rect ", at + 1))
+        {
+          float x = 0;
+          float y = 0;
+          float width = 0;
+          float height = 0;
+          std::istringstream rect(std::string(reinterpret_cast<const char *>(text.c_str()) + at + 6));
+          rect >> x >> y >> width >> height;
+          REQUIRE(rect);
+          bounds.Unite(boo::FloatRect(x, y, width, height));
+        }
+        return bounds;
+      }
+    };
+  }
+
   TEST_CASE("View: scrolling moves the painted page and leaves no stale pixels", "[UI][GPU]")
   {
     static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -519,93 +602,27 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "scroll-first");
     // A fixed background moves against the contents, so scrolling repaints all of them.
     CHECK(view.Frame().View()->UseSlowRepaints() == fixedBackground);
+    // A fixed header has a layer of its own, which stays put as the page's layer moves.
+    if (!fixedBackground)
+    {
+      CHECK(view.Document().GetElementById(u8"header")->Renderer()->IsComposited());
+    }
 
+    TrackedRepaints repaints(view);
     for (int32 step = 1; step <= 6; ++step)
     {
       // Down in steps of different sizes, then back up; twice in one frame on the third step.
       auto y = step <= 4 ? step * 23 : (8 - step) * 31;
+      repaints.Reset();
       view.ScrollTo({0, y});
       if (step == 3)
       {
         view.ScrollTo({0, y + 7});
       }
       frame();
+      CHECK(repaints.Bounds().IsEmpty() != fixedBackground);
       CheckNoStalePixels(fixture, view, "scroll-" + std::to_string(step));
     }
-  }
-
-  namespace
-  {
-    /// @brief The page as composited: tracks the repaints of the view's own layer (the render view's), which
-    /// holds what isn't composited by itself.
-    class TrackedRepaints
-    {
-    private:
-      View &_view;
-
-    public:
-      explicit TrackedRepaints(View &view) noexcept : _view(view)
-      {
-        Compositor().SetTracksRepaints(true);
-      }
-
-      ~TrackedRepaints() noexcept
-      {
-        Compositor().SetTracksRepaints(false);
-      }
-
-      KRYS_NODISCARD boo::RenderLayerCompositor &Compositor() const noexcept
-      {
-        return _view.Frame().View()->GetRenderViewForUpdate()->Compositor();
-      }
-
-      KRYS_NODISCARD boo::GraphicsLayer &ViewLayer() const noexcept
-      {
-        return *_view.Frame().View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer();
-      }
-
-      void Reset() noexcept
-      {
-        Compositor().ResetTrackedRepaintRects();
-      }
-
-      /// @brief The graphics layer of the composited element @p id.
-      KRYS_NODISCARD boo::GraphicsLayer &LayerOf(utf8_stringview id) const noexcept
-      {
-        auto element = _view.Document().GetElementById(id);
-        auto *layer = krys::Downcast<boo::RenderLayerModelObject>(*element->Renderer()).Layer();
-        krys_assert(layer && layer->Backing());
-        return *layer->Backing()->GetGraphicsLayer();
-      }
-
-      /// @brief The bounds of the view layer's repaints since the last reset, in the layer's coordinates.
-      KRYS_NODISCARD boo::FloatRect Bounds() const noexcept
-      {
-        return Bounds(ViewLayer());
-      }
-
-      /// @brief The bounds of @p layer's repaints since the last reset, in its coordinates.
-      KRYS_NODISCARD boo::FloatRect Bounds(boo::GraphicsLayer &layer) const noexcept
-      {
-        auto text = layer.LayerTreeAsText({boo::LayerTreeAsTextOptions::IncludeRepaintRects,
-                                           boo::LayerTreeAsTextOptions::IncludeRootLayerProperties});
-        // Only the layer's own rects: its children's come after "(children".
-        text = text.substr(0, text.find(u8"(children"));
-        boo::FloatRect bounds;
-        for (size_t at = text.find(u8"(rect "); at != utf8_string::npos; at = text.find(u8"(rect ", at + 1))
-        {
-          float x = 0;
-          float y = 0;
-          float width = 0;
-          float height = 0;
-          std::istringstream rect(std::string(reinterpret_cast<const char *>(text.c_str()) + at + 6));
-          rect >> x >> y >> width >> height;
-          REQUIRE(rect);
-          bounds.Unite(boo::FloatRect(x, y, width, height));
-        }
-        return bounds;
-      }
-    };
   }
 
   TEST_CASE("View: repaints the rect that changed", "[UI][GPU]")
@@ -670,6 +687,47 @@ namespace krys::ui::tests
       // The box before and after turning: about 28 pixels across, around its centre (110, 30).
       CHECK(boo::FloatRect(94, 14, 32, 32).Contains(bounds));
       CHECK(bounds.Contains(boo::FloatRect(100, 20, 20, 20)));
+    }
+  }
+
+  TEST_CASE("View: scrolling a box moves its layers and repaints nothing", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 160u);
+    View view({200, 160});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }"
+      u8"#scroller { margin: 10px; width: 140px; height: 100px; overflow: auto; background: white }"
+      u8".row { height: 30px; border-bottom: 1px solid #888; background: linear-gradient(90deg, #fde, #def) }"
+      u8"#blurred { margin: 10px; width: 40px; height: 20px; background: #073b4c; filter: blur(2px) }"
+      u8"</style><div id=scroller><div class=row></div><div class=row></div><div id=blurred></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div></div>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      (void)fixture.Painted(view);
+    };
+    frame();
+    frame();
+    TrackedRepaints repaints(view);
+    auto scroller = view.Document().GetElementById(u8"scroller");
+    REQUIRE(scroller->Renderer()->IsComposited());
+    CheckNoStalePixels(fixture, view, "box-scroll-first");
+
+    // Down in steps of different sizes, past the tiles painted at first, then back up; the blurred box,
+    // composited inside the scrolled contents, moves with them.
+    for (int32 y : {25, 60, 140, 300, 90, 0})
+    {
+      repaints.Reset();
+      scroller->SetScrollTop(y);
+      frame();
+      CHECK(repaints.Bounds().IsEmpty());
+      CHECK(repaints.Bounds(repaints.LayerOf(u8"scroller")).IsEmpty());
+      CHECK(repaints.Bounds(repaints.ScrolledContentsOf(u8"scroller")).IsEmpty());
+      CheckNoStalePixels(fixture, view, "box-scroll-" + std::to_string(y));
     }
   }
 

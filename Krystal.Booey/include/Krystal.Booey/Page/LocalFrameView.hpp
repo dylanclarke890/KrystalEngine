@@ -500,7 +500,8 @@ namespace krys::boo
     /// @note Take the scrolled contents first: the damage is where the contents are once they've moved.
     KRYS_NODISCARD Region TakeDamage() noexcept;
     /// @brief How the painted contents moved since the host last took them: the host moves its pixels in the
-    /// rect to match before painting the damage. Null when nothing moved.
+    /// rect to match before painting the damage. Null when nothing moved, and always when the page
+    /// composites.
     /// @see `HostWindow::scroll`.
     KRYS_NODISCARD Maybe<ScrolledContents> TakeScrolledContents() noexcept;
 
@@ -510,6 +511,10 @@ namespace krys::boo
     KRYS_NODISCARD bool HasSlowRepaintObjects() const noexcept
     {
       return !_slowRepaintObjects.empty();
+    }
+    KRYS_NODISCARD const HashSet<const RenderElement *> &SlowRepaintObjects() const noexcept
+    {
+      return _slowRepaintObjects;
     }
     void AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
     void RemoveViewportConstrainedObject(const RenderLayerModelObject &object) noexcept;
@@ -677,7 +682,7 @@ namespace krys::boo
     void ScrollContentsSlowPath(const IntRect &updateRect) noexcept;
     void RepaintSlowRepaintObjects() noexcept;
     /// @brief The host window's half of the fast path: the contents of @p rectToScroll move by @p
-    /// scrollDelta, with the damage, and what comes into view is damaged.
+    /// scrollDelta, with the damage, and what comes into view is damaged. Nothing, when the page composites.
     void ScrollHostContents(const IntSize &scrollDelta, const IntRect &rectToScroll) noexcept;
     /// @brief The part of the view whose painted contents move when it scrolls: the visible contents, without
     /// the scrollbars.

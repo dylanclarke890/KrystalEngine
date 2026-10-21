@@ -25,7 +25,8 @@ namespace krys::ui
     template <size_t ColumnCount, size_t RowCount>
     KRYS_NODISCARD Array<float, 20> RowsOf(const ColourMatrix<ColumnCount, RowCount> &matrix) noexcept
     {
-      const auto &data = ColourMatrix<5, 4>(matrix).data();
+      const ColourMatrix<5, 4> rowMatrix(matrix);
+      const auto &data = rowMatrix.data();
       Array<float, 20> rows {};
       std::copy(data.begin(), data.end(), rows.begin());
       return rows;

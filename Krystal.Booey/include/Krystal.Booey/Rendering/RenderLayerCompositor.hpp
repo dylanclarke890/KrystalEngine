@@ -151,8 +151,6 @@ namespace krys::boo
     bool _showDebugBorders {false};
     bool _showRepaintCounter {false};
     bool _acceleratedDrawingEnabled {false};
-    // FIXME: Composited fixed position layers (acceleratedCompositingForFixedPositionEnabled), once scrolling
-    // moves layers.
     bool _acceleratedCompositingForFixedPositionEnabled {false};
 
     bool _compositing {false};
