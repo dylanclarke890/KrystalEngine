@@ -481,9 +481,10 @@ namespace krys::boo::style
     // AnglePercentage and LengthPercentage share their calc canonicalization; `TDimensionRaw` is the
     // dimension half (`css::AngleRaw` or `css::LengthRaw`).
     template <typename To, typename TDimensionRaw, typename TPercentageRaw, typename From, typename... Rest>
-    KRYS_NODISCARD To DimensionPercentageCalcToStyle(css::Category dimensionCategory,
-                                                     css::Category dimensionPercentageCategory,
-                                                     const From &value, Rest &&...rest) noexcept
+    KRYS_NODISCARD
+    To DimensionPercentageCalcToStyle(css::Category dimensionCategory,
+                                      KRYS_MAYBE_UNUSED css::Category dimensionPercentageCategory,
+                                      const From &value, Rest &&...rest) noexcept
     {
       // NOTE: Simplification is needed here for the case of the user using the Typed CSSOM
       // to explicitly specify a CSSMath* value for a specified value.

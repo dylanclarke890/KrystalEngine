@@ -70,9 +70,11 @@ find_program(GPERF_EXECUTABLE NAMES gperf REQUIRED)
 set(KRYSTAL_BOOEY_HEADER_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/codegen/headers")
 set(KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/codegen")
 
-# The generated style builder and extractor have more sections than the default object format allows.
+# The generated style builder, extractor and interpolation wrapper map have more sections than the default object
+# format allows.
 set_source_files_properties(${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Style/BuilderGenerated.cpp
                             ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Style/ExtractorGenerated.cpp
+                            ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Style/InterpolationWrapperMap.cpp
   PROPERTIES
     COMPILE_OPTIONS $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
 )
@@ -745,6 +747,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderObject.hpp
   include/Krystal.Booey/Rendering/RenderPtr.hpp
   include/Krystal.Booey/Rendering/RenderView.hpp
+  include/Krystal.Booey/Rendering/VisibleRectContext.hpp
   include/Krystal.Booey/Rendering/RenderLayerModelObject.hpp
   include/Krystal.Booey/Rendering/RenderBoxModelObject.hpp
   include/Krystal.Booey/Rendering/ClipRect.hpp
@@ -772,6 +775,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderOverflow.hpp
   include/Krystal.Booey/Rendering/RenderLayoutState.hpp
   include/Krystal.Booey/Rendering/TextBoxTrimmer.hpp
+  include/Krystal.Booey/Rendering/LayoutRepainter.hpp
   include/Krystal.Booey/Rendering/LineClampUpdater.hpp
   include/Krystal.Booey/Rendering/RenderBox.hpp
   include/Krystal.Booey/Rendering/RenderBlock.hpp
@@ -2334,6 +2338,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/ScrollbarTheme.cpp
   src/Rendering/RenderLayoutState.cpp
   src/Rendering/TextBoxTrimmer.cpp
+  src/Rendering/LayoutRepainter.cpp
   src/Rendering/LineClampUpdater.cpp
   src/Rendering/RenderBox.cpp
   src/Rendering/RenderBlock.cpp

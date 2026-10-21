@@ -31,8 +31,7 @@ namespace krys::boo
   };
 
   /// @brief A table cell: its place in the grid, its spans, its collapsed borders and its layout.
-  // FIXME: Masks (paintMask), repaints (localRectsForRepaint, computeVisibleRectsInContainer) and sticky
-  // positioning (frameRectForStickyPositioning), once there are those.
+  // FIXME: Masks (paintMask) and sticky positioning (frameRectForStickyPositioning), once there are those.
   class RenderTableCell final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCell);
@@ -228,9 +227,15 @@ namespace krys::boo
     /// @brief Sorts @p borderValues from the lowest precedence to the highest.
     static void SortBorderValues(List<CollapsedBorderValue> &borderValues) noexcept;
 
+    KRYS_NODISCARD Maybe<RepaintRects>
+      ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
+                                     VisibleRectContext context) const noexcept override;
+
   protected:
     KRYS_NODISCARD LogicalExtentComputedValues
       ComputeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop) const noexcept override;
+    KRYS_NODISCARD RepaintRects
+      LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
 
   private:
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;

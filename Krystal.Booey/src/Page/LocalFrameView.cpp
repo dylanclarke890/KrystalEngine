@@ -74,6 +74,7 @@ namespace krys::boo
     }
 
     _frameRect = newRect;
+    RepaintEntireView();
 
     if (!_useFixedLayout && oldRect.Size() != newRect.Size())
     {
@@ -89,6 +90,48 @@ namespace krys::boo
   void LocalFrameView::Resize(const IntSize &size) noexcept
   {
     SetFrameRect(IntRect(_frameRect.Location(), size));
+  }
+
+  void LocalFrameView::RepaintContentRectangle(const IntRect &rect) noexcept
+  {
+    // FIXME: Not while updates are suppressed (shouldUpdate), once there's printing.
+    InvalidateRect(ContentsToView(rect));
+  }
+
+  void LocalFrameView::InvalidateRect(const IntRect &rect) noexcept
+  {
+    auto damage = Intersection(rect, IntRect(IntPoint(), _frameRect.Size()));
+    if (damage.IsEmpty())
+    {
+      return;
+    }
+    _damage.Unite(Region(damage));
+    // The host paints the damage in its next frame.
+    if (auto *frame = _frame.get())
+    {
+      if (auto *document = frame->Document())
+      {
+        document->ScheduleRenderingUpdate({});
+      }
+    }
+  }
+
+  void LocalFrameView::RepaintEntireView() noexcept
+  {
+    InvalidateRect(IntRect(IntPoint(), _frameRect.Size()));
+  }
+
+  void LocalFrameView::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
+  {
+    // The frame view's scrollbars are in its coordinates.
+    auto damage = rect;
+    damage.MoveBy(scrollbar.Location());
+    InvalidateRect(damage);
+  }
+
+  Region LocalFrameView::TakeDamage() noexcept
+  {
+    return std::exchange(_damage, Region {});
   }
 
   IntSize LocalFrameView::GetLayoutSize() const noexcept
@@ -1457,8 +1500,9 @@ namespace krys::boo
     // scrollbars.
 
     // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position.
-    // FIXME: Repainting the scrolled contents (scrollContents), once repaints are tracked (the whole page
-    // repaints), and the compositing layers, once there's compositing.
+    // FIXME: Moving the painted contents rather than repainting all of them (scrollContents), and the
+    // compositing layers, once there's compositing.
+    RepaintEntireView();
     if (!LayoutContext().IsInRenderTreeLayout())
     {
       if (auto *renderView = const_cast<RenderView *>(GetRenderView()); renderView && renderView->Layer())

@@ -63,6 +63,8 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    /// @brief The bounding box of the inline's line boxes with their ink overflow.
+    KRYS_NODISCARD LayoutRect LinesVisualOverflowBoundingBox() const noexcept;
     /// @brief Adds the rects of the inline's line boxes, moved by @p additionalOffset, skipping empty ones.
     void CollectLineBoxRects(List<LayoutRect> &rects, const LayoutPoint &additionalOffset) const noexcept;
 
@@ -78,6 +80,24 @@ namespace krys::boo
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
+
+#pragma region Repaint
+
+    KRYS_NODISCARD LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                                  VisibleRectContext context) const noexcept override;
+    KRYS_NODISCARD RepaintRects RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                                              RepaintOutlineBounds) const noexcept override;
+    KRYS_NODISCARD LayoutRect RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                        LayoutUnit outlineWidth) const noexcept final;
+    KRYS_NODISCARD Maybe<RepaintRects>
+      ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
+                                     VisibleRectContext context) const noexcept final;
+
+  private:
+    KRYS_NODISCARD RepaintRects ComputeVisibleRectsUsingPaintOffset(const RepaintRects &rects) const noexcept;
+
+  public:
+#pragma endregion
 
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;

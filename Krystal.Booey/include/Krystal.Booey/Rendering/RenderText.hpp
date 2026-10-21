@@ -219,6 +219,8 @@ namespace krys::boo
   protected:
     RenderText(Type type, dom::Node &node, utf8_string text) noexcept;
 
+    KRYS_NODISCARD RepaintRects LocalRectsForRepaint(RepaintOutlineBounds) const noexcept final;
+
     void WillBeDestroyed() noexcept override;
 
     virtual void SetRenderedText(utf8_string newText) noexcept;

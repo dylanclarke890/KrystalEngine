@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
@@ -42,6 +43,17 @@ namespace krys::ui
     FontFaceCache _fonts;
     /// @brief Made on the first replay, with the renderer's device.
     UniquePtr<ImageBufferTextures> _imageBuffers;
+    /// @brief The page as last painted, at the viewport's size: `Paint` repaints only its damage, then draws
+    /// it.
+    gfx::TextureHandle _pageTexture;
+    /// @brief Where the damaged part of the page is painted, cleared, before it's copied into the page
+    /// texture.
+    gfx::TextureHandle _damageTexture;
+    boo::IntSize _pageTextureSize;
+    /// @brief Paints into the page texture while the host's renderer is in its frame.
+    UniquePtr<gfx::Renderer2D> _pageRenderer;
+    /// @brief The device the page texture and renderer were made on.
+    gfx::Device *_device {nullptr};
     /// @brief The buttons held, as the DOM's `buttons` bit set.
     uint16 _buttons {0};
     /// @brief The last press, which the next one counts on from if it's a double click.
@@ -104,8 +116,11 @@ namespace krys::ui
     /// @brief Paints the page, up to date, into a display list.
     KRYS_NODISCARD Ref<const boo::display_list::DisplayList> Record() noexcept;
 
-    /// @brief Paints the page into @p renderer, between its `Begin` and `End`.
+    /// @brief Paints the page into @p renderer, between its `Begin` and `End`: the page's damage (what
+    /// changed since the last paint) is repainted into the page texture, which is then drawn.
     void Paint(gfx::Renderer2D &renderer) noexcept;
+    /// @brief Whether the page has changed since it was last painted (or never was).
+    KRYS_NODISCARD bool NeedsPaint() const noexcept;
 
     /// @brief Replays @p displayList into @p renderer, with this page's fonts, between its `Begin` and `End`.
     void Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept;
@@ -180,5 +195,12 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
+    /// @brief The rects to paint for @p damage, within @p viewRect: its rects, those close together merged.
+    KRYS_NODISCARD static List<boo::IntRect> DamageRects(const boo::Region &damage,
+                                                         const boo::IntRect &viewRect) noexcept;
+    /// @brief Records the page over each of the @p damage rects (in the view's coordinates) and replays them
+    /// into the page texture, replacing what was there.
+    void PaintDamage(gfx::CommandBuffer &commands, gfx::Device &device,
+                     const List<boo::IntRect> &damage) noexcept;
   };
 }

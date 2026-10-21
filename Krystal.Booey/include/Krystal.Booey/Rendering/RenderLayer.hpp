@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/ClipRect.hpp"
 #include "Krystal.Booey/Rendering/LayerFragment.hpp"
 #include "Krystal.Booey/Rendering/PaintPhase.hpp"
+#include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -105,7 +106,7 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Repaint, compositing, filters, masks, SVG clip paths, reflections, resizing, scrollbars, selection
+  // FIXME: Compositing, filters, masks, SVG clip paths, reflections, resizing, scrollbars, selection
   // gaps, event regions and fragmentation (paginated collectFragments) come with compositing, effects and
   // fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
@@ -321,6 +322,8 @@ namespace krys::boo
 
     bool _isHiddenByOverflowTruncation : 1 {false};
 
+    bool _repaintRectsValid : 1 {false};
+
 #if KRYS_DEBUG
     bool _layerListMutationAllowed : 1 {true};
 #endif
@@ -368,6 +371,10 @@ namespace krys::boo
 
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
+
+    // Cached repaint rects. Used by layout.
+    RenderObject::RepaintRects _repaintRects;
+    WeakPtr<const RenderLayerModelObject> _repaintContainer;
 
   public:
     explicit RenderLayer(RenderLayerModelObject &renderer) noexcept;
@@ -777,6 +784,8 @@ namespace krys::boo
 #pragma endregion
 
     void SetRepaintStatus(RepaintStatus status) noexcept;
+    /// @brief Whether the layer's renderer repaints after a layout moves or resizes it.
+    KRYS_NODISCARD bool ShouldRepaintAfterLayout() const noexcept;
     KRYS_NODISCARD RepaintStatus GetRepaintStatus() const noexcept
     {
       return _repaintStatus;
@@ -786,6 +795,28 @@ namespace krys::boo
       return _repaintStatus == RepaintStatus::NeedsFullRepaint
              || _repaintStatus == RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout;
     }
+
+    /// @brief The renderer's repaint rects, as of the last layer position update; null when the layer doesn't
+    /// paint itself or paints nothing.
+    KRYS_NODISCARD Maybe<RenderObject::RepaintRects> RepaintRects() const noexcept
+    {
+      if (_repaintRectsValid)
+      {
+        return _repaintRects;
+      }
+      return null;
+    }
+    KRYS_NODISCARD Maybe<LayoutRect> CachedClippedOverflowRect() const noexcept;
+    /// @brief Works out the renderer's repaint rects in @p repaintContainer's coordinates.
+    void ComputeRepaintRects(const RenderLayerModelObject *repaintContainer) noexcept;
+    void ComputeRepaintRectsIncludingDescendants() noexcept;
+    void ClearRepaintRects() noexcept
+    {
+      _repaintRectsValid = false;
+    }
+
+    /// @brief Repaints the layer's renderer and those of its descendant layers.
+    void RepaintIncludingDescendants() noexcept;
 
     KRYS_NODISCARD LayoutUnit StaticInlinePosition() const noexcept
     {

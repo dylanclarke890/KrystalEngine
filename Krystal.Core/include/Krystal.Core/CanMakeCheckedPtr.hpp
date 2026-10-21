@@ -37,7 +37,9 @@ namespace krys::detail
 
     ~CanMakeCheckedPtrBase() noexcept
     {
+#if KRYS_DEBUG
       krys_assert(_didBeginDeletion);
+#endif
     }
 
     CanMakeCheckedPtrBase &operator=(const CanMakeCheckedPtrBase &) noexcept

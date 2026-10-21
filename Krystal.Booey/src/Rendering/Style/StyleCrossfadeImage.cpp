@@ -31,7 +31,7 @@ namespace krys::boo
     return ArePointingToEqualData(_from, other._from) && ArePointingToEqualData(_to, other._to);
   }
 
-  RefPtr<StyleCrossfadeImage> StyleCrossfadeImage::Blend(const StyleCrossfadeImage &from,
+  RefPtr<StyleCrossfadeImage> StyleCrossfadeImage::Blend(KRYS_MAYBE_UNUSED const StyleCrossfadeImage &from,
                                                          const BlendingContext &) const noexcept
   {
     krys_debug_assert(EqualInputImages(from));

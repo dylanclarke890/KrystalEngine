@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
+#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
@@ -268,7 +269,7 @@ namespace krys::boo
     }
   }
 
-  void RenderImage::RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const IntRect *) noexcept
+  void RenderImage::RepaintOrMarkForLayout(ImageSizeChangeType imageSizeChange, const IntRect *rect) noexcept
   {
     LayoutSize newIntrinsicSize = ImageResource().IntrinsicSize(Style().UsedZoom());
     LayoutSize oldIntrinsicSize = IntrinsicSize();
@@ -304,11 +305,21 @@ namespace krys::boo
       UpdateInnerContentRect();
     }
 
-    // FIXME: Repaint only the changed rect (in source image coordinates, mapped to the content box), once
-    // there's repaint tracking.
     if (Parent())
     {
-      Repaint();
+      auto repaintRect = ContentBoxRect();
+      if (rect)
+      {
+        // The image changed rect is in source image coordinates (pre-zooming),
+        // so map from the bounds of the image to the contentsBox.
+        if (auto srcImg = ImageResource().GetImage(FlooredIntSize(ContentBoxRect().Size())))
+        {
+          FloatSize sourceSize = srcImg->Size() / Style().UsedZoom();
+          repaintRect.Intersect(LayoutRect(EnclosingIntRect(
+            MapRect(FloatRect(*rect), FloatRect(FloatPoint(), sourceSize), FloatRect(repaintRect)))));
+        }
+      }
+      RepaintRectangle(repaintRect);
     }
 
     // FIXME: Tell compositing layers the image changed (contentChanged), once there are layers.

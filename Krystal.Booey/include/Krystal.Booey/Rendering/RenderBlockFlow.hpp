@@ -680,6 +680,8 @@ namespace krys::boo
     KRYS_NODISCARD bool HasOverhangingFloat(RenderBox &renderer) const noexcept;
     void AddIntrudingFloats(RenderBlockFlow *previousBlock, RenderBlockFlow *container,
                             LayoutUnit logicalLeftOffset, LayoutUnit logicalTopOffset) noexcept;
+    void RepaintOverhangingFloats(bool paintAllDescendants) noexcept final;
+
     KRYS_NODISCARD bool HasOverhangingFloats() const noexcept
     {
       return Parent() && ContainsFloats() && LowestFloatLogicalBottom() > LogicalHeight();

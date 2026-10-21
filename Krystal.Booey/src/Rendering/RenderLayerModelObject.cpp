@@ -58,11 +58,6 @@ namespace krys::boo
     _layer->InsertOnlyThisLayer();
   }
 
-  bool RenderLayerModelObject::HasSelfPaintingLayer() const noexcept
-  {
-    return _layer && _layer->IsSelfPaintingLayer();
-  }
-
   void RenderLayerModelObject::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
   {
     s_wasFloating = IsFloating();
@@ -130,7 +125,12 @@ namespace krys::boo
       // support them.
       SetHasTransformRelatedProperty(false);
 
-      // FIXME: Repaint the about to be destroyed self-painting layer, once there's painting.
+      // Repaint the about to be destroyed self-painting layer when style change also triggers repaint.
+      if (Layer()->IsSelfPaintingLayer() && Layer()->GetRepaintStatus() == RepaintStatus::NeedsFullRepaint
+          && Layer()->CachedClippedOverflowRect())
+      {
+        RepaintUsingContainer(ContainerForRepaint().Renderer, *Layer()->CachedClippedOverflowRect());
+      }
 
       Layer()->RemoveOnlyThisLayer(); // calls destroyLayer() which clears m_layer
       if (s_wasFloating && IsFloating())
@@ -154,6 +154,13 @@ namespace krys::boo
 
     // FIXME: Viewport-constrained objects, scrollbar steps and scroll snap containers, once there's
     // scrolling.
+  }
+
+  bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,
+                                                                const RenderLayerModelObject *,
+                                                                VisibleRectContext) const noexcept
+  {
+    return false;
   }
 
   TransformationMatrix *RenderLayerModelObject::LayerTransform() const noexcept

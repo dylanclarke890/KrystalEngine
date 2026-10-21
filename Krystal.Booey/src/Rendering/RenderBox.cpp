@@ -203,8 +203,14 @@ namespace krys::boo
     const RenderStyle *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
     if (oldStyle)
     {
-      // FIXME: Repaint the root contents (the background of the root element or the body element could
-      // propagate up to the canvas), once there's painting.
+      // The background of the root element or the body element could propagate up to
+      // the canvas. Issue full repaint, when our style changes substantially.
+      if (diff >= style::DifferenceResult::Repaint && (IsDocumentElementRenderer() || IsBody()))
+      {
+        View().RepaintRootContents();
+        // FIXME: The compositor's root layer configuration when the background becomes or stops being
+        // entirely fixed, once there's compositing.
+      }
 
       // When a layout hint happens and an object's position style changes, we have to do a layout
       // to dirty the render tree using the old position value now.
@@ -386,7 +392,15 @@ namespace krys::boo
       // value.
       if (boxHasNonVisibleOverflow)
       {
-        // FIXME: Repaint the overflow that's erased, once there's painting.
+        if (!s_hadNonVisibleOverflow && HasRenderOverflow())
+        {
+          // Erase the overflow.
+          // Overflow changes have to result in immediate repaints of the entire layout overflow area because
+          // repaints issued by removal of descendants get clipped using the updated style when they
+          // shouldn't.
+          IssueRepaint(VisualOverflowRect(), ClipRepaintToLayer::Yes, ForceRepaint::Yes);
+          IssueRepaint(LayoutOverflowRect(), ClipRepaintToLayer::Yes, ForceRepaint::Yes);
+        }
         SetHasNonVisibleOverflow();
       }
     }
@@ -4204,6 +4218,280 @@ namespace krys::boo
     }
   }
 
+#pragma region Repaint
+
+  LayoutRect RenderBox::LocalOutlineBoundsRepaintRect() const noexcept
+  {
+    auto box = BorderBoundingBox();
+    return ApplyVisualEffectOverflow(box);
+  }
+
+  LayoutRect RenderBox::OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept
+  {
+    auto box = LocalOutlineBoundsRepaintRect();
+
+    if (repaintContainer != this)
+    {
+      // FIXME: The geometry map, once there is one.
+      auto containerRelativeQuad = LocalToContainerQuad(FloatQuad(FloatRect(box)), repaintContainer);
+      box = LayoutRect(containerRelativeQuad.BoundingBox());
+    }
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    box.Move(View().FrameView().LayoutContext().LayoutDelta());
+
+    return LayoutRect(SnapRectToDevicePixels(box, GetDocument().DeviceScaleFactor()));
+  }
+
+  auto RenderBox::LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept
+    -> RepaintRects
+  {
+    if (IsInsideEntirelyHiddenLayer())
+    {
+      return {};
+    }
+
+    auto overflowRect = VisualOverflowRect();
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    overflowRect.Move(View().FrameView().LayoutContext().LayoutDelta());
+
+    auto rects = RepaintRects {overflowRect};
+    if (repaintOutlineBounds == RepaintOutlineBounds::Yes)
+    {
+      rects.OutlineBoundsRect = LocalOutlineBoundsRepaintRect();
+    }
+
+    return rects;
+  }
+
+  auto RenderBox::ComputeVisibleRectsUsingPaintOffset(const RepaintRects &rects) const noexcept
+    -> RepaintRects
+  {
+    auto adjustedRects = rects;
+    auto *layoutState = View().FrameView().LayoutContext().LayoutState();
+
+    if (HasLayer() && Layer()->Transform())
+    {
+      adjustedRects.Transform(*Layer()->Transform(), GetDocument().DeviceScaleFactor());
+    }
+
+    // We can't trust the bits on RenderObject, because this might be called while re-resolving style.
+    if (Style().HasInFlowPosition() && Layer())
+    {
+      adjustedRects.Move(Layer()->OffsetForInFlowPosition());
+    }
+
+    adjustedRects.MoveBy(Location());
+    adjustedRects.Move(layoutState->PaintOffset());
+    if (layoutState->IsClipped())
+    {
+      adjustedRects.ClippedOverflowRect.Intersect(layoutState->ClipRect());
+    }
+    return adjustedRects;
+  }
+
+  auto RenderBox::ComputeVisibleRectsInContainer(const RepaintRects &rects,
+                                                 const RenderLayerModelObject *container,
+                                                 VisibleRectContext context) const noexcept
+    -> Maybe<RepaintRects>
+  {
+    // The rect we compute at each step is shifted by our x/y offset in the parent container's coordinate
+    // space. Only when we cross a writing mode boundary will we have to possibly flipForWritingMode (to
+    // convert into a more appropriate offset corner for the enclosing container).  This allows for a fully RL
+    // or BT document to repaint properly even during layout, since the rect remains flipped all the way until
+    // the end.
+    //
+    // RenderView::computeVisibleRectInContainer then converts the rect to physical coordinates. We also
+    // convert to physical when we hit a repaint container boundary. Therefore the final rect returned is
+    // always in the physical coordinate space of the container.
+    const RenderStyle &styleToUse = Style();
+    // Paint offset cache is only valid for root-relative, non-fixed position repainting
+    if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !container
+        && styleToUse.GetPosition() != PositionType::Fixed
+        && !context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+    {
+      return ComputeVisibleRectsUsingPaintOffset(rects);
+    }
+
+    auto adjustedRects = rects;
+    // FIXME: Reflections (`-webkit-box-reflect` was dropped).
+
+    if (container == this)
+    {
+      if (container->GetWritingMode().IsBlockFlipped())
+      {
+        FlipForWritingMode(adjustedRects);
+      }
+      if (context.DescendantNeedsEnclosingIntRect)
+      {
+        adjustedRects.EncloseToIntRects();
+      }
+      return adjustedRects;
+    }
+
+    bool containerIsSkipped;
+    auto *localContainer = Container(container, containerIsSkipped);
+    if (!localContainer)
+    {
+      return adjustedRects;
+    }
+
+    if (IsWritingModeRoot())
+    {
+      if (!IsOutOfFlowPositioned() || !context.DirtyRectIsFlipped)
+      {
+        FlipForWritingMode(adjustedRects);
+        context.DirtyRectIsFlipped = true;
+      }
+    }
+
+    auto locationOffset = LocationOffset();
+
+    // FIXME: Widgets (which snap to integral sizes and positions) and multi-column flows (which map the rect
+    // into their fragment), once there are any.
+
+    // We are now in our parent container's coordinate space. Apply our transform to obtain a bounding box
+    // in the parent's coordinate space that encloses us.
+    auto position = styleToUse.GetPosition();
+    if (HasLayer() && Layer()->IsTransformed())
+    {
+      context.HasPositionFixedDescendant = position == PositionType::Fixed;
+      adjustedRects.Transform(Layer()->CurrentTransform(), GetDocument().DeviceScaleFactor());
+    }
+    else if (position == PositionType::Fixed)
+    {
+      context.HasPositionFixedDescendant = true;
+    }
+
+    adjustedRects.Move(locationOffset);
+
+    if (position == PositionType::Absolute && localContainer->IsInFlowPositioned()
+        && Is<RenderInline>(*localContainer))
+    {
+      auto offsetForInFlowPosition =
+        Downcast<RenderInline>(*localContainer).OffsetForInFlowPositionedInline(this);
+      adjustedRects.Move(offsetForInFlowPosition);
+    }
+    else if (styleToUse.HasInFlowPosition() && Layer())
+    {
+      // Apply the relative position offset when invalidating a rectangle.  The layer
+      // is translated, but the render box isn't, so we need to do this to get the
+      // right dirty rect.  Since this is called from RenderObject::setStyle, the relative position
+      // flag on the RenderObject has been cleared, so use the one on the style().
+      auto offsetForInFlowPosition = Layer()->OffsetForInFlowPosition();
+      adjustedRects.Move(offsetForInFlowPosition);
+    }
+
+    if (localContainer->HasNonVisibleOverflow())
+    {
+      bool isEmpty = !Downcast<RenderLayerModelObject>(*localContainer)
+                        .ApplyCachedClipAndScrollPosition(adjustedRects, container, context);
+      if (isEmpty)
+      {
+        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        {
+          return null;
+        }
+        return adjustedRects;
+      }
+    }
+
+    if (containerIsSkipped)
+    {
+      // If the container is below localContainer, then we need to map the rect into container's coordinates.
+      LayoutSize containerOffset = container->OffsetFromAncestorContainer(*localContainer);
+      adjustedRects.Move(-containerOffset);
+      return adjustedRects;
+    }
+    return localContainer->ComputeVisibleRectsInContainer(adjustedRects, container, context);
+  }
+
+  void RenderBox::RepaintDuringLayoutIfMoved(const LayoutRect &oldRect) noexcept
+  {
+    if (oldRect.Location() != _frameRect.Location())
+    {
+      LayoutRect newRect = _frameRect;
+      // The child moved.  Invalidate the object's old and new positions.  We have to do this
+      // since the object may not have gotten a layout.
+      _frameRect = oldRect;
+      Repaint();
+      RepaintOverhangingFloats(true);
+      _frameRect = newRect;
+      Repaint();
+      RepaintOverhangingFloats(true);
+    }
+  }
+
+  void RenderBox::RepaintOverhangingFloats(bool) noexcept
+  {
+  }
+
+  void RenderBox::FlipForWritingMode(RepaintRects &rects) const noexcept
+  {
+    if (!GetWritingMode().IsBlockFlipped())
+    {
+      return;
+    }
+
+    rects.FlipForWritingMode(Size(), IsHorizontalWritingMode());
+  }
+
+  LayoutSize RenderBox::CachedSizeForOverflowClip() const noexcept
+  {
+    krys_debug_assert(HasNonVisibleOverflow());
+    krys_debug_assert(HasLayer());
+    return LayoutSize(Layer()->Size());
+  }
+
+  bool RenderBox::ApplyCachedClipAndScrollPosition(RepaintRects &rects,
+                                                   const RenderLayerModelObject *container,
+                                                   VisibleRectContext context) const noexcept
+  {
+    FlipForWritingMode(rects);
+
+    // FIXME: Composited scrolling doesn't scroll the rects of its own contents, once there's compositing.
+    rects.MoveBy(-LayoutPoint(GetScrollPosition())); // For overflow:auto/scroll/hidden.
+
+    // Do not clip scroll layer contents to reduce the number of repaints while scrolling.
+    if (!context.Options.Contains(VisibleRectContext::Option::ApplyContainerClip) && this == container)
+    {
+      FlipForWritingMode(rects);
+      return true;
+    }
+
+    // height() is inaccurate if we're in the middle of a layout of this RenderBox, so use the
+    // layer's size instead. Even if the layer's size is wrong, the layer itself will repaint
+    // anyway if its size does change.
+    LayoutRect clipRect(LayoutPoint(), CachedSizeForOverflowClip());
+    if (EffectiveOverflowX() == Overflow::Visible)
+    {
+      clipRect.ExpandToInfiniteX();
+    }
+    if (EffectiveOverflowY() == Overflow::Visible)
+    {
+      clipRect.ExpandToInfiniteY();
+    }
+
+    // FIXME: The scroll margin (for intersection observers), once there are any.
+
+    bool intersects;
+    if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+    {
+      intersects = rects.EdgeInclusiveIntersect(clipRect);
+    }
+    else
+    {
+      intersects = rects.Intersect(clipRect);
+    }
+
+    FlipForWritingMode(rects);
+    return intersects;
+  }
+
+#pragma endregion
+
   LayoutRect RenderBox::ApplyVisualEffectOverflow(const LayoutRect &borderBox) const noexcept
   {
     LayoutUnit overflowMinX = borderBox.X();
@@ -5961,7 +6249,7 @@ namespace krys::boo
 
       if (!didFullRepaint)
       {
-        didFullRepaint = RepaintLayerRectsForImage(image, style.GetBackgroundLayers());
+        didFullRepaint = RepaintBackgroundLayerRectsForImage(image, style.GetBackgroundLayers());
       }
       if (!didFullRepaint)
       {
@@ -5980,6 +6268,95 @@ namespace krys::boo
     // the composited layers' content changes, once there are those.
   }
 
+  bool RenderBox::RepaintBackgroundLayerRectsForImage(WrappedImagePtr image,
+                                                      const style::BackgroundLayers &layers) noexcept
+  {
+    LayoutRect rendererRect;
+    RenderBox *layerRenderer = nullptr;
+
+    for (auto &layer : layers.UsedValues())
+    {
+      if (auto layerImage = layer.GetImage().TryStyleImage();
+          layerImage && layerImage->Data() == image
+          && (layerImage->IsLoaded(this) || layerImage->CanRender(this, Style().UsedZoom())))
+      {
+        // Now that we know this image is being used, compute the renderer and the rect if we haven't already.
+        bool drawingRootBackground =
+          IsDocumentElementRenderer()
+          || (IsBody() && !GetDocument().DocumentElement()->Renderer()->HasBackground());
+        if (!layerRenderer)
+        {
+          if (drawingRootBackground)
+          {
+            layerRenderer = &View();
+
+            auto &renderView = Downcast<RenderView>(*layerRenderer);
+            LayoutUnit rw {renderView.FrameView().ContentsSize().Width()};
+            LayoutUnit rh {renderView.FrameView().ContentsSize().Height()};
+
+            rendererRect =
+              LayoutRect(-layerRenderer->MarginLeft(), -layerRenderer->MarginTop(),
+                         std::max(layerRenderer->Width() + layerRenderer->HorizontalMarginExtent()
+                                    + layerRenderer->BorderLeft() + layerRenderer->BorderRight(),
+                                  rw),
+                         std::max(layerRenderer->Height() + layerRenderer->VerticalMarginExtent()
+                                    + layerRenderer->BorderTop() + layerRenderer->BorderBottom(),
+                                  rh));
+
+            // If we're drawing the root background, then we want to use the bounds of the view
+            // (since root backgrounds cover the canvas, not just the element).
+            // FIXME: A composited root element takes the repaint itself, once there's compositing.
+          }
+          else
+          {
+            layerRenderer = this;
+            rendererRect = BorderBoxRect();
+          }
+        }
+        // FIXME: Figure out how to pass absolute position to calculateFillLayerImageGeometry (for pixel
+        // snapping)
+        auto geometry = BackgroundPainter::CalculateFillLayerImageGeometry(*layerRenderer, nullptr, layer,
+                                                                           LayoutPoint(), rendererRect);
+        if (geometry.HasNonLocalGeometry)
+        {
+          // Rather than incur the costs of computing the paintContainer for renderers with fixed backgrounds
+          // in order to get the right destRect, just repaint the entire renderer.
+          layerRenderer->Repaint();
+          return true;
+        }
+
+        LayoutRect rectToRepaint = geometry.DestinationRect;
+        bool shouldClipToLayer = true;
+
+        // If this is the root background layer, we may need to extend the repaintRect if the FrameView has an
+        // extendedBackground. We should only extend the rect if it is already extending the full width or
+        // height of the rendererRect.
+        if (drawingRootBackground && View().FrameView().HasExtendedBackgroundRectForPainting())
+        {
+          shouldClipToLayer = false;
+          IntRect extendedBackgroundRect = View().FrameView().ExtendedBackgroundRectForPainting();
+          if (rectToRepaint.Width() == rendererRect.Width())
+          {
+            rectToRepaint.Move(LayoutUnit {extendedBackgroundRect.X()}, 0_lu);
+            rectToRepaint.SetWidth(LayoutUnit {extendedBackgroundRect.Width()});
+          }
+          if (rectToRepaint.Height() == rendererRect.Height())
+          {
+            rectToRepaint.Move(0_lu, LayoutUnit {extendedBackgroundRect.Y()});
+            rectToRepaint.SetHeight(LayoutUnit {extendedBackgroundRect.Height()});
+          }
+        }
+
+        layerRenderer->RepaintRectangle(rectToRepaint, shouldClipToLayer);
+        if (geometry.DestinationRect == rendererRect)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   template <typename TLayers>
   bool RenderBox::RepaintLayerRectsForImage(WrappedImagePtr image, const TLayers &layers) noexcept
   {
@@ -5989,8 +6366,8 @@ namespace krys::boo
           layerImage && layerImage->Data() == image
           && (layerImage->IsLoaded(this) || layerImage->CanRender(this, Style().UsedZoom())))
       {
-        // FIXME: Repaint only the rect the layer paints the image in (its geometry, the root background's
-        // extended rect), once there's repaint tracking.
+        // FIXME: Repaint only the rect the mask layer paints the image in (calculateFillLayerImageGeometry),
+        // once mask images paint.
         Repaint();
         return true;
       }

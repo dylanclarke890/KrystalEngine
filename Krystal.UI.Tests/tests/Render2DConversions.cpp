@@ -36,6 +36,15 @@ namespace krys::ui::tests
 
     const boo::FloatRoundedRect elliptical({0, 0, 20, 10}, {2, 4}, {3, 3}, {4, 4}, {5, 5});
     CHECK_FALSE(ToCircularRoundedRect(elliptical).has_value());
+
+    // Corners a little elliptical, as pixel snapping leaves them, are drawn as the circle between their
+    // radii.
+    const boo::FloatRoundedRect snapped({0, 0, 20, 10}, {3.97f, 4.f}, {4, 4}, {4, 4}, {4, 4});
+    auto nearlyCircular = ToCircularRoundedRect(snapped);
+    REQUIRE(nearlyCircular.has_value());
+    CHECK(nearlyCircular->Radii.TopLeft == Catch::Approx(3.985f));
+    const boo::FloatRoundedRect slightlyElliptical({0, 0, 20, 10}, {3.9f, 4.f}, {4, 4}, {4, 4}, {4, 4});
+    CHECK_FALSE(ToCircularRoundedRect(slightlyElliptical).has_value());
   }
 
   TEST_CASE("Render2D conversions: paths", "[UI]")

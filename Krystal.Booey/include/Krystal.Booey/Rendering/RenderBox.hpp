@@ -38,7 +38,7 @@ namespace krys::boo
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
   /// and the computation of its sizes.
-  // FIXME: Hit testing, the repaint rects, scrolling (and autoscrolling), the coordinate mapping, the shape
+  // FIXME: Hit testing, scrolling (and autoscrolling), the coordinate mapping, the shape
   // outside, fragmentation, and the sizing of out-of-flow positioned boxes (PositionedLayoutConstraints) come
   // with hit testing, scrolling and the later layout slices.
   class RenderBox : public RenderBoxModelObject
@@ -250,6 +250,36 @@ namespace krys::boo
 
     void AddVisualEffectOverflow() noexcept;
     KRYS_NODISCARD LayoutRect ApplyVisualEffectOverflow(const LayoutRect &borderBox) const noexcept;
+
+#pragma region Repaint
+
+    KRYS_NODISCARD
+    LayoutRect OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept final;
+    KRYS_NODISCARD Maybe<RepaintRects>
+      ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
+                                     VisibleRectContext context) const noexcept override;
+    /// @brief Repaints the box at its old and new positions if layout moved it from @p oldRect.
+    void RepaintDuringLayoutIfMoved(const LayoutRect &oldRect) noexcept;
+    /// @brief Repaints the floats overhanging the box that it paints (or, with @p paintAllDescendants, that
+    /// are its descendants).
+    virtual void RepaintOverhangingFloats(bool paintAllDescendants) noexcept;
+    void FlipForWritingMode(RepaintRects &rects) const noexcept;
+    bool ApplyCachedClipAndScrollPosition(RepaintRects &rects, const RenderLayerModelObject *container,
+                                          VisibleRectContext context) const noexcept final;
+    /// @brief The size the overflow clip clips to: the layer's, which stays as it was until layout finishes.
+    KRYS_NODISCARD LayoutSize CachedSizeForOverflowClip() const noexcept;
+    /// @brief The border box with its visual effects (outline, shadows, border image outsets).
+    KRYS_NODISCARD LayoutRect LocalOutlineBoundsRepaintRect() const noexcept;
+
+  protected:
+    KRYS_NODISCARD RepaintRects
+      LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept override;
+
+  private:
+    KRYS_NODISCARD RepaintRects ComputeVisibleRectsUsingPaintOffset(const RepaintRects &rects) const noexcept;
+
+  public:
+#pragma endregion
 
     enum class ComputeOverflowOptions : uint8
     {
@@ -909,6 +939,10 @@ namespace krys::boo
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
     template <typename TLayers>
     bool RepaintLayerRectsForImage(WrappedImagePtr, const TLayers &) noexcept;
+    /// @brief Repaints the rects @p layers paint @p image in.
+    /// @return Whether that repainted the whole box.
+    bool RepaintBackgroundLayerRectsForImage(WrappedImagePtr image,
+                                             const style::BackgroundLayers &layers) noexcept;
 
   protected:
     void WillBeDestroyed() noexcept override;

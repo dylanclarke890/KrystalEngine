@@ -72,7 +72,10 @@ namespace krys::ui
   /// in other spaces are converted, clamping to sRGB's gamut; an invalid colour is transparent.
   KRYS_NODISCARD SRGBA<uint8> ToColour(const boo::Color &color, float alpha = 1.f) noexcept;
 
-  /// @brief The rounded rect as Render2D's analytic shape, when every corner is circular.
+  /// @brief The rounded rect as Render2D's analytic shape, when every corner is circular, or within a
+  /// sixteenth of a pixel of it.
+  /// @note Snapping a box to device pixels scales its radii with it, so a box's circular corners come out a
+  /// little elliptical (16 by 15.99, say); drawn as paths, each such box costs a coverage mask.
   KRYS_NODISCARD Maybe<gfx::RoundedRect2D> ToCircularRoundedRect(const boo::FloatRoundedRect &rect) noexcept;
 
   /// @brief Adds a rounded rect, its corners elliptical, as a closed contour.

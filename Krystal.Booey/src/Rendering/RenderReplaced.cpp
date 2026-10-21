@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
@@ -95,6 +96,8 @@ namespace krys::boo
   {
     krys_debug_assert(NeedsLayout());
 
+    LayoutRepainter repainter(*this);
+
     LayoutRect oldContentRect = ReplacedContentRect();
 
     SetHeight(MinimumReplacedHeight());
@@ -105,8 +108,8 @@ namespace krys::boo
     ClearOverflow();
     AddVisualEffectOverflow();
     UpdateLayerTransform();
-    // FIXME: Repaint after layout, once there's painting.
     InvalidateBackgroundObscurationStatus();
+    repainter.RepaintAfterLayout();
     ClearNeedsLayout();
 
     if (ReplacedContentRect() != oldContentRect)
@@ -117,6 +120,30 @@ namespace krys::boo
         Repaint();
       }
     }
+  }
+
+  auto RenderReplaced::LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept
+    -> RepaintRects
+  {
+    if (IsInsideEntirelyHiddenLayer())
+    {
+      return {};
+    }
+
+    // FIXME: The selection rect (which can project outside of the overflow rect), once there's selection.
+    auto overflowRect = VisualOverflowRect();
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    overflowRect.Move(View().FrameView().LayoutContext().LayoutDelta());
+
+    auto rects = RepaintRects {overflowRect};
+    if (repaintOutlineBounds == RepaintOutlineBounds::Yes)
+    {
+      rects.OutlineBoundsRect = LocalOutlineBoundsRepaintRect();
+    }
+
+    return rects;
   }
 
   void RenderReplaced::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept

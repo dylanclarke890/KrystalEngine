@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
@@ -574,6 +575,171 @@ namespace krys::boo
       images.erase(found);
     }
   }
+
+#pragma region Repaint
+
+  bool RenderView::ShouldRepaint(const LayoutRect &rect) const noexcept
+  {
+    // FIXME: Nothing repaints while printing, once there's printing.
+    return !rect.IsEmpty();
+  }
+
+  void RenderView::RepaintRootContents() noexcept
+  {
+    // FIXME: A composited render view repaints its backing, once there's compositing.
+
+    // Always use layoutOverflowRect() to fix rdar://problem/27182267.
+    // This should be cleaned up via webkit.org/b/159913 and webkit.org/b/159914.
+    const auto *repaintContainer = ContainerForRepaint().Renderer;
+    RepaintUsingContainer(repaintContainer, ComputeRectForRepaint(LayoutOverflowRect(), repaintContainer));
+  }
+
+  void RenderView::RepaintViewRectangle(const LayoutRect &repaintRect) noexcept
+  {
+    if (!ShouldRepaint(repaintRect))
+    {
+      return;
+    }
+
+    // FIXME: enclosingRect is needed as long as we integral snap ScrollView/FrameView/RenderWidget
+    // size/position.
+    auto enclosingRect = EnclosingIntRect(repaintRect);
+    auto viewRect = ViewRect();
+
+    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
+
+    if (_accumulatedRepaintRegion)
+    {
+      AccumulateRepaintRect(enclosingRect, EnclosingIntRect(viewRect));
+    }
+    else
+    {
+      FrameView().RepaintContentRectangle(enclosingRect);
+    }
+  }
+
+  bool RenderView::AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept
+  {
+    _accumulatedRepaintRegion->Unite(Region(rect));
+
+    bool entireViewDirty = false;
+    // Region will get slow if it gets too complex. Merge all rects so far to bounds if this happens.
+    // FIXME: Maybe there should be a region type that does this automatically.
+    constexpr uint32 maximumRepaintRegionGridSize = 16 * 16;
+    if (_accumulatedRepaintRegion->GridSize() > maximumRepaintRegionGridSize)
+    {
+      auto dirtyBounds = _accumulatedRepaintRegion->Bounds();
+      auto dirtyArea = static_cast<uint64>(dirtyBounds.Width()) * static_cast<uint64>(dirtyBounds.Height());
+      auto viewArea = static_cast<uint64>(viewRect.Width()) * static_cast<uint64>(viewRect.Height());
+      constexpr auto dirtyEntireViewThreshold = 0.75; // Derived empirically.
+      if (static_cast<double>(dirtyArea) >= static_cast<double>(viewArea) * dirtyEntireViewThreshold)
+      {
+        dirtyBounds = viewRect;
+        entireViewDirty = true;
+      }
+
+      _accumulatedRepaintRegion = CreateUnique<Region>(dirtyBounds);
+    }
+    else
+    {
+      entireViewDirty = rect.Contains(viewRect);
+    }
+
+    return entireViewDirty;
+  }
+
+  void RenderView::FlushAccumulatedRepaintRegion() const noexcept
+  {
+    // FIXME: A frame inside another frame repaints its owner's box, once there are iframes.
+
+    krys_debug_assert(_accumulatedRepaintRegion);
+    auto repaintRects = _accumulatedRepaintRegion->Rects();
+    for (const auto &rect : repaintRects)
+    {
+      FrameView().RepaintContentRectangle(rect);
+    }
+    _accumulatedRepaintRegion = nullptr;
+  }
+
+  void RenderView::RepaintViewAndCompositedLayers() noexcept
+  {
+    RepaintRootContents();
+
+    // FIXME: The compositor repaints the composited layers, once there's compositing.
+  }
+
+  LayoutRect RenderView::ViewRect() const noexcept
+  {
+    if (ShouldUsePrintingLayout())
+    {
+      return LayoutRect(LayoutPoint(), Size());
+    }
+    return LayoutRect(FrameView().VisibleContentRect());
+  }
+
+  auto RenderView::ComputeVisibleRectsInContainer(const RepaintRects &rects,
+                                                  KRYS_MAYBE_UNUSED const RenderLayerModelObject *container,
+                                                  VisibleRectContext context) const noexcept
+    -> Maybe<RepaintRects>
+  {
+    // If a container was specified, and was not nullptr or the RenderView,
+    // then we should have found it by now.
+    krys_debug_assert(!container || container == this);
+
+    // FIXME: Rects stay as they are while printing, once there's printing.
+
+    auto adjustedRects = rects;
+    if (GetWritingMode().IsBlockFlipped())
+    {
+      // We have to flip by hand since the view's logical height has not been determined.  We
+      // can use the viewport width and height.
+      adjustedRects.FlipForWritingMode(LayoutSize(ViewWidth(), ViewHeight()),
+                                       GetWritingMode().IsHorizontal());
+    }
+
+    if (context.HasPositionFixedDescendant)
+    {
+      adjustedRects.MoveBy(FrameView().ScrollPositionRespectingCustomFixedPosition());
+    }
+
+    // Apply our transform if we have one (because of full page zooming).
+    if (!container && HasLayer() && Layer()->Transform())
+    {
+      adjustedRects.Transform(*Layer()->Transform(), GetDocument().DeviceScaleFactor());
+    }
+
+    return adjustedRects;
+  }
+
+  RenderView::RepaintRegionAccumulator::RepaintRegionAccumulator(RenderView *view) noexcept
+  {
+    if (!view)
+    {
+      return;
+    }
+
+    _wasAccumulatingRepaintRegion = !!view->_accumulatedRepaintRegion;
+    if (!_wasAccumulatingRepaintRegion)
+    {
+      view->_accumulatedRepaintRegion = CreateUnique<Region>();
+    }
+    _view = CreateWeakPtr(view);
+  }
+
+  RenderView::RepaintRegionAccumulator::~RepaintRegionAccumulator() noexcept
+  {
+    if (_wasAccumulatingRepaintRegion)
+    {
+      return;
+    }
+    if (!_view)
+    {
+      return;
+    }
+    _view->FlushAccumulatedRepaintRegion();
+  }
+
+#pragma endregion
 
   void RenderView::ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept
   {

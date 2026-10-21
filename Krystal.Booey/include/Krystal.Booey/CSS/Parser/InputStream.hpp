@@ -90,7 +90,7 @@ namespace krys::boo::css
     }
 
     /// @brief Reconsume the last input character. This is used when the parser needs to "unread" a character.
-    void Reconsume(char32 ch) noexcept
+    void Reconsume(KRYS_MAYBE_UNUSED char32 ch) noexcept
     {
       _readPosition--;
       krys_debug_assert(NextInputCharacter() == ch);

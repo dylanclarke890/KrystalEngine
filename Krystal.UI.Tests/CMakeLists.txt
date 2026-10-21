@@ -43,8 +43,10 @@ target_sources(Krystal.UI.Tests
   PRIVATE
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
 
+    tests/Benchmark.cpp
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
     tests/View.cpp
     tests/Render2DConversions.cpp
+    tests/Repaint.cpp
 )

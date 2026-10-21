@@ -932,7 +932,131 @@ namespace krys::boo
     return VisibleInViewportState::No;
   }
 
-  void RenderObject::Repaint() const noexcept
+#pragma region Repaint
+
+  auto RenderObject::ContainerForRepaint() const noexcept -> RepaintContainerStatus
+  {
+    // FIXME: The enclosing compositing layer, the enclosing filter layer (for software filters) and the
+    // enclosing fragmented flow, once there are any: without them, repaints are in the render view's
+    // coordinates.
+    return {};
+  }
+
+  void RenderObject::PropagateRepaintToParentWithOutlineAutoIfNeeded(
+    const RenderLayerModelObject &repaintContainer, const LayoutRect &repaintRect) const noexcept
+  {
+    if (!HasOutlineAutoAncestor())
+    {
+      return;
+    }
+
+    // FIXME: We should really propagate only when the child renderer sticks out.
+    bool repaintRectNeedsConverting = false;
+    // Issue repaint on the renderer with outline: auto.
+    // FIXME: Column spanner placeholders, once there are multi-column flows.
+    for (const auto *renderer = this; renderer; renderer = renderer->Parent())
+    {
+      bool rendererHasOutlineAutoAncestor = renderer->HasOutlineAutoAncestor();
+      krys_debug_assert(rendererHasOutlineAutoAncestor
+                        || renderer->OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto);
+      if (renderer == &repaintContainer && rendererHasOutlineAutoAncestor)
+      {
+        repaintRectNeedsConverting = true;
+      }
+      if (rendererHasOutlineAutoAncestor)
+      {
+        continue;
+      }
+      // Issue repaint on the correct repaint container.
+      LayoutRect adjustedRepaintRect = repaintRect;
+      adjustedRepaintRect.Inflate(LayoutUnit {renderer->OutlineStyleForRepaint().OutlineSize()});
+      if (!repaintRectNeedsConverting)
+      {
+        repaintContainer.RepaintRectangle(adjustedRepaintRect);
+      }
+      else if (auto *rendererWithOutline = DynamicDowncast<RenderLayerModelObject>(*renderer))
+      {
+        adjustedRepaintRect =
+          LayoutRect(repaintContainer
+                       .LocalToContainerQuad(FloatQuad(FloatRect(adjustedRepaintRect)), rendererWithOutline)
+                       .BoundingBox());
+        rendererWithOutline->RepaintRectangle(adjustedRepaintRect);
+      }
+      return;
+    }
+    krys_debug_assert(false);
+  }
+
+  void RenderObject::RepaintUsingContainer(const RenderLayerModelObject *repaintContainer,
+                                           const LayoutRect &rect,
+                                           KRYS_MAYBE_UNUSED bool shouldClipToLayer) const noexcept
+  {
+    if (rect.IsEmpty())
+    {
+      return;
+    }
+
+    if (!repaintContainer)
+    {
+      repaintContainer = &View();
+    }
+
+    // FIXME: Fragmented flows repaint in their fragments, once there are any.
+
+    PropagateRepaintToParentWithOutlineAutoIfNeeded(*repaintContainer, rect);
+
+    // FIXME: Filters that need the full layer image, once there are layer filters.
+
+    if (repaintContainer->IsRenderView())
+    {
+      krys_debug_assert(repaintContainer == &View());
+      // FIXME: The composited render view's transform, once there's compositing.
+      View().RepaintViewRectangle(rect);
+      return;
+    }
+
+    // FIXME: Repainting the compositing layer's backing (setBackingNeedsRepaintInRect, clipped to the layer
+    // when shouldClipToLayer), once there's compositing.
+  }
+
+  void RenderObject::IssueRepaint(Maybe<LayoutRect> partialRepaintRect,
+                                  KRYS_MAYBE_UNUSED ClipRepaintToLayer clipRepaintToLayer,
+                                  ForceRepaint forceRepaint,
+                                  Maybe<LayoutBoxExtent> additionalRepaintOutsets) const noexcept
+  {
+    auto repaintContainer = ContainerForRepaint();
+    if (!repaintContainer.Renderer)
+    {
+      // Without compositing or frames inside frames, a full repaint is never already scheduled
+      // (fullRepaintIsScheduled).
+      repaintContainer = {false, &View()};
+    }
+
+    if (repaintContainer.FullRepaintIsScheduled && forceRepaint == ForceRepaint::No)
+    {
+      return;
+    }
+
+    LayoutRect repaintRect;
+
+    if (partialRepaintRect)
+    {
+      repaintRect = ComputeRectForRepaint(*partialRepaintRect, repaintContainer.Renderer);
+      if (additionalRepaintOutsets)
+      {
+        repaintRect.Expand(*additionalRepaintOutsets);
+      }
+    }
+    else
+    {
+      repaintRect = ClippedOverflowRectForRepaint(repaintContainer.Renderer);
+    }
+
+    RepaintUsingContainer(repaintContainer.Renderer, repaintRect,
+                          clipRepaintToLayer == ClipRepaintToLayer::Yes);
+  }
+
+  void RenderObject::Repaint(ForceRepaint forceRepaint) const noexcept
   {
     // Don't repaint if we're unrooted (note that view() still returns the view when unrooted)
     if (!IsRooted())
@@ -940,8 +1064,250 @@ namespace krys::boo
       return;
     }
 
-    GetDocument().ScheduleRenderingUpdate({});
+    // FIXME: Nothing repaints while printing, once there's printing.
+    IssueRepaint(null, ClipRepaintToLayer::No, forceRepaint);
   }
+
+  void RenderObject::RepaintRectangle(const LayoutRect &repaintRect, bool shouldClipToLayer) const noexcept
+  {
+    RepaintRectangle(repaintRect, shouldClipToLayer ? ClipRepaintToLayer::Yes : ClipRepaintToLayer::No,
+                     ForceRepaint::No);
+  }
+
+  void RenderObject::RepaintRectangle(const LayoutRect &repaintRect, ClipRepaintToLayer shouldClipToLayer,
+                                      ForceRepaint forceRepaint,
+                                      Maybe<LayoutBoxExtent> additionalRepaintOutsets) const noexcept
+  {
+    if (!IsRooted())
+    {
+      return;
+    }
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    auto dirtyRect = repaintRect;
+    dirtyRect.Move(View().FrameView().LayoutContext().LayoutDelta());
+    IssueRepaint(dirtyRect, shouldClipToLayer, forceRepaint, additionalRepaintOutsets);
+  }
+
+  LayoutRect RenderObject::AbsoluteClippedOverflowRectForRepaint() const noexcept
+  {
+    return ClippedOverflowRect(nullptr, VisibleRectContextForRepaint());
+  }
+
+  IntRect RenderObject::PixelSnappedAbsoluteClippedOverflowRect() const noexcept
+  {
+    return SnappedIntRect(AbsoluteClippedOverflowRectForRepaint());
+  }
+
+  LayoutRect
+    RenderObject::ClippedOverflowRectForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept
+  {
+    return ClippedOverflowRect(repaintContainer, VisibleRectContextForRepaint());
+  }
+
+  LayoutRect RenderObject::RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                     LayoutUnit outlineWidth) const noexcept
+  {
+    LayoutRect r(ClippedOverflowRectForRepaint(repaintContainer));
+    r.Inflate(outlineWidth);
+    return r;
+  }
+
+  LayoutRect RenderObject::OutlineBoundsForRepaint(const RenderLayerModelObject *) const noexcept
+  {
+    return {};
+  }
+
+  auto RenderObject::LocalRectsForRepaint(RepaintOutlineBounds) const noexcept -> RepaintRects
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  auto RenderObject::RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                                   RepaintOutlineBounds repaintOutlineBounds) const noexcept
+    -> RepaintRects
+  {
+    auto localRects = LocalRectsForRepaint(repaintOutlineBounds);
+    if (localRects.ClippedOverflowRect.IsEmpty())
+    {
+      return {};
+    }
+
+    auto result = ComputeRects(localRects, repaintContainer, VisibleRectContextForRepaint());
+    if (result.OutlineBoundsRect)
+    {
+      result.OutlineBoundsRect =
+        LayoutRect(SnapRectToDevicePixels(*result.OutlineBoundsRect, GetDocument().DeviceScaleFactor()));
+    }
+
+    return result;
+  }
+
+  LayoutRect RenderObject::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                               VisibleRectContext context) const noexcept
+  {
+    auto repaintRects = LocalRectsForRepaint(RepaintOutlineBounds::No);
+    if (repaintRects.ClippedOverflowRect.IsEmpty())
+    {
+      return {};
+    }
+
+    return ComputeRects(repaintRects, repaintContainer, context).ClippedOverflowRect;
+  }
+
+  auto RenderObject::ComputeRects(const RepaintRects &rects, const RenderLayerModelObject *repaintContainer,
+                                  VisibleRectContext context) const noexcept -> RepaintRects
+  {
+    auto result = ComputeVisibleRectsInContainer(rects, repaintContainer, context);
+    krys_assert(result.has_value());
+    return *result;
+  }
+
+  LayoutRect
+    RenderObject::ComputeRectForRepaint(const LayoutRect &rect,
+                                        const RenderLayerModelObject *repaintContainer) const noexcept
+  {
+    return ComputeRects(RepaintRects {rect}, repaintContainer, VisibleRectContextForRepaint())
+      .ClippedOverflowRect;
+  }
+
+  auto RenderObject::ComputeVisibleRectsInContainer(const RepaintRects &rects,
+                                                    const RenderLayerModelObject *container,
+                                                    VisibleRectContext context) const noexcept
+    -> Maybe<RepaintRects>
+  {
+    if (container == this)
+    {
+      return rects;
+    }
+
+    auto *parent = Parent();
+    if (!parent)
+    {
+      return rects;
+    }
+
+    auto adjustedRects = rects;
+    if (parent->HasNonVisibleOverflow())
+    {
+      bool isEmpty = !Downcast<RenderLayerModelObject>(*parent).ApplyCachedClipAndScrollPosition(
+        adjustedRects, container, context);
+      if (isEmpty)
+      {
+        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        {
+          return null;
+        }
+        return adjustedRects;
+      }
+    }
+    return parent->ComputeVisibleRectsInContainer(adjustedRects, container, context);
+  }
+
+  VisibleRectContext RenderObject::VisibleRectContextForRepaint() noexcept
+  {
+    return {.HasPositionFixedDescendant = false,
+            .DirtyRectIsFlipped = false,
+            .DescendantNeedsEnclosingIntRect = false,
+            .Options = {VisibleRectContext::Option::ApplyContainerClip,
+                        VisibleRectContext::Option::ApplyCompositedContainerScrolls}};
+  }
+
+  bool RenderObject::HasSelfPaintingLayer() const noexcept
+  {
+    if (!HasLayer())
+    {
+      return false;
+    }
+    auto *layer = Downcast<RenderLayerModelObject>(*this).Layer();
+    return layer && layer->IsSelfPaintingLayer();
+  }
+
+  bool RenderObject::HasOutlineAutoAncestor() const noexcept
+  {
+    return HasRareData() && GetRareData().HasOutlineAutoAncestor;
+  }
+
+  void RenderObject::SetHasOutlineAutoAncestor(bool hasOutlineAutoAncestor) noexcept
+  {
+    if (hasOutlineAutoAncestor || HasRareData())
+    {
+      EnsureRareData().HasOutlineAutoAncestor = hasOutlineAutoAncestor;
+    }
+  }
+
+  void RenderObject::SetLayerNeedsFullRepaint() noexcept
+  {
+    krys_debug_assert(HasLayer());
+    Downcast<RenderLayerModelObject>(*this).Layer()->SetRepaintStatus(RepaintStatus::NeedsFullRepaint);
+  }
+
+  void RenderObject::SetLayerNeedsFullRepaintForOutOfFlowMovementLayout() noexcept
+  {
+    krys_debug_assert(HasLayer());
+    Downcast<RenderLayerModelObject>(*this).Layer()->SetRepaintStatus(
+      RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
+  }
+
+  void RenderObject::RepaintRects::EncloseToIntRects() noexcept
+  {
+    ClippedOverflowRect = LayoutRect(EnclosingIntRect(ClippedOverflowRect));
+    if (OutlineBoundsRect)
+    {
+      *OutlineBoundsRect = LayoutRect(EnclosingIntRect(*OutlineBoundsRect));
+    }
+  }
+
+  void RenderObject::RepaintRects::FlipForWritingMode(LayoutSize containerSize,
+                                                      bool isHorizontalWritingMode) noexcept
+  {
+    if (isHorizontalWritingMode)
+    {
+      ClippedOverflowRect.SetY(containerSize.Height() - ClippedOverflowRect.MaxY());
+      if (OutlineBoundsRect)
+      {
+        OutlineBoundsRect->SetY(containerSize.Height() - OutlineBoundsRect->MaxY());
+      }
+    }
+    else
+    {
+      ClippedOverflowRect.SetX(containerSize.Width() - ClippedOverflowRect.MaxX());
+      if (OutlineBoundsRect)
+      {
+        OutlineBoundsRect->SetX(containerSize.Width() - OutlineBoundsRect->MaxX());
+      }
+    }
+  }
+
+  void RenderObject::RepaintRects::Transform(const TransformationMatrix &matrix) noexcept
+  {
+    ClippedOverflowRect = matrix.MapRect(ClippedOverflowRect);
+    if (OutlineBoundsRect)
+    {
+      *OutlineBoundsRect = matrix.MapRect(*OutlineBoundsRect);
+    }
+  }
+
+  void RenderObject::RepaintRects::Transform(const TransformationMatrix &matrix,
+                                             float deviceScaleFactor) noexcept
+  {
+    bool identicalRects = OutlineBoundsRect && *OutlineBoundsRect == ClippedOverflowRect;
+    ClippedOverflowRect =
+      LayoutRect(EncloseRectToDevicePixels(matrix.MapRect(ClippedOverflowRect), deviceScaleFactor));
+    if (identicalRects)
+    {
+      *OutlineBoundsRect = ClippedOverflowRect;
+    }
+    else if (OutlineBoundsRect)
+    {
+      *OutlineBoundsRect =
+        LayoutRect(EncloseRectToDevicePixels(matrix.MapRect(*OutlineBoundsRect), deviceScaleFactor));
+    }
+  }
+
+#pragma endregion
 
   void RenderObject::WillBeDestroyed() noexcept
   {
@@ -1123,7 +1489,10 @@ namespace krys::boo
     {
       ScheduleLayout(MarkContainingBlocksForLayout());
     }
-    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+    if (HasLayer())
+    {
+      SetLayerNeedsFullRepaint();
+    }
   }
 
   RenderElement *RenderObject::MarkContainingBlocksForLayout(RenderElement *layoutRoot) noexcept

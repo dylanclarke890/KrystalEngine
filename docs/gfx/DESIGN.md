@@ -1,6 +1,6 @@
 ﻿# Graphics redesign
 
-Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*. CSS animations and transitions (G9: G9a, interpolation and keyframe styles; G9b, the animation model and transitions; G9c, CSS animations) are done; see *G9 plan*.
+Status (2026-10-20): C0 (the colour types), G1 (the RHI and its OpenGL backend), G2 (Render2D, parts G2a to G2k; see *G2 parts*), T1 (Krystal.Text), G3 (text) and G4 (the Booey integration, parts G4a to G4h; see *G4 plan*) are done. Scrolling (G5: G5a, the viewport scrolls, and G5b, scrollbars, wheel and keyboard scrolling) is done; see *G5 plan*. The event and rendering loops (G6: G6a, timers and running the loop; G6b, the rendering update; G6c, mutation observers and slot change) are done; see *G6 plan*. Images (G7: G7a, decoding and drawing; G7b, loading and CSS images; G7c, `<img>`; G7d, animated images) are done; see *G7 plan*. Style sheets and web fonts (G8: G8a, style sheets; G8b, web fonts) are done; see *G8 plan*. CSS animations and transitions (G9: G9a, interpolation and keyframe styles; G9b, the animation model and transitions; G9c, CSS animations) are done; see *G9 plan*. Repainting only what changed (G10: the Release build; G10b, a retained page texture; G10c, damage tracking; G10d, the benchmark and hotspots) is done; see *G10 plan*.
 
 ## Why
 
@@ -303,8 +303,9 @@ All done in G1 (2026-10-17) unless noted.
 | G5 | Done (2026-10-19). Scrolling: the viewport scrolls, wheel and keyboard scrolling, scrollbars. In two parts (see *G5 plan*): done (2026-10-19). | Pages taller than their view scroll with the wheel, the keys and scrollbars. |
 | G6 | Done (2026-10-20). The event and rendering loops: timers, running tasks and microtasks with the host's time, the rendering update (`Page`), mutation observers. In three parts (see *G6 plan*): done (2026-10-20). | Timers and the rendering update run from the host's frame; style, layout and hover update without the host forcing them. |
 | G7 | Done (2026-10-20). Images: decoding and drawing, loading (through the host) and CSS images, `<img>`, animated images. In four parts (see *G7 plan*). | Pages show PNG, JPEG, GIF and WebP images, in `<img>` and CSS, loaded through the host. |
-| G8 | Style sheets and web fonts: `<link rel=stylesheet>` and `@import` loading through the host, `@font-face` with TTF, OTF and WOFF2. In two parts (see *G8 plan*). | Pages use external style sheets and their own fonts, loaded through the host, without a flash of unstyled content. |
-| G9 | CSS animations and transitions: interpolation, the animation model on the rendering update, `transition`, `animation` and `@keyframes`, their events. In three parts (see *G9 plan*). | Hover transitions and keyframe animations run from the host's frame, with their events, without script. |
+| G8 | Done (2026-10-20). Style sheets and web fonts: `<link rel=stylesheet>` and `@import` loading through the host, `@font-face` with TTF, OTF and WOFF2. In two parts (see *G8 plan*). | Pages use external style sheets and their own fonts, loaded through the host, without a flash of unstyled content. |
+| G9 | Done (2026-10-20). CSS animations and transitions: interpolation, the animation model on the rendering update, `transition`, `animation` and `@keyframes`, their events. In three parts (see *G9 plan*). | Hover transitions and keyframe animations run from the host's frame, with their events, without script. |
+| G10 | Done (2026-10-20). Repainting only what changed: the Release build, a retained page texture, damage tracking (upstream's repaint invalidation), then the hotspots a benchmark finds. In parts (see *G10 plan*). | A still page costs almost nothing per frame, and a small animation repaints only its rect; the editor page runs smoothly. |
 
 ### G2 parts
 
@@ -660,6 +661,19 @@ CSS animations and transitions. `transition` and `animation` parse and compute (
   - **Tests:** transitions starting, running at chosen times, reversing, cancelling and their events.
 - **G9c, CSS animations** (Booey): `CSSAnimation` from `@keyframes` (iteration count, direction, fill mode, play state, delays, timing functions with `steps()` and `linear()`), with `animationstart`, `animationiteration`, `animationend` and `animationcancel`. **Tests:** animations at chosen times and their events. **Golden:** an animations scene captured partway through at a fixed host time (Chrome's captured with the same time held). **Editor:** the cards' shadows transition on hover, and a spinner animates with `@keyframes`.
 - **Out (FIXMEs):** `Element.animate()` and `getAnimations()` (no scripting), scroll and view timelines (scroll-driven animations, a later part), composited animations, view transitions.
+
+### G10 plan (decided 2026-10-20)
+
+The editor's page is laggy: every frame re-records the whole page into a display list and replays all of it, whether or not anything changed. Measured on `Krystal.Editor/pages/index.html` at 1280x800 (Debug): replay 122 ms, recording 44 ms, the rendering update 8 ms a frame. Most of the replay is clipping (path clips 75 ms, rounded rect clips 19 ms, rounded rect clip-outs 15 ms); drawing is a few milliseconds. The Release build didn't build. In order (decided by the user):
+
+- **Release:** the Release configuration builds (assertion-only variables, `ShowWindow`, LLVM's headers as system headers), so the benchmark reports both configurations.
+- **G10b, a retained page** (Krystal.UI, Booey):
+  - **Booey:** the frame view collects damage, the host's side of upstream's `ScrollView::repaintContentRectangle` (`invalidateContentsAndRootView`): `LocalFrameView::RepaintContentRectangle` adds to it, and the host takes it. In this part every invalidation damages the whole view: renderer repaints (`RenderObject::Repaint`), layout, scrolling, image frames, view size changes.
+  - **Krystal.UI:** a `View` paints into a page texture, records and replays only when the page has damage, then draws the texture; `View::NeedsPaint` tells the host. **Editor:** draws the page texture each frame.
+  - **Tests:** a still page records nothing after its first paint; each kind of change damages it; the page goldens pass through the texture.
+- **G10c, damage tracking** (Booey): upstream's repaint invalidation: `RenderObject::repaintRectangle`, `repaintUsingContainer`, clipped overflow and outline bounds for repaint, `RenderView::repaintViewRectangle`, the layout repainter (`LayoutRepainter`) and repainting after layout, the layers' repaint rects, the repaint region accumulator, style difference repaints (`RenderElement::styleDidChange`), image and animation repaints, and repainting on scroll. The view records only the damaged region (painting already takes a dirty rect) and replays it into the page texture under a clip. **Tests:** changes damage their own rects (style, layout, text, images, scrolling, animations); no stale pixels after a sequence of changes, against full repaints.
+- **G10d, the hotspots:** a frame-cost benchmark (hidden by default) on the editor page and a fixed scene, run before and after; optimise what it shows (the clip costs above, recording) until the editor page runs smoothly.
+- **Out:** compositing layers and threaded painting.
 
 ### G2a as built (2026-10-18)
 
@@ -1078,6 +1092,28 @@ Testing: the device's hidden window gives tests a real OpenGL context (Krystal.G
 - **Changed from the plan:** the golden's animations are paused at negative delays rather than captured at a held host time, so neither capture depends on when it's taken and Chrome needs no virtual time.
 - **Out (FIXMEs):** the properties scripts override on CSS animations, named, scroll and view timelines and animation ranges, documents' listener types.
 - **Tests:** Booey tests CSS animations (7 cases). **Editor:** the cards' shadows transition on hover, and a card has a spinner and staggered pulsing dots from `@keyframes`.
+
+### G10 as built (2026-10-20)
+
+- **Release:** the Release configuration builds and its tests pass: the checked pointer's deletion assertion is debug-only, `ShowWindow`'s result is discarded (it's the previous visibility, not an error), LLVM's headers are system headers, the variables only debug assertions use are `KRYS_MAYBE_UNUSED`, and `InterpolationWrapperMap.cpp` builds with `/bigobj`. A Release-only crash in the render tree builder (`Block::Detach` kept raw pointers to siblings that detaching the child can destroy) is fixed by holding them weakly, as upstream does.
+- **G10b, a retained page:** the frame view collects damage as a region in its coordinates (`LocalFrameView::RepaintContentRectangle`, `InvalidateRect`, `RepaintEntireView`, `HasDamage`, `TakeDamage`) and schedules a rendering update for it. `View::Paint` keeps the page in a texture at the viewport's size, repaints it only when there's damage (the first paint and a resize repaint all of it), then draws it; `View::NeedsPaint` tells a host whether anything changed.
+- **G10c, damage tracking** (the ledger entry is *Repainting only what changed* in `docs/booey/PORTING.md`): upstream's repaint invalidation: repaint rects and visible rects in a container for boxes, inlines, text, replaced elements, table parts and the render view; repaints before and after style changes; `LayoutRepainter` in the block, flex, grid, table and replaced layouts, moved children, floats and cells, the partial repaint of laid out lines; the layers' repaint rects and their repaints after layout and scrolling; the repaint region accumulator; repaints when renderers are torn down; scrollbars, images and outline-auto ancestors. `View::Paint` records each damaged area with that dirty rect, replays it under a clip into a second texture, cleared, and copies it over the page texture, so what was there is replaced.
+- **G10d, the hotspots:** a hidden benchmark (`Krystal.UI.Tests/tests/Benchmark.cpp`, `[.benchmark]`) times `Update`, painting and submitting on the editor page at 1280 by 800 (at its top, where nothing visible changes; scrolled to its animations; and with the whole page repainted each frame) and on a still page. It found two hotspots:
+  - Damaged rects far apart (the spinner and an animated image) were painted as their bounds: `View::Paint` now merges only rects whose bounds waste no more than their own area (or when there are more than 8), and paints each group separately in one pass.
+  - Snapping a box to device pixels scales its radii with it, so a card's 16 px corners came out as 15.99 by 16 ellipses, and every card filled, cast its shadow and clipped through path masks (5 ms a card in Debug on a first paint). Corners within a sixteenth of a pixel of circular are now drawn as circles, analytically.
+- **Measured** (editor page, 1280 by 800, per frame; Debug / Release):
+
+| | Before G10b | G10b | G10c | G10d |
+|---|---|---|---|---|
+| Scrolled to its animations | 174 / – ms | 161 / 4.9 ms | 27 / 1.07 ms | 10.9 / 0.64 ms |
+| Whole page repainted each frame | 174 / – ms | 161 / 4.9 ms | 133 / 4.1 ms | 86 / 2.5 ms |
+| At its top (nothing visible changes) | 174 / – ms | 161 / 4.9 ms | 4.1 / 0.23 ms | 4.4 / 0.24 ms |
+| A still page | (repainted each frame) | 0.14 / 0.02 ms | 0.14 / 0.02 ms | 0.14 / 0.02 ms |
+
+  Before G10b, every frame recorded and replayed the whole page (Release didn't build); in G10b, the page's animations damaged the whole view each frame wherever it was scrolled. What's left in Debug is mostly `Update` (about 4 to 7 ms: restyling and laying out the animated elements each frame, offscreen or not, as upstream does).
+- **Changed from the plan:** G10b damaged the whole view for every change; G10c replaced that. The page texture is cleared in part by drawing into a second texture and copying, rather than by a partial clear in Render2D.
+- **Out (FIXMEs):** moving the painted contents when the view scrolls (`scrollContents`; a page scroll repaints all of it), compositing layers and threaded painting.
+- **Tests:** Krystal.UI tests damage ("damage", "damage is the rect that changed", "an animation damages the page each frame") and that repainting only the damage leaves no stale pixels against whole repaints, through a sequence of changes and a transition; the conversions test near-circular corners. The page goldens pass through the page texture. **Editor:** nothing new; the page is painted through the page texture.
 
 ## Open decisions
 

@@ -147,11 +147,10 @@ namespace krys::boo::layout
       return contentWidth;
     }
 
-    KRYS_NODISCARD float
-      TruncateOverflowingDisplayBoxes(inline_display::Boxes &boxes, size_t startIndex, size_t endIndex,
-                                      float lineBoxVisualLeft, float lineBoxVisualRight, float ellipsisWidth,
-                                      const RenderStyle &rootStyle,
-                                      LineEndingTruncationPolicy lineEndingTruncationPolicy) noexcept
+    KRYS_NODISCARD float TruncateOverflowingDisplayBoxes(
+      inline_display::Boxes &boxes, size_t startIndex, size_t endIndex, float lineBoxVisualLeft,
+      float lineBoxVisualRight, float ellipsisWidth, const RenderStyle &rootStyle,
+      KRYS_MAYBE_UNUSED LineEndingTruncationPolicy lineEndingTruncationPolicy) noexcept
     {
       krys_debug_assert(endIndex && startIndex <= endIndex);
       // We gotta truncate some runs.

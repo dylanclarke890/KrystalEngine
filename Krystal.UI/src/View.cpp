@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
+#include <limits>
 #include <mutex>
 
 namespace krys::ui
@@ -36,7 +37,17 @@ namespace krys::ui
     LoadHTML(u8"<!DOCTYPE html>");
   }
 
-  View::~View() noexcept = default;
+  View::~View() noexcept
+  {
+    if (_device && _pageTexture.IsValid())
+    {
+      _device->Destroy(_pageTexture);
+    }
+    if (_device && _damageTexture.IsValid())
+    {
+      _device->Destroy(_damageTexture);
+    }
+  }
 
   void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
@@ -154,9 +165,198 @@ namespace krys::ui
     return recorder.TakeDisplayList();
   }
 
+  bool View::NeedsPaint() const noexcept
+  {
+    auto *view = _frame->View();
+    return !_pageTexture.IsValid() || _pageTextureSize != ViewportSize() || (view && view->HasDamage());
+  }
+
   void View::Paint(gfx::Renderer2D &renderer) noexcept
   {
-    Replay(*Record(), renderer);
+    const auto size = ViewportSize();
+    auto *view = _frame->View();
+    auto *commands = renderer.GetCommandBuffer();
+    if (!view || size.IsEmpty() || !commands)
+    {
+      return;
+    }
+
+    auto &device = renderer.GetDevice();
+    _device = &device;
+    if (!_pageRenderer)
+    {
+      auto pageRenderer = gfx::Renderer2D::Create(device);
+      if (!pageRenderer)
+      {
+        return;
+      }
+      _pageRenderer = krys::move(*pageRenderer);
+    }
+
+    // A new viewport size needs new textures, all of the page painted.
+    if (!_pageTexture.IsValid() || _pageTextureSize != size)
+    {
+      for (auto *texture : {&_pageTexture, &_damageTexture})
+      {
+        if (texture->IsValid())
+        {
+          device.Destroy(*texture);
+        }
+        *texture = {};
+      }
+      auto createTexture = [&](utf8_stringview name)
+      {
+        return device.CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
+                                     .Width = static_cast<uint32>(size.Width()),
+                                     .Height = static_cast<uint32>(size.Height()),
+                                     .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
+                                     .DebugName = name});
+      };
+      auto pageTexture = createTexture(u8"Page");
+      auto damageTexture = createTexture(u8"Page damage");
+      if (!pageTexture || !damageTexture)
+      {
+        for (auto &texture : {pageTexture, damageTexture})
+        {
+          if (texture)
+          {
+            device.Destroy(*texture);
+          }
+        }
+        return;
+      }
+      _pageTexture = *pageTexture;
+      _damageTexture = *damageTexture;
+      _pageTextureSize = size;
+      view->RepaintEntireView();
+    }
+
+    // The rendering update runs in Update; painting only needs the layout, which can damage the page too.
+    (void)_document->UpdateLayout();
+    if (view->HasDamage())
+    {
+      const boo::IntRect viewRect(0, 0, size.Width(), size.Height());
+      auto damage = DamageRects(view->TakeDamage(), viewRect);
+      if (!damage.empty())
+      {
+        PaintDamage(*commands, device, damage);
+      }
+    }
+
+    renderer.DrawImage(_pageTexture, gfx::Rect2D {0.f, 0.f, static_cast<float>(size.Width()),
+                                                  static_cast<float>(size.Height())});
+  }
+
+  List<boo::IntRect> View::DamageRects(const boo::Region &damage, const boo::IntRect &viewRect) noexcept
+  {
+    List<boo::IntRect> rects;
+    for (const auto &rect : damage.Rects())
+    {
+      if (auto visible = boo::Intersection(rect, viewRect); !visible.IsEmpty())
+      {
+        rects.push_back(visible);
+      }
+    }
+
+    auto area = [](const boo::IntRect &rect)
+    {
+      return static_cast<int64>(rect.Width()) * rect.Height();
+    };
+    // Rects are merged while some two are close enough that painting their bounds costs little more than
+    // painting both (a region splits overlapping rects into bands, which merge back), or while there are
+    // many: each one painted is a recording and a pass of its own.
+    constexpr size_t maximumRects = 8;
+    bool merged = true;
+    while (merged && rects.size() > 1)
+    {
+      merged = false;
+      size_t bestFirst = 0;
+      size_t bestSecond = 0;
+      int64 bestWaste = std::numeric_limits<int64>::max();
+      for (size_t first = 0; first < rects.size(); ++first)
+      {
+        for (size_t second = first + 1; second < rects.size(); ++second)
+        {
+          auto bounds = boo::UnionRect(rects[first], rects[second]);
+          auto waste = area(bounds) - area(rects[first]) - area(rects[second]);
+          if (waste < bestWaste)
+          {
+            bestWaste = waste;
+            bestFirst = first;
+            bestSecond = second;
+          }
+        }
+      }
+      auto bestBounds = boo::UnionRect(rects[bestFirst], rects[bestSecond]);
+      if (rects.size() > maximumRects || bestWaste <= area(rects[bestFirst]) + area(rects[bestSecond]))
+      {
+        rects[bestFirst] = bestBounds;
+        rects.erase(rects.begin() + static_cast<ptrdiff_t>(bestSecond));
+        merged = true;
+      }
+    }
+    return rects;
+  }
+
+  void View::PaintDamage(gfx::CommandBuffer &commands, gfx::Device &device,
+                         const List<boo::IntRect> &damage) noexcept
+  {
+    const auto size = ViewportSize();
+    const boo::IntRect viewRect(0, 0, size.Width(), size.Height());
+    auto *view = _frame->View();
+
+    // Each rect is recorded on its own: a recording only holds what paints into its dirty rect.
+    List<Ref<const boo::display_list::DisplayList>> displayLists;
+    for (const auto &rect : damage)
+    {
+      boo::display_list::RecorderImpl recorder(
+        boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
+      view->Paint(recorder, rect);
+      displayLists.push_back(recorder.TakeDisplayList());
+    }
+
+    if (!_imageBuffers)
+    {
+      _imageBuffers = CreateUnique<ImageBufferTextures>(device, _fonts);
+    }
+
+    // The whole page is painted straight into the page texture. Parts of it are painted into the damage
+    // texture, cleared, and copied over those parts of the page texture: what was there before is replaced,
+    // as drawing over it would blend with it.
+    const bool wholePage = damage.size() == 1u && damage.front() == viewRect;
+    const auto target = wholePage ? _pageTexture : _damageTexture;
+    _pageRenderer->Begin(commands, {.Texture = target,
+                                    .Width = static_cast<uint32>(size.Width()),
+                                    .Height = static_cast<uint32>(size.Height()),
+                                    .Format = gfx::TextureFormat::RGBA8Unorm,
+                                    .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+    for (size_t index = 0; index < damage.size(); ++index)
+    {
+      const auto &rect = damage[index];
+      _pageRenderer->Save();
+      _pageRenderer->ClipRect(gfx::Rect2D {static_cast<float>(rect.X()), static_cast<float>(rect.Y()),
+                                           static_cast<float>(rect.Width()),
+                                           static_cast<float>(rect.Height())});
+      {
+        GraphicsContextRender2D context(*_pageRenderer, _fonts, boo::FloatRect(rect), _imageBuffers.get());
+        context.DrawDisplayList(*displayLists[index]);
+      }
+      _pageRenderer->Restore();
+    }
+    _pageRenderer->End();
+    _imageBuffers->Release();
+
+    if (!wholePage)
+    {
+      for (const auto &rect : damage)
+      {
+        const auto region = gfx::TextureRegion {.X = static_cast<uint32>(rect.X()),
+                                                .Y = static_cast<uint32>(rect.Y()),
+                                                .Width = static_cast<uint32>(rect.Width()),
+                                                .Height = static_cast<uint32>(rect.Height())};
+        commands.BlitTexture(_damageTexture, region, _pageTexture, region, gfx::SamplerFilter::Nearest);
+      }
+    }
   }
 
   void View::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept

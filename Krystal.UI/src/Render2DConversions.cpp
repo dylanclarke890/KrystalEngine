@@ -24,21 +24,29 @@ namespace krys::ui
 
   Maybe<gfx::RoundedRect2D> ToCircularRoundedRect(const boo::FloatRoundedRect &rect) noexcept
   {
+    // A corner this close to circular is drawn as the circle between its radii: no point of its curve moves
+    // by more than half the difference, a thirty-second of a pixel.
+    constexpr float circularCornerTolerance = 1.f / 16.f;
+
     const auto &radii = rect.GetRadii();
     auto circular = [](const boo::FloatSize &radius)
     {
-      return radius.Width() == radius.Height();
+      return std::abs(radius.Width() - radius.Height()) <= circularCornerTolerance;
     };
     if (!circular(radii.TopLeft()) || !circular(radii.TopRight()) || !circular(radii.BottomRight())
         || !circular(radii.BottomLeft()))
     {
       return std::nullopt;
     }
+    auto radius = [](const boo::FloatSize &corner)
+    {
+      return (corner.Width() + corner.Height()) / 2.f;
+    };
     return gfx::RoundedRect2D {.Rect = ToRect2D(rect.Rect()),
-                               .Radii = {.TopLeft = radii.TopLeft().Width(),
-                                         .TopRight = radii.TopRight().Width(),
-                                         .BottomRight = radii.BottomRight().Width(),
-                                         .BottomLeft = radii.BottomLeft().Width()}};
+                               .Radii = {.TopLeft = radius(radii.TopLeft()),
+                                         .TopRight = radius(radii.TopRight()),
+                                         .BottomRight = radius(radii.BottomRight()),
+                                         .BottomLeft = radius(radii.BottomLeft())}};
   }
 
   void AddRoundedRect(gfx::Path2D &path, const boo::FloatRoundedRect &rect) noexcept

@@ -210,6 +210,17 @@ namespace krys::boo
       _hasPausedImageAnimations = b;
     }
 
+    /// @brief Repaints only if the old and new rects differ: what changed between them, or both whole.
+    /// @return Whether it repainted (or nothing needed it).
+    bool RepaintAfterLayoutIfNeeded(const RenderLayerModelObject *repaintContainer,
+                                    RequiresFullRepaint requiresFullRepaint, const RepaintRects &oldRects,
+                                    const RepaintRects &newRects) noexcept;
+    /// @brief Whether layout checks if the renderer needs repainting (a `LayoutRepainter`), rather than
+    /// leaving it to its layer or a full repaint.
+    KRYS_NODISCARD bool CheckForRepaintDuringLayout() const noexcept;
+    /// @brief Whether the renderer is invisible and so is everything in its enclosing layer.
+    KRYS_NODISCARD bool IsInsideEntirelyHiddenLayer() const noexcept;
+
     VisibleInViewportState ImageFrameAvailable(CachedImage &, ImageAnimatingState,
                                                const IntRect *) noexcept override;
     KRYS_NODISCARD VisibleInViewportState
@@ -369,8 +380,7 @@ namespace krys::boo
 
     void WillBeDestroyed() noexcept override;
 
-    // FIXME: Most of the work upstream does here (repaint, layout invalidation, layers, images, counters,
-    // outlines, scroll anchoring, line layout) comes with layout and painting.
+    // FIXME: Scroll anchoring, once there is any.
     virtual void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept;
     virtual void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept;
 
@@ -433,6 +443,14 @@ namespace krys::boo
     KRYS_NODISCARD RenderPtr<RenderObject> DetachRendererInternal(RenderObject &renderer) noexcept;
 
     KRYS_NODISCARD style::Difference AdjustStyleDifference(style::Difference diff) const noexcept;
+
+    /// @brief Repaints, before @p newStyle replaces @p oldStyle, what the change will move or hide.
+    /// @return Whether it repainted.
+    bool RepaintBeforeStyleChange(style::Difference diff, const RenderStyle &oldStyle,
+                                  const RenderStyle &newStyle) noexcept;
+    KRYS_NODISCARD bool ShouldRepaintForStyleDifference(style::Difference diff) const noexcept;
+    void UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept;
+    void IssueRepaintForOutlineAuto(float outlineSize) noexcept;
   };
 }
 

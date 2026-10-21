@@ -1001,7 +1001,31 @@ namespace krys::boo
       _enclosingPaginationLayer = nullptr;
     }
 
-    // FIXME: Compute the repaint rects and repaint after layout, once there's painting.
+    auto repaintIfNecessary = [&](bool checkForRepaint)
+    {
+      // FIXME: Paint offset cache does not work with RenderLayers as there is not a 1-to-1
+      // mapping between them and the RenderObjects. It would be neat to enable
+      // LayoutState outside the layout() phase and use it here.
+      krys_debug_assert(!Renderer().View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled());
+
+      const auto *repaintContainer = Renderer().ContainerForRepaint().Renderer;
+
+      auto oldRects = RepaintRects();
+      ComputeRepaintRects(repaintContainer);
+      auto newRects = RepaintRects();
+
+      if (checkForRepaint && ShouldRepaintAfterLayout() && newRects)
+      {
+        auto needsFullRepaint = GetRepaintStatus() == RepaintStatus::NeedsFullRepaint
+                                  ? RequiresFullRepaint::Yes
+                                  : RequiresFullRepaint::No;
+        auto resolvedOldRects = oldRects.value_or(RenderObject::RepaintRects {});
+        Renderer().RepaintAfterLayoutIfNeeded(repaintContainer, needsFullRepaint, resolvedOldRects,
+                                              *newRects);
+      }
+    };
+
+    repaintIfNecessary(flags.Contains(UpdateLayerPositionsFlag::CheckForRepaint));
 
     _repaintStatus = RepaintStatus::NeedsNormalRepaint;
     _hasFixedContainingBlockAncestor =
@@ -1169,6 +1193,78 @@ namespace krys::boo
     // FIXME: The compositing geometry updates, once there's compositing.
 
     return geometryChanged;
+  }
+
+  bool RenderLayer::ShouldRepaintAfterLayout() const noexcept
+  {
+    // FIXME: SVG containers never repaint after layout (only their contents do), once there's SVG.
+    if (_repaintStatus == RepaintStatus::NeedsNormalRepaint
+        || _repaintStatus == RepaintStatus::NeedsFullRepaint)
+    {
+      return true;
+    }
+
+    // Composited layers that were moved during a positioned movement only
+    // layout, don't need to be repainted. They just need to be recomposited.
+    krys_debug_assert(_repaintStatus == RepaintStatus::NeedsFullRepaintForOutOfFlowMovementLayout);
+    // FIXME: Composited layers that don't paint into a composited ancestor, once there's compositing.
+    return true;
+  }
+
+  Maybe<LayoutRect> RenderLayer::CachedClippedOverflowRect() const noexcept
+  {
+    if (!_repaintRectsValid)
+    {
+      return null;
+    }
+
+    return _repaintRects.ClippedOverflowRect;
+  }
+
+  void RenderLayer::ComputeRepaintRects(const RenderLayerModelObject *repaintContainer) noexcept
+  {
+    krys_debug_assert(!_visibleContentStatusDirty);
+
+    if (IsSubtreeVisibilityHiddenOrOpacityZero() || !IsSelfPaintingLayer())
+    {
+      ClearRepaintRects();
+    }
+    else
+    {
+      _repaintRects = Renderer().RectsForRepaintingAfterLayout(repaintContainer, RepaintOutlineBounds::Yes);
+      _repaintRectsValid = true;
+    }
+
+    if (IsSubtreeVisibilityHiddenOrOpacityZero())
+    {
+      _repaintContainer = nullptr;
+    }
+    else
+    {
+      _repaintContainer = CreateWeakPtr(repaintContainer);
+    }
+  }
+
+  void RenderLayer::ComputeRepaintRectsIncludingDescendants() noexcept
+  {
+    // FIXME: computeRepaintRects() has to walk up the parent chain for every layer to compute the rects.
+    // We should make this more efficient.
+    ComputeRepaintRects(Renderer().ContainerForRepaint().Renderer);
+    ClearClipRects(PaintingClipRects);
+
+    for (auto *layer = FirstChild(); layer; layer = layer->NextSibling())
+    {
+      layer->ComputeRepaintRectsIncludingDescendants();
+    }
+  }
+
+  void RenderLayer::RepaintIncludingDescendants() noexcept
+  {
+    Renderer().Repaint();
+    for (auto *current = FirstChild(); current; current = current->NextSibling())
+    {
+      current->RepaintIncludingDescendants();
+    }
   }
 
   void RenderLayer::SetRepaintStatus(RepaintStatus status) noexcept
@@ -1370,7 +1466,7 @@ namespace krys::boo
 
     _visibleContentStatusDirty = false;
     _hasVisibleContent = true;
-    // FIXME: Compute the repaint rects, once there's painting.
+    ComputeRepaintRects(Renderer().ContainerForRepaint().Renderer);
     SetNeedsPositionUpdate();
     if (!IsNormalFlowOnly())
     {
@@ -1628,8 +1724,9 @@ namespace krys::boo
     else
     {
       Parent()->DirtyAncestorChainHasSelfPaintingLayerDescendantStatus();
-      // FIXME: Clear the repaint rects, and update the float painter of a floating box, once there's painting
-      // and floats.
+      ClearRepaintRects();
+      // FIXME: Update the float painter of a floating box (updateFloatPainterAfterSelfPaintingLayerChange),
+      // once floats track it.
     }
   }
 
@@ -3327,7 +3424,16 @@ namespace krys::boo
       flags.Add(UpdateLayerPositionsAfterScrollFlag::HasSeenAncestorWithOverflowClip);
     }
 
-    // FIXME: Compute the repaint rects of self-painting layers that moved, once there's painting.
+    bool shouldComputeRepaintRects =
+      (flags.Contains(UpdateLayerPositionsAfterScrollFlag::HasSeenViewportConstrainedAncestor)
+       || flags.ContainsAll({UpdateLayerPositionsAfterScrollFlag::IsOverflowScroll,
+                             UpdateLayerPositionsAfterScrollFlag::HasSeenAncestorWithOverflowClip}))
+      && IsSelfPaintingLayer();
+    // FIXME: We could track the repaint container as we walk down the tree.
+    if (shouldComputeRepaintRects)
+    {
+      ComputeRepaintRects(Renderer().ContainerForRepaint().Renderer);
+    }
 
     for (auto *child = FirstChild(); child; child = child->NextSibling())
     {

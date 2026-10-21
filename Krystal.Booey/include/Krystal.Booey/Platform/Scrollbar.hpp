@@ -255,7 +255,6 @@ namespace krys::boo
     KRYS_NODISCARD IntPoint ConvertFromContainingWindow(const IntPoint &windowPoint) const noexcept;
 
     /// @brief Repaints the scrollbar's @p rect.
-    // FIXME: Repaint tracking: the whole page repaints after every change.
     void InvalidateRect(const IntRect &rect) noexcept;
     void Invalidate() noexcept
     {

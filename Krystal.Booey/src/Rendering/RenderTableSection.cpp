@@ -789,7 +789,14 @@ namespace krys::boo
         if (childOffset.Width() || childOffset.Height())
         {
           View().FrameView().LayoutContext().AddLayoutDelta(childOffset);
-          // FIXME: Repaint the cell if it moved (repaintDuringLayoutIfMoved), once there's painting.
+
+          // If the child moved, we have to repaint it as well as any floating/positioned
+          // descendants.  An exception is if we need a layout.  In this case, we know we're going to
+          // repaint ourselves (and the child) anyway.
+          if (!Table()->SelfNeedsLayout() && cell->CheckForRepaintDuringLayout())
+          {
+            cell->RepaintDuringLayoutIfMoved(oldCellRect);
+          }
         }
       }
     }

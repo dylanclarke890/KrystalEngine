@@ -184,6 +184,7 @@ namespace krys::boo
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+    void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
 
     /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.

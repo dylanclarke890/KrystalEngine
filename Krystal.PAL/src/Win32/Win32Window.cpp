@@ -716,14 +716,14 @@ namespace krys::pal
 
     void Win32Window::Show() noexcept
     {
-      auto result = ::ShowWindow(_handle, SW_SHOW);
-      assert(result);
+      // The result is whether the window was visible before, not an error.
+      (void)::ShowWindow(_handle, SW_SHOW);
     }
 
     void Win32Window::Hide() noexcept
     {
-      auto result = ::ShowWindow(_handle, SW_HIDE);
-      assert(result);
+      // The result is whether the window was visible before, not an error.
+      (void)::ShowWindow(_handle, SW_HIDE);
     }
 
     void Win32Window::SetCallbacks(WindowCallbacks &&callbacks) noexcept

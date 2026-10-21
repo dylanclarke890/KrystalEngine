@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/FixedTableLayout.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -450,6 +451,8 @@ namespace krys::boo
 
   void RenderTable::LayoutCaption(RenderTableCaption &caption) noexcept
   {
+    LayoutRect captionRect(caption.FrameRect());
+
     if (caption.NeedsLayout())
     {
       // The margins may not be available but ensure the caption is at least located beneath any previous
@@ -463,7 +466,10 @@ namespace krys::boo
     // Apply the margins to the location now that they are definitely available from layout
     caption.SetLogicalLocation(LayoutPoint(caption.MarginStart(), caption.MarginBefore() + LogicalHeight()));
 
-    // FIXME: Repaint the caption if it moved (repaintDuringLayoutIfMoved), once there's painting.
+    if (!SelfNeedsLayout() && caption.CheckForRepaintDuringLayout())
+    {
+      caption.RepaintDuringLayoutIfMoved(captionRect);
+    }
 
     SetLogicalHeight(LogicalHeight() + caption.LogicalHeight() + caption.MarginBefore()
                      + caption.MarginAfter());
@@ -557,9 +563,11 @@ namespace krys::boo
     // to call this before we call BorderStart/BorderEnd to avoid getting a stale value.
     RecalcBordersInRowDirection();
 
+    bool sectionMoved = false;
+    LayoutUnit movedSectionLogicalTop;
     bool shouldCacheIntrinsicContentLogicalHeightForFlexItem = true;
 
-    // FIXME: Repaint (LayoutRepainter, the sections that moved), once there's painting.
+    LayoutRepainter repainter(*this);
     {
       // There are no reflections (-webkit-box-reflect was dropped).
       LayoutStateMaintainer statePusher(*this, LocationOffset(),
@@ -694,6 +702,13 @@ namespace krys::boo
       // position the table sections
       for (auto *section = TopSection(); section; section = SectionBelow(section))
       {
+        if (!sectionMoved && section->LogicalTop() != LogicalHeight())
+        {
+          sectionMoved = true;
+          movedSectionLogicalTop = std::min(LogicalHeight(), section->LogicalTop())
+                                   + (GetWritingMode().IsHorizontal() ? section->VisualOverflowRect().Y()
+                                                                      : section->VisualOverflowRect().X());
+        }
         section->SetLogicalLocation(LayoutPoint(sectionLogicalLeft, LogicalHeight()));
 
         SetLogicalHeight(LogicalHeight() + section->LogicalHeight());
@@ -725,7 +740,27 @@ namespace krys::boo
       ComputeOverflow(ClientLogicalBottom());
     }
 
-    // FIXME: The page offset, and laying the table out again when a section moved in paginated layout
+    // FIXME: The page offset, once there's pagination.
+
+    bool didFullRepaint = repainter.RepaintAfterLayout();
+    // Repaint with our new bounds if they are different from our old bounds.
+    if (!didFullRepaint && sectionMoved)
+    {
+      if (GetWritingMode().IsHorizontal())
+      {
+        RepaintRectangle(LayoutRect(VisualOverflowRect().X(), movedSectionLogicalTop,
+                                    VisualOverflowRect().Width(),
+                                    VisualOverflowRect().MaxY() - movedSectionLogicalTop));
+      }
+      else
+      {
+        RepaintRectangle(LayoutRect(movedSectionLogicalTop, VisualOverflowRect().Y(),
+                                    VisualOverflowRect().MaxX() - movedSectionLogicalTop,
+                                    VisualOverflowRect().Height()));
+      }
+    }
+
+    // FIXME: Laying the table out again when a section moved in paginated layout
     // (markForPaginationRelayoutIfNeeded), once there's pagination.
 
     // FIXME: This value isn't the intrinsic content logical height, but we need

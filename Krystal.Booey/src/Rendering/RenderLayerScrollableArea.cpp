@@ -179,19 +179,25 @@ namespace krys::boo
       // FIXME: The compositing layers, rendering-dependent regions and debug overlays, once there are any.
     }
 
-    // FIXME: The caret rect, repaint and the frame view's scroll offset notification, once there are
-    // selection and repaint tracking.
+    const auto *repaintContainer = renderer.ContainerForRepaint().Renderer;
+    // FIXME: The caret rect needs to be invalidated after scrolling, once there's selection.
 
-    // A mouse over the box moves soon, so the hover state follows the scrolled content.
-    // FIXME: The rect for repaint (clippedOverflowRectForRepaint) rather than the border box, once there's
-    // repaint tracking.
-    if (auto *scrolledBox = _layer.GetRenderBox())
+    auto cachedRect = _layer.CachedClippedOverflowRect();
+    auto rectForRepaint = cachedRect ? *cachedRect : renderer.ClippedOverflowRectForRepaint(repaintContainer);
+
+    FloatQuad quadForFakeMouseMoveEvent = FloatQuad(FloatRect(rectForRepaint));
+    if (repaintContainer)
     {
-      FloatQuad quadForFakeMouseMoveEvent =
-        scrolledBox->LocalToAbsoluteQuad(FloatQuad(FloatRect(scrolledBox->BorderBoxRect())));
-      view.FrameView().Frame().GetEventHandler().DispatchFakeMouseMoveEventSoonInQuad(
-        quadForFakeMouseMoveEvent);
+      quadForFakeMouseMoveEvent = repaintContainer->LocalToAbsoluteQuad(quadForFakeMouseMoveEvent);
     }
+    view.FrameView().Frame().GetEventHandler().DispatchFakeMouseMoveEventSoonInQuad(
+      quadForFakeMouseMoveEvent);
+
+    // FIXME: Composited scrolling repaints only when its backing needs it, and descendant composited layers
+    // with fixed backgrounds repaint too, once there's compositing.
+
+    // Just schedule a full repaint of our object.
+    renderer.RepaintUsingContainer(repaintContainer, rectForRepaint);
 
     // Schedule the scroll and scroll-related DOM events.
     if (auto *element = renderer.GetElement())
@@ -201,6 +207,40 @@ namespace krys::boo
     }
 
     view.FrameView().ViewportContentsChanged();
+  }
+
+  void RenderLayerScrollableArea::InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept
+  {
+    if (!ShowsOverflowControls())
+    {
+      return;
+    }
+
+    // FIXME: Scrollbars in their own compositing layers, once there's compositing.
+
+    auto scrollRect = rect;
+    RenderBox *box = _layer.GetRenderBox();
+    krys_debug_assert(box);
+    // If we are not yet inserted into the tree, there is no need to repaint.
+    if (!box->Parent())
+    {
+      return;
+    }
+
+    auto rects = OverflowControlsRects();
+
+    if (&scrollbar == _vBar.get())
+    {
+      scrollRect.MoveBy(rects.VerticalScrollbar.Location());
+    }
+    else
+    {
+      scrollRect.MoveBy(rects.HorizontalScrollbar.Location());
+    }
+
+    LayoutRect repaintRect = LayoutRect(scrollRect);
+    box->FlipForWritingMode(repaintRect);
+    box->RepaintRectangle(repaintRect);
   }
 
   void RenderLayerScrollableArea::ScrollDidEnd() noexcept
@@ -856,8 +896,8 @@ namespace krys::boo
 
       _layer.UpdateSelfPaintingLayer();
 
-      // FIXME: Repaint, once there's painting.
       auto &renderer = _layer.Renderer();
+      renderer.Repaint();
 
       if (renderer.Style().OverflowX() == Overflow::Auto || renderer.Style().OverflowY() == Overflow::Auto)
       {

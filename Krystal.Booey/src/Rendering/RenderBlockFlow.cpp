@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
@@ -314,7 +315,7 @@ namespace krys::boo
 
     // Empty block containers produce empty formatting lines which may affect trim-start/end.
     auto textBoxTrimmer = TextBoxTrimmer {*this};
-    // FIXME: Repaint (LayoutRepainter), once there's painting.
+    auto repainter = LayoutRepainter {*this};
 
     // FIXME: Instead of taking floats from previous sibling and forwarding them to next unconditionally, we
     // should completely skip these empty block containers.
@@ -358,6 +359,8 @@ namespace krys::boo
     {
       updateLayerProperties();
     }
+
+    repainter.RepaintAfterLayout();
   }
 
   void RenderBlockFlow::LayoutBlock(RelayoutChildren relayoutChildren, LayoutUnit pageLogicalHeight) noexcept
@@ -385,7 +388,7 @@ namespace krys::boo
       return LayoutBlockWithNoChildren();
     }
 
-    // FIXME: Repaint (LayoutRepainter), once there's painting.
+    LayoutRepainter repainter(*this);
 
     if (RecomputeLogicalWidthAndColumnWidth())
     {
@@ -542,7 +545,57 @@ namespace krys::boo
 
     UpdateLayerTransform();
 
-    // FIXME: Repaint with our new bounds if they are different from our old bounds, once there's painting.
+    // FIXME: This repaint logic should be moved into a separate helper function!
+    // Repaint with our new bounds if they are different from our old bounds.
+    bool didFullRepaint = repainter.RepaintAfterLayout();
+    if (!didFullRepaint && repaintLogicalTop != repaintLogicalBottom
+        && (styleToUse.UsedVisibility() == Visibility::Visible || EnclosingLayer()->HasVisibleContent()))
+    {
+      // FIXME: We could tighten up the left and right invalidation points if we let layoutInlineChildren fill
+      // them in based off the particular lines it had to lay out. We wouldn't need the
+      // hasNonVisibleOverflow() hack in that case either.
+      LayoutUnit repaintLogicalLeft = LogicalLeftVisualOverflow();
+      LayoutUnit repaintLogicalRight = LogicalRightVisualOverflow();
+      if (HasNonVisibleOverflow())
+      {
+        // If we have clipped overflow, we should use layout overflow as well, since visual overflow from
+        // lines didn't propagate to our block's overflow. Note the old code did this as well but even for
+        // overflow:visible. The addition of hasNonVisibleOverflow() at least tightens up the hack a bit.
+        // layoutInlineChildren should be patched to compute the entire repaint rect.
+        repaintLogicalLeft = std::min(repaintLogicalLeft, LogicalLeftLayoutOverflow());
+        repaintLogicalRight = std::max(repaintLogicalRight, LogicalRightLayoutOverflow());
+      }
+
+      LayoutRect repaintRect;
+      if (IsHorizontalWritingMode())
+      {
+        repaintRect =
+          LayoutRect(repaintLogicalLeft, repaintLogicalTop, repaintLogicalRight - repaintLogicalLeft,
+                     repaintLogicalBottom - repaintLogicalTop);
+      }
+      else
+      {
+        repaintRect =
+          LayoutRect(repaintLogicalTop, repaintLogicalLeft, repaintLogicalBottom - repaintLogicalTop,
+                     repaintLogicalRight - repaintLogicalLeft);
+      }
+
+      if (HasNonVisibleOverflow())
+      {
+        // Adjust repaint rect for scroll offset
+        repaintRect.MoveBy(-LayoutPoint(GetScrollPosition()));
+
+        // Don't allow this rect to spill out of our overflow box.
+        repaintRect.Intersect(LayoutRect(LayoutPoint(), Size()));
+      }
+
+      // Make sure the rect is still non-empty after intersecting for overflow above
+      if (!repaintRect.IsEmpty())
+      {
+        RepaintRectangle(repaintRect); // We need to do a partial repaint of our content.
+        // FIXME: Reflections (`-webkit-box-reflect` was dropped).
+      }
+    }
   }
 
   void RenderBlockFlow::DirtyForLayoutFromPercentageHeightDescendants() noexcept
@@ -1037,6 +1090,7 @@ namespace krys::boo
     // FIXME: Mark the child for relayout when its pagination changed (markForPaginationRelayoutIfNeeded),
     // once there's pagination.
 
+    bool childHadLayout = child.EverHadLayout();
     bool childNeededLayout = child.NeedsLayout();
     if (childNeededLayout)
     {
@@ -1126,12 +1180,22 @@ namespace krys::boo
     {
       View().FrameView().LayoutContext().AddLayoutDelta(childOffset);
 
-      // FIXME: If the child moved, we have to repaint it as well as any floating/positioned
-      // descendants, once there's painting.
+      // If the child moved, we have to repaint it as well as any floating/positioned
+      // descendants. An exception is if we need a layout. In this case, we know we're going to
+      // repaint ourselves (and the child) anyway.
+      if (childHadLayout && !SelfNeedsLayout() && child.CheckForRepaintDuringLayout())
+      {
+        child.RepaintDuringLayoutIfMoved(oldRect);
+      }
     }
 
-    // FIXME: Repaint a child laid out for the first time, and apply an after page or column break, once
-    // there's painting and pagination.
+    if (!childHadLayout && child.CheckForRepaintDuringLayout())
+    {
+      child.Repaint();
+      child.RepaintOverhangingFloats(true);
+    }
+
+    // FIXME: Apply an after page or column break, once there's pagination.
 
 #if KRYS_DEBUG
     krys_debug_assert(View().FrameView().LayoutContext().LayoutDelta() == oldLayoutDelta);
@@ -2412,6 +2476,7 @@ namespace krys::boo
         continue;
       }
 
+      LayoutRect oldRect = childBox.FrameRect();
       auto childBoxUsedClear = RenderStyle::GetUsedClear(childBox);
       if (childBoxUsedClear == UsedClear::Left || childBoxUsedClear == UsedClear::Both)
       {
@@ -2439,9 +2504,44 @@ namespace krys::boo
       {
         shapeOutside->InvalidateForSizeChangeIfNeeded();
       }
-      // FIXME: If the child moved, we have to repaint it, once there's painting.
+      // If the child moved, we have to repaint it.
+      if (childBox.CheckForRepaintDuringLayout())
+      {
+        childBox.RepaintDuringLayoutIfMoved(oldRect);
+      }
     }
     return true;
+  }
+
+  void RenderBlockFlow::RepaintOverhangingFloats(bool paintAllDescendants) noexcept
+  {
+    // Repaint any overhanging floats (if we know we're the one to paint them).
+    // Otherwise, bail out.
+    if (!HasOverhangingFloats())
+    {
+      return;
+    }
+
+    // FIXME: Avoid disabling LayoutState. At the very least, don't disable it for floats originating
+    // in this block. Better yet would be to push extra state for the containers of other floats.
+    LayoutStateDisabler layoutStateDisabler(View().FrameView().LayoutContext());
+    for (const auto &floatingObject : _floatingObjects->Set())
+    {
+      if (!floatingObject->Renderer())
+      {
+        continue;
+      }
+      // Only repaint the object if it is overhanging, is not in its own layer, and
+      // is our responsibility to paint (m_shouldPaint is set). When paintAllDescendants is true, the latter
+      // condition is replaced with being a descendant of us.
+      auto &renderer = *floatingObject->Renderer();
+      if (LogicalBottomForFloat(*floatingObject) > LogicalHeight() && !renderer.HasSelfPaintingLayer()
+          && (floatingObject->PaintsFloat() || (paintAllDescendants && renderer.IsDescendantOf(this))))
+      {
+        renderer.Repaint();
+        renderer.RepaintOverhangingFloats(false);
+      }
+    }
   }
 
   void RenderBlockFlow::ClearFloats(UsedClear usedClear) noexcept
@@ -3140,14 +3240,19 @@ namespace krys::boo
         break;
       case InvalidationReason::ContentChange:
       {
-        // FIXME: Repaint the block and its out-of-flow content (the display content is removed here), once
-        // there's painting.
+        // Since we eagerly remove the display content here, repaints issued between this invalidation
+        // (triggered by style change/content mutation) and the subsequent layout would produce empty rects.
+        Repaint();
         for (auto walker = InlineWalker(*this); !walker.AtEnd(); walker.Advance())
         {
           auto &renderer = *walker.Current();
           if (!renderer.EverHadLayout())
           {
             continue;
+          }
+          if (!renderer.IsInFlow() && InlineLayout()->Contains(Downcast<RenderElement>(renderer)))
+          {
+            renderer.Repaint();
           }
           renderer.SetNeedsPreferredWidthsUpdate();
         }
@@ -3296,6 +3401,35 @@ namespace krys::boo
     return {logicalTop, logicalBottom};
   }
 
+  namespace
+  {
+    void SetFullRepaintOnParentInlineBoxLayerIfNeeded(const RenderText &renderer) noexcept
+    {
+      // Repaints (on self) are normally issued either during layout using LayoutRepainter inside ::layout()
+      // functions (#1) or after layout, while recursing the layer tree (#2).
+      // Additionally, repaint at the block level (#3) takes care of regular in-flow content.
+      // However in case of text content, we don't have (#1), (#2) is primarily a geometry diff type of
+      // repaint meaning no repaint happens unless content size changes (or full repaint bit is set on the
+      // layer) and (#3) only works when the block container and the text content share the same layer. Here
+      // we mark the parent inline box's layer dirty to trigger repaint at (#2).
+      if (!renderer.NeedsLayout())
+      {
+        return;
+      }
+      auto *parent = renderer.Parent();
+      if (!parent)
+      {
+        krys_debug_assert(false);
+        return;
+      }
+      if (!parent->IsInline() || !parent->HasLayer())
+      {
+        return;
+      }
+      Downcast<RenderLayerModelObject>(*parent).Layer()->SetRepaintStatus(RepaintStatus::NeedsFullRepaint);
+    }
+  }
+
   RenderBlockFlow::InlineContentStatus
     RenderBlockFlow::MarkInlineContentDirtyForLayout(RelayoutChildren relayoutChildren) noexcept
   {
@@ -3359,8 +3493,10 @@ namespace krys::boo
         continue;
       }
 
-      // FIXME: Mark the parent inline box's layer for a full repaint when its text changed
-      // (setFullRepaintOnParentInlineBoxLayerIfNeeded), once there's painting.
+      if (auto *renderText = DynamicDowncast<RenderText>(renderer))
+      {
+        SetFullRepaintOnParentInlineBoxLayerIfNeeded(*renderText);
+      }
 
       if (auto *inlineLevelBox = DynamicDowncast<RenderBox>(renderer))
       {

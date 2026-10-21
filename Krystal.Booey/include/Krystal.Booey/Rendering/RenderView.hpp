@@ -23,13 +23,14 @@ namespace krys::boo
   class LocalFrameView;
   class RenderCounter;
 
+  class Region;
+
   /// @brief Counters whose text needs updating, keyed by address; the weak pointer tells whether the counter
   /// is still alive.
   using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Layout, layers, selection, printing and the repaint and compositing bookkeeping come with layout,
-  // selection and compositing.
+  // FIXME: Selection, printing and the compositing bookkeeping come with selection, printing and compositing.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -47,6 +48,7 @@ namespace krys::boo
     HashSet<const RenderBox *> _containerQueryBoxes;
     // Renderers remove themselves when they're destroyed or stop being an image's client.
     HashMap<RenderElement *, List<CachedImage *>> _renderersWithPausedImageAnimation;
+    mutable UniquePtr<Region> _accumulatedRepaintRegion;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -188,6 +190,43 @@ namespace krys::boo
                                  TransformState &transformState) const noexcept override;
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
+#pragma region Repaint
+
+    KRYS_NODISCARD Maybe<RepaintRects>
+      ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
+                                     VisibleRectContext context) const noexcept override;
+    /// @brief Repaints the whole of the view's contents (its layout overflow).
+    void RepaintRootContents() noexcept;
+    /// @brief Repaints @p repaintRect, in the view's (the contents') coordinates.
+    void RepaintViewRectangle(const LayoutRect &repaintRect) noexcept;
+    void RepaintViewAndCompositedLayers() noexcept;
+    /// @brief The part of the contents the view shows.
+    KRYS_NODISCARD LayoutRect ViewRect() const noexcept;
+
+    /// @brief While one exists, repaints in the view are united into a region, and the frame view is told of
+    /// it all at once when the outermost goes away.
+    class RepaintRegionAccumulator
+    {
+      KRYS_NON_COPY_MOVABLE(RepaintRegionAccumulator);
+
+    private:
+      bool _wasAccumulatingRepaintRegion {false};
+      WeakPtr<RenderView> _view;
+
+    public:
+      explicit RepaintRegionAccumulator(RenderView *view) noexcept;
+      ~RepaintRegionAccumulator() noexcept;
+    };
+
+  private:
+    KRYS_NODISCARD bool ShouldRepaint(const LayoutRect &rect) const noexcept;
+    /// @return Whether the whole view is now dirty.
+    bool AccumulateRepaintRect(IntRect rect, IntRect viewRect) noexcept;
+    void FlushAccumulatedRepaintRegion() const noexcept;
+
+  public:
+#pragma endregion
 
     /// @brief Resumes the paused image animations of the renderers now visible in @p visibleRect.
     void ResumePausedImageAnimationsIfNeeded(const IntRect &visibleRect) noexcept;

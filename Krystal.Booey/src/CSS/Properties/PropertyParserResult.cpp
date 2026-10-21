@@ -9,7 +9,7 @@ namespace krys::boo::css
     ParsedProperties.emplace_back(krys::move(property));
   }
 
-  void PropertyParserResult::AddProperty(PropertyParserState &state, PropertyId property,
+  void PropertyParserResult::AddProperty(KRYS_MAYBE_UNUSED PropertyParserState &state, PropertyId property,
                                          PropertyId currentShorthand, RefPtr<Value> &&value,
                                          IsImportant important, IsImplicit implicit) noexcept
   {

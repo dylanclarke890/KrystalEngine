@@ -356,8 +356,10 @@ namespace krys::boo::layout_integration
       renderer.SetMarginBefore(flexItemGeometry.MarginBefore());
       renderer.SetMarginAfter(flexItemGeometry.MarginAfter());
 
-      // FIXME: Repaint items that moved or had never been laid out (checkForRepaintDuringLayout), once
-      // there's painting.
+      if (!renderer.EverHadLayout() || renderer.CheckForRepaintDuringLayout())
+      {
+        renderer.Repaint();
+      }
     }
   }
 

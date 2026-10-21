@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutState.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -513,7 +514,7 @@ namespace krys::boo
 
   void RenderGrid::LayoutGrid(RelayoutChildren relayoutChildren) noexcept
   {
-    // FIXME: Repaint (LayoutRepainter), once there's painting.
+    LayoutRepainter repainter(*this);
     {
       // There are no reflections (-webkit-box-reflect was dropped).
       LayoutStateMaintainer statePusher(*this, LocationOffset(),
@@ -671,6 +672,8 @@ namespace krys::boo
 
     UpdateLayerTransform();
 
+    repainter.RepaintAfterLayout();
+
     _trackSizingAlgorithm.ClearBaselineItemsCache();
     _baselineItemsCached = false;
   }
@@ -702,7 +705,7 @@ namespace krys::boo
 
   void RenderGrid::LayoutMasonry(RelayoutChildren relayoutChildren) noexcept
   {
-    // FIXME: Repaint (LayoutRepainter), once there's painting.
+    LayoutRepainter repainter(*this);
     {
       // There are no reflections (-webkit-box-reflect was dropped).
       LayoutStateMaintainer statePusher(*this, LocationOffset(),
@@ -877,6 +880,8 @@ namespace krys::boo
     }
 
     UpdateLayerTransform();
+
+    repainter.RepaintAfterLayout();
 
     _trackSizingAlgorithm.ClearBaselineItemsCache();
     _baselineItemsCached = false;
@@ -2117,6 +2122,8 @@ namespace krys::boo
         GridAreaBreadthForGridItemIncludingAlignmentOffsets(gridItem, GridTrackSizingDirection::Columns),
         GridAreaBreadthForGridItemIncludingAlignmentOffsets(gridItem, GridTrackSizingDirection::Rows));
 
+      LayoutRect oldGridItemRect = gridItem.FrameRect();
+
       // Stretching logic might force a grid item layout, so we need to run it before the layoutIfNeeded
       // call to avoid unnecessary relayouts. This might imply that grid item margins, needed to correctly
       // determine the available space before stretching, are not set yet.
@@ -2130,7 +2137,13 @@ namespace krys::boo
 
       SetLogicalPositionForGridItem(gridItem);
 
-      // FIXME: Repaint the grid item if it moved (repaintDuringLayoutIfMoved), once there's painting.
+      // If the grid item moved, we have to repaint it as well as any floating/positioned
+      // descendants. An exception is if we need a layout. In this case, we know we're going to
+      // repaint ourselves (and the grid item) anyway.
+      if (!SelfNeedsLayout() && gridItem.CheckForRepaintDuringLayout())
+      {
+        gridItem.RepaintDuringLayoutIfMoved(oldGridItemRect);
+      }
     }
   }
 

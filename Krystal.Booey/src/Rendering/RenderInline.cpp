@@ -374,6 +374,220 @@ namespace krys::boo
     return {};
   }
 
+  LayoutRect RenderInline::LinesVisualOverflowBoundingBox() const noexcept
+  {
+    if (auto *layout = layout_integration::LineLayout::Containing(*this))
+    {
+      if (!LayoutBox())
+      {
+        // Repaint may be issued on subtrees during content mutation with newly inserted renderers.
+        krys_debug_assert(NeedsLayout());
+        return {};
+      }
+      return layout->InkOverflowBoundingBoxRectFor(*this);
+    }
+
+    // Without a line layout (the legacy line boxes are not supported), the inline has no lines.
+    return {};
+  }
+
+#pragma region Repaint
+
+  LayoutRect RenderInline::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                               VisibleRectContext context) const noexcept
+  {
+    // Only first-letter renderers are allowed in here during layout. They mutate the tree triggering
+    // repaints.
+#if KRYS_DEBUG
+    auto insideSelfPaintingInlineBox = [&]
+    {
+      if (HasSelfPaintingLayer())
+      {
+        return true;
+      }
+      auto *containingBlock = ContainingBlock();
+      for (auto *ancestor = Parent(); ancestor && ancestor != containingBlock; ancestor = ancestor->Parent())
+      {
+        if (ancestor->HasSelfPaintingLayer())
+        {
+          return true;
+        }
+      }
+      return false;
+    };
+    krys_debug_assert(!View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled()
+                      || Style().GetPseudoElementType() == PseudoElementType::FirstLetter
+                      || insideSelfPaintingInlineBox());
+#endif
+
+    auto knownEmpty = [&]
+    {
+      // FIXME: Continuations, once there are any.
+      if (layout_integration::LineLayout::Containing(*this))
+      {
+        return false;
+      }
+      return true;
+    };
+
+    if (knownEmpty())
+    {
+      return LayoutRect();
+    }
+
+    auto repaintRect = LinesVisualOverflowBoundingBox();
+    bool hitRepaintContainer = false;
+
+    // We need to add in the in-flow position offsets of any inlines (including us) up to our
+    // containing block.
+    RenderBlock *containingBlock = ContainingBlock();
+    for (const RenderElement *inlineFlow = this; inlineFlow; inlineFlow = inlineFlow->Parent())
+    {
+      auto *renderInline = DynamicDowncast<RenderInline>(*inlineFlow);
+      if (!renderInline || inlineFlow == containingBlock)
+      {
+        break;
+      }
+      if (inlineFlow == repaintContainer)
+      {
+        hitRepaintContainer = true;
+        break;
+      }
+      if (inlineFlow->Style().HasInFlowPosition() && inlineFlow->HasLayer())
+      {
+        repaintRect.Move(renderInline->Layer()->OffsetForInFlowPosition());
+      }
+    }
+
+    LayoutUnit outlineSize {Style().OutlineSize()};
+    repaintRect.Inflate(outlineSize);
+
+    if (hitRepaintContainer || !containingBlock)
+    {
+      return repaintRect;
+    }
+
+    auto rects = RepaintRects {repaintRect};
+
+    if (containingBlock->HasNonVisibleOverflow())
+    {
+      containingBlock->ApplyCachedClipAndScrollPosition(rects, repaintContainer, context);
+    }
+
+    rects = containingBlock->ComputeRects(rects, repaintContainer, context);
+    repaintRect = rects.ClippedOverflowRect;
+
+    if (outlineSize)
+    {
+      for (auto &child : ChildrenOfType<RenderElement>(*this))
+      {
+        repaintRect.Unite(child.RectWithOutlineForRepaint(repaintContainer, outlineSize));
+      }
+      // FIXME: The continuation, once there are any.
+    }
+
+    return repaintRect;
+  }
+
+  auto RenderInline::RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                                   RepaintOutlineBounds) const noexcept -> RepaintRects
+  {
+    // RepaintOutlineBounds is unused for inlines.
+    return RepaintRects {ClippedOverflowRect(repaintContainer, VisibleRectContextForRepaint())};
+  }
+
+  LayoutRect RenderInline::RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                     LayoutUnit outlineWidth) const noexcept
+  {
+    LayoutRect r(RenderBoxModelObject::RectWithOutlineForRepaint(repaintContainer, outlineWidth));
+    for (auto &child : ChildrenOfType<RenderElement>(*this))
+    {
+      r.Unite(child.RectWithOutlineForRepaint(repaintContainer, outlineWidth));
+    }
+    return r;
+  }
+
+  auto RenderInline::ComputeVisibleRectsUsingPaintOffset(const RepaintRects &rects) const noexcept
+    -> RepaintRects
+  {
+    auto adjustedRects = rects;
+    auto *layoutState = View().FrameView().LayoutContext().LayoutState();
+    if (Style().HasInFlowPosition() && Layer())
+    {
+      adjustedRects.Move(Layer()->OffsetForInFlowPosition());
+    }
+    adjustedRects.Move(layoutState->PaintOffset());
+    if (layoutState->IsClipped())
+    {
+      adjustedRects.ClippedOverflowRect.Intersect(layoutState->ClipRect());
+    }
+    return adjustedRects;
+  }
+
+  auto RenderInline::ComputeVisibleRectsInContainer(const RepaintRects &rects,
+                                                    const RenderLayerModelObject *container,
+                                                    VisibleRectContext context) const noexcept
+    -> Maybe<RepaintRects>
+  {
+    // Repaint offset cache is only valid for root-relative repainting
+    if (View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() && !container
+        && !context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+    {
+      return ComputeVisibleRectsUsingPaintOffset(rects);
+    }
+
+    if (container == this)
+    {
+      return rects;
+    }
+
+    bool containerSkipped;
+    RenderElement *localContainer = Container(container, containerSkipped);
+    if (!localContainer)
+    {
+      return rects;
+    }
+
+    auto adjustedRects = rects;
+    if (Style().HasInFlowPosition() && Layer())
+    {
+      // Apply the in-flow position offset when invalidating a rectangle. The layer
+      // is translated, but the render box isn't, so we need to do this to get the
+      // right dirty rect. Since this is called from RenderObject::setStyle, the relative or sticky position
+      // flag on the RenderObject has been cleared, so use the one on the style().
+      auto offsetForInFlowPosition = Layer()->OffsetForInFlowPosition();
+      adjustedRects.Move(offsetForInFlowPosition);
+    }
+
+    if (localContainer->HasNonVisibleOverflow())
+    {
+      // FIXME: Respect the value of context.options.
+      context.Options.Add(VisibleRectContext::Option::ApplyCompositedContainerScrolls);
+      bool isEmpty = !Downcast<RenderLayerModelObject>(*localContainer)
+                        .ApplyCachedClipAndScrollPosition(adjustedRects, container, context);
+      if (isEmpty)
+      {
+        if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        {
+          return null;
+        }
+        return adjustedRects;
+      }
+    }
+
+    if (containerSkipped)
+    {
+      // If the repaintContainer is below o, then we need to map the rect into repaintContainer's coordinates.
+      auto containerOffset = container->OffsetFromAncestorContainer(*localContainer);
+      adjustedRects.Move(-containerOffset);
+      return adjustedRects;
+    }
+
+    return localContainer->ComputeVisibleRectsInContainer(adjustedRects, container, context);
+  }
+
+#pragma endregion
+
   bool RenderInline::RequiresLayer() const noexcept
   {
     // FIXME: Running accelerated animations too, once there are any.

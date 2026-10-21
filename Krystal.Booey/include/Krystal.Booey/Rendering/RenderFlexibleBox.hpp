@@ -309,6 +309,8 @@ namespace krys::boo
     void CacheFlexItemMainSize(const RenderBox &flexItem) noexcept;
 
     void PerformFlexLayout(RelayoutChildren relayoutChildren) noexcept;
+    void AppendFlexItemFrameRects(FlexItemFrameRects &flexItemFrameRects) noexcept;
+    void RepaintFlexItemsDuringLayoutIfMoved(const FlexItemFrameRects &oldFlexItemRects) noexcept;
 
     KRYS_NODISCARD Maybe<FlexingLineData> ComputeNextFlexLine(size_t &nextIndex,
                                                               const FlexLayoutItems &allItems,

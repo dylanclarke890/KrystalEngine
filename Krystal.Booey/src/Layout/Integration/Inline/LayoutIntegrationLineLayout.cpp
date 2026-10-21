@@ -1106,8 +1106,21 @@ namespace krys::boo::layout_integration
                                         borderBoxVisualRect.Y() - marginBoxVisualRect.Y()});
         floatingObject.SetIsPlaced(true);
 
-        // FIXME: Repaint the float if it moved, once there's painting.
+        auto oldRect = renderer.FrameRect();
         renderer.SetLocation(borderBoxVisualRect.Location());
+
+        if (renderer.CheckForRepaintDuringLayout())
+        {
+          auto hasMoved = oldRect.Location() != renderer.Location();
+          if (hasMoved)
+          {
+            renderer.RepaintDuringLayoutIfMoved(oldRect);
+          }
+          else
+          {
+            renderer.Repaint();
+          }
+        }
         continue;
       }
 

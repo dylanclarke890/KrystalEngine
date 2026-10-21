@@ -495,7 +495,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The accessibility cache and outline-auto ancestors, once there are any.
+    // FIXME: The accessibility cache, once there is one.
+
+    // FIXME: Not after a multi-column set, once there are multi-column flows.
+    if (parent.HasOutlineAutoAncestor()
+        || parent.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto)
+    {
+      newChild->SetHasOutlineAutoAncestor();
+    }
   }
 
   void RenderTreeBuilder::Move(RenderBoxModelObject &from, RenderBoxModelObject &to, RenderObject &child,
@@ -756,7 +763,7 @@ namespace krys::boo
       krys_debug_assert(!c->IsInline());
     }
 #endif
-    // FIXME: Repaint, once there's painting.
+    parent.Repaint();
   }
 
   RenderObject *RenderTreeBuilder::SplitAnonymousBoxesAroundChild(RenderBoxModelObject &parent,

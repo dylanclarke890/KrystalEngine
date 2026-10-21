@@ -13,7 +13,9 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -275,7 +277,7 @@ namespace krys::boo
 
     style::LoadPendingResources(style, GetDocument(), GetElement());
 
-    // FIXME: The repaint before the change, once there's repaint tracking.
+    auto didRepaint = RepaintBeforeStyleChange(diff, _style, style);
     StyleWillChange(diff, style);
     auto oldStyle = krys::move(_style);
     _style = krys::move(style);
@@ -309,7 +311,633 @@ namespace krys::boo
       SetNeedsLayoutForStyleDifference(updatedDiff, &oldStyle);
     }
 
-    // FIXME: The repaint the difference asks for, once there's painting.
+    if (!didRepaint
+        && (updatedDiff == style::DifferenceResult::RepaintLayer
+            || ShouldRepaintForStyleDifference(updatedDiff)))
+    {
+      // Do a repaint with the new style now, e.g., for example if we go from
+      // not having an outline to having an outline.
+      Repaint();
+    }
+  }
+
+  namespace
+  {
+    bool HasNonWhitespaceTextContent(const RenderElement &renderer) noexcept
+    {
+      if (!renderer.ChildrenInline())
+      {
+        return false;
+      }
+
+      if (auto *blockContainer = DynamicDowncast<RenderBlockFlow>(renderer))
+      {
+        for (InlineWalker walker(*blockContainer); !walker.AtEnd(); walker.Advance())
+        {
+          if (auto *textRenderer = DynamicDowncast<RenderText>(*walker.Current());
+              textRenderer && !textRenderer->ContainsOnlyCollapsibleWhitespace())
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      for (auto &textRenderer : ChildrenOfType<RenderText>(renderer))
+      {
+        if (!textRenderer.ContainsOnlyCollapsibleWhitespace())
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    template <typename FillLayers>
+    bool MustRepaintFillLayers(const RenderElement &renderer, const FillLayers &layers) noexcept
+    {
+      // Nobody will use multiple layers without wanting fancy positioning.
+      if (layers.UsedLength() > 1)
+      {
+        return true;
+      }
+
+      auto &layer = layers.UsedFirst();
+
+      // Make sure we have a valid image.
+      auto image = layer.GetImage().TryStyleImage();
+      if (!image || !image->CanRender(&renderer, renderer.Style().UsedZoom()))
+      {
+        return false;
+      }
+
+      if (!layer.GetPositionX().IsKnownZero() || !layer.GetPositionY().IsKnownZero())
+      {
+        return true;
+      }
+
+      return krys::SwitchOn(
+        layer.GetSize(), [](const css::keywords::Contain &) { return true; },
+        [](const css::keywords::Cover &) { return true; },
+        [&](const style::BackgroundSize::LengthSize &size)
+        {
+          if (size.Width().IsPercentOrCalculated() || size.Height().IsPercentOrCalculated())
+          {
+            return true;
+          }
+          // If the image has neither an intrinsic width nor an intrinsic height, its size is determined as
+          // for 'contain'.
+          if ((size.Width().IsAuto() || size.Height().IsAuto()) && image->IsGeneratedImage())
+          {
+            return true;
+          }
+          return false;
+        });
+    }
+  }
+
+  bool RenderElement::ShouldRepaintForStyleDifference(style::Difference diff) const noexcept
+  {
+    if (diff == style::DifferenceResult::Repaint)
+    {
+      return true;
+    }
+
+    if (diff == style::DifferenceResult::RepaintIfText)
+    {
+      if (HasNonWhitespaceTextContent(*this))
+      {
+        return true;
+      }
+      for (auto &blockChild : ChildrenOfType<RenderBlock>(*this))
+      {
+        if (blockChild.IsAnonymousBlock() && HasNonWhitespaceTextContent(blockChild))
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool RenderElement::RepaintBeforeStyleChange(style::Difference diff, const RenderStyle &oldStyle,
+                                               const RenderStyle &newStyle) noexcept
+  {
+    enum class RequiredRepaint
+    {
+      None,
+      RendererOnly,
+      RendererAndDescendantsRenderersWithLayers
+    };
+    auto shouldRepaintBeforeStyleChange = [&]() -> RequiredRepaint
+    {
+      if (!Parent())
+      {
+        // Can't resolve absolute coordinates.
+        return RequiredRepaint::None;
+      }
+
+      if (Is<RenderLayerModelObject>(*this) && HasLayer())
+      {
+        if (diff == style::DifferenceResult::RepaintLayer)
+        {
+          return RequiredRepaint::RendererAndDescendantsRenderersWithLayers;
+        }
+
+        if (diff == style::DifferenceResult::Layout || diff == style::DifferenceResult::Overflow)
+        {
+          // Certain style changes require layer repaint, since the layer could end up being destroyed.
+          auto layerMayGetDestroyed =
+            oldStyle.GetPosition() != newStyle.GetPosition() || oldStyle.UsedZIndex() != newStyle.UsedZIndex()
+            || oldStyle.GetClip() != newStyle.GetClip() || oldStyle.HasClip() != newStyle.HasClip()
+            || oldStyle.HasOpacity() != newStyle.HasOpacity()
+            || oldStyle.HasTransform() != newStyle.HasTransform()
+            || oldStyle.HasFilter() != newStyle.HasFilter();
+          if (layerMayGetDestroyed)
+          {
+            return RequiredRepaint::RendererAndDescendantsRenderersWithLayers;
+          }
+        }
+      }
+
+      if (ShouldRepaintForStyleDifference(diff))
+      {
+        return RequiredRepaint::RendererOnly;
+      }
+
+      if (newStyle.OutlineSize() < oldStyle.OutlineSize())
+      {
+        return RequiredRepaint::RendererOnly;
+      }
+
+      if (auto *modelObject = DynamicDowncast<RenderLayerModelObject>(*this))
+      {
+        // If we don't have a layer yet, but we are going to get one because of transform or opacity, then we
+        // need to repaint the old position of the object.
+        bool hasLayer = modelObject->HasLayer();
+        bool willHaveLayer = newStyle.AffectsTransform() || newStyle.HasOpacity() || newStyle.HasFilter()
+                             || newStyle.HasBackdropFilter();
+        if (!hasLayer && willHaveLayer)
+        {
+          return RequiredRepaint::RendererOnly;
+        }
+      }
+
+      // Note that RenderObject::setNeedsLayout issues setLayerNeedsFullRepaint on renderers with layers.
+      if (Is<RenderBox>(*this))
+      {
+        if (oldStyle.GetPosition() != newStyle.GetPosition()
+            && oldStyle.GetPosition() == PositionType::Static)
+        {
+          krys_debug_assert(diff == style::DifferenceResult::Layout);
+          return RequiredRepaint::RendererOnly;
+        }
+
+        auto willBecomeHiddenSkippedContent = newStyle.UsedContentVisibility() == ContentVisibility::Hidden
+                                              && oldStyle.UsedContentVisibility() != ContentVisibility::Hidden
+                                              && oldStyle.UsedVisibility() == Visibility::Visible;
+        if (willBecomeHiddenSkippedContent)
+        {
+          krys_debug_assert(diff == style::DifferenceResult::Layout);
+          return RequiredRepaint::RendererOnly;
+        }
+      }
+
+      if (diff > style::DifferenceResult::RepaintLayer
+          && oldStyle.UsedVisibility() != newStyle.UsedVisibility())
+      {
+        if (auto *enclosingLayer = EnclosingLayer())
+        {
+          bool rendererWillBeHidden = newStyle.UsedVisibility() != Visibility::Visible;
+          if (rendererWillBeHidden && enclosingLayer->HasVisibleContent()
+              && (this == &enclosingLayer->Renderer()
+                  || enclosingLayer->Renderer().Style().UsedVisibility() != Visibility::Visible))
+          {
+            return RequiredRepaint::RendererOnly;
+          }
+        }
+      }
+
+      if (diff == style::DifferenceResult::Layout && Parent()->GetWritingMode().IsBlockFlipped())
+      {
+        // FIXME: Repaint during (after) layout is currently broken for flipped writing modes in block
+        // direction (mostly affecting vertical-rl) (see webkit.org/b/70762) This repaint call here ensures we
+        // invalidate at least the current rect which should cover the non-moving type of cases.
+        return RequiredRepaint::RendererOnly;
+      }
+
+      return RequiredRepaint::None;
+    }();
+
+    if (shouldRepaintBeforeStyleChange == RequiredRepaint::RendererAndDescendantsRenderersWithLayers)
+    {
+      krys_debug_assert(HasLayer());
+      Downcast<RenderLayerModelObject>(*this).Layer()->RepaintIncludingDescendants();
+      return true;
+    }
+
+    if (shouldRepaintBeforeStyleChange == RequiredRepaint::RendererOnly)
+    {
+      if (IsOutOfFlowPositioned() && Downcast<RenderLayerModelObject>(*this).Layer()->IsSelfPaintingLayer())
+      {
+        if (oldStyle.UsedVisibility() == Visibility::Hidden)
+        {
+          // Repaint on hidden renderer is a no-op.
+          return false;
+        }
+        if (auto cachedClippedOverflowRect =
+              Downcast<RenderLayerModelObject>(*this).Layer()->CachedClippedOverflowRect())
+        {
+          RepaintUsingContainer(ContainerForRepaint().Renderer, *cachedClippedOverflowRect);
+          return true;
+        }
+      }
+      Repaint();
+      return true;
+    }
+
+    return false;
+  }
+
+  bool RenderElement::RepaintAfterLayoutIfNeeded(const RenderLayerModelObject *repaintContainer,
+                                                 RequiresFullRepaint requiresFullRepaint,
+                                                 const RepaintRects &oldRects,
+                                                 const RepaintRects &newRects) noexcept
+  {
+    // FIXME: Nothing repaints while printing, once there's printing.
+
+    auto oldClippedOverflowRect = oldRects.ClippedOverflowRect;
+    auto newClippedOverflowRect = newRects.ClippedOverflowRect;
+    bool haveOutlinesBoundsRects = oldRects.OutlineBoundsRect && newRects.OutlineBoundsRect;
+
+    if (oldClippedOverflowRect.IsEmpty() && newClippedOverflowRect.IsEmpty())
+    {
+      return true;
+    }
+
+    auto mustRepaintBackgroundOrBorderOnSizeChange =
+      [&](LayoutRect oldOutlineBounds, LayoutRect newOutlineBounds)
+    {
+      if (HasMask() && MustRepaintFillLayers(*this, Style().GetMaskLayers()))
+      {
+        return true;
+      }
+
+      if (Style().HasBorderRadius())
+      {
+        // If the border radius changed, repaints at style change time will take care of that.
+        // This code is attempting to detect whether border-radius constraining based on box size
+        // affects the radii, using the outlineBoundsRect as a proxy for the border box.
+        auto oldShapeApproximation = BorderShape::ShapeForBorderRect(Style(), oldOutlineBounds);
+        auto newShapeApproximation = BorderShape::ShapeForBorderRect(Style(), newOutlineBounds);
+        if (oldShapeApproximation.Radii() != newShapeApproximation.Radii())
+        {
+          return true;
+        }
+      }
+
+      // If we don't have a background/border/mask, then nothing to do.
+      if (!HasVisibleBoxDecorations())
+      {
+        return false;
+      }
+
+      if (MustRepaintFillLayers(*this, Style().GetBackgroundLayers()))
+      {
+        return true;
+      }
+
+      // Our fill layers are ok. Let's check border.
+      if (Style().HasBorder() && BorderImageIsLoadedAndCanBeRendered())
+      {
+        return true;
+      }
+
+      return false;
+    };
+
+    auto fullRepaint = [&]()
+    {
+      if (requiresFullRepaint == RequiresFullRepaint::Yes)
+      {
+        return true;
+      }
+
+      if (oldClippedOverflowRect.IsEmpty() || newClippedOverflowRect.IsEmpty())
+      {
+        return true;
+      }
+
+      if (!oldClippedOverflowRect.Intersects(newClippedOverflowRect))
+      {
+        return true;
+      }
+
+      if (!haveOutlinesBoundsRects)
+      {
+        return false;
+      }
+
+      // If our outline bounds rect moved, we have to repaint everything.
+      if (oldRects.OutlineBoundsRect->Location() != newRects.OutlineBoundsRect->Location())
+      {
+        return true;
+      }
+
+      // If our outline bounds rect resized (as a proxy for a border box resize),
+      // we have to repaint if we paint content that scales with the size.
+      if (oldRects.OutlineBoundsRect->Size() != newRects.OutlineBoundsRect->Size()
+          && mustRepaintBackgroundOrBorderOnSizeChange(*oldRects.OutlineBoundsRect,
+                                                       *newRects.OutlineBoundsRect))
+      {
+        return true;
+      }
+
+      return false;
+    }();
+
+    if (!repaintContainer)
+    {
+      repaintContainer = &View();
+    }
+
+    if (fullRepaint)
+    {
+      if (newClippedOverflowRect.Contains(oldClippedOverflowRect))
+      {
+        RepaintUsingContainer(repaintContainer, newClippedOverflowRect);
+      }
+      else if (oldClippedOverflowRect.Contains(newClippedOverflowRect))
+      {
+        RepaintUsingContainer(repaintContainer, oldClippedOverflowRect);
+      }
+      else
+      {
+        RepaintUsingContainer(repaintContainer, oldClippedOverflowRect);
+        RepaintUsingContainer(repaintContainer, newClippedOverflowRect);
+      }
+      return true;
+    }
+
+    if (oldRects == newRects)
+    {
+      return false;
+    }
+
+    LayoutUnit deltaLeft = newClippedOverflowRect.X() - oldClippedOverflowRect.X();
+    if (deltaLeft > 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(oldClippedOverflowRect.X(), oldClippedOverflowRect.Y(), deltaLeft,
+                                       oldClippedOverflowRect.Height()));
+    }
+    else if (deltaLeft < 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(newClippedOverflowRect.X(), newClippedOverflowRect.Y(), -deltaLeft,
+                                       newClippedOverflowRect.Height()));
+    }
+
+    LayoutUnit deltaRight = newClippedOverflowRect.MaxX() - oldClippedOverflowRect.MaxX();
+    if (deltaRight > 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(oldClippedOverflowRect.MaxX(), newClippedOverflowRect.Y(), deltaRight,
+                                       newClippedOverflowRect.Height()));
+    }
+    else if (deltaRight < 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(newClippedOverflowRect.MaxX(), oldClippedOverflowRect.Y(), -deltaRight,
+                                       oldClippedOverflowRect.Height()));
+    }
+
+    LayoutUnit deltaTop = newClippedOverflowRect.Y() - oldClippedOverflowRect.Y();
+    if (deltaTop > 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(oldClippedOverflowRect.X(), oldClippedOverflowRect.Y(),
+                                       oldClippedOverflowRect.Width(), deltaTop));
+    }
+    else if (deltaTop < 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(newClippedOverflowRect.X(), newClippedOverflowRect.Y(),
+                                       newClippedOverflowRect.Width(), -deltaTop));
+    }
+
+    LayoutUnit deltaBottom = newClippedOverflowRect.MaxY() - oldClippedOverflowRect.MaxY();
+    if (deltaBottom > 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(newClippedOverflowRect.X(), oldClippedOverflowRect.MaxY(),
+                                       newClippedOverflowRect.Width(), deltaBottom));
+    }
+    else if (deltaBottom < 0)
+    {
+      RepaintUsingContainer(repaintContainer,
+                            LayoutRect(oldClippedOverflowRect.X(), newClippedOverflowRect.MaxY(),
+                                       oldClippedOverflowRect.Width(), -deltaBottom));
+    }
+
+    if (!haveOutlinesBoundsRects || *oldRects.OutlineBoundsRect == *newRects.OutlineBoundsRect)
+    {
+      return false;
+    }
+
+    auto oldOutlineBoundsRect = *oldRects.OutlineBoundsRect;
+    auto newOutlineBoundsRect = *newRects.OutlineBoundsRect;
+
+    // Repainting the delta of the old and new clipped overflow rects is not sufficient when the box has
+    // outlines border and shadows, because a size change has to repaint those areas affected by such
+    // decorations. It's not really correct to do math here with oldOutlineBoundsRect/newOutlineBoundsRect and
+    // local shadow/radius values, since oldOutlineBoundsRect/newOutlineBoundsRect are in the coordinate space
+    // of the repaint container, and have been mapped through ancestor transforms.
+
+    const RenderStyle &outlineStyle = OutlineStyleForRepaint();
+    const auto &style = Style();
+    auto outlineWidth = LayoutUnit {outlineStyle.OutlineSize()};
+    auto insetShadowExtent = style::ShadowInsetExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+    auto sizeDelta =
+      LayoutSize {AbsoluteValue(newOutlineBoundsRect.Width() - oldOutlineBoundsRect.Width()),
+                  AbsoluteValue(newOutlineBoundsRect.Height() - oldOutlineBoundsRect.Height())};
+    if (sizeDelta.Width())
+    {
+      auto [shadowLeft, shadowRight] =
+        style::ShadowHorizontalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+
+      auto insetExtent = [&]
+      {
+        // Inset "content" is inside the border box (e.g. border, negative outline and box shadow).
+        auto borderRightExtent = [&]() -> LayoutUnit
+        {
+          auto *renderBox = DynamicDowncast<RenderBox>(*this);
+          if (!renderBox)
+          {
+            return {};
+          }
+          auto borderBoxWidth = renderBox->Width();
+          return std::max({
+            renderBox->BorderRight(),
+            style::Evaluate<LayoutUnit>(style.BorderRadii().TopRight().Width(), borderBoxWidth,
+                                        style::ZoomNeeded {}),
+            style::Evaluate<LayoutUnit>(style.BorderRadii().BottomRight().Width(), borderBoxWidth,
+                                        style::ZoomNeeded {}),
+          });
+        };
+        auto outlineRightInsetExtent = [&]() -> LayoutUnit
+        {
+          auto offset = style::Evaluate<LayoutUnit>(outlineStyle.OutlineOffset(), style::ZoomNeeded {});
+          return offset < 0 ? -offset : 0_lu;
+        };
+        auto boxShadowRightInsetExtent = [&]() -> LayoutUnit
+        {
+          // Turn negative box shadow offset into inset.
+          auto inset = std::min(insetShadowExtent.Right(), shadowLeft);
+          // Clip inset shadow at the clipped overflow rect. We would never paint outside.
+          return inset < 0 ? std::min(-inset, std::min(newClippedOverflowRect.Width(),
+                                                       oldClippedOverflowRect.Width()))
+                           : 0_lu;
+        };
+        // Outline starts at the border box while box shadow starts at the padding box.
+        return std::max(outlineRightInsetExtent(), borderRightExtent() + boxShadowRightInsetExtent());
+      };
+      auto outsetExtent = [&]
+      {
+        // Outset "content" is outside of the border box (e.g. regular outline and box shadow).
+        return std::max(outlineWidth, shadowRight);
+      };
+      auto decorationRightExtent = insetExtent() + outsetExtent();
+      // Both inset and outset "decorations" are within the "outline and box shadow" box.
+      auto decorationLeft = newOutlineBoundsRect.X()
+                            + std::min(newOutlineBoundsRect.Width(), oldOutlineBoundsRect.Width())
+                            - decorationRightExtent;
+      auto clippedBoundsRight = std::min(newClippedOverflowRect.MaxX(), oldClippedOverflowRect.MaxX());
+      auto damageExtentWithinClippedOverflow = clippedBoundsRight - decorationLeft;
+      if (damageExtentWithinClippedOverflow > 0)
+      {
+        damageExtentWithinClippedOverflow =
+          std::min<LayoutUnit>(sizeDelta.Width() + decorationRightExtent, damageExtentWithinClippedOverflow);
+        auto damagedRect =
+          LayoutRect {decorationLeft, newOutlineBoundsRect.Y(), damageExtentWithinClippedOverflow,
+                      std::max(newOutlineBoundsRect.Height(), oldOutlineBoundsRect.Height())};
+        RepaintUsingContainer(repaintContainer, damagedRect);
+      }
+    }
+    if (sizeDelta.Height())
+    {
+      auto [shadowTop, shadowBottom] =
+        style::ShadowVerticalExtent(style.GetBoxShadow(), style.UsedZoomForLength());
+
+      auto insetExtent = [&]
+      {
+        // Inset "content" is inside the border box (e.g. border, negative outline and box shadow).
+        auto borderBottomExtent = [&]() -> LayoutUnit
+        {
+          auto *renderBox = DynamicDowncast<RenderBox>(*this);
+          if (!renderBox)
+          {
+            return {};
+          }
+          auto borderBoxHeight = renderBox->Height();
+          return std::max({
+            renderBox->BorderBottom(),
+            style::Evaluate<LayoutUnit>(style.BorderRadii().BottomLeft().Height(), borderBoxHeight,
+                                        style::ZoomNeeded {}),
+            style::Evaluate<LayoutUnit>(style.BorderRadii().BottomRight().Height(), borderBoxHeight,
+                                        style::ZoomNeeded {}),
+          });
+        };
+        auto outlineBottomInsetExtent = [&]() -> LayoutUnit
+        {
+          auto offset = style::Evaluate<LayoutUnit>(outlineStyle.OutlineOffset(), style::ZoomNeeded {});
+          return offset < 0 ? -offset : 0_lu;
+        };
+        auto boxShadowBottomInsetExtent = [&]() -> LayoutUnit
+        {
+          // Turn negative box shadow offset into inset.
+          auto inset = std::min(insetShadowExtent.Bottom(), shadowTop);
+          // Clip inset shadow at the clipped overflow rect. We would never paint outside.
+          return inset < 0 ? std::min(-inset, std::min(newClippedOverflowRect.Height(),
+                                                       oldClippedOverflowRect.Height()))
+                           : 0_lu;
+        };
+        // Outline starts at the border box while box shadow starts at the padding box.
+        return std::max(outlineBottomInsetExtent(), borderBottomExtent() + boxShadowBottomInsetExtent());
+      };
+      auto outsetExtent = [&]
+      {
+        // Outset "content" is outside of the border box (e.g. regular outline and box shadow).
+        return std::max(outlineWidth, shadowBottom);
+      };
+      auto decorationBottomExtent = insetExtent() + outsetExtent();
+      // Both inset and outset "decorations" are within the "outline and box shadow" box.
+      auto decorationTop =
+        std::min(newOutlineBoundsRect.MaxY(), oldOutlineBoundsRect.MaxY()) - decorationBottomExtent;
+      auto clippedBoundsBottom = std::min(newClippedOverflowRect.MaxY(), oldClippedOverflowRect.MaxY());
+      auto damageExtentWithinClippedOverflow = clippedBoundsBottom - decorationTop;
+      if (damageExtentWithinClippedOverflow > 0)
+      {
+        damageExtentWithinClippedOverflow = std::min<LayoutUnit>(sizeDelta.Height() + decorationBottomExtent,
+                                                                 damageExtentWithinClippedOverflow);
+        auto damagedRect = LayoutRect {newOutlineBoundsRect.X(), decorationTop,
+                                       std::max(newOutlineBoundsRect.Width(), oldOutlineBoundsRect.Width()),
+                                       damageExtentWithinClippedOverflow};
+        RepaintUsingContainer(repaintContainer, damagedRect);
+      }
+    }
+    return false;
+  }
+
+  bool RenderElement::IsInsideEntirelyHiddenLayer() const noexcept
+  {
+    // FIXME: Layers inside hidden SVG containers and resources, once there's SVG.
+    return Style().UsedVisibility() != Visibility::Visible && !EnclosingLayer()->HasVisibleContent();
+  }
+
+  bool RenderElement::CheckForRepaintDuringLayout() const noexcept
+  {
+    return EverHadLayout() && !HasSelfPaintingLayer()
+           && !GetDocument().View()->LayoutContext().NeedsFullRepaint();
+  }
+
+  void RenderElement::IssueRepaintForOutlineAuto(float outlineSize) noexcept
+  {
+    auto focusRingRects =
+      OutlinePainter::CollectFocusRingRects(*this, LayoutPoint(), ContainerForRepaint().Renderer);
+
+    LayoutRect repaintRect;
+    for (auto rect : focusRingRects)
+    {
+      rect.Inflate(LayoutUnit {outlineSize});
+      repaintRect.Unite(rect);
+    }
+    RepaintRectangle(repaintRect);
+  }
+
+  void RenderElement::UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept
+  {
+    // FIXME: Column spanner placeholders, once there are multi-column flows.
+
+    for (auto &child : ChildrenOfType<RenderObject>(*this))
+    {
+      if (hasOutlineAuto == child.HasOutlineAutoAncestor())
+      {
+        continue;
+      }
+      child.SetHasOutlineAutoAncestor(hasOutlineAuto);
+      bool childHasOutlineAuto = child.OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto;
+      if (childHasOutlineAuto)
+      {
+        continue;
+      }
+      if (auto *element = DynamicDowncast<RenderElement>(child))
+      {
+        element->UpdateOutlineAutoAncestor(hasOutlineAuto);
+      }
+    }
+    // FIXME: Continuations, once there are any.
   }
 
   void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -612,7 +1240,16 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Outline-auto ancestors and scroll anchoring, once there are any.
+    bool hadOutlineAuto = oldStyle && oldStyle->GetOutlineStyle() == OutlineStyle::Auto;
+    bool hasOutlineAuto = OutlineStyleForRepaint().GetOutlineStyle() == OutlineStyle::Auto;
+    if (hasOutlineAuto != hadOutlineAuto)
+    {
+      UpdateOutlineAutoAncestor(hasOutlineAuto);
+      IssueRepaintForOutlineAuto(hasOutlineAuto ? OutlineStyleForRepaint().OutlineSize()
+                                                : oldStyle->OutlineSize());
+    }
+
+    // FIXME: Scroll anchoring, once there is any.
 
     // FIXME: First line change on the block comes in as equal on inline boxes.
     auto needsLayoutBoxStyleUpdate =
@@ -1185,10 +1822,7 @@ namespace krys::boo
     }
     else if (auto *box = DynamicDowncast<RenderBox>(*this))
     {
-      // FIXME: The clipped overflow rect for repaint (absoluteClippedOverflowRectForRepaint), once there are
-      // repaint rects; for now the visual overflow, unclipped by the ancestors.
-      backgroundPaintingRect =
-        LayoutRect(box->LocalToAbsoluteQuad(FloatQuad(FloatRect(box->VisualOverflowRect()))).BoundingBox());
+      backgroundPaintingRect = box->AbsoluteClippedOverflowRectForRepaint();
     }
     else
     {
@@ -1646,7 +2280,7 @@ namespace krys::boo
     }
   }
 
-  void RenderElement::SetNeedsOutOfFlowMovementLayout(const RenderStyle *) noexcept
+  void RenderElement::SetNeedsOutOfFlowMovementLayout(const RenderStyle *oldStyle) noexcept
   {
     krys_debug_assert(!IsSetNeedsLayoutForbidden());
     if (NeedsOutOfFlowMovementLayout())
@@ -1655,7 +2289,17 @@ namespace krys::boo
     }
     SetNeedsOutOfFlowMovementLayoutBit(true);
     ScheduleLayout(MarkContainingBlocksForLayout());
-    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+    if (HasLayer())
+    {
+      if (oldStyle && style::DifferenceRequiresLayerRepaint(Style(), *oldStyle, false))
+      {
+        SetLayerNeedsFullRepaint();
+      }
+      else
+      {
+        SetLayerNeedsFullRepaintForOutOfFlowMovementLayout();
+      }
+    }
   }
 
   void RenderElement::ClearChildNeedsLayout() noexcept
@@ -1706,7 +2350,10 @@ namespace krys::boo
     }
     SetNeedsSimplifiedNormalFlowLayoutBit(true);
     ScheduleLayout(MarkContainingBlocksForLayout());
-    // FIXME: Mark the layer as needing a full repaint, once there are layers.
+    if (HasLayer())
+    {
+      SetLayerNeedsFullRepaint();
+    }
   }
 
   void RenderElement::SetOutOfFlowChildNeedsStaticPositionLayout() noexcept

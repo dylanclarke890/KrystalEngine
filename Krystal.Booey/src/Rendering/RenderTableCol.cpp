@@ -242,6 +242,31 @@ namespace krys::boo
     return Table()->OffsetHeightForColumn(*this);
   }
 
+  LayoutRect RenderTableCol::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                                 VisibleRectContext context) const noexcept
+  {
+    // For now, just repaint the whole table.
+    // FIXME: Find a better way to do this, e.g., need to repaint all the cells that we
+    // might have propagated a background color or borders into.
+    // FIXME: check for repaintContainer each time here?
+
+    auto *parentTable = Table();
+    if (!parentTable)
+    {
+      return {};
+    }
+
+    return parentTable->ClippedOverflowRect(repaintContainer, context);
+  }
+
+  auto RenderTableCol::RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                                     RepaintOutlineBounds) const noexcept -> RepaintRects
+  {
+    // Ignore RepaintOutlineBounds because it doesn't make sense to use the table's outline bounds to repaint
+    // a column.
+    return RepaintRects {ClippedOverflowRect(repaintContainer, VisibleRectContextForRepaint())};
+  }
+
   void RenderTableCol::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
   {
     // FIXME: Repaint only the rect the image paints in.

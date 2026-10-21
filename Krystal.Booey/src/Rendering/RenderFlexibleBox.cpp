@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BaselineAlignment.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
@@ -771,7 +772,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Repaint (LayoutRepainter), once there's painting.
+    LayoutRepainter repainter(*this);
 
     ResetLogicalHeightBeforeLayoutIfNeeded();
     _relaidOutFlexItems.clear();
@@ -811,8 +812,8 @@ namespace krys::boo
       // It doesn't get included in the normal layout process but is instead skipped.
       LayoutExcludedChildren(relayoutChildren);
 
-      // FIXME: Repaint the flex items that moved (appendFlexItemFrameRects,
-      // repaintFlexItemsDuringLayoutIfMoved), once there's painting.
+      FlexItemFrameRects oldFlexItemRects;
+      AppendFlexItemFrameRects(oldFlexItemRects);
 
       PerformFlexLayout(relayoutChildren);
 
@@ -835,6 +836,7 @@ namespace krys::boo
         LayoutOutOfFlowBoxes(relayoutChildren);
       }
 
+      RepaintFlexItemsDuringLayoutIfMoved(oldFlexItemRects);
       // FIXME: css3/flexbox/repaint-rtl-column.html seems to repaint more overflow than it needs to.
       ComputeOverflow(LayoutOverflowLogicalBottom(*this));
 
@@ -848,7 +850,43 @@ namespace krys::boo
     // that function may re-enter this one.
     ResetHasDefiniteHeight();
 
+    repainter.RepaintAfterLayout();
+
     _inLayout = oldInLayout;
+  }
+
+  void RenderFlexibleBox::AppendFlexItemFrameRects(FlexItemFrameRects &flexItemFrameRects) noexcept
+  {
+    for (RenderBox *flexItem = _orderIterator.First(); flexItem; flexItem = _orderIterator.Next())
+    {
+      if (!flexItem->IsOutOfFlowPositioned())
+      {
+        flexItemFrameRects.push_back(flexItem->FrameRect());
+      }
+    }
+  }
+
+  void RenderFlexibleBox::RepaintFlexItemsDuringLayoutIfMoved(
+    const FlexItemFrameRects &oldFlexItemRects) noexcept
+  {
+    size_t index = 0;
+    for (RenderBox *flexItem = _orderIterator.First(); flexItem; flexItem = _orderIterator.Next())
+    {
+      if (flexItem->IsOutOfFlowPositioned())
+      {
+        continue;
+      }
+
+      // If the child moved, we have to repaint it as well as any floating/positioned
+      // descendants. An exception is if we need a layout. In this case, we know we're going to
+      // repaint ourselves (and the child) anyway.
+      if (!SelfNeedsLayout() && flexItem->CheckForRepaintDuringLayout())
+      {
+        flexItem->RepaintDuringLayoutIfMoved(oldFlexItemRects[index]);
+      }
+      ++index;
+    }
+    krys_debug_assert(index == oldFlexItemRects.size());
   }
 
   void RenderFlexibleBox::RepositionLogicalHeightDependentFlexItems(FlexLineStates &lineStates,
@@ -3152,8 +3190,11 @@ namespace krys::boo
         SetForScope flexLayoutScope(_afterMainAxisItemSizing, true);
         flexItem.LayoutIfNeeded();
       }
-      // FIXME: Repaint items that had never been laid out (checkForRepaintDuringLayout), once there's
-      // painting.
+      if (!flexLayoutItem.EverHadLayout && flexItem.CheckForRepaintDuringLayout())
+      {
+        flexItem.Repaint();
+        flexItem.RepaintOverhangingFloats(true);
+      }
 
       UpdateAutoMarginsInMainAxis(flexItem, autoMarginOffset);
 

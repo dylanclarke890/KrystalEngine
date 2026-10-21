@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -99,6 +101,20 @@ namespace krys::boo
     HitTestChildBlockBackgrounds,
     HitTestFloat,
     HitTestForeground
+  };
+
+  /// @brief Whether repaint rects include the outline bounds rect.
+  enum class RepaintOutlineBounds : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Whether a repaint after layout repaints the old and new rects whole, rather than what changed.
+  enum class RequiresFullRepaint : bool
+  {
+    No,
+    Yes
   };
 
   /// @brief Whether marking a renderer as needing layout also marks its containing blocks.
@@ -406,10 +422,176 @@ namespace krys::boo
 
 #pragma endregion
 
-    /// @brief Asks for the renderer to be painted again.
-    /// FIXME: Repaint rects (only what changed), once there's repaint tracking: any change repaints the whole
-    /// page, so this schedules a rendering update.
-    void Repaint() const noexcept;
+#pragma region Repaint
+
+    /// @brief The renderer whose coordinates repaint rects are mapped to, and whether a full repaint of it
+    /// (or of a layer in between) is already scheduled.
+    struct RepaintContainerStatus
+    {
+      bool FullRepaintIsScheduled {false};
+      const RenderLayerModelObject *Renderer {nullptr};
+    };
+    /// @brief The renderer whose coordinates the renderer's repaints are in: null for the render view.
+    // FIXME: Compositing layers, filter layers and fragmented flows, once there are any.
+    KRYS_NODISCARD RepaintContainerStatus ContainerForRepaint() const noexcept;
+    /// @brief Repaints @p rect, in @p repaintContainer's coordinates (the render view's if null).
+    void RepaintUsingContainer(const RenderLayerModelObject *repaintContainer, const LayoutRect &rect,
+                               bool shouldClipToLayer = true) const noexcept;
+
+    enum class ForceRepaint : bool
+    {
+      No,
+      Yes
+    };
+    /// @brief Repaints the renderer: its clipped overflow rect.
+    void Repaint(ForceRepaint forceRepaint = ForceRepaint::No) const noexcept;
+
+    enum class ClipRepaintToLayer : bool
+    {
+      No,
+      Yes
+    };
+    /// @brief Repaints @p repaintRect, in the renderer's coordinates.
+    void RepaintRectangle(const LayoutRect &repaintRect, bool shouldClipToLayer = true) const noexcept;
+    void RepaintRectangle(const LayoutRect &repaintRect, ClipRepaintToLayer shouldClipToLayer,
+                          ForceRepaint forceRepaint,
+                          Maybe<LayoutBoxExtent> additionalRepaintOutsets = null) const noexcept;
+
+    /// @brief The rects a renderer repaints, mapped up to a repaint container.
+    struct RepaintRects
+    {
+      /// @brief Some rect (normally the visual overflow rect) mapped up to the repaint container, respecting
+      /// clipping.
+      LayoutRect ClippedOverflowRect;
+      /// @brief A rect representing the extent of outlines and shadows, mapped to the repaint container, but
+      /// not clipped.
+      Maybe<LayoutRect> OutlineBoundsRect;
+
+      RepaintRects() noexcept = default;
+      explicit RepaintRects(const LayoutRect &rect, const Maybe<LayoutRect> &outlineBounds = null) noexcept
+          : ClippedOverflowRect(rect), OutlineBoundsRect(outlineBounds)
+      {
+      }
+
+      KRYS_NODISCARD bool operator==(const RepaintRects &) const noexcept = default;
+
+      void Move(LayoutSize size) noexcept
+      {
+        ClippedOverflowRect.Move(size);
+        if (OutlineBoundsRect)
+        {
+          OutlineBoundsRect->Move(size);
+        }
+      }
+
+      void MoveBy(LayoutPoint point) noexcept
+      {
+        ClippedOverflowRect.MoveBy(point);
+        if (OutlineBoundsRect)
+        {
+          OutlineBoundsRect->MoveBy(point);
+        }
+      }
+
+      void Expand(LayoutSize size) noexcept
+      {
+        ClippedOverflowRect.Expand(size);
+        if (OutlineBoundsRect)
+        {
+          OutlineBoundsRect->Expand(size);
+        }
+      }
+
+      void EncloseToIntRects() noexcept;
+
+      void Unite(const RepaintRects &other) noexcept
+      {
+        ClippedOverflowRect.Unite(other.ClippedOverflowRect);
+        if (OutlineBoundsRect && other.OutlineBoundsRect)
+        {
+          OutlineBoundsRect->Unite(*other.OutlineBoundsRect);
+        }
+      }
+
+      void FlipForWritingMode(LayoutSize containerSize, bool isHorizontalWritingMode) noexcept;
+
+      /// @brief Intersects only the clipped overflow rect; returns whether it's still non-empty.
+      bool Intersect(const LayoutRect &clipRect) noexcept
+      {
+        ClippedOverflowRect.Intersect(clipRect);
+        return !ClippedOverflowRect.IsEmpty();
+      }
+
+      /// @brief Intersects only the clipped overflow rect, edges included; returns whether they intersect.
+      bool EdgeInclusiveIntersect(const LayoutRect &clipRect) noexcept
+      {
+        return ClippedOverflowRect.EdgeInclusiveIntersect(clipRect);
+      }
+
+      void Transform(const TransformationMatrix &matrix) noexcept;
+      void Transform(const TransformationMatrix &matrix, float deviceScaleFactor) noexcept;
+    };
+
+    /// @brief The rect to repaint whenever the renderer changes, in the view's coordinates: its overflow and
+    /// outlines.
+    KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRepaint() const noexcept;
+    KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
+
+    KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                                          VisibleRectContext context) const noexcept;
+    KRYS_NODISCARD LayoutRect
+      ClippedOverflowRectForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept;
+    KRYS_NODISCARD virtual LayoutRect
+      RectWithOutlineForRepaint(const RenderLayerModelObject *repaintContainer,
+                                LayoutUnit outlineWidth) const noexcept;
+    KRYS_NODISCARD virtual LayoutRect
+      OutlineBoundsForRepaint(const RenderLayerModelObject * /*repaintContainer*/) const noexcept;
+
+    /// @brief Maps @p rects from the renderer's coordinates to @p repaintContainer's, as @p context says.
+    KRYS_NODISCARD RepaintRects ComputeRects(const RepaintRects &rects,
+                                             const RenderLayerModelObject *repaintContainer,
+                                             VisibleRectContext context) const noexcept;
+    KRYS_NODISCARD LayoutRect ComputeRectForRepaint(
+      const LayoutRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
+
+    KRYS_NODISCARD virtual RepaintRects
+      RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                    RepaintOutlineBounds repaintOutlineBounds) const noexcept;
+
+    /// @brief Maps @p rects from the renderer's coordinates to @p container's, where they're visible, clipped
+    /// and scrolled as @p context says. With an edge-inclusive intersection, null when they're clipped away
+    /// entirely.
+    KRYS_NODISCARD virtual Maybe<RepaintRects>
+      ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
+                                     VisibleRectContext context) const noexcept;
+
+    KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
+
+    /// @brief Whether the renderer has a layer that paints itself.
+    KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;
+
+    KRYS_NODISCARD bool HasOutlineAutoAncestor() const noexcept;
+    void SetHasOutlineAutoAncestor(bool hasOutlineAutoAncestor = true) noexcept;
+
+    /// @brief Marks the enclosing layer as needing a full repaint after layout.
+    void SetLayerNeedsFullRepaint() noexcept;
+    void SetLayerNeedsFullRepaintForOutOfFlowMovementLayout() noexcept;
+
+  protected:
+    /// @brief The rects the renderer repaints, in its own coordinates.
+    KRYS_NODISCARD virtual RepaintRects LocalRectsForRepaint(RepaintOutlineBounds) const noexcept;
+
+    void IssueRepaint(Maybe<LayoutRect> partialRepaintRect = null,
+                      ClipRepaintToLayer clipRepaintToLayer = ClipRepaintToLayer::No,
+                      ForceRepaint forceRepaint = ForceRepaint::No,
+                      Maybe<LayoutBoxExtent> additionalRepaintOutsets = null) const noexcept;
+
+  private:
+    void PropagateRepaintToParentWithOutlineAutoIfNeeded(const RenderLayerModelObject &repaintContainer,
+                                                         const LayoutRect &repaintRect) const noexcept;
+
+  public:
+#pragma endregion
 
   private:
     friend class RenderElement;
@@ -1126,7 +1308,8 @@ namespace krys::boo
       // Dirty bit was set with MarkingBehavior::MarkOnlyThis
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
       EnumSet<style::MarginTrimSide> TrimmedMargins;
-      // FIXME: Reflections, outline-auto ancestors, referenced SVG resources, the ::backdrop renderer and the
+      bool HasOutlineAutoAncestor {false};
+      // FIXME: Reflections, referenced SVG resources, the ::backdrop renderer and the
       // control part, once there are any.
     };
     KRYS_NODISCARD bool HasRareData() const noexcept

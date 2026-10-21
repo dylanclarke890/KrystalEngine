@@ -285,11 +285,13 @@ namespace krys::boo
 
     // If this child is a block, and if our previous and next siblings are both anonymous blocks
     // with inline content, then we can fold the inline content back together.
-    auto *previousSibling = child.PreviousSibling();
-    auto *nextSibling = child.NextSibling();
-    bool canMergeAnonymousBlocks = canCollapseAnonymousBlock == CanCollapseAnonymousBlock::Yes
-                                   && CanMergeContiguousAnonymousBlocks(child, previousSibling, nextSibling,
-                                                                        _builder._anonymousDestroyRoot);
+    // Weak: detaching the child can destroy its siblings (anonymous wrappers).
+    WeakPtr<RenderObject> previousSibling = CreateWeakPtr(child.PreviousSibling());
+    WeakPtr<RenderObject> nextSibling = CreateWeakPtr(child.NextSibling());
+    bool canMergeAnonymousBlocks =
+      canCollapseAnonymousBlock == CanCollapseAnonymousBlock::Yes
+      && CanMergeContiguousAnonymousBlocks(child, previousSibling.get(), nextSibling.get(),
+                                           _builder._anonymousDestroyRoot);
 
     auto takenChild = _builder.DetachFromRenderElement(parent, child, willBeDestroyed);
 
@@ -348,7 +350,7 @@ namespace krys::boo
 
     if (canCollapseAnonymousBlock == CanCollapseAnonymousBlock::Yes && parent.CanDropAnonymousBlockChild())
     {
-      RenderObject *remaining = previousSibling ? previousSibling : nextSibling;
+      RenderObject *remaining = previousSibling ? previousSibling.get() : nextSibling.get();
       if (canMergeAnonymousBlocks && remaining && !remaining->PreviousSibling() && !remaining->NextSibling())
       {
         // The removal has knocked us down to containing only a single anonymous box. We can pull the content
@@ -363,12 +365,12 @@ namespace krys::boo
           {
             return nullptr;
           }
-          if (auto *previousBlock = DynamicDowncast<RenderBlock>(previousSibling);
+          if (auto *previousBlock = DynamicDowncast<RenderBlock>(previousSibling.get());
               previousBlock && previousBlock->IsAnonymousBlock())
           {
             return previousBlock;
           }
-          if (auto *nextBlock = DynamicDowncast<RenderBlock>(nextSibling);
+          if (auto *nextBlock = DynamicDowncast<RenderBlock>(nextSibling.get());
               nextBlock && nextBlock->IsAnonymousBlock())
           {
             return nextBlock;

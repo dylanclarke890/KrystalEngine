@@ -650,4 +650,85 @@ namespace krys::ui::tests
     CHECK(opacity() == Catch::Approx(before + 0.25f).margin(0.02f));
     std::filesystem::remove_all(directory);
   }
+
+  TEST_CASE("View: damage", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } #box { width: 50px; height: 50px; background: red }"
+      u8"#box:hover { background: blue } #tall { height: 500px }</style>"
+      u8"<div id=box></div><div id=tall></div>");
+    auto &frameView = *view.Frame().View();
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+
+    // Paints what changed: here, as the host's paint would, take the damage after each update.
+    auto paint = [&]
+    {
+      (void)view.Document().UpdateLayout();
+      return frameView.TakeDamage();
+    };
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      return paint();
+    };
+
+    // A new page is damaged; once painted, a still page isn't.
+    CHECK_FALSE(frame().IsEmpty());
+    CHECK(frame().IsEmpty());
+    CHECK(frame().IsEmpty());
+    CHECK_FALSE(frameView.HasDamage());
+
+    SECTION("a style change")
+    {
+      auto box = view.Document().GetElementById(u8"box");
+      REQUIRE_FALSE(box->SetAttribute(u8"style", u8"background: green").HasException());
+      CHECK_FALSE(frame().IsEmpty());
+      CHECK(frame().IsEmpty());
+    }
+
+    SECTION("hovering")
+    {
+      view.MouseMoved({10, 10});
+      CHECK_FALSE(frame().IsEmpty());
+      CHECK(frame().IsEmpty());
+    }
+
+    SECTION("scrolling")
+    {
+      view.ScrollTo({0, 100});
+      CHECK_FALSE(frame().IsEmpty());
+      CHECK(frame().IsEmpty());
+    }
+
+    SECTION("resizing")
+    {
+      view.Resize({300, 100});
+      auto damage = frame();
+      CHECK(damage.Bounds() == boo::IntRect(0, 0, 300, 100));
+    }
+  }
+
+  TEST_CASE("View: an animation damages the page each frame", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>@keyframes fade { from { opacity: 0 } to { opacity: 1 } }"
+      u8"#box { width: 10px; height: 10px; animation: fade 1s linear infinite }</style><div id=box></div>");
+    auto &frameView = *view.Frame().View();
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    for (int32 i = 0; i < 4; ++i)
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      (void)view.Document().UpdateLayout();
+      (void)frameView.TakeDamage();
+    }
+    time += 16ms;
+    (void)view.Update(time);
+    CHECK(view.NeedsPaint());
+  }
 }

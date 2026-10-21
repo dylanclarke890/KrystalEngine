@@ -10,10 +10,13 @@
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -751,6 +754,16 @@ namespace krys::boo
       }
       return callback(startIndex, wordLength);
     }
+  }
+
+  auto RenderText::LocalRectsForRepaint(RepaintOutlineBounds) const noexcept -> RepaintRects
+  {
+    LayoutRect overflowRect = LayoutRect(LinesBoundingBox());
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    overflowRect.Move(View().FrameView().LayoutContext().LayoutDelta());
+
+    return RepaintRects {overflowRect};
   }
 
   IntRect RenderText::LinesBoundingBox() const noexcept

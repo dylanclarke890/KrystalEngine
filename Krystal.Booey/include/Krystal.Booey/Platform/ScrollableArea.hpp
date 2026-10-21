@@ -318,7 +318,6 @@ namespace krys::boo
     }
 
     /// @brief Repaints @p rect of @p scrollbar.
-    // FIXME: Repaint tracking: the whole page repaints after every change.
     virtual void InvalidateScrollbar(Scrollbar &, const IntRect &) noexcept
     {
     }

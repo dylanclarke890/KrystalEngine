@@ -11,8 +11,8 @@
 namespace krys::boo
 {
   /// @brief A renderer that may have a layer.
-  // FIXME: Repaint, animations, viewport-constrained objects and SVG (transforms, resources, clipping) come
-  // with painting, animations, scrolling and SVG.
+  // FIXME: Animations, viewport-constrained objects and SVG (transforms, resources, clipping) come with
+  // animations, scrolling and SVG.
   class RenderLayerModelObject : public RenderElement
   {
     KRYS_NON_COPY_MOVABLE(RenderLayerModelObject);
@@ -26,7 +26,6 @@ namespace krys::boo
 
     void DestroyLayer() noexcept;
 
-    KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;
     KRYS_NODISCARD RenderLayer *Layer() const noexcept
     {
       return _layer.get();
@@ -45,6 +44,12 @@ namespace krys::boo
                                 EnumSet<style::TransformResolverOption> options) const noexcept = 0;
     void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
                         const FloatRect &boundingBox) const noexcept;
+
+    /// @brief Clips @p rects (in this renderer's coordinates, its contents scrolled) to its overflow clip, as
+    /// @p context says, for mapping them up to @p container; returns whether anything's left.
+    virtual bool ApplyCachedClipAndScrollPosition(RepaintRects &rects,
+                                                  const RenderLayerModelObject *container,
+                                                  VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD bool ShouldUsePositionedClipping() const noexcept
     {

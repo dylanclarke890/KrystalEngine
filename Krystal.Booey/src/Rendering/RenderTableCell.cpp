@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
@@ -11,6 +13,7 @@
 #include "Krystal.Booey/Rendering/RenderTableCol.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTableSection.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -188,6 +191,98 @@ namespace krys::boo
   WritingMode RenderTableCell::TableWritingMode() const noexcept
   {
     return Table()->GetWritingMode();
+  }
+
+  auto RenderTableCell::LocalRectsForRepaint(RepaintOutlineBounds repaintOutlineBounds) const noexcept
+    -> RepaintRects
+  {
+    // If the table grid is dirty, we cannot get reliable information about adjoining cells,
+    // so we ignore outside borders. This should not be a problem because it means that
+    // the table is going to recalculate the grid, relayout and repaint its current rect, which
+    // includes any outside borders of this cell.
+    if (!Table()->CollapseBorders() || Table()->NeedsSectionRecalc())
+    {
+      return RenderBlockFlow::LocalRectsForRepaint(repaintOutlineBounds);
+    }
+
+    bool flippedInline = TableWritingMode().IsInlineFlipped();
+    LayoutUnit outlineSize {Style().OutlineSize()};
+    LayoutUnit left = std::max(BorderHalfLeft(true), outlineSize);
+    LayoutUnit right = std::max(BorderHalfRight(true), outlineSize);
+    LayoutUnit top = std::max(BorderHalfTop(true), outlineSize);
+    LayoutUnit bottom = std::max(BorderHalfBottom(true), outlineSize);
+    if ((left && !flippedInline) || (right && flippedInline))
+    {
+      if (RenderTableCell *before = Table()->CellBefore(this))
+      {
+        top = std::max(top, before->BorderHalfTop(true));
+        bottom = std::max(bottom, before->BorderHalfBottom(true));
+      }
+    }
+    if ((left && flippedInline) || (right && !flippedInline))
+    {
+      if (RenderTableCell *after = Table()->CellAfter(this))
+      {
+        top = std::max(top, after->BorderHalfTop(true));
+        bottom = std::max(bottom, after->BorderHalfBottom(true));
+      }
+    }
+    if (top)
+    {
+      if (RenderTableCell *above = Table()->CellAbove(this))
+      {
+        left = std::max(left, above->BorderHalfLeft(true));
+        right = std::max(right, above->BorderHalfRight(true));
+      }
+    }
+    if (bottom)
+    {
+      if (RenderTableCell *below = Table()->CellBelow(this))
+      {
+        left = std::max(left, below->BorderHalfLeft(true));
+        right = std::max(right, below->BorderHalfRight(true));
+      }
+    }
+
+    LayoutPoint location(std::max<LayoutUnit>(left, -VisualOverflowRect().X()),
+                         std::max<LayoutUnit>(top, -VisualOverflowRect().Y()));
+    auto overflowRect = LayoutRect(-location.X(), -location.Y(),
+                                   location.X() + std::max(Width() + right, VisualOverflowRect().MaxX()),
+                                   location.Y() + std::max(Height() + bottom, VisualOverflowRect().MaxY()));
+
+    // FIXME: layoutDelta needs to be applied in parts before/after transforms and
+    // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
+    overflowRect.Move(View().FrameView().LayoutContext().LayoutDelta());
+
+    auto rects = RepaintRects {overflowRect};
+    if (repaintOutlineBounds == RepaintOutlineBounds::Yes)
+    {
+      rects.OutlineBoundsRect = LocalOutlineBoundsRepaintRect();
+    }
+
+    return rects;
+  }
+
+  auto RenderTableCell::ComputeVisibleRectsInContainer(const RepaintRects &rects,
+                                                       const RenderLayerModelObject *container,
+                                                       VisibleRectContext context) const noexcept
+    -> Maybe<RepaintRects>
+  {
+    if (container == this)
+    {
+      return rects;
+    }
+
+    auto adjustedRects = rects;
+    if ((!View().FrameView().LayoutContext().IsPaintOffsetCacheEnabled() || container
+         || context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))
+        && Parent())
+    {
+      // Rows are in the same coordinate space, so don't add their offset in.
+      adjustedRects.MoveBy(-ParentBox()->Location());
+    }
+
+    return RenderBlockFlow::ComputeVisibleRectsInContainer(adjustedRects, container, context);
   }
 
   void RenderTableCell::WillBeRemovedFromTree() noexcept

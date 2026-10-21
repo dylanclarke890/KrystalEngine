@@ -53,6 +53,12 @@ namespace krys::boo
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
 
+  protected:
+    KRYS_NODISCARD RepaintRects LocalRectsForRepaint(RepaintOutlineBounds) const noexcept final
+    {
+      return {};
+    }
+
   private:
     KRYS_NODISCARD bool RequiresLayer() const noexcept final
     {

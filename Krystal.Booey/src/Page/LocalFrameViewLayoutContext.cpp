@@ -124,7 +124,7 @@ namespace krys::boo
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InRenderTreeLayout);
       SubtreeLayoutStateMaintainer subtreeLayoutStateMaintainer(SubtreeLayoutRoot());
-      // FIXME: The repaint region accumulator, once there's painting.
+      RenderView::RepaintRegionAccumulator repaintRegionAccumulator(GetRenderView());
       layoutRoot->Layout();
       // FIXME: The layout areas the inspector reports, once there's an inspector.
       ClearSubtreeLayoutRoot();
@@ -144,6 +144,10 @@ namespace krys::boo
 
     {
       SetForScope layoutPhase(_layoutPhase, LayoutPhase::InPostLayout);
+      if (_needsFullRepaint)
+      {
+        GetRenderView()->RepaintRootContents();
+      }
       krys_debug_assert(!layoutRoot->NeedsLayout());
       // FIXME: Defer the layer position update (canDeferUpdateLayerPositions), compare the repaint rect
       // environment, update compositing and run the post-layout tasks, once there's painting and compositing.

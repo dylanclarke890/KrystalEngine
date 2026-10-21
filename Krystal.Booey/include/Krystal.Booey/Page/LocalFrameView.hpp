@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/Region.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollableArea.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -34,7 +35,7 @@ namespace krys::boo
   /// @brief The view a frame's document is laid out in: its frame rect, the size content is laid out at, the
   /// media type, pagination, the sizes viewport units resolve against, the layout context, and its scroll
   /// position within the document (the scrolling half of a scroll view).
-  /// @note FIXME: No obscured insets, visual viewport, auto-sizing, repaint rects or compositing, and views
+  /// @note FIXME: No obscured insets, visual viewport, auto-sizing or compositing, and views
   /// aren't widgets in a widget tree (there's no `Widget` or `ScrollView`): the visible content is the frame
   /// rect's size, less its scrollbars, at the scroll position.
   class LocalFrameView final : public RefCounted<LocalFrameView>,
@@ -71,6 +72,8 @@ namespace krys::boo
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
     ScrollPosition _scrollPosition;
+    /// @brief What needs painting again, in the view's coordinates, since the host last took it.
+    Region _damage;
     Timer _delayedScrollToFocusedElementTimer;
     SelectionRevealMode _selectionRevealModeForFocusedElement {SelectionRevealMode::DoNotReveal};
     bool _shouldScrollToFocusedElement {false};
@@ -206,6 +209,8 @@ namespace krys::boo
     }
 
 #pragma region Scrolling
+
+    void InvalidateScrollbar(Scrollbar &scrollbar, const IntRect &rect) noexcept override;
 
     KRYS_NODISCARD bool IsScrollView() const noexcept override
     {
@@ -403,6 +408,22 @@ namespace krys::boo
     // FIXME: The overhang areas, scrollbars and pan scroll icon, once there's rubber-banding, scrollbars and
     // pan scrolling.
     void Paint(GraphicsContext &context, const IntRect &rect) noexcept;
+
+    /// @brief Damages @p rect of the contents (in the contents' coordinates): the host paints it again.
+    /// @see `ScrollView::repaintContentRectangle`, which tells the host window
+    /// (`HostWindow::invalidateContentsAndRootView`).
+    void RepaintContentRectangle(const IntRect &rect) noexcept;
+    /// @brief Damages @p rect of the view (in the view's coordinates).
+    void InvalidateRect(const IntRect &rect) noexcept;
+    /// @brief Damages the whole view.
+    void RepaintEntireView() noexcept;
+    /// @brief Whether anything needs painting again.
+    KRYS_NODISCARD bool HasDamage() const noexcept
+    {
+      return !_damage.IsEmpty();
+    }
+    /// @brief What needs painting again, in the view's coordinates; the view then has no damage.
+    KRYS_NODISCARD Region TakeDamage() noexcept;
 
     /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates.
     /// FIXME: The overlay scrollbars and painting a single node (`setNodeToDraw`) aren't ported.

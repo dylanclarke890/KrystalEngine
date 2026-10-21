@@ -843,9 +843,37 @@ namespace krys::boo
       container->SetNeedsLayoutForOverflowChange();
     };
 
-    // FIXME: Repaint the destroy root and the ::backdrop renderers, once there's painting.
+    // FIXME: Repaint the ::backdrop renderers, once there's a top layer.
+
+    auto repaintRoot = [&](RenderElement &destroyRoot)
+    {
+      if (destroyRoot.IsBody())
+      {
+        destroyRoot.View().RepaintRootContents();
+        return;
+      }
+      auto shouldForceRepaint = [&]
+      {
+        auto *destroyRootWithLayer = DynamicDowncast<RenderLayerModelObject>(destroyRoot);
+        if (!destroyRootWithLayer || !destroyRootWithLayer->HasLayer())
+        {
+          return false;
+        }
+
+        // When any subtree repaint is propagated to this destroy root layer, we have to force it here
+        // as this layer will not be around to issue it _after_ layout.
+        // We also need to force repaint on a non-inflow box as the parent layer with full-repaint status
+        // would not necessarily enclose this box.
+        return destroyRootWithLayer->Layer()->NeedsFullRepaint()
+               || destroyRootWithLayer->IsOutOfFlowPositioned();
+      };
+      destroyRoot.Repaint(shouldForceRepaint() ? RenderObject::ForceRepaint::Yes
+                                               : RenderObject::ForceRepaint::No);
+    };
+
     if (destroyRootRenderer)
     {
+      repaintRoot(*destroyRootRenderer);
       markContainingBlockDirty(*destroyRootRenderer);
     }
 
@@ -857,8 +885,33 @@ namespace krys::boo
       {
         continue;
       }
-      // FIXME: Clear the selection if the renderer is at one of its ends, and repaint floats and positioned
-      // boxes, once there's selection and painting.
+      // FIXME: Clear the selection if the renderer is at one of its ends, once there's selection.
+
+      auto shouldRepaint = [&]
+      {
+        if (!renderElement->EverHadLayout())
+        {
+          return false;
+        }
+        if (renderElement->Style().GetOpacity().IsTransparent())
+        {
+          return false;
+        }
+        if (renderElement->IsOutOfFlowPositioned())
+        {
+          return destroyRootRenderer != renderElement->ContainingBlock()
+                 || !destroyRootRenderer->HasNonVisibleOverflow();
+        }
+        if (renderElement->IsFloating() || renderElement->IsPositioned())
+        {
+          return !destroyRootRenderer || !destroyRootRenderer->HasNonVisibleOverflow();
+        }
+        return false;
+      };
+      if (shouldRepaint())
+      {
+        renderElement->Repaint();
+      }
       if (renderElement->IsOutOfFlowPositioned())
       {
         // FIXME: Ideally we would check if containing block is the destory root or a descendent of the
@@ -939,7 +992,7 @@ namespace krys::boo
         {
           if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
           {
-            // FIXME: Repaint the renderer, once there's painting.
+            renderer->Repaint();
             if (auto *parent = renderer->Parent())
             {
               parent->SetChildNeedsLayout();
@@ -1013,7 +1066,7 @@ namespace krys::boo
     }
     if (needsRepaintAndLayout == NeedsRepaintAndLayout::Yes)
     {
-      // FIXME: Repaint the renderer, once there's painting.
+      renderer->Repaint();
       if (auto *parent = renderer->Parent())
       {
         parent->SetChildNeedsLayout();

@@ -689,13 +689,14 @@ namespace krys::boo::css
     }
 
     double value;
-    auto [nptr, nec] = std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
+    KRYS_MAYBE_UNUSED auto [nptr, nec] =
+      std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
     assert(nec == std::errc());
 
     if (!exponentPart.empty())
     {
       int64 exponent;
-      auto [eptr, eec] =
+      KRYS_MAYBE_UNUSED auto [eptr, eec] =
         std::from_chars(exponentPart.data(), exponentPart.data() + exponentPart.size(), exponent);
       assert(eec == std::errc());
 
@@ -713,7 +714,7 @@ namespace krys::boo::css
     auto ConvertHexStrToInt = [](const string &str) noexcept -> int32
     {
       int32 value = 0;
-      auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
+      KRYS_MAYBE_UNUSED auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
       assert(ec == std::errc());
       return value;
     };

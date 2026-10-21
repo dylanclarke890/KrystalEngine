@@ -201,8 +201,18 @@ namespace krys::boo
 
     ClearOverflow();
     AddVisualEffectOverflow();
-    // FIXME: Repaint the cells when the row itself needed layout (checkForRepaintDuringLayout), once there's
-    // painting.
+    // We only ever need to repaint if our cells didn't, which menas that they didn't need
+    // layout, so we know that our bounds didn't change. This code is just making up for
+    // the fact that we did not repaint in setStyle() because we had a layout hint.
+    // We cannot call repaint() because our clippedOverflowRect() is taken from the
+    // parent table, and being mid-layout, that is invalid. Instead, we repaint our cells.
+    if (SelfNeedsLayout() && CheckForRepaintDuringLayout())
+    {
+      for (RenderTableCell *cell = FirstCell(); cell; cell = cell->NextCell())
+      {
+        cell->Repaint();
+      }
+    }
 
     // RenderTableSection::LayoutRows will set our logical height and width later, so it calls
     // UpdateLayerTransform().
@@ -271,6 +281,36 @@ namespace krys::boo
     }
 
     return false;
+  }
+
+  LayoutRect RenderTableRow::ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
+                                                 VisibleRectContext context) const noexcept
+  {
+    krys_debug_assert(Parent());
+    // Rows and cells are in the same coordinate space. We need to both compute our overflow rect (which
+    // will accommodate a row outline and any visual effects on the row itself), but we also need to add in
+    // the repaint rects of cells.
+    auto result = RenderBox::ClippedOverflowRect(repaintContainer, context);
+    for (auto *cell = FirstCell(); cell; cell = cell->NextCell())
+    {
+      // Even if a cell is a repaint container, it's the row that paints the background behind it.
+      // So we don't care if a cell is a repaintContainer here.
+      result.UniteIfNonZero(cell->ClippedOverflowRect(repaintContainer, context));
+    }
+    return result;
+  }
+
+  auto RenderTableRow::RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
+                                                     RepaintOutlineBounds repaintOutlineBounds) const noexcept
+    -> RepaintRects
+  {
+    auto rects = RepaintRects {ClippedOverflowRect(repaintContainer, VisibleRectContextForRepaint())};
+    if (repaintOutlineBounds == RepaintOutlineBounds::Yes)
+    {
+      rects.OutlineBoundsRect = OutlineBoundsForRepaint(repaintContainer);
+    }
+
+    return rects;
   }
 
   void RenderTableRow::ImageChanged(WrappedImagePtr, const IntRect *) noexcept
