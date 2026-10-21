@@ -44,6 +44,7 @@ target_sources(Krystal.UI.Tests
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
 
     tests/Benchmark.cpp
+    tests/Compositing.cpp
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
     tests/View.cpp

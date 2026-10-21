@@ -11,6 +11,11 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief Maps an animation's input progress to its output progress (an easing function).
@@ -325,6 +330,8 @@ namespace krys::boo
       return AdoptRef(*new SpringTimingFunction(_mass, _stiffness, _damping, _initialVelocity));
     }
   };
+
+  TextStream &operator<<(TextStream &ts, const TimingFunction &timingFunction) noexcept;
 }
 
 #define KRYS_SPECIALIZE_TYPE_TRAITS_TIMING_FUNCTION(ToValueTypeName, predicate)                              \

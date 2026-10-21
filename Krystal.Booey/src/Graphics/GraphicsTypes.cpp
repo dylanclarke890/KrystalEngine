@@ -22,6 +22,16 @@ namespace krys::boo
                                                          "difference"};
   }
 
+  std::string_view CompositeOperatorName(CompositeOperator op, BlendMode blendOp) noexcept
+  {
+    krys_debug_assert(static_cast<uint32>(op) < std::size(compositeOperatorNames));
+    if (blendOp > BlendMode::Normal)
+    {
+      return BlendModeName(blendOp);
+    }
+    return compositeOperatorNames[static_cast<uint32>(op)];
+  }
+
   TextStream &operator<<(TextStream &ts, CompositeOperator op) noexcept
   {
     return ts << compositeOperatorNames[static_cast<uint32>(op)];

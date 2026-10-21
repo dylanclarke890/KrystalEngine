@@ -1,0 +1,42 @@
+﻿<!doctype html>
+<!-- The "compositing" golden: Krystal.UI.Tests/tests/Compositing.cpp builds the same scene from graphics layers. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; }
+</style>
+</head>
+<body>
+  <!-- A layer that draws content. -->
+  <div style="left: 16px; top: 16px; width: 100px; height: 80px; background: #118ab2">
+    <div style="left: 10px; top: 10px; width: 40px; height: 30px; background: #ffd166"></div>
+  </div>
+
+  <!-- A group made translucent as one: its children overlap. -->
+  <div style="left: 140px; top: 20px; width: 80px; height: 80px; opacity: 0.5">
+    <div style="left: 0; top: 0; width: 50px; height: 50px; background: #073b4c"></div>
+    <div style="left: 20px; top: 20px; width: 60px; height: 60px; background: #ef476f"></div>
+  </div>
+
+  <!-- A turned layer. -->
+  <div style="left: 250px; top: 30px; width: 80px; height: 60px; background: #06d6a0; transform: rotate(15deg)">
+    <div style="left: 10px; top: 10px; width: 20px; height: 20px; background: #073b4c"></div>
+  </div>
+
+  <!-- A blurred layer. -->
+  <div style="left: 30px; top: 140px; width: 100px; height: 70px; background: #ef476f; filter: blur(3px)">
+    <div style="left: 30px; top: 20px; width: 40px; height: 30px; background: #ffd166"></div>
+  </div>
+
+  <!-- A layer that clips its child. -->
+  <div style="left: 170px; top: 140px; width: 80px; height: 70px; background: #e9ecf2; overflow: hidden">
+    <div style="left: 40px; top: 30px; width: 80px; height: 60px; background: #118ab2"></div>
+  </div>
+
+  <!-- A layer whose contents are a solid colour. -->
+  <div style="left: 280px; top: 150px; width: 60px; height: 50px; background: #8338ec"></div>
+</body>
+</html>

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/SpringSolver.hpp"
 #include "Krystal.Booey/Graphics/UnitBezier.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -309,5 +310,65 @@ namespace krys::boo
     const auto *otherSpring = DynamicDowncast<SpringTimingFunction>(other);
     return otherSpring && _mass == otherSpring->_mass && _stiffness == otherSpring->_stiffness
            && _damping == otherSpring->_damping && _initialVelocity == otherSpring->_initialVelocity;
+  }
+
+  TextStream &operator<<(TextStream &ts, const TimingFunction &timingFunction) noexcept
+  {
+    switch (timingFunction.GetType())
+    {
+      case TimingFunction::Type::LinearFunction:
+      {
+        const auto &function = Downcast<LinearTimingFunction>(timingFunction);
+        ts << "linear(";
+        for (size_t i = 0; i < function.Points().size(); ++i)
+        {
+          if (i)
+          {
+            ts << ", ";
+          }
+
+          const auto &point = function.Points()[i];
+          ts << point.Value << ' ' << FormatCSSNumber(point.Progress * 100.0) << '%';
+        }
+        ts << ')';
+        break;
+      }
+      case TimingFunction::Type::CubicBezierFunction:
+      {
+        const auto &function = Downcast<CubicBezierTimingFunction>(timingFunction);
+        ts << "cubic-bezier(" << FormatCSSNumber(function.X1()) << ", " << FormatCSSNumber(function.Y1())
+           << ", " << FormatCSSNumber(function.X2()) << ", " << FormatCSSNumber(function.Y2()) << ')';
+        break;
+      }
+      case TimingFunction::Type::StepsFunction:
+      {
+        const auto &function = Downcast<StepsTimingFunction>(timingFunction);
+        ts << "steps(" << static_cast<int32>(function.NumberOfSteps());
+        if (auto stepPosition = function.GetStepPosition())
+        {
+          ts << ", ";
+          switch (stepPosition.value())
+          {
+            case StepsTimingFunction::StepPosition::JumpStart: ts << "jump-start"; break;
+            case StepsTimingFunction::StepPosition::JumpEnd:   ts << "jump-end"; break;
+            case StepsTimingFunction::StepPosition::JumpNone:  ts << "jump-none"; break;
+            case StepsTimingFunction::StepPosition::JumpBoth:  ts << "jump-both"; break;
+            case StepsTimingFunction::StepPosition::Start:     ts << "start"; break;
+            case StepsTimingFunction::StepPosition::End:       ts << "end"; break;
+          }
+        }
+        ts << ')';
+        break;
+      }
+      case TimingFunction::Type::SpringFunction:
+      {
+        const auto &function = Downcast<SpringTimingFunction>(timingFunction);
+        ts << "spring(" << FormatCSSNumber(function.Mass()) << ' ' << FormatCSSNumber(function.Stiffness())
+           << ' ' << FormatCSSNumber(function.Damping()) << ' ' << FormatCSSNumber(function.InitialVelocity())
+           << ')';
+        break;
+      }
+    }
+    return ts;
   }
 }

@@ -145,17 +145,6 @@ namespace krys::boo
     }
   }
 
-  template <typename E>
-  static TextStream &operator<<(TextStream &ts, const EnumSet<E> &flags) noexcept
-  {
-    List<E> values;
-    for (auto value : flags)
-    {
-      values.push_back(value);
-    }
-    return StreamSizedContainer(ts, values);
-  }
-
   TextStream &GraphicsContextState::Dump(TextStream &ts) const noexcept
   {
     auto dump = [&](Change change, auto GraphicsContextState::*property)

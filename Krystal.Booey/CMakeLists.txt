@@ -1626,6 +1626,22 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/TransparencyLayerContextSwitcher.hpp
   include/Krystal.Booey/Rendering/CSSFilterRenderer.hpp
   include/Krystal.Booey/Rendering/RenderLayerFilters.hpp
+
+  # Compositing (G12)
+  include/Krystal.Booey/Graphics/ContentsFormat.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayer.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerAnimationValue.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerClient.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerEnums.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerFactory.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerFilterAnimationValue.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerTransform.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp
+  include/Krystal.Booey/Graphics/LayerTreeAsTextOptions.hpp
+  include/Krystal.Booey/Graphics/PlatformLayerIdentifier.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2684,6 +2700,13 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/TransparencyLayerContextSwitcher.cpp
   src/Rendering/CSSFilterRenderer.cpp
   src/Rendering/RenderLayerFilters.cpp
+
+  # Compositing (G12)
+  src/Graphics/ContentsFormat.cpp
+  src/Graphics/GraphicsLayer.cpp
+  src/Graphics/GraphicsLayerAnimation.cpp
+  src/Graphics/GraphicsLayerKeyframeValueList.cpp
+  src/Graphics/GraphicsLayerTransform.cpp
 )
 
 target_precompile_headers(Krystal.Booey

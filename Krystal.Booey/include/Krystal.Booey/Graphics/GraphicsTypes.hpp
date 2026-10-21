@@ -143,8 +143,10 @@ namespace krys::boo
     RightTextAlign
   };
 
-  // FIXME: `compositeOperatorName`, `parseBlendMode` and `parseCompositeAndBlendOperator` come with the
-  // canvas 2D context.
+  /// @brief The name of @p op, or of @p blendOp when it isn't `normal`.
+  KRYS_NODISCARD std::string_view CompositeOperatorName(CompositeOperator op, BlendMode blendOp) noexcept;
+
+  // FIXME: `parseBlendMode` and `parseCompositeAndBlendOperator` come with the canvas 2D context.
 }
 
 namespace krys::boo

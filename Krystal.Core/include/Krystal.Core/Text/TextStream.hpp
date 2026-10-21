@@ -288,6 +288,23 @@ namespace krys
     return ts << '[' << pair.first << ", " << pair.second << ']';
   }
 
+  template <typename TEnum>
+  TextStream &operator<<(TextStream &ts, const EnumSet<TEnum> &options) noexcept
+  {
+    ts << '[';
+    bool needComma = false;
+    for (auto option : options)
+    {
+      if (needComma)
+      {
+        ts << ", ";
+      }
+      needComma = true;
+      ts << option;
+    }
+    return ts << ']';
+  }
+
   // Deprecated. Use TextStream::WriteIndent() instead.
   void WriteIndent(TextStream &ts, int32 indent) noexcept;
 }
