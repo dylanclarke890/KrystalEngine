@@ -5,6 +5,7 @@
 namespace krys::boo
 {
   class LoaderStrategy;
+  class PasteboardStrategy;
 
   /// @brief The strategies the host provides for what Booey can't do itself.
   /// @note The host owns the strategies; they must outlive their use.
@@ -12,6 +13,7 @@ namespace krys::boo
   {
   private:
     LoaderStrategy *_loaderStrategy {nullptr};
+    PasteboardStrategy *_pasteboardStrategy {nullptr};
 
   public:
     KRYS_NODISCARD static PlatformStrategies &Singleton() noexcept;
@@ -24,6 +26,17 @@ namespace krys::boo
     void SetLoaderStrategy(LoaderStrategy *loaderStrategy) noexcept
     {
       _loaderStrategy = loaderStrategy;
+    }
+
+    /// @brief How the system clipboard is written; null until the host sets one, and then copying does
+    /// nothing.
+    KRYS_NODISCARD PasteboardStrategy *GetPasteboardStrategy() const noexcept
+    {
+      return _pasteboardStrategy;
+    }
+    void SetPasteboardStrategy(PasteboardStrategy *pasteboardStrategy) noexcept
+    {
+      _pasteboardStrategy = pasteboardStrategy;
     }
   };
 }

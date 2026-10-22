@@ -387,6 +387,22 @@ namespace krys::boo
     return ShareRefPtr(DynamicDowncast<dom::Element>(block.get()));
   }
 
+  dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept
+  {
+    for (; node; node = dom::TreeQueries::ShadowHost(*node))
+    {
+      if (&dom::TreeQueries::Root(*node) == &scopeRoot)
+      {
+        return node;
+      }
+      if (!node->IsInShadowTree())
+      {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
+
   TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept
   {
     auto block = EnclosingBlock(ShareRefPtr(position.GetContainerNode()));

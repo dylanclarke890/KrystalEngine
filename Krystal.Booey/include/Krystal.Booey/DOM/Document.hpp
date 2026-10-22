@@ -39,6 +39,8 @@ namespace krys::boo
   class CachedResourceLoader;
   class DocumentTimeline;
   class FontLoadRequest;
+  class DOMSelection;
+  class Editor;
   class FrameSelection;
   class HitTestLocation;
   class HitTestRequest;
@@ -176,6 +178,8 @@ namespace krys::boo::dom
     RefPtr<Element> _activeElement;
     bool _isFocusedAndActive {true};
     UniquePtr<FrameSelection> _selection;
+    UniquePtr<boo::Editor> _editor;
+    RefPtr<DOMSelection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
     FocusTrigger _latestFocusTrigger {FocusTrigger::Other};
@@ -568,6 +572,16 @@ namespace krys::boo::dom
     {
       return *_selection;
     }
+
+    KRYS_NODISCARD boo::Editor &GetEditor() const noexcept
+    {
+      return *_editor;
+    }
+
+    /// @brief The script's view of the selection; null unless the document is fully active (shown in a
+    /// frame).
+    /// @see https://w3c.github.io/selection-api/#dom-document-getselection
+    KRYS_NODISCARD DOMSelection *GetSelection() noexcept;
 
     /// @brief The innermost element under the pointer that has a renderer, if any.
     KRYS_NODISCARD Element *HoveredElement() const noexcept

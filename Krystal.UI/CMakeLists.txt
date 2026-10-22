@@ -41,12 +41,14 @@ target_sources(Krystal.UI
       include/Krystal.UI/Compositing/TextureMapperPlatformLayer.hpp
       include/Krystal.UI/Compositing/TextureMapperTile.hpp
       include/Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp
+      include/Krystal.UI/EditorClient.hpp
       include/Krystal.UI/FileLoaderStrategy.hpp
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
       include/Krystal.UI/Render2DConversions.hpp
+      include/Krystal.UI/SystemPasteboardStrategy.hpp
       include/Krystal.UI/View.hpp
 
   PRIVATE
@@ -59,11 +61,13 @@ target_sources(Krystal.UI
     src/Compositing/TextureMapperLayer.cpp
     src/Compositing/TextureMapperTile.cpp
     src/Compositing/TextureMapperTiledBackingStore.cpp
+    src/EditorClient.cpp
     src/FileLoaderStrategy.cpp
     src/FontFaceCache.cpp
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp
     src/Input.cpp
     src/Render2DConversions.cpp
+    src/SystemPasteboardStrategy.cpp
     src/View.cpp
 )

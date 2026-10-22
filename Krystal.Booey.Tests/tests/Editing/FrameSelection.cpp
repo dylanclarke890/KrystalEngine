@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -167,5 +169,187 @@ namespace krys::boo::tests
     CHECK(!selection.IsFocusedAndActive());
     fixture.Document->SetFocusedAndActive(true);
     CHECK(selection.IsFocusedAndActive());
+  }
+}
+
+namespace krys::boo::tests
+{
+  namespace
+  {
+    using Alteration = FrameSelection::Alteration;
+
+    /// @brief Counts `selectstart` events, cancelling them if asked.
+    struct ModifySelectStartListener : public dom::EventListenerCallback
+    {
+      int32 Count {0};
+      bool Cancel {false};
+
+      void HandleEvent(dom::Event &event) noexcept override
+      {
+        ++Count;
+        if (Cancel)
+        {
+          event.PreventDefault();
+        }
+      }
+    };
+  }
+
+  TEST_CASE("FrameSelection: modifying by character and word", "[Editing][FrameSelection]")
+  {
+    FrameSelectionFixture fixture(u8"<p id=a>The quick brown fox</p>");
+    auto &selection = fixture.Selection();
+    auto &text = fixture.TextIn(u8"a");
+
+    selection.MoveTo(At(text, 4), Affinity::Downstream);
+    REQUIRE(selection.IsCaret());
+
+    // Extending keeps the base and moves the extent.
+    CHECK(
+      selection.Modify(Alteration::Extend, SelectionDirection::Right, TextGranularity::CharacterGranularity));
+    CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 4);
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 5);
+    CHECK(
+      selection.Modify(Alteration::Extend, SelectionDirection::Left, TextGranularity::CharacterGranularity));
+    CHECK(
+      selection.Modify(Alteration::Extend, SelectionDirection::Left, TextGranularity::CharacterGranularity));
+    CHECK(!selection.Selection().IsBaseFirst());
+    CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 3);
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 4);
+
+    // Words: moving right skips the spaces after a word, as Windows does.
+    selection.MoveTo(At(text, 0), Affinity::Downstream);
+    CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Right, TextGranularity::WordGranularity));
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 4);
+    CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Right, TextGranularity::WordGranularity));
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 10);
+    CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Left, TextGranularity::WordGranularity));
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 4);
+
+    // Moving collapses a range to its end in the direction moved.
+    selection.MoveTo(At(text, 4), At(text, 9), Affinity::Downstream);
+    CHECK(
+      selection.Modify(Alteration::Move, SelectionDirection::Right, TextGranularity::CharacterGranularity));
+    CHECK(selection.IsCaret());
+    CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 9);
+    selection.MoveTo(At(text, 4), At(text, 9), Affinity::Downstream);
+    CHECK(
+      selection.Modify(Alteration::Move, SelectionDirection::Left, TextGranularity::CharacterGranularity));
+    CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 4);
+  }
+
+  TEST_CASE("FrameSelection: modifying by line, paragraph and document", "[Editing][FrameSelection]")
+  {
+    FrameSelectionFixture fixture(
+      u8"<p id=a style=margin:0>The quick brown fox</p><p id=b style=margin:0>ab</p>"
+      u8"<p id=c style=margin:0>jumps over the lazy dog</p>");
+    auto &selection = fixture.Selection();
+    auto &first = fixture.TextIn(u8"a");
+    auto &second = fixture.TextIn(u8"b");
+    auto &third = fixture.TextIn(u8"c");
+
+    SECTION("Line boundaries")
+    {
+      selection.MoveTo(At(first, 4), Affinity::Downstream);
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Forward, TextGranularity::LineBoundary));
+      CHECK(selection.Selection().End().DeprecatedEditingOffset() == 19);
+      CHECK(
+        selection.Modify(Alteration::Extend, SelectionDirection::Backward, TextGranularity::LineBoundary));
+      CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
+    }
+
+    SECTION("Lines keep their horizontal position across a shorter line")
+    {
+      selection.MoveTo(At(first, 10), Affinity::Downstream);
+      CHECK(
+        selection.Modify(Alteration::Extend, SelectionDirection::Forward, TextGranularity::LineGranularity));
+      CHECK(selection.Selection().End().DeprecatedNode() == &second);
+      CHECK(selection.Selection().End().DeprecatedEditingOffset() == 2);
+      CHECK(
+        selection.Modify(Alteration::Extend, SelectionDirection::Forward, TextGranularity::LineGranularity));
+      CHECK(selection.Selection().End().DeprecatedNode() == &third);
+      auto offset = selection.Selection().End().DeprecatedEditingOffset();
+      CHECK(offset >= 9);
+      CHECK(offset <= 11);
+      CHECK(
+        selection.Modify(Alteration::Extend, SelectionDirection::Backward, TextGranularity::LineGranularity));
+      CHECK(selection.Selection().End().DeprecatedNode() == &second);
+    }
+
+    SECTION("Paragraphs")
+    {
+      selection.MoveTo(At(first, 2), Affinity::Downstream);
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Forward,
+                             TextGranularity::ParagraphBoundary));
+      CHECK(selection.Selection().End().DeprecatedNode() == &first);
+      CHECK(selection.Selection().End().DeprecatedEditingOffset() == 19);
+    }
+
+    SECTION("The document")
+    {
+      selection.MoveTo(At(second, 1), Affinity::Downstream);
+      CHECK(
+        selection.Modify(Alteration::Extend, SelectionDirection::Forward, TextGranularity::DocumentBoundary));
+      CHECK(selection.Selection().End().DeprecatedNode() == &third);
+      CHECK(selection.Selection().End().DeprecatedEditingOffset() == 23);
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Backward,
+                             TextGranularity::DocumentBoundary));
+      CHECK(selection.Selection().Start().DeprecatedNode() == &first);
+      CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
+    }
+
+    SECTION("A vertical distance")
+    {
+      selection.MoveTo(At(first, 1), Affinity::Downstream);
+      CHECK(selection.Modify(Alteration::Extend, 40, FrameSelection::VerticalDirection::Down));
+      CHECK(selection.Selection().End().DeprecatedNode() == &third);
+      CHECK(selection.Modify(Alteration::Extend, 20, FrameSelection::VerticalDirection::Up));
+      CHECK(selection.Selection().End().DeprecatedNode() == &second);
+      CHECK_FALSE(selection.Modify(Alteration::Extend, 0, FrameSelection::VerticalDirection::Up));
+    }
+  }
+
+  TEST_CASE("FrameSelection: modifying as the user", "[Editing][FrameSelection]")
+  {
+    FrameSelectionFixture fixture(
+      u8"<p id=a>The quick brown fox</p><div style=height:2000px></div><p id=z>The end</p>");
+    auto &selection = fixture.Selection();
+    auto &text = fixture.TextIn(u8"a");
+    auto listener = CreateRef<ModifySelectStartListener>();
+    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"selectstart"),
+                                       Ref<dom::EventListenerCallback> {listener}, true);
+
+    SECTION("Extending a caret fires selectstart, which can cancel it")
+    {
+      selection.MoveTo(At(text, 4), Affinity::Downstream);
+      listener->Cancel = true;
+      CHECK_FALSE(selection.Modify(Alteration::Extend, SelectionDirection::Right,
+                                   TextGranularity::CharacterGranularity, UserTriggered::Yes));
+      CHECK(listener->Count == 1);
+      CHECK(selection.IsCaret());
+
+      listener->Cancel = false;
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Right,
+                             TextGranularity::CharacterGranularity, UserTriggered::Yes));
+      CHECK(listener->Count == 2);
+      CHECK(selection.IsRange());
+
+      // Extending a range doesn't fire it again.
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Right,
+                             TextGranularity::CharacterGranularity, UserTriggered::Yes));
+      CHECK(listener->Count == 2);
+    }
+
+    SECTION("The extent is revealed")
+    {
+      selection.MoveTo(At(text, 0), Affinity::Downstream);
+      auto *view = fixture.Document->View();
+      CHECK(view->GetScrollPosition().Y() == 0);
+      CHECK(selection.Modify(Alteration::Extend, SelectionDirection::Forward,
+                             TextGranularity::DocumentBoundary, UserTriggered::Yes));
+      fixture.UpdateRendering();
+      CHECK(selection.Selection().End().DeprecatedNode() == &fixture.TextIn(u8"z"));
+      CHECK(view->GetScrollPosition().Y() > 1'500);
+    }
   }
 }

@@ -96,4 +96,61 @@ namespace krys::pal
     }
     return settings;
   }
+
+  bool SetClipboardText(utf8_stringview text, NativeHandle windowHandle) noexcept
+  {
+    if (!windowHandle.IsValid())
+    {
+      windowHandle = GetActiveWindow();
+    }
+
+    // The clipboard's text uses Windows line breaks.
+    utf8_string windowsText;
+    windowsText.reserve(text.size());
+    for (auto c : text)
+    {
+      if (c == u8'\n')
+      {
+        windowsText.push_back(u8'\r');
+      }
+      windowsText.push_back(c);
+    }
+
+    const auto *bytes = reinterpret_cast<const char *>(windowsText.data());
+    const int length = static_cast<int>(windowsText.size());
+    const int wideLength = length ? ::MultiByteToWideChar(CP_UTF8, 0, bytes, length, nullptr, 0) : 0;
+    if (length && !wideLength)
+    {
+      return false;
+    }
+
+    HGLOBAL memory = ::GlobalAlloc(GMEM_MOVEABLE, (static_cast<SIZE_T>(wideLength) + 1) * sizeof(wchar_t));
+    if (!memory)
+    {
+      return false;
+    }
+    auto *wide = static_cast<wchar_t *>(::GlobalLock(memory));
+    if (length)
+    {
+      ::MultiByteToWideChar(CP_UTF8, 0, bytes, length, wide, wideLength);
+    }
+    wide[wideLength] = L'\0';
+    ::GlobalUnlock(memory);
+
+    // Without an owner window, emptying the clipboard leaves it unowned, and setting its data fails.
+    if (!windowHandle.IsValid() || !::OpenClipboard(windowHandle.As<HWND>()))
+    {
+      ::GlobalFree(memory);
+      return false;
+    }
+    ::EmptyClipboard();
+    bool set = ::SetClipboardData(CF_UNICODETEXT, memory) != nullptr;
+    ::CloseClipboard();
+    if (!set)
+    {
+      // The clipboard owns the memory only once it takes it.
+      ::GlobalFree(memory);
+    }
+    return set;
+  }
 }

@@ -2866,8 +2866,15 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/Editing.hpp
       include/Krystal.Booey/Editing/EditingBehavior.hpp
       include/Krystal.Booey/Editing/EditingBoundary.hpp
+      include/Krystal.Booey/DOM/ClipboardEvent.hpp
+      include/Krystal.Booey/DOM/Dicts/ClipboardEventInit.hpp
+      include/Krystal.Booey/Editing/Editor.hpp
       include/Krystal.Booey/Editing/FrameSelection.hpp
       include/Krystal.Booey/Page/AutoscrollController.hpp
+      include/Krystal.Booey/Page/DOMSelection.hpp
+      include/Krystal.Booey/Page/EditorClient.hpp
+      include/Krystal.Booey/Platform/Pasteboard.hpp
+      include/Krystal.Booey/Platform/PasteboardStrategy.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
       include/Krystal.Booey/Editing/TextAffinity.hpp
@@ -3241,8 +3248,13 @@ target_sources(Krystal.Booey
     src/DOM/PositionIterator.cpp
     src/DOM/SimpleRange.cpp
     src/Editing/Editing.cpp
+    src/DOM/ClipboardEvent.cpp
+    src/Editing/Editor.cpp
+    src/Editing/EditorCommand.cpp
     src/Editing/FrameSelection.cpp
     src/Page/AutoscrollController.cpp
+    src/Page/DOMSelection.cpp
+    src/Platform/Pasteboard.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp
     src/Editing/VisiblePosition.cpp

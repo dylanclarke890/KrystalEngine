@@ -25,19 +25,24 @@ namespace krys::boo
       RenderingUpdateStep::LayerFlush};
   }
 
-  Page::Page(UniquePtr<ChromeClient> chromeClient) noexcept : _chromeClient(krys::move(chromeClient))
+  Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient) noexcept
+      : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient))
   {
     if (!_chromeClient)
     {
       _chromeClient = CreateUnique<EmptyChromeClient>();
     }
+    if (!_editorClient)
+    {
+      _editorClient = CreateUnique<EmptyEditorClient>();
+    }
   }
 
   Page::~Page() noexcept = default;
 
-  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient) noexcept
+  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient) noexcept
   {
-    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient)));
+    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient)));
     page->_mainFrame = LocalFrame::Create(page.get());
     return page;
   }

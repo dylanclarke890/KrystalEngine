@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
@@ -21,7 +22,16 @@ namespace krys::boo::dom
 {
   Range::~Range() noexcept
   {
+    krys_debug_assert(!_isAssociatedWithSelection);
     LiveRangeUpdater::Destroyed(*this);
+  }
+
+  void Range::UpdateAssociatedSelection() noexcept
+  {
+    if (_isAssociatedWithSelection)
+    {
+      _start.Container->NodeDocument().Selection().UpdateFromAssociatedLiveRange();
+    }
   }
 
 #pragma region Range
@@ -125,6 +135,7 @@ namespace krys::boo::dom
     {
       _start = _end;
     }
+    UpdateAssociatedSelection();
   }
 
   ExceptionOr<void> Range::SelectNode(Node &node) noexcept
@@ -867,6 +878,7 @@ namespace krys::boo::dom
     }
 
     _start = krys::move(boundaryPoint);
+    UpdateAssociatedSelection();
     return {};
   }
 
@@ -896,6 +908,7 @@ namespace krys::boo::dom
     }
 
     _end = krys::move(boundaryPoint);
+    UpdateAssociatedSelection();
     return {};
   }
 

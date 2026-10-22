@@ -39,6 +39,7 @@
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
@@ -57,6 +58,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
@@ -105,6 +107,7 @@ namespace krys::boo::dom
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
     _selection = CreateUnique<FrameSelection>(this);
+    _editor = CreateUnique<boo::Editor>(*this);
   }
 
   Document::~Document() noexcept
@@ -1237,6 +1240,19 @@ namespace krys::boo::dom
     }
 
     _pendingScrollEventTargets.emplace_back(ShareRef(originalTarget), eventType);
+  }
+
+  DOMSelection *Document::GetSelection() noexcept
+  {
+    if (!Frame())
+    {
+      return nullptr;
+    }
+    if (!_domSelection)
+    {
+      _domSelection = CreateRef<DOMSelection>(*this);
+    }
+    return _domSelection.get();
   }
 
   boo::Page *Document::GetPage() const noexcept

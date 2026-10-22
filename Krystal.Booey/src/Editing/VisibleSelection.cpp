@@ -13,24 +13,6 @@ namespace krys::boo
 {
   namespace
   {
-    /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root
-    /// is @p scopeRoot.
-    KRYS_NODISCARD dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept
-    {
-      for (; node; node = dom::TreeQueries::ShadowHost(*node))
-      {
-        if (&dom::TreeQueries::Root(*node) == &scopeRoot)
-        {
-          return node;
-        }
-        if (!node->IsInShadowTree())
-        {
-          return nullptr;
-        }
-      }
-      return nullptr;
-    }
-
     // FIXME: User agent shadow roots, once there are any.
     KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(dom::Node &node) noexcept
     {

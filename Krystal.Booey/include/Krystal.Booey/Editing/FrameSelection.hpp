@@ -1,8 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Page/ScrollBehavior.hpp"
+#include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -15,6 +19,7 @@ namespace krys::boo::dom
   class Document;
   class Element;
   class Node;
+  class Range;
 }
 
 namespace krys::boo
@@ -23,6 +28,27 @@ namespace krys::boo
   {
     No,
     Yes
+  };
+
+  enum class RevealExtentOption : bool
+  {
+    RevealExtent,
+    DoNotRevealExtent
+  };
+
+  enum class ForceCenterScroll : bool
+  {
+    No,
+    Yes
+  };
+
+  // FIXME: Only scrolling forward (onlyAllowForwardScrolling), once scrolling a rect into view can.
+  struct RevealSelectionOptions
+  {
+    SelectionRevealMode RevealMode {SelectionRevealMode::Reveal};
+    ScrollAlignment Alignment {ScrollAlignment::AlignCenterIfNeeded};
+    RevealExtentOption RevealExtent {RevealExtentOption::DoNotRevealExtent};
+    ScrollBehavior Behavior {ScrollBehavior::Instant};
   };
 
   enum class FrameSelectionSetSelectionOption : uint8
@@ -55,9 +81,8 @@ namespace krys::boo
   /// the selection's colours), and keeping the render tree's selection (`RenderSelection`) in step with it.
   // FIXME: The caret (CaretBase, the caret animator, its rect and painting, caret visibility), with carets in
   // editable content.
-  // FIXME: Modifying the selection by granularity and vertical distance (modify, willBeModified, the
-  // modifyExtending and modifyMoving functions), revealing it (revealSelection), the typing style, the live
-  // range of the DOM's Selection and selectionchange events, with the keyboard and the DOM's Selection.
+  // FIXME: The typing style, with editing commands.
+  // FIXME: selectionchange at text form controls, with form controls.
   // FIXME: Focusing the editable root a selection is placed in (setFocusedElementIfNeeded), with carets in
   // editable content.
   // FIXME: Frames: the drag caret (DragCaretController), selecting the frame element in the parent
@@ -95,13 +120,38 @@ namespace krys::boo
       Yes
     };
 
+    enum class Alteration : bool
+    {
+      Move,
+      Extend
+    };
+
+    enum class VerticalDirection : bool
+    {
+      Up,
+      Down
+    };
+
+  private:
+    enum class PositionType : uint8
+    {
+      Start,
+      End,
+      Extent
+    };
+
   private:
     dom::Document *_document;
     VisibleSelection _selection;
     VisiblePosition _originalBase; // Used to store base before the adjustment at bidi boundary.
     TextGranularity _granularity {TextGranularity::CharacterGranularity};
+    RefPtr<dom::Range> _associatedLiveRange;
+    Maybe<LayoutUnit> _xPosForVerticalArrowNavigation;
+    SelectionRevealMode _selectionRevealMode {SelectionRevealMode::DoNotReveal};
 
     bool _focused {false};
+    bool _alwaysAlignCursorOnScrollWhenRevealingSelection {false};
+    bool _hasScheduledSelectionChangeEventOnDocument {false};
     bool _shouldShowBlockCursor {false};
     bool _pendingSelectionUpdate {false};
 
@@ -150,6 +200,14 @@ namespace krys::boo
                           UserTriggered userTriggered = UserTriggered::No) noexcept;
     void SelectAll() noexcept;
     void Clear() noexcept;
+
+    bool Modify(Alteration alter, SelectionDirection direction, TextGranularity granularity,
+                UserTriggered userTriggered = UserTriggered::No) noexcept;
+    bool Modify(Alteration alter, uint32 verticalDistance, VerticalDirection direction,
+                UserTriggered userTriggered = UserTriggered::No,
+                CursorAlignOnScroll align = CursorAlignOnScroll::IfNeeded) noexcept;
+
+    void WillBeModified(Alteration alter, SelectionDirection direction) noexcept;
     void WillBeRemovedFromFrame() noexcept;
 
     /// @brief Brings the render tree's selection up to date, once the rendering is.
@@ -214,6 +272,9 @@ namespace krys::boo
     /// @brief Sets the render tree's selection from the selection.
     void UpdateAppearance() noexcept;
 
+    /// @brief Scrolls the selection (its caret, extent or bounds) into view.
+    void RevealSelection(const RevealSelectionOptions &revealSelectionOptions = {}) noexcept;
+
     KRYS_NODISCARD bool ShouldChangeSelection(const VisibleSelection &newSelection) const noexcept;
 
     void SetSelectionByMouseIfDifferent(
@@ -230,12 +291,54 @@ namespace krys::boo
       return _shouldShowBlockCursor;
     }
 
+    /// @brief The live range the DOM's Selection gives out for the selection, made when it's first asked for.
+    KRYS_NODISCARD RefPtr<dom::Range> AssociatedLiveRange() noexcept;
+    void AssociateLiveRange(dom::Range &liveRange) noexcept;
+    void DisassociateLiveRange() noexcept;
+    /// @brief Sets the selection from the associated live range, after its boundary points changed.
+    void UpdateFromAssociatedLiveRange() noexcept;
+    void UpdateOrDisassociateLiveRange(bool shouldMaintainLiveRange) noexcept;
+
     KRYS_NODISCARD bool IsInDocumentTree() const noexcept;
     KRYS_NODISCARD bool IsConnectedToDocument() const noexcept;
 
   private:
     void UpdateSelectionAppearanceNow() noexcept;
-    void UpdateAndRevealSelection() noexcept;
+    void UpdateAndRevealSelection(ScrollBehavior scrollBehavior = ScrollBehavior::Instant,
+                                  RevealExtentOption revealExtent = RevealExtentOption::RevealExtent,
+                                  ForceCenterScroll forceCenterScroll = ForceCenterScroll::No) noexcept;
+
+    KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock() noexcept;
+    KRYS_NODISCARD TextDirection DirectionOfSelection() noexcept;
+
+    KRYS_NODISCARD VisiblePosition PositionForPlatform(bool isGetStart) const noexcept;
+    KRYS_NODISCARD VisiblePosition StartForPlatform() const noexcept;
+    KRYS_NODISCARD VisiblePosition EndForPlatform() const noexcept;
+    KRYS_NODISCARD VisiblePosition
+      NextWordPositionForPlatform(const VisiblePosition &originalPosition) noexcept;
+
+    KRYS_NODISCARD VisiblePosition ModifyExtendingRight(TextGranularity granularity,
+                                                        UserTriggered userTriggered) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyExtendingForward(TextGranularity granularity,
+                                                          UserTriggered userTriggered) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyMovingRight(TextGranularity granularity,
+                                                     bool *reachedBoundary = nullptr) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyMovingForward(TextGranularity granularity,
+                                                       bool *reachedBoundary = nullptr) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyExtendingLeft(TextGranularity granularity,
+                                                       UserTriggered userTriggered) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyExtendingBackward(TextGranularity granularity,
+                                                           UserTriggered userTriggered) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyMovingLeft(TextGranularity granularity,
+                                                    bool *reachedBoundary = nullptr) noexcept;
+    KRYS_NODISCARD VisiblePosition ModifyMovingBackward(TextGranularity granularity,
+                                                        bool *reachedBoundary = nullptr) noexcept;
+    void AdjustSelectionExtentIfNeeded(VisiblePosition &extent, bool isForward,
+                                       UserTriggered userTriggered) noexcept;
+
+    KRYS_NODISCARD LayoutUnit LineDirectionPointForBlockDirectionNavigation(PositionType type) noexcept;
+
+    bool DispatchSelectStart() noexcept;
 
     bool SetSelectionWithoutUpdatingAppearance(const VisibleSelection &newSelectionPossiblyWithoutDirection,
                                                EnumSet<SetSelectionOption> options, CursorAlignOnScroll align,

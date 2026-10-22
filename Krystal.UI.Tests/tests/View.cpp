@@ -6,9 +6,12 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -377,6 +380,56 @@ namespace krys::ui::tests
     view.MousePressed({10, 60}, pal::MouseButton::Left);
     view.MouseReleased({10, 60}, pal::MouseButton::Left);
     CHECK_FALSE(view.Document().FocusedElement());
+  }
+
+  TEST_CASE("View: the keyboard selects and copies", "[UI]")
+  {
+    /// @brief Records what's written to the clipboard, in place of the system's.
+    struct RecordingPasteboard final : boo::PasteboardStrategy
+    {
+      List<utf8_string> Writes;
+
+      void WriteToPasteboard(utf8_stringview, utf8_stringview text) noexcept override
+      {
+        Writes.emplace_back(text);
+      }
+    };
+
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<p id=a>The quick brown fox</p>");
+    view.UpdateRendering();
+
+    auto &strategies = boo::PlatformStrategies::Singleton();
+    auto *systemPasteboard = strategies.GetPasteboardStrategy();
+    RecordingPasteboard pasteboard;
+    strategies.SetPasteboardStrategy(&pasteboard);
+
+    auto &selection = view.Document().Selection();
+    auto *text = view.Document().GetElementById(u8"a")->FirstChild();
+
+    // Shift with the arrows extends a selection; without Shift, outside editable text, the arrows scroll.
+    selection.MoveTo(boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 4),
+                     boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 9), boo::Affinity::Downstream);
+    CHECK(view.KeyPressed(pal::Key::RightArrow, {pal::KeyModifier::Shift}));
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 10);
+    CHECK(view.KeyPressed(pal::Key::RightArrow, {pal::KeyModifier::Shift, pal::KeyModifier::Control}));
+    CHECK(selection.Selection().End().DeprecatedEditingOffset() == 16);
+    CHECK(view.KeyPressed(pal::Key::Home, {pal::KeyModifier::Shift}));
+    CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
+
+    // Ctrl+C copies the selected text.
+    selection.MoveTo(boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 4),
+                     boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 15), boo::Affinity::Downstream);
+    CHECK(view.KeyPressed(pal::Key::C, {pal::KeyModifier::Control}, {u8"", u8"c"}));
+    CHECK(pasteboard.Writes == List<utf8_string> {u8"quick brown"});
+
+    // Ctrl+A selects everything.
+    CHECK(view.KeyPressed(pal::Key::A, {pal::KeyModifier::Control}, {u8"", u8"a"}));
+    CHECK(selection.IsRange());
+    CHECK(view.Document().GetEditor().SelectedText() == u8"The quick brown fox");
+
+    strategies.SetPasteboardStrategy(systemPasteboard);
   }
 
   TEST_CASE("View: keys", "[UI]")

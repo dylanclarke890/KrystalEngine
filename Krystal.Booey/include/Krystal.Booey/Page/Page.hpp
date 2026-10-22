@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -58,6 +59,7 @@ namespace krys::boo
 
   private:
     UniquePtr<ChromeClient> _chromeClient;
+    UniquePtr<EditorClient> _editorClient;
     RefPtr<LocalFrame> _mainFrame;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
@@ -67,18 +69,26 @@ namespace krys::boo
     bool _renderingUpdateIsScheduled {false};
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
-    explicit Page(UniquePtr<ChromeClient> chromeClient) noexcept;
+    Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient) noexcept;
 
   public:
     ~Page() noexcept;
 
     /// @brief A page with a main frame, which has no view or document yet.
     /// @param chromeClient The host's side of the page; without one, the page has an empty chrome client.
-    KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr) noexcept;
+    /// @param editorClient The host's side of the page's editor; without one, the page has an empty editor
+    /// client.
+    KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
+                                           UniquePtr<EditorClient> editorClient = nullptr) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
     {
       return *_chromeClient;
+    }
+
+    KRYS_NODISCARD EditorClient &GetEditorClient() const noexcept
+    {
+      return *_editorClient;
     }
 
     KRYS_NODISCARD LocalFrame &MainFrame() const noexcept

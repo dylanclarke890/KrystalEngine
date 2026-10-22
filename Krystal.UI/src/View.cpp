@@ -10,9 +10,11 @@
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
+#include "Krystal.UI/EditorClient.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/Input.hpp"
+#include "Krystal.UI/SystemPasteboardStrategy.hpp"
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
@@ -58,7 +60,8 @@ namespace krys::ui
   }
 
   View::View(const boo::IntSize &viewportSize) noexcept
-      : _page(boo::Page::Create(CreateChromeClient(_chromeClient))), _frame(ShareRef(_page->MainFrame()))
+      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>())),
+        _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
@@ -68,6 +71,11 @@ namespace krys::ui
     {
       static FileLoaderStrategy fileLoader;
       strategies.SetLoaderStrategy(&fileLoader);
+    }
+    if (!strategies.GetPasteboardStrategy())
+    {
+      static SystemPasteboardStrategy systemPasteboard;
+      strategies.SetPasteboardStrategy(&systemPasteboard);
     }
 
     _frame->CreateView(viewportSize);

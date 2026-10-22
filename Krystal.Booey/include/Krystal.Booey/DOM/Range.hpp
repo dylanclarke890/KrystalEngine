@@ -99,7 +99,26 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+    /// @brief Whether the document's selection is this range, so setting its boundary points sets the
+    /// selection.
+    KRYS_NODISCARD bool IsAssociatedWithSelection() const noexcept
+    {
+      return _isAssociatedWithSelection;
+    }
+    void DidAssociateWithSelection() noexcept
+    {
+      _isAssociatedWithSelection = true;
+    }
+    void DidDisassociateFromSelection() noexcept
+    {
+      _isAssociatedWithSelection = false;
+    }
+
   private:
+    bool _isAssociatedWithSelection {false};
+
+    void UpdateAssociatedSelection() noexcept;
+
     KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 

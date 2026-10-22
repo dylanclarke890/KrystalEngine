@@ -47,6 +47,8 @@ namespace krys::boo
     bool ColorFilterEnabled {false};
     /// @brief The system `appearance` values (`default-button` and friends).
     bool UseSystemAppearance {false};
+    /// @brief Moving a caret through content that isn't editable, with the keys that move one.
+    bool CaretBrowsingEnabled {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
 

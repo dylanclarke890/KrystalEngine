@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
@@ -822,11 +823,15 @@ namespace krys::boo
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept
   {
-    // FIXME: The editor's handling (handleKeyboardEvent), once there's editing; keyup stops animated
-    // keyboard scrolls, once there are any.
+    // FIXME: keyup stops animated keyboard scrolls, once there are any.
 
     if (event.Type() == EventNames::KeyDown)
     {
+      if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
+      {
+        return true;
+      }
+
       // FIXME: Escape (close watchers, modal dialogs and popovers) and Backspace (history navigation), once
       // there are dialogs, popovers and navigation.
       if (event.KeyIdentifier() == u8"U+0009")
@@ -850,6 +855,10 @@ namespace krys::boo
     }
     if (event.Type() == EventNames::KeyPress)
     {
+      if (_frame.Document()->GetEditor().HandleKeyboardEvent(event))
+      {
+        return true;
+      }
       if (event.CharCode() == ' ')
       {
         return DefaultSpaceEventHandler(event);

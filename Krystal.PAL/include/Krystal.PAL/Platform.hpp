@@ -40,4 +40,9 @@ namespace krys::pal
 
   /// @brief Gets the system's wheel scroll settings, read when the user last changed them.
   KRYS_NODISCARD WheelScrollSettings GetWheelScrollSettings() noexcept;
+
+  /// @brief Puts @p text (UTF-8, with LF line breaks) on the system clipboard, replacing what's there.
+  /// @param windowHandle The window that owns the clipboard's contents; the active window if null.
+  /// @return Whether the clipboard took the text.
+  bool SetClipboardText(utf8_stringview text, NativeHandle windowHandle = {nullptr}) noexcept;
 }

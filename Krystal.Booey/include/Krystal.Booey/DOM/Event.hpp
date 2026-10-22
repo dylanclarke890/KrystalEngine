@@ -226,6 +226,11 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsClipboardEvent() const noexcept
+    {
+      return false;
+    }
+
 #pragma endregion
 
   protected:

@@ -156,6 +156,10 @@ namespace krys::boo
   void UpdatePositionForNodeRemoval(dom::Position &position, dom::Node &node) noexcept;
   KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
 
+  /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root is
+  /// @p scopeRoot.
+  KRYS_NODISCARD dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept;
+
 #pragma endregion
 
 #pragma region VisiblePosition
