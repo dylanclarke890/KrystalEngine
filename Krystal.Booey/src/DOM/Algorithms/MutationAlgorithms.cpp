@@ -13,7 +13,6 @@
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
-#include "Krystal.Booey/Style/PseudoClassStateInvalidation.hpp"
 
 namespace krys::boo::dom
 {
@@ -121,15 +120,12 @@ namespace krys::boo::dom
 
     private:
       const ChildChange _childChange;
-      style::PseudoClassChangeInvalidations _pseudoClassInvalidations;
       style::ChildChangeInvalidation _invalidation;
 
     public:
-      ChildChangeStyleInvalidation(ContainerNode &parent, const ChildChange &childChange,
-                                   Node &child) noexcept
+      ChildChangeStyleInvalidation(ContainerNode &parent, const ChildChange &childChange) noexcept
           : _childChange(childChange), _invalidation(parent, _childChange)
       {
-        style::InvalidatePseudoClassesForChildChange(_pseudoClassInvalidations, parent, child);
       }
     };
   }
@@ -292,8 +288,8 @@ namespace krys::boo::dom
         return result.ReleaseException();
       }
 
-      ChildChangeStyleInvalidation styleInvalidation(
-        parent, MakeChildChangeForInsertion(parent, *target, child), *target);
+      ChildChangeStyleInvalidation styleInvalidation(parent,
+                                                     MakeChildChangeForInsertion(parent, *target, child));
 
       target->SetParentNode(&parent);
       if (child == nullptr)
@@ -468,7 +464,7 @@ namespace krys::boo::dom
 
     {
       ChildChangeStyleInvalidation removalStyleInvalidation(oldParent,
-                                                            MakeChildChangeForRemoval(oldParent, node), node);
+                                                            MakeChildChangeForRemoval(oldParent, node));
 
       // A moved subtree is styled again in its new place.
       ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
@@ -529,7 +525,7 @@ namespace krys::boo::dom
 
     {
       ChildChangeStyleInvalidation insertionStyleInvalidation(
-        newParent, MakeChildChangeForInsertion(newParent, node, child), node);
+        newParent, MakeChildChangeForInsertion(newParent, node, child));
 
       if (child == nullptr)
       {
@@ -794,7 +790,7 @@ namespace krys::boo::dom
     node.NodeDocument().NodeWillBeRemoved(node);
 
     {
-      ChildChangeStyleInvalidation styleInvalidation(parent, MakeChildChangeForRemoval(parent, node), node);
+      ChildChangeStyleInvalidation styleInvalidation(parent, MakeChildChangeForRemoval(parent, node));
 
       ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
 

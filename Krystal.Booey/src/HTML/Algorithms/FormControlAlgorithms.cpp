@@ -4,14 +4,17 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectedContentElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::html
 {
@@ -102,12 +105,14 @@ namespace krys::boo::html
     bool hasMultiple = element.HasAttribute(u8"multiple");
     if (hasMultiple)
     {
+      element.UpdateValidity();
       return;
     }
 
     auto options = ListOfOptions(element);
     if (options.empty())
     {
+      element.UpdateValidity();
       return;
     }
 
@@ -123,7 +128,8 @@ namespace krys::boo::html
       {
         if (!option->Disabled())
         {
-          option->_selectedness = true;
+          option->SetSelectedState(true);
+          element.UpdateValidity();
           return;
         }
       }
@@ -138,7 +144,7 @@ namespace krys::boo::html
       {
         if (option->_selectedness)
         {
-          option->_selectedness = false;
+          option->SetSelectedState(false);
           --selectedCount;
 
           if (selectedCount == 1uz)
@@ -148,6 +154,44 @@ namespace krys::boo::html
         }
       }
     }
+
+    element.UpdateValidity();
+  }
+
+  dom::DOMString FormControlAlgorithms::CollectOptionText(const HTMLOptionElement &option,
+                                                          bool includeAltText) noexcept
+  {
+    // SPEC(1): Let text be the empty string.
+    dom::DOMString text;
+
+    // SPEC(2): For each descendant node of option's descendants, in tree order:
+    for (auto *node = dom::TreeQueries::Next(option, &option); node;)
+    {
+      // SPEC(2.1): If descendant is a Text node, and none of its ancestors up to option are script elements,
+      // then append descendant's data to text.
+      if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      {
+        text += textNode->Data();
+      }
+
+      // SPEC(2.2): If includeAltText is true, and descendant is an img element, and its alt attribute is
+      // present, then append its value to text.
+      if (includeAltText && Is<HTMLImageElement>(*node))
+      {
+        text += Downcast<dom::Element>(*node).GetAttribute(u8"alt").value_or(dom::DOMString());
+      }
+
+      // Text inside script elements isn't part of the option text.
+      auto *element = DynamicDowncast<dom::Element>(*node);
+      bool isScriptElement = element && element->LocalName().View() == u8"script"
+                             && (element->NamespaceURI().View() == infra::Namespaces::HTML
+                                 || element->NamespaceURI().View() == infra::Namespaces::SVG);
+      node = isScriptElement ? dom::TreeQueries::NextSkippingChildren(*node, &option)
+                             : dom::TreeQueries::Next(*node, &option);
+    }
+
+    // SPEC(3): Return text.
+    return text;
   }
 
 #pragma endregion
@@ -209,6 +253,18 @@ namespace krys::boo::html
 
 #pragma region HTMLOptionElement
 
+  bool FormControlAlgorithms::IsDisabled(const HTMLOptionElement &option) noexcept
+  {
+    // An option element is disabled if its disabled attribute is present or if it is a child of an optgroup
+    // element whose disabled attribute is present.
+    if (option.HasAttribute(u8"disabled"))
+    {
+      return true;
+    }
+    auto *parent = DynamicDowncast<HTMLOptGroupElement>(option.ParentNode());
+    return parent && parent->HasAttribute(u8"disabled");
+  }
+
   void FormControlAlgorithms::UpdateNearestAncestorSelect(HTMLOptionElement &option) noexcept
   {
     // SPEC(1): Let oldSelect be option's cached nearest ancestor select element.
@@ -242,19 +298,16 @@ namespace krys::boo::html
     // SPEC(1): Let ancestorOptgroup be null.
     HTMLOptGroupElement *ancestorOptgroup = nullptr;
 
-    dom::SmallElementList ancestors;
-    for (auto &ancestor : dom::AncestorRange(element))
-    {
-      if (Is<dom::Element>(ancestor))
-      {
-        ancestors.push_back(ShareRef(Downcast<dom::Element>(ancestor)));
-      }
-    }
-
     // SPEC(2): For each ancestor of element's ancestors, in reverse tree order:
-    for (auto it = ancestors.rbegin(); it != ancestors.rend(); ++it)
+    for (auto *ancestorElement = element.ParentElement(); ancestorElement;
+         ancestorElement = ancestorElement->ParentElement())
     {
-      auto &ancestor = Downcast<HTMLElement>(**it);
+      auto *ancestorHTMLElement = DynamicDowncast<HTMLElement>(*ancestorElement);
+      if (!ancestorHTMLElement)
+      {
+        continue;
+      }
+      auto &ancestor = *ancestorHTMLElement;
 
       // SPEC(2.1): If ancestor is a datalist, hr, or option element, then return null.
       if (Is<HTMLDataListElement>(ancestor) || Is<HTMLHRElement>(ancestor) || Is<HTMLOptionElement>(ancestor))

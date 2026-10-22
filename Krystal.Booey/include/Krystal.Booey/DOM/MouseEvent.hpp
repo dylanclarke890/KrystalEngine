@@ -13,6 +13,7 @@ namespace krys::boo
 
 namespace krys::boo::dom
 {
+  class Element;
   class Node;
 
   /// @brief Whether @p eventType is `click` or `auxclick`.
@@ -51,6 +52,12 @@ namespace krys::boo::dom
                                                  double screenY, double clientX, double clientY,
                                                  EnumSet<Modifier> modifiers, MouseButton button,
                                                  uint16 buttons, EventTarget *relatedTarget) noexcept;
+
+    /// @brief A simulated press, release or click of the left button at @p target, standing in for
+    /// @p underlyingEvent (a key press, say), with its position and modifiers.
+    /// @param isTrusted Whether the user agent simulates it, rather than script.
+    KRYS_NODISCARD static Ref<MouseEvent> CreateSimulated(DOMStringAtom eventType, Event *underlyingEvent,
+                                                          Element &target, bool isTrusted) noexcept;
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-initmouseevent
@@ -114,3 +121,10 @@ namespace krys::boo::dom
                EventTarget *relatedTarget, Simulated isSimulated) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::MouseEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsMouseEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

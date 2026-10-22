@@ -91,3 +91,12 @@ tr:hover td { text-decoration: underline; }
 .selection img { width: 24px; height: 16px; vertical-align: middle; }
 .caret { cursor: text; caret-color: #7b2cbf; }
 .caret p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }
+.order { font-size: 13px; line-height: 18px; }
+.order label { display: block; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: #f7f8fb; }
+.order input:checked + span { color: #06a77d; font-weight: bold; }
+.order button { margin: 10px 8px 0 0; padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5;
+  color: #ffffff; font: inherit; cursor: pointer; }
+.order button:active { background: #3249b8; }
+.order button[type=reset] { background: #8d99ae; }
+.order:invalid button[name=drink] { opacity: 0.4; }
+.order #last-submission { margin: 8px 0 0; color: #5c677d; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

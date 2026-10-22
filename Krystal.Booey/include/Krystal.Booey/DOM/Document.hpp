@@ -168,6 +168,8 @@ namespace krys::boo::dom
     /// @brief The frozen base URL of the first `base` element with an `href` in the document tree, or null.
     /// @see https://html.spec.whatwg.org/#frozen-base-url
     url::URL _baseElementURL;
+    /// @brief The target of the first `base` element with a `target` in the document tree.
+    DOMString _baseTarget;
 
     mutable UniquePtr<css::ParserContext> _cachedCSSParserContext;
     Ref<Settings> _settings;
@@ -510,6 +512,13 @@ namespace krys::boo::dom
 
     /// @brief Sets the document's URL. An empty URL becomes `about:blank`.
     void SetURL(url::URL &&url) noexcept;
+
+    /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
+    /// @see https://html.spec.whatwg.org/#get-an-element's-target
+    KRYS_NODISCARD const DOMString &BaseTarget() const noexcept
+    {
+      return _baseTarget;
+    }
 
     /// @see https://html.spec.whatwg.org/#fallback-base-url
     KRYS_NODISCARD const url::URL &FallbackBaseURL() const noexcept;
@@ -1100,9 +1109,9 @@ namespace krys::boo::dom
     void UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept;
     KRYS_NODISCARD style::Update &EnsurePendingRenderTreeUpdate() noexcept;
 
-    /// @brief Finds the first `base` element with an `href` in the document tree and updates the document
-    /// base URL from it. Called whenever a `base` element is inserted, removed or moved, or its `href`
-    /// changes.
+    /// @brief Finds the first `base` elements with an `href` and with a `target` in the document tree, and
+    /// updates the document base URL and base target from them. Called whenever a `base` element is inserted,
+    /// removed or moved, or its `href` or `target` changes.
     void ProcessBaseElement() noexcept;
 
     void UpdateBaseURL() noexcept;

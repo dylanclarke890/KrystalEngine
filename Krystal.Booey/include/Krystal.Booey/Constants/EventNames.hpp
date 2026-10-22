@@ -7,6 +7,11 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview ReadyStateChange = u8"readystatechange";
   constexpr utf8_stringview Abort = u8"abort";
   constexpr utf8_stringview Change = u8"change";
+  constexpr utf8_stringview Invalid = u8"invalid";
+  constexpr utf8_stringview Submit = u8"submit";
+  constexpr utf8_stringview Reset = u8"reset";
+  constexpr utf8_stringview FormData = u8"formdata";
+  constexpr utf8_stringview Select = u8"select";
   constexpr utf8_stringview Load = u8"load";
   constexpr utf8_stringview Error = u8"error";
   constexpr utf8_stringview Click = u8"click";

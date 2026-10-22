@@ -1,6 +1,10 @@
 ﻿#include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include <cmath>
 
@@ -95,6 +99,52 @@ namespace krys::boo::dom
                                0, modifiers, button, buttons, relatedTarget, Simulated::No));
     mouseEvent->InitCoordinates({FiniteOrZero(clientX), FiniteOrZero(clientY)});
     mouseEvent->_timeStamp = timestamp;
+    return mouseEvent;
+  }
+
+  Ref<MouseEvent> MouseEvent::CreateSimulated(DOMStringAtom eventType, Event *underlyingEvent,
+                                              Element &target, bool isTrusted) noexcept
+  {
+    UIEventInit init;
+    init.Bubbles = true;
+    init.Cancelable = true;
+    init.Composed = true;
+
+    EnumSet<Modifier> modifiers;
+    for (auto *event = underlyingEvent; event; event = event->UnderlyingEvent())
+    {
+      if (event->IsMouseEvent() || event->IsKeyboardEvent())
+      {
+        modifiers = static_cast<UIEventWithKeyState *>(event)->ModifierKeys();
+        break;
+      }
+    }
+
+    auto *frame = target.NodeDocument().Frame();
+    Ref<MouseEvent> mouseEvent =
+      AdoptRef(*new MouseEvent(eventType, init, frame ? frame->View() : nullptr, {}, {}, 0, 0, modifiers,
+                               MouseButton::Left, 0, nullptr, Simulated::Yes));
+    mouseEvent->_isTrusted = isTrusted;
+    if (underlyingEvent)
+    {
+      mouseEvent->_timeStamp = underlyingEvent->TimeStamp();
+    }
+
+    mouseEvent->SetUnderlyingEvent(underlyingEvent);
+    if (auto *underlyingMouseEvent = DynamicDowncast<MouseEvent>(underlyingEvent))
+    {
+      mouseEvent->SetScreenLocation(underlyingMouseEvent->ScreenLocation());
+      mouseEvent->InitCoordinates({underlyingMouseEvent->ClientX(), underlyingMouseEvent->ClientY()});
+    }
+    else if (isTrusted)
+    {
+      // Without an underlying event, only the user agent's events have coordinates; script's
+      // (element.click()) are at 0, as in other browsers.
+      // FIXME: The target's screen rect (ChromeClient::rootViewToScreen), once the host maps to the screen.
+      auto center = target.BoundingClientRect().Center();
+      mouseEvent->SetScreenLocation({center.X(), center.Y()});
+      mouseEvent->InitCoordinates({center.X(), center.Y()});
+    }
     return mouseEvent;
   }
 

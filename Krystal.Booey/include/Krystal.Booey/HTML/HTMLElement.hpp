@@ -15,9 +15,17 @@ namespace krys::boo::dom
   class Document;
 }
 
+namespace krys::boo::dom
+{
+  class NodeList;
+}
+
 namespace krys::boo::html
 {
   class ElementInternals;
+  class FormAssociatedElement;
+  class FormListedElement;
+  class ValidatedFormListedElement;
 
   /// @see https://html.spec.whatwg.org/#htmlelement
   class HTMLElement : public dom::StyledElement
@@ -338,7 +346,61 @@ namespace krys::boo::html
 
 #pragma endregion
 
+  public:
+#pragma region Form Controls
+
+    KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual FormListedElement *AsFormListedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    /// @see https://html.spec.whatwg.org/#category-label
+    KRYS_NODISCARD virtual bool IsLabelable() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the element can be actually disabled: a form control, an optgroup or an option.
+    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    KRYS_NODISCARD bool CanBeActuallyDisabled() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    KRYS_NODISCARD virtual bool IsActuallyDisabled() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#interactive-content
+    KRYS_NODISCARD virtual bool IsInteractiveContent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept override;
+
+    /// @brief The labels of a labelable element, in tree order; null for other elements.
+    /// @see https://html.spec.whatwg.org/#dom-lfe-labels
+    KRYS_NODISCARD RefPtr<dom::NodeList> Labels() noexcept;
+
+#pragma endregion
+
+  protected:
 #pragma region Type Checks
+
+    /// @brief Whether the element is a form control: a button, fieldset, input, output, select or textarea.
+    KRYS_NODISCARD bool IsFormControlElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Button || _interface == HTMLElementInterface::FieldSet
+             || _interface == HTMLElementInterface::Input || _interface == HTMLElementInterface::Output
+             || _interface == HTMLElementInterface::Select || _interface == HTMLElementInterface::TextArea;
+    }
 
     KRYS_NODISCARD bool IsHTMLFontElement() const noexcept
     {

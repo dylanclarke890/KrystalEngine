@@ -15,8 +15,9 @@ namespace krys::boo::style
   using PseudoClassChangeInvalidations = List<UniquePtr<PseudoClassChangeInvalidation>>;
 
   /// @brief Starts the invalidations for the pseudo-class states that a change to one of @p element's
-  /// attributes may flip. The selector checker derives those states (`:link`, `:checked`, `:lang()` and
-  /// others) from attributes, and from those of the element's ancestors for some of them.
+  /// attributes may flip. The selector checker derives those states (`:link`, `:lang()`, `:dir()` and
+  /// others) from attributes, and from those of the element's ancestors for some of them; form controls
+  /// invalidate their own states.
   /// @param oldValue The value before the change, or null if the attribute is being added.
   /// @param newValue The value after the change, or null if the attribute is being removed.
   void InvalidatePseudoClassesForAttributeChange(PseudoClassChangeInvalidations &invalidations,
@@ -24,10 +25,4 @@ namespace krys::boo::style
                                                  const dom::QualifiedName &attributeName,
                                                  Maybe<dom::DOMStringView> oldValue,
                                                  Maybe<dom::DOMStringView> newValue) noexcept;
-
-  /// @brief Starts the invalidations for the pseudo-class states that inserting, removing or changing
-  /// @p child (a child of @p parent) may flip elsewhere in the tree: a form's default button, the controls a
-  /// disabled fieldset's first legend exempts and a text area's `:placeholder-shown`.
-  void InvalidatePseudoClassesForChildChange(PseudoClassChangeInvalidations &invalidations,
-                                             dom::ContainerNode &parent, dom::Node &child) noexcept;
 }

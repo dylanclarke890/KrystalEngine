@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -30,6 +31,7 @@ namespace krys::ui
   private:
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
+    Func<void(const FormSubmissionRequest &)> _formSubmissionHandler;
 
   public:
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -40,6 +42,42 @@ namespace krys::ui
     KRYS_NODISCARD boo::GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept override
     {
       return const_cast<GraphicsLayerFactoryTextureMapper *>(&_factory);
+    }
+
+    void SubmitForm(boo::LocalFrame &, boo::FormSubmission &submission) noexcept override
+    {
+      if (!_formSubmissionHandler)
+      {
+        return;
+      }
+
+      FormSubmissionRequest request;
+      switch (submission.GetMethod())
+      {
+        case boo::FormSubmission::Method::Get:    request.Method = u8"GET"; break;
+        case boo::FormSubmission::Method::Post:   request.Method = u8"POST"; break;
+        case boo::FormSubmission::Method::Dialog: request.Method = u8"DIALOG"; break;
+      }
+      request.URL = submission.RequestURL().String();
+      request.Target = submission.Target();
+      if (submission.GetMethod() == boo::FormSubmission::Method::Post)
+      {
+        request.ContentType = submission.ContentType();
+        if (!submission.Boundary().empty())
+        {
+          request.ContentType += u8"; boundary=" + submission.Boundary();
+        }
+        if (auto *data = submission.Data())
+        {
+          request.Body = data->FlattenToString();
+        }
+      }
+      _formSubmissionHandler(request);
+    }
+
+    void SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept
+    {
+      _formSubmissionHandler = krys::move(handler);
     }
 
     KRYS_NODISCARD GraphicsLayerTextureMapper *RootLayer() const noexcept
@@ -412,6 +450,11 @@ namespace krys::ui
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);
     PerformMicrotaskCheckpoint();
+  }
+
+  void View::SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept
+  {
+    _chromeClient->SetFormSubmissionHandler(krys::move(handler));
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

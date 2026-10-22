@@ -8,6 +8,64 @@ namespace krys::boo::html
       : HTMLPlugInElement(document, HTMLElementInterface::Object)
   {
   }
+
+  HTMLObjectElement::~HTMLObjectElement() noexcept
+  {
+    ClearForm();
+  }
+
+  bool HTMLObjectElement::AppendFormData(DOMFormData &) noexcept
+  {
+    // FIXME: A plug-in's form value (PluginViewBase::getFormValue), once there are plug-ins.
+    return false;
+  }
+
+  void HTMLObjectElement::OnInsert() noexcept
+  {
+    HTMLPlugInElement::OnInsert();
+    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    if (!IsConnected())
+    {
+      ResetFormOwner();
+    }
+  }
+
+  void HTMLObjectElement::OnPostConnection() noexcept
+  {
+    HTMLPlugInElement::OnPostConnection();
+    ResetFormOwner();
+  }
+
+  void HTMLObjectElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLPlugInElement::OnRemove(isSubtreeRoot, oldAncestor);
+    FormListedElement::ElementRemovedFromAncestor(*this, oldAncestor.IsConnected());
+  }
+
+  void HTMLObjectElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLPlugInElement::OnMove(isSubtreeRoot, oldAncestor);
+    FormListedElement::ElementRemovedFromAncestor(*this, false);
+    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    ResetFormOwner();
+  }
+
+  void HTMLObjectElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLPlugInElement::OnAdopt(oldDocument);
+    FormListedElement::DidMoveToNewDocument();
+  }
+
+  void HTMLObjectElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLPlugInElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      FormListedElement::ParseAttribute(localName, value);
+    }
+  }
 #pragma region HTMLObjectElement
 
   dom::ExceptionOr<dom::USVString> HTMLObjectElement::Data() const noexcept

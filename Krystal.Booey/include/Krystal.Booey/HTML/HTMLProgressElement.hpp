@@ -17,6 +17,12 @@ namespace krys::boo::html
 
     HTMLProgressElement(dom::Document &document) noexcept;
 
+    /// @brief A progress bar without a valid value is indeterminate.
+    KRYS_NODISCARD bool MatchesIndeterminatePseudoClass() const noexcept final
+    {
+      return !HasAttribute(u8"value");
+    }
+
 #pragma region HTMLProgressElement - https://html.spec.whatwg.org/#htmlprogresselement
 
     /// @see https://html.spec.whatwg.org/#dom-progress-value
@@ -39,6 +45,11 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLProgressElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLProgressElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLProgressElement();

@@ -31,6 +31,8 @@ namespace krys::boo::dom
   class ContainerNode;
   class DocumentAlgorithms;
   class Element;
+  class IdTargetObserverRegistry;
+  class RadioButtonGroups;
   class NodeAlgorithms;
 
   template <typename>
@@ -52,6 +54,8 @@ namespace krys::boo::dom
     ContainerNode &_rootNode;
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
+    UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
+    UniquePtr<dom::RadioButtonGroups> _radioButtonGroups;
 
   protected:
     /// @brief Created by the document or shadow root's constructor.
@@ -116,6 +120,18 @@ namespace krys::boo::dom
 
     /// @brief The adopted style sheets, without creating the array.
     KRYS_NODISCARD Span<const Ref<css::CSSStyleSheet>> GetAdoptedStyleSheets() const noexcept;
+
+    /// @brief The observers of the IDs in this tree.
+    KRYS_NODISCARD dom::IdTargetObserverRegistry &IdTargetObserverRegistry() const noexcept
+    {
+      return *_idTargetObserverRegistry;
+    }
+
+    /// @brief The groups of the radio buttons in this tree that have no form owner.
+    KRYS_NODISCARD dom::RadioButtonGroups &RadioButtonGroups() const noexcept
+    {
+      return *_radioButtonGroups;
+    }
 
     /// @brief The style sheet bookkeeping of this document or shadow root.
     KRYS_NODISCARD style::Scope &StyleScope() const noexcept

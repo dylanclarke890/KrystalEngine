@@ -10,7 +10,6 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
-#include "Krystal.Booey/Style/PseudoClassStateInvalidation.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
@@ -40,11 +39,9 @@ namespace krys::boo::dom
         TreeQueries::PreviousElementSibling(node),     TreeQueries::NextElementSibling(node),
         ContainerNode::ChildChange::Source::API,       ContainerNode::ChildChange::AffectsElements::No};
       Maybe<style::ChildChangeInvalidation> styleInvalidation;
-      style::PseudoClassChangeInvalidations pseudoClassInvalidations;
       if (parent)
       {
         styleInvalidation.emplace(*parent, childChange);
-        style::InvalidatePseudoClassesForChildChange(pseudoClassInvalidations, *parent, node);
       }
 
       node._data.insert(offset, data);

@@ -11,11 +11,13 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -153,14 +155,39 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"inert", krys::move(value));
   }
 
+  bool HTMLElement::CanBeActuallyDisabled() const noexcept
+  {
+    // FIXME: Form-associated custom elements, once there are any.
+    return IsHTMLButtonElement() || IsHTMLInputElement() || IsHTMLSelectElement() || IsHTMLTextAreaElement()
+           || IsHTMLOptGroupElement() || IsHTMLOptionElement() || IsHTMLFieldSetElement();
+  }
+
+  bool HTMLElement::IsActuallyDisabled() const noexcept
+  {
+    return CanBeActuallyDisabled() && IsDisabledFormControl();
+  }
+
+  bool HTMLElement::MatchesReadWritePseudoClass() const noexcept
+  {
+    return EditabilityFromContentEditableAttr(*this) != dom::Node::Editability::ReadOnly;
+  }
+
+  RefPtr<dom::NodeList> HTMLElement::Labels() noexcept
+  {
+    if (!IsLabelable())
+    {
+      return nullptr;
+    }
+
+    // FIXME: The same list each time ([SameObject]), once nodes cache their lists.
+    return CreateRef<LabelsNodeList>(*this);
+  }
+
   void HTMLElement::Click() noexcept
   {
-    // TODO(HTMLELEMENT, EVENTS, HTML): Implement Click() method.
-    // If this element is a form control that is disabled, then return.
-    // If this element's click in progress flag is set, then return.
-    // Set this element's click in progress flag.
-    // Fire a synthetic pointer event named click at this element, with the not trusted flag set.
-    // Unset this element's click in progress flag.
+    (void)dom::SimulateClick(*this, nullptr, dom::SimulatedClickMouseEventOptions::SendNoEvents,
+                             dom::SimulatedClickVisualOptions::DoNotShowPressedLook,
+                             dom::SimulatedClickSource::Bindings);
   }
 
   dom::DOMString HTMLElement::AccessKey() const noexcept

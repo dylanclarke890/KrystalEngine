@@ -333,6 +333,16 @@
       <p>This block is editable: type into it, and its caret blinks in purple.</p>
       <p>A second paragraph, to move the caret up and down into, or to cut and paste.</p>
     </div>
+    <!-- Forms: the form is :invalid until the required box is ticked (click its label), so the drink buttons
+         fade and clicking one fires invalid instead of submitting. Once it's valid, a drink button submits:
+         the editor logs the submission and shows its URL below. Reset unticks the box. -->
+    <form class="card order" action="https://example.com/order">
+      <input type="hidden" name="from" value="editor">
+      <label><input type="checkbox" name="milk" required><span>With milk (required)</span></label>
+      <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
+          type="reset">Reset</button></p>
+      <p id="last-submission">Nothing submitted yet.</p>
+    </form>
   </div>
 
   <!-- A frosted, fixed pill: it composites for its position, so scrolling the page moves its layer rather than

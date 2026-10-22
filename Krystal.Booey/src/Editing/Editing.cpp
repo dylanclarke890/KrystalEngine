@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"

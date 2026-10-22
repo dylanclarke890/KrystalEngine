@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlselectelement
-  class HTMLSelectElement : public HTMLElement
+  class HTMLSelectElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectElement);
 
@@ -35,9 +35,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-select-disabled
     void Disabled(bool value) noexcept;
 
-    // TODO(HTMLSELECT, HTML): Implement the form API.
-    // readonly attribute HTMLFormElement? form;
-
     /// @see https://html.spec.whatwg.org/#dom-select-multiple
     KRYS_NODISCARD bool Multiple() const noexcept;
 
@@ -45,7 +42,7 @@ namespace krys::boo::html
     void Multiple(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-select-name
     void Name(dom::DOMString &&value) noexcept;
@@ -62,11 +59,16 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-select-size
     void Size(uint32 value) noexcept;
 
-    // TODO(HTMLSELECT, HTML): Implement the type attribute.
-    // @see https://html.spec.whatwg.org/#dom-select-type
-    // KRYS_NODISCARD dom::DOMString Type() const noexcept;
-    // readonly attribute dom::DOMString type;
-    //
+    /// @see https://html.spec.whatwg.org/#dom-select-type
+    KRYS_NODISCARD dom::DOMString Type() const noexcept
+    {
+      return FormControlType();
+    }
+
+    /// @brief The index of the first selected option in the list of options, or -1 if none is.
+    /// @see https://html.spec.whatwg.org/#dom-select-selectedindex
+    KRYS_NODISCARD int32 SelectedIndex() const noexcept;
+
     // TODO(HTMLSELECT, HTML): Select api.
     // [SameObject] readonly attribute HTMLOptionsCollection options;
     // [CEReactions] attribute unsigned long length;
@@ -83,19 +85,47 @@ namespace krys::boo::html
     // attribute long selectedIndex;
     // attribute dom::DOMString value;
     //
-    // TODO(HTMLSELECT, HTML): Implement validity API.
-    // readonly attribute boolean willValidate;
-    // readonly attribute ValidityState validity;
-    // readonly attribute dom::DOMString validationMessage;
-    // boolean checkValidity();
-    // boolean reportValidity();
-    // undefined setCustomValidity(dom::DOMString error);
-    //
     // undefined showPicker();
-    //
-    // readonly attribute NodeList labels;
 
 #pragma endregion
+
+    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+
+    KRYS_NODISCARD bool IsEnumeratable() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsLabelable() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsRequiredFormControl() const noexcept final
+    {
+      return IsRequired();
+    }
+
+    KRYS_NODISCARD bool IsOptionalFormControl() const noexcept final
+    {
+      return !IsRequiredFormControl();
+    }
+
+    KRYS_NODISCARD bool ValueMissing() const noexcept final;
+
+    bool AppendFormData(DOMFormData &formData) noexcept final;
+
+    /// @see https://html.spec.whatwg.org/#the-select-element:concept-form-reset-control
+    void Reset() noexcept final;
+
+  private:
+    /// @see https://html.spec.whatwg.org/#placeholder-label-option
+    KRYS_NODISCARD bool HasPlaceholderLabelOption() const noexcept;
   };
 }
 

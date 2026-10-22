@@ -4,7 +4,9 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -17,7 +19,9 @@ namespace krys::boo::dom
 {
   DocumentOrShadowRoot::DocumentOrShadowRoot(ContainerNode &rootNode,
                                              RefPtr<html::CustomElementRegistry> &&registry) noexcept
-      : _rootNode(rootNode), _customElementRegistry(krys::move(registry))
+      : _rootNode(rootNode), _customElementRegistry(krys::move(registry)),
+        _idTargetObserverRegistry(CreateUnique<dom::IdTargetObserverRegistry>()),
+        _radioButtonGroups(CreateUnique<dom::RadioButtonGroups>())
   {
   }
 

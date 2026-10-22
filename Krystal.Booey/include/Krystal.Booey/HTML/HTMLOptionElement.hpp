@@ -20,8 +20,19 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#concept-option-selectedness
     bool _selectedness {false};
 
+    /// @see https://html.spec.whatwg.org/#concept-option-dirtiness
+    bool _dirtiness {false};
+
   public:
     HTMLOptionElement(dom::Document &document) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#concept-option-disabled
+    KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final;
+
+    KRYS_NODISCARD bool MatchesDefaultPseudoClass() const noexcept final
+    {
+      return HasAttribute(u8"selected");
+    }
 
 #pragma region HTMLOptionElement - https://html.spec.whatwg.org/#htmloptionelement
 
@@ -77,7 +88,19 @@ namespace krys::boo::html
 
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
 #pragma endregion
+
+    /// @brief Sets the option's selectedness, without making it dirty or running its select's selectedness
+    /// setting algorithm.
+    void SetSelectedState(bool selected) noexcept;
+
+    /// @brief Resets the option's dirtiness and its selectedness from its `selected` attribute, as its
+    /// select's reset algorithm does.
+    void ResetSelectedness() noexcept;
   };
 }
 

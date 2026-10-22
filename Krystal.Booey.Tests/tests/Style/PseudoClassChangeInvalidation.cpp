@@ -68,7 +68,7 @@ namespace krys::boo::style::tests
       <input id=c type=checkbox><span id=cs></span>
       <a id=a></a>
       <input id=r><span id=rs></span>
-      <select><option id=o>o</option></select>
+      <select><option>first</option><option id=o>o</option></select>
     </body>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
@@ -238,7 +238,8 @@ namespace krys::boo::style::tests
 
       auto b0 = Create(document, u8"button");
       REQUIRE_FALSE(form.InsertBefore(*b0, &b1).HasException());
-      CHECK(b1.StyleValidity() == Validity::ElementInvalid);
+      // The form invalidates the subtrees of its old and new default buttons.
+      CHECK(b1.StyleValidity() >= Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
       CHECK(width(*b0) == "5px");
       CHECK(width(b1) == "auto");
@@ -261,7 +262,8 @@ namespace krys::boo::style::tests
       REQUIRE(height() == "5px");
       auto text = document.CreateTextNode(u8"x");
       REQUIRE_FALSE(t.AppendChild(*text).HasException());
-      CHECK(t.StyleValidity() == Validity::ElementInvalid);
+      // The text area's new value invalidates its subtree.
+      CHECK(t.StyleValidity() >= Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
       CHECK(height() == "auto");
 

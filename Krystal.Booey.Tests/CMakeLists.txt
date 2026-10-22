@@ -425,6 +425,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderObject.cpp
 		tests/Platform/ScrollAlignment.cpp
 		tests/Platform/Timer.cpp
+		tests/Platform/Decimal.cpp
+		tests/Platform/DateComponents.cpp
 		tests/Platform/ImageDecoders/ScalableImageDecoder.cpp
 		tests/Platform/Network/DataURLDecoder.cpp
 		tests/Loader/Cache/CachedFont.cpp
@@ -559,11 +561,15 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/EventLoop.cpp
+		tests/HTML/FormListedElement.cpp
+		tests/HTML/HTMLFormElement.cpp
+		tests/HTML/HTMLInputElement.cpp
 		tests/HTML/HTMLLinkElement.cpp
 		tests/HTML/HTMLStyleElement.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp
 		tests/HTML/PresentationalHints.cpp
+		tests/HTML/ValidatedFormListedElement.cpp
 		tests/MathML/MathMLElement.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp

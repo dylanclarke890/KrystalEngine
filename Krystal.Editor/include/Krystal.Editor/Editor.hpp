@@ -447,6 +447,8 @@ namespace krys
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
+      _pageView->SetFormSubmissionHandler([this](const ui::FormSubmissionRequest &request)
+                                          { ShowFormSubmission(request); });
       LoadPage();
       auto &database = boo::FontDatabase::Singleton();
       auto faces = database.FacesInFamily(u8"Liberation Sans");
@@ -458,6 +460,22 @@ namespace krys
       _booeyFonts.Regular =
         boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, false, false});
       _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
+    }
+
+    /// @brief Logs a form submission from the page, which doesn't navigate, and shows its URL in the page's
+    /// `#last-submission` element.
+    void ShowFormSubmission(const ui::FormSubmissionRequest &request) noexcept
+    {
+      auto narrow = [](utf8_stringview text)
+      {
+        return std::string_view(reinterpret_cast<const char *>(text.data()), text.size());
+      };
+      _context->Logger->Info("Form submission: {} {} {}", narrow(request.Method), narrow(request.URL),
+                             narrow(request.Body));
+      if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
+      {
+        (void)label->TextContent(request.Method + u8" " + request.URL);
+      }
     }
 
     /// @brief The page view: the page laid out and painted by Booey, below the header.

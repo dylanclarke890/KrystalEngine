@@ -63,6 +63,11 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLMeterElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLMeterElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLMeterElement();

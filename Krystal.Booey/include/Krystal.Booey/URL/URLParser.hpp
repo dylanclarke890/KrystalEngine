@@ -55,6 +55,9 @@ namespace krys::boo::url
     KRYS_NODISCARD static Maybe<uint16> DefaultPortForProtocol(utf8_stringview scheme) noexcept;
     KRYS_NODISCARD static Maybe<utf8_string> FormURLDecode(utf8_stringview input) noexcept;
 
+    /// @see https://url.spec.whatwg.org/#percent-decode
+    KRYS_NODISCARD static utf8_string PercentDecode(utf8_stringview input) noexcept;
+
   private:
     /// @param input Null (`data() == nullptr`) gives `base` without its fragment.
     URLParser(utf8_stringview input, const URL &base = {}, bool allowC0AtEnd = false) noexcept;
@@ -133,7 +136,6 @@ namespace krys::boo::url
                     const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept;
     KRYS_NODISCARD utf8_string PercentDecode(
       utf8_stringview input, const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept;
-    KRYS_NODISCARD static utf8_string PercentDecode(utf8_stringview input) noexcept;
     KRYS_NODISCARD bool HasForbiddenHostCodePoint(utf8_stringview asciiDomain) noexcept;
     void PercentEncodeByte(uint8 byte) noexcept;
     void AppendToASCIIBuffer(char32 codePoint) noexcept;

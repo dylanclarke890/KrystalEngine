@@ -1671,6 +1671,61 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderGeometryMap.hpp
   include/Krystal.Booey/Rendering/RenderLayerBacking.hpp
   include/Krystal.Booey/Rendering/RenderLayerCompositor.hpp
+
+  # Forms (G14b)
+  include/Krystal.Booey/Platform/Decimal.hpp
+  include/Krystal.Booey/Platform/DateComponents.hpp
+  include/Krystal.Booey/DOM/IdTargetObserver.hpp
+  include/Krystal.Booey/DOM/IdTargetObserverRegistry.hpp
+  include/Krystal.Booey/DOM/FormDataEvent.hpp
+  include/Krystal.Booey/DOM/RadioButtonGroups.hpp
+  include/Krystal.Booey/DOM/SimulatedClick.hpp
+  include/Krystal.Booey/HTML/BaseButtonInputType.hpp
+  include/Krystal.Booey/HTML/BaseCheckableInputType.hpp
+  include/Krystal.Booey/HTML/BaseClickableWithKeyInputType.hpp
+  include/Krystal.Booey/HTML/BaseDateAndTimeInputType.hpp
+  include/Krystal.Booey/HTML/BaseTextInputType.hpp
+  include/Krystal.Booey/HTML/ButtonInputType.hpp
+  include/Krystal.Booey/HTML/CheckboxInputType.hpp
+  include/Krystal.Booey/HTML/ColorInputType.hpp
+  include/Krystal.Booey/HTML/DOMFormData.hpp
+  include/Krystal.Booey/HTML/DateInputType.hpp
+  include/Krystal.Booey/HTML/DateTimeLocalInputType.hpp
+  include/Krystal.Booey/HTML/EmailInputType.hpp
+  include/Krystal.Booey/HTML/FileInputType.hpp
+  include/Krystal.Booey/HTML/FormAssociatedElement.hpp
+  include/Krystal.Booey/HTML/FormListedElement.hpp
+  include/Krystal.Booey/HTML/HTMLFormControlElement.hpp
+  include/Krystal.Booey/HTML/HTMLFormControlsCollection.hpp
+  include/Krystal.Booey/HTML/HTMLTextFormControlElement.hpp
+  include/Krystal.Booey/HTML/HiddenInputType.hpp
+  include/Krystal.Booey/HTML/ImageInputType.hpp
+  include/Krystal.Booey/HTML/InputType.hpp
+  include/Krystal.Booey/HTML/InputTypeNames.hpp
+  include/Krystal.Booey/HTML/LabelsNodeList.hpp
+  include/Krystal.Booey/HTML/MonthInputType.hpp
+  include/Krystal.Booey/HTML/NumberInputType.hpp
+  include/Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp
+  include/Krystal.Booey/HTML/PasswordInputType.hpp
+  include/Krystal.Booey/HTML/RadioInputType.hpp
+  include/Krystal.Booey/HTML/RadioNodeList.hpp
+  include/Krystal.Booey/HTML/RangeInputType.hpp
+  include/Krystal.Booey/HTML/ResetInputType.hpp
+  include/Krystal.Booey/HTML/SearchInputType.hpp
+  include/Krystal.Booey/HTML/StepRange.hpp
+  include/Krystal.Booey/HTML/SubmitEvent.hpp
+  include/Krystal.Booey/HTML/SubmitInputType.hpp
+  include/Krystal.Booey/HTML/TelephoneInputType.hpp
+  include/Krystal.Booey/HTML/TextFieldInputType.hpp
+  include/Krystal.Booey/HTML/TextInputType.hpp
+  include/Krystal.Booey/HTML/TimeInputType.hpp
+  include/Krystal.Booey/HTML/URLInputType.hpp
+  include/Krystal.Booey/HTML/ValidatedFormListedElement.hpp
+  include/Krystal.Booey/HTML/WeekInputType.hpp
+  include/Krystal.Booey/Loader/FormSubmission.hpp
+  include/Krystal.Booey/Platform/LocalizedStrings.hpp
+  include/Krystal.Booey/Platform/Network/FormData.hpp
+  include/Krystal.Booey/Platform/Network/FormDataBuilder.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2747,6 +2802,56 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderGeometryMap.cpp
   src/Rendering/RenderLayerBacking.cpp
   src/Rendering/RenderLayerCompositor.cpp
+
+  # Forms (G14b)
+  src/Platform/Decimal.cpp
+  src/Platform/DateComponents.cpp
+  src/DOM/IdTargetObserver.cpp
+  src/DOM/IdTargetObserverRegistry.cpp
+  src/DOM/FormDataEvent.cpp
+  src/DOM/RadioButtonGroups.cpp
+  src/DOM/SimulatedClick.cpp
+  src/HTML/BaseButtonInputType.cpp
+  src/HTML/BaseCheckableInputType.cpp
+  src/HTML/BaseClickableWithKeyInputType.cpp
+  src/HTML/BaseDateAndTimeInputType.cpp
+  src/HTML/BaseTextInputType.cpp
+  src/HTML/CheckboxInputType.cpp
+  src/HTML/ColorInputType.cpp
+  src/HTML/DOMFormData.cpp
+  src/HTML/DateInputType.cpp
+  src/HTML/DateTimeLocalInputType.cpp
+  src/HTML/EmailInputType.cpp
+  src/HTML/FileInputType.cpp
+  src/HTML/FormAssociatedElement.cpp
+  src/HTML/FormListedElement.cpp
+  src/HTML/HTMLFormControlElement.cpp
+  src/HTML/HTMLFormControlsCollection.cpp
+  src/HTML/HTMLTextFormControlElement.cpp
+  src/HTML/HiddenInputType.cpp
+  src/HTML/ImageInputType.cpp
+  src/HTML/InputType.cpp
+  src/HTML/LabelsNodeList.cpp
+  src/HTML/MonthInputType.cpp
+  src/HTML/NumberInputType.cpp
+  src/HTML/Parser/HTMLParserIdioms.cpp
+  src/HTML/RadioInputType.cpp
+  src/HTML/RadioNodeList.cpp
+  src/HTML/RangeInputType.cpp
+  src/HTML/ResetInputType.cpp
+  src/HTML/SearchInputType.cpp
+  src/HTML/StepRange.cpp
+  src/HTML/SubmitEvent.cpp
+  src/HTML/SubmitInputType.cpp
+  src/HTML/TextFieldInputType.cpp
+  src/HTML/TimeInputType.cpp
+  src/HTML/URLInputType.cpp
+  src/HTML/ValidatedFormListedElement.cpp
+  src/HTML/WeekInputType.cpp
+  src/Loader/FormSubmission.cpp
+  src/Platform/LocalizedStrings.cpp
+  src/Platform/Network/FormData.cpp
+  src/Platform/Network/FormDataBuilder.cpp
 )
 
 target_precompile_headers(Krystal.Booey

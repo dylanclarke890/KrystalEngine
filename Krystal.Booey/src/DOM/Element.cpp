@@ -763,13 +763,20 @@ namespace krys::boo::dom
     return true;
   }
 
+  bool Element::DispatchSimulatedClick(Event *underlyingEvent, SimulatedClickMouseEventOptions eventOptions,
+                                       SimulatedClickVisualOptions visualOptions) noexcept
+  {
+    return SimulateClick(*this, underlyingEvent, eventOptions, visualOptions,
+                         SimulatedClickSource::UserAgent);
+  }
+
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
     Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent);
     // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
     // accessibility.
     (void)EventDispatcher::DispatchToTarget(*event, this);
-    if (event->DefaultPrevented())
+    if (event->DefaultPrevented() || event->DefaultHandled())
     {
       return false;
     }
@@ -1863,11 +1870,23 @@ namespace krys::boo::dom
       return;
     }
 
-    // NOTE: we currently don't need to handle `id` as we just use the value stored in the attribute. Later,
-    // when we optimise we can use this hook to update a member variable to skip needing to look up the
-    // attribute. This will be particularly important for a faster implementation of GetElementById.
-
-    if (localName == Attributes::Class)
+    // NOTE: the ID is read from the attribute, so only the ID's observers need telling about it.
+    if (localName == Attributes::Id)
+    {
+      if (oldValue != value && (IsConnected() || IsInShadowTree()))
+      {
+        auto &registry = TreeScope().IdTargetObserverRegistry();
+        if (oldValue && !oldValue->empty())
+        {
+          registry.NotifyObservers(*this, DOMStringAtom(*oldValue));
+        }
+        if (value && !value->empty())
+        {
+          registry.NotifyObservers(*this, DOMStringAtom(*value));
+        }
+      }
+    }
+    else if (localName == Attributes::Class)
     {
       auto &domTokenList = ClassList();
       domTokenList._tokens.clear();

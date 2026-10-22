@@ -789,7 +789,8 @@ namespace krys::boo
     {
       (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
       // FIXME: Also when the focused frame changed, once there are subframes.
-      return keydown->DefaultPrevented() || DefaultKeyboardEventHandler(*keydown);
+      return keydown->DefaultPrevented() || keydown->DefaultHandled()
+             || DefaultKeyboardEventHandler(*keydown);
     }
 
     // FIXME: Input methods (handleInputMethodKeydown), which run before the keydown is dispatched, and
@@ -798,7 +799,8 @@ namespace krys::boo
 
     // FIXME: Also when the focused frame changed, once there are subframes; the backward compatibility mode,
     // which dispatches a cancelled keypress anyway.
-    bool keydownResult = keydown->DefaultPrevented() || DefaultKeyboardEventHandler(*keydown);
+    bool keydownResult =
+      keydown->DefaultPrevented() || keydown->DefaultHandled() || DefaultKeyboardEventHandler(*keydown);
     if (keydownResult)
     {
       return keydownResult;
@@ -822,11 +824,10 @@ namespace krys::boo
     // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), once there are text fields.
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
-    return keydownResult || keypress->DefaultPrevented() || DefaultKeyboardEventHandler(*keypress);
+    return keydownResult || keypress->DefaultPrevented() || keypress->DefaultHandled()
+           || DefaultKeyboardEventHandler(*keypress);
   }
 
-  // FIXME: The event's underlying event (setUnderlyingEvent), which text controls read the selection from,
-  // with form controls.
   bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
                                           dom::TextEventInputType inputType) noexcept
   {
@@ -850,11 +851,16 @@ namespace krys::boo
     }
 
     auto event = dom::TextEvent::Create(text, inputType);
+    event->SetUnderlyingEvent(underlyingEvent);
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     if (event->DefaultPrevented())
     {
       return false;
+    }
+    if (event->DefaultHandled())
+    {
+      return true;
     }
     return _frame.Document()->GetEditor().HandleTextEvent(*event);
   }

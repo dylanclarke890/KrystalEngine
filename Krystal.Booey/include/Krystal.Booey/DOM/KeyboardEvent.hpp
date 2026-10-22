@@ -115,3 +115,10 @@ namespace krys::boo::dom
                   const PlatformKeyboardEvent &key) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::KeyboardEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsKeyboardEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

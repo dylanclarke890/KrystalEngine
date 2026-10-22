@@ -788,6 +788,7 @@ namespace krys::boo::dom
   void Document::ProcessBaseElement() noexcept
   {
     Maybe<DOMString> href;
+    Maybe<DOMString> target;
     for (auto &node : DescendantRange(*this))
     {
       auto *element = DynamicDowncast<html::HTMLElement>(&node);
@@ -796,12 +797,25 @@ namespace krys::boo::dom
         continue;
       }
 
-      href = element->GetAttribute(u8"href");
-      if (href.has_value())
+      if (!href)
       {
-        break;
+        href = element->GetAttribute(u8"href");
+        if (href && target)
+        {
+          break;
+        }
+      }
+      if (!target)
+      {
+        target = element->GetAttribute(u8"target");
+        if (target && href)
+        {
+          break;
+        }
       }
     }
+
+    _baseTarget = target.value_or(DOMString());
 
     url::URL baseElementURL;
     if (href.has_value())

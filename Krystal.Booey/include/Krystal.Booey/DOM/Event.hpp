@@ -45,6 +45,8 @@ namespace krys::boo::dom
     bool _composed : 1 {false};
     bool _initialized : 1 {false};
     bool _dispatched : 1 {false};
+    bool _defaultHandled : 1 {false};
+    RefPtr<Event> _underlyingEvent;
 
   public:
     virtual ~Event() noexcept = default;
@@ -181,6 +183,33 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-initevent
     void InitEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false) noexcept;
 
+#pragma endregion
+
+    /// @brief A trusted event of type @p type, for the user agent to dispatch.
+    KRYS_NODISCARD static Ref<Event> Create(DOMStringAtom type, bool canBubble, bool isCancelable,
+                                            bool isComposed = false) noexcept;
+
+    /// @brief Whether a node's default event handler has handled the event, so no more of them run.
+    KRYS_NODISCARD bool DefaultHandled() const noexcept
+    {
+      return _defaultHandled;
+    }
+
+    void SetDefaultHandled() noexcept
+    {
+      _defaultHandled = true;
+    }
+
+    /// @brief The event this one was made for, such as the keypress a simulated click stands in for.
+    KRYS_NODISCARD Event *UnderlyingEvent() const noexcept
+    {
+      return _underlyingEvent.get();
+    }
+
+    void SetUnderlyingEvent(Event *underlyingEvent) noexcept;
+
+#pragma region Event - https://dom.spec.whatwg.org/#event
+
   protected:
     /// @see https://dom.spec.whatwg.org/#event-relatedtarget
     virtual RefPtr<EventTarget> RelatedTarget() const noexcept
@@ -237,6 +266,16 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD virtual bool IsTextEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSubmitEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsFormDataEvent() const noexcept
     {
       return false;
     }

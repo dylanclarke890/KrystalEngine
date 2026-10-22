@@ -30,6 +30,7 @@ namespace krys::boo::dom
 {
   class ContainerNode;
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class NodeList;
 
@@ -420,6 +421,14 @@ namespace krys::boo::dom
     /// @brief Whether a selection can start at the node (dragging takes priority in draggable elements that
     /// can't be selected).
     KRYS_NODISCARD virtual bool CanStartSelection() const noexcept;
+
+    /// @brief Handles @p event after its dispatch when no listener canceled it: called for the event's
+    /// target, then for the nodes on its path until one handles it (`Event::SetDefaultHandled`), if it
+    /// bubbles.
+    virtual void DefaultEventHandler(Event &event) noexcept
+    {
+      (void)event;
+    }
     /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
     /// `<br>`, form controls) is ignored by editing.
     KRYS_NODISCARD virtual bool CanContainRangeEndPoint() const noexcept
@@ -458,6 +467,10 @@ namespace krys::boo::dom
 
   public:
 #pragma region Tree Scope
+
+    /// @brief The document or shadow root of the tree this node is in: its shadow root's when its root is
+    /// one, its document's otherwise (even while it's disconnected).
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScope() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept

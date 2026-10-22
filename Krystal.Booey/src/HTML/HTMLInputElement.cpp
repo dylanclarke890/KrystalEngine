@@ -1,30 +1,69 @@
 ﻿#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/FileInputType.hpp"
+#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
-#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/RadioInputType.hpp"
+#include "Krystal.Booey/HTML/TextInputType.hpp"
+#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include <algorithm>
+#include <cmath>
 
 namespace krys::boo::html
 {
-  HTMLInputElement::HTMLInputElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Input)
+  namespace
   {
+    /// @see https://html.spec.whatwg.org/#limited-to-only-non-negative-numbers-greater-than-zero
+    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(Maybe<dom::DOMStringView> value,
+                                                                           uint32 defaultValue) noexcept
+    {
+      if (!value)
+      {
+        return defaultValue;
+      }
+      auto result = Numbers::ParseNonNegativeInteger(*value);
+      if (!result.Success() || result.Value == 0 || result.Value > 2'147'483'647)
+      {
+        return defaultValue;
+      }
+      return static_cast<uint32>(result.Value);
+    }
   }
 
-#pragma region HTMLInputElement
+  HTMLInputElement::HTMLInputElement(dom::Document &document) noexcept
+      : HTMLTextFormControlElement(document, HTMLElementInterface::Input),
+        _inputType(CreateRef<TextInputType>(*this))
+  {
+    // Activation follows the type: see UpdateEventTargetFlags().
+    SetEventTargetFlag(dom::EventTargetFlags::HasLegacyPreActivationBehavior);
+    SetEventTargetFlag(dom::EventTargetFlags::HasLegacyCanceledActivationBehavior);
+  }
+
+  HTMLInputElement::~HTMLInputElement() noexcept
+  {
+    // The input type must not keep a pointer to this element once it's gone.
+    _inputType->DetachFromElement();
+  }
 
   bool HTMLInputElement::CanStartSelection() const noexcept
   {
-    // Only text fields: missing and unknown types are text.
-    auto type = text::ToASCIILower(dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())));
-    static constexpr dom::DOMStringView nonTextFieldTypes[] = {
-      u8"hidden",   u8"date",  u8"month", u8"week",   u8"time",  u8"datetime-local", u8"range", u8"color",
-      u8"checkbox", u8"radio", u8"file",  u8"submit", u8"image", u8"reset",          u8"button"};
-    if (std::ranges::find(nonTextFieldTypes, dom::DOMStringView(type)) != std::end(nonTextFieldTypes))
+    if (!IsTextField())
     {
       return false;
     }
-    return HTMLElement::CanStartSelection();
+    return HTMLTextFormControlElement::CanStartSelection();
   }
+
+#pragma region HTMLInputElement
 
   dom::DOMString HTMLInputElement::Accept() const noexcept
   {
@@ -76,24 +115,46 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"checked", krys::move(value));
   }
 
-  bool HTMLInputElement::Checked() const noexcept
+  void HTMLInputElement::SetChecked(bool isChecked, WasSetByJavaScript wasCheckedByJavaScript) noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"checked");
-  }
+    _dirtyCheckednessFlag = true;
+    if (Checked() == isChecked)
+    {
+      return;
+    }
 
-  void HTMLInputElement::Checked(bool value) noexcept
-  {
-    Reflection::Reflect<bool>(*this, u8"checked", krys::move(value));
+    _inputType->WillUpdateCheckedness(isChecked, wasCheckedByJavaScript);
+
+    style::PseudoClassChangeInvalidation checkedInvalidation(*this, css::SelectorPseudoClass::Checked,
+                                                             isChecked);
+
+    _isChecked = isChecked;
+
+    if (auto *buttons = RadioButtonGroups())
+    {
+      buttons->UpdateCheckedState(*this);
+    }
+    if (auto *renderer = Renderer(); renderer && renderer->Style().HasUsedAppearance())
+    {
+      renderer->Repaint();
+    }
+    UpdateValidity();
+    // FIXME: Telling accessibility the checked state changed, with accessibility.
   }
 
   dom::DOMString HTMLInputElement::ColourSpace() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"colorspace").value_or(u8"");
+    auto value = GetAttribute(u8"colorspace");
+    if (value && text::IsASCIICaselessEqual(dom::DOMStringView(*value), dom::DOMStringView(u8"display-p3")))
+    {
+      return u8"display-p3";
+    }
+    return u8"limited-srgb";
   }
 
   void HTMLInputElement::ColourSpace(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"colorspace", krys::move(value));
+    (void)SetAttribute(u8"colorspace", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::DirName() const noexcept
@@ -146,11 +207,6 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
   }
 
-  bool HTMLInputElement::FormNoValidate() const noexcept
-  {
-    return Reflection::Reflect<bool>(*this, u8"formnovalidate");
-  }
-
   void HTMLInputElement::FormNoValidate(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
@@ -168,6 +224,7 @@ namespace krys::boo::html
 
   uint32 HTMLInputElement::Height() const noexcept
   {
+    // FIXME: An image button's rendered height (or its image's), with the image input type's renderer.
     return Reflection::Reflect<uint32>(*this, u8"height");
   }
 
@@ -176,14 +233,22 @@ namespace krys::boo::html
     Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
-  bool HTMLInputElement::Indeterminate() const noexcept
+  void HTMLInputElement::SetIndeterminate(bool newValue) noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"indeterminate");
-  }
+    if (Indeterminate() == newValue)
+    {
+      return;
+    }
 
-  void HTMLInputElement::Indeterminate(bool value) noexcept
-  {
-    Reflection::Reflect<bool>(*this, u8"indeterminate", krys::move(value));
+    style::PseudoClassChangeInvalidation indeterminateInvalidation(
+      *this, css::SelectorPseudoClass::Indeterminate, newValue);
+    _isIndeterminate = newValue;
+
+    if (auto *renderer = Renderer(); renderer && renderer->Style().HasUsedAppearance())
+    {
+      renderer->Repaint();
+    }
+    // FIXME: Telling accessibility the value changed, with accessibility.
   }
 
   dom::DOMString HTMLInputElement::Max() const noexcept
@@ -194,11 +259,6 @@ namespace krys::boo::html
   void HTMLInputElement::Max(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"max", krys::move(value));
-  }
-
-  int32 HTMLInputElement::MaxLength() const noexcept
-  {
-    return Reflection::Reflect<int32>(*this, u8"maxlength");
   }
 
   void HTMLInputElement::MaxLength(int32 value) noexcept
@@ -216,11 +276,6 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"min", krys::move(value));
   }
 
-  int32 HTMLInputElement::MinLength() const noexcept
-  {
-    return Reflection::Reflect<int32>(*this, u8"minlength");
-  }
-
   void HTMLInputElement::MinLength(int32 value) noexcept
   {
     Reflection::Reflect<int32>(*this, u8"minlength", krys::move(value));
@@ -228,7 +283,7 @@ namespace krys::boo::html
 
   bool HTMLInputElement::Multiple() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"multiple");
+    return HasAttribute(u8"multiple");
   }
 
   void HTMLInputElement::Multiple(bool value) noexcept
@@ -238,7 +293,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return _name;
   }
 
   void HTMLInputElement::Name(dom::DOMString &&value) noexcept
@@ -258,7 +313,15 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::Placeholder() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"placeholder").value_or(u8"");
+    // The line breaks are removed from the attribute's value.
+    auto attributeValue = GetAttribute(u8"placeholder").value_or(dom::DOMString());
+    if (std::ranges::none_of(attributeValue, IsHTMLLineBreak)) KRYS_LIKELY
+    {
+      return attributeValue;
+    }
+
+    std::erase_if(attributeValue, IsHTMLLineBreak);
+    return attributeValue;
   }
 
   void HTMLInputElement::Placeholder(dom::DOMString &&value) noexcept
@@ -288,12 +351,20 @@ namespace krys::boo::html
 
   uint32 HTMLInputElement::Size() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"size");
+    return _size;
   }
 
-  void HTMLInputElement::Size(uint32 value) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::Size(uint32 size) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"size", krys::move(value));
+    if (!size)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+    auto limitedSize = size > 2'147'483'647 ? static_cast<uint32>(DefaultSize) : size;
+    auto string = std::to_string(limitedSize);
+    (void)SetAttribute(u8"size",
+                       dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size()));
+    return {};
   }
 
   dom::ExceptionOr<dom::USVString> HTMLInputElement::Src() const noexcept
@@ -316,67 +387,1203 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"step", krys::move(value));
   }
 
-  dom::DOMString HTMLInputElement::Type() const noexcept
-  {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
-  }
-
   void HTMLInputElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
-  }
-
-  bool HTMLInputElement::IsPasswordField() const noexcept
-  {
-    auto type = GetAttribute(u8"type");
-    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"password");
-  }
-
-  bool HTMLInputElement::IsSearchField() const noexcept
-  {
-    auto type = GetAttribute(u8"type");
-    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"search");
-  }
-
-  bool HTMLInputElement::IsImageButton() const noexcept
-  {
-    auto type = GetAttribute(u8"type");
-    return type && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*type, u8"image");
+    (void)SetAttribute(u8"type", krys::move(value));
   }
 
   bool HTMLInputElement::IsReplaced(const RenderStyle *) const noexcept
   {
-    return IsImageButton();
+    return _inputType && _inputType->IsImageButton();
   }
 
   dom::DOMString HTMLInputElement::DefaultValue() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"defaultvalue").value_or(u8"");
+    return GetAttribute(u8"value").value_or(dom::DOMString());
   }
 
   void HTMLInputElement::DefaultValue(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"defaultvalue", krys::move(value));
+    (void)SetAttribute(u8"value", krys::move(value));
+  }
+
+  Maybe<dom::DOMString> HTMLInputElement::ValueOrNull() const noexcept
+  {
+    if (_inputType->IsFileUpload())
+    {
+      return static_cast<const FileInputType &>(*_inputType).FirstElementPathForInputValue();
+    }
+
+    if (_valueIfDirty)
+    {
+      return _valueIfDirty;
+    }
+
+    if (auto valueString = GetAttribute(u8"value"))
+    {
+      if (auto sanitizedValue = SanitizeValue(dom::DOMStringView(*valueString)))
+      {
+        return sanitizedValue;
+      }
+    }
+
+    return _inputType->FallbackValue();
   }
 
   dom::DOMString HTMLInputElement::Value() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
+    return ValueOrNull().value_or(dom::DOMString());
   }
 
-  void HTMLInputElement::Value(dom::DOMString &&value) noexcept
+  dom::ExceptionOr<void> HTMLInputElement::SetValue(dom::DOMStringView value,
+                                                    TextFieldEventBehavior eventBehavior,
+                                                    TextControlSetValueSelection selection) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    if (IsFileUpload() && !value.empty())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    Ref<HTMLInputElement> protectedThis = ShareRef(*this);
+    auto sanitizedValue = SanitizeValue(value).value_or(dom::DOMString());
+    bool valueChanged = sanitizedValue != Value();
+
+    SetLastChangeWasNotUserEdit();
+    SetFormControlValueMatchesRenderer(false);
+    _inputType->SetValue(sanitizedValue, valueChanged, eventBehavior, selection);
+    // FIXME: Auto directionality (updateEffectiveTextDirection), with dir=auto.
+
+    if (valueChanged && eventBehavior == TextFieldEventBehavior::DispatchNoEvent)
+    {
+      SetTextAsOfLastFormControlChangeEvent(dom::DOMString(sanitizedValue));
+    }
+
+    // FIXME: The chrome client's didProgrammaticallyClearTextFormControl, with the host's autofill.
+    return {};
+  }
+
+  void HTMLInputElement::SetValueForUser(dom::DOMStringView value) noexcept
+  {
+    (void)SetValue(value, TextFieldEventBehavior::DispatchInputAndChangeEvent);
+  }
+
+  void HTMLInputElement::SetValueInternal(dom::DOMStringView sanitizedValue,
+                                          TextFieldEventBehavior eventBehavior) noexcept
+  {
+    _valueIfDirty = dom::DOMString(sanitizedValue);
+    _wasModifiedByUser = eventBehavior != TextFieldEventBehavior::DispatchNoEvent;
+    UpdateValidity();
+  }
+
+  double HTMLInputElement::ValueAsDate() const noexcept
+  {
+    return _inputType->ValueAsDate();
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetValueAsDate(double value) noexcept
+  {
+    return _inputType->SetValueAsDate(value);
+  }
+
+  double HTMLInputElement::ValueAsNumber() const noexcept
+  {
+    return _inputType->ValueAsDouble();
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetValueAsNumber(double newValue,
+                                                            TextFieldEventBehavior eventBehavior) noexcept
+  {
+    if (!std::isfinite(newValue))
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+    return _inputType->SetValueAsDouble(newValue, eventBehavior);
   }
 
   uint32 HTMLInputElement::Width() const noexcept
   {
+    // FIXME: An image button's rendered width (or its image's), with the image input type's renderer.
     return Reflection::Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLInputElement::Width(uint32 value) noexcept
   {
     Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::StepUp(int n) noexcept
+  {
+    return _inputType->StepUp(n);
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::StepDown(int n) noexcept
+  {
+    return _inputType->StepUp(-n);
+  }
+
+  dom::DOMString HTMLInputElement::ValidationMessage() const noexcept
+  {
+    if (!WillValidate())
+    {
+      return {};
+    }
+
+    if (CustomError())
+    {
+      return CustomValidationMessage();
+    }
+
+    return _inputType->ValidationMessage();
+  }
+
+#pragma endregion
+
+#pragma region Validity
+
+  bool HTMLInputElement::HasBadInput() const noexcept
+  {
+    return _inputType->HasBadInput();
+  }
+
+  bool HTMLInputElement::PatternMismatch() const noexcept
+  {
+    return _inputType->PatternMismatch(Value());
+  }
+
+  bool HTMLInputElement::RangeUnderflow() const noexcept
+  {
+    return _inputType->RangeUnderflow(Value());
+  }
+
+  bool HTMLInputElement::RangeOverflow() const noexcept
+  {
+    return _inputType->RangeOverflow(Value());
+  }
+
+  bool HTMLInputElement::StepMismatch() const noexcept
+  {
+    return _inputType->StepMismatch(Value());
+  }
+
+  bool HTMLInputElement::TooShort() const noexcept
+  {
+    return TooShort(Value(), CheckDirtyFlag);
+  }
+
+  bool HTMLInputElement::TooLong() const noexcept
+  {
+    return TooLong(Value(), CheckDirtyFlag);
+  }
+
+  bool HTMLInputElement::TypeMismatch() const noexcept
+  {
+    return _inputType->TypeMismatch();
+  }
+
+  bool HTMLInputElement::ValueMissing() const noexcept
+  {
+    return _inputType->ValueMissing(Value());
+  }
+
+  bool HTMLInputElement::ComputeValidity() const noexcept
+  {
+    auto value = Value();
+    bool someError = _inputType->IsInvalid(value) || TooShort(value, CheckDirtyFlag)
+                     || TooLong(value, CheckDirtyFlag) || CustomError();
+    return !someError;
+  }
+
+  bool HTMLInputElement::TooShort(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
+  {
+    if (!SupportsMinLength())
+    {
+      return false;
+    }
+
+    int32 min = MinLength();
+    if (min <= 0)
+    {
+      return false;
+    }
+
+    if (check == CheckDirtyFlag)
+    {
+      // Return false for the default value or a value set by a script even if it is shorter than minLength.
+      if (!HasDirtyValue() || !_wasModifiedByUser)
+      {
+        return false;
+      }
+    }
+
+    // The empty string is excluded from tooShort validation.
+    if (value.empty())
+    {
+      return false;
+    }
+
+    return LengthForAPIValue(value) < static_cast<size_t>(min);
+  }
+
+  bool HTMLInputElement::TooLong(dom::DOMStringView value, NeedsToCheckDirtyFlag check) const noexcept
+  {
+    if (!SupportsMaxLength())
+    {
+      return false;
+    }
+    uint32 max = EffectiveMaxLength();
+    if (check == CheckDirtyFlag)
+    {
+      // Return false for the default value or a value set by a script even if it is longer than maxLength.
+      if (!HasDirtyValue() || !_wasModifiedByUser)
+      {
+        return false;
+      }
+    }
+    return LengthForAPIValue(value) > max;
+  }
+
+  bool HTMLInputElement::IsValidValue(dom::DOMStringView value) const noexcept
+  {
+    if (!_inputType->IsValidValue(value))
+    {
+      return false;
+    }
+
+    return !TooShort(value, IgnoreDirtyFlag) && !TooLong(value, IgnoreDirtyFlag);
+  }
+
+  double HTMLInputElement::Minimum() const noexcept
+  {
+    return _inputType->Minimum();
+  }
+
+  double HTMLInputElement::Maximum() const noexcept
+  {
+    return _inputType->Maximum();
+  }
+
+  bool HTMLInputElement::GetAllowedValueStep(Decimal *step) const noexcept
+  {
+    return _inputType->GetAllowedValueStep(step);
+  }
+
+  StepRange HTMLInputElement::CreateStepRange(AnyStepHandling anyStepHandling) const noexcept
+  {
+    return _inputType->CreateStepRange(anyStepHandling);
+  }
+
+  bool HTMLInputElement::IsInRange() const noexcept
+  {
+    return WillValidate() && _inputType->IsInRange(Value());
+  }
+
+  bool HTMLInputElement::IsOutOfRange() const noexcept
+  {
+    return WillValidate() && _inputType->IsOutOfRange(Value());
+  }
+
+  bool HTMLInputElement::ComputeWillValidate() const noexcept
+  {
+    return _inputType->SupportsValidation() && HTMLTextFormControlElement::ComputeWillValidate();
+  }
+
+  void HTMLInputElement::RequiredStateChanged() noexcept
+  {
+    HTMLTextFormControlElement::RequiredStateChanged();
+    if (auto *buttons = RadioButtonGroups())
+    {
+      buttons->RequiredStateChanged(*this);
+    }
+    _inputType->RequiredStateChanged();
+  }
+
+  bool HTMLInputElement::IsRequiredFormControl() const noexcept
+  {
+    return _inputType->SupportsRequired() && IsRequired();
+  }
+
+#pragma endregion
+
+#pragma region Type queries
+
+  bool HTMLInputElement::IsSteppable() const noexcept
+  {
+    return _inputType->IsSteppable();
+  }
+
+  bool HTMLInputElement::IsTextButton() const noexcept
+  {
+    return _inputType->IsTextButton();
+  }
+
+  bool HTMLInputElement::IsRadioButton() const noexcept
+  {
+    return _inputType->IsRadioButton();
+  }
+
+  bool HTMLInputElement::IsTextField() const noexcept
+  {
+    return _inputType->IsTextField();
+  }
+
+  bool HTMLInputElement::IsSearchField() const noexcept
+  {
+    return _inputType->IsSearchField();
+  }
+
+  bool HTMLInputElement::IsInputTypeHidden() const noexcept
+  {
+    return _inputType->IsHiddenType();
+  }
+
+  bool HTMLInputElement::IsPasswordField() const noexcept
+  {
+    return _inputType->IsPasswordField();
+  }
+
+  bool HTMLInputElement::IsCheckbox() const noexcept
+  {
+    return _inputType->IsCheckbox();
+  }
+
+  bool HTMLInputElement::IsRangeControl() const noexcept
+  {
+    return _inputType->IsRangeControl();
+  }
+
+  bool HTMLInputElement::IsColorControl() const noexcept
+  {
+    return _inputType->IsColorControl();
+  }
+
+  bool HTMLInputElement::IsText() const noexcept
+  {
+    return _inputType->IsTextType();
+  }
+
+  bool HTMLInputElement::IsTextType() const noexcept
+  {
+    return _inputType->IsTextType();
+  }
+
+  bool HTMLInputElement::IsEmailField() const noexcept
+  {
+    return _inputType->IsEmailField();
+  }
+
+  bool HTMLInputElement::IsFileUpload() const noexcept
+  {
+    return _inputType->IsFileUpload();
+  }
+
+  bool HTMLInputElement::IsImageButton() const noexcept
+  {
+    return _inputType->IsImageButton();
+  }
+
+  bool HTMLInputElement::IsNumberField() const noexcept
+  {
+    return _inputType->IsNumberField();
+  }
+
+  bool HTMLInputElement::IsSubmitButton() const noexcept
+  {
+    return _inputType->IsSubmitButton();
+  }
+
+  bool HTMLInputElement::IsTelephoneField() const noexcept
+  {
+    return _inputType->IsTelephoneField();
+  }
+
+  bool HTMLInputElement::IsURLField() const noexcept
+  {
+    return _inputType->IsURLField();
+  }
+
+  bool HTMLInputElement::IsDateField() const noexcept
+  {
+    return _inputType->IsDateField();
+  }
+
+  bool HTMLInputElement::IsDateTimeLocalField() const noexcept
+  {
+    return _inputType->IsDateTimeLocalField();
+  }
+
+  bool HTMLInputElement::IsMonthField() const noexcept
+  {
+    return _inputType->IsMonthField();
+  }
+
+  bool HTMLInputElement::IsTimeField() const noexcept
+  {
+    return _inputType->IsTimeField();
+  }
+
+  bool HTMLInputElement::IsWeekField() const noexcept
+  {
+    return _inputType->IsWeekField();
+  }
+
+  DateComponentsType HTMLInputElement::DateType() const noexcept
+  {
+    return _inputType->DateType();
+  }
+
+  bool HTMLInputElement::IsEnumeratable() const noexcept
+  {
+    return _inputType->IsEnumeratable();
+  }
+
+  bool HTMLInputElement::IsLabelable() const noexcept
+  {
+    return _inputType->IsLabelable();
+  }
+
+  bool HTMLInputElement::IsInteractiveContent() const noexcept
+  {
+    return _inputType->IsInteractiveContent();
+  }
+
+  bool HTMLInputElement::SupportsReadOnly() const noexcept
+  {
+    return _inputType->SupportsReadOnly();
+  }
+
+  bool HTMLInputElement::SupportsPlaceholder() const noexcept
+  {
+    return _inputType->SupportsPlaceholder();
+  }
+
+  bool HTMLInputElement::IsEmptyValue() const noexcept
+  {
+    return _inputType->IsEmptyValue();
+  }
+
+  dom::DOMString HTMLInputElement::FormControlType() const noexcept
+  {
+    return dom::DOMString(_inputType->FormControlType());
+  }
+
+#pragma endregion
+
+#pragma region Pseudo-classes
+
+  bool HTMLInputElement::MatchesCheckedPseudoClass() const noexcept
+  {
+    return Checked() && _inputType->IsCheckable();
+  }
+
+  bool HTMLInputElement::MatchesIndeterminatePseudoClass() const noexcept
+  {
+    return _inputType->MatchesIndeterminatePseudoClass();
+  }
+
+  bool HTMLInputElement::MatchesDefaultPseudoClass() const noexcept
+  {
+    if (_inputType->CanBeSuccessfulSubmitButton())
+    {
+      return !IsDisabledFormControl() && Form() && Form()->DefaultButton() == this;
+    }
+    return _inputType->IsCheckable() && _isDefaultChecked;
+  }
+
+  bool HTMLInputElement::MatchesReadWritePseudoClass() const noexcept
+  {
+    return SupportsReadOnly() && IsMutable();
+  }
+
+  void HTMLInputElement::SetDefaultCheckedState(bool isDefaultChecked) noexcept
+  {
+    if (_isDefaultChecked == isDefaultChecked)
+    {
+      return;
+    }
+
+    Maybe<style::PseudoClassChangeInvalidation> defaultInvalidation;
+    if (_inputType->IsCheckable())
+    {
+      defaultInvalidation.emplace(*this, css::SelectorPseudoClass::Default, isDefaultChecked);
+    }
+    _isDefaultChecked = isDefaultChecked;
+  }
+
+#pragma endregion
+
+#pragma region Value
+
+  Maybe<dom::DOMString> HTMLInputElement::SanitizeValue(Maybe<dom::DOMStringView> value) const noexcept
+  {
+    if (!value)
+    {
+      return std::nullopt;
+    }
+    return _inputType->SanitizeValue(*value);
+  }
+
+  dom::DOMString HTMLInputElement::VisibleValue() const noexcept
+  {
+    return _inputType->VisibleValue();
+  }
+
+  dom::DOMString HTMLInputElement::ValueWithDefault() const noexcept
+  {
+    if (auto value = ValueOrNull())
+    {
+      return *value;
+    }
+
+    return _inputType->DefaultValue().value_or(dom::DOMString());
+  }
+
+  bool HTMLInputElement::IsActivatedSubmit() const noexcept
+  {
+    return _isActivatedSubmit;
+  }
+
+  void HTMLInputElement::SetActivatedSubmit(bool flag) noexcept
+  {
+    _isActivatedSubmit = flag;
+  }
+
+  uint32 HTMLInputElement::EffectiveMaxLength() const noexcept
+  {
+    // The number -1 represents no maximum at all; conveniently it becomes a super-large value when converted
+    // to unsigned.
+    return std::min<uint32>(static_cast<uint32>(MaxLength()), MaxEffectiveLength);
+  }
+
+  void HTMLInputElement::MaxLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept
+  {
+    uint32 oldEffectiveMaxLength = EffectiveMaxLength();
+    InternalSetMaxLength(ParseLengthAttribute(newValue));
+    if (oldEffectiveMaxLength != EffectiveMaxLength())
+    {
+      UpdateValueIfNeeded();
+    }
+
+    UpdateValidity();
+  }
+
+  void HTMLInputElement::MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept
+  {
+    int32 oldMinLength = MinLength();
+    InternalSetMinLength(ParseLengthAttribute(newValue));
+    if (oldMinLength != MinLength())
+    {
+      UpdateValueIfNeeded();
+    }
+
+    UpdateValidity();
+  }
+
+  void HTMLInputElement::UpdateValueIfNeeded() noexcept
+  {
+    auto newValue = SanitizeValue(_valueIfDirty ? Maybe<dom::DOMStringView>(*_valueIfDirty) : std::nullopt);
+    krys_debug_assert(_valueIfDirty || !newValue);
+    if (newValue != _valueIfDirty)
+    {
+      (void)SetValue(newValue.value_or(dom::DOMString()));
+    }
+  }
+
+#pragma endregion
+
+#pragma region Forms
+
+  dom::DOMString HTMLInputElement::ResultForDialogSubmit() const noexcept
+  {
+    return _inputType->ResultForDialogSubmit();
+  }
+
+  bool HTMLInputElement::AppendFormData(DOMFormData &formData) noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    return _inputType->IsFormDataAppendable() && _inputType->AppendFormData(formData);
+  }
+
+  bool HTMLInputElement::IsSuccessfulSubmitButton() const noexcept
+  {
+    // HTML spec says that buttons must have names to be considered successful. However, other browsers do not
+    // impose this constraint. So we do not.
+    return _inputType->CanBeSuccessfulSubmitButton();
+  }
+
+  void HTMLInputElement::Reset() noexcept
+  {
+    if (_inputType->StoresValueSeparateFromAttribute())
+    {
+      // Setting the value to null drops the dirty value, so the value follows the attribute again.
+      (void)SetValue({});
+      _valueIfDirty = std::nullopt;
+      UpdatePlaceholderVisibility();
+      UpdateValidity();
+    }
+
+    SetInteractedWithSinceLastFormSubmitEvent(false);
+    SetChecked(HasAttribute(u8"checked"));
+    _dirtyCheckednessFlag = false;
+  }
+
+  bool HTMLInputElement::ShouldAutocomplete() const noexcept
+  {
+    if (_autocomplete != Uninitialized)
+    {
+      return _autocomplete == On;
+    }
+    return HTMLTextFormControlElement::ShouldAutocomplete();
+  }
+
+  void HTMLInputElement::WillChangeForm() noexcept
+  {
+    RemoveFromRadioButtonGroup();
+    HTMLTextFormControlElement::WillChangeForm();
+  }
+
+  void HTMLInputElement::DidChangeForm() noexcept
+  {
+    HTMLTextFormControlElement::DidChangeForm();
+    AddToRadioButtonGroup();
+  }
+
+  void HTMLInputElement::DisabledStateChanged() noexcept
+  {
+    HTMLTextFormControlElement::DisabledStateChanged();
+    _inputType->DisabledStateChanged();
+  }
+
+  void HTMLInputElement::ReadOnlyStateChanged() noexcept
+  {
+    HTMLTextFormControlElement::ReadOnlyStateChanged();
+    _inputType->ReadOnlyStateChanged();
+  }
+
+#pragma endregion
+
+#pragma region Radio buttons
+
+  List<Ref<HTMLInputElement>> HTMLInputElement::RadioButtonGroup() const noexcept
+  {
+    if (auto *buttons = RadioButtonGroups())
+    {
+      return buttons->GroupMembers(*this);
+    }
+    return {};
+  }
+
+  RefPtr<HTMLInputElement> HTMLInputElement::CheckedRadioButtonForGroup() const noexcept
+  {
+    krys_debug_assert(IsRadioButton());
+
+    if (Checked())
+    {
+      return ShareRefPtr(const_cast<HTMLInputElement *>(this));
+    }
+
+    auto name = Name();
+    if (auto *buttons = RadioButtonGroups())
+    {
+      return buttons->CheckedButtonForGroup(name);
+    }
+
+    if (name.empty())
+    {
+      return nullptr;
+    }
+
+    krys_debug_assert(!IsConnected());
+    krys_debug_assert(!Form());
+
+    // The input is not managed by a RadioButtonGroups, we'll need to traverse the tree.
+    RefPtr<HTMLInputElement> checkedRadio;
+    auto &root = dom::TreeQueries::Root(const_cast<HTMLInputElement &>(*this));
+    RadioInputType::ForEachButtonInDetachedGroup(Downcast<dom::ContainerNode>(root), name,
+                                                 [&](HTMLInputElement &input)
+                                                 {
+                                                   if (input.Checked())
+                                                   {
+                                                     checkedRadio = ShareRefPtr(&input);
+                                                     return false;
+                                                   }
+                                                   return true;
+                                                 });
+    return checkedRadio;
+  }
+
+  dom::RadioButtonGroups *HTMLInputElement::RadioButtonGroups() const noexcept
+  {
+    if (!IsRadioButton())
+    {
+      return nullptr;
+    }
+    if (auto *formElement = Form())
+    {
+      return &formElement->RadioButtonGroups();
+    }
+    if (IsConnected() || IsInShadowTree())
+    {
+      return &TreeScope().RadioButtonGroups();
+    }
+    return nullptr;
+  }
+
+  void HTMLInputElement::AddToRadioButtonGroup() noexcept
+  {
+    if (auto *buttons = RadioButtonGroups())
+    {
+      buttons->AddButton(*this);
+    }
+  }
+
+  void HTMLInputElement::RemoveFromRadioButtonGroup() noexcept
+  {
+    if (auto *buttons = RadioButtonGroups())
+    {
+      buttons->RemoveButton(*this);
+    }
+  }
+
+#pragma endregion
+
+#pragma region Type changes
+
+  void HTMLInputElement::UpdateType(dom::DOMStringView typeAttributeValue) noexcept
+  {
+    krys_debug_assert(_inputType);
+    auto newType = InputType::CreateIfDifferent(*this, typeAttributeValue, _inputType.get());
+    if (!newType)
+    {
+      return;
+    }
+    krys_debug_assert(_inputType->GetType() != newType->GetType());
+
+    style::PseudoClassChangeInvalidation defaultInvalidation(*this, css::SelectorPseudoClass::Default,
+                                                             style::PseudoClassChangeInvalidation::AnyValue);
+
+    RemoveFromRadioButtonGroup();
+
+    bool didSupportReadOnly = _inputType->SupportsReadOnly();
+    bool willSupportReadOnly = newType->SupportsReadOnly();
+    Maybe<style::PseudoClassChangeInvalidation> readWriteInvalidation;
+
+    bool didStoreValue = _inputType->StoresValueSeparateFromAttribute();
+    bool willStoreValue = newType->StoresValueSeparateFromAttribute();
+    bool didRespectHeightAndWidth = _inputType->ShouldRespectHeightAndWidthAttributes();
+    bool wasImageButton = _inputType->IsImageButton();
+    bool wasSuccessfulSubmitButtonCandidate = _inputType->CanBeSuccessfulSubmitButton();
+
+    if (didStoreValue && !willStoreValue)
+    {
+      if (auto dirtyValue = std::exchange(_valueIfDirty, std::nullopt); dirtyValue && !dirtyValue->empty())
+      {
+        (void)SetAttribute(u8"value", krys::move(*dirtyValue));
+      }
+    }
+
+    _inputType->DetachFromElement();
+
+    bool previouslySelectable = _inputType->SupportsSelectionAPI();
+
+    _inputType = krys::move(newType);
+    if (!didStoreValue && willStoreValue)
+    {
+      auto valueAttribute = GetAttribute(u8"value");
+      _valueIfDirty =
+        SanitizeValue(valueAttribute ? Maybe<dom::DOMStringView>(*valueAttribute) : std::nullopt);
+    }
+    else
+    {
+      UpdateValueIfNeeded();
+    }
+
+    // FIXME: Auto directionality when the type changes to or from tel (updateEffectiveTextDirection), with
+    // dir=auto.
+
+    if (didSupportReadOnly != willSupportReadOnly && HasAttribute(u8"readonly")) KRYS_UNLIKELY
+    {
+      readWriteInvalidation.emplace(*this, std::initializer_list<Pair<css::SelectorPseudoClass, bool>> {
+                                             {css::SelectorPseudoClass::ReadWrite, !willSupportReadOnly},
+                                             {css::SelectorPseudoClass::ReadOnly, willSupportReadOnly},
+                                           });
+      ReadOnlyStateChanged();
+    }
+
+    UpdateWillValidateAndValidity();
+
+    SetFormControlValueMatchesRenderer(false);
+
+    _wasModifiedByUser = false;
+
+    if (didRespectHeightAndWidth != _inputType->ShouldRespectHeightAndWidthAttributes()
+        || wasImageButton != _inputType->IsImageButton())
+    {
+      // The presentational hints of the width, height, align, border, vspace and hspace attributes depend on
+      // the type.
+      InvalidatePresentationalHintStyle();
+    }
+
+    if (auto *form = Form();
+        form && wasSuccessfulSubmitButtonCandidate != _inputType->CanBeSuccessfulSubmitButton())
+    {
+      form->ResetDefaultButton();
+    }
+
+    RunPostTypeUpdateTasks();
+
+    // https://html.spec.whatwg.org/#input-type-change
+    // 8. Let nowSelectable be true if setRangeText() now applies to the element, and false otherwise.
+    bool nowSelectable = _inputType->SupportsSelectionAPI();
+    // 9. If previouslySelectable is false and nowSelectable is true, set the element's text entry cursor
+    // position to the beginning of the text control, and set its selection direction to "none".
+    if (!previouslySelectable && nowSelectable)
+    {
+      // FIXME: Caching the selection, with text fields.
+    }
+
+    UpdateValidity();
+    UpdatePlaceholderVisibility();
+  }
+
+  void HTMLInputElement::RunPostTypeUpdateTasks() noexcept
+  {
+    krys_debug_assert(_inputType);
+
+    if (_inputType->HasActivationBehavior())
+    {
+      SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    }
+    else
+    {
+      ClearEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+    }
+
+    if (Renderer())
+    {
+      InvalidateStyleAndRenderersForSubtree();
+    }
+
+    // FIXME: Restoring the focus appearance (updateFocusAppearance) when focused, with text fields.
+
+    SetChangedSinceLastFormControlChangeEvent(false);
+
+    AddToRadioButtonGroup();
+  }
+
+#pragma endregion
+
+#pragma region DOM hooks
+
+  void HTMLInputElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                            Maybe<dom::DOMStringView> value,
+                                            dom::DOMStringAtom namespaceURI) noexcept
+  {
+    if (oldValue == value)
+    {
+      return;
+    }
+
+    krys_debug_assert(_inputType);
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+
+    HTMLTextFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    if (localName == u8"type")
+    {
+      UpdateType(value.value_or(dom::DOMStringView()));
+    }
+    else if (localName == u8"value")
+    {
+      // We only need to invalidate if the form is looking at the default value right now.
+      if (!HasDirtyValue())
+      {
+        UpdatePlaceholderVisibility();
+        InvalidateStyleForSubtree();
+        SetFormControlValueMatchesRenderer(false);
+      }
+      UpdateValidity();
+      // FIXME: Auto directionality, with dir=auto.
+    }
+    else if (localName == u8"name")
+    {
+      RemoveFromRadioButtonGroup();
+      _name = dom::DOMString(value.value_or(dom::DOMStringView()));
+      AddToRadioButtonGroup();
+    }
+    else if (localName == u8"checked")
+    {
+      SetDefaultCheckedState(value.has_value());
+      // FIXME: Delaying SetChecked() until FinishParsingChildren() when the parser has form state to restore,
+      // once form state is saved and restored.
+      if (!_dirtyCheckednessFlag)
+      {
+        SetChecked(value.has_value());
+        // SetChecked() above sets the dirty checkedness flag so we need to reset it.
+        _dirtyCheckednessFlag = false;
+      }
+    }
+    else if (localName == u8"autocomplete")
+    {
+      auto newValue = value.value_or(dom::DOMStringView());
+      if (text::IsASCIICaselessEqual(newValue, dom::DOMStringView(u8"off")))
+      {
+        _autocomplete = Off;
+      }
+      else
+      {
+        _autocomplete = newValue.empty() ? Uninitialized : On;
+      }
+    }
+    else if (localName == u8"maxlength")
+    {
+      MaxLengthAttributeChanged(value);
+    }
+    else if (localName == u8"minlength")
+    {
+      MinLengthAttributeChanged(value);
+    }
+    else if (localName == u8"size")
+    {
+      uint32 oldSize = _size;
+      _size = LimitToOnlyHTMLNonNegativeNumbersGreaterThanZero(value, DefaultSize);
+      if (_size != oldSize)
+      {
+        if (auto *renderer = Renderer())
+        {
+          renderer->SetNeedsLayoutAndPreferredWidthsUpdate();
+        }
+      }
+    }
+    else if (localName == u8"max" || localName == u8"min" || localName == u8"multiple"
+             || localName == u8"pattern" || localName == u8"step")
+    {
+      UpdateValidity();
+    }
+    else if (localName == u8"alpha" || localName == u8"colorspace")
+    {
+      if (IsColorControl())
+      {
+        UpdateValueIfNeeded();
+        UpdateValidity();
+      }
+    }
+    // FIXME: The list attribute (its datalist and target observer), with datalists.
+
+    _inputType->AttributeChanged(localName);
+  }
+
+  void HTMLInputElement::OnInsert() noexcept
+  {
+    HTMLTextFormControlElement::OnInsert();
+    // FIXME: Resetting the list attribute's target observer, with datalists.
+    if (IsRadioButton())
+    {
+      UpdateValidity();
+    }
+    if (!IsConnected())
+    {
+      AddToRadioButtonGroup();
+    }
+  }
+
+  void HTMLInputElement::OnPostConnection() noexcept
+  {
+    HTMLTextFormControlElement::OnPostConnection();
+    if (!Form())
+    {
+      AddToRadioButtonGroup();
+    }
+  }
+
+  void HTMLInputElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLTextFormControlElement::OnRemove(isSubtreeRoot, oldAncestor);
+    bool disconnectedFromDocument = oldAncestor.IsConnected();
+    bool treeScopeChanged = &oldAncestor.TreeScope() != &TreeScope();
+    if (treeScopeChanged && IsRadioButton())
+    {
+      oldAncestor.TreeScope().RadioButtonGroups().RemoveButton(*this);
+    }
+    if (disconnectedFromDocument && !Form())
+    {
+      RemoveFromRadioButtonGroup();
+    }
+    krys_debug_assert(!IsConnected());
+    if (disconnectedFromDocument && !Form() && IsRadioButton())
+    {
+      UpdateValidity();
+    }
+    // FIXME: Resetting the list attribute's target observer, with datalists.
+  }
+
+  void HTMLInputElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  {
+    HTMLTextFormControlElement::OnClone(copy, subtree);
+
+    auto &clone = Downcast<HTMLInputElement>(copy);
+    clone._valueIfDirty = _valueIfDirty;
+    clone._wasModifiedByUser = false;
+    clone.SetChecked(_isChecked);
+    clone._isDefaultChecked = _isDefaultChecked;
+    clone._dirtyCheckednessFlag = _dirtyCheckednessFlag;
+    clone._isIndeterminate = _isIndeterminate;
+
+    clone.UpdateValidity();
+    clone.SetFormControlValueMatchesRenderer(false);
+  }
+
+  void HTMLInputElement::FinishParsingChildren() noexcept
+  {
+    krys_debug_assert(_inputType);
+    HTMLTextFormControlElement::FinishParsingChildren();
+    // FIXME: Skipping this when form state was restored, once form state is saved and restored.
+    if (HasAttribute(u8"checked"))
+    {
+      SetChecked(true);
+    }
+    _dirtyCheckednessFlag = false;
+  }
+
+  bool HTMLInputElement::RendererIsNeeded(const RenderStyle &style) noexcept
+  {
+    return _inputType->RendererIsNeeded() && HTMLTextFormControlElement::RendererIsNeeded(style);
+  }
+
+#pragma endregion
+
+#pragma region Events
+
+  void HTMLInputElement::LegacyPreActivationBehavior(dom::Event &event) noexcept
+  {
+    _clickHandlingState = {};
+    _clickHandlingState.Trusted = event.IsTrusted();
+    auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
+    if (event.Type() == EventNames::Click && mouseEvent && mouseEvent->Button() == 0)
+    {
+      _inputType->WillDispatchClick(_clickHandlingState);
+      _clickHandlingState.Stateful = true;
+    }
+  }
+
+  void HTMLInputElement::ActivationBehavior(dom::Event &event) noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    if (std::exchange(_clickHandlingState.Stateful, false))
+    {
+      _inputType->DidDispatchClick(event, _clickHandlingState);
+    }
+    _clickHandlingState.CheckedRadioButton = nullptr;
+
+    // Image and submit inputs submit their form, and reset inputs reset it.
+    _inputType->HandleActivationBehavior(event);
+    // FIXME: The popover target action (handlePopoverTargetAction) for buttons, once there are popovers.
+  }
+
+  void HTMLInputElement::LegacyCanceledActivationBehavior(dom::Event &event) noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+    if (std::exchange(_clickHandlingState.Stateful, false))
+    {
+      _inputType->DidDispatchClick(event, _clickHandlingState);
+    }
+    _clickHandlingState.CheckedRadioButton = nullptr;
+  }
+
+  void HTMLInputElement::DefaultEventHandler(dom::Event &event) noexcept
+  {
+    Ref<InputType> protectedInputType = ShareRef(*_inputType);
+
+    if (auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event); mouseEvent && mouseEvent->Button() == 0)
+    {
+      if (mouseEvent->Type() == EventNames::Click || mouseEvent->Type() == EventNames::AuxClick)
+      {
+        _inputType->HandleClickEvent(*mouseEvent);
+      }
+      // FIXME: Mouse down and move (dragging a slider's thumb), with the other controls.
+
+      if (mouseEvent->DefaultHandled())
+      {
+        return;
+      }
+    }
+
+    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event);
+        keyboardEvent && keyboardEvent->Type() == EventNames::KeyDown)
+    {
+      auto shouldCallBaseEventHandler = _inputType->HandleKeydownEvent(*keyboardEvent);
+      if (event.DefaultHandled() || shouldCallBaseEventHandler == InputType::ShouldCallBaseEventHandler::No)
+      {
+        return;
+      }
+    }
+
+    // Call the base event handler before any of our own event handling for almost all events in text fields.
+    // Makes editing keyboard handling take precedence over the keydown and keypress handling in this
+    // function.
+    bool callBaseClassEarly =
+      IsTextField() && (event.Type() == EventNames::KeyDown || event.Type() == EventNames::KeyPress);
+    if (callBaseClassEarly)
+    {
+      HTMLTextFormControlElement::DefaultEventHandler(event);
+      if (event.DefaultHandled())
+      {
+        return;
+      }
+    }
+
+    // Use key press event here since sending simulated mouse events on key down blocks the proper sending of
+    // the key press event.
+    if (auto *keyboardEvent = DynamicDowncast<dom::KeyboardEvent>(event))
+    {
+      if (keyboardEvent->Type() == EventNames::KeyPress)
+      {
+        _inputType->HandleKeypressEvent(*keyboardEvent);
+        if (keyboardEvent->DefaultHandled())
+        {
+          return;
+        }
+      }
+      else if (keyboardEvent->Type() == EventNames::KeyUp)
+      {
+        _inputType->HandleKeyupEvent(*keyboardEvent);
+        if (keyboardEvent->DefaultHandled())
+        {
+          return;
+        }
+      }
+    }
+
+    if (_inputType->ShouldSubmitImplicitly(event))
+    {
+      // FIXME: Adding a recent search (addSearchResult) for search fields, with text fields.
+
+      // Form submission finishes editing, just as loss of focus does. If there was a change, send the event
+      // now.
+      if (WasChangedSinceLastFormControlChangeEvent())
+      {
+        DispatchFormControlChangeEvent();
+      }
+
+      // Form may never have been present, or may have been destroyed by code responding to the change event.
+      if (RefPtr<HTMLFormElement> formElement = ShareRefPtr(Form()))
+      {
+        formElement->SubmitImplicitly(event, CanTriggerImplicitSubmission());
+      }
+
+      event.SetDefaultHandled();
+      return;
+    }
+
+    // FIXME: The before-text-inserted event and forwarding events to the shadow tree, with text fields.
+
+    if (!callBaseClassEarly && !event.DefaultHandled())
+    {
+      HTMLTextFormControlElement::DefaultEventHandler(event);
+    }
   }
 
 #pragma endregion
@@ -412,9 +1619,8 @@ namespace krys::boo::html
   {
     if (namespaceURI == dom::DOMStringAtom::Null())
     {
-      // The type decides which of the other attributes map to style.
       if (localName == u8"vspace" || localName == u8"hspace" || localName == u8"width"
-          || localName == u8"height" || localName == u8"type")
+          || localName == u8"height")
       {
         return true;
       }
@@ -423,7 +1629,7 @@ namespace krys::boo::html
         return IsImageButton();
       }
     }
-    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+    return HTMLTextFormControlElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
   }
 
   void HTMLInputElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
@@ -434,10 +1640,10 @@ namespace krys::boo::html
     using namespace presentational_hints;
     if (namespaceURI != dom::DOMStringAtom::Null())
     {
-      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      HTMLTextFormControlElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value,
+                                                                         style);
       return;
     }
-    // Only image buttons respect the align, width and height attributes.
     if (localName == u8"vspace")
     {
       if (IsImageButton())
@@ -458,6 +1664,7 @@ namespace krys::boo::html
     }
     if (localName == u8"align")
     {
+      // Only image buttons respect the align attribute.
       if (IsImageButton())
       {
         ApplyAlignmentAttributeToStyle(value, style);
@@ -466,18 +1673,24 @@ namespace krys::boo::html
     }
     if (localName == u8"width")
     {
-      if (IsImageButton())
+      if (_inputType->ShouldRespectHeightAndWidthAttributes())
       {
         AddHTMLLengthToStyle(style, css::PropertyId::Width, value);
+      }
+      if (IsImageButton())
+      {
         ApplyAspectRatioFromWidthAndHeightAttributesToStyle(value, AttributeOrEmpty(u8"height"), style);
       }
       return;
     }
     if (localName == u8"height")
     {
-      if (IsImageButton())
+      if (_inputType->ShouldRespectHeightAndWidthAttributes())
       {
         AddHTMLLengthToStyle(style, css::PropertyId::Height, value);
+      }
+      if (IsImageButton())
+      {
         ApplyAspectRatioFromWidthAndHeightAttributesToStyle(AttributeOrEmpty(u8"width"), value, style);
       }
       return;
@@ -490,7 +1703,7 @@ namespace krys::boo::html
       }
       return;
     }
-    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+    HTMLTextFormControlElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

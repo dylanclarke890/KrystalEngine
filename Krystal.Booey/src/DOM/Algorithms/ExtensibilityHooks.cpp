@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
@@ -10,6 +11,25 @@
 
 namespace krys::boo::dom
 {
+  namespace
+  {
+    /// @brief Tells @p scope's observers of @p node's ID (if it's an element with one) that it joined or left
+    /// the scope.
+    void NotifyIdTargetObservers(Node &node, DocumentOrShadowRoot &scope) noexcept
+    {
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element)
+      {
+        return;
+      }
+      auto id = element->GetAttribute(u8"id");
+      if (id && !id->empty())
+      {
+        scope.IdTargetObserverRegistry().NotifyObservers(*element, DOMStringAtom(*id));
+      }
+    }
+  }
+
   void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
   {
     // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
@@ -49,6 +69,10 @@ namespace krys::boo::dom
 
     insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
                                  style::InvalidationMode::InsertedIntoAncestor);
+    if (parent->IsConnected() || parent->IsInShadowTree())
+    {
+      NotifyIdTargetObservers(insertedNode, insertedNode.TreeScope());
+    }
     insertedNode.OnInsert();
   }
 
@@ -72,6 +96,7 @@ namespace krys::boo::dom
 
     auto *parent = movedNode.ParentNode();
     krys_debug_assert(parent);
+    auto &oldScope = oldAncestor.TreeScope();
 
     // NOTE: a node can be moved from a shadow tree to a light tree and vice versa but only as long as
     // they share the same shadow-including root (i.e. they're in the same document). This means that
@@ -88,6 +113,11 @@ namespace krys::boo::dom
     }
 
     movedNode.InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::InsertedIntoAncestor);
+    if (auto &newScope = movedNode.TreeScope(); &newScope != &oldScope)
+    {
+      NotifyIdTargetObservers(movedNode, oldScope);
+      NotifyIdTargetObservers(movedNode, newScope);
+    }
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
   }
 
@@ -106,6 +136,7 @@ namespace krys::boo::dom
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
+    bool wasInTreeScope = removedNode.IsConnected() || removedNode.IsInShadowTree();
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
@@ -122,6 +153,12 @@ namespace krys::boo::dom
     if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
     {
       removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+    }
+
+    // Nodes in the shadow trees of the removed nodes stay in their trees.
+    if (wasInTreeScope && !Is<ShadowRoot>(TreeQueries::Root(removedNode)))
+    {
+      NotifyIdTargetObservers(removedNode, oldAncestor.TreeScope());
     }
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);

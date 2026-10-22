@@ -12,6 +12,7 @@
 #include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
+#include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
@@ -485,6 +486,92 @@ namespace krys::boo::dom
       return false;
     }
 
+#pragma region Form Controls
+
+    KRYS_NODISCARD virtual bool IsFormListedElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsValidatedFormListedElement() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#concept-fe-disabled
+    KRYS_NODISCARD virtual bool IsDisabledFormControl() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-valid
+    KRYS_NODISCARD virtual bool MatchesValidPseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-invalid
+    KRYS_NODISCARD virtual bool MatchesInvalidPseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-user-valid
+    KRYS_NODISCARD virtual bool MatchesUserValidPseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-user-invalid
+    KRYS_NODISCARD virtual bool MatchesUserInvalidPseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-read-write
+    KRYS_NODISCARD virtual bool MatchesReadWritePseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-indeterminate
+    KRYS_NODISCARD virtual bool MatchesIndeterminatePseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-default
+    KRYS_NODISCARD virtual bool MatchesDefaultPseudoClass() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-optional
+    KRYS_NODISCARD virtual bool IsOptionalFormControl() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-required
+    KRYS_NODISCARD virtual bool IsRequiredFormControl() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-in-range
+    KRYS_NODISCARD virtual bool IsInRange() const noexcept
+    {
+      return false;
+    }
+
+    /// @see https://html.spec.whatwg.org/#selector-out-of-range
+    KRYS_NODISCARD virtual bool IsOutOfRange() const noexcept
+    {
+      return false;
+    }
+
+#pragma endregion
+
     /// @brief Whether the element is relevant to the user, for `content-visibility: auto`.
     /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user
     KRYS_NODISCARD bool IsRelevantToUser() const noexcept
@@ -858,6 +945,13 @@ namespace krys::boo::dom
     /// @return Whether the event was neither cancelled nor handled.
     bool DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept;
 
+    /// @brief Dispatches a click at the element from the user agent, standing in for @p underlyingEvent.
+    /// @return False if the element is a disabled form control, or is already being clicked.
+    bool DispatchSimulatedClick(
+      Event *underlyingEvent,
+      SimulatedClickMouseEventOptions eventOptions = SimulatedClickMouseEventOptions::SendNoEvents,
+      SimulatedClickVisualOptions visualOptions = SimulatedClickVisualOptions::ShowPressedLook) noexcept;
+
 #pragma endregion
 
 #pragma region User Action State
@@ -905,10 +999,12 @@ namespace krys::boo::dom
       return IsUserActionElement() && IsUserActionElementHasFocusWithin();
     }
 
-    void SetActive(bool value,
-                   style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept;
-    void SetHovered(bool value, style::InvalidationScope invalidationScope = style::InvalidationScope::All,
-                    HitTestRequest request = {}) noexcept;
+    virtual void
+      SetActive(bool value,
+                style::InvalidationScope invalidationScope = style::InvalidationScope::All) noexcept;
+    virtual void SetHovered(bool value,
+                            style::InvalidationScope invalidationScope = style::InvalidationScope::All,
+                            HitTestRequest request = {}) noexcept;
     /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
     void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
     void SetHasFocusVisible(bool value) noexcept;

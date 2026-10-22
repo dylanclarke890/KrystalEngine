@@ -59,6 +59,18 @@ namespace krys::boo::dom
     std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();
   }
 
+  DocumentOrShadowRoot &Node::TreeScope() const noexcept
+  {
+    if (IsInShadowTree())
+    {
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(const_cast<Node &>(*this))))
+      {
+        return *shadowRoot;
+      }
+    }
+    return NodeDocument();
+  }
+
 #pragma region Node
 
   DOMString Node::BaseURI() const noexcept

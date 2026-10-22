@@ -78,7 +78,8 @@ namespace krys::boo::html
   {
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
-    if (localName == u8"href" && namespaceURI == dom::DOMStringAtom::Null() && IsConnected())
+    if ((localName == u8"href" || localName == u8"target") && namespaceURI == dom::DOMStringAtom::Null()
+        && IsConnected())
     {
       NodeDocument().ProcessBaseElement();
     }

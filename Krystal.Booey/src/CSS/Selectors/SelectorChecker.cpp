@@ -1359,21 +1359,19 @@ namespace krys::boo::css
             }
           }
           break;
-        case SelectorPseudoClass::Enabled:   return MatchesEnabledPseudoClass(element);
-        case SelectorPseudoClass::Default:   return MatchesDefaultPseudoClass(element);
-        case SelectorPseudoClass::Disabled:  return MatchesDisabledPseudoClass(element);
-        case SelectorPseudoClass::ReadOnly:  return MatchesReadOnlyPseudoClass(element);
-        case SelectorPseudoClass::ReadWrite: return MatchesReadWritePseudoClass(element);
-        case SelectorPseudoClass::Optional:  return IsOptionalFormControl(element);
-        case SelectorPseudoClass::Required:  return IsRequiredFormControl(element);
-        case SelectorPseudoClass::Valid:
-        case SelectorPseudoClass::Invalid:
-        case SelectorPseudoClass::InRange:
-        case SelectorPseudoClass::OutOfRange:
-        case SelectorPseudoClass::UserValid:
-        case SelectorPseudoClass::UserInvalid:
-          // FIXME: Constraint validation.
-          return false;
+        case SelectorPseudoClass::Enabled:       return MatchesEnabledPseudoClass(element);
+        case SelectorPseudoClass::Default:       return MatchesDefaultPseudoClass(element);
+        case SelectorPseudoClass::Disabled:      return MatchesDisabledPseudoClass(element);
+        case SelectorPseudoClass::ReadOnly:      return MatchesReadOnlyPseudoClass(element);
+        case SelectorPseudoClass::ReadWrite:     return MatchesReadWritePseudoClass(element);
+        case SelectorPseudoClass::Optional:      return IsOptionalFormControl(element);
+        case SelectorPseudoClass::Required:      return IsRequiredFormControl(element);
+        case SelectorPseudoClass::Valid:         return element.MatchesValidPseudoClass();
+        case SelectorPseudoClass::Invalid:       return element.MatchesInvalidPseudoClass();
+        case SelectorPseudoClass::InRange:       return element.IsInRange();
+        case SelectorPseudoClass::OutOfRange:    return element.IsOutOfRange();
+        case SelectorPseudoClass::UserValid:     return element.MatchesUserValidPseudoClass();
+        case SelectorPseudoClass::UserInvalid:   return element.MatchesUserInvalidPseudoClass();
         case SelectorPseudoClass::Checked:       return IsChecked(element);
         case SelectorPseudoClass::Indeterminate: return MatchesIndeterminatePseudoClass(element);
         case SelectorPseudoClass::Root:

@@ -803,6 +803,39 @@ namespace krys::ui::tests
     std::filesystem::remove_all(directory);
   }
 
+  TEST_CASE("View: hands form submissions to the host", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } button { display: block; width: 100px; height: 40px }"
+      u8"</style><form action=\"https://example.com/order\" method=post><input name=size value=large>"
+      u8"<input name=empty required><button id=go name=go value=1>Order</button></form>");
+    view.UpdateRendering();
+
+    List<FormSubmissionRequest> requests;
+    view.SetFormSubmissionHandler([&](const FormSubmissionRequest &request) { requests.push_back(request); });
+
+    // The required field is empty, so clicking the button doesn't submit.
+    auto go = view.Document().GetElementById(u8"go");
+    REQUIRE(go);
+    REQUIRE(view.HitTest({10, 30}) == go.get());
+    view.MousePressed({10, 30}, pal::MouseButton::Left);
+    view.MouseReleased({10, 30}, pal::MouseButton::Left);
+    CHECK(requests.empty());
+
+    auto empty = view.Document().QuerySelector(u8"[name=empty]");
+    REQUIRE_FALSE(empty.HasException());
+    REQUIRE(empty.Value());
+    empty.Value()->RemoveAttribute(u8"required");
+    view.MousePressed({10, 30}, pal::MouseButton::Left);
+    view.MouseReleased({10, 30}, pal::MouseButton::Left);
+    REQUIRE(requests.size() == 1);
+    CHECK(requests[0].Method == u8"POST");
+    CHECK(requests[0].URL == u8"https://example.com/order");
+    CHECK(requests[0].ContentType == u8"application/x-www-form-urlencoded");
+    CHECK(requests[0].Body == u8"size=large&empty=&go=1");
+  }
+
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")
   {
     CHECK(FileLoaderStrategy::MimeTypeForExtension(u8".PNG") == u8"image/png");

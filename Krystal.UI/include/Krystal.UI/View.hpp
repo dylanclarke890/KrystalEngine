@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
+#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -27,6 +28,21 @@
 
 namespace krys::ui
 {
+  /// @brief A form submission the page asks the host to navigate to, as the host's handler receives it.
+  struct FormSubmissionRequest
+  {
+    /// @brief `GET`, `POST` or `DIALOG`.
+    utf8_string Method;
+    /// @brief The URL to navigate to: the action, with the form data as its query for a `GET`.
+    utf8_string URL;
+    /// @brief The browsing context to navigate (`_self` and the others, or a name).
+    utf8_string Target;
+    /// @brief The `Content-Type` of a `POST`'s body, with its boundary for `multipart/form-data`.
+    utf8_string ContentType;
+    /// @brief The body of a `POST`; empty otherwise.
+    utf8_string Body;
+  };
+
   /// @brief Shows a Booey page: parses its document into the page's main frame, with a view of the viewport's
   /// size; runs Booey's event loop with the host's time and the page's rendering update once a frame;
   /// composites its layer tree into a `Renderer2D`; and turns the platform layer's mouse and keyboard input
@@ -169,6 +185,10 @@ namespace krys::ui
     /// @brief The window showing the page gained (true) or lost (false) system focus: `:focus` matches only
     /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.
     void SetFocused(bool focused) noexcept;
+
+    /// @brief Hands the page's form submissions to @p handler; the page doesn't navigate itself, so a host
+    /// without a handler ignores them.
+    void SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept;
 
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept
     {

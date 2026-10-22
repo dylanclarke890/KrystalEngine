@@ -12,6 +12,35 @@
 
 namespace krys::boo::dom
 {
+  namespace
+  {
+    void CallDefaultEventHandlersInBubblingOrder(Event &event, Span<const Ref<Node>> path) noexcept
+    {
+      if (path.empty())
+      {
+        return;
+      }
+
+      // Non-bubbling events call only one default event handler, the one for the target.
+      path[0]->DefaultEventHandler(event);
+      krys_debug_assert(!event.DefaultPrevented());
+      if (event.DefaultHandled() || !event.Bubbles())
+      {
+        return;
+      }
+
+      for (size_t i = 1; i < path.size(); ++i)
+      {
+        path[i]->DefaultEventHandler(event);
+        krys_debug_assert(!event.DefaultPrevented());
+        if (event.DefaultHandled())
+        {
+          return;
+        }
+      }
+    }
+  }
+
   bool EventDispatcher::DispatchToTarget(Event &event, EventTarget *target, bool legacyTargetOverrideFlag,
                                          bool *legacyOutputDidListenersThrowFlag) noexcept
   {
@@ -19,6 +48,7 @@ namespace krys::boo::dom
     // on, would be a pain to do with a reference.
     krys_debug_assert(target);
     event._dispatched = true;
+    auto *originalTarget = target;
 
     auto *targetOverride = target;
     if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
@@ -195,6 +225,19 @@ namespace krys::boo::dom
       }
     }
 
+    // The nodes on the path, for their default event handlers.
+    List<Ref<Node>> defaultEventHandlerPath;
+    if (Is<Node>(originalTarget))
+    {
+      for (auto &structItem : event._path)
+      {
+        if (auto *node = DynamicDowncast<Node>(structItem.InvocationTarget()))
+        {
+          defaultEventHandlerPath.push_back(ShareRef(*node));
+        }
+      }
+    }
+
     event._eventPhase = EventPhaseType::NONE;
     event._currentTarget = nullptr;
     event._path.clear();
@@ -219,6 +262,14 @@ namespace krys::boo::dom
       {
         activationTarget->LegacyCanceledActivationBehavior(event);
       }
+    }
+
+    if (!event._canceled && !event._defaultHandled)
+    {
+      auto finalTarget = event._target;
+      event._target = ShareRefPtr(originalTarget);
+      CallDefaultEventHandlersInBubblingOrder(event, defaultEventHandlerPath);
+      event._target = krys::move(finalTarget);
     }
 
     return !event._canceled;

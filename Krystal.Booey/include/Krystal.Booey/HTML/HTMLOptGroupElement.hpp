@@ -12,6 +12,11 @@ namespace krys::boo::html
   public:
     HTMLOptGroupElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsDisabledFormControl() const noexcept final
+    {
+      return HasAttribute(u8"disabled");
+    }
+
 #pragma region HTMLOptGroupElement - https://html.spec.whatwg.org/#htmloptgroupelement
 
     /// @see https://html.spec.whatwg.org/#dom-optgroup-disabled
