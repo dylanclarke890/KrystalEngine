@@ -82,6 +82,14 @@ namespace krys::boo::dom
     ContainerNode(Document &document, dom::NodeType type, NodeFlags flags) noexcept;
 
   public:
+    ~ContainerNode() noexcept override;
+
+  protected:
+    /// @brief Unlinks the children, without the removal steps (the container is going), and drops the tree
+    /// references they hold.
+    void RemoveDetachedChildren() noexcept;
+
+  public:
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild

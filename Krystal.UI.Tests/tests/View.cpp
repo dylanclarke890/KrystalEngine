@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
 #include <filesystem>
@@ -108,6 +109,78 @@ namespace krys::ui::tests
       CHECK_FALSE(view.Document().GetElementById(u8"full"));
       CHECK(WidthOf(view, u8"other") == 120);
     }
+  }
+
+  TEST_CASE("View: frees a page's document when it loads another, or goes", "[UI]")
+  {
+    // A page with style, layout, composited layers, a running animation, a transition and a hovered element:
+    // all of it goes with the document.
+    const utf8_string page =
+      u8"<!DOCTYPE html><style>body { margin: 0 } #box { width: 40px; height: 40px; background: teal;"
+      u8" transition: background 1s } #box:hover { background: red }"
+      u8"#blurred { width: 40px; height: 20px; filter: blur(2px); background: navy;"
+      u8" animation: spin 1s infinite } @keyframes spin { to { transform: rotate(90deg) } }</style>"
+      u8"<div id=box></div><div id=blurred></div><p>Some <b>text</b></p>";
+    auto time = boo::html::EventLoop::Current().Now();
+    auto run = [&](View &view)
+    {
+      for (int32 i = 0; i < 3; ++i)
+      {
+        time += 16ms;
+        (void)view.Update(time);
+      }
+    };
+
+    const auto animationsBefore = boo::WebAnimation::Instances().size();
+    View view({200, 100});
+    view.LoadHTML(utf8_string(page));
+    run(view);
+    view.MouseMoved({10, 10});
+    run(view);
+    auto first = CreateWeakPtr<boo::dom::Document>(&view.Document());
+    auto box = CreateWeakPtr<boo::dom::Node>(view.Document().GetElementById(u8"box").get());
+    REQUIRE(first);
+
+    view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
+    run(view);
+    CHECK_FALSE(first);
+    CHECK_FALSE(box);
+    // Its animations and transitions went with it.
+    CHECK(boo::WebAnimation::Instances().size() == animationsBefore);
+
+    // A page loaded from files: its style sheets, fonts and images go too.
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    for (int32 i = 0; i < 10; ++i)
+    {
+      run(view);
+    }
+    auto editor = CreateWeakPtr<boo::dom::Document>(&view.Document());
+    view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
+    run(view);
+    CHECK_FALSE(editor);
+
+    // Loading it again reuses the cached resources the freed document's elements were clients of.
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    for (int32 i = 0; i < 20; ++i)
+    {
+      time += 50ms;
+      (void)view.Update(time);
+    }
+    CHECK(view.Document().GetElementById(u8"nonexistent") == nullptr);
+
+    WeakPtr<boo::dom::Document> second;
+    {
+      View other({200, 100});
+      other.LoadHTML(utf8_string(page));
+      run(other);
+      second = CreateWeakPtr<boo::dom::Document>(&other.Document());
+      REQUIRE(second);
+    }
+    CHECK_FALSE(second);
   }
 
   TEST_CASE("View: loads files", "[UI]")

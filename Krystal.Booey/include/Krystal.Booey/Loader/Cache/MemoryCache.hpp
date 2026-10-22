@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -23,6 +24,7 @@ namespace krys::boo
   // FIXME: Sessions, cache partitions, origins and revalidation, once there are network loads.
   class MemoryCache final
   {
+    friend class NeverDestroyed<MemoryCache>;
     KRYS_NON_COPY_MOVABLE(MemoryCache);
 
   private:

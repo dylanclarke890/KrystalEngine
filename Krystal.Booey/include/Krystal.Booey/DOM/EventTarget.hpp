@@ -35,12 +35,23 @@ namespace krys::boo::dom
   public:
     virtual ~EventTarget() noexcept = default;
 
+    /// @brief Drops a reference; the last one calls `RemovedLastRef`.
+    void SubRef() const noexcept
+    {
+      if (SubRefBase())
+      {
+        const_cast<EventTarget *>(this)->RemovedLastRef();
+      }
+    }
+
 #pragma region EventTarget - https://dom.spec.whatwg.org/#eventtarget
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-eventtarget
     EventTarget() noexcept = default;
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener
+    /// @note The target holds its listeners' callbacks: a callback that holds a reference to the target (or
+    /// to a node of its document) keeps both alive, as there's no garbage collector to find the cycle.
     void AddEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
                           const AddEventListenerOptionsOrBool &options) noexcept;
 
@@ -52,6 +63,13 @@ namespace krys::boo::dom
     ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
 
   protected:
+    /// @brief The last reference was dropped: deletes the target, unless something else keeps it (a document
+    /// that nodes still refer to).
+    virtual void RemovedLastRef() noexcept
+    {
+      delete this;
+    }
+
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD virtual EventTarget *GetParent(Event &event) const noexcept
     {

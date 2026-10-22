@@ -182,7 +182,7 @@ namespace krys::boo::dom
     }
 
     attribute._ownerElement = CreateWeakPtr(&element);
-    attribute._nodeDocument = ShareRefPtr(&element.NodeDocument());
+    attribute.SetNodeDocument(element.NodeDocument());
 
     HandleAttributeChanges(attribute, element, null, attribute._value);
   }
@@ -223,7 +223,7 @@ namespace krys::boo::dom
     }
 
     newAttribute._ownerElement = CreateWeakPtr(element.get());
-    newAttribute._nodeDocument = ShareRefPtr(&element->NodeDocument());
+    newAttribute.SetNodeDocument(element->NodeDocument());
     oldAttribute._ownerElement.reset();
 
     HandleAttributeChanges(oldAttribute, *element, oldAttribute._value, newAttribute._value);

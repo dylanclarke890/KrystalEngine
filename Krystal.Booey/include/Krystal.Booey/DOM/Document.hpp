@@ -224,12 +224,23 @@ namespace krys::boo::dom
     boo::Color _linkColor;
     boo::Color _visitedLinkColor;
     boo::Color _activeLinkColor;
+    /// @brief The nodes that refer to this document (all of them but the document itself): it lives while any
+    /// do, even with no references left.
+    uint32 _referencingNodeCount {0};
 
   protected:
     Document(DocumentFlags flags) noexcept;
 
   public:
     ~Document() noexcept override;
+
+    void IncrementReferencingNodeCount() noexcept
+    {
+      ++_referencingNodeCount;
+    }
+    /// @brief A node stopped referring to the document: the last one, once the document has no references,
+    /// deletes it.
+    void DecrementReferencingNodeCount() noexcept;
 
 #pragma region Document (DOM) - https://dom.spec.whatwg.org/#interface-document
 
@@ -1051,6 +1062,10 @@ namespace krys::boo::dom
 #pragma endregion
 
   protected:
+    /// @brief With nodes still referring to it, the document stops retaining its nodes (the elements it
+    /// tracks, its children) and waits for them to go; without, it's deleted.
+    void RemovedLastRef() noexcept override;
+
     void SetQuirksMode(QuirksMode mode) noexcept;
 
     void UpdateRenderTree(UniquePtr<style::Update> styleUpdate) noexcept;

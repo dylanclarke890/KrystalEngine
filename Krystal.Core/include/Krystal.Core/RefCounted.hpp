@@ -27,6 +27,11 @@ namespace krys
       _deletionHasBegun.store(true, std::memory_order_relaxed);
     }
 
+    void UnmarkDeletionHasBegun() const noexcept
+    {
+      _deletionHasBegun.store(false, std::memory_order_relaxed);
+    }
+
     KRYS_NODISCARD bool DeletionHasBegun() const noexcept
     {
       return _deletionHasBegun.load(std::memory_order_relaxed);
@@ -116,6 +121,23 @@ namespace krys::detail
 
       _refCount = tempCount;
       return false;
+    }
+
+    /// @brief For an object that stays alive after its last reference was dropped, kept by something other
+    /// than references (a document by the nodes that refer to it): its count resumes from zero, and it may
+    /// gain references again.
+    void ResumeFromNoRefs() const noexcept
+    {
+      _debugger.UnmarkDeletionHasBegun();
+      _refCount = 0;
+    }
+
+    /// @brief Before deleting an object kept with no references: restores the count its destruction expects.
+    void PrepareToDeleteWithNoRefs() const noexcept
+    {
+      krys_debug_assert(_refCount == 0);
+      _refCount = 1;
+      _debugger.MarkDeletionHasBegun();
     }
   };
 

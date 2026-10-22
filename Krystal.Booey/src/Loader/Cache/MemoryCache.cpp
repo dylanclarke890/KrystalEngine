@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
 
@@ -24,7 +25,7 @@ namespace krys::boo
 
   MemoryCache &MemoryCache::Singleton() noexcept
   {
-    static MemoryCache memoryCache;
+    static NeverDestroyed<MemoryCache> memoryCache;
     return memoryCache;
   }
 

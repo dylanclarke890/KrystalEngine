@@ -130,6 +130,56 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::DecrementReferencingNodeCount() noexcept
+  {
+    krys_debug_assert(_referencingNodeCount > 0);
+    --_referencingNodeCount;
+    if (!_referencingNodeCount && !GetRefCount())
+    {
+      PrepareToDeleteWithNoRefs();
+      delete this;
+    }
+  }
+
+  void Document::RemovedLastRef() noexcept
+  {
+    if (!_referencingNodeCount)
+    {
+      delete this;
+      return;
+    }
+
+    // The nodes keep the document from here; its count resumes from zero.
+    ResumeFromNoRefs();
+
+    // If removing a child removes the last node reference, we don't want the document to be destroyed until
+    // RemoveDetachedChildren returns, so we protect ourselves.
+    IncrementReferencingNodeCount();
+
+    krys_assert_msg(!HasLivingRenderTree(), "a document's render tree goes before its last reference");
+
+    // We must make sure not to be retaining any of our children through these extra pointers or we will
+    // create a reference cycle.
+    _focusedElement = nullptr;
+    _hoveredElement = nullptr;
+    _activeElement = nullptr;
+    _sequentialFocusNavigationStartingPoint = nullptr;
+    _pendingScrollEventTargets.clear();
+    _userActionElements->Clear();
+    _pendingRenderTreeUpdate = nullptr;
+    if (_fontLoader)
+    {
+      _fontLoader->StopLoadingAndClearFonts();
+    }
+    // FIXME: The title element, the parser, the selection, top layer, form controller, markers and CSS canvas
+    // elements, once there are any.
+
+    RemoveDetachedChildren();
+
+    // Last, since it may delete the document.
+    DecrementReferencingNodeCount();
+  }
+
   DOMImplementation &Document::Implementation() noexcept
   {
     if (_implementation == nullptr)

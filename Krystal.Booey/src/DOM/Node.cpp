@@ -24,10 +24,35 @@
 namespace krys::boo::dom
 {
   Node::Node(Document &document, dom::NodeType type, NodeFlags flags) noexcept
-      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(ShareRefPtr(&document)),
+      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
+    if (type != NodeType::DOCUMENT_NODE)
+    {
+      document.IncrementReferencingNodeCount();
+    }
+  }
+
+  Node::~Node() noexcept
+  {
+    // Last, since it may delete the document.
+    if (!IsDocumentNode())
+    {
+      _nodeDocument->DecrementReferencingNodeCount();
+    }
+  }
+
+  void Node::SetNodeDocument(Document &document) noexcept
+  {
+    krys_debug_assert(!IsDocumentNode());
+    if (_nodeDocument == &document)
+    {
+      return;
+    }
+    // The new document is counted first: dropping the old one's count may delete it.
+    document.IncrementReferencingNodeCount();
+    std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();
   }
 
 #pragma region Node

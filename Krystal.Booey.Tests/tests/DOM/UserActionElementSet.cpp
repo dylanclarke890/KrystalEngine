@@ -136,6 +136,8 @@ namespace krys::boo::dom::tests
     {
       document.UpdateHoverActiveState(Press, &i);
       REQUIRE(i.Hovered());
+      // Removing it drops its parent's reference: the test keeps its own.
+      auto protectedI = ShareRef(i);
       REQUIRE_FALSE(b.RemoveChild(i).HasException());
       CHECK(document.HoveredElement() == &b);
       CHECK_FALSE(i.IsUserActionElement());

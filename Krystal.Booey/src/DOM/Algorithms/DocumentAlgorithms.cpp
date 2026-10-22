@@ -85,12 +85,14 @@ namespace krys::boo::dom
 
     if (&document != &oldDocument)
     {
+      // The old document may have only the moving nodes to keep it.
+      auto protectedOldDocument = ShareRef(oldDocument);
       auto documentEffectiveGlobalRegistry =
         ShareRefPtr(html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document));
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
-        inclusiveDescendant._nodeDocument = ShareRefPtr(&document);
+        inclusiveDescendant.SetNodeDocument(document);
         if (Is<ShadowRoot>(inclusiveDescendant))
         {
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
@@ -109,7 +111,7 @@ namespace krys::boo::dom
           auto &elementInclusiveDescendant = Downcast<Element>(inclusiveDescendant);
           for (auto &attr : elementInclusiveDescendant._attributes)
           {
-            attr->_nodeDocument = ShareRefPtr(&document);
+            attr->SetNodeDocument(document);
           }
 
           auto registry = elementInclusiveDescendant.CustomElementRegistry();

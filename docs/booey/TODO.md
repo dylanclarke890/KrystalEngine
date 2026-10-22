@@ -35,7 +35,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **`NodeFilter`** — works but is clunky to use from C++ (`DOM/NodeIterator.hpp`, `DOM/TreeWalker.hpp`). https://dom.spec.whatwg.org/#interface-nodefilter
 - **Slot assignment on insertion** — inserted and moved nodes aren't assigned a slot by the insertion steps' own rules (`TODO(impl): SLOTTABLES` in `src/DOM/Algorithms/MutationAlgorithms.cpp`); `slotchange` is signalled (G6c). https://dom.spec.whatwg.org/#concept-node-insert
 - **Document encoding** — not set on creation or passed to clones; `characterSet` is always UTF-8 (`src/DOM/Document.cpp`, `src/DOM/Algorithms/NodeAlgorithms.cpp`). https://dom.spec.whatwg.org/#concept-document-encoding
-- **Memory** — documents are never freed (nodes hold their document; containers don't release children). (`PORTING.md`, *Open*)
+- **Memory** — documents are freed when their last reference and node go (M1, `PORTING.md`, *Freeing documents*); event listener callbacks that hold their own target keep it alive (no garbage collector).
 - **ID lookups** — `getElementById` and the selector ID fast paths walk the tree (no ID map per tree scope) (`DOM/Mixins/NonElementParentNode.hpp`, `src/DOM/SelectorQuery.cpp`).
 - **Live collections** — `LiveNodeList`/`LiveHTMLCollection` re-walk the tree on every access (no caching) (`DOM/Internals/`).
 - **Public tree accessors** — `FirstChild()`, `ParentNode()` and friends return raw pointers; the public API should return `RefPtr`. https://dom.spec.whatwg.org/#interface-node

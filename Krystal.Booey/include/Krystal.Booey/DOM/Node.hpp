@@ -38,6 +38,7 @@ namespace krys::boo::dom
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
+    friend class ContainerNode;
     friend class Document;
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
@@ -52,7 +53,9 @@ namespace krys::boo::dom
     NodeType _nodeType : BitCount<NodeType>() {NodeType::NONE};
     style::Validity _styleValidity : BitCount<style::Validity>() {style::Validity::Valid};
     NodeStyleFlags _styleFlags : BitCount<NodeStyleFlags>() {NodeStyleFlags::None};
-    RefPtr<Document> _nodeDocument;
+    /// @brief Not owned: the document counts the nodes that refer to it (`IncrementReferencingNodeCount`)
+    /// and lives while any do. A document's is itself, which it doesn't count.
+    Document *_nodeDocument;
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
@@ -62,8 +65,11 @@ namespace krys::boo::dom
   protected:
     Node(Document &document, NodeType type, NodeFlags flags) noexcept;
 
+    /// @brief Moves the node to @p document, which then counts it rather than its old document.
+    void SetNodeDocument(Document &document) noexcept;
+
   public:
-    virtual ~Node() noexcept = default;
+    virtual ~Node() noexcept;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
