@@ -10,9 +10,7 @@ namespace krys::boo
   struct PaintInfo;
 
   /// @brief Paints a line's ellipsis (`text-overflow: ellipsis`, `line-clamp`) in the line's text colour and
-  /// first text shadow.
-  /// FIXME: The selection's background and colour (paintSelection, ellipsisSelectionState) come with
-  /// selection.
+  /// first text shadow, over the selection's background when it's selected.
   class EllipsisBoxPainter
   {
     KRYS_NON_COPY_MOVABLE(EllipsisBoxPainter);
@@ -21,11 +19,17 @@ namespace krys::boo
     const inline_iterator::LineBox &_lineBox;
     PaintInfo &_paintInfo;
     LayoutPoint _paintOffset;
+    Color _selectionForegroundColor;
+    Color _selectionBackgroundColor;
 
   public:
     EllipsisBoxPainter(const inline_iterator::LineBox &lineBox, PaintInfo &paintInfo,
-                       const LayoutPoint &paintOffset) noexcept;
+                       const LayoutPoint &paintOffset, Color selectionForegroundColor,
+                       Color selectionBackgroundColor) noexcept;
 
     void Paint() noexcept;
+
+  private:
+    void PaintSelection() noexcept;
   };
 }

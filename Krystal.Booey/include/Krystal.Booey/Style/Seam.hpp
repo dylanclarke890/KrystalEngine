@@ -47,7 +47,7 @@
 // evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
 // the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
 // header, with its real implementation, when its slice is ported:
-//   - `RenderTheme` (focus ring metrics): rendering.
+//   - `RenderTheme` (focus ring metrics, selection colours): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security function: `dom::Document` (upstream member) once it has a security origin.
@@ -94,6 +94,14 @@ namespace krys::boo
     {
       return std::max<float>(outlineWidth - PlatformFocusRingWidth(), 0);
     }
+
+    // Text selection colors.
+    KRYS_NODISCARD static Color ActiveSelectionBackgroundColor(style::ColorOptions options) noexcept;
+    KRYS_NODISCARD static Color InactiveSelectionBackgroundColor(style::ColorOptions options) noexcept;
+    KRYS_NODISCARD static Color TransformSelectionBackgroundColor(const Color &color,
+                                                                  style::ColorOptions options) noexcept;
+    KRYS_NODISCARD static Color ActiveSelectionForegroundColor(style::ColorOptions options) noexcept;
+    KRYS_NODISCARD static Color InactiveSelectionForegroundColor(style::ColorOptions options) noexcept;
 
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.

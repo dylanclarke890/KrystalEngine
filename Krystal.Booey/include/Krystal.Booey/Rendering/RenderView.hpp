@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderSelection.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -31,7 +32,7 @@ namespace krys::boo
   using RenderCounterSet = HashMap<const RenderCounter *, WeakPtr<RenderCounter>>;
 
   /// @brief The root of a document's render tree, shown in the document's view.
-  // FIXME: Selection and printing come with selection and printing.
+  // FIXME: Printing, once there's printing.
   class RenderView final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderView);
@@ -51,6 +52,7 @@ namespace krys::boo
     HashMap<RenderElement *, List<CachedImage *>> _renderersWithPausedImageAnimation;
     mutable UniquePtr<Region> _accumulatedRepaintRegion;
     UniquePtr<RenderLayerCompositor> _compositor;
+    RenderSelection _selection;
 
   public:
     RenderView(dom::Document &document, RenderStyle &&style) noexcept;
@@ -73,6 +75,15 @@ namespace krys::boo
     KRYS_NODISCARD LocalFrameView &FrameView() const noexcept
     {
       return _frameView;
+    }
+
+    KRYS_NODISCARD RenderSelection &Selection() noexcept
+    {
+      return _selection;
+    }
+    KRYS_NODISCARD const RenderSelection &Selection() const noexcept
+    {
+      return _selection;
     }
 
     KRYS_NODISCARD RenderLayerCompositor &Compositor() noexcept;

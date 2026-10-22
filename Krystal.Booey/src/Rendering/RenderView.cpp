@@ -32,7 +32,8 @@ namespace krys::boo
           layout_integration::LayoutWithFormattingContextForBox,
           layout_integration::FormattingContextRootLogicalWidthForType,
           layout_integration::FormattingContextRootLogicalHeightForType,
-          layout_integration::LayoutWithFormattingContextForBlockInInline))
+          layout_integration::LayoutWithFormattingContextForBlockInInline)),
+        _selection(*this)
   {
     // FIXME: We should find a way to enforce this at compile time.
     krys_debug_assert(document.View());

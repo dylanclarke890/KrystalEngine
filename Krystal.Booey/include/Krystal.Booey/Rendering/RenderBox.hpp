@@ -740,6 +740,19 @@ namespace krys::boo
     KRYS_NODISCARD bool HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept;
     KRYS_NODISCARD bool CanBeProgramaticallyScrolled() const noexcept;
     KRYS_NODISCARD bool CanBeScrolledAndHasScrollableArea() const noexcept;
+
+    /// @brief Scrolls the box to bring @p positionInWindow into view, while a mouse drag selects past its
+    /// edge.
+    virtual void Autoscroll(const IntPoint &positionInWindow) noexcept;
+    KRYS_NODISCARD bool CanAutoscroll() const noexcept;
+    /// @brief How far @p windowPoint is within the band along the box's edges that autoscrolls, as an offset
+    /// out of the box.
+    KRYS_NODISCARD IntSize CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept;
+    /// @brief @p renderer or its nearest ancestor that can autoscroll.
+    KRYS_NODISCARD static RenderBox *FindAutoscrollable(RenderObject *renderer) noexcept;
+    virtual void StopAutoscroll() noexcept
+    {
+    }
     /// @brief Scrolls the box, or else its nearest containing block that scrolls, by @p stepCount steps of
     /// @p granularity in @p direction; the render view's isn't one.
     /// @param stopElement If given and set, the scroll goes no further than that element; it's set to the

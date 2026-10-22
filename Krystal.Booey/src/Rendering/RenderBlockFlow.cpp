@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
@@ -11,11 +12,13 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
+#include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
+#include "Krystal.Booey/Rendering/LogicalSelectionOffsetCachesInlines.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -4867,4 +4870,316 @@ namespace krys::boo
     return InlineLayout()
            && InlineLayout()->HitTest(request, result, locationInContainer, accumulatedOffset, hitTestAction);
   }
+
+#pragma region Selection
+
+  void RenderBlockFlow::ClipOutFloatingBoxes(RenderBlock &rootBlock, const PaintInfo *paintInfo,
+                                             const LayoutPoint &rootBlockPhysicalPosition,
+                                             const LayoutSize &offsetFromRootBlock) noexcept
+  {
+    if (!_floatingObjects)
+    {
+      return;
+    }
+
+    for (const auto &floatingObject : _floatingObjects->Set())
+    {
+      if (!floatingObject->Renderer())
+      {
+        continue;
+      }
+      LayoutRect floatBox(offsetFromRootBlock.Width(), offsetFromRootBlock.Height(),
+                          floatingObject->Renderer()->Width(), floatingObject->Renderer()->Height());
+      floatBox.Move(floatingObject->LocationOffsetOfBorderBox());
+      rootBlock.FlipForWritingMode(floatBox);
+      floatBox.Move(rootBlockPhysicalPosition.X(), rootBlockPhysicalPosition.Y());
+      paintInfo->Context().ClipOut(FloatRect(SnappedIntRect(floatBox)));
+    }
+  }
+
+  LayoutUnit RenderBlockFlow::AdjustEnclosingTopForPrecedingBlock(LayoutUnit top) const noexcept
+  {
+    if (SelectionState() != HighlightState::Inside && SelectionState() != HighlightState::End)
+    {
+      return top;
+    }
+
+    if (IsSelectionRoot())
+    {
+      return top;
+    }
+
+    LayoutSize offsetToBlockBefore;
+
+    auto blockBeforeWithinSelectionRoot = [&]() -> const RenderBlockFlow *
+    {
+      const RenderElement *object = this;
+      const RenderObject *sibling = nullptr;
+      do
+      {
+        sibling = object->PreviousInFlowSibling();
+        while (sibling)
+        {
+          auto *siblingBlock = DynamicDowncast<RenderBlock>(*sibling);
+          if (siblingBlock && !siblingBlock->IsSelectionRoot())
+          {
+            break;
+          }
+          sibling = sibling->PreviousInFlowSibling();
+        }
+
+        const auto &objectBlock = Downcast<RenderBlock>(*object);
+        offsetToBlockBefore -= LayoutSize(objectBlock.LogicalLeft(), objectBlock.LogicalTop());
+        object = object->Parent();
+      } while (!sibling && Is<RenderBlock>(object) && !Downcast<RenderBlock>(*object).IsSelectionRoot());
+
+      if (!sibling)
+      {
+        return nullptr;
+      }
+
+      const auto *beforeBlock = Downcast<RenderBlock>(sibling);
+
+      offsetToBlockBefore += LayoutSize(beforeBlock->LogicalLeft(), beforeBlock->LogicalTop());
+
+      auto *child = beforeBlock->LastChild();
+      while (auto *childBlock = DynamicDowncast<RenderBlock>(child))
+      {
+        beforeBlock = childBlock;
+        offsetToBlockBefore += LayoutSize(beforeBlock->LogicalLeft(), beforeBlock->LogicalTop());
+        child = beforeBlock->LastChild();
+      }
+      return DynamicDowncast<RenderBlockFlow>(beforeBlock);
+    };
+
+    const auto *blockBefore = blockBeforeWithinSelectionRoot();
+    if (!blockBefore)
+    {
+      return top;
+    }
+
+    // Do not adjust blocks sharing the same line.
+    if (!offsetToBlockBefore.Height())
+    {
+      return top;
+    }
+
+    if (auto lastLineBox = inline_iterator::LastLineBoxFor(*blockBefore))
+    {
+      auto lastLineSelectionState = LineSelection::SelectionState(*lastLineBox);
+      if (lastLineSelectionState != HighlightState::Inside && lastLineSelectionState != HighlightState::Start)
+      {
+        return top;
+      }
+
+      auto lastLineSelectionBottom =
+        LineSelection::LogicalBottom(*lastLineBox) + static_cast<float>(offsetToBlockBefore.Height());
+      top = std::max(top, LayoutUnit {lastLineSelectionBottom});
+    }
+    return top;
+  }
+
+  // FIXME: SVG text layout (svgTextLayout), once there's SVG text.
+  GapRects RenderBlockFlow::InlineSelectionGaps(RenderBlock &rootBlock,
+                                                const LayoutPoint &rootBlockPhysicalPosition,
+                                                const LayoutSize &offsetFromRootBlock,
+                                                LayoutUnit &lastLogicalTop, LayoutUnit &lastLogicalLeft,
+                                                LayoutUnit &lastLogicalRight,
+                                                const LogicalSelectionOffsetCaches &cache,
+                                                const PaintInfo *paintInfo) noexcept
+  {
+    krys_debug_assert(!IsSkippedContent());
+
+    auto updateLastLogicalValues = [&](auto logicalTop, auto logicalLeft, auto logicalRight)
+    {
+      lastLogicalTop = logicalTop;
+      lastLogicalLeft = logicalLeft;
+      lastLogicalRight = logicalRight;
+    };
+
+    bool containsStart =
+      SelectionState() == HighlightState::Start || SelectionState() == HighlightState::Both;
+    if (IsSkippedContentRoot(*this))
+    {
+      if (containsStart)
+      {
+        updateLastLogicalValues(BlockDirectionOffset(rootBlock, offsetFromRootBlock) + LogicalHeight(),
+                                LogicalLeftOffsetForContent(), LogicalRightOffsetForContent());
+      }
+      return {};
+    }
+
+    if (!HasContentfulInlineLine())
+    {
+      // Update our lastLogicalTop to be the bottom of the block. <hr>s or empty blocks with height can trip
+      // this case.
+      if (containsStart)
+      {
+        updateLastLogicalValues(BlockDirectionOffset(rootBlock, offsetFromRootBlock) + LogicalHeight(),
+                                LogicalLeftSelectionOffset(rootBlock, LogicalHeight(), cache),
+                                LogicalRightSelectionOffset(rootBlock, LogicalHeight(), cache));
+      }
+      return {};
+    }
+
+    auto hasSelectedChildren = [&](const inline_iterator::LineBoxIterator &lineBox)
+    {
+      return LineSelection::SelectionState(*lineBox) != HighlightState::None;
+    };
+
+    auto lineSelectionGap = [&](const inline_iterator::LineBoxIterator &lineBox, LayoutUnit selTop,
+                                LayoutUnit selHeight) -> GapRects
+    {
+      auto lineState = LineSelection::SelectionState(*lineBox);
+
+      bool leftGap;
+      bool rightGap;
+      GetSelectionGapInfo(lineState, leftGap, rightGap);
+
+      GapRects result;
+
+      auto firstSelectedBox = [&]() -> inline_iterator::LeafBoxIterator
+      {
+        for (auto box = lineBox->LineLeftmostLeafBox(); box; box.TraverseLineRightwardOnLine())
+        {
+          if (box->SelectionState() != HighlightState::None)
+          {
+            return box;
+          }
+        }
+        return {};
+      }();
+
+      auto lastSelectedBox = [&]() -> inline_iterator::LeafBoxIterator
+      {
+        for (auto box = lineBox->LineRightmostLeafBox(); box; box.TraverseLineLeftwardOnLine())
+        {
+          if (box->SelectionState() != HighlightState::None)
+          {
+            return box;
+          }
+        }
+        return {};
+      }();
+
+      if (leftGap)
+      {
+        result.UniteLeft(LogicalLeftSelectionGap(
+          rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, firstSelectedBox->Renderer().Parent(),
+          LayoutUnit(firstSelectedBox->LogicalLeftIgnoringInlineDirection()), selTop, selHeight, cache,
+          paintInfo));
+      }
+      if (rightGap)
+      {
+        result.UniteRight(LogicalRightSelectionGap(
+          rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastSelectedBox->Renderer().Parent(),
+          LayoutUnit(lastSelectedBox->LogicalRightIgnoringInlineDirection()), selTop, selHeight, cache,
+          paintInfo));
+      }
+
+      // When dealing with bidi text, a non-contiguous selection region is possible.
+      // e.g. The logical text aaaAAAbbb (capitals denote RTL text and non-capitals LTR) is layed out
+      // visually as 3 text runs |aaa|bbb|AAA| if we select 4 characters from the start of the text the
+      // selection will look like (underline denotes selection):
+      // |aaa|bbb|AAA|
+      //  ___       _
+      // We can see that the |bbb| run is not part of the selection while the runs around it are.
+      if (firstSelectedBox && firstSelectedBox != lastSelectedBox)
+      {
+        // Now fill in any gaps on the line that occurred between two selected elements.
+        LayoutUnit lastLogicalLeft {firstSelectedBox->LogicalRightIgnoringInlineDirection()};
+        bool isPreviousBoxSelected = firstSelectedBox->SelectionState() != HighlightState::None;
+        for (auto box = firstSelectedBox; box; box.TraverseLineRightwardOnLine())
+        {
+          if (box->SelectionState() != HighlightState::None)
+          {
+            LayoutRect logicalRect {
+              lastLogicalLeft, selTop,
+              LayoutUnit(box->LogicalLeftIgnoringInlineDirection() - lastLogicalLeft.ToFloat()), selHeight};
+            logicalRect.Move(IsHorizontalWritingMode()
+                               ? offsetFromRootBlock
+                               : LayoutSize(offsetFromRootBlock.Height(), offsetFromRootBlock.Width()));
+            LayoutRect gapRect = rootBlock.LogicalRectToPhysicalRect(rootBlockPhysicalPosition, logicalRect);
+            if (isPreviousBoxSelected && gapRect.Width() > 0 && gapRect.Height() > 0)
+            {
+              if (paintInfo && box->Renderer().Parent()->Style().UsedVisibility() == Visibility::Visible)
+              {
+                paintInfo->Context().FillRect(FloatRect(gapRect),
+                                              box->Renderer().Parent()->SelectionBackgroundColor());
+              }
+              // VisibleSelection may be non-contiguous, see comment above.
+              result.UniteCenter(gapRect);
+            }
+            lastLogicalLeft = LayoutUnit {box->LogicalRightIgnoringInlineDirection()};
+          }
+          if (box == lastSelectedBox)
+          {
+            break;
+          }
+          isPreviousBoxSelected = box->SelectionState() != HighlightState::None;
+        }
+      }
+
+      return result;
+    };
+
+    inline_iterator::LineBoxIterator lastSelectedLineBox;
+    auto lineBox = inline_iterator::FirstLineBoxFor(*this);
+    for (; lineBox && !hasSelectedChildren(lineBox); lineBox.TraverseNext())
+    {
+    }
+
+    GapRects result;
+
+    // Now paint the gaps for the lines.
+    for (; lineBox && hasSelectedChildren(lineBox); lineBox.TraverseNext())
+    {
+      auto selectionTop = LayoutUnit {LineSelection::LogicalTopAdjustedForPrecedingBlock(*lineBox)};
+      auto selectionHeight =
+        LayoutUnit {std::max(0.f, LineSelection::LogicalBottom(*lineBox) - selectionTop.ToFloat())};
+
+      if (!containsStart && !lastSelectedLineBox && SelectionState() != HighlightState::Start
+          && SelectionState() != HighlightState::Both)
+      {
+        result.UniteCenter(BlockSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock,
+                                             lastLogicalTop, lastLogicalLeft, lastLogicalRight, selectionTop,
+                                             cache, paintInfo));
+      }
+
+      LayoutRect logicalRect {LayoutUnit(lineBox->ContentLogicalLeft()), selectionTop,
+                              LayoutUnit(lineBox->ContentLogicalWidth()), selectionTop + selectionHeight};
+      logicalRect.Move(IsHorizontalWritingMode() ? offsetFromRootBlock
+                                                 : offsetFromRootBlock.TransposedSize());
+      LayoutRect physicalRect = rootBlock.LogicalRectToPhysicalRect(rootBlockPhysicalPosition, logicalRect);
+      if (!paintInfo
+          || (IsHorizontalWritingMode() && physicalRect.Y() < paintInfo->Rect.MaxY()
+              && physicalRect.MaxY() > paintInfo->Rect.Y())
+          || (!IsHorizontalWritingMode() && physicalRect.X() < paintInfo->Rect.MaxX()
+              && physicalRect.MaxX() > paintInfo->Rect.X()))
+      {
+        result.Unite(lineSelectionGap(lineBox, selectionTop, selectionHeight));
+      }
+
+      lastSelectedLineBox = lineBox;
+    }
+
+    if (containsStart && !lastSelectedLineBox)
+    {
+      // VisibleSelection must start just after our last line.
+      lastSelectedLineBox = inline_iterator::LastLineBoxFor(*this);
+    }
+
+    if (lastSelectedLineBox && SelectionState() != HighlightState::End
+        && SelectionState() != HighlightState::Both)
+    {
+      // Update our lastY to be the bottom of the last selected line.
+      auto lastLineSelectionBottom = LayoutUnit {LineSelection::LogicalBottom(*lastSelectedLineBox)};
+      updateLastLogicalValues(BlockDirectionOffset(rootBlock, offsetFromRootBlock) + lastLineSelectionBottom,
+                              LogicalLeftSelectionOffset(rootBlock, lastLineSelectionBottom, cache),
+                              LogicalRightSelectionOffset(rootBlock, lastLineSelectionBottom, cache));
+    }
+    return result;
+  }
+
+#pragma endregion
 }

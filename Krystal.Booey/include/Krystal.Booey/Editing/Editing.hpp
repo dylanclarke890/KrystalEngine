@@ -202,6 +202,10 @@ namespace krys::boo
     return c == ' ' || c == '\n';
   }
 
+  /// @brief ASCII whitespace for Latin-1 characters (which excludes U+0085 and U+00A0), and characters whose
+  /// bidi class is whitespace above it.
+  KRYS_NODISCARD bool DeprecatedIsSpaceOrNewline(char32 character) noexcept;
+
   KRYS_NODISCARD bool IsAmbiguousBoundaryCharacter(char32 character) noexcept;
 
 #pragma region Caret rendering

@@ -2,9 +2,12 @@
 
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
+#include "Krystal.Booey/DOM/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Editing/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
@@ -15,6 +18,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -26,12 +30,22 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class AutoscrollController;
   class FloatQuad;
   class HitTestRequest;
   class HitTestResult;
   class LocalFrame;
   class LocalFrameView;
   class MouseEventWithHitTestResults;
+  class RenderBox;
+  class VisiblePosition;
+  class VisibleSelection;
+
+  enum AppendTrailingWhitespace : bool
+  {
+    ShouldAppendTrailingWhitespace,
+    DontAppendTrailingWhitespace
+  };
   class ScrollableArea;
   class Scrollbar;
 
@@ -40,9 +54,12 @@ namespace krys::boo
   /// that element changes; `click`, `auxclick` and `dblclick`; the hover and active state; the cursor to
   /// show; the scrollbars under the mouse; `wheel`, which scrolls; and `keydown`, `keypress` and `keyup` at
   /// the focused element, with Tab and Shift+Tab moving the focus and the arrows, Page Up and Page Down,
-  /// Home, End and Space scrolling.
-  // FIXME: The rest of the event handler: the keyboard's other default actions, drag and drop, selection,
-  // context menus, resizers, subframes, autoscroll, pointer lock, touch and pointer events.
+  /// Home, End and Space scrolling; and selecting with the mouse: a press places the selection, a drag
+  /// extends it (scrolling as it reaches an edge), double and triple presses select words and paragraphs, and
+  /// Shift extends it.
+  // FIXME: The rest of the event handler: the keyboard's other default actions (selection by the keyboard is
+  // with the keyboard and the DOM's Selection), drag and drop, context menus, resizers, subframes, pan
+  // scrolling, pointer lock, touch and pointer events.
   class EventHandler
   {
     KRYS_NON_COPY_MOVABLE(EventHandler);
@@ -65,11 +82,26 @@ namespace krys::boo
       Set
     };
 
+    enum SelectionInitiationState : uint8
+    {
+      HaveNotStartedSelection,
+      PlacedCaret,
+      ExtendedSelection
+    };
+
   private:
     LocalFrame &_frame;
 
     RefPtr<dom::Node> _mousePressNode;
     bool _mousePressed {false};
+    bool _mouseDownMayStartSelect {false};
+    bool _mouseDownMayStartAutoscroll {false};
+    bool _mouseDownWasSingleClickInSelection {false};
+    SelectionInitiationState _selectionInitiationState {HaveNotStartedSelection};
+    LayoutPoint _mouseDownContentsPosition;
+    IntPoint _dragStartPosition;
+    Maybe<dom::SimpleRange> _dragStartSelection;
+    UniquePtr<AutoscrollController> _autoscrollController;
 
     RefPtr<dom::Element> _elementUnderMouse;
     RefPtr<dom::Element> _lastElementUnderMouse;
@@ -115,6 +147,19 @@ namespace krys::boo
     {
       return _lastKnownMousePosition;
     }
+
+    KRYS_NODISCARD dom::Node *MousePressNode() const noexcept
+    {
+      return _mousePressNode.get();
+    }
+
+    /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
+    void UpdateSelectionForMouseDrag() noexcept;
+    KRYS_NODISCARD bool ShouldUpdateAutoscroll() const noexcept;
+    KRYS_NODISCARD IntPoint TargetPositionInWindowForSelectionAutoscroll() const noexcept;
+    KRYS_NODISCARD RenderBox *AutoscrollRenderer() const noexcept;
+    KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
+    void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
 
     /// @brief The element the mouse is over, as of the last mouse event.
     KRYS_NODISCARD dom::Element *ElementUnderMouse() const noexcept
@@ -260,6 +305,29 @@ namespace krys::boo
     void UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar, SetOrClearLastScrollbar setOrClear) noexcept;
     KRYS_NODISCARD bool IsInsideScrollbar(const IntPoint &windowPoint) const noexcept;
 
-    // FIXME: Selection: handleMousePressEvent and handleMouseReleaseEvent for a hit test, which select text.
+#pragma region Selection
+
+    bool HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept;
+    bool HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept;
+    bool HandleMousePressEventDoubleClick(const MouseEventWithHitTestResults &event) noexcept;
+    bool HandleMousePressEventTripleClick(const MouseEventWithHitTestResults &event) noexcept;
+    KRYS_NODISCARD bool CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept;
+    KRYS_NODISCARD bool MouseDownMayStartSelect() const noexcept;
+    bool ExpandAndUpdateSelectionForMouseDownIfNeeded(dom::Node &targetNode,
+                                                      const VisibleSelection &selection,
+                                                      TextGranularity granularity) noexcept;
+    bool UpdateSelectionForMouseDownDispatchingSelectStart(dom::Node *targetNode,
+                                                           const VisibleSelection &selection,
+                                                           TextGranularity granularity) noexcept;
+    void SelectClosestWordFromHitTestResult(const HitTestResult &result,
+                                            AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+    KRYS_NODISCARD VisiblePosition SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
+                                                                            const LayoutPoint &localPoint,
+                                                                            dom::Node *targetNode) noexcept;
+    bool HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event) noexcept;
+    void UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept;
+    bool HandleMouseReleaseEvent(const MouseEventWithHitTestResults &event) noexcept;
+
+#pragma endregion
   };
 }

@@ -45,7 +45,6 @@ namespace krys::boo
 
   /// @brief Used to render the list item's marker.
   /// The RenderListMarker always has to be a child of a RenderListItem.
-  // FIXME: Selection (the selection's background, localSelectionRect) comes with selection.
   class RenderListMarker final : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderListMarker);
@@ -71,6 +70,14 @@ namespace krys::boo
     }
 
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
+
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent) noexcept final;
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final
+    {
+      return true;
+    }
+    KRYS_NODISCARD LayoutRect LocalSelectionRect() const noexcept;
 
     KRYS_NODISCARD utf8_string TextWithoutSuffix() const noexcept
     {

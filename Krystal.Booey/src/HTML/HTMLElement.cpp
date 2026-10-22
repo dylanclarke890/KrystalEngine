@@ -367,10 +367,6 @@ namespace krys::boo::html
       return ContentEditableType::Inherit;
     }
 
-    KRYS_NODISCARD css::CSSOMString ToCSSOMString(dom::DOMStringView value) noexcept
-    {
-      return css::CSSOMString(value);
-    }
   }
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
@@ -440,7 +436,7 @@ namespace krys::boo::html
     {
       // Have to quote so the locale id is treated as a string instead of as a CSS keyword.
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitLocale,
-                                           css::SerialiseString(ToCSSOMString(value)));
+                                           css::SerialiseString(css::CSSOMString(value)));
     }
     else
     {
@@ -491,7 +487,7 @@ namespace krys::boo::html
       }
       else
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, ToCSSOMString(value));
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::CSSOMString(value));
       }
     }
     else if (localName == u8"contenteditable")
@@ -557,7 +553,7 @@ namespace krys::boo::html
       else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"rtl")
                || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"ltr"))
       {
-        AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, ToCSSOMString(value));
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, css::CSSOMString(value));
         auto tagName = TagQualifiedName().TagName();
         if (tagName != TagName::bdi && tagName != TagName::bdo && tagName != TagName::output)
         {

@@ -330,6 +330,14 @@ namespace krys::boo
     /// @brief The element whose content this renderer renders: the host of a pseudo-element.
     KRYS_NODISCARD dom::Element *GeneratingElement() const noexcept;
 
+    KRYS_NODISCARD Color SelectionColor(css::PropertyId colorProperty) const noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+
+    // Obtains the selection colors that should be used when painting a selection.
+    KRYS_NODISCARD Color SelectionBackgroundColor() const noexcept;
+    KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;
+    KRYS_NODISCARD Color SelectionEmphasisMarkColor() const noexcept;
+
     KRYS_NODISCARD Overflow EffectiveOverflowX() const noexcept;
     KRYS_NODISCARD Overflow EffectiveOverflowY() const noexcept;
     KRYS_NODISCARD Overflow EffectiveOverflowBlockDirection() const noexcept;

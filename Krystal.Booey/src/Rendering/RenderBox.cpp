@@ -12,6 +12,8 @@
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
@@ -131,8 +133,13 @@ namespace krys::boo
 
   void RenderBox::WillBeDestroyed() noexcept
   {
-    // FIXME: Stop autoscrolling, and unregister the box's scroll snap positions, anchors, position-try box
-    // and anchor scroll adjusters, once there are any.
+    if (auto *frame = GetDocument().Frame(); frame && frame->GetEventHandler().AutoscrollRenderer() == this)
+    {
+      frame->GetEventHandler().StopAutoscrollTimer(true);
+    }
+
+    // FIXME: Unregister the box's scroll snap positions, anchors, position-try box and anchor scroll
+    // adjusters, once there are any.
     if (HasInitializedStyle() && Style().GetContainerType() != ContainerType::Normal)
     {
       View().UnregisterContainerQueryBox(*this);
@@ -4015,6 +4022,77 @@ namespace krys::boo
       return b->LogicalScroll(direction, granularity, stepCount, stopElement);
     }
     return false;
+  }
+
+  void RenderBox::Autoscroll(const IntPoint &positionInWindow) noexcept
+  {
+    if (Layer())
+    {
+      Layer()->Autoscroll(positionInWindow);
+    }
+  }
+
+  bool RenderBox::CanAutoscroll() const noexcept
+  {
+    if (IsRenderView())
+    {
+      return View().FrameView().IsScrollable();
+    }
+
+    // Check for a box that can be scrolled in its own right.
+    if (CanBeScrolledAndHasScrollableArea())
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  IntSize RenderBox::CalculateAutoscrollDirection(const IntPoint &windowPoint) const noexcept
+  {
+    // The band along the edges of a box that scrolls it.
+    constexpr int32 autoscrollBeltSize = 20;
+
+    IntRect box(AbsoluteBoundingBoxRect());
+    box.MoveBy(View().FrameView().GetScrollPosition());
+    IntRect windowBox = View().FrameView().ContentsToWindow(box);
+
+    IntPoint windowAutoscrollPoint = windowPoint;
+
+    if (windowAutoscrollPoint.X() < windowBox.X() + autoscrollBeltSize)
+    {
+      windowAutoscrollPoint.Move(-autoscrollBeltSize, 0);
+    }
+    else if (windowAutoscrollPoint.X() > windowBox.MaxX() - autoscrollBeltSize)
+    {
+      windowAutoscrollPoint.Move(autoscrollBeltSize, 0);
+    }
+
+    if (windowAutoscrollPoint.Y() < windowBox.Y() + autoscrollBeltSize)
+    {
+      windowAutoscrollPoint.Move(0, -autoscrollBeltSize);
+    }
+    else if (windowAutoscrollPoint.Y() > windowBox.MaxY() - autoscrollBeltSize)
+    {
+      windowAutoscrollPoint.Move(0, autoscrollBeltSize);
+    }
+
+    return windowAutoscrollPoint - windowPoint;
+  }
+
+  // FIXME: Subframes' owner elements (ownerElement), once there are frames.
+  RenderBox *RenderBox::FindAutoscrollable(RenderObject *renderer) noexcept
+  {
+    while (renderer)
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(*renderer); box && box->CanAutoscroll())
+      {
+        break;
+      }
+      renderer = renderer->Parent();
+    }
+
+    return DynamicDowncast<RenderBox>(renderer);
   }
 
   bool RenderBox::CanBeScrolledAndHasScrollableArea() const noexcept

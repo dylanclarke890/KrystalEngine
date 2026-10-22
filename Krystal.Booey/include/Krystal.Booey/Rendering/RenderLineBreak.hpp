@@ -14,7 +14,6 @@ namespace krys::boo
   }
 
   /// @brief The line break of a `<br>`, or the line break opportunity of a `<wbr>`.
-  // FIXME: Selection (canBeSelectionLeaf) comes with selection.
   class RenderLineBreak final : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderLineBreak);
@@ -63,6 +62,8 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept final;
 
   protected:
     KRYS_NODISCARD RepaintRects LocalRectsForRepaint(RepaintOutlineBounds) const noexcept final

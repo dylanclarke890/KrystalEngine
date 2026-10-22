@@ -6,17 +6,27 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/TextIterator.hpp"
+#include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
@@ -152,7 +162,8 @@ namespace krys::boo
   }
 
   EventHandler::EventHandler(LocalFrame &frame) noexcept
-      : _frame(frame), _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired)
+      : _frame(frame), _autoscrollController(CreateUnique<AutoscrollController>()),
+        _fakeMouseMoveEventTimer(*this, &EventHandler::FakeMouseMoveEventTimerFired)
   {
   }
 
@@ -171,6 +182,11 @@ namespace krys::boo
     _lastKnownMouseGlobalPosition = null;
     _mousePressNode = nullptr;
     _mousePressed = false;
+    _mouseDownMayStartSelect = false;
+    _mouseDownWasSingleClickInSelection = false;
+    _selectionInitiationState = HaveNotStartedSelection;
+    _mouseDownMayStartAutoscroll = false;
+    _dragStartSelection = null;
     _maxMouseMovedDuration = {};
     CancelFakeMouseMoveEvent();
   }
@@ -221,9 +237,15 @@ namespace krys::boo
     _mousePressed = true;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
     _mouseDownTimestamp = platformMouseEvent.Timestamp();
-    // FIXME: Dragging, selection and autoscroll (mouseDownMayStartDrag, mouseDownMayStartSelect,
-    // mouseDownMayStartAutoscroll and the mouse down's contents position).
-    if (!frame->View())
+    // FIXME: Dragging (mouseDownMayStartDrag), with drag and drop.
+    _mouseDownMayStartSelect = false;
+    _mouseDownMayStartAutoscroll = false;
+    if (auto *view = frame->View())
+    {
+      _mouseDownContentsPosition =
+        LayoutPoint(view->WindowToContents(FlooredIntPoint(platformMouseEvent.Position())));
+    }
+    else
     {
       InvalidateClick();
       return false;
@@ -280,18 +302,22 @@ namespace krys::boo
       }
     }
 
-    if (!swallowEvent && passedToScrollbar)
+    // FIXME: The input element's shadow tree (shouldRefetchEventTarget), with form controls.
+    if (!swallowEvent && !mouseEvent.TargetNode()->ParentNode())
     {
-      return true;
+      mouseEvent = document->PrepareMouseEvent(HitTestRequest(), documentPoint, platformMouseEvent);
     }
 
-    // The press sets the sequential focus navigation starting point again, after the focus change reset it
-    // to the focused element.
-    // FIXME: Selection (handleMousePressEvent for the hit test, after refetching the target if it was
-    // removed), which does this.
-    if (!swallowEvent && targetNode->IsConnected())
+    if (!swallowEvent)
     {
-      document->SetSequentialFocusNavigationStartingPoint(targetNode.get());
+      if (passedToScrollbar)
+      {
+        swallowEvent = true;
+      }
+      else
+      {
+        swallowEvent = HandleMousePressEvent(mouseEvent);
+      }
     }
     return swallowEvent;
   }
@@ -368,7 +394,13 @@ namespace krys::boo
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseMove), targetNode.get(), 0,
                                             platformMouseEvent, FireMouseOverOut::Yes);
 
-    // FIXME: Dragging (handleMouseDraggedEvent).
+    // FIXME: Mouse moves cancelled while capturing a drag (the capturesDragging inability reason), with drag
+    // and drop.
+    if (!swallowEvent)
+    {
+      swallowEvent = HandleMouseDraggedEvent(mouseEvent);
+    }
+
     return swallowEvent;
   }
 
@@ -454,11 +486,17 @@ namespace krys::boo
     bool swallowClickEvent =
       SwallowAnyClickEvent(platformMouseEvent, mouseEvent, IgnoreAncestorNodesForClickEvent::No);
 
-    // FIXME: Resizers, and selection (handleMouseReleaseEvent for the hit test).
+    // FIXME: Resizers, once layers resize.
+
+    bool swallowMouseReleaseEvent = false;
+    if (!swallowMouseUpEvent)
+    {
+      swallowMouseReleaseEvent = HandleMouseReleaseEvent(mouseEvent);
+    }
 
     InvalidateClick();
 
-    return swallowMouseUpEvent || swallowClickEvent;
+    return swallowMouseUpEvent || swallowClickEvent || swallowMouseReleaseEvent;
   }
 
   MouseEventWithHitTestResults EventHandler::PrepareMouseEvent(const HitTestRequest &request,
@@ -1206,20 +1244,33 @@ namespace krys::boo
     {
       case CursorType::Auto:
       {
-        // FIXME: Image overlay text and editable content (hasEditableStyle), with editing.
-        bool editable = false;
+        // FIXME: Image overlay text, once there are image overlays.
+        bool editable = node->HasEditableStyle();
 
         if (UseHandCursor(node, result.IsOverLink(), shiftKey))
         {
           return Cursor(Cursor::Type::Hand);
         }
 
-        // FIXME: Resizers (isPointInResizeControl), and an I-beam during selection, with selection.
+        // FIXME: Resizers (isPointInResizeControl), once layers resize.
 
-        // FIXME: Nodes that can't start a selection (canStartSelection), with editing and dragging.
-        if (editable
-            || (renderer && renderer->IsRenderText()
-                && renderer->Style().UsedUserSelect() != UserSelect::None))
+        // Disabled: during a selection the cursor follows the content beneath it, as Firefox's does, rather
+        // than staying an I-beam over boxes and gaps with no text.
+        // During selection, use an I-beam regardless of the content beneath the cursor.
+        // If a drag may be starting or we're capturing mouse events for a particular node, don't treat this
+        // as a selection.
+        // FIXME: Dragging (mouseDownMayStartDrag) and capturing mouse events, with drag and drop and pointer
+        // capture, if this is enabled again.
+        // if (_mousePressed && MouseDownMayStartSelect() && _frame.Document()->Selection().IsCaretOrRange()
+        //     && renderer && renderer->Style().UsedUserSelect() != UserSelect::None)
+        // {
+        //   return iBeam;
+        // }
+
+        if ((editable
+             || (renderer && renderer->IsRenderText() && node->CanStartSelection()
+                 && renderer->Style().UsedUserSelect() != UserSelect::None))
+            && !result.GetScrollbar())
         {
           return iBeam;
         }
@@ -1498,4 +1549,721 @@ namespace krys::boo
     // FIXME: The wheel delta filter and latching, once there are touchpad gestures.
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
   }
+
+#pragma region Selection
+
+  namespace
+  {
+    void SetSelectionIfNeeded(FrameSelection &selection, const VisibleSelection &newSelection) noexcept
+    {
+      if (selection.Selection() != newSelection && selection.ShouldChangeSelection(newSelection))
+      {
+        selection.SetSelection(newSelection, FrameSelection::DefaultSetSelectionOptions(UserTriggered::Yes));
+      }
+    }
+
+    KRYS_NODISCARD bool DispatchSelectStart(dom::Node *node) noexcept
+    {
+      if (!node || !node->Renderer())
+      {
+        return true;
+      }
+
+      auto type = dom::DOMStringAtom(EventNames::SelectStart);
+      return dom::EventDispatcher::FireEvent<dom::Event>(type, *node, [&](dom::Event &event)
+                                                         { event.InitEvent(type, true, true); });
+    }
+
+    // FIXME: Image overlays (ImageOverlay::isInsideOverlay) and nodes that select on mouse down
+    // (shouldSelectOnMouseDown), once there are any.
+    KRYS_NODISCARD RefPtr<dom::Node> NodeToSelectOnMouseDownForNode(dom::Node &targetNode) noexcept
+    {
+      return dom::Position::RootUserSelectAllForNode(&targetNode);
+    }
+
+    KRYS_NODISCARD VisibleSelection ExpandSelectionToRespectSelectOnMouseDown(
+      dom::Node &targetNode, const VisibleSelection &selection) noexcept
+    {
+      RefPtr<dom::Node> nodeToSelect = NodeToSelectOnMouseDownForNode(targetNode);
+      if (!nodeToSelect)
+      {
+        return selection;
+      }
+
+      VisibleSelection newSelection(selection);
+      newSelection.SetBase(dom::PositionBeforeNode(nodeToSelect.get())
+                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetExtent(dom::PositionAfterNode(nodeToSelect.get())
+                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+
+      return newSelection;
+    }
+
+    KRYS_NODISCARD bool ShouldAvoidExtendingSelectionOnClick(const dom::Node &targetNode,
+                                                             const VisibleSelection &selection) noexcept
+    {
+      if (Is<dom::Text>(targetNode))
+      {
+        return false;
+      }
+
+      if (selection.IsContentEditable())
+      {
+        return false;
+      }
+
+      auto range = selection.ToNormalizedRange();
+      if (!range)
+      {
+        return false;
+      }
+
+      if (range->Collapsed())
+      {
+        return false;
+      }
+
+      constexpr TextIteratorBehaviors plainTextOptions {
+        TextIteratorBehavior::EmitsObjectReplacementCharacters, TextIteratorBehavior::EntersTextControls};
+
+      if (HasAnyPlainText(*range, plainTextOptions, IgnoreCollapsedRanges::Yes))
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+    KRYS_NODISCARD uint64 TextDistance(const dom::Position &start, const dom::Position &end) noexcept
+    {
+      auto range = dom::MakeSimpleRange({start, end});
+      if (!range)
+      {
+        return 0;
+      }
+      return CharacterCount(*range, TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
+    }
+
+    // FIXME: The editor's isSelectTrailingWhitespaceEnabled, with the editor; off, as its client's default
+    // is.
+    KRYS_NODISCARD AppendTrailingWhitespace
+      AppendTrailingWhitespaceForEvent(const MouseEventWithHitTestResults &) noexcept
+    {
+      return DontAppendTrailingWhitespace;
+    }
+  }
+
+  bool EventHandler::ExpandAndUpdateSelectionForMouseDownIfNeeded(dom::Node &targetNode,
+                                                                  const VisibleSelection &selection,
+                                                                  TextGranularity granularity) noexcept
+  {
+    auto expandedSelection = ExpandSelectionToRespectSelectOnMouseDown(targetNode, selection);
+    if (ShouldAvoidExtendingSelectionOnClick(targetNode, expandedSelection))
+    {
+      return false;
+    }
+
+    return UpdateSelectionForMouseDownDispatchingSelectStart(&targetNode, expandedSelection, granularity);
+  }
+
+  bool EventHandler::UpdateSelectionForMouseDownDispatchingSelectStart(dom::Node *targetNode,
+                                                                       const VisibleSelection &selection,
+                                                                       TextGranularity granularity) noexcept
+  {
+    if (dom::Position::NodeIsUserSelectNone(targetNode))
+    {
+      return false;
+    }
+
+    if (!DispatchSelectStart(targetNode))
+    {
+      _mouseDownMayStartSelect = false;
+      return false;
+    }
+
+    if (selection.IsOrphan())
+    {
+      _mouseDownMayStartSelect = false;
+      return false;
+    }
+
+    if (selection.IsRange())
+    {
+      _selectionInitiationState = ExtendedSelection;
+      _dragStartSelection = selection.Range();
+    }
+    else
+    {
+      granularity = TextGranularity::CharacterGranularity;
+      _selectionInitiationState = PlacedCaret;
+    }
+
+    _frame.Document()->Selection().SetSelectionByMouseIfDifferent(selection, granularity);
+
+    return true;
+  }
+
+  void EventHandler::SelectClosestWordFromHitTestResult(
+    const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept
+  {
+    RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+    VisibleSelection newSelection;
+
+    if (targetNode && targetNode->Renderer())
+    {
+      VisiblePosition pos(
+        targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
+      if (pos.IsNotNull())
+      {
+        newSelection = VisibleSelection(pos);
+        newSelection.ExpandUsingGranularity(TextGranularity::WordGranularity);
+      }
+
+      if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.IsRange())
+      {
+        newSelection.AppendTrailingWhitespace();
+      }
+
+      ExpandAndUpdateSelectionForMouseDownIfNeeded(*targetNode, newSelection,
+                                                   TextGranularity::WordGranularity);
+    }
+  }
+
+  bool EventHandler::HandleMousePressEventDoubleClick(const MouseEventWithHitTestResults &event) noexcept
+  {
+    if (event.Event().Button() != MouseButton::Left)
+    {
+      return false;
+    }
+
+    auto &selection = _frame.Document()->Selection();
+    if (selection.IsRange())
+    {
+      // A double-click when range is already selected
+      // should not change the selection.  So, do not call
+      // SelectClosestWordFromHitTestResult, but do set
+      // _selectionInitiationState to prevent HandleMouseReleaseEvent
+      // from setting caret selection.
+      _selectionInitiationState = ExtendedSelection;
+      _dragStartSelection = selection.Selection().Range();
+    }
+    else if (MouseDownMayStartSelect())
+    {
+      SelectClosestWordFromHitTestResult(event.GetHitTestResult(), AppendTrailingWhitespaceForEvent(event));
+    }
+
+    return true;
+  }
+
+  bool EventHandler::HandleMousePressEventTripleClick(const MouseEventWithHitTestResults &event) noexcept
+  {
+    if (event.Event().Button() != MouseButton::Left)
+    {
+      return false;
+    }
+
+    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    if (!(targetNode && targetNode->Renderer() && MouseDownMayStartSelect()))
+    {
+      return false;
+    }
+
+    VisibleSelection newSelection;
+    VisiblePosition pos(
+      targetNode->Renderer()->VisiblePositionForPoint(event.LocalPoint(), HitTestSource::User));
+    if (pos.IsNotNull())
+    {
+      newSelection = VisibleSelection(pos);
+      newSelection.ExpandUsingGranularity(TextGranularity::ParagraphGranularity);
+    }
+
+    return ExpandAndUpdateSelectionForMouseDownIfNeeded(*targetNode, newSelection,
+                                                        TextGranularity::ParagraphGranularity);
+  }
+
+  // FIXME: Synthetic clicks (syntheticClickType, which snap to a word boundary), and the editor client's
+  // shouldAllowSingleClickToChangeSelection, with touch and the editor.
+  bool EventHandler::HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+    (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
+    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    if (!targetNode || !targetNode->Renderer() || !MouseDownMayStartSelect())
+    {
+      return false;
+    }
+
+    auto &selection = frame->Document()->Selection();
+
+    // Extend the selection if the Shift key is down, unless the click is in a link.
+    bool extendSelection = event.Event().ShiftKey() && !event.IsOverLink();
+
+    // Don't restart the selection when the mouse is pressed on an
+    // existing selection so we can allow for text dragging.
+    if (auto *view = frame->View())
+    {
+      LayoutPoint vPoint {view->WindowToContents(FlooredIntPoint(event.Event().Position()))};
+      if (!extendSelection && selection.Contains(vPoint))
+      {
+        _mouseDownWasSingleClickInSelection = true;
+        return false;
+      }
+    }
+
+    VisiblePosition visiblePosition(
+      targetNode->Renderer()->VisiblePositionForPoint(event.LocalPoint(), HitTestSource::User));
+    if (visiblePosition.IsNull())
+    {
+      visiblePosition = VisiblePosition(FirstPositionInOrBeforeNode(targetNode.get()));
+    }
+    dom::Position pos = visiblePosition.DeepEquivalent();
+
+    VisibleSelection newSelection = selection.Selection();
+    TextGranularity granularity = TextGranularity::CharacterGranularity;
+
+    if (extendSelection && newSelection.IsCaretOrRange())
+    {
+      VisibleSelection selectionInUserSelectAll = ExpandSelectionToRespectSelectOnMouseDown(
+        *targetNode, VisibleSelection(pos, VisibleSelection::DefaultAffinity));
+      if (selectionInUserSelectAll.IsRange())
+      {
+        if (selectionInUserSelectAll.Start() < newSelection.Start())
+        {
+          pos = selectionInUserSelectAll.Start();
+        }
+        else if (newSelection.End() < selectionInUserSelectAll.End())
+        {
+          pos = selectionInUserSelectAll.End();
+        }
+      }
+
+      if (!EditingBehavior(frame->Document()->GetSettings().EditingBehaviorType)
+             .ShouldConsiderSelectionAsDirectional()
+          && pos.IsNotNull())
+      {
+        // Shift-click shouldn't deselect a selection that was made right-to-left.
+        dom::Position start = newSelection.Start();
+        dom::Position end = newSelection.End();
+        auto distanceToStart = TextDistance(start, pos);
+        auto distanceToEnd = TextDistance(pos, end);
+        if (distanceToStart <= distanceToEnd)
+        {
+          newSelection = VisibleSelection(end, pos);
+        }
+        else
+        {
+          newSelection = VisibleSelection(start, pos);
+        }
+      }
+      else
+      {
+        if (newSelection.GetDirectionality() == Directionality::Strong)
+        {
+          RefPtr<dom::Node> baseNode =
+            ShareRefPtr(newSelection.IsBaseFirst() ? newSelection.Base().ComputeNodeAfterPosition()
+                                                   : newSelection.Base().ComputeNodeBeforePosition());
+          if (!baseNode)
+          {
+            baseNode = ShareRefPtr(newSelection.Base().GetContainerNode());
+          }
+          if (baseNode)
+          {
+            auto expandedBaseSelection = ExpandSelectionToRespectSelectOnMouseDown(
+              *baseNode, VisibleSelection {newSelection.VisibleBase()});
+            expandedBaseSelection.ExpandUsingGranularity(selection.Granularity());
+            if (expandedBaseSelection.IsRange())
+            {
+              if (newSelection.IsBaseFirst() && pos < newSelection.Start())
+              {
+                newSelection.SetBase(expandedBaseSelection.End());
+              }
+              else if (!newSelection.IsBaseFirst() && newSelection.End() < pos)
+              {
+                newSelection.SetBase(expandedBaseSelection.Start());
+              }
+            }
+          }
+        }
+        newSelection.SetExtent(pos);
+      }
+
+      if (selection.Granularity() != TextGranularity::CharacterGranularity)
+      {
+        granularity = selection.Granularity();
+        newSelection.ExpandUsingGranularity(selection.Granularity());
+      }
+    }
+    else
+    {
+      newSelection =
+        ExpandSelectionToRespectSelectOnMouseDown(*targetNode, VisibleSelection(visiblePosition));
+    }
+
+    return UpdateSelectionForMouseDownDispatchingSelectStart(targetNode.get(), newSelection, granularity);
+  }
+
+  // FIXME: The chrome client's shouldUseMouseEventForSelection, quirks and image overlay text, once there are
+  // any.
+  bool EventHandler::CanMouseDownStartSelect(const MouseEventWithHitTestResults &event) const noexcept
+  {
+    auto *node = event.TargetNode();
+
+    if (!node || !node->Renderer())
+    {
+      return true;
+    }
+
+    return node->CanStartSelection() || dom::Position::NodeIsUserSelectAll(node);
+  }
+
+  // FIXME: The textInteractionEnabled setting, once there's one.
+  bool EventHandler::MouseDownMayStartSelect() const noexcept
+  {
+    return _mouseDownMayStartSelect;
+  }
+
+  // FIXME: Dragging (setDragStateSource, mouseDownMayStartDrag), widgets, SVG panning and the scrollbar
+  // corner (isPointInScrollbarCorner), with drag and drop, widgets, SVG and resizers.
+  bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    CancelFakeMouseMoveEvent();
+
+    (void)frame->Document()->UpdateLayoutIgnorePendingStylesheets();
+
+    // If we got the event back, that must mean it wasn't prevented,
+    // so it's allowed to start a drag or selection if it wasn't in a scrollbar.
+    _mouseDownMayStartSelect = CanMouseDownStartSelect(event) && !event.GetScrollbar();
+
+    _mouseDownWasSingleClickInSelection = false;
+
+    _mousePressNode = ShareRefPtr(event.TargetNode());
+    frame->Document()->SetSequentialFocusNavigationStartingPoint(event.TargetNode());
+
+    _dragStartPosition = FlooredIntPoint(event.Event().Position());
+
+    _mousePressed = true;
+    _selectionInitiationState = HaveNotStartedSelection;
+
+    bool swallowEvent = false;
+    if (event.Event().ClickCount() == 2)
+    {
+      swallowEvent = HandleMousePressEventDoubleClick(event);
+    }
+    else if (event.Event().ClickCount() >= 3)
+    {
+      swallowEvent = HandleMousePressEventTripleClick(event);
+    }
+    else
+    {
+      swallowEvent = HandleMousePressEventSingleClick(event);
+    }
+
+    _mouseDownMayStartAutoscroll = [&]
+    {
+      // FIXME: Only within the visual viewport (visualViewportRect), once there's one.
+      if (MouseDownMayStartSelect())
+      {
+        return true;
+      }
+
+      auto *mousePressBox =
+        _mousePressNode ? DynamicDowncast<RenderBox>(_mousePressNode->Renderer()) : nullptr;
+      if (mousePressBox && mousePressBox->CanBeProgramaticallyScrolled())
+      {
+        return true;
+      }
+
+      return false;
+    }();
+
+    return swallowEvent;
+  }
+
+  VisiblePosition EventHandler::SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
+                                                                         const LayoutPoint &localPoint,
+                                                                         dom::Node *targetNode) noexcept
+  {
+    FloatPoint selectionEndPoint = localPoint;
+    auto *editableElement = selection.RootEditableElement();
+
+    if (!targetNode || !targetNode->Renderer())
+    {
+      return {};
+    }
+
+    dom::Node *adjustedTarget = targetNode;
+    if (editableElement && !editableElement->Contains(targetNode))
+    {
+      if (!editableElement->Renderer())
+      {
+        return {};
+      }
+
+      FloatPoint absolutePoint = targetNode->Renderer()->LocalToAbsolute(FloatPoint(selectionEndPoint));
+      selectionEndPoint = editableElement->Renderer()->AbsoluteToLocal(absolutePoint);
+      adjustedTarget = editableElement;
+    }
+
+    return adjustedTarget->Renderer()->VisiblePositionForPoint(LayoutPoint(selectionEndPoint),
+                                                               HitTestSource::User);
+  }
+
+  // FIXME: Dragging (handleDrag) and list boxes (isRenderListBox), with drag and drop and form controls.
+  bool EventHandler::HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event) noexcept
+  {
+    if (!_mousePressed)
+    {
+      return false;
+    }
+
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
+    if (event.Event().Button() != MouseButton::Left || !targetNode)
+    {
+      return false;
+    }
+
+    auto *renderer = targetNode->Renderer();
+    if (!renderer)
+    {
+      return false;
+    }
+
+    if (_mouseDownMayStartAutoscroll && !_autoscrollController->PanScrollInProgress())
+    {
+      _autoscrollController->StartAutoscrollForSelection(renderer);
+      _mouseDownMayStartAutoscroll = false;
+    }
+
+    if (_selectionInitiationState != ExtendedSelection)
+    {
+      HitTestResult result(_mouseDownContentsPosition);
+      frame->Document()->HitTest(HitTestRequest(), result);
+
+      UpdateSelectionForMouseDrag(result);
+    }
+    else
+    {
+      (void)targetNode->NodeDocument().UpdateStyleIfNeeded();
+    }
+    UpdateSelectionForMouseDrag(event.GetHitTestResult());
+    return true;
+  }
+
+  void EventHandler::UpdateSelectionForMouseDrag() noexcept
+  {
+    auto *view = _frame.View();
+    if (!view)
+    {
+      return;
+    }
+    auto *document = _frame.Document();
+    if (!document)
+    {
+      return;
+    }
+
+    constexpr EnumSet<HitTestRequest::Type> hitType {HitTestRequest::Type::ReadOnly,
+                                                     HitTestRequest::Type::Active, HitTestRequest::Type::Move,
+                                                     HitTestRequest::Type::DisallowUserAgentShadowContent};
+    HitTestResult result(
+      LayoutPoint(view->WindowToContents(FlooredIntPoint(_lastKnownMousePosition.value_or(DoublePoint())))));
+    document->HitTest(HitTestRequest(hitType), result);
+    UpdateSelectionForMouseDrag(result);
+  }
+
+  // FIXME: SVG text (keeping the selection in the containing block), image overlays
+  // (shouldExtendSelectionToTargetNode), once there are any.
+  void EventHandler::UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept
+  {
+    if (!MouseDownMayStartSelect())
+    {
+      return;
+    }
+
+    RefPtr<dom::Node> target = ShareRefPtr(hitTestResult.TargetNode());
+    if (!target)
+    {
+      return;
+    }
+
+    auto &selection = _frame.Document()->Selection();
+    VisiblePosition targetPosition = SelectionExtentRespectingEditingBoundary(
+      selection.Selection(), hitTestResult.LocalPoint(), target.get());
+
+    // Don't modify the selection if we're not on a node.
+    if (targetPosition.IsNull())
+    {
+      return;
+    }
+
+    // Restart the selection if this is the first mouse move. This work is usually
+    // done in HandleMousePressEvent, but not if the mouse press was on an existing selection.
+    VisibleSelection oldSelection = selection.Selection();
+    auto newSelection = oldSelection;
+
+    if (_selectionInitiationState == HaveNotStartedSelection && !DispatchSelectStart(target.get()))
+    {
+      _mouseDownMayStartSelect = false;
+      return;
+    }
+
+    bool shouldSetDragStartSelection = false;
+    if (_selectionInitiationState != ExtendedSelection)
+    {
+      // Always extend selection here because it's caused by a mouse drag
+      _selectionInitiationState = ExtendedSelection;
+      newSelection = VisibleSelection(targetPosition);
+      shouldSetDragStartSelection = true;
+    }
+
+    RefPtr<dom::Node> rootUserSelectAllForMousePressNode =
+      dom::Position::RootUserSelectAllForNode(_mousePressNode.get());
+    if (rootUserSelectAllForMousePressNode
+        && rootUserSelectAllForMousePressNode == dom::Position::RootUserSelectAllForNode(target.get()))
+    {
+      newSelection.SetBase(dom::PositionBeforeNode(rootUserSelectAllForMousePressNode.get())
+                             .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+    }
+    else
+    {
+      auto dragStart = [&]
+      {
+        return _mousePressNode->Renderer()->VisiblePositionForPoint(LayoutPoint(_dragStartPosition),
+                                                                    HitTestSource::User);
+      };
+      auto targetVisiblePosition = [&]
+      {
+        return target->Renderer()->VisiblePositionForPoint(hitTestResult.LocalPoint(), HitTestSource::User);
+      };
+
+      // Reset base for user select all when base is inside user-select-all area and extent < base.
+      if (rootUserSelectAllForMousePressNode && targetVisiblePosition() < dragStart())
+      {
+        newSelection.SetBase(dom::PositionAfterNode(rootUserSelectAllForMousePressNode.get())
+                               .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      }
+
+      RefPtr<dom::Node> rootUserSelectAllForTarget = dom::Position::RootUserSelectAllForNode(target.get());
+      if (rootUserSelectAllForTarget && _mousePressNode->Renderer() && targetVisiblePosition() < dragStart())
+      {
+        newSelection.SetExtent(dom::PositionBeforeNode(rootUserSelectAllForTarget.get())
+                                 .Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      }
+      else if (rootUserSelectAllForTarget && _mousePressNode->Renderer())
+      {
+        newSelection.SetExtent(dom::PositionAfterNode(rootUserSelectAllForTarget.get())
+                                 .Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary));
+      }
+      else
+      {
+        newSelection.SetExtent(targetPosition);
+      }
+    }
+
+    if (selection.Granularity() != TextGranularity::CharacterGranularity)
+    {
+      newSelection.ExpandUsingGranularity(selection.Granularity());
+      if (!newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
+          && oldSelection.End() < newSelection.End())
+      {
+        newSelection.SetBase(oldSelection.End());
+      }
+      else if (newSelection.IsBaseFirst() && !oldSelection.IsBaseFirst()
+               && oldSelection.Start() < newSelection.Start() && _dragStartSelection)
+      {
+        VisibleSelection dragStartSelection {*_dragStartSelection};
+        dragStartSelection.ExpandUsingGranularity(selection.Granularity());
+        if (!dragStartSelection.IsNoneOrOrphaned())
+        {
+          newSelection.SetBase(dragStartSelection.Start());
+        }
+      }
+    }
+
+    if (shouldSetDragStartSelection)
+    {
+      _dragStartSelection = newSelection.Range();
+    }
+
+    selection.SetSelectionByMouseIfDifferent(newSelection, selection.Granularity(),
+                                             FrameSelection::EndPointsAdjustmentMode::AdjustAtBidiBoundary);
+  }
+
+  // FIXME: The event loop's and the view's activation handling of the mouse up (handleMouseUp), caret
+  // browsing, and pasting the global selection on a middle click, with the platform, caret browsing and the
+  // pasteboard.
+  bool EventHandler::HandleMouseReleaseEvent(const MouseEventWithHitTestResults &event) noexcept
+  {
+    if (AutoscrollInProgress())
+    {
+      StopAutoscrollTimer();
+    }
+
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    // Used to prevent mouseMoveEvent from initiating a drag before
+    // the mouse is pressed again.
+    _mousePressed = false;
+    _mouseDownMayStartSelect = false;
+    _mouseDownMayStartAutoscroll = false;
+
+    bool handled = false;
+
+    // Clear the selection if the mouse didn't move after the last mouse
+    // press and it's not a context menu click.  We do this so when clicking
+    // on the selection, the selection goes away.  However, if we are
+    // editing, place the caret.
+    auto &selection = frame->Document()->Selection();
+    if (_mouseDownWasSingleClickInSelection && _selectionInitiationState != ExtendedSelection
+        && _dragStartPosition == FlooredIntPoint(event.Event().Position()) && selection.IsRange()
+        && event.Event().Button() != MouseButton::Right)
+    {
+      VisibleSelection newSelection;
+      auto *node = event.TargetNode();
+      if (node && node->Renderer() && node->HasEditableStyle())
+      {
+        auto pos = node->Renderer()->VisiblePositionForPoint(event.LocalPoint(), HitTestSource::User);
+        newSelection = VisibleSelection(pos);
+      }
+
+      SetSelectionIfNeeded(selection, newSelection);
+
+      handled = true;
+    }
+
+    return handled;
+  }
+
+  bool EventHandler::ShouldUpdateAutoscroll() const noexcept
+  {
+    return MousePressed();
+  }
+
+  IntPoint EventHandler::TargetPositionInWindowForSelectionAutoscroll() const noexcept
+  {
+    return FlooredIntPoint(_lastKnownMousePosition.value_or(DoublePoint()));
+  }
+
+  RenderBox *EventHandler::AutoscrollRenderer() const noexcept
+  {
+    return _autoscrollController->AutoscrollRenderer();
+  }
+
+  bool EventHandler::AutoscrollInProgress() const noexcept
+  {
+    return _autoscrollController->AutoscrollInProgress();
+  }
+
+  void EventHandler::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept
+  {
+    _autoscrollController->StopAutoscrollTimer(rendererIsBeingDestroyed);
+  }
+
+#pragma endregion
 }

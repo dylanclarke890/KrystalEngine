@@ -30,6 +30,11 @@ namespace krys::boo
   {
   }
 
+  bool RenderTextFragment::CanBeSelectionLeaf() const noexcept
+  {
+    return TextNode() && TextNode()->HasEditableStyle();
+  }
+
   RenderTextFragment::~RenderTextFragment() noexcept
   {
     krys_debug_assert(!_firstLetter);

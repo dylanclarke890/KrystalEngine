@@ -2148,6 +2148,51 @@ namespace krys::boo
     }
   }
 
+  void RenderLayer::AddBlockSelectionGapsBounds(const LayoutRect &bounds) noexcept
+  {
+    _blockSelectionGapsBounds.Unite(EnclosingIntRect(bounds));
+  }
+
+  void RenderLayer::ClearBlockSelectionGapsBounds() noexcept
+  {
+    _blockSelectionGapsBounds = IntRect();
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      child->ClearBlockSelectionGapsBounds();
+    }
+  }
+
+  void RenderLayer::RepaintBlockSelectionGaps() noexcept
+  {
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      child->RepaintBlockSelectionGaps();
+    }
+
+    if (_blockSelectionGapsBounds.IsEmpty())
+    {
+      return;
+    }
+
+    LayoutRect rect = _blockSelectionGapsBounds;
+    if (_scrollableArea)
+    {
+      rect.MoveBy(-_scrollableArea->GetScrollPosition());
+    }
+    if (Renderer().HasNonVisibleOverflow() && !UsesCompositedScrolling())
+    {
+      rect.Intersect(Downcast<RenderBox>(Renderer()).OverflowClipRect({}));
+    }
+    if (Renderer().HasClip())
+    {
+      rect.Intersect(Downcast<RenderBox>(Renderer()).ClipRect({}));
+    }
+    if (!rect.IsEmpty())
+    {
+      Renderer().RepaintRectangle(rect);
+    }
+  }
+
   void RenderLayer::SetRepaintStatus(RepaintStatus status) noexcept
   {
     if (status != _repaintStatus)
@@ -6111,6 +6156,15 @@ namespace krys::boo
       }
       return nullptr;
     }
+  }
+
+  void RenderLayer::Autoscroll(const IntPoint &positionInWindow) noexcept
+  {
+    IntPoint currentDocumentPosition = Renderer().View().FrameView().WindowToContents(positionInWindow);
+    LocalFrameView::ScrollRectToVisible(
+      LayoutRect(LayoutPoint(currentDocumentPosition), LayoutSize(1_lu, 1_lu)), Renderer(), false,
+      {SelectionRevealMode::Reveal, ScrollAlignment::AlignToEdgeIfNeeded,
+       ScrollAlignment::AlignToEdgeIfNeeded});
   }
 
   bool RenderLayer::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept

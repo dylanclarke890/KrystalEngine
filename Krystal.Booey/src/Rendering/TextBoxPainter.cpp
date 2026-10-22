@@ -6,9 +6,11 @@
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/StyledMarkedText.hpp"
 #include "Krystal.Booey/Rendering/TextPainter.hpp"
@@ -196,7 +198,7 @@ namespace krys::boo
         _paintTextRun(_textBox.GetTextRun()), _paintInfo(paintInfo),
         _selectableRange(_textBox.SelectableRange()), _paintOffset(paintOffset),
         _paintRect(ComputePaintRect(paintOffset)), _isFirstLine(_textBox.IsFirstFormattedLine()),
-        _isPrinting(_document.Printing())
+        _isPrinting(_document.Printing()), _haveSelection(ComputeHaveSelection())
   {
     krys_debug_assert(paintInfo.Phase == PaintPhase::Foreground || paintInfo.Phase == PaintPhase::Selection
                       || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::EventRegion
@@ -218,9 +220,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Selection (computeHaveSelection) comes with selection; until then there's nothing to paint in
-    // the selection phase.
-    if (_paintInfo.Phase == PaintPhase::Selection)
+    if (_paintInfo.Phase == PaintPhase::Selection && !_haveSelection)
     {
       return;
     }
@@ -245,8 +245,23 @@ namespace krys::boo
     }
     else
     {
-      // FIXME: The background fill of selections, document markers, highlights and IME compositions, and
-      // platform document markers (spelling and grammar errors) come with editing and selection.
+      if (_paintInfo.Phase == PaintPhase::Foreground)
+      {
+        // FIXME: The background fill of document markers, highlights and IME compositions, and platform
+        // document markers (spelling and grammar errors), come with editing.
+        auto shouldPaintBackgroundFill = [&]
+        {
+          if (_isPrinting)
+          {
+            return false;
+          }
+          return _haveSelection;
+        };
+        if (shouldPaintBackgroundFill())
+        {
+          PaintBackgroundFill();
+        }
+      }
 
       PaintForegroundAndDecorations();
 
@@ -262,8 +277,109 @@ namespace krys::boo
     }
   }
 
+  std::pair<uint32, uint32> TextBoxPainter::SelectionStartEnd() const noexcept
+  {
+    return _renderer.View().Selection().RangeForTextBox(_renderer, _selectableRange);
+  }
+
+  MarkedText TextBoxPainter::CreateMarkedTextFromSelectionInBox() const noexcept
+  {
+    auto [selectionStart, selectionEnd] = SelectionStartEnd();
+    if (selectionStart < selectionEnd)
+    {
+      return {selectionStart, selectionEnd, MarkedText::Type::Selection};
+    }
+    return {};
+  }
+
+  // FIXME: Document markers, highlights and IME compositions, with editing.
+  void TextBoxPainter::PaintBackgroundFill() noexcept
+  {
+    List<MarkedText> markedTexts;
+
+    if (_haveSelection && !_paintInfo.Context().PaintingDisabled())
+    {
+      auto selectionMarkedText = CreateMarkedTextFromSelectionInBox();
+      if (!selectionMarkedText.IsEmpty())
+      {
+        markedTexts.push_back(krys::move(selectionMarkedText));
+      }
+    }
+    auto styledMarkedTexts =
+      StyledMarkedText::SubdivideAndResolve(markedTexts, _renderer, _isFirstLine, _paintInfo);
+
+    // Coalesce styles of adjacent marked texts to minimize the number of drawing commands.
+    auto coalescedStyledMarkedTexts =
+      StyledMarkedText::CoalesceAdjacentWithEqualBackground(styledMarkedTexts);
+    for (auto &markedText : coalescedStyledMarkedTexts)
+    {
+      PaintBackgroundFillForRange(markedText.StartOffset, markedText.EndOffset,
+                                  markedText.MarkedStyle.BackgroundColor);
+    }
+  }
+
+  // FIXME: Shaped content (isInsideShapedContent), once there's shaping across boxes.
+  LayoutRect TextBoxPainter::SelectionRectForRange(uint32 startOffset, uint32 endOffset) const noexcept
+  {
+    // Note that if the text is truncated, we let the thing being painted in the truncation
+    // draw its own highlight.
+    auto lineBox = MakeIterator()->GetLineBox();
+    auto selectionBottom = LineSelection::LogicalBottom(*lineBox);
+    auto selectionTop = LineSelection::LogicalTopAdjustedForPrecedingBlock(*lineBox);
+    // Use same y positioning and height as for selection, so that when the selection and this subrange are on
+    // the same word there are no pieces sticking out.
+    auto deltaY = LayoutUnit {GetWritingMode().IsLineInverted() ? selectionBottom - _logicalRect.MaxY()
+                                                                : _logicalRect.Y() - selectionTop};
+    auto selectionHeight = LayoutUnit {std::max(0.f, selectionBottom - selectionTop)};
+    auto selectionRect = LayoutRect {LayoutUnit(_paintRect.X()), LayoutUnit(_paintRect.Y()) - deltaY,
+                                     LayoutUnit(_logicalRect.Width()), selectionHeight};
+
+    GetFontCascade().AdjustSelectionRectForText(_renderer.CanUseSimplifiedTextMeasuring().value_or(false),
+                                                _paintTextRun, selectionRect, startOffset, endOffset);
+    return selectionRect;
+  }
+
+  void TextBoxPainter::PaintBackgroundFillForRange(uint32 startOffset, uint32 endOffset,
+                                                   const Color &color) noexcept
+  {
+    if (startOffset >= endOffset)
+    {
+      return;
+    }
+
+    GraphicsContext &context = _paintInfo.Context();
+    GraphicsContextStateSaver stateSaver {context};
+    UpdateGraphicsContext(context, TextPaintStyle {color}); // Don't draw text at all!
+
+    auto selectionRect = SelectionRectForRange(startOffset, endOffset);
+
+    if (_paintTextRun.Length() == endOffset - startOffset)
+    {
+      // FIXME: We should reconsider re-measuring the content when non-whitespace runs are joined together.
+      auto unAdjustedSelectionRectMaxX = LayoutUnit {_paintRect.X() + _logicalRect.Width()};
+      auto visualRight = std::max(selectionRect.MaxX(), unAdjustedSelectionRectMaxX);
+      selectionRect.ShiftMaxXEdgeTo(visualRight);
+    }
+
+    // FIXME: Support painting combined text.
+    auto backgroundRect = SnapRectToDevicePixels(selectionRect, _document.DeviceScaleFactor());
+    context.FillRect(backgroundRect, color);
+  }
+
+  bool TextBoxPainter::ComputeHaveSelection() const noexcept
+  {
+    if (_isPrinting || _paintInfo.Phase == PaintPhase::TextClip)
+    {
+      return false;
+    }
+
+    return _renderer.View().Selection().HighlightStateForTextBox(_renderer, _selectableRange)
+           != RenderObject::HighlightState::None;
+  }
+
   void TextBoxPainter::PaintForegroundAndDecorations() noexcept
   {
+    auto shouldPaintSelectionForeground = _haveSelection;
     auto hasTextDecoration = !_style.TextDecorationLineInEffect().IsNone();
     // FIXME: Decorations from highlights and spelling and grammar errors come with marked text.
     auto hasDecoration = hasTextDecoration;
@@ -274,7 +390,11 @@ namespace krys::boo
       {
         return true;
       }
-      // FIXME: Selections, document markers and highlights come with editing and selection.
+      if (shouldPaintSelectionForeground)
+      {
+        return true;
+      }
+      // FIXME: Document markers and highlights come with editing.
       return false;
     };
     auto startPosition = _selectableRange.Clamp(TextBox().Start());
@@ -299,20 +419,67 @@ namespace krys::boo
 
       // FIXME: Document markers, highlights and dragged and transparent content come with editing.
     }
-    // FIXME: The selection's marked text comes with selection.
+    // The selection marked text acts as a placeholder when computing the marked texts for the gaps...
+    if (shouldPaintSelectionForeground)
+    {
+      krys_debug_assert(!_isPrinting);
+      auto selectionMarkedText = CreateMarkedTextFromSelectionInBox();
+      if (!selectionMarkedText.IsEmpty())
+      {
+        markedTexts.push_back(krys::move(selectionMarkedText));
+      }
+    }
 
     auto styledMarkedTexts =
       StyledMarkedText::SubdivideAndResolve(markedTexts, _renderer, _isFirstLine, _paintInfo);
 
+    // ... now remove the selection marked text if we are excluding selection.
+    if (!_isPrinting && _paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection))
+    {
+      std::erase_if(styledMarkedTexts, [](const StyledMarkedText &markedText)
+                    { return markedText.MarkedType == MarkedText::Type::Selection; });
+    }
+
     if (hasDecoration && _paintInfo.Phase != PaintPhase::Selection)
     {
-      // FIXME: Clipping decorations out of an excluded selection comes with selection.
+      uint32 length = _selectableRange.Truncation ? *_selectableRange.Truncation : _paintTextRun.Length();
+      uint32 selectionStart = 0;
+      uint32 selectionEnd = 0;
+      if (_haveSelection)
+      {
+        std::tie(selectionStart, selectionEnd) = SelectionStartEnd();
+      }
+
+      FloatRect textDecorationSelectionClipOutRect;
+      if ((_paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection))
+          && selectionStart < selectionEnd && selectionEnd <= length)
+      {
+        textDecorationSelectionClipOutRect = _paintRect;
+        float logicalWidthBeforeRange;
+        float logicalWidthAfterRange;
+        float logicalSelectionWidth = GetFontCascade().WidthOfTextRange(
+          _paintTextRun, selectionStart, selectionEnd, logicalWidthBeforeRange, logicalWidthAfterRange);
+        // FIXME: Do we need to handle vertical bottom to top text?
+        if (!TextBox().IsHorizontal())
+        {
+          textDecorationSelectionClipOutRect.Move(0, logicalWidthBeforeRange);
+          textDecorationSelectionClipOutRect.SetHeight(logicalSelectionWidth);
+        }
+        else if (TextBox().Direction() == TextDirection::RTL)
+        {
+          textDecorationSelectionClipOutRect.Move(logicalWidthAfterRange, 0);
+          textDecorationSelectionClipOutRect.SetWidth(logicalSelectionWidth);
+        }
+        else
+        {
+          textDecorationSelectionClipOutRect.Move(logicalWidthBeforeRange, 0);
+          textDecorationSelectionClipOutRect.SetWidth(logicalSelectionWidth);
+        }
+      }
 
       // Coalesce styles of adjacent marked texts to minimize the number of drawing commands.
       auto coalescedStyledMarkedTexts =
         StyledMarkedText::CoalesceAdjacentWithEqualDecorations(styledMarkedTexts);
-
-      FloatRect textDecorationSelectionClipOutRect;
 
       for (auto &markedText : coalescedStyledMarkedTexts)
       {

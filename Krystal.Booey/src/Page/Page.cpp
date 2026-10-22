@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
@@ -167,7 +168,12 @@ namespace krys::boo
                         }
                       });
 
-    // FIXME: Paint and event timing, selection appearance and highlights, once there are any.
+    // FIXME: Paint and event timing, once there are any.
+
+    ForEachDocument([](dom::Document &document)
+                    { document.Selection().UpdateAppearanceAfterUpdatingRendering(); });
+
+    // FIXME: Highlight positions (updateHighlightPositions), with the Highlight API.
   }
 
   void Page::RenderingUpdateCompleted() noexcept

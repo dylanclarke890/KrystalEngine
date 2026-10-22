@@ -33,7 +33,9 @@ namespace krys::boo::dom
     IsUserActionElement = 1 << 16,
     /// @brief Set on the `PseudoElement`s generated for `::before` and `::after`.
     IsPseudoElement = 1 << 17,
+    /// @brief Set on a node an end point of the frame's selection is anchored in, and on its ancestors.
+    ContainsSelectionEndPoint = 1 << 18,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 18u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 19u);

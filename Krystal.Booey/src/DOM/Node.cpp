@@ -516,6 +516,26 @@ namespace krys::boo::dom
     return parent && !parent->IsShadowRootNode() ? parent : nullptr;
   }
 
+  Node *Node::NonBoundaryShadowTreeRootNode() noexcept
+  {
+    krys_debug_assert(!IsShadowRootNode());
+    Node *root = this;
+    while (root)
+    {
+      if (root->IsShadowRootNode())
+      {
+        return root;
+      }
+      Node *parent = root->ParentNode();
+      if (parent && parent->IsShadowRootNode())
+      {
+        return root;
+      }
+      root = parent;
+    }
+    return nullptr;
+  }
+
   bool Node::IsDescendantOf(const Node *other) const noexcept
   {
     return other && TreeQueries::IsDescendant(*this, *other);

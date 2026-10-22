@@ -12,8 +12,9 @@ namespace krys::boo
 {
   KRYS_NODISCARD static StyledMarkedText ResolveStyleForMarkedText(const MarkedText &markedText,
                                                                    const StyledMarkedText::Style &baseStyle,
-                                                                   const RenderText &, const RenderStyle &,
-                                                                   const PaintInfo &) noexcept
+                                                                   const RenderText &renderer,
+                                                                   const RenderStyle &lineStyle,
+                                                                   const PaintInfo &paintInfo) noexcept
   {
     auto style = baseStyle;
     switch (markedText.MarkedType)
@@ -35,9 +36,19 @@ namespace krys::boo
       case MarkedText::Type::DraggedContent:     style.Alpha = 0.25; break;
       case MarkedText::Type::TransparentContent: style.Alpha = 0.0; break;
       case MarkedText::Type::Selection:
-        // FIXME: The selection's paint style and background (computeTextSelectionPaintStyle,
-        // selectionBackgroundColor) come with selection.
+      {
+        style.TextStyles =
+          ComputeTextSelectionPaintStyle(style.TextStyles, renderer, lineStyle, paintInfo, style.TextShadow);
+
+        Color selectionBackgroundColor = renderer.SelectionBackgroundColor();
+        style.BackgroundColor = selectionBackgroundColor;
+        if (selectionBackgroundColor.IsValid() && selectionBackgroundColor.IsVisible()
+            && style.TextStyles.FillColor == selectionBackgroundColor)
+        {
+          style.BackgroundColor = selectionBackgroundColor.InvertedColorWithAlpha(1.0);
+        }
         break;
+      }
     }
     StyledMarkedText styledMarkedText = markedText;
     styledMarkedText.MarkedStyle = krys::move(style);

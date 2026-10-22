@@ -1941,4 +1941,257 @@ namespace krys::boo
                                           MapCoordinatesMode::UseTransforms, wasFixed));
     }
   }
+
+#pragma region Selection
+
+  namespace
+  {
+    KRYS_NODISCARD LayoutRect SnappedSelectionRect(const LayoutRect &selectionRect, float logicalRight,
+                                                   WritingMode writingMode) noexcept
+    {
+      auto snappedSelectionRect = EnclosingIntRect(selectionRect);
+      LayoutUnit logicalWidth {snappedSelectionRect.Width()};
+      if (static_cast<float>(snappedSelectionRect.X()) > logicalRight)
+      {
+        logicalWidth = 0_lu;
+      }
+      else if (static_cast<float>(snappedSelectionRect.MaxX()) > logicalRight)
+      {
+        logicalWidth = LayoutUnit {logicalRight - static_cast<float>(snappedSelectionRect.X())};
+      }
+
+      if (writingMode.IsHorizontal())
+      {
+        return {LayoutUnit {snappedSelectionRect.X()}, selectionRect.Y(), logicalWidth,
+                selectionRect.Height()};
+      }
+      return {selectionRect.Y(), LayoutUnit {snappedSelectionRect.X()}, selectionRect.Height(), logicalWidth};
+    }
+
+    // FIXME: SVG text boxes (localSelectionRect), once there's SVG text.
+    KRYS_NODISCARD LayoutRect SelectionRectForTextBox(const inline_iterator::TextBox &textBox,
+                                                      uint32 rangeStart, uint32 rangeEnd) noexcept
+    {
+      bool isCaretCase = rangeStart == rangeEnd;
+
+      auto [clampedStart, clampedEnd] = textBox.SelectableRange().Clamp(rangeStart, rangeEnd);
+
+      if (clampedStart >= clampedEnd)
+      {
+        if (isCaretCase)
+        {
+          // handle unitary range, e.g.: representing caret position
+          bool isCaretWithinTextBox = rangeStart >= textBox.Start() && rangeStart < textBox.End();
+          // For last text box in a InlineTextBox chain, we allow the caret to move to a position 'after' the
+          // end of the last text box.
+          bool isCaretWithinLastTextBox = rangeStart >= textBox.Start() && rangeStart <= textBox.End();
+
+          auto isLastTextBox = !textBox.NextTextBox();
+
+          if ((isLastTextBox && !isCaretWithinLastTextBox) || (!isLastTextBox && !isCaretWithinTextBox))
+          {
+            return {};
+          }
+        }
+        else
+        {
+          bool isRangeWithinTextBox = (rangeStart >= textBox.Start() && rangeStart <= textBox.End());
+          if (!isRangeWithinTextBox)
+          {
+            return {};
+          }
+        }
+      }
+
+      auto lineSelectionRect = LineSelection::LogicalRect(*textBox.GetLineBox());
+      auto selectionRect =
+        LayoutRect {0_lu, LayoutUnit {lineSelectionRect.Y()}, LayoutUnit {textBox.LogicalWidth()},
+                    LayoutUnit {lineSelectionRect.Height()}};
+
+      auto textRun = textBox.GetTextRun();
+      if (clampedStart || clampedEnd != textRun.Length())
+      {
+        textBox.GetFontCascade().AdjustSelectionRectForText(
+          textBox.Renderer().CanUseSimplifiedTextMeasuring().value_or(false), textRun, selectionRect,
+          clampedStart, clampedEnd);
+      }
+
+      if (!textBox.GetWritingMode().IsLogicalLeftLineLeft())
+      {
+        selectionRect.SetX(LayoutUnit {textBox.LogicalWidth()} - selectionRect.MaxX());
+      }
+      selectionRect.Move(LayoutUnit {textBox.LogicalLeftIgnoringInlineDirection()}, 0_lu);
+
+      return SnappedSelectionRect(selectionRect, textBox.LogicalRightIgnoringInlineDirection(),
+                                  textBox.GetWritingMode());
+    }
+
+    KRYS_NODISCARD Maybe<IntRect> EllipsisRectForTextBox(const inline_iterator::TextBox &textBox,
+                                                         uint32 start, uint32 end) noexcept
+    {
+      auto lineBox = textBox.GetLineBox();
+      if (!lineBox->HasEllipsis())
+      {
+        return {};
+      }
+
+      auto selectableRange = textBox.SelectableRange();
+      if (!selectableRange.Truncation)
+      {
+        return {};
+      }
+
+      auto ellipsisStartPosition = std::max<int64>(static_cast<int64>(start) - selectableRange.Start, 0);
+      auto ellipsisEndPosition =
+        std::min<int64>(static_cast<int64>(end) - selectableRange.Start, selectableRange.Length);
+      // The ellipsis should be considered to be selected if the end of
+      // the selection is past the beginning of the truncation and the
+      // beginning of the selection is before or at the beginning of the truncation.
+      if (ellipsisEndPosition < *selectableRange.Truncation
+          && ellipsisStartPosition > *selectableRange.Truncation)
+      {
+        return {};
+      }
+
+      return EnclosingIntRect(
+        lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
+    }
+  }
+
+  Color RenderText::SelectionBackgroundColor() const noexcept
+  {
+    if (auto *ancestor = FirstNonAnonymousAncestor())
+    {
+      return ancestor->SelectionBackgroundColor();
+    }
+    return {};
+  }
+
+  Color RenderText::SelectionForegroundColor() const noexcept
+  {
+    if (auto *ancestor = FirstNonAnonymousAncestor())
+    {
+      return ancestor->SelectionForegroundColor();
+    }
+    return {};
+  }
+
+  Color RenderText::SelectionEmphasisMarkColor() const noexcept
+  {
+    if (auto *ancestor = FirstNonAnonymousAncestor())
+    {
+      return ancestor->SelectionEmphasisMarkColor();
+    }
+    return {};
+  }
+
+  UniquePtr<RenderStyle> RenderText::SelectionPseudoStyle() const noexcept
+  {
+    if (auto *ancestor = FirstNonAnonymousAncestor())
+    {
+      return ancestor->SelectionPseudoStyle();
+    }
+    return nullptr;
+  }
+
+  void RenderText::SetSelectionState(HighlightState state) noexcept
+  {
+    RenderObject::SetSelectionState(state);
+
+    // The containing block can be null in case of an orphaned tree.
+    auto *containingBlock = ContainingBlock();
+    if (containingBlock && !containingBlock->IsRenderView())
+    {
+      containingBlock->SetSelectionState(state);
+    }
+  }
+
+  LayoutRect
+    RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
+                                                       bool clipToVisibleContent,
+                                                       List<FloatQuad> &quads) noexcept
+  {
+    return CollectSelectionGeometriesForLineBoxes(repaintContainer, clipToVisibleContent, &quads);
+  }
+
+  LayoutRect
+    RenderText::CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
+                                                       bool clipToVisibleContent,
+                                                       List<FloatQuad> *quads) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+
+    if (SelectionState() == HighlightState::None)
+    {
+      return {};
+    }
+    if (!ContainingBlock())
+    {
+      return {};
+    }
+
+    // Now calculate startPos and endPos for painting selection.
+    // We include a selection while endPos > 0
+    uint32 startOffset;
+    uint32 endOffset;
+    if (SelectionState() == HighlightState::Inside)
+    {
+      // We are fully selected.
+      startOffset = 0;
+      endOffset = static_cast<uint32>(Text().size());
+    }
+    else
+    {
+      startOffset = View().Selection().StartOffset();
+      endOffset = View().Selection().EndOffset();
+      if (SelectionState() == HighlightState::Start)
+      {
+        endOffset = static_cast<uint32>(Text().size());
+      }
+      else if (SelectionState() == HighlightState::End)
+      {
+        startOffset = 0;
+      }
+    }
+
+    if (startOffset == endOffset)
+    {
+      return {};
+    }
+
+    LayoutRect resultRect;
+
+    for (const auto &textBox : inline_iterator::TextBoxesFor(*this))
+    {
+      LayoutRect rect;
+      rect.Unite(SelectionRectForTextBox(textBox, startOffset, endOffset));
+      rect.Unite(LayoutRect(EllipsisRectForTextBox(textBox, startOffset, endOffset).value_or(IntRect {})));
+      if (rect.IsEmpty())
+      {
+        continue;
+      }
+
+      resultRect.Unite(rect);
+
+      if (quads)
+      {
+        quads->push_back(LocalToContainerQuad(FloatQuad(FloatRect(rect)), repaintContainer));
+      }
+    }
+
+    if (clipToVisibleContent)
+    {
+      return ComputeRectForRepaint(resultRect, repaintContainer);
+    }
+    return LayoutRect(
+      LocalToContainerQuad(FloatQuad(FloatRect(resultRect)), repaintContainer).EnclosingBoundingBox());
+  }
+
+  LayoutRect RenderText::SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                 bool clipToVisibleContent) noexcept
+  {
+    return CollectSelectionGeometriesForLineBoxes(repaintContainer, clipToVisibleContent, nullptr);
+  }
+
+#pragma endregion
 }

@@ -4,13 +4,16 @@
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
+#include "Krystal.Booey/Rendering/LogicalSelectionOffsetCachesInlines.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -18,6 +21,7 @@
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
+#include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -2270,7 +2274,12 @@ namespace krys::boo
       }
     }
 
-    // FIXME: 3. Selection gaps (paintSelection) come with selection.
+    // 3. paint selection
+    if (!GetDocument().Printing())
+    {
+      // Fill in gaps in selection on lines, between blocks and "empty space" when content is skipped.
+      PaintSelection(paintInfo, scrolledOffset);
+    }
 
     if (shouldPaintContent)
     {
@@ -2640,4 +2649,536 @@ namespace krys::boo
     offset += ToLayoutSize(LayoutPoint(GetScrollPosition()));
     offset = FlipForWritingMode(offset);
   }
+
+#pragma region Selection
+
+  namespace
+  {
+    void ClipOutOutOfFlowBoxes(const PaintInfo *paintInfo, const LayoutPoint &offset,
+                               TrackedRendererListHashSet *outOfFlowBoxes) noexcept
+    {
+      if (!outOfFlowBoxes)
+      {
+        return;
+      }
+
+      for (auto *renderer : *outOfFlowBoxes)
+      {
+        paintInfo->Context().ClipOut(FloatRect(
+          IntRect(offset.X().ToInt() + renderer->X().ToInt(), offset.Y().ToInt() + renderer->Y().ToInt(),
+                  renderer->Width().ToInt(), renderer->Height().ToInt())));
+      }
+    }
+  }
+
+  LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
+                                  const LayoutSize &offsetFromRootBlock) noexcept
+  {
+    return rootBlock.IsHorizontalWritingMode() ? offsetFromRootBlock.Height() : offsetFromRootBlock.Width();
+  }
+
+  LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
+                                   const LayoutSize &offsetFromRootBlock) noexcept
+  {
+    return rootBlock.IsHorizontalWritingMode() ? offsetFromRootBlock.Width() : offsetFromRootBlock.Height();
+  }
+
+  bool RenderBlock::ShouldPaintSelectionGaps() const noexcept
+  {
+    return SelectionState() != HighlightState::None && Style().UsedVisibility() == Visibility::Visible
+           && IsSelectionRoot();
+  }
+
+  // FIXME: Reflections (hasReflection), once there are any.
+  bool RenderBlock::IsSelectionRoot() const noexcept
+  {
+    if (IsPseudoElement())
+    {
+      return false;
+    }
+    krys_debug_assert(GetElement() || IsAnonymous());
+
+    // FIXME: Eventually tables should have to learn how to fill gaps between cells, at least in simple
+    // non-spanning cases.
+    if (IsRenderTable())
+    {
+      return false;
+    }
+
+    if (IsBody() || IsDocumentElementRenderer() || HasNonVisibleOverflow() || IsPositioned() || IsFloating()
+        || IsRenderTableCell() || IsNonReplacedAtomicInlineLevelBox() || IsTransformed() || HasMask()
+        || IsWritingModeRoot() || IsRenderFragmentedFlow() || Style().GetColumnSpan() == ColumnSpan::All
+        || IsFlexItemIncludingDeprecated() || IsGridItem())
+    {
+      return true;
+    }
+
+    if (auto *start = View().Selection().Start())
+    {
+      auto *startElement = start->GetNode();
+      if (startElement && startElement->RootEditableElement() == GetElement())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  GapRects RenderBlock::SelectionGapRectsForRepaint(const RenderLayerModelObject *repaintContainer) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+
+    if (!ShouldPaintSelectionGaps())
+    {
+      return {};
+    }
+
+    FloatPoint containerPoint = LocalToContainerPoint(FloatPoint(), repaintContainer);
+    LayoutPoint offsetFromRepaintContainer(containerPoint - ToFloatSize(FloatPoint(GetScrollPosition())));
+
+    LogicalSelectionOffsetCaches cache(*this);
+    LayoutUnit lastTop;
+    LayoutUnit lastLeft = LogicalLeftSelectionOffset(*this, lastTop, cache);
+    LayoutUnit lastRight = LogicalRightSelectionOffset(*this, lastTop, cache);
+
+    return SelectionGaps(*this, offsetFromRepaintContainer, LayoutSize(), lastTop, lastLeft, lastRight,
+                         cache);
+  }
+
+  void RenderBlock::PaintSelection(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (ShouldPaintSelectionGaps() && paintInfo.Phase == PaintPhase::Foreground)
+    {
+      LogicalSelectionOffsetCaches cache(*this);
+      LayoutUnit lastTop;
+      LayoutUnit lastLeft = LogicalLeftSelectionOffset(*this, lastTop, cache);
+      LayoutUnit lastRight = LogicalRightSelectionOffset(*this, lastTop, cache);
+      GraphicsContextStateSaver stateSaver(paintInfo.Context());
+
+      LayoutRect gapRectsBounds =
+        SelectionGaps(*this, paintOffset, LayoutSize(), lastTop, lastLeft, lastRight, cache, &paintInfo);
+      if (!gapRectsBounds.IsEmpty())
+      {
+        if (auto *layer = EnclosingLayer())
+        {
+          gapRectsBounds.MoveBy(-paintOffset);
+          if (!HasLayer())
+          {
+            LayoutRect localBounds(gapRectsBounds);
+            FlipForWritingMode(localBounds);
+            gapRectsBounds =
+              LayoutRect(LocalToContainerQuad(FloatQuad(FloatRect(localBounds)), &layer->Renderer())
+                           .EnclosingBoundingBox());
+            if (auto *layerBox = DynamicDowncast<RenderBox>(layer->Renderer()))
+            {
+              gapRectsBounds.MoveBy(LayoutPoint(layerBox->GetScrollPosition()));
+            }
+          }
+          layer->AddBlockSelectionGapsBounds(gapRectsBounds);
+        }
+      }
+    }
+  }
+
+  LayoutRect RenderBlock::LogicalRectToPhysicalRect(const LayoutPoint &rootBlockPhysicalPosition,
+                                                    const LayoutRect &logicalRect) const noexcept
+  {
+    LayoutRect result;
+    if (IsHorizontalWritingMode())
+    {
+      result = logicalRect;
+    }
+    else
+    {
+      result = LayoutRect(logicalRect.Y(), logicalRect.X(), logicalRect.Height(), logicalRect.Width());
+    }
+    FlipForWritingMode(result);
+    result.MoveBy(rootBlockPhysicalPosition);
+    return result;
+  }
+
+  GapRects RenderBlock::SelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                                      const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                                      LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                                      const LogicalSelectionOffsetCaches &cache,
+                                      const PaintInfo *paintInfo) noexcept
+  {
+    // IMPORTANT: Callers of this method that intend for painting to happen need to do a save/restore.
+    // Clip out floating and positioned objects when painting selection gaps.
+    if (paintInfo)
+    {
+      // Note that we don't clip out overflow for positioned objects.  We just stick to the border box.
+      LayoutRect flippedBlockRect(offsetFromRootBlock.Width(), offsetFromRootBlock.Height(), Width(),
+                                  Height());
+      rootBlock.FlipForWritingMode(flippedBlockRect);
+      flippedBlockRect.MoveBy(rootBlockPhysicalPosition);
+      ClipOutOutOfFlowBoxes(paintInfo, flippedBlockRect.Location(), OutOfFlowBoxes());
+      // The <body> must make sure to examine its containingBlock's positioned objects.
+      if (IsBody() || IsDocumentElementRenderer())
+      {
+        for (auto *cb = ContainingBlock(); cb && !Is<RenderView>(*cb); cb = cb->ContainingBlock())
+        {
+          // FIXME: Not right for flipped writing modes.
+          ClipOutOutOfFlowBoxes(paintInfo, LayoutPoint(cb->X(), cb->Y()), cb->OutOfFlowBoxes());
+        }
+      }
+      ClipOutFloatingBoxes(rootBlock, paintInfo, rootBlockPhysicalPosition, offsetFromRootBlock);
+    }
+
+    // FIXME: overflow: auto/scroll fragments need more math here, since painting in the border box is
+    // different from painting in the padding box (one is scrolled, the other is fixed).
+    if (!Is<RenderBlockFlow>(*this))
+    {
+      // FIXME: Make multi-column selection gap filling work someday.
+      return {};
+    }
+
+    if (IsFlexItem() || IsGridItem() || IsDeprecatedFlexItem())
+    {
+      // FIXME: Adding a selection gap to these blocks would produce correct (visual) result only if we could
+      // also paint selection gaps between them, as we do for blocks in a BFC. Returning an empty gap rect
+      // here means we only paint the selection over the content, as opposed to expand it all the way to the
+      // end of the container.
+      return {};
+    }
+
+    if (IsTransformed() || Style().GetColumnSpan() == ColumnSpan::All || IsRenderFragmentedFlow())
+    {
+      // FIXME: We should learn how to gap fill multiple columns and transforms eventually.
+      lastLogicalTop = BlockDirectionOffset(rootBlock, offsetFromRootBlock) + LogicalHeight();
+      lastLogicalLeft = LogicalLeftSelectionOffset(rootBlock, LogicalHeight(), cache);
+      lastLogicalRight = LogicalRightSelectionOffset(rootBlock, LogicalHeight(), cache);
+      return {};
+    }
+
+    GapRects result;
+    if (ChildrenInline())
+    {
+      result = InlineSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop,
+                                   lastLogicalLeft, lastLogicalRight, cache, paintInfo);
+    }
+    else
+    {
+      result = BlockSelectionGaps(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, lastLogicalTop,
+                                  lastLogicalLeft, lastLogicalRight, cache, paintInfo);
+    }
+
+    // Fill the vertical gap all the way to the bottom of our block if the selection extends past our block.
+    if (&rootBlock == this
+        && (SelectionState() != HighlightState::Both && SelectionState() != HighlightState::End))
+    {
+      result.UniteCenter(BlockSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock,
+                                           lastLogicalTop, lastLogicalLeft, lastLogicalRight, LogicalHeight(),
+                                           cache, paintInfo));
+    }
+
+    return result;
+  }
+
+  GapRects RenderBlock::InlineSelectionGaps(RenderBlock &, const LayoutPoint &, const LayoutSize &,
+                                            LayoutUnit &, LayoutUnit &, LayoutUnit &,
+                                            const LogicalSelectionOffsetCaches &, const PaintInfo *) noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  GapRects RenderBlock::BlockSelectionGaps(RenderBlock &rootBlock,
+                                           const LayoutPoint &rootBlockPhysicalPosition,
+                                           const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                                           LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                                           const LogicalSelectionOffsetCaches &cache,
+                                           const PaintInfo *paintInfo) noexcept
+  {
+    krys_debug_assert(!IsSkippedContent());
+
+    if (IsSkippedContentRoot(*this))
+    {
+      return {};
+    }
+
+    // Jump right to the first block child that contains some selected objects.
+    RenderBox *curr;
+    for (curr = FirstChildBox(); curr && curr->SelectionState() == HighlightState::None;
+         curr = curr->NextSiblingBox())
+    {
+    }
+
+    if (!curr)
+    {
+      return {};
+    }
+
+    LogicalSelectionOffsetCaches childCache(*this, cache);
+
+    GapRects result;
+    for (bool sawSelectionEnd = false; curr && !sawSelectionEnd; curr = curr->NextSiblingBox())
+    {
+      HighlightState childState = curr->SelectionState();
+      if (childState == HighlightState::Both || childState == HighlightState::End)
+      {
+        sawSelectionEnd = true;
+      }
+
+      if (curr->IsFloatingOrOutOfFlowPositioned())
+      {
+        continue; // We must be a normal flow object in order to even be considered.
+      }
+
+      if (curr->IsInFlowPositioned() && curr->HasLayer())
+      {
+        // If the relposition offset is anything other than 0, then treat this just like an absolute
+        // positioned element. Just disregard it completely.
+        LayoutSize relOffset = curr->Layer()->OffsetForInFlowPosition();
+        if (relOffset.Width() || relOffset.Height())
+        {
+          continue;
+        }
+      }
+
+      // FIXME: Eventually we won't special-case table and other layout roots like this.
+      auto propagatesSelectionToChildren = Is<RenderTable>(*curr) || Is<RenderFlexibleBox>(*curr)
+                                           || Is<RenderDeprecatedFlexibleBox>(*curr) || Is<RenderGrid>(*curr);
+      auto paintsOwnSelection = curr->ShouldPaintSelectionGaps() || propagatesSelectionToChildren;
+      bool fillBlockGaps =
+        paintsOwnSelection || (curr->CanBeSelectionLeaf() && childState != HighlightState::None);
+      if (fillBlockGaps)
+      {
+        // We need to fill the vertical gap above this object.
+        if (childState == HighlightState::End || childState == HighlightState::Inside)
+        {
+          // Fill the gap above the object.
+          result.UniteCenter(BlockSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock,
+                                               lastLogicalTop, lastLogicalLeft, lastLogicalRight,
+                                               curr->LogicalTop(), cache, paintInfo));
+        }
+
+        // Only fill side gaps for objects that paint their own selection if we know for sure the selection is
+        // going to extend all the way *past* our object.  We know this if the selection did not end inside
+        // our object.
+        if (paintsOwnSelection && (childState == HighlightState::Start || sawSelectionEnd))
+        {
+          childState = HighlightState::None;
+        }
+
+        // Fill side gaps on this object based off its state.
+        bool leftGap;
+        bool rightGap;
+        GetSelectionGapInfo(childState, leftGap, rightGap);
+
+        if (leftGap)
+        {
+          result.UniteLeft(LogicalLeftSelectionGap(rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock,
+                                                   this, curr->LogicalLeft(), curr->LogicalTop(),
+                                                   curr->LogicalHeight(), cache, paintInfo));
+        }
+        if (rightGap)
+        {
+          result.UniteRight(LogicalRightSelectionGap(
+            rootBlock, rootBlockPhysicalPosition, offsetFromRootBlock, this, curr->LogicalRight(),
+            curr->LogicalTop(), curr->LogicalHeight(), cache, paintInfo));
+        }
+
+        // Update lastLogicalTop to be just underneath the object.  lastLogicalLeft and lastLogicalRight
+        // extend as far as they can without bumping into floating or positioned objects.  Ideally they will
+        // go right up to the border of the root selection block.
+        lastLogicalTop = BlockDirectionOffset(rootBlock, offsetFromRootBlock) + curr->LogicalBottom();
+        lastLogicalLeft = LogicalLeftSelectionOffset(rootBlock, curr->LogicalBottom(), cache);
+        lastLogicalRight = LogicalRightSelectionOffset(rootBlock, curr->LogicalBottom(), cache);
+      }
+      else if (childState != HighlightState::None)
+      {
+        if (auto *renderBlock = DynamicDowncast<RenderBlock>(*curr))
+        {
+          // We must be a block that has some selected object inside it, so recur.
+          result.Unite(renderBlock->SelectionGaps(
+            rootBlock, rootBlockPhysicalPosition,
+            LayoutSize(offsetFromRootBlock.Width() + curr->X(), offsetFromRootBlock.Height() + curr->Y()),
+            lastLogicalTop, lastLogicalLeft, lastLogicalRight, childCache, paintInfo));
+        }
+      }
+    }
+    return result;
+  }
+
+  LayoutRect RenderBlock::BlockSelectionGap(RenderBlock &rootBlock,
+                                            const LayoutPoint &rootBlockPhysicalPosition,
+                                            const LayoutSize &offsetFromRootBlock, LayoutUnit lastLogicalTop,
+                                            LayoutUnit lastLogicalLeft, LayoutUnit lastLogicalRight,
+                                            LayoutUnit logicalBottom,
+                                            const LogicalSelectionOffsetCaches &cache,
+                                            const PaintInfo *paintInfo) noexcept
+  {
+    LayoutUnit logicalTop = lastLogicalTop;
+    LayoutUnit logicalHeight =
+      BlockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalBottom - logicalTop;
+    if (logicalHeight <= 0)
+    {
+      return {};
+    }
+
+    // Get the selection offsets for the bottom of the gap
+    LayoutUnit logicalLeft =
+      std::max(lastLogicalLeft, LogicalLeftSelectionOffset(rootBlock, logicalBottom, cache));
+    LayoutUnit logicalRight =
+      std::min(lastLogicalRight, LogicalRightSelectionOffset(rootBlock, logicalBottom, cache));
+    LayoutUnit logicalWidth = logicalRight - logicalLeft;
+    if (logicalWidth <= 0)
+    {
+      return {};
+    }
+
+    LayoutRect gapRect = rootBlock.LogicalRectToPhysicalRect(
+      rootBlockPhysicalPosition, LayoutRect(logicalLeft, logicalTop, logicalWidth, logicalHeight));
+    if (paintInfo)
+    {
+      paintInfo->Context().FillRect(SnapRectToDevicePixels(gapRect, GetDocument().DeviceScaleFactor()),
+                                    SelectionBackgroundColor());
+    }
+    return gapRect;
+  }
+
+  LayoutRect RenderBlock::LogicalLeftSelectionGap(RenderBlock &rootBlock,
+                                                  const LayoutPoint &rootBlockPhysicalPosition,
+                                                  const LayoutSize &offsetFromRootBlock,
+                                                  RenderElement *selObj, LayoutUnit logicalLeft,
+                                                  LayoutUnit logicalTop, LayoutUnit logicalHeight,
+                                                  const LogicalSelectionOffsetCaches &cache,
+                                                  const PaintInfo *paintInfo) noexcept
+  {
+    LayoutUnit rootBlockLogicalTop = BlockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalTop;
+    LayoutUnit rootBlockLogicalLeft =
+      std::max(LogicalLeftSelectionOffset(rootBlock, logicalTop, cache),
+               LogicalLeftSelectionOffset(rootBlock, logicalTop + logicalHeight, cache));
+    LayoutUnit rootBlockLogicalRight =
+      std::min(InlineDirectionOffset(rootBlock, offsetFromRootBlock) + logicalLeft,
+               std::min(LogicalRightSelectionOffset(rootBlock, logicalTop, cache),
+                        LogicalRightSelectionOffset(rootBlock, logicalTop + logicalHeight, cache)));
+    LayoutUnit rootBlockLogicalWidth = rootBlockLogicalRight - rootBlockLogicalLeft;
+    if (rootBlockLogicalWidth <= 0)
+    {
+      return {};
+    }
+
+    LayoutRect gapRect = rootBlock.LogicalRectToPhysicalRect(
+      rootBlockPhysicalPosition,
+      LayoutRect(rootBlockLogicalLeft, rootBlockLogicalTop, rootBlockLogicalWidth, logicalHeight));
+    if (paintInfo)
+    {
+      paintInfo->Context().FillRect(SnapRectToDevicePixels(gapRect, GetDocument().DeviceScaleFactor()),
+                                    selObj->SelectionBackgroundColor());
+    }
+    return gapRect;
+  }
+
+  LayoutRect RenderBlock::LogicalRightSelectionGap(RenderBlock &rootBlock,
+                                                   const LayoutPoint &rootBlockPhysicalPosition,
+                                                   const LayoutSize &offsetFromRootBlock,
+                                                   RenderElement *selObj, LayoutUnit logicalRight,
+                                                   LayoutUnit logicalTop, LayoutUnit logicalHeight,
+                                                   const LogicalSelectionOffsetCaches &cache,
+                                                   const PaintInfo *paintInfo) noexcept
+  {
+    LayoutUnit rootBlockLogicalTop = BlockDirectionOffset(rootBlock, offsetFromRootBlock) + logicalTop;
+    LayoutUnit rootBlockLogicalLeft =
+      std::max(InlineDirectionOffset(rootBlock, offsetFromRootBlock) + logicalRight,
+               std::max(LogicalLeftSelectionOffset(rootBlock, logicalTop, cache),
+                        LogicalLeftSelectionOffset(rootBlock, logicalTop + logicalHeight, cache)));
+    LayoutUnit rootBlockLogicalRight =
+      std::min(LogicalRightSelectionOffset(rootBlock, logicalTop, cache),
+               LogicalRightSelectionOffset(rootBlock, logicalTop + logicalHeight, cache));
+    LayoutUnit rootBlockLogicalWidth = rootBlockLogicalRight - rootBlockLogicalLeft;
+    if (rootBlockLogicalWidth <= 0)
+    {
+      return {};
+    }
+
+    LayoutRect gapRect = rootBlock.LogicalRectToPhysicalRect(
+      rootBlockPhysicalPosition,
+      LayoutRect(rootBlockLogicalLeft, rootBlockLogicalTop, rootBlockLogicalWidth, logicalHeight));
+    if (paintInfo)
+    {
+      paintInfo->Context().FillRect(SnapRectToDevicePixels(gapRect, GetDocument().DeviceScaleFactor()),
+                                    selObj->SelectionBackgroundColor());
+    }
+    return gapRect;
+  }
+
+  void RenderBlock::GetSelectionGapInfo(HighlightState state, bool &leftGap, bool &rightGap) const noexcept
+  {
+    bool ltr = GetWritingMode().IsLogicalLeftInlineStart();
+    leftGap = (state == HighlightState::Inside) || (state == HighlightState::End && ltr)
+              || (state == HighlightState::Start && !ltr);
+    rightGap = (state == HighlightState::Inside) || (state == HighlightState::Start && ltr)
+               || (state == HighlightState::End && !ltr);
+  }
+
+  LayoutUnit RenderBlock::LogicalLeftSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
+                                                     const LogicalSelectionOffsetCaches &cache) noexcept
+  {
+    LayoutUnit logicalLeft = LogicalLeftOffsetForLine(position);
+    if (logicalLeft == LogicalLeftOffsetForContent())
+    {
+      // The border can potentially be further extended by our ContainingBlock().
+      if (&rootBlock != this)
+      {
+        return cache.GetContainingBlockInfo(*this).LogicalLeftSelectionOffset(rootBlock,
+                                                                              position + LogicalTop());
+      }
+      return logicalLeft;
+    }
+
+    RenderBlock *cb = this;
+    const LogicalSelectionOffsetCaches *currentCache = &cache;
+    while (cb != &rootBlock)
+    {
+      logicalLeft += cb->LogicalLeft();
+
+      krys_debug_assert(currentCache);
+      const auto &info = currentCache->GetContainingBlockInfo(*cb);
+      cb = info.Block();
+      if (!cb)
+      {
+        break;
+      }
+      currentCache = info.Cache();
+    }
+    return logicalLeft;
+  }
+
+  LayoutUnit RenderBlock::LogicalRightSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
+                                                      const LogicalSelectionOffsetCaches &cache) noexcept
+  {
+    LayoutUnit logicalRight = LogicalRightOffsetForLine(position);
+    if (logicalRight == LogicalRightOffsetForContent())
+    {
+      // The border can potentially be further extended by our ContainingBlock().
+      if (&rootBlock != this)
+      {
+        return cache.GetContainingBlockInfo(*this).LogicalRightSelectionOffset(rootBlock,
+                                                                               position + LogicalTop());
+      }
+      return logicalRight;
+    }
+
+    RenderBlock *cb = this;
+    const LogicalSelectionOffsetCaches *currentCache = &cache;
+    while (cb != &rootBlock)
+    {
+      logicalRight += cb->LogicalLeft();
+
+      krys_debug_assert(currentCache);
+      const auto &info = currentCache->GetContainingBlockInfo(*cb);
+      cb = info.Block();
+      if (!cb)
+      {
+        break;
+      }
+      currentCache = info.Cache();
+    }
+    return logicalRight;
+  }
+
+#pragma endregion
 }

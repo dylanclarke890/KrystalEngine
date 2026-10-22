@@ -39,8 +39,9 @@ namespace krys::boo::layout_integration
     {
       return;
     }
-    // FIXME: The root's selection colours come with selection.
-    EllipsisBoxPainter {lineBox, _paintInfo, _paintOffset}.Paint();
+    EllipsisBoxPainter {lineBox, _paintInfo, _paintOffset, Root().SelectionForegroundColor(),
+                        Root().SelectionBackgroundColor()}
+      .Paint();
   }
 
   void InlineContentPainter::PaintDisplayBox(const inline_display::Box &box) noexcept

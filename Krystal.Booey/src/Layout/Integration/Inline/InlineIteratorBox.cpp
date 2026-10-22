@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 
@@ -142,6 +143,21 @@ namespace krys::boo::inline_iterator
   InlineBoxIterator Box::ParentInlineBox() const noexcept
   {
     return InlineBoxIterator {_path.ParentInlineBox()};
+  }
+
+  RenderObjectHighlightState Box::SelectionState() const noexcept
+  {
+    if (!HasRenderer())
+    {
+      return {};
+    }
+
+    if (auto *text = DynamicDowncast<TextBox>(*this))
+    {
+      const auto &renderer = text->Renderer();
+      return renderer.View().Selection().HighlightStateForTextBox(renderer, text->SelectableRange());
+    }
+    return Renderer().SelectionState();
   }
 
   LineBoxIterator Box::GetLineBox() const noexcept

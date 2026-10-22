@@ -14,6 +14,7 @@
 #include "Krystal.Booey/CSS/Values/PaintImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -71,6 +72,32 @@ namespace krys::boo
     }
     auto colorScheme = style->GetColorScheme().GetColorScheme();
     return colorScheme.Contains(ColorScheme::Dark) && !colorScheme.Contains(ColorScheme::Light);
+  }
+
+  // The platform's selection colours are Chrome's.
+  Color RenderTheme::ActiveSelectionBackgroundColor(style::ColorOptions options) noexcept
+  {
+    return TransformSelectionBackgroundColor(SRGBA<uint8> {51, 103, 209}, options);
+  }
+
+  Color RenderTheme::InactiveSelectionBackgroundColor(style::ColorOptions options) noexcept
+  {
+    return TransformSelectionBackgroundColor(SRGBA<uint8> {200, 200, 200}, options);
+  }
+
+  Color RenderTheme::TransformSelectionBackgroundColor(const Color &color, style::ColorOptions) noexcept
+  {
+    return BlendWithWhite(color);
+  }
+
+  Color RenderTheme::ActiveSelectionForegroundColor(style::ColorOptions) noexcept
+  {
+    return Color::white;
+  }
+
+  Color RenderTheme::InactiveSelectionForegroundColor(style::ColorOptions) noexcept
+  {
+    return SRGBA<uint8> {50, 50, 50};
   }
 
   style::ColorOptions DocumentStyleColorOptions(const dom::Document &document,

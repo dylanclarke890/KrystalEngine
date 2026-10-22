@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
@@ -157,6 +159,24 @@ namespace krys::ui::tests
     // Chrome on Windows rasterises glyphs with DirectWrite, whose hinting and contrast differ from
     // FreeType's, so its golden is only reported.
     CheckPage("text", 360u, 200u, true);
+  }
+
+  TEST_CASE("Golden: selection", "[UI][GPU][Golden]")
+  {
+    // The scene's script selects for Chrome; the page has no script here, so the selection is made the same
+    // way through the document. Chrome's golden is only reported: its glyphs are DirectWrite's, and it
+    // highlights only the text and line ends where the blocks here fill their selection gaps.
+    CheckPage("selection", 360u, 240u, true,
+              [](View &view)
+              {
+                auto &document = view.Document();
+                auto *start = document.GetElementById(u8"start")->FirstChild();
+                auto *end = document.GetElementById(u8"end")->FirstChild();
+                document.Selection().MoveTo(boo::dom::MakeContainerOffsetPosition(ShareRefPtr(start), 14),
+                                            boo::dom::MakeContainerOffsetPosition(ShareRefPtr(end), 8),
+                                            boo::Affinity::Downstream);
+                view.UpdateRendering();
+              });
   }
 
   TEST_CASE("Golden: decorations", "[UI][GPU][Golden]")

@@ -18,6 +18,11 @@ namespace krys::boo
 
   RenderLineBreak::~RenderLineBreak() noexcept = default;
 
+  bool RenderLineBreak::CanBeSelectionLeaf() const noexcept
+  {
+    return true;
+  }
+
   void RenderLineBreak::UpdateFromStyle() noexcept
   {
     krys_assert(IsInline());

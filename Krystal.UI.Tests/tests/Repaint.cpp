@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -1054,5 +1055,100 @@ namespace krys::ui::tests
     CHECK(view.Update(now + 200ms));
 
     std::filesystem::remove_all(directory);
+  }
+
+  TEST_CASE("View: dragging a selection leaves no stale pixels", "[UI][GPU]")
+  {
+    static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+    (void)fonts;
+
+    RepaintFixture fixture(240u, 160u);
+    View view({240, 160});
+    view.LoadHTML(u8"<!DOCTYPE html><style>"
+                  u8"body { margin: 8px; font: 14px/18px 'Liberation Sans' }"
+                  u8"p { margin: 0 0 6px } .box { margin: 0 20px; padding: 4px; background: #def }"
+                  u8"::selection { background: #f80; color: white }"
+                  u8"</style><p>The first paragraph wraps onto a second line here.</p>"
+                  u8"<div class=box><p>A nested block, with its own gaps.</p></div><p>The last one.</p>");
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+    };
+    frame();
+    CheckNoStalePixels(fixture, view, "selection-first");
+
+    TrackedRepaints repaints(view);
+    view.MousePressed({10, 14}, pal::MouseButton::Left);
+    frame();
+    // Down through the lines, then back up, each move repainting what the selection gained or lost.
+    const boo::IntPoint points[] = {{120, 14}, {60, 32}, {100, 60}, {40, 90}, {200, 90}, {80, 32}, {30, 14}};
+    int32 step = 0;
+    for (const auto &point : points)
+    {
+      repaints.Reset();
+      view.MouseMoved(point);
+      frame();
+      CHECK_FALSE(repaints.Bounds().IsEmpty());
+      CheckNoStalePixels(fixture, view, "selection-drag-" + std::to_string(++step));
+    }
+    view.MouseMoved({200, 90});
+    view.MouseReleased({200, 90}, pal::MouseButton::Left);
+    frame();
+    CHECK(view.Document().Selection().IsRange());
+    CheckNoStalePixels(fixture, view, "selection-released");
+
+    // Losing focus repaints the selection in the inactive colours, and a click clears it.
+    repaints.Reset();
+    view.SetFocused(false);
+    frame();
+    CheckNoStalePixels(fixture, view, "selection-inactive");
+    view.SetFocused(true);
+    // Inside the selection, and far enough from the press that started it not to count as a double click.
+    view.MousePressed({60, 32}, pal::MouseButton::Left);
+    view.MouseReleased({60, 32}, pal::MouseButton::Left);
+    frame();
+    CHECK_FALSE(view.Document().Selection().IsRange());
+    CheckNoStalePixels(fixture, view, "selection-cleared");
+  }
+
+  TEST_CASE("View: dragging a selection past the edge scrolls", "[UI][GPU]")
+  {
+    static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+    (void)fonts;
+
+    View view({240, 160});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 14px/20px 'Liberation Sans' }</style>"
+                  u8"<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p><p>10</p>"
+                  u8"<p>11</p><p>12</p><p>13</p><p>14</p><p>15</p><p>16</p><p>17</p><p>18</p>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&](std::chrono::milliseconds step)
+    {
+      time += step;
+      (void)view.Update(time);
+    };
+    frame(16ms);
+
+    view.MousePressed({5, 30}, pal::MouseButton::Left);
+    view.MouseMoved({5, 150});
+    view.MouseMoved({5, 200});
+    // The autoscroll timer scrolls toward the mouse every 50ms while it's held below the view.
+    for (int32 i = 0; i < 10; ++i)
+    {
+      frame(50ms);
+    }
+    CHECK(view.ScrollPosition().Y() > 0);
+    auto scrolled = view.ScrollPosition().Y();
+
+    // Releasing stops it.
+    view.MouseReleased({5, 200}, pal::MouseButton::Left);
+    for (int32 i = 0; i < 4; ++i)
+    {
+      frame(50ms);
+    }
+    CHECK(view.ScrollPosition().Y() == scrolled);
+    CHECK(view.Document().Selection().IsRange());
   }
 }

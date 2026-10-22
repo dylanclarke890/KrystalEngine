@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
+#include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo
@@ -21,7 +22,6 @@ namespace krys::boo::inline_iterator
   };
 
   /// @brief A box on a line: text, an inline box, an atomic inline box, a line break or a block level box.
-  // FIXME: The selection state, once there's selection.
   class Box
   {
     friend class BoxIterator;
@@ -192,6 +192,10 @@ namespace krys::boo::inline_iterator
     {
       return _path;
     }
+
+    /// @brief How much of the selection the box holds: for text, which part of the renderer's selection is in
+    /// the box.
+    KRYS_NODISCARD RenderObjectHighlightState SelectionState() const noexcept;
 
   private:
     KRYS_NODISCARD bool HasRenderer() const noexcept

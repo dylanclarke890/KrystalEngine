@@ -82,3 +82,10 @@ tr:hover td { text-decoration: underline; }
 .pill { position: fixed; right: 16px; bottom: 16px; padding: 4px 12px; border-radius: 12px;
         background: rgba(7, 59, 76, 0.55); color: white; font-size: 12px; box-shadow: 0 2px 6px rgba(7, 59, 76, 0.3);
         backdrop-filter: blur(6px) saturate(1.6); }
+
+.selection { cursor: text; }
+.selection p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }
+.selection .quote { padding: 4px 10px; border-left: 4px solid #ef476f; background: #f7f8fb; }
+.selection .quote::selection { background: #ef476f; color: #ffffff; }
+.selection .label { -webkit-user-select: none; padding: 0 4px; border-radius: 4px; background: #ffd166; }
+.selection img { width: 24px; height: 16px; vertical-align: middle; }

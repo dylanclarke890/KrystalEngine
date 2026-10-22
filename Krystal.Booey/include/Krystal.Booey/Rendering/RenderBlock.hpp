@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/TextRun.hpp"
+#include "Krystal.Booey/Rendering/GapRects.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -19,6 +20,7 @@ namespace krys::boo
 
   using TrackedRendererListHashSet = ListHashSet<RenderBox *>;
 
+  class LogicalSelectionOffsetCaches;
   class RenderText;
   class TextRun;
 
@@ -30,8 +32,13 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Floats, line boxes, continuations (and their outlines), fragmentation, selection, carets and
-  // column rules come with the rest of layout, inline painting, editing and multi-column layout.
+  // FIXME: Floats, line boxes, continuations (and their outlines), fragmentation, carets and column rules
+  // come with the rest of layout, inline painting, editing and multi-column layout.
+  KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
+                                                 const LayoutSize &offsetFromRootBlock) noexcept;
+  KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
+                                                  const LayoutSize &offsetFromRootBlock) noexcept;
+
   // FIXME: This function should go on RenderObject as an instance method. Then
   // all cases in which positionForPoint recurs could call this instead to
   // prevent crossing editable boundaries. This would require many tests.
@@ -358,6 +365,75 @@ namespace krys::boo
     {
     }
     void PaintContents(PaintInfo &, const LayoutPoint &) noexcept;
+
+#pragma endregion
+
+#pragma region Selection
+
+  public:
+    KRYS_NODISCARD GapRects
+      SelectionGapRectsForRepaint(const RenderLayerModelObject *repaintContainer) noexcept;
+    KRYS_NODISCARD LayoutRect LogicalLeftSelectionGap(RenderBlock &rootBlock,
+                                                      const LayoutPoint &rootBlockPhysicalPosition,
+                                                      const LayoutSize &offsetFromRootBlock,
+                                                      RenderElement *selObj, LayoutUnit logicalLeft,
+                                                      LayoutUnit logicalTop, LayoutUnit logicalHeight,
+                                                      const LogicalSelectionOffsetCaches &cache,
+                                                      const PaintInfo *paintInfo) noexcept;
+    KRYS_NODISCARD LayoutRect LogicalRightSelectionGap(RenderBlock &rootBlock,
+                                                       const LayoutPoint &rootBlockPhysicalPosition,
+                                                       const LayoutSize &offsetFromRootBlock,
+                                                       RenderElement *selObj, LayoutUnit logicalRight,
+                                                       LayoutUnit logicalTop, LayoutUnit logicalHeight,
+                                                       const LogicalSelectionOffsetCaches &cache,
+                                                       const PaintInfo *paintInfo) noexcept;
+    void GetSelectionGapInfo(HighlightState state, bool &leftGap, bool &rightGap) const noexcept;
+    /// @brief Whether the block fills the selection gaps of its descendants itself.
+    KRYS_NODISCARD bool IsSelectionRoot() const noexcept;
+
+    KRYS_NODISCARD LayoutUnit LogicalLeftSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
+                                                         const LogicalSelectionOffsetCaches &cache) noexcept;
+    KRYS_NODISCARD LayoutUnit LogicalRightSelectionOffset(RenderBlock &rootBlock, LayoutUnit position,
+                                                          const LogicalSelectionOffsetCaches &cache) noexcept;
+
+    KRYS_NODISCARD LayoutRect LogicalRectToPhysicalRect(const LayoutPoint &rootBlockPhysicalPosition,
+                                                        const LayoutRect &logicalRect) const noexcept;
+
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool /*clipToVisibleContent*/) noexcept final
+    {
+      return SelectionGapRectsForRepaint(repaintContainer);
+    }
+    KRYS_NODISCARD bool ShouldPaintSelectionGaps() const noexcept final;
+
+  protected:
+    void PaintSelection(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
+    GapRects SelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                           const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                           LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                           const LogicalSelectionOffsetCaches &cache,
+                           const PaintInfo *paintInfo = nullptr) noexcept;
+    virtual GapRects InlineSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                                         const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                                         LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                                         const LogicalSelectionOffsetCaches &cache,
+                                         const PaintInfo *paintInfo) noexcept;
+    GapRects BlockSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                                const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                                LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                                const LogicalSelectionOffsetCaches &cache,
+                                const PaintInfo *paintInfo) noexcept;
+    LayoutRect BlockSelectionGap(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                                 const LayoutSize &offsetFromRootBlock, LayoutUnit lastLogicalTop,
+                                 LayoutUnit lastLogicalLeft, LayoutUnit lastLogicalRight,
+                                 LayoutUnit logicalBottom, const LogicalSelectionOffsetCaches &cache,
+                                 const PaintInfo *paintInfo) noexcept;
+
+    virtual void ClipOutFloatingBoxes(RenderBlock &, const PaintInfo *, const LayoutPoint &,
+                                      const LayoutSize &) noexcept
+    {
+    }
 
 #pragma endregion
 

@@ -56,6 +56,8 @@ namespace krys::ui
     bool _needsPaint {true};
     /// @brief The buttons held, as the DOM's `buttons` bit set.
     uint16 _buttons {0};
+    /// @brief Where the last mouse event was, so moves that don't move can be dropped.
+    Maybe<boo::IntPoint> _lastMousePosition;
     /// @brief The last press, which the next one counts on from if it's a double click.
     int32 _clickCount {0};
     boo::MouseButton _lastClickButton {boo::MouseButton::None};

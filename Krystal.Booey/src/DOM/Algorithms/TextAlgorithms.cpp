@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/PseudoClassStateInvalidation.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -52,6 +53,8 @@ namespace krys::boo::dom
     }
 
     LiveRangeUpdater::CharacterDataReplaced(node, offset, count, data.size());
+    node.NodeDocument().Selection().TextWasReplaced(
+      node, static_cast<uint32>(offset), static_cast<uint32>(count), static_cast<uint32>(data.size()));
 
     if (auto *text = DynamicDowncast<Text>(node))
     {

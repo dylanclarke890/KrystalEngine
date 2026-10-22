@@ -25,6 +25,8 @@
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include <unicode/uchar.h>
 
 namespace krys::boo
 {
@@ -424,6 +426,14 @@ namespace krys::boo
     // FIXME: this is required until <rdar://problem/6853027> is fixed and text checking can do this for us.
     return character == '\'' || character == '@' || character == 0x2019 /* rightSingleQuotationMark */
            || character == 0x05F4 /* hebrewPunctuationGershayim */;
+  }
+
+  bool DeprecatedIsSpaceOrNewline(char32 character) noexcept
+  {
+    // Use IsUnicodeCompatibleASCIIWhitespace() for all Latin-1 characters, which is incorrect as it
+    // excludes U+0085 and U+00A0.
+    return character <= 0xFF ? text::IsUnicodeCompatibleASCIIWhitespace(character)
+                             : u_charDirection(static_cast<UChar32>(character)) == U_WHITE_SPACE_NEUTRAL;
   }
 
   bool IsTableStructureNode(const dom::Node &node) noexcept

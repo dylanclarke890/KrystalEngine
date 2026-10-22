@@ -26,6 +26,8 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview KeyUp = u8"keyup";
   constexpr utf8_stringview Scroll = u8"scroll";
   constexpr utf8_stringview ScrollEnd = u8"scrollend";
+  constexpr utf8_stringview SelectStart = u8"selectstart";
+  constexpr utf8_stringview SelectionChange = u8"selectionchange";
   constexpr utf8_stringview SlotChange = u8"slotchange";
   constexpr utf8_stringview TouchStart = u8"touchstart";
   constexpr utf8_stringview TouchMove = u8"touchmove";

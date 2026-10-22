@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
 namespace krys::boo::inline_iterator
@@ -70,14 +73,53 @@ namespace krys::boo::inline_iterator
     return IsFirst() ? FormattingContextRoot().FirstLineStyle() : FormattingContextRoot().Style();
   }
 
-  FloatRect LineBox::EllipsisVisualRect() const noexcept
+  FloatRect LineBox::EllipsisVisualRect(AdjustedForSelection adjustedForSelection) const noexcept
   {
     krys_debug_assert(HasEllipsis());
 
     auto visualRect = _path.EllipsisVisualRectIgnoringBlockDirection();
+
     // FIXME: Add pixel snapping here.
+    if (adjustedForSelection == AdjustedForSelection::No)
+    {
+      FormattingContextRoot().FlipForWritingMode(visualRect);
+      return visualRect;
+    }
+    auto selectionTop = FormattingContextRoot().AdjustEnclosingTopForPrecedingBlock(
+      LayoutUnit {ContentLogicalTopAdjustedForPrecedingLineBox()});
+    auto selectionBottom = ContentLogicalBottomAdjustedForFollowingLineBox();
+
+    visualRect.SetY(static_cast<float>(selectionTop));
+    visualRect.SetHeight(selectionBottom - static_cast<float>(selectionTop));
     FormattingContextRoot().FlipForWritingMode(visualRect);
     return visualRect;
+  }
+
+  RenderObjectHighlightState LineBox::EllipsisSelectionState() const noexcept
+  {
+    auto lastLeafBox = LineRightmostLeafBox();
+    if (!lastLeafBox)
+    {
+      return RenderObjectHighlightState::None;
+    }
+
+    auto *text = DynamicDowncast<TextBox>(*lastLeafBox);
+    if (!text || text->SelectionState() == RenderObjectHighlightState::None)
+    {
+      return RenderObjectHighlightState::None;
+    }
+
+    auto selectionRange = text->SelectableRange();
+    if (!selectionRange.Truncation)
+    {
+      return RenderObjectHighlightState::None;
+    }
+
+    auto [selectionStart, selectionEnd] =
+      FormattingContextRoot().View().Selection().RangeForTextBox(text->Renderer(), selectionRange);
+    return selectionStart <= *selectionRange.Truncation && selectionEnd >= *selectionRange.Truncation
+             ? RenderObjectHighlightState::Inside
+             : RenderObjectHighlightState::None;
   }
 
   bool LineBox::IsFirst() const noexcept

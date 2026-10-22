@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGPaintOrder.hpp"
+#include "Krystal.Booey/Style/Values/TextDecoration/TextShadow.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
 namespace krys::boo
@@ -40,6 +41,13 @@ namespace krys::boo
   KRYS_NODISCARD TextPaintStyle ComputeTextPaintStyle(const RenderText &renderer,
                                                       const RenderStyle &lineStyle,
                                                       const PaintInfo &paintInfo) noexcept;
+  /// @brief How the selected part of @p renderer's text is painted: @p textPaintStyle with the selection's
+  /// colours, stroke and (into @p selectionShadow) shadow.
+  KRYS_NODISCARD TextPaintStyle ComputeTextSelectionPaintStyle(const TextPaintStyle &textPaintStyle,
+                                                               const RenderText &renderer,
+                                                               const RenderStyle &lineStyle,
+                                                               const PaintInfo &paintInfo,
+                                                               style::TextShadows &selectionShadow) noexcept;
 
   enum FillColorType
   {

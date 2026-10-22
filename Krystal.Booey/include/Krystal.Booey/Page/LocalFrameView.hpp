@@ -622,6 +622,8 @@ namespace krys::boo
 
     /// @brief Scrolls the document's focused element into view, on a zero-delay timer.
     void ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept;
+    /// @brief Brings the render tree's selection up to date at the next rendering update.
+    void ScheduleSelectionUpdate() noexcept;
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
 

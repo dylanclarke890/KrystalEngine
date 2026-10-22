@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
@@ -880,12 +881,24 @@ namespace krys::boo
     for (auto it = composedTreeDescendants.begin(), end = composedTreeDescendants.end(); it != end;
          it.TraverseNext())
     {
-      auto *renderElement = DynamicDowncast<RenderElement>(it->Renderer());
+      auto *renderer = it->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      // If child is the start or end of the selection, then clear the selection to
+      // avoid problems of invalid pointers.
+      if (renderer->IsSelectionBorder())
+      {
+        renderer->GetDocument().Selection().SetNeedsSelectionUpdate();
+      }
+
+      auto *renderElement = DynamicDowncast<RenderElement>(renderer);
       if (!renderElement)
       {
         continue;
       }
-      // FIXME: Clear the selection if the renderer is at one of its ends, once there's selection.
 
       auto shouldRepaint = [&]
       {

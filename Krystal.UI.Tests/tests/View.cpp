@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -260,6 +261,45 @@ namespace krys::ui::tests
 
     view.MouseLeft();
     CHECK_FALSE(b->Hovered());
+  }
+
+  TEST_CASE("View: a click that doesn't move doesn't select", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style><div></div>");
+    view.UpdateRendering();
+
+    view.MouseMoved({10, 10});
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+
+    // Windows reports a move with each press and release, at the same place.
+    view.MousePressed({10, 10}, pal::MouseButton::Left);
+    view.MouseMoved({10, 10});
+    view.UpdateRendering();
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+    view.MouseReleased({10, 10}, pal::MouseButton::Left);
+    view.MouseMoved({10, 10});
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+    CHECK_FALSE(view.Document().Selection().IsRange());
+  }
+
+  TEST_CASE("View: dragging a selection shows the I-beam only over text", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } div { height: 50px }"
+                  u8"</style><div></div><div>text</div><div></div>");
+    view.UpdateRendering();
+
+    view.MouseMoved({10, 10});
+    view.MousePressed({10, 10}, pal::MouseButton::Left);
+    view.MouseMoved({10, 120});
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+    view.MouseMoved({3, 60});
+    CHECK(view.CurrentCursor() == pal::CursorShape::IBeam);
+    view.MouseMoved({300, 60});
+    CHECK(view.CurrentCursor() == pal::CursorShape::Arrow);
+    view.MouseReleased({300, 60}, pal::MouseButton::Left);
+    CHECK(view.Document().Selection().IsRange());
   }
 
   TEST_CASE("View: dispatches mouse events and chooses the cursor", "[UI]")

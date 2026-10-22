@@ -224,7 +224,8 @@ namespace krys::boo::tests
 
     SECTION("a click")
     {
-      CHECK_FALSE(fixture.Press(5, 5));
+      // The press places a caret, so it's handled.
+      CHECK(fixture.Press(5, 5));
       CHECK(fixture.ById(u8"a").Active());
       CHECK_FALSE(fixture.Release(5, 5));
       CHECK_FALSE(fixture.ById(u8"a").Active());

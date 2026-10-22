@@ -18,6 +18,7 @@
 #include <iterator>
 #include <limits>
 #include <mutex>
+#include <utility>
 
 namespace krys::ui
 {
@@ -280,8 +281,29 @@ namespace krys::ui
 
   void View::MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
   {
-    (void)_frame->GetEventHandler().MouseMoved(MouseEvent(
-      boo::PlatformEvent::Type::MouseMoved, point, boo::MouseButton::None, 0, input::ToBooey(modifiers)));
+    // Windows reports moves when the mouse hasn't moved (raw input reports presses and releases as moves
+    // too), and one while a button is held would start a selection.
+    if (std::exchange(_lastMousePosition, point) == point)
+    {
+      return;
+    }
+
+    // A move carries the button held, as Windows' do: the left, then the middle, then the right.
+    auto button = boo::MouseButton::None;
+    if (_buttons & ButtonsBit(boo::MouseButton::Left))
+    {
+      button = boo::MouseButton::Left;
+    }
+    else if (_buttons & ButtonsBit(boo::MouseButton::Middle))
+    {
+      button = boo::MouseButton::Middle;
+    }
+    else if (_buttons & ButtonsBit(boo::MouseButton::Right))
+    {
+      button = boo::MouseButton::Right;
+    }
+    (void)_frame->GetEventHandler().MouseMoved(
+      MouseEvent(boo::PlatformEvent::Type::MouseMoved, point, button, 0, input::ToBooey(modifiers)));
     PerformMicrotaskCheckpoint();
   }
 
@@ -306,6 +328,7 @@ namespace krys::ui
     _lastClickPosition = point;
 
     _buttons |= ButtonsBit(button);
+    _lastMousePosition = point;
     (void)_frame->GetEventHandler().HandleMousePressEvent(MouseEvent(
       boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, input::ToBooey(modifiers)));
     PerformMicrotaskCheckpoint();
@@ -321,6 +344,7 @@ namespace krys::ui
     }
 
     _buttons &= static_cast<uint16>(~ButtonsBit(button));
+    _lastMousePosition = point;
     (void)_frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
       boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input::ToBooey(modifiers)));
     PerformMicrotaskCheckpoint();

@@ -1005,6 +1005,13 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/HitTestRequest.hpp
   include/Krystal.Booey/Rendering/HitTestSource.hpp
   include/Krystal.Booey/Rendering/CaretRectComputation.hpp
+  include/Krystal.Booey/Rendering/GapRects.hpp
+  include/Krystal.Booey/Rendering/LogicalSelectionOffsetCaches.hpp
+  include/Krystal.Booey/Rendering/LogicalSelectionOffsetCachesInlines.hpp
+  include/Krystal.Booey/Rendering/RenderHighlight.hpp
+  include/Krystal.Booey/Rendering/RenderObjectHighlightState.hpp
+  include/Krystal.Booey/Rendering/RenderSelection.hpp
+  include/Krystal.Booey/Rendering/RenderSelectionGeometry.hpp
   include/Krystal.Booey/DOM/Dicts/FocusEventInit.hpp
   include/Krystal.Booey/DOM/Dicts/UIEventInit.hpp
   include/Krystal.Booey/DOM/FocusEvent.hpp
@@ -2495,6 +2502,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/Integration/Inline/InlineIteratorLineBox.cpp
   src/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.cpp
   src/Rendering/CaretRectComputation.cpp
+  src/Rendering/RenderHighlight.cpp
+  src/Rendering/RenderSelection.cpp
+  src/Rendering/RenderSelectionGeometry.cpp
   src/Rendering/RenderQuote.cpp
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
@@ -2856,6 +2866,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/Editing.hpp
       include/Krystal.Booey/Editing/EditingBehavior.hpp
       include/Krystal.Booey/Editing/EditingBoundary.hpp
+      include/Krystal.Booey/Editing/FrameSelection.hpp
+      include/Krystal.Booey/Page/AutoscrollController.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
       include/Krystal.Booey/Editing/TextAffinity.hpp
@@ -2863,6 +2875,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/TextIterator.hpp
       include/Krystal.Booey/Editing/TextIteratorBehavior.hpp
       include/Krystal.Booey/Editing/VisiblePosition.hpp
+      include/Krystal.Booey/Editing/VisibleSelection.hpp
       include/Krystal.Booey/Editing/VisibleUnits.hpp
       include/Krystal.Booey/DOM/Callbacks/AbortAlgorithmCallback.hpp
       include/Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp
@@ -3228,9 +3241,12 @@ target_sources(Krystal.Booey
     src/DOM/PositionIterator.cpp
     src/DOM/SimpleRange.cpp
     src/Editing/Editing.cpp
+    src/Editing/FrameSelection.cpp
+    src/Page/AutoscrollController.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp
     src/Editing/VisiblePosition.cpp
+    src/Editing/VisibleSelection.cpp
     src/Editing/VisibleUnits.cpp
     src/DOM/CDATASection.cpp
     src/DOM/CharacterData.cpp

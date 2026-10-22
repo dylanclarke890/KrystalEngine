@@ -532,6 +532,21 @@ namespace krys::boo
       PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
                                          HitTestSource source) noexcept override;
 
+    /// @brief @p top, moved up to the bottom of the selected last line of the block before this one (within
+    /// the same selection root), so that the selection has no gap between them.
+    KRYS_NODISCARD LayoutUnit AdjustEnclosingTopForPrecedingBlock(LayoutUnit top) const noexcept;
+
+  protected:
+    void ClipOutFloatingBoxes(RenderBlock &rootBlock, const PaintInfo *paintInfo,
+                              const LayoutPoint &rootBlockPhysicalPosition,
+                              const LayoutSize &offsetFromRootBlock) noexcept override;
+    GapRects InlineSelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
+                                 const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
+                                 LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,
+                                 const LogicalSelectionOffsetCaches &cache,
+                                 const PaintInfo *paintInfo) noexcept override;
+
+  public:
   protected:
     void LayoutBlockWithNoChildren() noexcept;
 

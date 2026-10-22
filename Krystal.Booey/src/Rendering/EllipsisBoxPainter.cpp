@@ -8,8 +8,11 @@
 namespace krys::boo
 {
   EllipsisBoxPainter::EllipsisBoxPainter(const inline_iterator::LineBox &lineBox, PaintInfo &paintInfo,
-                                         const LayoutPoint &paintOffset) noexcept
-      : _lineBox(lineBox), _paintInfo(paintInfo), _paintOffset(paintOffset)
+                                         const LayoutPoint &paintOffset, Color selectionForegroundColor,
+                                         Color selectionBackgroundColor) noexcept
+      : _lineBox(lineBox), _paintInfo(paintInfo), _paintOffset(paintOffset),
+        _selectionForegroundColor(selectionForegroundColor),
+        _selectionBackgroundColor(selectionBackgroundColor)
   {
   }
 
@@ -25,7 +28,18 @@ namespace krys::boo
       textColor = _paintInfo.ForcedTextColor();
     }
 
-    // FIXME: A selected ellipsis's background and colour come with selection.
+    if (_lineBox.EllipsisSelectionState() != RenderObject::HighlightState::None)
+    {
+      PaintSelection();
+
+      // Select the correct color for painting the text.
+      auto foreground =
+        _paintInfo.ForceTextColor() ? _paintInfo.ForcedTextColor() : _selectionForegroundColor;
+      if (foreground.IsValid() && foreground != textColor)
+      {
+        context.SetFillColor(foreground);
+      }
+    }
 
     if (textColor != context.FillColor())
     {
@@ -72,5 +86,39 @@ namespace krys::boo
     {
       context.ClearDropShadow();
     }
+  }
+
+  void EllipsisBoxPainter::PaintSelection() noexcept
+  {
+    auto &context = _paintInfo.Context();
+    auto &style = _lineBox.Style();
+
+    auto textColor = style.VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+    auto backgroundColor = _selectionBackgroundColor;
+    if (!backgroundColor.IsVisible())
+    {
+      return;
+    }
+
+    // If the text color ends up being the same as the selection background, invert the selection background.
+    if (textColor == backgroundColor)
+    {
+      backgroundColor = backgroundColor.InvertedColorWithAlpha(1.0);
+    }
+
+    GraphicsContextStateSaver stateSaver {context};
+
+    auto visualRect =
+      LayoutRect {_lineBox.EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes)};
+    visualRect.Move(_paintOffset.X(), _paintOffset.Y());
+
+    auto ellipsisText = _lineBox.EllipsisText();
+    constexpr bool canUseSimplifiedTextMeasuring = false;
+    style.GetFontCascade().AdjustSelectionRectForText(canUseSimplifiedTextMeasuring, ellipsisText,
+                                                      visualRect);
+    context.FillRect(
+      SnapRectToDevicePixelsWithWritingDirection(
+        visualRect, _lineBox.FormattingContextRoot().GetDocument().DeviceScaleFactor(), ellipsisText.Ltr()),
+      backgroundColor);
   }
 }

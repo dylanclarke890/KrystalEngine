@@ -383,6 +383,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/WheelEvent.cpp
 		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
+		tests/Page/MouseSelection.cpp
 		tests/Page/Page.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/CSSFilterRenderer.cpp
@@ -534,6 +535,9 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/SimpleRange.cpp
 		tests/Editing/TextIterator.cpp
 		tests/Editing/VisiblePosition.cpp
+		tests/Editing/VisibleSelection.cpp
+		tests/Editing/FrameSelection.cpp
+		tests/Rendering/RenderSelection.cpp
 		tests/Editing/VisibleUnits.cpp
 		tests/DOM/NodeIterator.cpp
 		tests/DOM/ProcessingInstruction.cpp

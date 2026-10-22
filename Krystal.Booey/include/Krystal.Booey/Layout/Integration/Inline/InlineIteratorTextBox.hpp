@@ -13,7 +13,6 @@ namespace krys::boo
 namespace krys::boo::inline_iterator
 {
   /// @brief A text box: a run of a text renderer's text on a line.
-  // FIXME: The selectable range, once there's selection.
   class TextBox : public Box
   {
   public:
@@ -41,6 +40,12 @@ namespace krys::boo::inline_iterator
     KRYS_NODISCARD uint32 Length() const noexcept
     {
       return _path.Length();
+    }
+
+    /// @brief The part of the renderer's text the box shows, for clamping offsets to it.
+    KRYS_NODISCARD TextBoxSelectableRange SelectableRange() const noexcept
+    {
+      return _path.SelectableRange();
     }
 
     KRYS_NODISCARD const FontCascade &GetFontCascade() const noexcept;

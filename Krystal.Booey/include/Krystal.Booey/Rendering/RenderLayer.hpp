@@ -146,8 +146,8 @@ namespace krys::boo
 
   /// @brief The layer of a renderer that needs one: it positions, clips and orders (in z-order) the
   /// renderer's subtree.
-  // FIXME: Masks, SVG clip paths, reflections, resizing, scrollbars, selection gaps, event regions and
-  // fragmentation (paginated collectFragments) come with effects and fragmentation.
+  // FIXME: Masks, SVG clip paths, reflections, resizing, scrollbars, event regions and fragmentation
+  // (paginated collectFragments) come with effects and fragmentation.
   class RenderLayer final : public CanMakeWeakPtr<RenderLayer>, public CanMakeCheckedPtr<RenderLayer>
   {
     KRYS_NON_COPY_MOVABLE(RenderLayer);
@@ -679,6 +679,8 @@ namespace krys::boo
 
     RefPtr<RenderLayerFilters> _filters;
 
+    IntRect _blockSelectionGapsBounds;
+
     // Pointer to the enclosing RenderLayer that caused us to be paginated. It is 0 if we are not paginated.
     WeakPtr<RenderLayer> _enclosingPaginationLayer;
 
@@ -1073,6 +1075,9 @@ namespace krys::boo
     /// @return Whether a layer was hit: always for the view's layer on a move over the document, or a press
     /// or release.
     bool HitTest(const HitTestRequest &request, HitTestResult &result) noexcept;
+
+    /// @brief Scrolls to bring @p positionInWindow into view, as a mouse drag selects past the layer's edge.
+    void Autoscroll(const IntPoint &positionInWindow) noexcept;
     bool HitTest(const HitTestRequest &request, const HitTestLocation &hitTestLocation,
                  HitTestResult &result) noexcept;
 
@@ -1174,6 +1179,12 @@ namespace krys::boo
     KRYS_NODISCARD LayoutRect RepaintRectIncludingNonCompositingDescendants() const noexcept;
     /// @brief Repaints the layer's renderer and those of its descendant layers.
     void RepaintIncludingDescendants() noexcept;
+
+    /// @brief Adds to the bounds of the selection gaps the layer's blocks painted, in its coordinates.
+    void AddBlockSelectionGapsBounds(const LayoutRect &bounds) noexcept;
+    void ClearBlockSelectionGapsBounds() noexcept;
+    /// @brief Repaints the selection gaps the layer and its descendant layers painted.
+    void RepaintBlockSelectionGaps() noexcept;
 
     // Indicate that the layer contents need to be repainted. Only has an effect if layer compositing is being
     // used.

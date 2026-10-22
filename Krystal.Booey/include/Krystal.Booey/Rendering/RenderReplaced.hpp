@@ -16,7 +16,7 @@ namespace krys::boo
   };
 
   /// @brief A box whose content is outside CSS: images, media, frames, form controls.
-  // FIXME: Selection and hit testing; media and the other replaced elements come with their renderers.
+  // FIXME: Hit testing; media and the other replaced elements come with their renderers.
   class RenderReplaced : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderReplaced);
@@ -45,6 +45,20 @@ namespace krys::boo
     KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
                                                               HitTestSource source) noexcept final;
 
+    KRYS_NODISCARD bool IsSelected() const noexcept;
+    // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
+    KRYS_NODISCARD LayoutRect LocalSelectionRect(bool checkWhetherSelected = true) const noexcept;
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override
+    {
+      return true;
+    }
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent = true) noexcept final;
+
+  protected:
+    KRYS_NODISCARD virtual bool ShouldDrawSelectionTint() const noexcept;
+
+  public:
     KRYS_NODISCARD LayoutRect ReplacedContentRect(const LayoutSize &intrinsicSize) const noexcept;
     KRYS_NODISCARD LayoutRect ReplacedContentRect() const noexcept
     {

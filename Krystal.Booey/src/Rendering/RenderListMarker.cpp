@@ -129,6 +129,17 @@ namespace krys::boo
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderListMarker::~RenderListMarker() noexcept = default;
 
+  LayoutRect RenderListMarker::LocalSelectionRect() const noexcept
+  {
+    return {LayoutPoint(), Size()};
+  }
+
+  LayoutRect RenderListMarker::SelectionRectForRepaint(const RenderLayerModelObject *, bool) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+    return {};
+  }
+
   void RenderListMarker::WillBeDestroyed() noexcept
   {
     if (_image)
@@ -203,15 +214,26 @@ namespace krys::boo
 
     GraphicsContext &context = paintInfo.Context();
 
-    // FIXME: The selection's background (when selectionState() isn't None) comes with selection.
-
     if (IsImage())
     {
       if (RefPtr markerImage = _image->GetImage(this, markerRect.Size(), context))
       {
         context.DrawImage(*markerImage, markerRect);
       }
+      if (SelectionState() != HighlightState::None)
+      {
+        LayoutRect selectionRect = LocalSelectionRect();
+        selectionRect.MoveBy(boxOrigin);
+        context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
+      }
       return;
+    }
+
+    if (SelectionState() != HighlightState::None)
+    {
+      LayoutRect selectionRect = LocalSelectionRect();
+      selectionRect.MoveBy(boxOrigin);
+      context.FillRect(FloatRect(SnappedIntRect(selectionRect)), _listItem->SelectionBackgroundColor());
     }
 
     auto color = Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color);

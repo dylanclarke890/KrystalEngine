@@ -39,6 +39,7 @@ namespace krys::boo
   class CachedResourceLoader;
   class DocumentTimeline;
   class FontLoadRequest;
+  class FrameSelection;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -174,6 +175,7 @@ namespace krys::boo::dom
     // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
     RefPtr<Element> _activeElement;
     bool _isFocusedAndActive {true};
+    UniquePtr<FrameSelection> _selection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
     FocusTrigger _latestFocusTrigger {FocusTrigger::Other};
@@ -559,6 +561,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD UserActionElementSet &UserActionElements() const noexcept
     {
       return *_userActionElements;
+    }
+
+    /// @brief The document's selection (upstream, its frame's).
+    KRYS_NODISCARD FrameSelection &Selection() const noexcept
+    {
+      return *_selection;
     }
 
     /// @brief The innermost element under the pointer that has a renderer, if any.

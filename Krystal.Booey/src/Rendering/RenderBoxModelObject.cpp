@@ -51,6 +51,32 @@ namespace krys::boo
 
   RenderBoxModelObject::~RenderBoxModelObject() noexcept = default;
 
+  void RenderBoxModelObject::SetSelectionState(HighlightState state) noexcept
+  {
+    if (state == HighlightState::Inside && SelectionState() != HighlightState::None)
+    {
+      return;
+    }
+
+    if ((state == HighlightState::Start && SelectionState() == HighlightState::End)
+        || (state == HighlightState::End && SelectionState() == HighlightState::Start))
+    {
+      RenderLayerModelObject::SetSelectionState(HighlightState::Both);
+    }
+    else
+    {
+      RenderLayerModelObject::SetSelectionState(state);
+    }
+
+    // FIXME: We should consider whether it is OK propagating to ancestor RenderInlines.
+    // The containing block can be null in case of an orphaned tree.
+    auto *containingBlock = ContainingBlock();
+    if (containingBlock && !containingBlock->IsRenderView())
+    {
+      containingBlock->SetSelectionState(state);
+    }
+  }
+
   void RenderBoxModelObject::WillBeDestroyed() noexcept
   {
     // FIXME: The image quality controller, once there's painting.

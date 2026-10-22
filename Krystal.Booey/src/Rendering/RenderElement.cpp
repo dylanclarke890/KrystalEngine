@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
@@ -47,6 +48,7 @@
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
@@ -1659,6 +1661,100 @@ namespace krys::boo
   {
     return IsPseudoElement() ? static_cast<dom::PseudoElement &>(*GetElement()).HostElement() : GetElement();
   }
+
+#pragma region Selection
+
+  Color RenderElement::SelectionColor(css::PropertyId colorProperty) const noexcept
+  {
+    // If the element is unselectable, or we are only painting the selection,
+    // don't override the foreground color with the selection foreground color.
+    if (Style().UsedUserSelect() == UserSelect::None
+        || (View().FrameView().GetPaintBehavior().ContainsAny(
+          {PaintBehavior::SelectionOnly, PaintBehavior::SelectionAndBackgroundsOnly})))
+    {
+      return {};
+    }
+
+    if (auto pseudoStyle = SelectionPseudoStyle())
+    {
+      Color color = pseudoStyle->VisitedDependentColorWithColorFilter(colorProperty);
+      if (!color.IsValid())
+      {
+        color = pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
+      }
+      return color;
+    }
+
+    auto options = DocumentStyleColorOptions(GetDocument(), &Style());
+    if (GetDocument().Selection().IsFocusedAndActive())
+    {
+      return RenderTheme::ActiveSelectionForegroundColor(options);
+    }
+    return RenderTheme::InactiveSelectionForegroundColor(options);
+  }
+
+  // FIXME: Selection styles across user agent shadow roots (rendererForPseudoStyleAcrossShadowBoundary), once
+  // there are any.
+  UniquePtr<RenderStyle> RenderElement::SelectionPseudoStyle() const noexcept
+  {
+    if (IsAnonymous())
+    {
+      return nullptr;
+    }
+
+    return GetUncachedPseudoStyle(style::PseudoElementRequest(PseudoElementType::Selection));
+  }
+
+  Color RenderElement::SelectionForegroundColor() const noexcept
+  {
+    return SelectionColor(css::PropertyId::WebkitTextFillColor);
+  }
+
+  Color RenderElement::SelectionEmphasisMarkColor() const noexcept
+  {
+    return SelectionColor(css::PropertyId::TextEmphasisColor);
+  }
+
+  Color RenderElement::SelectionBackgroundColor() const noexcept
+  {
+    if (Style().UsedUserSelect() == UserSelect::None)
+    {
+      return {};
+    }
+
+    auto options = DocumentStyleColorOptions(GetDocument(), &Style());
+    auto &selection = GetDocument().Selection();
+    if (selection.ShouldShowBlockCursor() && selection.IsCaret())
+    {
+      return RenderTheme::TransformSelectionBackgroundColor(
+        Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color), options);
+    }
+
+    const RenderElement *pseudoStyleCandidate = this;
+    if (pseudoStyleCandidate->IsAnonymous())
+    {
+      pseudoStyleCandidate = pseudoStyleCandidate->FirstNonAnonymousAncestor();
+    }
+
+    if (pseudoStyleCandidate)
+    {
+      auto pseudoStyle = pseudoStyleCandidate->SelectionPseudoStyle();
+      if (pseudoStyle
+          && pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsValid())
+      {
+        return RenderTheme::TransformSelectionBackgroundColor(
+          pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor), options);
+      }
+    }
+
+    if (selection.IsFocusedAndActive())
+    {
+      return RenderTheme::ActiveSelectionBackgroundColor(options);
+    }
+    return RenderTheme::InactiveSelectionBackgroundColor(options);
+  }
+
+#pragma endregion
 
   Overflow RenderElement::EffectiveOverflowX() const noexcept
   {

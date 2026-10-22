@@ -254,6 +254,23 @@ namespace krys::boo::dom
       return HasNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
     }
 
+    /// @brief Whether an end point of the frame's selection is anchored in the node or a descendant.
+    KRYS_NODISCARD bool ContainsSelectionEndPoint() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+    }
+    void SetContainsSelectionEndPoint(bool value) noexcept
+    {
+      if (value)
+      {
+        SetNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+      }
+      else
+      {
+        ClearNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+      }
+    }
+
     /// @brief Whether a descendant's style needs resolving again.
     KRYS_NODISCARD bool ChildNeedsStyleRecalc() const noexcept
     {
@@ -331,6 +348,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD ContainerNode *ParentOrShadowHostNode() const noexcept;
     /// @brief The parent, unless it's a shadow root.
     KRYS_NODISCARD ContainerNode *NonShadowBoundaryParentNode() const noexcept;
+    /// @brief The ancestor that's a child of a shadow root, or null outside shadow trees.
+    KRYS_NODISCARD Node *NonBoundaryShadowTreeRootNode() noexcept;
     KRYS_NODISCARD bool IsDescendantOf(const Node *other) const noexcept;
     KRYS_NODISCARD bool IsDescendantOf(const Node &other) const noexcept
     {

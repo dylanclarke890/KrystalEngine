@@ -379,6 +379,29 @@ namespace krys::boo
     return DynamicDowncast<dom::Element>(NonPseudoNode());
   }
 
+  bool RenderObject::IsSelectionBorder() const noexcept
+  {
+    HighlightState st = SelectionState();
+    return st == HighlightState::Start || st == HighlightState::End || st == HighlightState::Both
+           || View().Selection().Start() == this || View().Selection().End() == this;
+  }
+
+  void RenderObject::SetSelectionState(HighlightState state) noexcept
+  {
+    _selectionState = state;
+  }
+
+  bool RenderObject::CanUpdateSelectionOnRootLineBoxes() const noexcept
+  {
+    if (NeedsLayout())
+    {
+      return false;
+    }
+
+    auto *containingBlock = ContainingBlock();
+    return containingBlock ? !containingBlock->NeedsLayout() : true;
+  }
+
   bool RenderObject::IsHR() const noexcept
   {
     auto *element = DynamicDowncast<html::HTMLElement>(GetNode());

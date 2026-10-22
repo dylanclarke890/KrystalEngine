@@ -15,7 +15,6 @@ namespace krys::boo
   /// first letter and that must therefore have different styles (and positions in the render tree).
   /// We cache offsets so that text transformations can be applied in such a way that we can recover
   /// the original unaltered string from our corresponding DOM node.
-  // FIXME: Selection (canBeSelectionLeaf) comes with editing.
   class RenderTextFragment final : public RenderText
   {
     KRYS_NON_COPY_MOVABLE(RenderTextFragment);
@@ -71,6 +70,8 @@ namespace krys::boo
     {
       _altText = krys::move(altText);
     }
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override;
 
   private:
     void SetTextInternal(utf8_string text, bool force) noexcept override;

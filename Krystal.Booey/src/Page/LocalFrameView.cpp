@@ -2234,6 +2234,18 @@ namespace krys::boo
     return rect;
   }
 
+  void LocalFrameView::ScheduleSelectionUpdate() noexcept
+  {
+    if (LayoutContext().NeedsLayout())
+    {
+      return;
+    }
+    // FIXME: We should not need to go through the layout process since selection update does not change
+    // dimension/geometry. However we can't tell at this point if the tree is stable yet, so let's just
+    // schedule a root only layout for now.
+    LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
+  }
+
   void LocalFrameView::ScheduleScrollToFocusedElement(SelectionRevealMode selectionRevealMode) noexcept
   {
     if (selectionRevealMode == SelectionRevealMode::DoNotReveal)

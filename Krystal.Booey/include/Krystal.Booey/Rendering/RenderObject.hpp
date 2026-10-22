@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
+#include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Core/Assert.hpp"
@@ -393,6 +394,8 @@ namespace krys::boo
       MayBeVisible,
     };
 
+    using HighlightState = RenderObjectHighlightState;
+
 #pragma region CachedImageClient emulation
 
     virtual void NotifyFinished(CachedResource &) noexcept
@@ -655,6 +658,7 @@ namespace krys::boo
     mutable bool _setNeedsLayoutForbidden {false};
     PositionedState _positionedState {PositionedState::IsStaticallyPositioned};
     BoxDecorationState _boxDecorationState {BoxDecorationState::None};
+    HighlightState _selectionState {HighlightState::None};
     bool _isBeingDestroyed {false};
     CheckedPtr<layout::Box> _layoutBox;
 
@@ -1191,6 +1195,52 @@ namespace krys::boo
     KRYS_NODISCARD virtual int32 PreviousOffset(int32 current) const noexcept;
     KRYS_NODISCARD virtual int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept;
     KRYS_NODISCARD virtual int32 NextOffset(int32 current) const noexcept;
+
+#pragma endregion
+
+#pragma region Selection
+
+    /// @brief Whether the object starts or ends a run of the selection, or is at one of its ends.
+    KRYS_NODISCARD bool IsSelectionBorder() const noexcept;
+
+    // The current selection state for an object.  For blocks, the state refers to the state of the leaf
+    // descendants (as described above in the HighlightState enum declaration).
+    KRYS_NODISCARD HighlightState SelectionState() const noexcept
+    {
+      return _selectionState;
+    }
+    virtual void SetSelectionState(HighlightState state) noexcept;
+    void SetSelectionStateIfNeeded(HighlightState state) noexcept
+    {
+      if (SelectionState() == state)
+      {
+        return;
+      }
+
+      SetSelectionState(state);
+    }
+    KRYS_NODISCARD bool CanUpdateSelectionOnRootLineBoxes() const noexcept;
+
+    // A single rectangle that encompasses all of the selected objects within this object. Used to determine
+    // the tightest possible bounding box for the selection. The rect returned is in the coordinate space of
+    // the paint invalidation container's backing.
+    KRYS_NODISCARD virtual LayoutRect
+      SelectionRectForRepaint(const RenderLayerModelObject * /*repaintContainer*/,
+                              bool /*clipToVisibleContent*/ = true) noexcept
+    {
+      return {};
+    }
+
+    KRYS_NODISCARD virtual bool CanBeSelectionLeaf() const noexcept
+    {
+      return false;
+    }
+
+    // Whether or not a given block needs to paint selection gaps.
+    KRYS_NODISCARD virtual bool ShouldPaintSelectionGaps() const noexcept
+    {
+      return false;
+    }
 
 #pragma endregion
 

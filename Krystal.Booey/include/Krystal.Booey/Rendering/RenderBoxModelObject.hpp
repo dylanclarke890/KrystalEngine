@@ -68,6 +68,8 @@ namespace krys::boo
 
     KRYS_NODISCARD bool RequiresLayer() const noexcept override;
 
+    void SetSelectionState(HighlightState state) noexcept override;
+
     void ApplyTransform(TransformationMatrix &transform, const RenderStyle &style,
                         const FloatRect &boundingBox,
                         EnumSet<style::TransformResolverOption> options) const noexcept override;

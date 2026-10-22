@@ -39,6 +39,7 @@
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -103,6 +104,7 @@ namespace krys::boo::dom
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
+    _selection = CreateUnique<FrameSelection>(this);
   }
 
   Document::~Document() noexcept
@@ -1200,6 +1202,7 @@ namespace krys::boo::dom
     if (auto *frame = Frame())
     {
       frame->GetEventHandler().NodeWillBeRemoved(node);
+      _selection->NodeWillBeRemoved(node);
     }
   }
 
@@ -1306,6 +1309,8 @@ namespace krys::boo::dom
       return;
     }
     _isFocusedAndActive = flag;
+
+    _selection->SetFocused(flag);
 
     // `:focus`, `:focus-visible` and `:focus-within` check whether the document is focused and active, so the
     // elements they may match restyle.
@@ -1448,6 +1453,8 @@ namespace krys::boo::dom
   void Document::WillBeRemovedFromFrame() noexcept
   {
     // FIXME: Unload, page hide and the other steps of unloading the document, once there's navigation.
+    _selection->WillBeRemovedFromFrame();
+
     if (HasLivingRenderTree())
     {
       DestroyRenderTree();

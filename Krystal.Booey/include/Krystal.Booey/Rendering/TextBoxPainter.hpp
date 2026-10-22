@@ -3,10 +3,12 @@
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxModernPath.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Rendering/MarkedText.hpp"
 #include "Krystal.Booey/Rendering/TextBoxSelectableRange.hpp"
 #include "Krystal.Booey/Rendering/TextDecorationPainter.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypes.hpp"
@@ -35,11 +37,10 @@ namespace krys::boo
     class InlineContent;
   }
 
-  /// @brief Paints a text box: its text, with shadows, emphasis marks and decorations.
-  /// FIXME: Selection, document markers, highlights and IME composition (the background fill, marked text
-  /// other than unmarked, composition underlines and platform document markers), event regions,
-  /// accessibility bounds and contentful paint tracking come with editing, selection, event regions and
-  /// accessibility.
+  /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations and the selection.
+  /// FIXME: Document markers, highlights and IME composition (their background fills and marked text,
+  /// composition underlines and platform document markers), event regions, accessibility bounds and
+  /// contentful paint tracking come with editing, event regions and accessibility.
   /// FIXME: Combined text (`text-combine-upright`, `RenderCombineText`) is still to come.
   class TextBoxPainter
   {
@@ -59,6 +60,7 @@ namespace krys::boo
     const FloatRect _paintRect;
     const bool _isFirstLine;
     const bool _isPrinting;
+    const bool _haveSelection;
 
   public:
     TextBoxPainter(const layout_integration::InlineContent &inlineContent, const inline_display::Box &box,
@@ -79,7 +81,18 @@ namespace krys::boo
     }
     KRYS_NODISCARD inline_iterator::TextBoxIterator MakeIterator() const noexcept;
 
+    void PaintBackgroundFill() noexcept;
     void PaintForegroundAndDecorations() noexcept;
+
+    /// @brief The range of the box's text the selection covers.
+    KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;
+    KRYS_NODISCARD MarkedText CreateMarkedTextFromSelectionInBox() const noexcept;
+    /// @brief The rect of the box's text from @p startOffset to @p endOffset, as tall as the line's
+    /// selection.
+    KRYS_NODISCARD LayoutRect SelectionRectForRange(uint32 startOffset, uint32 endOffset) const noexcept;
+    // FIXME: Rounded backgrounds (BackgroundStyle::Rounded), with IME composition highlights.
+    void PaintBackgroundFillForRange(uint32 startOffset, uint32 endOffset, const Color &color) noexcept;
+    KRYS_NODISCARD bool ComputeHaveSelection() const noexcept;
     void PaintForeground(const StyledMarkedText &markedText) noexcept;
     KRYS_NODISCARD bool PaintForegroundForShapeRange(TextPainter &textPainter) noexcept;
     KRYS_NODISCARD TextDecorationPainter CreateDecorationPainter(const StyledMarkedText &markedText,

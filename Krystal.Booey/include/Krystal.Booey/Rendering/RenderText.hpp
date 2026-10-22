@@ -29,8 +29,7 @@ namespace krys::boo
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
   /// text transform and text security.
-  // FIXME: Selection and the secure text timer that reveals the last typed character come with selection and
-  // editing.
+  // FIXME: The secure text timer that reveals the last typed character comes with editing.
   class RenderText : public RenderObject
   {
     KRYS_NON_COPY_MOVABLE(RenderText);
@@ -162,6 +161,30 @@ namespace krys::boo
     KRYS_NODISCARD int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept final;
     KRYS_NODISCARD int32 NextOffset(int32 current) const noexcept final;
 
+    KRYS_NODISCARD Color SelectionBackgroundColor() const noexcept;
+    KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;
+    KRYS_NODISCARD Color SelectionEmphasisMarkColor() const noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+
+    KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override
+    {
+      return true;
+    }
+    void SetSelectionState(HighlightState state) noexcept final;
+    KRYS_NODISCARD LayoutRect SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent = true) noexcept final;
+    /// @brief The selected part of the text's boxes (with their ellipses), in @p repaintContainer's
+    /// coordinates, adding each box's quad to @p quads.
+    LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent,
+                                                      List<FloatQuad> &quads) noexcept;
+
+  private:
+    LayoutRect CollectSelectionGeometriesForLineBoxes(const RenderLayerModelObject *repaintContainer,
+                                                      bool clipToVisibleContent,
+                                                      List<FloatQuad> *quads) noexcept;
+
+  public:
     KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
     {
       return _fontCodePath;

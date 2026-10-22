@@ -67,6 +67,77 @@ namespace krys::boo
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderReplaced::~RenderReplaced() noexcept = default;
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsHighlighted(const RenderReplaced &renderer, RenderObject::HighlightState state,
+                                      const RenderHighlight &rangeData) noexcept
+    {
+      using HighlightState = RenderObject::HighlightState;
+      if (state == HighlightState::None)
+      {
+        return false;
+      }
+      if (state == HighlightState::Inside)
+      {
+        return true;
+      }
+
+      auto selectionStart = rangeData.StartOffset();
+      auto selectionEnd = rangeData.EndOffset();
+      if (state == HighlightState::Start)
+      {
+        return !selectionStart;
+      }
+
+      auto *element = renderer.GetElement();
+      uint32 end = element->HasChildNodes() ? element->CountChildNodes() : 1;
+      if (state == HighlightState::End)
+      {
+        return selectionEnd == end;
+      }
+      if (state == HighlightState::Both)
+      {
+        return !selectionStart && selectionEnd == end;
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+  }
+
+  LayoutRect RenderReplaced::SelectionRectForRepaint(const RenderLayerModelObject *repaintContainer,
+                                                     bool clipToVisibleContent) noexcept
+  {
+    krys_debug_assert(!NeedsLayout());
+
+    if (!IsSelected())
+    {
+      return {};
+    }
+
+    LayoutRect rect = LocalSelectionRect();
+    if (clipToVisibleContent)
+    {
+      return ComputeRectForRepaint(rect, repaintContainer);
+    }
+    return LayoutRect(
+      LocalToContainerQuad(FloatQuad(FloatRect(rect)), repaintContainer).EnclosingBoundingBox());
+  }
+
+  LayoutRect RenderReplaced::LocalSelectionRect(bool checkWhetherSelected) const noexcept
+  {
+    if (checkWhetherSelected && !IsSelected())
+    {
+      return {};
+    }
+
+    return {LayoutPoint(), Size()};
+  }
+
+  bool RenderReplaced::IsSelected() const noexcept
+  {
+    return IsHighlighted(*this, SelectionState(), View().Selection());
+  }
+
   bool RenderReplaced::ShouldRespectZeroIntrinsicWidth() const noexcept
   {
     // Per CSSWG resolution, 0px intrinsic width should be respected for SVG
@@ -129,8 +200,9 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: The selection rect (which can project outside of the overflow rect), once there's selection.
-    auto overflowRect = VisualOverflowRect();
+    // The selectionRect can project outside of the overflowRect, so take their union
+    // for repainting to avoid selection painting glitches.
+    auto overflowRect = UnionRect(LocalSelectionRect(false), VisualOverflowRect());
 
     // FIXME: layoutDelta needs to be applied in parts before/after transforms and
     // repaint containers. https://bugs.webkit.org/show_bug.cgi?id=23308
@@ -205,10 +277,16 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The highlight colour and the selection tint, once there's selection.
+    // FIXME: The Highlight API's highlight colour (calculateHighlightColor), with `::highlight()`.
+
+    bool drawSelectionTint = ShouldDrawSelectionTint();
     if (paintInfo.Phase == PaintPhase::Selection)
     {
-      return;
+      if (SelectionState() == HighlightState::None)
+      {
+        return;
+      }
+      drawSelectionTint = false;
     }
 
     bool completelyClippedOut = false;
@@ -236,11 +314,29 @@ namespace krys::boo
         paintInfo.Context().Restore();
       }
     }
+
+    // The selection tint never gets clipped by border-radius rounding, since we want it to run right up to
+    // the edges of surrounding content.
+    if (drawSelectionTint)
+    {
+      LayoutRect selectionPaintingRect = LocalSelectionRect();
+      selectionPaintingRect.MoveBy(adjustedPaintOffset);
+      paintInfo.Context().FillRect(FloatRect(SnappedIntRect(selectionPaintingRect)),
+                                   SelectionBackgroundColor());
+    }
+  }
+
+  bool RenderReplaced::ShouldDrawSelectionTint() const noexcept
+  {
+    return SelectionState() != HighlightState::None && !GetDocument().Printing();
   }
 
   bool RenderReplaced::ShouldPaint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    // FIXME: Excluding selected replaced content (PaintBehavior::ExcludeSelection), once there's selection.
+    if ((paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeSelection)) && IsSelected())
+    {
+      return false;
+    }
 
     if (paintInfo.PaintBehavior.Contains(PaintBehavior::ExcludeReplacedContentExceptForIFrames))
     {

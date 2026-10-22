@@ -17,7 +17,7 @@ namespace krys::boo
   // Text units a visible position moves by. Text offsets in the boundary searches are bytes of UTF-8 text.
   // FIXME: The units of a granularity in a selection direction (atBoundaryOfGranularity,
   // withinTextUnitOfGranularity, positionOfNextBoundaryOfGranularity, enclosingTextUnitOfGranularity) and the
-  // ranges they make, once there's a selection.
+  // ranges they make, with modifying the selection.
 
   enum class WordSide : bool
   {

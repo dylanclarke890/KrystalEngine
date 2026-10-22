@@ -45,6 +45,54 @@ namespace krys::boo
     return textColor.Lightened();
   }
 
+  TextPaintStyle ComputeTextSelectionPaintStyle(const TextPaintStyle &textPaintStyle,
+                                                const RenderText &renderer, const RenderStyle &lineStyle,
+                                                const PaintInfo &paintInfo,
+                                                style::TextShadows &selectionShadow) noexcept
+  {
+    TextPaintStyle selectionPaintStyle = textPaintStyle;
+
+    Color foreground =
+      paintInfo.ForceTextColor() ? paintInfo.ForcedTextColor() : renderer.SelectionForegroundColor();
+    if (foreground.IsValid() && foreground != selectionPaintStyle.FillColor)
+    {
+      selectionPaintStyle.FillColor = foreground;
+    }
+
+    Color emphasisMarkForeground =
+      paintInfo.ForceTextColor() ? paintInfo.ForcedTextColor() : renderer.SelectionEmphasisMarkColor();
+    if (emphasisMarkForeground.IsValid() && emphasisMarkForeground != selectionPaintStyle.EmphasisMarkColor)
+    {
+      selectionPaintStyle.EmphasisMarkColor = emphasisMarkForeground;
+    }
+
+    if (auto pseudoStyle = renderer.SelectionPseudoStyle())
+    {
+      selectionPaintStyle.HasExplicitlySetFillColor = pseudoStyle->HasExplicitlySetColor();
+      selectionShadow = paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}}
+                                                   : pseudoStyle->GetTextShadow();
+      auto viewportSize = renderer.View().FrameView().Size();
+      float strokeWidth = pseudoStyle->UsedStrokeWidth(viewportSize);
+      if (strokeWidth != selectionPaintStyle.StrokeWidth)
+      {
+        selectionPaintStyle.StrokeWidth = strokeWidth;
+      }
+
+      Color stroke =
+        paintInfo.ForceTextColor() ? paintInfo.ForcedTextColor() : pseudoStyle->UsedStrokeColor();
+      if (stroke != selectionPaintStyle.StrokeColor)
+      {
+        selectionPaintStyle.StrokeColor = stroke;
+      }
+    }
+    else
+    {
+      selectionShadow =
+        paintInfo.ForceTextColor() ? style::TextShadows {css::keywords::None {}} : lineStyle.GetTextShadow();
+    }
+    return selectionPaintStyle;
+  }
+
   TextPaintStyle ComputeTextPaintStyle(const RenderText &renderer, const RenderStyle &lineStyle,
                                        const PaintInfo &paintInfo) noexcept
   {
