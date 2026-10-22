@@ -138,45 +138,46 @@ namespace krys::boo::html
       return value;
     }
 
-    KRYS_NODISCARD Maybe<css::ValueId> CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept
-    {
-      auto number = ParseFontSize(string);
-      if (!number)
-      {
-        return {};
-      }
+  }
 
-      switch (*number)
+  Maybe<css::ValueId> HTMLFontElement::CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept
+  {
+    auto number = ParseFontSize(string);
+    if (!number)
+    {
+      return {};
+    }
+
+    switch (*number)
+    {
+      case 1:
       {
-        case 1:
-        {
-          // FIXME: The spec says that we're supposed to use CSSValueXxSmall here.
-          return css::ValueId::XSmall;
-        }
-        case 2:
-        {
-          return css::ValueId::Small;
-        }
-        case 3:
-        {
-          return css::ValueId::Medium;
-        }
-        case 4:
-        {
-          return css::ValueId::Large;
-        }
-        case 5:
-        {
-          return css::ValueId::XLarge;
-        }
-        case 6:
-        {
-          return css::ValueId::XxLarge;
-        }
-        default:
-        {
-          return css::ValueId::XxxLarge;
-        }
+        // FIXME: The spec says that we're supposed to use CSSValueXxSmall here.
+        return css::ValueId::XSmall;
+      }
+      case 2:
+      {
+        return css::ValueId::Small;
+      }
+      case 3:
+      {
+        return css::ValueId::Medium;
+      }
+      case 4:
+      {
+        return css::ValueId::Large;
+      }
+      case 5:
+      {
+        return css::ValueId::XLarge;
+      }
+      case 6:
+      {
+        return css::ValueId::XxLarge;
+      }
+      default:
+      {
+        return css::ValueId::XxxLarge;
       }
     }
   }

@@ -18,6 +18,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo::css
+{
+  class MutableStyleProperties;
+}
+
 namespace krys::boo::dom
 {
   class CharacterData;
@@ -96,6 +101,7 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::CaretVisibilitySuppressionReason, 
 namespace krys::boo
 {
   class Color;
+  class EditingStyle;
   class GraphicsContext;
   class RenderBlock;
   class RenderStyle;
@@ -160,7 +166,6 @@ namespace krys::boo
   /// the selection's colours), and keeping the render tree's selection (`RenderSelection`) in step with it.
   // FIXME: The block cursor of overtype mode (paintBlockCursor), with editing commands; the caret colour the
   // host sets (setCaretColor), which only iOS uses.
-  // FIXME: The typing style, with editing commands.
   // FIXME: selectionchange at text form controls, with form controls.
   // FIXME: Frames: the drag caret (DragCaretController), selecting the frame element in the parent
   // (selectFrameElementInParentIfFullySelected), selections in another frame's document.
@@ -231,6 +236,7 @@ namespace krys::boo
     RefPtr<dom::Node> _previousCaretNode; // The last node which painted the caret. Retained for clearing the
                                           // old caret when it moves.
     RefPtr<dom::Range> _associatedLiveRange;
+    RefPtr<EditingStyle> _typingStyle;
     // The painted bounds of the caret in absolute coordinates
     IntRect _absCaretBounds;
     UniquePtr<CaretAnimator> _caretAnimator;
@@ -371,6 +377,12 @@ namespace krys::boo
 
     /// @brief Bounds of possibly-transformed caret in absolute coordinates.
     KRYS_NODISCARD IntRect AbsoluteCaretBounds(bool *insideFixed = nullptr) noexcept;
+
+    /// @brief The style typing applies next, set by styling a caret.
+    KRYS_NODISCARD EditingStyle *TypingStyle() const noexcept;
+    KRYS_NODISCARD RefPtr<css::MutableStyleProperties> CopyTypingStyle() const noexcept;
+    void SetTypingStyle(RefPtr<EditingStyle> &&style) noexcept;
+    void ClearTypingStyle() noexcept;
     void SetCaretRectNeedsUpdate() noexcept
     {
       CaretBase::SetCaretRectNeedsUpdate();
@@ -405,6 +417,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Document *GetDocument() noexcept override;
 
     KRYS_NODISCARD bool ShouldChangeSelection(const VisibleSelection &newSelection) const noexcept;
+    KRYS_NODISCARD bool ShouldDeleteSelection(const VisibleSelection &selection) const noexcept;
 
     void SetSelectionByMouseIfDifferent(
       const VisibleSelection &passedNewSelection, TextGranularity granularity,

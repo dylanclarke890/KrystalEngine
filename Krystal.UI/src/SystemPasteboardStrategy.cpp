@@ -12,4 +12,13 @@ namespace krys::ui
     }
     (void)pal::SetClipboardText(text);
   }
+
+  utf8_string SystemPasteboardStrategy::ReadStringFromPasteboard(utf8_stringview pasteboardType) noexcept
+  {
+    if (!pasteboardType.starts_with(u8"text/plain"))
+    {
+      return {};
+    }
+    return pal::GetClipboardText().value_or(utf8_string());
+  }
 }

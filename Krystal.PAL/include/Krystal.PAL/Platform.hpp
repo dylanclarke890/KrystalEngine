@@ -45,4 +45,8 @@ namespace krys::pal
   /// @param windowHandle The window that owns the clipboard's contents; the active window if null.
   /// @return Whether the clipboard took the text.
   bool SetClipboardText(utf8_stringview text, NativeHandle windowHandle = {nullptr}) noexcept;
+
+  /// @brief Gets the system clipboard's text, as UTF-8 with LF line breaks.
+  /// @return The text, or none if the clipboard holds no text or can't be opened.
+  KRYS_NODISCARD Maybe<utf8_string> GetClipboardText() noexcept;
 }

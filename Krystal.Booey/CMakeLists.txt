@@ -2870,6 +2870,42 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Dicts/ClipboardEventInit.hpp
       include/Krystal.Booey/Editing/Editor.hpp
       include/Krystal.Booey/Editing/FrameSelection.hpp
+      include/Krystal.Booey/Editing/AppendNodeCommand.hpp
+      include/Krystal.Booey/Editing/ApplyStyleCommand.hpp
+      include/Krystal.Booey/Editing/CompositeEditCommand.hpp
+      include/Krystal.Booey/Editing/DeleteFromTextNodeCommand.hpp
+      include/Krystal.Booey/Editing/EditAction.hpp
+      include/Krystal.Booey/Editing/EditCommand.hpp
+      include/Krystal.Booey/Editing/EditingStyle.hpp
+      include/Krystal.Booey/Editing/HTMLInterchange.hpp
+      include/Krystal.Booey/Editing/InsertIntoTextNodeCommand.hpp
+      include/Krystal.Booey/Editing/InsertNodeBeforeCommand.hpp
+      include/Krystal.Booey/Editing/MergeIdenticalElementsCommand.hpp
+      include/Krystal.Booey/Editing/RemoveNodeCommand.hpp
+      include/Krystal.Booey/Editing/ReplaceNodeWithSpanCommand.hpp
+      include/Krystal.Booey/Editing/SetNodeAttributeCommand.hpp
+      include/Krystal.Booey/Editing/SplitElementCommand.hpp
+      include/Krystal.Booey/Editing/SplitTextNodeCommand.hpp
+      include/Krystal.Booey/Editing/UndoStep.hpp
+      include/Krystal.Booey/Editing/WrapContentsInDummySpanCommand.hpp
+      include/Krystal.Booey/Editing/WritingDirection.hpp
+      include/Krystal.Booey/Editing/BreakBlockquoteCommand.hpp
+      include/Krystal.Booey/Editing/DeleteSelectionCommand.hpp
+      include/Krystal.Booey/Editing/InsertLineBreakCommand.hpp
+      include/Krystal.Booey/Editing/InsertParagraphSeparatorCommand.hpp
+      include/Krystal.Booey/Editing/InsertTextCommand.hpp
+      include/Krystal.Booey/Editing/Markup.hpp
+      include/Krystal.Booey/Editing/MarkupAccumulator.hpp
+      include/Krystal.Booey/Editing/RemoveNodePreservingChildrenCommand.hpp
+      include/Krystal.Booey/Editing/ReplaceSelectionCommand.hpp
+      include/Krystal.Booey/Editing/SimplifyMarkupCommand.hpp
+      include/Krystal.Booey/Editing/SmartReplace.hpp
+      include/Krystal.Booey/Editing/SplitTextNodeContainingElementCommand.hpp
+      include/Krystal.Booey/Editing/TextInsertionBaseCommand.hpp
+      include/Krystal.Booey/Editing/TypingCommand.hpp
+      include/Krystal.Booey/DOM/InputEvent.hpp
+      include/Krystal.Booey/DOM/TextEvent.hpp
+      include/Krystal.Booey/DOM/Dicts/InputEventInit.hpp
       include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
       include/Krystal.Booey/Page/AutoscrollController.hpp
       include/Krystal.Booey/Page/DOMSelection.hpp
@@ -3255,6 +3291,39 @@ target_sources(Krystal.Booey
     src/Editing/Editor.cpp
     src/Editing/EditorCommand.cpp
     src/Editing/FrameSelection.cpp
+    src/Editing/AppendNodeCommand.cpp
+    src/Editing/ApplyStyleCommand.cpp
+    src/Editing/DeleteFromTextNodeCommand.cpp
+    src/Editing/EditAction.cpp
+    src/Editing/EditCommand.cpp
+    src/Editing/EditingStyle.cpp
+    src/Editing/HTMLInterchange.cpp
+    src/Editing/InsertIntoTextNodeCommand.cpp
+    src/Editing/InsertNodeBeforeCommand.cpp
+    src/Editing/MergeIdenticalElementsCommand.cpp
+    src/Editing/RemoveNodeCommand.cpp
+    src/Editing/ReplaceNodeWithSpanCommand.cpp
+    src/Editing/SetNodeAttributeCommand.cpp
+    src/Editing/SplitElementCommand.cpp
+    src/Editing/SplitTextNodeCommand.cpp
+    src/Editing/WrapContentsInDummySpanCommand.cpp
+    src/Editing/BreakBlockquoteCommand.cpp
+    src/Editing/CompositeEditCommand.cpp
+    src/Editing/DeleteSelectionCommand.cpp
+    src/Editing/InsertLineBreakCommand.cpp
+    src/Editing/InsertParagraphSeparatorCommand.cpp
+    src/Editing/InsertTextCommand.cpp
+    src/Editing/Markup.cpp
+    src/Editing/MarkupAccumulator.cpp
+    src/Editing/RemoveNodePreservingChildrenCommand.cpp
+    src/Editing/ReplaceSelectionCommand.cpp
+    src/Editing/SimplifyMarkupCommand.cpp
+    src/Editing/SmartReplace.cpp
+    src/Editing/SplitTextNodeContainingElementCommand.cpp
+    src/Editing/TextInsertionBaseCommand.cpp
+    src/Editing/TypingCommand.cpp
+    src/DOM/InputEvent.cpp
+    src/DOM/TextEvent.cpp
     src/Page/AutoscrollController.cpp
     src/Page/DOMSelection.cpp
     src/Platform/CaretAnimator.cpp

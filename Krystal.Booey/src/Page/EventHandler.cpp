@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/TextEvent.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
@@ -822,6 +823,40 @@ namespace krys::boo
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
     return keydownResult || keypress->DefaultPrevented() || DefaultKeyboardEventHandler(*keypress);
+  }
+
+  // FIXME: The event's underlying event (setUnderlyingEvent), which text controls read the selection from,
+  // with form controls.
+  bool EventHandler::HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
+                                          dom::TextEventInputType inputType) noexcept
+  {
+    // Platforms should differentiate real commands like selectAll from text input in disguise (like
+    // insertNewline), and avoid dispatching text input events from keydown default handlers.
+    krys_debug_assert(!underlyingEvent || !underlyingEvent->IsKeyboardEvent()
+                      || underlyingEvent->Type() == EventNames::KeyPress);
+
+    RefPtr<dom::EventTarget> target;
+    if (underlyingEvent)
+    {
+      target = underlyingEvent->Target();
+    }
+    else
+    {
+      target = ShareRefPtr(EventTargetElementForDocument(_frame.Document()));
+    }
+    if (!target)
+    {
+      return false;
+    }
+
+    auto event = dom::TextEvent::Create(text, inputType);
+
+    (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
+    if (event->DefaultPrevented())
+    {
+      return false;
+    }
+    return _frame.Document()->GetEditor().HandleTextEvent(*event);
   }
 
   bool EventHandler::DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept

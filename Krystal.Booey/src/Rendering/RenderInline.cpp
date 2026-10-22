@@ -52,6 +52,37 @@ namespace krys::boo
     }
   }
 
+  bool RenderInline::MayAffectLayout() const noexcept
+  {
+    const auto *parentStyle = &Parent()->Style();
+    auto *parentRenderInline = DynamicDowncast<RenderInline>(*Parent());
+    auto hasHardLineBreakChildOnly = FirstChild() && FirstChild() == LastChild() && FirstChild()->IsBR();
+    bool checkFonts = GetDocument().InNoQuirksMode();
+    auto mayAffectLayout =
+      (parentRenderInline && parentRenderInline->MayAffectLayout())
+      || (parentRenderInline && !HoldsAlternative<css::keywords::Baseline>(parentStyle->GetVerticalAlign()))
+      || !HoldsAlternative<css::keywords::Baseline>(Style().GetVerticalAlign())
+      || !Style().GetTextEmphasisStyle().IsNone()
+      || (checkFonts
+          && (!parentStyle->GetFontCascade().MetricsOfPrimaryFont().HasIdenticalAscentDescentAndLineGap(
+                Style().GetFontCascade().MetricsOfPrimaryFont())
+              || parentStyle->SpecifiedLineHeight() != Style().SpecifiedLineHeight()))
+      || hasHardLineBreakChildOnly;
+
+    if (!mayAffectLayout && checkFonts)
+    {
+      // Have to check the first line style as well.
+      parentStyle = &Parent()->FirstLineStyle();
+      const auto &childStyle = FirstLineStyle();
+      mayAffectLayout =
+        !parentStyle->GetFontCascade().MetricsOfPrimaryFont().HasIdenticalAscentDescentAndLineGap(
+          childStyle.GetFontCascade().MetricsOfPrimaryFont())
+        || !HoldsAlternative<css::keywords::Baseline>(childStyle.GetVerticalAlign())
+        || parentStyle->SpecifiedLineHeight() != childStyle.SpecifiedLineHeight();
+    }
+    return mayAffectLayout;
+  }
+
   utf8_stringview RenderInline::RenderName() const noexcept
   {
     if (IsRelativelyPositioned())

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Editor.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/ClipboardEvent.hpp"
@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/UndoStep.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -19,127 +20,6 @@
 
 namespace krys::boo::tests
 {
-  namespace
-  {
-    /// @brief An editor client that allows selection changes and binds Shift+Right to extending the
-    /// selection.
-    struct TestEditorClient final : EditorClient
-    {
-      int32 KeyEvents {0};
-
-      KRYS_NODISCARD bool ShouldChangeSelectedRange(const Maybe<dom::SimpleRange> &,
-                                                    const Maybe<dom::SimpleRange> &, Affinity,
-                                                    bool) noexcept final
-      {
-        return true;
-      }
-
-      KRYS_NODISCARD bool CanCopyCut(LocalFrame *, bool defaultValue) const noexcept final
-      {
-        return defaultValue;
-      }
-
-      bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept final
-      {
-        ++KeyEvents;
-        if (event.Type() != EventNames::KeyDown || event.KeyCode() != vk::Right || !event.ShiftKey())
-        {
-          return false;
-        }
-        auto &document = Downcast<dom::Node>(*event.Target()).NodeDocument();
-        return document.GetEditor().GetCommand(u8"MoveRightAndModifySelection").Execute(&event);
-      }
-    };
-
-    /// @brief Records what's written to the clipboard.
-    struct RecordingPasteboardStrategy final : PasteboardStrategy
-    {
-      List<std::pair<utf8_string, utf8_string>> Writes;
-
-      void WriteToPasteboard(utf8_stringview pasteboardType, utf8_stringview text) noexcept final
-      {
-        Writes.emplace_back(utf8_string(pasteboardType), utf8_string(text));
-      }
-    };
-
-    /// @brief Counts the events of a type, cancelling them if asked.
-    struct CountingListener : public dom::EventListenerCallback
-    {
-      int32 Count {0};
-      bool Cancel {false};
-      bool LastWasTrustedClipboardEvent {false};
-
-      void HandleEvent(dom::Event &event) noexcept override
-      {
-        ++Count;
-        LastWasTrustedClipboardEvent = event.IsClipboardEvent() && event.IsTrusted() && event.Bubbles()
-                                       && event.Cancelable() && event.Composed();
-        if (Cancel)
-        {
-          event.PreventDefault();
-        }
-      }
-    };
-
-    /// @brief A document in a page whose editor client is a `TestEditorClient`, with a pasteboard strategy
-    /// that records writes.
-    struct EditorFixture : style::tests::ResolverFixture
-    {
-      RefPtr<Page> TestPage;
-      TestEditorClient *Client {nullptr};
-      RecordingPasteboardStrategy Pasteboard;
-
-      explicit EditorFixture(utf8_stringview markup) noexcept
-          : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
-                              + utf8_string(markup),
-                            style::tests::WithView::No)
-      {
-        auto client = CreateUnique<TestEditorClient>();
-        Client = client.get();
-        TestPage = Page::Create(nullptr, krys::move(client));
-        Frame = ShareRefPtr(&TestPage->MainFrame());
-        Frame->CreateView({400, 300});
-        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
-        (void)Document->UpdateLayout();
-        PlatformStrategies::Singleton().SetPasteboardStrategy(&Pasteboard);
-      }
-
-      ~EditorFixture() noexcept
-      {
-        PlatformStrategies::Singleton().SetPasteboardStrategy(nullptr);
-      }
-
-      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
-      {
-        return Downcast<dom::Text>(*ById(id).FirstChild());
-      }
-
-      KRYS_NODISCARD Editor &GetEditor() noexcept
-      {
-        return Document->GetEditor();
-      }
-
-      KRYS_NODISCARD FrameSelection &Selection() noexcept
-      {
-        return Document->Selection();
-      }
-
-      void Select(dom::Node &node, uint32 start, uint32 end) noexcept
-      {
-        Selection().MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&node), start),
-                           dom::MakeContainerOffsetPosition(ShareRefPtr(&node), end), Affinity::Downstream);
-      }
-
-      KRYS_NODISCARD Ref<CountingListener> Listen(utf8_stringview type) noexcept
-      {
-        auto listener = CreateRef<CountingListener>();
-        Document->AddEventListener(dom::DOMStringAtom(type), Ref<dom::EventListenerCallback> {listener},
-                                   true);
-        return listener;
-      }
-    };
-  }
-
   TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: commands", "[Editing][Editor]")
   {
     EditorFixture fixture(u8"<p id=a>The quick brown fox</p>");
@@ -255,6 +135,126 @@ namespace krys::boo::tests
       editor.Copy();
       CHECK(copy->Count == 1);
       CHECK(fixture.Pasteboard.Writes.empty());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: cutting", "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<div id=e contenteditable>The quick brown fox</div><p id=p>Not editable</p>");
+    auto &editor = fixture.GetEditor();
+    auto &root = fixture.ById(u8"e");
+    auto beforeCut = fixture.Listen(EventNames::BeforeCut);
+    auto cut = fixture.Listen(EventNames::Cut);
+
+    SECTION("Cutting copies the selected text, then deletes it")
+    {
+      fixture.Select(fixture.TextIn(u8"e"), 4, 10);
+      auto command = editor.GetCommand(u8"Cut");
+      CHECK(command.IsEnabled());
+      CHECK(beforeCut->Count == 1);
+      CHECK(beforeCut->LastWasTrustedClipboardEvent);
+
+      CHECK(command.Execute());
+      CHECK(cut->Count == 1);
+      CHECK(cut->LastWasTrustedClipboardEvent);
+      REQUIRE(fixture.Pasteboard.Writes.size() == 1);
+      CHECK(Narrow(fixture.Pasteboard.Writes[0].second) == "quick ");
+      CHECK(Narrow(fixture.InnerHTML(root)) == "The brown fox");
+
+      CHECK(fixture.Run(u8"Undo"));
+      CHECK(Narrow(fixture.InnerHTML(root)) == "The quick brown fox");
+    }
+
+    SECTION("A cancelled cut event does the cut itself")
+    {
+      fixture.Select(fixture.TextIn(u8"e"), 4, 10);
+      cut->Cancel = true;
+      editor.Cut();
+      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(Narrow(fixture.InnerHTML(root)) == "The quick brown fox");
+    }
+
+    SECTION("Text outside editable content can't be cut")
+    {
+      fixture.Select(fixture.TextIn(u8"p"), 0, 3);
+      CHECK_FALSE(editor.CanCut());
+      CHECK_FALSE(editor.GetCommand(u8"Cut").IsEnabled());
+      editor.Cut();
+      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(Narrow(fixture.InnerHTML(fixture.ById(u8"p"))) == "Not editable");
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: pasting", "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<div id=e contenteditable>abc</div><p id=p>Not editable</p>");
+    auto &editor = fixture.GetEditor();
+    auto &root = fixture.ById(u8"e");
+    auto paste = fixture.Listen(EventNames::Paste);
+    auto textInput = fixture.Listen(EventNames::TextInput);
+    fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+
+    SECTION("Pasting inserts the clipboard's text at the selection")
+    {
+      fixture.Pasteboard.Contents = u8"XY";
+      auto command = editor.GetCommand(u8"Paste");
+      CHECK(command.IsEnabled());
+      CHECK(command.Execute());
+      CHECK(paste->Count == 1);
+      CHECK(paste->LastWasTrustedClipboardEvent);
+      CHECK(textInput->Count == 1);
+      CHECK(Narrow(fixture.InnerHTML(root)) == "aXYbc");
+
+      CHECK(fixture.Run(u8"Undo"));
+      CHECK(Narrow(fixture.InnerHTML(root)) == "abc");
+    }
+
+    SECTION("Pasted lines are merged into the paragraphs around them")
+    {
+      // The last line moves into the text after the selection, keeping the break between them.
+      fixture.Pasteboard.Contents = u8"one\ntwo";
+      editor.Paste();
+      CHECK(Narrow(fixture.InnerHTML(root)) == "aone<br>twobc");
+    }
+
+    SECTION("Pasting as plain text")
+    {
+      fixture.Pasteboard.Contents = u8"XY";
+      CHECK(fixture.Run(u8"PasteAsPlainText"));
+      CHECK(Narrow(fixture.InnerHTML(root)) == "aXYbc");
+    }
+
+    SECTION("What's cut can be pasted back")
+    {
+      fixture.Select(fixture.TextIn(u8"e"), 0, 1);
+      editor.Cut();
+      fixture.SetCaret(fixture.TextIn(u8"e"), 2);
+      editor.Paste();
+      CHECK(Narrow(fixture.InnerHTML(root)) == "bca");
+    }
+
+    SECTION("A cancelled paste event does the paste itself")
+    {
+      fixture.Pasteboard.Contents = u8"XY";
+      paste->Cancel = true;
+      editor.Paste();
+      CHECK(Narrow(fixture.InnerHTML(root)) == "abc");
+      CHECK(textInput->Count == 0);
+    }
+
+    SECTION("Nothing is pasted outside editable content")
+    {
+      fixture.Pasteboard.Contents = u8"XY";
+      fixture.SetCaret(fixture.TextIn(u8"p"), 1);
+      CHECK_FALSE(editor.CanPaste());
+      editor.Paste();
+      CHECK(Narrow(fixture.InnerHTML(fixture.ById(u8"p"))) == "Not editable");
+    }
+
+    SECTION("The DOM can't paste")
+    {
+      CHECK(editor.GetCommand(u8"Paste").IsSupported());
+      CHECK_FALSE(editor.GetCommand(u8"Paste", EditorCommandSource::DOM).IsSupported());
     }
   }
 

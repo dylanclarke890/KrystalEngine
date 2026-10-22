@@ -2,6 +2,7 @@
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include <algorithm>
 
 #define NOMINMAX
@@ -152,5 +153,51 @@ namespace krys::pal
       ::GlobalFree(memory);
     }
     return set;
+  }
+
+  Maybe<utf8_string> GetClipboardText() noexcept
+  {
+    if (!::IsClipboardFormatAvailable(CF_UNICODETEXT) || !::OpenClipboard(nullptr))
+    {
+      return {};
+    }
+
+    Maybe<utf8_string> result;
+    if (HANDLE memory = ::GetClipboardData(CF_UNICODETEXT))
+    {
+      if (const auto *wide = static_cast<const wchar_t *>(::GlobalLock(memory)))
+      {
+        const int wideLength = static_cast<int>(::wcsnlen(wide, ::GlobalSize(memory) / sizeof(wchar_t)));
+        const int length =
+          wideLength ? ::WideCharToMultiByte(CP_UTF8, 0, wide, wideLength, nullptr, 0, nullptr, nullptr) : 0;
+        utf8_string windowsText(static_cast<size_t>(length), u8'\0');
+        if (length)
+        {
+          ::WideCharToMultiByte(CP_UTF8, 0, wide, wideLength, reinterpret_cast<char *>(windowsText.data()),
+                                length, nullptr, nullptr);
+        }
+        ::GlobalUnlock(memory);
+
+        // Windows line breaks become LFs, and lone CRs too.
+        utf8_string text;
+        text.reserve(windowsText.size());
+        for (size_t i = 0; i < windowsText.size(); ++i)
+        {
+          if (windowsText[i] == u8'\r')
+          {
+            text.push_back(u8'\n');
+            if (i + 1 < windowsText.size() && windowsText[i + 1] == u8'\n')
+            {
+              ++i;
+            }
+            continue;
+          }
+          text.push_back(windowsText[i]);
+        }
+        result = krys::move(text);
+      }
+    }
+    ::CloseClipboard();
+    return result;
   }
 }

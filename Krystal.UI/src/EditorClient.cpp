@@ -113,6 +113,11 @@ namespace krys::ui
     return defaultValue;
   }
 
+  bool EditorClient::CanPaste(boo::LocalFrame *, bool defaultValue) const noexcept
+  {
+    return defaultValue;
+  }
+
   utf8_stringview EditorClient::InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept
   {
     krys_debug_assert(event.Type() == boo::EventNames::KeyDown || event.Type() == boo::EventNames::KeyPress);
@@ -196,7 +201,62 @@ namespace krys::ui
       return false;
     }
 
-    // FIXME: Inserting the typed text (the editor's insertText), with editing commands and text input.
-    return false;
+    return node->NodeDocument().GetEditor().InsertText(keyEvent->Text(), &event);
+  }
+
+  void EditorClient::RegisterUndoStep(boo::UndoStep &step) noexcept
+  {
+    // A new edit can't be redone over; a redone one can.
+    if (!_isInRedo)
+    {
+      _redoStack.clear();
+    }
+    _undoStack.push_back(ShareRef(step));
+  }
+
+  void EditorClient::RegisterRedoStep(boo::UndoStep &step) noexcept
+  {
+    _redoStack.push_back(ShareRef(step));
+  }
+
+  void EditorClient::ClearUndoRedoOperations() noexcept
+  {
+    _undoStack.clear();
+    _redoStack.clear();
+  }
+
+  bool EditorClient::CanUndo() const noexcept
+  {
+    return !_undoStack.empty();
+  }
+
+  bool EditorClient::CanRedo() const noexcept
+  {
+    return !_redoStack.empty();
+  }
+
+  void EditorClient::Undo() noexcept
+  {
+    if (!CanUndo())
+    {
+      return;
+    }
+    auto step = krys::move(_undoStack.back());
+    _undoStack.pop_back();
+    step->Unapply();
+  }
+
+  void EditorClient::Redo() noexcept
+  {
+    if (!CanRedo())
+    {
+      return;
+    }
+    auto step = krys::move(_redoStack.back());
+    _redoStack.pop_back();
+    krys_debug_assert(!_isInRedo);
+    _isInRedo = true;
+    step->Reapply();
+    _isInRedo = false;
   }
 }

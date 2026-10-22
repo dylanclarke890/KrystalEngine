@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/TextEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -15,8 +17,8 @@
 
 namespace krys::boo
 {
-  // FIXME: The editing commands (typing, deleting, cutting, pasting, styling, lists, indenting, links, undo
-  // and redo, the mark and kill ring, find and spelling), with editing commands; the commands' state and
+  // FIXME: The editing commands (cutting, pasting, styling, lists, indenting, links, inserting HTML, images
+  // and rules, the mark and kill ring, find and spelling), with editing commands; the commands' state and
   // value (bold, the font and colours), with styling.
   class EditorInternalCommand
   {
@@ -31,6 +33,13 @@ namespace krys::boo
   namespace
   {
     constexpr bool IsNotTextInsertion = false;
+    constexpr bool IsTextInsertion = true;
+
+    // FIXME: The frame of the event's target (targetFrame), once there are subframes.
+    KRYS_NODISCARD LocalFrame &TargetFrame(LocalFrame &frame, dom::Event *) noexcept
+    {
+      return frame;
+    }
 
     bool ExpandSelectionToGranularity(LocalFrame &frame, TextGranularity granularity) noexcept
     {
@@ -523,11 +532,245 @@ namespace krys::boo
         ScrollLogicalDirection::ScrollBlockDirectionForward, ScrollGranularity::Document);
     }
 
+    KRYS_NODISCARD Editor::FromMenuOrKeyBinding FromMenuOrKeyBindingFor(EditorCommandSource source) noexcept
+    {
+      return source == EditorCommandSource::MenuOrKeyBinding ? Editor::FromMenuOrKeyBinding::Yes
+                                                             : Editor::FromMenuOrKeyBinding::No;
+    }
+
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
     bool ExecuteCopy(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
     {
-      frame.Document()->GetEditor().Copy(source == EditorCommandSource::MenuOrKeyBinding
-                                           ? Editor::FromMenuOrKeyBinding::Yes
-                                           : Editor::FromMenuOrKeyBinding::No);
+      frame.Document()->GetEditor().Copy(FromMenuOrKeyBindingFor(source));
+      return true;
+    }
+
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
+    bool ExecuteCut(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().Cut(FromMenuOrKeyBindingFor(source));
+      return true;
+    }
+
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
+    bool ExecutePaste(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().Paste(FromMenuOrKeyBindingFor(source));
+      return true;
+    }
+
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
+    bool ExecutePasteAndMatchStyle(LocalFrame &frame, dom::Event *, EditorCommandSource source,
+                                   utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().PasteAsPlainText(FromMenuOrKeyBindingFor(source));
+      return true;
+    }
+
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with scripting.
+    bool ExecutePasteAsPlainText(LocalFrame &frame, dom::Event *, EditorCommandSource source,
+                                 utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().PasteAsPlainText(FromMenuOrKeyBindingFor(source));
+      return true;
+    }
+
+    bool ExecuteDelete(LocalFrame &frame, dom::Event *, EditorCommandSource source, utf8_stringview) noexcept
+    {
+      switch (source)
+      {
+        case EditorCommandSource::MenuOrKeyBinding:
+        {
+          // Doesn't modify the text if the current selection isn't a range.
+          frame.Document()->GetEditor().PerformDelete();
+          return true;
+        }
+        case EditorCommandSource::DOM:
+        case EditorCommandSource::DOMWithUserInterface:
+          // If the current selection is a caret, delete the preceding character. IE performs forwardDelete,
+          // but we currently side with Firefox. Doesn't scroll to make the selection visible, or modify the
+          // kill ring (this time, siding with IE, not Firefox).
+          TypingCommand::DeleteKeyPressed(
+            *frame.Document(), frame.Document()->GetEditor().CanSmartCopyOrDelete()
+                                 ? EnumSet<TypingCommand::Option> {TypingCommand::Option::SmartDelete}
+                                 : EnumSet<TypingCommand::Option> {});
+          return true;
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+
+    bool ExecuteDeleteBackward(LocalFrame &frame, dom::Event *, EditorCommandSource, utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(
+        SelectionDirection::Backward, TextGranularity::CharacterGranularity, false, true);
+      return true;
+    }
+
+    bool ExecuteDeleteBackwardByDecomposingPreviousCharacter(LocalFrame &frame, dom::Event *,
+                                                             EditorCommandSource, utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(
+        SelectionDirection::Backward, TextGranularity::CharacterGranularity, false, true);
+      return true;
+    }
+
+    bool ExecuteDeleteForward(LocalFrame &frame, dom::Event *, EditorCommandSource, utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(
+        SelectionDirection::Forward, TextGranularity::CharacterGranularity, false, true);
+      return true;
+    }
+
+    bool ExecuteDeleteToBeginningOfLine(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                        utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Backward,
+                                                              TextGranularity::LineBoundary, true, false);
+      return true;
+    }
+
+    bool ExecuteDeleteToBeginningOfParagraph(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                             utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(
+        SelectionDirection::Backward, TextGranularity::ParagraphBoundary, true, false);
+      return true;
+    }
+
+    bool ExecuteDeleteToEndOfLine(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                  utf8_stringview) noexcept
+    {
+      // Despite its name, this command should delete the newline at the end of
+      // a paragraph if you are at the end of a paragraph (like DeleteToEndOfParagraph).
+      (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Forward,
+                                                              TextGranularity::LineBoundary, true, false);
+      return true;
+    }
+
+    bool ExecuteDeleteToEndOfParagraph(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                       utf8_stringview) noexcept
+    {
+      // Despite its name, this command should delete the newline at the end of
+      // a paragraph if you are at the end of a paragraph.
+      (void)frame.Document()->GetEditor().DeleteWithDirection(
+        SelectionDirection::Forward, TextGranularity::ParagraphBoundary, true, false);
+      return true;
+    }
+
+    bool ExecuteDeleteWordBackward(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                   utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Backward,
+                                                              TextGranularity::WordGranularity, true, false);
+      return true;
+    }
+
+    bool ExecuteDeleteWordForward(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                  utf8_stringview) noexcept
+    {
+      (void)frame.Document()->GetEditor().DeleteWithDirection(SelectionDirection::Forward,
+                                                              TextGranularity::WordGranularity, true, false);
+      return true;
+    }
+
+    bool ExecuteForwardDelete(LocalFrame &frame, dom::Event *, EditorCommandSource source,
+                              utf8_stringview) noexcept
+    {
+      switch (source)
+      {
+        case EditorCommandSource::MenuOrKeyBinding:
+          (void)frame.Document()->GetEditor().DeleteWithDirection(
+            SelectionDirection::Forward, TextGranularity::CharacterGranularity, false, true);
+          return true;
+        case EditorCommandSource::DOM:
+        case EditorCommandSource::DOMWithUserInterface:
+          // Doesn't scroll to make the selection visible, or modify the kill ring.
+          // ForwardDelete is not implemented in IE or Firefox, so this behavior is only needed for
+          // backward compatibility with ourselves, and for consistency with Delete.
+          TypingCommand::ForwardDeleteKeyPressed(*frame.Document());
+          return true;
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+
+    bool ExecuteInsertBacktab(LocalFrame &frame, dom::Event *event, EditorCommandSource,
+                              utf8_stringview) noexcept
+    {
+      return TargetFrame(frame, event)
+        .GetEventHandler()
+        .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::BackTab);
+    }
+
+    bool ExecuteInsertLineBreak(LocalFrame &frame, dom::Event *event, EditorCommandSource source,
+                                utf8_stringview) noexcept
+    {
+      switch (source)
+      {
+        case EditorCommandSource::MenuOrKeyBinding:
+          return TargetFrame(frame, event)
+            .GetEventHandler()
+            .HandleTextInputEvent(u8"\n", event, dom::TextEventInputType::LineBreak);
+        case EditorCommandSource::DOM:
+        case EditorCommandSource::DOMWithUserInterface:
+          // Doesn't scroll to make the selection visible, or modify the kill ring.
+          // InsertLineBreak is not implemented in IE or Firefox, so this behavior is only needed for
+          // backward compatibility with ourselves, and for consistency with other commands.
+          TypingCommand::InsertLineBreak(*frame.Document(), {});
+          return true;
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+
+    bool ExecuteInsertNewline(LocalFrame &frame, dom::Event *event, EditorCommandSource,
+                              utf8_stringview) noexcept
+    {
+      auto &targetFrame = TargetFrame(frame, event);
+      return targetFrame.GetEventHandler().HandleTextInputEvent(
+        u8"\n", event,
+        targetFrame.Document()->GetEditor().CanEditRichly() ? dom::TextEventInputType::Keyboard
+                                                            : dom::TextEventInputType::LineBreak);
+    }
+
+    bool ExecuteInsertNewlineInQuotedContent(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                             utf8_stringview) noexcept
+    {
+      TypingCommand::InsertParagraphSeparatorInQuotedContent(*frame.Document());
+      return true;
+    }
+
+    bool ExecuteInsertParagraph(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                utf8_stringview) noexcept
+    {
+      TypingCommand::InsertParagraphSeparator(*frame.Document(), {});
+      return true;
+    }
+
+    bool ExecuteInsertTab(LocalFrame &frame, dom::Event *event, EditorCommandSource, utf8_stringview) noexcept
+    {
+      return TargetFrame(frame, event)
+        .GetEventHandler()
+        .HandleTextInputEvent(u8"\t", event, dom::TextEventInputType::Keyboard);
+    }
+
+    bool ExecuteInsertText(LocalFrame &frame, dom::Event *event, EditorCommandSource,
+                           utf8_stringview value) noexcept
+    {
+      TypingCommand::InsertText(*frame.Document(), value, event, {});
+      return true;
+    }
+
+    bool ExecuteRedo(LocalFrame &frame, dom::Event *, EditorCommandSource, utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().Redo();
+      return true;
+    }
+
+    bool ExecuteUndo(LocalFrame &frame, dom::Event *, EditorCommandSource, utf8_stringview) noexcept
+    {
+      frame.Document()->GetEditor().Undo();
       return true;
     }
 
@@ -596,11 +839,36 @@ namespace krys::boo
       return client ? client->CanCopyCut(frame, defaultValue) : defaultValue;
     }
 
+    // FIXME: Script access to the clipboard (javaScriptCanAccessClipboard and domPasteAllowed), with
+    // scripting; until then pasting from the DOM is disallowed, as the default settings disallow it.
+    bool SupportedPaste(LocalFrame *frame) noexcept
+    {
+      if (!frame)
+      {
+        return false;
+      }
+
+      bool defaultValue = false;
+
+      EditorClient *client = frame->Document()->GetEditor().Client();
+      return client ? client->CanPaste(frame, defaultValue) : defaultValue;
+    }
+
     // Enabled functions
 
     bool Enabled(LocalFrame &, dom::Event *, EditorCommandSource) noexcept
     {
       return true;
+    }
+
+    bool EnabledRedo(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
+    {
+      return frame.Document()->GetEditor().CanRedo();
+    }
+
+    bool EnabledUndo(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
+    {
+      return frame.Document()->GetEditor().CanUndo();
     }
 
     bool EnabledVisibleSelection(LocalFrame &frame, dom::Event *event, EditorCommandSource) noexcept
@@ -628,6 +896,20 @@ namespace krys::boo
       return editor.CanDHTMLCopy() || editor.CanCopy();
     }
 
+    // FIXME: Script access to the clipboard (allowCopyCutFromDOM), with scripting.
+    bool EnabledCut(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
+    {
+      auto &editor = frame.Document()->GetEditor();
+      return editor.CanDHTMLCut() || editor.CanCut();
+    }
+
+    // FIXME: Script access to the clipboard (allowPasteFromDOM), with scripting.
+    bool EnabledPaste(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
+    {
+      auto &editor = frame.Document()->GetEditor();
+      return editor.CanDHTMLPaste() || editor.CanPaste();
+    }
+
     bool EnabledInEditableText(LocalFrame &frame, dom::Event *event, EditorCommandSource) noexcept
     {
       return frame.Document()->GetEditor().SelectionForCommand(event).RootEditableElement();
@@ -637,6 +919,28 @@ namespace krys::boo
                                               EditorCommandSource source) noexcept
     {
       return CaretBrowsingEnabled(frame) || EnabledInEditableText(frame, event, source);
+    }
+
+    bool EnabledDelete(LocalFrame &frame, dom::Event *event, EditorCommandSource source) noexcept
+    {
+      switch (source)
+      {
+        case EditorCommandSource::MenuOrKeyBinding: return frame.Document()->GetEditor().CanDelete();
+        case EditorCommandSource::DOM:
+        case EditorCommandSource::DOMWithUserInterface:
+          // "Delete" from DOM is like delete/backspace keypress, affects selected range if non-empty,
+          // otherwise removes a character
+          return EnabledInEditableText(frame, event, source);
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+
+    bool EnabledInRichlyEditableText(LocalFrame &frame, dom::Event *, EditorCommandSource) noexcept
+    {
+      const auto &selection = frame.Document()->Selection().Selection();
+      return selection.IsCaretOrRange() && selection.IsContentRichlyEditable()
+             && selection.RootEditableElement();
     }
 
     // AllowExecutionWhenDisabled functions
@@ -658,6 +962,18 @@ namespace krys::boo
       return false;
     }
 
+    bool AllowExecutionWhenDisabledPaste(LocalFrame &, EditorCommandSource source) noexcept
+    {
+      switch (source)
+      {
+        case EditorCommandSource::MenuOrKeyBinding:     return true;
+        case EditorCommandSource::DOM:
+        case EditorCommandSource::DOMWithUserInterface: return false;
+      }
+      krys_debug_assert(false);
+      return false;
+    }
+
     struct CommandEntry
     {
       utf8_stringview Name;
@@ -668,6 +984,61 @@ namespace krys::boo
     constexpr auto Commands = std::to_array<CommandEntry>({
       {u8"Copy",
        {ExecuteCopy, SupportedCopyCut, EnabledCopy, IsNotTextInsertion, AllowExecutionWhenDisabledCopyCut}},
+      {u8"Cut",
+       {ExecuteCut, SupportedCopyCut, EnabledCut, IsNotTextInsertion, AllowExecutionWhenDisabledCopyCut}},
+      {u8"Delete",
+       {ExecuteDelete, Supported, EnabledDelete, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteBackward",
+       {ExecuteDeleteBackward, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteBackwardByDecomposingPreviousCharacter",
+       {ExecuteDeleteBackwardByDecomposingPreviousCharacter, SupportedFromMenuOrKeyBinding,
+        EnabledInEditableText, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteForward",
+       {ExecuteDeleteForward, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteToBeginningOfLine",
+       {ExecuteDeleteToBeginningOfLine, SupportedFromMenuOrKeyBinding, EnabledInEditableText,
+        IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteToBeginningOfParagraph",
+       {ExecuteDeleteToBeginningOfParagraph, SupportedFromMenuOrKeyBinding, EnabledInEditableText,
+        IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteToEndOfLine",
+       {ExecuteDeleteToEndOfLine, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteToEndOfParagraph",
+       {ExecuteDeleteToEndOfParagraph, SupportedFromMenuOrKeyBinding, EnabledInEditableText,
+        IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteWordBackward",
+       {ExecuteDeleteWordBackward, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"DeleteWordForward",
+       {ExecuteDeleteWordForward, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"ForwardDelete",
+       {ExecuteForwardDelete, Supported, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertBacktab",
+       {ExecuteInsertBacktab, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertLineBreak",
+       {ExecuteInsertLineBreak, Supported, EnabledInEditableText, IsTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertNewline",
+       {ExecuteInsertNewline, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertNewlineInQuotedContent",
+       {ExecuteInsertNewlineInQuotedContent, Supported, EnabledInRichlyEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertParagraph",
+       {ExecuteInsertParagraph, Supported, EnabledInEditableText, IsNotTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertTab",
+       {ExecuteInsertTab, SupportedFromMenuOrKeyBinding, EnabledInEditableText, IsTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
+      {u8"InsertText",
+       {ExecuteInsertText, Supported, EnabledInEditableText, IsTextInsertion,
+        DoNotAllowExecutionWhenDisabled}},
       {u8"MoveBackward",
        {ExecuteMoveBackward, SupportedFromMenuOrKeyBinding, EnabledInEditableTextOrCaretBrowsing,
         IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
@@ -806,6 +1177,15 @@ namespace krys::boo
       {u8"MoveWordRightAndModifySelection",
        {ExecuteMoveWordRightAndModifySelection, SupportedFromMenuOrKeyBinding,
         EnabledVisibleSelectionOrCaretBrowsing, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"Paste",
+       {ExecutePaste, SupportedPaste, EnabledPaste, IsNotTextInsertion, AllowExecutionWhenDisabledPaste}},
+      {u8"PasteAndMatchStyle",
+       {ExecutePasteAndMatchStyle, SupportedPaste, EnabledPaste, IsNotTextInsertion,
+        AllowExecutionWhenDisabledPaste}},
+      {u8"PasteAsPlainText",
+       {ExecutePasteAsPlainText, SupportedPaste, EnabledPaste, IsNotTextInsertion,
+        AllowExecutionWhenDisabledPaste}},
+      {u8"Redo", {ExecuteRedo, Supported, EnabledRedo, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
       {u8"ScrollLineDown",
        {ExecuteScrollLineDown, SupportedFromMenuOrKeyBinding, Enabled, IsNotTextInsertion,
         DoNotAllowExecutionWhenDisabled}},
@@ -838,6 +1218,7 @@ namespace krys::boo
       {u8"SelectWord",
        {ExecuteSelectWord, SupportedFromMenuOrKeyBinding, EnabledVisibleSelection, IsNotTextInsertion,
         DoNotAllowExecutionWhenDisabled}},
+      {u8"Undo", {ExecuteUndo, Supported, EnabledUndo, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
       {u8"Unselect",
        {ExecuteUnselect, Supported, EnabledVisibleSelection, IsNotTextInsertion,
         DoNotAllowExecutionWhenDisabled}},

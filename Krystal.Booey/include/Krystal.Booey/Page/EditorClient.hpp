@@ -14,12 +14,13 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class LocalFrame;
+  class UndoStep;
 
   /// @brief What a page's editor asks of its host: the commands keys run, and whether selections and
   /// clipboard access are allowed.
   // FIXME: The rest of the editor client: editing delegates (shouldBeginEditing, shouldInsertText,
-  // shouldApplyStyle and their notifications), undo and redo, spelling and grammar, text checking and input
-  // methods, with editing commands.
+  // shouldApplyStyle and their notifications), spelling and grammar, text checking and input methods, with
+  // editing commands.
   class EditorClient
   {
     KRYS_NON_COPY_MOVABLE(EditorClient);
@@ -34,10 +35,27 @@ namespace krys::boo
                                                           bool stillSelecting) noexcept = 0;
 
     KRYS_NODISCARD virtual bool CanCopyCut(LocalFrame *frame, bool defaultValue) const noexcept = 0;
+    KRYS_NODISCARD virtual bool CanPaste(LocalFrame *frame, bool defaultValue) const noexcept = 0;
 
     /// @brief Runs the editor command a `keydown` or `keypress` is bound to, if any.
     /// @return Whether the event was handled, so its default action is done.
     virtual bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
+
+    virtual void RespondToChangedContents() noexcept = 0;
+
+    /// @brief Whether deleting and pasting whole words adds and removes the spaces around them.
+    KRYS_NODISCARD virtual bool SmartInsertDeleteEnabled() noexcept = 0;
+
+    /// @brief Keeps an edit (or an undone edit that was redone) so it can be undone.
+    virtual void RegisterUndoStep(UndoStep &step) noexcept = 0;
+    /// @brief Keeps an undone edit so it can be redone.
+    virtual void RegisterRedoStep(UndoStep &step) noexcept = 0;
+    virtual void ClearUndoRedoOperations() noexcept = 0;
+
+    KRYS_NODISCARD virtual bool CanUndo() const noexcept = 0;
+    KRYS_NODISCARD virtual bool CanRedo() const noexcept = 0;
+    virtual void Undo() noexcept = 0;
+    virtual void Redo() noexcept = 0;
   };
 
   /// @brief The editor client of a page that has no host.
@@ -56,9 +74,48 @@ namespace krys::boo
       return defaultValue;
     }
 
+    KRYS_NODISCARD bool CanPaste(LocalFrame *, bool defaultValue) const noexcept final
+    {
+      return defaultValue;
+    }
+
     bool HandleKeyboardEvent(dom::KeyboardEvent &) noexcept final
     {
       return false;
+    }
+
+    void RespondToChangedContents() noexcept final
+    {
+    }
+
+    KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept final
+    {
+      return false;
+    }
+
+    void RegisterUndoStep(UndoStep &) noexcept final
+    {
+    }
+    void RegisterRedoStep(UndoStep &) noexcept final
+    {
+    }
+    void ClearUndoRedoOperations() noexcept final
+    {
+    }
+
+    KRYS_NODISCARD bool CanUndo() const noexcept final
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool CanRedo() const noexcept final
+    {
+      return false;
+    }
+    void Undo() noexcept final
+    {
+    }
+    void Redo() noexcept final
+    {
     }
   };
 }

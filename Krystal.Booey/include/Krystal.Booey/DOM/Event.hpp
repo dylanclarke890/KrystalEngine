@@ -231,6 +231,16 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsInputEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsTextEvent() const noexcept
+    {
+      return false;
+    }
+
 #pragma endregion
 
   protected:

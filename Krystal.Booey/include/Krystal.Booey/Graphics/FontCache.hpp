@@ -151,6 +151,13 @@ namespace krys::boo
 
     void Invalidate() noexcept;
 
+    /// @brief Whether editing must not write @p fontFamily, a system font's private name, into the content.
+    KRYS_NODISCARD static bool IsSystemFontForbiddenForEditing(utf8_stringview fontFamily) noexcept
+    {
+      (void)fontFamily;
+      return false;
+    }
+
   private:
     KRYS_NODISCARD FontPlatformData *CachedFontPlatformData(const FontDescription &description,
                                                             const StringAtom &family,

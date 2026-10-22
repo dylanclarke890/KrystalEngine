@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
@@ -393,6 +394,11 @@ namespace krys::ui::tests
       {
         Writes.emplace_back(text);
       }
+
+      KRYS_NODISCARD utf8_string ReadStringFromPasteboard(utf8_stringview) noexcept override
+      {
+        return Writes.empty() ? utf8_string() : Writes.back();
+      }
     };
 
     View view({400, 300});
@@ -428,6 +434,77 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::A, {pal::KeyModifier::Control}, {u8"", u8"a"}));
     CHECK(selection.IsRange());
     CHECK(view.Document().GetEditor().SelectedText() == u8"The quick brown fox");
+
+    strategies.SetPasteboardStrategy(systemPasteboard);
+  }
+
+  TEST_CASE("View: the keyboard edits editable text", "[UI]")
+  {
+    /// @brief A clipboard in memory, in place of the system's.
+    struct MemoryPasteboard final : boo::PasteboardStrategy
+    {
+      utf8_string Contents;
+
+      void WriteToPasteboard(utf8_stringview, utf8_stringview text) noexcept override
+      {
+        Contents = utf8_string(text);
+      }
+
+      KRYS_NODISCARD utf8_string ReadStringFromPasteboard(utf8_stringview) noexcept override
+      {
+        return Contents;
+      }
+    };
+
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
+                  u8"<div id=e contenteditable>abc</div>");
+    view.UpdateRendering();
+
+    auto &strategies = boo::PlatformStrategies::Singleton();
+    auto *systemPasteboard = strategies.GetPasteboardStrategy();
+    MemoryPasteboard pasteboard;
+    strategies.SetPasteboardStrategy(&pasteboard);
+
+    auto &root = *view.Document().GetElementById(u8"e");
+    auto markup = [&]
+    {
+      auto html = boo::SerializeFragment(root, boo::SerializedNodes::SubtreesOfChildren);
+      return std::string(reinterpret_cast<const char *>(html.data()), html.size());
+    };
+    auto caretAt = [&](uint32 offset)
+    {
+      view.Document().Selection().MoveTo(
+        boo::dom::MakeContainerOffsetPosition(ShareRefPtr(root.FirstChild()), offset),
+        boo::Affinity::Downstream);
+    };
+
+    // Typed characters are inserted, Backspace deletes, and Enter starts a paragraph.
+    caretAt(3);
+    (void)view.KeyPressed(pal::Key::D, {}, {u8"d", u8"d"});
+    CHECK(markup() == "abcd");
+    CHECK(view.KeyPressed(pal::Key::Del));
+    CHECK(markup() == "abc");
+    (void)view.KeyPressed(pal::Key::Enter, {}, {u8"\r", u8"\r"});
+    CHECK(markup() == "abc<div><br></div>");
+
+    // Ctrl+Z undoes the paragraph, and Ctrl+Shift+Z redoes it.
+    CHECK(view.KeyPressed(pal::Key::Z, {pal::KeyModifier::Control}, {u8"", u8"z"}));
+    CHECK(markup() == "abc");
+    CHECK(view.KeyPressed(pal::Key::Z, {pal::KeyModifier::Control, pal::KeyModifier::Shift}, {u8"", u8"Z"}));
+    CHECK(markup() == "abc<div><br></div>");
+    CHECK(view.KeyPressed(pal::Key::Z, {pal::KeyModifier::Control}, {u8"", u8"z"}));
+
+    // Ctrl+X cuts, and Ctrl+V pastes.
+    view.Document().Selection().MoveTo(
+      boo::dom::MakeContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 0),
+      boo::dom::MakeContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 1), boo::Affinity::Downstream);
+    CHECK(view.KeyPressed(pal::Key::X, {pal::KeyModifier::Control}, {u8"", u8"x"}));
+    CHECK(pasteboard.Contents == u8"a");
+    CHECK(markup() == "bc");
+    caretAt(2);
+    CHECK(view.KeyPressed(pal::Key::V, {pal::KeyModifier::Control}, {u8"", u8"v"}));
+    CHECK(markup() == "bca");
 
     strategies.SetPasteboardStrategy(systemPasteboard);
   }

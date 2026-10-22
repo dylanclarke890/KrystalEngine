@@ -35,6 +35,11 @@ namespace krys::boo
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override;
 
+    /// @brief Whether removing this inline (leaving its children in its parent) could change the line layout:
+    /// its vertical alignment, emphasis marks, font metrics or line height differ from its parent's, or it
+    /// holds only a line break.
+    KRYS_NODISCARD bool MayAffectLayout() const noexcept;
+
     void ImageChanged(WrappedImagePtr, const IntRect * = nullptr) noexcept override;
 
     KRYS_NODISCARD LayoutUnit MarginLeft() const noexcept final;

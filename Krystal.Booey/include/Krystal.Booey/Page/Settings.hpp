@@ -49,6 +49,11 @@ namespace krys::boo
     bool UseSystemAppearance {false};
     /// @brief Moving a caret through content that isn't editable, with the keys that move one.
     bool CaretBrowsingEnabled {false};
+    /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
+    bool HTMLLegacyAttributeValueSerializationEnabled {false};
+    /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
+    /// the pasted copy stays in flow.
+    bool ShouldConvertPositionStyleOnCopy {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
 

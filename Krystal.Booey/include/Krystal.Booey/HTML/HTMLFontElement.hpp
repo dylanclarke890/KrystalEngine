@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::html
 {
@@ -29,6 +31,10 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-font-size
     void Size(dom::DOMString &&value) noexcept;
+
+    /// @brief The `font-size` keyword for a legacy font size (`1` to `7`, or relative with `+` or `-`).
+    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-font-size
+    KRYS_NODISCARD static Maybe<css::ValueId> CSSValueFromFontSizeNumber(dom::DOMStringView string) noexcept;
 
   protected:
     KRYS_NODISCARD bool

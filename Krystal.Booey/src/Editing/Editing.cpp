@@ -1,12 +1,16 @@
 ﻿#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/PositionIterator.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
@@ -19,6 +23,7 @@
 #include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
@@ -32,12 +37,6 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD bool IsHTMLElementOfType(const dom::Node *node, html::TagName tagName) noexcept
-    {
-      auto *element = DynamicDowncast<html::HTMLElement>(node);
-      return element && element->TagQualifiedName().TagName() == tagName;
-    }
-
     KRYS_NODISCARD bool IsHTMLBodyElement(const dom::Node *node) noexcept
     {
       return IsHTMLElementOfType(node, html::TagName::body);
@@ -1168,4 +1167,434 @@ namespace krys::boo
     return {dom::MakeContainerOffsetPosition(range.Start).Downstream(),
             dom::MakeContainerOffsetPosition(range.End).Upstream()};
   }
+
+#pragma region Elements editing makes
+
+  bool IsHTMLElementOfType(const dom::Node *node, html::TagName tagName) noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(node);
+    return element && element->TagQualifiedName().TagName() == tagName;
+  }
+
+  Ref<dom::Element> CreateHTMLElement(dom::Document &document, dom::DOMStringView localName) noexcept
+  {
+    auto element =
+      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(localName));
+    krys_debug_assert(!element.HasException());
+    return element.ReleaseValue();
+  }
+
+  Ref<dom::Element> CreateDefaultParagraphElement(dom::Document &document) noexcept
+  {
+    switch (document.GetEditor().DefaultParagraphSeparator())
+    {
+      case EditorParagraphSeparator::div: return CreateHTMLElement(document, u8"div");
+      case EditorParagraphSeparator::p:   break;
+    }
+    return CreateHTMLElement(document, u8"p");
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document,
+                                                          dom::Text &tabTextNode) noexcept
+    {
+      auto spanElement = CreateHTMLElement(document, u8"span");
+
+      (void)spanElement->SetAttribute(dom::DOMStringAtom(u8"class"), dom::DOMString(AppleTabSpanClass));
+      (void)spanElement->SetAttribute(dom::DOMStringAtom(u8"style"), u8"white-space:pre");
+
+      (void)spanElement->AppendChild(tabTextNode);
+
+      return spanElement;
+    }
+
+    KRYS_NODISCARD bool HasARenderedDescendant(dom::Node *node, dom::Node *excludedNode) noexcept
+    {
+      for (auto *n = node->FirstChild(); n;)
+      {
+        if (n == excludedNode)
+        {
+          n = dom::TreeQueries::NextSkippingChildren(*n, node);
+          continue;
+        }
+        if (n->Renderer())
+        {
+          return true;
+        }
+        n = dom::TreeQueries::Next(*n, node);
+      }
+      return false;
+    }
+  }
+
+  Ref<dom::Element> CreateTabSpanElement(dom::Document &document, utf8_string &&tabText) noexcept
+  {
+    return CreateTabSpanElement(document, *document.CreateTextNode(krys::move(tabText)));
+  }
+
+  // FIXME: An editing text node (createEditingTextNode, which echoes passwords), with password fields.
+  Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept
+  {
+    return CreateTabSpanElement(document, *document.CreateTextNode(u8"\t"));
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool HasEquivalentAttributes(const dom::Element &first,
+                                                const dom::Element &second) noexcept
+    {
+      const auto &firstAttributes = first.AttributeList();
+      const auto &secondAttributes = second.AttributeList();
+      if (firstAttributes.size() != secondAttributes.size())
+      {
+        return false;
+      }
+      for (const auto &attribute : firstAttributes)
+      {
+        auto otherValue = second.GetAttributeNS(attribute->NamespaceURI(), attribute->LocalName());
+        if (!otherValue || *otherValue != attribute->Value())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  Ref<dom::Element> CloneElementWithoutChildren(dom::Element &element) noexcept
+  {
+    auto clone = dom::NodeAlgorithms::CloneNode(element, &element.NodeDocument(), false);
+    krys_debug_assert(!clone.HasException());
+    auto node = clone.ReleaseValue();
+    return ShareRef(Downcast<dom::Element>(*node));
+  }
+
+  void CloneDataFromElement(dom::Element &target, const dom::Element &source) noexcept
+  {
+    source.SynchronizeAllAttributes();
+    for (const auto &attribute : source.AttributeList())
+    {
+      (void)target.SetAttributeNS(attribute->NamespaceURI(), dom::DOMStringAtom(attribute->Name()),
+                                  dom::DOMString(attribute->Value()));
+    }
+  }
+
+  dom::Element *TabSpanNode(dom::Node *node) noexcept
+  {
+    if (IsHTMLElementOfType(node, html::TagName::span))
+    {
+      auto &span = Downcast<dom::Element>(*node);
+      if (span.GetAttribute(dom::DOMStringAtom(u8"class")) == dom::DOMString(AppleTabSpanClass))
+      {
+        return &span;
+      }
+    }
+    return nullptr;
+  }
+
+  dom::Element *ParentTabSpanNode(dom::Node *node) noexcept
+  {
+    return Is<dom::Text>(node) ? TabSpanNode(node->ParentNode()) : nullptr;
+  }
+
+  bool IsMailBlockquote(const dom::Node &node) noexcept
+  {
+    if (!IsHTMLElementOfType(&node, html::TagName::blockquote))
+    {
+      return false;
+    }
+    return Downcast<dom::Element>(node).GetAttribute(dom::DOMStringAtom(u8"type"))
+           == dom::DOMString(u8"cite");
+  }
+
+  uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept
+  {
+    uint32 count = 0;
+    for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
+    {
+      if (IsMailBlockquote(*node))
+      {
+        ++count;
+      }
+    }
+    return count;
+  }
+
+  RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept
+  {
+    if (!node)
+    {
+      return nullptr;
+    }
+
+    auto root = HighestEditableRoot(FirstPositionInOrBeforeNode(node));
+
+    for (auto *ancestor = node->ParentNode(); ancestor; ancestor = ancestor->ParentNode())
+    {
+      if (IsHTMLElementOfType(ancestor, html::TagName::ul)
+          || IsHTMLElementOfType(ancestor, html::TagName::ol))
+      {
+        return ShareRefPtr(&Downcast<dom::Element>(*ancestor));
+      }
+      if (ancestor == root)
+      {
+        return nullptr;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<dom::Node> EnclosingListChild(dom::Node *node) noexcept
+  {
+    if (!node)
+    {
+      return nullptr;
+    }
+
+    // Check for a list item element, or for a node whose parent is a list element. Such a node
+    // will appear visually as a list item (but without a list marker)
+    auto root = HighestEditableRoot(FirstPositionInOrBeforeNode(node));
+
+    // FIXME: This function is inappropriately named since it starts with node instead of node->ParentNode()
+    for (auto *n = node; n && n->ParentNode(); n = n->ParentNode())
+    {
+      if (IsHTMLElementOfType(n, html::TagName::li) || (IsListHTMLElement(n->ParentNode()) && n != root))
+      {
+        return ShareRefPtr(n);
+      }
+      if (n == root || IsTableCell(*n))
+      {
+        return nullptr;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<dom::Node> EnclosingEmptyListItem(const VisiblePosition &position) noexcept
+  {
+    // Check that position is on a line by itself inside a list item
+    RefPtr<dom::Node> listChildNode = EnclosingListChild(position.DeepEquivalent().DeprecatedNode());
+    if (!listChildNode || !IsStartOfParagraph(position) || !IsEndOfParagraph(position))
+    {
+      return nullptr;
+    }
+
+    VisiblePosition firstInListChild(FirstPositionInOrBeforeNode(listChildNode.get()));
+    VisiblePosition lastInListChild(LastPositionInOrAfterNode(listChildNode.get()));
+
+    if (firstInListChild != position || lastInListChild != position)
+    {
+      return nullptr;
+    }
+
+    return listChildNode;
+  }
+
+  RefPtr<dom::Element> OutermostEnclosingList(dom::Node *node, dom::Node *rootList) noexcept
+  {
+    RefPtr<dom::Element> list = EnclosingList(node);
+    if (!list)
+    {
+      return nullptr;
+    }
+
+    while (RefPtr<dom::Element> nextList = EnclosingList(list.get()))
+    {
+      if (nextList.get() == rootList)
+      {
+        break;
+      }
+      list = krys::move(nextList);
+    }
+
+    return list;
+  }
+
+  bool CanMergeLists(dom::Element *firstList, dom::Element *secondList) noexcept
+  {
+    auto *first = DynamicDowncast<html::HTMLElement>(firstList);
+    auto *second = DynamicDowncast<html::HTMLElement>(secondList);
+    if (!first || !second)
+    {
+      return false;
+    }
+
+    return first->LocalName() == second->LocalName() // make sure the list types match (ol vs. ul)
+           && first->HasEditableStyle() && second->HasEditableStyle()       // both lists are editable
+           && first->RootEditableElement() == second->RootEditableElement() // don't cross editing boundaries
+           // Make sure there is no visible content between this li and the previous list.
+           && IsVisiblyAdjacent(dom::PositionInParentAfterNode(first),
+                                dom::PositionInParentBeforeNode(second));
+  }
+
+  dom::Element *ElementIfEquivalent(const dom::Element &first, dom::Node &second) noexcept
+  {
+    auto *secondElement = DynamicDowncast<dom::Element>(second);
+    if (secondElement && first.TagQualifiedName() == secondElement->TagQualifiedName()
+        && HasEquivalentAttributes(first, *secondElement))
+    {
+      return secondElement;
+    }
+    return nullptr;
+  }
+
+  dom::Element *EnclosingElementWithTag(const dom::Position &position, html::TagName tagName) noexcept
+  {
+    auto root = HighestEditableRoot(position);
+    for (auto *node = position.DeprecatedNode(); node; node = node->ParentNode())
+    {
+      if (root && !node->HasEditableStyle())
+      {
+        continue;
+      }
+      auto *element = DynamicDowncast<dom::Element>(*node);
+      if (!element)
+      {
+        continue;
+      }
+      if (IsHTMLElementOfType(element, tagName))
+      {
+        return element;
+      }
+      if (node == root)
+      {
+        return nullptr;
+      }
+    }
+    return nullptr;
+  }
+
+  bool IsNonTableCellHTMLBlockElement(const dom::Node *node) noexcept
+  {
+    using html::TagName;
+    for (auto tagName : {TagName::listing, TagName::ol, TagName::pre, TagName::table, TagName::ul,
+                         TagName::xmp, TagName::h1, TagName::h2, TagName::h3, TagName::h4, TagName::h5})
+    {
+      if (IsHTMLElementOfType(node, tagName))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  dom::Position AdjustedSelectionStartForStyleComputation(const VisibleSelection &selection) noexcept
+  {
+    // This function is used by range style computations to avoid bugs like:
+    // you can only bold/unbold a selection starting from end of line once
+    // It is important to skip certain irrelevant content at the start of the selection, so we do not wind up
+    // with a spurious "mixed" style.
+
+    auto visiblePosition = selection.VisibleStart();
+    if (visiblePosition.IsNull())
+    {
+      return {};
+    }
+
+    // if the selection is a caret, just return the position, since the style
+    // behind us is relevant
+    if (selection.IsCaret())
+    {
+      return visiblePosition.DeepEquivalent();
+    }
+
+    // if the selection starts just before a paragraph break, skip over it
+    if (IsEndOfParagraph(visiblePosition))
+    {
+      return visiblePosition.Next().DeepEquivalent().Downstream();
+    }
+
+    // otherwise, make sure to be at the start of the first selected node,
+    // instead of possibly at the end of the last node before the selection
+    return visiblePosition.DeepEquivalent().Downstream();
+  }
+
+  RefPtr<dom::Node> HighestNodeToRemoveInPruning(dom::Node *node) noexcept
+  {
+    RefPtr<dom::Node> previousNode;
+    auto *rootEditableElement = node ? node->RootEditableElement() : nullptr;
+    for (RefPtr<dom::Node> currentNode = ShareRefPtr(node); currentNode;
+         currentNode = ShareRefPtr<dom::Node>(currentNode->ParentNode()))
+    {
+      if (auto *renderer = currentNode->Renderer())
+      {
+        if (!renderer->CanHaveChildren() || HasARenderedDescendant(currentNode.get(), previousNode.get())
+            || rootEditableElement == currentNode.get())
+        {
+          return previousNode;
+        }
+      }
+      previousNode = currentNode;
+    }
+    return nullptr;
+  }
+
+  // Whitespace is ASCII, so it's found byte by byte; a no-break space is two bytes in UTF-8, so a rebalanced
+  // string can be longer than the string it rebalances.
+  utf8_string StringWithRebalancedWhitespace(utf8_stringview string, bool startIsStartOfParagraph,
+                                             bool shouldEmitNBSPbeforeEnd) noexcept
+  {
+    constexpr utf8_stringview noBreakSpace = u8" ";
+    auto isEditingWhitespaceAt = [&](size_t i, size_t &length)
+    {
+      if (string.substr(i).starts_with(noBreakSpace))
+      {
+        length = noBreakSpace.size();
+        return true;
+      }
+      length = 1;
+      return DeprecatedIsEditingWhitespace(string[i]);
+    };
+
+    utf8_string rebalancedString;
+    bool changed = false;
+    bool previousCharacterWasSpace = false;
+    for (size_t i = 0; i < string.size();)
+    {
+      size_t length = 1;
+      if (!isEditingWhitespaceAt(i, length))
+      {
+        previousCharacterWasSpace = false;
+        rebalancedString.append(string.substr(i, length));
+        i += length;
+        continue;
+      }
+      bool isLast = i + length == string.size();
+      utf8_stringview selectedWhitespaceCharacter;
+      // We need to ensure there is no next sibling text node.
+      if (previousCharacterWasSpace || (!i && startIsStartOfParagraph) || (isLast && shouldEmitNBSPbeforeEnd))
+      {
+        selectedWhitespaceCharacter = noBreakSpace;
+        previousCharacterWasSpace = false;
+      }
+      else
+      {
+        selectedWhitespaceCharacter = u8" ";
+        previousCharacterWasSpace = true;
+      }
+      if (string.substr(i, length) != selectedWhitespaceCharacter)
+      {
+        changed = true;
+      }
+      rebalancedString.append(selectedWhitespaceCharacter);
+      i += length;
+    }
+
+    return changed ? rebalancedString : utf8_string(string);
+  }
+
+  utf8_stringview NonBreakingSpaceString() noexcept
+  {
+    return u8" ";
+  }
+
+  bool IsVisiblyAdjacent(const dom::Position &first, const dom::Position &second) noexcept
+  {
+    return VisiblePosition(first) == VisiblePosition(second.Upstream());
+  }
+
+#pragma endregion
 }

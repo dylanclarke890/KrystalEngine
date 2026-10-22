@@ -23,9 +23,11 @@
 namespace krys::boo::dom
 {
   class Element;
+  class Event;
   class KeyboardEvent;
   class WheelEvent;
   class Node;
+  enum class TextEventInputType : uint8;
 }
 
 namespace krys::boo
@@ -239,6 +241,12 @@ namespace krys::boo
     /// end, and a `keypress` of Space (Shift+Space) a page down (up).
     /// @return Whether the event was handled.
     bool DefaultKeyboardEventHandler(dom::KeyboardEvent &event) noexcept;
+
+    /// @brief Fires `textInput` for text the user typed (or pasted, or dropped) at @p underlyingEvent's
+    /// target, or else the focused element, and has the editor insert it unless a listener cancels it.
+    /// @return Whether the editor handled it.
+    bool HandleTextInputEvent(utf8_stringview text, dom::Event *underlyingEvent,
+                              dom::TextEventInputType inputType) noexcept;
 
     /// @brief Scrolls the box of @p startingNode (the focused element, or else the last pressed node, if
     /// null), or else its nearest containing block that scrolls, by a step of @p granularity.

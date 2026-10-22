@@ -7,7 +7,9 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/RenderedPosition.hpp"
+#include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
@@ -392,6 +394,15 @@ namespace krys::boo
       return false;
     }
     krys_debug_assert(document->Frame());
+
+    if (options.Contains(SetSelectionOption::CloseTyping))
+    {
+      TypingCommand::CloseTyping(*document);
+    }
+    if (options.Contains(SetSelectionOption::ClearTypingStyle))
+    {
+      ClearTypingStyle();
+    }
 
     _granularity = granularity;
     SetNodeFlags(_selection, false);
@@ -2078,6 +2089,13 @@ namespace krys::boo
     return true;
   }
 
+  // FIXME: Asking the editor client whether to delete the range (shouldDeleteRange), with the editing
+  // delegates.
+  bool FrameSelection::ShouldDeleteSelection(const VisibleSelection &) const noexcept
+  {
+    return true;
+  }
+
   FloatRect FrameSelection::SelectionBounds(ClipToVisibleContent clipToVisibleContent) noexcept
   {
     if (!_document)
@@ -2452,6 +2470,30 @@ namespace krys::boo
       }
       html::FocusAlgorithms::FocusingSteps(*document);
     }
+  }
+
+  EditingStyle *FrameSelection::TypingStyle() const noexcept
+  {
+    return _typingStyle.get();
+  }
+
+  RefPtr<css::MutableStyleProperties> FrameSelection::CopyTypingStyle() const noexcept
+  {
+    if (!_typingStyle || !_typingStyle->Style())
+    {
+      return nullptr;
+    }
+    return _typingStyle->Style()->MutableCopy();
+  }
+
+  void FrameSelection::SetTypingStyle(RefPtr<EditingStyle> &&style) noexcept
+  {
+    _typingStyle = krys::move(style);
+  }
+
+  void FrameSelection::ClearTypingStyle() noexcept
+  {
+    _typingStyle = nullptr;
   }
 
   RefPtr<dom::Range> FrameSelection::AssociatedLiveRange() noexcept

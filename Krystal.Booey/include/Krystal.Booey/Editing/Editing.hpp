@@ -2,16 +2,20 @@
 
 #include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/EditingBoundary.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/HTML/Enums/TagName.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/String.hpp"
 
 namespace krys::boo::dom
 {
   class ContainerNode;
+  class Document;
   class Element;
   class Node;
   struct SimpleRange;
@@ -28,6 +32,7 @@ namespace krys::boo
   class RenderBlock;
   class RenderObject;
   class VisiblePosition;
+  class VisibleSelection;
 
 #pragma region Node
 
@@ -156,7 +161,8 @@ namespace krys::boo
   void UpdatePositionForNodeRemoval(dom::Position &position, dom::Node &node) noexcept;
   KRYS_NODISCARD TextDirection DirectionOfEnclosingBlock(const dom::Position &position) noexcept;
 
-  /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root is
+  /// @brief The node, or the shadow host it's in (or that host's, and so on), that's in the tree whose root
+  /// is
   /// @p scopeRoot.
   KRYS_NODISCARD dom::Node *AncestorNodeInThisScope(const dom::Node &scopeRoot, dom::Node *node) noexcept;
 
@@ -211,6 +217,56 @@ namespace krys::boo
   KRYS_NODISCARD bool DeprecatedIsSpaceOrNewline(char32 character) noexcept;
 
   KRYS_NODISCARD bool IsAmbiguousBoundaryCharacter(char32 character) noexcept;
+
+#pragma region Elements editing makes
+
+  /// @brief Whether @p node is an HTML element with the tag name @p tagName.
+  KRYS_NODISCARD bool IsHTMLElementOfType(const dom::Node *node, html::TagName tagName) noexcept;
+
+  KRYS_NODISCARD Ref<dom::Element> CreateHTMLElement(dom::Document &document,
+                                                     dom::DOMStringView localName) noexcept;
+  KRYS_NODISCARD Ref<dom::Element> CreateDefaultParagraphElement(dom::Document &document) noexcept;
+  KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept;
+  KRYS_NODISCARD Ref<dom::Element> CreateTabSpanElement(dom::Document &document,
+                                                        utf8_string &&tabText) noexcept;
+  /// @brief A copy of @p element, with its attributes, without its children.
+  KRYS_NODISCARD Ref<dom::Element> CloneElementWithoutChildren(dom::Element &element) noexcept;
+  /// @brief Gives @p target the attributes of @p source.
+  void CloneDataFromElement(dom::Element &target, const dom::Element &source) noexcept;
+
+  KRYS_NODISCARD dom::Element *TabSpanNode(dom::Node *node) noexcept;
+  KRYS_NODISCARD dom::Element *ParentTabSpanNode(dom::Node *node) noexcept;
+
+  KRYS_NODISCARD bool IsMailBlockquote(const dom::Node &node) noexcept;
+  KRYS_NODISCARD uint32 NumEnclosingMailBlockquotes(const dom::Position &position) noexcept;
+
+  KRYS_NODISCARD RefPtr<dom::Element> EnclosingList(dom::Node *node) noexcept;
+  KRYS_NODISCARD RefPtr<dom::Node> EnclosingListChild(dom::Node *node) noexcept;
+  KRYS_NODISCARD RefPtr<dom::Node> EnclosingEmptyListItem(const VisiblePosition &position) noexcept;
+  KRYS_NODISCARD RefPtr<dom::Element> OutermostEnclosingList(dom::Node *node,
+                                                             dom::Node *rootList = nullptr) noexcept;
+  KRYS_NODISCARD bool CanMergeLists(dom::Element *firstList, dom::Element *secondList) noexcept;
+
+  KRYS_NODISCARD dom::Element *ElementIfEquivalent(const dom::Element &first, dom::Node &second) noexcept;
+  KRYS_NODISCARD dom::Element *EnclosingElementWithTag(const dom::Position &position,
+                                                       html::TagName tagName) noexcept;
+  KRYS_NODISCARD bool IsNonTableCellHTMLBlockElement(const dom::Node *node) noexcept;
+  KRYS_NODISCARD dom::Position
+    AdjustedSelectionStartForStyleComputation(const VisibleSelection &selection) noexcept;
+
+  /// @brief The highest node, from @p node up, that removing would leave nothing rendered behind.
+  KRYS_NODISCARD RefPtr<dom::Node> HighestNodeToRemoveInPruning(dom::Node *node) noexcept;
+
+  /// @brief @p string with its whitespace alternating between spaces and no-break spaces, so that none of it
+  /// collapses.
+  KRYS_NODISCARD utf8_string StringWithRebalancedWhitespace(utf8_stringview string,
+                                                            bool startIsStartOfParagraph,
+                                                            bool shouldEmitNBSPbeforeEnd) noexcept;
+  KRYS_NODISCARD utf8_stringview NonBreakingSpaceString() noexcept;
+
+  KRYS_NODISCARD bool IsVisiblyAdjacent(const dom::Position &first, const dom::Position &second) noexcept;
+
+#pragma endregion
 
 #pragma region Caret rendering
 

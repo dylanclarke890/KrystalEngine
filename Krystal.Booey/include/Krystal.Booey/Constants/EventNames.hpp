@@ -28,6 +28,13 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview ScrollEnd = u8"scrollend";
   constexpr utf8_stringview BeforeCopy = u8"beforecopy";
   constexpr utf8_stringview Copy = u8"copy";
+  constexpr utf8_stringview BeforeCut = u8"beforecut";
+  constexpr utf8_stringview Cut = u8"cut";
+  constexpr utf8_stringview BeforePaste = u8"beforepaste";
+  constexpr utf8_stringview Paste = u8"paste";
+  constexpr utf8_stringview BeforeInput = u8"beforeinput";
+  constexpr utf8_stringview Input = u8"input";
+  constexpr utf8_stringview TextInput = u8"textInput";
   constexpr utf8_stringview SelectStart = u8"selectstart";
   constexpr utf8_stringview SelectionChange = u8"selectionchange";
   constexpr utf8_stringview SlotChange = u8"slotchange";

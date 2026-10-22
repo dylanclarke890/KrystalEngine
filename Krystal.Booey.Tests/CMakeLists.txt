@@ -537,7 +537,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Editing/TextIterator.cpp
 		tests/Editing/VisiblePosition.cpp
 		tests/Editing/VisibleSelection.cpp
+		tests/Editing/ApplyStyleCommand.cpp
 		tests/Editing/Editor.cpp
+		tests/Editing/Markup.cpp
+		tests/Editing/TypingCommand.cpp
 		tests/Editing/FrameSelection.cpp
 		tests/Rendering/RenderSelection.cpp
 		tests/Editing/VisibleUnits.cpp
