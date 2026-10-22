@@ -24,22 +24,6 @@ namespace krys::boo::layout
   {
     using ContinuousContent = InlineContentBreaker::ContinuousContent;
 
-    KRYS_NODISCARD char32 CodePointAt(utf8_stringview text, size_t position) noexcept
-    {
-      return text::DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position)).CodePoint;
-    }
-
-    /// @brief The byte offset of the code point that ends at @p position.
-    KRYS_NODISCARD size_t PreviousCodePointStart(utf8_stringview text, size_t position) noexcept
-    {
-      krys_debug_assert(position);
-      do
-      {
-        --position;
-      } while (position && text::IsTrailingUTF8(text[position]));
-      return position;
-    }
-
     KRYS_NODISCARD size_t NextCodePointStart(utf8_stringview text, size_t position) noexcept
     {
       return position
@@ -217,10 +201,10 @@ namespace krys::boo::layout
         // any characters.
         auto text = utf8_stringview {inlineTextItem.GetInlineTextBox().Content()};
         size_t left = inlineTextItem.Start();
-        for (auto index = PreviousCodePointStart(text, inlineTextItem.End()); index > left;
-             index = PreviousCodePointStart(text, index))
+        for (auto index = text::PreviousCodePointStart(text, inlineTextItem.End()); index > left;
+             index = text::PreviousCodePointStart(text, index))
         {
-          if (CanBreakBefore(CodePointAt(text, index), lineBreak))
+          if (CanBreakBefore(text::CodePointAt(text, index), lineBreak))
           {
             return index;
           }
@@ -234,7 +218,7 @@ namespace krys::boo::layout
         auto canBreakAtRunBoundary =
           nextInlineTextItem.IsWhitespace()
             ? nextInlineTextItem.Style().GetWhiteSpaceCollapse() != WhiteSpaceCollapse::BreakSpaces
-            : CanBreakBefore(CodePointAt(nextInlineTextItem.Content(), 0), lineBreak);
+            : CanBreakBefore(text::CodePointAt(nextInlineTextItem.Content(), 0), lineBreak);
         if (canBreakAtRunBoundary)
         {
           return inlineTextItem.End();
@@ -274,7 +258,7 @@ namespace krys::boo::layout
       // characters.
       auto lineBreak = textRun.Style.GetLineBreak();
       auto text = utf8_stringview {inlineTextItem.GetInlineTextBox().Content()};
-      if (CanBreakBefore(CodePointAt(text, inlineTextItem.Start() + wordBreak.Length), lineBreak))
+      if (CanBreakBefore(text::CodePointAt(text, inlineTextItem.Start() + wordBreak.Length), lineBreak))
       {
         return wordBreak;
       }
@@ -283,11 +267,11 @@ namespace krys::boo::layout
       auto right = left + wordBreak.Length;
       while (right > left)
       {
-        if (CanBreakBefore(CodePointAt(text, right), lineBreak))
+        if (CanBreakBefore(text::CodePointAt(text, right), lineBreak))
         {
           break;
         }
-        right = PreviousCodePointStart(text, right);
+        right = text::PreviousCodePointStart(text, right);
       }
       if (left == right)
       {
@@ -727,7 +711,7 @@ namespace krys::boo::layout
               return PartialRun {wordBreak->Length, wordBreak->LogicalWidth};
             }
           }
-          if (CanBreakBefore(CodePointAt(inlineTextItem.Content(), 0), style.GetLineBreak()))
+          if (CanBreakBefore(text::CodePointAt(inlineTextItem.Content(), 0), style.GetLineBreak()))
           {
             return PartialRun {};
           }
@@ -752,7 +736,7 @@ namespace krys::boo::layout
               {
                 return {};
               }
-              if (CanBreakBefore(CodePointAt(text, right), style.GetLineBreak()))
+              if (CanBreakBefore(text::CodePointAt(text, right), style.GetLineBreak()))
               {
                 return TextUtil::WordBreakLeft {
                   right - left,
@@ -859,7 +843,7 @@ namespace krys::boo::layout
             return PartialRun {inlineTextItem.Length(), trailingPartialRunWidth};
           }
           auto content = inlineTextItem.Content();
-          auto lastCharacterStart = PreviousCodePointStart(content, content.size());
+          auto lastCharacterStart = text::PreviousCodePointStart(content, content.size());
           if (lastCharacterStart)
           {
             auto startPosition = inlineTextItem.Start();

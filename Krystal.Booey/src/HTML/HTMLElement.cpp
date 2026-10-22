@@ -331,12 +331,6 @@ namespace krys::boo::html
 
   namespace
   {
-    KRYS_NODISCARD bool EqualLettersIgnoringASCIICase(dom::DOMStringView value,
-                                                      dom::DOMStringView letters) noexcept
-    {
-      return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, letters);
-    }
-
     KRYS_NODISCARD css::ValueId UnicodeBidiAttributeForDirAuto(const HTMLElement &element) noexcept
     {
       auto tagName = element.TagQualifiedName().TagName();
@@ -357,15 +351,15 @@ namespace krys::boo::html
 
     KRYS_NODISCARD ContentEditableType GetContentEditableType(dom::DOMStringView value) noexcept
     {
-      if (value.empty() || EqualLettersIgnoringASCIICase(value, u8"true"))
+      if (value.empty() || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true"))
       {
         return ContentEditableType::True;
       }
-      if (EqualLettersIgnoringASCIICase(value, u8"false"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"false"))
       {
         return ContentEditableType::False;
       }
-      if (EqualLettersIgnoringASCIICase(value, u8"plaintext-only"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"plaintext-only"))
       {
         return ContentEditableType::PlaintextOnly;
       }
@@ -491,7 +485,7 @@ namespace krys::boo::html
 
     if (localName == u8"align")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"middle"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::Center);
       }
@@ -533,7 +527,7 @@ namespace krys::boo::html
     else if (localName == u8"hidden")
     {
       // The hiddenUntilFoundEnabled setting is on by default.
-      if (EqualLettersIgnoringASCIICase(value, u8"until-found"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"until-found"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::ContentVisibility, css::ValueId::Hidden);
       }
@@ -544,23 +538,24 @@ namespace krys::boo::html
     }
     else if (localName == u8"draggable")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"true"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"true"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::Element);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"false"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"false"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::WebkitUserDrag, css::ValueId::None);
       }
     }
     else if (localName == u8"dir")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"auto"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"auto"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::UnicodeBidi,
                                              UnicodeBidiAttributeForDirAuto(*this));
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"rtl") || EqualLettersIgnoringASCIICase(value, u8"ltr"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"rtl")
+               || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"ltr"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, ToCSSOMString(value));
         auto tagName = TagQualifiedName().TagName();
@@ -637,42 +632,42 @@ namespace krys::boo::html
     auto floatValue = css::ValueId::Invalid;
     auto verticalAlignValue = css::ValueId::Invalid;
 
-    if (EqualLettersIgnoringASCIICase(alignment, u8"absmiddle")
-        || EqualLettersIgnoringASCIICase(alignment, u8"abscenter"))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"absmiddle")
+        || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"abscenter"))
     {
       verticalAlignValue = css::ValueId::Middle;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"absbottom"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"absbottom"))
     {
       verticalAlignValue = css::ValueId::Bottom;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"left"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"left"))
     {
       floatValue = css::ValueId::Left;
       verticalAlignValue = css::ValueId::Top;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"right"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"right"))
     {
       floatValue = css::ValueId::Right;
       verticalAlignValue = css::ValueId::Top;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"top"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"top"))
     {
       verticalAlignValue = css::ValueId::Top;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"middle"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"middle"))
     {
       verticalAlignValue = css::ValueId::WebkitBaselineMiddle;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"center"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"center"))
     {
       verticalAlignValue = css::ValueId::Middle;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"bottom"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"bottom"))
     {
       verticalAlignValue = css::ValueId::Baseline;
     }
-    else if (EqualLettersIgnoringASCIICase(alignment, u8"texttop"))
+    else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(alignment, u8"texttop"))
     {
       verticalAlignValue = css::ValueId::TextTop;
     }
@@ -755,7 +750,7 @@ namespace krys::boo::html
     }
 
     // "transparent" doesn't apply a color either.
-    if (EqualLettersIgnoringASCIICase(string, u8"transparent"))
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(string, u8"transparent"))
     {
       return {};
     }

@@ -6,12 +6,6 @@
 
 namespace krys::boo::css::mq
 {
-  KRYS_NODISCARD static const CSSOMStringAtom &AllAtom() noexcept
-  {
-    static const CSSOMStringAtom all {u8"all"};
-    return all;
-  }
-
   KRYS_NODISCARD static const CSSOMStringAtom &PrintAtom() noexcept
   {
     static const CSSOMStringAtom print {u8"print"};

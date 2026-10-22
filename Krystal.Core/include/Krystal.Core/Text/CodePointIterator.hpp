@@ -83,6 +83,32 @@ namespace krys::text
     return {codePoint, length, true};
   }
 
+  /// @brief Decodes the code point starting at byte @p offset of @p text.
+  /// @param offset Must be less than the text's length.
+  KRYS_NODISCARD constexpr char32 CodePointAt(utf8_stringview text, size_t offset) noexcept
+  {
+    return DecodeUTF8(Span<const char8>(text.data() + offset, text.size() - offset)).CodePoint;
+  }
+
+  /// @brief The byte offset of the code point that ends at byte @p offset of @p text.
+  /// @param offset Must not be 0.
+  KRYS_NODISCARD constexpr size_t PreviousCodePointStart(utf8_stringview text, size_t offset) noexcept
+  {
+    krys_debug_assert(offset);
+    do
+    {
+      --offset;
+    } while (offset && IsTrailingUTF8(text[offset]));
+    return offset;
+  }
+
+  /// @brief The last code point of @p text, which must not be empty.
+  KRYS_NODISCARD constexpr char32 LastCodePoint(utf8_stringview text) noexcept
+  {
+    krys_debug_assert(!text.empty());
+    return CodePointAt(text, PreviousCodePointStart(text, text.size()));
+  }
+
   /// @brief Whether `data` is entirely well-formed UTF-8.
   KRYS_NODISCARD constexpr bool IsValidUTF8(utf8_stringview text) noexcept
   {

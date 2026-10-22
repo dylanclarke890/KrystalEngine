@@ -2059,15 +2059,6 @@ namespace krys::boo
 
 #pragma region Painting
 
-  namespace
-  {
-    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
-    {
-      const auto *element = renderer.GetElement();
-      return element && IsSkippedContentRoot(renderer.Style(), *element);
-    }
-  }
-
   void RenderBlock::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     auto adjustedPaintOffset = paintOffset + Location();

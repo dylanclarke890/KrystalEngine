@@ -6612,4 +6612,9 @@ namespace krys::boo
     return false;
   }
 
+  bool IsSkippedContentRoot(const RenderBox &renderBox) noexcept
+  {
+    const auto *element = renderBox.GetElement();
+    return element && IsSkippedContentRoot(renderBox.Style(), *element);
+  }
 }

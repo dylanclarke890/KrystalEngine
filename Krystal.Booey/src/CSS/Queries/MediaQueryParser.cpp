@@ -9,12 +9,6 @@
 
 namespace krys::boo::css::mq
 {
-  KRYS_NODISCARD static const CSSOMStringAtom &AllAtom() noexcept
-  {
-    static const CSSOMStringAtom all {u8"all"};
-    return all;
-  }
-
   List<const FeatureSchema *> MediaQueryParser::FeatureSchemas() noexcept
   {
     return Features::AllSchemas();

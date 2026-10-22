@@ -6,10 +6,6 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON CACHE BOOL "Enable Just My Code Debugging")
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "ProgramDatabase" CACHE STRING "MSVC debug information format")
 
-# Leave unreferenced inline functions and data out of object files (the generated projects don't ask for it):
-# without it, Krystal.Booey's static library passes the 4 GB a library can hold.
-add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/Zc:inline>)
-
 # MSBuild's CL task only parallelises (/MP) within a batch of files with identical settings, and files that share a
 # basename get their own object path, so each one ends up in a batch of its own and compiles serially. The multi tool
 # task schedules every file independently instead.

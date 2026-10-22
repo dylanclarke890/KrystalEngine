@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -38,16 +39,16 @@ namespace krys::boo::html
     }
     if (localName == u8"align")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"middle")
-          || EqualLettersIgnoringASCIICase(value, u8"center"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle")
+          || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"center"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitCenter);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"left"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"left"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitLeft);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"right"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"right"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitRight);
       }

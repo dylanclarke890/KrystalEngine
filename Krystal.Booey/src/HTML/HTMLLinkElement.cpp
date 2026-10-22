@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -40,19 +41,6 @@ namespace krys::boo::html
     {
       static const StringAtom name {EventNames::Error};
       return name;
-    }
-
-    KRYS_NODISCARD dom::DOMStringView TrimASCIIWhitespace(dom::DOMStringView string) noexcept
-    {
-      while (!string.empty() && text::IsASCIIWhitespace(string.front()))
-      {
-        string.remove_prefix(1);
-      }
-      while (!string.empty() && text::IsASCIIWhitespace(string.back()))
-      {
-        string.remove_suffix(1);
-      }
-      return string;
     }
   }
 
@@ -177,7 +165,7 @@ namespace krys::boo::html
   url::URL HTMLLinkElement::NonEmptyHrefURL() const noexcept
   {
     auto href = GetAttribute(u8"href");
-    if (!href || TrimASCIIWhitespace(*href).empty())
+    if (!href || infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(*href).empty())
     {
       return {};
     }
@@ -292,7 +280,8 @@ namespace krys::boo::html
       {
         // FIXME: A content type parser (ParsedContentType), once there's one.
         auto mimeType = dom::DOMStringView(*_type);
-        mimeType = TrimASCIIWhitespace(mimeType.substr(0, mimeType.find(u8';')));
+        mimeType = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
+          mimeType.substr(0, mimeType.find(u8';')));
         treatAsStyleSheet = text::IsASCIICaselessEqual(mimeType, dom::DOMStringView(u8"text/css"));
       }
     }

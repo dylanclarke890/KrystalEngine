@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -165,7 +166,7 @@ namespace krys::boo::html
     }
     if (localName == u8"wrap")
     {
-      if (!EqualLettersIgnoringASCIICase(value, u8"off"))
+      if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"off"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::WhiteSpaceCollapse,
                                              css::ValueId::Preserve);

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::html
@@ -164,36 +165,36 @@ namespace krys::boo::html
       borderBottom = false;
       borderLeft = false;
 
-      if (EqualLettersIgnoringASCIICase(value, u8"above"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"above"))
       {
         borderTop = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"below"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"below"))
       {
         borderBottom = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"hsides"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"hsides"))
       {
         borderTop = borderBottom = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"vsides"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"vsides"))
       {
         borderLeft = borderRight = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"lhs"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"lhs"))
       {
         borderLeft = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"rhs"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"rhs"))
       {
         borderRight = true;
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"box")
-               || EqualLettersIgnoringASCIICase(value, u8"border"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"box")
+               || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"border"))
       {
         borderTop = borderBottom = borderLeft = borderRight = true;
       }
-      else if (!EqualLettersIgnoringASCIICase(value, u8"void"))
+      else if (!infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"void"))
       {
         return false;
       }
@@ -314,7 +315,7 @@ namespace krys::boo::html
     {
       if (!value.empty())
       {
-        if (EqualLettersIgnoringASCIICase(value, u8"center"))
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"center"))
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginInlineStart, css::ValueId::Auto);
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginInlineEnd, css::ValueId::Auto);
@@ -392,23 +393,23 @@ namespace krys::boo::html
     else if (localName == u8"rules")
     {
       _rulesAttr = TableRules::Unset;
-      if (EqualLettersIgnoringASCIICase(newValue, u8"none"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"none"))
       {
         _rulesAttr = TableRules::None;
       }
-      else if (EqualLettersIgnoringASCIICase(newValue, u8"groups"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"groups"))
       {
         _rulesAttr = TableRules::Groups;
       }
-      else if (EqualLettersIgnoringASCIICase(newValue, u8"rows"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"rows"))
       {
         _rulesAttr = TableRules::Rows;
       }
-      else if (EqualLettersIgnoringASCIICase(newValue, u8"cols"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"cols"))
       {
         _rulesAttr = TableRules::Cols;
       }
-      else if (EqualLettersIgnoringASCIICase(newValue, u8"all"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(newValue, u8"all"))
       {
         _rulesAttr = TableRules::All;
       }

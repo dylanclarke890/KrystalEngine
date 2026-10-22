@@ -26,12 +26,6 @@ namespace krys::boo
     constexpr int32 DefaultWidth = 300;
     constexpr int32 DefaultHeight = 150;
 
-    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
-    {
-      auto *element = renderer.GetElement();
-      return element && IsSkippedContentRoot(renderer.Style(), *element);
-    }
-
     KRYS_NODISCARD bool ShouldRepaintOnSizeChange(RenderReplaced &renderer) noexcept
     {
       // FIXME: Canvases, and excluding media, once they have renderers.

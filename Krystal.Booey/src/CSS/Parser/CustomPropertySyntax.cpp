@@ -9,16 +9,6 @@ namespace krys::boo::css
 {
   namespace
   {
-    KRYS_NODISCARD bool SkipExactly(CSSOMStringView &buffer, char8 character) noexcept
-    {
-      if (!buffer.empty() && buffer.front() == character)
-      {
-        buffer.remove_prefix(1uz);
-        return true;
-      }
-      return false;
-    }
-
     void SkipUntil(CSSOMStringView &buffer, char8 character) noexcept
     {
       while (!buffer.empty() && buffer.front() != character)

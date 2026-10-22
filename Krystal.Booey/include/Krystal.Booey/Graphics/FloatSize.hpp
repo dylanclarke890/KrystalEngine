@@ -252,6 +252,12 @@ namespace krys::boo
     return FloatSize(a / b.Width(), a / b.Height());
   }
 
+  /// @brief The determinant of the matrix whose columns are @p a and @p b (the z of their cross product).
+  KRYS_NODISCARD constexpr float Determinant(const FloatSize &a, const FloatSize &b) noexcept
+  {
+    return a.Width() * b.Height() - a.Height() * b.Width();
+  }
+
   KRYS_NODISCARD inline bool AreEssentiallyEqual(const FloatSize &a, const FloatSize &b) noexcept
   {
     return AreEssentiallyEqual(a.Width(), b.Width()) && AreEssentiallyEqual(a.Height(), b.Height());

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Detection/OS.hpp"
@@ -20,11 +21,6 @@ namespace krys::boo::url
     {
       // Ignore leading/trailing whitespace and control characters.
       return character <= ' ';
-    }
-
-    bool ContainsOnlyASCII(utf8_stringview string) noexcept
-    {
-      return std::ranges::all_of(string, [](char8 c) { return text::IsASCII(c); });
     }
 
     Maybe<uint16> ParseUInt16(utf8_stringview digits) noexcept
@@ -82,7 +78,7 @@ namespace krys::boo::url
 
     utf8_string DecodeEscapeSequencesFromParsedURL(utf8_stringview input) noexcept
     {
-      krys_debug_assert(ContainsOnlyASCII(input));
+      krys_debug_assert(infra::StringAlgorithms::IsASCIIString(input));
 
       auto length = input.size();
       if (length < 3 || input.find(u8'%') == utf8_stringview::npos)
@@ -121,7 +117,7 @@ namespace krys::boo::url
     {
       // hostnameBuffer needs to be big enough to hold an IDN-encoded name.
       // For host names bigger than this, we won't do IDN encoding, which is almost certainly OK.
-      if (string.size() > URLParser::HostnameBufferLength || ContainsOnlyASCII(string))
+      if (string.size() > URLParser::HostnameBufferLength || infra::StringAlgorithms::IsASCIIString(string))
       {
         buffer.append(string);
         return true;

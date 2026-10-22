@@ -4,11 +4,6 @@ namespace krys::boo
 {
   namespace
   {
-    KRYS_NODISCARD float Determinant(const FloatSize &a, const FloatSize &b) noexcept
-    {
-      return a.Width() * b.Height() - a.Height() * b.Width();
-    }
-
     KRYS_NODISCARD bool AreCollinearPoints(const FloatPoint &p0, const FloatPoint &p1,
                                            const FloatPoint &p2) noexcept
     {

@@ -13,11 +13,6 @@ namespace krys::boo
       return a.Width() * b.Width() + a.Height() * b.Height();
     }
 
-    KRYS_NODISCARD float Determinant(const FloatSize &a, const FloatSize &b) noexcept
-    {
-      return a.Width() * b.Height() - a.Height() * b.Width();
-    }
-
     KRYS_NODISCARD bool IsPointInTriangle(const FloatPoint &p, const FloatPoint &t1, const FloatPoint &t2,
                                           const FloatPoint &t3) noexcept
     {

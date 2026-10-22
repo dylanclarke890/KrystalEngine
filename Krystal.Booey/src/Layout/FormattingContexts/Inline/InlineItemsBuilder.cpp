@@ -93,11 +93,6 @@ namespace krys::boo::layout
              && text[endPosition - 1] == char8 {0xAD};
     }
 
-    KRYS_NODISCARD char32 CodePointAt(utf8_stringview text, size_t position) noexcept
-    {
-      return text::DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position)).CodePoint;
-    }
-
     KRYS_NODISCARD inline bool IsTextOrLineBreak(const Box &layoutBox) noexcept
     {
       return layoutBox.IsInFlow()
@@ -467,7 +462,7 @@ namespace krys::boo::layout
         // We need to store information about spacing added between inline text items since it needs to be
         // trimmed during line breaking if the consecutive items are placed on different lines
         auto content = inlineTextItem.Content();
-        auto characterClass = text_spacing::GetCharacterClass(CodePointAt(content, 0));
+        auto characterClass = text_spacing::GetCharacterClass(text::CodePointAt(content, 0));
         if (autospace.ShouldApplySpacing(spacingState.LastCharacterClassFromPreviousRun, characterClass))
         {
           trimmableTextSpacings.try_emplace(
@@ -637,7 +632,8 @@ namespace krys::boo::layout
       const RenderStyle &boundaryOwnerStyle = inlineItemList[boundaryIndex].LayoutBox().Parent().Style();
       auto boundaryTextAutospace = boundaryOwnerStyle.GetTextAutospace();
       if (!boundaryTextAutospace.IsNoAutospace() && !content.empty()
-          && boundaryTextAutospace.ShouldApplySpacing(CodePointAt(content, 0), lastCharacterFromPreviousRun))
+          && boundaryTextAutospace.ShouldApplySpacing(text::CodePointAt(content, 0),
+                                                      lastCharacterFromPreviousRun))
       {
         spacings.try_emplace(boundaryIndex, TextAutospace::TextAutospaceSize(
                                               *boundaryOwnerStyle.GetFontCascade().PrimaryFont()));

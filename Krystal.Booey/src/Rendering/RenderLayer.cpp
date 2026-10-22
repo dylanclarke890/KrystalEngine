@@ -6111,12 +6111,6 @@ namespace krys::boo
       }
       return nullptr;
     }
-
-    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
-    {
-      const auto *element = renderer.GetElement();
-      return element && IsSkippedContentRoot(renderer.Style(), *element);
-    }
   }
 
   bool RenderLayer::HitTest(const HitTestRequest &request, HitTestResult &result) noexcept

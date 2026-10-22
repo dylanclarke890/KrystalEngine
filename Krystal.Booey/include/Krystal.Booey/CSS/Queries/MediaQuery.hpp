@@ -10,6 +10,13 @@ namespace krys::boo::css::mq
     Only
   };
 
+  /// @brief The `all` media type.
+  KRYS_NODISCARD inline const CSSOMStringAtom &AllAtom() noexcept
+  {
+    static const CSSOMStringAtom all {u8"all"};
+    return all;
+  }
+
   /// @brief A media query: an optional `not`/`only` prefix, a media type and an optional condition.
   struct MediaQuery
   {

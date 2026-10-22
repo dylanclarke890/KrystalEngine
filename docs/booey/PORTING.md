@@ -125,6 +125,16 @@ Use the CSS aliases from `CSS/Types/CSSOMString.hpp`, never the Krystal.Core or 
 - A method named after a type would hide it in the class (`colorSpace()` → `Space()`, `quad()` → `GetQuad()`).
 - The typed colour maths (`platform/graphics/Color*.h` other than `Color`, `ColorBlending`, `ColorSerialization` and `ColorHash`) lives in Krystal.Core (`Krystal.Core/Colour/`, namespace `krys`), spelled "Colour": `ColorSpace` → `ColourSpace`, `ColorComponents` → `ColourComponents`, `convertColor` → `ConvertColour`, `PackedColor` → `PackedColour`, and so on. The CSS-facing `Color` class and names of CSS concepts (`css::ColorType`, the descriptors' `ColorType`, `ResolvedColor`, `InterpolateColors`) keep the spec's spelling (decided 2026-10-17; see *Colour types in Krystal.Core*).
 
+### Unity build
+
+Booey compiles as a unity build (since 2026-10-22): CMake joins its sources into batches of 16, so one object holds what 16 used to, and a header's inline functions and template instances are compiled once per batch instead of once per file. Without it, the Debug `Krystal.Booey.lib` reached 3.83 GB, near the 4 GB a static library can hold; with it, Debug is 1.67 GB and Release 1.98 GB. It's still a static library.
+
+- **File-local names share a batch.** Anonymous-namespace and `static` helpers, constants and types, and `using namespace` directives at namespace scope, are visible to the files after them in the batch. Two files defining the same helper (same name and parameters) fail to compile, and a directive can make a name ambiguous in another file.
+- **Share a helper instead of copying it.** Before writing a file-local helper, look for one: UTF-8 code points (`text::CodePointAt`, `PreviousCodePointStart`, `LastCodePoint` in Krystal.Core's `Text/CodePointIterator.hpp`), infra string algorithms (`infra::StringAlgorithms`: `StripLeadingAndTrailingWhitespace`, `IsASCIIString`, `ASCIICaseInsensitiveMatch`), `css::SkipExactly` (`ParserIdioms.hpp`), `Determinant` (`FloatSize.hpp`), `IsSkippedContentRoot(const RenderBox &)` (`RenderBox.hpp`). Put a new shared helper where upstream keeps it, or beside the type it works on.
+- **Qualify instead of `using namespace`** at namespace scope (`mq::Feature`, not `using namespace mq;`). Function-scope directives are fine.
+- **Different helpers under upstream's names** stay as they are, and their source compiles on its own (`SKIP_UNITY_BUILD_INCLUSION` in `Krystal.Booey/CMakeLists.txt`): `WidthIterator.cpp` and `ComplexTextController.cpp` both have an `ExpansionLocation`, and `TextBoxPainter.cpp` and `RenderListMarker.cpp` both have a `Snap`. Generated sources compile on their own too (their gperf tables share names).
+- **A file can compile only because an earlier file in its batch included something.** Include what each file uses; building once with `-DCMAKE_UNITY_BUILD=OFF` (not the default, so only when checking) shows what's missing.
+
 ### Won't port
 
 Remove these at the include site; don't stub them.

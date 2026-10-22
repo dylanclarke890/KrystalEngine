@@ -5,6 +5,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include <algorithm>
 #include <cassert>
 
 namespace krys::boo::infra
@@ -14,6 +15,12 @@ namespace krys::boo::infra
   {
   public:
     using position_variable = dom::DOMStringView::const_iterator;
+
+    /// @see https://infra.spec.whatwg.org/#ascii-string
+    KRYS_NODISCARD static bool IsASCIIString(dom::DOMStringView input) noexcept
+    {
+      return std::ranges::all_of(input, [](char8 c) { return ::krys::text::IsASCII(c); });
+    }
 
     /// @see https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
     KRYS_NODISCARD static dom::DOMStringView

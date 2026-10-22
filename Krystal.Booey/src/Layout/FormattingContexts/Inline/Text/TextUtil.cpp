@@ -26,17 +26,6 @@ namespace krys::boo::layout
       return text::DecodeUTF8(Span<const char8>(text.data() + position, text.size() - position));
     }
 
-    /// @brief The byte offset of the code point that ends at @p position.
-    KRYS_NODISCARD size_t PreviousCodePointStart(utf8_stringview text, size_t position) noexcept
-    {
-      krys_debug_assert(position);
-      do
-      {
-        --position;
-      } while (position && text::IsTrailingUTF8(text[position]));
-      return position;
-    }
-
     KRYS_NODISCARD inline InlineLayoutUnit SpaceWidth(const FontCascade &fontCascade,
                                                       bool canUseSimplifiedContentMeasuring) noexcept
     {
@@ -526,12 +515,13 @@ namespace krys::boo::layout
     char32 secondToLastCharacter = 0;
     if (!previousContent.empty())
     {
-      auto lastCharacterStart = PreviousCodePointStart(previousContent, previousContent.size());
+      auto lastCharacterStart = text::PreviousCodePointStart(previousContent, previousContent.size());
       lastCharacter = DecodeAt(previousContent, lastCharacterStart).CodePoint;
       if (lastCharacterStart)
       {
         secondToLastCharacter =
-          DecodeAt(previousContent, PreviousCodePointStart(previousContent, lastCharacterStart)).CodePoint;
+          DecodeAt(previousContent, text::PreviousCodePointStart(previousContent, lastCharacterStart))
+            .CodePoint;
       }
     }
     if (lastCharacter == text::SoftHyphen && previousContentStyle.GetHyphens() == Hyphens::None)
@@ -746,7 +736,8 @@ namespace krys::boo::layout
       return false;
     }
     auto content = inlineTextItem.Content();
-    auto trailingCharacter = DecodeAt(content, PreviousCodePointStart(content, content.size())).CodePoint;
+    auto trailingCharacter =
+      DecodeAt(content, text::PreviousCodePointStart(content, content.size())).CodePoint;
     return U_GET_GC_MASK(static_cast<UChar32>(trailingCharacter))
            & (U_GC_PE_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
   }
@@ -761,7 +752,7 @@ namespace krys::boo::layout
     krys_debug_assert(inlineTextItem.Length());
     auto content = inlineTextItem.Content();
     auto trailingPosition =
-      inlineTextItem.Start() + static_cast<uint32>(PreviousCodePointStart(content, content.size()));
+      inlineTextItem.Start() + static_cast<uint32>(text::PreviousCodePointStart(content, content.size()));
     return Width(inlineTextItem, style.GetFontCascade(), trailingPosition, inlineTextItem.End(), {});
   }
 
@@ -775,7 +766,8 @@ namespace krys::boo::layout
       return false;
     }
     auto content = inlineTextItem.Content();
-    auto trailingCharacter = DecodeAt(content, PreviousCodePointStart(content, content.size())).CodePoint;
+    auto trailingCharacter =
+      DecodeAt(content, text::PreviousCodePointStart(content, content.size())).CodePoint;
     auto isHangableStopOrComma =
       trailingCharacter == 0x002C || trailingCharacter == 0x002E || trailingCharacter == 0x060C
       || trailingCharacter == 0x06D4 || trailingCharacter == 0x3001 || trailingCharacter == 0x3002
@@ -795,7 +787,7 @@ namespace krys::boo::layout
     krys_debug_assert(inlineTextItem.Length());
     auto content = inlineTextItem.Content();
     auto trailingPosition =
-      inlineTextItem.Start() + static_cast<uint32>(PreviousCodePointStart(content, content.size()));
+      inlineTextItem.Start() + static_cast<uint32>(text::PreviousCodePointStart(content, content.size()));
     return Width(inlineTextItem, style.GetFontCascade(), trailingPosition, inlineTextItem.End(), {});
   }
 
@@ -855,7 +847,7 @@ namespace krys::boo::layout
   {
     for (auto position = string.size(); position > 0;)
     {
-      position = PreviousCodePointStart(string, position);
+      position = text::PreviousCodePointStart(string, position);
       auto character = DecodeAt(string, position).CodePoint;
       if (!IsCombiningMark(character))
       {

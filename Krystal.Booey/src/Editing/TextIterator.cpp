@@ -34,21 +34,6 @@ namespace krys::boo
       auto *element = DynamicDowncast<html::HTMLElement>(node);
       return element && element->TagQualifiedName().TagName() == tagName;
     }
-
-    /// @brief The last code point of @p text, which isn't empty.
-    KRYS_NODISCARD char32 LastCodePoint(utf8_stringview text) noexcept
-    {
-      int32 index = static_cast<int32>(text.size());
-      UChar32 codePoint;
-      U8_PREV(reinterpret_cast<const uint8_t *>(text.data()), 0, index, codePoint);
-      return codePoint < 0 ? 0 : static_cast<char32>(codePoint);
-    }
-
-    KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderer) noexcept
-    {
-      const auto *element = renderer.GetElement();
-      return element && IsSkippedContentRoot(renderer.Style(), *element);
-    }
   }
 
   // --------
@@ -948,7 +933,7 @@ namespace krys::boo
       auto altText = utf8_string(renderImage->AltText());
       if (!altText.empty())
       {
-        _lastCharacter = LastCodePoint(altText);
+        _lastCharacter = text::LastCodePoint(altText);
         _copyableText.Set(krys::move(altText));
         _text = _copyableText.Text();
         return true;
@@ -1402,7 +1387,8 @@ namespace krys::boo
     _positionStartOffset = textStartOffset;
     _positionEndOffset = textEndOffset;
 
-    _lastCharacter = LastCodePoint(utf8_stringview(string).substr(0, static_cast<size_t>(textEndOffset)));
+    _lastCharacter =
+      text::LastCodePoint(utf8_stringview(string).substr(0, static_cast<size_t>(textEndOffset)));
     _copyableText.Set(krys::move(string), static_cast<uint32>(textStartOffset),
                       static_cast<uint32>(textEndOffset - textStartOffset));
     _text = _copyableText.Text();
@@ -1620,8 +1606,8 @@ namespace krys::boo
     krys_debug_assert(_positionEndOffset - offsetInNode > 0);
     krys_debug_assert(_positionEndOffset - offsetInNode <= static_cast<int32>(text.size()));
 
-    _lastCharacter =
-      LastCodePoint(utf8_stringview(text).substr(0, static_cast<size_t>(_positionEndOffset - offsetInNode)));
+    _lastCharacter = text::LastCodePoint(
+      utf8_stringview(text).substr(0, static_cast<size_t>(_positionEndOffset - offsetInNode)));
     _copyableText.Set(krys::move(text), static_cast<uint32>(_positionStartOffset - offsetInNode),
                       static_cast<uint32>(_positionEndOffset - _positionStartOffset));
     _text = _copyableText.Text();

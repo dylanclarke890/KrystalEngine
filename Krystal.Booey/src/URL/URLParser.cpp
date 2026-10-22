@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/URL/URLParser.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
@@ -270,11 +271,6 @@ namespace krys::boo::url
       krys_assert(exponent <= 4);
       constexpr Array<uint64, 5> values {1, 256, 256 * 256, 256 * 256 * 256, 256ull * 256 * 256 * 256};
       return values[exponent];
-    }
-
-    bool ContainsOnlyASCII(utf8_stringview string) noexcept
-    {
-      return std::ranges::all_of(string, [](char8 c) { return text::IsASCII(c); });
     }
 
     bool DNSNameEndsInNumber(utf8_stringview name) noexcept
@@ -2735,7 +2731,7 @@ namespace krys::boo::url
                              const CodePointIterator &iteratorForSyntaxViolationPosition) noexcept
   {
     utf8_string ascii;
-    if (ContainsOnlyASCII(domain) && !SubdomainStartsWithXNDashDash(domain))
+    if (infra::StringAlgorithms::IsASCIIString(domain) && !SubdomainStartsWithXNDashDash(domain))
     {
       ascii.reserve(domain.size());
       for (char8 c : domain)
@@ -3095,7 +3091,7 @@ namespace krys::boo::url
     }
     // Upstream compares the UTF-8-decoded domain with the bytes read as Latin-1; they differ exactly when a
     // byte is non-ASCII.
-    if (!ContainsOnlyASCII(percentDecoded))
+    if (!infra::StringAlgorithms::IsASCIIString(percentDecoded))
     {
       SyntaxViolation(hostBegin);
     }

@@ -88,17 +88,6 @@ namespace krys::boo::css
 
   namespace
   {
-    KRYS_NODISCARD bool SkipExactly(CSSOMStringView &string, char8_t character) noexcept
-    {
-      if (!string.empty() && string.front() == character)
-      {
-        string.remove_prefix(1);
-        return true;
-      }
-
-      return false;
-    }
-
     template <typename Predicate>
     void SkipWhile(CSSOMStringView &string, Predicate &&predicate) noexcept
     {

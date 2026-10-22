@@ -706,16 +706,6 @@ namespace krys::boo
       return {decoded.CodePoint, static_cast<size_t>(decoded.Length)};
     }
 
-    KRYS_NODISCARD inline char32 LastCodePoint(utf8_stringview text) noexcept
-    {
-      auto position = text.size() - 1;
-      while (position && text::IsTrailingUTF8(text[position]))
-      {
-        --position;
-      }
-      return DecodeCodePointAt(text, position).CodePoint;
-    }
-
     KRYS_NODISCARD inline bool IsHangablePunctuationAtLineStart(char32 character) noexcept
     {
       return U_GET_GC_MASK(static_cast<UChar32>(character)) & (U_GC_PS_MASK | U_GC_PI_MASK | U_GC_PF_MASK);
@@ -1339,7 +1329,7 @@ namespace krys::boo
       return widths;
     }
 
-    widths.EndZeroSpace = LastCodePoint(_text) == text::ZeroWidthSpace;
+    widths.EndZeroSpace = text::LastCodePoint(_text) == text::ZeroWidthSpace;
 
     widths.Min = _minWidth.value_or(-1);
     widths.Max = _maxWidth.value_or(-1);

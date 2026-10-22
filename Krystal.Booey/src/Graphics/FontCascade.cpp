@@ -21,23 +21,6 @@ namespace krys::boo
   namespace
   {
     uint32 LastFontCascadeGeneration = 0;
-
-    /// @brief The last code point of @p text (UTF-8), which must not be empty.
-    KRYS_NODISCARD char32 LastCodePoint(utf8_stringview text) noexcept
-    {
-      krys_debug_assert(!text.empty());
-      auto start = text.length() - 1;
-      while (start && text.length() - start < 4 && (static_cast<char8>(text[start]) & 0xC0) == 0x80)
-      {
-        --start;
-      }
-      auto decoded = text::DecodeUTF8(Span<const char8> {text}.subspan(start));
-      if (start + decoded.Length != text.length())
-      {
-        return text::UnicodeReplacementChar;
-      }
-      return decoded.CodePoint;
-    }
   }
 
   FontCascade::CodePath FontCascade::s_codePath = CodePath::Auto;
@@ -1980,7 +1963,7 @@ namespace krys::boo
     }
 
     char32 initialCharacter =
-      direction == TextDirection::LTR ? *text::CodePointIterator {text} : LastCodePoint(text);
+      direction == TextDirection::LTR ? *text::CodePointIterator {text} : text::LastCodePoint(text);
 
     return CanExpandAroundIdeographsInComplexText() && IsCJKIdeographOrSymbol(initialCharacter);
   }
@@ -1993,7 +1976,7 @@ namespace krys::boo
     }
 
     char32 finalCharacter =
-      direction == TextDirection::LTR ? LastCodePoint(text) : *text::CodePointIterator {text};
+      direction == TextDirection::LTR ? text::LastCodePoint(text) : *text::CodePointIterator {text};
 
     return TreatAsSpace(finalCharacter)
            || (CanExpandAroundIdeographsInComplexText() && IsCJKIdeographOrSymbol(finalCharacter));

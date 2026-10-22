@@ -1139,6 +1139,8 @@ namespace krys::boo
     void InvalidateAncestorBackgroundObscurationStatus() noexcept;
   };
 
+  KRYS_NODISCARD bool IsSkippedContentRoot(const RenderBox &renderBox) noexcept;
+
   KRYS_NODISCARD inline LayoutUnit ResolveHeightForRatio(LayoutUnit borderAndPaddingLogicalWidth,
                                                          LayoutUnit borderAndPaddingLogicalHeight,
                                                          LayoutUnit logicalWidth, double aspectRatio,

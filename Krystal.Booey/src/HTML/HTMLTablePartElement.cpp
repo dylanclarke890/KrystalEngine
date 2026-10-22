@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::html
@@ -64,19 +65,19 @@ namespace krys::boo::html
     }
     if (localName == u8"valign")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"top"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"top"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, css::ValueId::Top);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"middle"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, css::ValueId::Middle);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"bottom"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"bottom"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, css::ValueId::Bottom);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"baseline"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"baseline"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, css::ValueId::Baseline);
       }
@@ -88,20 +89,20 @@ namespace krys::boo::html
     }
     if (localName == u8"align")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"middle")
-          || EqualLettersIgnoringASCIICase(value, u8"center"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle")
+          || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"center"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitCenter);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"absmiddle"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"absmiddle"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::Center);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"left"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"left"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitLeft);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"right"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"right"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitRight);
       }

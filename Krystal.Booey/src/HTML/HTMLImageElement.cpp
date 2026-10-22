@@ -9,6 +9,7 @@
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
@@ -20,28 +21,16 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD dom::DOMStringView TrimASCIIWhitespace(dom::DOMStringView string) noexcept
-    {
-      while (!string.empty() && text::IsASCIIWhitespace(string.front()))
-      {
-        string.remove_prefix(1);
-      }
-      while (!string.empty() && text::IsASCIIWhitespace(string.back()))
-      {
-        string.remove_suffix(1);
-      }
-      return string;
-    }
-
     KRYS_NODISCARD dom::DOMStringView
       ExtractMIMETypeFromTypeAttributeForLookup(dom::DOMStringView typeAttribute) noexcept
     {
       auto semicolonIndex = typeAttribute.find(u8';');
       if (semicolonIndex == dom::DOMStringView::npos)
       {
-        return TrimASCIIWhitespace(typeAttribute);
+        return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(typeAttribute);
       }
-      return TrimASCIIWhitespace(typeAttribute.substr(0, semicolonIndex));
+      return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
+        typeAttribute.substr(0, semicolonIndex));
     }
 
     KRYS_NODISCARD const css::CSSOMStringAtom &ScreenAtom() noexcept
@@ -538,7 +527,8 @@ namespace krys::boo::html
         continue;
       }
 
-      css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(dom::DOMString()), document);
+      css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(dom::DOMString()),
+                                            document);
       auto sourceSize = sizesParser.Length();
 
       candidate = BestFitSourceForImageAttributes(document.DeviceScaleFactor(), null,

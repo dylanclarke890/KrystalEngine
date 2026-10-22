@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -64,7 +65,7 @@ namespace krys::boo::html
       // <br clear> and <br clear=""> are just treated like <br> by Gecko, Mac IE, etc. -dwh
       if (!value.empty())
       {
-        if (EqualLettersIgnoringASCIICase(value, u8"all"))
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"all"))
         {
           AddPropertyToPresentationalHintStyle(style, css::PropertyId::Clear, css::ValueId::Both);
         }

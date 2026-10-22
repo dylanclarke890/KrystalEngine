@@ -21,9 +21,6 @@ namespace krys::boo::css
 {
   namespace
   {
-    // NOTE: The selector list has to fit into RuleData. <http://webkit.org/b/118369>
-    constexpr uint32 MaximumSelectorComponentCount = style::RuleData::MaximumSelectorComponentCount;
-
     using SelectorTextCache = HashMap<const CSSStyleRule *, CSSOMString>;
 
     KRYS_NODISCARD SelectorTextCache &GetSelectorTextCache() noexcept
@@ -126,7 +123,8 @@ namespace krys::boo::css
     }
 
     // NOTE: The selector list has to fit into RuleData. <http://webkit.org/b/118369>
-    if (selectorList->ComponentCount() > MaximumSelectorComponentCount)
+    // NOTE: The selector list has to fit into RuleData.
+    if (selectorList->ComponentCount() > style::RuleData::MaximumSelectorComponentCount)
     {
       return;
     }

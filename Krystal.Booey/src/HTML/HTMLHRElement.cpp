@@ -3,6 +3,7 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -92,12 +93,12 @@ namespace krys::boo::html
     }
     if (localName == u8"align")
     {
-      if (EqualLettersIgnoringASCIICase(value, u8"left"))
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"left"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginLeft, 0, css::UnitType::px);
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginRight, css::ValueId::Auto);
       }
-      else if (EqualLettersIgnoringASCIICase(value, u8"right"))
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"right"))
       {
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginLeft, css::ValueId::Auto);
         AddPropertyToPresentationalHintStyle(style, css::PropertyId::MarginRight, 0, css::UnitType::px);
