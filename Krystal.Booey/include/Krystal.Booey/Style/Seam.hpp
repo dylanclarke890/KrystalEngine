@@ -36,6 +36,7 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -93,6 +94,13 @@ namespace krys::boo
     KRYS_NODISCARD static float PlatformFocusRingOffset(float outlineWidth) noexcept
     {
       return std::max<float>(outlineWidth - PlatformFocusRingWidth(), 0);
+    }
+
+    /// @brief How long the caret stays on and off as it blinks; none if it doesn't blink.
+    // FIXME: The system's caret blink time, once the host reports it.
+    KRYS_NODISCARD static Maybe<MonotonicTime::duration> CaretBlinkInterval() noexcept
+    {
+      return std::chrono::milliseconds(500);
     }
 
     // Text selection colors.

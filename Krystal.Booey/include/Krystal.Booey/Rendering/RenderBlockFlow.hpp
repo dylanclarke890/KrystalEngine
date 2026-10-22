@@ -536,6 +536,10 @@ namespace krys::boo
     /// the same selection root), so that the selection has no gap between them.
     KRYS_NODISCARD LayoutUnit AdjustEnclosingTopForPrecedingBlock(LayoutUnit top) const noexcept;
 
+    /// @brief Room for the caret at the end of the lines of an editing host that clips its overflow, so the
+    /// caret isn't clipped there.
+    KRYS_NODISCARD LayoutUnit EndPaddingWidthForCaret() const noexcept;
+
   protected:
     void ClipOutFloatingBoxes(RenderBlock &rootBlock, const PaintInfo *paintInfo,
                               const LayoutPoint &rootBlockPhysicalPosition,

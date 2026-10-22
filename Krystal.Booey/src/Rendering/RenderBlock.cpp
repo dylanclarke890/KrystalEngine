@@ -3,10 +3,12 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
@@ -2306,7 +2308,59 @@ namespace krys::boo
 
     // 6. Continuation outlines (paintContinuationOutlines): there are no continuations, as blocks in inlines
     // are laid out in the inline's lines, so inlines paint their own outlines.
-    // FIXME: 7. Carets (paintCarets) come with editing.
+
+    // 7. paint caret.
+    // If the caret's node's render object's containing block is this block, and the paint action is
+    // PaintPhase::Foreground, then paint the caret.
+    if (shouldPaintContent)
+    {
+      PaintCarets(paintInfo, paintOffset);
+    }
+  }
+
+  void RenderBlock::PaintCarets(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (paintInfo.Phase == PaintPhase::Foreground)
+    {
+      PaintCaret(paintInfo, paintOffset, CaretType::CursorCaret);
+      PaintCaret(paintInfo, paintOffset, CaretType::DragCaret);
+    }
+  }
+
+  void RenderBlock::PaintCaret(PaintInfo &paintInfo, const LayoutPoint &paintOffset, CaretType type) noexcept
+  {
+    auto shouldPaintCaret = [&](RenderBlock *caretPainter, bool isContentEditable)
+    {
+      if (caretPainter != this)
+      {
+        return false;
+      }
+
+      return isContentEditable || GetDocument().GetSettings().CaretBrowsingEnabled;
+    };
+
+    switch (type)
+    {
+      case CaretType::CursorCaret:
+      {
+        auto &selection = GetDocument().Selection();
+        auto *caretPainter = selection.CaretRendererWithoutUpdatingLayout();
+        if (!caretPainter)
+        {
+          return;
+        }
+
+        bool isContentEditable = selection.Selection().HasEditableStyle();
+
+        if (shouldPaintCaret(caretPainter, isContentEditable))
+        {
+          selection.PaintCaret(paintInfo.Context(), paintOffset);
+        }
+        break;
+      }
+      // FIXME: The drag caret (the drag caret controller), with drag and drop.
+      case CaretType::DragCaret: break;
+    }
   }
 
 #pragma endregion

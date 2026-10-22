@@ -89,3 +89,5 @@ tr:hover td { text-decoration: underline; }
 .selection .quote::selection { background: #ef476f; color: #ffffff; }
 .selection .label { -webkit-user-select: none; padding: 0 4px; border-radius: 4px; background: #ffd166; }
 .selection img { width: 24px; height: 16px; vertical-align: middle; }
+.caret { cursor: text; caret-color: #7b2cbf; }
+.caret p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }

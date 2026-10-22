@@ -16,9 +16,18 @@ namespace krys::boo::layout_integration
   {
     KRYS_NODISCARD inline float EndPaddingQuirkValue(const RenderBlockFlow &flow) noexcept
     {
-      // FIXME: The caret width at the end of a root editable element (endPaddingWidthForCaret), once there's
-      // editing.
+      // FIXME: It's the copy of the lets-adjust-overflow-for-the-caret behavior from
+      // LegacyLineLayout::addOverflowFromInlineChildren.
       auto endPadding = flow.HasNonVisibleOverflow() ? flow.PaddingEnd() : 0_lu;
+      if (!endPadding)
+      {
+        endPadding = flow.EndPaddingWidthForCaret();
+      }
+      if (flow.HasNonVisibleOverflow() && !endPadding && flow.GetElement()
+          && flow.GetElement()->IsRootEditableElement() && flow.Style().IsLeftToRightDirection())
+      {
+        endPadding = 1_lu;
+      }
       return endPadding.ToFloat();
     }
 

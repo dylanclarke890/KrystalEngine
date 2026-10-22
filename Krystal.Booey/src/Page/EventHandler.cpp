@@ -286,6 +286,8 @@ namespace krys::boo
 
     // FIXME: Resizers (isPointInResizeControl), once layers resize.
 
+    _frame.Document()->Selection().SetCaretBlinkingSuspended(true);
+
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), targetNode.get(),
                                             _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
@@ -456,8 +458,9 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Caret blinking, pointer lock, page overlays, synthetic touch events, user gestures and pan
-    // scrolling.
+    frame->Document()->Selection().SetCaretBlinkingSuspended(false);
+
+    // FIXME: Pointer lock, page overlays, synthetic touch events, user gestures and pan scrolling.
 
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());

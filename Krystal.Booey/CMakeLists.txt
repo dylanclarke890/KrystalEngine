@@ -2870,11 +2870,14 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Dicts/ClipboardEventInit.hpp
       include/Krystal.Booey/Editing/Editor.hpp
       include/Krystal.Booey/Editing/FrameSelection.hpp
+      include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
       include/Krystal.Booey/Page/AutoscrollController.hpp
       include/Krystal.Booey/Page/DOMSelection.hpp
       include/Krystal.Booey/Page/EditorClient.hpp
+      include/Krystal.Booey/Platform/CaretAnimator.hpp
       include/Krystal.Booey/Platform/Pasteboard.hpp
       include/Krystal.Booey/Platform/PasteboardStrategy.hpp
+      include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
       include/Krystal.Booey/Editing/TextAffinity.hpp
@@ -3254,7 +3257,9 @@ target_sources(Krystal.Booey
     src/Editing/FrameSelection.cpp
     src/Page/AutoscrollController.cpp
     src/Page/DOMSelection.cpp
+    src/Platform/CaretAnimator.cpp
     src/Platform/Pasteboard.cpp
+    src/Platform/SimpleCaretAnimator.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp
     src/Editing/VisiblePosition.cpp

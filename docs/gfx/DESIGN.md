@@ -308,7 +308,7 @@ All done in G1 (2026-10-17) unless noted.
 | G10 | Done (2026-10-20). Repainting only what changed: the Release build, a retained page texture, damage tracking (upstream's repaint invalidation), then the hotspots a benchmark finds. In parts (see *G10 plan*). | A still page costs almost nothing per frame, and a small animation repaints only its rect; the editor page runs smoothly. |
 | G11 | Visual effects: `filter`, `backdrop-filter`, `mask-image` and `mask-border` drawn. Done (2026-10-21), in three parts (see *G11 plan*). | Filtered, backdrop-filtered and masked boxes match Chrome. |
 | G12 | Done (2026-10-21). Compositing: upstream's composited layer tree (`RenderLayerCompositor`, `RenderLayerBacking`, `GraphicsLayer`) on a Krystal.UI layer tree adapted from TextureMapper, with tiled backings. In four parts (see *G12 plan*). | Filters, opacity, transforms and their animations composite without repainting; scrolling moves layers; no stale pixels. |
-| G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21), and so is G13b, the selection painted and the mouse (2026-10-22), and so is G13c, the keyboard, the DOM's `Selection` and copying (2026-10-22). | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
+| G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21), and so is G13b, the selection painted and the mouse (2026-10-22), and so is G13c, the keyboard, the DOM's `Selection` and copying (2026-10-22), and so is G13d, carets (2026-10-22), which completes G13. | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
 
 ### G2 parts
 
@@ -1320,6 +1320,12 @@ Nothing can be selected: text paints unmarked, the I-beam is only a cursor, and 
 - **Krystal.PAL**: `SetClipboardText`, writing UTF-16 text with Windows line breaks, owned by the active window.
 - **Tests:** modifying by each granularity and distance, as the user and revealed; the commands, copying and the key routing; the DOM's `Selection`, its live range and `selectionchange`; a Krystal.UI test pressing the bound keys; the editor's selection card lists the keys.
 - **Out (FIXMEs):** the caret, and moving it (G13d); editing commands, cutting and pasting, and inserting typed text; `DataTransfer` (the clipboard data of clipboard events); writing the clipboard as HTML; script access to the clipboard; accessibility.
+
+### G13d as built (2026-10-22)
+
+- **Booey** (the ledger entry is *Carets* in `docs/booey/PORTING.md`): the caret animator and the simple one, blinking at the theme's 500ms on the event loop's time, serviced by a new rendering update step; `FrameSelection`'s caret (its rect in the block that paints it, its absolute bounds, its visibility, hidden while the document isn't focused and active, repainted where it was and is when it moves or blinks); `RenderBlock` painting it in its `caret-color` (or the parent's when `auto` would disappear into the background); focusing an editing host (`focus()`, Tab) or placing the selection in one focuses it and puts a caret at its start; the blinking pauses while the mouse is down; lines in a clipping editing host leave room for the caret at their end.
+- **Tests:** the caret's rect, colour and painting, blinking, focus and the arrows; focusing editing hosts; the room at line ends; a Krystal.UI test that a blink repaints only the caret and leaves no stale pixels; an editable card in the editor.
+- **Out (FIXMEs):** typing, deleting and pasting (editing commands); the drag caret; the overtype block cursor; stopping the blinking while typing.
 
 ## Open decisions
 

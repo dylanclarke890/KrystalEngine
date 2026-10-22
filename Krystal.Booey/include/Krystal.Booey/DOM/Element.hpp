@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
@@ -567,6 +569,11 @@ namespace krys::boo::dom
 
     /// @brief The URL of the image the element shows: its `src` attribute, or null if it has none.
     KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
+
+    /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
+    /// selection is already in it), and scrolls the element (or the caret) into view.
+    virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,
+                                       SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
     /// @brief The element's renderer, or null if it isn't rendered.
     KRYS_NODISCARD RenderElement *Renderer() const noexcept;

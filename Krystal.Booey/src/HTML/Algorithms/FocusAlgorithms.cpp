@@ -891,10 +891,11 @@ namespace krys::boo::html
     }
 
     FocusingSteps(*candidate, nullptr, {.Direction = direction, .Visibility = dom::FocusVisibility::Visible});
-    // What navigation focuses is scrolled into view, as `focus()` scrolls it.
-    if (auto *view = document.View())
+    // What navigation focuses is shown focused (scrolled into view, or with a caret in it), as `focus()`
+    // shows it.
+    if (RefPtr<dom::Element> focused = ShareRefPtr(document.FocusedElement()))
     {
-      view->ScheduleScrollToFocusedElement(SelectionRevealMode::Reveal);
+      focused->UpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll, SelectionRevealMode::Reveal);
     }
     return true;
   }

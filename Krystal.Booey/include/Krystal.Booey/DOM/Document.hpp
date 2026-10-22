@@ -900,6 +900,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD AnimationTimelinesController &EnsureTimelinesController() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents() noexcept;
+    /// @brief Moves the selection's caret on through its blinking.
+    void ServiceCaretAnimation() noexcept;
     /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.
     void KeyframesRuleDidChange(const css::CSSOMString &name) noexcept;
 

@@ -20,6 +20,7 @@ namespace krys::boo
       RenderingUpdateStep::MediaQueryEvaluation,
       RenderingUpdateStep::Animations,
       RenderingUpdateStep::AnimationFrameCallbacks,
+      RenderingUpdateStep::CaretAnimation,
       RenderingUpdateStep::FocusFixup,
       RenderingUpdateStep::CursorUpdate,
       RenderingUpdateStep::LayerFlush};
@@ -114,6 +115,9 @@ namespace krys::boo
 
     // FIXME: Running the animation frame callbacks (requestAnimationFrame), once there's scripting.
     RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks, [](dom::Document &) {});
+
+    RunProcessingStep(RenderingUpdateStep::CaretAnimation,
+                      [](dom::Document &document) { document.ServiceCaretAnimation(); });
 
     LayoutIfNeeded();
 

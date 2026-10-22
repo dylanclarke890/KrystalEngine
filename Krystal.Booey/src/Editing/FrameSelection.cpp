@@ -9,12 +9,18 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/RenderedPosition.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
@@ -59,6 +65,42 @@ namespace krys::boo
       // Only need to check the start container because live ranges enforce the invariant that start and end
       // have a common ancestor.
       return document && document->Contains(liveRange.StartContainer());
+    }
+
+    KRYS_NODISCARD bool IsNonOrphanedCaret(const VisibleSelection &selection) noexcept
+    {
+      return selection.IsCaret() && !selection.Start().IsOrphan() && !selection.End().IsOrphan();
+    }
+
+    KRYS_NODISCARD LayoutBoxExtent ComputeOutsetFromInnerOuterRect(const LayoutRect &innerRect,
+                                                                   const LayoutRect &outerRect) noexcept
+    {
+      LayoutBoxExtent result;
+      result.SetLeft(std::max<LayoutUnit>(LayoutUnit(0), innerRect.X() - outerRect.X()));
+      result.SetTop(std::max<LayoutUnit>(LayoutUnit(0), innerRect.Y() - outerRect.Y()));
+      result.SetRight(std::max<LayoutUnit>(LayoutUnit(0), outerRect.Width() - innerRect.Width()));
+      result.SetBottom(std::max<LayoutUnit>(LayoutUnit(0), outerRect.Height() - innerRect.Height()));
+
+      return result;
+    }
+
+    void RepaintCaretForLocalRect(dom::Node *node, const LayoutRect &rect,
+                                  CaretAnimator *caretAnimator) noexcept
+    {
+      if (auto *caretPainter = RendererForCaretPainting(node))
+      {
+        LayoutRect adjustedRect = caretAnimator ? caretAnimator->CaretRepaintRectForLocalRect(rect) : rect;
+        if (adjustedRect == rect)
+        {
+          caretPainter->RepaintRectangle(rect);
+        }
+        else
+        {
+          caretPainter->RepaintRectangle(rect, RenderObject::ClipRepaintToLayer::No,
+                                         RenderObject::ForceRepaint::Yes,
+                                         ComputeOutsetFromInnerOuterRect(rect, adjustedRect));
+        }
+      }
     }
 
     KRYS_NODISCARD bool IsBoundary(TextGranularity granularity) noexcept
@@ -190,16 +232,29 @@ namespace krys::boo
   }
 
   FrameSelection::FrameSelection(dom::Document *document) noexcept
-      : _document(document), _focused(document && document->IsFocusedAndActive())
+      : _document(document), _caretAnimator(CreateUnique<SimpleCaretAnimator>(*this)),
+        _focused(document && document->IsFocusedAndActive())
   {
     if (ShouldAlwaysUseDirectionalSelection(_document))
     {
       _selection.SetDirectionality(Directionality::Strong);
     }
 
-    if (IsFocusedAndActive())
+    bool activeAndFocused = IsFocusedAndActive();
+
+    constexpr auto shouldUpdateAppearance = ShouldUpdateAppearance::No;
+
+    // Caret blinking (blinks | does not blink)
+    if (activeAndFocused)
     {
       SetSelectionFromNone();
+      RemoveCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason::IsNotFocusedOrActive,
+                                             shouldUpdateAppearance);
+    }
+    else
+    {
+      AddCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason::IsNotFocusedOrActive,
+                                          shouldUpdateAppearance);
     }
   }
 
@@ -350,6 +405,23 @@ namespace krys::boo
     if (!willMutateSelection)
     {
       return false;
+    }
+
+    SetCaretRectNeedsUpdate();
+
+    if (!newSelection.IsNone() && !options.Contains(SetSelectionOption::DoNotSetFocus))
+    {
+      auto *oldFocusedElement = document->FocusedElement();
+      SetFocusedElementIfNeeded(options);
+      if (!document->Frame())
+      {
+        return false;
+      }
+      // FIXME: Should not be needed.
+      if (document->FocusedElement() != oldFocusedElement)
+      {
+        document->UpdateStyleIfNeeded();
+      }
     }
 
     // Always clear the x position used for vertical arrow navigation.
@@ -514,8 +586,7 @@ namespace krys::boo
     bool insideFixed = false;
     if (IsCaret())
     {
-      // FIXME: The caret's own bounds (absoluteCaretBounds, from its painted rect), with carets.
-      rect = LayoutRect(_selection.VisibleStart().AbsoluteCaretBounds(&insideFixed));
+      rect = LayoutRect(AbsoluteCaretBounds(&insideFixed));
     }
     else
     {
@@ -586,6 +657,12 @@ namespace krys::boo
                               RemovingNodeRemovesPosition(node, _selection.Extent()),
                               RemovingNodeRemovesPosition(node, _selection.Start()),
                               RemovingNodeRemovesPosition(node, _selection.End()));
+
+    if (_previousCaretNode && dom::TreeQueries::IsInclusiveAncestor(node, *_previousCaretNode)) KRYS_UNLIKELY
+    {
+      _previousCaretNode = ShareRefPtr(_selection.Start().AnchorNode());
+      SetCaretRectNeedsUpdate();
+    }
   }
 
   void FrameSelection::RespondToNodeModification(dom::Node &node, bool anchorRemoved, bool focusRemoved,
@@ -743,6 +820,8 @@ namespace krys::boo
   {
     _granularity = TextGranularity::CharacterGranularity;
 
+    GetCaretAnimator().Stop();
+
     if (auto *view = _document->GetRenderView())
     {
       view->Selection().Clear();
@@ -752,6 +831,7 @@ namespace krys::boo
     options.Add(SetSelectionOption::DoNotNotifyEditorClients);
     SetSelectionWithoutUpdatingAppearance(VisibleSelection(), options, CursorAlignOnScroll::IfNeeded,
                                           TextGranularity::CharacterGranularity);
+    _previousCaretNode = nullptr;
     _originalBase = {};
   }
 
@@ -1517,7 +1597,7 @@ namespace krys::boo
       _granularity = TextGranularity::CharacterGranularity;
     }
 
-    // FIXME: The caret's rect needing an update (setCaretRectNeedsUpdate), with carets.
+    SetCaretRectNeedsUpdate();
 
     (void)reachedBoundary;
     return true;
@@ -1892,6 +1972,11 @@ namespace krys::boo
     if (IsFocusedAndActive())
     {
       SetSelectionFromNone();
+      RemoveCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason::IsNotFocusedOrActive);
+    }
+    else
+    {
+      AddCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason::IsNotFocusedOrActive);
     }
   }
 
@@ -1912,14 +1997,40 @@ namespace krys::boo
     return _focused;
   }
 
+  // FIXME: Stopping the blinking while typing (shouldStopBlinkingDueToTypingCommand), with editing commands.
   void FrameSelection::UpdateAppearance() noexcept
   {
-    // Construct a new VisibleSolution, since _selection is not necessarily valid, and the following steps
-    // assume a valid selection.
     VisibleSelection oldSelection = Selection();
-    VisibleSelection selection(oldSelection.VisibleStart(), oldSelection.VisibleEnd());
 
     auto *document = _document;
+    bool caretRectChangedOrCleared = RecomputeCaretRect();
+
+    bool caretBrowsing = document->GetSettings().CaretBrowsingEnabled;
+    bool shouldBlink = CaretIsVisible() && IsCaret() && (oldSelection.IsContentEditable() || caretBrowsing);
+
+    // If the caret moved, stop the blink timer so we can restart with a
+    // black caret in the new location.
+    if (caretRectChangedOrCleared || !shouldBlink)
+    {
+      GetCaretAnimator().Stop(CaretAnimatorStopReason::CaretRectChanged);
+    }
+
+    // Start blinking with a black caret. Be sure not to restart if we're
+    // already blinking in the right location.
+    if (shouldBlink && !GetCaretAnimator().IsActive())
+    {
+      if (document && document->Frame())
+      {
+        GetCaretAnimator().Start();
+      }
+
+      GetCaretAnimator().SetVisible(true);
+    }
+
+    // Construct a new VisibleSolution, since _selection is not necessarily valid, and the following steps
+    // assume a valid selection.
+    VisibleSelection selection(oldSelection.VisibleStart(), oldSelection.VisibleEnd());
+
     auto *view = document->GetRenderView();
     if (!view)
     {
@@ -2017,7 +2128,330 @@ namespace krys::boo
 
   void FrameSelection::UpdateAppearanceAfterUpdatingRendering() noexcept
   {
+    SetCaretRectNeedsUpdate();
     UpdateAndRevealSelection();
+  }
+
+  CaretBase::CaretBase(CaretVisibility visibility) noexcept : _caretVisibility(visibility)
+  {
+  }
+
+  void CaretBase::ClearCaretRect() noexcept
+  {
+    _caretLocalRect = LayoutRect();
+  }
+
+  bool CaretBase::UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept
+  {
+    (void)document.UpdateLayoutIgnorePendingStylesheets();
+    _caretRectNeedsUpdate = false;
+    RenderBlock *renderer = nullptr;
+    _caretLocalRect = LocalCaretRectInRendererForCaretPainting(caretPosition, renderer);
+    return !_caretLocalRect.IsEmpty();
+  }
+
+  RenderBlock *FrameSelection::CaretRendererWithoutUpdatingLayout() const noexcept
+  {
+    return RendererForCaretPainting(_selection.Start().DeprecatedNode());
+  }
+
+  IntRect FrameSelection::AbsoluteCaretBounds(bool *insideFixed) noexcept
+  {
+    if (!_document)
+    {
+      return IntRect();
+    }
+    UpdateSelectionAppearanceNow();
+    (void)RecomputeCaretRect();
+    if (insideFixed)
+    {
+      *insideFixed = _caretInsidePositionFixed;
+    }
+    return _absCaretBounds;
+  }
+
+  bool FrameSelection::RecomputeCaretRect() noexcept
+  {
+    if (!ShouldUpdateCaretRect())
+    {
+      return false;
+    }
+
+    RefPtr<dom::Document> document = ShareRefPtr(_document);
+    if (!document)
+    {
+      return false;
+    }
+
+    if (!document->View())
+    {
+      return false;
+    }
+
+    LayoutRect oldRect = LocalCaretRectWithoutUpdate();
+
+    RefPtr<dom::Node> caretNode = _previousCaretNode;
+    if (ShouldUpdateCaretRect())
+    {
+      if (!IsNonOrphanedCaret(_selection))
+      {
+        ClearCaretRect();
+      }
+      else
+      {
+        VisiblePosition visibleStart = _selection.VisibleStart();
+        if (UpdateCaretRect(*document, visibleStart))
+        {
+          caretNode = ShareRefPtr(visibleStart.DeepEquivalent().DeprecatedNode());
+          _absCaretBoundsDirty = true;
+        }
+      }
+    }
+    LayoutRect newRect = LocalCaretRectWithoutUpdate();
+
+    if (caretNode == _previousCaretNode && oldRect == newRect && !_absCaretBoundsDirty)
+    {
+      return false;
+    }
+
+    IntRect oldAbsCaretBounds = _absCaretBounds;
+    bool isInsideFixed = false;
+    _absCaretBounds =
+      AbsoluteBoundsForLocalCaretRect(RendererForCaretPainting(caretNode.get()), newRect, &isInsideFixed);
+    _caretInsidePositionFixed = isInsideFixed;
+
+    _absCaretBoundsDirty = false;
+
+    if (caretNode == _previousCaretNode && oldAbsCaretBounds == _absCaretBounds)
+    {
+      return false;
+    }
+
+    if (auto *view = document->GetRenderView())
+    {
+      bool previousOrNewCaretNodeIsContentEditable =
+        _selection.IsContentEditable() || (_previousCaretNode && _previousCaretNode->IsContentEditable());
+      if (ShouldRepaintCaret(view, previousOrNewCaretNodeIsContentEditable))
+      {
+        if (_previousCaretNode)
+        {
+          RepaintCaretForLocalRect(_previousCaretNode.get(), oldRect, _caretAnimator.get());
+        }
+        _previousCaretNode = caretNode;
+        RepaintCaretForLocalRect(caretNode.get(), newRect, _caretAnimator.get());
+      }
+    }
+    return true;
+  }
+
+  bool CaretBase::ShouldRepaintCaret(const RenderView *view, bool isContentEditable) const noexcept
+  {
+    krys_debug_assert(view);
+    bool caretBrowsing =
+      view->GetDocument().GetSettings().CaretBrowsingEnabled; // The frame where the selection started.
+    return (caretBrowsing || isContentEditable);
+  }
+
+  void FrameSelection::InvalidateCaretRect() noexcept
+  {
+    if (!IsCaret())
+    {
+      return;
+    }
+
+    CaretBase::InvalidateCaretRect(_selection.Start().DeprecatedNode(), RecomputeCaretRect(),
+                                   _caretAnimator.get());
+  }
+
+  void CaretBase::InvalidateCaretRect(dom::Node *node, bool caretRectChanged,
+                                      CaretAnimator *caretAnimator) noexcept
+  {
+    // EDIT FIXME: This is an unfortunate hack.
+    // Basically, we can't trust this layout position since we
+    // can't guarantee that the check to see if we are in unrendered
+    // content will work at this point. We may have to wait for
+    // a layout and re-render of the document to happen. So, resetting this
+    // flag will cause another caret layout to happen the first time
+    // that we try to paint the caret after this call. That one will work since
+    // it happens after the document has accounted for any editing
+    // changes which may have been done.
+    // And, we need to leave this layout here so the caret moves right
+    // away after clicking.
+    _caretRectNeedsUpdate = true;
+
+    if (caretRectChanged)
+    {
+      return;
+    }
+
+    if (auto *view = node->NodeDocument().GetRenderView())
+    {
+      if (ShouldRepaintCaret(view, IsEditableNode(*node)))
+      {
+        RepaintCaretForLocalRect(node, LocalCaretRectWithoutUpdate(), caretAnimator);
+      }
+    }
+  }
+
+  void FrameSelection::PaintCaret(GraphicsContext &context, const LayoutPoint &paintOffset) noexcept
+  {
+    if (_selection.IsCaret() && _selection.Start().DeprecatedNode())
+    {
+      CaretBase::PaintCaret(*_selection.Start().DeprecatedNode(), context, paintOffset, _caretAnimator.get());
+    }
+  }
+
+  Color CaretBase::ComputeCaretColor(const RenderStyle &elementStyle, const dom::Node *node) noexcept
+  {
+    auto *parentElement = node ? node->ParentElement() : nullptr;
+    const RenderStyle *parentStyle =
+      parentElement && parentElement->Renderer() ? &parentElement->Renderer()->Style() : nullptr;
+    // CSS value "auto" is treated as an invalid color.
+    if (elementStyle.HasAutoCaretColor() && parentStyle)
+    {
+      auto parentBackgroundColor =
+        parentStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      auto elementBackgroundColor =
+        elementStyle.VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor);
+      auto disappearsIntoBackground =
+        BlendSourceOver(parentBackgroundColor, elementBackgroundColor) == parentBackgroundColor;
+      if (disappearsIntoBackground)
+      {
+        return parentStyle->VisitedDependentColorWithColorFilter(css::PropertyId::CaretColor);
+      }
+    }
+    return elementStyle.VisitedDependentColorWithColorFilter(css::PropertyId::CaretColor);
+  }
+
+  void CaretBase::PaintCaret(const dom::Node &node, GraphicsContext &context, const LayoutPoint &paintOffset,
+                             CaretAnimator *caretAnimator) const noexcept
+  {
+    auto caretPresentationProperties =
+      caretAnimator ? caretAnimator->GetPresentationProperties() : CaretAnimator::PresentationProperties();
+    if (_caretVisibility == CaretVisibility::Hidden
+        || caretPresentationProperties.Blink == CaretAnimator::PresentationProperties::BlinkState::Off)
+    {
+      return;
+    }
+
+    auto caret = LocalCaretRectWithoutUpdate();
+    if (auto *renderer = RendererForCaretPainting(&node))
+    {
+      renderer->FlipForWritingMode(caret);
+    }
+    caret.MoveBy(paintOffset);
+    if (caret.IsEmpty())
+    {
+      return;
+    }
+
+    Color caretColor = Color::black;
+    auto *element = DynamicDowncast<dom::Element>(node);
+    if (!element)
+    {
+      element = node.ParentElement();
+    }
+    if (element && element->Renderer())
+    {
+      caretColor = CaretBase::ComputeCaretColor(element->Renderer()->Style(), &node);
+    }
+
+    auto pixelSnappedCaretRect = SnapRectToDevicePixels(caret, node.NodeDocument().DeviceScaleFactor());
+    if (caretAnimator)
+    {
+      caretAnimator->Paint(context, pixelSnappedCaretRect, caretColor, paintOffset);
+    }
+    else
+    {
+      context.FillRect(pixelSnappedCaretRect, caretColor);
+    }
+  }
+
+  void FrameSelection::SetCaretBlinkingSuspended(bool suspended) noexcept
+  {
+    GetCaretAnimator().SetBlinkingSuspended(suspended);
+  }
+
+  bool FrameSelection::IsCaretBlinkingSuspended() const noexcept
+  {
+    return GetCaretAnimator().IsBlinkingSuspended();
+  }
+
+  void FrameSelection::CaretAnimationDidUpdate(CaretAnimator &) noexcept
+  {
+    InvalidateCaretRect();
+  }
+
+  dom::Document *FrameSelection::GetDocument() noexcept
+  {
+    return _document;
+  }
+
+  dom::Node *FrameSelection::CaretNode() noexcept
+  {
+    return Selection().VisibleStart().DeepEquivalent().DeprecatedNode();
+  }
+
+  void FrameSelection::AddCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason reason,
+                                                           ShouldUpdateAppearance doAppearanceUpdate) noexcept
+  {
+    _caretVisibilitySuppressionReasons.Add(reason);
+    UpdateCaretVisibility(doAppearanceUpdate);
+  }
+
+  void
+    FrameSelection::RemoveCaretVisibilitySuppressionReason(CaretVisibilitySuppressionReason reason,
+                                                           ShouldUpdateAppearance doAppearanceUpdate) noexcept
+  {
+    _caretVisibilitySuppressionReasons.Remove(reason);
+    UpdateCaretVisibility(doAppearanceUpdate);
+  }
+
+  void FrameSelection::UpdateCaretVisibility(ShouldUpdateAppearance doAppearanceUpdate) noexcept
+  {
+    auto visibility =
+      _caretVisibilitySuppressionReasons.IsEmpty() ? CaretVisibility::Visible : CaretVisibility::Hidden;
+
+    if (GetCaretVisibility() == visibility)
+    {
+      return;
+    }
+
+    GetCaretAnimator().SetVisible(false);
+
+    CaretBase::SetCaretVisibility(visibility);
+
+    if (doAppearanceUpdate == ShouldUpdateAppearance::Yes)
+    {
+      _pendingSelectionUpdate = true;
+    }
+  }
+
+  // FIXME: Focusing the anchor a caret is in when browsing with a caret (enclosingAnchorElement), and leaving
+  // out frame elements, once there are frames.
+  void FrameSelection::SetFocusedElementIfNeeded(EnumSet<SetSelectionOption> options) noexcept
+  {
+    if (IsNone() || !IsFocused())
+    {
+      return;
+    }
+
+    RefPtr<dom::Document> document = ShareRefPtr(_document);
+    if (RefPtr<dom::Element> target = ShareRefPtr(_selection.RootEditableElement()))
+    {
+      // Walk up the DOM tree to search for an element to focus.
+      if (auto *focusable = html::FocusAlgorithms::ClickFocusableInclusiveAncestor(*target))
+      {
+        dom::FocusOptions focusOptions;
+        if (options.Contains(SetSelectionOption::ForBindings))
+        {
+          focusOptions.Trigger = dom::FocusTrigger::Bindings;
+        }
+        html::FocusAlgorithms::FocusingSteps(*focusable, nullptr, focusOptions);
+        return;
+      }
+      html::FocusAlgorithms::FocusingSteps(*document);
+    }
   }
 
   RefPtr<dom::Range> FrameSelection::AssociatedLiveRange() noexcept

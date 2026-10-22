@@ -409,6 +409,14 @@ namespace krys::boo
   protected:
     void PaintSelection(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
 
+    enum class CaretType : bool
+    {
+      CursorCaret,
+      DragCaret
+    };
+    void PaintCarets(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+    void PaintCaret(PaintInfo &paintInfo, const LayoutPoint &paintOffset, CaretType type) noexcept;
+
     GapRects SelectionGaps(RenderBlock &rootBlock, const LayoutPoint &rootBlockPhysicalPosition,
                            const LayoutSize &offsetFromRootBlock, LayoutUnit &lastLogicalTop,
                            LayoutUnit &lastLogicalLeft, LayoutUnit &lastLogicalRight,

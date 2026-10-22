@@ -1114,6 +1114,60 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "selection-cleared");
   }
 
+  TEST_CASE("View: a blinking caret repaints only itself and leaves no stale pixels", "[UI][GPU]")
+  {
+    static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+    (void)fonts;
+
+    RepaintFixture fixture(240u, 120u);
+    View view({240, 120});
+    view.LoadHTML(u8"<!DOCTYPE html><style>"
+                  u8"body { margin: 8px; font: 14px/18px 'Liberation Sans' }"
+                  u8"#e { padding: 4px; background: #def; caret-color: #c00 }"
+                  u8"</style><div id=e contenteditable>Click to place the caret here.</div>");
+
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&](MonotonicTime::duration delta)
+    {
+      time += delta;
+      (void)view.Update(time);
+    };
+    frame(16ms);
+    CheckNoStalePixels(fixture, view, "caret-first");
+
+    // A click places the caret and focuses the editing host.
+    view.MousePressed({40, 20}, pal::MouseButton::Left);
+    view.MouseReleased({40, 20}, pal::MouseButton::Left);
+    frame(16ms);
+    auto &selection = view.Document().Selection();
+    REQUIRE(selection.IsCaret());
+    CHECK(view.Document().FocusedElement() == view.Document().GetElementById(u8"e").get());
+    CheckNoStalePixels(fixture, view, "caret-placed");
+
+    // Each blink repaints the caret's rect alone.
+    auto caret = boo::FloatRect(selection.AbsoluteCaretBounds());
+    TrackedRepaints repaints(view);
+    for (int32 blink = 1; blink <= 3; ++blink)
+    {
+      repaints.Reset();
+      frame(550ms);
+      auto bounds = repaints.Bounds();
+      CHECK_FALSE(bounds.IsEmpty());
+      CHECK(bounds.Width() <= caret.Width() + 2);
+      CHECK(bounds.Height() <= caret.Height() + 2);
+      CHECK(bounds.Intersects(caret));
+      CheckNoStalePixels(fixture, view, "caret-blink-" + std::to_string(blink));
+    }
+
+    // The arrows move it, repainting where it was and where it is.
+    repaints.Reset();
+    CHECK(view.KeyPressed(pal::Key::RightArrow, {}));
+    frame(16ms);
+    CHECK(repaints.Bounds().Width() > caret.Width() + 2);
+    CHECK(boo::FloatRect(selection.AbsoluteCaretBounds()).X() > caret.X());
+    CheckNoStalePixels(fixture, view, "caret-moved");
+  }
+
   TEST_CASE("View: dragging a selection past the edge scrolls", "[UI][GPU]")
   {
     static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});

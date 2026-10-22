@@ -1242,6 +1242,11 @@ namespace krys::boo::dom
     _pendingScrollEventTargets.emplace_back(ShareRef(originalTarget), eventType);
   }
 
+  void Document::ServiceCaretAnimation() noexcept
+  {
+    _selection->GetCaretAnimator().ServiceCaretAnimation();
+  }
+
   DOMSelection *Document::GetSelection() noexcept
   {
     if (!Frame())

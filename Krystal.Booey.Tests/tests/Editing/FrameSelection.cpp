@@ -5,6 +5,13 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 
@@ -351,5 +358,212 @@ namespace krys::boo::tests
       CHECK(selection.Selection().End().DeprecatedNode() == &fixture.TextIn(u8"z"));
       CHECK(view->GetScrollPosition().Y() > 1'500);
     }
+  }
+}
+
+namespace krys::boo::tests
+{
+  namespace
+  {
+    /// @brief A page showing @p markup (10px text on 20px lines, no body margin) in a 400x300 view.
+    struct CaretFixture : PaintFixture
+    {
+      explicit CaretFixture(utf8_stringview markup) noexcept
+          : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
+                           + utf8_string(markup),
+                         {400, 300}, true)
+      {
+        TestPage->UpdateRendering();
+      }
+
+      KRYS_NODISCARD FrameSelection &Selection() noexcept
+      {
+        return Document->Selection();
+      }
+
+      KRYS_NODISCARD dom::Text &TextIn(dom::DOMStringView id) noexcept
+      {
+        return Downcast<dom::Text>(*ById(id).FirstChild());
+      }
+
+      /// @brief Whether the view paints a caret: a rect 1px wide, filled with @p colour.
+      KRYS_NODISCARD bool PaintsCaret(utf8_stringview colour) noexcept
+      {
+        auto painted = Painted();
+        auto colourText = utf8_string(u8"(color ") + utf8_string(colour) + u8")";
+        for (auto at = painted.find(u8"(fill-rect-with-color"); at != utf8_string::npos;
+             at = painted.find(u8"(fill-rect-with-color", at + 1))
+        {
+          auto end = painted.find(u8"(fill-rect", at + 1);
+          auto fill = painted.substr(at, end == utf8_string::npos ? utf8_string::npos : end - at);
+          if (fill.find(u8" size 1x") != utf8_string::npos && fill.find(colourText) != utf8_string::npos)
+          {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      /// @brief Runs the event loop's timers up to @p delay from now, then the rendering update.
+      void Advance(MonotonicTime::duration delay) noexcept
+      {
+        auto &loop = html::EventLoop::Current();
+        loop.Run(loop.Now() + delay);
+        TestPage->UpdateRendering();
+      }
+    };
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameSelection: the caret in editable content",
+                   "[Editing][FrameSelection][Caret]")
+  {
+    CaretFixture fixture(u8"<div id=e contenteditable style=caret-color:#FF0000>The quick brown fox</div>"
+                         u8"<p id=p>Not editable</p>");
+    auto &selection = fixture.Selection();
+    auto &text = fixture.TextIn(u8"e");
+
+    SECTION("A caret in editable text has a rect, and paints in the caret colour")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 0), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      CHECK(selection.IsCaretVisible());
+      auto bounds = selection.AbsoluteCaretBounds();
+      CHECK(bounds.X() == 0);
+      // As tall as the text, not the line.
+      CHECK(bounds.Height() == 11);
+      CHECK(bounds.Width() == 1);
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      // Moving the caret moves its rect.
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 3), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      CHECK(selection.AbsoluteCaretBounds().X() > 10);
+    }
+
+    SECTION("A caret outside editable text isn't painted")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&fixture.TextIn(u8"p")), 2),
+                       Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      CHECK_FALSE(fixture.PaintsCaret(u8"#000000"));
+    }
+
+    SECTION("The caret blinks")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      CHECK(selection.GetCaretAnimator().IsActive());
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      // Moving the caret shows it again, and restarts the blinking.
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 4), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+
+      // The event handler suspends the blinking while the mouse is down; the next blink, which takes its
+      // suspension from the theme's interval, resumes it.
+      selection.SetCaretBlinkingSuspended(true);
+      CHECK(selection.IsCaretBlinkingSuspended());
+      fixture.Advance(std::chrono::milliseconds(550));
+      CHECK_FALSE(selection.IsCaretBlinkingSuspended());
+    }
+
+    SECTION("An unfocused document hides the caret")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      fixture.Document->SetFocusedAndActive(false);
+      fixture.TestPage->UpdateRendering();
+      CHECK_FALSE(selection.IsCaretVisible());
+      CHECK_FALSE(fixture.PaintsCaret(u8"#FF0000"));
+      fixture.Document->SetFocusedAndActive(true);
+      fixture.TestPage->UpdateRendering();
+      CHECK(selection.IsCaretVisible());
+      CHECK(fixture.PaintsCaret(u8"#FF0000"));
+    }
+
+    SECTION("The arrows move a caret in editable text")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      auto &editor = fixture.Document->GetEditor();
+      CHECK(editor.GetCommand(u8"MoveRight").Execute());
+      CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 3);
+      CHECK(editor.GetCommand(u8"MoveWordRight").Execute());
+      CHECK(editor.GetCommand(u8"MoveToEndOfLine").Execute());
+      CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 19);
+      CHECK(editor.GetCommand(u8"MoveToBeginningOfDocument").Execute());
+      CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
+    }
+
+    SECTION("Removing the text the caret is in")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(&text), 2), Affinity::Downstream);
+      fixture.TestPage->UpdateRendering();
+      (void)fixture.ById(u8"e").RemoveChild(text);
+      fixture.TestPage->UpdateRendering();
+      CHECK(selection.IsCaret());
+      CHECK(selection.Selection().Start().DeprecatedNode() == &fixture.ById(u8"e"));
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "FrameSelection: focusing an editing host",
+                   "[Editing][FrameSelection][Caret]")
+  {
+    CaretFixture fixture(u8"<div id=e contenteditable>Editable</div><button id=b>Button</button>");
+    auto &selection = fixture.Selection();
+    auto &host = fixture.ById(u8"e");
+
+    SECTION("focus() places a caret at its start")
+    {
+      Downcast<html::HTMLElement>(host).Focus();
+      CHECK(fixture.Document->FocusedElement() == &host);
+      CHECK(selection.IsCaret());
+      CHECK(selection.Selection().RootEditableElement() == &host);
+      CHECK(selection.Selection().VisibleStart() == VisiblePosition(FirstPositionInOrBeforeNode(&host)));
+    }
+
+    SECTION("Focusing something else leaves the selection")
+    {
+      Downcast<html::HTMLElement>(fixture.ById(u8"b")).Focus();
+      CHECK(selection.IsNone());
+    }
+
+    SECTION("Placing the selection in it focuses it")
+    {
+      selection.MoveTo(dom::MakeContainerOffsetPosition(ShareRefPtr(fixture.ById(u8"e").FirstChild()), 3),
+                       Affinity::Downstream);
+      CHECK(fixture.Document->FocusedElement() == &host);
+    }
+
+    SECTION("Sequential navigation places a caret in it")
+    {
+      CHECK(html::FocusAlgorithms::SequentialNavigation(*fixture.Document, dom::FocusDirection::Forward));
+      CHECK(fixture.Document->FocusedElement() == &host);
+      CHECK(selection.IsCaret());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBlockFlow: room for the caret at the end of lines",
+                   "[Editing][Caret]")
+  {
+    CaretFixture fixture(
+      u8"<div id=clipped contenteditable style=overflow:hidden>Text</div>"
+      u8"<div id=padded contenteditable style='overflow:hidden;padding-right:4px'>Text</div>"
+      u8"<div id=visible contenteditable>Text</div><div id=plain style=overflow:hidden>Text</div>");
+    auto padding = [&](dom::DOMStringView id)
+    {
+      return Downcast<RenderBlockFlow>(*fixture.ById(id).Renderer()).EndPaddingWidthForCaret();
+    };
+    CHECK(padding(u8"clipped") == LayoutUnit(CaretWidth()));
+    CHECK(padding(u8"padded") == LayoutUnit(0));
+    CHECK(padding(u8"visible") == LayoutUnit(0));
+    CHECK(padding(u8"plain") == LayoutUnit(0));
   }
 }

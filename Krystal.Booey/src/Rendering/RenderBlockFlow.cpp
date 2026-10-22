@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
+#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
@@ -4895,6 +4896,17 @@ namespace krys::boo
       floatBox.Move(rootBlockPhysicalPosition.X(), rootBlockPhysicalPosition.Y());
       paintInfo->Context().ClipOut(FloatRect(SnappedIntRect(floatBox)));
     }
+  }
+
+  LayoutUnit RenderBlockFlow::EndPaddingWidthForCaret() const noexcept
+  {
+    auto *element = GetElement();
+    if (element && element->IsRootEditableElement() && HasNonVisibleOverflow()
+        && Style().IsLeftToRightDirection() && !PaddingEnd())
+    {
+      return LayoutUnit(CaretWidth());
+    }
+    return {};
   }
 
   LayoutUnit RenderBlockFlow::AdjustEnclosingTopForPrecedingBlock(LayoutUnit top) const noexcept

@@ -33,6 +33,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -425,6 +427,43 @@ namespace krys::boo::dom
   bool Element::RendererIsNeeded(const RenderStyle &style) noexcept
   {
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
+  }
+
+  void Element::UpdateFocusAppearance(SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
+  {
+    if (IsRootEditableElement())
+    {
+      // Keep the document alive in this method, since SetSelection() may run script.
+      Ref<Document> document = ShareRef(NodeDocument());
+      if (!document->Frame())
+      {
+        return;
+      }
+      auto &selection = document->Selection();
+
+      // When focusing an editable element in an iframe, don't reset the selection if it already contains a
+      // selection.
+      if (this == selection.Selection().RootEditableElement())
+      {
+        selection.RevealSelection();
+        return;
+      }
+
+      // FIXME: We should restore the previous selection if there is one.
+      VisibleSelection newSelection = VisibleSelection(FirstPositionInOrBeforeNode(this));
+
+      if (selection.ShouldChangeSelection(newSelection))
+      {
+        selection.SetSelection(newSelection, FrameSelection::DefaultSetSelectionOptions());
+        selection.RevealSelection({revealMode});
+        return;
+      }
+    }
+
+    if (auto *view = NodeDocument().View())
+    {
+      view->ScheduleScrollToFocusedElement(revealMode);
+    }
   }
 
   Maybe<DOMString> Element::ImageSourceURL() const noexcept
