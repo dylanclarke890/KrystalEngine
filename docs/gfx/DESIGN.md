@@ -309,6 +309,7 @@ All done in G1 (2026-10-17) unless noted.
 | G11 | Visual effects: `filter`, `backdrop-filter`, `mask-image` and `mask-border` drawn. Done (2026-10-21), in three parts (see *G11 plan*). | Filtered, backdrop-filtered and masked boxes match Chrome. |
 | G12 | Done (2026-10-21). Compositing: upstream's composited layer tree (`RenderLayerCompositor`, `RenderLayerBacking`, `GraphicsLayer`) on a Krystal.UI layer tree adapted from TextureMapper, with tiled backings. In four parts (see *G12 plan*). | Filters, opacity, transforms and their animations composite without repainting; scrolling moves layers; no stale pixels. |
 | G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21), and so is G13b, the selection painted and the mouse (2026-10-22), and so is G13c, the keyboard, the DOM's `Selection` and copying (2026-10-22), and so is G13d, carets (2026-10-22), which completes G13. | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
+| G14 | Editing and form controls: editing commands (typing, deleting, line breaks, undo, cut and paste) in editable content, form behaviour (owners, validity, submission to the host), text fields, and the other controls drawn by a theme. In four parts (see *G14 plan*). | Text can be typed, deleted, undone and pasted in `contenteditable`, `<input>` and `<textarea>`; checkboxes, radios, buttons, sliders and selects work and paint as a theme draws them; a form's submission reaches the host. |
 
 ### G2 parts
 
@@ -1326,6 +1327,43 @@ Nothing can be selected: text paints unmarked, the I-beam is only a cursor, and 
 - **Booey** (the ledger entry is *Carets* in `docs/booey/PORTING.md`): the caret animator and the simple one, blinking at the theme's 500ms on the event loop's time, serviced by a new rendering update step; `FrameSelection`'s caret (its rect in the block that paints it, its absolute bounds, its visibility, hidden while the document isn't focused and active, repainted where it was and is when it moves or blinks); `RenderBlock` painting it in its `caret-color` (or the parent's when `auto` would disappear into the background); focusing an editing host (`focus()`, Tab) or placing the selection in one focuses it and puts a caret at its start; the blinking pauses while the mouse is down; lines in a clipping editing host leave room for the caret at their end.
 - **Tests:** the caret's rect, colour and painting, blinking, focus and the arrows; focusing editing hosts; the room at line ends; a Krystal.UI test that a blink repaints only the caret and leaves no stale pixels; an editable card in the editor.
 - **Out (FIXMEs):** typing, deleting and pasting (editing commands); the drag caret; the overtype block cursor; stopping the blinking while typing.
+
+### G14 plan (2026-10-22)
+
+G13 left editable content with a caret that moves but nothing that types, and Booey's form elements are the specification's attribute shells: no values that edit, no validity, no submission, no shadow trees, nothing painted for them. Upstream's editing is commands over the DOM (`CompositeEditCommand` and its kin, undone as `EditCommandComposition`s), and its form controls are elements with an input type each (`InputType`), user agent shadow trees for their insides, renderers of their own (`RenderTextControl`, `RenderSlider`, `RenderMenuList`) and a theme that draws them (`RenderTheme`). G14 ports them, mirroring upstream. There's no scripting (and if there ever is, it'll be language-neutral bindings), so every behaviour is reachable from C++: setting values, `submit()`, `checkValidity()`, the selection APIs.
+
+- **G14a, editing commands** (Booey, Krystal.UI):
+  - `EditCommand`, `CompositeEditCommand`, `SimpleEditCommand` and the simple commands they're made of (inserting and removing nodes, splitting and joining text, setting attributes), and `EditCommandComposition`, which undoes and redoes them; the editor's undo stack, kept by the editor client (upstream's `registerUndoStep`), and the `Undo` and `Redo` commands.
+  - Typing: `TypingCommand` (inserting text, deleting backward and forward by character and word, line breaks and paragraph separators, coalescing typing into one undo step), `InsertTextCommand`, `DeleteSelectionCommand`, `InsertLineBreakCommand`, `InsertParagraphSeparatorCommand`, and the editor's `insertText`, which Krystal.UI's editor client calls for typed text.
+  - `beforeinput` and `input` (`InputEvent`) around each edit, and `textInput` (`TextEvent`).
+  - Cutting, and pasting plain text: reading the pasteboard (the strategy grows reads), `ReplaceSelectionCommand` with a fragment made from text, and the `cut` and `paste` clipboard events.
+  - **Tests:** each command and its undo, typing runs that coalesce, deletion across blocks, pasting, the input events. An **editor** sample: the editable card types.
+  - **Out:** rich editing (styling commands, `execCommand`'s formatting, lists, indenting, links), pasting HTML (markup serialisation and sanitising), spelling, input methods and composition, drag and drop.
+- **G14b, forms** (Booey):
+  - `FormListedElement`, `ValidatedFormListedElement` and `HTMLFormControlElement`: the form owner (the `form` attribute too), `disabled` (with fieldsets), `readonly`, `required`, names and values, `labels`, and label activation.
+  - Constraint validation: `ValidityState`, `checkValidity()`, `reportValidity()` (the `invalid` event; the validation message bubble is a FIXME), `setCustomValidity()`, and the pseudo-classes it drives (`:valid`, `:invalid`, `:in-range`, `:out-of-range`, `:required`, `:optional`, `:read-only`, `:read-write`, `:user-valid`, `:user-invalid`, `:default`, `:indeterminate`).
+  - `HTMLFormElement`: `submit()`, `requestSubmit()`, `reset()`, implicit submission (Enter in a field), the `submit`, `reset` and `formdata` events, and building the form data set (`DOMFormData`). Submitting hands the method, action and data to the host (a hook on the chrome client) rather than navigating, as there's no loader navigation.
+  - Buttons: `<button>` and `<input type=submit|reset|button>` activation.
+  - **Tests:** form owners, validity per constraint, the pseudo-classes, submission and reset reaching the host.
+- **G14c, text fields** (Booey, Krystal.UI):
+  - User agent shadow roots (a closed mode script can't see, styled by the user agent sheet), which the form controls build their insides in.
+  - `HTMLTextFormControlElement` (the value, the selection APIs: `selectionStart`, `selectionEnd`, `selectionDirection`, `setSelectionRange()`, `select()`, `setRangeText()`; the placeholder; `select` and `selectionchange` at the control), `TextControlInnerElements`, `HTMLTextAreaElement`, and `InputType` with the text-like types (`text`, `search`, `password` with masked text, `email`, `url`, `tel`, `number`), `TextFieldInputType` and `BaseTextInputType`.
+  - `RenderTextControl`, `RenderTextControlSingleLine` and `RenderTextControlMultiLine`: fields that scroll their text to keep the caret in view, and `<textarea>`'s resizer.
+  - The text control paths G13 left as FIXMEs (the selection in a field, password fields, a field's own selection for commands).
+  - **Tests:** typing, selecting and scrolling in fields, the selection APIs, masked passwords, the shadow trees; goldens against Chrome; an **editor** sample with a small form.
+- **G14d, the other controls** (Booey, Krystal.UI):
+  - Input types: `checkbox` (with `indeterminate`), `radio` (groups), `range` (`RenderSlider`, the thumb and track in a shadow tree, dragging and the arrow keys), `hidden`, `image`, and `color`, `date` and the other pickers (their pickers through the host, or FIXMEs).
+  - `<select>`: the drop-down (`RenderMenuList`, its popup) and the list box (`RenderListBox`), `<option>` and `<optgroup>`, the keyboard.
+  - `<progress>` and `<meter>`.
+  - The theme: `RenderTheme`'s control painting and metrics (focus rings, `appearance`, `accent-color`), replacing `Style/Seam.hpp`'s stand-in; which look it draws is decided before G14d (see below).
+  - **Tests:** each control's states, events and keyboard; goldens of every control against Chrome (report-only where the theme differs); the editor sample's form gets the rest of the controls.
+  - **Out:** file inputs (a host file picker), autofill, datalists' suggestions, the validation message bubble.
+
+Decisions to make before the parts that need them:
+
+1. **The theme's look** (G14d): port upstream's portable theme (`RenderThemeAdwaita`, which draws every control with the graphics context), or draw controls as Chrome does, so the goldens match Chrome.
+2. **`<select>` popups** (G14d): a popup the host shows (a chrome client hook, as upstream's `PopupMenu`), or one Booey draws in the page as a top-layer box.
+3. **The undo stack's owner** (G14a): decided (2026-10-22): the editor client, as upstream, so the host can merge it with its own undo.
 
 ## Open decisions
 
