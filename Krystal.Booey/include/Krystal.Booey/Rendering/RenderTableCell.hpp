@@ -31,13 +31,15 @@ namespace krys::boo
   };
 
   /// @brief A table cell: its place in the grid, its spans, its collapsed borders and its layout.
-  // FIXME: Masks (paintMask) and sticky positioning (frameRectForStickyPositioning), once there are those.
   class RenderTableCell final : public RenderBlockFlow
   {
     KRYS_NON_COPY_MOVABLE(RenderTableCell);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderTableCell);
 
   public:
+    /// @brief The cell's frame rect relative to its row: cells are positioned relative to their section.
+    KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept override;
+
     // These is limited by the size of RenderTableCell::_column bitfield.
     constexpr static uint32 UnsetColumnIndex = 0x1FFFFFF;
     constexpr static uint32 MaxColumnIndex = 0x1FFFFFE; // 33554430

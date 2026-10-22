@@ -739,6 +739,58 @@ namespace krys::ui::tests
     CheckNoStalePixels(fixture, view, "box-scroll-changed");
   }
 
+  TEST_CASE("View: sticky headers stay in view and leave no stale pixels", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 160u);
+    View view({200, 160});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }"
+      u8"h2 { position: sticky; top: 0; margin: 0; height: 20px; background: #073b4c }"
+      u8"section { height: 150px; background: linear-gradient(#fde, #def) }"
+      u8"#scroller { margin: 10px; width: 140px; height: 80px; overflow: auto; background: white }"
+      u8"#scroller h3 { position: sticky; top: 0; margin: 0; height: 16px; background: #ef476f }"
+      u8".row { height: 30px; border-bottom: 1px solid #888 }</style>"
+      u8"<section><h2></h2></section>"
+      u8"<div id=scroller><h3></h3><div class=row></div><div class=row></div><div class=row></div>"
+      u8"<div class=row></div><div class=row></div><div class=row></div></div>"
+      u8"<section><h2></h2></section><section><h2></h2></section>");
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      (void)fixture.Painted(view);
+    };
+    frame();
+    frame();
+    CheckNoStalePixels(fixture, view, "sticky-first");
+
+    // The view: its sections' headers stick in turn (repainted, as they don't composite).
+    for (int32 y : {40, 120, 200, 310, 90})
+    {
+      view.ScrollTo({0, y});
+      frame();
+      CheckNoStalePixels(fixture, view, "sticky-view-" + std::to_string(y));
+    }
+
+    // The box scrolls on layers: its header composites and stays at its top without repainting.
+    view.ScrollTo({0, 0});
+    frame();
+    auto scroller = view.Document().GetElementById(u8"scroller");
+    auto header = view.Document().QuerySelector(u8"#scroller h3").ReleaseValue();
+    REQUIRE(header->Renderer()->IsComposited());
+    TrackedRepaints repaints(view);
+    for (int32 y : {20, 75, 10})
+    {
+      repaints.Reset();
+      scroller->SetScrollTop(y);
+      frame();
+      CHECK(repaints.Bounds().IsEmpty());
+      CHECK(repaints.Bounds(repaints.ScrolledContentsOf(u8"scroller")).IsEmpty());
+      CheckNoStalePixels(fixture, view, "sticky-box-" + std::to_string(y));
+    }
+  }
+
   TEST_CASE("View: scrolling under a fixed backdrop repaints nothing", "[UI][GPU]")
   {
     const utf8_string page =

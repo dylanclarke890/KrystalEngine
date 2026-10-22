@@ -1,9 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/BorderEdge.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
@@ -673,9 +675,239 @@ namespace krys::boo
       return RelativePositionOffset();
     }
 
-    // FIXME: The sticky position offset, once there's scrolling.
+    if (IsStickilyPositioned())
+    {
+      return StickyPositionOffset();
+    }
 
     return {};
+  }
+
+  Pair<const RenderBox &, const RenderLayer *>
+    RenderBoxModelObject::EnclosingClippingBoxForStickyPosition() const noexcept
+  {
+    krys_debug_assert(IsStickilyPositioned());
+    RenderLayer *clipLayer = HasLayer() ? Layer()->EnclosingOverflowClipLayer(ExcludeSelf) : nullptr;
+    const RenderBox &box = clipLayer ? Downcast<RenderBox>(clipLayer->Renderer()) : View();
+    return {box, clipLayer};
+  }
+
+  void
+    RenderBoxModelObject::ComputeStickyPositionConstraints(StickyPositionViewportConstraints &constraints,
+                                                           const FloatRect &constrainingRect) const noexcept
+  {
+    constraints.SetConstrainingRectAtLastLayout(constrainingRect);
+
+    // Do not use anonymous containing blocks to determine sticky constraints. We want the size of the first
+    // true containing block, because that is what imposes the limitation on the movement of stickily
+    // positioned items.
+    RenderBlock *containingBlock = ContainingBlock();
+    while (containingBlock && (!Is<RenderBlock>(*containingBlock) || containingBlock->IsAnonymousBlock()))
+    {
+      containingBlock = containingBlock->ContainingBlock();
+    }
+    krys_debug_assert(containingBlock);
+
+    auto [enclosingClippingBox, enclosingClippingLayer] = EnclosingClippingBoxForStickyPosition();
+
+    LayoutRect containerContentRect;
+    if (!enclosingClippingLayer || (containingBlock != &enclosingClippingBox))
+    {
+      // In this case either the scrolling element is the view or there is another containing block in the
+      // hierarchy between this stickily positioned item and its scrolling ancestor. In both cases, we use the
+      // content box rectangle of the containing block, which is what should constrain the movement.
+      containerContentRect = containingBlock->ComputedCSSContentBoxRect();
+    }
+    else
+    {
+      containerContentRect = containingBlock->LayoutOverflowRect();
+      containerContentRect.Contract(LayoutBoxExtent {
+        containingBlock->ComputedCSSPaddingTop(), containingBlock->ComputedCSSPaddingRight(),
+        containingBlock->ComputedCSSPaddingBottom(), containingBlock->ComputedCSSPaddingLeft()});
+    }
+
+    LayoutUnit maxWidth = containingBlock->ContentBoxLogicalWidth();
+
+    const auto &zoomFactor = Style().UsedZoomForLength();
+
+    // Sticky positioned element ignore any override logical width on the containing block (as they don't call
+    // containingBlockLogicalWidthForContent). It's unclear whether this is totally fine.
+    LayoutBoxExtent minMargin(
+      style::EvaluateMinimum<LayoutUnit>(Style().MarginTop(), maxWidth, zoomFactor),
+      style::EvaluateMinimum<LayoutUnit>(Style().MarginRight(), maxWidth, zoomFactor),
+      style::EvaluateMinimum<LayoutUnit>(Style().MarginBottom(), maxWidth, zoomFactor),
+      style::EvaluateMinimum<LayoutUnit>(Style().MarginLeft(), maxWidth, zoomFactor));
+
+    // Compute the container-relative area within which the sticky element is allowed to move.
+    containerContentRect.Contract(minMargin);
+
+    // Finally compute container rect relative to the scrolling ancestor. We pass an empty mode here, because
+    // sticky positioning should ignore transforms.
+    FloatRect containerRectRelativeToScrollingAncestor =
+      containingBlock->LocalToContainerQuad(FloatRect(containerContentRect), &enclosingClippingBox, {})
+        .BoundingBox();
+    if (enclosingClippingLayer)
+    {
+      FloatPoint containerLocationRelativeToScrollingAncestor =
+        containerRectRelativeToScrollingAncestor.Location()
+        - FloatSize(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
+                    enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop());
+      if (&enclosingClippingBox != containingBlock)
+      {
+        if (auto *scrollableArea = enclosingClippingLayer->GetScrollableArea())
+        {
+          containerLocationRelativeToScrollingAncestor +=
+            FloatSize(ToIntSize(scrollableArea->GetScrollOffset()));
+        }
+      }
+      containerRectRelativeToScrollingAncestor.SetLocation(containerLocationRelativeToScrollingAncestor);
+    }
+    constraints.SetContainingBlockRect(containerRectRelativeToScrollingAncestor);
+
+    // Now compute the sticky box rect, also relative to the scrolling ancestor.
+    LayoutRect stickyBoxRect = FrameRectForStickyPositioning();
+
+    // Ideally, it would be possible to call this->localToContainerQuad to determine the frame rectangle in
+    // the coordinate system of the scrolling ancestor, but localToContainerQuad itself depends on sticky
+    // positioning! Instead, start from the parent but first adjusting the rectangle for the writing mode of
+    // this stickily-positioned element. We also pass an empty mode here because sticky positioning should
+    // ignore transforms.
+    //
+    // FIXME: It would also be nice to not have to call localToContainerQuad again since we have already done
+    // a similar call to move from the containing block to the scrolling ancestor above, but
+    // localToContainerQuad takes care of a lot of complex situations involving inlines, tables, and
+    // transformations.
+    if (auto *parentBox = DynamicDowncast<RenderBox>(*Parent()))
+    {
+      parentBox->FlipForWritingMode(stickyBoxRect);
+    }
+    auto stickyBoxRelativeToScrollingAncestor =
+      Parent()->LocalToContainerQuad(FloatRect(stickyBoxRect), &enclosingClippingBox, {}).BoundingBox();
+
+    if (enclosingClippingLayer)
+    {
+      stickyBoxRelativeToScrollingAncestor.Move(
+        -FloatSize(enclosingClippingBox.BorderLeft() + enclosingClippingBox.PaddingLeft(),
+                   enclosingClippingBox.BorderTop() + enclosingClippingBox.PaddingTop()));
+
+      if (&enclosingClippingBox != Parent())
+      {
+        if (auto *scrollableArea = enclosingClippingLayer->GetScrollableArea())
+        {
+          stickyBoxRelativeToScrollingAncestor.Move(FloatSize(ToIntSize(scrollableArea->GetScrollOffset())));
+        }
+      }
+    }
+    constraints.SetStickyBoxRect(stickyBoxRelativeToScrollingAncestor);
+
+    if (!Style().Left().IsAuto())
+    {
+      constraints.SetLeftOffset(style::Evaluate<float>(Style().Left(), constrainingRect.Width(), zoomFactor));
+      constraints.AddAnchorEdge(AnchorEdge::Left);
+    }
+
+    if (!Style().Right().IsAuto())
+    {
+      constraints.SetRightOffset(
+        style::Evaluate<float>(Style().Right(), constrainingRect.Width(), zoomFactor));
+      constraints.AddAnchorEdge(AnchorEdge::Right);
+    }
+
+    if (!Style().Top().IsAuto())
+    {
+      constraints.SetTopOffset(style::Evaluate<float>(Style().Top(), constrainingRect.Height(), zoomFactor));
+      constraints.AddAnchorEdge(AnchorEdge::Top);
+    }
+
+    if (!Style().Bottom().IsAuto())
+    {
+      constraints.SetBottomOffset(
+        style::Evaluate<float>(Style().Bottom(), constrainingRect.Height(), zoomFactor));
+      constraints.AddAnchorEdge(AnchorEdge::Bottom);
+    }
+
+    if (constraints.HasAnchorEdge(AnchorEdge::Right) && constraints.HasAnchorEdge(AnchorEdge::Left))
+    {
+      float availableSpace = constrainingRect.Width() - constraints.LeftOffset() - constraints.RightOffset();
+      if (constraints.StickyBoxRect().Width() > availableSpace)
+      {
+        float delta = constraints.StickyBoxRect().Width() - availableSpace;
+        if (Style().GetWritingMode().IsAnyLeftToRight())
+        {
+          constraints.SetRightOffset(constraints.RightOffset() - delta);
+        }
+        else
+        {
+          constraints.SetLeftOffset(constraints.LeftOffset() - delta);
+        }
+      }
+    }
+
+    if (constraints.HasAnchorEdge(AnchorEdge::Bottom) && constraints.HasAnchorEdge(AnchorEdge::Top))
+    {
+      float availableSpace = constrainingRect.Height() - constraints.TopOffset() - constraints.BottomOffset();
+      if (constraints.StickyBoxRect().Height() > availableSpace)
+      {
+        float delta = constraints.StickyBoxRect().Height() - availableSpace;
+        if (Style().GetWritingMode().IsAnyTopToBottom())
+        {
+          constraints.SetBottomOffset(constraints.BottomOffset() - delta);
+        }
+        else
+        {
+          constraints.SetTopOffset(constraints.TopOffset() - delta);
+        }
+      }
+    }
+  }
+
+  FloatRect RenderBoxModelObject::ConstrainingRectForStickyPosition() const noexcept
+  {
+    RenderLayer *enclosingClippingLayer =
+      HasLayer() ? Layer()->EnclosingOverflowClipLayer(ExcludeSelf) : nullptr;
+
+    if (enclosingClippingLayer)
+    {
+      auto &enclosingClippingBox = Downcast<RenderBox>(enclosingClippingLayer->Renderer());
+      LayoutRect clipRect = enclosingClippingBox.OverflowClipRect({});
+      clipRect.Contract(LayoutSize(enclosingClippingBox.PaddingLeft() + enclosingClippingBox.PaddingRight(),
+                                   enclosingClippingBox.PaddingTop() + enclosingClippingBox.PaddingBottom()));
+
+      FloatRect constrainingRect =
+        enclosingClippingBox.LocalToContainerQuad(FloatRect(clipRect), &View()).BoundingBox();
+
+      auto *scrollableArea = enclosingClippingLayer->GetScrollableArea();
+      FloatPoint scrollOffset;
+      if (scrollableArea)
+      {
+        scrollOffset = FloatPoint() + FloatSize(ToIntSize(scrollableArea->GetScrollOffset()));
+      }
+
+      float scrollbarOffset = 0;
+      if (scrollableArea && enclosingClippingBox.HasLayer()
+          && scrollableArea->ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        scrollbarOffset = static_cast<float>(
+          scrollableArea->VerticalScrollbarWidth(OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize,
+                                                 Style().GetWritingMode().IsHorizontal()));
+      }
+
+      constrainingRect.SetLocation(FloatPoint(scrollOffset.X() + scrollbarOffset, scrollOffset.Y()));
+      return constrainingRect;
+    }
+
+    return FloatRect(View().FrameView().RectForFixedPositionLayout());
+  }
+
+  LayoutSize RenderBoxModelObject::StickyPositionOffset() const noexcept
+  {
+    FloatRect constrainingRect = ConstrainingRectForStickyPosition();
+    StickyPositionViewportConstraints constraints;
+    ComputeStickyPositionConstraints(constraints, constrainingRect);
+
+    // The sticky offset is physical, so we can just return the delta computed in absolute coords (though it
+    // may be wrong with transforms).
+    return LayoutSize(constraints.ComputeStickyOffset(constrainingRect));
   }
 
   LayoutPoint
@@ -710,7 +942,10 @@ namespace krys::boo
         {
           referencePoint.Move(RelativePositionOffset());
         }
-        // FIXME: The sticky position offset, once there's scrolling.
+        else if (IsStickilyPositioned())
+        {
+          referencePoint.Move(StickyPositionOffset());
+        }
 
         auto *ancestor = Parent();
         while (ancestor != offsetParent)

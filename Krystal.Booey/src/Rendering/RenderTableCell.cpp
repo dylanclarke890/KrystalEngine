@@ -146,6 +146,17 @@ namespace krys::boo
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
   RenderTableCell::~RenderTableCell() noexcept = default;
 
+  LayoutRect RenderTableCell::FrameRectForStickyPositioning() const noexcept
+  {
+    // RenderTableCell has the RenderTableRow as the container, but is positioned relatively to the
+    // RenderTableSection. The sticky positioning algorithm assumes that elements are positioned relatively to
+    // their container, so we correct for that here.
+    krys_debug_assert(ParentBox());
+    auto returnValue = FrameRect();
+    returnValue.Move(-ParentBox()->LocationOffset());
+    return returnValue;
+  }
+
   RenderTableCell *RenderTableCell::NextCell() const noexcept
   {
     return Downcast<RenderTableCell>(NextSibling());

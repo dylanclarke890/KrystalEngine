@@ -250,6 +250,76 @@ namespace krys::boo::tests
     CHECK(fixture.PaintedScrolled().contains(u8"(rect at (0,210) size 30x30)"));
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sticky boxes stick to the view",
+                   "[Page][LocalFrameView][Scrolling][Sticky]")
+  {
+    // A sticky box 50 pixels into a 200 pixel section, which holds it in, above 400 more pixels.
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0}</style><section style=height:200px>"
+      u8"<div style=height:50px></div>"
+      u8"<div id=sticky style=position:sticky;top:10px;height:20px;background:red></div></section>"
+      u8"<div style=height:400px></div>"};
+    auto &sticky = fixture.ById(u8"sticky");
+    CHECK(sticky.GetBoundingClientRect()->Y() == 50);
+
+    // Scrolled past it, it sticks 10 pixels from the top, where it's painted and hit.
+    fixture.View().SetScrollPosition({0, 100});
+    CHECK(sticky.GetBoundingClientRect()->Y() == 10);
+    CHECK(sticky.OffsetTop() == 110);
+    CHECK(fixture.Document->ElementFromPoint(5, 15).get() == &sticky);
+    // (The view's vertical scrollbar takes 21 pixels of its width.)
+    CHECK(fixture.PaintedScrolled().contains(u8"(rect at (0,110) size 179x20)"));
+
+    // Its section holds it in: it scrolls away with the section's end.
+    fixture.View().SetScrollPosition({0, 300});
+    CHECK(sticky.GetBoundingClientRect()->Y() == -120);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: sticky boxes stick inside their scroller",
+                   "[Page][LocalFrameView][Scrolling][Sticky]")
+  {
+    ScrollFixture fixture {
+      u8"<!DOCTYPE html><style>body{margin:0} .s{width:150px;height:60px;overflow:auto;"
+      u8"margin-left:10px}</style>"
+      u8"<div id=scroller class=s style=margin-top:20px>"
+      u8"<div id=header style=position:sticky;top:0;height:10px></div><div style=height:200px></div>"
+      u8"<div id=footer style=position:sticky;bottom:5px;height:10px></div></div>"
+      u8"<div id=table-scroller class=s><table style=border-spacing:0><thead><tr>"
+      u8"<th id=cell style=position:sticky;top:0;height:10px;padding:0>H</th></tr></thead><tbody>"
+      u8"<tr><td style=height:200px>Body</td></tr></tbody></table></div>"
+      u8"<div id=wide class=s style=white-space:nowrap;height:30px>"
+      u8"<span style=display:inline-block;width:100px></span>"
+      u8"<span id=inline style=position:sticky;left:5px>x</span>"
+      u8"<span style=display:inline-block;width:300px></span></div>"};
+    auto &scroller = fixture.ById(u8"scroller");
+    auto &header = fixture.ById(u8"header");
+    auto &footer = fixture.ById(u8"footer");
+
+    // The footer, laid out below, sticks 5 pixels above the scroller's bottom until it's reached.
+    CHECK(header.GetBoundingClientRect()->Y() == 20);
+    CHECK(footer.GetBoundingClientRect()->Y() == 20 + 60 - 5 - 10);
+
+    scroller.SetScrollTop(80);
+    (void)fixture.Document->UpdateLayout();
+    CHECK(header.GetBoundingClientRect()->Y() == 20);
+    CHECK(footer.GetBoundingClientRect()->Y() == 20 + 60 - 5 - 10);
+
+    // A table header cell sticks to the top of its scroller.
+    auto &tableScroller = fixture.ById(u8"table-scroller");
+    auto &cell = fixture.ById(u8"cell");
+    const double tableTop = tableScroller.GetBoundingClientRect()->Y();
+    tableScroller.SetScrollTop(50);
+    (void)fixture.Document->UpdateLayout();
+    CHECK(cell.GetBoundingClientRect()->Y() == tableTop);
+
+    // An inline box sticks 5 pixels from the left of a box scrolled sideways.
+    auto &wide = fixture.ById(u8"wide");
+    auto &inl = fixture.ById(u8"inline");
+    wide.SetScrollLeft(150);
+    (void)fixture.Document->UpdateLayout();
+    CHECK(inl.GetBoundingClientRect()->X() == 10 + 5);
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: painting is scrolled",
                    "[Page][LocalFrameView][Scrolling]")
   {

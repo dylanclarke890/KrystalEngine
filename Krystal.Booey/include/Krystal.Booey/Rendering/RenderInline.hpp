@@ -63,6 +63,10 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
+    {
+      return LayoutRect(LinesBoundingBox());
+    }
     /// @brief The bounding box of the inline's line boxes with their ink overflow.
     KRYS_NODISCARD LayoutRect LinesVisualOverflowBoundingBox() const noexcept;
     /// @brief Adds the rects of the inline's line boxes, moved by @p additionalOffset, skipping empty ones.

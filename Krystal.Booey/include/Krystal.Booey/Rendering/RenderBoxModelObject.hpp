@@ -15,13 +15,16 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo
 {
   class GraphicsContext;
   class Image;
   class RenderBlock;
+  class RenderBox;
   class RenderTextFragment;
+  class StickyPositionViewportConstraints;
   class StyleImage;
 
   enum class LineDirection : bool
@@ -52,7 +55,7 @@ namespace krys::boo
   };
 
   /// @brief A renderer that follows the CSS box model: a box or an inline box.
-  // FIXME: Continuations and sticky positioning come with inline painting and scrolling.
+  // FIXME: Continuations come with inline painting.
   class RenderBoxModelObject : public RenderLayerModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBoxModelObject);
@@ -75,8 +78,16 @@ namespace krys::boo
     void ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &dirtyRect = null) noexcept;
     KRYS_NODISCARD bool HasAcceleratedCompositing() const noexcept;
     KRYS_NODISCARD bool HasRunningAcceleratedAnimations() const noexcept;
-    // FIXME: Sticky positioning (constrainingRectForStickyPosition, enclosingClippingBoxForStickyPosition,
-    // computeStickyPositionConstraints, stickyPositionOffset), once there's scrolling.
+    /// @brief The rect a sticky box stays in: its scroller's scrolled clip rect, or the view's.
+    KRYS_NODISCARD FloatRect ConstrainingRectForStickyPosition() const noexcept;
+    /// @brief The box a sticky box scrolls with (its nearest overflow clip, or the view) and that box's
+    /// layer, if it's a clip.
+    KRYS_NODISCARD Pair<const RenderBox &, const RenderLayer *>
+      EnclosingClippingBoxForStickyPosition() const noexcept;
+    void ComputeStickyPositionConstraints(StickyPositionViewportConstraints &constraints,
+                                          const FloatRect &constrainingRect) const noexcept;
+    /// @brief How far a sticky box moves from where it's laid out to stay in view.
+    KRYS_NODISCARD LayoutSize StickyPositionOffset() const noexcept;
     KRYS_NODISCARD LayoutSize OffsetForInFlowPosition() const noexcept;
 
     void MapAbsoluteToLocalPoint(EnumSet<MapCoordinatesMode> mode,
@@ -88,6 +99,8 @@ namespace krys::boo
     KRYS_NODISCARD virtual LayoutUnit OffsetHeight() const noexcept = 0;
 
     KRYS_NODISCARD virtual LayoutRect BorderBoundingBox() const noexcept = 0;
+    /// @brief The rect sticky positioning moves, relative to the container.
+    KRYS_NODISCARD virtual LayoutRect FrameRectForStickyPositioning() const noexcept = 0;
 
     // Used to resolve the CSS padding values, which can be percentages of the containing block's width.
     KRYS_NODISCARD LayoutUnit ComputedCSSPaddingTop() const noexcept;

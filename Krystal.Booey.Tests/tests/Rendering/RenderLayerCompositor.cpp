@@ -398,6 +398,34 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE("RenderLayerCompositor: sticky boxes in a box that scrolls on layers composite",
+            "[Rendering][RenderLayerCompositor][Sticky]")
+  {
+    CompositingFixture fixture(
+      u8"<div id=scroller style='width:100px;height:50px;overflow:auto'>"
+      u8"<div id=header style='position:sticky;top:0;height:10px;background:green'></div>"
+      u8"<div style=height:200px></div></div>"
+      u8"<div id=page-header style='position:sticky;top:0;height:10px;background:blue'></div>"
+      u8"<div style=height:400px></div>");
+    auto &header = fixture.LayerOf(u8"header");
+    REQUIRE(header.IsComposited());
+    CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionSticky));
+    REQUIRE(header.Backing()->ViewportAnchorLayer());
+
+    // Stuck to the view, with no scrolling coordinator: it repaints as the view scrolls instead.
+    CHECK_FALSE(fixture.Compositor()
+                  .ReasonsForCompositing(fixture.LayerOf(u8"page-header"))
+                  .Contains(CompositingReason::PositionSticky));
+
+    // Scrolling the box keeps the header at its top, without repainting it.
+    auto &graphicsLayer = static_cast<CompositingTestLayer &>(*header.Backing()->GetGraphicsLayer());
+    graphicsLayer.NeedsDisplayRects.clear();
+    fixture.ById(u8"scroller").SetScrollTop(40);
+    fixture.TestPage->UpdateRendering();
+    CHECK(header.Backing()->ViewportAnchorLayer()->Position().Y() == 40);
+    CHECK(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
   TEST_CASE("RenderLayerCompositor: repaints go to the composited layer's backing",
             "[Rendering][RenderLayerCompositor]")
   {

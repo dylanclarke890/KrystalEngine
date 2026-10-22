@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/LayerOverlapMap.hpp"
@@ -2351,8 +2352,18 @@ namespace krys::boo
     }
 
     const RenderLayerModelObject &renderer = layer.Renderer();
-    // FIXME: Sticky positioning (the union of all the possible sticky positions), once there's sticky
-    // positioning.
+    if (renderer.IsStickilyPositioned())
+    {
+      // Use rectangle that represents union of all possible sticky element positions, because it could be
+      // moved around without re-computing overlap.
+      const auto &box = Downcast<RenderBoxModelObject>(renderer);
+      StickyPositionViewportConstraints constraints;
+      auto constrainingRectForStickyPosition = box.ConstrainingRectForStickyPosition();
+      box.ComputeStickyPositionConstraints(constraints, constrainingRectForStickyPosition);
+      extent.Bounds = LayoutRect(constraints.ComputeStickyExtent());
+      extent.ExtentComputed = true;
+      return;
+    }
 
     LayoutRect layerBounds;
     if (extent.HasTransformAnimation)
@@ -3674,10 +3685,34 @@ namespace krys::boo
     return false;
   }
 
-  bool RenderLayerCompositor::IsAsyncScrollableStickyLayer(const RenderLayer &,
-                                                           const RenderLayer **) const noexcept
+  bool RenderLayerCompositor::IsAsyncScrollableStickyLayer(
+    const RenderLayer &layer, const RenderLayer **enclosingAcceleratedOverflowLayer) const noexcept
   {
-    // FIXME: Sticky positioning, once there's sticky positioning.
+    krys_debug_assert(layer.Renderer().IsStickilyPositioned());
+
+    auto *enclosingOverflowLayer = layer.EnclosingOverflowClipLayer(ExcludeSelf);
+
+    if (enclosingOverflowLayer && enclosingOverflowLayer->HasCompositedScrollableOverflow())
+    {
+      if (enclosingAcceleratedOverflowLayer)
+      {
+        *enclosingAcceleratedOverflowLayer = enclosingOverflowLayer;
+      }
+      return true;
+    }
+
+    // If the layer is inside normal overflow, it's not async-scrollable.
+    if (enclosingOverflowLayer)
+    {
+      return false;
+    }
+
+    // No overflow ancestor, so see if the frame supports async scrolling.
+    if (HasCoordinatedScrolling())
+    {
+      return true;
+    }
+
     return false;
   }
 
@@ -3685,7 +3720,18 @@ namespace krys::boo
     RenderLayerCompositor::GetViewportConstrainedSublayers(const RenderLayer &layer,
                                                            const RenderLayer *) const noexcept
   {
-    // FIXME: Sticky positioning, view transitions and content inset background fill, once there are any.
+    // FIXME: View transitions and content inset background fill, once there are any.
+    if (layer.Renderer().IsStickilyPositioned())
+    {
+      const RenderLayer *overflowLayer = nullptr;
+      if (!IsAsyncScrollableStickyLayer(layer, &overflowLayer))
+      {
+        return ViewportConstrainedSublayers::None;
+      }
+
+      return ViewportConstrainedSublayers::Anchor;
+    }
+
     if (!(layer.Renderer().IsFixedPositioned() && layer.BehavesAsFixed()))
     {
       return ViewportConstrainedSublayers::None;

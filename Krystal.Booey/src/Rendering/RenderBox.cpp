@@ -896,8 +896,12 @@ namespace krys::boo
 
     auto containerOffset = OffsetFromContainer(*container, LayoutPoint(transformState.MappedPoint()));
 
-    // FIXME: Remove the sticky position offset when sticky offsets are ignored (IgnoreStickyOffsets), once
-    // there's sticky positioning.
+    // Remove sticky positioning from the offset if it should be ignored. This is done here in order to avoid
+    // piping this flag down the method chain.
+    if (mode.Contains(MapCoordinatesMode::IgnoreStickyOffsets) && IsStickilyPositioned())
+    {
+      containerOffset -= StickyPositionOffset();
+    }
 
     PushOntoTransformState(transformState, mode, ancestorContainer, container, containerOffset,
                            containerSkipped);
@@ -5405,11 +5409,6 @@ namespace krys::boo
   }
 
 #pragma endregion
-
-  const RenderBox &RenderBox::EnclosingClippingBoxForStickyPosition() const noexcept
-  {
-    krys_unreachable();
-  }
 
   LayoutRange RenderBox::ContainingBlockRangeForPositioned(const RenderBoxModelObject &container,
                                                            BoxAxis physicalAxis) const noexcept

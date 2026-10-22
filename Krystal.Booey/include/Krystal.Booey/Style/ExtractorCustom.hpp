@@ -174,7 +174,7 @@ namespace krys::boo::style
         LayoutUnit containingBlockSize;
         if (box->IsStickilyPositioned())
         {
-          auto &enclosingClippingBox = box->EnclosingClippingBoxForStickyPosition();
+          auto &enclosingClippingBox = box->EnclosingClippingBoxForStickyPosition().first;
           if (isVerticalProperty == enclosingClippingBox.IsHorizontalWritingMode())
           {
             containingBlockSize = enclosingClippingBox.ContentBoxLogicalHeight();

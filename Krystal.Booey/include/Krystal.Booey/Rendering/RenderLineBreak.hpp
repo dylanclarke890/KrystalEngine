@@ -108,6 +108,12 @@ namespace krys::boo
     {
       return LayoutRect(LayoutPoint(), LinesBoundingBox().Size());
     }
+    /// @brief Line breaks aren't sticky.
+    KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
+    {
+      krys_debug_assert(false);
+      return {};
+    }
 
     KRYS_NODISCARD bool CanHaveChildren() const noexcept final
     {

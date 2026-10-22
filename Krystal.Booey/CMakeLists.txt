@@ -943,6 +943,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/LocalFrameView.hpp
   include/Krystal.Booey/Page/ScrollBehavior.hpp
   include/Krystal.Booey/Page/ScrollOptions.hpp
+  include/Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp
   include/Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp
   include/Krystal.Booey/Rendering/Pagination.hpp
 
@@ -2522,6 +2523,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/LocalFrame.cpp
   src/Page/LocalFrameView.cpp
   src/Page/ScrollBehavior.cpp
+  src/Page/Scrolling/ScrollingConstraints.cpp
   src/Page/LocalFrameViewLayoutContext.cpp
 
   # Platform text (t1)

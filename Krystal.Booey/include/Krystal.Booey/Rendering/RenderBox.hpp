@@ -831,9 +831,10 @@ namespace krys::boo
       return true;
     }
 
-    /// @brief Collapses `enclosingClippingBoxForStickyPosition().first`.
-    // FIXME: Sticky positioning, once there's scrolling.
-    KRYS_NODISCARD const RenderBox &EnclosingClippingBoxForStickyPosition() const noexcept;
+    KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept override
+    {
+      return FrameRect();
+    }
     KRYS_NODISCARD LayoutRange ContainingBlockRangeForPositioned(const RenderBoxModelObject &container,
                                                                  BoxAxis physicalAxis) const noexcept;
 
