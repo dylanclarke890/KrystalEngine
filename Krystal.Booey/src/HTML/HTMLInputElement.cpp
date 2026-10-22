@@ -12,6 +12,20 @@ namespace krys::boo::html
 
 #pragma region HTMLInputElement
 
+  bool HTMLInputElement::CanStartSelection() const noexcept
+  {
+    // Only text fields: missing and unknown types are text.
+    auto type = text::ToASCIILower(dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())));
+    static constexpr dom::DOMStringView nonTextFieldTypes[] = {
+      u8"hidden",   u8"date",  u8"month", u8"week",   u8"time",  u8"datetime-local", u8"range", u8"color",
+      u8"checkbox", u8"radio", u8"file",  u8"submit", u8"image", u8"reset",          u8"button"};
+    if (std::ranges::find(nonTextFieldTypes, dom::DOMStringView(type)) != std::end(nonTextFieldTypes))
+    {
+      return false;
+    }
+    return HTMLElement::CanStartSelection();
+  }
+
   dom::DOMString HTMLInputElement::Accept() const noexcept
   {
     return Reflection::Reflect<dom::DOMString>(*this, u8"accept").value_or(u8"");

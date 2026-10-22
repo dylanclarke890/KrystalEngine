@@ -11,6 +11,13 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLInputElement);
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+    /// @brief Only text fields can start a selection.
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final;
+
     HTMLInputElement(dom::Document &document) noexcept;
 
 #pragma region HTMLInputElement - https://html.spec.whatwg.org/#htmlinputelement

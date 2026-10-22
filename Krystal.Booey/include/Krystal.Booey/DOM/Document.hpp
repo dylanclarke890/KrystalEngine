@@ -232,6 +232,11 @@ namespace krys::boo::dom
     Document(DocumentFlags flags) noexcept;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return true;
+    }
+
     ~Document() noexcept override;
 
     void IncrementReferencingNodeCount() noexcept

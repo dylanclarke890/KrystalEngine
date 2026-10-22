@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -181,5 +182,61 @@ namespace krys::boo::inline_iterator
     }
     return std::min(lineBox.ContentLogicalBottom(),
                     lineBox.ContentLogicalBottomAdjustedForFollowingLineBox());
+  }
+
+  LeafBoxIterator ClosestBoxForHorizontalPosition(const LineBox &lineBox, float horizontalPosition,
+                                                  bool editableOnly) noexcept
+  {
+    auto isEditable = [&](const LeafBoxIterator &box)
+    {
+      return box && box->Renderer().GetNode() && box->Renderer().GetNode()->HasEditableStyle();
+    };
+
+    auto firstBox = lineBox.LogicalLeftmostLeafBox();
+    auto lastBox = lineBox.LogicalRightmostLeafBox();
+
+    if (firstBox != lastBox)
+    {
+      if (firstBox->IsLineBreak())
+      {
+        firstBox = firstBox->NextLogicalRightwardOnLineIgnoringLineBreak();
+      }
+      else if (lastBox->IsLineBreak())
+      {
+        lastBox = lastBox->NextLogicalLeftwardOnLineIgnoringLineBreak();
+      }
+    }
+
+    if (firstBox == lastBox && (!editableOnly || isEditable(firstBox)))
+    {
+      return firstBox;
+    }
+
+    if (firstBox && horizontalPosition <= firstBox->LogicalLeft()
+        && !firstBox->Renderer().IsRenderListMarker() && (!editableOnly || isEditable(firstBox)))
+    {
+      return firstBox;
+    }
+
+    if (lastBox && horizontalPosition >= lastBox->LogicalRight() && !lastBox->Renderer().IsRenderListMarker()
+        && (!editableOnly || isEditable(lastBox)))
+    {
+      return lastBox;
+    }
+
+    auto closestBox = lastBox;
+    for (auto box = firstBox; box; box = box.TraverseLogicalRightwardOnLineIgnoringLineBreak())
+    {
+      if (!box->Renderer().IsRenderListMarker() && (!editableOnly || isEditable(box)))
+      {
+        if (horizontalPosition < box->LogicalRight())
+        {
+          return box;
+        }
+        closestBox = box;
+      }
+    }
+
+    return closestBox;
   }
 }

@@ -11,6 +11,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLObjectElement);
 
   public:
+    // FIXME: An object element using its fallback content is treated like a generic HTML element (it can
+    // contain range end points), once there's fallback content.
+
     HTMLObjectElement(dom::Document &document) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override

@@ -46,6 +46,11 @@ namespace krys::boo::dom
     Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return true;
+    }
+
 #pragma region Text - https://dom.spec.whatwg.org/#text
 
     /// @see https://dom.spec.whatwg.org/#dom-text-text

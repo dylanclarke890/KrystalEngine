@@ -2,17 +2,23 @@
 #include "Krystal.Booey/Core/Hyphenation.hpp"
 #include "Krystal.Booey/Core/TextBreakIterator.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/TextRun.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BreakablePositions.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -764,6 +770,406 @@ namespace krys::boo
     overflowRect.Move(View().FrameView().LayoutContext().LayoutDelta());
 
     return RepaintRects {overflowRect};
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD uint32 OffsetForPositionInRun(const inline_iterator::TextBox &textBox, float x) noexcept
+    {
+      if (textBox.IsLineBreak())
+      {
+        return 0;
+      }
+
+      auto runPosition = x - textBox.LogicalLeftIgnoringInlineDirection();
+      if (runPosition > textBox.LogicalWidth())
+      {
+        return textBox.IsInlineFlipped() ? 0 : textBox.Length();
+      }
+      if (runPosition < 0)
+      {
+        return textBox.IsInlineFlipped() ? textBox.Length() : 0;
+      }
+
+      if (!textBox.GetWritingMode().IsLogicalLeftLineLeft())
+      {
+        runPosition = textBox.LogicalWidth() - runPosition;
+      }
+      return static_cast<uint32>(textBox.GetFontCascade().OffsetForPosition(
+        textBox.GetTextRun(inline_iterator::TextRunMode::Editing), runPosition, true));
+    }
+
+    enum class ShouldAffinityBeDownstream : uint8
+    {
+      AlwaysDownstream,
+      AlwaysUpstream,
+      UpstreamIfPositionIsNotAtStart
+    };
+
+    KRYS_NODISCARD bool
+      LineDirectionPointFitsInBox(int32 pointLineDirection, const inline_iterator::TextBoxIterator &textRun,
+                                  ShouldAffinityBeDownstream &shouldAffinityBeDownstream) noexcept
+    {
+      shouldAffinityBeDownstream = ShouldAffinityBeDownstream::AlwaysDownstream;
+
+      // the x coordinate is equal to the left edge of this box
+      // the affinity must be downstream so the position doesn't jump back to the previous line
+      // except when box is the first box in the line
+      if (pointLineDirection <= textRun->LogicalLeft())
+      {
+        shouldAffinityBeDownstream = !textRun->NextLogicalLeftwardOnLine()
+                                       ? ShouldAffinityBeDownstream::UpstreamIfPositionIsNotAtStart
+                                       : ShouldAffinityBeDownstream::AlwaysDownstream;
+        return true;
+      }
+
+      // and the x coordinate is to the left of the right edge of this box
+      // check to see if position goes in this box
+      if (pointLineDirection < textRun->LogicalRight())
+      {
+        shouldAffinityBeDownstream = ShouldAffinityBeDownstream::UpstreamIfPositionIsNotAtStart;
+        return true;
+      }
+
+      // box is first on line
+      // and the x coordinate is to the left of the first text box left edge
+      if (!textRun->NextLogicalLeftwardOnLineIgnoringLineBreak()
+          && pointLineDirection < textRun->LogicalLeft())
+      {
+        return true;
+      }
+
+      if (!textRun->NextLogicalRightwardOnLineIgnoringLineBreak())
+      {
+        // box is last on line
+        // and the x coordinate is to the right of the last text box right edge
+        // generate VisiblePosition, use Affinity::Upstream affinity if possible
+        shouldAffinityBeDownstream = ShouldAffinityBeDownstream::UpstreamIfPositionIsNotAtStart;
+        return true;
+      }
+
+      return false;
+    }
+
+    KRYS_NODISCARD dom::PositionWithAffinity
+      CreatePositionWithAffinityForBox(const inline_iterator::BoxIterator &run, uint32 offset,
+                                       ShouldAffinityBeDownstream shouldAffinityBeDownstream) noexcept
+    {
+      auto affinity = VisiblePosition::DefaultAffinity;
+      switch (shouldAffinityBeDownstream)
+      {
+        case ShouldAffinityBeDownstream::AlwaysDownstream: affinity = Affinity::Downstream; break;
+        case ShouldAffinityBeDownstream::AlwaysUpstream:   affinity = Affinity::Upstream; break;
+        case ShouldAffinityBeDownstream::UpstreamIfPositionIsNotAtStart:
+          affinity = offset > run->MinimumCaretOffset() ? Affinity::Upstream : Affinity::Downstream;
+          break;
+      }
+      return run->Renderer().CreatePositionWithAffinity(static_cast<int32>(offset), affinity);
+    }
+
+    KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinityAfterAdjustingOffsetForBiDi(
+      const inline_iterator::TextBoxIterator &run, uint32 offset,
+      ShouldAffinityBeDownstream shouldAffinityBeDownstream) noexcept
+    {
+      if (offset && offset < run->Length())
+      {
+        return CreatePositionWithAffinityForBox(run, run->Start() + offset, shouldAffinityBeDownstream);
+      }
+
+      bool positionIsAtStartOfBox = !offset;
+      if (positionIsAtStartOfBox == run->IsLeftToRightDirection())
+      {
+        // offset is on the left edge
+
+        auto previousRun = run->NextLineLeftwardOnLineIgnoringLineBreak();
+        if ((previousRun && previousRun->BidiLevel() == run->BidiLevel())
+            || run->Renderer().ContainingBlock()->GetWritingMode().BidiDirection()
+                 == run->Direction()) // FIXME: left on 12CBA
+        {
+          return CreatePositionWithAffinityForBox(run, run->LeftmostCaretOffset(),
+                                                  shouldAffinityBeDownstream);
+        }
+
+        if (previousRun && previousRun->BidiLevel() > run->BidiLevel())
+        {
+          // e.g. left of B in aDC12BAb
+          auto leftmostRun = previousRun;
+          for (; previousRun; previousRun.TraverseLineLeftwardOnLineIgnoringLineBreak())
+          {
+            if (previousRun->BidiLevel() <= run->BidiLevel())
+            {
+              break;
+            }
+            leftmostRun = previousRun;
+          }
+          return CreatePositionWithAffinityForBox(leftmostRun, leftmostRun->RightmostCaretOffset(),
+                                                  shouldAffinityBeDownstream);
+        }
+
+        if (!previousRun || previousRun->BidiLevel() < run->BidiLevel())
+        {
+          // e.g. left of D in aDC12BAb
+          inline_iterator::LeafBoxIterator rightmostRun = run;
+          for (auto nextRun = run->NextLineRightwardOnLineIgnoringLineBreak(); nextRun;
+               nextRun.TraverseLineRightwardOnLineIgnoringLineBreak())
+          {
+            if (nextRun->BidiLevel() < run->BidiLevel())
+            {
+              break;
+            }
+            rightmostRun = nextRun;
+          }
+          return CreatePositionWithAffinityForBox(rightmostRun,
+                                                  run->IsLeftToRightDirection()
+                                                    ? rightmostRun->MaximumCaretOffset()
+                                                    : rightmostRun->MinimumCaretOffset(),
+                                                  shouldAffinityBeDownstream);
+        }
+
+        return CreatePositionWithAffinityForBox(run, run->RightmostCaretOffset(), shouldAffinityBeDownstream);
+      }
+
+      auto nextRun = run->NextLineRightwardOnLineIgnoringLineBreak();
+      if ((nextRun && nextRun->BidiLevel() == run->BidiLevel())
+          || run->Renderer().ContainingBlock()->GetWritingMode().BidiDirection() == run->Direction())
+      {
+        return CreatePositionWithAffinityForBox(run, run->RightmostCaretOffset(), shouldAffinityBeDownstream);
+      }
+
+      // offset is on the right edge
+      if (nextRun && nextRun->BidiLevel() > run->BidiLevel())
+      {
+        // e.g. right of C in aDC12BAb
+        auto rightmostRun = nextRun;
+        for (; nextRun; nextRun.TraverseLineRightwardOnLineIgnoringLineBreak())
+        {
+          if (nextRun->BidiLevel() <= run->BidiLevel())
+          {
+            break;
+          }
+          rightmostRun = nextRun;
+        }
+
+        return CreatePositionWithAffinityForBox(rightmostRun, rightmostRun->LeftmostCaretOffset(),
+                                                shouldAffinityBeDownstream);
+      }
+
+      if (!nextRun || nextRun->BidiLevel() < run->BidiLevel())
+      {
+        // e.g. right of A in aDC12BAb
+        inline_iterator::LeafBoxIterator leftmostRun = run;
+        for (auto previousRun = run->NextLineLeftwardOnLineIgnoringLineBreak(); previousRun;
+             previousRun.TraverseLineLeftwardOnLineIgnoringLineBreak())
+        {
+          if (previousRun->BidiLevel() < run->BidiLevel())
+          {
+            break;
+          }
+          leftmostRun = previousRun;
+        }
+
+        return CreatePositionWithAffinityForBox(leftmostRun,
+                                                run->IsLeftToRightDirection()
+                                                  ? leftmostRun->MinimumCaretOffset()
+                                                  : leftmostRun->MaximumCaretOffset(),
+                                                shouldAffinityBeDownstream);
+      }
+
+      return CreatePositionWithAffinityForBox(run, run->LeftmostCaretOffset(), shouldAffinityBeDownstream);
+    }
+  }
+
+  dom::PositionWithAffinity RenderText::PositionForPoint(const LayoutPoint &point, HitTestSource) noexcept
+  {
+    auto firstRun = inline_iterator::LineLeftmostTextBoxFor(*this);
+
+    if (!firstRun || !Text().length())
+    {
+      return CreatePositionWithAffinity(0, Affinity::Downstream);
+    }
+
+    auto logicalPoint =
+      firstRun->IsHorizontal() ? LayoutPoint {point.X(), point.Y()} : LayoutPoint {point.Y(), point.X()};
+    bool blocksAreFlipped = GetWritingMode().IsBlockFlipped();
+
+    inline_iterator::TextBoxIterator lastRun;
+    for (auto run = firstRun; run; run.TraverseNextTextBox())
+    {
+      if (run->IsLineBreak() && !run->NextLineLeftwardOnLine() && run->NextLineRightwardOnLine()
+          && !run->NextLineRightwardOnLine()->IsLineBreak())
+      {
+        run.TraverseNextTextBox();
+      }
+
+      auto lineBox = run->GetLineBox();
+      auto top =
+        LayoutUnit {std::min(inline_iterator::PreviousLineBoxContentBottomOrBorderAndPadding(*lineBox),
+                             lineBox->ContentLogicalTop())};
+      if (logicalPoint.Y() > top || (!blocksAreFlipped && logicalPoint.Y() == top))
+      {
+        auto bottom = LayoutUnit {LineSelection::LogicalBottom(*lineBox)};
+        if (auto nextLineBox = lineBox->Next())
+        {
+          bottom = std::min(bottom, LayoutUnit {nextLineBox->ContentLogicalTop()});
+        }
+
+        if (logicalPoint.Y() < bottom || (blocksAreFlipped && logicalPoint.Y() == bottom))
+        {
+          ShouldAffinityBeDownstream shouldAffinityBeDownstream;
+          if (LineDirectionPointFitsInBox(logicalPoint.X().ToInt(), run, shouldAffinityBeDownstream))
+          {
+            return CreatePositionWithAffinityAfterAdjustingOffsetForBiDi(
+              run, OffsetForPositionInRun(*run, logicalPoint.X()), shouldAffinityBeDownstream);
+          }
+        }
+      }
+      lastRun = run;
+    }
+
+    if (lastRun)
+    {
+      ShouldAffinityBeDownstream shouldAffinityBeDownstream;
+      (void)LineDirectionPointFitsInBox(logicalPoint.X().ToInt(), lastRun, shouldAffinityBeDownstream);
+      return CreatePositionWithAffinityAfterAdjustingOffsetForBiDi(
+        lastRun, OffsetForPositionInRun(*lastRun, logicalPoint.X()) + lastRun->Start(),
+        shouldAffinityBeDownstream);
+    }
+    return CreatePositionWithAffinity(0, Affinity::Downstream);
+  }
+
+  int32 RenderText::CaretMinOffset() const noexcept
+  {
+    auto first = inline_iterator::LineLeftmostTextBoxFor(*this);
+    if (!first)
+    {
+      return 0;
+    }
+
+    int32 minOffset = static_cast<int32>(first->Start());
+    for (auto box = first; box.TraverseNextTextBox();)
+    {
+      minOffset = std::min<int32>(minOffset, static_cast<int32>(box->Start()));
+    }
+
+    return minOffset;
+  }
+
+  int32 RenderText::CaretMaxOffset() const noexcept
+  {
+    auto first = inline_iterator::LineLeftmostTextBoxFor(*this);
+    if (!first)
+    {
+      return static_cast<int32>(Text().length());
+    }
+
+    int32 maxOffset = static_cast<int32>(first->End());
+    for (auto box = first; box.TraverseNextTextBox();)
+    {
+      maxOffset = std::max<int32>(maxOffset, static_cast<int32>(box->End()));
+    }
+
+    return maxOffset;
+  }
+
+  uint32 RenderText::CountRenderedCharacterOffsetsUntil(uint32 offset) const noexcept
+  {
+    uint32 result = 0;
+    for (auto &run : inline_iterator::TextBoxesFor(*this))
+    {
+      auto start = run.Start();
+      auto length = run.Length();
+      if (offset < start)
+      {
+        return result;
+      }
+      if (offset <= start + length)
+      {
+        result += offset - start;
+        return result;
+      }
+      result += length;
+    }
+    return result;
+  }
+
+  namespace
+  {
+    enum class OffsetType : bool
+    {
+      Character,
+      Caret
+    };
+
+    KRYS_NODISCARD bool ContainsOffset(const RenderText &text, uint32 offset, OffsetType type) noexcept
+    {
+      for (auto [box, orderCache] = inline_iterator::FirstTextBoxInLogicalOrderFor(text); box;
+           box = inline_iterator::NextTextBoxInLogicalOrder(box, orderCache))
+      {
+        auto start = box->Start();
+        if (offset < start)
+        {
+          return false;
+        }
+        auto end = box->End();
+        if (offset >= start && offset <= end)
+        {
+          if (offset == end && (type == OffsetType::Character || box->IsLineBreak()))
+          {
+            continue;
+          }
+          if (type == OffsetType::Character)
+          {
+            return true;
+          }
+          // Return false for offsets inside composed characters.
+          return !offset
+                 || static_cast<int32>(offset)
+                      == text.NextOffset(text.PreviousOffset(static_cast<int32>(offset)));
+        }
+      }
+      return false;
+    }
+  }
+
+  bool RenderText::ContainsRenderedCharacterOffset(uint32 offset) const noexcept
+  {
+    return ContainsOffset(*this, offset, OffsetType::Character);
+  }
+
+  bool RenderText::ContainsCaretOffset(uint32 offset) const noexcept
+  {
+    return ContainsOffset(*this, offset, OffsetType::Caret);
+  }
+
+  int32 RenderText::PreviousOffset(int32 current) const noexcept
+  {
+    if (_containsOnlyASCII)
+    {
+      return current - 1;
+    }
+
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, StringAtom::Null());
+    auto preceding = iterator.Preceding(static_cast<uint32>(current));
+    return preceding ? static_cast<int32>(*preceding) : current - 1;
+  }
+
+  int32 RenderText::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
+  {
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::DeleteMode {}, StringAtom::Null());
+    auto preceding = iterator.Preceding(static_cast<uint32>(current));
+    return preceding ? static_cast<int32>(*preceding) : 0;
+  }
+
+  int32 RenderText::NextOffset(int32 current) const noexcept
+  {
+    if (_containsOnlyASCII)
+    {
+      return current + 1;
+    }
+
+    CachedTextBreakIterator iterator(_text, {}, TextBreakIterator::CaretMode {}, StringAtom::Null());
+    auto following = iterator.Following(static_cast<uint32>(current));
+    return following ? static_cast<int32>(*following) : current + 1;
   }
 
   IntRect RenderText::LinesBoundingBox() const noexcept

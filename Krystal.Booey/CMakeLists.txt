@@ -901,6 +901,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp
   include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp
   include/Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp
   include/Krystal.Booey/Rendering/RenderQuote.hpp
   include/Krystal.Booey/Rendering/RenderTextFragment.hpp
@@ -990,6 +992,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
   include/Krystal.Booey/Rendering/HitTestRequest.hpp
   include/Krystal.Booey/Rendering/HitTestSource.hpp
+  include/Krystal.Booey/Rendering/CaretRectComputation.hpp
   include/Krystal.Booey/DOM/Dicts/FocusEventInit.hpp
   include/Krystal.Booey/DOM/Dicts/UIEventInit.hpp
   include/Krystal.Booey/DOM/FocusEvent.hpp
@@ -2478,6 +2481,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Layout/Integration/Inline/InlineIteratorTextBox.cpp
   src/Layout/Integration/Inline/InlineIteratorInlineBox.cpp
   src/Layout/Integration/Inline/InlineIteratorLineBox.cpp
+  src/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.cpp
+  src/Rendering/CaretRectComputation.cpp
   src/Rendering/RenderQuote.cpp
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
@@ -2803,6 +2808,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Core/MathExtras.hpp
       include/Krystal.Booey/Core/NumberFormatting.hpp
       include/Krystal.Booey/Core/TextBreakIterator.hpp
+      include/Krystal.Booey/Core/TextBoundaries.hpp
       include/Krystal.Booey/Core/WritingMode.hpp
 
       # CSS
@@ -2831,6 +2837,21 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Algorithms/TreeQueries.hpp
       include/Krystal.Booey/DOM/Attr.hpp
       include/Krystal.Booey/DOM/BoundaryPoint.hpp
+      include/Krystal.Booey/DOM/Position.hpp
+      include/Krystal.Booey/DOM/PositionIterator.hpp
+      include/Krystal.Booey/DOM/SimpleRange.hpp
+      include/Krystal.Booey/Editing/CharacterRange.hpp
+      include/Krystal.Booey/Editing/Editing.hpp
+      include/Krystal.Booey/Editing/EditingBehavior.hpp
+      include/Krystal.Booey/Editing/EditingBoundary.hpp
+      include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
+      include/Krystal.Booey/Editing/RenderedPosition.hpp
+      include/Krystal.Booey/Editing/TextAffinity.hpp
+      include/Krystal.Booey/Editing/TextGranularity.hpp
+      include/Krystal.Booey/Editing/TextIterator.hpp
+      include/Krystal.Booey/Editing/TextIteratorBehavior.hpp
+      include/Krystal.Booey/Editing/VisiblePosition.hpp
+      include/Krystal.Booey/Editing/VisibleUnits.hpp
       include/Krystal.Booey/DOM/Callbacks/AbortAlgorithmCallback.hpp
       include/Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp
       include/Krystal.Booey/DOM/Callbacks/MutationCallback.hpp
@@ -3165,6 +3186,7 @@ target_sources(Krystal.Booey
     src/Core/LayoutUnit.cpp
     src/Core/NumberFormatting.cpp
     src/Core/TextBreakIterator.cpp
+    src/Core/TextBoundaries.cpp
 
     # CSS (see KRYSTAL_BOOEY_CSS_SOURCES)
     ${KRYSTAL_BOOEY_CSS_SOURCES}
@@ -3190,6 +3212,14 @@ target_sources(Krystal.Booey
     src/DOM/Algorithms/TreeQueries.cpp
     src/DOM/Attr.cpp
     src/DOM/BoundaryPoint.cpp
+    src/DOM/Position.cpp
+    src/DOM/PositionIterator.cpp
+    src/DOM/SimpleRange.cpp
+    src/Editing/Editing.cpp
+    src/Editing/RenderedPosition.cpp
+    src/Editing/TextIterator.cpp
+    src/Editing/VisiblePosition.cpp
+    src/Editing/VisibleUnits.cpp
     src/DOM/CDATASection.cpp
     src/DOM/CharacterData.cpp
     src/DOM/Comment.cpp

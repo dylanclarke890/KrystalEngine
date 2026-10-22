@@ -210,6 +210,11 @@ namespace krys::boo::html
     // HTMLElement includes GlobalEventHandlers;
     // HTMLElement includes ElementContentEditable;
 
+    /// @brief The editability of @p node from the `contenteditable` attributes of it and its ancestors, for
+    /// nodes in shadow trees (whose style isn't used for editability).
+    KRYS_NODISCARD static dom::Node::Editability
+      EditabilityFromContentEditableAttr(const dom::Node &node) noexcept;
+
   protected:
 #pragma region Presentational hints - https://html.spec.whatwg.org/#presentational-hints
 

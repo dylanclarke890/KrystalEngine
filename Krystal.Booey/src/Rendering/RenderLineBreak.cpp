@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
@@ -19,6 +21,11 @@ namespace krys::boo
   void RenderLineBreak::UpdateFromStyle() noexcept
   {
     krys_assert(IsInline());
+  }
+
+  dom::PositionWithAffinity RenderLineBreak::PositionForPoint(const LayoutPoint &, HitTestSource) noexcept
+  {
+    return CreatePositionWithAffinity(0, Affinity::Downstream);
   }
 
   IntRect RenderLineBreak::LinesBoundingBox() const noexcept

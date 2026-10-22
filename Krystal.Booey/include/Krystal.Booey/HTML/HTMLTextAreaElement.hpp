@@ -10,6 +10,11 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+
     HTMLTextAreaElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/#htmltextareaelement

@@ -9,6 +9,12 @@ namespace krys::boo::html
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPlugInElement);
 
+  public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+
   protected:
     HTMLPlugInElement(dom::Document &document, HTMLElementInterface interface) noexcept;
 

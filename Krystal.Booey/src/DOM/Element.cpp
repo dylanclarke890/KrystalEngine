@@ -38,6 +38,7 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -768,6 +769,12 @@ namespace krys::boo::dom
     }
 
     // FIXME: Repaint elements with a used appearance, once there are renderers.
+  }
+
+  bool Element::CanContainRangeEndPoint() const noexcept
+  {
+    auto role = GetAttribute(u8"role");
+    return !role || !infra::StringAlgorithms::ASCIICaseInsensitiveMatch(DOMStringView(*role), u8"img");
   }
 
   namespace

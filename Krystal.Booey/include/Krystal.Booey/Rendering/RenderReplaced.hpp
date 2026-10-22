@@ -42,6 +42,9 @@ namespace krys::boo
 
     KRYS_NODISCARD virtual bool ShouldRespectZeroIntrinsicWidth() const noexcept;
 
+    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                              HitTestSource source) noexcept final;
+
     KRYS_NODISCARD LayoutRect ReplacedContentRect(const LayoutSize &intrinsicSize) const noexcept;
     KRYS_NODISCARD LayoutRect ReplacedContentRect() const noexcept
     {

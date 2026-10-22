@@ -10,6 +10,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSelectElement);
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final
+    {
+      return false;
+    }
+
     HTMLSelectElement(dom::Document &document) noexcept;
 
 #pragma region HTMLSelectElement - https://html.spec.whatwg.org/#htmlselectelement

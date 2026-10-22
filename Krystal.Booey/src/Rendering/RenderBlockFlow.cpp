@@ -1,11 +1,18 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/BlockStepSizing.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/LineClampUpdater.hpp"
@@ -4676,6 +4683,178 @@ namespace krys::boo
     }
 
     return false;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD dom::Position PositionForRun(const RenderBlockFlow &flow,
+                                                inline_iterator::LeafBoxIterator box, bool start) noexcept
+    {
+      if (!box)
+      {
+        return {};
+      }
+
+      if (!box->Renderer().NonPseudoNode())
+      {
+        return dom::MakeDeprecatedLegacyPosition(
+          ShareRefPtr<dom::Node>(flow.NonPseudoElement()),
+          static_cast<uint32>(start ? flow.CaretMinOffset() : flow.CaretMaxOffset()));
+      }
+
+      if (!box->IsText())
+      {
+        return dom::MakeDeprecatedLegacyPosition(
+          ShareRefPtr(box->Renderer().NonPseudoNode()),
+          static_cast<uint32>(start ? box->Renderer().CaretMinOffset() : box->Renderer().CaretMaxOffset()));
+      }
+
+      inline_iterator::TextBoxIterator textBox(*box);
+      return dom::MakeDeprecatedLegacyPosition(ShareRefPtr(textBox->Renderer().NonPseudoNode()),
+                                               start ? textBox->Start() : textBox->End());
+    }
+  }
+
+  dom::PositionWithAffinity
+    RenderBlockFlow::PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
+                                                        HitTestSource source) noexcept
+  {
+    krys_debug_assert(ChildrenInline());
+
+    auto firstLineBox = inline_iterator::FirstLineBoxFor(*this);
+
+    if (!firstLineBox)
+    {
+      return CreatePositionWithAffinity(0, Affinity::Downstream);
+    }
+
+    bool linesAreFlipped = GetWritingMode().IsLineInverted();
+    bool blocksAreFlipped = GetWritingMode().IsBlockFlipped();
+
+    // look for the closest line box in the root box which is at the passed-in y coordinate
+    inline_iterator::LeafBoxIterator closestBox;
+    inline_iterator::LineBoxIterator firstLineBoxWithChildren;
+    inline_iterator::LineBoxIterator lastLineBoxWithChildren;
+    for (auto lineBox = firstLineBox; lineBox; lineBox.TraverseNext())
+    {
+      if (!lineBox->LineLeftmostLeafBox())
+      {
+        continue;
+      }
+      if (!firstLineBoxWithChildren)
+      {
+        firstLineBoxWithChildren = lineBox;
+      }
+
+      if (!linesAreFlipped && lineBox->IsFirstAfterPageBreak()
+          && (pointInLogicalContents.Y() < lineBox->LogicalTop()
+              || (blocksAreFlipped && pointInLogicalContents.Y() == lineBox->LogicalTop())))
+      {
+        break;
+      }
+
+      lastLineBoxWithChildren = lineBox;
+
+      // check if this root line box is located at this y coordinate
+      auto selectionBottom = LineSelection::LogicalBottom(*lineBox);
+      if (pointInLogicalContents.Y() < selectionBottom
+          || (blocksAreFlipped && pointInLogicalContents.Y() == selectionBottom))
+      {
+        if (linesAreFlipped)
+        {
+          auto nextLineBoxWithChildren = lineBox->Next();
+          while (nextLineBoxWithChildren && !nextLineBoxWithChildren->LineLeftmostLeafBox())
+          {
+            nextLineBoxWithChildren.TraverseNext();
+          }
+
+          if (nextLineBoxWithChildren && nextLineBoxWithChildren->IsFirstAfterPageBreak()
+              && (pointInLogicalContents.Y() > nextLineBoxWithChildren->LogicalTop()
+                  || (!blocksAreFlipped
+                      && pointInLogicalContents.Y() == nextLineBoxWithChildren->LogicalTop())))
+          {
+            continue;
+          }
+        }
+        closestBox = inline_iterator::ClosestBoxForHorizontalPosition(*lineBox, pointInLogicalContents.X());
+        if (closestBox)
+        {
+          break;
+        }
+      }
+    }
+
+    bool moveCaretToBoundary = EditingBehavior(GetDocument().GetSettings().EditingBehaviorType)
+                                 .ShouldMoveCaretToHorizontalBoundaryWhenPastTopOrBottom();
+
+    if (!moveCaretToBoundary && !closestBox && lastLineBoxWithChildren)
+    {
+      // y coordinate is below last root line box, pretend we hit it
+      closestBox = inline_iterator::ClosestBoxForHorizontalPosition(*lastLineBoxWithChildren,
+                                                                    pointInLogicalContents.X());
+    }
+
+    if (closestBox)
+    {
+      if (moveCaretToBoundary)
+      {
+        auto firstLineWithChildrenTop = LayoutUnit {
+          std::min(inline_iterator::PreviousLineBoxContentBottomOrBorderAndPadding(*firstLineBoxWithChildren),
+                   firstLineBoxWithChildren->ContentLogicalTop())};
+        if (pointInLogicalContents.Y() < firstLineWithChildrenTop
+            || (blocksAreFlipped && pointInLogicalContents.Y() == firstLineWithChildrenTop))
+        {
+          auto box = firstLineBoxWithChildren->LineLeftmostLeafBox();
+          if (box->IsLineBreak())
+          {
+            if (auto next = box->NextLineRightwardOnLineIgnoringLineBreak())
+            {
+              box = next;
+            }
+          }
+          // y coordinate is above first root line box, so return the start of the first
+          return PositionForRun(*this, box, true);
+        }
+      }
+
+      // pass the box a top position that is inside it
+      auto point =
+        LayoutPoint {pointInLogicalContents.X(),
+                     LayoutUnit {inline_iterator::ContentStartInBlockDirection(*closestBox->GetLineBox())}};
+      if (!IsHorizontalWritingMode())
+      {
+        point = point.TransposedPoint();
+      }
+      if (closestBox->Renderer().IsBlockLevelReplacedOrAtomicInline())
+      {
+        return PositionForPointRespectingEditingBoundaries(
+          *this, const_cast<RenderBox &>(Downcast<RenderBox>(closestBox->Renderer())), point, source);
+      }
+      return const_cast<RenderObject &>(closestBox->Renderer()).PositionForPoint(point, source);
+    }
+
+    if (lastLineBoxWithChildren)
+    {
+      // We hit this case for Mac behavior when the Y coordinate is below the last box.
+      if (auto blockBox = lastLineBoxWithChildren->BlockLevelBox())
+      {
+        auto &childBlockRenderer = const_cast<RenderBox &>(Downcast<RenderBox>(blockBox->Renderer()));
+        return PositionForPointRespectingEditingBoundaries(*this, childBlockRenderer, pointInLogicalContents,
+                                                           source);
+      }
+      krys_debug_assert(moveCaretToBoundary);
+      inline_iterator::LineLogicalOrderCache orderCache;
+      if (auto logicallyLastBox =
+            inline_iterator::LastLeafOnLineInLogicalOrderWithNode(lastLineBoxWithChildren, orderCache))
+      {
+        return PositionForRun(*this, logicallyLastBox, false);
+      }
+    }
+
+    // Can't reach this. We have a root line box, but it has no kids.
+    // FIXME: This should ASSERT_NOT_REACHED(), but clicking on placeholder text
+    // seems to hit this code path.
+    return CreatePositionWithAffinity(0, Affinity::Downstream);
   }
 
   bool RenderBlockFlow::HitTestInlineChildren(const HitTestRequest &request, HitTestResult &result,

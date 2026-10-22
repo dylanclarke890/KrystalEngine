@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -18,6 +21,7 @@
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/GridLayoutFunctions.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
@@ -6257,6 +6261,130 @@ namespace krys::boo
     auto borderShape = BorderShape::ShapeForBorderRect(Style(), borderRect);
     // To handle non-round corners, BorderShape should do the hit-testing.
     return hitTestLocation.Intersects(borderShape.DeprecatedRoundedRect());
+  }
+
+  dom::PositionWithAffinity RenderBox::PositionForPoint(const LayoutPoint &point,
+                                                        HitTestSource source) noexcept
+  {
+    // no children...return this render object's element, if there is one, and offset 0
+    if (!FirstChild())
+    {
+      return CreatePositionWithAffinity(NonPseudoElement() ? FirstPositionInOrBeforeNode(NonPseudoElement())
+                                                           : dom::Position());
+    }
+
+    if (IsRenderTable() && NonPseudoElement())
+    {
+      LayoutUnit right = ContentBoxWidth() + HorizontalBorderAndPaddingExtent();
+      LayoutUnit bottom = ContentBoxHeight() + VerticalBorderAndPaddingExtent();
+
+      if (point.X() < 0 || point.X() > right || point.Y() < 0 || point.Y() > bottom)
+      {
+        if (point.X() <= right / 2)
+        {
+          return CreatePositionWithAffinity(FirstPositionInOrBeforeNode(NonPseudoElement()));
+        }
+        return CreatePositionWithAffinity(LastPositionInOrAfterNode(NonPseudoElement()));
+      }
+    }
+
+    // Pass off to the closest child.
+    LayoutUnit minDist = LayoutUnit::Max();
+    RenderBox *closestRenderer = nullptr;
+    LayoutPoint adjustedPoint = point;
+    if (IsRenderTableRow())
+    {
+      adjustedPoint.MoveBy(Location());
+    }
+
+    for (auto *renderer = FirstChildBox(); renderer; renderer = renderer->NextSiblingBox())
+    {
+      // FIXME: Fragmented flows' fragments (objectShouldFragmentInFlowFragment), once there are any.
+      if ((!renderer->FirstChild() && !renderer->IsInline() && !Is<RenderBlockFlow>(*renderer))
+          || (source == HitTestSource::Script ? renderer->Style().GetVisibility()
+                                              : renderer->Style().UsedVisibility())
+               != Visibility::Visible)
+      {
+        continue;
+      }
+
+      LayoutUnit top =
+        renderer->BorderTop() + renderer->PaddingTop() + (IsRenderTableRow() ? 0_lu : renderer->Y());
+      LayoutUnit bottom = top + renderer->ContentBoxHeight();
+      LayoutUnit left =
+        renderer->BorderLeft() + renderer->PaddingLeft() + (IsRenderTableRow() ? 0_lu : renderer->X());
+      LayoutUnit right = left + renderer->ContentBoxWidth();
+
+      if (point.X() <= right && point.X() >= left && point.Y() <= top && point.Y() >= bottom)
+      {
+        if (renderer->IsRenderTableRow())
+        {
+          return renderer->PositionForPoint(point + adjustedPoint - renderer->LocationOffset(), source);
+        }
+        return renderer->PositionForPoint(point - renderer->LocationOffset(), source);
+      }
+
+      // Find the distance from (x, y) to the box.  Split the space around the box into 8 pieces
+      // and use a different compare depending on which piece (x, y) is in.
+      LayoutPoint cmp;
+      if (point.X() > right)
+      {
+        if (point.Y() < top)
+        {
+          cmp = LayoutPoint(right, top);
+        }
+        else if (point.Y() > bottom)
+        {
+          cmp = LayoutPoint(right, bottom);
+        }
+        else
+        {
+          cmp = LayoutPoint(right, point.Y());
+        }
+      }
+      else if (point.X() < left)
+      {
+        if (point.Y() < top)
+        {
+          cmp = LayoutPoint(left, top);
+        }
+        else if (point.Y() > bottom)
+        {
+          cmp = LayoutPoint(left, bottom);
+        }
+        else
+        {
+          cmp = LayoutPoint(left, point.Y());
+        }
+      }
+      else
+      {
+        if (point.Y() < top)
+        {
+          cmp = LayoutPoint(point.X(), top);
+        }
+        else
+        {
+          cmp = LayoutPoint(point.X(), bottom);
+        }
+      }
+
+      LayoutSize difference = cmp - point;
+
+      LayoutUnit dist = difference.Width() * difference.Width() + difference.Height() * difference.Height();
+      if (dist < minDist)
+      {
+        closestRenderer = renderer;
+        minDist = dist;
+      }
+    }
+
+    if (closestRenderer)
+    {
+      return closestRenderer->PositionForPoint(adjustedPoint - closestRenderer->LocationOffset(), source);
+    }
+
+    return CreatePositionWithAffinity(FirstPositionInOrBeforeNode(NonPseudoElement()));
   }
 
   bool RenderBox::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,

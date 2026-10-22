@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"

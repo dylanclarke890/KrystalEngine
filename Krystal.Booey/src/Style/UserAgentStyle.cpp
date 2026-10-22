@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
 #include "Krystal.Booey/CSS/Rules/CounterStyleRule.hpp"
 #include "Krystal.Booey/CSS/Rules/KeyframesRule.hpp"

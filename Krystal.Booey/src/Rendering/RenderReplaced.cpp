@@ -1,6 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/RenderReplaced.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
@@ -447,6 +452,47 @@ namespace krys::boo
       intrinsicSize.SetHeight(
         std::clamp(LayoutUnit {intrinsicSize.Height()}, minLogicalHeight, maxLogicalHeight));
     }
+  }
+
+  dom::PositionWithAffinity RenderReplaced::PositionForPoint(const LayoutPoint &point,
+                                                             HitTestSource source) noexcept
+  {
+    auto [top, bottom] = [&]() -> std::pair<float, float>
+    {
+      if (auto run = inline_iterator::BoxFor(*this))
+      {
+        auto lineBox = run->GetLineBox();
+        auto lineContentTop =
+          LayoutUnit {std::min(inline_iterator::PreviousLineBoxContentBottomOrBorderAndPadding(*lineBox),
+                               lineBox->ContentLogicalTop())};
+        return std::make_pair(lineContentTop.ToFloat(), LineSelection::LogicalBottom(*lineBox));
+      }
+      return std::make_pair(LogicalTop().ToFloat(), LogicalBottom().ToFloat());
+    }();
+
+    LayoutUnit blockDirectionPosition = IsHorizontalWritingMode() ? point.Y() + Y() : point.X() + X();
+    LayoutUnit lineDirectionPosition = IsHorizontalWritingMode() ? point.X() + X() : point.Y() + Y();
+
+    if (blockDirectionPosition < top)
+    {
+      return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream); // coordinates are above
+    }
+
+    if (blockDirectionPosition >= bottom)
+    {
+      return CreatePositionWithAffinity(CaretMaxOffset(), Affinity::Downstream); // coordinates are below
+    }
+
+    if (GetElement())
+    {
+      if (lineDirectionPosition <= LogicalLeft() + (LogicalWidth() / 2))
+      {
+        return CreatePositionWithAffinity(0, Affinity::Downstream);
+      }
+      return CreatePositionWithAffinity(1, Affinity::Downstream);
+    }
+
+    return RenderBox::PositionForPoint(point, source);
   }
 
   LayoutRect RenderReplaced::ReplacedContentRect(const LayoutSize &intrinsicSize) const noexcept

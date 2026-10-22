@@ -10,6 +10,15 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLCanvasElement);
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final
+    {
+      return false;
+    }
+
     HTMLCanvasElement(dom::Document &document) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override

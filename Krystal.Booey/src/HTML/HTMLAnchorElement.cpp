@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
@@ -9,6 +10,15 @@ namespace krys::boo::html
   HTMLAnchorElement::HTMLAnchorElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Anchor)
   {
+  }
+
+  bool HTMLAnchorElement::CanStartSelection() const noexcept
+  {
+    if (!css::IsLink(*this))
+    {
+      return HTMLElement::CanStartSelection();
+    }
+    return HasEditableStyle();
   }
 
 #pragma region HTMLAnchorElement

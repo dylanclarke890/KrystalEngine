@@ -13,6 +13,11 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _htmlFor;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return false;
+    }
+
     HTMLOutputElement(dom::Document &document) noexcept;
 
 #pragma region HTMLOutputElement - https://html.spec.whatwg.org/#htmloutputelement

@@ -15,6 +15,11 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _sandbox;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return false;
+    }
+
     HTMLIFrameElement(dom::Document &document) noexcept;
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override

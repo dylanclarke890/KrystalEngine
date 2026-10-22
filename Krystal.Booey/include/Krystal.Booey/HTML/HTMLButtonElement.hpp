@@ -11,6 +11,11 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLButtonElement);
 
   public:
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final
+    {
+      return false;
+    }
+
     HTMLButtonElement(dom::Document &document) noexcept;
 
 #pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement

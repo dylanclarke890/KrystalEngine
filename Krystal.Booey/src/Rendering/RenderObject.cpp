@@ -1,17 +1,22 @@
 ﻿#include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -363,6 +368,156 @@ namespace krys::boo
   {
     return GetNode() && Is<dom::PseudoElement>(*GetNode());
   }
+
+  dom::Node *RenderObject::NonPseudoNode() const noexcept
+  {
+    return IsPseudoElement() ? nullptr : GetNode();
+  }
+
+  dom::Element *RenderObject::NonPseudoElement() const noexcept
+  {
+    return DynamicDowncast<dom::Element>(NonPseudoNode());
+  }
+
+  bool RenderObject::IsHR() const noexcept
+  {
+    auto *element = DynamicDowncast<html::HTMLElement>(GetNode());
+    return element && Is<html::HTMLHRElement>(*element);
+  }
+
+#pragma region Editing
+
+  dom::PositionWithAffinity RenderObject::PositionForPoint(const LayoutPoint &, HitTestSource) noexcept
+  {
+    return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
+  }
+
+  VisiblePosition RenderObject::VisiblePositionForPoint(const LayoutPoint &point,
+                                                        HitTestSource source) noexcept
+  {
+    auto positionWithAffinity = PositionForPoint(point, source);
+    return VisiblePosition(positionWithAffinity.GetPosition(), positionWithAffinity.GetAffinity());
+  }
+
+  int32 RenderObject::CaretMinOffset() const noexcept
+  {
+    return 0;
+  }
+
+  int32 RenderObject::CaretMaxOffset() const noexcept
+  {
+    if (IsBlockLevelReplacedOrAtomicInline())
+    {
+      return GetNode() ? static_cast<int32>(std::max(1u, GetNode()->CountChildNodes())) : 1;
+    }
+    if (IsHR())
+    {
+      return 1;
+    }
+    return 0;
+  }
+
+  int32 RenderObject::PreviousOffset(int32 current) const noexcept
+  {
+    return current - 1;
+  }
+
+  int32 RenderObject::PreviousOffsetForBackwardDeletion(int32 current) const noexcept
+  {
+    return current - 1;
+  }
+
+  int32 RenderObject::NextOffset(int32 current) const noexcept
+  {
+    return current + 1;
+  }
+
+  dom::PositionWithAffinity RenderObject::CreatePositionWithAffinity(int32 offset,
+                                                                     Affinity affinity) const noexcept
+  {
+    // If this is a non-anonymous renderer in an editable area, then it's simple.
+    if (auto *node = NonPseudoNode())
+    {
+      if (!node->HasEditableStyle())
+      {
+        // If it can be found, we prefer a visually equivalent position that is editable.
+        auto position = dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset));
+        auto candidate = position.Downstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary);
+        if (candidate.DeprecatedNode()->HasEditableStyle())
+        {
+          return dom::PositionWithAffinity(candidate, affinity);
+        }
+        candidate = position.Upstream(EditingBoundaryCrossingRule::CanCrossEditingBoundary);
+        if (candidate.DeprecatedNode()->HasEditableStyle())
+        {
+          return dom::PositionWithAffinity(candidate, affinity);
+        }
+      }
+      // FIXME: Eliminate legacy editing positions
+      return dom::PositionWithAffinity(
+        dom::MakeDeprecatedLegacyPosition(ShareRefPtr(node), static_cast<uint32>(offset)), affinity);
+    }
+
+    // We don't want to cross the boundary between editable and non-editable
+    // regions of the document, but that is either impossible or at least
+    // extremely unlikely in any normal case because we stop as soon as we
+    // find a single non-anonymous renderer.
+
+    // Find a nearby non-anonymous renderer.
+    const RenderObject *child = this;
+    while (const RenderObject *parent = child->Parent())
+    {
+      // Find non-anonymous content after.
+      const RenderObject *renderer = child;
+      while ((renderer = renderer->NextInPreOrder(parent)))
+      {
+        if (auto *node = renderer->NonPseudoNode())
+        {
+          return dom::PositionWithAffinity(FirstPositionInOrBeforeNode(node));
+        }
+      }
+
+      // Find non-anonymous content before.
+      renderer = child;
+      while ((renderer = renderer->PreviousInPreOrder()))
+      {
+        if (renderer == parent)
+        {
+          break;
+        }
+        if (auto *node = renderer->NonPseudoNode())
+        {
+          return dom::PositionWithAffinity(LastPositionInOrAfterNode(node));
+        }
+      }
+
+      // Use the parent itself unless it too is anonymous.
+      if (auto *element = parent->NonPseudoElement())
+      {
+        return dom::PositionWithAffinity(FirstPositionInOrBeforeNode(element));
+      }
+
+      // Repeat at the next level up.
+      child = parent;
+    }
+
+    // Everything was anonymous. Give up.
+    return {};
+  }
+
+  dom::PositionWithAffinity
+    RenderObject::CreatePositionWithAffinity(const dom::Position &position) const noexcept
+  {
+    if (position.IsNotNull())
+    {
+      return dom::PositionWithAffinity(position);
+    }
+
+    krys_debug_assert(!GetNode());
+    return CreatePositionWithAffinity(0, Affinity::Downstream);
+  }
+
+#pragma endregion
 
   void RenderObject::SetPositionState(PositionType position) noexcept
   {

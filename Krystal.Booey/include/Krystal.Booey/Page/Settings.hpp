@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Graphics/FontGenericFamilies.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -46,6 +47,8 @@ namespace krys::boo
     bool ColorFilterEnabled {false};
     /// @brief The system `appearance` values (`default-button` and friends).
     bool UseSystemAppearance {false};
+    /// @brief The platform whose editing and selection conventions documents follow.
+    boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
 
     SettingsValues Values;
 

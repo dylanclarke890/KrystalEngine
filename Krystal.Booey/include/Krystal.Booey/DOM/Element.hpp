@@ -107,6 +107,9 @@ namespace krys::boo::dom
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
+    /// @brief False for elements with `role="img"`, whose content editing ignores.
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override;
+
     ~Element() noexcept override;
 
 #pragma region Element - https://dom.spec.whatwg.org/#element

@@ -22,7 +22,10 @@
 namespace krys::boo::dom
 {
   class Document;
+  class Element;
   class Node;
+  class Position;
+  class PositionWithAffinity;
 }
 
 namespace krys::boo::layout
@@ -51,6 +54,9 @@ namespace krys::boo
   class RenderGeometryMap;
   class TransformState;
   class TransformationMatrix;
+  class VisiblePosition;
+  enum class Affinity : bool;
+  enum class HitTestSource : bool;
 
   // FIXME: SVG transforms and view transition captures come with their features.
   enum class RenderObjectStateFlag : uint8
@@ -1153,11 +1159,40 @@ namespace krys::boo
       return _node;
     }
 
+    /// @brief The node rendered, or null for an anonymous object or a pseudo-element.
+    KRYS_NODISCARD dom::Node *NonPseudoNode() const noexcept;
+    KRYS_NODISCARD dom::Element *NonPseudoElement() const noexcept;
+
     KRYS_NODISCARD dom::Document &GetDocument() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
     KRYS_NODISCARD WritingMode GetWritingMode() const noexcept;
+
+#pragma region Editing
+
+    /// @brief The position nearest @p point (in this renderer's coordinates), for hit testing to positions.
+    KRYS_NODISCARD virtual dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                                      HitTestSource source) noexcept;
+    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const LayoutPoint &point,
+                                                           HitTestSource source) noexcept;
+    /// @brief The position at @p offset in this renderer's node, or near it if the renderer is anonymous; a
+    /// visually equivalent editable position is preferred.
+    KRYS_NODISCARD dom::PositionWithAffinity CreatePositionWithAffinity(int32 offset,
+                                                                        Affinity affinity) const noexcept;
+    KRYS_NODISCARD dom::PositionWithAffinity
+      CreatePositionWithAffinity(const dom::Position &position) const noexcept;
+
+    KRYS_NODISCARD bool IsHR() const noexcept;
+
+    KRYS_NODISCARD virtual int32 CaretMinOffset() const noexcept;
+    KRYS_NODISCARD virtual int32 CaretMaxOffset() const noexcept;
+
+    KRYS_NODISCARD virtual int32 PreviousOffset(int32 current) const noexcept;
+    KRYS_NODISCARD virtual int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept;
+    KRYS_NODISCARD virtual int32 NextOffset(int32 current) const noexcept;
+
+#pragma endregion
 
 #pragma region Layout bits
 

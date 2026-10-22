@@ -367,4 +367,10 @@ namespace krys::boo::inline_iterator
 
   KRYS_NODISCARD float PreviousLineBoxContentBottomOrBorderAndPadding(const LineBox &lineBox) noexcept;
   KRYS_NODISCARD float ContentStartInBlockDirection(const LineBox &lineBox) noexcept;
+
+  /// @brief The leaf box on @p lineBox nearest @p horizontalPosition (logical, in the formatting context
+  /// root), skipping list markers and, with @p editableOnly, boxes that aren't editable.
+  KRYS_NODISCARD LeafBoxIterator ClosestBoxForHorizontalPosition(const LineBox &lineBox,
+                                                                 float horizontalPosition,
+                                                                 bool editableOnly = false) noexcept;
 }

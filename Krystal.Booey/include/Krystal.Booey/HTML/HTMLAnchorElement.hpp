@@ -14,6 +14,9 @@ namespace krys::boo::html
     UniquePtr<dom::DOMTokenList> _relList;
 
   public:
+    /// @brief Links start a selection only when editable.
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final;
+
     HTMLAnchorElement(dom::Document &document) noexcept;
 
 #pragma region HTMLAnchorElement - https://html.spec.whatwg.org/#htmlanchorelement

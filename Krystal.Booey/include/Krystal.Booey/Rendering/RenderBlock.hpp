@@ -32,6 +32,14 @@ namespace krys::boo
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
   // FIXME: Floats, line boxes, continuations (and their outlines), fragmentation, selection, carets and
   // column rules come with the rest of layout, inline painting, editing and multi-column layout.
+  // FIXME: This function should go on RenderObject as an instance method. Then
+  // all cases in which positionForPoint recurs could call this instead to
+  // prevent crossing editable boundaries. This would require many tests.
+  KRYS_NODISCARD dom::PositionWithAffinity
+    PositionForPointRespectingEditingBoundaries(RenderBlock &parent, RenderBox &child,
+                                                const LayoutPoint &pointInParentCoordinates,
+                                                HitTestSource source) noexcept;
+
   class RenderBlock : public RenderBox
   {
     friend class RenderBlockFlow;
@@ -289,6 +297,15 @@ namespace krys::boo
                      HitTestAction hitTestAction) noexcept override;
     /// @brief Moves @p offset by the block's scroll position, in its writing mode.
     void OffsetForContents(LayoutPoint &offset) const noexcept;
+    /// @brief The block's `text-indent`, resolved against its content box.
+    KRYS_NODISCARD LayoutUnit TextIndentOffset() const noexcept;
+
+    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                              HitTestSource source) noexcept override;
+    /// @brief The position nearest @p pointInLogicalContents among the block's lines.
+    KRYS_NODISCARD virtual dom::PositionWithAffinity
+      PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
+                                         HitTestSource source) noexcept;
     KRYS_NODISCARD dom::Node *NodeForHitTest() const noexcept override;
 
   protected:

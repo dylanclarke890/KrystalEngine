@@ -379,6 +379,39 @@ namespace krys::boo::html
     }
   }
 
+  dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
+  {
+    // FIXME: A page that's editable as a whole, once there's a page.
+    auto *startElement = DynamicDowncast<dom::Element>(node);
+    if (!startElement)
+    {
+      startElement = node.ParentElement();
+    }
+    for (auto *element = startElement; element; element = element->ParentElement())
+    {
+      if (!Is<HTMLElement>(*element))
+      {
+        continue;
+      }
+      auto value = element->GetAttribute(u8"contenteditable");
+      if (!value)
+      {
+        continue;
+      }
+      switch (GetContentEditableType(*value))
+      {
+        case ContentEditableType::True:          return dom::Node::Editability::CanEditRichly;
+        case ContentEditableType::PlaintextOnly: return dom::Node::Editability::CanEditPlainText;
+        case ContentEditableType::False:         return dom::Node::Editability::ReadOnly;
+        case ContentEditableType::Inherit:       break;
+      }
+    }
+
+    // FIXME: User agent shadow roots are read-only, and the document's design mode makes the document tree
+    // editable, once there are either.
+    return dom::Node::Editability::ReadOnly;
+  }
+
   dom::DOMString HTMLElement::AttributeOrEmpty(dom::DOMStringView localName) const noexcept
   {
     return GetAttribute(dom::DOMStringAtom(localName)).value_or(dom::DOMString {});

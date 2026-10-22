@@ -14,8 +14,7 @@ namespace krys::boo
   }
 
   /// @brief The line break of a `<br>`, or the line break opportunity of a `<wbr>`.
-  // FIXME: The lines' bounding box, the zero margins, the offset sizes, caret offsets, hit testing and
-  // selection come with layout.
+  // FIXME: Selection (canBeSelectionLeaf) comes with selection.
   class RenderLineBreak final : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderLineBreak);
@@ -49,6 +48,18 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+
+    KRYS_NODISCARD int32 CaretMinOffset() const noexcept final
+    {
+      return 0;
+    }
+    KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final
+    {
+      return 1;
+    }
+
+    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                              HitTestSource source) noexcept final;
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;

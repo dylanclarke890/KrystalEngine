@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
@@ -631,6 +633,13 @@ namespace krys::boo
     {
       RemoveOutOfFlowBoxesIfNeededOnStyleChange(*container, *oldStyle, newStyle);
     }
+  }
+
+  dom::PositionWithAffinity RenderInline::PositionForPoint(const LayoutPoint &point,
+                                                           HitTestSource source) noexcept
+  {
+    // FIXME: Translating the point to a continuation's block, once there are continuations.
+    return ContainingBlock()->PositionForPoint(point, source);
   }
 
   bool RenderInline::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,

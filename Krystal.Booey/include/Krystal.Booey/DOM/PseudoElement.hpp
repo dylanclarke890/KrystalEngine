@@ -21,6 +21,15 @@ namespace krys::boo::dom
     PseudoElementType _pseudoElementType;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override
+    {
+      return false;
+    }
+
     PseudoElement(Element &host, PseudoElementType pseudoElementType) noexcept;
     ~PseudoElement() noexcept override;
 

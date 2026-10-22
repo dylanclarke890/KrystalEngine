@@ -530,6 +530,11 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/NamedNodeMap.cpp
 		tests/DOM/Node.cpp
 		tests/DOM/NodeLifetime.cpp
+		tests/DOM/Position.cpp
+		tests/DOM/SimpleRange.cpp
+		tests/Editing/TextIterator.cpp
+		tests/Editing/VisiblePosition.cpp
+		tests/Editing/VisibleUnits.cpp
 		tests/DOM/NodeIterator.cpp
 		tests/DOM/ProcessingInstruction.cpp
 		tests/DOM/PseudoElement.cpp

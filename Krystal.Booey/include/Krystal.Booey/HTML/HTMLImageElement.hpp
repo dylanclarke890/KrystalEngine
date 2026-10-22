@@ -37,6 +37,19 @@ namespace krys::boo::html
     WeakPtr<HTMLSourceElement> _sourceElement;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override
+    {
+      if (ShadowRoot())
+      {
+        return HTMLElement::CanStartSelection();
+      }
+      return false;
+    }
+
     HTMLImageElement(dom::Document &document) noexcept;
     ~HTMLImageElement() noexcept override;
 

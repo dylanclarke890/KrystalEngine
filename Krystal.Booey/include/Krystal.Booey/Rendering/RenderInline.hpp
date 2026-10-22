@@ -21,6 +21,8 @@ namespace krys::boo
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
                      HitTestAction hitTestAction) noexcept override;
     void UpdateHitTestResult(HitTestResult &result, const LayoutPoint &point) const noexcept override;
+    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                              HitTestSource source) noexcept final;
 
     RenderInline(Type type, dom::Element &element, RenderStyle &&style) noexcept;
     RenderInline(Type type, dom::Document &document, RenderStyle &&style) noexcept;

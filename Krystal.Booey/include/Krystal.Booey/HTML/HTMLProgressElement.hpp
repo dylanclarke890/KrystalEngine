@@ -10,6 +10,11 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLProgressElement);
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return false;
+    }
+
     HTMLProgressElement(dom::Document &document) noexcept;
 
 #pragma region HTMLProgressElement - https://html.spec.whatwg.org/#htmlprogresselement

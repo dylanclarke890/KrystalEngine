@@ -528,6 +528,10 @@ namespace krys::boo
     /// @brief Paints the blocks in this block's inline content, when it has no other painted content.
     void PaintBlockLevelContentInInline(PaintInfo &, const LayoutPoint &) noexcept;
 
+    KRYS_NODISCARD dom::PositionWithAffinity
+      PositionForPointWithInlineChildren(const LayoutPoint &pointInLogicalContents,
+                                         HitTestSource source) noexcept override;
+
   protected:
     void LayoutBlockWithNoChildren() noexcept;
 

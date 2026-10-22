@@ -18,6 +18,7 @@
 #include "Krystal.Core/Types/CheckedPtr.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include <compare>
 
 namespace krys::boo
 {
@@ -317,6 +318,98 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Tree Helpers
+
+    KRYS_NODISCARD uint32 CountChildNodes() const noexcept;
+    /// @brief The child at @p index, or null if there are fewer children.
+    KRYS_NODISCARD Node *TraverseToChildAt(uint32 index) const noexcept;
+    /// @brief The node's index among its siblings.
+    KRYS_NODISCARD uint32 ComputeNodeIndex() const noexcept;
+    /// @see https://dom.spec.whatwg.org/#concept-node-length
+    KRYS_NODISCARD uint32 Length() const noexcept;
+    /// @brief The parent, or a shadow root's host.
+    KRYS_NODISCARD ContainerNode *ParentOrShadowHostNode() const noexcept;
+    /// @brief The parent, unless it's a shadow root.
+    KRYS_NODISCARD ContainerNode *NonShadowBoundaryParentNode() const noexcept;
+    KRYS_NODISCARD bool IsDescendantOf(const Node *other) const noexcept;
+    KRYS_NODISCARD bool IsDescendantOf(const Node &other) const noexcept
+    {
+      return IsDescendantOf(&other);
+    }
+    KRYS_NODISCARD bool IsInclusiveDescendantOf(const Node &other) const noexcept
+    {
+      return this == &other || IsDescendantOf(other);
+    }
+    KRYS_NODISCARD bool IsShadowIncludingDescendantOf(const Node *other) const noexcept;
+    /// @brief The last node in the subtree, in tree order.
+    KRYS_NODISCARD Node *LastDescendant() const noexcept;
+
+#pragma endregion
+
+#pragma region Editing
+
+    enum class UserSelectAllTreatment : bool
+    {
+      NotEditable,
+      Editable
+    };
+
+    enum class Editability : uint8
+    {
+      ReadOnly,
+      CanEditPlainText,
+      CanEditRichly
+    };
+
+    enum class ShouldUpdateStyle : bool
+    {
+      Update,
+      DoNotUpdate
+    };
+
+    /// @brief Whether the node is editable, resolving style first if it's out of date.
+    KRYS_NODISCARD bool IsContentEditable() const noexcept;
+    KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
+
+    /// @brief Whether the node is editable, by the style it has (`-webkit-user-modify`, which
+    /// `contenteditable` maps to, and `user-select`).
+    KRYS_NODISCARD bool
+      HasEditableStyle(UserSelectAllTreatment treatment = UserSelectAllTreatment::NotEditable) const noexcept
+    {
+      return ComputeEditability(treatment, ShouldUpdateStyle::DoNotUpdate) != Editability::ReadOnly;
+    }
+
+    // FIXME: Replace every use of this function by helpers in Editing.h
+    KRYS_NODISCARD bool HasRichlyEditableStyle() const noexcept
+    {
+      return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::DoNotUpdate)
+             == Editability::CanEditRichly;
+    }
+
+    KRYS_NODISCARD Editability ComputeEditability(UserSelectAllTreatment treatment,
+                                                  ShouldUpdateStyle shouldUpdateStyle) const noexcept;
+    KRYS_NODISCARD Editability
+      ComputeEditabilityWithStyle(const RenderStyle *incomingStyle, UserSelectAllTreatment treatment,
+                                  ShouldUpdateStyle shouldUpdateStyle) const noexcept;
+
+    /// @brief Whether the node is an editing host: an editable element whose parent isn't editable (or the
+    /// body).
+    KRYS_NODISCARD bool IsRootEditableElement() const noexcept;
+    /// @brief The editing host the node is in, or null if it isn't editable.
+    KRYS_NODISCARD Element *RootEditableElement() const noexcept;
+
+    /// @brief Whether a selection can start at the node (dragging takes priority in draggable elements that
+    /// can't be selected).
+    KRYS_NODISCARD virtual bool CanStartSelection() const noexcept;
+    /// @brief Whether a position can be inside the node; the content of nodes it can't be inside (images,
+    /// `<br>`, form controls) is ignored by editing.
+    KRYS_NODISCARD virtual bool CanContainRangeEndPoint() const noexcept
+    {
+      return false;
+    }
+
+#pragma endregion
+
 #pragma region Style Sheet Owner
 
     /// @brief Called when the style sheet this node owns has finished loading.
@@ -592,6 +685,26 @@ namespace krys::boo::dom
   private:
     void AdjustStyleValidity(style::Validity validity, style::InvalidationMode mode) noexcept;
   };
+}
+
+namespace krys::boo::dom
+{
+  /// @brief The trees a node's ancestors can be walked in: the node tree, the tree including shadow roots'
+  /// hosts, and the composed (flat) tree.
+  enum class TreeType : uint8
+  {
+    Tree,
+    ShadowIncludingTree,
+    ComposedTree
+  };
+
+  template <TreeType = TreeType::Tree>
+  KRYS_NODISCARD ContainerNode *Parent(const Node &node) noexcept;
+  template <TreeType = TreeType::Tree>
+  KRYS_NODISCARD Node *CommonInclusiveAncestor(const Node &a, const Node &b) noexcept;
+  /// @brief The order of @p a and @p b in the tree, or unordered if they aren't in the same one.
+  template <TreeType = TreeType::Tree>
+  KRYS_NODISCARD std::partial_ordering TreeOrder(const Node &a, const Node &b) noexcept;
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::Node)

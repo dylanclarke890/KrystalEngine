@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/PageRuleCollector.hpp"
 #include "Krystal.Booey/CSS/Properties/StyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/StylePropertiesInlines.hpp"
 #include "Krystal.Booey/CSS/Rules/Rule.hpp"
 #include "Krystal.Booey/CSS/Selectors/Selector.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"

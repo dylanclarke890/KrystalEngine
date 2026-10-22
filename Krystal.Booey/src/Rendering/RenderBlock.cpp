@@ -1,9 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Core/UnicodeBidi.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/TextAffinity.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/LayoutScope.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -2460,6 +2464,183 @@ namespace krys::boo
     }
 
     return false;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool IsEditingBoundary(RenderElement *ancestor, RenderBox &child) noexcept
+    {
+      krys_debug_assert(!ancestor || ancestor->NonPseudoElement());
+      krys_debug_assert(child.NonPseudoElement());
+      return !ancestor || !ancestor->Parent() || (ancestor->HasLayer() && ancestor->Parent()->IsRenderView())
+             || ancestor->NonPseudoElement()->HasEditableStyle()
+                  == child.NonPseudoElement()->HasEditableStyle();
+    }
+  }
+
+  dom::PositionWithAffinity
+    PositionForPointRespectingEditingBoundaries(RenderBlock &parent, RenderBox &child,
+                                                const LayoutPoint &pointInParentCoordinates,
+                                                HitTestSource source) noexcept
+  {
+    LayoutPoint childLocation = child.Location();
+    if (child.IsInFlowPositioned())
+    {
+      childLocation += child.OffsetForInFlowPosition();
+    }
+
+    // FIXME: This is wrong if the child's writing-mode is different from the parent's.
+    LayoutPoint pointInChildCoordinates(ToLayoutPoint(pointInParentCoordinates - childLocation));
+
+    // If this is an anonymous renderer, we just recur normally
+    auto *childElement = child.NonPseudoElement();
+    if (!childElement)
+    {
+      return child.PositionForPoint(pointInChildCoordinates, source);
+    }
+
+    // Otherwise, first make sure that the editability of the parent and child agree.
+    // If they don't agree, then we return a visible position just before or after the child
+    RenderElement *ancestor = &parent;
+    while (ancestor && !ancestor->NonPseudoElement())
+    {
+      ancestor = ancestor->Parent();
+    }
+
+    // If we can't find an ancestor to check editability on, or editability is unchanged, we recur like normal
+    if (IsEditingBoundary(ancestor, child))
+    {
+      return child.PositionForPoint(pointInChildCoordinates, source);
+    }
+
+    // Otherwise return before or after the child, depending on if the click was to the logical left or
+    // logical right of the child
+    LayoutUnit childMiddle = parent.LogicalWidthForChild(child) / 2;
+    LayoutUnit logicalLeft =
+      parent.IsHorizontalWritingMode() ? pointInChildCoordinates.X() : pointInChildCoordinates.Y();
+    if (logicalLeft < childMiddle)
+    {
+      return ancestor->CreatePositionWithAffinity(static_cast<int32>(childElement->ComputeNodeIndex()),
+                                                  Affinity::Downstream);
+    }
+    return ancestor->CreatePositionWithAffinity(static_cast<int32>(childElement->ComputeNodeIndex() + 1),
+                                                Affinity::Upstream);
+  }
+
+  dom::PositionWithAffinity RenderBlock::PositionForPointWithInlineChildren(const LayoutPoint &,
+                                                                            HitTestSource) noexcept
+  {
+    krys_unreachable();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool IsChildHitTestCandidate(const RenderBox &box, HitTestSource source) noexcept
+    {
+      auto visibility =
+        source == HitTestSource::Script ? box.Style().GetVisibility() : box.Style().UsedVisibility();
+      return box.Height() && visibility == Visibility::Visible && !box.IsOutOfFlowPositioned();
+    }
+  }
+
+  dom::PositionWithAffinity RenderBlock::PositionForPoint(const LayoutPoint &point,
+                                                          HitTestSource source) noexcept
+  {
+    if (IsRenderTable())
+    {
+      return RenderBox::PositionForPoint(point, source);
+    }
+
+    if (IsBlockLevelReplacedOrAtomicInline())
+    {
+      // FIXME: This seems wrong when the object's writing-mode doesn't match the line's writing-mode.
+      LayoutUnit pointLogicalLeft = IsHorizontalWritingMode() ? point.X() : point.Y();
+      LayoutUnit pointLogicalTop = IsHorizontalWritingMode() ? point.Y() : point.X();
+
+      if (pointLogicalTop < 0)
+      {
+        return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
+      }
+      if (pointLogicalLeft >= LogicalWidth())
+      {
+        return CreatePositionWithAffinity(CaretMaxOffset(), Affinity::Downstream);
+      }
+      if (pointLogicalTop < 0)
+      {
+        return CreatePositionWithAffinity(CaretMinOffset(), Affinity::Downstream);
+      }
+      if (pointLogicalTop >= LogicalHeight())
+      {
+        return CreatePositionWithAffinity(CaretMaxOffset(), Affinity::Downstream);
+      }
+    }
+    if (IsFlexibleBoxIncludingDeprecated() || IsRenderGrid())
+    {
+      return RenderBox::PositionForPoint(point, source);
+    }
+
+    LayoutPoint pointInContents = point;
+    OffsetForContents(pointInContents);
+    LayoutPoint pointInLogicalContents(pointInContents);
+    if (!IsHorizontalWritingMode())
+    {
+      pointInLogicalContents = pointInLogicalContents.TransposedPoint();
+    }
+
+    if (ChildrenInline())
+    {
+      return PositionForPointWithInlineChildren(pointInLogicalContents, source);
+    }
+
+    RenderBox *lastCandidateBox = LastChildBox();
+
+    // FIXME: Fragmented flows' candidates must be rendered by the fragment at the point, once there are any.
+    while (lastCandidateBox && !IsChildHitTestCandidate(*lastCandidateBox, source))
+    {
+      lastCandidateBox = lastCandidateBox->PreviousSiblingBox();
+    }
+
+    bool blocksAreFlipped = GetWritingMode().IsBlockFlipped();
+    if (lastCandidateBox)
+    {
+      if (pointInLogicalContents.Y() > LogicalTopForChild(*lastCandidateBox)
+          || (!blocksAreFlipped && pointInLogicalContents.Y() == LogicalTopForChild(*lastCandidateBox)))
+      {
+        return PositionForPointRespectingEditingBoundaries(*this, *lastCandidateBox, pointInContents, source);
+      }
+
+      for (auto *childBox = FirstChildBox(); childBox; childBox = childBox->NextSiblingBox())
+      {
+        if (!IsChildHitTestCandidate(*childBox, source))
+        {
+          continue;
+        }
+        auto childLogicalBottom = LogicalTopForChild(*childBox) + LogicalHeightForChild(*childBox);
+        if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(*childBox))
+        {
+          childLogicalBottom = std::max(childLogicalBottom, blockFlow->LowestFloatLogicalBottom());
+        }
+        // We hit child if our click is above the bottom of its padding box (like IE6/7 and FF3).
+        if (pointInLogicalContents.Y() < childLogicalBottom
+            || (blocksAreFlipped && pointInLogicalContents.Y() == childLogicalBottom))
+        {
+          return PositionForPointRespectingEditingBoundaries(*this, *childBox, pointInContents, source);
+        }
+      }
+    }
+
+    // We only get here if there are no hit test candidate children below the click.
+    return RenderBox::PositionForPoint(point, source);
+  }
+
+  LayoutUnit RenderBlock::TextIndentOffset() const noexcept
+  {
+    LayoutUnit cw;
+    if (Style().GetTextIndent().Length.IsPercentOrCalculated())
+    {
+      cw = ContentBoxLogicalWidth();
+    }
+    return style::Evaluate<LayoutUnit>(Style().GetTextIndent().Length, cw, Style().UsedZoomForLength());
   }
 
   void RenderBlock::OffsetForContents(LayoutPoint &offset) const noexcept

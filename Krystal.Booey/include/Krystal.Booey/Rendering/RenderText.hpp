@@ -29,9 +29,8 @@ namespace krys::boo
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
   /// text transform and text security.
-  // FIXME: Measurement (widths and preferred widths), line boxes,
-  // selection, caret offsets, hit testing, painting and the secure text timer that reveals the last typed
-  // character come with layout, painting and editing.
+  // FIXME: Selection and the secure text timer that reveals the last typed character come with selection and
+  // editing.
   class RenderText : public RenderObject
   {
     KRYS_NON_COPY_MOVABLE(RenderText);
@@ -146,6 +145,22 @@ namespace krys::boo
 
     /// @brief Whether any of the text is laid out in a text box.
     KRYS_NODISCARD bool HasRenderedText() const noexcept;
+
+    KRYS_NODISCARD dom::PositionWithAffinity PositionForPoint(const LayoutPoint &point,
+                                                              HitTestSource source) noexcept override;
+
+    KRYS_NODISCARD int32 CaretMinOffset() const noexcept final;
+    KRYS_NODISCARD int32 CaretMaxOffset() const noexcept final;
+    /// @brief The number of rendered (not collapsed) bytes before @p offset.
+    KRYS_NODISCARD uint32 CountRenderedCharacterOffsetsUntil(uint32 offset) const noexcept;
+    KRYS_NODISCARD bool ContainsRenderedCharacterOffset(uint32 offset) const noexcept;
+    /// @brief Whether a caret can be at @p offset: in a text box, and not inside a character.
+    KRYS_NODISCARD bool ContainsCaretOffset(uint32 offset) const noexcept;
+
+    // Return before/after offset for the next grapheme cluster (character), which is not always one byte.
+    KRYS_NODISCARD int32 PreviousOffset(int32 current) const noexcept final;
+    KRYS_NODISCARD int32 PreviousOffsetForBackwardDeletion(int32 current) const noexcept final;
+    KRYS_NODISCARD int32 NextOffset(int32 current) const noexcept final;
 
     KRYS_NODISCARD FontCascade::CodePath FontCodePath() const noexcept
     {

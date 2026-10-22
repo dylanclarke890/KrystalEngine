@@ -308,6 +308,7 @@ All done in G1 (2026-10-17) unless noted.
 | G10 | Done (2026-10-20). Repainting only what changed: the Release build, a retained page texture, damage tracking (upstream's repaint invalidation), then the hotspots a benchmark finds. In parts (see *G10 plan*). | A still page costs almost nothing per frame, and a small animation repaints only its rect; the editor page runs smoothly. |
 | G11 | Visual effects: `filter`, `backdrop-filter`, `mask-image` and `mask-border` drawn. Done (2026-10-21), in three parts (see *G11 plan*). | Filtered, backdrop-filtered and masked boxes match Chrome. |
 | G12 | Done (2026-10-21). Compositing: upstream's composited layer tree (`RenderLayerCompositor`, `RenderLayerBacking`, `GraphicsLayer`) on a Krystal.UI layer tree adapted from TextureMapper, with tiled backings. In four parts (see *G12 plan*). | Filters, opacity, transforms and their animations composite without repainting; scrolling moves layers; no stale pixels. |
+| G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21). | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
 
 ### G2 parts
 
@@ -1270,6 +1271,38 @@ Sticky positioning was left out of G12d: `position: sticky` boxes lay out where 
 - **Editor:** the first list card's items are grouped under sticky headers, which composite and stay at the box's top.
 - **Found on the way:** composited scrollers at fractional positions place their contents without pixel snapping, as upstream's (its own FIXME), so the editor's second list sits a pixel off the whole repaint; left as upstream has it.
 - **Out (FIXMEs):** the scrolling coordinator's sticky nodes (async scrolling), anchor positioning, pixel snapping composited scroll containers.
+
+### G13 plan (2026-10-21)
+
+Nothing can be selected: text paints unmarked, the I-beam is only a cursor, and editable content has no caret. Upstream's selection belongs to its editing code: positions in the DOM (`Position`, `VisiblePosition`), the units they move by (`VisibleUnits`, over `TextIterator`), the frame's selection (`FrameSelection`, `VisibleSelection`), the renderers' part in it (`RenderSelection`, selection states, gaps, the selection's paint style), the mouse and keyboard handling in `EventHandler`, the DOM's `Selection`, and the caret (`CaretBase`, `CaretAnimator`). G13 ports them, mirroring upstream. Editing commands (typing, deleting, pasting) and text fields come with form controls.
+
+- **G13a, positions** (Booey): positions in the DOM and where they render, which depend on each other (`Position` asks renderers for caret offsets and visible positions; `TextIterator` asks visible positions about lines; `VisibleUnits` walks text with `TextIterator`), so they come together.
+  - In the DOM: `Position` and `PositionIterator`, `SimpleRange` on Booey's `BoundaryPoint`, `TextAffinity`, `EditingBoundary` and `TextGranularity`. The nodes' editability queries (`hasEditableStyle`, `rootEditableElement`, `editingIgnoresContent`, `canStartSelection`), from `-webkit-user-modify` (which `contenteditable` maps to) and `user-select`. `Editing.cpp`'s position helpers. `TextIterator`, `SimplifiedBackwardsTextIterator` and `CharacterIterator`, with `plainText`.
+  - In the render tree: caret offsets (`caretMinOffset`, `caretMaxOffset`, `previousOffset`, `nextOffset`, the text boxes' caret queries, `LogicalOrderTraversal`). `positionForPoint` for renderers (`RenderObject`, `RenderBox`, `RenderBlock`, `RenderBlockFlow` with inline children through its lines, `RenderText`, `RenderReplaced`, `RenderLineBreak`). Local caret rects (`CaretRectComputation`).
+  - `VisiblePosition` and `VisibleUnits`: character, word, line, sentence, paragraph and document boundaries, and the positions on the next and previous lines.
+  - **Tests:** positions' upstream and downstream equivalents, candidates and editing boundaries; text iteration over blocks, inlines, collapsed whitespace, `display: none`, replaced elements and line breaks; positions for points over text, blocks, empty blocks and images; word, line and paragraph boundaries; caret rects.
+- **G13b, the selection painted** (Booey, Krystal.UI):
+  - `VisibleSelection` and `FrameSelection`: setting and extending the selection, and the focused and active state that `Document::SetFocusedAndActive` stands in for.
+  - `RenderSelection` and `RenderHighlight`: the renderers' selection states, the selection's geometry, and repainting what a change adds and removes.
+  - Painting: text with `::selection` and the theme's active and inactive highlight colours (`TextBoxPainter`'s selected marked text, `computeTextSelectionPaintStyle`), the blocks' selection gaps, replaced elements, list markers and ellipses.
+  - The mouse selects, with `user-select` (`EventHandler`'s press, drag and release): a click places the selection and a drag extends it, double and triple clicks select words and paragraphs, and Shift extends. Also `selectstart` and autoscroll while dragging.
+  - **Golden:** selected text, gaps and `::selection`, against Chrome. Repaint tests for dragging a selection, and an **editor** sample.
+- **G13c, the keyboard and the DOM** (Booey, Krystal.UI): `FrameSelection::modify` (Shift with the arrows, Home and End, by character, word and line) and select all. `DOMSelection` (`document.getSelection()`, with its live range as the spec has it), and `selectionchange` events. Copying the selection as plain text (`Editor`'s copy command, through a pasteboard the host gives). **Tests:** modifying by each granularity, the API, copying.
+- **G13d, carets** (Booey, Krystal.UI):
+  - Editable content (`contenteditable`) gets a caret: focusing an editing host or clicking in it places it, and the arrows move it.
+  - Painting: `CaretBase` and `FrameSelection::paintCaret` (`RenderBlock::paintCarets`), with `caret-color`. The caret's rect is invalidated when it changes and when its box scrolls.
+  - The caret blinks (`SimpleCaretAnimator`, on the host's time), and lines leave room for it at their end (`endPaddingWidthForCaret`).
+  - Typing waits for editing commands.
+  - **Tests:** caret rects, repaints and blinking damage. An **editor** sample with an editable block.
+- **Out (FIXMEs):** editing commands (typing, deleting, pasting, undo), text fields and the other form controls (next), input methods, spell checking and document markers, drag and drop, `::highlight()` and the Highlight API, find in page, caret browsing, touch selection, accessibility.
+
+### G13a as built (2026-10-21)
+
+- **Booey** (the ledger entry is *Positions* in `docs/booey/PORTING.md`): `Position`, `PositionIterator` and `SimpleRange`, with upstream's tree order and node queries added to Booey's DOM; the nodes' editability (from `-webkit-user-modify`, which `contenteditable` maps to, and `user-select`), `canStartSelection` and `canContainRangeEndPoint`; `Editing.cpp`'s position and caret painting helpers; `TextIterator`, `SimplifiedBackwardsTextIterator`, the character iterators and `plainText`; `VisiblePosition`, `VisibleUnits` (words, sentences, lines and the lines above and below, paragraphs, blocks, the document, editable content) and `RenderedPosition`; caret rects (`CaretRectComputation`); renderers' caret offsets and `positionForPoint` (text, line breaks, boxes, blocks and their lines, replaced elements, inlines). `Settings::EditingBehaviorType` picks the platform conventions (Windows by default).
+- **Text offsets are UTF-8 bytes**, as the DOM's are, so the text iterator's characters are bytes.
+- **Found on the way:** the Release `Krystal.Booey.lib` passed the 4 GB a static library can hold (LNK1248). The generated projects didn't ask for `/Zc:inline`, so every object kept its unreferenced inline functions; the top-level `CMakeLists.txt` now adds it for MSVC, and the Release library is 1.3 GB. That exposed six files calling `StyleProperties::PropertyCount` and `empty` (declared `inline`, defined in `StylePropertiesInlines.hpp`) without including their definitions, which had only linked through another object's copy; they include it now. The Debug library (no inlining, so `/Zc:inline` doesn't shrink it) is 3.83 GB, close to the limit.
+- **Tests:** positions, candidates and editing boundaries, simple ranges, text iteration, visible positions, positions for points and caret rects, and the visible units.
+- **Out (FIXMEs):** the units of a granularity in a selection direction (with `VisibleSelection`, G13b), the helpers only editing commands use, text search, the flat tree in the text iterator, SVG text carets.
 
 ## Open decisions
 
