@@ -19,6 +19,7 @@
 #include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -219,6 +220,17 @@ namespace krys::boo::html
   void HTMLElement::AccessKey(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
+  }
+
+  bool HTMLElement::AccessKeyAction(bool sendMouseEvents) noexcept
+  {
+    if (FocusAlgorithms::IsFocusableArea(*this))
+    {
+      Focus();
+    }
+    return DispatchSimulatedClick(nullptr, sendMouseEvents
+                                             ? dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents
+                                             : dom::SimulatedClickMouseEventOptions::SendNoEvents);
   }
 
   dom::DOMString HTMLElement::AccessKeyLabel() const noexcept

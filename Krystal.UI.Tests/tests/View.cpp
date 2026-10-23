@@ -6,12 +6,14 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -875,6 +877,103 @@ namespace krys::ui::tests
     CHECK(requests[0].URL == u8"https://example.com/order");
     CHECK(requests[0].ContentType == u8"application/x-www-form-urlencoded");
     CHECK(requests[0].Body == u8"size=large&empty=&go=1");
+  }
+
+  TEST_CASE("View: a drop-down's popup", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } select { margin: 10px }"
+                  u8"</style><select id=s><option>Apple</option><option disabled>Banana</option>"
+                  u8"<optgroup label=Fruit><option>Cherry</option><option>Date</option></optgroup></select>"
+                  u8"<p id=after>After</p>");
+    view.UpdateRendering();
+
+    auto &select = Downcast<boo::html::HTMLSelectElement>(*view.Document().GetElementById(u8"s"));
+    auto box = select.GetBoundingClientRect();
+    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    auto changes = 0;
+    struct Counter : public boo::dom::EventListenerCallback
+    {
+      int32 &Count;
+      explicit Counter(int32 &count) noexcept : Count(count)
+      {
+      }
+      void HandleEvent(boo::dom::Event &) noexcept override
+      {
+        ++Count;
+      }
+    };
+    select.AddEventListener(boo::dom::DOMStringAtom(u8"change"), CreateRef<Counter>(changes), false);
+
+    // Pressing the drop-down opens its popup below it, with the selected item highlighted; its release goes
+    // to the page and leaves the popup open.
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    auto *popup = view.Popup();
+    REQUIRE(popup);
+    CHECK(popup->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(popup->Rect().X() == static_cast<int32>(box->X()));
+    CHECK(popup->Rect().Width() >= static_cast<int32>(box->Width()));
+    CHECK(popup->HighlightedIndex() == 0);
+
+    // The popup's page lists the items: the disabled one and the optgroup's label can't be chosen.
+    auto &items = popup->ContentView().Document();
+    auto labels = items.QuerySelectorAll(u8".label");
+    REQUIRE_FALSE(labels.HasException());
+    CHECK(labels.Value()->Length() == 1uz);
+    auto disabled = items.QuerySelectorAll(u8".disabled");
+    REQUIRE_FALSE(disabled.HasException());
+    CHECK(disabled.Value()->Length() == 1uz);
+
+    // Down skips them; Enter chooses, firing change, and closes the popup.
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(popup->HighlightedIndex() == 3);
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK_FALSE(view.Popup());
+    CHECK(select.SelectedIndex() == 2);
+    CHECK(changes == 1);
+
+    // Escape closes it without choosing.
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    REQUIRE(view.Popup());
+    CHECK(view.KeyPressed(pal::Key::Escape));
+    CHECK_FALSE(view.Popup());
+    CHECK(select.SelectedIndex() == 2);
+
+    // Clicking an item chooses it.
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    popup = view.Popup();
+    REQUIRE(popup);
+    auto date = popup->ContentView().Document().QuerySelector(u8"[data-index='4']");
+    REQUIRE_FALSE(date.HasException());
+    REQUIRE(date.Value());
+    auto dateBox = date.Value()->GetBoundingClientRect();
+    boo::IntPoint onDate(popup->Rect().X() + static_cast<int32>(dateBox->X()) + 5,
+                         popup->Rect().Y() + static_cast<int32>(dateBox->Y()) + 3);
+    view.MouseMoved(onDate);
+    CHECK(popup->HighlightedIndex() == 4);
+    view.MousePressed(onDate, pal::MouseButton::Left);
+    view.MouseReleased(onDate, pal::MouseButton::Left);
+    CHECK_FALSE(view.Popup());
+    CHECK(select.SelectedIndex() == 3);
+    CHECK(changes == 2);
+
+    // Pressing outside closes it, and the press goes no further.
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    REQUIRE(view.Popup());
+    view.MousePressed({390, 290}, pal::MouseButton::Left);
+    view.MouseReleased({390, 290}, pal::MouseButton::Left);
+    CHECK_FALSE(view.Popup());
+    CHECK(view.Document().FocusedElement() == &select);
+
+    // The recording shows the popup over the page.
+    view.MousePressed(inside, pal::MouseButton::Left);
+    view.MouseReleased(inside, pal::MouseButton::Left);
+    REQUIRE(view.Popup());
+    CHECK(view.Record()->Items().size() > 0uz);
   }
 
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")

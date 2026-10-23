@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Platform/PopupMenuStyle.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/LineWidth.hpp"
 #include "Krystal.Booey/Style/Values/Box/Padding.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
@@ -296,6 +297,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD virtual style::PaddingBox PopupInternalPaddingBox(const RenderStyle &) const noexcept;
+
+    KRYS_NODISCARD virtual PopupMenuStyle::Size PopupMenuSize(const RenderStyle &, IntRect &) const noexcept
+    {
+      return PopupMenuStyle::Size::Normal;
+    }
 
     KRYS_NODISCARD virtual ScrollbarWidth ScrollbarWidthStyleForPart(StyleAppearance) noexcept
     {

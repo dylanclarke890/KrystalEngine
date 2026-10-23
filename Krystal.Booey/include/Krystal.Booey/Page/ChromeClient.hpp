@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Platform/PopupMenu.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
@@ -9,10 +11,11 @@ namespace krys::boo
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class LocalFrame;
+  class PopupMenuClient;
 
   /// @brief What a page asks of its host: the window's side of the page.
   // FIXME: The rest of the chrome client: windows and dialogs, focus, the status bar, tooltips, cursors,
-  // scrolling and repainting the host's view, popups and the other compositing hooks (layer flushes,
+  // scrolling and repainting the host's view, search popups and the other compositing hooks (layer flushes,
   // compositing triggers, display refresh monitors), once there are any.
   class ChromeClient
   {
@@ -38,6 +41,26 @@ namespace krys::boo
     {
       (void)frame;
       (void)submission;
+    }
+
+    /// @brief Whether a menu list's items are shown left to right regardless of their direction.
+    KRYS_NODISCARD virtual bool SelectItemWritingDirectionIsNatural() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether a menu list's text is aligned in its selected option's direction.
+    KRYS_NODISCARD virtual bool SelectItemAlignmentFollowsMenuWritingDirection() const noexcept
+    {
+      return true;
+    }
+
+    /// @brief Makes the popup menu a menu list shows its options in; a host that doesn't override this has no
+    /// popups, so menu lists don't open.
+    KRYS_NODISCARD virtual RefPtr<PopupMenu> CreatePopupMenu(PopupMenuClient &client) const noexcept
+    {
+      (void)client;
+      return nullptr;
     }
   };
 

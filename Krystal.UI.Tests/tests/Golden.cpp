@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -256,6 +257,29 @@ namespace krys::ui::tests
     // Ranges and progress bars are drawn by the Adwaita theme, so Chrome's golden is only reported; meters
     // are drawn by their shadow trees' gradients, which Chrome doesn't use either.
     CheckPage("ranges", 360u, 280u, true);
+  }
+
+  TEST_CASE("Golden: selects", "[UI][GPU][Golden]")
+  {
+    // Drop-downs and list boxes are drawn by the Adwaita theme, so Chrome's golden is only reported.
+    CheckPage("selects", 360u, 280u, true);
+  }
+
+  TEST_CASE("Golden: select popup", "[UI][GPU][Golden]")
+  {
+    // The popup is the view's overlay; Chrome draws its own in a window, so there's no Chrome golden.
+    CheckPage("select-popup", 240u, 200u, true,
+              [](View &view)
+              {
+                auto select = view.Document().GetElementById(u8"fruit");
+                REQUIRE(select);
+                auto box = select->GetBoundingClientRect();
+                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                view.MousePressed(inside, pal::MouseButton::Left);
+                view.MouseReleased(inside, pal::MouseButton::Left);
+                REQUIRE(view.Popup());
+                view.UpdateRendering();
+              });
   }
 
   TEST_CASE("Golden: scrollbars", "[UI][GPU][Golden]")

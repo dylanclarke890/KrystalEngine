@@ -107,7 +107,7 @@ namespace krys::boo::css
     }
     if (auto *option = DynamicDowncastHTML<html::HTMLOptionElement>(element))
     {
-      return option->Selected();
+      return option->Selected(html::AllowStyleInvalidation::No);
     }
     return false;
   }

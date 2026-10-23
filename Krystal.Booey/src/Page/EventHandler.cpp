@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
+#include "Krystal.Booey/Rendering/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/UI/Cursor.hpp"
@@ -1595,9 +1596,13 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: List boxes, which are scrollable areas of their own, once there are list boxes.
     auto scrollableAreaForBox = [](RenderBox &box) -> ScrollableArea *
     {
+      if (auto *renderListBox = DynamicDowncast<RenderListBox>(box))
+      {
+        return renderListBox;
+      }
+
       if (box.HasLayer())
       {
         return box.Layer()->GetScrollableArea();
@@ -2150,7 +2155,7 @@ namespace krys::boo
                                                                HitTestSource::User);
   }
 
-  // FIXME: Dragging (handleDrag) and list boxes (isRenderListBox), with drag and drop and form controls.
+  // FIXME: Dragging (handleDrag), with drag and drop.
   bool EventHandler::HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     if (!_mousePressed)
@@ -2166,10 +2171,20 @@ namespace krys::boo
       return false;
     }
 
-    auto *renderer = targetNode->Renderer();
+    RenderObject *renderer = targetNode->Renderer();
     if (!renderer)
     {
-      return false;
+      auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*targetNode);
+      if (!parent)
+      {
+        return false;
+      }
+
+      renderer = parent->Renderer();
+      if (!renderer || !renderer->IsRenderListBox())
+      {
+        return false;
+      }
     }
 
     if (_mouseDownMayStartAutoscroll && !_autoscrollController->PanScrollInProgress())

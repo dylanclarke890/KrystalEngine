@@ -1,0 +1,38 @@
+﻿<!doctype html>
+<!-- The "selects" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View. -->
+<html data-width="360" data-height="280">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px sans-serif; }
+  div { margin-bottom: 12px; }
+  select { vertical-align: top; margin: 0 12px 0 0; }
+  .dark { color-scheme: dark; background: #1e1e1e; padding: 4px; }
+</style>
+</head>
+<body>
+  <!-- Drop-downs: the selected option's text with the theme's arrow; a disabled one; one with an empty
+       option selected. -->
+  <div>
+    <select><option>Apple</option><option selected>Banana split</option></select>
+    <select disabled><option>Disabled</option></select>
+    <select><option></option><option>Cherry</option></select>
+  </div>
+  <!-- List boxes: four items tall with a scrollbar, an optgroup's label and a selected option; a multiple
+       selection; one shorter than its items. -->
+  <div>
+    <select size="4">
+      <option>Apple</option>
+      <optgroup label="Stone fruit"><option selected>Cherry</option><option>Plum</option></optgroup>
+      <option>Date</option><option>Fig</option>
+    </select>
+    <select multiple><option selected>Red</option><option>Green</option><option selected>Blue</option></select>
+    <select size="2"><option>One</option><option>Two</option><option>Three</option></select>
+  </div>
+  <div class="dark">
+    <select><option>Dark</option></select>
+    <select size="2"><option selected>Night</option><option>Day</option></select>
+  </div>
+</body>
+</html>

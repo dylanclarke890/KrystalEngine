@@ -47,6 +47,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
+      include/Krystal.UI/PopupMenuOverlay.hpp
       include/Krystal.UI/Render2DConversions.hpp
       include/Krystal.UI/SystemPasteboardStrategy.hpp
       include/Krystal.UI/View.hpp
@@ -67,6 +68,7 @@ target_sources(Krystal.UI
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp
     src/Input.cpp
+    src/PopupMenuOverlay.cpp
     src/Render2DConversions.cpp
     src/SystemPasteboardStrategy.cpp
     src/View.cpp

@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Editing/UndoStep.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -201,21 +202,21 @@ namespace krys::boo::tests
   };
 
   /// @brief A document in a page whose editor client is a `TestEditorClient`, with a pasteboard strategy
-  /// that records writes.
+  /// that records writes, and the chrome client given, if any.
   struct EditorFixture : style::tests::ResolverFixture
   {
     RefPtr<Page> TestPage;
     TestEditorClient *Client {nullptr};
     RecordingPasteboardStrategy Pasteboard;
 
-    explicit EditorFixture(utf8_stringview markup) noexcept
+    explicit EditorFixture(utf8_stringview markup, UniquePtr<ChromeClient> chromeClient = nullptr) noexcept
         : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0;font:10px/20px sans-serif}</style>"
                             + utf8_string(markup),
                           style::tests::WithView::No)
     {
       auto client = CreateUnique<TestEditorClient>();
       Client = client.get();
-      TestPage = Page::Create(nullptr, krys::move(client));
+      TestPage = Page::Create(krys::move(chromeClient), krys::move(client));
       Frame = ShareRefPtr(&TestPage->MainFrame());
       Frame->CreateView({400, 300});
       Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));

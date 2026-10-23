@@ -296,7 +296,7 @@ namespace krys::boo
 
     /// @brief Whether @p locationInContainer is over one of the block's scrollbars, which @p result then
     /// names.
-    bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
+    virtual bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
                                   const LayoutPoint &accumulatedOffset) noexcept;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,

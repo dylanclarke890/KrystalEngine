@@ -14,8 +14,11 @@
          below. The fields edit like the editable block; the notes keep their line breaks. The checkbox, radios
          and number field are drawn by the theme (Adwaita); the number field's spin button steps the cups, as do
          the arrow keys. Drag the strength slider's thumb, click its track, or use the arrow keys; the progress
-         bar and the meter below it are drawn by the theme and by the meter's shadow tree. Reset empties the
-         fields and unticks the box. -->
+         bar and the meter below it are drawn by the theme and by the meter's shadow tree. The beans drop-down
+         opens its popup on a click or Space (arrow keys and Enter choose, Escape closes, as does a click
+         outside it), or changes with the arrow keys and typing while closed; the extras list box selects with
+         clicks (Ctrl and Shift for more) and the keys, and scrolls. Reset empties the fields and unticks the
+         box. -->
     <form class="card order" action="https://example.com/order">
       <input type="hidden" name="from" value="editor">
       <input name="name" placeholder="Your name" required maxlength="24">
@@ -27,6 +30,12 @@
       <p class="gauges"><label>Strength <input type="range" name="strength" min="1" max="5" value="3"></label><label>Brewing
           <progress value="0.6"></progress></label><label>Beans left <meter value="0.3" low="0.25" high="0.75"
           optimum="1"></meter></label></p>
+      <p class="selects"><label>Beans <select name="beans"><option value="house">House blend</option><optgroup
+          label="Single origin"><option value="ethiopia">Ethiopia Yirgacheffe</option><option value="colombia"
+          selected>Colombia Huila</option><option value="sumatra" disabled>Sumatra (sold out)</option></optgroup>
+          <hr><option value="decaf">Decaf</option></select></label><label>Extras <select name="extras" multiple
+          size="3"><option>Cinnamon</option><option selected>Vanilla</option><option>Caramel</option>
+          <option>Hazelnut</option><option>Cocoa</option></select></label></p>
       <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
           type="reset">Reset</button></p>
       <p id="last-submission">Nothing submitted yet.</p>

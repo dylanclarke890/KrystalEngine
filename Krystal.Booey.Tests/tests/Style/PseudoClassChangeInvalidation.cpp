@@ -103,7 +103,10 @@ namespace krys::boo::style::tests
       option.Selected(true);
       CHECK(option.StyleValidity() == Validity::ElementInvalid);
       document.UpdateStyleIfNeeded();
-      CHECK(IsBlue(option));
+      // Options aren't rendered, so their style is computed on demand.
+      auto *style = option.ComputedStyle();
+      REQUIRE(style);
+      CHECK(style->GetColor() == Blue);
     }
 
     SECTION(":link")

@@ -821,6 +821,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/RenderText.hpp
   include/Krystal.Booey/Rendering/RenderButton.hpp
+  include/Krystal.Booey/Rendering/RenderListBox.hpp
+  include/Krystal.Booey/Rendering/RenderMenuList.hpp
   include/Krystal.Booey/Rendering/RenderMeter.hpp
   include/Krystal.Booey/Rendering/RenderProgress.hpp
   include/Krystal.Booey/Rendering/RenderSlider.hpp
@@ -1738,6 +1740,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/FormListedElement.hpp
   include/Krystal.Booey/HTML/HTMLFormControlElement.hpp
   include/Krystal.Booey/HTML/HTMLFormControlsCollection.hpp
+  include/Krystal.Booey/HTML/HTMLOptionsCollection.hpp
   include/Krystal.Booey/HTML/HTMLTextFormControlElement.hpp
   include/Krystal.Booey/HTML/HiddenInputType.hpp
   include/Krystal.Booey/HTML/ImageInputType.hpp
@@ -1764,6 +1767,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
   include/Krystal.Booey/HTML/TextInputType.hpp
   include/Krystal.Booey/HTML/TimeInputType.hpp
+  include/Krystal.Booey/HTML/TypeAhead.hpp
   include/Krystal.Booey/HTML/URLInputType.hpp
   include/Krystal.Booey/HTML/ValidatedFormListedElement.hpp
   include/Krystal.Booey/HTML/WeekInputType.hpp
@@ -2534,6 +2538,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableCol.cpp
   src/Rendering/RenderText.cpp
   src/Rendering/RenderButton.cpp
+  src/Rendering/RenderListBox.cpp
+  src/Rendering/RenderMenuList.cpp
   src/Rendering/RenderMeter.cpp
   src/Rendering/RenderProgress.cpp
   src/Rendering/RenderSlider.cpp
@@ -2900,6 +2906,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/FormListedElement.cpp
   src/HTML/HTMLFormControlElement.cpp
   src/HTML/HTMLFormControlsCollection.cpp
+  src/HTML/HTMLOptionsCollection.cpp
   src/HTML/HTMLTextFormControlElement.cpp
   src/HTML/HiddenInputType.cpp
   src/HTML/ImageInputType.cpp
@@ -2922,6 +2929,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
   src/HTML/TimeInputType.cpp
+  src/HTML/TypeAhead.cpp
   src/HTML/URLInputType.cpp
   src/HTML/ValidatedFormListedElement.cpp
   src/HTML/WeekInputType.cpp

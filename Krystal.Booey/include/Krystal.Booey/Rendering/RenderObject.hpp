@@ -788,6 +788,14 @@ namespace krys::boo
     {
       return _type == Type::Slider;
     }
+    KRYS_NODISCARD bool IsRenderMenuList() const noexcept
+    {
+      return _type == Type::MenuList;
+    }
+    KRYS_NODISCARD bool IsRenderListBox() const noexcept
+    {
+      return _type == Type::ListBox;
+    }
     KRYS_NODISCARD bool IsRenderProgress() const noexcept
     {
       return _type == Type::Progress;

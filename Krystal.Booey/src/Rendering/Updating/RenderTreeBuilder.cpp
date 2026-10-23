@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderButton.hpp"
+#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -309,6 +310,12 @@ namespace krys::boo
       return;
     }
 
+    if (auto *menuList = DynamicDowncast<RenderMenuList>(parent))
+    {
+      FormControlsBuilder().Attach(*menuList, krys::move(child), beforeChild);
+      return;
+    }
+
     if (auto *button = DynamicDowncast<RenderButton>(parent))
     {
       FormControlsBuilder().Attach(*button, krys::move(child), beforeChild);
@@ -361,8 +368,12 @@ namespace krys::boo
     krys_debug_assert(!parent.BeingDestroyed());
     krys_debug_assert(!child.BeingDestroyed());
 
-    // FIXME: SVG text, menu lists and SVG inlines, containers and roots, once there are their renderers and
-    // builders.
+    // FIXME: SVG text and SVG inlines, containers and roots, once there are their renderers and builders.
+
+    if (auto *menuList = DynamicDowncast<RenderMenuList>(parent))
+    {
+      return FormControlsBuilder().Detach(*menuList, child, willBeDestroyed);
+    }
 
     if (auto *button = DynamicDowncast<RenderButton>(parent))
     {
