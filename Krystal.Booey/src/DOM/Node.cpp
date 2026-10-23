@@ -20,6 +20,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
@@ -69,6 +70,21 @@ namespace krys::boo::dom
       }
     }
     return NodeDocument();
+  }
+
+  boo::RenderBox *Node::GetRenderBox() const noexcept
+  {
+    return DynamicDowncast<boo::RenderBox>(_renderer);
+  }
+
+  bool Node::IsInUserAgentShadowTree() const noexcept
+  {
+    if (!IsInShadowTree())
+    {
+      return false;
+    }
+    auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
+    return shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent;
   }
 
 #pragma region Node

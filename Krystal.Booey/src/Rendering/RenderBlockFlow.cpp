@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
@@ -488,8 +489,7 @@ namespace krys::boo
       {
         return false;
       }
-      // FIXME: Not for <input>, once there are form controls.
-      return true;
+      return !Is<html::HTMLInputElement>(GetElement());
     };
     if (shouldApplyAlignContent())
     {

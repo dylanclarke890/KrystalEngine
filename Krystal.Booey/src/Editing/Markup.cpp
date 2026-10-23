@@ -25,7 +25,9 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -46,13 +48,14 @@ namespace krys::boo
       return IsHTMLElementOfType(&node, tagName);
     }
 
-    // Composed tree traversal; there are no user agent shadow roots to skip.
+    // Composed tree traversal, ignoring user agent shadow trees.
 
     KRYS_NODISCARD dom::Node *FirstChildInComposedTree(dom::Node &node) noexcept
     {
       if (auto *element = DynamicDowncast<dom::Element>(node))
       {
-        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*element))
+        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*element);
+            shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
         {
           return shadowRoot->FirstChild();
         }
@@ -69,7 +72,7 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::Node *NextSiblingInComposedTree(dom::Node &node) noexcept
     {
-      if (auto *slot = dom::SlotAlgorithms::FindSlot(node))
+      if (auto *slot = dom::SlotAlgorithms::FindSlot(node); slot && !slot->IsInUserAgentShadowTree())
       {
         if (auto *assignedNodes = slot->AssignedNodes())
         {
@@ -1322,26 +1325,6 @@ namespace krys::boo
       return container && container->Renderer() && container->Renderer()->Style().PreserveNewline();
     }
 
-    KRYS_NODISCARD utf8_string StringBySimplifyingNewLines(utf8_stringview text) noexcept
-    {
-      utf8_string result;
-      result.reserve(text.size());
-      for (size_t i = 0; i < text.size(); ++i)
-      {
-        if (text[i] == u8'\r')
-        {
-          result.push_back(u8'\n');
-          if (i + 1 < text.size() && text[i + 1] == u8'\n')
-          {
-            ++i;
-          }
-          continue;
-        }
-        result.push_back(text[i]);
-      }
-      return result;
-    }
-
     List<Ref<dom::Element>> CollectElementsToRemoveFromFragment(dom::ContainerNode &container) noexcept
     {
       List<Ref<dom::Element>> toRemove;
@@ -1564,7 +1547,6 @@ namespace krys::boo
     return ParentTabSpanNode(firstChild->FirstChild()) && Is<dom::Text>(*secondChild);
   }
 
-  // FIXME: Pasting into a text control as line breaks (enclosingTextFormControl), with form controls.
   Ref<dom::DocumentFragment> CreateFragmentFromText(const dom::SimpleRange &context,
                                                     utf8_stringview text) noexcept
   {
@@ -1576,7 +1558,7 @@ namespace krys::boo
       return fragment;
     }
 
-    utf8_string string = StringBySimplifyingNewLines(text);
+    utf8_string string = infra::StringAlgorithms::NormalizeNewlines(text);
 
     auto createHTMLBRElement = [&document]()
     {
@@ -1620,7 +1602,7 @@ namespace krys::boo
                                      // Position::upstream/downstream.
                                      && !IsRenderedTable(block.get())
                                      && block != EditableRootForPosition(start);
-    bool useLineBreak = false;
+    bool useLineBreak = html::EnclosingTextFormControl(start);
 
     List<utf8_stringview> list;
     for (auto part : std::views::split(utf8_stringview(string), u8'\n'))

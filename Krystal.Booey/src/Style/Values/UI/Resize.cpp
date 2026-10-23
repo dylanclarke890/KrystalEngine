@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/UI/Resize.hpp"
 
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueConversion.hpp"
@@ -22,9 +24,7 @@ namespace krys::boo::style
 
     if (primitiveValue->ValueId() == css::ValueId::InternalTextareaAuto)
     {
-      // FIXME: Read `textAreasAreResizable` from the document's settings once `Settings` is ported; until
-      // then this uses its default (false).
-      return Resize::None;
+      return state.GetDocument().GetSettings().TextAreasAreResizable ? Resize::Both : Resize::None;
     }
 
     return FromCSSValue<Resize>(value);

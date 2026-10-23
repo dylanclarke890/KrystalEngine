@@ -1311,7 +1311,86 @@ namespace krys::boo
     // of the box.
     PaintScrollCorner(context, paintOffset, damageRect);
 
-    // FIXME: Paint our resizer last, since it sits on top of the scroll corner, once there are resizers.
+    // Paint our resizer last, since it sits on top of the scroll corner.
+    PaintResizer(context, LayoutPoint(paintOffset), LayoutRect(damageRect));
+  }
+
+  void RenderLayerScrollableArea::PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
+                                               const LayoutRect &damageRect) noexcept
+  {
+    auto &renderer = _layer.Renderer();
+    if (renderer.Style().GetResize() == style::Resize::None)
+    {
+      return;
+    }
+
+    auto rects = OverflowControlsRects();
+
+    LayoutRect resizerAbsRect = LayoutRect(rects.Resizer);
+    resizerAbsRect.MoveBy(paintOffset);
+    if (!resizerAbsRect.Intersects(damageRect))
+    {
+      return;
+    }
+
+    // FIXME: Custom resizers (::-webkit-resizer, dropped as non-standard), and invalidating control tints.
+
+    RenderTheme::PaintPlatformResizer(renderer, context, resizerAbsRect);
+
+    // Draw a frame around the resizer if there are any scrollbars present.
+    if (!HasOverlayScrollbars() && (_vBar || _hBar)
+        && renderer.Style().GetScrollbarWidth() != style::ScrollbarWidth::None)
+    {
+      RenderTheme::PaintPlatformResizerFrame(renderer, context, resizerAbsRect);
+    }
+  }
+
+  bool RenderLayerScrollableArea::HitTestResizerInFragments(const LayerFragments &layerFragments,
+                                                            const HitTestLocation &hitTestLocation,
+                                                            LayoutPoint &pointInFragment) const noexcept
+  {
+    if (layerFragments.empty())
+    {
+      return false;
+    }
+
+    auto &renderer = _layer.Renderer();
+    if (!renderer.VisibleToHitTesting())
+    {
+      return false;
+    }
+
+    auto borderBoxRect = SnappedIntRect(Downcast<RenderBox>(renderer).BorderBoxRect());
+    auto rects = OverflowControlsRects();
+
+    auto cornerRectInFragment = [&](const IntRect &fragmentBounds, const IntRect &resizerRect)
+    {
+      if (ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        IntSize offsetFromBottomLeft = borderBoxRect.MinXMaxYCorner() - resizerRect.MinXMaxYCorner();
+        return IntRect {fragmentBounds.MinXMaxYCorner() - offsetFromBottomLeft
+                          - IntSize {0, resizerRect.Height()},
+                        resizerRect.Size()};
+      }
+      IntSize offsetFromBottomRight = borderBoxRect.MaxXMaxYCorner() - resizerRect.MaxXMaxYCorner();
+      return IntRect {fragmentBounds.MaxXMaxYCorner() - offsetFromBottomRight - resizerRect.Size(),
+                      resizerRect.Size()};
+    };
+
+    for (auto i = static_cast<int64>(layerFragments.size()) - 1; i >= 0; --i)
+    {
+      const LayerFragment &fragment = layerFragments[static_cast<size_t>(i)];
+      auto resizerRectInFragment =
+        cornerRectInFragment(SnappedIntRect(fragment.LayerBounds()), rects.Resizer);
+      if (fragment.DirtyBackgroundRect().Intersects(hitTestLocation)
+          && resizerRectInFragment.Contains(hitTestLocation.RoundedPoint()))
+      {
+        pointInFragment = ToLayoutPoint(hitTestLocation.Point() - fragment.LayerBounds().Location());
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void RenderLayerScrollableArea::PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
@@ -1336,13 +1415,21 @@ namespace krys::boo
   bool RenderLayerScrollableArea::HitTestOverflowControls(HitTestResult &result,
                                                           const IntPoint &localPoint) noexcept
   {
-    // FIXME: Resizers (canResize), once there are resizers.
-    if (!_hBar && !_vBar)
+    if (!_hBar && !_vBar && !_layer.CanResize())
     {
       return false;
     }
 
     auto rects = OverflowControlsRects();
+
+    auto &renderer = _layer.Renderer();
+    if (renderer.Style().GetResize() != style::Resize::None)
+    {
+      if (rects.Resizer.Contains(localPoint))
+      {
+        return true;
+      }
+    }
 
     // FIXME: We should hit test the scroll corner and pass it back through the result.
     if (RefPtr<Scrollbar> vBar = _vBar; vBar && vBar->ShouldParticipateInHitTesting())

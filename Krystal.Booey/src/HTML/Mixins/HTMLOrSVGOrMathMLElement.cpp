@@ -119,12 +119,11 @@ namespace krys::boo::html::mixins
 
     FocusAlgorithms::FocusingSteps(element, nullptr, withVisibility);
 
-    // FIXME: The focus options' selection restoration mode, with form controls.
     if (RefPtr<dom::Element> focused = ShareRefPtr(element.NodeDocument().FocusedElement()))
     {
-      focused->UpdateFocusAppearance(dom::SelectionRestorationMode::RestoreOrSelectAll,
-                                     options.PreventScroll ? SelectionRevealMode::DoNotReveal
-                                                           : SelectionRevealMode::Reveal);
+      focused->UpdateFocusAppearance(options.SelectionRestoration, options.PreventScroll
+                                                                     ? SelectionRevealMode::DoNotReveal
+                                                                     : SelectionRevealMode::Reveal);
     }
   }
 

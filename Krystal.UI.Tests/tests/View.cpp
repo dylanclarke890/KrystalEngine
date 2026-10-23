@@ -11,6 +11,8 @@
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -507,6 +509,45 @@ namespace krys::ui::tests
     CHECK(markup() == "bca");
 
     strategies.SetPasteboardStrategy(systemPasteboard);
+  }
+
+  TEST_CASE("View: typing into text fields", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }"
+                  u8"input, textarea { display: block; width: 200px; height: 40px }</style>"
+                  u8"<input id=field value=ab><textarea id=area></textarea>");
+    view.UpdateRendering();
+
+    auto &field = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"field"));
+    auto &area = Downcast<boo::html::HTMLTextAreaElement>(*view.Document().GetElementById(u8"area"));
+
+    // A click focuses the field and puts the caret at the end of its text; typing goes into its value.
+    view.MousePressed({190, 20}, pal::MouseButton::Left);
+    view.MouseReleased({190, 20}, pal::MouseButton::Left);
+    CHECK(view.Document().FocusedElement() == &field);
+    CHECK(field.SelectionStart() == 2);
+    (void)view.KeyPressed(pal::Key::C, {}, {u8"c", u8"c"});
+    CHECK(field.Value() == u8"abc");
+    CHECK(view.KeyPressed(pal::Key::Del));
+    CHECK(field.Value() == u8"ab");
+
+    // Enter in a field doesn't add a line; in a text area it does.
+    (void)view.KeyPressed(pal::Key::Enter, {}, {u8"\r", u8"\r"});
+    CHECK(field.Value() == u8"ab");
+    view.MousePressed({100, 60}, pal::MouseButton::Left);
+    view.MouseReleased({100, 60}, pal::MouseButton::Left);
+    CHECK(view.Document().FocusedElement() == &area);
+    (void)view.KeyPressed(pal::Key::X, {}, {u8"x", u8"x"});
+    (void)view.KeyPressed(pal::Key::Enter, {}, {u8"\r", u8"\r"});
+    (void)view.KeyPressed(pal::Key::Y, {}, {u8"y", u8"y"});
+    CHECK(area.Value() == u8"x\ny");
+
+    // Ctrl+A selects only the focused control's text.
+    CHECK(view.KeyPressed(pal::Key::A, {pal::KeyModifier::Control}, {u8"", u8"a"}));
+    CHECK(area.SelectionStart() == 0);
+    CHECK(area.SelectionEnd() == 3);
+    CHECK(view.Document().GetEditor().SelectedText() == u8"x\ny");
   }
 
   TEST_CASE("View: keys", "[UI]")

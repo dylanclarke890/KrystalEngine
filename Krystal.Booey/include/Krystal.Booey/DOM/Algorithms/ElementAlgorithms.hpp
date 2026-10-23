@@ -80,10 +80,16 @@ namespace krys::boo::dom
                                                              SlotAssignmentMode slotAssignment,
                                                              html::CustomElementRegistry *registry) noexcept;
 
+    /// @brief Attaches a user agent shadow root to @p element, which must have no shadow root.
+    static ShadowRoot &AttachUserAgentShadowRoot(Element &element) noexcept;
+
     /// @brief Helper method for creating a new DOMTokenList bound to an element and attribute, optionally
     /// with a function to filter new values to only supported values.
     KRYS_NODISCARD static UniquePtr<DOMTokenList> CreateDOMTokenList(
       Element &element, DOMStringAtom attributeName,
       IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+
+  private:
+    static void AddShadowRoot(Element &element, const Ref<ShadowRoot> &shadow) noexcept;
   };
 }

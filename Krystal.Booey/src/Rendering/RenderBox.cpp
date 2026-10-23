@@ -7,6 +7,8 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
@@ -3311,7 +3313,11 @@ namespace krys::boo
     {
       return false;
     }
-    // FIXME: Form controls other than fieldsets (HTMLFormControlElement), once there are those.
+    if (Is<html::HTMLFormControlElement>(child.GetElement())
+        && !Is<html::HTMLFieldSetElement>(child.GetElement()))
+    {
+      return false;
+    }
     return true;
   }
 
@@ -3626,8 +3632,12 @@ namespace krys::boo
 
   bool RenderBox::AvoidsFloats() const noexcept
   {
-    // FIXME: Form controls, once there are form controls, and MathML blocks, once there's MathML.
+    // FIXME: MathML blocks, once there's MathML.
     if (Is<RenderReplaced>(*this) || IsLegend())
+    {
+      return true;
+    }
+    if (Is<html::HTMLFormControlElement>(GetElement()))
     {
       return true;
     }
@@ -6237,10 +6247,11 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Control clips (hasControlClip, controlClipRect), once there are form controls.
+    // FIXME: Not for the event region phase, once there are event regions.
+    bool isControlClip = HasControlClip();
     bool isOverflowClip = HasNonVisibleOverflow() && !Layer()->IsSelfPaintingLayer();
 
-    if (!isOverflowClip)
+    if (!isControlClip && !isOverflowClip)
     {
       return false;
     }
@@ -6257,7 +6268,9 @@ namespace krys::boo
     }
     float deviceScaleFactor = GetDocument().DeviceScaleFactor();
     FloatRect clipRect = SnapRectToDevicePixels(
-      OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize),
+      isControlClip
+        ? ControlClipRect(accumulatedOffset)
+        : OverflowClipRect(accumulatedOffset, OverlayScrollbarSizeRelevancy::IgnoreOverlayScrollbarSize),
       deviceScaleFactor);
     paintInfo.Context().Save();
     if (Style().HasBorderRadius())
@@ -6275,7 +6288,7 @@ namespace krys::boo
   void RenderBox::PopContentsClip(PaintInfo &paintInfo, PaintPhase originalPhase,
                                   const LayoutPoint &accumulatedOffset) noexcept
   {
-    krys_debug_assert(HasNonVisibleOverflow() && !Layer()->IsSelfPaintingLayer());
+    krys_debug_assert(HasControlClip() || (HasNonVisibleOverflow() && !Layer()->IsSelfPaintingLayer()));
 
     paintInfo.Context().Restore();
     if (originalPhase == PaintPhase::Outline)

@@ -16,6 +16,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
@@ -410,8 +411,17 @@ namespace krys::boo
     SetNodeFlags(_selection, true);
     UpdateOrDisassociateLiveRange(options.Contains(SetSelectionOption::MaintainLiveRange));
 
+    // Selection offsets should increase when LF is inserted before the caret in InsertLineBreakCommand. See
+    // <https://webkit.org/b/56061>.
     // https://www.w3.org/TR/selection-api/#selectionchange-event
+    RefPtr<html::HTMLTextFormControlElement> textControl =
+      ShareRefPtr(html::EnclosingTextFormControl(newSelection.Start()));
     bool shouldScheduleSelectionChangeEvent = willMutateSelection;
+    if (textControl)
+    {
+      shouldScheduleSelectionChangeEvent =
+        textControl->SelectionChanged(options.Contains(SetSelectionOption::FireSelectEvent));
+    }
 
     if (!willMutateSelection)
     {
@@ -439,7 +449,11 @@ namespace krys::boo
     // It will be restored by the vertical arrow navigation code if necessary.
     _xPosForVerticalArrowNavigation = null;
 
-    if (shouldScheduleSelectionChangeEvent && !_hasScheduledSelectionChangeEventOnDocument)
+    if (shouldScheduleSelectionChangeEvent && textControl)
+    {
+      textControl->ScheduleSelectionChangeEvent();
+    }
+    else if (shouldScheduleSelectionChangeEvent && !_hasScheduledSelectionChangeEventOnDocument)
     {
       _hasScheduledSelectionChangeEventOnDocument = true;
       html::EventLoop::Current().QueueTask(
@@ -1862,7 +1876,7 @@ namespace krys::boo
                                    result.LocalPoint(), HitTestSource::User)));
   }
 
-  // FIXME: Select elements and text fields (selectAll on a focused select or text field), with form controls.
+  // FIXME: Select elements (selectAll on a focused select), with them.
   void FrameSelection::SelectAll() noexcept
   {
     auto *focusedElement = _document->FocusedElement();
@@ -1885,6 +1899,11 @@ namespace krys::boo
     {
       if (_selection.IsNone() && focusedElement)
       {
+        if (focusedElement->IsTextField())
+        {
+          Downcast<html::HTMLTextFormControlElement>(*focusedElement).Select();
+          return;
+        }
         root = ShareRefPtr(focusedElement->NonBoundaryShadowTreeRootNode());
       }
       else

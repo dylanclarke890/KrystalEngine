@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -1658,8 +1659,16 @@ namespace krys::boo
     }
 
     const auto &style = renderer.Style();
-    // FIXME: Text controls that aren't flex or grid items and aren't sized by their content, once there are
-    // form controls.
+    if (auto *textControl = DynamicDowncast<RenderTextControl>(renderer))
+    {
+      if (!textControl->IsFlexItem() && !textControl->IsGridItem()
+          && style.GetFieldSizing() != FieldSizing::Content)
+      {
+        // Flexing type of layout systems may compute different size than what input's preferred width is
+        // which won't happen unless they run their layout as well.
+        return true;
+      }
+    }
 
     if (renderer.ShouldApplyLayoutContainment() && renderer.ShouldApplySizeContainment())
     {

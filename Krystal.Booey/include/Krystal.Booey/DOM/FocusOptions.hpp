@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -55,6 +56,8 @@ namespace krys::boo::dom
   // FIXME: The selection restoration mode, once there's editing.
   struct FocusOptions
   {
+    /// @brief What focusing an element with a selection of its own (a text control) does with it.
+    SelectionRestorationMode SelectionRestoration {SelectionRestorationMode::RestoreOrSelectAll};
     FocusRemovalEventsMode RemovalEventsMode {FocusRemovalEventsMode::Dispatch};
     FocusDirection Direction {FocusDirection::None};
     FocusTrigger Trigger {FocusTrigger::Other};

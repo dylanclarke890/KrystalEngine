@@ -93,6 +93,13 @@ tr:hover td { text-decoration: underline; }
 .caret p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }
 .order { font-size: 13px; line-height: 18px; }
 .order label { display: block; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: #f7f8fb; }
+.order input[name=name], .order textarea { display: block; box-sizing: border-box; width: 100%; margin: 0 0 6px;
+  padding: 4px 8px; border: 1px solid #c5cbd8; border-radius: 6px; background: #ffffff; font: inherit;
+  color: #073b4c; caret-color: #4f6df5; }
+.order input[name=name]:focus, .order textarea:focus { border-color: #4f6df5; outline: none; }
+.order input[name=name]:invalid { border-color: #ef476f; }
+.order textarea { resize: none; }
+.order ::placeholder { color: #8d99ae; }
 .order input:checked + span { color: #06a77d; font-weight: bold; }
 .order button { margin: 10px 8px 0 0; padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5;
   color: #ffffff; font: inherit; cursor: pointer; }

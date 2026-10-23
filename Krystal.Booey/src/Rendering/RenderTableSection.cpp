@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BorderPainter.hpp"
@@ -94,8 +96,12 @@ namespace krys::boo
       {
         return true;
       }
-      // FIXME: Form controls other than fieldsets (HTMLFormControlElement), once there are those.
-      return cellDescendant.IsBlockLevelReplacedOrAtomicInline();
+      if (cellDescendant.IsBlockLevelReplacedOrAtomicInline())
+      {
+        return true;
+      }
+      return Is<html::HTMLFormControlElement>(cellDescendant.GetElement())
+             && !Is<html::HTMLFieldSetElement>(cellDescendant.GetElement());
     }
   }
 

@@ -738,8 +738,19 @@ namespace krys::boo
     KRYS_NODISCARD bool CanUseOverlayScrollbars() const noexcept;
     KRYS_NODISCARD bool HasAutoScrollbar(ScrollbarOrientation orientation) const noexcept;
     KRYS_NODISCARD bool HasAlwaysPresentScrollbar(ScrollbarOrientation orientation) const noexcept;
-    KRYS_NODISCARD bool CanBeProgramaticallyScrolled() const noexcept;
+    KRYS_NODISCARD virtual bool CanBeProgramaticallyScrolled() const noexcept;
     KRYS_NODISCARD bool CanBeScrolledAndHasScrollableArea() const noexcept;
+
+    /// @brief Whether the box clips its content to `ControlClipRect` (a form control's insides).
+    KRYS_NODISCARD virtual bool HasControlClip() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual LayoutRect ControlClipRect(const LayoutPoint &) const noexcept
+    {
+      return {};
+    }
 
     /// @brief Scrolls the box to bring @p positionInWindow into view, while a mouse drag selects past its
     /// edge.
@@ -758,22 +769,22 @@ namespace krys::boo
     /// @param stopElement If given and set, the scroll goes no further than that element; it's set to the
     /// element of the box that scrolled.
     /// @return Whether something scrolled.
-    bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                dom::Element **stopElement = nullptr) noexcept;
+    virtual bool Scroll(ScrollDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
+                        dom::Element **stopElement = nullptr) noexcept;
     /// @brief As `Scroll`, in a direction relative to the box's writing mode.
-    bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity, uint32 stepCount = 1,
-                       dom::Element **stopElement = nullptr) noexcept;
+    virtual bool LogicalScroll(ScrollLogicalDirection direction, ScrollGranularity granularity,
+                               uint32 stepCount = 1, dom::Element **stopElement = nullptr) noexcept;
     KRYS_NODISCARD bool RequiresLayerWithScrollableArea() const noexcept;
-    KRYS_NODISCARD int32 ScrollLeft() const noexcept;
-    KRYS_NODISCARD int32 ScrollTop() const noexcept;
+    KRYS_NODISCARD virtual int32 ScrollLeft() const noexcept;
+    KRYS_NODISCARD virtual int32 ScrollTop() const noexcept;
     KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept;
-    void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
-                                        ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
-    void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =
-                                      ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
-    void SetScrollPosition(const ScrollPosition &position,
-                           const ScrollPositionChangeOptions &options =
-                             ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    virtual void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
+                                                ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    virtual void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =
+                                              ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
+    virtual void SetScrollPosition(const ScrollPosition &position,
+                                   const ScrollPositionChangeOptions &options =
+                                     ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
 
 #pragma region Geometry mapping
 

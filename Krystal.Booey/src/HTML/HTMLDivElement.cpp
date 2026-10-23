@@ -10,6 +10,11 @@ namespace krys::boo::html
   {
   }
 
+  HTMLDivElement::HTMLDivElement(dom::Document &document, dom::NodeFlags nodeFlags) noexcept
+      : HTMLElement(document, HTMLElementInterface::Div, HTMLElementFlags::None, nodeFlags)
+  {
+  }
+
 #pragma region HTMLDivElement Obsolete members
 
   dom::DOMString HTMLDivElement::Align() const noexcept

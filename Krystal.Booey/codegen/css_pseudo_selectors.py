@@ -76,6 +76,7 @@ KNOWN_KEY_TYPES = {
         "supports-single-colon-for-compatibility": [bool],
         "user-agent-part": [bool],
         "user-agent-part-string": [bool],
+        "user-agent-sheet-only": [bool],
     },
 }
 
@@ -95,9 +96,11 @@ class InputValidator:
 
     def validate_fields(self, data, pseudo_type):
         for pseudo_name, pseudo_data in data[pseudo_type].items():
-            # Only standard, unprefixed pseudos are supported.
-            if pseudo_name.startswith("-"):
+            # Only standard, unprefixed pseudos are supported, but for the internal user agent parts.
+            if pseudo_name.startswith("-") and not key_is_true(pseudo_data, "user-agent-sheet-only"):
                 raise Exception(f'"{pseudo_name}" is prefixed; only standard pseudos are supported.')
+            if key_is_true(pseudo_data, "user-agent-sheet-only") and not key_is_true(pseudo_data, "user-agent-part"):
+                raise Exception(f'"{pseudo_name}" is only for user agent sheets but is not a user agent part.')
 
             for key, value in pseudo_data.items():
                 if key not in KNOWN_KEY_TYPES[pseudo_type]:
@@ -226,6 +229,14 @@ def format_enablement_condition(settings_flag: str) -> str:
     return f"context.{settings_flag}"
 
 
+def pseudo_element_enablement_condition(pseudo_data) -> str | None:
+    if "settings-flag" in pseudo_data:
+        return format_enablement_condition(pseudo_data["settings-flag"])
+    if key_is_true(pseudo_data, "user-agent-sheet-only"):
+        return "IsUASheetBehavior(context.Mode)"
+    return None
+
+
 def write_case(writer: Writer, *, case: str, body: list[str]):
     writer.write(f"case {case}:")
     with writer.indent():
@@ -265,10 +276,9 @@ def write_is_pseudo_element_enabled(writer: Writer, pseudo_elements):
         user_agent_parts = {}
 
         for pseudo_name, pseudo_data in pseudo_elements.items():
-            if "settings-flag" not in pseudo_data:
+            enablement_condition = pseudo_element_enablement_condition(pseudo_data)
+            if enablement_condition is None:
                 continue
-
-            enablement_condition = format_enablement_condition(pseudo_data["settings-flag"])
 
             # User agent parts share one enum value, so they are told apart by name.
             if key_is_true(pseudo_data, "user-agent-part"):

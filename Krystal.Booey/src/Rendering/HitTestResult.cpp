@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include <algorithm>
 
@@ -81,10 +83,34 @@ namespace krys::boo
     return *this;
   }
 
+  namespace
+  {
+    KRYS_NODISCARD dom::Node *MoveOutOfUserAgentShadowTree(dom::Node &node) noexcept
+    {
+      if (node.IsInShadowTree())
+      {
+        if (auto *root = dom::TreeQueries::ContainingShadowRoot(node))
+        {
+          if (root->Mode() == dom::ShadowRootMode::UserAgent)
+          {
+            return root->Host();
+          }
+        }
+      }
+      return &node;
+    }
+  }
+
   void HitTestResult::SetToNonUserAgentShadowAncestor() noexcept
   {
-    // There are no user agent shadow trees (form controls' internals) to move out of; shadow roots are only
-    // open or closed.
+    if (auto *node = InnerNode())
+    {
+      SetInnerNode(MoveOutOfUserAgentShadowTree(*node));
+    }
+    if (auto *node = InnerNonSharedNode())
+    {
+      SetInnerNonSharedNode(MoveOutOfUserAgentShadowTree(*node));
+    }
   }
 
   void HitTestResult::SetInnerNode(dom::Node *node) noexcept
@@ -156,7 +182,13 @@ namespace krys::boo
       return HitTestProgress::Continue;
     }
 
-    // There are no user agent shadow trees whose nodes would be replaced by their hosts.
+    if ((request.DisallowsUserAgentShadowContent() && node->IsInUserAgentShadowTree())
+        || (request.DisallowsUserAgentShadowContentExceptForImageOverlays()
+            && node->IsInUserAgentShadowTree()))
+    {
+      // FIXME: Image overlays aren't exempt from the second check, with image overlays.
+      node = AncestorNodeInThisScope(node->NodeDocument(), node);
+    }
 
     auto &nodes = MutableListBasedTestResult();
     if (std::ranges::find_if(nodes, [&](const Ref<dom::Node> &existing) { return existing.get() == node; })

@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/TextInsertionBaseCommand.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
@@ -31,17 +33,39 @@ namespace krys::boo
     }
   }
 
-  // FIXME: The event text controls handle to filter the text they're given (BeforeTextInsertedEvent), with
-  // form controls; until then the text is inserted as it is.
-  utf8_string DispatchBeforeTextInsertedEvent(utf8_stringview text, const VisibleSelection &, bool) noexcept
+  utf8_string DispatchBeforeTextInsertedEvent(utf8_stringview text,
+                                              const VisibleSelection &selectionForInsertion,
+                                              bool insertionIsForUpdatingComposition) noexcept
   {
-    return utf8_string(text);
+    if (insertionIsForUpdatingComposition)
+    {
+      return utf8_string(text);
+    }
+
+    utf8_string newText(text);
+    if (RefPtr<dom::Node> startNode = ShareRefPtr(selectionForInsertion.Start().GetContainerNode()))
+    {
+      if (RefPtr<dom::Element> rootEditableElement = ShareRefPtr(startNode->RootEditableElement()))
+      {
+        // Send BeforeTextInsertedEvent. The event handler will update text if necessary.
+        auto event = dom::BeforeTextInsertedEvent::Create(text);
+        (void)dom::EventDispatcher::DispatchToTarget(*event, rootEditableElement.get());
+        newText = event->Text();
+      }
+    }
+    return newText;
   }
 
-  // FIXME: Asking text controls whether they'd take a newline (BeforeTextInsertedEvent), with form controls;
-  // until then any editable root takes one.
   bool CanAppendNewLineFeedToSelection(const VisibleSelection &selection) noexcept
   {
-    return selection.RootEditableElement();
+    RefPtr<dom::Element> node = ShareRefPtr(selection.RootEditableElement());
+    if (!node)
+    {
+      return false;
+    }
+
+    auto event = dom::BeforeTextInsertedEvent::Create(u8"\n");
+    (void)dom::EventDispatcher::DispatchToTarget(*event, node.get());
+    return !event->Text().empty();
   }
 }

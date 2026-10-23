@@ -1068,6 +1068,20 @@ namespace krys::boo
     return false;
   }
 
+  namespace
+  {
+    KRYS_NODISCARD inline bool IsDelayingUpdateScrollInfoAfterLayout(const RenderBlock &renderer) noexcept
+    {
+      auto *transaction =
+        renderer.View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists();
+      // FIXME: https://bugs.webkit.org/show_bug.cgi?id=97937
+      // Workaround for now. We cannot delay the scroll info for overflow
+      // for items with opposite writing directions, as the contents needs
+      // to overflow in that direction
+      return transaction && transaction->NestedCount && !renderer.GetWritingMode().IsBlockFlipped();
+    }
+  }
+
   void RenderBlock::Layout() noexcept
   {
     // Table cells call layoutBlock directly, so don't add any logic here. Put code into layoutBlock().
@@ -1076,7 +1090,12 @@ namespace krys::boo
       LayoutBlock(RelayoutChildren::No);
     }
 
-    // FIXME: Clear the layout overflow of a lightweight control clip, once there are form controls.
+    // It's safe to check for control clip here, since controls can never be table cells.
+    // If we have a lightweight clip, there can never be any overflow from children.
+    if (HasControlClip() && _overflow && !IsDelayingUpdateScrollInfoAfterLayout(*this))
+    {
+      ClearLayoutOverflow();
+    }
 
     InvalidateBackgroundObscurationStatus();
   }
@@ -1943,20 +1962,6 @@ namespace krys::boo
     }
   }
 
-  namespace
-  {
-    KRYS_NODISCARD inline bool IsDelayingUpdateScrollInfoAfterLayout(const RenderBlock &renderer) noexcept
-    {
-      auto *transaction =
-        renderer.View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists();
-      // FIXME: https://bugs.webkit.org/show_bug.cgi?id=97937
-      // Workaround for now. We cannot delay the scroll info for overflow
-      // for items with opposite writing directions, as the contents needs
-      // to overflow in that direction
-      return transaction && transaction->NestedCount && !renderer.GetWritingMode().IsBlockFlipped();
-    }
-  }
-
   void RenderBlock::BeginUpdateScrollInfoAfterLayoutTransaction() noexcept
   {
     ++View().FrameView().LayoutContext().GetUpdateScrollInfoAfterLayoutTransaction().NestedCount;
@@ -1981,7 +1986,10 @@ namespace krys::boo
 
     for (auto *block : blocksToUpdate)
     {
-      // FIXME: Clear the layout overflow of a lightweight control clip, once there are form controls.
+      if (block->HasControlClip() && block->HasRenderOverflow())
+      {
+        block->ClearLayoutOverflow();
+      }
       if (block->HasNonVisibleOverflow())
       {
         block->Layer()->UpdateScrollInfoAfterLayout();
@@ -2004,8 +2012,8 @@ namespace krys::boo
 
     if (IsDelayingUpdateScrollInfoAfterLayout(*this))
     {
-      // FIXME: Also delay a lightweight control clip's update, once there are form controls.
-      if (hasNonVisibleOverflow)
+      auto shouldUpdate = hasNonVisibleOverflow || HasControlClip();
+      if (shouldUpdate)
       {
         View().FrameView().LayoutContext().UpdateScrollInfoAfterLayoutTransactionIfExists()->Blocks.add(this);
         return;
@@ -2449,11 +2457,13 @@ namespace krys::boo
     if (shouldHittestContent)
     {
       // If we have clipping, then we can't have any spillout.
-      // FIXME: Control clips (hasControlClip, controlClipRect) come with form controls.
-      bool useClip = HasNonVisibleOverflow();
-      bool checkChildren = !useClip
-                           || locationInContainer.Intersects(OverflowClipRect(
-                             adjustedLocation, OverlayScrollbarSizeRelevancy::IncludeOverlayScrollbarSize));
+      bool useClip = HasControlClip() || HasNonVisibleOverflow();
+      bool checkChildren =
+        !useClip
+        || (HasControlClip()
+              ? locationInContainer.Intersects(ControlClipRect(adjustedLocation))
+              : locationInContainer.Intersects(OverflowClipRect(
+                  adjustedLocation, OverlayScrollbarSizeRelevancy::IncludeOverlayScrollbarSize)));
       if (checkChildren
           && HitTestChildren(request, result, locationInContainer, adjustedLocation, hitTestAction))
       {

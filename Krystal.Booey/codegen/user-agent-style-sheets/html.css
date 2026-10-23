@@ -400,6 +400,30 @@ input[type="search"] {
     box-sizing: border-box;
 }
 
+input::-webkit-textfield-decoration-container {
+    display: flex;
+    align-items: center;
+    content: none !important;
+    writing-mode: inherit !important;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-decoration {
+    appearance: auto;
+    display: block;
+    flex: none;
+    align-self: flex-start;
+    margin-block: auto;
+    margin-inline: 0;
+}
+
+input[type="search"]::-webkit-search-results-button {
+    appearance: auto;
+    display: block;
+    flex: none;
+}
+
 input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
     align-items: center;
     display: inline-flex;
@@ -412,6 +436,19 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
 }
 
 /* FIXME: Styling inner elements of the date control should be specific to input[type="date"]. */
+
+input::-webkit-inner-spin-button {
+    appearance: auto;
+    display: block;
+    position: relative;
+    cursor: default;
+    /* This height property is ignored for input type "number" and others which
+     * use RenderTextControlSingleLine as renderer which sets height of spin
+     * button in layout(). */
+    height: 1.5em;
+    flex: none;
+    -webkit-user-select: none;
+}
 
 textarea {
     appearance: auto;

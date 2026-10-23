@@ -401,6 +401,27 @@ namespace krys::boo::dom
     shadow->_clonable = clonable;
     shadow->_serializable = serializable;
 
+    AddShadowRoot(element, shadow);
+
+    return {};
+  }
+
+  ShadowRoot &ElementAlgorithms::AttachUserAgentShadowRoot(Element &element) noexcept
+  {
+    krys_debug_assert(!element._shadowRoot);
+
+    auto shadow = CreateRef<ShadowRoot>(element.NodeDocument());
+    shadow->_host = CreateWeakPtr(&element);
+    shadow->_mode = ShadowRootMode::UserAgent;
+    shadow->_slotAssignment = SlotAssignmentMode::Named;
+
+    AddShadowRoot(element, shadow);
+
+    return *shadow;
+  }
+
+  void ElementAlgorithms::AddShadowRoot(Element &element, const Ref<ShadowRoot> &shadow) noexcept
+  {
     RenderTreeUpdater::TearDownRenderersForShadowRootInsertion(element);
 
     element._shadowRoot = shadow;
@@ -410,9 +431,12 @@ namespace krys::boo::dom
       ExtensibilityHooks::NodeInserted(*shadow, false);
     }
 
-    element.InvalidateStyleAndRenderersForSubtree();
+    if (shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      element.DidAddUserAgentShadowRoot(*shadow);
+    }
 
-    return {};
+    element.InvalidateStyleAndRenderersForSubtree();
   }
 
   UniquePtr<DOMTokenList>

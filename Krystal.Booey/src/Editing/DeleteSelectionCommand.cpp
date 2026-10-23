@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
@@ -1296,8 +1297,7 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Telling the text field the text is about to be deleted (textWillBeDeletedInTextField), with form
-  // controls; and not rebalancing whitespace in secure fields (-webkit-text-security), which isn't supported.
+  // FIXME: Not rebalancing whitespace in secure fields (-webkit-text-security), which isn't supported.
   void DeleteSelectionCommand::DoApply() noexcept
   {
     // If selection has not been set to a custom selection when the command was created,
@@ -1310,6 +1310,17 @@ namespace krys::boo
     if (!_selectionToDelete.IsNonOrphanedRange() || !_selectionToDelete.IsContentEditable())
     {
       return;
+    }
+
+    // If the deletion is occurring in a text field, and we're not deleting to replace the selection, then let
+    // the frame call across the bridge to notify the form delegate.
+    if (!_replace)
+    {
+      if (RefPtr textControl = ShareRefPtr(html::EnclosingTextFormControl(_selectionToDelete.Start()));
+          textControl && textControl->Focused())
+      {
+        GetDocument().GetEditor().TextWillBeDeletedInTextField(*textControl);
+      }
     }
 
     // save this to later make the selection with

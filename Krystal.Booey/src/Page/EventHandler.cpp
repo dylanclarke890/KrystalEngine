@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TextEvent.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -110,9 +112,28 @@ namespace krys::boo
         }
       }
 
-      // FIXME: The shared shadow host of the two nodes (giving listeners the illusion that a host with a user
-      // agent shadow tree is a single element), once there are user agent shadow trees.
+      auto *mouseReleaseShadowHost = dom::TreeQueries::ShadowHost(*mouseReleaseNode);
+      if (mouseReleaseShadowHost && mouseReleaseShadowHost == dom::TreeQueries::ShadowHost(*mousePressNode))
+      {
+        // We want to dispatch the click to the shadow tree host element to give listeners the illusion that
+        // the shadow tree is a single element. For example, we want to give the illusion that <input
+        // type="range"> is a single element even though it is a composition of multiple shadom tree elements.
+        return ShareRefPtr(mouseReleaseShadowHost);
+      }
+
       return nullptr;
+    }
+
+    KRYS_NODISCARD bool ShouldRefetchEventTarget(const MouseEventWithHitTestResults &mouseEvent) noexcept
+    {
+      auto *targetNode = mouseEvent.TargetNode();
+      krys_debug_assert(targetNode);
+      if (!targetNode->ParentNode())
+      {
+        return true;
+      }
+      auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(*targetNode);
+      return shadowRoot && shadowRoot->Host() && Is<html::HTMLInputElement>(*shadowRoot->Host());
     }
 
     KRYS_NODISCARD dom::FocusDirection FocusDirectionForKey(const dom::DOMString &keyIdentifier) noexcept
@@ -171,8 +192,15 @@ namespace krys::boo
 
   EventHandler::~EventHandler() noexcept = default;
 
+  void EventHandler::ResizeLayerDestroyed() noexcept
+  {
+    krys_debug_assert(_resizeLayer);
+    _resizeLayer = nullptr;
+  }
+
   void EventHandler::Clear() noexcept
   {
+    _resizeLayer = nullptr;
     ClearElementUnderMouse();
     _lastElementUnderMouse = nullptr;
     _ancestorsOfLastElementUnderMouse.clear();
@@ -285,7 +313,18 @@ namespace krys::boo
     _clickCount = platformMouseEvent.ClickCount();
     _clickNode = ShareRefPtr(mouseEvent.TargetNode());
 
-    // FIXME: Resizers (isPointInResizeControl), once layers resize.
+    auto *layer = _clickNode && _clickNode->Renderer() ? _clickNode->Renderer()->EnclosingLayer() : nullptr;
+    auto localPoint = RoundedIntPoint(mouseEvent.GetHitTestResult().LocalPoint());
+    if (layer && layer->IsPointInResizeControl(localPoint))
+    {
+      layer->SetInResizeMode(true);
+      _resizeLayer = WeakPtr<RenderLayer>::WithRef(*layer);
+      _offsetFromResizeCorner = LayoutSize(layer->OffsetFromResizeCorner(localPoint));
+      RefPtr<dom::Node> resizedNode = ShareRefPtr(mouseEvent.TargetNode());
+      (void)DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), resizedNode.get(), _clickCount,
+                               platformMouseEvent, FireMouseOverOut::Yes);
+      return true;
+    }
 
     _frame.Document()->Selection().SetCaretBlinkingSuspended(true);
 
@@ -306,8 +345,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The input element's shadow tree (shouldRefetchEventTarget), with form controls.
-    if (!swallowEvent && !mouseEvent.TargetNode()->ParentNode())
+    if (!swallowEvent && ShouldRefetchEventTarget(mouseEvent))
     {
       mouseEvent = document->PrepareMouseEvent(HitTestRequest(), documentPoint, platformMouseEvent);
     }
@@ -374,7 +412,18 @@ namespace krys::boo
       *hitTestResult = mouseEvent.GetHitTestResult();
     }
 
-    // FIXME: Resizers.
+    if (auto *resizeLayer = _resizeLayer.get(); resizeLayer && resizeLayer->InResizeMode())
+    {
+      resizeLayer->Resize(platformMouseEvent, _offsetFromResizeCorner);
+
+      if (resizeLayer->Renderer().Style().ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        auto absolutePoint = frame->View()->WindowToContents(FlooredIntPoint(platformMouseEvent.Position()));
+        auto localPoint = RoundedIntPoint(resizeLayer->AbsoluteToContents(LayoutPoint(absolutePoint)));
+        _offsetFromResizeCorner.SetWidth(LayoutUnit(resizeLayer->OffsetFromResizeCorner(localPoint).Width()));
+      }
+    }
+    else
     {
       RefPtr<Scrollbar> scrollbar = ShareRefPtr(mouseEvent.GetScrollbar());
       UpdateLastScrollbarUnderMouse(scrollbar.get(), _mousePressed ? SetOrClearLastScrollbar::Clear
@@ -491,7 +540,11 @@ namespace krys::boo
     bool swallowClickEvent =
       SwallowAnyClickEvent(platformMouseEvent, mouseEvent, IgnoreAncestorNodesForClickEvent::No);
 
-    // FIXME: Resizers, once layers resize.
+    if (auto *resizeLayer = _resizeLayer.get())
+    {
+      resizeLayer->SetInResizeMode(false);
+      _resizeLayer = nullptr;
+    }
 
     bool swallowMouseReleaseEvent = false;
     if (!swallowMouseUpEvent)
@@ -692,8 +745,8 @@ namespace krys::boo
     // Walk up the tree from the element under the mouse to an element to focus, or focus the viewport if
     // there's none.
     // FIXME: A press inside a selected range in the focused element doesn't move the focus, once there's a
-    // selection; form controls that aren't mouse focusable still set the latest focus trigger, once there are
-    // form controls.
+    // selection. (Form controls are mouse focusable here, as on GTK and WPE, so the latest focus trigger
+    // needs no workaround for those that aren't.)
     RefPtr<dom::Element> element;
     if (RefPtr<dom::Element> pressedElement = _elementUnderMouse)
     {
@@ -821,7 +874,7 @@ namespace krys::boo
       return keydownResult;
     }
     Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent);
-    // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), once there are text fields.
+    // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), with input methods.
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
     return keydownResult || keypress->DefaultPrevented() || keypress->DefaultHandled()
@@ -1262,7 +1315,12 @@ namespace krys::boo
 
   Maybe<Cursor> EventHandler::SelectCursor(const HitTestResult &result, bool shiftKey) const noexcept
   {
-    // FIXME: Resizing layers, pan scrolling and auto-hiding cursors.
+    if (auto *resizeLayer = _resizeLayer.get(); resizeLayer && resizeLayer->InResizeMode())
+    {
+      return null;
+    }
+
+    // FIXME: Pan scrolling and auto-hiding cursors.
 
     // Use always pointer cursor for scrollbars.
     if (result.GetScrollbar())
@@ -1305,7 +1363,23 @@ namespace krys::boo
           return Cursor(Cursor::Type::Hand);
         }
 
-        // FIXME: Resizers (isPointInResizeControl), once layers resize.
+        auto *resizerRenderer = node->Renderer();
+
+        if (resizerRenderer && resizerRenderer->IsRenderText())
+        {
+          resizerRenderer = resizerRenderer->Parent();
+        }
+
+        if (resizerRenderer && resizerRenderer->HasLayer())
+        {
+          auto &layerRenderer = Downcast<RenderLayerModelObject>(*resizerRenderer);
+          if (layerRenderer.Layer()->IsPointInResizeControl(RoundedIntPoint(result.LocalPoint())))
+          {
+            return Cursor(layerRenderer.Style().ShouldPlaceVerticalScrollbarOnLeft()
+                            ? Cursor::Type::SouthWestResize
+                            : Cursor::Type::SouthEastResize);
+          }
+        }
 
         // Disabled: during a selection the cursor follows the content beneath it, as Firefox's does, rather
         // than staying an I-beam over boxes and gaps with no text.

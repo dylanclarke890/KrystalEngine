@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <utility>
@@ -13,12 +14,17 @@ namespace krys::boo
 {
   namespace
   {
-    // FIXME: User agent shadow roots, once there are any.
     KRYS_NODISCARD bool IsInUserAgentShadowRootOrHasEditableShadowAncestor(dom::Node &node) noexcept
     {
-      if (!dom::TreeQueries::ContainingShadowRoot(node))
+      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+      if (!shadowRoot)
       {
         return false;
+      }
+
+      if (shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
+      {
+        return true;
       }
 
       for (dom::Node *currentNode = &node; currentNode; currentNode = currentNode->ParentOrShadowHostNode())
@@ -811,6 +817,12 @@ namespace krys::boo
   dom::Element *VisibleSelection::RootEditableElement() const noexcept
   {
     return EditableRootForPosition(Start());
+  }
+
+  bool VisibleSelection::IsInPasswordField() const noexcept
+  {
+    auto *textControl = DynamicDowncast<html::HTMLInputElement>(html::EnclosingTextFormControl(Start()));
+    return textControl && textControl->IsPasswordField();
   }
 
   dom::Node *VisibleSelection::NonBoundaryShadowTreeRootNode() const noexcept

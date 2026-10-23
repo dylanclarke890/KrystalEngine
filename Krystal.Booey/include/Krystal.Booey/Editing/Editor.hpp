@@ -197,6 +197,13 @@ namespace krys::boo
 
     KRYS_NODISCARD EditingBehavior Behavior() const noexcept;
 
+    void TextFieldDidBeginEditing(dom::Element &element) noexcept;
+    void TextFieldDidEndEditing(dom::Element &element) noexcept;
+    void TextDidChangeInTextField(dom::Element &element) noexcept;
+    bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept;
+    void TextWillBeDeletedInTextField(dom::Element &input) noexcept;
+    void TextDidChangeInTextArea(dom::Element &element) noexcept;
+
     /// @brief The element a new paragraph is made of: a `div`, or a `p`.
     KRYS_NODISCARD EditorParagraphSeparator DefaultParagraphSeparator() const noexcept
     {
@@ -207,7 +214,9 @@ namespace krys::boo
       _defaultParagraphSeparator = separator;
     }
 
-    KRYS_NODISCARD const VisibleSelection &SelectionForCommand(dom::Event *event) const noexcept;
+    /// @brief The selection a command triggered by @p event works on: a text control's own selection when
+    /// the event is at one the frame's selection isn't in.
+    KRYS_NODISCARD VisibleSelection SelectionForCommand(dom::Event *event) const noexcept;
 
     KRYS_NODISCARD utf8_string SelectedText() const noexcept;
     KRYS_NODISCARD utf8_string SelectedTextForDataTransfer() const noexcept;

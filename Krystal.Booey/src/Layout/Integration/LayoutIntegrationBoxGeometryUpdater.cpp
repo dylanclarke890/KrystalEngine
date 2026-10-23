@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
@@ -18,6 +20,8 @@
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -212,9 +216,9 @@ namespace krys::boo::layout_integration
           continue;
         }
 
-        // FIXME: Text control inner containers and menu lists, once there are form controls.
-        if (Is<RenderFlexibleBox>(*inflowBox) || Is<RenderGrid>(*inflowBox)
-            || Is<RenderBlockFlow>(*inflowBox))
+        // FIXME: Menu lists, once there are menu lists.
+        if (Is<RenderFlexibleBox>(*inflowBox) || Is<RenderGrid>(*inflowBox) || Is<RenderBlockFlow>(*inflowBox)
+            || Is<RenderTextControlInnerContainer>(*inflowBox))
         {
           if (auto baseline = BaselineForBox(*inflowBox))
           {
@@ -250,18 +254,57 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Iframes, embedded objects, SVG roots, canvases, view transition captures and multi-line text
-      // controls have no baseline; images, attachments, buttons, list boxes, single-line text controls, file
-      // upload controls, sliders and other form controls have their own, once there are those renderers.
+      // FIXME: Iframes, embedded objects, SVG roots, canvases and view transition captures have no baseline;
+      // images, attachments, buttons, list boxes, file upload controls and sliders have their own, once there
+      // are those renderers.
+      if (Is<RenderTextControlMultiLine>(renderBox))
+      {
+        return null;
+      }
 
       auto marginBoxBottom = renderBox.MarginBoxLogicalHeight(writingMode)
                              - (writingMode.IsHorizontal() ? renderBox.MarginTop() : renderBox.MarginRight());
+
+      if (auto *textControl = DynamicDowncast<RenderTextControlSingleLine>(renderBox))
+      {
+        if (auto *innerTextRenderer = textControl->InnerTextRenderer())
+        {
+          auto baseline = LayoutUnit {};
+          if (innerTextRenderer->InlineLayout())
+          {
+            auto marginBoxLogicalHeight = innerTextRenderer->MarginBoxLogicalHeight(writingMode);
+            auto lastLineBaseline = innerTextRenderer->InlineLayout()->LastLineBaseline().value_or(0_lu);
+            baseline = std::min(marginBoxLogicalHeight, lastLineBaseline);
+          }
+          else
+          {
+            baseline = FontMetricsBasedBaseline(*innerTextRenderer);
+          }
+          baseline = SnapToInt(innerTextRenderer->LogicalTop() + baseline, SnapDirection::Floor);
+          for (auto *ancestor = innerTextRenderer->ContainingBlock(); ancestor && ancestor != textControl;
+               ancestor = ancestor->ContainingBlock())
+          {
+            baseline = SnapToInt(ancestor->LogicalTop() + baseline, SnapDirection::Floor);
+          }
+          return baseline;
+        }
+        // input::-webkit-textfield-decoration-container { display: none }
+        return null;
+      }
 
       // FIXME: MathML blocks use their first line's baseline, once there's MathML layout.
 
       if (Is<RenderTable>(renderBox))
       {
         return renderBox.FirstLineBaseline();
+      }
+
+      // FIXME: Menu lists, which also behave differently from flex boxes, with them.
+      if (Is<RenderTextControlInnerContainer>(renderBox))
+      {
+        // Inner containers are a type of flex box but they behave slightly differently so always check them
+        // before checking for flex.
+        return LastInflowBoxBaseline(Downcast<RenderBlock>(renderBox));
       }
 
       if (Is<RenderFlexibleBox>(renderBox) || Is<RenderGrid>(renderBox))
@@ -283,6 +326,50 @@ namespace krys::boo::layout_integration
           return LastInflowBoxBaseline(*blockFlow);
         }
         return null;
+      }
+
+      if (Is<html::HTMLFormControlElement>(renderBox.GetElement()))
+      {
+        // FIXME: For "leaf" theme objects like checkbox, let the theme decide what the baseline position is
+        // (baselinePosition), with the theme.
+
+        // Non-RenderTextControlSingleLine input type like input type color.
+        if (auto *container = DynamicDowncast<RenderBox>(renderBox.FirstInFlowChild()))
+        {
+          if (auto baseline = container->FirstLineBaseline())
+          {
+            return container->LogicalTop() + *baseline;
+          }
+        }
+        // e.g. leaf theme objects with no appearance (none) and empty content (e.g. before pseudo and
+        // content:
+        // "").
+        return null;
+      }
+
+      if (auto *element = renderBox.GetElement())
+      {
+        if (Is<html::HTMLFormControlElement>(dom::TreeQueries::ShadowHost(*element)))
+        {
+          // Inside RenderTextControl's shadow DOM (e.g. strong-password text)
+          auto lastBaseline = Maybe<LayoutUnit> {};
+          if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(renderBox))
+          {
+            if (auto *inlineLayout = blockFlow->InlineLayout())
+            {
+              lastBaseline = inlineLayout->LastLineBaseline().value_or(0_lu);
+            }
+          }
+          if (!lastBaseline)
+          {
+            lastBaseline =
+              SnapToInt(FontMetricsBasedBaseline(renderBox)
+                          + (writingMode.IsHorizontal() ? renderBox.BorderTop() + renderBox.PaddingTop()
+                                                        : renderBox.BorderRight() + renderBox.PaddingRight()),
+                        SnapDirection::Floor);
+          }
+          return std::min(marginBoxBottom, *lastBaseline);
+        }
       }
 
       if (auto *deprecatedFlexBox = DynamicDowncast<RenderDeprecatedFlexibleBox>(renderBox))
@@ -361,10 +448,10 @@ namespace krys::boo::layout_integration
           return !renderListMarker->IsImage();
         }
 
-        // FIXME: List boxes, sliders, multi-line text controls, attachments, MathML blocks and buttons, once
-        // there are those renderers.
+        // FIXME: List boxes, sliders, attachments, MathML blocks and buttons, once there are those renderers.
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
-            || Is<RenderTable>(renderBox) || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
+            || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
+            || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
             || Is<RenderDeprecatedFlexibleBox>(renderBox))
         {
           // These are special RenderBlock renderers that override the default baseline position behavior of

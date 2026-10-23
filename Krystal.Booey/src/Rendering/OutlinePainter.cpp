@@ -374,7 +374,10 @@ namespace krys::boo
                                                      const LayoutPoint &additionalOffset,
                                                      const RenderLayerModelObject *paintContainer) noexcept
   {
-    // FIXME: Text controls (isRenderTextControl), once there are text controls.
+    if (renderer.IsRenderTextControl())
+    {
+      return false;
+    }
 
     // For blocks inside inlines, we include margins so that we run right up to the inline boxes
     // above and below us (thus getting merged with them to form a single irregular shape).
@@ -385,8 +388,7 @@ namespace krys::boo
       rects.push_back(LayoutRect(additionalOffset, renderer.Size()));
     }
 
-    // FIXME: Control clips (hasControlClip), once there are form controls.
-    if (!renderer.HasNonVisibleOverflow())
+    if (!renderer.HasNonVisibleOverflow() && !renderer.HasControlClip())
     {
       if (renderer.ChildrenInline() && Is<RenderBlockFlow>(renderer))
       {

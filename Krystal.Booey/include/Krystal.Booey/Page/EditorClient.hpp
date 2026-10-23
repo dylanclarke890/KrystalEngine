@@ -8,6 +8,7 @@
 
 namespace krys::boo::dom
 {
+  class Element;
   class KeyboardEvent;
 }
 
@@ -56,6 +57,19 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool CanRedo() const noexcept = 0;
     virtual void Undo() noexcept = 0;
     virtual void Redo() noexcept = 0;
+
+    /// @brief Called when a text field is focused, so the host can offer to fill it (autofill).
+    virtual void TextFieldDidBeginEditing(dom::Element &element) noexcept = 0;
+    /// @brief Called when a text field loses the focus.
+    virtual void TextFieldDidEndEditing(dom::Element &element) noexcept = 0;
+    /// @brief Called after the user changed the text of the focused text field.
+    virtual void TextDidChangeInTextField(dom::Element &element) noexcept = 0;
+    /// @brief Lets the host handle a key in a focused text field (to move through its suggestions).
+    /// @return Whether the host handled it.
+    virtual bool DoTextFieldCommandFromEvent(dom::Element &element, dom::KeyboardEvent *event) noexcept = 0;
+    virtual void TextWillBeDeletedInTextField(dom::Element &element) noexcept = 0;
+    /// @brief Called after the user changed the text of the focused text area.
+    virtual void TextDidChangeInTextArea(dom::Element &element) noexcept = 0;
   };
 
   /// @brief The editor client of a page that has no host.
@@ -115,6 +129,31 @@ namespace krys::boo
     {
     }
     void Redo() noexcept final
+    {
+    }
+
+    void TextFieldDidBeginEditing(dom::Element &) noexcept final
+    {
+    }
+
+    void TextFieldDidEndEditing(dom::Element &) noexcept final
+    {
+    }
+
+    void TextDidChangeInTextField(dom::Element &) noexcept final
+    {
+    }
+
+    bool DoTextFieldCommandFromEvent(dom::Element &, dom::KeyboardEvent *) noexcept final
+    {
+      return false;
+    }
+
+    void TextWillBeDeletedInTextField(dom::Element &) noexcept final
+    {
+    }
+
+    void TextDidChangeInTextArea(dom::Element &) noexcept final
     {
     }
   };

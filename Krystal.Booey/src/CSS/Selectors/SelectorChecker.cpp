@@ -615,8 +615,23 @@ namespace krys::boo::css
           {
             return MatchResult::Fails(MatchOutcome::SelectorFailsCompletely);
           }
-          // FIXME: User agent shadow roots and their parts; no element is in one yet.
-          return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
+          if (auto *root = dom::TreeQueries::ContainingShadowRoot(*context.Element))
+          {
+            if (root->Mode() != dom::ShadowRootMode::UserAgent)
+            {
+              return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
+            }
+
+            if (context.Element->UserAgentPart() != context.CurrentSelector->Value())
+            {
+              return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
+            }
+          }
+          else
+          {
+            return MatchResult::Fails(MatchOutcome::SelectorFailsLocally);
+          }
+          break;
         }
         default:
         {

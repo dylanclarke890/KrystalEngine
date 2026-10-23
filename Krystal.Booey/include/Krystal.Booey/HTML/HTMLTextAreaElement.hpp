@@ -2,6 +2,11 @@
 
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 
+namespace krys::boo::dom
+{
+  class BeforeTextInsertedEvent;
+}
+
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmltextareaelement
@@ -10,6 +15,9 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextAreaElement);
 
   private:
+    static constexpr uint32 DefaultRows = 2;
+    static constexpr uint32 DefaultCols = 20;
+
     enum WrapMethod : uint8
     {
       NoWrap,
@@ -17,13 +25,17 @@ namespace krys::boo::html
       HardWrap
     };
 
-    dom::DOMString _value;
+    mutable dom::DOMString _value;
+    RefPtr<HTMLElement> _placeholder;
     WrapMethod _wrap {SoftWrap};
-    bool _isDirty {false};
-    bool _wasModifiedByUser {false};
+    mutable bool _isDirty {false};
+    mutable bool _wasModifiedByUser {false};
 
   public:
     HTMLTextAreaElement(dom::Document &document) noexcept;
+
+    /// @brief A text area with its user agent shadow tree.
+    KRYS_NODISCARD static Ref<HTMLTextAreaElement> Create(dom::Document &document) noexcept;
 
 #pragma region HTMLTextAreaElement - https://html.spec.whatwg.org/#htmltextareaelement
 
@@ -123,15 +135,8 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-textarea-textlength
     KRYS_NODISCARD uint32 TextLength() const noexcept;
 
-    // TODO(HTMLTEXTAREA, HTML): The selection API, with text fields.
-    // undefined select();
-    // attribute unsigned long selectionStart;
-    // attribute unsigned long selectionEnd;
-    // attribute dom::DOMString selectionDirection;
-    // undefined setRangeText(dom::DOMString replacement);
-    // undefined setRangeText(dom::DOMString replacement, unsigned long start, unsigned long end,
-    //                       optional SelectionMode selectionMode = "preserve");
-    // undefined setSelectionRange(unsigned long start, unsigned long end, optional dom::DOMString direction);
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
+    void SetSelectionRangeForBindings(uint32 start, uint32 end, dom::DOMStringView direction = {}) noexcept;
 
 #pragma endregion
 
@@ -139,6 +144,25 @@ namespace krys::boo::html
     {
       return u8"textarea";
     }
+
+    KRYS_NODISCARD bool IsTextField() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD HTMLElement *PlaceholderElement() const noexcept final
+    {
+      return _placeholder.get();
+    }
+
+    KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+    RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+    KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+    void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+                               SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
+    void DefaultEventHandler(dom::Event &event) noexcept final;
 
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
     {
@@ -196,6 +220,10 @@ namespace krys::boo::html
       return Value().empty();
     }
 
+    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept final;
+    void UpdatePlaceholderText() noexcept final;
+    void SubtreeHasChanged() noexcept final;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
     void OnChildrenChanged() noexcept final;
@@ -209,6 +237,13 @@ namespace krys::boo::html
                                                 css::MutableStyleProperties &style) noexcept override;
 
   private:
+    /// @brief Takes the text the user edited as the value, if the inner text changed since the value was set.
+    void UpdateValue() const noexcept;
+
+    void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept;
+    KRYS_NODISCARD static dom::DOMString SanitizeUserInputValue(dom::DOMStringView proposedValue,
+                                                                size_t maxLength) noexcept;
+
     void SetNonDirtyValue(dom::DOMStringView value, TextControlSetValueSelection selection) noexcept;
     void SetValueCommon(dom::DOMStringView newValue, TextFieldEventBehavior eventBehavior,
                         TextControlSetValueSelection selection) noexcept;

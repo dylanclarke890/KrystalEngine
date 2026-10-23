@@ -128,6 +128,39 @@ namespace krys::boo::tests
       step->Reapply();
       IsInRedo = false;
     }
+
+    /// @brief The text control notifications, in order.
+    List<std::string> TextControlNotifications;
+
+    void TextFieldDidBeginEditing(boo::dom::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("begin editing");
+    }
+
+    void TextFieldDidEndEditing(boo::dom::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("end editing");
+    }
+
+    void TextDidChangeInTextField(boo::dom::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("field changed");
+    }
+
+    bool DoTextFieldCommandFromEvent(boo::dom::Element &, boo::dom::KeyboardEvent *) noexcept final
+    {
+      return false;
+    }
+
+    void TextWillBeDeletedInTextField(boo::dom::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("will delete");
+    }
+
+    void TextDidChangeInTextArea(boo::dom::Element &) noexcept final
+    {
+      TextControlNotifications.emplace_back("area changed");
+    }
   };
 
   /// @brief Records what's written to the clipboard, and reads back @ref Contents.

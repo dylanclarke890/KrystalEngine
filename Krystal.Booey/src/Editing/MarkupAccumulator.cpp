@@ -297,6 +297,11 @@ namespace krys::boo
 
   bool MarkupAccumulator::IncludeShadowRoot(const dom::ShadowRoot &shadowRoot) const noexcept
   {
+    if (shadowRoot.Mode() == dom::ShadowRootMode::UserAgent)
+    {
+      return false;
+    }
+
     if (_serializeShadowRoots == SerializeShadowRoots::AllForInterchange)
     {
       return true;
@@ -496,8 +501,9 @@ namespace krys::boo
       _markup.append(u8"<template shadowrootmode=\"");
       switch (shadowRoot->Mode())
       {
-        case dom::ShadowRootMode::Open:   _markup.append(u8"open"); break;
-        case dom::ShadowRootMode::Closed: _markup.append(u8"closed"); break;
+        case dom::ShadowRootMode::Open:      _markup.append(u8"open"); break;
+        case dom::ShadowRootMode::Closed:    _markup.append(u8"closed"); break;
+        case dom::ShadowRootMode::UserAgent: krys_unreachable();
       }
       _markup.push_back(u8'"');
       if (shadowRoot->DelegatesFocus())

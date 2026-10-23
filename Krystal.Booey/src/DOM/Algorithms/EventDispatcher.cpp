@@ -103,7 +103,7 @@ namespace krys::boo::dom
 
           if (auto shadowRootParent = DynamicDowncast<ShadowRoot>(TreeQueries::Root(*nodeParent)))
           {
-            slotInClosedTree = shadowRootParent->Mode() == ShadowRootMode::Closed;
+            slotInClosedTree = shadowRootParent->Mode() != ShadowRootMode::Open;
           }
         }
 
@@ -289,7 +289,7 @@ namespace krys::boo::dom
 
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(invocationTargetNode))
       {
-        rootOfClosedTree = shadowRoot->Mode() == ShadowRootMode::Closed;
+        rootOfClosedTree = shadowRoot->Mode() != ShadowRootMode::Open;
       }
     }
 

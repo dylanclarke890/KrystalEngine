@@ -22,6 +22,7 @@
 
 namespace krys::boo
 {
+  class RenderBox;
   class RenderObject;
   class RenderStyle;
 }
@@ -314,6 +315,9 @@ namespace krys::boo::dom
       return _renderer;
     }
 
+    /// @brief The node's renderer if it's a box, or null.
+    KRYS_NODISCARD boo::RenderBox *GetRenderBox() const noexcept;
+
     void SetRenderer(RenderObject *renderer) noexcept
     {
       _renderer = renderer;
@@ -477,6 +481,9 @@ namespace krys::boo::dom
     {
       return HasNodeFlag(NodeFlags::IsInShadowTree);
     }
+
+    /// @brief Whether the node is in a user agent shadow tree.
+    KRYS_NODISCARD bool IsInUserAgentShadowTree() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-document-tree
     KRYS_NODISCARD bool IsInDocumentTree() const noexcept

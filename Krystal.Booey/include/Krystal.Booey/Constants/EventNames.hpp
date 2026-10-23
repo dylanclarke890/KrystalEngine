@@ -40,6 +40,9 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview BeforeInput = u8"beforeinput";
   constexpr utf8_stringview Input = u8"input";
   constexpr utf8_stringview TextInput = u8"textInput";
+  constexpr utf8_stringview Focus = u8"focus";
+  constexpr utf8_stringview Blur = u8"blur";
+  constexpr utf8_stringview WebkitBeforeTextInserted = u8"webkitBeforeTextInserted";
   constexpr utf8_stringview SelectStart = u8"selectstart";
   constexpr utf8_stringview SelectionChange = u8"selectionchange";
   constexpr utf8_stringview SlotChange = u8"slotchange";

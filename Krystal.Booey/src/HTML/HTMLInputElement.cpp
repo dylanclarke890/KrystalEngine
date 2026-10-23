@@ -1,18 +1,27 @@
 ﻿#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/FileInputType.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/HTML/RadioInputType.hpp"
+#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/HTML/TextInputType.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
@@ -861,6 +870,323 @@ namespace krys::boo::html
     return _inputType->IsEmptyValue();
   }
 
+  void HTMLInputElement::UpdatePlaceholderText() noexcept
+  {
+    _inputType->UpdatePlaceholderText();
+  }
+
+  void HTMLInputElement::SubtreeHasChanged() noexcept
+  {
+    _inputType->SubtreeHasChanged();
+    // FIXME: Auto directionality, which typing doesn't update through childrenChanged
+    // (updateEffectiveTextDirection), with dir=auto.
+  }
+
+  void HTMLInputElement::HandleFocusEvent(dom::Node *oldFocusedNode) noexcept
+  {
+    _inputType->HandleFocusEvent(oldFocusedNode);
+
+    InvalidateStyleOnFocusChangeIfNeeded();
+  }
+
+  void HTMLInputElement::HandleBlurEvent() noexcept
+  {
+    _inputType->HandleBlurEvent();
+
+    InvalidateStyleOnFocusChangeIfNeeded();
+  }
+
+  void HTMLInputElement::InvalidateStyleOnFocusChangeIfNeeded() noexcept
+  {
+    if (!IsTextField())
+    {
+      return;
+    }
+    // Focus change may affect the result of shouldTruncateText().
+    if (auto *style = ExistingComputedStyle(); style && style->GetTextOverflow() == TextOverflow::Ellipsis)
+    {
+      InvalidateStyleForSubtreeInternal();
+    }
+  }
+
+  void HTMLInputElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+                                               SelectionRevealMode revealMode) noexcept
+  {
+    if (IsTextField())
+    {
+      if (restorationMode == dom::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
+      {
+        RestoreCachedSelection(revealMode);
+      }
+      else
+      {
+        SetDefaultSelectionAfterFocus(restorationMode, revealMode);
+      }
+    }
+    else
+    {
+      HTMLTextFormControlElement::UpdateFocusAppearance(restorationMode, revealMode);
+    }
+  }
+
+  void HTMLInputElement::SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
+                                                       SelectionRevealMode revealMode) noexcept
+  {
+    krys_debug_assert(IsTextField());
+    uint32 start = 0;
+    auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
+    if (NodeDocument().Frame()
+        && NodeDocument().GetEditor().Behavior().ShouldMoveSelectionToEndWhenFocusingTextInput())
+    {
+      start = std::numeric_limits<uint32>::max();
+      direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+    }
+    uint32 end = restorationMode == dom::SelectionRestorationMode::PlaceCaretAtStart
+                   ? start
+                   : std::numeric_limits<uint32>::max();
+    SetSelectionRange(start, end, direction, revealMode);
+  }
+
+  void HTMLInputElement::EndEditing() noexcept
+  {
+    if (!IsTextField())
+    {
+      return;
+    }
+
+    if (NodeDocument().Frame())
+    {
+      NodeDocument().GetEditor().TextFieldDidEndEditing(*this);
+    }
+  }
+
+  void HTMLInputElement::DidBlur() noexcept
+  {
+    _inputType->ElementDidBlur();
+  }
+
+  void HTMLInputElement::SetValueFromRenderer(dom::DOMStringView value) noexcept
+  {
+    // File upload controls will never use this.
+    krys_debug_assert(!IsFileUpload());
+
+    // Workaround for bug where trailing \n is included in the result of textContent.
+    // The assert macro above may also be simplified by removing the expression
+    // that calls isEmpty.
+    // http://bugs.webkit.org/show_bug.cgi?id=9661
+    _valueIfDirty = value == u8"\n" ? dom::DOMString {} : dom::DOMString(value);
+
+    SetFormControlValueMatchesRenderer(true);
+    _wasModifiedByUser = true;
+
+    // Input event is fired by the Node::defaultEventHandler for editable controls.
+    if (!IsTextField())
+    {
+      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Input), true, false, true);
+      (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+    }
+
+    UpdateValidity();
+
+    // FIXME: Clearing the autofill flags, with autofill.
+  }
+
+  RenderPtr<RenderElement> HTMLInputElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return _inputType->CreateInputRenderer(krys::move(style));
+  }
+
+  void HTMLInputElement::DidAttachRenderers() noexcept
+  {
+    HTMLTextFormControlElement::DidAttachRenderers();
+
+    // FIXME: Attaching the type (InputType::attach, for image buttons' loaders), with image buttons.
+
+    if (NodeDocument().FocusedElement() == this)
+    {
+      EventLoop::Current().QueueTask(
+        TaskSource::UserInteraction,
+        [weakThis = WeakPtr<HTMLInputElement>::WithRef(*this)]
+        {
+          RefPtr<HTMLInputElement> protectedThis = ShareRefPtr(weakThis.get());
+          if (!protectedThis || protectedThis->NodeDocument().FocusedElement() != protectedThis)
+          {
+            return;
+          }
+          protectedThis->UpdateFocusAppearance(dom::SelectionRestorationMode::RestoreOrSelectAll,
+                                               SelectionRevealMode::Reveal);
+        });
+    }
+  }
+
+  HTMLElement *HTMLInputElement::ContainerElement() const noexcept
+  {
+    return _inputType->ContainerElement();
+  }
+
+  RefPtr<TextControlInnerTextElement> HTMLInputElement::InnerTextElement() const noexcept
+  {
+    return _inputType->InnerTextElement();
+  }
+
+  RefPtr<TextControlInnerTextElement>
+    HTMLInputElement::InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept
+  {
+    return _inputType->InnerTextElementCreatingShadowSubtreeIfNeeded();
+  }
+
+  HTMLElement *HTMLInputElement::InnerBlockElement() const noexcept
+  {
+    return _inputType->InnerBlockElement();
+  }
+
+  HTMLElement *HTMLInputElement::InnerSpinButtonElement() const noexcept
+  {
+    return _inputType->InnerSpinButtonElement();
+  }
+
+  HTMLElement *HTMLInputElement::ResultsButtonElement() const noexcept
+  {
+    return _inputType->ResultsButtonElement();
+  }
+
+  HTMLElement *HTMLInputElement::CancelButtonElement() const noexcept
+  {
+    return _inputType->CancelButtonElement();
+  }
+
+  HTMLElement *HTMLInputElement::PlaceholderElement() const noexcept
+  {
+    return _inputType->PlaceholderElement();
+  }
+
+  bool HTMLInputElement::SizeShouldIncludeDecoration(int32 &preferredSize) const noexcept
+  {
+    return _inputType->SizeShouldIncludeDecoration(DefaultSize, preferredSize);
+  }
+
+  float HTMLInputElement::DecorationWidth(float inputWidth) const noexcept
+  {
+    return _inputType->DecorationWidth(inputWidth);
+  }
+
+  bool HTMLInputElement::ShouldTruncateText(const RenderStyle &style) const noexcept
+  {
+    if (!IsTextField())
+    {
+      return false;
+    }
+    return NodeDocument().FocusedElement() != this && style.GetTextOverflow() == TextOverflow::Ellipsis;
+  }
+
+  RenderStyle HTMLInputElement::CreateInnerTextStyle(const RenderStyle &style) noexcept
+  {
+    auto textBlockStyle = RenderStyle::Create();
+    textBlockStyle.InheritFrom(style);
+    AdjustInnerTextStyle(style, textBlockStyle);
+
+    textBlockStyle.SetWhiteSpaceCollapse(WhiteSpaceCollapse::Preserve);
+    textBlockStyle.SetTextWrapMode(TextWrapMode::NoWrap);
+    textBlockStyle.SetOverflowWrap(OverflowWrap::Normal);
+    textBlockStyle.SetOverflowX(Overflow::Hidden);
+    textBlockStyle.SetOverflowY(Overflow::Hidden);
+    textBlockStyle.SetTextOverflow(ShouldTruncateText(style) ? TextOverflow::Ellipsis : TextOverflow::Clip);
+
+    textBlockStyle.SetDisplay(DisplayType::Block);
+
+    // FIXME: The strong password AutoFill button's inner text (a masked, translucent inline block), with
+    // autofill.
+
+    return textBlockStyle;
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetRangeText(dom::DOMStringView replacement, uint32 start,
+                                                        uint32 end, dom::DOMStringView selectionMode) noexcept
+  {
+    if (!_inputType->SupportsSelectionAPI())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    return HTMLTextFormControlElement::SetRangeText(replacement, start, end, selectionMode);
+  }
+
+  Maybe<uint32> HTMLInputElement::SelectionStartForBindings() const noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return null;
+    }
+
+    return SelectionStart();
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetSelectionStartForBindings(Maybe<uint32> start) noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    SetSelectionStart(start.value_or(0));
+    return {};
+  }
+
+  Maybe<uint32> HTMLInputElement::SelectionEndForBindings() const noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return null;
+    }
+
+    return SelectionEnd();
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetSelectionEndForBindings(Maybe<uint32> end) noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    SetSelectionEnd(end.value_or(0));
+    return {};
+  }
+
+  Maybe<dom::DOMString> HTMLInputElement::SelectionDirectionForBindings() const noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return null;
+    }
+
+    return dom::DOMString(SelectionDirection());
+  }
+
+  dom::ExceptionOr<void>
+    HTMLInputElement::SetSelectionDirectionForBindings(dom::DOMStringView direction) noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    SetSelectionDirection(direction);
+    return {};
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                                        dom::DOMStringView direction) noexcept
+  {
+    if (!CanHaveSelection() || !_inputType->SupportsSelectionAPI())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    SetSelectionRange(start, end, direction, ForBindings::Yes);
+    return {};
+  }
+
   dom::DOMString HTMLInputElement::FormControlType() const noexcept
   {
     return dom::DOMString(_inputType->FormControlType());
@@ -1181,6 +1507,7 @@ namespace krys::boo::html
       }
     }
 
+    _inputType->RemoveShadowSubtree();
     _inputType->DetachFromElement();
 
     bool previouslySelectable = _inputType->SupportsSelectionAPI();
@@ -1196,6 +1523,7 @@ namespace krys::boo::html
     {
       UpdateValueIfNeeded();
     }
+    _inputType->CreateShadowSubtreeIfNeeded();
 
     // FIXME: Auto directionality when the type changes to or from tel (updateEffectiveTextDirection), with
     // dir=auto.
@@ -1238,7 +1566,14 @@ namespace krys::boo::html
     // position to the beginning of the text control, and set its selection direction to "none".
     if (!previouslySelectable && nowSelectable)
     {
-      // FIXME: Caching the selection, with text fields.
+      auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
+      // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#set-the-selection-direction
+      if (IsTextField() && NodeDocument().Frame()
+          && NodeDocument().GetEditor().Behavior().ShouldConsiderSelectionAsDirectional())
+      {
+        direction = TextFieldSelectionDirection::SelectionHasForwardDirection;
+      }
+      CacheSelection(0, 0, direction);
     }
 
     UpdateValidity();
@@ -1263,7 +1598,10 @@ namespace krys::boo::html
       InvalidateStyleAndRenderersForSubtree();
     }
 
-    // FIXME: Restoring the focus appearance (updateFocusAppearance) when focused, with text fields.
+    if (NodeDocument().FocusedElement() == this)
+    {
+      UpdateFocusAppearance(dom::SelectionRestorationMode::RestoreOrSelectAll, SelectionRevealMode::Reveal);
+    }
 
     SetChangedSinceLastFormControlChangeEvent(false);
 
@@ -1384,6 +1722,12 @@ namespace krys::boo::html
     {
       UpdateValidity();
     }
+    if (IsConnected() && _inputType->NeedsShadowSubtree() && !_inputType->HasCreatedShadowSubtree()
+        && !_hasPendingUserAgentShadowTreeUpdate)
+    {
+      NodeDocument().AddElementWithPendingUserAgentShadowTreeUpdate(*this);
+      _hasPendingUserAgentShadowTreeUpdate = true;
+    }
     if (!IsConnected())
     {
       AddToRadioButtonGroup();
@@ -1412,6 +1756,11 @@ namespace krys::boo::html
     {
       RemoveFromRadioButtonGroup();
     }
+    if (disconnectedFromDocument && _hasPendingUserAgentShadowTreeUpdate)
+    {
+      NodeDocument().RemoveElementWithPendingUserAgentShadowTreeUpdate(*this);
+      _hasPendingUserAgentShadowTreeUpdate = false;
+    }
     krys_debug_assert(!IsConnected());
     if (disconnectedFromDocument && !Form() && IsRadioButton())
     {
@@ -1434,6 +1783,18 @@ namespace krys::boo::html
 
     clone.UpdateValidity();
     clone.SetFormControlValueMatchesRenderer(false);
+    if (clone._inputType->HasCreatedShadowSubtree())
+    {
+      clone._inputType->UpdateInnerTextValue();
+    }
+  }
+
+  void HTMLInputElement::UpdateUserAgentShadowTree() noexcept
+  {
+    krys_debug_assert(_hasPendingUserAgentShadowTreeUpdate);
+    NodeDocument().RemoveElementWithPendingUserAgentShadowTreeUpdate(*this);
+    _hasPendingUserAgentShadowTreeUpdate = false;
+    _inputType->CreateShadowSubtreeIfNeeded();
   }
 
   void HTMLInputElement::FinishParsingChildren() noexcept
@@ -1559,7 +1920,7 @@ namespace krys::boo::html
 
     if (_inputType->ShouldSubmitImplicitly(event))
     {
-      // FIXME: Adding a recent search (addSearchResult) for search fields, with text fields.
+      // FIXME: Adding a recent search (addSearchResult) for search fields, with recent searches.
 
       // Form submission finishes editing, just as loss of focus does. If there was a change, send the event
       // now.
@@ -1578,7 +1939,12 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: The before-text-inserted event and forwarding events to the shadow tree, with text fields.
+    if (auto *beforeTextInsertedEvent = DynamicDowncast<dom::BeforeTextInsertedEvent>(event))
+    {
+      _inputType->HandleBeforeTextInsertedEvent(*beforeTextInsertedEvent);
+    }
+
+    _inputType->ForwardEvent(event);
 
     if (!callBaseClassEarly && !event.DefaultHandled())
     {

@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
@@ -19,6 +20,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -38,6 +40,7 @@ namespace krys::boo
   class HitTestResult;
   class LocalFrame;
   class LocalFrameView;
+  class RenderLayer;
   class MouseEventWithHitTestResults;
   class RenderBox;
   class VisiblePosition;
@@ -112,6 +115,11 @@ namespace krys::boo
 
     RefPtr<Scrollbar> _lastScrollbarUnderMouse;
 
+    // The layer whose resizer the user is dragging, and the mouse's offset from its resize corner when the
+    // drag began (in the layer's coordinates).
+    WeakPtr<RenderLayer> _resizeLayer;
+    LayoutSize _offsetFromResizeCorner;
+
     Cursor _currentMouseCursor;
 
     RefPtr<dom::Node> _clickNode;
@@ -139,6 +147,9 @@ namespace krys::boo
     /// @brief Forgets @p nodeToBeRemoved and its descendants as the click node and the element under the
     /// mouse.
     void NodeWillBeRemoved(dom::Node &nodeToBeRemoved) noexcept;
+
+    /// @brief Called when the layer whose resizer is being dragged is destroyed.
+    void ResizeLayerDestroyed() noexcept;
 
     KRYS_NODISCARD bool MousePressed() const noexcept
     {

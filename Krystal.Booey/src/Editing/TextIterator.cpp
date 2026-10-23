@@ -8,6 +8,8 @@
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
@@ -15,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -881,8 +884,19 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Entering text controls (EntersTextControls) and image overlays (EntersImageOverlays), once there
-    // are either.
+    if (auto *renderTextControl = DynamicDowncast<RenderTextControl>(*renderer);
+        renderTextControl && _behaviors.Contains(TextIteratorBehavior::EntersTextControls))
+    {
+      if (auto innerTextElement = renderTextControl->TextFormControlElement().InnerTextElement())
+      {
+        _currentNode = ShareRefPtr<dom::Node>(dom::TreeQueries::ContainingShadowRoot(*innerTextElement));
+        PushFullyClippedState(_fullyClippedStack, *_currentNode, _behaviors);
+        _offset = 0;
+        return false;
+      }
+    }
+
+    // FIXME: Entering image overlays (EntersImageOverlays), once there are any.
 
     _hasEmitted = true;
 

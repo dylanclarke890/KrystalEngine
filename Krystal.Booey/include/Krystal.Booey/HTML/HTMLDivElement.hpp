@@ -23,6 +23,8 @@ namespace krys::boo::html
 #pragma endregion
 
   protected:
+    HTMLDivElement(dom::Document &document, dom::NodeFlags nodeFlags) noexcept;
+
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;

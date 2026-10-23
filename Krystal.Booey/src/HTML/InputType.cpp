@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/ButtonInputType.hpp"
 #include "Krystal.Booey/HTML/CheckboxInputType.hpp"
 #include "Krystal.Booey/HTML/ColorInputType.hpp"
@@ -22,6 +23,7 @@
 #include "Krystal.Booey/HTML/RangeInputType.hpp"
 #include "Krystal.Booey/HTML/ResetInputType.hpp"
 #include "Krystal.Booey/HTML/SearchInputType.hpp"
+#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/HTML/SubmitInputType.hpp"
 #include "Krystal.Booey/HTML/TelephoneInputType.hpp"
 #include "Krystal.Booey/HTML/TextInputType.hpp"
@@ -30,6 +32,7 @@
 #include "Krystal.Booey/HTML/WeekInputType.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
@@ -515,6 +518,229 @@ namespace krys::boo::html
   bool InputType::CanBeSuccessfulSubmitButton() noexcept
   {
     return false;
+  }
+
+  bool InputType::NeedsShadowSubtree() const noexcept
+  {
+    switch (_type)
+    {
+      case Type::Button:
+      case Type::Checkbox:
+      case Type::Hidden:
+      case Type::Image:
+      case Type::Radio:
+      case Type::Reset:
+      case Type::Submit:   return false;
+      default:             return true;
+    }
+  }
+
+  void InputType::SubtreeHasChanged() noexcept
+  {
+    krys_debug_assert_msg(false, "Only text fields have a subtree the user edits.");
+  }
+
+  void InputType::CreateShadowSubtreeIfNeeded() noexcept
+  {
+    if (_hasCreatedShadowSubtree || !NeedsShadowSubtree())
+    {
+      return;
+    }
+    Ref<InputType> protectedThis = ShareRef(*this);
+    Element()->EnsureUserAgentShadowRoot();
+    _hasCreatedShadowSubtree = true;
+    CreateShadowSubtree();
+  }
+
+  void InputType::RemoveShadowSubtree() noexcept
+  {
+    krys_debug_assert(Element());
+    auto *root = Element()->UserAgentShadowRoot();
+    if (!root)
+    {
+      return;
+    }
+
+    while (auto *child = root->FirstChild())
+    {
+      (void)root->RemoveChild(*child);
+    }
+    _hasCreatedShadowSubtree = false;
+  }
+
+  void InputType::StepUpFromRenderer(int n) noexcept
+  {
+    // The differences from stepUp()/stepDown():
+    //
+    // Difference 1: the current value
+    // If the current value is not a number, including empty, the current value is assumed as 0.
+    //   * If 0 is in-range, and matches to step value
+    //     - The value should be the +step if n > 0
+    //     - The value should be the -step if n < 0
+    //     If -step or +step is out of range, new value should be 0.
+    //   * If 0 is smaller than the minimum value
+    //     - The value should be the minimum value for any n
+    //   * If 0 is larger than the maximum value
+    //     - The value should be the maximum value for any n
+    //   * If 0 is in-range, but not matched to step value
+    //     - The value should be the larger matched value nearest to 0 if n > 0
+    //       e.g. <input type=number min=-100 step=3> -> 2
+    //     - The value should be the smaller matched value nearest to 0 if n < 0
+    //       e.g. <input type=number min=-100 step=3> -> -1
+    //   As for date/datetime-local/month/time/week types, the current value is assumed as "the current local
+    //   date/time". As for datetime type, the current value is assumed as "the current date/time in UTC".
+    // If the current value is smaller than the minimum value:
+    //  - The value should be the minimum value if n > 0
+    //  - Nothing should happen if n < 0
+    // If the current value is larger than the maximum value:
+    //  - The value should be the maximum value if n < 0
+    //  - Nothing should happen if n > 0
+    //
+    // Difference 2: clamping steps
+    // If the current value is not matched to step value:
+    // - The value should be the larger matched value nearest to 0 if n > 0
+    //   e.g. <input type=number value=3 min=-100 step=3> -> 5
+    // - The value should be the smaller matched value nearest to 0 if n < 0
+    //   e.g. <input type=number value=3 min=-100 step=3> -> 2
+    //
+    // n is assumed as -n if step < 0.
+
+    krys_debug_assert(IsSteppable());
+    if (!IsSteppable())
+    {
+      return;
+    }
+    krys_debug_assert(n);
+    if (!n)
+    {
+      return;
+    }
+
+    StepRange stepRange(CreateStepRange(AnyStepHandling::Default));
+
+    // FIXME: Not any changes after stepping, even if it is an invalid value, may be better.
+    // (e.g. Stepping-up for <input type="number" value="foo" step="any" /> => "foo")
+    if (!stepRange.HasStep())
+    {
+      return;
+    }
+
+    const Decimal step = stepRange.Step();
+
+    int sign;
+    if (step > 0)
+    {
+      sign = n;
+    }
+    else if (step < 0)
+    {
+      sign = -n;
+    }
+    else
+    {
+      sign = 0;
+    }
+
+    krys_debug_assert(Element());
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    auto currentStringValue = element->Value();
+    Decimal current = ParseToNumberOrNaN(currentStringValue);
+    if (!current.IsFinite())
+    {
+      current = DefaultValueForStepUp();
+      const Decimal nextDiff = step * n;
+      if (current < stepRange.Minimum() - nextDiff)
+      {
+        current = stepRange.Minimum() - nextDiff;
+      }
+      if (current > stepRange.Maximum() - nextDiff)
+      {
+        current = stepRange.Maximum() - nextDiff;
+      }
+      (void)SetValueAsDecimal(current, TextFieldEventBehavior::DispatchNoEvent);
+    }
+    if ((sign > 0 && current < stepRange.Minimum()) || (sign < 0 && current > stepRange.Maximum()))
+    {
+      (void)SetValueAsDecimal(sign > 0 ? stepRange.Minimum() : stepRange.Maximum(),
+                              TextFieldEventBehavior::DispatchInputAndChangeEvent);
+    }
+    else
+    {
+      if (StepMismatch(element->Value()))
+      {
+        krys_debug_assert(!step.IsZero());
+        const Decimal base = stepRange.StepBase();
+        Decimal newValue;
+        if (sign < 0)
+        {
+          newValue = base + ((current - base) / step).Floor() * step;
+        }
+        else if (sign > 0)
+        {
+          newValue = base + ((current - base) / step).Ceil() * step;
+        }
+        else
+        {
+          newValue = current;
+        }
+
+        if (newValue < stepRange.Minimum())
+        {
+          newValue = stepRange.Minimum();
+        }
+        if (newValue > stepRange.Maximum())
+        {
+          newValue = stepRange.Maximum();
+        }
+
+        (void)SetValueAsDecimal(newValue, n == 1 || n == -1
+                                            ? TextFieldEventBehavior::DispatchInputAndChangeEvent
+                                            : TextFieldEventBehavior::DispatchNoEvent);
+        if (n > 1)
+        {
+          (void)ApplyStep(n - 1, AnyStepHandling::Default,
+                          TextFieldEventBehavior::DispatchInputAndChangeEvent);
+        }
+        else if (n < -1)
+        {
+          (void)ApplyStep(n + 1, AnyStepHandling::Default,
+                          TextFieldEventBehavior::DispatchInputAndChangeEvent);
+        }
+      }
+      else
+      {
+        (void)ApplyStep(n, AnyStepHandling::Default, TextFieldEventBehavior::DispatchInputAndChangeEvent);
+      }
+    }
+  }
+
+  RefPtr<TextControlInnerTextElement> InputType::InnerTextElement() const noexcept
+  {
+    return nullptr;
+  }
+
+  RefPtr<TextControlInnerTextElement> InputType::InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept
+  {
+    CreateShadowSubtreeIfNeeded();
+    return InnerTextElement();
+  }
+
+  RenderPtr<RenderElement> InputType::CreateInputRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(Element());
+    return RenderElement::CreateFor(*Element(), krys::move(style));
+  }
+
+  bool InputType::SizeShouldIncludeDecoration(int32, int32 &preferredSize) const noexcept
+  {
+    krys_debug_assert(Element());
+    preferredSize = static_cast<int32>(Element()->Size());
+    return false;
+  }
+
+  float InputType::DecorationWidth(float) const noexcept
+  {
+    return 0;
   }
 
   bool InputType::RendererIsNeeded() noexcept

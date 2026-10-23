@@ -120,8 +120,8 @@ namespace krys::boo::style
         return false;
       }
 
-      // FIXME: Media elements' user agent shadow roots (the media controls) stop text decorations; there are
-      // no user agent shadow trees.
+      // FIXME: Media elements' user agent shadow roots (the media controls) stop text decorations, with
+      // media.
 
       // Outermost <svg> roots are considered to be atomic inline-level.
       if (auto *svgElement = DynamicDowncast<svg::SVGElement>(element);
@@ -611,8 +611,13 @@ namespace krys::boo::style
                                                                               : TextSecurity::None);
       }
 
-      // FIXME: Disallow -webkit-user-modify on user agent parts (but slots) in user agent shadow trees; there
-      // are no user agent shadow trees.
+      // Disallow -webkit-user-modify on ::pseudo elements, except if that pseudo-element targets a slot,
+      // in which case we want the editability to be passed onto the slotted contents.
+      if (element->IsInUserAgentShadowTree() && element->UserAgentPart() != dom::DOMStringAtom::Null()
+          && !Is<html::HTMLSlotElement>(*element))
+      {
+        style.SetUserModify(UserModify::ReadOnly);
+      }
 
       if (IsHTMLElement(element, html::TagName::marquee))
       {
@@ -627,8 +632,8 @@ namespace krys::boo::style
       // mark popover invokers (`setIsPopoverInvoker`); elements have no visibility adjustment or invoked
       // popover.
 
-      // FIXME: `<details>` content auto-reveals in its user agent shadow tree (`detailsAutoExpandEnabled`);
-      // there are no user agent shadow trees.
+      // FIXME: `<details>` content auto-reveals in its user agent shadow tree (`detailsAutoExpandEnabled`),
+      // once `<details>` has one.
 
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
           htmlElement && htmlElement->IsHiddenUntilFound())

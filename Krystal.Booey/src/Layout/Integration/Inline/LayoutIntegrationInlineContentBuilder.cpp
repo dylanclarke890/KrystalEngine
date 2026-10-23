@@ -261,11 +261,13 @@ namespace krys::boo::layout_integration
             childInkOverflow.Move(LayoutUnit {box.Left()}, LayoutUnit {box.Top()});
             lineInkOverflowRect.Unite(FloatRect {childInkOverflow});
           }
-          // FIXME: Form controls clip their content (hasControlClip), once there are form controls.
-          auto childScrollableOverflow =
-            renderer.LayoutOverflowRectForPropagation(renderer.Parent()->GetWritingMode());
-          childScrollableOverflow.Move(LayoutUnit {box.Left()}, LayoutUnit {box.Top()});
-          lineScrollableOverflowRect.Unite(FloatRect {childScrollableOverflow});
+          if (!renderer.HasControlClip())
+          {
+            auto childScrollableOverflow =
+              renderer.LayoutOverflowRectForPropagation(renderer.Parent()->GetWritingMode());
+            childScrollableOverflow.Move(LayoutUnit {box.Left()}, LayoutUnit {box.Top()});
+            lineScrollableOverflowRect.Unite(FloatRect {childScrollableOverflow});
+          }
           continue;
         }
 

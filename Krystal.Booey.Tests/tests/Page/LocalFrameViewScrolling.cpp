@@ -478,7 +478,8 @@ namespace krys::boo::tests
     ScrollFixture fixture {
       u8"<!DOCTYPE html><style>body{margin:0}</style>"
       u8"<div id=box style=position:absolute;top:0;width:100px;height:90px;overflow:scroll>"
-      u8"<div style=height:300px></div></div><input id=field style=position:absolute;left:120px;top:0>"};
+      u8"<div style=height:300px></div></div>"
+      u8"<input id=field style=position:absolute;left:120px;top:0;width:60px>"};
     auto &handler = fixture.Frame->GetEventHandler();
     auto &box = fixture.ById(u8"box");
     CHECK_FALSE(fixture.View().VerticalScrollbar());

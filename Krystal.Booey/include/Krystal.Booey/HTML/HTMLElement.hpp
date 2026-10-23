@@ -347,6 +347,17 @@ namespace krys::boo::html
 #pragma endregion
 
   public:
+    /// @brief Whether the element is a text control's inner text element, which holds its editable text.
+    KRYS_NODISCARD virtual bool IsTextControlInnerTextElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSearchFieldResultsButtonElement() const noexcept
+    {
+      return false;
+    }
+
 #pragma region Form Controls
 
     KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept

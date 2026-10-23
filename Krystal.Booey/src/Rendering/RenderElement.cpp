@@ -1,8 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
@@ -1693,8 +1695,29 @@ namespace krys::boo
     return RenderTheme::InactiveSelectionForegroundColor(options);
   }
 
-  // FIXME: Selection styles across user agent shadow roots (rendererForPseudoStyleAcrossShadowBoundary), once
-  // there are any.
+  RenderElement *RenderElement::RendererForPseudoStyleAcrossShadowBoundary() const noexcept
+  {
+    if (auto *root = dom::TreeQueries::ContainingShadowRoot(*GetElement()))
+    {
+      if (root->Mode() == dom::ShadowRootMode::UserAgent)
+      {
+        auto *currentElement = dom::TreeQueries::ShadowHost(*GetElement());
+        // When an element has display: contents, this element doesn't have a renderer
+        // and its children will render as children of the parent element.
+        while (currentElement && currentElement->HasDisplayContents())
+        {
+          currentElement = currentElement->ParentElement();
+        }
+        if (currentElement)
+        {
+          return currentElement->Renderer();
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
   UniquePtr<RenderStyle> RenderElement::SelectionPseudoStyle() const noexcept
   {
     if (IsAnonymous())
@@ -1702,7 +1725,21 @@ namespace krys::boo
       return nullptr;
     }
 
-    return GetUncachedPseudoStyle(style::PseudoElementRequest(PseudoElementType::Selection));
+    if (auto selectionStyle =
+          GetUncachedPseudoStyle(style::PseudoElementRequest(PseudoElementType::Selection)))
+    {
+      // We intentionally return the pseudo selection style here if it exists before ascending to
+      // the shadow host element. This allows us to apply selection pseudo styles in user agent
+      // shadow roots, instead of always deferring to the shadow host's selection pseudo style.
+      return selectionStyle;
+    }
+
+    if (auto *renderer = RendererForPseudoStyleAcrossShadowBoundary())
+    {
+      return renderer->GetUncachedPseudoStyle(style::PseudoElementRequest(PseudoElementType::Selection));
+    }
+
+    return nullptr;
   }
 
   Color RenderElement::SelectionForegroundColor() const noexcept

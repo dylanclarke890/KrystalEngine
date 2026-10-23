@@ -42,6 +42,28 @@ namespace krys::boo::infra
       return dom::DOMStringView(start, end);
     }
 
+    /// @brief @p input with each CR LF pair, then each remaining CR, replaced by an LF.
+    /// @see https://infra.spec.whatwg.org/#normalize-newlines
+    KRYS_NODISCARD static dom::DOMString NormalizeNewlines(dom::DOMStringView input) noexcept
+    {
+      dom::DOMString result;
+      result.reserve(input.size());
+      for (size_t i = 0; i < input.size(); ++i)
+      {
+        if (input[i] == u8'\r')
+        {
+          result.push_back(u8'\n');
+          if (i + 1 < input.size() && input[i + 1] == u8'\n')
+          {
+            ++i;
+          }
+          continue;
+        }
+        result.push_back(input[i]);
+      }
+      return result;
+    }
+
     /// @see https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
     KRYS_NODISCARD static dom::DOMString StripAndCollapseASCIIWhitespace(dom::DOMStringView input) noexcept
     {

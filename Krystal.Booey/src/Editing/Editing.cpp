@@ -23,13 +23,16 @@
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
+#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <unicode/uchar.h>
@@ -528,9 +531,19 @@ namespace krys::boo
     Ref protectedElement = ShareRef(element);
     element.NodeDocument().UpdateLayoutIgnorePendingStylesheets();
 
-    auto *renderer = element.Renderer();
-    // FIXME: Look at the inner element of a form control, not the control itself, as it is the editable part,
-    // once there are text form controls.
+    RenderObject *renderer = element.Renderer();
+    // Look at the inner element of a form control, not the control itself, as it is the editable part.
+    if (auto *formControlElement = DynamicDowncast<html::HTMLTextFormControlElement>(element))
+    {
+      if (!formControlElement->IsInnerTextElementEditable())
+      {
+        return {};
+      }
+      if (auto innerTextElement = formControlElement->InnerTextElement())
+      {
+        renderer = innerTextElement->Renderer();
+      }
+    }
     if (!renderer)
     {
       return {};

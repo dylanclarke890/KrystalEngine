@@ -60,10 +60,18 @@ namespace krys::boo::style
   {
     auto &ruleSets = element.StyleResolver().RuleSets();
 
-    // FIXME: User agent part (and ::cue) rules may affect the element's user agent shadow tree, once there
-    // are user agent shadow roots.
-    auto mayAffectShadowTree = []
+    auto mayAffectShadowTree = [&]
     {
+      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
+      {
+        if (ruleSets.HasMatchingUserOrAuthorStyle([](RuleSet &style)
+                                                  { return style.HasUserAgentPartRules(); }))
+        {
+          return true;
+        }
+        // FIXME: ::cue rules for media elements, with media.
+      }
       return false;
     };
 

@@ -6,7 +6,7 @@
 namespace krys::boo::html
 {
   /// @brief The password input type.
-  // FIXME: Masked text and the caps lock indicator come with text fields.
+  // FIXME: The caps lock indicator.
   class PasswordInputType final : public BaseTextInputType
   {
   public:

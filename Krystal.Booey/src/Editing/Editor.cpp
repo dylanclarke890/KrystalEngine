@@ -19,6 +19,7 @@
 #include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -173,15 +174,22 @@ namespace krys::boo
   // We need to use onbeforecopy as a real menu enabler because we allow elements that are not
   // normally selectable to implement copy/paste (like divs, or a document body).
 
-  // FIXME: Password fields, with form controls.
   bool Editor::CanDHTMLCut() noexcept
   {
+    if (_document.Selection().Selection().IsInPasswordField())
+    {
+      return false;
+    }
+
     return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::BeforeCut);
   }
 
-  // FIXME: Password fields, with form controls.
   bool Editor::CanDHTMLCopy() noexcept
   {
+    if (_document.Selection().Selection().IsInPasswordField())
+    {
+      return false;
+    }
     return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::BeforeCopy);
   }
 
@@ -195,11 +203,12 @@ namespace krys::boo
     return CanCopy() && CanDelete();
   }
 
-  // FIXME: Image documents and password fields, with them.
+  // FIXME: Image documents, with them.
   bool Editor::CanCopy() const noexcept
   {
     const VisibleSelection &selection = _document.Selection().Selection();
-    return selection.IsRange() || !IsEditablePosition(selection.Start());
+    return (selection.IsRange() || !IsEditablePosition(selection.Start()))
+           && (!selection.IsInPasswordField() || selection.IsInAutoFilledAndViewableField());
   }
 
   bool Editor::CanPaste() const noexcept
@@ -207,15 +216,23 @@ namespace krys::boo
     return CanEdit();
   }
 
-  // FIXME: Password fields, with form controls.
   bool Editor::TryDHTMLCopy() noexcept
   {
+    if (_document.Selection().Selection().IsInPasswordField())
+    {
+      return false;
+    }
+
     return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::Copy);
   }
 
-  // FIXME: Password fields, with form controls.
   bool Editor::TryDHTMLCut() noexcept
   {
+    if (_document.Selection().Selection().IsInPasswordField())
+    {
+      return false;
+    }
+
     return !DispatchClipboardEvent(FindEventTargetFromSelection(), ClipboardEventKind::Cut);
   }
 
@@ -404,8 +421,8 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Text form controls, image documents, image overlays and writing the selection as web content
-  // (writeSelectionToPasteboard), with form controls, images and DataTransfer; the editor client's
+  // FIXME: Image documents, image overlays and writing the selection as web content outside text controls
+  // (writeSelectionToPasteboard), with images and DataTransfer; the editor client's
   // notifications around writing the selection; spelling markers (updateMarkersForWordsAffectedByEditing),
   // with text checking; and accessibility's notification of the cut text, with accessibility.
   void Editor::PerformCutOrCopy(EditorActionSpecifier action) noexcept
@@ -431,6 +448,57 @@ namespace krys::boo
     return EditingBehavior(_document.GetSettings().EditingBehaviorType);
   }
 
+  void Editor::TextFieldDidBeginEditing(dom::Element &e) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->TextFieldDidBeginEditing(e);
+    }
+  }
+
+  void Editor::TextFieldDidEndEditing(dom::Element &e) noexcept
+  {
+    // FIXME: Dismissing the correction panel (dismissCorrectionPanelAsIgnored), with spelling correction.
+    if (auto *client = Client())
+    {
+      client->TextFieldDidEndEditing(e);
+    }
+  }
+
+  void Editor::TextDidChangeInTextField(dom::Element &e) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->TextDidChangeInTextField(e);
+    }
+  }
+
+  bool Editor::DoTextFieldCommandFromEvent(dom::Element &e, dom::KeyboardEvent *ke) noexcept
+  {
+    if (auto *client = Client())
+    {
+      return client->DoTextFieldCommandFromEvent(e, ke);
+    }
+
+    return false;
+  }
+
+  void Editor::TextWillBeDeletedInTextField(dom::Element &input) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->TextWillBeDeletedInTextField(input);
+    }
+  }
+
+  void Editor::TextDidChangeInTextArea(dom::Element &e) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->TextDidChangeInTextArea(e);
+    }
+  }
+
   // FIXME: Writing Tools suppressing editing, and stopping scrolling as content grows while typing.
   bool Editor::WillApplyEditing(CompositeEditCommand &command,
                                 List<RefPtr<dom::StaticRange>> &&targetRanges) noexcept
@@ -454,8 +522,28 @@ namespace krys::boo
       isInputMethodComposing, InputEventData(command), targetRanges, command.IsBeforeInputEventCancelable());
   }
 
-  // FIXME: Notifying text controls of the change (notifyTextFromControls), with form controls; updating the
-  // editor's UI, with menus; and autocorrection's response (respondToAppliedEditing), with text checking.
+  namespace
+  {
+    void NotifyTextFromControls(dom::Element *startRoot, dom::Element *endRoot,
+                                bool wasUserEdit = true) noexcept
+    {
+      RefPtr<html::HTMLTextFormControlElement> startingTextControl =
+        ShareRefPtr(html::EnclosingTextFormControl(FirstPositionInOrBeforeNode(startRoot)));
+      RefPtr<html::HTMLTextFormControlElement> endingTextControl =
+        ShareRefPtr(html::EnclosingTextFormControl(FirstPositionInOrBeforeNode(endRoot)));
+      if (startingTextControl)
+      {
+        startingTextControl->DidEditInnerTextValue(wasUserEdit);
+      }
+      if (endingTextControl && startingTextControl != endingTextControl)
+      {
+        endingTextControl->DidEditInnerTextValue(wasUserEdit);
+      }
+    }
+  }
+
+  // FIXME: Updating the editor's UI, with menus; and autocorrection's response (respondToAppliedEditing),
+  // with text checking.
   void Editor::AppliedEditing(CompositeEditCommand &command) noexcept
   {
     _document.UpdateLayout();
@@ -463,6 +551,14 @@ namespace krys::boo
     krys_debug_assert(command.Composition());
     Ref<EditCommandComposition> composition = ShareRef(*command.Composition());
     VisibleSelection newSelection(command.EndingSelection());
+
+    bool wasUserEdit = [&command]
+    {
+      auto *typingCommand = DynamicDowncast<TypingCommand>(command);
+      return !typingCommand || !typingCommand->TriggeringEventIsUntrusted();
+    }();
+    NotifyTextFromControls(composition->StartingRootEditableElement(),
+                           composition->EndingRootEditableElement(), wasUserEdit);
 
     if (command.IsTopLevelCommand())
     {
@@ -523,6 +619,9 @@ namespace krys::boo
   {
     _document.UpdateLayout();
 
+    NotifyTextFromControls(composition.StartingRootEditableElement(),
+                           composition.EndingRootEditableElement());
+
     VisibleSelection newSelection(composition.StartingSelection());
     ChangeSelectionAfterCommand(newSelection, FrameSelection::DefaultSetSelectionOptions());
     DispatchInputEvents(ShareRefPtr(composition.StartingRootEditableElement()),
@@ -547,6 +646,9 @@ namespace krys::boo
   void Editor::ReappliedEditing(EditCommandComposition &composition) noexcept
   {
     _document.UpdateLayout();
+
+    NotifyTextFromControls(composition.StartingRootEditableElement(),
+                           composition.EndingRootEditableElement());
 
     VisibleSelection newSelection(composition.EndingSelection());
     ChangeSelectionAfterCommand(newSelection, FrameSelection::DefaultSetSelectionOptions());
@@ -765,6 +867,15 @@ namespace krys::boo
                                  ? TypingCommand::TextCompositionType::Final
                                  : TypingCommand::TextCompositionType::None;
         TypingCommand::InsertText(*document, text, triggeringEvent, selection, options, compositionType);
+
+        // Reveal the current selection. Note that focus may have changed after insertion.
+        // FIXME: Asking the client whether to (shouldRevealCurrentSelectionAfterInsertion, which every client
+        // but one returns true from), and revealing the focused frame's selection, with frames.
+        if (!triggeringEvent || triggeringEvent->IsTrusted())
+        {
+          document->Selection().RevealSelection(
+            {SelectionRevealMode::Reveal, ScrollAlignment::AlignCenterIfNeeded});
+        }
       }
     }
 
@@ -1006,10 +1117,28 @@ namespace krys::boo
                                          RevealExtentOption::DoNotRevealExtent);
   }
 
-  // FIXME: A text control's own selection when the event's target is in one, with form controls.
-  const VisibleSelection &Editor::SelectionForCommand(dom::Event *) const noexcept
+  VisibleSelection Editor::SelectionForCommand(dom::Event *event) const noexcept
   {
-    return _document.Selection().Selection();
+    auto selection = _document.Selection().Selection();
+    if (!event)
+    {
+      return selection;
+    }
+    // If the target is a text control, and the current selection is outside of its shadow tree,
+    // then use the saved selection for that text control.
+    if (auto *target = DynamicDowncast<html::HTMLTextFormControlElement>(event->Target().get());
+        target && target->IsTextField())
+    {
+      auto start = selection.Start();
+      if (start.IsNull() || target != html::EnclosingTextFormControl(start))
+      {
+        if (auto range = target->Selection())
+        {
+          return VisibleSelection(*range, Affinity::Downstream, selection.GetDirectionality());
+        }
+      }
+    }
+    return selection;
   }
 
   utf8_string Editor::SelectedText() const noexcept

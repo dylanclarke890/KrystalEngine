@@ -1,9 +1,13 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
@@ -709,6 +713,11 @@ namespace krys::boo
 
   RenderLayer::~RenderLayer() noexcept
   {
+    if (InResizeMode())
+    {
+      Renderer().GetDocument().Frame()->GetEventHandler().ResizeLayerDestroyed();
+    }
+
     ClearLayerScrollableArea();
     // FIXME: The clip path, once there's an SVG clip path.
     ClearLayerFilters();
@@ -4583,6 +4592,151 @@ namespace krys::boo
     return Renderer().HasNonVisibleOverflow() && Renderer().Style().GetResize() != style::Resize::None;
   }
 
+  LayoutSize RenderLayer::MinimumSizeForResizing(float zoomFactor) const noexcept
+  {
+    // Use the resizer size as the strict minimum size
+    auto resizerRect = OverflowControlsRects().Resizer;
+    auto minWidth =
+      style::EvaluateMinimum<LayoutUnit>(Renderer().Style().MinWidth(), Renderer().ContainingBlock()->Width(),
+                                         Renderer().Style().UsedZoomForLength());
+    auto minHeight = style::EvaluateMinimum<LayoutUnit>(Renderer().Style().MinHeight(),
+                                                        Renderer().ContainingBlock()->Height(),
+                                                        Renderer().Style().UsedZoomForLength());
+    minWidth = std::max(LayoutUnit(minWidth / zoomFactor), LayoutUnit(resizerRect.Width()));
+    minHeight = std::max(LayoutUnit(minHeight / zoomFactor), LayoutUnit(resizerRect.Height()));
+    return LayoutSize(minWidth, minHeight);
+  }
+
+  void RenderLayer::Resize(const PlatformMouseEvent &event, const LayoutSize &oldOffset) noexcept
+  {
+    // FIXME: This should be possible on generated content but is not right now.
+    if (!InResizeMode() || !CanResize())
+    {
+      return;
+    }
+
+    // FIXME: This should be possible on all elements but is not right now.
+    RefPtr<dom::StyledElement> styledElement =
+      ShareRefPtr(DynamicDowncast<dom::StyledElement>(Renderer().GetElement()));
+    if (!styledElement)
+    {
+      return;
+    }
+
+    // FIXME: The only case where renderer->element()->renderer() != renderer is with continuations. Do they
+    // matter here? If they do it would still be better to deal with them explicitly.
+    auto *renderer = Downcast<RenderBox>(styledElement->Renderer());
+
+    Ref<dom::Document> document = ShareRef(styledElement->NodeDocument());
+    if (!document->Frame()->GetEventHandler().MousePressed())
+    {
+      return;
+    }
+
+    float zoomFactor = renderer->Style().UsedZoom();
+
+    auto absolutePoint = document->View()->WindowToContents(FlooredIntPoint(event.Position()));
+    auto localPoint = RoundedIntPoint(AbsoluteToContents(LayoutPoint(absolutePoint)));
+
+    LayoutSize newOffset = OffsetFromResizeCorner(localPoint);
+    newOffset.SetWidth(newOffset.Width() / zoomFactor);
+    newOffset.SetHeight(newOffset.Height() / zoomFactor);
+
+    LayoutSize currentSize = LayoutSize(renderer->Width() / zoomFactor, renderer->Height() / zoomFactor);
+
+    LayoutSize adjustedOldOffset =
+      LayoutSize(oldOffset.Width() / zoomFactor, oldOffset.Height() / zoomFactor);
+    if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
+    {
+      newOffset.SetWidth(-newOffset.Width());
+      adjustedOldOffset.SetWidth(-adjustedOldOffset.Width());
+    }
+
+    LayoutSize difference =
+      (currentSize + newOffset - adjustedOldOffset).ExpandedTo(MinimumSizeForResizing(zoomFactor))
+      - currentSize;
+
+    // FIXME: A single mutation record for the style attribute (StyleAttributeMutationScope), with mutation
+    // observers of style changes.
+    bool isBoxSizingBorder = renderer->Style().GetBoxSizing() == BoxSizing::BorderBox;
+
+    auto resize = renderer->Style().GetResize();
+    bool canResizeWidth = resize == style::Resize::Horizontal || resize == style::Resize::Both
+                          || (renderer->IsHorizontalWritingMode() ? resize == style::Resize::Inline
+                                                                  : resize == style::Resize::Block);
+    if (canResizeWidth && difference.Width())
+    {
+      if (Is<html::HTMLFormControlElement>(*styledElement))
+      {
+        // Make implicit margins from the theme explicit (see <http://bugs.webkit.org/show_bug.cgi?id=9547>).
+        (void)styledElement->SetInlineStyleProperty(
+          css::PropertyId::MarginLeft, static_cast<double>(renderer->MarginLeft().ToFloat() / zoomFactor),
+          css::UnitType::px);
+        (void)styledElement->SetInlineStyleProperty(
+          css::PropertyId::MarginRight, static_cast<double>(renderer->MarginRight().ToFloat() / zoomFactor),
+          css::UnitType::px);
+      }
+      LayoutUnit baseWidth =
+        renderer->Width() - (isBoxSizingBorder ? 0_lu : renderer->HorizontalBorderAndPaddingExtent());
+      baseWidth = baseWidth / zoomFactor;
+      (void)styledElement->SetInlineStyleProperty(
+        css::PropertyId::Width, RoundToInt(baseWidth + difference.Width()), css::UnitType::px);
+    }
+
+    bool canResizeHeight = resize == style::Resize::Vertical || resize == style::Resize::Both
+                           || (renderer->IsHorizontalWritingMode() ? resize == style::Resize::Block
+                                                                   : resize == style::Resize::Inline);
+    if (canResizeHeight && difference.Height())
+    {
+      if (Is<html::HTMLFormControlElement>(*styledElement))
+      {
+        // Make implicit margins from the theme explicit (see <http://bugs.webkit.org/show_bug.cgi?id=9547>).
+        (void)styledElement->SetInlineStyleProperty(
+          css::PropertyId::MarginTop, static_cast<double>(renderer->MarginTop().ToFloat() / zoomFactor),
+          css::UnitType::px);
+        (void)styledElement->SetInlineStyleProperty(
+          css::PropertyId::MarginBottom, static_cast<double>(renderer->MarginBottom().ToFloat() / zoomFactor),
+          css::UnitType::px);
+      }
+      LayoutUnit baseHeight =
+        renderer->Height() - (isBoxSizingBorder ? 0_lu : renderer->VerticalBorderAndPaddingExtent());
+      baseHeight = baseHeight / zoomFactor;
+      (void)styledElement->SetInlineStyleProperty(
+        css::PropertyId::Height, RoundToInt(baseHeight + difference.Height()), css::UnitType::px);
+    }
+
+    document->UpdateLayout();
+
+    // FIXME (Radar 4118564): We should also autoscroll the window as necessary to keep the point under the
+    // cursor in view.
+  }
+
+  IntSize RenderLayer::OffsetFromResizeCorner(const IntPoint &localPoint) const noexcept
+  {
+    auto resizerRect = OverflowControlsRects().Resizer;
+    auto resizeCorner = Renderer().Style().ShouldPlaceVerticalScrollbarOnLeft()
+                          ? resizerRect.MinXMaxYCorner()
+                          : resizerRect.MaxXMaxYCorner();
+    return IntSize(localPoint.X() - resizeCorner.X(), localPoint.Y() - resizeCorner.Y());
+  }
+
+  bool RenderLayer::IsPointInResizeControl(IntPoint localPoint) const noexcept
+  {
+    if (!CanResize())
+    {
+      return false;
+    }
+
+    return OverflowControlsRects().Resizer.Contains(localPoint);
+  }
+
+  LayoutPoint RenderLayer::AbsoluteToContents(const LayoutPoint &absolutePoint) const noexcept
+  {
+    // We don't use convertToLayerCoords because it doesn't know about transforms
+    return LayoutPoint(
+      Renderer().AbsoluteToLocal(FloatPoint(absolutePoint), MapCoordinatesMode::UseTransforms));
+  }
+
   RenderLayer::OverflowControlRects RenderLayer::OverflowControlsRects() const noexcept
   {
     if (_scrollableArea)
@@ -6432,7 +6586,13 @@ namespace krys::boo
     CollectFragments(layerFragments, rootLayer, hitTestRect, RootRelativeClipRects,
                      {ClipRectsOption::RespectOverflowClip}, offsetFromRoot);
 
-    // FIXME: Resizers (hitTestResizerInFragments) come with resizing.
+    LayoutPoint localPoint;
+    if (CanResize() && _scrollableArea
+        && _scrollableArea->HitTestResizerInFragments(layerFragments, hitTestLocation, localPoint))
+    {
+      Renderer().UpdateHitTestResult(result, localPoint);
+      return {this, selfZOffset};
+    }
 
     auto isHitCandidate = [&]()
     {

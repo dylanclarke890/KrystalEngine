@@ -89,6 +89,7 @@ namespace krys::boo::html
   class HTMLDocumentParser;
   class HTMLHeadElement;
   class HTMLHtmlElement;
+  class HTMLInputElement;
   class HTMLTitleElement;
   class HTMLTreeBuilder;
   class RenderBlocking;
@@ -217,6 +218,8 @@ namespace krys::boo::dom
 
     Timer _styleRecalcTimer;
     List<WeakPtr<Element>> _autofocusCandidates;
+    // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
+    List<WeakPtr<html::HTMLInputElement>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
@@ -635,10 +638,8 @@ namespace krys::boo::dom
 #pragma region Scrolling
 
     /// @brief Queues a `scroll` or `scrollend` event at @p originalTarget (an element, or the document for
-    /// the viewport) for the next scroll steps, once per target and type.
-    // FIXME: A text control's inner text element's events go to its shadow host, once there are text
-    // controls; scheduling a rendering update (scheduleRenderingUpdate), once there's a rendering loop: the
-    // host runs the scroll steps.
+    /// the viewport) for the next scroll steps, once per target and type. A text control's inner text
+    /// element's events go to the text control.
     void AddPendingScrollEventTarget(ContainerNode &originalTarget, ScrollEventType eventType) noexcept;
 
     /// @brief Fires the pending scroll events, in the order they were queued: at elements without bubbling,
@@ -716,6 +717,11 @@ namespace krys::boo::dom
     {
       return _inStyleRecalc;
     }
+
+    void AddElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept;
+    void RemoveElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept;
+    KRYS_NODISCARD bool
+      HasElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) const noexcept;
 
     /// @brief Whether the document is laid out in the middle of a style update, for container queries.
     KRYS_NODISCARD bool IsInStyleInterleavedLayout() const noexcept

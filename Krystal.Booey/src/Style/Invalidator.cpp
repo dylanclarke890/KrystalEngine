@@ -561,7 +561,11 @@ namespace krys::boo::style
 
   void Invalidator::InvalidateShadowParts(dom::ShadowRoot &shadowRoot) noexcept
   {
-    // FIXME: Return early for user agent shadow roots, once there are any.
+    if (shadowRoot.Mode() == dom::ShadowRootMode::UserAgent)
+    {
+      return;
+    }
+
     for (auto *descendant = FirstElementFrom(shadowRoot.FirstChild(), shadowRoot); descendant;
          descendant = FirstElementFrom(dom::TreeQueries::Next(*descendant, &shadowRoot), shadowRoot))
     {
@@ -580,10 +584,29 @@ namespace krys::boo::style
     }
   }
 
-  void Invalidator::InvalidateUserAgentParts(dom::ShadowRoot &) noexcept
+  void Invalidator::InvalidateUserAgentParts(dom::ShadowRoot &shadowRoot) noexcept
   {
-    // FIXME: Invalidate the user agent parts that the rule sets have rules for, once there are user agent
-    // shadow roots.
+    if (shadowRoot.Mode() != dom::ShadowRootMode::UserAgent)
+    {
+      return;
+    }
+
+    for (auto *descendant = FirstElementFrom(shadowRoot.FirstChild(), shadowRoot); descendant;
+         descendant = FirstElementFrom(dom::TreeQueries::Next(*descendant, &shadowRoot), shadowRoot))
+    {
+      auto part = descendant->UserAgentPart();
+      if (part.View().empty())
+      {
+        continue;
+      }
+      for (auto &ruleSet : _ruleSets)
+      {
+        if (ruleSet.RuleSet->UserAgentPartRules(part))
+        {
+          descendant->InvalidateStyleInternal();
+        }
+      }
+    }
   }
 
   void Invalidator::InvalidateInShadowTreeIfNeeded(dom::Element &element) noexcept

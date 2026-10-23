@@ -565,6 +565,7 @@ namespace krys::boo
     const bool _forcedStackingContext : 1;
 
     bool _isNormalFlowOnly : 1 {false};
+    bool _inResizeMode : 1 {false};
     bool _canBeBackdropRoot : 1 {false};
     bool _hasBackdropFilterDescendantsWithoutRoot : 1 {false};
     bool _isCSSStackingContext : 1 {false};
@@ -1493,6 +1494,27 @@ namespace krys::boo
     void UpdateScrollbarSteps() noexcept;
 
     KRYS_NODISCARD bool CanResize() const noexcept;
+    /// @brief The smallest the user can resize the box to: its minimum size, and at least the resizer.
+    KRYS_NODISCARD LayoutSize MinimumSizeForResizing(float zoomFactor) const noexcept;
+    /// @brief Resizes the box to follow the mouse as the user drags its resizer, setting its inline `width`
+    /// and `height`.
+    /// @param oldOffset The mouse's offset from the resize corner when the drag began.
+    void Resize(const PlatformMouseEvent &event, const LayoutSize &oldOffset) noexcept;
+
+    KRYS_NODISCARD bool InResizeMode() const noexcept
+    {
+      return _inResizeMode;
+    }
+
+    void SetInResizeMode(bool inResizeMode) noexcept
+    {
+      _inResizeMode = inResizeMode;
+    }
+
+    /// @brief Whether @p localPoint is over the box's resizer.
+    KRYS_NODISCARD bool IsPointInResizeControl(IntPoint localPoint) const noexcept;
+    KRYS_NODISCARD IntSize OffsetFromResizeCorner(const IntPoint &localPoint) const noexcept;
+    KRYS_NODISCARD LayoutPoint AbsoluteToContents(const LayoutPoint &absolutePoint) const noexcept;
 
     KRYS_NODISCARD OverflowControlRects OverflowControlsRects() const noexcept;
 

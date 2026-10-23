@@ -166,11 +166,10 @@ namespace krys::boo
   /// the selection's colours), and keeping the render tree's selection (`RenderSelection`) in step with it.
   // FIXME: The block cursor of overtype mode (paintBlockCursor), with editing commands; the caret colour the
   // host sets (setCaretColor), which only iOS uses.
-  // FIXME: selectionchange at text form controls, with form controls.
   // FIXME: Frames: the drag caret (DragCaretController), selecting the frame element in the parent
   // (selectFrameElementInParentIfFullySelected), selections in another frame's document.
   // FIXME: The editor's notifications (selectionWillChange, respondToChangedSelection, shouldChangeSelection
-  // asking its client), text form controls and closing typing, with editing commands and form controls.
+  // asking its client), with editing commands.
   class FrameSelection final : private CaretBase, public CaretAnimationClient
   {
     KRYS_NON_COPY_MOVABLE(FrameSelection);

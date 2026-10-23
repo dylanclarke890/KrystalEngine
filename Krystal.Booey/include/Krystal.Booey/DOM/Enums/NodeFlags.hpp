@@ -35,7 +35,9 @@ namespace krys::boo::dom
     IsPseudoElement = 1 << 17,
     /// @brief Set on a node an end point of the frame's selection is anchored in, and on its ancestors.
     ContainsSelectionEndPoint = 1 << 18,
+    /// @brief Set on elements whose style is resolved by `Element::ResolveCustomStyle`.
+    HasCustomStyleResolveCallbacks = 1 << 19,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 19u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 20u);

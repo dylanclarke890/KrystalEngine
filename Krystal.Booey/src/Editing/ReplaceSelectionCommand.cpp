@@ -3,7 +3,9 @@
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
@@ -19,6 +21,7 @@
 #include "Krystal.Booey/Editing/SmartReplace.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -342,10 +345,11 @@ namespace krys::boo
   }
 
   /// @brief The fragment being inserted, with the nodes it shouldn't bring removed and its interchange
-  /// newlines noted and removed.
-  // FIXME: Rendering the fragment in a staging document to filter it as plain text for editable roots that
-  // aren't richly editable, and the event text controls handle to filter it (BeforeTextInsertedEvent), with a
-  // page for sanitizing web content and form controls.
+  /// newlines noted and removed. A text control (or an editing host that isn't richly editable) gets the
+  /// fragment's text, which it may change (`BeforeTextInsertedEvent`).
+  // FIXME: Rendering the fragment in a staging document to take its text as it's rendered and drop its
+  // unrendered nodes, with a page for sanitizing web content; the text is the fragment's text nodes, with a
+  // line break for each `<br>` and between blocks, which is what pasted plain text makes.
   class ReplacementFragment
   {
     KRYS_NON_COPYABLE(ReplacementFragment);
@@ -354,6 +358,10 @@ namespace krys::boo
     RefPtr<dom::DocumentFragment> _fragment;
     bool _hasInterchangeNewlineAtStart {false};
     bool _hasInterchangeNewlineAtEnd {false};
+
+    /// @brief The text of @p fragment: its text nodes, with a line break for each `<br>` and before each
+    /// paragraph but the first.
+    KRYS_NODISCARD static utf8_string FragmentText(dom::DocumentFragment &fragment) noexcept;
 
   public:
     ReplacementFragment(RefPtr<dom::DocumentFragment> &&inputFragment,
@@ -421,7 +429,58 @@ namespace krys::boo
       return;
     }
 
+    auto *shadowHost = dom::TreeQueries::ShadowHost(*editableRoot);
+    if (!(shadowHost && shadowHost->Renderer() && shadowHost->Renderer()->IsRenderTextControl())
+        && editableRoot->HasRichlyEditableStyle())
+    {
+      RemoveInterchangeNodes(fragment.get());
+      return;
+    }
+
     RemoveInterchangeNodes(fragment.get());
+    auto text = FragmentText(*fragment);
+
+    // Give the root a chance to change the text.
+    auto event = dom::BeforeTextInsertedEvent::Create(text);
+    (void)dom::EventDispatcher::DispatchToTarget(*event, editableRoot.get());
+    if (text != event->Text() || !editableRoot->HasRichlyEditableStyle())
+    {
+      auto range = selection.ToNormalizedRange();
+      if (!range)
+      {
+        return;
+      }
+
+      _fragment = CreateFragmentFromText(*range, event->Text());
+      if (!_fragment->FirstChild())
+      {
+        return;
+      }
+
+      RemoveInterchangeNodes(_fragment.get());
+    }
+  }
+
+  utf8_string ReplacementFragment::FragmentText(dom::DocumentFragment &fragment) noexcept
+  {
+    utf8_string text;
+    for (auto *node = fragment.FirstChild(); node; node = dom::TreeQueries::Next(*node, &fragment))
+    {
+      if (auto *textNode = DynamicDowncast<dom::Text>(*node))
+      {
+        text.append(textNode->Data());
+      }
+      else if (HasTagName(node, html::TagName::br))
+      {
+        text.push_back(u8'\n');
+      }
+      else if (node->ParentNode() == &fragment && Is<dom::Element>(*node) && !text.empty()
+               && text.back() != u8'\n')
+      {
+        text.push_back(u8'\n');
+      }
+    }
+    return text;
   }
 
   ReplaceSelectionCommand::~ReplaceSelectionCommand() noexcept = default;
@@ -1803,10 +1862,20 @@ namespace krys::boo
     return IsStartOfParagraph(visiblePos) && IsEndOfParagraph(visiblePos);
   }
 
-  // FIXME: Not doing smart replace in password fields, with form controls.
   bool ReplaceSelectionCommand::ShouldPerformSmartReplace() const noexcept
   {
-    return _smartReplace;
+    if (!_smartReplace)
+    {
+      return false;
+    }
+
+    auto *textControl = html::EnclosingTextFormControl(PositionAtStartOfInsertedContent().DeepEquivalent());
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(textControl); input && input->IsPasswordField())
+    {
+      return false; // Disable smart replace for password fields.
+    }
+
+    return true;
   }
 
   bool ReplaceSelectionCommand::ShouldPerformSmartParagraphReplace() const noexcept

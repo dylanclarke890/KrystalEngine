@@ -50,6 +50,7 @@ namespace krys::boo::html
     bool _isIndeterminate : 1 {false};
     bool _isActivatedSubmit : 1 {false};
     bool _wasModifiedByUser : 1 {false};
+    bool _hasPendingUserAgentShadowTreeUpdate : 1 {false};
     AutoCompleteSetting _autocomplete {Uninitialized};
     RefPtr<InputType> _inputType;
     InputElementClickState _clickHandlingState;
@@ -326,16 +327,39 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-cva-validationmessage
     KRYS_NODISCARD dom::DOMString ValidationMessage() const noexcept final;
 
-    // TODO(HTMLINPUT, HTML): The selection API, with text fields.
-    // undefined select();
-    // attribute unsigned long? selectionStart;
-    // attribute unsigned long? selectionEnd;
-    // attribute dom::DOMString? selectionDirection;
-    // undefined setRangeText(dom::DOMString replacement);
-    // undefined setRangeText(dom::DOMString replacement, unsigned long start, unsigned long end, optional
-    // SelectionMode selectionMode = "preserve");
-    // undefined setSelectionRange(unsigned long start, unsigned long end, optional dom::DOMString direction);
-    //
+    /// @brief The selection's start, or null if the type has no selection.
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
+    KRYS_NODISCARD Maybe<uint32> SelectionStartForBindings() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
+    dom::ExceptionOr<void> SetSelectionStartForBindings(Maybe<uint32> start) noexcept;
+
+    /// @brief The selection's end, or null if the type has no selection.
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
+    KRYS_NODISCARD Maybe<uint32> SelectionEndForBindings() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectionend
+    dom::ExceptionOr<void> SetSelectionEndForBindings(Maybe<uint32> end) noexcept;
+
+    /// @brief The selection's direction, or null if the type has no selection.
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
+    KRYS_NODISCARD Maybe<dom::DOMString> SelectionDirectionForBindings() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
+    dom::ExceptionOr<void> SetSelectionDirectionForBindings(dom::DOMStringView direction) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-setselectionrange
+    dom::ExceptionOr<void> SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                        dom::DOMStringView direction = {}) noexcept;
+
+    using HTMLTextFormControlElement::SetRangeText;
+
+    /// @brief Throws `InvalidStateError` if the type has no selection.
+    /// @see https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
+    dom::ExceptionOr<void> SetRangeText(dom::DOMStringView replacement, uint32 start, uint32 end,
+                                        dom::DOMStringView selectionMode) noexcept final;
+
+    // TODO(HTMLINPUT, HTML): Implement ShowPicker(), with pickers.
     // undefined showPicker();
 
 #pragma endregion
@@ -371,7 +395,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsSteppable() const noexcept;
     KRYS_NODISCARD bool IsTextButton() const noexcept;
     KRYS_NODISCARD bool IsRadioButton() const noexcept;
-    KRYS_NODISCARD bool IsTextField() const noexcept;
+    KRYS_NODISCARD bool IsTextField() const noexcept final;
     KRYS_NODISCARD bool IsSearchField() const noexcept;
     KRYS_NODISCARD bool IsInputTypeHidden() const noexcept;
     KRYS_NODISCARD bool IsPasswordField() const noexcept;
@@ -430,6 +454,51 @@ namespace krys::boo::html
 
     // Functions for InputType classes.
     void SetValueInternal(dom::DOMStringView sanitizedValue, TextFieldEventBehavior eventBehavior) noexcept;
+
+    /// @brief Takes the text the user edited as the value (dirty, and modified by the user).
+    void SetValueFromRenderer(dom::DOMStringView value) noexcept;
+
+    /// @brief Caches a collapsed selection at @p caretOffset, as setting the value does while unfocused.
+    void CacheSelectionInResponseToSetValue(uint32 caretOffset) noexcept
+    {
+      CacheSelection(caretOffset, caretOffset, TextFieldSelectionDirection::SelectionHasNoDirection);
+    }
+
+    /// @brief Tells the editor a text field stopped being edited.
+    void EndEditing() noexcept;
+
+    /// @brief Creates the type's shadow tree, which inserting the element into a document left pending.
+    void UpdateUserAgentShadowTree() noexcept;
+
+    KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *CancelButtonElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *PlaceholderElement() const noexcept final;
+    KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+    RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept final;
+    KRYS_NODISCARD RenderStyle CreateInnerTextStyle(const RenderStyle &style) noexcept final;
+
+    /// @brief Whether the field's text ends in an ellipsis: when `text-overflow` says so and it isn't
+    /// focused.
+    KRYS_NODISCARD bool ShouldTruncateText(const RenderStyle &style) const noexcept;
+
+    /// @brief Sets @p preferredSize to the field's size in characters.
+    /// @return Whether the size includes the field's decorations.
+    KRYS_NODISCARD bool SizeShouldIncludeDecoration(int32 &preferredSize) const noexcept;
+    KRYS_NODISCARD float DecorationWidth(float inputWidth) const noexcept;
+
+    KRYS_NODISCARD bool CanHaveSelection() const noexcept
+    {
+      return IsTextField();
+    }
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
+    void DidAttachRenderers() noexcept final;
+    void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+                               SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
+    void DidBlur() noexcept final;
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
     KRYS_NODISCARD dom::DOMString ResultForDialogSubmit() const noexcept final;
@@ -503,6 +572,10 @@ namespace krys::boo::html
     void OnClone(dom::Node &copy, bool subtree) noexcept final;
 
     KRYS_NODISCARD bool IsEmptyValue() const noexcept final;
+    void UpdatePlaceholderText() noexcept final;
+    void SubtreeHasChanged() noexcept final;
+    void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
+    void HandleBlurEvent() noexcept final;
 
     void WillChangeForm() noexcept final;
     void DidChangeForm() noexcept final;
@@ -530,6 +603,9 @@ namespace krys::boo::html
 
     void UpdateType(dom::DOMStringView typeAttributeValue) noexcept;
     void RunPostTypeUpdateTasks() noexcept;
+    void SetDefaultSelectionAfterFocus(dom::SelectionRestorationMode restorationMode,
+                                       SelectionRevealMode revealMode) noexcept;
+    void InvalidateStyleOnFocusChangeIfNeeded() noexcept;
     void MaxLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
     void MinLengthAttributeChanged(Maybe<dom::DOMStringView> newValue) noexcept;
     void UpdateValueIfNeeded() noexcept;

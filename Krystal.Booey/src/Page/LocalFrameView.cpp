@@ -2297,10 +2297,17 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Scroll to the shadow host of an element in a user agent shadow root, and to the element a
-    // focused element delegates its focus appearance to, once there are user agent shadow roots and form
-    // controls.
-    auto *renderer = focusedElement->Renderer();
+    // FIXME: The element an image map's area delegates its focus appearance to (focusAppearanceUpdateTarget),
+    // with image maps.
+    dom::Element *updateTarget = focusedElement;
+
+    // Get the scroll-margin of the shadow host when we're inside a user agent shadow root.
+    if (updateTarget->IsInUserAgentShadowTree())
+    {
+      updateTarget = dom::TreeQueries::ShadowHost(*updateTarget);
+    }
+
+    auto *renderer = updateTarget->Renderer();
     if (!renderer)
     {
       return;

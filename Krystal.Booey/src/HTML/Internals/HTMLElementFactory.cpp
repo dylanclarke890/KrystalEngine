@@ -13,13 +13,13 @@
 #include "Krystal.Booey/HTML/HTMLAudioElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDataElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
-#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -383,7 +383,7 @@ namespace krys::boo::html
       }
       case TagName::textarea:
       {
-        return CreateRefPtr<HTMLTextAreaElement>(document);
+        return HTMLTextAreaElement::Create(document);
       }
       case TagName::title:
       {

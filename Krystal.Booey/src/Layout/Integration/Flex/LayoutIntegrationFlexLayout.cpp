@@ -213,8 +213,8 @@ namespace krys::boo::layout_integration
         return false;
       }
 
-      // FIXME: Text controls are unsupported too, once there are those.
-      if (!Is<RenderBlock>(flexItem) || flexItem.IsFieldset() || flexItem.IsRenderTable())
+      if (!Is<RenderBlock>(flexItem) || flexItem.IsFieldset() || flexItem.IsRenderTextControl()
+          || flexItem.IsRenderTable())
       {
         return false;
       }

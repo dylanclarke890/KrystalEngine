@@ -22,10 +22,15 @@
             "user-agent-part-string": [
                 "For pseudo-elements only. When the pseudo-element needs to be in UserAgentParts despite not being a `PseudoElement::UserAgentPart`.",
                 "Mutually exclusive with the user-agent-part field."
+            ],
+            "user-agent-sheet-only": [
+                "For pseudo-elements only. Whether the pseudo-element is parsed only in user agent style sheets.",
+                "For the internal parts of user agent shadow trees, which pages can't style."
             ]
         },
         "notes": [
-            "Only standard pseudo-classes and pseudo-elements are listed; prefixed, non-standard and legacy alias names are not supported."
+            "Only standard pseudo-classes and pseudo-elements are listed; prefixed, non-standard and legacy alias names are not supported.",
+            "The exceptions are the internal user agent parts, which only user agent style sheets can name."
         ]
     },
     "pseudo-classes": {
@@ -122,6 +127,36 @@
         }
     },
     "pseudo-elements": {
+        "-webkit-inner-spin-button": {
+            "comment": "The spin button of number fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-search-cancel-button": {
+            "comment": "The cancel button of search fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-search-decoration": {
+            "comment": "The decoration of search fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-search-results-button": {
+            "comment": "The results button of search fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-search-results-decoration": {
+            "comment": "The results decoration of search fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-textfield-decoration-container": {
+            "comment": "The container of text fields' inner text and decorations.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "after": {
             "supports-single-colon-for-compatibility": true
         },

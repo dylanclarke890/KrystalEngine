@@ -252,7 +252,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (aShadowRoot->Mode() == ShadowRootMode::Closed)
+    if (aShadowRoot->Mode() != ShadowRootMode::Open)
     {
       return true;
     }

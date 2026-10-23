@@ -52,6 +52,7 @@
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
@@ -1240,9 +1241,22 @@ namespace krys::boo::dom
   void Document::AddPendingScrollEventTarget(ContainerNode &originalTarget,
                                              ScrollEventType eventType) noexcept
   {
+    Ref<ContainerNode> target = [&]() -> Ref<ContainerNode>
+    {
+      if (auto *element = DynamicDowncast<html::HTMLElement>(originalTarget);
+          element && element->IsTextControlInnerTextElement())
+      {
+        if (auto *shadowHost = TreeQueries::ShadowHost(*element))
+        {
+          return ShareRef<ContainerNode>(*shadowHost);
+        }
+      }
+      return ShareRef(originalTarget);
+    }();
+
     auto found =
       std::ranges::find_if(_pendingScrollEventTargets, [&](const auto &pair)
-                           { return pair.first.get() == &originalTarget && pair.second == eventType; });
+                           { return pair.first.get() == target.get() && pair.second == eventType; });
     if (found != _pendingScrollEventTargets.end())
     {
       return;
@@ -1253,7 +1267,7 @@ namespace krys::boo::dom
       ScheduleRenderingUpdate({RenderingUpdateStep::Scroll});
     }
 
-    _pendingScrollEventTargets.emplace_back(ShareRef(originalTarget), eventType);
+    _pendingScrollEventTargets.emplace_back(krys::move(target), eventType);
   }
 
   void Document::ServiceCaretAnimation() noexcept
@@ -1811,6 +1825,28 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::AddElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept
+  {
+    krys_debug_assert(&element.NodeDocument() == this);
+    krys_debug_assert(!HasElementWithPendingUserAgentShadowTreeUpdate(element));
+    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(
+      WeakPtr<html::HTMLInputElement>::WithRef(element));
+  }
+
+  void Document::RemoveElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept
+  {
+    krys_debug_assert(&element.NodeDocument() == this);
+    std::erase_if(_elementsWithPendingUserAgentShadowTreeUpdates,
+                  [&](const auto &entry) { return !entry || entry.get() == &element; });
+  }
+
+  bool
+    Document::HasElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) const noexcept
+  {
+    return std::ranges::any_of(_elementsWithPendingUserAgentShadowTreeUpdates,
+                               [&](const auto &entry) { return entry.get() == &element; });
+  }
+
   void Document::ResolveStyle(ResolveStyleType type) noexcept
   {
     if (_inStyleRecalc)
@@ -1820,6 +1856,16 @@ namespace krys::boo::dom
 
     // FIXME: We should update style on our ancestor chain before proceeding, however doing so at
     // the time this comment was originally written caused several tests to crash.
+
+    // FIXME: Do this user agent shadow tree update per tree scope.
+    auto pendingUserAgentShadowTreeUpdates = _elementsWithPendingUserAgentShadowTreeUpdates;
+    for (auto &weakElement : pendingUserAgentShadowTreeUpdates)
+    {
+      if (RefPtr<html::HTMLInputElement> element = ShareRefPtr(weakElement.get()))
+      {
+        element->UpdateUserAgentShadowTree();
+      }
+    }
 
     StyleScope().FlushPendingUpdate();
     if (auto *frameView = View())

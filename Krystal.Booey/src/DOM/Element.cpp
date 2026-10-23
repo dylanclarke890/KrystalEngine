@@ -36,6 +36,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -50,6 +51,7 @@
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -57,6 +59,8 @@
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Invalidator.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
@@ -427,6 +431,16 @@ namespace krys::boo::dom
   bool Element::RendererIsNeeded(const RenderStyle &style) noexcept
   {
     return style.Display() != DisplayType::None && style.Display() != DisplayType::Contents;
+  }
+
+  void Element::DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &) noexcept
+  {
+    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"focus"), *this, relatedTarget);
+  }
+
+  void Element::DispatchBlurEvent(EventTarget *relatedTarget) noexcept
+  {
+    html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
   }
 
   void Element::UpdateFocusAppearance(SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
@@ -1004,6 +1018,18 @@ namespace krys::boo::dom
     }
 
     return NodeDocument().StyleScope().GetResolver();
+  }
+
+  style::UnadjustedStyle Element::ResolveStyle(const style::ResolutionContext &resolutionContext) noexcept
+  {
+    return StyleResolver().UnadjustedStyleForElement(*this, resolutionContext);
+  }
+
+  Maybe<style::UnadjustedStyle> Element::ResolveCustomStyle(const style::ResolutionContext &,
+                                                            const RenderStyle *) noexcept
+  {
+    krys_debug_assert(HasCustomStyleResolveCallbacks());
+    return null;
   }
 
   void InvalidateForSiblingCombinators(Element *sibling) noexcept
@@ -1626,12 +1652,47 @@ namespace krys::boo::dom
 
   RefPtr<ShadowRoot> Element::ShadowRoot() const noexcept
   {
-    if (!_shadowRoot || _shadowRoot->Mode() == ShadowRootMode::Closed)
+    if (!_shadowRoot || _shadowRoot->Mode() != ShadowRootMode::Open)
     {
       return nullptr;
     }
 
     return _shadowRoot;
+  }
+
+  ShadowRoot *Element::UserAgentShadowRoot() const noexcept
+  {
+    krys_debug_assert(!_shadowRoot || _shadowRoot->Mode() == ShadowRootMode::UserAgent);
+    return _shadowRoot.get();
+  }
+
+  ShadowRoot &Element::EnsureUserAgentShadowRoot() noexcept
+  {
+    if (auto *shadow = UserAgentShadowRoot())
+    {
+      return *shadow;
+    }
+    return CreateUserAgentShadowRoot();
+  }
+
+  ShadowRoot &Element::CreateUserAgentShadowRoot() noexcept
+  {
+    krys_debug_assert(!UserAgentShadowRoot());
+    return ElementAlgorithms::AttachUserAgentShadowRoot(*this);
+  }
+
+  DOMStringAtom Element::UserAgentPart() const noexcept
+  {
+    krys_debug_assert(IsInUserAgentShadowTree());
+    auto part = GetAttribute(u8"useragentpart");
+    return part ? DOMStringAtom(*part) : DOMStringAtom::Null();
+  }
+
+  void Element::SetUserAgentPart(DOMStringAtom part) noexcept
+  {
+    // We may set the useragentpart attribute on elements before appending them to the shadow tree.
+    krys_debug_assert(!IsConnected() || IsInUserAgentShadowTree());
+    (void)SetAttribute(u8"useragentpart", DOMString(part.View()));
   }
 
   ExceptionOr<RefPtr<Element>> Element::Closest(DOMStringView selectors) noexcept
@@ -2352,8 +2413,20 @@ namespace krys::boo::dom
     // If the element does not have any associated CSS layout box, the element has no associated scrolling
     // box, or the element has no overflow, terminate these steps.
     auto *renderer = RenderBoxOf(*this);
-    // FIXME: Single-line text controls scroll their inner text element, once there are form controls.
-    if (!renderer || !renderer->HasNonVisibleOverflow())
+    if (!renderer)
+    {
+      return;
+    }
+
+    auto rendererCanScroll = [&]
+    {
+      if (auto *renderTextControlSingleLine = DynamicDowncast<RenderTextControlSingleLine>(*renderer))
+      {
+        return renderTextControlSingleLine->InnerTextElementHasNonVisibleOverflow();
+      }
+      return renderer->HasNonVisibleOverflow();
+    };
+    if (!rendererCanScroll())
     {
       return;
     }

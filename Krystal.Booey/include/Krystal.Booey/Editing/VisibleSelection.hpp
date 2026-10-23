@@ -32,8 +32,7 @@ namespace krys::boo
 
   /// @brief A selection: an anchor and a focus, canonicalised to candidate positions and expanded to a
   /// granularity, as none, a caret or a range.
-  // FIXME: Password fields, auto-filled fields and writing suggestions (isInPasswordField,
-  // isInAutoFilledAndViewableField, canEnableWritingSuggestions) come with form controls.
+  // FIXME: Writing suggestions (canEnableWritingSuggestions), with writing suggestions.
   class VisibleSelection
   {
   private:
@@ -222,6 +221,15 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<dom::SimpleRange> ToNormalizedRange() const noexcept;
 
     KRYS_NODISCARD dom::Element *RootEditableElement() const noexcept;
+
+    /// @brief Whether the selection starts in a password field.
+    KRYS_NODISCARD bool IsInPasswordField() const noexcept;
+
+    // FIXME: Fields the host autofilled and lets the user see (autofilledAndViewable), with autofill.
+    KRYS_NODISCARD bool IsInAutoFilledAndViewableField() const noexcept
+    {
+      return false;
+    }
     KRYS_NODISCARD bool IsContentEditable() const noexcept;
     KRYS_NODISCARD bool HasEditableStyle() const noexcept;
     KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;

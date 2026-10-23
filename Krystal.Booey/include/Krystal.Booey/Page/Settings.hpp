@@ -54,6 +54,8 @@ namespace krys::boo
     /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
     /// the pasted copy stays in flow.
     bool ShouldConvertPositionStyleOnCopy {false};
+    /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
+    bool TextAreasAreResizable {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
 

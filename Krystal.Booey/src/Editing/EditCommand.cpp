@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 
 namespace krys::boo
 {
@@ -95,10 +96,9 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Text form controls (enclosingTextFormControl), with form controls.
   bool EditCommand::IsEditingTextAreaOrTextInput() const noexcept
   {
-    return false;
+    return html::EnclosingTextFormControl(_document->Selection().Selection().Start());
   }
 
   void EditCommand::SetStartingSelection(const VisibleSelection &selection) noexcept

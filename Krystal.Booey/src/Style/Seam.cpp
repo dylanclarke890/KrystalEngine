@@ -15,9 +15,11 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -34,6 +36,63 @@
 
 namespace krys::boo
 {
+  void RenderTheme::PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,
+                                         const LayoutRect &resizerCornerRect) noexcept
+  {
+    // The platform's resize corner image: two diagonal lines, each a dark line with a light one below it,
+    // 8 pixels square, drawn a pixel at a time.
+    // FIXME: The platform image (textAreaResizeCorner), and its 2x version, once the theme has images.
+    constexpr float cornerResizerSize = 8;
+    auto origin =
+      FloatPoint(resizerCornerRect.MaxXMaxYCorner()) - FloatSize(cornerResizerSize, cornerResizerSize);
+    bool flip = renderer.Style().ShouldPlaceVerticalScrollbarOnLeft();
+    if (flip)
+    {
+      origin =
+        FloatPoint(resizerCornerRect.X().ToFloat(), resizerCornerRect.MaxY().ToFloat() - cornerResizerSize);
+    }
+
+    auto dark = Color(SRGBA<uint8> {0, 0, 0, 0x99});
+    auto light = Color(SRGBA<uint8> {255, 255, 255, 0x99});
+    auto pixel = [&](int32 x, int32 y, const Color &color)
+    {
+      auto column = flip ? static_cast<int32>(cornerResizerSize) - 1 - x : x;
+      context.FillRect(FloatRect(origin.X() + column, origin.Y() + y, 1, 1), color);
+    };
+    for (int32 y = 0; y < 7; ++y)
+    {
+      // The long line, from (6, 0) to (0, 6).
+      pixel(6 - y, y, dark);
+      if (6 - y + 1 < 7)
+      {
+        pixel(6 - y + 1, y, light);
+      }
+      // The short line, from (6, 4) to (4, 6).
+      if (y >= 4)
+      {
+        pixel(10 - y, y, dark);
+        if (10 - y + 1 < 7)
+        {
+          pixel(10 - y + 1, y, light);
+        }
+      }
+    }
+  }
+
+  void RenderTheme::PaintPlatformResizerFrame(const RenderLayerModelObject &, GraphicsContext &context,
+                                              const LayoutRect &resizerAbsRect) noexcept
+  {
+    // Clipping will exclude the right and bottom edges of this frame.
+    GraphicsContextStateSaver stateSaver(context);
+    context.Clip(FloatRect(resizerAbsRect));
+    LayoutRect largerCorner = resizerAbsRect;
+    largerCorner.SetSize(LayoutSize(largerCorner.Width() + 1_lu, largerCorner.Height() + 1_lu));
+    context.SetStrokeColor(Color(SRGBA<uint8> {217, 217, 217}));
+    context.SetStrokeThickness(1.0f);
+    context.SetFillColor(Color::transparentBlack);
+    context.DrawRect(FloatRect(SnappedIntRect(largerCorner)));
+  }
+
   bool RenderTheme::HasAppearanceForElementTypeFromUAStyle(const dom::Element &element) noexcept
   {
     if (!Is<html::HTMLElement>(element))

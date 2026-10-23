@@ -235,8 +235,7 @@ namespace krys::boo::style
 
   bool Scope::IsForUserAgentShadowTree() const noexcept
   {
-    // FIXME: User agent shadow roots, once there are any.
-    return false;
+    return _shadowRoot && _shadowRoot->Mode() == dom::ShadowRootMode::UserAgent;
   }
 
   void Scope::ClearResolver() noexcept
@@ -1018,8 +1017,7 @@ namespace krys::boo::style
 
       for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
       {
-        // FIXME: Skip user agent shadow roots, once there are any.
-        if (descendantShadowRoot)
+        if (descendantShadowRoot && descendantShadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
         {
           descendantShadowRoot->StyleScope().DidChangeViewportSize();
         }

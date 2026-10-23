@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -259,10 +260,13 @@ namespace krys::boo
     krys_debug_assert(!anonymousBlock.ChildrenInline());
     krys_debug_assert(anonymousBlock.Parent());
 
-    // FIXME: Continuations, and buttons and text controls (which keep their anonymous blocks), once there are
-    // any.
+    // FIXME: Continuations, and buttons (which keep their anonymous blocks), once there are any.
 
     auto *parent = anonymousBlock.Parent();
+    if (Is<RenderTextControl>(*parent))
+    {
+      return;
+    }
 
     _builder.RemoveFloatingObjects(anonymousBlock);
     // FIXME: This should really just be a moveAllChilrenTo (see webkit.org/b/182495)

@@ -203,6 +203,14 @@ namespace krys::boo
                                const IntPoint &paintOffset, const IntRect &damageRect) noexcept;
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,
                            const IntRect &damageRect) noexcept;
+    /// @brief Paints the grip of a box the user can resize, in its bottom corner.
+    void PaintResizer(GraphicsContext &context, const LayoutPoint &paintOffset,
+                      const LayoutRect &damageRect) noexcept;
+    /// @brief Whether @p hitTestLocation is over the resizer in one of @p layerFragments; sets
+    /// @p pointInFragment to where.
+    KRYS_NODISCARD bool HitTestResizerInFragments(const LayerFragments &layerFragments,
+                                                  const HitTestLocation &hitTestLocation,
+                                                  LayoutPoint &pointInFragment) const noexcept;
     /// @brief Whether @p localPoint (in the box's coordinates) is over a scrollbar, which @p result then
     /// names.
     bool HitTestOverflowControls(HitTestResult &result, const IntPoint &localPoint) noexcept;

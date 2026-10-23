@@ -228,8 +228,24 @@ namespace krys::boo::style
 
     if (dom::TreeQueries::ContainingShadowRoot(Element()))
     {
-      // FIXME: User agent part rules, once there are user agent shadow trees.
+      MatchUserAgentPartRules(origin);
+      if (IsFirstMatchModeAndHasMatchedAnyRules())
+      {
+        return;
+      }
       MatchPartPseudoElementRules(origin);
+    }
+  }
+
+  void ElementRuleCollector::CollectMatchingUserAgentPartRules(const MatchRequest &matchRequest) noexcept
+  {
+    krys_debug_assert(Element().IsInUserAgentShadowTree());
+
+    auto &rules = matchRequest.RuleSet;
+    // FIXME: ::cue rules for WebVTT elements, with media.
+    if (auto part = Element().UserAgentPart(); !part.View().empty())
+    {
+      CollectMatchingRulesForList(rules.UserAgentPartRules(part), matchRequest);
     }
   }
 
@@ -243,7 +259,11 @@ namespace krys::boo::style
       "the call site since matching a particular element should be unnecessary.");
 
     auto &element = Element();
-    // FIXME: User agent part rules (and ::cue rules), once there are user agent shadow trees.
+    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(element);
+    if (shadowRoot && shadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
+    {
+      CollectMatchingUserAgentPartRules(matchRequest);
+    }
 
     bool isHTML = Is<html::HTMLElement>(element) && Is<dom::HTMLDocument>(element.NodeDocument());
 
@@ -376,6 +396,27 @@ namespace krys::boo::style
     return !_matchedRules.empty();
   }
 
+  void ElementRuleCollector::MatchUserAgentPartRules(DeclarationOrigin origin) noexcept
+  {
+    krys_debug_assert(Element().IsInShadowTree());
+    auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(Element());
+    if (!shadowRoot || shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
+    {
+      return;
+    }
+
+    // Look up user agent parts also from the host scope style as they are web-exposed.
+    auto *hostRules =
+      Scope::ForNode(*shadowRoot->Host()).GetResolver().RuleSets().StyleForDeclarationOrigin(origin);
+    if (!hostRules)
+    {
+      return;
+    }
+
+    MatchRequest hostRequest {*hostRules, ScopeOrdinal::ContainingHost};
+    CollectMatchingUserAgentPartRules(hostRequest);
+  }
+
   void ElementRuleCollector::MatchHostPseudoClassRules(DeclarationOrigin origin) noexcept
   {
     auto *shadowRoot = dom::TreeQueries::GetShadowRoot(Element());
@@ -445,8 +486,11 @@ namespace krys::boo::style
       return;
     }
 
-    // FIXME: User agent parts match as their shadow host, once there are user agent shadow trees.
-    auto &partMatchingElement = Element();
+    bool isUserAgentPart =
+      dom::TreeQueries::ContainingShadowRoot(Element())->Mode() == dom::ShadowRootMode::UserAgent
+      && Element().UserAgentPart() != dom::DOMStringAtom::Null();
+
+    auto &partMatchingElement = isUserAgentPart ? *dom::TreeQueries::ShadowHost(Element()) : Element();
     // An element without a part attribute has no part names.
     if (!partMatchingElement.HasAttribute(u8"part")
         || !dom::TreeQueries::ContainingShadowRoot(partMatchingElement))

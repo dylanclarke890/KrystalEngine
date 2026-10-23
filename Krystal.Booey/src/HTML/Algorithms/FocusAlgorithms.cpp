@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -141,6 +142,12 @@ namespace krys::boo::html
     /// focusable.
     KRYS_NODISCARD bool IsClickFocusable(const dom::Node &area) noexcept
     {
+      // The insides of a control (a text field's inner text, which is an editing host) aren't focused by a
+      // click; the control is.
+      if (area.IsInUserAgentShadowTree())
+      {
+        return false;
+      }
       return IsFocusableAreaNode(area);
     }
   }
@@ -437,10 +444,15 @@ namespace krys::boo::html
     for (size_t i = 0; i < oldChain.size(); ++i)
     {
       auto &entry = oldChain[i];
-      // FIXME: Fire change at text controls the user changed without committing, once there's editing.
+      // Dispatch a change event for form control elements that have been edited.
+      if (auto *formControlElement = DynamicDowncast<HTMLFormControlElement>(*entry);
+          formControlElement && formControlElement->WasChangedSinceLastFormControlChangeEvent())
+      {
+        formControlElement->DispatchFormControlChangeEvent();
+      }
 
       // FIXME: Fire blur at a document's Window, once there's a Window.
-      auto *blurEventTarget = DynamicDowncast<dom::Element>(*entry);
+      RefPtr<dom::Element> blurEventTarget = ShareRefPtr(DynamicDowncast<dom::Element>(*entry));
 
       dom::EventTarget *relatedBlurTarget = nullptr;
       if (i == oldChain.size() - 1 && blurEventTarget && !newChain.empty()
@@ -451,7 +463,8 @@ namespace krys::boo::html
 
       if (blurEventTarget)
       {
-        FireFocusEvent(u8"blur", *blurEventTarget, relatedBlurTarget);
+        blurEventTarget->DispatchBlurEvent(relatedBlurTarget);
+        blurEventTarget->DidBlur();
       }
     }
 
@@ -487,7 +500,7 @@ namespace krys::boo::html
 
       if (focusEventTarget)
       {
-        FireFocusEvent(u8"focus", *focusEventTarget, relatedFocusTarget);
+        focusEventTarget->DispatchFocusEvent(relatedFocusTarget, options);
       }
     }
 
@@ -680,7 +693,17 @@ namespace krys::boo::html
       return true;
     }
     auto *element = DynamicDowncast<dom::Element>(node);
-    return element && (dom::TreeQueries::IsShadowHost(*element) || Is<HTMLSlotElement>(*element));
+    if (!element)
+    {
+      return false;
+    }
+    // Sequential navigation doesn't enter a control's user agent shadow tree.
+    if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*element);
+        shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
+    {
+      return true;
+    }
+    return Is<HTMLSlotElement>(*element);
   }
 
   dom::Node *FocusAlgorithms::AssociatedFocusNavigationOwner(const dom::Element &element) noexcept

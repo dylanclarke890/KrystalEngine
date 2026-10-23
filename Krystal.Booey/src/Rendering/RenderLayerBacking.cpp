@@ -2937,7 +2937,10 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Text controls, once there are form controls.
+    if (Renderer().IsRenderTextControl())
+    {
+      return false;
+    }
 
     if (contentsInfo.PaintsBoxDecorations() || contentsInfo.PaintsContent())
     {
@@ -3726,7 +3729,7 @@ namespace krys::boo
       LayoutRect transformedClip = LayoutRect(clip);
       transformedClip.MoveBy(LayoutPoint(cornerRect.Location()));
       scrollableArea->PaintScrollCorner(context, IntPoint(), SnappedIntRect(transformedClip));
-      // FIXME: Resizers (paintResizer), once there are resizers.
+      scrollableArea->PaintResizer(context, LayoutPoint(), transformedClip);
     }
   }
 

@@ -877,6 +877,31 @@ namespace krys::boo
       return IsRenderBlockFlow()
              && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsFragmentedFlow);
     }
+    KRYS_NODISCARD bool IsRenderTextControl() const noexcept
+    {
+      return IsRenderBlockFlow()
+             && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsTextControl);
+    }
+    KRYS_NODISCARD bool IsRenderTextControlSingleLine() const noexcept
+    {
+      return IsRenderTextControl() && _type != Type::TextControlMultiLine;
+    }
+    KRYS_NODISCARD bool IsRenderTextControlMultiLine() const noexcept
+    {
+      return _type == Type::TextControlMultiLine;
+    }
+    KRYS_NODISCARD bool IsRenderTextControlInnerBlock() const noexcept
+    {
+      return _type == Type::TextControlInnerBlock;
+    }
+    KRYS_NODISCARD bool IsRenderTextControlInnerContainer() const noexcept
+    {
+      return _type == Type::TextControlInnerContainer;
+    }
+    KRYS_NODISCARD bool IsRenderSearchField() const noexcept
+    {
+      return _type == Type::SearchField;
+    }
     KRYS_NODISCARD bool IsViewTransitionContainingBlock() const noexcept
     {
       return IsRenderBlockFlow()

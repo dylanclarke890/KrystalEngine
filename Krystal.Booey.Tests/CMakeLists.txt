@@ -438,6 +438,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp
 		tests/Rendering/RenderText.cpp
+		tests/Rendering/RenderTextControl.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Page/Settings.cpp
@@ -564,6 +565,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
+		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/HTMLLinkElement.cpp
 		tests/HTML/HTMLStyleElement.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp

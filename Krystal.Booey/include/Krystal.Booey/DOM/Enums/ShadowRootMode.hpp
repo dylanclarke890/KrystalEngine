@@ -8,8 +8,11 @@ namespace krys::boo::dom
   enum class ShadowRootMode : uint8
   {
     Open,
-    Closed
+    Closed,
+    /// @brief A shadow root the user agent attaches for an element's insides (a form control's), which
+    /// pages can't see.
+    UserAgent
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ShadowRootMode, 2u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::dom::ShadowRootMode, 3u);

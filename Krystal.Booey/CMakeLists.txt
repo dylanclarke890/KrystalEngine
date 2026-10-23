@@ -821,6 +821,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableRow.hpp
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/RenderText.hpp
+  include/Krystal.Booey/Rendering/RenderTextControl.hpp
+  include/Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp
+  include/Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp
   include/Krystal.Booey/Rendering/RenderLineBreak.hpp
   include/Krystal.Booey/Rendering/CounterNode.hpp
   include/Krystal.Booey/Rendering/RenderCounter.hpp
@@ -1717,6 +1720,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/SubmitInputType.hpp
   include/Krystal.Booey/HTML/TelephoneInputType.hpp
   include/Krystal.Booey/HTML/TextFieldInputType.hpp
+  include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
   include/Krystal.Booey/HTML/TextInputType.hpp
   include/Krystal.Booey/HTML/TimeInputType.hpp
   include/Krystal.Booey/HTML/URLInputType.hpp
@@ -2488,6 +2492,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableRow.cpp
   src/Rendering/RenderTableCol.cpp
   src/Rendering/RenderText.cpp
+  src/Rendering/RenderTextControl.cpp
+  src/Rendering/RenderTextControlMultiLine.cpp
+  src/Rendering/RenderTextControlSingleLine.cpp
   src/Rendering/RenderLineBreak.cpp
   src/Rendering/CounterNode.cpp
   src/Rendering/RenderCounter.cpp
@@ -2844,6 +2851,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/SubmitEvent.cpp
   src/HTML/SubmitInputType.cpp
   src/HTML/TextFieldInputType.cpp
+  src/HTML/Shadow/TextControlInnerElements.cpp
   src/HTML/TimeInputType.cpp
   src/HTML/URLInputType.cpp
   src/HTML/ValidatedFormListedElement.cpp
@@ -3010,6 +3018,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/TypingCommand.hpp
       include/Krystal.Booey/DOM/InputEvent.hpp
       include/Krystal.Booey/DOM/TextEvent.hpp
+      include/Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp
       include/Krystal.Booey/DOM/Dicts/InputEventInit.hpp
       include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
       include/Krystal.Booey/Page/AutoscrollController.hpp
@@ -3429,6 +3438,7 @@ target_sources(Krystal.Booey
     src/Editing/TypingCommand.cpp
     src/DOM/InputEvent.cpp
     src/DOM/TextEvent.cpp
+    src/DOM/BeforeTextInsertedEvent.cpp
     src/Page/AutoscrollController.cpp
     src/Page/DOMSelection.cpp
     src/Platform/CaretAnimator.cpp

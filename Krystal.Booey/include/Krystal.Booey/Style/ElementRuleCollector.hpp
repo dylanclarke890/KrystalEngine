@@ -142,6 +142,7 @@ namespace krys::boo::style
 
     void AddElementInlineStyleProperties(bool includeSMILProperties) noexcept;
 
+    void MatchUserAgentPartRules(DeclarationOrigin origin) noexcept;
     void MatchHostPseudoClassRules(DeclarationOrigin origin) noexcept;
     void MatchSlottedPseudoElementRules(DeclarationOrigin origin) noexcept;
     void MatchPartPseudoElementRules(DeclarationOrigin origin) noexcept;
@@ -150,6 +151,7 @@ namespace krys::boo::style
 
     void CollectMatchingRules(DeclarationOrigin origin) noexcept;
     void CollectMatchingRules(const MatchRequest &matchRequest) noexcept;
+    void CollectMatchingUserAgentPartRules(const MatchRequest &matchRequest) noexcept;
     void CollectMatchingRulesForList(const RuleSet::RuleDataVector *rules,
                                      const MatchRequest &matchRequest) noexcept;
     KRYS_NODISCARD bool IsFirstMatchModeAndHasMatchedAnyRules() const noexcept;

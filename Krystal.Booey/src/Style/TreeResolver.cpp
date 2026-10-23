@@ -128,7 +128,15 @@ namespace krys::boo::style
 
     auto unadjustedStyle = [&]
     {
-      // FIXME: Elements with custom style resolve callbacks (resolveCustomStyle).
+      if (element.HasCustomStyleResolveCallbacks())
+      {
+        auto *shadowHostStyle =
+          GetScope().ShadowRoot ? _update->ElementStyle(*GetScope().ShadowRoot->Host()) : nullptr;
+        if (auto customStyle = element.ResolveCustomStyle(resolutionContext, shadowHostStyle))
+        {
+          return krys::move(*customStyle);
+        }
+      }
 
       if (resolutionType == ResolutionType::FullWithMatchResultCache)
       {
@@ -436,19 +444,36 @@ namespace krys::boo::style
       return null;
     }
 
-    // FIXME: The enclosing resolver of user agent shadow tree elements, once there are user agent shadow
-    // trees.
+    auto userAgentShadowTreeEnclosingResolver = [&]() -> Resolver *
+    {
+      if (element.IsInUserAgentShadowTree())
+      {
+        return GetScope().EnclosingScope->Resolver.get();
+      }
+      return nullptr;
+    };
 
     if (pseudoElementIdentifier.Type == PseudoElementType::FirstLine
         && !GetScope().Resolver->UsesFirstLineRules())
     {
-      return null;
+      // For user-agent shadow tree elements, also check the enclosing (document) scope
+      // because user-agent pseudo-elements like details::details-content::first-line
+      // are defined in the document scope but target elements in the shadow tree
+      auto *resolver = userAgentShadowTreeEnclosingResolver();
+      if (!resolver || !resolver->UsesFirstLineRules())
+      {
+        return null;
+      }
     }
 
     if (pseudoElementIdentifier.Type == PseudoElementType::FirstLetter
         && !GetScope().Resolver->UsesFirstLetterRules())
     {
-      return null;
+      auto *resolver = userAgentShadowTreeEnclosingResolver();
+      if (!resolver || !resolver->UsesFirstLetterRules())
+      {
+        return null;
+      }
     }
 
     if (!elementUpdate.Style->HasPseudoStyle(pseudoElementIdentifier.Type))

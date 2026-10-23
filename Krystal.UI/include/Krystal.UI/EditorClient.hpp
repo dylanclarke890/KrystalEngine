@@ -46,6 +46,33 @@ namespace krys::ui
     void Undo() noexcept override;
     void Redo() noexcept override;
 
+    // FIXME: Autofill (offering to fill text fields as they're edited), which the host doesn't do.
+
+    void TextFieldDidBeginEditing(boo::dom::Element &) noexcept override
+    {
+    }
+
+    void TextFieldDidEndEditing(boo::dom::Element &) noexcept override
+    {
+    }
+
+    void TextDidChangeInTextField(boo::dom::Element &) noexcept override
+    {
+    }
+
+    bool DoTextFieldCommandFromEvent(boo::dom::Element &, boo::dom::KeyboardEvent *) noexcept override
+    {
+      return false;
+    }
+
+    void TextWillBeDeletedInTextField(boo::dom::Element &) noexcept override
+    {
+    }
+
+    void TextDidChangeInTextArea(boo::dom::Element &) noexcept override
+    {
+    }
+
     /// @brief The name of the editor command @p event is bound to, or empty if none is.
     KRYS_NODISCARD static utf8_stringview InterpretKeyEvent(const boo::dom::KeyboardEvent &event) noexcept;
   };

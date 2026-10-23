@@ -6,21 +6,32 @@
 #include "Krystal.Booey/HTML/StepRange.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/Decimal.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo
+{
+  class RenderElement;
+  class RenderStyle;
+}
+
 namespace krys::boo::dom
 {
+  class BeforeTextInsertedEvent;
   class Event;
   class KeyboardEvent;
   class MouseEvent;
+  class Node;
 }
 
 namespace krys::boo::html
 {
   class DOMFormData;
+  class HTMLElement;
   class HTMLInputElement;
+  class TextControlInnerTextElement;
   struct InputElementClickState;
 
   enum class WasSetByJavaScript : bool
@@ -60,10 +71,10 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::InputTypeKind, 22uz);
 
 namespace krys::boo::html
 {
-  /// @brief The type-specific part of an input element: its value's rules, validity, form data and events.
-  /// Only HTMLInputElement uses it.
-  // FIXME: Shadow trees, renderers, pickers and the focus rules of the types come with text fields and the
-  // other controls.
+  /// @brief The type-specific part of an input element: its value's rules, validity, form data, events,
+  /// user agent shadow tree and renderer. Only HTMLInputElement uses it.
+  // FIXME: The shadow trees and renderers of the other controls (G14d), pickers, the switch control, and the
+  // types' own focus rules (isKeyboardFocusable, isMouseFocusable), which the focus model decides.
   class InputType : public RefCounted<InputType>
   {
   public:
@@ -77,6 +88,7 @@ namespace krys::boo::html
 
   private:
     const Type _type;
+    bool _hasCreatedShadowSubtree {false};
     // Null once the input type is no longer associated with an element (the element died or changed type).
     HTMLInputElement *_element;
 
@@ -207,6 +219,15 @@ namespace krys::boo::html
       return _type;
     }
 
+    /// @brief Whether the type has a user agent shadow tree: all but the buttons, checkboxes, radio buttons
+    /// and hidden inputs.
+    KRYS_NODISCARD bool NeedsShadowSubtree() const noexcept;
+
+    KRYS_NODISCARD bool HasCreatedShadowSubtree() const noexcept
+    {
+      return _hasCreatedShadowSubtree;
+    }
+
     KRYS_NODISCARD bool IsInteractiveContent() const noexcept;
     KRYS_NODISCARD bool IsLabelable() const noexcept;
     KRYS_NODISCARD bool IsEnumeratable() const noexcept;
@@ -269,6 +290,9 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool GetAllowedValueStep(Decimal *step) const noexcept;
     KRYS_NODISCARD virtual StepRange CreateStepRange(AnyStepHandling anyStepHandling) const noexcept;
     virtual dom::ExceptionOr<void> StepUp(int n) noexcept;
+    /// @brief Steps the value @p n times as the user does (the arrow keys, the spin button): an empty or
+    /// invalid value starts from the default, and a value off the step snaps to it first.
+    virtual void StepUpFromRenderer(int n) noexcept;
     KRYS_NODISCARD virtual dom::DOMString BadInputText() const noexcept;
     KRYS_NODISCARD virtual dom::DOMString TypeMismatchText() const noexcept;
     KRYS_NODISCARD virtual dom::DOMString ValueMissingText() const noexcept;
@@ -308,6 +332,73 @@ namespace krys::boo::html
     virtual ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
     virtual void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept;
     virtual void HandleKeyupEvent(dom::KeyboardEvent &event) noexcept;
+    virtual void HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &) noexcept
+    {
+    }
+    virtual void ForwardEvent(dom::Event &) noexcept
+    {
+    }
+
+    virtual void HandleFocusEvent(dom::Node * /* oldFocusedNode */) noexcept
+    {
+    }
+    virtual void HandleBlurEvent() noexcept
+    {
+    }
+    virtual void SubtreeHasChanged() noexcept;
+    virtual void ElementDidBlur() noexcept
+    {
+    }
+
+    // Shadow tree handling.
+
+    void CreateShadowSubtreeIfNeeded() noexcept;
+    virtual void CreateShadowSubtree() noexcept
+    {
+    }
+    virtual void RemoveShadowSubtree() noexcept;
+
+    KRYS_NODISCARD virtual HTMLElement *ContainerElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *InnerBlockElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept;
+    KRYS_NODISCARD virtual HTMLElement *InnerSpinButtonElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *ResultsButtonElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *CancelButtonElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *PlaceholderElement() const noexcept
+    {
+      return nullptr;
+    }
+    RefPtr<TextControlInnerTextElement> InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept;
+
+    KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept;
+
+    virtual void UpdateInnerTextValue() noexcept
+    {
+    }
+    virtual void UpdatePlaceholderText() noexcept
+    {
+    }
+
+    /// @brief Sets @p preferredSize to the field's size in characters.
+    /// @return Whether the size includes the field's decorations.
+    KRYS_NODISCARD virtual bool SizeShouldIncludeDecoration(int32 defaultSize,
+                                                            int32 &preferredSize) const noexcept;
+    KRYS_NODISCARD virtual float DecorationWidth(float inputWidth) const noexcept;
 
     // Helpers for event handlers.
     KRYS_NODISCARD virtual bool ShouldSubmitImplicitly(dom::Event &event) noexcept;

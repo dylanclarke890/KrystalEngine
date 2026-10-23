@@ -1,9 +1,19 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 
 namespace krys::boo::html
 {
@@ -22,29 +32,6 @@ namespace krys::boo::html
       }
       return HTMLTextAreaElement::LengthForAPIValue(text) - crlfCount;
     }
-
-    /// @brief @p value with its CRLF and CR line breaks made LFs.
-    KRYS_NODISCARD dom::DOMString SimplifyNewLines(dom::DOMStringView value) noexcept
-    {
-      dom::DOMString result;
-      result.reserve(value.size());
-      for (size_t i = 0; i < value.size(); ++i)
-      {
-        if (value[i] == u8'\r')
-        {
-          result += u8'\n';
-          if (i + 1 < value.size() && value[i + 1] == u8'\n')
-          {
-            ++i;
-          }
-        }
-        else
-        {
-          result += value[i];
-        }
-      }
-      return result;
-    }
   }
 
   HTMLTextAreaElement::HTMLTextAreaElement(dom::Document &document) noexcept
@@ -53,15 +40,213 @@ namespace krys::boo::html
     SetFormControlValueMatchesRenderer(true);
   }
 
+  Ref<HTMLTextAreaElement> HTMLTextAreaElement::Create(dom::Document &document) noexcept
+  {
+    auto textArea = CreateRef<HTMLTextAreaElement>(document);
+    textArea->EnsureUserAgentShadowRoot();
+    return textArea;
+  }
+
+  void HTMLTextAreaElement::DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept
+  {
+    (void)root.AppendChild(
+      *TextControlInnerTextElement::Create(NodeDocument(), IsInnerTextElementEditable()));
+  }
+
   void HTMLTextAreaElement::OnChildrenChanged() noexcept
   {
     HTMLTextFormControlElement::OnChildrenChanged();
     SetLastChangeWasNotUserEdit();
-    if (!_isDirty)
+    if (_isDirty)
+    {
+      SetInnerTextValue(Value());
+    }
+    else
     {
       SetNonDirtyValue(DefaultValue(), TextControlSetValueSelection::Clamp);
     }
-    // FIXME: Setting the inner text value of a dirty text area, with its shadow tree.
+  }
+
+  RenderPtr<RenderElement> HTMLTextAreaElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<RenderTextControlMultiLine>(*this, krys::move(style));
+  }
+
+  void HTMLTextAreaElement::UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
+                                                  SelectionRevealMode revealMode) noexcept
+  {
+    if (restorationMode == dom::SelectionRestorationMode::RestoreOrSelectAll && HasCachedSelection())
+    {
+      RestoreCachedSelection(revealMode);
+    }
+    else
+    {
+      // If this is the first focus, set a caret at the beginning of the text.
+      // This matches some browsers' behavior; see bug 11746 Comment #15.
+      // http://bugs.webkit.org/show_bug.cgi?id=11746#c15
+      SetSelectionRange(0, 0, TextFieldSelectionDirection::SelectionHasNoDirection, revealMode);
+    }
+  }
+
+  void HTMLTextAreaElement::DefaultEventHandler(dom::Event &event) noexcept
+  {
+    if (Renderer())
+    {
+      if (event.IsMouseEvent() || event.Type() == u8"blur")
+      {
+        ForwardEvent(event);
+      }
+      else if (auto *insertedEvent = DynamicDowncast<dom::BeforeTextInsertedEvent>(event))
+      {
+        HandleBeforeTextInsertedEvent(*insertedEvent);
+      }
+    }
+
+    HTMLTextFormControlElement::DefaultEventHandler(event);
+  }
+
+  void HTMLTextAreaElement::SubtreeHasChanged() noexcept
+  {
+    SetFormControlValueMatchesRenderer(false);
+    UpdateValidity();
+    UpdatePlaceholderVisibility();
+
+    if (!Focused())
+    {
+      return;
+    }
+
+    SetChangedSinceLastFormControlChangeEvent(true);
+
+    if (NodeDocument().Frame())
+    {
+      NodeDocument().GetEditor().TextDidChangeInTextArea(*this);
+    }
+    // FIXME: Auto directionality, which typing doesn't update through childrenChanged
+    // (updateEffectiveTextDirection), with dir=auto.
+  }
+
+  void HTMLTextAreaElement::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept
+  {
+    krys_debug_assert(Renderer());
+    int32 signedMaxLength = MaxLength();
+    if (signedMaxLength < 0)
+    {
+      return;
+    }
+    auto unsignedMaxLength = static_cast<size_t>(signedMaxLength);
+
+    auto currentValue = InnerTextValue();
+    size_t currentLength = ComputeLengthForAPIValue(currentValue);
+    if (currentLength + ComputeLengthForAPIValue(event.Text()) < unsignedMaxLength)
+    {
+      return;
+    }
+
+    // selectionLength represents the selection length of this text field to be
+    // removed by this insertion.
+    // If the text field has no focus, we don't need to take account of the
+    // selection length. The selection is the source of text drag-and-drop in
+    // that case, and nothing in the text field will be removed.
+    auto selectionRange = Focused() ? NodeDocument().Selection().Selection().ToNormalizedRange() : null;
+    size_t selectionLength = selectionRange ? ComputeLengthForAPIValue(PlainText(*selectionRange)) : 0;
+    krys_debug_assert(currentLength >= selectionLength);
+    size_t baseLength = currentLength - selectionLength;
+    size_t appendableLength = unsignedMaxLength > baseLength ? unsignedMaxLength - baseLength : 0;
+    event.SetText(SanitizeUserInputValue(event.Text(), appendableLength));
+  }
+
+  dom::DOMString HTMLTextAreaElement::SanitizeUserInputValue(dom::DOMStringView proposedValue,
+                                                             size_t maxLength) noexcept
+  {
+    size_t submissionLength = 0;
+    size_t i = 0;
+    while (i < proposedValue.size())
+    {
+      if (proposedValue[i] == u8'\r' && i + 1 < proposedValue.size() && proposedValue[i + 1] == u8'\n')
+      {
+        ++i;
+        continue;
+      }
+      // A character outside the Basic Multilingual Plane counts twice, as its two UTF-16 code units.
+      auto lead = static_cast<uint8>(proposedValue[i]);
+      size_t characterLength = lead < 0x80 ? 1 : lead < 0xE0 ? 2 : lead < 0xF0 ? 3 : 4;
+      size_t units = characterLength == 4 ? 2 : 1;
+      if (submissionLength + units > maxLength)
+      {
+        break;
+      }
+      submissionLength += units;
+      i += characterLength;
+      if (submissionLength == maxLength)
+      {
+        break;
+      }
+    }
+    return dom::DOMString(proposedValue.substr(0, std::min(i, proposedValue.size())));
+  }
+
+  RefPtr<TextControlInnerTextElement> HTMLTextAreaElement::InnerTextElement() const noexcept
+  {
+    auto *root = UserAgentShadowRoot();
+    return root ? ShareRefPtr(Downcast<TextControlInnerTextElement>(root->FirstChild())) : nullptr;
+  }
+
+  RefPtr<TextControlInnerTextElement>
+    HTMLTextAreaElement::InnerTextElementCreatingShadowSubtreeIfNeeded() noexcept
+  {
+    return InnerTextElement();
+  }
+
+  void HTMLTextAreaElement::UpdateValue() const noexcept
+  {
+    if (FormControlValueMatchesRenderer())
+    {
+      return;
+    }
+
+    krys_debug_assert(Renderer());
+    auto &self = const_cast<HTMLTextAreaElement &>(*this);
+    _value = InnerTextValue();
+    self.SetFormControlValueMatchesRenderer(true);
+    _isDirty = true;
+    _wasModifiedByUser = true;
+    self.UpdatePlaceholderVisibility();
+  }
+
+  void HTMLTextAreaElement::UpdatePlaceholderText() noexcept
+  {
+    auto placeholderText = GetAttribute(u8"placeholder").value_or(dom::DOMString {});
+    if (placeholderText.empty())
+    {
+      if (_placeholder)
+      {
+        (void)UserAgentShadowRoot()->RemoveChild(*_placeholder);
+        _placeholder = nullptr;
+      }
+      return;
+    }
+    if (!_placeholder)
+    {
+      _placeholder = TextControlPlaceholderElement::Create(NodeDocument());
+      (void)UserAgentShadowRoot()->InsertBefore(*_placeholder, InnerTextElement()->NextSibling());
+    }
+    _placeholder->InnerText(krys::move(placeholderText));
+  }
+
+  RenderStyle HTMLTextAreaElement::CreateInnerTextStyle(const RenderStyle &style) noexcept
+  {
+    auto textBlockStyle = RenderStyle::Create();
+    textBlockStyle.InheritFrom(style);
+    AdjustInnerTextStyle(style, textBlockStyle);
+    textBlockStyle.SetDisplay(DisplayType::Block);
+    return textBlockStyle;
+  }
+
+  void HTMLTextAreaElement::SetSelectionRangeForBindings(uint32 start, uint32 end,
+                                                         dom::DOMStringView direction) noexcept
+  {
+    SetSelectionRange(start, end, direction, ForBindings::Yes);
   }
 
   void HTMLTextAreaElement::OnClone(dom::Node &copy, bool subtree) noexcept
@@ -107,6 +292,13 @@ namespace krys::boo::html
       }
       _wrap = wrap;
     }
+    else if (localName == u8"rows" || localName == u8"cols")
+    {
+      if (auto *renderer = Renderer())
+      {
+        renderer->SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
     else if (localName == u8"maxlength")
     {
       InternalSetMaxLength(ParseLengthAttribute(value));
@@ -127,9 +319,9 @@ namespace krys::boo::html
       return false;
     }
 
-    // FIXME: The value with the line breaks wrapping makes (valueWithHardLineBreaks) for wrap="hard", with
-    // text fields' layout.
-    formData.Append(name, Value());
+    NodeDocument().UpdateLayout();
+
+    formData.Append(name, _wrap == HardWrap ? ValueWithHardLineBreaks() : Value());
     if (auto dirname = GetAttribute(u8"dirname"))
     {
       formData.Append(*dirname, DirectionForFormData());
@@ -145,7 +337,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTextAreaElement::Value() const noexcept
   {
-    // FIXME: Updating the value from the inner text the user edited (updateValue), with text fields.
+    UpdateValue();
     return _value;
   }
 
@@ -168,30 +360,56 @@ namespace krys::boo::html
   }
 
   void HTMLTextAreaElement::SetValueCommon(dom::DOMStringView newValue, TextFieldEventBehavior,
-                                           TextControlSetValueSelection) noexcept
+                                           TextControlSetValueSelection selection) noexcept
   {
     _wasModifiedByUser = false;
-    // Line endings the user types or pastes are normalised elsewhere; these come from script.
-    auto normalizedValue = SimplifyNewLines(newValue);
+    // Code elsewhere normalizes line endings added by the user via the keyboard or pasting.
+    // We normalize line endings coming from JavaScript here.
+    auto normalizedValue = infra::StringAlgorithms::NormalizeNewlines(newValue);
 
-    // Return early because we don't want to move the caret or trigger other side effects when the value isn't
-    // changing.
+    // Return early because we don't want to move the caret or trigger other side effects
+    // when the value isn't changing. This matches Firefox behavior, at least.
     if (normalizedValue == Value())
     {
       return;
     }
 
+    bool shouldClamp = selection == TextControlSetValueSelection::Clamp;
+    auto selectionStartValue = shouldClamp ? ComputeSelectionStart() : 0;
+    auto selectionEndValue = shouldClamp ? ComputeSelectionEnd() : 0;
+
     _value = normalizedValue;
+    SetInnerTextValue(dom::DOMString(_value));
     SetLastChangeWasNotUserEdit();
     UpdatePlaceholderVisibility();
     InvalidateStyleForSubtree();
+    // FIXME: Auto directionality (updateEffectiveTextDirection), with dir=auto.
     SetFormControlValueMatchesRenderer(true);
 
-    // FIXME: The inner text value, the selection (set to the end or clamped),
-    // auto directionality, accessibility and the chrome client's didProgrammaticallyClearTextFormControl,
-    // with text fields.
+    auto endOfString = static_cast<uint32>(_value.size());
+    if (selection == TextControlSetValueSelection::SetSelectionToEnd)
+    {
+      if (NodeDocument().FocusedElement() == this)
+      {
+        SetSelectionRange(endOfString, endOfString);
+      }
+      else
+      {
+        // We don't change text selection here but need to update caret to
+        // the end of the text value except for initialize.
+        CacheSelection(endOfString, endOfString, TextFieldSelectionDirection::SelectionHasNoDirection);
+      }
+    }
+    else if (shouldClamp)
+    {
+      CacheSelection(std::min(endOfString, selectionStartValue), std::min(endOfString, selectionEndValue),
+                     TextFieldSelectionDirection::SelectionHasNoDirection);
+    }
 
     SetTextAsOfLastFormControlChangeEvent(krys::move(normalizedValue));
+
+    // FIXME: Telling accessibility the value changed, and the chrome client's
+    // didProgrammaticallyClearTextFormControl, with accessibility and the host's autofill.
   }
 
   dom::DOMString HTMLTextAreaElement::DefaultValue() const noexcept
@@ -296,12 +514,14 @@ namespace krys::boo::html
 
   uint32 HTMLTextAreaElement::Cols() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"cols");
+    return Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(*this,
+                                                                                                 u8"cols");
   }
 
   void HTMLTextAreaElement::Cols(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"cols", krys::move(value));
+    (void)Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(
+      *this, u8"cols", value);
   }
 
   dom::DOMString HTMLTextAreaElement::DirName() const noexcept
@@ -376,12 +596,14 @@ namespace krys::boo::html
 
   uint32 HTMLTextAreaElement::Rows() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"rows");
+    return Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(*this,
+                                                                                                 u8"rows");
   }
 
   void HTMLTextAreaElement::Rows(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"rows", krys::move(value));
+    (void)Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(
+      *this, u8"rows", value);
   }
 
   dom::DOMString HTMLTextAreaElement::Wrap() const noexcept

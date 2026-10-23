@@ -9,18 +9,27 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/SimulatedClick.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
+#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::html
 {
@@ -302,15 +311,80 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::InnerText() const noexcept
   {
-    // TODO(HTMLELEMENT, HTML): Implement InnerText() setter method.
-    krys_not_implemented();
+    auto &self = const_cast<HTMLElement &>(*this);
+
+    // We need to update layout, since plainText uses line boxes in the render tree.
+    self.NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+
+    if (!Renderer())
+    {
+      return TextContent().value_or(dom::DOMString {});
+    }
+
+    if (Renderer()->IsSkippedContent())
+    {
+      return {};
+    }
+
+    return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
   void HTMLElement::InnerText(dom::DOMString &&value) noexcept
   {
-    // TODO(HTMLELEMENT, HTML): Implement InnerText() getter method.
-    (void)value;
-    krys_not_implemented();
+    // FIXME: This doesn't take whitespace collapsing into account at all.
+
+    if (value.find_first_of(u8"\r\n") == dom::DOMString::npos)
+    {
+      (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
+      return;
+    }
+
+    if (IsConnected() && IsTextControlInnerTextElement())
+    {
+      (void)dom::NodeAlgorithms::StringReplaceAll(infra::StringAlgorithms::NormalizeNewlines(value), *this);
+      return;
+    }
+
+    // Add text nodes and <br> elements.
+    auto &document = NodeDocument();
+    auto fragment = document.CreateDocumentFragment();
+    for (size_t start = 0, length = value.size(); start < length;)
+    {
+      // Find next line break.
+      char8 c = 0;
+      size_t i;
+      for (i = start; i < length; i++)
+      {
+        c = value[i];
+        if (c == u8'\r' || c == u8'\n')
+        {
+          break;
+        }
+      }
+
+      // If text is not the empty string, then append a new Text node whose data is text and node document is
+      // document to fragment.
+      if (i > start)
+      {
+        (void)fragment->AppendChild(*document.CreateTextNode(value.substr(start, i - start)));
+      }
+
+      if (i == length)
+      {
+        break;
+      }
+
+      (void)fragment->AppendChild(*CreateRef<HTMLBRElement>(document));
+      // Make sure \r\n doesn't result in two line breaks.
+      if (c == u8'\r' && i + 1 < length && value[i + 1] == u8'\n')
+      {
+        ++i;
+      }
+
+      start = i + 1; // Character after line break.
+    }
+
+    (void)dom::MutationAlgorithms::ReplaceAll(fragment.get(), *this);
   }
 
   dom::DOMString HTMLElement::OuterText() const noexcept
@@ -424,8 +498,13 @@ namespace krys::boo::html
       }
     }
 
-    // FIXME: User agent shadow roots are read-only, and the document's design mode makes the document tree
-    // editable, once there are either.
+    auto *containingShadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+    if (containingShadowRoot && containingShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
+    {
+      return dom::Node::Editability::ReadOnly;
+    }
+
+    // FIXME: The document's design mode makes the document tree editable, once there's a design mode.
     return dom::Node::Editability::ReadOnly;
   }
 

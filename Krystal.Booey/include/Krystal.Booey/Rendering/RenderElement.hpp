@@ -333,6 +333,10 @@ namespace krys::boo
     KRYS_NODISCARD Color SelectionColor(css::PropertyId colorProperty) const noexcept;
     KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
 
+    /// @brief The renderer of the shadow host (or its nearest ancestor that isn't `display: contents`) of a
+    /// user agent shadow tree the element is in, whose pseudo-element styles apply; null outside one.
+    KRYS_NODISCARD RenderElement *RendererForPseudoStyleAcrossShadowBoundary() const noexcept;
+
     // Obtains the selection colors that should be used when painting a selection.
     KRYS_NODISCARD Color SelectionBackgroundColor() const noexcept;
     KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;

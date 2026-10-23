@@ -79,6 +79,8 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class GraphicsContext;
+  class RenderLayerModelObject;
   class StyleImage;
 
   class RenderStyle;
@@ -110,6 +112,13 @@ namespace krys::boo
                                                                   style::ColorOptions options) noexcept;
     KRYS_NODISCARD static Color ActiveSelectionForegroundColor(style::ColorOptions options) noexcept;
     KRYS_NODISCARD static Color InactiveSelectionForegroundColor(style::ColorOptions options) noexcept;
+
+    /// @brief Paints a resizer's grip (two diagonal lines) in the bottom corner of @p resizerCornerRect.
+    static void PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,
+                                     const LayoutRect &resizerCornerRect) noexcept;
+    /// @brief Paints the frame around a resizer that sits between scrollbars.
+    static void PaintPlatformResizerFrame(const RenderLayerModelObject &renderer, GraphicsContext &context,
+                                          const LayoutRect &resizerAbsRect) noexcept;
 
     // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
     // FIXME: Remove when devolvable widgets are universally enabled.

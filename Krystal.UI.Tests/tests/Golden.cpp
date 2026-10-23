@@ -230,6 +230,13 @@ namespace krys::ui::tests
     CheckPage("focus", 360u, 200u, true, [](View &view) { (void)view.KeyPressed(pal::Key::Tab); });
   }
 
+  TEST_CASE("Golden: text fields", "[UI][GPU][Golden]")
+  {
+    // The fields lay out as Chrome's do, but its golden is only reported: its DirectWrite glyphs leave a seam
+    // between Ahem's boxes (see "Golden: text").
+    CheckPage("textfields", 360u, 240u, true);
+  }
+
   TEST_CASE("Golden: scrollbars", "[UI][GPU][Golden]")
   {
     // Chrome's captures hide scrollbars (and its Windows scrollbars aren't the theme's), so there's no Chrome

@@ -47,7 +47,9 @@ namespace krys::boo::css::calc
 namespace krys::boo::style
 {
   struct PseudoElementIdentifier;
+  struct ResolutionContext;
   class Resolver;
+  struct UnadjustedStyle;
 }
 
 namespace krys::boo::html
@@ -218,6 +220,21 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-element-shadowroot
     KRYS_NODISCARD RefPtr<ShadowRoot> ShadowRoot() const noexcept;
+
+    /// @brief The element's user agent shadow root, or null if it has none.
+    KRYS_NODISCARD dom::ShadowRoot *UserAgentShadowRoot() const noexcept;
+
+    /// @brief The element's user agent shadow root, attached if it has none.
+    dom::ShadowRoot &EnsureUserAgentShadowRoot() noexcept;
+
+    /// @brief Attaches a user agent shadow root to the element, which must have no shadow root.
+    dom::ShadowRoot &CreateUserAgentShadowRoot() noexcept;
+
+    /// @brief The name of the user agent part the element is (its `useragentpart` attribute), which user
+    /// agent style sheets select it by as a pseudo-element of its host; null if it isn't one.
+    KRYS_NODISCARD DOMStringAtom UserAgentPart() const noexcept;
+
+    void SetUserAgentPart(DOMStringAtom part) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-customelementregistry
     KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept
@@ -654,8 +671,44 @@ namespace krys::boo::dom
     {
     }
 
+    /// @brief Whether the element is a text field: a text area, or an input whose type is text-like.
+    KRYS_NODISCARD virtual bool IsTextField() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the element's style is resolved by `ResolveCustomStyle`.
+    KRYS_NODISCARD bool HasCustomStyleResolveCallbacks() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::HasCustomStyleResolveCallbacks);
+    }
+
+    /// @brief The element's style, for elements with custom style resolve callbacks (user agent shadow tree
+    /// elements that style themselves from their host); nothing to resolve it from the style sheets.
+    /// @param shadowHostStyle The style of the shadow host of the element's tree, or null outside one.
+    KRYS_NODISCARD virtual Maybe<style::UnadjustedStyle>
+      ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
+                         const RenderStyle *shadowHostStyle) noexcept;
+
+    /// @brief The element's style resolved from the style sheets, without adjusting it.
+    KRYS_NODISCARD style::UnadjustedStyle
+      ResolveStyle(const style::ResolutionContext &resolutionContext) noexcept;
+
     /// @brief The URL of the image the element shows: its `src` attribute, or null if it has none.
     KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
+
+    /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
+    /// update their placeholder and begin editing first.
+    virtual void DispatchFocusEvent(EventTarget *relatedTarget, const FocusOptions &options) noexcept;
+
+    /// @brief Fires `blur` (then `focusout`) at the element as the focus update steps unfocus it; text
+    /// controls update their placeholder and end editing first.
+    virtual void DispatchBlurEvent(EventTarget *relatedTarget) noexcept;
+
+    /// @brief Called after the element lost the focus and `blur` was fired at it.
+    virtual void DidBlur() noexcept
+    {
+    }
 
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
@@ -1050,6 +1103,11 @@ namespace krys::boo::dom
     virtual void FinishParsingChildren() noexcept;
 
 #pragma endregion
+
+    /// @brief Called after a user agent shadow root is attached to the element.
+    virtual void DidAddUserAgentShadowRoot(dom::ShadowRoot &) noexcept
+    {
+    }
 
 #pragma region Extension Hooks
 

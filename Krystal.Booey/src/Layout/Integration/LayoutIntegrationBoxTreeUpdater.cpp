@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -55,8 +56,11 @@ namespace krys::boo::layout_integration
                                            : layout::Box::NodeType::ReplacedElement;
         }
 
-        // FIXME: Buttons, menu lists, text control inner containers, sliders and slider containers
-        // (NodeType::ImplicitFlexBox), once there are form controls.
+        // FIXME: Buttons, menu lists, sliders and slider containers, once there are those renderers.
+        if (Is<RenderTextControlInnerContainer>(renderer))
+        {
+          return layout::Box::NodeType::ImplicitFlexBox;
+        }
 
         if (auto *renderLineBreak = DynamicDowncast<RenderLineBreak>(renderer))
         {
@@ -205,8 +209,15 @@ namespace krys::boo::layout_integration
           styleToAdjust.SetOverflowY(anonBlockParentStyle.OverflowY());
         }
 
-        // FIXME: Text controls and MathML math boxes with an internal table display (which confuses IFC)
-        // become blocks, once there are text controls and MathML rendering.
+        // FIXME: MathML math boxes too, once there's MathML rendering.
+        if (renderer.IsRenderTextControl())
+        {
+          // Something like <input style="appearance:none; display:table-header-group"> confuses IFC.
+          if (styleToAdjust.IsInternalTableBox() || styleToAdjust.Display() == DisplayType::TableCaption)
+          {
+            styleToAdjust.SetDisplay(DisplayType::Block);
+          }
+        }
         return;
       }
 

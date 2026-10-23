@@ -11,7 +11,7 @@ namespace krys::boo::dom
 {
   /// @brief An event from a keyboard: `keydown`, `keypress` and `keyup`.
   /// @see https://w3c.github.io/uievents/#interface-keyboardevent
-  // FIXME: The view, and composing with an input method, once there are text fields; key commands.
+  // FIXME: The view, composing with an input method, and key commands.
   class KeyboardEvent final : public UIEventWithKeyState
   {
     friend class EventFactory;
