@@ -821,6 +821,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/RenderText.hpp
   include/Krystal.Booey/Rendering/RenderButton.hpp
+  include/Krystal.Booey/Rendering/RenderMeter.hpp
+  include/Krystal.Booey/Rendering/RenderProgress.hpp
+  include/Krystal.Booey/Rendering/RenderSlider.hpp
   include/Krystal.Booey/Rendering/RenderTextControl.hpp
   include/Krystal.Booey/Rendering/RenderTheme.hpp
   include/Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp
@@ -1755,6 +1758,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/SubmitInputType.hpp
   include/Krystal.Booey/HTML/TelephoneInputType.hpp
   include/Krystal.Booey/HTML/TextFieldInputType.hpp
+  include/Krystal.Booey/HTML/Shadow/ProgressShadowElement.hpp
+  include/Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp
   include/Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
   include/Krystal.Booey/HTML/TextInputType.hpp
@@ -2529,6 +2534,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableCol.cpp
   src/Rendering/RenderText.cpp
   src/Rendering/RenderButton.cpp
+  src/Rendering/RenderMeter.cpp
+  src/Rendering/RenderProgress.cpp
+  src/Rendering/RenderSlider.cpp
   src/Rendering/RenderTextControl.cpp
   src/Rendering/RenderTheme.cpp
   src/Rendering/Adwaita/RenderThemeAdwaita.cpp
@@ -2909,6 +2917,8 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/SubmitEvent.cpp
   src/HTML/SubmitInputType.cpp
   src/HTML/TextFieldInputType.cpp
+  src/HTML/Shadow/ProgressShadowElement.cpp
+  src/HTML/Shadow/SliderThumbElement.cpp
   src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
   src/HTML/TimeInputType.cpp

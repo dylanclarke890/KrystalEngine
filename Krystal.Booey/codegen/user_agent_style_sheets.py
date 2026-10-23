@@ -23,6 +23,7 @@ SHEETS = {
     "ViewTransitionsUserAgentStyleSheet": "viewTransitions.css",
     "HorizontalFormControlsUserAgentStyleSheet": "horizontalFormControls.css",
     "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
+    "MeterElementShadowUserAgentStyleSheet": "meterElementShadow.css",
 }
 
 

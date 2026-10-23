@@ -309,7 +309,7 @@ All done in G1 (2026-10-17) unless noted.
 | G11 | Visual effects: `filter`, `backdrop-filter`, `mask-image` and `mask-border` drawn. Done (2026-10-21), in three parts (see *G11 plan*). | Filtered, backdrop-filtered and masked boxes match Chrome. |
 | G12 | Done (2026-10-21). Compositing: upstream's composited layer tree (`RenderLayerCompositor`, `RenderLayerBacking`, `GraphicsLayer`) on a Krystal.UI layer tree adapted from TextureMapper, with tiled backings. In four parts (see *G12 plan*). | Filters, opacity, transforms and their animations composite without repainting; scrolling moves layers; no stale pixels. |
 | G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21), and so is G13b, the selection painted and the mouse (2026-10-22), and so is G13c, the keyboard, the DOM's `Selection` and copying (2026-10-22), and so is G13d, carets (2026-10-22), which completes G13. | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
-| G14 | Editing and form controls: editing commands (typing, deleting, line breaks, undo, cut and paste) in editable content, form behaviour (owners, validity, submission to the host), text fields, and the other controls drawn by a theme. In four parts (see *G14 plan*); G14a, editing commands, G14b, forms, and G14c, text fields, are done, and so is G14d1, the theme (2026-10-22). | Text can be typed, deleted, undone and pasted in `contenteditable`, `<input>` and `<textarea>`; checkboxes, radios, buttons, sliders and selects work and paint as a theme draws them; a form's submission reaches the host. |
+| G14 | Editing and form controls: editing commands (typing, deleting, line breaks, undo, cut and paste) in editable content, form behaviour (owners, validity, submission to the host), text fields, and the other controls drawn by a theme. In four parts (see *G14 plan*); G14a, editing commands, G14b, forms, and G14c, text fields, are done, and so are G14d1, the theme, and G14d2, ranges, progress and meters (2026-10-22). | Text can be typed, deleted, undone and pasted in `contenteditable`, `<input>` and `<textarea>`; checkboxes, radios, buttons, sliders and selects work and paint as a theme draws them; a form's submission reaches the host. |
 
 ### G2 parts
 
@@ -1428,6 +1428,14 @@ G14c left the controls that aren't text fields with their behaviour (G14b) but n
 - **Differences:** the theme's system colours are semantic, so default black text records its colour in paint dumps; the selection and the default focus ring are Adwaita's (the accent colour), which moved the `selection` and `focus` goldens; search field icons wait for SVG images.
 - **Tests:** the theme's colours, appearance and adjustments, a page's styles turning appearance off, control states, painting; buttons' render trees and text; the spin button stepping a number field; the `controls` golden.
 - **Out (FIXMEs):** devolvable widgets, the system's caret blink, reduced motion and contrast settings, checkmarks for `appearance: base`, image buttons' renderer, the slider, progress and meter parts' updates (G14d2), menu lists (G14d3), colour wells (G14d4).
+
+### G14d2 as built (2026-10-22)
+
+- **Booey** (the ledger entry is *Ranges, progress and meters* in `docs/booey/PORTING.md`): ranges' shadow trees (container, track, thumb) with `RenderSlider` and the container's layout placing the thumb at the value, dragging the thumb (mouse capture, `input` while dragging, `change` on release), clicking the track to jump there, vertical sliders (`appearance: slider-vertical`) and their keys; `<progress>` with its shadow tree, `RenderProgress` and the indeterminate animation; `<meter>` with its shadow tree and style sheet, gauge regions and `RenderMeter`; the theme's slider track, progress bar and meter parts updated from their renderers.
+- **A bug the meter found:** elements made outside the element factory had no tag name, so user agent rules for their tags didn't match in user agent shadow trees; `HTMLDivElement` now names itself.
+- **Krystal.UI**: nothing to add. The `ranges` golden (report-only against Chrome); the editor's order form gains a strength slider, a progress bar and a meter.
+- **Tests:** the thumb's position, vertical sliders, dragging and track clicks, progress values and states, meter regions and values; the `ranges` golden.
+- **Out (FIXMEs):** ranges' tick marks (datalists), touch dragging, releasing a thumb's capture when its renderer detaches, the page's rendering update interval for the progress animation.
 
 ## Open decisions
 

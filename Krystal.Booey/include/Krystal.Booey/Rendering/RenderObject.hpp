@@ -784,6 +784,18 @@ namespace krys::boo
     {
       return _type == Type::Button;
     }
+    KRYS_NODISCARD bool IsRenderSlider() const noexcept
+    {
+      return _type == Type::Slider;
+    }
+    KRYS_NODISCARD bool IsRenderProgress() const noexcept
+    {
+      return _type == Type::Progress;
+    }
+    KRYS_NODISCARD bool IsRenderMeter() const noexcept
+    {
+      return _type == Type::Meter;
+    }
     KRYS_NODISCARD bool IsRenderFrameSet() const noexcept
     {
       return _type == Type::FrameSet;

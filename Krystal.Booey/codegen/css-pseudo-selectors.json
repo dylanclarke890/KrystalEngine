@@ -132,6 +132,46 @@
             "user-agent-part": true,
             "user-agent-sheet-only": true
         },
+        "-webkit-meter-bar": {
+            "comment": "The bar of meters.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-meter-even-less-good-value": {
+            "comment": "A meter's value when it's in the even less good region.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-meter-inner-element": {
+            "comment": "The inner element of meters.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-meter-optimum-value": {
+            "comment": "A meter's value when it's in the optimum region.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-meter-suboptimum-value": {
+            "comment": "A meter's value when it's in the suboptimal region.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-progress-bar": {
+            "comment": "The bar of progress elements.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-progress-inner-element": {
+            "comment": "The inner element of progress elements.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-progress-value": {
+            "comment": "The value of progress elements.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "-webkit-search-cancel-button": {
             "comment": "The cancel button of search fields.",
             "user-agent-part": true,
@@ -149,6 +189,21 @@
         },
         "-webkit-search-results-decoration": {
             "comment": "The results decoration of search fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-slider-container": {
+            "comment": "The container of ranges' tracks.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-slider-runnable-track": {
+            "comment": "The track of ranges.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-slider-thumb": {
+            "comment": "The thumb of ranges.",
             "user-agent-part": true,
             "user-agent-sheet-only": true
         },

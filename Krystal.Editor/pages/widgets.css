@@ -105,6 +105,9 @@ tr:hover td { text-decoration: underline; }
 .order .choices { margin: 6px 0 0; }
 .order .choices label { display: inline-block; margin-right: 6px; }
 .order input[name=cups] { width: 52px; font: inherit; }
+.order .gauges { margin: 6px 0 0; }
+.order .gauges label { display: inline-block; margin-right: 12px; }
+.order .gauges input, .order .gauges progress, .order .gauges meter { vertical-align: middle; }
 .order input:checked + span { color: #06a77d; font-weight: bold; }
 .order button { margin: 10px 8px 0 0; padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5;
   color: #ffffff; font: inherit; cursor: pointer; }

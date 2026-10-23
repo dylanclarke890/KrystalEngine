@@ -106,6 +106,9 @@ namespace krys::boo::css::tests
     CHECK(FindPseudoElementName(u8"details-content") == SelectorPseudoElement::UserAgentPart);
     CHECK(FindPseudoElementName(u8"thumb") == SelectorPseudoElement::UserAgentPart);
     CHECK(FindPseudoElementName(u8"track") == SelectorPseudoElement::UserAgentPart);
+    // The controls' internal parts, which parse only in user agent sheets.
+    CHECK(FindPseudoElementName(u8"-webkit-slider-thumb") == SelectorPseudoElement::UserAgentPart);
+    CHECK(FindPseudoElementName(u8"-webkit-progress-value") == SelectorPseudoElement::UserAgentPart);
   }
 
   TEST_CASE("FindPseudoElementName(unsupported)", "[CSS][Selectors][SelectorPseudoTypeMap]")
@@ -119,7 +122,7 @@ namespace krys::boo::css::tests
     CHECK_FALSE(FindPseudoElementName(u8"-webkit-input-placeholder"));
     CHECK_FALSE(FindPseudoElementName(u8"-webkit-file-upload-button"));
     CHECK_FALSE(FindPseudoElementName(u8"-webkit-scrollbar"));
-    CHECK_FALSE(FindPseudoElementName(u8"-webkit-slider-thumb"));
+    CHECK_FALSE(FindPseudoElementName(u8"-webkit-media-slider-thumb"));
     CHECK_FALSE(FindPseudoElementName(u8"-internal-writing-suggestions"));
   }
 }

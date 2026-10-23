@@ -1,7 +1,14 @@
 ﻿#include "Krystal.Booey/HTML/RangeInputType.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
+#include "Krystal.Booey/Rendering/RenderSlider.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <cmath>
@@ -92,8 +99,11 @@ namespace krys::boo::html
       isAnyStep ? (stepRange.Maximum() - stepRange.Minimum()) / Decimal(100) : stepRange.Step();
     const Decimal bigStep = std::max((stepRange.Maximum() - stepRange.Minimum()) / Decimal(10), step);
 
-    // FIXME: Vertical sliders (StyleAppearance::SliderVertical), with the slider's renderer.
     bool isVertical = false;
+    if (auto *renderer = element->Renderer())
+    {
+      isVertical = renderer->Style().UsedAppearance() == StyleAppearance::SliderVertical;
+    }
 
     Decimal newValue;
     if (key == u8"Up")
@@ -170,7 +180,10 @@ namespace krys::boo::html
           (void)element->SetValue(element->Value());
         }
       }
-      // FIXME: Moving the slider's thumb, with the slider's shadow tree.
+      if (HasCreatedShadowSubtree())
+      {
+        TypedSliderThumbElement().SetPositionFromValue();
+      }
     }
     InputType::AttributeChanged(localName);
   }
@@ -192,7 +205,120 @@ namespace krys::boo::html
       Element()->SetTextAsOfLastFormControlChangeEvent(dom::DOMString(value));
     }
 
-    // FIXME: Moving the slider's thumb, with the slider's shadow tree.
+    if (HasCreatedShadowSubtree())
+    {
+      TypedSliderThumbElement().SetPositionFromValue();
+    }
+  }
+
+  // FIXME: Should this work for untrusted input?
+  void RangeInputType::HandleMouseDownEvent(dom::MouseEvent &event) noexcept
+  {
+    krys_debug_assert(Element());
+
+    if (!HasCreatedShadowSubtree())
+    {
+      return;
+    }
+
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    if (element->IsDisabledFormControl())
+    {
+      return;
+    }
+
+    auto *targetNode = DynamicDowncast<dom::Node>(event.Target().get());
+    if (!targetNode)
+    {
+      return;
+    }
+
+    krys_debug_assert(element->UserAgentShadowRoot());
+    if (targetNode != element.get()
+        && !dom::TreeQueries::IsDescendant(*targetNode, *element->UserAgentShadowRoot()))
+    {
+      return;
+    }
+
+    auto &thumb = TypedSliderThumbElement();
+    if (targetNode == &thumb)
+    {
+      return;
+    }
+
+    auto location = event.AbsoluteLocation();
+    thumb.DragFrom(
+      LayoutPoint(FloatPoint(static_cast<float>(location.X()), static_cast<float>(location.Y()))));
+  }
+
+  void RangeInputType::DisabledStateChanged() noexcept
+  {
+    if (!HasCreatedShadowSubtree())
+    {
+      return;
+    }
+    TypedSliderThumbElement().HostDisabledStateChanged();
+  }
+
+  void RangeInputType::CreateShadowSubtree() noexcept
+  {
+    krys_debug_assert(NeedsShadowSubtree());
+    krys_debug_assert(Element());
+    krys_debug_assert(Element()->UserAgentShadowRoot());
+
+    auto &element = *Element();
+    auto &document = element.NodeDocument();
+
+    auto &shadowRoot = *element.UserAgentShadowRoot();
+
+    auto track = CreateRef<HTMLDivElement>(document);
+    auto container = SliderContainerElement::Create(document);
+    (void)shadowRoot.AppendChild(*container);
+    (void)container->AppendChild(*track);
+
+    track->SetUserAgentPart(css::UserAgentParts::WebkitSliderRunnableTrack());
+    auto thumb = html::SliderThumbElement::Create(document);
+    (void)track->AppendChild(*thumb);
+  }
+
+  HTMLElement *RangeInputType::SliderTrackElement() const noexcept
+  {
+    krys_debug_assert(Element());
+
+    if (!HasCreatedShadowSubtree())
+    {
+      return nullptr;
+    }
+
+    auto *root = Element()->UserAgentShadowRoot();
+    krys_debug_assert(root);
+    if (!root)
+    {
+      return nullptr;
+    }
+
+    auto *container = root->FirstChild();
+    krys_debug_assert(Is<SliderContainerElement>(container));
+    return container ? DynamicDowncast<HTMLElement>(container->FirstChild()) : nullptr;
+  }
+
+  html::SliderThumbElement &RangeInputType::TypedSliderThumbElement() const noexcept
+  {
+    krys_debug_assert(HasCreatedShadowSubtree());
+    krys_debug_assert(SliderTrackElement()->FirstChild()); // thumb
+
+    return Downcast<html::SliderThumbElement>(*SliderTrackElement()->FirstChild());
+  }
+
+  HTMLElement *RangeInputType::SliderThumbElement() const noexcept
+  {
+    return &TypedSliderThumbElement();
+  }
+
+  RenderPtr<RenderElement> RangeInputType::CreateInputRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(Element());
+    return CreateRenderer<RenderSlider>(*Element(), krys::move(style));
   }
 
   Maybe<dom::DOMString> RangeInputType::FallbackValue() const noexcept

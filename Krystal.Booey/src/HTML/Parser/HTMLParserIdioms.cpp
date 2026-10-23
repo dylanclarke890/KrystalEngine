@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <charconv>
 #include <cmath>
@@ -131,6 +132,18 @@ namespace krys::boo::html
   Decimal ParseToDecimalForNumberType(dom::DOMStringView string) noexcept
   {
     return ParseToDecimalForNumberType(string, Decimal::NaN());
+  }
+
+  double ParseHTMLFloatingPointNumberValue(dom::DOMStringView input, double fallbackValue) noexcept
+  {
+    auto result = Numbers::ParseFloatingPoint(input);
+    if (!result.Success())
+    {
+      return fallbackValue;
+    }
+
+    // The following expression converts -0 to +0.
+    return result.Value ? result.Value : 0;
   }
 
   double ParseToDoubleForNumberType(dom::DOMStringView string, double fallbackValue) noexcept

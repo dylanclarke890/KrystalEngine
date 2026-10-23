@@ -250,10 +250,5 @@ namespace krys::boo::style
       }
       return;
     }
-
-    if (tagName == html::TagName::progress && localName == u8"value" && presenceChanged)
-    {
-      InvalidateStates(invalidations, element, {PseudoClass::Indeterminate});
-    }
   }
 }

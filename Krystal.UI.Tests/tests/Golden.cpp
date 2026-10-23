@@ -251,6 +251,13 @@ namespace krys::ui::tests
               });
   }
 
+  TEST_CASE("Golden: ranges", "[UI][GPU][Golden]")
+  {
+    // Ranges and progress bars are drawn by the Adwaita theme, so Chrome's golden is only reported; meters
+    // are drawn by their shadow trees' gradients, which Chrome doesn't use either.
+    CheckPage("ranges", 360u, 280u, true);
+  }
+
   TEST_CASE("Golden: scrollbars", "[UI][GPU][Golden]")
   {
     // Chrome's captures hide scrollbars (and its Windows scrollbars aren't the theme's), so there's no Chrome

@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class RenderMeter;
+}
 
 namespace krys::boo::html
 {
@@ -10,12 +16,26 @@ namespace krys::boo::html
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMeterElement);
 
   public:
+    enum class GaugeRegion : uint8
+    {
+      Optimum,
+      Suboptimal,
+      EvenLessGood
+    };
+
+  private:
+    WeakPtr<HTMLElement> _valueElement;
+
+  public:
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
     {
       return false;
     }
 
-    HTMLMeterElement(dom::Document &document) noexcept;
+    explicit HTMLMeterElement(dom::Document &document) noexcept;
+    ~HTMLMeterElement() noexcept override;
+
+    KRYS_NODISCARD static Ref<HTMLMeterElement> Create(dom::Document &document) noexcept;
 
 #pragma region HTMLMeterElement - https://html.spec.whatwg.org/#htmlmeterelement
 
@@ -55,10 +75,26 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-meter-optimum
     void Optimum(double value) noexcept;
 
-    // TODO(HTMLMETER, HTML): Implement Labels().
     // readonly attribute NodeList labels;
 
 #pragma endregion
+
+    KRYS_NODISCARD double ValueRatio() const noexcept;
+    KRYS_NODISCARD GaugeRegion GetGaugeRegion() const noexcept;
+
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &child) const noexcept override;
+
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
+  private:
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+    void DidAddUserAgentShadowRoot(dom::ShadowRoot &root) noexcept override;
+
+    void DidElementStateChange() noexcept;
+    KRYS_NODISCARD RenderMeter *GetRenderMeter() const noexcept;
   };
 }
 

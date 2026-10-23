@@ -542,6 +542,27 @@ input[type="range"] {
     color: #909090;
 }
 
+input[type="range"]::-webkit-slider-container {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    flex: 1;
+    align-self: center;
+
+    box-sizing: border-box;
+    display: block;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: auto;
+    box-sizing: border-box;
+    display: block;
+}
+
 input:is([type="button"], [type="submit"], [type="reset"]):disabled,
 input[type="file"]:disabled::file-selector-button, button:disabled,
 select:disabled, optgroup:disabled, option:disabled,
@@ -629,6 +650,26 @@ progress {
     block-size: 1em;
     inline-size: 10em;
     vertical-align: -0.2em;
+}
+
+progress::-webkit-progress-inner-element {
+    box-sizing: inherit;
+    height: 100%;
+    width: 100%;
+}
+
+progress::-webkit-progress-bar {
+    background-color: gray;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+progress::-webkit-progress-value {
+    background-color: green;
+    block-size: 100%;
+    inline-size: 50%; /* should be removed later */
+    box-sizing: border-box;
 }
 
 /* inline elements */

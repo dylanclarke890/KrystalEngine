@@ -439,6 +439,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/BreakablePositions.cpp
 		tests/Rendering/RenderText.cpp
 		tests/Rendering/RenderButton.cpp
+		tests/Rendering/RenderProgress.cpp
+		tests/Rendering/RenderSlider.cpp
 		tests/Rendering/RenderTextControl.cpp
 		tests/Rendering/RenderTheme.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
@@ -566,6 +568,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
+		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp

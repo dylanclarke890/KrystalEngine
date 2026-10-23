@@ -41,6 +41,10 @@ namespace krys::boo::html
     HTMLElement(dom::Document &document, HTMLElementInterface interface,
                 HTMLElementFlags flags = HTMLElementFlags::None,
                 dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+    /// @brief Constructs an element with its tag name, for elements made outside the element factory (the
+    /// elements of user agent shadow trees), which otherwise gives elements their names.
+    HTMLElement(dom::Document &document, HTMLElementInterface interface, dom::DOMStringAtom localName,
+                HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept;
 
   public:
     HTMLElement(dom::Document &document) noexcept;
@@ -359,6 +363,16 @@ namespace krys::boo::html
     }
 
     KRYS_NODISCARD virtual bool IsSpinButtonElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSliderThumbElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSliderContainerElement() const noexcept
     {
       return false;
     }

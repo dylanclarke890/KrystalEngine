@@ -28,6 +28,7 @@
 #include "Krystal.Booey/HTML/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
@@ -36,6 +37,17 @@ namespace krys::boo::html
   HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface, HTMLElementFlags flags,
                            dom::NodeFlags nodeFlags) noexcept
       : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsHTMLElement),
+        _flags(flags), _interface(interface)
+  {
+  }
+
+  HTMLElement::HTMLElement(dom::Document &document, HTMLElementInterface interface,
+                           dom::DOMStringAtom localName, HTMLElementFlags flags,
+                           dom::NodeFlags nodeFlags) noexcept
+      : StyledElement(document,
+                      dom::QualifiedName(dom::DOMStringAtom(infra::Namespaces::HTML),
+                                         dom::DOMStringAtom::Null(), localName),
+                      nodeFlags | dom::NodeFlags::IsHTMLElement),
         _flags(flags), _interface(interface)
   {
   }

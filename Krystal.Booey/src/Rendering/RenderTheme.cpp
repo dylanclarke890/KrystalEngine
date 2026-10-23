@@ -31,12 +31,15 @@
 #include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderMeter.hpp"
+#include "Krystal.Booey/Rendering/RenderProgress.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -348,8 +351,8 @@ namespace krys::boo
     {
       const auto &part = element.UserAgentPart();
 
-      // FIXME: The list button (webkitListButton), with datalists; the slider thumb (webkitSliderThumb), with
-      // sliders (G14d2); the colour swatch parts, with colour inputs (G14d4).
+      // FIXME: The list button (webkitListButton), with datalists; the colour swatch parts, with colour
+      // inputs (G14d4).
 
       if (part == css::UserAgentParts::WebkitSearchCancelButton())
       {
@@ -379,6 +382,11 @@ namespace krys::boo
         }
       }
 
+      if (part == css::UserAgentParts::WebkitSliderThumb())
+      {
+        return StyleAppearance::SliderThumbHorizontal;
+      }
+
       if (part == css::UserAgentParts::WebkitInnerSpinButton())
       {
         return StyleAppearance::InnerSpinButton;
@@ -388,9 +396,88 @@ namespace krys::boo
     return StyleAppearance::None;
   }
 
-  // FIXME: Updating the meter, progress bar and slider track parts from their renderers
-  // (updateMeterPartForRenderer, updateProgressBarPartForRenderer, updateSliderTrackPartForRenderer), with
-  // RenderMeter, RenderProgress and the slider's shadow tree (G14d2).
+  namespace
+  {
+    void UpdateMeterPartForRenderer(MeterPart &meterPart, const RenderMeter &renderMeter) noexcept
+    {
+      auto &element = *renderMeter.MeterElement();
+      MeterPart::GaugeRegion gaugeRegion {};
+
+      switch (element.GetGaugeRegion())
+      {
+        case html::HTMLMeterElement::GaugeRegion::Optimum:
+          gaugeRegion = MeterPart::GaugeRegion::Optimum;
+          break;
+        case html::HTMLMeterElement::GaugeRegion::Suboptimal:
+          gaugeRegion = MeterPart::GaugeRegion::Suboptimal;
+          break;
+        case html::HTMLMeterElement::GaugeRegion::EvenLessGood:
+          gaugeRegion = MeterPart::GaugeRegion::EvenLessGood;
+          break;
+      }
+
+      meterPart.SetGaugeRegion(gaugeRegion);
+      meterPart.SetValue(element.Value());
+      meterPart.SetMinimum(element.Min());
+      meterPart.SetMaximum(element.Max());
+    }
+
+    void UpdateProgressBarPartForRenderer(ProgressBarPart &progressBarPart,
+                                          const RenderProgress &renderProgress) noexcept
+    {
+      progressBarPart.SetPosition(renderProgress.Position());
+      progressBarPart.SetAnimationStartTime(renderProgress.AnimationStartTime());
+    }
+
+    void UpdateSliderTrackPartForRenderer(SliderTrackPart &sliderTrackPart,
+                                          const RenderElement &renderer) noexcept
+    {
+      auto &input = Downcast<html::HTMLInputElement>(*renderer.GetElement());
+      krys_debug_assert(input.IsRangeControl());
+
+      IntSize thumbSize;
+      if (auto *thumbRenderer = input.SliderThumbElement()->Renderer())
+      {
+        const auto &thumbStyle = thumbRenderer->Style();
+
+        auto fixedWidth = thumbStyle.Width().TryFixed();
+        auto fixedHeight = thumbStyle.Height().TryFixed();
+        auto thumbWidth =
+          fixedWidth ? static_cast<int32>(fixedWidth->ResolveZoom(thumbStyle.UsedZoomForLength())) : 0;
+        auto thumbHeight =
+          fixedHeight ? static_cast<int32>(fixedHeight->ResolveZoom(thumbStyle.UsedZoomForLength())) : 0;
+
+        thumbSize = {thumbWidth, thumbHeight};
+      }
+
+      IntRect trackBounds;
+      if (auto *trackRenderer = input.SliderTrackElement()->Renderer())
+      {
+        trackBounds = trackRenderer->AbsoluteBoundingBoxRectIgnoringTransforms();
+
+        // We can ignoring transforms because transform is handled by the graphics context.
+        auto sliderBounds = renderer.AbsoluteBoundingBoxRectIgnoringTransforms();
+
+        // Make position relative to the transformed ancestor element.
+        trackBounds.MoveBy(-sliderBounds.Location());
+      }
+
+      double minimum = input.Minimum();
+      double maximum = input.Maximum();
+      double thumbPosition = 0;
+      if (maximum > minimum)
+      {
+        thumbPosition = (input.ValueAsNumber() - minimum) / (maximum - minimum);
+      }
+
+      // FIXME: The tick ratios of a data list's suggestions, with datalists.
+
+      sliderTrackPart.SetThumbSize(thumbSize);
+      sliderTrackPart.SetTrackBounds(trackBounds);
+      sliderTrackPart.SetThumbPosition(thumbPosition);
+      sliderTrackPart.SetTickRatios({});
+    }
+  }
 
   RefPtr<ControlPart> RenderTheme::CreateControlPart(const RenderElement &renderer) const noexcept
   {
@@ -456,8 +543,26 @@ namespace krys::boo
     return nullptr;
   }
 
-  void RenderTheme::UpdateControlPartForRenderer(ControlPart &, const RenderElement &) const noexcept
+  void RenderTheme::UpdateControlPartForRenderer(ControlPart &part,
+                                                 const RenderElement &renderer) const noexcept
   {
+    if (auto *meterPart = DynamicDowncast<MeterPart>(part))
+    {
+      UpdateMeterPartForRenderer(*meterPart, Downcast<RenderMeter>(renderer));
+      return;
+    }
+
+    if (auto *progressBarPart = DynamicDowncast<ProgressBarPart>(part))
+    {
+      UpdateProgressBarPartForRenderer(*progressBarPart, Downcast<RenderProgress>(renderer));
+      return;
+    }
+
+    if (auto *sliderTrackPart = DynamicDowncast<SliderTrackPart>(part))
+    {
+      UpdateSliderTrackPartForRenderer(*sliderTrackPart, renderer);
+      return;
+    }
   }
 
   EnumSet<ControlStyle::State>
@@ -970,8 +1075,11 @@ namespace krys::boo
     }
 
     // FIXME: This should be part of RenderTheme::extractControlStyleForRenderer().
-    // FIXME: A slider thumb delegates to its input (SliderThumbElement::hostInput), with sliders (G14d2).
-    auto *delegate = element;
+    dom::Element *delegate = element;
+    if (auto *sliderThumb = DynamicDowncast<html::SliderThumbElement>(element))
+    {
+      delegate = sliderThumb->HostInput();
+    }
 
     auto &document = delegate->NodeDocument();
     return delegate == document.FocusedElement() && document.Selection().IsFocusedAndActive();

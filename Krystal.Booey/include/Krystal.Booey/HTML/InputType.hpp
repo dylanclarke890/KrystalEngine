@@ -311,6 +311,9 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept;
 
     // Event handlers.
+    virtual void HandleMouseDownEvent(dom::MouseEvent &) noexcept
+    {
+    }
     virtual void HandleClickEvent(dom::MouseEvent &) noexcept
     {
     }
@@ -368,6 +371,14 @@ namespace krys::boo::html
     }
     KRYS_NODISCARD virtual RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept;
     KRYS_NODISCARD virtual HTMLElement *InnerSpinButtonElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *SliderThumbElement() const noexcept
+    {
+      return nullptr;
+    }
+    KRYS_NODISCARD virtual HTMLElement *SliderTrackElement() const noexcept
     {
       return nullptr;
     }

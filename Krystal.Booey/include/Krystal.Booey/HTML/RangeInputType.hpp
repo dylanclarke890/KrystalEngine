@@ -5,9 +5,10 @@
 
 namespace krys::boo::html
 {
-  /// @brief The range input type.
-  // FIXME: The slider (its shadow tree, renderer and thumb dragging) and its tick marks come with the other
-  // controls.
+  class SliderThumbElement;
+
+  /// @brief The range input type: a slider, with a track and a thumb in its shadow tree.
+  // FIXME: Tick marks for a data list's suggestions, with datalists.
   class RangeInputType final : public InputType
   {
   public:
@@ -35,5 +36,15 @@ namespace krys::boo::html
                   TextControlSetValueSelection selection) noexcept final;
     KRYS_NODISCARD Maybe<dom::DOMString> FallbackValue() const noexcept final;
     KRYS_NODISCARD dom::DOMString SanitizeValue(dom::DOMStringView proposedValue) const noexcept final;
+
+    void HandleMouseDownEvent(dom::MouseEvent &event) noexcept final;
+    void DisabledStateChanged() noexcept final;
+    void CreateShadowSubtree() noexcept final;
+    KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept final;
+    KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept final;
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+
+  private:
+    KRYS_NODISCARD html::SliderThumbElement &TypedSliderThumbElement() const noexcept;
   };
 }

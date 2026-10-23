@@ -34,4 +34,10 @@ namespace krys::boo::html
   KRYS_NODISCARD double ParseToDoubleForNumberType(dom::DOMStringView string, double fallbackValue) noexcept;
 
   KRYS_NODISCARD double ParseToDoubleForNumberType(dom::DOMStringView string) noexcept;
+
+  /// @brief Parses @p input with the rules for parsing floating-point number values, or returns
+  /// @p fallbackValue.
+  /// @see https://html.spec.whatwg.org/#rules-for-parsing-floating-point-number-values
+  KRYS_NODISCARD double ParseHTMLFloatingPointNumberValue(dom::DOMStringView input,
+                                                          double fallbackValue = 0) noexcept;
 }

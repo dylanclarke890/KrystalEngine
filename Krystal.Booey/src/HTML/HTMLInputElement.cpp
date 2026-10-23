@@ -1045,6 +1045,16 @@ namespace krys::boo::html
     return _inputType->InnerSpinButtonElement();
   }
 
+  HTMLElement *HTMLInputElement::SliderThumbElement() const noexcept
+  {
+    return _inputType->SliderThumbElement();
+  }
+
+  HTMLElement *HTMLInputElement::SliderTrackElement() const noexcept
+  {
+    return _inputType->SliderTrackElement();
+  }
+
   HTMLElement *HTMLInputElement::ResultsButtonElement() const noexcept
   {
     return _inputType->ResultsButtonElement();
@@ -1864,7 +1874,11 @@ namespace krys::boo::html
       {
         _inputType->HandleClickEvent(*mouseEvent);
       }
-      // FIXME: Mouse down and move (dragging a slider's thumb), with the other controls.
+      else if (mouseEvent->Type() == EventNames::MouseDown)
+      {
+        _inputType->HandleMouseDownEvent(*mouseEvent);
+      }
+      // FIXME: Mouse moves (handleMouseMoveEvent), which only the color input type's picker uses.
 
       if (mouseEvent->DefaultHandled())
       {

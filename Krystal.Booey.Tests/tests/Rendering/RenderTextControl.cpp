@@ -45,20 +45,20 @@ layer at (0,0) size 800x31
         text run at (207,18) width 10: "x"
       RenderTextControl {INPUT} at (444,15) size 57x16 [bgcolor=#FFFFFF] [border: (2px inset #808080)] id="empty"
 layer at (3,18) size 201x10
-  RenderBlock at (3,3) size 201x10
+  RenderBlock {DIV} at (3,3) size 201x10
     RenderText {#text} at (0,0) size 30x10
       text run at (0,0) width 30: "abc"
 layer at (217,0) size 227x26 clip at (218,1) size 225x24
   RenderTextControl {TEXTAREA} at (217,0) size 227x26 [bgcolor=#FFFFFF] [border: (1px solid #000000)] id="area"
-    RenderBlock at (3,3) size 221x10
+    RenderBlock {DIV} at (3,3) size 221x10
       RenderText {#text} at (0,0) size 20x10
         text run at (0,0) width 20: "xy"
 layer at (447,18) size 51x10
-  RenderBlock at (3,3) size 51x10 [color=#A9A9A9]
+  RenderBlock {DIV} at (3,3) size 51x10 [color=#A9A9A9]
     RenderText {#text} at (0,0) size 40x10
       text run at (0,0) width 40: "Name"
 layer at (447,18) size 51x10
-  RenderBlock at (3,3) size 51x10
+  RenderBlock {DIV} at (3,3) size 51x10
 )");
   }
 

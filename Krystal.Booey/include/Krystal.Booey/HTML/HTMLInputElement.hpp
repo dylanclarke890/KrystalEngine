@@ -473,6 +473,8 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *SliderThumbElement() const noexcept;
+    KRYS_NODISCARD HTMLElement *SliderTrackElement() const noexcept;
     KRYS_NODISCARD HTMLElement *ResultsButtonElement() const noexcept;
     KRYS_NODISCARD HTMLElement *CancelButtonElement() const noexcept;
     KRYS_NODISCARD HTMLElement *PlaceholderElement() const noexcept final;

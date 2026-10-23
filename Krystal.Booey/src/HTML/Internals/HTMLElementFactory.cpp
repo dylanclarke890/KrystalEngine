@@ -292,7 +292,7 @@ namespace krys::boo::html
       }
       case TagName::meter:
       {
-        return CreateRefPtr<HTMLMeterElement>(document);
+        return HTMLMeterElement::Create(document);
       }
       case TagName::object:
       {
@@ -328,7 +328,7 @@ namespace krys::boo::html
       }
       case TagName::progress:
       {
-        return CreateRefPtr<HTMLProgressElement>(document);
+        return HTMLProgressElement::Create(document);
       }
       case TagName::script:
       {
