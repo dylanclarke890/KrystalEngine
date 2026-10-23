@@ -92,9 +92,17 @@ namespace krys::boo::html
 
     keyboardEvent.SetDefaultHandled();
 
-    int index = _typeAhead.HandleEvent(keyboardEvent, {TypeAhead::MatchMode::MatchPrefix,
+    constexpr EnumSet<TypeAhead::MatchMode> matchMode {TypeAhead::MatchMode::MatchPrefix,
                                                        TypeAhead::MatchMode::CycleFirstChar,
-                                                       TypeAhead::MatchMode::MatchIndex});
+                                                       TypeAhead::MatchMode::MatchIndex};
+    int index = _typeAhead.HandleEvent(keyboardEvent, matchMode);
+    if (index < 0)
+    {
+      // A field has few names: when what was typed matches none of them (`a` then `p` for AM and PM), the key
+      // starts again by itself.
+      _typeAhead.ResetSession();
+      index = _typeAhead.HandleEvent(keyboardEvent, matchMode);
+    }
     if (index < 0)
     {
       return;

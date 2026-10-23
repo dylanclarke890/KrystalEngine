@@ -1064,6 +1064,13 @@ namespace krys::ui::tests
     view.MousePressed(onEarly, pal::MouseButton::Left);
     view.MouseReleased(onEarly, pal::MouseButton::Left);
     REQUIRE(view.ShownOverlay() == picker);
+    // Hovering a day of the next month highlights it without turning the page.
+    auto next = days.QuerySelector(u8"[data-value='" + DayValue(u8"2026-04-02") + u8"']");
+    REQUIRE_FALSE(next.HasException());
+    REQUIRE(next.Value());
+    view.MouseMoved(CentreOf(*next.Value(), picker->Rect().Location()));
+    CHECK(picker->HighlightedValue() == u8"2026-04-02");
+    CHECK(days.QuerySelector(u8"[data-value='" + DayValue(u8"2026-03-01") + u8"']").Value());
     auto day = days.QuerySelector(u8"[data-value='" + DayValue(u8"2026-03-20") + u8"']");
     REQUIRE_FALSE(day.HasException());
     REQUIRE(day.Value());

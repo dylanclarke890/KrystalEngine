@@ -361,6 +361,13 @@ namespace krys::boo::tests
       CHECK(time.Value() == u8"21:15");
       CHECK(fixture.Press(u8"Down"));
       CHECK(time.Value() == u8"09:15");
+      // Typing quickly switches back and forth: what was typed before doesn't stick.
+      CHECK(fixture.Type(u8"p", 0));
+      CHECK(time.Value() == u8"21:15");
+      CHECK(fixture.Type(u8"a", 0));
+      CHECK(time.Value() == u8"09:15");
+      CHECK(fixture.Type(u8"p", 0));
+      CHECK(time.Value() == u8"21:15");
     }
 
     SECTION("24 hour clocks")

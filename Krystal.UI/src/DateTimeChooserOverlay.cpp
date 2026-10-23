@@ -454,6 +454,11 @@ namespace krys::ui
       return;
     }
 
+    MoveHighlight(value);
+  }
+
+  void DateTimeChooserOverlay::MoveHighlight(int32 value) noexcept
+  {
     SetHighlightedClass(_highlighted, false);
     _highlighted = value;
     SetHighlightedClass(_highlighted, true);
@@ -502,9 +507,11 @@ namespace krys::ui
     }
     if (auto *cell = ElementWithAttributeAt(*_view, point, u8"data-value"))
     {
+      // The days of the months either side are shown too: hovering one highlights it without turning the
+      // page, which would move the days under the mouse.
       if (auto value = ParseInteger(*cell->GetAttribute(u8"data-value")); value && IsEnabled(*value))
       {
-        Highlight(*value);
+        MoveHighlight(*value);
       }
     }
   }

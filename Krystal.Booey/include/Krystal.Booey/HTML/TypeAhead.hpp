@@ -46,5 +46,13 @@ namespace krys::boo::html
 
     /// @return The index of the matching option, or -1 if none matches.
     KRYS_NODISCARD int32 HandleEvent(dom::KeyboardEvent &event, EnumSet<MatchMode> matchMode) noexcept;
+
+    /// @brief Forgets what was typed, so the next key starts a new search.
+    void ResetSession() noexcept
+    {
+      _lastTypeTime = {};
+      _repeatingChar = 0;
+      _buffer.clear();
+    }
   };
 }

@@ -116,7 +116,10 @@ namespace krys::ui
   private:
     /// @brief Fills the picker's page with the page of days or months shown, and places it.
     void Build() noexcept;
+    /// @brief Highlights @p value, turning the page to it if it's on another.
     void Highlight(int32 value) noexcept;
+    /// @brief Highlights @p value on the page shown.
+    void MoveHighlight(int32 value) noexcept;
     void SetHighlightedClass(int32 value, bool on) noexcept;
     void Choose(int32 value) noexcept;
     /// @brief Turns the page by @p pages, keeping the highlight on it.
