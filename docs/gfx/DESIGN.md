@@ -311,6 +311,8 @@ All done in G1 (2026-10-17) unless noted.
 | G13 | Selection and carets: positions, the frame's selection painted, the mouse and keyboard selecting, the DOM's `Selection`, carets in editable content. In four parts (see *G13 plan*); G13a, positions, is done (2026-10-21), and so is G13b, the selection painted and the mouse (2026-10-22), and so is G13c, the keyboard, the DOM's `Selection` and copying (2026-10-22), and so is G13d, carets (2026-10-22), which completes G13. | Text selects with the mouse and keyboard and paints selected as Chrome does; `contenteditable` shows a blinking caret the arrows move. |
 | G14 | Editing and form controls: editing commands (typing, deleting, line breaks, undo, cut and paste) in editable content, form behaviour (owners, validity, submission to the host), text fields, and the other controls drawn by a theme. In four parts (see *G14 plan*); G14a, editing commands, G14b, forms, and G14c, text fields, are done, and so are G14d1, the theme, G14d2, ranges, progress and meters (2026-10-22), G14d3, `<select>`, and G14d4, dates and colours (2026-10-23), which completes G14. | Text can be typed, deleted, undone and pasted in `contenteditable`, `<input>` and `<textarea>`; checkboxes, radios, buttons, sliders and selects work and paint as a theme draws them; a form's submission reaches the host. |
 
+G14 ends the redesign's slices; Booey's remaining work continues in `docs/booey/ROADMAP.md` (B1 onwards).
+
 ### G2 parts
 
 Decided (2026-10-18): one part at a time, each reviewed before the next. Revised the same day after G2b: the API follows `GraphicsContext` and general shapes go through coverage masks (see *Layer 2*), so borders and shadows are no longer Render2D parts of their own.
