@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 namespace krys::boo::dom
@@ -11,6 +14,22 @@ namespace krys::boo::dom
   {
     krys_debug_assert(!_beforePseudoElement);
     krys_debug_assert(!_afterPseudoElement);
+  }
+
+  void ElementRareData::SetCustomElementReactionQueue(
+    UniquePtr<html::CustomElementReactionQueue> &&queue) noexcept
+  {
+    _customElementReactionQueue = krys::move(queue);
+  }
+
+  void ElementRareData::SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept
+  {
+    _customElement = krys::move(customElement);
+  }
+
+  void ElementRareData::SetCustomStateSet(RefPtr<html::CustomStateSet> &&customStateSet) noexcept
+  {
+    _customStateSet = krys::move(customStateSet);
   }
 
   void ElementRareData::SetComputedStyle(UniquePtr<RenderStyle> style) noexcept

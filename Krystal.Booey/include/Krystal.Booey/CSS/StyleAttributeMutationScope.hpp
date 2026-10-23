@@ -23,6 +23,7 @@ namespace krys::boo::css
   private:
     RefPtr<dom::Element> _element;
     Maybe<dom::DOMString> _oldValue;
+    bool _isCustomElement {false};
     bool _shouldDeliver {false};
 
   public:

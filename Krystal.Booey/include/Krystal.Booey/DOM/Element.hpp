@@ -56,7 +56,11 @@ namespace krys::boo::style
 
 namespace krys::boo::html
 {
+  class CustomElement;
+  class CustomElementInterface;
+  class CustomElementReactionQueue;
   class CustomElementRegistry;
+  class CustomStateSet;
   class HTMLElementStack;
   class HTMLSlotElement;
   class HTMLTreeBuilder;
@@ -489,6 +493,53 @@ namespace krys::boo::dom
     {
       return _customElementState;
     }
+
+#pragma region Custom elements
+
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom
+    KRYS_NODISCARD bool IsDefinedCustomElement() const noexcept
+    {
+      return _customElementState == CustomElementState::Custom;
+    }
+
+    /// @brief Whether the element waits for a definition to upgrade it (its state is `undefined`).
+    KRYS_NODISCARD bool IsCustomElementUpgradeCandidate() const noexcept
+    {
+      return _customElementState == CustomElementState::Undefined;
+    }
+
+    KRYS_NODISCARD bool IsPrecustomizedOrDefinedCustomElement() const noexcept
+    {
+      return _customElementState == CustomElementState::Precustomized
+             || _customElementState == CustomElementState::Custom;
+    }
+
+    /// @brief The behaviour of the custom element, created by its definition; null unless the element is
+    /// defined.
+    KRYS_NODISCARD html::CustomElement *GetCustomElement() const noexcept;
+
+    /// @brief The element's custom element reaction queue, which holds the definition it's defined by or is
+    /// to be upgraded to; null if it has neither.
+    /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
+    KRYS_NODISCARD html::CustomElementReactionQueue *ReactionQueue() const noexcept;
+
+    void SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept;
+    void SetIsFailedCustomElement() noexcept;
+    void SetIsFailedCustomElementWithoutClearingReactionQueue() noexcept;
+    void SetIsPrecustomizedCustomElement() noexcept;
+    void ClearReactionQueueFromFailedCustomElement() noexcept;
+    void SetIsCustomElementUpgradeCandidate() noexcept;
+    void EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept;
+    void SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept;
+    void SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept;
+
+    /// @brief Whether the element's custom states include @p state, as `:state()` matches.
+    KRYS_NODISCARD bool HasCustomState(DOMStringAtom state) const noexcept;
+
+    /// @brief The element's custom states, created if it has none.
+    KRYS_NODISCARD html::CustomStateSet &EnsureCustomStateSet() noexcept;
+
+#pragma endregion
 
     /// @brief Writes attributes that are updated lazily (the `style` attribute after a change to the inline
     /// style) back to the attribute list. Everything that reads the attribute list calls this first.
@@ -1087,6 +1138,8 @@ namespace krys::boo::dom
 
   private:
     KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
+
+    void SetCustomElementState(CustomElementState state) noexcept;
 
     KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;
     KRYS_NODISCARD bool IsUserActionElementActive() const noexcept;

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -66,6 +67,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
     void Value(DOMString &&value) noexcept
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
     }
 
@@ -100,6 +102,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
       return {};
     }
@@ -113,6 +116,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
       return {};
     }

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
@@ -21,8 +23,8 @@ namespace krys::boo::html
     return nullptr;
   }
 
-  CustomElementDefinition *CustomElementAlgorithms::LookupCustomElementDefinition(
-    CustomElementRegistry *registry, dom::DOMStringAtom namespaceURI, dom::DOMStringAtom is) noexcept
+  CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
+    CustomElementRegistry *registry, dom::DOMStringAtom namespaceURI, dom::DOMStringAtom localName) noexcept
   {
     if (registry == nullptr)
     {
@@ -34,8 +36,26 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    // TODO(impl): CUSTOM-ELEMENTS
-    (void)is;
-    krys_not_implemented();
+    return registry->FindInterface(localName);
+  }
+
+  CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(dom::Node &node) noexcept
+  {
+    if (auto *element = DynamicDowncast<dom::Element>(node))
+    {
+      return element->CustomElementRegistry().get();
+    }
+
+    if (auto *document = DynamicDowncast<dom::Document>(node))
+    {
+      return document->CustomElementRegistry().get();
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(node))
+    {
+      return shadowRoot->CustomElementRegistry().get();
+    }
+
+    return nullptr;
   }
 }

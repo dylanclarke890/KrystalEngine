@@ -15,6 +15,13 @@ namespace krys::boo
   class RenderStyle;
 }
 
+namespace krys::boo::html
+{
+  class CustomElement;
+  class CustomElementReactionQueue;
+  class CustomStateSet;
+}
+
 namespace krys::boo::dom
 {
   class PseudoElement;
@@ -42,10 +49,34 @@ namespace krys::boo::dom
     HashMap<Maybe<style::PseudoElementIdentifier>, UniquePtr<ElementAnimationRareData>,
             PseudoElementIdentifierHash>
       _animationRareData;
+    UniquePtr<html::CustomElementReactionQueue> _customElementReactionQueue;
+    UniquePtr<html::CustomElement> _customElement;
+    RefPtr<html::CustomStateSet> _customStateSet;
 
   public:
     ElementRareData() noexcept;
     ~ElementRareData() noexcept;
+
+    KRYS_NODISCARD html::CustomElementReactionQueue *CustomElementReactionQueue() const noexcept
+    {
+      return _customElementReactionQueue.get();
+    }
+
+    void SetCustomElementReactionQueue(UniquePtr<html::CustomElementReactionQueue> &&queue) noexcept;
+
+    KRYS_NODISCARD html::CustomElement *CustomElement() const noexcept
+    {
+      return _customElement.get();
+    }
+
+    void SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept;
+
+    KRYS_NODISCARD html::CustomStateSet *CustomStateSet() const noexcept
+    {
+      return _customStateSet.get();
+    }
+
+    void SetCustomStateSet(RefPtr<html::CustomStateSet> &&customStateSet) noexcept;
 
     /// @brief The element's index among its parent's element children, plus one, cached by selector matching
     /// (zero if unknown).

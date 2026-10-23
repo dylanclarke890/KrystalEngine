@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include <algorithm>
@@ -504,6 +505,7 @@ namespace krys::boo
 
   void DOMSelection::DeleteFromDocument() noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto *frame = Frame();
     if (!frame)
     {

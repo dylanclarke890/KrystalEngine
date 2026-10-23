@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Region.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
@@ -92,6 +93,16 @@ namespace krys::ui
     /// @brief Whether a button was held as the overlay opened: its release goes to the page.
     bool _pageOwnsPress {false};
 
+    /// @brief A custom element definition the view gives each document it loads.
+    struct CustomElementDefinition
+    {
+      boo::dom::DOMStringAtom Name;
+      boo::html::CustomElementFactory Factory;
+      boo::html::CustomElementOptions Options;
+    };
+
+    List<CustomElementDefinition> _customElements;
+
     // FIXME: The system's double click time and distance, once the host reports them.
     static constexpr std::chrono::milliseconds DoubleClickTime {500};
     static constexpr int32 DoubleClickDistance {2};
@@ -111,6 +122,14 @@ namespace krys::ui
     /// @param cachePolicy As for `LoadHTML`.
     KRYS_NODISCARD Expected<void> LoadFile(const std::filesystem::path &path,
                                            boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept;
+
+    /// @brief Defines @p name as a custom element, whose behaviour @p factory creates, in every document the
+    /// view loads (before it's parsed, so its parser creates the elements) and in the current one (whose
+    /// elements of that name are upgraded).
+    /// @return An error if @p name isn't a valid custom element name or the view already defines it.
+    KRYS_NODISCARD Expected<void>
+      DefineCustomElement(boo::dom::DOMStringAtom name, boo::html::CustomElementFactory &&factory,
+                          boo::html::CustomElementOptions &&options = {}) noexcept;
 
     /// @brief Registers the font files (`.ttf`, `.otf`, `.ttc`, `.otc`) in @p directory for every page, so
     /// `font-family` finds them by name; documents already loaded pick them up at their next update.

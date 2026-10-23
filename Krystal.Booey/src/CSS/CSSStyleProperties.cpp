@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -345,6 +346,7 @@ namespace krys::boo::css
 
   dom::ExceptionOr<void> PropertySetCSSStyleProperties::SetCssText(const CSSOMString &text) noexcept
   {
+    html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
     if (!WillMutate())
     {
@@ -407,6 +409,7 @@ namespace krys::boo::css
                                                                     const CSSOMString &value,
                                                                     const CSSOMString &priority) noexcept
   {
+    html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
 
     auto property = PropertyIdFromName(propertyName);
@@ -456,6 +459,7 @@ namespace krys::boo::css
   dom::ExceptionOr<CSSOMString>
     PropertySetCSSStyleProperties::RemoveProperty(const CSSOMString &propertyName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     StyleAttributeMutationScope mutationScope {ParentElement()};
     auto property = PropertyIdFromName(propertyName);
     if (IsCustomPropertyName(propertyName))

@@ -1450,9 +1450,7 @@ namespace krys::boo::css
 
           return true;
         }
-        case SelectorPseudoClass::State:
-          // FIXME: Custom states (ElementInternals.states).
-          return false;
+        case SelectorPseudoClass::State: return element.HasCustomState(selector.Argument());
         case SelectorPseudoClass::Host:
         {
           if (!context.MustMatchHostPseudoClass)

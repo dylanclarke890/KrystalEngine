@@ -114,6 +114,13 @@ tr:hover td { text-decoration: underline; }
 .order .pickup { margin: 6px 0 0; }
 .order .pickup label { display: inline-block; margin-right: 12px; }
 .order .pickup input { font: inherit; vertical-align: middle; }
+.order .rating { margin: 6px 0 0; }
+.order .rating label { display: inline-block; }
+.order bean-rating { vertical-align: middle; margin: 0 6px; }
+.order .rating .unrated { color: #ef476f; }
+.order .rating .rated { display: none; color: #06a77d; font-weight: bold; }
+.order bean-rating:state(rated) + .unrated { display: none; }
+.order bean-rating:state(rated) ~ .rated { display: inline; }
 .order input:checked + span { color: #06a77d; font-weight: bold; }
 .order button { margin: 10px 8px 0 0; padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5;
   color: #ffffff; font: inherit; cursor: pointer; }

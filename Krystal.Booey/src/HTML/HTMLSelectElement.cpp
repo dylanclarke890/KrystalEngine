@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
@@ -217,6 +218,7 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLSelectElement::Add(const OptionOrOptGroupElement &element,
                                                 const Maybe<HTMLElementOrInt> &before) noexcept
   {
+    CEReactionsScope ceReactions;
     RefPtr<HTMLElement> beforeElement;
     Ref<dom::ContainerNode> parent = ShareRef<dom::ContainerNode>(*this);
     if (before)
@@ -253,6 +255,7 @@ namespace krys::boo::html
 
   void HTMLSelectElement::Remove(int32 optionIndex) noexcept
   {
+    CEReactionsScope ceReactions;
     int32 listIndex = OptionToListIndex(optionIndex);
     if (listIndex < 0)
     {
@@ -469,6 +472,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLSelectElement::SetItem(uint32 index, HTMLOptionElement *option) noexcept
   {
+    CEReactionsScope ceReactions;
     if (!option)
     {
       Remove(static_cast<int32>(index));
@@ -517,6 +521,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLSelectElement::Length(uint32 newLength) noexcept
   {
+    CEReactionsScope ceReactions;
     // If we are adding options, we should check 'index > MaxSelectItems' first to avoid integer overflow.
     if (newLength > Length() && newLength > MaxSelectItems)
     {

@@ -1770,6 +1770,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/TypeAhead.hpp
   include/Krystal.Booey/HTML/URLInputType.hpp
   include/Krystal.Booey/HTML/ValidatedFormListedElement.hpp
+  include/Krystal.Booey/HTML/ValidityStateFlags.hpp
   include/Krystal.Booey/HTML/WeekInputType.hpp
   include/Krystal.Booey/Loader/FormSubmission.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
@@ -3166,6 +3167,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/DOMImplementation.hpp
       include/Krystal.Booey/DOM/DOMTokenList.hpp
       include/Krystal.Booey/DOM/Element.hpp
+      include/Krystal.Booey/DOM/EventListenerHandle.hpp
       include/Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp
       include/Krystal.Booey/DOM/Enums/CustomElementState.hpp
       include/Krystal.Booey/DOM/Enums/DocumentFlags.hpp
@@ -3286,13 +3288,16 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Attributes/Reflection.hpp
       include/Krystal.Booey/HTML/Attributes/States/CORSSettingsState.hpp
       include/Krystal.Booey/HTML/Attributes/States/TranslateState.hpp
-      include/Krystal.Booey/HTML/CustomElement/CustomElementConstructor.hpp
-      include/Krystal.Booey/HTML/CustomElement/CustomElementDefinition.hpp
+      include/Krystal.Booey/HTML/CustomElement/CustomElement.hpp
+      include/Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp
+      include/Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
-      include/Krystal.Booey/HTML/CustomElement/ElementDefinitionOptions.hpp
       include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
+      include/Krystal.Booey/HTML/CustomElementFormValue.hpp
+      include/Krystal.Booey/HTML/CustomStateSet.hpp
       include/Krystal.Booey/HTML/ElementInternals.hpp
+      include/Krystal.Booey/HTML/FormAssociatedCustomElement.hpp
       include/Krystal.Booey/HTML/EventLoop.hpp
       include/Krystal.Booey/HTML/Enums/AttributeState.hpp
       include/Krystal.Booey/HTML/Enums/CanPlayTypeResult.hpp
@@ -3346,6 +3351,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLLinkElement.hpp
       include/Krystal.Booey/HTML/HTMLMapElement.hpp
       include/Krystal.Booey/HTML/HTMLMarqueeElement.hpp
+      include/Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp
       include/Krystal.Booey/HTML/HTMLMediaElement.hpp
       include/Krystal.Booey/HTML/HTMLMenuElement.hpp
       include/Krystal.Booey/HTML/HTMLMetaElement.hpp
@@ -3385,7 +3391,6 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLUnknownElement.hpp
       include/Krystal.Booey/HTML/HTMLVideoElement.hpp
       include/Krystal.Booey/HTML/Internals/AttributeDefinition.hpp
-      include/Krystal.Booey/HTML/Internals/CustomElementFactory.hpp
       include/Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp
       include/Krystal.Booey/HTML/Internals/PresentationalHints.hpp
       include/Krystal.Booey/HTML/MicroParsers/MicroParserError.hpp
@@ -3566,6 +3571,7 @@ target_sources(Krystal.Booey
     src/DOM/DOMTokenList.cpp
     src/DOM/Element.cpp
     src/DOM/Event.cpp
+    src/DOM/EventListenerHandle.cpp
     src/DOM/EventTarget.cpp
     src/DOM/InlineStyleSheetOwner.cpp
     src/DOM/Internals/ElementFactory.cpp
@@ -3635,7 +3641,13 @@ target_sources(Krystal.Booey
     src/HTML/Algorithms/CustomElementAlgorithms.cpp
     src/HTML/Algorithms/FormControlAlgorithms.cpp
     src/HTML/Algorithms/RenderBlocking.cpp
+    src/HTML/CustomElement/CustomElementInterface.cpp
+    src/HTML/CustomElement/CustomElementReactionQueue.cpp
+    src/HTML/CustomElement/CustomElementRegistry.cpp
+    src/HTML/CustomStateSet.cpp
+    src/HTML/ElementInternals.cpp
     src/HTML/EventLoop.cpp
+    src/HTML/FormAssociatedCustomElement.cpp
     src/HTML/HTMLAnchorElement.cpp
     src/HTML/HTMLAreaElement.cpp
     src/HTML/HTMLAudioElement.cpp
@@ -3670,6 +3682,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLLinkElement.cpp
     src/HTML/HTMLMapElement.cpp
     src/HTML/HTMLMarqueeElement.cpp
+    src/HTML/HTMLMaybeFormAssociatedCustomElement.cpp
     src/HTML/HTMLMediaElement.cpp
     src/HTML/HTMLMenuElement.cpp
     src/HTML/HTMLMetaElement.cpp
@@ -3708,7 +3721,6 @@ target_sources(Krystal.Booey
     src/HTML/HTMLUListElement.cpp
     src/HTML/HTMLUnknownElement.cpp
     src/HTML/HTMLVideoElement.cpp
-    src/HTML/Internals/CustomElementFactory.cpp
     src/HTML/Internals/HTMLElementFactory.cpp
     src/HTML/Parser/HTMLDocumentParser.cpp
     src/HTML/Parser/HTMLElementStack.cpp

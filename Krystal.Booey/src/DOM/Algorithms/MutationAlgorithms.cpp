@@ -11,6 +11,8 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
 
@@ -349,23 +351,29 @@ namespace krys::boo::dom
 
         if (auto *element = DynamicDowncast<Element>(inclusiveDescendant))
         {
-          // TODO(impl): CUSTOM-ELEMENTS
-          // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
-          // non-null:
-          // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
-          // inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped
-          // document set.
-          // If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
-          // inclusiveDescendant, callback name "connectedCallback", and « ».
-          // Otherwise, try to upgrade inclusiveDescendant.
+          if (auto registry = element->CustomElementRegistry())
+          {
+            if (registry->IsScoped())
+            {
+              registry->AppendToScopedDocumentSet(element->NodeDocument());
+            }
+
+            if (element->IsDefinedCustomElement())
+            {
+              html::CustomElementReactionQueue::EnqueueConnectedCallbackIfNeeded(*element);
+            }
+            else if (element->IsCustomElementUpgradeCandidate())
+            {
+              html::CustomElementReactionQueue::TryToUpgradeElement(*element);
+            }
+          }
         }
         else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
         {
-          // TODO(impl): CUSTOM-ELEMENTS
-          // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
-          // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
-          // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
-          // registry’s scoped document set.
+          if (auto registry = shadowRoot->CustomElementRegistry(); registry && registry->IsScoped())
+          {
+            registry->AppendToScopedDocumentSet(shadowRoot->NodeDocument());
+          }
         }
       }
     }
@@ -575,9 +583,11 @@ namespace krys::boo::dom
         auto isSubtreeRoot = &inclusiveDescendant == &node;
         ExtensibilityHooks::NodeMoved(inclusiveDescendant, isSubtreeRoot, oldParent);
 
-        // TODO(impl): CUSTOM-ELEMENTS
-        // If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
-        // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
+        if (auto *element = DynamicDowncast<Element>(inclusiveDescendant);
+            element && element->IsDefinedCustomElement() && newParent.IsConnected())
+        {
+          html::CustomElementReactionQueue::EnqueueConnectedMoveCallbackIfNeeded(*element);
+        }
       }
     }
 
@@ -841,17 +851,21 @@ namespace krys::boo::dom
 
       ExtensibilityHooks::NodeRemoved(node, true, parent);
 
-      // TODO(impl): CUSTOM-ELEMENTS
-      // bool isParentConnected = parent.IsConnected();
-      // if node is custom and isParentConnected is true, then enqueue a custom element callback
-      // reaction with node, callback name "disconnectedCallback", and « ».
+      bool isParentConnected = parent.IsConnected();
+      if (auto *element = DynamicDowncast<Element>(node);
+          element && element->IsDefinedCustomElement() && isParentConnected)
+      {
+        html::CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(*element);
+      }
 
       for (auto &descendant : ShadowIncludingDescendantRange(node))
       {
         ExtensibilityHooks::NodeRemoved(descendant, false, parent);
-        // TODO(impl): CUSTOM-ELEMENTS
-        // If descendant is custom and isParentConnected is true, then enqueue a custom element callback
-        // reaction with descendant, callback name "disconnectedCallback", and « ».
+        if (auto *element = DynamicDowncast<Element>(descendant);
+            element && element->IsDefinedCustomElement() && isParentConnected)
+        {
+          html::CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(*element);
+        }
       }
     }
 

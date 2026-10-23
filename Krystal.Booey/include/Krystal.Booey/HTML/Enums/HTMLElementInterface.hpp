@@ -39,6 +39,7 @@ namespace krys::boo::html
     LI,
     Map,
     Marquee,
+    MaybeFormAssociatedCustom,
     Media,
     Menu,
     Meta,
@@ -79,4 +80,4 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 69u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 70u);

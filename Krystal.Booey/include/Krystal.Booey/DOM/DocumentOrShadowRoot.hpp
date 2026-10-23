@@ -73,6 +73,8 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
     KRYS_NODISCARD RefPtr<html::CustomElementRegistry> CustomElementRegistry() const noexcept;
 
+    void SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept;
+
 #pragma endregion
 
 #pragma region DocumentOrShadowRoot Mixin (HTML) - https://html.spec.whatwg.org/#documentorshadowroot

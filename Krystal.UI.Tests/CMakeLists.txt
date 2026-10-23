@@ -24,10 +24,12 @@ target_compile_options(Krystal.UI.Tests
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
 )
 
-# The GPU tests use Krystal.Gfx.Tests' test device (header-only).
+# The GPU tests use Krystal.Gfx.Tests' test device (header-only), and the editor page's tests its custom
+# elements (header-only).
 target_include_directories(Krystal.UI.Tests
   PRIVATE
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/include
+    ${CMAKE_SOURCE_DIR}/Krystal.Editor/include
 )
 
 target_compile_definitions(Krystal.UI.Tests

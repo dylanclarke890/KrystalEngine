@@ -28,7 +28,9 @@ namespace krys::boo::dom
                                                    const EventTarget &eventTarget) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#add-an-event-listener
-    static void AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept;
+    /// @return Whether @p listener was added: not if its signal is aborted, it has no callback, or an equal
+    /// listener is already registered.
+    static bool AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#remove-an-event-listener
     static void RemoveEventListener(EventTarget &eventTarget, EventListener &listener) noexcept;

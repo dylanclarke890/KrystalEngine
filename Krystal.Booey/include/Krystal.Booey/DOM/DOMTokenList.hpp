@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -80,6 +81,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-add
     ExceptionOr<void> Add(const List<DOMString> &tokens) noexcept
     {
+      html::CEReactionsScope ceReactions;
       for (auto &token : tokens)
       {
         if (auto result = ValidateToken(token); result.HasException())
@@ -110,6 +112,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-remove
     ExceptionOr<void> Remove(const List<DOMString> &tokens) noexcept
     {
+      html::CEReactionsScope ceReactions;
       for (auto &token : tokens)
       {
         if (auto result = ValidateToken(token); result.HasException())
@@ -136,6 +139,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-toggle
     ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = null) noexcept
     {
+      html::CEReactionsScope ceReactions;
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();
@@ -168,6 +172,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-replace
     ExceptionOr<bool> Replace(const DOMString &token, const DOMString &newToken) noexcept
     {
+      html::CEReactionsScope ceReactions;
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();

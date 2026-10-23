@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::html
 {
@@ -70,6 +71,7 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLAnchorElement::Text(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     return dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 

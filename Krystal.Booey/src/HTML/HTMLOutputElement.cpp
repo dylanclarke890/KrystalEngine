@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::html
 {
@@ -48,6 +49,7 @@ namespace krys::boo::html
 
   void HTMLOutputElement::Value(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     _defaultValueOverride = DefaultValue();
     (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
@@ -59,6 +61,7 @@ namespace krys::boo::html
 
   void HTMLOutputElement::DefaultValue(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     if (!_defaultValueOverride)
     {
       (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <ranges>
 
@@ -54,16 +55,19 @@ namespace krys::boo::dom
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *_associatedElement);
     if (attr == nullptr)
     {
@@ -76,6 +80,7 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
                                                          DOMStringAtom localName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *_associatedElement);
     if (attr == nullptr)
     {

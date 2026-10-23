@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/FormDataEvent.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
@@ -265,6 +266,7 @@ namespace krys::boo::html
 
   void HTMLFormElement::Reset() noexcept
   {
+    CEReactionsScope ceReactions;
     if (_isInResetFunction)
     {
       return;

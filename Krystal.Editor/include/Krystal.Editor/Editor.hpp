@@ -4,7 +4,6 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
@@ -18,6 +17,7 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.Core/Utils/ScopedProfiler.hpp"
 #include "Krystal.Editor/Application.hpp"
+#include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
@@ -45,48 +45,6 @@ namespace krys
     BooeyScene,
   };
 
-  /// @brief Toggles `picked` on the card a click lands in.
-  struct CardPicker final : boo::dom::EventListenerCallback
-  {
-    void HandleEvent(boo::dom::Event &event) noexcept override
-    {
-      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-      auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-      if (!target)
-      {
-        return;
-      }
-      auto card = target->Closest(u8".card");
-      if (card.HasValue() && card.Value())
-      {
-        (void)card.Value()->ClassList().Toggle(boo::dom::DOMString(u8"picked"));
-      }
-    }
-  };
-
-  /// @brief Shows the `key` of each key pressed on the page in its `#last-key` element.
-  struct KeyLogger final : boo::dom::EventListenerCallback
-  {
-    void HandleEvent(boo::dom::Event &event) noexcept override
-    {
-      if (!event.IsKeyboardEvent())
-      {
-        return;
-      }
-      auto &keyboardEvent = static_cast<boo::dom::KeyboardEvent &>(event);
-      auto *node = DynamicDowncast<boo::dom::Node>(event.CurrentTarget().get());
-      if (!node)
-      {
-        return;
-      }
-      if (auto label = node->NodeDocument().GetElementById(u8"last-key"))
-      {
-        auto key = keyboardEvent.Key() == u8" " ? boo::dom::DOMString(u8"Space") : keyboardEvent.Key();
-        (void)label->TextContent(krys::move(key));
-      }
-    }
-  };
-
   class Editor : public Application
   {
   private:
@@ -101,6 +59,9 @@ namespace krys
     UniquePtr<gfx::FontFace2D> _font {};
     UniquePtr<gfx::FontFace2D> _boldFont {};
     UniquePtr<ui::View> _pageView {};
+    /// @brief The page's listeners, which go when the page is loaded again.
+    boo::dom::EventListenerHandle _cardPicker;
+    boo::dom::EventListenerHandle _keyLogger;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
     MonotonicTime::duration _pageTime {};
     /// @brief Counts the seconds the page has been open in its `#clock` element.
@@ -411,10 +372,35 @@ namespace krys
         _context->Logger->Error("{}", loaded.error());
         return;
       }
-      _pageView->Document().AddEventListener(boo::dom::DOMStringAtom(u8"click"), CreateRef<CardPicker>(),
-                                             false);
-      _pageView->Document().AddEventListener(boo::dom::DOMStringAtom(u8"keydown"), CreateRef<KeyLogger>(),
-                                             false);
+      auto &document = _pageView->Document();
+      // Toggles `picked` on the card a click lands in.
+      _cardPicker =
+        document.AddEventListener(u8"click",
+                                  [](boo::dom::Event &event)
+                                  {
+                                    auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+                                    auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+                                    if (!target)
+                                    {
+                                      return;
+                                    }
+                                    auto card = target->Closest(u8".card");
+                                    if (card.HasValue() && card.Value())
+                                    {
+                                      (void)card.Value()->ClassList().Toggle(boo::dom::DOMString(u8"picked"));
+                                    }
+                                  });
+      // Shows the `key` of each key pressed on the page in its `#last-key` element.
+      _keyLogger = document.AddEventListener<boo::dom::KeyboardEvent>(
+        u8"keydown",
+        [this](boo::dom::KeyboardEvent &event)
+        {
+          if (auto label = _pageView->Document().GetElementById(u8"last-key"))
+          {
+            auto key = event.Key() == u8" " ? boo::dom::DOMString(u8"Space") : event.Key();
+            (void)label->TextContent(krys::move(key));
+          }
+        });
       _context->Logger->Info("Loaded {}", path.string());
 
       _secondsOpen = 0;
@@ -449,6 +435,10 @@ namespace krys
       _pageView->SetFocused(_focused);
       _pageView->SetFormSubmissionHandler([this](const ui::FormSubmissionRequest &request)
                                           { ShowFormSubmission(request); });
+      // The page's custom elements, which its parser creates.
+      (void)_pageView->DefineCustomElement(
+        u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
+        BeanRating::Options());
       LoadPage();
       auto &database = boo::FontDatabase::Singleton();
       auto faces = database.FacesInFamily(u8"Liberation Sans");

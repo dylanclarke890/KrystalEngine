@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -216,6 +217,7 @@ namespace krys::boo::html
 
   void HTMLFieldSetElement::Disabled(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 

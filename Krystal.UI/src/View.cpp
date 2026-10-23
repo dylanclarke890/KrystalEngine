@@ -1,9 +1,11 @@
 ﻿#include "Krystal.UI/View.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
@@ -185,6 +187,14 @@ namespace krys::ui
     _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
     _needsPaint = true;
 
+    // The view's custom elements are defined before parsing, so the parser creates them as it goes.
+    for (auto &definition : _customElements)
+    {
+      (void)_document->CustomElementRegistry()->Define(definition.Name,
+                                                       boo::html::CustomElementFactory(definition.Factory),
+                                                       boo::html::CustomElementOptions(definition.Options));
+    }
+
     auto parser = CreateRef<boo::html::HTMLDocumentParser>(*_document);
     parser->InputStream().Append(krys::move(markup), boo::IsEOF(true));
     parser->PumpTokenizer();
@@ -207,6 +217,33 @@ namespace krys::ui
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
     LoadHTML(utf8_string(bytes.begin(), bytes.end()), boo::url::URL::FileURLWithFileSystemPath(absolutePath),
              cachePolicy);
+    return {};
+  }
+
+  Expected<void> View::DefineCustomElement(boo::dom::DOMStringAtom name,
+                                           boo::html::CustomElementFactory &&factory,
+                                           boo::html::CustomElementOptions &&options) noexcept
+  {
+    if (!boo::dom::NameValidation::IsValidCustomElementName(name.View()))
+    {
+      return Unexpected(std::format("{} isn't a valid custom element name",
+                                    std::string(name.View().begin(), name.View().end())));
+    }
+    for (auto &definition : _customElements)
+    {
+      if (definition.Name == name)
+      {
+        return Unexpected(
+          std::format("{} is already defined", std::string(name.View().begin(), name.View().end())));
+      }
+    }
+
+    auto &definition = _customElements.emplace_back(name, krys::move(factory), krys::move(options));
+    if (auto registry = _document->CustomElementRegistry())
+    {
+      (void)registry->Define(definition.Name, boo::html::CustomElementFactory(definition.Factory),
+                             boo::html::CustomElementOptions(definition.Options));
+    }
     return {};
   }
 

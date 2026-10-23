@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::css
@@ -30,9 +31,20 @@ namespace krys::boo::css
       return;
     }
 
-    // TODO(impl): CUSTOM-ELEMENT - also read the old value when the element is a defined custom element that
-    // observes the style attribute, and enqueue its attributeChangedCallback when the scope ends.
-    if (dom::MutationObserverAlgorithms::IsAttributeOldValueRequested(*_element, Attributes::Style))
+    bool shouldReadOldValue =
+      dom::MutationObserverAlgorithms::IsAttributeOldValueRequested(*_element, Attributes::Style);
+
+    if (_element->IsDefinedCustomElement()) KRYS_UNLIKELY
+    {
+      auto *reactionQueue = _element->ReactionQueue();
+      if (reactionQueue && reactionQueue->ObservesStyleAttribute())
+      {
+        _isCustomElement = true;
+        shouldReadOldValue = true;
+      }
+    }
+
+    if (shouldReadOldValue)
     {
       _oldValue = _element->GetAttribute(Attributes::Style);
     }
@@ -56,6 +68,16 @@ namespace krys::boo::css
     dom::MutationObserverAlgorithms::QueueMutationRecord(
       dom::MutationRecordType::Attributes, _element, Attributes::Style, dom::DOMStringAtom::Null(),
       _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
+
+    if (_isCustomElement)
+    {
+      auto newValue = _element->GetAttribute(Attributes::Style);
+      html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
+        *_element,
+        dom::QualifiedName(dom::DOMStringAtom::Null(), dom::DOMStringAtom::Null(), Attributes::Style),
+        _oldValue ? dom::DOMStringAtom(*_oldValue) : dom::DOMStringAtom::Null(),
+        newValue ? dom::DOMStringAtom(*newValue) : dom::DOMStringAtom::Null());
+    }
   }
 
   void StyleAttributeMutationScope::EnqueueMutationRecord() noexcept

@@ -84,7 +84,7 @@ namespace krys::boo::dom
     return false;
   }
 
-  void EventTargetAlgorithms::AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
+  bool EventTargetAlgorithms::AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
   {
     // SPEC-VIOLATION(DOM, SERVICE-WORKERS): service workers currently not supported.
     // "If eventTarget is a ServiceWorkerGlobalScope object, its service worker’s script resource’s has ever
@@ -93,12 +93,12 @@ namespace krys::boo::dom
 
     if (listener.Signal() != nullptr && listener.Signal()->Aborted())
     {
-      return;
+      return false;
     }
 
     if (listener.Callback() == nullptr)
     {
-      return;
+      return false;
     }
 
     if (!listener.Passive().has_value())
@@ -113,10 +113,11 @@ namespace krys::boo::dom
     };
 
     if (const auto &existing = std::ranges::find_if(eventTarget._eventListenerList, std::move(AlreadyExists));
-        existing == eventTarget._eventListenerList.end())
+        existing != eventTarget._eventListenerList.end())
     {
-      eventTarget._eventListenerList.push_back(ShareRef(listener));
+      return false;
     }
+    eventTarget._eventListenerList.push_back(ShareRef(listener));
 
     if (listener.Signal() != nullptr)
     {
@@ -133,6 +134,8 @@ namespace krys::boo::dom
         },
         *listener.Signal());
     }
+
+    return true;
   }
 
   void EventTargetAlgorithms::RemoveEventListener(EventTarget &eventTarget, EventListener &listener) noexcept

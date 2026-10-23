@@ -15,6 +15,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
@@ -200,6 +201,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::DeleteContents() noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Collapsed())
     {
       return {};
@@ -300,6 +302,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<DocumentFragment>> Range::ExtractContents() noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
 
     if (Collapsed())
@@ -595,6 +598,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::InsertNode(Node &node) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<ProcessingInstruction>(_start.Container.get()) || Is<Comment>(_start.Container.get())
         || (Is<Text>(_start.Container.get()) && _start.Container->ParentNode() == nullptr)
         || _start.Container == &node)
@@ -665,6 +669,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::SurroundContents(ContainerNode &newParent) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto IsPartiallyContainedNonTextNode = [&](const Node &node)
     {
       return !Is<Text>(node) && IsPartiallyContained(node);

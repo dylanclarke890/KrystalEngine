@@ -82,3 +82,10 @@ namespace krys::boo::dom
     WheelEvent(const PlatformWheelEvent &event, LocalFrameView *view, IsCancelable isCancelable) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::WheelEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsWheelEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

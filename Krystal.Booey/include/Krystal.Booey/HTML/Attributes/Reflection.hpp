@@ -646,9 +646,10 @@ namespace krys::boo::html
     KRYS_NODISCARD static Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // TODO(impl): ELEMENT-INTERNALS - the internals' ARIA attributes, with accessibility.
       (void)internals;
       (void)name;
+      return null;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#set-the-content-attribute

@@ -775,6 +775,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::UList;
     }
 
+    KRYS_NODISCARD bool IsHTMLMaybeFormAssociatedCustomElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::MaybeFormAssociatedCustom;
+    }
+
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLVideoElement() const noexcept

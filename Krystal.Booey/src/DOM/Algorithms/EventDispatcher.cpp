@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include <ranges>
 
@@ -422,7 +423,11 @@ namespace krys::boo::dom
       // TODO(impl): LOGGING - we should probably have some way to report exceptions that occur during event
       // listener invocations, even if we don't have JS objects or realms.
 
-      listener->Callback()->HandleEvent(event);
+      {
+        // The listener is host code, as script would be: the reactions of the methods it calls are its own.
+        html::CustomElementReactionStackSuspension suspension;
+        listener->Callback()->HandleEvent(event);
+      }
       event._inPassiveListener = false;
 
       // SPEC-VIOLATION(HTML): window/global objects currently not supported.

@@ -9,6 +9,9 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
@@ -153,9 +156,12 @@ namespace krys::boo::dom
       MutationRecordType::Attributes, ShareRef(element), attribute.LocalName(), attribute.NamespaceURI(),
       oldValue.has_value() ? DOMStringAtom(*oldValue) : DOMStringAtom::Null(), {}, {}, nullptr, nullptr);
 
-    // TODO(impl): CUSTOM-ELEMENT
-    // If element is custom, then enqueue a custom element callback reaction with element, callback name
-    // "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s namespace ».
+    if (element.IsDefinedCustomElement())
+    {
+      html::CustomElementReactionQueue::EnqueueAttributeChangedCallbackIfNeeded(
+        element, attribute.GetQualifiedName(), oldValue ? DOMStringAtom(*oldValue) : DOMStringAtom::Null(),
+        newValue ? DOMStringAtom(*newValue) : DOMStringAtom::Null());
+    }
 
     ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, newValue,
                                                 attribute.NamespaceURI());
@@ -356,13 +362,16 @@ namespace krys::boo::dom
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    // TODO(impl): CUSTOM-ELEMENTS
-    // If element’s local name is a valid custom element name, or element’s is value is non-null:
-    //   Let definition be the result of looking up a custom element definition given element’s custom element
-    //   registry, its namespace, its local name, and its is value.
-    //
-    //   If definition is non-null and definition’s disable shadow is true, then throw a "NotSupportedError"
-    //   DOMException.
+    // NOTE: customized built-in elements aren't supported, so an element's is value doesn't matter.
+    if (NameValidation::IsValidCustomElementName(element.LocalName().View()))
+    {
+      auto *definition = html::CustomElementAlgorithms::LookupCustomElementDefinition(
+        element.CustomElementRegistry().get(), element.NamespaceURI(), element.LocalName());
+      if (definition != nullptr && definition->IsShadowDisabled())
+      {
+        return Exception {ExceptionCode::NotSupportedError};
+      }
+    }
 
     if (TreeQueries::IsShadowHost(element))
     {

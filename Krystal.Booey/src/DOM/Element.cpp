@@ -38,7 +38,10 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -90,6 +93,128 @@ namespace krys::boo::dom
     }
     return *_elementRareData;
   }
+
+#pragma region Custom elements
+
+  void Element::SetCustomElementState(CustomElementState state) noexcept
+  {
+    style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::Defined,
+                                                           state == CustomElementState::Custom
+                                                             || state == CustomElementState::Uncustomized);
+    _customElementState = state;
+  }
+
+  html::CustomElement *Element::GetCustomElement() const noexcept
+  {
+    if (!_elementRareData || !IsDefinedCustomElement())
+    {
+      return nullptr;
+    }
+    return _elementRareData->CustomElement();
+  }
+
+  html::CustomElementReactionQueue *Element::ReactionQueue() const noexcept
+  {
+    if (!_elementRareData)
+    {
+      return nullptr;
+    }
+    return _elementRareData->CustomElementReactionQueue();
+  }
+
+  void Element::SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept
+  {
+    SetCustomElementState(CustomElementState::Custom);
+    auto &data = EnsureElementRareData();
+    if (!data.CustomElementReactionQueue())
+    {
+      data.SetCustomElementReactionQueue(CreateUnique<html::CustomElementReactionQueue>(elementInterface));
+    }
+  }
+
+  void Element::SetIsFailedCustomElement() noexcept
+  {
+    krys_debug_assert(IsHTMLUnknownElement());
+    SetIsFailedCustomElementWithoutClearingReactionQueue();
+    ClearReactionQueueFromFailedCustomElement();
+  }
+
+  void Element::SetIsFailedCustomElementWithoutClearingReactionQueue() noexcept
+  {
+    krys_debug_assert(_customElementState == CustomElementState::Undefined
+                      || _customElementState == CustomElementState::Precustomized);
+    SetCustomElementState(CustomElementState::Failed);
+  }
+
+  void Element::SetIsPrecustomizedCustomElement() noexcept
+  {
+    krys_debug_assert(_customElementState == CustomElementState::Failed);
+    SetCustomElementState(CustomElementState::Precustomized);
+  }
+
+  void Element::ClearReactionQueueFromFailedCustomElement() noexcept
+  {
+    krys_debug_assert(_customElementState == CustomElementState::Failed);
+    if (_elementRareData)
+    {
+      // Clear the queue instead of deleting it since this function can be called inside
+      // CustomElementReactionQueue::InvokeAll during upgrades.
+      if (auto *queue = _elementRareData->CustomElementReactionQueue())
+      {
+        queue->Clear();
+      }
+    }
+  }
+
+  void Element::SetIsCustomElementUpgradeCandidate() noexcept
+  {
+    krys_debug_assert(_customElementState == CustomElementState::Uncustomized);
+    SetCustomElementState(CustomElementState::Undefined);
+  }
+
+  void Element::EnqueueToUpgrade(html::CustomElementInterface &elementInterface) noexcept
+  {
+    krys_debug_assert(IsCustomElementUpgradeCandidate());
+    auto &data = EnsureElementRareData();
+    bool alreadyScheduledToUpgrade = data.CustomElementReactionQueue() != nullptr;
+    if (!alreadyScheduledToUpgrade)
+    {
+      data.SetCustomElementReactionQueue(CreateUnique<html::CustomElementReactionQueue>(elementInterface));
+    }
+    html::CustomElementReactionQueue::EnqueueElementUpgrade(*this, alreadyScheduledToUpgrade);
+  }
+
+  void Element::SetCustomElement(UniquePtr<html::CustomElement> &&customElement) noexcept
+  {
+    EnsureElementRareData().SetCustomElement(krys::move(customElement));
+  }
+
+  void Element::SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept
+  {
+    _customElementRegistry = krys::move(registry);
+  }
+
+  bool Element::HasCustomState(DOMStringAtom state) const noexcept
+  {
+    if (_elementRareData)
+    {
+      auto *customStates = _elementRareData->CustomStateSet();
+      return customStates && customStates->Has(state);
+    }
+    return false;
+  }
+
+  html::CustomStateSet &Element::EnsureCustomStateSet() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.CustomStateSet())
+    {
+      rareData.SetCustomStateSet(html::CustomStateSet::Create(*this));
+    }
+    return *rareData.CustomStateSet();
+  }
+
+#pragma endregion
 
   double
     Element::LookupCSSRandomBaseValue(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,
@@ -1329,6 +1454,7 @@ namespace krys::boo::dom
 
   void Element::Id(DOMString &&id) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"id", krys::move(id));
   }
 
@@ -1410,6 +1536,7 @@ namespace krys::boo::dom
 
   void Element::ClassName(DOMString &&className) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"class", krys::move(className));
   }
 
@@ -1430,6 +1557,7 @@ namespace krys::boo::dom
 
   void Element::Slot(DOMString &&slot) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*this, u8"slot", krys::move(slot));
   }
 
@@ -1485,6 +1613,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
@@ -1519,6 +1648,7 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
                                             DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto validateAndExtractResult =
       NameValidation::ValidateAndExtract(namespaceURI, qualifiedName, ValidateAndExtractContext::Attribute);
 
@@ -1539,16 +1669,19 @@ namespace krys::boo::dom
 
   void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::RemoveAttributeByName(qualifiedName, *this);
   }
 
   void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
   }
 
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
@@ -1620,16 +1753,19 @@ namespace krys::boo::dom
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (!std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a.get() == &attr; }))
     {
       return Exception {ExceptionCode::NotFoundError};
@@ -1749,6 +1885,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Element *> Element::InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, element); result.HasException())
     {
       return result.ReleaseException();
@@ -1759,6 +1896,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto textNode = CreateRef<Text>(NodeDocument(), krys::move(data));
     if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
     {
@@ -1784,6 +1922,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::TextContent(DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
@@ -1793,21 +1932,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::Before(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> Element::After(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> Element::Remove() noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Remove(*this);
   }
 
@@ -1871,21 +2014,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Element::MoveBefore(Node &node, Node *refChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 

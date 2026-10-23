@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::html
 {
@@ -17,6 +18,7 @@ namespace krys::boo::html
 
   void HTMLDialogElement::Open(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<bool>(*this, u8"open", krys::move(value));
   }
 

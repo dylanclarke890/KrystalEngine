@@ -34,6 +34,11 @@ namespace krys::boo::dom
     return _customElementRegistry;
   }
 
+  void DocumentOrShadowRoot::SetCustomElementRegistry(RefPtr<html::CustomElementRegistry> &&registry) noexcept
+  {
+    _customElementRegistry = krys::move(registry);
+  }
+
 #pragma endregion
 
 #pragma region DocumentOrShadowRoot Mixin (HTML)

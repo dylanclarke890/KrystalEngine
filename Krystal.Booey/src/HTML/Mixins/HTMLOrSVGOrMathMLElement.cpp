@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -69,6 +70,7 @@ namespace krys::boo::html::mixins
 
   void HTMLOrSVGOrMathMLElement::TabIndex(dom::Element &element, int32 value) noexcept
   {
+    CEReactionsScope ceReactions;
     auto string = std::to_string(value);
     dom::ElementAlgorithms::SetAttributeValue(element, u8"tabindex",
                                               dom::DOMString(string.begin(), string.end()));

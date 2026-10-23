@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
@@ -174,6 +175,7 @@ namespace krys::boo::html
 
   void HTMLOptionElement::Text(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Ref<HTMLOptionElement> protectedThis = ShareRef(*this);
 
     // Changing the text causes a recalc of a select's items, which will reset the selected index to the first
@@ -287,7 +289,8 @@ namespace krys::boo::html
       return;
     }
 
-    if (RefPtr<HTMLSelectElement> select = ShareRefPtr(HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::No)))
+    if (RefPtr<HTMLSelectElement> select = ShareRefPtr(
+          HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::No)))
     {
       _ownerSelect = select;
       select->SetRecalcListItems();

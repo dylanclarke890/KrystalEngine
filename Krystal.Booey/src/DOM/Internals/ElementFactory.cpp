@@ -3,11 +3,11 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementDefinition.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
-#include "Krystal.Booey/HTML/Internals/CustomElementFactory.hpp"
 #include "Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/MathML/Internals/MathMLElementFactory.hpp"
@@ -30,32 +30,40 @@ namespace krys::boo::dom
     }
 
     auto elementName = html::ParseTagName(krys::text::ToASCIILower(name.LocalName().View()));
-    if (name.NamespaceURI() == infra::Namespaces::HTML)
+    // NOTE: customized built-in elements aren't supported, so a definition is only looked up by the local
+    // name, and `is` doesn't make an element a custom element.
+    auto *definition = html::CustomElementAlgorithms::LookupCustomElementDefinition(
+      registry.value().get(), name.NamespaceURI(), name.LocalName());
+    if (definition != nullptr)
     {
-      result = html::CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
-                                                     registry.value().get());
-
-      if (result == nullptr)
+      if (synchronousCustomElements)
       {
-        result = html::HTMLElementFactory::TryCreate(document, elementName);
+        result = definition->ConstructElementWithFallback(document, *registry.value(), name);
       }
+      else
+      {
+        auto element = definition->CreateElement(document);
+        element->SetIsCustomElementUpgradeCandidate();
+        element->EnqueueToUpgrade(*definition);
+        result = element;
+      }
+    }
+    else if (name.NamespaceURI() == infra::Namespaces::HTML)
+    {
+      result = html::HTMLElementFactory::TryCreate(document, elementName);
 
-      bool isValidCustomElementName = NameValidation::IsValidCustomElementName(name.LocalName().View());
       if (result == nullptr)
       {
-        if (isValidCustomElementName)
+        if (NameValidation::IsValidCustomElementName(name.LocalName().View()))
         {
-          result = CreateRefPtr<html::HTMLElement>(document);
+          auto element = CreateRef<html::HTMLMaybeFormAssociatedCustomElement>(document, name.LocalName());
+          element->SetIsCustomElementUpgradeCandidate();
+          result = element;
         }
         else
         {
           result = CreateRefPtr<html::HTMLUnknownElement>(document);
         }
-      }
-
-      if (isValidCustomElementName || is != DOMStringAtom::Null())
-      {
-        result->_customElementState = CustomElementState::Undefined;
       }
     }
     else if (name.NamespaceURI() == infra::Namespaces::SVG)
@@ -79,6 +87,10 @@ namespace krys::boo::dom
 
     result->_qualifiedName = name;
     result->_customElementRegistry = registry.value();
+    if (registry.value() != nullptr && registry.value()->IsScoped())
+    {
+      registry.value()->AppendToScopedDocumentSet(document);
+    }
     result->_is = is;
 
     return AdoptRef(*result.release());

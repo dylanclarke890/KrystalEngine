@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/WrapContentsInDummySpanCommand.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -119,9 +120,13 @@ namespace krys::boo
       return;
     }
 
-    for (size_t i = _commands.size(); i; --i)
     {
-      _commands[i - 1]->DoUnapply();
+      // The custom element reactions of the commands' changes run once they're all made.
+      html::CEReactionsScope ceReactions;
+      for (size_t i = _commands.size(); i; --i)
+      {
+        _commands[i - 1]->DoUnapply();
+      }
     }
 
     if (addToUndoStack == AddToUndoStack::No)
@@ -160,10 +165,13 @@ namespace krys::boo
       return;
     }
 
-    for (size_t i = 0; i < _commands.size(); ++i)
     {
-      RefPtr<SimpleEditCommand> command = _commands[i];
-      command->DoReapply();
+      html::CEReactionsScope ceReactions;
+      for (size_t i = 0; i < _commands.size(); ++i)
+      {
+        RefPtr<SimpleEditCommand> command = _commands[i];
+        command->DoReapply();
+      }
     }
 
     _document->GetEditor().ReappliedEditing(*this);
@@ -257,7 +265,12 @@ namespace krys::boo
       return;
     }
 
-    DoApply();
+    {
+      // The custom element reactions of the command's changes run once they're all made, rather than after
+      // each of the DOM methods it calls.
+      html::CEReactionsScope ceReactions;
+      DoApply();
+    }
 
     DidApplyCommand();
     SetShouldRetainAutocorrectionIndicator(false);

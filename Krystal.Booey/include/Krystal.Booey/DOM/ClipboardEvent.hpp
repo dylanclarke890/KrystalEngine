@@ -30,3 +30,10 @@ namespace krys::boo::dom
     }
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::ClipboardEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsClipboardEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

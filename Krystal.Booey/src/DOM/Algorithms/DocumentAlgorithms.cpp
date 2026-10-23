@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 
 namespace krys::boo::dom
@@ -29,7 +30,7 @@ namespace krys::boo::dom
   {
     if (std::holds_alternative<ElementCreationOptions>(options))
     {
-      auto &dict = std::get<ElementCreationOptions>(options);
+      auto dict = std::get<ElementCreationOptions>(options);
       if (dict.CustomElementRegistry != nullptr && dict.Is != DOMStringAtom::Null())
       {
         return Exception {ExceptionCode::NotSupportedError};
@@ -39,6 +40,12 @@ namespace krys::boo::dom
           && dict.CustomElementRegistry != document.CustomElementRegistry())
       {
         return Exception {ExceptionCode::NotSupportedError};
+      }
+
+      // NOTE: a null registry is taken as one not given, which leaves the document's.
+      if (dict.CustomElementRegistry == nullptr)
+      {
+        dict.CustomElementRegistry = document.CustomElementRegistry();
       }
 
       return dict;
@@ -122,10 +129,14 @@ namespace krys::boo::dom
         }
       }
 
-      // TODO(impl): CUSTOM-ELEMENTS
-      // For each inclusiveDescendant of node’s shadow-including inclusive descendants that is custom, in
-      // shadow-including tree order: enqueue a custom element callback reaction with inclusiveDescendant,
-      // callback name "adoptedCallback", and « oldDocument, document ».
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
+      {
+        if (auto *element = DynamicDowncast<Element>(inclusiveDescendant);
+            element && element->IsDefinedCustomElement())
+        {
+          html::CustomElementReactionQueue::EnqueueAdoptedCallbackIfNeeded(*element, oldDocument, document);
+        }
+      }
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {

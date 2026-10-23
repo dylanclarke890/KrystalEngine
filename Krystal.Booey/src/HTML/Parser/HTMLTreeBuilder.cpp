@@ -7,7 +7,11 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
@@ -3832,10 +3836,10 @@ namespace krys::boo::html
 
     // SPEC(3): If the parser was not created as part of the HTML fragment parsing algorithm, then push a new
     // element queue onto element's relevant agent's custom element reactions stack.
+    Maybe<CustomElementReactionStack> reactionStack;
     if (!_context.has_value())
     {
-      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - push a new element queue onto
-      // element's relevant agent's custom element reactions stack.
+      reactionStack.emplace();
     }
 
     // SPEC(4): Insert element at insertionLocation.
@@ -3845,11 +3849,7 @@ namespace krys::boo::html
     // SPEC(5): If the parser was not created as part of the HTML fragment parsing algorithm, then pop the
     // element queue from element's relevant agent's custom element reactions stack, and invoke custom element
     // reactions in that queue.
-    if (!_context.has_value())
-    {
-      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - pop the element queue from element's
-      // relevant agent's custom element reactions stack, and invoke custom element reactions in that queue.
-    }
+    reactionStack.reset();
   }
 
   Ref<dom::Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token,
@@ -3925,25 +3925,31 @@ namespace krys::boo::html
       auto it = std::ranges::find_if(attributes,
                                      [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
 
-      return it != std::ranges::end(attributes) ? it->NameView() : dom::DOMStringAtom::Null();
+      return it != std::ranges::end(attributes) ? dom::DOMStringAtom(it->ValueView())
+                                                : dom::DOMStringAtom::Null();
     }();
 
-    RefPtr<CustomElementRegistry> registry = nullptr;
-    bool willExecuteScript = false;
+    // SPEC: Let registry be the result of looking up a custom element registry given intendedParent.
+    RefPtr<CustomElementRegistry> registry =
+      ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(intendedParent));
 
-    // TODO(CUSTOMELEMENTS): CreateElement - Let registry be the result of looking up a custom element
-    // registry given intendedParent.
-    // Let definition be the result of looking up a custom element definition given registry, namespace,
-    // localName, and is.
-    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
-    // HTML fragment parsing algorithm; otherwise false.
+    // SPEC: Let definition be the result of looking up a custom element definition given registry,
+    // namespace, localName, and is.
+    auto *definition =
+      CustomElementAlgorithms::LookupCustomElementDefinition(registry.get(), namespaceURI, name);
 
+    // SPEC: Let willExecuteScript be true if definition is non-null and the parser was not created as part
+    // of the HTML fragment parsing algorithm; otherwise false.
+    bool willExecuteScript = definition != nullptr && !_context.has_value();
+
+    Maybe<CustomElementReactionStack> reactionStack;
     if (willExecuteScript)
     {
-      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
-      // Increment document's throw-on-dynamic-markup-insertion counter.
-      // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
-      // Push a new element queue onto document's relevant agent's custom element reactions stack.
+      // FIXME: Increment document's throw-on-dynamic-markup-insertion counter, once there's document.write().
+      // SPEC: If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+      EventLoop::Current().PerformMicrotaskCheckpoint();
+      // SPEC: Push a new element queue onto document's relevant agent's custom element reactions stack.
+      reactionStack.emplace();
     }
 
     auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
@@ -3992,14 +3998,9 @@ namespace krys::boo::html
       }
     }
 
-    if (willExecuteScript)
-    {
-      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
-      // Let queue be the result of popping from document's relevant agent's custom element reactions stack.
-      // (This will be the same element queue as was pushed above.)
-      // Invoke custom element reactions in queue.
-      // Decrement document's throw-on-dynamic-markup-insertion counter.
-    }
+    // SPEC: If willExecuteScript is true: let queue be the result of popping from document's relevant
+    // agent's custom element reactions stack, and invoke custom element reactions in queue.
+    reactionStack.reset();
 
     // TODO(HTMLTREEBUILDER): CreateElement - xmlns attribute parse error
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the

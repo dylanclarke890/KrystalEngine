@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
@@ -10,7 +11,10 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
+#include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
@@ -21,6 +25,7 @@
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
@@ -216,6 +221,110 @@ namespace krys::ui::tests
     std::filesystem::remove(path);
 
     CHECK_FALSE(view.LoadFile(path).has_value());
+  }
+
+  TEST_CASE("View: defines custom elements in the pages it loads", "[UI]")
+  {
+    struct Counted : boo::html::CustomElement
+    {
+      int32 &Constructed;
+
+      Counted(boo::html::HTMLElement &element, int32 &constructed) noexcept
+          : CustomElement(element), Constructed(constructed)
+      {
+        ++Constructed;
+      }
+    };
+
+    int32 constructed = 0;
+    View view({200, 100});
+    view.LoadHTML(u8"<!DOCTYPE html><x-counter id=old></x-counter>");
+    REQUIRE(view
+              .DefineCustomElement(u8"x-counter", [&](boo::html::HTMLElement &element)
+                                   { return CreateUnique<Counted>(element, constructed); })
+              .has_value());
+    CHECK(view
+            .DefineCustomElement(u8"x-counter", [](boo::html::HTMLElement &)
+                                 { return UniquePtr<boo::html::CustomElement> {}; })
+            .error()
+          == "x-counter is already defined");
+    CHECK_FALSE(view
+                  .DefineCustomElement(u8"counter", [](boo::html::HTMLElement &)
+                                       { return UniquePtr<boo::html::CustomElement> {}; })
+                  .has_value());
+
+    // The current page's elements are upgraded.
+    CHECK(constructed == 1);
+    CHECK(view.Document().GetElementById(u8"old")->IsDefinedCustomElement());
+
+    // Pages loaded later create them as they're parsed.
+    view.LoadHTML(u8"<!DOCTYPE html><x-counter id=a></x-counter><x-counter id=b></x-counter>");
+    CHECK(constructed == 3);
+    CHECK(view.Document().GetElementById(u8"a")->IsDefinedCustomElement());
+    CHECK(view.Document().GetElementById(u8"b")->GetCustomElement() != nullptr);
+  }
+
+  TEST_CASE("View: the editor page's bean rating", "[UI]")
+  {
+    View view({1'200, 1'600});
+    REQUIRE(view
+              .DefineCustomElement(
+                u8"bean-rating", [](boo::html::HTMLElement &element)
+                { return CreateUnique<BeanRating>(element); }, BeanRating::Options())
+              .has_value());
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    view.UpdateRendering();
+
+    {
+      auto found = view.Document().QuerySelector(u8"bean-rating").ReleaseValue();
+      REQUIRE(found);
+      auto &rating = *found;
+      REQUIRE(dynamic_cast<BeanRating *>(rating.GetCustomElement()));
+      auto form = view.Document().QuerySelector(u8"form.order").ReleaseValue();
+      REQUIRE(form);
+      auto &orderForm = Downcast<boo::html::HTMLFormElement>(*form);
+      auto submitted = [&]
+      {
+        auto formData = boo::html::DOMFormData::Create(&orderForm, nullptr).ReleaseValue();
+        return formData->Get(u8"rating");
+      };
+
+      // Unrated, it's required.
+      CHECK_FALSE(rating.Matches(u8":state(rated)").ReleaseValue());
+      CHECK(rating.Matches(u8":invalid").ReleaseValue());
+      CHECK_FALSE(submitted().has_value());
+
+      // A click on the first bean rates it one.
+      auto box = rating.GetBoundingClientRect();
+      view.MousePressed({static_cast<int32>(box->X()) + 11, static_cast<int32>(box->Y() + box->Height() / 2)},
+                        pal::MouseButton::Left);
+      view.MouseReleased(
+        {static_cast<int32>(box->X()) + 11, static_cast<int32>(box->Y() + box->Height() / 2)},
+        pal::MouseButton::Left);
+      CHECK(rating.Matches(u8":state(rated)").ReleaseValue());
+      CHECK(rating.Matches(u8":valid").ReleaseValue());
+      CHECK(submitted() == u8"1");
+
+      // The click focused it: the arrow keys and digits rate it.
+      CHECK(view.Document().ActiveElement().get() == &rating);
+      (void)view.KeyPressed(pal::Key::RightArrow);
+      CHECK(submitted() == u8"2");
+      (void)view.KeyPressed(pal::Key::Num4, {}, {u8"4", u8"4"});
+      CHECK(submitted() == u8"4");
+
+      // Reset clears it.
+      orderForm.Reset();
+      CHECK_FALSE(rating.Matches(u8":state(rated)").ReleaseValue());
+      CHECK_FALSE(submitted().has_value());
+    }
+
+    // The page goes when another loads.
+    auto page = CreateWeakPtr<boo::dom::Document>(&view.Document());
+    view.LoadHTML(u8"<!DOCTYPE html><p>Another page</p>");
+    boo::html::EventLoop::Current().RunUntilIdle();
+    CHECK_FALSE(page);
   }
 
   TEST_CASE("View: records its painting", "[UI]")

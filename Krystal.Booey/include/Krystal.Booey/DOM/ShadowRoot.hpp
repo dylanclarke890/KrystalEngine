@@ -60,6 +60,14 @@ namespace krys::boo::dom
       _delegatesFocus = delegatesFocus;
     }
 
+    /// @brief Whether the shadow root was attached while its host was a custom element, so that the host's
+    /// internals expose it.
+    /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
+    KRYS_NODISCARD bool IsAvailableToElementInternals() const noexcept
+    {
+      return _availableToElementInternals;
+    }
+
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment
     KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
     {

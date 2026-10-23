@@ -85,6 +85,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
+		include/Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
 		include/Krystal.Booey.Tests/TestParserUtils.hpp
@@ -381,6 +382,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderLayer.cpp
 		tests/Rendering/HitTestResult.cpp
 		tests/DOM/KeyboardEvent.cpp
+		tests/DOM/EventListenerHandle.cpp
 		tests/DOM/MouseEvent.cpp
 		tests/DOM/WheelEvent.cpp
 		tests/DOM/AbortSignal.cpp
@@ -569,6 +571,8 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/BaseDateAndTimeInputType.cpp
+		tests/HTML/CustomElement/CustomElementRegistry.cpp
+		tests/HTML/ElementInternals.cpp
 		tests/HTML/ColorInputType.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp

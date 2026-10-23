@@ -47,6 +47,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -358,6 +359,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Node>> Document::ImportNode(Node &node, const BoolOrImportNodeOptions &options) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<Document>(node) || Is<ShadowRoot>(node))
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -391,6 +393,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<Document>(node))
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -516,6 +519,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Document::Title(DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto documentElement = DocumentElement();
     if (Is<svg::SVGElement>(*documentElement))
     {
@@ -568,6 +572,7 @@ namespace krys::boo::dom
 
   void Document::Dir(DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto html = html::DOMTreeAccessors::GetHeadElement(*this);
     if (html == nullptr)
     {
@@ -589,6 +594,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Document::Body(html::HTMLBodyElement &body) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto currentBody = Body();
     if (currentBody == &body)
     {
@@ -711,21 +717,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Document::Append(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Document::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Document::MoveBefore(Node &node, Node *refChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
@@ -1506,6 +1516,12 @@ namespace krys::boo::dom
   void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
   {
     _frame = WeakPtr<LocalFrame>::WithRef(frame);
+
+    // A document in a browsing context has its window's custom element registry, which is created with it.
+    if (CustomElementRegistry() == nullptr)
+    {
+      SetCustomElementRegistry(html::CustomElementRegistry::Create(*this));
+    }
 
     if (!HasLivingRenderTree() && View())
     {

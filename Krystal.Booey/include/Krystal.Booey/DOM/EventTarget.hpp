@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Dicts/AddEventListenerOptions.hpp"
 #include "Krystal.Booey/DOM/Dicts/EventListenerOptions.hpp"
 #include "Krystal.Booey/DOM/Enums/EventTargetFlags.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
@@ -54,6 +55,33 @@ namespace krys::boo::dom
     /// to a node of its document) keeps both alive, as there's no garbage collector to find the cycle.
     void AddEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
                           const AddEventListenerOptionsOrBool &options) noexcept;
+
+    /// @brief Adds a listener that calls @p callback, owned by the returned handle: destroying the handle
+    /// removes the listener, unless it was released to the target.
+    /// @note Listeners released to their target can still be removed together by a signal in @p options.
+    KRYS_NODISCARD EventListenerHandle
+      AddEventListener(DOMStringAtom type, Func<void(Event &)> &&callback,
+                       const AddEventListenerOptionsOrBool &options = false) noexcept;
+
+    /// @brief Adds a listener that calls @p callback for the events of type @p type that are a @p TEvent (a
+    /// `MouseEvent`, a `KeyboardEvent`), owned by the returned handle.
+    template <typename TEvent>
+    requires(DerivedFrom<TEvent, Event> && !SameType<TEvent, Event>)
+    KRYS_NODISCARD EventListenerHandle
+      AddEventListener(DOMStringAtom type, Func<void(TEvent &)> &&callback,
+                       const AddEventListenerOptionsOrBool &options = false) noexcept
+    {
+      return AddEventListener(type,
+                              Func<void(Event &)>(
+                                [callback = krys::move(callback)](Event &event)
+                                {
+                                  if (auto *typedEvent = DynamicDowncast<TEvent>(event))
+                                  {
+                                    callback(*typedEvent);
+                                  }
+                                }),
+                              options);
+    }
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-removeeventlistener
     void RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,

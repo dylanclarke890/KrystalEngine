@@ -19,7 +19,21 @@ namespace krys::boo::dom
   {
     AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
     auto listener = CreateRef<EventListener>(type, krys::move(callback), krys::move(options));
-    EventTargetAlgorithms::AddEventListener(*this, *listener.get());
+    (void)EventTargetAlgorithms::AddEventListener(*this, *listener.get());
+  }
+
+  EventListenerHandle
+    EventTarget::AddEventListener(DOMStringAtom type, Func<void(Event &)> &&callback,
+                                  const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
+  {
+    AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
+    auto listener = CreateRef<EventListener>(
+      type, CreateRef<FunctionEventListenerCallback>(krys::move(callback)), krys::move(options));
+    if (!EventTargetAlgorithms::AddEventListener(*this, *listener.get()))
+    {
+      return {};
+    }
+    return EventListenerHandle(*this, *listener);
   }
 
   void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,

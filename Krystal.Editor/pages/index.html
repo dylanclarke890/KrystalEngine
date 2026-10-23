@@ -20,7 +20,10 @@
          clicks (Ctrl and Shift for more) and the keys, and scrolls. The pickup date and time edit field by field
          (type digits, or step with Up and Down; Left, Right and Tab move between fields); a click or Space in
          the date opens its calendar (the arrow keys, Page Up and Page Down move, Enter chooses). The cup colour
-         opens a palette on a click. Reset empties the fields and unticks the box. -->
+         opens a palette on a click. The beans under it are <bean-rating>, a custom element defined in C++
+         (Krystal.Editor's BeanRating): click a bean, or focus it and use the arrow keys or a digit; it's
+         required, so the form stays invalid until it's rated, it submits its rating as "rating", and the page
+         styles it through :state(rated). Reset empties the fields, unticks the box and clears the rating. -->
     <form class="card order" action="https://example.com/order">
       <input type="hidden" name="from" value="editor">
       <input name="name" placeholder="Your name" required maxlength="24">
@@ -40,6 +43,8 @@
           <option>Hazelnut</option><option>Cocoa</option></select></label></p>
       <p class="pickup"><label>Pickup <input type="date" name="day" value="2026-10-23"> <input type="time"
           name="time" value="08:30"></label><label>Cup <input type="color" name="cup" value="#4f6df5"></label></p>
+      <p class="rating"><label>Last cup <bean-rating name="rating" required></bean-rating><span
+          class="unrated">Rate it to order</span><span class="rated">Thanks!</span></label></p>
       <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
           type="reset">Reset</button></p>
       <p id="last-submission">Nothing submitted yet.</p>

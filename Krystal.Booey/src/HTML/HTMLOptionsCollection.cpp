@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOptionsCollection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
@@ -18,22 +19,26 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLOptionsCollection::Length(uint32 length) noexcept
   {
+    CEReactionsScope ceReactions;
     return _selectElement->Length(length);
   }
 
   dom::ExceptionOr<void> HTMLOptionsCollection::SetItem(uint32 index, HTMLOptionElement *option) noexcept
   {
+    CEReactionsScope ceReactions;
     return _selectElement->SetItem(index, option);
   }
 
   dom::ExceptionOr<void> HTMLOptionsCollection::Add(const OptionOrOptGroupElement &element,
                                                     const Maybe<HTMLElementOrInt> &before) noexcept
   {
+    CEReactionsScope ceReactions;
     return _selectElement->Add(element, before);
   }
 
   void HTMLOptionsCollection::Remove(int32 index) noexcept
   {
+    CEReactionsScope ceReactions;
     _selectElement->Remove(index);
   }
 

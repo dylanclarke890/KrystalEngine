@@ -22,9 +22,11 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/LabelsNodeList.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Dimensions.hpp"
@@ -67,6 +69,7 @@ namespace krys::boo::html
 
   void HTMLElement::Title(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<dom::DOMString>(*this, u8"title", krys::move(value));
   }
 
@@ -77,6 +80,7 @@ namespace krys::boo::html
 
   void HTMLElement::Lang(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<dom::DOMString>(*this, u8"lang", krys::move(value));
   }
 
@@ -89,6 +93,7 @@ namespace krys::boo::html
 
   void HTMLElement::Translate(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<dom::DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
   }
 
@@ -101,6 +106,7 @@ namespace krys::boo::html
 
   void HTMLElement::Dir(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
   }
 
@@ -125,6 +131,7 @@ namespace krys::boo::html
 
   void HTMLElement::Hidden(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     if (value == u8"until-found")
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"until-found");
@@ -141,6 +148,7 @@ namespace krys::boo::html
 
   void HTMLElement::Hidden(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     if (value)
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"");
@@ -153,6 +161,7 @@ namespace krys::boo::html
 
   void HTMLElement::Hidden(double value) noexcept
   {
+    CEReactionsScope ceReactions;
     if (value == 0)
     {
       dom::ElementAlgorithms::RemoveAttributeByName(u8"hidden", *this);
@@ -174,12 +183,16 @@ namespace krys::boo::html
 
   void HTMLElement::Inert(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<bool>(*this, u8"inert", krys::move(value));
   }
 
   bool HTMLElement::CanBeActuallyDisabled() const noexcept
   {
-    // FIXME: Form-associated custom elements, once there are any.
+    if (auto *customElement = DynamicDowncast<HTMLMaybeFormAssociatedCustomElement>(*this))
+    {
+      return customElement->IsFormAssociatedCustomElement();
+    }
     return IsHTMLButtonElement() || IsHTMLInputElement() || IsHTMLSelectElement() || IsHTMLTextAreaElement()
            || IsHTMLOptGroupElement() || IsHTMLOptionElement() || IsHTMLFieldSetElement();
   }
@@ -219,6 +232,7 @@ namespace krys::boo::html
 
   void HTMLElement::AccessKey(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
   }
 
@@ -261,6 +275,7 @@ namespace krys::boo::html
 
   void HTMLElement::Draggable(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"draggable", value ? u8"true" : u8"false");
   }
 
@@ -301,6 +316,7 @@ namespace krys::boo::html
 
   void HTMLElement::WritingSuggestions(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
   }
 
@@ -317,6 +333,7 @@ namespace krys::boo::html
 
   void HTMLElement::Autocapitalize(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     Reflection::ReflectSetter(*this, u8"autocapitalize", krys::move(value));
   }
 
@@ -330,6 +347,7 @@ namespace krys::boo::html
 
   void HTMLElement::Autocorrect(bool value) noexcept
   {
+    CEReactionsScope ceReactions;
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"autocorrect", value ? u8"on" : u8"off");
   }
 
@@ -355,6 +373,7 @@ namespace krys::boo::html
 
   void HTMLElement::InnerText(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     // FIXME: This doesn't take whitespace collapsing into account at all.
 
     if (value.find_first_of(u8"\r\n") == dom::DOMString::npos)
@@ -419,6 +438,7 @@ namespace krys::boo::html
 
   void HTMLElement::OuterText(dom::DOMString &&value) noexcept
   {
+    CEReactionsScope ceReactions;
     // TODO(HTMLELEMENT, HTML): Implement OuterText() getter method.
     (void)value;
     krys_not_implemented();
@@ -426,8 +446,30 @@ namespace krys::boo::html
 
   dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
-    // TODO(HTMLELEMENT, ELEMENTINTERNALS, HTML): Implement AttachInternals() method.
-    krys_not_implemented();
+    // NOTE: customized built-in elements aren't supported, so an element's is value doesn't matter.
+    auto *queue = ReactionQueue();
+    if (!queue)
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+
+    if (queue->IsElementInternalsDisabled())
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+
+    if (queue->IsElementInternalsAttached())
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+
+    if (!IsPrecustomizedOrDefinedCustomElement())
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+
+    queue->SetElementInternalsAttached();
+    return ElementInternals::Create(*this);
   }
 
   uint32 HTMLElement::HeadingOffset() const noexcept

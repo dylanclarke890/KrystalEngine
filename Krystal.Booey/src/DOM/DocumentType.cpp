@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
@@ -19,21 +20,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> DocumentType::Before(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::After(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::Remove() noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Remove(*this);
   }
 

@@ -17,6 +17,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -147,6 +148,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Node::Normalize() noexcept
   {
+    html::CEReactionsScope ceReactions;
     for (auto *node = TreeQueries::NextExclusiveTextNode(*this, this); node != nullptr;
          node = TreeQueries::NextExclusiveTextNode(*node, this))
     {
@@ -199,6 +201,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<ShadowRoot>(this))
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -383,6 +386,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
@@ -393,6 +397,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
@@ -403,6 +408,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::PreRemove(oldChild, *containerNode);
@@ -413,6 +419,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::Append(newChild, *containerNode);
