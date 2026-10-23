@@ -29,6 +29,8 @@ namespace krys::boo::html
 
     HTMLButtonElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
 #pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement
 
     /// @see https://html.spec.whatwg.org/#dom-button-command

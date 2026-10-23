@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Booey/Style/RuleSetBuilder.hpp"
@@ -152,8 +153,16 @@ namespace krys::boo::style
     MediaQueryStyleSheet =
       css::StyleSheetContents::Create(css::ParserContext(css::ParserMode::UASheet)).release();
 
-    // FIXME: Append the render theme's extra default style sheet, once there is a render theme.
-    DefaultStyleSheet = ParseUASheet(css::HTMLUserAgentStyleSheet);
+    auto extraDefaultStyleSheet = RenderTheme::Singleton().ExtraDefaultStyleSheet();
+    if (extraDefaultStyleSheet.empty())
+    {
+      DefaultStyleSheet = ParseUASheet(css::HTMLUserAgentStyleSheet);
+    }
+    else
+    {
+      DefaultStyleSheet =
+        ParseUASheet(utf8_string(css::HTMLUserAgentStyleSheet) + utf8_string(extraDefaultStyleSheet));
+    }
     AddToDefaultStyle(*DefaultStyleSheet);
 
     CounterStylesStyleSheet = ParseUASheet(css::CounterStylesUserAgentStyleSheet);

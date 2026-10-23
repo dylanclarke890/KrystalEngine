@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -840,7 +841,7 @@ namespace krys::boo::style
     }
   }
 
-  void Adjuster::AdjustThemeStyle(RenderStyle &style, const RenderStyle &) const noexcept
+  void Adjuster::AdjustThemeStyle(RenderStyle &style, const RenderStyle &parentStyle) const noexcept
   {
     krys_debug_assert(style.HasAppearance());
     auto isOldWidthAuto = style.Width().IsAuto();
@@ -848,8 +849,7 @@ namespace krys::boo::style
     auto isOldHeightAuto = style.Height().IsAuto();
     auto isOldMinHeightAuto = style.MinHeight().IsAuto();
 
-    // FIXME: The render theme adjusts the style of elements with an appearance (`RenderTheme::adjustStyle`);
-    // there is no render theme.
+    RenderTheme::Singleton().AdjustStyle(style, parentStyle, _element.get());
 
     if (style.UsedContain().Contains(ContainValue::Size))
     {

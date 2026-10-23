@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
@@ -30,6 +31,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo
 {
@@ -114,6 +116,16 @@ namespace krys::boo
       nextSibling = nextSibling->NextSibling();
     }
     return nextSibling;
+  }
+
+  bool RenderObject::UseDarkAppearance() const noexcept
+  {
+    return DocumentUseDarkAppearance(GetDocument(), &Style());
+  }
+
+  style::ColorOptions RenderObject::StyleColorOptions() const noexcept
+  {
+    return DocumentStyleColorOptions(GetDocument(), &Style());
   }
 
   bool RenderObject::IsAtomicInlineLevelBox() const noexcept

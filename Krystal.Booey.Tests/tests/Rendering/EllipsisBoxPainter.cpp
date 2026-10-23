@@ -23,6 +23,8 @@ namespace krys::boo::tests
 (save)
 (clip
   (rect at (0,0) size 60x18))
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,14))
   (font-smoothing-mode auto)

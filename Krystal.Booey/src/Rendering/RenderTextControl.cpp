@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include <cmath>
@@ -193,8 +194,8 @@ namespace krys::boo
     // Use average character width. Matches IE.
     maxLogicalWidth =
       PreferredContentLogicalWidth(const_cast<RenderTextControl *>(this)->GetAverageCharWidth());
-    // FIXME: The theme's maximum width for the control (adjustedMaximumLogicalWidthForControl), with the
-    // theme.
+    maxLogicalWidth = LayoutUnit(RenderTheme::Singleton().AdjustedMaximumLogicalWidthForControl(
+      Style(), TextFormControlElement(), maxLogicalWidth.ToFloat()));
 
     auto &logicalWidth = Style().LogicalWidth();
     if (logicalWidth.IsCalculated())

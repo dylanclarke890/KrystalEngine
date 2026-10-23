@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
@@ -30,8 +31,17 @@ namespace krys::boo
         // ::target-text; computeStyleForPseudoElementStyle) come with marked text.
         break;
       case MarkedText::Type::TextExtractionHighlight:
+        // FIXME: This just uses the same color as annotation highlights for now, but we may eventually
+        // require a different appearance.
+        style.BackgroundColor = RenderTheme::Singleton().AnnotationHighlightBackgroundColor(
+          style::ColorOptions::UseSystemAppearance);
+        style.TextStyles.FillColor = RenderTheme::Singleton().AnnotationHighlightForegroundColor(
+          style::ColorOptions::UseSystemAppearance);
+        break;
       case MarkedText::Type::TextMatch:
-        // FIXME: The theme's annotation and text search highlight colours come with a theme.
+        // Text matches always use the light system appearance.
+        style.BackgroundColor =
+          RenderTheme::Singleton().TextSearchHighlightColor(style::ColorOptions::UseSystemAppearance);
         break;
       case MarkedText::Type::DraggedContent:     style.Alpha = 0.25; break;
       case MarkedText::Type::TransparentContent: style.Alpha = 0.0; break;

@@ -36,11 +36,13 @@ namespace krys::boo
     class DisplayList;
   }
 
+  class ControlPart;
+  struct ControlStyle;
+
   /// @brief Where painting goes: state (brushes, shadows, compositing, transforms, clips) and the drawing
   /// operations, implemented by display list recorders and drawing backends.
-  /// FIXME: Filters, system images, video frames and form controls (`drawConsumingImageBuffer`,
-  /// `drawFilteredImageBuffer`, `drawSystemImage`, `drawVideoFrame`, `drawControlPart`, `clipToImageBuffer`
-  /// and the fill and stroke patterns).
+  /// FIXME: Filters, system images and video frames (`drawConsumingImageBuffer`, `drawFilteredImageBuffer`,
+  /// `drawSystemImage`, `drawVideoFrame`, `clipToImageBuffer` and the fill and stroke patterns).
   /// FIXME: Bidirectional text runs (`drawBidiText`) need a bidi resolver over text runs.
   class GraphicsContext
   {
@@ -503,6 +505,9 @@ namespace krys::boo
     virtual void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
                             const FloatPoint &, FontSmoothingMode) noexcept = 0;
     virtual void DrawDisplayList(const display_list::DisplayList &) noexcept;
+    /// @brief Draws a form control as the theme does.
+    virtual void DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
+                                 const ControlStyle &) noexcept;
     KRYS_NODISCARD FloatRect ComputeUnderlineBoundsForText(const FloatRect &, bool printing) noexcept;
     void DrawLineForText(const FloatRect &, bool isPrinting, bool doubleLines = false,
                          boo::StrokeStyle = boo::StrokeStyle::SolidStroke) noexcept;

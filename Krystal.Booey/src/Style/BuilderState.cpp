@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKey.hpp"

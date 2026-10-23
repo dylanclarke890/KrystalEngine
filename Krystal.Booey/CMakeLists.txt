@@ -346,7 +346,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/GraphicsTypes.hpp
   include/Krystal.Booey/Style/ForVisitedLink.hpp
   include/Krystal.Booey/Style/Values/Color/ColorOptions.hpp
-  include/Krystal.Booey/Style/Values/Color/SystemColor.hpp
 
   # Slice 3: Colour, layer 5b (colour parser)
   include/Krystal.Booey/CSS/Parser/ParserFastPaths.hpp
@@ -821,7 +820,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderTableRow.hpp
   include/Krystal.Booey/Rendering/RenderTableCol.hpp
   include/Krystal.Booey/Rendering/RenderText.hpp
+  include/Krystal.Booey/Rendering/RenderButton.hpp
   include/Krystal.Booey/Rendering/RenderTextControl.hpp
+  include/Krystal.Booey/Rendering/RenderTheme.hpp
+  include/Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp
   include/Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp
   include/Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp
   include/Krystal.Booey/Rendering/RenderLineBreak.hpp
@@ -922,6 +924,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderQuote.hpp
   include/Krystal.Booey/Rendering/RenderTextFragment.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp
+  include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp
   include/Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp
@@ -1453,6 +1456,36 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp
   include/Krystal.Booey/Graphics/FloatSegment.hpp
   include/Krystal.Booey/Graphics/GraphicsContext.hpp
+  include/Krystal.Booey/Graphics/Controls/ControlStyle.hpp
+  include/Krystal.Booey/Graphics/Controls/PlatformControl.hpp
+  include/Krystal.Booey/Graphics/Controls/ControlFactory.hpp
+  include/Krystal.Booey/Graphics/Controls/ControlPart.hpp
+  include/Krystal.Booey/Graphics/Controls/ButtonPart.hpp
+  include/Krystal.Booey/Graphics/Controls/ToggleButtonPart.hpp
+  include/Krystal.Booey/Graphics/Controls/TextFieldPart.hpp
+  include/Krystal.Booey/Graphics/Controls/TextAreaPart.hpp
+  include/Krystal.Booey/Graphics/Controls/SearchFieldPart.hpp
+  include/Krystal.Booey/Graphics/Controls/SearchFieldCancelButtonPart.hpp
+  include/Krystal.Booey/Graphics/Controls/SearchFieldResultsPart.hpp
+  include/Krystal.Booey/Graphics/Controls/MenuListPart.hpp
+  include/Krystal.Booey/Graphics/Controls/MenuListButtonPart.hpp
+  include/Krystal.Booey/Graphics/Controls/SliderThumbPart.hpp
+  include/Krystal.Booey/Graphics/Controls/InnerSpinButtonPart.hpp
+  include/Krystal.Booey/Graphics/Controls/ColorWellPart.hpp
+  include/Krystal.Booey/Graphics/Controls/MeterPart.hpp
+  include/Krystal.Booey/Graphics/Controls/ProgressBarPart.hpp
+  include/Krystal.Booey/Graphics/Controls/SliderTrackPart.hpp
+  include/Krystal.Booey/Graphics/Adwaita/Adwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/ControlAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/ControlFactoryAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/ButtonControlAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/ToggleButtonAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/TextFieldAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/MenuListAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/InnerSpinButtonAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/ProgressBarAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/SliderTrackAdwaita.hpp
+  include/Krystal.Booey/Graphics/Adwaita/SliderThumbAdwaita.hpp
   include/Krystal.Booey/Graphics/GraphicsContextState.hpp
   include/Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp
   include/Krystal.Booey/Graphics/GraphicsStyle.hpp
@@ -1521,6 +1554,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/WheelEvent.hpp
   include/Krystal.Booey/Platform/PlatformWheelEvent.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeAdwaita.hpp
+  include/Krystal.Booey/Platform/Theme.hpp
+  include/Krystal.Booey/Platform/ThemeAdwaita.hpp
   include/Krystal.Booey/Platform/ScrollbarThemeComposite.hpp
 
   # The event and rendering loops (G6)
@@ -1720,6 +1755,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/SubmitInputType.hpp
   include/Krystal.Booey/HTML/TelephoneInputType.hpp
   include/Krystal.Booey/HTML/TextFieldInputType.hpp
+  include/Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp
   include/Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp
   include/Krystal.Booey/HTML/TextInputType.hpp
   include/Krystal.Booey/HTML/TimeInputType.hpp
@@ -1810,7 +1846,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/Values/Color/LightDarkColor.cpp
   src/CSS/Values/Color/PlatformColorResolutionState.cpp
   src/CSS/Values/Color/ResolvedColor.cpp
-  src/Style/Values/Color/SystemColor.cpp
 
   # Slice 3: Colour, layer 5b (colour parser)
   src/CSS/Parser/ParserFastPaths.cpp
@@ -2105,6 +2140,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/PropertyCascade.cpp
 
   # Style resolution, layer f3a (computed style foundations)
+  src/Core/StyleAppearance.cpp
   src/Core/TextFlags.cpp
   src/Core/TextSpacing.cpp
   src/Rendering/Style/RenderStyleConstants.cpp
@@ -2492,7 +2528,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderTableRow.cpp
   src/Rendering/RenderTableCol.cpp
   src/Rendering/RenderText.cpp
+  src/Rendering/RenderButton.cpp
   src/Rendering/RenderTextControl.cpp
+  src/Rendering/RenderTheme.cpp
+  src/Rendering/Adwaita/RenderThemeAdwaita.cpp
   src/Rendering/RenderTextControlMultiLine.cpp
   src/Rendering/RenderTextControlSingleLine.cpp
   src/Rendering/RenderLineBreak.cpp
@@ -2570,6 +2609,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderQuote.cpp
   src/Rendering/RenderTextFragment.cpp
   src/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
+  src/Rendering/Updating/RenderTreeBuilderFormControls.cpp
   src/Rendering/Updating/RenderTreeBuilderList.cpp
   src/Rendering/Updating/RenderTreeBuilderRuby.cpp
   src/Rendering/Updating/RenderTreeUpdater.cpp
@@ -2652,6 +2692,23 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/GradientColorStop.cpp
   src/Graphics/GradientColorStops.cpp
   src/Graphics/GraphicsContext.cpp
+  src/Graphics/Controls/ControlStyle.cpp
+  src/Graphics/Controls/ControlFactory.cpp
+  src/Graphics/Controls/ControlPart.cpp
+  src/Graphics/Controls/MeterPart.cpp
+  src/Graphics/Controls/ProgressBarPart.cpp
+  src/Graphics/Controls/SliderTrackPart.cpp
+  src/Graphics/Adwaita/Adwaita.cpp
+  src/Graphics/Adwaita/ControlAdwaita.cpp
+  src/Graphics/Adwaita/ControlFactoryAdwaita.cpp
+  src/Graphics/Adwaita/ButtonControlAdwaita.cpp
+  src/Graphics/Adwaita/ToggleButtonAdwaita.cpp
+  src/Graphics/Adwaita/TextFieldAdwaita.cpp
+  src/Graphics/Adwaita/MenuListAdwaita.cpp
+  src/Graphics/Adwaita/InnerSpinButtonAdwaita.cpp
+  src/Graphics/Adwaita/ProgressBarAdwaita.cpp
+  src/Graphics/Adwaita/SliderTrackAdwaita.cpp
+  src/Graphics/Adwaita/SliderThumbAdwaita.cpp
   src/Graphics/GraphicsContextState.cpp
   src/Graphics/GraphicsStyle.cpp
   src/Graphics/GraphicsTypes.cpp
@@ -2702,6 +2759,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Scrollbars, wheel and keyboard scrolling (G5b)
   src/DOM/WheelEvent.cpp
   src/Platform/ScrollbarThemeAdwaita.cpp
+  src/Platform/ThemeAdwaita.cpp
   src/Platform/ScrollbarThemeComposite.cpp
 
   # The event and rendering loops (G6)
@@ -2851,6 +2909,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/SubmitEvent.cpp
   src/HTML/SubmitInputType.cpp
   src/HTML/TextFieldInputType.cpp
+  src/HTML/Shadow/SpinButtonElement.cpp
   src/HTML/Shadow/TextControlInnerElements.cpp
   src/HTML/TimeInputType.cpp
   src/HTML/URLInputType.cpp

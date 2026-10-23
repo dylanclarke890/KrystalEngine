@@ -22,6 +22,7 @@ SHEETS = {
     "PopoverUserAgentStyleSheet": "popover.css",
     "ViewTransitionsUserAgentStyleSheet": "viewTransitions.css",
     "HorizontalFormControlsUserAgentStyleSheet": "horizontalFormControls.css",
+    "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
 }
 
 

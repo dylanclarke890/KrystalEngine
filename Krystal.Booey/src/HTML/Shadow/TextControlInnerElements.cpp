@@ -9,6 +9,7 @@
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControl.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
@@ -34,11 +35,16 @@ namespace krys::boo::html
 
   Maybe<style::UnadjustedStyle>
     TextControlInnerContainer::ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
-                                                  const RenderStyle *) noexcept
+                                                  const RenderStyle *shadowHostStyle) noexcept
   {
     // FIXME: Strong password fields' container wraps and clips (isStrongPasswordTextField), with autofill.
-    // FIXME: The theme's adjustments (adjustTextControlInnerContainerStyle), with the theme.
-    return ResolveStyle(resolutionContext);
+    auto style = ResolveStyle(resolutionContext);
+    if (shadowHostStyle)
+    {
+      RenderTheme::Singleton().AdjustTextControlInnerContainerStyle(*style.Style, *shadowHostStyle,
+                                                                    dom::TreeQueries::ShadowHost(*this));
+    }
+    return style;
   }
 
 #pragma endregion
@@ -139,7 +145,7 @@ namespace krys::boo::html
     auto &shadowHost = *dom::TreeQueries::ShadowHost(*this);
     auto style = Downcast<HTMLTextFormControlElement>(shadowHost).CreateInnerTextStyle(*shadowHostStyle);
 
-    // FIXME: The theme's adjustments (adjustTextControlInnerTextStyle), with the theme.
+    RenderTheme::Singleton().AdjustTextControlInnerTextStyle(style, *shadowHostStyle, &shadowHost);
 
     return style::UnadjustedStyle {CreateUnique<RenderStyle>(krys::move(style))};
   }
@@ -182,7 +188,8 @@ namespace krys::boo::html
       styleStyle.SetPaddingBottom(style::PaddingEdge::Fixed {0});
     }
 
-    // FIXME: The theme's adjustments (adjustTextControlInnerPlaceholderStyle), with the theme.
+    RenderTheme::Singleton().AdjustTextControlInnerPlaceholderStyle(styleStyle, *shadowHostStyle,
+                                                                    &controlElement);
 
     return style;
   }

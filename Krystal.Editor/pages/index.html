@@ -8,6 +8,27 @@
 </head>
 <body>
   <div class="row">
+    <!-- Forms: the form is :invalid until the name is filled in and the required box is ticked (click its
+         label), so the drink buttons fade and clicking one fires invalid instead of submitting. Once it's valid,
+         a drink button (or Enter in the name field) submits: the editor logs the submission and shows its URL
+         below. The fields edit like the editable block; the notes keep their line breaks. The checkbox, radios
+         and number field are drawn by the theme (Adwaita); the number field's spin button steps the cups, as do
+         the arrow keys. Reset empties the fields and unticks the box. -->
+    <form class="card order" action="https://example.com/order">
+      <input type="hidden" name="from" value="editor">
+      <input name="name" placeholder="Your name" required maxlength="24">
+      <textarea name="notes" placeholder="Notes for the barista" rows="2"></textarea>
+      <label><input type="checkbox" name="milk" required><span>With milk (required)</span></label>
+      <p class="choices"><label><input type="radio" name="size" value="small" checked><span>Small</span></label><label><input
+          type="radio" name="size" value="large"><span>Large</span></label><label>Cups <input type="number" name="cups"
+          value="1" min="1" max="9"></label></p>
+      <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
+          type="reset">Reset</button></p>
+      <p id="last-submission">Nothing submitted yet.</p>
+    </form>
+  </div>
+
+  <div class="row">
     <!-- Text: headings, paragraphs and inline boxes. -->
     <div class="card" tabindex="0" style="flex: 2">
       <h2>Pages in Krystal</h2>
@@ -333,20 +354,6 @@
       <p>This block is editable: type into it, and its caret blinks in purple.</p>
       <p>A second paragraph, to move the caret up and down into, or to cut and paste.</p>
     </div>
-    <!-- Forms: the form is :invalid until the name is filled in and the required box is ticked (click its
-         label), so the drink buttons fade and clicking one fires invalid instead of submitting. Once it's valid,
-         a drink button (or Enter in the name field) submits: the editor logs the submission and shows its URL
-         below. The fields edit like the editable block; the notes keep their line breaks. Reset empties the
-         fields and unticks the box. -->
-    <form class="card order" action="https://example.com/order">
-      <input type="hidden" name="from" value="editor">
-      <input name="name" placeholder="Your name" required maxlength="24">
-      <textarea name="notes" placeholder="Notes for the barista" rows="2"></textarea>
-      <label><input type="checkbox" name="milk" required><span>With milk (required)</span></label>
-      <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
-          type="reset">Reset</button></p>
-      <p id="last-submission">Nothing submitted yet.</p>
-    </form>
   </div>
 
   <!-- A frosted, fixed pill: it composites for its position, so scrolling the page moves its layer rather than

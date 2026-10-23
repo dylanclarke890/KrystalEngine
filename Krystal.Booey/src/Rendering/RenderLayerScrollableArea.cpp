@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
@@ -1335,13 +1336,13 @@ namespace krys::boo
 
     // FIXME: Custom resizers (::-webkit-resizer, dropped as non-standard), and invalidating control tints.
 
-    RenderTheme::PaintPlatformResizer(renderer, context, resizerAbsRect);
+    RenderTheme::Singleton().PaintPlatformResizer(renderer, context, resizerAbsRect);
 
     // Draw a frame around the resizer if there are any scrollbars present.
     if (!HasOverlayScrollbars() && (_vBar || _hBar)
         && renderer.Style().GetScrollbarWidth() != style::ScrollbarWidth::None)
     {
-      RenderTheme::PaintPlatformResizerFrame(renderer, context, resizerAbsRect);
+      RenderTheme::Singleton().PaintPlatformResizerFrame(renderer, context, resizerAbsRect);
     }
   }
 

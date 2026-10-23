@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/BaseButtonInputType.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/Rendering/RenderButton.hpp"
 
 namespace krys::boo::html
 {
@@ -24,5 +25,11 @@ namespace krys::boo::html
   bool BaseButtonInputType::DirAutoUsesValue() const noexcept
   {
     return true;
+  }
+
+  RenderPtr<RenderElement> BaseButtonInputType::CreateInputRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(Element());
+    return CreateRenderer<RenderButton>(*Element(), krys::move(style));
   }
 }

@@ -36,81 +36,6 @@
 
 namespace krys::boo
 {
-  void RenderTheme::PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,
-                                         const LayoutRect &resizerCornerRect) noexcept
-  {
-    // The platform's resize corner image: two diagonal lines, each a dark line with a light one below it,
-    // 8 pixels square, drawn a pixel at a time.
-    // FIXME: The platform image (textAreaResizeCorner), and its 2x version, once the theme has images.
-    constexpr float cornerResizerSize = 8;
-    auto origin =
-      FloatPoint(resizerCornerRect.MaxXMaxYCorner()) - FloatSize(cornerResizerSize, cornerResizerSize);
-    bool flip = renderer.Style().ShouldPlaceVerticalScrollbarOnLeft();
-    if (flip)
-    {
-      origin =
-        FloatPoint(resizerCornerRect.X().ToFloat(), resizerCornerRect.MaxY().ToFloat() - cornerResizerSize);
-    }
-
-    auto dark = Color(SRGBA<uint8> {0, 0, 0, 0x99});
-    auto light = Color(SRGBA<uint8> {255, 255, 255, 0x99});
-    auto pixel = [&](int32 x, int32 y, const Color &color)
-    {
-      auto column = flip ? static_cast<int32>(cornerResizerSize) - 1 - x : x;
-      context.FillRect(FloatRect(origin.X() + column, origin.Y() + y, 1, 1), color);
-    };
-    for (int32 y = 0; y < 7; ++y)
-    {
-      // The long line, from (6, 0) to (0, 6).
-      pixel(6 - y, y, dark);
-      if (6 - y + 1 < 7)
-      {
-        pixel(6 - y + 1, y, light);
-      }
-      // The short line, from (6, 4) to (4, 6).
-      if (y >= 4)
-      {
-        pixel(10 - y, y, dark);
-        if (10 - y + 1 < 7)
-        {
-          pixel(10 - y + 1, y, light);
-        }
-      }
-    }
-  }
-
-  void RenderTheme::PaintPlatformResizerFrame(const RenderLayerModelObject &, GraphicsContext &context,
-                                              const LayoutRect &resizerAbsRect) noexcept
-  {
-    // Clipping will exclude the right and bottom edges of this frame.
-    GraphicsContextStateSaver stateSaver(context);
-    context.Clip(FloatRect(resizerAbsRect));
-    LayoutRect largerCorner = resizerAbsRect;
-    largerCorner.SetSize(LayoutSize(largerCorner.Width() + 1_lu, largerCorner.Height() + 1_lu));
-    context.SetStrokeColor(Color(SRGBA<uint8> {217, 217, 217}));
-    context.SetStrokeThickness(1.0f);
-    context.SetFillColor(Color::transparentBlack);
-    context.DrawRect(FloatRect(SnappedIntRect(largerCorner)));
-  }
-
-  bool RenderTheme::HasAppearanceForElementTypeFromUAStyle(const dom::Element &element) noexcept
-  {
-    if (!Is<html::HTMLElement>(element))
-    {
-      return false;
-    }
-    switch (element.TagQualifiedName().TagName())
-    {
-      case html::TagName::input:
-      case html::TagName::textarea:
-      case html::TagName::button:
-      case html::TagName::progress:
-      case html::TagName::select:
-      case html::TagName::meter:    return true;
-      default:                      return false;
-    }
-  }
-
   int32 AdjustForAbsoluteZoom(int32 value, const RenderView &renderView) noexcept
   {
     return AdjustForAbsoluteZoom(value, renderView.Style());
@@ -131,32 +56,6 @@ namespace krys::boo
     }
     auto colorScheme = style->GetColorScheme().GetColorScheme();
     return colorScheme.Contains(ColorScheme::Dark) && !colorScheme.Contains(ColorScheme::Light);
-  }
-
-  // The platform's selection colours are Chrome's.
-  Color RenderTheme::ActiveSelectionBackgroundColor(style::ColorOptions options) noexcept
-  {
-    return TransformSelectionBackgroundColor(SRGBA<uint8> {51, 103, 209}, options);
-  }
-
-  Color RenderTheme::InactiveSelectionBackgroundColor(style::ColorOptions options) noexcept
-  {
-    return TransformSelectionBackgroundColor(SRGBA<uint8> {200, 200, 200}, options);
-  }
-
-  Color RenderTheme::TransformSelectionBackgroundColor(const Color &color, style::ColorOptions) noexcept
-  {
-    return BlendWithWhite(color);
-  }
-
-  Color RenderTheme::ActiveSelectionForegroundColor(style::ColorOptions) noexcept
-  {
-    return Color::white;
-  }
-
-  Color RenderTheme::InactiveSelectionForegroundColor(style::ColorOptions) noexcept
-  {
-    return SRGBA<uint8> {50, 50, 50};
   }
 
   style::ColorOptions DocumentStyleColorOptions(const dom::Document &document,

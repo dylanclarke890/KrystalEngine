@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/OutlineValue.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
@@ -59,13 +60,19 @@ namespace krys::boo
     krys_debug_assert(renderer.HasOutline());
 
     const auto &styleToUse = renderer.Style();
-    // FIXME: Themed focus rings (supportsFocusRing, adjustedPaintRect), once there's a theme; the focus ring
-    // is always painted by hand.
+    auto &theme = RenderTheme::Singleton();
+    auto hasThemedFocusRing = theme.SupportsFocusRing(renderer, styleToUse);
 
     // Only paint the focus ring by hand if the theme isn't able to draw it.
-    if (styleToUse.GetOutlineStyle() == OutlineStyle::Auto)
+    if (styleToUse.GetOutlineStyle() == OutlineStyle::Auto && !hasThemedFocusRing)
     {
-      auto focusRingRects = CollectFocusRingRects(renderer, paintRect.Location(), _paintInfo.PaintContainer);
+      LayoutRect paintRectToUse {paintRect};
+      if (auto *box = DynamicDowncast<RenderBox>(renderer))
+      {
+        paintRectToUse = theme.AdjustedPaintRect(*box, paintRectToUse);
+      }
+      auto focusRingRects =
+        CollectFocusRingRects(renderer, paintRectToUse.Location(), _paintInfo.PaintContainer);
 
       PaintFocusRing(renderer, focusRingRects);
       return;

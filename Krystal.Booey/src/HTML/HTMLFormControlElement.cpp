@@ -4,13 +4,42 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Booey/Style/TreeResolver.hpp"
 
 namespace krys::boo::html
 {
   HTMLFormControlElement::HTMLFormControlElement(dom::Document &document, HTMLElementInterface interface,
                                                  HTMLElementFlags flags) noexcept
-      : HTMLElement(document, interface, flags)
+      : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
+  }
+
+  void HTMLFormControlElement::DidAttachRenderers() noexcept
+  {
+    // The call to UpdateFromElement() needs to go after the call through
+    // to the base class's attach() because that can sometimes do a close
+    // on the renderer.
+    if (auto *renderer = Renderer())
+    {
+      renderer->UpdateFromElement();
+    }
+  }
+
+  void HTMLFormControlElement::DidRecalcStyle(EnumSet<style::Change>) noexcept
+  {
+    // UpdateFromElement() can cause the selection to change, and in turn
+    // trigger synchronous layout, so it must not be called during style recalc.
+    if (Renderer())
+    {
+      style::DeprecatedQueuePostResolutionCallback(
+        [element = ShareRef(*this)]
+        {
+          if (auto *renderer = element->Renderer())
+          {
+            renderer->UpdateFromElement();
+          }
+        });
+    }
   }
 
   HTMLFormControlElement::~HTMLFormControlElement() noexcept

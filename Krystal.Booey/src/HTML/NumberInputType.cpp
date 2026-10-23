@@ -5,7 +5,9 @@
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 #include <cmath>
@@ -220,10 +222,35 @@ namespace krys::boo::html
     return true;
   }
 
-  float NumberInputType::DecorationWidth(float) const noexcept
+  float NumberInputType::DecorationWidth(float inputWidth) const noexcept
   {
-    // FIXME: The spin button's width, with the spin button (the theme, G14d).
-    return 0;
+    krys_debug_assert(Element());
+
+    float width = 0;
+    auto *spinButton = Element()->InnerSpinButtonElement();
+    if (auto *spinRenderer = spinButton ? spinButton->GetRenderBox() : nullptr)
+    {
+      width += spinRenderer->BorderAndPaddingLogicalWidth().ToFloat();
+
+      // Since the width of spinRenderer is not calculated yet, spinRenderer->logicalWidth() returns 0.
+      // So computedStyle()->logicalWidth() is used instead.
+
+      // FIXME: This is incorrect for anything other than fixed widths.
+      const auto *computedStyle = spinButton->ExistingComputedStyle();
+      if (auto fixedLogicalWidth = computedStyle->LogicalWidth().TryFixed())
+      {
+        width += fixedLogicalWidth->ResolveZoom(computedStyle->UsedZoomForLength());
+      }
+      else if (auto percentageLogicalWidth = computedStyle->LogicalWidth().TryPercentage())
+      {
+        auto percentageLogicalWidthValue = percentageLogicalWidth->Value;
+        if (percentageLogicalWidthValue != 100.f)
+        {
+          width += inputWidth * percentageLogicalWidthValue / (100 - percentageLogicalWidthValue);
+        }
+      }
+    }
+    return width;
   }
 
   InputType::ShouldCallBaseEventHandler

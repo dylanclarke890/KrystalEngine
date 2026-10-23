@@ -51,6 +51,8 @@ namespace krys::boo::tests
       Painted(
         u8"<style>body{margin:0;font:16px sans-serif}span{outline:2px solid red}</style>a <span>bc</span> d")
       == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,14))
   (font-smoothing-mode auto)
@@ -89,6 +91,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}div{width:60px}span{outline:2px solid "
                   u8"red}</style><div>aa <span>bbb ccc</span></div>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,14))
   (font-smoothing-mode auto)
@@ -111,6 +115,8 @@ namespace krys::boo::tests
       Painted(
         u8"<style>body{margin:0;font:16px sans-serif}span{outline:2px auto blue}</style><span>focus</span>")
       == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,14))
   (font-smoothing-mode auto)

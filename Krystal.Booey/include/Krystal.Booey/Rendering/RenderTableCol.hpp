@@ -79,7 +79,7 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit OffsetHeight() const noexcept override;
 
     /// @brief Updates the span from the element's span attribute.
-    void UpdateFromElement() noexcept;
+    void UpdateFromElement() noexcept override;
 
     KRYS_NODISCARD bool IsChildAllowed(const RenderObject &child,
                                        const RenderStyle &style) const noexcept override;

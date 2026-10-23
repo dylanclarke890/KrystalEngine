@@ -1455,9 +1455,18 @@ namespace krys::boo::style
           element.ResetStyleRelations();
         }
 
-        // FIXME: willRecalcStyle and didRecalcStyle for elements with custom style resolve callbacks, and the
-        // accessibility updates (AXObjectCache).
+        if (element.HasCustomStyleResolveCallbacks())
+        {
+          element.WillRecalcStyle(parent.Changes);
+        }
+
         auto [elementUpdate, elementDescendantsToResolve] = ResolveElement(element, style, *resolutionType);
+
+        if (element.HasCustomStyleResolveCallbacks())
+        {
+          element.DidRecalcStyle(elementUpdate.Changes);
+        }
+        // FIXME: The accessibility updates (AXObjectCache).
 
         style = elementUpdate.Style.get();
         changes = elementUpdate.Changes;

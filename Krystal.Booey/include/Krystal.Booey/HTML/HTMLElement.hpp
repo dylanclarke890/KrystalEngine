@@ -358,6 +358,11 @@ namespace krys::boo::html
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsSpinButtonElement() const noexcept
+    {
+      return false;
+    }
+
 #pragma region Form Controls
 
     KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept

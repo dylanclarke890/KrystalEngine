@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 
@@ -69,7 +70,13 @@ namespace krys::boo::html
     krys_debug_assert(NeedsShadowSubtree());
   }
 
-  TextFieldInputType::~TextFieldInputType() noexcept = default;
+  TextFieldInputType::~TextFieldInputType() noexcept
+  {
+    if (auto innerSpinButton = _innerSpinButton)
+    {
+      innerSpinButton->RemoveSpinButtonOwner();
+    }
+  }
 
   bool TextFieldInputType::IsEmptyValue() const noexcept
   {
@@ -304,9 +311,8 @@ namespace krys::boo::html
 
   bool TextFieldInputType::ShouldHaveSpinButton() const noexcept
   {
-    // FIXME: The theme decides (shouldHaveSpinButton: steppable inputs but ranges), and draws the spin
-    // button, with the theme (G14d).
-    return false;
+    krys_debug_assert(Element());
+    return RenderTheme::Singleton().ShouldHaveSpinButton(*Element());
   }
 
   void TextFieldInputType::CreateShadowSubtree() noexcept
@@ -341,7 +347,14 @@ namespace krys::boo::html
     UpdatePlaceholderText();
     UpdateInnerTextValue();
 
-    // FIXME: The spin button, the caps lock indicator, the autofill button and the datalist dropdown.
+    if (shouldHaveSpinButton)
+    {
+      auto innerSpinButton = SpinButtonElement::Create(document, *this);
+      _innerSpinButton = innerSpinButton;
+      (void)_container->AppendChild(*innerSpinButton);
+    }
+
+    // FIXME: The caps lock indicator, the autofill button and the datalist dropdown.
   }
 
   HTMLElement *TextFieldInputType::ContainerElement() const noexcept
@@ -364,12 +377,22 @@ namespace krys::boo::html
     return _placeholder.get();
   }
 
+  HTMLElement *TextFieldInputType::InnerSpinButtonElement() const noexcept
+  {
+    return _innerSpinButton.get();
+  }
+
   void TextFieldInputType::RemoveShadowSubtree() noexcept
   {
     InputType::RemoveShadowSubtree();
     _innerText = nullptr;
     _placeholder = nullptr;
     _innerBlock = nullptr;
+    if (auto innerSpinButton = _innerSpinButton)
+    {
+      innerSpinButton->RemoveSpinButtonOwner();
+    }
+    _innerSpinButton = nullptr;
     _container = nullptr;
   }
 
@@ -387,12 +410,54 @@ namespace krys::boo::html
 
   void TextFieldInputType::DisabledStateChanged() noexcept
   {
-    // FIXME: Releasing the spin button's capture, the caps lock indicator and the autofill button, with them.
+    if (!HasCreatedShadowSubtree())
+    {
+      return;
+    }
+
+    if (auto innerSpinButton = _innerSpinButton)
+    {
+      innerSpinButton->ReleaseCapture();
+    }
+    // FIXME: The caps lock indicator and the autofill button, with them.
   }
 
   void TextFieldInputType::ReadOnlyStateChanged() noexcept
   {
-    // FIXME: Releasing the spin button's capture, the caps lock indicator and the autofill button, with them.
+    if (!HasCreatedShadowSubtree())
+    {
+      return;
+    }
+
+    if (auto innerSpinButton = _innerSpinButton)
+    {
+      innerSpinButton->ReleaseCapture();
+    }
+    // FIXME: The caps lock indicator and the autofill button, with them.
+  }
+
+  void TextFieldInputType::SpinButtonStepDown() noexcept
+  {
+    StepUpFromRenderer(-1);
+  }
+
+  void TextFieldInputType::SpinButtonStepUp() noexcept
+  {
+    StepUpFromRenderer(1);
+  }
+
+  void TextFieldInputType::FocusAndSelectSpinButtonOwner() noexcept
+  {
+    krys_debug_assert(Element());
+    Ref<HTMLInputElement> input = ShareRef(*Element());
+    input->Focus();
+    input->Select();
+  }
+
+  bool TextFieldInputType::ShouldSpinButtonRespondToMouseEvents() const noexcept
+  {
+    krys_debug_assert(Element());
+    return Element()->IsMutable();
   }
 
   bool TextFieldInputType::SupportsReadOnly() const noexcept

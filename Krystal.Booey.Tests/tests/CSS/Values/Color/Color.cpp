@@ -113,7 +113,9 @@ namespace krys::boo::css::tests
       CHECK(ColorFromAbsoluteKeyword(ValueId::Transparent) == boo::Color::transparentBlack);
       // CSS grey is #808080, which is `Color::darkGray` (`Color::gray` is #a0a0a0).
       CHECK(ColorFromKeyword(ValueId::Grey, style::ColorOptions::None) == boo::Color::darkGray);
-      CHECK(ColorFromKeyword(ValueId::Canvas, style::ColorOptions::None) == boo::Color::white);
+      // System colours are the theme's, which are semantic.
+      CHECK(EqualIgnoringSemanticColor(ColorFromKeyword(ValueId::Canvas, style::ColorOptions::None),
+                                       boo::Color::white));
     }
 
     SECTION("Resolution through the state")

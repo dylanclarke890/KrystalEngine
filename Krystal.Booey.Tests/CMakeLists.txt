@@ -438,7 +438,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp
 		tests/Rendering/RenderText.cpp
+		tests/Rendering/RenderButton.cpp
 		tests/Rendering/RenderTextControl.cpp
+		tests/Rendering/RenderTheme.cpp
 		tests/Rendering/Updating/RenderTreeBuilder.cpp
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Page/Settings.cpp
@@ -477,7 +479,6 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Color/Color.cpp
 		tests/Style/Values/Color/ColorConversion.cpp
 		tests/Style/Values/Color/DynamicRangeLimit.cpp
-		tests/Style/Values/Color/SystemColor.cpp
 		tests/Style/Values/Fonts/Fonts.cpp
 		tests/Style/Values/Transforms/Transforms.cpp
 		tests/Style/Values/FilterEffects/Filters.cpp
@@ -566,6 +567,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
+		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp
 		tests/HTML/HTMLStyleElement.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp

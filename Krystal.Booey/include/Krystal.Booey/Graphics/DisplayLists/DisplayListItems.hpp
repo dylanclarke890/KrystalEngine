@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/StyleAppearance.hpp"
 #include "Krystal.Booey/Core/TextFlags.hpp"
+#include "Krystal.Booey/Graphics/Controls/ControlStyle.hpp"
 #include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItem.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
@@ -511,6 +513,44 @@ namespace krys::boo::display_list
     {
       return _fontSmoothingMode;
     }
+
+    void Apply(GraphicsContext &) const noexcept;
+    void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
+  };
+
+  class DrawControlPart
+  {
+  private:
+    Ref<ControlPart> _part;
+    FloatRoundedRect _borderRect;
+    float _deviceScaleFactor;
+    ControlStyle _style;
+
+  public:
+    static constexpr std::string_view Name = "draw-control-part";
+
+    DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
+                    const ControlStyle &) noexcept;
+    DrawControlPart(const DrawControlPart &) noexcept;
+    DrawControlPart(DrawControlPart &&) noexcept;
+    DrawControlPart &operator=(const DrawControlPart &) noexcept;
+    DrawControlPart &operator=(DrawControlPart &&) noexcept;
+    ~DrawControlPart() noexcept;
+
+    KRYS_NODISCARD ControlPart &Part() const noexcept;
+    KRYS_NODISCARD FloatRoundedRect BorderRect() const noexcept
+    {
+      return _borderRect;
+    }
+    KRYS_NODISCARD float DeviceScaleFactor() const noexcept
+    {
+      return _deviceScaleFactor;
+    }
+    KRYS_NODISCARD const ControlStyle &Style() const noexcept
+    {
+      return _style;
+    }
+    KRYS_NODISCARD StyleAppearance GetType() const noexcept;
 
     void Apply(GraphicsContext &) const noexcept;
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;

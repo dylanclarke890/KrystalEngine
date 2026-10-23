@@ -69,6 +69,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-select-selectedindex
     KRYS_NODISCARD int32 SelectedIndex() const noexcept;
 
+    /// @brief Whether the select is drawn as a drop-down (a menu list) rather than a list box.
+    KRYS_NODISCARD bool UsesMenuList() const noexcept;
+
     // TODO(HTMLSELECT, HTML): Select api.
     // [SameObject] readonly attribute HTMLOptionsCollection options;
     // [CEReactions] attribute unsigned long length;

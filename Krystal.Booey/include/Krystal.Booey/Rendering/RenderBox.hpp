@@ -929,6 +929,12 @@ namespace krys::boo
     virtual void PaintClippingMask(PaintInfo &, const LayoutPoint &) noexcept;
 
     KRYS_NODISCARD BleedAvoidance DetermineBleedAvoidance(GraphicsContext &) const noexcept;
+
+    /// @brief The control part the theme draws the box with, made for its used appearance.
+    ControlPart *EnsureControlPart() noexcept;
+    ControlPart *EnsureControlPartForRenderer() noexcept;
+    ControlPart *EnsureControlPartForBorderOnly() noexcept;
+    ControlPart *EnsureControlPartForDecorations() noexcept;
     KRYS_NODISCARD bool BackgroundHasOpaqueTopLayer() const noexcept;
 
     /// @brief Whether the box's background is hidden by what's painted over it, so needn't be painted.

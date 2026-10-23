@@ -145,6 +145,8 @@ namespace krys::boo::html
 
     void OnInsert() noexcept override;
     void OnPostConnection() noexcept override;
+    void DidAttachRenderers() noexcept override;
+    void DidRecalcStyle(EnumSet<style::Change>) noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
     void OnAdopt(dom::Document &oldDocument) noexcept override;

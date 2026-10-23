@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
+#include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -670,6 +671,10 @@ namespace krys::boo::dom
     virtual void DidAttachRenderers() noexcept
     {
     }
+
+    /// @brief Called around the element's style resolution, for elements with custom style resolve callbacks.
+    virtual void WillRecalcStyle(EnumSet<style::Change>) noexcept;
+    virtual void DidRecalcStyle(EnumSet<style::Change>) noexcept;
 
     /// @brief Whether the element is a text field: a text area, or an input whose type is text-like.
     KRYS_NODISCARD virtual bool IsTextField() const noexcept

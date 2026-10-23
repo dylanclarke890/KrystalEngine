@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 namespace krys::boo

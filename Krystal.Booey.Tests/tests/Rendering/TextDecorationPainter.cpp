@@ -14,6 +14,10 @@ namespace krys::boo::tests
         u8"<style>body{margin:0;font:16px "
         u8"sans-serif}span{text-decoration:underline;text-decoration-skip-ink:none}</style><span>Hi</span>")
       == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
+(set-inline-stroke
+  (color #000000))
 (draw-lines-for-text
   (point (0,15))
   (thickness 1.00)
@@ -32,6 +36,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}span{text-decoration:overline line-through "
                   u8"blue;text-decoration-thickness:3px}</style><span>Hi</span>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (set-inline-stroke
   (color #0000FF))
 (draw-lines-for-text
@@ -65,6 +71,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}span{text-decoration:underline "
                   u8"red}</style><span>gypsy</span>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (set-inline-stroke
   (color #FF0000))
 (draw-lines-for-text
@@ -97,6 +105,10 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}span{text-decoration:underline "
                   u8"double;text-decoration-skip-ink:none}</style><span>Hi</span>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
+(set-inline-stroke
+  (color #000000))
 (draw-lines-for-text
   (point (0,15))
   (thickness 1.00)
@@ -115,6 +127,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}span{text-decoration:underline wavy "
                   u8"green}</style><span>Hi</span>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (set-inline-stroke
   (color #008000))
 (save)
@@ -138,7 +152,11 @@ namespace krys::boo::tests
                   u8"dotted;text-decoration-skip-ink:none;text-shadow:2px 2px red}</style><span>Hi</span>")
           == Canvas() + u8R"(
 (set-state
-  (change-flags [drop-shadow])
+  (change-flags [fill-brush, stroke-brush, drop-shadow])
+  (fill-brush 
+    (color #000000))
+  (stroke-brush 
+    (color #000000))
   (drop-shadow 
     (offset width=2 height=2)
     (radius 0.00)

@@ -198,9 +198,15 @@ namespace krys::boo
     _resizeLayer = nullptr;
   }
 
+  void EventHandler::SetCapturingMouseEventsElement(RefPtr<dom::Element> &&element) noexcept
+  {
+    _capturingMouseEventsElement = krys::move(element);
+  }
+
   void EventHandler::Clear() noexcept
   {
     _resizeLayer = nullptr;
+    _capturingMouseEventsElement = nullptr;
     ClearElementUnderMouse();
     _lastElementUnderMouse = nullptr;
     _ancestorsOfLastElementUnderMouse.clear();
@@ -574,9 +580,16 @@ namespace krys::boo
     (void)eventType;
     Ref frame = ShareRef(_frame);
 
-    // FIXME: The capturing mouse events element, with mouse capture.
-    // If the target node is a non-element, dispatch on the parent.
-    _elementUnderMouse = GetElementOrAncestorElementForNode(targetNode);
+    // If we're capturing, we always go right to that element.
+    if (_capturingMouseEventsElement)
+    {
+      _elementUnderMouse = _capturingMouseEventsElement;
+    }
+    else
+    {
+      // If the target node is a non-element, dispatch on the parent.
+      _elementUnderMouse = GetElementOrAncestorElementForNode(targetNode);
+    }
 
     krys_debug_assert(!_elementUnderMouse || &_elementUnderMouse->NodeDocument() == frame->Document());
     krys_debug_assert(!_lastElementUnderMouse

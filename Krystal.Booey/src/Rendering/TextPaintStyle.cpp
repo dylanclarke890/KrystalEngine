@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
@@ -113,8 +114,21 @@ namespace krys::boo
       return paintStyle;
     }
 
-    // FIXME: The theme's default and submit button text colours (insideDefaultButton, insideSubmitButton)
-    // come with a theme and form controls.
+    if (lineStyle.InsideDefaultButton())
+    {
+      if (renderer.GetDocument().IsFocusedAndActive())
+      {
+        // FIXME: The system appearance (Settings::useSystemAppearance), once there's a setting.
+        paintStyle.FillColor = RenderTheme::Singleton().DefaultButtonTextColor(style::ColorOptions::None);
+        return paintStyle;
+      }
+    }
+
+    if (lineStyle.InsideSubmitButton())
+    {
+      paintStyle.FillColor = RenderTheme::Singleton().SubmitButtonTextColor(renderer);
+      return paintStyle;
+    }
 
     paintStyle.FillColor = lineStyle.VisitedDependentColorWithColorFilter(
       css::PropertyId::WebkitTextFillColor, paintInfo.PaintBehavior);

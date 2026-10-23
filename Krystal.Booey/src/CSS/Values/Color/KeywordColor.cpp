@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/PlatformColorResolutionState.hpp"
 #include "Krystal.Booey/Graphics/Color/NamedColors.hpp"
-#include "Krystal.Booey/Style/Values/Color/SystemColor.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
@@ -80,7 +80,7 @@ namespace krys::boo::css
       return ColorFromAbsoluteKeyword(keyword);
     }
 
-    return style::SystemColor(keyword, options);
+    return RenderTheme::Singleton().SystemColor(keyword, options);
   }
 
   boo::Color CreateColor(const KeywordColor &unresolved, PlatformColorResolutionState &state) noexcept

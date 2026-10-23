@@ -1,20 +1,21 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/HTML/InputType.hpp"
+#include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 
 namespace krys::boo::html
 {
   /// @brief The base of the text-like input types and number: a field with an inner text element the user
   /// edits, and a placeholder.
-  // FIXME: The spin button (with the theme, G14d), the caps lock indicator, the autofill button and the
-  // datalist dropdown and suggestions.
-  class TextFieldInputType : public InputType
+  // FIXME: The caps lock indicator, the autofill button and the datalist dropdown and suggestions.
+  class TextFieldInputType : public InputType, protected SpinButtonOwner
   {
   private:
     RefPtr<HTMLElement> _container;
     RefPtr<HTMLElement> _innerBlock;
     RefPtr<TextControlInnerTextElement> _innerText;
     RefPtr<HTMLElement> _placeholder;
+    RefPtr<SpinButtonElement> _innerSpinButton;
 
   public:
     ~TextFieldInputType() noexcept override;
@@ -32,6 +33,7 @@ namespace krys::boo::html
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept final;
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept final;
     KRYS_NODISCARD RefPtr<TextControlInnerTextElement> InnerTextElement() const noexcept final;
+    KRYS_NODISCARD HTMLElement *InnerSpinButtonElement() const noexcept final;
 
     KRYS_NODISCARD virtual bool NeedsContainer() const noexcept;
     void CreateShadowSubtree() noexcept override;
@@ -62,6 +64,12 @@ namespace krys::boo::html
     bool AppendFormData(DOMFormData &formData) const noexcept final;
     void SubtreeHasChanged() noexcept final;
     void ElementDidBlur() noexcept final;
+
+    // SpinButtonOwner functions.
+    void FocusAndSelectSpinButtonOwner() noexcept final;
+    KRYS_NODISCARD bool ShouldSpinButtonRespondToMouseEvents() const noexcept final;
+    void SpinButtonStepDown() noexcept final;
+    void SpinButtonStepUp() noexcept final;
 
     KRYS_NODISCARD bool ShouldHaveSpinButton() const noexcept;
 

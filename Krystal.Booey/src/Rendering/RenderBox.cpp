@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/TextAffinity.hpp"
+#include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
@@ -46,6 +47,7 @@
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -5995,7 +5997,10 @@ namespace krys::boo
       return BleedAvoidance::None;
     }
 
-    // FIXME: The theme (mayNeedBleedAvoidance), once there are themed controls.
+    if (!RenderTheme::Singleton().MayNeedBleedAvoidance(style))
+    {
+      return BleedAvoidance::None;
+    }
 
     AffineTransform ctm = context.GetCTM();
     FloatSize contextScaling(static_cast<float>(ctm.XScale()), static_cast<float>(ctm.YScale()));
@@ -6031,6 +6036,36 @@ namespace krys::boo
     return BleedAvoidance::UseTransparencyLayer;
   }
 
+  ControlPart *RenderBox::EnsureControlPart() noexcept
+  {
+    auto &rareData = EnsureRareData();
+    auto type = Style().UsedAppearance();
+
+    // Some form-controls may change because of zooming without recreating
+    // a new renderer (e.g Menulist <-> MenulistButton).
+    if (!rareData.Control || type != rareData.Control->GetType())
+    {
+      rareData.Control = RenderTheme::Singleton().CreateControlPart(*this);
+    }
+
+    return rareData.Control.get();
+  }
+
+  ControlPart *RenderBox::EnsureControlPartForRenderer() noexcept
+  {
+    return RenderTheme::Singleton().CanCreateControlPartForRenderer(*this) ? EnsureControlPart() : nullptr;
+  }
+
+  ControlPart *RenderBox::EnsureControlPartForBorderOnly() noexcept
+  {
+    return RenderTheme::Singleton().CanCreateControlPartForBorderOnly(*this) ? EnsureControlPart() : nullptr;
+  }
+
+  ControlPart *RenderBox::EnsureControlPartForDecorations() noexcept
+  {
+    return RenderTheme::Singleton().CanCreateControlPartForDecorations(*this) ? EnsureControlPart() : nullptr;
+  }
+
   void RenderBox::PaintBoxDecorations(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
     if (!paintInfo.ShouldPaintWithinRoot(*this))
@@ -6042,7 +6077,7 @@ namespace krys::boo
     paintRect.MoveBy(paintOffset);
     AdjustBorderBoxRectForPainting(paintRect);
 
-    // FIXME: The theme's adjusted paint rect (adjustedPaintRect), once there are themed controls.
+    paintRect = RenderTheme::Singleton().AdjustedPaintRect(*this, paintRect);
     auto bleedAvoidance = DetermineBleedAvoidance(paintInfo.Context());
 
     BackgroundPainter backgroundPainter {*this, paintInfo};
@@ -6067,23 +6102,71 @@ namespace krys::boo
       paintInfo.Context().BeginTransparencyLayer(1);
     }
 
-    // FIXME: Native theme appearances (theme().paint, paintDecorations, paintBorderOnly), once there are
-    // themed controls; the CSS background and border are always painted.
+    auto &theme = RenderTheme::Singleton();
+
+    // If we have a native theme appearance, paint that before painting our background.
+    // The theme will tell us whether or not we should also paint the CSS background.
+    bool borderOrBackgroundPaintingIsNeeded = true;
+    if (Style().HasUsedAppearance())
+    {
+      if (auto *control = EnsureControlPartForRenderer())
+      {
+        borderOrBackgroundPaintingIsNeeded = theme.Paint(*this, *control, paintInfo, paintRect);
+      }
+      else
+      {
+        borderOrBackgroundPaintingIsNeeded = theme.Paint(*this, paintInfo, paintRect);
+      }
+    }
 
     BorderPainter borderPainter {*this, paintInfo};
 
-    if (bleedAvoidance == BleedAvoidance::BackgroundOverBorder)
+    if (borderOrBackgroundPaintingIsNeeded)
     {
-      borderPainter.PaintBorder(paintRect, Style(), bleedAvoidance);
-    }
+      if (bleedAvoidance == BleedAvoidance::BackgroundOverBorder)
+      {
+        borderPainter.PaintBorder(paintRect, Style(), bleedAvoidance);
+      }
 
-    backgroundPainter.PaintBackground(paintRect, bleedAvoidance);
+      backgroundPainter.PaintBackground(paintRect, bleedAvoidance);
+
+      if (Style().HasUsedAppearance())
+      {
+        if (auto *control = EnsureControlPartForDecorations())
+        {
+          (void)theme.Paint(*this, *control, paintInfo, paintRect);
+        }
+        else
+        {
+          theme.PaintDecorations(*this, paintInfo, paintRect);
+        }
+      }
+    }
 
     backgroundPainter.PaintBoxShadow(paintRect, Style(), style::ShadowStyle::Inset);
 
     if (bleedAvoidance != BleedAvoidance::BackgroundOverBorder)
     {
-      if (Style().HasVisibleBorderDecoration())
+      bool paintCSSBorder = false;
+
+      if (!Style().HasUsedAppearance())
+      {
+        paintCSSBorder = true;
+      }
+      else if (borderOrBackgroundPaintingIsNeeded)
+      {
+        // The theme will tell us whether or not we should also paint the CSS border.
+        if (auto *control = EnsureControlPartForBorderOnly())
+        {
+          paintCSSBorder = theme.Paint(*this, *control, paintInfo, paintRect);
+        }
+        else
+        {
+          paintCSSBorder = theme.PaintBorderOnly(*this, paintInfo);
+        }
+      }
+
+      if (paintCSSBorder && Style().HasVisibleBorderDecoration())
       {
         borderPainter.PaintBorder(paintRect, Style(), bleedAvoidance);
       }

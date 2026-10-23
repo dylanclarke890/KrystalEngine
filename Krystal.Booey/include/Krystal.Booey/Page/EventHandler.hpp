@@ -112,6 +112,7 @@ namespace krys::boo
     RefPtr<dom::Element> _lastElementUnderMouse;
     List<RefPtr<dom::Element>> _ancestorsOfLastElementUnderMouse;
     RefPtr<dom::Element> _mouseMoveTargetOverride;
+    RefPtr<dom::Element> _capturingMouseEventsElement;
 
     RefPtr<Scrollbar> _lastScrollbarUnderMouse;
 
@@ -150,6 +151,9 @@ namespace krys::boo
 
     /// @brief Called when the layer whose resizer is being dragged is destroyed.
     void ResizeLayerDestroyed() noexcept;
+
+    /// @brief Sends mouse events to @p element, wherever the mouse is, until it's cleared.
+    void SetCapturingMouseEventsElement(RefPtr<dom::Element> &&element) noexcept;
 
     KRYS_NODISCARD bool MousePressed() const noexcept
     {

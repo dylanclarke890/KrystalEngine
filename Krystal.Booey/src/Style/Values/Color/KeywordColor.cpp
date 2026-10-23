@@ -1,11 +1,11 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/Color.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Color/CurrentColor.hpp"
-#include "Krystal.Booey/Style/Values/Color/SystemColor.hpp"
 
 namespace krys::boo::style
 {
@@ -20,7 +20,8 @@ namespace krys::boo::style
                                                             : protectedDocument->LinkColor(state.Style)};
       case css::ValueId::WebkitActivelink: return {protectedDocument->ActiveLinkColor(state.Style)};
       case css::ValueId::WebkitFocusRingColor:
-        return {FocusRingColor(DocumentStyleColorOptions(*protectedDocument, &state.Style))};
+        return {RenderTheme::Singleton().FocusRingColor(
+          DocumentStyleColorOptions(*protectedDocument, &state.Style))};
       case css::ValueId::Currentcolor: return {CurrentColor()};
       default:
         return {css::ColorFromKeyword(unresolved.Value,

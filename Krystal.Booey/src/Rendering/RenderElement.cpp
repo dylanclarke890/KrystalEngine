@@ -40,6 +40,7 @@
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderTableSection.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -1690,9 +1691,9 @@ namespace krys::boo
     auto options = DocumentStyleColorOptions(GetDocument(), &Style());
     if (GetDocument().Selection().IsFocusedAndActive())
     {
-      return RenderTheme::ActiveSelectionForegroundColor(options);
+      return RenderTheme::Singleton().ActiveSelectionForegroundColor(options);
     }
-    return RenderTheme::InactiveSelectionForegroundColor(options);
+    return RenderTheme::Singleton().InactiveSelectionForegroundColor(options);
   }
 
   RenderElement *RenderElement::RendererForPseudoStyleAcrossShadowBoundary() const noexcept
@@ -1763,7 +1764,7 @@ namespace krys::boo
     auto &selection = GetDocument().Selection();
     if (selection.ShouldShowBlockCursor() && selection.IsCaret())
     {
-      return RenderTheme::TransformSelectionBackgroundColor(
+      return RenderTheme::Singleton().TransformSelectionBackgroundColor(
         Style().VisitedDependentColorWithColorFilter(css::PropertyId::Color), options);
     }
 
@@ -1779,16 +1780,16 @@ namespace krys::boo
       if (pseudoStyle
           && pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor).IsValid())
       {
-        return RenderTheme::TransformSelectionBackgroundColor(
+        return RenderTheme::Singleton().TransformSelectionBackgroundColor(
           pseudoStyle->VisitedDependentColorWithColorFilter(css::PropertyId::BackgroundColor), options);
       }
     }
 
     if (selection.IsFocusedAndActive())
     {
-      return RenderTheme::ActiveSelectionBackgroundColor(options);
+      return RenderTheme::Singleton().ActiveSelectionBackgroundColor(options);
     }
-    return RenderTheme::InactiveSelectionBackgroundColor(options);
+    return RenderTheme::Singleton().InactiveSelectionBackgroundColor(options);
   }
 
 #pragma endregion

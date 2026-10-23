@@ -1,4 +1,5 @@
-﻿#include "Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersCustomInlines.hpp"
+﻿#include "Krystal.Booey/Rendering/RenderTheme.hpp"
+#include "Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersCustomInlines.hpp"
 
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 

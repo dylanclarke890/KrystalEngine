@@ -8,6 +8,7 @@
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -94,7 +95,10 @@ namespace krys::boo::style::tests
 
     SECTION("Every rule of the sheets parses")
     {
-      RequireFullyParsed(css::HTMLUserAgentStyleSheet, UserAgentStyle::DefaultStyleSheet);
+      // The default sheet is the HTML sheet followed by the theme's.
+      RequireFullyParsed(css::CSSOMString(css::HTMLUserAgentStyleSheet)
+                           + css::CSSOMString(RenderTheme::Singleton().ExtraDefaultStyleSheet()),
+                         UserAgentStyle::DefaultStyleSheet);
       RequireFullyParsed(css::QuirksUserAgentStyleSheet, UserAgentStyle::QuirksStyleSheet);
       RequireFullyParsed(css::CounterStylesUserAgentStyleSheet, UserAgentStyle::CounterStylesStyleSheet);
     }

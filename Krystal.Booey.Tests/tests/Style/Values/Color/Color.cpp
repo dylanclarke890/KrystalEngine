@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
@@ -19,7 +20,6 @@
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"
 #include "Krystal.Booey/Style/Values/Color/ContrastColor.hpp"
 #include "Krystal.Booey/Style/Values/Color/RelativeColor.hpp"
-#include "Krystal.Booey/Style/Values/Color/SystemColor.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
 #include <string>
 
@@ -224,7 +224,7 @@ namespace krys::boo::style::tests
       CHECK(keyword(css::ValueId::WebkitActivelink).GetResolvedColor()
             == css::ColorFromKeyword(css::ValueId::WebkitActivelink, ColorOptions::None));
       CHECK(keyword(css::ValueId::WebkitFocusRingColor).GetResolvedColor()
-            == FocusRingColor(ColorOptions::None));
+            == RenderTheme::Singleton().FocusRingColor(ColorOptions::None));
     }
 
     SECTION("system colours follow the style's colour scheme")

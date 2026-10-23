@@ -85,6 +85,8 @@ namespace krys::boo::display_list
     void DrawGlyphsImmediate(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,
                              const FloatPoint &localAnchor, FontSmoothingMode) noexcept final;
     void DrawDisplayList(const DisplayList &) noexcept final;
+    void DrawControlPart(ControlPart &, const FloatRoundedRect &borderRect, float deviceScaleFactor,
+                         const ControlStyle &) noexcept final;
     void DrawNativeImage(NativeImage &, const FloatRect &destRect, const FloatRect &srcRect,
                          ImagePaintingOptions) noexcept final;
     void DrawPattern(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,

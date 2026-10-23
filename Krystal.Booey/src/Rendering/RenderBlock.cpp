@@ -25,6 +25,7 @@
 #include "Krystal.Booey/Rendering/RenderListMarker.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -1206,8 +1207,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The theme's repaint rect (RenderTheme::adjustRepaintRect), once there's a theme.
-    AddVisualOverflow(LayoutRect(SnappedIntRect(BorderBoxRect())));
+    FloatRect inflatedRect = BorderBoxRect();
+    RenderTheme::Singleton().AdjustRepaintRect(*this, inflatedRect);
+    AddVisualOverflow(LayoutRect(SnappedIntRect(LayoutRect(inflatedRect))));
+
+    // FIXME: The fragments' visual overflow (addFragmentsVisualOverflowFromTheme), with fragmented flows.
   }
 
   void RenderBlock::SetLogicalLeftForChild(RenderBox &child, LayoutUnit logicalLeft,

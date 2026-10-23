@@ -22,6 +22,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlMultiLine.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControlSingleLine.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -330,8 +331,13 @@ namespace krys::boo::layout_integration
 
       if (Is<html::HTMLFormControlElement>(renderBox.GetElement()))
       {
-        // FIXME: For "leaf" theme objects like checkbox, let the theme decide what the baseline position is
-        // (baselinePosition), with the theme.
+        // For "leaf" theme objects like checkbox, let the theme decide what the baseline position is.
+        auto &theme = RenderTheme::Singleton();
+        if (renderBox.Style().HasUsedAppearance()
+            && !theme.IsControlContainer(renderBox.Style().UsedAppearance()))
+        {
+          return LayoutUnit(theme.BaselinePosition(renderBox));
+        }
 
         // Non-RenderTextControlSingleLine input type like input type color.
         if (auto *container = DynamicDowncast<RenderBox>(renderBox.FirstInFlowChild()))
@@ -463,8 +469,10 @@ namespace krys::boo::layout_integration
         {
           return false;
         }
-        // FIXME: Theme appearances (hasUsedAppearance with a non-container appearance), once there's a theme.
-        return !blockFlow->ChildrenInline() || blockFlow->HasContentfulInlineOrBlockLine()
+        auto hasAppareance =
+          blockFlow->Style().HasUsedAppearance()
+          && !RenderTheme::Singleton().IsControlContainer(blockFlow->Style().UsedAppearance());
+        return hasAppareance || !blockFlow->ChildrenInline() || blockFlow->HasContentfulInlineOrBlockLine()
                || blockFlow->HasLineIfEmpty();
       };
 

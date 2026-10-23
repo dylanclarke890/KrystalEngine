@@ -175,6 +175,13 @@ namespace krys::boo::display_list
     _items.push_back(display_list::DrawDisplayList(ShareRef(displayList)));
   }
 
+  void RecorderImpl::DrawControlPart(ControlPart &part, const FloatRoundedRect &borderRect,
+                                     float deviceScaleFactor, const ControlStyle &style) noexcept
+  {
+    AppendStateChangeItemIfNecessary();
+    _items.push_back(display_list::DrawControlPart(part, borderRect, deviceScaleFactor, style));
+  }
+
   void RecorderImpl::DrawNativeImage(NativeImage &image, const FloatRect &destRect, const FloatRect &srcRect,
                                      ImagePaintingOptions options) noexcept
   {

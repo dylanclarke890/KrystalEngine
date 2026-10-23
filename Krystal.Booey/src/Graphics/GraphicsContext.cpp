@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
@@ -391,6 +392,12 @@ namespace krys::boo
   {
     FloatSegment line[1] {{0, rect.Width()}};
     DrawLinesForText(rect.Location(), rect.Height(), line, isPrinting, doubleUnderlines, style);
+  }
+
+  void GraphicsContext::DrawControlPart(ControlPart &part, const FloatRoundedRect &borderRect,
+                                        float deviceScaleFactor, const ControlStyle &style) noexcept
+  {
+    part.Draw(*this, borderRect, deviceScaleFactor, style);
   }
 
   void GraphicsContext::DrawDisplayList(const display_list::DisplayList &displayList) noexcept

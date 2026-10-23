@@ -275,7 +275,7 @@ namespace krys::boo::tests
     document.UpdateLayout();
     CHECK(layoutContext.DidFirstLayout());
     CHECK_FALSE(layoutContext.NeedsLayout());
-    CHECK(fixture.Rendered(u8"p").GetColor() == Black);
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
 
     fixture.View().Resize({1'200, 600});
     CHECK(layoutContext.IsLayoutPending());
@@ -283,7 +283,7 @@ namespace krys::boo::tests
 
     // Style updates alone don't re-evaluate media queries for viewport changes; layout does.
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Black);
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
 
     CHECK(document.UpdateLayout() == dom::Document::UpdateLayoutResult::ChangesDone);
     CHECK_FALSE(layoutContext.IsLayoutPending());
@@ -326,7 +326,7 @@ namespace krys::boo::tests
     </style><p id=p>x</p>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Black);
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
 
     auto paged = document.MatchMedia(u8"(overflow-block: paged)");
     CHECK_FALSE(paged->Matches());
@@ -339,7 +339,7 @@ namespace krys::boo::tests
     fixture.View().SetMediaType(css::CSSOMStringAtom {u8"screen"});
     fixture.View().SetPagination({.Mode = PaginationMode::TopToBottomPaginated});
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Black);
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
     document.EvaluateMediaQueriesAndReportChanges();
     CHECK(paged->Matches());
   }
@@ -351,7 +351,7 @@ namespace krys::boo::tests
     </style><p id=p>x</p>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
-    CHECK(fixture.Rendered(u8"p").GetColor() == Black);
+    CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 1);
 
     auto hiDPI = document.MatchMedia(u8"(resolution: 2x)");

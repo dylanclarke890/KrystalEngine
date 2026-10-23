@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
@@ -175,24 +176,24 @@ namespace krys::boo::tests
     RenderSelectionFixture fixture(u8"<p id=a>Some words</p>");
     fixture.Select(fixture.TextIn(u8"a"), 0, fixture.TextIn(u8"a"), 4);
     auto active = fixture.Painted();
-    // Active: white text on blue, the blue made translucent so that it looks the same over white.
-    auto activeBackground = SerialisationForRenderTreeAsText(
-      RenderTheme::ActiveSelectionBackgroundColor(style::ColorOptions::None));
-    CHECK(activeBackground != u8"#3367D1");
+    // Active: the accent colour at 30%, made translucent so that it looks the same over white; the text keeps
+    // its colour (Adwaita has no selection foreground colours).
+    auto &theme = RenderTheme::Singleton();
+    auto activeBackground =
+      SerialisationForRenderTreeAsText(theme.ActiveSelectionBackgroundColor(style::ColorOptions::None));
     auto overWhite =
-      BlendSourceOver(Color::white, RenderTheme::ActiveSelectionBackgroundColor(style::ColorOptions::None))
+      BlendSourceOver(Color::white, theme.ActiveSelectionBackgroundColor(style::ColorOptions::None))
         .ToColorTypeLossy<SRGBA<uint8>>()
         .Resolved();
-    CHECK(std::abs(static_cast<int32>(overWhite.Blue) - 209) <= 2);
+    CHECK(std::abs(static_cast<int32>(overWhite.Blue) - 247) <= 2);
+    CHECK(std::abs(static_cast<int32>(overWhite.Red) - 194) <= 2);
     CHECK(active.find(u8"(color " + activeBackground + u8")") != utf8_string::npos);
-    CHECK(active.find(u8"#FFFFFF") != utf8_string::npos);
 
     fixture.Document->SetFocusedAndActive(false);
     auto inactive = fixture.Painted();
-    auto inactiveBackground = SerialisationForRenderTreeAsText(
-      RenderTheme::InactiveSelectionBackgroundColor(style::ColorOptions::None));
+    auto inactiveBackground =
+      SerialisationForRenderTreeAsText(theme.InactiveSelectionBackgroundColor(style::ColorOptions::None));
     CHECK(inactive.find(activeBackground) == utf8_string::npos);
     CHECK(inactive.find(u8"(color " + inactiveBackground + u8")") != utf8_string::npos);
-    CHECK(inactive.find(u8"#323232") != utf8_string::npos);
   }
 }

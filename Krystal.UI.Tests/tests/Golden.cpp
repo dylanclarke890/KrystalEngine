@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -235,6 +236,19 @@ namespace krys::ui::tests
     // The fields lay out as Chrome's do, but its golden is only reported: its DirectWrite glyphs leave a seam
     // between Ahem's boxes (see "Golden: text").
     CheckPage("textfields", 360u, 240u, true);
+  }
+
+  TEST_CASE("Golden: controls", "[UI][GPU][Golden]")
+  {
+    // The controls are drawn by the Adwaita theme, which isn't Chrome's look, so Chrome's golden is only
+    // reported. The scene's script makes a checkbox indeterminate for Chrome; it's done the same way here.
+    CheckPage("controls", 360u, 240u, true,
+              [](View &view)
+              {
+                Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"mixed"))
+                  .SetIndeterminate(true);
+                view.UpdateRendering();
+              });
   }
 
   TEST_CASE("Golden: scrollbars", "[UI][GPU][Golden]")

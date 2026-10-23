@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -19,6 +20,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFormControls.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
@@ -128,7 +130,7 @@ namespace krys::boo
       : _view(view), _tableBuilder(CreateUnique<Table>(*this)), _blockBuilder(CreateUnique<Block>(*this)),
         _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this)),
         _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this)),
-        _rubyBuilder(CreateUnique<Ruby>(*this))
+        _rubyBuilder(CreateUnique<Ruby>(*this)), _formControlsBuilder(CreateUnique<FormControls>(*this))
   {
     krys_assert(!s_current || &_view != &s_current->_view);
     _previous = s_current;
@@ -307,6 +309,12 @@ namespace krys::boo
       return;
     }
 
+    if (auto *button = DynamicDowncast<RenderButton>(parent))
+    {
+      FormControlsBuilder().Attach(*button, krys::move(child), beforeChild);
+      return;
+    }
+
     if (auto *gridParent = DynamicDowncast<RenderGrid>(parent))
     {
       AttachToRenderGrid(*gridParent, krys::move(child), beforeChild);
@@ -353,8 +361,13 @@ namespace krys::boo
     krys_debug_assert(!parent.BeingDestroyed());
     krys_debug_assert(!child.BeingDestroyed());
 
-    // FIXME: SVG text, menu lists, buttons and SVG inlines, containers and roots, once there are their
-    // renderers and builders.
+    // FIXME: SVG text, menu lists and SVG inlines, containers and roots, once there are their renderers and
+    // builders.
+
+    if (auto *button = DynamicDowncast<RenderButton>(parent))
+    {
+      return FormControlsBuilder().Detach(*button, child, willBeDestroyed);
+    }
 
     if (auto *blockFlow = DynamicDowncast<RenderBlockFlow>(parent))
     {

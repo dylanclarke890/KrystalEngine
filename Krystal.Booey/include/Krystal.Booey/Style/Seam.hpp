@@ -48,7 +48,6 @@
 // evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
 // the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
 // header, with its real implementation, when its slice is ported:
-//   - `RenderTheme` (focus ring metrics, selection colours): rendering.
 //   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security function: `dom::Document` (upstream member) once it has a security origin.
@@ -84,47 +83,6 @@ namespace krys::boo
   class StyleImage;
 
   class RenderStyle;
-
-  class RenderTheme
-  {
-  public:
-    KRYS_NODISCARD static float PlatformFocusRingWidth() noexcept
-    {
-      return 3;
-    }
-
-    KRYS_NODISCARD static float PlatformFocusRingOffset(float outlineWidth) noexcept
-    {
-      return std::max<float>(outlineWidth - PlatformFocusRingWidth(), 0);
-    }
-
-    /// @brief How long the caret stays on and off as it blinks; none if it doesn't blink.
-    // FIXME: The system's caret blink time, once the host reports it.
-    KRYS_NODISCARD static Maybe<MonotonicTime::duration> CaretBlinkInterval() noexcept
-    {
-      return std::chrono::milliseconds(500);
-    }
-
-    // Text selection colors.
-    KRYS_NODISCARD static Color ActiveSelectionBackgroundColor(style::ColorOptions options) noexcept;
-    KRYS_NODISCARD static Color InactiveSelectionBackgroundColor(style::ColorOptions options) noexcept;
-    KRYS_NODISCARD static Color TransformSelectionBackgroundColor(const Color &color,
-                                                                  style::ColorOptions options) noexcept;
-    KRYS_NODISCARD static Color ActiveSelectionForegroundColor(style::ColorOptions options) noexcept;
-    KRYS_NODISCARD static Color InactiveSelectionForegroundColor(style::ColorOptions options) noexcept;
-
-    /// @brief Paints a resizer's grip (two diagonal lines) in the bottom corner of @p resizerCornerRect.
-    static void PaintPlatformResizer(const RenderLayerModelObject &renderer, GraphicsContext &context,
-                                     const LayoutRect &resizerCornerRect) noexcept;
-    /// @brief Paints the frame around a resizer that sits between scrollbars.
-    static void PaintPlatformResizerFrame(const RenderLayerModelObject &renderer, GraphicsContext &context,
-                                          const LayoutRect &resizerAbsRect) noexcept;
-
-    // NOTE: This is just a legacy hard-coded list of elements that have some appearance value in html.css
-    // FIXME: Remove when devolvable widgets are universally enabled.
-    // FIXME: Also the `::-webkit-list-button` part of user agent shadow trees, once there are any.
-    KRYS_NODISCARD static bool HasAppearanceForElementTypeFromUAStyle(const dom::Element &) noexcept;
-  };
 
   class RenderView;
   class RenderBlock;

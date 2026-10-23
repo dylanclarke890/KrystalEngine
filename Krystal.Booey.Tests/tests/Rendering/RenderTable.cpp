@@ -605,7 +605,9 @@ layer at (0,0) size 800x10
   (composite-operation source-over)
   (blend-mode normal))
 (set-state
-  (change-flags [stroke-style, should-antialias])
+  (change-flags [fill-brush, stroke-style, should-antialias])
+  (fill-brush 
+    (color #000000))
   (stroke-style no-stroke)
   (should-antialias 0))
 (draw-rect

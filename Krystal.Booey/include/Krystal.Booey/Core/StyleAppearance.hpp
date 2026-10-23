@@ -2,6 +2,11 @@
 
 #include "Krystal.Core/Numeric.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   // Must follow css-value-keywords.in order
@@ -45,4 +50,6 @@ namespace krys::boo
   };
 
   constexpr int AppearanceBitWidth = 7;
+
+  TextStream &operator<<(TextStream &ts, StyleAppearance appearance) noexcept;
 }

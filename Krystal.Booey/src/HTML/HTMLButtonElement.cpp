@@ -5,6 +5,8 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/Rendering/RenderButton.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
@@ -13,6 +15,16 @@ namespace krys::boo::html
       : HTMLFormControlElement(document, HTMLElementInterface::Button)
   {
     SetEventTargetFlag(dom::EventTargetFlags::HasActivationBehavior);
+  }
+
+  RenderPtr<RenderElement> HTMLButtonElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    // https://html.spec.whatwg.org/multipage/rendering.html#button-layout
+    if (style.IsDisplayFlexibleOrGridFormattingContextBox())
+    {
+      return HTMLFormControlElement::CreateElementRenderer(krys::move(style));
+    }
+    return CreateRenderer<RenderButton>(*this, krys::move(style));
   }
 
   dom::DOMString HTMLButtonElement::FormControlType() const noexcept

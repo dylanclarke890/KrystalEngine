@@ -61,6 +61,7 @@ namespace krys::boo
     class Block;
     class BlockFlow;
     class FirstLetter;
+    class FormControls;
     class Inline;
     class List;
     class Ruby;
@@ -78,6 +79,7 @@ namespace krys::boo
     UniquePtr<FirstLetter> _firstLetterBuilder;
     UniquePtr<List> _listBuilder;
     UniquePtr<Ruby> _rubyBuilder;
+    UniquePtr<FormControls> _formControlsBuilder;
     IsInternalMove _internalMovesType {IsInternalMove::No};
     TearDownType _tearDownType {TearDownType::Root};
     const RenderElement *_subtreeDestroyRoot {nullptr};
@@ -199,6 +201,10 @@ namespace krys::boo
     KRYS_NODISCARD Ruby &RubyBuilder() noexcept
     {
       return *_rubyBuilder;
+    }
+    KRYS_NODISCARD FormControls &FormControlsBuilder() noexcept
+    {
+      return *_formControlsBuilder;
     }
   };
 }

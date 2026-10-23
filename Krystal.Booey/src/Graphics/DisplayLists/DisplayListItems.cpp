@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
+#include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
@@ -497,6 +498,28 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"length", Length());
   }
 
+  DrawControlPart::DrawControlPart(ControlPart &part, const FloatRoundedRect &borderRect,
+                                   float deviceScaleFactor, const ControlStyle &style) noexcept
+      : _part(ShareRef(part)), _borderRect(borderRect), _deviceScaleFactor(deviceScaleFactor), _style(style)
+  {
+  }
+
+  DrawControlPart::DrawControlPart(const DrawControlPart &) noexcept = default;
+  DrawControlPart::DrawControlPart(DrawControlPart &&) noexcept = default;
+  DrawControlPart &DrawControlPart::operator=(const DrawControlPart &) noexcept = default;
+  DrawControlPart &DrawControlPart::operator=(DrawControlPart &&) noexcept = default;
+  DrawControlPart::~DrawControlPart() noexcept = default;
+
+  ControlPart &DrawControlPart::Part() const noexcept
+  {
+    return *_part;
+  }
+
+  StyleAppearance DrawControlPart::GetType() const noexcept
+  {
+    return _part->GetType();
+  }
+
   DrawDisplayList::DrawDisplayList(Ref<const boo::display_list::DisplayList> &&displayList) noexcept
       : _displayList(krys::move(displayList))
   {
@@ -656,6 +679,19 @@ namespace krys::boo::display_list
     ts.DumpProperty(u8"dest-rect", DestRect());
     ts.DumpProperty(u8"phase", Phase());
     ts.DumpProperty(u8"spacing", Spacing());
+  }
+
+  void DrawControlPart::Apply(GraphicsContext &context) const noexcept
+  {
+    context.DrawControlPart(*_part, _borderRect, _deviceScaleFactor, _style);
+  }
+
+  void DrawControlPart::Dump(TextStream &ts, EnumSet<AsTextFlag>) const noexcept
+  {
+    ts.DumpProperty(u8"type", GetType());
+    ts.DumpProperty(u8"border-rect", BorderRect());
+    ts.DumpProperty(u8"device-scale-factor", DeviceScaleFactor());
+    ts.DumpProperty(u8"style", Style());
   }
 
   void DrawDisplayList::Apply(GraphicsContext &context) const noexcept

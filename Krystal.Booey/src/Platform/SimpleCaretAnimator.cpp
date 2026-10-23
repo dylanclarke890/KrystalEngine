@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo
@@ -10,7 +11,7 @@ namespace krys::boo
   void SimpleCaretAnimator::UpdateAnimationProperties() noexcept
   {
     auto currentTime = Now();
-    auto caretBlinkInterval = RenderTheme::CaretBlinkInterval();
+    auto caretBlinkInterval = RenderTheme::Singleton().CaretBlinkInterval();
 
     SetBlinkingSuspended(!caretBlinkInterval);
 
@@ -38,6 +39,6 @@ namespace krys::boo
   void SimpleCaretAnimator::Start() noexcept
   {
     _lastTimeCaretPaintWasToggled = Now();
-    DidStart(_lastTimeCaretPaintWasToggled, RenderTheme::CaretBlinkInterval());
+    DidStart(_lastTimeCaretPaintWasToggled, RenderTheme::Singleton().CaretBlinkInterval());
   }
 }

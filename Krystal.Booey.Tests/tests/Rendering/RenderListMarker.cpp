@@ -108,7 +108,10 @@ namespace krys::boo::tests
               u8"sans-serif}ul{margin:0;padding-left:30px}</style><ul><li>disc</li><li "
               u8"style=list-style-type:circle>circle</li><li style=list-style-type:square>square</li></ul>")
       == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (set-inline-stroke
+  (color #000000)
   (thickness 1.00))
 (fill-ellipse
   (rect at (14,7) size 5.17x5.17))
@@ -133,7 +136,10 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px "
                   u8"sans-serif}ol{margin:0;padding-left:30px}</style><ol><li>one</li><li>two</li></ol>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (set-inline-stroke
+  (color #000000)
   (thickness 1.00))
 (draw-glyphs
   (local-anchor (8,14))

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
+#include "Krystal.Booey/Rendering/RenderTheme.hpp"
 
 namespace krys::boo::html
 {
@@ -125,6 +126,16 @@ namespace krys::boo::html
   void HTMLSelectElement::Disabled(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+  }
+
+  bool HTMLSelectElement::UsesMenuList() const noexcept
+  {
+    if (RenderTheme::Singleton().DelegatesMenuListRendering())
+    {
+      return true;
+    }
+
+    return !Multiple() && Size() <= 1;
   }
 
   bool HTMLSelectElement::Multiple() const noexcept

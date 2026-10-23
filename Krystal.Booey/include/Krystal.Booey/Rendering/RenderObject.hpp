@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
+#include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
@@ -36,6 +38,7 @@ namespace krys::boo::layout
 
 namespace krys::boo
 {
+  class ControlPart;
   class FloatPoint;
   class HitTestLocation;
   class HitTestRequest;
@@ -993,6 +996,11 @@ namespace krys::boo
       return !_stateFlags.Contains(StateFlag::VerticalWritingMode);
     }
 
+    /// @brief Whether the renderer is drawn in the dark appearance (its style's colour scheme).
+    KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+    /// @brief The options its system colours are resolved with.
+    KRYS_NODISCARD style::ColorOptions StyleColorOptions() const noexcept;
+
     KRYS_NODISCARD bool IsAtomicInlineLevelBox() const noexcept;
     KRYS_NODISCARD bool IsNonReplacedAtomicInlineLevelBox() const noexcept;
 
@@ -1256,6 +1264,11 @@ namespace krys::boo
       return {};
     }
 
+    /// @brief Updates the renderer from its element's state (a button's text, a table column's span).
+    virtual void UpdateFromElement() noexcept
+    {
+    }
+
     KRYS_NODISCARD virtual bool CanBeSelectionLeaf() const noexcept
     {
       return false;
@@ -1424,8 +1437,10 @@ namespace krys::boo
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
       EnumSet<style::MarginTrimSide> TrimmedMargins;
       bool HasOutlineAutoAncestor {false};
-      // FIXME: Reflections, referenced SVG resources, the ::backdrop renderer and the
-      // control part, once there are any.
+      // FIXME: Reflections, referenced SVG resources and the ::backdrop renderer, once there are any.
+
+      // From RenderBox
+      RefPtr<ControlPart> Control;
     };
     KRYS_NODISCARD bool HasRareData() const noexcept
     {

@@ -9,6 +9,8 @@ namespace krys::boo::tests
             "[Rendering][TextBoxPainter]")
   {
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}</style>Hi there") == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,14))
   (font-smoothing-mode auto)
@@ -26,6 +28,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}</style>a <b>bold</b> <span "
                   u8"style=font-size:24px>big</span>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,22))
   (font-smoothing-mode auto)
@@ -49,6 +53,8 @@ namespace krys::boo::tests
     CHECK(Painted(u8"<style>body{margin:0;font:20px sans-serif;text-shadow:2px 3px 4px red, 1px 1px "
                   u8"green}</style>Shadow")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (save)
 (clip
   (rect at (-65,-65) size 204.28x154))
@@ -86,6 +92,8 @@ namespace krys::boo::tests
   {
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif}</style><div dir=rtl>abc</div>")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (174.20,14))
   (font-smoothing-mode auto)
@@ -100,6 +108,8 @@ namespace krys::boo::tests
   {
     CHECK(Painted(u8"<style>body{margin:0;font:16px sans-serif;text-emphasis:dot}</style>Dots")
           == Canvas() + u8R"(
+(set-inline-fill-color
+  (color #000000))
 (draw-glyphs
   (local-anchor (0,23))
   (font-smoothing-mode auto)

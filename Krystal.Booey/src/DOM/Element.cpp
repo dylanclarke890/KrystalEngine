@@ -16,6 +16,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeIterator.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
@@ -1023,6 +1024,16 @@ namespace krys::boo::dom
   style::UnadjustedStyle Element::ResolveStyle(const style::ResolutionContext &resolutionContext) noexcept
   {
     return StyleResolver().UnadjustedStyleForElement(*this, resolutionContext);
+  }
+
+  void Element::WillRecalcStyle(EnumSet<style::Change>) noexcept
+  {
+    krys_debug_assert(HasCustomStyleResolveCallbacks());
+  }
+
+  void Element::DidRecalcStyle(EnumSet<style::Change>) noexcept
+  {
+    krys_debug_assert(HasCustomStyleResolveCallbacks());
   }
 
   Maybe<style::UnadjustedStyle> Element::ResolveCustomStyle(const style::ResolutionContext &,
