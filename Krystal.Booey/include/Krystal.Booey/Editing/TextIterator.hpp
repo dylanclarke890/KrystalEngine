@@ -55,6 +55,14 @@ namespace krys::boo
                                                             TextIteratorBehaviors behaviors = {},
                                                             bool isDisplayString = false) noexcept;
 
+  /// @brief @p stringToFold with its quotation marks (curly, low, angle and corner quotes, primes) replaced
+  /// by
+  /// `'` and `"`, so searches match either.
+  /// @param sourceOffsets If given, receives the offset in @p stringToFold of each byte of the result, and of
+  /// its end.
+  KRYS_NODISCARD utf8_string FoldQuoteMarks(utf8_stringview stringToFold,
+                                            List<uint32> *sourceOffsets = nullptr) noexcept;
+
   // FIXME: Move this somewhere else in the editing directory. It doesn't belong in the header with
   // TextIterator.
   KRYS_NODISCARD bool IsRendererReplacedElement(const RenderObject *renderer,

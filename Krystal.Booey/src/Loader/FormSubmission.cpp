@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Platform/Network/FormData.hpp"
 #include "Krystal.Booey/Platform/Network/FormDataBuilder.hpp"
 #include "Krystal.Booey/URL/URLParser.hpp"
@@ -273,5 +274,23 @@ namespace krys::boo
       requestURL.SetQuery(_formData->FlattenToString());
     }
     return requestURL;
+  }
+
+  void FormSubmission::PopulateFrameLoadRequest(FrameLoadRequest &frameRequest) const noexcept
+  {
+    krys_assert(_method == Method::Post || _method == Method::Get);
+
+    if (!_target.empty())
+    {
+      frameRequest.SetFrameName(dom::DOMStringAtom(_target));
+    }
+
+    if (_method == Method::Post)
+    {
+      // FIXME: The body and its content type, once requests carry them.
+      frameRequest.GetResourceRequest().SetHTTPMethod(u8"POST");
+    }
+
+    frameRequest.GetResourceRequest().SetURL(RequestURL());
   }
 }

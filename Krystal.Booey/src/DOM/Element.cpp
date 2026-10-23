@@ -569,6 +569,23 @@ namespace krys::boo::dom
     html::FocusAlgorithms::FireFocusEvent(DOMStringAtom(u8"blur"), *this, relatedTarget);
   }
 
+  void Element::FindTargetAndUpdateFocusAppearance(SelectionRestorationMode restorationMode,
+                                                   SelectionRevealMode revealMode) noexcept
+  {
+    auto target = FocusAppearanceUpdateTarget();
+    if (!target)
+    {
+      return;
+    }
+
+    target->UpdateFocusAppearance(restorationMode, revealMode);
+  }
+
+  RefPtr<Element> Element::FocusAppearanceUpdateTarget() noexcept
+  {
+    return ShareRefPtr(this);
+  }
+
   void Element::UpdateFocusAppearance(SelectionRestorationMode, SelectionRevealMode revealMode) noexcept
   {
     if (IsRootEditableElement())

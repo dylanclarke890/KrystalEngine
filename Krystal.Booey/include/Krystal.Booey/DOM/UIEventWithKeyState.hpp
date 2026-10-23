@@ -150,4 +150,18 @@ namespace krys::boo::dom
       return result;
     }
   };
+
+  /// @brief The first keyboard or mouse event in the chain of events from @p event through their underlying
+  /// events (a simulated click's key press), if any.
+  KRYS_NODISCARD inline UIEventWithKeyState *FindEventWithKeyState(Event *event) noexcept
+  {
+    for (auto *current = event; current; current = current->UnderlyingEvent())
+    {
+      if (current->IsKeyboardEvent() || current->IsMouseEvent())
+      {
+        return static_cast<UIEventWithKeyState *>(current);
+      }
+    }
+    return nullptr;
+  }
 }

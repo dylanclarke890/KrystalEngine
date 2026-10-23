@@ -3,6 +3,9 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/MicroParserResult.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include <charconv>
 #include <cmath>
 
@@ -167,6 +170,51 @@ namespace krys::boo::html
         return {.Error = MicroParserError::InvalidCharacter};
       }
       return {.Value = value};
+    }
+
+    /// @brief The numbers in @p input, separated by ASCII whitespace, commas or semicolons, as an image map
+    /// area's `coords` gives them: anything after a number up to the next separator is ignored, and a part
+    /// that doesn't start with a number is zero.
+    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-list-of-floating-point-numbers
+    KRYS_NODISCARD static List<double> ParseListOfFloatingPointNumbers(dom::DOMStringView input) noexcept
+    {
+      constexpr auto isSpaceOrDelimiter = [](char8 c)
+      {
+        return krys::text::IsASCIIWhitespace(c) || c == u8',' || c == u8';';
+      };
+      constexpr auto isNumberStart = [](char8 c)
+      {
+        return krys::text::IsASCIIDigit(c) || c == u8'.' || c == u8'-';
+      };
+
+      List<double> numbers;
+      position_variable position = input.begin();
+
+      // This skips past any leading delimiters.
+      infra::StringAlgorithms::AdvancePositionWhile(input, position, isSpaceOrDelimiter);
+
+      while (position != input.end())
+      {
+        // This skips past leading garbage.
+        infra::StringAlgorithms::AdvancePositionWhile(
+          input, position, [&](char8 c) { return !isSpaceOrDelimiter(c) && !isNumberStart(c); });
+
+        auto numberStart = position;
+        infra::StringAlgorithms::AdvancePositionWhile(input, position,
+                                                      [&](char8 c) { return !isSpaceOrDelimiter(c); });
+
+        auto from = reinterpret_cast<const char *>(input.data() + std::distance(input.begin(), numberStart));
+        auto to = reinterpret_cast<const char *>(input.data() + std::distance(input.begin(), position));
+        double number {};
+        auto result = std::from_chars(from, to, number);
+        numbers.push_back(result.ec == std::errc {} && result.ptr != from && std::isfinite(number) ? number
+                                                                                                   : 0);
+
+        // This skips past the delimiter.
+        infra::StringAlgorithms::AdvancePositionWhile(input, position, isSpaceOrDelimiter);
+      }
+
+      return numbers;
     }
 
     template <Number T>

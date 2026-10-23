@@ -15,12 +15,13 @@ namespace krys::boo
 namespace krys::boo::html
 {
   class HTMLImageLoader;
+  class HTMLMapElement;
   class HTMLPictureElement;
   class HTMLSourceElement;
   struct ImageCandidate;
 
   /// @see https://html.spec.whatwg.org/#htmlimageelement
-  // FIXME: Forms (form association), image maps (usemap), lazy loading, decode(), the legacy Image()
+  // FIXME: Forms (form association), lazy loading, decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
   class HTMLImageElement : public HTMLElement
   {
@@ -53,6 +54,11 @@ namespace krys::boo::html
     HTMLImageElement(dom::Document &document) noexcept;
     ~HTMLImageElement() noexcept override;
 
+    /// @brief The image map `usemap` names: the first `map` in the image's tree whose `id` or `name` is the
+    /// name after its `#`.
+    /// @see https://html.spec.whatwg.org/#image-map
+    KRYS_NODISCARD HTMLMapElement *AssociatedMapElement() const noexcept;
+
 #pragma region HTMLImageElement - https://html.spec.whatwg.org/#htmlimageelement
 
     /// @see https://html.spec.whatwg.org/#dom-img-alt
@@ -62,16 +68,16 @@ namespace krys::boo::html
     void Alt(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-srcset
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> SrcSet() const noexcept;
+    KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-srcset
-    dom::ExceptionOr<void> SrcSet(dom::USVString &&value) noexcept;
+    void SrcSet(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;
@@ -96,6 +102,10 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-img-ismap
     void IsMap(bool value) noexcept;
+
+    /// @brief Whether the image is a server-side image map: it has `ismap` and no client-side map
+    /// (`usemap`), so a link around it is followed with the coordinates clicked.
+    KRYS_NODISCARD bool IsServerMap() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-controls
     KRYS_NODISCARD bool Controls() const noexcept;
@@ -164,10 +174,10 @@ namespace krys::boo::html
     void Name(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LowSrc() const noexcept;
+    KRYS_NODISCARD dom::USVString LowSrc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-lowsrc
-    dom::ExceptionOr<void> LowSrc(dom::USVString &&value) noexcept;
+    void LowSrc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-align
     KRYS_NODISCARD dom::DOMString Align() const noexcept;
@@ -188,10 +198,10 @@ namespace krys::boo::html
     void VSpace(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-longdesc
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LongDesc() const noexcept;
+    KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-longdesc
-    dom::ExceptionOr<void> LongDesc(dom::USVString &&value) noexcept;
+    void LongDesc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-img-border
     KRYS_NODISCARD dom::DOMString Border() const noexcept;

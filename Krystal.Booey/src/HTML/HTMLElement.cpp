@@ -262,11 +262,11 @@ namespace krys::boo::html
       case AttributeState::False: return false;
       case AttributeState::Auto:
       {
-        // TODO(HTMLELEMENT, DRAGGABLE, HTML): Implement auto behavior for Draggable() getter.
-        //  If the element is an img element, an object element that represents an image, or an a element with
-        //  an href content attribute, the draggable IDL attribute must return true; otherwise, the draggable
-        //  IDL attribute must return false.
-        return false;
+        // If the element is an img element, an object element that represents an image, or an a element with
+        // an href content attribute, the draggable IDL attribute must return true; otherwise, the draggable
+        // IDL attribute must return false.
+        // FIXME: An object element that represents an image, once objects show images.
+        return IsHTMLImageElement() || (IsHTMLAnchorElement() && HasAttribute(u8"href"));
       }
     }
 

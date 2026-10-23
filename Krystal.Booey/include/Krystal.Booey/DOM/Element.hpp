@@ -780,6 +780,16 @@ namespace krys::boo::dom
     virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,
                                        SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
 
+    /// @brief Shows that the element is focused, through the element that shows it.
+    void FindTargetAndUpdateFocusAppearance(
+      SelectionRestorationMode restorationMode,
+      SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept;
+
+    /// @brief The element that shows that this one is focused (the image of an image map's area), or null if
+    /// none does.
+    /// @see https://html.spec.whatwg.org/#focus-processing-model
+    KRYS_NODISCARD virtual RefPtr<Element> FocusAppearanceUpdateTarget() noexcept;
+
     /// @brief The element's renderer, or null if it isn't rendered.
     KRYS_NODISCARD RenderElement *Renderer() const noexcept;
 
@@ -1124,7 +1134,7 @@ namespace krys::boo::dom
                             style::InvalidationScope invalidationScope = style::InvalidationScope::All,
                             HitTestRequest request = {}) noexcept;
     /// @brief Sets the element's focus, and the focus within of its ancestors in the composed tree.
-    void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
+    virtual void SetFocus(bool value, FocusVisibility visibility = FocusVisibility::Invisible) noexcept;
     void SetHasFocusVisible(bool value) noexcept;
     void SetHasFocusWithin(bool value) noexcept;
     /// @brief Gives the element's composed tree ancestors focus within while its focusability is checked.

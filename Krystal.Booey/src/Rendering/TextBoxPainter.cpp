@@ -247,15 +247,23 @@ namespace krys::boo
     {
       if (_paintInfo.Phase == PaintPhase::Foreground)
       {
-        // FIXME: The background fill of document markers, highlights and IME compositions, and platform
-        // document markers (spelling and grammar errors), come with editing.
+        // FIXME: The background fill of document markers and IME compositions, and platform document markers
+        // (spelling and grammar errors), come with editing.
         auto shouldPaintBackgroundFill = [&]
         {
           if (_isPrinting)
           {
             return false;
           }
-          return _haveSelection;
+          if (_haveSelection)
+          {
+            return true;
+          }
+          if (_document.HasHighlight())
+          {
+            return true;
+          }
+          return false;
         };
         if (shouldPaintBackgroundFill())
         {
@@ -292,10 +300,11 @@ namespace krys::boo
     return {};
   }
 
-  // FIXME: Document markers, highlights and IME compositions, with editing.
+  // FIXME: Document markers and IME compositions, with editing.
   void TextBoxPainter::PaintBackgroundFill() noexcept
   {
-    List<MarkedText> markedTexts;
+    auto markedTexts =
+      MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Background);
 
     if (_haveSelection && !_paintInfo.Context().PaintingDisabled())
     {
@@ -381,8 +390,12 @@ namespace krys::boo
   {
     auto shouldPaintSelectionForeground = _haveSelection;
     auto hasTextDecoration = !_style.TextDecorationLineInEffect().IsNone();
-    // FIXME: Decorations from highlights and spelling and grammar errors come with marked text.
-    auto hasDecoration = hasTextDecoration;
+    auto hasHighlightDecoration =
+      _document.HasHighlight()
+      && !MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Decoration)
+            .empty();
+    // FIXME: Decorations from spelling and grammar errors, once there are document markers.
+    auto hasDecoration = hasTextDecoration || hasHighlightDecoration;
 
     auto contentMayNeedStyledMarkedText = [&]
     {
@@ -394,7 +407,11 @@ namespace krys::boo
       {
         return true;
       }
-      // FIXME: Document markers and highlights come with editing.
+      // FIXME: Document markers, once there are any.
+      if (_document.HasHighlight())
+      {
+        return true;
+      }
       return false;
     };
     auto startPosition = _selectableRange.Clamp(TextBox().Start());
@@ -417,7 +434,13 @@ namespace krys::boo
       // subdividing the entire line.
       markedTexts.push_back({startPosition, endPosition, MarkedText::Type::Unmarked});
 
-      // FIXME: Document markers, highlights and dragged and transparent content come with editing.
+      if (!_isPrinting)
+      {
+        // FIXME: Document markers and dragged and transparent content, once there are those.
+        auto highlights =
+          MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Foreground);
+        markedTexts.insert(markedTexts.end(), highlights.begin(), highlights.end());
+      }
     }
     // The selection marked text acts as a placeholder when computing the marked texts for the gaps...
     if (shouldPaintSelectionForeground)

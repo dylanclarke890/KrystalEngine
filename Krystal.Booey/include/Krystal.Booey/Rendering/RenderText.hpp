@@ -165,6 +165,8 @@ namespace krys::boo
     KRYS_NODISCARD Color SelectionForegroundColor() const noexcept;
     KRYS_NODISCARD Color SelectionEmphasisMarkColor() const noexcept;
     KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+    /// @brief The `::target-text` style of the text's nearest element.
+    KRYS_NODISCARD const RenderStyle *TargetTextPseudoStyle() const noexcept;
 
     KRYS_NODISCARD bool CanBeSelectionLeaf() const noexcept override
     {

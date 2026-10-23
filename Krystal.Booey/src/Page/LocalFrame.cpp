@@ -8,9 +8,10 @@
 
 namespace krys::boo
 {
-  LocalFrame::LocalFrame(Page *page) noexcept
+  LocalFrame::LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept
       : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
-        _eventHandler(CreateUnique<EventHandler>(*this))
+        _eventHandler(CreateUnique<EventHandler>(*this)),
+        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
   {
   }
 
@@ -22,9 +23,9 @@ namespace krys::boo
     }
   }
 
-  Ref<LocalFrame> LocalFrame::Create(Page *page) noexcept
+  Ref<LocalFrame> LocalFrame::Create(Page *page, UniquePtr<LocalFrameLoaderClient> loaderClient) noexcept
   {
-    return AdoptRef(*new LocalFrame(page));
+    return AdoptRef(*new LocalFrame(page, krys::move(loaderClient)));
   }
 
   void LocalFrame::SetView(RefPtr<LocalFrameView> &&view) noexcept

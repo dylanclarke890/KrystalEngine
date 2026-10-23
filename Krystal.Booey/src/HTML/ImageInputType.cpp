@@ -10,7 +10,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    KRYS_NODISCARD dom::DOMString Number(int32 value) noexcept
+    KRYS_NODISCARD dom::DOMString ToDecimalString(int32 value) noexcept
     {
       auto string = std::to_string(value);
       return dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size());
@@ -34,13 +34,13 @@ namespace krys::boo::html
     auto name = element.Name();
     if (name.empty())
     {
-      formData.Append(u8"x", Number(_clickLocation.X()));
-      formData.Append(u8"y", Number(_clickLocation.Y()));
+      formData.Append(u8"x", ToDecimalString(_clickLocation.X()));
+      formData.Append(u8"y", ToDecimalString(_clickLocation.Y()));
       return true;
     }
 
-    formData.Append(name + u8".x", Number(_clickLocation.X()));
-    formData.Append(name + u8".y", Number(_clickLocation.Y()));
+    formData.Append(name + u8".x", ToDecimalString(_clickLocation.X()));
+    formData.Append(name + u8".y", ToDecimalString(_clickLocation.Y()));
 
     return true;
   }

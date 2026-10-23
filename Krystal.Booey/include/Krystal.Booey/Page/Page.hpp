@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
+#include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -79,8 +80,11 @@ namespace krys::boo
     /// @param chromeClient The host's side of the page; without one, the page has an empty chrome client.
     /// @param editorClient The host's side of the page's editor; without one, the page has an empty editor
     /// client.
-    KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
-                                           UniquePtr<EditorClient> editorClient = nullptr) noexcept;
+    /// @param mainFrameLoaderClient The host's side of the main frame's loader; without one, the main frame
+    /// ignores navigations.
+    KRYS_NODISCARD static Ref<Page>
+      Create(UniquePtr<ChromeClient> chromeClient = nullptr, UniquePtr<EditorClient> editorClient = nullptr,
+             UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
     {

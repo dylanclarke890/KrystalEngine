@@ -19,3 +19,10 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool IsValid() const noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::StaticRange)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::AbstractRange &range) noexcept
+  {
+    return !range.IsLiveRange();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

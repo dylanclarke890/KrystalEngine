@@ -10,12 +10,12 @@ namespace krys::boo::html
 
 #pragma region HTMLModElement
 
-  dom::ExceptionOr<dom::USVString> HTMLModElement::Cite() const noexcept
+  dom::USVString HTMLModElement::Cite() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
-  dom::ExceptionOr<void> HTMLModElement::Cite(dom::USVString &&value) noexcept
+  void HTMLModElement::Cite(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }

@@ -22,10 +22,10 @@ namespace krys::boo::html
 #pragma region HTMLEmbedElement - https://html.spec.whatwg.org/#htmlembedelement
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;

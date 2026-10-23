@@ -123,9 +123,9 @@ namespace krys::boo::html::mixins
 
     if (RefPtr<dom::Element> focused = ShareRefPtr(element.NodeDocument().FocusedElement()))
     {
-      focused->UpdateFocusAppearance(options.SelectionRestoration, options.PreventScroll
-                                                                     ? SelectionRevealMode::DoNotReveal
-                                                                     : SelectionRevealMode::Reveal);
+      focused->FindTargetAndUpdateFocusAppearance(options.SelectionRestoration,
+                                                  options.PreventScroll ? SelectionRevealMode::DoNotReveal
+                                                                        : SelectionRevealMode::Reveal);
     }
   }
 

@@ -160,8 +160,10 @@ namespace krys::boo
       krys_debug_assert(_percentHeightIgnoreList.empty());
     }
 
-    // The post-layout task that resumes the animations layout brought into view.
+    // The post-layout tasks: the animations layout brought into view resume, and the fragment's target is
+    // scrolled back into view.
     _frameView.ViewportContentsChanged();
+    _frameView.ScheduleScrollToAnchorAndTextFragment();
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept

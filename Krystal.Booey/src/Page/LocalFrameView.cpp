@@ -1,14 +1,23 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/FragmentDirectiveParser.hpp"
+#include "Krystal.Booey/DOM/FragmentDirectiveRangeFinder.hpp"
+#include "Krystal.Booey/DOM/HighlightRegistry.hpp"
+#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
+#include "Krystal.Booey/Editing/TextIterator.hpp"
+#include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -23,7 +32,9 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
+#include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -37,7 +48,8 @@ namespace krys::boo
 
   LocalFrameView::LocalFrameView(LocalFrame &frame) noexcept
       : _frame(WeakPtr<LocalFrame>::WithRef(frame)), _mediaType(ScreenAtom()), _layoutContext(*this),
-        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired)
+        _delayedScrollToFocusedElementTimer(*this, &LocalFrameView::ScrollToFocusedElementTimerFired),
+        _scrollToTextFragmentRetryTimer(*this, &LocalFrameView::ScrollToTextFragmentRetryTimerFired)
   {
   }
 
@@ -1811,9 +1823,11 @@ namespace krys::boo
     auto oldScrollType = CurrentScrollType();
     SetCurrentScrollType(options.Type);
 
-    // FIXME: The scroll position anchor and the scheduled scrolls (the focused element's scroll and the text
-    // fragment indicator) are cleared, once they're kept; snapping, once there's scroll snapping; animated
-    // scrolls (scrollToPositionWithAnimation), once there are scroll animations.
+    _maintainScrollPositionAnchor = nullptr;
+    CancelScheduledScrolls();
+
+    // FIXME: Snapping, once there's scroll snapping; animated scrolls (scrollToPositionWithAnimation), once
+    // there are scroll animations.
     auto position = ScrollPositionFromOffset(scrollOffset);
 
     // ScrollView::setScrollPosition.
@@ -2118,6 +2132,18 @@ namespace krys::boo
 
   void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
   {
+    // The user scrolling stops the view keeping the fragment in view (setLastUserScrollType).
+    if (CurrentScrollType() == ScrollType::User)
+    {
+      _wasEverScrolledExplicitlyByUser = true;
+      CancelScheduledScrolls();
+      if (auto *document = Frame().Document())
+      {
+        document->SetGotoAnchorNeededAfterStylesheetsLoad(false);
+      }
+      _maintainScrollPositionAnchor = nullptr;
+    }
+
     // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
     ScheduleScrollEvent();
 
@@ -2264,9 +2290,394 @@ namespace krys::boo
 
   void LocalFrameView::CancelScheduledScrolls() noexcept
   {
-    // FIXME: Scrolls to a fragment's anchor, once there's navigation.
     _shouldScrollToFocusedElement = false;
     _delayedScrollToFocusedElementTimer.Stop();
+    CancelScheduledTextFragmentIndicatorTimer();
+  }
+
+  void LocalFrameView::CancelScheduledTextFragmentIndicatorTimer() noexcept
+  {
+    if (_skipScrollResetOfScrollToTextFragmentRange)
+    {
+      return;
+    }
+    _pendingTextFragmentIndicatorRange = std::nullopt;
+    _pendingTextFragmentIndicatorText.clear();
+    _lastRevealedTextFragmentRect = std::nullopt;
+    // FIXME: The text indicator (its delayed timer and whether it was created), once there's one.
+  }
+
+  bool LocalFrameView::ScrollToTextFragment(bool isRetry) noexcept
+  {
+    static constexpr MonotonicTime::duration scrollToTextFragmentRetryInterval =
+      std::chrono::milliseconds(500);
+    static constexpr MonotonicTime::duration scrollToTextFragmentRetryTimeout = std::chrono::seconds(3);
+
+    krys_assert(Frame().Document());
+    Ref<dom::Document> document = ShareRef(*Frame().Document());
+
+    if (!document->GetSettings().ScrollToTextFragmentEnabled)
+    {
+      return false;
+    }
+
+    // FIXME: Only the main frame, once there are other frames.
+
+    document->FragmentHighlightRegistry().Clear();
+
+    auto &fragmentDirective = document->FragmentDirective();
+    if (fragmentDirective.empty())
+    {
+      return false;
+    }
+
+    dom::FragmentDirectiveParser fragmentDirectiveParser(fragmentDirective);
+    if (!fragmentDirectiveParser.IsValid())
+    {
+      return false;
+    }
+
+    auto &parsedTextDirectives = fragmentDirectiveParser.ParsedTextDirectives();
+    auto highlightRanges =
+      dom::FragmentDirectiveRangeFinder::FindRangesFromTextDirectives(parsedTextDirectives, *document);
+    if (document->GetSettings().ScrollToTextFragmentMarkingEnabled)
+    {
+      for (auto &range : highlightRanges)
+      {
+        if (auto init = dom::StaticRangeInit::Create(range.Start, range.End); !init.HasException())
+        {
+          document->FragmentHighlightRegistry().AddAnnotationHighlightWithRange(
+            CreateRef<dom::StaticRange>(init.ReleaseValue()));
+        }
+      }
+    }
+
+    // If we didn't find the expected range, retry every 500ms, until the first of:
+    //   - we successfully find the range
+    //   - the user scrolls the view
+    //   - the 3s timeout expires
+    if (highlightRanges.empty())
+    {
+      auto now = html::EventLoop::Current().Now();
+      if (!isRetry)
+      {
+        _scrollToTextFragmentRetryTimer.StartRepeating(scrollToTextFragmentRetryInterval);
+        _scrollToTextFragmentInitialAttemptTime = now;
+      }
+      else if (!_scrollToTextFragmentInitialAttemptTime
+               || now - *_scrollToTextFragmentInitialAttemptTime >= scrollToTextFragmentRetryTimeout
+               || _wasEverScrolledExplicitlyByUser)
+      {
+        _scrollToTextFragmentRetryTimer.Stop();
+      }
+
+      return false;
+    }
+
+    _scrollToTextFragmentRetryTimer.Stop();
+
+    auto &range = highlightRanges.front();
+    RefPtr<dom::Node> commonAncestor =
+      ShareRefPtr(dom::CommonInclusiveAncestor<dom::TreeType::ComposedTree>(range));
+    if (commonAncestor && !Is<dom::Element>(*commonAncestor))
+    {
+      commonAncestor = ShareRefPtr<dom::Node>(commonAncestor->ParentElement());
+    }
+    if (commonAncestor)
+    {
+      document->SetCSSTarget(&Downcast<dom::Element>(*commonAncestor));
+      // FIXME: Revealing the closed details and hidden=until-found ancestors, with <details> (B4).
+    }
+
+    {
+      TemporarySelectionChange selectionChange(
+        *document, VisibleSelection(range),
+        {TemporarySelectionOption::RevealSelection, TemporarySelectionOption::RevealSelectionBounds,
+         TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll});
+    }
+    // FIXME: The text indicator, once there's one (scrollToTextFragmentIndicatorEnabled).
+
+    MaintainScrollPositionAtScrollToTextFragmentRange(range);
+
+    return true;
+  }
+
+  void LocalFrameView::ScrollToTextFragmentRetryTimerFired() noexcept
+  {
+    (void)ScrollToTextFragment(true);
+  }
+
+  void
+    LocalFrameView::MaintainScrollPositionAtScrollToTextFragmentRange(const dom::SimpleRange &range) noexcept
+  {
+    _pendingTextFragmentIndicatorRange = range;
+    _pendingTextFragmentIndicatorText = PlainText(range);
+    _lastRevealedTextFragmentRect = std::nullopt;
+    if (!_pendingTextFragmentIndicatorRange)
+    {
+      return;
+    }
+
+    ScrollToPendingTextFragmentRange();
+  }
+
+  void LocalFrameView::ScrollToPendingTextFragmentRange() noexcept
+  {
+    if (_wasEverScrolledExplicitlyByUser)
+    {
+      return;
+    }
+
+    if (!_pendingTextFragmentIndicatorRange)
+    {
+      return;
+    }
+
+    if (LayoutContext().NeedsLayout())
+    {
+      return;
+    }
+
+    auto range = *_pendingTextFragmentIndicatorRange;
+    if (_pendingTextFragmentIndicatorText != PlainText(range))
+    {
+      return;
+    }
+
+    if (!range.StartContainer().Renderer() || !range.EndContainer().Renderer())
+    {
+      return;
+    }
+
+    // Revealing the range changes the selection, which lays out again (Booey brings the render tree's
+    // selection up to date with a layout), so the range is only revealed again once layout has moved it.
+    auto rangeRect =
+      UnionRect(VisiblePosition(dom::MakeContainerOffsetPosition(range.Start)).AbsoluteCaretBounds(),
+                VisiblePosition(dom::MakeContainerOffsetPosition(range.End)).AbsoluteCaretBounds());
+    if (_lastRevealedTextFragmentRect == rangeRect)
+    {
+      return;
+    }
+    _lastRevealedTextFragmentRect = rangeRect;
+
+    auto &document = *Frame().Document();
+
+    SetForScope skipScrollResetOfScrollToTextFragmentRange(_skipScrollResetOfScrollToTextFragmentRange, true);
+
+    TemporarySelectionChange selectionChange(
+      document, VisibleSelection(range),
+      {TemporarySelectionOption::RevealSelection, TemporarySelectionOption::RevealSelectionBounds,
+       TemporarySelectionOption::UserTriggered, TemporarySelectionOption::ForceCenterScroll,
+       TemporarySelectionOption::OnlyAllowForwardScrolling});
+
+    // FIXME: The text indicator, once there's one.
+  }
+
+  bool LocalFrameView::ScrollToFragment(const url::URL &url) noexcept
+  {
+    krys_assert(Frame().Document());
+
+    if (ScrollToTextFragment())
+    {
+      return true;
+    }
+
+    auto fragmentIdentifier = url.FragmentIdentifier();
+    if (ScrollToAnchorFragment(fragmentIdentifier))
+    {
+      return true;
+    }
+
+    if (fragmentIdentifier.data())
+    {
+      // https://html.spec.whatwg.org/#find-a-potential-indicated-element, with the fragment percent-decoded.
+      auto decoded = url::URLParser::PercentDecode(fragmentIdentifier);
+      if (decoded != fragmentIdentifier && ScrollToAnchorFragment(decoded))
+      {
+        return true;
+      }
+    }
+
+    // FIXME: Resetting the scroll anchor (resetScrollAnchor), once there's scroll anchoring.
+    return false;
+  }
+
+  bool LocalFrameView::ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept
+  {
+    // If our URL has no ref, then we have no place we need to jump to.
+    if (!fragmentIdentifier.data())
+    {
+      return false;
+    }
+
+    auto &document = *Frame().Document();
+    krys_debug_assert(document.HaveStylesheetsLoaded());
+
+    RefPtr<dom::Element> anchorElement = ShareRefPtr(document.FindAnchor(fragmentIdentifier));
+
+    // Setting to null will clear the current target.
+    document.SetCSSTarget(anchorElement.get());
+
+    // FIXME: SVG documents' own fragments (SVGSVGElement::scrollToFragment), with SVG.
+    // Implement the rule that "" and "top" both mean top of page as in other browsers.
+    if (!anchorElement
+        && !(fragmentIdentifier.empty()
+             || text::IsASCIICaselessEqual(fragmentIdentifier, utf8_stringview(u8"top"))))
+    {
+      return false;
+    }
+
+    // FIXME: Revealing the target's closed details and hidden=until-found ancestors, with <details> (B4).
+
+    dom::ContainerNode *scrollPositionAnchor = anchorElement.get();
+    if (!scrollPositionAnchor)
+    {
+      scrollPositionAnchor = &document;
+    }
+    MaintainScrollPositionAtAnchor(scrollPositionAnchor);
+
+    if (anchorElement)
+    {
+      // Run the focusing steps for target, with the Document's viewport as the fallback target, and move the
+      // sequential focus navigation starting point to target.
+      dom::FocusOptions options;
+      options.FocusVisible = true;
+      html::FocusAlgorithms::FocusingSteps(*anchorElement, &document, options);
+      document.SetSequentialFocusNavigationStartingPoint(anchorElement.get());
+    }
+
+    return true;
+  }
+
+  void LocalFrameView::MaintainScrollPositionAtAnchor(dom::ContainerNode *anchorNode) noexcept
+  {
+    _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode);
+    if (!anchorNode)
+    {
+      return;
+    }
+
+    CancelScheduledScrolls();
+
+    // FIXME: Making a content-visibility: auto ancestor relevant (updateContentRelevancyForScrollIfNeeded),
+    // once content-visibility is.
+
+    // We need to update the layout before scrolling, otherwise we could really mess things up if an anchor
+    // scroll comes at a bad moment.
+    auto &document = *Frame().Document();
+    document.UpdateStyleIfNeeded();
+    // Only do a layout if changes have occurred that make it necessary.
+    auto *renderView = GetRenderView();
+    if (renderView && renderView->NeedsLayout())
+    {
+      LayoutContext().Layout();
+    }
+    else
+    {
+      ScheduleScrollToAnchorAndTextFragment();
+    }
+
+    ScrollToAnchorAndTextFragmentNowIfNeeded();
+  }
+
+  void LocalFrameView::ScheduleScrollToAnchorAndTextFragment() noexcept
+  {
+    auto *anchorNode = _maintainScrollPositionAnchor.get();
+    if (!anchorNode && !_pendingTextFragmentIndicatorRange)
+    {
+      return;
+    }
+
+    _scheduledMaintainScrollPositionAnchor = CreateWeakPtr(anchorNode);
+
+    if (_scheduledToScrollToAnchor)
+    {
+      return;
+    }
+
+    _scheduledToScrollToAnchor = true;
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+                                         [protectedThis = ShareRef(*this)]
+                                         {
+                                           if (!protectedThis->_maintainScrollPositionAnchor)
+                                           {
+                                             SetForScope scrollPositionAnchor(
+                                               protectedThis->_maintainScrollPositionAnchor,
+                                               protectedThis->_scheduledMaintainScrollPositionAnchor);
+                                             protectedThis->ScrollToAnchorAndTextFragmentNowIfNeeded();
+                                           }
+                                           else
+                                           {
+                                             protectedThis->ScrollToAnchorAndTextFragmentNowIfNeeded();
+                                           }
+                                           protectedThis->_scheduledMaintainScrollPositionAnchor = nullptr;
+                                         });
+  }
+
+  void LocalFrameView::ScrollToAnchorAndTextFragmentNowIfNeeded() noexcept
+  {
+    if (!_scheduledToScrollToAnchor)
+    {
+      return;
+    }
+
+    _scheduledToScrollToAnchor = false;
+    ScrollToAnchor();
+    ScrollToPendingTextFragmentRange();
+  }
+
+  void LocalFrameView::ScrollToAnchor() noexcept
+  {
+    RefPtr<dom::ContainerNode> anchorNode = ShareRefPtr(_maintainScrollPositionAnchor.get());
+    if (!anchorNode)
+    {
+      return;
+    }
+
+    if (!anchorNode->Renderer())
+    {
+      return;
+    }
+
+    CancelScheduledScrolls();
+
+    LayoutRect rect;
+    bool insideFixed = false;
+    if (anchorNode != Frame().Document())
+    {
+      if (auto *renderElement = DynamicDowncast<RenderElement>(anchorNode->Renderer()))
+      {
+        rect = renderElement->AbsoluteAnchorRectWithScrollMargin(&insideFixed).first;
+      }
+    }
+
+    // Scroll nested layers and frames to reveal the anchor.
+    // Align to the top and to the closest side (this matches other browsers).
+    auto &renderer = *anchorNode->Renderer();
+    ScrollRectToVisibleOptions options;
+    auto writingMode = renderer.GetWritingMode();
+    if (writingMode.IsHorizontal())
+    {
+      options.AlignX = ScrollAlignment::AlignToEdgeIfNeeded;
+      options.AlignY = ScrollAlignment::AlignTopAlways;
+    }
+    else if (writingMode.BlockDirection() == FlowDirection::RightToLeft)
+    {
+      options.AlignX = ScrollAlignment::AlignRightAlways;
+      options.AlignY = ScrollAlignment::AlignToEdgeIfNeeded;
+    }
+    else
+    {
+      options.AlignX = ScrollAlignment::AlignLeftAlways;
+      options.AlignY = ScrollAlignment::AlignToEdgeIfNeeded;
+    }
+    ScrollRectToVisible(rect, renderer, insideFixed, options);
+
+    // FIXME: Telling accessibility (handleScrolledToAnchor), with accessibility (B17).
+
+    // scrollRectToVisible can call into setScrollPosition(), which resets _maintainScrollPositionAnchor.
+    _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode.get());
+    CancelScheduledScrolls();
   }
 
   void LocalFrameView::ScrollToFocusedElementTimerFired() noexcept
@@ -2297,14 +2708,16 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The element an image map's area delegates its focus appearance to (focusAppearanceUpdateTarget),
-    // with image maps.
-    dom::Element *updateTarget = focusedElement;
+    auto updateTarget = focusedElement->FocusAppearanceUpdateTarget();
+    if (!updateTarget)
+    {
+      return;
+    }
 
     // Get the scroll-margin of the shadow host when we're inside a user agent shadow root.
     if (updateTarget->IsInUserAgentShadowTree())
     {
-      updateTarget = dom::TreeQueries::ShadowHost(*updateTarget);
+      updateTarget = ShareRefPtr(dom::TreeQueries::ShadowHost(*updateTarget));
     }
 
     auto *renderer = updateTarget->Renderer();

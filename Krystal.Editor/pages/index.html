@@ -8,6 +8,45 @@
 </head>
 <body>
   <div class="row">
+    <!-- Links: the contents list's links scroll to their cards, which :target highlights (Back isn't there yet,
+         so another link moves the highlight). Tab to a link and press Enter to follow it too. -->
+    <nav class="card links" tabindex="0">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#order">Order a drink</a></li>
+        <li><a href="#text">Text</a></li>
+        <li><a href="#images">Images</a></li>
+        <li><a href="#selection">Selection and editing</a></li>
+      </ol>
+    </nav>
+
+    <!-- A text fragment link finds its text in the page, highlights it with ::target-text and scrolls to it.
+         Links away from the page aren't followed: the editor logs them and shows where they lead below the
+         order form, as it does for submissions (a target or Ctrl opens a new window, Shift too; a middle click
+         follows them as well). -->
+    <div class="card links" tabindex="0">
+      <h2>Links</h2>
+      <p><a href="#:~:text=Booey%20lays%20out,glyphs">A text fragment</a> marks a sentence in the text card.</p>
+      <p><a href="https://example.com/krystal">Krystal's site</a>, the <a href="https://example.com/docs"
+          target="_blank">docs in a new window</a>, and <a href="images/photo.jpg" download="photo.jpg">a
+          download</a>.</p>
+    </div>
+
+    <!-- An image map: the yellow square, the blue half and the pink half are areas, each a link. Hovering one
+         shows the hand; Tab focuses them in turn, each drawing its focus ring in its shape. -->
+    <div class="card links" tabindex="0">
+      <h2>Image map</h2>
+      <img src="images/landscape.png" width="192" height="96" alt="A blue and pink landscape with a sun"
+        usemap="#landscape">
+      <map name="landscape">
+        <area shape="circle" coords="96,48,30" href="#images" alt="The sun: images">
+        <area shape="rect" coords="0,0,96,96" href="#text" alt="The blue half: text">
+        <area shape="rect" coords="96,0,192,96" href="https://example.com/pink" alt="The pink half: away">
+      </map>
+    </div>
+  </div>
+
+  <div class="row">
     <!-- Forms: the form is :invalid until the name is filled in and the required box is ticked (click its
          label), so the drink buttons fade and clicking one fires invalid instead of submitting. Once it's valid,
          a drink button (or Enter in the name field) submits: the editor logs the submission and shows its URL
@@ -24,7 +63,7 @@
          (Krystal.Editor's BeanRating): click a bean, or focus it and use the arrow keys or a digit; it's
          required, so the form stays invalid until it's rated, it submits its rating as "rating", and the page
          styles it through :state(rated). Reset empties the fields, unticks the box and clears the rating. -->
-    <form class="card order" action="https://example.com/order">
+    <form class="card order" id="order" action="https://example.com/order">
       <input type="hidden" name="from" value="editor">
       <input name="name" placeholder="Your name" required maxlength="24">
       <textarea name="notes" placeholder="Notes for the barista" rows="2"></textarea>
@@ -47,13 +86,13 @@
           class="unrated">Rate it to order</span><span class="rated">Thanks!</span></label></p>
       <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
           type="reset">Reset</button></p>
-      <p id="last-submission">Nothing submitted yet.</p>
+      <p id="last-submission">Nothing submitted or followed yet.</p>
     </form>
   </div>
 
   <div class="row">
     <!-- Text: headings, paragraphs and inline boxes. -->
-    <div class="card" tabindex="0" style="flex: 2">
+    <div class="card" id="text" tabindex="0" style="flex: 2">
       <h2>Pages in Krystal</h2>
       <p>Booey lays out and shapes this text, and Render2D draws its glyphs. <span class="tag">Inline boxes
         keep their backgrounds and borders</span> as they wrap from one line to the next, and words can be
@@ -294,7 +333,7 @@
 
     <!-- Images: a PNG given a width, a JPEG scaled by its attributes, translucent WebP over a colour, a
          broken one showing its alt text, and an animated GIF, which pauses while it's scrolled out of view. -->
-    <div class="card" tabindex="0">
+    <div class="card" id="images" tabindex="0">
       <img src="images/landscape.png" width="96" style="margin: 0 8px 8px 0">
       <img src="images/photo.jpg" width="72" height="48" style="margin: 0 0 8px 0">
       <img src="images/disc.webp" style="width: 48px; height: 48px; margin-right: 8px; background: #118ab2; border-radius: 8px">
@@ -361,7 +400,7 @@
          keyboard, Shift with the arrows (and Ctrl, by word), Home and End extends a selection, Ctrl+A selects
          everything and Ctrl+C copies the selection as plain text. The quote has its own
          selection colours, the label can't be selected, and the image is tinted when it's selected. -->
-    <div class="card selection" tabindex="0">
+    <div class="card selection" id="selection" tabindex="0">
       <p>Selecting text paints it highlighted, and the gaps beside and between its lines and blocks are filled
         as well, so a selection reads as one region.</p>
       <p class="quote">This quote paints its selection in its own colours.</p>

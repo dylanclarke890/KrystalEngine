@@ -15,7 +15,6 @@
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/RadioNodeList.hpp"
 #include "Krystal.Booey/HTML/SubmitEvent.hpp"
-#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -84,12 +83,27 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"accept-charset", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLFormElement::Action() const noexcept
+  dom::USVString HTMLFormElement::Action() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"action");
+    // https://html.spec.whatwg.org/#dom-fs-action
+    // Let attributeValue be the result of running get an attribute value given this and action. If
+    // attributeValue is null or the empty string, return this's node document's URL, serialized.
+    auto attributeValue = GetAttribute(u8"action");
+    if (!attributeValue || attributeValue->empty())
+    {
+      return dom::USVString(NodeDocument().GetURL().String());
+    }
+    // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
+    // this's node document. If urlString is not failure, return urlString.
+    if (auto url = NodeDocument().CompleteURL(*attributeValue); url.IsValid())
+    {
+      return dom::USVString(url.String());
+    }
+    // Return attributeValue, converted to a scalar value string.
+    return dom::USVString(krys::move(*attributeValue));
   }
 
-  dom::ExceptionOr<void> HTMLFormElement::Action(dom::USVString &&value) noexcept
+  void HTMLFormElement::Action(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectSetter<dom::USVString>(*this, u8"action", krys::move(value));
   }
@@ -560,10 +574,9 @@ namespace krys::boo::html
     {
       SubmitDialog(krys::move(formSubmission));
     }
-    else if (auto *page = NodeDocument().GetPage())
+    else
     {
-      // The host navigates, as there's no loader navigation.
-      page->GetChromeClient().SubmitForm(*frame, *formSubmission);
+      frame->Loader().SubmitForm(krys::move(formSubmission));
     }
 
     _shouldSubmit = false;

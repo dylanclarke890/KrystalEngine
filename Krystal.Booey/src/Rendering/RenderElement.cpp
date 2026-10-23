@@ -1743,6 +1743,34 @@ namespace krys::boo
     return nullptr;
   }
 
+  const RenderStyle *RenderElement::TextSegmentPseudoStyle(PseudoElementType pseudoElementType) const noexcept
+  {
+    if (IsAnonymous())
+    {
+      return nullptr;
+    }
+
+    if (auto *pseudoStyle = GetCachedPseudoStyle({pseudoElementType}))
+    {
+      // We intentionally return the pseudo style here if it exists before ascending to the shadow host
+      // element. This allows us to apply pseudo styles in user agent shadow roots, instead of always
+      // deferring to the shadow host's selection pseudo style.
+      return pseudoStyle;
+    }
+
+    if (auto *renderer = RendererForPseudoStyleAcrossShadowBoundary())
+    {
+      return renderer->GetCachedPseudoStyle({pseudoElementType});
+    }
+
+    return nullptr;
+  }
+
+  const RenderStyle *RenderElement::TargetTextPseudoStyle() const noexcept
+  {
+    return TextSegmentPseudoStyle(PseudoElementType::TargetText);
+  }
+
   Color RenderElement::SelectionForegroundColor() const noexcept
   {
     return SelectionColor(css::PropertyId::WebkitTextFillColor);

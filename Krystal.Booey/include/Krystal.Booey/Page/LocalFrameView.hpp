@@ -95,6 +95,22 @@ namespace krys::boo
     Timer _delayedScrollToFocusedElementTimer;
     SelectionRevealMode _selectionRevealModeForFocusedElement {SelectionRevealMode::DoNotReveal};
     bool _shouldScrollToFocusedElement {false};
+    /// @brief The node the view keeps in view as layout changes (the fragment's target, or the document for
+    /// the top), until the view scrolls otherwise.
+    WeakPtr<dom::ContainerNode> _maintainScrollPositionAnchor;
+    WeakPtr<dom::ContainerNode> _scheduledMaintainScrollPositionAnchor;
+    bool _scheduledToScrollToAnchor {false};
+    /// @brief Tries the URL's text directives again while the page may still be loading their text.
+    Timer _scrollToTextFragmentRetryTimer;
+    Maybe<MonotonicTime::duration> _scrollToTextFragmentInitialAttemptTime;
+    bool _wasEverScrolledExplicitlyByUser {false};
+    /// @brief The text a text directive indicated, kept in view as layout changes, while its text stays the
+    /// same.
+    Maybe<dom::SimpleRange> _pendingTextFragmentIndicatorRange;
+    utf8_string _pendingTextFragmentIndicatorText;
+    /// @brief Where the pending range's ends were when it was last revealed.
+    Maybe<IntRect> _lastRevealedTextFragmentRect;
+    bool _skipScrollResetOfScrollToTextFragmentRange {false};
     IntSize _contentsSize;
     bool _inUpdateScrollbars {false};
     RefPtr<Scrollbar> _horizontalScrollbar;
@@ -627,6 +643,38 @@ namespace krys::boo
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
 
+    /// @brief Scrolls to the fragment of @p url: makes the element it indicates the document's target and
+    /// scrolls it into view (the top of the document for `#top` or an empty fragment), and focuses it.
+    /// @return Whether there was something to scroll to.
+    /// @see https://html.spec.whatwg.org/#scroll-to-the-fragment-identifier
+    bool ScrollToFragment(const url::URL &url) noexcept;
+
+    /// @brief Highlights the text the document's text directives indicate, makes its nearest element the
+    /// document's target and scrolls it into view, trying again every 500ms for 3s (until the user scrolls)
+    /// if it isn't there yet.
+    /// @return Whether there was text to scroll to.
+    /// @see https://wicg.github.io/scroll-to-text-fragment/#invoking-text-directives
+    bool ScrollToTextFragment(bool isRetry = false) noexcept;
+
+    /// @brief Scrolls to the element the fragment @p fragmentIdentifier indicates.
+    /// @return Whether there was something to scroll to.
+    bool ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept;
+
+    /// @brief Keeps @p anchorNode in view as layout changes (null stops it), scrolling to it now.
+    void MaintainScrollPositionAtAnchor(dom::ContainerNode *anchorNode) noexcept;
+
+    /// @brief The node the view keeps in view, if any.
+    KRYS_NODISCARD dom::ContainerNode *MaintainedScrollPositionAnchor() const noexcept
+    {
+      return _maintainScrollPositionAnchor.get();
+    }
+
+    /// @brief Scrolls to the maintained anchor in a task, as layout may have moved it.
+    void ScheduleScrollToAnchorAndTextFragment() noexcept;
+
+    /// @brief Scrolls to the maintained anchor if a scroll to it is scheduled.
+    void ScrollToAnchorAndTextFragmentNowIfNeeded() noexcept;
+
     /// @brief The scale from document coordinates to absolute ones: @p usedZoom (which already includes the
     /// page zoom) if given, or else the page zoom.
     // FIXME: The frame scale factor, once frames can be scaled.
@@ -709,5 +757,15 @@ namespace krys::boo
   private:
     void ScrollToFocusedElementTimerFired() noexcept;
     void ScrollToFocusedElementInternal() noexcept;
+    /// @brief Scrolls the maintained anchor into view: to its top and closest side.
+    void ScrollToAnchor() noexcept;
+    void ScrollToTextFragmentRetryTimerFired() noexcept;
+    /// @brief Keeps @p range in view as layout changes, scrolling to it now.
+    void MaintainScrollPositionAtScrollToTextFragmentRange(const dom::SimpleRange &range) noexcept;
+    /// @brief Scrolls the pending text fragment range back into view, unless its text changed or the user
+    /// scrolled.
+    void ScrollToPendingTextFragmentRange() noexcept;
+    /// @brief Forgets the pending text fragment range, unless a scroll to it is in progress.
+    void CancelScheduledTextFragmentIndicatorTimer() noexcept;
   };
 }

@@ -1,4 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/MarkedText.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/HighlightRegistry.hpp"
+#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Rendering/RenderHighlight.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -107,5 +115,123 @@ namespace krys::boo
                         });
     }
     return result;
+  }
+
+  List<MarkedText> MarkedText::CollectForHighlights(const RenderText &renderer,
+                                                    const TextBoxSelectableRange &selectableRange,
+                                                    PaintPhase phase) noexcept
+  {
+    List<MarkedText> markedTexts;
+    RenderHighlight renderHighlight;
+    auto &parentRenderer = *renderer.Parent();
+    auto &parentStyle = parentRenderer.Style();
+    auto &document = renderer.GetDocument();
+    if (auto *highlightRegistry = document.HighlightRegistryIfExists())
+    {
+      for (auto &highlightName : highlightRegistry->HighlightNames())
+      {
+        auto renderStyle = parentRenderer.GetUncachedPseudoStyle(
+          style::PseudoElementRequest(PseudoElementType::Highlight, highlightName), &parentStyle);
+        if (!renderStyle)
+        {
+          continue;
+        }
+        if (renderStyle->TextDecorationLineInEffect().IsNone() && phase == PaintPhase::Decoration)
+        {
+          continue;
+        }
+        auto *highlight = highlightRegistry->Get(highlightName);
+        for (auto &highlightRange : highlight->HighlightRanges())
+        {
+          if (!renderHighlight.SetRenderRange(*highlightRange))
+          {
+            continue;
+          }
+          // A collapsed range highlights nothing, live or static.
+          if (highlightRange->Range().Collapsed())
+          {
+            continue;
+          }
+          if (auto *staticRange = DynamicDowncast<dom::StaticRange>(highlightRange->Range());
+              staticRange && !staticRange->IsValid())
+          {
+            continue;
+          }
+          // FIXME: Potentially move this check elsewhere, to where we collect this range information.
+          auto hasRenderer = [&]
+          {
+            for (auto &node : dom::IntersectingNodes(dom::MakeSimpleRange(highlightRange->Range())))
+            {
+              if (node.Renderer())
+              {
+                return true;
+              }
+            }
+            return false;
+          }();
+          if (!hasRenderer)
+          {
+            continue;
+          }
+
+          auto [highlightStart, highlightEnd] = renderHighlight.RangeForTextBox(renderer, selectableRange);
+
+          if (highlightStart < highlightEnd)
+          {
+            int32 currentPriority = highlight->Priority();
+            // If we can just append it to the end, do that instead.
+            if (markedTexts.empty() || markedTexts.back().Priority <= currentPriority)
+            {
+              markedTexts.emplace_back(highlightStart, highlightEnd, Type::Highlight, highlightName,
+                                       currentPriority);
+            }
+            else
+            {
+              // Gets the first place such that it > currentPriority.
+              auto it = std::upper_bound(markedTexts.begin(), markedTexts.end(), currentPriority,
+                                         [](int32 targetMarkedTextPriority, const MarkedText &markedText)
+                                         { return targetMarkedTextPriority > markedText.Priority; });
+
+              auto insertIndex = it == markedTexts.end() ? 0 : std::distance(markedTexts.begin(), it) - 1;
+
+              markedTexts.insert(
+                markedTexts.begin() + insertIndex,
+                MarkedText(highlightStart, highlightEnd, Type::Highlight, highlightName, currentPriority));
+            }
+          }
+        }
+      }
+    }
+
+    auto appendMarkedTextHighlights = [&](const dom::HighlightRegistry &registry, Type markedTextType)
+    {
+      for (auto &[name, highlight] : registry.Map())
+      {
+        for (auto &highlightRange : highlight->HighlightRanges())
+        {
+          if (!renderHighlight.SetRenderRange(*highlightRange))
+          {
+            continue;
+          }
+
+          auto [highlightStart, highlightEnd] = renderHighlight.RangeForTextBox(renderer, selectableRange);
+          if (highlightStart < highlightEnd)
+          {
+            markedTexts.emplace_back(highlightStart, highlightEnd, markedTextType);
+          }
+        }
+      }
+    };
+
+    if (document.GetSettings().ScrollToTextFragmentEnabled)
+    {
+      if (auto *registry = document.FragmentHighlightRegistryIfExists())
+      {
+        appendMarkedTextHighlights(*registry, Type::FragmentHighlight);
+      }
+    }
+
+    // FIXME: The text extraction and app highlights' registries, once there are any.
+    return markedTexts;
   }
 }

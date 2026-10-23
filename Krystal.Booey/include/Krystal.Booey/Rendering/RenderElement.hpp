@@ -332,6 +332,12 @@ namespace krys::boo
 
     KRYS_NODISCARD Color SelectionColor(css::PropertyId colorProperty) const noexcept;
     KRYS_NODISCARD UniquePtr<RenderStyle> SelectionPseudoStyle() const noexcept;
+    /// @brief The style of the element's `::target-text`, or its shadow host's; null if there's none.
+    KRYS_NODISCARD const RenderStyle *TargetTextPseudoStyle() const noexcept;
+    /// @brief The style of a pseudo-element of text segments (`::target-text`, `::spelling-error`,
+    /// `::grammar-error`) of @p pseudoElementType, or its shadow host's.
+    KRYS_NODISCARD const RenderStyle *
+      TextSegmentPseudoStyle(PseudoElementType pseudoElementType) const noexcept;
 
     /// @brief The renderer of the shadow host (or its nearest ancestor that isn't `display: contents`) of a
     /// user agent shadow tree the element is in, whose pseudo-element styles apply; null outside one.

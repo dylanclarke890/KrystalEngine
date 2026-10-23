@@ -646,12 +646,12 @@ namespace krys::boo::html
 
 #pragma region HTMLLinkElement
 
-  dom::ExceptionOr<dom::USVString> HTMLLinkElement::Href() const noexcept
+  dom::USVString HTMLLinkElement::Href() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"href");
   }
 
-  dom::ExceptionOr<void> HTMLLinkElement::Href(dom::USVString &&value) noexcept
+  void HTMLLinkElement::Href(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
@@ -748,12 +748,12 @@ namespace krys::boo::html
     return *_sizes;
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLLinkElement::ImageSrcset() const noexcept
+  dom::USVString HTMLLinkElement::ImageSrcset() const noexcept
   {
     return Reflection::Reflect<dom::USVString>(*this, u8"imagesrcset");
   }
 
-  dom::ExceptionOr<void> HTMLLinkElement::ImageSrcset(dom::USVString &&value) noexcept
+  void HTMLLinkElement::ImageSrcset(dom::USVString &&value) noexcept
   {
     return Reflection::Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
   }

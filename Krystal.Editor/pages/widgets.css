@@ -1,5 +1,11 @@
 ﻿/* The styles of the cards' contents, imported by editor.css. */
 
+.links ol { margin: 0; padding-left: 22px; }
+.links li { margin-bottom: 4px; }
+.links a { color: #4f6df5; }
+.links a:hover { color: #ef476f; }
+.links img { display: block; border-radius: 8px; }
+
 .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
 .boxes div { background: #f7f8fb; }
 .boxes div { cursor: crosshair; }

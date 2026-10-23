@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -20,8 +21,9 @@ namespace krys::boo
 
   /// @brief Shows a document in a view: the host creates a frame, gives it a view (`CreateView`) and a
   /// document (`SetDocument`), and sets the zoom factors and the media environment.
-  /// @note FIXME: Only what layout and style need: no loader, navigation, frame tree, window, scripting,
-  /// editing or printing. The media environment stands in for the page's chrome client and the screen.
+  /// @note FIXME: Only what layout, style and navigation within a document need: no document loading, frame
+  /// tree, window, scripting or printing. The media environment stands in for the page's chrome client and
+  /// the screen.
   class LocalFrame final : public RefCounted<LocalFrame>, public CanMakeWeakPtr<LocalFrame>
   {
     KRYS_NON_COPY_MOVABLE(LocalFrame);
@@ -31,19 +33,28 @@ namespace krys::boo
     RefPtr<dom::Document> _document;
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
+    UniquePtr<FrameLoader> _loader;
     css::mq::MediaEnvironment _mediaEnvironment;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
     CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
     bool _documentIsBeingReplaced {false};
 
-    explicit LocalFrame(Page *page) noexcept;
+    LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept;
 
   public:
     ~LocalFrame() noexcept;
 
     /// @brief A frame, the main frame of @p page if given.
-    KRYS_NODISCARD static Ref<LocalFrame> Create(Page *page = nullptr) noexcept;
+    /// @param loaderClient The host's side of the frame's loader; without one, the frame ignores navigations.
+    KRYS_NODISCARD static Ref<LocalFrame>
+      Create(Page *page = nullptr, UniquePtr<LocalFrameLoaderClient> loaderClient = nullptr) noexcept;
+
+    /// @brief Navigates the frame: links and form submissions go through it.
+    KRYS_NODISCARD FrameLoader &Loader() const noexcept
+    {
+      return *_loader;
+    }
 
     /// @brief How the document's subresources use the memory cache: the host sets `Revalidate` when it
     /// reloads a page, so edited files load again.

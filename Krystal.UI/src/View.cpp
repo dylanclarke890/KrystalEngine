@@ -1,6 +1,7 @@
 ﻿#include "Krystal.UI/View.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -37,7 +40,6 @@ namespace krys::ui
     View *_view {nullptr};
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
-    Func<void(const FormSubmissionRequest &)> _formSubmissionHandler;
 
   public:
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
@@ -48,42 +50,6 @@ namespace krys::ui
     KRYS_NODISCARD boo::GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept override
     {
       return const_cast<GraphicsLayerFactoryTextureMapper *>(&_factory);
-    }
-
-    void SubmitForm(boo::LocalFrame &, boo::FormSubmission &submission) noexcept override
-    {
-      if (!_formSubmissionHandler)
-      {
-        return;
-      }
-
-      FormSubmissionRequest request;
-      switch (submission.GetMethod())
-      {
-        case boo::FormSubmission::Method::Get:    request.Method = u8"GET"; break;
-        case boo::FormSubmission::Method::Post:   request.Method = u8"POST"; break;
-        case boo::FormSubmission::Method::Dialog: request.Method = u8"DIALOG"; break;
-      }
-      request.URL = submission.RequestURL().String();
-      request.Target = submission.Target();
-      if (submission.GetMethod() == boo::FormSubmission::Method::Post)
-      {
-        request.ContentType = submission.ContentType();
-        if (!submission.Boundary().empty())
-        {
-          request.ContentType += u8"; boundary=" + submission.Boundary();
-        }
-        if (auto *data = submission.Data())
-        {
-          request.Body = data->FlattenToString();
-        }
-      }
-      _formSubmissionHandler(request);
-    }
-
-    void SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept
-    {
-      _formSubmissionHandler = krys::move(handler);
     }
 
     KRYS_NODISCARD RefPtr<boo::PopupMenu>
@@ -127,8 +93,116 @@ namespace krys::ui
     }
   };
 
+  /// @brief Asks the host's navigation handler about the main frame's navigations.
+  class View::FrameLoaderClient final : public boo::LocalFrameLoaderClient
+  {
+  private:
+    View *_view {nullptr};
+    Func<NavigationPolicy(const NavigationRequest &)> _navigationHandler;
+
+  public:
+    KRYS_NODISCARD boo::PolicyAction
+      DispatchDecidePolicyForNavigationAction(const boo::NavigationAction &action,
+                                              const boo::ResourceRequest &request,
+                                              const boo::FormSubmission *formSubmission) noexcept override
+    {
+      return Decide(action, request, formSubmission, {});
+    }
+
+    KRYS_NODISCARD boo::PolicyAction DispatchDecidePolicyForNewWindowAction(
+      const boo::NavigationAction &action, const boo::ResourceRequest &request,
+      const boo::FormSubmission *formSubmission, boo::dom::DOMStringView frameName) noexcept override
+    {
+      return Decide(action, request, formSubmission, frameName);
+    }
+
+    void SetView(View *view) noexcept
+    {
+      _view = view;
+    }
+
+    void SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
+    {
+      _navigationHandler = krys::move(handler);
+    }
+
+  private:
+    /// @param newWindowName The browsing context a new window would be; null (a null view) for the view's
+    /// own.
+    KRYS_NODISCARD boo::PolicyAction Decide(const boo::NavigationAction &action,
+                                            const boo::ResourceRequest &request,
+                                            const boo::FormSubmission *formSubmission,
+                                            boo::dom::DOMStringView newWindowName) const noexcept
+    {
+      if (!_navigationHandler)
+      {
+        return boo::PolicyAction::Use;
+      }
+
+      NavigationRequest navigation;
+      navigation.URL = request.URL().String();
+      navigation.OpensNewWindow = newWindowName.data() != nullptr;
+      navigation.Target = utf8_string(newWindowName);
+      navigation.SourceElement = ShareRefPtr(action.SourceElement());
+      if (auto &mouse = action.GetMouseEventData())
+      {
+        navigation.Button = mouse->Button;
+      }
+      if (auto &keys = action.KeyStateEventData())
+      {
+        navigation.ShiftKey = keys->ShiftKey;
+        navigation.CtrlKey = keys->CtrlKey;
+        navigation.AltKey = keys->AltKey;
+        navigation.MetaKey = keys->MetaKey;
+      }
+      if (action.DownloadAttribute() != boo::dom::DOMStringAtom::Null())
+      {
+        navigation.Download = utf8_string(action.DownloadAttribute().View());
+      }
+      navigation.Method = request.HTTPMethod();
+      if (formSubmission)
+      {
+        navigation.IsFormSubmission = true;
+        navigation.Target = formSubmission->Target();
+        if (!navigation.SourceElement)
+        {
+          navigation.SourceElement = ShareRefPtr<boo::dom::Element>(formSubmission->Form());
+        }
+        if (formSubmission->GetMethod() == boo::FormSubmission::Method::Post)
+        {
+          navigation.ContentType = formSubmission->ContentType();
+          if (!formSubmission->Boundary().empty())
+          {
+            navigation.ContentType += u8"; boundary=" + formSubmission->Boundary();
+          }
+          if (auto *data = formSubmission->Data())
+          {
+            navigation.Body = data->FlattenToString();
+          }
+        }
+      }
+      if (_view && !navigation.OpensNewWindow && navigation.Method == u8"GET")
+      {
+        navigation.IsSameDocument =
+          !boo::FrameLoader::ShouldReload(_view->Document().GetURL(), request.URL());
+      }
+
+      return _navigationHandler(navigation) == NavigationPolicy::Allow ? boo::PolicyAction::Use
+                                                                       : boo::PolicyAction::Ignore;
+    }
+  };
+
   namespace
   {
+    /// @brief The main frame's loader client, noted in @p frameLoaderClient as it's handed to the page.
+    KRYS_NODISCARD UniquePtr<boo::LocalFrameLoaderClient>
+      CreateFrameLoaderClient(View::FrameLoaderClient *&frameLoaderClient) noexcept
+    {
+      auto client = CreateUnique<View::FrameLoaderClient>();
+      frameLoaderClient = client.get();
+      return client;
+    }
+
     /// @brief The page's chrome client, noted in @p chromeClient as it's handed to the page.
     KRYS_NODISCARD UniquePtr<boo::ChromeClient> CreateChromeClient(View::ChromeClient *&chromeClient) noexcept
     {
@@ -139,7 +213,8 @@ namespace krys::ui
   }
 
   View::View(const boo::IntSize &viewportSize) noexcept
-      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>())),
+      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>(),
+                                CreateFrameLoaderClient(_frameLoaderClient))),
         _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
@@ -158,6 +233,7 @@ namespace krys::ui
     }
 
     _chromeClient->SetView(this);
+    _frameLoaderClient->SetView(this);
     _frame->CreateView(viewportSize);
     LoadHTML(u8"<!DOCTYPE html>");
   }
@@ -169,6 +245,7 @@ namespace krys::ui
       _overlay->Hide();
     }
     _chromeClient->SetView(nullptr);
+    _frameLoaderClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
     _frame->SetDocument(nullptr);
   }
@@ -655,9 +732,9 @@ namespace krys::ui
     PerformMicrotaskCheckpoint();
   }
 
-  void View::SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept
+  void View::SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
   {
-    _chromeClient->SetFormSubmissionHandler(krys::move(handler));
+    _frameLoaderClient->SetNavigationHandler(krys::move(handler));
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

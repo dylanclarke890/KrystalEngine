@@ -9,7 +9,6 @@
 
 namespace krys::boo
 {
-  class FormSubmission;
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class LocalFrame;
@@ -38,14 +37,6 @@ namespace krys::boo
     KRYS_NODISCARD virtual GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept
     {
       return nullptr;
-    }
-
-    /// @brief Navigates to a form submission: its method, action, target and data. The page never navigates
-    /// itself; a host that doesn't override this ignores submissions.
-    virtual void SubmitForm(LocalFrame &frame, FormSubmission &submission) noexcept
-    {
-      (void)frame;
-      (void)submission;
     }
 
     /// @brief Whether a menu list's items are shown left to right regardless of their direction.

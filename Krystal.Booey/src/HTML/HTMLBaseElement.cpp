@@ -11,7 +11,7 @@ namespace krys::boo::html
 
 #pragma region HTMLBaseElement
 
-  dom::ExceptionOr<dom::USVString> HTMLBaseElement::Href() const noexcept
+  dom::USVString HTMLBaseElement::Href() const noexcept
   {
     // The href IDL attribute, on getting, must return the result of running the following algorithm:
     // Let document be element's node document.
@@ -21,11 +21,17 @@ namespace krys::boo::html
     // encoding. (Thus, the base element isn't affected by other base elements or itself.)
     // If urlRecord is failure, return url.
     // Return the serialization of urlRecord.
-
-    return Reflection::Reflect<dom::USVString>(*this, u8"href");
+    auto &document = NodeDocument();
+    auto url = GetAttribute(u8"href").value_or(dom::DOMString());
+    auto urlRecord = document.CompleteURL(url, document.FallbackBaseURL());
+    if (!urlRecord.IsValid())
+    {
+      return dom::USVString(krys::move(url));
+    }
+    return dom::USVString(urlRecord.String());
   }
 
-  dom::ExceptionOr<void> HTMLBaseElement::Href(dom::USVString &&value) noexcept
+  void HTMLBaseElement::Href(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
   }

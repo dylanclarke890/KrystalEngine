@@ -7,11 +7,13 @@
 
 namespace krys::boo
 {
+  class RenderText;
+  struct TextBoxSelectableRange;
+
   /// @brief A range of a text box's text painted in its own way (unmarked text, selection, document markers,
   /// highlights), by byte offsets into the box's text.
-  /// FIXME: Collecting document markers, highlights and dragged or transparent content
-  /// (`collectForDocumentMarkers`, `collectForHighlights`, `collectForDraggedAndTransparentContent`) comes
-  /// with editing, the highlight registry and selection; until then text is only ever unmarked, and
+  /// FIXME: Collecting document markers and dragged or transparent content (`collectForDocumentMarkers`,
+  /// `collectForDraggedAndTransparentContent`), once there are document markers and drag and drop; until then
   /// `RenderedDocumentMarker`s aren't kept.
   struct MarkedText
   {
@@ -71,5 +73,12 @@ namespace krys::boo
     /// `OverlapStrategy::Frontmost` only the one painted last.
     KRYS_NODISCARD static List<MarkedText> Subdivide(const List<MarkedText> &markedTexts,
                                                      OverlapStrategy overlapStrategy = OverlapStrategy::None);
+
+    /// @brief The parts of @p renderer's text box (@p selectableRange) its document's highlights cover: the
+    /// custom highlights styled by `::highlight()` (for @p phase), in priority order, then the text
+    /// fragments' highlights.
+    KRYS_NODISCARD static List<MarkedText> CollectForHighlights(const RenderText &renderer,
+                                                                const TextBoxSelectableRange &selectableRange,
+                                                                PaintPhase phase) noexcept;
   };
 }

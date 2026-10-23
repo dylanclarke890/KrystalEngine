@@ -27,10 +27,10 @@ namespace krys::boo::html
 #pragma region HTMLObjectElement - https://html.spec.whatwg.org/#htmlobjectelement
 
     /// @see https://html.spec.whatwg.org/#dom-object-data
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Data() const noexcept;
+    KRYS_NODISCARD dom::USVString Data() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-data
-    dom::ExceptionOr<void> Data(dom::USVString &&value) noexcept;
+    void Data(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-object-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;

@@ -968,8 +968,13 @@ namespace krys::ui::tests
       u8"<input name=empty required><button id=go name=go value=1>Order</button></form>");
     view.UpdateRendering();
 
-    List<FormSubmissionRequest> requests;
-    view.SetFormSubmissionHandler([&](const FormSubmissionRequest &request) { requests.push_back(request); });
+    List<NavigationRequest> requests;
+    view.SetNavigationHandler(
+      [&](const NavigationRequest &request)
+      {
+        requests.push_back(request);
+        return NavigationPolicy::Ignore;
+      });
 
     // The required field is empty, so clicking the button doesn't submit.
     auto go = view.Document().GetElementById(u8"go");
@@ -986,10 +991,68 @@ namespace krys::ui::tests
     view.MousePressed({10, 30}, pal::MouseButton::Left);
     view.MouseReleased({10, 30}, pal::MouseButton::Left);
     REQUIRE(requests.size() == 1);
+    CHECK(requests[0].IsFormSubmission);
+    CHECK_FALSE(requests[0].IsSameDocument);
+    CHECK(requests[0].SourceElement.get() == view.Document().QuerySelector(u8"form").Value().get());
     CHECK(requests[0].Method == u8"POST");
     CHECK(requests[0].URL == u8"https://example.com/order");
     CHECK(requests[0].ContentType == u8"application/x-www-form-urlencoded");
     CHECK(requests[0].Body == u8"size=large&empty=&go=1");
+  }
+
+  TEST_CASE("View: asks the host about links", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } a { display: block; height: 40px }</style>"
+                  u8"<a id=away href=\"https://example.com/away\">Away</a><a id=here href=\"#here\">Here</a>",
+                  boo::url::URL(u8"https://example.com/page.html"));
+    view.UpdateRendering();
+
+    List<NavigationRequest> requests;
+    auto policy = NavigationPolicy::Ignore;
+    view.SetNavigationHandler(
+      [&](const NavigationRequest &request)
+      {
+        requests.push_back(request);
+        return policy;
+      });
+
+    // A link to another page: the host decides, and the page stays.
+    view.MousePressed({10, 10}, pal::MouseButton::Left);
+    view.MouseReleased({10, 10}, pal::MouseButton::Left);
+    REQUIRE(requests.size() == 1);
+    CHECK(requests[0].URL == u8"https://example.com/away");
+    CHECK_FALSE(requests[0].IsSameDocument);
+    CHECK_FALSE(requests[0].IsFormSubmission);
+    CHECK(requests[0].Button == boo::MouseButton::Left);
+    CHECK(requests[0].SourceElement.get() == view.Document().GetElementById(u8"away").get());
+
+    // A link within the page, ignored and then allowed.
+    view.MousePressed({10, 50}, pal::MouseButton::Left);
+    view.MouseReleased({10, 50}, pal::MouseButton::Left);
+    REQUIRE(requests.size() == 2);
+    CHECK(requests[1].IsSameDocument);
+    CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html");
+
+    policy = NavigationPolicy::Allow;
+    view.MousePressed({10, 50}, pal::MouseButton::Left);
+    view.MouseReleased({10, 50}, pal::MouseButton::Left);
+    CHECK(view.Document().GetURL().String() == u8"https://example.com/page.html#here");
+  }
+
+  TEST_CASE("View: a page opens at its URL's fragment", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 2000px }</style><div></div>"
+                  u8"<p id=far>Far</p><div></div>",
+                  boo::url::URL(u8"https://example.com/page.html#far"));
+    view.UpdateRendering();
+
+    auto far = view.Document().GetElementById(u8"far");
+    REQUIRE(far);
+    CHECK(view.Document().CSSTarget() == far.get());
+    CHECK(view.Frame().View()->GetScrollPosition().Y() > 0);
+    CHECK(far->GetBoundingClientRect()->Y() == 0);
   }
 
   TEST_CASE("View: a drop-down's popup", "[UI]")

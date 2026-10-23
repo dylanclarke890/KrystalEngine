@@ -68,14 +68,14 @@ namespace krys::boo::html
   }
 #pragma region HTMLObjectElement
 
-  dom::ExceptionOr<dom::USVString> HTMLObjectElement::Data() const noexcept
+  dom::USVString HTMLObjectElement::Data() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"data");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"data");
   }
 
-  dom::ExceptionOr<void> HTMLObjectElement::Data(dom::USVString &&value) noexcept
+  void HTMLObjectElement::Data(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"data", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"data", krys::move(value));
   }
 
   dom::DOMString HTMLObjectElement::Type() const noexcept

@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/HighlightRegistry.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -42,6 +43,7 @@
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -49,6 +51,9 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HashChangeEvent.hpp"
+#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
@@ -770,6 +775,10 @@ namespace krys::boo::dom
   void Document::SetURL(url::URL &&url) noexcept
   {
     url::URL newURL = url.IsEmpty() ? url::AboutBlankURL() : krys::move(url);
+
+    // https://wicg.github.io/scroll-to-text-fragment/#process-and-consume-fragment-directive
+    _fragmentDirective = newURL.ConsumeFragmentDirective();
+
     if (newURL == _url)
     {
       return;
@@ -1347,6 +1356,222 @@ namespace krys::boo::dom
     }
 
     // FIXME: The visual viewport's scroll events, once there's a visual viewport.
+  }
+
+  void Document::SetCSSTarget(Element *newTarget) noexcept
+  {
+    if (_cssTarget.get() == newTarget)
+    {
+      return;
+    }
+
+    Maybe<style::PseudoClassChangeInvalidation> oldInvalidation;
+    if (auto *oldTarget = _cssTarget.get())
+    {
+      oldInvalidation.emplace(*oldTarget, css::SelectorPseudoClass::Target, false);
+    }
+
+    Maybe<style::PseudoClassChangeInvalidation> newInvalidation;
+    if (newTarget)
+    {
+      newInvalidation.emplace(*newTarget, css::SelectorPseudoClass::Target, true);
+    }
+    _cssTarget = CreateWeakPtr(newTarget);
+  }
+
+  Element *Document::FindAnchor(DOMStringView name) const noexcept
+  {
+    if (name.empty())
+    {
+      return nullptr;
+    }
+    if (auto element = const_cast<Document *>(this)->GetElementById(name))
+    {
+      return element.get();
+    }
+    for (auto &node : DescendantRange(const_cast<Document &>(*this)))
+    {
+      auto *anchor = DynamicDowncast<html::HTMLAnchorElement>(node);
+      if (!anchor)
+      {
+        continue;
+      }
+      auto anchorName = anchor->GetAttribute(u8"name");
+      if (!anchorName)
+      {
+        continue;
+      }
+      // Quirks mode, ASCII case-insensitive comparison of names.
+      // FIXME: This behavior is not mentioned in the HTML specification. We should either remove this or get
+      // this into the specification.
+      if (InQuirksMode() ? text::IsASCIICaselessEqual(DOMStringView(*anchorName), name) : *anchorName == name)
+      {
+        return anchor;
+      }
+    }
+    return nullptr;
+  }
+
+  bool Document::HaveStylesheetsLoaded() const noexcept
+  {
+    return !const_cast<Document *>(this)->StyleScope().HasPendingSheets() || _ignorePendingStylesheets;
+  }
+
+  void Document::DidRemoveAllPendingStylesheet() noexcept
+  {
+    // FIXME: Running the scripts waiting for style sheets, once there are scripts.
+    if (!_gotoAnchorNeededAfterStylesheetsLoad || !View())
+    {
+      return;
+    }
+
+    // https://html.spec.whatwg.org/multipage/browsing-the-web.html#try-to-scroll-to-the-fragment
+    html::EventLoop::Current().QueueTask(html::TaskSource::Networking,
+                                         [protectedThis = ShareRef(*this), this]
+                                         {
+                                           auto *frameView = View();
+                                           if (!frameView)
+                                           {
+                                             return;
+                                           }
+                                           if (!HaveStylesheetsLoaded())
+                                           {
+                                             _gotoAnchorNeededAfterStylesheetsLoad = true;
+                                             return;
+                                           }
+                                           _gotoAnchorNeededAfterStylesheetsLoad = false;
+                                           (void)frameView->ScrollToFragment(_url);
+                                         });
+  }
+
+  void Document::EnqueueHashchangeEvent(USVString &&oldURL, USVString &&newURL) noexcept
+  {
+    // SPEC-VIOLATION(HTML): hashchange fires at the window, which isn't supported, so it fires at the
+    // document.
+    // FIXME: popstate event and hashchange event are supposed to fire in a single task.
+    html::EventLoop::Current().QueueTask(
+      html::TaskSource::DOMManipulation,
+      [protectedThis = ShareRef(*this),
+       event = html::HashChangeEvent::Create(krys::move(oldURL), krys::move(newURL))]
+      { (void)protectedThis->DispatchEvent(*event); });
+  }
+
+  HighlightRegistry &Document::GetHighlightRegistry() noexcept
+  {
+    if (!_highlightRegistry)
+    {
+      _highlightRegistry = HighlightRegistry::Create();
+    }
+    return *_highlightRegistry;
+  }
+
+  HighlightRegistry &Document::FragmentHighlightRegistry() noexcept
+  {
+    if (!_fragmentHighlightRegistry)
+    {
+      _fragmentHighlightRegistry = HighlightRegistry::Create();
+    }
+    return *_fragmentHighlightRegistry;
+  }
+
+  HighlightRegistry *Document::HighlightRegistryIfExists() const noexcept
+  {
+    return _highlightRegistry.get();
+  }
+
+  HighlightRegistry *Document::FragmentHighlightRegistryIfExists() const noexcept
+  {
+    return _fragmentHighlightRegistry.get();
+  }
+
+  bool Document::HasHighlight() const noexcept
+  {
+    return (_highlightRegistry && !_highlightRegistry->IsEmpty())
+           || (_fragmentHighlightRegistry && !_fragmentHighlightRegistry->IsEmpty());
+  }
+
+  namespace
+  {
+    void CollectHighlightRangesFromRegister(List<WeakPtr<HighlightRange>> &highlightRanges,
+                                            const HighlightRegistry &highlightRegistry) noexcept
+    {
+      for (auto &[name, highlight] : highlightRegistry.Map())
+      {
+        for (auto &highlightRange : highlight->HighlightRanges())
+        {
+          // FIXME: Only the live ranges that changed (Range::didChangeForHighlight), once ranges track it.
+          if (!highlightRange->StartPosition().IsNull() && !highlightRange->EndPosition().IsNull()
+              && !highlightRange->Range().IsLiveRange())
+          {
+            continue;
+          }
+
+          auto simpleRange = MakeSimpleRange(highlightRange->Range());
+          if (&simpleRange.StartContainer().TreeScope() != &simpleRange.EndContainer().TreeScope())
+          {
+            continue;
+          }
+          highlightRanges.push_back(CreateWeakPtr(highlightRange.get()));
+        }
+      }
+    }
+  }
+
+  void Document::UpdateHighlightPositions() noexcept
+  {
+    List<WeakPtr<HighlightRange>> highlightRanges;
+    if (_highlightRegistry)
+    {
+      CollectHighlightRangesFromRegister(highlightRanges, *_highlightRegistry);
+    }
+    if (_fragmentHighlightRegistry)
+    {
+      CollectHighlightRangesFromRegister(highlightRanges, *_fragmentHighlightRegistry);
+    }
+
+    for (auto &weakRangeData : highlightRanges)
+    {
+      RefPtr<HighlightRange> highlightRange = ShareRefPtr(weakRangeData.get());
+      if (!highlightRange)
+      {
+        continue;
+      }
+
+      VisibleSelection visibleSelection(MakeSimpleRange(highlightRange->Range()));
+      auto startPosition = visibleSelection.VisibleStart().DeepEquivalent();
+      auto endPosition = visibleSelection.VisibleEnd().DeepEquivalent();
+      if (!weakRangeData.get())
+      {
+        continue;
+      }
+
+      if (auto simpleRange = MakeSimpleRange(highlightRange->StartPosition(), highlightRange->EndPosition()))
+      {
+        if (auto init = StaticRangeInit::Create(simpleRange->Start, simpleRange->End); !init.HasException())
+        {
+          Highlight::RepaintRange(*CreateRef<StaticRange>(init.ReleaseValue()));
+        }
+      }
+
+      if (!startPosition.IsNull())
+      {
+        highlightRange->SetStartPosition(krys::move(startPosition));
+      }
+      if (!endPosition.IsNull())
+      {
+        highlightRange->SetEndPosition(krys::move(endPosition));
+      }
+
+      Highlight::RepaintRange(highlightRange->Range());
+    }
+  }
+
+  void Document::FinishedParsing() noexcept
+  {
+    if (auto *frame = Frame())
+    {
+      frame->Loader().FinishedParsing();
+    }
   }
 
   void Document::SetSequentialFocusNavigationStartingPoint(Node *node) noexcept

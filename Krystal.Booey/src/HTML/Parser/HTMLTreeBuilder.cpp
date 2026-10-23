@@ -3548,6 +3548,11 @@ namespace krys::boo::html
   {
     // TODO(HTMLTREEBUILDER): StopParsing - implement required steps.
     _openElementStack.PopAll();
+
+    if (!_context.has_value())
+    {
+      _document.FinishedParsing();
+    }
   }
 
 #pragma endregion

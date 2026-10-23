@@ -14,12 +14,12 @@ namespace krys::boo::html
   }
 #pragma region HTMLSourceElement
 
-  dom::ExceptionOr<dom::USVString> HTMLSourceElement::Src() const noexcept
+  dom::USVString HTMLSourceElement::Src() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLSourceElement::Src(dom::USVString &&value) noexcept
+  void HTMLSourceElement::Src(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -34,14 +34,14 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLSourceElement::SrcSet() const noexcept
+  dom::USVString HTMLSourceElement::SrcSet() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset");
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  dom::ExceptionOr<void> HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
   dom::DOMString HTMLSourceElement::Sizes() const noexcept

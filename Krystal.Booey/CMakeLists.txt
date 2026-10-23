@@ -1028,6 +1028,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/FocusEvent.hpp
   include/Krystal.Booey/DOM/UIEvent.hpp
   include/Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp
+  include/Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp
+  include/Krystal.Booey/DOM/Highlight.hpp
+  include/Krystal.Booey/DOM/HighlightRegistry.hpp
+  include/Krystal.Booey/DOM/FragmentDirectiveParser.hpp
+  include/Krystal.Booey/DOM/FragmentDirectiveRangeFinder.hpp
+  include/Krystal.Booey/DOM/FragmentDirectiveUtilities.hpp
+  include/Krystal.Booey/Editing/TemporarySelectionChange.hpp
+  include/Krystal.Booey/HTML/HashChangeEvent.hpp
+  include/Krystal.Booey/HTML/URLDecomposition.hpp
   include/Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp
   include/Krystal.Booey/Style/MatchedDeclarationsCache.hpp
   include/Krystal.Booey/Style/MatchResultCache.hpp
@@ -1773,6 +1782,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/HTML/ValidityStateFlags.hpp
   include/Krystal.Booey/HTML/WeekInputType.hpp
   include/Krystal.Booey/Loader/FormSubmission.hpp
+  include/Krystal.Booey/Loader/FrameLoader.hpp
+  include/Krystal.Booey/Loader/FrameLoaderTypes.hpp
+  include/Krystal.Booey/Loader/FrameLoadRequest.hpp
+  include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
+  include/Krystal.Booey/Loader/NavigationAction.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/Network/FormData.hpp
   include/Krystal.Booey/Platform/Network/FormDataBuilder.hpp
@@ -2677,6 +2691,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/UserActionElementSet.cpp
   src/DOM/DOMRectList.cpp
   src/HTML/Algorithms/FocusAlgorithms.cpp
+  src/HTML/Algorithms/HyperlinkAlgorithms.cpp
+  src/DOM/Highlight.cpp
+  src/DOM/HighlightRegistry.cpp
+  src/DOM/FragmentDirectiveParser.cpp
+  src/DOM/FragmentDirectiveRangeFinder.cpp
+  src/DOM/FragmentDirectiveUtilities.cpp
+  src/Editing/TemporarySelectionChange.cpp
+  src/HTML/HashChangeEvent.cpp
+  src/HTML/URLDecomposition.cpp
   src/HTML/Mixins/HTMLOrSVGOrMathMLElement.cpp
 
   # Frame view and viewport
@@ -2951,6 +2974,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/ValidatedFormListedElement.cpp
   src/HTML/WeekInputType.cpp
   src/Loader/FormSubmission.cpp
+  src/Loader/FrameLoader.cpp
+  src/Loader/FrameLoadRequest.cpp
+  src/Loader/NavigationAction.cpp
   src/Platform/LocalizedStrings.cpp
   src/Platform/Network/FormData.cpp
   src/Platform/Network/FormDataBuilder.cpp

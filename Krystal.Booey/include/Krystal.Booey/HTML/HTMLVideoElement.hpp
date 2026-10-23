@@ -34,10 +34,10 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 VideoHeight() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Poster() const noexcept;
+    KRYS_NODISCARD dom::USVString Poster() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
-    dom::ExceptionOr<void> Poster(dom::USVString &&value) noexcept;
+    void Poster(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-playsinline
     KRYS_NODISCARD bool PlaysInline() const noexcept;

@@ -41,10 +41,11 @@ namespace krys::boo
 
   Page::~Page() noexcept = default;
 
-  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient) noexcept
+  Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
+                         UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient) noexcept
   {
     Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient)));
-    page->_mainFrame = LocalFrame::Create(page.get());
+    page->_mainFrame = LocalFrame::Create(page.get(), krys::move(mainFrameLoaderClient));
     return page;
   }
 
@@ -182,7 +183,7 @@ namespace krys::boo
     ForEachDocument([](dom::Document &document)
                     { document.Selection().UpdateAppearanceAfterUpdatingRendering(); });
 
-    // FIXME: Highlight positions (updateHighlightPositions), with the Highlight API.
+    ForEachRenderableDocument([](dom::Document &document) { document.UpdateHighlightPositions(); });
   }
 
   void Page::RenderingUpdateCompleted() noexcept

@@ -19,3 +19,6 @@ p { margin: 0 0 8px; }
 /* Clicking a card focuses it (each takes a tabindex); a click focus isn't focus visible, so it gets this
    outline, while Tab (focus visible) gets the user agent's focus ring. */
 .card:focus:not(:focus-visible) { outline: 3px solid #118ab2; outline-offset: 4px; }
+/* A fragment link's card (the page's :target), and a text fragment's text. */
+.card:target { background: #e8f8f2; box-shadow: 0 0 0 3px #06d6a0, 0 12px 32px rgba(26, 34, 64, 0.12); }
+::target-text { background-color: #ffd166; }

@@ -25,6 +25,11 @@ namespace krys::boo::dom
   public:
     ~Range() noexcept override;
 
+    KRYS_NODISCARD bool IsLiveRange() const noexcept final
+    {
+      return true;
+    }
+
 #pragma region Range - https://dom.spec.whatwg.org/#range
 
     /// @see https://dom.spec.whatwg.org/#dom-range-range

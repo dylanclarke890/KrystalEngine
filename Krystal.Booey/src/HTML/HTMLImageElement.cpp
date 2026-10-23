@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/HTMLImageLoader.hpp"
+#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
@@ -70,24 +73,24 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::Src() const noexcept
+  dom::USVString HTMLImageElement::Src() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::Src(dom::USVString &&value) noexcept
+  void HTMLImageElement::Src(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::SrcSet() const noexcept
+  dom::USVString HTMLImageElement::SrcSet() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset");
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLImageElement::SrcSet(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
   dom::DOMString HTMLImageElement::Sizes() const noexcept
@@ -111,6 +114,39 @@ namespace krys::boo::html
     Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
+  HTMLMapElement *HTMLImageElement::AssociatedMapElement() const noexcept
+  {
+    // https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference
+    auto usemap = GetAttribute(u8"usemap");
+    if (!usemap)
+    {
+      return nullptr;
+    }
+    auto numberSign = dom::DOMStringView(*usemap).find(u8'#');
+    if (numberSign == dom::DOMStringView::npos)
+    {
+      return nullptr;
+    }
+    auto name = dom::DOMStringView(*usemap).substr(numberSign + 1);
+
+    auto &root = dom::TreeQueries::Root(const_cast<HTMLImageElement &>(*this));
+    for (auto &node : dom::DescendantRange(root))
+    {
+      auto *map = DynamicDowncast<HTMLMapElement>(node);
+      if (!map)
+      {
+        continue;
+      }
+      auto id = map->GetAttribute(u8"id");
+      auto mapName = map->GetAttribute(u8"name");
+      if ((id && *id == name) || (mapName && *mapName == name))
+      {
+        return map;
+      }
+    }
+    return nullptr;
+  }
+
   dom::DOMString HTMLImageElement::UseMap() const noexcept
   {
     return Reflection::Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
@@ -129,6 +165,27 @@ namespace krys::boo::html
   void HTMLImageElement::IsMap(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"ismap", krys::move(value));
+  }
+
+  bool HTMLImageElement::IsServerMap() const noexcept
+  {
+    if (!HasAttribute(u8"ismap"))
+    {
+      return false;
+    }
+
+    auto usemap = GetAttribute(u8"usemap");
+    if (!usemap)
+    {
+      return true;
+    }
+    // If the usemap attribute starts with '#', it refers to a map element in the document.
+    if (usemap->starts_with(u8'#'))
+    {
+      return false;
+    }
+
+    return NodeDocument().CompleteURL(*usemap).IsEmpty();
   }
 
   bool HTMLImageElement::Controls() const noexcept
@@ -246,8 +303,8 @@ namespace krys::boo::html
 
   dom::USVString HTMLImageElement::CurrentSrc() const noexcept
   {
-    // FIXME: The current URL as a string (CurrentURL()), once USVString holds one.
-    return {};
+    // The currentSrc IDL attribute must return the img element's current request's current URL.
+    return dom::USVString(CurrentURL().String());
   }
 
   dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
@@ -308,12 +365,12 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::LowSrc() const noexcept
+  dom::USVString HTMLImageElement::LowSrc() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"lowsrc");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::LowSrc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LowSrc(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
   }
@@ -348,12 +405,12 @@ namespace krys::boo::html
     Reflection::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::LongDesc() const noexcept
+  dom::USVString HTMLImageElement::LongDesc() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::LongDesc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LongDesc(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }

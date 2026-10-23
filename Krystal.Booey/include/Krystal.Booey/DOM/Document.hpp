@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
+#include "Krystal.Booey/DOM/Types/USVString.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
@@ -104,6 +105,7 @@ namespace krys::boo::dom
   class Comment;
   class DocumentType;
   class Element;
+  class HighlightRegistry;
   class HTMLCollection;
   class SelectorQuery;
   class ProcessingInstruction;
@@ -192,6 +194,15 @@ namespace krys::boo::dom
     List<std::pair<Ref<ContainerNode>, ScrollEventType>> _pendingScrollEventTargets;
     // Where sequential focus navigation starts from when it's inside the focused area: unset if null.
     RefPtr<Node> _sequentialFocusNavigationStartingPoint;
+    // The element the URL's fragment indicates, which `:target` matches.
+    WeakPtr<Element> _cssTarget;
+    // Whether the fragment is scrolled to once the pending style sheets have loaded.
+    bool _gotoAnchorNeededAfterStylesheetsLoad {false};
+    // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
+    RefPtr<HighlightRegistry> _highlightRegistry;
+    RefPtr<HighlightRegistry> _fragmentHighlightRegistry;
+    // The text directives taken from the URL's fragment (after `:~:`).
+    utf8_string _fragmentDirective;
     SequentialFocusNavigationStartingPointPosition _sequentialFocusNavigationStartingPointPosition {
       SequentialFocusNavigationStartingPointPosition::At};
 
@@ -678,6 +689,71 @@ namespace krys::boo::dom
     {
       return _sequentialFocusNavigationStartingPoint.get();
     }
+
+    /// @brief The document's target element, which `:target` matches; null if there's none.
+    /// @see https://html.spec.whatwg.org/#target-element
+    KRYS_NODISCARD Element *CSSTarget() const noexcept
+    {
+      return _cssTarget.get();
+    }
+
+    /// @brief Makes @p newTarget (or nothing, if it's null) the document's target element, invalidating the
+    /// style of the old and new targets.
+    void SetCSSTarget(Element *newTarget) noexcept;
+
+    /// @brief The element the fragment @p name indicates: the element with the ID @p name, or else the first
+    /// `<a>` whose `name` is @p name (ASCII case-insensitively in quirks mode); null for an empty name.
+    /// @see https://html.spec.whatwg.org/#find-a-potential-indicated-element
+    KRYS_NODISCARD Element *FindAnchor(DOMStringView name) const noexcept;
+
+    /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
+    KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;
+
+    /// @brief Whether the fragment is scrolled to once the pending style sheets have loaded.
+    KRYS_NODISCARD bool GotoAnchorNeededAfterStylesheetsLoad() const noexcept
+    {
+      return _gotoAnchorNeededAfterStylesheetsLoad;
+    }
+    void SetGotoAnchorNeededAfterStylesheetsLoad(bool value) noexcept
+    {
+      _gotoAnchorNeededAfterStylesheetsLoad = value;
+    }
+
+    /// @brief Run when the last pending style sheet has loaded: scrolls to the fragment if that waited for
+    /// it.
+    void DidRemoveAllPendingStylesheet() noexcept;
+
+    /// @brief Queues a task to fire `hashchange` from @p oldURL to @p newURL.
+    void EnqueueHashchangeEvent(dom::USVString &&oldURL, dom::USVString &&newURL) noexcept;
+
+    /// @brief The document's custom highlights, which `::highlight()` styles.
+    /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
+    KRYS_NODISCARD HighlightRegistry &GetHighlightRegistry() noexcept;
+    KRYS_NODISCARD HighlightRegistry *HighlightRegistryIfExists() const noexcept;
+
+    /// @brief The highlights of the text the URL's text directives indicate, which `::target-text` styles.
+    KRYS_NODISCARD HighlightRegistry &FragmentHighlightRegistry() noexcept;
+    KRYS_NODISCARD HighlightRegistry *FragmentHighlightRegistryIfExists() const noexcept;
+
+    /// @brief Whether any highlight is registered, so text may need painting with highlights.
+    KRYS_NODISCARD bool HasHighlight() const noexcept;
+
+    /// @brief Works out where each highlight range's painting starts and ends, repainting what moved; run at
+    /// each rendering update.
+    void UpdateHighlightPositions() noexcept;
+
+    /// @brief The fragment directive of the document's URL (what followed `:~:`), which `SetURL` takes from
+    /// the URL.
+    /// @see https://wicg.github.io/scroll-to-text-fragment/#fragment-directive
+    KRYS_NODISCARD const utf8_string &FragmentDirective() const noexcept
+    {
+      return _fragmentDirective;
+    }
+
+    /// @brief Run when the parser stops parsing the document: its frame's loader scrolls to the fragment.
+    // FIXME: The rest of the end (https://html.spec.whatwg.org/#the-end): readiness, DOMContentLoaded and the
+    // load event, with document loading (B3).
+    void FinishedParsing() noexcept;
 
     /// @brief Whether the latest focus change the user made was by clicking.
     KRYS_NODISCARD bool WasLastFocusByClick() const noexcept

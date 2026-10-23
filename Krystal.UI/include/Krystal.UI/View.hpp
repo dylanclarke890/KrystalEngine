@@ -30,15 +30,46 @@
 
 namespace krys::ui
 {
-  /// @brief A form submission the page asks the host to navigate to, as the host's handler receives it.
-  struct FormSubmissionRequest
+  /// @brief What the host decides to do with a navigation.
+  enum class NavigationPolicy : uint8
   {
-    /// @brief `GET`, `POST` or `DIALOG`.
-    utf8_string Method;
-    /// @brief The URL to navigate to: the action, with the form data as its query for a `GET`.
+    /// @brief Navigate: within the page (to a fragment), Booey does it; to another document, nothing happens
+    /// yet (document loading is to come).
+    Allow,
+    /// @brief Leave the page as it is: the host may have handled the navigation itself.
+    Ignore,
+  };
+
+  /// @brief A navigation the page asks the host about (a link followed or a form submitted), as the host's
+  /// handler receives it.
+  struct NavigationRequest
+  {
+    /// @brief The URL to navigate to: for a form, the action, with the form data as its query for a `GET`.
     utf8_string URL;
-    /// @brief The browsing context to navigate (`_self` and the others, or a name).
+    /// @brief The browsing context named (the link's or the form's target, or the document's base target);
+    /// empty for the view's own.
     utf8_string Target;
+    /// @brief Whether the target names another browsing context (`_blank` or a name), which the host would
+    /// open.
+    bool OpensNewWindow {false};
+    /// @brief Whether allowing it navigates within the page: to a fragment of the page's URL.
+    bool IsSameDocument {false};
+    /// @brief The element that started it: the link or the form.
+    RefPtr<boo::dom::Element> SourceElement;
+    /// @brief The mouse button that followed the link, if a click did.
+    Maybe<boo::MouseButton> Button;
+    /// @brief The modifier keys held as the link was followed or the form submitted.
+    bool ShiftKey {false};
+    bool CtrlKey {false};
+    bool AltKey {false};
+    bool MetaKey {false};
+    /// @brief The link's `download` attribute, if it has one.
+    Maybe<utf8_string> Download;
+
+    /// @brief Whether a form was submitted.
+    bool IsFormSubmission {false};
+    /// @brief `GET` or `POST`.
+    utf8_string Method {u8"GET"};
     /// @brief The `Content-Type` of a `POST`'s body, with its boundary for `multipart/form-data`.
     utf8_string ContentType;
     /// @brief The body of a `POST`; empty otherwise.
@@ -60,11 +91,14 @@ namespace krys::ui
 
   public:
     class ChromeClient;
+    class FrameLoaderClient;
 
   private:
     /// @brief The page's chrome client, which the page owns: it hands Booey the graphics layers and keeps the
     /// root of the page's layer tree.
     ChromeClient *_chromeClient {nullptr};
+    /// @brief The main frame's loader client, which the frame owns: it asks the navigation handler.
+    FrameLoaderClient *_frameLoaderClient {nullptr};
     Ref<boo::Page> _page;
     Ref<boo::LocalFrame> _frame;
     RefPtr<boo::dom::HTMLDocument> _document;
@@ -213,9 +247,9 @@ namespace krys::ui
     /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.
     void SetFocused(bool focused) noexcept;
 
-    /// @brief Hands the page's form submissions to @p handler; the page doesn't navigate itself, so a host
-    /// without a handler ignores them.
-    void SetFormSubmissionHandler(Func<void(const FormSubmissionRequest &)> &&handler) noexcept;
+    /// @brief Asks @p handler about each navigation the page starts (links followed and forms submitted). A
+    /// view without a handler allows every navigation, so only navigations within the page happen.
+    void SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept;
 
     KRYS_NODISCARD boo::dom::HTMLDocument &Document() const noexcept
     {

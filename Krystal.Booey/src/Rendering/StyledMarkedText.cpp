@@ -1,9 +1,11 @@
 ﻿#include "Krystal.Booey/Rendering/StyledMarkedText.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include <algorithm>
@@ -11,6 +13,42 @@
 
 namespace krys::boo
 {
+  static void ComputeStyleForPseudoElementStyle(StyledMarkedText::Style &style,
+                                                const RenderStyle *pseudoElementStyle,
+                                                const PaintInfo &paintInfo) noexcept
+  {
+    if (!pseudoElementStyle)
+    {
+      return;
+    }
+
+    style.BackgroundColor = pseudoElementStyle->VisitedDependentColorWithColorFilter(
+      css::PropertyId::BackgroundColor, paintInfo.PaintBehavior);
+    style.TextStyles.FillColor = pseudoElementStyle->UsedStrokeColor();
+    style.TextStyles.StrokeColor = pseudoElementStyle->UsedStrokeColor();
+    style.TextStyles.HasExplicitlySetFillColor = pseudoElementStyle->HasExplicitlySetColor();
+
+    auto color = TextDecorationPainter::DecorationColor(*pseudoElementStyle, paintInfo.PaintBehavior);
+    auto decorationStyle = pseudoElementStyle->GetTextDecorationStyle();
+    auto decorations = pseudoElementStyle->TextDecorationLineInEffect();
+
+    if (decorations.HasUnderline())
+    {
+      style.TextDecorationStyles.Underline.DecorationColor = color;
+      style.TextDecorationStyles.Underline.DecorationStyle = decorationStyle;
+    }
+    if (decorations.HasOverline())
+    {
+      style.TextDecorationStyles.Overline.DecorationColor = color;
+      style.TextDecorationStyles.Overline.DecorationStyle = decorationStyle;
+    }
+    if (decorations.HasLineThrough())
+    {
+      style.TextDecorationStyles.Linethrough.DecorationColor = color;
+      style.TextDecorationStyles.Linethrough.DecorationStyle = decorationStyle;
+    }
+  }
+
   KRYS_NODISCARD static StyledMarkedText ResolveStyleForMarkedText(const MarkedText &markedText,
                                                                    const StyledMarkedText::Style &baseStyle,
                                                                    const RenderText &renderer,
@@ -24,12 +62,31 @@ namespace krys::boo
       case MarkedText::Type::DictationAlternatives:
       case MarkedText::Type::Unmarked:              break;
       case MarkedText::Type::GrammarError:
-      case MarkedText::Type::Highlight:
       case MarkedText::Type::SpellingError:
-      case MarkedText::Type::FragmentHighlight:
-        // FIXME: The pseudo-elements' styles (::grammar-error, ::highlight(), ::spelling-error,
-        // ::target-text; computeStyleForPseudoElementStyle) come with marked text.
+        // FIXME: ::grammar-error and ::spelling-error, once there are document markers.
         break;
+      case MarkedText::Type::Highlight:
+      {
+        auto renderStyle = renderer.Parent()->GetUncachedPseudoStyle(
+          style::PseudoElementRequest(PseudoElementType::Highlight, markedText.HighlightName),
+          &renderer.Style());
+        ComputeStyleForPseudoElementStyle(style, renderStyle.get(), paintInfo);
+        break;
+      }
+      case MarkedText::Type::FragmentHighlight:
+      {
+        if (auto *renderStyle = renderer.TargetTextPseudoStyle())
+        {
+          ComputeStyleForPseudoElementStyle(style, renderStyle, paintInfo);
+          break;
+        }
+
+        style.BackgroundColor = RenderTheme::Singleton().AnnotationHighlightBackgroundColor(
+          style::ColorOptions::UseSystemAppearance);
+        style.TextStyles.FillColor = RenderTheme::Singleton().AnnotationHighlightForegroundColor(
+          style::ColorOptions::UseSystemAppearance);
+        break;
+      }
       case MarkedText::Type::TextExtractionHighlight:
         // FIXME: This just uses the same color as annotation highlights for now, but we may eventually
         // require a different appearance.

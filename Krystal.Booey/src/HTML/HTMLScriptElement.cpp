@@ -21,14 +21,14 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLScriptElement::Src() const noexcept
+  dom::USVString HTMLScriptElement::Src() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"src");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLScriptElement::Src(dom::USVString &&value) noexcept
+  void HTMLScriptElement::Src(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"src", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   bool HTMLScriptElement::NoModule() const noexcept

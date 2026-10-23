@@ -137,4 +137,15 @@ namespace krys::boo::html::tests
     CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8" 1").Success());
     CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"inf").Success());
   }
+
+  TEST_CASE("Numbers::ParseListOfFloatingPointNumbers", "[HTML][MicroParsers][Numbers]")
+  {
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"1, 2;3  4") == List<double> {1, 2, 3, 4});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8" ,;1.5,-.5,1e1, ") == List<double> {1.5, -0.5, 10});
+    // Anything after a number is ignored, and a part that isn't a number is zero.
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"10px,x,20") == List<double> {10, 0, 20});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"a1,-") == List<double> {1, 0});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"").empty());
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8" ;, ").empty());
+  }
 }

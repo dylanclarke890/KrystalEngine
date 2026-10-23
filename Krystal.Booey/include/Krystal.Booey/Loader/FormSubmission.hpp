@@ -24,6 +24,7 @@ namespace krys::boo::html
 namespace krys::boo
 {
   class FormData;
+  class FrameLoadRequest;
 
   enum class FormSubmissionTrigger : uint8
   {
@@ -190,6 +191,9 @@ namespace krys::boo
     {
       return _trigger;
     }
+
+    /// @brief Gives @p frameRequest the submission's target, method and URL.
+    void PopulateFrameLoadRequest(FrameLoadRequest &frameRequest) const noexcept;
 
     void ClearTarget() noexcept
     {

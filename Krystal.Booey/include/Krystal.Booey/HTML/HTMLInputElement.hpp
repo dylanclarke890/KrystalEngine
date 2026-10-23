@@ -133,10 +133,10 @@ namespace krys::boo::html
     // attribute FileList? files;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> FormAction() const noexcept;
+    KRYS_NODISCARD dom::USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
-    dom::ExceptionOr<void> FormAction(dom::USVString &&value) noexcept;
+    void FormAction(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formenctype
     KRYS_NODISCARD dom::DOMString FormEnctype() const noexcept;
@@ -249,10 +249,10 @@ namespace krys::boo::html
     dom::ExceptionOr<void> Size(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-step
     KRYS_NODISCARD dom::DOMString Step() const noexcept;

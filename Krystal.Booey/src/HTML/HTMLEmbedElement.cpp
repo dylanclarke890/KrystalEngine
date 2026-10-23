@@ -11,14 +11,14 @@ namespace krys::boo::html
   {
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLEmbedElement::Src() const noexcept
+  dom::USVString HTMLEmbedElement::Src() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"src");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLEmbedElement::Src(dom::USVString &&value) noexcept
+  void HTMLEmbedElement::Src(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"src", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::DOMString HTMLEmbedElement::Type() const noexcept

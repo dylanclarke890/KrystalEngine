@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/RenderHighlight.hpp"
+#include "Krystal.Booey/DOM/Highlight.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include <limits>
 
@@ -14,6 +15,36 @@ namespace krys::boo
   {
     _current = _current->NextInPreOrder();
     return _current;
+  }
+
+  bool RenderHighlight::SetRenderRange(const dom::HighlightRange &highlightRange) noexcept
+  {
+    if (highlightRange.StartPosition().IsNull() || highlightRange.EndPosition().IsNull())
+    {
+      return false;
+    }
+
+    auto &startPosition = highlightRange.StartPosition();
+    auto &endPosition = highlightRange.EndPosition();
+
+    if (!startPosition.GetContainerNode() || !endPosition.GetContainerNode())
+    {
+      return false;
+    }
+
+    auto *startRenderer = startPosition.GetContainerNode()->Renderer();
+    auto *endRenderer = endPosition.GetContainerNode()->Renderer();
+
+    if (!startRenderer || !endRenderer)
+    {
+      return false;
+    }
+
+    auto startOffset = static_cast<uint32>(startPosition.ComputeOffsetInContainerNode());
+    auto endOffset = static_cast<uint32>(endPosition.ComputeOffsetInContainerNode());
+
+    SetRenderRange({startRenderer, endRenderer, startOffset, endOffset});
+    return true;
   }
 
   void RenderHighlight::SetRenderRange(const RenderRange &renderRange) noexcept

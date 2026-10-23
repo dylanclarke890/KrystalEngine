@@ -417,8 +417,10 @@ namespace krys::boo::style
 
     DidChangeActiveStyleSheetCandidates();
 
-    // FIXME: Tell the document that every pending style sheet has loaded (didRemoveAllPendingStylesheet),
-    // once scripts and rendering wait for style sheets.
+    if (!_shadowRoot)
+    {
+      _document->DidRemoveAllPendingStylesheet();
+    }
   }
 
   bool Scope::HasPendingSheet(const dom::Element &element) const noexcept

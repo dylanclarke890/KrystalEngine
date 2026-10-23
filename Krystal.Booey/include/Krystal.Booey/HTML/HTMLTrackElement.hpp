@@ -26,10 +26,10 @@ namespace krys::boo::html
     void Kind(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-track-srclang
     KRYS_NODISCARD dom::DOMString SrcLang() const noexcept;

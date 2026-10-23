@@ -43,14 +43,14 @@ namespace krys::boo::html
     return 0u;
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLVideoElement::Poster() const noexcept
+  dom::USVString HTMLVideoElement::Poster() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"poster");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster");
   }
 
-  dom::ExceptionOr<void> HTMLVideoElement::Poster(dom::USVString &&value) noexcept
+  void HTMLVideoElement::Poster(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"poster", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept

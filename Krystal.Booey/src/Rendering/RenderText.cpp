@@ -2094,6 +2094,15 @@ namespace krys::boo
     return nullptr;
   }
 
+  const RenderStyle *RenderText::TargetTextPseudoStyle() const noexcept
+  {
+    if (auto *ancestor = FirstNonAnonymousAncestor())
+    {
+      return ancestor->TargetTextPseudoStyle();
+    }
+    return nullptr;
+  }
+
   void RenderText::SetSelectionState(HighlightState state) noexcept
   {
     RenderObject::SetSelectionState(state);

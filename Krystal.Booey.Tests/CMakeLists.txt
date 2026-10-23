@@ -435,6 +435,11 @@ target_sources(Krystal.Booey.Tests
 		tests/Platform/Network/DataURLDecoder.cpp
 		tests/Loader/Cache/CachedFont.cpp
 		tests/Loader/Cache/CachedResourceLoader.cpp
+		tests/Loader/FragmentNavigation.cpp
+		tests/DOM/FragmentDirectiveParser.cpp
+		tests/DOM/FragmentDirectiveRangeFinder.cpp
+		tests/DOM/Highlight.cpp
+		tests/Loader/FrameLoader.cpp
 		tests/HTML/Parser/HTMLSrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/HTMLImageElement.cpp
@@ -570,19 +575,23 @@ target_sources(Krystal.Booey.Tests
 		# HTML
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
 		tests/HTML/Attributes/Reflection.cpp
+		tests/HTML/Attributes/ReflectURL.cpp
 		tests/HTML/BaseDateAndTimeInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
 		tests/HTML/ElementInternals.cpp
 		tests/HTML/ColorInputType.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
+		tests/HTML/HTMLAnchorElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
+		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp
+		tests/HTML/URLDecomposition.cpp
 		tests/HTML/HTMLStyleElement.cpp
 		tests/HTML/MicroParsers/Dimensions.cpp
 		tests/HTML/MicroParsers/Numbers.cpp

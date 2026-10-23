@@ -433,8 +433,8 @@ namespace krys
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
-      _pageView->SetFormSubmissionHandler([this](const ui::FormSubmissionRequest &request)
-                                          { ShowFormSubmission(request); });
+      _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
+                                      { return HandleNavigation(request); });
       // The page's custom elements, which its parser creates.
       (void)_pageView->DefineCustomElement(
         u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
@@ -452,20 +452,34 @@ namespace krys
       _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
     }
 
-    /// @brief Logs a form submission from the page, which doesn't navigate, and shows its URL in the page's
+    /// @brief Lets the page navigate within itself; logs a navigation away from it (a link or a form
+    /// submission), which the editor doesn't follow, and shows where it leads in the page's
     /// `#last-submission` element.
-    void ShowFormSubmission(const ui::FormSubmissionRequest &request) noexcept
+    KRYS_NODISCARD ui::NavigationPolicy HandleNavigation(const ui::NavigationRequest &request) noexcept
     {
+      if (request.IsSameDocument)
+      {
+        return ui::NavigationPolicy::Allow;
+      }
+
       auto narrow = [](utf8_stringview text)
       {
         return std::string_view(reinterpret_cast<const char *>(text.data()), text.size());
       };
-      _context->Logger->Info("Form submission: {} {} {}", narrow(request.Method), narrow(request.URL),
-                             narrow(request.Body));
+      _context->Logger->Info("Navigation: {} {} {}{}", narrow(request.Method), narrow(request.URL),
+                             narrow(request.Body), request.OpensNewWindow ? " (new window)" : "");
       if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
       {
-        (void)label->TextContent(request.Method + u8" " + request.URL);
+        utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.URL
+                           : request.Download       ? u8"Download " + request.URL
+                                                    : u8"Link to " + request.URL;
+        if (request.OpensNewWindow)
+        {
+          text += u8" (new window)";
+        }
+        (void)label->TextContent(krys::move(text));
       }
+      return ui::NavigationPolicy::Ignore;
     }
 
     /// @brief The page view: the page laid out and painted by Booey, below the header.

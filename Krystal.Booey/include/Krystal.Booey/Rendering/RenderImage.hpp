@@ -5,6 +5,12 @@
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo::html
+{
+  class HTMLAreaElement;
+  class HTMLMapElement;
+}
+
 namespace krys::boo
 {
   class StyleImage;
@@ -17,8 +23,8 @@ namespace krys::boo
   };
 
   /// @brief The renderer of an image: an `<img>`, or generated content (`content: url(...)`).
-  // FIXME: Image maps (usemap, area focus rings), shadow content (image overlays and controls), selection
-  // geometry, the broken image icon, and whether the foreground is known to be opaque.
+  // FIXME: Shadow content (image overlays and controls), selection geometry, the broken image icon, and
+  // whether the foreground is known to be opaque.
   class RenderImage : public RenderReplaced
   {
     KRYS_NON_COPY_MOVABLE(RenderImage);
@@ -84,6 +90,12 @@ namespace krys::boo
     KRYS_NODISCARD bool IsShowingAltText() const noexcept;
 
     KRYS_NODISCARD virtual bool ShouldDisplayBrokenImageIcon() const noexcept;
+
+    /// @brief Repaints the focus ring of @p element, an area of the image's map, as it gains or loses focus.
+    void AreaElementFocusChanged(html::HTMLAreaElement &element) noexcept;
+
+    /// @brief The image map the image uses, if any.
+    KRYS_NODISCARD html::HTMLMapElement *ImageMap() const noexcept;
     KRYS_NODISCARD bool ShouldRespectZeroIntrinsicWidth() const noexcept override;
 
     KRYS_NODISCARD utf8_stringview RenderName() const noexcept override
@@ -117,7 +129,13 @@ namespace krys::boo
       return false;
     }
 
+    void Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
     void PaintReplaced(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept override;
+    void PaintAreaElementFocusRing(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept;
+
+    bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                     const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,
+                     HitTestAction action) noexcept override;
     void PaintIncompleteImageOutline(PaintInfo &paintInfo, LayoutPoint paintOffset,
                                      LayoutUnit borderWidth) const noexcept;
 

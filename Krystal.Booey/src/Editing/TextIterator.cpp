@@ -2181,4 +2181,88 @@ namespace krys::boo
     }
     return result;
   }
+
+  utf8_string FoldQuoteMarks(utf8_stringview stringToFold, List<uint32> *sourceOffsets) noexcept
+  {
+    auto folded = [](char32 character) -> char32
+    {
+      switch (character)
+      {
+        // The single quotation marks.
+        case 0x05F3: // Hebrew punctuation geresh
+        case 0x2018: // Left single quotation mark
+        case 0x201A: // Left low single quotation mark
+        case 0x201B: // Single low-9 quotation mark
+        case 0x2039: // Single left-pointing angle quotation mark
+        case 0x203A: // Single right-pointing angle quotation mark
+        case 0x300C: // Left corner bracket
+        case 0x300D: // Right corner bracket
+        case 0x300E: // Left white corner bracket
+        case 0x300F: // Right white corner bracket
+        case 0xFE41: // Presentation form for vertical left corner bracket
+        case 0xFE42: // Presentation form for vertical right corner bracket
+        case 0xFE43: // Presentation form for vertical left white corner bracket
+        case 0xFE44: // Presentation form for vertical right white corner bracket
+        case 0xFF07: // Fullwidth apostrophe
+        case 0xFF62: // Halfwidth left corner bracket
+        case 0xFF63: // Halfwidth right corner bracket
+        case 0x2019: // Right single quotation mark
+          return U'\'';
+        // The double quotation marks.
+        case 0x05F4: // Hebrew punctuation gershayim
+        case 0x201C: // Left double quotation mark
+        case 0x201E: // Left low double quotation mark
+        case 0x201D: // Right double quotation mark
+        case 0x00AB: // Left-pointing double angle quotation mark
+        case 0x00BB: // Right-pointing double angle quotation mark
+        case 0x201F: // Double high-reversed-9 quotation mark
+        case 0x2E42: // Double low-reversed-9 quotation mark
+        case 0x301D: // Reversed double prime quotation mark
+        case 0x301E: // Double prime quotation mark
+        case 0x301F: // Low double prime quotation mark
+        case 0xFF02: // Fullwidth quotation mark
+          return U'"';
+        default: return character;
+      }
+    };
+
+    utf8_string result;
+    result.reserve(stringToFold.size());
+    if (sourceOffsets)
+    {
+      sourceOffsets->clear();
+      sourceOffsets->reserve(stringToFold.size() + 1);
+    }
+    int32_t index = 0;
+    auto length = static_cast<int32_t>(stringToFold.size());
+    while (index < length)
+    {
+      auto start = index;
+      UChar32 character = 0;
+      U8_NEXT(reinterpret_cast<const uint8_t *>(stringToFold.data()), index, length, character);
+      auto replacement = character >= 0 ? folded(static_cast<char32>(character)) : U'\0';
+      if (character >= 0 && replacement != static_cast<char32>(character))
+      {
+        result += static_cast<char8>(replacement);
+        if (sourceOffsets)
+        {
+          sourceOffsets->push_back(static_cast<uint32>(start));
+        }
+        continue;
+      }
+      for (auto offset = start; offset < index; ++offset)
+      {
+        result += stringToFold[static_cast<size_t>(offset)];
+        if (sourceOffsets)
+        {
+          sourceOffsets->push_back(static_cast<uint32>(offset));
+        }
+      }
+    }
+    if (sourceOffsets)
+    {
+      sourceOffsets->push_back(static_cast<uint32>(stringToFold.size()));
+    }
+    return result;
+  }
 }

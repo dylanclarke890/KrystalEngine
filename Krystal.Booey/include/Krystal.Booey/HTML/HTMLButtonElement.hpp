@@ -50,10 +50,10 @@ namespace krys::boo::html
     void Disabled(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> FormAction() const noexcept;
+    KRYS_NODISCARD dom::USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    dom::ExceptionOr<void> FormAction(dom::USVString &&value) noexcept;
+    void FormAction(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
     KRYS_NODISCARD dom::DOMString EncType() const noexcept;

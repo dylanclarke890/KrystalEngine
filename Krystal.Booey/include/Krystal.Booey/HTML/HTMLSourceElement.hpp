@@ -27,10 +27,10 @@ namespace krys::boo::html
 #pragma region HTMLSourceElement - https://html.spec.whatwg.org/#htmlsourceelement
 
     /// @see https://html.spec.whatwg.org/#dom-source-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
@@ -39,10 +39,10 @@ namespace krys::boo::html
     void Type(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> SrcSet() const noexcept;
+    KRYS_NODISCARD dom::USVString SrcSet() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-srcset
-    dom::ExceptionOr<void> SrcSet(dom::USVString &&value) noexcept;
+    void SrcSet(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-source-sizes
     KRYS_NODISCARD dom::DOMString Sizes() const noexcept;

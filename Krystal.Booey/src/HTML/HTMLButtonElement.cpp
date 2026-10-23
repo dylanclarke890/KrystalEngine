@@ -221,12 +221,27 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLButtonElement::FormAction() const noexcept
+  dom::USVString HTMLButtonElement::FormAction() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"formaction");
+    // https://html.spec.whatwg.org/#dom-fs-formaction
+    // Let attributeValue be the result of running get an attribute value given this and formaction. If
+    // attributeValue is null or the empty string, return this's node document's URL, serialized.
+    auto attributeValue = GetAttribute(u8"formaction");
+    if (!attributeValue || attributeValue->empty())
+    {
+      return dom::USVString(NodeDocument().GetURL().String());
+    }
+    // Let urlString be the result of encoding-parsing-and-serializing a URL given attributeValue, relative to
+    // this's node document. If urlString is not failure, return urlString.
+    if (auto url = NodeDocument().CompleteURL(*attributeValue); url.IsValid())
+    {
+      return dom::USVString(url.String());
+    }
+    // Return attributeValue, converted to a scalar value string.
+    return dom::USVString(krys::move(*attributeValue));
   }
 
-  dom::ExceptionOr<void> HTMLButtonElement::FormAction(dom::USVString &&value) noexcept
+  void HTMLButtonElement::FormAction(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }

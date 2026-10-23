@@ -30,10 +30,10 @@ namespace krys::boo::html
 #pragma region HTMLIFrameElement - https://html.spec.whatwg.org/#htmliframeelement
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-srcdoc
     KRYS_NODISCARD dom::DOMString SrcDoc() const noexcept;
@@ -121,10 +121,10 @@ namespace krys::boo::html
     void FrameBorder(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> LongDesc() const noexcept;
+    KRYS_NODISCARD dom::USVString LongDesc() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-longdesc
-    dom::ExceptionOr<void> LongDesc(dom::USVString &&value) noexcept;
+    void LongDesc(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-iframe-marginwidth
     KRYS_NODISCARD dom::DOMString MarginWidth() const noexcept;

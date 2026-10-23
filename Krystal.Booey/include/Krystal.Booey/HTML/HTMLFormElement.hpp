@@ -57,10 +57,10 @@ namespace krys::boo::html
     void AcceptCharset(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Action() const noexcept;
+    KRYS_NODISCARD dom::USVString Action() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-action
-    dom::ExceptionOr<void> Action(dom::USVString &&value) noexcept;
+    void Action(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-form-autocomplete
     KRYS_NODISCARD dom::DOMString Autocomplete() const noexcept;

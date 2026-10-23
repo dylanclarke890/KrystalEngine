@@ -6,6 +6,11 @@
 #include "Krystal.Core/Types/WeakPtr.hpp"
 #include <utility>
 
+namespace krys::boo::dom
+{
+  class HighlightRange;
+}
+
 namespace krys::boo
 {
   class RenderText;
@@ -75,8 +80,6 @@ namespace krys::boo
   };
 
   /// @brief A highlighted range of the render tree, and which part of it each renderer and text box holds.
-  // FIXME: Highlight ranges (the Highlight API's setRenderRange(const HighlightRange &)), with
-  // `::highlight()`.
   class RenderHighlight
   {
   protected:
@@ -95,6 +98,9 @@ namespace krys::boo
     }
 
     void SetRenderRange(const RenderRange &renderRange) noexcept;
+    /// @brief The render range a highlight range's positions cover.
+    /// @return Whether it has one: both positions are set and their containers have renderers.
+    bool SetRenderRange(const dom::HighlightRange &highlightRange) noexcept;
     KRYS_NODISCARD const RenderRange &Get() const noexcept
     {
       return _renderRange;

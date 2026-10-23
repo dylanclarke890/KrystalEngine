@@ -16,10 +16,10 @@ namespace krys::boo::html
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Href() const noexcept;
+    KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    dom::ExceptionOr<void> Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;

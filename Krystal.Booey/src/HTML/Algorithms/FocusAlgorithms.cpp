@@ -7,8 +7,10 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -75,9 +77,8 @@ namespace krys::boo::html
     /// (following the elements the specification suggests).
     KRYS_NODISCARD bool IsFocusableByDefault(const dom::Element &element) noexcept
     {
-      // Links (the shapes of `area` elements are focusable areas of their images, which need image maps).
-      // FIXME: The shapes of `area` elements, once there are image maps.
-      if (css::IsLink(element) && !IsHTMLElement(element, TagName::area))
+      // Links, including the shapes of `area` elements.
+      if (css::IsLink(element))
       {
         return true;
       }
@@ -238,14 +239,21 @@ namespace krys::boo::html
     {
       return false;
     }
+    // The shapes of an `area` element are focusable areas while the image that uses its image map is being
+    // rendered (the area itself never is).
+    if (auto *area = DynamicDowncast<HTMLAreaElement>(element))
+    {
+      auto image = area->ImageElement();
+      return image && IsBeingRendered(*image);
+    }
     return IsBeingRendered(element);
   }
 
   dom::Node *FocusAlgorithms::GetFocusableArea(dom::Element &focusTarget,
                                                dom::FocusTrigger focusTrigger) noexcept
   {
-    // FIXME: The shapes of `area` elements and the scrollable regions of elements, once there are image maps
-    // and scrolling.
+    // An `area` element stands for its shapes, as the focusable areas of its image.
+    // FIXME: The scrollable regions of elements, once there's scrolling.
 
     // If focus target is the document element of its Document: return the Document's viewport.
     if (&focusTarget == dom::TreeQueries::DocumentElement(focusTarget.NodeDocument()))
@@ -956,7 +964,8 @@ namespace krys::boo::html
     // shows it.
     if (RefPtr<dom::Element> focused = ShareRefPtr(document.FocusedElement()))
     {
-      focused->UpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll, SelectionRevealMode::Reveal);
+      focused->FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll,
+                                                  SelectionRevealMode::Reveal);
     }
     return true;
   }

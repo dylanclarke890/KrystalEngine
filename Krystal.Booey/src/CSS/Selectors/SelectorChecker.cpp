@@ -1323,7 +1323,10 @@ namespace krys::boo::css
           return selector.MatchNth(count);
         }
         case SelectorPseudoClass::Target:
-          // FIXME: The document's target element, once documents navigate to fragments.
+          if (&element == element.NodeDocument().CSSTarget())
+          {
+            return true;
+          }
           break;
         case SelectorPseudoClass::Autofill:
           // FIXME: Autofill.

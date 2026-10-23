@@ -1,11 +1,18 @@
 ﻿#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/ImagePaintingOptions.hpp"
+#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
+#include "Krystal.Booey/Rendering/HitTestLocation.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderImageResourceStyleImage.hpp"
@@ -403,6 +410,121 @@ namespace krys::boo
                                                        contentSize),
                                             GetDocument().DeviceScaleFactor()),
                      borderWidth);
+  }
+
+  void RenderImage::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    RenderReplaced::Paint(paintInfo, paintOffset);
+
+    if (paintInfo.Phase == PaintPhase::Outline)
+    {
+      PaintAreaElementFocusRing(paintInfo, paintOffset);
+    }
+  }
+
+  void RenderImage::PaintAreaElementFocusRing(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
+  {
+    if (GetDocument().Printing() || !GetDocument().Selection().IsFocusedAndActive())
+    {
+      return;
+    }
+
+    if (paintInfo.Context().PaintingDisabled() && !paintInfo.Context().PerformingPaintInvalidation())
+    {
+      return;
+    }
+
+    RefPtr<html::HTMLAreaElement> areaElement =
+      ShareRefPtr(DynamicDowncast<html::HTMLAreaElement>(GetDocument().FocusedElement()));
+    if (!areaElement || areaElement->ImageElement().get() != GetElement())
+    {
+      return;
+    }
+
+    auto *areaElementStyle = areaElement->ComputedStyle();
+    if (!areaElementStyle)
+    {
+      return;
+    }
+
+    auto outlineWidth = style::Evaluate<float>(areaElementStyle->OutlineWidth(), style::ZoomNeeded {});
+    if (!outlineWidth)
+    {
+      return;
+    }
+
+    // Even if the theme handles focus ring drawing for entire elements, it won't do it for
+    // an area within an image, so we don't call RenderTheme::SupportsFocusRing here.
+    auto path = areaElement->ComputePathForFocusRing(Size());
+    if (path.IsEmpty())
+    {
+      return;
+    }
+
+    AffineTransform zoomTransform;
+    zoomTransform.Scale(Style().UsedZoom());
+    path.Transform(zoomTransform);
+
+    auto adjustedOffset = paintOffset;
+    adjustedOffset.MoveBy(Location());
+    path.Translate(ToFloatSize(adjustedOffset));
+
+    paintInfo.Context().DrawFocusRing(
+      path, outlineWidth,
+      areaElementStyle->VisitedDependentColorWithColorFilter(css::PropertyId::OutlineColor));
+  }
+
+  void RenderImage::AreaElementFocusChanged(html::HTMLAreaElement &element) noexcept
+  {
+    krys_debug_assert(element.ImageElement().get() == GetElement());
+    (void)element;
+
+    // It would be more efficient to only repaint the focus ring rectangle
+    // for the passed-in area element. That would require adding functions
+    // to the area element class.
+    Repaint();
+  }
+
+  html::HTMLMapElement *RenderImage::ImageMap() const noexcept
+  {
+    auto *imageElement = DynamicDowncast<html::HTMLImageElement>(GetElement());
+    return imageElement ? imageElement->AssociatedMapElement() : nullptr;
+  }
+
+  bool RenderImage::NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
+                                const HitTestLocation &locationInContainer,
+                                const LayoutPoint &accumulatedOffset, HitTestAction action) noexcept
+  {
+    HitTestResult tempResult(result.GetHitTestLocation());
+    bool inside =
+      RenderReplaced::NodeAtPoint(request, tempResult, locationInContainer, accumulatedOffset, action);
+
+    if (tempResult.InnerNode() && GetElement())
+    {
+      if (RefPtr<html::HTMLMapElement> map = ShareRefPtr(ImageMap()))
+      {
+        LayoutRect contentBox = ContentBoxRect();
+        float scaleFactor = 1 / Style().UsedZoom();
+        LayoutPoint mapLocation = locationInContainer.Point() - ToLayoutSize(accumulatedOffset)
+                                  - LocationOffset() - ToLayoutSize(contentBox.Location());
+        mapLocation.Scale(scaleFactor);
+
+        if (map->MapMouseEvent(mapLocation, contentBox.Size(), tempResult))
+        {
+          tempResult.SetInnerNonSharedNode(GetElement());
+        }
+      }
+    }
+
+    if (!inside && request.ResultIsElementList())
+    {
+      result.Append(tempResult, request);
+    }
+    if (inside)
+    {
+      result = tempResult;
+    }
+    return inside;
   }
 
   void RenderImage::PaintReplaced(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
