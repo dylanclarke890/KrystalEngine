@@ -17,8 +17,10 @@
          bar and the meter below it are drawn by the theme and by the meter's shadow tree. The beans drop-down
          opens its popup on a click or Space (arrow keys and Enter choose, Escape closes, as does a click
          outside it), or changes with the arrow keys and typing while closed; the extras list box selects with
-         clicks (Ctrl and Shift for more) and the keys, and scrolls. Reset empties the fields and unticks the
-         box. -->
+         clicks (Ctrl and Shift for more) and the keys, and scrolls. The pickup date and time edit field by field
+         (type digits, or step with Up and Down; Left, Right and Tab move between fields); a click or Space in
+         the date opens its calendar (the arrow keys, Page Up and Page Down move, Enter chooses). The cup colour
+         opens a palette on a click. Reset empties the fields and unticks the box. -->
     <form class="card order" action="https://example.com/order">
       <input type="hidden" name="from" value="editor">
       <input name="name" placeholder="Your name" required maxlength="24">
@@ -36,6 +38,8 @@
           <hr><option value="decaf">Decaf</option></select></label><label>Extras <select name="extras" multiple
           size="3"><option>Cinnamon</option><option selected>Vanilla</option><option>Caramel</option>
           <option>Hazelnut</option><option>Cocoa</option></select></label></p>
+      <p class="pickup"><label>Pickup <input type="date" name="day" value="2026-10-23"> <input type="time"
+          name="time" value="08:30"></label><label>Cup <input type="color" name="cup" value="#4f6df5"></label></p>
       <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
           type="reset">Reset</button></p>
       <p id="last-submission">Nothing submitted yet.</p>

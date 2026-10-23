@@ -166,7 +166,7 @@ namespace krys::boo
       return _contentAnalysis;
     }
 
-    KRYS_NODISCARD const StringAtom &Locale() const noexcept
+    KRYS_NODISCARD const StringAtom &GetLocale() const noexcept
     {
       return _locale;
     }

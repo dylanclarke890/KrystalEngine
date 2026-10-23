@@ -127,6 +127,81 @@
         }
     },
     "pseudo-elements": {
+        "-internal-color-swatch-overlay": {
+            "comment": "The overlay of colour inputs' swatches.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-color-swatch": {
+            "comment": "The swatch of colour inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-color-swatch-wrapper": {
+            "comment": "The wrapper of colour inputs' swatches.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit": {
+            "comment": "The editable fields of date and time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-day-field": {
+            "comment": "The day field of date and time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-fields-wrapper": {
+            "comment": "The wrapper of date and time inputs' fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-hour-field": {
+            "comment": "The hour field of time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-meridiem-field": {
+            "comment": "The AM/PM field of time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-millisecond-field": {
+            "comment": "The millisecond field of time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-minute-field": {
+            "comment": "The minute field of time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-month-field": {
+            "comment": "The month field of date inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-second-field": {
+            "comment": "The second field of time inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-text": {
+            "comment": "The text between date and time inputs' fields.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-week-field": {
+            "comment": "The week field of week inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
+        "-webkit-datetime-edit-year-field": {
+            "comment": "The year field of date inputs.",
+            "user-agent-part": true,
+            "user-agent-sheet-only": true
+        },
         "-webkit-inner-spin-button": {
             "comment": "The spin button of number fields.",
             "user-agent-part": true,

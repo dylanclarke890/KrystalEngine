@@ -437,6 +437,63 @@ input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], 
 
 /* FIXME: Styling inner elements of the date control should be specific to input[type="date"]. */
 
+input::-webkit-datetime-edit {
+    display: inline-block;
+    overflow: hidden;
+    padding: 1px;
+}
+
+input::-webkit-datetime-edit-fields-wrapper {
+    display: inline-block;
+    white-space: pre;
+}
+
+input::-webkit-datetime-edit-year-field,
+input::-webkit-datetime-edit-month-field,
+input::-webkit-datetime-edit-week-field,
+input::-webkit-datetime-edit-day-field,
+input::-webkit-datetime-edit-hour-field,
+input::-webkit-datetime-edit-minute-field,
+input::-webkit-datetime-edit-second-field,
+input::-webkit-datetime-edit-millisecond-field,
+input::-webkit-datetime-edit-meridiem-field {
+    display: inline-block;
+    font: inherit !important;
+    padding: 1px;
+    text-align: center;
+}
+
+input::-webkit-datetime-edit-year-field:focus,
+input::-webkit-datetime-edit-month-field:focus,
+input::-webkit-datetime-edit-week-field:focus,
+input::-webkit-datetime-edit-day-field:focus,
+input::-webkit-datetime-edit-hour-field:focus,
+input::-webkit-datetime-edit-minute-field:focus,
+input::-webkit-datetime-edit-second-field:focus,
+input::-webkit-datetime-edit-millisecond-field:focus,
+input::-webkit-datetime-edit-meridiem-field:focus {
+    background-color: highlight;
+    color: highlighttext;
+    outline: none;
+}
+
+input[disabled]::-webkit-datetime-edit-year-field,
+input[disabled]::-webkit-datetime-edit-month-field,
+input[disabled]::-webkit-datetime-edit-week-field,
+input[disabled]::-webkit-datetime-edit-day-field,
+input[disabled]::-webkit-datetime-edit-hour-field,
+input[disabled]::-webkit-datetime-edit-minute-field,
+input[disabled]::-webkit-datetime-edit-second-field,
+input[disabled]::-webkit-datetime-edit-millisecond-field,
+input[disabled]::-webkit-datetime-edit-meridiem-field,
+input[disabled]::-webkit-datetime-edit-text {
+    color: GrayText;
+}
+
+input::-webkit-datetime-edit-text {
+    display: inline;
+}
+
 input::-webkit-inner-spin-button {
     appearance: auto;
     display: block;
@@ -585,6 +642,27 @@ input[type="color"] {
     outline: none;
     inline-size: 44px;
     block-size: 23px;
+}
+
+input[type="color"]::-internal-color-swatch-overlay {
+    appearance: auto;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    appearance: auto;
+    display: flex;
+    padding-inline: 2px;
+    padding-block: 4px 5px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    appearance: auto;
+    background-color: #000000;
+    border-radius: 2px;
+    flex: 1;
 }
 
 select {

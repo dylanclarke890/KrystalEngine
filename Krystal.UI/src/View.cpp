@@ -10,11 +10,14 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
+#include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/EditorClient.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/Input.hpp"
+#include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/SystemPasteboardStrategy.hpp"
 #include <cstdlib>
 #include <fstream>
@@ -91,6 +94,26 @@ namespace krys::ui
       return CreateRef<PopupMenuOverlay>(*_view, client);
     }
 
+    KRYS_NODISCARD RefPtr<boo::ColorChooser>
+      CreateColorChooser(boo::ColorChooserClient &client, const boo::Color &initialColor) noexcept override
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      return CreateRef<ColorChooserOverlay>(*_view, client, initialColor);
+    }
+
+    KRYS_NODISCARD RefPtr<boo::DateTimeChooser>
+      CreateDateTimeChooser(boo::DateTimeChooserClient &client) noexcept override
+    {
+      if (!_view)
+      {
+        return nullptr;
+      }
+      return CreateRef<DateTimeChooserOverlay>(*_view, client);
+    }
+
     void SetView(View *view) noexcept
     {
       _view = view;
@@ -139,9 +162,9 @@ namespace krys::ui
 
   View::~View() noexcept
   {
-    if (_popup)
+    if (_overlay)
     {
-      _popup->Hide();
+      _overlay->Hide();
     }
     _chromeClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
@@ -199,10 +222,10 @@ namespace krys::ui
 
   void View::Resize(const boo::IntSize &viewportSize) noexcept
   {
-    // The popup was placed in the old viewport.
-    if (_popup)
+    // The overlay was placed in the old viewport.
+    if (_overlay)
     {
-      _popup->Hide();
+      _overlay->Hide();
     }
     if (auto *view = _frame->View())
     {
@@ -221,18 +244,18 @@ namespace krys::ui
   {
     boo::html::EventLoop::Current().Run(now, budget);
 
-    // The popup's page shares the event loop, and updates with the page.
-    bool popupUpdated = false;
-    if (_popup && _popup->ContentView().GetPage().IsRenderingUpdateScheduled())
+    // The overlay's page shares the event loop, and updates with the page.
+    bool overlayUpdated = false;
+    if (_overlay && _overlay->ContentView().GetPage().IsRenderingUpdateScheduled())
     {
-      _popup->ContentView().UpdateRendering();
-      popupUpdated = true;
+      _overlay->ContentView().UpdateRendering();
+      overlayUpdated = true;
     }
 
     // Each frame is a rendering opportunity.
     if (!_page->IsRenderingUpdateScheduled())
     {
-      return popupUpdated;
+      return overlayUpdated;
     }
     _page->UpdateRendering();
     _needsPaint = true;
@@ -285,15 +308,15 @@ namespace krys::ui
       view->Paint(recorder, boo::IntRect(0, 0, size.Width(), size.Height()));
       view->SetPaintBehavior(paintBehavior);
     }
-    if (_popup)
+    if (_overlay)
     {
-      auto popupList = _popup->ContentView().Record();
-      auto &rect = _popup->Rect();
+      auto overlayList = _overlay->ContentView().Record();
+      auto &rect = _overlay->Rect();
       boo::GraphicsContextStateSaver stateSaver(recorder);
       recorder.Translate(static_cast<float>(rect.X()), static_cast<float>(rect.Y()));
       recorder.Clip(
         boo::FloatRect(0, 0, static_cast<float>(rect.Width()), static_cast<float>(rect.Height())));
-      recorder.DrawDisplayList(*popupList);
+      recorder.DrawDisplayList(*overlayList);
     }
     return recorder.TakeDisplayList();
   }
@@ -301,7 +324,7 @@ namespace krys::ui
   bool View::NeedsPaint() const noexcept
   {
     auto *view = _frame->View();
-    return _needsPaint || (view && view->HasDamage()) || (_popup && _popup->ContentView().NeedsPaint());
+    return _needsPaint || (view && view->HasDamage()) || (_overlay && _overlay->ContentView().NeedsPaint());
   }
 
   void View::Paint(gfx::Renderer2D &renderer) noexcept
@@ -347,40 +370,41 @@ namespace krys::ui
     _textureMapper->EndPainting();
 
     _needsPaint = root->Layer().DescendantsOrSelfHaveRunningAnimations();
-    PaintPopup(renderer);
+    PaintOverlay(renderer);
   }
 
-  void View::PaintPopup(gfx::Renderer2D &renderer) noexcept
+  void View::PaintOverlay(gfx::Renderer2D &renderer) noexcept
   {
-    if (!_popup)
+    if (!_overlay)
     {
       return;
     }
 
-    auto &rect = _popup->Rect();
+    auto &rect = _overlay->Rect();
     renderer.Save();
     renderer.Translate(static_cast<float>(rect.X()), static_cast<float>(rect.Y()));
     renderer.ClipRect({0.f, 0.f, static_cast<float>(rect.Width()), static_cast<float>(rect.Height())});
-    _popup->ContentView().Paint(renderer);
+    _overlay->ContentView().Paint(renderer);
     renderer.Restore();
   }
 
-  void View::ShowPopup(PopupMenuOverlay &popup) noexcept
+  void View::ShowOverlay(Overlay &overlay) noexcept
   {
-    if (_popup && _popup.get() != &popup)
+    if (_overlay && _overlay.get() != &overlay)
     {
-      _popup->Hide();
+      RefPtr<Overlay> previous = _overlay;
+      previous->Hide();
     }
-    _popup = ShareRefPtr(&popup);
+    _overlay = ShareRefPtr(&overlay);
     _pageOwnsPress = _buttons != 0;
     _needsPaint = true;
   }
 
-  void View::PopupHidden(PopupMenuOverlay &popup) noexcept
+  void View::OverlayHidden(Overlay &overlay) noexcept
   {
-    if (_popup.get() == &popup)
+    if (_overlay.get() == &overlay)
     {
-      _popup = nullptr;
+      _overlay = nullptr;
       _needsPaint = true;
     }
   }
@@ -415,13 +439,13 @@ namespace krys::ui
       return;
     }
 
-    // While the popup is open, the page doesn't see the mouse move.
-    if (_popup)
+    // While an overlay is open, the page doesn't see the mouse move.
+    if (_overlay)
     {
-      auto &rect = _popup->Rect();
+      auto &rect = _overlay->Rect();
       if (rect.Contains(point))
       {
-        _popup->MouseMoved(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
+        _overlay->MouseMoved(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
       }
       return;
     }
@@ -454,15 +478,15 @@ namespace krys::ui
       return;
     }
 
-    // A press outside the popup closes it, and goes no further.
-    if (_popup)
+    // A press outside the overlay closes it, and goes no further.
+    if (_overlay)
     {
       _buttons |= ButtonsBit(button);
       _lastMousePosition = point;
-      if (!_popup->Rect().Contains(point))
+      if (!_overlay->Rect().Contains(point))
       {
-        RefPtr<PopupMenuOverlay> popup = _popup;
-        popup->Hide();
+        RefPtr<Overlay> overlay = _overlay;
+        overlay->Hide();
         PerformMicrotaskCheckpoint();
       }
       return;
@@ -498,15 +522,15 @@ namespace krys::ui
     _buttons &= static_cast<uint16>(~ButtonsBit(button));
     _lastMousePosition = point;
 
-    // A release over the popup chooses the item under it; the release of the press that opened it goes to the
-    // page.
-    if (_popup && !std::exchange(_pageOwnsPress, false))
+    // A release over the overlay goes to it (a popup chooses the item under it); the release of the press
+    // that opened it goes to the page.
+    if (_overlay && !std::exchange(_pageOwnsPress, false))
     {
-      auto &rect = _popup->Rect();
+      auto &rect = _overlay->Rect();
       if (rect.Contains(point))
       {
-        RefPtr<PopupMenuOverlay> popup = _popup;
-        popup->MouseReleased(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
+        RefPtr<Overlay> overlay = _overlay;
+        overlay->MouseReleased(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()));
         PerformMicrotaskCheckpoint();
       }
       return;
@@ -531,12 +555,12 @@ namespace krys::ui
     {
       return false;
     }
-    if (_popup)
+    if (_overlay)
     {
-      auto &rect = _popup->Rect();
+      auto &rect = _overlay->Rect();
       return rect.Contains(point)
-             && _popup->MouseWheel(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()), notchesX,
-                                   notchesY);
+             && _overlay->MouseWheel(boo::IntPoint(point.X() - rect.X(), point.Y() - rect.Y()), notchesX,
+                                     notchesY);
     }
     bool handled = _frame->GetEventHandler().HandleWheelEvent(
       input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
@@ -552,11 +576,11 @@ namespace krys::ui
   bool View::KeyPressed(pal::Key key, pal::KeyModifiers modifiers, const pal::KeyText &text,
                         bool isAutoRepeat) noexcept
   {
-    // While the popup is open, it takes the keys.
-    if (_popup)
+    // While an overlay is open, it takes the keys.
+    if (_overlay)
     {
-      RefPtr<PopupMenuOverlay> popup = _popup;
-      bool handled = popup->KeyPressed(key, modifiers);
+      RefPtr<Overlay> overlay = _overlay;
+      bool handled = overlay->KeyPressed(key, modifiers);
       PerformMicrotaskCheckpoint();
       return handled;
     }
@@ -584,10 +608,10 @@ namespace krys::ui
 
   void View::SetFocused(bool focused) noexcept
   {
-    if (!focused && _popup)
+    if (!focused && _overlay)
     {
-      RefPtr<PopupMenuOverlay> popup = _popup;
-      popup->Hide();
+      RefPtr<Overlay> overlay = _overlay;
+      overlay->Hide();
     }
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);

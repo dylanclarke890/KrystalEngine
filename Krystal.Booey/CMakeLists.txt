@@ -33,9 +33,9 @@ target_compile_options(Krystal.Booey
 find_path(BRIGAND_INCLUDE_DIRS "brigand/adapted.hpp")
 target_include_directories(Krystal.Booey PRIVATE ${BRIGAND_INCLUDE_DIRS})
 
-# Third-party - ICU (IDNA for URL host parsing; script codes in the public font description)
-find_package(ICU REQUIRED COMPONENTS uc dt)
-target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::dt)
+# Third-party - ICU (IDNA for URL host parsing; script codes in the public font description; locale data for form controls)
+find_package(ICU REQUIRED COMPONENTS uc in dt)
+target_link_libraries(Krystal.Booey PUBLIC ICU::uc PRIVATE ICU::in ICU::dt)
 
 # Font faces, shared with Krystal.Gfx
 target_link_libraries(Krystal.Booey PUBLIC Krystal.Text)
@@ -1775,6 +1775,22 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
   include/Krystal.Booey/Platform/Network/FormData.hpp
   include/Krystal.Booey/Platform/Network/FormDataBuilder.hpp
+
+  # Dates and colours (G14d4)
+  include/Krystal.Booey/Core/DateTimeFormat.hpp
+  include/Krystal.Booey/Core/LocaleICU.hpp
+  include/Krystal.Booey/Core/PlatformLocale.hpp
+  include/Krystal.Booey/HTML/DateTimeFieldsState.hpp
+  include/Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp
+  include/Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp
+  include/Krystal.Booey/HTML/Shadow/DateTimeFieldElements.hpp
+  include/Krystal.Booey/HTML/Shadow/DateTimeNumericFieldElement.hpp
+  include/Krystal.Booey/HTML/Shadow/DateTimeSymbolicFieldElement.hpp
+  include/Krystal.Booey/Platform/ColorChooser.hpp
+  include/Krystal.Booey/Platform/ColorChooserClient.hpp
+  include/Krystal.Booey/Platform/DateTimeChooser.hpp
+  include/Krystal.Booey/Platform/DateTimeChooserClient.hpp
+  include/Krystal.Booey/Platform/DateTimeChooserParameters.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2937,6 +2953,16 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Platform/LocalizedStrings.cpp
   src/Platform/Network/FormData.cpp
   src/Platform/Network/FormDataBuilder.cpp
+
+  # Dates and colours (G14d4)
+  src/Core/DateTimeFormat.cpp
+  src/Core/LocaleICU.cpp
+  src/Core/PlatformLocale.cpp
+  src/HTML/Shadow/DateTimeEditElement.cpp
+  src/HTML/Shadow/DateTimeFieldElement.cpp
+  src/HTML/Shadow/DateTimeFieldElements.cpp
+  src/HTML/Shadow/DateTimeNumericFieldElement.cpp
+  src/HTML/Shadow/DateTimeSymbolicFieldElement.cpp
 )
 
 target_precompile_headers(Krystal.Booey

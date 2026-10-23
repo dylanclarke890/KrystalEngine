@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Controls/ButtonPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/ColorWellPart.hpp"
 #include "Krystal.Booey/Graphics/Controls/InnerSpinButtonPart.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMeterElement.hpp"
@@ -1521,10 +1523,13 @@ namespace krys::boo
     return inputElement.IsSteppable() && !inputElement.IsRangeControl();
   }
 
-  void RenderTheme::SetColorWellSwatchBackground(html::HTMLElement &, Color) noexcept
+  void RenderTheme::SetColorWellSwatchBackground(html::HTMLElement &swatch, Color color) noexcept
   {
-    // FIXME: The colour well's swatch (setInlineStyleProperty with the serialised colour), with colour inputs
-    // (G14d4).
+    if (!color.IsOpaque())
+    {
+      color = BlendSourceOver(Color::white, color);
+    }
+    (void)swatch.SetInlineStyleProperty(css::PropertyId::BackgroundColor, SerialisationForHTML(color));
   }
 
   void RenderTheme::AdjustSliderThumbStyle(RenderStyle &style, const dom::Element *element) const noexcept

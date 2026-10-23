@@ -111,6 +111,9 @@ tr:hover td { text-decoration: underline; }
 .order .selects { margin: 6px 0 0; }
 .order .selects label { display: inline-block; margin-right: 12px; vertical-align: top; }
 .order select { font: inherit; vertical-align: top; }
+.order .pickup { margin: 6px 0 0; }
+.order .pickup label { display: inline-block; margin-right: 12px; }
+.order .pickup input { font: inherit; vertical-align: middle; }
 .order input:checked + span { color: #06a77d; font-weight: bold; }
 .order button { margin: 10px 8px 0 0; padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5;
   color: #ffffff; font: inherit; cursor: pointer; }

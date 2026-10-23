@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -49,6 +50,7 @@ namespace krys::boo
   class PlatformMouseEvent;
   class LocalFrame;
   class LocalFrameView;
+  class Locale;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
@@ -218,6 +220,7 @@ namespace krys::boo::dom
 
     Timer _styleRecalcTimer;
     List<WeakPtr<Element>> _autofocusCandidates;
+    mutable HashMap<utf8_string, UniquePtr<Locale>> _localeCache;
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
     List<WeakPtr<html::HTMLInputElement>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
@@ -558,6 +561,10 @@ namespace krys::boo::dom
     /// @brief Gives the document @p settings, and resolves its style again with them. Style sheets that were
     /// already parsed aren't parsed again.
     void SetSettings(Ref<Settings> &&settings) noexcept;
+
+    /// @brief The locale form controls in @p locale (a language tag, from a `lang` attribute) use: the user
+    /// interface's, unless @p locale is given and `Settings::LangAttributeAwareFormControlUIEnabled` is on.
+    KRYS_NODISCARD boo::Locale &GetCachedLocale(utf8_stringview locale) const noexcept;
 
     void InvalidateCachedCSSParserContext() noexcept;
 

@@ -1,0 +1,41 @@
+﻿<!doctype html>
+<!-- The "dates" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, in US English. Chrome on
+     Windows lays dates out in the system's regional format, so its golden is only reported. -->
+<html data-width="360" data-height="260">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px sans-serif; }
+  div { margin-bottom: 10px; }
+  input { vertical-align: middle; margin: 0 8px 0 0; }
+  .dark { color-scheme: dark; background: #1e1e1e; padding: 4px; }
+</style>
+</head>
+<body>
+  <!-- Dates, times and local date times show their fields in the locale's order, with its separators. -->
+  <div>
+    <input type="date" value="2026-03-07">
+    <input type="time" value="13:05">
+  </div>
+  <div>
+    <input type="datetime-local" value="2026-12-31T23:59">
+  </div>
+  <!-- Months show the month's name; weeks show the week and its year; an empty time shows its placeholders. -->
+  <div>
+    <input type="month" value="2026-09">
+    <input type="week" value="2026-W05">
+    <input type="time">
+  </div>
+  <!-- A disabled date; colour inputs show a swatch of their colour. -->
+  <div>
+    <input type="date" value="1999-01-02" disabled>
+    <input type="color">
+    <input type="color" value="#2266cc">
+  </div>
+  <div class="dark">
+    <input type="date" value="2026-03-07">
+    <input type="color" value="#ff8800">
+  </div>
+</body>
+</html>

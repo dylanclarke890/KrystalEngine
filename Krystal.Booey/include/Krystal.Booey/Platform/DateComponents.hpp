@@ -25,6 +25,9 @@ namespace krys::boo
     Week,
   };
 
+  /// @brief The local time now, in milliseconds since the epoch.
+  KRYS_NODISCARD double LocalTimeNow() noexcept;
+
   namespace detail
   {
     struct DateParsingBuffer;

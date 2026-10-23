@@ -37,6 +37,11 @@ namespace krys::boo::dom
       return _relatedTarget;
     }
 
+    KRYS_NODISCARD bool IsFocusEvent() const noexcept final
+    {
+      return true;
+    }
+
   protected:
     void RelatedTarget(EventTarget *relatedTarget) noexcept override
     {
@@ -44,3 +49,10 @@ namespace krys::boo::dom
     }
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::dom::FocusEvent)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Event &event) noexcept
+  {
+    return event.IsFocusEvent();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

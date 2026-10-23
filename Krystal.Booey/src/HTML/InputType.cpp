@@ -31,6 +31,8 @@
 #include "Krystal.Booey/HTML/URLInputType.hpp"
 #include "Krystal.Booey/HTML/WeekInputType.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -812,6 +814,21 @@ namespace krys::boo::html
   {
     krys_debug_assert(Element());
     return Element()->Value();
+  }
+
+  dom::DOMString InputType::LocalizeValue(dom::DOMStringView proposedValue) const noexcept
+  {
+    return dom::DOMString(proposedValue);
+  }
+
+  ChromeClient *InputType::GetChromeClient() const noexcept
+  {
+    if (!Element())
+    {
+      return nullptr;
+    }
+    auto *page = Element()->NodeDocument().GetPage();
+    return page ? &page->GetChromeClient() : nullptr;
   }
 
   dom::DOMString InputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept

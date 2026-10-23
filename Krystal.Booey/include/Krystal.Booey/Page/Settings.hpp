@@ -56,6 +56,9 @@ namespace krys::boo
     bool ShouldConvertPositionStyleOnCopy {false};
     /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
     bool TextAreasAreResizable {false};
+    /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather
+    /// than the user interface's.
+    bool LangAttributeAwareFormControlUIEnabled {false};
     /// @brief The platform whose editing and selection conventions documents follow.
     boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
 

@@ -23,7 +23,7 @@
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
-#include "Krystal.UI/PopupMenuOverlay.hpp"
+#include "Krystal.UI/Overlay.hpp"
 #include <chrono>
 #include <filesystem>
 
@@ -50,11 +50,11 @@ namespace krys::ui
   /// into DOM events.
   /// @note The first view makes Krystal.UI's `FileLoaderStrategy` Booey's loader, unless the host set one, so
   /// pages load `file:` images.
-  /// @note A menu list's popup shows as an overlay above the page: while it's open, it takes the keys and the
-  /// mouse, and a press outside it closes it.
+  /// @note A menu list's popup and the date and colour pickers show as overlays above the page: while one is
+  /// open, it takes the keys and the mouse, and a press outside it closes it.
   class View
   {
-    friend class PopupMenuOverlay;
+    friend class Overlay;
     KRYS_NON_COPY_MOVABLE(View);
 
   public:
@@ -87,9 +87,9 @@ namespace krys::ui
     bool _focused {true};
     /// @brief The `key` of each key held, which its release reports too.
     HashMap<pal::Key, utf8_string> _heldKeyValues;
-    /// @brief The menu list popup open over the page, if any.
-    RefPtr<PopupMenuOverlay> _popup;
-    /// @brief Whether a button was held as the popup opened: its release goes to the page.
+    /// @brief The overlay open over the page (a menu list's popup, a picker), if any.
+    RefPtr<Overlay> _overlay;
+    /// @brief Whether a button was held as the overlay opened: its release goes to the page.
     bool _pageOwnsPress {false};
 
     // FIXME: The system's double click time and distance, once the host reports them.
@@ -218,17 +218,17 @@ namespace krys::ui
       return _fonts;
     }
 
-    /// @brief The menu list popup open over the page, if any.
-    KRYS_NODISCARD PopupMenuOverlay *Popup() const noexcept
+    /// @brief The overlay open over the page (a menu list's popup, a picker), if any.
+    KRYS_NODISCARD Overlay *ShownOverlay() const noexcept
     {
-      return _popup.get();
+      return _overlay.get();
     }
 
   private:
-    void ShowPopup(PopupMenuOverlay &popup) noexcept;
-    void PopupHidden(PopupMenuOverlay &popup) noexcept;
-    /// @brief Paints the open popup over the page, at its place in the viewport.
-    void PaintPopup(gfx::Renderer2D &renderer) noexcept;
+    void ShowOverlay(Overlay &overlay) noexcept;
+    void OverlayHidden(Overlay &overlay) noexcept;
+    /// @brief Paints the open overlay over the page, at its place in the viewport.
+    void PaintOverlay(gfx::Renderer2D &renderer) noexcept;
     KRYS_NODISCARD boo::PlatformMouseEvent
       MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point, boo::MouseButton button,
                  int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept;

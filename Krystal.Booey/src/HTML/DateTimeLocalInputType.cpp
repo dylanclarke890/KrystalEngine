@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/DateTimeLocalInputType.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/HTML/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include <cmath>
 
@@ -67,4 +69,54 @@ namespace krys::boo::html
     return {};
   }
 
+  bool DateTimeLocalInputType::IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept
+  {
+    return results.ContainsAll(
+      {DateTimeFormatValidationResults::HasYear, DateTimeFormatValidationResults::HasMonth,
+       DateTimeFormatValidationResults::HasDay, DateTimeFormatValidationResults::HasHour,
+       DateTimeFormatValidationResults::HasMinute, DateTimeFormatValidationResults::HasMeridiem});
+  }
+
+  dom::DOMString
+    DateTimeLocalInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  {
+    if (!state.Year || !state.Month || !state.DayOfMonth || !state.Hour || !state.Minute || !state.Meridiem)
+    {
+      return {};
+    }
+
+    auto dateString = PadNumber(*state.Year, 4) + u8'-' + PadNumber(*state.Month, 2) + u8'-'
+                      + PadNumber(*state.DayOfMonth, 2);
+    auto hourMinuteString = PadNumber(*state.Hour23(), 2) + u8':' + PadNumber(*state.Minute, 2);
+
+    if (state.Millisecond)
+    {
+      return dateString + u8'T' + hourMinuteString + u8':' + PadNumber(state.Second.value_or(0), 2) + u8'.'
+             + PadNumber(*state.Millisecond, 3);
+    }
+
+    if (state.Second)
+    {
+      return dateString + u8'T' + hourMinuteString + u8':' + PadNumber(*state.Second, 2);
+    }
+
+    return dateString + u8'T' + hourMinuteString;
+  }
+
+  void DateTimeLocalInputType::SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                                                     const DateComponents &date) const noexcept
+  {
+    layoutParameters.ShouldHaveMillisecondField = ShouldHaveMillisecondField(date);
+
+    if (layoutParameters.ShouldHaveMillisecondField || ShouldHaveSecondField(date))
+    {
+      layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.DateTimeFormatWithSeconds();
+      layoutParameters.FallbackDateTimeFormat = u8"yyyy-MM-dd'T'HH:mm:ss";
+    }
+    else
+    {
+      layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.DateTimeFormatWithoutSeconds();
+      layoutParameters.FallbackDateTimeFormat = u8"yyyy-MM-dd'T'HH:mm";
+    }
+  }
 }

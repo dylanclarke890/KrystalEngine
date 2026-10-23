@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/MonthInputType.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/HTML/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include <cmath>
 
@@ -87,4 +89,26 @@ namespace krys::boo::html
     return Decimal::FromDouble(months);
   }
 
+  bool MonthInputType::IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept
+  {
+    return results.ContainsAll(
+      {DateTimeFormatValidationResults::HasYear, DateTimeFormatValidationResults::HasMonth});
+  }
+
+  dom::DOMString MonthInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  {
+    if (!state.Year || !state.Month)
+    {
+      return {};
+    }
+
+    return PadNumber(*state.Year, 4) + u8'-' + PadNumber(*state.Month, 2);
+  }
+
+  void MonthInputType::SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                                             const DateComponents &) const noexcept
+  {
+    layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.ShortMonthFormat();
+    layoutParameters.FallbackDateTimeFormat = u8"yyyy-MM";
+  }
 }

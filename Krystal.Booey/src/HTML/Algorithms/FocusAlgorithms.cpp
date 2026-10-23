@@ -138,17 +138,44 @@ namespace krys::boo::html
       return element && FocusAlgorithms::IsFocusableArea(*element);
     }
 
+    /// @brief Whether @p node is in a user agent shadow tree whose root delegates focus: a part of a control
+    /// that's focused instead of the control.
+    KRYS_NODISCARD bool IsInUserAgentShadowTreeThatDelegatesFocus(const dom::Node &node) noexcept
+    {
+      if (!node.IsInUserAgentShadowTree())
+      {
+        return false;
+      }
+      auto *shadowRoot = dom::TreeQueries::ContainingShadowRoot(node);
+      return shadowRoot && shadowRoot->DelegatesFocus();
+    }
+
     /// @brief Whether @p area is click focusable: the user agent considers every focusable area click
     /// focusable.
     KRYS_NODISCARD bool IsClickFocusable(const dom::Node &area) noexcept
     {
       // The insides of a control (a text field's inner text, which is an editing host) aren't focused by a
-      // click; the control is.
-      if (area.IsInUserAgentShadowTree())
+      // click; the control is, unless the control delegates its focus to them.
+      if (area.IsInUserAgentShadowTree() && !IsInUserAgentShadowTreeThatDelegatesFocus(area))
       {
         return false;
       }
       return IsFocusableAreaNode(area);
+    }
+
+    /// @brief Whether @p element is a part of a control in its user agent shadow tree, and the control (or a
+    /// control it's part of) is disabled.
+    KRYS_NODISCARD bool IsPartOfDisabledControl(const dom::Element &element) noexcept
+    {
+      for (auto *host = dom::TreeQueries::ShadowHost(element); host;
+           host = host->IsInUserAgentShadowTree() ? dom::TreeQueries::ShadowHost(*host) : nullptr)
+      {
+        if (css::MatchesDisabledPseudoClass(*host))
+        {
+          return true;
+        }
+      }
+      return false;
     }
   }
 
@@ -200,6 +227,10 @@ namespace krys::boo::html
       return false;
     }
     if (css::MatchesDisabledPseudoClass(element))
+    {
+      return false;
+    }
+    if (element.IsInUserAgentShadowTree() && IsPartOfDisabledControl(element))
     {
       return false;
     }
@@ -682,6 +713,12 @@ namespace krys::boo::html
       {
         return candidate;
       }
+      // A shadow host that delegates focus is focused through its focus delegate, by the focusing steps.
+      if (IsShadowHostThatDelegatesFocus(*candidate) && !candidate->IsInUserAgentShadowTree()
+          && GetFocusableArea(*candidate, dom::FocusTrigger::Click))
+      {
+        return candidate;
+      }
     }
     return nullptr;
   }
@@ -697,9 +734,10 @@ namespace krys::boo::html
     {
       return false;
     }
-    // Sequential navigation doesn't enter a control's user agent shadow tree.
+    // Sequential navigation doesn't enter a control's user agent shadow tree, unless the control delegates
+    // its focus to its parts.
     if (auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*element);
-        shadowRoot && shadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
+        shadowRoot && (shadowRoot->Mode() != dom::ShadowRootMode::UserAgent || shadowRoot->DelegatesFocus()))
     {
       return true;
     }

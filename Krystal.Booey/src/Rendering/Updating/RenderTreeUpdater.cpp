@@ -1017,7 +1017,7 @@ namespace krys::boo
           element.SetRenderer(nullptr);
         }
 
-        // FIXME: Custom style resolve callbacks (didDetachRenderers), once there are any.
+        element.DidDetachRenderers();
       }
     };
 

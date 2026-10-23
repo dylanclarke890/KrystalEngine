@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
@@ -1379,6 +1380,21 @@ namespace krys::boo::dom
       static_cast<css::CSSFontSelector &>(*_fontSelector).SettingsChanged();
     }
     ScheduleFullStyleRebuild();
+  }
+
+  boo::Locale &Document::GetCachedLocale(utf8_stringview locale) const noexcept
+  {
+    utf8_string localeKey(locale);
+    if (locale.empty() || !GetSettings().LangAttributeAwareFormControlUIEnabled)
+    {
+      localeKey = DefaultLanguage();
+    }
+    auto [it, isNewEntry] = _localeCache.try_emplace(localeKey);
+    if (isNewEntry)
+    {
+      it->second = boo::Locale::Create(localeKey);
+    }
+    return *it->second;
   }
 
   void Document::DidInsertInDocumentShadowRoot(ShadowRoot &shadowRoot) noexcept

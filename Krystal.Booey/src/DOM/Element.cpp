@@ -1640,6 +1640,11 @@ namespace krys::boo::dom
     return ShareRef(attr);
   }
 
+  boo::Locale &Element::GetLocale() const noexcept
+  {
+    return NodeDocument().GetCachedLocale(css::EffectiveLang(*this));
+  }
+
   ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const ShadowRootInit &init) noexcept
   {
     auto registry =

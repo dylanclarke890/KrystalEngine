@@ -21,6 +21,11 @@ namespace krys::boo
     }
   }
 
+  utf8_string WeekFormatInLDML() noexcept
+  {
+    return u8"'Week' ww, yyyy";
+  }
+
   utf8_string SubmitButtonDefaultLabel() noexcept
   {
     return u8"Submit";

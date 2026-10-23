@@ -95,7 +95,7 @@ namespace krys::ui
     Build();
 
     _visible = true;
-    _owner->ShowPopup(*this);
+    ShowIn(*_owner, *this);
   }
 
   void PopupMenuOverlay::Hide() noexcept
@@ -110,7 +110,7 @@ namespace krys::ui
     _visible = false;
     if (_owner)
     {
-      _owner->PopupHidden(*this);
+      HiddenFrom(*_owner, *this);
     }
     if (_client)
     {

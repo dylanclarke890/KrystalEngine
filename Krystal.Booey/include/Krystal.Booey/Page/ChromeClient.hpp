@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Platform/ColorChooser.hpp"
+#include "Krystal.Booey/Platform/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/PopupMenu.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -11,6 +13,9 @@ namespace krys::boo
   class GraphicsLayer;
   class GraphicsLayerFactory;
   class LocalFrame;
+  class Color;
+  class ColorChooserClient;
+  class DateTimeChooserClient;
   class PopupMenuClient;
 
   /// @brief What a page asks of its host: the window's side of the page.
@@ -58,6 +63,25 @@ namespace krys::boo
     /// @brief Makes the popup menu a menu list shows its options in; a host that doesn't override this has no
     /// popups, so menu lists don't open.
     KRYS_NODISCARD virtual RefPtr<PopupMenu> CreatePopupMenu(PopupMenuClient &client) const noexcept
+    {
+      (void)client;
+      return nullptr;
+    }
+
+    /// @brief Makes and shows the picker a colour input chooses its colour in, with @p initialColor chosen; a
+    /// host that doesn't override this has no colour pickers.
+    KRYS_NODISCARD virtual RefPtr<ColorChooser> CreateColorChooser(ColorChooserClient &client,
+                                                                   const Color &initialColor) noexcept
+    {
+      (void)client;
+      (void)initialColor;
+      return nullptr;
+    }
+
+    /// @brief Makes the picker a date input chooses its date in; a host that doesn't override this has no
+    /// date pickers.
+    KRYS_NODISCARD virtual RefPtr<DateTimeChooser>
+      CreateDateTimeChooser(DateTimeChooserClient &client) noexcept
     {
       (void)client;
       return nullptr;

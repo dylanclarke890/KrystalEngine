@@ -52,6 +52,14 @@ namespace krys::boo::dom
       return _delegatesFocus;
     }
 
+    /// @brief Sets whether a user agent shadow root delegates focus: its control's parts (a date input's
+    /// fields) are focused instead of the control, and sequential navigation moves between them.
+    void SetUserAgentDelegatesFocus(bool delegatesFocus) noexcept
+    {
+      krys_debug_assert(_mode == ShadowRootMode::UserAgent);
+      _delegatesFocus = delegatesFocus;
+    }
+
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment
     KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
     {

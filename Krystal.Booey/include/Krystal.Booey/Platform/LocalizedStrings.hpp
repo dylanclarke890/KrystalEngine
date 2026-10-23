@@ -8,6 +8,10 @@
 namespace krys::boo
 {
   KRYS_NODISCARD utf8_string SubmitButtonDefaultLabel() noexcept;
+
+  /// @brief The layout of week inputs' fields, in Unicode TR35 LDML: the week of the year (`ww`) and its
+  /// year.
+  KRYS_NODISCARD utf8_string WeekFormatInLDML() noexcept;
   KRYS_NODISCARD utf8_string ResetButtonDefaultLabel() noexcept;
 
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingText() noexcept;

@@ -13,6 +13,7 @@
 
 namespace krys::boo
 {
+  class ChromeClient;
   class RenderElement;
   class RenderStyle;
 }
@@ -73,8 +74,8 @@ namespace krys::boo::html
 {
   /// @brief The type-specific part of an input element: its value's rules, validity, form data, events,
   /// user agent shadow tree and renderer. Only HTMLInputElement uses it.
-  // FIXME: The shadow trees and renderers of the other controls (G14d), pickers, the switch control, and the
-  // types' own focus rules (isKeyboardFocusable, isMouseFocusable), which the focus model decides.
+  // FIXME: The switch control, datalists (shouldRespectListAttribute), and the types' own focus rules
+  // (isKeyboardFocusable, isMouseFocusable), which the focus model decides.
   class InputType : public RefCounted<InputType>
   {
   public:
@@ -298,6 +299,8 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual dom::DOMString ValueMissingText() const noexcept;
     KRYS_NODISCARD virtual bool CanSetStringValue() const noexcept;
     KRYS_NODISCARD virtual dom::DOMString VisibleValue() const noexcept;
+    /// @brief @p proposedValue as the user sees it, in the element's locale.
+    KRYS_NODISCARD virtual dom::DOMString LocalizeValue(dom::DOMStringView proposedValue) const noexcept;
 
     /// @brief Type check for the current value. Some types do nothing here, though TypeMismatchFor() does
     /// something for them because of value sanitization.
@@ -351,6 +354,22 @@ namespace krys::boo::html
     virtual void SubtreeHasChanged() noexcept;
     virtual void ElementDidBlur() noexcept
     {
+    }
+
+    /// @brief Shows the type's picker (a date or colour chooser), if it has one.
+    virtual void ShowPicker() noexcept
+    {
+    }
+
+    /// @brief Called when the element's renderers are torn down: closes the picker.
+    virtual void Detach() noexcept
+    {
+    }
+
+    /// @brief Whether the type's picker is showing.
+    KRYS_NODISCARD virtual bool IsPresentingAttachedView() const noexcept
+    {
+      return false;
     }
 
     // Shadow tree handling.
@@ -479,6 +498,9 @@ namespace krys::boo::html
     {
       return _element;
     }
+
+    /// @brief The chrome client of the element's page, which makes pickers; null without a page.
+    KRYS_NODISCARD ChromeClient *GetChromeClient() const noexcept;
 
     KRYS_NODISCARD Decimal ParseToNumberOrNaN(dom::DOMStringView string) const noexcept;
 

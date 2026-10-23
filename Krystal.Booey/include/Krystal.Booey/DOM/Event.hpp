@@ -250,6 +250,11 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsFocusEvent() const noexcept
+    {
+      return false;
+    }
+
     KRYS_NODISCARD virtual bool IsWheelEvent() const noexcept
     {
       return false;

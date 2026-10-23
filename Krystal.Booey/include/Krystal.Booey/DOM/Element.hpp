@@ -29,6 +29,7 @@
 namespace krys::boo
 {
   enum class PseudoElementType : uint8;
+  class Locale;
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
@@ -459,6 +460,9 @@ namespace krys::boo::dom
       return _qualifiedName;
     }
 
+    /// @brief The locale the element's form controls use, from its language.
+    KRYS_NODISCARD boo::Locale &GetLocale() const noexcept;
+
     /// @brief The attribute list, synchronised first.
     KRYS_NODISCARD const List<Ref<Attr>> &AttributeList() const noexcept
     {
@@ -672,6 +676,12 @@ namespace krys::boo::dom
     {
     }
 
+    /// @brief Called by the render tree updater after the element's renderer was torn down (a control closes
+    /// its picker).
+    virtual void DidDetachRenderers() noexcept
+    {
+    }
+
     /// @brief Called around the element's style resolution, for elements with custom style resolve callbacks.
     virtual void WillRecalcStyle(EnumSet<style::Change>) noexcept;
     virtual void DidRecalcStyle(EnumSet<style::Change>) noexcept;
@@ -714,7 +724,6 @@ namespace krys::boo::dom
     virtual void DidBlur() noexcept
     {
     }
-
     /// @brief Shows that the element is focused: places a caret at the start of an editing host (unless the
     /// selection is already in it), and scrolls the element (or the caret) into view.
     virtual void UpdateFocusAppearance(SelectionRestorationMode restorationMode,

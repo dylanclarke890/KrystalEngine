@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/WeekInputType.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/HTML/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include <cmath>
 
 namespace krys::boo::html
@@ -38,4 +41,26 @@ namespace krys::boo::html
     return DateComponents::FromMillisecondsSinceEpochForWeek(value);
   }
 
+  bool WeekInputType::IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept
+  {
+    return results.ContainsAll(
+      {DateTimeFormatValidationResults::HasYear, DateTimeFormatValidationResults::HasWeek});
+  }
+
+  dom::DOMString WeekInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  {
+    if (!state.Year || !state.Week)
+    {
+      return {};
+    }
+
+    return PadNumber(*state.Year, 4) + u8"-W" + PadNumber(*state.Week, 2);
+  }
+
+  void WeekInputType::SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                                            const DateComponents &) const noexcept
+  {
+    layoutParameters.DateTimeFormat = WeekFormatInLDML();
+    layoutParameters.FallbackDateTimeFormat = u8"yyyy-'W'ww";
+  }
 }

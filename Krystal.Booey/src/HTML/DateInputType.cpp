@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/DateInputType.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/HTML/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include <cmath>
 
@@ -38,4 +40,28 @@ namespace krys::boo::html
     return DateComponents::FromMillisecondsSinceEpochForDate(value);
   }
 
+  bool DateInputType::IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept
+  {
+    return results.ContainsAll({DateTimeFormatValidationResults::HasYear,
+                                DateTimeFormatValidationResults::HasMonth,
+                                DateTimeFormatValidationResults::HasDay});
+  }
+
+  dom::DOMString DateInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  {
+    if (!state.DayOfMonth || !state.Month || !state.Year)
+    {
+      return {};
+    }
+
+    return PadNumber(*state.Year, 4) + u8'-' + PadNumber(*state.Month, 2) + u8'-'
+           + PadNumber(*state.DayOfMonth, 2);
+  }
+
+  void DateInputType::SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                                            const DateComponents &) const noexcept
+  {
+    layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.DateFormat();
+    layoutParameters.FallbackDateTimeFormat = u8"yyyy-MM-dd";
+  }
 }

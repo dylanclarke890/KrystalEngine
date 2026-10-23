@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/TimeInputType.hpp"
+#include "Krystal.Booey/Core/PlatformLocale.hpp"
+#include "Krystal.Booey/HTML/DateTimeFieldsState.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include <cmath>
 
@@ -52,4 +54,58 @@ namespace krys::boo::html
     return Decimal::FromDouble(milliseconds);
   }
 
+  void TimeInputType::HandleActivationBehavior(dom::Event &) noexcept
+  {
+  }
+
+  void TimeInputType::ShowPicker() noexcept
+  {
+  }
+
+  bool TimeInputType::IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept
+  {
+    return results.ContainsAll({DateTimeFormatValidationResults::HasHour,
+                                DateTimeFormatValidationResults::HasMinute,
+                                DateTimeFormatValidationResults::HasMeridiem});
+  }
+
+  dom::DOMString TimeInputType::FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept
+  {
+    if (!state.Hour || !state.Minute || !state.Meridiem)
+    {
+      return {};
+    }
+
+    auto hourMinuteString = PadNumber(*state.Hour23(), 2) + u8':' + PadNumber(*state.Minute, 2);
+
+    if (state.Millisecond)
+    {
+      return hourMinuteString + u8':' + PadNumber(state.Second.value_or(0), 2) + u8'.'
+             + PadNumber(*state.Millisecond, 3);
+    }
+
+    if (state.Second)
+    {
+      return hourMinuteString + u8':' + PadNumber(*state.Second, 2);
+    }
+
+    return hourMinuteString;
+  }
+
+  void TimeInputType::SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                                            const DateComponents &date) const noexcept
+  {
+    layoutParameters.ShouldHaveMillisecondField = ShouldHaveMillisecondField(date);
+
+    if (layoutParameters.ShouldHaveMillisecondField || ShouldHaveSecondField(date))
+    {
+      layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.TimeFormat();
+      layoutParameters.FallbackDateTimeFormat = u8"HH:mm:ss";
+    }
+    else
+    {
+      layoutParameters.DateTimeFormat = layoutParameters.FormatLocale.ShortTimeFormat();
+      layoutParameters.FallbackDateTimeFormat = u8"HH:mm";
+    }
+  }
 }

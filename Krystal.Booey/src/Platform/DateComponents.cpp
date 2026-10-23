@@ -4,11 +4,21 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include <array>
 #include <charconv>
+#include <chrono>
 #include <climits>
 #include <cmath>
 
 namespace krys::boo
 {
+  double LocalTimeNow() noexcept
+  {
+    auto now = std::chrono::system_clock::now();
+    double ms = static_cast<double>(
+      std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+    auto offset = std::chrono::current_zone()->get_info(now).offset;
+    return ms + static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(offset).count());
+  }
+
   namespace detail
   {
     /// @brief The characters left to parse.

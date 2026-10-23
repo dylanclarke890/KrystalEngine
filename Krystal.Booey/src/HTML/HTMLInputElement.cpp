@@ -965,6 +965,36 @@ namespace krys::boo::html
     _inputType->ElementDidBlur();
   }
 
+  void HTMLInputElement::DidDetachRenderers() noexcept
+  {
+    SetFormControlValueMatchesRenderer(false);
+    _inputType->Detach();
+  }
+
+  dom::ExceptionOr<void> HTMLInputElement::ShowPicker() noexcept
+  {
+    if (!NodeDocument().Frame())
+    {
+      return {};
+    }
+
+    if (!IsMutable())
+    {
+      return dom::Exception(dom::ExceptionCode::InvalidStateError,
+                            u8"Input showPicker() cannot be used on immutable controls.");
+    }
+
+    // FIXME: Require transient activation (NotAllowedError), once there is user activation.
+
+    _inputType->ShowPicker();
+    return {};
+  }
+
+  bool HTMLInputElement::IsPresentingAttachedView() const noexcept
+  {
+    return _inputType->IsPresentingAttachedView();
+  }
+
   void HTMLInputElement::SetValueFromRenderer(dom::DOMStringView value) noexcept
   {
     // File upload controls will never use this.

@@ -10,6 +10,7 @@
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI/View.hpp"
 #include <string>
+#include <unicode/uloc.h>
 
 namespace krys::ui::tests
 {
@@ -277,7 +278,71 @@ namespace krys::ui::tests
                 boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
                 view.MousePressed(inside, pal::MouseButton::Left);
                 view.MouseReleased(inside, pal::MouseButton::Left);
-                REQUIRE(view.Popup());
+                REQUIRE(view.ShownOverlay());
+                view.UpdateRendering();
+              });
+  }
+
+  namespace
+  {
+    /// @brief Makes the system's language US English while it lives, so form controls show dates the same on
+    /// every machine.
+    struct USEnglishScope
+    {
+      std::string Previous;
+
+      USEnglishScope() noexcept : Previous(uloc_getDefault())
+      {
+        UErrorCode status = U_ZERO_ERROR;
+        uloc_setDefault("en_US", &status);
+      }
+
+      ~USEnglishScope() noexcept
+      {
+        UErrorCode status = U_ZERO_ERROR;
+        uloc_setDefault(Previous.c_str(), &status);
+      }
+    };
+  }
+
+  TEST_CASE("Golden: dates", "[UI][GPU][Golden]")
+  {
+    // Dates' fields and colour wells are drawn by the Adwaita theme, and Chrome on Windows lays dates out in
+    // the system's regional format, so Chrome's golden is only reported.
+    USEnglishScope english;
+    CheckPage("dates", 360u, 260u, true);
+  }
+
+  TEST_CASE("Golden: date picker", "[UI][GPU][Golden]")
+  {
+    // The picker is the view's overlay; Chrome draws its own in a window, so there's no Chrome golden.
+    USEnglishScope english;
+    CheckPage("date-picker", 280u, 260u, true,
+              [](View &view)
+              {
+                auto &input =
+                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
+                input.Click();
+                REQUIRE(view.ShownOverlay());
+                // The highlight moves to the 12th.
+                (void)view.KeyPressed(pal::Key::RightArrow);
+                (void)view.KeyPressed(pal::Key::RightArrow);
+                (void)view.KeyPressed(pal::Key::RightArrow);
+                (void)view.KeyPressed(pal::Key::RightArrow);
+                (void)view.KeyPressed(pal::Key::RightArrow);
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: color picker", "[UI][GPU][Golden]")
+  {
+    CheckPage("color-picker", 240u, 200u, true,
+              [](View &view)
+              {
+                auto &input =
+                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
+                input.Click();
+                REQUIRE(view.ShownOverlay());
                 view.UpdateRendering();
               });
   }

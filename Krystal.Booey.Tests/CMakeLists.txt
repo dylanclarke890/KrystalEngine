@@ -347,6 +347,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/Transforms/Quaternion.cpp
 		tests/Graphics/Transforms/TransformExtras.cpp
 		tests/Graphics/Transforms/TransformationMatrix.cpp
+		tests/Core/DateTimeFormat.cpp
+		tests/Core/LocaleICU.cpp
 		tests/Core/LocaleToScriptMapping.cpp
 		tests/Core/TextBreakIterator.cpp
 		tests/Core/TextFlags.cpp
@@ -566,6 +568,8 @@ target_sources(Krystal.Booey.Tests
 		# HTML
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
 		tests/HTML/Attributes/Reflection.cpp
+		tests/HTML/BaseDateAndTimeInputType.cpp
+		tests/HTML/ColorInputType.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLFormElement.cpp

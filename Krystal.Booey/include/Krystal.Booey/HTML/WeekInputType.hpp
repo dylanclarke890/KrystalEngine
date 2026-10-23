@@ -29,5 +29,14 @@ namespace krys::boo::html
     KRYS_NODISCARD Maybe<DateComponents>
       ParseToDateComponents(dom::DOMStringView source) const noexcept final;
     KRYS_NODISCARD Maybe<DateComponents> SetMillisecondToDateComponents(double value) const noexcept final;
+
+    // DateTimeEditElementEditControlOwner functions:
+    KRYS_NODISCARD dom::DOMString
+      FormatDateTimeFieldsState(const DateTimeFieldsState &state) const noexcept final;
+
+    // BaseDateAndTimeInputType functions:
+    void SetupLayoutParameters(DateTimeEditElement::LayoutParameters &layoutParameters,
+                               const DateComponents &date) const noexcept final;
+    KRYS_NODISCARD bool IsValidFormat(EnumSet<DateTimeFormatValidationResults> results) const noexcept final;
   };
 }

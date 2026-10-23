@@ -15,14 +15,18 @@
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
+#include "Krystal.UI/ColorChooserOverlay.hpp"
+#include "Krystal.UI/DateTimeChooserOverlay.hpp"
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/Input.hpp"
+#include "Krystal.UI/PopupMenuOverlay.hpp"
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -909,7 +913,7 @@ namespace krys::ui::tests
     // to the page and leaves the popup open.
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
-    auto *popup = view.Popup();
+    auto *popup = static_cast<PopupMenuOverlay *>(view.ShownOverlay());
     REQUIRE(popup);
     CHECK(popup->Rect().Y() == static_cast<int32>(box->Bottom()));
     CHECK(popup->Rect().X() == static_cast<int32>(box->X()));
@@ -929,22 +933,22 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::DownArrow));
     CHECK(popup->HighlightedIndex() == 3);
     CHECK(view.KeyPressed(pal::Key::Enter));
-    CHECK_FALSE(view.Popup());
+    CHECK_FALSE(view.ShownOverlay());
     CHECK(select.SelectedIndex() == 2);
     CHECK(changes == 1);
 
     // Escape closes it without choosing.
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
-    REQUIRE(view.Popup());
+    REQUIRE(view.ShownOverlay());
     CHECK(view.KeyPressed(pal::Key::Escape));
-    CHECK_FALSE(view.Popup());
+    CHECK_FALSE(view.ShownOverlay());
     CHECK(select.SelectedIndex() == 2);
 
     // Clicking an item chooses it.
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
-    popup = view.Popup();
+    popup = static_cast<PopupMenuOverlay *>(view.ShownOverlay());
     REQUIRE(popup);
     auto date = popup->ContentView().Document().QuerySelector(u8"[data-index='4']");
     REQUIRE_FALSE(date.HasException());
@@ -956,24 +960,229 @@ namespace krys::ui::tests
     CHECK(popup->HighlightedIndex() == 4);
     view.MousePressed(onDate, pal::MouseButton::Left);
     view.MouseReleased(onDate, pal::MouseButton::Left);
-    CHECK_FALSE(view.Popup());
+    CHECK_FALSE(view.ShownOverlay());
     CHECK(select.SelectedIndex() == 3);
     CHECK(changes == 2);
 
     // Pressing outside closes it, and the press goes no further.
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
-    REQUIRE(view.Popup());
+    REQUIRE(view.ShownOverlay());
     view.MousePressed({390, 290}, pal::MouseButton::Left);
     view.MouseReleased({390, 290}, pal::MouseButton::Left);
-    CHECK_FALSE(view.Popup());
+    CHECK_FALSE(view.ShownOverlay());
     CHECK(view.Document().FocusedElement() == &select);
 
     // The recording shows the popup over the page.
     view.MousePressed(inside, pal::MouseButton::Left);
     view.MouseReleased(inside, pal::MouseButton::Left);
-    REQUIRE(view.Popup());
+    REQUIRE(view.ShownOverlay());
     CHECK(view.Record()->Items().size() > 0uz);
+  }
+
+  namespace
+  {
+    /// @brief The middle of @p element, in its view's viewport offset by @p origin.
+    KRYS_NODISCARD boo::IntPoint CentreOf(boo::dom::Element &element, boo::IntPoint origin = {}) noexcept
+    {
+      auto box = element.GetBoundingClientRect();
+      return boo::IntPoint(origin.X() + static_cast<int32>(box->X() + box->Width() / 2),
+                           origin.Y() + static_cast<int32>(box->Y() + box->Height() / 2));
+    }
+
+    /// @brief The days since 1970-01-01 of the date @p date, as the date picker's cells name them.
+    KRYS_NODISCARD utf8_string DayValue(utf8_stringview date) noexcept
+    {
+      auto components = boo::DateComponents::FromParsingDate(date);
+      auto days = static_cast<int64>(components->MillisecondsSinceEpoch() / 86'400'000.0);
+      auto text = std::to_string(days);
+      return utf8_string(text.begin(), text.end());
+    }
+
+    struct EventCounter : public boo::dom::EventListenerCallback
+    {
+      int32 Count {0};
+
+      void HandleEvent(boo::dom::Event &) noexcept override
+      {
+        ++Count;
+      }
+    };
+  }
+
+  TEST_CASE("View: a date input's picker", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif } input { margin: 10px }"
+                  u8"</style><input type=date id=d value=2026-03-07 min=2026-03-02><p id=after>After</p>");
+    view.UpdateRendering();
+
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"d"));
+    auto box = input.GetBoundingClientRect();
+    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    auto changes = CreateRef<EventCounter>();
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    auto open = [&]
+    {
+      view.MousePressed(inside, pal::MouseButton::Left);
+      view.MouseReleased(inside, pal::MouseButton::Left);
+      return static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+    };
+
+    // A click opens the picker below the input, on the value's month with its day highlighted.
+    auto *picker = open();
+    REQUIRE(picker);
+    CHECK(picker->GetMode() == DateTimeChooserOverlay::Mode::Days);
+    CHECK(picker->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(picker->HighlightedValue() == u8"2026-03-07");
+    CHECK(input.IsPresentingAttachedView());
+
+    // The arrow keys move the highlight, Page Down turns the page; Enter chooses, firing change, and closes
+    // it.
+    CHECK(view.KeyPressed(pal::Key::RightArrow));
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(picker->HighlightedValue() == u8"2026-03-15");
+    CHECK(view.KeyPressed(pal::Key::PageDown));
+    CHECK(picker->HighlightedValue() == u8"2026-04-15");
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK_FALSE(input.IsPresentingAttachedView());
+    CHECK(input.Value() == u8"2026-04-15");
+    CHECK(changes->Count == 1);
+
+    // Clicking a day chooses it; days before the minimum can't be chosen.
+    (void)input.SetValue(u8"2026-03-07");
+    picker = open();
+    REQUIRE(picker);
+    auto &days = picker->ContentView().Document();
+    auto early = days.QuerySelector(u8"[data-value='" + DayValue(u8"2026-03-01") + u8"']");
+    REQUIRE_FALSE(early.HasException());
+    REQUIRE(early.Value());
+    CHECK(early.Value()->GetAttribute(u8"class").value_or(utf8_string()).contains(u8"disabled"));
+    auto onEarly = CentreOf(*early.Value(), picker->Rect().Location());
+    view.MousePressed(onEarly, pal::MouseButton::Left);
+    view.MouseReleased(onEarly, pal::MouseButton::Left);
+    REQUIRE(view.ShownOverlay() == picker);
+    auto day = days.QuerySelector(u8"[data-value='" + DayValue(u8"2026-03-20") + u8"']");
+    REQUIRE_FALSE(day.HasException());
+    REQUIRE(day.Value());
+    auto onDay = CentreOf(*day.Value(), picker->Rect().Location());
+    view.MouseMoved(onDay);
+    CHECK(picker->HighlightedValue() == u8"2026-03-20");
+    view.MousePressed(onDay, pal::MouseButton::Left);
+    view.MouseReleased(onDay, pal::MouseButton::Left);
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"2026-03-20");
+
+    // The previous month's button turns the page; Escape closes the picker without choosing.
+    picker = open();
+    REQUIRE(picker);
+    auto previous = picker->ContentView().Document().QuerySelector(u8"[data-action='-1']");
+    REQUIRE_FALSE(previous.HasException());
+    REQUIRE(previous.Value());
+    auto onPrevious = CentreOf(*previous.Value(), picker->Rect().Location());
+    view.MousePressed(onPrevious, pal::MouseButton::Left);
+    view.MouseReleased(onPrevious, pal::MouseButton::Left);
+    CHECK(picker->HighlightedValue() == u8"2026-02-20");
+    CHECK(view.KeyPressed(pal::Key::Escape));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"2026-03-20");
+
+    // Pressing outside closes it; so does the window losing focus.
+    REQUIRE(open());
+    view.MousePressed({390, 290}, pal::MouseButton::Left);
+    view.MouseReleased({390, 290}, pal::MouseButton::Left);
+    CHECK_FALSE(view.ShownOverlay());
+    REQUIRE(open());
+    view.SetFocused(false);
+    CHECK_FALSE(view.ShownOverlay());
+    view.SetFocused(true);
+
+    // Month inputs choose from a year's months.
+    view.LoadHTML(u8"<!DOCTYPE html><input type=month id=m value=2026-09>");
+    view.UpdateRendering();
+    auto &month = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"m"));
+    month.Click();
+    auto *months = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+    REQUIRE(months);
+    CHECK(months->GetMode() == DateTimeChooserOverlay::Mode::Months);
+    CHECK(months->HighlightedValue() == u8"2026-09");
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK(month.Value() == u8"2026-12");
+
+    // Week inputs choose a day's week.
+    view.LoadHTML(u8"<!DOCTYPE html><input type=week id=w value=2026-W10>");
+    view.UpdateRendering();
+    auto &week = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"w"));
+    week.Click();
+    auto *weeks = static_cast<DateTimeChooserOverlay *>(view.ShownOverlay());
+    REQUIRE(weeks);
+    CHECK(weeks->GetMode() == DateTimeChooserOverlay::Mode::Weeks);
+    CHECK(weeks->HighlightedValue() == u8"2026-W10");
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(view.KeyPressed(pal::Key::Space));
+    CHECK(week.Value() == u8"2026-W11");
+  }
+
+  TEST_CASE("View: a colour input's picker", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } input { margin: 10px }</style>"
+                  u8"<input type=color id=c value=#336699>");
+    view.UpdateRendering();
+
+    auto &input = Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"c"));
+    auto box = input.GetBoundingClientRect();
+    boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+    auto changes = CreateRef<EventCounter>();
+    input.AddEventListener(boo::dom::DOMStringAtom(u8"change"),
+                           Ref<boo::dom::EventListenerCallback> {changes}, false);
+    auto open = [&]
+    {
+      view.MousePressed(inside, pal::MouseButton::Left);
+      view.MouseReleased(inside, pal::MouseButton::Left);
+      return static_cast<ColorChooserOverlay *>(view.ShownOverlay());
+    };
+
+    // A click opens the palette below the input; the value isn't in it, so the first colour is highlighted.
+    auto *picker = open();
+    REQUIRE(picker);
+    CHECK(picker->Colors().size() == 40uz);
+    CHECK(picker->Rect().Y() == static_cast<int32>(box->Bottom()));
+    CHECK(picker->HighlightedIndex() == 0);
+
+    // The arrow keys move the highlight; Enter chooses, firing change, and closes it.
+    CHECK(view.KeyPressed(pal::Key::DownArrow));
+    CHECK(view.KeyPressed(pal::Key::RightArrow));
+    CHECK(picker->HighlightedIndex() == 9);
+    CHECK(view.KeyPressed(pal::Key::Enter));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"#804000");
+    CHECK(changes->Count == 1);
+
+    // Opening it again highlights the value; clicking a colour chooses it.
+    picker = open();
+    REQUIRE(picker);
+    CHECK(picker->HighlightedIndex() == 9);
+    auto red = picker->ContentView().Document().QuerySelector(u8"[data-index='16']");
+    REQUIRE_FALSE(red.HasException());
+    REQUIRE(red.Value());
+    auto onRed = CentreOf(*red.Value(), picker->Rect().Location());
+    view.MouseMoved(onRed);
+    CHECK(picker->HighlightedIndex() == 16);
+    view.MousePressed(onRed, pal::MouseButton::Left);
+    view.MouseReleased(onRed, pal::MouseButton::Left);
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"#ff0000");
+    CHECK(changes->Count == 2);
+
+    // Escape closes it without choosing.
+    REQUIRE(open());
+    CHECK(view.KeyPressed(pal::Key::Escape));
+    CHECK_FALSE(view.ShownOverlay());
+    CHECK(input.Value() == u8"#ff0000");
   }
 
   TEST_CASE("FileLoaderStrategy: MIME types by extension", "[UI]")

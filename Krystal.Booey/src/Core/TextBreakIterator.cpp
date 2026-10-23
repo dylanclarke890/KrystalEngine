@@ -239,7 +239,7 @@ namespace krys::boo
                                      {
                                        return candidate.GetMode() == mode
                                               && candidate.GetContentAnalysis() == contentAnalysis
-                                              && candidate.Locale() == locale;
+                                              && candidate.GetLocale() == locale;
                                      });
     if (iter == _unused.end())
     {

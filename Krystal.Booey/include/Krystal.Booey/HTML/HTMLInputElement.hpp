@@ -359,8 +359,11 @@ namespace krys::boo::html
     dom::ExceptionOr<void> SetRangeText(dom::DOMStringView replacement, uint32 start, uint32 end,
                                         dom::DOMStringView selectionMode) noexcept final;
 
-    // TODO(HTMLINPUT, HTML): Implement ShowPicker(), with pickers.
-    // undefined showPicker();
+    /// @see https://html.spec.whatwg.org/#dom-input-showpicker
+    dom::ExceptionOr<void> ShowPicker() noexcept;
+
+    /// @brief Whether the type's picker is showing.
+    KRYS_NODISCARD bool IsPresentingAttachedView() const noexcept;
 
 #pragma endregion
 
@@ -498,6 +501,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
     void DidAttachRenderers() noexcept final;
+    void DidDetachRenderers() noexcept final;
     void UpdateFocusAppearance(dom::SelectionRestorationMode restorationMode,
                                SelectionRevealMode revealMode = SelectionRevealMode::Reveal) noexcept final;
     void DidBlur() noexcept final;
