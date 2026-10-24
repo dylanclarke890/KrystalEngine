@@ -21,7 +21,7 @@ namespace krys::boo::html
     friend class ::krys::boo::dom::SlotAlgorithms;
 
   private:
-    List<Ref<dom::Node>> _assignedNodes;
+    List<WeakRef<dom::Node>> _assignedNodes;
     List<WeakRef<dom::Node>> _manuallyAssignedNodes;
 
   public:
@@ -39,7 +39,7 @@ namespace krys::boo::html
 
     /// @brief The slot's assigned nodes, or null if it has none.
     /// @see https://dom.spec.whatwg.org/#slot-assigned-nodes
-    KRYS_NODISCARD const List<Ref<dom::Node>> *AssignedNodes() const noexcept
+    KRYS_NODISCARD const List<WeakRef<dom::Node>> *AssignedNodes() const noexcept
     {
       return _assignedNodes.empty() ? nullptr : &_assignedNodes;
     }

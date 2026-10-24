@@ -14,6 +14,8 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
@@ -415,6 +417,81 @@ namespace krys::ui::tests
       CHECK(&view.Document() == index.get());
       CHECK(view.Document().GetURL().Query().empty());
       CHECK(routed == List<std::string> {"guide=history", ""});
+    }
+  }
+
+  TEST_CASE("View: the editor page's dialogs, popovers and details", "[UI]")
+  {
+    View view({1'200, 1'600});
+    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    auto byId = [&](utf8_stringview id)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      return element;
+    };
+    auto click = [&](utf8_stringview selectors)
+    {
+      auto element = document.QuerySelector(selectors).ReleaseValue();
+      REQUIRE(element);
+      element->DispatchSimulatedClick(nullptr);
+      boo::html::EventLoop::Current().RunUntilIdle();
+    };
+    auto showing = [&](utf8_stringview id)
+    {
+      return byId(id)->Matches(u8":popover-open").ReleaseValue();
+    };
+
+    SECTION("the modal dialog closes with its buttons' values")
+    {
+      // As the editor does for the Refill button.
+      auto &refill = Downcast<boo::html::HTMLDialogElement>(*byId(u8"refill"));
+      REQUIRE_FALSE(refill.ShowModal().HasException());
+      CHECK(refill.Matches(u8":modal").ReleaseValue());
+      click(u8"#refill button[value=yes]");
+      CHECK_FALSE(refill.Open());
+      CHECK(refill.ReturnValue() == u8"yes");
+    }
+
+    SECTION("the popovers")
+    {
+      click(u8"button[popovertarget=menu]");
+      CHECK(showing(u8"menu"));
+      // The nested popover keeps the menu open; a hint leaves it open too.
+      click(u8"#menu button[popovertarget=menu-more]");
+      CHECK(showing(u8"menu"));
+      CHECK(showing(u8"menu-more"));
+      click(u8"button[popovertarget=hint]");
+      CHECK(showing(u8"hint"));
+      CHECK(showing(u8"menu"));
+      // The toast shows and hides only with its buttons.
+      click(u8"button[popovertarget=toast][popovertargetaction=show]");
+      CHECK(showing(u8"toast"));
+      click(u8"button[popovertarget=toast][popovertargetaction=hide]");
+      CHECK_FALSE(showing(u8"toast"));
+    }
+
+    SECTION("the details")
+    {
+      auto details = document.QuerySelectorAll(u8".overlays details").ReleaseValue();
+      REQUIRE(details->Length() == 3u);
+      auto &fresh = Downcast<boo::html::HTMLDetailsElement>(*details->Item(0));
+      auto &local = Downcast<boo::html::HTMLDetailsElement>(*details->Item(1));
+      auto &secret = Downcast<boo::html::HTMLDetailsElement>(*details->Item(2));
+      CHECK(fresh.Open());
+      // The two questions are an accordion.
+      click(u8"details[name=faq]:not([open]) summary");
+      CHECK(local.Open());
+      CHECK_FALSE(fresh.Open());
+      // The link to the hidden text opens its details.
+      CHECK_FALSE(secret.Open());
+      click(u8"a[href='#secret']");
+      CHECK(secret.Open());
     }
   }
 

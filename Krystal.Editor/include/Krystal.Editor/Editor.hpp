@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/NavigateEvent.hpp"
 #include "Krystal.Booey/Page/Navigation.hpp"
@@ -65,6 +66,8 @@ namespace krys
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
     boo::dom::EventListenerHandle _keyLogger;
+    boo::dom::EventListenerHandle _dialogOpener;
+    boo::dom::EventListenerHandle _dialogLogger;
     /// @brief Routes the guide's topics within the page, on the window's navigation.
     boo::dom::EventListenerHandle _router;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
@@ -427,7 +430,8 @@ namespace krys
       return std::string_view(reinterpret_cast<const char *>(text.data()), text.size());
     }
 
-    /// @brief Sets up the page as it commits: the card picker, the key logger and the guide's router.
+    /// @brief Sets up the page as it commits: the card picker, the key logger, the dialogs and the guide's
+    /// router.
     void AttachPage() noexcept
     {
       auto &document = _pageView->Document();
@@ -464,6 +468,56 @@ namespace krys
             (void)label->TextContent(krys::move(key));
           }
         });
+      // Opens the dialog a clicked button's `data-dialog` names: modally, unless the button is
+      // `data-modeless`.
+      _dialogOpener = document.AddEventListener(
+        u8"click",
+        [this](boo::dom::Event &event)
+        {
+          auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+          auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+          if (!target)
+          {
+            return;
+          }
+          auto id = target->GetAttribute(u8"data-dialog");
+          if (!id)
+          {
+            return;
+          }
+          auto element = _pageView->Document().GetElementById(*id);
+          auto *dialog = element ? DynamicDowncast<boo::html::HTMLDialogElement>(*element) : nullptr;
+          if (!dialog)
+          {
+            return;
+          }
+          if (target->HasAttribute(u8"data-modeless"))
+          {
+            (void)dialog->Show();
+          }
+          else
+          {
+            (void)dialog->ShowModal();
+          }
+        });
+      // Shows how the last dialog closed in the page's `#dialog-result` element (`close` doesn't bubble, so
+      // this listens as it's captured).
+      _dialogLogger = document.AddEventListener(
+        u8"close",
+        [this](boo::dom::Event &event)
+        {
+          auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+          auto *dialog = node ? DynamicDowncast<boo::html::HTMLDialogElement>(*node) : nullptr;
+          auto label = _pageView->Document().GetElementById(u8"dialog-result");
+          if (!dialog || !label)
+          {
+            return;
+          }
+          const auto &result = dialog->ReturnValue();
+          (void)label->TextContent(result.empty() ? boo::dom::DOMString(u8"Closed without an answer.")
+                                                  : u8"Closed with \u201c" + result + u8"\u201d.");
+        },
+        true);
     }
 
     /// @brief Shows how long the page has been open, once a second.

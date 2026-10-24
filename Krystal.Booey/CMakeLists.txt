@@ -1033,6 +1033,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/HighlightRegistry.hpp
   include/Krystal.Booey/DOM/FragmentDirectiveParser.hpp
   include/Krystal.Booey/DOM/FragmentDirectiveRangeFinder.hpp
+  include/Krystal.Booey/DOM/FindRevealAlgorithms.hpp
   include/Krystal.Booey/DOM/FragmentDirectiveUtilities.hpp
   include/Krystal.Booey/Editing/TemporarySelectionChange.hpp
   include/Krystal.Booey/HTML/HashChangeEvent.hpp
@@ -2753,6 +2754,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/HighlightRegistry.cpp
   src/DOM/FragmentDirectiveParser.cpp
   src/DOM/FragmentDirectiveRangeFinder.cpp
+  src/DOM/FindRevealAlgorithms.cpp
   src/DOM/FragmentDirectiveUtilities.cpp
   src/Editing/TemporarySelectionChange.cpp
   src/HTML/HashChangeEvent.cpp
@@ -3506,6 +3508,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLSourceElement.hpp
       include/Krystal.Booey/HTML/HTMLSpanElement.hpp
       include/Krystal.Booey/HTML/HTMLStyleElement.hpp
+      include/Krystal.Booey/HTML/HTMLSummaryElement.hpp
       include/Krystal.Booey/HTML/HTMLTableCaptionElement.hpp
       include/Krystal.Booey/HTML/HTMLTableCellElement.hpp
       include/Krystal.Booey/HTML/HTMLTableColElement.hpp
@@ -3843,6 +3846,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLSourceElement.cpp
     src/HTML/HTMLSpanElement.cpp
     src/HTML/HTMLStyleElement.cpp
+    src/HTML/HTMLSummaryElement.cpp
     src/HTML/HTMLTableCaptionElement.cpp
     src/HTML/HTMLTableCellElement.cpp
     src/HTML/HTMLTableColElement.cpp

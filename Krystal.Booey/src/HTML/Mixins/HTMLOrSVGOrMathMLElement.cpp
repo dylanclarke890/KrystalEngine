@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include <string>
@@ -41,21 +42,8 @@ namespace krys::boo::html::mixins
         case TagName::textarea: return 0;
         case TagName::summary:
         {
-          auto *parent = element.ParentElement();
-          if (!parent || !Is<HTMLElement>(*parent)
-              || parent->TagQualifiedName().TagName() != TagName::details)
-          {
-            return -1;
-          }
-          for (auto *child = parent->FirstChild(); child; child = child->NextSibling())
-          {
-            if (auto *summary = DynamicDowncast<HTMLElement>(*child);
-                summary && summary->TagQualifiedName().TagName() == TagName::summary)
-            {
-              return summary == &element ? 0 : -1;
-            }
-          }
-          return -1;
+          auto *summary = DynamicDowncast<HTMLSummaryElement>(element);
+          return summary && summary->IsActiveSummary() ? 0 : -1;
         }
         default: return -1;
       }

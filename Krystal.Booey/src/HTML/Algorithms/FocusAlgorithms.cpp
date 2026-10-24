@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -33,30 +34,6 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsHTMLElement(const dom::Element &element, TagName tagName) noexcept
     {
       return Is<HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
-    }
-
-    /// @brief Whether @p element is a summary for its parent `details`: its first `summary` child.
-    /// @see https://html.spec.whatwg.org/#summary-for-its-parent-details
-    KRYS_NODISCARD bool IsSummaryForItsParentDetails(const dom::Element &element) noexcept
-    {
-      if (!IsHTMLElement(element, TagName::summary))
-      {
-        return false;
-      }
-      auto *parent = element.ParentElement();
-      if (!parent || !IsHTMLElement(*parent, TagName::details))
-      {
-        return false;
-      }
-      for (auto *child = dom::TreeQueries::FirstElementChild(*parent); child;
-           child = dom::TreeQueries::NextElementSibling(*child))
-      {
-        if (IsHTMLElement(*child, TagName::summary))
-        {
-          return child == &element;
-        }
-      }
-      return false;
     }
 
     /// @brief Whether @p element is an editing host: editable, and not inside an editable element.
@@ -107,7 +84,11 @@ namespace krys::boo::html
         }
       }
       // FIXME: Elements with a draggable attribute, once there's drag and drop.
-      return IsSummaryForItsParentDetails(element) || IsEditingHost(element);
+      if (auto *summary = DynamicDowncast<HTMLSummaryElement>(element); summary && summary->IsActiveSummary())
+      {
+        return true;
+      }
+      return IsEditingHost(element);
     }
 
     /// @brief Whether @p element is being rendered or delegating its rendering to its children

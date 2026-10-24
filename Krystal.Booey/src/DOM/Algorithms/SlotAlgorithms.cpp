@@ -7,8 +7,10 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -142,6 +144,14 @@ namespace krys::boo::dom
       return nullptr;
     }
 
+    // A details element's first summary child takes its summary slot, and its other children its content
+    // slot.
+    if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(*parent);
+        details && shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      return details->SlotForHostChild(slottable);
+    }
+
     if (shadow->SlotAssignment() == SlotAssignmentMode::Manual)
     {
       for (auto &descendant : DescendantRange(*shadow))
@@ -267,7 +277,8 @@ namespace krys::boo::dom
   void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
   {
     auto slottables = FindSlottables(slot);
-    if (slottables != slot._assignedNodes)
+    if (!std::ranges::equal(slottables, slot._assignedNodes,
+                            [](const auto &a, const auto &b) { return a.get() == b.get(); }))
     {
       SignalSlotChange(slot);
 
@@ -282,16 +293,18 @@ namespace krys::boo::dom
       }
     }
 
-    slot._assignedNodes = std::move(slottables);
-    for (auto &slottable : slot._assignedNodes)
+    slot._assignedNodes.clear();
+    slot._assignedNodes.reserve(slottables.size());
+    for (auto &slottable : slottables)
     {
+      slot._assignedNodes.push_back(CreateWeakRef<Node>(*slottable));
       if (auto *element = DynamicDowncast<Element>(*slottable))
       {
-        element->_assignedSlot = ShareRef(slot);
+        element->_assignedSlot = CreateWeakPtr(&slot);
       }
       else if (auto *text = DynamicDowncast<Text>(*slottable))
       {
-        text->_assignedSlot = ShareRef(slot);
+        text->_assignedSlot = CreateWeakPtr(&slot);
       }
     }
   }

@@ -36,6 +36,11 @@ namespace krys::boo
     return u8"Reset";
   }
 
+  utf8_string DefaultDetailsSummaryText() noexcept
+  {
+    return u8"Details";
+  }
+
   utf8_string ValidationMessageValueMissingText() noexcept
   {
     return u8"Fill out this field";

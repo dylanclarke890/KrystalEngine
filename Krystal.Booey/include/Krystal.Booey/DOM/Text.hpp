@@ -34,7 +34,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#slotable-name
     DOMString _slottableName;
     /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
-    RefPtr<html::HTMLSlotElement> _assignedSlot;
+    WeakPtr<html::HTMLSlotElement> _assignedSlot;
     /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
 

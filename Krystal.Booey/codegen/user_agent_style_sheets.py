@@ -24,6 +24,7 @@ SHEETS = {
     "HorizontalFormControlsUserAgentStyleSheet": "horizontalFormControls.css",
     "ThemeAdwaitaUserAgentStyleSheet": "themeAdwaita.css",
     "MeterElementShadowUserAgentStyleSheet": "meterElementShadow.css",
+    "DetailsElementShadowUserAgentStyleSheet": "detailsElementShadow.css",
 }
 
 

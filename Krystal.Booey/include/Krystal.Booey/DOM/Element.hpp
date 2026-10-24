@@ -26,6 +26,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -113,7 +114,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#slotable-name
     DOMString _slottableName;
     /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
-    RefPtr<html::HTMLSlotElement> _assignedSlot;
+    WeakPtr<html::HTMLSlotElement> _assignedSlot;
     /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
 
@@ -718,7 +719,7 @@ namespace krys::boo::dom
 
     /// @brief Whether @p child, a child of the element in the composed tree, gets a renderer when the element
     /// has one.
-    // FIXME: The overrides (details, media, SVG, MathML, ...) come with their renderers.
+    // FIXME: The overrides (media, SVG, MathML, ...) come with their renderers.
     KRYS_NODISCARD virtual bool ChildShouldCreateRenderer(const Node &) const noexcept
     {
       return true;

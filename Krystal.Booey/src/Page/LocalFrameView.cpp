@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/FindRevealAlgorithms.hpp"
 #include "Krystal.Booey/DOM/FragmentDirectiveParser.hpp"
 #include "Krystal.Booey/DOM/FragmentDirectiveRangeFinder.hpp"
 #include "Krystal.Booey/DOM/HighlightRegistry.hpp"
@@ -2418,7 +2419,7 @@ namespace krys::boo
     if (commonAncestor)
     {
       document->SetCSSTarget(&Downcast<dom::Element>(*commonAncestor));
-      // FIXME: Revealing the closed details and hidden=until-found ancestors, with <details> (B4).
+      (void)dom::RevealClosedDetailsAndHiddenUntilFoundAncestors(*commonAncestor);
     }
 
     {
@@ -2559,7 +2560,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Revealing the target's closed details and hidden=until-found ancestors, with <details> (B4).
+    if (anchorElement)
+    {
+      (void)dom::RevealClosedDetailsAndHiddenUntilFoundAncestors(*anchorElement);
+    }
 
     dom::ContainerNode *scrollPositionAnchor = anchorElement.get();
     if (!scrollPositionAnchor)

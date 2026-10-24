@@ -6,6 +6,17 @@
 .links a:hover { color: #ef476f; }
 .links img { display: block; border-radius: 8px; }
 
+.overlays button { margin-right: 6px; }
+.overlays details { margin-bottom: 4px; }
+.overlays summary { cursor: pointer; color: #4f6df5; }
+.overlays a { color: #4f6df5; }
+dialog, [popover] { border: none; border-radius: 12px; padding: 16px 20px; color: #1a2240;
+                    box-shadow: 0 12px 32px rgba(26, 34, 64, 0.25); }
+dialog::backdrop { background: rgba(26, 34, 64, 0.4); }
+[popover="hint"] { background: #1a2240; color: #ffffff; }
+[popover="manual"] { background: #06d6a0; }
+#menu-more { background: #fff4d1; }
+
 .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
 .boxes div { background: #f7f8fb; }
 .boxes div { cursor: crosshair; }

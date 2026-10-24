@@ -769,6 +769,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::Style;
     }
 
+    KRYS_NODISCARD bool IsHTMLSummaryElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Summary;
+    }
+
     KRYS_NODISCARD bool IsHTMLTableElement() const noexcept
     {
       return _interface == HTMLElementInterface::Table;

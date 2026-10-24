@@ -2297,7 +2297,7 @@ namespace krys::boo::dom
     {
       documentElement->InvalidateStyleInternal();
     }
-    if (RefPtr<Element> modalElement = ShareRefPtr<Element>(NodeDocument().ActiveModalDialog()))
+    if (RefPtr<Element> modalElement = ShareRefPtr(NodeDocument().ActiveModalDialog()))
     {
       modalElement->InvalidateStyleInternal();
     }
@@ -2360,6 +2360,7 @@ namespace krys::boo::dom
   RefPtr<html::HTMLElement> Element::TopmostPopoverAncestor(html::HTMLElement *source,
                                                             bool isPopover) noexcept
   {
+    (void)isPopover;
     krys_debug_assert(isPopover || !source);
 
     // The showing auto popovers, then the showing hint popovers.

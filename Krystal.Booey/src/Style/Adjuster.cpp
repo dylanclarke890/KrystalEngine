@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Style/Adjuster.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
@@ -656,8 +657,12 @@ namespace krys::boo::style
         style.SetIsPopoverInvoker();
       }
 
-      // FIXME: `<details>` content auto-reveals in its user agent shadow tree (`detailsAutoExpandEnabled`),
-      // once `<details>` has one.
+      // The detailsAutoExpandEnabled setting is on by default.
+      if (element->IsInUserAgentShadowTree()
+          && element->UserAgentPart() == css::UserAgentParts::DetailsContent())
+      {
+        style.SetAutoRevealsWhenFound();
+      }
 
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
           htmlElement && htmlElement->IsHiddenUntilFound())

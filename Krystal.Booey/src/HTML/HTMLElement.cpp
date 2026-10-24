@@ -139,7 +139,7 @@ namespace krys::boo::html
   void HTMLElement::Hidden(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    if (value == u8"until-found")
+    if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"until-found"))
     {
       dom::ElementAlgorithms::SetAttributeValue(*this, u8"hidden", u8"until-found");
     }

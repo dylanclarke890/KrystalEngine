@@ -1,7 +1,9 @@
 ﻿#include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -103,5 +105,42 @@ namespace krys::boo::dom::tests
     document = nullptr;
     CHECK_FALSE(weak);
     CHECK_FALSE(paragraph);
+  }
+
+  TEST_CASE("Node lifetime: documents with interactive elements are freed", "[DOM][NodeLifetime]")
+  {
+    const auto markup =
+      GENERATE(as<std::string> {}, "<details><summary>S</summary>D</details>", "<details>D</details>",
+               "<details name=a open></details><details name=a></details>", "<summary>S</summary>",
+               "<dialog>D</dialog>", "<dialog closedby=any><form method=dialog></form></dialog>",
+               "<div popover id=p></div><button popovertarget=p>B</button>",
+               "<div popover=hint></div><div popover=manual></div>");
+    CAPTURE(markup);
+    RefPtr<HTMLDocument> document = CreateRef<HTMLDocument>();
+    {
+      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      parser->InputStream().Append(utf8_string(markup.begin(), markup.end()), IsEOF(true));
+      (void)parser->PumpTokenizer();
+    }
+    // The signal slots hold slots whose assignment changed until the microtask checkpoint.
+    html::EventLoop::Current().RunUntilIdle();
+    auto weak = CreateWeakPtr<Document>(&*document);
+    document = nullptr;
+    CHECK_FALSE(weak);
+  }
+
+  TEST_CASE("Node lifetime: a document with slotted nodes is freed", "[DOM][NodeLifetime]")
+  {
+    RefPtr<HTMLDocument> document = DocumentWithTree();
+    {
+      auto &host = *document->DocumentElement()->FirstChild();
+      auto shadow = Downcast<Element>(host).AttachShadow({}).ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*document->CreateElement(u8"slot").ReleaseValue()).HasException());
+      REQUIRE(Downcast<Element>(*host.FirstChild()).AssignedSlot());
+    }
+    html::EventLoop::Current().RunUntilIdle();
+    auto weak = CreateWeakPtr<Document>(&*document);
+    document = nullptr;
+    CHECK_FALSE(weak);
   }
 }

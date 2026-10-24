@@ -63,6 +63,7 @@
 #include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSpanElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCaptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
@@ -119,7 +120,6 @@ namespace krys::boo::html
       case TagName::small:
       case TagName::strong:
       case TagName::sub:
-      case TagName::summary:
       case TagName::sup:
       case TagName::u:
       case TagName::var:
@@ -187,7 +187,7 @@ namespace krys::boo::html
       }
       case TagName::details:
       {
-        return CreateRefPtr<HTMLDetailsElement>(document);
+        return HTMLDetailsElement::Create(document);
       }
       case TagName::dialog:
       {
@@ -357,6 +357,10 @@ namespace krys::boo::html
       case TagName::style:
       {
         return CreateRefPtr<HTMLStyleElement>(document);
+      }
+      case TagName::summary:
+      {
+        return CreateRefPtr<HTMLSummaryElement>(document);
       }
       case TagName::table:
       {

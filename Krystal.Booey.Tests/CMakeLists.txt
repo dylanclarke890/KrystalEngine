@@ -596,6 +596,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLAnchorElement.cpp
+		tests/HTML/HTMLDetailsElement.cpp
 		tests/HTML/HTMLDialogElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp

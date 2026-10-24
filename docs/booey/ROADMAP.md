@@ -397,3 +397,11 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 - **Booey** (the ledger entry is *Popovers* in `docs/booey/PORTING.md`): the `popover` attribute (`auto`, `manual` and `hint`, reflected), `ShowPopover()` (with `source`), `HidePopover()`, `TogglePopover()`, `:popover-open`, the auto and hint stacks (nesting by ancestry and by invoker, the hint stack parent), light dismiss, Escape through the popovers' close watchers, the popover focusing steps and returning the focus, `beforetoggle` and coalesced `toggle`; `popovertarget` and `popovertargetaction` on buttons (`PopoverTargetElement`, element reflection), the trigger and its style bit, popovers in their triggers' focus navigation scopes; dialogs hide the popovers they aren't in. The stacks follow the spec, so `hint` sits beside `auto` and `manual`.
 - **Moved:** the implicit anchor element to B4g; a button's `commandfor` as a popover target to B4f.
 - **Tests:** 3 cases (`tests/HTML/Popover.cpp`).
+
+### B4e as built (2026-10-23)
+
+- **Booey** (the ledger entry is *Details and summary* in `docs/booey/PORTING.md`): `<summary>` (the active summary: activation and Space and Enter toggle its details, focusable and in the tab order, a `list-item` with the disclosure marker), `<details>`' user agent shadow tree (the summary slot with the default summary, the content slot styled by `::details-content` and skipped with `content-visibility: hidden` while closed), coalesced `toggle`, exclusive accordions (`name` groups: opening one closes the others; inserting or joining closes the newcomer), and revealing for fragments and text fragments: closed details open, and `hidden=until-found` elements get `beforematch` and lose `hidden`.
+- **Moved:** auto-expanding for find in page, until Booey has find.
+- **Editor:** dialogs, popovers and details cards on the editor page; the editor opens the dialogs (`data-dialog`) until B4f's commands can.
+- **Fixed:** slots and slottables kept each other, so documents with slotted nodes leaked.
+- **Tests:** 4 cases (`tests/HTML/HTMLDetailsElement.cpp`); 2 lifetime cases (`tests/DOM/NodeLifetime.cpp`); one Krystal.UI case for the editor page's cards.

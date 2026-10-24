@@ -108,6 +108,62 @@
   </div>
 
   <div class="row">
+    <!-- Dialogs: the editor opens them (C++, listening for clicks on buttons with a data-dialog attribute), the
+         first modally: it goes in the top layer over a ::backdrop, takes focus, makes the rest of the page inert
+         and traps Tab. Its form's buttons close it with their values (method="dialog"), Escape closes it, and so
+         does a click outside it (closedby="any"); the editor shows how it closed below. The second isn't modal:
+         the page stays usable, and only its button closes it. -->
+    <div class="card overlays" tabindex="0">
+      <h2>Dialogs</h2>
+      <p><button data-dialog="refill">Refill</button><button data-dialog="tip" data-modeless>Barista's tip</button></p>
+      <p id="dialog-result">No dialog closed yet.</p>
+      <dialog id="refill" closedby="any">
+        <form method="dialog">
+          <h2>Refill your cup?</h2>
+          <p>Escape, or a click outside, closes this without an answer.</p>
+          <p><button value="yes" autofocus>Yes please</button><button value="no">No thanks</button></p>
+        </form>
+      </dialog>
+      <dialog id="tip">
+        <form method="dialog">
+          <p>Warm the cup before you pour.</p>
+          <p><button value="tip read">Got it</button></p>
+        </form>
+      </dialog>
+    </div>
+
+    <!-- Popovers, opened declaratively by their buttons (popovertarget). The menu is an auto popover: Escape, a
+         click outside it or opening another auto popover hides it, and its nested popover keeps it open. The
+         hint is a hint popover: it hides other hints, but leaves the menu open. The toast is manual: only its
+         show and hide buttons change it. -->
+    <div class="card overlays" tabindex="0">
+      <h2>Popovers</h2>
+      <p><button popovertarget="menu">Menu</button><button popovertarget="hint">Hint</button><button
+          popovertarget="toast" popovertargetaction="show">Show toast</button><button popovertarget="toast"
+          popovertargetaction="hide">Hide toast</button></p>
+      <div id="menu" popover>
+        <p>Today's specials</p>
+        <p><button popovertarget="menu-more">More</button><button popovertarget="menu"
+            popovertargetaction="hide">Close</button></p>
+        <div id="menu-more" popover>Pastries arrive at nine.</div>
+      </div>
+      <div id="hint" popover="hint">Hints don't close the menu.</div>
+      <div id="toast" popover="manual">Your order is ready.</div>
+    </div>
+
+    <!-- Details: clicking a summary (or Space or Enter on it) opens or closes its details, and the two
+         questions are an accordion (they share a name), so opening one closes the other. The last has no
+         summary, so it shows the default one; following the link to its hidden text opens it. -->
+    <div class="card overlays" tabindex="0">
+      <h2>Details</h2>
+      <details name="faq" open><summary>Is it fresh?</summary>Roasted this week.</details>
+      <details name="faq"><summary>Is it local?</summary>From down the road.</details>
+      <details><span id="secret">The house blend is half Colombia Huila.</span></details>
+      <p><a href="#secret">The secret</a> opens the last.</p>
+    </div>
+  </div>
+
+  <div class="row">
     <!-- Text: headings, paragraphs and inline boxes. -->
     <div class="card" id="text" tabindex="0" style="flex: 2">
       <h2>Pages in Krystal</h2>

@@ -14,6 +14,9 @@ namespace krys::boo
   KRYS_NODISCARD utf8_string WeekFormatInLDML() noexcept;
   KRYS_NODISCARD utf8_string ResetButtonDefaultLabel() noexcept;
 
+  /// @brief The text of a `details` element's default summary, shown when it has no `summary` child.
+  KRYS_NODISCARD utf8_string DefaultDetailsSummaryText() noexcept;
+
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingText() noexcept;
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingForCheckboxText() noexcept;
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingForFileText() noexcept;
