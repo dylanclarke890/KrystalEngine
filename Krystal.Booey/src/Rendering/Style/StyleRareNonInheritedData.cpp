@@ -78,6 +78,7 @@ namespace krys::boo
         ContentVisibility(static_cast<unsigned>(style::ComputedStyle::InitialContentVisibility())),
         EffectiveBlendMode(static_cast<unsigned>(style::ComputedStyle::InitialBlendMode())),
         Isolation(static_cast<unsigned>(style::ComputedStyle::InitialIsolation())),
+        Overlay(static_cast<unsigned>(style::ComputedStyle::InitialOverlay())),
         InputSecurity(static_cast<unsigned>(style::ComputedStyle::InitialInputSecurity())),
         BreakBefore(static_cast<unsigned>(style::ComputedStyle::InitialBreakBefore())),
         BreakAfter(static_cast<unsigned>(style::ComputedStyle::InitialBreakAfter())),
@@ -129,12 +130,13 @@ namespace krys::boo
         TransformStyleForcedToFlat(o.TransformStyleForcedToFlat), BackfaceVisibility(o.BackfaceVisibility),
         ScrollBehavior(o.ScrollBehavior), TextDecorationStyle(o.TextDecorationStyle),
         TextGroupAlign(o.TextGroupAlign), ContentVisibility(o.ContentVisibility),
-        EffectiveBlendMode(o.EffectiveBlendMode), Isolation(o.Isolation), InputSecurity(o.InputSecurity),
-        BreakBefore(o.BreakBefore), BreakAfter(o.BreakAfter), BreakInside(o.BreakInside),
-        ContainerType(o.ContainerType), TextBoxTrim(o.TextBoxTrim), OverflowAnchor(o.OverflowAnchor),
-        PositionTryOrder(o.PositionTryOrder), PositionVisibility(o.PositionVisibility),
-        FieldSizing(o.FieldSizing), NativeAppearanceDisabled(o.NativeAppearanceDisabled),
-        ScrollbarWidth(o.ScrollbarWidth), UsesAnchorFunctions(o.UsesAnchorFunctions),
+        EffectiveBlendMode(o.EffectiveBlendMode), Isolation(o.Isolation), Overlay(o.Overlay),
+        InputSecurity(o.InputSecurity), BreakBefore(o.BreakBefore), BreakAfter(o.BreakAfter),
+        BreakInside(o.BreakInside), ContainerType(o.ContainerType), TextBoxTrim(o.TextBoxTrim),
+        OverflowAnchor(o.OverflowAnchor), PositionTryOrder(o.PositionTryOrder),
+        PositionVisibility(o.PositionVisibility), FieldSizing(o.FieldSizing),
+        NativeAppearanceDisabled(o.NativeAppearanceDisabled), ScrollbarWidth(o.ScrollbarWidth),
+        UsesAnchorFunctions(o.UsesAnchorFunctions),
         AnchorFunctionScrollCompensatedAxes(o.AnchorFunctionScrollCompensatedAxes),
         IsPopoverInvoker(o.IsPopoverInvoker), UseSVGZoomRulesForLength(o.UseSVGZoomRulesForLength),
         MarginTrim(o.MarginTrim), Contain(o.Contain), OverflowContinue(o.OverflowContinue),
@@ -184,7 +186,7 @@ namespace krys::boo
            && TransformStyleForcedToFlat == o.TransformStyleForcedToFlat
            && BackfaceVisibility == o.BackfaceVisibility && ScrollBehavior == o.ScrollBehavior
            && TextDecorationStyle == o.TextDecorationStyle && TextGroupAlign == o.TextGroupAlign
-           && EffectiveBlendMode == o.EffectiveBlendMode && Isolation == o.Isolation
+           && EffectiveBlendMode == o.EffectiveBlendMode && Isolation == o.Isolation && Overlay == o.Overlay
            && InputSecurity == o.InputSecurity && ContentVisibility == o.ContentVisibility
            && BreakAfter == o.BreakAfter && BreakBefore == o.BreakBefore && BreakInside == o.BreakInside
            && ContainerType == o.ContainerType && TextBoxTrim == o.TextBoxTrim

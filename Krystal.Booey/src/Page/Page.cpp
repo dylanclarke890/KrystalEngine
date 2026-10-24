@@ -197,6 +197,8 @@ namespace krys::boo
 
     LayoutIfNeeded();
 
+    ForEachDocument([](dom::Document &document) { document.ProcessTopLayerRemovals(); });
+
     // FIXME: Resize observations, once there are resize observers.
 
     // https://html.spec.whatwg.org/#focus-fixup-rule

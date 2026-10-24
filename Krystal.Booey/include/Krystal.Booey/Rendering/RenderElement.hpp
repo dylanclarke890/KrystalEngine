@@ -402,6 +402,10 @@ namespace krys::boo
 
     KRYS_NODISCARD RenderLayer *LayerParent() const noexcept;
     KRYS_NODISCARD RenderLayer *LayerNextSibling(RenderLayer &parentLayer) const noexcept;
+
+    /// @brief The renderer of the element's `::backdrop`, while the element is in the top layer.
+    KRYS_NODISCARD RenderBlockFlow *BackdropRenderer() const noexcept;
+    void SetBackdropRenderer(RenderBlockFlow &renderer) noexcept;
     void RemoveLayers() noexcept;
     void MoveLayers(RenderLayer &newParent) noexcept;
 

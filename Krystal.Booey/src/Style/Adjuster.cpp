@@ -383,7 +383,9 @@ namespace krys::boo::style
 
   void Adjuster::AdjustAnimatedStyle(RenderStyle &style, EnumSet<AnimationImpact> impact) const noexcept
   {
-    Adjust(style);
+    // The animated style keeps its overlay, which a transition may hold at auto while the element leaves
+    // the top layer.
+    AdjustInternal(style);
 
     // Set an explicit used z-index in two cases:
     // 1. When the element respects z-index, and the style has an explicit z-index set (for example, the
@@ -400,6 +402,18 @@ namespace krys::boo::style
   }
 
   void Adjuster::Adjust(RenderStyle &style) const noexcept
+  {
+    // The user agent's `* { overlay: none !important }` rule, and its `overlay: auto !important` rule for
+    // each element in the top layer that isn't pending removal.
+    // https://drafts.csswg.org/css-position-4/#overlay
+    auto *element = _element.get();
+    bool inTopLayer = element && element->IsInTopLayer() && !_document->IsPendingTopLayerRemoval(*element);
+    style.SetOverlay(inTopLayer ? Overlay::Auto : Overlay::None);
+
+    AdjustInternal(style);
+  }
+
+  void Adjuster::AdjustInternal(RenderStyle &style) const noexcept
   {
     if (style.Display() == DisplayType::Contents)
     {

@@ -312,12 +312,11 @@ namespace krys::boo
 
       StorePreviousRenderer(element);
 
-      // FIXME: Skipped content in the top layer, once there's a top layer.
       auto mayHaveRenderedDescendants = [&]
       {
         if (element.Renderer())
         {
-          return true;
+          return !(element.IsInTopLayer() && element.Renderer()->IsSkippedContent());
         }
         return element.HasDisplayContents()
                && ShouldCreateRenderer(element, GetRenderTreePosition().Parent());
@@ -417,7 +416,14 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The ::backdrop renderer, writing suggestions and view transitions, once there are any.
+    style::DifferenceResult minimalStyleDifference = style::DifferenceResult::Equal;
+    if (update && update->RecompositeLayer)
+    {
+      minimalStyleDifference = style::DifferenceResult::RecompositeLayer;
+    }
+
+    GetGeneratedContent().UpdateBackdropRenderer(*renderer, minimalStyleDifference);
+    // FIXME: Writing suggestions and view transitions, once there are any.
 
     _builder->UpdateAfterDescendants(*renderer);
 
@@ -445,9 +451,16 @@ namespace krys::boo
 
     auto elementUpdateStyle = RenderStyle::CloneIncludingPseudoElements(*elementUpdate.Style);
 
-    // FIXME: Elements in the top layer whose skipped content changed, once there's a top layer.
-    bool shouldTearDownRenderers = elementUpdate.Changes.Contains(style::Change::Renderer)
-                                   && (element.Renderer() || element.HasDisplayContents());
+    bool shouldTearDownRenderers = [&]
+    {
+      if (element.IsInTopLayer() && elementUpdate.Changes.Contains(style::Change::Inherited)
+          && elementUpdate.Style->IsSkippedRootOrSkippedContent())
+      {
+        return true;
+      }
+      return elementUpdate.Changes.Contains(style::Change::Renderer)
+             && (element.Renderer() || element.HasDisplayContents());
+    }();
 
     if (shouldTearDownRenderers)
     {
@@ -483,8 +496,10 @@ namespace krys::boo
 
     // FIXME: The last remembered size for contain-intrinsic-size, once there's layout.
 
-    // FIXME: Elements in the top layer under skipped content, once there's a top layer.
-    bool shouldCreateNewRenderer = !element.Renderer() && !hasDisplayContentsOrNone;
+    bool shouldCreateNewRenderer =
+      !element.Renderer() && !hasDisplayContentsOrNone
+      && !(element.IsInTopLayer()
+           && GetRenderTreePosition().Parent().Style().IsSkippedRootOrSkippedContent());
     if (shouldCreateNewRenderer)
     {
       // FIXME: Custom style resolve callbacks (willAttachRenderers), once there are any.
@@ -844,7 +859,13 @@ namespace krys::boo
       container->SetNeedsLayoutForOverflowChange();
     };
 
-    // FIXME: Repaint the ::backdrop renderers, once there's a top layer.
+    auto repaintBackdropIfApplicable = [&](RenderElement &renderer)
+    {
+      if (auto *backdropRenderer = renderer.BackdropRenderer())
+      {
+        backdropRenderer->Repaint(RenderObject::ForceRepaint::Yes);
+      }
+    };
 
     auto repaintRoot = [&](RenderElement &destroyRoot)
     {
@@ -875,6 +896,7 @@ namespace krys::boo
     if (destroyRootRenderer)
     {
       repaintRoot(*destroyRootRenderer);
+      repaintBackdropIfApplicable(*destroyRootRenderer);
       markContainingBlockDirty(*destroyRootRenderer);
     }
 
@@ -925,6 +947,7 @@ namespace krys::boo
       {
         renderElement->Repaint();
       }
+      repaintBackdropIfApplicable(*renderElement);
       if (renderElement->IsOutOfFlowPositioned())
       {
         // FIXME: Ideally we would check if containing block is the destory root or a descendent of the
@@ -1012,7 +1035,10 @@ namespace krys::boo
               parent->SetNeedsPreferredWidthsUpdate();
             }
           }
-          // FIXME: The ::backdrop renderer, once there's a top layer.
+          if (auto *backdropRenderer = renderer->BackdropRenderer())
+          {
+            builder.DestroyAndCleanUpAnonymousWrappers(*backdropRenderer, {});
+          }
           builder.DestroyAndCleanUpAnonymousWrappers(*renderer, root.Renderer());
           element.SetRenderer(nullptr);
         }

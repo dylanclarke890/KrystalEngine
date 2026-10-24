@@ -62,6 +62,26 @@ namespace krys::boo::style::interpolation
     return from == ContentVisibility::Hidden ? to : from;
   }
 
+  KRYS_NODISCARD inline Overlay BlendFunc(Overlay from, Overlay to, const Context &context) noexcept
+  {
+    // https://drafts.csswg.org/css-position-4/#overlay
+    // auto is interpolated as a discrete step where values of p such that 0 < p < 1 map to auto and other
+    // values of p map to the closer endpoint.
+    if (from == to)
+    {
+      return from;
+    }
+    if (context.Progress <= 0)
+    {
+      return from;
+    }
+    if (context.Progress >= 1)
+    {
+      return to;
+    }
+    return Overlay::Auto;
+  }
+
   KRYS_NODISCARD inline Visibility BlendFunc(Visibility from, Visibility to, const Context &context) noexcept
   {
     if (context.IsDiscrete)

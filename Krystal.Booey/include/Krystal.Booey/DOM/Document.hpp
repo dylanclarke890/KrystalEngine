@@ -38,6 +38,7 @@
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
@@ -228,6 +229,9 @@ namespace krys::boo::dom
     RefPtr<Node> _sequentialFocusNavigationStartingPoint;
     // The element the URL's fragment indicates, which `:target` matches.
     WeakPtr<Element> _cssTarget;
+    // The top layer, bottom to top, and the elements in it waiting to be removed.
+    ListHashSet<Ref<Element>> _topLayerElements;
+    ListHashSet<Ref<Element>> _topLayerPendingRemovals;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -778,6 +782,43 @@ namespace krys::boo::dom
     /// `<a>` whose `name` is @p name (ASCII case-insensitively in quirks mode); null for an empty name.
     /// @see https://html.spec.whatwg.org/#find-a-potential-indicated-element
     KRYS_NODISCARD Element *FindAnchor(DOMStringView name) const noexcept;
+
+    /// @brief Adds @p element, which mustn't be in it, to the top of the document's top layer. Use
+    /// `Element::AddToTopLayer`, which calls this.
+    /// @see https://drafts.csswg.org/css-position-4/#add-an-element-to-the-top-layer
+    void AddTopLayerElement(Element &element) noexcept;
+
+    /// @brief Removes @p element, which must be in it, from the document's top layer. Use
+    /// `Element::RemoveFromTopLayer`, which calls this.
+    /// @see https://drafts.csswg.org/css-position-4/#remove-an-element-from-the-top-layer-immediately
+    void RemoveTopLayerElement(Element &element) noexcept;
+
+    /// @brief The document's top layer, bottom to top.
+    /// @see https://drafts.csswg.org/css-position-4/#document-top-layer
+    KRYS_NODISCARD const ListHashSet<Ref<Element>> &TopLayerElements() const noexcept
+    {
+      return _topLayerElements;
+    }
+
+    /// @brief Whether the document's top layer has any elements.
+    KRYS_NODISCARD bool HasTopLayerElement() const noexcept
+    {
+      return !_topLayerElements.empty();
+    }
+
+    /// @brief Whether @p element is in the top layer's pending removals: it leaves the top layer once its
+    /// `overlay` is `none` (after any transition of it) or it isn't rendered.
+    /// @see https://drafts.csswg.org/css-position-4/#document-pending-top-layer-removals
+    KRYS_NODISCARD bool IsPendingTopLayerRemoval(const Element &element) const noexcept;
+
+    /// @brief Adds @p element, which must be in the top layer, to its pending removals. Use
+    /// `Element::RequestRemoveFromTopLayer`, which calls this.
+    void AddPendingTopLayerRemoval(Element &element) noexcept;
+
+    /// @brief Removes the elements pending removal whose `overlay` is `none` or that aren't rendered from the
+    /// top layer, in the rendering update.
+    /// @see https://drafts.csswg.org/css-position-4/#process-top-layer-removals
+    void ProcessTopLayerRemovals() noexcept;
 
     /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
     KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;

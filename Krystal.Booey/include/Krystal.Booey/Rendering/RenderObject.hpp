@@ -49,6 +49,7 @@ namespace krys::boo
   class LayoutRect;
   class LayoutSize;
   class RenderBlock;
+  class RenderBlockFlow;
   class RenderBox;
   class RenderElement;
   class RenderLayer;
@@ -1457,7 +1458,8 @@ namespace krys::boo
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
       EnumSet<style::MarginTrimSide> TrimmedMargins;
       bool HasOutlineAutoAncestor {false};
-      // FIXME: Reflections, referenced SVG resources and the ::backdrop renderer, once there are any.
+      // FIXME: Reflections and referenced SVG resources, once there are any.
+      WeakPtr<RenderBlockFlow> BackdropRenderer;
 
       // From RenderBox
       RefPtr<ControlPart> Control;

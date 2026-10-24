@@ -2331,8 +2331,23 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *LayerNextSiblingRespectingTopLayer(const RenderElement &renderer,
                                                                    const RenderLayer &parentLayer) noexcept
     {
-      // FIXME: Top layer renderers follow the top layer's order (topLayerRenderLayers), once there's a top
-      // layer.
+      krys_debug_assert(!dom::IsInTopLayerOrBackdrop(renderer.Style(), renderer.GetElement())
+                        || renderer.HasLayer());
+
+      if (auto *layerModelObject = DynamicDowncast<RenderLayerModelObject>(renderer);
+          layerModelObject && dom::IsInTopLayerOrBackdrop(renderer.Style(), renderer.GetElement()))
+      {
+        krys_debug_assert(layerModelObject->HasLayer());
+        auto topLayerLayers = RenderLayer::TopLayerRenderLayers(renderer.View());
+        auto layerIndex = std::ranges::find(topLayerLayers, layerModelObject->Layer());
+        if (layerIndex != topLayerLayers.end() && layerIndex + 1 != topLayerLayers.end())
+        {
+          return *(layerIndex + 1);
+        }
+
+        return nullptr;
+      }
+
       return FindNextLayer(*renderer.Parent(), parentLayer, &renderer);
     }
 
@@ -2341,9 +2356,20 @@ namespace krys::boo
     {
       if (currentRenderer.HasLayer())
       {
-        // FIXME: Top layer and backdrop renderers go in the view's layer, once there's a top layer.
-        auto *beforeChild = LayerNextSiblingRespectingTopLayer(insertedRenderer, parentLayer);
-        parentLayer.AddChild(*Downcast<RenderLayerModelObject>(currentRenderer).Layer(), beforeChild);
+        auto *layerToUse = &parentLayer;
+        if (dom::IsInTopLayerOrBackdrop(currentRenderer.Style(), currentRenderer.GetElement()))
+        {
+          // The special handling of a toplayer/backdrop content may result in trying to insert the associated
+          // layer twice as we connect subtrees.
+          if (auto *currentParentLayer = Downcast<RenderLayerModelObject>(currentRenderer).Layer()->Parent())
+          {
+            krys_debug_assert(currentParentLayer == currentRenderer.View().Layer());
+            return;
+          }
+          layerToUse = insertedRenderer.View().Layer();
+        }
+        auto *beforeChild = LayerNextSiblingRespectingTopLayer(insertedRenderer, *layerToUse);
+        layerToUse->AddChild(*Downcast<RenderLayerModelObject>(currentRenderer).Layer(), beforeChild);
         return;
       }
 
@@ -2378,7 +2404,10 @@ namespace krys::boo
   {
     if (HasLayer())
     {
-      // FIXME: Top layer and backdrop renderers stay in the view's layer, once there's a top layer.
+      if (dom::IsInTopLayerOrBackdrop(Style(), GetElement()))
+      {
+        return;
+      }
       auto *layer = Downcast<RenderLayerModelObject>(*this).Layer();
       if (auto *layerParent = layer->Parent())
       {
@@ -2396,8 +2425,13 @@ namespace krys::boo
 
   RenderLayer *RenderElement::LayerParent() const noexcept
   {
-    // FIXME: Top layer and backdrop renderers' layers are children of the view's layer, once there's a top
-    // layer.
+    krys_debug_assert(!dom::IsInTopLayerOrBackdrop(Style(), GetElement()) || HasLayer());
+
+    if (HasLayer() && dom::IsInTopLayerOrBackdrop(Style(), GetElement()))
+    {
+      return View().Layer();
+    }
+
     return Parent()->EnclosingLayer();
   }
 
@@ -2405,6 +2439,16 @@ namespace krys::boo
   RenderLayer *RenderElement::LayerNextSibling(RenderLayer &parentLayer) const noexcept
   {
     return LayerNextSiblingRespectingTopLayer(*this, parentLayer);
+  }
+
+  RenderBlockFlow *RenderElement::BackdropRenderer() const noexcept
+  {
+    return HasRareData() ? GetRareData().BackdropRenderer.get() : nullptr;
+  }
+
+  void RenderElement::SetBackdropRenderer(RenderBlockFlow &renderer) noexcept
+  {
+    EnsureRareData().BackdropRenderer = CreateWeakPtr(&renderer);
   }
 
   void RenderElement::InsertedIntoTree() noexcept

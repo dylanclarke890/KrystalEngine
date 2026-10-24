@@ -36,8 +36,7 @@ namespace krys::boo
   class RenderView;
 
   /// @brief Applies a style update to the render tree.
-  // FIXME: The renderers of generated content, ::marker, ::backdrop, the top layer and layout come with the
-  // rest of the render tree.
+  // FIXME: The renderers of generated content, ::marker and layout come with the rest of the render tree.
   class RenderTreeUpdater
   {
     KRYS_NON_COPY_MOVABLE(RenderTreeUpdater);

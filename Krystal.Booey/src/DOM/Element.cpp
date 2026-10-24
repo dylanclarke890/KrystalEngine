@@ -2189,11 +2189,115 @@ namespace krys::boo::dom
 
 #pragma endregion
 
-  bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *) noexcept
+#pragma region Top Layer
+
+  namespace
   {
-    // FIXME: Whether the element is in the top layer (modal dialogs, popovers, fullscreen), once there's a
-    // top layer.
-    return style.GetPseudoElementType() == PseudoElementType::Backdrop;
+    template <typename TFunction>
+    void ForEachRenderLayer(Element &element, const TFunction &function) noexcept
+    {
+      auto *layerModelObject = DynamicDowncast<RenderLayerModelObject>(element.Renderer());
+      if (!layerModelObject)
+      {
+        return;
+      }
+
+      // FIXME: The layers of the renderer's continuations (forRendererAndContinuations), once there are
+      // continuations.
+      if (layerModelObject->HasLayer())
+      {
+        function(*layerModelObject->Layer());
+      }
+    }
+  }
+
+  void Element::AddToTopLayer() noexcept
+  {
+    if (IsInTopLayer())
+    {
+      krys_assert(NodeDocument().IsPendingTopLayerRemoval(*this));
+      RemoveFromTopLayer();
+    }
+    krys_assert(IsConnected());
+
+    ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerWillChange(); });
+
+    Ref<Document> document = ShareRef(NodeDocument());
+    document->AddTopLayerElement(*this);
+    SetEventTargetFlag(EventTargetFlags::IsInTopLayer);
+
+    // FIXME: Scheduling a content relevancy update (ContentRelevancy::IsInTopLayer), once content relevancy
+    // is computed.
+
+    // Invalidate inert state
+    InvalidateStyleInternal();
+    if (RefPtr<Element> documentElement = document->DocumentElement())
+    {
+      documentElement->InvalidateStyleInternal();
+    }
+
+    ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerDidChange(); });
+  }
+
+  void Element::RequestRemoveFromTopLayer() noexcept
+  {
+    auto &document = NodeDocument();
+    if (!IsInTopLayer() || document.IsPendingTopLayerRemoval(*this))
+    {
+      return;
+    }
+
+    document.AddPendingTopLayerRemoval(*this);
+    // The overlay: auto rule no longer applies.
+    InvalidateStyleInternal();
+  }
+
+  void Element::RemoveFromTopLayer() noexcept
+  {
+    krys_assert(IsInTopLayer());
+
+    ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerWillChange(); });
+
+    // We need to call Styleable::FromRenderer() while this element is still contained in
+    // Document::TopLayerElements(), since Styleable::FromRenderer() relies on this to
+    // find the backdrop's associated element.
+    if (auto *renderer = Renderer())
+    {
+      if (auto *backdrop = renderer->BackdropRenderer())
+      {
+        if (auto styleable = style::Styleable::FromRenderer(*backdrop))
+        {
+          styleable->CancelStyleOriginatedAnimations();
+        }
+      }
+    }
+
+    // Unable to protect the document as it may have started destruction.
+    NodeDocument().RemoveTopLayerElement(*this);
+    ClearEventTargetFlag(EventTargetFlags::IsInTopLayer);
+
+    // FIXME: Scheduling a content relevancy update (ContentRelevancy::IsInTopLayer), once content relevancy
+    // is computed.
+
+    // Invalidate inert state
+    InvalidateStyleInternal();
+    if (RefPtr<Element> documentElement = NodeDocument().DocumentElement())
+    {
+      documentElement->InvalidateStyleInternal();
+    }
+    // FIXME: Invalidating the active modal dialog's style, with dialogs (B4c).
+
+    ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerDidChange(); });
+  }
+
+#pragma endregion
+
+  bool IsInTopLayerOrBackdrop(const RenderStyle &style, const Element *element) noexcept
+  {
+    // Elements in the top layer are rendered there while their overlay is auto.
+    // https://drafts.csswg.org/css-position-4/#rendered-in-the-top-layer
+    return (element && element->IsInTopLayer() && style.GetOverlay() == Overlay::Auto)
+           || style.GetPseudoElementType() == PseudoElementType::Backdrop;
   }
 
   namespace

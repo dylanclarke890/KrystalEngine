@@ -1082,6 +1082,33 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Top Layer
+
+    /// @brief Whether the element is in its document's top layer.
+    /// @see https://drafts.csswg.org/css-position-4/#in-top-layer
+    KRYS_NODISCARD bool IsInTopLayer() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlags::IsInTopLayer);
+    }
+
+    /// @brief Adds the element, which must be connected, to the top of its document's top layer, where it's
+    /// rendered above the rest of the document with its `::backdrop`. An element that's leaving the top layer
+    /// is moved to the top; otherwise it mustn't be in it already.
+    /// @see https://drafts.csswg.org/css-position-4/#add-an-element-to-the-top-layer
+    void AddToTopLayer() noexcept;
+
+    /// @brief Asks for the element to leave its document's top layer: it stays rendered there until its
+    /// `overlay` (which then computes to `none`) stops being `auto`, so a transition on `overlay` can keep it
+    /// there while it animates out. Nothing happens if it isn't in the top layer or is already leaving.
+    /// @see https://drafts.csswg.org/css-position-4/#request-an-element-to-be-removed-from-the-top-layer
+    void RequestRemoveFromTopLayer() noexcept;
+
+    /// @brief Removes the element, which must be in it, from its document's top layer at once.
+    /// @see https://drafts.csswg.org/css-position-4/#remove-an-element-from-the-top-layer-immediately
+    void RemoveFromTopLayer() noexcept;
+
+#pragma endregion
+
 #pragma region User Action State
 
     /// @brief Whether the element has user action state in its document (`Document::UserActionElements`).

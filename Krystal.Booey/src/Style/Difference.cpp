@@ -306,6 +306,12 @@ namespace krys::boo::style
       return true;
     }
 
+    // Whether an element in the top layer is rendered there changes its position and its layer's parent.
+    if (a.Overlay != b.Overlay)
+    {
+      return true;
+    }
+
     if (a.Isolation != b.Isolation)
     {
       // Ideally this would trigger a cheaper layout that just updates layer z-order trees

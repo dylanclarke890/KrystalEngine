@@ -136,7 +136,8 @@ namespace krys::boo::dom
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
-    bool wasInTreeScope = removedNode.IsConnected() || removedNode.IsInShadowTree();
+    bool wasConnected = removedNode.IsConnected();
+    bool wasInTreeScope = wasConnected || removedNode.IsInShadowTree();
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
@@ -146,6 +147,20 @@ namespace krys::boo::dom
       element->SetSavedLayerScrollPosition({});
       element->ClearBeforePseudoElement();
       element->ClearAfterPseudoElement();
+
+      if (wasConnected)
+      {
+        if (element->IsInTopLayer()) KRYS_UNLIKELY
+        {
+          element->RemoveFromTopLayer();
+        }
+
+        auto &oldDocument = element->NodeDocument();
+        if (oldDocument.CSSTarget() == element)
+        {
+          oldDocument.SetCSSTarget(nullptr);
+        }
+      }
     }
 
     // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of

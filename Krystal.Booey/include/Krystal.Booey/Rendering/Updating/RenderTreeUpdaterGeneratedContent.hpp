@@ -8,12 +8,12 @@
 namespace krys::boo
 {
   enum class PseudoElementType : uint8;
+  class RenderElement;
   class RenderQuote;
 
   /// @brief Updates the `::before` and `::after` pseudo-elements of the elements being updated, their content
   /// renderers, and the quotes and counters.
-  // FIXME: Image content (RenderImage), ::backdrop and writing suggestions come with images, the top layer
-  // and editing.
+  // FIXME: Image content (RenderImage) and writing suggestions come with images and editing.
   class RenderTreeUpdater::GeneratedContent
   {
     KRYS_NON_COPY_MOVABLE(GeneratedContent);
@@ -28,6 +28,8 @@ namespace krys::boo
     void UpdateBeforeOrAfterPseudoElement(dom::Element &current, const style::ElementUpdate &elementUpdate,
                                           PseudoElementType pseudoElementType) noexcept;
     void UpdateRemainingQuotes() noexcept;
+    void UpdateBackdropRenderer(RenderElement &renderer,
+                                style::DifferenceResult minimalStyleDifference) noexcept;
     void UpdateCounters() noexcept;
 
     static void RemoveBeforePseudoElement(dom::Element &element, RenderTreeBuilder &builder) noexcept;

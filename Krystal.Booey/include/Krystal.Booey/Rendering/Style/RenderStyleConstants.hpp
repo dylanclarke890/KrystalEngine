@@ -825,6 +825,13 @@ namespace krys::boo
     Isolate
   };
 
+  /// @see https://drafts.csswg.org/css-position-4/#overlay
+  enum class Overlay : bool
+  {
+    None,
+    Auto
+  };
+
   // Fill, Stroke, ViewBox are just used for SVG.
   enum class CSSBoxType : uint8
   {

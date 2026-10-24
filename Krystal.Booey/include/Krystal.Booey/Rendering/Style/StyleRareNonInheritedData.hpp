@@ -204,6 +204,7 @@ namespace krys::boo
     unsigned ContentVisibility : 2;
     unsigned EffectiveBlendMode : 5;
     unsigned Isolation : 1;
+    unsigned Overlay : 1;
     unsigned InputSecurity : 1;
     unsigned BreakBefore : 4;
     unsigned BreakAfter : 4;

@@ -1033,7 +1033,7 @@ namespace krys::boo
   static bool CanCreateStackingContext(const RenderLayer &layer) noexcept
   {
     const auto &renderer = layer.Renderer();
-    // FIXME: View transition captures and the top layer, once there are any.
+    // FIXME: View transition captures, once there are any.
     return renderer.HasTransformRelatedProperty() || renderer.HasClipPath() || renderer.HasFilter()
            || renderer.HasMask() || renderer.HasBackdropFilter() || renderer.HasBlendMode()
            || renderer.IsTransparent() || renderer.RequiresRenderingConsolidationForViewTransition()
@@ -1041,7 +1041,7 @@ namespace krys::boo
                                       // explicit z-index.
            || renderer.Style().HasIsolation() || renderer.ShouldApplyPaintContainment()
            || !renderer.Style().UsedZIndex().IsAuto()
-           || renderer.Style().GetWillChange().CanCreateStackingContext();
+           || renderer.Style().GetWillChange().CanCreateStackingContext() || layer.EstablishesTopLayer();
   }
 
   bool RenderLayer::ShouldBeNormalFlowOnly() const noexcept
@@ -1153,7 +1153,7 @@ namespace krys::boo
     }
     _zOrderListsDirty = true;
 
-    // FIXME: The top layer, once there's a top layer.
+    // FIXME: Ideally, we'd only dirty if the lists changed.
     if (HasCompositingDescendant())
     {
       SetNeedsCompositingPaintOrderChildrenUpdate();
@@ -1329,8 +1329,21 @@ namespace krys::boo
       negZOrderList->shrink_to_fit();
     }
 
-    // FIXME: The top layer's layers and the view transition containing block go last in the view's list, once
-    // there's a top layer and view transitions.
+    if (IsRenderViewLayer() && Renderer().GetDocument().HasTopLayerElement())
+    {
+      auto topLayerLayers = TopLayerRenderLayers(Renderer().View());
+      if (!topLayerLayers.empty())
+      {
+        if (!posZOrderList)
+        {
+          posZOrderList = CreateUnique<List<RenderLayer *>>();
+        }
+        posZOrderList->insert(posZOrderList->end(), topLayerLayers.begin(), topLayerLayers.end());
+      }
+    }
+
+    // FIXME: The view transition containing block goes last in the view's list, once there are view
+    // transitions.
   }
 
   void RenderLayer::RemoveSelfFromCompositor() noexcept
@@ -1381,8 +1394,12 @@ namespace krys::boo
                                   EnumSet<Compositing> &accumulatedDirtyFlags) noexcept
   {
     krys_debug_assert(!DescendantDependentFlagsAreDirty());
-    // FIXME: Layers that establish the top layer and the view transition containing block are collected by
-    // the view, once there are any.
+    // FIXME: The view transition containing block is collected by the view too, once there are view
+    // transitions.
+    if (EstablishesTopLayer())
+    {
+      return;
+    }
 
     bool isStacking = IsStackingContext();
     bool layerOrDescendantsAreVisible = _hasVisibleContent || _alwaysIncludedInZOrderLists
@@ -3381,9 +3398,14 @@ namespace krys::boo
     return true;
   }
 
-  static bool IsContainerForPositioned(RenderLayer &layer, PositionType position) noexcept
+  static bool IsContainerForPositioned(RenderLayer &layer, PositionType position,
+                                       bool establishesTopLayer) noexcept
   {
-    // FIXME: The top layer's container is the view's layer, once there's a top layer.
+    if (establishesTopLayer)
+    {
+      return layer.IsRenderViewLayer();
+    }
+
     switch (position)
     {
       case PositionType::Fixed:    return layer.Renderer().CanContainFixedPositionObjects();
@@ -3423,11 +3445,12 @@ namespace krys::boo
   RenderLayer *RenderLayer::EnclosingAncestorForPosition(PositionType position) const noexcept
   {
     auto *curr = Parent();
-    while (curr && !IsContainerForPositioned(*curr, position))
+    while (curr && !IsContainerForPositioned(*curr, position, EstablishesTopLayer()))
     {
       curr = curr->Parent();
     }
 
+    krys_debug_assert(!EstablishesTopLayer() || !curr || curr == Renderer().View().Layer());
     return curr;
   }
 
@@ -3554,7 +3577,7 @@ namespace krys::boo
           foundAncestor = true;
         }
 
-        if (IsContainerForPositioned(*currLayer, PositionType::Fixed))
+        if (IsContainerForPositioned(*currLayer, PositionType::Fixed, layer->EstablishesTopLayer()))
         {
           fixedPositionContainerLayer = currLayer;
           // A layer that has a transform-related property but not a
@@ -3591,7 +3614,7 @@ namespace krys::boo
         // RenderFragmentedFlow is a positioned container, child of RenderView, positioned at (0,0).
         // This implies that, for out-of-flow positioned elements inside a RenderFragmentedFlow,
         // we are bailing out before reaching root layer.
-        if (IsContainerForPositioned(*parentLayer, position))
+        if (IsContainerForPositioned(*parentLayer, position, layer->EstablishesTopLayer()))
         {
           break;
         }
@@ -6380,6 +6403,60 @@ namespace krys::boo
       }
     }
     return nullptr;
+  }
+
+  List<RenderLayer *> RenderLayer::TopLayerRenderLayers(const RenderView &renderView) noexcept
+  {
+    List<RenderLayer *> layers;
+    for (auto &element : renderView.GetDocument().TopLayerElements())
+    {
+      auto *renderer = element->Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+
+      auto *backdropRenderer = renderer->BackdropRenderer();
+      if (backdropRenderer && backdropRenderer->HasLayer() && backdropRenderer->Layer()->Parent())
+      {
+        layers.push_back(backdropRenderer->Layer());
+      }
+
+      if (renderer->HasLayer())
+      {
+        auto &modelObject = Downcast<RenderLayerModelObject>(*renderer);
+        if (modelObject.Layer()->Parent())
+        {
+          layers.push_back(modelObject.Layer());
+        }
+      }
+    }
+    return layers;
+  }
+
+  bool RenderLayer::EstablishesTopLayer() const noexcept
+  {
+    return dom::IsInTopLayerOrBackdrop(Renderer().Style(), Renderer().GetElement());
+  }
+
+  void RenderLayer::EstablishesTopLayerWillChange() noexcept
+  {
+    Compositor().EstablishesTopLayerWillChangeForLayer(*this);
+
+    if (auto *parentLayer = Parent())
+    {
+      parentLayer->RemoveChild(*this);
+    }
+  }
+
+  void RenderLayer::EstablishesTopLayerDidChange() noexcept
+  {
+    if (auto *parentLayer = Renderer().LayerParent())
+    {
+      (void)SetIsNormalFlowOnly(ShouldBeNormalFlowOnly());
+      auto *beforeChild = Renderer().LayerNextSibling(*parentLayer);
+      parentLayer->AddChild(*this, beforeChild);
+    }
   }
 
   Ref<HitTestingTransformState> RenderLayer::CreateLocalTransformState(

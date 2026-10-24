@@ -193,8 +193,16 @@ namespace krys::boo::dom
     {
       _fontLoader->StopLoadingAndClearFonts();
     }
-    // FIXME: The title element, the parser, the selection, top layer, form controller, markers and CSS canvas
-    // elements, once there are any.
+    // FIXME: The title element, the parser, the selection, form controller, markers and CSS canvas elements,
+    // once there are any.
+
+    // The children are detached without their removing steps, so the elements in the top layer leave it
+    // first.
+    while (!_topLayerElements.empty())
+    {
+      Ref<Element> element = _topLayerElements.last();
+      element->RemoveFromTopLayer();
+    }
 
     RemoveDetachedChildren();
 
@@ -1432,6 +1440,54 @@ namespace krys::boo::dom
       newInvalidation.emplace(*newTarget, css::SelectorPseudoClass::Target, true);
     }
     _cssTarget = CreateWeakPtr(newTarget);
+  }
+
+  void Document::AddTopLayerElement(Element &element) noexcept
+  {
+    krys_assert(&element.NodeDocument() == this && !element.IsInTopLayer());
+    KRYS_MAYBE_UNUSED auto result = _topLayerElements.add(ShareRef(element));
+    krys_assert(result.second);
+    // FIXME: The auto popover list, with popovers (B4d).
+  }
+
+  void Document::RemoveTopLayerElement(Element &element) noexcept
+  {
+    krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
+    Ref<Element> protectedElement = ShareRef(element);
+    _topLayerPendingRemovals.remove(protectedElement);
+    KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.remove(protectedElement);
+    krys_assert(didRemove);
+    // FIXME: The auto popover list, with popovers (B4d).
+  }
+
+  bool Document::IsPendingTopLayerRemoval(const Element &element) const noexcept
+  {
+    return element.IsInTopLayer()
+           && _topLayerPendingRemovals.contains(ShareRef(const_cast<Element &>(element)));
+  }
+
+  void Document::AddPendingTopLayerRemoval(Element &element) noexcept
+  {
+    krys_assert(&element.NodeDocument() == this && element.IsInTopLayer());
+    (void)_topLayerPendingRemovals.add(ShareRef(element));
+  }
+
+  void Document::ProcessTopLayerRemovals() noexcept
+  {
+    List<Ref<Element>> pendingRemovals {_topLayerPendingRemovals.begin(), _topLayerPendingRemovals.end()};
+    for (auto &element : pendingRemovals)
+    {
+      if (!element->IsInTopLayer() || !IsPendingTopLayerRemoval(*element))
+      {
+        continue;
+      }
+
+      auto *renderer = element->Renderer();
+      if (!renderer || renderer->Style().GetOverlay() == Overlay::None)
+      {
+        element->RemoveFromTopLayer();
+      }
+    }
   }
 
   Element *Document::FindAnchor(DOMStringView name) const noexcept

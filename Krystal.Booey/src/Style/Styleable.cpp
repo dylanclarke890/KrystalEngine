@@ -59,9 +59,17 @@ namespace krys::boo::style
           }
         }
         break;
+      case PseudoElementType::Backdrop:
+        for (auto &topLayerElement : renderer.GetDocument().TopLayerElements())
+        {
+          if (topLayerElement->Renderer() && topLayerElement->Renderer()->BackdropRenderer() == &renderer)
+          {
+            return Styleable(*topLayerElement, style::PseudoElementIdentifier {PseudoElementType::Backdrop});
+          }
+        }
+        break;
       default:
-        // FIXME: The ::backdrop renderer and the view transition pseudo-elements' renderers, once there are
-        // those.
+        // FIXME: The view transition pseudo-elements' renderers, once there are those.
         return null;
     }
 
@@ -195,9 +203,14 @@ namespace krys::boo::style
           }
         }
         break;
+      case PseudoElementType::Backdrop:
+        if (auto *hostRenderer = Element.Renderer())
+        {
+          return hostRenderer->BackdropRenderer();
+        }
+        break;
       default:
-        // FIXME: The ::backdrop renderer and the view transition pseudo-elements' renderers, once there are
-        // those.
+        // FIXME: The view transition pseudo-elements' renderers, once there are those.
         break;
     }
 

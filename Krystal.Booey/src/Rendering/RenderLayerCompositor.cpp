@@ -2095,7 +2095,10 @@ namespace krys::boo
     void ClearBackingSharingWithinStackingContext(RenderLayer &stackingContextRoot,
                                                   RenderLayer &curLayer) noexcept
     {
-      // FIXME: Layers that establish the top layer, once there's a top layer.
+      if (curLayer.EstablishesTopLayer())
+      {
+        return;
+      }
 
       if (&curLayer != &stackingContextRoot && curLayer.IsStackingContext())
       {

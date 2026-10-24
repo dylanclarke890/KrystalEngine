@@ -561,6 +561,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/NodeLifetime.cpp
 		tests/DOM/Position.cpp
 		tests/DOM/SimpleRange.cpp
+		tests/DOM/TopLayer.cpp
 		tests/Editing/TextIterator.cpp
 		tests/Editing/VisiblePosition.cpp
 		tests/Editing/VisibleSelection.cpp

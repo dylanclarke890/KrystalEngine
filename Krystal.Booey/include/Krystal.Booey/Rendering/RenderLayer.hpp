@@ -1085,6 +1085,16 @@ namespace krys::boo
     /// @brief The nearest element of the layer's renderer or its ancestors.
     KRYS_NODISCARD dom::Element *EnclosingElement() const noexcept;
 
+    /// @brief The layers of the top layer's elements and their `::backdrop`s, bottom to top, which the view's
+    /// layer paints above everything else.
+    KRYS_NODISCARD static List<RenderLayer *> TopLayerRenderLayers(const RenderView &renderView) noexcept;
+
+    /// @brief Whether the layer's renderer is in the top layer or is a `::backdrop`; its layer is then a
+    /// child of the view's layer.
+    KRYS_NODISCARD bool EstablishesTopLayer() const noexcept;
+    void EstablishesTopLayerWillChange() noexcept;
+    void EstablishesTopLayerDidChange() noexcept;
+
 #pragma endregion
 
 #pragma region Painting

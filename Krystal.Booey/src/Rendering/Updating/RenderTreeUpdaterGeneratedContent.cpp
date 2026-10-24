@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderQuote.hpp"
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -293,6 +295,46 @@ namespace krys::boo
       }
     }
     _updater._builder->UpdateAfterDescendants(*pseudoElementRenderer);
+  }
+
+  void RenderTreeUpdater::GeneratedContent::UpdateBackdropRenderer(
+    RenderElement &renderer, style::DifferenceResult minimalStyleDifference) noexcept
+  {
+    auto destroyBackdropIfNeeded = [&renderer, this]
+    {
+      if (auto *backdropRenderer = renderer.BackdropRenderer())
+      {
+        _updater._builder->Destroy(*backdropRenderer);
+      }
+    };
+
+    // Intentionally bail out early here to avoid computing the style.
+    if (!renderer.GetElement() || !renderer.GetElement()->IsInTopLayer())
+    {
+      destroyBackdropIfNeeded();
+      return;
+    }
+
+    const auto *style = renderer.GetCachedPseudoStyle({PseudoElementType::Backdrop}, &renderer.Style());
+    if (!style || style->Display() == DisplayType::None)
+    {
+      destroyBackdropIfNeeded();
+      return;
+    }
+
+    auto newStyle = RenderStyle::Clone(*style);
+    if (auto *backdropRenderer = renderer.BackdropRenderer())
+    {
+      backdropRenderer->SetStyle(krys::move(newStyle), minimalStyleDifference);
+    }
+    else
+    {
+      auto newBackdropRenderer = boo::CreateRenderer<RenderBlockFlow>(
+        RenderObject::Type::BlockFlow, renderer.GetDocument(), krys::move(newStyle));
+      newBackdropRenderer->InitializeStyle();
+      renderer.SetBackdropRenderer(*newBackdropRenderer.get());
+      _updater._builder->Attach(renderer.View(), krys::move(newBackdropRenderer));
+    }
   }
 
   bool RenderTreeUpdater::GeneratedContent::NeedsPseudoElement(const RenderStyle *style) noexcept

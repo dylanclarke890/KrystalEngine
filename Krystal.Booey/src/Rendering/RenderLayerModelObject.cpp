@@ -35,6 +35,7 @@ namespace krys::boo
     bool s_hadLayer = false;
     bool s_wasTransformed = false;
     bool s_layerWasSelfPainting = false;
+    bool s_establishesTopLayerChanged = false;
   }
 
   // Do not add any code in below destructor. Add it to willBeDestroyed() instead.
@@ -80,6 +81,16 @@ namespace krys::boo
     }
 
     const auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+
+    // Whether the element is rendered in the top layer follows its overlay, so its layer moves to or from the
+    // view's layer as its style changes.
+    s_establishesTopLayerChanged = s_hadLayer && oldStyle && Layer()->Parent()
+                                   && dom::IsInTopLayerOrBackdrop(*oldStyle, GetElement())
+                                        != dom::IsInTopLayerOrBackdrop(newStyle, GetElement());
+    if (s_establishesTopLayerChanged)
+    {
+      Layer()->EstablishesTopLayerWillChange();
+    }
     if (diff == style::DifferenceResult::RepaintLayer && Parent() && oldStyle
         && oldStyle->GetClip() != newStyle.GetClip())
     {
@@ -121,6 +132,11 @@ namespace krys::boo
         && ((oldStyle->IsOriginalDisplayBlockType()) || (oldStyle->IsOriginalDisplayInlineType())))
     {
       Parent()->SetChildNeedsLayout();
+    }
+
+    if (s_establishesTopLayerChanged && HasLayer() && !Layer()->Parent())
+    {
+      Layer()->EstablishesTopLayerDidChange();
     }
 
     if (RequiresLayer())

@@ -2384,7 +2384,21 @@ namespace krys::boo
       switch (*type)
       {
         case PseudoElementType::Backdrop:
-          // FIXME: ::backdrop hit tests to the element that generated it, which comes with the top layer.
+          // If we're a ::backdrop pseudo-element, we should hit-test to the element that generated it.
+          // This matches the behavior that other browsers have.
+          for (auto &element : GetDocument().TopLayerElements())
+          {
+            if (!element->Renderer())
+            {
+              continue;
+            }
+            krys_debug_assert(element->Renderer()->BackdropRenderer());
+            if (element->Renderer()->BackdropRenderer() == this)
+            {
+              return element.get();
+            }
+          }
+          krys_debug_assert(false);
           break;
 
         case PseudoElementType::ViewTransition:

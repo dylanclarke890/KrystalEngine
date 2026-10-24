@@ -9205,6 +9205,23 @@
         "url": "https://www.w3.org/TR/css-contain-2/#content-visibility"
       }
     },
+    "overlay": {
+      "animation-type": "see prose",
+      "initial": "none",
+      "values": ["none", "auto"],
+      "codegen-properties": {
+        "animation-wrapper": "NonNormalizedDiscreteWrapper<Overlay>",
+        "animation-wrapper-requires-non-normalized-discrete-interpolation": true,
+        "render-style-storage-path": ["_nonInheritedData", "rareData"],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "Overlay",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-position-4",
+        "url": "https://drafts.csswg.org/css-position-4/#overlay"
+      }
+    },
     "backface-visibility": {
       "animation-type": "discrete",
       "initial": "visible",

@@ -59,6 +59,7 @@ namespace krys::boo::style
       RestoreUsedDocumentElementStyleToComputed(const RenderStyle &style) noexcept;
 
   private:
+    void AdjustInternal(RenderStyle &style) const noexcept;
     void AdjustDisplayContentsStyle(RenderStyle &style) const noexcept;
 
     void AdjustThemeStyle(RenderStyle &style, const RenderStyle &parentStyle) const noexcept;

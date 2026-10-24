@@ -433,8 +433,7 @@ namespace krys::boo::style
       return null;
     }
 
-    // FIXME: ::backdrop applies to elements in the top layer, once there is a top layer.
-    if (pseudoElementIdentifier.Type == PseudoElementType::Backdrop)
+    if (pseudoElementIdentifier.Type == PseudoElementType::Backdrop && !element.IsInTopLayer())
     {
       return null;
     }
