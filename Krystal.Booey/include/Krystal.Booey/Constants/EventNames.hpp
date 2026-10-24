@@ -79,6 +79,9 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview TransitionRun = u8"transitionrun";
   constexpr utf8_stringview TransitionStart = u8"transitionstart";
   constexpr utf8_stringview Cancel = u8"cancel";
+  constexpr utf8_stringview Close = u8"close";
+  constexpr utf8_stringview Toggle = u8"toggle";
+  constexpr utf8_stringview Command = u8"command";
   constexpr utf8_stringview Finish = u8"finish";
   constexpr utf8_stringview Remove = u8"remove";
 

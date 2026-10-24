@@ -341,6 +341,16 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsToggleEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCommandEvent() const noexcept
+    {
+      return false;
+    }
+
 #pragma endregion
 
   protected:

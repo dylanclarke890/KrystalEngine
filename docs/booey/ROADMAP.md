@@ -379,3 +379,15 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 - **Booey** (the ledger entry is *The top layer* in `docs/booey/PORTING.md`): the document's top layer (`Element::AddToTopLayer`, `RemoveFromTopLayer`, `RequestRemoveFromTopLayer`), left by elements as they're disconnected; its elements are positioned in the viewport (`position` other than `fixed` computes to `absolute`), and their layers and their `::backdrop`s' are the view's last, above any `z-index`; a `::backdrop` hit tests to its element. The `overlay` property (decision 3, from the spec: upstream has none) is set only by the user agent, `auto` while an element is in the top layer; a removal that's requested waits until `overlay` is `none`, so `transition: overlay 1s allow-discrete` keeps an element rendered in the top layer while it animates out.
 - **Moved:** inertness and `:modal` to B4c, with dialogs.
 - **Tests:** 3 cases (`tests/DOM/TopLayer.cpp`).
+
+### B4b as built (2026-10-23)
+
+- **Booey** (the ledger entry is *Close watchers and toggle events* in `docs/booey/PORTING.md`): `html::CloseWatcher`, made from C++ with `CloseWatcher::Create(document, {.Signal = ...})`, with `cancel` and `close` events (and `oncancel`, `onclose`); the window's `CloseWatcherManager` groups watchers by user activation, and Escape asks the last group to close, newest first. `ToggleEvent` (with `source`), the coalescing `ToggleEventTask` and `CommandEvent` are ready for B4c to B4f.
+- **Krystal.UI:** nothing new; Escape already reaches the page as a key event.
+- **Tests:** 3 cases (`tests/HTML/CloseWatcher/CloseWatcher.cpp`, `tests/DOM/ToggleEvent.cpp`).
+
+### B4c as built (2026-10-23)
+
+- **Booey** (the ledger entry is *Dialogs* in `docs/booey/PORTING.md`): `<dialog>`'s `Show()`, `ShowModal()` (in the top layer, blocking the document: everything outside it is inert, `:modal` matches), `Close()`, `RequestClose()`, `returnValue`, `closedby` and light dismiss, the dialog focusing steps and restoring the focus, `beforetoggle` and coalesced `toggle`, `cancel` and `close`, `method=dialog` forms. Dialogs register with close watchers as the spec has them, so close watchers moved to the spec's model (cancel and close actions, an enabled state; the page's `requestClose()` can always be canceled).
+- **Moved:** the dialog commands to B4f; hiding popovers as a dialog shows to B4d.
+- **Tests:** 3 cases (`tests/HTML/HTMLDialogElement.cpp`), and close watcher cases updated.

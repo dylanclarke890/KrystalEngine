@@ -37,6 +37,7 @@ namespace krys::boo::dom
 
 namespace krys::boo::html
 {
+  class CloseWatcherManager;
   class CustomElementRegistry;
 }
 
@@ -87,6 +88,7 @@ namespace krys::boo
     mutable RefPtr<boo::Location> _location;
     mutable RefPtr<boo::History> _history;
     mutable RefPtr<boo::Navigation> _navigation;
+    mutable RefPtr<html::CloseWatcherManager> _closeWatcherManager;
     RefPtr<Storage> _sessionStorage;
     RefPtr<Storage> _localStorage;
     mutable RefPtr<Screen> _screen;
@@ -168,6 +170,13 @@ namespace krys::boo
 
     /// @brief The window's `Navigation`, if it was made.
     KRYS_NODISCARD boo::Navigation *NavigationIfExists() const noexcept;
+
+    /// @brief The window's close watchers.
+    /// @see https://html.spec.whatwg.org/#close-watcher-manager
+    KRYS_NODISCARD html::CloseWatcherManager &GetCloseWatcherManager() const noexcept;
+
+    /// @brief The window's close watcher manager, if it was made.
+    KRYS_NODISCARD html::CloseWatcherManager *CloseWatcherManagerIfExists() const noexcept;
 
     /// @brief The frame's name (its navigable's target name), which links and forms can target.
     /// @see https://html.spec.whatwg.org/#dom-name

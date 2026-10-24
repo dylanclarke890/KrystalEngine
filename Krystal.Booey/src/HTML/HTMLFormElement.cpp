@@ -589,10 +589,24 @@ namespace krys::boo::html
   void HTMLFormElement::SubmitDialog(Ref<FormSubmission> &&formSubmission) noexcept
   {
     // Let subject be the nearest ancestor dialog element of form, if any.
+    RefPtr<HTMLDialogElement> dialog;
+    for (auto *ancestor = ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+    {
+      if (auto *candidate = DynamicDowncast<HTMLDialogElement>(*ancestor))
+      {
+        dialog = ShareRefPtr(candidate);
+        break;
+      }
+    }
+
     // If there isn't one, or if it does not have an open attribute, do nothing.
+    if (!dialog || !dialog->Open())
+    {
+      return;
+    }
+
     // Then, close the dialog subject. If there is a result, let that be the return value.
-    // FIXME: Closing the dialog with the submission's return value, once dialogs open and close.
-    (void)formSubmission;
+    dialog->CloseTheDialog(formSubmission->ReturnValue(), nullptr);
   }
 
   void HTMLFormElement::OnInsert() noexcept

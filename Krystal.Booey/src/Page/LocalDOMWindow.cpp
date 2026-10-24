@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ErrorEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -472,6 +473,20 @@ namespace krys::boo
   boo::Navigation *LocalDOMWindow::NavigationIfExists() const noexcept
   {
     return _navigation.get();
+  }
+
+  html::CloseWatcherManager &LocalDOMWindow::GetCloseWatcherManager() const noexcept
+  {
+    if (!_closeWatcherManager)
+    {
+      _closeWatcherManager = html::CloseWatcherManager::Create();
+    }
+    return *_closeWatcherManager;
+  }
+
+  html::CloseWatcherManager *LocalDOMWindow::CloseWatcherManagerIfExists() const noexcept
+  {
+    return _closeWatcherManager.get();
   }
 
   Navigator &LocalDOMWindow::GetNavigator() const noexcept
@@ -1014,6 +1029,7 @@ namespace krys::boo
     // Set the last activation timestamp of the window to the current high resolution time. There are no
     // ancestor or descendant frames to notify.
     _lastActivationTimestamp = NowTimestamp();
+    GetCloseWatcherManager().NotifyAboutUserActivation();
   }
 
   bool LocalDOMWindow::HasStickyActivation() const noexcept

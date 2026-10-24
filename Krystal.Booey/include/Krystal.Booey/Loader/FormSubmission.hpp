@@ -117,14 +117,14 @@ namespace krys::boo
     RefPtr<FormData> _formData;
     utf8_string _boundary;
     RefPtr<dom::Event> _event;
-    dom::DOMString _returnValue; // for form[method=dialog]
+    Maybe<dom::DOMString> _returnValue; // for form[method=dialog]
     RefPtr<html::HTMLFormElement> _form;
     RefPtr<html::HTMLFormControlElement> _submitter;
     FormSubmissionTrigger _trigger {FormSubmissionTrigger::NotSubmittedByJavaScript};
 
   public:
     // dialog form submissions
-    FormSubmission(Method method, dom::DOMStringView returnValue, const url::URL &action,
+    FormSubmission(Method method, Maybe<dom::DOMString> returnValue, const url::URL &action,
                    dom::DOMStringView target, dom::DOMStringView contentType, dom::Event *event) noexcept;
 
     // get/post form submissions
@@ -176,7 +176,7 @@ namespace krys::boo
       return _event.get();
     }
 
-    KRYS_NODISCARD const dom::DOMString &ReturnValue() const noexcept
+    KRYS_NODISCARD const Maybe<dom::DOMString> &ReturnValue() const noexcept
     {
       return _returnValue;
     }

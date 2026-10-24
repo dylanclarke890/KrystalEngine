@@ -1041,7 +1041,7 @@ namespace krys::boo::html
     return ApplyStep(n, AnyStepHandling::Reject, TextFieldEventBehavior::DispatchNoEvent);
   }
 
-  dom::DOMString InputType::ResultForDialogSubmit() const noexcept
+  Maybe<dom::DOMString> InputType::ResultForDialogSubmit() const noexcept
   {
     krys_debug_assert(Element());
     return Element()->Value();

@@ -33,6 +33,7 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
+#include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
@@ -49,6 +50,8 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -57,6 +60,7 @@
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
@@ -203,6 +207,7 @@ namespace krys::boo::dom
       Ref<Element> element = _topLayerElements.last();
       element->RemoveFromTopLayer();
     }
+    _openDialogs.clear();
 
     RemoveDetachedChildren();
 
@@ -1490,6 +1495,99 @@ namespace krys::boo::dom
     }
   }
 
+  html::HTMLDialogElement *Document::ActiveModalDialog() const noexcept
+  {
+    for (auto element = _topLayerElements.rbegin(); element != _topLayerElements.rend(); ++element)
+    {
+      if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element->get());
+          dialog && dialog->IsModal())
+      {
+        return dialog;
+      }
+    }
+    return nullptr;
+  }
+
+  void Document::AddOpenDialog(html::HTMLDialogElement &dialog) noexcept
+  {
+    krys_debug_assert(!_openDialogs.contains(ShareRef(dialog)));
+    _openDialogs.add(ShareRef(dialog));
+  }
+
+  void Document::RemoveOpenDialog(html::HTMLDialogElement &dialog) noexcept
+  {
+    _openDialogs.remove(ShareRef(dialog));
+  }
+
+  void Document::HandleLightDismiss(const MouseEvent &event, Node &target) noexcept
+  {
+    krys_debug_assert(event.IsTrusted());
+
+    // FIXME: Light dismiss open popovers, with popovers (B4d).
+
+    // Light dismiss open dialogs.
+    if (_openDialogs.empty())
+    {
+      return;
+    }
+
+    // The nearest clicked dialog: none for a press on a modal dialog's backdrop (outside its bounds).
+    auto nearestClickedDialog = [&]() -> html::HTMLDialogElement *
+    {
+      if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(target);
+          dialog && dialog->Open() && dialog->IsModal())
+      {
+        auto bounds = dialog->BoundingClientRect();
+        auto x = static_cast<float>(event.ClientX());
+        auto y = static_cast<float>(event.ClientY());
+        if (x < bounds.X() || x > bounds.MaxX() || y < bounds.Y() || y > bounds.MaxY())
+        {
+          return nullptr;
+        }
+      }
+      auto *element = DynamicDowncast<Element>(target);
+      for (element = element ? element : target.ParentElementInComposedTree(); element;
+           element = element->ParentElementInComposedTree())
+      {
+        if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(*element); dialog && dialog->Open())
+        {
+          return dialog;
+        }
+      }
+      return nullptr;
+    };
+    RefPtr<html::HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
+
+    if (event.Type() == EventNames::MouseDown)
+    {
+      _dialogPointerDownTarget = CreateWeakPtr(ancestor.get());
+      return;
+    }
+
+    if (event.Type() == EventNames::MouseUp)
+    {
+      bool sameTarget = ancestor.get() == _dialogPointerDownTarget.get();
+      _dialogPointerDownTarget = nullptr;
+      if (!sameTarget)
+      {
+        return;
+      }
+      Ref<html::HTMLDialogElement> topmostDialog = _openDialogs.last();
+      if (ancestor.get() == topmostDialog.get())
+      {
+        return;
+      }
+      if (topmostDialog->ComputedClosedByState() != html::HTMLDialogElement::ClosedByState::Any)
+      {
+        return;
+      }
+      if (auto *closeWatcher = topmostDialog->GetCloseWatcher())
+      {
+        (void)closeWatcher->RequestToClose(false);
+      }
+    }
+  }
+
   Element *Document::FindAnchor(DOMStringView name) const noexcept
   {
     if (name.empty())
@@ -1824,6 +1922,12 @@ namespace krys::boo::dom
     }
     _scriptedAnimationController = nullptr;
     _idleCallbackController = nullptr;
+
+    // Its close watchers are destroyed.
+    if (auto *closeWatcherManager = _domWindow ? _domWindow->CloseWatcherManagerIfExists() : nullptr)
+    {
+      closeWatcherManager->DestroyAll();
+    }
   }
 
   LocalDOMWindow *Document::DefaultView() const noexcept

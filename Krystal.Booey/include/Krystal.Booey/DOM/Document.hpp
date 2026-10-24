@@ -98,6 +98,7 @@ namespace krys::boo::html
   class FocusAlgorithms;
   class FormController;
   class HTMLBaseElement;
+  class HTMLDialogElement;
   class HTMLBodyElement;
   class HTMLDocumentParser;
   class HTMLHeadElement;
@@ -120,6 +121,7 @@ namespace krys::boo::dom
   class Element;
   class HighlightRegistry;
   class HTMLCollection;
+  class MouseEvent;
   class SelectorQuery;
   class ProcessingInstruction;
   class ShadowRoot;
@@ -232,6 +234,9 @@ namespace krys::boo::dom
     // The top layer, bottom to top, and the elements in it waiting to be removed.
     ListHashSet<Ref<Element>> _topLayerElements;
     ListHashSet<Ref<Element>> _topLayerPendingRemovals;
+    // The open dialogs, in the order they opened, and the dialog the last press was in (light dismiss).
+    ListHashSet<Ref<html::HTMLDialogElement>> _openDialogs;
+    WeakPtr<html::HTMLDialogElement> _dialogPointerDownTarget;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -819,6 +824,25 @@ namespace krys::boo::dom
     /// top layer, in the rendering update.
     /// @see https://drafts.csswg.org/css-position-4/#process-top-layer-removals
     void ProcessTopLayerRemovals() noexcept;
+
+    /// @brief The topmost modal dialog in the top layer, which blocks the document: everything else is inert.
+    /// @see https://html.spec.whatwg.org/#blocked-by-a-modal-dialog
+    KRYS_NODISCARD html::HTMLDialogElement *ActiveModalDialog() const noexcept;
+
+    /// @brief The open dialogs, in the order they opened.
+    /// @see https://html.spec.whatwg.org/#open-dialogs-list
+    KRYS_NODISCARD const ListHashSet<Ref<html::HTMLDialogElement>> &OpenDialogs() const noexcept
+    {
+      return _openDialogs;
+    }
+    void AddOpenDialog(html::HTMLDialogElement &dialog) noexcept;
+    void RemoveOpenDialog(html::HTMLDialogElement &dialog) noexcept;
+
+    /// @brief Closes what a press and release outside it light dismisses: the topmost open dialog if its
+    /// `closedby` is `any`. Run as @p event (a trusted `mousedown` or `mouseup`, standing in for
+    /// `pointerdown` and `pointerup`) is about to be dispatched at @p target.
+    /// @see https://html.spec.whatwg.org/#light-dismiss-activities
+    void HandleLightDismiss(const MouseEvent &event, Node &target) noexcept;
 
     /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
     KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;

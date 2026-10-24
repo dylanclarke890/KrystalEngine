@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
@@ -205,14 +206,22 @@ namespace krys::boo::html
     {
       element = node.ParentElementInComposedTree();
     }
+    // While the document is blocked by a modal dialog, every connected node but the dialog and its flat tree
+    // descendants is inert.
+    auto *modalDialog = node.IsConnected() ? node.NodeDocument().ActiveModalDialog() : nullptr;
+    bool isInModalDialog = false;
     for (; element; element = element->ParentElementInComposedTree())
     {
       if (Is<HTMLElement>(*element) && element->HasAttribute(u8"inert"))
       {
         return true;
       }
+      if (element == modalDialog)
+      {
+        isInModalDialog = true;
+      }
     }
-    return false;
+    return modalDialog && !isInModalDialog;
   }
 
   bool FocusAlgorithms::IsFocusableArea(const dom::Element &element) noexcept

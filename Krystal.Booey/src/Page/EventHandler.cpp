@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -962,8 +963,16 @@ namespace krys::boo
         return true;
       }
 
-      // FIXME: Escape (close watchers, modal dialogs and popovers) and Backspace (history navigation), once
-      // there are dialogs, popovers and navigation.
+      if (event.Key() == u8"Escape")
+      {
+        if (auto *window = _frame.Document()->Window())
+        {
+          // Dialogs and popovers close through their close watchers.
+          (void)window->GetCloseWatcherManager().EscapeKeyHandler(event);
+        }
+        return false;
+      }
+      // FIXME: Backspace (history navigation).
       if (event.KeyIdentifier() == u8"U+0009")
       {
         return DefaultTabEventHandler(event);

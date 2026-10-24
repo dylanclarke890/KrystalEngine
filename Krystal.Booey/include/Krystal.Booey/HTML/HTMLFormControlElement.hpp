@@ -112,7 +112,7 @@ namespace krys::boo::html
     }
 
     /// @brief The return value of a dialog this control submits.
-    KRYS_NODISCARD virtual dom::DOMString ResultForDialogSubmit() const noexcept;
+    KRYS_NODISCARD virtual Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept;
 
     KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {

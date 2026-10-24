@@ -22,6 +22,11 @@ namespace krys::boo::html
     return true;
   }
 
+  Maybe<dom::DOMString> ImageInputType::ResultForDialogSubmit() const noexcept
+  {
+    return ToDecimalString(_clickLocation.X()) + u8"," + ToDecimalString(_clickLocation.Y());
+  }
+
   bool ImageInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

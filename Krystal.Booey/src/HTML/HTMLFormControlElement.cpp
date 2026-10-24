@@ -190,8 +190,8 @@ namespace krys::boo::html
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
   }
 
-  dom::DOMString HTMLFormControlElement::ResultForDialogSubmit() const noexcept
+  Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept
   {
-    return GetAttribute(u8"value").value_or(dom::DOMString());
+    return GetAttribute(u8"value");
   }
 }

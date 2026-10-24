@@ -492,7 +492,7 @@ namespace krys::boo::html
     void DispatchSimulatedClickIfActive(dom::KeyboardEvent &event) const noexcept;
 
     KRYS_NODISCARD virtual DateComponentsType DateType() const noexcept;
-    KRYS_NODISCARD virtual dom::DOMString ResultForDialogSubmit() const noexcept;
+    KRYS_NODISCARD virtual Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept;
 
   protected:
     InputType(Type type, HTMLInputElement &element) noexcept : _type(type), _element(&element)

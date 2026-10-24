@@ -842,7 +842,12 @@ namespace krys::boo::dom
     bool didNotSwallowEvent = true;
 
     // FIXME: Pointer events (dispatchPointerEventIfNeeded), which dispatch clicks as pointer events; until
-    // then clicks are mouse events.
+    // then clicks are mouse events, and presses and releases run light dismiss as pointerdown and pointerup
+    // would.
+    if (mouseEvent->IsTrusted() && (eventType == EventNames::MouseDown || eventType == EventNames::MouseUp))
+    {
+      NodeDocument().HandleLightDismiss(*mouseEvent, *this);
+    }
     krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
     (void)EventDispatcher::DispatchToTarget(*mouseEvent, this);
     if (mouseEvent->DefaultPrevented())
@@ -2285,7 +2290,10 @@ namespace krys::boo::dom
     {
       documentElement->InvalidateStyleInternal();
     }
-    // FIXME: Invalidating the active modal dialog's style, with dialogs (B4c).
+    if (RefPtr<Element> modalElement = ShareRefPtr<Element>(NodeDocument().ActiveModalDialog()))
+    {
+      modalElement->InvalidateStyleInternal();
+    }
 
     ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerDidChange(); });
   }

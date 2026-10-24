@@ -562,6 +562,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Position.cpp
 		tests/DOM/SimpleRange.cpp
 		tests/DOM/TopLayer.cpp
+		tests/DOM/ToggleEvent.cpp
 		tests/Editing/TextIterator.cpp
 		tests/Editing/VisiblePosition.cpp
 		tests/Editing/VisibleSelection.cpp
@@ -589,11 +590,13 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Attributes/ReflectURL.cpp
 		tests/HTML/BaseDateAndTimeInputType.cpp
 		tests/HTML/CustomElement/CustomElementRegistry.cpp
+		tests/HTML/CloseWatcher/CloseWatcher.cpp
 		tests/HTML/ElementInternals.cpp
 		tests/HTML/ColorInputType.cpp
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLAnchorElement.cpp
+		tests/HTML/HTMLDialogElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
 		tests/HTML/HTMLMapElement.cpp

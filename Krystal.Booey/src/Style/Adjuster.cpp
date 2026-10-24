@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -776,11 +777,13 @@ namespace krys::boo::style
     {
       return element && Is<html::HTMLElement>(*element) && element->HasAttribute(u8"inert");
     };
-    // FIXME: The document element is an inert subtree root while there is an active modal dialog or a
-    // fullscreen element, and the active modal dialog and the fullscreen element aren't inert; there is no
-    // top layer.
+    // FIXME: Fullscreen elements, once there are any.
     auto isInertSubtreeRoot = [&](const dom::Element *element) -> bool
     {
+      if (_document->ActiveModalDialog() && element && element == _document->DocumentElement().get())
+      {
+        return true;
+      }
       return hasInertAttribute(element);
     };
     if (isInertSubtreeRoot(_element.get()))
@@ -790,6 +793,12 @@ namespace krys::boo::style
 
     if (auto *element = _element.get())
     {
+      // Make sure the active dialog is interactable when the whole document is blocked by the modal dialog
+      if (element == _document->ActiveModalDialog() && !hasInertAttribute(element))
+      {
+        style.SetEffectiveInert(false);
+      }
+
       style.SetEventListenerRegionTypes(ComputeEventListenerRegionTypes(
         *_document, style, *element, _parentStyle.EventListenerRegionTypes()));
     }

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/RuleFeature.hpp"
@@ -1471,9 +1472,15 @@ namespace krys::boo::css
 
         case SelectorPseudoClass::Dir:     return MatchesDirPseudoClass(element, selector.Argument());
 
-        case SelectorPseudoClass::PopoverOpen:
         case SelectorPseudoClass::Modal:
-          // FIXME: Popovers and modal dialogs.
+        {
+          // FIXME: Fullscreen elements, once there are any.
+          auto *dialog = DynamicDowncast<html::HTMLDialogElement>(element);
+          return dialog && dialog->IsModal();
+        }
+
+        case SelectorPseudoClass::PopoverOpen:
+          // FIXME: Popovers (B4d).
           return false;
 
         case SelectorPseudoClass::ActiveViewTransition:

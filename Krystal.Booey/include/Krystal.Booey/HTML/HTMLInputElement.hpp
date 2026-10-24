@@ -512,7 +512,7 @@ namespace krys::boo::html
     void DidBlur() noexcept final;
 
     KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept final;
-    KRYS_NODISCARD dom::DOMString ResultForDialogSubmit() const noexcept final;
+    KRYS_NODISCARD Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept final;
 
     KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
 

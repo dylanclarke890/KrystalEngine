@@ -3246,6 +3246,9 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/TypingCommand.hpp
       include/Krystal.Booey/DOM/InputEvent.hpp
       include/Krystal.Booey/DOM/TextEvent.hpp
+      include/Krystal.Booey/DOM/ToggleEvent.hpp
+      include/Krystal.Booey/DOM/ToggleEventTask.hpp
+      include/Krystal.Booey/DOM/CommandEvent.hpp
       include/Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp
       include/Krystal.Booey/DOM/Dicts/InputEventInit.hpp
       include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
@@ -3416,6 +3419,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp
+      include/Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp
+      include/Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp
       include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
       include/Krystal.Booey/HTML/CustomElementFormValue.hpp
@@ -3670,6 +3675,9 @@ target_sources(Krystal.Booey
     src/Editing/TypingCommand.cpp
     src/DOM/InputEvent.cpp
     src/DOM/TextEvent.cpp
+    src/DOM/ToggleEvent.cpp
+    src/DOM/ToggleEventTask.cpp
+    src/DOM/CommandEvent.cpp
     src/DOM/BeforeTextInsertedEvent.cpp
     src/Page/AutoscrollController.cpp
     src/Page/DOMSelection.cpp
@@ -3768,6 +3776,8 @@ target_sources(Krystal.Booey
     src/HTML/CustomElement/CustomElementInterface.cpp
     src/HTML/CustomElement/CustomElementReactionQueue.cpp
     src/HTML/CustomElement/CustomElementRegistry.cpp
+    src/HTML/CloseWatcher/CloseWatcher.cpp
+    src/HTML/CloseWatcher/CloseWatcherManager.cpp
     src/HTML/CustomStateSet.cpp
     src/HTML/ElementInternals.cpp
     src/HTML/EventLoop.cpp

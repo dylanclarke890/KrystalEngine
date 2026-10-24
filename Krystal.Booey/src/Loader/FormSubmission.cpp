@@ -130,11 +130,11 @@ namespace krys::boo
     _method = ParseMethodType(type);
   }
 
-  FormSubmission::FormSubmission(Method method, dom::DOMStringView returnValue, const url::URL &action,
+  FormSubmission::FormSubmission(Method method, Maybe<dom::DOMString> returnValue, const url::URL &action,
                                  dom::DOMStringView target, dom::DOMStringView contentType,
                                  dom::Event *event) noexcept
       : _method(method), _action(action), _target(target), _contentType(contentType),
-        _event(ShareRefPtr(event)), _returnValue(returnValue)
+        _event(ShareRefPtr(event)), _returnValue(krys::move(returnValue))
   {
   }
 
@@ -184,7 +184,7 @@ namespace krys::boo
     {
       if (copiedAttributes.GetMethod() == Method::Dialog)
       {
-        dom::DOMString returnValue = submitter ? submitter->ResultForDialogSubmit() : dom::DOMString();
+        Maybe<dom::DOMString> returnValue = submitter ? submitter->ResultForDialogSubmit() : null;
         return CreateRef<FormSubmission>(copiedAttributes.GetMethod(), returnValue, actionURL,
                                          form.EffectiveTarget(event, submitter.get()), encodingType, event);
       }

@@ -1373,7 +1373,7 @@ namespace krys::boo::html
 
 #pragma region Forms
 
-  dom::DOMString HTMLInputElement::ResultForDialogSubmit() const noexcept
+  Maybe<dom::DOMString> HTMLInputElement::ResultForDialogSubmit() const noexcept
   {
     return _inputType->ResultForDialogSubmit();
   }

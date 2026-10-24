@@ -31,9 +31,9 @@ namespace krys::boo::html
     KRYS_NODISCARD static Maybe<int32> TabIndexValue(const dom::Element &element) noexcept;
 
     /// @brief Whether @p node is inert: an element with an `inert` attribute or a flat tree descendant of
-    /// one.
+    /// one, or, while its document is blocked by a modal dialog, outside that dialog's flat tree.
     /// @see https://html.spec.whatwg.org/#inert
-    // FIXME: Modal dialogs and fullscreen elements, once there are any.
+    // FIXME: Fullscreen elements, once there are any.
     KRYS_NODISCARD static bool IsInert(const dom::Node &node) noexcept;
 
     /// @brief Whether @p element is a focusable area (it is focusable).

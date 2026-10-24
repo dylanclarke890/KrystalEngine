@@ -34,7 +34,9 @@ namespace krys::boo::html
     NoCORS,
     Anonymous,
     UseCredentials,
+    Any,
+    CloseRequest,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 24uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 26uz);
