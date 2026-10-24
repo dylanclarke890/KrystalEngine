@@ -66,6 +66,7 @@ namespace krys::boo
   class RenderStyle;
   class RenderTreeUpdater;
   class RenderView;
+  class ResizeObserver;
   struct Settings;
 }
 
@@ -246,6 +247,10 @@ namespace krys::boo::dom
     // How many popovers are being hidden, and whether one is being shown: no popover shows meanwhile.
     uint32 _hidingPopoverNestingCount {0};
     bool _isShowingPopover {false};
+    // The resize observers observing the document's elements, and the document's own, which keeps the last
+    // remembered sizes.
+    List<WeakPtr<ResizeObserver>> _resizeObservers;
+    RefPtr<ResizeObserver> _resizeObserverForContainIntrinsicSize;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -742,9 +747,31 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/cssom-view/#run-the-scroll-steps
     void RunScrollSteps() noexcept;
 
-    /// @brief The rendering update's resize observations step: records the last successful position options.
-    // FIXME: Gathering and delivering the resize observations, with resize observers.
-    void UpdateResizeObservations() noexcept;
+    /// @brief The rendering update's resize observations step: records the last successful position options,
+    /// then gathers and delivers the resize observations, deeper each round, laying out the page between
+    /// them. Observations that were skipped (no deeper than the last round's) are reported as an error at the
+    /// window, and left for the next update.
+    /// @see https://html.spec.whatwg.org/#update-the-rendering
+    void UpdateResizeObservations(Page &page) noexcept;
+
+    void AddResizeObserver(ResizeObserver &observer) noexcept;
+    void RemoveResizeObserver(ResizeObserver &observer) noexcept;
+    KRYS_NODISCARD bool HasResizeObservers() const noexcept;
+    /// @brief Gathers the observations of the document's resize observers deeper than @p deeperThan.
+    /// @return The depth of the shallowest one, or `ResizeObserver::MaxElementDepth()` if there's none.
+    KRYS_NODISCARD size_t GatherResizeObservations(size_t deeperThan) noexcept;
+    void DeliverResizeObservations() noexcept;
+    KRYS_NODISCARD bool HasSkippedResizeObservations() const noexcept;
+    void SetHasSkippedResizeObservations(bool skipped) noexcept;
+
+    /// @brief Gathers the observations of the elements whose last remembered sizes are kept.
+    KRYS_NODISCARD size_t GatherResizeObservationsForContainIntrinsicSize() noexcept;
+    /// @brief Keeps @p element's last remembered size (`contain-intrinsic-size: auto`) up to date.
+    void ObserveForContainIntrinsicSize(Element &element) noexcept;
+    void UnobserveForContainIntrinsicSize(Element &element) noexcept;
+    /// @brief Has @p element's size reported again, so its last remembered size is updated (or cleared, if it
+    /// was disconnected).
+    void ResetObservationSizeForContainIntrinsicSize(Element &element) noexcept;
 
     /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
     void SetNeedsDOMWindowResizeEvent() noexcept;
@@ -1621,6 +1648,10 @@ namespace krys::boo::dom
     /// @brief With nodes still referring to it, the document stops retaining its nodes (the elements it
     /// tracks, its children) and waits for them to go; without, it's deleted.
     void RemovedLastRef() noexcept override;
+
+    /// @brief The teardown shared by the last reference going and leaving the frame: the observers
+    /// disconnect.
+    void CommonTeardown() noexcept;
 
     void SetQuirksMode(QuirksMode mode) noexcept;
 

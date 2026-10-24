@@ -281,7 +281,7 @@ namespace krys::boo::style::tests
     {
       SetStyle(target, u8"position-try-fallbacks: --left");
       CHECK(FrameRectOf(target).X() == 500);
-      fixture.Document->UpdateResizeObservations();
+      fixture.Document->UpdateResizeObservations(*fixture.Document->GetPage());
       CHECK(fixture.Document->StyleScope().LastSuccessfulPositionOptionIndexFor(Styleable {target, null})
             == 0);
 

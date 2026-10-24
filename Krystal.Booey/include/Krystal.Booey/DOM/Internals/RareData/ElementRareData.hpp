@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
@@ -15,6 +16,7 @@ namespace krys::boo
 {
   class ElementAnimationRareData;
   class RenderStyle;
+  struct ResizeObserverData;
 }
 
 namespace krys::boo::html
@@ -63,6 +65,9 @@ namespace krys::boo::dom
     UniquePtr<PopoverData> _popoverData;
     WeakPtr<Element> _invokedPopover;
     ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
+    UniquePtr<ResizeObserverData> _resizeObserverData;
+    Maybe<LayoutUnit> _lastRememberedLogicalWidth;
+    Maybe<LayoutUnit> _lastRememberedLogicalHeight;
 
   public:
     ElementRareData() noexcept;
@@ -109,6 +114,37 @@ namespace krys::boo::dom
     KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
     {
       return _explicitlySetAttrElementsMap;
+    }
+
+    KRYS_NODISCARD ResizeObserverData *GetResizeObserverData() const noexcept
+    {
+      return _resizeObserverData.get();
+    }
+    void SetResizeObserverData(UniquePtr<ResizeObserverData> &&data) noexcept;
+
+    KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
+    {
+      return _lastRememberedLogicalWidth;
+    }
+    KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalHeight() const noexcept
+    {
+      return _lastRememberedLogicalHeight;
+    }
+    void SetLastRememberedLogicalWidth(LayoutUnit width) noexcept
+    {
+      _lastRememberedLogicalWidth = width;
+    }
+    void SetLastRememberedLogicalHeight(LayoutUnit height) noexcept
+    {
+      _lastRememberedLogicalHeight = height;
+    }
+    void ClearLastRememberedLogicalWidth() noexcept
+    {
+      _lastRememberedLogicalWidth = null;
+    }
+    void ClearLastRememberedLogicalHeight() noexcept
+    {
+      _lastRememberedLogicalHeight = null;
     }
 
     /// @brief The element's index among its parent's element children, plus one, cached by selector matching

@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 
 namespace krys::boo
 {
@@ -494,7 +495,34 @@ namespace krys::boo
       element.ClearDisplayContentsOrNoneStyle();
     }
 
-    // FIXME: The last remembered size for contain-intrinsic-size, once there's layout.
+    if (!hasDisplayContentsOrNone)
+    {
+      if (!elementUpdateStyle.LogicalContainIntrinsicWidth().HasAuto())
+      {
+        element.ClearLastRememberedLogicalWidth();
+      }
+      if (!elementUpdateStyle.LogicalContainIntrinsicHeight().HasAuto())
+      {
+        element.ClearLastRememberedLogicalHeight();
+      }
+    }
+
+    auto scopeExit = MakeScopeExit(
+      [&]
+      {
+        if (!hasDisplayContentsOrNone)
+        {
+          auto *box = element.GetRenderBox();
+          if (box && box->Style().HasAutoLengthContainIntrinsicSize() && !IsSkippedContentRoot(*box))
+          {
+            _document->ObserveForContainIntrinsicSize(element);
+          }
+          else
+          {
+            _document->UnobserveForContainIntrinsicSize(element);
+          }
+        }
+      });
 
     bool shouldCreateNewRenderer =
       !element.Renderer() && !hasDisplayContentsOrNone

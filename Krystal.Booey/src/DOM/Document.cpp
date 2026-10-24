@@ -86,12 +86,15 @@
 #include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/ResizeObserver.hpp"
+#include "Krystal.Booey/Page/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -114,6 +117,49 @@
 
 namespace krys::boo::dom
 {
+  namespace
+  {
+    void CallbackForContainIntrinsicSize(const List<Ref<ResizeObserverEntry>> &entries,
+                                         ResizeObserver &observer) noexcept
+    {
+      for (auto &entry : entries)
+      {
+        Ref<Element> target = ShareRef(entry->Target());
+        if (!target->IsConnected())
+        {
+          observer.Unobserve(*target);
+          target->ClearLastRememberedLogicalWidth();
+          target->ClearLastRememberedLogicalHeight();
+          continue;
+        }
+
+        auto *box = target->GetRenderBox();
+        if (!box)
+        {
+          observer.Unobserve(*target);
+          continue;
+        }
+        krys_debug_assert(!IsSkippedContentRoot(*box));
+        krys_debug_assert(box->Style().HasAutoLengthContainIntrinsicSize());
+
+        auto &contentBoxSize = entry->ContentBoxSize().front();
+        if (box->Style().LogicalContainIntrinsicWidth().HasAuto())
+        {
+          auto adjustedWidth =
+            LayoutUnit {ApplyZoom(static_cast<float>(contentBoxSize->InlineSize()), box->Style())};
+          target->SetLastRememberedLogicalWidth(adjustedWidth);
+        }
+
+        if (box->Style().LogicalContainIntrinsicHeight().HasAuto())
+        {
+          auto adjustedHeight =
+            LayoutUnit {ApplyZoom(static_cast<float>(contentBoxSize->BlockSize()), box->Style())};
+          target->SetLastRememberedLogicalHeight(adjustedHeight);
+        }
+      }
+    }
+  }
+
   Document::Document(DocumentFlags flags) noexcept : Document()
   {
     SetDocumentFlag(flags);
@@ -214,6 +260,8 @@ namespace krys::boo::dom
     _hintStackParent = nullptr;
 
     RemoveDetachedChildren();
+
+    CommonTeardown();
 
     // Last, since it may delete the document.
     DecrementReferencingNodeCount();
@@ -1358,7 +1406,97 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::UpdateResizeObservations() noexcept
+  void Document::AddResizeObserver(ResizeObserver &observer) noexcept
+  {
+    if (std::ranges::find(_resizeObservers, &observer, [](auto &weak) { return weak.get(); })
+        == _resizeObservers.end())
+    {
+      _resizeObservers.push_back(CreateWeakPtr(&observer));
+    }
+  }
+
+  void Document::RemoveResizeObserver(ResizeObserver &observer) noexcept
+  {
+    auto it = std::ranges::find(_resizeObservers, &observer, [](auto &weak) { return weak.get(); });
+    if (it != _resizeObservers.end())
+    {
+      _resizeObservers.erase(it);
+    }
+  }
+
+  bool Document::HasResizeObservers() const noexcept
+  {
+    return !_resizeObservers.empty();
+  }
+
+  size_t Document::GatherResizeObservations(size_t deeperThan) noexcept
+  {
+    size_t minDepth = ResizeObserver::MaxElementDepth();
+    for (auto &weakObserver : _resizeObservers)
+    {
+      RefPtr<ResizeObserver> observer = ShareRefPtr(weakObserver.get());
+      if (!observer || !observer->HasObservations())
+      {
+        continue;
+      }
+
+      auto depth = observer->GatherObservations(deeperThan);
+      minDepth = std::min(minDepth, depth);
+    }
+    return minDepth;
+  }
+
+  size_t Document::GatherResizeObservationsForContainIntrinsicSize() noexcept
+  {
+    if (!_resizeObserverForContainIntrinsicSize)
+    {
+      return ResizeObserver::MaxElementDepth();
+    }
+
+    return _resizeObserverForContainIntrinsicSize->GatherObservations(0);
+  }
+
+  void Document::DeliverResizeObservations() noexcept
+  {
+    if (_resizeObserverForContainIntrinsicSize)
+    {
+      Ref<ResizeObserver> observer = _resizeObserverForContainIntrinsicSize;
+      observer->DeliverObservations();
+    }
+
+    List<RefPtr<ResizeObserver>> observersToNotify;
+    for (auto &weakObserver : _resizeObservers)
+    {
+      RefPtr<ResizeObserver> observer = ShareRefPtr(weakObserver.get());
+      if (observer && observer->HasActiveObservations())
+      {
+        observersToNotify.push_back(krys::move(observer));
+      }
+    }
+    for (auto &observer : observersToNotify)
+    {
+      observer->DeliverObservations();
+    }
+  }
+
+  bool Document::HasSkippedResizeObservations() const noexcept
+  {
+    return std::ranges::any_of(_resizeObservers,
+                               [](auto &observer) { return observer && observer->HasSkippedObservations(); });
+  }
+
+  void Document::SetHasSkippedResizeObservations(bool skipped) noexcept
+  {
+    for (auto &observer : _resizeObservers)
+    {
+      if (observer)
+      {
+        observer->SetHasSkippedObservations(skipped);
+      }
+    }
+  }
+
+  void Document::UpdateResizeObservations(Page &page) noexcept
   {
     if (_renderView)
     {
@@ -1367,6 +1505,69 @@ namespace krys::boo::dom
       auto lastSuccessfulPositionOptionMap =
         style::AnchorPositionEvaluator::RecordLastSuccessfulPositionOptions(_renderView->PositionTryBoxes());
       StyleScope().SetLastSuccessfulPositionOptionIndexMap(krys::move(lastSuccessfulPositionOptionMap));
+    }
+
+    // FIXME: The content visibility state's initial determination, once there's content-visibility: auto.
+    if (!HasResizeObservers() && !_resizeObserverForContainIntrinsicSize)
+    {
+      return;
+    }
+
+    size_t resizeObserverDepth = 0;
+    while (true)
+    {
+      page.LayoutIfNeeded();
+
+      // Start check resize observers;
+      if (!resizeObserverDepth
+          && GatherResizeObservationsForContainIntrinsicSize() != ResizeObserver::MaxElementDepth())
+      {
+        DeliverResizeObservations();
+      }
+
+      resizeObserverDepth = GatherResizeObservations(resizeObserverDepth);
+      if (resizeObserverDepth == ResizeObserver::MaxElementDepth())
+      {
+        break;
+      }
+      DeliverResizeObservations();
+    }
+
+    if (HasSkippedResizeObservations())
+    {
+      SetHasSkippedResizeObservations(false);
+      if (RefPtr<LocalDOMWindow> window = ShareRefPtr(Window()))
+      {
+        window->ReportError(DOMString(u8"ResizeObserver loop completed with undelivered notifications."));
+      }
+      // Starting a new schedule the next round of notify.
+      ScheduleRenderingUpdate({RenderingUpdateStep::ResizeObservations});
+    }
+  }
+
+  void Document::ObserveForContainIntrinsicSize(Element &element) noexcept
+  {
+    if (!_resizeObserverForContainIntrinsicSize)
+    {
+      _resizeObserverForContainIntrinsicSize =
+        ResizeObserver::CreateNativeObserver(*this, CallbackForContainIntrinsicSize);
+    }
+    _resizeObserverForContainIntrinsicSize->Observe(element, {ResizeObserverBoxOptions::ContentBox});
+  }
+
+  void Document::UnobserveForContainIntrinsicSize(Element &element) noexcept
+  {
+    if (RefPtr<ResizeObserver> observer = _resizeObserverForContainIntrinsicSize)
+    {
+      observer->Unobserve(element);
+    }
+  }
+
+  void Document::ResetObservationSizeForContainIntrinsicSize(Element &element) noexcept
+  {
+    if (RefPtr<ResizeObserver> observer = _resizeObserverForContainIntrinsicSize)
+    {
+      observer->ResetObservationSize(element);
     }
   }
 
@@ -2734,7 +2935,22 @@ namespace krys::boo::dom
     }
     _timeline = nullptr;
 
+    CommonTeardown();
+
     _frame = nullptr;
+  }
+
+  void Document::CommonTeardown() noexcept
+  {
+    // FIXME: The rest of the teardown shared by destruction and the last reference going, once there's any.
+    auto resizeObservers = _resizeObservers;
+    for (auto &weakResizeObserver : resizeObservers)
+    {
+      if (RefPtr<ResizeObserver> resizeObserver = ShareRefPtr(weakResizeObserver.get()))
+      {
+        resizeObserver->Disconnect();
+      }
+    }
   }
 
   DocumentTimeline &Document::Timeline() noexcept

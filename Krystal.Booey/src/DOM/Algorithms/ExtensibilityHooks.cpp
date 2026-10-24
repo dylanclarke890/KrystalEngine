@@ -156,6 +156,13 @@ namespace krys::boo::dom
         }
 
         auto &oldDocument = element->NodeDocument();
+        if (element->LastRememberedLogicalWidth() || element->LastRememberedLogicalHeight())
+        {
+          // The disconnected element could be unobserved because of other properties, here we need to make
+          // sure it is observed, so that deliver could be triggered and it would clear lastRememberedSize.
+          oldDocument.ObserveForContainIntrinsicSize(*element);
+          oldDocument.ResetObservationSizeForContainIntrinsicSize(*element);
+        }
         if (oldDocument.CSSTarget() == element)
         {
           oldDocument.SetCSSTarget(nullptr);

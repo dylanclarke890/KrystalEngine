@@ -1869,6 +1869,14 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/ResolvedScopedName.hpp
   include/Krystal.Booey/Style/ScopeIdentifier.hpp
   include/Krystal.Booey/Style/TreeResolutionState.hpp
+  # Resize observers (B5a)
+  include/Krystal.Booey/Page/ResizeObservation.hpp
+  include/Krystal.Booey/Page/ResizeObserver.hpp
+  include/Krystal.Booey/Page/ResizeObserverBoxOptions.hpp
+  include/Krystal.Booey/Page/ResizeObserverCallback.hpp
+  include/Krystal.Booey/Page/ResizeObserverEntry.hpp
+  include/Krystal.Booey/Page/ResizeObserverOptions.hpp
+  include/Krystal.Booey/Page/ResizeObserverSize.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3098,6 +3106,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Anchor positioning (B4g1)
   src/Style/AnchorPositionEvaluator.cpp
   src/Style/ResolvedScopedName.cpp
+  # Resize observers (B5a)
+  src/Page/ResizeObservation.cpp
+  src/Page/ResizeObserver.cpp
 )
 
 target_precompile_headers(Krystal.Booey

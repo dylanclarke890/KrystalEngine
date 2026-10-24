@@ -389,6 +389,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/EventHandler.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
+		tests/Page/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
 		tests/Loader/DocumentLoader.cpp

@@ -45,6 +45,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -52,6 +53,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -86,6 +88,8 @@ namespace krys::boo::dom
   {
     krys_debug_assert(!BeforePseudoElement());
     krys_debug_assert(!AfterPseudoElement());
+
+    DisconnectFromResizeObservers();
   }
 
   ElementRareData &Element::EnsureElementRareData() noexcept
@@ -2406,6 +2410,83 @@ namespace krys::boo::dom
       return nullptr;
     }
     return combinedPopovers[static_cast<size_t>(index)];
+  }
+
+#pragma endregion
+
+#pragma region Resize Observers
+
+  void Element::DisconnectFromResizeObservers() noexcept
+  {
+    auto *observerData = ResizeObserverDataIfExists();
+    if (!observerData)
+    {
+      return;
+    }
+
+    for (const auto &observer : observerData->Observers)
+    {
+      if (observer)
+      {
+        observer->TargetDestroyed(*this);
+      }
+    }
+    observerData->Observers.clear();
+  }
+
+  ResizeObserverData &Element::EnsureResizeObserverData() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.GetResizeObserverData())
+    {
+      rareData.SetResizeObserverData(CreateUnique<ResizeObserverData>());
+    }
+    return *rareData.GetResizeObserverData();
+  }
+
+  ResizeObserverData *Element::ResizeObserverDataIfExists() const noexcept
+  {
+    return _elementRareData ? _elementRareData->GetResizeObserverData() : nullptr;
+  }
+
+  Maybe<LayoutUnit> Element::LastRememberedLogicalWidth() const noexcept
+  {
+    return _elementRareData ? _elementRareData->LastRememberedLogicalWidth() : null;
+  }
+
+  Maybe<LayoutUnit> Element::LastRememberedLogicalHeight() const noexcept
+  {
+    return _elementRareData ? _elementRareData->LastRememberedLogicalHeight() : null;
+  }
+
+  void Element::SetLastRememberedLogicalWidth(LayoutUnit width) noexcept
+  {
+    krys_debug_assert(width >= 0);
+    EnsureElementRareData().SetLastRememberedLogicalWidth(width);
+  }
+
+  void Element::ClearLastRememberedLogicalWidth() noexcept
+  {
+    if (!_elementRareData)
+    {
+      return;
+    }
+    _elementRareData->ClearLastRememberedLogicalWidth();
+  }
+
+  void Element::SetLastRememberedLogicalHeight(LayoutUnit height) noexcept
+  {
+    krys_debug_assert(height >= 0);
+    EnsureElementRareData().SetLastRememberedLogicalHeight(height);
+  }
+
+  void Element::ClearLastRememberedLogicalHeight() noexcept
+  {
+    if (!_elementRareData)
+    {
+      return;
+    }
+    _elementRareData->ClearLastRememberedLogicalHeight();
   }
 
 #pragma endregion

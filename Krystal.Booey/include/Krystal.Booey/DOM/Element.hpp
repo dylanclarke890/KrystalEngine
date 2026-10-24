@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
@@ -36,6 +37,7 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
+  struct ResizeObserverData;
 }
 
 namespace krys::boo
@@ -1144,6 +1146,23 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Resize Observers
+
+    /// @brief The resize observers observing the element.
+    ResizeObserverData &EnsureResizeObserverData() noexcept;
+    KRYS_NODISCARD ResizeObserverData *ResizeObserverDataIfExists() const noexcept;
+
+    /// @brief The element's last remembered size in each axis, for `contain-intrinsic-size: auto`.
+    /// @see https://drafts.csswg.org/css-sizing-4/#last-remembered
+    KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept;
+    KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalHeight() const noexcept;
+    void SetLastRememberedLogicalWidth(LayoutUnit width) noexcept;
+    void ClearLastRememberedLogicalWidth() noexcept;
+    void SetLastRememberedLogicalHeight(LayoutUnit height) noexcept;
+    void ClearLastRememberedLogicalHeight() noexcept;
+
+#pragma endregion
+
 #pragma region Commands
 
     /// @brief Whether the element carries out a built-in command for the buttons whose `commandfor` element
@@ -1248,6 +1267,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD ElementRareData &EnsureElementRareData() noexcept;
 
     void SetCustomElementState(CustomElementState state) noexcept;
+
+    void DisconnectFromResizeObservers() noexcept;
 
     KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;
     KRYS_NODISCARD bool IsUserActionElementActive() const noexcept;

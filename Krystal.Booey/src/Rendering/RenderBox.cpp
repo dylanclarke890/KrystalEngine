@@ -3826,8 +3826,18 @@ namespace krys::boo
       return null;
     }
 
-    // FIXME: The last remembered size of an element whose contents are skipped (contain-intrinsic-size:
-    // auto), once there's content-visibility.
+    if (containIntrinsicWidth.HasAuto() && IsSkippedContentRoot(*this))
+    {
+      // If auto is specified and the element has a last remembered size and is currently skipping its
+      // contents, its explicit intrinsic inner size in the corresponding axis is the last remembered size in
+      // that axis.
+      // https://drafts.csswg.org/css-sizing-4/#intrinsic-size-override
+      if (auto width = IsHorizontalWritingMode() ? GetElement()->LastRememberedLogicalWidth()
+                                                 : GetElement()->LastRememberedLogicalHeight())
+      {
+        return width;
+      }
+    }
 
     if (auto length = containIntrinsicWidth.TryLength())
     {
@@ -3849,8 +3859,18 @@ namespace krys::boo
       return null;
     }
 
-    // FIXME: The last remembered size of an element whose contents are skipped (contain-intrinsic-size:
-    // auto), once there's content-visibility.
+    if (containIntrinsicHeight.HasAuto() && IsSkippedContentRoot(*this))
+    {
+      // If auto is specified and the element has a last remembered size and is currently skipping its
+      // contents, its explicit intrinsic inner size in the corresponding axis is the last remembered size in
+      // that axis.
+      // https://drafts.csswg.org/css-sizing-4/#intrinsic-size-override
+      if (auto height = IsHorizontalWritingMode() ? GetElement()->LastRememberedLogicalHeight()
+                                                  : GetElement()->LastRememberedLogicalWidth())
+      {
+        return height;
+      }
+    }
 
     if (auto length = containIntrinsicHeight.TryLength())
     {

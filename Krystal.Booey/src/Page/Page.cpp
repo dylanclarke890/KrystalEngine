@@ -204,7 +204,7 @@ namespace krys::boo
     ForEachDocument([](dom::Document &document) { document.ProcessTopLayerRemovals(); });
 
     RunProcessingStep(RenderingUpdateStep::ResizeObservations,
-                      [](dom::Document &document) { document.UpdateResizeObservations(); });
+                      [this](dom::Document &document) { document.UpdateResizeObservations(*this); });
 
     // https://html.spec.whatwg.org/#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,

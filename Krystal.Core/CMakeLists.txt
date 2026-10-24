@@ -277,6 +277,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Utils/NativeHandle.hpp
       include/Krystal.Core/Utils/NeverDestroyed.hpp
       include/Krystal.Core/Utils/PointerComparison.hpp
+      include/Krystal.Core/Utils/ScopeExit.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
       include/Krystal.Core/Utils/SetForScope.hpp
       include/Krystal.Core/Utils/StringId.hpp
