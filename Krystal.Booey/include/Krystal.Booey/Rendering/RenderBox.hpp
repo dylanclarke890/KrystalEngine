@@ -778,6 +778,8 @@ namespace krys::boo
     KRYS_NODISCARD virtual int32 ScrollLeft() const noexcept;
     KRYS_NODISCARD virtual int32 ScrollTop() const noexcept;
     KRYS_NODISCARD ScrollPosition GetScrollPosition() const noexcept;
+    /// @brief The scroll position, constrained to the scrollable area's range (without any overscroll).
+    KRYS_NODISCARD ScrollPosition ConstrainedScrollPosition() const noexcept;
     virtual void SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options =
                                                 ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
     virtual void SetScrollTop(int32 newTop, const ScrollPositionChangeOptions &options =

@@ -765,7 +765,7 @@ namespace krys::boo::html
       GetPopoverData()->SetVisibilityState(dom::PopoverVisibilityState::Showing);
     }
 
-    // FIXME: Set the implicit anchor element to source, with anchor positioning (B4g).
+    // The invoker is also the popover's implicit anchor element.
     SetInvoker(source);
 
     RunPopoverFocusingSteps();
@@ -854,7 +854,6 @@ namespace krys::boo::html
       }
 
       RequestRemoveFromTopLayer();
-      // FIXME: Clear the implicit anchor element, with anchor positioning (B4g).
     }
     else if (IsInTopLayer())
     {

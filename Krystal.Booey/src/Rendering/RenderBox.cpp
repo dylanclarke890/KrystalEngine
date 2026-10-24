@@ -142,8 +142,8 @@ namespace krys::boo
       frame->GetEventHandler().StopAutoscrollTimer(true);
     }
 
-    // FIXME: Unregister the box's scroll snap positions, anchors, position-try box and anchor scroll
-    // adjusters, once there are any.
+    // FIXME: Unregister the box's scroll snap positions, position-try box and anchor scroll adjusters, once
+    // there are any. (Anchors unregister in RenderBoxModelObject::WillBeDestroyed.)
     if (HasInitializedStyle() && Style().GetContainerType() != ContainerType::Normal)
     {
       View().UnregisterContainerQueryBox(*this);
@@ -807,6 +807,23 @@ namespace krys::boo
     }
 
     return scrollableArea->GetScrollPosition();
+  }
+
+  ScrollPosition RenderBox::ConstrainedScrollPosition() const noexcept
+  {
+    if (!HasPotentiallyScrollableOverflow())
+    {
+      return {0, 0};
+    }
+
+    krys_debug_assert(HasLayer());
+    auto *scrollableArea = Layer()->GetScrollableArea();
+    if (!scrollableArea)
+    {
+      return {0, 0};
+    }
+
+    return scrollableArea->ConstrainedScrollPosition(scrollableArea->GetScrollPosition());
   }
 
   void RenderBox::SetScrollLeft(int32 newLeft, const ScrollPositionChangeOptions &options) noexcept

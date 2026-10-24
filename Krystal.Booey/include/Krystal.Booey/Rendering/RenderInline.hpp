@@ -70,6 +70,10 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    /// @brief The top left of the inline's first inline box.
+    KRYS_NODISCARD LayoutPoint FirstInlineBoxTopLeft() const noexcept;
+    KRYS_NODISCARD LayoutUnit OffsetLeft() const noexcept final;
+    KRYS_NODISCARD LayoutUnit OffsetTop() const noexcept final;
     KRYS_NODISCARD LayoutRect FrameRectForStickyPositioning() const noexcept final
     {
       return LayoutRect(LinesBoundingBox());

@@ -800,6 +800,17 @@ namespace krys::boo::dom
     MarkAncestorsForInvalidatedStyle();
   }
 
+  void Element::InvalidateForAnchorRectChange() noexcept
+  {
+    Node::InvalidateStyle(style::Validity::ElementInvalid);
+  }
+
+  void Element::InvalidateForResumingAnchorPositionedElementResolution() noexcept
+  {
+    InvalidateStyleInternal();
+    MarkAncestorsForInvalidatedStyle();
+  }
+
   void Element::FinishParsingChildren() noexcept
   {
     ClearNodeFlag(NodeFlags::IsParsingChildren);

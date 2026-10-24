@@ -405,6 +405,25 @@ namespace krys::boo
     container->MapLocalToContainer(ancestorContainer, transformState, mode, wasFixed);
   }
 
+  LayoutUnit RenderInline::OffsetLeft() const noexcept
+  {
+    return AdjustedPositionRelativeToOffsetParent(FirstInlineBoxTopLeft()).X();
+  }
+
+  LayoutUnit RenderInline::OffsetTop() const noexcept
+  {
+    return AdjustedPositionRelativeToOffsetParent(FirstInlineBoxTopLeft()).Y();
+  }
+
+  LayoutPoint RenderInline::FirstInlineBoxTopLeft() const noexcept
+  {
+    if (auto *lineLayout = layout_integration::LineLayout::Containing(*this))
+    {
+      return lineLayout->FirstInlineBoxRect(*this).Location();
+    }
+    return {};
+  }
+
   IntRect RenderInline::LinesBoundingBox() const noexcept
   {
     if (auto *layout = layout_integration::LineLayout::Containing(*this))

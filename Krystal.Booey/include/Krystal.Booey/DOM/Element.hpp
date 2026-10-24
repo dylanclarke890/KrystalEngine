@@ -830,6 +830,8 @@ namespace krys::boo::dom
     void InvalidateStyleForSubtreeInternal() noexcept;
     void InvalidateForQueryContainerSizeChange() noexcept;
     void InvalidateForResumingQueryContainerResolution() noexcept;
+    void InvalidateForAnchorRectChange() noexcept;
+    void InvalidateForResumingAnchorPositionedElementResolution() noexcept;
 
     /// @brief Whether a change to the element needs to invalidate style: false when the element isn't
     /// connected or its style (or the whole document's) will be resolved again anyway.

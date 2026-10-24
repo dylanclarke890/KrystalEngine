@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
+#include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -75,7 +76,7 @@ namespace krys::boo::style
     // available via DOM.
     const RenderStyle *DocumentElementStyle {nullptr};
     style::SelectorMatchingState *SelectorMatchingState {nullptr};
-    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with anchor positioning.
+    style::TreeResolutionState *TreeResolutionState {nullptr};
 
     bool IsSVGUseTreeRoot {false};
   };

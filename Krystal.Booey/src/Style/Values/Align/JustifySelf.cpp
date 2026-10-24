@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/Values/Align/JustifySelf.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"

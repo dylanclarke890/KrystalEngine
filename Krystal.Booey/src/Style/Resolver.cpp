@@ -51,14 +51,14 @@ namespace krys::boo::style
     const RenderStyle *_parentStyle {};
     UniquePtr<const RenderStyle> _ownedParentStyle;
     const RenderStyle *_rootElementStyle {};
-    // FIXME: The tree resolution state (the anchor-positioned states) comes with anchor positioning.
+    style::TreeResolutionState *_treeResolutionState {};
 
   public:
     State() noexcept = default;
 
     State(const dom::Element &element, const RenderStyle *parentStyle,
-          const RenderStyle *documentElementStyle) noexcept
-        : _element(&element), _parentStyle(parentStyle)
+          const RenderStyle *documentElementStyle, style::TreeResolutionState *treeResolutionState) noexcept
+        : _element(&element), _parentStyle(parentStyle), _treeResolutionState(treeResolutionState)
     {
       krys_debug_assert(element.IsConnected());
 
@@ -119,6 +119,11 @@ namespace krys::boo::style
     KRYS_NODISCARD const RenderStyle *RootElementStyle() const noexcept
     {
       return _rootElementStyle;
+    }
+
+    KRYS_NODISCARD style::TreeResolutionState *GetTreeResolutionState() const noexcept
+    {
+      return _treeResolutionState;
     }
   };
 
@@ -224,7 +229,8 @@ namespace krys::boo::style
   auto Resolver::InitializeStateAndStyle(const dom::Element &element, const ResolutionContext &context,
                                          UniquePtr<RenderStyle> &&initialStyle) noexcept -> State
   {
-    auto state = State {element, context.ParentStyle, context.DocumentElementStyle};
+    auto state =
+      State {element, context.ParentStyle, context.DocumentElementStyle, context.TreeResolutionState};
 
     if (initialStyle)
     {
@@ -275,7 +281,8 @@ namespace krys::boo::style
     return BuilderContext {.Document = ShareRefPtr(&Document()),
                            .ParentStyle = state.ParentStyle(),
                            .RootElementStyle = state.RootElementStyle(),
-                           .Element = ShareRefPtr(state.Element())};
+                           .Element = ShareRefPtr(state.Element()),
+                           .TreeResolutionState = state.GetTreeResolutionState()};
   }
 
   UnadjustedStyle Resolver::UnadjustedStyleForElement(dom::Element &element, const ResolutionContext &context,
@@ -398,7 +405,7 @@ namespace krys::boo::style
       }
     }
 
-    auto state = State(element, nullptr, context.DocumentElementStyle);
+    auto state = State(element, nullptr, context.DocumentElementStyle, context.TreeResolutionState);
 
     state.SetStyle(RenderStyle::ClonePtr(elementStyle));
     state.SetParentStyle(RenderStyle::ClonePtr(context.ParentStyle ? *context.ParentStyle : elementStyle));
@@ -657,7 +664,8 @@ namespace krys::boo::style
                                                        const PseudoElementRequest &pseudoElementRequest,
                                                        const ResolutionContext &context) noexcept
   {
-    auto state = State(element, context.ParentStyle, context.DocumentElementStyle);
+    auto state =
+      State(element, context.ParentStyle, context.DocumentElementStyle, context.TreeResolutionState);
 
     if (state.ParentStyle())
     {
@@ -710,7 +718,7 @@ namespace krys::boo::style
       return RenderStyle::CreatePtr();
     }
 
-    auto state = State(*documentElement, Document().InitialContainingBlockStyle(), nullptr);
+    auto state = State(*documentElement, Document().InitialContainingBlockStyle(), nullptr, nullptr);
 
     state.SetStyle(RenderStyle::CreatePtr());
     state.Style()->InheritFrom(*state.RootElementStyle());

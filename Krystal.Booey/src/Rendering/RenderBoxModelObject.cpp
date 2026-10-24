@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -85,7 +86,25 @@ namespace krys::boo
       GetFirstLetterRemainingTextMap().erase(this);
     }
 
+    View().UnregisterAnchor(*this);
+
     RenderLayerModelObject::WillBeDestroyed();
+  }
+
+  void RenderBoxModelObject::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
+  {
+    const auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+
+    if (style::AnchorPositionEvaluator::IsAnchor(newStyle))
+    {
+      View().RegisterAnchor(*this);
+    }
+    else if (oldStyle && style::AnchorPositionEvaluator::IsAnchor(*oldStyle))
+    {
+      View().UnregisterAnchor(*this);
+    }
+
+    RenderLayerModelObject::StyleWillChange(diff, newStyle);
   }
 
   RenderTextFragment *RenderBoxModelObject::FirstLetterRemainingText() const noexcept

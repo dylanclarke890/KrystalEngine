@@ -91,6 +91,12 @@ namespace krys::boo::style
     }
   }
 
+  ScopeIdentifier ScopeIdentifier::Generate() noexcept
+  {
+    static uint64 next = 0;
+    return ScopeIdentifier {++next};
+  }
+
   Scope::Scope(dom::Document &document) noexcept
       : _document(&document), _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
         _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
@@ -1121,8 +1127,8 @@ namespace krys::boo::style
   {
     auto didInvalidate = false;
     didInvalidate |= InvalidateForContainerDependencies(context);
-    // FIXME: The anchor-positioned boxes and position-try fallbacks (invalidateForAnchorDependencies,
-    // invalidateForPositionTryFallbacks), once there's anchor positioning.
+    didInvalidate |= InvalidateForAnchorDependencies(context);
+    // FIXME: The position-try fallbacks (invalidateForPositionTryFallbacks), with position options.
     return didInvalidate;
   }
 
@@ -1188,5 +1194,97 @@ namespace krys::boo::style
     }
 
     return !containersToInvalidate.empty();
+  }
+
+  bool Scope::InvalidateForAnchorDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    auto previousAnchorPositions = krys::move(_anchorPositionsOnLastUpdate);
+    _anchorPositionsOnLastUpdate.clear();
+
+    List<Ref<dom::Element>> anchoredElementsToInvalidate;
+
+    if (renderView->Anchors().empty())
+    {
+      return false;
+    }
+
+    auto anchorMap = AnchorPositionEvaluator::MakeAnchorPositionedForAnchorMap(_anchorPositionedToAnchorMap);
+
+    auto makeAnchorPosition = [&](const RenderBoxModelObject &anchorRenderer)
+    {
+      AnchorPosition result;
+      result.AbsoluteRect = LayoutRect(anchorRenderer.AbsoluteBoundingBoxRectIgnoringTransforms());
+      // Include containing block sizes as anchor function insets may be computed against any side and if they
+      // change we need to invalidate.
+      for (auto *containingBlock = anchorRenderer.ContainingBlock(); containingBlock;
+           containingBlock = containingBlock->ContainingBlock())
+      {
+        if (containingBlock->CanContainAbsolutelyPositionedObjects())
+        {
+          result.ContainingBlockSizes.push_back(containingBlock->ContentBoxSize());
+        }
+      }
+      return result;
+    };
+
+    for (const auto *anchorRenderer : renderView->Anchors())
+    {
+      auto anchorPosition = makeAnchorPosition(*anchorRenderer);
+      _anchorPositionsOnLastUpdate.insert_or_assign(
+        anchorRenderer, Pair<WeakPtr<const RenderObject>, AnchorPosition> {
+                          CreateWeakPtr<const RenderObject>(anchorRenderer), anchorPosition});
+
+      auto it = previousAnchorPositions.find(anchorRenderer);
+      bool changed =
+        it == previousAnchorPositions.end() || !it->second.first || it->second.second != anchorPosition;
+      if (!changed)
+      {
+        continue;
+      }
+
+      auto anchoredElements = anchorMap.find(anchorRenderer);
+      if (anchoredElements == anchorMap.end())
+      {
+        continue;
+      }
+
+      for (auto &anchoredElement : anchoredElements->second)
+      {
+        if (!context.InvalidatedAnchorPositioned.insert(anchoredElement.get()).second)
+        {
+          continue;
+        }
+        anchoredElementsToInvalidate.push_back(anchoredElement);
+      }
+    }
+
+    for (auto &toInvalidate : anchoredElementsToInvalidate)
+    {
+      auto *renderer = toInvalidate->Renderer();
+      if (renderer && AnchorPositionEvaluator::IsLayoutTimeAnchorPositioned(renderer->Style()))
+      {
+        renderer->SetNeedsLayout();
+      }
+      toInvalidate->InvalidateForAnchorRectChange();
+    }
+
+    return !anchoredElementsToInvalidate.empty();
+  }
+
+  void Scope::UpdateAnchorPositioningStateAfterStyleResolution() noexcept
+  {
+    // FIXME: Update the anchors' scroll adjustments (AnchorPositionEvaluator::updateScrollAdjustments), with
+    // the anchors' scroll adjustment.
+
+    std::erase_if(_anchorPositionedToAnchorMap, [](const auto &elementAndState)
+                  { return !elementAndState.second.Element || elementAndState.second.Anchors.empty(); });
   }
 }

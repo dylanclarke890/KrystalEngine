@@ -115,8 +115,11 @@ namespace krys::boo::style::tests
     CHECK(justifySelf(u8"left") == "right");
     CHECK(alignSelf(u8"start") == "start");
 
-    // `flip-start` resolves physical positions to logical ones, ready to be swapped across axes.
+    // `flip-start` swaps the axes: `justify-self` applies to `align-self`, its physical positions resolved to
+    // logical ones first.
     UseFallback(*this, {PositionTryFallbackTactic::FlipStart});
-    CHECK(justifySelf(u8"left") == "self-start");
+    Build(PropertyId::JustifySelf, u8"left");
+    CHECK(Serialised(Style.GetAlignSelf()) == "self-start");
+    CHECK(Serialised(Style.GetJustifySelf()) == "right");
   }
 }

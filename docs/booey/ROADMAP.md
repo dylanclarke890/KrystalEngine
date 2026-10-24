@@ -411,3 +411,15 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 - **Booey** (the ledger entry is *Commands* in `docs/booey/PORTING.md`): buttons' `command` (the built-in `toggle-popover`, `show-popover`, `hide-popover`, `show-modal`, `close` and `request-close`, and custom `--` commands) and `commandfor` (`commandForElement`, an element reflection attribute); a `command` event (`CommandEvent`, trusted, cancelable, not bubbling, with the button as `source`) at the `commandfor` element, then its built-in command unless canceled (`HandleCommandInternal` on popovers and dialogs, the button the source); a button with a command and no `type` is a plain button, and in a form needs an explicit `type=button`; a click on a button doesn't light dismiss the popover it's the `commandfor` of.
 - **Editor:** the dialogs card opens Refill with `command=show-modal`; the tip uses a custom `--show` command, carried out by the editor in C++ from its `CommandEvent`, and closes with `command=close`. The `data-dialog` opener went.
 - **Tests:** 3 cases (`tests/HTML/HTMLButtonElement.cpp`); the Krystal.UI case for the editor page's cards opens and closes the dialogs through their commands.
+
+### B4g as split (2026-10-24)
+
+Anchor positioning is in three steps:
+- **B4g1, anchors and their functions:** `AnchorPositionEvaluator` (finding anchors: `anchor-name`, `position-anchor`, `anchor-scope`, acceptable anchors, implicit anchors), `anchor()`, `anchor-size()`, `position-area` and `anchor-center` (the default anchor box in `PositionedLayoutConstraints`), and style resolution interleaved with layout for anchor-positioned boxes.
+- **B4g2, position options and `position-visibility`:** `@position-try`, `position-try-fallbacks`, `position-try-order` and the last successful option (the tree resolver's position options, the render view's position-try boxes, the scope's invalidation), and `position-visibility` (`anchors-valid`, `anchors-visible`, `no-overflow`).
+- **B4g3, scroll adjustment:** `AnchorScrollAdjuster` and the scroll snapshots, the layers' anchor scroll adjustment (`RenderLayer`, the compositor, `LocalFrameView`), and the scrollers' anchor dependencies.
+
+### B4g1 as built (2026-10-24)
+
+- **Booey** (the ledger entry is *Anchor positioning* in `docs/booey/PORTING.md`): anchor-positioned boxes find their anchors by `anchor-name` (the last acceptable one in tree order, limited by `anchor-scope`), by `position-anchor`, or implicitly (a popover's invoker, a pseudo-element's originating element); `anchor()` and `anchor-size()` resolve against them, with their fallbacks; `position-area` and `anchor-center` place a box by its default anchor; style resolution and layout interleave until anchors are found and laid out, and a box follows its anchor when the anchor moves or resizes. `RenderInline`'s `offsetLeft` and `offsetTop` were fixed on the way.
+- **Tests:** 3 cases (`tests/Style/AnchorPositionEvaluator.cpp`).

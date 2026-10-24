@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCustomPropertyData.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/BuilderGenerated.hpp"
 #include "Krystal.Booey/Style/BuilderStateInlines.hpp"
 #include "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp"
@@ -387,8 +388,11 @@ namespace krys::boo::style
       return ApplyProperty(newId, *valueToApply, linkMatchMask, cascadeOrigin);
     }
 
-    // FIXME: Resolve the property for the position-try fallback's tactics
-    // (`AnchorPositionEvaluator::resolvePositionTryFallbackProperty`) once anchor positioning is ported.
+    if (_state->GetPositionTryFallback())
+    {
+      id = AnchorPositionEvaluator::ResolvePositionTryFallbackProperty(id, style.GetWritingMode(),
+                                                                       *_state->GetPositionTryFallback());
+    }
 
     auto valueId = valueToApply->ValueId();
     auto valueType = [&]

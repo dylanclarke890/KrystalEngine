@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include <utility>
 
 namespace krys::boo
@@ -29,11 +31,10 @@ namespace krys::boo
                                                          : _writingMode.BlockAxis()),
         _style(style), _alignment(_containingAxis == LogicalBoxAxis::Inline ? style.GetJustifySelf().Resolve()
                                                                             : style.GetAlignSelf().Resolve()),
-        // FIXME: The default anchor box (AnchorPositionEvaluator::defaultAnchorForBox), once there's anchor
-        // positioning.
-        _defaultAnchorBox(nullptr), _marginBefore(style::MarginEdge::Fixed {0}),
-        _marginAfter(style::MarginEdge::Fixed {0}), _insetBefore(style::InsetEdge::Fixed {0}),
-        _insetAfter(style::InsetEdge::Fixed {0})
+        _defaultAnchorBox(NeedsAnchor() ? style::AnchorPositionEvaluator::DefaultAnchorForBox(renderer)
+                                        : nullptr),
+        _marginBefore(style::MarginEdge::Fixed {0}), _marginAfter(style::MarginEdge::Fixed {0}),
+        _insetBefore(style::InsetEdge::Fixed {0}), _insetAfter(style::InsetEdge::Fixed {0})
   {
     krys_debug_assert(_container);
 
@@ -249,8 +250,31 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Store the anchor geometry (computeAnchorRectRelativeToContainingBlock) and adjust the containing
-    // block for position-area, once there's anchor positioning.
+    // Store the anchor geometry.
+    LayoutRect anchorRect = style::AnchorPositionEvaluator::ComputeAnchorRectRelativeToContainingBlock(
+      *_defaultAnchorBox, *_container, _renderer);
+    _anchorArea = ExtractRange(anchorRect);
+
+    // Adjust containing block for position-area.
+    if (_style.GetPositionArea().IsNone())
+    {
+      return;
+    }
+    _containingRange = AdjustForPositionArea(_containingRange, _anchorArea, _physicalAxis);
+
+    // Margin basis is always against the inline axis.
+    if (LogicalBoxAxis::Inline == _containingAxis)
+    {
+      _containingInlineSize = _containingRange.Size();
+      return;
+    }
+    // Else we're representing the block axis, but need the inline dimensions.
+    auto inlineAxis = OppositeAxis(_physicalAxis);
+    LayoutRange inlineContainingBlock(_container->BorderLogicalLeft(), _containingInlineSize);
+    auto inlineAnchorArea = BoxAxis::Horizontal == inlineAxis
+                              ? LayoutRange {anchorRect.X(), anchorRect.Width()}
+                              : LayoutRange {anchorRect.Y(), anchorRect.Height()};
+    _containingInlineSize = AdjustForPositionArea(inlineContainingBlock, inlineAnchorArea, inlineAxis).Size();
   }
 
   LayoutRange PositionedLayoutConstraints::AdjustForPositionArea(LayoutRange rangeToAdjust,
@@ -543,9 +567,18 @@ namespace krys::boo
       // See https://www.w3.org/TR/css-align-3/#auto-safety-position
 
       auto containingRange = _originalContainingRange;
-      // FIXME: A fixed positioned box with a default anchor may overflow into the view's scrollable area
-      // (expandToScrollableArea from the constrained scroll position), once there's anchor positioning and
-      // the frame view scrolls.
+      if (_defaultAnchorBox && PositionType::Fixed == _style.GetPosition())
+      {
+        // We didn't modify the _containingRange to include scrollable area for positioning, but we should
+        // allow it for overflow management if we can scroll to reach that overflow.
+        if (const auto *renderView = DynamicDowncast<RenderView>(_container))
+        {
+          auto &view = renderView->FrameView();
+          auto scrollPosition = view.ScrollPositionRespectingCustomFixedPosition();
+          ExpandToScrollableArea(containingRange, view.ConstrainedScrollPosition(ScrollPosition {
+                                                    scrollPosition.X().ToInt(), scrollPosition.Y().ToInt()}));
+        }
+      }
 
       auto spaceAfter = std::max(0_lu, containingRange.Max() - _insetModifiedContainingRange.Max());
       auto spaceBefore = std::max(0_lu, _insetModifiedContainingRange.Min() - containingRange.Min());

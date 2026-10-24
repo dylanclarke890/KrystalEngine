@@ -468,6 +468,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/Updating/RenderTreeBuilderFirstLetter.cpp
 		tests/Page/Settings.cpp
 		tests/Style/Adjuster.cpp
+		tests/Style/AnchorPositionEvaluator.cpp
 		tests/Style/AttributeChangeInvalidation.cpp
 		tests/Style/Builder.cpp
 		tests/Style/BuilderState.cpp

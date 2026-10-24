@@ -37,7 +37,7 @@ namespace krys::boo::style
 
   TreeResolver::~TreeResolver() noexcept
   {
-    // FIXME: Scope::updateAnchorPositioningStateAfterStyleResolution, with anchor positioning.
+    _document->StyleScope().UpdateAnchorPositioningStateAfterStyleResolution();
   }
 
   TreeResolver::Scope::Scope(dom::Document &document, style::Update &update) noexcept
@@ -734,7 +734,8 @@ namespace krys::boo::style
 
   ResolutionContext TreeResolver::MakeResolutionContext() noexcept
   {
-    return {&GetParent().Style, ParentBoxStyle(), DocumentElementStyle(), &GetScope().SelectorMatchingState};
+    return {&GetParent().Style, ParentBoxStyle(), DocumentElementStyle(), &GetScope().SelectorMatchingState,
+            &_treeResolutionState};
   }
 
   ResolutionContext TreeResolver::MakeResolutionContextForPseudoElement(
@@ -758,7 +759,7 @@ namespace krys::boo::style
     };
 
     return {parentStyle(), ParentBoxStyleForPseudoElement(elementUpdate), DocumentElementStyle(),
-            &GetScope().SelectorMatchingState};
+            &GetScope().SelectorMatchingState, &_treeResolutionState};
   }
 
   Maybe<ResolutionContext>
@@ -773,7 +774,8 @@ namespace krys::boo::style
 
     // First line style for inlines is made by inheriting from parent first line style.
     return ResolutionContext {parentFirstLineStyle, ParentBoxStyleForPseudoElement(elementUpdate),
-                              DocumentElementStyle(), &GetScope().SelectorMatchingState};
+                              DocumentElementStyle(), &GetScope().SelectorMatchingState,
+                              &_treeResolutionState};
   }
 
   const RenderStyle *TreeResolver::DocumentElementStyle() const noexcept
@@ -849,13 +851,19 @@ namespace krys::boo::style
     }();
 
     auto unanimatedDisplay = resolvedStyle.Style->Display();
+    auto hasUnresolvedAnchorPosition = HasUnresolvedAnchorPosition(styleable);
 
     WeakStyleOriginatedAnimations newStyleOriginatedAnimations;
 
     auto updateAnimations = [&]
     {
-      // FIXME: Not updating animations in the back/forward cache, while printing or with an unresolved anchor
-      // position, once there are those.
+      // FIXME: Not updating animations in the back/forward cache or while printing, once there are those.
+
+      if (hasUnresolvedAnchorPosition)
+      {
+        return;
+      }
+
       if (oldStyle && (oldStyle->HasTransitions() || resolvedStyle.Style->HasTransitions()))
       {
         styleable.UpdateCSSTransitions(*oldStyle, *resolvedStyle.Style, newStyleOriginatedAnimations);
@@ -876,6 +884,26 @@ namespace krys::boo::style
 
     auto applyAnimations = [&]() -> Pair<UniquePtr<RenderStyle>, EnumSet<AnimationImpact>>
     {
+      if (hasUnresolvedAnchorPosition)
+      {
+        auto newStyle = krys::move(resolvedStyle.Style);
+        krys_debug_assert(newStyle);
+
+        // When display transitions to none, it keeps its old value throughout the transition, and only
+        // switches to none after the transition ends. CSS transition machinery normally handles this, except
+        // we skip applying transitions when anchor position hasn't been resolved. This results in display:
+        // none until its anchor position is resolved, when it switches back to the old value. To remedy this,
+        // we manually patch display to be the old value if:
+        // 1. the old style's display is not none, and
+        // 2. the new style has display: none and specifies a transition on display.
+        if (oldStyle && oldStyle->HasTransitions() && oldStyle->Display() != DisplayType::None
+            && StyleHasDisplayTransition(*newStyle) && newStyle->Display() == DisplayType::None)
+        {
+          newStyle->SetDisplay(oldStyle->Display());
+        }
+        return {krys::move(newStyle), EnumSet<AnimationImpact> {}};
+      }
+
       if (!styleable.HasKeyframeEffects())
       {
         // FIXME: Push after-change style into parent stack instead.
@@ -955,7 +983,7 @@ namespace krys::boo::style
       changes.Add(Change::Renderer);
     }
 
-    // FIXME: Collecting changed anchor names, with anchor positioning.
+    CollectChangedAnchorNames(*newStyle, currentStyle);
 
     auto animationsAffectedDisplay = [&, animatedDisplay = newStyle->Display()]()
     {
@@ -1082,12 +1110,13 @@ namespace krys::boo::style
     newStyle->SetPseudoElementIdentifier(resolvedStyle.Style->GetPseudoElementIdentifier());
     newStyle->CopyPseudoElementBitsFrom(*resolvedStyle.Style);
 
-    // FIXME: The tree resolution state and the position-try fallback, with anchor positioning.
+    // FIXME: The position-try fallback, with position options.
     auto builderContext = BuilderContext {
       .Document = ShareRefPtr<const dom::Document>(_document.get()),
       .ParentStyle = &parentStyle,
       .RootElementStyle = resolutionContext.DocumentElementStyle,
       .Element = ShareRefPtr<const dom::Element>(&styleable.Element),
+      .TreeResolutionState = &_treeResolutionState,
     };
 
     auto styleBuilder =
@@ -1126,12 +1155,12 @@ namespace krys::boo::style
     const MatchResult &matchResult, const dom::Element &element,
     const ResolutionContext &resolutionContext) noexcept
   {
-    // FIXME: The tree resolution state, with anchor positioning.
     auto builderContext = BuilderContext {
       .Document = ShareRefPtr<const dom::Document>(_document.get()),
       .ParentStyle = resolutionContext.ParentStyle,
       .RootElementStyle = resolutionContext.DocumentElementStyle,
       .Element = ShareRefPtr(&element),
+      .TreeResolutionState = &_treeResolutionState,
     };
 
     HashSet<AnimatableCSSProperty> properties(animatedProperties.begin(), animatedProperties.end());
@@ -1488,7 +1517,7 @@ namespace krys::boo::style
       }
 
       auto queryContainerAction = UpdateStateForQueryContainer(element, style, descendantsToResolve);
-      // FIXME: Anchor-positioned elements (updateAnchorPositioningState), with anchor positioning.
+      auto anchorPositionedElementAction = UpdateAnchorPositioningState(element, style);
 
       ResumeDescendantResolutionIfNeeded(element, changes, descendantsToResolve);
 
@@ -1502,7 +1531,8 @@ namespace krys::boo::style
 
         // Style resolution will be resumed after the container or anchor-positioned element has been
         // resolved.
-        if (queryContainerAction == LayoutInterleavingAction::SkipDescendants)
+        if (queryContainerAction == LayoutInterleavingAction::SkipDescendants
+            || anchorPositionedElementAction == LayoutInterleavingAction::SkipDescendants)
         {
           DeferDescendantResolution(element, changes, descendantsToResolve);
           return false;
@@ -1633,7 +1663,11 @@ namespace krys::boo::style
       return nullptr;
     }
 
-    // FIXME: Updating the anchor positioning states after an interleaved layout, with anchor positioning.
+    if (didInterleavedLayout)
+    {
+      AnchorPositionEvaluator::UpdateAnchorPositioningStatesAfterInterleavedLayout(
+        *_document, _treeResolutionState.AnchorPositionedStates);
+    }
 
     if (!documentElement->ChildNeedsStyleRecalc() && !documentElement->NeedsStyleRecalc())
     {
@@ -1668,16 +1702,85 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Revisiting unresolved anchor-positioned elements, unchosen position options and the
-    // anchor-positioned elements of changed anchor names, with anchor positioning.
+    for (auto &[key, state] : _treeResolutionState.AnchorPositionedStates)
+    {
+      // Ensure that style resolution visits any unresolved anchor-positioned elements.
+      if (state->Stage < AnchorPositionResolutionStage::Resolved)
+      {
+        const_cast<dom::Element &>(*key.first).InvalidateForResumingAnchorPositionedElementResolution();
+        _needsInterleavedLayout = true;
+        SaveBeforeResolutionStyleForInterleaving(*key.first);
+      }
+    }
+
+    // FIXME: Revisiting unchosen position options, with position options.
+
+    if (!_changedAnchorNames.empty() || _allAnchorNamesInvalid)
+    {
+      // If there are changes to the anchor names then loop through the existing anchors and see if any of
+      // them references those names.
+      for (auto &[address, anchors] : _document->StyleScope().AnchorPositionedToAnchorMap())
+      {
+        RefPtr<dom::Element> anchorPositionedElement = ShareRefPtr(anchors.Element.get());
+        if (!anchorPositionedElement)
+        {
+          continue;
+        }
+
+        bool anchorPositionedReferencesChangedAnchorNames = [&]
+        {
+          if (_allAnchorNamesInvalid)
+          {
+            return true;
+          }
+
+          for (const auto &anchor : anchors.Anchors)
+          {
+            if (_changedAnchorNames.contains(anchor.Name.Name()))
+            {
+              return true;
+            }
+          }
+
+          return false;
+        }();
+
+        if (anchorPositionedReferencesChangedAnchorNames)
+        {
+          // Invalidate the anchor-positioned element, so subsequent style resolution rounds would visit it.
+          anchorPositionedElement->InvalidateForResumingAnchorPositionedElementResolution();
+
+          // Mark that additional style resolution round is needed.
+          _needsInterleavedLayout = true;
+
+          // If the anchor-positioned element is currently being tracked for resolution, reset the resolution
+          // stage to FindAnchor. This re-runs anchor resolution to pick up new anchor name changes.
+          AnchorPositionedKey anchorPositionedKey {anchorPositionedElement, anchors.PseudoElementIdentifier};
+          auto stateIt = _treeResolutionState.AnchorPositionedStates.find(anchorPositionedKey);
+          if (stateIt != _treeResolutionState.AnchorPositionedStates.end())
+          {
+            krys_debug_assert(stateIt->second);
+            stateIt->second->Stage = AnchorPositionResolutionStage::FindAnchors;
+          }
+        }
+      }
+
+      _changedAnchorNames.clear();
+      _allAnchorNamesInvalid = false;
+    }
 
     if (_update->Roots().empty())
     {
       return {};
     }
 
-    // FIXME: Ensure one interleaved layout when there are anchor-positioned elements, with anchor
-    // positioning.
+    // Ensure we do at least one interleaved layout as any style change may affect existing anchor positions.
+    if (!_didFirstInterleavedLayout
+        && std::ranges::any_of(_document->StyleScope().AnchorPositionedToAnchorMap(),
+                               [](const auto &entry) { return entry.second.Element.get(); }))
+    {
+      _needsInterleavedLayout = true;
+    }
 
     Adjuster::PropagateToDocumentElementAndInitialContainingBlock(*_update, *_document);
 
@@ -1687,18 +1790,136 @@ namespace krys::boo::style
   const RenderStyle *TreeResolver::BeforeResolutionStyle(
     const dom::Element &element, const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept
   {
-    // FIXME: The styles saved for layout interleaving (saveBeforeResolutionStyleForInterleaving), with anchor
-    // positioning.
-    auto *style = element.RenderOrDisplayContentsStyle();
-    if (!pseudoElementIdentifier)
+    auto resolvePseudoStyle = [&](const RenderStyle *style) -> const RenderStyle *
     {
-      return style;
+      if (!pseudoElementIdentifier)
+      {
+        return style;
+      }
+      if (!style)
+      {
+        return nullptr;
+      }
+      return style->GetCachedPseudoStyle(*pseudoElementIdentifier);
+    };
+
+    auto it = _savedBeforeResolutionStylesForInterleaving.find(ShareRef(element));
+    if (it != _savedBeforeResolutionStylesForInterleaving.end())
+    {
+      return resolvePseudoStyle(it->second.get());
     }
+
+    return resolvePseudoStyle(element.RenderOrDisplayContentsStyle());
+  }
+
+  void TreeResolver::SaveBeforeResolutionStyleForInterleaving(const dom::Element &element) noexcept
+  {
+    auto [it, inserted] = _savedBeforeResolutionStylesForInterleaving.try_emplace(ShareRef(element));
+    if (!inserted)
+    {
+      return;
+    }
+    if (auto *style = element.RenderOrDisplayContentsStyle())
+    {
+      it->second = CreateUnique<RenderStyle>(RenderStyle::CloneIncludingPseudoElements(*style));
+    }
+  }
+
+  auto TreeResolver::UpdateAnchorPositioningState(dom::Element &element, const RenderStyle *style) noexcept
+    -> LayoutInterleavingAction
+  {
     if (!style)
     {
-      return nullptr;
+      return LayoutInterleavingAction::None;
     }
-    return style->GetCachedPseudoStyle(*pseudoElementIdentifier);
+
+    auto update = [&](const RenderStyle *style)
+    {
+      if (!style)
+      {
+        return;
+      }
+      AnchorPositionEvaluator::UpdateAnchorPositionedStateForDefaultAnchorAndPositionVisibility(
+        element, *style, _treeResolutionState.AnchorPositionedStates);
+    };
+
+    update(style);
+    update(style->GetCachedPseudoStyle({PseudoElementType::Before}));
+    update(style->GetCachedPseudoStyle({PseudoElementType::After}));
+
+    auto needsInterleavedLayout = HasUnresolvedAnchorPosition({element, null});
+    if (needsInterleavedLayout)
+    {
+      return LayoutInterleavingAction::SkipDescendants;
+    }
+
+    return LayoutInterleavingAction::None;
+  }
+
+  bool TreeResolver::HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept
+  {
+    auto it = _treeResolutionState.AnchorPositionedStates.find(
+      {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+    return it != _treeResolutionState.AnchorPositionedStates.end()
+           && it->second->Stage < AnchorPositionResolutionStage::Resolved;
+  }
+
+  bool TreeResolver::HasResolvedAnchorPosition(const Styleable &styleable) const noexcept
+  {
+    auto it = _treeResolutionState.AnchorPositionedStates.find(
+      {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+    return it != _treeResolutionState.AnchorPositionedStates.end()
+           && it->second->Stage >= AnchorPositionResolutionStage::Resolved;
+  }
+
+  void TreeResolver::CollectChangedAnchorNames(const RenderStyle &newStyle,
+                                               const RenderStyle *currentStyle) noexcept
+  {
+    // A changed anchor name is either a name being added, a name being removed, or a name whose
+    // interpretation changes. This may change which elements get anchored to it.
+
+    if (!currentStyle || currentStyle->GetAnchorNames() != newStyle.GetAnchorNames())
+    {
+      // This could check which individual names differ but usually there is just one.
+      auto addChanged = [&](const RenderStyle &style)
+      {
+        for (const auto &name : style.GetAnchorNames())
+        {
+          _changedAnchorNames.insert(name.Name);
+        }
+      };
+      if (currentStyle)
+      {
+        addChanged(*currentStyle);
+      }
+      addChanged(newStyle);
+    }
+
+    // Only anchor-names in self and descendants are affected by anchor-scope so we need to check only if
+    // there is an existing style.
+    if (currentStyle && currentStyle->AnchorScope() != newStyle.AnchorScope())
+    {
+      auto addChanged = [&](const RenderStyle &style)
+      {
+        switch (style.AnchorScope().Type)
+        {
+          case NameScope::Type::None: break;
+          case NameScope::Type::All:
+            // This affects desdendants too so lets just say all names are invalid.
+            _allAnchorNamesInvalid = true;
+            break;
+          case NameScope::Type::Ident:
+            // A scope change changes interpretation of these names.
+            for (const auto &name : style.AnchorScope().Names)
+            {
+              _changedAnchorNames.insert(name.Value);
+            }
+            break;
+        }
+      };
+      addChanged(*currentStyle);
+      addChanged(newStyle);
+    }
   }
 
   static List<Func<void()>> &PostResolutionCallbackQueue() noexcept

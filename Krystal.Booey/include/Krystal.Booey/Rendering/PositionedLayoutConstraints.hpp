@@ -15,8 +15,6 @@ namespace krys::boo
 {
   /// @brief The constraints an out-of-flow positioned box is sized and positioned under, along one of its
   /// axes: its containing block's range, its insets and margins, and its alignment.
-  // FIXME: Anchor positioning (the default anchor box, position-area and anchor-center), once there's anchor
-  // positioning; until then a box never has a default anchor.
   class PositionedLayoutConstraints
   {
   private:

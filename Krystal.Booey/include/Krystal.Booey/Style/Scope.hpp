@@ -2,8 +2,11 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/ScopedName.hpp"
+#include "Krystal.Booey/Style/ScopeIdentifier.hpp"
 #include "Krystal.Booey/Style/ScopeOrdinal.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
@@ -40,6 +43,12 @@ namespace krys::boo::dom
 namespace krys::boo::html
 {
   class HTMLSlotElement;
+}
+
+namespace krys::boo
+{
+  class RenderBoxModelObject;
+  class RenderObject;
 }
 
 namespace krys::boo::style
@@ -96,6 +105,7 @@ namespace krys::boo::style
     };
 
   private:
+    const ScopeIdentifier _identifier {ScopeIdentifier::Generate()};
     dom::Document *_document;
     dom::ShadowRoot *_shadowRoot {nullptr};
 
@@ -136,11 +146,25 @@ namespace krys::boo::style
     HashMap<const dom::Element *, Pair<WeakPtr<const dom::Element>, LayoutSize>>
       _queryContainerDimensionsOnLastUpdate;
 
+    style::AnchorPositionedToAnchorMap _anchorPositionedToAnchorMap;
+
+    struct AnchorPosition
+    {
+      LayoutRect AbsoluteRect;
+      List<LayoutSize> ContainingBlockSizes;
+
+      KRYS_NODISCARD bool operator==(const AnchorPosition &) const noexcept = default;
+    };
+    // Keyed by address, like the query containers' dimensions.
+    HashMap<const RenderBoxModelObject *, Pair<WeakPtr<const RenderObject>, AnchorPosition>>
+      _anchorPositionsOnLastUpdate;
+
   public:
     /// @brief What the invalidations for layout dependencies have already invalidated in one layout.
     struct LayoutDependencyUpdateContext
     {
       HashSet<const dom::Element *> InvalidatedContainers;
+      HashSet<const dom::Element *> InvalidatedAnchorPositioned;
     };
 
     explicit Scope(dom::Document &document) noexcept;
@@ -258,6 +282,11 @@ namespace krys::boo::style
       return _shadowRoot;
     }
 
+    KRYS_NODISCARD ScopeIdentifier Identifier() const noexcept
+    {
+      return _identifier;
+    }
+
     /// @brief The scope of the shadow root's host, or null for a document's scope.
     KRYS_NODISCARD const Scope *HostScope() const noexcept;
 
@@ -281,6 +310,17 @@ namespace krys::boo::style
     /// @return Whether anything was invalidated, so the document needs another style update and layout.
     bool InvalidateForLayoutDependencies(LayoutDependencyUpdateContext &context) noexcept;
 
+    /// @brief The anchors each anchor-positioned element was last resolved against.
+    KRYS_NODISCARD style::AnchorPositionedToAnchorMap &AnchorPositionedToAnchorMap() noexcept
+    {
+      return _anchorPositionedToAnchorMap;
+    }
+    KRYS_NODISCARD const style::AnchorPositionedToAnchorMap &AnchorPositionedToAnchorMap() const noexcept
+    {
+      return _anchorPositionedToAnchorMap;
+    }
+    void UpdateAnchorPositioningStateAfterStyleResolution() noexcept;
+
     /// @brief Collapses `setLastSuccessfulPositionOptionIndexMap({ })`.
     // FIXME: A no-op until anchor positioning records the last successful position options.
     void ClearLastSuccessfulPositionOptionIndexMap() noexcept
@@ -289,6 +329,7 @@ namespace krys::boo::style
 
   private:
     bool InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept;
+    bool InvalidateForAnchorDependencies(LayoutDependencyUpdateContext &context) noexcept;
 
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;

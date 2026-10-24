@@ -1864,6 +1864,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp
   include/Krystal.Booey/Page/NavigateEvent.hpp
   include/Krystal.Booey/Page/Navigation.hpp
+  # Anchor positioning (B4g1)
+  include/Krystal.Booey/Style/AnchorPositionEvaluator.hpp
+  include/Krystal.Booey/Style/ResolvedScopedName.hpp
+  include/Krystal.Booey/Style/ScopeIdentifier.hpp
+  include/Krystal.Booey/Style/TreeResolutionState.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3090,6 +3095,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/NavigationCurrentEntryChangeEvent.cpp
   src/Page/NavigateEvent.cpp
   src/Page/Navigation.cpp
+  # Anchor positioning (B4g1)
+  src/Style/AnchorPositionEvaluator.cpp
+  src/Style/ResolvedScopedName.cpp
 )
 
 target_precompile_headers(Krystal.Booey

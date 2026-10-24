@@ -240,6 +240,7 @@ namespace krys::boo
                          EnumSet<TypeFlag> baseTypeFlags, TypeSpecificFlags typeSpecificFlags) noexcept;
 
     void WillBeDestroyed() noexcept override;
+    void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void UpdateFromStyle() noexcept override;
 
     KRYS_NODISCARD LayoutPoint

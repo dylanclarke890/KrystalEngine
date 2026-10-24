@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Core/CanMakeCheckedPtr.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <bitset>
@@ -63,7 +64,7 @@ namespace krys::boo::style
     const RenderStyle *ParentStyle {};
     const RenderStyle *RootElementStyle {};
     RefPtr<const dom::Element> Element {};
-    // FIXME: `treeResolutionState` (the anchor-positioned states) comes with anchor positioning.
+    style::TreeResolutionState *TreeResolutionState {};
     Maybe<BuilderPositionTryFallback> PositionTryFallback {};
   };
 
@@ -207,7 +208,10 @@ namespace krys::boo::style
     KRYS_NODISCARD uint32 SiblingCount() noexcept;
     KRYS_NODISCARD uint32 SiblingIndex() noexcept;
 
-    // FIXME: `anchorPositionedStates()` comes with anchor positioning.
+    KRYS_NODISCARD style::AnchorPositionedStates *AnchorPositionedStates() noexcept
+    {
+      return _context.TreeResolutionState ? &_context.TreeResolutionState->AnchorPositionedStates : nullptr;
+    }
     KRYS_NODISCARD const Maybe<BuilderPositionTryFallback> &GetPositionTryFallback() const noexcept
     {
       return _context.PositionTryFallback;

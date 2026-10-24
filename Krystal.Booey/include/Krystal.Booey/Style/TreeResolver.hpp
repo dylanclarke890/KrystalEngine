@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/SelectorMatchingState.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -35,9 +36,8 @@ namespace krys::boo::style
   };
 
   /// @brief Resolves the styles of a document's elements that need resolving, walking the composed tree.
-  // FIXME: Animations (the animated updates, @starting-style, after-change styles), anchor positioning
-  // (position options, position visibility, changed anchor names), layout interleaving for anchor-positioned
-  // elements, accessibility updates and elements with custom style resolve callbacks.
+  // FIXME: Animations (the animated updates, @starting-style, after-change styles), position options and
+  // position visibility, accessibility updates and elements with custom style resolve callbacks.
   class TreeResolver
   {
     KRYS_NON_COPY_MOVABLE(TreeResolver);
@@ -122,6 +122,14 @@ namespace krys::boo::style
 
     HashMap<Ref<dom::Element>, QueryContainerState> _queryContainerStates;
 
+    // This state gets passes to the style builder and holds state for a single tree resolution, including
+    // over any interleaving.
+    TreeResolutionState _treeResolutionState;
+    HashMap<Ref<const dom::Element>, UniquePtr<RenderStyle>> _savedBeforeResolutionStylesForInterleaving;
+
+    HashSet<css::CSSOMStringAtom> _changedAnchorNames;
+    bool _allAnchorNamesInvalid {false};
+
     UniquePtr<Update> _update;
 
   public:
@@ -148,6 +156,8 @@ namespace krys::boo::style
 
     KRYS_NODISCARD LayoutInterleavingAction UpdateStateForQueryContainer(
       dom::Element &element, const RenderStyle *style, DescendantsToResolve &descendantsToResolve) noexcept;
+    KRYS_NODISCARD LayoutInterleavingAction UpdateAnchorPositioningState(dom::Element &element,
+                                                                         const RenderStyle *style) noexcept;
 
     // For elements requiring style/layout interleaving (anchor-positioned and query
     // containers), descendant resolution is deferred on the first style resolution
@@ -262,6 +272,12 @@ namespace krys::boo::style
     KRYS_NODISCARD const RenderStyle *
       BeforeResolutionStyle(const dom::Element &element,
                             const Maybe<PseudoElementIdentifier> &pseudoElementIdentifier) const noexcept;
+    void SaveBeforeResolutionStyleForInterleaving(const dom::Element &element) noexcept;
+
+    KRYS_NODISCARD bool HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept;
+    KRYS_NODISCARD bool HasResolvedAnchorPosition(const Styleable &styleable) const noexcept;
+
+    void CollectChangedAnchorNames(const RenderStyle &newStyle, const RenderStyle *currentStyle) noexcept;
   };
 
   // Integrate with the HTML5 event loop instead, see EventLoop.cpp and consumers.

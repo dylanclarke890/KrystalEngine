@@ -48,7 +48,6 @@
 // evaluation, colour resolution, the computed value conversions and the extractor need. Each declares only
 // the members those callers use, under its upstream name. None can be constructed. Each type moves to its own
 // header, with its real implementation, when its slice is ported:
-//   - `style::AnchorPositionEvaluator`: anchor positioning (`Style/AnchorPositionEvaluator.hpp`, unreviewed).
 //   - the `Document*` colour functions: `dom::Document` (upstream members) once it has a page and settings.
 //   - the `Document*` security function: `dom::Document` (upstream member) once it has a security origin.
 // A few members collapse an upstream call chain whose types aren't ported yet; they're marked below.
@@ -110,42 +109,4 @@ namespace krys::boo
   /// @brief Collapses `document.protectedSecurityOrigin()->canRequest(url, ...)`. There's no security origin
   /// or loader yet, so every URL can be requested.
   KRYS_NODISCARD bool DocumentCanRequest(const dom::Document &, const url::URL &) noexcept;
-}
-
-namespace krys::boo::style
-{
-  class BuilderState;
-  struct BuilderPositionTryFallback;
-
-  class AnchorPositionEvaluator
-  {
-  public:
-    using Side = Variant<css::ValueId, double>;
-
-    AnchorPositionEvaluator() = delete;
-
-    KRYS_NODISCARD static Maybe<double> Evaluate(BuilderState &, Maybe<ScopedName> elementName,
-                                                 Side) noexcept;
-    KRYS_NODISCARD static Maybe<double> EvaluateSize(BuilderState &, Maybe<ScopedName> elementName,
-                                                     Maybe<AnchorSizeDimension>) noexcept;
-
-    /// @brief Whether @p property takes `anchor()`: the inset properties.
-    KRYS_NODISCARD static bool PropertyAllowsAnchorFunction(css::PropertyId property) noexcept
-    {
-      return css::Property::IsInsetProperty(property);
-    }
-
-    /// @brief Whether @p property takes `anchor-size()`: the sizing, inset and margin properties.
-    KRYS_NODISCARD static bool PropertyAllowsAnchorSizeFunction(css::PropertyId property) noexcept
-    {
-      return css::Property::IsSizingProperty(property) || css::Property::IsInsetProperty(property)
-             || css::Property::IsMarginProperty(property);
-    }
-
-    /// @brief Swaps a self-alignment position (`align-self`/`justify-self`) according to a position-try
-    /// fallback's tactics.
-    KRYS_NODISCARD static css::ValueId
-      ResolvePositionTryFallbackValueForSelfPosition(css::PropertyId, css::ValueId position, WritingMode,
-                                                     const BuilderPositionTryFallback &) noexcept;
-  };
 }
