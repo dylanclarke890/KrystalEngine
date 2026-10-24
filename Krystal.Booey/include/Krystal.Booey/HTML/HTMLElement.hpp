@@ -339,6 +339,11 @@ namespace krys::boo::html
                                                dom::FireEvents fireEvents, bool throwExceptions,
                                                HTMLElement *source) noexcept;
 
+    /// @brief The popover commands, for a popover.
+    KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept override;
+    /// @brief Shows or hides the element, if it's a popover, for the popover commands.
+    bool HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept override;
+
   protected:
 #pragma endregion
 

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
@@ -279,6 +280,49 @@ namespace krys::boo::html
     _requestCloseSourceElement = CreateWeakPtr(source);
     (void)closeWatcher->RequestToClose(false);
     _enableCloseWatcherForRequestClose = false;
+  }
+
+  bool HTMLDialogElement::IsValidCommandType(dom::CommandType command) const noexcept
+  {
+    return HTMLElement::IsValidCommandType(command) || command == dom::CommandType::ShowModal
+           || command == dom::CommandType::Close || command == dom::CommandType::RequestClose;
+  }
+
+  bool HTMLDialogElement::HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept
+  {
+    if (HTMLElement::HandleCommandInternal(invoker, command))
+    {
+      return true;
+    }
+
+    if (IsPopoverShowing())
+    {
+      return false;
+    }
+
+    if (Open())
+    {
+      if (command == dom::CommandType::Close)
+      {
+        CloseTheDialog(invoker.GetAttribute(u8"value"), &invoker);
+        return true;
+      }
+      if (command == dom::CommandType::RequestClose)
+      {
+        RequestCloseTheDialog(invoker.GetAttribute(u8"value"), &invoker);
+        return true;
+      }
+    }
+    else
+    {
+      if (command == dom::CommandType::ShowModal)
+      {
+        (void)ShowModalDialog(&invoker);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void HTMLDialogElement::RunFocusingSteps() noexcept

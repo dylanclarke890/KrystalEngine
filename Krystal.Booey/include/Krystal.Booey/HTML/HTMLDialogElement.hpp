@@ -113,6 +113,12 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dialog-focusing-steps
     void RunFocusingSteps() noexcept;
 
+    /// @brief The popover commands, and the dialog commands.
+    KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept final;
+    /// @brief Shows the dialog modally or closes it for the dialog commands (unless it's a showing popover),
+    /// and shows or hides it for the popover commands.
+    bool HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept final;
+
   protected:
     void OnInsert() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;

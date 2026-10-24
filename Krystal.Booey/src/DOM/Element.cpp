@@ -2464,8 +2464,8 @@ namespace krys::boo::dom
 
   bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
   {
-    // FIXME: commandfor (B4f), and the ARIA element reflection attributes, once there's accessibility.
-    return attributeName == u8"popovertarget";
+    // FIXME: The ARIA element reflection attributes, once there's accessibility.
+    return attributeName == u8"popovertarget" || attributeName == u8"commandfor";
   }
 
 #pragma endregion

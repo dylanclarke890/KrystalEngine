@@ -4,6 +4,7 @@
   #define KRYS_ENABLE_PROFILING
 #endif
 
+#include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
@@ -66,7 +67,7 @@ namespace krys
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
     boo::dom::EventListenerHandle _keyLogger;
-    boo::dom::EventListenerHandle _dialogOpener;
+    boo::dom::EventListenerHandle _commandHandler;
     boo::dom::EventListenerHandle _dialogLogger;
     /// @brief Routes the guide's topics within the page, on the window's navigation.
     boo::dom::EventListenerHandle _router;
@@ -468,38 +469,20 @@ namespace krys
             (void)label->TextContent(krys::move(key));
           }
         });
-      // Opens the dialog a clicked button's `data-dialog` names: modally, unless the button is
-      // `data-modeless`.
-      _dialogOpener = document.AddEventListener(
-        u8"click",
-        [this](boo::dom::Event &event)
+      // Carries out the page's custom `--show` command, which shows a dialog without making it modal (there's
+      // no built-in command for that). `command` doesn't bubble, so this listens as it's captured.
+      _commandHandler = document.AddEventListener<boo::dom::CommandEvent>(
+        u8"command",
+        [](boo::dom::CommandEvent &event)
         {
           auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
-          auto *target = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
-          if (!target)
-          {
-            return;
-          }
-          auto id = target->GetAttribute(u8"data-dialog");
-          if (!id)
-          {
-            return;
-          }
-          auto element = _pageView->Document().GetElementById(*id);
-          auto *dialog = element ? DynamicDowncast<boo::html::HTMLDialogElement>(*element) : nullptr;
-          if (!dialog)
-          {
-            return;
-          }
-          if (target->HasAttribute(u8"data-modeless"))
+          auto *dialog = node ? DynamicDowncast<boo::html::HTMLDialogElement>(*node) : nullptr;
+          if (dialog && event.Command() == u8"--show")
           {
             (void)dialog->Show();
           }
-          else
-          {
-            (void)dialog->ShowModal();
-          }
-        });
+        },
+        true);
       // Shows how the last dialog closed in the page's `#dialog-result` element (`close` doesn't bubble, so
       // this listens as it's captured).
       _dialogLogger = document.AddEventListener(

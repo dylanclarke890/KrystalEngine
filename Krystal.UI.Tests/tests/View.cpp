@@ -3,6 +3,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
+#include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
@@ -447,15 +448,35 @@ namespace krys::ui::tests
       return byId(id)->Matches(u8":popover-open").ReleaseValue();
     };
 
-    SECTION("the modal dialog closes with its buttons' values")
+    SECTION("the dialogs open and close through their commands")
     {
-      // As the editor does for the Refill button.
       auto &refill = Downcast<boo::html::HTMLDialogElement>(*byId(u8"refill"));
-      REQUIRE_FALSE(refill.ShowModal().HasException());
+      click(u8"button[commandfor=refill]");
       CHECK(refill.Matches(u8":modal").ReleaseValue());
       click(u8"#refill button[value=yes]");
       CHECK_FALSE(refill.Open());
       CHECK(refill.ReturnValue() == u8"yes");
+
+      // As the editor does for the tip's custom command.
+      auto &tip = Downcast<boo::html::HTMLDialogElement>(*byId(u8"tip"));
+      List<std::string> commands;
+      auto handler = tip.AddEventListener<boo::dom::CommandEvent>(
+        u8"command",
+        [&](boo::dom::CommandEvent &event)
+        {
+          commands.push_back(std::string(event.Command().begin(), event.Command().end()));
+          if (event.Command() == u8"--show")
+          {
+            (void)tip.Show();
+          }
+        });
+      click(u8"button[commandfor=tip][command='--show']");
+      CHECK(tip.Open());
+      CHECK_FALSE(tip.IsModal());
+      click(u8"#tip button[command=close]");
+      CHECK_FALSE(tip.Open());
+      CHECK(tip.ReturnValue() == u8"tip read");
+      CHECK(commands == List<std::string> {"--show", "close"});
     }
 
     SECTION("the popovers")

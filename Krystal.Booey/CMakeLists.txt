@@ -3299,6 +3299,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Element.hpp
       include/Krystal.Booey/DOM/EventListenerHandle.hpp
       include/Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp
+      include/Krystal.Booey/DOM/Enums/CommandType.hpp
       include/Krystal.Booey/DOM/Enums/CustomElementState.hpp
       include/Krystal.Booey/DOM/Enums/DocumentFlags.hpp
       include/Krystal.Booey/DOM/Enums/DocumentPosition.hpp

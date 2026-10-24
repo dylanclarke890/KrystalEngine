@@ -405,3 +405,9 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 - **Editor:** dialogs, popovers and details cards on the editor page; the editor opens the dialogs (`data-dialog`) until B4f's commands can.
 - **Fixed:** slots and slottables kept each other, so documents with slotted nodes leaked.
 - **Tests:** 4 cases (`tests/HTML/HTMLDetailsElement.cpp`); 2 lifetime cases (`tests/DOM/NodeLifetime.cpp`); one Krystal.UI case for the editor page's cards.
+
+### B4f as built (2026-10-23)
+
+- **Booey** (the ledger entry is *Commands* in `docs/booey/PORTING.md`): buttons' `command` (the built-in `toggle-popover`, `show-popover`, `hide-popover`, `show-modal`, `close` and `request-close`, and custom `--` commands) and `commandfor` (`commandForElement`, an element reflection attribute); a `command` event (`CommandEvent`, trusted, cancelable, not bubbling, with the button as `source`) at the `commandfor` element, then its built-in command unless canceled (`HandleCommandInternal` on popovers and dialogs, the button the source); a button with a command and no `type` is a plain button, and in a form needs an explicit `type=button`; a click on a button doesn't light dismiss the popover it's the `commandfor` of.
+- **Editor:** the dialogs card opens Refill with `command=show-modal`; the tip uses a custom `--show` command, carried out by the editor in C++ from its `CommandEvent`, and closes with `command=close`. The `data-dialog` opener went.
+- **Tests:** 3 cases (`tests/HTML/HTMLButtonElement.cpp`); the Krystal.UI case for the editor page's cards opens and closes the dialogs through their commands.

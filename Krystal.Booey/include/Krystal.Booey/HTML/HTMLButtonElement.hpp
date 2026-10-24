@@ -40,8 +40,10 @@ namespace krys::boo::html
     void Command(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
-    // TODO(HTMLBUTTON, HTML): Implement the command API.
-    // [CEReactions] attribute Element? commandForElement;
+    KRYS_NODISCARD RefPtr<dom::Element> CommandForElementForBindings() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
+    void CommandForElementForBindings(dom::Element *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -124,6 +126,13 @@ namespace krys::boo::html
     /// @brief Whether the button is a submit button because its `type` says so.
     KRYS_NODISCARD bool IsExplicitlySetSubmitButton() const noexcept;
 
+    /// @brief The element the button sends its command: its `commandfor` element.
+    /// @see https://html.spec.whatwg.org/#attr-button-commandfor
+    KRYS_NODISCARD RefPtr<dom::Element> CommandForElement() const noexcept;
+
+    /// @brief The state of the button's `command` attribute.
+    KRYS_NODISCARD dom::CommandType GetCommandType() const noexcept;
+
     bool AppendFormData(DOMFormData &formData) noexcept final;
 
     /// @see https://html.spec.whatwg.org/#the-button-element:activation-behaviour
@@ -139,6 +148,10 @@ namespace krys::boo::html
 
   private:
     void ComputeType(dom::DOMStringView typeAttributeValue) noexcept;
+
+    /// @brief Fires `command` at the button's `commandfor` element, which then carries out a built-in command
+    /// unless a listener canceled it.
+    void HandleCommand() noexcept;
   };
 }
 

@@ -61,6 +61,7 @@
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
@@ -1737,16 +1738,27 @@ namespace krys::boo::dom
       }
       if (!targetPopover)
       {
-        // FIXME: A button's commandfor element, with commands (B4f).
-        if (auto *control = DynamicDowncast<html::HTMLFormControlElement>(*htmlElement))
+        auto isShowingAutoOrHintPopover = [](html::HTMLElement *popover)
         {
-          RefPtr<html::HTMLElement> popover = control->PopoverTargetElement();
-          if (popover && popover->IsPopoverShowing()
-              && (popover->GetPopoverState() == PopoverState::Auto
-                  || popover->GetPopoverState() == PopoverState::Hint))
-          {
-            targetPopover = popover.get();
-          }
+          return popover && popover->IsPopoverShowing()
+                 && (popover->GetPopoverState() == PopoverState::Auto
+                     || popover->GetPopoverState() == PopoverState::Hint);
+        };
+        RefPtr<html::HTMLElement> popover;
+        if (auto *button = DynamicDowncast<html::HTMLButtonElement>(*htmlElement))
+        {
+          RefPtr<Element> commandForElement = button->CommandForElement();
+          popover =
+            ShareRefPtr(commandForElement ? DynamicDowncast<html::HTMLElement>(*commandForElement) : nullptr);
+        }
+        if (!isShowingAutoOrHintPopover(popover.get()))
+        {
+          auto *control = DynamicDowncast<html::HTMLFormControlElement>(*htmlElement);
+          popover = control ? control->PopoverTargetElement() : nullptr;
+        }
+        if (isShowingAutoOrHintPopover(popover.get()))
+        {
+          targetPopover = popover.get();
         }
       }
     }

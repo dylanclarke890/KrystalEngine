@@ -1,16 +1,39 @@
 ﻿#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Rendering/RenderButton.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Types/Array.hpp"
 
 namespace krys::boo::html
 {
+  namespace
+  {
+    struct CommandKeyword
+    {
+      utf8_stringview Keyword;
+      dom::CommandType Type;
+    };
+
+    /// @brief The built-in commands' keywords.
+    constexpr Array<CommandKeyword, 6> CommandKeywords = {{
+      {u8"toggle-popover", dom::CommandType::TogglePopover},
+      {u8"show-popover", dom::CommandType::ShowPopover},
+      {u8"hide-popover", dom::CommandType::HidePopover},
+      {u8"show-modal", dom::CommandType::ShowModal},
+      {u8"close", dom::CommandType::Close},
+      {u8"request-close", dom::CommandType::RequestClose},
+    }};
+  }
+
   HTMLButtonElement::HTMLButtonElement(dom::Document &document) noexcept
       : HTMLFormControlElement(document, HTMLElementInterface::Button)
   {
@@ -43,12 +66,18 @@ namespace krys::boo::html
                                              dom::DOMStringAtom namespaceURI) noexcept
   {
     HTMLFormControlElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
-    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"type")
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+    if (localName == u8"type")
     {
       ComputeType(value.value_or(dom::DOMStringView()));
     }
-    // FIXME: The command and commandfor attributes (Settings::commandAttributesEnabled), once there are
-    // commands.
+    else if (localName == u8"command" || localName == u8"commandfor")
+    {
+      ComputeType(GetAttribute(u8"type").value_or(dom::DOMString()));
+    }
   }
 
   void HTMLButtonElement::ActivationBehavior(dom::Event &event) noexcept
@@ -79,9 +108,22 @@ namespace krys::boo::html
         event.SetDefaultHandled();
         return;
       }
+
+      if (_type == ButtonType::Button
+          && !text::IsASCIICaselessEqual(
+            dom::DOMStringView(GetAttribute(u8"type").value_or(dom::DOMString())),
+            dom::DOMStringView(u8"button")))
+      {
+        return;
+      }
     }
 
-    // FIXME: The button's command (handleCommand), with commands (B4f).
+    if (CommandForElement())
+    {
+      HandleCommand();
+      return;
+    }
+
     HandlePopoverTargetAction(event.Target().get());
   }
 
@@ -183,6 +225,14 @@ namespace krys::boo::html
     {
       _type = ButtonType::Button;
     }
+    else if (text::IsASCIICaselessEqual(typeAttributeValue, dom::DOMStringView(u8"submit")))
+    {
+      _type = ButtonType::Submit;
+    }
+    else if (HasAttribute(u8"command") || HasAttribute(u8"commandfor"))
+    {
+      _type = ButtonType::Button;
+    }
     else
     {
       _type = ButtonType::Submit;
@@ -199,16 +249,105 @@ namespace krys::boo::html
     }
   }
 
+  RefPtr<dom::Element> HTMLButtonElement::CommandForElement() const noexcept
+  {
+    return ElementForAttributeInternal(dom::DOMStringAtom(u8"commandfor"));
+  }
+
+  dom::CommandType HTMLButtonElement::GetCommandType() const noexcept
+  {
+    auto action = GetAttribute(u8"command");
+    if (!action || action->empty())
+    {
+      return dom::CommandType::Invalid;
+    }
+
+    for (const auto &[keyword, type] : CommandKeywords)
+    {
+      if (text::IsASCIICaselessEqual(dom::DOMStringView(*action), dom::DOMStringView(keyword)))
+      {
+        return type;
+      }
+    }
+
+    if (action->starts_with(u8"--"))
+    {
+      return dom::CommandType::Custom;
+    }
+
+    return dom::CommandType::Invalid;
+  }
+
+  void HTMLButtonElement::HandleCommand() noexcept
+  {
+    RefPtr<dom::Element> invokee = CommandForElement();
+    if (!invokee)
+    {
+      return;
+    }
+
+    auto commandRaw = GetAttribute(u8"command");
+    auto command = GetCommandType();
+
+    if (command == dom::CommandType::Invalid)
+    {
+      return;
+    }
+
+    if (command != dom::CommandType::Custom && !invokee->IsValidCommandType(command))
+    {
+      return;
+    }
+
+    dom::CommandEventInit init;
+    init.Bubbles = false;
+    init.Cancelable = true;
+    init.Source = ShareRefPtr<dom::Element>(this);
+    init.Command = commandRaw.value_or(dom::DOMString());
+
+    auto event = dom::CommandEvent::Create(dom::DOMStringAtom(EventNames::Command), init, true);
+    (void)dom::EventDispatcher::DispatchToTarget(*event, invokee.get());
+
+    if (!event->DefaultPrevented() && command != dom::CommandType::Custom)
+    {
+      (void)invokee->HandleCommandInternal(*this, command);
+    }
+  }
+
 #pragma region HTMLButtonElement
 
   dom::DOMString HTMLButtonElement::Command() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"command").value_or(u8"");
+    auto command = GetCommandType();
+    if (command == dom::CommandType::Custom)
+    {
+      return GetAttribute(u8"command").value_or(dom::DOMString());
+    }
+    for (const auto &[keyword, type] : CommandKeywords)
+    {
+      if (type == command)
+      {
+        return dom::DOMString(keyword);
+      }
+    }
+    return {};
   }
 
   void HTMLButtonElement::Command(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"command", krys::move(value));
+  }
+
+  RefPtr<dom::Element> HTMLButtonElement::CommandForElementForBindings() const noexcept
+  {
+    // FIXME: Retargeting against the button's tree, once there are reference targets.
+    return CommandForElement();
+  }
+
+  void HTMLButtonElement::CommandForElementForBindings(dom::Element *element) noexcept
+  {
+    CEReactionsScope ceReactions;
+    SetElementAttribute(dom::DOMStringAtom(u8"commandfor"), element);
   }
 
   bool HTMLButtonElement::Disabled() const noexcept

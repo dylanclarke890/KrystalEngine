@@ -108,14 +108,16 @@
   </div>
 
   <div class="row">
-    <!-- Dialogs: the editor opens them (C++, listening for clicks on buttons with a data-dialog attribute), the
-         first modally: it goes in the top layer over a ::backdrop, takes focus, makes the rest of the page inert
-         and traps Tab. Its form's buttons close it with their values (method="dialog"), Escape closes it, and so
-         does a click outside it (closedby="any"); the editor shows how it closed below. The second isn't modal:
-         the page stays usable, and only its button closes it. -->
+    <!-- Dialogs, opened by command buttons (commandfor and command). Refill's show-modal command shows the first
+         modally: it goes in the top layer over a ::backdrop, takes focus, makes the rest of the page inert and
+         traps Tab. Its form's buttons close it with their values (method="dialog"), Escape closes it, and so
+         does a click outside it (closedby="any"); the editor shows how it closed below. The tip's command is a
+         custom one, which the editor carries out in C++ (it listens for the command event): it shows the
+         second without making it modal, so the page stays usable; its button's close command closes it. -->
     <div class="card overlays" tabindex="0">
       <h2>Dialogs</h2>
-      <p><button data-dialog="refill">Refill</button><button data-dialog="tip" data-modeless>Barista's tip</button></p>
+      <p><button commandfor="refill" command="show-modal">Refill</button><button commandfor="tip"
+          command="--show">Barista's tip</button></p>
       <p id="dialog-result">No dialog closed yet.</p>
       <dialog id="refill" closedby="any">
         <form method="dialog">
@@ -125,10 +127,8 @@
         </form>
       </dialog>
       <dialog id="tip">
-        <form method="dialog">
-          <p>Warm the cup before you pour.</p>
-          <p><button value="tip read">Got it</button></p>
-        </form>
+        <p>Warm the cup before you pour.</p>
+        <p><button commandfor="tip" command="close" value="tip read">Got it</button></p>
       </dialog>
     </div>
 

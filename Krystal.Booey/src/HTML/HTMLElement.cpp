@@ -31,6 +31,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -984,6 +985,43 @@ namespace krys::boo::html
                                                 HTMLElement *source) noexcept
   {
     GetPopoverData()->EnsureToggleEventTask(*this)->Queue(oldState, newState, source);
+  }
+
+  bool HTMLElement::IsValidCommandType(dom::CommandType command) const noexcept
+  {
+    return Element::IsValidCommandType(command) || command == dom::CommandType::TogglePopover
+           || command == dom::CommandType::ShowPopover || command == dom::CommandType::HidePopover;
+  }
+
+  bool HTMLElement::HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept
+  {
+    if (GetPopoverState() == dom::PopoverState::None)
+    {
+      return false;
+    }
+
+    if (IsPopoverShowing())
+    {
+      bool shouldHide =
+        command == dom::CommandType::TogglePopover || command == dom::CommandType::HidePopover;
+      if (shouldHide)
+      {
+        (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, &invoker);
+        return true;
+      }
+    }
+    else
+    {
+      bool shouldShow =
+        command == dom::CommandType::TogglePopover || command == dom::CommandType::ShowPopover;
+      if (shouldShow)
+      {
+        (void)ShowPopoverInternal(&invoker, false);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   bool HTMLElement::FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState,

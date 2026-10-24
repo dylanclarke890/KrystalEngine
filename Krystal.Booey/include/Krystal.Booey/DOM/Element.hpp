@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Enums/CommandType.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
@@ -63,6 +64,7 @@ namespace krys::boo::html
   class CustomElementReactionQueue;
   class CustomElementRegistry;
   class CustomStateSet;
+  class HTMLButtonElement;
   class HTMLElement;
   class HTMLElementStack;
   class HTMLSlotElement;
@@ -1137,6 +1139,24 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#topmost-popover-ancestor
     KRYS_NODISCARD RefPtr<html::HTMLElement> TopmostPopoverAncestor(html::HTMLElement *source,
                                                                     bool isPopover) noexcept;
+
+#pragma endregion
+
+#pragma region Commands
+
+    /// @brief Whether the element carries out a built-in command for the buttons whose `commandfor` element
+    /// it is; buttons don't send it the others.
+    KRYS_NODISCARD virtual bool IsValidCommandType(CommandType) const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Carries out a built-in command, sent by a button, if it applies to the element's state.
+    /// @return Whether the element carried it out.
+    virtual bool HandleCommandInternal(html::HTMLButtonElement &, CommandType) noexcept
+    {
+      return false;
+    }
 
 #pragma endregion
 
