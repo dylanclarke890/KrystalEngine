@@ -2,12 +2,14 @@
 
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp"
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
@@ -24,7 +26,13 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class Element;
+  class PopoverData;
   class PseudoElement;
+
+  /// @brief The elements set through an element's element reflection attributes, by attribute name.
+  /// @see https://html.spec.whatwg.org/#explicitly-set-attr-element
+  using ExplicitlySetAttrElementsMap = HashMap<DOMStringAtom, WeakPtr<Element>>;
 
   class ElementRareData : public ParentNodeRareData
   {
@@ -52,6 +60,9 @@ namespace krys::boo::dom
     UniquePtr<html::CustomElementReactionQueue> _customElementReactionQueue;
     UniquePtr<html::CustomElement> _customElement;
     RefPtr<html::CustomStateSet> _customStateSet;
+    UniquePtr<PopoverData> _popoverData;
+    WeakPtr<Element> _invokedPopover;
+    ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
 
   public:
     ElementRareData() noexcept;
@@ -77,6 +88,28 @@ namespace krys::boo::dom
     }
 
     void SetCustomStateSet(RefPtr<html::CustomStateSet> &&customStateSet) noexcept;
+
+    KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept
+    {
+      return _popoverData.get();
+    }
+
+    void SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept;
+
+    KRYS_NODISCARD Element *InvokedPopover() const noexcept
+    {
+      return _invokedPopover.get();
+    }
+
+    void SetInvokedPopover(Element *element) noexcept
+    {
+      _invokedPopover = CreateWeakPtr(element);
+    }
+
+    KRYS_NODISCARD ExplicitlySetAttrElementsMap &GetExplicitlySetAttrElementsMap() noexcept
+    {
+      return _explicitlySetAttrElementsMap;
+    }
 
     /// @brief The element's index among its parent's element children, plus one, cached by selector matching
     /// (zero if unknown).

@@ -599,6 +599,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLDialogElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
+		tests/HTML/Popover.cpp
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLSelectElement.cpp

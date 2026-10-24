@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/ToggleEventTask.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
@@ -154,12 +156,29 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
     KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
 
-    // TODO(HTMLELEMENT, POPOVER, HTML): Implement the popover API.
-    // The popover API - https://html.spec.whatwg.org/#dom-showpopover
-    // undefined showPopover(optional ShowPopoverOptions options = {});
-    // undefined hidePopover();
-    // boolean togglePopover(optional (TogglePopoverOptions or boolean) options = {});
-    // [CEReactions] attribute dom::DOMString? popover;
+    /// @brief Shows the popover, invoked by @p options' source.
+    /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it isn't
+    /// connected, its document isn't fully active, it's a modal dialog, another popover is being shown or
+    /// hidden, or its `popover` attribute changes as other popovers hide.
+    /// @see https://html.spec.whatwg.org/#dom-showpopover
+    dom::ExceptionOr<void> ShowPopover(const ShowPopoverOptions &options = {}) noexcept;
+
+    /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it's a modal
+    /// dialog.
+    /// @see https://html.spec.whatwg.org/#dom-hidepopover
+    dom::ExceptionOr<void> HidePopover() noexcept;
+
+    /// @brief Hides the popover if it's showing, else shows it, unless @p options forces one or the other.
+    /// @return Whether the popover is showing, or the exceptions of `ShowPopover` and `HidePopover`.
+    /// @see https://html.spec.whatwg.org/#dom-togglepopover
+    dom::ExceptionOr<bool>
+      TogglePopover(const TogglePopoverOptionsOrBool &options = TogglePopoverOptions {}) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-popover
+    KRYS_NODISCARD Maybe<dom::DOMString> Popover() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-popover
+    void Popover(Maybe<dom::DOMString> &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
@@ -304,7 +323,30 @@ namespace krys::boo::html
 
 #pragma endregion
 
+#pragma region Popovers
+
+  public:
+    /// @brief Shows the popover, invoked by @p source; the exceptions of `ShowPopover` are returned only if
+    /// @p throwExceptions.
+    /// @see https://html.spec.whatwg.org/#show-popover
+    dom::ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
+
+    /// @brief Hides the popover, and the popovers above it in its stack; the exceptions of `HidePopover` are
+    /// returned only if @p throwExceptions.
+    /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
+    /// @see https://html.spec.whatwg.org/#hide-popover-algorithm
+    dom::ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                               dom::FireEvents fireEvents, bool throwExceptions,
+                                               HTMLElement *source) noexcept;
+
+  protected:
+#pragma endregion
+
 #pragma region Extensibility Hooks
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
 
     void OnInsert() noexcept override
     {
@@ -341,8 +383,13 @@ namespace krys::boo::html
       // If removedNode is a form-associated element with a non-null form owner and removedNode and its form
       // owner are no longer in the same tree, then reset the form owner of removedNode.
       //
+
       // If removedNode's popover attribute is not in the No Popover state, then run the hide popover
       // algorithm given removedNode, false, false, false, and null.
+      if (GetPopoverData())
+      {
+        (void)HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false, nullptr);
+      }
     }
 
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
@@ -826,6 +873,23 @@ namespace krys::boo::html
     void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
                                                   css::MutableStyleProperties &style) noexcept;
     void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+
+    /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
+    /// is.
+    /// @see https://html.spec.whatwg.org/#check-popover-validity
+    KRYS_NODISCARD dom::ExceptionOr<bool>
+      CheckPopoverValidity(bool expectedToBeShowing, dom::Document *expectedDocument) const noexcept;
+    /// @see https://html.spec.whatwg.org/#popover-focusing-steps
+    void RunPopoverFocusingSteps() noexcept;
+    /// @see https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
+    void QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+                                     HTMLElement *source) noexcept;
+    /// @return Whether the event wasn't canceled.
+    bool FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
+                                      HTMLElement *source) noexcept;
+    /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.
+    void SetInvoker(HTMLElement *invoker) noexcept;
+    void PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept;
   };
 }
 

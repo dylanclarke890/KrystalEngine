@@ -98,7 +98,6 @@ namespace krys::boo::html
     KRYS_NODISCARD static dom::Element *ClickFocusableInclusiveAncestor(dom::Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#focus-navigation-scope-owner
-    // FIXME: Elements in the popover showing state with a popover trigger, once there are popovers.
     KRYS_NODISCARD static bool IsFocusNavigationScopeOwner(const dom::Node &node) noexcept;
 
     /// @see https://html.spec.whatwg.org/#associated-focus-navigation-owner

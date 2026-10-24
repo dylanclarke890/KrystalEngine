@@ -3249,6 +3249,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/ToggleEvent.hpp
       include/Krystal.Booey/DOM/ToggleEventTask.hpp
       include/Krystal.Booey/DOM/CommandEvent.hpp
+      include/Krystal.Booey/DOM/PopoverData.hpp
       include/Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp
       include/Krystal.Booey/DOM/Dicts/InputEventInit.hpp
       include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
@@ -3308,6 +3309,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Enums/NodeFlags.hpp
       include/Krystal.Booey/DOM/Enums/NodeStyleFlags.hpp
       include/Krystal.Booey/DOM/Enums/NodeType.hpp
+      include/Krystal.Booey/DOM/Enums/PopoverState.hpp
       include/Krystal.Booey/DOM/Enums/QuirksMode.hpp
       include/Krystal.Booey/DOM/Enums/ShadowRootMode.hpp
       include/Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp
@@ -3678,6 +3680,7 @@ target_sources(Krystal.Booey
     src/DOM/ToggleEvent.cpp
     src/DOM/ToggleEventTask.cpp
     src/DOM/CommandEvent.cpp
+    src/DOM/PopoverData.cpp
     src/DOM/BeforeTextInsertedEvent.cpp
     src/Page/AutoscrollController.cpp
     src/Page/DOMSelection.cpp

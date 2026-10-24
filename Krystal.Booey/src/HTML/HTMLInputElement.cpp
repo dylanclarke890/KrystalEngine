@@ -1918,7 +1918,13 @@ namespace krys::boo::html
 
     // Image and submit inputs submit their form, and reset inputs reset it.
     _inputType->HandleActivationBehavior(event);
-    // FIXME: The popover target action (handlePopoverTargetAction) for buttons, once there are popovers.
+
+    // Buttons with a form owner submit or reset it, other than plain buttons.
+    if (Form() && _inputType->GetType() != InputType::Type::Button)
+    {
+      return;
+    }
+    HandlePopoverTargetAction(event.Target().get());
   }
 
   void HTMLInputElement::LegacyCanceledActivationBehavior(dom::Event &event) noexcept

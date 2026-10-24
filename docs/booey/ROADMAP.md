@@ -355,7 +355,7 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 4. **The sample:** a modal dialog, a popover menu, a `<details>` FAQ and command buttons (see B4h).
 
 **Proposed** (to confirm when the part starts):
-- **`popover=hint`.** Upstream has only `auto` and `manual`; the spec's `hint` state (its own stack, closed by an `auto` popover opening) is standard. Port it with the spec's algorithms beside upstream's two.
+- **`popover=hint`.** Upstream has only `auto` and `manual`; the spec's `hint` state (its own stack, closed by an `auto` popover opening) is standard. Port it with the spec's algorithms beside upstream's two. (Taken, 2026-10-23, B4d.)
 - **Toggle events from C++.** `ToggleEvent`'s `oldState` and `newState` as strings (as the IDL), `source` (the invoker) included.
 
 **Parts:**
@@ -391,3 +391,9 @@ Interactive elements. Booey has `HTMLDialogElement` and `HTMLDetailsElement` wit
 - **Booey** (the ledger entry is *Dialogs* in `docs/booey/PORTING.md`): `<dialog>`'s `Show()`, `ShowModal()` (in the top layer, blocking the document: everything outside it is inert, `:modal` matches), `Close()`, `RequestClose()`, `returnValue`, `closedby` and light dismiss, the dialog focusing steps and restoring the focus, `beforetoggle` and coalesced `toggle`, `cancel` and `close`, `method=dialog` forms. Dialogs register with close watchers as the spec has them, so close watchers moved to the spec's model (cancel and close actions, an enabled state; the page's `requestClose()` can always be canceled).
 - **Moved:** the dialog commands to B4f; hiding popovers as a dialog shows to B4d.
 - **Tests:** 3 cases (`tests/HTML/HTMLDialogElement.cpp`), and close watcher cases updated.
+
+### B4d as built (2026-10-23)
+
+- **Booey** (the ledger entry is *Popovers* in `docs/booey/PORTING.md`): the `popover` attribute (`auto`, `manual` and `hint`, reflected), `ShowPopover()` (with `source`), `HidePopover()`, `TogglePopover()`, `:popover-open`, the auto and hint stacks (nesting by ancestry and by invoker, the hint stack parent), light dismiss, Escape through the popovers' close watchers, the popover focusing steps and returning the focus, `beforetoggle` and coalesced `toggle`; `popovertarget` and `popovertargetaction` on buttons (`PopoverTargetElement`, element reflection), the trigger and its style bit, popovers in their triggers' focus navigation scopes; dialogs hide the popovers they aren't in. The stacks follow the spec, so `hint` sits beside `auto` and `manual`.
+- **Moved:** the implicit anchor element to B4g; a button's `commandfor` as a popover target to B4f.
+- **Tests:** 3 cases (`tests/HTML/Popover.cpp`).

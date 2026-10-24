@@ -1479,9 +1479,7 @@ namespace krys::boo::css
           return dialog && dialog->IsModal();
         }
 
-        case SelectorPseudoClass::PopoverOpen:
-          // FIXME: Popovers (B4d).
-          return false;
+        case SelectorPseudoClass::PopoverOpen: return element.IsPopoverShowing();
 
         case SelectorPseudoClass::ActiveViewTransition:
         case SelectorPseudoClass::ActiveViewTransitionType:

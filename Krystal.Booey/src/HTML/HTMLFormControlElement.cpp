@@ -1,7 +1,14 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/PopoverData.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
+#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/FormController.hpp"
+#include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -9,6 +16,18 @@
 
 namespace krys::boo::html
 {
+  template <>
+  struct EnumeratedAttributeTraits<"popovertargetaction", HTMLFormControlElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"toggle", AttributeState::Toggle},
+      KeywordStateMapping {u8"show", AttributeState::Show},
+      KeywordStateMapping {u8"hide", AttributeState::Hide}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Toggle;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Toggle;
+  };
+
   HTMLFormControlElement::HTMLFormControlElement(dom::Document &document, HTMLElementInterface interface,
                                                  HTMLElementFlags flags) noexcept
       : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
@@ -193,5 +212,102 @@ namespace krys::boo::html
   Maybe<dom::DOMString> HTMLFormControlElement::ResultForDialogSubmit() const noexcept
   {
     return GetAttribute(u8"value");
+  }
+
+  RefPtr<HTMLElement> HTMLFormControlElement::PopoverTargetElement() const noexcept
+  {
+    // Only buttons invoke popovers.
+    if (auto *inputElement = DynamicDowncast<HTMLInputElement>(*this))
+    {
+      if (!inputElement->IsTextButton() && !inputElement->IsImageButton())
+      {
+        return nullptr;
+      }
+    }
+    else if (!Is<HTMLButtonElement>(*this))
+    {
+      return nullptr;
+    }
+
+    if (IsDisabledFormControl())
+    {
+      return nullptr;
+    }
+
+    if (Form() && IsSubmitButton())
+    {
+      return nullptr;
+    }
+
+    RefPtr<dom::Element> element = ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
+    auto *popover = element ? DynamicDowncast<HTMLElement>(*element) : nullptr;
+    if (popover && popover->GetPopoverState() != dom::PopoverState::None)
+    {
+      return ShareRefPtr(popover);
+    }
+    return nullptr;
+  }
+
+  RefPtr<dom::Element> HTMLFormControlElement::PopoverTargetElementForBindings() const noexcept
+  {
+    // FIXME: Retargeting against the control's tree, once there are reference targets.
+    return ElementForAttributeInternal(dom::DOMStringAtom(u8"popovertarget"));
+  }
+
+  void HTMLFormControlElement::PopoverTargetElementForBindings(dom::Element *element) noexcept
+  {
+    CEReactionsScope ceReactions;
+    SetElementAttribute(dom::DOMStringAtom(u8"popovertarget"), element);
+  }
+
+  dom::DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
+  {
+    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"popovertargetaction");
+    return EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveCanonicalKeyword<
+      dom::DOMString>(krys::move(value));
+  }
+
+  void HTMLFormControlElement::PopoverTargetAction(dom::DOMString &&value) noexcept
+  {
+    CEReactionsScope ceReactions;
+    Reflection::Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));
+  }
+
+  void HTMLFormControlElement::HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept
+  {
+    RefPtr<HTMLElement> popover = PopoverTargetElement();
+    if (!popover)
+    {
+      return;
+    }
+    krys_debug_assert(popover->GetPopoverData());
+
+    // An activation inside the popover, which is inside the button, doesn't toggle it.
+    if (auto *eventTargetNode = DynamicDowncast<dom::Node>(eventTarget);
+        eventTargetNode && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*eventTargetNode, *popover)
+        && dom::TreeQueries::IsShadowIncludingDescendant(*popover, *this))
+    {
+      return;
+    }
+
+    auto action = EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveState(
+      GetAttribute(dom::DOMStringAtom(u8"popovertargetaction")));
+    if (action == AttributeState::Show && popover->IsPopoverShowing())
+    {
+      return;
+    }
+    if (action == AttributeState::Hide && !popover->IsPopoverShowing())
+    {
+      return;
+    }
+
+    if (popover->IsPopoverShowing())
+    {
+      (void)popover->HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, this);
+    }
+    else
+    {
+      (void)popover->ShowPopoverInternal(this, false);
+    }
   }
 }

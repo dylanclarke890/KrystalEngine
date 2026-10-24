@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Markup.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserFastPaths.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorEnums.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Ratio.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/RatioValue.hpp"
@@ -9,23 +10,28 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/SimpleRange.hpp"
 #include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/ToggleEvent.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLBRElement.hpp"
+#include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/LabelsNodeList.hpp"
@@ -34,6 +40,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 
 namespace krys::boo::html
 {
@@ -472,6 +479,70 @@ namespace krys::boo::html
     return ElementInternals::Create(*this);
   }
 
+  dom::ExceptionOr<void> HTMLElement::ShowPopover(const ShowPopoverOptions &options) noexcept
+  {
+    return ShowPopoverInternal(options.Source.get());
+  }
+
+  dom::ExceptionOr<void> HTMLElement::HidePopover() noexcept
+  {
+    return HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
+  }
+
+  dom::ExceptionOr<bool> HTMLElement::TogglePopover(const TogglePopoverOptionsOrBool &options) noexcept
+  {
+    Maybe<bool> force;
+    HTMLElement *source = nullptr;
+    if (auto *value = std::get_if<bool>(&options))
+    {
+      force = *value;
+    }
+    else
+    {
+      auto &dictionary = std::get<TogglePopoverOptions>(options);
+      force = dictionary.Force;
+      source = dictionary.Source.get();
+    }
+
+    if (IsPopoverShowing() && !force.value_or(false))
+    {
+      if (auto result =
+            HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, true, nullptr);
+          result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+    else if (force.value_or(true))
+    {
+      if (auto result = ShowPopoverInternal(source); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+    else
+    {
+      if (auto check = CheckPopoverValidity(IsPopoverShowing(), nullptr); check.HasException())
+      {
+        return check.ReleaseException();
+      }
+    }
+    return IsPopoverShowing();
+  }
+
+  Maybe<dom::DOMString> HTMLElement::Popover() const noexcept
+  {
+    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"popover");
+    return EnumeratedAttribute<"popover", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
+      krys::move(value));
+  }
+
+  void HTMLElement::Popover(Maybe<dom::DOMString> &&value) noexcept
+  {
+    CEReactionsScope ceReactions;
+    Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"popover", krys::move(value));
+  }
+
   uint32 HTMLElement::HeadingOffset() const noexcept
   {
     return Reflection::Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
@@ -535,6 +606,482 @@ namespace krys::boo::html
     }
 
   }
+
+#pragma region Popovers
+
+  namespace
+  {
+    /// @brief What a popover algorithm returns once @p validity says the popover can't be shown or hidden.
+    KRYS_NODISCARD dom::ExceptionOr<void> InvalidPopoverResult(dom::ExceptionOr<bool> &&validity,
+                                                               bool throwExceptions) noexcept
+    {
+      if (throwExceptions && validity.HasException())
+      {
+        return validity.ReleaseException();
+      }
+      return {};
+    }
+
+    KRYS_NODISCARD bool IsValid(const dom::ExceptionOr<bool> &validity) noexcept
+    {
+      return validity.HasValue() && validity.Value();
+    }
+
+    KRYS_NODISCARD bool ListContains(const List<Ref<HTMLElement>> &list, const HTMLElement &element) noexcept
+    {
+      return std::ranges::find(list, &element, [](auto &item) { return item.get(); }) != list.end();
+    }
+  }
+
+  dom::ExceptionOr<void> HTMLElement::ShowPopoverInternal(HTMLElement *source, bool throwExceptions) noexcept
+  {
+    Ref<dom::Document> document = ShareRef(NodeDocument());
+
+    // This prevents showing a popover during the show or hide of another popover.
+    if (document->IsShowingPopover() || document->HidingPopoverNestingCount())
+    {
+      if (throwExceptions)
+      {
+        return dom::Exception {dom::ExceptionCode::InvalidStateError,
+                               u8"Cannot show a popover while showing or hiding a popover."};
+      }
+      return {};
+    }
+
+    auto validity = CheckPopoverValidity(false, nullptr);
+    if (!IsValid(validity))
+    {
+      return InvalidPopoverResult(krys::move(validity), throwExceptions);
+    }
+
+    krys_debug_assert(!GetPopoverData()->Invoker());
+    krys_debug_assert(!IsInTopLayer() || document->IsPendingTopLayerRemoval(*this));
+
+    Ref<HTMLElement> protectedThis = ShareRef(*this);
+    document->SetIsShowingPopover(true);
+    auto cleanupShowingSteps = [&]
+    {
+      document->SetIsShowingPopover(false);
+    };
+
+    if (!FirePopoverBeforeToggleEvent(dom::ToggleState::Closed, dom::ToggleState::Open, true, source))
+    {
+      cleanupShowingSteps();
+      return {};
+    }
+
+    // Firing beforetoggle could have disconnected the element or changed its popover attribute.
+    validity = CheckPopoverValidity(false, document.get());
+    if (!IsValid(validity))
+    {
+      cleanupShowingSteps();
+      return InvalidPopoverResult(krys::move(validity), throwExceptions);
+    }
+
+    bool shouldRestoreFocus = false;
+    auto originalType = GetPopoverState();
+    auto effectiveType = originalType;
+    RefPtr<HTMLElement> ancestor;
+    if (originalType == dom::PopoverState::Auto || originalType == dom::PopoverState::Hint)
+    {
+      ancestor = TopmostPopoverAncestor(source, true);
+
+      // Hint popovers are lower priority than auto popovers, so an auto popover with a hint popover as its
+      // parent is downgraded to a hint popover.
+      if (ancestor && ancestor->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Hint
+          && effectiveType == dom::PopoverState::Auto)
+      {
+        effectiveType = dom::PopoverState::Hint;
+      }
+
+      document->HidePopoverStackUntil(ancestor.get(), dom::PopoverState::Hint, dom::FocusPreviousElement::No,
+                                      dom::FireEvents::Yes);
+      if (effectiveType == dom::PopoverState::Auto)
+      {
+        document->HidePopoverStackUntil(ancestor.get(), dom::PopoverState::Auto,
+                                        dom::FocusPreviousElement::No, dom::FireEvents::Yes);
+      }
+
+      if (originalType != GetPopoverState())
+      {
+        cleanupShowingSteps();
+        if (throwExceptions)
+        {
+          return dom::Exception {
+            dom::ExceptionCode::InvalidStateError,
+            u8"The value of the popover attribute was changed while hiding the popover."};
+        }
+        return {};
+      }
+
+      // Hiding the other popovers could have fired beforetoggle, whose listeners could have disconnected the
+      // element or changed its popover attribute.
+      validity = CheckPopoverValidity(false, document.get());
+      if (!IsValid(validity))
+      {
+        cleanupShowingSteps();
+        return InvalidPopoverResult(krys::move(validity), throwExceptions);
+      }
+
+      // The focus returns to the previously focused element only for the first popover in a stack.
+      if (!document->TopmostAutoOrHintPopover())
+      {
+        shouldRestoreFocus = true;
+      }
+
+      GetPopoverData()->SetOpenedInPopoverMode(effectiveType);
+      if (document->Window())
+      {
+        auto weakThis = CreateWeakPtr(this);
+        GetPopoverData()->SetCloseWatcher(CloseWatcher::Establish(
+          *document, [](bool) { return true; },
+          [weakThis]
+          {
+            if (RefPtr<HTMLElement> popover = weakThis.lock())
+            {
+              (void)popover->HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false,
+                                                 nullptr);
+            }
+          },
+          [] { return true; }));
+      }
+    }
+
+    GetPopoverData()->SetPreviouslyFocusedElement(nullptr);
+    RefPtr<dom::Element> originallyFocusedElement = ShareRefPtr(document->FocusedElement());
+
+    AddToTopLayer();
+
+    if (effectiveType == dom::PopoverState::Hint && ancestor
+        && ancestor->GetPopoverData()->OpenedInPopoverMode() == dom::PopoverState::Auto)
+    {
+      document->SetHintStackParent(ancestor.get());
+    }
+
+    {
+      style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::PopoverOpen,
+                                                             true);
+      GetPopoverData()->SetVisibilityState(dom::PopoverVisibilityState::Showing);
+    }
+
+    // FIXME: Set the implicit anchor element to source, with anchor positioning (B4g).
+    SetInvoker(source);
+
+    RunPopoverFocusingSteps();
+
+    if (shouldRestoreFocus && GetPopoverData())
+    {
+      GetPopoverData()->SetPreviouslyFocusedElement(originallyFocusedElement.get());
+    }
+
+    cleanupShowingSteps();
+    if (GetPopoverData())
+    {
+      QueuePopoverToggleEventTask(dom::ToggleState::Closed, dom::ToggleState::Open, source);
+    }
+    return {};
+  }
+
+  dom::ExceptionOr<void> HTMLElement::HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                                          dom::FireEvents fireEvents, bool throwExceptions,
+                                                          HTMLElement *source) noexcept
+  {
+    auto validity = CheckPopoverValidity(true, nullptr);
+    if (!IsValid(validity))
+    {
+      return InvalidPopoverResult(krys::move(validity), throwExceptions);
+    }
+
+    Ref<dom::Document> document = ShareRef(NodeDocument());
+    Ref<HTMLElement> protectedThis = ShareRef(*this);
+
+    bool nestedHide = GetPopoverData()->IsHidingPopover();
+    GetPopoverData()->SetIsHidingPopover(true);
+    if (nestedHide)
+    {
+      fireEvents = dom::FireEvents::No;
+    }
+    document->IncrementHidingPopoverNestingCount();
+    auto cleanupSteps = [&]
+    {
+      if (!nestedHide && GetPopoverData())
+      {
+        GetPopoverData()->SetIsHidingPopover(false);
+      }
+      document->DecrementHidingPopoverNestingCount();
+    };
+
+    bool autoPopoverListContainsElement = ListContains(document->ShowingAutoPopoverList(), *this);
+    bool hintPopoverListContainsElement = ListContains(document->ShowingHintPopoverList(), *this);
+
+    if (auto mode = GetPopoverData()->OpenedInPopoverMode();
+        mode == dom::PopoverState::Auto || mode == dom::PopoverState::Hint)
+    {
+      if (hintPopoverListContainsElement)
+      {
+        document->HidePopoverStackUntil(this, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
+      }
+      // If the hint stack parent is being hidden, then all hint popovers are hidden.
+      if (this == document->HintStackParent())
+      {
+        document->HidePopoverStackUntil(nullptr, dom::PopoverState::Hint, focusPreviousElement, fireEvents);
+      }
+      if (autoPopoverListContainsElement)
+      {
+        document->HidePopoverStackUntil(this, dom::PopoverState::Auto, focusPreviousElement, fireEvents);
+      }
+
+      // Hiding the other popovers could have disconnected the element or changed its popover attribute.
+      validity = CheckPopoverValidity(true, document.get());
+      if (!IsValid(validity))
+      {
+        cleanupSteps();
+        return InvalidPopoverResult(krys::move(validity), throwExceptions);
+      }
+    }
+
+    if (fireEvents == dom::FireEvents::Yes)
+    {
+      (void)FirePopoverBeforeToggleEvent(dom::ToggleState::Open, dom::ToggleState::Closed, false, source);
+
+      // Firing beforetoggle could have disconnected the element or changed its popover attribute.
+      validity = CheckPopoverValidity(true, document.get());
+      if (!IsValid(validity))
+      {
+        cleanupSteps();
+        return InvalidPopoverResult(krys::move(validity), throwExceptions);
+      }
+
+      RequestRemoveFromTopLayer();
+      // FIXME: Clear the implicit anchor element, with anchor positioning (B4g).
+    }
+    else if (IsInTopLayer())
+    {
+      RemoveFromTopLayer();
+    }
+
+    SetInvoker(nullptr);
+    GetPopoverData()->SetOpenedInPopoverMode(dom::PopoverState::None);
+    {
+      Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
+      if (ParentNode())
+      {
+        styleInvalidation.emplace(*this, css::SelectorPseudoClass::PopoverOpen, false);
+      }
+      GetPopoverData()->SetVisibilityState(dom::PopoverVisibilityState::Hidden);
+    }
+
+    if (this == document->HintStackParent() || document->ShowingHintPopoverList().empty())
+    {
+      document->SetHintStackParent(nullptr);
+    }
+
+    if (fireEvents == dom::FireEvents::Yes)
+    {
+      QueuePopoverToggleEventTask(dom::ToggleState::Open, dom::ToggleState::Closed, source);
+    }
+
+    if (RefPtr<dom::Element> previouslyFocusedElement =
+          ShareRefPtr(GetPopoverData()->PreviouslyFocusedElement()))
+    {
+      GetPopoverData()->SetPreviouslyFocusedElement(nullptr);
+      auto *focusedElement = document->FocusedElement();
+      if (focusPreviousElement == dom::FocusPreviousElement::Yes && focusedElement
+          && dom::TreeQueries::IsShadowIncludingInclusiveDescendant(*focusedElement, *this))
+      {
+        FocusAlgorithms::FocusingSteps(*previouslyFocusedElement, nullptr, {.PreventScroll = true});
+      }
+    }
+
+    // The focusing steps' events could have removed the popover attribute, which destroys the close watcher.
+    if (auto *popoverData = GetPopoverData())
+    {
+      if (RefPtr<CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
+      {
+        closeWatcher->Destroy();
+        popoverData->SetCloseWatcher(nullptr);
+      }
+    }
+
+    cleanupSteps();
+    return {};
+  }
+
+  dom::ExceptionOr<bool> HTMLElement::CheckPopoverValidity(bool expectedToBeShowing,
+                                                           dom::Document *expectedDocument) const noexcept
+  {
+    if (GetPopoverState() == dom::PopoverState::None)
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError,
+                             u8"Element does not have the popover attribute."};
+    }
+
+    if (IsPopoverShowing() != expectedToBeShowing)
+    {
+      return false;
+    }
+
+    // A showing popover can be disconnected (the removing steps run after its removal) or in a document that
+    // isn't fully active: hiding it has to succeed.
+    if (!expectedToBeShowing && !IsConnected())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is not connected."};
+    }
+    if (!expectedToBeShowing && !NodeDocument().IsFullyActive())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError,
+                             u8"Invalid for popovers within documents that are not fully active."};
+    }
+    if (expectedDocument && &NodeDocument() != expectedDocument)
+    {
+      return dom::Exception {
+        dom::ExceptionCode::InvalidStateError,
+        u8"Invalid when the document changes while showing or hiding a popover element."};
+    }
+    if (auto *dialog = DynamicDowncast<HTMLDialogElement>(*this); dialog && dialog->IsModal())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is a modal <dialog> element."};
+    }
+    // FIXME: The fullscreen flag, once there's fullscreen.
+    return true;
+  }
+
+  void HTMLElement::RunPopoverFocusingSteps() noexcept
+  {
+    // FIXME: If the allow focus steps given subject's node document return false, then return, with
+    // permissions policy.
+
+    if (auto *dialog = DynamicDowncast<HTMLDialogElement>(*this))
+    {
+      dialog->RunFocusingSteps();
+      return;
+    }
+
+    // Let control be subject if it has the autofocus attribute, else its autofocus delegate.
+    RefPtr<dom::Node> control =
+      HasAttribute(u8"autofocus")
+        ? ShareRefPtr<dom::Node>(this)
+        : ShareRefPtr(FocusAlgorithms::AutofocusDelegate(*this, dom::FocusTrigger::Other));
+    if (!control)
+    {
+      return;
+    }
+
+    Ref<dom::Document> controlDocument = ShareRef(control->NodeDocument());
+    if (!controlDocument->GetPage())
+    {
+      return;
+    }
+
+    FocusAlgorithms::FocusingSteps(*control);
+
+    // Empty the top document's autofocus candidates, and set its autofocus processed flag.
+    controlDocument->AutofocusCandidates().clear();
+    controlDocument->SetAutofocusProcessed();
+  }
+
+  void HTMLElement::QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+                                                HTMLElement *source) noexcept
+  {
+    GetPopoverData()->EnsureToggleEventTask(*this)->Queue(oldState, newState, source);
+  }
+
+  bool HTMLElement::FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState,
+                                                 bool cancelable, HTMLElement *source) noexcept
+  {
+    auto stringForState = [](dom::ToggleState state)
+    {
+      return dom::DOMString(state == dom::ToggleState::Closed ? u8"closed" : u8"open");
+    };
+
+    dom::ToggleEventInit init;
+    init.OldState = stringForState(oldState);
+    init.NewState = stringForState(newState);
+    init.Source = ShareRefPtr<dom::Element>(source);
+    auto event = dom::ToggleEvent::Create(dom::DOMStringAtom(u8"beforetoggle"), init, cancelable);
+    (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+    return !event->DefaultPrevented();
+  }
+
+  void HTMLElement::SetInvoker(HTMLElement *invoker) noexcept
+  {
+    if (RefPtr<HTMLElement> oldInvoker = ShareRefPtr(GetPopoverData()->Invoker()))
+    {
+      oldInvoker->SetInvokedPopover(nullptr);
+    }
+    GetPopoverData()->SetInvoker(invoker);
+    if (invoker)
+    {
+      invoker->SetInvokedPopover(this);
+    }
+  }
+
+  void HTMLElement::PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept
+  {
+    auto computePopoverState = [](Maybe<dom::DOMStringView> value)
+    {
+      auto state = EnumeratedAttribute<"popover", HTMLElement>::ResolveState(
+        value ? Maybe<dom::DOMString>(dom::DOMString(*value)) : null);
+      if (!state)
+      {
+        return dom::PopoverState::None;
+      }
+      switch (*state)
+      {
+        case AttributeState::Auto: return dom::PopoverState::Auto;
+        case AttributeState::Hint: return dom::PopoverState::Hint;
+        default:                   return dom::PopoverState::Manual;
+      }
+    };
+
+    auto newPopoverState = computePopoverState(value);
+    if (newPopoverState == GetPopoverState())
+    {
+      return;
+    }
+
+    style::PseudoClassChangeInvalidation styleInvalidation(*this, css::SelectorPseudoClass::PopoverOpen,
+                                                           false);
+
+    // A showing popover whose state changes hides; its beforetoggle listeners could change the attribute
+    // again.
+    if (IsPopoverShowing())
+    {
+      (void)HidePopoverInternal(dom::FocusPreviousElement::Yes, dom::FireEvents::Yes, false, nullptr);
+      auto currentValue = GetAttribute(dom::DOMStringAtom(u8"popover"));
+      newPopoverState = computePopoverState(currentValue ? Maybe<dom::DOMStringView>(*currentValue) : null);
+    }
+
+    if (newPopoverState == dom::PopoverState::None)
+    {
+      if (auto *popoverData = GetPopoverData())
+      {
+        if (RefPtr<CloseWatcher> closeWatcher = ShareRefPtr(popoverData->CloseWatcher()))
+        {
+          closeWatcher->Destroy();
+        }
+      }
+      ClearPopoverData();
+    }
+    else
+    {
+      EnsurePopoverData().SetPopoverState(newPopoverState);
+    }
+  }
+
+  void HTMLElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                       Maybe<dom::DOMStringView> value,
+                                       dom::DOMStringAtom namespaceURI) noexcept
+  {
+    StyledElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"popover")
+    {
+      PopoverAttributeChanged(value);
+    }
+  }
+
+#pragma endregion
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
   {

@@ -81,8 +81,8 @@ namespace krys::boo::html
       }
     }
 
-    // FIXME: The button's command (handleCommand) and popover target (handlePopoverTargetAction), once there
-    // are commands and popovers.
+    // FIXME: The button's command (handleCommand), with commands (B4f).
+    HandlePopoverTargetAction(event.Target().get());
   }
 
   void HTMLButtonElement::DefaultEventHandler(dom::Event &event) noexcept

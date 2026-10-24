@@ -648,9 +648,13 @@ namespace krys::boo::style
         style.SetTextAlign(TextAlign::Start);
       }
 
-      // FIXME: Force-hide the element for its visibility adjustment (`VisibilityAdjustment::Subtree`), and
-      // mark popover invokers (`setIsPopoverInvoker`); elements have no visibility adjustment or invoked
-      // popover.
+      // FIXME: Force-hide the element for its visibility adjustment (`VisibilityAdjustment::Subtree`);
+      // elements have no visibility adjustment.
+
+      if (element->InvokedPopover())
+      {
+        style.SetIsPopoverInvoker();
+      }
 
       // FIXME: `<details>` content auto-reveals in its user agent shadow tree (`detailsAutoExpandEnabled`),
       // once `<details>` has one.

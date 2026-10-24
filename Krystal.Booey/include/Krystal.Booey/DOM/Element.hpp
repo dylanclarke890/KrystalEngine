@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
 #include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
@@ -61,6 +62,7 @@ namespace krys::boo::html
   class CustomElementReactionQueue;
   class CustomElementRegistry;
   class CustomStateSet;
+  class HTMLElement;
   class HTMLElementStack;
   class HTMLSlotElement;
   class HTMLTreeBuilder;
@@ -71,6 +73,7 @@ namespace krys::boo::dom
   class ElementRareData;
   class HTMLCollection;
   class NodeList;
+  class PopoverData;
   class PseudoElement;
   class ShadowRoot;
 
@@ -1106,6 +1109,51 @@ namespace krys::boo::dom
     /// @brief Removes the element, which must be in it, from its document's top layer at once.
     /// @see https://drafts.csswg.org/css-position-4/#remove-an-element-from-the-top-layer-immediately
     void RemoveFromTopLayer() noexcept;
+
+#pragma endregion
+
+#pragma region Popovers
+
+    /// @brief The element's popover state, if it has a `popover` attribute.
+    KRYS_NODISCARD PopoverData *GetPopoverData() const noexcept;
+    PopoverData &EnsurePopoverData() noexcept;
+    void ClearPopoverData() noexcept;
+
+    /// @brief Whether the element is in the popover showing state.
+    /// @see https://html.spec.whatwg.org/#popover-showing-state
+    KRYS_NODISCARD bool IsPopoverShowing() const noexcept;
+    /// @brief The state of the element's `popover` attribute.
+    KRYS_NODISCARD PopoverState GetPopoverState() const noexcept;
+
+    /// @brief The popover the element (a button) showed and is still the popover trigger of, if any.
+    KRYS_NODISCARD Element *InvokedPopover() const noexcept;
+    void SetInvokedPopover(Element *element) noexcept;
+
+    /// @brief The topmost showing auto or hint popover that's a flat tree ancestor of the element, or (if
+    /// @p isPopover) of @p source, the element's invoker, inclusive.
+    /// @param isPopover Whether the element is a popover about to show, rather than another element about to
+    /// enter the top layer (a dialog), whose source isn't considered.
+    /// @see https://html.spec.whatwg.org/#topmost-popover-ancestor
+    KRYS_NODISCARD RefPtr<html::HTMLElement> TopmostPopoverAncestor(html::HTMLElement *source,
+                                                                    bool isPopover) noexcept;
+
+#pragma endregion
+
+#pragma region Element Reflection
+
+    /// @brief The element an element reflection attribute refers to: the one set through its IDL attribute,
+    /// if it's still in the element's shadow-including ancestors' trees, else the one with the attribute's
+    /// value as its ID in the element's tree.
+    /// @see https://html.spec.whatwg.org/#attr-associated-element
+    KRYS_NODISCARD RefPtr<Element> ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept;
+
+    /// @brief Sets an element reflection attribute's element: the content attribute becomes empty, or is
+    /// removed if @p element is null.
+    /// @see https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:element
+    void SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept;
+
+    /// @brief Whether @p attributeName (in the null namespace) is reflected by an `Element?` IDL attribute.
+    KRYS_NODISCARD static bool IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept;
 
 #pragma endregion
 

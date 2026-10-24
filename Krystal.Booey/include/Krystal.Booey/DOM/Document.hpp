@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Enums/BackForwardCacheState.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
+#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
 #include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
 #include "Krystal.Booey/DOM/Enums/ReasonForSuspension.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
@@ -101,6 +102,7 @@ namespace krys::boo::html
   class HTMLDialogElement;
   class HTMLBodyElement;
   class HTMLDocumentParser;
+  class HTMLElement;
   class HTMLHeadElement;
   class HTMLHtmlElement;
   class HTMLInputElement;
@@ -237,6 +239,13 @@ namespace krys::boo::dom
     // The open dialogs, in the order they opened, and the dialog the last press was in (light dismiss).
     ListHashSet<Ref<html::HTMLDialogElement>> _openDialogs;
     WeakPtr<html::HTMLDialogElement> _dialogPointerDownTarget;
+    // The popover the last press was in (light dismiss), and the showing auto popover the first showing hint
+    // popover opened from.
+    WeakPtr<html::HTMLElement> _popoverPointerDownTarget;
+    WeakPtr<html::HTMLElement> _hintStackParent;
+    // How many popovers are being hidden, and whether one is being shown: no popover shows meanwhile.
+    uint32 _hidingPopoverNestingCount {0};
+    bool _isShowingPopover {false};
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -838,11 +847,71 @@ namespace krys::boo::dom
     void AddOpenDialog(html::HTMLDialogElement &dialog) noexcept;
     void RemoveOpenDialog(html::HTMLDialogElement &dialog) noexcept;
 
-    /// @brief Closes what a press and release outside it light dismisses: the topmost open dialog if its
-    /// `closedby` is `any`. Run as @p event (a trusted `mousedown` or `mouseup`, standing in for
-    /// `pointerdown` and `pointerup`) is about to be dispatched at @p target.
+    /// @brief Closes what a press and release outside it light dismisses: the auto and hint popovers it
+    /// wasn't in or on an invoker of, and the topmost open dialog if its `closedby` is `any`. Run as @p event
+    /// (a trusted `mousedown` or `mouseup`, standing in for `pointerdown` and `pointerup`) is about to be
+    /// dispatched at @p target.
     /// @see https://html.spec.whatwg.org/#light-dismiss-activities
     void HandleLightDismiss(const MouseEvent &event, Node &target) noexcept;
+
+    /// @brief The showing popovers opened as auto popovers, in top layer order.
+    /// @see https://html.spec.whatwg.org/#showing-auto-popover-list
+    KRYS_NODISCARD List<Ref<html::HTMLElement>> ShowingAutoPopoverList() const noexcept;
+    /// @brief The showing popovers opened as hint popovers, in top layer order.
+    /// @see https://html.spec.whatwg.org/#showing-hint-popover-list
+    KRYS_NODISCARD List<Ref<html::HTMLElement>> ShowingHintPopoverList() const noexcept;
+    /// @brief The last showing hint popover, else the last showing auto popover, if any.
+    /// @see https://html.spec.whatwg.org/#topmost-auto-popover
+    KRYS_NODISCARD html::HTMLElement *TopmostAutoOrHintPopover() const noexcept;
+
+    /// @brief Hides the showing hint popovers above @p endpoint (all of them if it isn't one), then the
+    /// showing auto popovers above it (or above the hint stack parent if it's a hint popover).
+    /// @see https://html.spec.whatwg.org/#hide-all-popovers-until
+    void HideAllPopoversUntil(html::HTMLElement *endpoint, FocusPreviousElement focusPreviousElement,
+                              FireEvents fireEvents) noexcept;
+    /// @brief Hides the showing popovers of @p stackType (`Auto` or `Hint`) above @p endpoint, newest first,
+    /// or all of them if it isn't one.
+    /// @see https://html.spec.whatwg.org/#hide-popover-stack-until
+    void HidePopoverStackUntil(html::HTMLElement *endpoint, PopoverState stackType,
+                               FocusPreviousElement focusPreviousElement, FireEvents fireEvents) noexcept;
+
+    /// @brief The popover a press on @p node is in, or on an invoker of, if it's a showing auto or hint
+    /// popover; the higher in the stacks of the two.
+    /// @see https://html.spec.whatwg.org/#topmost-clicked-popover
+    KRYS_NODISCARD RefPtr<html::HTMLElement> TopmostClickedPopover(Node &node) const noexcept;
+
+    /// @brief The showing auto popover the first showing hint popover opened from, if any.
+    /// @see https://html.spec.whatwg.org/#hint-stack-parent
+    KRYS_NODISCARD html::HTMLElement *HintStackParent() const noexcept
+    {
+      return _hintStackParent.get();
+    }
+    void SetHintStackParent(html::HTMLElement *element) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#hiding-popover-nesting-count
+    KRYS_NODISCARD uint32 HidingPopoverNestingCount() const noexcept
+    {
+      return _hidingPopoverNestingCount;
+    }
+    void IncrementHidingPopoverNestingCount() noexcept
+    {
+      ++_hidingPopoverNestingCount;
+    }
+    void DecrementHidingPopoverNestingCount() noexcept
+    {
+      krys_debug_assert(_hidingPopoverNestingCount);
+      --_hidingPopoverNestingCount;
+    }
+
+    /// @see https://html.spec.whatwg.org/#showing-popover
+    KRYS_NODISCARD bool IsShowingPopover() const noexcept
+    {
+      return _isShowingPopover;
+    }
+    void SetIsShowingPopover(bool value) noexcept
+    {
+      _isShowingPopover = value;
+    }
 
     /// @brief Whether the style sheets that block rendering have loaded (or are being ignored).
     KRYS_NODISCARD bool HaveStylesheetsLoaded() const noexcept;

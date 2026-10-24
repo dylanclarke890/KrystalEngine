@@ -157,7 +157,10 @@ namespace krys::boo::html
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is not connected."};
     }
-    // FIXME: If subject's popover visibility state is showing, then throw, with popovers (B4d).
+    if (IsPopoverShowing())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError, u8"Element is already an open popover."};
+    }
     Ref<dom::Document> document = ShareRef(NodeDocument());
     if (!document->IsFullyActive())
     {
@@ -171,7 +174,7 @@ namespace krys::boo::html
     }
 
     // The beforetoggle listeners could have opened, disconnected or shown the dialog as a popover.
-    if (Open() || !IsConnected())
+    if (Open() || !IsConnected() || IsPopoverShowing())
     {
       return {};
     }
@@ -474,7 +477,8 @@ namespace krys::boo::html
 
   void HTMLDialogElement::HidePopoversOnShow() noexcept
   {
-    // FIXME: Hide all popovers until the topmost popover ancestor of the dialog (or the document), with
-    // popovers (B4d).
+    // Hide the popovers above the topmost popover the dialog is in, or all of them.
+    RefPtr<HTMLElement> hideUntil = TopmostPopoverAncestor(nullptr, false);
+    NodeDocument().HideAllPopoversUntil(hideUntil.get(), dom::FocusPreviousElement::No, dom::FireEvents::Yes);
   }
 }

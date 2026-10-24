@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -30,6 +31,11 @@ namespace krys::boo::dom
   void ElementRareData::SetCustomStateSet(RefPtr<html::CustomStateSet> &&customStateSet) noexcept
   {
     _customStateSet = krys::move(customStateSet);
+  }
+
+  void ElementRareData::SetPopoverData(UniquePtr<PopoverData> &&popoverData) noexcept
+  {
+    _popoverData = krys::move(popoverData);
   }
 
   void ElementRareData::SetComputedStyle(UniquePtr<RenderStyle> style) noexcept

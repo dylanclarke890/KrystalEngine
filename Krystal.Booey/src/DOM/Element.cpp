@@ -14,6 +14,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
@@ -27,6 +28,7 @@
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -2117,6 +2119,11 @@ namespace krys::boo::dom
       return;
     }
 
+    if (_elementRareData && IsElementReflectionAttribute(localName))
+    {
+      _elementRareData->GetExplicitlySetAttrElementsMap().erase(localName);
+    }
+
     // NOTE: the ID is read from the attribute, so only the ID's observers need telling about it.
     if (localName == Attributes::Id)
     {
@@ -2296,6 +2303,168 @@ namespace krys::boo::dom
     }
 
     ForEachRenderLayer(*this, [](RenderLayer &layer) { layer.EstablishesTopLayerDidChange(); });
+  }
+
+#pragma endregion
+
+#pragma region Popovers
+
+  PopoverData *Element::GetPopoverData() const noexcept
+  {
+    return _elementRareData ? _elementRareData->GetPopoverData() : nullptr;
+  }
+
+  PopoverData &Element::EnsurePopoverData() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.GetPopoverData())
+    {
+      rareData.SetPopoverData(CreateUnique<PopoverData>());
+    }
+    return *rareData.GetPopoverData();
+  }
+
+  void Element::ClearPopoverData() noexcept
+  {
+    if (_elementRareData)
+    {
+      _elementRareData->SetPopoverData(nullptr);
+    }
+  }
+
+  bool Element::IsPopoverShowing() const noexcept
+  {
+    auto *popoverData = GetPopoverData();
+    return popoverData && popoverData->VisibilityState() == PopoverVisibilityState::Showing;
+  }
+
+  PopoverState Element::GetPopoverState() const noexcept
+  {
+    auto *popoverData = GetPopoverData();
+    return popoverData ? popoverData->GetPopoverState() : PopoverState::None;
+  }
+
+  Element *Element::InvokedPopover() const noexcept
+  {
+    return _elementRareData ? _elementRareData->InvokedPopover() : nullptr;
+  }
+
+  void Element::SetInvokedPopover(Element *element) noexcept
+  {
+    EnsureElementRareData().SetInvokedPopover(element);
+
+    // Invalidate so the popover invoker style bit gets updated.
+    InvalidateStyleInternal();
+  }
+
+  RefPtr<html::HTMLElement> Element::TopmostPopoverAncestor(html::HTMLElement *source,
+                                                            bool isPopover) noexcept
+  {
+    krys_debug_assert(isPopover || !source);
+
+    // The showing auto popovers, then the showing hint popovers.
+    auto &document = NodeDocument();
+    auto combinedPopovers = document.ShowingAutoPopoverList();
+    auto hintPopovers = document.ShowingHintPopoverList();
+    combinedPopovers.insert(combinedPopovers.end(), hintPopovers.begin(), hintPopovers.end());
+
+    // The index of the last of them that's a flat tree ancestor of the walk's start, or -1.
+    auto ancestorIndex = [&](Element *start) -> int64
+    {
+      int64 index = -1;
+      for (auto *element = start; element; element = element->ParentElementInComposedTree())
+      {
+        auto it =
+          std::ranges::find_if(combinedPopovers, [&](auto &popover) { return popover.get() == element; });
+        if (it != combinedPopovers.end())
+        {
+          index = std::max(index, static_cast<int64>(it - combinedPopovers.begin()));
+        }
+      }
+      return index;
+    };
+
+    auto index = ancestorIndex(ParentElementInComposedTree());
+    if (source)
+    {
+      index = std::max(index, ancestorIndex(source));
+    }
+    if (index == -1)
+    {
+      return nullptr;
+    }
+    return combinedPopovers[static_cast<size_t>(index)];
+  }
+
+#pragma endregion
+
+#pragma region Element Reflection
+
+  RefPtr<Element> Element::ElementForAttributeInternal(DOMStringAtom attributeName) const noexcept
+  {
+    if (_elementRareData)
+    {
+      auto &map = _elementRareData->GetExplicitlySetAttrElementsMap();
+      if (auto it = map.find(attributeName); it != map.end())
+      {
+        auto *explicitlySetElement = it->second.get();
+        if (explicitlySetElement
+            && TreeQueries::IsShadowIncludingDescendant(*this, TreeQueries::Root(*explicitlySetElement)))
+        {
+          return ShareRefPtr(explicitlySetElement);
+        }
+        return nullptr;
+      }
+    }
+
+    // The element with the attribute's value as its ID in the element's tree, connected or not.
+    auto id = GetAttribute(attributeName);
+    if (!id || id->empty())
+    {
+      return nullptr;
+    }
+    auto &root = TreeQueries::Root(const_cast<Element &>(*this));
+    if (auto *document = DynamicDowncast<Document>(root))
+    {
+      return document->GetElementById(*id);
+    }
+    if (auto *fragment = DynamicDowncast<DocumentFragment>(root))
+    {
+      return fragment->GetElementById(*id);
+    }
+    for (auto *node = &root; node; node = TreeQueries::Next(*node, &root))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node);
+          element && element->GetAttribute(Attributes::Id) == id)
+      {
+        return ShareRefPtr(element);
+      }
+    }
+    return nullptr;
+  }
+
+  void Element::SetElementAttribute(DOMStringAtom attributeName, Element *element) noexcept
+  {
+    krys_debug_assert(IsElementReflectionAttribute(attributeName));
+
+    if (!element)
+    {
+      if (_elementRareData)
+      {
+        _elementRareData->GetExplicitlySetAttrElementsMap().erase(attributeName);
+      }
+      RemoveAttribute(attributeName);
+      return;
+    }
+
+    (void)SetAttribute(attributeName, DOMString());
+    EnsureElementRareData().GetExplicitlySetAttrElementsMap()[attributeName] = CreateWeakPtr(element);
+  }
+
+  bool Element::IsElementReflectionAttribute(DOMStringAtom attributeName) noexcept
+  {
+    // FIXME: commandfor (B4f), and the ARIA element reflection attributes, once there's accessibility.
+    return attributeName == u8"popovertarget";
   }
 
 #pragma endregion

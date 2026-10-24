@@ -114,6 +114,24 @@ namespace krys::boo::html
     /// @brief The return value of a dialog this control submits.
     KRYS_NODISCARD virtual Maybe<dom::DOMString> ResultForDialogSubmit() const noexcept;
 
+    /// @brief The popover the control (a button) shows or hides, if it can.
+    /// @see https://html.spec.whatwg.org/#popover-target-element
+    KRYS_NODISCARD RefPtr<HTMLElement> PopoverTargetElement() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
+    KRYS_NODISCARD RefPtr<dom::Element> PopoverTargetElementForBindings() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-popovertargetelement
+    void PopoverTargetElementForBindings(dom::Element *element) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
+    KRYS_NODISCARD dom::DOMString PopoverTargetAction() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-popovertargetaction
+    void PopoverTargetAction(dom::DOMString &&value) noexcept;
+
+    /// @brief Shows or hides the control's popover target element as its activation, unless the activation
+    /// came from inside the popover (@p eventTarget is the event's target).
+    /// @see https://html.spec.whatwg.org/#popover-target-attribute-activation-behavior
+    void HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept;
+
     KRYS_NODISCARD FormAssociatedElement *AsFormAssociatedElement() noexcept final
     {
       return this;

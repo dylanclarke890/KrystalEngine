@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
+#include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
@@ -760,6 +761,12 @@ namespace krys::boo::html
     {
       return true;
     }
+    // The trigger of a showing popover, whose scope the popover is in.
+    if (auto *popover = DynamicDowncast<HTMLElement>(element->InvokedPopover());
+        popover && popover->IsPopoverShowing() && popover->GetPopoverData()->Invoker() == element)
+    {
+      return true;
+    }
     return Is<HTMLSlotElement>(*element);
   }
 
@@ -786,6 +793,14 @@ namespace krys::boo::html
     if (Is<dom::Document>(*parent))
     {
       return parent;
+    }
+    // A showing popover is in its trigger's scope.
+    if (auto *popover = DynamicDowncast<HTMLElement>(element); popover && popover->IsPopoverShowing())
+    {
+      if (auto *trigger = popover->GetPopoverData()->Invoker())
+      {
+        return trigger;
+      }
     }
     auto *parentElement = DynamicDowncast<dom::Element>(*parent);
     return parentElement ? AssociatedFocusNavigationOwner(*parentElement) : nullptr;

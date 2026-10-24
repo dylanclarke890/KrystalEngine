@@ -36,7 +36,12 @@ namespace krys::boo::html
     UseCredentials,
     Any,
     CloseRequest,
+    Manual,
+    Hint,
+    Toggle,
+    Show,
+    Hide,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 26uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 31uz);
