@@ -3,12 +3,14 @@
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
@@ -54,10 +56,10 @@ namespace krys::boo::dom
     auto *targetOverride = target;
     if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
     {
-      krys_debug_assert(target->IsWindow());
-      // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window. Might implement in the future.
       // If legacy target override flag is given, let targetOverride be target’s associated Document.
-      krys_not_implemented();
+      krys_debug_assert(target->IsWindow());
+      targetOverride = Downcast<LocalDOMWindow>(*target).Document();
+      krys_debug_assert(targetOverride);
     }
 
     EventTarget *activationTarget = nullptr;
@@ -359,11 +361,24 @@ namespace krys::boo::dom
     }
   }
 
+  LocalDOMWindow *EventDispatcher::RelevantWindow(EventTarget &target) noexcept
+  {
+    if (auto *window = DynamicDowncast<LocalDOMWindow>(target))
+    {
+      return window;
+    }
+    if (auto *node = DynamicDowncast<Node>(target))
+    {
+      return node->NodeDocument().Window();
+    }
+    // FIXME: The other targets' globals (signals, media query lists), once they record their document.
+    return nullptr;
+  }
+
   bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
                                     EventPhaseType phase, bool invocationTargetInShadowTree,
                                     bool *legacyOutputDidListenersThrowFlag) noexcept
   {
-    (void)invocationTargetInShadowTree;
     (void)legacyOutputDidListenersThrowFlag;
 
     bool found = false;
@@ -397,20 +412,30 @@ namespace krys::boo::dom
         EventTargetAlgorithms::RemoveEventListener(*event._currentTarget, *listener);
       }
 
-      // SPEC-VIOLATION(HTML): realms/global objects currently not supported.
-      // Let global be listener callback’s associated realm’s global object.
+      // Let global be listener callback’s associated realm’s global object. Listeners are host code rather
+      // than script, so their global is the current target's: its window, or its node document's.
       // Let currentEvent be undefined.
-      // If global is a Window object :
+      // If global is a Window object:
       //   Set currentEvent to global’s current event.
       //   If invocationTargetInShadowTree is false, then set global’s current event to event.
+      RefPtr<LocalDOMWindow> global = ShareRefPtr(RelevantWindow(*event._currentTarget));
+      RefPtr<Event> currentEvent;
+      if (global)
+      {
+        currentEvent = global->_currentEvent;
+        if (!invocationTargetInShadowTree)
+        {
+          global->_currentEvent = ShareRefPtr(&event);
+        }
+      }
 
       if (listener->Passive() == true)
       {
         event._inPassiveListener = true;
       }
 
-      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
-      // If global is a Window object, then record timing info for event listener given event and listener.
+      // FIXME: If global is a Window object, then record timing info for event listener given event and
+      // listener, once there's event timing.
 
       // SPEC-VIOLATION(WEBIDL): this is javascript-specific and we don't have JS objects or exceptions, so
       // we'll just call the callback directly.
@@ -430,8 +455,11 @@ namespace krys::boo::dom
       }
       event._inPassiveListener = false;
 
-      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
       // If global is a Window object, then set global’s current event to currentEvent.
+      if (global)
+      {
+        global->_currentEvent = krys::move(currentEvent);
+      }
 
       if (event._stopImmediatePropagation)
       {

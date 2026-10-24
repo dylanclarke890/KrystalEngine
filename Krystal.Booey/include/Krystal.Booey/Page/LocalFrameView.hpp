@@ -56,6 +56,13 @@ namespace krys::boo
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(LocalFrameView);
 
   public:
+    /// @brief How the user scrolled a view: themselves, or by something they did (moving the selection).
+    enum class UserScrollType : uint8
+    {
+      Explicit,
+      Implicit
+    };
+
     struct OverrideViewportSize
     {
       Maybe<float> Width;
@@ -103,6 +110,12 @@ namespace krys::boo
     /// @brief Tries the URL's text directives again while the page may still be loading their text.
     Timer _scrollToTextFragmentRetryTimer;
     Maybe<MonotonicTime::duration> _scrollToTextFragmentInitialAttemptTime;
+    /// @brief The scroll position as the document entered the back/forward cache.
+    ScrollPosition _cachedScrollPosition;
+    /// @brief Whether the frame's loader is still to hear of the first layout.
+    bool _firstLayoutCallbackPending {false};
+    /// @brief How the user last scrolled the view, if they did.
+    Maybe<UserScrollType> _lastUserScrollType;
     bool _wasEverScrolledExplicitlyByUser {false};
     /// @brief The text a text directive indicated, kept in view as layout changes, while its text stays the
     /// same.
@@ -122,6 +135,9 @@ namespace krys::boo
     bool _canHaveScrollbars {true};
     uint32 _updateScrollbarsPass {0};
     IntSize _lastUsedSizeForLayout;
+    /// @brief The viewport's size and zoom when `resize` was last scheduled, or at the first layout.
+    IntSize _lastViewportSize;
+    float _lastUsedZoomFactor {1};
 
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
@@ -441,6 +457,9 @@ namespace krys::boo
     /// (or the body) for layout if the size content is laid out at changed.
     void WillDoLayout(const RenderElement &layoutRoot) noexcept;
 
+    /// @brief After a layout: tells the frame's loader of its first layout, once.
+    void FireLayoutRelatedMilestonesIfNeeded() noexcept;
+
     /// @brief Whether the user can scroll the view: it has overflow, and `overflow` doesn't hide both axes.
     KRYS_NODISCARD bool IsScrollable() const noexcept;
     /// @brief Scrolls the view by a step of @p granularity in a direction relative to the document's writing
@@ -643,6 +662,33 @@ namespace krys::boo
     /// @brief Cancels a scroll to the focused element that hasn't happened yet.
     void CancelScheduledScrolls() noexcept;
 
+    /// @brief Keeps the scroll position, as the view's document enters the back/forward cache.
+    void CacheCurrentScrollState() noexcept
+    {
+      _cachedScrollPosition = GetScrollPosition();
+    }
+
+    KRYS_NODISCARD const ScrollPosition &CachedScrollPosition() const noexcept
+    {
+      return _cachedScrollPosition;
+    }
+
+    /// @brief Whether the user scrolled the view (since the view was made, or its last user scroll type was
+    /// cleared).
+    KRYS_NODISCARD bool WasScrolledByUser() const noexcept
+    {
+      return _lastUserScrollType.has_value();
+    }
+
+    KRYS_NODISCARD bool WasEverScrolledExplicitlyByUser() const noexcept
+    {
+      return _wasEverScrolledExplicitlyByUser;
+    }
+
+    /// @brief Notes how the user last scrolled the view (null to clear it), which stops the view keeping the
+    /// fragment or the focused element in view; a programmatic scroll isn't the user's.
+    void SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept;
+
     /// @brief Scrolls to the fragment of @p url: makes the element it indicates the document's target and
     /// scrolls it into view (the top of the document for `#top` or an empty fragment), and focuses it.
     /// @return Whether there was something to scroll to.
@@ -671,6 +717,22 @@ namespace krys::boo
 
     /// @brief Scrolls to the maintained anchor in a task, as layout may have moved it.
     void ScheduleScrollToAnchorAndTextFragment() noexcept;
+
+    /// @brief @p value, in layout units, in CSS pixels: less the page zoom.
+    KRYS_NODISCARD int32 MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept;
+
+    /// @brief @p value, in CSS pixels, in layout units: with the page zoom.
+    KRYS_NODISCARD LayoutUnit MapFromCSSToLayoutUnits(int32 value) const noexcept;
+
+    /// @brief The viewport's size, with its scrollbars, as `resize` reports changes to it.
+    KRYS_NODISCARD IntSize SizeForResizeEvent() const noexcept;
+
+    /// @brief After a layout: has the next rendering update fire `resize` at the window if the viewport's
+    /// size or zoom changed since the last time.
+    void ScheduleResizeEventIfNeeded() noexcept;
+
+    /// @brief The viewport moved or resized: the window's visual viewport takes its new geometry.
+    void LayoutOrVisualViewportChanged() noexcept;
 
     /// @brief Scrolls to the maintained anchor if a scroll to it is scheduled.
     void ScrollToAnchorAndTextFragmentNowIfNeeded() noexcept;

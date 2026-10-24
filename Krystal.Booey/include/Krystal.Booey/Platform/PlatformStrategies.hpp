@@ -6,6 +6,7 @@ namespace krys::boo
 {
   class LoaderStrategy;
   class PasteboardStrategy;
+  class StorageProvider;
 
   /// @brief The strategies the host provides for what Booey can't do itself.
   /// @note The host owns the strategies; they must outlive their use.
@@ -14,6 +15,7 @@ namespace krys::boo
   private:
     LoaderStrategy *_loaderStrategy {nullptr};
     PasteboardStrategy *_pasteboardStrategy {nullptr};
+    StorageProvider *_storageProvider {nullptr};
 
   public:
     KRYS_NODISCARD static PlatformStrategies &Singleton() noexcept;
@@ -37,6 +39,17 @@ namespace krys::boo
     void SetPasteboardStrategy(PasteboardStrategy *pasteboardStrategy) noexcept
     {
       _pasteboardStrategy = pasteboardStrategy;
+    }
+
+    /// @brief Where origins' local storage is kept; null until the host sets one, and then it's kept in
+    /// memory.
+    KRYS_NODISCARD StorageProvider *GetStorageProvider() const noexcept
+    {
+      return _storageProvider;
+    }
+    void SetStorageProvider(StorageProvider *storageProvider) noexcept
+    {
+      _storageProvider = storageProvider;
     }
   };
 }

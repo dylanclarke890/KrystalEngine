@@ -8,6 +8,11 @@ namespace krys::boo::html
   class BaseButtonInputType : public BaseClickableWithKeyInputType
   {
   public:
+    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final
+    {
+      return false;
+    }
+
     bool AppendFormData(DOMFormData &formData) const noexcept override;
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept override;
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,

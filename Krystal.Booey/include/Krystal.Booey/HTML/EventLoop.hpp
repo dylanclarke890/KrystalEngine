@@ -9,18 +9,24 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Queue.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo
 {
   class Timer;
 }
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::html
 {
   /// @brief A minimal event loop: one queue of tasks and a microtask queue, with the timers, run by the host
-  /// with its current time.
-  /// @note There's no rendering step, no task document (every document is fully active) and no
-  /// scripting, so a microtask checkpoint only runs microtasks.
+  /// with its current time. A task may belong to a document: it waits while the document's tasks are
+  /// suspended (in the back/forward cache), and is dropped once the document's active objects are stopped.
+  /// @note There's no rendering step and no scripting, so a microtask checkpoint only runs microtasks.
   /// @see https://html.spec.whatwg.org/#event-loops
   class EventLoop
   {
@@ -35,11 +41,14 @@ namespace krys::boo::html
     {
       TaskSource Source;
       EventLoop::Steps Steps;
+      /// @see https://html.spec.whatwg.org/#concept-task-document
+      WeakPtr<dom::Document> Document;
+      bool HasDocument {false};
     };
 
     // NOTE: the spec allows one task queue per source; tasks from every source share one queue here, which
     // keeps tasks from the same source in order.
-    Queue<Task> _taskQueue;
+    Deque<Task> _taskQueue;
 
     /// @see https://html.spec.whatwg.org/#microtask-queue
     Queue<Steps> _microtaskQueue;
@@ -60,6 +69,11 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#queue-a-task
     void QueueTask(TaskSource source, Steps &&steps) noexcept;
+
+    /// @brief Queues a task of @p document (a global task of its window, or an element task of one of its
+    /// elements).
+    /// @see https://html.spec.whatwg.org/#queue-a-global-task
+    void QueueTask(TaskSource source, dom::Document &document, Steps &&steps) noexcept;
 
     /// @brief Queues a task on @p source after @p timeout of the host's time.
     /// @see https://html.spec.whatwg.org/#run-steps-after-a-timeout
@@ -96,10 +110,8 @@ namespace krys::boo::html
     /// it's idle.
     KRYS_NODISCARD Maybe<MonotonicTime::duration> NextWakeTime() const noexcept;
 
-    KRYS_NODISCARD bool HasPendingTasks() const noexcept
-    {
-      return !_taskQueue.empty();
-    }
+    /// @brief Whether a task can run: one without a document, or whose document's tasks aren't suspended.
+    KRYS_NODISCARD bool HasPendingTasks() const noexcept;
 
     KRYS_NODISCARD bool HasPendingMicrotasks() const noexcept
     {

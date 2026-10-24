@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 
@@ -83,59 +84,59 @@ namespace krys::boo::css::tests
   {
     SECTION("Queries are evaluated against the environment")
     {
-      REQUIRE(Document->MatchMedia(u8"all")->Matches());
-      REQUIRE(Document->MatchMedia(u8"")->Matches());
-      REQUIRE(Document->MatchMedia(u8"screen")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"print")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 500px)")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 1000px)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"print, (orientation: landscape)")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"not all")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"(unknown-feature)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"all")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"screen")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"print")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 500px)")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"(min-width: 1000px)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"print, (orientation: landscape)")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"not all")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"(unknown-feature)")->Matches());
     }
 
     SECTION("Font-relative units resolve against the initial font")
     {
       // The initial font is the bundled Liberation Sans at 16px: an x-height of 8.453125px, a zero width of
       // 8.8984375px, a cap height of 11.0078125px, a line spacing of 18px and no water ideogram (1em).
-      REQUIRE(Document->MatchMedia(u8"(width: 50em)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 50rem)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 94.6rex) and (max-width: 94.7rex)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 44.4rlh) and (max-width: 44.5rlh)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 94.6ex) and (max-width: 94.7ex)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 89.9ch) and (max-width: 90ch)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(width: 50ic)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 72.6cap) and (max-width: 72.7cap)")->Matches());
-      REQUIRE(Document->MatchMedia(u8"(min-width: 44.4lh) and (max-width: 44.5lh)")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 51em)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(width: 50em)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(width: 50rem)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 94.6rex) and (max-width: 94.7rex)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 44.4rlh) and (max-width: 44.5rlh)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 94.6ex) and (max-width: 94.7ex)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 89.9ch) and (max-width: 90ch)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(width: 50ic)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 72.6cap) and (max-width: 72.7cap)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 44.4lh) and (max-width: 44.5lh)")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"(min-width: 51em)")->Matches());
     }
 
     SECTION("Nothing matches without a frame or a document element")
     {
       Frame->SetDocument(nullptr);
-      REQUIRE_FALSE(Document->MatchMedia(u8"all")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"all")->Matches());
 
       auto empty = CreateRef<dom::HTMLDocument>();
       auto emptyFrame = ShowInFrame(*empty);
-      REQUIRE_FALSE(empty->MatchMedia(u8"all")->Matches());
+      REQUIRE_FALSE(empty->Window()->MatchMedia(u8"all")->Matches());
     }
 
     SECTION("Without a view there's no media type, and conditions are unknown")
     {
       Frame->SetView(nullptr);
-      REQUIRE(Document->MatchMedia(u8"all")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"screen")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 0)")->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"not all and (min-width: 0)")->Matches());
+      REQUIRE(Document->Window()->MatchMedia(u8"all")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"screen")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"(min-width: 0)")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"not all and (min-width: 0)")->Matches());
     }
 
     SECTION("The result is kept until the queries are evaluated again")
     {
-      auto list = Document->MatchMedia(u8"(min-width: 500px)");
+      auto list = Document->Window()->MatchMedia(u8"(min-width: 500px)");
       REQUIRE(list->Matches());
       Resize(400);
       REQUIRE(list->Matches());
-      REQUIRE_FALSE(Document->MatchMedia(u8"(min-width: 500px)")->Matches());
+      REQUIRE_FALSE(Document->Window()->MatchMedia(u8"(min-width: 500px)")->Matches());
 
       Document->EvaluateMediaQueriesAndReportChanges();
       REQUIRE_FALSE(list->Matches());
@@ -144,11 +145,12 @@ namespace krys::boo::css::tests
 
   TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: media", "[CSS][MediaQueryList]")
   {
-    REQUIRE(Document->MatchMedia(u8"(MIN-WIDTH: 100PX)")->Media() == u8"(min-width: 100px)");
-    REQUIRE(Document->MatchMedia(u8"screen   and (color),PRINT")->Media() == u8"screen and (color), print");
-    REQUIRE(Document->MatchMedia(u8"")->Media() == u8"");
-    REQUIRE(Document->MatchMedia(u8"(min-width: 100px")->Media() == u8"(min-width: 100px)");
-    REQUIRE(Document->MatchMedia(u8"foo bar")->Media() == u8"not all");
+    REQUIRE(Document->Window()->MatchMedia(u8"(MIN-WIDTH: 100PX)")->Media() == u8"(min-width: 100px)");
+    REQUIRE(Document->Window()->MatchMedia(u8"screen   and (color),PRINT")->Media()
+            == u8"screen and (color), print");
+    REQUIRE(Document->Window()->MatchMedia(u8"")->Media() == u8"");
+    REQUIRE(Document->Window()->MatchMedia(u8"(min-width: 100px")->Media() == u8"(min-width: 100px)");
+    REQUIRE(Document->Window()->MatchMedia(u8"foo bar")->Media() == u8"not all");
   }
 
   TEST_CASE_METHOD(MatchMediaFixture, "MediaQueryList: change events", "[CSS][MediaQueryList]")
@@ -156,9 +158,9 @@ namespace krys::boo::css::tests
     List<ChangeRecord> records;
     Ref<dom::EventListenerCallback> recorder = CreateRef<ChangeRecorder>(records);
 
-    auto wide = Document->MatchMedia(u8"(min-width: 500px)");
-    auto narrow = Document->MatchMedia(u8"(max-width: 499px)");
-    auto print = Document->MatchMedia(u8"print");
+    auto wide = Document->Window()->MatchMedia(u8"(min-width: 500px)");
+    auto narrow = Document->Window()->MatchMedia(u8"(max-width: 499px)");
+    auto print = Document->Window()->MatchMedia(u8"print");
     wide->AddEventListener(u8"change", Ref {recorder}, false);
     narrow->AddListener(recorder);
     print->AddListener(recorder);
@@ -210,7 +212,7 @@ namespace krys::boo::css::tests
       narrow->RemoveListener(recorder);
       narrow->AddListener(nullptr);
       narrow->RemoveListener(nullptr);
-      wide = Document->MatchMedia(u8"print");
+      wide = Document->Window()->MatchMedia(u8"print");
 
       Resize(400);
       Document->EvaluateMediaQueriesAndReportChanges();

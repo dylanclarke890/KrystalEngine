@@ -14,6 +14,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
@@ -3959,6 +3960,10 @@ namespace krys::boo::html
 
     auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
                                                willExecuteScript, registry);
+    if (auto *input = DynamicDowncast<HTMLInputElement>(element.get()))
+    {
+      input->SetCreatedByParser();
+    }
     for (auto &attr : attributes)
     {
       if (attr.Flags == ParsedAttributeFlags::None)

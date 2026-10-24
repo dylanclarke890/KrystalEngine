@@ -55,6 +55,8 @@ namespace krys::boo::html
     void WillUpgradeFormAssociated() noexcept;
     void DidUpgradeFormAssociated() noexcept;
 
+    void FinishParsingChildren() noexcept final;
+
   private:
     void OnInsert() noexcept final;
     void OnPostConnection() noexcept final;

@@ -494,6 +494,22 @@ namespace krys::boo::html
     }
   }
 
+  bool ValidatedFormListedElement::IsCandidateForSavingAndRestoringState() const noexcept
+  {
+    // We don't save/restore control state in a form with autocomplete=off.
+    return ShouldSaveAndRestoreFormControlState() && AsHTMLElement().IsConnected() && ShouldAutocomplete();
+  }
+
+  FormControlState ValidatedFormListedElement::SaveFormControlState() const noexcept
+  {
+    return {};
+  }
+
+  void ValidatedFormListedElement::RestoreFormControlStateIfNecessary() noexcept
+  {
+    AsHTMLElement().NodeDocument().GetFormController().RestoreControlStateFor(*this);
+  }
+
   bool ValidatedFormListedElement::ShouldAutocomplete() const noexcept
   {
     if (!Form())

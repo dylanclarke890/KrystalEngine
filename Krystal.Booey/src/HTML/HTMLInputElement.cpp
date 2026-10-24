@@ -1050,7 +1050,7 @@ namespace krys::boo::html
     if (NodeDocument().FocusedElement() == this)
     {
       EventLoop::Current().QueueTask(
-        TaskSource::UserInteraction,
+        TaskSource::UserInteraction, NodeDocument(),
         [weakThis = WeakPtr<HTMLInputElement>::WithRef(*this)]
         {
           RefPtr<HTMLInputElement> protectedThis = ShareRefPtr(weakThis.get());
@@ -1700,6 +1700,7 @@ namespace krys::boo::html
       }
       UpdateValidity();
       // FIXME: Auto directionality, with dir=auto.
+      _valueAttributeWasUpdatedAfterParsing = !_parsingInProgress;
     }
     else if (localName == u8"name")
     {
@@ -1710,9 +1711,11 @@ namespace krys::boo::html
     else if (localName == u8"checked")
     {
       SetDefaultCheckedState(value.has_value());
-      // FIXME: Delaying SetChecked() until FinishParsingChildren() when the parser has form state to restore,
-      // once form state is saved and restored.
-      if (!_dirtyCheckednessFlag)
+      // Another radio button in the same group might be checked by state restore. We shouldn't call
+      // setChecked() even if this has the checked attribute. So, delay the setChecked() call until
+      // finishParsingChildren() is called if parsing is in progress.
+      if ((!_parsingInProgress || !NodeDocument().GetFormController().HasFormStateToRestore())
+          && !_dirtyCheckednessFlag)
       {
         SetChecked(value.has_value());
         // SetChecked() above sets the dirty checkedness flag so we need to reset it.
@@ -1854,14 +1857,33 @@ namespace krys::boo::html
 
   void HTMLInputElement::FinishParsingChildren() noexcept
   {
+    _parsingInProgress = false;
     krys_debug_assert(_inputType);
     HTMLTextFormControlElement::FinishParsingChildren();
-    // FIXME: Skipping this when form state was restored, once form state is saved and restored.
-    if (HasAttribute(u8"checked"))
+    if (!_stateRestored)
     {
-      SetChecked(true);
+      if (HasAttribute(u8"checked"))
+      {
+        SetChecked(true);
+      }
+      _dirtyCheckednessFlag = false;
     }
-    _dirtyCheckednessFlag = false;
+  }
+
+  bool HTMLInputElement::ShouldSaveAndRestoreFormControlState() const noexcept
+  {
+    return _inputType->ShouldSaveAndRestoreFormControlState();
+  }
+
+  FormControlState HTMLInputElement::SaveFormControlState() const noexcept
+  {
+    return _inputType->SaveFormControlState();
+  }
+
+  void HTMLInputElement::RestoreFormControlState(const FormControlState &state) noexcept
+  {
+    _inputType->RestoreFormControlState(state);
+    _stateRestored = true;
   }
 
   bool HTMLInputElement::RendererIsNeeded(const RenderStyle &style) noexcept

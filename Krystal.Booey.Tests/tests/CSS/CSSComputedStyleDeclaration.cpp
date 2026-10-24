@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
 namespace krys::boo::css::tests
 {
@@ -20,7 +21,7 @@ namespace krys::boo::css::tests
       #a::before { content: "b"; color: rgb(255, 0, 0) }
     </style><div id=a></div>)"};
     auto &a = fixture.ById(u8"a");
-    auto style = GetComputedStyle(a);
+    auto style = fixture.Document->Window()->GetComputedStyle(a);
 
     CHECK(style->GetStyleDeclarationType() == StyleDeclarationType::Style);
     CHECK(Value(*style, u8"color") == "rgb(0, 0, 255)");
@@ -58,15 +59,16 @@ namespace krys::boo::css::tests
 
     SECTION("pseudo-elements")
     {
-      auto before = GetComputedStyle(a, u8"::before");
+      auto before = fixture.Document->Window()->GetComputedStyle(a, u8"::before");
       CHECK(Value(*before, u8"color") == "rgb(255, 0, 0)");
       CHECK(Value(*before, u8"content") == "\"b\"");
 
       // A string that doesn't start with a colon is ignored.
-      CHECK(Value(*GetComputedStyle(a, u8"before"), u8"color") == "rgb(0, 128, 0)");
+      CHECK(Value(*fixture.Document->Window()->GetComputedStyle(a, u8"before"), u8"color")
+            == "rgb(0, 128, 0)");
 
       // An invalid pseudo-element gives an empty declaration.
-      auto invalid = GetComputedStyle(a, u8"::nonsense");
+      auto invalid = fixture.Document->Window()->GetComputedStyle(a, u8"::nonsense");
       CHECK(invalid->Length() == 0);
       CHECK(Value(*invalid, u8"color").empty());
     }

@@ -188,6 +188,28 @@ namespace krys::boo::html
            && !PatternMismatch(value) && !ValueMissing(value);
   }
 
+  bool InputType::ShouldSaveAndRestoreFormControlState() const noexcept
+  {
+    return true;
+  }
+
+  FormControlState InputType::SaveFormControlState() const noexcept
+  {
+    krys_debug_assert(Element());
+    auto currentValue = Element()->Value();
+    if (currentValue == Element()->GetAttribute(u8"value").value_or(dom::DOMString()))
+    {
+      return {};
+    }
+    return {krys::move(currentValue)};
+  }
+
+  void InputType::RestoreFormControlState(const FormControlState &state) noexcept
+  {
+    krys_debug_assert(Element());
+    (void)Element()->SetValue(state[0]);
+  }
+
   bool InputType::IsFormDataAppendable() const noexcept
   {
     krys_debug_assert(Element());

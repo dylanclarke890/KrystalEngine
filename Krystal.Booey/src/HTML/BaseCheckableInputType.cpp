@@ -7,6 +7,18 @@
 
 namespace krys::boo::html
 {
+  FormControlState BaseCheckableInputType::SaveFormControlState() const noexcept
+  {
+    krys_debug_assert(Element());
+    return {dom::DOMString(Element()->Checked() ? u8"on" : u8"off")};
+  }
+
+  void BaseCheckableInputType::RestoreFormControlState(const FormControlState &state) noexcept
+  {
+    krys_debug_assert(Element());
+    Element()->SetChecked(state[0] == u8"on");
+  }
+
   bool BaseCheckableInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

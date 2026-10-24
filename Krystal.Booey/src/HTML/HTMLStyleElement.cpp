@@ -177,7 +177,7 @@ namespace krys::boo::html
     // https://html.spec.whatwg.org/#update-a-style-block: once the sheet and its critical subresources have
     // loaded, queue an element task on the networking task source to fire load (or error) at the element.
     html::EventLoop::Current().QueueTask(
-      TaskSource::Networking, [element = ShareRef(*this), loaded = _loadedSheet]
+      TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
       { dom::EventDispatcher::FireEvent(loaded ? EventNames::Load : EventNames::Error, *element); });
   }
 

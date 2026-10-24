@@ -43,6 +43,9 @@ namespace krys::ui
   protected:
     /// @brief Shows @p overlay over @p owner's page, hiding the one shown before.
     static void ShowIn(View &owner, Overlay &overlay) noexcept;
+
+    /// @brief Replaces @p view's document with one parsed from @p markup at once: an overlay's content.
+    static void ReplaceDocument(View &view, utf8_string &&markup) noexcept;
     /// @brief Tells @p owner that @p overlay is hidden.
     static void HiddenFrom(View &owner, Overlay &overlay) noexcept;
 

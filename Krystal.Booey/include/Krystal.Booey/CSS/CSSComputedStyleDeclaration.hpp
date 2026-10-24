@@ -96,11 +96,4 @@ namespace krys::boo::css
 
     KRYS_NODISCARD style::Extractor GetExtractor() const noexcept;
   };
-
-  /// @brief The resolved values of `element`'s properties, or of its pseudo-element `pseudoElement` (such as
-  /// `::before`).
-  /// @see https://drafts.csswg.org/cssom/#dom-window-getcomputedstyle
-  // FIXME: This is a member of the window; move it there once there is one.
-  KRYS_NODISCARD Ref<CSSStyleDeclaration> GetComputedStyle(dom::Element &element,
-                                                           const CSSOMString &pseudoElement = {}) noexcept;
 }

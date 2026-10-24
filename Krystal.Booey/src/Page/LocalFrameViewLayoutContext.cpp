@@ -160,10 +160,17 @@ namespace krys::boo
       krys_debug_assert(_percentHeightIgnoreList.empty());
     }
 
-    // The post-layout tasks: the animations layout brought into view resume, and the fragment's target is
-    // scrolled back into view.
+    // The post-layout tasks: the animations layout brought into view resume, the fragment's target is
+    // scrolled back into view, the window is told if the viewport resized, and the loader of the first
+    // layout.
+    if (!IsLayoutNested() && Document()->DocumentElement())
+    {
+      _frameView.FireLayoutRelatedMilestonesIfNeeded();
+    }
     _frameView.ViewportContentsChanged();
     _frameView.ScheduleScrollToAnchorAndTextFragment();
+    _frameView.ScheduleResizeEventIfNeeded();
+    _frameView.LayoutOrVisualViewportChanged();
   }
 
   bool LocalFrameViewLayoutContext::UpdateCompositingLayersAfterStyleChange() noexcept

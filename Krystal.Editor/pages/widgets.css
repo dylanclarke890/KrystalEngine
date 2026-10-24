@@ -100,6 +100,10 @@ tr:hover td { text-decoration: underline; }
 .order { font-size: 13px; line-height: 18px; }
 /* The form spans the page and grows with its contents (more specific than `.card`, which sets a height). */
 .card.order { width: 100%; height: auto; }
+.card.settings { height: auto; }
+.settings label { display: block; margin-bottom: 6px; }
+.guide .topics a { margin-right: 16px; color: #4f6df5; }
+.guide .topics a.current { color: #ef476f; font-weight: bold; text-decoration: none; }
 .order label { display: block; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: #f7f8fb; }
 .order input[name=name], .order textarea { display: block; box-sizing: border-box; width: 100%; margin: 0 0 6px;
   padding: 4px 8px; border: 1px solid #c5cbd8; border-radius: 6px; background: #ffffff; font: inherit;

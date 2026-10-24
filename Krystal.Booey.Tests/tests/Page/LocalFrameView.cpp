@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -227,7 +228,7 @@ namespace krys::boo::tests
     SECTION("Page zoom")
     {
       // Media query lengths are unzoomed, so the 800px wide view is 400px wide at a zoom of 2.
-      auto wide = document.MatchMedia(u8"(width: 400px)");
+      auto wide = document.Window()->MatchMedia(u8"(width: 400px)");
       CHECK_FALSE(wide->Matches());
       fixture.Frame->SetPageZoomFactor(2);
       CHECK(document.RenderViewStyle().UsedZoom() == 2);
@@ -328,7 +329,7 @@ namespace krys::boo::tests
     document.UpdateStyleIfNeeded();
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
 
-    auto paged = document.MatchMedia(u8"(overflow-block: paged)");
+    auto paged = document.Window()->MatchMedia(u8"(overflow-block: paged)");
     CHECK_FALSE(paged->Matches());
 
     fixture.View().SetMediaType(css::CSSOMStringAtom {u8"print"});
@@ -354,7 +355,7 @@ namespace krys::boo::tests
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 1);
 
-    auto hiDPI = document.MatchMedia(u8"(resolution: 2x)");
+    auto hiDPI = document.Window()->MatchMedia(u8"(resolution: 2x)");
     CHECK_FALSE(hiDPI->Matches());
 
     css::mq::MediaEnvironment environment;

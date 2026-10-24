@@ -53,4 +53,21 @@ namespace krys::tests
       CHECK(Decode("TQ==", Base64DecodeOption::ValidatePadding) == std::string("M"));
     }
   }
+
+  TEST_CASE("Base64Encode: encodes the standard alphabet, padded", "[Text][Base64]")
+  {
+    auto encode = [](std::string_view input)
+    {
+      auto encoded =
+        Base64Encode(Span<const uint8>(reinterpret_cast<const uint8 *>(input.data()), input.size()));
+      return std::string(encoded.begin(), encoded.end());
+    };
+    CHECK(encode("") == "");
+    CHECK(encode("M") == "TQ==");
+    CHECK(encode("Ma") == "TWE=");
+    CHECK(encode("Man") == "TWFu");
+    CHECK(encode("ManM") == "TWFuTQ==");
+    CHECK(encode("\xfb\xff\xbf") == "+/+/");
+    CHECK(Decode(encode("any carnal pleasure.")) == std::string("any carnal pleasure."));
+  }
 }

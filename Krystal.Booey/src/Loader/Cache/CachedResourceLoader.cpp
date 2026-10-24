@@ -186,14 +186,12 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Clear the validated URLs when the document's load event finishes, once there's one.
     if (!url.ProtocolIsData())
     {
       _validatedURLs.insert(url.String());
     }
 
     krys_debug_assert(resource->URL() == url);
-    // FIXME: Collect the document's resources when its loads are done (loadDone), once loads are counted.
     if (!_garbageCollectDocumentResourcesTimer.IsActive())
     {
       _garbageCollectDocumentResourcesTimer.StartOneShot({});
@@ -217,6 +215,36 @@ namespace krys::boo
     }
 
     return resource;
+  }
+
+  void CachedResourceLoader::IncrementRequestCount(const CachedResource &) noexcept
+  {
+    // FIXME: Loads that don't delay the load event (ignoreForRequestCount), once there are any.
+    ++_requestCount;
+  }
+
+  void CachedResourceLoader::DecrementRequestCount(const CachedResource &) noexcept
+  {
+    --_requestCount;
+    krys_debug_assert(_requestCount >= 0);
+  }
+
+  void CachedResourceLoader::LoadDone() noexcept
+  {
+    Ref<CachedResourceLoader> protectedThis = ShareRef(*this);
+    if (RefPtr<LocalFrame> frame = ShareRefPtr(Frame()))
+    {
+      frame->Loader().LoadDone();
+    }
+    if (!_garbageCollectDocumentResourcesTimer.IsActive())
+    {
+      _garbageCollectDocumentResourcesTimer.StartOneShot({});
+    }
+  }
+
+  void CachedResourceLoader::DocumentDidFinishLoadEvent() noexcept
+  {
+    _validatedURLs.clear();
   }
 
   CachedResourceLoader::RevalidationPolicy CachedResourceLoader::DetermineRevalidationPolicy(
@@ -299,9 +327,11 @@ namespace krys::boo
       return CachePolicy::Verify;
     }
 
-    // FIXME: Main resources' policy from the frame loader's load type, once there's a frame loader.
+    // The host's policy, unless the load type has one (a reload, or going back and forward).
+    // FIXME: Main resources' policy, once main resources go through the memory cache.
     (void)type;
-    return frame->SubresourceCachePolicy();
+    auto policy = frame->Loader().SubresourceCachePolicy();
+    return policy != CachePolicy::Verify ? policy : frame->SubresourceCachePolicy();
   }
 
   void CachedResourceLoader::SetAutoLoadImages(bool enable) noexcept

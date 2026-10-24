@@ -19,5 +19,11 @@ namespace krys::boo::html
     {
       return InputTypeNames::Password;
     }
+
+    /// @brief Password fields are never saved or restored.
+    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final
+    {
+      return false;
+    }
   };
 }

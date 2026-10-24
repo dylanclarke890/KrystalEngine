@@ -142,7 +142,8 @@ namespace krys::boo::css
 
     const auto &nonInheritedCustomProperties = style->NonInheritedCustomProperties();
     return CSSOMString(
-      nonInheritedCustomProperties.FindKeyAtIndex(i - inheritedCustomProperties.Size() - exposedCount).View());
+      nonInheritedCustomProperties.FindKeyAtIndex(i - inheritedCustomProperties.Size() - exposedCount)
+        .View());
   }
 
   CSSRule *CSSComputedStyleDeclaration::ParentRule() const noexcept
@@ -213,22 +214,5 @@ namespace krys::boo::css
                                                                           IsImportant) noexcept
   {
     return dom::ExceptionCode::NoModificationAllowedError;
-  }
-
-  Ref<CSSStyleDeclaration> GetComputedStyle(dom::Element &element, const CSSOMString &pseudoElement) noexcept
-  {
-    if (!pseudoElement.starts_with(u8':'))
-    {
-      return CSSComputedStyleDeclaration::Create(element, null);
-    }
-
-    // FIXME: This does not work for pseudo-elements that take arguments (webkit.org/b/264103).
-    auto [pseudoElementIsParsable, pseudoElementIdentifier] =
-      SelectorParser::ParsePseudoElement(pseudoElement, SelectorParserContext {element.NodeDocument()});
-    if (!pseudoElementIsParsable)
-    {
-      return CSSComputedStyleDeclaration::CreateEmpty(element);
-    }
-    return CSSComputedStyleDeclaration::Create(element, pseudoElementIdentifier);
   }
 }

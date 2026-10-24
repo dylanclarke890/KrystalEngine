@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/HTML/FormListedElement.hpp"
 #include "Krystal.Core/TriState.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -113,11 +114,32 @@ namespace krys::boo::html
 
     KRYS_NODISCARD virtual bool ShouldAutocomplete() const noexcept;
 
+    /// @brief Whether the control's state is saved with its document's history item and restored to it: if
+    /// the control saves state, is connected, and isn't in a form with `autocomplete=off`.
+    KRYS_NODISCARD bool IsCandidateForSavingAndRestoringState() const noexcept;
+
+    KRYS_NODISCARD virtual bool ShouldSaveAndRestoreFormControlState() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief The control's state, to restore it later; empty if there's nothing to restore.
+    KRYS_NODISCARD virtual FormControlState SaveFormControlState() const noexcept;
+
+    /// @brief Gives the control the @p state it saved.
+    virtual void RestoreFormControlState(const FormControlState &state) noexcept
+    {
+      (void)state;
+    }
+
     /// @brief The control's type, as `type` exposes it.
     KRYS_NODISCARD virtual dom::DOMString FormControlType() const noexcept = 0;
 
   protected:
     ValidatedFormListedElement() noexcept = default;
+
+    /// @brief Gives the control its saved state, if its document has some for it.
+    void RestoreFormControlStateIfNecessary() noexcept;
 
     KRYS_NODISCARD bool HasDisabledAttribute() const noexcept
     {

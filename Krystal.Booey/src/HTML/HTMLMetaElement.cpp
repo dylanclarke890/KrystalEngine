@@ -27,8 +27,6 @@ namespace krys::boo::html
 
   dom::DOMString HTMLMetaElement::HttpEquiv() const noexcept
   {
-    // TODO(HTMLMETAELEMENT, HTML)" 'http-equiv' is an enumerated attribute, don't think it's limited to known
-    // values though.
     return Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
   }
 
@@ -72,4 +70,39 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  void HTMLMetaElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+    Process();
+  }
+
+  void HTMLMetaElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                           Maybe<dom::DOMStringView> value,
+                                           dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if ((localName == u8"http-equiv" || localName == u8"content")
+        && namespaceURI == dom::DOMStringAtom::Null())
+    {
+      Process();
+    }
+  }
+
+  void HTMLMetaElement::Process() noexcept
+  {
+    // When a meta element is inserted into the document, if its http-equiv attribute is present and
+    // represents one of the pragma directives, run its algorithm.
+    if (!IsConnected())
+    {
+      return;
+    }
+    auto httpEquiv = GetAttribute(u8"http-equiv");
+    auto content = GetAttribute(u8"content");
+    if (!httpEquiv || !content)
+    {
+      return;
+    }
+    NodeDocument().ProcessMetaHttpEquiv(*httpEquiv, *content);
+  }
 }

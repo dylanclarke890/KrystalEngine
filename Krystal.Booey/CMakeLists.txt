@@ -1806,6 +1806,63 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Platform/DateTimeChooser.hpp
   include/Krystal.Booey/Platform/DateTimeChooserClient.hpp
   include/Krystal.Booey/Platform/DateTimeChooserParameters.hpp
+
+  # The window (B3a)
+  include/Krystal.Booey/Page/BarProp.hpp
+  include/Krystal.Booey/Page/External.hpp
+  include/Krystal.Booey/Page/LocalDOMWindow.hpp
+  include/Krystal.Booey/Page/Screen.hpp
+  include/Krystal.Booey/Page/VisualViewport.hpp
+  include/Krystal.Booey/DOM/IdleCallbackController.hpp
+  include/Krystal.Booey/DOM/IdleDeadline.hpp
+  include/Krystal.Booey/DOM/ScriptedAnimationController.hpp
+  include/Krystal.Booey/Page/DOMTimer.hpp
+  include/Krystal.Booey/HTML/ErrorEvent.hpp
+  include/Krystal.Booey/HTML/MessageEvent.hpp
+  include/Krystal.Booey/HTML/SerializedScriptValue.hpp
+  include/Krystal.Booey/Page/ConsoleTypes.hpp
+  include/Krystal.Booey/Page/WindowFeatures.hpp
+  include/Krystal.Booey/Page/Navigator.hpp
+  include/Krystal.Booey/Page/UserActivation.hpp
+  include/Krystal.Booey/Platform/Language.hpp
+  include/Krystal.Booey/Plugins/DOMMimeTypeArray.hpp
+  include/Krystal.Booey/Plugins/DOMPluginArray.hpp
+  include/Krystal.Booey/Storage/Storage.hpp
+  include/Krystal.Booey/Storage/StorageArea.hpp
+  include/Krystal.Booey/Storage/StorageEvent.hpp
+  include/Krystal.Booey/HTML/EventHandlerAttributes.hpp
+
+  # Loading documents (B3b)
+  include/Krystal.Booey/Loader/DocumentLoader.hpp
+  include/Krystal.Booey/Loader/DocumentWriter.hpp
+  include/Krystal.Booey/Loader/SubstituteData.hpp
+  include/Krystal.Booey/HTML/PageTransitionEvent.hpp
+  include/Krystal.Booey/HTML/BeforeUnloadEvent.hpp
+  include/Krystal.Booey/HTML/MicroParsers/Refresh.hpp
+  include/Krystal.Booey/Loader/NavigationScheduler.hpp
+  include/Krystal.Booey/Page/Location.hpp
+  include/Krystal.Booey/History/HistoryItem.hpp
+  include/Krystal.Booey/History/BackForwardClient.hpp
+  include/Krystal.Booey/History/BackForwardList.hpp
+  include/Krystal.Booey/History/BackForwardController.hpp
+  include/Krystal.Booey/Loader/HistoryController.hpp
+  include/Krystal.Booey/HTML/FormController.hpp
+  include/Krystal.Booey/DOM/Enums/ReasonForSuspension.hpp
+  include/Krystal.Booey/DOM/Enums/BackForwardCacheState.hpp
+  include/Krystal.Booey/History/CachedFrame.hpp
+  include/Krystal.Booey/History/CachedPage.hpp
+  include/Krystal.Booey/History/BackForwardCache.hpp
+  include/Krystal.Booey/HTML/PopStateEvent.hpp
+  include/Krystal.Booey/Page/History.hpp
+  include/Krystal.Booey/Page/NavigationNavigationType.hpp
+  include/Krystal.Booey/Page/NavigationPromise.hpp
+  include/Krystal.Booey/Page/NavigationHistoryEntry.hpp
+  include/Krystal.Booey/Page/NavigationDestination.hpp
+  include/Krystal.Booey/Page/NavigationTransition.hpp
+  include/Krystal.Booey/Page/NavigationActivation.hpp
+  include/Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp
+  include/Krystal.Booey/Page/NavigateEvent.hpp
+  include/Krystal.Booey/Page/Navigation.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -2990,6 +3047,47 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/Shadow/DateTimeFieldElements.cpp
   src/HTML/Shadow/DateTimeNumericFieldElement.cpp
   src/HTML/Shadow/DateTimeSymbolicFieldElement.cpp
+
+  # The window (B3a)
+  src/Page/LocalDOMWindow.cpp
+  src/Page/Screen.cpp
+  src/Page/VisualViewport.cpp
+  src/DOM/IdleCallbackController.cpp
+  src/DOM/IdleDeadline.cpp
+  src/DOM/ScriptedAnimationController.cpp
+  src/Page/DOMTimer.cpp
+  src/HTML/ErrorEvent.cpp
+  src/HTML/MessageEvent.cpp
+  src/Page/WindowFeatures.cpp
+  src/Page/Navigator.cpp
+  src/Platform/Language.cpp
+  src/Storage/Storage.cpp
+  src/Storage/StorageArea.cpp
+  src/HTML/EventHandlerAttributes.cpp
+
+  # Loading documents (B3b)
+  src/Loader/DocumentLoader.cpp
+  src/Loader/DocumentWriter.cpp
+  src/HTML/PageTransitionEvent.cpp
+  src/HTML/BeforeUnloadEvent.cpp
+  src/HTML/MicroParsers/Refresh.cpp
+  src/Loader/NavigationScheduler.cpp
+  src/Page/Location.cpp
+  src/History/HistoryItem.cpp
+  src/History/BackForwardList.cpp
+  src/History/BackForwardController.cpp
+  src/Loader/HistoryController.cpp
+  src/HTML/FormController.cpp
+  src/History/CachedFrame.cpp
+  src/History/CachedPage.cpp
+  src/History/BackForwardCache.cpp
+  src/HTML/PopStateEvent.cpp
+  src/Page/History.cpp
+  src/Page/NavigationPromise.cpp
+  src/Page/NavigationHistoryEntry.cpp
+  src/Page/NavigationCurrentEntryChangeEvent.cpp
+  src/Page/NavigateEvent.cpp
+  src/Page/Navigation.cpp
 )
 
 target_precompile_headers(Krystal.Booey

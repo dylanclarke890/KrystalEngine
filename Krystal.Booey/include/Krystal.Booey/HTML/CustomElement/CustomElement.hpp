@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/HTML/CustomElementFormValue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -14,6 +15,14 @@ namespace krys::boo::html
 {
   class HTMLElement;
   class HTMLFormElement;
+
+  /// @brief Why a form-associated custom element's state is restored: the session history, or autofill.
+  /// @see https://html.spec.whatwg.org/#dom-form-associated-custom-element-formstaterestorecallback
+  enum class FormStateRestoreMode : uint8
+  {
+    Restore,
+    Autocomplete
+  };
 
   /// @brief The behaviour of a custom element, written in C++: what a custom element's class is in script.
   /// A custom element definition creates one for each element it defines (when the element is created, or
@@ -96,6 +105,16 @@ namespace krys::boo::html
     virtual void FormDisabledCallback(bool disabled) noexcept
     {
       (void)disabled;
+    }
+
+    /// @brief A form-associated element is given back the @p state it set
+    /// (`ElementInternals.setFormValue()`'s state), as its document is loaded again from the session history
+    /// (@p mode `Restore`).
+    virtual void FormStateRestoreCallback(const CustomElementFormValue &state,
+                                          FormStateRestoreMode mode) noexcept
+    {
+      (void)state;
+      (void)mode;
     }
   };
 }

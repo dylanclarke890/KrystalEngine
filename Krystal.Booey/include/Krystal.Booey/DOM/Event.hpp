@@ -189,6 +189,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD static Ref<Event> Create(DOMStringAtom type, bool canBubble, bool isCancelable,
                                             bool isComposed = false) noexcept;
 
+    /// @brief Whether the event is being dispatched (its dispatch flag).
+    KRYS_NODISCARD bool IsBeingDispatched() const noexcept
+    {
+      return _dispatched;
+    }
+
     /// @brief Whether a node's default event handler has handled the event, so no more of them run.
     KRYS_NODISCARD bool DefaultHandled() const noexcept
     {
@@ -286,6 +292,46 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD virtual bool IsHashChangeEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsMessageEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsErrorEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsStorageEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPageTransitionEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPopStateEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsNavigateEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsNavigationCurrentEntryChangeEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsBeforeUnloadEvent() const noexcept
     {
       return false;
     }

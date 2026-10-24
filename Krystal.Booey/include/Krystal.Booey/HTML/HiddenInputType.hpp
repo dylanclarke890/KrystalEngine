@@ -18,6 +18,8 @@ namespace krys::boo::html
       return InputTypeNames::Hidden;
     }
 
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
+    void RestoreFormControlState(const FormControlState &state) noexcept final;
     KRYS_NODISCARD bool RendererIsNeeded() noexcept final;
     KRYS_NODISCARD bool StoresValueSeparateFromAttribute() noexcept final;
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,

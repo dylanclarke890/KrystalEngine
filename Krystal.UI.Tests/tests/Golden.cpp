@@ -8,6 +8,7 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
 #include <string>
 #include <unicode/uloc.h>
@@ -33,6 +34,7 @@ namespace krys::ui::tests
       (void)fonts;
       View view({static_cast<int32>(width), static_cast<int32>(height)});
       REQUIRE(view.LoadFile(GoldenDirectory() / "scenes" / (name + ".html")).has_value());
+      WaitForLoad(view);
       // Let the page's resources load, as Chrome's capture does: its images and style sheets load as
       // networking tasks, and its web fonts once laying text out asks for them (their text is invisible
       // until then).

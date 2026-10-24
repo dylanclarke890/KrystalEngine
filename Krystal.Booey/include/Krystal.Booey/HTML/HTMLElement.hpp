@@ -6,6 +6,7 @@
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementInterface.hpp"
+#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -222,8 +223,14 @@ namespace krys::boo::html
 
 #pragma endregion
 
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+
+    KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+    KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+
+#pragma endregion
+
     // TODO(HTMLELEMENT, HTML): HTMLElement mixins:
-    // HTMLElement includes GlobalEventHandlers;
     // HTMLElement includes ElementContentEditable;
 
     /// @brief The editability of @p node from the `contenteditable` attributes of it and its ancestors, for

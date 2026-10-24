@@ -42,8 +42,10 @@ namespace krys::boo::dom
     }
 
     _fontsToBeginLoading.push_back(CachedResourceHandle<CachedFont>(font));
-    // FIXME: Increment the loader's request count now, in order to prevent the load event from being
-    // dispatched after this font has been requested but before it began loading, once there's one.
+    // Increment the request count now, in order to prevent didFinishLoad from being dispatched after this
+    // font has been requested but before it began loading. Balanced by DecrementRequestCount() in
+    // LoadPendingFonts() and in StopLoadingAndClearFonts().
+    _document.GetCachedResourceLoader().IncrementRequestCount(font);
     if (!_isFontLoadingSuspended && !_fontLoadingTimer.IsActive())
     {
       _fontLoadingTimer.StartOneShot({});
@@ -64,14 +66,16 @@ namespace krys::boo::dom
     for (auto &fontHandle : fontsToBeginLoading)
     {
       fontHandle->BeginLoadIfNeeded(*cachedResourceLoader);
+      // Balances IncrementRequestCount() in BeginLoadingFontSoon().
+      cachedResourceLoader->DecrementRequestCount(*fontHandle);
     }
   }
 
   void DocumentFontLoader::FontLoadingTimerFired() noexcept
   {
     LoadPendingFonts();
-    // FIXME: Tell the frame loader that the loads are done, so it can check whether the document has loaded,
-    // once there's one.
+    // FIXME: Call this on the next frame instead of the next run loop, as ResourceLoader would.
+    _document.GetCachedResourceLoader().LoadDone();
   }
 
   void DocumentFontLoader::StopLoadingAndClearFonts() noexcept
@@ -82,6 +86,12 @@ namespace krys::boo::dom
     }
 
     _fontLoadingTimer.Stop();
+    auto &cachedResourceLoader = _document.GetCachedResourceLoader();
+    for (auto &fontHandle : _fontsToBeginLoading)
+    {
+      // Balances IncrementRequestCount() in BeginLoadingFontSoon().
+      cachedResourceLoader.DecrementRequestCount(*fontHandle);
+    }
     _fontsToBeginLoading.clear();
     if (auto *fontSelector = _document.FontSelectorIfExists())
     {

@@ -52,8 +52,8 @@ namespace krys::boo::dom
   bool EventTargetAlgorithms::DefaultPassiveValue(const DOMStringAtom &type,
                                                   const EventTarget &eventTarget) noexcept
   {
-    if (type != EventNames::TouchStart || type != EventNames::TouchMove || type != EventNames::Wheel
-        || type != EventNames::MouseWheel)
+    if (type != EventNames::TouchStart && type != EventNames::TouchMove && type != EventNames::Wheel
+        && type != EventNames::MouseWheel)
     {
       return false;
     }

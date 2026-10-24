@@ -21,6 +21,15 @@ namespace krys::boo::html
       return InputTypeNames::File;
     }
 
+    /// @brief Nothing: a file input's files aren't kept.
+    // FIXME: The chosen files and their display string, once a file input has files.
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final
+    {
+      return {};
+    }
+    void RestoreFormControlState(const FormControlState &) noexcept final
+    {
+    }
     bool AppendFormData(DOMFormData &formData) const noexcept final;
     KRYS_NODISCARD bool ValueMissing(dom::DOMStringView value) const noexcept final;
     KRYS_NODISCARD dom::DOMString ValueMissingText() const noexcept final;

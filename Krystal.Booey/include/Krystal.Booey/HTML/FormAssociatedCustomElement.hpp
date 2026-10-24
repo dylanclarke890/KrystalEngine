@@ -79,6 +79,16 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
 
+    /// @brief Restores the element's state once it's parsed, unless its form will.
+    void FinishParsingChildren() noexcept;
+
+    /// @brief Whether the element is defined: every definition has a `FormStateRestoreCallback`.
+    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final;
+    /// @brief The element's state (`ElementInternals.setFormValue()`'s): a string, or name and value pairs.
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
+    /// @brief Enqueues the element's `FormStateRestoreCallback` with @p savedState.
+    void RestoreFormControlState(const FormControlState &savedState) noexcept final;
+
     // The element's node hooks, which it forwards.
     using ValidatedFormListedElement::DidFinishInsertingNode;
     using ValidatedFormListedElement::DidMoveToNewDocument;

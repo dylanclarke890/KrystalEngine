@@ -224,7 +224,7 @@ namespace krys::ui
     {
       _view->Resize(boo::IntSize(width, viewport.Height()));
     }
-    _view->LoadHTML(krys::move(html));
+    ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
     _itemElements.assign(static_cast<size_t>(listSize), nullptr);

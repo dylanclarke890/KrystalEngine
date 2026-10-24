@@ -42,7 +42,7 @@ namespace krys::boo::style
       auto &settings = document.GetSettings().Values;
 
       FontCascadeDescription fontDescription;
-      // FIXME: The document's content language (`Content-Language`, `<meta http-equiv>`) isn't tracked.
+      fontDescription.SetSpecifiedLocale(StringAtom(document.ContentLanguage()));
       fontDescription.SetOneFamily(css::WebKitFontFamilyNames::StandardFamily());
       // FIXME: The settings' shouldAllowUserInstalledFonts comes with Settings (its default, Yes, is the
       // description's).

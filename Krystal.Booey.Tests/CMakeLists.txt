@@ -390,6 +390,16 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
 		tests/Page/Page.cpp
+		tests/Page/LocalDOMWindow.cpp
+		tests/Loader/DocumentLoader.cpp
+		tests/Loader/HistoryController.cpp
+		tests/History/BackForwardList.cpp
+		tests/HTML/FormController.cpp
+		tests/DOM/DocumentSuspension.cpp
+		tests/History/BackForwardCache.cpp
+		tests/Page/History.cpp
+		tests/Page/Navigation.cpp
+		tests/HTML/MicroParsers/Refresh.cpp
 		tests/Rendering/BackgroundPainter.cpp
 		tests/Rendering/CSSFilterRenderer.cpp
 		tests/Rendering/LayerOverlapMap.cpp

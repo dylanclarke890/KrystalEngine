@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Loader/FetchOptions.hpp"
 #include "Krystal.Booey/Loader/FrameLoaderTypes.hpp"
+#include "Krystal.Booey/Loader/SubstituteData.hpp"
+#include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceRequest.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -21,9 +23,21 @@ namespace krys::boo
     NewFrameOpenerPolicy _newFrameOpenerPolicy {NewFrameOpenerPolicy::Allow};
     dom::DOMStringAtom _downloadAttribute {dom::DOMStringAtom::Null()};
     RefPtr<dom::Element> _sourceElement;
+    Maybe<WindowFeatures> _windowFeatures;
     bool _isRequestFromClientOrUserInput {false};
+    bool _isFromNavigationAPI {false};
 
   public:
+    /// @brief Whether the Navigation API started the navigation (`navigation.navigate()`, `reload()`).
+    KRYS_NODISCARD bool IsFromNavigationAPI() const noexcept
+    {
+      return _isFromNavigationAPI;
+    }
+    void SetIsFromNavigationAPI(bool isFromNavigationAPI) noexcept
+    {
+      _isFromNavigationAPI = isFromNavigationAPI;
+    }
+
     KRYS_NODISCARD NewFrameOpenerPolicy GetNewFrameOpenerPolicy() const noexcept
     {
       return _newFrameOpenerPolicy;
@@ -45,6 +59,16 @@ namespace krys::boo
       return _sourceElement.get();
     }
     void SetSourceElement(dom::Element *sourceElement) noexcept;
+
+    /// @brief The features `window.open()` asked a new window to have, if it opened one.
+    KRYS_NODISCARD const Maybe<WindowFeatures> &GetWindowFeatures() const noexcept
+    {
+      return _windowFeatures;
+    }
+    void SetWindowFeatures(Maybe<WindowFeatures> &&features) noexcept
+    {
+      _windowFeatures = krys::move(features);
+    }
 
     /// @brief Whether the host or the user asked for the navigation, rather than the page.
     KRYS_NODISCARD bool IsRequestFromClientOrUserInput() const noexcept
@@ -72,8 +96,7 @@ namespace krys::boo
 
   /// @brief A request to load a URL into a frame: what's loaded, from which document, into which browsing
   /// context.
-  // FIXME: Substitute data, history locking, client redirects and the security origin, once there's document
-  // loading and history.
+  // FIXME: History locking, client redirects and the security origin, once there's history.
   class FrameLoadRequest : public FrameLoadRequestBase
   {
   private:
@@ -82,6 +105,7 @@ namespace krys::boo
     dom::DOMStringAtom _frameName;
     ReferrerPolicy _referrerPolicy {ReferrerPolicy::EmptyString};
     NavigationHistoryBehavior _navigationHistoryBehavior {NavigationHistoryBehavior::Auto};
+    Maybe<SubstituteData> _substituteData;
 
   public:
     /// @param requester The document asking for the load.
@@ -118,6 +142,16 @@ namespace krys::boo
     KRYS_NODISCARD dom::DOMStringAtom FrameName() const noexcept
     {
       return _frameName;
+    }
+
+    /// @brief The document's content, which the host gives in place of loading the request's URL.
+    KRYS_NODISCARD const Maybe<SubstituteData> &GetSubstituteData() const noexcept
+    {
+      return _substituteData;
+    }
+    void SetSubstituteData(SubstituteData &&substituteData) noexcept
+    {
+      _substituteData = krys::move(substituteData);
     }
     void SetFrameName(dom::DOMStringAtom frameName) noexcept
     {

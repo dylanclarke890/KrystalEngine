@@ -9,8 +9,11 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/Func.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -27,6 +30,19 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#eventtarget-event-listener-list
     SmallList<Ref<EventListener>> _eventListenerList;
+
+    /// @brief An event handler: its value and the listener that calls it, added when it was first set.
+    /// @see https://html.spec.whatwg.org/#event-handlers
+    struct EventHandler
+    {
+      DOMStringAtom Name;
+      Func<void(Event &)> Value;
+      RefPtr<EventListener> Listener;
+    };
+
+    /// @brief The target's event handlers (its event handler map), made when one is first set.
+    /// @see https://html.spec.whatwg.org/#event-handler-map
+    UniquePtr<List<EventHandler>> _eventHandlers;
 
   protected:
     EventTarget(EventTargetFlags flags) noexcept : _flags(flags)
@@ -89,6 +105,16 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-eventtarget-dispatchevent
     ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
+
+    /// @brief The value of the target's own event handler @p name; null if it's not set.
+    /// @see https://html.spec.whatwg.org/#getting-the-current-value-of-the-event-handler
+    KRYS_NODISCARD const Func<void(Event &)> *EventHandlerValue(DOMStringAtom name) const noexcept;
+
+    /// @brief Sets the target's own event handler @p name to @p value, activating it (adding its listener)
+    /// the first time; an empty @p value deactivates it (removing its listener).
+    /// @see https://html.spec.whatwg.org/#activate-an-event-handler
+    /// @see https://html.spec.whatwg.org/#deactivate-an-event-handler
+    void SetEventHandlerValue(DOMStringAtom name, Func<void(Event &)> &&value) noexcept;
 
   protected:
     /// @brief The last reference was dropped: deletes the target, unless something else keeps it (a document

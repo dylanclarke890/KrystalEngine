@@ -308,7 +308,7 @@ namespace krys::boo
     {
       _pendingAnimationsProcessingTaskIsQueued = true;
       html::EventLoop::Current().QueueTask(
-        html::TaskSource::InternalAsyncTask,
+        html::TaskSource::InternalAsyncTask, _document,
         [document = CreateWeakPtr(&_document), identifier = _pendingAnimationsProcessingTaskIdentifier]
         {
           if (!document)

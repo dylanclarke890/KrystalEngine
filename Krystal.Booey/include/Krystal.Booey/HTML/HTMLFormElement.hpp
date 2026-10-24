@@ -48,6 +48,8 @@ namespace krys::boo::html
     HTMLFormElement(dom::Document &document) noexcept;
     ~HTMLFormElement() noexcept override;
 
+    void FinishParsingChildren() noexcept final;
+
 #pragma region HTMLFormElement - https://html.spec.whatwg.org/#htmlformelement
 
     /// @see https://html.spec.whatwg.org/#dom-form-acceptcharset

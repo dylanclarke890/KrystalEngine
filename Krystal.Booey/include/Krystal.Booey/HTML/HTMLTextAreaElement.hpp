@@ -145,6 +145,15 @@ namespace krys::boo::html
       return u8"textarea";
     }
 
+    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final
+    {
+      return true;
+    }
+
+    /// @brief The text area's value, if the user changed it.
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
+    void RestoreFormControlState(const FormControlState &state) noexcept final;
+
     KRYS_NODISCARD bool IsTextField() const noexcept final
     {
       return true;

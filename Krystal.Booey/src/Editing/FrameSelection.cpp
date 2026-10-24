@@ -457,7 +457,7 @@ namespace krys::boo
     {
       _hasScheduledSelectionChangeEventOnDocument = true;
       html::EventLoop::Current().QueueTask(
-        html::TaskSource::UserInteraction,
+        html::TaskSource::UserInteraction, *document,
         [weakDocument = WeakPtr<dom::Document>::WithRef(*document)]
         {
           if (RefPtr<dom::Document> document = ShareRefPtr(weakDocument.get()))
@@ -631,7 +631,10 @@ namespace krys::boo
 
     // FIXME: This code only handles scrolling the startContainer's layer, but
     // the selection rect could intersect more than just that.
-    // FIXME: The view's last user scroll type (setLastUserScrollType), with scroll anchoring.
+    if (auto *view = _document->Frame() ? _document->Frame()->View() : nullptr)
+    {
+      view->SetLastUserScrollType(LocalFrameView::UserScrollType::Implicit);
+    }
     ScrollRectToVisibleOptions options;
     options.RevealMode = revealSelectionOptions.RevealMode;
     options.AlignX = revealSelectionOptions.Alignment;

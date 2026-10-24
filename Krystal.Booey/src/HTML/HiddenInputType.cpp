@@ -1,10 +1,28 @@
 ﻿#include "Krystal.Booey/HTML/HiddenInputType.hpp"
+#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
+  FormControlState HiddenInputType::SaveFormControlState() const noexcept
+  {
+    // ValueAttributeWasUpdatedAfterParsing() never be true for form controls create by createElement() or
+    // cloneNode(). It's OK for now because we restore values only to form controls created by parsing.
+    krys_debug_assert(Element());
+    auto &element = *Element();
+    return element.ValueAttributeWasUpdatedAfterParsing() ? FormControlState {element.Value()}
+                                                          : FormControlState {};
+  }
+
+  void HiddenInputType::RestoreFormControlState(const FormControlState &state) noexcept
+  {
+    krys_debug_assert(Element());
+    dom::ElementAlgorithms::SetAttributeValue(*Element(), dom::DOMStringAtom(u8"value"),
+                                              dom::DOMString(state[0]));
+  }
+
   bool HiddenInputType::RendererIsNeeded() noexcept
   {
     return false;

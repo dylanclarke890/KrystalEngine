@@ -5,6 +5,11 @@
 
 namespace krys::ui
 {
+  void Overlay::ReplaceDocument(View &view, utf8_string &&markup) noexcept
+  {
+    view.ReplaceDocument(krys::move(markup));
+  }
+
   void Overlay::ShowIn(View &owner, Overlay &overlay) noexcept
   {
     owner.ShowOverlay(overlay);

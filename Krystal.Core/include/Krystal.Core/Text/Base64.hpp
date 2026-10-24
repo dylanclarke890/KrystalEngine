@@ -7,6 +7,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/String.hpp"
 
 namespace krys
 {
@@ -27,4 +28,7 @@ namespace krys
   /// @note Valid input is a multiple of four characters, less one or two at the end, or padded with `=`.
   KRYS_NODISCARD Maybe<List<uint8>> Base64Decode(Span<const uint8> input,
                                                  EnumSet<Base64DecodeOption> options = {}) noexcept;
+
+  /// @brief Encodes @p input as base64 (the standard alphabet, `+` and `/`), padded with `=`.
+  KRYS_NODISCARD utf8_string Base64Encode(Span<const uint8> input) noexcept;
 }

@@ -8,6 +8,8 @@ namespace krys::boo::html
   class BaseCheckableInputType : public InputType
   {
   public:
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
+    void RestoreFormControlState(const FormControlState &state) noexcept final;
     bool AppendFormData(DOMFormData &formData) const noexcept override;
     ShouldCallBaseEventHandler HandleKeydownEvent(dom::KeyboardEvent &event) noexcept override;
     void HandleKeypressEvent(dom::KeyboardEvent &event) noexcept override;

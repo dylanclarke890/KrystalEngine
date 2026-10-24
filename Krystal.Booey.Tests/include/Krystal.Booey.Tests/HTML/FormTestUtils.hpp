@@ -5,6 +5,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -83,8 +84,11 @@ namespace krys::boo::tests
       return Downcast<T>(Downcast<html::HTMLElement>(ById(id)));
     }
 
+    /// @brief The submissions the host was asked about, after running the tasks that start them (they're
+    /// scheduled).
     KRYS_NODISCARD const List<ReceivedSubmission> &Submissions() const noexcept
     {
+      html::EventLoop::Current().RunUntilIdle();
       return SubmissionList;
     }
   };

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 
 namespace krys::boo::tests
@@ -69,9 +70,15 @@ namespace krys::boo::tests
   {
     FragmentFixture fixture;
     List<std::pair<std::string, std::string>> hashChanges;
-    auto handle = fixture.Document->AddEventListener<html::HashChangeEvent>(
-      u8"hashchange", [&](html::HashChangeEvent &event)
-      { hashChanges.emplace_back(Str(event.OldURL()), Str(event.NewURL())); });
+    // hashchange fires at the window, trusted.
+    auto handle = fixture.Document->Window()->AddEventListener<html::HashChangeEvent>(
+      u8"hashchange",
+      [&](html::HashChangeEvent &event)
+      {
+        CHECK(event.IsTrusted());
+        CHECK(event.Target().get() == fixture.Document->Window());
+        hashChanges.emplace_back(Str(event.OldURL()), Str(event.NewURL()));
+      });
 
     SECTION("a link to a fragment scrolls its target into view and makes it the target")
     {

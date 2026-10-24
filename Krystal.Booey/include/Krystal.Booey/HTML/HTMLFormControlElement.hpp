@@ -129,6 +129,8 @@ namespace krys::boo::html
       return this;
     }
 
+    void FinishParsingChildren() noexcept override;
+
     KRYS_NODISCARD HTMLElement &AsHTMLElement() noexcept final
     {
       return *this;

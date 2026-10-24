@@ -20,6 +20,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
@@ -269,7 +270,14 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Pointer lock, page overlays, synthetic touch events and user gestures.
+    // FIXME: Pointer lock, page overlays and synthetic touch events.
+
+    // A press is an activation-triggering input event: the window is notified before the event is dispatched.
+    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    if (auto *window = frame->Window())
+    {
+      window->NotifyActivated();
+    }
 
     _mousePressed = true;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -788,7 +796,7 @@ namespace krys::boo
 
   void EventHandler::ScheduleScrollEvent() noexcept
   {
-    // FIXME: Noting the frame was scrolled by the user (setFrameWasScrolledByUser), once that's kept.
+    SetFrameWasScrolledByUser();
     if (!_frame.View())
     {
       return;
@@ -821,7 +829,18 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: User gestures, typing gestures and access keys (handleAccessKey).
+    // A key press other than Escape is an activation-triggering input event: the window is notified before
+    // the event is dispatched. https://html.spec.whatwg.org/#activation-triggering-input-event
+    if (initialKeyEvent.GetType() != Type::KeyUp && initialKeyEvent.GetType() != Type::Char
+        && initialKeyEvent.Key() != u8"Escape")
+    {
+      if (auto *window = _frame.Window())
+      {
+        window->NotifyActivated();
+      }
+    }
+
+    // FIXME: Typing gestures and access keys (handleAccessKey).
 
     // FIXME: it would be fair to let an input method handle KeyUp events before DOM dispatch.
     if (initialKeyEvent.GetType() == Type::KeyUp || initialKeyEvent.GetType() == Type::Char)
@@ -1086,7 +1105,7 @@ namespace krys::boo
       auto *r = node->Renderer();
       if (r && r->EnclosingBox().Scroll(direction, granularity))
       {
-        // FIXME: Whether the user scrolled the frame (setFrameWasScrolledByUser), with scroll restoration.
+        SetFrameWasScrolledByUser();
         return true;
       }
     }
@@ -1114,6 +1133,7 @@ namespace krys::boo
       auto *r = node->Renderer();
       if (r && r->EnclosingBox().LogicalScroll(direction, granularity))
       {
+        SetFrameWasScrolledByUser();
         return true;
       }
     }
@@ -1463,7 +1483,16 @@ namespace krys::boo
     {
       return false;
     }
+    SetFrameWasScrolledByUser();
     return scrollbar->MouseDown(mouseEvent.Event());
+  }
+
+  void EventHandler::SetFrameWasScrolledByUser() noexcept
+  {
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View()))
+    {
+      view->SetLastUserScrollType(LocalFrameView::UserScrollType::Explicit);
+    }
   }
 
   void EventHandler::UpdateLastScrollbarUnderMouse(Scrollbar *scrollbar,
@@ -1530,8 +1559,8 @@ namespace krys::boo
 
     _isHandlingWheelEvent = true;
 
-    // FIXME: Whether the user scrolled the frame (setFrameWasScrolledByUser), latching and the wheel delta
-    // filter, once there are scroll restoration, latching and touchpad gestures.
+    // FIXME: Latching and the wheel delta filter, once there are touchpad gestures.
+    SetFrameWasScrolledByUser();
     SetLastKnownMousePosition(DoublePoint(event.Position().X(), event.Position().Y()),
                               DoublePoint(event.GlobalPosition().X(), event.GlobalPosition().Y()));
 

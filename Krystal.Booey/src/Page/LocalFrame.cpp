@@ -11,7 +11,8 @@ namespace krys::boo
   LocalFrame::LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept
       : _page(page ? WeakPtr<Page>::WithRef(*page) : WeakPtr<Page>()),
         _eventHandler(CreateUnique<EventHandler>(*this)),
-        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient)))
+        _loader(CreateUnique<FrameLoader>(*this, krys::move(loaderClient))),
+        _navigationScheduler(CreateUnique<NavigationScheduler>(*this))
   {
   }
 
@@ -43,7 +44,9 @@ namespace krys::boo
 
     _view = krys::move(view);
 
-    if (_document && _view)
+    // A document in the back/forward cache has no render tree until it's shown again.
+    if (_document && _view
+        && _document->GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache)
     {
       _document->CreateRenderTree();
     }
@@ -75,7 +78,11 @@ namespace krys::boo
     // The mouse's state refers to the old document's nodes.
     _eventHandler->Clear();
 
-    if (RefPtr<dom::Document> previousDocument = _document)
+    // A document entering the back/forward cache keeps its state, and is destroyed only if the cache drops
+    // it.
+    if (RefPtr<dom::Document> previousDocument = _document;
+        previousDocument
+        && previousDocument->GetBackForwardCacheState() != dom::BackForwardCacheState::InBackForwardCache)
     {
       previousDocument->WillBeRemovedFromFrame();
     }

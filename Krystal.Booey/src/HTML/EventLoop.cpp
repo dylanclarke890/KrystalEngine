@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Platform/ThreadTimers.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -18,7 +19,43 @@ namespace krys::boo::html
 
   void EventLoop::QueueTask(TaskSource source, Steps &&steps) noexcept
   {
-    _taskQueue.push({source, krys::move(steps)});
+    _taskQueue.push_back({source, krys::move(steps)});
+  }
+
+  void EventLoop::QueueTask(TaskSource source, dom::Document &document, Steps &&steps) noexcept
+  {
+    _taskQueue.push_back({source, krys::move(steps), CreateWeakPtr(&document), true});
+  }
+
+  namespace
+  {
+    enum class TaskState : uint8
+    {
+      Runnable,
+      Suspended,
+      Dropped
+    };
+
+    template <typename TTask>
+    KRYS_NODISCARD TaskState StateOf(const TTask &task) noexcept
+    {
+      if (!task.HasDocument)
+      {
+        return TaskState::Runnable;
+      }
+      auto *document = task.Document.get();
+      if (!document || document->ActiveDOMObjectsAreStopped())
+      {
+        return TaskState::Dropped;
+      }
+      return document->ScheduledTasksAreSuspended() ? TaskState::Suspended : TaskState::Runnable;
+    }
+  }
+
+  bool EventLoop::HasPendingTasks() const noexcept
+  {
+    return std::ranges::any_of(_taskQueue,
+                               [](const Task &task) { return StateOf(task) == TaskState::Runnable; });
   }
 
   void EventLoop::QueueMicrotask(Steps &&steps) noexcept
@@ -53,17 +90,29 @@ namespace krys::boo::html
 
   bool EventLoop::RunNextTask() noexcept
   {
-    if (_taskQueue.empty())
+    // Let taskQueue be one of the event loop's task queues, containing at least one runnable task; the oldest
+    // runnable task is taken. Tasks of documents that went away are dropped.
+    for (auto iterator = _taskQueue.begin(); iterator != _taskQueue.end();)
     {
-      return false;
+      auto state = StateOf(*iterator);
+      if (state == TaskState::Suspended)
+      {
+        ++iterator;
+        continue;
+      }
+      if (state == TaskState::Dropped)
+      {
+        iterator = _taskQueue.erase(iterator);
+        continue;
+      }
+
+      Task task = krys::move(*iterator);
+      _taskQueue.erase(iterator);
+      task.Steps();
+      PerformMicrotaskCheckpoint();
+      return true;
     }
-
-    Task task = krys::move(_taskQueue.front());
-    _taskQueue.pop();
-    task.Steps();
-
-    PerformMicrotaskCheckpoint();
-    return true;
+    return false;
   }
 
   void EventLoop::ScheduleTask(MonotonicTime::duration timeout, TaskSource source, Steps &&steps) noexcept

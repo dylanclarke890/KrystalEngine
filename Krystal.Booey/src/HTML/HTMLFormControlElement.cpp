@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
+#include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
@@ -12,6 +13,15 @@ namespace krys::boo::html
                                                  HTMLElementFlags flags) noexcept
       : HTMLElement(document, interface, flags, dom::NodeFlags::HasCustomStyleResolveCallbacks)
   {
+  }
+
+  void HTMLFormControlElement::FinishParsingChildren() noexcept
+  {
+    HTMLElement::FinishParsingChildren();
+    if (!FormController::OwnerForm(*this))
+    {
+      RestoreFormControlStateIfNecessary();
+    }
   }
 
   void HTMLFormControlElement::DidAttachRenderers() noexcept

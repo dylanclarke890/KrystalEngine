@@ -14,7 +14,9 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -1011,6 +1013,15 @@ namespace krys::boo::html
     {
       document.SetSequentialFocusNavigationStartingPoint(element);
       element->SetFocus(true, visibility);
+
+      // The focus moved while a navigation is ongoing: its finish doesn't reset it.
+      if (auto *window = document.Window())
+      {
+        if (auto *navigation = window->NavigationIfExists())
+        {
+          navigation->SetFocusChanged(FocusDidChange::Yes);
+        }
+      }
     }
   }
 }

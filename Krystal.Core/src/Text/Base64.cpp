@@ -128,4 +128,38 @@ namespace krys
 
     return result;
   }
+
+  utf8_string Base64Encode(Span<const uint8> input) noexcept
+  {
+    constexpr char8 alphabet[] = u8"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    utf8_string result;
+    result.reserve((input.size() + 2) / 3 * 4);
+    size_t i = 0;
+    for (; i + 2 < input.size(); i += 3)
+    {
+      uint32 group = (uint32 {input[i]} << 16) | (uint32 {input[i + 1]} << 8) | input[i + 2];
+      result += alphabet[(group >> 18) & 0x3Fu];
+      result += alphabet[(group >> 12) & 0x3Fu];
+      result += alphabet[(group >> 6) & 0x3Fu];
+      result += alphabet[group & 0x3Fu];
+    }
+
+    if (i + 1 == input.size())
+    {
+      uint32 group = uint32 {input[i]} << 16;
+      result += alphabet[(group >> 18) & 0x3Fu];
+      result += alphabet[(group >> 12) & 0x3Fu];
+      result += u8"==";
+    }
+    else if (i + 2 == input.size())
+    {
+      uint32 group = (uint32 {input[i]} << 16) | (uint32 {input[i + 1]} << 8);
+      result += alphabet[(group >> 18) & 0x3Fu];
+      result += alphabet[(group >> 12) & 0x3Fu];
+      result += alphabet[(group >> 6) & 0x3Fu];
+      result += u8'=';
+    }
+    return result;
+  }
 }

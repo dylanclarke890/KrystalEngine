@@ -52,6 +52,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/HTML/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
@@ -63,15 +64,23 @@
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
+#include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
+#include "Krystal.Booey/HTML/PopStateEvent.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
+#include "Krystal.Booey/Page/History.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
@@ -1338,11 +1347,6 @@ namespace krys::boo::dom
     // anchoring, once there are those.
 
     // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/66.
-    if (_pendingScrollEventTargets.empty())
-    {
-      return;
-    }
-
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
@@ -1355,7 +1359,58 @@ namespace krys::boo::dom
       (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target, krys::move(initialize));
     }
 
-    // FIXME: The visual viewport's scroll events, once there's a visual viewport.
+    if (_needsVisualViewportScrollEvent)
+    {
+      _needsVisualViewportScrollEvent = false;
+      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      {
+        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Scroll), window->GetVisualViewport());
+      }
+    }
+  }
+
+  void Document::SetNeedsVisualViewportResize() noexcept
+  {
+    _needsVisualViewportResizeEvent = true;
+    ScheduleRenderingUpdate(RenderingUpdateStep::Resize);
+  }
+
+  void Document::SetNeedsVisualViewportScrollEvent() noexcept
+  {
+    if (!_needsVisualViewportScrollEvent)
+    {
+      ScheduleRenderingUpdate(RenderingUpdateStep::Scroll);
+    }
+    _needsVisualViewportScrollEvent = true;
+  }
+
+  void Document::SetNeedsDOMWindowResizeEvent() noexcept
+  {
+    _needsDOMWindowResizeEvent = true;
+    ScheduleRenderingUpdate(RenderingUpdateStep::Resize);
+  }
+
+  void Document::RunResizeSteps() noexcept
+  {
+    // FIXME: Deferring the resize events (shouldDeferResizeEvents, and while the document is hidden), once
+    // there are those.
+    // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/65.
+    if (_needsDOMWindowResizeEvent)
+    {
+      _needsDOMWindowResizeEvent = false;
+      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      {
+        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), *window);
+      }
+    }
+    if (_needsVisualViewportResizeEvent)
+    {
+      _needsVisualViewportResizeEvent = false;
+      if (RefPtr<LocalDOMWindow> window = _domWindow)
+      {
+        (void)EventDispatcher::FireEvent(DOMStringAtom(EventNames::Resize), window->GetVisualViewport());
+      }
+    }
   }
 
   void Document::SetCSSTarget(Element *newTarget) noexcept
@@ -1426,7 +1481,7 @@ namespace krys::boo::dom
     }
 
     // https://html.spec.whatwg.org/multipage/browsing-the-web.html#try-to-scroll-to-the-fragment
-    html::EventLoop::Current().QueueTask(html::TaskSource::Networking,
+    html::EventLoop::Current().QueueTask(html::TaskSource::Networking, *this,
                                          [protectedThis = ShareRef(*this), this]
                                          {
                                            auto *frameView = View();
@@ -1446,14 +1501,306 @@ namespace krys::boo::dom
 
   void Document::EnqueueHashchangeEvent(USVString &&oldURL, USVString &&newURL) noexcept
   {
-    // SPEC-VIOLATION(HTML): hashchange fires at the window, which isn't supported, so it fires at the
-    // document.
     // FIXME: popstate event and hashchange event are supposed to fire in a single task.
-    html::EventLoop::Current().QueueTask(
-      html::TaskSource::DOMManipulation,
-      [protectedThis = ShareRef(*this),
-       event = html::HashChangeEvent::Create(krys::move(oldURL), krys::move(newURL))]
-      { (void)protectedThis->DispatchEvent(*event); });
+    QueueTaskToDispatchEventOnWindow(html::TaskSource::DOMManipulation,
+                                     html::HashChangeEvent::Create(krys::move(oldURL), krys::move(newURL)));
+  }
+
+  LocalDOMWindow *Document::Window() const noexcept
+  {
+    return _domWindow.get();
+  }
+
+  bool Document::IsFullyActive() const noexcept
+  {
+    // A Document d is fully active if d is the active document of a navigable navigable, and either navigable
+    // is a top-level traversable or navigable's container document is fully active.
+    return _frame && _frame->Document() == this;
+  }
+
+  void Document::StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept
+  {
+    if (!Frame())
+    {
+      return;
+    }
+
+    RefPtr<LocalDOMWindow> window = _domWindow;
+    auto event =
+      html::PopStateEvent::Create(krys::move(stateObject), window ? &window->GetHistory() : nullptr);
+    DispatchWindowEvent(*event);
+  }
+
+  void Document::UpdateURLForPushOrReplaceState(const url::URL &url) noexcept
+  {
+    if (!Frame())
+    {
+      return;
+    }
+
+    SetURL(url::URL(url));
+    // FIXME: The outgoing referrer and the document loader's request URL, once there are those.
+  }
+
+  int32 Document::CircularSequentialID() noexcept
+  {
+    ++_circularSequentialID;
+    if (_circularSequentialID <= 0)
+    {
+      _circularSequentialID = 1;
+    }
+    return _circularSequentialID;
+  }
+
+  bool Document::AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept
+  {
+    return _timeouts.emplace(timeoutId, ShareRef(timer)).second;
+  }
+
+  RefPtr<DOMTimer> Document::TakeTimeout(int32 timeoutId) noexcept
+  {
+    auto it = _timeouts.find(timeoutId);
+    if (it == _timeouts.end())
+    {
+      return nullptr;
+    }
+    RefPtr<DOMTimer> timer = it->second;
+    _timeouts.erase(it);
+    return timer;
+  }
+
+  int32 Document::RequestAnimationFrame(FrameRequestCallback &&callback) noexcept
+  {
+    if (!_scriptedAnimationController)
+    {
+      _scriptedAnimationController = CreateUnique<ScriptedAnimationController>(*this);
+    }
+    return _scriptedAnimationController->RegisterCallback(krys::move(callback));
+  }
+
+  void Document::CancelAnimationFrame(int32 id) noexcept
+  {
+    if (_scriptedAnimationController)
+    {
+      _scriptedAnimationController->CancelCallback(id);
+    }
+  }
+
+  void Document::ServiceRequestAnimationFrameCallbacks() noexcept
+  {
+    if (_scriptedAnimationController && _domWindow)
+    {
+      _scriptedAnimationController->ServiceRequestAnimationFrameCallbacks(_domWindow->FrozenNowTimestamp());
+    }
+  }
+
+  int32 Document::RequestIdleCallback(IdleRequestCallback &&callback,
+                                      MonotonicTime::duration timeout) noexcept
+  {
+    if (!_idleCallbackController)
+    {
+      _idleCallbackController = CreateUnique<IdleCallbackController>(*this);
+    }
+    return _idleCallbackController->QueueIdleCallback(krys::move(callback), timeout);
+  }
+
+  void Document::CancelIdleCallback(int32 id) noexcept
+  {
+    if (_idleCallbackController)
+    {
+      _idleCallbackController->RemoveIdleCallback(id);
+    }
+  }
+
+  bool Document::HasPendingIdleCallback() const noexcept
+  {
+    return _idleCallbackController && _idleCallbackController->HasPendingIdleCallback();
+  }
+
+  void Document::Suspend(ReasonForSuspension reason) noexcept
+  {
+    if (_isSuspended)
+    {
+      return;
+    }
+
+    // FIXME: Elements' document suspension callbacks (media), view transitions, the page's overlay
+    // scrollbars, the composited layers' pending update and font loading, once there are those.
+    SuspendScheduledTasks(reason);
+
+    // The frame's timers: the layout, the animations and autoscrolling stop.
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(View()))
+    {
+      view->LayoutContext().UnscheduleLayout();
+      if (_timelinesController)
+      {
+        _timelinesController->SuspendAnimations();
+      }
+      Frame()->GetEventHandler().StopAutoscrollTimer();
+    }
+
+    _isSuspended = true;
+  }
+
+  void Document::Resume(ReasonForSuspension reason) noexcept
+  {
+    if (!_isSuspended)
+    {
+      return;
+    }
+
+    if (_timelinesController)
+    {
+      _timelinesController->ResumeAnimations();
+    }
+
+    ResumeScheduledTasks(reason);
+
+    _isSuspended = false;
+  }
+
+  void Document::SuspendScheduledTasks(ReasonForSuspension reason) noexcept
+  {
+    if (_scheduledTasksAreSuspended)
+    {
+      return;
+    }
+
+    if (_scriptedAnimationController)
+    {
+      _scriptedAnimationController->Suspend();
+    }
+    SuspendActiveDOMObjects(reason);
+
+    _scheduledTasksAreSuspended = true;
+  }
+
+  void Document::ResumeScheduledTasks(ReasonForSuspension reason) noexcept
+  {
+    if (!_scheduledTasksAreSuspended || _reasonForSuspendingActiveDOMObjects != reason)
+    {
+      return;
+    }
+
+    ResumeActiveDOMObjects(reason);
+    if (_scriptedAnimationController)
+    {
+      _scriptedAnimationController->Resume();
+    }
+
+    _scheduledTasksAreSuspended = false;
+  }
+
+  void Document::SuspendActiveDOMObjects(ReasonForSuspension reason) noexcept
+  {
+    if (_activeDOMObjectsAreSuspended)
+    {
+      return;
+    }
+
+    _activeDOMObjectsAreSuspended = true;
+    _reasonForSuspendingActiveDOMObjects = reason;
+    for (auto &[id, timer] : _timeouts)
+    {
+      timer->Suspend();
+    }
+  }
+
+  void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
+  {
+    if (_reasonForSuspendingActiveDOMObjects != reason)
+    {
+      return;
+    }
+
+    _activeDOMObjectsAreSuspended = false;
+    for (auto &[id, timer] : _timeouts)
+    {
+      timer->Resume();
+    }
+  }
+
+  void Document::SetBackForwardCacheState(BackForwardCacheState state) noexcept
+  {
+    if (_backForwardCacheState == state)
+    {
+      return;
+    }
+
+    _backForwardCacheState = state;
+
+    switch (state)
+    {
+      case BackForwardCacheState::InBackForwardCache:
+        if (RefPtr<LocalFrameView> frameView = ShareRefPtr(View()))
+        {
+          frameView->CacheCurrentScrollState();
+        }
+        // FIXME: The pointer lock and the shared object pool, once there are those.
+        StyleScope().ClearResolver();
+        _styleRecalcTimer.Stop();
+        break;
+      case BackForwardCacheState::NotInBackForwardCache:
+        if (ChildNeedsStyleRecalc())
+        {
+          ScheduleStyleRecalc();
+        }
+        break;
+      case BackForwardCacheState::AboutToEnterBackForwardCache: break;
+    }
+  }
+
+  void Document::DetachFromCachedFrame() noexcept
+  {
+    krys_debug_assert(_backForwardCacheState == BackForwardCacheState::InBackForwardCache);
+    _frame = nullptr;
+  }
+
+  void Document::StopActiveDOMObjects() noexcept
+  {
+    _activeDOMObjectsAreStopped = true;
+
+    // Stopping a timer releases its action, which may hold the document's nodes.
+    auto timeouts = std::exchange(_timeouts, {});
+    for (auto &[id, timer] : timeouts)
+    {
+      timer->Stop();
+    }
+    _scriptedAnimationController = nullptr;
+    _idleCallbackController = nullptr;
+  }
+
+  LocalDOMWindow *Document::DefaultView() const noexcept
+  {
+    // If this's browsing context is null, then return null; otherwise its WindowProxy.
+    return Frame() ? _domWindow.get() : nullptr;
+  }
+
+  void Document::DispatchWindowEvent(Event &event) noexcept
+  {
+    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    {
+      (void)EventDispatcher::DispatchToTarget(event, window.get());
+    }
+  }
+
+  void Document::QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept
+  {
+    html::EventLoop::Current().QueueTask(source, *this,
+                                         [protectedThis = ShareRef(*this), event = krys::move(event)]
+                                         { protectedThis->DispatchWindowEvent(*event); });
+  }
+
+  EventTarget *Document::GetParent(Event &event) const noexcept
+  {
+    // A Document's get the parent algorithm, given an event, returns null if event's type attribute value is
+    // "load" or the Document does not have a browsing context; otherwise the Document's relevant global
+    // object.
+    if (event.Type() == EventNames::Load || !Frame())
+    {
+      return nullptr;
+    }
+    return _domWindow.get();
   }
 
   HighlightRegistry &Document::GetHighlightRegistry() noexcept
@@ -1568,9 +1915,235 @@ namespace krys::boo::dom
 
   void Document::FinishedParsing() noexcept
   {
+    // https://html.spec.whatwg.org/#the-end
+    Ref<Document> protectedThis = ShareRef(*this);
+    bool wasLoading = _parsing || _currentDocumentReadiness == html::DocumentReadyState::Loading;
+    SetParsing(false);
+
+    if (wasLoading)
+    {
+      // Update the current document readiness to "interactive", then fire DOMContentLoaded at the Document,
+      // with its bubbles attribute initialized to true.
+      DocumentAlgorithms::UpdateCurrentDocumentReadiness(*this, html::DocumentReadyState::Interactive);
+      if (!_loadTiming.DOMContentLoadedEventStartTime)
+      {
+        _loadTiming.DOMContentLoadedEventStartTime = _domWindow ? _domWindow->NowTimestamp() : 0;
+        auto event = Event::Create(DOMStringAtom(EventNames::DOMContentLoaded), true, false);
+        (void)EventDispatcher::DispatchToTarget(*event, this);
+        _loadTiming.DOMContentLoadedEventEndTime = _domWindow ? _domWindow->NowTimestamp() : 0;
+      }
+    }
+
     if (auto *frame = Frame())
     {
       frame->Loader().FinishedParsing();
+    }
+  }
+
+  void Document::DecrementLoadEventDelayCount() noexcept
+  {
+    krys_debug_assert(_loadEventDelayCount);
+    if (--_loadEventDelayCount)
+    {
+      return;
+    }
+    // The frame checks whether the document has loaded on a later task.
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, *this,
+                                         [protectedThis = ShareRef(*this)]
+                                         {
+                                           if (auto *frame = protectedThis->Frame())
+                                           {
+                                             frame->Loader().CheckCompleted();
+                                           }
+                                         });
+  }
+
+  html::FormController &Document::GetFormController() noexcept
+  {
+    if (!_formController)
+    {
+      _formController = CreateUnique<html::FormController>();
+    }
+    return *_formController;
+  }
+
+  List<DOMString> Document::FormElementsState() const noexcept
+  {
+    if (!_formController)
+    {
+      return {};
+    }
+    return _formController->FormElementsState(*this);
+  }
+
+  void Document::SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept
+  {
+    if (stateVector.empty() && !_formController)
+    {
+      return;
+    }
+    GetFormController().SetStateForNewFormElements(stateVector);
+  }
+
+  void Document::ImplicitClose() noexcept
+  {
+    Ref<Document> protectedThis = ShareRef(*this);
+    DispatchWindowLoadEvent();
+    DispatchPageshowEvent(false);
+
+    // An event handler may have removed the frame.
+    if (!Frame())
+    {
+      return;
+    }
+
+    UpdateStyleIfNeeded();
+
+    // Always do a layout after loading if needed.
+    RefPtr<LocalFrameView> view = ShareRefPtr(View());
+    if (view && GetRenderView() && (!GetRenderView()->FirstChild() || GetRenderView()->NeedsLayout()))
+    {
+      view->LayoutContext().Layout();
+      (void)view->LayoutContext().UpdateCompositingLayersAfterLayoutIfNeeded();
+    }
+  }
+
+  void Document::DispatchWindowLoadEvent() noexcept
+  {
+    RefPtr<LocalDOMWindow> window = _domWindow;
+    if (!window)
+    {
+      return;
+    }
+
+    // Fire an event named load at window, with legacy target override flag set.
+    if (!_loadTiming.LoadEventStartTime)
+    {
+      _loadTiming.LoadEventStartTime = window->NowTimestamp();
+    }
+    (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::Load), *window, nullptr, true);
+    if (!_loadTiming.LoadEventEndTime)
+    {
+      _loadTiming.LoadEventEndTime = window->NowTimestamp();
+    }
+    _loadEventFinished = true;
+    GetCachedResourceLoader().DocumentDidFinishLoadEvent();
+  }
+
+  void Document::ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept
+  {
+    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"content-language")))
+    {
+      // https://html.spec.whatwg.org/#attr-meta-http-equiv-content-language
+      // If the element's content attribute contains a U+002C COMMA character (,) then return. Collect a
+      // sequence of code points that are not ASCII whitespace, after skipping ASCII whitespace; if it's
+      // empty, return; otherwise it's the pragma-set default language.
+      if (content.find(u8',') != DOMStringView::npos)
+      {
+        return;
+      }
+      size_t start = 0;
+      while (start < content.size() && text::IsASCIIWhitespace(content[start]))
+      {
+        ++start;
+      }
+      size_t end = start;
+      while (end < content.size() && !text::IsASCIIWhitespace(content[end]))
+      {
+        ++end;
+      }
+      if (end > start)
+      {
+        SetContentLanguage(DOMString(content.substr(start, end - start)));
+      }
+      return;
+    }
+
+    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"default-style")))
+    {
+      // https://html.spec.whatwg.org/#attr-meta-http-equiv-default-style
+      if (!content.empty())
+      {
+        StyleScope().SetPreferredStylesheetSetName(DOMString(content));
+      }
+      return;
+    }
+
+    if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"refresh")))
+    {
+      // https://html.spec.whatwg.org/#shared-declarative-refresh-steps
+      // If document's will declaratively refresh is true, then return.
+      auto *frame = Frame();
+      if (_willDeclarativelyRefresh || !frame)
+      {
+        return;
+      }
+      auto directive = html::ParseRefresh(content);
+      if (!directive)
+      {
+        return;
+      }
+      auto url = directive->URL.empty() ? GetURL() : CompleteURL(directive->URL);
+      if (!url.IsValid())
+      {
+        return;
+      }
+      _willDeclarativelyRefresh = true;
+      frame->GetNavigationScheduler().ScheduleRedirect(*this, directive->Delay, url, IsMetaRefresh::Yes);
+      return;
+    }
+
+    // FIXME: Content-Security-Policy and the other pragmas, once there's a security policy; Set-Cookie is
+    // obsolete and ignored, as are X-UA-Compatible and Content-Type (the parser reads the charset).
+  }
+
+  void Document::SetContentLanguage(DOMString &&language) noexcept
+  {
+    if (_contentLanguage == language)
+    {
+      return;
+    }
+    _contentLanguage = krys::move(language);
+
+    // Recalculate style so language is used when selecting the initial font, and :lang() matches.
+    StyleScope().DidChangeStyleSheetEnvironment();
+  }
+
+  boo::Location *Document::GetLocation() const noexcept
+  {
+    // Return this's relevant global object's Location object, if this is fully active, and null otherwise.
+    return Frame() && _domWindow ? &_domWindow->GetLocation() : nullptr;
+  }
+
+  void Document::DispatchPagehideEvent(bool persisted) noexcept
+  {
+    // If the document's page showing is true: set it to false, and fire a page transition event named
+    // pagehide at its relevant global object with persisted.
+    if (!_pageShowing)
+    {
+      return;
+    }
+    _pageShowing = false;
+    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    {
+      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageHide), persisted);
+      (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
+    }
+  }
+
+  void Document::DispatchPageshowEvent(bool persisted) noexcept
+  {
+    // If the Document's page showing is false, then set it to true and fire a page transition event named
+    // pageshow at the window with false.
+    if (_pageShowing)
+    {
+      return;
+    }
+    _pageShowing = true;
+    if (RefPtr<LocalDOMWindow> window = _domWindow)
+    {
+      auto event = html::PageTransitionEvent::Create(DOMStringAtom(EventNames::PageShow), persisted);
+      (void)EventDispatcher::DispatchToTarget(*event, window.get(), true);
     }
   }
 
@@ -1738,14 +2311,25 @@ namespace krys::boo::dom
     ScheduleFullStyleRebuild();
   }
 
+  void Document::CreateDOMWindow() noexcept
+  {
+    krys_assert(Frame());
+    krys_assert(!_domWindow);
+
+    _domWindow = LocalDOMWindow::Create(*this);
+    // A document in a browsing context has its window's custom element registry, which is created with it.
+    (void)_domWindow->EnsureCustomElementRegistry();
+  }
+
   void Document::DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept
   {
     _frame = WeakPtr<LocalFrame>::WithRef(frame);
 
-    // A document in a browsing context has its window's custom element registry, which is created with it.
-    if (CustomElementRegistry() == nullptr)
+    // FIXME: The document loader's writer makes the window as it makes the document, reusing the initial
+    // empty document's (takeDOMWindowFrom), once there's document loading (B3b).
+    if (!_domWindow)
     {
-      SetCustomElementRegistry(html::CustomElementRegistry::Create(*this));
+      CreateDOMWindow();
     }
 
     if (!HasLivingRenderTree() && View())
@@ -1758,7 +2342,9 @@ namespace krys::boo::dom
 
   void Document::WillBeRemovedFromFrame() noexcept
   {
-    // FIXME: Unload, page hide and the other steps of unloading the document, once there's navigation.
+    // FIXME: Unload, page hide and the other steps of unloading the document, once there's navigation; the
+    // back/forward cache suspends the document's active objects rather than stopping them (B3d).
+    StopActiveDOMObjects();
     _selection->WillBeRemovedFromFrame();
 
     if (HasLivingRenderTree())
@@ -2409,13 +2995,6 @@ namespace krys::boo::dom
       _mediaQueryMatcher = css::MediaQueryMatcher::Create(*this);
     }
     return *_mediaQueryMatcher;
-  }
-
-  Ref<css::MediaQueryList> Document::MatchMedia(DOMStringView query) noexcept
-  {
-    // The matcher only returns null once the document is gone.
-    Ref<css::MediaQueryList> list = GetMediaQueryMatcher().MatchMedia(query);
-    return list;
   }
 
   void Document::EvaluateMediaQueriesAndReportChanges() noexcept

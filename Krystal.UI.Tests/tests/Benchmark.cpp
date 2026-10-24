@@ -10,6 +10,7 @@
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
 #include <chrono>
 #include <string>
@@ -82,6 +83,7 @@ namespace krys::ui::tests
       {
         View view({static_cast<int32>(width), static_cast<int32>(height)});
         REQUIRE(view.LoadFile(path).has_value());
+        WaitForLoad(view);
         auto time = boo::html::EventLoop::Current().Now() + 1s;
         const auto frame = duration_cast<MonotonicTime::duration>(microseconds {16'667});
         for (int32 i = 0; i < frames + 10; ++i)

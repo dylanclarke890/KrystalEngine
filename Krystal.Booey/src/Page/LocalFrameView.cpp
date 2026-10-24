@@ -16,8 +16,10 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/ScrollbarTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -1235,9 +1237,14 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: A frameset body lays its children out, once there are framesets; the resize event's viewport
-    // size and zoom and the first layout callback, once there's a window.
+    // FIXME: A frameset body lays its children out, once there are framesets.
     auto firstLayout = !_layoutContext.DidFirstLayout();
+    if (firstLayout)
+    {
+      _firstLayoutCallbackPending = true;
+      _lastViewportSize = SizeForResizeEvent();
+      _lastUsedZoomFactor = layoutRoot.Style().UsedZoom();
+    }
     AdjustScrollbarsForLayout(firstLayout);
 
     auto oldSize = _lastUsedSizeForLayout;
@@ -1250,6 +1257,16 @@ namespace krys::boo
       {
         MarkRootOrBodyRendererDirty();
       }
+    }
+  }
+
+  void LocalFrameView::FireLayoutRelatedMilestonesIfNeeded() noexcept
+  {
+    // FIXME: The page's other layout milestones (visually non-empty), once a client asks for them.
+    if (_firstLayoutCallbackPending)
+    {
+      _firstLayoutCallbackPending = false;
+      Frame().Loader().DidFirstLayout();
     }
   }
 
@@ -2132,18 +2149,6 @@ namespace krys::boo
 
   void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
   {
-    // The user scrolling stops the view keeping the fragment in view (setLastUserScrollType).
-    if (CurrentScrollType() == ScrollType::User)
-    {
-      _wasEverScrolledExplicitlyByUser = true;
-      CancelScheduledScrolls();
-      if (auto *document = Frame().Document())
-      {
-        document->SetGotoAnchorNeededAfterStylesheetsLoad(false);
-      }
-      _maintainScrollPositionAnchor = nullptr;
-    }
-
     // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
     ScheduleScrollEvent();
 
@@ -2155,8 +2160,8 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The layout viewport (updateLayoutViewport, with visual viewports) and the editor, once there are
-    // those.
+    // FIXME: The layout viewport (updateLayoutViewport) and the editor, once there are those.
+    LayoutOrVisualViewportChanged();
     ViewportContentsChanged();
   }
 
@@ -2185,6 +2190,33 @@ namespace krys::boo
     if (auto *renderView = document ? document->GetRenderView() : nullptr)
     {
       renderView->ResumePausedImageAnimationsIfNeeded(visibleRect);
+    }
+  }
+
+  void LocalFrameView::SetLastUserScrollType(Maybe<UserScrollType> userScrollType) noexcept
+  {
+    CancelScheduledScrolls();
+    if (CurrentScrollType() == ScrollType::Programmatic)
+    {
+      return;
+    }
+
+    RefPtr<dom::Document> document = ShareRefPtr(Frame().Document());
+    if (userScrollType && document)
+    {
+      document->SetGotoAnchorNeededAfterStylesheetsLoad(false);
+    }
+
+    _maintainScrollPositionAnchor = nullptr;
+    if (_lastUserScrollType == userScrollType)
+    {
+      return;
+    }
+    _lastUserScrollType = userScrollType;
+
+    if (userScrollType == UserScrollType::Explicit)
+    {
+      _wasEverScrolledExplicitlyByUser = true;
     }
   }
 
@@ -2578,6 +2610,66 @@ namespace krys::boo
     }
 
     ScrollToAnchorAndTextFragmentNowIfNeeded();
+  }
+
+  int32 LocalFrameView::MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept
+  {
+    // FIXME: The frame scale factor, once frames can be scaled.
+    return static_cast<int32>(value / Frame().PageZoomFactor());
+  }
+
+  LayoutUnit LocalFrameView::MapFromCSSToLayoutUnits(int32 value) const noexcept
+  {
+    return LayoutUnit(value * Frame().PageZoomFactor());
+  }
+
+  IntSize LocalFrameView::SizeForResizeEvent() const noexcept
+  {
+    // FIXME: The fixed layout size when scrolling is delegated, once it can be.
+    return VisibleContentRectIncludingScrollbars().Size();
+  }
+
+  void LocalFrameView::ScheduleResizeEventIfNeeded() noexcept
+  {
+    if (_layoutContext.IsInRenderTreeLayout() || _layoutContext.NeedsLayout())
+    {
+      return;
+    }
+
+    auto *renderView = GetRenderView();
+    if (!renderView)
+    {
+      return;
+    }
+
+    auto currentSize = SizeForResizeEvent();
+    float currentZoomFactor = renderView->Style().UsedZoom();
+
+    if (currentSize == _lastViewportSize && currentZoomFactor == _lastUsedZoomFactor)
+    {
+      return;
+    }
+
+    _lastViewportSize = currentSize;
+    _lastUsedZoomFactor = currentZoomFactor;
+
+    if (!_layoutContext.DidFirstLayout())
+    {
+      return;
+    }
+
+    Frame().Document()->SetNeedsDOMWindowResizeEvent();
+  }
+
+  void LocalFrameView::LayoutOrVisualViewportChanged() noexcept
+  {
+    if (auto *window = Frame().Window())
+    {
+      if (auto *visualViewport = window->OptionalVisualViewport())
+      {
+        visualViewport->Update();
+      }
+    }
   }
 
   void LocalFrameView::ScheduleScrollToAnchorAndTextFragment() noexcept

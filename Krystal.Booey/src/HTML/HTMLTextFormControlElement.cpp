@@ -712,7 +712,7 @@ namespace krys::boo::html
     }
 
     _hasScheduledSelectionChangeEvent = true;
-    EventLoop::Current().QueueTask(TaskSource::UserInteraction,
+    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
                                    [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                    {
                                      textControl->_hasScheduledSelectionChangeEvent = false;
@@ -724,7 +724,7 @@ namespace krys::boo::html
 
   void HTMLTextFormControlElement::ScheduleSelectEvent() noexcept
   {
-    EventLoop::Current().QueueTask(TaskSource::UserInteraction,
+    EventLoop::Current().QueueTask(TaskSource::UserInteraction, NodeDocument(),
                                    [textControl = Ref<HTMLTextFormControlElement>(ShareRef(*this))]
                                    {
                                      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Select),

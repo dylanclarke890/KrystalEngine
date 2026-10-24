@@ -263,7 +263,6 @@ namespace krys::boo::css
 
   dom::DOMString EffectiveLang(const dom::Element &element) noexcept
   {
-    // FIXME: The document's default language (a Content-Language pragma or header).
     dom::DOMStringAtom xmlNamespace(infra::Namespaces::XML);
     for (auto *ancestor = &element; ancestor;
          ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
@@ -277,7 +276,9 @@ namespace krys::boo::css
         return *lang;
       }
     }
-    return {};
+    // Otherwise, the document's pragma-set default language, if any.
+    // FIXME: The Content-Language header, once responses have headers.
+    return element.NodeDocument().ContentLanguage();
   }
 
   TextDirection EffectiveTextDirection(const dom::Element &element) noexcept

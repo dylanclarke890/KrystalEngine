@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -22,8 +23,8 @@ namespace krys::boo
   /// @brief Shows a document in a view: the host creates a frame, gives it a view (`CreateView`) and a
   /// document (`SetDocument`), and sets the zoom factors and the media environment.
   /// @note FIXME: Only what layout, style and navigation within a document need: no document loading, frame
-  /// tree, window, scripting or printing. The media environment stands in for the page's chrome client and
-  /// the screen.
+  /// tree, scripting or printing. The media environment stands in for the page's chrome client and the
+  /// screen.
   class LocalFrame final : public RefCounted<LocalFrame>, public CanMakeWeakPtr<LocalFrame>
   {
     KRYS_NON_COPY_MOVABLE(LocalFrame);
@@ -34,7 +35,10 @@ namespace krys::boo
     RefPtr<LocalFrameView> _view;
     UniquePtr<EventHandler> _eventHandler;
     UniquePtr<FrameLoader> _loader;
+    UniquePtr<NavigationScheduler> _navigationScheduler;
     css::mq::MediaEnvironment _mediaEnvironment;
+    /// @see https://html.spec.whatwg.org/#nav-target
+    dom::DOMString _specifiedName;
     float _pageZoomFactor {1};
     float _textZoomFactor {1};
     CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
@@ -56,10 +60,15 @@ namespace krys::boo
       return *_loader;
     }
 
-    /// @brief How the document's subresources use the memory cache: the host sets `Revalidate` when it
-    /// reloads a page, so edited files load again.
-    // FIXME: The frame loader's load types (reloads, back and forward), and going back to `Verify` once the
-    // document has loaded, once there's a frame loader.
+    /// @brief The frame's navigations to come (redirects, location changes, form submissions).
+    KRYS_NODISCARD NavigationScheduler &GetNavigationScheduler() const noexcept
+    {
+      return *_navigationScheduler;
+    }
+
+    /// @brief How the document's subresources use the memory cache, unless the load type has a policy (a
+    /// reload, or going back and forward): the host sets `Revalidate` when it loads a page again, so edited
+    /// files load again.
     KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept
     {
       return _subresourceCachePolicy;
@@ -79,6 +88,24 @@ namespace krys::boo
     KRYS_NODISCARD dom::Document *Document() const noexcept
     {
       return _document.get();
+    }
+
+    /// @brief The window of the frame's document, if any.
+    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept
+    {
+      return _document ? _document->Window() : nullptr;
+    }
+
+    /// @brief The frame's name (its navigable's target name), which links and forms can target.
+    /// @see https://html.spec.whatwg.org/#nav-target
+    KRYS_NODISCARD const dom::DOMString &SpecifiedName() const noexcept
+    {
+      return _specifiedName;
+    }
+
+    void SetSpecifiedName(dom::DOMString &&name) noexcept
+    {
+      _specifiedName = krys::move(name);
     }
 
     /// @brief The view the frame's document is laid out in, if any.

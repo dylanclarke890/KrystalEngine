@@ -688,7 +688,7 @@ namespace krys::boo::html
     if (selectionState)
     {
       EventLoop::Current().QueueTask(
-        TaskSource::DOMManipulation,
+        TaskSource::DOMManipulation, element->NodeDocument(),
         [selectionState = *selectionState, element = WeakPtr<HTMLInputElement>::WithRef(*element)]
         {
           if (!element || !element->Focused())

@@ -108,10 +108,20 @@ namespace krys::boo
 
     void GarbageCollectDocumentResources() noexcept;
 
+    /// @brief How many of the document's loads are in flight, which delay its load event.
     KRYS_NODISCARD int32 RequestCount() const noexcept
     {
       return _requestCount;
     }
+
+    void IncrementRequestCount(const CachedResource &resource) noexcept;
+    void DecrementRequestCount(const CachedResource &resource) noexcept;
+
+    /// @brief A load is done: the frame checks whether its document has loaded.
+    void LoadDone() noexcept;
+
+    /// @brief The document's load event finished: URLs are validated again.
+    void DocumentDidFinishLoadEvent() noexcept;
 
     KRYS_NODISCARD static const ResourceLoaderOptions &DefaultCachedResourceOptions() noexcept;
 

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
@@ -119,8 +120,11 @@ namespace krys::boo::tests
       return Downcast<T>(Downcast<html::HTMLElement>(ById(id)));
     }
 
+    /// @brief The navigations the host was asked about, after running the tasks that start them (form
+    /// submissions are scheduled).
     KRYS_NODISCARD const List<ReceivedNavigation> &Navigations() const noexcept
     {
+      html::EventLoop::Current().RunUntilIdle();
       return Client->Navigations;
     }
 

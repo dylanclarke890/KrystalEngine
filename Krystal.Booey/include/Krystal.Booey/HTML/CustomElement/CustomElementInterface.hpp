@@ -91,6 +91,7 @@ namespace krys::boo::html
     void InvokeFormAssociatedCallback(dom::Element &element, HTMLFormElement *form) noexcept;
     void InvokeFormResetCallback(dom::Element &element) noexcept;
     void InvokeFormDisabledCallback(dom::Element &element, bool isDisabled) noexcept;
+    void InvokeFormStateRestoreCallback(dom::Element &element, const CustomElementFormValue &state) noexcept;
 
     KRYS_NODISCARD bool ObservesAttribute(dom::DOMStringAtom name) const noexcept
     {

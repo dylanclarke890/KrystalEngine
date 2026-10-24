@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Core/LocaleICU.hpp"
 #include "Krystal.Booey/Core/LocaleToScriptMapping.hpp"
+#include "Krystal.Booey/Platform/Language.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <array>
 #include <hb.h>
@@ -114,6 +115,12 @@ namespace krys::boo
 
   utf8_string DefaultLanguage() noexcept
   {
+    // The host's preferred languages come first.
+    if (auto &override = UserPreferredLanguagesOverride(); !override.empty())
+    {
+      return override.front();
+    }
+
     std::array<char, ULOC_FULLNAME_CAPACITY> tag {};
     UErrorCode status = U_ZERO_ERROR;
     int32_t length =

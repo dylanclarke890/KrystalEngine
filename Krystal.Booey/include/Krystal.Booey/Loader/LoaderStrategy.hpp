@@ -36,5 +36,12 @@ namespace krys::boo
     virtual void LoadResource(LocalFrame &frame, const ResourceRequest &request,
                               const ResourceLoaderOptions &options,
                               Func<void(LoadResult &&)> &&completionHandler) noexcept = 0;
+
+    /// @brief Whether the network is reachable (`navigator.onLine`); the host tells pages when it changes
+    /// through `Page::NetworkStateChanged`.
+    KRYS_NODISCARD virtual bool IsOnLine() const noexcept
+    {
+      return true;
+    }
   };
 }

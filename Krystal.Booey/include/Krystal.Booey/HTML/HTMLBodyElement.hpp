@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html
@@ -11,6 +12,13 @@ namespace krys::boo::html
 
   public:
     HTMLBodyElement(dom::Document &document) noexcept;
+
+#pragma region WindowEventHandlers - https://html.spec.whatwg.org/#windoweventhandlers
+
+    /// @note The body and frameset elements' window event handlers are their document's window's.
+    KRYS_WINDOW_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+
+#pragma endregion
 
 #pragma region HTMLBodyElement Obsolete members - https://html.spec.whatwg.org/#HTMLBodyElement-partial
 

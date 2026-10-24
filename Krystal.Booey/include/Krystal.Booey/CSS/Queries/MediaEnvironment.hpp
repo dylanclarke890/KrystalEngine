@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -36,6 +37,9 @@ namespace krys::boo::css::mq
 
     /// @brief The screen's size, in CSS pixels.
     FloatSize ScreenSize {};
+    /// @brief The part of the screen windows can use (less the task bar), in CSS pixels; empty for the whole
+    /// screen.
+    FloatRect ScreenAvailableRect {};
 
     /// @brief Bits per colour component.
     int32 ScreenDepthPerComponent {8};

@@ -34,6 +34,43 @@ namespace krys::boo
     NavigationAPIReplace
   };
 
+  /// @brief Whether a redirect comes from `<meta http-equiv=refresh>`.
+  enum class IsMetaRefresh : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Which of `pagehide` and `unload` a document's frame fires as it stops loading it.
+  enum class UnloadEventPolicy : uint8
+  {
+    None,
+    UnloadOnly,
+    UnloadAndPageHide
+  };
+
+  /// @brief Whether stopping a frame's loads forgets the history item it was loading.
+  enum class ClearProvisionalItem : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Whether going to a history item stays in the document.
+  enum class IsSameDocumentNavigation : bool
+  {
+    No,
+    Yes
+  };
+
+  /// @brief Whether the frame goes to a history item, as the client decides.
+  enum class ShouldGoToHistoryItem : uint8
+  {
+    No,
+    Yes,
+    ItemUnknown
+  };
+
   /// @brief Whether a new browsing context opened by a navigation gets its opener.
   enum class NewFrameOpenerPolicy : uint8
   {

@@ -5,14 +5,21 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/History/BackForwardCache.hpp"
+#include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/Loader/FormSubmission.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
+#include "Krystal.Booey/Loader/SubstituteData.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -40,8 +47,178 @@ namespace krys::ui
     View *_view {nullptr};
     GraphicsLayerFactoryTextureMapper _factory;
     GraphicsLayerTextureMapper *_rootLayer {nullptr};
+    Func<void()> _focusRequestHandler;
+    Func<void()> _closeRequestHandler;
+    Func<void(const boo::FloatRect &)> _windowRectRequestHandler;
+    Maybe<boo::FloatRect> _windowRect;
+    Func<void(const utf8_string &)> _alertHandler;
+    Func<bool(const utf8_string &)> _confirmHandler;
+    Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> _promptHandler;
+    Func<void()> _printHandler;
+    Func<void(const ConsoleMessage &)> _consoleMessageHandler;
+    Func<bool(const utf8_string &)> _beforeUnloadHandler;
+    Func<void(const utf8_string &, const utf8_string &, bool)> _protocolHandlerRequestHandler;
 
   public:
+    void RegisterProtocolHandler(const boo::dom::DOMString &scheme,
+                                 const boo::dom::DOMString &url) noexcept override
+    {
+      if (_protocolHandlerRequestHandler)
+      {
+        _protocolHandlerRequestHandler(scheme, url, true);
+      }
+    }
+
+    void UnregisterProtocolHandler(const boo::dom::DOMString &scheme,
+                                   const boo::dom::DOMString &url) noexcept override
+    {
+      if (_protocolHandlerRequestHandler)
+      {
+        _protocolHandlerRequestHandler(scheme, url, false);
+      }
+    }
+
+    void SetProtocolHandlerRequestHandler(
+      Func<void(const utf8_string &, const utf8_string &, bool)> &&handler) noexcept
+    {
+      _protocolHandlerRequestHandler = krys::move(handler);
+    }
+
+    void RunJavaScriptAlert(boo::LocalFrame &, const boo::dom::DOMString &message) noexcept override
+    {
+      if (_alertHandler)
+      {
+        _alertHandler(message);
+      }
+    }
+
+    KRYS_NODISCARD bool RunJavaScriptConfirm(boo::LocalFrame &,
+                                             const boo::dom::DOMString &message) noexcept override
+    {
+      return _confirmHandler && _confirmHandler(message);
+    }
+
+    KRYS_NODISCARD Maybe<boo::dom::DOMString>
+      RunJavaScriptPrompt(boo::LocalFrame &, const boo::dom::DOMString &message,
+                          const boo::dom::DOMString &defaultValue) noexcept override
+    {
+      if (!_promptHandler)
+      {
+        return null;
+      }
+      auto result = _promptHandler(message, defaultValue);
+      return result ? Maybe<boo::dom::DOMString>(boo::dom::DOMString(*result)) : null;
+    }
+
+    KRYS_NODISCARD bool RunBeforeUnloadConfirmPanel(const boo::dom::DOMString &message,
+                                                    boo::LocalFrame &) noexcept override
+    {
+      return !_beforeUnloadHandler || _beforeUnloadHandler(message);
+    }
+
+    void SetBeforeUnloadHandler(Func<bool(const utf8_string &)> &&handler) noexcept
+    {
+      _beforeUnloadHandler = krys::move(handler);
+    }
+
+    void Print(boo::LocalFrame &) noexcept override
+    {
+      if (_printHandler)
+      {
+        _printHandler();
+      }
+    }
+
+    void AddMessageToConsole(boo::MessageSource source, boo::MessageLevel level,
+                             const boo::dom::DOMString &message, uint32 lineNumber, uint32 columnNumber,
+                             const boo::dom::DOMString &sourceID) noexcept override
+    {
+      if (_consoleMessageHandler)
+      {
+        _consoleMessageHandler(ConsoleMessage {source, level, message, sourceID, lineNumber, columnNumber});
+      }
+    }
+
+    void SetAlertHandler(Func<void(const utf8_string &)> &&handler) noexcept
+    {
+      _alertHandler = krys::move(handler);
+    }
+
+    void SetConfirmHandler(Func<bool(const utf8_string &)> &&handler) noexcept
+    {
+      _confirmHandler = krys::move(handler);
+    }
+
+    void
+      SetPromptHandler(Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> &&handler) noexcept
+    {
+      _promptHandler = krys::move(handler);
+    }
+
+    void SetPrintHandler(Func<void()> &&handler) noexcept
+    {
+      _printHandler = krys::move(handler);
+    }
+
+    void SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept
+    {
+      _consoleMessageHandler = krys::move(handler);
+    }
+
+    KRYS_NODISCARD boo::FloatRect WindowRect() const noexcept override
+    {
+      if (_windowRect)
+      {
+        return *_windowRect;
+      }
+      return _view ? boo::FloatRect(boo::FloatPoint(), boo::FloatSize(_view->ViewportSize()))
+                   : boo::FloatRect();
+    }
+
+    void SetWindowRect(const boo::FloatRect &rect) noexcept override
+    {
+      if (_windowRectRequestHandler)
+      {
+        _windowRectRequestHandler(rect);
+      }
+    }
+
+    void SetHostWindowRect(const boo::FloatRect &rect) noexcept
+    {
+      _windowRect = rect;
+    }
+
+    void SetWindowRectRequestHandler(Func<void(const boo::FloatRect &)> &&handler) noexcept
+    {
+      _windowRectRequestHandler = krys::move(handler);
+    }
+
+    void Focus() noexcept override
+    {
+      if (_focusRequestHandler)
+      {
+        _focusRequestHandler();
+      }
+    }
+
+    void CloseWindow() noexcept override
+    {
+      if (_closeRequestHandler)
+      {
+        _closeRequestHandler();
+      }
+    }
+
+    void SetFocusRequestHandler(Func<void()> &&handler) noexcept
+    {
+      _focusRequestHandler = krys::move(handler);
+    }
+
+    void SetCloseRequestHandler(Func<void()> &&handler) noexcept
+    {
+      _closeRequestHandler = krys::move(handler);
+    }
+
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
     {
       _rootLayer = layer ? &Downcast<GraphicsLayerTextureMapper>(*layer) : nullptr;
@@ -99,8 +276,84 @@ namespace krys::ui
   private:
     View *_view {nullptr};
     Func<NavigationPolicy(const NavigationRequest &)> _navigationHandler;
+    Maybe<utf8_string> _userAgent;
+    Func<void(const LoadEvent &)> _loadHandler;
 
   public:
+    void DispatchDidClearWindowObject() noexcept override
+    {
+      if (_view)
+      {
+        _view->DidClearWindowObject();
+      }
+    }
+
+    void DispatchDidStartProvisionalLoad() noexcept override
+    {
+      Notify({LoadEventType::Started, {}});
+    }
+
+    void DispatchDidCommitLoad() noexcept override
+    {
+      // A page from the back/forward cache commits once it's restored, so the host sees its document.
+      if (_view && _view->Frame().Loader().IsLoadingFromCachedPage())
+      {
+        return;
+      }
+      if (_view)
+      {
+        _view->DidCommitLoad();
+      }
+      Notify({LoadEventType::Committed, {}});
+    }
+
+    void DidRestoreFromBackForwardCache() noexcept override
+    {
+      if (_view)
+      {
+        _view->DidCommitLoad();
+      }
+      Notify({LoadEventType::Committed, {}, true});
+    }
+
+    void DispatchDidFinishLoad() noexcept override
+    {
+      Notify({LoadEventType::Finished, {}});
+    }
+
+    void DispatchDidFailProvisionalLoad(const boo::ResourceError &error) noexcept override
+    {
+      Notify({LoadEventType::Failed, error});
+    }
+
+    void DispatchDidFailLoad(const boo::ResourceError &error) noexcept override
+    {
+      Notify({LoadEventType::Failed, error});
+    }
+
+    void SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
+    {
+      _loadHandler = krys::move(handler);
+    }
+
+    void Notify(const LoadEvent &event) const noexcept
+    {
+      if (_loadHandler)
+      {
+        _loadHandler(event);
+      }
+    }
+
+    KRYS_NODISCARD boo::dom::DOMString UserAgent(const boo::url::URL &url) const noexcept override
+    {
+      return _userAgent ? boo::dom::DOMString(*_userAgent) : boo::LocalFrameLoaderClient::UserAgent(url);
+    }
+
+    void SetUserAgent(utf8_string &&userAgent) noexcept
+    {
+      _userAgent = krys::move(userAgent);
+    }
+
     KRYS_NODISCARD boo::PolicyAction
       DispatchDecidePolicyForNavigationAction(const boo::NavigationAction &action,
                                               const boo::ResourceRequest &request,
@@ -134,7 +387,8 @@ namespace krys::ui
                                             const boo::FormSubmission *formSubmission,
                                             boo::dom::DOMStringView newWindowName) const noexcept
     {
-      if (!_navigationHandler)
+      // The host's own loads aren't asked about.
+      if (!_navigationHandler || action.IsRequestFromClientOrUserInput())
       {
         return boo::PolicyAction::Use;
       }
@@ -159,6 +413,7 @@ namespace krys::ui
       {
         navigation.Download = utf8_string(action.DownloadAttribute().View());
       }
+      navigation.Features = action.GetWindowFeatures();
       navigation.Method = request.HTTPMethod();
       if (formSubmission)
       {
@@ -213,12 +468,18 @@ namespace krys::ui
   }
 
   View::View(const boo::IntSize &viewportSize) noexcept
-      : _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>(),
-                                CreateFrameLoaderClient(_frameLoaderClient))),
+      : _backForwardList(boo::BackForwardList::Create()),
+        _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>(),
+                                CreateFrameLoaderClient(_frameLoaderClient), _backForwardList)),
         _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
     std::call_once(valuePool, [] { boo::css::StaticValuePool::Init(); });
+
+    // The back/forward cache keeps a few pages, unless the host sizes it.
+    static std::once_flag backForwardCache;
+    std::call_once(backForwardCache,
+                   [] { boo::BackForwardCache::Singleton().SetMaxSize(DefaultBackForwardCacheCapacity); });
 
     auto &strategies = boo::PlatformStrategies::Singleton();
     if (!strategies.GetLoaderStrategy())
@@ -235,7 +496,8 @@ namespace krys::ui
     _chromeClient->SetView(this);
     _frameLoaderClient->SetView(this);
     _frame->CreateView(viewportSize);
-    LoadHTML(u8"<!DOCTYPE html>");
+    // The frame starts with its initial empty document, at once.
+    _frame->Loader().Init();
   }
 
   View::~View() noexcept
@@ -250,51 +512,136 @@ namespace krys::ui
     _frame->SetDocument(nullptr);
   }
 
+  boo::dom::HTMLDocument &View::Document() const noexcept
+  {
+    return Downcast<boo::dom::HTMLDocument>(*_frame->Document());
+  }
+
   void View::LoadHTML(utf8_string &&markup, boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
   {
     _frame->SetSubresourceCachePolicy(cachePolicy);
-    // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
-    // inserted (autofocus candidates need that).
-    _document = CreateRef<boo::dom::HTMLDocument>();
-    if (!url.IsNull())
-    {
-      _document->SetURL(krys::move(url));
-    }
-    _document->SetFocusedAndActive(_focused);
-    _frame->SetDocument(ShareRefPtr<boo::dom::Document>(_document.get()));
-    _needsPaint = true;
-
-    // The view's custom elements are defined before parsing, so the parser creates them as it goes.
-    for (auto &definition : _customElements)
-    {
-      (void)_document->CustomElementRegistry()->Define(definition.Name,
-                                                       boo::html::CustomElementFactory(definition.Factory),
-                                                       boo::html::CustomElementOptions(definition.Options));
-    }
-
-    auto parser = CreateRef<boo::html::HTMLDocumentParser>(*_document);
-    parser->InputStream().Append(krys::move(markup), boo::IsEOF(true));
-    parser->PumpTokenizer();
-    _document->StyleScope().FlushPendingUpdate();
+    auto requestURL = url.IsNull() ? boo::url::URL(u8"about:blank") : url;
+    boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
+                                  boo::ResourceRequest(krys::move(requestURL)),
+                                  boo::dom::DOMStringAtom::Null());
+    request.SetSubstituteData(boo::SubstituteData(krys::move(markup), u8"text/html", krys::move(url)));
+    _frame->Loader().Load(krys::move(request));
   }
 
   Expected<void> View::LoadFile(const std::filesystem::path &path, boo::CachePolicy cachePolicy) noexcept
   {
-    std::ifstream file(path, std::ios::binary);
-    if (!file)
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(path, error))
     {
       return Unexpected(std::format("Couldn't open {}", path.string()));
     }
-    std::string bytes {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-    // Decoding UTF-8 removes its byte order mark, which would otherwise be text in the document.
-    if (bytes.starts_with("\xEF\xBB\xBF"))
-    {
-      bytes.erase(0, 3);
-    }
     auto absolutePath = std::filesystem::absolute(path).generic_u8string();
-    LoadHTML(utf8_string(bytes.begin(), bytes.end()), boo::url::URL::FileURLWithFileSystemPath(absolutePath),
-             cachePolicy);
+    Load(boo::url::URL::FileURLWithFileSystemPath(absolutePath), cachePolicy);
     return {};
+  }
+
+  void View::Load(boo::url::URL &&url, boo::CachePolicy cachePolicy) noexcept
+  {
+    _frame->SetSubresourceCachePolicy(cachePolicy);
+    boo::FrameLoadRequest request(ShareRef<boo::dom::Document>(Document()),
+                                  boo::ResourceRequest(krys::move(url)), boo::dom::DOMStringAtom::Null());
+    _frame->Loader().Load(krys::move(request));
+  }
+
+  bool View::IsLoading() const noexcept
+  {
+    return _frame->Loader().IsLoading();
+  }
+
+  void View::Stop() noexcept
+  {
+    _frame->Loader().StopForUserCancel();
+  }
+
+  void View::SetLoadHandler(Func<void(const LoadEvent &)> &&handler) noexcept
+  {
+    _frameLoaderClient->SetLoadHandler(krys::move(handler));
+  }
+
+  bool View::CanGoBack() const noexcept
+  {
+    return _page->BackForward().CanGoBackOrForward(-1);
+  }
+
+  bool View::CanGoForward() const noexcept
+  {
+    return _page->BackForward().CanGoBackOrForward(1);
+  }
+
+  bool View::GoBack() noexcept
+  {
+    bool wentBack = _page->BackForward().GoBack();
+    PerformMicrotaskCheckpoint();
+    return wentBack;
+  }
+
+  bool View::GoForward() noexcept
+  {
+    bool wentForward = _page->BackForward().GoForward();
+    PerformMicrotaskCheckpoint();
+    return wentForward;
+  }
+
+  void View::GoToItem(boo::HistoryItem &item) noexcept
+  {
+    _page->GoToItem(*_frame, item, boo::FrameLoadType::IndexedBackForward);
+    PerformMicrotaskCheckpoint();
+  }
+
+  void View::Reload() noexcept
+  {
+    _frame->Loader().Reload(true);
+    PerformMicrotaskCheckpoint();
+  }
+
+  void View::DidCommitLoad() noexcept
+  {
+    // A committed document (a new one, or one the back/forward cache restored) takes the window's focus and
+    // is painted; the old one's overlay goes.
+    if (_overlay)
+    {
+      _overlay->Hide();
+    }
+    Document().SetFocusedAndActive(_focused);
+    _needsPaint = true;
+  }
+
+  void View::DidClearWindowObject() noexcept
+  {
+    // A new document: it takes the window's focus, and the view's custom elements are defined before it's
+    // parsed, so the parser creates them as it goes.
+    if (_overlay)
+    {
+      _overlay->Hide();
+    }
+    auto &document = Document();
+    document.SetFocusedAndActive(_focused);
+    _needsPaint = true;
+    for (auto &definition : _customElements)
+    {
+      (void)document.Window()->CustomElements().Define(definition.Name,
+                                                       boo::html::CustomElementFactory(definition.Factory),
+                                                       boo::html::CustomElementOptions(definition.Options));
+    }
+  }
+
+  void View::ReplaceDocument(utf8_string &&markup) noexcept
+  {
+    // The document is parsed in the frame, as a navigation's is, so it's fully active as its elements are
+    // inserted; it replaces the current one at once, without a load.
+    boo::DocumentWriter writer;
+    writer.SetFrame(*_frame);
+    if (!writer.Begin(boo::url::URL(u8"about:blank")))
+    {
+      return;
+    }
+    writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup.data()), markup.size()));
+    writer.End();
   }
 
   Expected<void> View::DefineCustomElement(boo::dom::DOMStringAtom name,
@@ -316,11 +663,9 @@ namespace krys::ui
     }
 
     auto &definition = _customElements.emplace_back(name, krys::move(factory), krys::move(options));
-    if (auto registry = _document->CustomElementRegistry())
-    {
-      (void)registry->Define(definition.Name, boo::html::CustomElementFactory(definition.Factory),
-                             boo::html::CustomElementOptions(definition.Options));
-    }
+    (void)Document().Window()->CustomElements().Define(definition.Name,
+                                                       boo::html::CustomElementFactory(definition.Factory),
+                                                       boo::html::CustomElementOptions(definition.Options));
     return {};
   }
 
@@ -356,6 +701,7 @@ namespace krys::ui
 
   bool View::Update(MonotonicTime::duration now, Maybe<MonotonicTime::duration> budget) noexcept
   {
+    auto start = MonotonicTime::Now();
     boo::html::EventLoop::Current().Run(now, budget);
 
     // The overlay's page shares the event loop, and updates with the page.
@@ -367,13 +713,21 @@ namespace krys::ui
     }
 
     // Each frame is a rendering opportunity.
-    if (!_page->IsRenderingUpdateScheduled())
+    bool updated = overlayUpdated;
+    if (_page->IsRenderingUpdateScheduled())
     {
-      return overlayUpdated;
+      _page->UpdateRendering();
+      _needsPaint = true;
+      updated = true;
     }
-    _page->UpdateRendering();
-    _needsPaint = true;
-    return true;
+
+    // The rest of the frame's budget is idle, up to 50ms (the idle period's limit).
+    // https://w3c.github.io/requestidlecallback/#start-an-idle-period-algorithm
+    constexpr auto maximumIdlePeriod = std::chrono::milliseconds(50);
+    auto deadline = budget ? start + std::min<MonotonicTime::duration>(*budget, maximumIdlePeriod)
+                           : MonotonicTime::Now() + maximumIdlePeriod;
+    _page->OpportunisticallyRunIdleCallbacks(deadline);
+    return updated;
   }
 
   void View::PerformMicrotaskCheckpoint() noexcept
@@ -397,7 +751,7 @@ namespace krys::ui
 
   void View::ScrollTo(const boo::IntPoint &position) noexcept
   {
-    (void)_document->UpdateLayout();
+    (void)Document().UpdateLayout();
     if (auto *view = _frame->View())
     {
       view->SetScrollPosition(position);
@@ -408,7 +762,7 @@ namespace krys::ui
   Ref<const boo::display_list::DisplayList> View::Record() noexcept
   {
     // The rendering update runs in Update; painting only needs the layout.
-    (void)_document->UpdateLayout();
+    (void)Document().UpdateLayout();
     const auto size = ViewportSize();
     boo::display_list::RecorderImpl recorder(
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
@@ -461,7 +815,7 @@ namespace krys::ui
     }
 
     // The rendering update runs in Update; painting only needs the layout and the layers up to date.
-    (void)_document->UpdateLayout({boo::dom::LayoutOptions::UpdateCompositingLayers});
+    (void)Document().UpdateLayout({boo::dom::LayoutOptions::UpdateCompositingLayers});
     (void)view->FlushCompositingStateIncludingSubframes();
 
     // What the view repaints is in its layers: the damage it tracks for a page that isn't composited is
@@ -541,7 +895,7 @@ namespace krys::ui
 
   boo::dom::Element *View::HitTest(const boo::IntPoint &point) noexcept
   {
-    return _document->ElementFromPoint(point.X(), point.Y()).get();
+    return Document().ElementFromPoint(point.X(), point.Y()).get();
   }
 
   void View::MouseMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
@@ -650,9 +1004,19 @@ namespace krys::ui
       return;
     }
 
-    (void)_frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
+    bool handled = _frame->GetEventHandler().HandleMouseReleaseEvent(MouseEvent(
       boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input::ToBooey(modifiers)));
     PerformMicrotaskCheckpoint();
+
+    // The mouse's back and forward buttons go back and forward, unless the page handled them.
+    if (!handled && button == boo::MouseButton::Back)
+    {
+      (void)GoBack();
+    }
+    else if (!handled && button == boo::MouseButton::Forward)
+    {
+      (void)GoForward();
+    }
   }
 
   void View::MouseLeft() noexcept
@@ -703,6 +1067,19 @@ namespace krys::ui
     _heldKeyValues.insert_or_assign(key, event.Key());
     bool handled = _frame->GetEventHandler().KeyEvent(event);
     PerformMicrotaskCheckpoint();
+
+    // Alt+Left and Alt+Right go back and forward, unless the page handled them.
+    if (!handled && modifiers == pal::KeyModifiers {pal::KeyModifier::Alt})
+    {
+      if (key == pal::Key::LeftArrow)
+      {
+        return GoBack();
+      }
+      if (key == pal::Key::RightArrow)
+      {
+        return GoForward();
+      }
+    }
     return handled;
   }
 
@@ -728,13 +1105,79 @@ namespace krys::ui
       overlay->Hide();
     }
     _focused = focused;
-    boo::html::FocusAlgorithms::SystemFocusChanged(*_document, focused);
+    boo::html::FocusAlgorithms::SystemFocusChanged(Document(), focused);
     PerformMicrotaskCheckpoint();
   }
 
   void View::SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));
+  }
+
+  void View::SetFocusRequestHandler(Func<void()> &&handler) noexcept
+  {
+    _chromeClient->SetFocusRequestHandler(krys::move(handler));
+  }
+
+  void View::SetCloseRequestHandler(Func<void()> &&handler) noexcept
+  {
+    _chromeClient->SetCloseRequestHandler(krys::move(handler));
+  }
+
+  void View::SetWindowRect(const boo::FloatRect &rect) noexcept
+  {
+    _chromeClient->SetHostWindowRect(rect);
+  }
+
+  void View::SetWindowRectRequestHandler(Func<void(const boo::FloatRect &)> &&handler) noexcept
+  {
+    _chromeClient->SetWindowRectRequestHandler(krys::move(handler));
+  }
+
+  void View::SetAlertHandler(Func<void(const utf8_string &)> &&handler) noexcept
+  {
+    _chromeClient->SetAlertHandler(krys::move(handler));
+  }
+
+  void View::SetConfirmHandler(Func<bool(const utf8_string &)> &&handler) noexcept
+  {
+    _chromeClient->SetConfirmHandler(krys::move(handler));
+  }
+
+  void View::SetPromptHandler(
+    Func<Maybe<utf8_string>(const utf8_string &, const utf8_string &)> &&handler) noexcept
+  {
+    _chromeClient->SetPromptHandler(krys::move(handler));
+  }
+
+  void View::SetPrintHandler(Func<void()> &&handler) noexcept
+  {
+    _chromeClient->SetPrintHandler(krys::move(handler));
+  }
+
+  void View::SetBeforeUnloadHandler(Func<bool(const utf8_string &)> &&handler) noexcept
+  {
+    _chromeClient->SetBeforeUnloadHandler(krys::move(handler));
+  }
+
+  void View::SetConsoleMessageHandler(Func<void(const ConsoleMessage &)> &&handler) noexcept
+  {
+    _chromeClient->SetConsoleMessageHandler(krys::move(handler));
+  }
+
+  void View::SetProtocolHandlerRequestHandler(
+    Func<void(const utf8_string &scheme, const utf8_string &url, bool registered)> &&handler) noexcept
+  {
+    _chromeClient->SetProtocolHandlerRequestHandler(krys::move(handler));
+  }
+
+  void View::SetUserAgent(utf8_string &&userAgent) noexcept
+  {
+    _frameLoaderClient->SetUserAgent(krys::move(userAgent));
+    if (auto *window = Document().Window())
+    {
+      window->GetNavigator().UserAgentChanged();
+    }
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

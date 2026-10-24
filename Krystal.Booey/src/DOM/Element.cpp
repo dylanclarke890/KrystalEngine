@@ -47,6 +47,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
@@ -2222,40 +2223,6 @@ namespace krys::boo::dom
       return static_cast<int32>(value / zoomFactor);
     }
 
-    /// @brief Scrolls @p document's view as the window's `scrollTo()` does.
-    // FIXME: Through the Window (LocalDOMWindow::scrollTo), once there's a Window.
-    void ScrollWindowTo(Document &document, const ScrollToOptions &options) noexcept
-    {
-      auto *frame = DocumentFrameWithNonNullView(document);
-      if (!frame)
-      {
-        return;
-      }
-      auto &view = *frame->View();
-
-      ScrollToOptions scrollToOptions = NormalizeNonFiniteCoordinatesOrFallBackTo(
-        options, view.ContentsScrollPosition().X(), view.ContentsScrollPosition().Y());
-
-      // This is an optimization for the common case of scrolling to (0, 0) when the scroller is already at
-      // the origin. If an animated scroll is in progress, this optimization is skipped to ensure that the
-      // animated scroll is really stopped.
-      if (view.GetScrollAnimationStatus() == ScrollAnimationStatus::NotAnimating && !*scrollToOptions.Left
-          && !*scrollToOptions.Top && view.ContentsScrollPosition().IsZero())
-      {
-        return;
-      }
-
-      // FIXME: Cancelling the scheduled scrolls (cancelScheduledScrolls), once they're scheduled.
-      document.UpdateLayoutIgnorePendingStylesheets();
-
-      // The frame scale factor is 1 (FIXME: once frames can be scaled).
-      IntPoint layoutPos(static_cast<int32>(*scrollToOptions.Left * frame->PageZoomFactor()),
-                         static_cast<int32>(*scrollToOptions.Top * frame->PageZoomFactor()));
-
-      // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
-      view.SetContentsScrollPosition(layoutPos, ScrollPositionChangeOptions::CreateProgrammatic());
-    }
-
     KRYS_NODISCARD ScrollAlignment ToScrollAlignmentForInlineDirection(Maybe<ScrollLogicalPosition> position,
                                                                        WritingMode writingMode) noexcept
     {
@@ -2586,7 +2553,10 @@ namespace krys::boo::dom
     {
       // If the element is the scrolling element and is not potentially scrollable,
       // invoke scroll() on window with options as the only argument, and terminate these steps.
-      ScrollWindowTo(document, options);
+      if (auto *window = document.Window())
+      {
+        window->ScrollTo(options);
+      }
       return;
     }
 

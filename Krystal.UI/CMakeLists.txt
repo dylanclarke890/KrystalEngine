@@ -43,6 +43,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/Compositing/TextureMapperTiledBackingStore.hpp
       include/Krystal.UI/EditorClient.hpp
       include/Krystal.UI/FileLoaderStrategy.hpp
+      include/Krystal.UI/FileStorageProvider.hpp
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
@@ -67,6 +68,7 @@ target_sources(Krystal.UI
     src/Compositing/TextureMapperTiledBackingStore.cpp
     src/EditorClient.cpp
     src/FileLoaderStrategy.cpp
+    src/FileStorageProvider.cpp
     src/FontFaceCache.cpp
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp

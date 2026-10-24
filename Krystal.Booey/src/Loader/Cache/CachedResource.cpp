@@ -47,6 +47,10 @@ namespace krys::boo
     _loading = true;
     SetStatus(Pending);
 
+    // The load delays its document's load event until it's done.
+    cachedResourceLoader.IncrementRequestCount(*this);
+    _requestCountingLoader = CreateWeakPtr(&cachedResourceLoader);
+
     auto completeAsNetworkingTask =
       [protectedThis = CachedResourceHandle<CachedResource>(*this)](LoadResult &&result)
     {
@@ -79,6 +83,7 @@ namespace krys::boo
       SetResourceError(
         ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, URL(), u8"No loader strategy"));
       FailBeforeStarting();
+      RequestDone();
       return;
     }
 
@@ -86,6 +91,25 @@ namespace krys::boo
   }
 
   void CachedResource::DidFinishLoad(LoadResult &&result) noexcept
+  {
+    // The resource's clients hear of it before its document's loads are checked.
+    CachedResourceHandle<CachedResource> protectedThis(*this);
+    ApplyLoadResult(krys::move(result));
+    RequestDone();
+  }
+
+  void CachedResource::RequestDone() noexcept
+  {
+    RefPtr<CachedResourceLoader> loader = ShareRefPtr(std::exchange(_requestCountingLoader, nullptr).get());
+    if (!loader)
+    {
+      return;
+    }
+    loader->DecrementRequestCount(*this);
+    loader->LoadDone();
+  }
+
+  void CachedResource::ApplyLoadResult(LoadResult &&result) noexcept
   {
     if (!IsLoading())
     {

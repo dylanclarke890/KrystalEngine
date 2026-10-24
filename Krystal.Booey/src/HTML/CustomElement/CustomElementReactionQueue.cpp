@@ -115,6 +115,11 @@ namespace krys::boo::html
         krys_debug_assert(_payload.has_value() && std::holds_alternative<FormDisabledPayload>(*_payload));
         elementInterface.InvokeFormDisabledCallback(element, std::get<FormDisabledPayload>(*_payload));
         break;
+      case Type::FormStateRestore:
+        krys_debug_assert(_payload.has_value() && std::holds_alternative<FormStateRestorePayload>(*_payload));
+        elementInterface.InvokeFormStateRestoreCallback(element,
+                                                        std::get<FormStateRestorePayload>(*_payload).State);
+        break;
     }
   }
 
@@ -288,6 +293,18 @@ namespace krys::boo::html
     auto &queue = *element.ReactionQueue();
     krys_debug_assert(queue.IsFormAssociated());
     queue._items.emplace_back(Item::Type::FormReset);
+    EnqueueElementOnAppropriateElementQueue(element);
+  }
+
+  void CustomElementReactionQueue::EnqueueFormStateRestoreCallbackIfNeeded(
+    dom::Element &element, CustomElementFormValue &&state) noexcept
+  {
+    krys_debug_assert(CustomElementReactionDisallowedScope::IsReactionAllowed());
+    krys_debug_assert(element.ReactionQueue() != nullptr);
+    auto &queue = *element.ReactionQueue();
+    krys_debug_assert(queue.IsFormAssociated());
+    queue._items.emplace_back(Item::Type::FormStateRestore,
+                              Item::FormStateRestorePayload {krys::move(state)});
     EnqueueElementOnAppropriateElementQueue(element);
   }
 

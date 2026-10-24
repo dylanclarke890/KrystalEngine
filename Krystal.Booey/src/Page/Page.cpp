@@ -1,10 +1,18 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/History/BackForwardCache.hpp"
+#include "Krystal.Booey/History/BackForwardController.hpp"
+#include "Krystal.Booey/History/BackForwardList.hpp"
+#include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -14,6 +22,7 @@ namespace krys::boo
   namespace
   {
     constexpr EnumSet<RenderingUpdateStep> AllRenderingUpdateSteps {
+      RenderingUpdateStep::RestoreScrollPositionAndViewState,
       RenderingUpdateStep::FlushAutofocusCandidates,
       RenderingUpdateStep::Resize,
       RenderingUpdateStep::Scroll,
@@ -26,8 +35,12 @@ namespace krys::boo
       RenderingUpdateStep::LayerFlush};
   }
 
-  Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient) noexcept
-      : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient))
+  Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
+             RefPtr<BackForwardClient> &&backForwardClient) noexcept
+      : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
+        _backForwardController(CreateUnique<BackForwardController>(
+          *this, backForwardClient ? ShareRef(*backForwardClient)
+                                   : Ref<BackForwardClient>(BackForwardList::Create())))
   {
     if (!_chromeClient)
     {
@@ -39,14 +52,59 @@ namespace krys::boo
     }
   }
 
-  Page::~Page() noexcept = default;
+  Page::~Page() noexcept
+  {
+    BackForwardCache::Singleton().RemoveAllItemsForPage(*this);
+    _backForwardController->Close();
+  }
+
+  void Page::DestroyRenderTrees() noexcept
+  {
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (document.HasLivingRenderTree())
+        {
+          document.DestroyRenderTree();
+        }
+      });
+  }
 
   Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-                         UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient) noexcept
+                         UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,
+                         RefPtr<BackForwardClient> backForwardClient) noexcept
   {
-    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient)));
+    Ref<Page> page =
+      AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient), krys::move(backForwardClient)));
     page->_mainFrame = LocalFrame::Create(page.get(), krys::move(mainFrameLoaderClient));
     return page;
+  }
+
+  void Page::GoToItem(LocalFrame &frame, HistoryItem &item, FrameLoadType type) noexcept
+  {
+    // stopAllLoaders may end up running onload handlers, which could cause further history traversals that
+    // may lead to the passed in HistoryItem being deref()-ed. Make sure we can still use it with
+    // HistoryController::goToItem later.
+    Ref<HistoryItem> protectedItem = ShareRef(item);
+
+    if (frame.Loader().History().ShouldStopLoadingForHistoryItem(item))
+    {
+      frame.Loader().StopAllLoadersAndCheckCompleteness();
+    }
+    frame.Loader().History().GoToItem(item, type);
+  }
+
+  void Page::GoToItemForNavigationAPI(LocalFrame &frame, HistoryItem &item, FrameLoadType type,
+                                      LocalFrame &triggeringFrame,
+                                      NavigationAPIMethodTracker *tracker) noexcept
+  {
+    Ref<HistoryItem> protectedItem = ShareRef(item);
+
+    if (frame.Loader().History().ShouldStopLoadingForHistoryItem(item))
+    {
+      frame.Loader().StopAllLoadersAndCheckCompleteness();
+    }
+    frame.Loader().History().GoToItemForNavigationAPI(item, type, triggeringFrame, tracker);
   }
 
   EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) const noexcept
@@ -95,14 +153,31 @@ namespace krys::boo
 
     LayoutIfNeeded();
 
-    // FIXME: Restoring the scroll position and view state, revealing documents and freezing the documents'
-    // timestamps, once there are navigation, visibility and windows.
+    RunProcessingStep(RenderingUpdateStep::RestoreScrollPositionAndViewState,
+                      [](dom::Document &document)
+                      {
+                        if (RefPtr<LocalFrame> frame = ShareRefPtr(document.Frame()))
+                        {
+                          frame->Loader().RestoreScrollPositionAndViewStateNowIfNeeded();
+                        }
+                      });
+
+    // FIXME: Revealing documents, once there's visibility.
+
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (auto *window = document.Window())
+        {
+          window->FreezeNowTimestamp();
+        }
+      });
 
     RunProcessingStep(RenderingUpdateStep::FlushAutofocusCandidates, [](dom::Document &document)
                       { html::FocusAlgorithms::FlushAutofocusCandidates(document); });
 
-    // FIXME: The resize steps fire `resize` at the window, once there's a window.
-    RunProcessingStep(RenderingUpdateStep::Resize, [](dom::Document &) {});
+    RunProcessingStep(RenderingUpdateStep::Resize,
+                      [](dom::Document &document) { document.RunResizeSteps(); });
 
     RunProcessingStep(RenderingUpdateStep::Scroll,
                       [](dom::Document &document) { document.RunScrollSteps(); });
@@ -114,8 +189,8 @@ namespace krys::boo
     RunProcessingStep(RenderingUpdateStep::Animations,
                       [](dom::Document &document) { document.UpdateAnimationsAndSendEvents(); });
 
-    // FIXME: Running the animation frame callbacks (requestAnimationFrame), once there's scripting.
-    RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks, [](dom::Document &) {});
+    RunProcessingStep(RenderingUpdateStep::AnimationFrameCallbacks,
+                      [](dom::Document &document) { document.ServiceRequestAnimationFrameCallbacks(); });
 
     RunProcessingStep(RenderingUpdateStep::CaretAnimation,
                       [](dom::Document &document) { document.ServiceCaretAnimation(); });
@@ -144,10 +219,65 @@ namespace krys::boo
     LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();
 
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (auto *window = document.Window())
+        {
+          window->UnfreezeNowTimestamp();
+        }
+      });
+
     --_renderingUpdateDepth;
 
     // There's no drawing area to finalize the update after painting, so the update finalizes itself.
     FinalizeRenderingUpdate();
+  }
+
+  Ref<StorageArea> Page::SessionStorageArea(dom::DOMStringView origin) noexcept
+  {
+    dom::DOMString key(origin);
+    auto it = _sessionStorageAreas.find(key);
+    if (it != _sessionStorageAreas.end())
+    {
+      return it->second;
+    }
+    // Session storage has no quota beyond the local storage's, as upstream.
+    Ref<StorageArea> area =
+      MemoryStorageArea::Create(StorageType::Session, MemoryStorageArea::DefaultLocalStorageQuota);
+    _sessionStorageAreas.emplace(krys::move(key), area);
+    return area;
+  }
+
+  void Page::NetworkStateChanged(bool isOnLine) noexcept
+  {
+    List<Ref<dom::Document>> documents;
+    ForEachDocument([&](dom::Document &document) { documents.push_back(ShareRef(document)); });
+
+    auto eventName = dom::DOMStringAtom(isOnLine ? EventNames::Online : EventNames::Offline);
+    for (auto &document : documents)
+    {
+      Ref<dom::Event> event = dom::Event::Create(eventName, false, false);
+      document->DispatchWindowEvent(*event);
+    }
+  }
+
+  void Page::OpportunisticallyRunIdleCallbacks(MonotonicTime::duration deadline) noexcept
+  {
+    if (MonotonicTime::Now() >= deadline)
+    {
+      return;
+    }
+
+    ForEachDocument(
+      [deadline](dom::Document &document)
+      {
+        if (auto *controller = document.GetIdleCallbackController();
+            controller && controller->HasPendingIdleCallback())
+        {
+          controller->StartIdlePeriod(deadline);
+        }
+      });
   }
 
   void Page::FinalizeRenderingUpdate() noexcept

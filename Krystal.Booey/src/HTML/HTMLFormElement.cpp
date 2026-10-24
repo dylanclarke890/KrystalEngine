@@ -54,8 +54,10 @@ namespace krys::boo::html
 
   HTMLFormElement::~HTMLFormElement() noexcept
   {
-    // FIXME: Telling the form controller the form is going (FormController::willDeleteForm), once form state
-    // is saved and restored.
+    if (auto *formController = NodeDocument().FormControllerIfExists())
+    {
+      formController->WillDeleteForm(*this);
+    }
 
     // FormWillBeDestroyed below would try to update the validity of every radio button in a group.
     _radioButtonGroups.Clear();
@@ -1014,6 +1016,12 @@ namespace krys::boo::html
   bool HTMLFormElement::IsSupportedPropertyName(dom::DOMStringView name) noexcept
   {
     return !name.empty() && Elements()->NamedItem(name);
+  }
+
+  void HTMLFormElement::FinishParsingChildren() noexcept
+  {
+    HTMLElement::FinishParsingChildren();
+    NodeDocument().GetFormController().RestoreControlStateIn(*this);
   }
 
   bool HTMLFormElement::ShouldAutocomplete() const noexcept

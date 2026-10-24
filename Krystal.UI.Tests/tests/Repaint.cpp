@@ -16,6 +16,7 @@
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
 #include <chrono>
 #include <filesystem>
@@ -182,6 +183,7 @@ namespace krys::ui::tests
       u8"<div id=box></div><p id=text>Some text that changes.</p>"
       u8"<div id=spin></div><div id=scroller><div></div><div></div><div></div><div></div></div>"
       u8"<div id=moved></div><div id=list></div>");
+    WaitForLoad(view);
 
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
@@ -303,6 +305,7 @@ namespace krys::ui::tests
       u8"#tinted { left: 20px; top: 140px; width: 60px; height: 60px; background: #ef476f; filter: sepia(1) }"
       u8"</style>"
       u8"<div id=blurred><div id=inner></div></div><div id=shadowed></div><div id=tinted></div>");
+    WaitForLoad(view);
 
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
@@ -371,6 +374,7 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; background: #e9ecf2 }"
                   u8"div { position: absolute; left: 20px; top: 10px; width: 30px; height: 30px }</style>"
                   u8"<div style='background: #073b4c; filter: blur(2px)'></div>");
+    WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
 
     // Below a 30 pixel header: the page moves down with the host's transform, and nothing is drawn above it.
@@ -416,6 +420,7 @@ namespace krys::ui::tests
     RepaintFixture fixture(80u, 40u);
     View view({80, 40});
     REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    WaitForLoad(view);
     (void)view.Update(boo::html::EventLoop::Current().Now());
     CheckNoStalePixels(fixture, view, "fractional-images");
 
@@ -445,6 +450,7 @@ namespace krys::ui::tests
     RepaintFixture fixture(200u, 100u);
     View view({200, 100});
     REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now();
     auto frame = [&](MonotonicTime::duration delta)
     {
@@ -581,6 +587,7 @@ namespace krys::ui::tests
         u8"<div class=row>5</div><div class=row>6</div><div class=row>7</div><div class=row>8</div>"
         u8"<div class=row>9</div><div class=row>10</div><div class=row>11</div><div class=row>12</div>"
         u8"<div id=spin></div>");
+      WaitForLoad(view);
     }
 
     SECTION("a fixed background")
@@ -591,6 +598,7 @@ namespace krys::ui::tests
                     u8" background: linear-gradient(#f88, #88f) fixed }"
                     u8"p { margin: 40px 10px; font: 14px 'Liberation Sans' }"
                     u8"</style><p>One</p><p>Two</p><p>Three</p><p>Four</p><p>Five</p><p>Six</p>");
+      WaitForLoad(view);
     }
 
     auto time = boo::html::EventLoop::Current().Now() + 1s;
@@ -635,6 +643,7 @@ namespace krys::ui::tests
       u8"#box:hover { background: blue }"
       u8"#spin { position: absolute; left: 100px; top: 20px; width: 20px; height: 20px; background: teal }"
       u8"#tall { height: 500px }</style><div id=box></div><div id=spin></div><div id=tall></div>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     // A frame as the host runs it: an update, then a paint if the page asks for one.
     auto frame = [&]
@@ -704,6 +713,7 @@ namespace krys::ui::tests
       u8"<div class=row></div><div class=row></div><div class=row id=changed></div><div class=row></div>"
       u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div>"
       u8"<div class=row></div><div class=row></div><div class=row></div><div class=row></div></div>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
     {
@@ -755,6 +765,7 @@ namespace krys::ui::tests
       u8"<div id=scroller><h3></h3><div class=row></div><div class=row></div><div class=row></div>"
       u8"<div class=row></div><div class=row></div><div class=row></div></div>"
       u8"<section><h2></h2></section><section><h2></h2></section>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
     {
@@ -811,6 +822,7 @@ namespace krys::ui::tests
     RepaintFixture fixture(200u, 160u);
     View view({200, 160});
     view.LoadHTML(utf8_string(page));
+    WaitForLoad(view);
     (void)frame(view, fixture);
     REQUIRE(view.Document().GetElementById(u8"glass")->Renderer()->IsComposited());
     TrackedRepaints repaints(view);
@@ -827,6 +839,7 @@ namespace krys::ui::tests
       // the same scroll position: the backdrop shows what's beneath it now.
       View fresh({200, 160});
       fresh.LoadHTML(utf8_string(page));
+      WaitForLoad(fresh);
       (void)frame(fresh, fixture);
       fresh.ScrollTo({0, y});
       auto expected = frame(fresh, fixture);
@@ -853,6 +866,7 @@ namespace krys::ui::tests
       u8"#both { left: 168px; top: 24px; filter: blur(1px);"
       u8" mask-image: radial-gradient(circle, black 50%, transparent 52%) }</style>"
       u8"<div id=masked><div></div></div><div id=clipped><div></div></div><div id=both><div></div></div>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
     {
@@ -906,6 +920,7 @@ namespace krys::ui::tests
       u8"#blurred { position: absolute; left: 30px; top: 20px; width: 40px; height: 40px;"
       u8" background: #073b4c; filter: blur(2px); opacity: 0.9; transform: translateX(1px) }</style>"
       u8"<p>Text beside it</p><div id=blurred></div>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
     {
@@ -959,6 +974,7 @@ namespace krys::ui::tests
       markup += animation;
       markup += u8" }</style><div id=box></div>";
       view.LoadHTML(krys::move(markup));
+      WaitForLoad(view);
     };
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
@@ -1042,6 +1058,7 @@ namespace krys::ui::tests
     RepaintFixture fixture(200u, 100u);
     View view({200, 100});
     REQUIRE(view.LoadFile(directory / "page.html").has_value());
+    WaitForCommit(view);
     view.UpdateRendering();
     auto now = boo::html::EventLoop::Current().Now();
     // The load completes; painting the image starts its animation. The host paints after each update.
@@ -1070,6 +1087,7 @@ namespace krys::ui::tests
                   u8"::selection { background: #f80; color: white }"
                   u8"</style><p>The first paragraph wraps onto a second line here.</p>"
                   u8"<div class=box><p>A nested block, with its own gaps.</p></div><p>The last one.</p>");
+    WaitForLoad(view);
 
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&]
@@ -1125,6 +1143,7 @@ namespace krys::ui::tests
                   u8"body { margin: 8px; font: 14px/18px 'Liberation Sans' }"
                   u8"#e { padding: 4px; background: #def; caret-color: #c00 }"
                   u8"</style><div id=e contenteditable>Click to place the caret here.</div>");
+    WaitForLoad(view);
 
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&](MonotonicTime::duration delta)
@@ -1177,6 +1196,7 @@ namespace krys::ui::tests
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 14px/20px 'Liberation Sans' }</style>"
                   u8"<p>1</p><p>2</p><p>3</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p><p>10</p>"
                   u8"<p>11</p><p>12</p><p>13</p><p>14</p><p>15</p><p>16</p><p>17</p><p>18</p>");
+    WaitForLoad(view);
     auto time = boo::html::EventLoop::Current().Now() + 1s;
     auto frame = [&](std::chrono::milliseconds step)
     {

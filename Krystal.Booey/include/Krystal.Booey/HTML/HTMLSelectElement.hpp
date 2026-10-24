@@ -228,6 +228,15 @@ namespace krys::boo::html
 
     KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
 
+    KRYS_NODISCARD bool ShouldSaveAndRestoreFormControlState() const noexcept final
+    {
+      return true;
+    }
+
+    /// @brief The values of the selected options.
+    KRYS_NODISCARD FormControlState SaveFormControlState() const noexcept final;
+    void RestoreFormControlState(const FormControlState &state) noexcept final;
+
     KRYS_NODISCARD bool IsEnumeratable() const noexcept final
     {
       return true;
@@ -289,6 +298,10 @@ namespace krys::boo::html
     bool PlatformHandleKeydownEvent(dom::KeyboardEvent &event) noexcept;
     void ListBoxDefaultEventHandler(dom::Event &event) noexcept;
     void SetOptionsChangedOnRenderer() noexcept;
+    /// @brief The list index of the first option from @p listIndexStart to before @p listIndexEnd whose value
+    /// is @p value; null if there's none.
+    KRYS_NODISCARD Maybe<size_t> SearchOptionsForValue(dom::DOMStringView value, size_t listIndexStart,
+                                                       size_t listIndexEnd) const noexcept;
 
     /// @brief Shows the menu list's popup, if the select is drawn as a menu list.
     void ShowPopup() noexcept;

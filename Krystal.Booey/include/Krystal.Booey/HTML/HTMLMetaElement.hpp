@@ -49,6 +49,18 @@ namespace krys::boo::html
     void Scheme(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnInsert() noexcept override;
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
+  private:
+    /// @brief Runs the element's pragma directive, if it has one, while it's connected.
+    /// @see https://html.spec.whatwg.org/#pragma-directives
+    void Process() noexcept;
   };
 }
 

@@ -256,6 +256,9 @@ namespace krys::boo
     /// @brief Queues a `scroll` event at the document, after the view scrolled.
     void ScheduleScrollEvent() noexcept;
 
+    /// @brief Notes that the user scrolled the frame, which scroll restoration then leaves as it is.
+    void SetFrameWasScrolledByUser() noexcept;
+
     /// @brief The default actions of a keyboard event that wasn't cancelled: Tab and Shift+Tab move the
     /// focus; the arrows scroll by a line, Page Up and Page Down by a page, and Home and End to the start or
     /// end, and a `keypress` of Space (Shift+Space) a page down (up).

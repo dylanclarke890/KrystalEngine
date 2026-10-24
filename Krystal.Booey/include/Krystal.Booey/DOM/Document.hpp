@@ -5,13 +5,17 @@
 #include "Krystal.Booey/DOM/Dicts/ImportNodeOptions.hpp"
 #include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
+#include "Krystal.Booey/DOM/Enums/BackForwardCacheState.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Enums/QuirksMode.hpp"
+#include "Krystal.Booey/DOM/Enums/ReasonForSuspension.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
+#include "Krystal.Booey/DOM/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/DocumentRareData.hpp"
 #include "Krystal.Booey/DOM/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
+#include "Krystal.Booey/DOM/ScriptedAnimationController.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
@@ -23,8 +27,10 @@
 #include "Krystal.Booey/Graphics/GraphicsTypes.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
 #include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
 #include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
+#include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
@@ -49,7 +55,9 @@ namespace krys::boo
   class HitTestResult;
   class MouseEventWithHitTestResults;
   class PlatformMouseEvent;
+  class LocalDOMWindow;
   class LocalFrame;
+  class Location;
   class LocalFrameView;
   class Locale;
   class RenderElement;
@@ -87,6 +95,7 @@ namespace krys::boo::html
   class CustomElementAlgorithms;
   class CustomElementRegistry;
   class FocusAlgorithms;
+  class FormController;
   class HTMLBaseElement;
   class HTMLBodyElement;
   class HTMLDocumentParser;
@@ -96,6 +105,9 @@ namespace krys::boo::html
   class HTMLTitleElement;
   class HTMLTreeBuilder;
   class RenderBlocking;
+  class SerializedScriptValue;
+
+  enum class TaskSource : uint8;
 }
 
 namespace krys::boo::dom
@@ -124,6 +136,19 @@ namespace krys::boo::dom
   };
 
   class DocumentFontLoader;
+
+  /// @brief When a document reached each point of its loading, in milliseconds since its window's time
+  /// origin; 0 for those it hasn't reached.
+  /// @see https://html.spec.whatwg.org/#load-timing-info
+  struct DocumentLoadTimingInfo
+  {
+    double DOMInteractiveTime {0};
+    double DOMContentLoadedEventStartTime {0};
+    double DOMContentLoadedEventEndTime {0};
+    double DOMCompleteTime {0};
+    double LoadEventStartTime {0};
+    double LoadEventEndTime {0};
+  };
 
   class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
@@ -184,8 +209,15 @@ namespace krys::boo::dom
     // The element the pointer was pressed on: the chain of its ancestors stays `:active` until it's released.
     RefPtr<Element> _activeElement;
     bool _isFocusedAndActive {true};
+    BackForwardCacheState _backForwardCacheState {BackForwardCacheState::NotInBackForwardCache};
+    Maybe<ReasonForSuspension> _reasonForSuspendingActiveDOMObjects;
+    bool _isSuspended {false};
+    bool _scheduledTasksAreSuspended {false};
+    bool _activeDOMObjectsAreSuspended {false};
+    bool _activeDOMObjectsAreStopped {false};
     UniquePtr<FrameSelection> _selection;
     UniquePtr<boo::Editor> _editor;
+    UniquePtr<html::FormController> _formController;
     RefPtr<DOMSelection> _domSelection;
     // The focused area of the document: an element, or the viewport if null.
     RefPtr<Element> _focusedElement;
@@ -216,6 +248,33 @@ namespace krys::boo::dom
     RefPtr<DocumentTimeline> _timeline;
 
     WeakPtr<LocalFrame> _frame;
+    // The document's window, made as the document becomes a frame's.
+    RefPtr<LocalDOMWindow> _domWindow;
+    bool _needsDOMWindowResizeEvent {false};
+    bool _needsVisualViewportResizeEvent {false};
+    bool _needsVisualViewportScrollEvent {false};
+    /// @brief Whether the document's parser is running (a document a frame loads).
+    bool _parsing {false};
+    /// @see https://html.spec.whatwg.org/#page-showing
+    bool _pageShowing {false};
+    bool _loadEventFinished {false};
+    /// @brief Things other than loads that delay the document's load event.
+    uint32 _loadEventDelayCount {0};
+    /// @see https://html.spec.whatwg.org/#unload-counter
+    uint32 _unloadCounter {0};
+    /// @see https://html.spec.whatwg.org/#will-declaratively-refresh
+    bool _willDeclarativelyRefresh {false};
+    /// @see https://html.spec.whatwg.org/#pragma-set-default-language
+    DOMString _contentLanguage;
+    /// @brief The document's timers (`setTimeout()`, `setInterval()`), by ID.
+    /// @see https://html.spec.whatwg.org/#map-of-settimeout-and-setinterval-ids
+    HashMap<int32, Ref<DOMTimer>> _timeouts;
+    int32 _circularSequentialID {0};
+    /// @see https://html.spec.whatwg.org/#timer-nesting-level
+    int32 _timerNestingLevel {0};
+    UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
+    UniquePtr<IdleCallbackController> _idleCallbackController;
+    DocumentLoadTimingInfo _loadTiming;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
@@ -665,6 +724,20 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/cssom-view/#run-the-scroll-steps
     void RunScrollSteps() noexcept;
 
+    /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
+    void SetNeedsDOMWindowResizeEvent() noexcept;
+
+    /// @brief The visual viewport's size changed: the next resize steps fire `resize` at it.
+    void SetNeedsVisualViewportResize() noexcept;
+
+    /// @brief The visual viewport moved within the layout viewport: the next scroll steps fire `scroll` at
+    /// it.
+    void SetNeedsVisualViewportScrollEvent() noexcept;
+
+    /// @brief Fires `resize` at the window if the view's size or zoom changed since the last time.
+    /// @see https://drafts.csswg.org/cssom-view/#run-the-resize-steps
+    void RunResizeSteps() noexcept;
+
 #pragma endregion
 
 #pragma region Focus - https://html.spec.whatwg.org/#focus
@@ -725,6 +798,16 @@ namespace krys::boo::dom
 
     /// @brief Queues a task to fire `hashchange` from @p oldURL to @p newURL.
     void EnqueueHashchangeEvent(dom::USVString &&oldURL, dom::USVString &&newURL) noexcept;
+
+    /// @brief Whether the document is its frame's (its navigable's active document).
+    /// @see https://html.spec.whatwg.org/#fully-active
+    KRYS_NODISCARD bool IsFullyActive() const noexcept;
+
+    /// @brief The frame went to a history entry of the document with @p stateObject: fires `popstate`.
+    void StatePopped(RefPtr<html::SerializedScriptValue> &&stateObject) noexcept;
+
+    /// @brief Gives the document @p url, which `pushState()` or `replaceState()` set.
+    void UpdateURLForPushOrReplaceState(const url::URL &url) noexcept;
 
     /// @brief The document's custom highlights, which `::highlight()` styles.
     /// @see https://drafts.csswg.org/css-highlight-api-1/#dom-css-highlights
@@ -854,6 +937,209 @@ namespace krys::boo::dom
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
     /// @brief The page of the document's frame, if any.
     KRYS_NODISCARD boo::Page *GetPage() const noexcept;
+    /// @brief The document's window (its relevant global object), if it has been in a frame; it keeps it
+    /// after leaving the frame.
+    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;
+    /// @brief The document's window while it's in a frame (its browsing context's `WindowProxy`); null
+    /// otherwise.
+    /// @see https://html.spec.whatwg.org/#dom-document-defaultview
+    KRYS_NODISCARD LocalDOMWindow *DefaultView() const noexcept;
+    /// @brief Fires @p event at the document's window, if it has one.
+    void DispatchWindowEvent(Event &event) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#load-timing-info
+    KRYS_NODISCARD const DocumentLoadTimingInfo &LoadTiming() const noexcept
+    {
+      return _loadTiming;
+    }
+
+    /// @brief Whether the document's parser is running: it's being loaded into a frame.
+    KRYS_NODISCARD bool Parsing() const noexcept
+    {
+      return _parsing;
+    }
+    void SetParsing(bool parsing) noexcept
+    {
+      _parsing = parsing;
+    }
+
+    /// @brief Whether something other than a load delays the document's load event.
+    KRYS_NODISCARD bool IsDelayingLoadEvent() const noexcept
+    {
+      return _loadEventDelayCount != 0;
+    }
+    void IncrementLoadEventDelayCount() noexcept
+    {
+      ++_loadEventDelayCount;
+    }
+    /// @brief Ends a delay of the load event; the last one has the frame check whether the document loaded.
+    void DecrementLoadEventDelayCount() noexcept;
+
+    /// @brief Whether the window's load event has fired.
+    KRYS_NODISCARD bool LoadEventFinished() const noexcept
+    {
+      return _loadEventFinished;
+    }
+
+    /// @see https://html.spec.whatwg.org/#page-showing
+    KRYS_NODISCARD bool PageShowing() const noexcept
+    {
+      return _pageShowing;
+    }
+
+    /// @brief The document finished loading: fires `load` at the window, then `pageshow`.
+    void ImplicitClose() noexcept;
+
+    /// @brief Fires `load` at the window, with the document as its target.
+    void DispatchWindowLoadEvent() noexcept;
+
+    /// @brief Fires `pageshow` at the window if the document isn't showing yet.
+    /// @see https://html.spec.whatwg.org/#fire-a-page-transition-event
+    void DispatchPageshowEvent(bool persisted) noexcept;
+
+    /// @brief Runs the pragma directive @p equiv (a `<meta http-equiv>`'s) with @p content: `refresh`,
+    /// `content-language` and `default-style`; the others are ignored.
+    /// @see https://html.spec.whatwg.org/#pragma-directives
+    void ProcessMetaHttpEquiv(DOMStringView equiv, DOMStringView content) noexcept;
+
+    /// @brief Saves and restores the state of the document's form controls, made on first use.
+    KRYS_NODISCARD html::FormController &GetFormController() noexcept;
+
+    KRYS_NODISCARD html::FormController *FormControllerIfExists() const noexcept
+    {
+      return _formController.get();
+    }
+
+    /// @brief The state of the document's form controls, saved to its history item as it's left.
+    KRYS_NODISCARD List<DOMString> FormElementsState() const noexcept;
+
+    /// @brief The form state the document's controls are given as they're parsed: their history item's.
+    void SetStateForNewFormElements(const List<DOMString> &stateVector) noexcept;
+
+    /// @brief The document's language from its `content-language` pragma, for elements without a language of
+    /// their own; empty if it has none.
+    /// @see https://html.spec.whatwg.org/#pragma-set-default-language
+    KRYS_NODISCARD const DOMString &ContentLanguage() const noexcept
+    {
+      return _contentLanguage;
+    }
+    void SetContentLanguage(DOMString &&language) noexcept;
+
+    /// @brief The window's `Location`, while the document is fully active; null otherwise.
+    /// @see https://html.spec.whatwg.org/#dom-document-location
+    KRYS_NODISCARD boo::Location *GetLocation() const noexcept;
+
+    /// @brief Fires `pagehide` at the window if the document is showing.
+    /// @see https://html.spec.whatwg.org/#unload-a-document
+    void DispatchPagehideEvent(bool persisted) noexcept;
+
+    /// @brief How many `beforeunload`, `pagehide` and `unload` events of the document are being dispatched:
+    /// while there's one, it can't show dialogs.
+    /// @see https://html.spec.whatwg.org/#unload-counter
+    KRYS_NODISCARD uint32 UnloadCounter() const noexcept
+    {
+      return _unloadCounter;
+    }
+    void IncrementUnloadCounter() noexcept
+    {
+      ++_unloadCounter;
+    }
+    void DecrementUnloadCounter() noexcept
+    {
+      krys_debug_assert(_unloadCounter);
+      --_unloadCounter;
+    }
+
+    /// @brief The next ID for a timer: positive, wrapping around.
+    KRYS_NODISCARD int32 CircularSequentialID() noexcept;
+    /// @brief Adds @p timer as the timer @p timeoutId.
+    /// @return False, adding nothing, if there's a timer @p timeoutId already.
+    bool AddTimeout(int32 timeoutId, DOMTimer &timer) noexcept;
+    /// @brief Removes the timer @p timeoutId, if there is one, and returns it.
+    RefPtr<DOMTimer> TakeTimeout(int32 timeoutId) noexcept;
+    /// @brief How deeply nested the timer whose action is running is; 0 outside a timer.
+    KRYS_NODISCARD int32 TimerNestingLevel() const noexcept
+    {
+      return _timerNestingLevel;
+    }
+    void SetTimerNestingLevel(int32 level) noexcept
+    {
+      _timerNestingLevel = level;
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
+    int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
+    /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
+    void CancelAnimationFrame(int32 id) noexcept;
+    /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
+    /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
+    void ServiceRequestAnimationFrameCallbacks() noexcept;
+
+    /// @see https://w3c.github.io/requestidlecallback/#the-requestidlecallback-method
+    int32 RequestIdleCallback(IdleRequestCallback &&callback, MonotonicTime::duration timeout) noexcept;
+    /// @see https://w3c.github.io/requestidlecallback/#the-cancelidlecallback-method
+    void CancelIdleCallback(int32 id) noexcept;
+    KRYS_NODISCARD bool HasPendingIdleCallback() const noexcept;
+    KRYS_NODISCARD IdleCallbackController *GetIdleCallbackController() const noexcept
+    {
+      return _idleCallbackController.get();
+    }
+
+    /// @brief Stops the document's timers and drops its animation frame and idle callbacks and its tasks:
+    /// it's leaving its frame.
+    void StopActiveDOMObjects() noexcept;
+
+    KRYS_NODISCARD bool ActiveDOMObjectsAreStopped() const noexcept
+    {
+      return _activeDOMObjectsAreStopped;
+    }
+
+    /// @brief Suspends the document (as it enters the back/forward cache): its tasks wait, and its timers,
+    /// animation frame callbacks, animations and layout stop, until it's resumed for the same @p reason.
+    void Suspend(ReasonForSuspension reason) noexcept;
+    void Resume(ReasonForSuspension reason) noexcept;
+
+    KRYS_NODISCARD bool IsSuspended() const noexcept
+    {
+      return _isSuspended;
+    }
+
+    /// @brief Suspends the document's tasks, timers and animation frame callbacks.
+    void SuspendScheduledTasks(ReasonForSuspension reason) noexcept;
+    void ResumeScheduledTasks(ReasonForSuspension reason) noexcept;
+
+    KRYS_NODISCARD bool ScheduledTasksAreSuspended() const noexcept
+    {
+      return _scheduledTasksAreSuspended;
+    }
+
+    /// @brief Suspends the document's timers.
+    void SuspendActiveDOMObjects(ReasonForSuspension reason) noexcept;
+    void ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept;
+
+    KRYS_NODISCARD bool ActiveDOMObjectsAreSuspended() const noexcept
+    {
+      return _activeDOMObjectsAreSuspended;
+    }
+
+    KRYS_NODISCARD Maybe<ReasonForSuspension> ReasonForSuspendingActiveDOMObjects() const noexcept
+    {
+      return _reasonForSuspendingActiveDOMObjects;
+    }
+
+    KRYS_NODISCARD BackForwardCacheState GetBackForwardCacheState() const noexcept
+    {
+      return _backForwardCacheState;
+    }
+
+    /// @brief Notes where the document is in entering the back/forward cache: as it's cached, its view's
+    /// scroll position is kept, and its style resolver and pending style update go.
+    void SetBackForwardCacheState(BackForwardCacheState state) noexcept;
+
+    /// @brief Detaches the document, now in the back/forward cache, from its frame.
+    void DetachFromCachedFrame() noexcept;
+    /// @brief Queues a task on @p source that fires @p event at the document's window, if it has one then.
+    void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept;
     /// @brief The loader of the document's subresources (images), made on first use.
     KRYS_NODISCARD CachedResourceLoader &GetCachedResourceLoader() const noexcept;
     /// @brief Asks the page for a rendering update that runs @p requestedSteps, if the document is in one.
@@ -905,6 +1191,9 @@ namespace krys::boo::dom
     /// @brief Schedules an update of @p text's renderer after @p lengthOfReplacedText bytes from
     /// @p offsetOfReplacedText were replaced.
     void UpdateTextRenderer(Text &text, uint32 offsetOfReplacedText, uint32 lengthOfReplacedText) noexcept;
+
+    /// @brief Makes the document's window: the document must be in a frame, and not have one yet.
+    void CreateDOMWindow() noexcept;
 
     /// @brief Called when @p frame starts showing the document.
     void DidBecomeCurrentDocumentInFrame(LocalFrame &frame) noexcept;
@@ -1074,15 +1363,17 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+
+    KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+    KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+
+#pragma endregion
+
 #pragma region Media queries - https://drafts.csswg.org/cssom-view/#the-mediaquerylist-interface
 
     /// @brief Evaluates the document's `MediaQueryList`s and dispatches their `change` events.
     KRYS_NODISCARD css::MediaQueryMatcher &GetMediaQueryMatcher() noexcept;
-
-    /// @brief A new `MediaQueryList` for @p query, evaluated against the document.
-    /// @note `matchMedia()` is a `Window` member; there's no window, so it's on the document.
-    /// @see https://drafts.csswg.org/cssom-view/#dom-window-matchmedia
-    KRYS_NODISCARD Ref<css::MediaQueryList> MatchMedia(DOMStringView query) noexcept;
 
     /// @brief Re-evaluates the document's `MediaQueryList`s and fires `change` at each one whose result
     /// changed. The host calls this after changing the media environment.
@@ -1205,17 +1496,8 @@ namespace krys::boo::dom
 
     void UpdateBaseURL() noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#get-the-parent
-    KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override
-    {
-      (void)event;
-      // SPEC-VIOLATION(HTML, DOM): We don't have global objects so we'll always return nullptr here.
-      // A document’s get the parent algorithm, given an event, returns null if event’s type
-      // attribute value is "load" or document does not have a browsing context; otherwise the document’s
-      // relevant global object.
-
-      return nullptr;
-    }
+    /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent
+    KRYS_NODISCARD EventTarget *GetParent(Event &event) const noexcept override;
 
     KRYS_NODISCARD bool IsScriptingDisabled() const noexcept
     {

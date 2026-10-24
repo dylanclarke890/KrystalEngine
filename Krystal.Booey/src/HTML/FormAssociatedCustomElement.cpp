@@ -164,7 +164,65 @@ namespace krys::boo::html
     SetDataListAncestorState(TriState::Indeterminate);
     UpdateWillValidateAndValidity();
     SyncWithFieldsetAncestors(_element.ParentNode());
-    // FIXME: Restore the control's state, once there's form state restoration.
+    RestoreFormControlStateIfNecessary();
+  }
+
+  void FormAssociatedCustomElement::FinishParsingChildren() noexcept
+  {
+    if (!FormController::OwnerForm(*this))
+    {
+      RestoreFormControlStateIfNecessary();
+    }
+  }
+
+  bool FormAssociatedCustomElement::ShouldSaveAndRestoreFormControlState() const noexcept
+  {
+    return _element.IsDefinedCustomElement();
+  }
+
+  FormControlState FormAssociatedCustomElement::SaveFormControlState() const noexcept
+  {
+    krys_debug_assert(_element.IsDefinedCustomElement());
+
+    FormControlState savedState;
+    // FIXME: Files, once a form value can hold them.
+    if (auto *formData = std::get_if<RefPtr<DOMFormData>>(&_state))
+    {
+      auto &items = (*formData)->Items();
+      savedState.reserve(items.size() * 2);
+      for (const auto &item : items)
+      {
+        savedState.push_back(item.Name);
+        savedState.push_back(item.Data);
+      }
+    }
+    else if (auto *string = std::get_if<dom::DOMString>(&_state))
+    {
+      savedState.push_back(*string);
+    }
+    return savedState;
+  }
+
+  void FormAssociatedCustomElement::RestoreFormControlState(const FormControlState &savedState) noexcept
+  {
+    krys_debug_assert(_element.IsDefinedCustomElement());
+
+    CustomElementFormValue restoredState {nullptr};
+    if (savedState.size() == 1)
+    {
+      restoredState = savedState[0];
+    }
+    else
+    {
+      auto formData = DOMFormData::Create();
+      for (size_t i = 0; i + 1 < savedState.size(); i += 2)
+      {
+        formData->Append(savedState[i], savedState[i + 1]);
+      }
+      restoredState = RefPtr<DOMFormData>(formData);
+    }
+
+    CustomElementReactionQueue::EnqueueFormStateRestoreCallbackIfNeeded(_element, krys::move(restoredState));
   }
 
   dom::DOMString FormAssociatedCustomElement::FormControlType() const noexcept

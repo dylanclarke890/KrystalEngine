@@ -858,7 +858,7 @@ namespace krys::boo::style
       return;
     }
     _isPendingUpdateTaskQueued = true;
-    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation,
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, Document(),
                                          [scope = CreateWeakPtr(this)]
                                          {
                                            if (scope)

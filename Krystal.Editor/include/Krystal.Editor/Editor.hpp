@@ -10,6 +10,9 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/NavigateEvent.hpp"
+#include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
 #include "Krystal.Core/Types/Array.hpp"
@@ -62,6 +65,10 @@ namespace krys
     /// @brief The page's listeners, which go when the page is loaded again.
     boo::dom::EventListenerHandle _cardPicker;
     boo::dom::EventListenerHandle _keyLogger;
+    /// @brief Routes the guide's topics within the page, on the window's navigation.
+    boo::dom::EventListenerHandle _router;
+    /// @brief The last load's events, which the pages show in their `#load-events` element.
+    utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
     MonotonicTime::duration _pageTime {};
     /// @brief Counts the seconds the page has been open in its `#clock` element.
@@ -190,7 +197,10 @@ namespace krys
           if (event.Key() == pal::Key::F5 && event.State() == pal::KeyState::Pressed)
           {
             // Reloading loads the page's style sheets and images again, so edits to them show.
-            LoadPage(boo::CachePolicy::Revalidate);
+            if (_pageView)
+            {
+              _pageView->Reload();
+            }
           }
 
           if (event.Key() == pal::Key::Escape)
@@ -273,6 +283,10 @@ namespace krys
           if (event.IsPressed() && _pointer.Y() >= 0)
           {
             _pageView->MousePressed(_pointer, event.Button(), event.Modifiers());
+          }
+          else if (event.IsPressed() && event.Button() == pal::MouseButton::Left)
+          {
+            ClickHeader(static_cast<float>(_pointer.X()), static_cast<float>(_pointer.Y()) + HeaderHeight);
           }
           else if (event.WasReleased())
           {
@@ -359,20 +373,69 @@ namespace krys
       return boo::IntSize(static_cast<int32>(_width), static_cast<int32>(height));
     }
 
-    /// @brief Loads (or reloads) the page view's HTML file.
-    void LoadPage(boo::CachePolicy cachePolicy = boo::CachePolicy::Verify) noexcept
+    /// @brief Loads the page view's first page.
+    void LoadPage() noexcept
     {
       if (!_pageView)
       {
         return;
       }
       const auto path = std::filesystem::path {KRYS_EDITOR_PAGES_DIR} / "index.html";
-      if (auto loaded = _pageView->LoadFile(path, cachePolicy); !loaded)
+      if (auto loaded = _pageView->LoadFile(path); !loaded)
       {
         _context->Logger->Error("{}", loaded.error());
         return;
       }
+
+      _secondsOpen = 0;
+      _clockTimer.StartRepeating(std::chrono::seconds(1));
+    }
+
+    /// @brief Hears the page view's loads: a page is set up as it commits (on a later frame than the load
+    /// starts, or as the back/forward cache restores it), and each page shows the last load's events.
+    void HandleLoad(const ui::LoadEvent &event) noexcept
+    {
       auto &document = _pageView->Document();
+      switch (event.Type)
+      {
+        case ui::LoadEventType::Started: _loadEvents = u8"started"; break;
+        case ui::LoadEventType::Committed:
+          // A page from the back/forward cache has already loaded.
+          _loadEvents +=
+            event.FromBackForwardCache ? u8", committed from the back/forward cache" : u8", committed";
+          AttachPage();
+          break;
+        case ui::LoadEventType::Finished:
+          _loadEvents += u8", finished";
+          _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
+          ShowGuide(document.GetURL());
+          break;
+        case ui::LoadEventType::Failed:
+          _loadEvents += u8", failed";
+          _context->Logger->Error("Couldn't load: {}", Narrow(event.Error.LocalizedDescription()));
+          break;
+      }
+      if (auto label = document.GetElementById(u8"load-events"))
+      {
+        (void)label->TextContent(u8"Last load of " + utf8_string(document.GetURL().LastPathComponent())
+                                 + u8": " + _loadEvents);
+      }
+    }
+
+    KRYS_NODISCARD static std::string_view Narrow(utf8_stringview text) noexcept
+    {
+      return std::string_view(reinterpret_cast<const char *>(text.data()), text.size());
+    }
+
+    /// @brief Sets up the page as it commits: the card picker, the key logger and the guide's router.
+    void AttachPage() noexcept
+    {
+      auto &document = _pageView->Document();
+      if (auto *window = document.Window())
+      {
+        _router = window->GetNavigation().AddEventListener<boo::NavigateEvent>(
+          u8"navigate", [this](boo::NavigateEvent &event) { RouteGuide(event); });
+      }
       // Toggles `picked` on the card a click lands in.
       _cardPicker =
         document.AddEventListener(u8"click",
@@ -401,10 +464,6 @@ namespace krys
             (void)label->TextContent(krys::move(key));
           }
         });
-      _context->Logger->Info("Loaded {}", path.string());
-
-      _secondsOpen = 0;
-      _clockTimer.StartRepeating(std::chrono::seconds(1));
     }
 
     /// @brief Shows how long the page has been open, once a second.
@@ -416,6 +475,84 @@ namespace krys
         auto text = std::format("Open for {}:{:02}", _secondsOpen / 60, _secondsOpen % 60);
         (void)clock->TextContent(
           boo::dom::DOMString(reinterpret_cast<const char8_t *>(text.data()), text.size()));
+      }
+    }
+
+    /// @brief The guide topic @p url names in its `guide` query parameter; empty if none.
+    KRYS_NODISCARD static utf8_string GuideTopic(const boo::url::URL &url) noexcept
+    {
+      constexpr utf8_stringview key = u8"guide=";
+      auto query = url.Query();
+      for (size_t start = 0; start <= query.size();)
+      {
+        auto end = std::min(query.find(u8'&', start), query.size());
+        auto parameter = query.substr(start, end - start);
+        if (parameter.starts_with(key))
+        {
+          return utf8_string(parameter.substr(key.size()));
+        }
+        start = end + 1;
+      }
+      return {};
+    }
+
+    /// @brief The guide's router: intercepts navigations to the page's guide topics (and back and forward
+    /// between the page's entries), so the URL and the history change without a load, and shows the topic.
+    void RouteGuide(boo::NavigateEvent &event) noexcept
+    {
+      if (!event.CanIntercept() || event.HashChange()
+          || event.NavigationType() == boo::NavigationNavigationType::Reload)
+      {
+        return;
+      }
+      auto &document = _pageView->Document();
+      const auto &destination = event.Destination()->URL();
+      if (destination.Path() != document.GetURL().Path())
+      {
+        return;
+      }
+      if (GuideTopic(destination).empty()
+          && event.NavigationType() != boo::NavigationNavigationType::Traverse)
+      {
+        return;
+      }
+      boo::NavigateEvent::NavigationInterceptOptions options;
+      options.Handler = [this, destination](Func<void(boo::dom::ExceptionOr<void>)> &&completion)
+      {
+        ShowGuide(destination);
+        completion({});
+      };
+      (void)event.Intercept(document, krys::move(options));
+    }
+
+    /// @brief Shows the guide topic @p url names, and marks its link.
+    void ShowGuide(const boo::url::URL &url) noexcept
+    {
+      auto &document = _pageView->Document();
+      auto view = document.GetElementById(u8"guide-view");
+      if (!view)
+      {
+        return;
+      }
+      auto topic = GuideTopic(url);
+      utf8_string text =
+        topic == u8"pages"
+          ? u8"Each document the view loads is a page of its own: the settings link loads one in "
+            u8"place of this, and the load's events show under the order form."
+        : topic == u8"history"
+          ? u8"The view keeps a session history: back and forward go through it, and the pages "
+            u8"left wait in the back/forward cache, so they come back as they were."
+        : topic == u8"routing"
+          ? u8"These topics never load: the editor's router intercepts their navigations, so "
+            u8"only the URL, the history and this paragraph change."
+          : u8"Pick a topic.";
+      (void)view->TextContent(krys::move(text));
+      for (utf8_stringview name : {u8"pages", u8"history", u8"routing"})
+      {
+        if (auto link = document.GetElementById(u8"topic-" + utf8_string(name)))
+        {
+          (void)link->ClassList().Toggle(boo::dom::DOMString(u8"current"), name == topic);
+        }
       }
     }
 
@@ -435,6 +572,7 @@ namespace krys
       _pageView->SetFocused(_focused);
       _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
                                       { return HandleNavigation(request); });
+      _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });
       // The page's custom elements, which its parser creates.
       (void)_pageView->DefineCustomElement(
         u8"bean-rating", [](boo::html::HTMLElement &element) { return CreateUnique<BeanRating>(element); },
@@ -452,22 +590,23 @@ namespace krys
       _booeyFonts.Bold = boo::Font::Create(boo::FontPlatformData {ShareRef(*faces.front()), 14, true, false});
     }
 
-    /// @brief Lets the page navigate within itself; logs a navigation away from it (a link or a form
-    /// submission), which the editor doesn't follow, and shows where it leads in the page's
-    /// `#last-submission` element.
+    /// @brief Lets the page navigate within itself and follow links to the editor's other pages; logs any
+    /// other navigation (a link or a form submission), which the editor doesn't follow, and shows where it
+    /// leads in the page's `#last-submission` element.
     KRYS_NODISCARD ui::NavigationPolicy HandleNavigation(const ui::NavigationRequest &request) noexcept
     {
       if (request.IsSameDocument)
       {
         return ui::NavigationPolicy::Allow;
       }
-
-      auto narrow = [](utf8_stringview text)
+      if (!request.IsFormSubmission && !request.Download && !request.OpensNewWindow
+          && boo::url::URL(request.URL).ProtocolIs(u8"file"))
       {
-        return std::string_view(reinterpret_cast<const char *>(text.data()), text.size());
-      };
-      _context->Logger->Info("Navigation: {} {} {}{}", narrow(request.Method), narrow(request.URL),
-                             narrow(request.Body), request.OpensNewWindow ? " (new window)" : "");
+        return ui::NavigationPolicy::Allow;
+      }
+
+      _context->Logger->Info("Navigation: {} {} {}{}", Narrow(request.Method), Narrow(request.URL),
+                             Narrow(request.Body), request.OpensNewWindow ? " (new window)" : "");
       if (auto label = _pageView->Document().GetElementById(u8"last-submission"))
       {
         utf8_string text = request.IsFormSubmission ? request.Method + u8" " + request.URL
@@ -615,6 +754,40 @@ namespace krys
                  Rgb(0xffffff, active ? 255 : 150), active);
       }
       DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
+
+      // The page view's back and forward buttons, faded when there's nowhere to go.
+      if (_pageView && _view == EditorView::Page)
+      {
+        const bool can[] {_pageView->CanGoBack(), _pageView->CanGoForward()};
+        const char32_t *arrows[] {U"\u2039", U"\u203a"};
+        for (int i = 0; i < 2; ++i)
+        {
+          const auto button = HistoryButton(i);
+          _renderer->FillRoundedRect(
+            Rounded(button.X, button.Y, button.Width, button.Height, button.Width / 2),
+            Rgb(0xffffff, can[i] ? 60 : 20));
+          DrawText(arrows[i], button.X + 11.f, button.Y + 24.f, 24.f, Rgb(0xffffff, can[i] ? 255 : 90), true);
+        }
+      }
+    }
+
+    /// @brief The header's back (0) and forward (1) buttons.
+    KRYS_NODISCARD gfx::Rect2D HistoryButton(int index) const noexcept
+    {
+      return {static_cast<float>(_width) - 380.f + static_cast<float>(index) * 40.f, 12.f, 32.f, 32.f};
+    }
+
+    /// @brief A click in the header at (@p x, @p y): its back and forward buttons go back and forward.
+    void ClickHeader(float x, float y) noexcept
+    {
+      for (int i = 0; i < 2; ++i)
+      {
+        const auto button = HistoryButton(i);
+        if (x >= button.X && x < button.X + button.Width && y >= button.Y && y < button.Y + button.Height)
+        {
+          (void)(i == 0 ? _pageView->GoBack() : _pageView->GoForward());
+        }
+      }
     }
 
     void DrawCard(const char32_t *title, float x, float y, float width, float height) noexcept

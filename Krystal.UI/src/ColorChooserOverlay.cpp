@@ -147,7 +147,7 @@ namespace krys::ui
     {
       _view->Resize(viewport);
     }
-    _view->LoadHTML(krys::move(html));
+    ReplaceDocument(*_view, krys::move(html));
     (void)_view->Document().UpdateLayout();
 
     _swatches.assign(_colors.size(), nullptr);

@@ -8,8 +8,9 @@
 </head>
 <body>
   <div class="row">
-    <!-- Links: the contents list's links scroll to their cards, which :target highlights (Back isn't there yet,
-         so another link moves the highlight). Tab to a link and press Enter to follow it too. -->
+    <!-- Links: the contents list's links scroll to their cards, which :target highlights; the header's back
+         button (or the mouse's, or Alt+Left) goes back to the card before. Tab to a link and press Enter to
+         follow it too. -->
     <nav class="card links" tabindex="0">
       <h2>Contents</h2>
       <ol>
@@ -21,12 +22,14 @@
     </nav>
 
     <!-- A text fragment link finds its text in the page, highlights it with ::target-text and scrolls to it.
-         Links away from the page aren't followed: the editor logs them and shows where they lead below the
-         order form, as it does for submissions (a target or Ctrl opens a new window, Shift too; a middle click
-         follows them as well). -->
+         The settings link loads the editor's second page in place of this one; going back brings this one
+         back from the back/forward cache, as it was left. Links off the editor's pages aren't followed: the
+         editor logs them and shows where they lead below the order form, as it does for submissions (a target
+         or Ctrl opens a new window, Shift too; a middle click follows them as well). -->
     <div class="card links" tabindex="0">
       <h2>Links</h2>
-      <p><a href="#:~:text=Booey%20lays%20out,glyphs">A text fragment</a> marks a sentence in the text card.</p>
+      <p><a href="#:~:text=Booey%20lays%20out,glyphs">A text fragment</a> marks a sentence in the text card;
+        <a href="settings.html">the settings</a> are another page.</p>
       <p><a href="https://example.com/krystal">Krystal's site</a>, the <a href="https://example.com/docs"
           target="_blank">docs in a new window</a>, and <a href="images/photo.jpg" download="photo.jpg">a
           download</a>.</p>
@@ -87,7 +90,21 @@
       <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
           type="reset">Reset</button></p>
       <p id="last-submission">Nothing submitted or followed yet.</p>
+      <p id="load-events">No loads yet.</p>
     </form>
+  </div>
+
+  <div class="row">
+    <!-- A guide routed within the page: its links go to this page with a ?guide= query, and the editor's
+         router (C++, listening to the window's navigation) intercepts them, so the URL and the session history
+         change without a load and the router shows the topic. Back and forward move between the topics the
+         same way, and reloading opens the page at its topic. -->
+    <nav class="card guide" id="guide" tabindex="0">
+      <h2>Guide</h2>
+      <p class="topics"><a id="topic-pages" href="?guide=pages">Pages</a><a id="topic-history"
+          href="?guide=history">History</a><a id="topic-routing" href="?guide=routing">Routing</a></p>
+      <p id="guide-view">Pick a topic.</p>
+    </nav>
   </div>
 
   <div class="row">

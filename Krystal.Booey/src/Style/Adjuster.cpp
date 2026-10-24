@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -310,7 +311,10 @@ namespace krys::boo::style
                                                             const dom::Document &document) noexcept
   {
     auto regionTypes = ComputeEventListenerRegionTypes(document, rootStyle, document, {});
-    // FIXME: Add the window's event listener region types (there is no window).
+    if (auto *window = document.Window())
+    {
+      regionTypes.Add(ComputeEventListenerRegionTypes(document, rootStyle, *window, {}));
+    }
 
     bool changed = regionTypes != rootStyle.EventListenerRegionTypes();
     rootStyle.SetEventListenerRegionTypes(regionTypes);

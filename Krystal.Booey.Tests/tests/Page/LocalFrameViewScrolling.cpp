@@ -572,13 +572,26 @@ namespace krys::boo::tests
 
     SECTION("a cancelled wheel event scrolls nothing")
     {
+      // The document's wheel listeners are passive unless they say otherwise.
+      auto canceller = CreateRef<WheelCanceller>();
+      dom::AddEventListenerOptions options;
+      options.Passive = false;
+      fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
+                                         Ref<dom::EventListenerCallback> {canceller}, options);
+      CHECK(Wheel(handler, {20, 20}, {0, 100}));
+      CHECK(canceller->DeltaY == 100);
+      CHECK(box.ScrollTop() == 0);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+
+    SECTION("a passive listener on the document can't cancel it")
+    {
       auto canceller = CreateRef<WheelCanceller>();
       fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
                                          Ref<dom::EventListenerCallback> {canceller}, false);
       CHECK(Wheel(handler, {20, 20}, {0, 100}));
       CHECK(canceller->DeltaY == 100);
-      CHECK(box.ScrollTop() == 0);
-      CHECK(view.GetScrollPosition() == ScrollPosition());
+      CHECK(box.ScrollTop() == 100);
     }
   }
 

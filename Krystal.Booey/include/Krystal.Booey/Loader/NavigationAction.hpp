@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
+#include "Krystal.Booey/Page/NavigationNavigationType.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
@@ -49,9 +50,20 @@ namespace krys::boo
     Maybe<UIEventWithKeyStateData> _keyStateEventData;
     Maybe<MouseEventData> _mouseEventData;
     NavigationType _type {NavigationType::Other};
+    Maybe<NavigationNavigationType> _navigationAPIType;
 
   public:
     NavigationAction() noexcept;
+
+    /// @brief The Navigation API's type of the navigation, if it's one the API reports.
+    KRYS_NODISCARD Maybe<NavigationNavigationType> NavigationAPIType() const noexcept
+    {
+      return _navigationAPIType;
+    }
+    void SetNavigationAPIType(Maybe<NavigationNavigationType> navigationAPIType) noexcept
+    {
+      _navigationAPIType = navigationAPIType;
+    }
     NavigationAction(const ResourceRequest &originalRequest, FrameLoadType frameLoadType,
                      bool isFormSubmission, dom::Event *event = nullptr,
                      dom::DOMStringAtom downloadAttribute = dom::DOMStringAtom::Null(),

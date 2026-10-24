@@ -28,6 +28,7 @@ target_compile_options(Krystal.UI.Tests
 # elements (header-only).
 target_include_directories(Krystal.UI.Tests
   PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/include
     ${CMAKE_SOURCE_DIR}/Krystal.Editor/include
 )

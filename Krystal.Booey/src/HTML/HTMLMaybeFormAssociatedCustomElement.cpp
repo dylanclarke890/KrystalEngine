@@ -170,6 +170,15 @@ namespace krys::boo::html
     _formAssociatedCustomElement->WillUpgrade();
   }
 
+  void HTMLMaybeFormAssociatedCustomElement::FinishParsingChildren() noexcept
+  {
+    HTMLElement::FinishParsingChildren();
+    if (IsFormAssociatedCustomElement())
+    {
+      _formAssociatedCustomElement->FinishParsingChildren();
+    }
+  }
+
   void HTMLMaybeFormAssociatedCustomElement::DidUpgradeFormAssociated() noexcept
   {
     krys_debug_assert(IsFormAssociatedCustomElement());

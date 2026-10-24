@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/StepRange.hpp"
 #include "Krystal.Booey/Platform/DateComponents.hpp"
@@ -238,6 +239,10 @@ namespace krys::boo::html
     KRYS_NODISCARD bool HasActivationBehavior() const noexcept;
 
     // Form value functions.
+    KRYS_NODISCARD virtual bool ShouldSaveAndRestoreFormControlState() const noexcept;
+    /// @brief The input's state to restore: its value, if it isn't its `value` attribute's.
+    KRYS_NODISCARD virtual FormControlState SaveFormControlState() const noexcept;
+    virtual void RestoreFormControlState(const FormControlState &state) noexcept;
     KRYS_NODISCARD virtual bool IsFormDataAppendable() const noexcept;
     virtual bool AppendFormData(DOMFormData &formData) const noexcept;
 

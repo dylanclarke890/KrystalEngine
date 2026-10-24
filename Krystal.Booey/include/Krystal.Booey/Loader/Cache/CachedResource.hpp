@@ -82,6 +82,8 @@ namespace krys::boo
     Status _status {Pending};
     bool _inCache {false};
     bool _loading {false};
+    /// @brief The loader whose request count the load is in, until it's done.
+    WeakPtr<CachedResourceLoader> _requestCountingLoader;
     List<Func<void()>> _loadedCallbacks;
 
   public:
@@ -285,6 +287,11 @@ namespace krys::boo
     /// @brief What upstream's subresource loader does when a load ends: hands the response and data to the
     /// resource, or its error.
     void DidFinishLoad(LoadResult &&) noexcept;
+    void ApplyLoadResult(LoadResult &&) noexcept;
+
+    /// @brief The load is done: it leaves its loader's request count, which may let the document finish
+    /// loading.
+    void RequestDone() noexcept;
   };
 }
 
