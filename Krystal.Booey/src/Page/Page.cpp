@@ -15,6 +15,8 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
@@ -30,7 +32,9 @@ namespace krys::boo
       RenderingUpdateStep::Animations,
       RenderingUpdateStep::AnimationFrameCallbacks,
       RenderingUpdateStep::CaretAnimation,
+      RenderingUpdateStep::ResizeObservations,
       RenderingUpdateStep::FocusFixup,
+      RenderingUpdateStep::SnapshottedScrollOffsets,
       RenderingUpdateStep::CursorUpdate,
       RenderingUpdateStep::LayerFlush};
   }
@@ -199,7 +203,8 @@ namespace krys::boo
 
     ForEachDocument([](dom::Document &document) { document.ProcessTopLayerRemovals(); });
 
-    // FIXME: Resize observations, once there are resize observers.
+    RunProcessingStep(RenderingUpdateStep::ResizeObservations,
+                      [](dom::Document &document) { document.UpdateResizeObservations(); });
 
     // https://html.spec.whatwg.org/#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
@@ -217,6 +222,15 @@ namespace krys::boo
                       });
 
     // FIXME: Content relevancy, view transitions and intersection observations, once there are any.
+
+    RunProcessingStep(RenderingUpdateStep::SnapshottedScrollOffsets,
+                      [](dom::Document &document)
+                      {
+                        if (auto *renderView = document.GetRenderView())
+                        {
+                          style::AnchorPositionEvaluator::UpdateScrollAdjustments(*renderView);
+                        }
+                      });
 
     LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();

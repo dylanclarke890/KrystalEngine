@@ -491,6 +491,7 @@ namespace krys::boo
 
     /// @brief Fires `scrollend` at the document after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+    void UpdateAnchorPositionedAfterScroll() noexcept override;
 
     /// @brief Called when what the viewport shows may have changed (scrolling, resizing, layout): resumes the
     /// image animations now visible.

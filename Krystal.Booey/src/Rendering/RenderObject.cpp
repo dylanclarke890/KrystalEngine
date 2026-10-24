@@ -285,6 +285,30 @@ namespace krys::boo
     return element && Is<html::HTMLFieldSetElement>(*element);
   }
 
+  RenderBox *RenderObject::EnclosingScrollableContainer() const noexcept
+  {
+    // Walk up the container chain to find the scrollable container that contains
+    // this RenderObject. The important thing here is that `container()` respects
+    // the containing block chain for positioned elements. This is important because
+    // scrollable overflow does not establish a new containing block for children.
+    for (auto *candidate = Container(); candidate; candidate = candidate->Container())
+    {
+      // Currently the RenderView can look like it has scrollable overflow, but we never
+      // want to return this as our container. Instead we should use the root element.
+      if (candidate->IsRenderView())
+      {
+        break;
+      }
+      if (candidate->HasPotentiallyScrollableOverflow())
+      {
+        return Downcast<RenderBox>(candidate);
+      }
+    }
+
+    // If we reach the root, then the root element is the scrolling container.
+    return GetDocument().DocumentElement() ? GetDocument().DocumentElement()->GetRenderBox() : nullptr;
+  }
+
   RenderBox &RenderObject::EnclosingBox() const noexcept
   {
     for (const RenderObject *renderer = this; renderer; renderer = renderer->Parent())
@@ -861,7 +885,10 @@ namespace krys::boo
     {
       return true;
     }
-    // FIXME: The layer's anchor scroll adjustment, once there's anchor positioning.
+    if (HasLayer() && Downcast<RenderLayerModelObject>(*this).Layer()->AnchorScrollAdjustment())
+    {
+      return true;
+    }
     if (containerObject && containerObject->Style().HasPerspective())
     {
       return containerObject == Parent();

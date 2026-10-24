@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include <algorithm>
 
 namespace krys::boo
 {
@@ -35,6 +36,88 @@ namespace krys::boo
   {
     auto *document = Document();
     return document ? document->GetRenderView() : nullptr;
+  }
+
+  const AnchorScrollAdjuster *
+    LocalFrameViewLayoutContext::AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept
+  {
+    auto it = std::ranges::find_if(_anchorScrollAdjusters,
+                                   [&](const auto &item) { return item.Anchored() == &anchored; });
+    if (it == _anchorScrollAdjusters.end())
+    {
+      return {};
+    }
+    return &*it;
+  }
+
+  AnchorScrollAdjuster::Diff
+    LocalFrameViewLayoutContext::RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&scrollAdjuster) noexcept
+  {
+    auto it = std::ranges::find_if(_anchorScrollAdjusters, [&](const auto &item)
+                                   { return item.Anchored() == scrollAdjuster.Anchored(); });
+
+    bool recaptureDiffers = false;
+    if (it == _anchorScrollAdjusters.end())
+    {
+      _anchorScrollAdjusters.push_back(krys::move(scrollAdjuster));
+      return AnchorScrollAdjuster::Diff::New;
+    }
+
+    recaptureDiffers = it->RecaptureDiffers(scrollAdjuster);
+    *it = krys::move(scrollAdjuster);
+    return recaptureDiffers ? AnchorScrollAdjuster::Diff::SnapshotsDiffer
+                            : AnchorScrollAdjuster::Diff::SnapshotsMatch;
+  }
+
+  void LocalFrameViewLayoutContext::UnregisterAnchorScrollAdjusterFor(const RenderBox &anchored) noexcept
+  {
+    if (auto it = std::ranges::find_if(_anchorScrollAdjusters,
+                                       [&](const auto &item) { return item.Anchored() == &anchored; });
+        it != _anchorScrollAdjusters.end())
+    {
+      _anchorScrollAdjusters.erase(it);
+    }
+    krys_debug_assert(std::ranges::none_of(_anchorScrollAdjusters,
+                                           [&](const auto &item) { return item.Anchored() == &anchored; }));
+
+    if (anchored.Layer())
+    {
+      anchored.Layer()->ClearAnchorScrollAdjustment();
+    }
+  }
+
+  void
+    LocalFrameViewLayoutContext::InvalidateAnchorDependenciesForScroller(const RenderBox &scroller) noexcept
+  {
+    for (auto &adjuster : _anchorScrollAdjusters)
+    {
+      adjuster.InvalidateForScroller(scroller);
+    }
+  }
+
+  void
+    LocalFrameViewLayoutContext::RemoveScrollerFromAnchorScrollAdjusters(const RenderBox &scroller) noexcept
+  {
+    if (!GetRenderView() || GetRenderView()->RenderTreeBeingDestroyed())
+    {
+      _anchorScrollAdjusters.clear();
+    }
+    else
+    {
+      // Unregistering erases from the list, so the boxes to unregister are collected first.
+      List<RenderBox *> invalidated;
+      for (auto &adjuster : _anchorScrollAdjusters)
+      {
+        if (adjuster.InvalidateForScroller(scroller))
+        {
+          invalidated.push_back(adjuster.Anchored());
+        }
+      }
+      for (auto *anchored : invalidated)
+      {
+        UnregisterAnchorScrollAdjusterFor(*anchored);
+      }
+    }
   }
 
   void LocalFrameViewLayoutContext::Layout() noexcept

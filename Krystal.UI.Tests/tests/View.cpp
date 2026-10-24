@@ -513,7 +513,151 @@ namespace krys::ui::tests
       CHECK_FALSE(secret.Open());
       click(u8"a[href='#secret']");
       CHECK(secret.Open());
+      // The text fragment link opens the question whose answer it finds, which closes the other.
+      click(u8"details[name=faq]:not([open]) summary");
+      CHECK(fresh.Open());
+      click(u8"a[href^='#:~:text=From']");
+      CHECK(local.Open());
+      CHECK_FALSE(fresh.Open());
     }
+
+    SECTION("the header's menu is anchored to its button")
+    {
+      click(u8"#menu-button");
+      REQUIRE(showing(u8"page-menu"));
+      auto button = byId(u8"menu-button")->GetBoundingClientRect();
+      auto menu = byId(u8"page-menu")->GetBoundingClientRect();
+      CHECK(menu->X() == Catch::Approx(button->X()));
+      CHECK(menu->Y() == Catch::Approx(button->Y() + button->Height() + 4));
+
+      // The nested menu opens to the right of its button, and keeps the first open.
+      click(u8"#goto-button");
+      CHECK(showing(u8"page-menu"));
+      REQUIRE(showing(u8"page-menu-goto"));
+      auto gotoButton = byId(u8"goto-button")->GetBoundingClientRect();
+      auto gotoMenu = byId(u8"page-menu-goto")->GetBoundingClientRect();
+      CHECK(gotoMenu->X() == Catch::Approx(gotoButton->X() + gotoButton->Width() + 4));
+      CHECK(gotoMenu->Y() == Catch::Approx(gotoButton->Y()));
+
+      // Escape closes them (opened without user activation, their close watchers are grouped).
+      (void)view.KeyPressed(pal::Key::Escape);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(showing(u8"page-menu-goto"));
+      CHECK_FALSE(showing(u8"page-menu"));
+
+      // So does a click outside them.
+      click(u8"#menu-button");
+      click(u8"#goto-button");
+      REQUIRE(showing(u8"page-menu-goto"));
+      view.MousePressed({4, 4}, pal::MouseButton::Left);
+      view.MouseReleased({4, 4}, pal::MouseButton::Left);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(showing(u8"page-menu-goto"));
+      CHECK_FALSE(showing(u8"page-menu"));
+    }
+
+    SECTION("dialogs fade out in the top layer")
+    {
+      auto &refill = Downcast<boo::html::HTMLDialogElement>(*byId(u8"refill"));
+      auto time = boo::html::EventLoop::Current().Now();
+      auto run = [&](MonotonicTime::duration duration)
+      {
+        for (auto end = time + duration; time < end;)
+        {
+          time += 16ms;
+          (void)view.Update(time);
+        }
+      };
+      click(u8"button[commandfor=refill]");
+      run(300ms);
+      REQUIRE(refill.Renderer());
+      CHECK(refill.Renderer()->AnimatedStyle()->GetOpacity().Value.Value == Catch::Approx(1.0f));
+
+      click(u8"#refill button[value=yes]");
+      CHECK_FALSE(refill.Open());
+      run(48ms);
+      // Closed, it stays rendered in the top layer while it fades out.
+      CHECK(refill.IsInTopLayer());
+      REQUIRE(refill.Renderer());
+      CHECK(refill.Renderer()->AnimatedStyle()->GetOpacity().Value.Value < 1.0f);
+      run(300ms);
+      CHECK_FALSE(refill.IsInTopLayer());
+      CHECK_FALSE(refill.Renderer());
+    }
+  }
+
+  TEST_CASE("View: the editor's settings page asks before saving", "[UI]")
+  {
+    View view({1'200, 800});
+    List<NavigationRequest> submissions;
+    view.SetNavigationHandler(
+      [&](const NavigationRequest &request)
+      {
+        if (request.IsFormSubmission)
+        {
+          submissions.push_back(request);
+          return NavigationPolicy::Ignore;
+        }
+        return NavigationPolicy::Allow;
+      });
+    REQUIRE(
+      view
+        .LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "settings.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    auto confirm = document.GetElementById(u8"confirm-save");
+    REQUIRE(confirm);
+    auto &dialog = Downcast<boo::html::HTMLDialogElement>(*confirm);
+    auto &form = Downcast<boo::html::HTMLFormElement>(*document.GetElementById(u8"settings"));
+    // As the editor does: the form is submitted when the dialog closes with "save".
+    auto closer = dialog.AddEventListener(u8"close",
+                                          [&](boo::dom::Event &)
+                                          {
+                                            if (dialog.ReturnValue() == u8"save")
+                                            {
+                                              (void)form.RequestSubmit();
+                                            }
+                                            dialog.ReturnValue({});
+                                          });
+    auto click = [&](utf8_stringview selectors)
+    {
+      auto element = document.QuerySelector(selectors).ReleaseValue();
+      REQUIRE(element);
+      element->DispatchSimulatedClick(nullptr);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      (void)view.Update(boo::html::EventLoop::Current().Now());
+    };
+
+    // Save shows the dialog modally, over the page.
+    click(u8".settings button[command=show-modal]");
+    REQUIRE(dialog.Matches(u8":modal").ReleaseValue());
+    CHECK(document.ActiveElement().get()
+          == document.QuerySelector(u8"#confirm-save button[value=save]").Value().get());
+
+    // Escape cancels; so does Cancel.
+    (void)view.KeyPressed(pal::Key::Escape);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    CHECK_FALSE(dialog.Open());
+    click(u8".settings button[command=show-modal]");
+    click(u8"#confirm-save button[value=cancel]");
+    CHECK_FALSE(dialog.Open());
+    CHECK(submissions.empty());
+
+    // Saving submits the form.
+    click(u8".settings button[command=show-modal]");
+    click(u8"#confirm-save button[value=save]");
+    CHECK_FALSE(dialog.Open());
+    REQUIRE(submissions.size() == 1);
+    CHECK(submissions[0].SourceElement.get() == &form);
+    CHECK(submissions[0].URL.starts_with(u8"https://example.com/settings?"));
+
+    // Escape after a save doesn't save again.
+    click(u8".settings button[command=show-modal]");
+    (void)view.KeyPressed(pal::Key::Escape);
+    boo::html::EventLoop::Current().RunUntilIdle();
+    (void)view.Update(boo::html::EventLoop::Current().Now());
+    CHECK(submissions.size() == 1);
   }
 
   TEST_CASE("View: records its painting", "[UI]")

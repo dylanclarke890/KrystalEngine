@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -91,6 +92,7 @@ namespace krys::boo
     Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
     // Keyed by address: flex layout removes each item it adds.
     HashSet<const RenderBox *> _percentHeightIgnoreList;
+    List<AnchorScrollAdjuster> _anchorScrollAdjusters;
 
   public:
     explicit LocalFrameViewLayoutContext(LocalFrameView &frameView) noexcept;
@@ -233,6 +235,17 @@ namespace krys::boo
     KRYS_NODISCARD LocalFrame &Frame() const noexcept;
     KRYS_NODISCARD dom::Document *Document() const noexcept;
     KRYS_NODISCARD RenderView *GetRenderView() const noexcept;
+
+    KRYS_NODISCARD List<AnchorScrollAdjuster> &AnchorScrollAdjusters() noexcept
+    {
+      return _anchorScrollAdjusters;
+    }
+    KRYS_NODISCARD const AnchorScrollAdjuster *
+      AnchorScrollAdjusterFor(const RenderBox &anchored) const noexcept;
+    AnchorScrollAdjuster::Diff RegisterAnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept;
+    void UnregisterAnchorScrollAdjusterFor(const RenderBox &anchored) noexcept;
+    void InvalidateAnchorDependenciesForScroller(const RenderBox &scroller) noexcept;
+    void RemoveScrollerFromAnchorScrollAdjusters(const RenderBox &scroller) noexcept;
 
   private:
     void LayoutTimerFired() noexcept;

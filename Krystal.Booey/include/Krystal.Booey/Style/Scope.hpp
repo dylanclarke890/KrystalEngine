@@ -57,6 +57,7 @@ namespace krys::boo::style
   class MatchResultCache;
   class Resolver;
   class RuleSet;
+  struct Styleable;
 
   /// @brief The style sheets of a document or shadow root: the nodes that can provide a style sheet (in tree
   /// order), the sheets that are still loading, the preferred style sheet set, and the active style sheets
@@ -158,6 +159,8 @@ namespace krys::boo::style
     // Keyed by address, like the query containers' dimensions.
     HashMap<const RenderBoxModelObject *, Pair<WeakPtr<const RenderObject>, AnchorPosition>>
       _anchorPositionsOnLastUpdate;
+
+    HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> _lastSuccessfulPositionOptionIndexes;
 
   public:
     /// @brief What the invalidations for layout dependencies have already invalidated in one layout.
@@ -321,15 +324,18 @@ namespace krys::boo::style
     }
     void UpdateAnchorPositioningStateAfterStyleResolution() noexcept;
 
-    /// @brief Collapses `setLastSuccessfulPositionOptionIndexMap({ })`.
-    // FIXME: A no-op until anchor positioning records the last successful position options.
-    void ClearLastSuccessfulPositionOptionIndexMap() noexcept
-    {
-    }
+    /// @brief The index of the position option @p styleable last chose, from the last rendering update.
+    /// @see https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option
+    KRYS_NODISCARD Maybe<size_t>
+      LastSuccessfulPositionOptionIndexFor(const Styleable &styleable) const noexcept;
+    void SetLastSuccessfulPositionOptionIndexMap(
+      HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> &&map) noexcept;
+    void ForgetLastSuccessfulPositionOptionIndex(const Styleable &styleable) noexcept;
 
   private:
     bool InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept;
     bool InvalidateForAnchorDependencies(LayoutDependencyUpdateContext &context) noexcept;
+    bool InvalidateForPositionTryFallbacks(LayoutDependencyUpdateContext &context) noexcept;
 
     KRYS_NODISCARD Scope &DocumentScope() noexcept;
     KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScope() noexcept;

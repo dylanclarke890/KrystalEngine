@@ -1451,7 +1451,10 @@ namespace krys::boo
     // do a full layout.
     if (outOfFlowBox.NeedsOutOfFlowMovementLayoutOnly() && outOfFlowBox.TryLayoutDoingOutOfFlowMovementOnly())
     {
-      // FIXME: Capture the scroll snapshots of anchor-positioned boxes, once there's anchor positioning.
+      if (style::AnchorPositionEvaluator::IsAnchorPositioned(outOfFlowBox.Style()))
+      {
+        style::AnchorPositionEvaluator::CaptureScrollSnapshots(outOfFlowBox);
+      }
       outOfFlowBox.ClearNeedsLayout();
     }
 

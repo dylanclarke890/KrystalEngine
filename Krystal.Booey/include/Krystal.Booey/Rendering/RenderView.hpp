@@ -50,6 +50,8 @@ namespace krys::boo
     HashSet<const RenderBox *> _containerQueryBoxes;
     // Keyed by address: a renderer unregisters itself when it's destroyed or stops being an anchor.
     HashSet<const RenderBoxModelObject *> _anchors;
+    // Keyed by address: a box unregisters itself when it's destroyed or stops having position-try fallbacks.
+    HashSet<const RenderBox *> _positionTryBoxes;
     // Renderers remove themselves when they're destroyed or stop being an image's client.
     HashMap<RenderElement *, List<CachedImage *>> _renderersWithPausedImageAnimation;
     mutable UniquePtr<Region> _accumulatedRepaintRegion;
@@ -217,6 +219,17 @@ namespace krys::boo
     KRYS_NODISCARD const HashSet<const RenderBoxModelObject *> &Anchors() const noexcept
     {
       return _anchors;
+    }
+
+    void RegisterPositionTryBox(const RenderBox &box) noexcept
+    {
+      _positionTryBoxes.insert(&box);
+    }
+    void UnregisterPositionTryBox(const RenderBox &box) noexcept;
+    /// @brief The out-of-flow boxes with position-try fallbacks.
+    KRYS_NODISCARD const HashSet<const RenderBox *> &PositionTryBoxes() const noexcept
+    {
+      return _positionTryBoxes;
     }
 
     void MapLocalToContainer(const RenderLayerModelObject *ancestorContainer, TransformState &transformState,

@@ -272,13 +272,7 @@ namespace krys::boo
 
     /// @brief Lays out this renderer and its descendants that need layout.
     virtual void Layout() noexcept;
-    void LayoutIfNeeded() noexcept
-    {
-      if (NeedsLayout())
-      {
-        Layout();
-      }
-    }
+    void LayoutIfNeeded() noexcept;
 
     void
       SetChildNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;

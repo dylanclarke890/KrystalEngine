@@ -1074,6 +1074,7 @@ namespace krys::boo
     KRYS_NODISCARD RenderLayer *EnclosingLayer() const noexcept;
     /// @brief The nearest box that is this renderer or one of its ancestors.
     KRYS_NODISCARD RenderBox &EnclosingBox() const noexcept;
+    KRYS_NODISCARD RenderBox *EnclosingScrollableContainer() const noexcept;
 
     KRYS_NODISCARD bool IsSkippedContent() const noexcept;
 

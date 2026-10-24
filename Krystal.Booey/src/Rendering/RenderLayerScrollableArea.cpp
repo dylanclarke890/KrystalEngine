@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
@@ -350,6 +351,11 @@ namespace krys::boo
     {
       element->NodeDocument().AddPendingScrollEventTarget(*element, dom::ScrollEventType::Scrollend);
     }
+  }
+
+  void RenderLayerScrollableArea::UpdateAnchorPositionedAfterScroll() noexcept
+  {
+    style::AnchorPositionEvaluator::UpdateScrollAdjustments(_layer.Renderer().View());
   }
 
   int32 RenderLayerScrollableArea::ScrollWidth() const noexcept

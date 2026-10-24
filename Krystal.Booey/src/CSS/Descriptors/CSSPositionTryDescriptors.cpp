@@ -485,7 +485,7 @@ namespace krys::boo::css
       if (auto *parentStyleSheetScope = parentStyleSheet->StyleScope())
       {
         // FIXME: only invalidate elements that use this position-try rule in position-try-fallbacks
-        parentStyleSheetScope->ClearLastSuccessfulPositionOptionIndexMap();
+        parentStyleSheetScope->SetLastSuccessfulPositionOptionIndexMap({});
       }
     };
 

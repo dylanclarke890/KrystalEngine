@@ -372,6 +372,10 @@ namespace krys::boo
     {
     }
 
+    virtual void UpdateAnchorPositionedAfterScroll() noexcept
+    {
+    }
+
   protected:
     ScrollableArea() noexcept = default;
     virtual ~ScrollableArea() noexcept = default;

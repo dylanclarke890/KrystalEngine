@@ -44,13 +44,15 @@ namespace krys::boo
     Animations,
     AnimationFrameCallbacks,
     CaretAnimation,
+    ResizeObservations,
     FocusFixup,
+    SnapshottedScrollOffsets,
     CursorUpdate,
     LayerFlush,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 11uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 13uz);
 
 namespace krys::boo
 {

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
+#include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -13,6 +14,9 @@
 #include "Krystal.Booey/HTML/HTMLMeterElement.hpp"
 #include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
+#include "Krystal.Booey/Rendering/RenderBlock.hpp"
+#include "Krystal.Booey/Rendering/Style/PositionTryOrder.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
@@ -102,6 +106,30 @@ namespace krys::boo::style
     _scopeStack.pop_back();
   }
 
+  // Takes an old style (from previous style resolution) and new style (from current style resolution),
+  // determine if the last successful position option should be invalidated. This follows the criterias in the
+  // spec: https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option
+  static bool ShouldInvalidateLastSuccessfulPositionOptionIndex(const RenderStyle *oldStyle,
+                                                                const RenderStyle *newStyle) noexcept
+  {
+    if (oldStyle && newStyle)
+    {
+      if (oldStyle->GetPositionTryFallbacks() != newStyle->GetPositionTryFallbacks())
+      {
+        return true;
+      }
+
+      if (oldStyle->GetPositionTryOrder() != newStyle->GetPositionTryOrder())
+      {
+        return true;
+      }
+
+      // FIXME: add missing invalidation criterias in the spec.
+    }
+
+    return false;
+  }
+
   ResolvedStyle TreeResolver::StyleForStyleable(const Styleable &styleable, ResolutionType resolutionType,
                                                 const ResolutionContext &resolutionContext,
                                                 const RenderStyle *existingStyle) noexcept
@@ -114,7 +142,10 @@ namespace krys::boo::style
 
     auto &element = styleable.Element;
 
-    // FIXME: Choosing a position option (tryChoosePositionOption), with anchor positioning.
+    if (auto optionStyle = TryChoosePositionOption(styleable, resolutionContext))
+    {
+      return krys::move(*optionStyle);
+    }
 
     if (resolutionType == ResolutionType::FastPathInherit)
     {
@@ -173,8 +204,14 @@ namespace krys::boo::style
     ResolvedStyle resolvedStyle {
       .Style = krys::move(style), .Relations = {}, .MatchResult = krys::move(unadjustedStyle.MatchResult)};
 
-    // FIXME: Forgetting the last successful position option and generating the position options, with anchor
-    // positioning.
+    // Invalidate the last successful position option here. This is the only place where we have access to the
+    // old and new style, and hence we could determine whether the style changes enough to invalidate.
+    if (ShouldInvalidateLastSuccessfulPositionOptionIndex(existingStyle, resolvedStyle.Style.get()))
+    {
+      _document->StyleScope().ForgetLastSuccessfulPositionOptionIndex(styleable);
+    }
+
+    GeneratePositionOptionsIfNeeded(resolvedStyle, styleable, resolutionContext);
 
     return resolvedStyle;
   }
@@ -205,7 +242,22 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Dropping the position options of the subtree's elements, with anchor positioning.
+    auto nonRenderedElementsWithPositionOptions = [&]
+    {
+      List<RefPtr<const dom::Element>> result;
+      for (const auto &[styleable, options] : _positionOptions)
+      {
+        if (styleable.first->IsComposedTreeDescendantOf(subtreeRoot))
+        {
+          result.push_back(styleable.first);
+        }
+      }
+
+      return result;
+    }();
+
+    std::erase_if(_positionOptions, [&nonRenderedElementsWithPositionOptions](const auto &kv)
+                  { return std::ranges::contains(nonRenderedElementsWithPositionOptions, kv.first.first); });
 
     subtreeRoot.ClearChildNeedsStyleRecalc();
   }
@@ -313,7 +365,7 @@ namespace krys::boo::style
     Styleable styleable {element, null};
     auto resolvedStyle = StyleForStyleable(styleable, resolutionType, resolutionContext, existingStyle);
 
-    // FIXME: Position visibility (updateForPositionVisibility), with anchor positioning.
+    UpdateForPositionVisibility(*resolvedStyle.Style, styleable);
 
     auto update = CreateAnimatedElementUpdate(krys::move(resolvedStyle), styleable, GetParent().Changes,
                                               resolutionContext, GetParent().IsInDisplayNoneTree);
@@ -426,7 +478,7 @@ namespace krys::boo::style
   Maybe<ElementUpdate> TreeResolver::ResolvePseudoElement(
     dom::Element &element, const PseudoElementIdentifier &pseudoElementIdentifier,
     const ElementUpdate &elementUpdate, style::IsInDisplayNoneTree isInDisplayNoneTree,
-    const RenderStyle *) noexcept
+    const RenderStyle *existingStyle) noexcept
   {
     if (elementUpdate.Style->Display() == DisplayType::None)
     {
@@ -489,11 +541,39 @@ namespace krys::boo::style
 
     auto resolutionContext = MakeResolutionContextForPseudoElement(elementUpdate, pseudoElementIdentifier);
 
+    bool pseudoSupportsPositionTry = pseudoElementIdentifier.Type == PseudoElementType::Before
+                                     || pseudoElementIdentifier.Type == PseudoElementType::After
+                                     || pseudoElementIdentifier.Type == PseudoElementType::Backdrop;
+
     Styleable styleable {element, pseudoElementIdentifier};
 
-    // FIXME: Position options for ::before, ::after and ::backdrop, with anchor positioning.
-    auto resolvedStyle = GetScope().Resolver->StyleForPseudoElement(
-      element, PseudoElementRequest(pseudoElementIdentifier), resolutionContext);
+    auto resolvedStyle = [&]
+    {
+      Maybe<ResolvedStyle> resolvedStyle;
+
+      if (pseudoSupportsPositionTry)
+      {
+        resolvedStyle = TryChoosePositionOption(styleable, resolutionContext);
+      }
+
+      if (!resolvedStyle)
+      {
+        resolvedStyle = GetScope().Resolver->StyleForPseudoElement(
+          element, PseudoElementRequest(pseudoElementIdentifier), resolutionContext);
+
+        if (resolvedStyle && pseudoSupportsPositionTry)
+        {
+          if (ShouldInvalidateLastSuccessfulPositionOptionIndex(existingStyle, resolvedStyle->Style.get()))
+          {
+            _document->StyleScope().ForgetLastSuccessfulPositionOptionIndex(styleable);
+          }
+
+          GeneratePositionOptionsIfNeeded(*resolvedStyle, styleable, resolutionContext);
+        }
+      }
+
+      return resolvedStyle;
+    }();
 
     if (!resolvedStyle)
     {
@@ -1060,7 +1140,8 @@ namespace krys::boo::style
     // could compute it along with the primary style and include it in MatchedPropertiesCache but it is not
     // clear this would be benefitial as it is typically only used once.
     return ResolveAgainInDifferentContext(resolvedStyle, styleable, parentStyle,
-                                          PropertyCascade::StartingStylePropertyTypes(), resolutionContext);
+                                          PropertyCascade::StartingStylePropertyTypes(), null,
+                                          resolutionContext);
   }
 
   UniquePtr<RenderStyle>
@@ -1096,12 +1177,15 @@ namespace krys::boo::style
     const auto &parentStyle = ParentAfterChangeStyle(styleable, resolutionContext);
 
     return ResolveAgainInDifferentContext(resolvedStyle, styleable, parentStyle,
-                                          PropertyCascade::NormalPropertyTypes(), resolutionContext);
+                                          PropertyCascade::NormalPropertyTypes(), null, resolutionContext);
   }
 
-  UniquePtr<RenderStyle> TreeResolver::ResolveAgainInDifferentContext(
-    const ResolvedStyle &resolvedStyle, const Styleable &styleable, const RenderStyle &parentStyle,
-    EnumSet<PropertyCascade::PropertyType> properties, const ResolutionContext &resolutionContext) noexcept
+  UniquePtr<RenderStyle>
+    TreeResolver::ResolveAgainInDifferentContext(const ResolvedStyle &resolvedStyle,
+                                                 const Styleable &styleable, const RenderStyle &parentStyle,
+                                                 EnumSet<PropertyCascade::PropertyType> properties,
+                                                 Maybe<BuilderPositionTryFallback> &&positionTryFallback,
+                                                 const ResolutionContext &resolutionContext) noexcept
   {
     krys_debug_assert(resolvedStyle.MatchResult);
 
@@ -1110,13 +1194,13 @@ namespace krys::boo::style
     newStyle->SetPseudoElementIdentifier(resolvedStyle.Style->GetPseudoElementIdentifier());
     newStyle->CopyPseudoElementBitsFrom(*resolvedStyle.Style);
 
-    // FIXME: The position-try fallback, with position options.
     auto builderContext = BuilderContext {
       .Document = ShareRefPtr<const dom::Document>(_document.get()),
       .ParentStyle = &parentStyle,
       .RootElementStyle = resolutionContext.DocumentElementStyle,
       .Element = ShareRefPtr<const dom::Element>(&styleable.Element),
       .TreeResolutionState = &_treeResolutionState,
+      .PositionTryFallback = krys::move(positionTryFallback),
     };
 
     auto styleBuilder =
@@ -1713,7 +1797,16 @@ namespace krys::boo::style
       }
     }
 
-    // FIXME: Revisiting unchosen position options, with position options.
+    for (auto &[styleable, options] : _positionOptions)
+    {
+      if (!options.Chosen)
+      {
+        krys_debug_assert(styleable.first);
+        const_cast<dom::Element &>(*styleable.first).InvalidateForResumingAnchorPositionedElementResolution();
+        _needsInterleavedLayout = true;
+        SaveBeforeResolutionStyleForInterleaving(*styleable.first);
+      }
+    }
 
     if (!_changedAnchorNames.empty() || _allAnchorNamesInvalid)
     {
@@ -1854,6 +1947,402 @@ namespace krys::boo::style
     }
 
     return LayoutInterleavingAction::None;
+  }
+
+  static Maybe<LayoutSize> ScrollContainerSizeForPositionOptions(const Styleable &anchored) noexcept
+  {
+    auto *anchoredRenderer = anchored.Renderer();
+    if (!anchoredRenderer)
+    {
+      return null;
+    }
+    // Overlay scrollbars can't affect anchor() function resolution so we don't need to save the size.
+    const auto &containingBlock = *anchoredRenderer->ContainingBlock();
+    if (containingBlock.CanUseOverlayScrollbars())
+    {
+      return null;
+    }
+    // FIXME: The second test is likely meant to be IsScrollContainerX.
+    bool isOverflowScroller = containingBlock.IsScrollContainerY() || containingBlock.IsScrollContainerY();
+    if (!containingBlock.IsRenderView() && !isOverflowScroller)
+    {
+      return null;
+    }
+    return containingBlock.ContentBoxSize();
+  }
+
+  void TreeResolver::GeneratePositionOptionsIfNeeded(const ResolvedStyle &resolvedStyle,
+                                                     const Styleable &styleable,
+                                                     const ResolutionContext &resolutionContext) noexcept
+  {
+    // https://drafts.csswg.org/css-anchor-position-1/#fallback-apply
+
+    if (!resolvedStyle.Style || resolvedStyle.Style->GetPositionTryFallbacks().IsNone())
+    {
+      return;
+    }
+
+    if (!resolvedStyle.Style->HasOutOfFlowPosition())
+    {
+      return;
+    }
+
+    AnchorPositionedKey positionOptionsKey {ShareRefPtr<const dom::Element>(&styleable.Element),
+                                            styleable.PseudoElementIdentifier};
+
+    if (_positionOptions.contains(positionOptionsKey))
+    {
+      return;
+    }
+
+    auto generatePositionOptions = [&]
+    {
+      ResolvedStyle clonedResolvedStyle {.Style = RenderStyle::ClonePtr(*resolvedStyle.Style),
+                                         .Relations = {},
+                                         .MatchResult = resolvedStyle.MatchResult};
+      PositionOptions options {.OriginalResolvedStyle = krys::move(clonedResolvedStyle)};
+
+      auto scrollContainerSizeOnGeneration = ScrollContainerSizeForPositionOptions(styleable);
+      options.OptionStyles.push_back(
+        {RenderStyle::ClonePtr(*resolvedStyle.Style), null, scrollContainerSizeOnGeneration});
+
+      size_t i = 0;
+      for (const auto &fallback : resolvedStyle.Style->GetPositionTryFallbacks())
+      {
+        auto index = i++;
+        auto optionStyle =
+          GeneratePositionOption(fallback, options.OriginalResolvedStyle, styleable, resolutionContext);
+        if (!optionStyle)
+        {
+          continue;
+        }
+        optionStyle->SetUsedPositionOptionIndex(index);
+
+        options.OptionStyles.push_back({krys::move(optionStyle), fallback, scrollContainerSizeOnGeneration});
+      }
+
+      return options;
+    };
+
+    auto options = generatePositionOptions();
+
+    // If the fallbacks contain anchor references we need to resolve the anchors first and regenerate the
+    // options.
+    if (HasUnresolvedAnchorPosition(styleable))
+    {
+      return;
+    }
+
+    _positionOptions.emplace(krys::move(positionOptionsKey), krys::move(options));
+  }
+
+  UniquePtr<RenderStyle>
+    TreeResolver::GeneratePositionOption(const PositionTryFallback &fallback,
+                                         const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                         const ResolutionContext &resolutionContext) noexcept
+  {
+    // https://drafts.csswg.org/css-anchor-position-1/#fallback-apply
+
+    if (!resolvedStyle.MatchResult)
+    {
+      return nullptr;
+    }
+
+    auto resolveFallbackProperties = [&] -> RefPtr<const css::StyleProperties>
+    {
+      if (fallback.PositionAreaFallback.Properties)
+      {
+        krys_debug_assert(!fallback.RuleAndTacticsFallback.Rule);
+        krys_debug_assert(!fallback.RuleAndTacticsFallback.Tactics);
+        return fallback.PositionAreaFallback.Properties;
+      }
+      if (!fallback.RuleAndTacticsFallback.Rule)
+      {
+        return nullptr;
+      }
+
+      // "If an at-rule or property defines a name that other CSS constructs can refer to it by, ... it must
+      // be defined as a tree-scoped name." https://drafts.csswg.org/css-scoping-1/#shadow-names
+      return style::Scope::ResolveTreeScopedReference(
+        styleable.Element, *fallback.RuleAndTacticsFallback.Rule,
+        [](const style::Scope &scope, const css::CSSOMStringAtom &name) -> RefPtr<const css::StyleProperties>
+        {
+          const auto &ruleSet = scope.ResolverIfExists()->RuleSets().AuthorStyle();
+          auto rule = ruleSet.PositionTryRuleForName(name);
+          if (!rule)
+          {
+            return nullptr;
+          }
+          return rule->ProtectedProperties();
+        });
+    };
+
+    const auto &tactics = fallback.RuleAndTacticsFallback.Tactics->Value;
+    auto builderFallback = BuilderPositionTryFallback {
+      .Properties = resolveFallbackProperties(),
+      .Tactics = List<PositionTryFallbackTactic>(tactics.begin(), tactics.end()),
+    };
+
+    return ResolveAgainInDifferentContext(resolvedStyle, styleable, *resolutionContext.ParentStyle,
+                                          PropertyCascade::NormalPropertyTypes(), krys::move(builderFallback),
+                                          resolutionContext);
+  }
+
+  const RenderStyle &TreeResolver::PositionOptions::OriginalStyle() const noexcept
+  {
+    krys_debug_assert(!OptionStyles.empty());
+    krys_debug_assert(OptionStyles[0].Style);
+    return *OptionStyles[0].Style;
+  }
+
+  UniquePtr<RenderStyle> TreeResolver::PositionOptions::CurrentOption() const noexcept
+  {
+    krys_debug_assert(Index < OptionStyles.size());
+    krys_debug_assert(OptionStyles[Index].Style);
+    return RenderStyle::ClonePtr(*OptionStyles[Index].Style);
+  }
+
+  void TreeResolver::SortPositionOptionsIfNeeded(PositionOptions &options,
+                                                 const Styleable &styleable) noexcept
+  {
+    if (options.Sorted)
+    {
+      return;
+    }
+    options.Sorted = true;
+
+    auto *box = DynamicDowncast<RenderBox>(styleable.Renderer());
+    if (!box || !box->IsOutOfFlowPositioned())
+    {
+      return;
+    }
+
+    auto order = options.OriginalStyle().GetPositionTryOrder();
+    if (order != PositionTryOrder::Normal && options.OptionStyles.size() > 2)
+    {
+      // "For each entry in the position options list, apply that position option to the box, and find the
+      // specified inset-modified containing block size that results from those styles."
+      // https://drafts.csswg.org/css-anchor-position-1/#position-try-order-property
+      auto boxAxis = BoxAxisForPositionTryOrder(order, options.OriginalStyle().GetWritingMode());
+
+      struct SortingOption
+      {
+        PositionOption Option;
+        LayoutUnit ContainingBlockSize;
+      };
+      List<SortingOption> optionsForSorting;
+      optionsForSorting.reserve(options.OptionStyles.size());
+
+      for (size_t i = 1; i < options.OptionStyles.size(); ++i)
+      {
+        auto constraints = PositionedLayoutConstraints {*box, *options.OptionStyles[i].Style, boxAxis};
+        constraints.ComputeInsets();
+        optionsForSorting.push_back(
+          {krys::move(options.OptionStyles[i]), constraints.InsetModifiedContainingSize()});
+      }
+
+      // "Stably sort the position options list according to this size, with the largest coming first."
+      std::ranges::stable_sort(optionsForSorting, std::ranges::greater {},
+                               &SortingOption::ContainingBlockSize);
+
+      for (size_t i = 0; i < optionsForSorting.size(); ++i)
+      {
+        options.OptionStyles[i + 1] = krys::move(optionsForSorting[i].Option);
+      }
+    }
+
+    // If the styleable has a last successful position option...
+    if (auto lastSuccessfulIndex = _document->StyleScope().LastSuccessfulPositionOptionIndexFor(styleable))
+    {
+      // ... find which style in options.OptionStyles has that index
+      auto lastSuccessfulOption =
+        std::ranges::find_if(options.OptionStyles,
+                             [&](const auto &option)
+                             {
+                               krys_debug_assert(option.Style);
+                               return option.Style->UsedPositionOptionIndex() == *lastSuccessfulIndex;
+                             });
+
+      // If there's one, move it to the beginning.
+      // (if it's at index zero, do nothing since it's already at the beginning)
+      if (lastSuccessfulOption != options.OptionStyles.end()
+          && lastSuccessfulOption != options.OptionStyles.begin())
+      {
+        std::rotate(options.OptionStyles.begin(), lastSuccessfulOption, lastSuccessfulOption + 1);
+      }
+    }
+  }
+
+  Maybe<ResolvedStyle>
+    TreeResolver::TryChoosePositionOption(const Styleable &styleable,
+                                          const ResolutionContext &resolutionContext) noexcept
+  {
+    // https://drafts.csswg.org/css-anchor-position-1/#fallback-apply
+
+    AnchorPositionedKey anchorPositionedKey {ShareRefPtr<const dom::Element>(&styleable.Element),
+                                             styleable.PseudoElementIdentifier};
+
+    auto optionIt = _positionOptions.find(anchorPositionedKey);
+    if (optionIt == _positionOptions.end())
+    {
+      return null;
+    }
+
+    auto &options = optionIt->second;
+
+    SortPositionOptionsIfNeeded(options, styleable);
+
+    auto invalidateQueryContainer = [&]
+    {
+      // Pseudo-elements can't be query containers, so skip invalidating for pseudo-elements.
+      if (styleable.PseudoElementIdentifier)
+      {
+        return;
+      }
+
+      auto iter = _queryContainerStates.find(ShareRef(styleable.Element));
+      if (iter == _queryContainerStates.end())
+      {
+        return;
+      }
+
+      iter->second.Invalidated = false;
+    };
+
+    auto *renderer = DynamicDowncast<RenderBox>(styleable.Renderer());
+    if (!renderer)
+    {
+      invalidateQueryContainer();
+
+      options.Chosen = true;
+      options.Index = 0;
+      return ResolvedStyle {RenderStyle::ClonePtr(options.OriginalStyle())};
+    }
+
+    // On the first try, we force apply the original style (which _could_ be different from the existing
+    // style, since the original style might have a fallback applied to it)
+    if (options.IsFirstTry)
+    {
+      invalidateQueryContainer();
+
+      options.IsFirstTry = false;
+      options.Index = 0;
+      return ResolvedStyle {options.CurrentOption()};
+    }
+
+    if (!options.Chosen)
+    {
+      krys_debug_assert(options.Index < options.OptionStyles.size());
+
+      auto &option = options.OptionStyles[options.Index];
+      auto newScrollContainerSize = ScrollContainerSizeForPositionOptions(styleable);
+
+      // Re-generate the options if a scrollbar change changes the view size. It may affect anchor() function
+      // resolution.
+      if (option.ScrollContainerSizeOnGeneration != newScrollContainerSize)
+      {
+        option.ScrollContainerSizeOnGeneration = newScrollContainerSize;
+        if (option.Option)
+        {
+          option.Style = GeneratePositionOption(*option.Option, options.OriginalResolvedStyle, styleable,
+                                                resolutionContext);
+        }
+
+        return ResolvedStyle {options.CurrentOption()};
+      }
+    }
+
+    // We can't test for overflow before the box has been positioned.
+    auto stateIt = _treeResolutionState.AnchorPositionedStates.find(anchorPositionedKey);
+    if (stateIt != _treeResolutionState.AnchorPositionedStates.end()
+        && stateIt->second->Stage < AnchorPositionResolutionStage::Positioned)
+    {
+      return ResolvedStyle {options.CurrentOption()};
+    }
+
+    if (!AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*renderer))
+    {
+      // We don't overflow anymore so this is a good style.
+      options.Chosen = true;
+      return ResolvedStyle {options.CurrentOption()};
+    }
+
+    if (options.Chosen)
+    {
+      // We have already chosen.
+      return ResolvedStyle {options.CurrentOption()};
+    }
+
+    // Next option to try if this doesn't work.
+    ++options.Index;
+
+    invalidateQueryContainer();
+
+    if (options.Index >= options.OptionStyles.size())
+    {
+      // None of the options worked, return back to the original.
+      options.Index = 0;
+      options.Chosen = true;
+      return ResolvedStyle {options.CurrentOption()};
+    }
+
+    return ResolvedStyle {options.CurrentOption()};
+  }
+
+  void TreeResolver::UpdateForPositionVisibility(RenderStyle &style, const Styleable &styleable) noexcept
+  {
+    if (!HasResolvedAnchorPosition(styleable))
+    {
+      return;
+    }
+
+    auto shouldHideAnchorPositioned = [&]
+    {
+      auto *anchored = DynamicDowncast<RenderBox>(styleable.Renderer());
+      if (!anchored)
+      {
+        return false;
+      }
+
+      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+      {
+        // "If the box has a default anchor box but that anchor box is invisible or clipped by intervening
+        // boxes, the box’s visibility property computes to force-hidden."
+        if (AnchorPositionEvaluator::IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(*anchored))
+        {
+          return true;
+        }
+      }
+      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+      {
+        if (AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*anchored))
+        {
+          return true;
+        }
+      }
+      if (style.GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsValid))
+      {
+        auto stateIt = _treeResolutionState.AnchorPositionedStates.find(
+          {ShareRefPtr<const dom::Element>(&styleable.Element), styleable.PseudoElementIdentifier});
+        if (stateIt != _treeResolutionState.AnchorPositionedStates.end())
+        {
+          for (const auto &[name, anchorElement] : stateIt->second->AnchorElements)
+          {
+            if (!anchorElement)
+            {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
+
+    // FIXME: Implement via "visibility: force-hidden".
+    if (shouldHideAnchorPositioned())
+    {
+      style.SetIsForceHidden();
+    }
   }
 
   bool TreeResolver::HasUnresolvedAnchorPosition(const Styleable &styleable) const noexcept

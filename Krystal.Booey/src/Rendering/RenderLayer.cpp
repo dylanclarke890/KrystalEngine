@@ -2837,9 +2837,15 @@ namespace krys::boo
   void RenderLayer::UpdateTransformFromStyle(TransformationMatrix &transform, const RenderStyle &style,
                                              EnumSet<style::TransformResolverOption> options) const noexcept
   {
-    // FIXME: The default scroll shift of anchor-positioned boxes goes first
-    // (https://drafts.csswg.org/css-anchor-position-1/#default-scroll-shift), once there's anchor
-    // positioning.
+    // https://drafts.csswg.org/css-anchor-position-1/#default-scroll-shift
+    // > After layout has been performed for abspos, it is additionally shifted by
+    // > the default scroll shift, as if affected by a transform
+    // > ** (before any other transforms). **
+    if (_anchorScrollAdjustment)
+    {
+      transform.Translate(_anchorScrollAdjustment->Width().ToDouble(),
+                          _anchorScrollAdjustment->Height().ToDouble());
+    }
 
     // FIXME: Snap the reference box to device pixels when the renderer needs it
     // (snapRectToDevicePixelsIfNeeded), once there's painting.
@@ -2999,8 +3005,54 @@ namespace krys::boo
 
   bool RenderLayer::IsTransformed() const noexcept
   {
-    // FIXME: The anchor scroll adjustment applies a transform too, once there's anchor positioning.
-    return Renderer().IsTransformed();
+    // If the scroll offset is present, a transform is applied on top of existing
+    // transforms from the renderer.
+    return Renderer().IsTransformed() || _anchorScrollAdjustment;
+  }
+
+  bool RenderLayer::SetAnchorScrollAdjustment(LayoutSize offset) noexcept
+  {
+    if (_anchorScrollAdjustment == offset)
+    {
+      return false;
+    }
+
+    if (Renderer().RenderTreeBeingDestroyed())
+    {
+      return false;
+    }
+
+    // FIXME: Scroll offset should be adjusted in the scrolling tree so layers stay exactly in sync.
+    _anchorScrollAdjustment = offset;
+    UpdateTransform();
+
+    if (IsComposited())
+    {
+      SetNeedsCompositingGeometryUpdate();
+    }
+
+    return true;
+  }
+
+  void RenderLayer::ClearAnchorScrollAdjustment() noexcept
+  {
+    if (!_anchorScrollAdjustment)
+    {
+      return;
+    }
+
+    if (Renderer().RenderTreeBeingDestroyed())
+    {
+      return;
+    }
+
+    _anchorScrollAdjustment = null;
+    UpdateTransform();
+
+    if (IsComposited())
+    {
+      SetNeedsCompositingGeometryUpdate();
+    }
   }
 
   namespace

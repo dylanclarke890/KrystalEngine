@@ -742,6 +742,10 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/cssom-view/#run-the-scroll-steps
     void RunScrollSteps() noexcept;
 
+    /// @brief The rendering update's resize observations step: records the last successful position options.
+    // FIXME: Gathering and delivering the resize observations, with resize observers.
+    void UpdateResizeObservations() noexcept;
+
     /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
     void SetNeedsDOMWindowResizeEvent() noexcept;
 

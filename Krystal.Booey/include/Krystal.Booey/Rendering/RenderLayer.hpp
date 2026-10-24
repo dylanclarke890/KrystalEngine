@@ -676,6 +676,11 @@ namespace krys::boo
 
     UniquePtr<TransformationMatrix> _transform;
 
+    // If the RenderLayer contains an anchor-positioned box, this is the "default scroll shift"
+    // for scroll compensation purpose. This offset aligns the anchor-positioned box with the anchor
+    // after scroll, and is applied as a transform.
+    Maybe<LayoutSize> _anchorScrollAdjustment;
+
     UniquePtr<RenderLayerScrollableArea> _scrollableArea;
 
     RefPtr<RenderLayerFilters> _filters;
@@ -1264,6 +1269,13 @@ namespace krys::boo
     }
     /// @brief Whether this layer is part of its parent's 3D rendering context.
     KRYS_NODISCARD bool ParticipatesInPreserve3D() const noexcept;
+
+    KRYS_NODISCARD Maybe<LayoutSize> AnchorScrollAdjustment() const noexcept
+    {
+      return _anchorScrollAdjustment;
+    }
+    bool SetAnchorScrollAdjustment(LayoutSize) noexcept; // Returns true if changed.
+    void ClearAnchorScrollAdjustment() noexcept;
     KRYS_NODISCARD bool AncestorLayerIsDOMParent(const RenderLayer *ancestor) const noexcept;
     KRYS_NODISCARD bool HasPerspective() const noexcept;
     KRYS_NODISCARD bool Has3DTransform() const noexcept

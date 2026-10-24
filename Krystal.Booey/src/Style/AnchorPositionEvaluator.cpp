@@ -6,21 +6,275 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
 #include <ranges>
+
+namespace krys::boo
+{
+  AnchorScrollSnapshot::AnchorScrollSnapshot(const RenderBox &scroller, LayoutPoint snapshot) noexcept
+      : Scroller(CreateWeakPtr(&scroller)), ScrollSnapshot(snapshot)
+  {
+  }
+
+  AnchorScrollSnapshot::AnchorScrollSnapshot(LayoutPoint snapshot) noexcept : ScrollSnapshot(snapshot)
+  {
+  }
+
+  LayoutSize AnchorScrollSnapshot::AdjustmentForCurrentScrollPosition() const noexcept
+  {
+    if (Scroller)
+    {
+      return ScrollSnapshot - LayoutPoint(Scroller->GetScrollPosition());
+    }
+    return {};
+  }
+
+  bool AnchorScrollSnapshot::operator==(const AnchorScrollSnapshot &other) const noexcept
+  {
+    return Scroller.get() == other.Scroller.get() && ScrollSnapshot == other.ScrollSnapshot;
+  }
+
+  bool AnchorScrollAdjuster::IsEmpty() const noexcept
+  {
+    return _scrollSnapshots.empty() && !(_hasChainedAnchor || _hasStickyAnchor);
+  }
+
+  AnchorScrollAdjuster::AnchorScrollAdjuster(RenderBox &anchored,
+                                             const RenderBoxModelObject &defaultAnchor) noexcept
+      : _anchored(ShareCheckedRef(anchored))
+  {
+    const auto &style = anchored.Style();
+
+    auto compensatedAxes = style.AnchorFunctionScrollCompensatedAxes();
+    _needsXAdjustment = compensatedAxes.Contains(BoxAxis::Horizontal);
+    _needsYAdjustment = compensatedAxes.Contains(BoxAxis::Vertical);
+
+    auto containingWritingMode = anchored.Container()->Style().GetWritingMode();
+    if (auto positionAreaValue = style.GetPositionArea().TryValue())
+    {
+      if (positionAreaValue->CoordMatchedTrackForAxis(BoxAxis::Horizontal, containingWritingMode,
+                                                      style.GetWritingMode())
+          != style::PositionAreaTrack::SpanAll)
+      {
+        _needsXAdjustment = true;
+      }
+      else
+      {
+        if (containingWritingMode.IsHorizontal())
+        {
+          auto alignment = style.GetJustifySelf();
+          _needsXAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
+        }
+        else
+        {
+          auto alignment = style.GetAlignSelf();
+          _needsXAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
+        }
+      }
+      if (positionAreaValue->CoordMatchedTrackForAxis(BoxAxis::Vertical, containingWritingMode,
+                                                      style.GetWritingMode())
+          != style::PositionAreaTrack::SpanAll)
+      {
+        _needsYAdjustment = true;
+      }
+      else
+      {
+        if (containingWritingMode.IsHorizontal())
+        {
+          auto alignment = style.GetAlignSelf();
+          _needsYAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
+        }
+        else
+        {
+          auto alignment = style.GetJustifySelf();
+          _needsYAdjustment |= alignment.IsAuto() || alignment.IsNormal() || alignment.IsAnchorCenter();
+        }
+      }
+    }
+
+    if (!_needsXAdjustment)
+    {
+      _needsXAdjustment = containingWritingMode.IsHorizontal() ? style.GetJustifySelf().IsAnchorCenter()
+                                                               : style.GetAlignSelf().IsAnchorCenter();
+    }
+    if (!_needsYAdjustment)
+    {
+      // FIXME: Both branches read align-self; the vertical writing mode one is likely meant to read
+      // justify-self.
+      _needsYAdjustment = containingWritingMode.IsHorizontal() ? style.GetAlignSelf().IsAnchorCenter()
+                                                               : style.GetAlignSelf().IsAnchorCenter();
+    }
+
+    _isHidden = style.IsForceHidden();
+
+    _hasStickyAnchor = defaultAnchor.IsStickilyPositioned();
+    if (_hasStickyAnchor)
+    {
+      _stickySnapshot = defaultAnchor.StickyPositionOffset();
+    }
+
+    if (const auto *anchorBox = DynamicDowncast<RenderBox>(defaultAnchor))
+    {
+      if (style::AnchorPositionEvaluator::DefaultAnchorForBox(*anchorBox))
+      {
+        _hasChainedAnchor = true;
+      }
+    }
+  }
+
+  AnchorScrollAdjuster::AnchorScrollAdjuster(const AnchorScrollAdjuster &) noexcept = default;
+  AnchorScrollAdjuster::AnchorScrollAdjuster(AnchorScrollAdjuster &&) noexcept = default;
+  AnchorScrollAdjuster::~AnchorScrollAdjuster() noexcept = default;
+  AnchorScrollAdjuster &AnchorScrollAdjuster::operator=(const AnchorScrollAdjuster &) noexcept = default;
+  AnchorScrollAdjuster &AnchorScrollAdjuster::operator=(AnchorScrollAdjuster &&) noexcept = default;
+
+  RenderBox *AnchorScrollAdjuster::Anchored() const noexcept
+  {
+    return _anchored.get();
+  }
+
+  bool AnchorScrollAdjuster::RecaptureDiffers(const AnchorScrollAdjuster &other) const noexcept
+  {
+    bool same = _anchored.get() == other._anchored.get() && _scrollSnapshots == other._scrollSnapshots
+                && _stickySnapshot == other._stickySnapshot;
+    return !same;
+  }
+
+  void AnchorScrollAdjuster::AddSnapshot(const RenderBox &scroller) noexcept
+  {
+    krys_debug_assert(scroller.HasPotentiallyScrollableOverflow() && !scroller.IsRenderView());
+    _scrollSnapshots.emplace_back(scroller, LayoutPoint(scroller.ConstrainedScrollPosition()));
+  }
+
+  static ScrollPosition ConstrainedViewportScrollPosition(const LocalFrameView &view) noexcept
+  {
+    auto position = view.ScrollPositionRespectingCustomFixedPosition();
+    return view.ConstrainedScrollPosition(ScrollPosition {position.X().ToInt(), position.Y().ToInt()});
+  }
+
+  void AnchorScrollAdjuster::AddViewportSnapshot(const RenderView &renderView) noexcept
+  {
+    auto position = ConstrainedViewportScrollPosition(renderView.FrameView());
+    _scrollSnapshots.insert(_scrollSnapshots.begin(), AnchorScrollSnapshot {LayoutPoint(position)});
+    _adjustForViewport = true;
+  }
+
+  LayoutSize AnchorScrollAdjuster::AdjustmentForViewport(const RenderView &renderView) const noexcept
+  {
+    if (_adjustForViewport)
+    {
+      // Viewport snapshot is stored in the first slot.
+      krys_debug_assert(!_scrollSnapshots.empty() && !_scrollSnapshots.front().Scroller);
+      return _scrollSnapshots.front().ScrollSnapshot
+             - LayoutPoint(ConstrainedViewportScrollPosition(renderView.FrameView()));
+    }
+    return {};
+  }
+
+  LayoutSize AnchorScrollAdjuster::AccumulateAdjustments(const RenderView &renderView,
+                                                         const RenderBox &anchored) const noexcept
+  {
+    krys_debug_assert(_anchored.get() == &anchored);
+    LayoutSize scrollAdjustment;
+
+    if (_hasChainedAnchor || _hasStickyAnchor)
+    {
+      if (auto *defaultAnchor = style::AnchorPositionEvaluator::DefaultAnchorForBox(anchored))
+      {
+        const auto *defaultAnchorBox = DynamicDowncast<RenderBox>(defaultAnchor);
+        krys_debug_assert(defaultAnchorBox); // We shouldn't exist if there's no default anchor.
+        if (defaultAnchorBox)
+        {
+          // The anchor may itself be scroll-compensated. Recurse if needed.
+          if (const auto *chainedAdjuster =
+                renderView.FrameView().LayoutContext().AnchorScrollAdjusterFor(*defaultAnchorBox))
+          {
+            scrollAdjustment += chainedAdjuster->AccumulateAdjustments(renderView, *defaultAnchorBox);
+          }
+          // Compensate for sticky adjustments.
+          if (_hasStickyAnchor)
+          {
+            scrollAdjustment += defaultAnchorBox->StickyPositionOffset() - _stickySnapshot;
+          }
+        }
+      }
+    }
+
+    for (const auto &snapshot : _scrollSnapshots)
+    {
+      scrollAdjustment += snapshot.AdjustmentForCurrentScrollPosition();
+    }
+    scrollAdjustment += AdjustmentForViewport(renderView);
+
+    if (!_needsXAdjustment)
+    {
+      scrollAdjustment.SetWidth(0_lu);
+    }
+    if (!_needsYAdjustment)
+    {
+      scrollAdjustment.SetHeight(0_lu);
+    }
+    return scrollAdjustment;
+  }
+
+  void AnchorScrollAdjuster::SetFallbackLimits(const RenderBox &anchored) noexcept
+  {
+    auto xConstraints = PositionedLayoutConstraints {
+      anchored, anchored.GetWritingMode().IsHorizontal() ? LogicalBoxAxis::Inline : LogicalBoxAxis::Block};
+    auto yConstraints = PositionedLayoutConstraints {
+      anchored, anchored.GetWritingMode().IsHorizontal() ? LogicalBoxAxis::Block : LogicalBoxAxis::Inline};
+    auto xLimits = xConstraints.OriginalContainingRange();
+    auto yLimits = yConstraints.OriginalContainingRange();
+
+    auto marginRect = anchored.MarginBoxRect();
+    marginRect.MoveBy(anchored.Location());
+    _fallbackLimits.Min.SetWidth(xLimits.Min() - marginRect.X());
+    _fallbackLimits.Min.SetHeight(yLimits.Min() - marginRect.Y());
+    _fallbackLimits.Max.SetWidth(xLimits.Max() - marginRect.MaxX());
+    _fallbackLimits.Max.SetHeight(yLimits.Max() - marginRect.MaxY());
+
+    _hasFallback = true;
+  }
+
+  bool AnchorScrollAdjuster::InvalidateForScroller(const RenderBox &scroller) noexcept
+  {
+    bool anchoredNeedsInvalidation = false;
+    for (const auto &snapshot : _scrollSnapshots)
+    {
+      if (snapshot.Scroller.get() == &scroller)
+      {
+        anchoredNeedsInvalidation = true;
+        break;
+      }
+    }
+    if (anchoredNeedsInvalidation)
+    {
+      _anchored->SetNeedsLayout();
+      krys_debug_assert(_anchored->GetElement());
+      if (auto *element = _anchored->GetElement())
+      {
+        element->InvalidateForAnchorRectChange();
+      }
+    }
+    return anchoredNeedsInvalidation;
+  }
+}
 
 namespace krys::boo::style
 {
@@ -548,8 +802,9 @@ namespace krys::boo::style
       return null;
     }
 
-    // FIXME: Record the axis as compensating for scroll (addAnchorFunctionScrollCompensatedAxis), with the
-    // anchors' scroll adjustment.
+    AddAnchorFunctionScrollCompensatedAxis(
+      style, *anchorPositionedRenderer, *anchorRenderer,
+      MapInsetPropertyToPhysicalAxis(propertyID, style.GetWritingMode()));
 
     // Proceed with computing the inset value for the specified inset property.
     double insetValue = ComputeInsetValue(propertyID, *anchorRenderer, *anchorPositionedRenderer, side,
@@ -1054,6 +1309,152 @@ namespace krys::boo::style
     return anchorElements;
   }
 
+  static inline void ClearAnchorScrollSnapshots(RenderBox &anchored) noexcept
+  {
+    if (!anchored.Layer()->AnchorScrollAdjustment())
+    {
+      return;
+    }
+    anchored.View().FrameView().LayoutContext().UnregisterAnchorScrollAdjusterFor(anchored);
+  }
+
+  void AnchorPositionEvaluator::CaptureScrollSnapshots(RenderBox &anchored,
+                                                       bool invalidateStyleForScrollPositionChanges) noexcept
+  {
+    if (!anchored.Layer())
+    {
+      return;
+    }
+
+    auto *defaultAnchor = AnchorPositionEvaluator::DefaultAnchorForBox(anchored);
+    if (!defaultAnchor)
+    {
+      return ClearAnchorScrollSnapshots(anchored);
+    }
+
+    AnchorScrollAdjuster adjuster(anchored, *defaultAnchor);
+    // Note: We sometimes hit this path during interleaved layout because style bits aren't set yet.
+    if (!adjuster.MayNeedAdjustment())
+    {
+      return ClearAnchorScrollSnapshots(anchored);
+    }
+
+    auto *containingBlock = anchored.ContainingBlock();
+    krys_debug_assert(defaultAnchor->IsDescendantOf(containingBlock));
+
+    bool isFixedAnchor = defaultAnchor->Layer() && defaultAnchor->Layer()->BehavesAsFixed();
+    for (auto *ancestor = defaultAnchor->Container(); ancestor && ancestor != containingBlock;
+         ancestor = ancestor->Container())
+    {
+      if (auto *box = DynamicDowncast<RenderBox>(ancestor))
+      {
+        if (box->HasPotentiallyScrollableOverflow())
+        {
+          adjuster.AddSnapshot(*box);
+        }
+        if (box->Layer() && box->Layer()->BehavesAsFixed())
+        {
+          isFixedAnchor = true;
+        }
+      }
+    }
+
+    if (anchored.Layer() && anchored.Layer()->BehavesAsFixed() && !isFixedAnchor)
+    {
+      adjuster.AddViewportSnapshot(anchored.View());
+    }
+
+    if (adjuster.IsEmpty())
+    {
+      return ClearAnchorScrollSnapshots(anchored);
+    }
+
+    if (!anchored.Style().GetPositionTryFallbacks().IsNone()
+        || anchored.Style().GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow))
+    {
+      adjuster.SetFallbackLimits(anchored);
+    }
+
+    auto captureDiff =
+      anchored.View().FrameView().LayoutContext().RegisterAnchorScrollAdjuster(krys::move(adjuster));
+    if (invalidateStyleForScrollPositionChanges && AnchorScrollAdjuster::Diff::SnapshotsDiffer == captureDiff
+        && anchored.Style().UsesAnchorFunctions())
+    {
+      // Scroll positions changed since the last capture, which means anchor() resolution needs updating.
+      if (auto *element = anchored.GetElement())
+      {
+        element->InvalidateForAnchorRectChange();
+      }
+    }
+    (void)anchored.Layer()->SetAnchorScrollAdjustment({});
+  }
+
+  void AnchorPositionEvaluator::UpdateScrollAdjustments(RenderView &renderView) noexcept
+  {
+    // https://drafts.csswg.org/css-anchor-position-1/#scroll
+    auto &layoutContext = renderView.FrameView().LayoutContext();
+    bool needsRecompositing = false;
+
+    for (const auto &adjuster : layoutContext.AnchorScrollAdjusters())
+    {
+      auto *anchored = adjuster.Anchored();
+      if (!anchored || !anchored->Layer())
+      {
+        krys_debug_assert(false); // RenderBox failed to clean up.
+        continue;
+      }
+
+      LayoutSize scrollOffset = adjuster.AccumulateAdjustments(renderView, *anchored);
+      if (!anchored->Layer()->SetAnchorScrollAdjustment(scrollOffset))
+      {
+        continue;
+      }
+
+      bool shouldBeHidden = false;
+      bool needsInvalidation = false;
+      if (adjuster.HasFallbackLimits())
+      {
+        if (adjuster.ExceedsFallbackLimits(scrollOffset))
+        {
+          if (!anchored->Style().GetPositionTryFallbacks().IsNone())
+          {
+            anchored->SetNeedsLayout();
+            needsInvalidation = true;
+          }
+          else
+          {
+            shouldBeHidden =
+              anchored->Style().GetPositionVisibility().Contains(PositionVisibilityValue::NoOverflow);
+          }
+        }
+      }
+      if (!shouldBeHidden
+          && anchored->Style().GetPositionVisibility().Contains(PositionVisibilityValue::AnchorsVisible))
+      {
+        shouldBeHidden =
+          AnchorPositionEvaluator::IsDefaultAnchorInvisibleOrClippedByInterveningBoxes(*anchored);
+      }
+
+      if (needsInvalidation || shouldBeHidden != adjuster.IsHidden())
+      {
+        krys_debug_assert(anchored->GetElement());
+        if (auto *element = anchored->GetElement())
+        {
+          element->InvalidateForAnchorRectChange(); // FIXME: Optimize this.
+        }
+      }
+      else
+      {
+        needsRecompositing = true;
+      }
+    }
+
+    if (needsRecompositing && !layoutContext.IsInLayout())
+    {
+      renderView.Compositor().ScheduleCompositingLayerUpdate();
+    }
+  }
+
   void AnchorPositionEvaluator::UpdateAnchorPositioningStatesAfterInterleavedLayout(
     dom::Document &document, AnchorPositionedStates &anchorPositionedStates) noexcept
   {
@@ -1113,8 +1514,13 @@ namespace krys::boo::style
 
         case AnchorPositionResolutionStage::ResolveAnchorFunctions:
         case AnchorPositionResolutionStage::Resolved:
-          // FIXME: Capture the anchored box's scroll snapshots (captureScrollSnapshots), with the anchors'
-          // scroll adjustment.
+          if (auto *anchored = key.first->Renderer())
+          {
+            if (auto *anchoredBox = DynamicDowncast<RenderBox>(anchored))
+            {
+              AnchorPositionEvaluator::CaptureScrollSnapshots(*anchoredBox, false);
+            }
+          }
           state.Stage = AnchorPositionResolutionStage::Positioned;
           break;
 
@@ -1562,5 +1968,61 @@ namespace krys::boo::style
       }
     }
     return nullptr;
+  }
+
+  HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash>
+    AnchorPositionEvaluator::RecordLastSuccessfulPositionOptions(
+      const HashSet<const RenderBox *> &positionTryBoxes) noexcept
+  {
+    HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> lastSuccessfulPositionOptionMap;
+
+    for (const auto *positionTryBox : positionTryBoxes)
+    {
+      auto styleable = Styleable::FromRenderer(*positionTryBox);
+      krys_debug_assert(styleable);
+      if (!styleable)
+      {
+        continue;
+      }
+
+      if (auto usedPositionOptionIndex = positionTryBox->Style().UsedPositionOptionIndex())
+      {
+        lastSuccessfulPositionOptionMap.emplace(
+          AnchorPositionedKey {ShareRefPtr<const dom::Element>(&styleable->Element),
+                               styleable->PseudoElementIdentifier},
+          *usedPositionOptionIndex);
+      }
+    }
+
+    return lastSuccessfulPositionOptionMap;
+  }
+
+  void AnchorPositionEvaluator::AddAnchorFunctionScrollCompensatedAxis(RenderStyle &style,
+                                                                       const RenderBox &anchored,
+                                                                       const RenderBoxModelObject &anchor,
+                                                                       BoxAxis axis) noexcept
+  {
+    // https://drafts.csswg.org/css-anchor-position-1/#scroll
+    // An absolutely positioned box abspos compensates for scroll in the horizontal or vertical axis if both
+    // of the following conditions are true:
+    // - abspos has a default anchor box.
+    auto *defaultAnchor = DefaultAnchorForBox(anchored);
+    if (!defaultAnchor)
+    {
+      return;
+    }
+
+    // - at least one anchor() function on abspos’s used inset properties in the axis refers to a target
+    // anchor
+    //   element with the same nearest scroll container ancestor as abspos’s default anchor box.
+    if (defaultAnchor != &anchor
+        && defaultAnchor->EnclosingScrollableContainer() != anchor.EnclosingScrollableContainer())
+    {
+      return;
+    }
+
+    auto axes = style.AnchorFunctionScrollCompensatedAxes();
+    axes.Add(axis);
+    style.SetAnchorFunctionScrollCompensatedAxes(axes);
   }
 }

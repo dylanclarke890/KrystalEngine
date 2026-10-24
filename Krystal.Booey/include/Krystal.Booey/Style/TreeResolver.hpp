@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
@@ -11,12 +12,14 @@
 #include "Krystal.Booey/Style/TreeResolutionState.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/Style/Validity.hpp"
+#include "Krystal.Booey/Style/Values/AnchorPosition/PositionTryFallback.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -36,8 +39,8 @@ namespace krys::boo::style
   };
 
   /// @brief Resolves the styles of a document's elements that need resolving, walking the composed tree.
-  // FIXME: Animations (the animated updates, @starting-style, after-change styles), position options and
-  // position visibility, accessibility updates and elements with custom style resolve callbacks.
+  // FIXME: Animations (the animated updates, @starting-style, after-change styles), accessibility updates and
+  // elements with custom style resolve callbacks.
   class TreeResolver
   {
     KRYS_NON_COPY_MOVABLE(TreeResolver);
@@ -108,6 +111,34 @@ namespace krys::boo::style
       bool Invalidated {false};
     };
 
+    struct PositionOption
+    {
+      // New style after applying the option.
+      UniquePtr<RenderStyle> Style;
+
+      // The position option used to generate the style. If option is null, no position option is used.
+      Maybe<PositionTryFallback> Option;
+
+      // The size of the content box of the element when the style is generated.
+      // Non-overlay scrollbars appearing or disappearing may affect the content box size that anchor
+      // functions are resolved against.
+      Maybe<LayoutSize> ScrollContainerSizeOnGeneration;
+    };
+
+    struct PositionOptions
+    {
+      // Array of option styles. By convention, the original style is at index 0.
+      List<PositionOption> OptionStyles {};
+      ResolvedStyle OriginalResolvedStyle;
+      size_t Index {0};
+      bool Sorted {false};
+      bool Chosen {false};
+      bool IsFirstTry {true};
+
+      KRYS_NODISCARD const RenderStyle &OriginalStyle() const noexcept;
+      KRYS_NODISCARD UniquePtr<RenderStyle> CurrentOption() const noexcept;
+    };
+
   private:
     Ref<dom::Document> _document;
     UniquePtr<RenderStyle> _computedDocumentElementStyle;
@@ -126,6 +157,8 @@ namespace krys::boo::style
     // over any interleaving.
     TreeResolutionState _treeResolutionState;
     HashMap<Ref<const dom::Element>, UniquePtr<RenderStyle>> _savedBeforeResolutionStylesForInterleaving;
+
+    HashMap<AnchorPositionedKey, PositionOptions, AnchorPositionedKeyHash> _positionOptions;
 
     HashSet<css::CSSOMStringAtom> _changedAnchorNames;
     bool _allAnchorNamesInvalid {false};
@@ -159,6 +192,18 @@ namespace krys::boo::style
     KRYS_NODISCARD LayoutInterleavingAction UpdateAnchorPositioningState(dom::Element &element,
                                                                          const RenderStyle *style) noexcept;
 
+    void GeneratePositionOptionsIfNeeded(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                         const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      GeneratePositionOption(const PositionTryFallback &fallback, const ResolvedStyle &resolvedStyle,
+                             const Styleable &styleable, const ResolutionContext &resolutionContext) noexcept;
+    void SortPositionOptionsIfNeeded(PositionOptions &options, const Styleable &styleable) noexcept;
+    KRYS_NODISCARD Maybe<ResolvedStyle>
+      TryChoosePositionOption(const Styleable &styleable,
+                              const ResolutionContext &resolutionContext) noexcept;
+
+    void UpdateForPositionVisibility(RenderStyle &style, const Styleable &styleable) noexcept;
+
     // For elements requiring style/layout interleaving (anchor-positioned and query
     // containers), descendant resolution is deferred on the first style resolution
     // pass and resumed in subsequent passes.
@@ -186,9 +231,12 @@ namespace krys::boo::style
     KRYS_NODISCARD UniquePtr<RenderStyle>
       ResolveAfterChangeStyleForNonAnimated(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
                                             const ResolutionContext &resolutionContext) noexcept;
-    KRYS_NODISCARD UniquePtr<RenderStyle> ResolveAgainInDifferentContext(
-      const ResolvedStyle &resolvedStyle, const Styleable &styleable, const RenderStyle &parentStyle,
-      EnumSet<PropertyCascade::PropertyType> properties, const ResolutionContext &resolutionContext) noexcept;
+    KRYS_NODISCARD UniquePtr<RenderStyle>
+      ResolveAgainInDifferentContext(const ResolvedStyle &resolvedStyle, const Styleable &styleable,
+                                     const RenderStyle &parentStyle,
+                                     EnumSet<PropertyCascade::PropertyType> properties,
+                                     Maybe<BuilderPositionTryFallback> &&positionTryFallback,
+                                     const ResolutionContext &resolutionContext) noexcept;
     KRYS_NODISCARD const RenderStyle &
       ParentAfterChangeStyle(const Styleable &styleable,
                              const ResolutionContext &resolutionContext) const noexcept;

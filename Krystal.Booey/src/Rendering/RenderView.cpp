@@ -20,6 +20,8 @@
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 
 namespace krys::boo
@@ -105,6 +107,18 @@ namespace krys::boo
   }
 
 #pragma region Painting
+
+  void RenderView::UnregisterPositionTryBox(const RenderBox &box) noexcept
+  {
+    _positionTryBoxes.erase(&box);
+
+    // Explicitly forget the last successful position option here, so if the box ever comes back (i.e display:
+    // none to non-none), we don't accidentally reuse the last successful position option.
+    if (auto styleable = style::Styleable::FromRenderer(box))
+    {
+      GetDocument().StyleScope().ForgetLastSuccessfulPositionOptionIndex(*styleable);
+    }
+  }
 
   void RenderView::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {

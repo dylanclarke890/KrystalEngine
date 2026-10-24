@@ -1358,6 +1358,18 @@ namespace krys::boo::dom
     }
   }
 
+  void Document::UpdateResizeObservations() noexcept
+  {
+    if (_renderView)
+    {
+      // Per spec, this is recorded when ResizeObserver events are determined and delivered.
+      // See https://drafts.csswg.org/css-anchor-position-1/#last-successful-position-option.
+      auto lastSuccessfulPositionOptionMap =
+        style::AnchorPositionEvaluator::RecordLastSuccessfulPositionOptions(_renderView->PositionTryBoxes());
+      StyleScope().SetLastSuccessfulPositionOptionIndexMap(krys::move(lastSuccessfulPositionOptionMap));
+    }
+  }
+
   void Document::RunScrollSteps() noexcept
   {
     // FIXME: Deferring the scroll events (shouldDeferScrollEvents), servicing scroll animations and scroll

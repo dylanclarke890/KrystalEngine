@@ -33,6 +33,7 @@
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
 #include "Krystal.Booey/URL/URLParser.hpp"
@@ -728,8 +729,8 @@ namespace krys::boo
 
   void LocalFrameView::AddViewportConstrainedObject(const RenderLayerModelObject &object) noexcept
   {
-    // FIXME: The scrolling coordinator and anchor-positioned viewport-constrained objects, once there are
-    // any.
+    // FIXME: The scrolling coordinator (and the anchor-positioned viewport-constrained objects it can't
+    // scroll), once there's one.
     _viewportConstrainedObjects.insert(&object);
   }
 
@@ -1612,6 +1613,36 @@ namespace krys::boo
         options.AlignY = ScrollAlignment::NoScroll;
       }
     }
+
+    void AdjustForScrollByAnchor(const RenderLayerModelObject &renderer, EnumSet<BoxAxis> &isFixed) noexcept
+    {
+      if (!renderer.IsFixedPositioned())
+      {
+        return;
+      }
+      const auto *renderBox = DynamicDowncast<RenderBox>(&renderer);
+      krys_debug_assert(renderBox);
+
+      if (!renderBox || !style::AnchorPositionEvaluator::IsAnchorPositioned(renderBox->Style()))
+      {
+        return;
+      }
+      const auto *adjuster =
+        renderBox->View().FrameView().LayoutContext().AnchorScrollAdjusterFor(*renderBox);
+      if (!adjuster || !adjuster->HasViewportSnapshot())
+      {
+        return;
+      }
+
+      if (adjuster->MayNeedXAdjustment())
+      {
+        isFixed.Remove(BoxAxis::Horizontal);
+      }
+      if (adjuster->MayNeedYAdjustment())
+      {
+        isFixed.Remove(BoxAxis::Vertical);
+      }
+    }
   }
 
   bool LocalFrameView::ScrollRectToVisible(const LayoutRect &absoluteRect, const RenderObject &renderer,
@@ -1652,8 +1683,11 @@ namespace krys::boo
           adjustedOptions.VisibilityCheckRect->SetLocation(adjustedRect.Location());
         }
       }
-      // FIXME: Adjust the fixed axes for anchor-positioned fixed boxes (adjustForScrollByAnchor), once
-      // there's anchor positioning.
+      // FIXME: Make scroll adjustments work for more than just fixedpos elements.
+      if (insideFixed)
+      {
+        AdjustForScrollByAnchor(layer->Renderer(), isFixed);
+      }
     }
 
     // FIXME: Scroll a child frame's view and then its owner (scrollRectToVisibleInChildView), once there are
@@ -2238,6 +2272,14 @@ namespace krys::boo
     if (auto *document = Frame().Document())
     {
       document->AddPendingScrollEventTarget(*document, dom::ScrollEventType::Scrollend);
+    }
+  }
+
+  void LocalFrameView::UpdateAnchorPositionedAfterScroll() noexcept
+  {
+    if (auto *view = GetRenderViewForUpdate())
+    {
+      style::AnchorPositionEvaluator::UpdateScrollAdjustments(*view);
     }
   }
 

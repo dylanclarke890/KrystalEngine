@@ -3603,10 +3603,9 @@ namespace krys::boo
     return layer.HasCompositedScrollableOverflow();
   }
 
-  bool RenderLayerCompositor::RequiresCompositingForAnchorPositioning(const RenderLayer &) const noexcept
+  bool RenderLayerCompositor::RequiresCompositingForAnchorPositioning(const RenderLayer &layer) const noexcept
   {
-    // FIXME: Anchor scroll adjustment, once there's anchor positioning.
-    return false;
+    return layer.AnchorScrollAdjustment().has_value();
   }
 
   IndirectCompositingReason RenderLayerCompositor::ComputeIndirectCompositingReason(

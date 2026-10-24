@@ -2620,6 +2620,19 @@ namespace krys::boo
     ClearNeedsLayout();
   }
 
+  void RenderElement::LayoutIfNeeded() noexcept
+  {
+    if (!NeedsLayout())
+    {
+      return;
+    }
+    Layout();
+    if (style::AnchorPositionEvaluator::IsAnchorPositioned(Style()))
+    {
+      style::AnchorPositionEvaluator::CaptureScrollSnapshots(Downcast<RenderBox>(*this));
+    }
+  }
+
   void RenderElement::SetChildNeedsLayout(MarkingBehavior markParents) noexcept
   {
     krys_debug_assert(!IsSetNeedsLayoutForbidden());

@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Style/MatchResultCache.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include <algorithm>
@@ -1128,7 +1129,7 @@ namespace krys::boo::style
     auto didInvalidate = false;
     didInvalidate |= InvalidateForContainerDependencies(context);
     didInvalidate |= InvalidateForAnchorDependencies(context);
-    // FIXME: The position-try fallbacks (invalidateForPositionTryFallbacks), with position options.
+    didInvalidate |= InvalidateForPositionTryFallbacks(context);
     return didInvalidate;
   }
 
@@ -1279,12 +1280,79 @@ namespace krys::boo::style
     return !anchoredElementsToInvalidate.empty();
   }
 
+  bool Scope::InvalidateForPositionTryFallbacks(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    bool invalidated = false;
+
+    for (const auto *box : renderView->PositionTryBoxes())
+    {
+      if (!AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*box))
+      {
+        continue;
+      }
+
+      auto *element = box->GetElement();
+      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+      {
+        element = pseudoElement->HostElement();
+      }
+
+      if (element)
+      {
+        if (!context.InvalidatedAnchorPositioned.insert(element).second)
+        {
+          continue;
+        }
+        element->InvalidateForAnchorRectChange();
+        invalidated = true;
+      }
+    }
+
+    return invalidated;
+  }
+
   void Scope::UpdateAnchorPositioningStateAfterStyleResolution() noexcept
   {
-    // FIXME: Update the anchors' scroll adjustments (AnchorPositionEvaluator::updateScrollAdjustments), with
-    // the anchors' scroll adjustment.
+    if (auto *renderView = _document->GetRenderView())
+    {
+      // Is this necessary? Or will the combination of layout and scroll invalidation handle it sufficiently?
+      AnchorPositionEvaluator::UpdateScrollAdjustments(*renderView);
+    }
 
     std::erase_if(_anchorPositionedToAnchorMap, [](const auto &elementAndState)
                   { return !elementAndState.second.Element || elementAndState.second.Anchors.empty(); });
+  }
+
+  Maybe<size_t> Scope::LastSuccessfulPositionOptionIndexFor(const Styleable &styleable) const noexcept
+  {
+    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+                             styleable.PseudoElementIdentifier};
+    auto it = _lastSuccessfulPositionOptionIndexes.find(key);
+    if (it == _lastSuccessfulPositionOptionIndexes.end())
+    {
+      return null;
+    }
+    return it->second;
+  }
+
+  void Scope::SetLastSuccessfulPositionOptionIndexMap(
+    HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> &&map) noexcept
+  {
+    _lastSuccessfulPositionOptionIndexes = krys::move(map);
+  }
+
+  void Scope::ForgetLastSuccessfulPositionOptionIndex(const Styleable &styleable) noexcept
+  {
+    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+                             styleable.PseudoElementIdentifier};
+    _lastSuccessfulPositionOptionIndexes.erase(key);
   }
 }

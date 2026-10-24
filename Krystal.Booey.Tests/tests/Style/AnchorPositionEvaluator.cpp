@@ -5,9 +5,14 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::style::tests
 {
@@ -210,5 +215,236 @@ namespace krys::boo::style::tests
       REQUIRE_FALSE(menu.ShowPopover().HasException());
       CHECK(FrameRectOf(menu).Location() == LayoutPoint(3, 4));
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "AnchorPositionEvaluator: position options",
+                   "[Style][AnchorPositionEvaluator]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #anchor { position: absolute; left: 700px; top: 50px; width: 40px; height: 20px; anchor-name: --a }
+      #target { position: absolute; position-anchor: --a; left: anchor(right); top: anchor(top);
+                width: 200px; height: 10px }
+      @position-try --left { left: auto; right: anchor(left) }
+      @position-try --below { left: anchor(left); top: anchor(bottom) }
+      #host.on::before { content: ''; position: absolute; position-anchor: --a; left: anchor(right); top: 0;
+                         width: 200px; height: 5px; position-try-fallbacks: --left }
+    </style><div id=anchor></div><div id=target></div><div id=host></div>)html"};
+    auto &anchor = fixture.ById(u8"anchor");
+    auto &target = fixture.ById(u8"target");
+    auto usedIndex = [&]
+    {
+      return target.Renderer()->Style().UsedPositionOptionIndex();
+    };
+
+    SECTION("The first option that doesn't overflow is used")
+    {
+      SetStyle(target, u8"position-try-fallbacks: --below, --left");
+      CHECK(FrameRectOf(target) == LayoutRect(500, 50, 200, 10));
+      CHECK(usedIndex() == 1);
+
+      auto *targetBox = DynamicDowncast<RenderBox>(target.Renderer());
+      REQUIRE(targetBox);
+      CHECK(fixture.Document->GetRenderView()->PositionTryBoxes().contains(targetBox));
+    }
+
+    SECTION("The original style is used while it fits, or when no option does")
+    {
+      SetStyle(target, u8"position-try-fallbacks: --left");
+      SetStyle(anchor, u8"left: 100px");
+      CHECK(FrameRectOf(target).X() == 140);
+      CHECK_FALSE(usedIndex());
+
+      SetStyle(target, u8"position-try-fallbacks: --left; width: 900px");
+      CHECK(FrameRectOf(target).X() == 140);
+      CHECK_FALSE(usedIndex());
+    }
+
+    SECTION("Try tactics flip the original style")
+    {
+      SetStyle(target, u8"position-try-fallbacks: flip-inline");
+      CHECK(FrameRectOf(target).X() == 500);
+      CHECK(usedIndex() == 0);
+    }
+
+    SECTION("position-try-order sorts the options by their inset-modified containing block")
+    {
+      SetStyle(anchor, u8"left: 300px");
+      SetStyle(target, u8"left: 750px; width: 100px; position-try-fallbacks: --left, --below");
+      CHECK(FrameRectOf(target).X() == 200);
+      SetStyle(target, u8"left: 750px; width: 100px; position-try-fallbacks: --left, --below; "
+                       u8"position-try-order: most-width");
+      CHECK(FrameRectOf(target).Location() == LayoutPoint(300, 70));
+    }
+
+    SECTION("The last successful option is tried first, until the fallbacks change")
+    {
+      SetStyle(target, u8"position-try-fallbacks: --left");
+      CHECK(FrameRectOf(target).X() == 500);
+      fixture.Document->UpdateResizeObservations();
+      CHECK(fixture.Document->StyleScope().LastSuccessfulPositionOptionIndexFor(Styleable {target, null})
+            == 0);
+
+      // Both styles fit now, but the last successful option stays.
+      SetStyle(anchor, u8"left: 400px");
+      CHECK(FrameRectOf(target).X() == 200);
+
+      SetStyle(target, u8"position-try-fallbacks: --left, --below");
+      CHECK(FrameRectOf(target).X() == 440);
+      CHECK_FALSE(
+        fixture.Document->StyleScope().LastSuccessfulPositionOptionIndexFor(Styleable {target, null}));
+    }
+
+    SECTION("A pseudo-element's position options")
+    {
+      auto &host = fixture.ById(u8"host");
+      REQUIRE_FALSE(host.SetAttribute(u8"class", u8"on").HasException());
+      (void)fixture.Document->UpdateLayout();
+      auto *before = host.BeforePseudoElement();
+      REQUIRE(before);
+      auto *beforeBox = DynamicDowncast<RenderBox>(before->Renderer());
+      REQUIRE(beforeBox);
+      CHECK(beforeBox->Style().UsedPositionOptionIndex() == 0);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "AnchorPositionEvaluator: position-visibility",
+                   "[Style][AnchorPositionEvaluator]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0 }
+      #anchor { position: absolute; left: 100px; top: 50px; width: 40px; height: 20px; anchor-name: --a }
+      #target { position: absolute; position-anchor: --a; left: anchor(right); top: anchor(top);
+                width: 20px; height: 10px }
+    </style><div id=anchor></div><div id=target></div>)html"};
+    auto &anchor = fixture.ById(u8"anchor");
+    auto &target = fixture.ById(u8"target");
+    auto isHidden = [&]
+    {
+      (void)fixture.Document->UpdateLayout();
+      REQUIRE(target.Renderer());
+      return target.Renderer()->Style().IsForceHidden();
+    };
+
+    SECTION("anchors-visible, the initial value, hides the box with its anchor")
+    {
+      CHECK_FALSE(isHidden());
+      SetStyle(anchor, u8"visibility: hidden");
+      CHECK(isHidden());
+      SetStyle(target, u8"position-visibility: always");
+      CHECK_FALSE(isHidden());
+    }
+
+    SECTION("no-overflow hides an overflowing box")
+    {
+      SetStyle(target, u8"position-visibility: no-overflow; width: 900px");
+      CHECK(isHidden());
+      SetStyle(target, u8"position-visibility: no-overflow");
+      CHECK_FALSE(isHidden());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "AnchorPositionEvaluator: scroll adjustment",
+                   "[Style][AnchorPositionEvaluator]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0; height: 2000px }
+      #scroller { position: absolute; left: 0; top: 0; width: 300px; height: 200px; overflow: scroll }
+      #content { height: 1000px }
+      #anchor { position: absolute; left: 50px; top: 100px; width: 40px; height: 20px; anchor-name: --a }
+      #target { position: absolute; position-anchor: --a; left: anchor(right); top: anchor(bottom);
+                width: 20px; height: 10px }
+      @position-try --below { bottom: auto; top: anchor(bottom) }
+    </style><div id=scroller><div id=content><div id=anchor></div></div></div><div id=target></div>)html"};
+    auto &scroller = fixture.ById(u8"scroller");
+    auto &target = fixture.ById(u8"target");
+    auto adjustment = [&]
+    {
+      auto *box = DynamicDowncast<RenderBox>(target.Renderer());
+      REQUIRE(box);
+      REQUIRE(box->Layer());
+      return box->Layer()->AnchorScrollAdjustment();
+    };
+    auto &layoutContext = fixture.Frame->View()->LayoutContext();
+
+    SECTION("The box is shifted by its anchor's scrolling, without a layout")
+    {
+      CHECK(FrameRectOf(target) == LayoutRect(90, 120, 20, 10));
+      REQUIRE(adjustment());
+      CHECK(*adjustment() == LayoutSize());
+      auto *targetBox = DynamicDowncast<RenderBox>(target.Renderer());
+      CHECK(layoutContext.AnchorScrollAdjusterFor(*targetBox));
+      CHECK(targetBox->Layer()->IsTransformed());
+
+      scroller.SetScrollTop(30);
+      CHECK(*adjustment() == LayoutSize(0, -30));
+      CHECK(targetBox->FrameRect() == LayoutRect(90, 120, 20, 10));
+    }
+
+    SECTION("Only the axes with anchor() are compensated")
+    {
+      SetStyle(target, u8"left: 10px");
+      CHECK(FrameRectOf(target).X() == 10);
+      SetStyle(scroller, u8"overflow: scroll; width: 100px");
+      SetStyle(fixture.ById(u8"content"), u8"width: 1000px");
+      (void)fixture.Document->UpdateLayout();
+      scroller.ScrollTo(20, 30);
+      REQUIRE(adjustment());
+      CHECK(*adjustment() == LayoutSize(0, -30));
+    }
+
+    SECTION("A box without anchor() in a scrolled axis isn't adjusted")
+    {
+      SetStyle(target, u8"left: 10px; top: 10px");
+      (void)FrameRectOf(target);
+      CHECK_FALSE(adjustment());
+      auto *targetBox = DynamicDowncast<RenderBox>(target.Renderer());
+      CHECK_FALSE(layoutContext.AnchorScrollAdjusterFor(*targetBox));
+    }
+
+    SECTION("Scrolling past the fallback limits chooses another option")
+    {
+      SetStyle(target, u8"top: auto; bottom: anchor(top); height: 90px; position-try-fallbacks: --below");
+      CHECK(FrameRectOf(target).Y() == 10);
+      CHECK_FALSE(target.Renderer()->Style().UsedPositionOptionIndex());
+
+      scroller.SetScrollTop(30);
+      CHECK(FrameRectOf(target).Y() == 90);
+      CHECK(target.Renderer()->Style().UsedPositionOptionIndex() == 0);
+      REQUIRE(adjustment());
+      CHECK(*adjustment() == LayoutSize());
+    }
+
+    SECTION("The adjuster goes with the box")
+    {
+      (void)FrameRectOf(target);
+      CHECK(layoutContext.AnchorScrollAdjusters().size() == 1);
+      REQUIRE_FALSE(target.Remove().HasException());
+      (void)fixture.Document->UpdateLayout();
+      CHECK(layoutContext.AnchorScrollAdjusters().empty());
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "AnchorPositionEvaluator: scroll adjustment of fixed boxes",
+                   "[Style][AnchorPositionEvaluator]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0; height: 2000px }
+      #anchor { position: absolute; left: 50px; top: 100px; width: 40px; height: 20px; anchor-name: --a }
+      #target { position: fixed; position-anchor: --a; left: anchor(right); top: anchor(bottom);
+                width: 20px; height: 10px }
+    </style><div id=anchor></div><div id=target></div>)html"};
+    auto &target = fixture.ById(u8"target");
+    CHECK(FrameRectOf(target) == LayoutRect(90, 120, 20, 10));
+
+    auto *targetBox = DynamicDowncast<RenderBox>(target.Renderer());
+    REQUIRE(targetBox);
+    auto *adjuster = fixture.Frame->View()->LayoutContext().AnchorScrollAdjusterFor(*targetBox);
+    REQUIRE(adjuster);
+    CHECK(adjuster->HasViewportSnapshot());
+
+    fixture.Frame->View()->SetScrollPosition({0, 40});
+    REQUIRE(targetBox->Layer()->AnchorScrollAdjustment());
+    CHECK(*targetBox->Layer()->AnchorScrollAdjustment() == LayoutSize(0, -40));
   }
 }

@@ -7,6 +7,24 @@
 <link rel="stylesheet" href="editor.css">
 </head>
 <body>
+  <!-- The page's header: its menu button opens an auto popover (popovertarget), anchored below the button
+       (its implicit anchor is its invoker) and flipped above it when there's no room below. "Go to" opens a
+       nested menu to its right, which keeps the first open; Escape or a click outside closes both. Both fade
+       in and out, as the dialogs do. -->
+  <header class="page-header">
+    <h1>Krystal's café</h1>
+    <button id="menu-button" popovertarget="page-menu">Menu</button>
+    <div id="page-menu" class="menu" popover>
+      <a href="#order">Order a drink</a>
+      <a href="#faq">Questions</a>
+      <button id="goto-button" popovertarget="page-menu-goto">Go to</button>
+      <div id="page-menu-goto" class="menu" popover>
+        <a href="settings.html">The settings</a>
+        <a href="#guide">The guide</a>
+      </div>
+    </div>
+  </header>
+
   <div class="row">
     <!-- Links: the contents list's links scroll to their cards, which :target highlights; the header's back
          button (or the mouse's, or Alt+Left) goes back to the card before. Tab to a link and press Enter to
@@ -153,13 +171,15 @@
 
     <!-- Details: clicking a summary (or Space or Enter on it) opens or closes its details, and the two
          questions are an accordion (they share a name), so opening one closes the other. The last has no
-         summary, so it shows the default one; following the link to its hidden text opens it. -->
-    <div class="card overlays" tabindex="0">
+         summary, so it shows the default one; following the link to its hidden text opens it, and the text
+         fragment link opens the second question to mark its answer (closing the first). -->
+    <div class="card overlays" id="faq" tabindex="0">
       <h2>Details</h2>
       <details name="faq" open><summary>Is it fresh?</summary>Roasted this week.</details>
-      <details name="faq"><summary>Is it local?</summary>From down the road.</details>
+      <details name="faq"><summary>Is it local?</summary><span>From down the road.</span></details>
       <details><span id="secret">The house blend is half Colombia Huila.</span></details>
-      <p><a href="#secret">The secret</a> opens the last.</p>
+      <p><a href="#secret">The secret</a> opens the last; <a href="#:~:text=From%20down%20the%20road">where
+          it's from</a> opens the second.</p>
     </div>
   </div>
 

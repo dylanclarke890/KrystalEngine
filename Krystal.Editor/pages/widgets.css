@@ -13,9 +13,29 @@
 dialog, [popover] { border: none; border-radius: 12px; padding: 16px 20px; color: #1a2240;
                     box-shadow: 0 12px 32px rgba(26, 34, 64, 0.25); }
 dialog::backdrop { background: rgba(26, 34, 64, 0.4); }
+/* Dialogs and popovers fade in and out: they start transparent when shown (@starting-style), and their
+   display and overlay transition discretely, so they stay rendered in the top layer while they fade out. */
+dialog, [popover] { opacity: 0; transition: opacity 150ms ease-out, display 150ms allow-discrete,
+                    overlay 150ms allow-discrete; }
+dialog[open], :popover-open { opacity: 1; }
+@starting-style { dialog[open], :popover-open { opacity: 0; } }
+dialog::backdrop { opacity: 0; transition: opacity 150ms ease-out, display 150ms allow-discrete,
+                   overlay 150ms allow-discrete; }
+dialog[open]::backdrop { opacity: 1; }
+@starting-style { dialog[open]::backdrop { opacity: 0; } }
 [popover="hint"] { background: #1a2240; color: #ffffff; }
 [popover="manual"] { background: #06d6a0; }
 #menu-more { background: #fff4d1; }
+/* The header's menus, placed by anchor positioning against the buttons that open them (their invokers):
+   the menu below its button, flipped above when there's no room, and the nested menu to the right of its
+   button, flipped to the left. */
+.menu { padding: 6px; }
+.menu a, .menu button { display: block; margin: 0; padding: 4px 10px; border: none; border-radius: 6px;
+                        background: none; color: #1a2240; font: inherit; text-align: left; text-decoration: none;
+                        cursor: pointer; }
+.menu a:hover, .menu button:hover { background: #dfe5ff; }
+#page-menu { position-area: bottom span-right; position-try-fallbacks: flip-block; margin: 4px 0 0; }
+#page-menu-goto { position-area: right span-bottom; position-try-fallbacks: flip-inline; margin: 0 0 0 4px; }
 
 .boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
 .boxes div { background: #f7f8fb; }

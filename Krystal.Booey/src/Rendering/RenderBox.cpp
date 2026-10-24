@@ -142,11 +142,28 @@ namespace krys::boo
       frame->GetEventHandler().StopAutoscrollTimer(true);
     }
 
-    // FIXME: Unregister the box's scroll snap positions, position-try box and anchor scroll adjusters, once
-    // there are any. (Anchors unregister in RenderBoxModelObject::WillBeDestroyed.)
-    if (HasInitializedStyle() && Style().GetContainerType() != ContainerType::Normal)
+    // FIXME: Unregister the box's scroll snap positions, once there are any. (Anchors unregister in
+    // RenderBoxModelObject::WillBeDestroyed.)
+    if (HasInitializedStyle())
     {
-      View().UnregisterContainerQueryBox(*this);
+      if (Style().GetContainerType() != ContainerType::Normal)
+      {
+        View().UnregisterContainerQueryBox(*this);
+      }
+      if (!Style().GetPositionTryFallbacks().IsNone())
+      {
+        View().UnregisterPositionTryBox(*this);
+      }
+      if (style::AnchorPositionEvaluator::IsAnchorPositioned(
+            Style())) // Keep this in sync with StyleDidChange().
+      {
+        View().FrameView().LayoutContext().UnregisterAnchorScrollAdjusterFor(*this);
+      }
+      // Keep this in sync with AnchorScrollAdjuster::AddSnapshot() calls.
+      if (HasPotentiallyScrollableOverflow())
+      {
+        View().FrameView().LayoutContext().RemoveScrollerFromAnchorScrollAdjusters(*this);
+      }
     }
 
     // The weak maps upstream forget the box by themselves.
@@ -271,7 +288,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scroll snap positions, position-try boxes and anchor-positioned boxes, once there are any.
+    // FIXME: Scroll snap positions and anchor-positioned boxes, once there are any.
     if (newStyle.GetContainerType() != ContainerType::Normal)
     {
       View().RegisterContainerQueryBox(*this);
@@ -279,6 +296,15 @@ namespace krys::boo
     else if (oldStyle && oldStyle->GetContainerType() != ContainerType::Normal)
     {
       View().UnregisterContainerQueryBox(*this);
+    }
+
+    if (!newStyle.GetPositionTryFallbacks().IsNone() && newStyle.HasOutOfFlowPosition())
+    {
+      View().RegisterPositionTryBox(*this);
+    }
+    else if (oldStyle && !oldStyle->GetPositionTryFallbacks().IsNone() && oldStyle->HasOutOfFlowPosition())
+    {
+      View().UnregisterPositionTryBox(*this);
     }
 
     RenderBoxModelObject::StyleWillChange(diff, newStyle);
@@ -364,8 +390,19 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Anchor scroll adjusters and the anchor dependencies of scrollers, once there's anchor
-    // positioning.
+    if (oldStyle && style::AnchorPositionEvaluator::IsAnchorPositioned(*oldStyle)
+        && !style::AnchorPositionEvaluator::IsAnchorPositioned(Style()))
+    {
+      // Only out-of-flow code manages these, so if we're changing we need to clear them.
+      // Keep this in sync with WillBeDestroyed().
+      View().FrameView().LayoutContext().UnregisterAnchorScrollAdjusterFor(*this);
+    }
+
+    if ((Layer() && diff == style::DifferenceResult::Layout && HasNonVisibleOverflow())
+        || (oldStyle && oldStyle->IsOverflowVisible() != Style().IsOverflowVisible()))
+    {
+      View().FrameView().LayoutContext().InvalidateAnchorDependenciesForScroller(*this);
+    }
   }
 
   void RenderBox::UpdateFromStyle() noexcept

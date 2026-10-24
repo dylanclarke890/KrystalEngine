@@ -47,12 +47,13 @@ namespace krys::boo
 
   void ScrollableArea::ScrollPositionChanged(const ScrollPosition &position) noexcept
   {
+    IntPoint oldPosition = GetScrollPosition();
     // Tell the derived class to scroll its contents.
     SetScrollOffset(ScrollOffsetFromPosition(position));
 
     // Tell the scrollbars to update their thumb postions.
-    // FIXME: Invalidate overlay scrollbars, and notify the scrollbars controller, scroll anchoring and anchor
-    // positioning, once there are any.
+    // FIXME: Invalidate overlay scrollbars, and notify the scrollbars controller and scroll anchoring, once
+    // there are any.
     if (auto *horizontalScrollbar = this->HorizontalScrollbar())
     {
       horizontalScrollbar->OffsetDidChange();
@@ -60,6 +61,11 @@ namespace krys::boo
     if (auto *verticalScrollbar = this->VerticalScrollbar())
     {
       verticalScrollbar->OffsetDidChange();
+    }
+
+    if (GetScrollPosition() != oldPosition)
+    {
+      UpdateAnchorPositionedAfterScroll();
     }
   }
 

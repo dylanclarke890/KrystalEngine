@@ -12,6 +12,7 @@
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/NavigateEvent.hpp"
 #include "Krystal.Booey/Page/Navigation.hpp"
@@ -483,20 +484,37 @@ namespace krys
           }
         },
         true);
-      // Shows how the last dialog closed in the page's `#dialog-result` element (`close` doesn't bubble, so
-      // this listens as it's captured).
+      // Submits the settings page's form once its `#confirm-save` dialog closes with "save", and shows how
+      // the last dialog closed in the first page's `#dialog-result` element (`close` doesn't bubble, so this
+      // listens as it's captured).
       _dialogLogger = document.AddEventListener(
         u8"close",
         [this](boo::dom::Event &event)
         {
           auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
           auto *dialog = node ? DynamicDowncast<boo::html::HTMLDialogElement>(*node) : nullptr;
-          auto label = _pageView->Document().GetElementById(u8"dialog-result");
-          if (!dialog || !label)
+          if (!dialog)
           {
             return;
           }
           const auto &result = dialog->ReturnValue();
+          if (dialog->Id() == u8"confirm-save")
+          {
+            auto *form = DynamicDowncast<boo::html::HTMLFormElement>(
+              _pageView->Document().GetElementById(u8"settings").get());
+            if (form && result == u8"save")
+            {
+              (void)form->RequestSubmit();
+            }
+            // Closing without a value (Escape) keeps the last one, so it's cleared for the next time.
+            dialog->ReturnValue({});
+            return;
+          }
+          auto label = _pageView->Document().GetElementById(u8"dialog-result");
+          if (!label)
+          {
+            return;
+          }
           (void)label->TextContent(result.empty() ? boo::dom::DOMString(u8"Closed without an answer.")
                                                   : u8"Closed with \u201c" + result + u8"\u201d.");
         },

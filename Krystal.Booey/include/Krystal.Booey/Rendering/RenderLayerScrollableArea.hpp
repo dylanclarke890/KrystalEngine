@@ -185,6 +185,7 @@ namespace krys::boo
 
     /// @brief Fires `scrollend` at the element after a scroll it fired `scroll` for.
     void ScrollDidEnd() noexcept override;
+    void UpdateAnchorPositionedAfterScroll() noexcept final;
     /// @brief Updates the compositing layers a scroll moved, from the enclosing compositing layer of the
     /// stacking context.
     void UpdateCompositingLayersAfterScroll() noexcept;
