@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/NavigationCurrentEntryChangeEvent.hpp"
 #include "Krystal.Booey/Page/NavigationDestination.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include <algorithm>

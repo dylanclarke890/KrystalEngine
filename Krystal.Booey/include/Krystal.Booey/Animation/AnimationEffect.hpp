@@ -2,6 +2,9 @@
 
 #include "Krystal.Booey/Animation/AnimationEffectTiming.hpp"
 #include "Krystal.Booey/Animation/ComputedEffectTiming.hpp"
+#include "Krystal.Booey/Animation/EffectTiming.hpp"
+#include "Krystal.Booey/Animation/OptionalEffectTiming.hpp"
+#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/RefCounted.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -9,12 +12,15 @@
 
 namespace krys::boo
 {
+  namespace dom
+  {
+    class Document;
+  }
+
   class WebAnimation;
 
   /// @brief Something an animation plays: its timing, and what it does at each point in its timing.
   /// @see https://drafts.csswg.org/web-animations-1/#animation-effects
-  // FIXME: The Web Animations interface (`getTiming()`, `getComputedTiming()` and `updateTiming()` with their
-  // script types), once there's scripting.
   class AnimationEffect : public RefCounted<AnimationEffect>, public CanMakeWeakPtr<AnimationEffect>
   {
   private:
@@ -33,11 +39,29 @@ namespace krys::boo
       return false;
     }
 
+    /// @brief The specified timing, as `getTiming()` returns it: the style of a style-originated animation is
+    /// brought up to date first.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-gettiming
+    KRYS_NODISCARD EffectTiming GetBindingsTiming() const noexcept;
     KRYS_NODISCARD BasicEffectTiming GetBasicTiming() noexcept;
+    /// @brief The timing at the current time, as `getComputedTiming()` returns it: the style of a
+    /// style-originated animation is brought up to date first.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-getcomputedtiming
+    KRYS_NODISCARD ComputedEffectTiming GetBindingsComputedTiming() noexcept;
     KRYS_NODISCARD ComputedEffectTiming
       GetComputedTiming(UseCachedCurrentTime useCachedCurrentTime = UseCachedCurrentTime::Yes,
                         EndpointInclusiveActiveInterval endpointInclusiveActiveInterval =
                           EndpointInclusiveActiveInterval::No) noexcept;
+    /// @brief Updates the timing properties present in @p timing, as `updateTiming()` does: those of a CSS
+    /// animation then no longer follow its style.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animationeffect-updatetiming
+    dom::ExceptionOr<void> BindingsUpdateTiming(dom::Document &document,
+                                                const Maybe<OptionalEffectTiming> &timing) noexcept;
+    /// @brief Updates the timing properties present in @p timing.
+    /// @return A `TypeError` if a value is invalid, leaving every property unchanged.
+    /// @see https://drafts.csswg.org/web-animations-1/#updating-animationeffect-timing
+    dom::ExceptionOr<void> UpdateTiming(dom::Document &document,
+                                        const Maybe<OptionalEffectTiming> &timing) noexcept;
 
     virtual void AnimationDidTick() noexcept
     {
@@ -95,15 +119,15 @@ namespace krys::boo
     {
       return _timing.IterationStart;
     }
-    /// @return False, leaving the iteration start unchanged, if it's negative.
-    bool SetIterationStart(double iterationStart) noexcept;
+    /// @return A `TypeError`, leaving the iteration start unchanged, if it's negative.
+    dom::ExceptionOr<void> SetIterationStart(double iterationStart) noexcept;
 
     KRYS_NODISCARD double Iterations() const noexcept
     {
       return _timing.Iterations;
     }
-    /// @return False, leaving the iteration count unchanged, if it's negative or NaN.
-    bool SetIterations(double iterations) noexcept;
+    /// @return A `TypeError`, leaving the iteration count unchanged, if it's negative or NaN.
+    dom::ExceptionOr<void> SetIterations(double iterations) noexcept;
 
     KRYS_NODISCARD WebAnimationTime IterationDuration() noexcept;
     /// @attention The computed timing properties must be up to date.

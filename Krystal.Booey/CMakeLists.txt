@@ -1670,6 +1670,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/AnimationEffectTiming.hpp
   include/Krystal.Booey/Animation/BasicEffectTiming.hpp
   include/Krystal.Booey/Animation/ComputedEffectTiming.hpp
+  include/Krystal.Booey/Animation/EffectTiming.hpp
+  include/Krystal.Booey/Animation/OptionalEffectTiming.hpp
+  include/Krystal.Booey/Animation/CompositeOperationOrAuto.hpp
+  include/Krystal.Booey/Animation/KeyframeEffectOptions.hpp
+  include/Krystal.Booey/Animation/TimelineRangeOffset.hpp
+  include/Krystal.Booey/Animation/AnimationPromise.hpp
+  include/Krystal.Booey/Animation/DocumentTimelineOptions.hpp
+  include/Krystal.Booey/Animation/GetAnimationsOptions.hpp
+  include/Krystal.Booey/Animation/KeyframeAnimationOptions.hpp
+  include/Krystal.Booey/Animation/KeyframeInput.hpp
   include/Krystal.Booey/Animation/FillMode.hpp
   include/Krystal.Booey/Animation/PlaybackDirection.hpp
   include/Krystal.Booey/Animation/AnimationEventBase.hpp
@@ -1688,6 +1698,25 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/CSSTransition.hpp
   include/Krystal.Booey/Animation/CSSAnimation.hpp
   include/Krystal.Booey/Animation/CSSAnimationEvent.hpp
+
+  # Typed OM numeric values (B6a)
+  include/Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSNumericValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericBaseType.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathOperator.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericType.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSNumericArray.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathValue.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathSum.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathProduct.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathNegate.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathInvert.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathMin.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathMax.hpp
+  include/Krystal.Booey/CSS/TypedOM/Numeric/CSSMathClamp.hpp
 
   # Filters (G11a)
   include/Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp
@@ -2970,6 +2999,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/StyleOriginatedAnimationEvent.cpp
   src/Animation/CSSTransitionEvent.cpp
   src/Animation/AnimationEffect.cpp
+  src/Animation/AnimationPromise.cpp
   src/Animation/AnimationTimeline.cpp
   src/Animation/DocumentTimeline.cpp
   src/Animation/AnimationTimelinesController.cpp
@@ -2982,6 +3012,22 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/CSSTransition.cpp
   src/Animation/CSSAnimation.cpp
   src/Animation/CSSAnimationEvent.cpp
+
+  # Typed OM numeric values (B6a)
+  src/CSS/TypedOM/CSSStyleValue.cpp
+  src/CSS/TypedOM/CSSKeywordValue.cpp
+  src/CSS/TypedOM/CSSNumericValue.cpp
+  src/CSS/TypedOM/CSSUnitValue.cpp
+  src/CSS/TypedOM/Numeric/CSSNumericType.cpp
+  src/CSS/TypedOM/Numeric/CSSNumericArray.cpp
+  src/CSS/TypedOM/Numeric/CSSMathValue.cpp
+  src/CSS/TypedOM/Numeric/CSSMathSum.cpp
+  src/CSS/TypedOM/Numeric/CSSMathProduct.cpp
+  src/CSS/TypedOM/Numeric/CSSMathNegate.cpp
+  src/CSS/TypedOM/Numeric/CSSMathInvert.cpp
+  src/CSS/TypedOM/Numeric/CSSMathMin.cpp
+  src/CSS/TypedOM/Numeric/CSSMathMax.cpp
+  src/CSS/TypedOM/Numeric/CSSMathClamp.cpp
 
   # Filters (G11a)
   src/Graphics/Filters/FEColorMatrix.cpp

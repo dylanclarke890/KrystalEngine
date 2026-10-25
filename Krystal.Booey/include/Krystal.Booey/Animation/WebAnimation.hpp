@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
+#include "Krystal.Booey/Animation/AnimationPromise.hpp"
 #include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
@@ -33,9 +34,8 @@ namespace krys::boo
 
   /// @brief An animation: it plays an animation effect, and gives it its time from a timeline.
   /// @see https://drafts.csswg.org/web-animations-1/#animations
-  // FIXME: The Web Animations interface (the ready and finished promises, `commitStyles()`, the frame rate,
-  // the animation range and the script types), and suspending animations with the document, once there are
-  // scripting, frame rates, scroll timelines and page visibility.
+  // FIXME: The animation range (`rangeStart`, `rangeEnd`), once there are scroll timelines, and suspending
+  // animations with the document (upstream's `ActiveDOMObject`).
   class WebAnimation : public dom::EventTarget
   {
   public:
@@ -90,6 +90,8 @@ namespace krys::boo
 
     RefPtr<AnimationEffect> _effect;
     RefPtr<AnimationTimeline> _timeline;
+    Ref<AnimationPromise> _readyPromise;
+    Ref<AnimationPromise> _finishedPromise;
     Maybe<WebAnimationTime> _previousCurrentTime;
     Maybe<WebAnimationTime> _startTime;
     Maybe<WebAnimationTime> _pendingStartTime;
@@ -99,9 +101,6 @@ namespace krys::boo
     dom::DOMString _id;
     int32 _suspendCount {0};
     bool _isSuspended {false};
-    /// @brief Whether the current finished promise is resolved: no scripts can wait on it, but whether the
-    /// animation has finished playing still gates the finish notification steps.
-    bool _finishedPromiseIsFulfilled {false};
     bool _finishNotificationStepsMicrotaskPending {false};
     bool _isRelevant {false};
     bool _shouldSkipUpdatingFinishedStateWhenResolving {false};
@@ -149,6 +148,12 @@ namespace krys::boo
     }
     void SetId(dom::DOMString &&id) noexcept;
 
+    KRYS_NODISCARD AnimationEffect *BindingsEffect() const noexcept
+    {
+      return Effect();
+    }
+    /// @brief Sets the effect, as `effect` does.
+    virtual void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
     KRYS_NODISCARD AnimationEffect *Effect() const noexcept
     {
       return _effect.get();
@@ -157,6 +162,12 @@ namespace krys::boo
     void SetEffect(RefPtr<AnimationEffect> &&newEffect) noexcept;
     KRYS_NODISCARD KeyframeEffect *GetKeyframeEffect() const noexcept;
 
+    KRYS_NODISCARD virtual AnimationTimeline *BindingsTimeline() const noexcept
+    {
+      return Timeline();
+    }
+    /// @brief Sets the timeline, as `timeline` does.
+    virtual void SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept;
     KRYS_NODISCARD AnimationTimeline *Timeline() const noexcept
     {
       return _timeline.get();
@@ -192,6 +203,18 @@ namespace krys::boo
       return HasPendingPauseTask() || HasPendingPlayTask();
     }
 
+    /// @see https://drafts.csswg.org/web-animations-1/#current-ready-promise
+    KRYS_NODISCARD AnimationPromise &Ready() noexcept
+    {
+      return *_readyPromise;
+    }
+
+    /// @see https://drafts.csswg.org/web-animations-1/#current-finished-promise
+    KRYS_NODISCARD AnimationPromise &Finished() noexcept
+    {
+      return *_finishedPromise;
+    }
+
     /// @see https://drafts.csswg.org/web-animations-1/#cancel-an-animation
     virtual void Cancel(Silently silently = Silently::No) noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#finish-an-animation
@@ -202,10 +225,65 @@ namespace krys::boo
     void UpdatePlaybackRate(double newPlaybackRate) noexcept;
     /// @see https://drafts.csswg.org/web-animations-2/#pause-an-animation
     dom::ExceptionOr<void> Pause() noexcept;
+    /// @brief Reverses the animation, as `reverse()` does.
+    virtual dom::ExceptionOr<void> BindingsReverse() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#reverse-an-animation
     dom::ExceptionOr<void> Reverse() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-persist
     void Persist() noexcept;
+    /// @brief Writes the animation's current values into its target's `style` attribute.
+    /// @return A `NoModificationAllowedError` if the target can't have a style attribute (a pseudo-element),
+    /// or an `InvalidStateError` if it isn't rendered.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animation-commitstyles
+    dom::ExceptionOr<void> CommitStyles() noexcept;
+
+    /// @brief The start time, as `startTime` gives it: the style of a style-originated animation is brought
+    /// up to date first.
+    KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsStartTime() const noexcept
+    {
+      return StartTime();
+    }
+    /// @return A `TypeError` if @p startTime isn't valid for the timeline: a percentage on a monotonic
+    /// timeline, or a time on a progress-based one.
+    virtual dom::ExceptionOr<void> SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept;
+    KRYS_NODISCARD virtual Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept
+    {
+      return CurrentTime();
+    }
+    /// @return A `TypeError` if @p currentTime isn't valid for the timeline, or if it's unresolved while the
+    /// current time is resolved.
+    virtual dom::ExceptionOr<void>
+      SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept;
+    KRYS_NODISCARD virtual PlayState BindingsPlayState() const noexcept
+    {
+      return GetPlayState();
+    }
+    KRYS_NODISCARD virtual ReplaceState BindingsReplaceState() const noexcept
+    {
+      return GetReplaceState();
+    }
+    KRYS_NODISCARD virtual bool BindingsPending() const noexcept
+    {
+      return Pending();
+    }
+    KRYS_NODISCARD virtual AnimationPromise &BindingsReady() noexcept
+    {
+      return Ready();
+    }
+    KRYS_NODISCARD virtual AnimationPromise &BindingsFinished() noexcept
+    {
+      return Finished();
+    }
+    /// @brief Plays the animation, as `play()` does.
+    virtual dom::ExceptionOr<void> BindingsPlay() noexcept
+    {
+      return Play();
+    }
+    /// @brief Pauses the animation, as `pause()` does.
+    virtual dom::ExceptionOr<void> BindingsPause() noexcept
+    {
+      return Pause();
+    }
 
     KRYS_NODISCARD Maybe<WebAnimationTime> StartTime() const noexcept
     {
@@ -297,6 +375,8 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<Seconds> ConvertAnimationTimeToTimelineTime(Seconds animationTime) const noexcept;
 
   protected:
+    /// @brief Resolves the first ready promise.
+    void Initialize() noexcept;
     void EnqueueAnimationEvent(Ref<AnimationEventBase> &&event) noexcept;
     virtual void AnimationDidFinish() noexcept;
     KRYS_NODISCARD WebAnimationTime ZeroTime() const noexcept;
@@ -338,6 +418,8 @@ namespace krys::boo
     void ApplyPendingPlaybackRate() noexcept;
     /// @see https://drafts.csswg.org/web-animations-2/#ready
     void MaybeMarkAsReady() noexcept;
+    /// @see https://drafts.csswg.org/web-animations-2/#validating-a-css-numberish-time
+    KRYS_NODISCARD bool IsTimeValid(const Maybe<WebAnimationTime> &time) const noexcept;
   };
 }
 

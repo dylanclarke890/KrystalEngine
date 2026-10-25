@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
@@ -39,6 +40,12 @@ namespace krys::boo::dom
       _styleSheetList = css::StyleSheetList::Create(*this);
     }
     return *_styleSheetList;
+  }
+
+  List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
+  {
+    return NodeDocument().MatchingAnimations([&](Element &target) -> bool
+                                             { return TreeQueries::ContainingShadowRoot(target) == this; });
   }
 
 #pragma endregion

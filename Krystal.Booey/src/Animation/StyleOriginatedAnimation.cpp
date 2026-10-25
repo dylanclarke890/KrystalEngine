@@ -70,6 +70,8 @@ namespace krys::boo
   void StyleOriginatedAnimation::Initialize(const RenderStyle *oldStyle, const RenderStyle &newStyle,
                                             const style::ResolutionContext &resolutionContext) noexcept
   {
+    WebAnimation::Initialize();
+
     // We need to suspend invalidation of the animation's keyframe effect during its creation as it would
     // otherwise trigger invalidation of the document's style and this would be incorrect since it would
     // happen during style invalidation.
@@ -96,6 +98,60 @@ namespace krys::boo
 
   void StyleOriginatedAnimation::SyncPropertiesWithBackingAnimation() noexcept
   {
+  }
+
+  Maybe<WebAnimationTime> StyleOriginatedAnimation::BindingsStartTime() const noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsStartTime();
+  }
+
+  Maybe<WebAnimationTime> StyleOriginatedAnimation::BindingsCurrentTime() const noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsCurrentTime();
+  }
+
+  WebAnimation::PlayState StyleOriginatedAnimation::BindingsPlayState() const noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsPlayState();
+  }
+
+  WebAnimation::ReplaceState StyleOriginatedAnimation::BindingsReplaceState() const noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsReplaceState();
+  }
+
+  bool StyleOriginatedAnimation::BindingsPending() const noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsPending();
+  }
+
+  AnimationPromise &StyleOriginatedAnimation::BindingsReady() noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsReady();
+  }
+
+  AnimationPromise &StyleOriginatedAnimation::BindingsFinished() noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsFinished();
+  }
+
+  dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPlay() noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsPlay();
+  }
+
+  dom::ExceptionOr<void> StyleOriginatedAnimation::BindingsPause() noexcept
+  {
+    FlushPendingStyleChanges();
+    return WebAnimation::BindingsPause();
   }
 
   void StyleOriginatedAnimation::FlushPendingStyleChanges() const noexcept

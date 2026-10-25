@@ -7764,6 +7764,10 @@ class GeneratePropertyId:
 
             KRYS_NODISCARD CSSOMStringView ToString(PropertyId id) noexcept;
 
+            /// @brief The property's name as an IDL attribute: camel-cased (`backgroundColor`), with a leading
+            /// dash dropped (`webkitLineClamp`).
+            KRYS_NODISCARD CSSOMString NameForIDL(PropertyId id) noexcept;
+
             KRYS_NODISCARD PropertyId CascadeAliasProperty(PropertyId id) noexcept;
 
             template<PropertyId First, PropertyId Last>
@@ -8044,6 +8048,7 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
                     "Krystal.Booey/Page/Settings.hpp",
+                    "Krystal.Core/Text/ASCII.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",
                 ],
@@ -8137,6 +8142,27 @@ class GeneratePropertyId:
               }
 
               return PropertyNameStrings[index];
+            }
+
+            CSSOMString NameForIDL(PropertyId id) noexcept
+            {
+              auto nameForCSS = ToString(id);
+              CSSOMString characters;
+              characters.reserve(nameForCSS.size());
+              for (size_t i = 0; i < nameForCSS.size(); ++i)
+              {
+                auto character = nameForCSS[i];
+                if (character == u8'-')
+                {
+                  if (++i == nameForCSS.size())
+                  {
+                    break;
+                  }
+                  character = i != 1 ? text::ToASCIIUpper(nameForCSS[i]) : nameForCSS[i];
+                }
+                characters.push_back(character);
+              }
+              return characters;
             }
           """)
 

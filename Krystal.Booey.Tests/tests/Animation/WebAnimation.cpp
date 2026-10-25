@@ -225,7 +225,7 @@ namespace krys::boo::tests
 
     SECTION("an infinite animation can't be finished")
     {
-      REQUIRE(fixture.Effect->SetIterations(std::numeric_limits<double>::infinity()));
+      REQUIRE_FALSE(fixture.Effect->SetIterations(std::numeric_limits<double>::infinity()).HasException());
       CHECK(animation.Finish().HasException());
     }
   }

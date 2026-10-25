@@ -205,6 +205,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Rules/DescriptorRules.cpp
 		tests/CSS/Rules/KeyframesRule.cpp
 		tests/CSS/Rules/Rule.cpp
+		tests/CSS/TypedOM/CSSNumericValue.cpp
 		tests/CSS/Values/Aggregates.cpp
 		tests/CSS/Values/Borders/BorderRadius.cpp
 		tests/CSS/Values/Borders/BoxShadow.cpp
@@ -363,10 +364,13 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontCache.cpp
 		tests/Graphics/ComplexTextController.cpp
 		tests/Graphics/FontCascade.cpp
+		tests/Animation/Animatable.cpp
+		tests/Animation/AnimationEffect.cpp
 		tests/Animation/AnimationEffectTiming.cpp
 		tests/Animation/BlendingKeyframes.cpp
 		tests/Animation/CSSAnimation.cpp
 		tests/Animation/CSSTransition.cpp
+		tests/Animation/KeyframeEffect.cpp
 		tests/Animation/KeyframeInterpolation.cpp
 		tests/Animation/WebAnimation.cpp
 		tests/CSS/CSSFontSelector.cpp

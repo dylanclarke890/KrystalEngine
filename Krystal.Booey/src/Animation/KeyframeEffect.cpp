@@ -1,11 +1,25 @@
 ﻿#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
+#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Animations.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
+#include "Krystal.Booey/CSS/Rules/KeyframeRule.hpp"
+#include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
+#include "Krystal.Booey/CSS/TypedOM/CSSUnitValue.hpp"
+#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformOperationsSharedPrimitivesPrefix.hpp"
@@ -16,17 +30,24 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
+#include "Krystal.Booey/Style/Extractor.hpp"
 #include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/Style/PendingResources.hpp"
 #include "Krystal.Booey/Style/PropertyAllowlist.hpp"
+#include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
+#include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 #include "Krystal.Booey/Style/Values/WillChange/WillChange.hpp"
+#include <algorithm>
+#include <charconv>
 #include <cmath>
+#include <limits>
 
 namespace krys::boo
 {
@@ -51,6 +72,759 @@ namespace krys::boo
       auto *linearTimingFunction = DynamicDowncast<LinearTimingFunction>(timingFunction);
       return linearTimingFunction && !linearTimingFunction->Points().empty();
     }
+
+    KRYS_NODISCARD css::PropertyId
+      IDLAttributeNameToAnimationPropertyName(const dom::DOMString &idlAttributeName) noexcept
+    {
+      // https://drafts.csswg.org/web-animations-1/#idl-attribute-name-to-animation-property-name
+      // 1. If attribute conforms to the <custom-property-name> production, return attribute.
+
+      // 2. If attribute is the string "cssFloat", then return an animation property representing the CSS
+      // float property.
+      if (idlAttributeName == u8"cssFloat")
+      {
+        return css::PropertyId::Float;
+      }
+
+      // 3. If attribute is the string "cssOffset", then return an animation property representing the CSS
+      // offset property.
+      if (idlAttributeName == u8"cssOffset")
+      {
+        return css::PropertyId::Offset;
+      }
+
+      // If the attribute is the string "fontStretch" return the CSS font-width property that it aliases.
+      if (idlAttributeName == u8"fontStretch")
+      {
+        return css::PropertyId::FontWidth;
+      }
+
+      // 4. Otherwise, return the result of applying the IDL attribute to CSS property algorithm [CSSOM] to
+      // attribute.
+      auto cssPropertyId = css::CSSStyleProperties::GetPropertyIdFromJavaScriptPropertyName(
+        css::CSSOMStringAtom(idlAttributeName));
+
+      if (cssPropertyId == css::PropertyId::Invalid && css::IsCustomPropertyName(idlAttributeName))
+      {
+        return css::PropertyId::Custom;
+      }
+
+      // We need to check that converting the property back to IDL form yields the same result such that a
+      // property passed in non-IDL form is rejected, for instance "font-size".
+      if (idlAttributeName != KeyframeEffect::PropertyIdToIDLAttributeName(cssPropertyId))
+      {
+        return css::PropertyId::Invalid;
+      }
+
+      return cssPropertyId;
+    }
+
+    KRYS_NODISCARD bool IsTimelineRangeOffsetValid(const TimelineRangeOffset &timelineRangeOffset) noexcept
+    {
+      if (style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset.RangeName)
+          == style::SingleAnimationRangeName::Normal)
+      {
+        return false;
+      }
+      auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset.Offset.get());
+      return offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage;
+    }
+
+    /// @brief The whole of @p string as a number, as script converts a string to a double.
+    KRYS_NODISCARD Maybe<double> StringToDouble(const dom::DOMString &string) noexcept
+    {
+      const auto *begin = reinterpret_cast<const char *>(string.data());
+      const auto *end = begin + string.size();
+      double value = 0;
+      auto [pointer, error] = std::from_chars(begin, end, value);
+      if (error != std::errc {} || pointer != end || begin == end)
+      {
+        return null;
+      }
+      return value;
+    }
+
+    KRYS_NODISCARD Maybe<Variant<double, TimelineRangeOffset>>
+      DoubleOrTimelineRangeOffsetFromString(const dom::DOMString &offsetString,
+                                            const dom::Document &document) noexcept
+    {
+      if (auto doubleValue = StringToDouble(offsetString))
+      {
+        return Variant<double, TimelineRangeOffset> {*doubleValue};
+      }
+
+      css::ParserContext parserContext(document);
+      auto offsets = css::PropertyParserHelpers::ParseKeyframeKeyList(offsetString, parserContext);
+      if (offsets.size() != 1)
+      {
+        return null;
+      }
+
+      auto [rangeValueId, value] = offsets[0];
+      auto rangeName = style::ConvertValueIdToSingleAnimationRangeName(rangeValueId);
+      if (rangeName == style::SingleAnimationRangeName::Normal)
+      {
+        return Variant<double, TimelineRangeOffset> {value};
+      }
+
+      return Variant<double, TimelineRangeOffset> {
+        TimelineRangeOffset {style::ConvertSingleAnimationRangeNameToRangeString(rangeName),
+                             css::CSSNumericFactory::Percent(value * 100)}};
+    }
+
+    KRYS_NODISCARD Maybe<KeyframeEffect::KeyframeOffset>
+      ValidateKeyframeOffset(const KeyframeEffect::KeyframeOffset &offset,
+                             const dom::Document &document) noexcept
+    {
+      if (const auto *doubleValue = std::get_if<double>(&offset))
+      {
+        return KeyframeEffect::KeyframeOffset {*doubleValue};
+      }
+
+      if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&offset))
+      {
+        if (!IsTimelineRangeOffsetValid(*timelineRangeOffset))
+        {
+          return null;
+        }
+        return KeyframeEffect::KeyframeOffset {*timelineRangeOffset};
+      }
+
+      if (const auto *stringOffset = std::get_if<dom::DOMString>(&offset))
+      {
+        auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
+        if (!parsedValue)
+        {
+          return null;
+        }
+        if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
+        {
+          return KeyframeEffect::KeyframeOffset {*doubleOffset};
+        }
+        return KeyframeEffect::KeyframeOffset {std::get<TimelineRangeOffset>(*parsedValue)};
+      }
+
+      krys_debug_assert(std::holds_alternative<std::nullptr_t>(offset));
+      return KeyframeEffect::KeyframeOffset {nullptr};
+    }
+
+    KRYS_NODISCARD double ComputedOffset(style::SingleAnimationRangeName rangeName, double offset) noexcept
+    {
+      if (rangeName == style::SingleAnimationRangeName::Normal
+          || rangeName == style::SingleAnimationRangeName::Omitted)
+      {
+        return offset;
+      }
+
+      // FIXME: The offset within the active view timeline's named range, and within the animation's
+      // attachment range, once there are view timelines; until then, as without a view timeline.
+      return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    void ComputeMissingKeyframeOffsets(List<KeyframeEffect::ParsedKeyframe> &keyframes) noexcept
+    {
+      // https://drafts.csswg.org/web-animations-1/#compute-missing-keyframe-offsets
+
+      if (keyframes.empty())
+      {
+        return;
+      }
+
+      List<KeyframeEffect::ParsedKeyframe *> keyframesWithDoubleOrNullOffset;
+
+      // 1. For each keyframe, in keyframes, let the computed keyframe offset of the keyframe be equal to its
+      // keyframe offset value. In our implementation, we only set non-null values to avoid making
+      // computedOffset Maybe<double>. Instead, we'll know that a keyframe hasn't had a computed offset by
+      // checking if it has a null offset and a 0 computedOffset, since the first keyframe will already have a
+      // 0 computedOffset.
+      for (auto &keyframe : keyframes)
+      {
+        auto &offset = keyframe.Offset;
+        if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&offset))
+        {
+          auto rangeName = style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset->RangeName);
+          auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset->Offset.get());
+          krys_debug_assert(offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage);
+          keyframe.ComputedOffset = ComputedOffset(rangeName, offsetUnitValue->Value() / 100);
+        }
+        else
+        {
+          keyframesWithDoubleOrNullOffset.push_back(&keyframe);
+          if (const auto *doubleValue = std::get_if<double>(&offset))
+          {
+            keyframe.ComputedOffset = *doubleValue;
+          }
+          else
+          {
+            keyframe.ComputedOffset = std::numeric_limits<double>::quiet_NaN();
+          }
+        }
+      }
+
+      if (keyframesWithDoubleOrNullOffset.empty())
+      {
+        return;
+      }
+
+      // 2. If keyframes contains more than one keyframe and the computed keyframe offset of the first
+      // keyframe in keyframes is null, set the computed keyframe offset of the first keyframe to 0.
+      if (keyframesWithDoubleOrNullOffset.size() > 1
+          && std::isnan(keyframesWithDoubleOrNullOffset[0]->ComputedOffset))
+      {
+        keyframesWithDoubleOrNullOffset[0]->ComputedOffset = 0;
+      }
+
+      // 3. If the computed keyframe offset of the last keyframe in keyframes is null, set its computed
+      // keyframe offset to 1.
+      if (std::isnan(keyframesWithDoubleOrNullOffset.back()->ComputedOffset))
+      {
+        keyframesWithDoubleOrNullOffset.back()->ComputedOffset = 1;
+      }
+
+      // 4. For each pair of keyframes A and B where:
+      //    - A appears before B in keyframes, and
+      //    - A and B have a computed keyframe offset that is not null, and
+      //    - all keyframes between A and B have a null computed keyframe offset,
+      //    calculate the computed keyframe offset of each keyframe between A and B as follows:
+      //    1. Let offsetk be the computed keyframe offset of a keyframe k.
+      //    2. Let n be the number of keyframes between and including A and B minus 1.
+      //    3. Let index refer to the position of keyframe in the sequence of keyframes between A and B such
+      //    that
+      //       the first keyframe after A has an index of 1.
+      //    4. Set the computed keyframe offset of keyframe to offsetA + (offsetB − offsetA) × index / n.
+
+      size_t indexOfLastKeyframeWithNonNullOffset = 0;
+      for (size_t i = 1; i < keyframesWithDoubleOrNullOffset.size(); ++i)
+      {
+        auto &keyframe = *keyframesWithDoubleOrNullOffset[i];
+        // Keyframes with a null offset that don't yet have a non-zero computed offset are keyframes with an
+        // offset that needs to be computed.
+        if (std::isnan(keyframe.ComputedOffset))
+        {
+          continue;
+        }
+        if (indexOfLastKeyframeWithNonNullOffset != i - 1)
+        {
+          double lastNonNullOffset =
+            keyframesWithDoubleOrNullOffset[indexOfLastKeyframeWithNonNullOffset]->ComputedOffset;
+          double offsetDelta = keyframe.ComputedOffset - lastNonNullOffset;
+          double offsetIncrement =
+            offsetDelta / static_cast<double>(i - indexOfLastKeyframeWithNonNullOffset);
+          size_t indexOfFirstKeyframeWithNullOffset = indexOfLastKeyframeWithNonNullOffset + 1;
+          for (size_t j = indexOfFirstKeyframeWithNullOffset; j < i; ++j)
+          {
+            keyframesWithDoubleOrNullOffset[j]->ComputedOffset =
+              lastNonNullOffset
+              + static_cast<double>(j - indexOfLastKeyframeWithNonNullOffset) * offsetIncrement;
+          }
+        }
+        indexOfLastKeyframeWithNonNullOffset = i;
+      }
+    }
+
+    /// @brief Steps 2 to 6 of processing a keyframe-like object: the properties of @p properties that can be
+    /// animated, sorted, with their values.
+    /// @see https://drafts.csswg.org/web-animations-1/#process-a-keyframe-like-object
+    KRYS_NODISCARD List<KeyframeEffect::PropertyAndValues> ProcessKeyframeLikeObjectProperties(
+      dom::Document &document, const List<Pair<dom::DOMString, List<dom::DOMString>>> &properties) noexcept
+    {
+      // 2. Build up a list of animatable properties as follows:
+      //
+      //    1. Let animatable properties be a list of property names (including shorthand properties that have
+      //       longhand sub-properties that are animatable) that can be animated by the implementation.
+      //    2. Convert each property name in animatable properties to the equivalent IDL attribute by applying
+      //       the animation property name to IDL attribute name algorithm.
+
+      // 3. Let input properties be the result of calling the EnumerableOwnNames operation with keyframe input
+      //    as the object.
+      // A property given more than once keeps its last values, as an object's would.
+      List<const Pair<dom::DOMString, List<dom::DOMString>> *> inputProperties;
+      for (const auto &property : properties)
+      {
+        std::erase_if(inputProperties,
+                      [&](const auto *inputProperty) { return inputProperty->first == property.first; });
+        inputProperties.push_back(&property);
+      }
+
+      auto isDirectionAwareShorthand = [](css::PropertyId property)
+      {
+        for (auto longhand : css::ShorthandForProperty(property))
+        {
+          if (css::Property::IsDirectionAwareProperty(longhand))
+          {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      css::ParserContext parserContext(document);
+
+      // 4. Make up a new list animation properties that consists of all of the properties that are in both
+      //    input properties and animatable properties, or which are in input properties and conform to the
+      //    <custom-property-name> production.
+      using InputProperty = const Pair<dom::DOMString, List<dom::DOMString>> *;
+      List<InputProperty> logicalShorthands;
+      List<InputProperty> physicalShorthands;
+      List<InputProperty> logicalLonghands;
+      List<InputProperty> physicalLonghands;
+      for (const auto *inputProperty : inputProperties)
+      {
+        auto cssProperty = IDLAttributeNameToAnimationPropertyName(inputProperty->first);
+        if (cssProperty != css::PropertyId::Custom
+            && !css::IsExposed(cssProperty, &parserContext.PropertySettings))
+        {
+          cssProperty = css::PropertyId::Invalid;
+        }
+        auto resolvedCSSProperty = css::Property::ResolveDirectionAwareProperty(cssProperty, WritingMode());
+        AnimatableCSSProperty animatableProperty = resolvedCSSProperty;
+        if (cssProperty == css::PropertyId::Custom)
+        {
+          animatableProperty = css::CSSOMStringAtom(inputProperty->first);
+        }
+        if (style::interpolation::CanInterpolate(animatableProperty))
+        {
+          if (cssProperty != css::PropertyId::Custom && isDirectionAwareShorthand(cssProperty))
+          {
+            logicalShorthands.push_back(inputProperty);
+          }
+          else if (cssProperty != css::PropertyId::Custom && css::IsShorthand(cssProperty))
+          {
+            physicalShorthands.push_back(inputProperty);
+          }
+          else if (resolvedCSSProperty != cssProperty)
+          {
+            logicalLonghands.push_back(inputProperty);
+          }
+          else
+          {
+            physicalLonghands.push_back(inputProperty);
+          }
+        }
+      }
+
+      // 5. Sort animation properties in ascending order by the Unicode codepoints that define each property
+      //    name.
+      auto sortPropertiesInAscendingOrder = [](List<InputProperty> &list)
+      {
+        std::ranges::sort(list, [](InputProperty a, InputProperty b) { return a->first < b->first; });
+      };
+      sortPropertiesInAscendingOrder(logicalShorthands);
+      sortPropertiesInAscendingOrder(physicalShorthands);
+      sortPropertiesInAscendingOrder(logicalLonghands);
+      sortPropertiesInAscendingOrder(physicalLonghands);
+
+      List<InputProperty> animationProperties;
+      animationProperties.insert(animationProperties.end(), logicalShorthands.begin(),
+                                 logicalShorthands.end());
+      animationProperties.insert(animationProperties.end(), physicalShorthands.begin(),
+                                 physicalShorthands.end());
+      animationProperties.insert(animationProperties.end(), logicalLonghands.begin(), logicalLonghands.end());
+      animationProperties.insert(animationProperties.end(), physicalLonghands.begin(),
+                                 physicalLonghands.end());
+
+      // 6. For each property name in animation properties,
+      List<KeyframeEffect::PropertyAndValues> propertiesAndValues;
+      for (const auto *animationProperty : animationProperties)
+      {
+        // 1. to 3. Let property values be the value given for the property name.
+
+        // 4. Calculate the normalized property name as the result of applying the IDL attribute name to
+        //    animation property name algorithm to property name.
+        const auto &propertyName = animationProperty->first;
+        auto cssPropertyId = IDLAttributeNameToAnimationPropertyName(propertyName);
+
+        // 5. Add a property to to keyframe output with normalized property name as the property name, and
+        //    property values as the property value.
+        if (cssPropertyId == css::PropertyId::Custom)
+        {
+          propertiesAndValues.push_back(KeyframeEffect::PropertyAndValues {
+            cssPropertyId, css::CSSOMStringAtom(propertyName), animationProperty->second});
+        }
+        else
+        {
+          propertiesAndValues.push_back(KeyframeEffect::PropertyAndValues {
+            cssPropertyId, css::CSSOMStringAtom::Null(), animationProperty->second});
+        }
+      }
+
+      // 7. Return keyframe output.
+      return propertiesAndValues;
+    }
+
+    void SetKeyframeProperty(KeyframeEffect::ParsedKeyframe &keyframe,
+                             const KeyframeEffect::PropertyAndValues &property, const dom::DOMString &value,
+                             const css::ParserContext &parserContext) noexcept
+    {
+      if (property.Property == css::PropertyId::Custom)
+      {
+        if (keyframe.Style->SetCustomProperty(css::CSSOMString(property.CustomProperty.View()), value,
+                                              parserContext))
+        {
+          keyframe.CustomStyleStrings.insert_or_assign(property.CustomProperty, value);
+        }
+      }
+      else if (keyframe.Style->SetProperty(property.Property, value, parserContext))
+      {
+        keyframe.StyleStrings.insert_or_assign(property.Property, value);
+      }
+    }
+
+    KRYS_NODISCARD dom::ExceptionOr<void>
+      ProcessIterableKeyframes(dom::Document &document, List<KeyframeEffect::InputKeyframe> &&keyframesInput,
+                               List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes) noexcept
+    {
+      css::ParserContext parserContext(document);
+
+      for (auto &inputKeyframe : keyframesInput)
+      {
+        // 7. Append to processed keyframes the result of running the procedure to process a keyframe-like
+        // object passing nextItem as the keyframe input and with the allow lists flag set to false.
+        KeyframeEffect::ParsedKeyframe keyframeOutput;
+
+        if (const auto *doubleValue = std::get_if<double>(&inputKeyframe.Offset))
+        {
+          keyframeOutput.Offset = *doubleValue;
+        }
+        else if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&inputKeyframe.Offset))
+        {
+          if (!IsTimelineRangeOffsetValid(*timelineRangeOffset))
+          {
+            return dom::Exception {dom::ExceptionCode::TypeError};
+          }
+          keyframeOutput.Offset = *timelineRangeOffset;
+        }
+        else if (const auto *stringOffset = std::get_if<dom::DOMString>(&inputKeyframe.Offset))
+        {
+          auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
+          if (!parsedValue)
+          {
+            return dom::Exception {dom::ExceptionCode::TypeError};
+          }
+          if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
+          {
+            keyframeOutput.Offset = *doubleOffset;
+          }
+          else
+          {
+            keyframeOutput.Offset = std::get<TimelineRangeOffset>(*parsedValue);
+          }
+        }
+
+        keyframeOutput.Easing = krys::move(inputKeyframe.Easing);
+        keyframeOutput.Composite = inputKeyframe.Composite;
+
+        List<Pair<dom::DOMString, List<dom::DOMString>>> properties;
+        properties.reserve(inputKeyframe.Properties.size());
+        for (auto &[name, value] : inputKeyframe.Properties)
+        {
+          properties.push_back({krys::move(name), List<dom::DOMString> {krys::move(value)}});
+        }
+
+        for (const auto &propertyAndValue : ProcessKeyframeLikeObjectProperties(document, properties))
+        {
+          // With the "allow lists" flag set to false, there is only ever a single value for a given property.
+          krys_debug_assert(propertyAndValue.Values.size() == 1);
+          SetKeyframeProperty(keyframeOutput, propertyAndValue, propertyAndValue.Values[0], parserContext);
+        }
+
+        parsedKeyframes.push_back(krys::move(keyframeOutput));
+      }
+
+      return {};
+    }
+
+    KRYS_NODISCARD dom::ExceptionOr<void> ProcessPropertyIndexedKeyframes(
+      dom::Document &document, KeyframeEffect::InputPropertyIndexedKeyframes &&keyframesInput,
+      List<KeyframeEffect::ParsedKeyframe> &parsedKeyframes, List<dom::DOMString> &unusedEasings) noexcept
+    {
+      // 1. Let property-indexed keyframe be the result of running the procedure to process a keyframe-like
+      // object passing object as the keyframe input.
+      auto &baseProperties = static_cast<KeyframeEffect::BasePropertyIndexedKeyframe &>(keyframesInput);
+
+      // Convert string offsets to TimelineRangeOffset in case we were provided with a list of offsets.
+      if (auto *offsets = std::get_if<List<KeyframeEffect::KeyframeOffset>>(&baseProperties.Offset))
+      {
+        for (auto &offset : *offsets)
+        {
+          const auto *stringOffset = std::get_if<dom::DOMString>(&offset);
+          if (!stringOffset)
+          {
+            continue;
+          }
+          auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
+          if (!parsedValue)
+          {
+            return dom::Exception {dom::ExceptionCode::TypeError};
+          }
+          if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
+          {
+            offset = *doubleOffset;
+          }
+          else
+          {
+            offset = std::get<TimelineRangeOffset>(*parsedValue);
+          }
+        }
+      }
+
+      auto propertiesAndValues = ProcessKeyframeLikeObjectProperties(document, keyframesInput.Properties);
+
+      css::ParserContext parserContext(document);
+
+      // 2. For each member, m, in property-indexed keyframe, perform the following steps:
+      for (const auto &m : propertiesAndValues)
+      {
+        // 1. Let property name be the key for m.
+        // 2. If property name is “composite”, or “easing”, or “offset”, skip the remaining steps in this loop
+        //    and continue from the next member in property-indexed keyframe after m.
+        //    We skip this test since we split those properties and the actual CSS properties that we're
+        //    currently iterating over.
+        // 3. Let property values be the value for m.
+        // 4. Let property keyframes be an empty sequence of keyframes.
+        List<KeyframeEffect::ParsedKeyframe> propertyKeyframes;
+        // 5. For each value, v, in property values perform the following steps:
+        for (const auto &v : m.Values)
+        {
+          // 1. Let k be a new keyframe with a null keyframe offset.
+          KeyframeEffect::ParsedKeyframe k;
+          // 2. Add the property-value pair, property name → v, to k.
+          SetKeyframeProperty(k, m, v, parserContext);
+          // 3. Append k to property keyframes.
+          propertyKeyframes.push_back(krys::move(k));
+        }
+        // 6. Apply the procedure to compute missing keyframe offsets to property keyframes.
+        ComputeMissingKeyframeOffsets(propertyKeyframes);
+
+        // 7. Add keyframes in property keyframes to processed keyframes.
+        parsedKeyframes.insert(parsedKeyframes.end(), std::make_move_iterator(propertyKeyframes.begin()),
+                               std::make_move_iterator(propertyKeyframes.end()));
+      }
+
+      // 3. Sort processed keyframes by the computed keyframe offset of each keyframe in increasing order.
+      std::ranges::stable_sort(parsedKeyframes,
+                               [](const auto &lhs, const auto &rhs)
+                               {
+                                 if (!std::isnan(lhs.ComputedOffset) && !std::isnan(rhs.ComputedOffset))
+                                 {
+                                   return lhs.ComputedOffset < rhs.ComputedOffset;
+                                 }
+                                 // This will sort null values prior to other values.
+                                 return !std::isnan(lhs.ComputedOffset) && std::isnan(rhs.ComputedOffset);
+                               });
+
+      // 4. Merge adjacent keyframes in processed keyframes when they have equal computed keyframe offsets.
+      size_t i = 1;
+      while (i < parsedKeyframes.size())
+      {
+        auto &keyframe = parsedKeyframes[i];
+        auto &previousKeyframe = parsedKeyframes[i - 1];
+        // If the offsets of this keyframe and the previous keyframe are different, this means that the two
+        // keyframes should not be merged and we can move on to the next keyframe.
+        if (keyframe.ComputedOffset != previousKeyframe.ComputedOffset)
+        {
+          i++;
+          continue;
+        }
+        // Otherwise, both this keyframe and the previous keyframe should be merged. Unprocessed keyframes in
+        // parsedKeyframes at this stage have at most a single property in cssPropertiesAndValues, so just set
+        // this on the previous keyframe. In case an invalid or null value was originally provided, then the
+        // property was not set and the property count is 0, in which case there is nothing to merge.
+        if (!keyframe.StyleStrings.empty())
+        {
+          (void)previousKeyframe.Style->MergeAndOverrideOnConflict(*keyframe.Style);
+          for (const auto &[property, value] : keyframe.StyleStrings)
+          {
+            previousKeyframe.StyleStrings.insert_or_assign(property, value);
+          }
+        }
+        if (!keyframe.CustomStyleStrings.empty())
+        {
+          (void)previousKeyframe.Style->MergeAndOverrideOnConflict(*keyframe.Style);
+          for (const auto &[customProperty, value] : keyframe.CustomStyleStrings)
+          {
+            previousKeyframe.CustomStyleStrings.insert_or_assign(customProperty, value);
+          }
+        }
+        // Since we've processed this keyframe, we can remove it and keep i the same so that we process the
+        // next keyframe in the next loop iteration.
+        parsedKeyframes.erase(parsedKeyframes.begin() + static_cast<ptrdiff_t>(i));
+      }
+
+      // 5. Let offsets be a sequence of nullable double values assigned based on the type of the “offset”
+      // member
+      //    of the property-indexed keyframe as follows:
+      //    - sequence<double?>, the value of “offset” as-is.
+      //    - double?, a sequence of length one with the value of “offset” as its single item, i.e. « offset
+      //    »,
+      List<KeyframeEffect::KeyframeOffset> offsets;
+      const auto &sourceOffsets = baseProperties.Offset;
+      if (const auto *listOfKeyframeOffsets =
+            std::get_if<List<KeyframeEffect::KeyframeOffset>>(&sourceOffsets))
+      {
+        for (const auto &keyframeOffset : *listOfKeyframeOffsets)
+        {
+          auto validatedOffset = ValidateKeyframeOffset(keyframeOffset, document);
+          if (!validatedOffset)
+          {
+            return dom::Exception {dom::ExceptionCode::TypeError};
+          }
+          offsets.push_back(*validatedOffset);
+        }
+      }
+      else if (const auto *doubleValue = std::get_if<double>(&sourceOffsets))
+      {
+        offsets.push_back(*doubleValue);
+      }
+      else if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&sourceOffsets))
+      {
+        if (!IsTimelineRangeOffsetValid(*timelineRangeOffset))
+        {
+          return dom::Exception {dom::ExceptionCode::TypeError};
+        }
+        offsets.push_back(*timelineRangeOffset);
+      }
+      else if (const auto *stringOffset = std::get_if<dom::DOMString>(&sourceOffsets))
+      {
+        auto parsedValue = DoubleOrTimelineRangeOffsetFromString(*stringOffset, document);
+        if (!parsedValue)
+        {
+          return dom::Exception {dom::ExceptionCode::TypeError};
+        }
+        if (const auto *doubleOffset = std::get_if<double>(&*parsedValue))
+        {
+          offsets.push_back(*doubleOffset);
+        }
+        else
+        {
+          offsets.push_back(std::get<TimelineRangeOffset>(*parsedValue));
+        }
+      }
+      else
+      {
+        offsets.push_back(nullptr);
+      }
+
+      // 6. Assign each value in offsets to the keyframe offset of the keyframe with corresponding position in
+      //    property keyframes until the end of either sequence is reached.
+      for (size_t index = 0; index < offsets.size() && index < parsedKeyframes.size(); ++index)
+      {
+        parsedKeyframes[index].Offset = offsets[index];
+      }
+
+      // 7. Let easings be a sequence of DOMString values assigned based on the type of the “easing” member of
+      //    the property-indexed keyframe as follows:
+      //    - sequence<DOMString>, the value of “easing” as-is.
+      //    - DOMString, a sequence of length one with the value of “easing” as its single item, i.e. « easing
+      //    »,
+      List<dom::DOMString> easings;
+      if (const auto *easingList = std::get_if<List<dom::DOMString>>(&baseProperties.Easing))
+      {
+        easings = *easingList;
+      }
+      else if (const auto *easing = std::get_if<dom::DOMString>(&baseProperties.Easing))
+      {
+        easings.push_back(*easing);
+      }
+
+      // 8. If easings is an empty sequence, let it be a sequence of length one containing the single value
+      //    “linear”, i.e. « "linear" ».
+      if (easings.empty())
+      {
+        easings.push_back(u8"linear");
+      }
+
+      // 9. If easings has fewer items than property keyframes, repeat the elements in easings successively
+      //    starting from the beginning of the list until easings has as many items as property keyframes.
+      if (easings.size() < parsedKeyframes.size())
+      {
+        size_t initialNumberOfEasings = easings.size();
+        for (i = initialNumberOfEasings; i < parsedKeyframes.size(); ++i)
+        {
+          easings.push_back(easings[i % initialNumberOfEasings]);
+        }
+      }
+
+      // 10. If easings has more items than property keyframes, store the excess items as unused easings.
+      while (easings.size() > parsedKeyframes.size())
+      {
+        unusedEasings.push_back(krys::move(easings.back()));
+        easings.pop_back();
+      }
+
+      // 11. Assign each value in easings to a property named “easing” on the keyframe with the corresponding
+      //     position in property keyframes until the end of property keyframes is reached.
+      for (size_t index = 0; index < parsedKeyframes.size(); ++index)
+      {
+        parsedKeyframes[index].Easing = easings[index];
+      }
+
+      // 12. If the “composite” member of the property-indexed keyframe is not an empty sequence:
+      List<CompositeOperationOrAuto> compositeModes;
+      if (const auto *compositeList = std::get_if<List<CompositeOperationOrAuto>>(&baseProperties.Composite))
+      {
+        compositeModes = *compositeList;
+      }
+      else if (const auto *composite = std::get_if<CompositeOperationOrAuto>(&baseProperties.Composite))
+      {
+        compositeModes.push_back(*composite);
+      }
+      if (!compositeModes.empty())
+      {
+        // 1. Let composite modes be a sequence of CompositeOperationOrAuto values assigned from the
+        // “composite”
+        //    member of property-indexed keyframe. If that member is a single CompositeOperationOrAuto value
+        //    operation, let composite modes be a sequence of length one, with the value of the “composite” as
+        //    its single item.
+        // 2. As with easings, if composite modes has fewer items than processed keyframes, repeat the
+        // elements
+        //    in composite modes successively starting from the beginning of the list until composite modes
+        //    has as many items as processed keyframes.
+        if (compositeModes.size() < parsedKeyframes.size())
+        {
+          size_t initialNumberOfCompositeModes = compositeModes.size();
+          for (i = initialNumberOfCompositeModes; i < parsedKeyframes.size(); ++i)
+          {
+            compositeModes.push_back(compositeModes[i % initialNumberOfCompositeModes]);
+          }
+        }
+        // 3. Assign each value in composite modes that is not auto to the keyframe-specific composite
+        // operation
+        //    on the keyframe with the corresponding position in processed keyframes until the end of
+        //    processed keyframes is reached.
+        for (size_t index = 0; index < compositeModes.size() && index < parsedKeyframes.size(); ++index)
+        {
+          if (compositeModes[index] != CompositeOperationOrAuto::Auto)
+          {
+            parsedKeyframes[index].Composite = compositeModes[index];
+          }
+        }
+      }
+
+      return {};
+    }
+
+    KRYS_NODISCARD TimelineRangeOffset
+      TimelineRangeOffsetFromSpecifiedOffset(const BlendingKeyframe::KeyframeOffset &specifiedOffset) noexcept
+    {
+      auto name = style::ConvertSingleAnimationRangeNameToRangeString(specifiedOffset.Name);
+      return TimelineRangeOffset {name, css::CSSNumericFactory::Percent(specifiedOffset.Value * 100)};
+    }
+
+    KRYS_NODISCARD BlendingKeyframe::KeyframeOffset
+      SpecifiedOffsetForParsedKeyframe(const KeyframeEffect::ParsedKeyframe &keyframe) noexcept
+    {
+      if (const auto *timelineRangeOffset = std::get_if<TimelineRangeOffset>(&keyframe.Offset))
+      {
+        auto rangeName = style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset->RangeName);
+        auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset->Offset.get());
+        krys_debug_assert(offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage);
+        return {rangeName, offsetUnitValue->Value() / 100};
+      }
+
+      krys_debug_assert(!std::isnan(keyframe.ComputedOffset));
+      return keyframe.ComputedOffset;
+    }
   }
 
   KeyframeEffect::~KeyframeEffect() noexcept
@@ -67,6 +841,105 @@ namespace krys::boo
     }
 
     krys_debug_assert(!_inTargetEffectStack);
+  }
+
+  KeyframeEffect::ParsedKeyframe::ParsedKeyframe() noexcept : Style(css::MutableStyleProperties::Create())
+  {
+  }
+
+  KeyframeEffect::ParsedKeyframe::~ParsedKeyframe() noexcept = default;
+  KeyframeEffect::ParsedKeyframe::ParsedKeyframe(ParsedKeyframe &&) noexcept = default;
+  KeyframeEffect::ParsedKeyframe &
+    KeyframeEffect::ParsedKeyframe::operator=(ParsedKeyframe &&) noexcept = default;
+
+  dom::DOMString KeyframeEffect::PropertyIdToIDLAttributeName(css::PropertyId property) noexcept
+  {
+    // https://drafts.csswg.org/web-animations-1/#animation-property-name-to-idl-attribute-name
+    // 1. If property follows the <custom-property-name> production, return property.
+
+    // 2. If property refers to the CSS float property, return the string "cssFloat".
+    if (property == css::PropertyId::Float)
+    {
+      return u8"cssFloat";
+    }
+
+    // 3. If property refers to the CSS offset property, return the string "cssOffset".
+    if (property == css::PropertyId::Offset)
+    {
+      return u8"cssOffset";
+    }
+
+    // 4. Otherwise, return the result of applying the CSS property to IDL attribute algorithm [CSSOM] to
+    // property.
+    return css::NameForIDL(property);
+  }
+
+  dom::ExceptionOr<Ref<KeyframeEffect>>
+    KeyframeEffect::Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
+                           Maybe<Variant<double, KeyframeEffectOptions>> &&options) noexcept
+  {
+    Ref keyframeEffect = AdoptRef(*new KeyframeEffect(target, {}));
+    keyframeEffect->_document = CreateWeakPtr(&document);
+
+    if (options)
+    {
+      OptionalEffectTiming timing;
+      auto &optionsValue = *options;
+      if (const auto *duration = std::get_if<double>(&optionsValue))
+      {
+        timing.Duration = Variant<double, dom::DOMString> {*duration};
+      }
+      else
+      {
+        auto &keyframeEffectOptions = std::get<KeyframeEffectOptions>(optionsValue);
+
+        auto setPseudoElementResult = keyframeEffect->SetPseudoElement(keyframeEffectOptions.PseudoElement);
+        if (setPseudoElementResult.HasException())
+        {
+          return setPseudoElementResult.ReleaseException();
+        }
+
+        auto convertedDuration = keyframeEffectOptions.DurationAsDoubleOrString();
+        if (!convertedDuration)
+        {
+          return dom::Exception {dom::ExceptionCode::TypeError};
+        }
+
+        timing = {
+          .Duration = *convertedDuration,
+          .Iterations = keyframeEffectOptions.Iterations,
+          .Delay = keyframeEffectOptions.Delay,
+          .EndDelay = keyframeEffectOptions.EndDelay,
+          .IterationStart = keyframeEffectOptions.IterationStart,
+          .Easing = keyframeEffectOptions.Easing,
+          .Fill = keyframeEffectOptions.Fill,
+          .Direction = keyframeEffectOptions.Direction,
+        };
+
+        keyframeEffect->SetComposite(keyframeEffectOptions.Composite);
+        keyframeEffect->SetIterationComposite(keyframeEffectOptions.IterationComposite);
+      }
+      auto updateTimingResult = keyframeEffect->UpdateTiming(document, timing);
+      if (updateTimingResult.HasException())
+      {
+        return updateTimingResult.ReleaseException();
+      }
+    }
+
+    auto processKeyframesResult = keyframeEffect->ProcessKeyframes(document, krys::move(keyframes));
+    if (processKeyframesResult.HasException())
+    {
+      return processKeyframesResult.ReleaseException();
+    }
+
+    return keyframeEffect;
+  }
+
+  Ref<KeyframeEffect> KeyframeEffect::Create(Ref<KeyframeEffect> &&source) noexcept
+  {
+    Ref keyframeEffect = AdoptRef(*new KeyframeEffect(nullptr, {}));
+    keyframeEffect->CopyPropertiesFromSource(krys::move(source));
+    return keyframeEffect;
   }
 
   Ref<KeyframeEffect>
@@ -86,6 +959,524 @@ namespace krys::boo
     }
   }
 
+  void KeyframeEffect::CopyPropertiesFromSource(Ref<KeyframeEffect> &&source) noexcept
+  {
+    _target = source->_target;
+    _pseudoElementIdentifier = source->_pseudoElementIdentifier;
+    _document = source->_document;
+    _compositeOperation = source->_compositeOperation;
+    _iterationCompositeOperation = source->_iterationCompositeOperation;
+
+    List<ParsedKeyframe> parsedKeyframes;
+    for (const auto &sourceParsedKeyframe : source->_parsedKeyframes)
+    {
+      ParsedKeyframe parsedKeyframe;
+      parsedKeyframe.Easing = sourceParsedKeyframe.Easing;
+      parsedKeyframe.Offset = sourceParsedKeyframe.Offset;
+      parsedKeyframe.Composite = sourceParsedKeyframe.Composite;
+      parsedKeyframe.StyleStrings = sourceParsedKeyframe.StyleStrings;
+      parsedKeyframe.CustomStyleStrings = sourceParsedKeyframe.CustomStyleStrings;
+      parsedKeyframe.ComputedOffset = sourceParsedKeyframe.ComputedOffset;
+      parsedKeyframe.TimingFunction = sourceParsedKeyframe.TimingFunction;
+      parsedKeyframe.Style = sourceParsedKeyframe.Style->MutableCopy();
+      parsedKeyframes.push_back(krys::move(parsedKeyframe));
+    }
+    _parsedKeyframes = krys::move(parsedKeyframes);
+
+    SetFill(source->Fill());
+    SetDelay(source->SpecifiedDelay());
+    SetEndDelay(source->SpecifiedEndDelay());
+    SetDirection(source->Direction());
+    (void)SetIterations(source->Iterations());
+    SetTimingFunction(ShareRefPtr(source->TimingFunction()));
+    (void)SetIterationStart(source->IterationStart());
+    SetIterationDuration(source->SpecifiedIterationDuration());
+
+    BlendingKeyframes blendingKeyframes(_blendingKeyframes.Identifier());
+    blendingKeyframes.CopyKeyframes(source->_blendingKeyframes);
+    SetBlendingKeyframes(krys::move(blendingKeyframes));
+  }
+
+  auto KeyframeEffect::GetKeyframes() noexcept -> List<ComputedKeyframe>
+  {
+    // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffectreadonly-getkeyframes
+
+    if (RefPtr styleOriginatedAnimation = ShareRefPtr(DynamicDowncast<StyleOriginatedAnimation>(Animation())))
+    {
+      styleOriginatedAnimation->FlushPendingStyleChanges();
+    }
+
+    // FIXME: Updating the computed offsets of keyframes in named timeline ranges
+    // (`updateComputedKeyframeOffsetsIfNeeded`), once there are view timelines.
+
+    List<ComputedKeyframe> computedKeyframes;
+
+    if (!_parsedKeyframes.empty() || _animationType == WebAnimationType::WebAnimation
+        || !_blendingKeyframes.ContainsAnimatableCSSProperty())
+    {
+      for (size_t i = 0; i < _parsedKeyframes.size(); ++i)
+      {
+        const auto &parsedKeyframe = _parsedKeyframes[i];
+        ComputedKeyframe computedKeyframe {static_cast<const ComputedKeyframe &>(parsedKeyframe)};
+        for (auto &[cssPropertyId, stringValue] : computedKeyframe.StyleStrings)
+        {
+          if (cssPropertyId == css::PropertyId::Custom)
+          {
+            continue;
+          }
+          if (auto cssValue = parsedKeyframe.Style->GetPropertyCSSValue(cssPropertyId))
+          {
+            stringValue = cssValue->CssText(css::DefaultSerialisationContext());
+          }
+        }
+        computedKeyframe.Easing = TimingFunctionForKeyframeAtIndex(i)->CssText();
+        computedKeyframes.push_back(krys::move(computedKeyframe));
+      }
+      return computedKeyframes;
+    }
+
+    RefPtr target = _target;
+    const auto *lastStyleChangeEventStyle = TargetStyleable()->LastStyleChangeEventStyle();
+    const auto &elementStyle = lastStyleChangeEventStyle ? *lastStyleChangeEventStyle : CurrentStyle();
+
+    style::Extractor computedStyleExtractor {target.get(), false, _pseudoElementIdentifier};
+
+    BlendingKeyframes computedBlendingKeyframes(_blendingKeyframes.Identifier());
+    computedBlendingKeyframes.CopyKeyframes(_blendingKeyframes);
+
+    // FIXME: Or when there's an active view timeline, once there are view timelines.
+    if (computedBlendingKeyframes.HasKeyframeNotUsingRangeOffset())
+    {
+      computedBlendingKeyframes.FillImplicitKeyframes(*this, elementStyle);
+    }
+
+    auto keyframeRules = [&]() -> List<Ref<css::KeyframeRule>>
+    {
+      RefPtr cssAnimation = ShareRefPtr(DynamicDowncast<CSSAnimation>(Animation()));
+      if (!cssAnimation)
+      {
+        return {};
+      }
+
+      if (!_target || !_target->IsConnected())
+      {
+        return {};
+      }
+
+      const auto &backingStyleAnimation = cssAnimation->BackingStyleAnimation();
+      auto *styleScope =
+        style::Scope::ForOrdinal(*_target, backingStyleAnimation.GetName().TryKeyframesName()->ScopeOrdinal);
+      if (!styleScope)
+      {
+        return {};
+      }
+
+      return styleScope->GetResolver().KeyframeRulesForName(
+        computedBlendingKeyframes.KeyframesName(), backingStyleAnimation.GetTimingFunction().Value.get());
+    }();
+
+    auto matchingStyleRuleKeyframe = [&](const BlendingKeyframe &keyframe) -> css::KeyframeRule *
+    {
+      auto *cssAnimation = DynamicDowncast<CSSAnimation>(Animation());
+      if (!cssAnimation)
+      {
+        return nullptr;
+      }
+
+      const auto &backingStyleAnimation = cssAnimation->BackingStyleAnimation();
+      auto defaultCompositeOperation = backingStyleAnimation.GetCompositeOperation();
+      RefPtr<boo::TimingFunction> defaultTimingFunction = backingStyleAnimation.GetTimingFunction().Value;
+
+      auto compositeOperation = keyframe.CompositeOperation().value_or(defaultCompositeOperation);
+      RefPtr<boo::TimingFunction> timingFunction = ShareRefPtr(keyframe.GetTimingFunction());
+      if (!timingFunction)
+      {
+        timingFunction = defaultTimingFunction;
+      }
+
+      auto compositeOperationForStyleRuleKeyframe = [&](const Ref<css::KeyframeRule> &styleRuleKeyframe)
+      {
+        if (auto compositeOperationCSSValue =
+              styleRuleKeyframe->Properties().GetPropertyCSSValue(css::PropertyId::AnimationComposition))
+        {
+          if (auto keyframeCompositeOperation = ToCompositeOperation(*compositeOperationCSSValue))
+          {
+            return *keyframeCompositeOperation;
+          }
+        }
+        return defaultCompositeOperation;
+      };
+
+      auto timingFunctionForStyleRuleKeyframe =
+        [&](const Ref<css::KeyframeRule> &styleRuleKeyframe) -> RefPtr<const boo::TimingFunction>
+      {
+        if (auto timingFunctionCSSValue =
+              styleRuleKeyframe->Properties().GetPropertyCSSValue(css::PropertyId::AnimationTimingFunction))
+        {
+          if (auto keyframeTimingFunction = style::CreateTimingFunctionDeprecated(*timingFunctionCSSValue))
+          {
+            return keyframeTimingFunction;
+          }
+        }
+        if (defaultTimingFunction)
+        {
+          return defaultTimingFunction;
+        }
+        return ShareRefPtr<const boo::TimingFunction>(&CubicBezierTimingFunction::DefaultTimingFunction());
+      };
+
+      const auto &specifiedOffset = keyframe.SpecifiedOffset();
+      css::KeyframeRule::Key key {style::ConvertSingleAnimationRangeNameToValueId(specifiedOffset.Name),
+                                  specifiedOffset.Value};
+
+      for (const auto &keyframeRule : keyframeRules)
+      {
+        if (compositeOperationForStyleRuleKeyframe(keyframeRule) != compositeOperation)
+        {
+          continue;
+        }
+        if (timingFunctionForStyleRuleKeyframe(keyframeRule).get() != timingFunction.get())
+        {
+          continue;
+        }
+        for (const auto &keyframeRuleKey : keyframeRule->Keys())
+        {
+          if (keyframeRuleKey == key)
+          {
+            return keyframeRule.get();
+          }
+        }
+      }
+      return nullptr;
+    };
+
+    auto styleProperties = css::MutableStyleProperties::Create();
+    if (_animationType == WebAnimationType::CSSAnimation && _target->IsConnected())
+    {
+      Maybe<style::PseudoElementRequest> pseudoElementRequest;
+      if (_pseudoElementIdentifier)
+      {
+        pseudoElementRequest = style::PseudoElementRequest(*_pseudoElementIdentifier);
+      }
+      auto matchingRules = _target->StyleResolver().PseudoStyleRulesForElement(
+        target.get(), pseudoElementRequest, style::Resolver::AllCSSRules);
+      for (const auto &matchedRule : matchingRules)
+      {
+        (void)styleProperties->MergeAndOverrideOnConflict(matchedRule->Properties());
+      }
+      if (auto *styledElement = DynamicDowncast<dom::StyledElement>(*_target);
+          styledElement && !_pseudoElementIdentifier)
+      {
+        if (const auto *inlineProperties = styledElement->InlineStyle())
+        {
+          (void)styleProperties->MergeAndOverrideOnConflict(*inlineProperties);
+        }
+      }
+    }
+
+    List<ComputedKeyframe> computedKeyframesWithTimelineRangeOffset;
+    List<ComputedKeyframe> computedKeyframesWithDoubleOffset;
+
+    for (const auto &keyframe : computedBlendingKeyframes)
+    {
+      const auto &style = *keyframe.Style();
+      auto *keyframeRule = matchingStyleRuleKeyframe(keyframe);
+
+      ComputedKeyframe computedKeyframe;
+      if (keyframe.UsesRangeOffset())
+      {
+        computedKeyframe.Offset = TimelineRangeOffsetFromSpecifiedOffset(keyframe.SpecifiedOffset());
+      }
+      else
+      {
+        computedKeyframe.Offset = keyframe.SpecifiedOffset().Value;
+      }
+      computedKeyframe.ComputedOffset = keyframe.Offset();
+      // For CSS transitions, all keyframes should return "linear" since the effect's global timing function
+      // applies.
+      computedKeyframe.Easing = Animation() && Is<CSSTransition>(*Animation())
+                                  ? dom::DOMString(u8"linear")
+                                  : TimingFunctionForBlendingKeyframe(keyframe)->CssText();
+
+      if (auto compositeOperation = keyframe.CompositeOperation())
+      {
+        computedKeyframe.Composite = ToCompositeOperationOrAuto(*compositeOperation);
+      }
+
+      auto addPropertyToKeyframe = [&](css::PropertyId cssPropertyId)
+      {
+        dom::DOMString styleString;
+        if (keyframeRule)
+        {
+          if (auto cssValue = keyframeRule->Properties().GetPropertyCSSValue(cssPropertyId))
+          {
+            if (!cssValue->HasVariableReferences())
+            {
+              styleString = keyframeRule->Properties().GetPropertyValue(cssPropertyId);
+            }
+          }
+        }
+        if (styleString.empty())
+        {
+          if (auto cssValue = styleProperties->GetPropertyCSSValue(cssPropertyId))
+          {
+            if (!cssValue->HasVariableReferences())
+            {
+              styleString = styleProperties->GetPropertyValue(cssPropertyId);
+            }
+          }
+        }
+        if (styleString.empty())
+        {
+          styleString = computedStyleExtractor.PropertyValueSerialisationInStyle(
+            style, cssPropertyId, css::DefaultSerialisationContext(), css::ValuePool::MainThreadPool(),
+            nullptr, style::ExtractorState::PropertyValueType::Computed);
+        }
+        computedKeyframe.StyleStrings.insert_or_assign(cssPropertyId, styleString);
+      };
+
+      auto addCustomPropertyToKeyframe = [&](const css::CSSOMStringAtom &customProperty)
+      {
+        dom::DOMString styleString;
+        if (keyframeRule)
+        {
+          if (auto cssValue = keyframeRule->Properties().GetCustomPropertyCSSValue(customProperty.View()))
+          {
+            if (!cssValue->HasVariableReferences())
+            {
+              styleString = keyframeRule->Properties().GetCustomPropertyValue(customProperty.View());
+            }
+          }
+        }
+        if (styleString.empty())
+        {
+          if (auto cssValue = styleProperties->GetCustomPropertyCSSValue(customProperty.View()))
+          {
+            if (!cssValue->HasVariableReferences())
+            {
+              styleString = styleProperties->GetCustomPropertyValue(customProperty.View());
+            }
+          }
+        }
+        if (styleString.empty())
+        {
+          styleString = computedStyleExtractor.CustomPropertyValueSerialisationInStyle(
+            style, customProperty, css::DefaultSerialisationContext());
+        }
+        computedKeyframe.CustomStyleStrings.insert_or_assign(customProperty, styleString);
+      };
+
+      for (const auto &property : keyframe.Properties())
+      {
+        krys::SwitchOn(
+          property, [&](css::PropertyId cssProperty) { addPropertyToKeyframe(cssProperty); },
+          [&](const css::CSSOMStringAtom &customProperty)
+          {
+            if (_animationType != WebAnimationType::CSSAnimation)
+            {
+              addCustomPropertyToKeyframe(customProperty);
+            }
+          });
+      }
+
+      // FIXME: this is so that we mimic the Chrome behavior since this isn't spec'd out, but it makes little
+      // sense to me. Items ought to be sorted by computed offset just like BlendingKeyframes would organize
+      // its keyframes. https://github.com/w3c/csswg-drafts/issues/11467
+      if (std::holds_alternative<double>(computedKeyframe.Offset))
+      {
+        computedKeyframesWithDoubleOffset.push_back(krys::move(computedKeyframe));
+      }
+      else
+      {
+        computedKeyframesWithTimelineRangeOffset.push_back(krys::move(computedKeyframe));
+      }
+    }
+
+    computedKeyframes.insert(computedKeyframes.end(),
+                             std::make_move_iterator(computedKeyframesWithDoubleOffset.begin()),
+                             std::make_move_iterator(computedKeyframesWithDoubleOffset.end()));
+    computedKeyframes.insert(computedKeyframes.end(),
+                             std::make_move_iterator(computedKeyframesWithTimelineRangeOffset.begin()),
+                             std::make_move_iterator(computedKeyframesWithTimelineRangeOffset.end()));
+
+    return computedKeyframes;
+  }
+
+  dom::ExceptionOr<void> KeyframeEffect::SetBindingsKeyframes(dom::Document &document,
+                                                              KeyframesInput &&keyframesInput) noexcept
+  {
+    auto retVal = SetKeyframes(document, krys::move(keyframesInput));
+    if (!retVal.HasException())
+    {
+      if (RefPtr cssAnimation = ShareRefPtr(DynamicDowncast<CSSAnimation>(Animation())))
+      {
+        cssAnimation->EffectKeyframesWereSetUsingBindings();
+      }
+    }
+    return retVal;
+  }
+
+  dom::ExceptionOr<void> KeyframeEffect::SetKeyframes(dom::Document &document,
+                                                      KeyframesInput &&keyframesInput) noexcept
+  {
+    auto processKeyframesResult = ProcessKeyframes(document, krys::move(keyframesInput));
+    if (!processKeyframesResult.HasException() && Animation())
+    {
+      Animation()->EffectTimingDidChange();
+
+      // Need a full style invalidation since the new keyframes may interact differently with the base style.
+      if (auto target = TargetStyleable())
+      {
+        target->Element.InvalidateStyleInternal();
+      }
+    }
+
+    return processKeyframesResult;
+  }
+
+  dom::ExceptionOr<void> KeyframeEffect::ProcessKeyframes(dom::Document &document,
+                                                          KeyframesInput &&keyframesInput) noexcept
+  {
+    Ref protectedDocument = ShareRef(document);
+
+    // 1. If object is null, return an empty sequence of keyframes.
+    if (std::holds_alternative<std::nullptr_t>(keyframesInput))
+    {
+      return {};
+    }
+
+    // 2. Let processed keyframes be an empty sequence of keyframes.
+    List<ParsedKeyframe> parsedKeyframes;
+
+    // 3. to 5. Perform the steps corresponding to the first matching condition from below,
+    List<dom::DOMString> unusedEasings;
+    if (auto *keyframeList = std::get_if<List<InputKeyframe>>(&keyframesInput))
+    {
+      auto retVal = ProcessIterableKeyframes(document, krys::move(*keyframeList), parsedKeyframes);
+      if (retVal.HasException())
+      {
+        return retVal.ReleaseException();
+      }
+    }
+    else
+    {
+      auto retVal = ProcessPropertyIndexedKeyframes(
+        document, krys::move(std::get<InputPropertyIndexedKeyframes>(keyframesInput)), parsedKeyframes,
+        unusedEasings);
+      if (retVal.HasException())
+      {
+        return retVal.ReleaseException();
+      }
+    }
+
+    // 6. If processed keyframes is not loosely sorted by offset, throw a TypeError and abort these steps.
+    // 7. If there exist any keyframe in processed keyframes whose keyframe offset is non-null and less than
+    //    zero or greater than one, throw a TypeError and abort these steps.
+    double lastNonNullOffset = -1;
+    for (const auto &keyframe : parsedKeyframes)
+    {
+      const auto *doubleOffset = std::get_if<double>(&keyframe.Offset);
+      if (!doubleOffset)
+      {
+        continue;
+      }
+      auto offset = *doubleOffset;
+      if (offset < lastNonNullOffset || offset < 0 || offset > 1)
+      {
+        return dom::Exception {dom::ExceptionCode::TypeError};
+      }
+      lastNonNullOffset = offset;
+    }
+
+    // We take a slight detour from the spec text and compute the missing keyframe offsets right away since
+    // they can be computed up-front.
+    ComputeMissingKeyframeOffsets(parsedKeyframes);
+
+    css::ParserContext parserContext(document);
+
+    // 8. For each frame in processed keyframes, perform the following steps:
+    for (auto &keyframe : parsedKeyframes)
+    {
+      // Let the timing function of frame be the result of parsing the “easing” property on frame using the
+      // CSS syntax defined for the easing property of the AnimationEffectTiming interface. If parsing the
+      // “easing” property fails, throw a TypeError and abort this procedure.
+
+      // FIXME: Determine the how calc() and relative units should be resolved and switch to the
+      // non-deprecated parsing function.
+      auto timingFunctionResult =
+        css::PropertyParserHelpers::ParseEasingFunctionDeprecated(keyframe.Easing, parserContext);
+      if (!timingFunctionResult)
+      {
+        return dom::Exception {dom::ExceptionCode::TypeError};
+      }
+      keyframe.TimingFunction = krys::move(timingFunctionResult);
+    }
+
+    // 9. Parse each of the values in unused easings using the CSS syntax defined for easing property of the
+    //    AnimationEffectTiming interface, and if any of the values fail to parse, throw a TypeError and abort
+    //    this procedure.
+    for (const auto &easing : unusedEasings)
+    {
+      // FIXME: Determine the how calc() and relative units should be resolved and switch to the
+      // non-deprecated parsing function.
+      if (!css::PropertyParserHelpers::ParseEasingFunctionDeprecated(easing, parserContext))
+      {
+        return dom::Exception {dom::ExceptionCode::TypeError};
+      }
+    }
+
+    _parsedKeyframes = krys::move(parsedKeyframes);
+
+    ClearBlendingKeyframes();
+
+    Invalidate();
+
+    return {};
+  }
+
+  void KeyframeEffect::UpdateBlendingKeyframes(RenderStyle &elementStyle,
+                                               const style::ResolutionContext &resolutionContext) noexcept
+  {
+    // FIXME: Updating the computed offsets of keyframes in named timeline ranges
+    // (`updateComputedKeyframeOffsetsIfNeeded`), once there are view timelines.
+
+    if (!_blendingKeyframes.IsEmpty() || !_target)
+    {
+      return;
+    }
+
+    BlendingKeyframes blendingKeyframes(_blendingKeyframes.Identifier());
+    auto &styleResolver = _target->StyleResolver();
+
+    for (const auto &keyframe : _parsedKeyframes)
+    {
+      BlendingKeyframe blendingKeyframe(SpecifiedOffsetForParsedKeyframe(keyframe), nullptr);
+      blendingKeyframe.SetTimingFunction(keyframe.TimingFunction->Clone());
+
+      switch (keyframe.Composite)
+      {
+        case CompositeOperationOrAuto::Replace:
+          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Replace);
+          break;
+        case CompositeOperationOrAuto::Add:
+          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Add);
+          break;
+        case CompositeOperationOrAuto::Accumulate:
+          blendingKeyframe.SetCompositeOperation(boo::CompositeOperation::Accumulate);
+          break;
+        case CompositeOperationOrAuto::Auto: break;
+      }
+
+      auto keyframeRule = css::KeyframeRule::Create(keyframe.Style->ImmutableCopyIfNeeded());
+      blendingKeyframe.SetStyle(styleResolver.StyleForKeyframe(*_target, elementStyle, resolutionContext,
+                                                               *keyframeRule, blendingKeyframe));
+      blendingKeyframes.Insert(krys::move(blendingKeyframe));
+      blendingKeyframes.UpdatePropertiesMetadata(keyframeRule->Properties());
+    }
+
+    SetBlendingKeyframes(krys::move(blendingKeyframes));
+  }
+
   const AnimatableCSSPropertySet &KeyframeEffect::AnimatedProperties() noexcept
   {
     if (!_blendingKeyframes.IsEmpty())
@@ -93,7 +1484,21 @@ namespace krys::boo
       return _blendingKeyframes.Properties();
     }
 
-    // FIXME: The properties of the parsed keyframes, once there are keyframes from scripts.
+    if (_animatedProperties.empty())
+    {
+      for (const auto &keyframe : _parsedKeyframes)
+      {
+        for (const auto &[keyframeCustomProperty, value] : keyframe.CustomStyleStrings)
+        {
+          _animatedProperties.insert(keyframeCustomProperty);
+        }
+        for (const auto &[keyframeProperty, value] : keyframe.StyleStrings)
+        {
+          _animatedProperties.insert(keyframeProperty);
+        }
+      }
+    }
+
     return _animatedProperties;
   }
 
@@ -104,8 +1509,18 @@ namespace krys::boo
       return _blendingKeyframes.ContainsProperty(property);
     }
 
-    // FIXME: The properties of the parsed keyframes, once there are keyframes from scripts.
-    return false;
+    return krys::SwitchOn(
+      property,
+      [&](css::PropertyId cssProperty)
+      {
+        return std::ranges::any_of(_parsedKeyframes, [&](const auto &keyframe)
+                                   { return keyframe.StyleStrings.contains(cssProperty); });
+      },
+      [&](const css::CSSOMStringAtom &customProperty)
+      {
+        return std::ranges::any_of(_parsedKeyframes, [&](const auto &keyframe)
+                                   { return keyframe.CustomStyleStrings.contains(customProperty); });
+      });
   }
 
   void KeyframeEffect::ClearBlendingKeyframes() noexcept
@@ -451,6 +1866,27 @@ namespace krys::boo
     return {};
   }
 
+  dom::ExceptionOr<void> KeyframeEffect::SetPseudoElement(const css::CSSOMString &pseudoElement) noexcept
+  {
+    // https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
+    auto [parsed, pseudoElementIdentifier] = PseudoElementIdentifierFromString(pseudoElement, Document());
+    if (!parsed)
+    {
+      return dom::Exception {dom::ExceptionCode::SyntaxError, u8"Parsing pseudo-element selector failed"};
+    }
+
+    if (_pseudoElementIdentifier == pseudoElementIdentifier)
+    {
+      return {};
+    }
+
+    auto previousTargetStyleable = TargetStyleable();
+    _pseudoElementIdentifier = pseudoElementIdentifier;
+    DidChangeTargetStyleable(previousTargetStyleable);
+
+    return {};
+  }
+
   void
     KeyframeEffect::DidChangeTargetStyleable(const Maybe<style::Styleable> &previousTargetStyleable) noexcept
   {
@@ -482,7 +1918,7 @@ namespace krys::boo
   }
 
   EnumSet<AnimationImpact>
-    KeyframeEffect::Apply(RenderStyle &targetStyle, const style::ResolutionContext &,
+    KeyframeEffect::Apply(RenderStyle &targetStyle, const style::ResolutionContext &resolutionContext,
                           EndpointInclusiveActiveInterval endpointInclusiveActiveInterval) noexcept
   {
     EnumSet<AnimationImpact> impact;
@@ -491,7 +1927,7 @@ namespace krys::boo
       return impact;
     }
 
-    // FIXME: Resolving the parsed keyframes into blending keyframes, once there are keyframes from scripts.
+    UpdateBlendingKeyframes(targetStyle, resolutionContext);
 
     auto computedTiming = GetComputedTiming(UseCachedCurrentTime::Yes, endpointInclusiveActiveInterval);
     if (_phaseAtLastApplication != computedTiming.Phase)
@@ -849,7 +2285,15 @@ namespace krys::boo
 
   const TimingFunction *KeyframeEffect::TimingFunctionForKeyframeAtIndex(size_t index) const noexcept
   {
-    // FIXME: The timing functions of the parsed keyframes, once there are keyframes from scripts.
+    if (!_parsedKeyframes.empty())
+    {
+      if (index >= _parsedKeyframes.size())
+      {
+        return nullptr;
+      }
+      return _parsedKeyframes[index].TimingFunction.get();
+    }
+
     if (index >= _blendingKeyframes.Size())
     {
       return nullptr;
@@ -1159,8 +2603,23 @@ namespace krys::boo
       {
         return false;
       }
-      // FIXME: The direction-aware properties of the parsed keyframes, once there are keyframes from scripts.
-      return !_blendingKeyframes.IsEmpty() && _blendingKeyframes.ContainsDirectionAwareProperty();
+      if (!_blendingKeyframes.IsEmpty())
+      {
+        return _blendingKeyframes.ContainsDirectionAwareProperty();
+      }
+
+      for (const auto &keyframe : _parsedKeyframes)
+      {
+        for (const auto &[property, value] : keyframe.StyleStrings)
+        {
+          if (css::Property::IsDirectionAwareProperty(property))
+          {
+            return true;
+          }
+        }
+      }
+
+      return false;
     }();
 
     auto usesAnchorFunctions = _blendingKeyframes.UsesAnchorFunctions();
@@ -1740,6 +3199,24 @@ namespace krys::boo
     Invalidate();
   }
 
+  boo::CompositeOperation KeyframeEffect::BindingsComposite() const noexcept
+  {
+    if (RefPtr styleOriginatedAnimation = ShareRefPtr(DynamicDowncast<StyleOriginatedAnimation>(Animation())))
+    {
+      styleOriginatedAnimation->FlushPendingStyleChanges();
+    }
+    return Composite();
+  }
+
+  void KeyframeEffect::SetBindingsComposite(boo::CompositeOperation compositeOperation) noexcept
+  {
+    SetComposite(compositeOperation);
+    if (RefPtr cssAnimation = ShareRefPtr(DynamicDowncast<CSSAnimation>(Animation())))
+    {
+      cssAnimation->EffectCompositeOperationWasSetUsingBindings();
+    }
+  }
+
   void KeyframeEffect::SetComposite(boo::CompositeOperation compositeOperation) noexcept
   {
     if (_compositeOperation == compositeOperation)
@@ -1790,9 +3267,57 @@ namespace krys::boo
       krys_debug_assert(Document());
       const auto &settings = Document()->GetSettings();
 
-      // FIXME: The parsed keyframes, before keyframes are computed, once there are keyframes from scripts.
       if (_blendingKeyframes.IsEmpty())
       {
+        // We may not have computed keyframes yet, so we should check our parsed keyframes in the same way we
+        // checked computed keyframes.
+        for (const auto &keyframe : _parsedKeyframes)
+        {
+          // We keep three property lists, one which contains all properties seen across keyframes which will
+          // be filtered eventually to only contain implicit properties, one containing properties seen on the
+          // 0% keyframe and one containing properties seen on the 100% keyframe.
+          HashSet<css::PropertyId> implicitProperties;
+          HashSet<css::PropertyId> explicitZeroProperties;
+          HashSet<css::PropertyId> explicitOneProperties;
+          for (const auto &propertyReference : *keyframe.Style)
+          {
+            auto computedOffset = keyframe.ComputedOffset;
+            if (std::isnan(computedOffset))
+            {
+              continue;
+            }
+            auto property = propertyReference.Id();
+            // All properties may end up being implicit.
+            implicitProperties.insert(property);
+            if (!computedOffset)
+            {
+              explicitZeroProperties.insert(property);
+            }
+            else if (computedOffset == 1)
+            {
+              explicitOneProperties.insert(property);
+            }
+          }
+          // Let's remove all properties found on the 0% and 100% keyframes from the list of potential
+          // implicit properties.
+          for (auto explicitProperty : explicitZeroProperties)
+          {
+            implicitProperties.erase(explicitProperty);
+          }
+          for (auto explicitProperty : explicitOneProperties)
+          {
+            implicitProperties.erase(explicitProperty);
+          }
+          // At this point all properties left in implicitProperties are known to be implicit, so we must
+          // check them for any accelerated property.
+          for (auto implicitProperty : implicitProperties)
+          {
+            if (style::interpolation::IsAccelerated(implicitProperty, settings))
+            {
+              return true;
+            }
+          }
+        }
         return false;
       }
 
@@ -1851,22 +3376,43 @@ namespace krys::boo
       krys_debug_assert(Document());
       const auto &settings = Document()->GetSettings();
 
-      // FIXME: The parsed keyframes, before keyframes are computed, once there are keyframes from scripts.
-      for (const auto &keyframe : _blendingKeyframes)
+      if (!_blendingKeyframes.IsEmpty())
       {
-        // If we find a keyframe with a composite operation, we check whether one
-        // of its properties is accelerated.
-        if (auto keyframeComposite = keyframe.CompositeOperation())
+        for (const auto &keyframe : _blendingKeyframes)
         {
-          if (*keyframeComposite != boo::CompositeOperation::Replace)
+          // If we find a keyframe with a composite operation, we check whether one
+          // of its properties is accelerated.
+          if (auto keyframeComposite = keyframe.CompositeOperation())
           {
-            for (const auto &property : keyframe.Properties())
+            if (*keyframeComposite != boo::CompositeOperation::Replace)
             {
-              if (style::interpolation::IsAccelerated(property, settings))
+              for (const auto &property : keyframe.Properties())
               {
-                return true;
+                if (style::interpolation::IsAccelerated(property, settings))
+                {
+                  return true;
+                }
               }
             }
+          }
+        }
+        return false;
+      }
+
+      // We may not have computed keyframes yet, so we should check our parsed keyframes in the same way we
+      // checked computed keyframes.
+      for (const auto &keyframe : _parsedKeyframes)
+      {
+        if (keyframe.Composite != CompositeOperationOrAuto::Add
+            && keyframe.Composite != CompositeOperationOrAuto::Accumulate)
+        {
+          continue;
+        }
+        for (const auto &property : *keyframe.Style)
+        {
+          if (style::interpolation::IsAccelerated(property.Id(), settings))
+          {
+            return true;
           }
         }
       }

@@ -102,6 +102,14 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region DocumentOrShadowRoot Mixin (Web Animations) - https://drafts.csswg.org/web-animations-1/#extensions-to-the-documentorshadowroot-interface-mixin
+
+    /// @brief The relevant animations whose effects target elements in this shadow tree, in composite order.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-documentorshadowroot-getanimations
+    KRYS_NODISCARD List<RefPtr<WebAnimation>> GetAnimations() noexcept;
+
+#pragma endregion
+
     /// @brief Whether the focused element is in this shadow tree (the host matches `:focus`).
     KRYS_NODISCARD bool ContainsFocusedElement() const noexcept
     {

@@ -296,4 +296,54 @@ namespace krys::boo::tests
     CHECK(stack->SortedEffects()[0]->Animation()->IsCSSTransition());
     CHECK(stack->SortedEffects()[1]->Animation()->IsCSSAnimation());
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "CSSAnimation: properties C++ overrides stop following the style",
+                   "[Animation][CSSAnimation]")
+  {
+    CSSAnimationFixture fixture {FadingBox(u8"fade 1s linear")};
+    auto &animation = fixture.OnlyAnimation(u8"box");
+    fixture.StartAnimations();
+
+    SECTION("pausing")
+    {
+      REQUIRE_FALSE(static_cast<WebAnimation &>(animation).BindingsPause().HasException());
+      fixture.Frame();
+      CHECK(animation.GetPlayState() == WebAnimation::PlayState::Paused);
+      // animation-play-state no longer plays or pauses it.
+      fixture.SetStyle(u8"box", u8"animation-play-state: paused");
+      fixture.Frame();
+      fixture.SetStyle(u8"box", u8"animation-play-state: running");
+      fixture.Frame();
+      CHECK(animation.GetPlayState() == WebAnimation::PlayState::Paused);
+    }
+
+    SECTION("updateTiming()")
+    {
+      auto &effect = *animation.GetKeyframeEffect();
+      REQUIRE_FALSE(
+        effect
+          .BindingsUpdateTiming(*fixture.Document,
+                                OptionalEffectTiming {.Duration = Variant<double, dom::DOMString> {4'000.0}})
+          .HasException());
+      fixture.SetStyle(u8"box", u8"animation-duration: 2s");
+      fixture.Frame();
+      CHECK(effect.SpecifiedIterationDuration() == Seconds {4});
+      // Properties it didn't give still follow the style.
+      fixture.SetStyle(u8"box", u8"animation-duration: 2s; animation-iteration-count: 3");
+      fixture.Frame();
+      CHECK(effect.Iterations() == 3);
+    }
+
+    SECTION("setKeyframes()")
+    {
+      auto &effect = *animation.GetKeyframeEffect();
+      InputKeyframe keyframe;
+      keyframe.Properties = {{u8"opacity", u8"0.5"}};
+      REQUIRE_FALSE(effect.SetBindingsKeyframes(*fixture.Document, List<InputKeyframe> {keyframe, keyframe})
+                      .HasException());
+      fixture.Frame();
+      CHECK(fixture.Opacity(u8"box") == Catch::Approx(0.5f));
+    }
+  }
 }

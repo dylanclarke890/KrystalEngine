@@ -5,14 +5,26 @@
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
+#include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
+#include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
+#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Style/Extractor.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace krys::boo
@@ -20,6 +32,7 @@ namespace krys::boo
   Ref<WebAnimation> WebAnimation::Create(dom::Document &document, AnimationEffect *effect) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
+    result->Initialize();
     result->SetEffect(ShareRefPtr(effect));
     result->SetTimeline(ShareRefPtr<AnimationTimeline>(&document.Timeline()));
     return result;
@@ -29,6 +42,7 @@ namespace krys::boo
                                          AnimationTimeline *timeline) noexcept
   {
     Ref<WebAnimation> result = AdoptRef(*new WebAnimation(document));
+    result->Initialize();
     result->SetEffect(ShareRefPtr(effect));
     if (timeline)
     {
@@ -47,7 +61,14 @@ namespace krys::boo
     return instances;
   }
 
-  WebAnimation::WebAnimation(dom::Document &document) noexcept : _document(CreateWeakPtr(&document))
+  void WebAnimation::Initialize() noexcept
+  {
+    _readyPromise->Resolve();
+  }
+
+  WebAnimation::WebAnimation(dom::Document &document) noexcept
+      : _readyPromise(AnimationPromise::Create(*this)), _finishedPromise(AnimationPromise::Create(*this)),
+        _document(CreateWeakPtr(&document))
   {
     Instances().insert(this);
   }
@@ -92,6 +113,16 @@ namespace krys::boo
   void WebAnimation::SetId(dom::DOMString &&id) noexcept
   {
     _id = krys::move(id);
+  }
+
+  void WebAnimation::SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept
+  {
+    SetEffect(krys::move(newEffect));
+  }
+
+  void WebAnimation::SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept
+  {
+    SetTimeline(krys::move(timeline));
   }
 
   void WebAnimation::SetEffect(RefPtr<AnimationEffect> &&newEffect) noexcept
@@ -274,7 +305,15 @@ namespace krys::boo
       {
         // 5. If previous play state is "finished" or "running":
         //    Schedule a pending play task.
+        // FIXME: re-creating the ready promise is not part of the spec but Chrome implements this behavior
+        // and it makes sense since the new start time won't be computed until the timeline is updated. This
+        // is covered by https://github.com/w3c/csswg-drafts/issues/11465.
+        auto wasAlreadyPending = Pending();
         _timeToRunPendingPlayTask = TimeToRunPendingTask::WhenReady;
+        if (!wasAlreadyPending)
+        {
+          _readyPromise = AnimationPromise::Create(*this);
+        }
       }
       else if (previousPlayState == PlayState::Paused && previousProgress)
       {
@@ -354,6 +393,44 @@ namespace krys::boo
     }
   }
 
+  bool WebAnimation::IsTimeValid(const Maybe<WebAnimationTime> &time) const noexcept
+  {
+    // https://drafts.csswg.org/web-animations-2/#validating-a-css-numberish-time
+    if (time && !time->IsValid())
+    {
+      return false;
+    }
+    if (_timeline && _timeline->IsProgressBased() && time && time->Time())
+    {
+      return false;
+    }
+    if ((!_timeline || _timeline->IsMonotonic()) && time && time->Percentage())
+    {
+      return false;
+    }
+    return true;
+  }
+
+  dom::ExceptionOr<void> WebAnimation::SetBindingsStartTime(const Maybe<WebAnimationTime> &startTime) noexcept
+  {
+    if (!IsTimeValid(startTime))
+    {
+      return dom::Exception {dom::ExceptionCode::TypeError};
+    }
+    SetStartTime(startTime);
+    return {};
+  }
+
+  dom::ExceptionOr<void>
+    WebAnimation::SetBindingsCurrentTime(const Maybe<WebAnimationTime> &currentTime) noexcept
+  {
+    if (!IsTimeValid(currentTime))
+    {
+      return dom::Exception {dom::ExceptionCode::TypeError};
+    }
+    return SetCurrentTime(currentTime);
+  }
+
   void WebAnimation::SetStartTime(Maybe<WebAnimationTime> newStartTime) noexcept
   {
     // https://drafts.csswg.org/web-animations-2/#setting-the-start-time-of-an-animation
@@ -362,7 +439,7 @@ namespace krys::boo
     // start
     //    time as the input.
     // 2. If valid start time is false, abort this procedure.
-    // FIXME: Validating the time, once there's the script interface.
+    // (We do this in SetBindingsStartTime())
 
     // 3. Set auto align start time to false.
     _autoAlignStartTime = false;
@@ -413,6 +490,7 @@ namespace krys::boo
     {
       _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
       _timeToRunPendingPlayTask = TimeToRunPendingTask::NotScheduled;
+      _readyPromise->Resolve();
     }
 
     // 11. Run the procedure to update an animation's finished state for animation with the did seek flag set
@@ -481,7 +559,7 @@ namespace krys::boo
     // time
     //    as the input.
     // 3. If valid seek time is false, abort this procedure.
-    // FIXME: Validating the time, once there's the script interface.
+    // (We do this up front in SetBindingsCurrentTime()).
 
     // 4. Set auto align start time to false.
     _autoAlignStartTime = false;
@@ -543,6 +621,7 @@ namespace krys::boo
       // 4. Cancel the pending pause task.
       _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
       // 5. Resolve animation's current ready promise with animation.
+      _readyPromise->Resolve();
     }
 
     // 3. Run the procedure to update an animation's finished state for animation with the did seek flag set
@@ -788,8 +867,15 @@ namespace krys::boo
 
       // 2. Reject the current finished promise with a DOMException named "AbortError".
       // 3. Set the [[PromiseIsHandled]] internal slot of the current finished promise to true.
+      if (!_finishedPromise->IsFulfilled())
+      {
+        html::EventLoop::Current().QueueMicrotask(
+          [finishedPromise = _finishedPromise]() mutable
+          { finishedPromise->Reject(dom::Exception {dom::ExceptionCode::AbortError}); });
+      }
+
       // 4. Let current finished promise be a new (pending) Promise object.
-      _finishedPromiseIsFulfilled = false;
+      _finishedPromise = AnimationPromise::Create(*this);
 
       // 5. Create an AnimationPlaybackEvent, cancelEvent.
       // 6. Set cancelEvent's type attribute to cancel.
@@ -935,7 +1021,18 @@ namespace krys::boo
 
     // 5. Reject animation's current ready promise with a DOMException named "AbortError".
     // 6. Set the [[PromiseIsHandled]] internal slot of animation’s current ready promise to true.
+    html::EventLoop::Current().QueueMicrotask(
+      [readyPromise = _readyPromise]() mutable
+      {
+        if (!readyPromise->IsFulfilled())
+        {
+          readyPromise->Reject(dom::Exception {dom::ExceptionCode::AbortError});
+        }
+      });
+
     // 7. Let animation's current ready promise be the result of creating a new resolved Promise object.
+    _readyPromise = AnimationPromise::Create(*this);
+    _readyPromise->Resolve();
   }
 
   dom::ExceptionOr<void> WebAnimation::Finish() noexcept
@@ -982,6 +1079,7 @@ namespace krys::boo
       // 2. Cancel the pending pause task.
       _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
       // 3. Resolve the current ready promise of animation with animation.
+      _readyPromise->Resolve();
     }
 
     // 7. If there is a pending play task and start time is resolved, cancel that task and resolve the current
@@ -989,6 +1087,7 @@ namespace krys::boo
     if (HasPendingPlayTask() && _startTime)
     {
       _timeToRunPendingPlayTask = TimeToRunPendingTask::NotScheduled;
+      _readyPromise->Resolve();
     }
 
     // 8. Run the procedure to update an animation's finished state animation with the did seek flag set to
@@ -1110,7 +1209,7 @@ namespace krys::boo
 
     // 5. If current finished state is true and the current finished promise is not yet resolved, perform the
     //    following steps:
-    if (currentFinishedState && !_finishedPromiseIsFulfilled)
+    if (currentFinishedState && !_finishedPromise->IsFulfilled())
     {
       AnimationDidFinish();
       if (synchronouslyNotify == SynchronouslyNotify::Yes)
@@ -1139,9 +1238,9 @@ namespace krys::boo
 
     // 6. If current finished state is false and animation's current finished promise is already resolved, set
     //    animation's current finished promise to a new (pending) Promise object.
-    if (!currentFinishedState && _finishedPromiseIsFulfilled)
+    if (!currentFinishedState && _finishedPromise->IsFulfilled())
     {
-      _finishedPromiseIsFulfilled = false;
+      _finishedPromise = AnimationPromise::Create(*this);
     }
 
     UpdateRelevance();
@@ -1160,7 +1259,7 @@ namespace krys::boo
     }
 
     // 2. Resolve animation's current finished promise object with animation.
-    _finishedPromiseIsFulfilled = true;
+    _finishedPromise->Resolve();
 
     // 3. Create an AnimationPlaybackEvent, finishEvent.
     // 4. Set finishEvent's type attribute to finish.
@@ -1209,6 +1308,7 @@ namespace krys::boo
     bool abortedPause = HasPendingPauseTask();
 
     // 2. Let has pending ready promise be a boolean flag that is initially false.
+    bool hasPendingReadyPromise = false;
 
     // 3. Let has finite timeline be true if animation has an associated timeline that is not monotonically
     //    increasing.
@@ -1278,6 +1378,7 @@ namespace krys::boo
     {
       _timeToRunPendingPauseTask = TimeToRunPendingTask::NotScheduled;
       _timeToRunPendingPlayTask = TimeToRunPendingTask::NotScheduled;
+      hasPendingReadyPromise = true;
     }
 
     // 10. If the following three conditions are all satisfied:
@@ -1296,6 +1397,10 @@ namespace krys::boo
     // 11. If has pending ready promise is false, let animation's current ready promise be a new promise in
     // the
     //     relevant Realm of animation.
+    if (!hasPendingReadyPromise)
+    {
+      _readyPromise = AnimationPromise::Create(*this);
+    }
 
     // 12. Schedule a task to run as soon as animation is ready.
     _timeToRunPendingPlayTask = TimeToRunPendingTask::WhenReady;
@@ -1381,6 +1486,10 @@ namespace krys::boo
     }
 
     // 4. Resolve animation's current ready promise with animation.
+    if (!_readyPromise->IsFulfilled())
+    {
+      _readyPromise->Resolve();
+    }
 
     // 5. Run the procedure to update an animation's finished state for animation with the did seek flag set
     // to
@@ -1443,16 +1552,22 @@ namespace krys::boo
     }
 
     // 6. Let has pending ready promise be a boolean flag that is initially false.
+    bool hasPendingReadyPromise = false;
 
     // 7. If animation has a pending play task, cancel that task and let has pending ready promise be true.
     if (HasPendingPlayTask())
     {
       _timeToRunPendingPlayTask = TimeToRunPendingTask::NotScheduled;
+      hasPendingReadyPromise = true;
     }
 
     // 8. If has pending ready promise is false, set animation's current ready promise to a new (pending)
     // Promise
     //    object.
+    if (!hasPendingReadyPromise)
+    {
+      _readyPromise = AnimationPromise::Create(*this);
+    }
 
     // 9. Schedule a task to be executed at the first possible moment where all of the following conditions
     // are
@@ -1471,6 +1586,11 @@ namespace krys::boo
     InvalidateEffect();
 
     return {};
+  }
+
+  dom::ExceptionOr<void> WebAnimation::BindingsReverse() noexcept
+  {
+    return Reverse();
   }
 
   dom::ExceptionOr<void> WebAnimation::Reverse() noexcept
@@ -1552,6 +1672,10 @@ namespace krys::boo
     _startTime = null;
 
     // 5. Resolve animation's current ready promise with animation.
+    if (!_readyPromise->IsFulfilled())
+    {
+      _readyPromise->Resolve();
+    }
 
     // 6. Run the procedure to update an animation's finished state for animation with the did seek flag set
     // to
@@ -1829,6 +1953,192 @@ namespace krys::boo
 
     _replaceState = replaceState;
     UpdateRelevance();
+  }
+
+  dom::ExceptionOr<void> WebAnimation::CommitStyles() noexcept
+  {
+    // https://drafts.csswg.org/web-animations-1/#commit-computed-styles
+
+    // 1. Let targets be the set of all effect targets for animation effects associated with animation.
+    RefPtr effect = ShareRefPtr(GetKeyframeEffect());
+
+    // 2. For each target in targets:
+    //
+    // 2.1 If target is not an element capable of having a style attribute (for example, it is a
+    // pseudo-element or is an element in a document format for which style attributes are not defined) throw
+    // a "NoModificationAllowedError" DOMException and abort these steps.
+    RefPtr styledElement =
+      ShareRefPtr(DynamicDowncast<dom::StyledElement>(effect ? effect->Target() : nullptr));
+    if (!styledElement || effect->TargetsPseudoElement())
+    {
+      return dom::Exception {dom::ExceptionCode::NoModificationAllowedError};
+    }
+
+    // 2.2 If, after applying any pending style changes, target is not being rendered, throw an
+    // "InvalidStateError" DOMException and abort these steps.
+    (void)styledElement->NodeDocument().UpdateStyleIfNeeded();
+    auto *renderer = styledElement->Renderer();
+    if (!renderer)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    // 2.3 Let inline style be the result of getting the CSS declaration block corresponding to target’s style
+    // attribute. If target does not have a style attribute, let inline style be a new empty CSS declaration
+    // block with the readonly flag unset and owner node set to target.
+
+    auto unanimatedStyle = [&]()
+    {
+      if (auto styleable = style::Styleable::FromRenderer(*renderer))
+      {
+        if (const auto *lastStyleChangeEventStyle = styleable->LastStyleChangeEventStyle())
+        {
+          return RenderStyle::Clone(*lastStyleChangeEventStyle);
+        }
+      }
+      // If we don't have a style for the last style change event, then the current renderer style cannot be
+      // animated.
+      return RenderStyle::Clone(renderer->Style());
+    }();
+
+    style::Extractor computedStyleExtractor {styledElement.get(), false, null};
+
+    css::ParserContext parserContext(styledElement->NodeDocument());
+    auto inlineStyle = [&]()
+    {
+      if (const auto *existingInlineStyle = styledElement->InlineStyle())
+      {
+        return existingInlineStyle->MutableCopy();
+      }
+      auto styleDeclaration = css::MutableStyleProperties::Create();
+      if (auto styleAttribute = styledElement->GetAttribute(dom::DOMStringAtom(Attributes::Style)))
+      {
+        (void)styleDeclaration->ParseDeclaration(*styleAttribute, parserContext);
+      }
+      return styleDeclaration;
+    }();
+
+    // We cannot use the keyframe effect stack directly here since effects that aren't relevant will not be
+    // represented and since commitStyles() uses endpoint-inclusive active intervals, an animation that was
+    // just finished, or is about to become active, would be disregarded.
+    const auto *unsortedAnimations = styledElement->Animations({});
+    krys_debug_assert(unsortedAnimations && !unsortedAnimations->empty());
+    List<RefPtr<WebAnimation>> sortedAnimations;
+    if (unsortedAnimations)
+    {
+      for (const auto &animation : *unsortedAnimations)
+      {
+        if (animation->GetPlayState() != WebAnimation::PlayState::Idle)
+        {
+          sortedAnimations.push_back(animation);
+        }
+      }
+    }
+    std::ranges::stable_sort(sortedAnimations, [](const auto &lhs, const auto &rhs)
+                             { return CompareAnimationsByCompositeOrder(*lhs, *rhs); });
+
+    auto commitProperty = [&](const AnimatableCSSProperty &property)
+    {
+      // 1. Let partialEffectStack be a copy of the effect stack for property on target.
+      // 2. If animation's replace state is removed, add all animation effects associated with animation whose
+      // effect target is target and which include property as a target property to partialEffectStack.
+      // 3. Remove from partialEffectStack any animation effects whose associated animation has a higher
+      // composite order than animation.
+      // 4. Let effect value be the result of calculating the result of partialEffectStack for property using
+      // target’s computed style (see § 5.4.3 Calculating the result of an effect stack) and setting the
+      // endpoint-inclusive active interval flag to true when calculating the animation effect phase (see §
+      // 4.6.6 Animation effect phases and states).
+      // 5. Set a CSS declaration property for effect value in inline style.
+      // 6. Update style attribute for inline style.
+
+      // We actually perform those steps in a different way: instead of building a copy of the sorted
+      // animation list and then removing stuff, we iterate through the sorted animation list and stop when
+      // we've found this animation's effect or when we've found an effect associated with an animation with a
+      // higher composite order.
+      auto animatedStyle = RenderStyle::ClonePtr(unanimatedStyle);
+      for (const auto &animation : sortedAnimations)
+      {
+        RefPtr effectInStack = ShareRefPtr(animation->GetKeyframeEffect());
+        if (!effectInStack)
+        {
+          continue;
+        }
+        if (effectInStack->Animation() != this
+            && !CompareAnimationsByCompositeOrder(*effectInStack->Animation(), *this))
+        {
+          break;
+        }
+        if (effectInStack->AnimatedProperties().contains(property))
+        {
+          (void)effectInStack->Animation()->Resolve(*animatedStyle, {nullptr},
+                                                    EndpointInclusiveActiveInterval::Yes);
+        }
+        if (effectInStack->Animation() == this)
+        {
+          break;
+        }
+      }
+      if (_replaceState == ReplaceState::Removed)
+      {
+        (void)effect->Animation()->Resolve(*animatedStyle, {nullptr}, EndpointInclusiveActiveInterval::Yes);
+      }
+      return krys::SwitchOn(
+        property,
+        [&](css::PropertyId propertyId)
+        {
+          auto string = computedStyleExtractor.PropertyValueSerialisationInStyle(
+            *animatedStyle, propertyId, css::DefaultSerialisationContext(), css::ValuePool::MainThreadPool(),
+            nullptr, style::ExtractorState::PropertyValueType::Computed);
+          if (string.empty())
+          {
+            return false;
+          }
+          auto resolvedCSSProperty =
+            css::Property::ResolveDirectionAwareProperty(propertyId, animatedStyle->GetWritingMode());
+          return inlineStyle->SetProperty(resolvedCSSProperty, string, parserContext);
+        },
+        [&](const css::CSSOMStringAtom &customProperty)
+        {
+          auto string = computedStyleExtractor.CustomPropertyValueSerialisationInStyle(
+            *animatedStyle, customProperty, css::DefaultSerialisationContext());
+          if (!string.empty())
+          {
+            return inlineStyle->SetCustomProperty(css::CSSOMString(customProperty.View()), string,
+                                                  parserContext);
+          }
+          return false;
+        });
+    };
+
+    // 2.4 Let targeted properties be the set of physical longhand properties that are a target property for
+    // at least one animation effect associated with animation whose effect target is target.
+    AnimatableCSSPropertySet targetedProperties;
+    for (const auto &property : effect->AnimatedProperties())
+    {
+      if (const auto *propertyId = std::get_if<css::PropertyId>(&property))
+      {
+        for (auto longhand : css::ShorthandForProperty(*propertyId))
+        {
+          targetedProperties.insert(longhand);
+        }
+      }
+      targetedProperties.insert(property);
+    }
+    // 2.5 For each property, property, in targeted properties:
+    auto didMutate = false;
+    for (const auto &property : targetedProperties)
+    {
+      didMutate = commitProperty(property) || didMutate;
+    }
+
+    if (didMutate)
+    {
+      (void)styledElement->SetAttribute(
+        dom::DOMStringAtom(Attributes::Style),
+        dom::DOMString(inlineStyle->AsTextAtom(css::DefaultSerialisationContext()).View()));
+    }
+
+    return {};
   }
 
   Seconds WebAnimation::TimeToNextTick() const noexcept

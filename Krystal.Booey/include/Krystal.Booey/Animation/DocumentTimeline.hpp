@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/AnimationTimeline.hpp"
+#include "Krystal.Booey/Animation/DocumentTimelineOptions.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -19,8 +20,7 @@ namespace krys::boo
 
   /// @brief The default timeline of a document: its time is the host's time since the document's time origin.
   /// @see https://drafts.csswg.org/web-animations-1/#the-documents-default-timeline
-  // FIXME: Accelerated timelines (threaded animations), frame rates and the `DocumentTimeline()`
-  // constructor's origin time, once there are any.
+  // FIXME: Accelerated timelines (threaded animations), once there are any.
   class DocumentTimeline final : public AnimationTimeline
   {
   private:
@@ -38,6 +38,11 @@ namespace krys::boo
     ~DocumentTimeline() noexcept override;
 
     KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document) noexcept;
+    /// @brief The `DocumentTimeline(options)` constructor: a timeline whose zero time is the options' origin
+    /// time.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-documenttimeline-documenttimeline
+    KRYS_NODISCARD static Ref<DocumentTimeline> Create(dom::Document &document,
+                                                       DocumentTimelineOptions &&options) noexcept;
 
     KRYS_NODISCARD dom::Document *Document() const noexcept
     {

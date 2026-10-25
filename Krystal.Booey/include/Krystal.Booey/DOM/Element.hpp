@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/Animation/GetAnimationsOptions.hpp"
+#include "Krystal.Booey/Animation/KeyframeAnimationOptions.hpp"
+#include "Krystal.Booey/Animation/KeyframeInput.hpp"
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
@@ -978,6 +981,20 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Animations
+
+    /// @brief Animates the element with @p keyframes and plays the animation, as `animate()` does.
+    /// @param options A duration in milliseconds, or the animation's options.
+    /// @return A `TypeError` if the keyframes or the timing are invalid, or a `SyntaxError` if the
+    /// pseudo-element selector is.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-animate
+    KRYS_NODISCARD ExceptionOr<Ref<WebAnimation>>
+      Animate(boo::KeyframesInput &&keyframes,
+              Maybe<Variant<double, KeyframeAnimationOptions>> &&options = null) noexcept;
+    /// @brief The relevant animations whose effects target the element (or, with `subtree`, its descendants
+    /// too), in composite order.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-animatable-getanimations
+    KRYS_NODISCARD List<RefPtr<WebAnimation>>
+      GetAnimations(const Maybe<GetAnimationsOptions> &options = null) noexcept;
 
     /// @brief Whether the element, or one of its pseudo-elements, may have keyframe effects.
     KRYS_NODISCARD bool MayHaveKeyframeEffects() const noexcept;

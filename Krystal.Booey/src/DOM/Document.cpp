@@ -2,6 +2,8 @@
 #include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
@@ -19,6 +21,7 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
@@ -120,6 +123,7 @@
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -3173,6 +3177,47 @@ namespace krys::boo::dom
   DocumentTimeline *Document::ExistingTimeline() const noexcept
   {
     return _timeline.get();
+  }
+
+  List<RefPtr<WebAnimation>> Document::GetAnimations() noexcept
+  {
+    return MatchingAnimations([](Element &target) -> bool
+                              { return !TreeQueries::ContainingShadowRoot(target); });
+  }
+
+  List<RefPtr<WebAnimation>>
+    Document::MatchingAnimations(KRYS_NOESCAPE const Func<bool(Element &)> &function) noexcept
+  {
+    // For the list of animations to be current, we need to account for any pending CSS changes, such as
+    // updates to CSS Animations and CSS Transitions. This requires updating layout as well since resolving
+    // layout-dependent media queries could yield animations.
+    (void)UpdateStyleIfNeeded();
+
+    List<RefPtr<WebAnimation>> animations;
+
+    auto effectCanBeListed = [&](AnimationEffect *effect)
+    {
+      if (auto *keyframeEffect = DynamicDowncast<KeyframeEffect>(effect))
+      {
+        RefPtr target = ShareRefPtr(keyframeEffect->Target());
+        return target && target->IsConnected() && &target->NodeDocument() == this && function(*target);
+      }
+
+      return false;
+    };
+
+    for (auto *animation : WebAnimation::Instances())
+    {
+      if (animation->IsRelevant() && effectCanBeListed(animation->Effect()))
+      {
+        animations.push_back(ShareRefPtr(animation));
+      }
+    }
+
+    std::ranges::stable_sort(animations, [](const auto &lhs, const auto &rhs)
+                             { return CompareAnimationsByCompositeOrder(*lhs, *rhs); });
+
+    return animations;
   }
 
   AnimationTimelinesController &Document::EnsureTimelinesController() noexcept

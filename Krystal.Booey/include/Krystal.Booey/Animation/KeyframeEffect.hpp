@@ -2,13 +2,20 @@
 
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
 #include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
+#include "Krystal.Booey/Animation/CompositeOperationOrAuto.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffectOptions.hpp"
+#include "Krystal.Booey/Animation/KeyframeInput.hpp"
 #include "Krystal.Booey/Animation/KeyframeInterpolation.hpp"
+#include "Krystal.Booey/Animation/TimelineRangeOffset.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/Graphics/Animation/CompositeOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/IterationCompositeOperation.hpp"
 #include "Krystal.Booey/Style/InterpolationClient.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Pair.hpp"
 
 namespace krys::boo::dom
 {
@@ -27,14 +34,56 @@ namespace krys::boo
   /// @brief An animation effect that animates properties of an element, or of one of its pseudo-elements,
   /// through keyframes.
   /// @see https://drafts.csswg.org/web-animations-1/#keyframe-effects
-  // FIXME: Keyframes from scripts (the parsed keyframes, `getKeyframes()` and `setKeyframes()`), the
-  // `KeyframeEffect` interface, accelerated effects (threaded animations) and view timeline keyframe offsets,
-  // once there are scripting, threaded animations and view timelines.
+  // FIXME: View timeline keyframe offsets (computing the offsets of keyframes in named timeline ranges), once
+  // there are view timelines.
   class KeyframeEffect final : public AnimationEffect,
                                public style::interpolation::Client,
                                public KeyframeInterpolation
   {
   public:
+    using KeyframeOffset = boo::KeyframeOffset;
+    using BasePropertyIndexedKeyframe = boo::BasePropertyIndexedKeyframe;
+    using BaseKeyframe = boo::BaseKeyframe;
+    using InputKeyframe = boo::InputKeyframe;
+    using InputPropertyIndexedKeyframes = boo::InputPropertyIndexedKeyframes;
+    using KeyframesInput = boo::KeyframesInput;
+
+    struct PropertyAndValues
+    {
+      css::PropertyId Property;
+      css::CSSOMStringAtom CustomProperty;
+      List<dom::DOMString> Values;
+    };
+
+    struct KeyframeLikeObject
+    {
+      BasePropertyIndexedKeyframe BaseProperties;
+      List<PropertyAndValues> PropertiesAndValues;
+    };
+
+    struct BaseComputedKeyframe : BaseKeyframe
+    {
+      double ComputedOffset {0};
+    };
+
+    /// @brief A keyframe as `getKeyframes()` returns it: its properties' values as CSS text.
+    struct ComputedKeyframe : BaseComputedKeyframe
+    {
+      HashMap<css::PropertyId, dom::DOMString> StyleStrings;
+      HashMap<css::CSSOMStringAtom, dom::DOMString> CustomStyleStrings;
+    };
+
+    struct ParsedKeyframe : ComputedKeyframe
+    {
+      RefPtr<boo::TimingFunction> TimingFunction;
+      Ref<css::MutableStyleProperties> Style;
+
+      ParsedKeyframe() noexcept;
+      ~ParsedKeyframe() noexcept;
+      ParsedKeyframe(ParsedKeyframe &&) noexcept;
+      ParsedKeyframe &operator=(ParsedKeyframe &&) noexcept;
+    };
+
     enum class RecomputationReason : uint8
     {
       LogicalPropertyChange,
@@ -86,6 +135,7 @@ namespace krys::boo
 
     WeakPtr<dom::Document> _document;
     BlendingKeyframes _blendingKeyframes;
+    List<ParsedKeyframe> _parsedKeyframes;
     AnimatableCSSPropertySet _animatedProperties;
     AnimatableCSSPropertySet _acceleratedProperties;
     AnimatableCSSPropertySet _acceleratedPropertiesWithImplicitKeyframe;
@@ -118,9 +168,25 @@ namespace krys::boo
   public:
     ~KeyframeEffect() noexcept override;
 
+    /// @brief The `KeyframeEffect(target, keyframes, options)` constructor.
+    /// @param options A duration in milliseconds, or the effect's options.
+    /// @return A `TypeError` if the keyframes or the timing are invalid, or a `SyntaxError` if the
+    /// pseudo-element selector is.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect
+    KRYS_NODISCARD static dom::ExceptionOr<Ref<KeyframeEffect>>
+      Create(dom::Document &document, dom::Element *target, KeyframesInput &&keyframes,
+             Maybe<Variant<double, KeyframeEffectOptions>> &&options = null) noexcept;
+    /// @brief The `KeyframeEffect(source)` constructor: a copy of @p source.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-keyframeeffect-source
+    KRYS_NODISCARD static Ref<KeyframeEffect> Create(Ref<KeyframeEffect> &&source) noexcept;
     KRYS_NODISCARD static Ref<KeyframeEffect>
       Create(const dom::Element &target,
              const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
+
+    KRYS_NODISCARD const List<ParsedKeyframe> &ParsedKeyframes() const noexcept
+    {
+      return _parsedKeyframes;
+    }
 
     KRYS_NODISCARD dom::Element *Target() const noexcept
     {
@@ -129,7 +195,19 @@ namespace krys::boo
     void SetTarget(RefPtr<dom::Element> &&newTarget) noexcept;
     KRYS_NODISCARD bool TargetsPseudoElement() const noexcept;
     KRYS_NODISCARD css::CSSOMString PseudoElement() const noexcept;
+    /// @return A `SyntaxError` if @p pseudoElement isn't a pseudo-element selector.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-pseudoelement
+    dom::ExceptionOr<void> SetPseudoElement(const css::CSSOMString &pseudoElement) noexcept;
     KRYS_NODISCARD Maybe<style::Styleable> TargetStyleable() const noexcept;
+
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-getkeyframes
+    KRYS_NODISCARD List<ComputedKeyframe> GetKeyframes() noexcept;
+    /// @brief Replaces the keyframes, as `setKeyframes()` does: a CSS animation's then no longer follow its
+    /// `@keyframes` rule.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-keyframeeffect-setkeyframes
+    dom::ExceptionOr<void> SetBindingsKeyframes(dom::Document &document,
+                                                KeyframesInput &&keyframesInput) noexcept;
+    dom::ExceptionOr<void> SetKeyframes(dom::Document &document, KeyframesInput &&keyframesInput) noexcept;
 
     KRYS_NODISCARD boo::IterationCompositeOperation IterationComposite() const noexcept
     {
@@ -141,6 +219,12 @@ namespace krys::boo
       return _compositeOperation;
     }
     void SetComposite(boo::CompositeOperation compositeOperation) noexcept;
+    /// @brief The composite operation, as `composite` gives it: the style of a style-originated animation is
+    /// brought up to date first.
+    KRYS_NODISCARD boo::CompositeOperation BindingsComposite() const noexcept;
+    /// @brief Sets the composite operation, as `composite` does: a CSS animation's then no longer follows its
+    /// style.
+    void SetBindingsComposite(boo::CompositeOperation compositeOperation) noexcept;
 
     /// @brief Applies the effect at the animation's current time to @p targetStyle.
     EnumSet<AnimationImpact> Apply(RenderStyle &targetStyle,
@@ -246,7 +330,17 @@ namespace krys::boo
       return _animationType;
     }
 
+    /// @see https://drafts.csswg.org/web-animations-1/#animation-property-name-to-idl-attribute-name
+    KRYS_NODISCARD static dom::DOMString PropertyIdToIDLAttributeName(css::PropertyId property) noexcept;
+
   private:
+    void CopyPropertiesFromSource(Ref<KeyframeEffect> &&source) noexcept;
+    /// @see https://drafts.csswg.org/web-animations-1/#processing-a-keyframes-argument
+    dom::ExceptionOr<void> ProcessKeyframes(dom::Document &document,
+                                            KeyframesInput &&keyframesInput) noexcept;
+    void UpdateBlendingKeyframes(RenderStyle &elementStyle,
+                                 const style::ResolutionContext &resolutionContext) noexcept;
+
     void AddPendingAcceleratedAction(AcceleratedAction action) noexcept;
     KRYS_NODISCARD bool IsCompletelyAccelerated() const noexcept
     {

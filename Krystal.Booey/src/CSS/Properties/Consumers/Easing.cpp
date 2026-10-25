@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/CSS/Values/EasingFunctionValue.hpp"
+#include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
+#include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -424,5 +427,34 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return {};
+  }
+
+  RefPtr<TimingFunction> ParseEasingFunctionDeprecated(const CSSOMString &string,
+                                                       const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto result = ConsumeUnresolvedEasingFunction(range, state);
+    if (!result)
+    {
+      return {};
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return {};
+    }
+
+    return style::CreateTimingFunctionDeprecated(*result);
   }
 }

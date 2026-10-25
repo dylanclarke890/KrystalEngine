@@ -17,7 +17,6 @@ namespace krys::boo
 
   /// @brief An animation created by style: a CSS animation or a CSS transition, owned by the element whose
   /// style created it until scripts take it over.
-  // FIXME: The `bindings*` overrides that flush pending style changes first, once there's scripting.
   class StyleOriginatedAnimation : public WebAnimation
   {
   private:
@@ -50,6 +49,17 @@ namespace krys::boo
     void Tick() noexcept override;
 
     KRYS_NODISCARD bool CanHaveGlobalPosition() noexcept final;
+
+    // The Web Animations interface brings the animation up to date with its style first.
+    KRYS_NODISCARD Maybe<WebAnimationTime> BindingsStartTime() const noexcept final;
+    KRYS_NODISCARD Maybe<WebAnimationTime> BindingsCurrentTime() const noexcept final;
+    KRYS_NODISCARD WebAnimation::PlayState BindingsPlayState() const noexcept final;
+    KRYS_NODISCARD WebAnimation::ReplaceState BindingsReplaceState() const noexcept final;
+    KRYS_NODISCARD bool BindingsPending() const noexcept final;
+    KRYS_NODISCARD AnimationPromise &BindingsReady() noexcept final;
+    KRYS_NODISCARD AnimationPromise &BindingsFinished() noexcept final;
+    dom::ExceptionOr<void> BindingsPlay() noexcept override;
+    dom::ExceptionOr<void> BindingsPause() noexcept override;
 
     /// @brief Brings the animation up to date with the owning element's style.
     void FlushPendingStyleChanges() const noexcept;

@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
@@ -1272,6 +1274,86 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Animations
+
+  ExceptionOr<Ref<WebAnimation>>
+    Element::Animate(KeyframesInput &&keyframes,
+                     Maybe<Variant<double, KeyframeAnimationOptions>> &&options) noexcept
+  {
+    DOMString id;
+    Maybe<RefPtr<AnimationTimeline>> timeline;
+    Maybe<Variant<double, KeyframeEffectOptions>> keyframeEffectOptions;
+    if (options)
+    {
+      auto &optionsValue = *options;
+      if (const auto *duration = std::get_if<double>(&optionsValue))
+      {
+        keyframeEffectOptions = Variant<double, KeyframeEffectOptions> {*duration};
+      }
+      else
+      {
+        auto &keyframeAnimationOptions = std::get<KeyframeAnimationOptions>(optionsValue);
+        id = keyframeAnimationOptions.Id;
+        timeline = keyframeAnimationOptions.Timeline;
+        keyframeEffectOptions = Variant<double, KeyframeEffectOptions> {
+          static_cast<KeyframeEffectOptions &&>(krys::move(keyframeAnimationOptions))};
+      }
+    }
+
+    Ref document = ShareRef(NodeDocument());
+    auto keyframeEffectResult =
+      KeyframeEffect::Create(*document, this, krys::move(keyframes), krys::move(keyframeEffectOptions));
+    if (keyframeEffectResult.HasException())
+    {
+      return keyframeEffectResult.ReleaseException();
+    }
+
+    Ref animation = WebAnimation::Create(*document, keyframeEffectResult.Value().get());
+    animation->SetId(krys::move(id));
+    if (timeline)
+    {
+      animation->SetTimeline(RefPtr<AnimationTimeline> {*timeline});
+    }
+    // FIXME: The animation range (`rangeStart` and `rangeEnd`), once there are scroll timelines.
+
+    auto animationPlayResult = animation->Play();
+    if (animationPlayResult.HasException())
+    {
+      return animationPlayResult.ReleaseException();
+    }
+
+    return animation;
+  }
+
+  List<RefPtr<WebAnimation>> Element::GetAnimations(const Maybe<GetAnimationsOptions> &options) noexcept
+  {
+    // If we are to return animations in the subtree, we can get all of the document's animations and filter
+    // animations targeting that are not registered on this element, one of its pseudo elements or a child's
+    // pseudo element.
+    Ref document = ShareRef(NodeDocument());
+    if (options && options->Subtree)
+    {
+      return document->MatchingAnimations([&](Element &target) -> bool { return Contains(&target); });
+    }
+
+    // For the list of animations to be current, we need to account for any pending CSS changes, such as
+    // updates to CSS Animations and CSS Transitions. This requires updating layout as well since resolving
+    // layout-dependent media queries could yield animations.
+    // FIXME: We might be able to use style::Extractor which is more optimized.
+    (void)document->UpdateStyleIfNeeded();
+
+    List<RefPtr<WebAnimation>> animations;
+    if (auto *effectStack = GetKeyframeEffectStack({}))
+    {
+      for (const auto &effect : effectStack->SortedEffects())
+      {
+        if (effect && effect->Animation()->IsRelevant())
+        {
+          animations.push_back(ShareRefPtr(effect->Animation()));
+        }
+      }
+    }
+    return animations;
+  }
 
   bool Element::MayHaveKeyframeEffects() const noexcept
   {

@@ -28,6 +28,12 @@ namespace krys::boo
     return AdoptRef(*new DocumentTimeline(document, Seconds {0}));
   }
 
+  Ref<DocumentTimeline> DocumentTimeline::Create(dom::Document &document,
+                                                 DocumentTimelineOptions &&options) noexcept
+  {
+    return AdoptRef(*new DocumentTimeline(document, Seconds {options.OriginTime / 1'000}));
+  }
+
   DocumentTimeline::DocumentTimeline(dom::Document &document, Seconds originTime) noexcept
       : _tickScheduleTimer(*this, &DocumentTimeline::ScheduleAnimationResolution),
         _document(CreateWeakPtr(&document)), _originTime(originTime)

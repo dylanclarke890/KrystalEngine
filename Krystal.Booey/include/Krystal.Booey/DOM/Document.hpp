@@ -1511,6 +1511,14 @@ namespace krys::boo::dom
     /// @see https://drafts.csswg.org/web-animations-1/#dom-document-timeline
     KRYS_NODISCARD DocumentTimeline &Timeline() noexcept;
     KRYS_NODISCARD DocumentTimeline *ExistingTimeline() const noexcept;
+    /// @brief The relevant animations whose effects target elements in the document (outside shadow trees),
+    /// in composite order.
+    /// @see https://drafts.csswg.org/web-animations-1/#dom-documentorshadowroot-getanimations
+    KRYS_NODISCARD List<RefPtr<WebAnimation>> GetAnimations() noexcept;
+    /// @brief The relevant animations whose effects target connected elements of the document for which
+    /// @p function is true, in composite order.
+    KRYS_NODISCARD List<RefPtr<WebAnimation>>
+      MatchingAnimations(KRYS_NOESCAPE const Func<bool(Element &)> &function) noexcept;
     KRYS_NODISCARD AnimationTimelinesController *TimelinesController() const noexcept
     {
       return _timelinesController.get();
