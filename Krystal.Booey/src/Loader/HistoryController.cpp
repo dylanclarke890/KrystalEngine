@@ -29,7 +29,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The page scale factor, once there's page scaling.
     auto *document = _frame.Document();
     if (document && document->GetBackForwardCacheState() != dom::BackForwardCacheState::NotInBackForwardCache)
     {
@@ -38,6 +37,13 @@ namespace krys::boo
     else
     {
       item->SetScrollPosition(frameView->GetScrollPosition());
+    }
+
+    // FIXME: Divided by the page's view scale factor, once it has one; only for the main frame, once there
+    // are subframes.
+    if (auto *page = _frame.GetPage())
+    {
+      item->SetPageScaleFactor(page->PageScaleFactor());
     }
   }
 
@@ -63,11 +69,17 @@ namespace krys::boo
     RefPtr<LocalFrameView> view = ShareRefPtr(_frame.View());
     if (view && !view->WasScrolledByUser())
     {
-      // FIXME: Scrolling to the focused element first (scrollToFocusedElementImmediatelyIfNeeded), and the
-      // page scale factor, once there's page scaling.
+      // FIXME: Scrolling to the focused element first (scrollToFocusedElementImmediatelyIfNeeded).
       auto desiredScrollPosition = currentItem->ShouldRestoreScrollPosition() ? currentItem->ScrollPosition()
                                                                               : view->GetScrollPosition();
-      view->SetScrollPosition(desiredScrollPosition);
+      if (auto *page = _frame.GetPage(); page && currentItem->PageScaleFactor())
+      {
+        page->SetPageScaleFactor(currentItem->PageScaleFactor(), desiredScrollPosition);
+      }
+      else
+      {
+        view->SetScrollPosition(desiredScrollPosition);
+      }
     }
   }
 

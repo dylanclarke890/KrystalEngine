@@ -379,6 +379,14 @@ namespace krys::boo
     auto pointerEvent = dom::PointerEvent::Create(platformTouchEvent, coalescedEvents, predictedEvents, index,
                                                   isPrimary, view, touchDelta);
 
+    // A pointer cancelled because its touch now pans or zooms the page fires nothing more.
+    // https://w3c.github.io/pointerevents/#the-pointercancel-event
+    if (pointerEvent->Type() != EventNames::PointerDown
+        && HasCancelledPointerEventForIdentifier(pointerEvent->PointerId()))
+    {
+      return;
+    }
+
     Ref<CapturingData> capturingData = EnsureCapturingDataForPointerEvent(*pointerEvent);
 
     // Check if the target changed, which would require dispatching boundary events.

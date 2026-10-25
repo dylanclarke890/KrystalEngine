@@ -155,8 +155,7 @@ namespace krys::boo::dom
 
       auto *frame = document.Frame();
       auto *view = document.View();
-      // FIXME: The frame's scale factor (frameScaleFactor) comes with pinch zooming.
-      float scaleFactor = frame->PageZoomFactor();
+      float scaleFactor = frame->PageZoomFactor() * frame->FrameScaleFactor();
 
       LayoutPoint absolutePoint = clientPoint;
       absolutePoint.Scale(scaleFactor);

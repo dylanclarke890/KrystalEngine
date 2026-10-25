@@ -25,8 +25,8 @@ namespace krys::boo::style
     if (auto *frame = document.Frame())
     {
       documentStyle.SetZoom(!document.Printing() ? frame->PageZoomFactor() : 1);
+      documentStyle.SetPageScaleTransform(frame->FrameScaleFactor());
     }
-    // FIXME: The frame's scale factor (`setPageScaleTransform`), once frames have a page.
 
     // This overrides any -webkit-user-modify inherited from the parent iframe.
     // FIXME: Documents in design mode are `read-write`; there's no design mode.

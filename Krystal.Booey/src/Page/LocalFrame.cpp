@@ -2,6 +2,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -99,6 +101,26 @@ namespace krys::boo
     if (newDocument)
     {
       newDocument->DidBecomeCurrentDocumentInFrame(*this);
+    }
+  }
+
+  float LocalFrame::FrameScaleFactor() const noexcept
+  {
+    auto *page = GetPage();
+    if (!page)
+    {
+      return 1;
+    }
+
+    // Main frame is scaled with respect to the container.
+    return page->PageScaleFactor();
+  }
+
+  void LocalFrame::DeviceOrPageScaleFactorChanged() noexcept
+  {
+    if (auto *root = _document ? _document->GetRenderView() : nullptr)
+    {
+      root->Compositor().DeviceOrPageScaleFactorChanged();
     }
   }
 

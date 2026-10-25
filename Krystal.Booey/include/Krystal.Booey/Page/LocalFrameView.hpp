@@ -138,6 +138,7 @@ namespace krys::boo
     /// @brief The viewport's size and zoom when `resize` was last scheduled, or at the first layout.
     IntSize _lastViewportSize;
     float _lastUsedZoomFactor {1};
+    float _lastFrameScaleFactor {1};
 
     explicit LocalFrameView(LocalFrame &frame) noexcept;
 
@@ -241,11 +242,8 @@ namespace krys::boo
       return _scrollPosition;
     }
 
-    /// @brief The scale of the frame's content: none, as there's no page scaling.
-    KRYS_NODISCARD float FrameScaleFactor() const noexcept
-    {
-      return 1;
-    }
+    /// @brief The scale of the frame's content (the page's scale).
+    KRYS_NODISCARD float FrameScaleFactor() const noexcept;
 
     /// @brief Whether the background is painted beyond the document, while rubber-banding: never.
     /// FIXME: Comes with scrolling the viewport.
@@ -745,7 +743,6 @@ namespace krys::boo
 
     /// @brief The scale from document coordinates to absolute ones: @p usedZoom (which already includes the
     /// page zoom) if given, or else the page zoom.
-    // FIXME: The frame scale factor, once frames can be scaled.
     KRYS_NODISCARD float DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom = null) const noexcept;
     KRYS_NODISCARD float AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom = null) const noexcept;
     KRYS_NODISCARD FloatRect AbsoluteToDocumentRect(FloatRect rect,

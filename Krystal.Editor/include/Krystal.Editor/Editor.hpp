@@ -28,6 +28,7 @@
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
+#include "Krystal.Editor/PagePointers.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
@@ -80,6 +81,8 @@ namespace krys
     UniquePtr<editor::PageObservers> _observers;
     /// @brief The page's animation from C++, made once it has loaded.
     UniquePtr<editor::PageAnimations> _animations;
+    /// @brief The page's pointer samples from C++, made once it has loaded.
+    UniquePtr<editor::PagePointers> _pointers;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -122,6 +125,7 @@ namespace krys
     {
       _observers = nullptr;
       _animations = nullptr;
+      _pointers = nullptr;
       _pageView = nullptr;
       _booeyFonts = {};
       _renderer = nullptr;
@@ -457,11 +461,13 @@ namespace krys
           AttachPage();
           _observers = event.FromBackForwardCache ? CreateUnique<editor::PageObservers>(document) : nullptr;
           _animations = event.FromBackForwardCache ? CreateUnique<editor::PageAnimations>(document) : nullptr;
+          _pointers = event.FromBackForwardCache ? CreateUnique<editor::PagePointers>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
           _observers = CreateUnique<editor::PageObservers>(document);
           _animations = CreateUnique<editor::PageAnimations>(document);
+          _pointers = CreateUnique<editor::PagePointers>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;

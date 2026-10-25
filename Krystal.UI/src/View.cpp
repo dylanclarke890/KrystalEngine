@@ -2,6 +2,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
@@ -23,7 +24,10 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
@@ -33,6 +37,8 @@
 #include "Krystal.UI/Input.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/SystemPasteboardStrategy.hpp"
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
@@ -625,6 +631,9 @@ namespace krys::ui
       _overlay->Hide();
     }
     Document().SetFocusedAndActive(_focused);
+    // The old document's gestures and fling end with it.
+    ResetGesture();
+    _fling = null;
     _needsPaint = true;
   }
 
@@ -720,6 +729,12 @@ namespace krys::ui
   {
     auto start = MonotonicTime::Now();
     boo::html::EventLoop::Current().Run(now, budget);
+
+    // The fling moves on with the host's time, before the rendering update shows it.
+    if (_fling)
+    {
+      StepFling(now);
+    }
 
     // The overlay's page shares the event loop, and updates with the page.
     bool overlayUpdated = false;
@@ -1005,8 +1020,14 @@ namespace krys::ui
 
     _buttons |= ButtonsBit(button);
     _lastMousePosition = point;
-    (void)_frame->GetEventHandler().HandleMousePressEvent(MouseEvent(
-      boo::PlatformEvent::Type::MousePressed, point, button, _clickCount, input::ToBooey(modifiers)));
+    auto event = MouseEvent(boo::PlatformEvent::Type::MousePressed, point, button, _clickCount,
+                            input::ToBooey(modifiers));
+    (void)_frame->GetEventHandler().HandleMousePressEvent(event);
+    // The right button's press asks for a context menu: there's none, but the page gets `contextmenu`.
+    if (button == boo::MouseButton::Right)
+    {
+      (void)_frame->GetEventHandler().SendContextMenuEvent(event);
+    }
     PerformMicrotaskCheckpoint();
   }
 
@@ -1078,14 +1099,14 @@ namespace krys::ui
     return handled;
   }
 
-  int32 View::CountClick(const boo::IntPoint &point, boo::MouseButton button) noexcept
+  int32 View::CountClick(const boo::IntPoint &point, boo::MouseButton button, int32 distance) noexcept
   {
     // A press soon after the last, near it and with the same button, counts on from it.
     auto now = MonotonicTime::Now();
     bool continuesClicks = _clickCount > 0 && button == _lastClickButton
                            && now - _lastClickTime <= DoubleClickTime
-                           && std::abs(point.X() - _lastClickPosition.X()) <= DoubleClickDistance
-                           && std::abs(point.Y() - _lastClickPosition.Y()) <= DoubleClickDistance;
+                           && std::abs(point.X() - _lastClickPosition.X()) <= distance
+                           && std::abs(point.Y() - _lastClickPosition.Y()) <= distance;
     _clickCount = continuesClicks ? _clickCount + 1 : 1;
     _lastClickButton = button;
     _lastClickTime = now;
@@ -1132,8 +1153,12 @@ namespace krys::ui
                                           : boo::MouseButton::Left;
         _penButtons |= _penButton == boo::MouseButton::Other ? uint16 {32} : ButtonsBit(_penButton);
         int32 clickCount = CountClick(intPoint, _penButton);
-        (void)handler.HandleMousePressEvent(
-          PenEvent(boo::PlatformEvent::Type::MousePressed, point, _penButton, clickCount, input));
+        auto event = PenEvent(boo::PlatformEvent::Type::MousePressed, point, _penButton, clickCount, input);
+        (void)handler.HandleMousePressEvent(event);
+        if (_penButton == boo::MouseButton::Right)
+        {
+          (void)handler.SendContextMenuEvent(event);
+        }
         break;
       }
       case pal::PointerAction::Released:
@@ -1244,6 +1269,7 @@ namespace krys::ui
       event.SetCoalescedEvents({event});
     }
 
+    uint32 id = it->Id;
     if (state == boo::PlatformTouchPoint::TouchReleased || state == boo::PlatformTouchPoint::TouchCancelled)
     {
       _touches.erase(it);
@@ -1251,7 +1277,335 @@ namespace krys::ui
 
     bool handled = _frame->GetEventHandler().HandleTouchEvent(event);
     PerformMicrotaskCheckpoint();
+    RecogniseGesture(id, input.Action, position, handled);
     return handled;
+  }
+
+  void View::RecogniseGesture(uint32 id, pal::PointerAction action, const boo::DoublePoint &position,
+                              bool cancelled) noexcept
+  {
+    switch (action)
+    {
+      case pal::PointerAction::Pressed:
+      {
+        if (_touches.size() == 1)
+        {
+          // A touch stops the fling, and can't tap while it does.
+          bool stoppedFling = std::exchange(_fling, null).has_value();
+          ResetGesture();
+          if (cancelled)
+          {
+            break;
+          }
+          _gestureState = GestureState::MayTap;
+          _gestureTouchId = id;
+          _gestureStart = _gestureLast = position;
+          _gestureTouchActions = TouchActionsAt(position);
+          _gestureCanTap = !stoppedFling;
+          _longPressTimer.StartOneShot(LongPressDuration);
+          break;
+        }
+
+        // A second touch pinches, where the page can be pinched.
+        bool canPinch = _gestureTouchActions.ContainsAny(
+          {boo::TouchAction::Auto, boo::TouchAction::Manipulation, boo::TouchAction::PinchZoom});
+        if (_touches.size() == 2 && !cancelled && canPinch
+            && (_gestureState == GestureState::MayTap || _gestureState == GestureState::Pan))
+        {
+          _longPressTimer.Stop();
+          for (auto &touch : _touches)
+          {
+            CancelTouchPointer(touch.Id, touch.Point.Pos());
+          }
+          auto first = _touches[0].Point.Pos();
+          auto second = _touches[1].Point.Pos();
+          auto centre = boo::DoublePoint((first.X() + second.X()) / 2, (first.Y() + second.Y()) / 2);
+          _pinchStartScale = _page->PageScaleFactor();
+          _pinchStartDistance = std::hypot(second.X() - first.X(), second.Y() - first.Y());
+          auto scroll = ScrollPosition();
+          _pinchDocumentPoint = boo::DoublePoint((scroll.X() + centre.X()) / _pinchStartScale,
+                                                 (scroll.Y() + centre.Y()) / _pinchStartScale);
+          _gestureState = _pinchStartDistance > 0 ? GestureState::Pinch : GestureState::None;
+          break;
+        }
+        if (_gestureState != GestureState::Pinch)
+        {
+          ResetGesture();
+        }
+        break;
+      }
+      case pal::PointerAction::Moved:
+      {
+        if (_gestureState == GestureState::Pinch)
+        {
+          UpdatePinch();
+          break;
+        }
+        if (id != _gestureTouchId)
+        {
+          break;
+        }
+        if (_gestureState == GestureState::MayTap)
+        {
+          // The page takes the touch by cancelling its moves before it pans.
+          if (cancelled)
+          {
+            ResetGesture();
+            break;
+          }
+          auto delta = position - _gestureStart;
+          if (std::hypot(delta.Width(), delta.Height()) < PanThreshold)
+          {
+            break;
+          }
+
+          // The touch pans if `touch-action` allows its direction where it began; otherwise it's the page's.
+          bool any =
+            _gestureTouchActions.ContainsAny({boo::TouchAction::Auto, boo::TouchAction::Manipulation});
+          _panX = any || _gestureTouchActions.Contains(boo::TouchAction::PanX);
+          _panY = any || _gestureTouchActions.Contains(boo::TouchAction::PanY);
+          bool horizontal = std::abs(delta.Width()) >= std::abs(delta.Height());
+          _longPressTimer.Stop();
+          if (horizontal ? !_panX : !_panY)
+          {
+            ResetGesture();
+            break;
+          }
+          CancelTouchPointer(id, position);
+          _gestureState = GestureState::Pan;
+          _panSamples = {{boo::html::EventLoop::Current().Now(), _gestureStart}};
+        }
+        if (_gestureState == GestureState::Pan)
+        {
+          PanTo(position);
+        }
+        break;
+      }
+      case pal::PointerAction::Released:
+      {
+        if (_gestureState == GestureState::Pinch)
+        {
+          // Once a touch lifts, the rest of the pinch does nothing.
+          ResetGesture();
+          break;
+        }
+        if (id != _gestureTouchId)
+        {
+          break;
+        }
+        auto state = _gestureState;
+        bool canTap = _gestureCanTap;
+        if (state == GestureState::Pan)
+        {
+          PanTo(position);
+          StartFling();
+        }
+        ResetGesture();
+        // A cancelled touchend stops the tap's mouse events, the click among them, and the long press's
+        // context menu.
+        if (state == GestureState::MayTap && canTap && !cancelled && _touches.empty())
+        {
+          Tap(id, position);
+        }
+        else if (state == GestureState::LongPress && !cancelled)
+        {
+          RequestContextMenu(id, position);
+        }
+        break;
+      }
+      case pal::PointerAction::Cancelled:
+      {
+        ResetGesture();
+        break;
+      }
+      default: break;
+    }
+  }
+
+  EnumSet<boo::TouchAction> View::TouchActionsAt(const boo::DoublePoint &point) noexcept
+  {
+    auto *element = HitTest(boo::FlooredIntPoint(point));
+    auto *renderer = element ? element->Renderer() : nullptr;
+    if (!renderer)
+    {
+      return boo::TouchAction::Auto;
+    }
+    return boo::style::ToPlatform<boo::style::TouchAction> {}(renderer->Style().UsedTouchAction());
+  }
+
+  void View::ResetGesture() noexcept
+  {
+    _gestureState = GestureState::None;
+    _longPressTimer.Stop();
+    _panRemainder = {};
+    _panSamples.clear();
+  }
+
+  void View::CancelTouchPointer(uint32 id, const boo::DoublePoint &position) noexcept
+  {
+    if (auto *view = _frame->View())
+    {
+      boo::PlatformTouchPoint point(id, boo::PlatformTouchPoint::TouchCancelled, position, position, {}, 0,
+                                    0);
+      _page->GetPointerCaptureController().CancelPointer(
+        boo::dom::PointerEvent::PointerIdForTouch(point),
+        view->WindowToContents(boo::FlooredIntPoint(position)));
+      PerformMicrotaskCheckpoint();
+    }
+  }
+
+  void View::PanTo(const boo::DoublePoint &position) noexcept
+  {
+    auto movement = position - _gestureLast;
+    _gestureLast = position;
+    boo::DoubleSize delta(_panX ? movement.Width() : 0, _panY ? movement.Height() : 0);
+
+    // The samples within the fling's window of this one.
+    auto now = boo::html::EventLoop::Current().Now();
+    _panSamples.emplace_back(now, position);
+    std::erase_if(_panSamples, [&](const auto &sample) { return now - sample.first > FlingSampleWindow; });
+
+    // Scrolls are in whole pixels; the rest waits for the next move.
+    auto remainder =
+      boo::DoubleSize(_panRemainder.Width() + delta.Width(), _panRemainder.Height() + delta.Height());
+    boo::DoubleSize step(std::round(remainder.Width()), std::round(remainder.Height()));
+    _panRemainder = boo::DoubleSize(remainder.Width() - step.Width(), remainder.Height() - step.Height());
+    if (step.Width() || step.Height())
+    {
+      (void)ScrollForTouch(_gestureStart, step);
+    }
+  }
+
+  bool View::ScrollForTouch(const boo::DoublePoint &position, const boo::DoubleSize &delta) noexcept
+  {
+    auto point = boo::FlooredIntPoint(position);
+    bool scrolled = _frame->GetEventHandler().HandleTouchScroll(boo::PlatformWheelEvent(
+      point, point, static_cast<float>(delta.Width()), static_cast<float>(delta.Height()), 0, 0,
+      boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, MonotonicTime::Now()));
+    PerformMicrotaskCheckpoint();
+    _needsPaint = true;
+    return scrolled;
+  }
+
+  void View::StartFling() noexcept
+  {
+    if (_panSamples.size() < 2)
+    {
+      return;
+    }
+    auto &[firstTime, firstPosition] = _panSamples.front();
+    auto &[lastTime, lastPosition] = _panSamples.back();
+    double seconds = std::chrono::duration<double>(lastTime - firstTime).count();
+    if (seconds <= 0)
+    {
+      return;
+    }
+    auto distance = lastPosition - firstPosition;
+    boo::DoubleSize velocity(_panX ? distance.Width() / seconds : 0, _panY ? distance.Height() / seconds : 0);
+    if (std::hypot(velocity.Width(), velocity.Height()) < MinimumFlingVelocity)
+    {
+      return;
+    }
+    _fling = Fling {_gestureStart, velocity, {}, boo::html::EventLoop::Current().Now()};
+  }
+
+  void View::StepFling(MonotonicTime::duration now) noexcept
+  {
+    double seconds = std::chrono::duration<double>(now - _fling->LastTime).count();
+    if (seconds <= 0)
+    {
+      return;
+    }
+    _fling->LastTime = now;
+
+    // The velocity decays exponentially; the distance is its integral over the step.
+    double decay = std::exp(-seconds / FlingTimeConstant);
+    auto &velocity = _fling->Velocity;
+    auto remainder =
+      boo::DoubleSize(_fling->Remainder.Width() + velocity.Width() * FlingTimeConstant * (1 - decay),
+                      _fling->Remainder.Height() + velocity.Height() * FlingTimeConstant * (1 - decay));
+    velocity = velocity.ScaledBy(decay);
+
+    boo::DoubleSize step(std::round(remainder.Width()), std::round(remainder.Height()));
+    _fling->Remainder = boo::DoubleSize(remainder.Width() - step.Width(), remainder.Height() - step.Height());
+    bool scrolled = (!step.Width() && !step.Height()) || ScrollForTouch(_fling->Position, step);
+    // It stops once it's slow, or at the end of what it scrolls.
+    if (!scrolled || std::hypot(velocity.Width(), velocity.Height()) < StopFlingVelocity)
+    {
+      _fling = null;
+    }
+  }
+
+  void View::UpdatePinch() noexcept
+  {
+    if (_touches.size() < 2)
+    {
+      return;
+    }
+    auto first = _touches[0].Point.Pos();
+    auto second = _touches[1].Point.Pos();
+    auto centre = boo::DoublePoint((first.X() + second.X()) / 2, (first.Y() + second.Y()) / 2);
+    double distance = std::hypot(second.X() - first.X(), second.Y() - first.Y());
+    float scale = std::clamp(static_cast<float>(_pinchStartScale * distance / _pinchStartDistance),
+                             MinimumPageScale, MaximumPageScale);
+
+    // The document point that was between the touches stays between them.
+    boo::IntPoint origin(static_cast<int32>(std::lround(_pinchDocumentPoint.X() * scale - centre.X())),
+                         static_cast<int32>(std::lround(_pinchDocumentPoint.Y() * scale - centre.Y())));
+    _page->SetPageScaleFactor(scale, origin);
+    PerformMicrotaskCheckpoint();
+    _needsPaint = true;
+  }
+
+  void View::Tap(uint32 id, const boo::DoublePoint &position) noexcept
+  {
+    // A tap is the mouse moving there and clicking, as one finger's tap, from the touch's pointer: its
+    // compatibility mouse events don't fire if the page cancelled its pointerdown.
+    auto point = boo::FlooredIntPoint(position);
+    int32 clickCount = CountClick(point, boo::MouseButton::Left, DoubleTapDistance);
+    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, position, position, {}, 0,
+                                       0);
+    auto pointerId = boo::dom::PointerEvent::PointerIdForTouch(touchPoint);
+    auto event = [&](boo::PlatformEvent::Type type, boo::MouseButton button, uint16 buttons, int32 count)
+    {
+      // FIXME: The screen position, once the host reports where the page is on the screen.
+      return boo::PlatformMouseEvent(
+        boo::DoublePoint(point), boo::DoublePoint(point), button, type, count, {}, MonotonicTime::Now(),
+        buttons, {}, 0, boo::SyntheticClickType::OneFingerTap, pointerId, boo::dom::TouchPointerEventType());
+    };
+
+    auto &handler = _frame->GetEventHandler();
+    (void)handler.MouseMoved(event(boo::PlatformEvent::Type::MouseMoved, boo::MouseButton::None, 0, 0));
+    (void)handler.HandleMousePressEvent(
+      event(boo::PlatformEvent::Type::MousePressed, boo::MouseButton::Left, 1, clickCount));
+    (void)handler.HandleMouseReleaseEvent(
+      event(boo::PlatformEvent::Type::MouseReleased, boo::MouseButton::Left, 0, clickCount));
+    PerformMicrotaskCheckpoint();
+  }
+
+  void View::LongPressed() noexcept
+  {
+    // It asks for the context menu as it lifts, as Windows' press and hold does.
+    if (_gestureState == GestureState::MayTap)
+    {
+      _gestureState = GestureState::LongPress;
+    }
+  }
+
+  void View::RequestContextMenu(uint32 id, const boo::DoublePoint &position) noexcept
+  {
+    // As the right button's press asks for a context menu: there's none, but the page gets `contextmenu`.
+    auto point = boo::FlooredIntPoint(position);
+    boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, position, position, {}, 0,
+                                       0);
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), boo::MouseButton::Right,
+                                  boo::PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now(), 0, {},
+                                  0, boo::SyntheticClickType::NoTap,
+                                  boo::dom::PointerEvent::PointerIdForTouch(touchPoint),
+                                  boo::dom::TouchPointerEventType());
+    (void)_frame->GetEventHandler().SendContextMenuEvent(event);
+    PerformMicrotaskCheckpoint();
   }
 
   void View::SetPointingDevices(const pal::PointingDevices &devices) noexcept

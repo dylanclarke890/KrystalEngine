@@ -51,10 +51,10 @@ namespace krys::boo
   HistoryItem::HistoryItem(const HistoryItem &item) noexcept
       : _url(item._url), _originalURL(item._originalURL), _referrer(item._referrer), _target(item._target),
         _title(item._title), _displayTitle(item._displayTitle), _scrollPosition(item._scrollPosition),
-        _lastVisitWasFailure(item._lastVisitWasFailure), _isTargetItem(item._isTargetItem),
-        _itemSequenceNumber(item._itemSequenceNumber), _documentSequenceNumber(item._documentSequenceNumber),
-        _substituteData(item._substituteData), _itemID(item._itemID),
-        _uuidIdentifier(CreateVersion4UUIDString())
+        _pageScaleFactor(item._pageScaleFactor), _lastVisitWasFailure(item._lastVisitWasFailure),
+        _isTargetItem(item._isTargetItem), _itemSequenceNumber(item._itemSequenceNumber),
+        _documentSequenceNumber(item._documentSequenceNumber), _substituteData(item._substituteData),
+        _itemID(item._itemID), _uuidIdentifier(CreateVersion4UUIDString())
   {
   }
 

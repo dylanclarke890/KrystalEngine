@@ -595,6 +595,65 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: a touch's pan scrolls",
+                   "[Page][LocalFrameView][Scrolling]")
+  {
+    // The box is fixed at the top of the view: 50 pixels tall, with 150 more to scroll.
+    ScrollFixture fixture {utf8_string(TallPage)
+                           + u8"<div id=box style=position:fixed;top:0;width:100px;height:50px;overflow:auto>"
+                             u8"<div style=height:200px></div></div>"};
+    auto &view = fixture.View();
+    auto &handler = fixture.Frame->GetEventHandler();
+    auto &box = fixture.ById(u8"box");
+    auto pan = [&](IntPoint position, FloatSize delta)
+    {
+      return handler.HandleTouchScroll(
+        PlatformWheelEvent(position, position, -delta.Width(), -delta.Height(), 0, 0,
+                           PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, MonotonicTime::Now()));
+    };
+
+    // No wheel event fires.
+    auto canceller = CreateRef<WheelCanceller>();
+    dom::AddEventListenerOptions options;
+    options.Passive = false;
+    fixture.Document->AddEventListener(dom::DOMStringAtom(u8"wheel"),
+                                       Ref<dom::EventListenerCallback> {canceller}, options);
+
+    SECTION("the box under the touch scrolls, then the view once it reaches its end")
+    {
+      CHECK(pan({20, 20}, {0, 100}));
+      CHECK(box.ScrollTop() == 100);
+      CHECK(pan({20, 20}, {0, 100}));
+      CHECK(box.ScrollTop() == 150);
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+      CHECK(pan({20, 20}, {0, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(0, 100));
+      CHECK(canceller->DeltaY == 0);
+    }
+
+    SECTION("elsewhere the view scrolls, to its ends")
+    {
+      CHECK(pan({150, 70}, {30, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(30, 100));
+      CHECK(pan({150, 70}, {0, -1'000}));
+      CHECK(view.GetScrollPosition() == ScrollPosition(30, 0));
+      CHECK_FALSE(pan({150, 70}, {0, -100}));
+      CHECK_FALSE(pan({150, 70}, {}));
+    }
+
+    SECTION("overscroll-behavior stops the scroll at the box's end")
+    {
+      REQUIRE_FALSE(box
+                      .SetAttribute(u8"style", u8"position:fixed;top:0;width:100px;height:50px;overflow:auto;"
+                                               u8"overscroll-behavior:contain")
+                      .HasException());
+      (void)fixture.Document->UpdateLayout();
+      box.SetScrollTop(150);
+      CHECK(pan({20, 20}, {0, 100}));
+      CHECK(view.GetScrollPosition() == ScrollPosition());
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "LocalFrameView: the keyboard scrolls",
                    "[Page][LocalFrameView][Scrolling]")
   {

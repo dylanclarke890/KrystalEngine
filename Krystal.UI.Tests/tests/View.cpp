@@ -40,6 +40,7 @@
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
+#include "Krystal.Editor/PagePointers.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -807,6 +808,131 @@ namespace krys::ui::tests
     }
   }
 
+  TEST_CASE("View: the editor page's pointers", "[UI]")
+  {
+    boo::MemoryCache::Singleton().EvictResources();
+    View view({1'200, 600});
+    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes it once the page has loaded.
+    editor::PagePointers pointers(document);
+    auto byId = [&](utf8_stringview id)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      return element;
+    };
+    auto textOf = [&](utf8_stringview id)
+    {
+      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
+      return std::string(text.begin(), text.end());
+    };
+
+    // The pointer cards at the top of the view.
+    auto padRect = byId(u8"pointer-pad")->GetBoundingClientRect();
+    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(padRect->Top()) - 20));
+    view.UpdateRendering();
+    auto centre = [&](utf8_stringview id)
+    {
+      auto rect = byId(id)->GetBoundingClientRect();
+      return boo::IntPoint(static_cast<int32>(rect->Left() + rect->Width() / 2),
+                           static_cast<int32>(rect->Top() + rect->Height() / 2));
+    };
+    auto touchInput = [](pal::PointerAction action, uint32 id)
+    {
+      pal::PointerInput input;
+      input.Id = id;
+      input.Type = pal::PointerType::Touch;
+      input.Action = action;
+      input.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
+      input.Pressure = 0.5f;
+      return input;
+    };
+    CHECK(textOf(u8"pointer-readout") == "Move a mouse, a pen or a finger over the pad.\nTouches held: 0");
+
+    SECTION("the pad shows the pointers over it and the touches it holds, which don't pinch")
+    {
+      auto pad = centre(u8"pointer-pad");
+      view.MouseMoved(pad);
+      CHECK(textOf(u8"pointer-readout").starts_with("mouse 1 at "));
+
+      auto first = boo::DoublePoint(pad.X() - 40, pad.Y());
+      auto second = boo::DoublePoint(pad.X() + 40, pad.Y());
+      (void)view.TouchInput(first, touchInput(pal::PointerAction::Pressed, 10));
+      (void)view.TouchInput(second, touchInput(pal::PointerAction::Pressed, 11));
+      (void)view.TouchInput(boo::DoublePoint(pad.X() + 120, pad.Y()),
+                            touchInput(pal::PointerAction::Moved, 11));
+      auto readout = textOf(u8"pointer-readout");
+      CHECK(readout.contains("\ntouch 3 at "));
+      CHECK(readout.contains("pressure 0.50"));
+      CHECK(readout.contains("\ntouch 4 at "));
+      CHECK(readout.ends_with("Touches held: 2"));
+      CHECK(view.GetPage().PageScaleFactor() == 1);
+
+      (void)view.TouchInput(first, touchInput(pal::PointerAction::Released, 10));
+      (void)view.TouchInput(second, touchInput(pal::PointerAction::Released, 11));
+      readout = textOf(u8"pointer-readout");
+      CHECK_FALSE(readout.contains("touch"));
+      CHECK(readout.ends_with("Touches held: 0"));
+    }
+
+    SECTION("the chip follows the pointer that captured it, within its area")
+    {
+      auto chip = centre(u8"drag-chip");
+      view.MouseMoved(chip);
+      // The capture takes hold at the pointer's next event.
+      view.MousePressed(chip, pal::MouseButton::Left);
+      view.MouseMoved(boo::IntPoint(chip.X() + 50, chip.Y() + 30));
+      CHECK(textOf(u8"drag-chip") == "Dragging (pointer 1)");
+      CHECK(byId(u8"drag-chip")->GetAttribute(u8"style") == boo::dom::DOMString(u8"left: 50px; top: 30px"));
+      // Far outside its area, it stops at the area's edge.
+      view.MouseMoved(boo::IntPoint(chip.X() - 500, chip.Y() + 1'000));
+      auto style = byId(u8"drag-chip")->GetAttribute(u8"style").value_or(boo::dom::DOMString());
+      CHECK(std::string(style.begin(), style.end()).starts_with("left: 0px; top: "));
+      view.MouseReleased(boo::IntPoint(chip.X() - 500, chip.Y() + 1'000), pal::MouseButton::Left);
+      CHECK(textOf(u8"drag-chip") == "Drag me");
+    }
+
+    SECTION("the box locks the pointer, and shows the movement it gets")
+    {
+      CHECK(textOf(u8"lock-readout") == "Click the box to lock the pointer to it.");
+      view.SetPointerLockHandler([](bool) { return true; });
+      auto box = centre(u8"lock-box");
+      view.MouseMoved(box);
+      view.MousePressed(box, pal::MouseButton::Left);
+      view.MouseReleased(box, pal::MouseButton::Left);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK(view.PointerLocked());
+      CHECK(textOf(u8"lock-readout") == "Locked: move the mouse. Escape unlocks it.");
+      view.LockedMouseMoved({5, -3}, {5, -3});
+      view.LockedMouseMoved({2, 1}, {2, 1});
+      CHECK(textOf(u8"lock-readout") == "Locked: moved 2, 1; 7, -2 in all. Escape unlocks it.");
+      (void)view.KeyPressed(pal::Key::Escape);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK(textOf(u8"lock-readout") == "Click the box to lock the pointer to it.");
+    }
+
+    SECTION("the tiles pan with a finger, and a tap clicks them")
+    {
+      auto area = centre(u8"pan-area");
+      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Pressed, 1));
+      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Released, 1));
+      CHECK(textOf(u8"gesture-log").starts_with("click from touch at "));
+
+      (void)view.TouchInput(boo::DoublePoint(area), touchInput(pal::PointerAction::Pressed, 1));
+      (void)view.TouchInput(boo::DoublePoint(area.X() - 30, area.Y() - 40),
+                            touchInput(pal::PointerAction::Moved, 1));
+      (void)view.TouchInput(boo::DoublePoint(area.X() - 30, area.Y() - 40),
+                            touchInput(pal::PointerAction::Released, 1));
+      CHECK(byId(u8"pan-area")->ScrollLeft() == 30);
+      CHECK(byId(u8"pan-area")->ScrollTop() == 40);
+    }
+  }
+
   TEST_CASE("View: the editor's settings page asks before saving", "[UI]")
   {
     View view({1'200, 800});
@@ -1145,8 +1271,10 @@ namespace krys::ui::tests
   TEST_CASE("View: pens and touches", "[UI]")
   {
     View view({400, 300});
-    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
-                  u8"<div id=a></div><div id=b></div>");
+    // The page takes its touches, so they make no gestures.
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px; touch-action: none }</style>"
+      u8"<div id=a></div><div id=b></div>");
     WaitForLoad(view);
     view.UpdateRendering();
 
@@ -1283,6 +1411,235 @@ namespace krys::ui::tests
         window.MatchMedia(u8"(pointer: fine) and (any-pointer: coarse) and (any-pointer: fine)")->Matches());
       CHECK(window.MatchMedia(u8"(any-hover: hover)")->Matches());
       CHECK(window.GetNavigator().MaxTouchPoints() == 5);
+    }
+  }
+
+  TEST_CASE("View: gestures", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }"
+      u8"#none { touch-action: none } #panx { touch-action: pan-x } #tall { width: 2000px; height: 2000px }"
+      u8"</style><div id=a></div><div id=none></div><div id=panx></div><div id=tall></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &loop = boo::html::EventLoop::Current();
+    auto now = loop.Now();
+    auto frame = [&](std::chrono::milliseconds delta = std::chrono::milliseconds(16))
+    {
+      now += delta;
+      (void)view.Update(now);
+    };
+
+    // Each event as `type:id`, a pointer event's with its type and id.
+    List<std::string> records;
+    auto record = [&](boo::dom::Event &event)
+    {
+      auto type = event.Type().View();
+      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      auto id =
+        element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString()) : boo::dom::DOMString();
+      std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
+      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      {
+        auto pointerType = pointer->PointerType();
+        text +=
+          "/" + std::string(pointerType.begin(), pointerType.end()) + std::to_string(pointer->PointerId());
+      }
+      records.push_back(text);
+    };
+    List<boo::dom::EventListenerHandle> handles;
+    for (auto type : {u8"pointerdown", u8"pointerup", u8"pointercancel", u8"mousedown", u8"mouseup",
+                      u8"click", u8"dblclick", u8"contextmenu"})
+    {
+      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
+                                                         Func<void(boo::dom::Event &)>(record)));
+    }
+    // On the document, touchmove's listeners are passive unless they say otherwise; on `tall` they aren't.
+    auto cancel = [&](utf8_stringview type, bool onTall = false)
+    {
+      boo::dom::EventTarget &target =
+        onTall ? static_cast<boo::dom::EventTarget &>(*view.Document().GetElementById(u8"tall"))
+               : view.Document();
+      handles.push_back(target.AddEventListener(
+        boo::dom::DOMStringAtom(type),
+        Func<void(boo::dom::Event &)>([](boo::dom::Event &event) { event.PreventDefault(); })));
+    };
+
+    auto touch = [&](pal::PointerAction action, boo::DoublePoint point, uint32 id = 1)
+    {
+      pal::PointerInput input;
+      input.Id = id;
+      input.Type = pal::PointerType::Touch;
+      input.Action = action;
+      input.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
+      (void)view.TouchInput(point, input);
+    };
+    auto tap = [&](boo::DoublePoint point)
+    {
+      touch(pal::PointerAction::Pressed, point);
+      touch(pal::PointerAction::Released, point);
+    };
+
+    SECTION("a tap clicks, with its compatibility mouse events; two quickly, a double click")
+    {
+      tap({10, 10});
+      CHECK(records
+            == List<std::string> {"pointerdown:a/touch3", "pointerup:a/touch3", "mousedown:a", "mouseup:a",
+                                  "click:a/touch3"});
+      records.clear();
+      tap({14, 12});
+      CHECK(records
+            == List<std::string> {"pointerdown:a/touch3", "pointerup:a/touch3", "mousedown:a", "mouseup:a",
+                                  "click:a/touch3", "dblclick:a"});
+    }
+
+    SECTION("a cancelled pointerdown stops the tap's compatibility mouse events, not its click")
+    {
+      cancel(u8"pointerdown");
+      tap({10, 10});
+      CHECK(records == List<std::string> {"pointerdown:a/touch3", "pointerup:a/touch3", "click:a/touch3"});
+    }
+
+    SECTION("a cancelled touchend stops the click too")
+    {
+      cancel(u8"touchend");
+      tap({10, 10});
+      CHECK(records == List<std::string> {"pointerdown:a/touch3", "pointerup:a/touch3"});
+    }
+
+    SECTION("a long press asks for a context menu as it lifts, and doesn't tap")
+    {
+      touch(pal::PointerAction::Pressed, {10, 10});
+      frame(std::chrono::milliseconds(400));
+      CHECK(records == List<std::string> {"pointerdown:a/touch3"});
+      frame(std::chrono::milliseconds(200));
+      touch(pal::PointerAction::Released, {10, 10});
+      CHECK(records
+            == List<std::string> {"pointerdown:a/touch3", "pointerup:a/touch3", "contextmenu:a/touch3"});
+    }
+
+    SECTION("the right button asks for a context menu too, after its press")
+    {
+      view.MousePressed({10, 10}, pal::MouseButton::Right);
+      view.MouseReleased({10, 10}, pal::MouseButton::Right);
+      CHECK(records
+            == List<std::string> {"pointerdown:a/mouse1", "mousedown:a", "contextmenu:a/mouse1",
+                                  "pointerup:a/mouse1", "mouseup:a"});
+    }
+
+    SECTION("a pan scrolls what's under it, after pointercancel, then flings on")
+    {
+      touch(pal::PointerAction::Pressed, {100, 200});
+      // Within the threshold, nothing scrolls.
+      touch(pal::PointerAction::Moved, {100, 195});
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+      touch(pal::PointerAction::Moved, {100, 150});
+      CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointercancel:tall/touch3"});
+      CHECK(view.ScrollPosition() == boo::IntPoint(0, 50));
+      frame();
+      touch(pal::PointerAction::Moved, {100, 100});
+      CHECK(view.ScrollPosition() == boo::IntPoint(0, 100));
+      touch(pal::PointerAction::Released, {100, 100});
+      // No pointerup or click follows the cancelled pointer.
+      CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointercancel:tall/touch3"});
+
+      // It flung at 100 pixels in 16ms, and slows as the frames go.
+      frame();
+      auto first = view.ScrollPosition().Y();
+      CHECK(first > 100);
+      frame();
+      auto second = view.ScrollPosition().Y();
+      CHECK(second - first > 0);
+      CHECK(second - first < first - 100);
+      frame(std::chrono::milliseconds(5'000));
+      auto stopped = view.ScrollPosition();
+      frame();
+      CHECK(view.ScrollPosition() == stopped);
+    }
+
+    SECTION("a touch stops the fling, and doesn't tap")
+    {
+      touch(pal::PointerAction::Pressed, {100, 200});
+      touch(pal::PointerAction::Moved, {100, 150});
+      frame();
+      touch(pal::PointerAction::Moved, {100, 100});
+      touch(pal::PointerAction::Released, {100, 100});
+      frame();
+      records.clear();
+      tap({100, 100});
+      auto stopped = view.ScrollPosition();
+      frame();
+      CHECK(view.ScrollPosition() == stopped);
+      CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointerup:tall/touch3"});
+    }
+
+    SECTION("touch-action: none leaves the touch to the page")
+    {
+      touch(pal::PointerAction::Pressed, {10, 60});
+      touch(pal::PointerAction::Moved, {10, 160});
+      touch(pal::PointerAction::Released, {10, 160});
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(records == List<std::string> {"pointerdown:none/touch3", "pointerup:none/touch3"});
+    }
+
+    SECTION("touch-action: pan-x pans sideways only")
+    {
+      // Upwards, it's the page's.
+      touch(pal::PointerAction::Pressed, {100, 125});
+      touch(pal::PointerAction::Moved, {100, 60});
+      touch(pal::PointerAction::Moved, {40, 60});
+      touch(pal::PointerAction::Released, {40, 60});
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+
+      // Sideways, it pans, along the one axis.
+      touch(pal::PointerAction::Pressed, {100, 125});
+      touch(pal::PointerAction::Moved, {40, 115});
+      CHECK(view.ScrollPosition() == boo::IntPoint(60, 0));
+      touch(pal::PointerAction::Released, {40, 115});
+    }
+
+    SECTION("a cancelled touchmove takes the touch from the pan")
+    {
+      cancel(u8"touchmove", true);
+      touch(pal::PointerAction::Pressed, {100, 200});
+      touch(pal::PointerAction::Moved, {100, 150});
+      touch(pal::PointerAction::Released, {100, 150});
+      CHECK(view.ScrollPosition() == boo::IntPoint());
+      CHECK(records == List<std::string> {"pointerdown:tall/touch3", "pointerup:tall/touch3"});
+    }
+
+    SECTION("two touches pinch, scaling the page about the point between them")
+    {
+      touch(pal::PointerAction::Pressed, {100, 200}, 1);
+      touch(pal::PointerAction::Pressed, {200, 200}, 2);
+      CHECK(records
+            == List<std::string> {"pointerdown:tall/touch3", "pointerdown:tall/touch4",
+                                  "pointercancel:tall/touch3", "pointercancel:tall/touch4"});
+
+      // Twice as far apart: twice the scale, with the document's (150, 200) between them at (200, 200).
+      touch(pal::PointerAction::Moved, {300, 200}, 2);
+      CHECK(view.GetPage().PageScaleFactor() == 2);
+      CHECK(view.ScrollPosition() == boo::IntPoint(100, 200));
+
+      // The scale has its limits.
+      touch(pal::PointerAction::Moved, {1'000, 200}, 2);
+      CHECK(view.GetPage().PageScaleFactor() == 5);
+      touch(pal::PointerAction::Moved, {110, 200}, 2);
+      CHECK(view.GetPage().PageScaleFactor() == 1);
+      touch(pal::PointerAction::Released, {110, 200}, 2);
+      touch(pal::PointerAction::Released, {100, 200}, 1);
+      CHECK(view.GetPage().PageScaleFactor() == 1);
+    }
+
+    SECTION("touch-action: pan-x doesn't pinch")
+    {
+      touch(pal::PointerAction::Pressed, {100, 125}, 1);
+      touch(pal::PointerAction::Pressed, {200, 125}, 2);
+      touch(pal::PointerAction::Moved, {300, 125}, 2);
+      CHECK(view.GetPage().PageScaleFactor() == 1);
+      CHECK(records == List<std::string> {"pointerdown:panx/touch3", "pointerdown:panx/touch4"});
     }
   }
 

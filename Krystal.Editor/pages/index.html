@@ -581,6 +581,38 @@
     <div class="card reveal" id="reveal-3"><h2>Cold brew</h2><p>Overnight, in cold water.</p></div>
   </div>
 
+  <div class="row pointers">
+    <!-- Pointers: the pad shows each pointer over it (its type, id, pressure and tilt) and the touches it holds;
+         it keeps its touches to itself (touch-action: none), so they don't pan or pinch. -->
+    <div class="card" tabindex="0">
+      <h2>Pointers</h2>
+      <div class="pad" id="pointer-pad"><pre id="pointer-readout"></pre></div>
+    </div>
+    <!-- Pointer capture: the chip captures the pointer that presses it (setPointerCapture), which drags it about
+         its area until it lets go, wherever it goes. -->
+    <div class="card" tabindex="0">
+      <h2>Pointer capture</h2>
+      <div class="drag-area" id="drag-area"><div class="chip" id="drag-chip">Drag me</div></div>
+    </div>
+    <!-- Pointer lock: a click on the box locks the pointer to it (requestPointerLock); the window hides the cursor
+         and the box gets the mouse's movement until Escape unlocks it. -->
+    <div class="card" tabindex="0">
+      <h2>Pointer lock</h2>
+      <div class="lock-box" id="lock-box"><p id="lock-readout"></p></div>
+    </div>
+  </div>
+
+  <div class="row gestures">
+    <!-- Touch gestures: the tiles pan with a finger and fling on when flicked; a tap clicks, two double click,
+         and a long press asks for a context menu, as the readout shows. Two fingers pinch the page. -->
+    <div class="card" tabindex="0">
+      <h2>Touch gestures</h2>
+      <p>Pan the tiles with a finger, or flick them; tap, double tap or long press one. Pinch to zoom the page.</p>
+      <div class="pan-area" id="pan-area"><div class="tiles"></div></div>
+      <p class="log" id="gesture-log">Nothing yet</p>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

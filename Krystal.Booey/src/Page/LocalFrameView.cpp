@@ -1122,9 +1122,11 @@ namespace krys::boo
     // overflow:scroll on <body> as applying to the document's scrollbars.  The CSS2.1 draft states that HTML
     // UAs should use the <html> or <body> element and XML/XHTML UAs should use the root element.
 
-    // FIXME: Disregarding hidden when the main frame is scaled or has a header or footer (overrideHidden),
-    // once frames scale and have those; embedded SVG documents, once there's SVG rendering.
-    bool overrideHidden = false;
+    // To combat the inability to scroll on a page with overflow:hidden on the root when scaled, disregard
+    // hidden when there is a frameScaleFactor that is greater than one on the main frame.
+    // FIXME: Also when there's a header or footer, once there are those; embedded SVG documents, once there's
+    // SVG rendering.
+    bool overrideHidden = Frame().FrameScaleFactor() > 1;
 
     Overflow overflowX = renderer.Style().OverflowX();
     Overflow overflowY = renderer.Style().OverflowY();
@@ -1246,6 +1248,7 @@ namespace krys::boo
       _firstLayoutCallbackPending = true;
       _lastViewportSize = SizeForResizeEvent();
       _lastUsedZoomFactor = layoutRoot.Style().UsedZoom();
+      _lastFrameScaleFactor = Frame().FrameScaleFactor();
     }
     AdjustScrollbarsForLayout(firstLayout);
 
@@ -1780,8 +1783,14 @@ namespace krys::boo
 
     // If the element is inside position:fixed and we're not scaled, no amount of scrolling is going to move
     // things around.
-    // FIXME: The scaled cases, once frames can be scaled.
-    return visibleRect;
+    if (FrameScaleFactor() == 1)
+    {
+      return visibleRect;
+    }
+
+    // FIXME: Shouldn't this return visibleRect as well?
+    // FIXME: The visual viewport's case (visualViewportEnabled), once there are visual viewports.
+    return GetRectToExposeForScrollIntoView(visibleRect, exposeRect, alignX, alignY);
   }
 
   ScrollPosition LocalFrameView::MaximumScrollPosition() const noexcept
@@ -2286,9 +2295,26 @@ namespace krys::boo
   LayoutPoint LocalFrameView::ScrollPositionForFixedPosition() const noexcept
   {
     // FIXME: The layout viewport's origin (visualViewportEnabled), the scroll position constrained to the
-    // document for rubber-banding, the header and footer and the frame scale factor (the drag factors), once
-    // there are visual viewports, rubber-banding, headers and page scaling.
-    return LayoutPoint(GetScrollPosition());
+    // document for rubber-banding, and the header and footer, once there are visual viewports, rubber-banding
+    // and headers.
+    LayoutPoint position(GetScrollPosition());
+    LayoutRect visibleContentRect(VisibleContentRect());
+    LayoutSize totalContentsSize(ContentsSize());
+    float frameScaleFactor = FrameScaleFactor();
+
+    LayoutSize maxSize = totalContentsSize - visibleContentRect.Size();
+
+    float dragFactorX =
+      !maxSize.Width()
+        ? 1
+        : (totalContentsSize.Width() - visibleContentRect.Width() * frameScaleFactor) / maxSize.Width();
+    float dragFactorY =
+      !maxSize.Height()
+        ? 1
+        : (totalContentsSize.Height() - visibleContentRect.Height() * frameScaleFactor) / maxSize.Height();
+
+    return LayoutPoint(position.X() * dragFactorX / frameScaleFactor,
+                       position.Y() * dragFactorY / frameScaleFactor);
   }
 
   LayoutRect LocalFrameView::RectForFixedPositionLayout() const noexcept
@@ -2676,13 +2702,12 @@ namespace krys::boo
 
   int32 LocalFrameView::MapFromLayoutToCSSUnits(LayoutUnit value) const noexcept
   {
-    // FIXME: The frame scale factor, once frames can be scaled.
-    return static_cast<int32>(value / Frame().PageZoomFactor());
+    return static_cast<int32>(value / (Frame().PageZoomFactor() * Frame().FrameScaleFactor()));
   }
 
   LayoutUnit LocalFrameView::MapFromCSSToLayoutUnits(int32 value) const noexcept
   {
-    return LayoutUnit(value * Frame().PageZoomFactor());
+    return LayoutUnit(value * Frame().PageZoomFactor() * Frame().FrameScaleFactor());
   }
 
   IntSize LocalFrameView::SizeForResizeEvent() const noexcept
@@ -2706,14 +2731,17 @@ namespace krys::boo
 
     auto currentSize = SizeForResizeEvent();
     float currentZoomFactor = renderView->Style().UsedZoom();
+    float currentFrameScaleFactor = Frame().FrameScaleFactor();
 
-    if (currentSize == _lastViewportSize && currentZoomFactor == _lastUsedZoomFactor)
+    if (currentSize == _lastViewportSize && currentZoomFactor == _lastUsedZoomFactor
+        && currentFrameScaleFactor == _lastFrameScaleFactor)
     {
       return;
     }
 
     _lastViewportSize = currentSize;
     _lastUsedZoomFactor = currentZoomFactor;
+    _lastFrameScaleFactor = currentFrameScaleFactor;
 
     if (!_layoutContext.DidFirstLayout())
     {
@@ -2889,10 +2917,15 @@ namespace krys::boo
     ScrollRectToVisible(anchorRectWithScrollMargin, *renderer, insideFixed, options);
   }
 
+  float LocalFrameView::FrameScaleFactor() const noexcept
+  {
+    return Frame().FrameScaleFactor();
+  }
+
   float LocalFrameView::DocumentToAbsoluteScaleFactor(Maybe<float> usedZoom) const noexcept
   {
     // If usedZoom is passed, it already factors in pageZoomFactor().
-    return usedZoom ? *usedZoom : Frame().PageZoomFactor();
+    return (usedZoom ? *usedZoom : Frame().PageZoomFactor()) * Frame().FrameScaleFactor();
   }
 
   float LocalFrameView::AbsoluteToDocumentScaleFactor(Maybe<float> usedZoom) const noexcept
@@ -2913,7 +2946,7 @@ namespace krys::boo
       -FloatSize(static_cast<float>(VisibleContentRect().X()), static_cast<float>(VisibleContentRect().Y()));
 
     // Layout and visual viewports are affected by page zoom, so we need to factor that out.
-    return clientOrigin.Scaled(1 / Frame().PageZoomFactor());
+    return clientOrigin.Scaled(1 / (Frame().PageZoomFactor() * Frame().FrameScaleFactor()));
   }
 
   FloatRect LocalFrameView::DocumentToClientRect(FloatRect rect) const noexcept
@@ -2929,7 +2962,7 @@ namespace krys::boo
 
   FloatRect LocalFrameView::AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept
   {
-    // FIXME: The frame scale factor, once frames can be scaled.
+    rect.Scale(1 / Frame().FrameScaleFactor());
     rect.MoveBy(-FloatPoint(LayoutViewportRect().Location()));
     return rect;
   }

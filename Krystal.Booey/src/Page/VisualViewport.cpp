@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 
 namespace krys::boo
 {
@@ -112,10 +113,11 @@ namespace krys::boo
     {
       if (auto *view = frame->View())
       {
-        // There's no pinch zoom, so the visual viewport is the layout viewport: the visible content, less the
-        // scrollbars.
+        // The visual viewport is the visible content, less the scrollbars, unscaled.
+        // FIXME: The header and footer and rubber-banding (visibleDocumentRect), once there are those.
         auto visualViewportRect = FloatRect(view->VisibleContentRect());
-        auto layoutViewportRect = visualViewportRect;
+        visualViewportRect.Scale(1 / view->FrameScaleFactor());
+        auto layoutViewportRect = FloatRect(view->LayoutViewportRect());
         auto pageZoomFactor = frame->PageZoomFactor();
         krys_debug_assert(pageZoomFactor);
         offsetLeft = (visualViewportRect.X() - layoutViewportRect.X()) / pageZoomFactor;
@@ -125,7 +127,11 @@ namespace krys::boo
         width = visualViewportRect.Width() / pageZoomFactor;
         height = visualViewportRect.Height() / pageZoomFactor;
       }
-      // FIXME: The page scale factor, once pages can be pinch-zoomed.
+      if (auto *page = frame->GetPage())
+      {
+        // FIXME: Divided by the chrome client's base viewport layout size scale factor, once it has one.
+        scale = page->PageScaleFactor();
+      }
     }
 
     auto *document = frame ? frame->Document() : nullptr;

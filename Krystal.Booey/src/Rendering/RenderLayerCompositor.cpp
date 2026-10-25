@@ -2534,7 +2534,7 @@ namespace krys::boo
     auto clippedBounds = extent.Bounds;
     if (!clipRect.IsInfinite())
     {
-      // FIXME: Page scale, once there's page scaling.
+      clipRect.Scale(PageScaleFactor());
       clippedBounds.Intersect(clipRect);
     }
 
@@ -4032,8 +4032,8 @@ namespace krys::boo
 
   float RenderLayerCompositor::PageScaleFactor() const noexcept
   {
-    // FIXME: Page scale, once there's page scaling.
-    return 1;
+    auto *page = _renderView.GetDocument().GetPage();
+    return page ? page->PageScaleFactor() : 1;
   }
 
   float RenderLayerCompositor::ZoomedOutPageScaleFactor() const noexcept

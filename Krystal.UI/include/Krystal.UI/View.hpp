@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -195,6 +196,60 @@ namespace krys::ui
     /// @brief The touches on the screen, the first first.
     List<ActiveTouch> _touches;
 
+    /// @brief What the touches that the page leaves alone are doing.
+    enum class GestureState : uint8
+    {
+      /// @brief Nothing: no touch, or the page has the touches.
+      None,
+      /// @brief One touch that hasn't moved far: a tap if it lifts soon, a long press if it stays.
+      MayTap,
+      /// @brief A touch scrolling what's under it.
+      Pan,
+      /// @brief A touch held still, which asks for a context menu as it lifts.
+      LongPress,
+      /// @brief Two touches scaling the page.
+      Pinch,
+    };
+
+    GestureState _gestureState {GestureState::None};
+    /// @brief The touch the gesture follows (its id in the page's touch events), and where it began.
+    uint32 _gestureTouchId {0};
+    boo::DoublePoint _gestureStart;
+    /// @brief Where the pan last scrolled to.
+    boo::DoublePoint _gestureLast;
+    /// @brief The used `touch-action` where the gesture began.
+    EnumSet<boo::TouchAction> _gestureTouchActions;
+    /// @brief Whether the touch can still tap: not when it stopped a fling.
+    bool _gestureCanTap {false};
+    /// @brief The axes the pan scrolls.
+    bool _panX {false};
+    bool _panY {false};
+    /// @brief The part of the pan not scrolled yet (scrolls are in whole pixels).
+    boo::DoubleSize _panRemainder;
+    /// @brief The pan's recent positions, at the event loop's time, which the fling's velocity comes from.
+    List<std::pair<MonotonicTime::duration, boo::DoublePoint>> _panSamples;
+    /// @brief The page's scale when the pinch began, the distance between its touches then, and the point
+    /// between them in the unscaled document, which stays between them.
+    float _pinchStartScale {1};
+    double _pinchStartDistance {0};
+    boo::DoublePoint _pinchDocumentPoint;
+
+    /// @brief The scroll that goes on, slowing, after a pan lifts.
+    struct Fling
+    {
+      /// @brief Where the pan began, which the fling scrolls from.
+      boo::DoublePoint Position;
+      /// @brief In pixels a second.
+      boo::DoubleSize Velocity;
+      boo::DoubleSize Remainder;
+      /// @brief The host's time at the fling's last step.
+      MonotonicTime::duration LastTime {};
+    };
+
+    Maybe<Fling> _fling;
+    /// @brief Fires when a touch has been held still long enough to be a long press.
+    boo::Timer _longPressTimer {*this, &View::LongPressed};
+
     /// @brief A custom element definition the view gives each document it loads.
     struct CustomElementDefinition
     {
@@ -212,6 +267,24 @@ namespace krys::ui
     // FIXME: The system's double click time and distance, once the host reports them.
     static constexpr std::chrono::milliseconds DoubleClickTime {500};
     static constexpr int32 DoubleClickDistance {2};
+
+    // FIXME: The system's touch thresholds, once the host reports them.
+    /// @brief How near a tap is to the last for the two to be a double tap.
+    static constexpr int32 DoubleTapDistance {20};
+    /// @brief How far a touch moves before it's a pan, not a tap.
+    static constexpr double PanThreshold {10};
+    /// @brief How long a still touch is held before it's a long press.
+    static constexpr std::chrono::milliseconds LongPressDuration {500};
+    /// @brief How far back the pan's positions give the fling its velocity.
+    static constexpr std::chrono::milliseconds FlingSampleWindow {100};
+    /// @brief The slowest pan (in pixels a second) that flings, and the speed a fling stops at.
+    static constexpr double MinimumFlingVelocity {100};
+    static constexpr double StopFlingVelocity {20};
+    /// @brief How quickly a fling slows: its velocity falls by a factor of e in this many seconds.
+    static constexpr double FlingTimeConstant {0.325};
+    /// @brief How far a pinch scales the page.
+    static constexpr float MinimumPageScale {1};
+    static constexpr float MaximumPageScale {5};
 
   public:
     /// @brief A view of an empty document, with a viewport of @p viewportSize.
@@ -346,6 +419,12 @@ namespace krys::ui
     /// @brief A touch's input at @p point (in viewport coordinates): `touchstart`, `touchmove`, `touchend` or
     /// `touchcancel` at the element it began on, with every touch on the screen, each preceded by the touch's
     /// pointer events of type `touch`. While an overlay is open, touches are ignored.
+    ///
+    /// Touches the page doesn't cancel make gestures, as the used `touch-action` where they began allows:
+    /// a touch that moves pans (the box under it scrolls as the wheel scrolls it, after `pointercancel`), and
+    /// flings on as `Update` runs if it lifts moving; one that lifts soon taps (a click, with its
+    /// compatibility mouse events; two quickly, a double click); one held still is a long press
+    /// (`contextmenu` as it lifts); two pinch, scaling the page about the point between them.
     /// @return Whether the page cancelled or handled the touch event.
     bool TouchInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept;
     /// @brief The touches on the screen.
@@ -510,7 +589,39 @@ namespace krys::ui
                                                     const boo::DoublePoint &point, boo::MouseButton button,
                                                     int32 clickCount,
                                                     const pal::PointerInput &input) const noexcept;
-    /// @brief Counts a press of @p button at @p point on from the last, if it's soon after it and near it.
-    KRYS_NODISCARD int32 CountClick(const boo::IntPoint &point, boo::MouseButton button) noexcept;
+    /// @brief Counts a press of @p button at @p point on from the last, if it's soon after it and within
+    /// @p distance of it.
+    KRYS_NODISCARD int32 CountClick(const boo::IntPoint &point, boo::MouseButton button,
+                                    int32 distance = DoubleClickDistance) noexcept;
+
+    /// @brief Follows the gestures the touches make, after the touch event for @p action of the touch @p id
+    /// at @p position, which the page cancelled if @p cancelled.
+    void RecogniseGesture(uint32 id, pal::PointerAction action, const boo::DoublePoint &position,
+                          bool cancelled) noexcept;
+    /// @brief The used `touch-action` of the element at @p point.
+    KRYS_NODISCARD EnumSet<boo::TouchAction> TouchActionsAt(const boo::DoublePoint &point) noexcept;
+    /// @brief Ends the gesture, without its default action.
+    void ResetGesture() noexcept;
+    /// @brief The touch @p id's pointer events end, as the page loses the touch to a pan or a pinch
+    /// (`pointercancel`).
+    void CancelTouchPointer(uint32 id, const boo::DoublePoint &position) noexcept;
+    /// @brief The pan moved to @p position: what's under its start scrolls by the movement, on the axes it
+    /// scrolls.
+    void PanTo(const boo::DoublePoint &position) noexcept;
+    /// @brief Scrolls what's under @p position by @p delta (the content moving with the touch).
+    /// @return Whether something scrolled.
+    bool ScrollForTouch(const boo::DoublePoint &position, const boo::DoubleSize &delta) noexcept;
+    /// @brief The pan lifted: it flings on if it was moving fast enough.
+    void StartFling() noexcept;
+    /// @brief Moves the fling on to the host's time @p now.
+    void StepFling(MonotonicTime::duration now) noexcept;
+    /// @brief The two touches moved: the page scales by how far apart they are, about the point between them.
+    void UpdatePinch() noexcept;
+    /// @brief A touch tapped at @p position: a click there, with its compatibility mouse events.
+    void Tap(uint32 id, const boo::DoublePoint &position) noexcept;
+    /// @brief The long press timer fired: the touch is a long press.
+    void LongPressed() noexcept;
+    /// @brief A long press of the touch @p id lifted at @p position: the page gets `contextmenu` there.
+    void RequestContextMenu(uint32 id, const boo::DoublePoint &position) noexcept;
   };
 }

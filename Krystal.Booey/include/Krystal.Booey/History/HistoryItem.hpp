@@ -47,6 +47,7 @@ namespace krys::boo
     dom::DOMString _displayTitle;
 
     IntPoint _scrollPosition;
+    float _pageScaleFactor {0}; // 0 indicates "unset".
     List<dom::DOMString> _documentState;
 
     bool _lastVisitWasFailure {false};
@@ -185,6 +186,16 @@ namespace krys::boo
     void ClearScrollPosition() noexcept
     {
       _scrollPosition = IntPoint();
+    }
+
+    /// @brief The page's scale when the item was left, or 0 if it wasn't saved.
+    KRYS_NODISCARD float PageScaleFactor() const noexcept
+    {
+      return _pageScaleFactor;
+    }
+    void SetPageScaleFactor(float scaleFactor) noexcept
+    {
+      _pageScaleFactor = scaleFactor;
     }
 
     /// @brief Whether going back to the item restores its scroll position (`history.scrollRestoration`).

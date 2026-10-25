@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -1789,6 +1790,27 @@ namespace krys::boo
       return false;
     }
 
+    // Script-made wheel events don't scroll (scrollViaNonPlatformEvent).
+    auto &platformEvent = wheelEvent.UnderlyingPlatformEvent();
+    if (!platformEvent)
+    {
+      return false;
+    }
+
+    return HandleWheelEventInAppropriateEnclosingBox(
+      startNode, platformEvent->CopyWithDelta(filteredPlatformDelta),
+      FloatSize(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY())));
+  }
+
+  bool EventHandler::HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode,
+                                                               const PlatformWheelEvent &event,
+                                                               FloatSize biasedDelta) noexcept
+  {
+    if (!startNode->Renderer())
+    {
+      return false;
+    }
+
     auto scrollableAreaForBox = [](RenderBox &box) -> ScrollableArea *
     {
       if (auto *renderListBox = DynamicDowncast<RenderListBox>(box))
@@ -1804,22 +1826,13 @@ namespace krys::boo
     };
 
     RenderBox *currentEnclosingBox = &startNode->Renderer()->EnclosingBox();
-    auto biasedDelta =
-      FloatSize(static_cast<float>(wheelEvent.DeltaX()), static_cast<float>(wheelEvent.DeltaY()));
 
     while (currentEnclosingBox)
     {
       if (auto *boxScrollableArea = scrollableAreaForBox(*currentEnclosingBox))
       {
-        // Script-made wheel events don't scroll (scrollViaNonPlatformEvent).
-        auto &platformEvent = wheelEvent.UnderlyingPlatformEvent();
-        if (!platformEvent)
-        {
-          return false;
-        }
-        auto copiedEvent = platformEvent->CopyWithDelta(filteredPlatformDelta);
-        bool scrollingWasHandled = ScrollableAreaCanHandleEvent(copiedEvent, *boxScrollableArea)
-                                   && HandleWheelEventInScrollableArea(copiedEvent, *boxScrollableArea);
+        bool scrollingWasHandled = ScrollableAreaCanHandleEvent(event, *boxScrollableArea)
+                                   && HandleWheelEventInScrollableArea(event, *boxScrollableArea);
         if (scrollingWasHandled)
         {
           return true;
@@ -1886,6 +1899,39 @@ namespace krys::boo
 
     // FIXME: The wheel delta filter and latching, once there are touchpad gestures.
     return HandleWheelEventInAppropriateEnclosingBox(startNode, wheelEvent, filteredPlatformDelta);
+  }
+
+  bool EventHandler::HandleTouchScroll(const PlatformWheelEvent &event) noexcept
+  {
+    Ref frame = ShareRef(_frame);
+    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    if (!document || !view || (!event.DeltaX() && !event.DeltaY()))
+    {
+      return false;
+    }
+
+    SetFrameWasScrolledByUser();
+
+    HitTestRequest request;
+    HitTestResult result(LayoutPoint(view->WindowToContents(event.Position())));
+    (void)document->HitTest(request, result);
+
+    if (RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement()))
+    {
+      if (HandleWheelEventInAppropriateEnclosingBox(element.get(), event, event.Delta()))
+      {
+        return true;
+      }
+    }
+
+    auto filteredDelta = view->DeltaForPropagation(event.Delta());
+    if (view->ShouldBlockScrollPropagation(filteredDelta))
+    {
+      return true;
+    }
+
+    return HandleWheelEventInScrollableArea(event.CopyWithDelta(filteredDelta), *view);
   }
 
 #pragma region Selection
@@ -2067,6 +2113,135 @@ namespace krys::boo
     }
   }
 
+  void EventHandler::SelectClosestContextualWordFromHitTestResult(
+    const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept
+  {
+    RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+    VisibleSelection newSelection;
+
+    if (targetNode && targetNode->Renderer())
+    {
+      // FIXME: The system's lookup of the word under the point
+      // (selectClosestWordFromHitTestResultBasedOnLookup), which only the Mac has.
+      VisiblePosition pos(
+        targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
+      if (pos.IsNotNull())
+      {
+        newSelection = VisibleSelection(pos);
+        newSelection.ExpandUsingGranularity(TextGranularity::WordGranularity);
+      }
+
+      if (appendTrailingWhitespace == ShouldAppendTrailingWhitespace && newSelection.IsRange())
+      {
+        newSelection.AppendTrailingWhitespace();
+      }
+
+      (void)UpdateSelectionForMouseDownDispatchingSelectStart(
+        targetNode.get(), ExpandSelectionToRespectSelectOnMouseDown(*targetNode, newSelection),
+        TextGranularity::WordGranularity);
+    }
+  }
+
+  namespace
+  {
+    // FIXME: Editable links, which are live only as the editable link behavior setting says, with that
+    // setting.
+    KRYS_NODISCARD bool IsDraggableLink(const dom::Element &element) noexcept
+    {
+      auto *anchorElement = DynamicDowncast<html::HTMLAnchorElement>(element);
+      return anchorElement && anchorElement->HasAttribute(u8"href") && !anchorElement->HasEditableStyle();
+    }
+  }
+
+  void EventHandler::SelectClosestContextualWordOrLinkFromHitTestResult(
+    const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept
+  {
+    // FIXME: In the editable case, word selection sometimes selects content that isn't underneath the mouse.
+    // If the selection is non-editable, we do word selection to make it easier to use the contextual menu
+    // items available for text selections. But only if we're above text.
+    if (!_frame.Document()->Selection().Selection().IsContentEditable()
+        && !Is<dom::Text>(result.TargetNode()))
+    {
+      return;
+    }
+
+    RefPtr<dom::Element> urlElement = ShareRefPtr(result.URLElement());
+    if (!urlElement || !IsDraggableLink(*urlElement))
+    {
+      if (RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode());
+          targetNode && IsEditableNode(*targetNode))
+      {
+        SelectClosestWordFromHitTestResult(result, appendTrailingWhitespace);
+        return;
+      }
+
+      SelectClosestContextualWordFromHitTestResult(result, appendTrailingWhitespace);
+      return;
+    }
+
+    if (RefPtr<dom::Node> targetNode = ShareRefPtr(result.TargetNode()); targetNode && targetNode->Renderer())
+    {
+      VisibleSelection newSelection;
+      VisiblePosition pos(
+        targetNode->Renderer()->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User));
+      if (pos.IsNotNull() && pos.DeepEquivalent().DeprecatedNode()->IsDescendantOf(*urlElement))
+      {
+        newSelection = VisibleSelection::SelectionFromContentsOfNode(urlElement.get());
+      }
+
+      (void)UpdateSelectionForMouseDownDispatchingSelectStart(
+        targetNode.get(), ExpandSelectionToRespectSelectOnMouseDown(*targetNode, newSelection),
+        TextGranularity::WordGranularity);
+    }
+  }
+
+  bool EventHandler::SendContextMenuEvent(const PlatformMouseEvent &event) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    // Context menus should not be handled while pointer is locked.
+    if (auto *page = frame->GetPage(); !page || page->GetPointerLockController().IsLocked())
+    {
+      return false;
+    }
+
+    RefPtr<dom::Document> doc = ShareRefPtr(frame->Document());
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+    if (!doc || !view)
+    {
+      return false;
+    }
+
+    // Caret blinking is normally un-suspended in HandleMouseReleaseEvent, but we
+    // won't receive that event once the context menu is up.
+    doc->Selection().SetCaretBlinkingSuspended(false);
+    // Clear mouse press state to avoid initiating a drag while context menu is up.
+    _mousePressed = false;
+    const auto flooredEventPosition = FlooredIntPoint(event.Position());
+    LayoutPoint viewportPos {view->WindowToContents(flooredEventPosition)};
+    MouseEventWithHitTestResults mouseEvent = doc->PrepareMouseEvent(
+      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Active,
+                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      DoublePoint(viewportPos), event);
+
+    // Do not show context menus when clicking on scrollbars.
+    if (mouseEvent.GetScrollbar() || view->ScrollbarAtPoint(flooredEventPosition))
+    {
+      return false;
+    }
+
+    if (EditingBehavior(doc->GetSettings().EditingBehaviorType).ShouldSelectOnContextualMenuClick()
+        && !doc->Selection().Contains(viewportPos))
+    {
+      _mouseDownMayStartSelect = true; // context menu events are always allowed to perform a selection
+      SelectClosestContextualWordOrLinkFromHitTestResult(mouseEvent.GetHitTestResult(),
+                                                         AppendTrailingWhitespaceForEvent(mouseEvent));
+    }
+
+    return !DispatchMouseEvent(dom::DOMStringAtom(EventNames::ContextMenu), mouseEvent.TargetNode(), 0, event,
+                               FireMouseOverOut::No);
+  }
+
   namespace
   {
     KRYS_NODISCARD dom::DOMStringAtom EventNameForTouchPointState(PlatformTouchPoint::State state) noexcept
@@ -2113,6 +2288,17 @@ namespace krys::boo
     if (!frame->View() || !frame->Document())
     {
       return false;
+    }
+
+    // The pointers of the touches that ended before are forgotten, so a later touch with the same id starts
+    // afresh. They're kept until now so the host's tap after a touch ends sees whether the touch's
+    // pointerdown was cancelled.
+    if (auto *page = frame->GetPage())
+    {
+      for (auto pointerId : std::exchange(_endedTouchPointerIds, {}))
+      {
+        page->GetPointerCaptureController().TouchWithIdentifierWasRemoved(pointerId);
+      }
     }
 
     // First build up the lists to use for the 'touches', 'targetTouches' and 'changedTouches' attributes
@@ -2162,9 +2348,6 @@ namespace krys::boo
         allTouchReleased = false;
       }
     }
-
-    // The pointers of the touches that ended, forgotten once their events are dispatched.
-    List<PointerID> removedPointerIds;
 
     for (uint32 index = 0; index < points.size(); index++)
     {
@@ -2294,7 +2477,7 @@ namespace krys::boo
         if (pointState == PlatformTouchPoint::TouchReleased
             || pointState == PlatformTouchPoint::TouchCancelled)
         {
-          removedPointerIds.push_back(dom::PointerEvent::PointerIdForTouch(point));
+          _endedTouchPointerIds.push_back(dom::PointerEvent::PointerIdForTouch(point));
         }
       }
 
@@ -2350,15 +2533,6 @@ namespace krys::boo
     if (allTouchReleased)
     {
       _originatingTouchPointDocument = nullptr;
-    }
-
-    // The pointers of the touches that ended are forgotten, so a later touch with the same id starts afresh.
-    if (auto *page = frame->GetPage())
-    {
-      for (auto pointerId : removedPointerIds)
-      {
-        page->GetPointerCaptureController().TouchWithIdentifierWasRemoved(pointerId);
-      }
     }
 
     // Now iterate the changedTouches list and the targets within it, sending events to the targets as
@@ -2451,8 +2625,9 @@ namespace krys::boo
                                                         TextGranularity::ParagraphGranularity);
   }
 
-  // FIXME: Synthetic clicks (syntheticClickType, which snap to a word boundary), and the editor client's
-  // shouldAllowSingleClickToChangeSelection, with touch and the editor.
+  // FIXME: Taps put the caret at the nearest word boundary (wordBoundaryForPositionWithoutCrossingLine), once
+  // the visible units have the granularity queries; the editor client's
+  // shouldAllowSingleClickToChangeSelection, with the editor.
   bool EventHandler::HandleMousePressEventSingleClick(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);

@@ -7,8 +7,11 @@
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <string>
 
@@ -559,6 +562,46 @@ namespace krys::boo::tests
       CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Pointer);
       fixture.Handler().UpdateCursor();
       CHECK(fixture.Handler().CurrentMouseCursor().GetType() == Cursor::Type::Wait);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "EventHandler: contextmenu", "[Page][EventHandler]")
+  {
+    MouseFixture fixture {u8"<div id=a style=height:20px>hello world</div>"};
+    List<std::string> records;
+    Listen(*fixture.Document, u8"contextmenu",
+           [&](dom::Event &event) { records.push_back("contextmenu:" + Name(event.Target().get())); });
+    auto event = MouseFixture::Event(PlatformEvent::Type::MousePressed, 5, 5, MouseButton::Right, 1);
+
+    SECTION("after a press of the right button, which no longer holds the mouse")
+    {
+      (void)fixture.Handler().HandleMousePressEvent(event);
+      CHECK(fixture.Handler().MousePressed());
+      CHECK_FALSE(fixture.Handler().SendContextMenuEvent(event));
+      CHECK(records == Strings {"contextmenu:a"});
+      CHECK_FALSE(fixture.Handler().MousePressed());
+      // The selection isn't touched.
+      CHECK_FALSE(fixture.Document->Selection().Selection().IsRange());
+    }
+
+    SECTION("cancelling it")
+    {
+      Listen(fixture.ById(u8"a"), u8"contextmenu", [](dom::Event &event) { event.PreventDefault(); });
+      CHECK(fixture.Handler().SendContextMenuEvent(event));
+      CHECK(records == Strings {"contextmenu:a"});
+    }
+
+    SECTION("with the Mac's editing behaviour, the word under it is selected first")
+    {
+      auto &settings = fixture.Document->GetSettings();
+      settings.EditingBehaviorType = EditingBehaviorType::Mac;
+      CHECK_FALSE(fixture.Handler().SendContextMenuEvent(event));
+      settings.EditingBehaviorType = EditingBehaviorType::Windows;
+      CHECK(records == Strings {"contextmenu:a"});
+      auto &selection = fixture.Document->Selection().Selection();
+      REQUIRE(selection.IsRange());
+      CHECK(selection.Start().DeprecatedEditingOffset() == 0);
+      CHECK(selection.End().DeprecatedEditingOffset() == 5);
     }
   }
 }

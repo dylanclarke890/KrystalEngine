@@ -60,6 +60,56 @@ namespace krys::boo
     }
   }
 
+  void Page::SetPageScaleFactor(float scale, const IntPoint &origin) noexcept
+  {
+    RefPtr<dom::Document> mainDocument = ShareRefPtr(_mainFrame->Document());
+    RefPtr<LocalFrameView> mainFrameView = mainDocument ? ShareRefPtr(mainDocument->View()) : nullptr;
+
+    if (scale == _pageScaleFactor)
+    {
+      if (mainFrameView && mainFrameView->GetScrollPosition() != origin)
+      {
+        (void)mainDocument->UpdateLayoutIgnorePendingStylesheets(
+          {dom::LayoutOptions::UpdateCompositingLayers});
+      }
+    }
+    else
+    {
+      _pageScaleFactor = scale;
+
+      // FIXME: Every root frame, once there are subframes.
+      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      {
+        view->LayoutContext().SetNeedsLayoutAfterViewConfigurationChange();
+        view->SetNeedsCompositingGeometryUpdate();
+        view->SetDescendantsNeedUpdateBackingAndHierarchyTraversal();
+
+        if (mainDocument)
+        {
+          mainDocument->ResolveStyle(dom::Document::ResolveStyleType::Rebuild);
+        }
+
+        // Transform change on RenderView doesn't trigger repaint on non-composited contents.
+        view->InvalidateRect(IntRect(LayoutRect::InfiniteRect()));
+
+        _mainFrame->DeviceOrPageScaleFactorChanged();
+      }
+
+      if (mainFrameView && mainFrameView->GetScrollPosition() != origin && mainDocument->GetRenderView()
+          && mainDocument->GetRenderView()->NeedsLayout() && mainFrameView->LayoutContext().DidFirstLayout())
+      {
+        auto &layoutContext = mainFrameView->LayoutContext();
+        layoutContext.Layout();
+        (void)layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded();
+      }
+    }
+
+    if (mainFrameView && mainFrameView->GetScrollPosition() != origin)
+    {
+      mainFrameView->SetScrollPosition(origin);
+    }
+  }
+
   void Page::DidChangeMainDocument(dom::Document *newDocument) noexcept
   {
     (void)newDocument;

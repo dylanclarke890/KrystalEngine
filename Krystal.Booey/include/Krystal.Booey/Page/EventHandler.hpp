@@ -150,6 +150,8 @@ namespace krys::boo
     RefPtr<dom::Document> _originatingTouchPointDocument;
     uint32 _originatingTouchPointTargetKey {0};
     bool _touchPressed {false};
+    /// @brief The pointers of the touches that ended, forgotten at the next touch event.
+    List<PointerID> _endedTouchPointerIds;
 
   public:
     explicit EventHandler(LocalFrame &frame) noexcept;
@@ -240,6 +242,13 @@ namespace krys::boo
     /// @return Whether a touch event was cancelled or handled.
     bool HandleTouchEvent(const PlatformTouchEvent &event) noexcept;
 
+    /// @brief Sends `contextmenu` to the element under @p event, as the host does after a press of the right
+    /// button or a long press: the press is over, so no drag starts; with the Mac's editing behaviour, the
+    /// word (or link) under it is selected first. Not while the pointer is locked, nor over a scrollbar.
+    /// @return Whether the event was cancelled.
+    // FIXME: The keyboard's context menu (sendContextMenuEventForKey), once the host reports the menu key.
+    bool SendContextMenuEvent(const PlatformMouseEvent &event) noexcept;
+
     /// @brief Chooses the cursor again for the last known mouse position, as after the page changes under a
     /// still mouse.
     void UpdateCursor() noexcept;
@@ -274,6 +283,12 @@ namespace krys::boo
     /// it.
     /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
     bool DefaultWheelEventHandler(dom::Node *startNode, dom::WheelEvent &wheelEvent) noexcept;
+    /// @brief Scrolls for a touch's pan, or the fling after it, by @p event's delta from where the touch
+    /// began (its position): the nearest box under it that can scroll that way, passing over boxes at their
+    /// end unless `overscroll-behavior` stops it, then the view, as the wheel scrolls; unlike the wheel's, no
+    /// event fires.
+    /// @return Whether it scrolled (or `overscroll-behavior` stopped the scroll there).
+    bool HandleTouchScroll(const PlatformWheelEvent &event) noexcept;
     KRYS_NODISCARD bool IsHandlingWheelEvent() const noexcept
     {
       return _isHandlingWheelEvent;
@@ -351,6 +366,10 @@ namespace krys::boo
 
     bool HandleWheelEventInternal(const PlatformWheelEvent &event, EnumSet<EventHandling> &handling) noexcept;
     bool ProcessWheelEventForScrolling(const PlatformWheelEvent &event) noexcept;
+    /// @param biasedDelta The delta whose axes `overscroll-behavior` may stop from passing to the boxes
+    /// further out.
+    bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const PlatformWheelEvent &event,
+                                                   FloatSize biasedDelta) noexcept;
     bool HandleWheelEventInAppropriateEnclosingBox(dom::Node *startNode, const dom::WheelEvent &wheelEvent,
                                                    const FloatSize &filteredPlatformDelta) noexcept;
     KRYS_NODISCARD static bool ScrollableAreaCanHandleEvent(const PlatformWheelEvent &wheelEvent,
@@ -381,6 +400,10 @@ namespace krys::boo
                                                            TextGranularity granularity) noexcept;
     void SelectClosestWordFromHitTestResult(const HitTestResult &result,
                                             AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+    void SelectClosestContextualWordFromHitTestResult(
+      const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
+    void SelectClosestContextualWordOrLinkFromHitTestResult(
+      const HitTestResult &result, AppendTrailingWhitespace appendTrailingWhitespace) noexcept;
     KRYS_NODISCARD VisiblePosition SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
                                                                             const LayoutPoint &localPoint,
                                                                             dom::Node *targetNode) noexcept;

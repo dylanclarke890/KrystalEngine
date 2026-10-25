@@ -4355,8 +4355,7 @@ namespace krys::boo
     if (IsRenderViewLayer())
     {
       // The root layer is always just the size of the document.
-      // FIXME: The unscaled document rect, once the view knows it.
-      return Renderer().View().LayoutOverflowRect();
+      return LayoutRect(Renderer().View().UnscaledDocumentRect());
     }
 
     LayoutRect boundingBoxRect = LocalBoundingBox(flags | IncludeRootBackgroundPaintingArea);

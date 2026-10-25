@@ -82,6 +82,7 @@ namespace krys::boo
     /// @brief Steps asked for during a rendering update after they had run, for the next one.
     EnumSet<RenderingUpdateStep> _unfulfilledRequestedSteps;
     uint32 _renderingUpdateDepth {0};
+    float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
     bool _isClosing {false};
     /// @brief The page's session storage (its top-level traversable's), by origin.
@@ -139,6 +140,17 @@ namespace krys::boo
     {
       return *_pointerLockController;
     }
+
+    /// @brief How much the page is scaled, as by pinching: the main frame's content is drawn scaled by it
+    /// (about the document's origin), and scrolls in the scaled content, without being laid out again.
+    KRYS_NODISCARD float PageScaleFactor() const noexcept
+    {
+      return _pageScaleFactor;
+    }
+    /// @brief Scales the page by @p scale, and scrolls the main frame to @p origin (in the scaled content).
+    // FIXME: Telling media elements in a stable state (inStableState, pageScaleFactorChanged), once there are
+    // media elements.
+    void SetPageScaleFactor(float scale, const IntPoint &origin) noexcept;
 
     /// @brief Called when the main frame's document is replaced by @p newDocument.
     // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once

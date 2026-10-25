@@ -2894,8 +2894,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD int32 AdjustContentsScrollPositionOrSizeForZoom(int32 value,
                                                                    const LocalFrame &frame) noexcept
     {
-      // FIXME: The frame scale factor (frameScaleFactor), once frames can be scaled.
-      double zoomFactor = frame.PageZoomFactor();
+      double zoomFactor = frame.PageZoomFactor() * frame.FrameScaleFactor();
       if (zoomFactor == 1)
       {
         return value;
@@ -3585,7 +3584,8 @@ namespace krys::boo::dom
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(static_cast<int32>(newLeft * frame->PageZoomFactor()), frame->View()->ScrollY());
+        IntPoint position(static_cast<int32>(newLeft * frame->PageZoomFactor() * frame->FrameScaleFactor()),
+                          frame->View()->ScrollY());
         frame->View()->SetScrollPosition(position, options);
       }
       return;
@@ -3614,7 +3614,8 @@ namespace krys::boo::dom
     {
       if (auto *frame = DocumentFrameWithNonNullView(document))
       {
-        IntPoint position(frame->View()->ScrollX(), static_cast<int32>(newTop * frame->PageZoomFactor()));
+        IntPoint position(frame->View()->ScrollX(),
+                          static_cast<int32>(newTop * frame->PageZoomFactor() * frame->FrameScaleFactor()));
         frame->View()->SetScrollPosition(position, options);
       }
       return;

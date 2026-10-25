@@ -92,6 +92,23 @@ tr:hover td { text-decoration: underline; }
 @keyframes reveal { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 .reveal { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
 
+/* Pointers: the pad keeps its touches, the chip is dragged about its area, and the box locks the pointer. */
+.pointers .card, .gestures .card { height: auto; min-width: 0; }
+.pad { height: 140px; border-radius: 12px; background: #e3e7ef; touch-action: none; overflow: hidden; }
+.pad pre { margin: 0; padding: 8px; font-size: 12px; white-space: pre-wrap; pointer-events: none; }
+.drag-area { position: relative; height: 140px; border-radius: 12px; background: #e3e7ef; }
+.chip { position: absolute; left: 0; top: 0; padding: 8px 14px; border-radius: 16px; background: #4f6df5;
+        color: #ffffff; touch-action: none; user-select: none; }
+.lock-box { height: 140px; border-radius: 12px; background: #1a2240; color: #ffffff; padding: 8px;
+            box-sizing: border-box; }
+.lock-box p { margin: 0; }
+
+/* Touch gestures: tiles in a box that pans both ways. */
+.pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
+.tiles { width: 1600px; height: 640px;
+         background: repeating-linear-gradient(45deg, #ffd166 0 40px, #06d6a0 40px 80px); }
+.gestures .log { margin: 8px 0 0; color: #5c677d; }
+
 /* Web fonts: a heading in a face loaded from its TrueType file, and digits from Ahem's WOFF 2 (its glyphs
    are boxes), chosen by unicode-range. */
 @font-face { font-family: Display; src: url(../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf)

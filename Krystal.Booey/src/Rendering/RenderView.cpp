@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInitialContainingBlock.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -249,8 +250,8 @@ namespace krys::boo
 
     Compositor().RootBackgroundColorOrTransparencyChanged();
 
-    // FIXME: The page scale factor, once pages scale.
-    float pageScaleFactor = 1;
+    auto *page = GetDocument().GetPage();
+    float pageScaleFactor = page ? page->PageScaleFactor() : 1;
 
     // If painting will entirely fill the view, no need to fill the background.
     if (rootFillsViewport && rootObscuresBackground && pageScaleFactor >= 1

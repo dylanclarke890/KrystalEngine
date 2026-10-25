@@ -149,6 +149,13 @@ namespace krys::boo
     void SetTextZoomFactor(float factor) noexcept;
     void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
 
+    /// @brief How much the frame's content is scaled: the page's scale.
+    // FIXME: A subframe's is its owner's zoom relative to the root frame's, once there are subframes.
+    KRYS_NODISCARD float FrameScaleFactor() const noexcept;
+    /// @brief Tells the frame's compositor the device or page scale changed.
+    // FIXME: And the child frames, once there are subframes.
+    void DeviceOrPageScaleFactorChanged() noexcept;
+
     /// @brief The device and user state the frame's document is presented with.
     KRYS_NODISCARD const css::mq::MediaEnvironment &GetMediaEnvironment() const noexcept
     {
