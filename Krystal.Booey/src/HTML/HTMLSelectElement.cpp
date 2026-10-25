@@ -18,6 +18,7 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderListBox.hpp"
 #include "Krystal.Booey/Rendering/RenderMenuList.hpp"
@@ -1339,24 +1340,30 @@ namespace krys::boo::html
       return false;
     }
 
-    if (event.KeyIdentifier() == u8"Down" || event.KeyIdentifier() == u8"Up")
+    if (!NodeDocument().GetSettings().SpatialNavigationEnabled)
     {
-      Focus();
-      NodeDocument().UpdateStyleIfNeeded();
-      // Calling Focus() may cause us to lose our renderer. Return true so that our caller doesn't process the
-      // event further, but don't set the event as handled.
-      if (!UsesMenuList() || !Renderer())
+      if (event.KeyIdentifier() == u8"Down" || event.KeyIdentifier() == u8"Up")
       {
-        return true;
-      }
+        Focus();
+        NodeDocument().UpdateStyleIfNeeded();
+        // Calling Focus() may cause us to lose our renderer. Return true so that our caller doesn't process
+        // the event further, but don't set the event as handled.
+        if (!UsesMenuList() || !Renderer())
+        {
+          return true;
+        }
 
-      // Save the selection so it can be compared to the new selection when dispatching change events during
-      // SelectOption, which gets called from the menu list when the user makes a selection from the menu.
-      SaveLastSelection();
-      ShowPopup();
-      event.SetDefaultHandled();
+        // Save the selection so it can be compared to the new selection when dispatching change events
+        // during SelectOption, which gets called from the menu list when the user makes a selection from the
+        // menu.
+        SaveLastSelection();
+        ShowPopup();
+        event.SetDefaultHandled();
+      }
+      return true;
     }
-    return true;
+
+    return false;
   }
 
   void HTMLSelectElement::MenuListDefaultEventHandler(dom::Event &event) noexcept
@@ -1374,10 +1381,30 @@ namespace krys::boo::html
         return;
       }
 
+      // When using spatial navigation, we want to be able to navigate away from the select element when the
+      // user hits any of the arrow keys, instead of changing the selection.
+      if (NodeDocument().GetSettings().SpatialNavigationEnabled)
+      {
+        if (!_activeSelectionState)
+        {
+          return;
+        }
+      }
+
       auto keyIdentifier = keyboardEvent->KeyIdentifier();
       bool handled = true;
       auto &listItems = ListItems();
       int32 listIndex = OptionToListIndex(SelectedIndex());
+
+      // When using caret browsing, we want to be able to move the focus out of the select element when user
+      // hits a left or right arrow key.
+      if (NodeDocument().GetSettings().CaretBrowsingEnabled)
+      {
+        if (keyIdentifier == u8"Left" || keyIdentifier == u8"Right")
+        {
+          return;
+        }
+      }
 
       if (keyIdentifier == u8"Down" || keyIdentifier == u8"Right")
       {
@@ -1433,6 +1460,14 @@ namespace krys::boo::html
 
       int32 keyCode = keyboardEvent->KeyCode();
       bool handled = false;
+
+      if (keyCode == ' ' && NodeDocument().GetSettings().SpatialNavigationEnabled)
+      {
+        // Use space to toggle arrow key handling for selection change or spatial navigation.
+        _activeSelectionState = !_activeSelectionState;
+        keyboardEvent->SetDefaultHandled();
+        return;
+      }
 
       if (RenderTheme::Singleton().PopsMenuBySpaceOrReturn())
       {
@@ -1771,6 +1806,17 @@ namespace krys::boo::html
         handled = true;
       }
 
+      if (NodeDocument().GetSettings().SpatialNavigationEnabled)
+      {
+        // Check if the selection moves to the boundary.
+        if (keyIdentifier == u8"Left" || keyIdentifier == u8"Right"
+            || ((keyIdentifier == u8"Down" || keyIdentifier == u8"Up")
+                && endIndex == _activeSelectionEndIndex))
+        {
+          return;
+        }
+      }
+
       if (endIndex >= 0 && handled)
       {
         // Save the selection so it can be compared to the new selection when dispatching change events
@@ -1780,7 +1826,8 @@ namespace krys::boo::html
         krys_debug_assert(listItems.empty() || static_cast<size_t>(endIndex) < listItems.size());
         SetActiveSelectionEndIndex(endIndex);
 
-        _allowsNonContiguousSelection = _multiple && keyboardEvent->CtrlKey();
+        _allowsNonContiguousSelection =
+          _multiple && (NodeDocument().GetSettings().SpatialNavigationEnabled || keyboardEvent->CtrlKey());
         bool selectNewItem = keyboardEvent->ShiftKey() || !_allowsNonContiguousSelection;
 
         if (selectNewItem)

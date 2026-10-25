@@ -370,6 +370,12 @@ namespace krys::boo
       SetScrollPosition(position, options);
     }
 
+    /// @brief Scrolls by @p delta, clamped to the scroll range.
+    void ScrollBy(const IntSize &delta) noexcept
+    {
+      SetScrollPosition(GetScrollPosition() + delta);
+    }
+
     /// @brief Scrolls to @p scrollPosition, clamped to the scroll range unless @p options say otherwise.
     void SetScrollPosition(const ScrollPosition &scrollPosition,
                            const ScrollPositionChangeOptions &options =

@@ -85,6 +85,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver.hpp"
@@ -93,6 +94,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
+#include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
@@ -1445,6 +1447,18 @@ namespace krys::boo::dom
     return frame ? frame->GetPage() : nullptr;
   }
 
+  html::DocumentVisibilityState Document::VisibilityState() const noexcept
+  {
+    // The visibility of the document is inherited from the visibility of the page. If there is no page
+    // associated with the document, we will assume that the page is hidden, as specified by the spec.
+    if (!GetPage())
+    {
+      return html::DocumentVisibilityState::Hidden;
+    }
+    // FIXME: The page's visibility state, once the host reports it.
+    return html::DocumentVisibilityState::Visible;
+  }
+
   CachedResourceLoader &Document::GetCachedResourceLoader() const noexcept
   {
     if (!_cachedResourceLoader)
@@ -2503,6 +2517,7 @@ namespace krys::boo::dom
     {
       timer->Suspend();
     }
+    StopGamepadHapticEffects();
   }
 
   void Document::ResumeActiveDOMObjects(ReasonForSuspension reason) noexcept
@@ -2556,6 +2571,15 @@ namespace krys::boo::dom
     _frame = nullptr;
   }
 
+  void Document::StopGamepadHapticEffects() noexcept
+  {
+    auto *navigator = _domWindow ? _domWindow->NavigatorIfExists() : nullptr;
+    if (auto *gamepads = navigator ? navigator->GamepadsIfExists() : nullptr)
+    {
+      gamepads->StopHapticEffects();
+    }
+  }
+
   void Document::StopActiveDOMObjects() noexcept
   {
     _activeDOMObjectsAreStopped = true;
@@ -2574,6 +2598,8 @@ namespace krys::boo::dom
     {
       closeWatcherManager->DestroyAll();
     }
+
+    StopGamepadHapticEffects();
   }
 
   LocalDOMWindow *Document::DefaultView() const noexcept

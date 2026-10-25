@@ -1,9 +1,33 @@
 ﻿#include "Krystal.PAL/Input.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 
 namespace krys::pal
 {
-  Input::Input(EventManager *events) noexcept : _mouse(), _keyboard(), _events(events)
+  Input::Input(EventManager *events, UniquePtr<GamepadBackend> gamepads) noexcept
+      : _keyboard(), _mouse(), _events(events), _gamepadBackend(krys::move(gamepads))
   {
+    if (_gamepadBackend)
+    {
+      _gamepads.resize(_gamepadBackend->SlotCount());
+      for (uint32 slot = 0; slot < _gamepads.size(); ++slot)
+      {
+        _gamepads[slot]._slot = slot;
+      }
+    }
+  }
+
+  Span<const Gamepad> Input::GetGamepads() const noexcept
+  {
+    return _gamepads;
+  }
+
+  bool Input::SetGamepadRumble(uint32 slot, float strong, float weak) noexcept
+  {
+    if (!_gamepadBackend || slot >= _gamepads.size() || !_gamepads[slot]._connected)
+    {
+      return false;
+    }
+    return _gamepadBackend->SetRumble(slot, strong, weak);
   }
 
   const Keyboard &Input::GetKeyboard() const noexcept
@@ -35,6 +59,84 @@ namespace krys::pal
 
     _keyboard._pressed.clear();
     _keyboard._released.clear();
+
+    for (auto &pad : _gamepads)
+    {
+      pad._held.Add(pad._pressed);
+      pad._held.Remove(pad._released);
+      pad._pressed = {};
+      pad._released = {};
+    }
+    PollGamepads();
+  }
+
+  void Input::PollGamepads() noexcept
+  {
+    if (!_gamepadBackend)
+    {
+      return;
+    }
+
+    auto now = nanoseconds(MonotonicTime::Now());
+    bool scan = !_lastGamepadScan || now - *_lastGamepadScan >= GamepadScanInterval;
+    if (scan)
+    {
+      _lastGamepadScan = now;
+    }
+
+    for (auto &pad : _gamepads)
+    {
+      if (!pad._connected && !scan)
+      {
+        continue;
+      }
+
+      auto reading = _gamepadBackend->Read(pad._slot);
+      if (!reading)
+      {
+        if (pad._connected)
+        {
+          // A pad that goes away lets go of its buttons, without events for them.
+          auto slot = pad._slot;
+          pad = Gamepad();
+          pad._slot = slot;
+          _events->Enqueue(CreateUnique<GamepadConnectionEvent>(slot, false));
+        }
+        continue;
+      }
+
+      bool connected = !pad._connected;
+      if (connected)
+      {
+        pad._connected = true;
+        pad._name = _gamepadBackend->Name(pad._slot);
+        _events->Enqueue(CreateUnique<GamepadConnectionEvent>(pad._slot, true));
+      }
+      if (connected || reading->PacketNumber != pad._packetNumber)
+      {
+        pad._packetNumber = reading->PacketNumber;
+        pad._lastChanged = now;
+      }
+
+      pad._buttons = reading->Buttons;
+      pad._axes = reading->Axes;
+      for (size_t i = 0; i < GamepadButtonCount; ++i)
+      {
+        auto button = static_cast<GamepadButton>(i);
+        bool down = Gamepad::IsPressedValue(button, pad._buttons[i]);
+        bool wasDown = pad._held.Contains(button);
+        if (down && !wasDown)
+        {
+          pad._pressed.Add(button);
+          _events->Enqueue(CreateUnique<GamepadButtonEvent>(pad._slot, button, GamepadButtonState::Pressed));
+        }
+        else if (!down && wasDown)
+        {
+          pad._released.Add(button);
+          _events->Enqueue(CreateUnique<GamepadButtonEvent>(pad._slot, button, GamepadButtonState::Released));
+        }
+      }
+    }
   }
 
   void Input::OnKeyboardEvent(WindowHandle window, Key key, KeyState state, KeyModifiers modifiers,

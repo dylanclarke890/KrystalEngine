@@ -124,6 +124,18 @@ namespace krys::boo::dom
       delete this;
     }
 
+    /// @brief A listener for events of type @p type was added.
+    virtual void DidAddEventListener(DOMStringAtom type) noexcept
+    {
+      (void)type;
+    }
+
+    /// @brief A listener for events of type @p type was removed.
+    virtual void DidRemoveEventListener(DOMStringAtom type) noexcept
+    {
+      (void)type;
+    }
+
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD virtual EventTarget *GetParent(Event &event) const noexcept
     {

@@ -3,6 +3,8 @@
 #include "Krystal.Booey/HTML/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/LoaderStrategy.hpp"
+#include "Krystal.Booey/Modules/Gamepad/Gamepad.hpp"
+#include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -37,6 +39,17 @@ namespace krys::boo
   {
     auto *window = _window.get();
     return window ? window->Frame() : nullptr;
+  }
+
+  dom::Document *Navigator::Document() const noexcept
+  {
+    auto *window = _window.get();
+    return window ? window->Document() : nullptr;
+  }
+
+  const List<RefPtr<Gamepad>> &Navigator::GetGamepads() noexcept
+  {
+    return NavigatorGamepad::GetGamepads(*this);
   }
 
   dom::DOMString Navigator::AppVersion() const noexcept

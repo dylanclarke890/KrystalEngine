@@ -613,6 +613,40 @@
     </div>
   </div>
 
+  <div class="row gamepads">
+    <!-- Spatial navigation: a pad's D-pad or left stick moves the focus to the nearest control that way, here
+         or anywhere on the page; so do the arrow keys within this card. A presses (and opens the drop-down),
+         B closes (a dialog, a popover or the drop-down), the bumpers tab and the right stick scrolls, as the
+         list shows. -->
+    <div class="card" id="nav-grid">
+      <h2>Spatial navigation</h2>
+      <p>Move with a pad's D-pad or left stick, or the arrow keys here. A presses, B closes, the bumpers tab and
+        the right stick scrolls.</p>
+      <div class="nav-grid">
+        <button>Espresso</button>
+        <button>Filter</button>
+        <div class="nav-list" id="nav-list">
+          <button>Cinnamon</button><button>Cocoa</button><button>Nutmeg</button><button>Vanilla</button>
+          <button>Caramel</button><button>Hazelnut</button><button>Maple</button><button>Honey</button>
+        </div>
+        <select id="nav-size"><option>Small</option><option selected>Medium</option><option>Large</option></select>
+        <button>Cold brew</button>
+        <label><input type="radio" name="nav-milk" value="Oat" checked> Oat</label>
+        <label><input type="radio" name="nav-milk" value="Almond"> Almond</label>
+      </div>
+      <p class="log" id="nav-log">Nothing pressed yet</p>
+    </div>
+    <!-- Gamepads: the pads the page can see (navigator.getGamepads(); a page sees them once a button is pressed),
+         with their buttons and axes in the standard layout, shown each frame; the button rumbles them
+         (vibrationActuator.playEffect("dual-rumble")). -->
+    <div class="card" id="gamepad-card">
+      <h2>Gamepads</h2>
+      <pre class="pad-readout" id="gamepad-readout"></pre>
+      <button id="rumble">Rumble</button>
+      <span class="log" id="rumble-log"></span>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

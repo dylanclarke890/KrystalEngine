@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
@@ -13,6 +14,8 @@
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
@@ -121,6 +124,46 @@ namespace krys::boo::html
   Path HTMLAreaElement::ComputePathForFocusRing(const LayoutSize &elementSize) const noexcept
   {
     return GetRegion(IsDefault() ? elementSize : _lastSize);
+  }
+
+  Path HTMLAreaElement::ComputePath(const RenderElement &renderer) const noexcept
+  {
+    // FIXME: This doesn't work correctly with transforms.
+    FloatPoint absPos = renderer.LocalToAbsolute();
+
+    // Default should default to the size of the containing object.
+    LayoutSize size = _lastSize;
+    if (IsDefault())
+    {
+      size = renderer.OutlineBoundsForRepaint(nullptr).Size();
+    }
+
+    auto path = GetRegion(size);
+    float zoomFactor = renderer.Style().UsedZoom();
+    if (zoomFactor != 1.0f)
+    {
+      AffineTransform zoomTransform;
+      zoomTransform.Scale(zoomFactor);
+      path.Transform(zoomTransform);
+    }
+
+    path.Translate(ToFloatSize(absPos));
+    return path;
+  }
+
+  LayoutRect HTMLAreaElement::ComputeRect(const RenderObject *renderer) const noexcept
+  {
+    if (!renderer)
+    {
+      return {};
+    }
+
+    if (Is<RenderText>(*renderer))
+    {
+      krys_debug_assert(false);
+      return {};
+    }
+    return EnclosingLayoutRect(ComputePath(Downcast<RenderElement>(*renderer)).FastBoundingRect());
   }
 
   Path HTMLAreaElement::GetRegion(const LayoutSize &size) const noexcept

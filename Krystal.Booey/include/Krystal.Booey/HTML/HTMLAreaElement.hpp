@@ -55,6 +55,11 @@ namespace krys::boo::html
     /// @brief The area's shape in an image of @p elementSize, for its focus ring.
     KRYS_NODISCARD Path ComputePathForFocusRing(const LayoutSize &elementSize) const noexcept;
 
+    /// @brief The area's shape in absolute coordinates, over its image's @p renderer.
+    KRYS_NODISCARD Path ComputePath(const RenderElement &renderer) const noexcept;
+    /// @brief The bounds of the area's shape in absolute coordinates, over its image's @p renderer.
+    KRYS_NODISCARD LayoutRect ComputeRect(const RenderObject *renderer) const noexcept;
+
     /// @brief The parent map's image.
     KRYS_NODISCARD RefPtr<HTMLImageElement> ImageElement() const noexcept;
 

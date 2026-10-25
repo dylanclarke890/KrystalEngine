@@ -17,10 +17,14 @@
 #include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/SpatialNavigation.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -975,6 +979,236 @@ namespace krys::boo::html
                                                   SelectionRevealMode::Reveal);
     }
     return true;
+  }
+
+  namespace
+  {
+    void UpdateFocusCandidateIfNeeded(dom::FocusDirection direction, const FocusCandidate &current,
+                                      FocusCandidate &candidate, FocusCandidate &closest) noexcept
+    {
+      krys_debug_assert(candidate.VisibleNode->Renderer());
+
+      // Ignore off screen child nodes of containers that do not scroll (overflow:hidden)
+      if (candidate.IsOffscreen && !CanBeScrolledIntoView(direction, candidate))
+      {
+        return;
+      }
+
+      DistanceDataForNode(direction, current, candidate);
+      if (candidate.Distance == MaxDistance())
+      {
+        return;
+      }
+
+      if (candidate.IsOffscreenAfterScrolling && candidate.Alignment < RectsAlignment::Full)
+      {
+        return;
+      }
+
+      if (closest.IsNull())
+      {
+        closest = candidate;
+        return;
+      }
+
+      LayoutRect intersectionRect = Intersection(candidate.Rect, closest.Rect);
+      if (!intersectionRect.IsEmpty() && !AreElementsOnSameLine(closest, candidate))
+      {
+        // If 2 nodes are intersecting, do hit test to find which node in on top.
+        auto center = FlooredIntPoint(intersectionRect.Center()); // FIXME: Would roundedIntPoint be better?
+        constexpr EnumSet<HitTestRequest::Type> hitType {
+          HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active, HitTestRequest::Type::IgnoreClipping,
+          HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent};
+        // The main frame: there's one frame.
+        auto *frame = candidate.VisibleNode->NodeDocument().Frame();
+        if (!frame)
+        {
+          return;
+        }
+        HitTestResult result = frame->GetEventHandler().HitTestResultAtPoint(LayoutPoint(center), hitType);
+        if (candidate.VisibleNode->Contains(result.InnerNode()))
+        {
+          closest = candidate;
+          return;
+        }
+        if (closest.VisibleNode->Contains(result.InnerNode()))
+        {
+          return;
+        }
+      }
+
+      if (candidate.Alignment == closest.Alignment)
+      {
+        if (candidate.Distance < closest.Distance)
+        {
+          closest = candidate;
+        }
+        return;
+      }
+
+      if (candidate.Alignment > closest.Alignment)
+      {
+        closest = candidate;
+      }
+    }
+
+    void FindFocusCandidateInContainer(const dom::ContainerNode &container, const LayoutRect &startingRect,
+                                       dom::FocusDirection direction, FocusCandidate &closest) noexcept
+    {
+      auto *focusedNode = container.NodeDocument().FocusedElement();
+
+      FocusCandidate current;
+      current.Rect = startingRect;
+      current.FocusableNode = CreateWeakPtr(focusedNode);
+      current.VisibleNode = CreateWeakPtr(focusedNode);
+
+      auto next = [&](const dom::Element &element) -> dom::Element *
+      {
+        dom::Node *node = CanScrollInDirection(element, direction)
+                            ? dom::TreeQueries::NextSkippingChildren(element, &container)
+                            : dom::TreeQueries::Next(element, &container);
+        while (node && !Is<dom::Element>(*node))
+        {
+          node = dom::TreeQueries::Next(*node, &container);
+        }
+        return static_cast<dom::Element *>(node);
+      };
+      dom::Node *first = dom::TreeQueries::Next(container, &container);
+      while (first && !Is<dom::Element>(*first))
+      {
+        first = dom::TreeQueries::Next(*first, &container);
+      }
+      for (auto *element = static_cast<dom::Element *>(first); element; element = next(*element))
+      {
+        if (element == focusedNode)
+        {
+          continue;
+        }
+
+        if (!FocusAlgorithms::IsSequentiallyFocusable(*element) && !CanScrollInDirection(*element, direction))
+        {
+          continue;
+        }
+
+        FocusCandidate candidate = FocusCandidate(element, direction);
+        if (candidate.IsNull())
+        {
+          continue;
+        }
+
+        if (!IsValidCandidate(direction, current, candidate))
+        {
+          continue;
+        }
+
+        candidate.EnclosingScrollableBox = CreateWeakPtr(const_cast<dom::ContainerNode *>(&container));
+        UpdateFocusCandidateIfNeeded(direction, current, candidate, closest);
+      }
+    }
+
+    bool AdvanceFocusDirectionallyInContainer(const dom::ContainerNode &container,
+                                              const LayoutRect &startingRect,
+                                              dom::FocusDirection direction) noexcept
+    {
+      LayoutRect newStartingRect = startingRect;
+
+      if (startingRect.IsEmpty())
+      {
+        newStartingRect = VirtualRectForDirection(direction, NodeRectInAbsoluteCoordinates(container));
+      }
+
+      // Find the closest node within current container in the direction of the navigation.
+      FocusCandidate focusCandidate;
+      FindFocusCandidateInContainer(container, newStartingRect, direction, focusCandidate);
+
+      if (focusCandidate.IsNull())
+      {
+        // Nothing to focus, scroll if possible.
+        // NOTE: If no scrolling is performed (i.e. scrollInDirection returns false), the
+        // spatial navigation algorithm will skip this container.
+        return ScrollInDirection(container, direction);
+      }
+
+      if (RefPtr<dom::Element> visibleNode = ShareRefPtr(focusCandidate.VisibleNode.get());
+          visibleNode && CanScrollInDirection(*visibleNode, direction))
+      {
+        if (focusCandidate.IsOffscreenAfterScrolling)
+        {
+          (void)ScrollInDirection(*visibleNode, direction);
+          return true;
+        }
+        // Navigate into a new scrollable container.
+        LayoutRect newRect;
+        auto *focusedElement = container.NodeDocument().FocusedElement();
+        if (focusedElement && !HasOffscreenRect(*focusedElement))
+        {
+          newRect = NodeRectInAbsoluteCoordinates(*focusedElement, true);
+        }
+        return AdvanceFocusDirectionallyInContainer(*visibleNode, newRect, direction);
+      }
+      if (focusCandidate.IsOffscreenAfterScrolling)
+      {
+        RefPtr<dom::ContainerNode> scrollableBox = ShareRefPtr(focusCandidate.EnclosingScrollableBox.get());
+        (void)ScrollInDirection(*scrollableBox, direction);
+        return true;
+      }
+
+      // We found a new focus node, navigate to it.
+      RefPtr<dom::Element> element = ShareRefPtr(focusCandidate.FocusableNode.get());
+      FocusAlgorithms::FocusingSteps(*element, nullptr,
+                                     {.SelectionRestoration = dom::SelectionRestorationMode::SelectAll,
+                                      .Direction = direction,
+                                      .Visibility = dom::FocusVisibility::Visible});
+      if (element->NodeDocument().FocusedElement() == element.get())
+      {
+        element->FindTargetAndUpdateFocusAppearance(dom::SelectionRestorationMode::SelectAll,
+                                                    SelectionRevealMode::Reveal);
+      }
+      return true;
+    }
+  }
+
+  bool FocusAlgorithms::DirectionalNavigation(dom::Document &document, dom::FocusDirection direction) noexcept
+  {
+    krys_debug_assert(direction == dom::FocusDirection::Up || direction == dom::FocusDirection::Down
+                      || direction == dom::FocusDirection::Left || direction == dom::FocusDirection::Right);
+    if (!document.View())
+    {
+      return false;
+    }
+
+    (void)document.UpdateLayoutIgnorePendingStylesheets();
+
+    // Figure out the starting rect.
+    RefPtr<dom::ContainerNode> container = ShareRefPtr(&document);
+    LayoutRect startingRect;
+    if (auto *focusedElement = document.FocusedElement())
+    {
+      if (!HasOffscreenRect(*focusedElement))
+      {
+        container =
+          ShareRefPtr(ScrollableEnclosingBoxOrParentFrameForNodeInDirection(direction, *focusedElement));
+        startingRect = NodeRectInAbsoluteCoordinates(*focusedElement, true /* ignore border */);
+      }
+      else if (auto *area = DynamicDowncast<HTMLAreaElement>(*focusedElement); area && area->ImageElement())
+      {
+        container = ShareRefPtr(
+          ScrollableEnclosingBoxOrParentFrameForNodeInDirection(direction, *area->ImageElement()));
+        startingRect = VirtualRectForAreaElementAndDirection(area, direction);
+      }
+    }
+
+    krys_debug_assert(container);
+    bool consumed = false;
+    do
+    {
+      consumed = AdvanceFocusDirectionallyInContainer(*container, startingRect, direction);
+      (void)document.UpdateLayoutIgnorePendingStylesheets();
+      startingRect = NodeRectInAbsoluteCoordinates(*container, true /* ignore border */);
+      container = ShareRefPtr(ScrollableEnclosingBoxOrParentFrameForNodeInDirection(direction, *container));
+    } while (!consumed && container);
+
+    return consumed;
   }
 
   void FocusAlgorithms::SystemFocusChanged(dom::Document &document, bool focused) noexcept

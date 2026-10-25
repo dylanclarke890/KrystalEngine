@@ -61,6 +61,49 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region GamepadConnectionEvent
+
+  GamepadConnectionEvent::GamepadConnectionEvent(uint32 slot, bool connected) noexcept
+      : Event(), _slot(slot), _connected(connected)
+  {
+  }
+
+  uint32 GamepadConnectionEvent::Slot() const noexcept
+  {
+    return _slot;
+  }
+
+  bool GamepadConnectionEvent::Connected() const noexcept
+  {
+    return _connected;
+  }
+
+#pragma endregion
+
+#pragma region GamepadButtonEvent
+
+  GamepadButtonEvent::GamepadButtonEvent(uint32 slot, GamepadButton button, GamepadButtonState state) noexcept
+      : Event(), _slot(slot), _button(button), _state(state)
+  {
+  }
+
+  uint32 GamepadButtonEvent::Slot() const noexcept
+  {
+    return _slot;
+  }
+
+  GamepadButton GamepadButtonEvent::Button() const noexcept
+  {
+    return _button;
+  }
+
+  GamepadButtonState GamepadButtonEvent::State() const noexcept
+  {
+    return _state;
+  }
+
+#pragma endregion
+
 #pragma region MouseButtonEvent
 
   MouseButtonEvent::MouseButtonEvent(WindowHandle window, const MouseButton button,

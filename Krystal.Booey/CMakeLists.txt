@@ -1709,6 +1709,25 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/Dicts/PointerLockOptions.hpp
   include/Krystal.Booey/Page/PointerLockController.hpp
 
+  # The Gamepad API (B8c)
+  include/Krystal.Booey/Modules/Gamepad/Gamepad.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadButton.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadEffectParameters.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadEvent.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadHapticActuator.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadHapticEffectType.hpp
+  include/Krystal.Booey/Modules/Gamepad/GamepadManager.hpp
+  include/Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp
+  include/Krystal.Booey/Platform/Gamepad/EmptyGamepadProvider.hpp
+  include/Krystal.Booey/Platform/Gamepad/GamepadConstants.hpp
+  include/Krystal.Booey/Platform/Gamepad/GamepadProvider.hpp
+  include/Krystal.Booey/Platform/Gamepad/GamepadProviderClient.hpp
+  include/Krystal.Booey/Platform/Gamepad/KnownGamepads.hpp
+  include/Krystal.Booey/Platform/Gamepad/PlatformGamepad.hpp
+
+  # Spatial navigation (B8a)
+  include/Krystal.Booey/Page/SpatialNavigation.hpp
+
   # Pen and touch from the host (B7b)
   include/Krystal.Booey/DOM/Dicts/TouchEventInit.hpp
   include/Krystal.Booey/DOM/Touch.hpp
@@ -3046,6 +3065,18 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Pointer lock (B7c)
   src/Page/PointerLockController.cpp
+
+  # The Gamepad API (B8c)
+  src/Modules/Gamepad/Gamepad.cpp
+  src/Modules/Gamepad/GamepadEvent.cpp
+  src/Modules/Gamepad/GamepadHapticActuator.cpp
+  src/Modules/Gamepad/GamepadManager.cpp
+  src/Modules/Gamepad/NavigatorGamepad.cpp
+  src/Platform/Gamepad/EmptyGamepadProvider.cpp
+  src/Platform/Gamepad/GamepadProvider.cpp
+
+  # Spatial navigation (B8a)
+  src/Page/SpatialNavigation.cpp
 
   # Pen and touch from the host (B7b)
   src/DOM/Touch.cpp

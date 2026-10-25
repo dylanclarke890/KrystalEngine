@@ -198,8 +198,6 @@ namespace krys::boo::dom
     DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
     html::DocumentReadyState _currentDocumentReadiness
       : BitCount<html::DocumentReadyState>() {html::DocumentReadyState::Complete};
-    html::DocumentVisibilityState _visibilityState
-      : BitCount<html::DocumentVisibilityState>() {html::DocumentVisibilityState::Hidden};
 
     /// @see https://html.spec.whatwg.org/#parser-cannot-change-the-mode-flag
     bool _parserCannotChangeTheMode : 1 {false};
@@ -595,15 +593,15 @@ namespace krys::boo::dom
     // boolean queryCommandSupported(DOMString commandId);
     // DOMString queryCommandValue(DOMString commandId);
 
+    /// @see https://html.spec.whatwg.org/#dom-document-hidden
     KRYS_NODISCARD bool Hidden() const noexcept
     {
-      return _visibilityState == html::DocumentVisibilityState::Hidden;
+      return VisibilityState() != html::DocumentVisibilityState::Visible;
     }
 
-    KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept
-    {
-      return _visibilityState;
-    }
+    /// @brief The page's visibility: hidden if the document isn't in a page's frame.
+    /// @see https://html.spec.whatwg.org/#dom-document-visibilitystate
+    KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept;
 
     // special event handler IDL attributes that only apply to Document objects
     // [LegacyLenientThis] attribute EventHandler onreadystatechange;
@@ -1822,6 +1820,11 @@ namespace krys::boo::dom
     {
       return _nodeIterators;
     }
+
+  private:
+    /// @brief Stops the effects the gamepads' haptic actuators are playing, as the document is suspended or
+    /// stopped.
+    void StopGamepadHapticEffects() noexcept;
   };
 }
 

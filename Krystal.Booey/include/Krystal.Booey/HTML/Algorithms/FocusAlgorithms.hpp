@@ -125,6 +125,14 @@ namespace krys::boo::html
     // FIXME: Navigables (frames), and moving the focus out to the host, once it can take it.
     static bool SequentialNavigation(dom::Document &document, dom::FocusDirection direction) noexcept;
 
+    /// @brief Moves the focus to the nearest keyboard focusable element in @p direction (`Up`, `Down`, `Left`
+    /// or `Right`) from the focused element (or the edge of the viewport), searching the scrollable box
+    /// around it and then the boxes around that, and scrolling a box a line when it has nothing to move to.
+    /// The new focused element is focus visible.
+    /// @return Whether the focus moved or a box scrolled.
+    // FIXME: Frames.
+    static bool DirectionalNavigation(dom::Document &document, dom::FocusDirection direction) noexcept;
+
     /// @brief Updates @p document when its window gains or loses system focus: its focused and active flag,
     /// and a `focus` or `blur` event at its focused element, which stays focused.
     static void SystemFocusChanged(dom::Document &document, bool focused) noexcept;

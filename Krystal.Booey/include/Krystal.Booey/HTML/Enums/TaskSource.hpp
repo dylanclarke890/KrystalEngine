@@ -26,7 +26,9 @@ namespace krys::boo::html
     PostedMessage,
     /// @brief The user agent's own asynchronous work.
     InternalAsyncTask,
+    /// @see https://w3c.github.io/gamepad/#dfn-gamepad-task-source
+    Gamepad,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 9uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 10uz);

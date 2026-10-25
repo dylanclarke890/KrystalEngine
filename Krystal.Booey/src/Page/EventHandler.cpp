@@ -1223,23 +1223,38 @@ namespace krys::boo
   {
     krys_debug_assert(event.Type() == EventNames::KeyDown);
 
-    // FIXME: Spatial navigation (advanceFocus in the arrow's direction), once the host can turn it on.
-    ScrollLogicalDirection direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
-    switch (focusDirection)
+    if (!_frame.Document()->GetSettings().SpatialNavigationEnabled)
     {
-      case dom::FocusDirection::Down: direction = ScrollLogicalDirection::ScrollBlockDirectionForward; break;
-      case dom::FocusDirection::Right:
-        direction = ScrollLogicalDirection::ScrollInlineDirectionForward;
-        break;
-      case dom::FocusDirection::Up: direction = ScrollLogicalDirection::ScrollBlockDirectionBackward; break;
-      case dom::FocusDirection::Left:
-        direction = ScrollLogicalDirection::ScrollInlineDirectionBackward;
-        break;
-      case dom::FocusDirection::None:
-      case dom::FocusDirection::Backward:
-      case dom::FocusDirection::Forward:  krys_assert(false); break;
+      ScrollLogicalDirection direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
+      switch (focusDirection)
+      {
+        case dom::FocusDirection::Down:
+          direction = ScrollLogicalDirection::ScrollBlockDirectionForward;
+          break;
+        case dom::FocusDirection::Right:
+          direction = ScrollLogicalDirection::ScrollInlineDirectionForward;
+          break;
+        case dom::FocusDirection::Up: direction = ScrollLogicalDirection::ScrollBlockDirectionBackward; break;
+        case dom::FocusDirection::Left:
+          direction = ScrollLogicalDirection::ScrollInlineDirectionBackward;
+          break;
+        case dom::FocusDirection::None:
+        case dom::FocusDirection::Backward:
+        case dom::FocusDirection::Forward:  krys_assert(false); break;
+      }
+      return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Line);
     }
-    return DefaultKeyboardScrollEventHandler(event, direction, ScrollGranularity::Line);
+
+    if (event.CtrlKey() || event.MetaKey() || event.ShiftKey())
+    {
+      return false;
+    }
+
+    // Arrows and other possible directional navigation keys can be used in design
+    // mode editing.
+    // FIXME: Design mode, once documents have it.
+
+    return html::FocusAlgorithms::DirectionalNavigation(*_frame.Document(), focusDirection);
   }
 
   bool EventHandler::ScrollOverflow(ScrollDirection direction, ScrollGranularity granularity,

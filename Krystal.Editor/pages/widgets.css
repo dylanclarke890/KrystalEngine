@@ -103,6 +103,20 @@ tr:hover td { text-decoration: underline; }
             box-sizing: border-box; }
 .lock-box p { margin: 0; }
 
+/* Gamepads: a grid of controls to move through, with a list that scrolls, and the pads' readout. */
+.gamepads .card { height: auto; min-width: 0; }
+.nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-items: start; }
+.nav-grid button, .nav-grid select { padding: 6px 10px; border: none; border-radius: 6px; background: #4f6df5;
+  color: #ffffff; font: inherit; }
+.nav-grid select { background: #e3e7ef; color: #1a2240; }
+.nav-grid :focus-visible { outline: 3px solid #ef476f; outline-offset: 2px; }
+.nav-list { grid-row: span 2; height: 90px; overflow: auto; padding: 4px; border-radius: 8px; background: #e3e7ef; }
+.nav-list button { display: block; width: 100%; margin-bottom: 4px; }
+.gamepads .log { margin: 8px 0 0; color: #5c677d; }
+.pad-readout { min-height: 80px; margin: 0 0 8px; padding: 8px; border-radius: 12px; background: #1a2240;
+  color: #ffffff; font-size: 12px; white-space: pre-wrap; }
+#rumble { padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5; color: #ffffff; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

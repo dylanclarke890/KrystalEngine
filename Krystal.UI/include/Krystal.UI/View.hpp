@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
@@ -22,8 +23,10 @@
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
@@ -260,6 +263,17 @@ namespace krys::ui
 
     List<CustomElementDefinition> _customElements;
 
+    /// @brief Whether the pads drive the page.
+    bool _gamepadNavigationEnabled {true};
+    /// @brief The direction the pads hold (the D-pad or the left stick), which moves the focus again when its
+    /// repeat is due.
+    boo::dom::FocusDirection _gamepadDirection {boo::dom::FocusDirection::None};
+    MonotonicTime::duration _gamepadNextRepeat {};
+    /// @brief The host's time when the right stick last scrolled, while it's held.
+    Maybe<MonotonicTime::duration> _gamepadLastScroll;
+    /// @brief The part of the right stick's scroll not scrolled yet (scrolls are in whole pixels).
+    boo::DoubleSize _gamepadScrollRemainder;
+
     /// @brief How many pages the back/forward cache keeps, unless the host sets it
     /// (`boo::BackForwardCache::Singleton().SetMaxSize`).
     static constexpr uint32 DefaultBackForwardCacheCapacity {3};
@@ -285,6 +299,17 @@ namespace krys::ui
     /// @brief How far a pinch scales the page.
     static constexpr float MinimumPageScale {1};
     static constexpr float MaximumPageScale {5};
+
+    /// @brief How long a direction is held on the pad before the focus moves again, and how often it moves
+    /// after that.
+    static constexpr std::chrono::milliseconds GamepadRepeatDelay {500};
+    static constexpr std::chrono::milliseconds GamepadRepeatInterval {100};
+    /// @brief How far the left stick is pushed before it moves the focus.
+    static constexpr float GamepadStickThreshold {0.5f};
+    /// @brief How fast the right stick scrolls when pushed all the way, in pixels a second.
+    static constexpr double GamepadScrollSpeed {1'500};
+    /// @brief The longest time a frame of the right stick scrolls for, so a long frame doesn't jump.
+    static constexpr std::chrono::milliseconds GamepadMaximumScrollStep {100};
 
   public:
     /// @brief A view of an empty document, with a viewport of @p viewportSize.
@@ -469,6 +494,23 @@ namespace krys::ui
     /// @return Whether the page cancelled the key.
     bool KeyReleased(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
 
+    /// @brief The pads' input for this frame (@p gamepads, as the input has them after
+    /// `pal::Input::BeginFrame()`), at the host's time @p now: the pads drive the page as the keyboard does,
+    /// without key events. The D-pad and the left stick move the focus spatially (whatever the page's
+    /// settings; again after a delay while held, then repeatedly), A clicks the focused element, B is a close
+    /// request (closing a dialog or a popover), the bumpers move the focus as Tab and Shift+Tab do, and the
+    /// right stick scrolls the focused element's box (or else the viewport). The focused element becomes
+    /// focus visible. While an overlay is open, the pads drive it as its keys do. Call it once a frame; it
+    /// does nothing while the mapping is off or the window doesn't have focus.
+    void GamepadInput(Span<const pal::Gamepad> gamepads, MonotonicTime::duration now) noexcept;
+    /// @brief Turns the pads' mapping onto the page on or off (for pages that read the pads themselves); it
+    /// starts on.
+    void SetGamepadNavigationEnabled(bool enabled) noexcept;
+    KRYS_NODISCARD bool GamepadNavigationEnabled() const noexcept
+    {
+      return _gamepadNavigationEnabled;
+    }
+
     /// @brief The window showing the page gained (true) or lost (false) system focus: `:focus` matches only
     /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.
     void SetFocused(bool focused) noexcept;
@@ -593,6 +635,19 @@ namespace krys::ui
     /// @p distance of it.
     KRYS_NODISCARD int32 CountClick(const boo::IntPoint &point, boo::MouseButton button,
                                     int32 distance = DoubleClickDistance) noexcept;
+
+    /// @brief A press on the pad, as a key press would be: an activation of the page unless it's a close
+    /// request (@p activates), and the focused element becomes focus visible.
+    void GamepadInteraction(bool activates) noexcept;
+    /// @brief Presses @p key in the open overlay, if there is one.
+    /// @return Whether an overlay was open.
+    bool GamepadOverlayKey(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
+    /// @brief The pad moves the focus in @p direction (or an overlay's highlight, as its arrow key does).
+    void GamepadMove(boo::dom::FocusDirection direction) noexcept;
+    /// @brief Forgets the pads' held direction and scroll.
+    void ResetGamepadState() noexcept;
+    /// @brief The right stick scrolled by @p delta pixels.
+    void GamepadScroll(const boo::DoubleSize &delta) noexcept;
 
     /// @brief Follows the gestures the touches make, after the touch event for @p action of the touch @p id
     /// at @p position, which the page cancelled if @p cancelled.

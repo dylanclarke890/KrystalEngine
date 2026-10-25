@@ -111,6 +111,56 @@ namespace krys::boo
     return scrollOffset.ConstrainedBetween(MinimumScrollOffset(), MaximumScrollOffset());
   }
 
+  void RenderLayerScrollableArea::ScrollByRecursively(const IntSize &delta,
+                                                      ScrollableArea **scrolledArea) noexcept
+  {
+    if (delta.IsZero())
+    {
+      return;
+    }
+
+    auto &renderer = _layer.Renderer();
+    if (renderer.HasNonVisibleOverflow())
+    {
+      ScrollOffset newScrollOffset = GetScrollOffset() + delta;
+      (void)ScrollToOffset(newScrollOffset);
+      if (scrolledArea)
+      {
+        *scrolledArea = this;
+      }
+
+      // If this layer can't do the scroll we ask the next layer up that can scroll to try
+      IntSize remainingScrollOffset = newScrollOffset - GetScrollOffset();
+      if (!remainingScrollOffset.IsZero() && renderer.Parent())
+      {
+        // FIXME: This skips scrollable frames.
+        if (auto *enclosingScrollableLayer =
+              _layer.EnclosingScrollableLayer(IncludeSelfOrNot::ExcludeSelf, CrossFrameBoundaries::Yes))
+        {
+          if (auto *scrollableArea = enclosingScrollableLayer->GetScrollableArea())
+          {
+            scrollableArea->ScrollByRecursively(remainingScrollOffset, scrolledArea);
+          }
+        }
+
+        // FIXME: Update the autoscroll renderer, once there's pan scrolling.
+      }
+    }
+    else
+    {
+      // If we are here, we were called on a renderer that can be programmatically scrolled, but doesn't
+      // have an overflow clip. Which means that it is a document node that can be scrolled.
+      renderer.View().FrameView().ScrollBy(delta);
+      if (scrolledArea)
+      {
+        *scrolledArea = &renderer.View().FrameView();
+      }
+
+      // FIXME: If we didn't scroll the whole way, do we want to try looking at the frames ownerElement?
+      // https://bugs.webkit.org/show_bug.cgi?id=28237
+    }
+  }
+
   ScrollOffset RenderLayerScrollableArea::ScrollToOffset(const ScrollOffset &scrollOffset,
                                                          const ScrollPositionChangeOptions &options) noexcept
   {

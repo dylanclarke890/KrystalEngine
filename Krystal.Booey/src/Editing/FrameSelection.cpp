@@ -1505,6 +1505,8 @@ namespace krys::boo
     style::PostResolutionCallbackDisabler disabler(*selectionDocument);
 
     bool reachedBoundary = false;
+    bool wasRange = _selection.IsRange();
+    dom::Position originalStartPosition = _selection.Start();
     VisiblePosition position;
     switch (direction)
     {
@@ -1555,7 +1557,13 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Spatial navigation (not moving a caret that stays put), once the host can turn it on.
+    if (_document && _document->GetSettings().SpatialNavigationEnabled)
+    {
+      if (!wasRange && alter == Alteration::Move && position == VisiblePosition(originalStartPosition))
+      {
+        return false;
+      }
+    }
 
     // Some of the above operations set an xPosForVerticalArrowNavigation.
     // Setting a selection will clear it, so save it to possibly restore later.

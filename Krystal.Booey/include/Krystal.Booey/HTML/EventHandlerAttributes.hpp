@@ -132,6 +132,8 @@ namespace krys::boo::html
   X(AfterPrint, u8"afterprint")                                                                              \
   X(BeforePrint, u8"beforeprint")                                                                            \
   X(BeforeUnload, u8"beforeunload")                                                                          \
+  X(GamepadConnected, u8"gamepadconnected")                                                                  \
+  X(GamepadDisconnected, u8"gamepaddisconnected")                                                            \
   X(HashChange, u8"hashchange")                                                                              \
   X(LanguageChange, u8"languagechange")                                                                      \
   X(Message, u8"message")                                                                                    \

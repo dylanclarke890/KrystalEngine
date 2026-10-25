@@ -70,6 +70,10 @@ namespace krys::boo
                                 const ScrollPositionChangeOptions &options =
                                   ScrollPositionChangeOptions::CreateProgrammatic()) noexcept;
 
+    /// @brief Scrolls by @p delta, passing what this box can't scroll on to the enclosing scrollable layer
+    /// (or the view, if the layer has no overflow clip), setting @p scrolledArea to the last area scrolled.
+    void ScrollByRecursively(const IntSize &delta, ScrollableArea **scrolledArea = nullptr) noexcept;
+
     /// @brief Scrolls so the absolute rect is aligned as asked.
     /// @return The rect in absolute coordinates after scrolling.
     LayoutRect ScrollRectToVisible(const LayoutRect &absoluteRect,

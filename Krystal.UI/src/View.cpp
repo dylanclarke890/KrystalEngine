@@ -9,6 +9,7 @@
 #include "Krystal.Booey/History/BackForwardCache.hpp"
 #include "Krystal.Booey/History/BackForwardController.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
@@ -1726,6 +1728,263 @@ namespace krys::ui
       input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, key, modifiers, {}, false, keyValue));
     PerformMicrotaskCheckpoint();
     return handled;
+  }
+
+  void View::GamepadInput(Span<const pal::Gamepad> gamepads, MonotonicTime::duration now) noexcept
+  {
+    if (!_gamepadNavigationEnabled || !_focused)
+    {
+      ResetGamepadState();
+      return;
+    }
+
+    using pal::GamepadAxis;
+    using pal::GamepadButton;
+    using FocusDirection = boo::dom::FocusDirection;
+    auto pressed = [gamepads](GamepadButton button)
+    {
+      return std::ranges::any_of(gamepads, [button](const pal::Gamepad &gamepad)
+                                 { return gamepad.Connected() && gamepad.IsButtonPressed(button); });
+    };
+
+    // The direction a pad holds: its D-pad, or else its left stick past the threshold, along its main axis.
+    auto heldDirection = [](const pal::Gamepad &gamepad)
+    {
+      if (gamepad.IsButtonHeld(GamepadButton::DPadUp))
+      {
+        return FocusDirection::Up;
+      }
+      if (gamepad.IsButtonHeld(GamepadButton::DPadDown))
+      {
+        return FocusDirection::Down;
+      }
+      if (gamepad.IsButtonHeld(GamepadButton::DPadLeft))
+      {
+        return FocusDirection::Left;
+      }
+      if (gamepad.IsButtonHeld(GamepadButton::DPadRight))
+      {
+        return FocusDirection::Right;
+      }
+      float x = gamepad.AxisValue(GamepadAxis::LeftX);
+      float y = gamepad.AxisValue(GamepadAxis::LeftY);
+      if (std::max(std::abs(x), std::abs(y)) < GamepadStickThreshold)
+      {
+        return FocusDirection::None;
+      }
+      if (std::abs(x) > std::abs(y))
+      {
+        return x > 0 ? FocusDirection::Right : FocusDirection::Left;
+      }
+      return y > 0 ? FocusDirection::Down : FocusDirection::Up;
+    };
+
+    // The first pad that holds a direction, or pushes the right stick, has its way. The stick's push is
+    // squared, so a light push scrolls slowly.
+    auto direction = FocusDirection::None;
+    double scrollX = 0;
+    double scrollY = 0;
+    for (auto &gamepad : gamepads)
+    {
+      if (!gamepad.Connected())
+      {
+        continue;
+      }
+      if (direction == FocusDirection::None)
+      {
+        direction = heldDirection(gamepad);
+      }
+      if (!scrollX && !scrollY)
+      {
+        double x = gamepad.AxisValue(GamepadAxis::RightX);
+        double y = gamepad.AxisValue(GamepadAxis::RightY);
+        scrollX = x * std::abs(x);
+        scrollY = y * std::abs(y);
+      }
+    }
+
+    // A new direction moves the focus at once; one held moves it again after a delay, then repeatedly.
+    if (direction != _gamepadDirection)
+    {
+      _gamepadDirection = direction;
+      if (direction != FocusDirection::None)
+      {
+        _gamepadNextRepeat = now + GamepadRepeatDelay;
+        GamepadMove(direction);
+      }
+    }
+    else if (direction != FocusDirection::None && now >= _gamepadNextRepeat)
+    {
+      _gamepadNextRepeat = now + GamepadRepeatInterval;
+      GamepadMove(direction);
+    }
+
+    // A clicks the focused element, with a press and release before the click, as an access key does.
+    if (pressed(GamepadButton::South) && !GamepadOverlayKey(pal::Key::Enter))
+    {
+      GamepadInteraction(true);
+      if (RefPtr<boo::dom::Element> element = ShareRefPtr(Document().FocusedElement()))
+      {
+        (void)element->DispatchSimulatedClick(
+          nullptr, boo::dom::SimulatedClickMouseEventOptions::SendMouseUpDownEvents);
+      }
+      PerformMicrotaskCheckpoint();
+    }
+
+    // B is a close request, as Escape is.
+    if (pressed(GamepadButton::East) && !GamepadOverlayKey(pal::Key::Escape))
+    {
+      GamepadInteraction(false);
+      if (RefPtr<boo::LocalDOMWindow> window = ShareRefPtr(Document().Window()))
+      {
+        (void)window->GetCloseWatcherManager().ProcessCloseWatchers();
+      }
+      PerformMicrotaskCheckpoint();
+    }
+
+    // The bumpers move the focus in sequence, as Tab and Shift+Tab do.
+    if (pressed(GamepadButton::RightShoulder) && !GamepadOverlayKey(pal::Key::Tab))
+    {
+      GamepadInteraction(true);
+      Ref document = ShareRef(Document());
+      (void)boo::html::FocusAlgorithms::SequentialNavigation(*document, FocusDirection::Forward);
+      PerformMicrotaskCheckpoint();
+    }
+    if (pressed(GamepadButton::LeftShoulder)
+        && !GamepadOverlayKey(pal::Key::Tab, pal::KeyModifiers {pal::KeyModifier::Shift}))
+    {
+      GamepadInteraction(true);
+      Ref document = ShareRef(Document());
+      (void)boo::html::FocusAlgorithms::SequentialNavigation(*document, FocusDirection::Backward);
+      PerformMicrotaskCheckpoint();
+    }
+
+    // The right stick scrolls for the time since the last frame it was pushed in.
+    if ((scrollX || scrollY) && !_overlay)
+    {
+      if (_gamepadLastScroll)
+      {
+        auto elapsed = std::min<MonotonicTime::duration>(now - *_gamepadLastScroll, GamepadMaximumScrollStep);
+        double distance = GamepadScrollSpeed * std::chrono::duration<double>(elapsed).count();
+        GamepadScroll(boo::DoubleSize(scrollX * distance, scrollY * distance));
+      }
+      _gamepadLastScroll = now;
+    }
+    else
+    {
+      _gamepadLastScroll = null;
+      _gamepadScrollRemainder = {};
+    }
+  }
+
+  void View::SetGamepadNavigationEnabled(bool enabled) noexcept
+  {
+    _gamepadNavigationEnabled = enabled;
+    if (!enabled)
+    {
+      ResetGamepadState();
+    }
+  }
+
+  void View::GamepadInteraction(bool activates) noexcept
+  {
+    Ref document = ShareRef(Document());
+
+    // A press other than a close request is an activation-triggering input, as a key press is.
+    if (auto *window = document->Window(); window && activates)
+    {
+      window->NotifyActivated();
+    }
+
+    // As with the keyboard, the focused element matches :focus-visible.
+    if (auto *element = document->FocusedElement())
+    {
+      element->SetHasFocusVisible(true);
+    }
+  }
+
+  bool View::GamepadOverlayKey(pal::Key key, pal::KeyModifiers modifiers) noexcept
+  {
+    RefPtr<Overlay> overlay = _overlay;
+    if (!overlay)
+    {
+      return false;
+    }
+    (void)overlay->KeyPressed(key, modifiers);
+    PerformMicrotaskCheckpoint();
+    return true;
+  }
+
+  void View::GamepadMove(boo::dom::FocusDirection direction) noexcept
+  {
+    using FocusDirection = boo::dom::FocusDirection;
+    pal::Key key = pal::Key::DownArrow;
+    switch (direction)
+    {
+      case FocusDirection::Up:    key = pal::Key::UpArrow; break;
+      case FocusDirection::Down:  key = pal::Key::DownArrow; break;
+      case FocusDirection::Left:  key = pal::Key::LeftArrow; break;
+      case FocusDirection::Right: key = pal::Key::RightArrow; break;
+      default:                    krys_debug_assert(false); return;
+    }
+    if (GamepadOverlayKey(key))
+    {
+      return;
+    }
+
+    GamepadInteraction(true);
+    Ref document = ShareRef(Document());
+    (void)boo::html::FocusAlgorithms::DirectionalNavigation(*document, direction);
+    PerformMicrotaskCheckpoint();
+    _needsPaint = true;
+  }
+
+  void View::GamepadScroll(const boo::DoubleSize &delta) noexcept
+  {
+    // Scrolls are in whole pixels; the rest waits for the next frame.
+    boo::DoubleSize remainder(_gamepadScrollRemainder.Width() + delta.Width(),
+                              _gamepadScrollRemainder.Height() + delta.Height());
+    boo::DoubleSize step(std::trunc(remainder.Width()), std::trunc(remainder.Height()));
+    _gamepadScrollRemainder =
+      boo::DoubleSize(remainder.Width() - step.Width(), remainder.Height() - step.Height());
+
+    Ref document = ShareRef(Document());
+    (void)document->UpdateLayout();
+    RefPtr<boo::LocalFrameView> view = ShareRefPtr(_frame->View());
+
+    // Each axis scrolls the focused element's box (or else the nearest box around it that can), or else the
+    // viewport, as the arrow keys do.
+    auto scrollAxis = [&](double amount, boo::ScrollDirection backward, boo::ScrollDirection forward)
+    {
+      if (!amount)
+      {
+        return;
+      }
+      auto scrollDirection = amount < 0 ? backward : forward;
+      auto stepCount = static_cast<uint32>(std::abs(amount));
+      auto *element = document->FocusedElement();
+      auto *renderer = element ? element->Renderer() : nullptr;
+      if (renderer
+          && renderer->EnclosingBox().Scroll(scrollDirection, boo::ScrollGranularity::Pixel, stepCount))
+      {
+        return;
+      }
+      if (view)
+      {
+        (void)view->Scroll(scrollDirection, boo::ScrollGranularity::Pixel, stepCount);
+      }
+    };
+    scrollAxis(step.Width(), boo::ScrollDirection::ScrollLeft, boo::ScrollDirection::ScrollRight);
+    scrollAxis(step.Height(), boo::ScrollDirection::ScrollUp, boo::ScrollDirection::ScrollDown);
+    PerformMicrotaskCheckpoint();
+    _needsPaint = true;
+  }
+
+  void View::ResetGamepadState() noexcept
+  {
+    _gamepadDirection = boo::dom::FocusDirection::None;
+    _gamepadLastScroll = null;
+    _gamepadScrollRemainder = {};
   }
 
   void View::SetFocused(bool focused) noexcept

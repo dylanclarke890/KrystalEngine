@@ -18,6 +18,7 @@
 #include "Krystal.Booey/HTML/URLDecomposition.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
+#include "Krystal.Booey/Modules/Gamepad/GamepadManager.hpp"
 #include "Krystal.Booey/Page/BarProp.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/DOMTimer.hpp"
@@ -53,6 +54,12 @@ namespace krys::boo
       static List<LocalDOMWindow *> windows;
       return windows;
     }
+
+    /// @brief Whether @p type is a gamepad event's.
+    KRYS_NODISCARD bool IsGamepadEventType(dom::DOMStringAtom type) noexcept
+    {
+      return type.View() == EventNames::GamepadConnected || type.View() == EventNames::GamepadDisconnected;
+    }
   }
 
   LocalDOMWindow::LocalDOMWindow(dom::Document &document) noexcept
@@ -68,8 +75,46 @@ namespace krys::boo
 
   LocalDOMWindow::~LocalDOMWindow() noexcept
   {
+    if (_gamepadEventListenerCount)
+    {
+      GamepadManager::Singleton().UnregisterDOMWindow(*this);
+    }
+
     RemoveLanguageChangeObserver(this);
     std::erase(AllWindows(), this);
+  }
+
+  void LocalDOMWindow::DidAddEventListener(dom::DOMStringAtom type) noexcept
+  {
+    if (IsGamepadEventType(type))
+    {
+      IncrementGamepadEventListenerCount();
+    }
+  }
+
+  void LocalDOMWindow::DidRemoveEventListener(dom::DOMStringAtom type) noexcept
+  {
+    if (IsGamepadEventType(type))
+    {
+      DecrementGamepadEventListenerCount();
+    }
+  }
+
+  void LocalDOMWindow::IncrementGamepadEventListenerCount() noexcept
+  {
+    if (++_gamepadEventListenerCount == 1)
+    {
+      GamepadManager::Singleton().RegisterDOMWindow(*this);
+    }
+  }
+
+  void LocalDOMWindow::DecrementGamepadEventListenerCount() noexcept
+  {
+    krys_debug_assert(_gamepadEventListenerCount);
+    if (!--_gamepadEventListenerCount)
+    {
+      GamepadManager::Singleton().UnregisterDOMWindow(*this);
+    }
   }
 
   void LocalDOMWindow::ForEachWindow(const Func<void(LocalDOMWindow &)> &function) noexcept
@@ -497,6 +542,11 @@ namespace krys::boo
       _navigator = Navigator::Create(const_cast<LocalDOMWindow &>(*this));
     }
     return *_navigator;
+  }
+
+  Navigator *LocalDOMWindow::NavigatorIfExists() const noexcept
+  {
+    return _navigator.get();
   }
 
   void LocalDOMWindow::LanguagesChanged() noexcept

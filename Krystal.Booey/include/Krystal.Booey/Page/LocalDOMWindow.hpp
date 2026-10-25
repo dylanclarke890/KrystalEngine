@@ -109,6 +109,9 @@ namespace krys::boo
     double _lastHistoryActionActivationTimestamp;
     /// @see https://html.spec.whatwg.org/#concept-error-reporting-mode
     bool _errorReportingMode {false};
+    /// @brief How many listeners for gamepad events the window has: it's registered with the gamepad
+    /// manager while it has any.
+    uint32 _gamepadEventListenerCount {0};
 
     explicit LocalDOMWindow(dom::Document &document) noexcept;
 
@@ -297,6 +300,9 @@ namespace krys::boo
 
     /// @see https://html.spec.whatwg.org/#dom-navigator
     KRYS_NODISCARD Navigator &GetNavigator() const noexcept;
+
+    /// @brief The window's navigator, if something asked for it.
+    KRYS_NODISCARD Navigator *NavigatorIfExists() const noexcept;
 
     /// @note Legacy: `navigator`.
     /// @see https://html.spec.whatwg.org/#dom-clientinformation
@@ -656,6 +662,12 @@ namespace krys::boo
     /// @see https://w3c.github.io/hr-time/#dfn-current-high-resolution-time
     KRYS_NODISCARD double NowTimestamp() const noexcept;
 
+    /// @brief The host's time as the window was made, which timestamps count from.
+    KRYS_NODISCARD MonotonicTime::duration TimeOrigin() const noexcept
+    {
+      return _timeOrigin;
+    }
+
     /// @brief Freezes the timestamp for the rendering update in progress: its steps all see the same time.
     void FreezeNowTimestamp() noexcept;
     void UnfreezeNowTimestamp() noexcept;
@@ -673,7 +685,14 @@ namespace krys::boo
     /// @see https://w3c.github.io/selection-api/#dom-window-getselection
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
 
+  protected:
+    void DidAddEventListener(dom::DOMStringAtom type) noexcept final;
+    void DidRemoveEventListener(dom::DOMStringAtom type) noexcept final;
+
   private:
+    void IncrementGamepadEventListenerCount() noexcept;
+    void DecrementGamepadEventListenerCount() noexcept;
+
     /// @brief Whether the page may move and resize its host's window: not while a button is held, so a page
     /// can't start a drag the user didn't.
     KRYS_NODISCARD bool AllowedToChangeWindowGeometry() const noexcept;

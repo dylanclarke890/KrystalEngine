@@ -55,8 +55,22 @@ namespace krys::boo::html
 
   bool CloseWatcherManager::EscapeKeyHandler(dom::KeyboardEvent &event) noexcept
   {
+    if (!event.DefaultHandled() && event.IsTrusted() && event.Key() == u8"Escape")
+    {
+      return ProcessCloseWatchers();
+    }
+
+    if (_allowedNumberOfGroups > 1)
+    {
+      --_allowedNumberOfGroups;
+    }
+    return false;
+  }
+
+  bool CloseWatcherManager::ProcessCloseWatchers() noexcept
+  {
     bool processedACloseWatcher = false;
-    if (!_groups.empty() && !event.DefaultHandled() && event.IsTrusted() && event.Key() == u8"Escape")
+    if (!_groups.empty())
     {
       auto groupCopy = _groups.back();
       for (auto &watcher : groupCopy | std::views::reverse)

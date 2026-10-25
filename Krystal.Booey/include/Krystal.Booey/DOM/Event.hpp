@@ -374,6 +374,11 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsGamepadEvent() const noexcept
+    {
+      return false;
+    }
+
 #pragma endregion
 
   protected:

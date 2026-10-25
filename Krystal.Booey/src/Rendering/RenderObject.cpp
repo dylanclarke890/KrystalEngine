@@ -1409,6 +1409,11 @@ namespace krys::boo
     return ClippedOverflowRect(nullptr, VisibleRectContextForRepaint());
   }
 
+  LayoutRect RenderObject::AbsoluteClippedOverflowRectForSpatialNavigation() const noexcept
+  {
+    return ClippedOverflowRect(nullptr, VisibleRectContextForSpatialNavigation());
+  }
+
   IntRect RenderObject::PixelSnappedAbsoluteClippedOverflowRect() const noexcept
   {
     return SnappedIntRect(AbsoluteClippedOverflowRectForRepaint());
@@ -1527,6 +1532,16 @@ namespace krys::boo
             .DescendantNeedsEnclosingIntRect = false,
             .Options = {VisibleRectContext::Option::ApplyContainerClip,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls}};
+  }
+
+  VisibleRectContext RenderObject::VisibleRectContextForSpatialNavigation() noexcept
+  {
+    return {.HasPositionFixedDescendant = false,
+            .DirtyRectIsFlipped = false,
+            .DescendantNeedsEnclosingIntRect = false,
+            .Options = {VisibleRectContext::Option::ApplyContainerClip,
+                        VisibleRectContext::Option::ApplyCompositedContainerScrolls,
+                        VisibleRectContext::Option::ApplyCompositedClips}};
   }
 
   bool RenderObject::HasSelfPaintingLayer() const noexcept

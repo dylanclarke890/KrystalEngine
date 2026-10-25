@@ -7,6 +7,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 
 namespace krys::boo::html
@@ -129,7 +130,10 @@ namespace krys::boo::html
     // even for RTL, left still means previous radio button (and so moves to the right). Seems strange, but
     // we'll match it. However, when using Spatial Navigation, we need to be able to navigate without changing
     // the selection.
-    // FIXME: Spatial navigation, with settings.
+    if (element->NodeDocument().GetSettings().SpatialNavigationEnabled)
+    {
+      return ShouldCallBaseEventHandler::Yes;
+    }
     bool forward = key == u8"Down" || key == u8"Right";
 
     // We can only stay within the form's children if the form hasn't been demoted to a leaf because of

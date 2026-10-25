@@ -9,11 +9,19 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class Document;
+}
 
 namespace krys::boo
 {
   class DOMMimeTypeArray;
+  class Gamepad;
+  class NavigatorGamepad;
   class DOMPluginArray;
   class LocalDOMWindow;
   class LocalFrame;
@@ -24,6 +32,7 @@ namespace krys::boo
   class Navigator final : public RefCounted<Navigator>
   {
     KRYS_NON_COPY_MOVABLE(Navigator);
+    friend class NavigatorGamepad;
 
   private:
     WeakPtr<LocalDOMWindow> _window;
@@ -31,6 +40,7 @@ namespace krys::boo
     mutable RefPtr<DOMPluginArray> _plugins;
     mutable RefPtr<DOMMimeTypeArray> _mimeTypes;
     mutable RefPtr<UserActivation> _userActivation;
+    UniquePtr<NavigatorGamepad> _gamepad;
 
   public:
     explicit Navigator(LocalDOMWindow &window) noexcept;
@@ -191,8 +201,26 @@ namespace krys::boo
 
 #pragma endregion
 
+#pragma region Navigator (Gamepad) - https://w3c.github.io/gamepad/#extensions-to-the-navigator-interface
+
+    /// @brief The connected gamepads, each at its index (null where there's none), with their current
+    /// values; none until a pad is used while the document is looking.
+    /// @see https://w3c.github.io/gamepad/#dom-navigator-getgamepads
+    KRYS_NODISCARD const List<RefPtr<Gamepad>> &GetGamepads() noexcept;
+
+    /// @brief The navigator's gamepads, if it has looked at them.
+    KRYS_NODISCARD NavigatorGamepad *GamepadsIfExists() const noexcept
+    {
+      return _gamepad.get();
+    }
+
+#pragma endregion
+
     /// @see https://html.spec.whatwg.org/#dom-navigator-useractivation
     KRYS_NODISCARD UserActivation &GetUserActivation() const noexcept;
+
+    /// @brief The window's document, unless it has been destroyed.
+    KRYS_NODISCARD dom::Document *Document() const noexcept;
 
   private:
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;

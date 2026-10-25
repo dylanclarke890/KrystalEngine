@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
@@ -223,6 +224,48 @@ namespace krys::pal
     KRYS_NODISCARD const PointerInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A gamepad connected or disconnected.
+  class GamepadConnectionEvent : public Event
+  {
+  private:
+    uint32 _slot;
+    bool _connected;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("gamepad-connection-event")
+
+    /// @brief Constructs a `GamepadConnectionEvent`.
+    /// @param slot The pad's slot.
+    /// @param connected Whether it connected (or disconnected).
+    GamepadConnectionEvent(uint32 slot, bool connected) noexcept;
+
+    KRYS_NODISCARD uint32 Slot() const noexcept;
+
+    KRYS_NODISCARD bool Connected() const noexcept;
+  };
+
+  /// @brief A gamepad's button was pressed or released.
+  class GamepadButtonEvent : public Event
+  {
+  private:
+    uint32 _slot;
+    GamepadButton _button;
+    GamepadButtonState _state;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("gamepad-button-event")
+
+    /// @brief Constructs a `GamepadButtonEvent`.
+    /// @param slot The pad's slot.
+    GamepadButtonEvent(uint32 slot, GamepadButton button, GamepadButtonState state) noexcept;
+
+    KRYS_NODISCARD uint32 Slot() const noexcept;
+
+    KRYS_NODISCARD GamepadButton Button() const noexcept;
+
+    KRYS_NODISCARD GamepadButtonState State() const noexcept;
   };
 
   class WindowResizeEvent : public Event

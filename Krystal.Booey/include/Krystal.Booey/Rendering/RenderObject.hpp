@@ -552,6 +552,9 @@ namespace krys::boo
     /// @brief The rect to repaint whenever the renderer changes, in the view's coordinates: its overflow and
     /// outlines.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRepaint() const noexcept;
+    /// @brief The renderer's clipped overflow rect in the view's coordinates, clipped as composited, as
+    /// spatial navigation tests whether it's on screen.
+    KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForSpatialNavigation() const noexcept;
     KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
@@ -583,6 +586,7 @@ namespace krys::boo
                                      VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
+    KRYS_NODISCARD static VisibleRectContext VisibleRectContextForSpatialNavigation() noexcept;
 
     /// @brief Whether the renderer has a layer that paints itself.
     KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;

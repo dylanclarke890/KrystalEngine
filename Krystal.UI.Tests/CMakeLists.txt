@@ -48,6 +48,9 @@ target_sources(Krystal.UI.Tests
 
     tests/Benchmark.cpp
     tests/Compositing.cpp
+    tests/Gamepads.cpp
+    tests/GamepadNavigation.cpp
+    tests/GamepadProvider.cpp
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
     tests/View.cpp

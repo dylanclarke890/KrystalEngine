@@ -49,6 +49,9 @@ namespace krys::boo
     bool UseSystemAppearance {false};
     /// @brief Moving a caret through content that isn't editable, with the keys that move one.
     bool CaretBrowsingEnabled {false};
+    /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
+    /// scrolling.
+    bool SpatialNavigationEnabled {false};
     /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
     bool HTMLLegacyAttributeValueSerializationEnabled {false};
     /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
