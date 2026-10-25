@@ -95,6 +95,7 @@
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Page/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -2534,7 +2535,8 @@ namespace krys::boo::dom
         {
           frameView->CacheCurrentScrollState();
         }
-        // FIXME: The pointer lock and the shared object pool, once there are those.
+        ExitPointerLock();
+        // FIXME: The shared object pool, once there's one.
         StyleScope().ClearResolver();
         _styleRecalcTimer.Stop();
         break;
@@ -2600,6 +2602,23 @@ namespace krys::boo::dom
     html::EventLoop::Current().QueueTask(
       source, *this, [protectedThis = ShareRef(*this), event = krys::move(event)]
       { (void)EventDispatcher::DispatchToTarget(*event, protectedThis.get()); });
+  }
+
+  void Document::ExitPointerLock() noexcept
+  {
+    RefPtr<Page> page = ShareRefPtr(GetPage());
+    if (!page)
+    {
+      return;
+    }
+    if (auto *target = page->GetPointerLockController().GetElement())
+    {
+      if (&target->NodeDocument() != this)
+      {
+        return;
+      }
+    }
+    page->GetPointerLockController().RequestPointerUnlock();
   }
 
   EventTarget *Document::GetParent(Event &event) const noexcept
@@ -3161,6 +3180,11 @@ namespace krys::boo::dom
     if (HasLivingRenderTree())
     {
       DestroyRenderTree();
+    }
+
+    if (auto *page = GetPage())
+    {
+      page->GetPointerLockController().DocumentDetached(*this);
     }
 
     _styleRecalcTimer.Stop();

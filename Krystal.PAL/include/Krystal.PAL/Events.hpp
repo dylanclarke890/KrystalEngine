@@ -126,6 +126,42 @@ namespace krys::pal
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
 
+  /// @brief Represents a mouse movement while the pointer is locked.
+  class LockedMouseMoveEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    float _deltaX, _deltaY;
+    float _rawDeltaX, _rawDeltaY;
+    KeyModifiers _modifiers;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("locked-mouse-move-event")
+
+    /// @brief Constructs a `LockedMouseMoveEvent`.
+    /// @param deltaX The cursor's movement along the x-axis since the last event, with the system's
+    /// acceleration.
+    /// @param deltaY The cursor's movement along the y-axis since the last event, with the system's
+    /// acceleration.
+    /// @param rawDeltaX The device's movement along the x-axis since the last event, without it.
+    /// @param rawDeltaY The device's movement along the y-axis since the last event, without it.
+    /// @param modifiers The modifier keys held.
+    LockedMouseMoveEvent(WindowHandle window, float deltaX, float deltaY, float rawDeltaX, float rawDeltaY,
+                         KeyModifiers modifiers = {}) noexcept;
+
+    KRYS_NODISCARD float DeltaX() const noexcept;
+
+    KRYS_NODISCARD float DeltaY() const noexcept;
+
+    KRYS_NODISCARD float RawDeltaX() const noexcept;
+
+    KRYS_NODISCARD float RawDeltaY() const noexcept;
+
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
   /// @brief Represents a user interaction with a mouse scroll wheel (or a touchpad's scrolling).
   class MouseScrollEvent : public Event
   {

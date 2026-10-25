@@ -29,6 +29,7 @@
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
@@ -345,13 +346,23 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Pointer lock, page overlays and synthetic touch events.
+    // FIXME: Page overlays and synthetic touch events.
 
     // A press is an activation-triggering input event: the window is notified before the event is dispatched.
     // https://html.spec.whatwg.org/#activation-triggering-input-event
     if (auto *window = frame->Window())
     {
       window->NotifyActivated();
+    }
+
+    if (auto *page = frame->GetPage())
+    {
+      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
+      {
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
+                                                       dom::DOMStringAtom(EventNames::MouseDown));
+        return true;
+      }
     }
 
     _mousePressed = true;
@@ -476,8 +487,17 @@ namespace krys::boo
     Ref frame = ShareRef(_frame);
     RefPtr<LocalFrameView> protectedView = ShareRefPtr(frame->View());
 
-    // FIXME: Synthetic touch events, pointer lock, hover timers, fake mouse moves, SVG panning and frame set
-    // resizing.
+    // FIXME: Synthetic touch events, hover timers, fake mouse moves, SVG panning and frame set resizing.
+
+    if (auto *page = frame->GetPage())
+    {
+      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
+      {
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
+                                                       dom::DOMStringAtom(EventNames::MouseMove));
+        return true;
+      }
+    }
 
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
 
@@ -636,7 +656,17 @@ namespace krys::boo
 
     frame->Document()->Selection().SetCaretBlinkingSuspended(false);
 
-    // FIXME: Pointer lock, page overlays, synthetic touch events, user gestures and pan scrolling.
+    if (auto *page = frame->GetPage())
+    {
+      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
+      {
+        pointerLockController.DispatchLockedMouseEvent(platformMouseEvent,
+                                                       dom::DOMStringAtom(EventNames::MouseUp));
+        return true;
+      }
+    }
+
+    // FIXME: Page overlays, synthetic touch events, user gestures and pan scrolling.
 
     _mousePressed = false;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
@@ -929,8 +959,16 @@ namespace krys::boo
   {
     using Type = PlatformEvent::Type;
 
-    // FIXME: Escape unlocking the pointer, hiding validation messages and leaving fullscreen; the caps lock
-    // state of text fields; pan scrolling.
+    if (initialKeyEvent.GetType() == Type::KeyDown && initialKeyEvent.Key() == u8"Escape")
+    {
+      if (auto *page = _frame.GetPage(); page && page->GetPointerLockController().GetElement())
+      {
+        page->GetPointerLockController().RequestPointerUnlockAndForceCursorVisible();
+      }
+    }
+
+    // FIXME: Escape hiding validation messages and leaving fullscreen; the caps lock state of text fields;
+    // pan scrolling.
 
     // Check for cases where we are too early for events -- possible unmatched key up from pressing return in
     // the location bar.
@@ -1674,7 +1712,14 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Pointer lock, which sends the wheel to the locked element, once there's pointer lock.
+    if (auto *page = frame->GetPage())
+    {
+      if (auto &pointerLockController = page->GetPointerLockController(); pointerLockController.IsLocked())
+      {
+        pointerLockController.DispatchLockedWheelEvent(event);
+        return true;
+      }
+    }
 
     _isHandlingWheelEvent = true;
 

@@ -101,6 +101,47 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region LockedMouseMoveEvent
+
+  LockedMouseMoveEvent::LockedMouseMoveEvent(WindowHandle window, float deltaX, float deltaY, float rawDeltaX,
+                                             float rawDeltaY, KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _rawDeltaX(rawDeltaX),
+        _rawDeltaY(rawDeltaY), _modifiers(modifiers)
+  {
+  }
+
+  float LockedMouseMoveEvent::DeltaX() const noexcept
+  {
+    return _deltaX;
+  }
+
+  float LockedMouseMoveEvent::DeltaY() const noexcept
+  {
+    return _deltaY;
+  }
+
+  float LockedMouseMoveEvent::RawDeltaX() const noexcept
+  {
+    return _rawDeltaX;
+  }
+
+  float LockedMouseMoveEvent::RawDeltaY() const noexcept
+  {
+    return _rawDeltaY;
+  }
+
+  KeyModifiers LockedMouseMoveEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
+  }
+
+  WindowHandle LockedMouseMoveEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region MouseMoveEvent
 
   MouseMoveEvent::MouseMoveEvent(WindowHandle window, const float deltaX, const float deltaY,

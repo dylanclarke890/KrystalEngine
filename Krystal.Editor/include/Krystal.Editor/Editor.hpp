@@ -288,6 +288,19 @@ namespace krys
           return true;
         });
 
+      // While the page has locked the pointer, the mouse's movement goes to it instead.
+      _context->Events->On<LockedMouseMoveEvent>(
+        [&](const auto &event)
+        {
+          if (_pageView)
+          {
+            _pageView->LockedMouseMoved(boo::DoublePoint(event.DeltaX(), event.DeltaY()),
+                                        boo::DoublePoint(event.RawDeltaX(), event.RawDeltaY()),
+                                        event.Modifiers());
+          }
+          return true;
+        });
+
       _context->Events->On<MouseButtonEvent>(
         [&](const auto &event)
         {
@@ -663,6 +676,14 @@ namespace krys
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
       _pageView->SetPointingDevices(pal::GetPointingDevices());
+      // The window hides and confines the cursor while the page has locked the pointer.
+      _pageView->SetPointerLockHandler(
+        [&](bool locked)
+        {
+          bool done = _context->Window->SetPointerLocked(locked);
+          UpdateCursor();
+          return done;
+        });
       _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
                                       { return HandleNavigation(request); });
       _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });

@@ -43,6 +43,9 @@ namespace krys::pal
     void OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY,
                           KeyModifiers modifiers) noexcept;
 
+    void OnLockedMouseMoveEvent(WindowHandle window, float dx, float dy, float rawDx, float rawDy,
+                                KeyModifiers modifiers) noexcept;
+
     void OnMouseScrollEvent(WindowHandle window, float deltaX, float deltaY, float clientX, float clientY,
                             KeyModifiers modifiers) noexcept;
 

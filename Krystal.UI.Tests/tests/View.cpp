@@ -2,6 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/CommandEvent.hpp"
@@ -1020,6 +1021,125 @@ namespace krys::ui::tests
     CHECK(records
           == List<std::string> {"mousedown:a/1/1", "mouseup:a/1/0", "click:a/1/0", "mousedown:a/1/2",
                                 "mouseup:a/1/0", "auxclick:a/1/0"});
+  }
+
+  TEST_CASE("View: pointer lock", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+                  u8"<div id=a></div><div id=b></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    auto &a = *view.Document().GetElementById(u8"a");
+
+    // Each event as `type:id`, a mouse move's with its movement, and the handler's calls as `lock` and
+    // `unlock`.
+    List<std::string> records;
+    auto record = [&](boo::dom::Event &event)
+    {
+      auto type = event.Type().View();
+      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      auto id = element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString())
+                        : boo::dom::DOMString(u8"document");
+      std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
+      if (event.Type() == boo::EventNames::MouseMove)
+      {
+        auto &mouse = static_cast<boo::dom::MouseEvent &>(event);
+        text += "/" + std::to_string(static_cast<int>(mouse.MovementX())) + ","
+                + std::to_string(static_cast<int>(mouse.MovementY()));
+      }
+      records.push_back(text);
+    };
+    List<boo::dom::EventListenerHandle> handles;
+    for (auto type : {u8"pointerlockchange", u8"pointerlockerror", u8"mousemove"})
+    {
+      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
+                                                         Func<void(boo::dom::Event &)>(record)));
+    }
+
+    // A press on `a` asks to lock the pointer to it (a press is a user gesture).
+    boo::dom::PointerLockOptions options;
+    handles.push_back(a.AddEventListener(
+      boo::dom::DOMStringAtom(u8"mousedown"),
+      Func<void(boo::dom::Event &)>([&](boo::dom::Event &) { a.RequestPointerLock(options); })));
+    auto click = [&]
+    {
+      view.MousePressed({10, 10}, pal::MouseButton::Left);
+      view.MouseReleased({10, 10}, pal::MouseButton::Left);
+      boo::html::EventLoop::Current().RunUntilIdle();
+    };
+
+    view.MouseMoved({10, 10});
+    records.clear();
+
+    // Without a handler, there's no pointer lock.
+    click();
+    CHECK(records == List<std::string> {"pointerlockerror:document"});
+    CHECK_FALSE(view.PointerLocked());
+    records.clear();
+
+    bool hostLocks = true;
+    view.SetPointerLockHandler(
+      [&](bool locked)
+      {
+        records.push_back(locked ? "lock" : "unlock");
+        return hostLocks;
+      });
+
+    SECTION("locking, the movement, and Escape unlocking")
+    {
+      click();
+      CHECK(records == List<std::string> {"lock", "pointerlockchange:document"});
+      CHECK(view.PointerLocked());
+      CHECK(view.CurrentCursor() == pal::CursorShape::Hidden);
+      CHECK(view.Document().PointerLockElement().get() == &a);
+      records.clear();
+
+      // The movement goes to `a`, with the system's acceleration unless the page asked for the device's own.
+      view.LockedMouseMoved({4, -2}, {2, -1});
+      CHECK(records == List<std::string> {"mousemove:a/4,-2"});
+      records.clear();
+      options.UnadjustedMovement = true;
+      click();
+      view.LockedMouseMoved({4, -2}, {2, -1});
+      CHECK(records == List<std::string> {"pointerlockchange:document", "mousemove:a/2,-1"});
+      records.clear();
+
+      (void)view.KeyPressed(pal::Key::Escape);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK(records == List<std::string> {"unlock", "pointerlockchange:document"});
+      CHECK_FALSE(view.PointerLocked());
+      CHECK(view.CurrentCursor() != pal::CursorShape::Hidden);
+      records.clear();
+
+      // Unlocked, moves are the mouse's and carry how far it went.
+      view.LockedMouseMoved({4, -2}, {2, -1});
+      view.MouseMoved({15, 12});
+      CHECK(records == List<std::string> {"mousemove:a/5,2"});
+    }
+
+    SECTION("the window losing focus unlocks it, and a window without focus can't lock it")
+    {
+      click();
+      records.clear();
+      view.SetFocused(false);
+      boo::html::EventLoop::Current().RunUntilIdle();
+      CHECK(records == List<std::string> {"unlock", "pointerlockchange:document"});
+      CHECK_FALSE(view.PointerLocked());
+      records.clear();
+
+      click();
+      CHECK(records == List<std::string> {"pointerlockerror:document"});
+    }
+
+    SECTION("a host that doesn't lock it")
+    {
+      hostLocks = false;
+      click();
+      CHECK(records == List<std::string> {"lock", "pointerlockerror:document"});
+      CHECK_FALSE(view.PointerLocked());
+    }
   }
 
   TEST_CASE("View: pens and touches", "[UI]")

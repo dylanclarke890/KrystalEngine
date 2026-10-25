@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
@@ -174,6 +175,12 @@ namespace krys::ui
     uint16 _penButtons {0};
     /// @brief The button the pen pressed with, which its release reports.
     boo::MouseButton _penButton {boo::MouseButton::None};
+    /// @brief The pointing devices the system has, as the host last said.
+    pal::PointingDevices _pointingDevices;
+    /// @brief Locks the pointer (true) or unlocks it (false) for the page, returning whether it did.
+    Func<bool(bool)> _pointerLockHandler;
+    /// @brief Whether the host has locked the pointer for the page.
+    bool _pointerLocked {false};
 
     /// @brief A touch on the screen.
     struct ActiveTouch
@@ -352,8 +359,26 @@ namespace krys::ui
     /// host does, it's a mouse alone.
     void SetPointingDevices(const pal::PointingDevices &devices) noexcept;
 
-    /// @brief The cursor the page wants over it, as of the last mouse move.
+    /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is
+    /// locked).
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
+
+    /// @brief Sets what locks the pointer for the page (`requestPointerLock()`) and unlocks it: called with
+    /// true, it hides the cursor, keeps it in place and reports the mouse's movement as
+    /// `LockedMouseMoved()`, and returns whether it did; called with false, it shows the cursor again.
+    /// Without one, pages can't lock the pointer; a page can't lock it while the window doesn't have focus,
+    /// and loses it when the window does.
+    void SetPointerLockHandler(Func<bool(bool)> &&handler) noexcept;
+    /// @brief Whether the pointer is locked for the page.
+    KRYS_NODISCARD bool PointerLocked() const noexcept
+    {
+      return _pointerLocked;
+    }
+    /// @brief The mouse moved by @p movement (with the system's acceleration; @p unadjustedMovement without
+    /// it) while the pointer is locked: `mousemove` fires at the locked element with the movement, where the
+    /// mouse was when it was locked.
+    void LockedMouseMoved(const boo::DoublePoint &movement, const boo::DoublePoint &unadjustedMovement,
+                          pal::KeyModifiers modifiers = {}) noexcept;
 
     /// @brief Presses @p key (again, if @p isAutoRepeat): `keydown` fires at the focused element (or the
     /// body), then `keypress` if it isn't cancelled and the key types text; the focused element becomes focus
@@ -464,9 +489,20 @@ namespace krys::ui
     void OverlayHidden(Overlay &overlay) noexcept;
     /// @brief Paints the open overlay over the page, at its place in the viewport.
     void PaintOverlay(gfx::Renderer2D &renderer) noexcept;
+    /// @param movement For a move, how far the mouse moved since the last (@p unadjustedMovement, before the
+    /// system's acceleration, while the pointer is locked).
     KRYS_NODISCARD boo::PlatformMouseEvent
       MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point, boo::MouseButton button,
-                 int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept;
+                 int32 clickCount, EnumSet<boo::PlatformEvent::Modifier> modifiers,
+                 const boo::DoublePoint &movement = {},
+                 const boo::DoublePoint &unadjustedMovement = {}) const noexcept;
+    /// @brief The button a move carries: the one held, as Windows' do (the left, then the middle, then the
+    /// right).
+    KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
+    /// @brief Asks the host to lock the pointer for the page.
+    KRYS_NODISCARD boo::PointerLockRequestResult LockPointer() noexcept;
+    /// @brief Asks the host to unlock the pointer.
+    bool UnlockPointer() noexcept;
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;

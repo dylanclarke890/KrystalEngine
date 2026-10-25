@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/PopupMenu.hpp"
@@ -183,6 +184,28 @@ namespace krys::boo
     {
       (void)client;
       return nullptr;
+    }
+
+    /// @brief Whether the system has a mouse, whose movement the host can report before the system's
+    /// acceleration (pointer lock's unadjusted movement).
+    KRYS_NODISCARD virtual bool HasAccessoryMousePointingDevice() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief The page asks to lock the pointer: the host hides the cursor, keeps it where it is and reports
+    /// the mouse's movement, then calls @p completionHandler with whether it did; a host that doesn't
+    /// override this has no pointer lock.
+    virtual void RequestPointerLock(Func<void(PointerLockRequestResult)> &&completionHandler) noexcept
+    {
+      completionHandler(PointerLockRequestResult::Unsupported);
+    }
+
+    /// @brief The page asks to unlock the pointer: the host shows the cursor again, then calls
+    /// @p completionHandler with whether it did.
+    virtual void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept
+    {
+      completionHandler(false);
     }
   };
 

@@ -73,6 +73,16 @@ namespace krys::pal
     _events->Enqueue(CreateUnique<MouseMoveEvent>(window, dx, dy, clientX, clientY, modifiers));
   }
 
+  void Input::OnLockedMouseMoveEvent(WindowHandle window, float dx, float dy, float rawDx, float rawDy,
+                                     KeyModifiers modifiers) noexcept
+  {
+    // The cursor doesn't move while the pointer is locked.
+    _mouse._deltaX += rawDx;
+    _mouse._deltaY += rawDy;
+
+    _events->Enqueue(CreateUnique<LockedMouseMoveEvent>(window, dx, dy, rawDx, rawDy, modifiers));
+  }
+
   void Input::OnMouseScrollEvent(WindowHandle window, float deltaX, float deltaY, float clientX,
                                  float clientY, KeyModifiers modifiers) noexcept
   {

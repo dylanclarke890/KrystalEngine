@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -46,7 +47,8 @@ namespace krys::boo
         _backForwardController(CreateUnique<BackForwardController>(
           *this, backForwardClient ? ShareRef(*backForwardClient)
                                    : Ref<BackForwardClient>(BackForwardList::Create()))),
-        _pointerCaptureController(CreateUnique<PointerCaptureController>(*this))
+        _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
+        _pointerLockController(CreateUnique<PointerLockController>(*this))
   {
     if (!_chromeClient)
     {

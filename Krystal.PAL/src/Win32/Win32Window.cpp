@@ -552,6 +552,11 @@ namespace krys::pal
         case WM_SETFOCUS:
         case WM_KILLFOCUS:
         {
+          // The pointer lock ends with the window's focus.
+          if (message == WM_KILLFOCUS && _pointerLock)
+          {
+            ReleasePointerLock();
+          }
           if (_callbacks.OnFocusChange)
           {
             _callbacks.OnFocusChange(handle, message == WM_SETFOCUS);
@@ -750,6 +755,31 @@ namespace krys::pal
           RAWINPUT raw {};
           std::memcpy(&raw, lpb, dwSize);
 
+          if (raw.header.dwType == RIM_TYPEMOUSE && _pointerLock)
+          {
+            // The device's movement is the raw input's; the cursor's (with the system's acceleration) is how
+            // far it went from the centre, where it's put back.
+            float rawX = static_cast<float>(raw.data.mouse.lLastX);
+            float rawY = static_cast<float>(raw.data.mouse.lLastY);
+            float x = 0;
+            float y = 0;
+            POINT point {};
+            if (::GetCursorPos(&point))
+            {
+              x = static_cast<float>(point.x - _pointerLock->Centre.x);
+              y = static_cast<float>(point.y - _pointerLock->Centre.y);
+              if (x != 0 || y != 0)
+              {
+                ::SetCursorPos(_pointerLock->Centre.x, _pointerLock->Centre.y);
+              }
+            }
+            // Raw input reports presses and releases as moves that don't move.
+            if ((x != 0 || y != 0 || rawX != 0 || rawY != 0) && _callbacks.OnLockedMouseMove)
+            {
+              _callbacks.OnLockedMouseMove(handle, x, y, rawX, rawY, CurrentModifiers());
+            }
+            break;
+          }
           if (raw.header.dwType == RIM_TYPEMOUSE)
           {
             if (!_callbacks.OnMouseMove)
@@ -775,8 +805,20 @@ namespace krys::pal
           break;
         }
 #pragma endregion
+        case WM_MOVE:
+        {
+          if (_pointerLock)
+          {
+            ConfinePointer();
+          }
+          break;
+        }
         case WM_SIZE:
         {
+          if (_pointerLock)
+          {
+            ConfinePointer();
+          }
           static bool isMinimised = false;
           switch (wParam)
           {
@@ -916,9 +958,67 @@ namespace krys::pal
       return _cursor;
     }
 
+    bool Win32Window::SetPointerLocked(bool locked) noexcept
+    {
+      if (!locked)
+      {
+        if (_pointerLock)
+        {
+          ReleasePointerLock();
+        }
+        return true;
+      }
+      if (_pointerLock)
+      {
+        return true;
+      }
+      if (::GetFocus() != _handle)
+      {
+        return false;
+      }
+
+      PointerLock pointerLock;
+      (void)::GetCursorPos(&pointerLock.Restore);
+      _pointerLock = pointerLock;
+      ConfinePointer();
+      ApplyCursor();
+      return true;
+    }
+
+    bool Win32Window::IsPointerLocked() const noexcept
+    {
+      return _pointerLock.has_value();
+    }
+
+    void Win32Window::ConfinePointer() const noexcept
+    {
+      RECT client {};
+      if (!::GetClientRect(_handle, &client))
+      {
+        return;
+      }
+      POINT topLeft {client.left, client.top};
+      POINT bottomRight {client.right, client.bottom};
+      (void)::ClientToScreen(_handle, &topLeft);
+      (void)::ClientToScreen(_handle, &bottomRight);
+      RECT clip {topLeft.x, topLeft.y, bottomRight.x, bottomRight.y};
+      (void)::ClipCursor(&clip);
+
+      _pointerLock->Centre = {(topLeft.x + bottomRight.x) / 2, (topLeft.y + bottomRight.y) / 2};
+      (void)::SetCursorPos(_pointerLock->Centre.x, _pointerLock->Centre.y);
+    }
+
+    void Win32Window::ReleasePointerLock() const noexcept
+    {
+      (void)::ClipCursor(nullptr);
+      (void)::SetCursorPos(_pointerLock->Restore.x, _pointerLock->Restore.y);
+      _pointerLock = null;
+      ApplyCursor();
+    }
+
     void Win32Window::ApplyCursor() const noexcept
     {
-      if (_cursor == CursorShape::Hidden)
+      if (_cursor == CursorShape::Hidden || _pointerLock)
       {
         ::SetCursor(NULL);
         return;

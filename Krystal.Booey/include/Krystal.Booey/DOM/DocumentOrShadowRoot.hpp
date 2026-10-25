@@ -113,6 +113,15 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region DocumentOrShadowRoot Extensions (Pointer Lock) - https://w3c.github.io/pointerlock/#extensions-to-the-documentorshadowroot-mixin
+
+    /// @brief The element the pointer is locked to, retargeted against this; null if there's none, it's
+    /// still being locked, or it's in another document.
+    /// @see https://w3c.github.io/pointerlock/#dom-documentorshadowroot-pointerlockelement
+    KRYS_NODISCARD RefPtr<Element> PointerLockElement() const noexcept;
+
+#pragma endregion
+
     /// @brief The node hit at @p clientPoint (in CSS pixels, relative to the viewport), if it's inside the
     /// viewport.
     /// @param localPoint Set to the point in the coordinates of the hit node's renderer.

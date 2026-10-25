@@ -12,6 +12,8 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
@@ -42,6 +44,29 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region DocumentOrShadowRoot Mixin (HTML)
+
+  RefPtr<Element> DocumentOrShadowRoot::PointerLockElement() const noexcept
+  {
+    auto &document = _rootNode.NodeDocument();
+    auto *page = document.GetPage();
+    if (!page || page->GetPointerLockController().LockPending())
+    {
+      return nullptr;
+    }
+    auto *element = page->GetPointerLockController().GetElement();
+    if (!element || &element->NodeDocument() != &document)
+    {
+      return nullptr;
+    }
+
+    // The element retargeted against this, if that's in this tree.
+    auto *retargeted = DynamicDowncast<Node>(EventTargetAlgorithms::Retarget(element, _rootNode));
+    if (!retargeted || &TreeQueries::Root(*retargeted) != &_rootNode)
+    {
+      return nullptr;
+    }
+    return ShareRefPtr(DynamicDowncast<Element>(*retargeted));
+  }
 
   RefPtr<Element> DocumentOrShadowRoot::ActiveElement() const noexcept
   {

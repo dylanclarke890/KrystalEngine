@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -21,6 +22,16 @@ namespace krys::pal::win32
     CursorShape _cursor {CursorShape::Arrow};
     /// @brief The pens and touches in range, by id, so a capture change can cancel them.
     mutable HashMap<uint32, PointerType> _activePointers;
+
+    /// @brief The pointer lock: where the cursor is kept (the client area's centre) and where it goes back
+    /// to, in screen coordinates.
+    struct PointerLock
+    {
+      POINT Centre {};
+      POINT Restore {};
+    };
+
+    mutable Maybe<PointerLock> _pointerLock;
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -47,6 +58,10 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD CursorShape GetCursor() const noexcept override;
 
+    bool SetPointerLocked(bool locked) noexcept override;
+
+    KRYS_NODISCARD bool IsPointerLocked() const noexcept override;
+
     LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
@@ -56,7 +71,12 @@ namespace krys::pal::win32
     /// @brief Reports a pen's or a touch's pointer message.
     /// @return Whether it was a pen's or a touch's, which the system then doesn't turn into mouse input.
     bool HandlePointerMessage(HWND window, UINT message, WPARAM wParam) const noexcept;
-    /// @brief Shows the window's cursor, as the mouse is over the client area.
+    /// @brief Shows the window's cursor, as the mouse is over the client area (none while the pointer is
+    /// locked).
     void ApplyCursor() const noexcept;
+    /// @brief Keeps the cursor in the client area, at its centre, while the pointer is locked.
+    void ConfinePointer() const noexcept;
+    /// @brief Unlocks the pointer, putting the cursor back where it was.
+    void ReleasePointerLock() const noexcept;
   };
 }

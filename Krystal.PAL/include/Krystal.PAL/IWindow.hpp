@@ -59,6 +59,9 @@ namespace krys::pal
   struct WindowCallbacks
   {
     using MouseMoveHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
+    /// @brief The mouse's movement while the pointer is locked: the cursor's (with the system's
+    /// acceleration), then the device's own (without it), then the modifiers held.
+    using LockedMouseMoveHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
     using MouseButtonHandler = Func<void(WindowHandle, MouseButton, MouseButtonState, KeyModifiers)>;
     /// @brief The wheel's turn in notches (fractions of one from touchpads and smooth wheels): positive is
     /// away from the user, or to the right; then the cursor's position in client space and the modifiers
@@ -75,6 +78,8 @@ namespace krys::pal
     using FocusChangeHandler = Func<void(WindowHandle, bool)>;
 
     MouseMoveHandler OnMouseMove = nullptr;
+    /// @brief Called for the mouse's moves instead of `OnMouseMove` while the pointer is locked.
+    LockedMouseMoveHandler OnLockedMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
     MouseScrollHandler OnMouseScroll = nullptr;
     /// @brief Called for pens and touches; without it, the system turns them into mouse input.
@@ -118,5 +123,13 @@ namespace krys::pal
     virtual void SetCursor(CursorShape cursor) noexcept = 0;
 
     KRYS_NODISCARD virtual CursorShape GetCursor() const noexcept = 0;
+
+    /// @brief Locks the pointer (@p locked) or unlocks it: while it's locked, the cursor is hidden and kept
+    /// in the window, and the mouse's moves come as `OnLockedMouseMove`; unlocking puts the cursor back where
+    /// it was. The window unlocks it when it loses focus.
+    /// @return Whether the pointer is now as asked: a window without focus can't lock it.
+    virtual bool SetPointerLocked(bool locked) noexcept = 0;
+
+    KRYS_NODISCARD virtual bool IsPointerLocked() const noexcept = 0;
   };
 }

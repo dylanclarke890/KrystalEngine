@@ -30,6 +30,7 @@ namespace krys::boo
   class HistoryItem;
   class LocalFrame;
   class PointerCaptureController;
+  class PointerLockController;
 
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
@@ -74,6 +75,7 @@ namespace krys::boo
     UniquePtr<EditorClient> _editorClient;
     UniquePtr<BackForwardController> _backForwardController;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
+    UniquePtr<PointerLockController> _pointerLockController;
     RefPtr<LocalFrame> _mainFrame;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
@@ -130,6 +132,12 @@ namespace krys::boo
     KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
     {
       return *_pointerCaptureController;
+    }
+
+    /// @brief The page's pointer lock.
+    KRYS_NODISCARD PointerLockController &GetPointerLockController() const noexcept
+    {
+      return *_pointerLockController;
     }
 
     /// @brief Called when the main frame's document is replaced by @p newDocument.

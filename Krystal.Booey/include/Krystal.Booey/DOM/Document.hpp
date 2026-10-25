@@ -611,6 +611,14 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Document (Pointer Lock) - https://w3c.github.io/pointerlock/#extensions-to-the-document-interface
+
+    /// @brief Unlocks the pointer, if an element of this document has it.
+    /// @see https://w3c.github.io/pointerlock/#dom-document-exitpointerlock
+    void ExitPointerLock() noexcept;
+
+#pragma endregion
+
 #pragma region Node - https://dom.spec.whatwg.org/#interface-node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodename

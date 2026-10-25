@@ -59,6 +59,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
@@ -2177,6 +2178,20 @@ namespace krys::boo::dom
       return page->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerID>(pointerId));
     }
     return false;
+  }
+
+#pragma endregion
+
+#pragma region Element (Pointer Lock)
+
+  void Element::RequestPointerLock(PointerLockOptions options,
+                                   Func<void(ExceptionOr<void> &&)> &&promise) noexcept
+  {
+    if (auto *page = NodeDocument().GetPage())
+    {
+      page->GetPointerLockController().RequestPointerLock(this, Maybe<PointerLockOptions>(options),
+                                                          krys::move(promise));
+    }
   }
 
 #pragma endregion

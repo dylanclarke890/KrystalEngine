@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
@@ -66,7 +67,13 @@ namespace krys::boo
 
     // 3. If this method is invoked while the document has a locked element, throw an exception with the name
     // InvalidStateError.
-    // FIXME: With pointer lock.
+    if (auto *page = capturingTarget->NodeDocument().GetPage())
+    {
+      if (page->GetPointerLockController().IsLocked())
+      {
+        return dom::Exception {dom::ExceptionCode::InvalidStateError};
+      }
+    }
 
     // 4. If the pointer is not in the active buttons state or the element's node document is not the active
     // document of the pointer, then terminate these steps.

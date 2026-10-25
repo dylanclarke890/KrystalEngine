@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Screen.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
@@ -907,6 +908,7 @@ namespace krys::boo
 
     // Set message to the result of normalizing newlines given message, and show it to the user.
     (void)Document()->UpdateStyleIfNeeded();
+    GetPage()->GetPointerLockController().RequestPointerUnlock();
     GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(), NormalizeNewlines(message));
   }
 
@@ -918,6 +920,7 @@ namespace krys::boo
     }
 
     (void)Document()->UpdateStyleIfNeeded();
+    GetPage()->GetPointerLockController().RequestPointerUnlock();
     return GetPage()->GetChromeClient().RunJavaScriptConfirm(*Frame(), NormalizeNewlines(message));
   }
 
@@ -930,6 +933,7 @@ namespace krys::boo
     }
 
     (void)Document()->UpdateStyleIfNeeded();
+    GetPage()->GetPointerLockController().RequestPointerUnlock();
     return GetPage()->GetChromeClient().RunJavaScriptPrompt(*Frame(), NormalizeNewlines(message),
                                                             defaultValue);
   }

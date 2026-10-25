@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Dicts/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
@@ -302,6 +303,18 @@ namespace krys::boo::dom
     ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
     /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
     KRYS_NODISCARD bool HasPointerCapture(int32 pointerId) noexcept;
+
+#pragma endregion
+
+#pragma region Element (Pointer Lock) - https://w3c.github.io/pointerlock/#extensions-to-the-element-interface
+
+    /// @brief Asks to lock the pointer to this element: while it's locked, the mouse's events come here with
+    /// the cursor hidden, and its moves carry the mouse's movement. `pointerlockchange` fires at the document
+    /// once it's locked, or `pointerlockerror` if it can't be.
+    /// @param promise Called once, as a microtask, when the lock is applied or the request fails.
+    /// @see https://w3c.github.io/pointerlock/#dom-element-requestpointerlock
+    void RequestPointerLock(PointerLockOptions options = {},
+                            Func<void(ExceptionOr<void> &&)> &&promise = {}) noexcept;
 
 #pragma endregion
 

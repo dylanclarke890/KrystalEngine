@@ -46,6 +46,8 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview PointerLeave = u8"pointerleave";
   constexpr utf8_stringview GotPointerCapture = u8"gotpointercapture";
   constexpr utf8_stringview LostPointerCapture = u8"lostpointercapture";
+  constexpr utf8_stringview PointerLockChange = u8"pointerlockchange";
+  constexpr utf8_stringview PointerLockError = u8"pointerlockerror";
   constexpr utf8_stringview KeyDown = u8"keydown";
   constexpr utf8_stringview KeyPress = u8"keypress";
   constexpr utf8_stringview KeyUp = u8"keyup";

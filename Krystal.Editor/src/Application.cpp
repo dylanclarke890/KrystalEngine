@@ -183,6 +183,10 @@ namespace krys
                          KeyModifiers modifiers) noexcept
       { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY, modifiers); },
 
+      .OnLockedMouseMove = [&](WindowHandle window, float deltaX, float deltaY, float rawDeltaX,
+                               float rawDeltaY, KeyModifiers modifiers) noexcept
+      { _context->Input->OnLockedMouseMoveEvent(window, deltaX, deltaY, rawDeltaX, rawDeltaY, modifiers); },
+
       .OnMouseButton =
         [&](WindowHandle window, MouseButton button, MouseButtonState state, KeyModifiers modifiers) noexcept
       { _context->Input->OnMouseButtonEvent(window, button, state, modifiers); },

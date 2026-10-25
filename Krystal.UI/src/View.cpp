@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -258,6 +259,21 @@ namespace krys::ui
         return nullptr;
       }
       return CreateRef<DateTimeChooserOverlay>(*_view, client);
+    }
+
+    KRYS_NODISCARD bool HasAccessoryMousePointingDevice() const noexcept override
+    {
+      return _view && _view->_pointingDevices.Mouse;
+    }
+
+    void RequestPointerLock(Func<void(boo::PointerLockRequestResult)> &&completionHandler) noexcept override
+    {
+      completionHandler(_view ? _view->LockPointer() : boo::PointerLockRequestResult::Unsupported);
+    }
+
+    void RequestPointerUnlock(Func<void(bool)> &&completionHandler) noexcept override
+    {
+      completionHandler(_view && _view->UnlockPointer());
     }
 
     void SetView(View *view) noexcept
@@ -903,7 +919,8 @@ namespace krys::ui
   {
     // Windows reports moves when the mouse hasn't moved (raw input reports presses and releases as moves
     // too), and one while a button is held would start a selection.
-    if (std::exchange(_lastMousePosition, point) == point)
+    auto lastPosition = std::exchange(_lastMousePosition, point);
+    if (lastPosition == point)
     {
       return;
     }
@@ -919,23 +936,46 @@ namespace krys::ui
       return;
     }
 
-    // A move carries the button held, as Windows' do: the left, then the middle, then the right.
-    auto button = boo::MouseButton::None;
+    // The move's movement is how far the mouse went since the last.
+    boo::DoublePoint movement;
+    if (lastPosition)
+    {
+      movement = boo::DoublePoint(point.X() - lastPosition->X(), point.Y() - lastPosition->Y());
+    }
+    (void)_frame->GetEventHandler().MouseMoved(MouseEvent(
+      boo::PlatformEvent::Type::MouseMoved, point, HeldButton(), 0, input::ToBooey(modifiers), movement));
+    PerformMicrotaskCheckpoint();
+  }
+
+  void View::LockedMouseMoved(const boo::DoublePoint &movement, const boo::DoublePoint &unadjustedMovement,
+                              pal::KeyModifiers modifiers) noexcept
+  {
+    if (!_pointerLocked)
+    {
+      return;
+    }
+    // The mouse stays where it was when the pointer was locked.
+    (void)_frame->GetEventHandler().MouseMoved(
+      MouseEvent(boo::PlatformEvent::Type::MouseMoved, _lastMousePosition.value_or(boo::IntPoint()),
+                 HeldButton(), 0, input::ToBooey(modifiers), movement, unadjustedMovement));
+    PerformMicrotaskCheckpoint();
+  }
+
+  boo::MouseButton View::HeldButton() const noexcept
+  {
     if (_buttons & ButtonsBit(boo::MouseButton::Left))
     {
-      button = boo::MouseButton::Left;
+      return boo::MouseButton::Left;
     }
-    else if (_buttons & ButtonsBit(boo::MouseButton::Middle))
+    if (_buttons & ButtonsBit(boo::MouseButton::Middle))
     {
-      button = boo::MouseButton::Middle;
+      return boo::MouseButton::Middle;
     }
-    else if (_buttons & ButtonsBit(boo::MouseButton::Right))
+    if (_buttons & ButtonsBit(boo::MouseButton::Right))
     {
-      button = boo::MouseButton::Right;
+      return boo::MouseButton::Right;
     }
-    (void)_frame->GetEventHandler().MouseMoved(
-      MouseEvent(boo::PlatformEvent::Type::MouseMoved, point, button, 0, input::ToBooey(modifiers)));
-    PerformMicrotaskCheckpoint();
+    return boo::MouseButton::None;
   }
 
   void View::MousePressed(const boo::IntPoint &point, pal::MouseButton palButton,
@@ -1217,6 +1257,7 @@ namespace krys::ui
   void View::SetPointingDevices(const pal::PointingDevices &devices) noexcept
   {
     using boo::css::mq::PointerCharacteristics;
+    _pointingDevices = devices;
     auto environment = _frame->GetMediaEnvironment();
 
     // The mouse is the primary pointing device if there's one, else the touch screen, else the pen.
@@ -1251,7 +1292,40 @@ namespace krys::ui
 
   pal::CursorShape View::CurrentCursor() const noexcept
   {
+    if (_pointerLocked)
+    {
+      return pal::CursorShape::Hidden;
+    }
     return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());
+  }
+
+  void View::SetPointerLockHandler(Func<bool(bool)> &&handler) noexcept
+  {
+    _pointerLockHandler = krys::move(handler);
+  }
+
+  boo::PointerLockRequestResult View::LockPointer() noexcept
+  {
+    if (!_pointerLockHandler)
+    {
+      return boo::PointerLockRequestResult::Unsupported;
+    }
+    // A window without focus can't take the pointer.
+    if (!_focused || !_pointerLockHandler(true))
+    {
+      return boo::PointerLockRequestResult::Failure;
+    }
+    _pointerLocked = true;
+    return boo::PointerLockRequestResult::Success;
+  }
+
+  bool View::UnlockPointer() noexcept
+  {
+    if (std::exchange(_pointerLocked, false) && _pointerLockHandler)
+    {
+      (void)_pointerLockHandler(false);
+    }
+    return true;
   }
 
   bool View::KeyPressed(pal::Key key, pal::KeyModifiers modifiers, const pal::KeyText &text,
@@ -1309,6 +1383,13 @@ namespace krys::ui
     }
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(Document(), focused);
+
+    // The pointer lock ends with the window's focus.
+    if (!focused && _pointerLocked)
+    {
+      (void)UnlockPointer();
+      _page->GetPointerLockController().DidLosePointerLock();
+    }
     PerformMicrotaskCheckpoint();
   }
 
@@ -1385,11 +1466,14 @@ namespace krys::ui
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,
                                            boo::MouseButton button, int32 clickCount,
-                                           EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept
+                                           EnumSet<boo::PlatformEvent::Modifier> modifiers,
+                                           const boo::DoublePoint &movement,
+                                           const boo::DoublePoint &unadjustedMovement) const noexcept
   {
     // FIXME: The screen position, once the host reports where the page is on the screen.
     boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
-                                  modifiers, MonotonicTime::Now(), _buttons);
+                                  modifiers, MonotonicTime::Now(), _buttons, movement);
+    event.SetUnadjustedMovementDelta(unadjustedMovement);
     // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
     if (type == boo::PlatformEvent::Type::MouseMoved)
     {

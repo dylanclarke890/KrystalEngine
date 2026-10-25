@@ -396,6 +396,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
 		tests/Page/PenAndTouch.cpp
+		tests/Page/PointerLockController.cpp
 		tests/Page/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp

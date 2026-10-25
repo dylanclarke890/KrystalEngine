@@ -19,6 +19,7 @@ namespace krys::boo
     DoublePoint _position;
     DoublePoint _globalPosition;
     DoublePoint _movementDelta;
+    DoublePoint _unadjustedMovementDelta;
     double _force {0};
     PenOrientation _penOrientation;
     PointerID _pointerId {MousePointerID};
@@ -65,6 +66,17 @@ namespace krys::boo
     KRYS_NODISCARD const DoublePoint &MovementDelta() const noexcept
     {
       return _movementDelta;
+    }
+
+    // Unaccelerated pointer movement
+    KRYS_NODISCARD const DoublePoint &UnadjustedMovementDelta() const noexcept
+    {
+      return _unadjustedMovementDelta;
+    }
+
+    void SetUnadjustedMovementDelta(const DoublePoint &unadjustedMovementDelta) noexcept
+    {
+      _unadjustedMovementDelta = unadjustedMovementDelta;
     }
 
     KRYS_NODISCARD MouseButton Button() const noexcept

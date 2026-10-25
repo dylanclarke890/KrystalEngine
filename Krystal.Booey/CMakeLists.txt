@@ -1705,6 +1705,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/ViewTimelineOptions.hpp
   include/Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp
 
+  # Pointer lock (B7c)
+  include/Krystal.Booey/DOM/Dicts/PointerLockOptions.hpp
+  include/Krystal.Booey/Page/PointerLockController.hpp
+
   # Pen and touch from the host (B7b)
   include/Krystal.Booey/DOM/Dicts/TouchEventInit.hpp
   include/Krystal.Booey/DOM/Touch.hpp
@@ -3039,6 +3043,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/ScrollTimeline.cpp
   src/Animation/ViewTimeline.cpp
   src/Animation/StyleOriginatedTimelinesController.cpp
+
+  # Pointer lock (B7c)
+  src/Page/PointerLockController.cpp
 
   # Pen and touch from the host (B7b)
   src/DOM/Touch.cpp
