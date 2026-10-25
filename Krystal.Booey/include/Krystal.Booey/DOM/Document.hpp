@@ -57,6 +57,7 @@ namespace krys::boo
   class HitTestResult;
   class MouseEventWithHitTestResults;
   class PlatformMouseEvent;
+  class IntersectionObserver;
   class LocalDOMWindow;
   class LocalFrame;
   class Location;
@@ -67,6 +68,7 @@ namespace krys::boo
   class RenderTreeUpdater;
   class RenderView;
   class ResizeObserver;
+  struct IntersectionObserverData;
   struct Settings;
 }
 
@@ -109,6 +111,7 @@ namespace krys::boo::html
   class HTMLInputElement;
   class HTMLTitleElement;
   class HTMLTreeBuilder;
+  class LazyLoadImageObserver;
   class RenderBlocking;
   class SerializedScriptValue;
 
@@ -251,6 +254,12 @@ namespace krys::boo::dom
     // remembered sizes.
     List<WeakPtr<ResizeObserver>> _resizeObservers;
     RefPtr<ResizeObserver> _resizeObserverForContainIntrinsicSize;
+    // The intersection observers with targets whose tracking document this is, and the data of those whose
+    // root the document is.
+    List<WeakPtr<IntersectionObserver>> _intersectionObservers;
+    UniquePtr<IntersectionObserverData> _intersectionObserverData;
+    // The intersection observer that loads the lazily loaded images, made on first use.
+    UniquePtr<html::LazyLoadImageObserver> _lazyLoadImageObserver;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -312,6 +321,7 @@ namespace krys::boo::dom
     bool _hasStyleWithViewportUnits {false};
 
     Timer _styleRecalcTimer;
+    Timer _intersectionObserversInitialUpdateTimer;
     List<WeakPtr<Element>> _autofocusCandidates;
     mutable HashMap<utf8_string, UniquePtr<Locale>> _localeCache;
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
@@ -772,6 +782,30 @@ namespace krys::boo::dom
     /// @brief Has @p element's size reported again, so its last remembered size is updated (or cleared, if it
     /// was disconnected).
     void ResetObservationSizeForContainIntrinsicSize(Element &element) noexcept;
+
+    void AddIntersectionObserver(IntersectionObserver &observer) noexcept;
+    void RemoveIntersectionObserver(IntersectionObserver &observer) noexcept;
+    KRYS_NODISCARD size_t NumberOfIntersectionObservers() const noexcept
+    {
+      return _intersectionObservers.size();
+    }
+    /// @brief The rendering update's intersection observations step: updates the observations of the
+    /// intersection observers the document tracks, and notifies those with new entries.
+    /// @see https://html.spec.whatwg.org/#update-the-rendering
+    void UpdateIntersectionObservations() noexcept;
+    void UpdateIntersectionObservations(
+      const List<WeakPtr<IntersectionObserver>> &intersectionObservers) noexcept;
+    /// @brief Schedules the first observations of a newly observed target: in the next rendering update once
+    /// the document has loaded, or after a delay while it's loading.
+    void ScheduleInitialIntersectionObservationUpdate() noexcept;
+    /// @brief The intersection observers whose root the document is.
+    IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
+    KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept
+    {
+      return _intersectionObserverData.get();
+    }
+    /// @brief The observer that loads the document's lazily loaded images, made on first use.
+    KRYS_NODISCARD html::LazyLoadImageObserver &GetLazyLoadImageObserver() noexcept;
 
     /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
     void SetNeedsDOMWindowResizeEvent() noexcept;

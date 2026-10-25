@@ -395,6 +395,12 @@ namespace krys::boo
     /// @brief The rect fixed-position boxes are laid out in: the visible content.
     KRYS_NODISCARD LayoutRect RectForFixedPositionLayout() const noexcept;
 
+    /// @brief The size of the layout viewport: the initial containing block's.
+    KRYS_NODISCARD LayoutSize BaseLayoutViewportSize() const noexcept;
+    /// @brief The layout viewport, in document coordinates: the initial containing block's size at the scroll
+    /// position.
+    KRYS_NODISCARD LayoutRect LayoutViewportRect() const noexcept;
+
     /// @brief Scrolls the view so @p absoluteRect (in the contents' coordinates) is visible as asked, unless
     /// it's fixed on both axes.
     void ScrollRectToVisibleInTopLevelView(const LayoutRect &absoluteRect, EnumSet<BoxAxis> isFixed,
@@ -495,8 +501,7 @@ namespace krys::boo
 
     /// @brief Called when what the viewport shows may have changed (scrolling, resizing, layout): resumes the
     /// image animations now visible.
-    // FIXME: Intersection observers, lazy loading, content visibility and the visible viewport rect, once
-    // there are any.
+    // FIXME: The visible viewport rect, once there's one.
     void ViewportContentsChanged() noexcept;
     void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
 
@@ -756,6 +761,10 @@ namespace krys::boo
     KRYS_NODISCARD IntPoint ContentsToWindow(const IntPoint &point) const noexcept;
     KRYS_NODISCARD IntRect ContentsToWindow(const IntRect &rect) const noexcept;
     KRYS_NODISCARD FloatRect DocumentToClientRect(FloatRect rect) const noexcept;
+    KRYS_NODISCARD FloatRect AbsoluteToClientRect(FloatRect rect,
+                                                  Maybe<float> usedZoom = null) const noexcept;
+    /// @brief Converts an absolute rect to one relative to the layout viewport.
+    KRYS_NODISCARD FloatRect AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept;
 
     void AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept override;
 

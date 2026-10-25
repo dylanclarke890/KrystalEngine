@@ -389,6 +389,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/EventHandler.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
+		tests/Page/IntersectionObserver.cpp
 		tests/Page/ResizeObserver.cpp
 		tests/Page/Page.cpp
 		tests/Page/LocalDOMWindow.cpp
@@ -454,6 +455,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Parser/HTMLSrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/HTMLImageElement.cpp
+		tests/HTML/LazyLoadImageObserver.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

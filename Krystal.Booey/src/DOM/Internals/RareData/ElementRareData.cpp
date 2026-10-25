@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomStateSet.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
@@ -16,6 +17,11 @@ namespace krys::boo::dom
   {
     krys_debug_assert(!_beforePseudoElement);
     krys_debug_assert(!_afterPseudoElement);
+  }
+
+  void ElementRareData::SetIntersectionObserverData(UniquePtr<IntersectionObserverData> &&data) noexcept
+  {
+    _intersectionObserverData = krys::move(data);
   }
 
   void ElementRareData::SetResizeObserverData(UniquePtr<ResizeObserverData> &&data) noexcept

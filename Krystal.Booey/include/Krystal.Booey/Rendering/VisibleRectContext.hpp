@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Page/IntersectionObserverMarginBox.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
 {
@@ -21,7 +23,6 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::VisibleRectContextOption, 5uz);
 namespace krys::boo
 {
   /// @brief The state of mapping a rect up to a container, through `ComputeVisibleRectsInContainer`.
-  // FIXME: The scroll margin, once there are intersection observers.
   struct VisibleRectContext
   {
     using Option = VisibleRectContextOption;
@@ -30,5 +31,8 @@ namespace krys::boo
     bool DirtyRectIsFlipped {false};
     bool DescendantNeedsEnclosingIntRect {false};
     EnumSet<Option> Options {};
+    /// @brief An intersection observer's scroll margin, which grows the clips of the scroll containers on the
+    /// way.
+    Maybe<IntersectionObserverMarginBox> ScrollMargin {};
   };
 }

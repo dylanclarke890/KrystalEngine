@@ -2297,6 +2297,20 @@ namespace krys::boo
     return LayoutRect(VisibleContentRect());
   }
 
+  LayoutSize LocalFrameView::BaseLayoutViewportSize() const noexcept
+  {
+    return GetRenderView() ? GetRenderView()->Size() : LayoutSize(Size());
+  }
+
+  LayoutRect LocalFrameView::LayoutViewportRect() const noexcept
+  {
+    // FIXME: The layout viewport's own origin and its override (updateLayoutViewport), once there are visual
+    // viewports; until then it's at the scroll position.
+    // Size of initial containing block, anchored at scroll position, in document coordinates (unchanged by
+    // scale factor).
+    return LayoutRect(ScrollPositionForFixedPosition(), BaseLayoutViewportSize());
+  }
+
   bool LocalFrameView::ShouldPlaceVerticalScrollbarOnLeft() const noexcept
   {
     auto *renderView = GetRenderView();
@@ -2903,6 +2917,18 @@ namespace krys::boo
   FloatRect LocalFrameView::DocumentToClientRect(FloatRect rect) const noexcept
   {
     rect.Move(DocumentToClientOffset());
+    return rect;
+  }
+
+  FloatRect LocalFrameView::AbsoluteToClientRect(FloatRect rect, Maybe<float> usedZoom) const noexcept
+  {
+    return DocumentToClientRect(AbsoluteToDocumentRect(rect, usedZoom));
+  }
+
+  FloatRect LocalFrameView::AbsoluteToLayoutViewportRect(FloatRect rect) const noexcept
+  {
+    // FIXME: The frame scale factor, once frames can be scaled.
+    rect.MoveBy(-FloatPoint(LayoutViewportRect().Location()));
     return rect;
   }
 

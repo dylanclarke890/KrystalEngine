@@ -6,21 +6,6 @@
 
 namespace krys::boo
 {
-  namespace
-  {
-    template <typename T, typename TPredicate>
-    bool RemoveFirstMatching(List<T> &list, TPredicate &&predicate) noexcept
-    {
-      auto it = std::ranges::find_if(list, predicate);
-      if (it == list.end())
-      {
-        return false;
-      }
-      list.erase(it);
-      return true;
-    }
-  }
-
   Ref<ResizeObserver> ResizeObserver::Create(dom::Document &document,
                                              ResizeObserverCallback &&callback) noexcept
   {

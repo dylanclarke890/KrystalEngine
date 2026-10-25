@@ -21,7 +21,7 @@ namespace krys::boo::html
   struct ImageCandidate;
 
   /// @see https://html.spec.whatwg.org/#htmlimageelement
-  // FIXME: Forms (form association), lazy loading, decode(), the legacy Image()
+  // FIXME: Forms (form association), decode(), the legacy Image()
   // constructor, and re-selecting the source when the media queries it depends on change.
   class HTMLImageElement : public HTMLElement
   {
@@ -225,6 +225,17 @@ namespace krys::boo::html
     KRYS_NODISCARD CachedImage *GetCachedImage() const noexcept;
     KRYS_NODISCARD Image *GetImage() const noexcept;
     KRYS_NODISCARD ImageLoader &GetImageLoader() const noexcept;
+
+    /// @brief Starts the deferred load of the image, if it's lazily loaded.
+    void LoadDeferredImage() noexcept;
+    /// @brief Whether the image is lazily loaded, and its load is deferred until it intersects the viewport.
+    KRYS_NODISCARD bool IsDeferred() const noexcept;
+    /// @brief Whether the image will load lazily: its `loading` attribute is `lazy`, and scripting is
+    /// enabled.
+    /// @see https://html.spec.whatwg.org/#will-lazy-load-element-steps
+    KRYS_NODISCARD bool IsLazyLoadable() const noexcept;
+    KRYS_NODISCARD static bool
+      HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept;
 
     /// @brief The selected source: the best fitting candidate of a `<picture>`'s sources, or else of `srcset`
     /// and `src`.

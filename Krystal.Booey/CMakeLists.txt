@@ -1877,6 +1877,14 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/ResizeObserverEntry.hpp
   include/Krystal.Booey/Page/ResizeObserverOptions.hpp
   include/Krystal.Booey/Page/ResizeObserverSize.hpp
+
+  # Intersection observers (B5b)
+  include/Krystal.Booey/Page/IntersectionObserver.hpp
+  include/Krystal.Booey/Page/IntersectionObserverCallback.hpp
+  include/Krystal.Booey/Page/IntersectionObserverEntry.hpp
+  include/Krystal.Booey/Page/IntersectionObserverMarginBox.hpp
+  # Lazy images (B5c)
+  include/Krystal.Booey/HTML/LazyLoadImageObserver.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3109,6 +3117,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Resize observers (B5a)
   src/Page/ResizeObservation.cpp
   src/Page/ResizeObserver.cpp
+
+  # Intersection observers (B5b)
+  src/Page/IntersectionObserver.cpp
+  src/Page/IntersectionObserverEntry.cpp
+  # Lazy images (B5c)
+  src/HTML/LazyLoadImageObserver.cpp
 )
 
 target_precompile_headers(Krystal.Booey

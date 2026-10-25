@@ -43,6 +43,12 @@ namespace krys::boo
       }
       return CreateUnique<RenderImageResource>();
     }
+
+    KRYS_NODISCARD bool IsDeferredImage(dom::Element *element) noexcept
+    {
+      auto *image = DynamicDowncast<html::HTMLImageElement>(element);
+      return image && image->IsDeferred();
+    }
   }
 
   RenderImage::RenderImage(Type type, dom::Element &element, RenderStyle &&style, StyleImage *styleImage,
@@ -537,7 +543,10 @@ namespace krys::boo
     float deviceScaleFactor = GetDocument().DeviceScaleFactor();
     LayoutUnit missingImageBorderWidth(1 / deviceScaleFactor);
 
-    // FIXME: Deferred (lazily loaded) images paint nothing, once there's lazy loading.
+    if (IsDeferredImage(GetElement()))
+    {
+      return;
+    }
 
     if (!ImageResource().GetCachedImage() || ShouldDisplayBrokenImageIcon())
     {

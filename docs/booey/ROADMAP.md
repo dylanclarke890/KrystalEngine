@@ -468,3 +468,13 @@ Observers. Booey has none: the rendering update's resize observations step (`Doc
 
 - **Booey** (the ledger entry is *Resize observers* in `docs/booey/PORTING.md`): `ResizeObserver`, made from C++ with `ResizeObserver::Create(document, callback)`, observes content or border boxes; the rendering update gathers and delivers observations round by round, deeper each time, laying out between rounds, and reports skipped ones as an `error` at the window; observers disconnect when destroyed and when their document goes. The document's native observer keeps the last remembered sizes for `contain-intrinsic-size: auto`, which a box whose contents are skipped (`content-visibility: hidden` for now) takes as its size. Krystal.Core got `ScopeExit`.
 - **Tests:** 3 cases (`tests/Page/ResizeObserver.cpp`).
+
+### B5b as built (2026-10-24)
+
+- **Booey** (the ledger entry is *Intersection observers* in `docs/booey/PORTING.md`): `IntersectionObserver`, made from C++ with `IntersectionObserver::Create(document, callback, init)`, reports targets crossing its thresholds against an element, document or implicit root, with root and scroll margins (scroll containers' clips grow by the scroll margin); the rendering update's new intersection observations step updates and notifies the observers, and a new target's first observation is scheduled at once when the document has loaded, or after two seconds while it's loading; targets, roots and observers going away disconnect as upstream. `LocalFrameView` got the layout viewport's rect and conversions, and Krystal.Core `RemoveFirstMatching`.
+- **Tests:** 4 cases (`tests/Page/IntersectionObserver.cpp`).
+
+### B5c as built (2026-10-24)
+
+- **Booey** (the ledger entry is *Lazy images* in `docs/booey/PORTING.md`): `<img loading=lazy>` defers its fetch, observed by the document's `LazyLoadImageObserver` (an intersection observer with a `100%` scroll margin), and loads once it intersects the viewport or comes within a scrollport of a scroller's clip; deferred images paint nothing, `loading` is reflected with its known values, changing it away from `lazy` loads at once, images already in the memory cache aren't deferred, and without scripting (the host's flag) images load eagerly.
+- **Tests:** 4 cases (`tests/HTML/LazyLoadImageObserver.cpp`).

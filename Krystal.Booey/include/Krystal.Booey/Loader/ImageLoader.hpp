@@ -29,10 +29,18 @@ namespace krys::boo
     Yes
   };
 
+  enum class LazyImageLoadState : uint8
+  {
+    None,
+    Deferred,
+    LoadImmediately,
+    FullImage
+  };
+
   /// @brief Loads the image of an element (`<img>`, and later `<input type=image>`, video posters and
   /// `<object>`), keeps its renderer's image up to date, and fires its `load` and `error` events.
-  // FIXME: Lazy loading (`loading=lazy`), decode() promises, loading manually, image documents, archives, and
-  // whether the image is visible in the viewport (for animations, G7d).
+  // FIXME: decode() promises, loading manually, image documents, archives, and whether the image is visible
+  // in the viewport (for animations, G7d).
   class ImageLoader : public CachedImageClient
   {
     KRYS_NON_COPY_MOVABLE(ImageLoader);
@@ -48,6 +56,7 @@ namespace krys::boo
     bool _hasPendingErrorEvent : 1 {false};
     bool _imageComplete : 1 {true};
     bool _elementIsProtected : 1 {false};
+    LazyImageLoadState _lazyImageLoadState {LazyImageLoadState::None};
 
   public:
     ~ImageLoader() noexcept override;
@@ -96,6 +105,16 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::Document &GetDocument() noexcept;
 
+    /// @brief Starts the deferred load of a lazily loaded image, once it intersects the viewport.
+    void LoadDeferredImage() noexcept;
+
+    /// @brief Whether the image's load is deferred until it intersects the viewport, or about to start.
+    KRYS_NODISCARD bool IsDeferred() const noexcept
+    {
+      return _lazyImageLoadState == LazyImageLoadState::Deferred
+             || _lazyImageLoadState == LazyImageLoadState::LoadImmediately;
+    }
+
   protected:
     explicit ImageLoader(dom::Element &element) noexcept;
 
@@ -120,5 +139,7 @@ namespace krys::boo
     void TimerFired() noexcept;
 
     void SetImageCompleteAndMaybeUpdateRenderer() noexcept;
+
+    void ResetLazyImageLoading(dom::Document &document) noexcept;
   };
 }

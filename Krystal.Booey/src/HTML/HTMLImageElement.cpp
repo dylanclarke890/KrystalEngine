@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/HTMLImageLoader.hpp"
 #include "Krystal.Booey/HTML/HTMLMapElement.hpp"
@@ -14,6 +15,7 @@
 #include "Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -22,6 +24,17 @@
 
 namespace krys::boo::html
 {
+  template <>
+  struct EnumeratedAttributeTraits<"loading", HTMLImageElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {
+      KeywordStateMapping {u8"lazy", AttributeState::Lazy},
+      KeywordStateMapping {u8"eager", AttributeState::Eager}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Eager;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
+  };
+
   namespace
   {
     KRYS_NODISCARD dom::DOMStringView
@@ -331,8 +344,9 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): Loading() is limited to known values.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"loading").value_or(u8"");
+    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"loading");
+    return EnumeratedAttribute<"loading", HTMLImageElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      krys::move(value));
   }
 
   void HTMLImageElement::Loading(dom::DOMString &&value) noexcept
@@ -473,6 +487,31 @@ namespace krys::boo::html
   ImageLoader &HTMLImageElement::GetImageLoader() const noexcept
   {
     return *_imageLoader;
+  }
+
+  void HTMLImageElement::LoadDeferredImage() noexcept
+  {
+    _imageLoader->LoadDeferredImage();
+  }
+
+  bool HTMLImageElement::IsDeferred() const noexcept
+  {
+    return _imageLoader->IsDeferred();
+  }
+
+  bool HTMLImageElement::IsLazyLoadable() const noexcept
+  {
+    auto *frame = NodeDocument().Frame();
+    if (!frame || !frame->GetMediaEnvironment().CanExecuteScripts)
+    {
+      return false;
+    }
+    return HasLazyLoadableAttributeValue(GetAttribute(u8"loading"));
+  }
+
+  bool HTMLImageElement::HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept
+  {
+    return attributeValue && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*attributeValue, u8"lazy");
   }
 
   HTMLPictureElement *HTMLImageElement::PictureElement() const noexcept
@@ -673,8 +712,15 @@ namespace krys::boo::html
         _imageLoader->UpdateFromElementIgnoringPreviousErrorToSameValue();
       }
     }
-    // FIXME: usemap, loading, referrerpolicy and crossorigin, once there are image maps, lazy loading and
-    // network loads.
+    else if (localName == u8"loading")
+    {
+      // No action needed for eager to lazy transition.
+      if (!HasLazyLoadableAttributeValue(value))
+      {
+        LoadDeferredImage();
+      }
+    }
+    // FIXME: usemap, referrerpolicy and crossorigin, once there are image maps and network loads.
   }
 
   void HTMLImageElement::OnInsert() noexcept

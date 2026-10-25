@@ -16,6 +16,7 @@ namespace krys::boo
 {
   class ElementAnimationRareData;
   class RenderStyle;
+  struct IntersectionObserverData;
   struct ResizeObserverData;
 }
 
@@ -65,6 +66,7 @@ namespace krys::boo::dom
     UniquePtr<PopoverData> _popoverData;
     WeakPtr<Element> _invokedPopover;
     ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
+    UniquePtr<IntersectionObserverData> _intersectionObserverData;
     UniquePtr<ResizeObserverData> _resizeObserverData;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
@@ -115,6 +117,12 @@ namespace krys::boo::dom
     {
       return _explicitlySetAttrElementsMap;
     }
+
+    KRYS_NODISCARD IntersectionObserverData *GetIntersectionObserverData() const noexcept
+    {
+      return _intersectionObserverData.get();
+    }
+    void SetIntersectionObserverData(UniquePtr<IntersectionObserverData> &&data) noexcept;
 
     KRYS_NODISCARD ResizeObserverData *GetResizeObserverData() const noexcept
     {

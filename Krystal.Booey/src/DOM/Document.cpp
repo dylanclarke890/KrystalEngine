@@ -71,6 +71,7 @@
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
+#include "Krystal.Booey/HTML/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
 #include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/PopStateEvent.hpp"
@@ -80,6 +81,7 @@
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/History.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -119,6 +121,8 @@ namespace krys::boo::dom
 {
   namespace
   {
+    constexpr auto IntersectionObserversInitialUpdateDelay = std::chrono::milliseconds(2'000);
+
     void CallbackForContainIntrinsicSize(const List<Ref<ResizeObserverEntry>> &entries,
                                          ResizeObserver &observer) noexcept
     {
@@ -172,7 +176,9 @@ namespace krys::boo::dom
         DocumentOrShadowRoot(static_cast<ContainerNode &>(*this)), _flags(DocumentFlags::None),
         _url(url::AboutBlankURL()), _baseURL(_url), _settings(ShareRef(Settings::Default())),
         _userActionElements(CreateUnique<UserActionElementSet>()),
-        _styleRecalcTimer([this] { (void)ShareRef(*this)->UpdateStyleIfNeeded(); })
+        _styleRecalcTimer([this] { (void)ShareRef(*this)->UpdateStyleIfNeeded(); }),
+        _intersectionObserversInitialUpdateTimer(
+          [this] { ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations}); })
   {
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
@@ -182,6 +188,20 @@ namespace krys::boo::dom
 
   Document::~Document() noexcept
   {
+    if (_intersectionObserverData)
+    {
+      for (const auto &observer : _intersectionObserverData->Observers)
+      {
+        if (observer)
+        {
+          observer->RootDestroyed();
+        }
+      }
+      _intersectionObserverData->Observers.clear();
+      // Document cannot be a target.
+      krys_debug_assert(_intersectionObserverData->Registrations.empty());
+    }
+
     if (_styleSheetList)
     {
       _styleSheetList->Detach();
@@ -1399,11 +1419,126 @@ namespace krys::boo::dom
 
   void Document::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept
   {
-    // FIXME: The initial update of intersection observers, once there are any.
+    if (_intersectionObserversInitialUpdateTimer.IsActive())
+    {
+      _intersectionObserversInitialUpdateTimer.Stop();
+      requestedSteps.Add(RenderingUpdateStep::IntersectionObservations);
+    }
     if (auto *page = GetPage())
     {
       page->ScheduleRenderingUpdate(requestedSteps);
     }
+  }
+
+  void Document::AddIntersectionObserver(IntersectionObserver &observer) noexcept
+  {
+    krys_debug_assert(
+      std::ranges::find(_intersectionObservers, &observer, [](auto &weak) { return weak.get(); })
+      == _intersectionObservers.end());
+    _intersectionObservers.push_back(CreateWeakPtr(&observer));
+  }
+
+  void Document::RemoveIntersectionObserver(IntersectionObserver &observer) noexcept
+  {
+    auto it = std::ranges::find(_intersectionObservers, &observer, [](auto &weak) { return weak.get(); });
+    if (it != _intersectionObservers.end())
+    {
+      _intersectionObservers.erase(it);
+    }
+  }
+
+  void Document::UpdateIntersectionObservations() noexcept
+  {
+    UpdateIntersectionObservations(_intersectionObservers);
+  }
+
+  void Document::UpdateIntersectionObservations(
+    const List<WeakPtr<IntersectionObserver>> &intersectionObservers) noexcept
+  {
+    RefPtr<LocalFrame> frame = ShareRefPtr(Frame());
+    if (!frame)
+    {
+      return;
+    }
+
+    RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
+    if (!frameView)
+    {
+      return;
+    }
+
+    // FIXME: The page deferring intersection observations (shouldDeferIntersectionObservations), once it can.
+    if (!GetPage())
+    {
+      return;
+    }
+
+    bool needsLayout =
+      frameView->LayoutContext().IsLayoutPending() || (GetRenderView() && GetRenderView()->NeedsLayout());
+    if (needsLayout || HasPendingStyleRecalc())
+    {
+      if (!intersectionObservers.empty())
+      {
+        ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations});
+      }
+      return;
+    }
+
+    List<WeakPtr<IntersectionObserver>> intersectionObserversWithPendingNotifications;
+
+    // Copied, as observing and unobserving change the list.
+    for (auto &weakObserver : List<WeakPtr<IntersectionObserver>>(intersectionObservers))
+    {
+      RefPtr<IntersectionObserver> observer = ShareRefPtr(weakObserver.get());
+      if (!observer)
+      {
+        continue;
+      }
+
+      auto needNotify = observer->UpdateObservations(*frame);
+      if (needNotify == IntersectionObserver::NeedNotify::Yes)
+      {
+        intersectionObserversWithPendingNotifications.push_back(CreateWeakPtr(observer.get()));
+      }
+    }
+
+    for (auto &weakObserver : intersectionObserversWithPendingNotifications)
+    {
+      if (RefPtr<IntersectionObserver> observer = ShareRefPtr(weakObserver.get()))
+      {
+        observer->Notify();
+      }
+    }
+  }
+
+  void Document::ScheduleInitialIntersectionObservationUpdate() noexcept
+  {
+    if (ReadyState() == html::DocumentReadyState::Complete)
+    {
+      ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations});
+    }
+    else if (!_intersectionObserversInitialUpdateTimer.IsActive())
+    {
+      _intersectionObserversInitialUpdateTimer.StartOneShot(IntersectionObserversInitialUpdateDelay);
+    }
+  }
+
+  IntersectionObserverData &Document::EnsureIntersectionObserverData() noexcept
+  {
+    if (!_intersectionObserverData)
+    {
+      _intersectionObserverData = CreateUnique<IntersectionObserverData>();
+    }
+    return *_intersectionObserverData;
+  }
+
+  html::LazyLoadImageObserver &Document::GetLazyLoadImageObserver() noexcept
+  {
+    if (!_lazyLoadImageObserver)
+    {
+      _lazyLoadImageObserver = CreateUnique<html::LazyLoadImageObserver>();
+    }
+    return *_lazyLoadImageObserver;
   }
 
   void Document::AddResizeObserver(ResizeObserver &observer) noexcept
@@ -2943,6 +3078,15 @@ namespace krys::boo::dom
   void Document::CommonTeardown() noexcept
   {
     // FIXME: The rest of the teardown shared by destruction and the last reference going, once there's any.
+    auto intersectionObservers = _intersectionObservers;
+    for (auto &weakIntersectionObserver : intersectionObservers)
+    {
+      if (RefPtr<IntersectionObserver> intersectionObserver = ShareRefPtr(weakIntersectionObserver.get()))
+      {
+        intersectionObserver->Disconnect();
+      }
+    }
+
     auto resizeObservers = _resizeObservers;
     for (auto &weakResizeObserver : resizeObservers)
     {

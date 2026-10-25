@@ -4677,7 +4677,19 @@ namespace krys::boo
       clipRect.ExpandToInfiniteY();
     }
 
-    // FIXME: The scroll margin (for intersection observers), once there are any.
+    if (context.ScrollMargin && (IsScrollContainerX() || IsScrollContainerY()))
+    {
+      auto borderWidths = BorderWidths();
+      clipRect.Contract(borderWidths);
+      auto scrollMarginEdges = LayoutBoxExtent {
+        style::Evaluate<LayoutUnit>(context.ScrollMargin->Top(), clipRect.Height(), style::ZoomNeeded {}),
+        style::Evaluate<LayoutUnit>(context.ScrollMargin->Right(), clipRect.Width(), style::ZoomNeeded {}),
+        style::Evaluate<LayoutUnit>(context.ScrollMargin->Bottom(), clipRect.Height(), style::ZoomNeeded {}),
+        style::Evaluate<LayoutUnit>(context.ScrollMargin->Left(), clipRect.Width(), style::ZoomNeeded {}),
+      };
+
+      clipRect.Expand(scrollMarginEdges);
+    }
 
     bool intersects;
     if (context.Options.Contains(VisibleRectContext::Option::UseEdgeInclusiveIntersection))

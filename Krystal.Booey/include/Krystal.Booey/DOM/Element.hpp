@@ -37,6 +37,7 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
   class RenderTreeUpdater;
+  struct IntersectionObserverData;
   struct ResizeObserverData;
 }
 
@@ -130,6 +131,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept override;
 
     ~Element() noexcept override;
+
+    void OnAdopt(Document &oldDocument) noexcept override;
 
 #pragma region Element - https://dom.spec.whatwg.org/#element
 
@@ -1146,6 +1149,14 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Intersection Observers
+
+    /// @brief The intersection observers whose root the element is, and those observing it.
+    IntersectionObserverData &EnsureIntersectionObserverData() noexcept;
+    KRYS_NODISCARD IntersectionObserverData *IntersectionObserverDataIfExists() const noexcept;
+
+#pragma endregion
+
 #pragma region Resize Observers
 
     /// @brief The resize observers observing the element.
@@ -1268,6 +1279,7 @@ namespace krys::boo::dom
 
     void SetCustomElementState(CustomElementState state) noexcept;
 
+    void DisconnectFromIntersectionObservers() noexcept;
     void DisconnectFromResizeObservers() noexcept;
 
     KRYS_NODISCARD bool IsUserActionElementInActiveChain() const noexcept;

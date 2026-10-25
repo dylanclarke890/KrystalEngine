@@ -50,6 +50,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -89,7 +90,27 @@ namespace krys::boo::dom
     krys_debug_assert(!BeforePseudoElement());
     krys_debug_assert(!AfterPseudoElement());
 
+    DisconnectFromIntersectionObservers();
     DisconnectFromResizeObservers();
+  }
+
+  void Element::OnAdopt(Document &oldDocument) noexcept
+  {
+    ContainerNode::OnAdopt(oldDocument);
+
+    // FIXME: The rest of moving to a new document (didMoveToNewDocument), as it's needed.
+    if (auto *observerData = IntersectionObserverDataIfExists())
+    {
+      auto &newDocument = NodeDocument();
+      for (const auto &observer : observerData->Observers)
+      {
+        if (observer->HasObservationTargets())
+        {
+          oldDocument.RemoveIntersectionObserver(*observer);
+          newDocument.AddIntersectionObserver(*observer);
+        }
+      }
+    }
   }
 
   ElementRareData &Element::EnsureElementRareData() noexcept
@@ -2415,6 +2436,48 @@ namespace krys::boo::dom
 #pragma endregion
 
 #pragma region Resize Observers
+
+  void Element::DisconnectFromIntersectionObservers() noexcept
+  {
+    auto *observerData = IntersectionObserverDataIfExists();
+    if (!observerData)
+    {
+      return;
+    }
+
+    for (const auto &registration : observerData->Registrations)
+    {
+      if (registration.Observer)
+      {
+        registration.Observer->TargetDestroyed(*this);
+      }
+    }
+    observerData->Registrations.clear();
+
+    for (const auto &observer : observerData->Observers)
+    {
+      if (observer)
+      {
+        observer->RootDestroyed();
+      }
+    }
+    observerData->Observers.clear();
+  }
+
+  IntersectionObserverData &Element::EnsureIntersectionObserverData() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.GetIntersectionObserverData())
+    {
+      rareData.SetIntersectionObserverData(CreateUnique<IntersectionObserverData>());
+    }
+    return *rareData.GetIntersectionObserverData();
+  }
+
+  IntersectionObserverData *Element::IntersectionObserverDataIfExists() const noexcept
+  {
+    return _elementRareData ? _elementRareData->GetIntersectionObserverData() : nullptr;
+  }
 
   void Element::DisconnectFromResizeObservers() noexcept
   {

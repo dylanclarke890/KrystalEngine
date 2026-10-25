@@ -221,7 +221,10 @@ namespace krys::boo
                         }
                       });
 
-    // FIXME: Content relevancy, view transitions and intersection observations, once there are any.
+    // FIXME: Content relevancy and view transitions, once there are any.
+
+    RunProcessingStep(RenderingUpdateStep::IntersectionObservations,
+                      [](dom::Document &document) { document.UpdateIntersectionObservations(); });
 
     RunProcessingStep(RenderingUpdateStep::SnapshottedScrollOffsets,
                       [](dom::Document &document)

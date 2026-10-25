@@ -46,13 +46,14 @@ namespace krys::boo
     CaretAnimation,
     ResizeObservations,
     FocusFixup,
+    IntersectionObservations,
     SnapshottedScrollOffsets,
     CursorUpdate,
     LayerFlush,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 13uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 14uz);
 
 namespace krys::boo
 {

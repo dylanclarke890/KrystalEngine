@@ -41,7 +41,9 @@ namespace krys::boo::html
     Toggle,
     Show,
     Hide,
+    Lazy,
+    Eager,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 31uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 33uz);

@@ -4,8 +4,10 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/LazyLoadImageObserver.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
+#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -36,6 +38,27 @@ namespace krys::boo
     KRYS_NODISCARD bool ContainsOnlyASCIIWhitespace(dom::DOMStringView string) noexcept
     {
       return std::ranges::all_of(string, [](char8 c) { return text::IsASCIIWhitespace(c); });
+    }
+
+    KRYS_NODISCARD bool CanReuseFromListOfAvailableImages(const CachedResourceRequest &request) noexcept
+    {
+      CachedResourceHandle resource =
+        MemoryCache::Singleton().ResourceForRequest(request.GetResourceRequest());
+      // FIXME: Preloaded resources, once there are preloads.
+      if (!resource || resource->StillNeedsLoad())
+      {
+        return false;
+      }
+
+      // FIXME: A CORS resource of another origin isn't reused, once there are origins.
+
+      if (resource->Options().RequestMode != request.Options().RequestMode
+          || resource->Options().CredentialsMode != request.Options().CredentialsMode)
+      {
+        return false;
+      }
+
+      return true;
     }
   }
 
@@ -153,7 +176,18 @@ namespace krys::boo
       CachedResourceRequest request(ResourceRequest(krys::move(imageURL)), options);
       request.SetInitiatorType(element->LocalName().View());
 
-      auto requested = document->GetCachedResourceLoader().RequestImage(krys::move(request));
+      if (_lazyImageLoadState == LazyImageLoadState::None && imageElement)
+      {
+        if (imageElement->IsLazyLoadable() && !CanReuseFromListOfAvailableImages(request))
+        {
+          _lazyImageLoadState = LazyImageLoadState::Deferred;
+          request.SetIgnoreForRequestCount(true);
+        }
+      }
+      auto imageLoading = _lazyImageLoadState == LazyImageLoadState::Deferred
+                            ? ImageLoading::DeferredUntilVisible
+                            : ImageLoading::Immediate;
+      auto requested = document->GetCachedResourceLoader().RequestImage(krys::move(request), imageLoading);
       newImage = requested ? *requested : CachedResourceHandle<CachedImage>();
 
       // If we do not have an image here, it means that a cross-site
@@ -218,9 +252,18 @@ namespace krys::boo
           UpdateRenderer();
         }
 
+        if (_lazyImageLoadState == LazyImageLoadState::Deferred)
+        {
+          html::LazyLoadImageObserver::Observe(_element);
+        }
+
         // If newImage is cached, AddClient() will result in the load event
         // being queued to fire.
         newImage->AddClient(*this);
+      }
+      else
+      {
+        ResetLazyImageLoading(GetDocument());
       }
 
       if (oldImage)
@@ -269,6 +312,12 @@ namespace krys::boo
     (void)resource;
 
     _pendingURL.clear();
+
+    if (IsDeferred())
+    {
+      html::LazyLoadImageObserver::Unobserve(_element, GetDocument());
+      _lazyImageLoadState = LazyImageLoadState::FullImage;
+    }
 
     if (!_hasPendingLoadEvent)
     {
@@ -457,14 +506,34 @@ namespace krys::boo
     LoadEventSender().DispatchPendingEvents();
   }
 
-  void ImageLoader::ElementDidMoveToNewDocument(dom::Document &) noexcept
+  void ImageLoader::ElementDidMoveToNewDocument(dom::Document &oldDocument) noexcept
   {
     ClearFailedLoadURL();
     ClearImage();
+    ResetLazyImageLoading(oldDocument);
   }
 
   void ImageLoader::ClearFailedLoadURL() noexcept
   {
     _failedLoadURL.clear();
+  }
+
+  void ImageLoader::LoadDeferredImage() noexcept
+  {
+    if (_lazyImageLoadState != LazyImageLoadState::Deferred)
+    {
+      return;
+    }
+    _lazyImageLoadState = LazyImageLoadState::LoadImmediately;
+    UpdateFromElement(RelevantMutation::No);
+  }
+
+  void ImageLoader::ResetLazyImageLoading(dom::Document &document) noexcept
+  {
+    if (IsDeferred())
+    {
+      html::LazyLoadImageObserver::Unobserve(_element, document);
+    }
+    _lazyImageLoadState = LazyImageLoadState::None;
   }
 }
