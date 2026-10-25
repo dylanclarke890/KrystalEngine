@@ -229,4 +229,29 @@ namespace krys::boo
   {
     _layoutContext.EnablePercentHeightResolveFor(_flexItem);
   }
+
+  ContentVisibilityOverrideScope::ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
+                                                                 EnumSet<OverrideType> overrideTypes) noexcept
+      : _layoutContext(layoutContext)
+  {
+    if (overrideTypes.Contains(OverrideType::Hidden))
+    {
+      layoutContext.SetIsVisiblityHiddenIgnored(true);
+    }
+    if (overrideTypes.Contains(OverrideType::Auto))
+    {
+      layoutContext.SetIsVisiblityAutoIgnored(true);
+    }
+    if (overrideTypes.Contains(OverrideType::RevealedWhenFound))
+    {
+      layoutContext.SetIsRevealedWhenFoundIgnored(true);
+    }
+  }
+
+  ContentVisibilityOverrideScope::~ContentVisibilityOverrideScope() noexcept
+  {
+    _layoutContext.SetIsVisiblityHiddenIgnored(false);
+    _layoutContext.SetIsVisiblityAutoIgnored(false);
+    _layoutContext.SetIsRevealedWhenFoundIgnored(false);
+  }
 }

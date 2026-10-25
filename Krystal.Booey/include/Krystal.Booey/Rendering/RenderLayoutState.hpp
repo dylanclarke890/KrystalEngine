@@ -6,7 +6,9 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Debug.hpp"
+#include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo
@@ -214,4 +216,29 @@ namespace krys::boo
                                const RenderBox &flexItem) noexcept;
     ~FlexPercentResolveDisabler() noexcept;
   };
+
+  /// @brief Has layout descend into the content that content-visibility skips, for the reasons given, for
+  /// the length of its scope.
+  class ContentVisibilityOverrideScope
+  {
+    KRYS_NON_COPY_MOVABLE(ContentVisibilityOverrideScope);
+
+  public:
+    enum class OverrideType : uint8
+    {
+      Hidden,
+      Auto,
+      RevealedWhenFound
+    };
+
+  private:
+    LocalFrameViewLayoutContext &_layoutContext;
+
+  public:
+    ContentVisibilityOverrideScope(LocalFrameViewLayoutContext &layoutContext,
+                                   EnumSet<OverrideType> overrideTypes) noexcept;
+    ~ContentVisibilityOverrideScope() noexcept;
+  };
 }
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::ContentVisibilityOverrideScope::OverrideType, 3uz);

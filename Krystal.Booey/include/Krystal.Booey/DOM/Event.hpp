@@ -351,6 +351,11 @@ namespace krys::boo::dom
       return false;
     }
 
+    KRYS_NODISCARD virtual bool IsContentVisibilityAutoStateChangeEvent() const noexcept
+    {
+      return false;
+    }
+
 #pragma endregion
 
   protected:

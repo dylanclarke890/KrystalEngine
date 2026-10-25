@@ -83,6 +83,7 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview Toggle = u8"toggle";
   constexpr utf8_stringview BeforeMatch = u8"beforematch";
   constexpr utf8_stringview Command = u8"command";
+  constexpr utf8_stringview ContentVisibilityAutoStateChange = u8"contentvisibilityautostatechange";
   constexpr utf8_stringview Finish = u8"finish";
   constexpr utf8_stringview Remove = u8"remove";
 

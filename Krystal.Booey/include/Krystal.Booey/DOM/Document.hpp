@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/Enums/BackForwardCacheState.hpp"
+#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Enums/DocumentFlags.hpp"
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
@@ -123,6 +124,7 @@ namespace krys::boo::dom
   class Attr;
   class CDATASection;
   class Comment;
+  class ContentVisibilityDocumentState;
   class DocumentType;
   class Element;
   class HighlightRegistry;
@@ -135,6 +137,8 @@ namespace krys::boo::dom
   class TreeWalker;
   class UserActionElementSet;
   class VisitedLinkState;
+
+  enum class DidUpdateAnyContentRelevancy : bool;
 
   /// @see https://dom.spec.whatwg.org/#interface-document
   /// @brief The event a scroll fires at what scrolled.
@@ -260,6 +264,10 @@ namespace krys::boo::dom
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
     // The intersection observer that loads the lazily loaded images, made on first use.
     UniquePtr<html::LazyLoadImageObserver> _lazyLoadImageObserver;
+    // The relevancy of the elements with `content-visibility: auto`, made on first use, and the reasons to
+    // check again in the next rendering update.
+    UniquePtr<ContentVisibilityDocumentState> _contentVisibilityDocumentState;
+    EnumSet<ContentRelevancy> _contentRelevancyUpdate;
     // Whether the fragment is scrolled to once the pending style sheets have loaded.
     bool _gotoAnchorNeededAfterStylesheetsLoad {false};
     // The custom highlights (`CSS.highlights`), and the text fragments' highlights.
@@ -806,6 +814,27 @@ namespace krys::boo::dom
     }
     /// @brief The observer that loads the document's lazily loaded images, made on first use.
     KRYS_NODISCARD html::LazyLoadImageObserver &GetLazyLoadImageObserver() noexcept;
+
+    /// @brief The relevancy of the elements with `content-visibility: auto`, made on first use.
+    KRYS_NODISCARD ContentVisibilityDocumentState &GetContentVisibilityDocumentState() noexcept;
+    enum class UpdateLayoutIfContentVisibilityChanged : bool
+    {
+      No,
+      Yes
+    };
+    /// @brief The rendering update's content relevancy step: checks the relevancy of the elements with
+    /// `content-visibility: auto` for the reasons scheduled, laying out if any changed (unless
+    /// @p updateLayout is `No`).
+    DidUpdateAnyContentRelevancy
+      UpdateRelevancyOfContentVisibilityElements(UpdateLayoutIfContentVisibilityChanged updateLayout =
+                                                   UpdateLayoutIfContentVisibilityChanged::Yes) noexcept;
+    /// @brief Has the next rendering update check the relevancy of the elements with
+    /// `content-visibility: auto` for @p contentRelevancy.
+    void ScheduleContentRelevancyUpdate(ContentRelevancy contentRelevancy) noexcept;
+    /// @brief Makes the `content-visibility: auto` ancestor whose contents hide @p scrollAnchor relevant, so
+    /// it can be scrolled to.
+    void UpdateContentRelevancyForScrollIfNeeded(const Element &scrollAnchor) noexcept;
+    KRYS_NODISCARD bool IsObservingContentVisibilityTargets() const noexcept;
 
     /// @brief The view's size or zoom changed: the next resize steps fire `resize` at the window.
     void SetNeedsDOMWindowResizeEvent() noexcept;
@@ -1436,9 +1465,12 @@ namespace krys::boo::dom
     bool HitTest(const HitTestRequest &request, const HitTestLocation &location,
                  HitTestResult &result) noexcept;
 
-    /// @brief Updates style, then lays the document out if it needs it.
-    UpdateLayoutResult UpdateLayout(EnumSet<LayoutOptions> layoutOptions = {}) noexcept;
-    UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets() noexcept;
+    /// @brief Updates style, then lays the document out if it needs it; with the options that treat skipped
+    /// content as visible, lays out the skipped subtree holding @p context (or every skipped subtree).
+    UpdateLayoutResult UpdateLayout(EnumSet<LayoutOptions> layoutOptions = {},
+                                    const Element *context = nullptr) noexcept;
+    UpdateLayoutResult UpdateLayoutIgnorePendingStylesheets(EnumSet<LayoutOptions> layoutOptions = {},
+                                                            const Element *context = nullptr) noexcept;
 
     /// @brief The element that scrolls the viewport: the root element, or in quirks mode the body unless it's
     /// potentially scrollable.

@@ -2072,8 +2072,27 @@ namespace krys::boo
 
   void RenderTable::Paint(PaintInfo &paintInfo, const LayoutPoint &paintOffset) noexcept
   {
-    // FIXME: Tables inside skipped content behind continuations (the isSkippedContent check) come with
-    // content-visibility's skipped content.
+    auto isSkippedContent = [&]
+    {
+      if (Style().UsedContentVisibility() == ContentVisibility::Visible)
+      {
+        return false;
+      }
+      // FIXME: Tables can never be skipped content roots. If a table is _inside_ a skipped subtree, we should
+      // have bailed out at the skipped root ancestor. However with continuations used visibility values does
+      // not always get propagated properly and we may end up here with a dirty (skipped) table.
+      if (auto *containingBlock = ContainingBlock();
+          containingBlock && containingBlock->IsAnonymousBlock()
+          && !containingBlock->Style().IsSkippedRootOrSkippedContent())
+      {
+        return true;
+      }
+      return false;
+    };
+    if (isSkippedContent())
+    {
+      return;
+    }
 
     LayoutPoint adjustedPaintOffset = paintOffset + Location();
 

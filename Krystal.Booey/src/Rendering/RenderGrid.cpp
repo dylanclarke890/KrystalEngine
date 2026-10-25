@@ -2176,8 +2176,11 @@ namespace krys::boo
   void RenderGrid::LayoutOutOfFlowBox(RenderBox &gridItem, RelayoutChildren relayoutChildren,
                                       bool fixedPositionObjectsOnly) noexcept
   {
-    // FIXME: Content skipped by content-visibility (isSkippedContentRootForLayout), once layout skips
-    // content.
+    if (LayoutContext().IsSkippedContentRootForLayout(*this))
+    {
+      gridItem.ClearNeedsLayoutForSkippedContent();
+      return;
+    }
 
     LayoutRange columnBreadth = GridAreaRangeForOutOfFlow(gridItem, GridTrackSizingDirection::Columns);
     LayoutRange rowBreadth = GridAreaRangeForOutOfFlow(gridItem, GridTrackSizingDirection::Rows);

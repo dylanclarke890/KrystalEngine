@@ -1874,7 +1874,17 @@ namespace krys::boo
 
   bool WebAnimation::IsSkippedContentAnimation() const noexcept
   {
-    // FIXME: Animations of skipped content (content-visibility), once there's content visibility.
+    if (Pending())
+    {
+      return false;
+    }
+    if (auto *animation = DynamicDowncast<StyleOriginatedAnimation>(this))
+    {
+      if (auto element = animation->OwningElement())
+      {
+        return element->Element.Renderer() && element->Element.Renderer()->IsSkippedContent();
+      }
+    }
     return false;
   }
 

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
@@ -533,6 +534,44 @@ namespace krys::boo
     LocalFrameViewLayoutContext::IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept
   {
     return _percentHeightIgnoreList.contains(&flexItem);
+  }
+
+  bool LocalFrameViewLayoutContext::IsSkippedContentForLayout(const RenderElement &renderer) const noexcept
+  {
+    if (IsVisiblityHiddenIgnored() || IsVisiblityAutoIgnored()
+        || (IsRevealedWhenFoundIgnored() && renderer.Style().AutoRevealsWhenFound()))
+    {
+      // In theory we should only descend into a hidden/auto subree when hidden/auto root is ignored (see
+      // IsSkippedContentRootForLayout below).
+      return false;
+    }
+    return renderer.IsSkippedContent();
+  }
+
+  bool LocalFrameViewLayoutContext::IsSkippedContentRootForLayout(const RenderBox &renderBox) const noexcept
+  {
+    if (!IsSkippedContentRoot(renderBox))
+    {
+      return false;
+    }
+
+    auto contentVisibility = renderBox.Style().GetContentVisibility();
+    if (contentVisibility == ContentVisibility::Hidden && IsVisiblityHiddenIgnored())
+    {
+      return false;
+    }
+
+    if (contentVisibility == ContentVisibility::Auto && IsVisiblityAutoIgnored())
+    {
+      return false;
+    }
+
+    if (renderBox.Style().AutoRevealsWhenFound() && IsRevealedWhenFoundIgnored())
+    {
+      return false;
+    }
+
+    return true;
   }
 
   LayoutSize LocalFrameViewLayoutContext::LayoutDelta() const noexcept

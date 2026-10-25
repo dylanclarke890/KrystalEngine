@@ -2274,8 +2274,7 @@ namespace krys::boo::dom
     document->AddTopLayerElement(*this);
     SetEventTargetFlag(EventTargetFlags::IsInTopLayer);
 
-    // FIXME: Scheduling a content relevancy update (ContentRelevancy::IsInTopLayer), once content relevancy
-    // is computed.
+    document->ScheduleContentRelevancyUpdate(ContentRelevancy::IsInTopLayer);
 
     // Invalidate inert state
     InvalidateStyleInternal();
@@ -2324,8 +2323,7 @@ namespace krys::boo::dom
     NodeDocument().RemoveTopLayerElement(*this);
     ClearEventTargetFlag(EventTargetFlags::IsInTopLayer);
 
-    // FIXME: Scheduling a content relevancy update (ContentRelevancy::IsInTopLayer), once content relevancy
-    // is computed.
+    NodeDocument().ScheduleContentRelevancyUpdate(ContentRelevancy::IsInTopLayer);
 
     // Invalidate inert state
     InvalidateStyleInternal();
@@ -2510,6 +2508,30 @@ namespace krys::boo::dom
   ResizeObserverData *Element::ResizeObserverDataIfExists() const noexcept
   {
     return _elementRareData ? _elementRareData->GetResizeObserverData() : nullptr;
+  }
+
+  // https://drafts.csswg.org/css-contain/#relevant-to-the-user
+  bool Element::IsRelevantToUser() const noexcept
+  {
+    if (auto relevancy = GetContentRelevancy())
+    {
+      return !relevancy->IsEmpty();
+    }
+    return false;
+  }
+
+  Maybe<EnumSet<ContentRelevancy>> Element::GetContentRelevancy() const noexcept
+  {
+    if (!_elementRareData)
+    {
+      return null;
+    }
+    return _elementRareData->GetContentRelevancy();
+  }
+
+  void Element::SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
+  {
+    EnsureElementRareData().SetContentRelevancy(contentRelevancy);
   }
 
   Maybe<LayoutUnit> Element::LastRememberedLogicalWidth() const noexcept
@@ -2821,7 +2843,9 @@ namespace krys::boo::dom
 
   Ref<DOMRectList> Element::GetClientRects() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
 
     auto *renderer = Renderer();
 
@@ -2867,7 +2891,9 @@ namespace krys::boo::dom
   FloatRect Element::BoundingClientRect() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
     auto pair = BoundingAbsoluteRectWithoutLayout();
     if (!pair)
     {
@@ -2887,8 +2913,8 @@ namespace krys::boo::dom
   void Element::ScrollIntoView(const ScrollIntoViewOptions &options) noexcept
   {
     auto &document = NodeDocument();
-    // FIXME: Make content-visibility: auto content relevant (updateContentRelevancyForScrollIfNeeded), once
-    // content relevancy is computed.
+    document.UpdateContentRelevancyForScrollIfNeeded(*this);
+
     document.UpdateLayoutIgnorePendingStylesheets();
 
     // FIXME: Scroll a list box to the option or optgroup, once there are form controls.
@@ -3036,7 +3062,9 @@ namespace krys::boo::dom
   int32 Element::OffsetLeft() noexcept
   {
     auto offset = 0;
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetLeft());
@@ -3064,7 +3092,9 @@ namespace krys::boo::dom
   int32 Element::OffsetTop() noexcept
   {
     auto offset = 0;
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       offset = AdjustOffsetForZoomAndSubpixelLayout(*renderer, renderer->OffsetTop());
@@ -3091,7 +3121,9 @@ namespace krys::boo::dom
 
   int32 Element::OffsetWidth() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       auto offsetWidth = LayoutUnit(RoundToInt(renderer->OffsetWidth()));
@@ -3103,7 +3135,9 @@ namespace krys::boo::dom
 
   int32 Element::OffsetHeight() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
     if (auto *renderer = DynamicDowncast<RenderBoxModelObject>(Renderer()))
     {
       auto offsetHeight = LayoutUnit(RoundToInt(renderer->OffsetHeight()));
@@ -3129,7 +3163,9 @@ namespace krys::boo::dom
 
   Element *Element::OffsetParentIgnoringShadowTrees() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
     auto *renderer = Renderer();
     if (!renderer)
     {
@@ -3141,7 +3177,9 @@ namespace krys::boo::dom
 
   int32 Element::ClientLeft() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
 
     if (auto *renderer = RenderBoxOf(*this))
     {
@@ -3154,7 +3192,9 @@ namespace krys::boo::dom
 
   int32 Element::ClientTop() noexcept
   {
-    NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+    NodeDocument().UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                         LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                        this);
 
     if (auto *renderer = RenderBoxOf(*this))
     {
@@ -3168,7 +3208,9 @@ namespace krys::boo::dom
   int32 Element::ClientWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (!document.HasLivingRenderTree())
     {
@@ -3217,7 +3259,9 @@ namespace krys::boo::dom
   int32 Element::ClientHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (!document.HasLivingRenderTree())
     {
@@ -3257,7 +3301,9 @@ namespace krys::boo::dom
   int32 Element::ScrollLeft() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (document.ScrollingElement() == this)
     {
@@ -3278,7 +3324,9 @@ namespace krys::boo::dom
   int32 Element::ScrollTop() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (document.ScrollingElement() == this)
     {
@@ -3299,7 +3347,9 @@ namespace krys::boo::dom
   void Element::SetScrollLeft(int32 newLeft) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
     auto options = ScrollPositionChangeOptions::CreateProgrammatic();
@@ -3326,7 +3376,9 @@ namespace krys::boo::dom
   void Element::SetScrollTop(int32 newTop) noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     // FIXME: Smooth scrolling (useSmoothScrolling), once there are scroll animations.
     auto options = ScrollPositionChangeOptions::CreateProgrammatic();
@@ -3353,7 +3405,9 @@ namespace krys::boo::dom
   int32 Element::ScrollWidth() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (document.ScrollingElement() == this)
     {
@@ -3374,7 +3428,9 @@ namespace krys::boo::dom
   int32 Element::ScrollHeight() noexcept
   {
     auto &document = NodeDocument();
-    document.UpdateLayoutIgnorePendingStylesheets();
+    document.UpdateLayoutIgnorePendingStylesheets({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                                   LayoutOptions::TreatContentVisibilityAutoAsVisible},
+                                                  this);
 
     if (document.ScrollingElement() == this)
     {

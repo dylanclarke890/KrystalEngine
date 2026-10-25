@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/NavigateEvent.hpp"
 #include "Krystal.Booey/Page/Navigation.hpp"
@@ -33,6 +34,7 @@
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
+#include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -583,6 +585,110 @@ namespace krys::ui::tests
       run(300ms);
       CHECK_FALSE(refill.IsInTopLayer());
       CHECK_FALSE(refill.Renderer());
+    }
+  }
+
+  TEST_CASE("View: the editor page's observers", "[UI]")
+  {
+    // Images that other cases loaded load at once, from the memory cache.
+    boo::MemoryCache::Singleton().EvictResources();
+    View view({1'200, 300});
+    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes them once the page has loaded.
+    editor::PageObservers observers(document);
+    auto byId = [&](utf8_stringview id)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      return element;
+    };
+    auto textOf = [&](utf8_stringview id)
+    {
+      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
+      return std::string(text.begin(), text.end());
+    };
+    auto update = [&]
+    {
+      view.UpdateRendering();
+      boo::html::EventLoop::Current().RunUntilIdle();
+    };
+    update();
+
+    SECTION("the resize card shows its size as the view resizes")
+    {
+      // Its content box: the card less its padding.
+      auto card = byId(u8"resize-card");
+      auto sizeText = [&]
+      {
+        return std::format("{} \u00d7 140 pixels", card->OffsetWidth() - 40);
+      };
+      CHECK(textOf(u8"resize-size") == sizeText());
+
+      auto before = card->OffsetWidth();
+      view.Resize({1'000, 300});
+      update();
+      CHECK(card->OffsetWidth() < before);
+      CHECK(textOf(u8"resize-size") == sizeText());
+    }
+
+    SECTION("the lazy list's images load as it scrolls")
+    {
+      auto list = byId(u8"lazy-list");
+      auto images = list->QuerySelectorAll(u8"img").ReleaseValue();
+      REQUIRE(images->Length() == 21);
+      auto &first = Downcast<boo::html::HTMLImageElement>(*images->Item(0));
+      auto &last = Downcast<boo::html::HTMLImageElement>(*images->Item(20));
+
+      // Below the page's view, none has loaded.
+      CHECK(first.IsDeferred());
+      CHECK(textOf(u8"lazy-count") == "No images loaded yet");
+
+      // Scrolled to, those within a list's height of its view load; the rest wait.
+      list->ScrollIntoView(true);
+      update();
+      update();
+      CHECK(first.Complete());
+      CHECK(last.IsDeferred());
+      auto loaded = observers.ImagesLoaded();
+      CHECK(loaded > 0);
+      CHECK(loaded < 21);
+      CHECK(textOf(u8"lazy-count") == std::format("{} of 21 images loaded", loaded));
+
+      list->SetScrollTop(10'000);
+      update();
+      CHECK_FALSE(last.IsDeferred());
+      CHECK(last.Complete());
+      CHECK(observers.ImagesLoaded() > loaded);
+    }
+
+    SECTION("the chapters skip their contents off screen, and the header's chapter follows the scroll")
+    {
+      // At the top of the page, no chapter is in view, and each is skipped.
+      CHECK(observers.CurrentChapter().empty());
+      CHECK_FALSE(byId(u8"chapter-1")->IsRelevantToUser());
+
+      byId(u8"chapter-1")->ScrollIntoView(true);
+      update();
+      update();
+      CHECK(observers.CurrentChapter() == u8"The beans");
+      CHECK(byId(u8"chapter-1")->IsRelevantToUser());
+      CHECK_FALSE(byId(u8"chapter-6")->IsRelevantToUser());
+      auto height = byId(u8"chapter-1")->OffsetHeight();
+      CHECK(height != 320);
+
+      // Scrolled past, the first chapter is skipped again, at the size it last had.
+      byId(u8"chapter-6")->ScrollIntoView(true);
+      update();
+      update();
+      CHECK(observers.CurrentChapter() == u8"Tasting");
+      CHECK(byId(u8"chapter-6")->IsRelevantToUser());
+      CHECK_FALSE(byId(u8"chapter-1")->IsRelevantToUser());
+      CHECK(byId(u8"chapter-1")->OffsetHeight() == height);
     }
   }
 

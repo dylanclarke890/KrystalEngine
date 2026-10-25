@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Page/Navigation.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Log/ILogger.hpp"
+#include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Editor/Application.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
+#include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
@@ -37,6 +39,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <string>
 
 namespace krys
 {
@@ -72,6 +75,8 @@ namespace krys
     boo::dom::EventListenerHandle _dialogLogger;
     /// @brief Routes the guide's topics within the page, on the window's navigation.
     boo::dom::EventListenerHandle _router;
+    /// @brief The page's observers, made once it has loaded: the header shows the chapter most in view.
+    UniquePtr<editor::PageObservers> _observers;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -112,6 +117,7 @@ namespace krys
 
     void OnShutdown() noexcept override
     {
+      _observers = nullptr;
       _pageView = nullptr;
       _booeyFonts = {};
       _renderer = nullptr;
@@ -409,9 +415,11 @@ namespace krys
           _loadEvents +=
             event.FromBackForwardCache ? u8", committed from the back/forward cache" : u8", committed";
           AttachPage();
+          _observers = event.FromBackForwardCache ? CreateUnique<editor::PageObservers>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
+          _observers = CreateUnique<editor::PageObservers>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;
@@ -809,6 +817,17 @@ namespace krys
                  Rgb(0xffffff, active ? 255 : 150), active);
       }
       DrawText(U"F2 switches views, F5 reloads the page", width - 290.f, 34.f, 13.f, Rgb(0xffffff, 170));
+
+      // The page's chapter most in view, from its intersection observer.
+      if (_observers && _view == EditorView::Page && !_observers->CurrentChapter().empty())
+      {
+        std::u32string chapter = U"Reading: ";
+        for (text::CodePointIterator it(utf8_stringview(_observers->CurrentChapter())); !it.AtEnd(); ++it)
+        {
+          chapter.push_back(*it);
+        }
+        DrawText(chapter.c_str(), 480.f, 34.f, 15.f, Rgb(0xffffff), true);
+      }
 
       // The page view's back and forward buttons, faded when there's nowhere to go.
       if (_pageView && _view == EditorView::Page)

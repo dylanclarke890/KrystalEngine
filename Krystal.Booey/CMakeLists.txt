@@ -1885,6 +1885,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Page/IntersectionObserverMarginBox.hpp
   # Lazy images (B5c)
   include/Krystal.Booey/HTML/LazyLoadImageObserver.hpp
+  # Content visibility (B5d)
+  include/Krystal.Booey/DOM/ContentVisibilityAutoStateChangeEvent.hpp
+  include/Krystal.Booey/DOM/ContentVisibilityDocumentState.hpp
+  include/Krystal.Booey/DOM/Enums/ContentRelevancy.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3123,6 +3127,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Page/IntersectionObserverEntry.cpp
   # Lazy images (B5c)
   src/HTML/LazyLoadImageObserver.cpp
+  # Content visibility (B5d)
+  src/DOM/ContentVisibilityAutoStateChangeEvent.cpp
+  src/DOM/ContentVisibilityDocumentState.cpp
 )
 
 target_precompile_headers(Krystal.Booey

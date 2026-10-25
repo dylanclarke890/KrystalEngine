@@ -1013,11 +1013,15 @@ namespace krys::boo::html
     {
       oldFocusedElement->SetFocus(false);
       document.SetSequentialFocusNavigationStartingPoint(nullptr);
+
+      document.ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
     }
     if (element)
     {
       document.SetSequentialFocusNavigationStartingPoint(element);
       element->SetFocus(true, visibility);
+
+      document.ScheduleContentRelevancyUpdate(dom::ContentRelevancy::Focused);
 
       // The focus moved while a navigation is ongoing: its finish doesn't reset it.
       if (auto *window = document.Window())

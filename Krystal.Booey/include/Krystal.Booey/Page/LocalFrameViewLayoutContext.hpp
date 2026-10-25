@@ -35,6 +35,7 @@ namespace krys::boo
   /// render tree. A scheduled layout runs on the layout timer, when the host next runs the event loop.
   class LocalFrameViewLayoutContext final
   {
+    friend class ContentVisibilityOverrideScope;
     friend class LayoutStateMaintainer;
     friend class LayoutStateDisabler;
     friend class SubtreeLayoutStateMaintainer;
@@ -88,6 +89,10 @@ namespace krys::boo
     bool _needsFullRepaint {true};
     bool _updateCompositingLayersIsPending {false};
     uint32 _paintOffsetCacheDisableCount {0};
+    // Whether layout descends into the content that content-visibility skips, for each reason it's skipped.
+    bool _visiblityHiddenIsIgnored {false};
+    bool _visiblityAutoIsIgnored {false};
+    bool _revealedWhenFoundIgnored {false};
     Maybe<TextBoxTrim> _textBoxTrim;
     Maybe<UpdateScrollInfoAfterLayoutTransaction> _updateScrollInfoAfterLayoutTransaction;
     // Keyed by address: flex layout removes each item it adds.
@@ -146,6 +151,13 @@ namespace krys::boo
     void DisablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     void EnablePercentHeightResolveFor(const RenderBox &flexItem) noexcept;
     KRYS_NODISCARD bool IsPercentHeightResolveDisabledFor(const RenderBox &flexItem) const noexcept;
+
+    /// @brief Whether layout skips @p renderer, which content-visibility skips, unless layout is forced into
+    /// skipped content.
+    KRYS_NODISCARD bool IsSkippedContentForLayout(const RenderElement &renderer) const noexcept;
+    /// @brief Whether layout skips the contents of @p renderBox, whose contents content-visibility skips,
+    /// unless layout is forced into them.
+    KRYS_NODISCARD bool IsSkippedContentRootForLayout(const RenderBox &renderBox) const noexcept;
 
     KRYS_NODISCARD Maybe<TextBoxTrim> GetTextBoxTrim() const noexcept
     {
@@ -262,6 +274,33 @@ namespace krys::boo
     // that can trigger repaint of a non-child (e.g. when a list item moves its list marker around).
     // Note that even when disabled, LayoutState is still used to store layoutDelta.
     // These functions may only be accessed by LayoutStateMaintainer or LayoutStateDisabler.
+    KRYS_NODISCARD bool IsVisiblityHiddenIgnored() const noexcept
+    {
+      return _visiblityHiddenIsIgnored;
+    }
+    void SetIsVisiblityHiddenIgnored(bool ignored) noexcept
+    {
+      _visiblityHiddenIsIgnored = ignored;
+    }
+
+    KRYS_NODISCARD bool IsVisiblityAutoIgnored() const noexcept
+    {
+      return _visiblityAutoIsIgnored;
+    }
+    void SetIsVisiblityAutoIgnored(bool ignored) noexcept
+    {
+      _visiblityAutoIsIgnored = ignored;
+    }
+
+    KRYS_NODISCARD bool IsRevealedWhenFoundIgnored() const noexcept
+    {
+      return _revealedWhenFoundIgnored;
+    }
+    void SetIsRevealedWhenFoundIgnored(bool ignored) noexcept
+    {
+      _revealedWhenFoundIgnored = ignored;
+    }
+
     void DisablePaintOffsetCache() noexcept
     {
       _paintOffsetCacheDisableCount++;

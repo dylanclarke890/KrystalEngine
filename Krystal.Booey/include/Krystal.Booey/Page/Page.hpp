@@ -32,8 +32,8 @@ namespace krys::boo
 
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
-  // transitions, intersection and resize observations, content relevancy, paint and event timing, video
-  // frame callbacks, caret animations, validation messages and the scrolling tree update.
+  // transitions, paint and event timing, video frame callbacks, validation messages and the scrolling tree
+  // update.
   enum class RenderingUpdateStep : uint8
   {
     RestoreScrollPositionAndViewState,
@@ -46,6 +46,7 @@ namespace krys::boo
     CaretAnimation,
     ResizeObservations,
     FocusFixup,
+    UpdateContentRelevancy,
     IntersectionObservations,
     SnapshottedScrollOffsets,
     CursorUpdate,
@@ -53,7 +54,7 @@ namespace krys::boo
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 14uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
 
 namespace krys::boo
 {

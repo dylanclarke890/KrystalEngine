@@ -162,8 +162,27 @@ namespace krys::boo
 
   void RenderBlockFlow::RebuildFloatingObjectSetFromIntrudingFloats() noexcept
   {
-    // FIXME: Content skipped by content-visibility (isSkippedContentRootForLayout, the floating objects that
-    // may be stale), once layout skips content.
+    if (LayoutContext().IsSkippedContentRootForLayout(*this))
+    {
+      return;
+    }
+
+    auto mayHaveStaleFloatingObjects = [&]
+    {
+      if (Style().IsSkippedRootOrSkippedContent())
+      {
+        return true;
+      }
+      if (auto wasSkipped = WasSkippedDuringLastLayoutDueToContentVisibility())
+      {
+        return *wasSkipped;
+      }
+      return false;
+    };
+    if (mayHaveStaleFloatingObjects())
+    {
+      _floatingObjects = {};
+    }
 
     HashSet<RenderBox *> oldIntrudingFloatSet;
 
@@ -745,8 +764,14 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Skip the content that content-visibility skips (isSkippedContentRootForLayout), once layout
-    // skips content.
+    // FIXME: We should bail out sooner when subtree layout entry point is _inside_ a skipped subtree.
+    // FIXME: Multi-column flows lay out their skipped content, once there are multi-column flows.
+    if (LayoutContext().IsSkippedContentRootForLayout(*this)
+        || LayoutContext().IsSkippedContentForLayout(*this))
+    {
+      ClearNeedsLayoutForSkippedContent();
+      return;
+    }
 
     {
       auto textBoxTrimmer = TextBoxTrimmer {*this};
@@ -829,8 +854,14 @@ namespace krys::boo
                   // ruby runs).
       }
 
-      // FIXME: Skip the column spanners that content-visibility skips (isSkippedContentForLayout), once
-      // layout skips content.
+      if (LayoutContext().IsSkippedContentForLayout(child))
+      {
+        krys_debug_assert(child.IsColumnSpanner());
+
+        child.ClearNeedsLayout();
+        child.ClearNeedsLayoutForSkippedContent();
+        continue;
+      }
 
       UpdateBlockChildDirtyBitsBeforeLayout(relayoutChildren, child);
 
@@ -2080,7 +2111,10 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Content skipped by content-visibility (isSkippedContentForLayout), once layout skips content.
+    if (LayoutContext().IsSkippedContentForLayout(toBlockFlow))
+    {
+      return;
+    }
 
     if (!toBlockFlow._floatingObjects)
     {
@@ -2845,9 +2879,14 @@ namespace krys::boo
 
     if (floatToRemove)
     {
-      // FIXME: Clear the layout bits of content skipped by content-visibility instead, once layout skips
-      // content.
-      RemoveFloatingBox(*floatToRemove);
+      if (IsSkippedContentRootOrSkippedContent(*this))
+      {
+        ClearNeedsLayout(HadSkippedLayout::Yes);
+      }
+      else
+      {
+        RemoveFloatingBox(*floatToRemove);
+      }
     }
     else if (ChildrenInline())
     {

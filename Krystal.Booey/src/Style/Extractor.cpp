@@ -475,8 +475,10 @@ namespace krys::boo::style
 
       if (forcedLayout == ForcedLayout::Yes)
       {
-        // FIXME: Treat content-visibility hidden and auto as visible, once there's layout.
-        document->UpdateLayoutIgnorePendingStylesheets();
+        document->UpdateLayoutIgnorePendingStylesheets(
+          {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+           dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+          element.get());
       }
     }
 

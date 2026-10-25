@@ -65,6 +65,17 @@ tr:hover td { text-decoration: underline; }
          background: #f7f8fb; }
 .strip div { display: inline-block; width: 90px; height: 90px; margin: 8px 4px; border-radius: 12px; }
 
+/* Observers: the resize card's size, the lazy list's images and the chapters, which skip their contents while
+   they're off screen. */
+.observed .size { margin-top: 16px; font-size: 22px; line-height: 28px; color: #073b4c; }
+.lazy { display: flex; flex-direction: column; gap: 8px; }
+.lazy .list { flex: 1; height: auto; min-height: 0; }
+.lazy .list p { display: flex; align-items: center; gap: 10px; }
+.lazy .list img { width: 48px; height: 32px; border-radius: 4px; background: #e3e7ef; }
+.lazy #lazy-count { margin: 0; color: #5c677d; }
+.chapter { content-visibility: auto; contain-intrinsic-size: auto 320px; margin-bottom: 20px; padding: 24px;
+           border-radius: 16px; background: #ffffff; box-shadow: 0 2px 6px rgba(26, 34, 64, 0.1); }
+
 /* Web fonts: a heading in a face loaded from its TrueType file, and digits from Ahem's WOFF 2 (its glyphs
    are boxes), chosen by unicode-range. */
 @font-face { font-family: Display; src: url(../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf)

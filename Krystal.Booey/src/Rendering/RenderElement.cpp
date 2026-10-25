@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -26,6 +27,7 @@
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderCounter.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGeometryMap.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -1014,6 +1016,36 @@ namespace krys::boo
   void RenderElement::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
   {
     auto *oldStyle = HasInitializedStyle() ? &Style() : nullptr;
+
+    auto updateContentVisibilityDocumentStateIfNeeded = [&]
+    {
+      if (!GetElement())
+      {
+        return;
+      }
+      bool contentVisibilityChanged =
+        oldStyle && oldStyle->GetContentVisibility() != newStyle.GetContentVisibility();
+      if (contentVisibilityChanged)
+      {
+        if (oldStyle->GetContentVisibility() == ContentVisibility::Auto)
+        {
+          dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+        }
+        auto wasSkippedContent = oldStyle->GetContentVisibility() == ContentVisibility::Hidden
+                                   ? dom::IsSkippedContent::Yes
+                                   : dom::IsSkippedContent::No;
+        auto isSkippedContent = newStyle.GetContentVisibility() == ContentVisibility::Hidden
+                                  ? dom::IsSkippedContent::Yes
+                                  : dom::IsSkippedContent::No;
+        dom::ContentVisibilityDocumentState::UpdateAnimations(*GetElement(), wasSkippedContent,
+                                                              isSkippedContent);
+      }
+      if ((contentVisibilityChanged || !oldStyle)
+          && newStyle.GetContentVisibility() == ContentVisibility::Auto)
+      {
+        dom::ContentVisibilityDocumentState::Observe(*ShareRef(*GetElement()));
+      }
+    };
     if (oldStyle)
     {
       if (diff >= style::DifferenceResult::Repaint && LayoutBox())
@@ -1062,7 +1094,9 @@ namespace krys::boo
       SetHasTransformRelatedProperty(false);
     }
 
-    // FIXME: Content visibility observation and outline counting, once there are any.
+    updateContentVisibilityDocumentStateIfNeeded();
+
+    // FIXME: Outline counting, once there's any.
 
     // FIXME: A fixed root background composited on its own isn't slow, once there's compositing; and the
     // setting for fixed backgrounds painting relative to the document, once there are settings for it.
@@ -2549,6 +2583,11 @@ namespace krys::boo
     {
       View().RemoveRendererWithPausedImageAnimations(*this);
     }
+
+    if (Style().GetContentVisibility() == ContentVisibility::Auto && GetElement())
+    {
+      dom::ContentVisibilityDocumentState::Unobserve(*ShareRef(*GetElement()));
+    }
   }
 
 #pragma region Painting
@@ -2620,10 +2659,25 @@ namespace krys::boo
     ClearNeedsLayout();
   }
 
+  void RenderElement::ClearNeedsLayoutForSkippedContent() noexcept
+  {
+    for (auto &descendant : DescendantsOfTypePostOrder<RenderObject>(*this))
+    {
+      descendant.ClearNeedsLayout(HadSkippedLayout::Yes);
+    }
+    ClearNeedsLayout(HadSkippedLayout::Yes);
+  }
+
   void RenderElement::LayoutIfNeeded() noexcept
   {
     if (!NeedsLayout())
     {
+      return;
+    }
+    // FIXME: Replace this with ASSERT after fixing FC layout code not calling into child layout.
+    if (LayoutContext().IsSkippedContentForLayout(*this))
+    {
+      ClearNeedsLayoutForSkippedContent();
       return;
     }
     Layout();

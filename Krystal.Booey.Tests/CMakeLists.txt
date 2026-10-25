@@ -456,6 +456,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/HTMLImageElement.cpp
 		tests/HTML/LazyLoadImageObserver.cpp
+		tests/DOM/ContentVisibilityDocumentState.cpp
 		tests/Rendering/LineClampUpdater.cpp
 		tests/Rendering/Updating/RenderTreeBuilderRuby.cpp
 		tests/Rendering/BreakablePositions.cpp

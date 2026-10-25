@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/Enums/CommandType.hpp"
+#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.Booey/DOM/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -658,12 +660,11 @@ namespace krys::boo::dom
 
     /// @brief Whether the element is relevant to the user, for `content-visibility: auto`.
     /// @see https://drafts.csswg.org/css-contain/#relevant-to-the-user
-    KRYS_NODISCARD bool IsRelevantToUser() const noexcept
-    {
-      // FIXME: Content relevancy (on screen, focused, selected, in the top layer) is never computed, so no
-      // element is relevant to the user.
-      return false;
-    }
+    KRYS_NODISCARD bool IsRelevantToUser() const noexcept;
+
+    /// @brief Why the element is relevant to the user, once its relevancy has been determined.
+    KRYS_NODISCARD Maybe<EnumSet<ContentRelevancy>> GetContentRelevancy() const noexcept;
+    void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept;
 
     /// @brief The base value of a `random()` of the element (or of one of its pseudo-elements) that isn't
     /// shared between elements.

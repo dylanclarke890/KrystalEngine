@@ -2,10 +2,12 @@
 
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
+#include "Krystal.Booey/DOM/Enums/ContentRelevancy.hpp"
 #include "Krystal.Booey/DOM/Internals/RareData/ParentNodeRareData.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -70,6 +72,7 @@ namespace krys::boo::dom
     UniquePtr<ResizeObserverData> _resizeObserverData;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
+    Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
 
   public:
     ElementRareData() noexcept;
@@ -153,6 +156,15 @@ namespace krys::boo::dom
     void ClearLastRememberedLogicalHeight() noexcept
     {
       _lastRememberedLogicalHeight = null;
+    }
+
+    KRYS_NODISCARD const Maybe<EnumSet<ContentRelevancy>> &GetContentRelevancy() const noexcept
+    {
+      return _contentRelevancy;
+    }
+    void SetContentRelevancy(EnumSet<ContentRelevancy> contentRelevancy) noexcept
+    {
+      _contentRelevancy = contentRelevancy;
     }
 
     /// @brief The element's index among its parent's element children, plus one, cached by selector matching

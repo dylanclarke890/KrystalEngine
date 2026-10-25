@@ -511,6 +511,86 @@
     </div>
   </div>
 
+  <div class="row">
+    <!-- Resize observer: the editor observes this card's content box, which grows and shrinks with the window,
+         and shows its size. -->
+    <div class="card observed" id="resize-card" tabindex="0">
+      <h2>Resize observer</h2>
+      <p>Resize the window: the editor's resize observer reports this card's size.</p>
+      <p class="size" id="resize-size">Not observed yet</p>
+    </div>
+    <!-- Lazy images: the list's images load only once they come within a list's height of its view
+         (loading=lazy), as it scrolls; the editor counts their loads. -->
+    <div class="card lazy" tabindex="0" style="flex: 2">
+      <div class="list" id="lazy-list">
+        <p><img loading="lazy" src="images/photo.jpg?item=1" alt=""> Photo 1</p>
+        <p><img loading="lazy" src="images/landscape.png?item=2" alt=""> Landscape 1</p>
+        <p><img loading="lazy" src="images/disc.webp?item=3" alt=""> Disc 1</p>
+        <p><img loading="lazy" src="images/checker.png?item=4" alt=""> Checker 1</p>
+        <p><img loading="lazy" src="images/frame.png?item=5" alt=""> Frame 1</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=6" alt=""> Marker 1</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=7" alt=""> Diamond 1</p>
+        <p><img loading="lazy" src="images/photo.jpg?item=8" alt=""> Photo 2</p>
+        <p><img loading="lazy" src="images/landscape.png?item=9" alt=""> Landscape 2</p>
+        <p><img loading="lazy" src="images/disc.webp?item=10" alt=""> Disc 2</p>
+        <p><img loading="lazy" src="images/checker.png?item=11" alt=""> Checker 2</p>
+        <p><img loading="lazy" src="images/frame.png?item=12" alt=""> Frame 2</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=13" alt=""> Marker 2</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=14" alt=""> Diamond 2</p>
+        <p><img loading="lazy" src="images/photo.jpg?item=15" alt=""> Photo 3</p>
+        <p><img loading="lazy" src="images/landscape.png?item=16" alt=""> Landscape 3</p>
+        <p><img loading="lazy" src="images/disc.webp?item=17" alt=""> Disc 3</p>
+        <p><img loading="lazy" src="images/checker.png?item=18" alt=""> Checker 3</p>
+        <p><img loading="lazy" src="images/frame.png?item=19" alt=""> Frame 3</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=20" alt=""> Marker 3</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=21" alt=""> Diamond 3</p>
+      </div>
+      <p id="lazy-count">No images loaded yet</p>
+    </div>
+  </div>
+
+  <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
+       auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
+       go; the editor's header shows the chapter most in view, which an intersection observer finds. -->
+  <div class="chapters">
+    <section class="chapter" id="chapter-1">
+      <h2>The beans</h2>
+      <p>Every cup starts as the seed of a cherry. Arabica grows high and slow, and tastes of fruit and flowers; robusta grows low and fast, and tastes of chocolate and earth, with twice the caffeine.</p>
+      <p>The cherries are picked by hand when they ripen, then washed, dried in the sun or fermented, and hulled down to the green beans that travel the world.</p>
+      <p>A green bean keeps for a year. Roasted, it keeps for weeks; ground, for minutes.</p>
+    </section>
+    <section class="chapter" id="chapter-2">
+      <h2>Roasting</h2>
+      <p>Roasting turns the green bean brown and sweet. At first it dries and yellows; then it cracks, as the steam inside breaks it open, and its sugars caramelise.</p>
+      <p>A light roast stops soon after the first crack and keeps the bean’s own flavours. A dark roast runs on to the second crack, and tastes more of the roast than of the bean.</p>
+      <p>Roasted beans rest for a few days, giving off the gas they made, before they’re at their best.</p>
+    </section>
+    <section class="chapter" id="chapter-3">
+      <h2>Grinding</h2>
+      <p>Grinding opens the bean to the water. The finer the grind, the faster the water draws the flavour out, so each way of brewing has a grind of its own.</p>
+      <p>Espresso wants a powder as fine as flour; a filter, coarse sand; a press, breadcrumbs.</p>
+      <p>Burr grinders crush the beans evenly between two plates; blade grinders chop them unevenly, so some grounds give too much and others too little.</p>
+    </section>
+    <section class="chapter" id="chapter-4">
+      <h2>Brewing</h2>
+      <p>Brewing is water, time and heat. Water just off the boil draws out the flavour; too hot, it scalds the grounds, and too cool, it leaves them sour.</p>
+      <p>An espresso pushes water through a puck of grounds in under half a minute, at nine times the air’s pressure. A filter lets it drip through in a few minutes; a press steeps it for four.</p>
+      <p>Cold brew steeps overnight in cold water, and comes out smooth and low in acid.</p>
+    </section>
+    <section class="chapter" id="chapter-5">
+      <h2>Milk</h2>
+      <p>Steamed milk is sweeter than cold: heat breaks its sugars down. Steam it to the warmth of a bath, no hotter, or it tastes cooked.</p>
+      <p>Air folded in at the start makes the foam; the rest of the steaming makes it fine. A flat white has a thin layer of it, a latte a little more, and a cappuccino a third of the cup.</p>
+      <p>Oat milk foams nearly as well as cow’s milk, and almond milk hardly at all.</p>
+    </section>
+    <section class="chapter" id="chapter-6">
+      <h2>Tasting</h2>
+      <p>Tasters slurp: the spray carries the coffee across the tongue and up to the nose, where most of the flavour is.</p>
+      <p>They look for sweetness, acidity and body, and for the notes that set a coffee apart: berries, citrus, nuts, caramel or spice.</p>
+      <p>The same beans taste different hot and cooling, so a cupping goes on until the cups are cold.</p>
+    </section>
+  </div>
+
   <!-- A frosted, fixed pill: it composites for its position, so scrolling the page moves its layer rather than
        repainting it, and its backdrop filter blurs what scrolls beneath it. The list and strip cards scroll on
        layers of their own. -->

@@ -56,6 +56,7 @@ namespace krys::boo
   class RenderLayerModelObject;
   class RenderTreeBuilder;
   class RenderView;
+  class LocalFrameViewLayoutContext;
   class RenderGeometryMap;
   class TransformState;
   class TransformationMatrix;
@@ -729,6 +730,7 @@ namespace krys::boo
 
     /// @brief The render tree's root.
     KRYS_NODISCARD RenderView &View() const noexcept;
+    KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() const noexcept;
 
     KRYS_NODISCARD layout::Box *LayoutBox() noexcept;
     KRYS_NODISCARD const layout::Box *LayoutBox() const noexcept;

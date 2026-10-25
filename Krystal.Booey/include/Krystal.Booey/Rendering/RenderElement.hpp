@@ -273,6 +273,9 @@ namespace krys::boo
     /// @brief Lays out this renderer and its descendants that need layout.
     virtual void Layout() noexcept;
     void LayoutIfNeeded() noexcept;
+    /// @brief Clears the layout bits of this renderer and its descendants, whose layout content-visibility
+    /// skips.
+    void ClearNeedsLayoutForSkippedContent() noexcept;
 
     void
       SetChildNeedsLayout(MarkingBehavior markParents = MarkingBehavior::MarkContainingBlockChain) noexcept;

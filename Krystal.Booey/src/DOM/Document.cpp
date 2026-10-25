@@ -22,6 +22,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
+#include "Krystal.Booey/DOM/ContentVisibilityDocumentState.hpp"
 #include "Krystal.Booey/DOM/DocumentFontLoader.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
@@ -97,6 +98,8 @@
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderLayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -115,6 +118,7 @@
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom
@@ -1287,6 +1291,8 @@ namespace krys::boo::dom
       // Clearing the focus while the element is still in the tree also clears its ancestors' focus within.
       RefPtr<Element> focusedElement = std::exchange(_focusedElement, nullptr);
       focusedElement->SetFocus(false);
+
+      ScheduleContentRelevancyUpdate(ContentRelevancy::Focused);
     }
 
     // A removed sequential focus navigation starting point moves to where the node was, so navigation
@@ -1541,6 +1547,57 @@ namespace krys::boo::dom
     return *_lazyLoadImageObserver;
   }
 
+  ContentVisibilityDocumentState &Document::GetContentVisibilityDocumentState() noexcept
+  {
+    if (!_contentVisibilityDocumentState)
+    {
+      _contentVisibilityDocumentState = CreateUnique<ContentVisibilityDocumentState>();
+    }
+    return *_contentVisibilityDocumentState;
+  }
+
+  bool Document::IsObservingContentVisibilityTargets() const noexcept
+  {
+    return _contentVisibilityDocumentState && _contentVisibilityDocumentState->HasObservationTargets();
+  }
+
+  DidUpdateAnyContentRelevancy Document::UpdateRelevancyOfContentVisibilityElements(
+    UpdateLayoutIfContentVisibilityChanged updateLayout) noexcept
+  {
+    if (_contentRelevancyUpdate.IsEmpty() || !IsObservingContentVisibilityTargets())
+    {
+      return DidUpdateAnyContentRelevancy::No;
+    }
+    const DidUpdateAnyContentRelevancy result =
+      _contentVisibilityDocumentState->UpdateRelevancyOfContentVisibilityElements(_contentRelevancyUpdate);
+    if (result == DidUpdateAnyContentRelevancy::Yes
+        && updateLayout == UpdateLayoutIfContentVisibilityChanged::Yes)
+    {
+      (void)UpdateLayoutIgnorePendingStylesheets();
+    }
+    _contentRelevancyUpdate = {};
+    return result;
+  }
+
+  void Document::ScheduleContentRelevancyUpdate(ContentRelevancy contentRelevancy) noexcept
+  {
+    if (!IsObservingContentVisibilityTargets())
+    {
+      return;
+    }
+    _contentRelevancyUpdate.Add(contentRelevancy);
+    ScheduleRenderingUpdate({RenderingUpdateStep::UpdateContentRelevancy});
+  }
+
+  void Document::UpdateContentRelevancyForScrollIfNeeded(const Element &scrollAnchor) noexcept
+  {
+    if (!_contentVisibilityDocumentState)
+    {
+      return;
+    }
+    _contentVisibilityDocumentState->UpdateContentRelevancyForScrollIfNeeded(scrollAnchor);
+  }
+
   void Document::AddResizeObserver(ResizeObserver &observer) noexcept
   {
     if (std::ranges::find(_resizeObservers, &observer, [](auto &weak) { return weak.get(); })
@@ -1642,8 +1699,7 @@ namespace krys::boo::dom
       StyleScope().SetLastSuccessfulPositionOptionIndexMap(krys::move(lastSuccessfulPositionOptionMap));
     }
 
-    // FIXME: The content visibility state's initial determination, once there's content-visibility: auto.
-    if (!HasResizeObservers() && !_resizeObserverForContainIntrinsicSize)
+    if (!HasResizeObservers() && !_resizeObserverForContainIntrinsicSize && !_contentVisibilityDocumentState)
     {
       return;
     }
@@ -1652,6 +1708,14 @@ namespace krys::boo::dom
     while (true)
     {
       page.LayoutIfNeeded();
+      // If we have determined a change because of visibility we need to get up-to-date layout before
+      // reporting any values to resize observers.
+      if (_contentVisibilityDocumentState
+          && _contentVisibilityDocumentState->DetermineInitialVisibleContentVisibility()
+               == HadInitialVisibleContentVisibilityDetermination::Yes)
+      {
+        continue;
+      }
 
       // Start check resize observers;
       if (!resizeObserverDepth
@@ -3204,22 +3268,64 @@ namespace krys::boo::dom
     StyleScope().DidChangeViewportSize();
   }
 
-  Document::UpdateLayoutResult Document::UpdateLayoutIgnorePendingStylesheets() noexcept
+  Document::UpdateLayoutResult
+    Document::UpdateLayoutIgnorePendingStylesheets(EnumSet<LayoutOptions> layoutOptions,
+                                                   const Element *context) noexcept
   {
-    SetForScope ignorePendingStylesheets(_ignorePendingStylesheets, true);
-    // FIXME: This should just invalidate elements with missing styles.
-    if (_hasNodesWithMissingStyle)
-    {
-      ScheduleFullStyleRebuild();
-    }
-
-    // FIXME: Update the relevancy of content-visibility elements, once there's content relevancy.
-
-    return UpdateLayout();
+    layoutOptions.Add(LayoutOptions::IgnorePendingStylesheets);
+    return UpdateLayout(layoutOptions, context);
   }
 
-  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<LayoutOptions> layoutOptions) noexcept
+  namespace
   {
+    KRYS_NODISCARD RenderElement *RootForSkippedLayout(RenderElement &rootCandidate) noexcept
+    {
+      auto skippedSubtreeRoot = [&](auto &skippedRootOrSkippedContent) -> RenderElement *
+      {
+        if (auto *renderBox = DynamicDowncast<RenderBox>(skippedRootOrSkippedContent);
+            renderBox && IsSkippedContentRoot(*renderBox))
+        {
+          return renderBox;
+        }
+        for (auto *ancestor = skippedRootOrSkippedContent.ContainingBlock(); ancestor;
+             ancestor = ancestor->ContainingBlock())
+        {
+          if (IsSkippedContentRoot(*ancestor))
+          {
+            return ancestor;
+          }
+        }
+        return &skippedRootOrSkippedContent.View();
+      };
+      return skippedSubtreeRoot(rootCandidate);
+    }
+  }
+
+  Document::UpdateLayoutResult Document::UpdateLayout(EnumSet<LayoutOptions> layoutOptions,
+                                                      const Element *context) noexcept
+  {
+    bool oldIgnore = _ignorePendingStylesheets;
+    auto restoreIgnorePendingStylesheets = MakeScopeExit([&] { _ignorePendingStylesheets = oldIgnore; });
+
+    if (layoutOptions.Contains(LayoutOptions::IgnorePendingStylesheets))
+    {
+      if (!HaveStylesheetsLoaded())
+      {
+        _ignorePendingStylesheets = true;
+        // FIXME: This should just invalidate elements with missing styles.
+        if (_hasNodesWithMissingStyle)
+        {
+          ScheduleFullStyleRebuild();
+        }
+      }
+      if (UpdateRelevancyOfContentVisibilityElements(UpdateLayoutIfContentVisibilityChanged::No)
+          == DidUpdateAnyContentRelevancy::Yes)
+      {
+        _ignorePendingStylesheets = oldIgnore;
+        return UpdateLayout(layoutOptions, context);
+      }
+    }
+
     RefPtr<LocalFrameView> frameView = ShareRefPtr(View());
     if (frameView && frameView->LayoutContext().IsInRenderTreeLayout())
     {
@@ -3240,12 +3346,106 @@ namespace krys::boo::dom
     if (frameView && GetRenderView())
     {
       auto &layoutContext = frameView->LayoutContext();
-      // FIXME: Force the layout of skipped content (content-visibility) when asked, once there's layout.
-      if (layoutContext.NeedsLayout())
+      auto runForcedLayoutOnSkippedContentIfNeeded = [&]
+      {
+        if (!layoutOptions.ContainsAny({LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+                                        LayoutOptions::TreatContentVisibilityAutoAsVisible,
+                                        LayoutOptions::TreatRevealedWhenFoundAsVisible}))
+        {
+          return false;
+        }
+
+        if (context
+            && (!context->Renderer() || !context->Renderer()->Style().IsSkippedRootOrSkippedContent()))
+        {
+          return false;
+        }
+
+        auto *rootForLayout = RootForSkippedLayout(context ? *context->Renderer() : *GetRenderView());
+        if (!rootForLayout)
+        {
+          krys_debug_assert_msg(false, "a skipped subtree always has a root");
+          return false;
+        }
+
+        auto markRendererDirtyIfNeeded = [&](auto &renderer)
+        {
+          auto everhadLayoutAndWasSkippedDuringLast =
+            renderer.WasSkippedDuringLastLayoutDueToContentVisibility();
+          // Never had layout or was skipped at the last one (or marked dirty since the last layout, but not
+          // self needs layout which is required to "refresh" stale content).
+          if (!everhadLayoutAndWasSkippedDuringLast || *everhadLayoutAndWasSkippedDuringLast
+              || (renderer.NeedsLayout() && !renderer.SelfNeedsLayout()))
+          {
+            renderer.SetNeedsLayout();
+          }
+          return renderer.NeedsLayout();
+        };
+
+        auto isSkippedContentStale = markRendererDirtyIfNeeded(*rootForLayout);
+        if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+        {
+          for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
+          {
+            isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
+          }
+        }
+        else if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible)
+                 || layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible))
+        {
+          for (auto &descendant : DescendantsOfType<RenderObject>(*rootForLayout))
+          {
+            // FIXME: While 'c-v: auto' is used 'hidden' inside 'c-v: hidden' we could entirly skip hidden
+            // subtrees here.
+            auto shouldLayoutSkippedContent =
+              (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible)
+               && descendant.Style().UsedContentVisibility() == ContentVisibility::Auto)
+              || (layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible)
+                  && descendant.Style().AutoRevealsWhenFound());
+
+            if (shouldLayoutSkippedContent)
+            {
+              isSkippedContentStale |= markRendererDirtyIfNeeded(descendant);
+            }
+          }
+        }
+
+        if (!isSkippedContentStale)
+        {
+          return false;
+        }
+
+        auto overrideTypes = [&]
+        {
+          auto types = EnumSet<ContentVisibilityOverrideScope::OverrideType> {};
+
+          if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityHiddenAsVisible))
+          {
+            types.Add(ContentVisibilityOverrideScope::OverrideType::Hidden);
+          }
+          if (layoutOptions.Contains(LayoutOptions::TreatContentVisibilityAutoAsVisible))
+          {
+            types.Add(ContentVisibilityOverrideScope::OverrideType::Auto);
+          }
+          if (layoutOptions.Contains(LayoutOptions::TreatRevealedWhenFoundAsVisible))
+          {
+            types.Add(ContentVisibilityOverrideScope::OverrideType::RevealedWhenFound);
+          }
+          return types;
+        };
+        auto contentVisibilityOverrideScope = ContentVisibilityOverrideScope {layoutContext, overrideTypes()};
+        layoutContext.Layout();
+        return true;
+      };
+
+      auto didRunLayout = runForcedLayoutOnSkippedContentIfNeeded();
+      if (!didRunLayout && layoutContext.NeedsLayout())
       {
         layoutContext.Layout();
-        result = UpdateLayoutResult::ChangesDone;
+        didRunLayout = true;
       }
+
+      result = didRunLayout ? UpdateLayoutResult::ChangesDone : result;
 
       if (layoutOptions.Contains(LayoutOptions::UpdateCompositingLayers)
           && layoutContext.UpdateCompositingLayersAfterLayoutIfNeeded())
@@ -3610,7 +3810,7 @@ namespace krys::boo::dom
       ScheduleFullStyleRebuild();
     }
 
-    // FIXME: Update the relevancy of content-visibility elements, once there's content relevancy.
+    (void)UpdateRelevancyOfContentVisibilityElements();
 
     return UpdateStyleIfNeeded();
   }

@@ -215,7 +215,10 @@ namespace krys::boo::html
   {
     if (IsConnected())
     {
-      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+        {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+         dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+        this);
     }
 
     if (!Renderer())
@@ -251,7 +254,10 @@ namespace krys::boo::html
   {
     if (IsConnected())
     {
-      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+        {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+         dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+        this);
     }
 
     if (!Renderer())

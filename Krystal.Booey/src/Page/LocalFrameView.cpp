@@ -2651,8 +2651,10 @@ namespace krys::boo
 
     CancelScheduledScrolls();
 
-    // FIXME: Making a content-visibility: auto ancestor relevant (updateContentRelevancyForScrollIfNeeded),
-    // once content-visibility is.
+    if (auto *element = DynamicDowncast<dom::Element>(anchorNode))
+    {
+      Frame().Document()->UpdateContentRelevancyForScrollIfNeeded(*element);
+    }
 
     // We need to update the layout before scrolling, otherwise we could really mess things up if an anchor
     // scroll comes at a bad moment.

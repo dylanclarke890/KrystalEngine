@@ -1304,8 +1304,21 @@ namespace krys::boo
     {
       return false;
     }
-    // FIXME: Content skipped by content-visibility (wasSkippedDuringLastLayoutDueToContentVisibility,
-    // isSkippedContentRootForLayout), once layout skips content.
+    if (auto wasSkippedDuringLastLayout = WasSkippedDuringLastLayoutDueToContentVisibility();
+        wasSkippedDuringLastLayout && *wasSkippedDuringLastLayout)
+    {
+      return false;
+    }
+    if (LayoutContext().IsSkippedContentRootForLayout(*this)
+        && (OutOfFlowChildNeedsLayout() || CanContainFixedPositionObjects()))
+    {
+      return false;
+    }
+    if (IsSkippedContentRoot(*this) && FirstChild()
+        && FirstChild()->WasSkippedDuringLastLayoutDueToContentVisibility())
+    {
+      return false;
+    }
     return OutOfFlowChildNeedsLayout() || NeedsSimplifiedNormalFlowLayout();
   }
 
@@ -1412,8 +1425,13 @@ namespace krys::boo
   {
     krys_debug_assert(outOfFlowBox.IsOutOfFlowPositioned());
 
-    // FIXME: Content skipped by content-visibility (isSkippedContentRootForLayout), once layout skips
-    // content, and the box's fragment range, once there are fragmented flows.
+    if (LayoutContext().IsSkippedContentRootForLayout(*this))
+    {
+      outOfFlowBox.ClearNeedsLayoutForSkippedContent();
+      return;
+    }
+
+    // FIXME: The box's fragment range, once there are fragmented flows.
 
     // A fixed position element with an absolute positioned ancestor has no way of knowing if the latter has
     // changed position. So if this is a fixed position element, mark it for layout if it has an abspos

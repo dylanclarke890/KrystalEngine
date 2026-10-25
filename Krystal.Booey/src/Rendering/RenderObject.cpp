@@ -1071,6 +1071,11 @@ namespace krys::boo
     return *GetDocument().GetRenderView();
   }
 
+  LocalFrameViewLayoutContext &RenderObject::LayoutContext() const noexcept
+  {
+    return View().FrameView().LayoutContext();
+  }
+
   RenderElement *RenderObject::FirstNonAnonymousAncestor() const noexcept
   {
     auto *ancestor = Parent();
