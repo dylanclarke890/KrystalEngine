@@ -3,12 +3,14 @@
 #include "Krystal.Booey/Animation/AnimationEffect.hpp"
 #include "Krystal.Booey/Animation/AnimationPromise.hpp"
 #include "Krystal.Booey/Animation/AnimationTimeline.hpp"
+#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTime.hpp"
 #include "Krystal.Booey/Animation/WebAnimationTypes.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
@@ -34,8 +36,7 @@ namespace krys::boo
 
   /// @brief An animation: it plays an animation effect, and gives it its time from a timeline.
   /// @see https://drafts.csswg.org/web-animations-1/#animations
-  // FIXME: The animation range (`rangeStart`, `rangeEnd`), once there are scroll timelines, and suspending
-  // animations with the document (upstream's `ActiveDOMObject`).
+  // FIXME: Suspending animations with the document (upstream's `ActiveDOMObject`).
   class WebAnimation : public dom::EventTarget
   {
   public:
@@ -97,6 +98,8 @@ namespace krys::boo
     Maybe<WebAnimationTime> _pendingStartTime;
     Maybe<WebAnimationTime> _holdTime;
     Maybe<double> _pendingPlaybackRate;
+    RefPtr<css::Value> _specifiedRangeStart;
+    RefPtr<css::Value> _specifiedRangeEnd;
     double _playbackRate {1};
     dom::DOMString _id;
     int32 _suspendCount {0};
@@ -111,6 +114,10 @@ namespace krys::boo
     ReplaceState _replaceState {ReplaceState::Active};
     uint64 _globalPosition {0};
     WeakPtr<dom::Document> _document;
+    style::SingleAnimationRange _timelineRange {
+      .Start = {css::keywords::Normal {}},
+      .End = {css::keywords::Normal {}},
+    };
 
   protected:
     explicit WebAnimation(dom::Document &document) noexcept;
@@ -295,6 +302,24 @@ namespace krys::boo
     /// @see https://drafts.csswg.org/web-animations-2/#the-overall-progress-of-an-animation
     KRYS_NODISCARD Maybe<double> OverallProgress() const noexcept;
 
+    /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangestart
+    KRYS_NODISCARD TimelineRangeValue BindingsRangeStart() const noexcept
+    {
+      return _timelineRange.Start.ToTimelineRangeValue();
+    }
+    /// @see https://drafts.csswg.org/web-animations-2/#dom-animation-rangeend
+    KRYS_NODISCARD TimelineRangeValue BindingsRangeEnd() const noexcept
+    {
+      return _timelineRange.End.ToTimelineRangeValue();
+    }
+    virtual void SetBindingsRangeStart(TimelineRangeValue &&rangeStartValue) noexcept;
+    virtual void SetBindingsRangeEnd(TimelineRangeValue &&rangeEndValue) noexcept;
+    void SetRangeStart(style::SingleAnimationRangeStart &&rangeStart) noexcept;
+    void SetRangeEnd(style::SingleAnimationRangeEnd &&rangeEnd) noexcept;
+    /// @brief The animation's attachment range, with the edges set from C++ computed for its target.
+    /// @see https://drafts.csswg.org/web-animations-2/#animation-attachment-range
+    KRYS_NODISCARD const style::SingleAnimationRange &Range() noexcept;
+
     KRYS_NODISCARD Maybe<WebAnimationTime> HoldTime() const noexcept
     {
       return _holdTime;
@@ -328,6 +353,8 @@ namespace krys::boo
     }
     void UpdateRelevance() noexcept;
     void EffectTimingDidChange() noexcept;
+    /// @brief The scroll metrics of the source of the animation's progress-based timeline changed.
+    void ProgressBasedTimelineSourceDidChangeMetrics() noexcept;
 
     /// @brief Stops changes to the animation from invalidating its effect's target's style, while it's being
     /// created during style resolution.
@@ -418,6 +445,8 @@ namespace krys::boo
     void ApplyPendingPlaybackRate() noexcept;
     /// @see https://drafts.csswg.org/web-animations-2/#ready
     void MaybeMarkAsReady() noexcept;
+    /// @see https://drafts.csswg.org/web-animations-2/#auto-aligning-start-time
+    void AutoAlignStartTime() noexcept;
     /// @see https://drafts.csswg.org/web-animations-2/#validating-a-css-numberish-time
     KRYS_NODISCARD bool IsTimeValid(const Maybe<WebAnimationTime> &time) const noexcept;
   };

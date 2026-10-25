@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="editor.css">
 </head>
 <body>
+  <!-- Reading progress: a bar across the top of the window that fills as the page scrolls, by a scroll timeline
+       on the page's scroller (animation-timeline: scroll(root)). -->
+  <div class="reading-progress" id="reading-progress"></div>
+
   <!-- The page's header: its menu button opens an auto popover (popovertarget), anchored below the button
        (its implicit anchor is its invoker) and flipped above it when there's no room below. "Go to" opens a
        nested menu to its right, which keeps the first open; Escape or a click outside closes both. Both fade
@@ -547,6 +551,34 @@
       </div>
       <p id="lazy-count">No images loaded yet</p>
     </div>
+  </div>
+
+  <div class="row">
+    <!-- Web animations: the editor animates the ball from C++ (Element::Animate), and its buttons play, pause
+         and reverse it; the range seeks it, and the readout shows its time on each animation frame. -->
+    <div class="card animated" id="animation-card" tabindex="0" style="flex: 2">
+      <h2>Web animations</h2>
+      <div class="track"><div class="ball" id="anim-ball"></div></div>
+      <p class="controls">
+        <button id="anim-play">Play</button>
+        <button id="anim-pause">Pause</button>
+        <button id="anim-reverse">Reverse</button>
+        <input type="range" id="anim-seek" min="0" max="100" step="any" value="0" aria-label="Seek">
+      </p>
+      <p class="time" id="anim-time">Not animated yet</p>
+    </div>
+    <!-- Scroll-driven animations: the cards below fade and rise in as they scroll into view, each on a view
+         timeline of its own (animation-timeline: view()) over its entry into the scrollport. -->
+    <div class="card" tabindex="0">
+      <h2>Scroll-driven</h2>
+      <p>Scroll down: the bar at the top fills as you read, and the cards below come in as they enter the view.</p>
+    </div>
+  </div>
+
+  <div class="row reveals">
+    <div class="card reveal" id="reveal-1"><h2>Espresso</h2><p>Nine bars, twenty-five seconds.</p></div>
+    <div class="card reveal" id="reveal-2"><h2>Filter</h2><p>A slow drip through paper.</p></div>
+    <div class="card reveal" id="reveal-3"><h2>Cold brew</h2><p>Overnight, in cold water.</p></div>
   </div>
 
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:

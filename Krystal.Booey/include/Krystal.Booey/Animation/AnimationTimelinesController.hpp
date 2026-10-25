@@ -15,12 +15,13 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class AnimationTimeline;
+  class ScrollTimeline;
   class WebAnimation;
 
   /// @brief A document's timelines: it caches the current time for an animation frame, gives pending
   /// animations their start time, and runs the "update animations and send events" procedure.
-  // FIXME: Frame rate alignment, accelerated effect stacks, scroll timelines and hidden page suspension, once
-  // there are any.
+  // FIXME: Accelerated effect stacks and hidden page suspension, once there are any. (No frame rate
+  // alignment: animation frame rates are non-standard.)
   class AnimationTimelinesController final
   {
     KRYS_NON_COPY_MOVABLE(AnimationTimelinesController);
@@ -29,6 +30,7 @@ namespace krys::boo
     Timer _cachedCurrentTimeClearanceTimer;
     List<WeakPtr<AnimationTimeline>> _timelines;
     List<WeakPtr<WebAnimation>> _pendingAnimations;
+    List<Ref<ScrollTimeline>> _updatedScrollTimelines;
     dom::Document &_document;
     Maybe<Seconds> _cachedCurrentTime;
     /// @brief The last time cached, which the clearance timer doesn't clear: the pending animations' start
@@ -50,6 +52,7 @@ namespace krys::boo
 
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents(Seconds timestamp) noexcept;
+    void RunPostRenderingUpdateTasks() noexcept;
 
     void AddPendingAnimation(WebAnimation &animation) noexcept;
 
@@ -69,5 +72,6 @@ namespace krys::boo
     void ClearCachedCurrentTime() noexcept;
     void ProcessPendingAnimations() noexcept;
     void CancelPendingAnimationsProcessingTask() noexcept;
+    KRYS_NODISCARD bool IsPendingTimelineAttachment(const WebAnimation &animation) const noexcept;
   };
 }

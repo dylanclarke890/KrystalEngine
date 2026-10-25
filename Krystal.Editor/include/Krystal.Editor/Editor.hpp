@@ -26,6 +26,7 @@
 #include "Krystal.Editor/Application.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
+#include "Krystal.Editor/PageAnimations.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
@@ -77,6 +78,8 @@ namespace krys
     boo::dom::EventListenerHandle _router;
     /// @brief The page's observers, made once it has loaded: the header shows the chapter most in view.
     UniquePtr<editor::PageObservers> _observers;
+    /// @brief The page's animation from C++, made once it has loaded.
+    UniquePtr<editor::PageAnimations> _animations;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -118,6 +121,7 @@ namespace krys
     void OnShutdown() noexcept override
     {
       _observers = nullptr;
+      _animations = nullptr;
       _pageView = nullptr;
       _booeyFonts = {};
       _renderer = nullptr;
@@ -416,10 +420,12 @@ namespace krys
             event.FromBackForwardCache ? u8", committed from the back/forward cache" : u8", committed";
           AttachPage();
           _observers = event.FromBackForwardCache ? CreateUnique<editor::PageObservers>(document) : nullptr;
+          _animations = event.FromBackForwardCache ? CreateUnique<editor::PageAnimations>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
           _observers = CreateUnique<editor::PageObservers>(document);
+          _animations = CreateUnique<editor::PageAnimations>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;

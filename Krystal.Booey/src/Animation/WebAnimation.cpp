@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/StyleOriginatedAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Constants/Attributes.hpp"
@@ -944,12 +945,18 @@ namespace krys::boo
 
   void WebAnimation::EnqueueAnimationEvent(Ref<AnimationEventBase> &&event) noexcept
   {
-    // FIXME: The document timeline of a scroll timeline's source, once there are scroll timelines.
     auto documentTimeline = [&]() -> DocumentTimeline *
     {
       if (auto *timeline = DynamicDowncast<DocumentTimeline>(_timeline.get()))
       {
         return timeline;
+      }
+      if (RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get())))
+      {
+        if (RefPtr source = scrollTimeline->Source())
+        {
+          return source->NodeDocument().ExistingTimeline();
+        }
       }
       if (RefPtr keyframeEffect = ShareRefPtr(GetKeyframeEffect()))
       {
@@ -1685,6 +1692,68 @@ namespace krys::boo
     InvalidateEffect();
   }
 
+  void WebAnimation::AutoAlignStartTime() noexcept
+  {
+    // https://drafts.csswg.org/web-animations-2/#auto-aligning-start-time
+
+    // When attached to a non-monotonic timeline, the start time of the animation may be layout dependent. In
+    // this case, we defer calculation of the start time until the timeline has been updated post layout. When
+    // updating timeline current time, the start time of any attached animation is conditionally updated. The
+    // procedure for calculating an auto-aligned start time is as follows:
+
+    // 1. If the auto-align start time flag is false, abort this procedure.
+    if (!_autoAlignStartTime)
+    {
+      return;
+    }
+
+    // 2. If the timeline is inactive, abort this procedure.
+    if (!_timeline || !_timeline->CurrentTime())
+    {
+      return;
+    }
+
+    auto playState = GetPlayState();
+
+    // 3. If play state is idle, abort this procedure.
+    if (playState == PlayState::Idle)
+    {
+      return;
+    }
+
+    // 4. If play state is paused, and hold time is resolved, abort this procedure.
+    if (playState == PlayState::Paused && _holdTime)
+    {
+      return;
+    }
+
+    RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(_timeline.get()));
+    krys_debug_assert(scrollTimeline);
+    auto interval = scrollTimeline->IntervalForAttachmentRange(Range());
+
+    // 5. Let start offset be the resolved timeline time corresponding to the start of the animation
+    // attachment range. In the case of view timelines, it requires a calculation based on the proportion of
+    // the cover range.
+    auto startOffset = interval.first;
+
+    // 6. Let end offset be the resolved timeline time corresponding to the end of the animation attachment
+    // range. In the case of view timelines, it requires a calculation based on the proportion of the cover
+    // range.
+    auto endOffset = interval.second;
+
+    // 7. Set start time to start offset if effective playback rate ≥ 0, and end offset otherwise.
+    auto previousStartTime = std::exchange(
+      _startTime, Maybe<WebAnimationTime> {EffectivePlaybackRate() >= 0 ? startOffset : endOffset});
+
+    // 8. Clear hold time.
+    _holdTime = null;
+
+    if (previousStartTime != _startTime)
+    {
+      ProgressBasedTimelineSourceDidChangeMetrics();
+    }
+  }
+
   bool WebAnimation::NeedsTick() const noexcept
   {
     return Pending() || GetPlayState() == PlayState::Running || _hasScheduledEventsDuringTick;
@@ -1694,7 +1763,13 @@ namespace krys::boo
   {
     auto wasPending = Pending();
 
-    // FIXME: Auto-aligning the start time with progress-based timelines, once there are scroll timelines.
+    // https://drafts.csswg.org/scroll-animations-1/#event-loop
+    // When updating timeline current time, the start time of any attached animation is conditionally updated.
+    // For each attached animation, run the procedure for calculating an auto-aligned start time.
+    if (_timeline && _timeline->IsProgressBased())
+    {
+      AutoAlignStartTime();
+    }
 
     MaybeMarkAsReady();
 
@@ -2238,5 +2313,108 @@ namespace krys::boo
 
     // Otherwise, overallProgress = min(max(current time / animation's associated effect end, 0), 1)
     return std::min(std::max(*currentTime / endTime, 0.0), 1.0);
+  }
+
+  void WebAnimation::SetBindingsRangeStart(TimelineRangeValue &&rangeStartValue) noexcept
+  {
+    RefPtr keyframeEffect = ShareRefPtr(GetKeyframeEffect());
+    if (!keyframeEffect)
+    {
+      return;
+    }
+
+    auto rangeStart = ConvertToCSSValue(krys::move(rangeStartValue), ShareRefPtr(keyframeEffect->Target()),
+                                        style::SingleAnimationRangeType::Start);
+    if (_specifiedRangeStart == rangeStart)
+    {
+      return;
+    }
+
+    _specifiedRangeStart = krys::move(rangeStart);
+    if (RefPtr effect = _effect)
+    {
+      effect->AnimationRangeDidChange();
+    }
+  }
+
+  void WebAnimation::SetBindingsRangeEnd(TimelineRangeValue &&rangeEndValue) noexcept
+  {
+    RefPtr keyframeEffect = ShareRefPtr(GetKeyframeEffect());
+    if (!keyframeEffect)
+    {
+      return;
+    }
+
+    auto rangeEnd = ConvertToCSSValue(krys::move(rangeEndValue), ShareRefPtr(keyframeEffect->Target()),
+                                      style::SingleAnimationRangeType::End);
+    if (_specifiedRangeEnd == rangeEnd)
+    {
+      return;
+    }
+
+    _specifiedRangeEnd = krys::move(rangeEnd);
+    if (RefPtr effect = _effect)
+    {
+      effect->AnimationRangeDidChange();
+    }
+  }
+
+  void WebAnimation::SetRangeStart(style::SingleAnimationRangeStart &&rangeStart) noexcept
+  {
+    if (_timelineRange.Start == rangeStart)
+    {
+      return;
+    }
+
+    _timelineRange.Start = krys::move(rangeStart);
+    if (RefPtr effect = _effect)
+    {
+      effect->AnimationRangeDidChange();
+    }
+  }
+
+  void WebAnimation::SetRangeEnd(style::SingleAnimationRangeEnd &&rangeEnd) noexcept
+  {
+    if (_timelineRange.End == rangeEnd)
+    {
+      return;
+    }
+
+    _timelineRange.End = krys::move(rangeEnd);
+    if (RefPtr effect = _effect)
+    {
+      effect->AnimationRangeDidChange();
+    }
+  }
+
+  const style::SingleAnimationRange &WebAnimation::Range() noexcept
+  {
+    if (RefPtr keyframeEffect = ShareRefPtr(GetKeyframeEffect()))
+    {
+      RefPtr target = ShareRefPtr(keyframeEffect->Target());
+      if (_specifiedRangeStart)
+      {
+        _timelineRange.Start = style::DeprecatedConvertCSSValueToStyle<style::SingleAnimationRangeStart>(
+                                 target, *_specifiedRangeStart)
+                                 .value_or(style::SingleAnimationRangeStart {css::keywords::Normal {}});
+      }
+      if (_specifiedRangeEnd)
+      {
+        _timelineRange.End =
+          style::DeprecatedConvertCSSValueToStyle<style::SingleAnimationRangeEnd>(target, *_specifiedRangeEnd)
+            .value_or(style::SingleAnimationRangeEnd {css::keywords::Normal {}});
+      }
+    }
+
+    return _timelineRange;
+  }
+
+  void WebAnimation::ProgressBasedTimelineSourceDidChangeMetrics() noexcept
+  {
+    krys_debug_assert(_timeline && _timeline->IsProgressBased());
+    if (RefPtr effect = _effect)
+    {
+      effect->AnimationProgressBasedTimelineSourceDidChangeMetrics(Range());
+    }
   }
 }

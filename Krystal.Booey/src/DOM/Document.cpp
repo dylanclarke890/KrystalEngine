@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/Core/PlatformLocale.hpp"
@@ -3229,6 +3230,15 @@ namespace krys::boo::dom
     return *_timelinesController;
   }
 
+  StyleOriginatedTimelinesController &Document::EnsureStyleOriginatedTimelinesController() noexcept
+  {
+    if (!_styleOriginatedTimelinesController)
+    {
+      _styleOriginatedTimelinesController = CreateUnique<StyleOriginatedTimelinesController>();
+    }
+    return *_styleOriginatedTimelinesController;
+  }
+
   void Document::KeyframesRuleDidChange(const css::CSSOMString &name) noexcept
   {
     for (auto *animation : WebAnimation::Instances())
@@ -3268,6 +3278,14 @@ namespace krys::boo::dom
     if (auto *timelinesController = TimelinesController())
     {
       timelinesController->UpdateAnimationsAndSendEvents(Seconds {page->LastRenderingUpdateTimestamp()});
+    }
+  }
+
+  void Document::RunPostRenderingUpdateAnimationTasks() noexcept
+  {
+    if (auto *timelinesController = TimelinesController())
+    {
+      timelinesController->RunPostRenderingUpdateTasks();
     }
   }
 
@@ -3783,6 +3801,11 @@ namespace krys::boo::dom
           frameView->LayoutContext().ScheduleLayout();
         }
       }
+    }
+
+    if (auto *styleOriginatedTimelinesController = GetStyleOriginatedTimelinesController())
+    {
+      styleOriginatedTimelinesController->DocumentDidResolveStyle();
     }
   }
 

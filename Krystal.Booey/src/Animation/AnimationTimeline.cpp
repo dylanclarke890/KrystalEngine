@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
 namespace krys::boo
 {
@@ -106,5 +107,13 @@ namespace krys::boo
   {
     auto *controller = Controller();
     return controller && controller->AnimationsAreSuspended();
+  }
+
+  style::SingleAnimationRange AnimationTimeline::DefaultRange() const noexcept
+  {
+    return {
+      .Start = {css::keywords::Normal {}},
+      .End = {css::keywords::Normal {}},
+    };
   }
 }

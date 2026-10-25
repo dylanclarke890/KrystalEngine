@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Editor/BeanRating.hpp"
+#include "Krystal.Editor/PageAnimations.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
@@ -689,6 +690,116 @@ namespace krys::ui::tests
       CHECK(byId(u8"chapter-6")->IsRelevantToUser());
       CHECK_FALSE(byId(u8"chapter-1")->IsRelevantToUser());
       CHECK(byId(u8"chapter-1")->OffsetHeight() == height);
+    }
+  }
+
+  TEST_CASE("View: the editor page's animations", "[UI]")
+  {
+    using namespace std::chrono_literals;
+    boo::MemoryCache::Singleton().EvictResources();
+    View view({1'200, 300});
+    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes it once the page has loaded.
+    editor::PageAnimations animations(document);
+    auto byId = [&](utf8_stringview id)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      return element;
+    };
+    auto textOf = [&](utf8_stringview id)
+    {
+      auto text = byId(id)->TextContent().value_or(boo::dom::DOMString {});
+      return std::string(text.begin(), text.end());
+    };
+    auto time = boo::html::EventLoop::Current().Now();
+    auto run = [&](MonotonicTime::duration delta)
+    {
+      constexpr auto frame =
+        std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::microseconds {16'667});
+      for (auto end = time + delta; time < end;)
+      {
+        time += frame;
+        (void)view.Update(time);
+      }
+    };
+    run(50ms);
+
+    SECTION("the ball's animation from C++, with its controls and readout")
+    {
+      auto *animation = animations.Animation();
+      REQUIRE(animation);
+      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Paused);
+      CHECK(textOf(u8"anim-time") == "0.00 s of 2 s, paused");
+
+      // Seeking halfway puts the ball halfway along its track (ease-in-out is halfway at half time).
+      animations.Seek(0.5);
+      run(50ms);
+      auto ball = byId(u8"anim-ball");
+      auto track = byId(u8"anim-ball")->ParentElement();
+      REQUIRE(track);
+      CHECK(ball->OffsetLeft() - track->OffsetLeft()
+            == Catch::Approx((track->OffsetWidth() - 40) / 2.0).margin(0.5));
+      CHECK(textOf(u8"anim-time") == "1.00 s of 2 s, paused");
+      CHECK(Downcast<boo::html::HTMLInputElement>(*byId(u8"anim-seek")).ValueAsNumber() == Catch::Approx(50));
+
+      // The buttons play, reverse and pause it; the readout follows on the animation frames.
+      Downcast<boo::html::HTMLElement>(*byId(u8"anim-play")).Click();
+      run(200ms);
+      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Running);
+      CHECK(textOf(u8"anim-time").ends_with(", running"));
+      auto timeBeforeReversing = animation->CurrentTime()->Time()->count();
+      CHECK(timeBeforeReversing > 1);
+
+      Downcast<boo::html::HTMLElement>(*byId(u8"anim-reverse")).Click();
+      run(200ms);
+      CHECK(animation->PlaybackRate() == -1);
+      CHECK(animation->CurrentTime()->Time()->count() < timeBeforeReversing);
+
+      Downcast<boo::html::HTMLElement>(*byId(u8"anim-pause")).Click();
+      run(50ms);
+      CHECK(animation->GetPlayState() == boo::WebAnimation::PlayState::Paused);
+      CHECK(textOf(u8"anim-time").ends_with(", paused"));
+    }
+
+    SECTION("the reading bar and the cards follow the page's scroll")
+    {
+      auto progress = [&]
+      {
+        auto barAnimations = byId(u8"reading-progress")->GetAnimations();
+        REQUIRE(barAnimations.size() == 1);
+        auto currentTime = barAnimations[0]->CurrentTime();
+        REQUIRE(currentTime);
+        REQUIRE(currentTime->Percentage());
+        return *currentTime->Percentage();
+      };
+      auto opacityOf = [&](utf8_stringview id)
+      {
+        auto *renderer = byId(id)->Renderer();
+        REQUIRE(renderer);
+        return renderer->Style().GetOpacity().Value.Value;
+      };
+
+      // At the top of the page, the bar is empty and the cards below the view haven't come in.
+      CHECK(progress() == Catch::Approx(0));
+      CHECK(opacityOf(u8"reveal-1") == 0);
+
+      // Scrolled to, a card has come in.
+      byId(u8"reveal-1")->ScrollIntoView(true);
+      run(50ms);
+      CHECK(progress() > 0);
+      CHECK(progress() < 100);
+      CHECK(opacityOf(u8"reveal-1") == 1);
+
+      // At the bottom of the page, the bar is full.
+      view.Document().ScrollingElement()->SetScrollTop(1'000'000);
+      run(50ms);
+      CHECK(progress() == Catch::Approx(100));
     }
   }
 

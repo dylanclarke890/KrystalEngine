@@ -2,6 +2,9 @@
 #include "Krystal.Booey/Animation/CSSAnimationEvent.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Animation/ScrollTimeline.hpp"
+#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
+#include "Krystal.Booey/Animation/ViewTimeline.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -128,8 +131,14 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The animation range (`animation-range-start`, `animation-range-end`), once there are scroll and
-    // view timelines.
+    if (!_overriddenProperties.Contains(Property::RangeStart))
+    {
+      SetRangeStart(style::SingleAnimationRangeStart {animation.GetRange().Start});
+    }
+    if (!_overriddenProperties.Contains(Property::RangeEnd))
+    {
+      SetRangeEnd(style::SingleAnimationRangeEnd {animation.GetRange().End});
+    }
 
     EffectTimingDidChange();
 
@@ -178,17 +187,35 @@ namespace krys::boo
     krys_debug_assert(OwningElement());
     Ref document = ShareRef(OwningElement()->Element.NodeDocument());
 
-    const auto &timeline = _backingStyleAnimation.GetTimeline();
-    if (timeline.IsAuto())
+    _backingStyleAnimation.GetTimeline().SwitchOn(
+      [&](const css::keywords::Auto &)
+      { SetTimeline(ShareRefPtr<AnimationTimeline>(document->ExistingTimeline())); },
+      [&](const css::keywords::None &) { SetTimeline(nullptr); },
+      [&](const css::CustomIdentifier &)
+      {
+        auto &styleOriginatedTimelinesController = document->EnsureStyleOriginatedTimelinesController();
+        styleOriginatedTimelinesController.AttachAnimation(*this);
+      },
+      [&](const style::ScrollFunction &scrollFunction)
+      {
+        auto scrollTimeline = ScrollTimeline::Create(scrollFunction->Scroller, scrollFunction->Axis);
+        scrollTimeline->SetSource(*OwningElement());
+        SetTimeline(RefPtr<AnimationTimeline> {krys::move(scrollTimeline)});
+      },
+      [&](const style::ViewFunction &viewFunction)
+      {
+        auto viewTimeline =
+          ViewTimeline::Create(css::CSSOMStringAtom::Null(), viewFunction->Axis, viewFunction->Insets);
+        viewTimeline->SetSubject(*OwningElement());
+        SetTimeline(RefPtr<AnimationTimeline> {krys::move(viewTimeline)});
+      });
+
+    // If we're not dealing with a named timeline, we should make sure we have no pending attachment operation
+    // for this timeline name.
+    if (!_backingStyleAnimation.GetTimeline().IsCustomIdentifier())
     {
-      SetTimeline(ShareRefPtr<AnimationTimeline>(document->ExistingTimeline()));
-    }
-    else
-    {
-      // FIXME: Named timelines and the scroll() and view() functions, once there are scroll and view
-      // timelines; until then, such an animation has no timeline, as one naming a timeline that doesn't
-      // exist.
-      SetTimeline(nullptr);
+      auto &styleOriginatedTimelinesController = document->EnsureStyleOriginatedTimelinesController();
+      styleOriginatedTimelinesController.RemovePendingOperationsForCSSAnimation(*this);
     }
 
     UnsuspendEffectInvalidation();
@@ -204,6 +231,18 @@ namespace krys::boo
   {
     _overriddenProperties.Add(Property::Timeline);
     StyleOriginatedAnimation::SetBindingsTimeline(krys::move(timeline));
+  }
+
+  void CSSAnimation::SetBindingsRangeStart(TimelineRangeValue &&range) noexcept
+  {
+    _overriddenProperties.Add(Property::RangeStart);
+    StyleOriginatedAnimation::SetBindingsRangeStart(krys::move(range));
+  }
+
+  void CSSAnimation::SetBindingsRangeEnd(TimelineRangeValue &&range) noexcept
+  {
+    _overriddenProperties.Add(Property::RangeEnd);
+    StyleOriginatedAnimation::SetBindingsRangeEnd(krys::move(range));
   }
 
   dom::ExceptionOr<void> CSSAnimation::BindingsPlay() noexcept

@@ -198,13 +198,13 @@ namespace krys::boo
 
   namespace
   {
-    void ClearBackingSharingLayerProviders(ListHashSet<RenderLayer *> &sharingLayers,
+    void ClearBackingSharingLayerProviders(List<WeakPtr<RenderLayer>> &sharingLayers,
                                            const RenderLayer &providerLayer,
                                            EnumSet<UpdateBackingSharingFlags> flags) noexcept
     {
-      for (auto *layer : sharingLayers)
+      for (auto &layer : sharingLayers)
       {
-        if (layer->BackingProviderLayer() == &providerLayer)
+        if (layer && layer->BackingProviderLayer() == &providerLayer)
         {
           layer->SetBackingProviderLayer(nullptr, flags);
         }
@@ -214,13 +214,15 @@ namespace krys::boo
 
   void RenderLayerBacking::SetBackingSharingLayers(ListHashSet<RenderLayer *> &&sharingLayers) noexcept
   {
-    bool sharingLayersChanged = _backingSharingLayers.size() != sharingLayers.size();
+    auto liveSharingLayers =
+      std::ranges::count_if(_backingSharingLayers, [](const auto &layer) { return !!layer; });
+    bool sharingLayersChanged = static_cast<size_t>(liveSharingLayers) != sharingLayers.size();
     ClearBackingSharingLayerProviders(_backingSharingLayers, _owningLayer,
                                       {UpdateBackingSharingFlags::DuringCompositingUpdate});
 
-    for (auto *oldSharingLayer : _backingSharingLayers)
+    for (auto &oldSharingLayer : _backingSharingLayers)
     {
-      if (!sharingLayers.contains(oldSharingLayer))
+      if (oldSharingLayer && !sharingLayers.contains(oldSharingLayer.get()))
       {
         sharingLayersChanged = true;
       }
@@ -234,9 +236,13 @@ namespace krys::boo
       }
     }
 
-    _backingSharingLayers = krys::move(sharingLayers);
+    _backingSharingLayers.clear();
+    for (auto *layer : sharingLayers)
+    {
+      _backingSharingLayers.push_back(CreateWeakPtr(layer));
+    }
 
-    for (auto *layer : _backingSharingLayers)
+    for (auto &layer : _backingSharingLayers)
     {
       layer->SetBackingProviderLayer(&_owningLayer, {UpdateBackingSharingFlags::DuringCompositingUpdate});
     }
@@ -246,7 +252,8 @@ namespace krys::boo
                                                      EnumSet<UpdateBackingSharingFlags> flags) noexcept
   {
     layer.SetBackingProviderLayer(nullptr, flags);
-    _backingSharingLayers.remove(&layer);
+    std::erase_if(_backingSharingLayers,
+                  [&](const WeakPtr<RenderLayer> &sharingLayer) { return sharingLayer.get() == &layer; });
   }
 
   void RenderLayerBacking::ClearBackingSharingLayers(EnumSet<UpdateBackingSharingFlags> flags) noexcept
@@ -843,8 +850,13 @@ namespace krys::boo
     // they are containing-block descendants.
     if (!Renderer().HasNonVisibleOverflow())
     {
-      for (auto *layer : _backingSharingLayers)
+      for (auto &weakLayer : _backingSharingLayers)
       {
+        if (!weakLayer)
+        {
+          continue;
+        }
+        auto *layer = weakLayer.get();
         auto *boundsRootLayer = &_owningLayer;
         krys_debug_assert(layer->IsDescendantOf(_owningLayer));
         auto offset = layer->OffsetFromAncestor(&_owningLayer);
@@ -3593,9 +3605,12 @@ namespace krys::boo
         sharingLayerPaintFlags.Add(RenderLayer::PaintLayerFlag::PaintingOverflowContents);
       }
 
-      for (auto *layer : _backingSharingLayers)
+      for (auto &layer : _backingSharingLayers)
       {
-        paintOneLayer(*layer, sharingLayerPaintFlags);
+        if (layer)
+        {
+          paintOneLayer(*layer, sharingLayerPaintFlags);
+        }
       }
     }
 

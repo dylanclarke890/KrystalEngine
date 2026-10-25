@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Animation/AnimationEffect.hpp"
 #include "Krystal.Booey/Animation/AnimationTimeline.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/ScrollTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
@@ -482,6 +483,20 @@ namespace krys::boo
     _timingDidMutate = true;
   }
 
+  void AnimationEffect::AnimationProgressBasedTimelineSourceDidChangeMetrics(
+    const style::SingleAnimationRange &animationAttachmentRange) noexcept
+  {
+    if (!animationAttachmentRange.IsDefault())
+    {
+      _timingDidMutate = true;
+    }
+  }
+
+  void AnimationEffect::AnimationRangeDidChange() noexcept
+  {
+    _timingDidMutate = true;
+  }
+
   void AnimationEffect::UpdateComputedTimingPropertiesIfNeeded() noexcept
   {
     if (!_timingDidMutate)
@@ -493,8 +508,6 @@ namespace krys::boo
 
     auto playbackRate = _animation ? _animation->PlaybackRate() : 1.0;
 
-    // FIXME: The duration of the animation attachment range for scroll timelines, once there are scroll
-    // timelines.
     auto rangeDuration = [&]() -> Maybe<WebAnimationTime>
     {
       RefPtr animation = ShareRefPtr(_animation.get());
@@ -507,6 +520,13 @@ namespace krys::boo
       {
         return null;
       }
+
+      if (RefPtr scrollTimeline = ShareRefPtr(DynamicDowncast<ScrollTimeline>(timeline.get())))
+      {
+        auto interval = scrollTimeline->IntervalForAttachmentRange(animation->Range());
+        return interval.second - interval.first;
+      }
+
       return timeline->Duration();
     }();
 

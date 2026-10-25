@@ -206,6 +206,9 @@ namespace krys::boo
     RunProcessingStep(RenderingUpdateStep::ResizeObservations,
                       [this](dom::Document &document) { document.UpdateResizeObservations(*this); });
 
+    // https://drafts.csswg.org/scroll-animations-1/#event-loop
+    ForEachDocument([](dom::Document &document) { document.RunPostRenderingUpdateAnimationTasks(); });
+
     // https://html.spec.whatwg.org/#focus-fixup-rule
     RunProcessingStep(RenderingUpdateStep::FocusFixup,
                       [](dom::Document &document)

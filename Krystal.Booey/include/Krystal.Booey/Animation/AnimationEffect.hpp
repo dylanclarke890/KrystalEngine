@@ -19,6 +19,11 @@ namespace krys::boo
 
   class WebAnimation;
 
+  namespace style
+  {
+    struct SingleAnimationRange;
+  }
+
   /// @brief Something an animation plays: its timing, and what it does at each point in its timing.
   /// @see https://drafts.csswg.org/web-animations-1/#animation-effects
   class AnimationEffect : public RefCounted<AnimationEffect>, public CanMakeWeakPtr<AnimationEffect>
@@ -83,6 +88,9 @@ namespace krys::boo
     {
     }
     virtual void AnimationPlaybackRateDidChange() noexcept;
+    virtual void AnimationProgressBasedTimelineSourceDidChangeMetrics(
+      const style::SingleAnimationRange &animationAttachmentRange) noexcept;
+    void AnimationRangeDidChange() noexcept;
 
     KRYS_NODISCARD const AnimationEffectTiming &Timing() const noexcept
     {

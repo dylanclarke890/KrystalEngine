@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 
+#include "Krystal.Booey/CSS/TypedOM/CSSNumericFactory.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
@@ -18,6 +19,46 @@ namespace krys::boo::style
   bool SingleAnimationRangeLength::IsDefault(SingleAnimationRangeType type) const noexcept
   {
     return *this == DefaultValue(type);
+  }
+
+  KRYS_NODISCARD static RefPtr<css::CSSNumericValue>
+    ToCSSNumericValue(const SingleAnimationRangeLength &offset) noexcept
+  {
+    // FIXME: A calculated offset (calc()) has no numeric value yet, so it's left out.
+    if (offset.IsCalculated())
+    {
+      return nullptr;
+    }
+    return offset.IsPercent()
+             ? RefPtr<css::CSSNumericValue> {css::CSSNumericFactory::Percent(offset.TryPercentage()->Value)}
+             : RefPtr<css::CSSNumericValue> {
+                 css::CSSNumericFactory::Px(offset.TryFixed()->ResolveZoom(ZoomNeeded {}))};
+  }
+
+  TimelineRangeValue SingleAnimationRangeStart::ToTimelineRangeValue() const noexcept
+  {
+    if (_name == SingleAnimationRangeName::Normal)
+    {
+      return ConvertSingleAnimationRangeNameToRangeString(_name);
+    }
+
+    return TimelineRangeOffset {
+      ConvertSingleAnimationRangeNameToRangeString(_name),
+      ToCSSNumericValue(_offset),
+    };
+  }
+
+  TimelineRangeValue SingleAnimationRangeEnd::ToTimelineRangeValue() const noexcept
+  {
+    if (_name == SingleAnimationRangeName::Normal)
+    {
+      return ConvertSingleAnimationRangeNameToRangeString(_name);
+    }
+
+    return TimelineRangeOffset {
+      ConvertSingleAnimationRangeNameToRangeString(_name),
+      ToCSSNumericValue(_offset),
+    };
   }
 
   SingleAnimationRange SingleAnimationRange::DefaultForScrollTimeline() noexcept

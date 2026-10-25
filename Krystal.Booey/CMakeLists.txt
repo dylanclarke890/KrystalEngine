@@ -1699,6 +1699,12 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/CSSAnimation.hpp
   include/Krystal.Booey/Animation/CSSAnimationEvent.hpp
 
+  # Scroll and view timelines (B6c)
+  include/Krystal.Booey/Animation/TimelineRangeValue.hpp
+  include/Krystal.Booey/Animation/ScrollTimelineOptions.hpp
+  include/Krystal.Booey/Animation/ViewTimelineOptions.hpp
+  include/Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp
+
   # Typed OM numeric values (B6a)
   include/Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp
@@ -3012,6 +3018,12 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/CSSTransition.cpp
   src/Animation/CSSAnimation.cpp
   src/Animation/CSSAnimationEvent.cpp
+
+  # Scroll and view timelines (B6c)
+  src/Animation/TimelineRangeValue.cpp
+  src/Animation/ScrollTimeline.cpp
+  src/Animation/ViewTimeline.cpp
+  src/Animation/StyleOriginatedTimelinesController.cpp
 
   # Typed OM numeric values (B6a)
   src/CSS/TypedOM/CSSStyleValue.cpp

@@ -21,7 +21,7 @@ namespace krys::boo::style
   using WeakStyleOriginatedAnimations = List<WeakPtr<StyleOriginatedAnimation>>;
 
   /// @brief An element, or one of its pseudo-elements: something that is styled.
-  // FIXME: Scroll and view timelines and view transitions, once there are any.
+  // FIXME: View transitions, once there are any.
   struct Styleable
   {
     dom::Element &Element;
@@ -173,6 +173,12 @@ namespace krys::boo::style
     /// @see https://drafts.csswg.org/css-transitions-1/#starting
     void UpdateCSSTransitions(const RenderStyle &currentStyle, const RenderStyle &newStyle,
                               WeakStyleOriginatedAnimations &newStyleOriginatedAnimations) const noexcept;
+    /// @brief Gives the element's anonymous scroll timelines their source, and registers its named ones.
+    void UpdateCSSScrollTimelines(const RenderStyle *currentStyle,
+                                  const RenderStyle &afterChangeStyle) const noexcept;
+    /// @brief Gives the element's anonymous view timelines their subject, and registers its named ones.
+    void UpdateCSSViewTimelines(const RenderStyle *currentStyle,
+                                const RenderStyle &afterChangeStyle) const noexcept;
   };
 
   /// @brief A weak reference to a `Styleable`.

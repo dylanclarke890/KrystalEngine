@@ -8,10 +8,13 @@
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/ListHashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+#include <algorithm>
 
 namespace krys
 {
@@ -50,7 +53,9 @@ namespace krys::boo
     RenderLayer &_owningLayer;
 
     // A list other layers that paint into this backing store, later than _owningLayer in paint order.
-    ListHashSet<RenderLayer *> _backingSharingLayers;
+    /// @brief The layers that paint into this backing, held weakly: a sharing layer can be destroyed before
+    /// its provider as the render tree is torn down.
+    List<WeakPtr<RenderLayer>> _backingSharingLayers;
 
     // Only used if we are clipped by an ancestor which is not a stacking context.
     UniquePtr<LayerAncestorClippingStack> _ancestorClippingStack;
@@ -112,7 +117,7 @@ namespace krys::boo
     }
 
     // Included layers are non-z-order descendant layers that are painted into this backing.
-    KRYS_NODISCARD const ListHashSet<RenderLayer *> &BackingSharingLayers() const noexcept
+    KRYS_NODISCARD const List<WeakPtr<RenderLayer>> &BackingSharingLayers() const noexcept
     {
       return _backingSharingLayers;
     }
@@ -120,7 +125,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool HasBackingSharingLayers() const noexcept
     {
-      return !_backingSharingLayers.empty();
+      return std::ranges::any_of(_backingSharingLayers, [](const auto &layer) { return !!layer; });
     }
 
     void RemoveBackingSharingLayer(RenderLayer &layer, EnumSet<UpdateBackingSharingFlags> flags) noexcept;

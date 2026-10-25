@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
+#include "Krystal.Booey/Animation/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
@@ -39,6 +40,7 @@
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
+#include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
 #include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
@@ -208,7 +210,8 @@ namespace krys::boo
       return KeyframeEffect::KeyframeOffset {nullptr};
     }
 
-    KRYS_NODISCARD double ComputedOffset(style::SingleAnimationRangeName rangeName, double offset) noexcept
+    KRYS_NODISCARD double ComputedOffset(style::SingleAnimationRangeName rangeName, double offset,
+                                         const ViewTimeline *viewTimeline, WebAnimation *animation) noexcept
     {
       if (rangeName == style::SingleAnimationRangeName::Normal
           || rangeName == style::SingleAnimationRangeName::Omitted)
@@ -216,12 +219,37 @@ namespace krys::boo
         return offset;
       }
 
-      // FIXME: The offset within the active view timeline's named range, and within the animation's
-      // attachment range, once there are view timelines; until then, as without a view timeline.
-      return std::numeric_limits<double>::quiet_NaN();
+      if (!viewTimeline)
+      {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+
+      Ref timeline = ShareRef(*viewTimeline);
+
+      auto [namedRangeStartOffset, namedRangeEndOffset] =
+        timeline->OffsetIntervalForTimelineRangeName(rangeName);
+      auto namedRangeOffsetDelta = namedRangeEndOffset - namedRangeStartOffset;
+      auto computedOffsetWithinNamedRange = namedRangeStartOffset + offset * namedRangeOffsetDelta;
+
+      if (!animation)
+      {
+        return computedOffsetWithinNamedRange;
+      }
+
+      auto attachmentRange = ShareRef(*animation)->Range();
+      if (attachmentRange.IsDefault())
+      {
+        return computedOffsetWithinNamedRange;
+      }
+
+      auto [attachmentRangeStartOffset, attachmentRangeEndOffset] =
+        timeline->OffsetIntervalForAttachmentRange(attachmentRange);
+      auto attachmentRangeOffsetDelta = attachmentRangeEndOffset - attachmentRangeStartOffset;
+      return (computedOffsetWithinNamedRange - attachmentRangeStartOffset) / attachmentRangeOffsetDelta;
     }
 
-    void ComputeMissingKeyframeOffsets(List<KeyframeEffect::ParsedKeyframe> &keyframes) noexcept
+    void ComputeMissingKeyframeOffsets(List<KeyframeEffect::ParsedKeyframe> &keyframes,
+                                       const ViewTimeline *viewTimeline, WebAnimation *animation) noexcept
     {
       // https://drafts.csswg.org/web-animations-1/#compute-missing-keyframe-offsets
 
@@ -245,7 +273,8 @@ namespace krys::boo
           auto rangeName = style::ConvertRangeStringToSingleTimelineRangeName(timelineRangeOffset->RangeName);
           auto *offsetUnitValue = DynamicDowncast<css::CSSUnitValue>(timelineRangeOffset->Offset.get());
           krys_debug_assert(offsetUnitValue && offsetUnitValue->UnitEnum() == css::UnitType::Percentage);
-          keyframe.ComputedOffset = ComputedOffset(rangeName, offsetUnitValue->Value() / 100);
+          keyframe.ComputedOffset =
+            ComputedOffset(rangeName, offsetUnitValue->Value() / 100, viewTimeline, animation);
         }
         else
         {
@@ -594,7 +623,7 @@ namespace krys::boo
           propertyKeyframes.push_back(krys::move(k));
         }
         // 6. Apply the procedure to compute missing keyframe offsets to property keyframes.
-        ComputeMissingKeyframeOffsets(propertyKeyframes);
+        ComputeMissingKeyframeOffsets(propertyKeyframes, nullptr, nullptr);
 
         // 7. Add keyframes in property keyframes to processed keyframes.
         parsedKeyframes.insert(parsedKeyframes.end(), std::make_move_iterator(propertyKeyframes.begin()),
@@ -1006,8 +1035,7 @@ namespace krys::boo
       styleOriginatedAnimation->FlushPendingStyleChanges();
     }
 
-    // FIXME: Updating the computed offsets of keyframes in named timeline ranges
-    // (`updateComputedKeyframeOffsetsIfNeeded`), once there are view timelines.
+    UpdateComputedKeyframeOffsetsIfNeeded();
 
     List<ComputedKeyframe> computedKeyframes;
 
@@ -1044,8 +1072,7 @@ namespace krys::boo
     BlendingKeyframes computedBlendingKeyframes(_blendingKeyframes.Identifier());
     computedBlendingKeyframes.CopyKeyframes(_blendingKeyframes);
 
-    // FIXME: Or when there's an active view timeline, once there are view timelines.
-    if (computedBlendingKeyframes.HasKeyframeNotUsingRangeOffset())
+    if (computedBlendingKeyframes.HasKeyframeNotUsingRangeOffset() || ActiveViewTimeline())
     {
       computedBlendingKeyframes.FillImplicitKeyframes(*this, elementStyle);
     }
@@ -1390,7 +1417,7 @@ namespace krys::boo
 
     // We take a slight detour from the spec text and compute the missing keyframe offsets right away since
     // they can be computed up-front.
-    ComputeMissingKeyframeOffsets(parsedKeyframes);
+    ComputeMissingKeyframeOffsets(parsedKeyframes, ActiveViewTimeline().get(), Animation());
 
     css::ParserContext parserContext(document);
 
@@ -1437,8 +1464,7 @@ namespace krys::boo
   void KeyframeEffect::UpdateBlendingKeyframes(RenderStyle &elementStyle,
                                                const style::ResolutionContext &resolutionContext) noexcept
   {
-    // FIXME: Updating the computed offsets of keyframes in named timeline ranges
-    // (`updateComputedKeyframeOffsetsIfNeeded`), once there are view timelines.
+    UpdateComputedKeyframeOffsetsIfNeeded();
 
     if (!_blendingKeyframes.IsEmpty() || !_target)
     {
@@ -1560,6 +1586,8 @@ namespace krys::boo
 
     _blendingKeyframes = krys::move(blendingKeyframes);
     _animatedProperties.clear();
+
+    _needsComputedKeyframeOffsetsUpdate = true;
 
     ComputedNeedsForcedLayout();
     ComputeStackingContextImpact();
@@ -1777,6 +1805,8 @@ namespace krys::boo
     UpdateIsAssociatedWithProgressBasedTimeline();
 
     UpdateEffectStackMembership();
+
+    _needsComputedKeyframeOffsetsUpdate = true;
   }
 
   void KeyframeEffect::AnimationRelevancyDidChange() noexcept
@@ -2495,6 +2525,11 @@ namespace krys::boo
   {
     Invalidate();
     UpdateAcceleratedActions();
+
+    if (RefPtr viewTimeline = ActiveViewTimeline())
+    {
+      ComputeMissingKeyframeOffsets(_parsedKeyframes, viewTimeline.get(), Animation());
+    }
   }
 
   void KeyframeEffect::AnimationDidChangeTimingProperties() noexcept
@@ -3592,5 +3627,65 @@ namespace krys::boo
 
     krys_debug_assert(false);
     return false;
+  }
+
+  RefPtr<const ViewTimeline> KeyframeEffect::ActiveViewTimeline() const noexcept
+  {
+    RefPtr animation = ShareRefPtr(Animation());
+    if (!animation)
+    {
+      return nullptr;
+    }
+
+    RefPtr viewTimeline = ShareRefPtr(DynamicDowncast<ViewTimeline>(animation->Timeline()));
+    if (viewTimeline && viewTimeline->CurrentTime())
+    {
+      return viewTimeline;
+    }
+
+    return nullptr;
+  }
+
+  void KeyframeEffect::AnimationProgressBasedTimelineSourceDidChangeMetrics(
+    const style::SingleAnimationRange &animationAttachmentRange) noexcept
+  {
+    AnimationEffect::AnimationProgressBasedTimelineSourceDidChangeMetrics(animationAttachmentRange);
+    _needsComputedKeyframeOffsetsUpdate = true;
+  }
+
+  void KeyframeEffect::UpdateComputedKeyframeOffsetsIfNeeded() noexcept
+  {
+    if (!_needsComputedKeyframeOffsetsUpdate)
+    {
+      return;
+    }
+
+    // FIXME: also call this when metrics of the view timeline changes.
+
+    RefPtr animation = ShareRefPtr(Animation());
+    if (!animation)
+    {
+      return;
+    }
+
+    RefPtr viewTimeline = ShareRefPtr(DynamicDowncast<ViewTimeline>(animation->Timeline()));
+    if (viewTimeline && !viewTimeline->CurrentTime())
+    {
+      return;
+    }
+
+    if (!_parsedKeyframes.empty())
+    {
+      ComputeMissingKeyframeOffsets(_parsedKeyframes, viewTimeline.get(), animation.get());
+    }
+
+    _blendingKeyframes.UpdatedComputedOffsets(
+      [&](const BlendingKeyframe::KeyframeOffset &specifiedOffset)
+      {
+        return ComputedOffset(specifiedOffset.Name, specifiedOffset.Value, viewTimeline.get(),
+                              animation.get());
+      });
+
+    _needsComputedKeyframeOffsetsUpdate = false;
   }
 }

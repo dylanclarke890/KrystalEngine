@@ -1282,6 +1282,8 @@ namespace krys::boo::dom
     DOMString id;
     Maybe<RefPtr<AnimationTimeline>> timeline;
     Maybe<Variant<double, KeyframeEffectOptions>> keyframeEffectOptions;
+    TimelineRangeValue animationRangeStart;
+    TimelineRangeValue animationRangeEnd;
     if (options)
     {
       auto &optionsValue = *options;
@@ -1294,6 +1296,8 @@ namespace krys::boo::dom
         auto &keyframeAnimationOptions = std::get<KeyframeAnimationOptions>(optionsValue);
         id = keyframeAnimationOptions.Id;
         timeline = keyframeAnimationOptions.Timeline;
+        animationRangeStart = keyframeAnimationOptions.RangeStart;
+        animationRangeEnd = keyframeAnimationOptions.RangeEnd;
         keyframeEffectOptions = Variant<double, KeyframeEffectOptions> {
           static_cast<KeyframeEffectOptions &&>(krys::move(keyframeAnimationOptions))};
       }
@@ -1313,7 +1317,8 @@ namespace krys::boo::dom
     {
       animation->SetTimeline(RefPtr<AnimationTimeline> {*timeline});
     }
-    // FIXME: The animation range (`rangeStart` and `rangeEnd`), once there are scroll timelines.
+    animation->SetBindingsRangeStart(krys::move(animationRangeStart));
+    animation->SetBindingsRangeEnd(krys::move(animationRangeEnd));
 
     auto animationPlayResult = animation->Play();
     if (animationPlayResult.HasException())

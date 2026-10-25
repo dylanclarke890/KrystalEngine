@@ -35,8 +35,6 @@ namespace krys::boo
 {
   /// @brief An animation created by an element's `animation` properties from an `@keyframes` rule.
   /// @see https://drafts.csswg.org/css-animations-2/#cssanimation
-  // FIXME: Named, scroll and view timelines, and the animation range, once there are scroll-driven
-  // animations.
   class CSSAnimation final : public StyleOriginatedAnimation
   {
     using Property = CSSAnimationProperty;
@@ -99,6 +97,8 @@ namespace krys::boo
 
     KRYS_NODISCARD AnimationTimeline *BindingsTimeline() const noexcept final;
     void SetBindingsTimeline(RefPtr<AnimationTimeline> &&timeline) noexcept final;
+    void SetBindingsRangeStart(TimelineRangeValue &&range) noexcept final;
+    void SetBindingsRangeEnd(TimelineRangeValue &&range) noexcept final;
     dom::ExceptionOr<void> BindingsPlay() noexcept final;
     dom::ExceptionOr<void> BindingsPause() noexcept final;
     void SetBindingsEffect(RefPtr<AnimationEffect> &&newEffect) noexcept final;

@@ -1877,6 +1877,15 @@ namespace krys::boo::css
       return _value[i];
     }
 
+    KRYS_NODISCARD bool contains(const auto &item) const noexcept
+    {
+      return _value.contains(item);
+    }
+    KRYS_NODISCARD bool containsIf(const auto &predicate) const noexcept
+    {
+      return _value.containsIf(predicate);
+    }
+
     bool operator==(const ListOrNone &) const = default;
 
     KRYS_NODISCARD bool IsNone() const noexcept

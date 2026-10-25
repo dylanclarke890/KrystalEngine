@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Animation/TimelineRangeValue.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapper.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
@@ -132,14 +133,14 @@ namespace krys::boo::style
   {
     using Base::Base;
 
-    // FIXME: `toTimelineRangeValue()` comes with the Typed OM (`CSSNumericValue`) and Web Animations.
+    KRYS_NODISCARD TimelineRangeValue ToTimelineRangeValue() const noexcept;
   };
 
   struct SingleAnimationRangeEnd : SingleAnimationRangeEdge<SingleAnimationRangeType::End>
   {
     using Base::Base;
 
-    // FIXME: `toTimelineRangeValue()` comes with the Typed OM (`CSSNumericValue`) and Web Animations.
+    KRYS_NODISCARD TimelineRangeValue ToTimelineRangeValue() const noexcept;
   };
 
   struct SingleAnimationRange

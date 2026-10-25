@@ -2,6 +2,8 @@
 #include "Krystal.Booey/Animation/AnimationEventBase.hpp"
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Animation/ScrollTimeline.hpp"
+#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
@@ -87,6 +89,7 @@ namespace krys::boo
     }
 
     // 1. Update the current time of all timelines associated with document passing now as the timestamp.
+    krys_debug_assert(_updatedScrollTimelines.empty());
     List<Ref<AnimationTimeline>> timelinesToUpdate;
     List<Ref<WebAnimation>> animationsToRemove;
     List<Ref<CSSTransition>> completedTransitions;
@@ -100,6 +103,12 @@ namespace krys::boo
       }
 
       timelinesToUpdate.push_back(timeline);
+
+      // https://drafts.csswg.org/scroll-animations-1/#event-loop
+      if (auto *scrollTimeline = DynamicDowncast<ScrollTimeline>(timeline.get()))
+      {
+        _updatedScrollTimelines.push_back(ShareRef(*scrollTimeline));
+      }
 
       List<Ref<WebAnimation>> relevantAnimations(timeline->RelevantAnimations().begin(),
                                                  timeline->RelevantAnimations().end());
@@ -123,7 +132,7 @@ namespace krys::boo
         // invalidation if required for this animation.
         animation->Tick();
 
-        if (!animation->IsRelevant() && !animation->NeedsTick())
+        if (!animation->IsRelevant() && !animation->NeedsTick() && !IsPendingTimelineAttachment(*animation))
         {
           animationsToRemove.push_back(animation);
         }
@@ -209,6 +218,16 @@ namespace krys::boo
       {
         documentTimeline->DocumentDidUpdateAnimationsAndSendEvents();
       }
+    }
+  }
+
+  void AnimationTimelinesController::RunPostRenderingUpdateTasks() noexcept
+  {
+    // https://drafts.csswg.org/scroll-animations-1/#event-loop
+    auto scrollTimelines = std::exchange(_updatedScrollTimelines, {});
+    for (auto &scrollTimeline : scrollTimelines)
+    {
+      scrollTimeline->UpdateCurrentTimeIfStale();
     }
   }
 
@@ -370,5 +389,12 @@ namespace krys::boo
         pendingAnimation->SetPendingStartTime(WebAnimationTime {*_lastCachedCurrentTime});
       }
     }
+  }
+
+  bool AnimationTimelinesController::IsPendingTimelineAttachment(const WebAnimation &animation) const noexcept
+  {
+    auto *styleOriginatedTimelinesController = _document.GetStyleOriginatedTimelinesController();
+    return styleOriginatedTimelinesController
+           && styleOriginatedTimelinesController->IsPendingTimelineAttachment(animation);
   }
 }

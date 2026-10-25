@@ -47,6 +47,7 @@
 namespace krys::boo
 {
   class AnimationTimelinesController;
+  class StyleOriginatedTimelinesController;
   class CachedResourceLoader;
   class DocumentTimeline;
   class FontLoadRequest;
@@ -285,6 +286,7 @@ namespace krys::boo::dom
     mutable RefPtr<CachedResourceLoader> _cachedResourceLoader;
     mutable UniquePtr<DocumentFontLoader> _fontLoader;
     UniquePtr<AnimationTimelinesController> _timelinesController;
+    UniquePtr<StyleOriginatedTimelinesController> _styleOriginatedTimelinesController;
     RefPtr<DocumentTimeline> _timeline;
 
     WeakPtr<LocalFrame> _frame;
@@ -1524,8 +1526,16 @@ namespace krys::boo::dom
       return _timelinesController.get();
     }
     KRYS_NODISCARD AnimationTimelinesController &EnsureTimelinesController() noexcept;
+    KRYS_NODISCARD StyleOriginatedTimelinesController *GetStyleOriginatedTimelinesController() const noexcept
+    {
+      return _styleOriginatedTimelinesController.get();
+    }
+    KRYS_NODISCARD StyleOriginatedTimelinesController &EnsureStyleOriginatedTimelinesController() noexcept;
     /// @see https://drafts.csswg.org/web-animations-1/#update-animations-and-send-events
     void UpdateAnimationsAndSendEvents() noexcept;
+    /// @brief Updates the scroll timelines that went stale during the rendering update.
+    /// @see https://drafts.csswg.org/scroll-animations-1/#event-loop
+    void RunPostRenderingUpdateAnimationTasks() noexcept;
     /// @brief Moves the selection's caret on through its blinking.
     void ServiceCaretAnimation() noexcept;
     /// @brief Recomputes the keyframes of the document's CSS animations of the `@keyframes` rule @p name.

@@ -372,6 +372,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Animation/CSSTransition.cpp
 		tests/Animation/KeyframeEffect.cpp
 		tests/Animation/KeyframeInterpolation.cpp
+		tests/Animation/ScrollTimeline.cpp
+		tests/Animation/StyleOriginatedTimelinesController.cpp
+		tests/Animation/ViewTimeline.cpp
 		tests/Animation/WebAnimation.cpp
 		tests/CSS/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp

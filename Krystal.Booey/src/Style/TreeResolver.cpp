@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
+#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/CSS/Rules/PositionTryRule.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -949,7 +950,24 @@ namespace krys::boo::style
         styleable.UpdateCSSTransitions(*oldStyle, *resolvedStyle.Style, newStyleOriginatedAnimations);
       }
 
-      // FIXME: Scroll and view timelines and timeline scopes, once there are those.
+      if ((oldStyle && oldStyle->HasScrollTimelines()) || resolvedStyle.Style->HasScrollTimelines())
+      {
+        styleable.UpdateCSSScrollTimelines(oldStyle, *resolvedStyle.Style);
+      }
+
+      if ((oldStyle && oldStyle->HasViewTimelines()) || resolvedStyle.Style->HasViewTimelines())
+      {
+        styleable.UpdateCSSViewTimelines(oldStyle, *resolvedStyle.Style);
+      }
+
+      if ((oldStyle && oldStyle->TimelineScope().Type != NameScope::Type::None)
+          || resolvedStyle.Style->TimelineScope().Type != NameScope::Type::None)
+      {
+        auto &styleOriginatedTimelinesController =
+          element.NodeDocument().EnsureStyleOriginatedTimelinesController();
+        styleOriginatedTimelinesController.UpdateNamedTimelineMapForTimelineScope(
+          resolvedStyle.Style->TimelineScope(), styleable);
+      }
 
       // The order in which CSS Transitions and CSS Animations are updated matters since CSS Transitions
       // define the after-change style to use CSS Animations as defined in the previous style change event. As

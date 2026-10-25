@@ -13,12 +13,16 @@ namespace krys::boo
   class AnimationTimelinesController;
   class WebAnimation;
 
+  namespace style
+  {
+    struct SingleAnimationRange;
+  }
+
   using AnimationCollection = ListHashSet<Ref<WebAnimation>>;
 
   /// @brief A source of time for animations.
   /// @see https://drafts.csswg.org/web-animations-1/#timelines
-  // FIXME: Animation attachment ranges (`defaultRange()`) and accelerated timelines, once there are scroll
-  // timelines and accelerated animations.
+  // FIXME: Accelerated timelines, once there are accelerated animations.
   class AnimationTimeline : public RefCounted<AnimationTimeline>, public CanMakeWeakPtr<AnimationTimeline>
   {
   protected:
@@ -35,6 +39,14 @@ namespace krys::boo
     virtual ~AnimationTimeline() noexcept;
 
     KRYS_NODISCARD virtual bool IsDocumentTimeline() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsScrollTimeline() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsViewTimeline() const noexcept
     {
       return false;
     }
@@ -88,6 +100,9 @@ namespace krys::boo
     {
       return nullptr;
     }
+
+    /// @brief The attachment range of animations whose range is `normal`.
+    KRYS_NODISCARD virtual style::SingleAnimationRange DefaultRange() const noexcept;
 
     /// @brief Gives @p animation its position in the global animation list, if it has none yet.
     static void UpdateGlobalPosition(WebAnimation &animation) noexcept;

@@ -31,11 +31,11 @@ namespace krys::boo::style
 
 namespace krys::boo
 {
+  class ViewTimeline;
+
   /// @brief An animation effect that animates properties of an element, or of one of its pseudo-elements,
   /// through keyframes.
   /// @see https://drafts.csswg.org/web-animations-1/#keyframe-effects
-  // FIXME: View timeline keyframe offsets (computing the offsets of keyframes in named timeline ranges), once
-  // there are view timelines.
   class KeyframeEffect final : public AnimationEffect,
                                public style::interpolation::Client,
                                public KeyframeInterpolation
@@ -161,6 +161,7 @@ namespace krys::boo
     bool _hasReferenceFilter {false};
     bool _animatesSizeAndSizeDependentTransform {false};
     bool _isAssociatedWithProgressBasedTimeline {false};
+    bool _needsComputedKeyframeOffsetsUpdate {false};
 
     KeyframeEffect(dom::Element *target,
                    const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept;
@@ -389,7 +390,13 @@ namespace krys::boo
     void AnimationSuspensionStateDidChange(bool animationIsSuspended) noexcept final;
     void AnimationPlaybackRateDidChange() noexcept final;
     void AnimationTimelineDidChange() noexcept final;
+    void AnimationProgressBasedTimelineSourceDidChangeMetrics(
+      const style::SingleAnimationRange &animationAttachmentRange) noexcept final;
     void SetAnimation(WebAnimation *animation) noexcept final;
+
+    /// @brief The animation's view timeline, if it has one and it's active.
+    KRYS_NODISCARD RefPtr<const ViewTimeline> ActiveViewTimeline() const noexcept;
+    void UpdateComputedKeyframeOffsetsIfNeeded() noexcept;
     KRYS_NODISCARD Seconds TimeToNextTick(const BasicEffectTiming &timing) noexcept final;
     KRYS_NODISCARD bool TicksContinuouslyWhileActive() const noexcept final;
     KRYS_NODISCARD Maybe<double> ProgressUntilNextStep(double iterationProgress) const noexcept final;

@@ -3,6 +3,8 @@
 #include "Krystal.Booey/Animation/CSSTransition.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
+#include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
+#include "Krystal.Booey/Animation/ViewTimeline.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp"
@@ -288,7 +290,11 @@ namespace krys::boo::style
   void Styleable::ElementWasRemoved() const noexcept
   {
     CancelStyleOriginatedAnimations();
-    // FIXME: Telling the style-originated timelines controller, once there are scroll and view timelines.
+    if (auto *styleOriginatedTimelinesController =
+          Element.NodeDocument().GetStyleOriginatedTimelinesController())
+    {
+      styleOriginatedTimelinesController->StyleableWasRemoved(*this);
+    }
   }
 
   void Styleable::WillChangeRenderer() const noexcept
@@ -316,7 +322,11 @@ namespace krys::boo::style
     // FIXME: Not canceling style-originated animations when entering the back/forward cache, once there's
     // navigation.
     CancelStyleOriginatedAnimations({});
-    // FIXME: Unregistering the named timelines of the element, once there are scroll and view timelines.
+    if (auto *styleOriginatedTimelinesController =
+          Element.NodeDocument().GetStyleOriginatedTimelinesController())
+    {
+      styleOriginatedTimelinesController->UnregisterNamedTimelinesAssociatedWithElement(*this);
+    }
   }
 
   void Styleable::CancelStyleOriginatedAnimations(
@@ -1111,5 +1121,146 @@ namespace krys::boo::style
       UpdateCSSTransitionsForStyleableAndProperty(*this, customProperty, currentStyle, newStyle,
                                                   generationTime, newStyleOriginatedAnimations);
     }
+  }
+
+  void Styleable::UpdateCSSScrollTimelines(const RenderStyle *currentStyle,
+                                           const RenderStyle &afterChangeStyle) const noexcept
+  {
+    auto updateAnonymousScrollTimelines = [&]
+    {
+      if (currentStyle && currentStyle->GetScrollTimelines() == afterChangeStyle.GetScrollTimelines())
+      {
+        return;
+      }
+
+      const auto &currentTimelines = afterChangeStyle.GetScrollTimelines();
+      for (const auto &currentTimeline : currentTimelines)
+      {
+        currentTimeline->SetSource(&Element);
+      }
+
+      if (!currentStyle)
+      {
+        return;
+      }
+
+      for (const auto &previousTimeline : currentStyle->GetScrollTimelines())
+      {
+        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Source().get() == &Element)
+        {
+          previousTimeline->SetSource(nullptr);
+        }
+      }
+    };
+
+    auto updateNamedScrollTimelines = [&]
+    {
+      if (currentStyle && currentStyle->ScrollTimelineNames() == afterChangeStyle.ScrollTimelineNames()
+          && currentStyle->ScrollTimelineAxes() == afterChangeStyle.ScrollTimelineAxes())
+      {
+        return;
+      }
+
+      auto &styleOriginatedTimelinesController =
+        Element.NodeDocument().EnsureStyleOriginatedTimelinesController();
+
+      const auto &currentTimelineNames = afterChangeStyle.ScrollTimelineNames();
+      const auto &currentTimelineAxes = afterChangeStyle.ScrollTimelineAxes();
+      auto numberOfAxes = currentTimelineAxes.size();
+      for (size_t i = 0; i < currentTimelineNames.size(); ++i)
+      {
+        styleOriginatedTimelinesController.RegisterNamedScrollTimeline(
+          currentTimelineNames[i].Value.Value, *this, currentTimelineAxes[i % numberOfAxes]);
+      }
+
+      if (!currentStyle)
+      {
+        return;
+      }
+
+      for (const auto &previousTimelineName : currentStyle->ScrollTimelineNames())
+      {
+        if (!currentTimelineNames.contains(previousTimelineName))
+        {
+          styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
+        }
+      }
+    };
+
+    updateAnonymousScrollTimelines();
+    updateNamedScrollTimelines();
+  }
+
+  void Styleable::UpdateCSSViewTimelines(const RenderStyle *currentStyle,
+                                         const RenderStyle &afterChangeStyle) const noexcept
+  {
+    auto updateAnonymousViewTimelines = [&]
+    {
+      if (currentStyle && currentStyle->GetViewTimelines() == afterChangeStyle.GetViewTimelines())
+      {
+        return;
+      }
+
+      const auto &currentTimelines = afterChangeStyle.GetViewTimelines();
+      for (const auto &currentTimeline : currentTimelines)
+      {
+        currentTimeline->SetSubject(&Element);
+      }
+
+      if (!currentStyle)
+      {
+        return;
+      }
+
+      for (const auto &previousTimeline : currentStyle->GetViewTimelines())
+      {
+        if (!currentTimelines.contains(previousTimeline) && previousTimeline->Subject() == &Element)
+        {
+          previousTimeline->SetSubject(nullptr);
+        }
+      }
+    };
+
+    auto updateNamedViewTimelines = [&]
+    {
+      if ((currentStyle && currentStyle->ViewTimelineNames() == afterChangeStyle.ViewTimelineNames())
+          && (currentStyle && currentStyle->ViewTimelineAxes() == afterChangeStyle.ViewTimelineAxes())
+          && (currentStyle
+              && currentStyle->GetViewTimelineInsets() == afterChangeStyle.GetViewTimelineInsets()))
+      {
+        return;
+      }
+
+      auto &styleOriginatedTimelinesController =
+        Element.NodeDocument().EnsureStyleOriginatedTimelinesController();
+
+      const auto &currentTimelineNames = afterChangeStyle.ViewTimelineNames();
+      const auto &currentTimelineAxes = afterChangeStyle.ViewTimelineAxes();
+      const auto &currentTimelineInsets = afterChangeStyle.GetViewTimelineInsets();
+      auto numberOfAxes = currentTimelineAxes.size();
+      auto numberOfInsets = currentTimelineInsets.size();
+      for (size_t i = 0; i < currentTimelineNames.size(); ++i)
+      {
+        styleOriginatedTimelinesController.RegisterNamedViewTimeline(
+          currentTimelineNames[i].Value.Value, *this, currentTimelineAxes[i % numberOfAxes],
+          currentTimelineInsets[i % numberOfInsets]);
+      }
+
+      if (!currentStyle)
+      {
+        return;
+      }
+
+      for (const auto &previousTimelineName : currentStyle->ViewTimelineNames())
+      {
+        if (!currentTimelineNames.contains(previousTimelineName))
+        {
+          styleOriginatedTimelinesController.UnregisterNamedTimeline(previousTimelineName.Value.Value, *this);
+        }
+      }
+    };
+
+    updateAnonymousViewTimelines();
+    updateNamedViewTimelines();
   }
 }
