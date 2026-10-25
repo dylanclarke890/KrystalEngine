@@ -311,6 +311,29 @@ namespace krys
           return true;
         });
 
+      // Pens and touches go to the page view as pointer events (a pen's with its compatibility mouse events,
+      // a touch's with touch events).
+      _context->Events->On<PointerInputEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView || _view != EditorView::Page)
+          {
+            return true;
+          }
+          auto &input = event.Input();
+          boo::DoublePoint point(input.ClientX, input.ClientY - HeaderHeight);
+          if (input.Type == pal::PointerType::Pen)
+          {
+            _pageView->PenInput(point, input);
+            UpdateCursor();
+          }
+          else
+          {
+            (void)_pageView->TouchInput(point, input);
+          }
+          return true;
+        });
+
       // The wheel scrolls the page view: the box under the mouse, or else the page.
       _context->Events->On<MouseScrollEvent>(
         [&](const auto &event)
@@ -639,6 +662,7 @@ namespace krys
       (void)ui::View::AddFontDirectory(std::filesystem::path {KRYS_EDITOR_FONTS_DIR});
       _pageView = CreateUnique<ui::View>(PageSize());
       _pageView->SetFocused(_focused);
+      _pageView->SetPointingDevices(pal::GetPointingDevices());
       _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
                                       { return HandleNavigation(request); });
       _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });

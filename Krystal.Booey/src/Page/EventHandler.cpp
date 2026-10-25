@@ -6,9 +6,11 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TextEvent.hpp"
+#include "Krystal.Booey/DOM/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
@@ -26,6 +28,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
@@ -206,6 +209,67 @@ namespace krys::boo
     _capturingMouseEventsElement = krys::move(element);
   }
 
+  void EventHandler::PointerCaptureElementDidChange(dom::Element *element) noexcept
+  {
+    if (_capturingMouseEventsElement.get() == element)
+    {
+      return;
+    }
+
+    SetCapturingMouseEventsElement(ShareRefPtr(element));
+
+    // Click events should be aware of pointer capture, too.
+    if (element && _clickNode)
+    {
+      _clickCaptureElement = ShareRefPtr(element);
+    }
+
+    // Since `UpdateMouseEventTargetNode` will dispatch boundary events, call it only when
+    // pointer capture is received. When capture is released, the PointerCaptureController
+    // already handles the appropriate boundary events (pointerout and pointerleave from
+    // the captured element).
+    if (element)
+    {
+      UpdateMouseEventTargetNode(dom::DOMStringAtom(EventNames::GotPointerCapture), element,
+                                 _lastPlatformMouseEvent, FireMouseOverOut::Yes);
+    }
+  }
+
+  HitTestResult EventHandler::HitTestResultAtPoint(const LayoutPoint &point,
+                                                   EnumSet<HitTestRequest::Type> hitType) const noexcept
+  {
+    Ref frame = ShareRef(_frame);
+
+    // FIXME: Hit testing in the root frame (the frames above can obscure this one), once there are subframes.
+
+    auto result = HitTestResult {point};
+    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    if (!document)
+    {
+      return result;
+    }
+
+    // We should always start hit testing a clean tree.
+    // FIXME: The subframes' too (updateLayoutAndStyleIfNeededRecursive), once there are subframes.
+    (void)document->UpdateLayout();
+
+    HitTestRequest request(hitType);
+    document->HitTest(request, result);
+    if (!request.ReadOnly())
+    {
+      RefPtr<dom::Element> targetElement = ShareRefPtr(result.TargetElement());
+      document->UpdateHoverActiveState(request, targetElement.get());
+    }
+
+    // FIXME: Image overlays (disallowsUserAgentShadowContentExceptForImageOverlays), once there are any.
+    if (request.DisallowsUserAgentShadowContent())
+    {
+      result.SetToNonUserAgentShadowAncestor();
+    }
+
+    return result;
+  }
+
   void EventHandler::Clear() noexcept
   {
     _resizeLayer = nullptr;
@@ -217,6 +281,7 @@ namespace krys::boo
     _lastScrollbarUnderMouse = nullptr;
     _clickCount = 0;
     _clickNode = nullptr;
+    _clickCaptureElement = nullptr;
     _lastKnownMousePosition = null;
     _lastKnownMouseGlobalPosition = null;
     _mousePressNode = nullptr;
@@ -227,6 +292,10 @@ namespace krys::boo
     _mouseDownMayStartAutoscroll = false;
     _dragStartSelection = null;
     _maxMouseMovedDuration = {};
+    _originatingTouchPointTargets.clear();
+    _originatingTouchPointDocument = nullptr;
+    _originatingTouchPointTargetKey = 0;
+    _touchPressed = false;
     CancelFakeMouseMoveEvent();
   }
 
@@ -253,6 +322,11 @@ namespace krys::boo
     if (contains(_lastElementUnderMouse.get()))
     {
       _lastElementUnderMouse = nullptr;
+    }
+
+    if (contains(_clickCaptureElement.get()))
+    {
+      _clickCaptureElement = nullptr;
     }
 
     // Ancestors are held strongly, so the removed ones are dropped here.
@@ -422,6 +496,13 @@ namespace krys::boo
       hitType.Add(HitTestRequest::Type::Active);
     }
 
+    // Treat any mouse move events as readonly if the user is currently touching the screen.
+    if (_touchPressed)
+    {
+      hitType.Add(HitTestRequest::Type::Active);
+      hitType.Add(HitTestRequest::Type::ReadOnly);
+    }
+
     MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(HitTestRequest(hitType), platformMouseEvent);
     if (hitTestResult)
     {
@@ -477,6 +558,7 @@ namespace krys::boo
   {
     _clickCount = 0;
     _clickNode = nullptr;
+    _clickCaptureElement = nullptr;
   }
 
   bool EventHandler::SwallowAnyClickEvent(
@@ -502,8 +584,7 @@ namespace krys::boo
       nodeToClick = TargetNodeForClickEvent(clickNode.get(), mouseEvent.TargetNode());
     }
 
-    // FIXME: The click capture element, with pointer capture.
-    if (!nodeToClick)
+    if (!nodeToClick && !_clickCaptureElement)
     {
       return false;
     }
@@ -515,8 +596,37 @@ namespace krys::boo
     bool isPrimaryPointerButton = platformMouseEvent.Button() == MouseButton::Left;
     dom::DOMStringAtom eventName(isPrimaryPointerButton ? EventNames::Click : EventNames::AuxClick);
 
-    return !DispatchMouseEvent(eventName, nodeToClick.get(), _clickCount, platformMouseEvent,
-                               FireMouseOverOut::No);
+    bool swallowed = false;
+    RefPtr<dom::Element> clickCaptureElement = std::exchange(_clickCaptureElement, nullptr);
+    if (clickCaptureElement)
+    {
+      UpdateMouseEventTargetNode(eventName, nodeToClick.get(), platformMouseEvent, FireMouseOverOut::Yes);
+      swallowed =
+        !DispatchAnyClickEvent(eventName, clickCaptureElement.get(), _clickCount, platformMouseEvent);
+    }
+    else if (nodeToClick)
+    {
+      swallowed = !DispatchMouseEvent(eventName, nodeToClick.get(), _clickCount, platformMouseEvent,
+                                      FireMouseOverOut::No);
+    }
+
+    // FIXME: Telling the chrome client about the click (didDispatchClickEvent), once it wants to know.
+    return swallowed;
+  }
+
+  bool EventHandler::DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode,
+                                           int32 clickCount,
+                                           const PlatformMouseEvent &platformMouseEvent) noexcept
+  {
+    if (clickNode)
+    {
+      if (RefPtr<dom::Element> node = ShareRefPtr(DynamicDowncast<dom::Element>(clickNode)))
+      {
+        return node->DispatchMouseEvent(platformMouseEvent, eventType, clickCount).Dispatched
+               == dom::Element::EventIsDispatched::Yes;
+      }
+    }
+    return false;
   }
 
   bool EventHandler::HandleMouseReleaseEvent(const PlatformMouseEvent &platformMouseEvent) noexcept
@@ -1910,6 +2020,338 @@ namespace krys::boo
       ExpandAndUpdateSelectionForMouseDownIfNeeded(*targetNode, newSelection,
                                                    TextGranularity::WordGranularity);
     }
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD dom::DOMStringAtom EventNameForTouchPointState(PlatformTouchPoint::State state) noexcept
+    {
+      switch (state)
+      {
+        case PlatformTouchPoint::TouchReleased:  return dom::DOMStringAtom(EventNames::TouchEnd);
+        case PlatformTouchPoint::TouchCancelled: return dom::DOMStringAtom(EventNames::TouchCancel);
+        case PlatformTouchPoint::TouchPressed:   return dom::DOMStringAtom(EventNames::TouchStart);
+        case PlatformTouchPoint::TouchMoved:     return dom::DOMStringAtom(EventNames::TouchMove);
+        // TouchStationary state is not converted to touch events, so fall through to assert.
+        default:                                 krys_debug_assert_msg(false, "Not reached."); return dom::DOMStringAtom::Null();
+      }
+    }
+
+    KRYS_NODISCARD HitTestResult HitTestResultInFrame(LocalFrame *frame, const LayoutPoint &point,
+                                                      EnumSet<HitTestRequest::Type> hitType) noexcept
+    {
+      HitTestResult result(point);
+
+      if (!frame || !frame->Document() || !frame->Document()->GetRenderView())
+      {
+        return result;
+      }
+
+      if (frame->View())
+      {
+        IntRect rect = frame->View()->VisibleContentRect();
+        if (!rect.Contains(RoundedIntPoint(point)))
+        {
+          return result;
+        }
+      }
+      RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+      HitTestRequest request(hitType);
+      (void)document->HitTest(request, result);
+      return result;
+    }
+  }
+
+  bool EventHandler::HandleTouchEvent(const PlatformTouchEvent &event) noexcept
+  {
+    Ref frame = ShareRef(_frame);
+    if (!frame->View() || !frame->Document())
+    {
+      return false;
+    }
+
+    // First build up the lists to use for the 'touches', 'targetTouches' and 'changedTouches' attributes
+    // in the event.
+
+    // Holds the complete set of touches on the screen and will be used as the 'touches' list in the event.
+    RefPtr<dom::TouchList> touches = dom::TouchList::Create();
+
+    // A different view on the 'touches' list above, filtered and grouped by event target. Used for the
+    // 'targetTouches' list in the event.
+    HashMap<dom::EventTarget *, RefPtr<dom::TouchList>> touchesByTarget;
+
+    // Array of touches per state, used to assemble the 'changedTouches' list in the event.
+    struct Touches
+    {
+      // The touches corresponding to the particular change state this struct instance represents.
+      RefPtr<dom::TouchList> TouchList;
+      // The targets involved in TouchList, in the order they were first seen.
+      List<RefPtr<dom::EventTarget>> Targets;
+    };
+    std::array<Touches, PlatformTouchPoint::TouchStateEnd> changedTouches;
+
+    const List<PlatformTouchPoint> &points = event.TouchPoints();
+
+    // The end of a touch is an activation-triggering input event: the window is notified before the event
+    // is dispatched.
+    // https://html.spec.whatwg.org/#activation-triggering-input-event
+    if (event.GetType() == PlatformEvent::Type::TouchEnd)
+    {
+      if (auto *window = frame->Window())
+      {
+        window->NotifyActivated();
+      }
+    }
+
+    bool freshTouchEvents = true;
+    bool allTouchReleased = true;
+    for (auto &point : points)
+    {
+      if (point.GetState() != PlatformTouchPoint::TouchPressed)
+      {
+        freshTouchEvents = false;
+      }
+      if (point.GetState() != PlatformTouchPoint::TouchReleased
+          && point.GetState() != PlatformTouchPoint::TouchCancelled)
+      {
+        allTouchReleased = false;
+      }
+    }
+
+    // The pointers of the touches that ended, forgotten once their events are dispatched.
+    List<PointerID> removedPointerIds;
+
+    for (uint32 index = 0; index < points.size(); index++)
+    {
+      auto &point = points[index];
+      PlatformTouchPoint::State pointState = point.GetState();
+      LayoutPoint pagePoint = LayoutPoint(frame->View()->WindowToContents(FlooredIntPoint(point.Pos())));
+
+      EnumSet<HitTestRequest::Type> hitType {HitTestRequest::Type::TouchEvent};
+      // The HitTestRequest types used for mouse events map quite adequately
+      // to touch events. Note that in addition to meaning that the hit test
+      // should affect the active state of the current node if necessary,
+      // HitTestRequest::Type::Active signifies that the hit test is taking place
+      // with the mouse (or finger in this case) being pressed.
+      switch (pointState)
+      {
+        case PlatformTouchPoint::TouchPressed: hitType.Add(HitTestRequest::Type::Active); break;
+        case PlatformTouchPoint::TouchMoved:
+          hitType.Add(HitTestRequest::Type::Active);
+          hitType.Add(HitTestRequest::Type::Move);
+          hitType.Add(HitTestRequest::Type::ReadOnly);
+          break;
+        case PlatformTouchPoint::TouchReleased:
+        case PlatformTouchPoint::TouchCancelled: hitType.Add(HitTestRequest::Type::Release); break;
+        case PlatformTouchPoint::TouchStationary:
+          hitType.Add(HitTestRequest::Type::Active);
+          hitType.Add(HitTestRequest::Type::ReadOnly);
+          break;
+        default: krys_debug_assert_msg(false, "Not reached."); break;
+      }
+
+      // Increment the platform touch id by 1 to avoid storing a key of 0 in the hashmap.
+      uint32 touchPointTargetKey = point.Id() + 1;
+      RefPtr<dom::EventTarget> touchTarget;
+      if (pointState == PlatformTouchPoint::TouchPressed)
+      {
+        HitTestResult result;
+        if (freshTouchEvents)
+        {
+          EnumSet<HitTestRequest::Type> freshHitType = hitType;
+          freshHitType.Add(HitTestRequest::Type::AllowChildFrameContent);
+          result = HitTestResultAtPoint(pagePoint, freshHitType);
+          _originatingTouchPointTargetKey = touchPointTargetKey;
+        }
+        else if (_originatingTouchPointDocument && _originatingTouchPointDocument->Frame())
+        {
+          Ref documentFrame = ShareRef(*_originatingTouchPointDocument->Frame());
+          DoublePoint framePoint = documentFrame->View()->WindowToContents(point.Pos());
+          result =
+            HitTestResultInFrame(documentFrame.get(), LayoutPoint(RoundedIntPoint(framePoint)), hitType);
+          if (!result.InnerNode())
+          {
+            continue;
+          }
+        }
+        else
+        {
+          continue;
+        }
+
+        RefPtr<dom::Element> element = ShareRefPtr(result.TargetElement());
+        if (!element)
+        {
+          continue;
+        }
+
+        // Record the originating touch document even if it does not have a touch listener.
+        if (freshTouchEvents)
+        {
+          _originatingTouchPointDocument = ShareRefPtr(&element->NodeDocument());
+          freshTouchEvents = false;
+        }
+        // FIXME: Skip documents without touch event listeners (hasTouchEventHandlers), once targets can say
+        // which listeners they have.
+        _originatingTouchPointTargets.insert_or_assign(touchPointTargetKey, element);
+        touchTarget = element;
+      }
+      else if (pointState == PlatformTouchPoint::TouchReleased
+               || pointState == PlatformTouchPoint::TouchCancelled)
+      {
+        // No need to perform a hit-test since we only need to unset :hover and :active states.
+        if (allTouchReleased)
+        {
+          frame->Document()->UpdateHoverActiveState(HitTestRequest(hitType), nullptr);
+        }
+        if (touchPointTargetKey == _originatingTouchPointTargetKey)
+        {
+          _originatingTouchPointTargetKey = 0;
+        }
+
+        // The target should be the original target for this touch, so get it from the hashmap. As it's a
+        // release or cancel we also remove it from the map.
+        if (auto it = _originatingTouchPointTargets.find(touchPointTargetKey);
+            it != _originatingTouchPointTargets.end())
+        {
+          touchTarget = krys::move(it->second);
+          _originatingTouchPointTargets.erase(it);
+        }
+      }
+      else
+      {
+        // No hittest is performed on move or stationary, since the target is not allowed to change anyway.
+        if (auto it = _originatingTouchPointTargets.find(touchPointTargetKey);
+            it != _originatingTouchPointTargets.end())
+        {
+          touchTarget = it->second;
+        }
+      }
+
+      auto *touchTargetNode = DynamicDowncast<dom::Node>(touchTarget.get());
+      if (!touchTargetNode)
+      {
+        continue;
+      }
+      Ref document = ShareRef(touchTargetNode->NodeDocument());
+      RefPtr<LocalFrame> targetFrame = ShareRefPtr(document->Frame());
+      if (!targetFrame || !targetFrame->View())
+      {
+        continue;
+      }
+
+      // FIXME: Pass the touch delta for pointermove events by remembering the position per pointer.
+      if (auto *page = targetFrame->GetPage())
+      {
+        auto &pointerCaptureController = page->GetPointerCaptureController();
+        pointerCaptureController.DispatchEventForTouchAtIndex(*touchTarget, event, index, !index,
+                                                              targetFrame->View(), {0, 0});
+        if (pointState == PlatformTouchPoint::TouchReleased
+            || pointState == PlatformTouchPoint::TouchCancelled)
+        {
+          removedPointerIds.push_back(dom::PointerEvent::PointerIdForTouch(point));
+        }
+      }
+
+      // pagePoint should always be relative to the target elements containing frame.
+      pagePoint = LayoutPoint(targetFrame->View()->WindowToContents(FlooredIntPoint(point.Pos())));
+
+      float scaleFactor = targetFrame->PageZoomFactor() * targetFrame->View()->FrameScaleFactor();
+
+      DoublePoint adjustedPagePoint(pagePoint.X().ToDouble() / scaleFactor,
+                                    pagePoint.Y().ToDouble() / scaleFactor);
+      DoubleSize adjustedRadius = point.Radius().ScaledBy(1 / scaleFactor);
+
+      auto touch = dom::Touch::Create(targetFrame.get(), touchTarget.get(), static_cast<int32>(point.Id()),
+                                      point.ScreenPos(), adjustedPagePoint, adjustedRadius,
+                                      point.RotationAngle(), point.Force(), point.Twist());
+
+      // Ensure this target's touch list exists, even if it ends up empty, so it can always be passed to
+      // TouchEvent::Create below.
+      auto targetTouchesIterator = touchesByTarget.find(touchTarget.get());
+      if (targetTouchesIterator == touchesByTarget.end())
+      {
+        targetTouchesIterator = touchesByTarget.emplace(touchTarget.get(), dom::TouchList::Create()).first;
+      }
+
+      // touches and targetTouches should only contain information about touches still on the screen, so if
+      // this point is released or cancelled it will only appear in the changedTouches list.
+      if (pointState != PlatformTouchPoint::TouchReleased && pointState != PlatformTouchPoint::TouchCancelled)
+      {
+        touches->Append(Ref<dom::Touch>(touch));
+        targetTouchesIterator->second->Append(Ref<dom::Touch>(touch));
+      }
+
+      // Now build up the correct list for changedTouches.
+      // Note that any touches that are in the TouchStationary state (e.g. if
+      // the user had several points touched but did not move them all) should
+      // never be in the changedTouches list so we do not handle them explicitly here.
+      if (pointState != PlatformTouchPoint::TouchStationary)
+      {
+        krys_debug_assert(pointState < PlatformTouchPoint::TouchStateEnd);
+        auto &changed = changedTouches[pointState];
+        if (!changed.TouchList)
+        {
+          changed.TouchList = dom::TouchList::Create();
+        }
+        changed.TouchList->Append(krys::move(touch));
+        if (std::ranges::find(changed.Targets, touchTarget) == changed.Targets.end())
+        {
+          changed.Targets.push_back(touchTarget);
+        }
+      }
+    }
+    _touchPressed = touches->Length() > 0;
+    if (allTouchReleased)
+    {
+      _originatingTouchPointDocument = nullptr;
+    }
+
+    // The pointers of the touches that ended are forgotten, so a later touch with the same id starts afresh.
+    if (auto *page = frame->GetPage())
+    {
+      for (auto pointerId : removedPointerIds)
+      {
+        page->GetPointerCaptureController().TouchWithIdentifierWasRemoved(pointerId);
+      }
+    }
+
+    // Now iterate the changedTouches list and the targets within it, sending events to the targets as
+    // required.
+    bool swallowedEvent = false;
+    RefPtr<dom::TouchList> emptyList = dom::TouchList::Create();
+    for (uint32 state = 0; state != PlatformTouchPoint::TouchStateEnd; ++state)
+    {
+      auto &changed = changedTouches[state];
+      if (!changed.TouchList)
+      {
+        continue;
+      }
+
+      // When sending a touch cancel event, use empty touches and targetTouches lists.
+      bool isTouchCancelEvent = state == PlatformTouchPoint::TouchCancelled;
+      RefPtr<dom::TouchList> &effectiveTouches = isTouchCancelEvent ? emptyList : touches;
+      auto stateName = EventNameForTouchPointState(static_cast<PlatformTouchPoint::State>(state));
+
+      for (auto &target : changed.Targets)
+      {
+        auto *targetNode = DynamicDowncast<dom::Node>(target.get());
+        krys_debug_assert(targetNode);
+
+        RefPtr<dom::TouchList> targetTouches =
+          isTouchCancelEvent ? emptyList : touchesByTarget.find(target.get())->second;
+        krys_debug_assert(targetTouches);
+
+        auto *targetFrame = targetNode->NodeDocument().Frame();
+        Ref<dom::TouchEvent> touchEvent = dom::TouchEvent::Create(
+          effectiveTouches.get(), targetTouches.get(), changed.TouchList.get(), stateName,
+          targetFrame ? targetFrame->View() : nullptr, {}, event.Modifiers());
+        (void)dom::EventDispatcher::DispatchToTarget(*touchEvent, target.get());
+        swallowedEvent = swallowedEvent || touchEvent->DefaultPrevented() || touchEvent->DefaultHandled();
+      }
+    }
+
+    return swallowedEvent;
   }
 
   bool EventHandler::HandleMousePressEventDoubleClick(const MouseEventWithHitTestResults &event) noexcept

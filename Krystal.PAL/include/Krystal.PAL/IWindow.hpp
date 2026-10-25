@@ -10,6 +10,7 @@
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Pointer.hpp"
 
 namespace krys::pal
 {
@@ -63,6 +64,8 @@ namespace krys::pal
     /// away from the user, or to the right; then the cursor's position in client space and the modifiers
     /// held.
     using MouseScrollHandler = Func<void(WindowHandle, float, float, float, float, KeyModifiers)>;
+    /// @brief A pen's or a touch's input; the mouse comes as the mouse handlers.
+    using PointerHandler = Func<void(WindowHandle, const PointerInput &)>;
     using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
     using CloseHandler = Func<void(WindowHandle)>;
     using ResizeHandler = Func<void(WindowHandle, int, int)>;
@@ -74,6 +77,8 @@ namespace krys::pal
     MouseMoveHandler OnMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
     MouseScrollHandler OnMouseScroll = nullptr;
+    /// @brief Called for pens and touches; without it, the system turns them into mouse input.
+    PointerHandler OnPointer = nullptr;
     KeyHandler OnKey = nullptr;
     CloseHandler OnClose = nullptr;
     ResizeHandler OnResize = nullptr;

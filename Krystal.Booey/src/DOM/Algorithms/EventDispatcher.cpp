@@ -270,9 +270,9 @@ namespace krys::boo::dom
     if (!event._canceled && !event._defaultHandled)
     {
       auto finalTarget = event._target;
-      event._target = ShareRefPtr(originalTarget);
+      event.SetTarget(ShareRefPtr(originalTarget));
       CallDefaultEventHandlersInBubblingOrder(event, defaultEventHandlerPath);
-      event._target = krys::move(finalTarget);
+      event.SetTarget(krys::move(finalTarget));
     }
 
     return !event._canceled;
@@ -314,7 +314,7 @@ namespace krys::boo::dom
 
     assert(lastNonNullShadowAdjustedTarget != event._path.rend());
 
-    event._target = ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget());
+    event.SetTarget(ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget()));
     event.RelatedTarget(pathStruct.RelatedTarget());
     event.TouchTargetList(pathStruct.TouchTargetList());
 

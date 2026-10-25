@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/Func.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.PAL/Pointer.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
@@ -167,6 +169,24 @@ namespace krys::ui
     RefPtr<Overlay> _overlay;
     /// @brief Whether a button was held as the overlay opened: its release goes to the page.
     bool _pageOwnsPress {false};
+    /// @brief The pen's buttons held (its tip, its barrel button or its eraser), as the DOM's `buttons` bit
+    /// set.
+    uint16 _penButtons {0};
+    /// @brief The button the pen pressed with, which its release reports.
+    boo::MouseButton _penButton {boo::MouseButton::None};
+
+    /// @brief A touch on the screen.
+    struct ActiveTouch
+    {
+      /// @brief The host's id for it.
+      uint32 HostId {0};
+      /// @brief Its id in the page's touch events: the lowest that no other touch has.
+      uint32 Id {0};
+      boo::PlatformTouchPoint Point;
+    };
+
+    /// @brief The touches on the screen, the first first.
+    List<ActiveTouch> _touches;
 
     /// @brief A custom element definition the view gives each document it loads.
     struct CustomElementDefinition
@@ -311,6 +331,27 @@ namespace krys::ui
                     pal::KeyModifiers modifiers = {},
                     const pal::WheelScrollSettings &settings = pal::GetWheelScrollSettings()) noexcept;
 
+    /// @brief A pen's input at @p point (in viewport coordinates): the pen moves (hovering or touching),
+    /// presses and releases as the mouse does, with its pressure, tilt and twist, as pointer events of type
+    /// `pen` (and their compatibility mouse events). Its tip presses the left button, with the barrel button
+    /// held the right, and its eraser the eraser button (5); leaving the page leaves the element it was over.
+    void PenInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept;
+    /// @brief A touch's input at @p point (in viewport coordinates): `touchstart`, `touchmove`, `touchend` or
+    /// `touchcancel` at the element it began on, with every touch on the screen, each preceded by the touch's
+    /// pointer events of type `touch`. While an overlay is open, touches are ignored.
+    /// @return Whether the page cancelled or handled the touch event.
+    bool TouchInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept;
+    /// @brief The touches on the screen.
+    KRYS_NODISCARD uint32 TouchCount() const noexcept
+    {
+      return static_cast<uint32>(_touches.size());
+    }
+
+    /// @brief Tells the page what pointing devices the system has (@p devices): the `pointer`, `hover`,
+    /// `any-pointer` and `any-hover` media features and `navigator.maxTouchPoints` follow them. Until the
+    /// host does, it's a mouse alone.
+    void SetPointingDevices(const pal::PointingDevices &devices) noexcept;
+
     /// @brief The cursor the page wants over it, as of the last mouse move.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
 
@@ -429,5 +470,11 @@ namespace krys::ui
     static void PerformMicrotaskCheckpoint() noexcept;
     /// @brief @p button's bit in the DOM's `buttons` bit set.
     KRYS_NODISCARD static uint16 ButtonsBit(boo::MouseButton button) noexcept;
+    KRYS_NODISCARD boo::PlatformMouseEvent PenEvent(boo::PlatformEvent::Type type,
+                                                    const boo::DoublePoint &point, boo::MouseButton button,
+                                                    int32 clickCount,
+                                                    const pal::PointerInput &input) const noexcept;
+    /// @brief Counts a press of @p button at @p point on from the last, if it's soon after it and near it.
+    KRYS_NODISCARD int32 CountClick(const boo::IntPoint &point, boo::MouseButton button) noexcept;
   };
 }

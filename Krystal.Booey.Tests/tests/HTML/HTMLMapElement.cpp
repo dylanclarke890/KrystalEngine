@@ -44,7 +44,9 @@ namespace krys::boo::html::tests
 
     struct MapFixture : boo::tests::PaintFixture
     {
-      explicit MapFixture(utf8_stringview markup = MapMarkup) noexcept : PaintFixture(utf8_string(markup))
+      // In a page, whose pointer capture controller dispatches the clicks (as pointer events).
+      explicit MapFixture(utf8_stringview markup = MapMarkup) noexcept
+          : PaintFixture(utf8_string(markup), {200, 100}, true)
       {
         (void)Document->UpdateLayout();
       }

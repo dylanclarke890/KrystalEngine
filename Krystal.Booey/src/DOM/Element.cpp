@@ -30,6 +30,7 @@
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
@@ -56,6 +57,8 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
@@ -864,14 +867,92 @@ namespace krys::boo::dom
     return NodeDocument().UserActionElements().IsFocused(*this);
   }
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsCompatibilityMouseEvent(const MouseEvent &mouseEvent) noexcept
+    {
+      // https://www.w3.org/TR/pointerevents/#compatibility-mapping-with-mouse-events
+      auto type = mouseEvent.Type();
+      return !IsAnyClick(mouseEvent) && type != EventNames::MouseOver && type != EventNames::MouseOut
+             && type != EventNames::MouseEnter && type != EventNames::MouseLeave;
+    }
+
+    enum class ShouldIgnoreMouseEvent : bool
+    {
+      No,
+      Yes
+    };
+
+    KRYS_NODISCARD ShouldIgnoreMouseEvent
+      DispatchPointerEventIfNeeded(Element &element, const MouseEvent &mouseEvent,
+                                   const PlatformMouseEvent &platformEvent, bool &didNotSwallowEvent) noexcept
+    {
+      if (auto *page = element.NodeDocument().GetPage())
+      {
+        auto &pointerCaptureController = page->GetPointerCaptureController();
+        if (platformEvent.PointerId() != MousePointerID && !IsAnyClick(mouseEvent)
+            && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
+              platformEvent.PointerId()))
+        {
+          return ShouldIgnoreMouseEvent::Yes;
+        }
+
+        if (platformEvent.GetSyntheticClickType() != SyntheticClickType::NoTap && !IsAnyClick(mouseEvent)
+            && mouseEvent.Type() != EventNames::ContextMenu)
+        {
+          return ShouldIgnoreMouseEvent::No;
+        }
+
+        if (auto pointerEvent = pointerCaptureController.PointerEventForMouseEvent(
+              mouseEvent, platformEvent.PointerId(), platformEvent.PointerType()))
+        {
+          pointerCaptureController.DispatchEvent(*pointerEvent, &element);
+          if (IsCompatibilityMouseEvent(mouseEvent)
+              && pointerCaptureController.PreventsCompatibilityMouseEventsForIdentifier(
+                pointerEvent->PointerId()))
+          {
+            return ShouldIgnoreMouseEvent::Yes;
+          }
+
+          if (pointerEvent->DefaultPrevented() || pointerEvent->DefaultHandled())
+          {
+            didNotSwallowEvent = false;
+            if (pointerEvent->Type() == EventNames::PointerDown)
+            {
+              return ShouldIgnoreMouseEvent::Yes;
+            }
+          }
+        }
+      }
+
+      return ShouldIgnoreMouseEvent::No;
+    }
+  }
+
   Element::DispatchMouseEventResult Element::DispatchMouseEvent(const PlatformMouseEvent &platformEvent,
                                                                 DOMStringAtom eventType, int32 detail,
                                                                 Element *relatedTarget) noexcept
   {
     auto eventIsDefaultPrevented = EventIsDefaultPrevented::No;
+    // FIXME: Force events (MouseForceChanged, MouseForceDown and MouseForceUp), once the host reports force
+    // clicks.
 
-    Ref<MouseEvent> mouseEvent =
-      MouseEvent::Create(eventType, NodeDocument().View(), platformEvent, detail, relatedTarget);
+    List<Ref<MouseEvent>> childMouseEvents;
+    for (const auto &childPlatformEvent : platformEvent.CoalescedEvents())
+    {
+      childMouseEvents.push_back(MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent, {},
+                                                    {}, detail, relatedTarget));
+    }
+
+    List<Ref<MouseEvent>> predictedEvents;
+    for (const auto &childPlatformEvent : platformEvent.PredictedEvents())
+    {
+      predictedEvents.push_back(MouseEvent::Create(eventType, NodeDocument().View(), childPlatformEvent, {},
+                                                   {}, detail, relatedTarget));
+    }
+
+    Ref<MouseEvent> mouseEvent = MouseEvent::Create(eventType, NodeDocument().View(), platformEvent,
+                                                    childMouseEvents, predictedEvents, detail, relatedTarget);
 
     if (mouseEvent->Type().View().empty())
     {
@@ -881,19 +962,26 @@ namespace krys::boo::dom
     Ref protectedThis = ShareRef(*this);
     bool didNotSwallowEvent = true;
 
-    // FIXME: Pointer events (dispatchPointerEventIfNeeded), which dispatch clicks as pointer events; until
-    // then clicks are mouse events, and presses and releases run light dismiss as pointerdown and pointerup
-    // would.
-    if (mouseEvent->IsTrusted() && (eventType == EventNames::MouseDown || eventType == EventNames::MouseUp))
+    if (DispatchPointerEventIfNeeded(*this, *mouseEvent, platformEvent, didNotSwallowEvent)
+        == ShouldIgnoreMouseEvent::Yes)
     {
-      NodeDocument().HandleLightDismiss(*mouseEvent, *this);
+      return {EventIsDispatched::No, eventIsDefaultPrevented};
     }
-    krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
-    (void)EventDispatcher::DispatchToTarget(*mouseEvent, this);
-    if (mouseEvent->DefaultPrevented())
+
+    bool shouldNotDispatchMouseEvent =
+      IsAnyClick(*mouseEvent) || mouseEvent->Type() == EventNames::ContextMenu;
+    if (!shouldNotDispatchMouseEvent)
     {
-      eventIsDefaultPrevented = EventIsDefaultPrevented::Yes;
-      didNotSwallowEvent = false;
+      krys_debug_assert(!mouseEvent->Target() || mouseEvent->Target() != relatedTarget);
+      (void)EventDispatcher::DispatchToTarget(*mouseEvent, this);
+      if (mouseEvent->DefaultPrevented())
+      {
+        eventIsDefaultPrevented = EventIsDefaultPrevented::Yes;
+      }
+      if (mouseEvent->DefaultPrevented() || mouseEvent->DefaultHandled())
+      {
+        didNotSwallowEvent = false;
+      }
     }
 
     // The document should not receive dblclick for non-primary buttons.
@@ -904,12 +992,17 @@ namespace krys::boo::dom
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
         DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        mouseEvent->TimeStamp(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
+        MonotonicTime::Now().count(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
         mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(), mouseEvent->ModifierKeys(),
-        mouseEvent->ButtonType(), mouseEvent->Buttons(), relatedTarget);
+        mouseEvent->ButtonType(), mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
+
+      if (mouseEvent->DefaultHandled())
+      {
+        doubleClickEvent->SetDefaultHandled();
+      }
 
       (void)EventDispatcher::DispatchToTarget(*doubleClickEvent, this);
-      if (doubleClickEvent->DefaultPrevented())
+      if (doubleClickEvent->DefaultHandled() || doubleClickEvent->DefaultPrevented())
       {
         return {EventIsDispatched::No, eventIsDefaultPrevented};
       }
@@ -2052,6 +2145,38 @@ namespace krys::boo::dom
     }
 
     return {};
+  }
+
+#pragma endregion
+
+#pragma region Element (Pointer Events)
+
+  ExceptionOr<void> Element::SetPointerCapture(int32 pointerId) noexcept
+  {
+    if (auto *page = NodeDocument().GetPage())
+    {
+      return page->GetPointerCaptureController().SetPointerCapture(this, static_cast<PointerID>(pointerId));
+    }
+    return {};
+  }
+
+  ExceptionOr<void> Element::ReleasePointerCapture(int32 pointerId) noexcept
+  {
+    if (auto *page = NodeDocument().GetPage())
+    {
+      return page->GetPointerCaptureController().ReleasePointerCapture(this,
+                                                                       static_cast<PointerID>(pointerId));
+    }
+    return {};
+  }
+
+  bool Element::HasPointerCapture(int32 pointerId) noexcept
+  {
+    if (auto *page = NodeDocument().GetPage())
+    {
+      return page->GetPointerCaptureController().HasPointerCapture(this, static_cast<PointerID>(pointerId));
+    }
+    return false;
   }
 
 #pragma endregion

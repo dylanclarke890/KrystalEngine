@@ -66,7 +66,8 @@ namespace krys::boo::tests
 
       explicit MouseFixture(utf8_stringview markup) noexcept
           : PaintFixture(u8"<!DOCTYPE html><style>body{margin:0;font:16px sans-serif}</style>"
-                         + utf8_string(markup))
+                           + utf8_string(markup),
+                         {200, 100}, true)
       {
         (void)Document->UpdateLayout();
         // Capturing at the document sees the events that don't bubble too.

@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
@@ -960,16 +961,7 @@ namespace krys::ui
       return;
     }
 
-    // A press soon after the last, near it and with the same button, counts on from it.
-    auto now = MonotonicTime::Now();
-    bool continuesClicks = _clickCount > 0 && button == _lastClickButton
-                           && now - _lastClickTime <= DoubleClickTime
-                           && std::abs(point.X() - _lastClickPosition.X()) <= DoubleClickDistance
-                           && std::abs(point.Y() - _lastClickPosition.Y()) <= DoubleClickDistance;
-    _clickCount = continuesClicks ? _clickCount + 1 : 1;
-    _lastClickButton = button;
-    _lastClickTime = now;
-    _lastClickPosition = point;
+    (void)CountClick(point, button);
 
     _buttons |= ButtonsBit(button);
     _lastMousePosition = point;
@@ -1044,6 +1036,217 @@ namespace krys::ui
       input::WheelEvent(point, notchesX, notchesY, modifiers, settings));
     PerformMicrotaskCheckpoint();
     return handled;
+  }
+
+  int32 View::CountClick(const boo::IntPoint &point, boo::MouseButton button) noexcept
+  {
+    // A press soon after the last, near it and with the same button, counts on from it.
+    auto now = MonotonicTime::Now();
+    bool continuesClicks = _clickCount > 0 && button == _lastClickButton
+                           && now - _lastClickTime <= DoubleClickTime
+                           && std::abs(point.X() - _lastClickPosition.X()) <= DoubleClickDistance
+                           && std::abs(point.Y() - _lastClickPosition.Y()) <= DoubleClickDistance;
+    _clickCount = continuesClicks ? _clickCount + 1 : 1;
+    _lastClickButton = button;
+    _lastClickTime = now;
+    _lastClickPosition = point;
+    return _clickCount;
+  }
+
+  void View::PenInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept
+  {
+    auto intPoint = boo::FlooredIntPoint(point);
+
+    // While an overlay is open, the pen is the mouse.
+    if (_overlay)
+    {
+      switch (input.Action)
+      {
+        case pal::PointerAction::Pressed:
+          MousePressed(intPoint, pal::MouseButton::Left, input.Modifiers);
+          break;
+        case pal::PointerAction::Released:
+          MouseReleased(intPoint, pal::MouseButton::Left, input.Modifiers);
+          break;
+        case pal::PointerAction::Entered:
+        case pal::PointerAction::Moved:   MouseMoved(intPoint, input.Modifiers); break;
+        default:                          break;
+      }
+      return;
+    }
+
+    auto &handler = _frame->GetEventHandler();
+    switch (input.Action)
+    {
+      case pal::PointerAction::Entered:
+      case pal::PointerAction::Moved:
+      {
+        (void)handler.MouseMoved(PenEvent(boo::PlatformEvent::Type::MouseMoved, point, _penButton, 0, input));
+        break;
+      }
+      case pal::PointerAction::Pressed:
+      {
+        // https://w3c.github.io/pointerevents/#the-button-property
+        _penButton = input.Eraser         ? boo::MouseButton::Other
+                     : input.BarrelButton ? boo::MouseButton::Right
+                                          : boo::MouseButton::Left;
+        _penButtons |= _penButton == boo::MouseButton::Other ? uint16 {32} : ButtonsBit(_penButton);
+        int32 clickCount = CountClick(intPoint, _penButton);
+        (void)handler.HandleMousePressEvent(
+          PenEvent(boo::PlatformEvent::Type::MousePressed, point, _penButton, clickCount, input));
+        break;
+      }
+      case pal::PointerAction::Released:
+      {
+        auto button = std::exchange(_penButton, boo::MouseButton::None);
+        if (button == boo::MouseButton::None)
+        {
+          break;
+        }
+        _penButtons = 0;
+        (void)handler.HandleMouseReleaseEvent(
+          PenEvent(boo::PlatformEvent::Type::MouseReleased, point, button, _clickCount, input));
+        break;
+      }
+      case pal::PointerAction::Left:
+      {
+        // A move outside the viewport hits nothing, so the element under the pen is left.
+        (void)handler.MouseMoved(PenEvent(boo::PlatformEvent::Type::MouseMoved, boo::DoublePoint(-1, -1),
+                                          boo::MouseButton::None, 0, input));
+        break;
+      }
+      case pal::PointerAction::Cancelled:
+      {
+        // FIXME: End the event handler's press too, without the release's events.
+        _penButton = boo::MouseButton::None;
+        _penButtons = 0;
+        _page->GetPointerCaptureController().CancelPointer(boo::PenPointerID,
+                                                           _frame->View()->WindowToContents(intPoint));
+        break;
+      }
+    }
+    PerformMicrotaskCheckpoint();
+  }
+
+  bool View::TouchInput(const boo::DoublePoint &point, const pal::PointerInput &input) noexcept
+  {
+    if (_overlay)
+    {
+      return false;
+    }
+
+    auto it = std::ranges::find(_touches, input.Id, &ActiveTouch::HostId);
+    if (input.Action == pal::PointerAction::Pressed && it == _touches.end())
+    {
+      // The lowest id no other touch has.
+      uint32 id = 0;
+      while (std::ranges::find(_touches, id, &ActiveTouch::Id) != _touches.end())
+      {
+        ++id;
+      }
+      _touches.push_back({input.Id, id, {}});
+      it = _touches.end() - 1;
+    }
+    if (it == _touches.end())
+    {
+      return false;
+    }
+
+    boo::PlatformEvent::Type type = boo::PlatformEvent::Type::TouchMove;
+    boo::PlatformTouchPoint::State state = boo::PlatformTouchPoint::TouchMoved;
+    switch (input.Action)
+    {
+      case pal::PointerAction::Pressed:
+        type = boo::PlatformEvent::Type::TouchStart;
+        state = boo::PlatformTouchPoint::TouchPressed;
+        break;
+      case pal::PointerAction::Released:
+        type = boo::PlatformEvent::Type::TouchEnd;
+        state = boo::PlatformTouchPoint::TouchReleased;
+        break;
+      case pal::PointerAction::Cancelled:
+        type = boo::PlatformEvent::Type::TouchCancel;
+        state = boo::PlatformTouchPoint::TouchCancelled;
+        break;
+      default: break;
+    }
+
+    // A cancellation from the host may come without a position: the touch stays where it was.
+    bool hasPosition = input.Action != pal::PointerAction::Cancelled || point.X() || point.Y();
+    auto &previous = it->Point;
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    boo::DoublePoint position = hasPosition ? point : previous.Pos();
+    boo::DoubleSize radius =
+      hasPosition ? boo::DoubleSize(input.Width / 2, input.Height / 2) : previous.Radius();
+    float force = hasPosition ? input.Pressure.value_or(0.f) : previous.Force();
+    it->Point = boo::PlatformTouchPoint(it->Id, state, position, position, radius, 0, force);
+
+    List<boo::PlatformTouchPoint> points;
+    for (auto &touch : _touches)
+    {
+      if (&touch == &*it)
+      {
+        points.push_back(touch.Point);
+      }
+      else
+      {
+        points.push_back(boo::PlatformTouchPoint(
+          touch.Id, boo::PlatformTouchPoint::TouchStationary, touch.Point.ScreenPos(), touch.Point.Pos(),
+          touch.Point.Radius(), touch.Point.RotationAngle(), touch.Point.Force()));
+      }
+    }
+
+    boo::PlatformTouchEvent event(type, krys::move(points), input::ToBooey(input.Modifiers),
+                                  MonotonicTime::Now());
+    // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
+    if (type == boo::PlatformEvent::Type::TouchMove)
+    {
+      event.SetCoalescedEvents({event});
+    }
+
+    if (state == boo::PlatformTouchPoint::TouchReleased || state == boo::PlatformTouchPoint::TouchCancelled)
+    {
+      _touches.erase(it);
+    }
+
+    bool handled = _frame->GetEventHandler().HandleTouchEvent(event);
+    PerformMicrotaskCheckpoint();
+    return handled;
+  }
+
+  void View::SetPointingDevices(const pal::PointingDevices &devices) noexcept
+  {
+    using boo::css::mq::PointerCharacteristics;
+    auto environment = _frame->GetMediaEnvironment();
+
+    // The mouse is the primary pointing device if there's one, else the touch screen, else the pen.
+    if (devices.Mouse || (!devices.Touch && devices.Pen))
+    {
+      environment.PrimaryPointingDevice = PointerCharacteristics::Fine;
+      environment.HoverSupportedByPrimaryPointingDevice = true;
+    }
+    else
+    {
+      environment.PrimaryPointingDevice =
+        devices.Touch ? PointerCharacteristics::Coarse : PointerCharacteristics::None;
+      environment.HoverSupportedByPrimaryPointingDevice = false;
+    }
+
+    environment.AllAvailablePointingDevices = PointerCharacteristics::None;
+    if (devices.Mouse || devices.Pen)
+    {
+      environment.AllAvailablePointingDevices =
+        environment.AllAvailablePointingDevices | PointerCharacteristics::Fine;
+    }
+    if (devices.Touch)
+    {
+      environment.AllAvailablePointingDevices =
+        environment.AllAvailablePointingDevices | PointerCharacteristics::Coarse;
+    }
+    // A pen hovers, as the mouse does.
+    environment.HoverSupportedByAnyAvailablePointingDevice = devices.Mouse || devices.Pen;
+    environment.MaxTouchPoints = devices.Touch ? devices.MaxTouchPoints : 0;
+    _frame->SetMediaEnvironment(environment);
   }
 
   pal::CursorShape View::CurrentCursor() const noexcept
@@ -1185,8 +1388,36 @@ namespace krys::ui
                                            EnumSet<boo::PlatformEvent::Modifier> modifiers) const noexcept
   {
     // FIXME: The screen position, once the host reports where the page is on the screen.
-    return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
-                                   modifiers, MonotonicTime::Now(), _buttons);
+    boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
+                                  modifiers, MonotonicTime::Now(), _buttons);
+    // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
+    if (type == boo::PlatformEvent::Type::MouseMoved)
+    {
+      event.SetCoalescedEvents({event});
+    }
+    return event;
+  }
+
+  boo::PlatformMouseEvent View::PenEvent(boo::PlatformEvent::Type type, const boo::DoublePoint &point,
+                                         boo::MouseButton button, int32 clickCount,
+                                         const pal::PointerInput &input) const noexcept
+  {
+    // A pen without pressure presses at half pressure.
+    double force = input.Pressure ? *input.Pressure : (input.InContact ? 0.5 : 0);
+    // FIXME: The screen position, once the host reports where the page is on the screen.
+    boo::PlatformMouseEvent event(point, point, button, type, clickCount, input::ToBooey(input.Modifiers),
+                                  MonotonicTime::Now(), _penButtons, {}, force,
+                                  boo::SyntheticClickType::NoTap, boo::PenPointerID,
+                                  boo::dom::PenPointerEventType());
+    event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),
+                             static_cast<int32>(std::round(input.TiltY)),
+                             static_cast<int32>(std::round(input.Twist))});
+    // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
+    if (type == boo::PlatformEvent::Type::MouseMoved)
+    {
+      event.SetCoalescedEvents({event});
+    }
+    return event;
   }
 
   uint16 View::ButtonsBit(boo::MouseButton button) noexcept

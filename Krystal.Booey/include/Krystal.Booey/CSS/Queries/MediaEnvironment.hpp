@@ -77,6 +77,9 @@ namespace krys::boo::css::mq
     /// @brief What the available pointing devices can do, together.
     PointerCharacteristics AllAvailablePointingDevices {PointerCharacteristics::Fine};
 
+    /// @brief How many touches the touch screens take at once; 0 without one (`navigator.maxTouchPoints`).
+    uint32 MaxTouchPoints {0};
+
     /// @brief Whether scripts can run.
     bool CanExecuteScripts {true};
 

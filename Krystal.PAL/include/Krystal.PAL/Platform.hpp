@@ -6,6 +6,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
+#include "Krystal.PAL/Pointer.hpp"
 
 namespace krys::pal
 {
@@ -40,6 +41,10 @@ namespace krys::pal
 
   /// @brief Gets the system's wheel scroll settings, read when the user last changed them.
   KRYS_NODISCARD WheelScrollSettings GetWheelScrollSettings() noexcept;
+
+  /// @brief Gets the pointing devices the system has: a mouse, a pen, a touch screen and how many touches it
+  /// takes.
+  KRYS_NODISCARD PointingDevices GetPointingDevices() noexcept;
 
   /// @brief Puts @p text (UTF-8, with LF line breaks) on the system clipboard, replacing what's there.
   /// @param windowHandle The window that owns the clipboard's contents; the active window if null.

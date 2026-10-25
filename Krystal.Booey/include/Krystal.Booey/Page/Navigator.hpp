@@ -183,6 +183,14 @@ namespace krys::boo
 
 #pragma endregion
 
+#pragma region NavigatorMaxTouchPoints - https://w3c.github.io/pointerevents/#extensions-to-the-navigator-interface
+
+    /// @brief How many touches the device's touch screens take at once: the frame's media environment's.
+    /// @see https://w3c.github.io/pointerevents/#dom-navigator-maxtouchpoints
+    KRYS_NODISCARD int32 MaxTouchPoints() const noexcept;
+
+#pragma endregion
+
     /// @see https://html.spec.whatwg.org/#dom-navigator-useractivation
     KRYS_NODISCARD UserActivation &GetUserActivation() const noexcept;
 

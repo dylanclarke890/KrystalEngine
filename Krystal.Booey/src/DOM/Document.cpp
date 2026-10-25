@@ -40,6 +40,7 @@
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
@@ -93,6 +94,7 @@
 #include "Krystal.Booey/Page/Location.hpp"
 #include "Krystal.Booey/Page/MouseEventWithHitTestResults.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/ResizeObserver.hpp"
 #include "Krystal.Booey/Page/ResizeObserverEntry.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
@@ -1096,12 +1098,35 @@ namespace krys::boo::dom
     HitTestResult result {LayoutPoint(documentPoint)};
     HitTest(request, result);
 
+    auto captureElementChanged = CaptureChange::No;
     if (!request.ReadOnly())
     {
-      // FIXME: Pointer capture (processPendingPointerCapture, targeting the capture element and reporting its
-      // changes) comes with pointer events.
       RefPtr<Element> targetElement = ShareRefPtr(result.TargetElement());
-      UpdateHoverActiveState(request, targetElement.get());
+      if (auto *page = GetPage())
+      {
+        // Before we dispatch a new mouse event, we must run the Process Pending Capture Element steps as
+        // defined in https://w3c.github.io/pointerevents/#process-pending-pointer-capture.
+        auto &pointerCaptureController = page->GetPointerCaptureController();
+        RefPtr<Element> previousCaptureElement =
+          ShareRefPtr(pointerCaptureController.PointerCaptureElement(this, event.PointerId()));
+        pointerCaptureController.ProcessPendingPointerCapture(event.PointerId());
+        RefPtr<Element> captureElement =
+          ShareRefPtr(pointerCaptureController.PointerCaptureElement(this, event.PointerId()));
+        // If the capture element has changed while running the Process Pending Capture Element steps then
+        // we need to indicate that when calling UpdateHoverActiveState to be sure that the :active and :hover
+        // element chains are updated.
+        if (previousCaptureElement != captureElement)
+        {
+          captureElementChanged = CaptureChange::Yes;
+        }
+        // If we have a capture element, we must target it instead of what would normally hit-test for this
+        // event.
+        if (captureElement)
+        {
+          targetElement = krys::move(captureElement);
+        }
+      }
+      UpdateHoverActiveState(request, targetElement.get(), captureElementChanged);
     }
 
     return MouseEventWithHitTestResults(event, result);
@@ -1940,7 +1965,7 @@ namespace krys::boo::dom
     _openDialogs.remove(ShareRef(dialog));
   }
 
-  void Document::HandleLightDismiss(const MouseEvent &event, Node &target) noexcept
+  void Document::HandleLightDismiss(const PointerEvent &event, Node &target) noexcept
   {
     krys_debug_assert(event.IsTrusted());
 
@@ -1949,11 +1974,11 @@ namespace krys::boo::dom
     if (TopmostAutoOrHintPopover())
     {
       RefPtr<html::HTMLElement> ancestor = TopmostClickedPopover(target);
-      if (event.Type() == EventNames::MouseDown)
+      if (event.Type() == EventNames::PointerDown)
       {
         _popoverPointerDownTarget = CreateWeakPtr(ancestor.get());
       }
-      else if (event.Type() == EventNames::MouseUp)
+      else if (event.Type() == EventNames::PointerUp)
       {
         bool sameTarget = ancestor.get() == _popoverPointerDownTarget.get();
         _popoverPointerDownTarget = nullptr;
@@ -1997,13 +2022,13 @@ namespace krys::boo::dom
     };
     RefPtr<html::HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
 
-    if (event.Type() == EventNames::MouseDown)
+    if (event.Type() == EventNames::PointerDown)
     {
       _dialogPointerDownTarget = CreateWeakPtr(ancestor.get());
       return;
     }
 
-    if (event.Type() == EventNames::MouseUp)
+    if (event.Type() == EventNames::PointerUp)
     {
       bool sameTarget = ancestor.get() == _dialogPointerDownTarget.get();
       _dialogPointerDownTarget = nullptr;
@@ -2568,6 +2593,13 @@ namespace krys::boo::dom
     html::EventLoop::Current().QueueTask(source, *this,
                                          [protectedThis = ShareRef(*this), event = krys::move(event)]
                                          { protectedThis->DispatchWindowEvent(*event); });
+  }
+
+  void Document::QueueTaskToDispatchEvent(html::TaskSource source, Ref<Event> &&event) noexcept
+  {
+    html::EventLoop::Current().QueueTask(
+      source, *this, [protectedThis = ShareRef(*this), event = krys::move(event)]
+      { (void)EventDispatcher::DispatchToTarget(*event, protectedThis.get()); });
   }
 
   EventTarget *Document::GetParent(Event &event) const noexcept

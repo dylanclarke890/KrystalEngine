@@ -12,10 +12,14 @@
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
+#include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
+#include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -36,8 +40,6 @@ namespace krys::boo
 {
   class AutoscrollController;
   class FloatQuad;
-  class HitTestRequest;
-  class HitTestResult;
   class LocalFrame;
   class LocalFrameView;
   class RenderLayer;
@@ -64,7 +66,10 @@ namespace krys::boo
   /// Shift extends it.
   // FIXME: The rest of the event handler: the keyboard's other default actions (selection by the keyboard is
   // with the keyboard and the DOM's Selection), drag and drop, context menus, resizers, subframes, pan
-  // scrolling, pointer lock, touch and pointer events.
+  // scrolling, pointer lock and touch events.
+
+  // Pointer events from the mouse are dispatched by the elements as they get mouse events
+  // (`Element::DispatchMouseEvent`).
   class EventHandler
   {
     KRYS_NON_COPY_MOVABLE(EventHandler);
@@ -124,6 +129,8 @@ namespace krys::boo
     Cursor _currentMouseCursor;
 
     RefPtr<dom::Node> _clickNode;
+    /// @brief The element capturing the mouse when the click began, which gets the click.
+    RefPtr<dom::Element> _clickCaptureElement;
     int32 _clickCount {0};
 
     // Same coordinates as PlatformMouseEvent::Position().
@@ -137,6 +144,12 @@ namespace krys::boo
     bool _hasScheduledCursorUpdate {false};
     bool _isHandlingWheelEvent {false};
     PlatformMouseEvent _lastPlatformMouseEvent;
+
+    // The element each touch began on, by its id plus one (so no key is 0).
+    HashMap<uint32, RefPtr<dom::EventTarget>> _originatingTouchPointTargets;
+    RefPtr<dom::Document> _originatingTouchPointDocument;
+    uint32 _originatingTouchPointTargetKey {0};
+    bool _touchPressed {false};
 
   public:
     explicit EventHandler(LocalFrame &frame) noexcept;
@@ -154,6 +167,14 @@ namespace krys::boo
 
     /// @brief Sends mouse events to @p element, wherever the mouse is, until it's cleared.
     void SetCapturingMouseEventsElement(RefPtr<dom::Element> &&element) noexcept;
+
+    /// @brief Called when @p element captures the mouse's pointer (`setPointerCapture()`), or null when the
+    /// capture is released: mouse events, and the click, go to it.
+    void PointerCaptureElementDidChange(dom::Element *element) noexcept;
+
+    /// @brief Hit tests at @p point (in the frame's contents), after bringing the layout up to date.
+    KRYS_NODISCARD HitTestResult HitTestResultAtPoint(const LayoutPoint &point,
+                                                      EnumSet<HitTestRequest::Type> hitType) const noexcept;
 
     KRYS_NODISCARD bool MousePressed() const noexcept
     {
@@ -213,6 +234,11 @@ namespace krys::boo
     /// `auxclick`) at the nearest common ancestor of the pressed and released elements.
     /// @return Whether the event was swallowed (cancelled).
     bool HandleMouseReleaseEvent(const PlatformMouseEvent &platformMouseEvent) noexcept;
+
+    /// @brief Handles a change to the touches on the screen: `touchstart`, `touchmove`, `touchend` and
+    /// `touchcancel` at the elements the touches began on, each preceded by the touches' pointer events.
+    /// @return Whether a touch event was cancelled or handled.
+    bool HandleTouchEvent(const PlatformTouchEvent &event) noexcept;
 
     /// @brief Chooses the cursor again for the last known mouse position, as after the page changes under a
     /// still mouse.
@@ -304,6 +330,9 @@ namespace krys::boo
                               const MouseEventWithHitTestResults &mouseEvent,
                               IgnoreAncestorNodesForClickEvent ignoreAncestorNodesForClickEvent) noexcept;
 
+    /// @return Whether the click was dispatched without being cancelled.
+    bool DispatchAnyClickEvent(dom::DOMStringAtom eventType, dom::Node *clickNode, int32 clickCount,
+                               const PlatformMouseEvent &platformMouseEvent) noexcept;
     /// @return Whether the event was dispatched without being cancelled.
     bool DispatchMouseEvent(dom::DOMStringAtom eventType, dom::Node *targetNode, int32 clickCount,
                             const PlatformMouseEvent &platformMouseEvent,

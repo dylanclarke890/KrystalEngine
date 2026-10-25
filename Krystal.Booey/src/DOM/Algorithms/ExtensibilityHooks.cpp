@@ -6,6 +6,8 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 
@@ -142,6 +144,11 @@ namespace krys::boo::dom
 
     if (auto *element = DynamicDowncast<Element>(removedNode))
     {
+      if (auto *page = element->NodeDocument().GetPage())
+      {
+        // FIXME: The pointer lock controller, with pointer lock.
+        page->GetPointerCaptureController().ElementWasRemoved(*element);
+      }
       style::Styleable::FromElement(*element).ElementWasRemoved();
       element->NodeDocument().UserActionElements().ClearAllForElement(*element);
       element->SetSavedLayerScrollPosition({});

@@ -82,4 +82,9 @@ namespace krys::pal
     _mouse._clientY = clientY;
     _events->Enqueue(CreateUnique<MouseScrollEvent>(window, deltaX, deltaY, clientX, clientY, modifiers));
   }
+
+  void Input::OnPointerEvent(WindowHandle window, const PointerInput &input) noexcept
+  {
+    _events->Enqueue(CreateUnique<PointerInputEvent>(window, input));
+  }
 }

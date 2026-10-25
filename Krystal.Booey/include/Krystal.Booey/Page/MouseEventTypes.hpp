@@ -5,6 +5,26 @@
 
 namespace krys::boo
 {
+  static constexpr double ForceAtClick = 1;
+  static constexpr double ForceAtForceClick = 2;
+
+  /// @brief Whether a mouse event stands in for a tap, and with how many fingers.
+  /// @brief How a pen is held: its tilt along each axis and its twist about its own axis, in degrees.
+  /// @see https://w3c.github.io/pointerevents/#dom-pointerevent-tiltx
+  struct PenOrientation
+  {
+    int32 TiltX {0};
+    int32 TiltY {0};
+    int32 Twist {0};
+  };
+
+  enum class SyntheticClickType : uint8
+  {
+    NoTap,
+    OneFingerTap,
+    TwoFingerTap
+  };
+
   // These button numbers match the ones used in the DOM API, 0 through 2, except for None and Other which
   // aren't specified. We reserve -2 for the former and -1 to represent pointer events that indicate that the
   // pressed mouse button hasn't changed since the last event, as specified in the DOM API for Pointer Events.

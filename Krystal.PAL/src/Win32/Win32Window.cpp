@@ -9,6 +9,10 @@
 #include <windows.h>
 #include <windowsx.h>
 
+#ifndef WM_TABLET_QUERYSYSTEMGESTURESTATUS
+  #define WM_TABLET_QUERYSYSTEMGESTURESTATUS 0x02CC
+#endif
+
 #ifdef CreateWindow
   #undef CreateWindow
 #endif
@@ -168,6 +172,10 @@ namespace
       default:             return Key::UNKNOWN;
     }
   }
+
+  // The answers to WM_TABLET_QUERYSYSTEMGESTURESTATUS (tpcshrd.h).
+  constexpr LRESULT TabletDisablePressAndHold = 0x00'00'00'01;
+  constexpr LRESULT TabletDisableFlicks = 0x00'01'00'00;
 
   /// @brief The modifier keys held as the current message was sent.
   static krys::pal::KeyModifiers CurrentModifiers() noexcept
@@ -386,6 +394,136 @@ namespace krys::pal
         throw std::runtime_error("Failed to register raw input device: " + win32::GetLastErrorAsString());
     }
 
+    bool Win32Window::HandlePointerMessage(HWND window, UINT message, WPARAM wParam) const noexcept
+    {
+      if (!_callbacks.OnPointer)
+      {
+        return false;
+      }
+
+      const UINT32 pointerId = GET_POINTERID_WPARAM(wParam);
+
+      // The pointer's information is gone once the window loses it, so it's cancelled as it was last seen.
+      if (message == WM_POINTERCAPTURECHANGED)
+      {
+        auto it = _activePointers.find(pointerId);
+        if (it == _activePointers.end())
+        {
+          return false;
+        }
+        PointerInput input;
+        input.Id = pointerId;
+        input.Type = it->second;
+        input.Action = PointerAction::Cancelled;
+        input.Modifiers = CurrentModifiers();
+        _activePointers.erase(it);
+        _callbacks.OnPointer(GetWindowHandle(), input);
+        return true;
+      }
+
+      POINTER_INPUT_TYPE type {};
+      if (!::GetPointerType(pointerId, &type) || (type != PT_PEN && type != PT_TOUCH))
+      {
+        return false;
+      }
+
+      PointerInput input;
+      input.Id = pointerId;
+      input.Type = type == PT_PEN ? PointerType::Pen : PointerType::Touch;
+
+      POINTER_INFO info {};
+      if (type == PT_PEN)
+      {
+        POINTER_PEN_INFO pen {};
+        if (!::GetPointerPenInfo(pointerId, &pen))
+        {
+          return false;
+        }
+        info = pen.pointerInfo;
+        // Pressure from 0 to 1024, tilt in degrees from -90 to 90 and rotation in degrees from 0 to 359.
+        if (pen.penMask & PEN_MASK_PRESSURE)
+        {
+          input.Pressure = static_cast<float>(pen.pressure) / 1024.f;
+        }
+        if (pen.penMask & PEN_MASK_TILT_X)
+        {
+          input.TiltX = static_cast<float>(pen.tiltX);
+        }
+        if (pen.penMask & PEN_MASK_TILT_Y)
+        {
+          input.TiltY = static_cast<float>(pen.tiltY);
+        }
+        if (pen.penMask & PEN_MASK_ROTATION)
+        {
+          input.Twist = static_cast<float>(pen.rotation);
+        }
+        input.BarrelButton = (pen.penFlags & PEN_FLAG_BARREL) != 0;
+        input.Eraser = (pen.penFlags & (PEN_FLAG_ERASER | PEN_FLAG_INVERTED)) != 0;
+      }
+      else
+      {
+        POINTER_TOUCH_INFO touch {};
+        if (!::GetPointerTouchInfo(pointerId, &touch))
+        {
+          return false;
+        }
+        info = touch.pointerInfo;
+        if (touch.touchMask & TOUCH_MASK_CONTACTAREA)
+        {
+          input.Width = static_cast<float>(touch.rcContact.right - touch.rcContact.left);
+          input.Height = static_cast<float>(touch.rcContact.bottom - touch.rcContact.top);
+        }
+        if (touch.touchMask & TOUCH_MASK_PRESSURE)
+        {
+          input.Pressure = static_cast<float>(touch.pressure) / 1024.f;
+        }
+      }
+
+      // The position is in screen coordinates.
+      POINT point = info.ptPixelLocation;
+      input.ScreenX = static_cast<float>(point.x);
+      input.ScreenY = static_cast<float>(point.y);
+      ::ScreenToClient(window, &point);
+      input.ClientX = static_cast<float>(point.x);
+      input.ClientY = static_cast<float>(point.y);
+      input.InContact = (info.pointerFlags & POINTER_FLAG_INCONTACT) != 0;
+      input.IsPrimary = (info.pointerFlags & POINTER_FLAG_PRIMARY) != 0;
+      input.Modifiers = CurrentModifiers();
+
+      switch (message)
+      {
+        case WM_POINTERENTER:  input.Action = PointerAction::Entered; break;
+        case WM_POINTERDOWN:   input.Action = PointerAction::Pressed; break;
+        case WM_POINTERUPDATE: input.Action = PointerAction::Moved; break;
+        case WM_POINTERUP:
+          input.Action = (info.pointerFlags & POINTER_FLAG_CANCELED) != 0 ? PointerAction::Cancelled
+                                                                          : PointerAction::Released;
+          break;
+        default: input.Action = PointerAction::Left; break;
+      }
+
+      // A touch is only reported while it's down: it enters and leaves with its press and release.
+      if (input.Type == PointerType::Touch
+          && (input.Action == PointerAction::Entered || input.Action == PointerAction::Left
+              || (input.Action == PointerAction::Moved && !input.InContact)))
+      {
+        return true;
+      }
+
+      const bool ends = input.Action == PointerAction::Left || input.Action == PointerAction::Cancelled
+                        || (input.Type == PointerType::Touch && input.Action == PointerAction::Released);
+      if (ends)
+      {
+        _activePointers.erase(pointerId);
+      }
+      else
+      {
+        _activePointers.insert_or_assign(pointerId, input.Type);
+      }
+      _callbacks.OnPointer(GetWindowHandle(), input);
+      return true;
+    }
+
     void Win32Window::ProcessMessages() noexcept
     {
       MSG message {};
@@ -430,6 +568,26 @@ namespace krys::pal
           break;
         }
 #pragma region Input Messages
+        // Pens and touches; the mouse's come as the mouse messages.
+        case WM_POINTERENTER:
+        case WM_POINTERDOWN:
+        case WM_POINTERUPDATE:
+        case WM_POINTERUP:
+        case WM_POINTERLEAVE:
+        case WM_POINTERCAPTURECHANGED:
+        {
+          if (HandlePointerMessage(window, message, wParam))
+          {
+            return 0;
+          }
+          break;
+        }
+        // Holding a pen or a finger still doesn't wait for the system's press and hold (a right click), and
+        // flicks aren't gestures: the pointers go to the window as they are.
+        case WM_TABLET_QUERYSYSTEMGESTURESTATUS:
+        {
+          return TabletDisablePressAndHold | TabletDisableFlicks;
+        }
         // Alt combinations (and F10) come as system keys; they still go on to DefWindowProc, for Alt+F4.
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:

@@ -53,17 +53,22 @@ namespace krys::boo::dom
   MouseEvent::MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
                          const DoublePoint &screenLocation, const DoublePoint &windowLocation,
                          double movementX, double movementY, EnumSet<Modifier> modifiers, MouseButton button,
-                         uint16 buttons, EventTarget *relatedTarget, Simulated isSimulated) noexcept
+                         uint16 buttons, EventTarget *relatedTarget, double force,
+                         SyntheticClickType syntheticClickType, const List<Ref<MouseEvent>> &coalescedEvents,
+                         const List<Ref<MouseEvent>> &predictedEvents, Simulated isSimulated) noexcept
       : MouseRelatedEvent(type, eventInitDict, view, screenLocation, windowLocation, movementX, movementY,
                           modifiers, isSimulated),
-        _button(ButtonOrLeft(button)), _buttons(buttons), _buttonDown(button != MouseButton::None),
-        _relatedTarget(ShareRefPtr(relatedTarget))
+        _button(ButtonOrLeft(button)), _buttons(buttons), _syntheticClickType(syntheticClickType),
+        _buttonDown(button != MouseButton::None), _relatedTarget(ShareRefPtr(relatedTarget)), _force(force),
+        _coalescedEvents(coalescedEvents), _predictedEvents(predictedEvents)
   {
     _isTrusted = true;
   }
 
   Ref<MouseEvent> MouseEvent::Create(DOMStringAtom eventType, LocalFrameView *view,
-                                     const PlatformMouseEvent &event, int32 detail,
+                                     const PlatformMouseEvent &event,
+                                     const List<Ref<MouseEvent>> &coalescedEvents,
+                                     const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
                                      Node *relatedTarget) noexcept
   {
     bool isMouseEnterOrLeave = eventType == EventNames::MouseEnter || eventType == EventNames::MouseLeave;
@@ -74,11 +79,12 @@ namespace krys::boo::dom
     init.Composed = !isMouseEnterOrLeave;
     init.Detail = detail;
 
-    Ref<MouseEvent> mouseEvent =
-      AdoptRef(*new MouseEvent(eventType, init, view, event.GlobalPosition(), event.Position(),
-                               event.MovementDelta().X(), event.MovementDelta().Y(), event.Modifiers(),
-                               event.Button(), event.Buttons(), relatedTarget, Simulated::No));
+    Ref<MouseEvent> mouseEvent = AdoptRef(*new MouseEvent(
+      eventType, init, view, event.GlobalPosition(), event.Position(), event.MovementDelta().X(),
+      event.MovementDelta().Y(), event.Modifiers(), event.Button(), event.Buttons(), relatedTarget,
+      event.Force(), event.GetSyntheticClickType(), coalescedEvents, predictedEvents, Simulated::No));
     mouseEvent->_timeStamp = static_cast<DOMHighResTimeStamp>(event.Timestamp().count());
+    mouseEvent->_penOrientation = event.GetPenOrientation();
     return mouseEvent;
   }
 
@@ -86,7 +92,8 @@ namespace krys::boo::dom
                                      bool isComposed, DOMHighResTimeStamp timestamp, LocalFrameView *view,
                                      int32 detail, double screenX, double screenY, double clientX,
                                      double clientY, EnumSet<Modifier> modifiers, MouseButton button,
-                                     uint16 buttons, EventTarget *relatedTarget) noexcept
+                                     uint16 buttons, SyntheticClickType syntheticClickType,
+                                     EventTarget *relatedTarget) noexcept
   {
     UIEventInit init;
     init.Bubbles = canBubble;
@@ -94,9 +101,9 @@ namespace krys::boo::dom
     init.Composed = isComposed;
     init.Detail = detail;
 
-    Ref<MouseEvent> mouseEvent =
-      AdoptRef(*new MouseEvent(eventType, init, view, {FiniteOrZero(screenX), FiniteOrZero(screenY)}, {}, 0,
-                               0, modifiers, button, buttons, relatedTarget, Simulated::No));
+    Ref<MouseEvent> mouseEvent = AdoptRef(*new MouseEvent(
+      eventType, init, view, {FiniteOrZero(screenX), FiniteOrZero(screenY)}, {}, 0, 0, modifiers, button,
+      buttons, relatedTarget, 0, syntheticClickType, {}, {}, Simulated::No));
     mouseEvent->InitCoordinates({FiniteOrZero(clientX), FiniteOrZero(clientY)});
     mouseEvent->_timeStamp = timestamp;
     return mouseEvent;
@@ -121,9 +128,9 @@ namespace krys::boo::dom
     }
 
     auto *frame = target.NodeDocument().Frame();
-    Ref<MouseEvent> mouseEvent =
-      AdoptRef(*new MouseEvent(eventType, init, frame ? frame->View() : nullptr, {}, {}, 0, 0, modifiers,
-                               MouseButton::Left, 0, nullptr, Simulated::Yes));
+    Ref<MouseEvent> mouseEvent = AdoptRef(
+      *new MouseEvent(eventType, init, frame ? frame->View() : nullptr, {}, {}, 0, 0, modifiers,
+                      MouseButton::Left, 0, nullptr, 0, SyntheticClickType::NoTap, {}, {}, Simulated::Yes));
     mouseEvent->_isTrusted = isTrusted;
     if (underlyingEvent)
     {

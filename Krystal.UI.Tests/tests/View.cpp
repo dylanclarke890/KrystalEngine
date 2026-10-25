@@ -2,6 +2,7 @@
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/PointerEvent.hpp"
+#include "Krystal.Booey/DOM/TouchEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
@@ -1017,6 +1020,150 @@ namespace krys::ui::tests
     CHECK(records
           == List<std::string> {"mousedown:a/1/1", "mouseup:a/1/0", "click:a/1/0", "mousedown:a/1/2",
                                 "mouseup:a/1/0", "auxclick:a/1/0"});
+  }
+
+  TEST_CASE("View: pens and touches", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0 } div { height: 50px }</style>"
+                  u8"<div id=a></div><div id=b></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+
+    // Each event as `type:id/buttons`, a pointer event's with its type, id and pressure, and a touch event's
+    // with its touches.
+    List<std::string> records;
+    auto record = [&](boo::dom::Event &event)
+    {
+      auto type = event.Type().View();
+      auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+      auto *element = node ? DynamicDowncast<boo::dom::Element>(*node) : nullptr;
+      auto id =
+        element ? element->GetAttribute(u8"id").value_or(boo::dom::DOMString()) : boo::dom::DOMString();
+      std::string text = std::string(type.begin(), type.end()) + ":" + std::string(id.begin(), id.end());
+      if (auto *pointer = DynamicDowncast<boo::dom::PointerEvent>(event))
+      {
+        auto pointerType = pointer->PointerType();
+        text += "/" + std::string(pointerType.begin(), pointerType.end())
+                + std::to_string(pointer->PointerId()) + "/" + std::to_string(pointer->Buttons()) + "/"
+                + std::to_string(static_cast<int>(pointer->Pressure() * 100));
+      }
+      else if (auto *touch = DynamicDowncast<boo::dom::TouchEvent>(event))
+      {
+        text += "/" + std::to_string(touch->Touches()->Length()) + ","
+                + std::to_string(touch->ChangedTouches()->Length());
+      }
+      else if (auto *mouse = DynamicDowncast<boo::dom::MouseEvent>(event))
+      {
+        text += "/" + std::to_string(mouse->Buttons());
+      }
+      records.push_back(text);
+    };
+    List<boo::dom::EventListenerHandle> handles;
+    for (auto type : {u8"pointerdown", u8"pointermove", u8"pointerup", u8"pointercancel", u8"mousedown",
+                      u8"mouseup", u8"click", u8"touchstart", u8"touchmove", u8"touchend", u8"touchcancel"})
+    {
+      handles.push_back(view.Document().AddEventListener(boo::dom::DOMStringAtom(type),
+                                                         Func<void(boo::dom::Event &)>(record)));
+    }
+
+    auto input = [](pal::PointerType type, pal::PointerAction action, uint32 id = 7)
+    {
+      pal::PointerInput input;
+      input.Id = id;
+      input.Type = type;
+      input.Action = action;
+      input.InContact = action == pal::PointerAction::Pressed || action == pal::PointerAction::Moved;
+      return input;
+    };
+
+    SECTION("a pen hovers, presses and releases as the mouse does, with its pressure and tilt")
+    {
+      RefPtr<boo::dom::PointerEvent> down;
+      handles.push_back(view.Document().AddEventListener(
+        boo::dom::DOMStringAtom(u8"pointerdown"),
+        Func<void(boo::dom::Event &)>([&](boo::dom::Event &event)
+                                      { down = ShareRefPtr(&Downcast<boo::dom::PointerEvent>(event)); })));
+
+      auto hover = input(pal::PointerType::Pen, pal::PointerAction::Moved);
+      hover.InContact = false;
+      view.PenInput({10, 10}, hover);
+      auto press = input(pal::PointerType::Pen, pal::PointerAction::Pressed);
+      press.Pressure = 0.75f;
+      press.TiltX = 20;
+      press.Twist = 90;
+      view.PenInput({10, 10}, press);
+      view.PenInput({10, 10}, input(pal::PointerType::Pen, pal::PointerAction::Released));
+      CHECK(records
+            == List<std::string> {"pointermove:a/pen2/0/0", "pointerdown:a/pen2/1/75", "mousedown:a/1",
+                                  "pointerup:a/pen2/0/0", "mouseup:a/0", "click:a/pen2/0/0"});
+      REQUIRE(down);
+      CHECK(down->TiltX() == 20);
+      CHECK(down->Twist() == 90);
+      records.clear();
+
+      // The barrel button presses the right button, the eraser the eraser button; a pen without pressure
+      // presses at half pressure.
+      auto barrel = input(pal::PointerType::Pen, pal::PointerAction::Pressed);
+      barrel.BarrelButton = true;
+      view.PenInput({10, 60}, barrel);
+      view.PenInput({10, 60}, input(pal::PointerType::Pen, pal::PointerAction::Released));
+      auto eraser = input(pal::PointerType::Pen, pal::PointerAction::Pressed);
+      eraser.Eraser = true;
+      view.PenInput({10, 60}, eraser);
+      CHECK(down->Button() == 5);
+      view.PenInput({10, 60}, input(pal::PointerType::Pen, pal::PointerAction::Released));
+      CHECK(records
+            == List<std::string> {"pointerdown:b/pen2/2/50", "mousedown:b/2", "pointerup:b/pen2/0/0",
+                                  "mouseup:b/0", "pointerdown:b/pen2/32/50", "mousedown:b/32",
+                                  "pointerup:b/pen2/0/0", "mouseup:b/0"});
+    }
+
+    SECTION("touches: ids from the lowest free, every touch in the events, and no mouse events")
+    {
+      auto first = input(pal::PointerType::Touch, pal::PointerAction::Pressed, 100);
+      first.Width = 10;
+      first.Height = 8;
+      first.Pressure = 0.5f;
+      (void)view.TouchInput({10, 10}, first);
+      (void)view.TouchInput({10, 60}, input(pal::PointerType::Touch, pal::PointerAction::Pressed, 200));
+      CHECK(view.TouchCount() == 2);
+      (void)view.TouchInput({20, 60}, input(pal::PointerType::Touch, pal::PointerAction::Moved, 200));
+      (void)view.TouchInput({10, 10}, input(pal::PointerType::Touch, pal::PointerAction::Released, 100));
+      // The first touch's id is free again.
+      (void)view.TouchInput({10, 10}, input(pal::PointerType::Touch, pal::PointerAction::Pressed, 300));
+      (void)view.TouchInput({}, input(pal::PointerType::Touch, pal::PointerAction::Cancelled, 200));
+      (void)view.TouchInput({}, input(pal::PointerType::Touch, pal::PointerAction::Cancelled, 300));
+      CHECK(view.TouchCount() == 0);
+      CHECK(records
+            == List<std::string> {"pointerdown:a/touch3/1/50", "touchstart:a/1,1",
+                                  "pointermove:a/touch3/1/50", "pointerdown:b/touch4/1/50",
+                                  "touchstart:b/2,1", "pointermove:a/touch3/1/50",
+                                  "pointermove:b/touch4/1/50", "touchmove:b/2,1", "pointerup:a/touch3/0/0",
+                                  "pointermove:b/touch4/1/50", "touchend:a/1,1", "pointermove:b/touch4/1/50",
+                                  "pointerdown:a/touch3/1/50", "touchstart:a/2,1",
+                                  "pointercancel:b/touch4/0/0", "pointermove:a/touch3/1/50",
+                                  "touchcancel:b/0,1", "pointercancel:a/touch3/0/0", "touchcancel:a/0,1"});
+    }
+
+    SECTION("the pointing devices: media features and maxTouchPoints")
+    {
+      auto &window = *view.Document().Window();
+      CHECK(window.MatchMedia(u8"(pointer: fine) and (hover: hover)")->Matches());
+      CHECK(window.GetNavigator().MaxTouchPoints() == 0);
+
+      view.SetPointingDevices({.Mouse = false, .Pen = false, .Touch = true, .MaxTouchPoints = 10});
+      CHECK(window.MatchMedia(u8"(pointer: coarse) and (hover: none)")->Matches());
+      CHECK(window.MatchMedia(u8"(any-pointer: coarse) and (any-hover: none)")->Matches());
+      CHECK_FALSE(window.MatchMedia(u8"(any-pointer: fine)")->Matches());
+      CHECK(window.GetNavigator().MaxTouchPoints() == 10);
+
+      view.SetPointingDevices({.Mouse = true, .Pen = true, .Touch = true, .MaxTouchPoints = 5});
+      CHECK(
+        window.MatchMedia(u8"(pointer: fine) and (any-pointer: coarse) and (any-pointer: fine)")->Matches());
+      CHECK(window.MatchMedia(u8"(any-hover: hover)")->Matches());
+      CHECK(window.GetNavigator().MaxTouchPoints() == 5);
+    }
   }
 
   TEST_CASE("View: a click focuses and the window's focus", "[UI]")

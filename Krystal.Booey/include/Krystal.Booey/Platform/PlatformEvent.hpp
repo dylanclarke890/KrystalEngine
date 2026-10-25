@@ -28,6 +28,12 @@ namespace krys::boo
 
     // PlatformWheelEvent
     Wheel,
+
+    // PlatformTouchEvent
+    TouchStart,
+    TouchMove,
+    TouchEnd,
+    TouchCancel,
   };
 
   enum class PlatformEventModifier : uint8

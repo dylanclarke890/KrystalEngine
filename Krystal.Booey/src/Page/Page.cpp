@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -44,7 +45,8 @@ namespace krys::boo
       : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
         _backForwardController(CreateUnique<BackForwardController>(
           *this, backForwardClient ? ShareRef(*backForwardClient)
-                                   : Ref<BackForwardClient>(BackForwardList::Create())))
+                                   : Ref<BackForwardClient>(BackForwardList::Create()))),
+        _pointerCaptureController(CreateUnique<PointerCaptureController>(*this))
   {
     if (!_chromeClient)
     {
@@ -54,6 +56,12 @@ namespace krys::boo
     {
       _editorClient = CreateUnique<EmptyEditorClient>();
     }
+  }
+
+  void Page::DidChangeMainDocument(dom::Document *newDocument) noexcept
+  {
+    (void)newDocument;
+    _pointerCaptureController->Reset();
   }
 
   Page::~Page() noexcept

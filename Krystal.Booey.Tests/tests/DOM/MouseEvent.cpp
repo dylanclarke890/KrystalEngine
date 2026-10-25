@@ -130,13 +130,13 @@ namespace krys::boo::dom::tests
 
     SECTION("enter and leave don't bubble")
     {
-      auto enter =
-        MouseEvent::Create(DOMStringAtom(u8"mouseenter"), fixture.Frame->View(), platform, 0, nullptr);
+      auto enter = MouseEvent::Create(DOMStringAtom(u8"mouseenter"), fixture.Frame->View(), platform, {}, {},
+                                      0, nullptr);
       CHECK_FALSE(enter->Bubbles());
       CHECK_FALSE(enter->Cancelable());
       CHECK_FALSE(enter->Composed());
       auto down =
-        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, 1, nullptr);
+        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, {}, {}, 1, nullptr);
       CHECK(down->Bubbles());
       CHECK(down->Cancelable());
       CHECK(down->Composed());
@@ -148,9 +148,10 @@ namespace krys::boo::dom::tests
       CHECK(down->Buttons() == 1);
       // Movement is only kept for moves.
       CHECK(down->MovementX() == 0);
-      CHECK(MouseEvent::Create(DOMStringAtom(u8"mousemove"), fixture.Frame->View(), platform, 0, nullptr)
-              ->MovementY()
-            == 4);
+      CHECK(
+        MouseEvent::Create(DOMStringAtom(u8"mousemove"), fixture.Frame->View(), platform, {}, {}, 0, nullptr)
+          ->MovementY()
+        == 4);
     }
 
     SECTION("offsets are relative to the target's border box, layer positions to its layer")
@@ -171,7 +172,7 @@ namespace krys::boo::dom::tests
       fixture.Frame->SetPageZoomFactor(2);
       (void)fixture.Document->UpdateLayout();
       auto down =
-        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, 1, nullptr);
+        MouseEvent::Create(DOMStringAtom(u8"mousedown"), fixture.Frame->View(), platform, {}, {}, 1, nullptr);
       CHECK(down->PageX() == 16);
       CHECK(down->ClientX() == 16);
     }

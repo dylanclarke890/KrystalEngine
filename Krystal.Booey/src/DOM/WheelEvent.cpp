@@ -37,7 +37,8 @@ namespace krys::boo::dom
                          IsCancelable isCancelable) noexcept
       : MouseEvent(DOMStringAtom(EventNames::Wheel), TrustedInit(isCancelable), view,
                    ToDoublePoint(event.GlobalPosition()), ToDoublePoint(event.Position()), 0, 0,
-                   event.Modifiers(), MouseButton::Left, 0, nullptr, Simulated::No),
+                   event.Modifiers(), MouseButton::Left, 0, nullptr, 0, SyntheticClickType::NoTap, {}, {},
+                   Simulated::No),
         _deltaX(-event.DeltaX()), _deltaY(-event.DeltaY()), _deltaMode(DetermineDeltaMode(event)),
         _underlyingPlatformEvent(event)
   {

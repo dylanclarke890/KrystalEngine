@@ -75,6 +75,11 @@ namespace krys::boo
 
     SetForScope documentIsBeingReplaced(_documentIsBeingReplaced, true);
 
+    if (auto *page = GetPage(); page && &page->MainFrame() == this)
+    {
+      page->DidChangeMainDocument(newDocument.get());
+    }
+
     // The mouse's state refers to the old document's nodes.
     _eventHandler->Clear();
 

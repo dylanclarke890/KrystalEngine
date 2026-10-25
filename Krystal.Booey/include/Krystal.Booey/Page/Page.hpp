@@ -29,6 +29,7 @@ namespace krys::boo
   class GraphicsContext;
   class HistoryItem;
   class LocalFrame;
+  class PointerCaptureController;
 
   /// @brief The steps of the rendering update that something asked for.
   // FIXME: The steps for the features Booey doesn't have yet: revealing documents, fullscreen, view
@@ -72,6 +73,7 @@ namespace krys::boo
     UniquePtr<ChromeClient> _chromeClient;
     UniquePtr<EditorClient> _editorClient;
     UniquePtr<BackForwardController> _backForwardController;
+    UniquePtr<PointerCaptureController> _pointerCaptureController;
     RefPtr<LocalFrame> _mainFrame;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
@@ -123,6 +125,17 @@ namespace krys::boo
     {
       return *_backForwardController;
     }
+
+    /// @brief The page's pointers and the elements capturing them.
+    KRYS_NODISCARD PointerCaptureController &GetPointerCaptureController() const noexcept
+    {
+      return *_pointerCaptureController;
+    }
+
+    /// @brief Called when the main frame's document is replaced by @p newDocument.
+    // FIXME: The rest of what the page resets (the sampled top color, element targeting and the like), once
+    // there are those.
+    void DidChangeMainDocument(dom::Document *newDocument) noexcept;
 
     /// @brief Goes to @p item in @p frame (back or forward), once the frame's load stops, if it's for another
     /// document.

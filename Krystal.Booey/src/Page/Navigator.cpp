@@ -192,6 +192,12 @@ namespace krys::boo
     return numberOfCores;
   }
 
+  int32 Navigator::MaxTouchPoints() const noexcept
+  {
+    auto *frame = Frame();
+    return frame ? static_cast<int32>(frame->GetMediaEnvironment().MaxTouchPoints) : 0;
+  }
+
   UserActivation &Navigator::GetUserActivation() const noexcept
   {
     if (!_userActivation)

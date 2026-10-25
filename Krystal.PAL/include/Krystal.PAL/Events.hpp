@@ -6,6 +6,7 @@
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Pointer.hpp"
 
 namespace krys::pal
 {
@@ -165,6 +166,25 @@ namespace krys::pal
 
     /// @brief Gets the modifier keys held during the scroll.
     KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief Represents a pen's or a touch's input.
+  class PointerInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    PointerInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("pointer-input-event")
+
+    /// @brief Constructs a `PointerInputEvent`.
+    /// @param input The pen's or the touch's input.
+    PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept;
+
+    KRYS_NODISCARD const PointerInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

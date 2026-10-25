@@ -131,6 +131,7 @@ namespace krys::boo::dom
   class HighlightRegistry;
   class HTMLCollection;
   class MouseEvent;
+  class PointerEvent;
   class SelectorQuery;
   class ProcessingInstruction;
   class ShadowRoot;
@@ -945,10 +946,9 @@ namespace krys::boo::dom
 
     /// @brief Closes what a press and release outside it light dismisses: the auto and hint popovers it
     /// wasn't in or on an invoker of, and the topmost open dialog if its `closedby` is `any`. Run as @p event
-    /// (a trusted `mousedown` or `mouseup`, standing in for `pointerdown` and `pointerup`) is about to be
-    /// dispatched at @p target.
+    /// (a trusted `pointerdown` or `pointerup`) is about to be dispatched at @p target.
     /// @see https://html.spec.whatwg.org/#light-dismiss-activities
-    void HandleLightDismiss(const MouseEvent &event, Node &target) noexcept;
+    void HandleLightDismiss(const PointerEvent &event, Node &target) noexcept;
 
     /// @brief The showing popovers opened as auto popovers, in top layer order.
     /// @see https://html.spec.whatwg.org/#showing-auto-popover-list
@@ -1370,6 +1370,8 @@ namespace krys::boo::dom
     void DetachFromCachedFrame() noexcept;
     /// @brief Queues a task on @p source that fires @p event at the document's window, if it has one then.
     void QueueTaskToDispatchEventOnWindow(html::TaskSource source, Ref<Event> &&event) noexcept;
+    /// @brief Queues a task on @p source that fires @p event at the document.
+    void QueueTaskToDispatchEvent(html::TaskSource source, Ref<Event> &&event) noexcept;
     /// @brief The loader of the document's subresources (images), made on first use.
     KRYS_NODISCARD CachedResourceLoader &GetCachedResourceLoader() const noexcept;
     /// @brief Asks the page for a rendering update that runs @p requestedSteps, if the document is in one.

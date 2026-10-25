@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/MouseRelatedEvent.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo
 {
@@ -21,9 +22,9 @@ namespace krys::boo::dom
   KRYS_NODISCARD bool IsAnyClick(const Event &event) noexcept;
 
   /// @brief An event from a pointing device: `mousedown`, `mouseup`, `mousemove`, `mouseover`, `mouseout`,
-  /// `mouseenter`, `mouseleave`, `click`, `auxclick` and `dblclick`; `wheel` is a `WheelEvent`.
+  /// `mouseenter`, `mouseleave` and `dblclick`; `click`, `auxclick` and `contextmenu` are `PointerEvent`s,
+  /// and `wheel` is a `WheelEvent`.
   /// @see https://w3c.github.io/uievents/#interface-mouseevent
-  // FIXME: Force, synthetic clicks, and coalesced and predicted events come with pointer events.
   class MouseEvent : public MouseRelatedEvent
   {
     friend class EventFactory;
@@ -33,25 +34,33 @@ namespace krys::boo::dom
   private:
     int16 _button {static_cast<int16>(MouseButton::Left)};
     uint16 _buttons {0};
+    SyntheticClickType _syntheticClickType {SyntheticClickType::NoTap};
     bool _buttonDown {false};
     RefPtr<EventTarget> _relatedTarget;
+    double _force {0};
+    PenOrientation _penOrientation;
+    List<Ref<MouseEvent>> _coalescedEvents;
+    List<Ref<MouseEvent>> _predictedEvents;
 
   public:
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-mouseevent
     MouseEvent(DOMStringAtom type, const MouseEventInit &initializer = {}) noexcept;
 
     /// @brief A trusted event of type @p eventType from @p event, which happened in @p view.
+    /// @param coalescedEvents The events for the moves @p event stands for.
+    /// @param predictedEvents The events for the moves predicted after @p event.
     KRYS_NODISCARD static Ref<MouseEvent> Create(DOMStringAtom eventType, LocalFrameView *view,
-                                                 const PlatformMouseEvent &event, int32 detail,
+                                                 const PlatformMouseEvent &event,
+                                                 const List<Ref<MouseEvent>> &coalescedEvents,
+                                                 const List<Ref<MouseEvent>> &predictedEvents, int32 detail,
                                                  Node *relatedTarget) noexcept;
 
     /// @brief A trusted event from its parts, with its client location rather than its window location.
-    KRYS_NODISCARD static Ref<MouseEvent> Create(DOMStringAtom eventType, bool canBubble, bool isCancelable,
-                                                 bool isComposed, DOMHighResTimeStamp timestamp,
-                                                 LocalFrameView *view, int32 detail, double screenX,
-                                                 double screenY, double clientX, double clientY,
-                                                 EnumSet<Modifier> modifiers, MouseButton button,
-                                                 uint16 buttons, EventTarget *relatedTarget) noexcept;
+    KRYS_NODISCARD static Ref<MouseEvent>
+      Create(DOMStringAtom eventType, bool canBubble, bool isCancelable, bool isComposed,
+             DOMHighResTimeStamp timestamp, LocalFrameView *view, int32 detail, double screenX,
+             double screenY, double clientX, double clientY, EnumSet<Modifier> modifiers, MouseButton button,
+             uint16 buttons, SyntheticClickType syntheticClickType, EventTarget *relatedTarget) noexcept;
 
     /// @brief A simulated press, release or click of the left button at @p target, standing in for
     /// @p underlyingEvent (a key press, say), with its position and modifiers.
@@ -82,9 +91,31 @@ namespace krys::boo::dom
       return _buttons;
     }
 
+    KRYS_NODISCARD SyntheticClickType GetSyntheticClickType() const noexcept
+    {
+      return _syntheticClickType;
+    }
+
     KRYS_NODISCARD bool ButtonDown() const noexcept
     {
       return _buttonDown;
+    }
+
+    /// @brief The pressure, for a pressure sensitive device.
+    KRYS_NODISCARD double Force() const noexcept
+    {
+      return _force;
+    }
+
+    void SetForce(double force) noexcept
+    {
+      _force = force;
+    }
+
+    /// @brief How the pen is held, for a pen's events, which its pointer events report.
+    KRYS_NODISCARD const PenOrientation &GetPenOrientation() const noexcept
+    {
+      return _penOrientation;
     }
 
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-relatedtarget
@@ -94,12 +125,22 @@ namespace krys::boo::dom
     }
 
     /// @note Legacy: the node the pointer moved to.
-    KRYS_NODISCARD RefPtr<Node> ToElement() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<Node> ToElement() const noexcept;
     /// @note Legacy: the node the pointer moved from.
-    KRYS_NODISCARD RefPtr<Node> FromElement() const noexcept;
+    KRYS_NODISCARD virtual RefPtr<Node> FromElement() const noexcept;
 
     /// @note Legacy: the button, counted from one, or zero if none was pressed.
     KRYS_NODISCARD uint32 Which() const noexcept;
+
+    KRYS_NODISCARD const List<Ref<MouseEvent>> &CoalescedEvents() const noexcept
+    {
+      return _coalescedEvents;
+    }
+
+    KRYS_NODISCARD const List<Ref<MouseEvent>> &PredictedEvents() const noexcept
+    {
+      return _predictedEvents;
+    }
 
     /// @brief Whether @p event is a click that may run activation behavior (not one from the right button).
     KRYS_NODISCARD static bool CanTriggerActivationBehavior(const Event &event) noexcept;
@@ -118,7 +159,9 @@ namespace krys::boo::dom
     MouseEvent(DOMStringAtom type, const UIEventInit &eventInitDict, LocalFrameView *view,
                const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
                double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
-               EventTarget *relatedTarget, Simulated isSimulated) noexcept;
+               EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,
+               const List<Ref<MouseEvent>> &coalescedEvents, const List<Ref<MouseEvent>> &predictedEvents,
+               Simulated isSimulated) noexcept;
   };
 }
 

@@ -42,6 +42,25 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region PointerInputEvent
+
+  PointerInputEvent::PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept
+      : Event(), _window(window), _input(input)
+  {
+  }
+
+  const PointerInput &PointerInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle PointerInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region MouseButtonEvent
 
   MouseButtonEvent::MouseButtonEvent(WindowHandle window, const MouseButton button,

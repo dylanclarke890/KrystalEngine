@@ -73,6 +73,18 @@ namespace krys::pal
     ::Sleep(static_cast<unsigned long>(duration.count()));
   }
 
+  PointingDevices GetPointingDevices() noexcept
+  {
+    PointingDevices devices;
+    devices.Mouse = ::GetSystemMetrics(SM_MOUSEPRESENT) != 0;
+    const int digitizer = ::GetSystemMetrics(SM_DIGITIZER);
+    const bool ready = (digitizer & NID_READY) != 0;
+    devices.Touch = ready && (digitizer & (NID_INTEGRATED_TOUCH | NID_EXTERNAL_TOUCH)) != 0;
+    devices.Pen = ready && (digitizer & (NID_INTEGRATED_PEN | NID_EXTERNAL_PEN)) != 0;
+    devices.MaxTouchPoints = devices.Touch ? static_cast<uint32>(::GetSystemMetrics(SM_MAXIMUMTOUCHES)) : 0;
+    return devices;
+  }
+
   WheelScrollSettings GetWheelScrollSettings() noexcept
   {
     WheelScrollSettings settings;

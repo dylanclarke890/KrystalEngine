@@ -1705,6 +1705,21 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Animation/ViewTimelineOptions.hpp
   include/Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp
 
+  # Pen and touch from the host (B7b)
+  include/Krystal.Booey/DOM/Dicts/TouchEventInit.hpp
+  include/Krystal.Booey/DOM/Touch.hpp
+  include/Krystal.Booey/DOM/TouchEvent.hpp
+  include/Krystal.Booey/DOM/TouchList.hpp
+  include/Krystal.Booey/Platform/PlatformTouchEvent.hpp
+  include/Krystal.Booey/Platform/PlatformTouchPoint.hpp
+
+  # Pointer events from the mouse (B7a)
+  include/Krystal.Booey/DOM/Dicts/PointerEventInit.hpp
+  include/Krystal.Booey/DOM/PointerEvent.hpp
+  include/Krystal.Booey/DOM/PointerEventTypeNames.hpp
+  include/Krystal.Booey/Page/PointerCaptureController.hpp
+  include/Krystal.Booey/Platform/PointerID.hpp
+
   # Typed OM numeric values (B6a)
   include/Krystal.Booey/CSS/TypedOM/CSSStyleValue.hpp
   include/Krystal.Booey/CSS/TypedOM/CSSKeywordValue.hpp
@@ -3024,6 +3039,16 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Animation/ScrollTimeline.cpp
   src/Animation/ViewTimeline.cpp
   src/Animation/StyleOriginatedTimelinesController.cpp
+
+  # Pen and touch from the host (B7b)
+  src/DOM/Touch.cpp
+  src/DOM/TouchEvent.cpp
+  src/DOM/TouchList.cpp
+
+  # Pointer events from the mouse (B7a)
+  src/DOM/PointerEvent.cpp
+  src/DOM/PointerEventTypeNames.cpp
+  src/Page/PointerCaptureController.cpp
 
   # Typed OM numeric values (B6a)
   src/CSS/TypedOM/CSSStyleValue.cpp

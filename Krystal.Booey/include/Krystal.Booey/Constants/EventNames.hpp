@@ -36,7 +36,16 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview MouseOut = u8"mouseout";
   constexpr utf8_stringview MouseEnter = u8"mouseenter";
   constexpr utf8_stringview MouseLeave = u8"mouseleave";
+  constexpr utf8_stringview PointerDown = u8"pointerdown";
+  constexpr utf8_stringview PointerUp = u8"pointerup";
   constexpr utf8_stringview PointerMove = u8"pointermove";
+  constexpr utf8_stringview PointerCancel = u8"pointercancel";
+  constexpr utf8_stringview PointerOver = u8"pointerover";
+  constexpr utf8_stringview PointerOut = u8"pointerout";
+  constexpr utf8_stringview PointerEnter = u8"pointerenter";
+  constexpr utf8_stringview PointerLeave = u8"pointerleave";
+  constexpr utf8_stringview GotPointerCapture = u8"gotpointercapture";
+  constexpr utf8_stringview LostPointerCapture = u8"lostpointercapture";
   constexpr utf8_stringview KeyDown = u8"keydown";
   constexpr utf8_stringview KeyPress = u8"keypress";
   constexpr utf8_stringview KeyUp = u8"keyup";
@@ -67,6 +76,8 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview SlotChange = u8"slotchange";
   constexpr utf8_stringview TouchStart = u8"touchstart";
   constexpr utf8_stringview TouchMove = u8"touchmove";
+  constexpr utf8_stringview TouchEnd = u8"touchend";
+  constexpr utf8_stringview TouchCancel = u8"touchcancel";
   constexpr utf8_stringview Wheel = u8"wheel";
   constexpr utf8_stringview MouseWheel = u8"mousewheel";
   constexpr utf8_stringview BeforeUnload = u8"beforeunload";

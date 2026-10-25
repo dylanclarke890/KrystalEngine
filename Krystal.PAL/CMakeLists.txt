@@ -37,6 +37,7 @@ target_sources(Krystal.PAL
       include/Krystal.PAL/Mouse.hpp
       include/Krystal.PAL/MouseButtons.hpp
       include/Krystal.PAL/Platform.hpp
+      include/Krystal.PAL/Pointer.hpp
 
 	PRIVATE 
     src/Events.cpp

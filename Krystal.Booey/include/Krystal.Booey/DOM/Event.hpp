@@ -241,6 +241,14 @@ namespace krys::boo::dom
       (void)touchTargets;
     }
 
+    /// @brief Called when the event's target changes to another target (not when it's cleared).
+    virtual void ReceivedTarget() noexcept
+    {
+    }
+
+    /// @brief Sets the event's target, telling the event if it's a new one.
+    void SetTarget(RefPtr<EventTarget> target) noexcept;
+
 #pragma endregion
 
   public:
@@ -262,6 +270,16 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD virtual bool IsWheelEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPointerEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsTouchEvent() const noexcept
     {
       return false;
     }

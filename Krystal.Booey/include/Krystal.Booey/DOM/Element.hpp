@@ -294,6 +294,17 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Element (Pointer Events) - https://w3c.github.io/pointerevents/#extensions-to-the-element-interface
+
+    /// @see https://w3c.github.io/pointerevents/#dom-element-setpointercapture
+    ExceptionOr<void> SetPointerCapture(int32 pointerId) noexcept;
+    /// @see https://w3c.github.io/pointerevents/#dom-element-releasepointercapture
+    ExceptionOr<void> ReleasePointerCapture(int32 pointerId) noexcept;
+    /// @see https://w3c.github.io/pointerevents/#dom-element-haspointercapture
+    KRYS_NODISCARD bool HasPointerCapture(int32 pointerId) noexcept;
+
+#pragma endregion
+
 #pragma region Element (CSSOM View) - https://drafts.csswg.org/cssom-view/#extension-to-the-element-interface
 
     /// @brief The bounding boxes of the element's boxes, in client coordinates.
@@ -1078,7 +1089,8 @@ namespace krys::boo::dom
       EventIsDefaultPrevented DefaultPrevented;
     };
 
-    /// @brief Dispatches a trusted mouse event of type @p eventType from @p platformEvent at this element; a
+    /// @brief Dispatches a trusted mouse event of type @p eventType from @p platformEvent at this element,
+    /// after the pointer event it maps to (`click`, `auxclick` and `contextmenu` are only pointer events); a
     /// `click` with a @p detail of 2 is followed by a `dblclick`.
     /// @return Whether the event was dispatched without being cancelled, and whether it was cancelled.
     DispatchMouseEventResult DispatchMouseEvent(const PlatformMouseEvent &platformEvent,

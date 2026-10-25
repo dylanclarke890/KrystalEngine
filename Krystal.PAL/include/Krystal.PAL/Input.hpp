@@ -45,5 +45,7 @@ namespace krys::pal
 
     void OnMouseScrollEvent(WindowHandle window, float deltaX, float deltaY, float clientX, float clientY,
                             KeyModifiers modifiers) noexcept;
+
+    void OnPointerEvent(WindowHandle window, const PointerInput &input) noexcept;
   };
 }

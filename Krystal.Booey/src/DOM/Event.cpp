@@ -148,6 +148,20 @@ namespace krys::boo::dom
     Initialize(*this, type, bubbles, cancelable);
   }
 
+  void Event::SetTarget(RefPtr<EventTarget> target) noexcept
+  {
+    if (_target == target)
+    {
+      return;
+    }
+
+    _target = krys::move(target);
+    if (_target)
+    {
+      ReceivedTarget();
+    }
+  }
+
   void Event::Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept
   {
     event._initialized = true;

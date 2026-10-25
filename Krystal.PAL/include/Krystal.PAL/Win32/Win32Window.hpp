@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -18,6 +19,8 @@ namespace krys::pal::win32
     WNDCLASSW _class;
     HWND _handle;
     CursorShape _cursor {CursorShape::Arrow};
+    /// @brief The pens and touches in range, by id, so a capture change can cancel them.
+    mutable HashMap<uint32, PointerType> _activePointers;
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -50,6 +53,9 @@ namespace krys::pal::win32
     void CreateWindowClass(HMODULE instance);
     void CreateWindowHandle(HMODULE instance);
     void RegisterRawInput() const;
+    /// @brief Reports a pen's or a touch's pointer message.
+    /// @return Whether it was a pen's or a touch's, which the system then doesn't turn into mouse input.
+    bool HandlePointerMessage(HWND window, UINT message, WPARAM wParam) const noexcept;
     /// @brief Shows the window's cursor, as the mouse is over the client area.
     void ApplyCursor() const noexcept;
   };
