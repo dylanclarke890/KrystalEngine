@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
@@ -17,6 +19,25 @@ namespace krys::boo::svg
 
   SVGElement::SVGElement(dom::Document &document) noexcept : SVGElement(document, SVGElementInterface::None)
   {
+  }
+
+  void SVGElement::CommitPropertyChange(SVGProperty *property) noexcept
+  {
+    // We want to dirty the top-level property when a descendant changes. For example
+    // a change in an SVGLength item in SVGLengthList should set the dirty flag on
+    // SVGLengthList and not the SVGLength.
+    property->SetDirty();
+
+    // FIXME: Invalidate the SVG attributes and notify the element of the attribute the property reflects,
+    // found through the property registry (B11a3).
+  }
+
+  void SVGElement::CommitPropertyChange(SVGAnimatedProperty &animatedProperty) noexcept
+  {
+    // FIXME: Find the attribute through the property registry, serialise a style property (x, width, ...) to
+    // the attribute immediately, invalidate the SVG attributes and notify the element (B11a3). Until then the
+    // property is only marked dirty.
+    animatedProperty.SetDirty();
   }
 
   bool SVGElement::IsInnerSVGSVGElement() const noexcept

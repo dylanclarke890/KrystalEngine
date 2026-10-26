@@ -801,12 +801,18 @@ SVG. Booey has the HTML parser's SVG steps (foreign content, the tag and attribu
 
 `SVGElement.h`'s graph is 96 files (about 18k lines: it reaches the property system, its animators and several elements), so B11a goes in three steps:
 - **B11a1, the values.** `SVGLengthValue`, `SVGLengthContext`, `SVGAngleValue`, `SVGPreserveAspectRatioValue`, the unit, marker and zoom-and-pan types, `SVGParsingError` and `SVGPropertyTraits`.
-- **B11a2, the property system.** `svg/properties` without the animators, and the DOM's types over it: `SVGLength`, `SVGNumber`, `SVGAngle`, `SVGPoint`, `SVGRect`, `SVGMatrix`, `SVGTransform` with `SVGTransformValue` and its parser (`SVGTransformable`), `SVGPreserveAspectRatio`, the lists and `SVGStringList`, and the animated properties elements expose.
-- **B11a3, `SVGElement`.** `SVGElement` in full, its rare data, the mixins, `SVGSVGElement`'s viewport (which completes `SVGLengthContext`), `SVGStyleElement`'s sheets and the generated element factory.
+- **B11a2, the property system.** `svg/properties` without the animators, and the DOM's types over it: `SVGLength`, `SVGNumber`, `SVGAngle`, `SVGPoint`, `SVGRect`, `SVGMatrix`, `SVGTransform` with `SVGTransformValue` and its parser (`SVGTransformable`), `SVGPreserveAspectRatio`, the lists and `SVGStringList`, and the animated properties elements expose. The accessors and the owner registry moved to B11a3 as built (see *B11a2 as built*).
+- **B11a3, `SVGElement`.** The property accessors and the owner registry, `SVGElement` in full, its rare data, the mixins, `SVGSVGElement`'s viewport (which completes `SVGLengthContext`), `SVGStyleElement`'s sheets and the generated element factory.
 
 ### B11a1 as built (2026-10-26)
 
 - **Booey** (the ledger entry is *SVG values* in `docs/booey/PORTING.md`): the value types, parsed and serialised as upstream (lengths through the CSS parser in SVG attribute mode), with `SVGLengthContext` resolving lengths against a viewport or an element's fonts; an element's `<svg>` viewport waits for B11a3. `RenderElement::ParentStyle` is added. `SVGTransformValue` and `SVGTransformable` moved to B11a2 (they need `SVGMatrix` and `SVGLocatable`).
 - **Krystal.Core:** `Text/StringToIntegerConversion.hpp` (`ParseInteger`) and `Text/ParsingUtilities.hpp` (`SkipCharactersExactly`), from WTF.
 - **Tests:** Booey: `tests/SVG/SVGLengthValue.cpp`, `SVGAngleValue.cpp`, `SVGPreserveAspectRatioValue.cpp` and `Properties/SVGPropertyTraits.cpp`; 2803 cases pass. Krystal.Core: `tests/Text/StringToIntegerConversion.cpp`.
+
+### B11a2 as built (2026-10-26)
+
+- **Booey** (the ledger entry is *SVG properties* in `docs/booey/PORTING.md`): the properties, lists and animated properties of `svg/properties`, and `SVGLength`, `SVGNumber`, `SVGAngle`, `SVGPoint`, `SVGRect`, `SVGMatrix`, `SVGTransform`, `SVGPreserveAspectRatio`, the five lists and the transform parser over them, with `DOMMatrix2DInit`. `SVGElement` is a property owner; until the registry is ported its commits only mark properties dirty.
+- **Moved:** the accessors and the owner registry go to B11a3, since they need SVG's attribute names, `SVGTests`' conditional processing attributes and an element; `SVGLocatable` (the base of `SVGTransformable`) goes there too, with `SVGGraphicsElement`; `SVGAnimatedPathSegList` waits for `<path>` (B11b). The animation life cycle of the animated properties waits for SMIL (B11i).
+- **Tests:** Booey: `tests/SVG/SVGLength.cpp`, `SVGLengthList.cpp`, `SVGNumberList.cpp`, `SVGPointList.cpp`, `SVGStringList.cpp`, `SVGTransformList.cpp` and `Properties/SVGAnimatedProperty.cpp`; 2821 cases pass.
 

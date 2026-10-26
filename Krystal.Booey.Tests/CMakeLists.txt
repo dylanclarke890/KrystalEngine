@@ -80,6 +80,7 @@ target_sources(Krystal.Booey.Tests
       include
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
+		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
@@ -654,11 +655,18 @@ target_sources(Krystal.Booey.Tests
 
 		# URL
 		tests/SVG/Internals/SVGPath.cpp
+		tests/SVG/Properties/SVGAnimatedProperty.cpp
 		tests/SVG/Properties/SVGPropertyTraits.cpp
 		tests/SVG/SVGAngleValue.cpp
 		tests/SVG/SVGElement.cpp
+		tests/SVG/SVGLength.cpp
+		tests/SVG/SVGLengthList.cpp
 		tests/SVG/SVGLengthValue.cpp
+		tests/SVG/SVGNumberList.cpp
+		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp
+		tests/SVG/SVGStringList.cpp
+		tests/SVG/SVGTransformList.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

@@ -5,10 +5,13 @@
 #include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementFlags.hpp"
 #include "Krystal.Booey/SVG/Enums/SVGElementInterface.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGPropertyOwner.hpp"
 
 namespace krys::boo::svg
 {
-  class SVGElement : public dom::StyledElement
+  class SVGAnimatedProperty;
+
+  class SVGElement : public dom::StyledElement, public SVGPropertyOwner
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
@@ -77,6 +80,14 @@ namespace krys::boo::svg
     KRYS_NODISCARD static css::PropertyId
       CssPropertyIdForSVGAttributeName(dom::DOMStringAtom localName,
                                        dom::DOMStringAtom namespaceURI) noexcept;
+
+    KRYS_NODISCARD const SVGElement *AttributeContextElement() const noexcept override
+    {
+      return this;
+    }
+
+    void CommitPropertyChange(SVGProperty *) noexcept override;
+    void CommitPropertyChange(SVGAnimatedProperty &) noexcept;
 
   protected:
     KRYS_NODISCARD bool
