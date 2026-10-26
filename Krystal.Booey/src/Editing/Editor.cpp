@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/ClipboardEvent.hpp"
 #include "Krystal.Booey/DOM/CompositionEvent.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -21,6 +22,7 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
+#include "Krystal.Booey/Editing/WebContentReader.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -32,6 +34,7 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
+#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
 #include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
 
@@ -58,15 +61,16 @@ namespace krys::boo
       return {};
     }
 
-    // FIXME: The data transfer of pastes and drops, with DataTransfer.
     bool DispatchBeforeInputEvent(dom::Element &element, utf8_stringview inputType,
                                   dom::IsInputMethodComposing isInputMethodComposing,
                                   Maybe<dom::DOMString> data = null,
+                                  RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                                   const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                   bool cancelable = true) noexcept
     {
       auto event = dom::InputEvent::Create(dom::DOMStringAtom(EventNames::BeforeInput), inputType, cancelable,
-                                           krys::move(data), targetRanges, 0, isInputMethodComposing);
+                                           krys::move(data), krys::move(dataTransfer), targetRanges, 0,
+                                           isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
       return !event->DefaultPrevented();
     }
@@ -76,10 +80,12 @@ namespace krys::boo
     void DispatchInputEvent(dom::Element &element, utf8_stringview inputType,
                             dom::IsInputMethodComposing isInputMethodComposing,
                             Maybe<dom::DOMString> data = null,
+                            RefPtr<dom::DataTransfer> &&dataTransfer = nullptr,
                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
     {
-      auto event = dom::InputEvent::Create(dom::DOMStringAtom(EventNames::Input), inputType, false,
-                                           krys::move(data), targetRanges, 0, isInputMethodComposing);
+      auto event =
+        dom::InputEvent::Create(dom::DOMStringAtom(EventNames::Input), inputType, false, krys::move(data),
+                                krys::move(dataTransfer), targetRanges, 0, isInputMethodComposing);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &element);
     }
 
@@ -87,19 +93,22 @@ namespace krys::boo
                                    utf8_stringview inputTypeName,
                                    dom::IsInputMethodComposing isInputMethodComposing,
                                    const Maybe<dom::DOMString> &data = null,
+                                   const RefPtr<dom::DataTransfer> &dataTransfer = nullptr,
                                    const List<RefPtr<dom::StaticRange>> &targetRanges = {},
                                    bool cancelable = true) noexcept
     {
       bool continueWithDefaultBehavior = true;
       if (startRoot)
       {
-        continueWithDefaultBehavior &= DispatchBeforeInputEvent(
-          *startRoot, inputTypeName, isInputMethodComposing, data, targetRanges, cancelable);
+        continueWithDefaultBehavior &=
+          DispatchBeforeInputEvent(*startRoot, inputTypeName, isInputMethodComposing, data,
+                                   RefPtr<dom::DataTransfer>(dataTransfer), targetRanges, cancelable);
       }
       if (endRoot && endRoot != startRoot)
       {
-        continueWithDefaultBehavior &= DispatchBeforeInputEvent(
-          *endRoot, inputTypeName, isInputMethodComposing, data, targetRanges, cancelable);
+        continueWithDefaultBehavior &=
+          DispatchBeforeInputEvent(*endRoot, inputTypeName, isInputMethodComposing, data,
+                                   RefPtr<dom::DataTransfer>(dataTransfer), targetRanges, cancelable);
       }
       return continueWithDefaultBehavior;
     }
@@ -108,15 +117,17 @@ namespace krys::boo
                              utf8_stringview inputTypeName,
                              dom::IsInputMethodComposing isInputMethodComposing,
                              const Maybe<dom::DOMString> &data = null,
-                             const List<RefPtr<dom::StaticRange>> &targetRanges = {}) noexcept
+                             const RefPtr<dom::DataTransfer> &dataTransfer = nullptr) noexcept
     {
       if (startRoot)
       {
-        DispatchInputEvent(*startRoot, inputTypeName, isInputMethodComposing, data, targetRanges);
+        DispatchInputEvent(*startRoot, inputTypeName, isInputMethodComposing, data,
+                           RefPtr<dom::DataTransfer>(dataTransfer));
       }
       if (endRoot && endRoot != startRoot)
       {
-        DispatchInputEvent(*endRoot, inputTypeName, isInputMethodComposing, data, targetRanges);
+        DispatchInputEvent(*endRoot, inputTypeName, isInputMethodComposing, data,
+                           RefPtr<dom::DataTransfer>(dataTransfer));
       }
     }
 
@@ -128,6 +139,42 @@ namespace krys::boo
         return null;
       }
       return data;
+    }
+
+    KRYS_NODISCARD Ref<dom::DataTransfer>
+      CreateDataTransferForClipboardEvent(dom::Document &document, ClipboardEventKind kind) noexcept
+    {
+      using StoreMode = dom::DataTransfer::StoreMode;
+      switch (kind)
+      {
+        case ClipboardEventKind::Copy:
+        case ClipboardEventKind::CopyFont:
+        case ClipboardEventKind::Cut:
+          return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::ReadWrite,
+                                                          CreateUnique<StaticPasteboard>());
+        case ClipboardEventKind::PasteAsPlainText:
+        {
+          auto plainTextType = u8"text/plain";
+          auto plainText = Pasteboard::CreateForCopyAndPaste()->ReadString(plainTextType);
+          auto pasteboard = CreateUnique<StaticPasteboard>();
+          pasteboard->WriteString(plainTextType, plainText);
+          return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Readonly,
+                                                          krys::move(pasteboard));
+        }
+        case ClipboardEventKind::Paste:
+        case ClipboardEventKind::PasteAsQuotation:
+        case ClipboardEventKind::PasteFont:
+          return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Readonly,
+                                                          Pasteboard::CreateForCopyAndPaste());
+        case ClipboardEventKind::BeforeCopy:
+        case ClipboardEventKind::BeforeCut:
+        case ClipboardEventKind::BeforePaste:
+          return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Invalid,
+                                                          CreateUnique<StaticPasteboard>());
+      }
+      krys_debug_assert(false);
+      return dom::DataTransfer::CreateForCopyAndPaste(document, StoreMode::Invalid,
+                                                      CreateUnique<StaticPasteboard>());
     }
   }
 
@@ -173,9 +220,9 @@ namespace krys::boo
 
   // Returns whether caller should continue with "the default processing", which is the same as
   // the event handler NOT setting the return value to false
-  // FIXME: The clipboard data the event's listeners write, committed to the pasteboard when they cancel a
-  // copy or cut, with DataTransfer.
-  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept
+  // https://w3c.github.io/clipboard-apis/#fire-a-clipboard-event
+  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
+                                      Ref<dom::DataTransfer> &&dataTransfer) noexcept
   {
     // FIXME: Move the target selection code here.
     if (!target)
@@ -183,12 +230,32 @@ namespace krys::boo
       return true;
     }
 
-    auto event = dom::ClipboardEvent::Create(dom::DOMStringAtom(EventNameForClipboardEvent(kind)));
+    auto event =
+      dom::ClipboardEvent::Create(dom::DOMStringAtom(EventNameForClipboardEvent(kind)), Ref(dataTransfer));
 
     (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
     bool noDefaultProcessing = event->DefaultPrevented();
+    if (noDefaultProcessing && (kind == ClipboardEventKind::Copy || kind == ClipboardEventKind::Cut)
+        && dataTransfer->GetPasteboard().HasData())
+    {
+      dataTransfer->CommitToPasteboard(*Pasteboard::CreateForCopyAndPaste());
+    }
+
+    dataTransfer->MakeInvalidForSecurity();
 
     return !noDefaultProcessing;
+  }
+
+  bool Editor::DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept
+  {
+    if (!target)
+    {
+      return true;
+    }
+
+    auto &document = target->NodeDocument();
+    return DispatchClipboardEvent(krys::move(target), kind,
+                                  CreateDataTransferForClipboardEvent(document, kind));
   }
 
   // WinIE uses onbeforecut and onbeforepaste to enables the cut and paste menu items.  They
@@ -403,8 +470,8 @@ namespace krys::boo
       return;
     }
     bool chosePlainText = false;
-    auto fragment =
-      pasteboard->ReadDocumentFragment(*range, options.Contains(PasteOption::AllowPlainText), chosePlainText);
+    auto fragment = WebContentFromPasteboard(*pasteboard, *range,
+                                             options.Contains(PasteOption::AllowPlainText), chosePlainText);
     if (fragment && ShouldInsertFragment(*fragment, range))
     {
       PasteAsFragment(ShareRef(*fragment), CanSmartReplaceWithPasteboard(*pasteboard), chosePlainText,
@@ -412,6 +479,29 @@ namespace krys::boo
                         ? MailBlockquoteHandling::IgnoreBlockquote
                         : MailBlockquoteHandling::RespectBlockquote);
     }
+  }
+
+  void Editor::WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept
+  {
+    PasteboardWebContent pasteboardContent;
+    pasteboardContent.CanSmartCopyOrDelete = CanSmartCopyOrDelete();
+    pasteboardContent.Text = SelectedTextForDataTransfer();
+    pasteboardContent.Markup = SerializePreservingVisualAppearance(
+      _document.Selection().Selection(), ResolveURLs::YesExcludingURLsForPrivacy, SerializeComposedTree::Yes,
+      IgnoreUserSelectNone::Yes);
+    pasteboardContent.ContentOrigin = _document.OriginIdentifierForPasteboard();
+    pasteboard.Write(pasteboardContent);
+  }
+
+  RefPtr<dom::DocumentFragment> Editor::WebContentFromPasteboard(Pasteboard &pasteboard,
+                                                                 const dom::SimpleRange &context,
+                                                                 bool allowPlainText,
+                                                                 bool &chosePlainText) noexcept
+  {
+    WebContentReader reader(*_document.Frame(), context, allowPlainText);
+    pasteboard.Read(reader);
+    chosePlainText = reader.MadeFragmentFromPlainText();
+    return reader.TakeFragment();
   }
 
   utf8_string Editor::ReadPlainTextFromPasteboard(Pasteboard &pasteboard) noexcept
@@ -443,10 +533,10 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Image documents, image overlays and writing the selection as web content outside text controls
-  // (writeSelectionToPasteboard), with images and DataTransfer; the editor client's
-  // notifications around writing the selection; spelling markers (updateMarkersForWordsAffectedByEditing),
-  // with text checking; and accessibility's notification of the cut text, with accessibility.
+  // FIXME: Image documents and image overlays (writeImageToPasteboard), with images on the pasteboard; the
+  // editor client's notifications around writing the selection; spelling markers
+  // (updateMarkersForWordsAffectedByEditing), with text checking; and accessibility's notification of the cut
+  // text, with accessibility.
   void Editor::PerformCutOrCopy(EditorActionSpecifier action) noexcept
   {
     auto selection = SelectedRange();
@@ -455,9 +545,16 @@ namespace krys::boo
       return;
     }
 
-    Pasteboard::CreateForCopyAndPaste()->WritePlainText(
-      SelectedTextForDataTransfer(),
-      CanSmartCopyOrDelete() ? Pasteboard::CanSmartReplace : Pasteboard::CannotSmartReplace);
+    if (html::EnclosingTextFormControl(_document.Selection().Selection().Start()))
+    {
+      Pasteboard::CreateForCopyAndPaste()->WritePlainText(
+        SelectedTextForDataTransfer(),
+        CanSmartCopyOrDelete() ? Pasteboard::CanSmartReplace : Pasteboard::CannotSmartReplace);
+    }
+    else
+    {
+      WriteSelectionToPasteboard(*Pasteboard::CreateForCopyAndPaste());
+    }
 
     if (action == EditorActionSpecifier::CutAction)
     {
@@ -538,10 +635,11 @@ namespace krys::boo
 
     auto isInputMethodComposing =
       command.IsInputMethodComposing() ? dom::IsInputMethodComposing::Yes : dom::IsInputMethodComposing::No;
-    return DispatchBeforeInputEvents(
-      ShareRefPtr(composition->StartingRootEditableElement()),
-      ShareRefPtr(composition->EndingRootEditableElement()), command.InputEventTypeName(),
-      isInputMethodComposing, InputEventData(command), targetRanges, command.IsBeforeInputEventCancelable());
+    return DispatchBeforeInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
+                                     ShareRefPtr(composition->EndingRootEditableElement()),
+                                     command.InputEventTypeName(), isInputMethodComposing,
+                                     InputEventData(command), command.InputEventDataTransfer(), targetRanges,
+                                     command.IsBeforeInputEventCancelable());
   }
 
   namespace
@@ -600,7 +698,7 @@ namespace krys::boo
     {
       DispatchInputEvents(ShareRefPtr(composition->StartingRootEditableElement()),
                           ShareRefPtr(composition->EndingRootEditableElement()), command.InputEventTypeName(),
-                          isInputMethodComposing, InputEventData(command));
+                          isInputMethodComposing, InputEventData(command), command.InputEventDataTransfer());
     }
 
     if (command.IsTopLevelCommand())

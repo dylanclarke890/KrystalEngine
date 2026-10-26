@@ -3434,7 +3434,15 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Page/EditorClient.hpp
       include/Krystal.Booey/Platform/CaretAnimator.hpp
       include/Krystal.Booey/Platform/Pasteboard.hpp
+      include/Krystal.Booey/Platform/PasteboardCustomData.hpp
       include/Krystal.Booey/Platform/PasteboardStrategy.hpp
+      include/Krystal.Booey/Platform/SelectionData.hpp
+      include/Krystal.Booey/Platform/StaticPasteboard.hpp
+      include/Krystal.Booey/DOM/DataTransfer.hpp
+      include/Krystal.Booey/DOM/DataTransferItem.hpp
+      include/Krystal.Booey/DOM/DataTransferItemList.hpp
+      include/Krystal.Booey/Editing/PasteboardFileListReader.hpp
+      include/Krystal.Booey/Editing/WebContentReader.hpp
       include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
@@ -3865,6 +3873,14 @@ target_sources(Krystal.Booey
     src/Page/DOMSelection.cpp
     src/Platform/CaretAnimator.cpp
     src/Platform/Pasteboard.cpp
+    src/Platform/PasteboardCustomData.cpp
+    src/Platform/SelectionData.cpp
+    src/Platform/StaticPasteboard.cpp
+    src/DOM/DataTransfer.cpp
+    src/DOM/DataTransferItem.cpp
+    src/DOM/DataTransferItemList.cpp
+    src/Editing/PasteboardFileListReader.cpp
+    src/Editing/WebContentReader.cpp
     src/Platform/SimpleCaretAnimator.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp

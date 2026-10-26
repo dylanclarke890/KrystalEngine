@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -23,6 +24,7 @@ namespace krys::boo::dom
 
 namespace krys::boo
 {
+  class Page;
   class VisibleSelection;
 
   enum class ResolveURLs : uint8
@@ -155,6 +157,29 @@ namespace krys::boo
     List<Ref<dom::ShadowRoot>> &&explicitShadowRoots = {}) noexcept;
 
   KRYS_NODISCARD utf8_string URLToMarkup(utf8_stringview url, utf8_stringview title) noexcept;
+
+  /// @brief A page with empty clients, whose main frame shows an empty document, to parse markup in apart
+  /// from @p destinationDocument.
+  KRYS_NODISCARD Ref<Page> CreatePageForSanitizingWebContent(dom::Document *destinationDocument) noexcept;
+
+  enum class MSOListQuirks : bool
+  {
+    CheckIfNeeded,
+    Disabled
+  };
+
+  /// @brief @p rawHTML parsed in a staging page and serialised again with its styles inlined, which leaves
+  /// out what the parser and serialiser don't keep (scripts, comments, unknown markup).
+  /// @param fragmentSanitizer Changes the parsed fragment before it's serialised, if given.
+  /// @return The markup, or none if the staging page has no document.
+  KRYS_NODISCARD Maybe<utf8_string>
+    SanitizeMarkup(utf8_stringview rawHTML, dom::Document *destinationDocument,
+                   MSOListQuirks msoListQuirks = MSOListQuirks::Disabled,
+                   const Func<void(dom::DocumentFragment &)> &fragmentSanitizer = {}) noexcept;
+  KRYS_NODISCARD utf8_string SanitizedMarkupForFragmentInDocument(Ref<dom::DocumentFragment> &&fragment,
+                                                                  dom::Document &document,
+                                                                  MSOListQuirks msoListQuirks,
+                                                                  utf8_stringview originalMarkup) noexcept;
 
   KRYS_NODISCARD utf8_string DocumentTypeString(const dom::Document &document) noexcept;
 }

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
@@ -1833,6 +1834,16 @@ namespace krys::boo
     }
 
     return CompositeEditCommand::InputEventData();
+  }
+
+  RefPtr<dom::DataTransfer> ReplaceSelectionCommand::InputEventDataTransfer() const noexcept
+  {
+    if (IsEditingTextAreaOrTextInput())
+    {
+      return CompositeEditCommand::InputEventDataTransfer();
+    }
+
+    return dom::DataTransfer::CreateForInputEvent(_documentFragmentPlainText, _documentFragmentHTMLMarkup);
   }
 
   bool ReplaceSelectionCommand::ShouldRemoveEndBR(dom::Node *endBR,

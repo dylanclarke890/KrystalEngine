@@ -34,6 +34,7 @@
 #include "Krystal.Booey/Platform/DateComponents.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/SelectionData.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -57,6 +58,66 @@ namespace krys::ui::tests
 {
   namespace
   {
+    /// @brief A clipboard in memory, in place of the system's: text and markup, counting the writes.
+    struct MemoryPasteboard final : boo::PasteboardStrategy
+    {
+      int32 Writes {0};
+      utf8_string Text;
+      utf8_string Markup;
+
+      KRYS_NODISCARD List<utf8_string> Types(utf8_stringview) noexcept override
+      {
+        List<utf8_string> types;
+        if (!Text.empty())
+        {
+          types.emplace_back(u8"text/plain");
+        }
+        if (!Markup.empty())
+        {
+          types.emplace_back(u8"text/html");
+        }
+        return types;
+      }
+      KRYS_NODISCARD utf8_string ReadTextFromClipboard(utf8_stringview,
+                                                       utf8_stringview type) noexcept override
+      {
+        return type.starts_with(u8"text/plain") ? Text : type == u8"text/html" ? Markup : utf8_string();
+      }
+      KRYS_NODISCARD List<utf8_string> ReadFilePathsFromClipboard(utf8_stringview) noexcept override
+      {
+        return {};
+      }
+      KRYS_NODISCARD RefPtr<boo::SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
+                                                                       utf8_stringview) noexcept override
+      {
+        return nullptr;
+      }
+      void WriteToClipboard(utf8_stringview, boo::SelectionData &&selectionData) noexcept override
+      {
+        ++Writes;
+        Text = selectionData.Text();
+        Markup = selectionData.Markup();
+      }
+      void ClearClipboard(utf8_stringview) noexcept override
+      {
+        Text.clear();
+        Markup.clear();
+      }
+      KRYS_NODISCARD int64 ChangeCount(utf8_stringview) noexcept override
+      {
+        return Writes;
+      }
+      KRYS_NODISCARD List<utf8_string> TypesSafeForDOMToReadAndWrite(utf8_stringview name,
+                                                                     utf8_stringview) noexcept override
+      {
+        return Types(name);
+      }
+      int64 WriteCustomData(const List<boo::PasteboardCustomData> &, utf8_stringview) noexcept override
+      {
+        return Writes;
+      }
+    };
+
     KRYS_NODISCARD int32 WidthOf(View &view, boo::dom::DOMStringView id)
     {
       auto element = view.Document().GetElementById(id);
@@ -1685,22 +1746,6 @@ namespace krys::ui::tests
 
   TEST_CASE("View: the keyboard selects and copies", "[UI]")
   {
-    /// @brief Records what's written to the clipboard, in place of the system's.
-    struct RecordingPasteboard final : boo::PasteboardStrategy
-    {
-      List<utf8_string> Writes;
-
-      void WriteToPasteboard(utf8_stringview, utf8_stringview text) noexcept override
-      {
-        Writes.emplace_back(text);
-      }
-
-      KRYS_NODISCARD utf8_string ReadStringFromPasteboard(utf8_stringview) noexcept override
-      {
-        return Writes.empty() ? utf8_string() : Writes.back();
-      }
-    };
-
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
                   u8"<p id=a>The quick brown fox</p>");
@@ -1709,7 +1754,7 @@ namespace krys::ui::tests
 
     auto &strategies = boo::PlatformStrategies::Singleton();
     auto *systemPasteboard = strategies.GetPasteboardStrategy();
-    RecordingPasteboard pasteboard;
+    MemoryPasteboard pasteboard;
     strategies.SetPasteboardStrategy(&pasteboard);
 
     auto &selection = view.Document().Selection();
@@ -1725,11 +1770,13 @@ namespace krys::ui::tests
     CHECK(view.KeyPressed(pal::Key::Home, {pal::KeyModifier::Shift}));
     CHECK(selection.Selection().Start().DeprecatedEditingOffset() == 0);
 
-    // Ctrl+C copies the selected text.
+    // Ctrl+C copies the selected text and its markup.
     selection.MoveTo(boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 4),
                      boo::dom::MakeContainerOffsetPosition(ShareRefPtr(text), 15), boo::Affinity::Downstream);
     CHECK(view.KeyPressed(pal::Key::C, {pal::KeyModifier::Control}, {u8"", u8"c"}));
-    CHECK(pasteboard.Writes == List<utf8_string> {u8"quick brown"});
+    CHECK(pasteboard.Writes == 1);
+    CHECK(pasteboard.Text == u8"quick brown");
+    CHECK_FALSE(pasteboard.Markup.empty());
 
     // Ctrl+A selects everything.
     CHECK(view.KeyPressed(pal::Key::A, {pal::KeyModifier::Control}, {u8"", u8"a"}));
@@ -1741,22 +1788,6 @@ namespace krys::ui::tests
 
   TEST_CASE("View: the keyboard edits editable text", "[UI]")
   {
-    /// @brief A clipboard in memory, in place of the system's.
-    struct MemoryPasteboard final : boo::PasteboardStrategy
-    {
-      utf8_string Contents;
-
-      void WriteToPasteboard(utf8_stringview, utf8_stringview text) noexcept override
-      {
-        Contents = utf8_string(text);
-      }
-
-      KRYS_NODISCARD utf8_string ReadStringFromPasteboard(utf8_stringview) noexcept override
-      {
-        return Contents;
-      }
-    };
-
     View view({400, 300});
     view.LoadHTML(u8"<!DOCTYPE html><style>body { margin: 0; font: 16px sans-serif }</style>"
                   u8"<div id=e contenteditable>abc</div>");
@@ -1802,7 +1833,7 @@ namespace krys::ui::tests
       boo::dom::MakeContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 0),
       boo::dom::MakeContainerOffsetPosition(ShareRefPtr(root.FirstChild()), 1), boo::Affinity::Downstream);
     CHECK(view.KeyPressed(pal::Key::X, {pal::KeyModifier::Control}, {u8"", u8"x"}));
-    CHECK(pasteboard.Contents == u8"a");
+    CHECK(pasteboard.Text == u8"a");
     CHECK(markup() == "bc");
     caretAt(2);
     CHECK(view.KeyPressed(pal::Key::V, {pal::KeyModifier::Control}, {u8"", u8"v"}));

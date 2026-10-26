@@ -28,8 +28,8 @@ namespace krys::boo
 {
   /// @brief Replaces the selection with a fragment (pasted, dropped or moved content), merging its first and
   /// last paragraphs with the paragraphs around it and removing the styles it doesn't need.
-  // FIXME: The input event's data transfer (inputEventDataTransfer), with DataTransfer; and the accessibility
-  // selection of the inserted text (visibleSelectionForInsertedText), with accessibility.
+  // FIXME: The accessibility selection of the inserted text (visibleSelectionForInsertedText), with
+  // accessibility.
   class ReplaceSelectionCommand : public CompositeEditCommand
   {
   public:
@@ -99,6 +99,7 @@ namespace krys::boo
 
   private:
     KRYS_NODISCARD dom::DOMString InputEventData() const noexcept final;
+    KRYS_NODISCARD RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept final;
     bool WillApplyCommand() noexcept final;
     void DoApply() noexcept override;
 

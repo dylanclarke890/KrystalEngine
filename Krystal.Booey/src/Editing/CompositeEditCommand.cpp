@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/SimpleRange.hpp"
@@ -353,6 +354,11 @@ namespace krys::boo
 
   void CompositeEditCommand::SetShouldRetainAutocorrectionIndicator(bool) noexcept
   {
+  }
+
+  RefPtr<dom::DataTransfer> CompositeEditCommand::InputEventDataTransfer() const noexcept
+  {
+    return nullptr;
   }
 
   dom::DOMString CompositeEditCommand::InputEventTypeName() const noexcept

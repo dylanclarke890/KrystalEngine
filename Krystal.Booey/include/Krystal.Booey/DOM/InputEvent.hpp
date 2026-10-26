@@ -18,7 +18,6 @@ namespace krys::boo::dom
 
   /// @brief An event about an edit: `beforeinput` before it's made, which can cancel it, and `input` after.
   /// @see https://w3c.github.io/uievents/#interface-inputevent
-  // FIXME: The data transfer (dataTransfer) that pastes and drops carry, with DataTransfer.
   class InputEvent final : public UIEvent
   {
     friend class EventFactory;
@@ -28,16 +27,18 @@ namespace krys::boo::dom
   private:
     DOMString _inputType;
     Maybe<DOMString> _data;
+    RefPtr<DataTransfer> _dataTransfer;
     List<RefPtr<StaticRange>> _targetRanges;
     bool _isInputMethodComposing {false};
 
   public:
     /// @see https://w3c.github.io/uievents/#dom-inputevent-inputevent
     InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict = {}) noexcept;
+    ~InputEvent() noexcept;
 
     /// @brief A trusted input event, which bubbles and crosses shadow boundaries.
     KRYS_NODISCARD static Ref<InputEvent> Create(DOMStringAtom type, DOMStringView inputType, bool cancelable,
-                                                 Maybe<DOMString> data,
+                                                 Maybe<DOMString> data, RefPtr<DataTransfer> &&dataTransfer,
                                                  const List<RefPtr<StaticRange>> &targetRanges, int32 detail,
                                                  IsInputMethodComposing isInputMethodComposing) noexcept;
 
@@ -56,6 +57,12 @@ namespace krys::boo::dom
     KRYS_NODISCARD const Maybe<DOMString> &Data() const noexcept
     {
       return _data;
+    }
+
+    /// @see https://w3c.github.io/input-events/#dom-inputevent-datatransfer
+    KRYS_NODISCARD const RefPtr<DataTransfer> &GetDataTransfer() const noexcept
+    {
+      return _dataTransfer;
     }
 
     /// @see https://w3c.github.io/uievents/#dom-inputevent-iscomposing

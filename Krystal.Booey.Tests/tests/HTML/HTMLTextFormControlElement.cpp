@@ -375,7 +375,7 @@ namespace krys::boo::tests
     CHECK_FALSE(fixture.GetEditor().CanCopy());
     (void)fixture.Run(u8"Copy");
     (void)fixture.Run(u8"Cut");
-    CHECK(fixture.Pasteboard.Writes.empty());
+    CHECK(fixture.Pasteboard.Writes == 0);
     CHECK(Narrow(field.Value()) == "secret");
   }
 

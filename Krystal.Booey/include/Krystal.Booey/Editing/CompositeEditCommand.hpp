@@ -13,6 +13,7 @@
 namespace krys::boo::dom
 {
   class ContainerNode;
+  class DataTransfer;
   class Element;
   class StaticRange;
   class Text;
@@ -116,7 +117,7 @@ namespace krys::boo
 
   /// @brief An edit made of other edits, which it applies to the composition its top-level command makes.
   // FIXME: Document markers (replaceTextInNodePreservingMarkers keeping spelling and grammar markers), with
-  // document markers; the input events' data transfer, with DataTransfer.
+  // document markers.
   class CompositeEditCommand : public EditCommand, public CanMakeWeakPtr<CompositeEditCommand>
   {
   protected:
@@ -154,6 +155,8 @@ namespace krys::boo
     {
       return {};
     }
+    /// @brief The data transfer the command's input events carry: what it pastes or drops, if anything.
+    KRYS_NODISCARD virtual RefPtr<dom::DataTransfer> InputEventDataTransfer() const noexcept;
     KRYS_NODISCARD virtual bool IsBeforeInputEventCancelable() const noexcept
     {
       return true;

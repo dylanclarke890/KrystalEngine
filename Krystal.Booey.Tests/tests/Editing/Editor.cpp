@@ -4,16 +4,22 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/ClipboardEvent.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/InputEvent.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/UndoStep.hpp"
+#include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
@@ -96,7 +102,7 @@ namespace krys::boo::tests
 
     fixture.Select(text, 4, 15);
 
-    SECTION("Copying writes the selected text as plain text")
+    SECTION("Copying writes the selected text and markup")
     {
       auto command = editor.GetCommand(u8"Copy");
       CHECK(command.IsEnabled());
@@ -106,9 +112,12 @@ namespace krys::boo::tests
       CHECK(command.Execute());
       CHECK(copy->Count == 1);
       CHECK(copy->LastWasTrustedClipboardEvent);
-      REQUIRE(fixture.Pasteboard.Writes.size() == 1);
-      CHECK(fixture.Pasteboard.Writes[0].first == u8"text/plain;charset=utf-8");
-      CHECK(fixture.Pasteboard.Writes[0].second == u8"quick brown");
+      CHECK(fixture.Pasteboard.Writes == 1);
+      CHECK(fixture.Pasteboard.Text == u8"quick brown");
+      CHECK(Narrow(fixture.Pasteboard.Markup).contains("quick brown"));
+      REQUIRE(fixture.Pasteboard.CustomData);
+      CHECK(PasteboardCustomData::FromSharedBuffer(*fixture.Pasteboard.CustomData).Origin()
+            == fixture.Document->OriginIdentifierForPasteboard());
     }
 
     SECTION("A cancelled copy event does the copy itself")
@@ -116,7 +125,7 @@ namespace krys::boo::tests
       copy->Cancel = true;
       editor.Copy();
       CHECK(copy->Count == 1);
-      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(fixture.Pasteboard.Writes == 0);
     }
 
     SECTION("A caret outside editable text copies nothing, but still copies")
@@ -125,8 +134,8 @@ namespace krys::boo::tests
                                  Affinity::Downstream);
       CHECK(editor.CanCopy());
       editor.Copy();
-      REQUIRE(fixture.Pasteboard.Writes.size() == 1);
-      CHECK(fixture.Pasteboard.Writes[0].second.empty());
+      CHECK(fixture.Pasteboard.Writes == 1);
+      CHECK(fixture.Pasteboard.Text.empty());
     }
 
     SECTION("Without a pasteboard strategy, copying does nothing")
@@ -134,7 +143,7 @@ namespace krys::boo::tests
       PlatformStrategies::Singleton().SetPasteboardStrategy(nullptr);
       editor.Copy();
       CHECK(copy->Count == 1);
-      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(fixture.Pasteboard.Writes == 0);
     }
   }
 
@@ -157,8 +166,8 @@ namespace krys::boo::tests
       CHECK(command.Execute());
       CHECK(cut->Count == 1);
       CHECK(cut->LastWasTrustedClipboardEvent);
-      REQUIRE(fixture.Pasteboard.Writes.size() == 1);
-      CHECK(Narrow(fixture.Pasteboard.Writes[0].second) == "quick ");
+      CHECK(fixture.Pasteboard.Writes == 1);
+      CHECK(Narrow(fixture.Pasteboard.Text) == "quick ");
       CHECK(Narrow(fixture.InnerHTML(root)) == "The brown fox");
 
       CHECK(fixture.Run(u8"Undo"));
@@ -170,7 +179,7 @@ namespace krys::boo::tests
       fixture.Select(fixture.TextIn(u8"e"), 4, 10);
       cut->Cancel = true;
       editor.Cut();
-      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(fixture.Pasteboard.Writes == 0);
       CHECK(Narrow(fixture.InnerHTML(root)) == "The quick brown fox");
     }
 
@@ -180,7 +189,7 @@ namespace krys::boo::tests
       CHECK_FALSE(editor.CanCut());
       CHECK_FALSE(editor.GetCommand(u8"Cut").IsEnabled());
       editor.Cut();
-      CHECK(fixture.Pasteboard.Writes.empty());
+      CHECK(fixture.Pasteboard.Writes == 0);
       CHECK(Narrow(fixture.InnerHTML(fixture.ById(u8"p"))) == "Not editable");
     }
   }
@@ -196,7 +205,7 @@ namespace krys::boo::tests
 
     SECTION("Pasting inserts the clipboard's text at the selection")
     {
-      fixture.Pasteboard.Contents = u8"XY";
+      fixture.Pasteboard.Text = u8"XY";
       auto command = editor.GetCommand(u8"Paste");
       CHECK(command.IsEnabled());
       CHECK(command.Execute());
@@ -212,14 +221,14 @@ namespace krys::boo::tests
     SECTION("Pasted lines are merged into the paragraphs around them")
     {
       // The last line moves into the text after the selection, keeping the break between them.
-      fixture.Pasteboard.Contents = u8"one\ntwo";
+      fixture.Pasteboard.Text = u8"one\ntwo";
       editor.Paste();
       CHECK(Narrow(fixture.InnerHTML(root)) == "aone<br>twobc");
     }
 
     SECTION("Pasting as plain text")
     {
-      fixture.Pasteboard.Contents = u8"XY";
+      fixture.Pasteboard.Text = u8"XY";
       CHECK(fixture.Run(u8"PasteAsPlainText"));
       CHECK(Narrow(fixture.InnerHTML(root)) == "aXYbc");
     }
@@ -235,7 +244,7 @@ namespace krys::boo::tests
 
     SECTION("A cancelled paste event does the paste itself")
     {
-      fixture.Pasteboard.Contents = u8"XY";
+      fixture.Pasteboard.Text = u8"XY";
       paste->Cancel = true;
       editor.Paste();
       CHECK(Narrow(fixture.InnerHTML(root)) == "abc");
@@ -244,7 +253,7 @@ namespace krys::boo::tests
 
     SECTION("Nothing is pasted outside editable content")
     {
-      fixture.Pasteboard.Contents = u8"XY";
+      fixture.Pasteboard.Text = u8"XY";
       fixture.SetCaret(fixture.TextIn(u8"p"), 1);
       CHECK_FALSE(editor.CanPaste());
       editor.Paste();
@@ -280,5 +289,225 @@ namespace krys::boo::tests
     (void)key(vk::Right, {});
     CHECK(fixture.Client->KeyEvents == 2);
     CHECK(fixture.Selection().Selection().End().DeprecatedEditingOffset() == 10);
+  }
+
+  namespace
+  {
+    /// @brief Calls a function with each event it handles.
+    struct FunctionListener final : dom::EventListenerCallback
+    {
+      Func<void(dom::Event &)> Function;
+
+      explicit FunctionListener(Func<void(dom::Event &)> &&function) noexcept : Function(krys::move(function))
+      {
+      }
+
+      void HandleEvent(dom::Event &event) noexcept override
+      {
+        Function(event);
+      }
+    };
+
+    void ListenWith(EditorFixture &fixture, utf8_stringview type,
+                    Func<void(dom::Event &)> &&function) noexcept
+    {
+      fixture.Document->AddEventListener(
+        dom::DOMStringAtom(type),
+        Ref<dom::EventListenerCallback>(CreateRef<FunctionListener>(krys::move(function))), true);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: clipboard events' data", "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<div id=e contenteditable>abc</div><p id=p>The quick brown fox</p>");
+    auto &editor = fixture.GetEditor();
+    auto &document = *fixture.Document;
+    auto &root = fixture.ById(u8"e");
+
+    SECTION("A cancelled copy puts what its listeners wrote on the clipboard")
+    {
+      RefPtr<dom::DataTransfer> clipboardData;
+      ListenWith(fixture, EventNames::Copy,
+                 [&](dom::Event &event)
+                 {
+                   clipboardData = ShareRefPtr(Downcast<dom::ClipboardEvent>(event).ClipboardData());
+                   REQUIRE(clipboardData);
+                   CHECK(clipboardData->CanWriteData());
+                   clipboardData->SetData(document, u8"text/plain", u8"written");
+                   clipboardData->SetData(document, u8"text/html", u8"<b>written</b><script>x</script>");
+                   clipboardData->SetData(document, u8"application/x-custom", u8"custom");
+                   event.PreventDefault();
+                 });
+      fixture.Select(fixture.TextIn(u8"p"), 4, 9);
+      editor.Copy();
+
+      CHECK(fixture.Pasteboard.Writes == 1);
+      CHECK(fixture.Pasteboard.Text == u8"written");
+      CHECK(Narrow(fixture.Pasteboard.Markup).contains("written"));
+      CHECK_FALSE(Narrow(fixture.Pasteboard.Markup).contains("script"));
+      REQUIRE(fixture.Pasteboard.CustomData);
+      auto customData = PasteboardCustomData::FromSharedBuffer(*fixture.Pasteboard.CustomData);
+      CHECK(customData.Origin() == document.OriginIdentifierForPasteboard());
+      CHECK(customData.ReadStringInCustomData(u8"application/x-custom") == u8"custom");
+
+      // The data can't be used once the event is over.
+      CHECK(clipboardData->Types(document).empty());
+    }
+
+    SECTION("An uncancelled copy copies the selection, whatever its listeners wrote")
+    {
+      ListenWith(
+        fixture, EventNames::Copy, [&](dom::Event &event)
+        { Downcast<dom::ClipboardEvent>(event).ClipboardData()->SetData(document, u8"text", u8"ignored"); });
+      fixture.Select(fixture.TextIn(u8"p"), 4, 9);
+      editor.Copy();
+      CHECK(fixture.Pasteboard.Text == u8"quick");
+    }
+
+    SECTION("Listeners of the events before copying can't read or write")
+    {
+      int32 events = 0;
+      ListenWith(fixture, EventNames::BeforeCopy,
+                 [&](dom::Event &event)
+                 {
+                   ++events;
+                   auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
+                   REQUIRE(clipboardData);
+                   CHECK_FALSE(clipboardData->CanReadTypes());
+                   clipboardData->SetData(document, u8"text", u8"x");
+                   CHECK(clipboardData->GetData(document, u8"text").empty());
+                 });
+      fixture.Select(fixture.TextIn(u8"p"), 4, 9);
+      (void)editor.GetCommand(u8"Copy").IsEnabled();
+      CHECK(events == 1);
+    }
+
+    SECTION("Paste listeners read the clipboard")
+    {
+      fixture.Pasteboard.Text = u8"pasted";
+      fixture.Pasteboard.Markup = u8"<i>pasted</i>";
+      List<dom::DOMString> types;
+      dom::DOMString text;
+      dom::DOMString markup;
+      ListenWith(fixture, EventNames::Paste,
+                 [&](dom::Event &event)
+                 {
+                   auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
+                   REQUIRE(clipboardData);
+                   CHECK_FALSE(clipboardData->CanWriteData());
+                   types = clipboardData->Types(document);
+                   text = clipboardData->GetData(document, u8"text");
+                   markup = clipboardData->GetData(document, u8"text/html");
+                   event.PreventDefault();
+                 });
+      fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+      editor.Paste();
+      CHECK(types == List<dom::DOMString> {u8"text/plain", u8"text/html"});
+      CHECK(text == u8"pasted");
+      // Markup from another application is sanitised: parsed apart, and serialised with its styles inlined.
+      CHECK(Narrow(markup).starts_with("<i style=\""));
+      CHECK(Narrow(markup).ends_with("\">pasted</i>"));
+      CHECK(Narrow(fixture.InnerHTML(root)) == "abc");
+    }
+
+    SECTION("Rich text is pasted as markup")
+    {
+      fixture.Pasteboard.Text = u8"bold";
+      fixture.Pasteboard.Markup = u8"<b>bold</b>";
+      fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+      editor.Paste();
+      CHECK(Narrow(fixture.InnerHTML(root)) == "a<b>bold</b>bc");
+    }
+
+    SECTION("A page reads back the custom types it copied, and other pages don't")
+    {
+      ListenWith(fixture, EventNames::Copy,
+                 [&](dom::Event &event)
+                 {
+                   auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
+                   clipboardData->SetData(document, u8"application/x-custom", u8"custom");
+                   event.PreventDefault();
+                 });
+      dom::DOMString custom;
+      List<dom::DOMString> types;
+      ListenWith(fixture, EventNames::Paste,
+                 [&](dom::Event &event)
+                 {
+                   auto *clipboardData = Downcast<dom::ClipboardEvent>(event).ClipboardData();
+                   types = clipboardData->Types(document);
+                   custom = clipboardData->GetData(document, u8"application/x-custom");
+                 });
+      fixture.Select(fixture.TextIn(u8"p"), 4, 9);
+      editor.Copy();
+      fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+      editor.Paste();
+      CHECK(types == List<dom::DOMString> {u8"application/x-custom"});
+      CHECK(custom == u8"custom");
+
+      EditorFixture other(u8"<div contenteditable>x</div>");
+      auto otherData = dom::DataTransfer::CreateForCopyAndPaste(
+        *other.Document, dom::DataTransfer::StoreMode::Readonly, Pasteboard::CreateForCopyAndPaste());
+      other.Pasteboard.CustomData = fixture.Pasteboard.CustomData;
+      CHECK(otherData->Types(*other.Document).empty());
+      CHECK(otherData->GetData(*other.Document, u8"application/x-custom").empty());
+    }
+
+    SECTION("Pastes' input events carry what's pasted, except in text fields")
+    {
+      RefPtr<dom::DataTransfer> dataTransfer;
+      int32 events = 0;
+      ListenWith(fixture, EventNames::BeforeInput,
+                 [&](dom::Event &event)
+                 {
+                   ++events;
+                   dataTransfer = Downcast<dom::InputEvent>(event).GetDataTransfer();
+                 });
+      fixture.Pasteboard.Text = u8"XY";
+      fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+      editor.Paste();
+      CHECK(events == 1);
+      REQUIRE(dataTransfer);
+      CHECK(dataTransfer->GetData(document, u8"text/plain") == u8"XY");
+      CHECK(Narrow(dataTransfer->GetData(document, u8"text/html")).contains("XY"));
+      CHECK_FALSE(dataTransfer->CanWriteData());
+    }
+
+    SECTION("Files on the clipboard are given to paste listeners")
+    {
+      fixture.Pasteboard.FilePaths = {u8"C:\\files\\notes.txt"};
+      utf8_string name;
+      ListenWith(fixture, EventNames::Paste,
+                 [&](dom::Event &event)
+                 {
+                   auto &files = Downcast<dom::ClipboardEvent>(event).ClipboardData()->Files(document);
+                   REQUIRE(files.Length() == 1);
+                   name = files.Item(0)->Name();
+                   event.PreventDefault();
+                 });
+      fixture.SetCaret(fixture.TextIn(u8"e"), 1);
+      editor.Paste();
+      CHECK(name == u8"notes.txt");
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Editor: input events in text fields have no data transfer",
+                   "[Editing][Editor]")
+  {
+    EditorFixture fixture(u8"<input id=field value=ab>");
+    auto &field = Downcast<html::HTMLInputElement>(fixture.ById(u8"field"));
+    bool hadDataTransfer = true;
+    int32 events = 0;
+    ListenWith(fixture, EventNames::BeforeInput,
+               [&](dom::Event &event)
+               {
+                 ++events;
+                 hadDataTransfer = static_cast<bool>(Downcast<dom::InputEvent>(event).GetDataTransfer());
+               });
+    field.Focus();
+    fixture.Pasteboard.Text = u8"XY";
+    fixture.GetEditor().Paste();
+    CHECK(events == 1);
+    CHECK_FALSE(hadDataTransfer);
+    CHECK(Narrow(field.Value()).contains("XY"));
   }
 }

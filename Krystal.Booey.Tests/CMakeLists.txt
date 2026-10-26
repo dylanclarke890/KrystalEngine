@@ -400,6 +400,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/SpatialNavigation.cpp
 		tests/Modules/Gamepad/Gamepad.cpp
 		tests/FileAPI/Blob.cpp
+		tests/DOM/DataTransfer.cpp
 		tests/Page/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp

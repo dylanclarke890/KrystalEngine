@@ -52,6 +52,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/VisibleSelection.hpp"
+#include "Krystal.Booey/History/HistoryItem.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
@@ -1432,6 +1433,15 @@ namespace krys::boo::dom
   void Document::ServiceCaretAnimation() noexcept
   {
     _selection->GetCaretAnimator().ServiceCaretAnimation();
+  }
+
+  const DOMString &Document::OriginIdentifierForPasteboard() const noexcept
+  {
+    if (_uniqueIdentifier.empty())
+    {
+      _uniqueIdentifier = u8"null:" + CreateVersion4UUIDString();
+    }
+    return _uniqueIdentifier;
   }
 
   DOMSelection *Document::GetSelection() noexcept

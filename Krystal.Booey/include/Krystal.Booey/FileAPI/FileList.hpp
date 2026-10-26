@@ -9,14 +9,17 @@ namespace krys::boo
     class FileInputType;
   }
 
-  class DataTransfer;
+  namespace dom
+  {
+    class DataTransfer;
+  }
 
   /// @brief A list of files: a file input's, or a drop's.
   /// @see https://w3c.github.io/FileAPI/#filelist-section
   class FileList final : public RefCounted<FileList>
   {
     // FileLists can only be changed by their owners.
-    friend class DataTransfer;
+    friend class dom::DataTransfer;
     friend class html::FileInputType;
     KRYS_NON_COPY_MOVABLE(FileList);
 

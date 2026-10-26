@@ -16,8 +16,11 @@
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Platform/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
+#include "Krystal.Booey/Platform/SelectionData.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <string>
 
@@ -225,21 +228,142 @@ namespace krys::boo::tests
     }
   };
 
-  /// @brief Records what's written to the clipboard, and reads back @ref Contents.
+  /// @brief A clipboard in memory, holding text, markup, files and pages' custom data as a host's would, and
+  /// counting what's written to it.
   struct RecordingPasteboardStrategy final : PasteboardStrategy
   {
-    List<std::pair<utf8_string, utf8_string>> Writes;
-    utf8_string Contents;
+    int32 Writes {0};
+    int64 Changes {0};
+    utf8_string Text;
+    utf8_string Markup;
+    List<utf8_string> FilePaths;
+    RefPtr<SharedBuffer> CustomData;
 
-    void WriteToPasteboard(utf8_stringview pasteboardType, utf8_stringview text) noexcept final
+    KRYS_NODISCARD List<utf8_string> Types(utf8_stringview) noexcept final
     {
-      Writes.emplace_back(utf8_string(pasteboardType), utf8_string(text));
-      Contents = utf8_string(text);
+      List<utf8_string> types;
+      if (!Text.empty())
+      {
+        types.emplace_back(u8"text/plain");
+      }
+      if (!Markup.empty())
+      {
+        types.emplace_back(u8"text/html");
+      }
+      if (!FilePaths.empty())
+      {
+        types.emplace_back(u8"text/uri-list");
+      }
+      if (CustomData)
+      {
+        types.emplace_back(PasteboardCustomData::BooeyType());
+      }
+      return types;
     }
 
-    KRYS_NODISCARD utf8_string ReadStringFromPasteboard(utf8_stringview pasteboardType) noexcept final
+    KRYS_NODISCARD utf8_string ReadTextFromClipboard(utf8_stringview, utf8_stringview type) noexcept final
     {
-      return pasteboardType.starts_with(u8"text/plain") ? Contents : utf8_string();
+      if (type.starts_with(u8"text/plain"))
+      {
+        return Text;
+      }
+      return type == u8"text/html" ? Markup : utf8_string();
+    }
+
+    KRYS_NODISCARD List<utf8_string> ReadFilePathsFromClipboard(utf8_stringview) noexcept final
+    {
+      return FilePaths;
+    }
+
+    KRYS_NODISCARD RefPtr<SharedBuffer> ReadBufferFromClipboard(utf8_stringview,
+                                                                utf8_stringview type) noexcept final
+    {
+      return type == PasteboardCustomData::BooeyType() ? CustomData : nullptr;
+    }
+
+    void WriteToClipboard(utf8_stringview pasteboardName, SelectionData &&selectionData) noexcept final
+    {
+      ClearClipboard(pasteboardName);
+      ++Writes;
+      Text = selectionData.Text();
+      Markup = selectionData.Markup();
+      CustomData = selectionData.CustomData();
+    }
+
+    void ClearClipboard(utf8_stringview) noexcept final
+    {
+      ++Changes;
+      Text.clear();
+      Markup.clear();
+      FilePaths.clear();
+      CustomData = nullptr;
+    }
+
+    KRYS_NODISCARD int64 ChangeCount(utf8_stringview) noexcept final
+    {
+      return Changes;
+    }
+
+    KRYS_NODISCARD List<utf8_string> TypesSafeForDOMToReadAndWrite(utf8_stringview pasteboardName,
+                                                                   utf8_stringview origin) noexcept final
+    {
+      List<utf8_string> domTypes;
+      auto add = [&](utf8_stringview type)
+      {
+        if (std::ranges::find(domTypes, type) == domTypes.end())
+        {
+          domTypes.emplace_back(type);
+        }
+      };
+      if (CustomData)
+      {
+        auto customData = PasteboardCustomData::FromSharedBuffer(*CustomData);
+        if (customData.Origin() == origin)
+        {
+          for (auto &type : customData.OrderedTypes())
+          {
+            add(type);
+          }
+        }
+      }
+      for (auto &type : Types(pasteboardName))
+      {
+        if (Pasteboard::IsSafeTypeForDOMToReadAndWrite(type))
+        {
+          add(type);
+        }
+      }
+      return domTypes;
+    }
+
+    int64 WriteCustomData(const List<PasteboardCustomData> &data,
+                          utf8_stringview pasteboardName) noexcept final
+    {
+      if (data.size() != 1)
+      {
+        return Changes;
+      }
+
+      SelectionData selectionData;
+      const auto &customData = data[0];
+      customData.ForEachPlatformString(
+        [&](auto &type, auto &string)
+        {
+          if (type == u8"text/plain")
+          {
+            selectionData.SetText(string);
+          }
+          else if (type == u8"text/html")
+          {
+            selectionData.SetMarkup(string);
+          }
+        });
+      if (customData.HasSameOriginCustomData() || !customData.Origin().empty())
+      {
+        selectionData.SetCustomData(customData.CreateSharedBuffer());
+      }
+      WriteToClipboard(pasteboardName, krys::move(selectionData));
+      return Changes;
     }
   };
 

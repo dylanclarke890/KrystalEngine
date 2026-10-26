@@ -28,6 +28,9 @@
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Loader/DocumentWriter.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -72,7 +75,8 @@ namespace krys::boo
 
     KRYS_NODISCARD dom::Node *NextSiblingInComposedTree(dom::Node &node) noexcept
     {
-      if (auto *slot = dom::SlotAlgorithms::FindSlot(node); slot && !slot->IsInUserAgentShadowTree())
+      auto *slot = dom::SlotAlgorithms::IsSlottable(node) ? dom::SlotAlgorithms::FindSlot(node) : nullptr;
+      if (slot && !slot->IsInUserAgentShadowTree())
       {
         if (auto *assignedNodes = slot->AssignedNodes())
         {
@@ -1491,6 +1495,104 @@ namespace krys::boo
       selection.Start(), selection.End(), nodes, resolveURLs, serializeComposedTree, ignoreUserSelectNone,
       AnnotateForInterchange::Yes, ConvertBlocksToInlines::No, StandardFontFamilySerializationMode::Keep,
       MSOListMode::DoNotPreserve, preserveBaseElement, preserveDirectionForInlineText);
+  }
+
+  // FIXME: The destination page's dark appearance (setUseColorAppearance), with dark appearance.
+  Ref<Page> CreatePageForSanitizingWebContent(dom::Document *) noexcept
+  {
+    Ref<Page> page = Page::Create();
+
+    auto &frame = page->MainFrame();
+    frame.CreateView(IntSize {800, 600});
+
+    static constexpr utf8_stringview markup = u8"<!DOCTYPE html><html><head><meta name='color-scheme' "
+                                              u8"content='light dark'/></head><body></body></html>";
+    DocumentWriter writer;
+    writer.SetFrame(frame);
+    writer.SetMIMEType(u8"text/html");
+    if (writer.Begin({}))
+    {
+      writer.AddData(Span<const uint8>(reinterpret_cast<const uint8 *>(markup.data()), markup.size()));
+      writer.End();
+      krys_assert(frame.Document() && frame.Document()->Body());
+    }
+
+    return page;
+  }
+
+  Maybe<utf8_string> SanitizeMarkup(utf8_stringview rawHTML, dom::Document *destinationDocument,
+                                    MSOListQuirks msoListQuirks,
+                                    const Func<void(dom::DocumentFragment &)> &fragmentSanitizer) noexcept
+  {
+    Ref<Page> page = CreatePageForSanitizingWebContent(destinationDocument);
+    RefPtr<dom::Document> stagingDocument = ShareRefPtr(page->MainFrame().Document());
+    if (!stagingDocument)
+    {
+      return null;
+    }
+
+    auto fragment = CreateFragmentFromMarkup(*stagingDocument, rawHTML, {});
+
+    if (fragmentSanitizer)
+    {
+      fragmentSanitizer(*fragment);
+    }
+
+    auto markup =
+      SanitizedMarkupForFragmentInDocument(krys::move(fragment), *stagingDocument, msoListQuirks, rawHTML);
+    page->MainFrame().SetDocument(nullptr);
+    return markup;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool ShouldPreserveMSOLists(utf8_stringview markup) noexcept
+    {
+      if (!markup.starts_with(u8"<html xmlns:"))
+      {
+        return false;
+      }
+      auto tagClose = markup.find(u8'>');
+      if (tagClose == utf8_stringview::npos)
+      {
+        return false;
+      }
+      auto tag = markup.substr(0, tagClose);
+      return tag.contains(u8"xmlns:o=\"urn:schemas-microsoft-com:office:office\"")
+             && tag.contains(u8"xmlns:w=\"urn:schemas-microsoft-com:office:word\"");
+    }
+  }
+
+  utf8_string SanitizedMarkupForFragmentInDocument(Ref<dom::DocumentFragment> &&fragment,
+                                                   dom::Document &document, MSOListQuirks msoListQuirks,
+                                                   utf8_stringview originalMarkup) noexcept
+  {
+    MSOListMode msoListMode =
+      msoListQuirks == MSOListQuirks::CheckIfNeeded && ShouldPreserveMSOLists(originalMarkup)
+        ? MSOListMode::Preserve
+        : MSOListMode::DoNotPreserve;
+
+    RefPtr<dom::Element> bodyElement = document.Body();
+    krys_debug_assert(bodyElement);
+    (void)bodyElement->AppendChild(*fragment);
+
+    // SerializeComposedTree::No because there can't be a shadow tree in the pasted fragment.
+    auto result = SerializePreservingVisualAppearanceInternal(
+      dom::FirstPositionInNode(bodyElement.get()), dom::LastPositionInNode(bodyElement.get()), nullptr,
+      ResolveURLs::YesExcludingURLsForPrivacy, SerializeComposedTree::No, IgnoreUserSelectNone::No,
+      AnnotateForInterchange::Yes, ConvertBlocksToInlines::No, StandardFontFamilySerializationMode::Strip,
+      msoListMode, PreserveBaseElement::No, PreserveDirectionForInlineText::No);
+
+    if (msoListMode != MSOListMode::Preserve)
+    {
+      return result;
+    }
+
+    return u8"<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n"
+           u8"xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n"
+           u8"xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\"\n"
+           u8"xmlns=\"http://www.w3.org/TR/REC-html40\">"
+           + result + u8"</html>";
   }
 
   // FIXME: Restoring attachment elements' files (restoreAttachmentElementsInFragment), with attachments; and

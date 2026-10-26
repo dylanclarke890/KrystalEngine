@@ -14,6 +14,7 @@
 
 namespace krys::boo::dom
 {
+  class DataTransfer;
   class Document;
   class DocumentFragment;
   class Element;
@@ -207,6 +208,15 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD utf8_string ReadPlainTextFromPasteboard(Pasteboard &pasteboard) noexcept;
+    /// @brief Writes the selection's text and markup (with its styles inlined) to @p pasteboard.
+    void WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept;
+    /// @brief The pasteboard's richest content as a fragment to paste at @p context.
+    /// @param allowPlainText Whether plain text may be read when there's no richer content.
+    /// @param chosePlainText Set to whether the fragment was made from plain text.
+    KRYS_NODISCARD RefPtr<dom::DocumentFragment> WebContentFromPasteboard(Pasteboard &pasteboard,
+                                                                          const dom::SimpleRange &context,
+                                                                          bool allowPlainText,
+                                                                          bool &chosePlainText) noexcept;
 
     /// @brief The command named @p commandName (ignoring ASCII case), from a menu or key binding.
     KRYS_NODISCARD Command GetCommand(utf8_stringview commandName) noexcept;
@@ -392,6 +402,8 @@ namespace krys::boo
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 
     bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept;
+    bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
+                                Ref<dom::DataTransfer> &&dataTransfer) noexcept;
     KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFrom(const VisibleSelection &selection) const noexcept;
     KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFromSelection() const noexcept;
 

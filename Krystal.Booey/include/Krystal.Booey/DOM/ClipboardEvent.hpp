@@ -10,19 +10,30 @@ namespace krys::boo::dom
   /// @brief A clipboard event: `copy`, `cut` and `paste`, and the legacy `beforecopy`, `beforecut` and
   /// `beforepaste`.
   /// @see https://w3c.github.io/clipboard-apis/#clipboard-event-interfaces
-  // FIXME: The clipboard data (clipboardData) the event's listeners read and write, with DataTransfer.
   class ClipboardEvent final : public Event
   {
     friend class EventFactory;
 
     using dictionary_type = ClipboardEventInit;
 
+  private:
+    RefPtr<DataTransfer> _clipboardData;
+
   public:
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboardevent
     ClipboardEvent(DOMStringAtom type, const ClipboardEventInit &eventInitDict = {}) noexcept;
+    ~ClipboardEvent() noexcept;
 
-    /// @brief A trusted clipboard event, which bubbles, can be cancelled and crosses shadow boundaries.
-    KRYS_NODISCARD static Ref<ClipboardEvent> Create(DOMStringAtom type) noexcept;
+    /// @brief A trusted clipboard event carrying @p dataTransfer, which bubbles, can be cancelled and crosses
+    /// shadow boundaries.
+    KRYS_NODISCARD static Ref<ClipboardEvent> Create(DOMStringAtom type,
+                                                     Ref<DataTransfer> &&dataTransfer) noexcept;
+
+    /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboarddata
+    KRYS_NODISCARD DataTransfer *ClipboardData() const noexcept
+    {
+      return _clipboardData.get();
+    }
 
     KRYS_NODISCARD bool IsClipboardEvent() const noexcept final
     {
