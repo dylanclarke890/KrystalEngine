@@ -68,7 +68,8 @@ namespace krys::boo::dom
     }
     else if (name.NamespaceURI() == infra::Namespaces::SVG)
     {
-      result = svg::SVGElementFactory::TryCreate(document, elementName);
+      // SVG's tag names are case-sensitive.
+      result = svg::SVGElementFactory::TryCreate(document, name.TagName());
 
       if (result == nullptr)
       {

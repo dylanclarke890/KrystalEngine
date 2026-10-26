@@ -67,6 +67,12 @@ namespace krys::boo::dom
     ~DocumentOrShadowRoot() noexcept;
 
   public:
+    /// @brief The document or shadow root itself.
+    KRYS_NODISCARD ContainerNode &RootNode() const noexcept
+    {
+      return _rootNode;
+    }
+
 #pragma region DocumentOrShadowRoot Mixin (DOM) - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
     /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.

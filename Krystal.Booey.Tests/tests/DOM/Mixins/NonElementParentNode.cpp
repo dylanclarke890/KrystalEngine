@@ -68,4 +68,17 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(fragment->RemoveChild(*parent.Value()).HasException());
     }
   }
+
+  // FIXME: An element without an id is found for the empty string: Element::Id() is empty for a missing
+  // attribute, so the comparison matches it. No element has the empty string as its ID.
+  TEST_CASE("NonElementParentNode::GetElementById finds nothing for the empty string",
+            "[NonElementParentNode][!shouldfail]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto element = document->CreateElement(u8"div");
+    REQUIRE_FALSE(element.HasException());
+    REQUIRE_FALSE(document->AppendChild(*element.Value()).HasException());
+
+    CHECK(document->GetElementById(u8"") == nullptr);
+  }
 }

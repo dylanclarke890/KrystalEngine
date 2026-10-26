@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Style/Values/SVG/SVGStrokeDashoffset.hpp"
 #include "Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include <cmath>
 #include <numbers>
@@ -234,12 +235,32 @@ namespace krys::boo::svg
   }
 
   float SVGLengthContext::RemoveZoomFromFontOrRootFontRelativeLength(float value,
-                                                                     css::LengthUnit) const noexcept
+                                                                     css::LengthUnit unit) const noexcept
   {
-    // FIXME: Divide by the used zoom of the nearest `<svg>` (the context itself when it's the outermost one,
-    // otherwise its viewport element) for font-relative units, or the root element's for root-font-relative
-    // ones, once there's `SVGElement::ViewportElement` and `SVGSVGElement` (B11a3).
-    return value;
+    RefPtr<const SVGSvgElement> svgElement = ShareRefPtr(
+      _context->IsOutermostSVGSVGElement() ? Downcast<SVGSvgElement>(_context.get())
+                                           : DynamicDowncast<SVGSvgElement>(_context->ViewportElement()));
+
+    if (!svgElement || !svgElement->Renderer())
+    {
+      return value;
+    }
+
+    float usedZoom = 1.0f;
+
+    if (css::IsFontRelativeLength(unit))
+    {
+      usedZoom = svgElement->Renderer()->Style().UsedZoom();
+    }
+    else if (css::IsRootFontRelativeLength(unit))
+    {
+      if (auto *rootRenderer = svgElement->NodeDocument().DocumentElement()->Renderer())
+      {
+        usedZoom = rootRenderer->Style().UsedZoom();
+      }
+    }
+
+    return (usedZoom != 1.0f) ? value / usedZoom : value;
   }
 
   dom::ExceptionOr<float>
@@ -487,9 +508,25 @@ namespace krys::boo::svg
     // the (anonymous) RenderSVGViewportContainer (first and only child of RenderSVGRoot)
     // applies zooming/panning for the whole SVG subtree as affine transform. Therefore
     // any length within the SVG subtree needs to exclude the 'zoom' information.
-    // FIXME: The outermost `<svg>`'s current viewport size excluding zoom, or else the nearest `<svg>`'s
-    // (skipping `<symbol>`) view box size, or its viewport size when the view box is empty, once there's
-    // `SVGElement::ViewportElement` and `SVGSVGElement` (B11a3).
-    return {};
+    if (_context->IsOutermostSVGSVGElement())
+    {
+      return Downcast<SVGSvgElement>(*ProtectedContext()).CurrentViewportSizeExcludingZoom();
+    }
+
+    // Take size from nearest SVGSVGElement, skipping over <symbol> elements.
+    RefPtr<const SVGSvgElement> svg = ShareRefPtr(
+      DynamicDowncast<SVGSvgElement>(_context->ViewportElement(SVGElement::ViewportElementType::SVGSVGOnly)));
+    if (!svg)
+    {
+      return {};
+    }
+
+    auto viewportSize = svg->CurrentViewBoxRect().Size();
+    if (viewportSize.IsEmpty())
+    {
+      viewportSize = svg->CurrentViewportSizeExcludingZoom();
+    }
+
+    return viewportSize;
   }
 }

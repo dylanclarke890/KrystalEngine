@@ -38,11 +38,12 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 - **Slot assignment on insertion** — inserted and moved nodes aren't assigned a slot by the insertion steps' own rules (`TODO(impl): SLOTTABLES` in `src/DOM/Algorithms/MutationAlgorithms.cpp`); `slotchange` is signalled (G6c). https://dom.spec.whatwg.org/#concept-node-insert
 - **Document encoding** — not set on creation or passed to clones; `characterSet` is always UTF-8 (`src/DOM/Document.cpp`, `src/DOM/Algorithms/NodeAlgorithms.cpp`). https://dom.spec.whatwg.org/#concept-document-encoding
 - **Memory** — documents are freed when their last reference and node go (M1, `PORTING.md`, *Freeing documents*); event listener callbacks that hold their own target keep it alive (no garbage collector).
-- **ID lookups** — `getElementById` and the selector ID fast paths walk the tree (no ID map per tree scope) (`DOM/Mixins/NonElementParentNode.hpp`, `src/DOM/SelectorQuery.cpp`).
+- **ID lookups** — `getElementById` and the selector ID fast paths walk the tree (no ID map per tree scope) (`DOM/Mixins/NonElementParentNode.hpp`, `src/DOM/SelectorQuery.cpp`); `getElementById("")` finds the first element without an id, since `Element::Id()` is empty for a missing attribute (`[!shouldfail]` in `tests/DOM/Mixins/NonElementParentNode.cpp`).
 - **Live collections** — `LiveNodeList`/`LiveHTMLCollection` re-walk the tree on every access (no caching) (`DOM/Internals/`).
 - **Public tree accessors** — `FirstChild()`, `ParentNode()` and friends return raw pointers; the public API should return `RefPtr`. https://dom.spec.whatwg.org/#interface-node
 - **Token lists** — only `classList` follows its attribute; `relList`, `sandbox`, `sizes`, `blocking`, `htmlFor` should update from `Element::OnAttributeChanged`.
 - **Header weight** — `Node.hpp` includes the registered observer and mutation record types; forward declare them if possible.
+- **HTML element lookup** — `ElementFactory` looks HTML elements up by their lowercased local name, so `createElementNS` makes `DIV` in the HTML namespace a div rather than an unknown element (`src/DOM/Internals/ElementFactory.cpp`; `[!shouldfail]` in `tests/DOM/Internals/ElementFactory.cpp`). https://dom.spec.whatwg.org/#concept-element-interface
 - **Small fixes** — `NodeAlgorithms::Equals` compares attributes by position; `Node.cpp:212` doesn't use `element1`; `NameValidation.cpp` decodes whole strings and assumes valid UTF-8.
 
 ## HTML

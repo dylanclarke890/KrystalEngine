@@ -102,6 +102,13 @@ namespace krys::boo::dom
       return _storage.get();
     }
 
+    /// @brief Whether this and @p other have the same local name and namespace, whatever their prefixes.
+    KRYS_NODISCARD bool Matches(const QualifiedName &other) const noexcept
+    {
+      return _storage == other._storage
+             || (LocalName() == other.LocalName() && NamespaceURI() == other.NamespaceURI());
+    }
+
     KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept
     {
       return a._storage == b._storage;

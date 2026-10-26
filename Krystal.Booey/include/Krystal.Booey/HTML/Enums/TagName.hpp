@@ -174,10 +174,64 @@ namespace krys::boo::html
     font_face_uri,
     missing_glyph,
     annotation_xml,
+    // SVG
+    animate,
+    animateMotion,
+    animateTransform,
+    clipPath,
+    defs,
+    ellipse,
+    feBlend,
+    feColorMatrix,
+    feComponentTransfer,
+    feComposite,
+    feConvolveMatrix,
+    feDiffuseLighting,
+    feDisplacementMap,
+    feDistantLight,
+    feDropShadow,
+    feFlood,
+    feFuncA,
+    feFuncB,
+    feFuncG,
+    feFuncR,
+    feGaussianBlur,
+    feImage,
+    feMerge,
+    feMergeNode,
+    feMorphology,
+    feOffset,
+    fePointLight,
+    feSpecularLighting,
+    feSpotLight,
+    feTile,
+    feTurbulence,
+    filter,
+    line,
+    linearGradient,
+    marker,
+    mask,
+    metadata,
+    mpath,
+    path,
+    pattern,
+    polygon,
+    polyline,
+    radialGradient,
+    rect,
+    set,
+    stop,
+    switch_, // conflicts with switch keyword
+    symbol,
+    text,
+    textPath,
+    tspan,
+    use,
+    view,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TagName, 164u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TagName, 217u);
 
 namespace krys::boo::html
 {
@@ -432,6 +486,14 @@ namespace krys::boo::html
         {
           return TagName::xmp;
         }
+        if (name == u8"set")
+        {
+          return TagName::set;
+        }
+        if (name == u8"use")
+        {
+          return TagName::use;
+        }
         break;
       }
       case 4:
@@ -532,6 +594,38 @@ namespace krys::boo::html
         {
           return TagName::time;
         }
+        if (name == u8"defs")
+        {
+          return TagName::defs;
+        }
+        if (name == u8"line")
+        {
+          return TagName::line;
+        }
+        if (name == u8"mask")
+        {
+          return TagName::mask;
+        }
+        if (name == u8"path")
+        {
+          return TagName::path;
+        }
+        if (name == u8"rect")
+        {
+          return TagName::rect;
+        }
+        if (name == u8"stop")
+        {
+          return TagName::stop;
+        }
+        if (name == u8"text")
+        {
+          return TagName::text;
+        }
+        if (name == u8"view")
+        {
+          return TagName::view;
+        }
         break;
       }
       case 5:
@@ -619,6 +713,14 @@ namespace krys::boo::html
         if (name == u8"video")
         {
           return TagName::video;
+        }
+        if (name == u8"mpath")
+        {
+          return TagName::mpath;
+        }
+        if (name == u8"tspan")
+        {
+          return TagName::tspan;
         }
         break;
       }
@@ -720,6 +822,26 @@ namespace krys::boo::html
         {
           return TagName::strong;
         }
+        if (name == u8"feTile")
+        {
+          return TagName::feTile;
+        }
+        if (name == u8"filter")
+        {
+          return TagName::filter;
+        }
+        if (name == u8"marker")
+        {
+          return TagName::marker;
+        }
+        if (name == u8"switch")
+        {
+          return TagName::switch_;
+        }
+        if (name == u8"symbol")
+        {
+          return TagName::symbol;
+        }
         break;
       }
       case 7:
@@ -776,6 +898,54 @@ namespace krys::boo::html
         {
           return TagName::summary;
         }
+        if (name == u8"animate")
+        {
+          return TagName::animate;
+        }
+        if (name == u8"ellipse")
+        {
+          return TagName::ellipse;
+        }
+        if (name == u8"feBlend")
+        {
+          return TagName::feBlend;
+        }
+        if (name == u8"feFlood")
+        {
+          return TagName::feFlood;
+        }
+        if (name == u8"feFuncA")
+        {
+          return TagName::feFuncA;
+        }
+        if (name == u8"feFuncB")
+        {
+          return TagName::feFuncB;
+        }
+        if (name == u8"feFuncG")
+        {
+          return TagName::feFuncG;
+        }
+        if (name == u8"feFuncR")
+        {
+          return TagName::feFuncR;
+        }
+        if (name == u8"feImage")
+        {
+          return TagName::feImage;
+        }
+        if (name == u8"feMerge")
+        {
+          return TagName::feMerge;
+        }
+        if (name == u8"pattern")
+        {
+          return TagName::pattern;
+        }
+        if (name == u8"polygon")
+        {
+          return TagName::polygon;
+        }
         break;
       }
       case 8:
@@ -828,6 +998,27 @@ namespace krys::boo::html
         {
           return TagName::noscript;
         }
+        if (name == u8"clipPath")
+        {
+          return TagName::clipPath;
+        }
+        if (name == u8"feOffset")
+        {
+          return TagName::feOffset;
+        }
+        if (name == u8"metadata")
+        {
+          return TagName::metadata;
+        }
+        if (name == u8"polyline")
+        {
+          return TagName::polyline;
+        }
+        if (name == u8"textPath")
+        {
+          return TagName::textPath;
+        }
+        break;
       }
       case 9:
       {
@@ -857,6 +1048,42 @@ namespace krys::boo::html
         }
         break;
       }
+      case 11:
+      {
+        if (name == u8"feComposite")
+        {
+          return TagName::feComposite;
+        }
+        if (name == u8"feMergeNode")
+        {
+          return TagName::feMergeNode;
+        }
+        if (name == u8"feSpotLight")
+        {
+          return TagName::feSpotLight;
+        }
+        break;
+      }
+      case 12:
+      {
+        if (name == u8"feDropShadow")
+        {
+          return TagName::feDropShadow;
+        }
+        if (name == u8"feMorphology")
+        {
+          return TagName::feMorphology;
+        }
+        if (name == u8"fePointLight")
+        {
+          return TagName::fePointLight;
+        }
+        if (name == u8"feTurbulence")
+        {
+          return TagName::feTurbulence;
+        }
+        break;
+      }
       case 13:
       {
         if (name == u8"color-profile")
@@ -879,6 +1106,15 @@ namespace krys::boo::html
         {
           return TagName::foreignObject;
         }
+        if (name == u8"animateMotion")
+        {
+          return TagName::animateMotion;
+        }
+        if (name == u8"feColorMatrix")
+        {
+          return TagName::feColorMatrix;
+        }
+        break;
       }
       case 14:
       {
@@ -890,6 +1126,23 @@ namespace krys::boo::html
         {
           return TagName::annotation_xml;
         }
+        if (name == u8"feDistantLight")
+        {
+          return TagName::feDistantLight;
+        }
+        if (name == u8"feGaussianBlur")
+        {
+          return TagName::feGaussianBlur;
+        }
+        if (name == u8"linearGradient")
+        {
+          return TagName::linearGradient;
+        }
+        if (name == u8"radialGradient")
+        {
+          return TagName::radialGradient;
+        }
+        break;
       }
       case 15:
       {
@@ -897,12 +1150,49 @@ namespace krys::boo::html
         {
           return TagName::selectedcontent;
         }
+        break;
       }
       case 16:
       {
         if (name == u8"font-face-format")
         {
           return TagName::font_face_format;
+        }
+        if (name == u8"animateTransform")
+        {
+          return TagName::animateTransform;
+        }
+        if (name == u8"feConvolveMatrix")
+        {
+          return TagName::feConvolveMatrix;
+        }
+        break;
+      }
+      case 17:
+      {
+        if (name == u8"feDiffuseLighting")
+        {
+          return TagName::feDiffuseLighting;
+        }
+        if (name == u8"feDisplacementMap")
+        {
+          return TagName::feDisplacementMap;
+        }
+        break;
+      }
+      case 18:
+      {
+        if (name == u8"feSpecularLighting")
+        {
+          return TagName::feSpecularLighting;
+        }
+        break;
+      }
+      case 19:
+      {
+        if (name == u8"feComponentTransfer")
+        {
+          return TagName::feComponentTransfer;
         }
         break;
       }

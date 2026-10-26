@@ -37,7 +37,10 @@ namespace krys::boo::dom
     ContainsSelectionEndPoint = 1 << 18,
     /// @brief Set on elements whose style is resolved by `Element::ResolveCustomStyle`.
     HasCustomStyleResolveCallbacks = 1 << 19,
+    /// @brief Set on an SVG element when one of its properties has changed since the attribute it reflects
+    /// was last written; see `Element::SynchronizeAllAttributes`.
+    AnimatedSVGAttributesAreDirty = 1 << 20,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 20u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 21u);

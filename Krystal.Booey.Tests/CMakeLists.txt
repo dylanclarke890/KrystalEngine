@@ -81,6 +81,7 @@ target_sources(Krystal.Booey.Tests
     FILES
 		include/Krystal.Booey.Tests/DOM/TestElement.hpp
 		include/Krystal.Booey.Tests/SVG/PropertyTestUtils.hpp
+		include/Krystal.Booey.Tests/SVG/TestSVGElement.hpp
 		include/Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp
 		include/Krystal.Booey.Tests/Platform/ImageDecoders/TestImages.hpp
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
@@ -559,6 +560,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Algorithms/TreeQueries.cpp
 		tests/DOM/Internals/Event/Event.cpp
 		tests/DOM/Internals/Event/CustomEvent.cpp
+		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp
 		tests/DOM/Internals/QualifiedNameCache.cpp
 		tests/DOM/Mixins/ChildNode.cpp
@@ -654,8 +656,10 @@ target_sources(Krystal.Booey.Tests
 		tests/Infra/StringAlgorithms.cpp
 
 		# URL
+		tests/SVG/Internals/SVGElementFactory.cpp
 		tests/SVG/Internals/SVGPath.cpp
 		tests/SVG/Properties/SVGAnimatedProperty.cpp
+		tests/SVG/Properties/SVGPropertyOwnerRegistry.cpp
 		tests/SVG/Properties/SVGPropertyTraits.cpp
 		tests/SVG/SVGAngleValue.cpp
 		tests/SVG/SVGElement.cpp
@@ -666,7 +670,11 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp
 		tests/SVG/SVGStringList.cpp
+		tests/SVG/SVGStyleElement.cpp
+		tests/SVG/SVGSvgElement.cpp
+		tests/SVG/SVGTests.cpp
 		tests/SVG/SVGTransformList.cpp
+		tests/SVG/SVGURIReference.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

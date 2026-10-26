@@ -27,6 +27,7 @@
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/RuleSet.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/SVG/SVGStyleElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include <algorithm>
@@ -510,9 +511,10 @@ namespace krys::boo::style
       auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
       auto *linkElement = htmlElement ? DynamicDowncast<html::HTMLLinkElement>(*htmlElement) : nullptr;
       auto *styleElement = htmlElement ? DynamicDowncast<html::HTMLStyleElement>(*htmlElement) : nullptr;
-      if (!linkElement && !styleElement)
+      auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+      auto *svgStyleElement = svgElement ? DynamicDowncast<svg::SVGStyleElement>(*svgElement) : nullptr;
+      if (!linkElement && !styleElement && !svgStyleElement)
       {
-        // FIXME: SVGStyleElement, once it owns a style sheet.
         continue;
       }
 
@@ -547,7 +549,11 @@ namespace krys::boo::style
       }
       // Get the current preferred styleset. This is the
       // set of sheets that will be enabled.
-      if (linkElement)
+      if (svgStyleElement)
+      {
+        sheet = ShareRefPtr(svgStyleElement->Sheet());
+      }
+      else if (linkElement)
       {
         sheet = ShareRefPtr(linkElement->Sheet());
       }

@@ -587,12 +587,17 @@ namespace krys::boo::dom
 #pragma endregion
 
     /// @brief Writes attributes that are updated lazily (the `style` attribute after a change to the inline
-    /// style) back to the attribute list. Everything that reads the attribute list calls this first.
+    /// style, an SVG element's attributes after a change to the properties that reflect them) back to the
+    /// attribute list. Everything that reads the attribute list calls this first.
     void SynchronizeAllAttributes() const noexcept
     {
       if (HasNodeFlag(NodeFlags::StyleAttributeIsDirty)) KRYS_UNLIKELY
       {
         SynchronizeStyleAttribute();
+      }
+      if (HasNodeFlag(NodeFlags::AnimatedSVGAttributesAreDirty)) KRYS_UNLIKELY
+      {
+        SynchronizeAnimatedSVGAttributes();
       }
     }
 
@@ -1352,6 +1357,10 @@ namespace krys::boo::dom
     /// or queueing a mutation record, for lazily synchronised attributes.
     void SetSynchronizedLazyAttribute(DOMStringAtom localName, DOMString &&value) noexcept;
 
+    /// @brief Sets the attribute @p name (matched by its namespace and local name) to `value` without running
+    /// the attribute change steps or queueing a mutation record, for lazily synchronised attributes.
+    void SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString &&value) noexcept;
+
 #pragma region Parser Hooks
 
     /// @brief Called by the parser when it pushes this element onto the stack of open elements.
@@ -1386,6 +1395,7 @@ namespace krys::boo::dom
 
   private:
     void SynchronizeStyleAttribute() const noexcept;
+    void SynchronizeAnimatedSVGAttributes() const noexcept;
   };
 
   /// @brief Invalidates the style of @p sibling and its following siblings that sibling combinators make

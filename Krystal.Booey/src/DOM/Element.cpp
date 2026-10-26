@@ -81,6 +81,7 @@
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
@@ -2400,9 +2401,32 @@ namespace krys::boo::dom
     _attributes.push_back(krys::move(attr));
   }
 
+  void Element::SetSynchronizedLazyAttribute(const QualifiedName &name, DOMString &&value) noexcept
+  {
+    auto it = std::ranges::find_if(
+      _attributes, [&](const Ref<Attr> &attr)
+      { return attr->LocalName() == name.LocalName() && attr->NamespaceURI() == name.NamespaceURI(); });
+    if (it != _attributes.end())
+    {
+      (*it)->_value = krys::move(value);
+      return;
+    }
+
+    auto attr = AdoptRef<Attr>(*new Attr(NodeDocument(), name, krys::move(value)));
+    attr->_ownerElement = CreateWeakPtr(this);
+    _attributes.push_back(krys::move(attr));
+  }
+
   void Element::SynchronizeStyleAttribute() const noexcept
   {
     const_cast<StyledElement &>(Downcast<StyledElement>(*this)).SynchronizeStyleAttributeInternal();
+  }
+
+  void Element::SynchronizeAnimatedSVGAttributes() const noexcept
+  {
+    auto &svgElement = const_cast<svg::SVGElement &>(Downcast<svg::SVGElement>(*this));
+    svgElement.ClearNodeFlag(NodeFlags::AnimatedSVGAttributesAreDirty);
+    svgElement.SynchronizeAllSVGAttributes();
   }
 
 #pragma endregion

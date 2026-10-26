@@ -1,10 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey.Tests/SVG/TestSVGElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
-#include "Krystal.Booey/SVG/SVGElement.hpp"
-#include "Krystal.Booey/SVG/SVGUnitTypes.hpp"
-#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::svg::tests
 {
@@ -12,12 +10,12 @@ namespace krys::boo::svg::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGAnimatedProperty: primitives", "[SVG][SVGAnimatedProperty]")
   {
-    ResolverFixture fixture {u8"<svg><rect id=r /></svg>"};
-    auto &rect = Downcast<SVGElement>(fixture.ById(u8"r"));
+    auto document = ResolverFixture::Parse(u8"<svg></svg>");
+    auto element = CreateTestSVGElement(*document);
 
-    auto number = SVGAnimatedNumber::Create(&rect, 1.5f);
+    auto &number = element->Number;
     CHECK(number->IsAttached());
-    CHECK(number->ContextElement() == &rect);
+    CHECK(number->ContextElement() == element.get());
     CHECK(number->BaseVal() == 1.5f);
     CHECK(number->AnimVal() == 1.5f);
     CHECK(number->CurrentValue() == 1.5f);
@@ -35,15 +33,15 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(number->IsDirty());
     CHECK(number->BaseValAsString() == u8"3");
 
-    auto boolean = SVGAnimatedBoolean::Create(&rect);
+    auto &boolean = element->Boolean;
     CHECK_FALSE(boolean->BaseVal());
     REQUIRE_FALSE(boolean->SetBaseVal(true).HasException());
     CHECK(boolean->Synchronize() == dom::DOMString(u8"true"));
 
-    auto integer = SVGAnimatedInteger::Create(&rect, 7);
+    auto &integer = element->Integer;
     CHECK(integer->BaseValAsString() == u8"7");
 
-    auto string = SVGAnimatedString::Create(&rect);
+    auto &string = element->String;
     CHECK(string->BaseVal().empty());
     REQUIRE_FALSE(string->SetBaseVal(dom::DOMString {u8"#target"}).HasException());
     CHECK(string->Synchronize() == dom::DOMString(u8"#target"));
@@ -57,12 +55,12 @@ namespace krys::boo::svg::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGAnimatedProperty: values", "[SVG][SVGAnimatedProperty]")
   {
-    ResolverFixture fixture {u8"<svg><rect id=r /></svg>"};
-    auto &rect = Downcast<SVGElement>(fixture.ById(u8"r"));
+    auto document = ResolverFixture::Parse(u8"<svg></svg>");
+    auto element = CreateTestSVGElement(*document);
 
-    auto length = SVGAnimatedLength::Create(&rect, SVGLengthMode::Width);
+    auto &length = element->Dx;
     CHECK(length->BaseVal()->Value().LengthMode() == SVGLengthMode::Width);
-    CHECK(length->BaseVal()->ContextElement() == &rect);
+    CHECK(length->BaseVal()->ContextElement() == element.get());
     CHECK(length->BaseVal()->IsAttached());
 
     // The animated value is a read-only copy that follows the base value.
@@ -82,16 +80,16 @@ namespace krys::boo::svg::tests
     CHECK(animVal->ValueAsString() == u8"5%");
     CHECK_FALSE(length->IsDirty());
 
-    auto rectValue = SVGAnimatedRect::Create(&rect);
+    auto &rectValue = element->ViewBox;
     REQUIRE_FALSE(rectValue->BaseVal()->SetWidth(20).HasException());
     CHECK(rectValue->BaseValAsString() == u8"0 0 20 0");
     CHECK(rectValue->AnimVal()->Width() == 20);
 
-    auto angle = SVGAnimatedAngle::Create(&rect);
+    auto &angle = element->OrientAngle;
     REQUIRE_FALSE(angle->BaseVal()->SetValueAsString(u8"90deg").HasException());
     CHECK(angle->Synchronize() == dom::DOMString(u8"90deg"));
 
-    auto preserveAspectRatio = SVGAnimatedPreserveAspectRatio::Create(&rect);
+    auto &preserveAspectRatio = element->PreserveAspectRatio;
     REQUIRE_FALSE(preserveAspectRatio->BaseVal()
                     ->SetAlign(SVGPreserveAspectRatioValue::SVG_PRESERVEASPECTRATIO_XMINYMIN)
                     .HasException());
@@ -100,10 +98,10 @@ namespace krys::boo::svg::tests
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGAnimatedProperty: lists", "[SVG][SVGAnimatedProperty]")
   {
-    ResolverFixture fixture {u8"<svg><rect id=r /></svg>"};
-    auto &rect = Downcast<SVGElement>(fixture.ById(u8"r"));
+    auto document = ResolverFixture::Parse(u8"<svg></svg>");
+    auto element = CreateTestSVGElement(*document);
 
-    auto lengths = SVGAnimatedLengthList::Create(&rect, SVGLengthMode::Height);
+    auto &lengths = element->Lengths;
     CHECK(lengths->BaseVal()->LengthMode() == SVGLengthMode::Height);
     REQUIRE(lengths->BaseVal()->Parse(u8"1px 2px"));
 
@@ -121,15 +119,15 @@ namespace krys::boo::svg::tests
     CHECK(lengths->Synchronize() == dom::DOMString(u8"1px 3em"));
     CHECK(&lengths->CurrentValue() == lengths->BaseVal().get());
 
-    auto numbers = SVGAnimatedNumberList::Create(&rect);
+    auto &numbers = element->Numbers;
     REQUIRE_FALSE(numbers->BaseVal()->AppendItem(SVGNumber::Create(4)).HasException());
     CHECK(numbers->AnimVal()->ValueAsString() == u8"4");
 
-    auto points = SVGAnimatedPointList::Create(&rect);
+    auto &points = element->Points;
     REQUIRE(points->BaseVal()->Parse(u8"1 2 3 4"));
     CHECK(points->AnimVal()->NumberOfItems() == 2);
 
-    auto transforms = SVGAnimatedTransformList::Create(&rect);
+    auto &transforms = element->Transform;
     transforms->BaseVal()->Parse(u8"translate(1 2)");
     REQUIRE_FALSE(transforms->BaseVal()->Items()[0]->Matrix().SetA(2).HasException());
     CHECK(transforms->IsDirty());
@@ -139,10 +137,10 @@ namespace krys::boo::svg::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "SVGAnimatedProperty: enumerations",
                    "[SVG][SVGAnimatedProperty]")
   {
-    ResolverFixture fixture {u8"<svg><rect id=r /></svg>"};
-    auto &rect = Downcast<SVGElement>(fixture.ById(u8"r"));
+    auto document = ResolverFixture::Parse(u8"<svg></svg>");
+    auto element = CreateTestSVGElement(*document);
 
-    auto units = SVGAnimatedEnumeration::Create(&rect, SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
+    auto &units = element->Units;
     CHECK(units->BaseVal() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
     CHECK(units->AnimVal() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
     CHECK(units->CurrentValue<SVGUnitTypes::SVGUnitType>() == SVGUnitTypes::SVG_UNIT_TYPE_USERSPACEONUSE);
@@ -159,7 +157,7 @@ namespace krys::boo::svg::tests
     CHECK_FALSE(units->Synchronize());
 
     // Orientations are enumerations too, set to auto-start-reverse by parsing.
-    auto orient = SVGAnimatedOrientType::Create(&rect, SVGMarkerOrientAngle);
+    auto &orient = element->OrientType;
     CHECK(orient->BaseVal() == SVGMarkerOrientAngle);
     orient->SetBaseValInternal(SVGMarkerOrientAutoStartReverse);
     CHECK(orient->BaseVal() == SVGMarkerOrientAutoStartReverse);
