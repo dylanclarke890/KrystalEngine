@@ -86,6 +86,10 @@ namespace krys::boo::tests
       CHECK(Narrow(fixture.InnerHTML(root)) == "abc&nbsp;");
       (void)editor.InsertText(u8"d", nullptr);
       CHECK(Narrow(fixture.InnerHTML(root)) == "abc d");
+      // The no-break space became a space, a byte shorter: the caret is still after the typed text.
+      CHECK(fixture.Selection().Selection().Start().DeprecatedEditingOffset() == 5);
+      (void)editor.InsertText(u8"e", nullptr);
+      CHECK(Narrow(fixture.InnerHTML(root)) == "abc de");
     }
 
     SECTION("Text outside editable content isn't inserted")

@@ -60,6 +60,10 @@ namespace krys::pal
     void OnKeyboardEvent(WindowHandle window, Key key, KeyState state, KeyModifiers modifiers,
                          const KeyText &text) noexcept;
 
+    void OnTextEvent(WindowHandle window, const utf8_string &text) noexcept;
+
+    void OnCompositionEvent(WindowHandle window, const CompositionInput &input) noexcept;
+
     void OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state,
                             KeyModifiers modifiers) noexcept;
 

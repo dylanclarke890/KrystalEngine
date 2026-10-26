@@ -1,10 +1,13 @@
 ﻿#include "Krystal.PAL/Win32/Win32Window.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
+#include <algorithm>
 #include <cassert>
 #include <hidusage.h>
+#include <imm.h>
 #include <string>
 #include <windows.h>
 #include <windowsx.h>
@@ -16,6 +19,8 @@
 #ifdef CreateWindow
   #undef CreateWindow
 #endif
+
+#pragma comment(lib, "Imm32.lib")
 
 namespace
 {
@@ -209,6 +214,123 @@ namespace
     return modifiers;
   }
 
+  /// @brief Whether @p character is text: not a control character, except the carriage return.
+  static bool IsTypedCharacter(const wchar_t character) noexcept
+  {
+    return (character >= 0x20 && character != 0x7f) || character == L'\r';
+  }
+
+  /// @brief @p text in UTF-8 (a lone surrogate as the replacement character).
+  static krys::utf8_string ToUtf8(const std::wstring_view text) noexcept
+  {
+    if (text.empty())
+    {
+      return {};
+    }
+    const int size =
+      ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), NULL, 0, NULL, NULL);
+    krys::utf8_string result(static_cast<size_t>(size), u8'\0');
+    ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()),
+                          reinterpret_cast<char *>(result.data()), size, NULL, NULL);
+    return result;
+  }
+
+  /// @brief Each of @p text's UTF-16 offsets (and its end) as the offset in its UTF-8 form, as `ToUtf8()`
+  /// makes it: the second half of a surrogate pair maps to its first's.
+  static krys::List<krys::uint32> Utf8Offsets(const std::wstring_view text) noexcept
+  {
+    krys::List<krys::uint32> offsets(text.size() + 1, 0);
+    krys::uint32 offset = 0;
+    for (size_t i = 0; i < text.size(); ++i)
+    {
+      offsets[i] = offset;
+      const wchar_t character = text[i];
+      if (IS_HIGH_SURROGATE(character) && i + 1 < text.size() && IS_LOW_SURROGATE(text[i + 1]))
+      {
+        offsets[++i] = offset;
+        offset += 4;
+      }
+      else
+      {
+        // A lone surrogate becomes the replacement character, three bytes.
+        offset += character < 0x80 ? 1 : character < 0x800 ? 2 : 3;
+      }
+    }
+    offsets[text.size()] = offset;
+    return offsets;
+  }
+
+  /// @brief The virtual key code of a key message, the key's own for one the input method took
+  /// (`VK_PROCESSKEY`), from its scan code.
+  static WPARAM KeyCodeFor(const WPARAM keyCode, const LPARAM lParam) noexcept
+  {
+    if (keyCode != VK_PROCESSKEY)
+    {
+      return keyCode;
+    }
+    UINT scanCode = (lParam >> 16) & 0xff;
+    if ((HIWORD(lParam) & KF_EXTENDED) != 0)
+    {
+      scanCode |= 0xe000;
+    }
+    const UINT mapped = ::MapVirtualKeyW(scanCode, MAPVK_VSC_TO_VK);
+    return mapped != 0 ? mapped : keyCode;
+  }
+
+  /// @brief The window's input method context, while it's in scope.
+  class InputContext
+  {
+    KRYS_NON_COPY_MOVABLE(InputContext);
+
+  private:
+    HWND _window;
+    HIMC _context;
+
+  public:
+    explicit InputContext(HWND window) noexcept : _window(window), _context(::ImmGetContext(window))
+    {
+    }
+
+    ~InputContext() noexcept
+    {
+      if (_context)
+      {
+        ::ImmReleaseContext(_window, _context);
+      }
+    }
+
+    KRYS_NODISCARD HIMC Get() const noexcept
+    {
+      return _context;
+    }
+
+    KRYS_NODISCARD explicit operator bool() const noexcept
+    {
+      return _context != NULL;
+    }
+  };
+
+  /// @brief Part of the input method's composition, as @p index (a `GCS_*` flag) names it.
+  template <typename T>
+  static krys::List<T> CompositionData(HIMC context, const DWORD index) noexcept
+  {
+    const LONG size = ::ImmGetCompositionStringW(context, index, nullptr, 0);
+    if (size <= 0)
+    {
+      return {};
+    }
+    krys::List<T> data(static_cast<size_t>(size) / sizeof(T));
+    ::ImmGetCompositionStringW(context, index, data.data(), static_cast<DWORD>(data.size() * sizeof(T)));
+    return data;
+  }
+
+  /// @brief The input method's composition string or result, as @p index (a `GCS_*` flag) names it.
+  static std::wstring CompositionString(HIMC context, const DWORD index) noexcept
+  {
+    auto data = CompositionData<wchar_t>(context, index);
+    return std::wstring(data.begin(), data.end());
+  }
+
   /// @brief The characters @p keyCode types with the keyboard @p state, without control characters except the
   /// carriage return, and without changing the layout's dead key state.
   static krys::utf8_string TypedText(const WPARAM keyCode, const LPARAM lParam, const BYTE *state) noexcept
@@ -228,39 +350,27 @@ namespace
     std::wstring text;
     for (int i = 0; i < count; ++i)
     {
-      if (buffer[i] >= 0x20 && buffer[i] != 0x7f || buffer[i] == L'\r')
+      if (IsTypedCharacter(buffer[i]))
       {
         text.push_back(buffer[i]);
       }
     }
-    if (text.empty())
-    {
-      return {};
-    }
-    const int size =
-      ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), NULL, 0, NULL, NULL);
-    krys::utf8_string result(static_cast<size_t>(size), u8'\0');
-    ::WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()),
-                          reinterpret_cast<char *>(result.data()), size, NULL, NULL);
-    return result;
+    return ToUtf8(text);
   }
 
-  /// @brief The text a key press types, with the modifiers held and with only Shift and Caps Lock.
-  static krys::pal::KeyText KeyTextFor(const WPARAM keyCode, const LPARAM lParam) noexcept
+  /// @brief The text a key press would type with only Shift and Caps Lock.
+  static krys::utf8_string UnmodifiedTextFor(const WPARAM keyCode, const LPARAM lParam) noexcept
   {
     BYTE state[256] {};
     if (!::GetKeyboardState(state))
     {
       return {};
     }
-    krys::pal::KeyText text;
-    text.Text = TypedText(keyCode, lParam, state);
     for (int key : {VK_CONTROL, VK_LCONTROL, VK_RCONTROL, VK_MENU, VK_LMENU, VK_RMENU})
     {
       state[key] = 0;
     }
-    text.UnmodifiedText = TypedText(keyCode, lParam, state);
-    return text;
+    return TypedText(keyCode, lParam, state);
   }
 
   static LPCWSTR CursorShapeToResource(const krys::pal::CursorShape cursor) noexcept
@@ -326,6 +436,8 @@ namespace krys::pal
       CreateWindowClass(instance);
       CreateWindowHandle(instance);
       RegisterRawInput();
+      // Without an input context, the input method doesn't see the keys.
+      ::ImmAssociateContextEx(_handle, NULL, 0);
     }
 
     Win32Window::~Win32Window() noexcept
@@ -526,8 +638,10 @@ namespace krys::pal
 
     void Win32Window::ProcessMessages() noexcept
     {
+      // All the thread's messages: the input method and the text services (the emoji panel among them) have
+      // windows of their own on it, which their messages go to.
       MSG message {};
-      while (::PeekMessageW(&message, _handle, 0, 0, PM_REMOVE) != 0)
+      while (::PeekMessageW(&message, NULL, 0, 0, PM_REMOVE) != 0)
       {
         ::TranslateMessage(&message);
         ::DispatchMessageW(&message);
@@ -536,7 +650,6 @@ namespace krys::pal
 
     LRESULT Win32Window::HandleMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam) const noexcept
     {
-      static HashSet<WPARAM> _pressedKeys;
       const auto handle = GetWindowHandle();
       switch (message)
       {
@@ -552,10 +665,18 @@ namespace krys::pal
         case WM_SETFOCUS:
         case WM_KILLFOCUS:
         {
-          // The pointer lock ends with the window's focus.
+          // The pointer lock ends with the window's focus, and the system caret goes with it.
           if (message == WM_KILLFOCUS && _pointerLock)
           {
             ReleasePointerLock();
+          }
+          if (message == WM_KILLFOCUS)
+          {
+            DestroyCaret();
+          }
+          else
+          {
+            PlaceInputMethodWindows();
           }
           if (_callbacks.OnFocusChange)
           {
@@ -597,13 +718,7 @@ namespace krys::pal
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
         {
-          if (_callbacks.OnKey)
-          {
-            const auto key = KeyCodeToEngineKey(wParam, lParam);
-            const auto state = _pressedKeys.contains(wParam) ? KeyState::Held : KeyState::Pressed;
-            _callbacks.OnKey(handle, key, state, CurrentModifiers(), KeyTextFor(wParam, lParam));
-            _pressedKeys.emplace(wParam);
-          }
+          HandleKeyDown(message, wParam, lParam);
           break;
         }
         case WM_KEYUP:
@@ -611,10 +726,74 @@ namespace krys::pal
         {
           if (_callbacks.OnKey)
           {
-            const auto key = KeyCodeToEngineKey(wParam, lParam);
+            const auto keyCode = KeyCodeFor(wParam, lParam);
+            const auto key = KeyCodeToEngineKey(keyCode, lParam);
             const auto state = KeyState::Released;
             _callbacks.OnKey(handle, key, state, CurrentModifiers(), {});
-            _pressedKeys.erase(wParam);
+            _pressedKeys.erase(keyCode);
+          }
+          break;
+        }
+        // Characters without a key press; a key press's own go with it.
+        case WM_CHAR:
+        {
+          HandleCharacter(static_cast<wchar_t>(wParam));
+          return 0;
+        }
+        // The host shows the text being composed; the input method still shows its candidates.
+        case WM_IME_SETCONTEXT:
+        {
+          if (_callbacks.OnComposition)
+          {
+            lParam &= ~static_cast<LPARAM>(ISC_SHOWUICOMPOSITIONWINDOW);
+          }
+          break;
+        }
+        case WM_IME_STARTCOMPOSITION:
+        {
+          if (_callbacks.OnComposition)
+          {
+            _composing = true;
+            _compositionEmpty = true;
+            PlaceInputMethodWindows();
+            ReportComposition({.Action = CompositionAction::Started});
+            return 0;
+          }
+          break;
+        }
+        // Not going on to DefWindowProc, which would send the result again as characters.
+        case WM_IME_COMPOSITION:
+        {
+          if (_callbacks.OnComposition)
+          {
+            HandleComposition(lParam);
+            return 0;
+          }
+          break;
+        }
+        case WM_IME_ENDCOMPOSITION:
+        {
+          if (_callbacks.OnComposition)
+          {
+            if (_composing)
+            {
+              // The input method may end a composition it cancelled without emptying it first.
+              if (!_compositionEmpty)
+              {
+                ReportComposition({.Action = CompositionAction::Updated});
+              }
+              _composing = false;
+              ReportComposition({.Action = CompositionAction::Ended});
+            }
+            return 0;
+          }
+          break;
+        }
+        case WM_IME_NOTIFY:
+        {
+          if (wParam == IMN_OPENCANDIDATE)
+          {
+            PlaceInputMethodWindows();
           }
           break;
         }
@@ -1014,6 +1193,280 @@ namespace krys::pal
       (void)::SetCursorPos(_pointerLock->Restore.x, _pointerLock->Restore.y);
       _pointerLock = null;
       ApplyCursor();
+    }
+
+    void Win32Window::HandleKeyDown(const UINT message, WPARAM keyCode, const LPARAM lParam) const noexcept
+    {
+      // Without a key handler, the characters come as text.
+      if (!_callbacks.OnKey)
+      {
+        return;
+      }
+
+      KeyText text;
+      if (keyCode == VK_PROCESSKEY)
+      {
+        text.HandledByInputMethod = true;
+        keyCode = KeyCodeFor(keyCode, lParam);
+      }
+
+      // The characters the system translated the press to are queued after it, and go with it; a dead key
+      // makes a dead character, and its accent comes with the next key's. A system key's characters stay,
+      // for menu mnemonics.
+      if (message == WM_KEYDOWN)
+      {
+        std::wstring characters;
+        MSG next {};
+        while (::PeekMessageW(&next, _handle, WM_CHAR, WM_DEADCHAR, PM_REMOVE) != 0)
+        {
+          if (next.message == WM_DEADCHAR)
+          {
+            text.DeadKey = true;
+          }
+          else if (IsTypedCharacter(static_cast<wchar_t>(next.wParam)))
+          {
+            characters.push_back(static_cast<wchar_t>(next.wParam));
+          }
+        }
+        // A character outside the basic plane typed as its surrogate pair's halves, a key press for each (as
+        // the emoji panel may send it), comes with the second.
+        if (!characters.empty() && IS_LOW_SURROGATE(characters.front()) && _highSurrogate != 0)
+        {
+          characters.insert(characters.begin(), _highSurrogate);
+        }
+        _highSurrogate = 0;
+        if (!characters.empty() && IS_HIGH_SURROGATE(characters.back()))
+        {
+          _highSurrogate = characters.back();
+          characters.pop_back();
+        }
+        text.Text = ToUtf8(characters);
+      }
+      text.UnmodifiedText = UnmodifiedTextFor(keyCode, lParam);
+
+      const auto key = KeyCodeToEngineKey(keyCode, lParam);
+      const auto state = _pressedKeys.contains(keyCode) ? KeyState::Held : KeyState::Pressed;
+      _callbacks.OnKey(GetWindowHandle(), key, state, CurrentModifiers(), text);
+      _pressedKeys.emplace(keyCode);
+    }
+
+    void Win32Window::HandleCharacter(const wchar_t character) const noexcept
+    {
+      // A character outside the basic plane comes as its surrogate pair's halves, one at a time.
+      if (IS_HIGH_SURROGATE(character))
+      {
+        _highSurrogate = character;
+        return;
+      }
+
+      std::wstring characters;
+      if (IS_LOW_SURROGATE(character))
+      {
+        if (_highSurrogate != 0)
+        {
+          characters = {_highSurrogate, character};
+        }
+      }
+      else if (IsTypedCharacter(character))
+      {
+        characters.push_back(character);
+      }
+      _highSurrogate = 0;
+
+      if (!characters.empty() && _callbacks.OnText)
+      {
+        _callbacks.OnText(GetWindowHandle(), ToUtf8(characters));
+      }
+    }
+
+    void Win32Window::HandleComposition(const LPARAM changes) const noexcept
+    {
+      InputContext context(_handle);
+      if (!context)
+      {
+        return;
+      }
+
+      // The result commits the composition; without one, it's text typed as it is.
+      if ((changes & GCS_RESULTSTR) != 0)
+      {
+        auto result = ToUtf8(CompositionString(context.Get(), GCS_RESULTSTR));
+        if (_composing)
+        {
+          _compositionEmpty = true;
+          ReportComposition({.Action = CompositionAction::Committed, .Text = krys::move(result)});
+        }
+        else if (!result.empty() && _callbacks.OnText)
+        {
+          _callbacks.OnText(GetWindowHandle(), result);
+        }
+      }
+
+      if (!_composing || (changes & GCS_COMPSTR) == 0)
+      {
+        return;
+      }
+
+      const auto text = CompositionString(context.Get(), GCS_COMPSTR);
+      const auto offsets = Utf8Offsets(text);
+      const auto length = static_cast<DWORD>(text.size());
+
+      // One attribute per UTF-16 code unit, and the clauses' boundaries, from 0 to the length.
+      List<BYTE> attributes;
+      if ((changes & GCS_COMPATTR) != 0)
+      {
+        attributes = CompositionData<BYTE>(context.Get(), GCS_COMPATTR);
+      }
+      List<DWORD> boundaries;
+      if ((changes & GCS_COMPCLAUSE) != 0)
+      {
+        boundaries = CompositionData<DWORD>(context.Get(), GCS_COMPCLAUSE);
+      }
+      if (boundaries.size() < 2)
+      {
+        boundaries = {0, length};
+      }
+
+      CompositionInput input {.Action = CompositionAction::Updated, .Text = ToUtf8(text)};
+      for (size_t i = 0; i + 1 < boundaries.size(); ++i)
+      {
+        const DWORD start = (std::min)(boundaries[i], length);
+        const DWORD end = (std::min)(boundaries[i + 1], length);
+        if (start >= end)
+        {
+          continue;
+        }
+        const bool target =
+          start < attributes.size()
+          && (attributes[start] == ATTR_TARGET_CONVERTED || attributes[start] == ATTR_TARGET_NOTCONVERTED);
+        input.Clauses.push_back({.Start = offsets[start], .End = offsets[end], .Target = target});
+      }
+
+      DWORD caret = length;
+      if ((changes & GCS_CURSORPOS) != 0)
+      {
+        const LONG position = ::ImmGetCompositionStringW(context.Get(), GCS_CURSORPOS, nullptr, 0);
+        caret = position < 0 ? length : (std::min)(static_cast<DWORD>(position), length);
+      }
+      input.Caret = offsets[caret];
+
+      _compositionEmpty = input.Text.empty();
+      ReportComposition(input);
+    }
+
+    void Win32Window::ReportComposition(const CompositionInput &input) const noexcept
+    {
+      if (_callbacks.OnComposition)
+      {
+        _callbacks.OnComposition(GetWindowHandle(), input);
+      }
+    }
+
+    void Win32Window::SetTextInputEnabled(const bool enabled) noexcept
+    {
+      if (enabled == _textInputEnabled)
+      {
+        return;
+      }
+
+      if (!enabled)
+      {
+        CancelComposition();
+        DestroyCaret();
+      }
+      _textInputEnabled = enabled;
+      ::ImmAssociateContextEx(_handle, NULL, enabled ? IACE_DEFAULT : 0);
+      if (enabled)
+      {
+        PlaceInputMethodWindows();
+      }
+    }
+
+    bool Win32Window::IsTextInputEnabled() const noexcept
+    {
+      return _textInputEnabled;
+    }
+
+    void Win32Window::SetTextInputRect(const TextInputRect &rect) noexcept
+    {
+      _textInputRect = rect;
+      PlaceInputMethodWindows();
+    }
+
+    void Win32Window::CompleteComposition() noexcept
+    {
+      if (!_composing)
+      {
+        return;
+      }
+      InputContext context(_handle);
+      if (context)
+      {
+        ::ImmNotifyIME(context.Get(), NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+      }
+    }
+
+    void Win32Window::CancelComposition() noexcept
+    {
+      if (!_composing)
+      {
+        return;
+      }
+      // What the input method reports for it now, or later, isn't the host's.
+      _composing = false;
+      _compositionEmpty = true;
+      InputContext context(_handle);
+      if (context)
+      {
+        ::ImmNotifyIME(context.Get(), NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+      }
+    }
+
+    void Win32Window::PlaceInputMethodWindows() const noexcept
+    {
+      if (!_textInputEnabled || !_textInputRect)
+      {
+        return;
+      }
+
+      const auto &rect = *_textInputRect;
+      InputContext context(_handle);
+      if (context)
+      {
+        // The candidates go below the text, kept clear of it; some input methods place them by the
+        // composition window's position instead.
+        CANDIDATEFORM position {
+          .dwIndex = 0,
+          .dwStyle = CFS_CANDIDATEPOS,
+          .ptCurrentPos = {rect.X, rect.Y + rect.Height},
+        };
+        ::ImmSetCandidateWindow(context.Get(), &position);
+        CANDIDATEFORM exclude {
+          .dwIndex = 0,
+          .dwStyle = CFS_EXCLUDE,
+          .ptCurrentPos = {rect.X, rect.Y},
+          .rcArea = {rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height},
+        };
+        ::ImmSetCandidateWindow(context.Get(), &exclude);
+        COMPOSITIONFORM composition {.dwStyle = CFS_POINT, .ptCurrentPos = {rect.X, rect.Y}};
+        ::ImmSetCompositionWindow(context.Get(), &composition);
+      }
+
+      // The caret is never shown.
+      if (::GetFocus() == _handle && ::CreateCaret(_handle, NULL, 1, (std::max)(rect.Height, 1)))
+      {
+        _hasCaret = true;
+        ::SetCaretPos(rect.X, rect.Y);
+      }
+    }
+
+    void Win32Window::DestroyCaret() const noexcept
+    {
+      if (_hasCaret)
+      {
+        ::DestroyCaret();
+        _hasCaret = false;
+      }
     }
 
     void Win32Window::ApplyCursor() const noexcept

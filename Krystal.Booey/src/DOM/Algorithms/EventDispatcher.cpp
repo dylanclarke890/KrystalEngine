@@ -267,7 +267,7 @@ namespace krys::boo::dom
       }
     }
 
-    if (!event._canceled && !event._defaultHandled)
+    if (!event._canceled && !event._defaultHandled && !event._isDefaultEventHandlerIgnored)
     {
       auto finalTarget = event._target;
       event.SetTarget(ShareRefPtr(originalTarget));

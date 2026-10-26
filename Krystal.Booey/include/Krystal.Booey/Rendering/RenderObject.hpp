@@ -29,6 +29,7 @@ namespace krys::boo::dom
   class Node;
   class Position;
   class PositionWithAffinity;
+  struct SimpleRange;
 }
 
 namespace krys::boo::layout
@@ -181,6 +182,16 @@ namespace krys::boo
     IsShape,
     UsesBoundaryCaching
   };
+
+  enum class RenderObjectBoundingRectBehavior : uint8
+  {
+    RespectClipping,
+    UseVisibleBounds,
+    IgnoreTinyRects,
+    IgnoreEmptyTextSelections,
+    UseSelectionHeight,
+    ComputeIndividualCharacterRects,
+  };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectStateFlag, 20uz);
@@ -189,6 +200,7 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBlockFlowFlag, 5uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectLineBreakFlag, 1uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectReplacedFlag, 5uz);
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectSVGModelObjectFlag, 6uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderObjectBoundingRectBehavior, 6uz);
 
 namespace krys::boo
 {
@@ -321,6 +333,7 @@ namespace krys::boo
     using LineBreakFlag = RenderObjectLineBreakFlag;
     using ReplacedFlag = RenderObjectReplacedFlag;
     using SVGModelObjectFlag = RenderObjectSVGModelObjectFlag;
+    using BoundingRectBehavior = RenderObjectBoundingRectBehavior;
 
     /// @brief The flags of one kind of renderer.
     class TypeSpecificFlags
@@ -1187,6 +1200,10 @@ namespace krys::boo
     virtual void AbsoluteQuads(List<FloatQuad> &, bool * /*wasFixed*/ = nullptr) const noexcept
     {
     }
+
+    /// @brief The quads, in absolute coordinates, of the text and line breaks @p range covers.
+    KRYS_NODISCARD static List<FloatQuad>
+      AbsoluteTextQuads(const dom::SimpleRange &range, EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
 
     /// @brief The bounding box of the renderer in absolute coordinates.
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,

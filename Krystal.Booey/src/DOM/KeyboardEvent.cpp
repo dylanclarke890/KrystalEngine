@@ -1,5 +1,9 @@
 ﻿#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 
@@ -7,6 +11,16 @@ namespace krys::boo::dom
 {
   namespace
   {
+    KRYS_NODISCARD bool ViewIsCompositing(const LocalDOMWindow *view) noexcept
+    {
+      if (!view)
+      {
+        return false;
+      }
+      auto *localFrame = view->Frame();
+      return localFrame && localFrame->Document() && localFrame->Document()->GetEditor().HasComposition();
+    }
+
     KRYS_NODISCARD DOMStringAtom EventTypeForKeyboardEventType(PlatformEvent::Type type) noexcept
     {
       switch (type)
@@ -37,7 +51,8 @@ namespace krys::boo::dom
       }
     }
 
-    KRYS_NODISCARD KeyboardEvent::KeyLocationCode LocationCodeForKey(const PlatformKeyboardEvent &key) noexcept
+    KRYS_NODISCARD KeyboardEvent::KeyLocationCode
+      LocationCodeForKey(const PlatformKeyboardEvent &key) noexcept
     {
       if (key.IsKeypad())
       {
@@ -80,13 +95,16 @@ namespace krys::boo::dom
     _timeStamp = static_cast<DOMHighResTimeStamp>(key.Timestamp().count());
   }
 
-  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key) noexcept
+  Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key,
+                                           const LocalDOMWindow *view) noexcept
   {
     UIEventInit init;
     init.Bubbles = true;
     init.Cancelable = true;
     init.Composed = true;
-    return AdoptRef(*new KeyboardEvent(EventTypeForKeyboardEventType(key.GetType()), init, key));
+    auto event = AdoptRef(*new KeyboardEvent(EventTypeForKeyboardEventType(key.GetType()), init, key));
+    event->_isComposing = ViewIsCompositing(view);
+    return event;
   }
 
   void KeyboardEvent::InitKeyboardEvent(DOMStringAtom type, bool canBubble, bool cancelable,

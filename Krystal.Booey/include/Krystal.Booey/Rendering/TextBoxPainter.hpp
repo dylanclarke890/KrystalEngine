@@ -17,6 +17,7 @@ namespace krys::boo
 {
   class FontCascade;
   class RenderStyle;
+  struct CompositionUnderline;
   class RenderText;
   class TextPainter;
   struct PaintInfo;
@@ -37,10 +38,11 @@ namespace krys::boo
     class InlineContent;
   }
 
-  /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations and the selection.
-  /// FIXME: Document markers, highlights and IME composition (their background fills and marked text,
-  /// composition underlines and platform document markers), event regions, accessibility bounds and
-  /// contentful paint tracking come with editing, event regions and accessibility.
+  /// @brief Paints a text box: its text, with shadows, emphasis marks, decorations, highlights, the selection
+  /// and an input method's composition (its underlines, or else its fill).
+  /// FIXME: Document markers (their background fills and marked text, and platform document markers), the
+  /// composition's custom highlights, event regions, accessibility bounds and contentful paint tracking come
+  /// with document markers, event regions and accessibility.
   /// FIXME: Combined text (`text-combine-upright`, `RenderCombineText`) is still to come.
   class TextBoxPainter
   {
@@ -61,6 +63,8 @@ namespace krys::boo
     const bool _isFirstLine;
     const bool _isPrinting;
     const bool _haveSelection;
+    bool _containsComposition {false};
+    bool _compositionWithCustomUnderlines {false};
 
   public:
     TextBoxPainter(const layout_integration::InlineContent &inlineContent, const inline_display::Box &box,
@@ -83,6 +87,12 @@ namespace krys::boo
 
     void PaintBackgroundFill() noexcept;
     void PaintForegroundAndDecorations() noexcept;
+    void PaintCompositionUnderlines() noexcept;
+    void PaintCompositionUnderline(const CompositionUnderline &underline) noexcept;
+    void FillCompositionUnderline(float start, float width,
+                                  const CompositionUnderline &underline) const noexcept;
+    /// @brief Where the box starts from its line's content start, as text widths are measured.
+    KRYS_NODISCARD float TextPosition() const noexcept;
 
     /// @brief The range of the box's text the selection covers.
     KRYS_NODISCARD std::pair<uint32, uint32> SelectionStartEnd() const noexcept;

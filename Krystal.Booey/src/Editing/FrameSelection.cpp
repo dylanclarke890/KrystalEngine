@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/EditingStyle.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/RenderedPosition.hpp"
 #include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
@@ -448,6 +449,10 @@ namespace krys::boo
     // Always clear the x position used for vertical arrow navigation.
     // It will be restored by the vertical arrow navigation code if necessary.
     _xPosForVerticalArrowNavigation = null;
+    if (!options.Contains(SetSelectionOption::DoNotNotifyEditorClients))
+    {
+      document->GetEditor().RespondToChangedSelection(oldSelection, options);
+    }
 
     if (shouldScheduleSelectionChangeEvent && textControl)
     {

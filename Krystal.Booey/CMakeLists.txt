@@ -3377,6 +3377,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/AppendNodeCommand.hpp
       include/Krystal.Booey/Editing/ApplyStyleCommand.hpp
       include/Krystal.Booey/Editing/CompositeEditCommand.hpp
+      include/Krystal.Booey/Editing/CompositionHighlight.hpp
+      include/Krystal.Booey/Editing/CompositionUnderline.hpp
       include/Krystal.Booey/Editing/DeleteFromTextNodeCommand.hpp
       include/Krystal.Booey/Editing/EditAction.hpp
       include/Krystal.Booey/Editing/EditCommand.hpp
@@ -3408,6 +3410,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Editing/TextInsertionBaseCommand.hpp
       include/Krystal.Booey/Editing/TypingCommand.hpp
       include/Krystal.Booey/DOM/InputEvent.hpp
+      include/Krystal.Booey/DOM/CompositionEvent.hpp
       include/Krystal.Booey/DOM/TextEvent.hpp
       include/Krystal.Booey/DOM/ToggleEvent.hpp
       include/Krystal.Booey/DOM/ToggleEventTask.hpp
@@ -3415,6 +3418,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/PopoverData.hpp
       include/Krystal.Booey/DOM/BeforeTextInsertedEvent.hpp
       include/Krystal.Booey/DOM/Dicts/InputEventInit.hpp
+      include/Krystal.Booey/DOM/Dicts/CompositionEventInit.hpp
       include/Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp
       include/Krystal.Booey/Page/AutoscrollController.hpp
       include/Krystal.Booey/Page/DOMSelection.hpp
@@ -3841,6 +3845,7 @@ target_sources(Krystal.Booey
     src/Editing/TextInsertionBaseCommand.cpp
     src/Editing/TypingCommand.cpp
     src/DOM/InputEvent.cpp
+    src/DOM/CompositionEvent.cpp
     src/DOM/TextEvent.cpp
     src/DOM/ToggleEvent.cpp
     src/DOM/ToggleEventTask.cpp

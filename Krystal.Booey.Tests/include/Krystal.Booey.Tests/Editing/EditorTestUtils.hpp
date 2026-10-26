@@ -67,6 +67,67 @@ namespace krys::boo::tests
     {
     }
 
+    int32 DiscardedCompositions {0};
+    int32 CompositionUpdates {0};
+    /// @brief Whether the host's input method would be on, for the focused element.
+    bool InputMethodEnabled {false};
+
+    // Abandons the composition if the selection changed for any reason but the input method's own action.
+    void RespondToChangedSelection(LocalFrame *frame) noexcept final
+    {
+      if (!frame || !frame->Document())
+      {
+        return;
+      }
+      auto &document = *frame->Document();
+      auto &editor = document.GetEditor();
+      if (editor.HasComposition() && !editor.IgnoreSelectionChanges() && !document.Selection().IsNone())
+      {
+        editor.CancelComposition();
+        DiscardedComposition(document);
+      }
+    }
+
+    void DiscardedComposition(const dom::Document &) noexcept final
+    {
+      ++DiscardedCompositions;
+    }
+
+    void DidUpdateComposition() noexcept final
+    {
+      ++CompositionUpdates;
+    }
+
+    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    {
+      auto *platformEvent = event.UnderlyingPlatformEvent();
+      if (platformEvent && platformEvent->HandledByInputMethod())
+      {
+        event.SetDefaultHandled();
+      }
+    }
+
+    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept final
+    {
+      auto *platformEvent = event.UnderlyingPlatformEvent();
+      auto &editor = Downcast<dom::Node>(*event.Target()).NodeDocument().GetEditor();
+      if (const auto &underlines = platformEvent->PreeditUnderlines())
+      {
+        auto rangeStart = static_cast<uint32>(platformEvent->PreeditSelectionRangeStart().value_or(0));
+        auto rangeLength = static_cast<uint32>(platformEvent->PreeditSelectionRangeLength().value_or(0));
+        editor.SetComposition(platformEvent->Text(), *underlines, rangeStart, rangeStart + rangeLength);
+      }
+      else
+      {
+        editor.ConfirmComposition(platformEvent->Text());
+      }
+    }
+
+    void SetInputMethodState(dom::Element *element) noexcept final
+    {
+      InputMethodEnabled = element && element->ShouldUseInputMethod();
+    }
+
     KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept final
     {
       return false;

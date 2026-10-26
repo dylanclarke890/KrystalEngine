@@ -201,6 +201,12 @@ namespace krys
                    const KeyText &text) noexcept
       { _context->Input->OnKeyboardEvent(window, key, state, modifiers, text); },
 
+      .OnText = [&](WindowHandle window, const utf8_string &text) noexcept
+      { _context->Input->OnTextEvent(window, text); },
+
+      .OnComposition = [&](WindowHandle window, const CompositionInput &input) noexcept
+      { _context->Input->OnCompositionEvent(window, input); },
+
       .OnClose = [&](WindowHandle window) noexcept
       { _context->Events->Enqueue(CreateUnique<WindowCloseEvent>(window)); },
 

@@ -30,6 +30,7 @@
 #include "Krystal.Editor/PageGamepads.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Editor/PagePointers.hpp"
+#include "Krystal.Editor/PageTextInput.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/Events.hpp"
@@ -91,6 +92,8 @@ namespace krys
     UniquePtr<editor::PagePointers> _pointers;
     /// @brief The page's gamepad samples from C++, made once it has loaded.
     UniquePtr<editor::PageGamepads> _gamepads;
+    /// @brief The page's input method sample from C++, made once it has loaded.
+    UniquePtr<editor::PageTextInput> _textInput;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -99,6 +102,8 @@ namespace krys
     boo::Timer _clockTimer {[this] { TickClock(); }};
     uint32 _secondsOpen {0};
     bool _focused {true};
+    /// @brief Where the window's input method was last told the page's text input is, in the window.
+    Maybe<boo::IntRect> _textInputRect;
     editor::BooeyFonts _booeyFonts {};
     EditorView _view {EditorView::Page};
     /// @brief The mouse in page view coordinates: below the header.
@@ -263,6 +268,36 @@ namespace krys
           return true;
         });
 
+      // Text typed without a key press, and the input method's composition, go to the page view.
+      _context->Events->On<TextInputEvent>(
+        [&](const auto &event)
+        {
+          if (_pageView && _view == EditorView::Page)
+          {
+            (void)_pageView->InsertText(event.Text());
+          }
+          return true;
+        });
+
+      _context->Events->On<CompositionInputEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView || _view != EditorView::Page)
+          {
+            return true;
+          }
+          const auto &input = event.Input();
+          switch (input.Action)
+          {
+            case CompositionAction::Updated:
+              _pageView->SetComposition(input.Text, input.Clauses, input.Caret);
+              break;
+            case CompositionAction::Committed: _pageView->ConfirmComposition(input.Text); break;
+            default:                           break;
+          }
+          return true;
+        });
+
       _context->Events->On<WindowResizeEvent>(
         [&](const auto &event)
         {
@@ -410,6 +445,7 @@ namespace krys
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
         _pageView->Update(_pageTime);
       }
+      UpdateTextInput();
     }
 
     void OnRender(gfx::CommandBuffer &commands) noexcept override
@@ -445,6 +481,32 @@ namespace krys
     }
 
   private:
+    /// @brief The window's input method follows the page view: it's on while the page's focus takes text,
+    /// with its windows by the composition or the caret.
+    void UpdateTextInput() noexcept
+    {
+      bool enabled = _pageView && _view == EditorView::Page && _focused && _pageView->AcceptsTextInput();
+      _context->Window->SetTextInputEnabled(enabled);
+      if (!enabled)
+      {
+        _textInputRect = null;
+        return;
+      }
+
+      auto rect = _pageView->TextInputRect();
+      if (!rect)
+      {
+        return;
+      }
+      // The page is below the header.
+      rect->Move(0, static_cast<int32>(HeaderHeight));
+      if (rect != _textInputRect)
+      {
+        _textInputRect = rect;
+        _context->Window->SetTextInputRect({rect->X(), rect->Y(), rect->Width(), rect->Height()});
+      }
+    }
+
     /// @brief The size of the page view: the window below the header.
     KRYS_NODISCARD boo::IntSize PageSize() const noexcept
     {
@@ -487,6 +549,7 @@ namespace krys
           _animations = event.FromBackForwardCache ? CreateUnique<editor::PageAnimations>(document) : nullptr;
           _pointers = event.FromBackForwardCache ? CreateUnique<editor::PagePointers>(document) : nullptr;
           _gamepads = event.FromBackForwardCache ? CreateUnique<editor::PageGamepads>(document) : nullptr;
+          _textInput = event.FromBackForwardCache ? CreateUnique<editor::PageTextInput>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
@@ -494,6 +557,7 @@ namespace krys
           _animations = CreateUnique<editor::PageAnimations>(document);
           _pointers = CreateUnique<editor::PagePointers>(document);
           _gamepads = CreateUnique<editor::PageGamepads>(document);
+          _textInput = CreateUnique<editor::PageTextInput>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;
@@ -716,6 +780,8 @@ namespace krys
           UpdateCursor();
           return done;
         });
+      // The page dropping its composition drops the input method's.
+      _pageView->SetCompositionDiscardedHandler([&] { _context->Window->CancelComposition(); });
       _pageView->SetNavigationHandler([this](const ui::NavigationRequest &request)
                                       { return HandleNavigation(request); });
       _pageView->SetLoadHandler([this](const ui::LoadEvent &event) { HandleLoad(event); });

@@ -228,6 +228,12 @@ namespace krys::boo::dom
     _customElementRegistry = krys::move(registry);
   }
 
+  bool Element::ShouldUseInputMethod() noexcept
+  {
+    return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::Update)
+           != Editability::ReadOnly;
+  }
+
   bool Element::HasCustomState(DOMStringAtom state) const noexcept
   {
     if (_elementRareData)
@@ -1069,7 +1075,7 @@ namespace krys::boo::dom
 
   bool Element::DispatchKeyEvent(const PlatformKeyboardEvent &platformEvent) noexcept
   {
-    Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent);
+    Ref<KeyboardEvent> event = KeyboardEvent::Create(platformEvent, NodeDocument().Window());
     // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), once there's
     // accessibility.
     (void)EventDispatcher::DispatchToTarget(*event, this);

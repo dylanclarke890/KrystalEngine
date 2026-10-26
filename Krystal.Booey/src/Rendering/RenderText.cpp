@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
+#include <limits>
 #include <string>
 #include <unicode/ubrk.h>
 #include <unicode/ucasemap.h>
@@ -2056,6 +2057,148 @@ namespace krys::boo
       return EnclosingIntRect(
         lineBox->EllipsisVisualRect(inline_iterator::LineBox::AdjustedForSelection::Yes));
     }
+
+    KRYS_NODISCARD FloatRect LocalQuadForTextBox(const inline_iterator::TextBox &textBox, uint32 start,
+                                                 uint32 end, bool useSelectionHeight) noexcept
+    {
+      LayoutRect boxSelectionRect = SelectionRectForTextBox(textBox, start, end);
+      if (!boxSelectionRect.Height())
+      {
+        return {};
+      }
+      if (useSelectionHeight)
+      {
+        return boxSelectionRect;
+      }
+
+      auto rect = textBox.VisualRectIgnoringBlockDirection();
+      if (textBox.IsHorizontal())
+      {
+        boxSelectionRect.SetHeight(LayoutUnit {rect.Height()});
+        boxSelectionRect.SetY(LayoutUnit {rect.Y()});
+      }
+      else
+      {
+        boxSelectionRect.SetWidth(LayoutUnit {rect.Width()});
+        boxSelectionRect.SetX(LayoutUnit {rect.X()});
+      }
+      return boxSelectionRect;
+    }
+
+    // FIXME: SVG text boxes (localSelectionRect), once there's SVG text.
+    KRYS_NODISCARD List<LayoutRect> CharacterRects(const inline_iterator::TextBox &run, uint32 rangeStart,
+                                                   uint32 rangeEnd) noexcept
+    {
+      auto [clampedStart, clampedEnd] = run.SelectableRange().Clamp(rangeStart, rangeEnd);
+      if (clampedStart >= clampedEnd)
+      {
+        return {};
+      }
+
+      auto lineSelectionRect = LineSelection::LogicalRect(*run.GetLineBox());
+      auto selectionRect =
+        LayoutRect {LayoutUnit {run.LogicalLeftIgnoringInlineDirection()}, LayoutUnit {lineSelectionRect.Y()},
+                    LayoutUnit {run.LogicalWidth()}, LayoutUnit {lineSelectionRect.Height()}};
+      auto rects = run.GetFontCascade().CharacterSelectionRectsForText(run.GetTextRun(), selectionRect,
+                                                                       clampedStart, clampedEnd);
+      for (auto &characterRect : rects)
+      {
+        characterRect = SnappedSelectionRect(characterRect, run.LogicalRightIgnoringInlineDirection(),
+                                             run.GetWritingMode());
+      }
+      return rects;
+    }
+  }
+
+  List<FloatQuad> RenderText::AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                    EnumSet<BoundingRectBehavior> behavior,
+                                                    bool *wasFixed) const noexcept
+  {
+    bool useSelectionHeight = behavior.Contains(BoundingRectBehavior::UseSelectionHeight);
+    bool ignoreEmptyTextSelections = behavior.Contains(BoundingRectBehavior::IgnoreEmptyTextSelections);
+    bool computeIndividualCharacterRects =
+      behavior.Contains(BoundingRectBehavior::ComputeIndividualCharacterRects);
+
+    // Work around signed/unsigned issues: callers pass the largest offset to mean "all the way to the end".
+    start = std::min(start, static_cast<uint32>(std::numeric_limits<int32>::max()));
+    end = std::min(end, static_cast<uint32>(std::numeric_limits<int32>::max()));
+
+    const auto caretMinOffset = static_cast<uint32>(CaretMinOffset());
+    const auto caretMaxOffset = static_cast<uint32>(CaretMaxOffset());
+
+    // Narrows |start| and |end| into |caretMinOffset| and |caretMaxOffset| to ignore unrendered leading
+    // and trailing whitespaces.
+    start = std::min(std::max(caretMinOffset, start), caretMaxOffset);
+    end = std::min(std::max(caretMinOffset, end), caretMaxOffset);
+
+    List<FloatQuad> quads;
+    for (auto &textBox : inline_iterator::TextBoxesFor(*this))
+    {
+      if (ignoreEmptyTextSelections && !textBox.SelectableRange().Intersects(start, end))
+      {
+        continue;
+      }
+
+      if (computeIndividualCharacterRects)
+      {
+        auto rects = CharacterRects(textBox, start, end);
+        if (!useSelectionHeight)
+        {
+          for (auto &rect : rects)
+          {
+            auto visualRect = textBox.VisualRectIgnoringBlockDirection();
+            if (textBox.IsHorizontal())
+            {
+              rect.SetHeight(LayoutUnit {visualRect.Height()});
+              rect.SetY(LayoutUnit {visualRect.Y()});
+            }
+            else
+            {
+              rect.SetWidth(LayoutUnit {visualRect.Width()});
+              rect.SetX(LayoutUnit {visualRect.X()});
+            }
+          }
+        }
+
+        for (auto &rect : rects)
+        {
+          if (FloatRect localRect {rect}; !localRect.IsZero())
+          {
+            quads.push_back(LocalToAbsoluteQuad(localRect, MapCoordinatesMode::UseTransforms, wasFixed));
+          }
+        }
+        continue;
+      }
+
+      if (start <= textBox.Start() && textBox.End() <= end)
+      {
+        // FIXME: SVG text boxes' transforms (calculateBoundariesIncludingSVGTransform), once there's SVG.
+        auto boundaries = textBox.VisualRectIgnoringBlockDirection();
+
+        if (useSelectionHeight)
+        {
+          LayoutRect selectionRect = SelectionRectForTextBox(textBox, start, end);
+          if (textBox.IsHorizontal())
+          {
+            boundaries.SetHeight(selectionRect.Height());
+            boundaries.SetY(selectionRect.Y());
+          }
+          else
+          {
+            boundaries.SetWidth(selectionRect.Width());
+            boundaries.SetX(selectionRect.X());
+          }
+        }
+        quads.push_back(LocalToAbsoluteQuad(boundaries, MapCoordinatesMode::UseTransforms, wasFixed));
+        continue;
+      }
+      FloatRect rect = LocalQuadForTextBox(textBox, start, end, useSelectionHeight);
+      if (!rect.IsZero())
+      {
+        quads.push_back(LocalToAbsoluteQuad(rect, MapCoordinatesMode::UseTransforms, wasFixed));
+      }
+    }
+    return quads;
   }
 
   Color RenderText::SelectionBackgroundColor() const noexcept

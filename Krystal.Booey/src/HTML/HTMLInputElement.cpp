@@ -750,6 +750,11 @@ namespace krys::boo::html
     return _inputType->IsTextField();
   }
 
+  bool HTMLInputElement::ShouldUseInputMethod() noexcept
+  {
+    return _inputType->ShouldUseInputMethod();
+  }
+
   bool HTMLInputElement::IsSearchField() const noexcept
   {
     return _inputType->IsSearchField();

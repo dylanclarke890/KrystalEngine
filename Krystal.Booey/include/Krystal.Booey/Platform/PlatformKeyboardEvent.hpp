@@ -1,16 +1,20 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Platform/PlatformEvent.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo
 {
-  /// @brief A key press or release from the host, before it becomes `keydown`, `keypress` and `keyup`.
-  // FIXME: Input methods (handledByInputMethod, the preedit), key commands, synthetic events and the current
-  // modifier state, once there are text fields.
+  /// @brief A key press or release from the host, before it becomes `keydown`, `keypress` and `keyup`. A key
+  /// press an input method handled carries what it made of it: the text it composes (the preedit, with its
+  /// underlines and selection) or the text it confirmed.
+  // FIXME: Key commands, synthetic events and the current modifier state.
   class PlatformKeyboardEvent : public PlatformEvent
   {
   protected:
@@ -24,6 +28,11 @@ namespace krys::boo
     utf8_string _code;
     utf8_string _keyIdentifier;
     int32 _windowsVirtualKeyCode {0};
+
+    bool _handledByInputMethod {false};
+    Maybe<List<CompositionUnderline>> _preeditUnderlines;
+    Maybe<uint64> _preeditSelectionRangeStart;
+    Maybe<uint64> _preeditSelectionRangeLength;
 
   public:
     PlatformKeyboardEvent() noexcept : PlatformEvent(Type::KeyDown)
@@ -51,7 +60,7 @@ namespace krys::boo
       krys_debug_assert(type == Type::RawKeyDown || type == Type::Char);
       _type = type;
 
-      if (backwardCompatibilityMode)
+      if (backwardCompatibilityMode || _handledByInputMethod)
       {
         return;
       }
@@ -127,6 +136,25 @@ namespace krys::boo
     KRYS_NODISCARD bool IsSystemKey() const noexcept
     {
       return _isSystemKey;
+    }
+
+    /// @brief Whether an input method handled the key: its text is then the text the input method composes
+    /// (with the preedit's underlines) or confirmed (without them).
+    KRYS_NODISCARD bool HandledByInputMethod() const noexcept
+    {
+      return _handledByInputMethod;
+    }
+    KRYS_NODISCARD const Maybe<List<CompositionUnderline>> &PreeditUnderlines() const noexcept
+    {
+      return _preeditUnderlines;
+    }
+    KRYS_NODISCARD const Maybe<uint64> &PreeditSelectionRangeStart() const noexcept
+    {
+      return _preeditSelectionRangeStart;
+    }
+    KRYS_NODISCARD const Maybe<uint64> &PreeditSelectionRangeLength() const noexcept
+    {
+      return _preeditSelectionRangeLength;
     }
   };
 }

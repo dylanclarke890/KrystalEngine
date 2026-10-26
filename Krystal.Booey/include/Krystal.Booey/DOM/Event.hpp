@@ -46,6 +46,7 @@ namespace krys::boo::dom
     bool _initialized : 1 {false};
     bool _dispatched : 1 {false};
     bool _defaultHandled : 1 {false};
+    bool _isDefaultEventHandlerIgnored : 1 {false};
     RefPtr<Event> _underlyingEvent;
 
   public:
@@ -206,6 +207,17 @@ namespace krys::boo::dom
       _defaultHandled = true;
     }
 
+    /// @brief Whether no default event handler runs for the event (a key an input method handled).
+    KRYS_NODISCARD bool IsDefaultEventHandlerIgnored() const noexcept
+    {
+      return _isDefaultEventHandlerIgnored;
+    }
+
+    void SetIsDefaultEventHandlerIgnored() noexcept
+    {
+      _isDefaultEventHandlerIgnored = true;
+    }
+
     /// @brief The event this one was made for, such as the keypress a simulated click stands in for.
     KRYS_NODISCARD Event *UnderlyingEvent() const noexcept
     {
@@ -246,12 +258,12 @@ namespace krys::boo::dom
     {
     }
 
-    /// @brief Sets the event's target, telling the event if it's a new one.
-    void SetTarget(RefPtr<EventTarget> target) noexcept;
-
 #pragma endregion
 
   public:
+    /// @brief Sets the event's target, telling the event if it's a new one.
+    void SetTarget(RefPtr<EventTarget> target) noexcept;
+
 #pragma region Type Checks
 
     KRYS_NODISCARD virtual bool IsMouseEvent() const noexcept
@@ -295,6 +307,11 @@ namespace krys::boo::dom
     }
 
     KRYS_NODISCARD virtual bool IsTextEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCompositionEvent() const noexcept
     {
       return false;
     }

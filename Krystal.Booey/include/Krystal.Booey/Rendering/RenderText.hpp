@@ -258,6 +258,11 @@ namespace krys::boo
 
     void BoundingRects(List<LayoutRect> &rects, const LayoutPoint &accumulatedOffset) const noexcept override;
     void AbsoluteQuads(List<FloatQuad> &quads, bool *wasFixed = nullptr) const noexcept override;
+    /// @brief The quads, in absolute coordinates, of the text from @p start to @p end, one per text box (or
+    /// one per character, with `ComputeIndividualCharacterRects`).
+    KRYS_NODISCARD List<FloatQuad> AbsoluteQuadsForRange(uint32 start, uint32 end,
+                                                         EnumSet<BoundingRectBehavior> behavior = {},
+                                                         bool *wasFixed = nullptr) const noexcept;
 
   protected:
     RenderText(Type type, dom::Node &node, utf8_string text) noexcept;

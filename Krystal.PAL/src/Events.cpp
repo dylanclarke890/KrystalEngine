@@ -42,6 +42,44 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region TextInputEvent
+
+  TextInputEvent::TextInputEvent(WindowHandle window, utf8_string text) noexcept
+      : Event(), _window(window), _text(krys::move(text))
+  {
+  }
+
+  const utf8_string &TextInputEvent::Text() const noexcept
+  {
+    return _text;
+  }
+
+  WindowHandle TextInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region CompositionInputEvent
+
+  CompositionInputEvent::CompositionInputEvent(WindowHandle window, CompositionInput input) noexcept
+      : Event(), _window(window), _input(krys::move(input))
+  {
+  }
+
+  const CompositionInput &CompositionInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle CompositionInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region PointerInputEvent
 
   PointerInputEvent::PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept

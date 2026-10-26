@@ -450,6 +450,7 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual bool SupportsPlaceholder() const noexcept;
     KRYS_NODISCARD virtual bool IsEmptyValue() const noexcept;
     KRYS_NODISCARD virtual bool SupportsReadOnly() const noexcept;
+    KRYS_NODISCARD virtual bool ShouldUseInputMethod() const noexcept;
 
     virtual void AttributeChanged(dom::DOMStringAtom) noexcept
     {

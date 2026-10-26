@@ -1,5 +1,9 @@
 ﻿#include "Krystal.Booey/Rendering/TextBoxPainter.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/CompositionHighlight.hpp"
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Enums/TagName.hpp"
@@ -203,6 +207,10 @@ namespace krys::boo
     krys_debug_assert(paintInfo.Phase == PaintPhase::Foreground || paintInfo.Phase == PaintPhase::Selection
                       || paintInfo.Phase == PaintPhase::TextClip || paintInfo.Phase == PaintPhase::EventRegion
                       || paintInfo.Phase == PaintPhase::Accessibility);
+
+    auto &editor = _renderer.GetDocument().GetEditor();
+    _containsComposition = _renderer.TextNode() && editor.CompositionNode() == _renderer.TextNode();
+    _compositionWithCustomUnderlines = _containsComposition && editor.CompositionUsesCustomUnderlines();
   }
 
   TextBoxPainter::~TextBoxPainter() noexcept = default;
@@ -247,15 +255,19 @@ namespace krys::boo
     {
       if (_paintInfo.Phase == PaintPhase::Foreground)
       {
-        // FIXME: The background fill of document markers and IME compositions, and platform document markers
-        // (spelling and grammar errors), come with editing.
+        // FIXME: The background fill of document markers, and platform document markers (spelling and grammar
+        // errors), come with document markers.
         auto shouldPaintBackgroundFill = [&]
         {
           if (_isPrinting)
           {
             return false;
           }
-          if (_haveSelection)
+          if (_haveSelection && !_compositionWithCustomUnderlines)
+          {
+            return true;
+          }
+          if (_containsComposition && !_compositionWithCustomUnderlines)
           {
             return true;
           }
@@ -273,8 +285,12 @@ namespace krys::boo
 
       PaintForegroundAndDecorations();
 
-      // FIXME: Composition underlines, the page's relevant repainted objects and the document's painted
-      // text tracking (didPaintText) come with editing and paint milestones.
+      if (_paintInfo.Phase == PaintPhase::Foreground && _compositionWithCustomUnderlines)
+      {
+        PaintCompositionUnderlines();
+      }
+      // FIXME: The page's relevant repainted objects and the document's painted text tracking (didPaintText)
+      // come with paint milestones.
     }
 
     if (glyphRotation)
@@ -300,13 +316,23 @@ namespace krys::boo
     return {};
   }
 
-  // FIXME: Document markers and IME compositions, with editing.
+  // FIXME: Document markers, and the composition's custom highlights, with those.
   void TextBoxPainter::PaintBackgroundFill() noexcept
   {
+    if (_containsComposition && !_compositionWithCustomUnderlines)
+    {
+      auto &editor = _renderer.GetDocument().GetEditor();
+      auto [clampedStart, clampedEnd] =
+        _selectableRange.Clamp(editor.CompositionStart(), editor.CompositionEnd());
+      PaintBackgroundFillForRange(clampedStart, clampedEnd,
+                                  CompositionHighlight::DefaultCompositionFillColor);
+    }
+
     auto markedTexts =
       MarkedText::CollectForHighlights(_renderer, _selectableRange, MarkedText::PaintPhase::Background);
 
-    if (_haveSelection && !_paintInfo.Context().PaintingDisabled())
+    auto hasSelectionWithNonCustomUnderline = _haveSelection && !_compositionWithCustomUnderlines;
+    if (hasSelectionWithNonCustomUnderline && !_paintInfo.Context().PaintingDisabled())
     {
       auto selectionMarkedText = CreateMarkedTextFromSelectionInBox();
       if (!selectionMarkedText.IsEmpty())
@@ -388,7 +414,7 @@ namespace krys::boo
 
   void TextBoxPainter::PaintForegroundAndDecorations() noexcept
   {
-    auto shouldPaintSelectionForeground = _haveSelection;
+    auto shouldPaintSelectionForeground = _haveSelection && !_compositionWithCustomUnderlines;
     auto hasTextDecoration = !_style.TextDecorationLineInEffect().IsNone();
     auto hasHighlightDecoration =
       _document.HasHighlight()
@@ -546,6 +572,126 @@ namespace krys::boo
         PaintForeground(markedText);
       }
     }
+  }
+
+  // FIXME: The redesigned text cursor's rounded underlines, which are Cocoa's.
+  void TextBoxPainter::FillCompositionUnderline(float start, float width,
+                                                const CompositionUnderline &underline) const noexcept
+  {
+    // Thick marked text underlines are 2px thick as long as there is room for the 2px line under the
+    // baseline. All other marked text underlines are 1px thick. If there's not enough space the underline
+    // will touch or overlap characters.
+    int32 lineThickness = 1;
+    auto baseline = Snap(_style.MetricsOfPrimaryFont().Ascent());
+    if (underline.Thick && _logicalRect.Height() - baseline >= 2)
+    {
+      lineThickness = 2;
+    }
+
+    // We need to have some space between underlines of subsequent clauses, because some input methods do not
+    // use different underline styles for those. We make each line shorter, which has a harmless side effect
+    // of shortening the first and last clauses, too.
+    start += 1;
+    width -= 2;
+
+    auto underlineColor =
+      underline.UnderlineColor == CompositionUnderlineColor::TextColor
+        ? _style.VisitedDependentColorWithColorFilter(css::PropertyId::WebkitTextFillColor)
+        : _style.ColorByApplyingColorFilter(underline.Color);
+
+    auto &context = _paintInfo.Context();
+    context.SetStrokeColor(underlineColor);
+    context.SetStrokeThickness(static_cast<float>(lineThickness));
+    context.DrawLineForText(
+      FloatRect(_paintRect.X() + start,
+                _paintRect.Y() + _logicalRect.Height() - static_cast<float>(lineThickness), width,
+                static_cast<float>(lineThickness)),
+      _isPrinting);
+  }
+
+  void TextBoxPainter::PaintCompositionUnderlines() noexcept
+  {
+    const auto &underlines = _renderer.GetDocument().GetEditor().CustomCompositionUnderlines();
+    for (const auto &underline : underlines)
+    {
+      if (underline.EndOffset <= TextBox().Start())
+      {
+        // Underline is completely before this run. This might be an underline that sits
+        // before the first run we draw, or underlines that were within runs we skipped
+        // due to truncation.
+        continue;
+      }
+
+      if (underline.StartOffset >= TextBox().End())
+      {
+        break; // Underline is completely after this run, bail. A later run will paint it.
+      }
+
+      // Underline intersects this run. Paint it.
+      PaintCompositionUnderline(underline);
+
+      if (underline.EndOffset > TextBox().End())
+      {
+        break; // Underline also runs into the next run. Bail now, no more marker advancement.
+      }
+    }
+  }
+
+  namespace
+  {
+    void MirrorRTLSegment(float logicalWidth, TextDirection direction, float &start, float width) noexcept
+    {
+      if (direction == TextDirection::LTR)
+      {
+        return;
+      }
+      start = logicalWidth - width - start;
+    }
+  }
+
+  float TextBoxPainter::TextPosition() const noexcept
+  {
+    // When computing the width of a text run, RenderBlock::computeInlineDirectionPositionsForLine() doesn't
+    // include the actual offset from the containing block edge in its measurement. TextPosition() should be
+    // consistent so the text are rendered in the same width.
+    if (!_logicalRect.X())
+    {
+      return 0;
+    }
+    return _logicalRect.X() - MakeIterator()->GetLineBox()->ContentLogicalLeft();
+  }
+
+  void TextBoxPainter::PaintCompositionUnderline(const CompositionUnderline &underline) noexcept
+  {
+    float start = 0;                    // start of line to draw, relative to tx
+    float width = _logicalRect.Width(); // how much line to draw
+    bool useWholeWidth = true;
+    uint32 paintStart = TextBox().Start();
+    uint32 paintEnd = TextBox().End();
+    if (paintStart <= underline.StartOffset)
+    {
+      paintStart = underline.StartOffset;
+      useWholeWidth = false;
+      start =
+        _renderer.Width(TextBox().Start(), paintStart - TextBox().Start(), TextPosition(), _isFirstLine);
+    }
+    if (paintEnd != underline.EndOffset)
+    {
+      paintEnd = std::min(paintEnd, underline.EndOffset);
+      useWholeWidth = false;
+    }
+    if (_selectableRange.Truncation)
+    {
+      paintEnd = std::min(paintEnd, TextBox().Start() + *_selectableRange.Truncation);
+      useWholeWidth = false;
+    }
+    if (!useWholeWidth)
+    {
+      width = _renderer.Width(paintStart, paintEnd - paintStart, TextPosition() + start, _isFirstLine);
+      MirrorRTLSegment(_logicalRect.Width(), TextBox().Direction(), start, width);
+    }
+
+    FillCompositionUnderline(start, width, underline);
   }
 
   void TextBoxPainter::PaintForeground(const StyledMarkedText &markedText) noexcept

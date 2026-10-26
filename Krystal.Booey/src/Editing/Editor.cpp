@@ -3,21 +3,26 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/ClipboardEvent.hpp"
+#include "Krystal.Booey/DOM/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/InputEvent.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TextEvent.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Editing/RenderedPosition.hpp"
 #include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
+#include "Krystal.Booey/Graphics/FloatQuad.hpp"
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
@@ -27,6 +32,8 @@
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
+#include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
+#include "Krystal.Booey/Rendering/RenderObject.hpp"
 
 namespace krys::boo
 {
@@ -139,7 +146,6 @@ namespace krys::boo
     return nullptr;
   }
 
-  // FIXME: Input methods (handleInputMethodKeydown, didDispatchInputMethodKeydown), with text input.
   bool Editor::HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept
   {
     if (auto *client = Client())
@@ -147,6 +153,22 @@ namespace krys::boo
       return client->HandleKeyboardEvent(event);
     }
     return false;
+  }
+
+  void Editor::HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->HandleInputMethodKeydown(event);
+    }
+  }
+
+  void Editor::DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->DidDispatchInputMethodKeydown(event);
+    }
   }
 
   // Returns whether caller should continue with "the default processing", which is the same as
@@ -1104,7 +1126,6 @@ namespace krys::boo
                                  editingAction);
   }
 
-  // FIXME: Ignoring selection changes (setIgnoreSelectionChanges), with input methods.
   void Editor::RevealSelectionAfterEditingOperation(const ScrollAlignment &alignment,
                                                     RevealExtentOption revealExtentOption) noexcept
   {
@@ -1115,6 +1136,436 @@ namespace krys::boo
   {
     RevealSelectionAfterEditingOperation(ScrollAlignment::AlignCenterIfNeeded,
                                          RevealExtentOption::DoNotRevealExtent);
+  }
+
+  bool Editor::HasComposition() const noexcept
+  {
+    return static_cast<bool>(_compositionNode);
+  }
+
+  dom::Text *Editor::CompositionNode() const noexcept
+  {
+    return _compositionNode.get();
+  }
+
+  bool Editor::InsertTextForConfirmedComposition(utf8_stringview text) noexcept
+  {
+    return _document.Frame()->GetEventHandler().HandleTextInputEvent(text, nullptr,
+                                                                     dom::TextEventInputType::Composition);
+  }
+
+  void Editor::SelectComposition() noexcept
+  {
+    auto range = CompositionRange();
+    if (!range)
+    {
+      return;
+    }
+
+    // The composition can start inside a composed character sequence, so we have to override checks.
+    VisibleSelection selection;
+    selection.SetWithoutValidation(dom::MakeDeprecatedLegacyPosition(range->Start),
+                                   dom::MakeDeprecatedLegacyPosition(range->End));
+    _document.Selection().SetSelection(selection, {});
+  }
+
+  void Editor::ConfirmComposition() noexcept
+  {
+    if (!_compositionNode)
+    {
+      return;
+    }
+    // A copy: confirming replaces the composition's text in its node.
+    auto text = utf8_string(utf8_stringview(_compositionNode->Data())
+                              .substr(_compositionStart, _compositionEnd - _compositionStart));
+    SetComposition(text, SetCompositionMode::ConfirmComposition);
+  }
+
+  void Editor::ConfirmOrCancelCompositionAndNotifyClient() noexcept
+  {
+    if (!HasComposition())
+    {
+      return;
+    }
+
+    RefPtr<dom::Document> document = ShareRefPtr(&_document);
+    auto *frame = document->Frame();
+    if (!frame)
+    {
+      return;
+    }
+
+    if (CancelCompositionIfSelectionIsInvalid())
+    {
+      return;
+    }
+
+    ConfirmComposition();
+
+    if (auto *editorClient = Client())
+    {
+      editorClient->RespondToChangedSelection(frame);
+      editorClient->DiscardedComposition(*document);
+    }
+  }
+
+  void Editor::CancelComposition() noexcept
+  {
+    if (!_compositionNode)
+    {
+      return;
+    }
+    SetComposition({}, SetCompositionMode::CancelComposition);
+  }
+
+  bool Editor::CancelCompositionIfSelectionIsInvalid() noexcept
+  {
+    uint32 start;
+    uint32 end;
+    if (!HasComposition() || IgnoreSelectionChanges() || GetCompositionSelection(start, end))
+    {
+      return false;
+    }
+
+    CancelComposition();
+    return true;
+  }
+
+  void Editor::ConfirmComposition(utf8_stringview text) noexcept
+  {
+    SetComposition(text, SetCompositionMode::ConfirmComposition);
+  }
+
+  namespace
+  {
+    // FIXME: The user typing gesture (UserTypingGestureIndicator), with typing gestures.
+    class SetCompositionScope
+    {
+      KRYS_NON_COPY_MOVABLE(SetCompositionScope);
+
+    private:
+      Ref<dom::Document> _document;
+
+    public:
+      explicit SetCompositionScope(dom::Document &document) noexcept : _document(ShareRef(document))
+      {
+        _document->GetEditor().SetIgnoreSelectionChanges(true);
+      }
+
+      ~SetCompositionScope() noexcept
+      {
+        _document->GetEditor().SetIgnoreSelectionChanges(false);
+        if (auto *editorClient = _document->GetEditor().Client())
+        {
+          editorClient->DidUpdateComposition();
+        }
+      }
+    };
+  }
+
+  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
+  void Editor::SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept
+  {
+    Ref<dom::Document> document = ShareRef(_document);
+    SetCompositionScope setCompositionScope(*document);
+
+    if (mode == SetCompositionMode::CancelComposition)
+    {
+      krys_debug_assert(text.empty());
+    }
+    else
+    {
+      SelectComposition();
+    }
+
+    _compositionNode = nullptr;
+    _customCompositionUnderlines.clear();
+
+    if (document->Selection().IsNone())
+    {
+      return;
+    }
+
+    // Always delete the current composition before inserting the finalized composition text if we're
+    // confirming our composition. Our default behavior (if the beforeinput event is not prevented) is to
+    // insert the finalized composition text back in. We pass TypingCommand::TextCompositionType::Pending here
+    // to indicate that we are deleting the pending composition.
+    if (mode != SetCompositionMode::CancelComposition)
+    {
+      TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Pending);
+    }
+
+    (void)InsertTextForConfirmedComposition(text);
+
+    if (RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement()))
+    {
+      auto event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+      (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
+    }
+
+    if (mode == SetCompositionMode::CancelComposition)
+    {
+      // An open typing command that disagrees about current selection would cause issues with typing later
+      // on.
+      TypingCommand::CloseTyping(*document);
+    }
+  }
+
+  void Editor::CloseTyping() noexcept
+  {
+    TypingCommand::CloseTyping(_document);
+  }
+
+  // FIXME: Accessibility's composition notifications (onTextCompositionChange), with accessibility.
+  void Editor::SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
+                              uint32 selectionStart, uint32 selectionEnd) noexcept
+  {
+    Ref<dom::Document> document = ShareRef(_document);
+    SetCompositionScope setCompositionScope(*document);
+
+    // Updates styles before setting selection for composition to prevent
+    // inserting the previous composition text into text nodes oddly.
+    (void)document->UpdateStyleIfNeeded();
+
+    SelectComposition();
+
+    if (document->Selection().IsNone())
+    {
+      return;
+    }
+
+    auto originalText = SelectedText();
+    bool isStartingToRecomposeExistingRange =
+      !text.empty() && selectionStart < selectionEnd && !HasComposition();
+    if (isStartingToRecomposeExistingRange)
+    {
+      // We pass TypingCommand::TextCompositionType::Final here to indicate that we are removing composition
+      // text that has been finalized.
+      TypingCommand::DeleteSelection(*document, {}, TypingCommand::TextCompositionType::Final);
+      const auto &currentSelection = document->Selection().Selection();
+      if (currentSelection.IsRange())
+      {
+        // If deletion was prevented, then we need to collapse the selection to the end so that the original
+        // text will not be recomposed.
+        document->Selection().SetSelection(VisibleSelection {currentSelection.End(), currentSelection.End()});
+      }
+    }
+
+    RefPtr<dom::CompositionEvent> event;
+    RefPtr<dom::Element> target = ShareRefPtr(document->FocusedElement());
+    if (target)
+    {
+      // Dispatch an appropriate composition event to the focused node.
+      // We check the composition status and choose an appropriate composition event since this
+      // function is used for three purposes:
+      // 1. Starting a new composition.
+      //    Send a compositionstart and a compositionupdate event when this function creates
+      //    a new composition node, i.e.
+      //    _compositionNode == 0 && !text.empty().
+      //    Sending a compositionupdate event at this time ensures that at least one
+      //    compositionupdate event is dispatched.
+      // 2. Updating the existing composition node.
+      //    Send a compositionupdate event when this function updates the existing composition
+      //    node, i.e. _compositionNode != 0 && !text.empty().
+      // 3. Canceling the ongoing composition.
+      //    Send a compositionend event when function deletes the existing composition node, i.e.
+      //    _compositionNode != 0 && text.empty().
+      if (!_compositionNode)
+      {
+        // We should send a compositionstart event only when the given text is not empty because this
+        // function doesn't create a composition node when the text is empty.
+        if (!text.empty())
+        {
+          auto start =
+            dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionStart), originalText);
+          (void)dom::EventDispatcher::DispatchToTarget(*start, target.get());
+          event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+        }
+      }
+      else if (!text.empty())
+      {
+        event = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionUpdate), text);
+      }
+
+      if (event)
+      {
+        (void)dom::EventDispatcher::DispatchToTarget(*event, target.get());
+      }
+    }
+
+    // If text is empty, then delete the old composition here. If text is non-empty, InsertTextCommand::input
+    // will delete the old composition with an optimized replace operation.
+    if (text.empty())
+    {
+      TypingCommand::DeleteSelection(*document, TypingCommand::Option::PreventSpellChecking,
+                                     TypingCommand::TextCompositionType::Pending);
+      if (target)
+      {
+        auto end = dom::CompositionEvent::Create(dom::DOMStringAtom(EventNames::CompositionEnd), text);
+        (void)dom::EventDispatcher::DispatchToTarget(*end, target.get());
+      }
+    }
+
+    _compositionNode = nullptr;
+    _customCompositionUnderlines.clear();
+
+    if (!text.empty())
+    {
+      TypingCommand::InsertText(
+        *document, text, event.get(),
+        {TypingCommand::Option::SelectInsertedText, TypingCommand::Option::PreventSpellChecking},
+        TypingCommand::TextCompositionType::Pending);
+
+      // Find out what node has the composition now.
+      auto base = document->Selection().Selection().Base().Downstream();
+      auto extent = document->Selection().Selection().Extent();
+      RefPtr<dom::Node> baseNode = ShareRefPtr(base.DeprecatedNode());
+      auto baseOffset = static_cast<uint32>(base.DeprecatedEditingOffset());
+      RefPtr<dom::Node> extentNode = ShareRefPtr(extent.DeprecatedNode());
+      auto extentOffset = static_cast<uint32>(extent.DeprecatedEditingOffset());
+
+      if (auto *baseTextNode = DynamicDowncast<dom::Text>(baseNode.get());
+          baseTextNode && baseNode == extentNode && baseOffset + text.size() == extentOffset)
+      {
+        _compositionNode = ShareRefPtr(baseTextNode);
+        _compositionStart = baseOffset;
+        _compositionEnd = extentOffset;
+        _customCompositionUnderlines = underlines;
+        for (auto &underline : _customCompositionUnderlines)
+        {
+          underline.StartOffset += baseOffset;
+          underline.EndOffset += baseOffset;
+        }
+
+        if (auto *renderer = baseTextNode->Renderer())
+        {
+          renderer->Repaint();
+        }
+
+        auto start = std::min(baseOffset + selectionStart, extentOffset);
+        auto end = std::min(std::max(start, baseOffset + selectionEnd), extentOffset);
+        auto range = dom::SimpleRange {{ShareRef(*baseTextNode), start}, {ShareRef(*baseTextNode), end}};
+        (void)document->Selection().SetSelectedRange(range, Affinity::Downstream,
+                                                     FrameSelection::ShouldCloseTyping::No);
+      }
+    }
+  }
+
+  void Editor::SetIgnoreSelectionChanges(bool ignore, RevealSelection shouldRevealExistingSelection) noexcept
+  {
+    if (_ignoreSelectionChanges == ignore)
+    {
+      return;
+    }
+
+    _ignoreSelectionChanges = ignore;
+    if (!ignore && shouldRevealExistingSelection == RevealSelection::Yes)
+    {
+      RevealSelectionAfterEditingOperation(ScrollAlignment::AlignToEdgeIfNeeded,
+                                           RevealExtentOption::RevealExtent);
+    }
+  }
+
+  Maybe<dom::SimpleRange> Editor::CompositionRange() const noexcept
+  {
+    if (!_compositionNode)
+    {
+      return {};
+    }
+    auto length = static_cast<uint32>(_compositionNode->Length());
+    auto start = std::min(_compositionStart, length);
+    auto end = std::clamp(_compositionEnd, start, length);
+    if (start >= end)
+    {
+      return {};
+    }
+    return dom::SimpleRange {{ShareRef<dom::Node>(*_compositionNode), start},
+                             {ShareRef<dom::Node>(*_compositionNode), end}};
+  }
+
+  bool Editor::GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept
+  {
+    if (!_compositionNode)
+    {
+      return false;
+    }
+    const auto &selection = _document.Selection().Selection();
+    auto start = selection.Start();
+    if (start.DeprecatedNode() != _compositionNode.get())
+    {
+      return false;
+    }
+    auto end = selection.End();
+    if (end.DeprecatedNode() != _compositionNode.get())
+    {
+      return false;
+    }
+
+    if (static_cast<uint32>(start.DeprecatedEditingOffset()) < _compositionStart)
+    {
+      return false;
+    }
+    if (static_cast<uint32>(end.DeprecatedEditingOffset()) > _compositionEnd)
+    {
+      return false;
+    }
+
+    selectionStart = static_cast<uint32>(start.DeprecatedEditingOffset()) - _compositionStart;
+    selectionEnd = static_cast<uint32>(end.DeprecatedEditingOffset()) - _compositionStart;
+    return true;
+  }
+
+  // FIXME: Spelling and grammar, the kill ring (setStartNewKillRingSequence), revealing images that load
+  // (imageElementsToLoadBeforeRevealingSelection) and the editor's user interface updates
+  // (scheduleEditorUIUpdate), with those.
+  void Editor::RespondToChangedSelection(const VisibleSelection &,
+                                         EnumSet<FrameSelectionSetSelectionOption>) noexcept
+  {
+    if (auto *client = Client())
+    {
+      client->RespondToChangedSelection(_document.Frame());
+    }
+  }
+
+  namespace
+  {
+    void CollapseCaretWidth(IntRect &rect) noexcept
+    {
+      // FIXME: Width adjustment doesn't work for rotated text.
+      if (rect.Width() == CaretWidth())
+      {
+        rect.SetWidth(0);
+      }
+      else if (rect.Height() == CaretWidth())
+      {
+        rect.SetHeight(0);
+      }
+    }
+  }
+
+  IntRect Editor::FirstRectForRange(const dom::SimpleRange &range) const noexcept
+  {
+    (void)range.Start.GetDocument().UpdateLayout();
+
+    VisiblePosition start(dom::MakeDeprecatedLegacyPosition(range.Start));
+
+    if (range.Collapsed())
+    {
+      // FIXME: Getting caret rect and removing caret width is a very roundabout way to get collapsed range
+      // location. In particular, width adjustment doesn't work for rotated text.
+      IntRect startCaretRect = RenderedPosition(start).AbsoluteRect();
+      CollapseCaretWidth(startCaretRect);
+      return startCaretRect;
+    }
+
+    VisiblePosition end(dom::MakeDeprecatedLegacyPosition(range.End), Affinity::Upstream);
+
+    if (InSameLine(start, end))
+    {
+      return EnclosingIntRect(UnitedBoundingBoxes(RenderObject::AbsoluteTextQuads(range)));
+    }
+
+    return RenderedPosition(start).AbsoluteRect(CaretRectMode::ExpandToEndOfLine);
   }
 
   VisibleSelection Editor::SelectionForCommand(dom::Event *event) const noexcept

@@ -42,6 +42,7 @@ namespace krys::boo::html
     void DisabledStateChanged() noexcept final;
     void ReadOnlyStateChanged() noexcept final;
     KRYS_NODISCARD bool SupportsReadOnly() const noexcept final;
+    KRYS_NODISCARD bool ShouldUseInputMethod() const noexcept override;
     void HandleFocusEvent(dom::Node *oldFocusedNode) noexcept final;
     void HandleBlurEvent() noexcept final;
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,

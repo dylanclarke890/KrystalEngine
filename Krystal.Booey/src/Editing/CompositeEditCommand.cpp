@@ -933,12 +933,50 @@ namespace krys::boo
   }
 
   // FIXME: Doesn't go into text nodes that contribute adjacent text (siblings, cousins, etc).
-  void CompositeEditCommand::RebalanceWhitespaceAt(const dom::Position &position) noexcept
+  dom::Position WhitespaceRebalance::Adjust(const dom::Position &position) const noexcept
+  {
+    if (position.GetAnchorType() != dom::Position::AnchorType::PositionIsOffsetInAnchor
+        || position.GetContainerNode() != Node.get())
+    {
+      return position;
+    }
+    auto offset = static_cast<uint32>(position.OffsetInContainerNode());
+    if (offset <= Offset)
+    {
+      return position;
+    }
+    if (offset >= Offset + OldText.size())
+    {
+      return dom::Position(RefPtr<dom::Text>(Node),
+                           static_cast<uint32>(offset - OldText.size() + NewText.size()));
+    }
+
+    // Within the run, to the same character: count the old run's characters before the offset, and step over
+    // as many in the new one.
+    auto isLeadByte = [](char8_t byte)
+    {
+      return (static_cast<uint8>(byte) & 0xC0) != 0x80;
+    };
+    auto characters = std::ranges::count_if(utf8_stringview(OldText).substr(0, offset - Offset), isLeadByte);
+    uint32 newOffset = 0;
+    for (; characters && newOffset < NewText.size(); --characters)
+    {
+      ++newOffset;
+      while (newOffset < NewText.size() && !isLeadByte(NewText[newOffset]))
+      {
+        ++newOffset;
+      }
+    }
+    return dom::Position(RefPtr<dom::Text>(Node), Offset + newOffset);
+  }
+
+  Maybe<WhitespaceRebalance>
+    CompositeEditCommand::RebalanceWhitespaceAt(const dom::Position &position) noexcept
   {
     auto textNode = TextNodeForRebalance(position);
     if (!textNode)
     {
-      return;
+      return {};
     }
 
     // If the rebalance is for the single offset, and neither text[offset] nor text[offset - 1] are some form
@@ -950,12 +988,12 @@ namespace krys::boo
       offset--;
       if (offset < 0 || !IsEditingWhitespaceByte(text, static_cast<size_t>(offset)))
       {
-        return;
+        return {};
       }
     }
 
-    RebalanceWhitespaceOnTextSubstring(*textNode, position.OffsetInContainerNode(),
-                                       position.OffsetInContainerNode());
+    return RebalanceWhitespaceOnTextSubstring(*textNode, position.OffsetInContainerNode(),
+                                              position.OffsetInContainerNode());
   }
 
   namespace
@@ -999,8 +1037,9 @@ namespace krys::boo
     }
   }
 
-  void CompositeEditCommand::RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset,
-                                                                int32 endOffset) noexcept
+  Maybe<WhitespaceRebalance>
+    CompositeEditCommand::RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset,
+                                                             int32 endOffset) noexcept
   {
     dom::DOMString text = textNode.Data();
     krys_debug_assert(!text.empty());
@@ -1030,7 +1069,7 @@ namespace krys::boo
     size_t length = downstream - upstream;
     if (!length)
     {
-      return;
+      return {};
     }
 
     VisiblePosition visibleUpstreamPos(dom::Position(ShareRefPtr(&textNode), static_cast<uint32>(upstream)));
@@ -1050,11 +1089,15 @@ namespace krys::boo
                                      (IsEndOfParagraph(visibleDownstreamPos) || downstream == text.size())
                                        && !nextSiblingIsTextNodeWithoutLeadingSpace);
 
-    if (string != rebalancedString)
+    if (string == rebalancedString)
     {
-      ReplaceTextInNodePreservingMarkers(textNode, static_cast<uint32>(upstream), static_cast<uint32>(length),
-                                         rebalancedString);
+      return {};
     }
+    WhitespaceRebalance rebalance {ShareRefPtr(&textNode), static_cast<uint32>(upstream), utf8_string(string),
+                                   utf8_string(rebalancedString)};
+    ReplaceTextInNodePreservingMarkers(textNode, static_cast<uint32>(upstream), static_cast<uint32>(length),
+                                       rebalancedString);
+    return rebalance;
   }
 
   void CompositeEditCommand::PrepareWhitespaceAtPositionForSplit(dom::Position &position) noexcept
@@ -1112,10 +1155,10 @@ namespace krys::boo
       return;
     }
 
-    RebalanceWhitespaceAt(selection.Start());
+    auto rebalance = RebalanceWhitespaceAt(selection.Start());
     if (selection.IsRange())
     {
-      RebalanceWhitespaceAt(selection.End());
+      (void)RebalanceWhitespaceAt(rebalance ? rebalance->Adjust(selection.End()) : selection.End());
     }
   }
 

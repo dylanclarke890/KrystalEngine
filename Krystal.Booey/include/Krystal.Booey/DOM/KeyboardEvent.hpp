@@ -7,11 +7,16 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
+namespace krys::boo
+{
+  class LocalDOMWindow;
+}
+
 namespace krys::boo::dom
 {
   /// @brief An event from a keyboard: `keydown`, `keypress` and `keyup`.
   /// @see https://w3c.github.io/uievents/#interface-keyboardevent
-  // FIXME: The view, composing with an input method, and key commands.
+  // FIXME: The view, once events have views, and key commands.
   class KeyboardEvent final : public UIEventWithKeyState
   {
     friend class EventFactory;
@@ -43,8 +48,9 @@ namespace krys::boo::dom
     KeyboardEvent(DOMStringAtom type, const KeyboardEventInit &initializer = {}) noexcept;
 
     /// @brief A trusted event from @p key, which must be a raw key down, a char or a key up (a combined key
-    /// down is disambiguated first).
-    KRYS_NODISCARD static Ref<KeyboardEvent> Create(const PlatformKeyboardEvent &key) noexcept;
+    /// down is disambiguated first); it's composing if @p view's editor has a composition.
+    KRYS_NODISCARD static Ref<KeyboardEvent> Create(const PlatformKeyboardEvent &key,
+                                                    const LocalDOMWindow *view = nullptr) noexcept;
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-keyboardevent-initkeyboardevent

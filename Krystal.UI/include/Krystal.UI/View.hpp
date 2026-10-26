@@ -32,6 +32,7 @@
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Platform.hpp"
 #include "Krystal.PAL/Pointer.hpp"
+#include "Krystal.PAL/TextInput.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
@@ -131,6 +132,8 @@ namespace krys::ui
   /// pages load `file:` images.
   /// @note A menu list's popup and the date and colour pickers show as overlays above the page: while one is
   /// open, it takes the keys and the mouse, and a press outside it closes it.
+  class EditorClient;
+
   class View
   {
     friend class Overlay;
@@ -141,6 +144,8 @@ namespace krys::ui
     class FrameLoaderClient;
 
   private:
+    /// @brief The page's editor client, which the page owns.
+    EditorClient *_editorClient {nullptr};
     /// @brief The page's chrome client, which the page owns: it hands Booey the graphics layers and keeps the
     /// root of the page's layer tree.
     ChromeClient *_chromeClient {nullptr};
@@ -494,6 +499,30 @@ namespace krys::ui
     /// @return Whether the page cancelled the key.
     bool KeyReleased(pal::Key key, pal::KeyModifiers modifiers = {}) noexcept;
 
+    /// @brief Characters typed without a key press (@p text: the emoji panel, Alt and a keypad code):
+    /// `keypress` fires with them, and they're typed unless it's cancelled.
+    /// @return Whether the page cancelled or handled it.
+    bool InsertText(const utf8_string &text) noexcept;
+    /// @brief The input method composes @p text, with @p clauses (the one being converted thick) and the
+    /// caret at @p caret (UTF-8 offsets in it): as a key press the input method handled (`keydown` with key
+    /// code 229), the focused element's composition becomes it, starting one if there's none; empty text
+    /// removes it.
+    void SetComposition(const utf8_string &text, Span<const pal::CompositionClause> clauses,
+                        uint32 caret) noexcept;
+    /// @brief The input method committed @p text: as a key press it handled, the text takes the composition's
+    /// place (or is typed, without one).
+    void ConfirmComposition(const utf8_string &text) noexcept;
+    /// @brief Whether the focused element takes text from the input method (it's editable, or a text field
+    /// other than a password field), so the host turns its input method on.
+    KRYS_NODISCARD bool AcceptsTextInput() const noexcept;
+    /// @brief Where the composition starts (its first line), or else the caret, in viewport coordinates, for
+    /// placing the input method's windows; null without either.
+    KRYS_NODISCARD Maybe<boo::IntRect> TextInputRect() noexcept;
+    /// @brief Calls @p handler when the page drops the composition itself (confirming it as the mouse
+    /// presses or the window loses focus, or cancelling it as the selection leaves it), so the host's input
+    /// method drops its own (`pal::IWindow::CancelComposition()`).
+    void SetCompositionDiscardedHandler(Func<void()> &&handler) noexcept;
+
     /// @brief The pads' input for this frame (@p gamepads, as the input has them after
     /// `pal::Input::BeginFrame()`), at the host's time @p now: the pads drive the page as the keyboard does,
     /// without key events. The D-pad and the left stick move the focus spatially (whatever the page's
@@ -597,6 +626,10 @@ namespace krys::ui
     /// @brief A new document is the view's, before it's parsed: it takes the view's focus state and custom
     /// elements.
     void DidClearWindowObject() noexcept;
+
+    /// @brief Confirms the composition, if there is one, and tells the host to drop the input method's: the
+    /// mouse pressed, or the window lost focus.
+    void ConfirmCompositionForHost() noexcept;
 
     /// @brief A load committed (a new document, or one the back/forward cache kept): it's painted with the
     /// view's focus state.

@@ -39,6 +39,7 @@ target_sources(Krystal.PAL
       include/Krystal.PAL/MouseButtons.hpp
       include/Krystal.PAL/Platform.hpp
       include/Krystal.PAL/Pointer.hpp
+      include/Krystal.PAL/TextInput.hpp
 
 	PRIVATE 
     src/Events.cpp

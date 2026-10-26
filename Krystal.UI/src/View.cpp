@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PointerEvent.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
@@ -483,6 +485,14 @@ namespace krys::ui
       return client;
     }
 
+    /// @brief The page's editor client, noted in @p editorClient as it's handed to the page.
+    KRYS_NODISCARD UniquePtr<boo::EditorClient> CreateEditorClient(EditorClient *&editorClient) noexcept
+    {
+      auto client = CreateUnique<EditorClient>();
+      editorClient = client.get();
+      return client;
+    }
+
     /// @brief The page's chrome client, noted in @p chromeClient as it's handed to the page.
     KRYS_NODISCARD UniquePtr<boo::ChromeClient> CreateChromeClient(View::ChromeClient *&chromeClient) noexcept
     {
@@ -494,7 +504,7 @@ namespace krys::ui
 
   View::View(const boo::IntSize &viewportSize) noexcept
       : _backForwardList(boo::BackForwardList::Create()),
-        _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateUnique<EditorClient>(),
+        _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
                                 CreateFrameLoaderClient(_frameLoaderClient), _backForwardList)),
         _frame(ShareRef(_page->MainFrame()))
   {
@@ -1018,6 +1028,9 @@ namespace krys::ui
       return;
     }
 
+    // A press ends the composition: it's confirmed where it is, wherever the press puts the selection.
+    ConfirmCompositionForHost();
+
     (void)CountClick(point, button);
 
     _buttons |= ButtonsBit(button);
@@ -1149,6 +1162,7 @@ namespace krys::ui
       }
       case pal::PointerAction::Pressed:
       {
+        ConfirmCompositionForHost();
         // https://w3c.github.io/pointerevents/#the-button-property
         _penButton = input.Eraser         ? boo::MouseButton::Other
                      : input.BarrelButton ? boo::MouseButton::Right
@@ -1205,6 +1219,7 @@ namespace krys::ui
     auto it = std::ranges::find(_touches, input.Id, &ActiveTouch::HostId);
     if (input.Action == pal::PointerAction::Pressed && it == _touches.end())
     {
+      ConfirmCompositionForHost();
       // The lowest id no other touch has.
       uint32 id = 0;
       while (std::ranges::find(_touches, id, &ActiveTouch::Id) != _touches.end())
@@ -1696,6 +1711,12 @@ namespace krys::ui
       return handled;
     }
 
+    // The input method's keys reach the page as the composition changes they make.
+    if (text.HandledByInputMethod)
+    {
+      return true;
+    }
+
     auto event = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, key, modifiers, text, isAutoRepeat);
     _heldKeyValues.insert_or_assign(key, event.Key());
     bool handled = _frame->GetEventHandler().KeyEvent(event);
@@ -1728,6 +1749,88 @@ namespace krys::ui
       input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, key, modifiers, {}, false, keyValue));
     PerformMicrotaskCheckpoint();
     return handled;
+  }
+
+  bool View::InsertText(const utf8_string &text) noexcept
+  {
+    if (_overlay || text.empty())
+    {
+      return false;
+    }
+    bool handled = _frame->GetEventHandler().KeyEvent(input::TextInputEvent(text));
+    PerformMicrotaskCheckpoint();
+    return handled;
+  }
+
+  void View::SetComposition(const utf8_string &text, Span<const pal::CompositionClause> clauses,
+                            uint32 caret) noexcept
+  {
+    if (_overlay)
+    {
+      return;
+    }
+    (void)_frame->GetEventHandler().KeyEvent(
+      input::InputMethodKeyboardEvent(text, input::CompositionUnderlines(text, clauses), caret, 0));
+    PerformMicrotaskCheckpoint();
+  }
+
+  void View::ConfirmComposition(const utf8_string &text) noexcept
+  {
+    if (_overlay)
+    {
+      return;
+    }
+    (void)_frame->GetEventHandler().KeyEvent(input::InputMethodKeyboardEvent(text, null));
+    PerformMicrotaskCheckpoint();
+  }
+
+  bool View::AcceptsTextInput() const noexcept
+  {
+    return !_overlay && _editorClient->AcceptsTextInput();
+  }
+
+  Maybe<boo::IntRect> View::TextInputRect() noexcept
+  {
+    auto *view = _frame->View();
+    if (!view)
+    {
+      return null;
+    }
+
+    auto &document = Document();
+    (void)document.UpdateLayout();
+    auto &editor = document.GetEditor();
+    boo::IntRect rect;
+    if (auto range = editor.CompositionRange())
+    {
+      rect = editor.FirstRectForRange(*range);
+    }
+    else
+    {
+      rect = document.Selection().AbsoluteCaretBounds();
+    }
+    if (rect == boo::IntRect())
+    {
+      return null;
+    }
+    return view->ContentsToWindow(rect);
+  }
+
+  void View::SetCompositionDiscardedHandler(Func<void()> &&handler) noexcept
+  {
+    _editorClient->SetDiscardedCompositionHandler(krys::move(handler));
+  }
+
+  void View::ConfirmCompositionForHost() noexcept
+  {
+    auto &editor = Document().GetEditor();
+    if (!editor.HasComposition())
+    {
+      return;
+    }
+    editor.ConfirmComposition();
+    PerformMicrotaskCheckpoint();
+    _editorClient->DiscardedComposition(Document());
   }
 
   void View::GamepadInput(Span<const pal::Gamepad> gamepads, MonotonicTime::duration now) noexcept
@@ -1993,6 +2096,11 @@ namespace krys::ui
     {
       RefPtr<Overlay> overlay = _overlay;
       overlay->Hide();
+    }
+    // The composition is confirmed as the window loses focus.
+    if (!focused)
+    {
+      ConfirmCompositionForHost();
     }
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(Document(), focused);

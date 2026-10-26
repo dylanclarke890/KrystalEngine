@@ -8,6 +8,7 @@
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Pointer.hpp"
+#include "Krystal.PAL/TextInput.hpp"
 
 namespace krys::pal
 {
@@ -43,6 +44,45 @@ namespace krys::pal
 
     /// @brief Gets the text the key types (empty for releases).
     KRYS_NODISCARD const KeyText &Text() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief Characters typed without a key press (the emoji panel, Alt and a keypad code, an input method's
+  /// result outside a composition).
+  class TextInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    utf8_string _text;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("text-input-event")
+
+    /// @brief Constructs a `TextInputEvent`.
+    /// @param text The characters typed.
+    TextInputEvent(WindowHandle window, utf8_string text) noexcept;
+
+    KRYS_NODISCARD const utf8_string &Text() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A change to the text an input method composes.
+  class CompositionInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    CompositionInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("composition-input-event")
+
+    /// @brief Constructs a `CompositionInputEvent`.
+    /// @param input The change to the composition.
+    CompositionInputEvent(WindowHandle window, CompositionInput input) noexcept;
+
+    KRYS_NODISCARD const CompositionInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

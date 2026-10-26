@@ -254,14 +254,23 @@ namespace krys::boo
         _markerSupplier->AddMarkersToTextNode(*textNode, offset, _text);
       }
 
+      // A rebalanced run can change length (a no-break space is two bytes), so the positions move across it.
+      auto adjustPositions = [&](const Maybe<WhitespaceRebalance> &rebalance)
+      {
+        if (rebalance)
+        {
+          startPosition = rebalance->Adjust(startPosition);
+          endPosition = rebalance->Adjust(endPosition);
+        }
+      };
       if (_rebalanceType == RebalanceLeadingAndTrailingWhitespaces)
       {
         // The insertion may require adjusting adjacent whitespace, if it is present.
-        RebalanceWhitespaceAt(endPosition);
+        adjustPositions(RebalanceWhitespaceAt(endPosition));
         // Rebalancing on both sides isn't necessary if we've inserted only spaces.
         if (!ShouldRebalanceLeadingWhitespaceFor(_text))
         {
-          RebalanceWhitespaceAt(startPosition);
+          adjustPositions(RebalanceWhitespaceAt(startPosition));
         }
       }
       else
@@ -271,8 +280,8 @@ namespace krys::boo
         if (auto textForRebalance = TextNodeForRebalance(startPosition))
         {
           krys_debug_assert(textForRebalance == textNode);
-          RebalanceWhitespaceOnTextSubstring(*textNode, startPosition.OffsetInContainerNode(),
-                                             endPosition.OffsetInContainerNode());
+          adjustPositions(RebalanceWhitespaceOnTextSubstring(*textNode, startPosition.OffsetInContainerNode(),
+                                                             endPosition.OffsetInContainerNode()));
         }
       }
     }

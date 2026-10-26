@@ -87,6 +87,7 @@
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
+#include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/History.hpp"
 #include "Krystal.Booey/Page/IntersectionObserver.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
@@ -1326,6 +1327,11 @@ namespace krys::boo::dom
       focusedElement->SetFocus(false);
 
       ScheduleContentRelevancyUpdate(ContentRelevancy::Focused);
+
+      if (auto *editorClient = GetEditor().Client())
+      {
+        editorClient->SetInputMethodState(nullptr);
+      }
     }
 
     // A removed sequential focus navigation starting point moves to where the node was, so navigation

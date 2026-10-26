@@ -51,6 +51,10 @@ namespace krys::boo
 {
   namespace
   {
+    // Match key code of composition keydown event on windows.
+    // IE sends VK_PROCESSKEY which has value 229;
+    constexpr int32 CompositionEventKeyCode = 229;
+
     /// @brief The element key events go to in @p document: its focused element, or its body.
     // FIXME: A fullscreen video and a plugin document's plugin, once there are any.
     KRYS_NODISCARD dom::Element *EventTargetElementForDocument(dom::Document *document) noexcept
@@ -1003,7 +1007,7 @@ namespace krys::boo
     {
       keyDownEvent.DisambiguateKeyDownEvent(Type::RawKeyDown);
     }
-    Ref<dom::KeyboardEvent> keydown = dom::KeyboardEvent::Create(keyDownEvent);
+    Ref<dom::KeyboardEvent> keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
 
     auto setHasFocusVisibleIfNeeded = [&](dom::Element &element)
     {
@@ -1029,9 +1033,31 @@ namespace krys::boo
              || DefaultKeyboardEventHandler(*keydown);
     }
 
-    // FIXME: Input methods (handleInputMethodKeydown), which run before the keydown is dispatched, and
-    // accessibility stopping the propagation.
+    // Run input method in advance of DOM event handling. This may result in the IM
+    // modifying the page prior the keydown event, but this behaviour is necessary
+    // in order to match IE:
+    // 1. preventing default handling of keydown and keypress events has no effect on IM input;
+    // 2. if an input method handles the event, its keyCode is set to 229 in keydown event.
+    _frame.Document()->GetEditor().HandleInputMethodKeydown(*keydown);
+
+    bool handledByInputMethod = keydown->DefaultHandled();
+
+    if (handledByInputMethod)
+    {
+      keyDownEvent.SetWindowsVirtualKeyCode(CompositionEventKeyCode);
+      keydown = dom::KeyboardEvent::Create(keyDownEvent, _frame.Window());
+      keydown->SetTarget(element);
+      keydown->SetIsDefaultEventHandlerIgnored();
+    }
+
+    // FIXME: Accessibility stopping the propagation (accessibilityPreventsEventPropagation), with
+    // accessibility.
     (void)dom::EventDispatcher::DispatchToTarget(*keydown, element.get());
+    if (handledByInputMethod)
+    {
+      _frame.Document()->GetEditor().DidDispatchInputMethodKeydown(*keydown);
+      return true;
+    }
 
     // FIXME: Also when the focused frame changed, once there are subframes; the backward compatibility mode,
     // which dispatches a cancelled keypress anyway.
@@ -1056,8 +1082,13 @@ namespace krys::boo
     {
       return keydownResult;
     }
-    Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent);
-    // FIXME: A composing keypress goes to the editor (handleKeyboardEvent), with input methods.
+    Ref<dom::KeyboardEvent> keypress = dom::KeyboardEvent::Create(keyPressEvent, _frame.Window());
+    if (keypress->IsComposing())
+    {
+      keypress->SetTarget(element);
+      (void)_frame.Document()->GetEditor().HandleKeyboardEvent(*keypress);
+      return keydownResult;
+    }
     (void)dom::EventDispatcher::DispatchToTarget(*keypress, element.get());
 
     return keydownResult || keypress->DefaultPrevented() || keypress->DefaultHandled()

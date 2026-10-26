@@ -2,8 +2,12 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/DOMRectReadOnly.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
@@ -182,6 +186,40 @@ namespace krys::ui::tests
                                             boo::Affinity::Downstream);
                 view.UpdateRendering();
               });
+  }
+
+  /// @brief Composes "kanji henkan" at the end of the scene's #field with @p underlines.
+  void Compose(View &view, const List<boo::CompositionUnderline> &underlines)
+  {
+    auto &document = view.Document();
+    auto &field = Downcast<boo::html::HTMLElement>(*document.GetElementById(u8"field"));
+    field.Focus();
+    auto &text = Downcast<boo::dom::Text>(*field.FirstChild());
+    document.Selection().MoveTo(
+      boo::dom::MakeContainerOffsetPosition(ShareRefPtr(&text), static_cast<uint32>(text.Length())),
+      boo::Affinity::Downstream);
+    document.GetEditor().SetComposition(u8"kanji henkan", underlines, 12, 12);
+    view.UpdateRendering();
+  }
+
+  TEST_CASE("Golden: composition", "[UI][GPU][Golden]")
+  {
+    // Chrome's golden is only reported: a page can't compose text, so it has none.
+    using boo::CompositionUnderlineColor;
+    CheckPage("composition", 360u, 120u, true,
+              [](View &view)
+              {
+                Compose(view,
+                        {{0, 5, CompositionUnderlineColor::TextColor, {}, false},
+                         {5, 9, CompositionUnderlineColor::TextColor, {}, true},
+                         {9, 12, CompositionUnderlineColor::GivenColor, boo::Color(boo::Color::red), false}});
+              });
+  }
+
+  TEST_CASE("Golden: composition fill", "[UI][GPU][Golden]")
+  {
+    // Without underlines, the composition is filled. Chrome's golden is only reported (see above).
+    CheckPage("composition-fill", 360u, 120u, true, [](View &view) { Compose(view, {}); });
   }
 
   TEST_CASE("Golden: decorations", "[UI][GPU][Golden]")

@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 
@@ -32,6 +33,20 @@ namespace krys::pal::win32
     };
 
     mutable Maybe<PointerLock> _pointerLock;
+    /// @brief The keys down, by virtual key code, to tell presses from repeats.
+    mutable HashSet<WPARAM> _pressedKeys;
+
+    bool _textInputEnabled {false};
+    Maybe<TextInputRect> _textInputRect;
+    /// @brief Whether the input method is composing, as last reported; and whether the text it composes, as
+    /// last reported, is empty (so an ended composition can be reported as emptied first).
+    mutable bool _composing {false};
+    mutable bool _compositionEmpty {true};
+    /// @brief The first half of a surrogate pair that came as a character without a key press, until its
+    /// second half comes.
+    mutable wchar_t _highSurrogate {0};
+    /// @brief Whether the window has made the system caret, for the input method's windows.
+    mutable bool _hasCaret {false};
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -62,6 +77,16 @@ namespace krys::pal::win32
 
     KRYS_NODISCARD bool IsPointerLocked() const noexcept override;
 
+    void SetTextInputEnabled(bool enabled) noexcept override;
+
+    KRYS_NODISCARD bool IsTextInputEnabled() const noexcept override;
+
+    void SetTextInputRect(const TextInputRect &rect) noexcept override;
+
+    void CompleteComposition() noexcept override;
+
+    void CancelComposition() noexcept override;
+
     LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
@@ -78,5 +103,18 @@ namespace krys::pal::win32
     void ConfinePointer() const noexcept;
     /// @brief Unlocks the pointer, putting the cursor back where it was.
     void ReleasePointerLock() const noexcept;
+    /// @brief Reports a key press, with the characters the system translated it to.
+    void HandleKeyDown(UINT message, WPARAM keyCode, LPARAM lParam) const noexcept;
+    /// @brief Reports a character that came without a key press.
+    void HandleCharacter(wchar_t character) const noexcept;
+    /// @brief Reports the input method's composition changing, as @p changes (`GCS_*` flags) say.
+    void HandleComposition(LPARAM changes) const noexcept;
+    /// @brief Reports a change to the composition, if the host takes them.
+    void ReportComposition(const CompositionInput &input) const noexcept;
+    /// @brief Places the input method's windows by the text input rect, and the system caret (which some
+    /// input methods and accessibility tools follow) at it.
+    void PlaceInputMethodWindows() const noexcept;
+    /// @brief Destroys the system caret, if the window made it.
+    void DestroyCaret() const noexcept;
   };
 }

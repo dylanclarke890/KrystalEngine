@@ -893,6 +893,11 @@ namespace krys::boo::html
     return false;
   }
 
+  bool InputType::ShouldUseInputMethod() const noexcept
+  {
+    return false;
+  }
+
   bool InputType::MatchesIndeterminatePseudoClass() const noexcept
   {
     return false;

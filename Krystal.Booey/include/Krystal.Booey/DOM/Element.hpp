@@ -782,6 +782,10 @@ namespace krys::boo::dom
       return false;
     }
 
+    /// @brief Whether the element takes text from the host's input method while it's focused: it's editable,
+    /// or a text field (not a password field).
+    KRYS_NODISCARD virtual bool ShouldUseInputMethod() noexcept;
+
     /// @brief Whether the element's style is resolved by `ResolveCustomStyle`.
     KRYS_NODISCARD bool HasCustomStyleResolveCallbacks() const noexcept
     {

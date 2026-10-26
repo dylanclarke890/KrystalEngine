@@ -117,6 +117,15 @@ tr:hover td { text-decoration: underline; }
   color: #ffffff; font-size: 12px; white-space: pre-wrap; }
 #rumble { padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5; color: #ffffff; }
 
+/* Input methods: the fields to type into, and the log of their events. */
+.text-input .card { height: auto; min-width: 0; }
+.ime-field { display: block; width: 100%; box-sizing: border-box; margin: 0 0 8px; padding: 6px 8px;
+  border: 1px solid #c3cad8; border-radius: 6px; background: #ffffff; font: inherit; }
+textarea.ime-field { height: 60px; resize: vertical; }
+.ime-log { min-height: 160px; margin: 0 0 8px; padding: 8px; border-radius: 12px; background: #1a2240;
+  color: #ffffff; font-size: 12px; white-space: pre-wrap; }
+#ime-clear { padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5; color: #ffffff; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

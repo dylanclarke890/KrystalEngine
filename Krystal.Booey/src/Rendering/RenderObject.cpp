@@ -3,6 +3,8 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/SimpleRange.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
@@ -25,6 +27,7 @@
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTextControl.hpp"
@@ -1037,6 +1040,33 @@ namespace krys::boo
   {
     return HasLayer()
            && static_cast<const RenderLayerModelObject &>(*this).Layer()->ParticipatesInPreserve3D();
+  }
+
+  List<FloatQuad> RenderObject::AbsoluteTextQuads(const dom::SimpleRange &range,
+                                                  EnumSet<BoundingRectBehavior> behavior) noexcept
+  {
+    List<FloatQuad> quads;
+    for (auto &node : dom::IntersectingNodes(range))
+    {
+      auto *renderer = node.Renderer();
+      if (!renderer)
+      {
+        continue;
+      }
+      if (auto *lineBreakRenderer = DynamicDowncast<RenderLineBreak>(*renderer);
+          lineBreakRenderer && lineBreakRenderer->IsBR())
+      {
+        lineBreakRenderer->AbsoluteQuads(quads);
+      }
+      else if (auto *renderText = DynamicDowncast<RenderText>(*renderer))
+      {
+        auto offsetRange = dom::CharacterDataOffsetRange(range, node);
+        auto textQuads = renderText->AbsoluteQuadsForRange(static_cast<uint32>(offsetRange.Start),
+                                                           static_cast<uint32>(offsetRange.End), behavior);
+        quads.insert(quads.end(), textQuads.begin(), textQuads.end());
+      }
+    }
+    return quads;
   }
 
   IntRect RenderObject::AbsoluteBoundingBoxRect(bool useTransforms, bool *wasFixed) const noexcept

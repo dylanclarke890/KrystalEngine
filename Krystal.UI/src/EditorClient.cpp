@@ -1,9 +1,13 @@
 ﻿#include "Krystal.UI/EditorClient.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include <array>
 
@@ -202,6 +206,68 @@ namespace krys::ui
     }
 
     return node->NodeDocument().GetEditor().InsertText(keyEvent->Text(), &event);
+  }
+
+  void EditorClient::RespondToChangedSelection(boo::LocalFrame *frame) noexcept
+  {
+    if (!frame || !frame->Document())
+    {
+      return;
+    }
+
+    // Abandon the current inline input session if selection changed for any other reason but an input method
+    // direct action.
+    // FIXME: Many changes that affect composition node do not go through RespondToChangedSelection(). We need
+    // to do something when DOM manipulation affects the composition, because otherwise input method's idea
+    // about it will be different from Editor's.
+    // FIXME: We can't cancel composition when selection changes to NoSelection, but we probably should.
+    auto &document = *frame->Document();
+    auto &editor = document.GetEditor();
+    if (editor.HasComposition() && !editor.IgnoreSelectionChanges() && !document.Selection().IsNone())
+    {
+      editor.CancelComposition();
+      DiscardedComposition(document);
+    }
+  }
+
+  void EditorClient::DiscardedComposition(const boo::dom::Document &) noexcept
+  {
+    if (_discardedCompositionHandler)
+    {
+      _discardedCompositionHandler();
+    }
+  }
+
+  void EditorClient::HandleInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept
+  {
+    auto *platformEvent = event.UnderlyingPlatformEvent();
+    if (platformEvent && platformEvent->HandledByInputMethod())
+    {
+      event.SetDefaultHandled();
+    }
+  }
+
+  void EditorClient::DidDispatchInputMethodKeydown(boo::dom::KeyboardEvent &event) noexcept
+  {
+    auto *platformEvent = event.UnderlyingPlatformEvent();
+    krys_debug_assert(event.Target());
+    auto &editor = Downcast<boo::dom::Node>(*event.Target()).NodeDocument().GetEditor();
+
+    if (const auto &underlines = platformEvent->PreeditUnderlines())
+    {
+      auto rangeStart = static_cast<uint32>(platformEvent->PreeditSelectionRangeStart().value_or(0));
+      auto rangeLength = static_cast<uint32>(platformEvent->PreeditSelectionRangeLength().value_or(0));
+      editor.SetComposition(platformEvent->Text(), *underlines, rangeStart, rangeStart + rangeLength);
+    }
+    else
+    {
+      editor.ConfirmComposition(platformEvent->Text());
+    }
+  }
+
+  void EditorClient::SetInputMethodState(boo::dom::Element *element) noexcept
+  {
+    _acceptsTextInput = element && element->ShouldUseInputMethod();
   }
 
   void EditorClient::RegisterUndoStep(boo::UndoStep &step) noexcept

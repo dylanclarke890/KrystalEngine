@@ -465,6 +465,11 @@ namespace krys::boo::html
     return true;
   }
 
+  bool TextFieldInputType::ShouldUseInputMethod() const noexcept
+  {
+    return true;
+  }
+
   dom::DOMString TextFieldInputType::SanitizeValue(dom::DOMStringView proposedValue) const noexcept
   {
     if (std::ranges::none_of(proposedValue, IsHTMLLineBreak)) KRYS_LIKELY

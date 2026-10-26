@@ -217,6 +217,64 @@ namespace krys::ui::input
                                       isSystemKey, ToBooey(modifiers), MonotonicTime::Now());
   }
 
+  namespace
+  {
+    /// @brief A key press the input method handled, with what it made of it.
+    class InputMethodPlatformKeyboardEvent : public boo::PlatformKeyboardEvent
+    {
+    public:
+      InputMethodPlatformKeyboardEvent(utf8_string text, Maybe<List<boo::CompositionUnderline>> underlines,
+                                       uint32 selectionStart, uint32 selectionLength) noexcept
+          : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Unidentified", u8"Unidentified", u8"U+0000",
+                                  boo::vk::Process, false, false, false, {}, MonotonicTime::Now())
+      {
+        _handledByInputMethod = true;
+        if (underlines)
+        {
+          _preeditSelectionRangeStart = selectionStart;
+          _preeditSelectionRangeLength = selectionLength;
+        }
+        _preeditUnderlines = krys::move(underlines);
+      }
+    };
+  }
+
+  boo::PlatformKeyboardEvent InputMethodKeyboardEvent(utf8_string text,
+                                                      Maybe<List<boo::CompositionUnderline>> underlines,
+                                                      uint32 selectionStart, uint32 selectionLength) noexcept
+  {
+    return InputMethodPlatformKeyboardEvent(krys::move(text), krys::move(underlines), selectionStart,
+                                            selectionLength);
+  }
+
+  boo::PlatformKeyboardEvent TextInputEvent(utf8_string text) noexcept
+  {
+    auto keyIdentifier = KeyIdentifierForText(text);
+    return boo::PlatformKeyboardEvent(boo::PlatformEvent::Type::Char, text, text, text, {},
+                                      krys::move(keyIdentifier), 0, false, false, false, {},
+                                      MonotonicTime::Now());
+  }
+
+  List<boo::CompositionUnderline> CompositionUnderlines(utf8_stringview text,
+                                                        Span<const pal::CompositionClause> clauses) noexcept
+  {
+    List<boo::CompositionUnderline> underlines;
+    for (const auto &clause : clauses)
+    {
+      underlines.push_back({.StartOffset = clause.Start,
+                            .EndOffset = clause.End,
+                            .UnderlineColor = boo::CompositionUnderlineColor::TextColor,
+                            .Thick = clause.Target});
+    }
+    if (underlines.empty() && !text.empty())
+    {
+      underlines.push_back({.StartOffset = 0,
+                            .EndOffset = static_cast<uint32>(text.size()),
+                            .UnderlineColor = boo::CompositionUnderlineColor::TextColor});
+    }
+    return underlines;
+  }
+
   pal::CursorShape ToCursorShape(boo::Cursor cursor) noexcept
   {
     using Type = boo::Cursor::Type;

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
@@ -19,6 +20,7 @@ namespace krys::boo::dom
   class Event;
   class KeyboardEvent;
   class StaticRange;
+  class Text;
   class TextEvent;
   enum class TextEventInputType : uint8;
   struct SimpleRange;
@@ -30,6 +32,7 @@ namespace krys::boo
   class EditCommandComposition;
   class EditorClient;
   class EditorInternalCommand;
+  class IntRect;
   class LocalFrame;
   class Pasteboard;
   class VisibleSelection;
@@ -91,10 +94,10 @@ namespace krys::boo
   };
 
   /// @brief A document's editor: the commands that act on its selection (moving and extending it, selecting
-  /// and copying), the keys bound to them, and the clipboard.
+  /// and copying), the keys bound to them, the clipboard, and the text an input method composes.
   // FIXME: Editing commands (typing, deleting, cutting, pasting, styling, undo and redo), the typing style,
-  // spelling and grammar, text checking, input methods, the mark and kill ring, find, and the editor's
-  // responses to selection and content changes, with editing commands, form controls and text input.
+  // spelling and grammar, text checking, the mark and kill ring, find, and the editor's responses to
+  // selection and content changes, with editing commands, form controls and text input.
   class Editor
   {
     KRYS_NON_COPY_MOVABLE(Editor);
@@ -106,9 +109,21 @@ namespace krys::boo
     bool _copyingFromMenuOrKeyBinding {false};
     bool _pastingFromMenuOrKeyBinding {false};
     bool _overwriteModeEnabled {false};
+    bool _ignoreSelectionChanges {false};
+
+    RefPtr<dom::Text> _compositionNode;
+    uint32 _compositionStart {0};
+    uint32 _compositionEnd {0};
+    List<CompositionUnderline> _customCompositionUnderlines;
 
   public:
     enum class FromMenuOrKeyBinding : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class RevealSelection : bool
     {
       No,
       Yes
@@ -154,6 +169,10 @@ namespace krys::boo
     /// @brief Lets the editor client run the command @p event is bound to.
     /// @return Whether it did, so the event's default action is done.
     bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept;
+    /// @brief Lets the editor client mark a `keydown` an input method handled, before it's dispatched.
+    void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
+    /// @brief Lets the editor client apply what an input method made of a key, after its `keydown`.
+    void DidDispatchInputMethodKeydown(dom::KeyboardEvent &event) noexcept;
 
     using PasteOption = EditorPasteOption;
 
@@ -290,8 +309,86 @@ namespace krys::boo
     }
 
     void RespondToChangedContents(const VisibleSelection &endingSelection) noexcept;
+    /// @brief Tells the editor client the selection changed.
+    void RespondToChangedSelection(const VisibleSelection &oldSelection,
+                                   EnumSet<FrameSelectionSetSelectionOption> options) noexcept;
+
+    /// @brief Inserts the text an input method confirmed, firing `textInput` first.
+    bool InsertTextForConfirmedComposition(utf8_stringview text) noexcept;
+
+    // International text input composition.
+    KRYS_NODISCARD bool HasComposition() const noexcept;
+    /// @brief Sets the text an input method composes, replacing the composition (or else the selection) with
+    /// @p text, underlined by @p underlines, with @p selectionStart to @p selectionEnd selected (offsets in
+    /// @p text's code units); empty @p text cancels the composition. Fires `compositionstart` (with the text
+    /// it replaces) when one starts, `compositionupdate` while it has text, and `compositionend` when it's
+    /// cancelled.
+    // FIXME: The host's custom highlights and annotations (Cocoa's inline predictions).
+    void SetComposition(utf8_stringview text, const List<CompositionUnderline> &underlines,
+                        uint32 selectionStart, uint32 selectionEnd) noexcept;
+    /// @brief Confirms the composition as it is: its text stays, and `compositionend` fires.
+    void ConfirmComposition() noexcept;
+    /// @brief Confirms the composition as @p text, or inserts @p text in place of the selection if there's
+    /// none.
+    void ConfirmComposition(utf8_stringview text) noexcept;
+    /// @brief Confirms the composition, or cancels it if the selection has left it, and tells the client.
+    void ConfirmOrCancelCompositionAndNotifyClient() noexcept;
+    /// @brief Drops the composition, leaving its text as it is, and `compositionend` fires with no data (to
+    /// remove the text, set an empty composition).
+    void CancelComposition() noexcept;
+    /// @brief Cancels the composition if the selection isn't within it.
+    /// @return Whether it did.
+    bool CancelCompositionIfSelectionIsInvalid() noexcept;
+    /// @brief The composition's text, or null if there's none.
+    KRYS_NODISCARD Maybe<dom::SimpleRange> CompositionRange() const noexcept;
+    /// @brief The selection within the composition, relative to its start.
+    /// @return Whether the selection is within the composition.
+    bool GetCompositionSelection(uint32 &selectionStart, uint32 &selectionEnd) const noexcept;
+
+    /// @brief The text node the composition is in, for painting it.
+    KRYS_NODISCARD dom::Text *CompositionNode() const noexcept;
+    KRYS_NODISCARD uint32 CompositionStart() const noexcept
+    {
+      return _compositionStart;
+    }
+    KRYS_NODISCARD uint32 CompositionEnd() const noexcept
+    {
+      return _compositionEnd;
+    }
+    KRYS_NODISCARD bool CompositionUsesCustomUnderlines() const noexcept
+    {
+      return !_customCompositionUnderlines.empty();
+    }
+    /// @brief The composition's underlines, with offsets in its text node.
+    KRYS_NODISCARD const List<CompositionUnderline> &CustomCompositionUnderlines() const noexcept
+    {
+      return _customCompositionUnderlines;
+    }
+
+    /// @brief Ignores selection changes (they don't cancel the composition) until called with false.
+    void SetIgnoreSelectionChanges(
+      bool ignore, RevealSelection shouldRevealExistingSelection = RevealSelection::Yes) noexcept;
+    KRYS_NODISCARD bool IgnoreSelectionChanges() const noexcept
+    {
+      return _ignoreSelectionChanges;
+    }
+
+    /// @brief The first line's rect of @p range in absolute coordinates (the caret's, without its width, when
+    /// it's collapsed), for placing an input method's windows.
+    KRYS_NODISCARD IntRect FirstRectForRange(const dom::SimpleRange &range) const noexcept;
+
+    void CloseTyping() noexcept;
 
   private:
+    enum class SetCompositionMode : bool
+    {
+      ConfirmComposition,
+      CancelComposition
+    };
+
+    void SelectComposition() noexcept;
+    void SetComposition(utf8_stringview text, SetCompositionMode mode) noexcept;
+
     KRYS_NODISCARD utf8_string SelectedText(TextIteratorBehaviors behaviors) const noexcept;
 
     bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept;

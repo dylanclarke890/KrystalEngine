@@ -22,6 +22,20 @@ namespace krys::boo
 {
   class EditingStyle;
 
+  /// @brief A whitespace run rebalancing replaced in a text node. A no-break space is two bytes and a space
+  /// one, so the run's length can change while its characters stay as many.
+  struct WhitespaceRebalance
+  {
+    RefPtr<dom::Text> Node;
+    uint32 Offset {0};
+    utf8_string OldText;
+    utf8_string NewText;
+
+    /// @brief @p position moved across the replacement: after the run by the change in length, within it to
+    /// the same character.
+    KRYS_NODISCARD dom::Position Adjust(const dom::Position &position) const noexcept;
+  };
+
   enum class ApplyStylePropertyLevel : bool
   {
     Default,
@@ -198,8 +212,11 @@ namespace krys::boo
                             AllowPasswordEcho allowPasswordEcho = AllowPasswordEcho::Yes) noexcept;
     void MergeIdenticalElements(dom::Element &first, dom::Element &second) noexcept;
     void RebalanceWhitespace() noexcept;
-    void RebalanceWhitespaceAt(const dom::Position &position) noexcept;
-    void RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset, int32 endOffset) noexcept;
+    /// @return The run it replaced, if any, to move positions in its text node across.
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceAt(const dom::Position &position) noexcept;
+    /// @return The run it replaced, if any, to move positions in its text node across.
+    Maybe<WhitespaceRebalance> RebalanceWhitespaceOnTextSubstring(dom::Text &textNode, int32 startOffset,
+                                                                  int32 endOffset) noexcept;
     void PrepareWhitespaceAtPositionForSplit(dom::Position &position) noexcept;
     void ReplaceCollapsibleWhitespaceWithNonBreakingSpaceIfNeeded(
       const VisiblePosition &visiblePosition) noexcept;

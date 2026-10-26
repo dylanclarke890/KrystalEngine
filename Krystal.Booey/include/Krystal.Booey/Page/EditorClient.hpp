@@ -8,6 +8,7 @@
 
 namespace krys::boo::dom
 {
+  class Document;
   class Element;
   class KeyboardEvent;
 }
@@ -17,11 +18,10 @@ namespace krys::boo
   class LocalFrame;
   class UndoStep;
 
-  /// @brief What a page's editor asks of its host: the commands keys run, and whether selections and
-  /// clipboard access are allowed.
+  /// @brief What a page's editor asks of its host: the commands keys run, input methods, and whether
+  /// selections and clipboard access are allowed.
   // FIXME: The rest of the editor client: editing delegates (shouldBeginEditing, shouldInsertText,
-  // shouldApplyStyle and their notifications), spelling and grammar, text checking and input methods, with
-  // editing commands.
+  // shouldApplyStyle and their notifications), spelling and grammar, and text checking.
   class EditorClient
   {
     KRYS_NON_COPY_MOVABLE(EditorClient);
@@ -43,6 +43,26 @@ namespace krys::boo
     virtual bool HandleKeyboardEvent(dom::KeyboardEvent &event) noexcept = 0;
 
     virtual void RespondToChangedContents() noexcept = 0;
+    /// @brief Called after the selection changed (unless the change asked not to tell the editor's clients).
+    virtual void RespondToChangedSelection(LocalFrame *frame) noexcept = 0;
+    /// @brief Called when the page dropped the input method's composition (confirming or cancelling it), so
+    /// the host can tell the input method.
+    virtual void DiscardedComposition(const dom::Document &document) noexcept = 0;
+    /// @brief Called after the composition was set, confirmed or cancelled.
+    virtual void DidUpdateComposition() noexcept = 0;
+
+    /// @brief Called before a `keydown` is dispatched: marks it handled (its default handled) if an input
+    /// method handled the key, so it goes out with key code 229 and no `keypress`.
+    virtual void HandleInputMethodKeydown(dom::KeyboardEvent &event) noexcept = 0;
+    /// @brief Called after a `keydown` an input method handled was dispatched, to apply what it made of the
+    /// key: the composition, or the text it confirmed.
+    virtual void DidDispatchInputMethodKeydown(dom::KeyboardEvent &) noexcept
+    {
+    }
+
+    /// @brief Called as the focused element changes (@p element; null when nothing is), so the host can turn
+    /// its input method on for elements that use one (`Element::ShouldUseInputMethod()`) and off otherwise.
+    virtual void SetInputMethodState(dom::Element *element) noexcept = 0;
 
     /// @brief Whether deleting and pasting whole words adds and removes the spaces around them.
     KRYS_NODISCARD virtual bool SmartInsertDeleteEnabled() noexcept = 0;
@@ -99,6 +119,26 @@ namespace krys::boo
     }
 
     void RespondToChangedContents() noexcept final
+    {
+    }
+
+    void RespondToChangedSelection(LocalFrame *) noexcept final
+    {
+    }
+
+    void DiscardedComposition(const dom::Document &) noexcept final
+    {
+    }
+
+    void DidUpdateComposition() noexcept final
+    {
+    }
+
+    void HandleInputMethodKeydown(dom::KeyboardEvent &) noexcept final
+    {
+    }
+
+    void SetInputMethodState(dom::Element *) noexcept final
     {
     }
 

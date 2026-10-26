@@ -51,6 +51,7 @@ namespace krys::boo
     RefPtr<dom::Document> _document;
     EnumSet<TemporarySelectionOption> _options;
     Maybe<VisibleSelection> _selectionToRestore;
+    bool _wasIgnoringSelectionChanges {false};
 
   public:
     explicit TemporarySelectionChange(dom::Document &document,

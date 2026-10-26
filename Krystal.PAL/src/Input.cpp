@@ -152,6 +152,16 @@ namespace krys::pal
     _events->Enqueue(CreateUnique<KeyboardEvent>(window, key, state, modifiers, text));
   }
 
+  void Input::OnTextEvent(WindowHandle window, const utf8_string &text) noexcept
+  {
+    _events->Enqueue(CreateUnique<TextInputEvent>(window, text));
+  }
+
+  void Input::OnCompositionEvent(WindowHandle window, const CompositionInput &input) noexcept
+  {
+    _events->Enqueue(CreateUnique<CompositionInputEvent>(window, input));
+  }
+
   void Input::OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state,
                                  KeyModifiers modifiers) noexcept
   {

@@ -1,16 +1,21 @@
 ﻿#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include <utility>
 
 namespace krys::boo
 {
   TemporarySelectionChange::TemporarySelectionChange(dom::Document &document,
                                                      Maybe<VisibleSelection> temporarySelection,
                                                      EnumSet<TemporarySelectionOption> options) noexcept
-      : _document(ShareRefPtr(&document)), _options(options)
+      : _document(ShareRefPtr(&document)), _options(options),
+        _wasIgnoringSelectionChanges(document.GetEditor().IgnoreSelectionChanges())
   {
-    // FIXME: Ignoring selection changes (Editor::setIgnoreSelectionChanges), once the editor tells its client
-    // about them.
+    if (options.Contains(TemporarySelectionOption::IgnoreSelectionChanges))
+    {
+      document.GetEditor().SetIgnoreSelectionChanges(true);
+    }
 
     if (temporarySelection)
     {
@@ -21,7 +26,10 @@ namespace krys::boo
 
   void TemporarySelectionChange::Invalidate() noexcept
   {
-    _document = nullptr;
+    if (auto document = std::exchange(_document, nullptr))
+    {
+      document->GetEditor().SetIgnoreSelectionChanges(false, Editor::RevealSelection::No);
+    }
   }
 
   TemporarySelectionChange::~TemporarySelectionChange() noexcept
@@ -34,6 +42,14 @@ namespace krys::boo
     if (_selectionToRestore)
     {
       SetSelection(*_selectionToRestore, IsTemporarySelection::No);
+    }
+
+    if (_options.Contains(TemporarySelectionOption::IgnoreSelectionChanges))
+    {
+      auto revealSelection = _options.Contains(TemporarySelectionOption::RevealSelection)
+                               ? Editor::RevealSelection::Yes
+                               : Editor::RevealSelection::No;
+      _document->GetEditor().SetIgnoreSelectionChanges(_wasIgnoringSelectionChanges, revealSelection);
     }
   }
 

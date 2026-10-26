@@ -1,15 +1,20 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.PAL/TextInput.hpp"
 
 /// @brief Conversions between the platform layer's input and cursors and Booey's.
 namespace krys::ui::input
@@ -44,6 +49,22 @@ namespace krys::ui::input
                                                           pal::KeyModifiers modifiers,
                                                           const pal::KeyText &text, bool isAutoRepeat,
                                                           utf8_stringview releasedKeyValue = {}) noexcept;
+
+  /// @brief A key press the input method handled, carrying what it made: the text it composes, with
+  /// @p underlines (its clauses) and the selection in it from @p selectionStart for @p selectionLength, or,
+  /// without underlines, the text it committed. The page gets `keydown` with key code 229, then the
+  /// composition changes.
+  KRYS_NODISCARD boo::PlatformKeyboardEvent
+    InputMethodKeyboardEvent(utf8_string text, Maybe<List<boo::CompositionUnderline>> underlines,
+                             uint32 selectionStart = 0, uint32 selectionLength = 0) noexcept;
+
+  /// @brief Characters typed without a key press, as a `keypress` with them alone.
+  KRYS_NODISCARD boo::PlatformKeyboardEvent TextInputEvent(utf8_string text) noexcept;
+
+  /// @brief The underlines under the input method's @p clauses of @p text, in the text's colour, thick under
+  /// the clause being converted; one under all of it without clauses.
+  KRYS_NODISCARD List<boo::CompositionUnderline>
+    CompositionUnderlines(utf8_stringview text, Span<const pal::CompositionClause> clauses) noexcept;
 
   /// @brief A turn of the wheel at @p point by @p notchesX and @p notchesY (positive is away from the user,
   /// or to the right), scrolling @p settings' lines (or a page) per notch, at 100 pixels per three lines;

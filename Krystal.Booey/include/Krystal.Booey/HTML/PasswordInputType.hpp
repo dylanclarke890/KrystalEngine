@@ -25,5 +25,12 @@ namespace krys::boo::html
     {
       return false;
     }
+
+    /// @brief Input methods are disabled for the password field because otherwise anyone can access the
+    /// underlying password and display it in clear text.
+    KRYS_NODISCARD bool ShouldUseInputMethod() const noexcept final
+    {
+      return false;
+    }
   };
 }

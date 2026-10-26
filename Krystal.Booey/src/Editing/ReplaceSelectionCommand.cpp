@@ -2046,8 +2046,17 @@ namespace krys::boo
     if (start.IsNotNull() && !start.IsOrphan() && end.IsNotNull() && !end.IsOrphan())
     {
       // FIXME (11475): Remove this and require that the creator of the fragment to use nbsps.
-      RebalanceWhitespaceAt(start);
-      RebalanceWhitespaceAt(end);
+      // A rebalanced run can change length (a no-break space is two bytes), so the positions move across it.
+      if (auto rebalance = RebalanceWhitespaceAt(start))
+      {
+        start = rebalance->Adjust(start);
+        end = rebalance->Adjust(end);
+      }
+      if (auto rebalance = RebalanceWhitespaceAt(end))
+      {
+        start = rebalance->Adjust(start);
+        end = rebalance->Adjust(end);
+      }
 
       if (_matchStyle)
       {

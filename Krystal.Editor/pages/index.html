@@ -647,6 +647,25 @@
     </div>
   </div>
 
+  <div class="row text-input">
+    <!-- Input methods: type into the fields with one (Japanese, Chinese or Korean, say); the text being
+         composed is underlined, the clause being converted thickly, and the input method's candidates show by
+         it. The log shows the composition events and the beforeinput and input events, with whether each is
+         part of a composition (isComposing). -->
+    <div class="card" id="ime-fields">
+      <h2>Input methods</h2>
+      <p>Switch to an input method (Win+Space) and type here; Win+. opens the emoji panel.</p>
+      <input class="ime-field" id="ime-input" placeholder="A text field">
+      <textarea class="ime-field" id="ime-textarea" placeholder="A text area"></textarea>
+      <div class="ime-field" id="ime-editable" contenteditable>Editable content</div>
+    </div>
+    <div class="card">
+      <h2>Composition events</h2>
+      <pre class="ime-log" id="ime-log"></pre>
+      <button id="ime-clear">Clear</button>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

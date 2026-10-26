@@ -1394,7 +1394,10 @@ namespace krys::boo
       InsertNodeAt(*CreateHTMLElement(GetDocument(), u8"br"), _endingPosition);
     }
 
-    RebalanceWhitespaceAt(_endingPosition);
+    if (auto rebalance = RebalanceWhitespaceAt(_endingPosition))
+    {
+      _endingPosition = rebalance->Adjust(_endingPosition);
+    }
 
     CalculateTypingStyleAfterDelete();
 

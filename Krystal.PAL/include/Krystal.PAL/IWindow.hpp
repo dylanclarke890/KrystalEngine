@@ -11,6 +11,7 @@
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 #include "Krystal.PAL/Pointer.hpp"
+#include "Krystal.PAL/TextInput.hpp"
 
 namespace krys::pal
 {
@@ -70,6 +71,11 @@ namespace krys::pal
     /// @brief A pen's or a touch's input; the mouse comes as the mouse handlers.
     using PointerHandler = Func<void(WindowHandle, const PointerInput &)>;
     using KeyHandler = Func<void(WindowHandle, Key, KeyState, KeyModifiers, const KeyText &)>;
+    /// @brief Characters typed without a key press (the emoji panel, Alt and a keypad code, an input
+    /// method's result outside a composition), without control characters.
+    using TextHandler = Func<void(WindowHandle, const utf8_string &)>;
+    /// @brief A change to the text an input method composes.
+    using CompositionHandler = Func<void(WindowHandle, const CompositionInput &)>;
     using CloseHandler = Func<void(WindowHandle)>;
     using ResizeHandler = Func<void(WindowHandle, int, int)>;
     using MinimiseHandler = Func<void(WindowHandle)>;
@@ -85,6 +91,10 @@ namespace krys::pal
     /// @brief Called for pens and touches; without it, the system turns them into mouse input.
     PointerHandler OnPointer = nullptr;
     KeyHandler OnKey = nullptr;
+    TextHandler OnText = nullptr;
+    /// @brief Called as the input method composes text, which the host shows; without it, the input method
+    /// shows its own composition window, and its result comes as `OnText`.
+    CompositionHandler OnComposition = nullptr;
     CloseHandler OnClose = nullptr;
     ResizeHandler OnResize = nullptr;
     MinimiseHandler OnMinimise = nullptr;
@@ -131,5 +141,23 @@ namespace krys::pal
     virtual bool SetPointerLocked(bool locked) noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsPointerLocked() const noexcept = 0;
+
+    /// @brief Turns the input method on (@p enabled), for when what has the focus takes text, or off, which
+    /// cancels its composition. It starts off, so key presses go to the window as they are.
+    virtual void SetTextInputEnabled(bool enabled) noexcept = 0;
+
+    KRYS_NODISCARD virtual bool IsTextInputEnabled() const noexcept = 0;
+
+    /// @brief Sets where the text being composed is (or the caret, without a composition), so the input
+    /// method's windows are placed by it and keep clear of it.
+    virtual void SetTextInputRect(const TextInputRect &rect) noexcept = 0;
+
+    /// @brief Asks the input method to commit its composition, as the host's focus moved: the result comes
+    /// as `OnComposition`, usually before this returns.
+    virtual void CompleteComposition() noexcept = 0;
+
+    /// @brief Asks the input method to drop its composition, as the host dropped its own: nothing more is
+    /// reported for it.
+    virtual void CancelComposition() noexcept = 0;
   };
 }

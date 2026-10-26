@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -1265,6 +1267,11 @@ namespace krys::boo::html
           navigation->SetFocusChanged(FocusDidChange::Yes);
         }
       }
+    }
+
+    if (auto *editorClient = document.GetEditor().Client())
+    {
+      editorClient->SetInputMethodState(element);
     }
   }
 }
