@@ -223,6 +223,12 @@ namespace krys::boo::html
     return false;
   }
 
+  dom::DOMString InputType::DisplayString() const noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
   bool InputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

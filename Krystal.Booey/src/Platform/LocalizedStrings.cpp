@@ -21,6 +21,31 @@ namespace krys::boo
     }
   }
 
+  utf8_string FileButtonChooseFileLabel() noexcept
+  {
+    return u8"Choose File";
+  }
+
+  utf8_string FileButtonChooseMultipleFilesLabel() noexcept
+  {
+    return u8"Choose Files";
+  }
+
+  utf8_string FileButtonNoFileSelectedLabel() noexcept
+  {
+    return u8"no file selected";
+  }
+
+  utf8_string FileButtonNoFilesSelectedLabel() noexcept
+  {
+    return u8"no files selected";
+  }
+
+  utf8_string MultipleFileUploadText(uint32 numberOfFiles) noexcept
+  {
+    return Concatenate(Number(static_cast<int>(numberOfFiles)), u8" files");
+  }
+
   utf8_string WeekFormatInLDML() noexcept
   {
     return u8"'Week' ww, yyyy";

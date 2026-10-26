@@ -1,10 +1,16 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/DataTransfer.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
+#include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+#include "Krystal.Editor/PageDragAndDrop.hpp"
+#include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
@@ -392,5 +398,147 @@ namespace krys::ui::tests
     CHECK(at(50, 20) == Array<uint8, 4> {0, 255, 0, 255});
 
     view.MouseReleased({200, 150}, pal::MouseButton::Left);
+  }
+
+  TEST_CASE("View: the editor page's drag and drop", "[UI][Drag]")
+  {
+    boo::MemoryCache::Singleton().EvictResources();
+    View view({1'200, 600});
+    view.SetNavigationHandler([](const NavigationRequest &) { return NavigationPolicy::Allow; });
+    auto page = gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html";
+    REQUIRE(view.LoadFile(page).has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes it once the page has loaded.
+    editor::PageDragAndDrop dragAndDrop(document);
+    auto byId = [&](utf8_stringview id)
+    {
+      auto element = document.GetElementById(id);
+      REQUIRE(element);
+      return element;
+    };
+    auto textOf = [&](utf8_stringview id)
+    {
+      return Narrow(byId(id)->TextContent().value_or(u8""));
+    };
+    auto children = [&](utf8_stringview id)
+    {
+      std::string ids;
+      for (RefPtr<boo::dom::Element> child = byId(id)->FirstElementChild(); child;
+           child = child->NextElementSibling())
+      {
+        ids += (ids.empty() ? "" : " ") + Narrow(child->GetAttribute(u8"id").value_or(u8""));
+      }
+      return ids;
+    };
+
+    // The sample at the top of the view.
+    auto sampleRect = byId(u8"drag-and-drop")->GetBoundingClientRect();
+    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(sampleRect->Top()) - 20));
+    view.UpdateRendering();
+    // A point in @p id's box, @p fraction of the way down it.
+    auto at = [&](utf8_stringview id, double fraction = 0.5)
+    {
+      auto rect = byId(id)->GetBoundingClientRect();
+      return boo::IntPoint(static_cast<int32>(rect->Left() + rect->Width() / 2),
+                           static_cast<int32>(rect->Top() + rect->Height() * fraction));
+    };
+    auto drag = [&](boo::IntPoint from, boo::IntPoint to)
+    {
+      view.MousePressed(from, pal::MouseButton::Left);
+      view.MouseMoved(from + boo::IntSize(0, 10));
+      REQUIRE(view.IsDragging());
+      view.MouseMoved(to);
+      view.MouseMoved(to + boo::IntSize(1, 0));
+      view.MouseReleased(to + boo::IntSize(1, 0), pal::MouseButton::Left);
+      CHECK_FALSE(view.IsDragging());
+    };
+    auto systemDrag = [&](boo::IntPoint point, pal::DragContent content)
+    {
+      pal::DragInput input;
+      input.Action = pal::DragAction::Entered;
+      input.ClientX = static_cast<float>(point.X());
+      input.ClientY = static_cast<float>(point.Y());
+      input.AllowedOperations = {pal::DropOperation::Copy, pal::DropOperation::Move,
+                                 pal::DropOperation::Link};
+      input.Content = krys::move(content);
+      auto entered = view.SystemDragInput(point, input);
+      input.Action = pal::DragAction::Dropped;
+      input.Content = {};
+      CHECK(view.SystemDragInput(point, input) == entered);
+      return entered;
+    };
+    CHECK(textOf(u8"drag-log").starts_with("Drag a card"));
+    CHECK(textOf(u8"drop-readout").starts_with("Drop text, links or files here"));
+    CHECK(children(u8"drag-todo") == "card-grind card-heat card-bloom");
+    CHECK(children(u8"drag-done") == "card-weigh");
+
+    SECTION("Cards move between the lists, and within them")
+    {
+      // Dropped on the lower half of a card, a card goes after it.
+      drag(at(u8"card-grind"), at(u8"card-weigh", 0.75));
+      CHECK(children(u8"drag-todo") == "card-heat card-bloom");
+      CHECK(children(u8"drag-done") == "card-weigh card-grind");
+      // The log doesn't show the moves' dragover events. As upstream, the drop's effect isn't the one chosen,
+      // and the source can't read its data once the drag has ended.
+      CHECK(textOf(u8"drag-log")
+            == "card-grind: dragstart [text/plain] move/none\n"
+               "card-grind: dragenter [text/plain] move/move\n"
+               "card-weigh: dragenter [text/plain] move/move\n"
+               "card-grind: dragleave [text/plain] move/none\n"
+               "card-weigh: drop [text/plain] move/none\n"
+               "card-grind: dragend [] move/move");
+      CHECK_FALSE(byId(u8"card-grind")->ClassList().Contains(u8"dragging"));
+      CHECK_FALSE(byId(u8"drag-done")->ClassList().Contains(u8"over"));
+
+      // On the upper half, before it; on the list below the cards, at its end.
+      drag(at(u8"card-bloom"), at(u8"card-heat", 0.25));
+      CHECK(children(u8"drag-todo") == "card-bloom card-heat");
+      drag(at(u8"card-weigh"), at(u8"drag-todo", 0.95));
+      CHECK(children(u8"drag-todo") == "card-bloom card-heat card-weigh");
+      CHECK(children(u8"drag-done") == "card-grind");
+
+      // Elsewhere, a card's drag isn't taken. (The card is where the last press was, which a press at the same
+      // point would make a double click.)
+      drag(at(u8"card-grind", 0.25), at(u8"drag-log"));
+      CHECK(children(u8"drag-done") == "card-grind");
+      CHECK(textOf(u8"drag-log").ends_with("card-grind: dragend [] move/none"));
+    }
+
+    SECTION("The drop zone lists what's dropped on it")
+    {
+      // A card only moves, and the zone doesn't take it from its list.
+      drag(at(u8"card-heat"), at(u8"drop-zone"));
+      CHECK(textOf(u8"drop-readout") == "Text: “Heat the water”");
+      CHECK(children(u8"drag-todo") == "card-grind card-heat card-bloom");
+      CHECK_FALSE(byId(u8"drop-zone")->ClassList().Contains(u8"over"));
+
+      // From another application, the zone takes a copy.
+      pal::DragContent link;
+      link.Text = u8"a link";
+      link.URL = u8"https://example.com/";
+      CHECK(systemDrag(at(u8"drop-zone"), krys::move(link)) == pal::DropOperation::Copy);
+      CHECK(textOf(u8"drop-readout") == "Text: “a link”\nURL: https://example.com/");
+      CHECK(textOf(u8"drag-log").ends_with("drop-zone: drop [text/plain text/html text/uri-list] all/none"));
+
+      // A drag carrying files only shows the page its files, as upstream.
+      pal::DragContent files;
+      files.Text = u8"ignored";
+      files.Files = {utf8_string(reinterpret_cast<const char8_t *>(page.generic_string().c_str()))};
+      CHECK(systemDrag(at(u8"drop-zone"), krys::move(files)) == pal::DropOperation::Copy);
+      CHECK(textOf(u8"drop-readout").starts_with("File: index.html ("));
+      CHECK(textOf(u8"drop-readout").ends_with(" bytes, text/html)"));
+    }
+
+    SECTION("The file input takes files dropped on it")
+    {
+      pal::DragContent content;
+      content.Files = {utf8_string(reinterpret_cast<const char8_t *>(page.generic_string().c_str()))};
+      CHECK(systemDrag(at(u8"drop-files"), krys::move(content)) == pal::DropOperation::Copy);
+      CHECK(textOf(u8"drag-log").ends_with("input: change, 1 file: index.html"));
+
+      Downcast<boo::html::HTMLElement>(*byId(u8"drag-clear")).Click();
+      CHECK(textOf(u8"drag-log").starts_with("Drag a card"));
+    }
   }
 }

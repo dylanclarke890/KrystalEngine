@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/Controls/ButtonPart.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
+#include "Krystal.Booey/Graphics/StringTruncator.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
@@ -36,6 +38,7 @@
 #include "Krystal.Booey/HTML/Shadow/SliderThumbElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/SpinButtonElement.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
+#include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -1945,6 +1948,41 @@ namespace krys::boo
 
     krys_debug_assert(false);
     return Color::transparentBlack;
+  }
+
+  utf8_string RenderTheme::FileListDefaultLabel(bool multipleFilesAllowed) const noexcept
+  {
+    if (multipleFilesAllowed)
+    {
+      return FileButtonNoFilesSelectedLabel();
+    }
+    return FileButtonNoFileSelectedLabel();
+  }
+
+  utf8_string RenderTheme::FileListNameForWidth(const FileList *fileList, const FontCascade &font,
+                                                int32 width, bool multipleFilesAllowed) const noexcept
+  {
+    if (width <= 0)
+    {
+      return {};
+    }
+
+    utf8_string string;
+    if (fileList->IsEmpty())
+    {
+      string = FileListDefaultLabel(multipleFilesAllowed);
+    }
+    else if (fileList->Length() == 1)
+    {
+      string = fileList->Item(0)->Name();
+    }
+    else
+    {
+      return StringTruncator::RightTruncate(MultipleFileUploadText(fileList->Length()),
+                                            static_cast<float>(width), font);
+    }
+
+    return StringTruncator::CenterTruncate(string, static_cast<float>(width), font);
   }
 
   Color RenderTheme::FocusRingColor(style::ColorOptions options) const noexcept

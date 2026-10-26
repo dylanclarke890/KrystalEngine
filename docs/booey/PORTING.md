@@ -89,6 +89,26 @@ Step B5c of observers (*B5 plan* in `docs/booey/ROADMAP.md`): an `<img loading=l
 - `LocalFrameView::ViewportContentsChanged`'s FIXME no longer lists intersection observers and lazy loading (neither is upstream's there); the visible viewport rect is left.
 Tests: `tests/HTML/LazyLoadImageObserver.cpp` (4 cases / 47 assertions: `loading`'s known values; images deferred and observed, painting nothing, the first in view loading on the first observation and the second on scrolling, with their `load` events; images in a scroller loading within a scrollport of its clip; changing `loading` to eager, an image already in the memory cache, no scripting, and removing the source). The whole Booey suite passes (2702 cases; 7 expected failures); Krystal.UI's 103 cases pass except the filters golden, off by 26 pixels on battery power.
 
+## File inputs drawn (B10f, 2026-10-26)
+
+Part B10f of drag and drop (*B10 plan* in `docs/booey/ROADMAP.md`): the sample's file input takes drops, but file inputs had no renderer of their own and laid out empty, so nothing could be dropped on one. The user chose to port the control (2026-10-26). Graph from `rendering/RenderFileUploadControl.cpp` (headers-only, following `rendering/` and `html/`): 62 files, all ported before. Read in full: `rendering/RenderFileUploadControl.h`, `.cpp`; `html/FileInputType.cpp`'s shadow tree, renderer, `disabledStateChanged`, `attributeChanged`, `displayString`, `icon` and `defaultToolTip`; `HTMLInputElement`'s `displayString`, `icon` and `setCanReceiveDroppedFiles`; `RenderTheme::fileListDefaultLabel` and `fileListNameForWidth`; `LocalizedStrings.cpp`'s file button strings and `multipleFileUploadText`.
+
+| WebKit | Verdict | Krystal | CMake | Notes |
+|---|---|---|---|---|
+| `rendering/RenderFileUploadControl.h`, `.cpp` | `port*` | `Rendering/RenderFileUploadControl.hpp`, `src/Rendering/RenderFileUploadControl.cpp` | on | tested. No file icon; see *Differences*. |
+| `html/FileInputType.h`, `.cpp` (shadow tree, renderer) | `port*` | `HTML/FileInputType.hpp`, `src/HTML/FileInputType.cpp` | on | tested. The button (`::file-selector-button`) and its label follow `multiple` and `disabled`. |
+| `html/HTMLInputElement.cpp`, `InputType.cpp` (`displayString`, `setCanReceiveDroppedFiles`) | `port` | `HTML/HTMLInputElement.hpp`, `InputType.hpp`, `src/...` | on | tested. A drag of files over the input updates the renderer, which marks the button active. |
+| `rendering/RenderTheme.cpp` (`fileListDefaultLabel`, `fileListNameForWidth`) | `port` | `Rendering/RenderTheme.hpp`, `src/Rendering/RenderTheme.cpp` | on | tested. |
+| `platform/LocalizedStrings.cpp` (file buttons, `multipleFileUploadText`) | `port` | `Platform/LocalizedStrings.hpp`, `src/Platform/LocalizedStrings.cpp` | on | English, as the other strings. |
+
+**Bugs fixed:** none.
+**Added (upstream API):** `RenderFileUploadControl` (`ButtonValue`, `FileTextValue`, `InputElement`) and `RenderObject::IsRenderFileUploadControl`; `FileInputType::CreateInputRenderer`, `CreateShadowSubtree`, `DisabledStateChanged`, `AttributeChanged` and `DisplayString`; `InputType::DisplayString`, `HTMLInputElement::DisplayString`; `RenderTheme::FileListDefaultLabel` and `FileListNameForWidth`; `FileButtonChooseFileLabel`, `FileButtonChooseMultipleFilesLabel`, `FileButtonNoFileSelectedLabel`, `FileButtonNoFilesSelectedLabel` and `MultipleFileUploadText`.
+**Differences:**
+- No file icon (`icon()`, `requestIcon`, `iconLoaded` and the Cocoa theme's `paintFileUploadIconDecorations`): the host's file icons come with its file picker, a FIXME, as do the chooser itself and the tooltip naming the files (`defaultToolTip`). The name has the room the icon would take.
+- The file name is drawn in logical order (`drawBidiText` is a FIXME in `GraphicsContext`).
+- The shadow tree's button is made without upstream's script-disallowed scopes, which Booey doesn't have.
+Tests: `Krystal.Booey.Tests/tests/Rendering/RenderFileUploadControl.cpp` (2 cases / 35 assertions: the layout (34 nominal characters, the button in the shadow tree), the button's part and labels, the name drawn after the button on its baseline, names cut to fit, how many files, the button following `multiple` and `disabled` and a drag of files, fixed and narrow widths). `tests/Page/DragController.cpp` drops files on a file input without giving it a size. 2790 cases pass.
+
 ## Dragging in from other applications (B10e, 2026-10-26)
 
 Part B10e of drag and drop (*B10 plan* in `docs/booey/ROADMAP.md`): drags from other applications over the window, in Krystal.PAL (an OLE drop target) and Krystal.UI (the page's drag events and drops), after upstream's GTK host for the page's side and the old Windows port for reading the data. Booey is unchanged: a drag from outside is a `DragData` over a `SelectionData`, as B10c's. Read in full: GTK 4's `DropTarget` (`accept`, `enter`, `update`, `leave`, `drop`, `didPerformAction`) and `GtkUtilities.cpp`'s drag operations (`gdkDragActionToDragOperation`, `dragOperationToSingleGdkDragAction`); the old Windows port's `ClipboardUtilitiesWin.cpp` (`getURL`, `getWebLocData`, `extractURL`, `getPlainText`, `getTextHTML`, `getCFHTML`, `extractMarkupFromCFHTML`) and `DragDataWin.cpp`, from the commit before `adefaa9ed9f8`.

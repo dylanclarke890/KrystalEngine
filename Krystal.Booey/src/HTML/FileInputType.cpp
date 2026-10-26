@@ -1,13 +1,15 @@
 ﻿#include "Krystal.Booey/HTML/FileInputType.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Platform/DragData.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
-#include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/RenderFileUploadControl.hpp"
 
 namespace krys::boo::html
 {
@@ -85,6 +87,12 @@ namespace krys::boo::html
                                  : ValidationMessageValueMissingForFileText();
   }
 
+  RenderPtr<RenderElement> FileInputType::CreateInputRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(Element());
+    return CreateRenderer<RenderFileUploadControl>(*Element(), krys::move(style));
+  }
+
   bool FileInputType::CanSetStringValue() const noexcept
   {
     return false;
@@ -119,6 +127,62 @@ namespace krys::boo::html
     Ref<HTMLInputElement> element = ShareRef(*Element());
     element->InvalidateStyleForSubtree();
     element->UpdateValidity();
+  }
+
+  void FileInputType::CreateShadowSubtree() noexcept
+  {
+    krys_debug_assert(NeedsShadowSubtree());
+    krys_debug_assert(Element());
+    krys_debug_assert(Element()->UserAgentShadowRoot());
+
+    Ref<HTMLInputElement> element = ShareRef(*Element());
+    auto button = CreateRef<HTMLInputElement>(element->NodeDocument());
+    (void)button->SetAttribute(dom::DOMStringAtom(u8"type"), dom::DOMString(InputTypeNames::Button));
+    button->SetUserAgentPart(css::UserAgentParts::FileSelectorButton());
+    (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()
+                                               : FileButtonChooseFileLabel());
+    (void)element->UserAgentShadowRoot()->AppendChild(*button);
+    DisabledStateChanged();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD RefPtr<HTMLInputElement> FileSelectorButton(const dom::Element &element) noexcept
+    {
+      auto *root = element.UserAgentShadowRoot();
+      return root ? ShareRefPtr(DynamicDowncast<HTMLInputElement>(root->FirstChild())) : nullptr;
+    }
+  }
+
+  void FileInputType::DisabledStateChanged() noexcept
+  {
+    krys_debug_assert(Element());
+
+    if (auto button = FileSelectorButton(*Element()))
+    {
+      (void)button->ToggleAttribute(dom::DOMStringAtom(u8"disabled"), Element()->IsDisabledFormControl());
+    }
+  }
+
+  void FileInputType::AttributeChanged(dom::DOMStringAtom name) noexcept
+  {
+    if (name == u8"multiple")
+    {
+      if (auto *element = Element())
+      {
+        if (auto button = FileSelectorButton(*element))
+        {
+          (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()
+                                                     : FileButtonChooseFileLabel());
+        }
+      }
+    }
+    BaseClickableWithKeyInputType::AttributeChanged(name);
+  }
+
+  dom::DOMString FileInputType::DisplayString() const noexcept
+  {
+    return _displayString;
   }
 
   bool FileInputType::DirAutoUsesValue() const noexcept

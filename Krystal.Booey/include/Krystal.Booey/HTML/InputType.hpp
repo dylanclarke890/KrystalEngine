@@ -250,6 +250,8 @@ namespace krys::boo::html
     /// @brief Takes the files of @p dragData dropped on the input.
     /// @return Whether it took any.
     virtual bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
+    /// @brief A file input's text for its files, given with them by the host's chooser.
+    KRYS_NODISCARD virtual dom::DOMString DisplayString() const noexcept;
 
     // DOM property functions.
     /// @brief Checked last, if both the dirty value and the value attribute are missing.

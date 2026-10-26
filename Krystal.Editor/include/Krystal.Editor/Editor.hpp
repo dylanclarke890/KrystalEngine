@@ -27,6 +27,7 @@
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
+#include "Krystal.Editor/PageDragAndDrop.hpp"
 #include "Krystal.Editor/PageGamepads.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
 #include "Krystal.Editor/PagePointers.hpp"
@@ -94,6 +95,8 @@ namespace krys
     UniquePtr<editor::PageGamepads> _gamepads;
     /// @brief The page's input method sample from C++, made once it has loaded.
     UniquePtr<editor::PageTextInput> _textInput;
+    /// @brief The page's drag and drop sample from C++, made once it has loaded.
+    UniquePtr<editor::PageDragAndDrop> _dragAndDrop;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -143,6 +146,8 @@ namespace krys
       _animations = nullptr;
       _pointers = nullptr;
       _gamepads = nullptr;
+      _textInput = nullptr;
+      _dragAndDrop = nullptr;
       _pageView = nullptr;
       if (_previousGamepadProvider)
       {
@@ -573,6 +578,8 @@ namespace krys
           _pointers = event.FromBackForwardCache ? CreateUnique<editor::PagePointers>(document) : nullptr;
           _gamepads = event.FromBackForwardCache ? CreateUnique<editor::PageGamepads>(document) : nullptr;
           _textInput = event.FromBackForwardCache ? CreateUnique<editor::PageTextInput>(document) : nullptr;
+          _dragAndDrop =
+            event.FromBackForwardCache ? CreateUnique<editor::PageDragAndDrop>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
@@ -581,6 +588,7 @@ namespace krys
           _pointers = CreateUnique<editor::PagePointers>(document);
           _gamepads = CreateUnique<editor::PageGamepads>(document);
           _textInput = CreateUnique<editor::PageTextInput>(document);
+          _dragAndDrop = CreateUnique<editor::PageDragAndDrop>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;

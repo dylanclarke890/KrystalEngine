@@ -826,6 +826,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderMeter.hpp
   include/Krystal.Booey/Rendering/RenderProgress.hpp
   include/Krystal.Booey/Rendering/RenderSlider.hpp
+  include/Krystal.Booey/Rendering/RenderFileUploadControl.hpp
   include/Krystal.Booey/Rendering/RenderTextControl.hpp
   include/Krystal.Booey/Rendering/RenderTheme.hpp
   include/Krystal.Booey/Rendering/Adwaita/RenderThemeAdwaita.hpp
@@ -2735,6 +2736,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/RenderMeter.cpp
   src/Rendering/RenderProgress.cpp
   src/Rendering/RenderSlider.cpp
+  src/Rendering/RenderFileUploadControl.cpp
   src/Rendering/RenderTextControl.cpp
   src/Rendering/RenderTheme.cpp
   src/Rendering/Adwaita/RenderThemeAdwaita.cpp

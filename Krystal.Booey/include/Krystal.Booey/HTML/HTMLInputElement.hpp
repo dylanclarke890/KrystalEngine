@@ -159,6 +159,8 @@ namespace krys::boo::html
       return _canReceiveDroppedFiles;
     }
     void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
+    /// @brief A file input's text for its files, given with them by the host's chooser.
+    KRYS_NODISCARD dom::DOMString DisplayString() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;

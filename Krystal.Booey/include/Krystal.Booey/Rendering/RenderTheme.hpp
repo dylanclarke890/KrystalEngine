@@ -35,6 +35,7 @@ namespace krys::boo
   }
 
   class ControlPart;
+  class FileList;
   class FontCascade;
   class FontCascadeDescription;
   class GraphicsContext;
@@ -381,8 +382,12 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: File inputs' labels and decorations (fileListDefaultLabel, fileListNameForWidth,
-    // paintFileUploadIconDecorations), with file inputs.
+    /// @brief What a file input shows when it has no files.
+    KRYS_NODISCARD virtual utf8_string FileListDefaultLabel(bool multipleFilesAllowed) const noexcept;
+    /// @brief What a file input shows for @p fileList, truncated to @p width in @p font.
+    KRYS_NODISCARD virtual utf8_string FileListNameForWidth(const FileList *fileList, const FontCascade &font,
+                                                            int32 width,
+                                                            bool multipleFilesAllowed) const noexcept;
 
     KRYS_NODISCARD virtual InnerSpinButtonLayout
       GetInnerSpinButtonLayout(const RenderElement &) const noexcept

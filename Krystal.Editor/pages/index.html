@@ -666,6 +666,50 @@
     </div>
   </div>
 
+  <div id="drag-and-drop">
+    <div class="row drag-drop">
+      <!-- Drag and drop: the cards are draggable (draggable=true); a card's drag carries its text and only
+           moves it, and the lists take it, before or after the card it's dropped on. -->
+      <div class="card" id="drag-lists">
+        <h2>Drag and drop</h2>
+        <p>Drag the cards to reorder them, or move them to the other list.</p>
+        <div class="drag-lists">
+          <div class="drag-list" id="drag-todo">
+            <div class="drag-card" id="card-grind" draggable="true">Grind the beans</div>
+            <div class="drag-card" id="card-heat" draggable="true">Heat the water</div>
+            <div class="drag-card" id="card-bloom" draggable="true">Let it bloom</div>
+          </div>
+          <div class="drag-list" id="drag-done">
+            <div class="drag-card" id="card-weigh" draggable="true">Weigh the coffee</div>
+          </div>
+        </div>
+      </div>
+      <!-- The log shows each drag event (but drag and dragover, which come with every move) with the types of its
+           data and the operations its source allows and its target chose (effectAllowed/dropEffect). -->
+      <div class="card">
+        <h2>Drag events</h2>
+        <pre class="drag-log" id="drag-log"></pre>
+        <button id="drag-clear">Clear</button>
+      </div>
+    </div>
+    <div class="row drag-drop">
+      <!-- The drop zone takes anything dragged onto it, from the page or from another application, and lists its
+           text, URLs and files. A file input takes files dropped on it, as a choice of them. -->
+      <div class="card">
+        <h2>Drops</h2>
+        <div class="drop-zone" id="drop-zone"><pre id="drop-readout"></pre></div>
+        <input type="file" multiple id="drop-files">
+      </div>
+      <!-- Text: select some and drag it; dropped into the other field it's moved, or copied with Ctrl. -->
+      <div class="card">
+        <h2>Dragging text</h2>
+        <p>Select some text and drag it into the other field; hold Ctrl to copy it.</p>
+        <input class="drag-field" id="drag-field" value="Select a word and drag it">
+        <div class="drag-field" id="drag-editable" contenteditable>Drop text here, or drag it back.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

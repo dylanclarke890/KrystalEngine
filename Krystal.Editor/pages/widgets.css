@@ -126,6 +126,24 @@ textarea.ime-field { height: 60px; resize: vertical; }
   color: #ffffff; font-size: 12px; white-space: pre-wrap; }
 #ime-clear { padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5; color: #ffffff; }
 
+/* Drag and drop: the lists of cards, the log of drag events, the drop zone and the fields to drag text between;
+   what a drop would land on is marked. */
+.drag-drop .card { height: auto; min-width: 0; }
+.drag-lists { display: flex; gap: 12px; }
+.drag-list { flex: 1; min-height: 120px; padding: 6px; border-radius: 12px; background: #e3e7ef; }
+.drag-card { margin-bottom: 6px; padding: 8px 10px; border-radius: 8px; background: #ffffff; cursor: grab;
+  box-shadow: 0 1px 3px rgba(26, 34, 64, 0.15); }
+.drag-card.dragging { opacity: 0.4; }
+.drag-list.over, .drop-zone.over { box-shadow: inset 0 0 0 2px #4f6df5; background: #dfe6ff; }
+.drag-log { min-height: 160px; margin: 0 0 8px; padding: 8px; border-radius: 12px; background: #1a2240;
+  color: #ffffff; font-size: 12px; white-space: pre-wrap; }
+#drag-clear { padding: 4px 12px; border: none; border-radius: 6px; background: #4f6df5; color: #ffffff; }
+.drop-zone { min-height: 100px; margin: 0 0 8px; border: 2px dashed #8d99ae; border-radius: 12px; }
+.drop-zone pre { margin: 0; padding: 8px; font-size: 12px; white-space: pre-wrap; pointer-events: none; }
+.drag-field { display: block; width: 100%; box-sizing: border-box; margin: 0 0 8px; padding: 6px 8px;
+  border: 1px solid #c3cad8; border-radius: 6px; background: #ffffff; font: inherit; }
+div.drag-field { min-height: 60px; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

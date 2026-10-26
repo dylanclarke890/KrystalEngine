@@ -808,6 +808,10 @@ namespace krys::boo
     {
       return _type == Type::Slider;
     }
+    KRYS_NODISCARD bool IsRenderFileUploadControl() const noexcept
+    {
+      return _type == Type::FileUploadControl;
+    }
     KRYS_NODISCARD bool IsRenderMenuList() const noexcept
     {
       return _type == Type::MenuList;

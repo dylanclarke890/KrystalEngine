@@ -8,7 +8,7 @@ namespace krys::boo::html
 {
   /// @brief The file input type.
   // FIXME: The file chooser the host shows (showPicker, its settings, the files chosen in it, and its
-  // icons), and the button and file name it draws come with the host's file picker; directories
+  // icons) and the tooltip naming the files come with the host's file picker; directories
   // (allowsDirectories), with directory uploads.
   class FileInputType final : public BaseClickableWithKeyInputType
   {
@@ -51,10 +51,18 @@ namespace krys::boo::html
     void FilesChosen(const List<utf8_string> &paths) noexcept;
 
     bool ReceiveDroppedFiles(const DragData &dragData) noexcept final;
+    KRYS_NODISCARD dom::DOMString DisplayString() const noexcept final;
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 
     void SetValue(dom::DOMStringView sanitizedValue, bool valueChanged, TextFieldEventBehavior eventBehavior,
                   TextControlSetValueSelection selection) noexcept final;
+
+  private:
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
+    /// @brief The shadow tree: the button that opens the chooser (`::file-selector-button`).
+    void CreateShadowSubtree() noexcept final;
+    void DisabledStateChanged() noexcept final;
+    void AttributeChanged(dom::DOMStringAtom name) noexcept final;
   };
 }

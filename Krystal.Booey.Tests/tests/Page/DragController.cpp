@@ -536,9 +536,7 @@ namespace krys::boo::tests
   TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: dropping into form controls",
                    "[Page][DragController]")
   {
-    // File inputs don't draw their button yet, so this one is given a size.
-    DragFixture fixture(u8"<input id=t><br><input id=f type=file multiple "
-                        u8"style=\"display:inline-block;width:100px;height:20px\">");
+    DragFixture fixture(u8"<input id=t><br><input id=f type=file multiple>");
     auto &text = Downcast<html::HTMLInputElement>(fixture.ById(u8"t"));
     auto &file = Downcast<html::HTMLInputElement>(fixture.ById(u8"f"));
     fixture.Client->SourceMask = AnyDragOperation();

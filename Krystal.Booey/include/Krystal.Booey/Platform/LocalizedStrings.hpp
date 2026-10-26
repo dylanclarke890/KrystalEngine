@@ -17,6 +17,17 @@ namespace krys::boo
   /// @brief The text of a `details` element's default summary, shown when it has no `summary` child.
   KRYS_NODISCARD utf8_string DefaultDetailsSummaryText() noexcept;
 
+  /// @brief The label of a file input's button.
+  KRYS_NODISCARD utf8_string FileButtonChooseFileLabel() noexcept;
+  /// @brief The label of a `multiple` file input's button.
+  KRYS_NODISCARD utf8_string FileButtonChooseMultipleFilesLabel() noexcept;
+  /// @brief What a file input shows without a file.
+  KRYS_NODISCARD utf8_string FileButtonNoFileSelectedLabel() noexcept;
+  /// @brief What a `multiple` file input shows without files.
+  KRYS_NODISCARD utf8_string FileButtonNoFilesSelectedLabel() noexcept;
+  /// @brief What a file input shows for more than one file.
+  KRYS_NODISCARD utf8_string MultipleFileUploadText(uint32 numberOfFiles) noexcept;
+
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingText() noexcept;
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingForCheckboxText() noexcept;
   KRYS_NODISCARD utf8_string ValidationMessageValueMissingForFileText() noexcept;
