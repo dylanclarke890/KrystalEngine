@@ -97,6 +97,11 @@ namespace krys::boo
       return _style;
     }
 
+    KRYS_NODISCARD const RenderStyle *ParentStyle() const noexcept
+    {
+      return !Parent() ? nullptr : &Parent()->Style();
+    }
+
     KRYS_NODISCARD bool HasInitializedStyle() const noexcept
     {
       return _hasInitializedStyle;

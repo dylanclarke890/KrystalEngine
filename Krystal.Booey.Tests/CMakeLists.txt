@@ -654,7 +654,11 @@ target_sources(Krystal.Booey.Tests
 
 		# URL
 		tests/SVG/Internals/SVGPath.cpp
+		tests/SVG/Properties/SVGPropertyTraits.cpp
+		tests/SVG/SVGAngleValue.cpp
 		tests/SVG/SVGElement.cpp
+		tests/SVG/SVGLengthValue.cpp
+		tests/SVG/SVGPreserveAspectRatioValue.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

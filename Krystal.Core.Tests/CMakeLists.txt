@@ -63,6 +63,7 @@ target_sources(Krystal.Core.Tests
 	PRIVATE tests/Text/Base64.cpp
 	PRIVATE tests/Text/CodePointIterator.cpp
 	PRIVATE tests/Text/StringBuilder.cpp
+	PRIVATE tests/Text/StringToIntegerConversion.cpp
 	PRIVATE tests/Text/TextStream.cpp
 
   # Types

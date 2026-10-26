@@ -3765,6 +3765,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/Internals/SVGPathStringBuilder.hpp
       include/Krystal.Booey/SVG/Internals/SVGPathStringViewSource.hpp
       include/Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp
+      include/Krystal.Booey/SVG/Properties/SVGPropertyTraits.hpp
+      include/Krystal.Booey/SVG/SVGAngleValue.hpp
       include/Krystal.Booey/SVG/SVGCircleElement.hpp
       include/Krystal.Booey/SVG/SVGDefsElement.hpp
       include/Krystal.Booey/SVG/SVGDescElement.hpp
@@ -3776,10 +3778,15 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGGeometryElement.hpp
       include/Krystal.Booey/SVG/SVGGraphicsElement.hpp
       include/Krystal.Booey/SVG/SVGImageElement.hpp
+      include/Krystal.Booey/SVG/SVGLengthContext.hpp
+      include/Krystal.Booey/SVG/SVGLengthValue.hpp
       include/Krystal.Booey/SVG/SVGLineElement.hpp
+      include/Krystal.Booey/SVG/SVGMarkerTypes.hpp
       include/Krystal.Booey/SVG/SVGMetadataElement.hpp
+      include/Krystal.Booey/SVG/SVGParsingError.hpp
       include/Krystal.Booey/SVG/SVGPolygonElement.hpp
       include/Krystal.Booey/SVG/SVGPolylineElement.hpp
+      include/Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp
       include/Krystal.Booey/SVG/SVGRectElement.hpp
       include/Krystal.Booey/SVG/SVGScriptElement.hpp
       include/Krystal.Booey/SVG/SVGStyleElement.hpp
@@ -3787,8 +3794,10 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGSwitchElement.hpp
       include/Krystal.Booey/SVG/SVGSymbolElement.hpp
       include/Krystal.Booey/SVG/SVGTitleElement.hpp
+      include/Krystal.Booey/SVG/SVGUnitTypes.hpp
       include/Krystal.Booey/SVG/SVGUnknownElement.hpp
       include/Krystal.Booey/SVG/SVGUseElement.hpp
+      include/Krystal.Booey/SVG/SVGZoomAndPanType.hpp
 
       # Types
       include/Krystal.Booey/Types/IsEOF.hpp
@@ -4094,6 +4103,8 @@ target_sources(Krystal.Booey
     src/SVG/Internals/SVGPathStringBuilder.cpp
     src/SVG/Internals/SVGPathStringViewSource.cpp
     src/SVG/Internals/SVGPathUtilities.cpp
+    src/SVG/Properties/SVGPropertyTraits.cpp
+    src/SVG/SVGAngleValue.cpp
     src/SVG/SVGCircleElement.cpp
     src/SVG/SVGDefsElement.cpp
     src/SVG/SVGDescElement.cpp
@@ -4104,10 +4115,13 @@ target_sources(Krystal.Booey
     src/SVG/SVGGeometryElement.cpp
     src/SVG/SVGGraphicsElement.cpp
     src/SVG/SVGImageElement.cpp
+    src/SVG/SVGLengthContext.cpp
+    src/SVG/SVGLengthValue.cpp
     src/SVG/SVGLineElement.cpp
     src/SVG/SVGMetadataElement.cpp
     src/SVG/SVGPolygonElement.cpp
     src/SVG/SVGPolylineElement.cpp
+    src/SVG/SVGPreserveAspectRatioValue.cpp
     src/SVG/SVGRectElement.cpp
     src/SVG/SVGScriptElement.cpp
     src/SVG/SVGStyleElement.cpp
