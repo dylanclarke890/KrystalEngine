@@ -6,12 +6,66 @@
 #include "Krystal.Booey/Editing/PasteboardFileListReader.hpp"
 #include "Krystal.Booey/Editing/WebContentReader.hpp"
 #include "Krystal.Booey/FileAPI/FileList.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/StaticPasteboard.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include <algorithm>
+
+namespace krys::boo
+{
+  /// @brief Updates a data transfer's drag image as the image the page set loads.
+  class DragImageLoader final : public CachedImageClient, public RefCounted<DragImageLoader>
+  {
+    KRYS_NON_COPY_MOVABLE(DragImageLoader);
+
+  private:
+    WeakPtr<dom::DataTransfer> _dataTransfer;
+    WeakPtr<const dom::Document> _document;
+
+  public:
+    KRYS_NODISCARD static Ref<DragImageLoader> Create(dom::DataTransfer &dataTransfer,
+                                                      const dom::Document &document) noexcept
+    {
+      return AdoptRef(*new DragImageLoader(dataTransfer, document));
+    }
+
+    void StartLoading(CachedResourceHandle<CachedImage> &image) noexcept
+    {
+      // FIXME: Does this really trigger a load? Does it need to?
+      image->AddClient(*this);
+    }
+
+    void StopLoading(CachedResourceHandle<CachedImage> &image) noexcept
+    {
+      image->RemoveClient(*this);
+    }
+
+    void MoveToDataTransfer(dom::DataTransfer &newDataTransfer) noexcept
+    {
+      _dataTransfer = CreateWeakPtr(&newDataTransfer);
+    }
+
+  private:
+    DragImageLoader(dom::DataTransfer &dataTransfer, const dom::Document &document) noexcept
+        : _dataTransfer(CreateWeakPtr(&dataTransfer)), _document(CreateWeakPtr(&document))
+    {
+    }
+
+    void ImageChanged(CachedImage *, const IntRect *) noexcept final
+    {
+      if (RefPtr<dom::DataTransfer> dataTransfer = ShareRefPtr(_dataTransfer.get()))
+      {
+        dataTransfer->UpdateDragImage(_document.get());
+      }
+    }
+  };
+}
 
 namespace krys::boo::dom
 {
@@ -175,7 +229,13 @@ namespace krys::boo::dom
   {
   }
 
-  DataTransfer::~DataTransfer() noexcept = default;
+  DataTransfer::~DataTransfer() noexcept
+  {
+    if (RefPtr<DragImageLoader> dragImageLoader = _dragImageLoader; dragImageLoader && _dragImage)
+    {
+      dragImageLoader->StopLoading(_dragImage);
+    }
+  }
 
   Ref<DataTransfer> DataTransfer::CreateForCopyAndPaste(const Document &document, StoreMode storeMode,
                                                         UniquePtr<Pasteboard> &&pasteboard) noexcept
@@ -682,7 +742,6 @@ namespace krys::boo::dom
     _dropEffect = DOMString(IEOpFromDragOp(operationMask));
   }
 
-  // FIXME: The drag image and its element and location, with drag images.
   void DataTransfer::MoveDragState(Ref<DataTransfer> &&other) noexcept
   {
     krys_assert(Is<StaticPasteboard>(other->GetPasteboard()));
@@ -690,6 +749,108 @@ namespace krys::boo::dom
 
     _dropEffect = other->_dropEffect;
     _effectAllowed = other->_effectAllowed;
+    _dragLocation = other->_dragLocation;
+    _dragImage = other->_dragImage;
+    _dragImageElement = krys::move(other->_dragImageElement);
+    _dragImageLoader = krys::move(other->_dragImageLoader);
+    if (RefPtr<DragImageLoader> dragImageLoader = _dragImageLoader)
+    {
+      dragImageLoader->MoveToDataTransfer(*this);
+    }
     _fileList = krys::move(other->_fileList);
+  }
+
+  bool DataTransfer::HasDragImage() const noexcept
+  {
+    return _dragImage || _dragImageElement;
+  }
+
+  void DataTransfer::SetDragImage(Ref<Element> &&element, int32 x, int32 y) noexcept
+  {
+    if (!ForDrag() || !CanWriteData())
+    {
+      return;
+    }
+
+    CachedResourceHandle<CachedImage> image;
+    if (auto *imageElement = DynamicDowncast<html::HTMLImageElement>(*element);
+        imageElement && !imageElement->IsConnected())
+    {
+      image = imageElement->GetCachedImage();
+    }
+
+    _dragLocation = IntPoint(x, y);
+
+    Ref<const Document> document = ShareRef(element->NodeDocument());
+    if (RefPtr<DragImageLoader> dragImageLoader = _dragImageLoader; dragImageLoader && _dragImage)
+    {
+      dragImageLoader->StopLoading(_dragImage);
+    }
+    _dragImage = image;
+    if (_dragImage)
+    {
+      if (!_dragImageLoader)
+      {
+        _dragImageLoader = DragImageLoader::Create(*this, *document);
+      }
+      Ref<DragImageLoader> dragImageLoader = ShareRef(*_dragImageLoader);
+      dragImageLoader->StartLoading(_dragImage);
+    }
+
+    if (image)
+    {
+      _dragImageElement = nullptr;
+    }
+    else
+    {
+      _dragImageElement = krys::move(element);
+    }
+
+    UpdateDragImage(document.get());
+  }
+
+  void DataTransfer::UpdateDragImage(const Document *document) noexcept
+  {
+    // Don't allow setting the image if we haven't started dragging yet; we'll rely on the dragging code
+    // to install this drag image as part of getting the drag kicked off.
+    if (!_shouldUpdateDragImage)
+    {
+      return;
+    }
+
+    IntPoint computedHotSpot;
+    auto computedImage = DragImage {CreateDragImage(document, computedHotSpot)};
+    if (!computedImage)
+    {
+      return;
+    }
+
+    _pasteboard->SetDragImage(krys::move(computedImage), computedHotSpot);
+  }
+
+  RefPtr<Element> DataTransfer::DragImageElement() const noexcept
+  {
+    return _dragImageElement;
+  }
+
+  DragImageRef DataTransfer::CreateDragImage(const Document *, IntPoint &location) const noexcept
+  {
+    location = _dragLocation;
+
+    if (_dragImage)
+    {
+      return CreateDragImageFromImage(_dragImage->GetImage(), ImageOrientation::Orientation::None);
+    }
+
+    if (_dragImageElement)
+    {
+      if (RefPtr<LocalFrame> frame = ShareRefPtr(_dragImageElement->NodeDocument().Frame()))
+      {
+        return CreateDragImageForNode(*frame, *DragImageElement());
+      }
+    }
+
+    // We do not have enough information to create a drag image, use the default icon.
+    return nullptr;
   }
 }

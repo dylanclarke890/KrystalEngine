@@ -85,6 +85,7 @@ namespace krys::boo
     LocalFrameViewLayoutContext _layoutContext;
     EnumSet<PaintBehavior> _paintBehavior;
     boo::Color _baseBackgroundColor {boo::Color::white};
+    RefPtr<dom::Node> _nodeToDraw;
     bool _isPainting {false};
     bool _isTransparent {false};
     bool _contentIsOpaque {false};
@@ -570,9 +571,30 @@ namespace krys::boo
     /// @brief Whether scrolling repaints the whole view rather than moving the painted contents.
     KRYS_NODISCARD bool UseSlowRepaints() const noexcept;
 
-    /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates.
-    /// FIXME: The overlay scrollbars and painting a single node (`setNodeToDraw`) aren't ported.
+    /// @brief Paints the document's render view over @p dirtyRect, in the contents' coordinates; only the
+    /// node to draw and its descendants, if there's one.
+    /// FIXME: The overlay scrollbars aren't ported.
     void PaintContents(GraphicsContext &, const IntRect &dirtyRect) noexcept;
+
+    /// @brief Paints only @p node and its descendants from now on, or everything if it's null.
+    // FIXME: change this to use the subtreePaint terminology.
+    void SetNodeToDraw(dom::Node *node) noexcept;
+
+    enum SelectionInSnapshot
+    {
+      IncludeSelection,
+      ExcludeSelection
+    };
+    enum CoordinateSpaceForSnapshot
+    {
+      DocumentCoordinates,
+      ViewCoordinates
+    };
+    /// @brief Paints @p imageRect for a snapshot, with the composited layers flattened into it: of the
+    /// contents (in their coordinates), or of the view as it's scrolled.
+    void PaintContentsForSnapshot(GraphicsContext &context, const IntRect &imageRect,
+                                  SelectionInSnapshot shouldPaintSelection,
+                                  CoordinateSpaceForSnapshot coordinateSpace) noexcept;
 
     void SetPaintBehavior(EnumSet<PaintBehavior> behavior) noexcept
     {

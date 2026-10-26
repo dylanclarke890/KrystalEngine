@@ -1,7 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Page/DragActions.hpp"
+#include "Krystal.Booey/Platform/DragImage.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -14,6 +17,8 @@
 
 namespace krys::boo
 {
+  class CachedImage;
+  class DragImageLoader;
   class File;
   class FileList;
   class Pasteboard;
@@ -24,11 +29,10 @@ namespace krys::boo::dom
 {
   class DataTransferItemList;
   class Document;
+  class Element;
 
   /// @brief The data of a drag, a clipboard event or an input event, and what a page may do with it.
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
-  // FIXME: The drag image (setDragImage, createDragImage, updateDragImage, dragImageElement, hasDragImage,
-  // dragLocation), with drag images.
   class DataTransfer final : public RefCounted<DataTransfer>, public CanMakeWeakPtr<DataTransfer>
   {
     KRYS_NON_COPY_MOVABLE(DataTransfer);
@@ -63,6 +67,10 @@ namespace krys::boo::dom
     DOMString _dropEffect;
     DOMString _effectAllowed;
     bool _shouldUpdateDragImage {false};
+    IntPoint _dragLocation;
+    CachedResourceHandle<CachedImage> _dragImage;
+    RefPtr<Element> _dragImageElement;
+    RefPtr<DragImageLoader> _dragImageLoader;
 
     DataTransfer(StoreMode mode, UniquePtr<Pasteboard> &&pasteboard, Type type = Type::CopyAndPaste,
                  DOMString &&effectAllowed = u8"uninitialized") noexcept;
@@ -105,18 +113,28 @@ namespace krys::boo::dom
     void SetSourceOperationMask(EnumSet<DragOperation> operationMask) noexcept;
     void SetDestinationOperationMask(EnumSet<DragOperation> operationMask) noexcept;
 
+    /// @brief Sets the drag image to @p element (an image that isn't in a document, or a snapshot of the
+    /// element), with the cursor at @p x, @p y in it.
+    /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-setdragimage
+    void SetDragImage(Ref<Element> &&element, int32 x, int32 y) noexcept;
+
     void SetDragHasStarted() noexcept
     {
       _shouldUpdateDragImage = true;
     }
+    /// @brief Makes the drag image the page set, with where the cursor is in it in @p dragLocation; null if
+    /// it set none.
+    KRYS_NODISCARD DragImageRef CreateDragImage(const Document *document,
+                                                IntPoint &dragLocation) const noexcept;
+    /// @brief Gives the pasteboard the drag image the page set, once the drag has started.
+    void UpdateDragImage(const Document *document) noexcept;
+    /// @brief The element the page set as the drag image, if it isn't an image out of a document.
+    KRYS_NODISCARD RefPtr<Element> DragImageElement() const noexcept;
 
-    /// @brief Takes the data, effects and files @p other (`dragstart`'s data transfer) has.
+    /// @brief Takes the data, effects, drag image and files @p other (`dragstart`'s data transfer) has.
     void MoveDragState(Ref<DataTransfer> &&other) noexcept;
-    // FIXME: Whether the page set a drag image, with drag images.
-    KRYS_NODISCARD bool HasDragImage() const noexcept
-    {
-      return false;
-    }
+    /// @brief Whether the page set a drag image.
+    KRYS_NODISCARD bool HasDragImage() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-dropeffect
     KRYS_NODISCARD DOMString DropEffect() const noexcept;

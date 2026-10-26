@@ -1210,6 +1210,13 @@ namespace krys::boo
                                                    bool *wasFixed = nullptr) const noexcept;
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept;
 
+    /// @brief The absolute rect painting the renderer's subtree covers: its bounding box with its
+    /// descendants' layers'.
+    /// @param topLevelRect Set to the renderer's own bounding box.
+    // FIXME: change this to use the subtreePaint terminology
+    KRYS_NODISCARD LayoutRect PaintingRootRect(LayoutRect &topLevelRect) noexcept;
+    void AddAbsoluteRectForLayer(LayoutRect &result) noexcept;
+
     KRYS_NODISCARD bool ShouldUseTransformFromContainer(const RenderElement *containerObject) const noexcept;
     void GetTransformFromContainer(const LayoutSize &offsetInContainer,
                                    TransformationMatrix &transform) const noexcept;

@@ -330,11 +330,12 @@ namespace krys::ui
       return boo::AnyDragSourceAction();
     }
 
-    void StartDrag(boo::DragItem, boo::dom::DataTransfer &dataTransfer, boo::LocalFrame &) noexcept override
+    void StartDrag(boo::DragItem item, boo::dom::DataTransfer &dataTransfer,
+                   boo::LocalFrame &) noexcept override
     {
       if (_view)
       {
-        _view->DragStarted(dataTransfer);
+        _view->DragStarted(krys::move(item), dataTransfer);
       }
     }
   };
@@ -882,6 +883,7 @@ namespace krys::ui
         boo::FloatRect(0, 0, static_cast<float>(rect.Width()), static_cast<float>(rect.Height())));
       recorder.DrawDisplayList(*overlayList);
     }
+    DrawDragImage(recorder);
     return recorder.TakeDisplayList();
   }
 
@@ -935,6 +937,7 @@ namespace krys::ui
 
     _needsPaint = root->Layer().DescendantsOrSelfHaveRunningAnimations();
     PaintOverlay(renderer);
+    PaintDragImage(renderer);
   }
 
   void View::PaintOverlay(gfx::Renderer2D &renderer) noexcept
@@ -950,6 +953,41 @@ namespace krys::ui
     renderer.ClipRect({0.f, 0.f, static_cast<float>(rect.Width()), static_cast<float>(rect.Height())});
     _overlay->ContentView().Paint(renderer);
     renderer.Restore();
+  }
+
+  void View::PaintDragImage(gfx::Renderer2D &renderer) noexcept
+  {
+    if (!_drag || !_drag->Image)
+    {
+      return;
+    }
+
+    const auto size = ViewportSize();
+    boo::display_list::RecorderImpl recorder(
+      boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
+    DrawDragImage(recorder);
+    auto displayList = recorder.TakeDisplayList();
+    Replay(*displayList, renderer);
+  }
+
+  void View::DrawDragImage(boo::GraphicsContext &context) const noexcept
+  {
+    if (!_drag || !_drag->Image)
+    {
+      return;
+    }
+
+    auto &image = *_drag->Image.Get();
+    // The image is in device pixels.
+    boo::FloatSize size(boo::DragImageSize(_drag->Image.Get()));
+    size.Scale(1 / _frame->Document()->DeviceScaleFactor());
+    boo::GraphicsContextStateSaver stateSaver(context);
+    if (_drag->FadeImage)
+    {
+      context.SetAlpha(boo::DragController::DragImageAlpha);
+    }
+    context.DrawImageBuffer(image,
+                            boo::FloatRect(boo::FloatPoint(_drag->Position + _drag->ImageOffset), size));
   }
 
   void View::ShowOverlay(Overlay &overlay) noexcept
@@ -2323,18 +2361,28 @@ namespace krys::ui
     }
   }
 
-  void View::DragStarted(boo::dom::DataTransfer &dataTransfer) noexcept
+  void View::DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept
   {
     ActiveDrag drag;
     drag.Data = dataTransfer.GetPasteboard().GetSelectionData();
     drag.SourceOperationMask = dataTransfer.SourceOperationMask();
     drag.Position = _lastMousePosition.value_or(boo::IntPoint());
+    // The image starts where the page put it and follows the mouse from where it was pressed.
+    drag.ImageOffset = item.DragLocationInContentCoordinates - item.EventPositionInContentCoordinates;
+    drag.FadeImage =
+      item.SourceAction == boo::DragSourceAction::DHTML || item.SourceAction == boo::DragSourceAction::Link;
+    drag.Image = krys::move(item.Image);
     _drag = krys::move(drag);
+    _needsPaint = true;
   }
 
   void View::DragMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
   {
     auto &drag = *_drag;
+    if (drag.Image && drag.Position != point)
+    {
+      _needsPaint = true;
+    }
     drag.Position = point;
     drag.Modifiers = modifiers;
     boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers));
@@ -2359,6 +2407,10 @@ namespace krys::ui
     // The drag's data outlives the drop, which reads it.
     auto drag = krys::move(*_drag);
     _drag = null;
+    if (drag.Image)
+    {
+      _needsPaint = true;
+    }
 
     auto &controller = _page->GetDragController();
     EnumSet<boo::DragOperation> operation;

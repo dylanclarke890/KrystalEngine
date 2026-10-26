@@ -747,3 +747,10 @@ Drag and drop. Booey has the `draggable` attribute (and its `-webkit-user-drag` 
 - **Tests:** Booey: `tests/Page/DragController.cpp`; 2782 cases pass. Krystal.UI: `tests/DragAndDrop.cpp`; 119 cases pass. Krystal.Editor builds.
 - **Left for later:** the standard `user-select` property (only `-webkit-user-select` exists, as upstream; `docs/booey/TODO.md`).
 
+### B10d as built (2026-10-26)
+
+- **Decisions** (the user's, 2026-10-26, while building it): links' drag images are the old Windows port's label (their text in bold over their URL, in a grey rounded rectangle), with `StringTruncator` for text too long for it, where GLib has none; Krystal.UI draws the page's own drag images (an element, or the one it set) and links' labels at the alpha Booey fades selections and images to, so every drag image is translucent.
+- **Booey** (the ledger entry is *The drag image* in `docs/booey/PORTING.md`): `DragImage` (a drag image is an image buffer: snapshots of nodes and the selection, links' labels, images' own images; scaling, fitting and fading them); `FrameSnapshotting` (a frame rect, a node alone, the selection), with `LocalFrameView`'s node to draw and snapshot painting and `RenderObject::PaintingRootRect`; `StringTruncator`; `DataTransfer.setDragImage()` and its loader; `DragController`'s drag images for each kind of drag (`DoImageDrag`, the page's image and where it puts it) and `DragItem`'s image; an element drag given its element as the image. No icons for dragged images' files, text indicators, or images changed mid-drag (GLib's pasteboard ignores them).
+- **Krystal.UI:** the view draws the drag item's image under the cursor, over the page and any overlay, where the page put it relative to the press, and repaints as it moves.
+- **Tests:** Booey: `tests/Graphics/StringTruncator.cpp`, `tests/Platform/DragImage.cpp`, and drag images in `tests/DOM/DataTransfer.cpp` and `tests/Page/DragController.cpp`; 2788 cases pass. Krystal.UI: the image in `tests/DragAndDrop.cpp`, recorded and painted on the GPU; 120 cases pass. Krystal.Editor builds.
+

@@ -3593,9 +3593,8 @@ namespace krys::boo
   }
 
   // FIXME: The event loop's handling of the drag (eventLoopHandleMouseDragged) and the view activated by the
-  // press (eventActivatedView), which are the Mac's; the drag image of an element the page didn't give one
-  // (setDragImage), with drag images; images' origins (restrictedOriginForImageData), once there are security
-  // origins.
+  // press (eventActivatedView), which are the Mac's; images' origins (restrictedOriginForImageData), once
+  // there are security origins.
   bool EventHandler::HandleDrag(const MouseEventWithHitTestResults &event,
                                 CheckDragHysteresis checkDragHysteresis) noexcept
   {
@@ -3732,7 +3731,14 @@ namespace krys::boo
           && !dragState.DataTransfer->HasDragImage())
       {
         (void)draggedElement->NodeDocument().UpdateStyleIfNeeded();
-        if (!draggedElement->Renderer())
+        if (auto *renderer = draggedElement->Renderer())
+        {
+          auto absolutePosition = renderer->LocalToAbsolute();
+          auto delta = RoundedIntPoint(_mouseDownContentsPosition) - RoundedIntPoint(absolutePosition);
+          Ref<dom::Element> element = draggedElement;
+          dragState.DataTransfer->SetDragImage(krys::move(element), delta.Width(), delta.Height());
+        }
+        else
         {
           DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event.Event());
           _mouseDownMayStartDrag = false;

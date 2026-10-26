@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Booey/Page/DragClient.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
@@ -28,6 +29,8 @@ namespace krys::boo
   class DragData;
   class FrameSelection;
   class HitTestResult;
+  class Image;
+  class IntRect;
   class LocalFrame;
   class Page;
   class PlatformMouseEvent;
@@ -37,8 +40,7 @@ namespace krys::boo
   /// drag client, and what a drag over the page and its drop do: the page's drag events, then by default
   /// editing (text moved or copied into editable content), files into file inputs, or a load of what's
   /// dropped.
-  // FIXME: Dragging colour inputs and dropping colours, with colours on the pasteboard; the drag image
-  // (doImageDrag, the drag image of selections, links and images), with drag images; dropped image
+  // FIXME: Dragging colour inputs and dropping colours, with colours on the pasteboard; dropped image
   // placeholders, attachments and models, which are Cocoa's; remote frames.
   class DragController
   {
@@ -151,6 +153,15 @@ namespace krys::boo
     bool StartDrag(LocalFrame &src, const DragState &state, EnumSet<DragOperation> sourceOperationMask,
                    const PlatformMouseEvent &dragEvent, const IntPoint &dragOrigin,
                    HasNonDefaultPasteboardData hasData) noexcept;
+    /// @brief The largest an image's drag image is, in CSS pixels.
+    KRYS_NODISCARD static const IntSize &MaxDragImageSize() noexcept;
+
+    // FIXME: These values are straight out of DragControllerMac, so probably have
+    // little correlation with Gdk standards...
+    static constexpr int32 MaxOriginalImageArea = 1'500 * 1'500;
+    static constexpr int32 DragIconRightInset = 7;
+    static constexpr int32 DragIconBottomInset = 3;
+    static constexpr float DragImageAlpha = 0.75f;
 
   private:
     bool DispatchTextInputEventFor(LocalFrame *innerFrame, const DragData &dragData) noexcept;
@@ -173,7 +184,11 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<HitTestResult> HitTestResultForDragStart(LocalFrame &source, dom::Element &element,
                                                                   const IntPoint &location) const noexcept;
 
-    void DoSystemDrag(const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
+    KRYS_NODISCARD bool ShouldUseCachedImageForDragImage(const Image &image) const noexcept;
+
+    void DoImageDrag(dom::Element &element, const IntPoint &dragOrigin, const IntRect &layoutRect,
+                     LocalFrame &frame, IntPoint &dragImageOffset, const DragState &state) noexcept;
+    void DoSystemDrag(DragImage image, const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
                       const DragState &state) noexcept;
 
     KRYS_NODISCARD DragClient &Client() const noexcept

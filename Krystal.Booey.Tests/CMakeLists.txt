@@ -405,6 +405,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
 		tests/Page/DragController.cpp
+		tests/Graphics/StringTruncator.cpp
+		tests/Platform/DragImage.cpp
 		tests/Page/IntersectionObserver.cpp
 		tests/Page/ResizeObserver.cpp
 		tests/Page/Page.cpp

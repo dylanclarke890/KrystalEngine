@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Platform/DragImage.hpp"
 #include "Krystal.Booey/Platform/PasteboardCustomData.hpp"
 #include "Krystal.Booey/Platform/SelectionData.hpp"
 #include "Krystal.Booey/Platform/SharedBuffer.hpp"
@@ -103,9 +104,8 @@ namespace krys::boo
 
   /// @brief A pasteboard: the system clipboard, read and written through the host's pasteboard strategy, or
   /// the data of a drag.
-  // FIXME: The drag image (setDragImage), with drag images; writing images, colours and buffers, with images
-  // on the pasteboard; the smart paste type, with writing it; reading items by index, with the async
-  // clipboard API.
+  // FIXME: Writing images, colours and buffers, with images on the pasteboard; the smart paste type, with
+  // writing it; reading items by index, with the async clipboard API.
   // FIXME: Trustworthy web URLs (canWriteTrustworthyWebURLsPboardType), which are Cocoa's.
   class Pasteboard
   {
@@ -183,6 +183,10 @@ namespace krys::boo
 
     virtual void WriteMarkup(utf8_stringview markup) noexcept;
     virtual void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept;
+
+    /// @brief Changes the image of the drag in progress: nothing, as the host draws the image it started
+    /// with.
+    virtual void SetDragImage(DragImage, const IntPoint &hotSpot) noexcept;
 
     KRYS_NODISCARD int64 ChangeCount() const noexcept;
     KRYS_NODISCARD const utf8_string &Name() const noexcept

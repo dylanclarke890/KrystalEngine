@@ -3452,6 +3452,9 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/Page/DragItem.hpp
       include/Krystal.Booey/Page/DragState.hpp
       include/Krystal.Booey/Platform/DragData.hpp
+      include/Krystal.Booey/Graphics/StringTruncator.hpp
+      include/Krystal.Booey/Page/FrameSnapshotting.hpp
+      include/Krystal.Booey/Platform/DragImage.hpp
       include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
@@ -3894,6 +3897,9 @@ target_sources(Krystal.Booey
     src/Editing/MoveSelectionCommand.cpp
     src/Page/DragController.cpp
     src/Platform/DragData.cpp
+    src/Graphics/StringTruncator.cpp
+    src/Page/FrameSnapshotting.cpp
+    src/Platform/DragImage.cpp
     src/Platform/SimpleCaretAnimator.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp

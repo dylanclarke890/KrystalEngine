@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/FragmentDirectiveParser.hpp"
 #include "Krystal.Booey/DOM/FragmentDirectiveRangeFinder.hpp"
 #include "Krystal.Booey/DOM/HighlightRegistry.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
@@ -1373,11 +1374,68 @@ namespace krys::boo
     _isPainting = true;
     auto paintBehavior = _paintBehavior;
 
+    // _nodeToDraw is used to draw only one element (and its descendants)
+    RenderObject *renderer = _nodeToDraw ? _nodeToDraw->Renderer() : nullptr;
     RenderLayer *rootLayer = renderView->Layer();
-    rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, nullptr);
+    rootLayer->Paint(context, LayoutRect(dirtyRect), LayoutSize(), _paintBehavior, renderer);
 
     _paintBehavior = paintBehavior;
     _isPainting = false;
+  }
+
+  void LocalFrameView::SetNodeToDraw(dom::Node *node) noexcept
+  {
+    _nodeToDraw = ShareRefPtr(node);
+  }
+
+  // Booey has one frame: its selection is the only one to clear and restore.
+  void LocalFrameView::PaintContentsForSnapshot(GraphicsContext &context, const IntRect &imageRect,
+                                                SelectionInSnapshot shouldPaintSelection,
+                                                CoordinateSpaceForSnapshot coordinateSpace) noexcept
+  {
+    auto *document = Frame().Document();
+    if (!document)
+    {
+      return;
+    }
+    (void)document->UpdateLayout();
+
+    // Cache paint behavior and set a new behavior appropriate for snapshots.
+    auto oldBehavior = GetPaintBehavior();
+    auto snapshotBehavior = oldBehavior;
+    snapshotBehavior.Add({PaintBehavior::FlattenCompositingLayers, PaintBehavior::Snapshotting});
+    SetPaintBehavior(snapshotBehavior);
+
+    // If the snapshot should exclude selection, then we'll clear the current selection
+    // in the render tree only. This will allow us to restore the selection from the DOM
+    // after we paint the snapshot.
+    if (shouldPaintSelection == ExcludeSelection)
+    {
+      if (auto *renderView = document->GetRenderView())
+      {
+        renderView->Selection().Clear();
+      }
+    }
+
+    if (coordinateSpace == DocumentCoordinates)
+    {
+      PaintContents(context, imageRect);
+    }
+    else
+    {
+      // A snapshot in ViewCoordinates will include a scrollbar, and the snapshot will contain
+      // whatever content the document is currently scrolled to.
+      Paint(context, imageRect);
+    }
+
+    // Restore selection.
+    if (shouldPaintSelection == ExcludeSelection)
+    {
+      document->Selection().UpdateAppearance();
+    }
+
+    // Restore cached paint behavior.
+    SetPaintBehavior(oldBehavior);
   }
 
   void LocalFrameView::AvailableContentSizeChanged(AvailableSizeChangeReason reason) noexcept

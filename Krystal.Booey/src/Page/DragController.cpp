@@ -248,6 +248,32 @@ namespace krys::boo
       }
     }
 
+    KRYS_NODISCARD IntPoint DragLocForDHTMLDrag(const IntPoint &mouseDraggedPoint, const IntPoint &dragOrigin,
+                                                const IntPoint &dragImageOffset, bool isLinkImage) noexcept
+    {
+      // dragImageOffset is the cursor position relative to the lower-left corner of the image.
+      const int32 yOffset = -dragImageOffset.Y();
+
+      if (isLinkImage)
+      {
+        return IntPoint(mouseDraggedPoint.X() - dragImageOffset.X(), mouseDraggedPoint.Y() + yOffset);
+      }
+
+      return IntPoint(dragOrigin.X() - dragImageOffset.X(), dragOrigin.Y() + yOffset);
+    }
+
+    /// @brief Where @p element is in the root view: its renderer's bounding box, in window coordinates.
+    KRYS_NODISCARD IntRect BoundsInRootViewSpace(dom::Element &element) noexcept
+    {
+      auto *view = element.NodeDocument().View();
+      auto *renderer = element.Renderer();
+      if (!view || !renderer)
+      {
+        return {};
+      }
+      return view->ContentsToWindow(renderer->AbsoluteBoundingBoxRect());
+    }
+
     KRYS_NODISCARD IntPoint DragLocForSelectionDrag(LocalFrame &src) noexcept
     {
       IntRect draggingRect = EnclosingIntRect(src.Document()->Selection().SelectionBounds());
@@ -1015,9 +1041,9 @@ namespace krys::boo
     return hitTestResult;
   }
 
-  // FIXME: The drag image (the page's, or one made of the selection, the image or the link), with drag
-  // images; touch drags, which upstream refuses on GTK, with touch drags; whether the source's document may
-  // display the link (canDisplay), once there are security origins.
+  // FIXME: Touch drags, which upstream refuses on GTK, with touch drags; whether the source's document may
+  // display the link (canDisplay), once there are security origins. The page has no device scale factor of
+  // its own: the document's is used.
   bool DragController::StartDrag(LocalFrame &src, const DragState &state,
                                  EnumSet<DragOperation> sourceOperationMask,
                                  const PlatformMouseEvent &dragEvent, const IntPoint &dragOrigin,
@@ -1043,15 +1069,23 @@ namespace krys::boo
     _draggingImageURL = url::URL();
     _sourceDragOperationMask = sourceOperationMask;
 
+    DragImage dragImage;
     IntPoint dragLoc(0, 0);
+    IntPoint dragImageOffset(0, 0);
 
     krys_debug_assert(state.DataTransfer);
 
     Ref<dom::DataTransfer> dataTransfer = ShareRef(*state.DataTransfer);
     if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
     {
-      // Without a drag image of the page's, the drag sits where it began.
-      dragLoc = dragOrigin;
+      dragImage = DragImage {dataTransfer->CreateDragImage(src.Document(), dragImageOffset)};
+      // We allow DHTML/JS to set the drag image, even if its a link, image or text we're dragging.
+      // This is in the spirit of the IE API, which allows overriding of pasteboard data and DragOp.
+      if (dragImage)
+      {
+        dragLoc = DragLocForDHTMLDrag(mouseDraggedPoint, dragOrigin, dragImageOffset, !linkURL.IsEmpty());
+        _dragOffset = dragImageOffset;
+      }
     }
 
     if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::Selection} || !imageURL.IsEmpty()
@@ -1091,10 +1125,20 @@ namespace krys::boo
         }
       }
       Client().WillPerformDragSourceAction(DragSourceAction::Selection, dragOrigin, *dataTransfer);
-      dragLoc = DragLocForSelectionDrag(src);
-      _dragOffset = IntPoint(dragOrigin.X() - dragLoc.X(), dragOrigin.Y() - dragLoc.Y());
+      if (!dragImage)
+      {
+        auto [dragImageRef] = CreateDragImageForSelection(src);
+        dragImage = DragImage {DissolveDragImageToFraction(dragImageRef, DragImageAlpha)};
+        dragLoc = DragLocForSelectionDrag(src);
+        _dragOffset = IntPoint(dragOrigin.X() - dragLoc.X(), dragOrigin.Y() - dragLoc.Y());
+      }
 
-      DoSystemDrag(dragLoc, dragOrigin, src, state);
+      if (!dragImage)
+      {
+        return false;
+      }
+
+      DoSystemDrag(krys::move(dragImage), dragLoc, dragOrigin, src, state);
       return true;
     }
 
@@ -1114,8 +1158,16 @@ namespace krys::boo
 
       Client().WillPerformDragSourceAction(DragSourceAction::Image, dragOrigin, *dataTransfer);
 
-      dragLoc = dragOrigin;
-      DoSystemDrag(dragLoc, dragOrigin, src, state);
+      if (!dragImage)
+      {
+        DoImageDrag(*element, dragOrigin, hitTestResult->ImageRect(), src, _dragOffset, state);
+      }
+      else
+      {
+        // DHTML defined drag image
+        DoSystemDrag(krys::move(dragImage), dragLoc, dragOrigin, src, state);
+      }
+
       return true;
     }
 
@@ -1144,26 +1196,99 @@ namespace krys::boo
       }
 
       Client().WillPerformDragSourceAction(DragSourceAction::Link, dragOrigin, *dataTransfer);
+      if (!dragImage)
+      {
+        float deviceScaleFactor = src.Document()->DeviceScaleFactor();
+        auto [dragImageRef] =
+          CreateDragImageForLink(*element, linkURL, textContentWithSimplifiedWhiteSpace, deviceScaleFactor);
+        dragImage = DragImage {dragImageRef};
+        if (dragImage)
+        {
+          _dragOffset = DragOffsetForLinkDragImage(dragImage.Get());
+          dragLoc = IntPoint(dragOrigin.X() + _dragOffset.X(), dragOrigin.Y() + _dragOffset.Y());
+          dragImage =
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+        }
+      }
 
-      dragLoc = dragOrigin;
-      DoSystemDrag(dragLoc, dragOrigin, src, state);
+      DoSystemDrag(krys::move(dragImage), dragLoc, dragOrigin, src, state);
       return true;
     }
 
-    if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
+    if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML} && dragImage)
     {
       krys_debug_assert(_dragSourceAction.Contains(DragSourceAction::DHTML));
       Client().WillPerformDragSourceAction(DragSourceAction::DHTML, dragOrigin, *dataTransfer);
-      DoSystemDrag(dragLoc, dragOrigin, src, state);
+      DoSystemDrag(krys::move(dragImage), dragLoc, dragOrigin, src, state);
       return true;
     }
 
     return false;
   }
 
+  void DragController::DoImageDrag(dom::Element &element, const IntPoint &dragOrigin,
+                                   const IntRect &layoutRect, LocalFrame &frame, IntPoint &dragImageOffset,
+                                   const DragState &state) noexcept
+  {
+    IntPoint mouseDownPoint = dragOrigin;
+    DragImage dragImage;
+    IntPoint scaledOrigin;
+
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    auto orientation = renderer->GetImageOrientation();
+    float deviceScaleFactor = element.NodeDocument().DeviceScaleFactor();
+
+    auto *image = GetImage(element);
+    if (image && !layoutRect.IsEmpty() && ShouldUseCachedImageForDragImage(*image)
+        && (dragImage = DragImage {CreateDragImageFromImage(image, orientation)}))
+    {
+      dragImage = DragImage {FitDragImageToMaxSize(dragImage.Get(), layoutRect.Size(), MaxDragImageSize())};
+      IntSize fittedSize = DragImageSize(dragImage.Get());
+
+      dragImage = DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+      dragImage = DragImage {DissolveDragImageToFraction(dragImage.Get(), DragImageAlpha)};
+
+      // Properly orient the drag image and orient it differently if it's smaller than the original.
+      float scale = fittedSize.Width() / static_cast<float>(layoutRect.Width());
+      float dx = scale * (layoutRect.X() - mouseDownPoint.X());
+      auto originY = static_cast<float>(layoutRect.Y());
+      float dy = scale * (originY - mouseDownPoint.Y());
+      scaledOrigin = IntPoint(static_cast<int32>(dx + 0.5), static_cast<int32>(dy + 0.5));
+    }
+    else
+    {
+      // FIXME: The response's suggested filename (ResourceResponse::suggestedFilename), once responses
+      // parse it; the host has no icon for it either way.
+      if (GetCachedImage(element))
+      {
+        dragImage = DragImage {CreateDragImageIconForCachedImageFilename({})};
+        if (dragImage)
+        {
+          dragImage =
+            DragImage {PlatformAdjustDragImageForDeviceScaleFactor(dragImage.Get(), deviceScaleFactor)};
+          scaledOrigin =
+            IntPoint(DragIconRightInset - DragImageSize(dragImage.Get()).Width(), DragIconBottomInset);
+        }
+      }
+    }
+
+    if (!dragImage)
+    {
+      return;
+    }
+
+    dragImageOffset = mouseDownPoint + scaledOrigin;
+    DoSystemDrag(krys::move(dragImage), dragImageOffset, dragOrigin, frame, state);
+  }
+
   // Booey has one frame, whose view is the root view: its window coordinates are the root view's.
-  void DragController::DoSystemDrag(const IntPoint &dragLoc, const IntPoint &eventPos, LocalFrame &frame,
-                                    const DragState &state) noexcept
+  void DragController::DoSystemDrag(DragImage image, const IntPoint &dragLoc, const IntPoint &eventPos,
+                                    LocalFrame &frame, const DragState &state) noexcept
   {
     _didInitiateDrag = true;
     _dragInitiator = ShareRefPtr(frame.Document());
@@ -1172,6 +1297,7 @@ namespace krys::boo
     RefPtr<LocalFrameView> frameView = ShareRefPtr(frame.View());
 
     DragItem item;
+    item.Image = krys::move(image);
     krys_debug_assert(state.Type.HasExactlyOneBitSet());
     item.SourceAction = state.Type.ToSingleValue();
     item.ContainsSelection = frame.Document()->Selection().Contains(LayoutPoint(eventPos));
@@ -1182,10 +1308,27 @@ namespace krys::boo
 
     if (RefPtr<dom::Element> element = state.Source)
     {
-      if (auto *renderer = element->Renderer())
+      RefPtr<dom::Element> dataTransferImageElement = state.DataTransfer->DragImageElement();
+      if (state.Type == EnumSet<boo::DragSourceAction> {DragSourceAction::DHTML})
       {
-        item.DragPreviewFrameInRootViewCoordinates =
-          frameView->ContentsToWindow(renderer->AbsoluteBoundingBoxRect());
+        // If the drag image has been customized, fall back to positioning the preview relative to the drag
+        // event location.
+        IntSize dragPreviewSize;
+        if (dataTransferImageElement)
+        {
+          dragPreviewSize = BoundsInRootViewSpace(*dataTransferImageElement).Size();
+        }
+        else
+        {
+          dragPreviewSize = DragImageSize(item.Image.Get());
+          dragPreviewSize.Scale(1 / frame.Document()->DeviceScaleFactor());
+        }
+        item.DragPreviewFrameInRootViewCoordinates = {item.DragLocationInWindowCoordinates, dragPreviewSize};
+      }
+      else
+      {
+        // We can position the preview using the bounds of the drag source element.
+        item.DragPreviewFrameInRootViewCoordinates = BoundsInRootViewSpace(*element);
       }
 
       if (RefPtr<dom::Element> link = ContainingLinkElement(*element))
@@ -1203,6 +1346,17 @@ namespace krys::boo
       }
     }
     Client().StartDrag(krys::move(item), *state.DataTransfer, *mainFrame);
+  }
+
+  const IntSize &DragController::MaxDragImageSize() noexcept
+  {
+    static const IntSize maxDragImageSize(200, 200);
+    return maxDragImageSize;
+  }
+
+  bool DragController::ShouldUseCachedImageForDragImage(const Image &image) const noexcept
+  {
+    return image.Size().Height() * image.Size().Width() <= MaxOriginalImageArea;
   }
 
   void DragController::DeclareAndWriteDragImage(dom::DataTransfer &dataTransfer, dom::Element &element,

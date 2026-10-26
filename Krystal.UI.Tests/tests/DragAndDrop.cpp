@@ -3,6 +3,9 @@
 #include "Krystal.Booey/DOM/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
+#include "Krystal.Gfx.Tests/TestDevice.hpp"
+#include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/View.hpp"
 #include <string>
@@ -19,6 +22,33 @@ namespace krys::ui::tests
     KRYS_NODISCARD std::string Narrow(utf8_stringview text) noexcept
     {
       return std::string(reinterpret_cast<const char *>(text.data()), text.size());
+    }
+
+    /// @brief Where the view draws the drag image, and how opaque, if it draws one.
+    struct DrawnDragImage
+    {
+      boo::FloatRect Rect;
+      float Alpha {1};
+    };
+
+    /// @brief The drag image @p view draws over its page: the last image buffer it draws.
+    KRYS_NODISCARD Maybe<DrawnDragImage> DragImageIn(View &view) noexcept
+    {
+      Maybe<DrawnDragImage> drawn;
+      float alpha = 1;
+      auto displayList = view.Record();
+      for (const auto &item : displayList->Items())
+      {
+        if (auto *setState = std::get_if<boo::display_list::SetState>(&item))
+        {
+          alpha = setState->State().Alpha();
+        }
+        else if (auto *draw = std::get_if<boo::display_list::DrawImageBuffer>(&item))
+        {
+          drawn = DrawnDragImage {draw->DestinationRect(), alpha};
+        }
+      }
+      return drawn;
     }
 
     /// @brief The types of the drag events at @p view's document, with their targets' ids.
@@ -145,6 +175,24 @@ namespace krys::ui::tests
       CHECK_FALSE(view.IsDragging());
     }
 
+    SECTION("The image follows the cursor, faded, until the drop")
+    {
+      // The element was pressed 10px into it, so it's drawn 10px up and left of the cursor.
+      auto drawn = DragImageIn(view);
+      REQUIRE(drawn);
+      CHECK(drawn->Rect == boo::FloatRect(0, 20, 400, 40));
+      CHECK(drawn->Alpha == 0.75f);
+
+      view.MouseMoved({50, 100});
+      CHECK(view.NeedsPaint());
+      drawn = DragImageIn(view);
+      REQUIRE(drawn);
+      CHECK(drawn->Rect == boo::FloatRect(40, 90, 400, 40));
+
+      view.MouseReleased({50, 100}, pal::MouseButton::Left);
+      CHECK_FALSE(DragImageIn(view));
+    }
+
     SECTION("The window losing focus cancels it")
     {
       view.SetFocused(false);
@@ -152,5 +200,65 @@ namespace krys::ui::tests
       CHECK(log.Text.ends_with("dragend@src"));
       view.SetFocused(true);
     }
+  }
+
+  TEST_CASE("View: the drag image is painted under the cursor", "[UI][GPU][Drag]")
+  {
+    constexpr uint32 Width = 400;
+    constexpr uint32 Height = 300;
+    auto device = gfx::tests::CreateTestDevice();
+    auto renderer = gfx::Renderer2D::Create(*device);
+    REQUIRE(renderer.has_value());
+
+    View view({static_cast<int32>(Width), static_cast<int32>(Height)});
+    view.LoadHTML(u8"<!DOCTYPE html><style>body{margin:0;background:white}</style>"
+                  u8"<div draggable=true style=\"width:100px;height:40px;background:#00ff00\"></div>");
+    WaitForLoad(view);
+    view.UpdateRendering();
+    view.MousePressed({10, 10}, pal::MouseButton::Left);
+    view.MouseMoved({10, 30});
+    REQUIRE(view.IsDragging());
+    view.MouseMoved({200, 150});
+
+    auto target =
+      device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
+                             .Width = Width,
+                             .Height = Height,
+                             .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
+                             .DebugName = u8"Drag"});
+    REQUIRE(target.has_value());
+    device->BeginFrame();
+    auto &commands = device->GetCommandBuffer();
+    (*renderer)->Begin(commands, {.Texture = *target,
+                                  .Width = Width,
+                                  .Height = Height,
+                                  .Format = gfx::TextureFormat::RGBA8Unorm,
+                                  .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
+    view.Paint(**renderer);
+    (*renderer)->End();
+    device->Submit(commands);
+    device->EndFrame();
+
+    List<Array<uint8, 4>> pixels(static_cast<size_t>(Width) * Height);
+    device->ReadTexture(*target, gfx::TextureRegion::Whole2D(Width, Height),
+                        Span<byte>(reinterpret_cast<byte *>(pixels.data()), pixels.size() * 4u));
+    device->Destroy(*target);
+    auto at = [&](uint32 x, uint32 y)
+    {
+      return pixels[static_cast<size_t>(y) * Width + x];
+    };
+
+    // The image is the element at three quarters opacity over the page, 10px up and left of the cursor.
+    auto inImage = at(230, 160);
+    CHECK(inImage[0] >= 60);
+    CHECK(inImage[0] <= 68);
+    CHECK(inImage[1] == 255);
+    CHECK(inImage[2] >= 60);
+    CHECK(inImage[2] <= 68);
+    // Beyond it is the page, and the element stays where it is.
+    CHECK(at(300, 200) == Array<uint8, 4> {255, 255, 255, 255});
+    CHECK(at(50, 20) == Array<uint8, 4> {0, 255, 0, 255});
+
+    view.MouseReleased({200, 150}, pal::MouseButton::Left);
   }
 }

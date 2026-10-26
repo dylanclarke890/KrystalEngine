@@ -57,6 +57,10 @@ namespace krys::boo
     void WriteMarkup(utf8_stringview markup) noexcept final;
     void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept final;
 
+    void SetDragImage(DragImage, const IntPoint &) noexcept final
+    {
+    }
+
     void WriteCustomData(const List<PasteboardCustomData> &) noexcept final
     {
     }

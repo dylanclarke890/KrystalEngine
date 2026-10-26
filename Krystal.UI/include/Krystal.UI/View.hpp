@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/WindowFeatures.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
+#include "Krystal.Booey/Platform/DragImage.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
@@ -205,6 +206,13 @@ namespace krys::ui
       EnumSet<boo::DragOperation> SourceOperationMask;
       /// @brief What a drop where the mouse is would do, if anything.
       Maybe<boo::DragOperation> Operation;
+      /// @brief The image drawn under the cursor, if the drag has one; its size is in device pixels.
+      boo::DragImage Image;
+      /// @brief Where the image's top left corner is from the cursor.
+      boo::IntSize ImageOffset;
+      /// @brief Whether the image is drawn translucent: the page's own images (an element or the image it
+      /// set) and links' labels, which aren't faded already.
+      bool FadeImage {false};
       /// @brief Whether the mouse is over the page.
       bool InView {false};
       boo::IntPoint Position;
@@ -672,6 +680,10 @@ namespace krys::ui
     void OverlayHidden(Overlay &overlay) noexcept;
     /// @brief Paints the open overlay over the page, at its place in the viewport.
     void PaintOverlay(gfx::Renderer2D &renderer) noexcept;
+    /// @brief Paints the drag's image under the cursor, over the page and the overlay.
+    void PaintDragImage(gfx::Renderer2D &renderer) noexcept;
+    /// @brief Draws the drag's image into @p context, if the drag has one.
+    void DrawDragImage(boo::GraphicsContext &context) const noexcept;
     /// @param movement For a move, how far the mouse moved since the last (@p unadjustedMovement, before the
     /// system's acceleration, while the pointer is locked).
     KRYS_NODISCARD boo::PlatformMouseEvent
@@ -682,8 +694,8 @@ namespace krys::ui
     /// @brief The button a move carries: the one held, as Windows' do (the left, then the middle, then the
     /// right).
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
-    /// @brief A drag of @p dataTransfer's data started in the page.
-    void DragStarted(boo::dom::DataTransfer &dataTransfer) noexcept;
+    /// @brief The drag @p item describes, of @p dataTransfer's data, started in the page.
+    void DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept;
     /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
     /// it's entered or updated, and off it, it's left.
     void DragMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept;

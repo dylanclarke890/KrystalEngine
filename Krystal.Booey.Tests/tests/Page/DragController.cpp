@@ -611,4 +611,64 @@ namespace krys::boo::tests
     (void)fixture.Document->UpdateLayout();
     CHECK(fixture.ById(u8"src").FirstChild()->CanStartSelection());
   }
+  TEST_CASE_METHOD(css::tests::ValueFixture, "DragController: drag images", "[Page][DragController]")
+  {
+    SECTION("A draggable element is snapshotted, under the cursor where it was pressed")
+    {
+      DragFixture fixture(u8"<div id=src draggable=true style=\"width:100px\">source</div>");
+      fixture.Press(10, 15);
+      fixture.Move(10, 30);
+      REQUIRE(fixture.Client->LastItem);
+      auto &item = *fixture.Client->LastItem;
+      REQUIRE(item.Image);
+      CHECK(DragImageSize(item.Image.Get()) == IntSize(100, 40));
+      CHECK(item.EventPositionInContentCoordinates == IntPoint(10, 15));
+      CHECK(item.DragLocationInContentCoordinates == IntPoint(0, 0));
+      CHECK(item.DragPreviewFrameInRootViewCoordinates == IntRect(0, 0, 100, 40));
+      fixture.End(10, 30, {});
+    }
+
+    SECTION("The page's own image, from dragstart")
+    {
+      DragFixture fixture(u8"<div id=src draggable=true>source</div>"
+                          u8"<div id=image style=\"width:30px;height:20px\">image</div>");
+      fixture.ListenWith(EventNames::DragStart, [&](dom::Event &event)
+                         { DataTransferOf(event).SetDragImage(ShareRef(fixture.ById(u8"image")), 5, 6); });
+      fixture.Press(10, 15);
+      fixture.Move(10, 30);
+      REQUIRE(fixture.Client->LastItem);
+      auto &item = *fixture.Client->LastItem;
+      REQUIRE(item.Image);
+      CHECK(DragImageSize(item.Image.Get()) == IntSize(30, 20));
+      CHECK(item.DragLocationInContentCoordinates == IntPoint(5, 9));
+      CHECK(item.DragPreviewFrameInRootViewCoordinates.Size() == IntSize(30, 20));
+      fixture.End(10, 30, {});
+    }
+
+    SECTION("A link's label, centred below the cursor")
+    {
+      DragFixture fixture(u8"<a id=link href=\"https://example.com/x\">example link</a>");
+      fixture.Press(5, 10);
+      fixture.Move(5, 60);
+      REQUIRE(fixture.Client->LastItem);
+      auto &item = *fixture.Client->LastItem;
+      REQUIRE(item.Image);
+      auto size = DragImageSize(item.Image.Get());
+      CHECK(size.Width() <= 200);
+      CHECK(item.DragLocationInContentCoordinates == IntPoint(5 - size.Width() / 2, 8));
+      fixture.End(5, 60, {});
+    }
+
+    SECTION("A selection, faded")
+    {
+      DragFixture fixture(u8"<p id=p>drag this text</p>");
+      fixture.Select(fixture.TextIn(u8"p"), 0, 4);
+      fixture.Press(5, 10);
+      fixture.Move(5, 30);
+      REQUIRE(fixture.Client->LastItem);
+      CHECK(fixture.Client->LastItem->SourceAction == DragSourceAction::Selection);
+      CHECK(fixture.Client->LastItem->Image);
+      fixture.End(5, 30, {});
+    }
+  }
 }

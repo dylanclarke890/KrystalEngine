@@ -172,6 +172,10 @@ namespace krys::boo
     }
   }
 
+  void Pasteboard::SetDragImage(DragImage, const IntPoint &) noexcept
+  {
+  }
+
   void Pasteboard::Write(const PasteboardURL &pasteboardURL) noexcept
   {
     krys_debug_assert(!pasteboardURL.Url.IsEmpty());

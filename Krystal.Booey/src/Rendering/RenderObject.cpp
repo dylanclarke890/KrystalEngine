@@ -22,6 +22,7 @@
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
@@ -1094,6 +1095,39 @@ namespace krys::boo
   IntRect RenderObject::AbsoluteBoundingBoxRectIgnoringTransforms() const noexcept
   {
     return AbsoluteBoundingBoxRect(false);
+  }
+
+  void RenderObject::AddAbsoluteRectForLayer(LayoutRect &result) noexcept
+  {
+    if (HasLayer())
+    {
+      result.Unite(LayoutRect(AbsoluteBoundingBoxRectIgnoringTransforms()));
+    }
+
+    auto *renderElement = DynamicDowncast<RenderElement>(*this);
+    if (!renderElement)
+    {
+      return;
+    }
+
+    for (auto &child : ChildrenOfType<RenderObject>(*renderElement))
+    {
+      child.AddAbsoluteRectForLayer(result);
+    }
+  }
+
+  LayoutRect RenderObject::PaintingRootRect(LayoutRect &topLevelRect) noexcept
+  {
+    LayoutRect result(AbsoluteBoundingBoxRectIgnoringTransforms());
+    topLevelRect = result;
+    if (auto *renderElement = DynamicDowncast<RenderElement>(*this))
+    {
+      for (auto &child : ChildrenOfType<RenderObject>(*renderElement))
+      {
+        child.AddAbsoluteRectForLayer(result);
+      }
+    }
+    return result;
   }
 
   RenderView &RenderObject::View() const noexcept
