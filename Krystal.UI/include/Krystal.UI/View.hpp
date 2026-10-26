@@ -29,6 +29,7 @@
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
@@ -220,6 +221,20 @@ namespace krys::ui
     };
 
     Maybe<ActiveDrag> _drag;
+
+    /// @brief A drag from another application over the view.
+    struct SystemDrag
+    {
+      /// @brief What's dragged.
+      boo::SelectionData Data;
+      /// @brief What a drop where the cursor is would do, if anything.
+      Maybe<boo::DragOperation> Operation;
+      /// @brief Whether the cursor is over the page.
+      bool InView {false};
+      boo::IntPoint Position;
+    };
+
+    Maybe<SystemDrag> _systemDrag;
 
     /// @brief A touch on the screen.
     struct ActiveTouch
@@ -508,6 +523,16 @@ namespace krys::ui
     {
       return _drag.has_value();
     }
+
+    /// @brief A drag from another application entered the view, moved over it, left it or was dropped on it,
+    /// at @p point (in viewport coordinates; a point outside the viewport is off the page), as @p input
+    /// says: the page gets its drag events as for a drag that started in it, and a drop it takes does what
+    /// the page or the drop's default says (text inserted into editable content, files given to a file
+    /// input, a URL loaded).
+    /// @return What a drop at @p point would do, which the window tells the drag's source; after a drop, what
+    /// it did. None after a leave, or a drop the page didn't take.
+    Maybe<pal::DropOperation> SystemDragInput(const boo::IntPoint &point,
+                                              const pal::DragInput &input) noexcept;
 
     /// @brief Sets what locks the pointer for the page (`requestPointerLock()`) and unlocks it: called with
     /// true, it hides the cursor, keeps it in place and reports the mouse's movement as

@@ -209,4 +209,9 @@ namespace krys::pal
   {
     _events->Enqueue(CreateUnique<PointerInputEvent>(window, input));
   }
+
+  void Input::OnDragEvent(WindowHandle window, const DragInput &input) noexcept
+  {
+    _events->Enqueue(CreateUnique<DragInputEvent>(window, input));
+  }
 }

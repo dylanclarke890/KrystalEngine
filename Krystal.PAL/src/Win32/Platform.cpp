@@ -12,22 +12,41 @@
 #define NOMINMAX
 #include <windows.h>
 
+#include "Krystal.PAL/Win32/DropTarget.hpp"
+
+#include <ole2.h>
 #include <shellapi.h>
 #include <shellscalingapi.h>
+#include <shlwapi.h>
 
+#pragma comment(lib, "Ole32.lib")
 #pragma comment(lib, "Shcore.lib")
 #pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Winmm.lib")
 
 namespace krys::pal
 {
+  namespace
+  {
+    /// @brief Whether OLE was initialised on the thread, for the windows' drop targets.
+    bool OleInitialised = false;
+  }
+
   void Initialise() noexcept
   {
     SetTimerPrecision();
+    OleInitialised = SUCCEEDED(::OleInitialize(nullptr));
   }
 
   void Shutdown() noexcept
   {
+    if (OleInitialised)
+    {
+      ::OleUninitialize();
+      OleInitialised = false;
+    }
+
     // Reset timer precision to default
     TIMECAPS timeCaps {};
 
@@ -348,6 +367,21 @@ namespace krys::pal
       ::CloseClipboard();
       return result;
     }
+
+    /// @brief The paths of the files @p drop names.
+    KRYS_NODISCARD List<utf8_string> FilesFromDrop(HDROP drop) noexcept
+    {
+      List<utf8_string> paths;
+      const UINT count = ::DragQueryFileW(drop, 0xFF'FF'FF'FF, nullptr, 0);
+      for (UINT i = 0; i < count; ++i)
+      {
+        const UINT length = ::DragQueryFileW(drop, i, nullptr, 0);
+        std::wstring path(length + 1, L'\0');
+        ::DragQueryFileW(drop, i, path.data(), length + 1);
+        paths.push_back(FromWide(path.c_str(), static_cast<int>(length)));
+      }
+      return paths;
+    }
   }
 
   bool SetClipboardText(utf8_stringview text, NativeHandle windowHandle) noexcept
@@ -443,14 +477,7 @@ namespace krys::pal
 
     if (auto drop = static_cast<HDROP>(::GetClipboardData(CF_HDROP)))
     {
-      const UINT count = ::DragQueryFileW(drop, 0xFF'FF'FF'FF, nullptr, 0);
-      for (UINT i = 0; i < count; ++i)
-      {
-        const UINT length = ::DragQueryFileW(drop, i, nullptr, 0);
-        std::wstring path(length + 1, L'\0');
-        ::DragQueryFileW(drop, i, path.data(), length + 1);
-        paths.push_back(FromWide(path.c_str(), static_cast<int>(length)));
-      }
+      paths = FilesFromDrop(drop);
     }
     ::CloseClipboard();
     return paths;
@@ -469,5 +496,165 @@ namespace krys::pal
   uint32 GetClipboardChangeCount() noexcept
   {
     return static_cast<uint32>(::GetClipboardSequenceNumber());
+  }
+
+  namespace
+  {
+    /// @brief The bytes of @p data's @p format, if it has that format.
+    KRYS_NODISCARD Maybe<std::string> GetDragData(IDataObject &data, UINT format) noexcept
+    {
+      FORMATETC request {static_cast<CLIPFORMAT>(format), nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
+      STGMEDIUM medium {};
+      if (!format || FAILED(data.GetData(&request, &medium)))
+      {
+        return {};
+      }
+
+      Maybe<std::string> result;
+      if (const auto *bytes = static_cast<const char *>(::GlobalLock(medium.hGlobal)))
+      {
+        result = std::string(bytes, ::GlobalSize(medium.hGlobal));
+        ::GlobalUnlock(medium.hGlobal);
+      }
+      ::ReleaseStgMedium(&medium);
+      return result;
+    }
+
+    /// @brief The UTF-16 text in @p bytes, up to its terminator.
+    KRYS_NODISCARD utf8_string WideText(const std::string &bytes) noexcept
+    {
+      const auto *wide = reinterpret_cast<const wchar_t *>(bytes.data());
+      return FromWide(wide, static_cast<int>(::wcsnlen(wide, bytes.size() / sizeof(wchar_t))));
+    }
+
+    /// @brief The text in the system's code page in @p bytes, up to its terminator.
+    KRYS_NODISCARD utf8_string AnsiText(const std::string &bytes) noexcept
+    {
+      const int length = static_cast<int>(::strnlen(bytes.data(), bytes.size()));
+      const int wideLength = length ? ::MultiByteToWideChar(CP_ACP, 0, bytes.data(), length, nullptr, 0) : 0;
+      std::wstring wide(static_cast<size_t>(wideLength), L'\0');
+      if (wideLength)
+      {
+        ::MultiByteToWideChar(CP_ACP, 0, bytes.data(), length, wide.data(), wideLength);
+      }
+      return FromWide(wide.c_str(), wideLength);
+    }
+
+    /// @brief Firefox's markup format.
+    KRYS_NODISCARD UINT TextHTMLFormat() noexcept
+    {
+      static const UINT format = ::RegisterClipboardFormatW(L"text/html");
+      return format;
+    }
+
+    KRYS_NODISCARD UINT URLWFormat() noexcept
+    {
+      static const UINT format = ::RegisterClipboardFormatW(L"UniformResourceLocatorW");
+      return format;
+    }
+
+    KRYS_NODISCARD UINT URLFormat() noexcept
+    {
+      static const UINT format = ::RegisterClipboardFormatW(L"UniformResourceLocator");
+      return format;
+    }
+
+    /// @brief Sets @p content's URL to the internet shortcut (a `.url` file) at @p path's, and its title to
+    /// the shortcut's name.
+    /// @return Whether @p path is an internet shortcut with a URL.
+    bool ReadInternetShortcut(utf8_stringview path, DragContent &content) noexcept
+    {
+      auto widePath = ToWide(path);
+      if (::_wcsicmp(::PathFindExtensionW(widePath.c_str()), L".url"))
+      {
+        return false;
+      }
+
+      // The longest URL Windows takes (`INTERNET_MAX_URL_LENGTH`).
+      constexpr DWORD maxURLLength = 2'048 + 32 + 4;
+      std::wstring url(maxURLLength, L'\0');
+      const DWORD length = ::GetPrivateProfileStringW(L"InternetShortcut", L"url", nullptr, url.data(),
+                                                      maxURLLength, widePath.c_str());
+      if (!length)
+      {
+        return false;
+      }
+
+      content.URL = FromWide(url.c_str(), static_cast<int>(length));
+      std::wstring name(::PathFindFileNameW(widePath.c_str()));
+      ::PathRemoveExtensionW(name.data());
+      content.URLTitle = FromWide(name.c_str(), static_cast<int>(::wcslen(name.c_str())));
+      return true;
+    }
+
+    /// @brief Sets @p content's URL and title from @p url, a URL and its title on the next line, if it has
+    /// one; else the URL is its own title.
+    void SetURLAndTitle(utf8_string &&url, DragContent &content) noexcept
+    {
+      auto split = url.find(u8'\n');
+      if (split == utf8_string::npos)
+      {
+        content.URLTitle = url;
+        content.URL = krys::move(url);
+        return;
+      }
+      content.URLTitle = url.substr(split + 1);
+      url.resize(split);
+      content.URL = krys::move(url);
+    }
+  }
+
+  namespace win32
+  {
+    DragContent ReadDragContent(IDataObject &data) noexcept
+    {
+      DragContent content;
+      if (auto bytes = GetDragData(data, CF_UNICODETEXT))
+      {
+        content.Text = FromWindowsLineBreaks(WideText(*bytes));
+      }
+      else if (auto ansiBytes = GetDragData(data, CF_TEXT))
+      {
+        content.Text = FromWindowsLineBreaks(AnsiText(*ansiBytes));
+      }
+
+      // Firefox's markup, else the HTML format's fragment.
+      if (auto bytes = GetDragData(data, TextHTMLFormat()))
+      {
+        content.HTML = WideText(*bytes);
+      }
+      else if (auto cfhtmlBytes = GetDragData(data, HTMLClipboardFormat()))
+      {
+        auto markup = ExtractMarkupFromCFHTML(
+          std::string_view(cfhtmlBytes->data(), ::strnlen(cfhtmlBytes->data(), cfhtmlBytes->size())));
+        if (!markup.empty())
+        {
+          content.HTML = krys::move(markup);
+        }
+      }
+
+      FORMATETC filesRequest {CF_HDROP, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
+      STGMEDIUM files {};
+      if (SUCCEEDED(data.GetData(&filesRequest, &files)))
+      {
+        content.Files = FilesFromDrop(static_cast<HDROP>(files.hGlobal));
+        ::ReleaseStgMedium(&files);
+      }
+
+      // An internet shortcut dragged is its URL; else the URL formats' URL, with its title.
+      if (!content.Files.empty() && ReadInternetShortcut(content.Files.front(), content))
+      {
+        return content;
+      }
+      if (auto bytes = GetDragData(data, URLWFormat()))
+      {
+        SetURLAndTitle(WideText(*bytes), content);
+      }
+      else if (auto ansiBytes = GetDragData(data, URLFormat()))
+      {
+        SetURLAndTitle(AnsiText(*ansiBytes), content);
+      }
+      return content;
+    }
   }
 }

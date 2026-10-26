@@ -423,6 +423,26 @@ namespace krys
           return true;
         });
 
+      // Drags from other applications go to the page view, which answers what a drop would do; off it (over
+      // the header, or with another view shown), they're off the page.
+      _context->Events->On<DragInputEvent>(
+        [&](const auto &event)
+        {
+          if (!_pageView)
+          {
+            return true;
+          }
+          auto &input = event.Input();
+          boo::IntPoint point(static_cast<int32>(input.ClientX),
+                              static_cast<int32>(input.ClientY - HeaderHeight));
+          if (_view != EditorView::Page)
+          {
+            point = boo::IntPoint(-1, -1);
+          }
+          _context->Window->SetDropOperation(_pageView->SystemDragInput(point, input));
+          return true;
+        });
+
       _context->Events->On<WindowCloseEvent>(
         [&](const auto &)
         {

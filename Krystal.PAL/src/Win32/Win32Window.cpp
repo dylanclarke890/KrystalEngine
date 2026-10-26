@@ -3,6 +3,7 @@
 #include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/Platform.hpp"
+#include "Krystal.PAL/Win32/DropTarget.hpp"
 #include "Krystal.PAL/Win32/Utils.hpp"
 #include <algorithm>
 #include <cassert>
@@ -495,6 +496,7 @@ namespace krys::pal
 
     Win32Window::~Win32Window() noexcept
     {
+      RevokeDropTarget();
     }
 
     WindowHandle Win32Window::GetWindowHandle() const noexcept
@@ -1162,6 +1164,54 @@ namespace krys::pal
     void Win32Window::SetCallbacks(WindowCallbacks &&callbacks) noexcept
     {
       _callbacks = std::move(callbacks);
+      UpdateDropTarget();
+    }
+
+    void Win32Window::SetDropOperation(Maybe<DropOperation> operation) noexcept
+    {
+      if (_dropTarget)
+      {
+        _dropTarget->SetOperation(operation);
+      }
+    }
+
+    void Win32Window::UpdateDropTarget() noexcept
+    {
+      if (!_callbacks.OnDrag)
+      {
+        RevokeDropTarget();
+        return;
+      }
+      if (_dropTarget)
+      {
+        return;
+      }
+
+      _dropTarget = new DropTarget(_handle,
+                                   [this](const DragInput &input)
+                                   {
+                                     if (_callbacks.OnDrag)
+                                     {
+                                       _callbacks.OnDrag(GetWindowHandle(), input);
+                                     }
+                                   });
+      // Registering fails without OLE (`pal::Initialise()` initialises it).
+      if (FAILED(::RegisterDragDrop(_handle, _dropTarget)))
+      {
+        _dropTarget->Release();
+        _dropTarget = nullptr;
+      }
+    }
+
+    void Win32Window::RevokeDropTarget() noexcept
+    {
+      if (!_dropTarget)
+      {
+        return;
+      }
+      ::RevokeDragDrop(_handle);
+      _dropTarget->Release();
+      _dropTarget = nullptr;
     }
 
     void Win32Window::SetCursor(CursorShape cursor) noexcept

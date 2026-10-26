@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
+#include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Booey/Page/MouseEventTypes.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
@@ -10,6 +11,7 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
@@ -41,6 +43,10 @@ namespace krys::ui::input
 
   KRYS_NODISCARD boo::MouseButton ToBooey(pal::MouseButton button) noexcept;
   KRYS_NODISCARD EnumSet<boo::PlatformEvent::Modifier> ToBooey(pal::KeyModifiers modifiers) noexcept;
+
+  KRYS_NODISCARD EnumSet<boo::DragOperation> ToBooey(pal::DropOperations operations) noexcept;
+  /// @brief The drop operation for a drag operation: none for those other than copying, moving and linking.
+  KRYS_NODISCARD Maybe<pal::DropOperation> ToDropOperation(boo::DragOperation operation) noexcept;
 
   /// @brief A key press (`Type::KeyDown`, to be split into `keydown` and `keypress`) or release
   /// (`Type::KeyUp`) of @p key. A press's `key` is the key's name, or else the text it types (with the

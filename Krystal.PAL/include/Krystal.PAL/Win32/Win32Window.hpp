@@ -13,6 +13,8 @@
 
 namespace krys::pal::win32
 {
+  class DropTarget;
+
   class Win32Window final : public IWindow
   {
   private:
@@ -47,6 +49,8 @@ namespace krys::pal::win32
     mutable wchar_t _highSurrogate {0};
     /// @brief Whether the window has made the system caret, for the input method's windows.
     mutable bool _hasCaret {false};
+    /// @brief The window's drop target, while the host takes drops.
+    DropTarget *_dropTarget {nullptr};
 
   public:
     Win32Window(const WindowSettings &settings);
@@ -87,6 +91,8 @@ namespace krys::pal::win32
 
     void CancelComposition() noexcept override;
 
+    void SetDropOperation(Maybe<DropOperation> operation) noexcept override;
+
     LRESULT HandleMessage(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) const noexcept;
 
   private:
@@ -116,5 +122,9 @@ namespace krys::pal::win32
     void PlaceInputMethodWindows() const noexcept;
     /// @brief Destroys the system caret, if the window made it.
     void DestroyCaret() const noexcept;
+    /// @brief Registers the window's drop target if the host takes drops, or revokes it if not.
+    void UpdateDropTarget() noexcept;
+    /// @brief Revokes the window's drop target, if it has one.
+    void RevokeDropTarget() noexcept;
   };
 }

@@ -36,6 +36,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/PointerEvents/TouchAction.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.UI/ColorChooserOverlay.hpp"
 #include "Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp"
 #include "Krystal.UI/DateTimeChooserOverlay.hpp"
@@ -2359,6 +2360,57 @@ namespace krys::ui
       }
       return {};
     }
+
+    /// @brief What's dragged in from another application, as the page's pasteboard reads it.
+    KRYS_NODISCARD boo::SelectionData SelectionDataForDrag(const pal::DragContent &content) noexcept
+    {
+      boo::SelectionData data;
+      if (content.Text)
+      {
+        data.SetText(*content.Text);
+      }
+      if (content.HTML)
+      {
+        data.SetMarkup(*content.HTML);
+      }
+      if (content.URL)
+      {
+        boo::url::URL url(*content.URL);
+        if (url.IsValid())
+        {
+          data.SetURL(url, content.URLTitle);
+        }
+      }
+      // Files come as a URI list of their file URLs.
+      utf8_string uriList;
+      for (const auto &path : content.Files)
+      {
+        if (!uriList.empty())
+        {
+          uriList += u8"\r\n";
+        }
+        uriList += boo::url::URL::FileURLWithFileSystemPath(path).String();
+      }
+      if (!uriList.empty())
+      {
+        data.SetURIList(uriList);
+      }
+      return data;
+    }
+
+    /// @brief What a drop of @p data may do, of what its source allows (@p operations).
+    KRYS_NODISCARD EnumSet<boo::DragOperation> SourceOperationMask(pal::DropOperations operations,
+                                                                   const boo::SelectionData &data) noexcept
+    {
+      auto mask = input::ToBooey(operations);
+      // A page only reads the files dropped on it, and a source told they moved removes them (Windows'
+      // file manager deletes files a drop moved).
+      if (data.HasFilenames())
+      {
+        mask.Remove(boo::DragOperation::Move);
+      }
+      return mask;
+    }
   }
 
   void View::DragStarted(boo::DragItem &&item, boo::dom::DataTransfer &dataTransfer) noexcept
@@ -2435,6 +2487,81 @@ namespace krys::ui
                                                            boo::MouseButton::Left, 0,
                                                            input::ToBooey(drag.Modifiers)),
                                                 operation);
+  }
+
+  Maybe<pal::DropOperation> View::SystemDragInput(const boo::IntPoint &point,
+                                                  const pal::DragInput &input) noexcept
+  {
+    auto &controller = _page->GetDragController();
+    if (input.Action == pal::DragAction::Entered)
+    {
+      _systemDrag = SystemDrag {};
+      _systemDrag->Data = SelectionDataForDrag(input.Content);
+    }
+    if (!_systemDrag)
+    {
+      return null;
+    }
+
+    auto &drag = *_systemDrag;
+    auto size = ViewportSize();
+    bool inView = point.X() >= 0 && point.Y() >= 0 && point.X() < size.Width() && point.Y() < size.Height();
+    auto operationMask = SourceOperationMask(input.AllowedOperations, drag.Data);
+
+    switch (input.Action)
+    {
+      case pal::DragAction::Entered:
+      case pal::DragAction::Moved:
+      {
+        drag.Position = point;
+        boo::DragData data(&drag.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        if (inView)
+        {
+          drag.Operation = controller.DragEnteredOrUpdated(*_frame, krys::move(data));
+          drag.InView = true;
+        }
+        else if (drag.InView)
+        {
+          controller.DragExited(*_frame, krys::move(data));
+          drag.InView = false;
+          drag.Operation = null;
+        }
+        return drag.Operation ? input::ToDropOperation(*drag.Operation) : null;
+      }
+      case pal::DragAction::Left:
+      {
+        if (drag.InView)
+        {
+          boo::DragData data(&drag.Data, drag.Position, drag.Position, {});
+          controller.DragExited(*_frame, krys::move(data));
+        }
+        _systemDrag = null;
+        return null;
+      }
+      case pal::DragAction::Dropped:
+      {
+        // The drag's data outlives the drop, which reads it.
+        auto dropped = krys::move(drag);
+        _systemDrag = null;
+        if (!dropped.InView)
+        {
+          return null;
+        }
+
+        boo::DragData data(&dropped.Data, point, point, operationMask, DragFlags(input.Modifiers));
+        if (inView && dropped.Operation)
+        {
+          if (controller.PerformDragOperation(krys::move(data)))
+          {
+            return input::ToDropOperation(*dropped.Operation);
+          }
+          return null;
+        }
+        controller.DragExited(*_frame, krys::move(data));
+        return null;
+      }
+    }
+    return null;
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

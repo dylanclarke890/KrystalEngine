@@ -99,6 +99,25 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region DragInputEvent
+
+  DragInputEvent::DragInputEvent(WindowHandle window, DragInput input) noexcept
+      : Event(), _window(window), _input(krys::move(input))
+  {
+  }
+
+  const DragInput &DragInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle DragInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region GamepadConnectionEvent
 
   GamepadConnectionEvent::GamepadConnectionEvent(uint32 slot, bool connected) noexcept

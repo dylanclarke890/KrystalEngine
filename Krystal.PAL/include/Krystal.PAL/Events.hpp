@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/IWindow.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
@@ -262,6 +263,25 @@ namespace krys::pal
     PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept;
 
     KRYS_NODISCARD const PointerInput &Input() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A drag from another application over a window.
+  class DragInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    DragInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("drag-input-event")
+
+    /// @brief Constructs a `DragInputEvent`.
+    /// @param input The drag's input.
+    DragInputEvent(WindowHandle window, DragInput input) noexcept;
+
+    KRYS_NODISCARD const DragInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

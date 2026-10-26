@@ -28,6 +28,7 @@ target_sources(Krystal.PAL
       include
     FILES
       include/Krystal.PAL/CursorShapes.hpp
+      include/Krystal.PAL/DragAndDrop.hpp
       include/Krystal.PAL/KeyModifiers.hpp
       include/Krystal.PAL/Events.hpp
       include/Krystal.PAL/Gamepad.hpp
@@ -51,8 +52,10 @@ target_sources(Krystal.PAL
 if(WIN32)
   target_sources(Krystal.PAL
     PRIVATE
+      include/Krystal.PAL/Win32/DropTarget.hpp
       include/Krystal.PAL/Win32/Utils.hpp
       include/Krystal.PAL/Win32/Win32Window.hpp
+      src/Win32/DropTarget.cpp
       src/Win32/Platform.cpp
       src/Win32/Utils.cpp
       src/Win32/Win32Window.cpp

@@ -175,6 +175,35 @@ namespace krys::ui::input
     return result;
   }
 
+  EnumSet<boo::DragOperation> ToBooey(pal::DropOperations operations) noexcept
+  {
+    EnumSet<boo::DragOperation> result;
+    if (operations.Contains(pal::DropOperation::Copy))
+    {
+      result.Add(boo::DragOperation::Copy);
+    }
+    if (operations.Contains(pal::DropOperation::Move))
+    {
+      result.Add(boo::DragOperation::Move);
+    }
+    if (operations.Contains(pal::DropOperation::Link))
+    {
+      result.Add(boo::DragOperation::Link);
+    }
+    return result;
+  }
+
+  Maybe<pal::DropOperation> ToDropOperation(boo::DragOperation operation) noexcept
+  {
+    switch (operation)
+    {
+      case boo::DragOperation::Copy: return pal::DropOperation::Copy;
+      case boo::DragOperation::Move: return pal::DropOperation::Move;
+      case boo::DragOperation::Link: return pal::DropOperation::Link;
+      default:                       return null;
+    }
+  }
+
   boo::PlatformKeyboardEvent KeyboardEvent(boo::PlatformEvent::Type type, pal::Key key,
                                            pal::KeyModifiers modifiers, const pal::KeyText &text,
                                            bool isAutoRepeat, utf8_stringview releasedKeyValue) noexcept

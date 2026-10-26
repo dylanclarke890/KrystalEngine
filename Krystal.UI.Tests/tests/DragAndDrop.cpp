@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/FileAPI/FileList.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
@@ -199,6 +200,137 @@ namespace krys::ui::tests
       CHECK_FALSE(view.IsDragging());
       CHECK(log.Text.ends_with("dragend@src"));
       view.SetFocused(true);
+    }
+  }
+
+  TEST_CASE("View: drags from other applications", "[UI][Drag]")
+  {
+    View view({400, 300});
+    view.LoadHTML(utf8_string(Page));
+    WaitForLoad(view);
+    view.UpdateRendering();
+    DragLog log(view);
+
+    auto entered = [](float x, float y, pal::DragContent content,
+                      pal::DropOperations operations = {pal::DropOperation::Copy, pal::DropOperation::Move})
+    {
+      pal::DragInput input;
+      input.Action = pal::DragAction::Entered;
+      input.ClientX = x;
+      input.ClientY = y;
+      input.AllowedOperations = operations;
+      input.Content = krys::move(content);
+      return input;
+    };
+    auto next = [](pal::DragAction action, const pal::DragInput &entered)
+    {
+      pal::DragInput input = entered;
+      input.Action = action;
+      input.Content = {};
+      return input;
+    };
+
+    SECTION("Text dropped into editable content")
+    {
+      pal::DragContent content;
+      content.Text = u8"dropped";
+      auto input = entered(100, 90, krys::move(content));
+
+      CHECK(view.SystemDragInput({100, 90}, input) == pal::DropOperation::Copy);
+      CHECK(view.SystemDragInput({100, 91}, next(pal::DragAction::Moved, input)) == pal::DropOperation::Copy);
+      CHECK(view.SystemDragInput({100, 91}, next(pal::DragAction::Dropped, input))
+            == pal::DropOperation::Copy);
+      CHECK(Narrow(boo::SerializeFragment(*view.Document().GetElementById(u8"e"),
+                                          boo::SerializedNodes::SubtreesOfChildren))
+            == "editabledropped");
+      CHECK(log.Text == "dragenter@e dragover@e drop@e");
+    }
+
+    SECTION("The page reads what's dropped, and decides what the drop does")
+    {
+      std::string text, uriList, types;
+      size_t files = 0;
+      auto accept = [](boo::dom::Event &event)
+      {
+        auto *node = DynamicDowncast<boo::dom::Node>(event.Target().get());
+        auto *element = DynamicDowncast<boo::dom::Element>(node);
+        if (element && element->GetAttribute(u8"id") == boo::dom::DOMString(u8"dst"))
+        {
+          event.PreventDefault();
+        }
+      };
+      auto enter = view.Document().AddEventListener(u8"dragenter", accept);
+      auto over = view.Document().AddEventListener(u8"dragover", accept);
+      auto drop = view.Document().AddEventListener(
+        u8"drop",
+        [&](boo::dom::Event &event)
+        {
+          auto &dataTransfer = *Downcast<boo::dom::DragEvent>(event).GetDataTransfer();
+          text = Narrow(dataTransfer.GetData(view.Document(), u8"text/plain"));
+          uriList = Narrow(dataTransfer.GetData(view.Document(), u8"text/uri-list"));
+          for (auto &type : dataTransfer.Types(view.Document()))
+          {
+            types += (types.empty() ? "" : " ") + Narrow(type);
+          }
+          files = dataTransfer.Files(view.Document()).Length();
+          event.PreventDefault();
+        });
+
+      SECTION("A link: the source's move is the default")
+      {
+        pal::DragContent content;
+        content.Text = u8"a link";
+        content.URL = u8"https://example.com/page";
+        content.URLTitle = u8"Example";
+        pal::DropOperations all {pal::DropOperation::Copy, pal::DropOperation::Move,
+                                 pal::DropOperation::Link};
+        auto input = entered(10, 50, krys::move(content), all);
+
+        CHECK(view.SystemDragInput({10, 50}, input) == pal::DropOperation::Move);
+        CHECK(view.SystemDragInput({10, 50}, next(pal::DragAction::Dropped, input))
+              == pal::DropOperation::Move);
+        CHECK(text == "a link");
+        CHECK(uriList == "https://example.com/page");
+        CHECK(types == "text/plain text/html text/uri-list");
+        CHECK(files == 0);
+      }
+
+      SECTION("Files: never moved, as the page only reads them")
+      {
+        pal::DragContent content;
+        content.Files = {u8"C:/Krystal/notes.txt", u8"C:/Krystal/image.png"};
+        pal::DropOperations all {pal::DropOperation::Copy, pal::DropOperation::Move,
+                                 pal::DropOperation::Link};
+        auto input = entered(10, 50, krys::move(content), all);
+
+        CHECK(view.SystemDragInput({10, 50}, input) == pal::DropOperation::Copy);
+        CHECK(view.SystemDragInput({10, 50}, next(pal::DragAction::Dropped, input))
+              == pal::DropOperation::Copy);
+        CHECK(types == "Files text/uri-list");
+        CHECK(files == 2);
+      }
+    }
+
+    SECTION("Leaving the view, and the page")
+    {
+      pal::DragContent content;
+      content.Text = u8"dropped";
+      auto input = entered(10, 50, krys::move(content));
+
+      CHECK_FALSE(view.SystemDragInput({10, 50}, input));
+      // Off the page (over the host's own interface), it leaves it.
+      CHECK_FALSE(view.SystemDragInput({10, -5}, next(pal::DragAction::Moved, input)));
+      CHECK(log.Text == "dragenter@dst dragleave@dst");
+      CHECK(view.SystemDragInput({100, 90}, next(pal::DragAction::Moved, input)) == pal::DropOperation::Copy);
+      CHECK_FALSE(view.SystemDragInput({100, 90}, next(pal::DragAction::Left, input)));
+      CHECK(log.Text.ends_with("dragenter@e dragleave@e"));
+
+      // Input after it left, until another enters, is ignored.
+      CHECK_FALSE(view.SystemDragInput({100, 90}, next(pal::DragAction::Dropped, input)));
+      CHECK(log.Text.ends_with("dragleave@e"));
+      CHECK(Narrow(boo::SerializeFragment(*view.Document().GetElementById(u8"e"),
+                                          boo::SerializedNodes::SubtreesOfChildren))
+            == "editable");
     }
   }
 

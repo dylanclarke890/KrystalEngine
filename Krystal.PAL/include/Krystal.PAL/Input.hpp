@@ -78,6 +78,8 @@ namespace krys::pal
 
     void OnPointerEvent(WindowHandle window, const PointerInput &input) noexcept;
 
+    void OnDragEvent(WindowHandle window, const DragInput &input) noexcept;
+
     void PollGamepads() noexcept;
   };
 }

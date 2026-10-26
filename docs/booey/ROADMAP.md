@@ -754,3 +754,11 @@ Drag and drop. Booey has the `draggable` attribute (and its `-webkit-user-drag` 
 - **Krystal.UI:** the view draws the drag item's image under the cursor, over the page and any overlay, where the page put it relative to the press, and repaints as it moves.
 - **Tests:** Booey: `tests/Graphics/StringTruncator.cpp`, `tests/Platform/DragImage.cpp`, and drag images in `tests/DOM/DataTransfer.cpp` and `tests/Page/DragController.cpp`; 2788 cases pass. Krystal.UI: the image in `tests/DragAndDrop.cpp`, recorded and painted on the GPU; 120 cases pass. Krystal.Editor builds.
 
+### B10e as built (2026-10-26)
+
+- **Ledger:** *Dragging in from other applications* in `docs/booey/PORTING.md`. Booey is unchanged.
+- **Krystal.PAL:** the window's OLE drop target (`IDropTarget`, registered while the host has `OnDrag`, with the shell's helper showing the source's drag image): enter, move, leave and drop as `DragInput` (the position, the keys, what the source allows, and what's dragged: text, markup, a URL and its title, files), answered with `IWindow::SetDropOperation()`; OLE initialised by `pal::Initialise()`; `DragInputEvent`.
+- **Krystal.UI:** `View::SystemDragInput()`: what's dragged becomes a `SelectionData` as on GTK, and the page gets its drag events and drops as for B10c's drags; a drag carrying files is never offered a move.
+- **Editor:** passes the window's drags to the page view, and its answers back to the window.
+- **Tests:** Krystal.UI: drags from other applications in `tests/DragAndDrop.cpp`, through a stand-in for the window's input; 121 cases pass. Not driven by tests: the OLE side. Krystal.Editor builds.
+

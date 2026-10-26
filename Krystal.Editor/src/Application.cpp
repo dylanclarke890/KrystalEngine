@@ -232,6 +232,8 @@ namespace krys
       { _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi)); },
       .OnFocusChange = [&](WindowHandle window, bool focused) noexcept
       { _context->Events->Enqueue(CreateUnique<WindowFocusEvent>(window, focused)); },
+      .OnDrag = [&](WindowHandle window, const DragInput &input) noexcept
+      { _context->Input->OnDragEvent(window, input); },
     };
   }
 

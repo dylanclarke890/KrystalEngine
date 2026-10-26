@@ -7,6 +7,7 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Utils/NativeHandle.hpp"
 #include "Krystal.PAL/CursorShapes.hpp"
+#include "Krystal.PAL/DragAndDrop.hpp"
 #include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
@@ -82,6 +83,8 @@ namespace krys::pal
     using RestoreHandler = Func<void(WindowHandle)>;
     using DPIChangeHandler = Func<void(WindowHandle, int)>;
     using FocusChangeHandler = Func<void(WindowHandle, bool)>;
+    /// @brief A drag from another application over the window.
+    using DragHandler = Func<void(WindowHandle, const DragInput &)>;
 
     MouseMoveHandler OnMouseMove = nullptr;
     /// @brief Called for the mouse's moves instead of `OnMouseMove` while the pointer is locked.
@@ -102,6 +105,9 @@ namespace krys::pal
     DPIChangeHandler OnDPIChange = nullptr;
     /// @brief Called when the window gains (true) or loses (false) keyboard focus.
     FocusChangeHandler OnFocusChange = nullptr;
+    /// @brief Called as drags from other applications come over the window, move, leave and drop; the host
+    /// answers with `IWindow::SetDropOperation()`. Without it, the window takes no drops.
+    DragHandler OnDrag = nullptr;
   };
 
   class IWindow
@@ -159,5 +165,10 @@ namespace krys::pal
     /// @brief Asks the input method to drop its composition, as the host dropped its own: nothing more is
     /// reported for it.
     virtual void CancelComposition() noexcept = 0;
+
+    /// @brief Sets what a drop of the drag over the window would do where the cursor is, as the host answers
+    /// the drag's input (none until it does, and after the drag leaves or drops): the drag's source hears it
+    /// at the drag's next move, and at the drop. A drop is reported only if the last answer was an operation.
+    virtual void SetDropOperation(Maybe<DropOperation> operation) noexcept = 0;
   };
 }
