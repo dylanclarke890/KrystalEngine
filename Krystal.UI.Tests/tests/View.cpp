@@ -322,7 +322,8 @@ namespace krys::ui::tests
       auto submitted = [&]
       {
         auto formData = boo::html::DOMFormData::Create(&orderForm, nullptr).ReleaseValue();
-        return formData->Get(u8"rating");
+        auto value = formData->Get(u8"rating");
+        return value ? Maybe<boo::dom::DOMString>(std::get<boo::dom::DOMString>(*value)) : std::nullopt;
       };
 
       // Unrated, it's required.

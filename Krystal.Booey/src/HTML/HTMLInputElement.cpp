@@ -805,6 +805,23 @@ namespace krys::boo::html
     return _inputType->IsFileUpload();
   }
 
+  FileList *HTMLInputElement::Files() noexcept
+  {
+    if (_inputType->IsFileUpload())
+    {
+      return &static_cast<FileInputType &>(*_inputType).Files();
+    }
+    return nullptr;
+  }
+
+  void HTMLInputElement::SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept
+  {
+    if (_inputType->IsFileUpload())
+    {
+      static_cast<FileInputType &>(*_inputType).SetFiles(krys::move(files), wasSetByJavaScript);
+    }
+  }
+
   bool HTMLInputElement::IsImageButton() const noexcept
   {
     return _inputType->IsImageButton();

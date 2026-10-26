@@ -41,7 +41,7 @@ namespace krys::boo::html::tests
         {
           for (auto &item : formDataEvent->FormData().Items())
           {
-            Entries.push_back(Str(item.Name) + "=" + Str(item.Data));
+            Entries.push_back(Str(item.Name) + "=" + Str(std::get<dom::DOMString>(item.Data)));
           }
           formDataEvent->FormData().Append(u8"added", u8"1");
         }

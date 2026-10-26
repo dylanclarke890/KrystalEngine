@@ -399,6 +399,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/PointerLockController.cpp
 		tests/Page/SpatialNavigation.cpp
 		tests/Modules/Gamepad/Gamepad.cpp
+		tests/FileAPI/Blob.cpp
 		tests/Page/PointerCaptureController.cpp
 		tests/Page/DOMSelection.cpp
 		tests/Page/MouseSelection.cpp
@@ -620,6 +621,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLDialogElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
+		tests/HTML/FileInputType.cpp
 		tests/HTML/Popover.cpp
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp

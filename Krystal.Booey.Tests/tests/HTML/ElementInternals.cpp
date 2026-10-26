@@ -4,9 +4,11 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomStateSet.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/FormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 
@@ -178,10 +180,33 @@ namespace krys::boo::html::tests
 
       auto submitted = Submitted(u8"f");
       REQUIRE(submitted->Items().size() == 3);
-      CHECK(submitted->Get(u8"rating") == u8"4");
-      CHECK(submitted->Get(u8"x") == u8"1");
-      CHECK(submitted->Get(u8"y") == u8"2");
+      CHECK(submitted->Get(u8"rating") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"4")));
+      CHECK(submitted->Get(u8"x") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"1")));
+      CHECK(submitted->Get(u8"y") == html::DOMFormData::FormDataEntryValue(dom::DOMString(u8"2")));
       CHECK_FALSE(submitted->Has(u8"z"));
+    }
+
+    SECTION("they submit files")
+    {
+      auto file = File::Create(u8"C:/dir/photo.png");
+      REQUIRE_FALSE(InternalsOf(u8"a").SetFormValue(RefPtr<File>(file)).HasException());
+      auto entries = DOMFormData::Create();
+      entries->Append(u8"x", *file, Maybe<dom::DOMStringView>(u8"renamed.png"));
+      REQUIRE_FALSE(InternalsOf(u8"b").SetFormValue(RefPtr<DOMFormData>(entries)).HasException());
+
+      auto submitted = Submitted(u8"f");
+      REQUIRE(submitted->Items().size() == 2);
+      CHECK(submitted->Get(u8"rating") == html::DOMFormData::FormDataEntryValue(RefPtr<File>(file)));
+      auto renamed = submitted->Get(u8"x");
+      REQUIRE(renamed);
+      CHECK(std::get<RefPtr<File>>(*renamed)->Name() == u8"renamed.png");
+      CHECK(std::get<RefPtr<File>>(*renamed)->Path() == u8"C:/dir/photo.png");
+
+      // Files aren't saved with the state.
+      auto *element = Downcast<HTMLMaybeFormAssociatedCustomElement>(ById(u8"a"))
+                        .FormAssociatedCustomElementForElementInternals();
+      REQUIRE(element);
+      CHECK(element->SaveFormControlState().empty());
     }
 
     SECTION("they set their validity")

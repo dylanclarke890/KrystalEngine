@@ -1862,6 +1862,11 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Loader/LocalFrameLoaderClient.hpp
   include/Krystal.Booey/Loader/NavigationAction.hpp
   include/Krystal.Booey/Platform/LocalizedStrings.hpp
+  include/Krystal.Booey/FileAPI/Blob.hpp
+  include/Krystal.Booey/FileAPI/BlobPropertyBag.hpp
+  include/Krystal.Booey/FileAPI/File.hpp
+  include/Krystal.Booey/FileAPI/FileList.hpp
+  include/Krystal.Booey/Platform/Network/BlobData.hpp
   include/Krystal.Booey/Platform/Network/FormData.hpp
   include/Krystal.Booey/Platform/Network/FormDataBuilder.hpp
 
@@ -3183,6 +3188,10 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Loader/FrameLoadRequest.cpp
   src/Loader/NavigationAction.cpp
   src/Platform/LocalizedStrings.cpp
+  src/FileAPI/Blob.cpp
+  src/FileAPI/File.cpp
+  src/FileAPI/FileList.cpp
+  src/Platform/Network/BlobData.cpp
   src/Platform/Network/FormData.cpp
   src/Platform/Network/FormDataBuilder.cpp
 

@@ -4,6 +4,11 @@
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/HTML/InputType.hpp"
 
+namespace krys::boo
+{
+  class FileList;
+}
+
 namespace krys::boo::dom
 {
   class RadioButtonGroups;
@@ -134,8 +139,15 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-input-disabled
     void Disabled(bool value) noexcept;
 
-    // TODO(HTMLINPUT, HTML): Implement Files().
-    // attribute FileList? files;
+    /// @brief A file input's files, or null for other types.
+    /// @see https://html.spec.whatwg.org/#dom-input-files
+    KRYS_NODISCARD FileList *Files() noexcept;
+
+    /// @brief Replaces a file input's files (other types ignore it); unless set by script, fires `input` and
+    /// `change` if their paths changed, or else `cancel`.
+    /// @see https://html.spec.whatwg.org/#dom-input-files
+    void SetFiles(RefPtr<FileList> &&files,
+                  WasSetByJavaScript wasSetByJavaScript = WasSetByJavaScript::No) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;

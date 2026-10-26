@@ -227,7 +227,7 @@ namespace krys::boo::tests
         {
           for (auto &item : (*formData)->Items())
           {
-            entry += " " + Narrow(item.Name) + "=" + Narrow(item.Data);
+            entry += " " + Narrow(item.Name) + "=" + Narrow(std::get<dom::DOMString>(item.Data));
           }
         }
         _log.push_back(entry);

@@ -53,10 +53,41 @@ namespace krys::boo::html
     return newFormData;
   }
 
-  // https://html.spec.whatwg.org/#create-an-entry
+  namespace
+  {
+    // https://html.spec.whatwg.org/#create-an-entry
+    KRYS_NODISCARD DOMFormData::Item CreateStringEntry(dom::DOMStringView name,
+                                                       dom::DOMStringView value) noexcept
+    {
+      return {.Name = dom::DOMString(name), .Data = dom::DOMString(value)};
+    }
+
+    // https://html.spec.whatwg.org/#create-an-entry
+    KRYS_NODISCARD DOMFormData::Item CreateFileEntry(dom::DOMStringView name, Blob &blob,
+                                                     Maybe<dom::DOMStringView> filename) noexcept
+    {
+      if (auto *file = DynamicDowncast<File>(blob))
+      {
+        if (filename)
+        {
+          return {.Name = dom::DOMString(name),
+                  .Data = RefPtr<File>(File::Create(*file, Maybe<utf8_stringview>(*filename)))};
+        }
+        return {.Name = dom::DOMString(name), .Data = ShareRefPtr(file)};
+      }
+      return {.Name = dom::DOMString(name),
+              .Data = RefPtr<File>(File::Create(blob, filename ? *filename : u8"blob"))};
+    }
+  }
+
   void DOMFormData::Append(dom::DOMStringView name, dom::DOMStringView value) noexcept
   {
-    _items.push_back({.Name = dom::DOMString(name), .Data = dom::DOMString(value)});
+    _items.push_back(CreateStringEntry(name, value));
+  }
+
+  void DOMFormData::Append(dom::DOMStringView name, Blob &blob, Maybe<dom::DOMStringView> filename) noexcept
+  {
+    _items.push_back(CreateFileEntry(name, blob, filename));
   }
 
   void DOMFormData::Remove(dom::DOMStringView name) noexcept
@@ -96,7 +127,12 @@ namespace krys::boo::html
 
   void DOMFormData::Set(dom::DOMStringView name, dom::DOMStringView value) noexcept
   {
-    Set(name, Item {.Name = dom::DOMString(name), .Data = dom::DOMString(value)});
+    Set(name, CreateStringEntry(name, value));
+  }
+
+  void DOMFormData::Set(dom::DOMStringView name, Blob &blob, Maybe<dom::DOMStringView> filename) noexcept
+  {
+    Set(name, CreateFileEntry(name, blob, filename));
   }
 
   void DOMFormData::Set(dom::DOMStringView name, Item &&item) noexcept

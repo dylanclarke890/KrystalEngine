@@ -103,7 +103,14 @@ namespace krys::boo::html
       {
         for (auto &item : (*entries)->Items())
         {
-          formData.Append(item.Name, item.Data);
+          if (auto *value = std::get_if<dom::DOMString>(&item.Data))
+          {
+            formData.Append(item.Name, *value);
+          }
+          else
+          {
+            formData.Append(item.Name, *std::get<RefPtr<File>>(item.Data));
+          }
         }
       }
     }
@@ -112,6 +119,13 @@ namespace krys::boo::html
       if (auto name = Name(); !name.empty())
       {
         formData.Append(name, *value);
+      }
+    }
+    else if (auto *file = std::get_if<RefPtr<File>>(&_submissionValue))
+    {
+      if (auto name = Name(); !name.empty() && *file)
+      {
+        formData.Append(name, **file);
       }
     }
 
@@ -185,15 +199,20 @@ namespace krys::boo::html
     krys_debug_assert(_element.IsDefinedCustomElement());
 
     FormControlState savedState;
-    // FIXME: Files, once a form value can hold them.
+
+    // FIXME: Support File when saving / restoring state.
+    // https://bugs.webkit.org/show_bug.cgi?id=249895
     if (auto *formData = std::get_if<RefPtr<DOMFormData>>(&_state))
     {
       auto &items = (*formData)->Items();
       savedState.reserve(items.size() * 2);
       for (const auto &item : items)
       {
-        savedState.push_back(item.Name);
-        savedState.push_back(item.Data);
+        if (auto *value = std::get_if<dom::DOMString>(&item.Data))
+        {
+          savedState.push_back(item.Name);
+          savedState.push_back(*value);
+        }
       }
     }
     else if (auto *string = std::get_if<dom::DOMString>(&_state))
