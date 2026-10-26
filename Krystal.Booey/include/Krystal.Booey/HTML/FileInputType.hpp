@@ -8,8 +8,8 @@ namespace krys::boo::html
 {
   /// @brief The file input type.
   // FIXME: The file chooser the host shows (showPicker, its settings, the files chosen in it, and its
-  // icons), dropped files, and the button and file name it draws come with the host's file picker and drag
-  // and drop.
+  // icons), and the button and file name it draws come with the host's file picker; directories
+  // (allowsDirectories), with directory uploads.
   class FileInputType final : public BaseClickableWithKeyInputType
   {
   private:
@@ -45,6 +45,12 @@ namespace krys::boo::html
     /// @brief Replaces the files with @p files (if not null); unless set by script, fires `input` and
     /// `change` if their paths changed, or else `cancel`.
     void SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept;
+
+    /// @brief Takes the files at @p paths as the user's choice: all of them if the input is `multiple`, else
+    /// the first.
+    void FilesChosen(const List<utf8_string> &paths) noexcept;
+
+    bool ReceiveDroppedFiles(const DragData &dragData) noexcept final;
 
     KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
 

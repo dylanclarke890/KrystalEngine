@@ -1,10 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -25,10 +27,8 @@ namespace krys::boo::dom
 
   /// @brief The data of a drag, a clipboard event or an input event, and what a page may do with it.
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-datatransfer-interface
-  // FIXME: Drags (createForDrag, createForDragStartEvent, createForDrop, createForUpdatingDropTarget, the
-  // source and destination operation masks, moveDragState), with drag and drop; the drag image
-  // (setDragImage, createDragImage, updateDragImage, dragImageElement, hasDragImage, dragLocation), with drag
-  // images.
+  // FIXME: The drag image (setDragImage, createDragImage, updateDragImage, dragImageElement, hasDragImage,
+  // dragLocation), with drag images.
   class DataTransfer final : public RefCounted<DataTransfer>, public CanMakeWeakPtr<DataTransfer>
   {
     KRYS_NON_COPY_MOVABLE(DataTransfer);
@@ -62,6 +62,7 @@ namespace krys::boo::dom
     Type _type;
     DOMString _dropEffect;
     DOMString _effectAllowed;
+    bool _shouldUpdateDragImage {false};
 
     DataTransfer(StoreMode mode, UniquePtr<Pasteboard> &&pasteboard, Type type = Type::CopyAndPaste,
                  DOMString &&effectAllowed = u8"uninitialized") noexcept;
@@ -77,6 +78,45 @@ namespace krys::boo::dom
     /// @brief The read-only data of an input event: @p plainText and @p htmlText.
     KRYS_NODISCARD static Ref<DataTransfer> CreateForInputEvent(DOMStringView plainText,
                                                                 DOMStringView htmlText) noexcept;
+
+    /// @brief The data of a drag that starts in @p document, which its pasteboard carries to the drop.
+    KRYS_NODISCARD static Ref<DataTransfer> CreateForDrag(const Document &document) noexcept;
+    /// @brief What `dragstart`'s listeners may write, moved into the drag's data transfer after it.
+    KRYS_NODISCARD static Ref<DataTransfer> CreateForDragStartEvent(const Document &document) noexcept;
+    /// @brief The read-only data of `drop`.
+    KRYS_NODISCARD static Ref<DataTransfer> CreateForDrop(const Document &document,
+                                                          UniquePtr<Pasteboard> &&pasteboard,
+                                                          EnumSet<DragOperation> sourceOperationMask,
+                                                          bool draggingFiles) noexcept;
+    /// @brief The protected data of `dragenter`, `dragover` and `dragleave`: its types, not its data.
+    KRYS_NODISCARD static Ref<DataTransfer>
+      CreateForUpdatingDropTarget(const Document &document, UniquePtr<Pasteboard> &&pasteboard,
+                                  EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept;
+
+    KRYS_NODISCARD bool DropEffectIsUninitialized() const noexcept
+    {
+      return _dropEffect == u8"uninitialized";
+    }
+
+    /// @brief The operations `effectAllowed` allows.
+    KRYS_NODISCARD EnumSet<DragOperation> SourceOperationMask() const noexcept;
+    /// @brief The operation `dropEffect` chose.
+    KRYS_NODISCARD EnumSet<DragOperation> DestinationOperationMask() const noexcept;
+    void SetSourceOperationMask(EnumSet<DragOperation> operationMask) noexcept;
+    void SetDestinationOperationMask(EnumSet<DragOperation> operationMask) noexcept;
+
+    void SetDragHasStarted() noexcept
+    {
+      _shouldUpdateDragImage = true;
+    }
+
+    /// @brief Takes the data, effects and files @p other (`dragstart`'s data transfer) has.
+    void MoveDragState(Ref<DataTransfer> &&other) noexcept;
+    // FIXME: Whether the page set a drag image, with drag images.
+    KRYS_NODISCARD bool HasDragImage() const noexcept
+    {
+      return false;
+    }
 
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-dropeffect
     KRYS_NODISCARD DOMString DropEffect() const noexcept;

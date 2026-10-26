@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
@@ -2391,8 +2392,28 @@ namespace krys::boo
         }
         break;
       }
-      // FIXME: The drag caret (the drag caret controller), with drag and drop.
-      case CaretType::DragCaret: break;
+      case CaretType::DragCaret:
+      {
+        auto *page = GetDocument().GetPage();
+        if (!page)
+        {
+          return;
+        }
+
+        auto &dragCaretController = page->GetDragCaretController();
+        auto *caretPainter = dragCaretController.CaretRenderer();
+        if (!caretPainter)
+        {
+          return;
+        }
+
+        bool isContentEditable = dragCaretController.IsContentEditable();
+        if (shouldPaintCaret(caretPainter, isContentEditable))
+        {
+          dragCaretController.PaintDragCaret(GetDocument().Frame(), paintInfo.Context(), paintOffset);
+        }
+        break;
+      }
     }
   }
 

@@ -16,6 +16,8 @@
 
 namespace krys::boo
 {
+  class DragData;
+
   enum class PlainTextURLReadingPolicy : bool
   {
     IgnoreURL,
@@ -43,6 +45,13 @@ namespace krys::boo
     url::URL Url;
     utf8_string Title;
     utf8_string Markup;
+  };
+
+  // FIXME: The image itself (image), with images on the pasteboard.
+  struct PasteboardImage
+  {
+    PasteboardURL Url;
+    utf8_string SuggestedName;
   };
 
   // For reading from the pasteboard.
@@ -94,9 +103,10 @@ namespace krys::boo
 
   /// @brief A pasteboard: the system clipboard, read and written through the host's pasteboard strategy, or
   /// the data of a drag.
-  // FIXME: Pasteboards for drags (createForDragAndDrop, create from drag data, setDragImage), with drag and
-  // drop; writing images (write(PasteboardImage)), colours and buffers, with images on the pasteboard; the
-  // smart paste type, with writing it; reading items by index, with the async clipboard API.
+  // FIXME: The drag image (setDragImage), with drag images; writing images, colours and buffers, with images
+  // on the pasteboard; the smart paste type, with writing it; reading items by index, with the async
+  // clipboard API.
+  // FIXME: Trustworthy web URLs (canWriteTrustworthyWebURLsPboardType), which are Cocoa's.
   class Pasteboard
   {
     KRYS_NON_COPY_MOVABLE(Pasteboard);
@@ -129,6 +139,10 @@ namespace krys::boo
     virtual ~Pasteboard() noexcept = default;
 
     KRYS_NODISCARD static UniquePtr<Pasteboard> CreateForCopyAndPaste() noexcept;
+    /// @brief An empty pasteboard for a drag that starts in a page.
+    KRYS_NODISCARD static UniquePtr<Pasteboard> CreateForDragAndDrop() noexcept;
+    /// @brief A pasteboard holding the data of @p dragData.
+    KRYS_NODISCARD static UniquePtr<Pasteboard> Create(const DragData &dragData) noexcept;
 
     KRYS_NODISCARD static bool IsSafeTypeForDOMToReadAndWrite(utf8_stringview type) noexcept;
     KRYS_NODISCARD static bool
@@ -157,6 +171,7 @@ namespace krys::boo
     virtual void Read(PasteboardFileReader &reader) noexcept;
 
     virtual void Write(const PasteboardURL &pasteboardURL) noexcept;
+    virtual void Write(const PasteboardImage &pasteboardImage) noexcept;
     virtual void Write(const PasteboardWebContent &pasteboardContent) noexcept;
 
     virtual void WriteCustomData(const List<PasteboardCustomData> &data) noexcept;

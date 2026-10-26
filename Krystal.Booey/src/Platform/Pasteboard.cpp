@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Platform/Pasteboard.hpp"
+#include "Krystal.Booey/Platform/DragData.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Platform/PasteboardStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
@@ -88,6 +89,17 @@ namespace krys::boo
     return CreateUnique<Pasteboard>(u8"CLIPBOARD");
   }
 
+  UniquePtr<Pasteboard> Pasteboard::CreateForDragAndDrop() noexcept
+  {
+    return CreateUnique<Pasteboard>(SelectionData());
+  }
+
+  UniquePtr<Pasteboard> Pasteboard::Create(const DragData &dragData) noexcept
+  {
+    krys_debug_assert(dragData.PlatformData());
+    return CreateUnique<Pasteboard>(*dragData.PlatformData());
+  }
+
   Pasteboard::Pasteboard(utf8_stringview name) noexcept : _name(name)
   {
     if (auto *strategy = Strategy())
@@ -172,6 +184,32 @@ namespace krys::boo
     {
       SelectionData data;
       data.SetURL(pasteboardURL.Url, pasteboardURL.Title);
+      if (auto *strategy = Strategy())
+      {
+        strategy->WriteToClipboard(_name, krys::move(data));
+      }
+    }
+  }
+
+  void Pasteboard::Write(const PasteboardImage &pasteboardImage) noexcept
+  {
+    if (_selectionData)
+    {
+      _selectionData->ClearAll();
+      if (!pasteboardImage.Url.Url.IsEmpty())
+      {
+        _selectionData->SetURL(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
+        _selectionData->SetMarkup(pasteboardImage.Url.Markup);
+      }
+    }
+    else
+    {
+      SelectionData data;
+      if (!pasteboardImage.Url.Url.IsEmpty())
+      {
+        data.SetURL(pasteboardImage.Url.Url, pasteboardImage.Url.Title);
+        data.SetMarkup(pasteboardImage.Url.Markup);
+      }
       if (auto *strategy = Strategy())
       {
         strategy->WriteToClipboard(_name, krys::move(data));

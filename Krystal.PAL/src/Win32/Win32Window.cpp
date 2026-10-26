@@ -391,9 +391,62 @@ namespace
       case CursorShape::ResizeEW:   return IDC_SIZEWE;
       case CursorShape::ResizeNESW: return IDC_SIZENESW;
       case CursorShape::ResizeNWSE: return IDC_SIZENWSE;
+      case CursorShape::DragNone:
+      case CursorShape::DragMove:
+      case CursorShape::DragCopy:
+      case CursorShape::DragLink:
       case CursorShape::Hidden:     return NULL;
     }
     return IDC_ARROW;
+  }
+
+  /// @brief The drag and drop cursor OLE shows for @p cursor (ole32.dll's cursors 1 to 4), or null if it
+  /// isn't one.
+  static HCURSOR DragCursor(const krys::pal::CursorShape cursor) noexcept
+  {
+    using krys::pal::CursorShape;
+    int resource = 0;
+    switch (cursor)
+    {
+      case CursorShape::DragNone: resource = 1; break;
+      case CursorShape::DragMove: resource = 2; break;
+      case CursorShape::DragCopy: resource = 3; break;
+      case CursorShape::DragLink: resource = 4; break;
+      default:                    return NULL;
+    }
+
+    static HMODULE ole32 = ::LoadLibraryExW(L"ole32.dll", NULL, LOAD_LIBRARY_AS_DATAFILE);
+    if (!ole32)
+    {
+      return NULL;
+    }
+    return ::LoadCursorW(ole32, MAKEINTRESOURCEW(resource));
+  }
+
+  /// @brief Captures the mouse while a button is held, so the release reaches the window wherever the mouse
+  /// is (a drag in the page follows it out of the window), and releases it with the last button.
+  static void UpdateMouseCapture(HWND window, UINT message, WPARAM wParam) noexcept
+  {
+    switch (message)
+    {
+      case WM_LBUTTONDOWN:
+      case WM_RBUTTONDOWN:
+      case WM_MBUTTONDOWN:
+      case WM_XBUTTONDOWN: ::SetCapture(window); break;
+      case WM_LBUTTONUP:
+      case WM_RBUTTONUP:
+      case WM_MBUTTONUP:
+      case WM_XBUTTONUP:
+      {
+        constexpr WPARAM buttons = MK_LBUTTON | MK_RBUTTON | MK_MBUTTON | MK_XBUTTON1 | MK_XBUTTON2;
+        if (!(GET_KEYSTATE_WPARAM(wParam) & buttons) && ::GetCapture() == window)
+        {
+          ::ReleaseCapture();
+        }
+        break;
+      }
+      default: break;
+    }
   }
 
   static std::wstring ToWideString(const krys::string &str)
@@ -651,6 +704,7 @@ namespace krys::pal
     LRESULT Win32Window::HandleMessage(HWND window, UINT message, WPARAM wParam, LPARAM lParam) const noexcept
     {
       const auto handle = GetWindowHandle();
+      UpdateMouseCapture(window, message, wParam);
       switch (message)
       {
         case WM_SETCURSOR:
@@ -1118,6 +1172,14 @@ namespace krys::pal
       }
       _cursor = cursor;
 
+      // While the window captures the mouse (a button is held), its cursor shows wherever the mouse is, and
+      // no WM_SETCURSOR comes.
+      if (::GetCapture() == _handle)
+      {
+        ApplyCursor();
+        return;
+      }
+
       // WM_SETCURSOR only comes as the mouse moves, so a change under a still mouse is applied now.
       POINT point {};
       if (!::GetCursorPos(&point) || ::WindowFromPoint(point) != _handle)
@@ -1474,6 +1536,11 @@ namespace krys::pal
       if (_cursor == CursorShape::Hidden || _pointerLock)
       {
         ::SetCursor(NULL);
+        return;
+      }
+      if (auto dragCursor = DragCursor(_cursor))
+      {
+        ::SetCursor(dragCursor);
         return;
       }
       ::SetCursor(::LoadCursorW(NULL, CursorShapeToResource(_cursor)));

@@ -6,9 +6,11 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Editing/TextGranularity.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
+#include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Booey/Platform/Cursor.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
@@ -19,6 +21,8 @@
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -28,6 +32,7 @@
 
 namespace krys::boo::dom
 {
+  class DataTransfer;
   class Element;
   class Event;
   class KeyboardEvent;
@@ -39,9 +44,11 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class AutoscrollController;
+  struct DragState;
   class FloatQuad;
   class LocalFrame;
   class LocalFrameView;
+  class Pasteboard;
   class RenderLayer;
   class MouseEventWithHitTestResults;
   class RenderBox;
@@ -56,17 +63,34 @@ namespace krys::boo
   class ScrollableArea;
   class Scrollbar;
 
+  // The link drag hysteresis is much larger than the others because there
+  // needs to be enough space to cancel the link press without starting a link drag,
+  // and because dragging links is rare.
+  constexpr int32 LinkDragHysteresis = 40;
+  constexpr int32 ImageDragHysteresis = 5;
+  constexpr int32 TextDragHysteresis = 3;
+  constexpr int32 ColorDragHystersis = 3;
+  constexpr int32 GeneralDragHysteresis = 3;
+
+  enum CheckDragHysteresis : bool
+  {
+    ShouldCheckDragHysteresis,
+    DontCheckDragHysteresis
+  };
+
   /// @brief Turns the host's mouse and keyboard input into DOM events for a frame: `mousemove`, `mousedown`
   /// and `mouseup` at the element under the mouse; `mouseover`, `mouseout`, `mouseenter` and `mouseleave` as
   /// that element changes; `click`, `auxclick` and `dblclick`; the hover and active state; the cursor to
   /// show; the scrollbars under the mouse; `wheel`, which scrolls; and `keydown`, `keypress` and `keyup` at
   /// the focused element, with Tab and Shift+Tab moving the focus and the arrows, Page Up and Page Down,
-  /// Home, End and Space scrolling; and selecting with the mouse: a press places the selection, a drag
-  /// extends it (scrolling as it reaches an edge), double and triple presses select words and paragraphs, and
-  /// Shift extends it.
+  /// Home, End and Space scrolling; selecting with the mouse: a press places the selection, a drag extends it
+  /// (scrolling as it reaches an edge), double and triple presses select words and paragraphs, and Shift
+  /// extends it; and drag and drop: a press on something draggable that moves far enough starts a drag
+  /// (`dragstart`, then `drag` as it moves and `dragend` when it ends, at the source), and a drag over the
+  /// page gets `dragenter`, `dragover`, `dragleave` and `drop` at its targets.
   // FIXME: The rest of the event handler: the keyboard's other default actions (selection by the keyboard is
-  // with the keyboard and the DOM's Selection), drag and drop, context menus, resizers, subframes, pan
-  // scrolling, pointer lock and touch events.
+  // with the keyboard and the DOM's Selection), context menus, resizers, subframes, pan scrolling, pointer
+  // lock and touch events.
 
   // Pointer events from the mouse are dispatched by the elements as they get mouse events
   // (`Element::DispatchMouseEvent`).
@@ -99,6 +123,59 @@ namespace krys::boo
       ExtendedSelection
     };
 
+    /// @brief Whether the press may go on to drag or select, or why it can't.
+    class CapturesDragging
+    {
+    public:
+      enum class InabilityReason : uint8
+      {
+        MousePressIsCancelled,
+        MouseMoveIsCancelled,
+        Unknown,
+      };
+
+    private:
+      Maybe<InabilityReason> _inabilityReason {InabilityReason::Unknown};
+
+    public:
+      CapturesDragging(bool capturesDragging) noexcept
+      {
+        *this = capturesDragging;
+      }
+
+      CapturesDragging(InabilityReason inabilityReason) noexcept : _inabilityReason(inabilityReason)
+      {
+      }
+
+      CapturesDragging &operator=(bool capturesDragging) noexcept
+      {
+        if (capturesDragging)
+        {
+          _inabilityReason = null;
+        }
+        else
+        {
+          _inabilityReason = InabilityReason::Unknown;
+        }
+        return *this;
+      }
+
+      CapturesDragging &operator=(InabilityReason inabilityReason) noexcept
+      {
+        _inabilityReason = inabilityReason;
+        return *this;
+      }
+
+      explicit operator bool() const noexcept
+      {
+        return !_inabilityReason;
+      }
+      KRYS_NODISCARD InabilityReason GetInabilityReason() const noexcept
+      {
+        return *_inabilityReason;
+      }
+    };
+
   private:
     LocalFrame &_frame;
 
@@ -111,6 +188,13 @@ namespace krys::boo
     LayoutPoint _mouseDownContentsPosition;
     IntPoint _dragStartPosition;
     Maybe<dom::SimpleRange> _dragStartSelection;
+    RefPtr<dom::Element> _dragTarget;
+    bool _mouseDownMayStartDrag {false};
+    bool _dragMayStartSelectionInstead {false};
+    bool _shouldOnlyFireDragOverEvent {false};
+    bool _didStartDrag {false};
+    CapturesDragging _capturesDragging {false};
+    PlatformMouseEvent _mouseDownEvent;
     UniquePtr<AutoscrollController> _autoscrollController;
 
     RefPtr<dom::Element> _elementUnderMouse;
@@ -193,6 +277,47 @@ namespace krys::boo
       return _mousePressNode.get();
     }
 
+    /// @brief What a drop target said of a drag over it: whether it accepts it, and the operations it chose.
+    struct DragTargetResponse
+    {
+      bool Accept {false};
+      Maybe<EnumSet<DragOperation>> OperationMask;
+    };
+
+    /// @brief How long a press on the selection must be held before moving drags it rather than selecting.
+    static constexpr MonotonicTime::duration TextDragDelay {};
+
+    /// @brief A drag moved over the frame: `dragenter` and `dragleave` as its target changes, else
+    /// `dragover`, each after `drag` at the source.
+    DragTargetResponse UpdateDragAndDrop(const PlatformMouseEvent &event,
+                                         const Func<UniquePtr<Pasteboard>()> &makePasteboard,
+                                         EnumSet<DragOperation> sourceOperationMask,
+                                         bool draggingFiles) noexcept;
+    /// @brief A drag left the frame: `dragleave` at its target.
+    void CancelDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
+                           EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept;
+    /// @brief A drag dropped on the frame: `drop` at its target.
+    /// @return Whether the page cancelled it, doing the drop itself.
+    bool PerformDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
+                            EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept;
+    void UpdateDragStateAfterEditDragIfNeeded(dom::Element &rootEditableElement) noexcept;
+    /// @brief The element being dragged, if a drag started in a page.
+    KRYS_NODISCARD static dom::Element *DraggedElement() noexcept;
+
+    /// @brief Whether a press @p event may start a drag.
+    KRYS_NODISCARD bool EventMayStartDrag(const PlatformMouseEvent &event) const noexcept;
+
+    void DidStartDrag() noexcept;
+    void DragCancelled() noexcept;
+    /// @brief The drag that started in the frame ended at @p event, with @p dragOperationMask done: `dragend`
+    /// at the source.
+    void DragSourceEndedAt(const PlatformMouseEvent &event, EnumSet<DragOperation> dragOperationMask,
+                           MayExtendDragSession mayExtendDragSession = MayExtendDragSession::No) noexcept;
+
+    /// @brief Whether a drag of an image may be dropped in the frame as a file.
+    // FIXME: The origin the image's data is restricted to, once there are security origins.
+    KRYS_NODISCARD bool CanDropCurrentlyDraggedImageAsFile() const noexcept;
+
     /// @brief Extends the selection to the last known mouse position, as dragging (and autoscrolling) does.
     void UpdateSelectionForMouseDrag() noexcept;
     KRYS_NODISCARD bool ShouldUpdateAutoscroll() const noexcept;
@@ -205,6 +330,8 @@ namespace krys::boo
     }
     KRYS_NODISCARD bool AutoscrollInProgress() const noexcept;
     void StopAutoscrollTimer(bool rendererIsBeingDestroyed = false) noexcept;
+
+    KRYS_NODISCARD static DragState &GetDragState() noexcept;
 
     /// @brief The element the mouse is over, as of the last mouse event.
     KRYS_NODISCARD dom::Element *ElementUnderMouse() const noexcept
@@ -339,6 +466,35 @@ namespace krys::boo
     KRYS_NODISCARD MouseEventWithHitTestResults
       PrepareMouseEvent(const HitTestRequest &request, const PlatformMouseEvent &mouseEvent) noexcept;
 
+#pragma region Drag and drop
+
+    void SetDragStateSource(dom::Element *element) const noexcept;
+    KRYS_NODISCARD EnumSet<DragSourceAction> UpdateDragSourceActionsAllowed() const noexcept;
+    KRYS_NODISCARD bool ShouldAllowMouseDownToStartDrag() const noexcept;
+
+    bool DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &target,
+                           const PlatformMouseEvent &event, dom::DataTransfer &dataTransfer) noexcept;
+    DragTargetResponse DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom eventType, dom::Element &target,
+                                                        const PlatformMouseEvent &event,
+                                                        UniquePtr<Pasteboard> &&pasteboard,
+                                                        EnumSet<DragOperation> sourceOperationMask,
+                                                        bool draggingFiles) noexcept;
+    bool HandleDrag(const MouseEventWithHitTestResults &event,
+                    CheckDragHysteresis checkDragHysteresis) noexcept;
+    void ClearDragState() noexcept;
+
+    KRYS_NODISCARD static bool ShouldDispatchEventsToDragSourceElement() noexcept;
+    void DispatchEventToDragSourceElement(dom::DOMStringAtom eventType,
+                                          const PlatformMouseEvent &event) noexcept;
+    bool DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept;
+
+    KRYS_NODISCARD bool DragHysteresisExceeded(const FloatPoint &dragViewportLocation) const noexcept;
+    KRYS_NODISCARD bool MouseMovementExceedsThreshold(const FloatPoint &viewportLocation,
+                                                      int32 pointsThreshold) const noexcept;
+    static void InvalidateDataTransfer() noexcept;
+
+#pragma endregion
+
     void SetLastKnownMousePosition(DoublePoint position, DoublePoint globalPosition) noexcept;
     void InvalidateClick() noexcept;
     bool SwallowAnyClickEvent(const PlatformMouseEvent &platformMouseEvent,
@@ -407,7 +563,9 @@ namespace krys::boo
     KRYS_NODISCARD VisiblePosition SelectionExtentRespectingEditingBoundary(const VisibleSelection &selection,
                                                                             const LayoutPoint &localPoint,
                                                                             dom::Node *targetNode) noexcept;
-    bool HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event) noexcept;
+    bool
+      HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event,
+                              CheckDragHysteresis checkDragHysteresis = ShouldCheckDragHysteresis) noexcept;
     void UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept;
     bool HandleMouseReleaseEvent(const MouseEventWithHitTestResults &event) noexcept;
 

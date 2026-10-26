@@ -5,7 +5,16 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -162,6 +171,119 @@ namespace krys::boo
   bool HitTestResult::IsOverLink() const noexcept
   {
     return _innerURLElement && css::IsLink(*_innerURLElement);
+  }
+
+  bool HitTestResult::IsSelected() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return false;
+    }
+
+    auto *frame = _innerNonSharedNode->NodeDocument().Frame();
+    if (!frame)
+    {
+      return false;
+    }
+
+    return _innerNonSharedNode->NodeDocument().Selection().Contains(_hitTestLocation.Point());
+  }
+
+  // FIXME: The document's encoding's display string (displayStringModifiedByEncoding), with text encodings.
+  utf8_string HitTestResult::AltDisplayString() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return {};
+    }
+
+    if (auto *image = DynamicDowncast<html::HTMLImageElement>(*_innerNonSharedNode))
+    {
+      return image->GetAttribute(u8"alt").value_or(dom::DOMString());
+    }
+
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*_innerNonSharedNode))
+    {
+      return input->GetAttribute(u8"alt").value_or(dom::DOMString());
+    }
+
+    return {};
+  }
+
+  // FIXME: Image overlays' hosts (nodeForImageData), once there are image overlays.
+  Image *HitTestResult::GetImage() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return nullptr;
+    }
+
+    if (auto *image = DynamicDowncast<RenderImage>(_innerNonSharedNode->Renderer()))
+    {
+      if (image->GetCachedImage() && !image->GetCachedImage()->ErrorOccurred())
+      {
+        return image->GetCachedImage()->ImageForRenderer(image);
+      }
+    }
+
+    return nullptr;
+  }
+
+  IntRect HitTestResult::ImageRect() const noexcept
+  {
+    if (!GetImage())
+    {
+      return {};
+    }
+
+    return _innerNonSharedNode->GetRenderBox()->AbsoluteContentQuad().EnclosingBoundingBox();
+  }
+
+  // FIXME: Link decoration filtering (applyLinkDecorationFiltering), which is Cocoa's.
+  url::URL HitTestResult::AbsoluteImageURL() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return {};
+    }
+
+    auto *renderer = _innerNonSharedNode->Renderer();
+    if (!renderer || !renderer->IsRenderImage())
+    {
+      return {};
+    }
+
+    auto *element = DynamicDowncast<dom::Element>(*_innerNonSharedNode);
+    auto *htmlElement = DynamicDowncast<html::HTMLElement>(_innerNonSharedNode.get());
+    if ((htmlElement
+         && (Is<html::HTMLEmbedElement>(*htmlElement) || Is<html::HTMLImageElement>(*htmlElement)
+             || Is<html::HTMLInputElement>(*htmlElement) || Is<html::HTMLObjectElement>(*htmlElement)))
+        || Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(element)))
+    {
+      return _innerNonSharedNode->NodeDocument().CompleteURL(
+        element->ImageSourceURL().value_or(dom::DOMString()));
+    }
+
+    return {};
+  }
+
+  url::URL HitTestResult::AbsoluteLinkURL() const noexcept
+  {
+    if (!_innerURLElement)
+    {
+      return {};
+    }
+
+    return _innerURLElement->AbsoluteLinkURL();
+  }
+
+  utf8_string HitTestResult::TextContent() const noexcept
+  {
+    if (!_innerURLElement)
+    {
+      return {};
+    }
+    return _innerURLElement->TextContent().value_or(dom::DOMString());
   }
 
   template <typename TRect>

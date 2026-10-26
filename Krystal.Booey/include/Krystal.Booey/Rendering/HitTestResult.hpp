@@ -1,10 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/HitTestLocation.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -12,6 +14,7 @@
 
 namespace krys::boo
 {
+  class Image;
   class LocalFrame;
 
   namespace dom
@@ -28,9 +31,9 @@ namespace krys::boo
 
   /// @brief What a hit test found: the innermost node under the point, the link element it's in, the point in
   /// its renderer's coordinates, and for list-based tests every node hit.
-  /// FIXME: Widgets (isOverWidget's widgets), and the queries about what was hit (selection, spelling,
-  /// titles, images, media, links' URLs and targets, editability, dictation) come with widgets, editing,
-  /// images, media and navigation.
+  /// FIXME: Widgets (isOverWidget's widgets), and the rest of the queries about what was hit (spelling,
+  /// titles, media, links' targets, editability, dictation) come with widgets, spelling, media and
+  /// navigation.
   class HitTestResult
   {
   public:
@@ -157,6 +160,19 @@ namespace krys::boo
 
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
     KRYS_NODISCARD bool IsOverLink() const noexcept;
+
+    /// @brief Whether the hit-tested point is in its frame's selection.
+    KRYS_NODISCARD bool IsSelected() const noexcept;
+    /// @brief The `alt` text of the image or image input hit.
+    KRYS_NODISCARD utf8_string AltDisplayString() const noexcept;
+    /// @brief The image hit, if it has loaded.
+    KRYS_NODISCARD Image *GetImage() const noexcept;
+    /// @brief The box of the image hit, in absolute coordinates.
+    KRYS_NODISCARD IntRect ImageRect() const noexcept;
+    KRYS_NODISCARD url::URL AbsoluteImageURL() const noexcept;
+    KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
+    /// @brief The text of the link hit.
+    KRYS_NODISCARD utf8_string TextContent() const noexcept;
 
     /// @brief Adds @p node to the nodes a list-based test hit.
     /// @return Whether the test can stop: never for a test of every element under the point, else once @p

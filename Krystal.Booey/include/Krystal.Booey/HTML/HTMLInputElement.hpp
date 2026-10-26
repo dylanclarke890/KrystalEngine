@@ -61,6 +61,7 @@ namespace krys::boo::html
     /// @brief Whether the input was given its saved state.
     bool _stateRestored : 1 {false};
     bool _valueAttributeWasUpdatedAfterParsing : 1 {false};
+    bool _canReceiveDroppedFiles : 1 {false};
     AutoCompleteSetting _autocomplete {Uninitialized};
     RefPtr<InputType> _inputType;
     InputElementClickState _clickHandlingState;
@@ -148,6 +149,16 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-input-files
     void SetFiles(RefPtr<FileList> &&files,
                   WasSetByJavaScript wasSetByJavaScript = WasSetByJavaScript::No) noexcept;
+
+    /// @brief Takes a file input's files from @p dragData, dropped on it.
+    /// @return Whether it took any.
+    bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
+    /// @brief Whether a drag over the input carries files it would take.
+    KRYS_NODISCARD bool CanReceiveDroppedFiles() const noexcept
+    {
+      return _canReceiveDroppedFiles;
+    }
+    void SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-input-formaction
     KRYS_NODISCARD dom::USVString FormAction() const noexcept;

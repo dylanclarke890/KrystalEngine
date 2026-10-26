@@ -2,7 +2,9 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
@@ -24,6 +26,8 @@
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
+#include "Krystal.Booey/Page/DragController.hpp"
+#include "Krystal.Booey/Page/DragState.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -32,7 +36,9 @@
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Platform/StaticPasteboard.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
@@ -297,11 +303,15 @@ namespace krys::boo
     _selectionInitiationState = HaveNotStartedSelection;
     _mouseDownMayStartAutoscroll = false;
     _dragStartSelection = null;
+    _dragTarget = nullptr;
+    _shouldOnlyFireDragOverEvent = false;
+    _capturesDragging = false;
     _maxMouseMovedDuration = {};
     _originatingTouchPointTargets.clear();
     _originatingTouchPointDocument = nullptr;
     _originatingTouchPointTargetKey = 0;
     _touchPressed = false;
+    _didStartDrag = false;
     CancelFakeMouseMoveEvent();
   }
 
@@ -371,9 +381,10 @@ namespace krys::boo
     }
 
     _mousePressed = true;
+    _capturesDragging = true;
     SetLastKnownMousePosition(platformMouseEvent.Position(), platformMouseEvent.GlobalPosition());
     _mouseDownTimestamp = platformMouseEvent.Timestamp();
-    // FIXME: Dragging (mouseDownMayStartDrag), with drag and drop.
+    _mouseDownMayStartDrag = false;
     _mouseDownMayStartSelect = false;
     _mouseDownMayStartAutoscroll = false;
     if (auto *view = frame->View())
@@ -437,6 +448,15 @@ namespace krys::boo
     RefPtr<dom::Node> targetNode = ShareRefPtr(mouseEvent.TargetNode());
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseDown), targetNode.get(),
                                             _clickCount, platformMouseEvent, FireMouseOverOut::Yes);
+    if (!swallowEvent || mouseEvent.GetScrollbar())
+    {
+      _capturesDragging = true;
+    }
+    else
+    {
+      _capturesDragging = _capturesDragging ? CapturesDragging::InabilityReason::Unknown
+                                            : _capturesDragging.GetInabilityReason();
+    }
 
     // If the hit testing originally determined the event was in a scrollbar, refetch the
     // MouseEventWithHitTestResults in case the scrollbar widget was destroyed when the mouse event was
@@ -569,9 +589,10 @@ namespace krys::boo
     bool swallowEvent = !DispatchMouseEvent(dom::DOMStringAtom(EventNames::MouseMove), targetNode.get(), 0,
                                             platformMouseEvent, FireMouseOverOut::Yes);
 
-    // FIXME: Mouse moves cancelled while capturing a drag (the capturesDragging inability reason), with drag
-    // and drop.
-    if (!swallowEvent)
+    if (!swallowEvent
+        || (!_capturesDragging
+            && _capturesDragging.GetInabilityReason()
+                 == CapturesDragging::InabilityReason::MouseMoveIsCancelled))
     {
       swallowEvent = HandleMouseDraggedEvent(mouseEvent);
     }
@@ -891,7 +912,18 @@ namespace krys::boo
     {
       auto result = elementUnderMouse->DispatchMouseEvent(platformMouseEvent, eventType, clickCount);
       _mouseMoveTargetOverride = nullptr;
-      // FIXME: Whether a cancelled mousedown or mousemove stops dragging (capturesDragging), with dragging.
+      _capturesDragging = CapturesDragging::InabilityReason::Unknown;
+      if (result.DefaultPrevented == dom::Element::EventIsDefaultPrevented::Yes)
+      {
+        if (isMouseDownEvent)
+        {
+          _capturesDragging = CapturesDragging::InabilityReason::MousePressIsCancelled;
+        }
+        else if (eventType == EventNames::MouseMove)
+        {
+          _capturesDragging = CapturesDragging::InabilityReason::MouseMoveIsCancelled;
+        }
+      }
       if (result.Dispatched == dom::Element::EventIsDispatched::No)
       {
         return false;
@@ -1624,10 +1656,10 @@ namespace krys::boo
         // During selection, use an I-beam regardless of the content beneath the cursor.
         // If a drag may be starting or we're capturing mouse events for a particular node, don't treat this
         // as a selection.
-        // FIXME: Dragging (mouseDownMayStartDrag) and capturing mouse events, with drag and drop and pointer
-        // capture, if this is enabled again.
-        // if (_mousePressed && MouseDownMayStartSelect() && _frame.Document()->Selection().IsCaretOrRange()
-        //     && renderer && renderer->Style().UsedUserSelect() != UserSelect::None)
+        // FIXME: Capturing mouse events, with pointer capture, if this is enabled again.
+        // if (_mousePressed && MouseDownMayStartSelect() && !_mouseDownMayStartDrag
+        //     && _frame.Document()->Selection().IsCaretOrRange() && renderer
+        //     && renderer->Style().UsedUserSelect() != UserSelect::None)
         // {
         //   return iBeam;
         // }
@@ -2185,17 +2217,6 @@ namespace krys::boo
       (void)UpdateSelectionForMouseDownDispatchingSelectStart(
         targetNode.get(), ExpandSelectionToRespectSelectOnMouseDown(*targetNode, newSelection),
         TextGranularity::WordGranularity);
-    }
-  }
-
-  namespace
-  {
-    // FIXME: Editable links, which are live only as the editable link behavior setting says, with that
-    // setting.
-    KRYS_NODISCARD bool IsDraggableLink(const dom::Element &element) noexcept
-    {
-      auto *anchorElement = DynamicDowncast<html::HTMLAnchorElement>(element);
-      return anchorElement && anchorElement->HasAttribute(u8"href") && !anchorElement->HasEditableStyle();
     }
   }
 
@@ -2813,11 +2834,14 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Dragging (setDragStateSource, mouseDownMayStartDrag), widgets, SVG panning and the scrollbar
-  // corner (isPointInScrollbarCorner), with drag and drop, widgets, SVG and resizers.
+  // FIXME: Widgets, SVG panning and the scrollbar corner (isPointInScrollbarCorner), with widgets, SVG and
+  // resizers; image overlays' text, once there are image overlays.
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);
+
+    // Reset drag state.
+    SetDragStateSource(nullptr);
 
     CancelFakeMouseMoveEvent();
 
@@ -2827,7 +2851,18 @@ namespace krys::boo
     // so it's allowed to start a drag or selection if it wasn't in a scrollbar.
     _mouseDownMayStartSelect = CanMouseDownStartSelect(event) && !event.GetScrollbar();
 
+    bool singleClick = event.Event().ClickCount() <= 1;
+
+    // Careful that the drag starting logic stays in sync with EventMayStartDrag()
+    // FIXME: EventMayStartDrag() does not check for shift key press, link or image event targets.
+    // Single mouse down on links or images can always trigger drag-n-drop.
+    bool isMouseDownOnLinkOrImage = event.IsOverLink() || event.GetHitTestResult().GetImage();
+    _mouseDownMayStartDrag = singleClick && (!event.Event().ShiftKey() || isMouseDownOnLinkOrImage)
+                             && ShouldAllowMouseDownToStartDrag();
+
     _mouseDownWasSingleClickInSelection = false;
+
+    _mouseDownEvent = event.Event();
 
     _mousePressNode = ShareRefPtr(event.TargetNode());
     frame->Document()->SetSequentialFocusNavigationStartingPoint(event.TargetNode());
@@ -2901,8 +2936,8 @@ namespace krys::boo
                                                                HitTestSource::User);
   }
 
-  // FIXME: Dragging (handleDrag), with drag and drop.
-  bool EventHandler::HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event) noexcept
+  bool EventHandler::HandleMouseDraggedEvent(const MouseEventWithHitTestResults &event,
+                                             CheckDragHysteresis checkDragHysteresis) noexcept
   {
     if (!_mousePressed)
     {
@@ -2910,6 +2945,11 @@ namespace krys::boo
     }
 
     Ref<LocalFrame> frame = ShareRef(_frame);
+
+    if (HandleDrag(event, checkDragHysteresis))
+    {
+      return true;
+    }
 
     RefPtr<dom::Node> targetNode = ShareRefPtr(event.TargetNode());
     if (event.Event().Button() != MouseButton::Left || !targetNode)
@@ -2932,6 +2972,8 @@ namespace krys::boo
         return false;
       }
     }
+
+    _mouseDownMayStartDrag = false;
 
     if (_mouseDownMayStartAutoscroll && !_autoscrollController->PanScrollInProgress())
     {
@@ -3111,6 +3153,8 @@ namespace krys::boo
     // Used to prevent mouseMoveEvent from initiating a drag before
     // the mouse is pressed again.
     _mousePressed = false;
+    _capturesDragging = false;
+    _mouseDownMayStartDrag = false;
     _mouseDownMayStartSelect = false;
     _mouseDownMayStartAutoscroll = false;
 
@@ -3164,6 +3208,584 @@ namespace krys::boo
   void EventHandler::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept
   {
     _autoscrollController->StopAutoscrollTimer(rendererIsBeingDestroyed);
+  }
+
+#pragma endregion
+
+#pragma region Drag and drop
+
+  DragState &EventHandler::GetDragState() noexcept
+  {
+    static DragState &state = *new DragState;
+    return state;
+  }
+
+  dom::Element *EventHandler::DraggedElement() noexcept
+  {
+    return GetDragState().Source.get();
+  }
+
+  // FIXME: Telling the accessibility tree the drag source changed (onDragElementChanged), with accessibility.
+  void EventHandler::SetDragStateSource(dom::Element *element) const noexcept
+  {
+    GetDragState().Source = ShareRefPtr(element);
+  }
+
+  // FIXME: The origin the dragged image's data is restricted to (restrictedOriginForImageData), once there
+  // are security origins.
+  bool EventHandler::CanDropCurrentlyDraggedImageAsFile() const noexcept
+  {
+    return true;
+  }
+
+  bool EventHandler::ShouldAllowMouseDownToStartDrag() const noexcept
+  {
+    return true;
+  }
+
+  EnumSet<DragSourceAction> EventHandler::UpdateDragSourceActionsAllowed() const noexcept
+  {
+    auto *page = _frame.GetPage();
+    if (!page)
+    {
+      return {};
+    }
+
+    auto *view = _frame.View();
+    if (!view)
+    {
+      return {};
+    }
+
+    // The frame's view is the root view.
+    return page->GetDragController().DelegateDragSourceAction(
+      view->ContentsToWindow(RoundedIntPoint(_mouseDownContentsPosition)));
+  }
+
+  bool EventHandler::EventMayStartDrag(const PlatformMouseEvent &event) const noexcept
+  {
+    // This is a pre-flight check of whether the event might lead to a drag being started.  Be careful
+    // that its logic needs to stay in sync with HandleMouseMoveEvent() and the way we set
+    // _mouseDownMayStartDrag in HandleMousePressEvent
+    auto *document = _frame.Document();
+    if (!document)
+    {
+      return false;
+    }
+
+    if (event.Button() != MouseButton::Left || event.ClickCount() != 1)
+    {
+      return false;
+    }
+
+    auto *view = _frame.View();
+    if (!view)
+    {
+      return false;
+    }
+
+    auto *page = _frame.GetPage();
+    if (!page)
+    {
+      return false;
+    }
+
+    (void)UpdateDragSourceActionsAllowed();
+    HitTestResult result(LayoutPoint(view->WindowToContents(FlooredIntPoint(event.Position()))));
+    document->HitTest(
+      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
+                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      result);
+    DragState state;
+    auto *targetElement = result.TargetElement();
+    return targetElement
+           && page->GetDragController().DraggableElement(
+             &_frame, targetElement, RoundedIntPoint(result.GetHitTestLocation().Point()), state);
+  }
+
+  // FIXME: Telling the accessibility tree of the drag events (onDraggingStarted and the others), with
+  // accessibility.
+  bool EventHandler::DispatchDragEvent(dom::DOMStringAtom eventType, dom::Element &dragTarget,
+                                       const PlatformMouseEvent &event,
+                                       dom::DataTransfer &dataTransfer) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+    RefPtr<LocalFrameView> view = ShareRefPtr(frame->View());
+
+    // FIXME: We might want to dispatch a dragleave even if the view is gone.
+    if (!view)
+    {
+      return false;
+    }
+
+    auto dragEvent = dom::DragEvent::Create(
+      eventType, true, true, true, static_cast<dom::DOMHighResTimeStamp>(event.Timestamp().count()),
+      view.get(), 0, DoublePoint(FlooredIntPoint(event.GlobalPosition())),
+      DoublePoint(FlooredIntPoint(event.Position())), event.MovementDelta().X(), event.MovementDelta().Y(),
+      event.Modifiers(), MouseButton::Left, 0, nullptr, event.Force(), SyntheticClickType::NoTap,
+      &dataTransfer);
+
+    (void)dragTarget.DispatchEvent(*dragEvent);
+
+    return dragEvent->DefaultPrevented();
+  }
+
+  EventHandler::DragTargetResponse EventHandler::DispatchDragEnterOrDragOverEvent(
+    dom::DOMStringAtom eventType, dom::Element &target, const PlatformMouseEvent &event,
+    UniquePtr<Pasteboard> &&pasteboard, EnumSet<DragOperation> sourceOperationMask,
+    bool draggingFiles) noexcept
+  {
+    auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+      target.NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
+    bool accept = DispatchDragEvent(eventType, target, event, *dataTransfer);
+    dataTransfer->MakeInvalidForSecurity();
+    if (accept && !dataTransfer->DropEffectIsUninitialized())
+    {
+      return {true, dataTransfer->DestinationOperationMask()};
+    }
+    return {accept, null};
+  }
+
+  // FIXME: Subframes' drags (contentFrameForNode), once there are subframes.
+  EventHandler::DragTargetResponse
+    EventHandler::UpdateDragAndDrop(const PlatformMouseEvent &event,
+                                    const Func<UniquePtr<Pasteboard>()> &makePasteboard,
+                                    EnumSet<DragOperation> sourceOperationMask, bool draggingFiles) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+    if (!frame->View())
+    {
+      return {};
+    }
+
+    MouseEventWithHitTestResults mouseEvent = PrepareMouseEvent(
+      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
+                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      event);
+
+    RefPtr<dom::Element> newTarget;
+    if (auto *targetNode = mouseEvent.TargetNode())
+    {
+      // Drag events should never go to non-element nodes (following IE, and proper mouseover/out dispatch)
+      if (auto *element = DynamicDowncast<dom::Element>(*targetNode))
+      {
+        newTarget = ShareRefPtr(element);
+      }
+      else
+      {
+        newTarget = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*targetNode));
+      }
+    }
+
+    _autoscrollController->UpdateDragAndDrop(newTarget.get(), FlooredIntPoint(event.Position()),
+                                             event.Timestamp());
+
+    DragTargetResponse response;
+    if (_dragTarget != newTarget)
+    {
+      // FIXME: this ordering was explicitly chosen to match WinIE. However,
+      // it is sometimes incorrect when dragging within subframes.
+      //
+      // Moreover, this ordering conforms to the HTML spec's drag-and-drop processing model.
+      if (newTarget)
+      {
+        // As per the HTML spec, we must always fire a drag event before firing a dragenter, dragleave, or
+        // dragover event.
+        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
+        response =
+          DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom(EventNames::DragEnter), *newTarget, event,
+                                           makePasteboard(), sourceOperationMask, draggingFiles);
+      }
+
+      if (RefPtr<dom::Element> dragTarget = _dragTarget)
+      {
+        auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+          dragTarget->NodeDocument(), makePasteboard(), sourceOperationMask, draggingFiles);
+        (void)DispatchDragEvent(dom::DOMStringAtom(EventNames::DragLeave), *dragTarget, event, *dataTransfer);
+        dataTransfer->MakeInvalidForSecurity();
+      }
+
+      if (newTarget)
+      {
+        // We do not explicitly call DispatchDragEvent here because it could ultimately result in the
+        // appearance that two dragover events fired. So, we mark that we should only fire a dragover event on
+        // the next call to this function.
+        _shouldOnlyFireDragOverEvent = true;
+      }
+    }
+    else if (newTarget)
+    {
+      // Note, when dealing with sub-frames, we may need to fire only a dragover event as a drag event may
+      // have been fired earlier.
+      if (!_shouldOnlyFireDragOverEvent)
+      {
+        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
+      }
+      response = DispatchDragEnterOrDragOverEvent(dom::DOMStringAtom(EventNames::DragOver), *newTarget, event,
+                                                  makePasteboard(), sourceOperationMask, draggingFiles);
+      _shouldOnlyFireDragOverEvent = false;
+    }
+    _dragTarget = krys::move(newTarget);
+    return response;
+  }
+
+  void EventHandler::CancelDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
+                                       EnumSet<DragOperation> sourceOperationMask,
+                                       bool draggingFiles) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    if (RefPtr<dom::Element> dragTarget = _dragTarget)
+    {
+      DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::Drag), event);
+
+      auto dataTransfer = dom::DataTransfer::CreateForUpdatingDropTarget(
+        dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
+      (void)DispatchDragEvent(dom::DOMStringAtom(EventNames::DragLeave), *dragTarget, event, *dataTransfer);
+      dataTransfer->MakeInvalidForSecurity();
+    }
+    ClearDragState();
+  }
+
+  bool EventHandler::PerformDragAndDrop(const PlatformMouseEvent &event, UniquePtr<Pasteboard> &&pasteboard,
+                                        EnumSet<DragOperation> sourceOperationMask,
+                                        bool draggingFiles) noexcept
+  {
+    Ref<LocalFrame> frame = ShareRef(_frame);
+
+    bool preventedDefault = false;
+    if (RefPtr<dom::Element> dragTarget = _dragTarget)
+    {
+      Ref<dom::DataTransfer> dataTransfer = dom::DataTransfer::CreateForDrop(
+        dragTarget->NodeDocument(), krys::move(pasteboard), sourceOperationMask, draggingFiles);
+      preventedDefault =
+        DispatchDragEvent(dom::DOMStringAtom(EventNames::Drop), *dragTarget, event, *dataTransfer);
+      dataTransfer->MakeInvalidForSecurity();
+    }
+    ClearDragState();
+    return preventedDefault;
+  }
+
+  void EventHandler::ClearDragState() noexcept
+  {
+    StopAutoscrollTimer();
+    _dragStartSelection = null;
+    _dragTarget = nullptr;
+    _capturingMouseEventsElement = nullptr;
+    _shouldOnlyFireDragOverEvent = false;
+  }
+
+  bool EventHandler::DragHysteresisExceeded(const FloatPoint &dragViewportLocation) const noexcept
+  {
+    auto dragOperation = GetDragState().Type.ToSingleValue();
+    krys_debug_assert(dragOperation);
+    int32 threshold = GeneralDragHysteresis;
+    if (dragOperation)
+    {
+      switch (*dragOperation)
+      {
+        case DragSourceAction::Selection: threshold = TextDragHysteresis; break;
+        case DragSourceAction::Image:     threshold = ImageDragHysteresis; break;
+        case DragSourceAction::Link:      threshold = LinkDragHysteresis; break;
+        case DragSourceAction::Color:     threshold = ColorDragHystersis; break;
+        case DragSourceAction::DHTML:     break;
+      }
+    }
+
+    return MouseMovementExceedsThreshold(dragViewportLocation, threshold);
+  }
+
+  bool EventHandler::MouseMovementExceedsThreshold(const FloatPoint &viewportLocation,
+                                                   int32 pointsThreshold) const noexcept
+  {
+    auto *view = _frame.View();
+    if (!view)
+    {
+      return false;
+    }
+    IntPoint location = view->WindowToContents(FlooredIntPoint(viewportLocation));
+    IntSize delta = location - RoundedIntPoint(_mouseDownContentsPosition);
+
+    return std::abs(delta.Width()) >= pointsThreshold || std::abs(delta.Height()) >= pointsThreshold;
+  }
+
+  void EventHandler::InvalidateDataTransfer() noexcept
+  {
+    if (!GetDragState().DataTransfer)
+    {
+      return;
+    }
+    GetDragState().DataTransfer->MakeInvalidForSecurity();
+    GetDragState().DataTransfer = nullptr;
+  }
+
+  // The dragged content's markers (removeDraggedContentDocumentMarkersFromAllFramesInPage) are iOS's.
+  void EventHandler::DragCancelled() noexcept
+  {
+  }
+
+  // The dragged content's markers (addDraggedContentMarker) are iOS's.
+  void EventHandler::DidStartDrag() noexcept
+  {
+  }
+
+  void EventHandler::DragSourceEndedAt(const PlatformMouseEvent &event,
+                                       EnumSet<DragOperation> dragOperationMask,
+                                       MayExtendDragSession) noexcept
+  {
+    // Send a hit test request so that RenderLayer gets a chance to update the :hover and :active
+    // pseudoclasses.
+    (void)PrepareMouseEvent(
+      HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::Release,
+                                                    HitTestRequest::Type::DisallowUserAgentShadowContent}),
+      event);
+
+    if (ShouldDispatchEventsToDragSourceElement())
+    {
+      GetDragState().DataTransfer->SetDestinationOperationMask(dragOperationMask);
+      DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event);
+    }
+    InvalidateDataTransfer();
+
+    SetDragStateSource(nullptr);
+    // In case the drag was ended due to an escape key press we need to ensure
+    // that consecutive mousemove events don't reinitiate the drag and drop.
+    _mouseDownMayStartDrag = false;
+  }
+
+  void EventHandler::UpdateDragStateAfterEditDragIfNeeded(dom::Element &rootEditableElement) noexcept
+  {
+    // If inserting the dragged contents removed the drag source, we still want to fire dragend at the root
+    // editable element.
+    if (DraggedElement() && !DraggedElement()->IsConnected())
+    {
+      SetDragStateSource(&rootEditableElement);
+    }
+  }
+
+  bool EventHandler::ShouldDispatchEventsToDragSourceElement() noexcept
+  {
+    return DraggedElement() && GetDragState().DataTransfer && GetDragState().ShouldDispatchEvents;
+  }
+
+  void EventHandler::DispatchEventToDragSourceElement(dom::DOMStringAtom eventType,
+                                                      const PlatformMouseEvent &event) noexcept
+  {
+    if (ShouldDispatchEventsToDragSourceElement())
+    {
+      Ref<dom::Element> draggedElement = ShareRef(*DraggedElement());
+      (void)DispatchDragEvent(eventType, *draggedElement, event, *GetDragState().DataTransfer);
+    }
+  }
+
+  bool EventHandler::DispatchDragStartEventOnSourceElement(dom::DataTransfer &dataTransfer) noexcept
+  {
+    Ref<dom::Element> draggedElement = ShareRef(*DraggedElement());
+    if (auto *page = _frame.GetPage())
+    {
+      page->GetDragController().PrepareForDragStart(_frame, GetDragState().Type, *draggedElement,
+                                                    dataTransfer,
+                                                    RoundedIntPoint(_mouseDownContentsPosition));
+    }
+    return !DispatchDragEvent(dom::DOMStringAtom(EventNames::DragStart), *draggedElement, _mouseDownEvent,
+                              dataTransfer)
+           && !_frame.Document()->Selection().Selection().IsInPasswordField();
+  }
+
+  // FIXME: The event loop's handling of the drag (eventLoopHandleMouseDragged) and the view activated by the
+  // press (eventActivatedView), which are the Mac's; the drag image of an element the page didn't give one
+  // (setDragImage), with drag images; images' origins (restrictedOriginForImageData), once there are security
+  // origins.
+  bool EventHandler::HandleDrag(const MouseEventWithHitTestResults &event,
+                                CheckDragHysteresis checkDragHysteresis) noexcept
+  {
+    if (event.Event().Button() != MouseButton::Left
+        || event.Event().GetType() != PlatformEvent::Type::MouseMoved)
+    {
+      // If we allowed the other side of the bridge to handle a drag
+      // last time, then _mousePressed might still be set. So we
+      // clear it now to make sure the next move after a drag
+      // doesn't look like a drag.
+      _mousePressed = false;
+      return false;
+    }
+
+    Ref<LocalFrame> frame = ShareRef(_frame);
+    auto &dragState = GetDragState();
+
+    // Careful that the drag starting logic stays in sync with EventMayStartDrag().
+    if (_mouseDownMayStartDrag && !DraggedElement())
+    {
+      dragState.ShouldDispatchEvents = UpdateDragSourceActionsAllowed().Contains(DragSourceAction::DHTML);
+
+      // Try to find an element that wants to be dragged.
+      HitTestResult result(_mouseDownContentsPosition);
+      frame->Document()->HitTest(
+        HitTestRequest(EnumSet<HitTestRequest::Type> {HitTestRequest::Type::ReadOnly,
+                                                      HitTestRequest::Type::DisallowUserAgentShadowContent}),
+        result);
+      if (auto *page = frame->GetPage())
+      {
+        SetDragStateSource(page->GetDragController()
+                             .DraggableElement(frame.get(), result.TargetElement(),
+                                               RoundedIntPoint(_mouseDownContentsPosition), dragState)
+                             .get());
+      }
+
+      if (!DraggedElement())
+      {
+        _mouseDownMayStartDrag = false; // no element is draggable
+      }
+      else
+      {
+        _dragMayStartSelectionInstead = dragState.Type.Contains(DragSourceAction::Selection);
+      }
+    }
+
+    // For drags starting in the selection, the user must wait between the mousedown and mousedrag,
+    // or else we bail on the dragging stuff and allow selection to occur
+    if (_mouseDownMayStartDrag && _dragMayStartSelectionInstead
+        && dragState.Type.Contains(DragSourceAction::Selection)
+        && event.Event().Timestamp() - _mouseDownTimestamp < TextDragDelay)
+    {
+      krys_debug_assert(event.Event().GetType() == PlatformEvent::Type::MouseMoved);
+      if (dragState.Type.Contains(DragSourceAction::Image))
+      {
+        // ... unless the mouse is over an image, then we start dragging just the image
+        dragState.Type = DragSourceAction::Image;
+      }
+      else if (!dragState.Type.ContainsAny({DragSourceAction::DHTML, DragSourceAction::Link}))
+      {
+        // ... but only bail if we're not over an unselectable element.
+        _mouseDownMayStartDrag = false;
+        SetDragStateSource(nullptr);
+      }
+      else
+      {
+        // Prevent the following case from occuring:
+        // 1. User starts a drag immediately after mouse down over an unselectable element.
+        // 2. We enter this block and decided that since we're over an unselectable element, don't cancel the
+        //    drag.
+        // 3. The drag gets resolved as a potential selection drag below /but/ we haven't exceeded the drag
+        //    hysteresis yet.
+        // 4. We enter this block again, and since it's now marked as a selection drag, we cancel the drag.
+        _dragMayStartSelectionInstead = false;
+      }
+    }
+
+    if (!_mouseDownMayStartDrag)
+    {
+      return !MouseDownMayStartSelect() && !_mouseDownMayStartAutoscroll;
+    }
+    krys_debug_assert(DraggedElement());
+
+    if (!dragState.Type.HasExactlyOneBitSet())
+    {
+      krys_debug_assert(dragState.Type.Contains(DragSourceAction::Selection));
+      dragState.Type = DragSourceAction::Selection;
+    }
+
+    // We are starting a text/image/url drag, so the cursor should be an arrow
+    // FIXME: Custom cursors aren't supported during drag and drop (default to pointer).
+    _currentMouseCursor = Cursor(Cursor::Type::Pointer);
+
+    if (checkDragHysteresis == ShouldCheckDragHysteresis
+        && !DragHysteresisExceeded(FloatPoint(event.Event().Position())))
+    {
+      return true;
+    }
+
+    // Once we're past the hysteresis point, we don't want to treat this gesture as a click
+    InvalidateClick();
+
+    EnumSet<DragOperation> sourceOperationMask;
+
+    // This does work only if we missed a dragEnd. Do it anyway, just to make sure the old dataTransfer gets
+    // numbed.
+    // FIXME: Consider doing this earlier in this function as the earliest point we're sure it would be safe
+    // to drop an old drag.
+    InvalidateDataTransfer();
+
+    RefPtr<dom::Document> document = ShareRefPtr(frame->Document());
+    if (!document)
+    {
+      return false;
+    }
+
+    dragState.DataTransfer = dom::DataTransfer::CreateForDrag(*document);
+    auto hasNonDefaultPasteboardData = HasNonDefaultPasteboardData::No;
+
+    if (dragState.ShouldDispatchEvents)
+    {
+      krys_debug_assert(DraggedElement());
+      auto dragStartDataTransfer =
+        dom::DataTransfer::CreateForDragStartEvent(DraggedElement()->NodeDocument());
+      _mouseDownMayStartDrag = DispatchDragStartEventOnSourceElement(*dragStartDataTransfer);
+      if (Downcast<StaticPasteboard>(dragStartDataTransfer->GetPasteboard()).HasNonDefaultData())
+      {
+        hasNonDefaultPasteboardData = HasNonDefaultPasteboardData::Yes;
+      }
+      dragState.DataTransfer->MoveDragState(krys::move(dragStartDataTransfer));
+
+      if (RefPtr<dom::Element> draggedElement = ShareRefPtr(DraggedElement());
+          draggedElement && dragState.Type == EnumSet<DragSourceAction> {DragSourceAction::DHTML}
+          && !dragState.DataTransfer->HasDragImage())
+      {
+        (void)draggedElement->NodeDocument().UpdateStyleIfNeeded();
+        if (!draggedElement->Renderer())
+        {
+          DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event.Event());
+          _mouseDownMayStartDrag = false;
+          InvalidateDataTransfer();
+          SetDragStateSource(nullptr);
+          return true;
+        }
+      }
+
+      dragState.DataTransfer->MakeInvalidForSecurity();
+
+      if (_mouseDownMayStartDrag)
+      {
+        // Gather values from DHTML element, if it set any.
+        sourceOperationMask = dragState.DataTransfer->SourceOperationMask();
+
+        // A drag image update can be fired as a result of kicking off the drag. Because of that
+        // reentrancy, we may think we've not started the drag when that happens. So we have to assume it's
+        // started before we kick it off.
+        dragState.DataTransfer->SetDragHasStarted();
+      }
+    }
+
+    if (_mouseDownMayStartDrag)
+    {
+      auto *page = frame->GetPage();
+      _didStartDrag = page
+                      && page->GetDragController().StartDrag(
+                        *frame, dragState, sourceOperationMask, event.Event(),
+                        RoundedIntPoint(_mouseDownContentsPosition), hasNonDefaultPasteboardData);
+      // The host could re-enter this code and start another drag.
+      if (_didStartDrag)
+      {
+        _mouseDownMayStartDrag = false;
+        return true;
+      }
+      if (ShouldDispatchEventsToDragSourceElement())
+      {
+        // Drag was canned at the last minute. We owe dragSource a dragend event.
+        DispatchEventToDragSourceElement(dom::DOMStringAtom(EventNames::DragEnd), event.Event());
+        _mouseDownMayStartDrag = false;
+      }
+    }
+
+    if (!_mouseDownMayStartDrag)
+    {
+      // Something failed to start the drag, clean up.
+      InvalidateDataTransfer();
+      SetDragStateSource(nullptr);
+    }
+
+    // No more default handling (like selection), whether we're past the hysteresis bounds or not
+    return true;
   }
 
 #pragma endregion

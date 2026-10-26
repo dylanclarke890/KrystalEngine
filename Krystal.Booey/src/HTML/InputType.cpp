@@ -217,6 +217,12 @@ namespace krys::boo::html
     return !Element()->Name().empty();
   }
 
+  bool InputType::ReceiveDroppedFiles(const DragData &) noexcept
+  {
+    krys_debug_assert(false);
+    return false;
+  }
+
   bool InputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

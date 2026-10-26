@@ -1381,6 +1381,10 @@ namespace krys::boo::dom
     {
       frame->GetEventHandler().NodeWillBeRemoved(node);
       _selection->NodeWillBeRemoved(node);
+      if (auto *page = frame->GetPage())
+      {
+        page->GetDragCaretController().NodeWillBeRemoved(node);
+      }
     }
   }
 

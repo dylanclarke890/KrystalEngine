@@ -822,6 +822,17 @@ namespace krys::boo::html
     }
   }
 
+  bool HTMLInputElement::ReceiveDroppedFiles(const DragData &dragData) noexcept
+  {
+    return _inputType->ReceiveDroppedFiles(dragData);
+  }
+
+  // FIXME: Updating the renderer (updateFromElement), once file inputs draw their button and file name.
+  void HTMLInputElement::SetCanReceiveDroppedFiles(bool canReceiveDroppedFiles) noexcept
+  {
+    _canReceiveDroppedFiles = canReceiveDroppedFiles;
+  }
+
   bool HTMLInputElement::IsImageButton() const noexcept
   {
     return _inputType->IsImageButton();

@@ -26,7 +26,13 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -36,7 +42,9 @@
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
 #include "Krystal.Booey/Platform/StaticPasteboard.hpp"
 #include "Krystal.Booey/Rendering/CaretRectComputation.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/SVG/SVGImageElement.hpp"
 
 namespace krys::boo
 {
@@ -431,8 +439,7 @@ namespace krys::boo
     }
   }
 
-  // FIXME: The edit action of the paste (the event's input type), with drag and drop and removing
-  // backgrounds.
+  // FIXME: The edit action of the paste (the event's input type), with removing backgrounds.
   void Editor::PasteAsFragment(Ref<dom::DocumentFragment> &&pastingFragment, bool smartReplace,
                                bool matchStyle, MailBlockquoteHandling respectsMailBlockquote,
                                EditAction) noexcept
@@ -491,6 +498,78 @@ namespace krys::boo
       IgnoreUserSelectNone::Yes);
     pasteboardContent.ContentOrigin = _document.OriginIdentifierForPasteboard();
     pasteboard.Write(pasteboardContent);
+  }
+
+  IgnoreSelectionChangeForScope::IgnoreSelectionChangeForScope(LocalFrame &frame) noexcept
+      : _selectionChange(*frame.Document(), null, TemporarySelectionOption::IgnoreSelectionChanges)
+  {
+  }
+
+  // FIXME: Link decoration filtering (applyLinkDecorationFiltering), which is Cocoa's.
+  void Editor::CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept
+  {
+    PasteboardURL pasteboardURL;
+    pasteboardURL.Url = url;
+    pasteboardURL.Title = utf8_string(title);
+
+    pasteboard.Write(pasteboardURL);
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD dom::DOMString ElementURL(dom::Element &element) noexcept
+    {
+      if (Is<html::HTMLImageElement>(element) || Is<html::HTMLInputElement>(element))
+      {
+        return element.GetAttribute(u8"src").value_or(dom::DOMString());
+      }
+      if (Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(&element)))
+      {
+        return element.GetAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href")
+          .value_or(dom::DOMString());
+      }
+      if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+          htmlElement
+          && (Is<html::HTMLEmbedElement>(*htmlElement) || Is<html::HTMLObjectElement>(*htmlElement)))
+      {
+        return element.ImageSourceURL().value_or(dom::DOMString());
+      }
+      return {};
+    }
+
+    KRYS_NODISCARD bool HasImageForElement(dom::Element &element) noexcept
+    {
+      auto *renderer = DynamicDowncast<RenderImage>(element.Renderer());
+      if (!renderer)
+      {
+        return false;
+      }
+
+      auto *cachedImage = renderer->GetCachedImage();
+      if (!cachedImage || cachedImage->ErrorOccurred())
+      {
+        return false;
+      }
+
+      return cachedImage->ImageForRenderer(renderer);
+    }
+  }
+
+  void Editor::WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement, const url::URL &,
+                                      utf8_stringview title) noexcept
+  {
+    PasteboardImage pasteboardImage;
+
+    if (!HasImageForElement(imageElement))
+    {
+      return;
+    }
+
+    pasteboardImage.Url.Url = imageElement.NodeDocument().CompleteURL(ElementURL(imageElement));
+    pasteboardImage.Url.Title = utf8_string(title);
+    pasteboardImage.Url.Markup =
+      SerializeFragment(imageElement, SerializedNodes::SubtreeIncludingNode, nullptr, ResolveURLs::Yes);
+    pasteboard.Write(pasteboardImage);
   }
 
   RefPtr<dom::DocumentFragment> Editor::WebContentFromPasteboard(Pasteboard &pasteboard,

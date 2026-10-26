@@ -103,6 +103,7 @@ namespace krys::boo
   class Color;
   class EditingStyle;
   class GraphicsContext;
+  class LocalFrame;
   class RenderBlock;
   class RenderStyle;
   class RenderView;
@@ -162,12 +163,47 @@ namespace krys::boo
     }
   };
 
+  /// @brief The caret that shows where a drag over editable content would drop, painted as a caret is.
+  // FIXME: The caret's and its editable element's rects in the root view
+  // (caretRectInRootViewCoordinates, editableElementRectInRootViewCoordinates), which hosts' drop previews
+  // use.
+  class DragCaretController : private CaretBase
+  {
+    KRYS_NON_COPY_MOVABLE(DragCaretController);
+
+  private:
+    VisiblePosition _position;
+
+  public:
+    DragCaretController() noexcept;
+
+    KRYS_NODISCARD RenderBlock *CaretRenderer() const noexcept;
+    void PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
+                        const LayoutPoint &paintOffset) const noexcept;
+
+    KRYS_NODISCARD bool IsContentEditable() const noexcept;
+    KRYS_NODISCARD bool IsContentRichlyEditable() const noexcept;
+
+    KRYS_NODISCARD bool HasCaret() const noexcept;
+    KRYS_NODISCARD const VisiblePosition &CaretPosition() const noexcept
+    {
+      return _position;
+    }
+    void SetCaretPosition(const VisiblePosition &position) noexcept;
+    void Clear() noexcept;
+
+    void NodeWillBeRemoved(dom::Node &node) noexcept;
+
+  private:
+    void ClearCaretPositionWithoutUpdatingStyle() noexcept;
+  };
+
   /// @brief A document's selection: what's selected, whether the document is focused and active (which picks
   /// the selection's colours), and keeping the render tree's selection (`RenderSelection`) in step with it.
   // FIXME: The block cursor of overtype mode (paintBlockCursor), with editing commands; the caret colour the
   // host sets (setCaretColor), which only iOS uses.
-  // FIXME: Frames: the drag caret (DragCaretController), selecting the frame element in the parent
-  // (selectFrameElementInParentIfFullySelected), selections in another frame's document.
+  // FIXME: Frames: selecting the frame element in the parent (selectFrameElementInParentIfFullySelected),
+  // selections in another frame's document.
   // FIXME: The editor's notifications (selectionWillChange, respondToChangedSelection, shouldChangeSelection
   // asking its client), with editing commands.
   class FrameSelection final : private CaretBase, public CaretAnimationClient

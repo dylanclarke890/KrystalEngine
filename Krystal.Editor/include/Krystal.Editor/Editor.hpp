@@ -244,7 +244,8 @@ namespace krys
             }
           }
 
-          if (event.Key() == pal::Key::Escape)
+          // Escape cancels a drag in the page rather than quitting.
+          if (event.Key() == pal::Key::Escape && !(_pageView && _pageView->IsDragging()))
           {
             _context->Logger->Info("ESC key pressed, quitting application...");
             Stop();
@@ -264,6 +265,8 @@ namespace krys
               (void)_pageView->KeyPressed(event.Key(), event.Modifiers(), event.Text(),
                                           event.State() == pal::KeyState::Held);
             }
+            // The keys change a drag's cursor.
+            UpdateCursor();
           }
           return true;
         });
@@ -757,10 +760,12 @@ namespace krys
       }
     }
 
-    /// @brief Shows the page's cursor over the page view, and the arrow everywhere else.
+    /// @brief Shows the page's cursor over the page view, and the arrow everywhere else; a drag in the page
+    /// shows its cursor wherever the mouse is.
     void UpdateCursor() noexcept
     {
-      bool overPage = _pageView && _view == EditorView::Page && _pointer.Y() >= 0;
+      bool overPage =
+        _pageView && _view == EditorView::Page && (_pointer.Y() >= 0 || _pageView->IsDragging());
       _context->Window->SetCursor(overPage ? _pageView->CurrentCursor() : pal::CursorShape::Arrow);
     }
 

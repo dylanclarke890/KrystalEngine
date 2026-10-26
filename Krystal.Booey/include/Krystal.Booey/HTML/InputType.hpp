@@ -15,6 +15,7 @@
 namespace krys::boo
 {
   class ChromeClient;
+  class DragData;
   class RenderElement;
   class RenderStyle;
 }
@@ -245,6 +246,10 @@ namespace krys::boo::html
     virtual void RestoreFormControlState(const FormControlState &state) noexcept;
     KRYS_NODISCARD virtual bool IsFormDataAppendable() const noexcept;
     virtual bool AppendFormData(DOMFormData &formData) const noexcept;
+
+    /// @brief Takes the files of @p dragData dropped on the input.
+    /// @return Whether it took any.
+    virtual bool ReceiveDroppedFiles(const DragData &dragData) noexcept;
 
     // DOM property functions.
     /// @brief Checked last, if both the dirty value and the value attribute are missing.

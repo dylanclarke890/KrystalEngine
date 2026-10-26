@@ -49,6 +49,8 @@ namespace krys::boo
     bool UseSystemAppearance {false};
     /// @brief Moving a caret through content that isn't editable, with the keys that move one.
     bool CaretBrowsingEnabled {false};
+    /// @brief Whether a drag and drop held near the edge of a box that scrolls scrolls it.
+    bool AutoscrollForDragAndDropEnabled {true};
     /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
     /// scrolling.
     bool SpatialNavigationEnabled {false};

@@ -79,6 +79,20 @@ namespace krys::boo
     _customData.WriteString(u8"text/uri-list", url.Url.String());
   }
 
+  void StaticPasteboard::Write(const PasteboardImage &image) noexcept
+  {
+    // FIXME: This should ideally remember the image data, so that when this StaticPasteboard
+    // is committed to the native pasteboard, we'll preserve the image as well. For now, stick
+    // with our existing behavior, which prevents image data from being copied in the case where
+    // any non-default data was written by the page.
+    _fileContentState = FileContentState::InMemoryImage;
+
+    if (CanExposeURLToDOMWhenPasteboardContainsFiles(image.Url.Url.String()))
+    {
+      Write(image.Url);
+    }
+  }
+
   void StaticPasteboard::Write(const PasteboardWebContent &content) noexcept
   {
     if (!content.Markup.empty())

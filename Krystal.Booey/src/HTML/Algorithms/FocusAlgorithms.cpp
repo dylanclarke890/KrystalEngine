@@ -89,7 +89,7 @@ namespace krys::boo::html
           default: break;
         }
       }
-      // FIXME: Elements with a draggable attribute, once there's drag and drop.
+      // FIXME: Elements with a draggable attribute, once a drag can start without a pointing device.
       if (auto *summary = DynamicDowncast<HTMLSummaryElement>(element); summary && summary->IsActiveSummary())
       {
         return true;

@@ -2196,6 +2196,111 @@ namespace krys::boo
     _caretLocalRect = LayoutRect();
   }
 
+#pragma region DragCaretController
+
+  DragCaretController::DragCaretController() noexcept : CaretBase(CaretVisibility::Visible)
+  {
+  }
+
+  bool DragCaretController::IsContentEditable() const noexcept
+  {
+    return _position.RootEditableElement();
+  }
+
+  bool DragCaretController::IsContentRichlyEditable() const noexcept
+  {
+    return IsRichlyEditablePosition(_position.DeepEquivalent());
+  }
+
+  bool DragCaretController::HasCaret() const noexcept
+  {
+    return !_position.IsNull();
+  }
+
+  void DragCaretController::Clear() noexcept
+  {
+    SetCaretPosition(VisiblePosition());
+  }
+
+  void DragCaretController::SetCaretPosition(const VisiblePosition &position) noexcept
+  {
+    if (auto *node = _position.DeepEquivalent().DeprecatedNode())
+    {
+      InvalidateCaretRect(node);
+    }
+    _position = position;
+    SetCaretRectNeedsUpdate();
+    dom::Document *document = nullptr;
+    if (auto *node = _position.DeepEquivalent().DeprecatedNode())
+    {
+      InvalidateCaretRect(node);
+      document = &node->NodeDocument();
+    }
+    if (_position.IsNull() || _position.IsOrphan())
+    {
+      ClearCaretRect();
+    }
+    else
+    {
+      (void)UpdateCaretRect(*document, _position);
+    }
+  }
+
+  void DragCaretController::NodeWillBeRemoved(dom::Node &node) noexcept
+  {
+    if (!HasCaret() || !node.IsConnected())
+    {
+      return;
+    }
+
+    if (!RemovingNodeRemovesPosition(node, _position.DeepEquivalent()))
+    {
+      return;
+    }
+
+    if (auto *view = node.NodeDocument().GetRenderView())
+    {
+      view->Selection().Clear();
+    }
+
+    // It's important to avoid updating style or layout here, since we're in the middle of removing the node
+    // from the document.
+    ClearCaretPositionWithoutUpdatingStyle();
+  }
+
+  void DragCaretController::ClearCaretPositionWithoutUpdatingStyle() noexcept
+  {
+    if (auto *node = _position.DeepEquivalent().AnchorNode())
+    {
+      InvalidateCaretRect(node, true);
+    }
+
+    _position = {};
+    ClearCaretRect();
+  }
+
+  RenderBlock *DragCaretController::CaretRenderer() const noexcept
+  {
+    if (_position.IsNull())
+    {
+      return nullptr;
+    }
+
+    return RendererForCaretPainting(_position.DeepEquivalent().DeprecatedNode());
+  }
+
+  void DragCaretController::PaintDragCaret(LocalFrame *frame, GraphicsContext &context,
+                                           const LayoutPoint &paintOffset) const noexcept
+  {
+    auto *node = _position.DeepEquivalent().DeprecatedNode();
+    if (node && node->NodeDocument().Frame() == frame)
+    {
+      PaintCaret(*node, context, paintOffset, nullptr);
+    }
+  }
+
+#pragma endregion
+
   bool CaretBase::UpdateCaretRect(dom::Document &document, const VisiblePosition &caretPosition) noexcept
   {
     (void)document.UpdateLayoutIgnorePendingStylesheets();

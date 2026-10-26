@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/EditAction.hpp"
 #include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Editing/TemporarySelectionChange.hpp"
 #include "Krystal.Booey/Editing/TextIteratorBehavior.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -11,6 +12,11 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/String.hpp"
+
+namespace krys::boo::url
+{
+  class URL;
+}
 
 namespace krys::boo::dom
 {
@@ -74,6 +80,24 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::EditorPasteOption, 3uz);
 
 namespace krys::boo
 {
+  /// @brief Keeps a frame's selection changes from reaching the editor's clients while it lives.
+  class IgnoreSelectionChangeForScope
+  {
+    KRYS_NON_COPY_MOVABLE(IgnoreSelectionChangeForScope);
+
+  private:
+    TemporarySelectionChange _selectionChange;
+
+  public:
+    explicit IgnoreSelectionChangeForScope(LocalFrame &frame) noexcept;
+    ~IgnoreSelectionChangeForScope() noexcept = default;
+
+    void Invalidate() noexcept
+    {
+      _selectionChange.Invalidate();
+    }
+  };
+
   enum class EditorActionSpecifier : bool
   {
     CutAction,
@@ -210,6 +234,13 @@ namespace krys::boo
     KRYS_NODISCARD utf8_string ReadPlainTextFromPasteboard(Pasteboard &pasteboard) noexcept;
     /// @brief Writes the selection's text and markup (with its styles inlined) to @p pasteboard.
     void WriteSelectionToPasteboard(Pasteboard &pasteboard) noexcept;
+    /// @brief Writes @p url, titled @p title, to @p pasteboard.
+    void CopyURL(const url::URL &url, utf8_stringview title, Pasteboard &pasteboard) noexcept;
+    /// @brief Writes the image @p imageElement shows to @p pasteboard: its URL, titled @p title, and its
+    /// markup.
+    // FIXME: The image itself, with images on the pasteboard.
+    void WriteImageToPasteboard(Pasteboard &pasteboard, dom::Element &imageElement, const url::URL &url,
+                                utf8_stringview title) noexcept;
     /// @brief The pasteboard's richest content as a fragment to paste at @p context.
     /// @param allowPlainText Whether plain text may be read when there's no richer content.
     /// @param chosePlainText Set to whether the fragment was made from plain text.
@@ -389,6 +420,12 @@ namespace krys::boo
 
     void CloseTyping() noexcept;
 
+    KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFrom(const VisibleSelection &selection) const noexcept;
+    KRYS_NODISCARD bool ShouldInsertFragment(dom::DocumentFragment &fragment,
+                                             const Maybe<dom::SimpleRange> &replacingDOMRange) const noexcept;
+    KRYS_NODISCARD bool ShouldInsertText(utf8_stringview text,
+                                         const Maybe<dom::SimpleRange> &range) const noexcept;
+
   private:
     enum class SetCompositionMode : bool
     {
@@ -404,7 +441,6 @@ namespace krys::boo
     bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind) noexcept;
     bool DispatchClipboardEvent(RefPtr<dom::Element> &&target, ClipboardEventKind kind,
                                 Ref<dom::DataTransfer> &&dataTransfer) noexcept;
-    KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFrom(const VisibleSelection &selection) const noexcept;
     KRYS_NODISCARD RefPtr<dom::Element> FindEventTargetFromSelection() const noexcept;
 
     void PerformCutOrCopy(EditorActionSpecifier action) noexcept;
@@ -412,14 +448,10 @@ namespace krys::boo
     void PasteAsPlainTextWithPasteboard(Pasteboard &pasteboard) noexcept;
     void PasteWithPasteboard(Pasteboard *pasteboard, EnumSet<PasteOption> options) noexcept;
     KRYS_NODISCARD bool CanSmartReplaceWithPasteboard(Pasteboard &pasteboard) noexcept;
-    KRYS_NODISCARD bool ShouldInsertFragment(dom::DocumentFragment &fragment,
-                                             const Maybe<dom::SimpleRange> &replacingDOMRange) const noexcept;
 
     void ChangeSelectionAfterCommand(const VisibleSelection &newSelection,
                                      EnumSet<FrameSelectionSetSelectionOption> options) noexcept;
 
     KRYS_NODISCARD bool ShouldSmartDelete() noexcept;
-    KRYS_NODISCARD bool ShouldInsertText(utf8_stringview text,
-                                         const Maybe<dom::SimpleRange> &range) const noexcept;
   };
 }

@@ -9,6 +9,7 @@
 #include "Krystal.Booey/History/BackForwardList.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementInterface.hpp"
 #include "Krystal.Booey/Page/ConsoleTypes.hpp"
+#include "Krystal.Booey/Page/DragActions.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Platform/PlatformTouchEvent.hpp"
+#include "Krystal.Booey/Platform/SelectionData.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/Expected.hpp"
@@ -141,6 +143,7 @@ namespace krys::ui
 
   public:
     class ChromeClient;
+    class DragClient;
     class FrameLoaderClient;
 
   private:
@@ -151,6 +154,8 @@ namespace krys::ui
     ChromeClient *_chromeClient {nullptr};
     /// @brief The main frame's loader client, which the frame owns: it asks the navigation handler.
     FrameLoaderClient *_frameLoaderClient {nullptr};
+    /// @brief The page's drag client, which the page owns: it starts the view's drag.
+    DragClient *_dragClient {nullptr};
     /// @brief The page's session history, which the page shares.
     Ref<boo::BackForwardList> _backForwardList;
     Ref<boo::Page> _page;
@@ -190,6 +195,23 @@ namespace krys::ui
     Func<bool(bool)> _pointerLockHandler;
     /// @brief Whether the host has locked the pointer for the page.
     bool _pointerLocked {false};
+
+    /// @brief A drag that started in the page, which the view runs until it's dropped or cancelled.
+    struct ActiveDrag
+    {
+      /// @brief What's dragged.
+      boo::SelectionData Data;
+      /// @brief What the source allows a drop to do.
+      EnumSet<boo::DragOperation> SourceOperationMask;
+      /// @brief What a drop where the mouse is would do, if anything.
+      Maybe<boo::DragOperation> Operation;
+      /// @brief Whether the mouse is over the page.
+      bool InView {false};
+      boo::IntPoint Position;
+      pal::KeyModifiers Modifiers;
+    };
+
+    Maybe<ActiveDrag> _drag;
 
     /// @brief A touch on the screen.
     struct ActiveTouch
@@ -469,8 +491,15 @@ namespace krys::ui
     void SetPointingDevices(const pal::PointingDevices &devices) noexcept;
 
     /// @brief The cursor the page wants over it, as of the last mouse move (none while the pointer is
-    /// locked).
+    /// locked); while a drag runs, the drag and drop cursor for what a drop would do.
     KRYS_NODISCARD pal::CursorShape CurrentCursor() const noexcept;
+
+    /// @brief Whether a drag that started in the page is running: the mouse's moves move it, the release
+    /// drops it and Escape cancels it, and Ctrl makes a drop copy rather than move.
+    KRYS_NODISCARD bool IsDragging() const noexcept
+    {
+      return _drag.has_value();
+    }
 
     /// @brief Sets what locks the pointer for the page (`requestPointerLock()`) and unlocks it: called with
     /// true, it hides the cursor, keeps it in place and reports the mouse's movement as
@@ -653,6 +682,14 @@ namespace krys::ui
     /// @brief The button a move carries: the one held, as Windows' do (the left, then the middle, then the
     /// right).
     KRYS_NODISCARD boo::MouseButton HeldButton() const noexcept;
+    /// @brief A drag of @p dataTransfer's data started in the page.
+    void DragStarted(boo::dom::DataTransfer &dataTransfer) noexcept;
+    /// @brief The drag moved to @p point (in viewport coordinates), with @p modifiers held: over the page,
+    /// it's entered or updated, and off it, it's left.
+    void DragMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept;
+    /// @brief Ends the drag at @p point: drops it there if @p drop and the page would take it, else cancels
+    /// it.
+    void EndDrag(const boo::IntPoint &point, bool drop) noexcept;
     /// @brief Asks the host to lock the pointer for the page.
     KRYS_NODISCARD boo::PointerLockRequestResult LockPointer() noexcept;
     /// @brief Asks the host to unlock the pointer.

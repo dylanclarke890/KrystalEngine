@@ -5,6 +5,7 @@
 #include "Krystal.Booey/History/BackForwardClient.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/DragClient.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Storage/StorageArea.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -26,6 +27,8 @@ namespace krys::boo::dom
 namespace krys::boo
 {
   class BackForwardController;
+  class DragCaretController;
+  class DragController;
   class GraphicsContext;
   class HistoryItem;
   class LocalFrame;
@@ -76,6 +79,8 @@ namespace krys::boo
     UniquePtr<BackForwardController> _backForwardController;
     UniquePtr<PointerCaptureController> _pointerCaptureController;
     UniquePtr<PointerLockController> _pointerLockController;
+    UniquePtr<DragController> _dragController;
+    UniquePtr<DragCaretController> _dragCaretController;
     RefPtr<LocalFrame> _mainFrame;
     /// @brief The steps of the rendering update in progress that haven't run yet.
     EnumSet<RenderingUpdateStep> _renderingUpdateRemainingSteps;
@@ -90,7 +95,7 @@ namespace krys::boo
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
 
     Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-         RefPtr<BackForwardClient> &&backForwardClient) noexcept;
+         RefPtr<BackForwardClient> &&backForwardClient, UniquePtr<DragClient> dragClient) noexcept;
 
   public:
     ~Page() noexcept;
@@ -103,10 +108,12 @@ namespace krys::boo
     /// ignores navigations.
     /// @param backForwardClient The page's back/forward list; without one, the page keeps it in memory (a
     /// `BackForwardList`).
+    /// @param dragClient The host's side of drags in the page; without one, no drag starts in the page.
     KRYS_NODISCARD static Ref<Page> Create(UniquePtr<ChromeClient> chromeClient = nullptr,
                                            UniquePtr<EditorClient> editorClient = nullptr,
                                            UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient = nullptr,
-                                           RefPtr<BackForwardClient> backForwardClient = nullptr) noexcept;
+                                           RefPtr<BackForwardClient> backForwardClient = nullptr,
+                                           UniquePtr<DragClient> dragClient = nullptr) noexcept;
 
     KRYS_NODISCARD ChromeClient &GetChromeClient() const noexcept
     {
@@ -139,6 +146,18 @@ namespace krys::boo
     KRYS_NODISCARD PointerLockController &GetPointerLockController() const noexcept
     {
       return *_pointerLockController;
+    }
+
+    /// @brief The page's drags and drops.
+    KRYS_NODISCARD DragController &GetDragController() const noexcept
+    {
+      return *_dragController;
+    }
+
+    /// @brief The caret showing where a drag would drop.
+    KRYS_NODISCARD DragCaretController &GetDragCaretController() const noexcept
+    {
+      return *_dragCaretController;
     }
 
     /// @brief How much the page is scaled, as by pinching: the main frame's content is drawn scaled by it

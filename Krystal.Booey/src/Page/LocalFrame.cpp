@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/VisiblePosition.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -64,6 +67,49 @@ namespace krys::boo
     frameView->SetUseFixedLayout(useFixedLayout);
 
     SetView(krys::move(frameView));
+  }
+
+  VisiblePosition LocalFrame::VisiblePositionForPoint(const IntPoint &framePoint) const noexcept
+  {
+    HitTestResult result = GetEventHandler().HitTestResultAtPoint(
+      LayoutPoint(framePoint), {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+                                HitTestRequest::Type::AllowVisibleChildFrameContentOnly});
+    RefPtr<dom::Node> node = ShareRefPtr(result.InnerNonSharedNode());
+    if (!node)
+    {
+      return {};
+    }
+    auto *renderer = node->Renderer();
+    if (!renderer)
+    {
+      return {};
+    }
+    auto visiblePos = renderer->VisiblePositionForPoint(result.LocalPoint(), HitTestSource::User);
+    if (visiblePos.IsNull())
+    {
+      visiblePos = VisiblePosition(FirstPositionInOrBeforeNode(node.get()));
+    }
+    return visiblePos;
+  }
+
+  dom::Document *LocalFrame::DocumentAtPoint(const IntPoint &point) noexcept
+  {
+    if (!View())
+    {
+      return nullptr;
+    }
+
+    IntPoint pt = View()->WindowToContents(point);
+    HitTestResult result = HitTestResult(LayoutPoint(pt));
+
+    if (Document() && Document()->GetRenderView())
+    {
+      result = GetEventHandler().HitTestResultAtPoint(
+        LayoutPoint(pt),
+        {HitTestRequest::Type::ReadOnly, HitTestRequest::Type::Active,
+         HitTestRequest::Type::DisallowUserAgentShadowContent, HitTestRequest::Type::AllowChildFrameContent});
+    }
+    return result.InnerNode() ? &result.InnerNode()->NodeDocument() : nullptr;
   }
 
   void LocalFrame::SetDocument(RefPtr<dom::Document> &&newDocument) noexcept

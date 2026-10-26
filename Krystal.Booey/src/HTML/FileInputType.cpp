@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/Platform/DragData.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
 #include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
@@ -123,6 +124,35 @@ namespace krys::boo::html
   bool FileInputType::DirAutoUsesValue() const noexcept
   {
     return false;
+  }
+
+  void FileInputType::FilesChosen(const List<utf8_string> &paths) noexcept
+  {
+    krys_debug_assert(Element());
+    krys_debug_assert(!paths.empty());
+
+    size_t size = Element()->HasAttribute(u8"multiple") ? paths.size() : 1;
+    List<Ref<File>> files;
+    files.reserve(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+      files.push_back(File::Create(paths[i]));
+    }
+    SetFiles(FileList::Create(krys::move(files)), WasSetByJavaScript::No);
+  }
+
+  // Transcoding dropped images to a type the input accepts (receiveDroppedFilesWithImageTranscoding) is the
+  // Mac's.
+  bool FileInputType::ReceiveDroppedFiles(const DragData &dragData) noexcept
+  {
+    auto paths = dragData.AsFilenames();
+    if (paths.empty())
+    {
+      return false;
+    }
+
+    FilesChosen(paths);
+    return true;
   }
 
   void FileInputType::SetFiles(RefPtr<FileList> &&files, WasSetByJavaScript wasSetByJavaScript) noexcept

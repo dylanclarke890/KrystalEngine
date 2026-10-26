@@ -69,6 +69,13 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview Cut = u8"cut";
   constexpr utf8_stringview BeforePaste = u8"beforepaste";
   constexpr utf8_stringview Paste = u8"paste";
+  constexpr utf8_stringview DragStart = u8"dragstart";
+  constexpr utf8_stringview Drag = u8"drag";
+  constexpr utf8_stringview DragEnter = u8"dragenter";
+  constexpr utf8_stringview DragOver = u8"dragover";
+  constexpr utf8_stringview DragLeave = u8"dragleave";
+  constexpr utf8_stringview Drop = u8"drop";
+  constexpr utf8_stringview DragEnd = u8"dragend";
   constexpr utf8_stringview BeforeInput = u8"beforeinput";
   constexpr utf8_stringview Input = u8"input";
   constexpr utf8_stringview TextInput = u8"textInput";

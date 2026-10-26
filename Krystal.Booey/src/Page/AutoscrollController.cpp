@@ -2,12 +2,15 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 
 namespace krys::boo
 {
   namespace
   {
+    constexpr MonotonicTime::duration AutoscrollDelay = std::chrono::milliseconds(200);
     constexpr MonotonicTime::duration AutoscrollInterval = std::chrono::milliseconds(50);
   }
 
@@ -51,6 +54,60 @@ namespace krys::boo
     StartAutoscrollTimer();
   }
 
+  void AutoscrollController::UpdateDragAndDrop(dom::Node *dropTargetNode, const IntPoint &eventPosition,
+                                               MonotonicTime::duration eventTime) noexcept
+  {
+    IntSize offset;
+    auto findDragAndDropScroller = [&]() -> RenderBox *
+    {
+      if (!dropTargetNode)
+      {
+        return nullptr;
+      }
+
+      auto *scrollable = RenderBox::FindAutoscrollable(dropTargetNode->Renderer());
+      if (!scrollable)
+      {
+        return nullptr;
+      }
+
+      if (!scrollable->GetDocument().GetSettings().AutoscrollForDragAndDropEnabled)
+      {
+        return nullptr;
+      }
+
+      offset = scrollable->CalculateAutoscrollDirection(eventPosition);
+      if (offset.IsZero())
+      {
+        return nullptr;
+      }
+
+      return scrollable;
+    };
+
+    auto *scrollable = findDragAndDropScroller();
+    if (!scrollable)
+    {
+      StopAutoscrollTimer();
+      return;
+    }
+
+    _dragAndDropAutoscrollReferencePosition = eventPosition + offset;
+
+    if (_autoscrollType == AutoscrollType::None)
+    {
+      _autoscrollType = AutoscrollType::DragAndDrop;
+      _autoscrollRenderer = CreateWeakPtr(scrollable);
+      _dragAndDropAutoscrollStartTime = eventTime;
+      StartAutoscrollTimer();
+    }
+    else if (_autoscrollRenderer.get() != scrollable)
+    {
+      _dragAndDropAutoscrollStartTime = eventTime;
+      _autoscrollRenderer = CreateWeakPtr(scrollable);
+    }
+  }
+
   // FIXME: Subframes (mouseDownWasInSubframe), once there are frames.
   void AutoscrollController::StopAutoscrollTimer(bool rendererIsBeingDestroyed) noexcept
   {
@@ -82,6 +139,14 @@ namespace krys::boo
     Ref<LocalFrame> frame = ShareRef(*_autoscrollRenderer->GetDocument().Frame());
     switch (_autoscrollType)
     {
+      case AutoscrollType::DragAndDrop:
+      {
+        if (MonotonicTime::Now() - _dragAndDropAutoscrollStartTime > AutoscrollDelay)
+        {
+          _autoscrollRenderer->Autoscroll(_dragAndDropAutoscrollReferencePosition);
+        }
+        break;
+      }
       case AutoscrollType::Selection:
       {
         if (!frame->GetEventHandler().ShouldUpdateAutoscroll())

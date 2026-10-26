@@ -1,6 +1,7 @@
 ﻿#include "Krystal.UI/View.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/DOM/DataTransfer.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -21,11 +22,14 @@
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/SubstituteData.hpp"
+#include "Krystal.Booey/Page/DragController.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Navigator.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Platform/DragData.hpp"
+#include "Krystal.Booey/Platform/Pasteboard.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
@@ -298,6 +302,43 @@ namespace krys::ui
   };
 
   /// @brief Asks the host's navigation handler about the main frame's navigations.
+  /// @brief Runs the drags that start in the page: the view keeps what's dragged and moves, drops or cancels
+  /// the drag as the mouse and the keys say.
+  class View::DragClient final : public boo::DragClient
+  {
+  private:
+    View *_view {nullptr};
+
+  public:
+    void SetView(View *view) noexcept
+    {
+      _view = view;
+    }
+
+    void WillPerformDragDestinationAction(boo::DragDestinationAction, const boo::DragData &) noexcept override
+    {
+    }
+
+    void WillPerformDragSourceAction(boo::DragSourceAction, const boo::IntPoint &,
+                                     boo::dom::DataTransfer &) noexcept override
+    {
+    }
+
+    KRYS_NODISCARD EnumSet<boo::DragSourceAction>
+      DragSourceActionMaskForPoint(const boo::IntPoint &) noexcept override
+    {
+      return boo::AnyDragSourceAction();
+    }
+
+    void StartDrag(boo::DragItem, boo::dom::DataTransfer &dataTransfer, boo::LocalFrame &) noexcept override
+    {
+      if (_view)
+      {
+        _view->DragStarted(dataTransfer);
+      }
+    }
+  };
+
   class View::FrameLoaderClient final : public boo::LocalFrameLoaderClient
   {
   private:
@@ -493,6 +534,14 @@ namespace krys::ui
       return client;
     }
 
+    /// @brief The page's drag client, noted in @p dragClient as it's handed to the page.
+    KRYS_NODISCARD UniquePtr<boo::DragClient> CreateDragClient(View::DragClient *&dragClient) noexcept
+    {
+      auto client = CreateUnique<View::DragClient>();
+      dragClient = client.get();
+      return client;
+    }
+
     /// @brief The page's chrome client, noted in @p chromeClient as it's handed to the page.
     KRYS_NODISCARD UniquePtr<boo::ChromeClient> CreateChromeClient(View::ChromeClient *&chromeClient) noexcept
     {
@@ -505,7 +554,8 @@ namespace krys::ui
   View::View(const boo::IntSize &viewportSize) noexcept
       : _backForwardList(boo::BackForwardList::Create()),
         _page(boo::Page::Create(CreateChromeClient(_chromeClient), CreateEditorClient(_editorClient),
-                                CreateFrameLoaderClient(_frameLoaderClient), _backForwardList)),
+                                CreateFrameLoaderClient(_frameLoaderClient), _backForwardList,
+                                CreateDragClient(_dragClient))),
         _frame(ShareRef(_page->MainFrame()))
   {
     static std::once_flag valuePool;
@@ -530,6 +580,7 @@ namespace krys::ui
 
     _chromeClient->SetView(this);
     _frameLoaderClient->SetView(this);
+    _dragClient->SetView(this);
     _frame->CreateView(viewportSize);
     // The frame starts with its initial empty document, at once.
     _frame->Loader().Init();
@@ -543,6 +594,7 @@ namespace krys::ui
     }
     _chromeClient->SetView(nullptr);
     _frameLoaderClient->SetView(nullptr);
+    _dragClient->SetView(nullptr);
     // The layers go before the texture mapper that holds their textures.
     _frame->SetDocument(nullptr);
   }
@@ -963,6 +1015,14 @@ namespace krys::ui
       return;
     }
 
+    // While a drag runs, the mouse moves it.
+    if (_drag)
+    {
+      DragMoved(point, modifiers);
+      PerformMicrotaskCheckpoint();
+      return;
+    }
+
     // The move's movement is how far the mouse went since the last.
     boo::DoublePoint movement;
     if (lastPosition)
@@ -971,6 +1031,11 @@ namespace krys::ui
     }
     (void)_frame->GetEventHandler().MouseMoved(MouseEvent(
       boo::PlatformEvent::Type::MouseMoved, point, HeldButton(), 0, input::ToBooey(modifiers), movement));
+    // A drag that the move started enters the page at once.
+    if (_drag)
+    {
+      DragMoved(point, modifiers);
+    }
     PerformMicrotaskCheckpoint();
   }
 
@@ -1028,6 +1093,13 @@ namespace krys::ui
       return;
     }
 
+    // Other buttons do nothing while a drag runs.
+    if (_drag)
+    {
+      _buttons |= ButtonsBit(button);
+      return;
+    }
+
     // A press ends the composition: it's confirmed where it is, wherever the press puts the selection.
     ConfirmCompositionForHost();
 
@@ -1057,6 +1129,18 @@ namespace krys::ui
 
     _buttons &= static_cast<uint16>(~ButtonsBit(button));
     _lastMousePosition = point;
+
+    // The release of the button that's dragging drops the drag; the page doesn't see it, as it doesn't see
+    // the mouse while a system drag runs.
+    if (_drag)
+    {
+      if (button == boo::MouseButton::Left)
+      {
+        EndDrag(point, true);
+        PerformMicrotaskCheckpoint();
+      }
+      return;
+    }
 
     // A release over the overlay goes to it (a popup chooses the item under it); the release of the press
     // that opened it goes to the page.
@@ -1667,6 +1751,19 @@ namespace krys::ui
     {
       return pal::CursorShape::Hidden;
     }
+    if (_drag)
+    {
+      if (!_drag->InView || !_drag->Operation)
+      {
+        return pal::CursorShape::DragNone;
+      }
+      switch (*_drag->Operation)
+      {
+        case boo::DragOperation::Copy: return pal::CursorShape::DragCopy;
+        case boo::DragOperation::Link: return pal::CursorShape::DragLink;
+        default:                       return pal::CursorShape::DragMove;
+      }
+    }
     return input::ToCursorShape(_frame->GetEventHandler().CurrentMouseCursor());
   }
 
@@ -1702,6 +1799,22 @@ namespace krys::ui
   bool View::KeyPressed(pal::Key key, pal::KeyModifiers modifiers, const pal::KeyText &text,
                         bool isAutoRepeat) noexcept
   {
+    // While a drag runs, the keys go to it: Escape cancels it, and the modifiers held choose what a drop
+    // would do.
+    if (_drag)
+    {
+      if (key == pal::Key::Escape)
+      {
+        EndDrag(_drag->Position, false);
+      }
+      else
+      {
+        DragMoved(_drag->Position, modifiers);
+      }
+      PerformMicrotaskCheckpoint();
+      return true;
+    }
+
     // While an overlay is open, it takes the keys.
     if (_overlay)
     {
@@ -1739,6 +1852,14 @@ namespace krys::ui
 
   bool View::KeyReleased(pal::Key key, pal::KeyModifiers modifiers) noexcept
   {
+    // While a drag runs, the keys go to it: the modifiers held choose what a drop would do.
+    if (_drag)
+    {
+      DragMoved(_drag->Position, modifiers);
+      PerformMicrotaskCheckpoint();
+      return true;
+    }
+
     utf8_string keyValue;
     if (auto held = _heldKeyValues.find(key); held != _heldKeyValues.end())
     {
@@ -2097,10 +2218,14 @@ namespace krys::ui
       RefPtr<Overlay> overlay = _overlay;
       overlay->Hide();
     }
-    // The composition is confirmed as the window loses focus.
+    // The composition is confirmed, and a drag cancelled, as the window loses focus.
     if (!focused)
     {
       ConfirmCompositionForHost();
+      if (_drag)
+      {
+        EndDrag(_drag->Position, false);
+      }
     }
     _focused = focused;
     boo::html::FocusAlgorithms::SystemFocusChanged(Document(), focused);
@@ -2183,6 +2308,81 @@ namespace krys::ui
     {
       window->GetNavigator().UserAgentChanged();
     }
+  }
+
+  namespace
+  {
+    /// @brief The drag's flags for @p modifiers: Ctrl makes a drop copy.
+    KRYS_NODISCARD EnumSet<boo::DragApplicationFlags> DragFlags(pal::KeyModifiers modifiers) noexcept
+    {
+      if (modifiers.Contains(pal::KeyModifier::Control))
+      {
+        return {boo::DragApplicationFlags::IsCopyKeyDown};
+      }
+      return {};
+    }
+  }
+
+  void View::DragStarted(boo::dom::DataTransfer &dataTransfer) noexcept
+  {
+    ActiveDrag drag;
+    drag.Data = dataTransfer.GetPasteboard().GetSelectionData();
+    drag.SourceOperationMask = dataTransfer.SourceOperationMask();
+    drag.Position = _lastMousePosition.value_or(boo::IntPoint());
+    _drag = krys::move(drag);
+  }
+
+  void View::DragMoved(const boo::IntPoint &point, pal::KeyModifiers modifiers) noexcept
+  {
+    auto &drag = *_drag;
+    drag.Position = point;
+    drag.Modifiers = modifiers;
+    boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(modifiers));
+
+    auto size = ViewportSize();
+    bool inView = point.X() >= 0 && point.Y() >= 0 && point.X() < size.Width() && point.Y() < size.Height();
+    if (inView)
+    {
+      drag.Operation = _page->GetDragController().DragEnteredOrUpdated(*_frame, krys::move(data));
+      drag.InView = true;
+    }
+    else if (drag.InView)
+    {
+      _page->GetDragController().DragExited(*_frame, krys::move(data));
+      drag.InView = false;
+      drag.Operation = null;
+    }
+  }
+
+  void View::EndDrag(const boo::IntPoint &point, bool drop) noexcept
+  {
+    // The drag's data outlives the drop, which reads it.
+    auto drag = krys::move(*_drag);
+    _drag = null;
+
+    auto &controller = _page->GetDragController();
+    EnumSet<boo::DragOperation> operation;
+    if (drag.InView)
+    {
+      boo::DragData data(&drag.Data, point, point, drag.SourceOperationMask, DragFlags(drag.Modifiers));
+      if (drop && drag.Operation)
+      {
+        if (controller.PerformDragOperation(krys::move(data)))
+        {
+          operation = *drag.Operation;
+        }
+      }
+      else
+      {
+        controller.DragExited(*_frame, krys::move(data));
+      }
+    }
+
+    controller.DragEnded();
+    _frame->GetEventHandler().DragSourceEndedAt(MouseEvent(boo::PlatformEvent::Type::MouseMoved, point,
+                                                           boo::MouseButton::Left, 0,
+                                                           input::ToBooey(drag.Modifiers)),
+                                                operation);
   }
 
   boo::PlatformMouseEvent View::MouseEvent(boo::PlatformEvent::Type type, const boo::IntPoint &point,

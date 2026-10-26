@@ -53,6 +53,11 @@ namespace krys::boo
   class PlatformMouseEvent;
 }
 
+namespace krys::boo::url
+{
+  class URL;
+}
+
 namespace krys::boo::css::calc
 {
   struct RandomCachingKey;
@@ -805,6 +810,9 @@ namespace krys::boo::dom
 
     /// @brief The URL of the image the element shows: its `src` attribute, or null if it has none.
     KRYS_NODISCARD virtual Maybe<DOMString> ImageSourceURL() const noexcept;
+
+    /// @brief The URL the element links to, if it's a link, resolved against its document's base URL.
+    KRYS_NODISCARD url::URL AbsoluteLinkURL() const noexcept;
 
     /// @brief Fires `focus` (then `focusin`) at the element as the focus update steps focus it; text controls
     /// update their placeholder and begin editing first.

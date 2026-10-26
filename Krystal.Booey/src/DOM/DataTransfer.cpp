@@ -74,6 +74,83 @@ namespace krys::boo::dom
       return urlList;
     }
 
+    KRYS_NODISCARD EnumSet<DragOperation> DragOpFromIEOp(DOMStringView operation) noexcept
+    {
+      if (operation == u8"uninitialized")
+      {
+        return AnyDragOperation();
+      }
+      if (operation == u8"none")
+      {
+        return {};
+      }
+      if (operation == u8"copy")
+      {
+        return {DragOperation::Copy};
+      }
+      if (operation == u8"link")
+      {
+        return {DragOperation::Link};
+      }
+      if (operation == u8"move")
+      {
+        return {DragOperation::Generic, DragOperation::Move};
+      }
+      if (operation == u8"copyLink")
+      {
+        return {DragOperation::Copy, DragOperation::Link};
+      }
+      if (operation == u8"copyMove")
+      {
+        return {DragOperation::Copy, DragOperation::Generic, DragOperation::Move};
+      }
+      if (operation == u8"linkMove")
+      {
+        return {DragOperation::Link, DragOperation::Generic, DragOperation::Move};
+      }
+      if (operation == u8"all")
+      {
+        return AnyDragOperation();
+      }
+      return {DragOperation::Private}; // Really a marker for "no conversion".
+    }
+
+    KRYS_NODISCARD DOMStringView IEOpFromDragOp(EnumSet<DragOperation> operationMask) noexcept
+    {
+      bool isGenericMove = operationMask.ContainsAny({DragOperation::Generic, DragOperation::Move});
+
+      if ((isGenericMove && operationMask.ContainsAll({DragOperation::Copy, DragOperation::Link}))
+          || operationMask.ContainsAll(AnyDragOperation()))
+      {
+        return u8"all";
+      }
+      if (isGenericMove && operationMask.Contains(DragOperation::Copy))
+      {
+        return u8"copyMove";
+      }
+      if (isGenericMove && operationMask.Contains(DragOperation::Link))
+      {
+        return u8"linkMove";
+      }
+      if (operationMask.ContainsAll({DragOperation::Copy, DragOperation::Link}))
+      {
+        return u8"copyLink";
+      }
+      if (isGenericMove)
+      {
+        return u8"move";
+      }
+      if (operationMask.Contains(DragOperation::Copy))
+      {
+        return u8"copy";
+      }
+      if (operationMask.Contains(DragOperation::Link))
+      {
+        return u8"link";
+      }
+      return u8"none";
+    }
+
     /// @brief Reads the types of the files on a pasteboard.
     struct PasteboardFileTypeReader final : PasteboardFileReader
     {
@@ -510,10 +587,15 @@ namespace krys::boo::dom
     return _effectAllowed;
   }
 
-  // FIXME: Ignoring attempts to set it to an unknown value (dragOpFromIEOp), with drag operations.
   void DataTransfer::SetEffectAllowed(DOMStringView effect) noexcept
   {
     if (!ForDrag())
+    {
+      return;
+    }
+
+    // Ignore any attempts to set it to an unknown value.
+    if (DragOpFromIEOp(effect) == EnumSet<DragOperation> {DragOperation::Private})
     {
       return;
     }
@@ -524,5 +606,90 @@ namespace krys::boo::dom
     }
 
     _effectAllowed = DOMString(effect);
+  }
+
+  Ref<DataTransfer> DataTransfer::CreateForDrag(const Document &) noexcept
+  {
+    return AdoptRef(
+      *new DataTransfer(StoreMode::ReadWrite, Pasteboard::CreateForDragAndDrop(), Type::DragAndDropData));
+  }
+
+  Ref<DataTransfer> DataTransfer::CreateForDragStartEvent(const Document &document) noexcept
+  {
+    auto dataTransfer = AdoptRef(
+      *new DataTransfer(StoreMode::ReadWrite, CreateUnique<StaticPasteboard>(), Type::DragAndDropData));
+    dataTransfer->_originIdentifier = document.OriginIdentifierForPasteboard();
+    return dataTransfer;
+  }
+
+  Ref<DataTransfer> DataTransfer::CreateForDrop(const Document &document, UniquePtr<Pasteboard> &&pasteboard,
+                                                EnumSet<DragOperation> sourceOperationMask,
+                                                bool draggingFiles) noexcept
+  {
+    auto dataTransfer =
+      AdoptRef(*new DataTransfer(StoreMode::Readonly, krys::move(pasteboard),
+                                 draggingFiles ? Type::DragAndDropFiles : Type::DragAndDropData));
+    dataTransfer->SetSourceOperationMask(sourceOperationMask);
+    dataTransfer->_originIdentifier = document.OriginIdentifierForPasteboard();
+    return dataTransfer;
+  }
+
+  Ref<DataTransfer> DataTransfer::CreateForUpdatingDropTarget(const Document &document,
+                                                              UniquePtr<Pasteboard> &&pasteboard,
+                                                              EnumSet<DragOperation> sourceOperationMask,
+                                                              bool draggingFiles) noexcept
+  {
+    auto dataTransfer =
+      AdoptRef(*new DataTransfer(StoreMode::Protected, krys::move(pasteboard),
+                                 draggingFiles ? Type::DragAndDropFiles : Type::DragAndDropData));
+    dataTransfer->SetSourceOperationMask(sourceOperationMask);
+    dataTransfer->_originIdentifier = document.OriginIdentifierForPasteboard();
+    return dataTransfer;
+  }
+
+  EnumSet<DragOperation> DataTransfer::SourceOperationMask() const noexcept
+  {
+    auto operationMask = DragOpFromIEOp(_effectAllowed);
+    krys_debug_assert((operationMask != EnumSet<DragOperation> {DragOperation::Private}));
+    return operationMask;
+  }
+
+  EnumSet<DragOperation> DataTransfer::DestinationOperationMask() const noexcept
+  {
+    auto operationMask = DragOpFromIEOp(_dropEffect);
+    krys_debug_assert(
+      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.IsEmpty()
+       || operationMask == EnumSet<DragOperation> {DragOperation::Link}
+       || operationMask == EnumSet<DragOperation> {DragOperation::Generic, DragOperation::Move}
+       || operationMask.ContainsAll(AnyDragOperation())));
+    return operationMask;
+  }
+
+  void DataTransfer::SetSourceOperationMask(EnumSet<DragOperation> operationMask) noexcept
+  {
+    krys_debug_assert((operationMask != EnumSet<DragOperation> {DragOperation::Private}));
+    _effectAllowed = DOMString(IEOpFromDragOp(operationMask));
+  }
+
+  void DataTransfer::SetDestinationOperationMask(EnumSet<DragOperation> operationMask) noexcept
+  {
+    krys_debug_assert(
+      (operationMask == EnumSet<DragOperation> {DragOperation::Copy} || operationMask.IsEmpty()
+       || operationMask == EnumSet<DragOperation> {DragOperation::Link}
+       || operationMask == EnumSet<DragOperation> {DragOperation::Generic}
+       || operationMask == EnumSet<DragOperation> {DragOperation::Move}
+       || operationMask == EnumSet<DragOperation> {DragOperation::Generic, DragOperation::Move}));
+    _dropEffect = DOMString(IEOpFromDragOp(operationMask));
+  }
+
+  // FIXME: The drag image and its element and location, with drag images.
+  void DataTransfer::MoveDragState(Ref<DataTransfer> &&other) noexcept
+  {
+    krys_assert(Is<StaticPasteboard>(other->GetPasteboard()));
+    other->CommitToPasteboard(*_pasteboard);
+
+    _dropEffect = other->_dropEffect;
+    _effectAllowed = other->_effectAllowed;
+    _fileList = krys::move(other->_fileList);
   }
 }

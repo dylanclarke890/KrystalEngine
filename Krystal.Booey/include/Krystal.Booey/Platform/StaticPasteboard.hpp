@@ -52,6 +52,7 @@ namespace krys::boo
     using Pasteboard::Read;
 
     void Write(const PasteboardURL &url) noexcept final;
+    void Write(const PasteboardImage &image) noexcept final;
     void Write(const PasteboardWebContent &content) noexcept final;
     void WriteMarkup(utf8_stringview markup) noexcept final;
     void WritePlainText(utf8_stringview text, SmartReplaceOption smartReplaceOption) noexcept final;

@@ -3443,6 +3443,15 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/DataTransferItemList.hpp
       include/Krystal.Booey/Editing/PasteboardFileListReader.hpp
       include/Krystal.Booey/Editing/WebContentReader.hpp
+      include/Krystal.Booey/DOM/DragEvent.hpp
+      include/Krystal.Booey/DOM/Dicts/DragEventInit.hpp
+      include/Krystal.Booey/Editing/MoveSelectionCommand.hpp
+      include/Krystal.Booey/Page/DragActions.hpp
+      include/Krystal.Booey/Page/DragClient.hpp
+      include/Krystal.Booey/Page/DragController.hpp
+      include/Krystal.Booey/Page/DragItem.hpp
+      include/Krystal.Booey/Page/DragState.hpp
+      include/Krystal.Booey/Platform/DragData.hpp
       include/Krystal.Booey/Platform/SimpleCaretAnimator.hpp
       include/Krystal.Booey/Editing/InlineRunAndOffset.hpp
       include/Krystal.Booey/Editing/RenderedPosition.hpp
@@ -3881,6 +3890,10 @@ target_sources(Krystal.Booey
     src/DOM/DataTransferItemList.cpp
     src/Editing/PasteboardFileListReader.cpp
     src/Editing/WebContentReader.cpp
+    src/DOM/DragEvent.cpp
+    src/Editing/MoveSelectionCommand.cpp
+    src/Page/DragController.cpp
+    src/Platform/DragData.cpp
     src/Platform/SimpleCaretAnimator.cpp
     src/Editing/RenderedPosition.cpp
     src/Editing/TextIterator.cpp

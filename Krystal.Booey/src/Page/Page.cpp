@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/DragController.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
@@ -42,13 +43,17 @@ namespace krys::boo
   }
 
   Page::Page(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
-             RefPtr<BackForwardClient> &&backForwardClient) noexcept
+             RefPtr<BackForwardClient> &&backForwardClient, UniquePtr<DragClient> dragClient) noexcept
       : _chromeClient(krys::move(chromeClient)), _editorClient(krys::move(editorClient)),
         _backForwardController(CreateUnique<BackForwardController>(
           *this, backForwardClient ? ShareRef(*backForwardClient)
                                    : Ref<BackForwardClient>(BackForwardList::Create()))),
         _pointerCaptureController(CreateUnique<PointerCaptureController>(*this)),
-        _pointerLockController(CreateUnique<PointerLockController>(*this))
+        _pointerLockController(CreateUnique<PointerLockController>(*this)),
+        _dragController(CreateUnique<DragController>(
+          *this,
+          dragClient ? krys::move(dragClient) : UniquePtr<DragClient>(CreateUnique<EmptyDragClient>()))),
+        _dragCaretController(CreateUnique<DragCaretController>())
   {
     if (!_chromeClient)
     {
@@ -136,10 +141,11 @@ namespace krys::boo
 
   Ref<Page> Page::Create(UniquePtr<ChromeClient> chromeClient, UniquePtr<EditorClient> editorClient,
                          UniquePtr<LocalFrameLoaderClient> mainFrameLoaderClient,
-                         RefPtr<BackForwardClient> backForwardClient) noexcept
+                         RefPtr<BackForwardClient> backForwardClient,
+                         UniquePtr<DragClient> dragClient) noexcept
   {
-    Ref<Page> page =
-      AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient), krys::move(backForwardClient)));
+    Ref<Page> page = AdoptRef(*new Page(krys::move(chromeClient), krys::move(editorClient),
+                                        krys::move(backForwardClient), krys::move(dragClient)));
     page->_mainFrame = LocalFrame::Create(page.get(), krys::move(mainFrameLoaderClient));
     return page;
   }

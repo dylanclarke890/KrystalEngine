@@ -23,6 +23,7 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include <tuple>
@@ -727,8 +728,17 @@ namespace krys::boo::dom
       return true;
     }
 
-    // FIXME: A draggable element that can't be selected (`-webkit-user-drag: element` with `user-select:
-    // none`) can't start one, once there's dragging.
+    if (auto *renderer = Renderer())
+    {
+      const RenderStyle &style = renderer->Style();
+
+      // We allow selections to begin within an element that has user-select: none set,
+      // but if the element is draggable then dragging should take priority over selection.
+      if (style.GetUserDrag() == UserDrag::Element && style.UsedUserSelect() == UserSelect::None)
+      {
+        return false;
+      }
+    }
     auto *parent = ParentOrShadowHostNode();
     return parent ? parent->CanStartSelection() : true;
   }

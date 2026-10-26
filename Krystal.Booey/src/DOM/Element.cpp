@@ -668,6 +668,35 @@ namespace krys::boo::dom
     return GetAttribute(u8"src");
   }
 
+  url::URL Element::AbsoluteLinkURL() const noexcept
+  {
+    if (!css::IsLink(*this))
+    {
+      return {};
+    }
+
+    Maybe<DOMString> linkAttribute;
+    if (NamespaceURI().View() == infra::Namespaces::SVG && LocalName().View() == u8"a")
+    {
+      linkAttribute = GetAttribute(u8"href");
+      if (!linkAttribute)
+      {
+        linkAttribute = GetAttributeNS(DOMStringAtom(infra::Namespaces::XLink), u8"href");
+      }
+    }
+    else
+    {
+      linkAttribute = GetAttribute(u8"href");
+    }
+
+    if (!linkAttribute || linkAttribute->empty())
+    {
+      return {};
+    }
+
+    return NodeDocument().CompleteURL(*linkAttribute);
+  }
+
   RenderElement *Element::Renderer() const noexcept
   {
     return static_cast<RenderElement *>(Node::Renderer());

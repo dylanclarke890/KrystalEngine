@@ -31,6 +31,14 @@ namespace krys::pal
     ResizeNESW,
     /// @brief Resizing towards the top left or the bottom right.
     ResizeNWSE,
+    /// @brief A drag that a drop wouldn't take: the system's drag and drop cursor.
+    DragNone,
+    /// @brief A drag that a drop would move: the system's drag and drop cursor.
+    DragMove,
+    /// @brief A drag that a drop would copy: the system's drag and drop cursor.
+    DragCopy,
+    /// @brief A drag that a drop would link to: the system's drag and drop cursor.
+    DragLink,
     /// @brief No cursor.
     Hidden,
   };
