@@ -30,6 +30,7 @@
 #include "Krystal.Booey/Rendering/Shapes/BoxLayoutShape.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
@@ -719,8 +720,8 @@ namespace krys::boo
     }
 
     ClearLayerScrollableArea();
-    // FIXME: The clip path, once there's an SVG clip path.
     ClearLayerFilters();
+    ClearLayerClipPath();
 
     // Child layers will be deleted by their corresponding render objects, so
     // we don't need to delete them ourselves.
@@ -5505,8 +5506,6 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Clipping inside SVG resource containers (<clipPath>, <mask>), once there's SVG.
-
     auto clippedContentBounds =
       CalculateLayerBounds(paintingInfo.RootLayer, offsetFromRoot, {UseLocalClipRectIfPossible});
 
@@ -5526,8 +5525,35 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: SVG clip paths (`url()` references to <clipPath>, applied as path clips or clipping masks) come
-    // with SVG.
+    if (auto *svgClipper = Renderer().LegacySVGClipperResourceFromStyle())
+    {
+      // Use the border box as the reference box, even though this is not clearly specified:
+      // https://github.com/w3c/csswg-drafts/issues/5786. clippedContentBounds is used as the reference box
+      // for inlines, which is also poorly specified: https://github.com/w3c/csswg-drafts/issues/6383.
+      auto referenceBox =
+        ReferenceBoxRectForClipPath(CSSBoxType::BorderBox, offsetFromRoot, clippedContentBounds);
+      auto snappedReferenceBox = SnapRectToDevicePixelsIfNeeded(referenceBox, Renderer());
+      auto offset = snappedReferenceBox.Location();
+
+      auto snappedClippingBounds = SnapRectToDevicePixelsIfNeeded(clippedContentBounds, Renderer());
+      snappedClippingBounds.Move(-offset.X(), -offset.Y());
+
+      stateSaver.Save();
+      context.Translate(offset);
+      (void)svgClipper->ApplyClippingToContext(context, Renderer(), {{}, referenceBox.Size()},
+                                               snappedClippingBounds, Renderer().Style().UsedZoom());
+      context.Translate(-offset.X(), -offset.Y());
+
+      // FIXME: Support event regions.
+    }
+  }
+
+  void RenderLayer::ClearLayerClipPath() noexcept
+  {
+    if (auto *svgClipper = Renderer().LegacySVGClipperResourceFromStyle())
+    {
+      svgClipper->RemoveClientFromCache(Renderer());
+    }
   }
 
   bool RenderLayer::ShouldHaveFiltersForPainting(GraphicsContext &context, EnumSet<PaintLayerFlag> paintFlags,

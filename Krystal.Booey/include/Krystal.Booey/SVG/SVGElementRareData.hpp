@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -22,8 +23,7 @@ namespace krys::boo::svg
     List<WeakPtr<SVGElement>> _referencingElements;
     WeakPtr<SVGElement> _referenceTarget;
 
-    // FIXME: The CSS clients that refer to the element as a resource (SVGResourceElementClient), with
-    // clipping and masking (B11f).
+    List<WeakPtr<SVGResourceElementClient>> _referencingCSSClients;
 
     List<WeakPtr<SVGElement>> _instances;
     WeakPtr<SVGElement> _correspondingElement;
@@ -82,6 +82,21 @@ namespace krys::boo::svg
       return std::exchange(_referencingElements, {});
     }
 
+    void AddReferencingCSSClient(SVGResourceElementClient &client) noexcept
+    {
+      Add(_referencingCSSClients, client);
+    }
+
+    void RemoveReferencingCSSClient(SVGResourceElementClient &client) noexcept
+    {
+      Remove(_referencingCSSClients, client);
+    }
+
+    KRYS_NODISCARD const List<WeakPtr<SVGResourceElementClient>> &ReferencingCSSClients() const noexcept
+    {
+      return _referencingCSSClients;
+    }
+
     KRYS_NODISCARD SVGElement *ReferenceTarget() const noexcept
     {
       return _referenceTarget.get();
@@ -120,19 +135,21 @@ namespace krys::boo::svg
 
   private:
     // The lists are sets: an element is in one at most once, and elements that have gone are dropped.
-    static void Add(List<WeakPtr<SVGElement>> &elements, SVGElement &element) noexcept
+    template <typename T>
+    static void Add(List<WeakPtr<T>> &elements, T &element) noexcept
     {
-      std::erase_if(elements, [](const WeakPtr<SVGElement> &weakElement) { return !weakElement; });
-      if (std::ranges::none_of(elements, [&](const WeakPtr<SVGElement> &weakElement)
-                               { return weakElement.get() == &element; }))
+      std::erase_if(elements, [](const WeakPtr<T> &weakElement) { return !weakElement; });
+      if (std::ranges::none_of(elements,
+                               [&](const WeakPtr<T> &weakElement) { return weakElement.get() == &element; }))
       {
         elements.push_back(CreateWeakPtr(&element));
       }
     }
 
-    static void Remove(List<WeakPtr<SVGElement>> &elements, SVGElement &element) noexcept
+    template <typename T>
+    static void Remove(List<WeakPtr<T>> &elements, T &element) noexcept
     {
-      std::erase_if(elements, [&](const WeakPtr<SVGElement> &weakElement)
+      std::erase_if(elements, [&](const WeakPtr<T> &weakElement)
                     { return !weakElement || weakElement.get() == &element; });
     }
   };

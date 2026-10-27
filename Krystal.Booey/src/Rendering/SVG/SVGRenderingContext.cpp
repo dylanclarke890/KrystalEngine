@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -9,7 +10,11 @@
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
 #include <cmath>
@@ -138,14 +143,84 @@ namespace krys::boo
       SVGRenderSupport::ClipContextToCSSClippingArea(_paintInfo->Context(), renderer);
     }
 
-    // FIXME: The renderer's resources (SVGResourcesCache): its masker and clipper, with clipping and masking
-    // (B11f), and its filter, with filters (B11h).
-    if (style.GetFilter().IsReferenceFilter())
+    auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*_renderer);
+
+    if (!resources)
+    {
+      if (style.GetFilter().IsReferenceFilter())
+      {
+        return;
+      }
+
+      _renderingFlags.Add(RenderingFlag::RenderingPrepared);
+      return;
+    }
+
+    if (!isRenderingMask)
+    {
+      if (auto *masker = resources->Masker())
+      {
+        GraphicsContext *contextPtr = &_paintInfo->Context();
+        auto result = masker->ApplyResource(*_renderer, style, contextPtr, {});
+        _paintInfo->SetContext(*contextPtr);
+        if (!ResourceWasApplied(result))
+        {
+          return;
+        }
+      }
+    }
+
+    auto *clipper = resources->Clipper();
+    if (!hasSimpleClip && clipper && !Is<LegacyRenderSVGRoot>(renderer))
+    {
+      GraphicsContext *contextPtr = &_paintInfo->Context();
+      auto result = clipper->ApplyResource(*_renderer, style, contextPtr, {});
+      _paintInfo->SetContext(*contextPtr);
+      if (!ResourceWasApplied(result))
+      {
+        return;
+      }
+
+      _pathClippingIsEntirelyWithinRendererContents =
+        result.Contains(LegacyRenderSVGResource::ApplyResult::ClipContainsRendererContent);
+    }
+
+    // FIXME: The filter (LegacyRenderSVGResourceFilter::applyResource and the filter's drawing region), with
+    // filters (B11h).
+    if (!isRenderingMask && style.GetFilter().IsReferenceFilter())
     {
       return;
     }
 
     _renderingFlags.Add(RenderingFlag::RenderingPrepared);
+  }
+
+  void SVGRenderingContext::ClipToImageBuffer(GraphicsContext &context, const FloatRect &targetRect,
+                                              const FloatSize &scale, RefPtr<ImageBuffer> &imageBuffer,
+                                              bool safeToClear) noexcept
+  {
+    if (!imageBuffer)
+    {
+      return;
+    }
+
+    AffineTransform absoluteTransform;
+    absoluteTransform.Scale(scale.Width(), scale.Height());
+
+    auto absoluteTargetRect = CalculateImageBufferRect(targetRect, absoluteTransform);
+
+    // The mask image has been created in the absolute coordinate space, as the image should not be scaled.
+    // So the actual masking process has to be done in the absolute coordinate space as well.
+    context.ConcatCTM(absoluteTransform.Inverse().value_or(AffineTransform {}));
+    context.ClipToImageBuffer(*imageBuffer, FloatRect(absoluteTargetRect));
+    context.ConcatCTM(absoluteTransform);
+
+    // When nesting resources, with objectBoundingBox as content unit types, there's no use in caching the
+    // resulting image buffer as the parent resource already caches the result.
+    if (safeToClear && !CurrentContentTransformation().IsIdentity())
+    {
+      imageBuffer = nullptr;
+    }
   }
 
   float SVGRenderingContext::CalculateScreenFontSizeScalingFactor(const RenderObject &renderer) noexcept

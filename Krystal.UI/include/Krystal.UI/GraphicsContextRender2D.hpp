@@ -32,6 +32,15 @@ namespace krys::ui
       Maybe<boo::CompositeMode> CompositeMode;
     };
 
+    // A clip to an image buffer's alpha: a layer that the image masks when the state it was made in ends.
+    struct ImageClip
+    {
+      gfx::TextureHandle Texture;
+      gfx::Rect2D Destination;
+      gfx::Transform2D Transform;
+      uint32 StackSize {0};
+    };
+
     gfx::Renderer2D &_renderer;
     FontFaceCache &_fonts;
     ImageBufferTextures *_imageBuffers;
@@ -41,6 +50,7 @@ namespace krys::ui
     // Clip bounds in target pixels, for `ClipBounds`.
     boo::FloatRect _clipBounds;
     List<boo::FloatRect> _clipBoundsStack;
+    List<ImageClip> _imageClips;
 
   public:
     /// @param bounds The target's rect, in its pixels, the initial clip bounds.
@@ -98,6 +108,7 @@ namespace krys::ui
     void ClipOutRoundedRect(const boo::FloatRoundedRect &) noexcept override;
     void ClipPath(const boo::Path &, boo::WindRule = boo::WindRule::EvenOdd) noexcept override;
     KRYS_NODISCARD boo::IntRect ClipBounds() const noexcept override;
+    void ClipToImageBuffer(boo::ImageBuffer &, const boo::FloatRect &) noexcept override;
 
     void DrawGlyphs(const boo::Font &, Span<const boo::GlyphBufferGlyph>, Span<const boo::GlyphBufferAdvance>,
                     const boo::FloatPoint &, boo::FontSmoothingMode) noexcept override;
@@ -179,5 +190,6 @@ namespace krys::ui
 
     void FillShape(const gfx::Path2D &path, gfx::FillRule rule, const gfx::Paint2D &paint) noexcept;
     void IntersectClipBounds(const boo::FloatRect &rect) noexcept;
+    void EndImageClips() noexcept;
   };
 }

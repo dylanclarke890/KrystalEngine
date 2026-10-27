@@ -50,6 +50,7 @@ namespace krys::boo::display_list
     void ClipOut(const Path &) noexcept final;
     void ClipOutRoundedRect(const FloatRoundedRect &) noexcept final;
     void ClipPath(const Path &, WindRule = WindRule::EvenOdd) noexcept final;
+    void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept final;
 
     void BeginTransparencyLayer(float) noexcept final;
     void BeginTransparencyLayer(CompositeOperator, boo::BlendMode = BlendMode::Normal) noexcept final;

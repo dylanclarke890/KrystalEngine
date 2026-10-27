@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include <numbers>
 
@@ -209,6 +210,21 @@ namespace krys::boo::tests
     CHECK(context.ClipBounds() == IntRect(-10, -10, 100, 100));
     CHECK(ItemNames(recorder)
           == List<std::string_view> {"clip", "translate", "clip-out", "clip-path", "reset-clip", "clip"});
+  }
+
+  TEST_CASE("RecorderImpl: records clips to image buffers", "[Graphics][DisplayList]")
+  {
+    RecorderImpl recorder({100, 100});
+    GraphicsContext &context = recorder;
+    auto buffer = ImageBuffer::Create({10, 10}, 1);
+    REQUIRE(buffer);
+
+    // The clip bounds are the destination rect.
+    context.ClipToImageBuffer(*buffer, {5, 5, 10, 10});
+    CHECK(context.ClipBounds() == IntRect(5, 5, 10, 10));
+    CHECK(AsText(recorder) == u8R"(
+(clip-to-image-buffer
+  (dest-rect at (5,5) size 10x10)))");
   }
 
   TEST_CASE("RecorderImpl: records state changes when something is drawn", "[Graphics][DisplayList]")

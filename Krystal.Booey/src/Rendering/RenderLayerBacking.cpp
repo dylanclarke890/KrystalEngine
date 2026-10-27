@@ -2524,8 +2524,8 @@ namespace krys::boo
       if (hasClipPath)
       {
         // If we have a mask, we need to paint the combined clip-path and mask into the mask layer.
-        // FIXME: Reference clip paths (style::ReferencePath), once there's SVG.
-        if (hasMask || !GraphicsLayer::SupportsLayerType(GraphicsLayer::Type::Shape))
+        if (hasMask || Renderer().Style().GetClipPath().IsReference()
+            || !GraphicsLayer::SupportsLayerType(GraphicsLayer::Type::Shape))
         {
           maskPhases.Add(GraphicsLayerPaintingPhase::ClipPath);
         }

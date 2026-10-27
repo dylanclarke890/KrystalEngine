@@ -10,6 +10,8 @@
 
 namespace krys::boo
 {
+  class LegacyRenderSVGResourceClipper;
+
   /// @brief A renderer that may have a layer.
   // FIXME: Viewport-constrained objects and SVG (transforms, resources, clipping) come with scrolling and
   // SVG.
@@ -57,6 +59,8 @@ namespace krys::boo
     virtual bool ApplyCachedClipAndScrollPosition(RepaintRects &rects,
                                                   const RenderLayerModelObject *container,
                                                   VisibleRectContext context) const noexcept;
+
+    KRYS_NODISCARD LegacyRenderSVGResourceClipper *LegacySVGClipperResourceFromStyle() const noexcept;
 
     KRYS_NODISCARD bool ShouldUsePositionedClipping() const noexcept
     {

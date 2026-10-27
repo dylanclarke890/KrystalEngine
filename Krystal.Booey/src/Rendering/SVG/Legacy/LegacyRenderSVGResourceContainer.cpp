@@ -142,7 +142,7 @@ namespace krys::boo
                                                                                   visitedRenderers);
     }
 
-    // FIXME: markAllClientLayersForInvalidation, with clipping and masking from HTML (B11f).
+    // FIXME: markAllClientLayersForInvalidation, with filters from HTML (B11h).
   }
 
   void LegacyRenderSVGResourceContainer::MarkClientForInvalidation(RenderObject &client,

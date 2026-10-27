@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
@@ -73,7 +74,7 @@ namespace krys::boo::svg
     }
 
     // "base class" methods for all the elements which render as paths
-    // FIXME: The element's path as a clip path (toClipPath), with clipping (B11f).
+    KRYS_NODISCARD virtual Path ToClipPath() noexcept;
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGraphicsElement, SVGElement, SVGTests>;

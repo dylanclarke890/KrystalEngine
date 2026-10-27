@@ -13,6 +13,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGForeignObject.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
@@ -441,11 +443,27 @@ namespace krys::boo
     return IsNonVisibleOverflow(renderer.Style().OverflowX());
   }
 
-  void SVGRenderSupport::IntersectRepaintRectWithResources(const RenderElement &, FloatRect &,
-                                                           RepaintRectCalculation) noexcept
+  void SVGRenderSupport::IntersectRepaintRectWithResources(
+    const RenderElement &renderer, FloatRect &repaintRect,
+    RepaintRectCalculation repaintRectCalculation) noexcept
   {
-    // FIXME: The filter's, clipper's and masker's resource bounding boxes (SVGResourcesCache), with filters
-    // (B11h) and clipping and masking (B11f).
+    auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer);
+    if (!resources)
+    {
+      return;
+    }
+
+    // FIXME: The filter's resource bounding box, with filters (B11h).
+
+    if (auto *clipper = resources->Clipper())
+    {
+      repaintRect.Intersect(clipper->ResourceBoundingBox(renderer, repaintRectCalculation));
+    }
+
+    if (auto *masker = resources->Masker())
+    {
+      repaintRect.Intersect(masker->ResourceBoundingBox(renderer, repaintRectCalculation));
+    }
   }
 
   bool SVGRenderSupport::FiltersForceContainerLayout(const RenderElement &renderer) noexcept
@@ -562,8 +580,17 @@ namespace krys::boo
 
     // We just take clippers into account to determine if a point is on the node. The Specification may
     // change later and we also need to check maskers.
-    // FIXME: Hit test the clipper's content (LegacyRenderSVGResourceClipper::hitTestClipContent), with
-    // clipping (B11f).
+    auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer);
+    if (!resources)
+    {
+      return true;
+    }
+
+    if (auto *clipper = resources->Clipper())
+    {
+      return clipper->HitTestClipContent(renderer.ObjectBoundingBox(), point);
+    }
+
     return true;
   }
 

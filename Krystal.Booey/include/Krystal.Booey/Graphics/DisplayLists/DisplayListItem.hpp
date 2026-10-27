@@ -26,6 +26,7 @@ namespace krys::boo::display_list
   class ClipOutRoundedRect;
   class ClipOutToPath;
   class ClipPath;
+  class ClipToImageBuffer;
   class ConcatenateCTM;
   class DrawDotsForDocumentMarker;
   class DrawEllipse;
@@ -74,18 +75,19 @@ namespace krys::boo::display_list
   class EndPage;
   class SetURLForRect;
 
-  // FIXME: The filter and system image items (ClipToImageBuffer, DrawFilteredImageBuffer, DrawSystemImage).
+  // FIXME: The filter and system image items (DrawFilteredImageBuffer, DrawSystemImage).
   using Item =
     Variant<ApplyDeviceScaleFactor, BeginTransparencyLayer, BeginTransparencyLayerWithCompositeMode,
             ClearRect, Clip, ClipRoundedRect, ClipOut, ClipOutRoundedRect, ClipOutToPath, ClipPath,
-            ConcatenateCTM, DrawControlPart, DrawDotsForDocumentMarker, DrawEllipse, DrawFocusRingPath,
-            DrawFocusRingRects, DrawGlyphs, DrawDisplayList, DrawImageBuffer, DrawNativeImage,
-            DrawPatternNativeImage, DrawPatternImageBuffer, DrawPlaceholder, DrawLine, DrawLinesForText,
-            DrawPath, DrawRect, EndTransparencyLayer, FillCompositedRect, FillEllipse, FillPath, FillRect,
-            FillRectWithColor, FillRectWithGradient, FillRectWithGradientAndSpaceTransform,
-            FillRectWithRoundedHole, FillRoundedRect, ResetClip, Restore, Rotate, Save, Scale, SetCTM,
-            SetInlineFillColor, SetInlineStroke, SetLineCap, SetLineDash, SetLineJoin, SetMiterLimit,
-            SetState, StrokeEllipse, StrokePath, StrokeRect, Translate, BeginPage, EndPage, SetURLForRect>;
+            ClipToImageBuffer, ConcatenateCTM, DrawControlPart, DrawDotsForDocumentMarker, DrawEllipse,
+            DrawFocusRingPath, DrawFocusRingRects, DrawGlyphs, DrawDisplayList, DrawImageBuffer,
+            DrawNativeImage, DrawPatternNativeImage, DrawPatternImageBuffer, DrawPlaceholder, DrawLine,
+            DrawLinesForText, DrawPath, DrawRect, EndTransparencyLayer, FillCompositedRect, FillEllipse,
+            FillPath, FillRect, FillRectWithColor, FillRectWithGradient,
+            FillRectWithGradientAndSpaceTransform, FillRectWithRoundedHole, FillRoundedRect, ResetClip,
+            Restore, Rotate, Save, Scale, SetCTM, SetInlineFillColor, SetInlineStroke, SetLineCap,
+            SetLineDash, SetLineJoin, SetMiterLimit, SetState, StrokeEllipse, StrokePath, StrokeRect,
+            Translate, BeginPage, EndPage, SetURLForRect>;
 
   enum class AsTextFlag : uint8
   {

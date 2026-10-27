@@ -92,6 +92,9 @@ namespace krys::boo
     void ClipPath(const Path &, WindRule = WindRule::EvenOdd) noexcept final
     {
     }
+    void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept final
+    {
+    }
     void DrawLinesForText(const FloatPoint &, float, Span<const FloatSegment>, bool, bool,
                           boo::StrokeStyle) noexcept final
     {

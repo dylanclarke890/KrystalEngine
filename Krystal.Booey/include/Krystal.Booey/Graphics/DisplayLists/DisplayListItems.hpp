@@ -577,6 +577,32 @@ namespace krys::boo::display_list
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
+  class ClipToImageBuffer
+  {
+  private:
+    Ref<ImageBuffer> _imageBuffer;
+    FloatRect _destinationRect;
+
+  public:
+    static constexpr std::string_view Name = "clip-to-image-buffer";
+
+    ClipToImageBuffer(ImageBuffer &, const FloatRect &destinationRect) noexcept;
+    ClipToImageBuffer(const ClipToImageBuffer &) noexcept;
+    ClipToImageBuffer(ClipToImageBuffer &&) noexcept;
+    ClipToImageBuffer &operator=(const ClipToImageBuffer &) noexcept;
+    ClipToImageBuffer &operator=(ClipToImageBuffer &&) noexcept;
+    ~ClipToImageBuffer() noexcept;
+
+    KRYS_NODISCARD ImageBuffer &GetImageBuffer() const noexcept;
+    KRYS_NODISCARD FloatRect DestinationRect() const noexcept
+    {
+      return _destinationRect;
+    }
+
+    void Apply(GraphicsContext &) const noexcept;
+    void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
+  };
+
   class DrawImageBuffer
   {
   private:

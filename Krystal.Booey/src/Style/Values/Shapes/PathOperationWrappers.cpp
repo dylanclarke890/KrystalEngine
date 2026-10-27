@@ -12,7 +12,10 @@
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordSerialisation.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGURIReference.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::style
 {
@@ -36,15 +39,20 @@ namespace krys::boo::style
       // document local references. To see an example of how this should work, see ReferenceFilterOperation
       // which supports both document local and remote URLs.
 
-      // FIXME: Unify all the fragment accessing/construction
-      // (`SVGURIReference::fragmentIdentifierFromIRIString`).
-      utf8_stringview resolved = styleURL.Resolved.String();
-      auto fragment = resolved.starts_with(u8'#') ? StringAtom {resolved.substr(1)}
-                                                  : StringAtom {styleURL.Resolved.FragmentIdentifier()};
+      auto fragment = svg::SVGURIReference::FragmentIdentifierFromIRIString(styleURL, state.GetDocument());
 
-      // FIXME: Look the target element up in the element's tree scope for SVG references
-      // (`SVGURIReference::targetElementFromIRIString`).
-      return ReferencePathOperation::Create(styleURL, fragment, nullptr);
+      const auto &treeScope = [&]() -> const dom::DocumentOrShadowRoot &
+      {
+        if (const auto *element = state.GetElement())
+        {
+          return element->TreeScopeForSVGReferences();
+        }
+        return state.GetDocument();
+      }();
+      auto target = svg::SVGURIReference::TargetElementFromIRIString(styleURL, treeScope);
+
+      return ReferencePathOperation::Create(styleURL, fragment,
+                                            DynamicDowncast<svg::SVGElement>(target.Element.get()));
     }
 
     if (const auto *ray = DynamicDowncast<css::RayValue>(value))

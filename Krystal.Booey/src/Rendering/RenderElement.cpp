@@ -22,6 +22,7 @@
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
 #include "Krystal.Booey/Rendering/OutlinePainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
+#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -48,6 +49,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
 #include "Krystal.Booey/Style/PendingResources.hpp"
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
@@ -1324,7 +1326,14 @@ namespace krys::boo
     registerImages(Style().GetCachedPseudoStyle({PseudoElementType::FirstLine}),
                    oldStyle ? oldStyle->GetCachedPseudoStyle({PseudoElementType::FirstLine}) : nullptr);
 
-    // FIXME: SVG resources, once there are any.
+    SVGRenderSupport::StyleChanged(*this, oldStyle);
+
+    if (diff >= style::DifferenceResult::Repaint)
+    {
+      UpdateReferencedSVGResources();
+      // FIXME: Repainting the clients of the enclosing resource container
+      // (repaintClientsOfReferencedSVGResources) belongs to the layer-based engine, which isn't ported.
+    }
 
     if (!Parent())
     {
@@ -2525,6 +2534,43 @@ namespace krys::boo
   void RenderElement::SetBackdropRenderer(RenderBlockFlow &renderer) noexcept
   {
     EnsureRareData().BackdropRenderer = CreateWeakPtr(&renderer);
+  }
+
+  ReferencedSVGResources &RenderElement::EnsureReferencedSVGResources() noexcept
+  {
+    auto &rareData = EnsureRareData();
+    if (!rareData.ReferencedSVGResources)
+    {
+      rareData.ReferencedSVGResources = CreateUnique<ReferencedSVGResources>(*this);
+    }
+
+    return *rareData.ReferencedSVGResources;
+  }
+
+  void RenderElement::ClearReferencedSVGResources() noexcept
+  {
+    if (!HasRareData())
+    {
+      return;
+    }
+
+    EnsureRareData().ReferencedSVGResources = nullptr;
+  }
+
+  // This needs to run when the entire render tree has been constructed, so can't be called from
+  // styleDidChange.
+  void RenderElement::UpdateReferencedSVGResources() noexcept
+  {
+    auto referencedElementIDs = ReferencedSVGResources::ReferencedSVGResourceIDs(Style(), GetDocument());
+    if (!referencedElementIDs.empty())
+    {
+      EnsureReferencedSVGResources().UpdateReferencedResources(TreeScopeForSVGReferences(),
+                                                               referencedElementIDs);
+    }
+    else
+    {
+      ClearReferencedSVGResources();
+    }
   }
 
   void RenderElement::InsertedIntoTree() noexcept

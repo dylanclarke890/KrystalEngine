@@ -1,14 +1,17 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
-  class AffineTransform;
   class GraphicsContext;
+  class ImageBuffer;
   class RenderElement;
   class RenderObject;
   struct PaintInfo;
@@ -84,12 +87,21 @@ namespace krys::boo
     }
 
     static void RenderSubtreeToContext(GraphicsContext &, RenderElement &, const AffineTransform &) noexcept;
-    // FIXME: clipToImageBuffer, with masking (B11f), and bufferForeground (buffered-rendering: static), once
-    // there are image buffers.
+    static void ClipToImageBuffer(GraphicsContext &, const FloatRect &targetRect, const FloatSize &scale,
+                                  RefPtr<ImageBuffer> &, bool safeToClear) noexcept;
 
     KRYS_NODISCARD static float CalculateScreenFontSizeScalingFactor(const RenderObject &) noexcept;
     KRYS_NODISCARD static AffineTransform
       CalculateTransformationToOutermostCoordinateSystem(const RenderObject &) noexcept;
+
+    KRYS_NODISCARD static IntRect CalculateImageBufferRect(const FloatRect &targetRect,
+                                                           const AffineTransform &absoluteTransform) noexcept
+    {
+      return EnclosingIntRect(absoluteTransform.MapRect(targetRect));
+    }
+
+    // FIXME: Support for the buffered-rendering hint (bufferForeground), once image buffers can be drawn
+    // back from the CPU.
 
     KRYS_NODISCARD const RenderElement *Renderer() const noexcept
     {

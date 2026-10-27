@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
@@ -1857,6 +1858,11 @@ namespace krys::boo
   dom::Document &RenderObject::GetDocument() const noexcept
   {
     return _node.NodeDocument();
+  }
+
+  dom::DocumentOrShadowRoot &RenderObject::TreeScopeForSVGReferences() const noexcept
+  {
+    return _node.TreeScopeForSVGReferences();
   }
 
   WritingMode RenderObject::GetWritingMode() const noexcept

@@ -1,6 +1,7 @@
 ﻿#include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Style/BuilderTestUtils.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
@@ -99,6 +100,27 @@ namespace krys::boo::style::tests
       CHECK_FALSE(Blending<OffsetPath> {}.CanBlend(
         from, Convert<OffsetPath>(PropertyId::OffsetPath, u8"circle(10px)")));
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Style offset-path: references", "[Style][Values][Motion]")
+  {
+    ResolverFixture fixture {
+      u8R"html(<!DOCTYPE html><svg><path id=p d="M10 10 L60 10" /><line id=l x1=5 x2=5 y2=20 /><g id=g /></svg>)html"
+      u8R"html(<div id=path style="offset-path: url(#p)"></div><div id=line style="offset-path: url(#l)"></div>)html"
+      u8R"html(<div id=group style="offset-path: url(#g)"></div><div id=missing style="offset-path: url(#none)"></div>)html"};
+
+    // A reference to an SVG path or geometry element takes its path; other elements give none.
+    auto pathOf = [&](dom::DOMStringView id)
+    {
+      return TryPath(fixture.Resolve(fixture.ById(id)).Style->GetOffsetPath(), MotionData());
+    };
+    auto path = pathOf(u8"path");
+    REQUIRE(path);
+    CHECK(path->BoundingRect() == FloatRect {10, 10, 50, 0});
+    REQUIRE(pathOf(u8"line"));
+    CHECK(pathOf(u8"line")->BoundingRect() == FloatRect {5, 0, 0, 20});
+    CHECK_FALSE(pathOf(u8"group"));
+    CHECK_FALSE(pathOf(u8"missing"));
   }
 
   TEST_CASE("Path operations", "[Rendering][PathOperation]")

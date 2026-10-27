@@ -536,6 +536,36 @@ namespace krys::boo::display_list
     return _displayList;
   }
 
+  ClipToImageBuffer::ClipToImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destinationRect) noexcept
+      : _imageBuffer(ShareRef(imageBuffer)), _destinationRect(destinationRect)
+  {
+  }
+
+  ClipToImageBuffer::ClipToImageBuffer(const ClipToImageBuffer &) noexcept = default;
+  ClipToImageBuffer::ClipToImageBuffer(ClipToImageBuffer &&) noexcept = default;
+  ClipToImageBuffer &ClipToImageBuffer::operator=(const ClipToImageBuffer &) noexcept = default;
+  ClipToImageBuffer &ClipToImageBuffer::operator=(ClipToImageBuffer &&) noexcept = default;
+  ClipToImageBuffer::~ClipToImageBuffer() noexcept = default;
+
+  ImageBuffer &ClipToImageBuffer::GetImageBuffer() const noexcept
+  {
+    return *_imageBuffer;
+  }
+
+  void ClipToImageBuffer::Apply(GraphicsContext &context) const noexcept
+  {
+    context.ClipToImageBuffer(*_imageBuffer, _destinationRect);
+  }
+
+  void ClipToImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      ts.DumpProperty(u8"image-buffer-identifier", _imageBuffer->GetRenderingResourceIdentifier());
+    }
+    ts.DumpProperty(u8"dest-rect", DestinationRect());
+  }
+
   DrawImageBuffer::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,
                                    const FloatRect &srcRect, ImagePaintingOptions options) noexcept
       : _imageBuffer(ShareRef(imageBuffer)), _destinationRect(destRect), _srcRect(srcRect), _options(options)

@@ -24,6 +24,7 @@ namespace krys::boo::svg
   enum class CTMScope : bool;
   class SVGConditionalProcessingAttributes;
   class SVGElementRareData;
+  class SVGResourceElementClient;
   class SVGSvgElement;
   class SVGUseElement;
 
@@ -180,6 +181,9 @@ namespace krys::boo::svg
     KRYS_NODISCARD List<Ref<SVGElement>> Instances() const noexcept;
 
     KRYS_NODISCARD List<Ref<SVGElement>> ReferencingElements() const noexcept;
+    KRYS_NODISCARD List<WeakPtr<SVGResourceElementClient>> ReferencingCSSClients() const noexcept;
+    void AddReferencingCSSClient(SVGResourceElementClient &) noexcept;
+    void RemoveReferencingCSSClient(SVGResourceElementClient &) noexcept;
     void AddReferencingElement(SVGElement &element) noexcept;
     void RemoveReferencingElement(SVGElement &element) noexcept;
     void RemoveElementReference() noexcept;
@@ -333,6 +337,11 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Circle;
     }
 
+    KRYS_NODISCARD bool IsSVGClipPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::ClipPath;
+    }
+
     KRYS_NODISCARD bool IsSVGDefsElement() const noexcept
     {
       return _interface == SVGElementInterface::Defs;
@@ -381,6 +390,16 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsSVGLinearGradientElement() const noexcept
     {
       return _interface == SVGElementInterface::LinearGradient;
+    }
+
+    KRYS_NODISCARD bool IsSVGMarkerElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Marker;
+    }
+
+    KRYS_NODISCARD bool IsSVGMaskElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Mask;
     }
 
     KRYS_NODISCARD bool IsSVGMetadataElement() const noexcept

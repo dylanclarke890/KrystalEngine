@@ -370,6 +370,10 @@ namespace krys::boo
     {
       ts << "svg image";
     }
+    else if (image.IsSVGResourceImage())
+    {
+      ts << "svg resource image";
+    }
     else if (image.IsSVGImageForContainer())
     {
       ts << "svg image for container";

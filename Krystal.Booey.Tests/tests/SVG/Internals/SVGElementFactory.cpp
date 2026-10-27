@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
 #include "Krystal.Booey/SVG/SVGDescElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
@@ -15,6 +16,8 @@
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
+#include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
+#include "Krystal.Booey/SVG/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPatternElement.hpp"
@@ -58,6 +61,7 @@ namespace krys::boo::svg::tests
 
     CHECK(IsCreated<SVGAElement>(*document, u8"a"));
     CHECK(IsCreated<SVGCircleElement>(*document, u8"circle"));
+    CHECK(IsCreated<SVGClipPathElement>(*document, u8"clipPath"));
     CHECK(IsCreated<SVGDefsElement>(*document, u8"defs"));
     CHECK(IsCreated<SVGDescElement>(*document, u8"desc"));
     CHECK(IsCreated<SVGEllipseElement>(*document, u8"ellipse"));
@@ -66,6 +70,8 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGImageElement>(*document, u8"image"));
     CHECK(IsCreated<SVGLineElement>(*document, u8"line"));
     CHECK(IsCreated<SVGLinearGradientElement>(*document, u8"linearGradient"));
+    CHECK(IsCreated<SVGMarkerElement>(*document, u8"marker"));
+    CHECK(IsCreated<SVGMaskElement>(*document, u8"mask"));
     CHECK(IsCreated<SVGMetadataElement>(*document, u8"metadata"));
     CHECK(IsCreated<SVGPathElement>(*document, u8"path"));
     CHECK(IsCreated<SVGPatternElement>(*document, u8"pattern"));
@@ -84,9 +90,9 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGViewElement>(*document, u8"view"));
 
     // The elements that aren't ported yet, the SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
-    for (auto localName : {u8"clipPath", u8"text", u8"filter", u8"feGaussianBlur", u8"animate", u8"set",
-                           u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor",
-                           u8"animateColor", u8"div", u8"x"})
+    for (auto localName :
+         {u8"text", u8"filter", u8"feGaussianBlur", u8"animate", u8"set", u8"font", u8"font-face",
+          u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
     {
       CAPTURE(css::tests::ToNarrow(localName));
       CHECK(IsCreated<SVGUnknownElement>(*document, localName));
@@ -113,7 +119,7 @@ namespace krys::boo::svg::tests
 
     auto &clipPath = *document->GetElementById(u8"c");
     CHECK(clipPath.LocalName() == u8"clipPath");
-    CHECK(Is<SVGUnknownElement>(Downcast<SVGElement>(clipPath)));
+    CHECK(Is<SVGClipPathElement>(Downcast<SVGElement>(clipPath)));
 
     // <style> in SVG makes a style sheet.
     CHECK(document->StyleSheets().Length() == 1u);

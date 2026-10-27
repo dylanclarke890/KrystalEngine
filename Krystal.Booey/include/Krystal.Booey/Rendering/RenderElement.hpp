@@ -418,6 +418,8 @@ namespace krys::boo
     /// @brief The renderer of the element's `::backdrop`, while the element is in the top layer.
     KRYS_NODISCARD RenderBlockFlow *BackdropRenderer() const noexcept;
     void SetBackdropRenderer(RenderBlockFlow &renderer) noexcept;
+
+    KRYS_NODISCARD ReferencedSVGResources &EnsureReferencedSVGResources() noexcept;
     void RemoveLayers() noexcept;
     void MoveLayers(RenderLayer &newParent) noexcept;
 
@@ -518,6 +520,9 @@ namespace krys::boo
     bool RepaintBeforeStyleChange(style::Difference diff, const RenderStyle &oldStyle,
                                   const RenderStyle &newStyle) noexcept;
     KRYS_NODISCARD bool ShouldRepaintForStyleDifference(style::Difference diff) const noexcept;
+
+    void UpdateReferencedSVGResources() noexcept;
+    void ClearReferencedSVGResources() noexcept;
     void UpdateOutlineAutoAncestor(bool hasOutlineAuto) noexcept;
     void IssueRepaintForOutlineAuto(float outlineSize) noexcept;
   };

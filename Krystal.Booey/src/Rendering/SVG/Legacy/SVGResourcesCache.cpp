@@ -81,10 +81,10 @@ namespace krys::boo
       return resource && resource->ResourceType() == RenderSVGResourceType::PatternResourceType;
     }
 
-    // FIXME: The masker and filter, with masking (B11f) and filters (B11h).
+    // FIXME: The filter, with filters (B11h).
     KRYS_NODISCARD bool HasResourcesRequiringRemovalOnClientLayoutChange(SVGResources &resources) noexcept
     {
-      return HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Fill())
+      return resources.Masker() || HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Fill())
              || HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Stroke());
     }
 
@@ -168,8 +168,18 @@ namespace krys::boo
         return true;
       }
 
-      // FIXME: clip-path, the first mask image and filter, with clipping and masking (B11f) and filters
-      // (B11h); the markers, with markers (B11f).
+      if (oldStyle->GetClipPath() != newStyle.GetClipPath())
+      {
+        return true;
+      }
+
+      // RenderSVGResourceMarker only supports SVG <mask> references.
+      if (oldStyle->GetMaskLayers().UsedFirst().GetImage() != newStyle.GetMaskLayers().UsedFirst().GetImage())
+      {
+        return true;
+      }
+
+      // FIXME: The filter, with filters (B11h).
 
       if (oldStyle->Fill().UrlDisregardingType() != newStyle.Fill().UrlDisregardingType())
       {
@@ -177,6 +187,21 @@ namespace krys::boo
       }
 
       if (oldStyle->Stroke().UrlDisregardingType() != newStyle.Stroke().UrlDisregardingType())
+      {
+        return true;
+      }
+
+      if (oldStyle->MarkerStart() != newStyle.MarkerStart())
+      {
+        return true;
+      }
+
+      if (oldStyle->MarkerMid() != newStyle.MarkerMid())
+      {
+        return true;
+      }
+
+      if (oldStyle->MarkerEnd() != newStyle.MarkerEnd())
       {
         return true;
       }

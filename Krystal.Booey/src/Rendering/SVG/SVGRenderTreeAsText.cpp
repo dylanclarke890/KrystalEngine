@@ -5,9 +5,13 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceRadialGradient.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
@@ -20,6 +24,7 @@
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
+#include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 #include "Krystal.Booey/SVG/SVGPolyElement.hpp"
@@ -83,6 +88,12 @@ namespace krys::boo
     TextStream &operator<<(TextStream &ts, const svg::SVGUnitTypes::SVGUnitType &unitType) noexcept
     {
       ts << svg::SVGPropertyTraits<svg::SVGUnitTypes::SVGUnitType>::ToString(unitType);
+      return ts;
+    }
+
+    TextStream &operator<<(TextStream &ts, const svg::SVGMarkerUnitsType &markerUnit) noexcept
+    {
+      ts << svg::SVGPropertyTraits<svg::SVGMarkerUnitsType>::ToString(markerUnit);
       return ts;
     }
 
@@ -397,9 +408,33 @@ namespace krys::boo
     auto id = resource.GetElement().Id();
     WriteNameAndQuotedValue(ts, u8"id", id);
 
-    // FIXME: Maskers, filters, clippers and markers, with clipping, masking and markers (B11f) and filters
-    // (B11h).
-    if (auto *pattern = DynamicDowncast<const LegacyRenderSVGResourcePattern>(resource))
+    if (auto *masker = DynamicDowncast<const LegacyRenderSVGResourceMasker>(resource))
+    {
+      WriteNameValuePair(ts, u8"maskUnits", masker->MaskUnits());
+      WriteNameValuePair(ts, u8"maskContentUnits", masker->MaskContentUnits());
+      ts << '\n';
+    }
+    // FIXME: Filters (their units and their filter graph), with filters (B11h).
+    else if (auto *clipper = DynamicDowncast<const LegacyRenderSVGResourceClipper>(resource))
+    {
+      WriteNameValuePair(ts, u8"clipPathUnits", clipper->ClipPathUnits());
+      ts << '\n';
+    }
+    else if (auto *marker = DynamicDowncast<const LegacyRenderSVGResourceMarker>(resource))
+    {
+      WriteNameValuePair(ts, u8"markerUnits", marker->MarkerUnits());
+      ts << u8" [ref at " << marker->ReferencePoint() << ']';
+      ts << u8" [angle=";
+      if (auto angle = marker->Angle())
+      {
+        ts << *angle << u8"]\n";
+      }
+      else
+      {
+        ts << u8"auto" << u8"]\n";
+      }
+    }
+    else if (auto *pattern = DynamicDowncast<const LegacyRenderSVGResourcePattern>(resource))
     {
       // Dump final results that are used for rendering. No use in asking SVGPatternElement for its
       // patternUnits(), as it may link to other patterns using xlink:href, we need to build the full
@@ -503,9 +538,44 @@ namespace krys::boo
     WriteChildren(ts, root, behavior);
   }
 
-  void WriteResources(TextStream &, const RenderObject &, EnumSet<RenderAsTextFlag>) noexcept
+  void WriteResources(TextStream &ts, const RenderObject &renderer,
+                      EnumSet<RenderAsTextFlag> behavior) noexcept
   {
-    // FIXME: The masker, clipper and filter the renderer references, with clipping and masking (B11f) and
-    // filters (B11h).
+    const RenderStyle &style = renderer.Style();
+
+    // FIXME: We want to use SVGResourcesCache to determine which resources are present, instead of quering
+    // the resource <-> id cache. For now leave the DRT output as is, but later on we should change this so
+    // cycles are properly ignored in the DRT output.
+    if (style.HasPositionedMask())
+    {
+      if (auto maskImage = style.GetMaskLayers().UsedFirst().GetImage().TryStyleImage())
+      {
+        auto &document = renderer.GetDocument();
+        auto resourceID = svg::SVGURIReference::FragmentIdentifierFromIRIString(maskImage->Url(), document);
+        if (auto *masker = GetRenderSVGResourceById<LegacyRenderSVGResourceMasker>(
+              renderer.TreeScopeForSVGReferences(), resourceID))
+        {
+          ts << Indent << ' ';
+          WriteNameAndQuotedValue(ts, u8"masker", resourceID.View());
+          ts << ' ';
+          WriteStandardPrefix(ts, *masker, behavior, WriteIndentOrNot::No);
+          ts << ' ' << masker->ResourceBoundingBox(renderer, RepaintRectCalculation::Accurate) << '\n';
+        }
+      }
+    }
+    if (auto clipPath = style.GetClipPath().TryReference())
+    {
+      auto id = clipPath->Fragment();
+      if (auto *clipper = GetRenderSVGResourceById<LegacyRenderSVGResourceClipper>(
+            renderer.TreeScopeForSVGReferences(), id))
+      {
+        ts << Indent << ' ';
+        WriteNameAndQuotedValue(ts, u8"clipPath", id.View());
+        ts << ' ';
+        WriteStandardPrefix(ts, *clipper, behavior, WriteIndentOrNot::No);
+        ts << ' ' << clipper->ResourceBoundingBox(renderer, RepaintRectCalculation::Accurate) << '\n';
+      }
+    }
+    // FIXME: The filter the renderer references, with filters (B11h).
   }
 }

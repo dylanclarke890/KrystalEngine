@@ -1,8 +1,14 @@
 ﻿#include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGResourceImage.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/SVGURIReference.hpp"
 
 namespace krys::boo
 {
@@ -85,6 +91,67 @@ namespace krys::boo
     return _url;
   }
 
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &treeScope,
+                                                 const dom::DOMStringAtom &fragment) const noexcept
+  {
+    auto *renderSVGResource = ReferencedSVGResources::ReferencedRenderResource(treeScope, fragment);
+    _isRenderSVGResource = renderSVGResource != nullptr;
+    return renderSVGResource;
+  }
+
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::UncheckedRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    if (!renderer)
+    {
+      return nullptr;
+    }
+
+    if (_url.Resolved.String().find(u8'#') == utf8_string::npos)
+    {
+      _isRenderSVGResource = false;
+      return nullptr;
+    }
+
+    if (!_cachedImage)
+    {
+      auto fragmentIdentifier =
+        svg::SVGURIReference::FragmentIdentifierFromIRIString(_url, renderer->GetDocument());
+      return UncheckedRenderSVGResource(renderer->TreeScopeForSVGReferences(), fragmentIdentifier);
+    }
+
+    auto *image = DynamicDowncast<svg::SVGImage>(_cachedImage->GetImage());
+    if (!image)
+    {
+      return nullptr;
+    }
+
+    auto rootElement = image->RootElement();
+    if (!rootElement)
+    {
+      return nullptr;
+    }
+
+    return UncheckedRenderSVGResource(rootElement->TreeScopeForSVGReferences(),
+                                      dom::DOMStringAtom(_url.Resolved.FragmentIdentifier()));
+  }
+
+  LegacyRenderSVGResourceContainer *
+    StyleCachedImage::LegacyRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    if (_isRenderSVGResource && !*_isRenderSVGResource)
+    {
+      return nullptr;
+    }
+    return UncheckedRenderSVGResource(renderer);
+  }
+
+  bool StyleCachedImage::IsRenderSVGResource(const RenderElement *renderer) const noexcept
+  {
+    return LegacyRenderSVGResource(renderer);
+  }
+
   void StyleCachedImage::Load(CachedResourceLoader &loader, const ResourceLoaderOptions &options) noexcept
   {
     krys_debug_assert(_isPending);
@@ -109,6 +176,10 @@ namespace krys::boo
 
   bool StyleCachedImage::CanRender(const RenderElement *renderer, float multiplier) const noexcept
   {
+    if (IsRenderSVGResource(renderer))
+    {
+      return true;
+    }
     if (!_cachedImage)
     {
       return false;
@@ -121,8 +192,12 @@ namespace krys::boo
     return _isPending;
   }
 
-  bool StyleCachedImage::IsLoaded(const RenderElement *) const noexcept
+  bool StyleCachedImage::IsLoaded(const RenderElement *renderer) const noexcept
   {
+    if (IsRenderSVGResource(renderer))
+    {
+      return true;
+    }
     if (!_cachedImage)
     {
       return false;
@@ -141,6 +216,10 @@ namespace krys::boo
 
   FloatSize StyleCachedImage::ImageSize(const RenderElement *renderer, float multiplier) const noexcept
   {
+    if (IsRenderSVGResource(renderer))
+    {
+      return _containerSize;
+    }
     if (!_cachedImage)
     {
       return {};
@@ -166,10 +245,21 @@ namespace krys::boo
     return _cachedImage->ImageHasRelativeHeight();
   }
 
-  void StyleCachedImage::ComputeIntrinsicDimensions(const RenderElement *, float &intrinsicWidth,
+  void StyleCachedImage::ComputeIntrinsicDimensions(const RenderElement *renderer, float &intrinsicWidth,
                                                     float &intrinsicHeight,
                                                     FloatSize &intrinsicRatio) noexcept
   {
+    // In case of an SVG resource, we should return the container size.
+    if (IsRenderSVGResource(renderer))
+    {
+      FloatSize size = FloorSizeToDevicePixels(LayoutSize(_containerSize),
+                                               renderer ? renderer->GetDocument().DeviceScaleFactor() : 1);
+      intrinsicWidth = size.Width();
+      intrinsicHeight = size.Height();
+      intrinsicRatio = size;
+      return;
+    }
+
     if (!_cachedImage)
     {
       return;
@@ -243,6 +333,11 @@ namespace krys::boo
                                            const GraphicsContext &, bool) const noexcept
   {
     krys_debug_assert(!_isPending);
+
+    if (auto *renderSVGResource = LegacyRenderSVGResource(renderer))
+    {
+      return svg::SVGResourceImage::Create(*renderSVGResource, _url);
+    }
 
     if (!_cachedImage)
     {

@@ -440,6 +440,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
 		tests/Rendering/RenderBlockFlow.cpp
 		tests/Rendering/PositionedLayoutConstraints.cpp
@@ -672,6 +675,7 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGLength.cpp
 		tests/SVG/SVGLengthList.cpp
 		tests/SVG/SVGLengthValue.cpp
+		tests/SVG/SVGMarkerElement.cpp
 		tests/SVG/SVGNumberList.cpp
 		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp

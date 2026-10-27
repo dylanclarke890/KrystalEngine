@@ -1,8 +1,12 @@
 ﻿#include "Krystal.Booey/Rendering/PathOperation.hpp"
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Rendering/MotionPath.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperBlending.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesBlending.hpp"
+#include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
+#include "Krystal.Booey/SVG/SVGPathElement.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo
 {
@@ -36,11 +40,13 @@ namespace krys::boo
   }
 
   ReferencePathOperation::ReferencePathOperation(const style::URL &url, const css::CSSOMStringAtom &fragment,
-                                                 const svg::SVGElement *) noexcept
+                                                 const svg::SVGElement *element) noexcept
       : PathOperation(Type::Reference), _url(url), _fragment(fragment)
   {
-    // FIXME: Take the path from the element when it's an SVG path or geometry element
-    // (`pathFromGraphicsElement`), once SVG geometry is ported.
+    if (Is<svg::SVGPathElement>(element) || Is<svg::SVGGeometryElement>(element))
+    {
+      _path = PathFromGraphicsElement(*element);
+    }
   }
 
   ReferencePathOperation::ReferencePathOperation(Maybe<Path> &&path) noexcept

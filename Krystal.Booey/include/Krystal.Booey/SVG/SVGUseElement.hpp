@@ -89,7 +89,7 @@ namespace krys::boo::svg
     void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept final;
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
-    // FIXME: The clip path of a <use> in a <clipPath> (toClipPath), with clipping (B11f).
+    KRYS_NODISCARD Path ToClipPath() noexcept final;
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final;
 
     void NotifyFinished(CachedResource &) noexcept final;

@@ -477,6 +477,8 @@ namespace krys::boo
                                                                  float resolutionScale = 1) const noexcept;
     KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const FloatSize &,
                                                                const FloatSize &scale) const noexcept;
+    KRYS_NODISCARD RefPtr<ImageBuffer> CreateScaledImageBuffer(const FloatRect &,
+                                                               const FloatSize &scale) const noexcept;
     /// @brief A buffer of @p size at the resolution this context draws at, its context scaled so @p size
     /// fills it.
     KRYS_NODISCARD virtual RefPtr<ImageBuffer> CreateAlignedImageBuffer(const FloatSize &size) const noexcept;
@@ -511,6 +513,7 @@ namespace krys::boo
     virtual void ClipOutRoundedRect(const FloatRoundedRect &) noexcept;
     virtual void ClipPath(const Path &, WindRule = WindRule::EvenOdd) noexcept = 0;
     KRYS_NODISCARD virtual IntRect ClipBounds() const noexcept;
+    virtual void ClipToImageBuffer(ImageBuffer &, const FloatRect &) noexcept = 0;
 
     // Text
 

@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCycleSolver.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 
@@ -87,6 +90,31 @@ namespace krys::boo
 
     switch (resourceLeadingToCycle.ResourceType())
     {
+      case RenderSVGResourceType::MaskerResourceType:
+      {
+        krys_debug_assert(&resourceLeadingToCycle == resources.Masker());
+        resources.ResetMasker();
+        break;
+      }
+      case RenderSVGResourceType::MarkerResourceType:
+      {
+        krys_debug_assert(&resourceLeadingToCycle == resources.MarkerStart()
+                          || &resourceLeadingToCycle == resources.MarkerMid()
+                          || &resourceLeadingToCycle == resources.MarkerEnd());
+        if (resources.MarkerStart() == &resourceLeadingToCycle)
+        {
+          resources.ResetMarkerStart();
+        }
+        if (resources.MarkerMid() == &resourceLeadingToCycle)
+        {
+          resources.ResetMarkerMid();
+        }
+        if (resources.MarkerEnd() == &resourceLeadingToCycle)
+        {
+          resources.ResetMarkerEnd();
+        }
+        break;
+      }
       case RenderSVGResourceType::PatternResourceType:
       case RenderSVGResourceType::LinearGradientResourceType:
       case RenderSVGResourceType::RadialGradientResourceType:
@@ -103,12 +131,15 @@ namespace krys::boo
         }
         break;
       }
-      // FIXME: Maskers, markers, filters and clippers, with clipping and masking (B11f) and filters (B11h).
-      case RenderSVGResourceType::MaskerResourceType:
-      case RenderSVGResourceType::MarkerResourceType:
+      // FIXME: Filters, with filters (B11h).
       case RenderSVGResourceType::FilterResourceType:
+      {
+        break;
+      }
       case RenderSVGResourceType::ClipperResourceType:
       {
+        krys_debug_assert(&resourceLeadingToCycle == resources.Clipper());
+        resources.ResetClipper();
         break;
       }
       case RenderSVGResourceType::SolidColorResourceType:

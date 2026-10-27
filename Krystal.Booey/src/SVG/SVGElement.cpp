@@ -278,6 +278,29 @@ namespace krys::boo::svg
     return CopyToRefs(_svgRareData->ReferencingElements());
   }
 
+  List<WeakPtr<SVGResourceElementClient>> SVGElement::ReferencingCSSClients() const noexcept
+  {
+    if (!_svgRareData)
+    {
+      return {};
+    }
+    return _svgRareData->ReferencingCSSClients();
+  }
+
+  void SVGElement::AddReferencingCSSClient(SVGResourceElementClient &client) noexcept
+  {
+    EnsureSVGRareData().AddReferencingCSSClient(client);
+  }
+
+  void SVGElement::RemoveReferencingCSSClient(SVGResourceElementClient &client) noexcept
+  {
+    if (!_svgRareData)
+    {
+      return;
+    }
+    EnsureSVGRareData().RemoveReferencingCSSClient(client);
+  }
+
   void SVGElement::AddReferencingElement(SVGElement &element) noexcept
   {
     EnsureSVGRareData().AddReferencingElement(element);

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
+#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
 #include "Krystal.Booey/SVG/SVGDescElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
+#include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
+#include "Krystal.Booey/SVG/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPatternElement.hpp"
@@ -139,10 +142,18 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGPatternElement>(document);
       }
-      // FIXME: <clipPath>, <mask> and <marker> (B11f).
       case TagName::clipPath:
+      {
+        return CreateRefPtr<SVGClipPathElement>(document);
+      }
       case TagName::mask:
+      {
+        return CreateRefPtr<SVGMaskElement>(document);
+      }
       case TagName::marker:
+      {
+        return CreateRefPtr<SVGMarkerElement>(document);
+      }
       // FIXME: <text>, <tspan> and <textPath>, with text (B11g).
       case TagName::text:
       case TagName::tspan:

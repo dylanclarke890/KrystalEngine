@@ -52,12 +52,14 @@
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/Calc/TreeEvaluation.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Masking/ClipPath.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/BasicShape.hpp"
+#include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include <cmath>
 
@@ -6502,7 +6504,18 @@ namespace krys::boo
       auto path = style::ComputePath(shape, ReferenceBoxRect(basicShape->ReferenceBox()));
       return path.Contains(FloatPoint(hitTestLocationInLocalCoordinates), style::ComputeWindRule(shape));
     }
-    // FIXME: Reference paths (url(), clipped by SVG <clipPath> content) come with SVG.
+    if (auto reference = clipPath.TryReference())
+    {
+      auto element = GetDocument().GetElementById(reference->Fragment().View());
+      auto *svgElement = DynamicDowncast<svg::SVGElement>(element.get());
+      if (!svgElement || !Is<svg::SVGClipPathElement>(*svgElement) || !svgElement->Renderer())
+      {
+        return true;
+      }
+      auto &clipper = Downcast<LegacyRenderSVGResourceClipper>(*svgElement->Renderer());
+      return clipper.HitTestClipContent(FloatRect {BorderBoxRect()},
+                                        FloatPoint {hitTestLocationInLocalCoordinates});
+    }
     return true;
   }
 

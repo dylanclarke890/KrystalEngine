@@ -19,9 +19,8 @@ namespace krys::boo
   private:
     dom::DOMStringAtom _id;
     HashSet<RenderElement *> _clients;
-    // FIXME: The layers clipped, masked or filtered from HTML (m_clientLayers, addClientRenderLayer,
-    // removeClientRenderLayer, markAllClientLayersForInvalidation), with clipping and masking from HTML
-    // (B11f).
+    // FIXME: The layers filtered from HTML (m_clientLayers, addClientRenderLayer, removeClientRenderLayer,
+    // markAllClientLayersForInvalidation), with filters from HTML (B11h).
     bool _registered {false};
     bool _isInvalidating {false};
 
@@ -89,7 +88,12 @@ namespace krys::boo
     return nullptr;
   }
 
-  // FIXME: getRenderSVGResourceById, typed by the resource type, with clipping and masking (B11f).
+  template <typename TRenderer>
+  KRYS_NODISCARD TRenderer *GetRenderSVGResourceById(dom::DocumentOrShadowRoot &treeScope,
+                                                     const dom::DOMStringAtom &id) noexcept
+  {
+    return DynamicDowncast<TRenderer>(GetRenderSVGResourceContainerById(treeScope, id));
+  }
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::LegacyRenderSVGResourceContainer)

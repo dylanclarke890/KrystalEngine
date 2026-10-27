@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
@@ -149,6 +150,14 @@ namespace krys::boo::svg
   FloatRect SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     return SVGTransformable::GetBBox(this, styleUpdateStrategy);
+  }
+
+  Path SVGGraphicsElement::ToClipPath() noexcept
+  {
+    Path path = PathFromGraphicsElement(*this);
+    // FIXME: How do we know the element has done a layout?
+    path.Transform(AnimatedLocalTransform());
+    return path;
   }
 
   RenderPtr<RenderElement> SVGGraphicsElement::CreateElementRenderer(RenderStyle &&style) noexcept

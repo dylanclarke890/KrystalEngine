@@ -9,6 +9,7 @@ namespace krys::boo::svg
     None,
     A,
     Circle,
+    ClipPath,
     Defs,
     Desc,
     Ellipse,
@@ -19,6 +20,8 @@ namespace krys::boo::svg
     Image,
     Line,
     LinearGradient,
+    Marker,
+    Mask,
     Metadata,
     Path,
     Pattern,
@@ -39,4 +42,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 30uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 33uz);

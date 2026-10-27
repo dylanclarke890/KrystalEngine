@@ -1,0 +1,92 @@
+﻿<!doctype html>
+<!-- The "svg-clip-mask-markers" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  svg, div { position: absolute; }
+</style>
+</head>
+<body>
+  <!-- Clip paths: one shape (a path clip), several shapes (an image clip), in bounding box units, and one
+       transformed with an evenodd clip-rule. -->
+  <svg style="left: 8px; top: 8px" width="168" height="104">
+    <defs>
+      <clipPath id="circle"><circle cx="44" cy="28" r="20" /></clipPath>
+      <clipPath id="quads" clipPathUnits="objectBoundingBox">
+        <rect width="0.5" height="0.5" />
+        <rect x="0.5" y="0.5" width="0.5" height="0.5" />
+      </clipPath>
+      <clipPath id="star" transform="translate(4 0)">
+        <path clip-rule="evenodd" d="M44 56 L56 96 L24 70 L64 70 L32 96 Z" />
+      </clipPath>
+      <clipPath id="pill"><rect x="96" y="60" width="64" height="20" rx="10" /></clipPath>
+    </defs>
+    <rect x="8" y="8" width="72" height="40" fill="#ef476f" clip-path="url(#circle)" />
+    <rect x="88" y="8" width="72" height="40" fill="#118ab2" clip-path="url(#quads)" />
+    <rect x="8" y="56" width="72" height="40" fill="#06d6a0" clip-path="url(#star)" />
+    <g clip-path="url(#pill)">
+      <rect x="88" y="56" width="72" height="40" fill="#073b4c" />
+      <circle cx="96" cy="70" r="12" fill="#ffd166" />
+    </g>
+  </svg>
+
+  <!-- Masks: luminance (a gradient fades the shape out), alpha, in user space units, and with content in
+       bounding box units. -->
+  <svg style="left: 184px; top: 8px" width="168" height="104">
+    <defs>
+      <linearGradient id="fade"><stop offset="0" stop-color="white" /><stop offset="1" stop-color="black" /></linearGradient>
+      <mask id="luminance"><rect x="8" y="8" width="72" height="40" fill="url(#fade)" /></mask>
+      <mask id="alpha" style="mask-type: alpha"><circle cx="124" cy="28" r="20" fill="#118ab2" fill-opacity="0.5" /></mask>
+      <mask id="user" maskUnits="userSpaceOnUse" x="8" y="56" width="36" height="40">
+        <rect x="0" y="0" width="168" height="104" fill="white" />
+      </mask>
+      <mask id="bbox" maskContentUnits="objectBoundingBox">
+        <circle cx="0.5" cy="0.5" r="0.4" fill="white" />
+      </mask>
+    </defs>
+    <rect x="8" y="8" width="72" height="40" fill="#ef476f" mask="url(#luminance)" />
+    <rect x="88" y="8" width="72" height="40" fill="#073b4c" mask="url(#alpha)" />
+    <rect x="8" y="56" width="72" height="40" fill="#06d6a0" mask="url(#user)" />
+    <rect x="88" y="56" width="72" height="40" fill="#ffd166" mask="url(#bbox)" />
+  </svg>
+
+  <!-- Markers: oriented along a path, a fixed angle, auto-start-reverse, and in user space units. -->
+  <svg style="left: 8px; top: 120px" width="168" height="112">
+    <defs>
+      <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0 0 L6 3 L0 6 Z" fill="#ef476f" />
+      </marker>
+      <marker id="dot" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="45">
+        <rect width="4" height="4" fill="#118ab2" />
+      </marker>
+      <marker id="reverse" viewBox="0 0 10 10" markerWidth="4" markerHeight="4" refX="5" refY="5" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 Z" fill="#06d6a0" />
+      </marker>
+      <marker id="big" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="6" refY="6">
+        <circle cx="6" cy="6" r="5" fill="#ffd166" stroke="#073b4c" />
+      </marker>
+    </defs>
+    <path d="M12 16 L72 16 L72 48" fill="none" stroke="#073b4c" stroke-width="2"
+          marker-start="url(#arrow)" marker-mid="url(#arrow)" marker-end="url(#arrow)" />
+    <polyline points="96 16 120 48 144 16" fill="none" stroke="#073b4c" stroke-width="2"
+              marker-start="url(#dot)" marker-mid="url(#dot)" marker-end="url(#dot)" />
+    <line x1="16" y1="84" x2="72" y2="84" stroke="#073b4c" stroke-width="3"
+          marker-start="url(#reverse)" marker-end="url(#reverse)" />
+    <polygon points="100 68 148 68 124 100" fill="none" stroke="#073b4c" stroke-width="4"
+             marker-start="url(#big)" marker-mid="url(#big)" />
+  </svg>
+
+  <!-- HTML boxes: a clip-path and a mask-image referencing SVG resources. The mask fades by alpha, which
+       masks the same by luminance or alpha. -->
+  <svg width="0" height="0">
+    <clipPath id="html-clip"><circle cx="40" cy="40" r="36" /></clipPath>
+    <linearGradient id="html-fade"><stop offset="0" stop-color="white" /><stop offset="1" stop-color="white" stop-opacity="0" /></linearGradient>
+    <mask id="html-mask"><rect width="80" height="80" fill="url(#html-fade)" /></mask>
+  </svg>
+  <div style="left: 192px; top: 136px; width: 72px; height: 80px; background: #118ab2; clip-path: url(#html-clip)"></div>
+  <div style="left: 272px; top: 136px; width: 80px; height: 80px; background: #ef476f; mask-image: url(#html-mask)"></div>
+</body>
+</html>

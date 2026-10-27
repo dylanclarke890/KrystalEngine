@@ -4,7 +4,9 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
@@ -12,6 +14,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 
 namespace krys::boo
 {
@@ -139,8 +142,20 @@ namespace krys::boo
       RenderElement &renderer, bool needsLayout,
       LegacyRenderSVGResource::VisitedRenderers *visitedRenderers) noexcept
     {
-      // FIXME: Invalidate the renderer's filter, masker and clipper (SVGResourcesCache), with clipping and
-      // masking (B11f) and filters (B11h).
+      if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer))
+      {
+        // FIXME: The filter, with filters (B11h).
+
+        if (auto *masker = resources->Masker())
+        {
+          masker->RemoveClientFromCacheAndMarkForInvalidation(renderer);
+        }
+
+        if (auto *clipper = resources->Clipper())
+        {
+          clipper->RemoveClientFromCacheAndMarkForInvalidation(renderer);
+        }
+      }
 
       auto *svgElement = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
       if (!svgElement)
@@ -166,8 +181,14 @@ namespace krys::boo
         }
       }
 
-      // FIXME: Tell the CSS clients referencing the element (referencingCSSClients), with clipping and
-      // masking from HTML (B11f).
+      for (auto &cssClient : svgElement->ReferencingCSSClients())
+      {
+        if (!cssClient)
+        {
+          continue;
+        }
+        cssClient->ResourceChanged(*svgElement);
+      }
     }
   }
 

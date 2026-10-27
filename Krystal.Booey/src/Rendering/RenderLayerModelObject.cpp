@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Animation/BlendingKeyframes.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
@@ -300,5 +301,14 @@ namespace krys::boo
                                            const RenderLayerModelObject &renderer) noexcept
   {
     return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
+  }
+
+  LegacyRenderSVGResourceClipper *RenderLayerModelObject::LegacySVGClipperResourceFromStyle() const noexcept
+  {
+    if (auto clipPath = Style().GetClipPath().TryReference())
+    {
+      return ReferencedSVGResources::ReferencedClipperRenderer(TreeScopeForSVGReferences(), *clipPath);
+    }
+    return nullptr;
   }
 }

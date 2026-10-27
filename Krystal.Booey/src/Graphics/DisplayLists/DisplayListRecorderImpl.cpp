@@ -151,6 +151,12 @@ namespace krys::boo::display_list
     _items.push_back(display_list::ClipPath(path, rule));
   }
 
+  void RecorderImpl::ClipToImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destinationRect) noexcept
+  {
+    UpdateStateForClipToImageBuffer(destinationRect);
+    _items.push_back(display_list::ClipToImageBuffer(imageBuffer, destinationRect));
+  }
+
   void RecorderImpl::DrawGlyphs(const Font &font, Span<const GlyphBufferGlyph> glyphs,
                                 Span<const GlyphBufferAdvance> advances, const FloatPoint &localAnchor,
                                 FontSmoothingMode smoothingMode) noexcept

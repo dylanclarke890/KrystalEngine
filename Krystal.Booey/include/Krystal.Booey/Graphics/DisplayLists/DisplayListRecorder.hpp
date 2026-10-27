@@ -77,6 +77,7 @@ namespace krys::boo::display_list
     void UpdateStateForClip(const FloatRect &) noexcept;
     void UpdateStateForClipRoundedRect(const FloatRoundedRect &) noexcept;
     void UpdateStateForClipPath(const Path &) noexcept;
+    void UpdateStateForClipToImageBuffer(const FloatRect &) noexcept;
     void UpdateStateForClipOut(const FloatRect &) noexcept;
     void UpdateStateForClipOut(const Path &) noexcept;
     void UpdateStateForClipOutRoundedRect(const FloatRoundedRect &) noexcept;

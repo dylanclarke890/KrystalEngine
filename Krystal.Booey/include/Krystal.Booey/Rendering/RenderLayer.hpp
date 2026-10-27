@@ -1832,6 +1832,7 @@ namespace krys::boo
 
     RenderLayerFilters &EnsureLayerFilters() noexcept;
     void ClearLayerFilters() noexcept;
+    void ClearLayerClipPath() noexcept;
     void UpdateFiltersAfterStyleChange(style::Difference, const RenderStyle *oldStyle) noexcept;
     void UpdateFilterPaintingStrategy() noexcept;
 

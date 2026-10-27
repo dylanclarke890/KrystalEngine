@@ -892,3 +892,13 @@ B11b is about 4.6k lines of renderer and 2.2k of elements upstream, with about 2
 - **Krystal.UI:** the `svg-paint-servers` golden; its transformed pattern isn't rotated, since Chrome draws a pattern's content at its final transform where the tile is drawn into an image first here.
 - **Tests:** Booey: `tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp`, `LegacyRenderSVGResourcePattern.cpp`, `tests/SVG/SVGGradientElement.cpp`, `tests/Graphics/Pattern.cpp`; 2902 cases pass. Krystal.UI: 127 cases pass.
 
+### B11f as built (2026-10-27)
+
+- **Booey** (the ledger entry is *Clipping, masking and markers* in `docs/booey/PORTING.md`): `<clipPath>`, `<mask>` and `<marker>` (`LegacyRenderSVGResourceClipper`, `Masker`, `Marker`) with their units, content units, `orient` (`auto`, `auto-start-reverse` and angles), reference points and view boxes; clip paths of one shape clip to its path, others and masks to an image of their content; markers drawn at a path's vertices; the resources, the cache and the cycle solver told of them; `clip-path: url()` from HTML boxes painted, composited and hit tested through the clipper (`ReferencedSVGResources`, whose clients repaint the box when the clip path changes), and `mask-image: url()` to a `<mask>` drawn by `SVGResourceImage`. In one part, by the user's choice (2026-10-27).
+- **Mask clips** (the user's choice, 2026-10-27): upstream's `GraphicsContext::clipToImageBuffer` and its display list item; Krystal.UI clips to the destination, opens a layer, and at the restore that ends the clip draws the buffer's texture over it with `DestinationIn`.
+- **Fixed:** `RenderElement::StyleDidChange` never told SVG renderers' resources of style changes (`SVGRenderSupport::StyleChanged`); five files' missing includes, exposed by the unity batches moving.
+- **Reference paths:** an `offset-path: url()` takes the referenced SVG path or geometry element's path (`ReferencePathOperation`); a `clip-path: url()` clips through the clipper.
+- **Not done:** a `mask-image: url()` to a `<mask>` masks by alpha, not luminance (as upstream); filters wait for B11h.
+- **Krystal.UI:** the `svg-clip-mask-markers` golden.
+- **Tests:** Booey: `tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.cpp`, `LegacyRenderSVGResourceMasker.cpp`, `LegacyRenderSVGResourceMarker.cpp`, `tests/SVG/SVGMarkerElement.cpp`, references in `tests/Style/Values/Motion/Motion.cpp`; 2920 cases pass. Krystal.UI: 128 cases pass.
+

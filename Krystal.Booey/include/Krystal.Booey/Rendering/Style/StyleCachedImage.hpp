@@ -6,8 +6,14 @@
 
 namespace krys::boo
 {
-  /// @brief A `url()` image.
-  /// FIXME: The SVG resource lookups (masks and other resources referenced by fragment), once SVG renders.
+  namespace dom
+  {
+    class DocumentOrShadowRoot;
+  }
+
+  class LegacyRenderSVGResourceContainer;
+
+  /// @brief A `url()` image, or an SVG resource it refers to by its fragment (a `<mask>`).
   class StyleCachedImage final : public StyleImage
   {
   private:
@@ -16,6 +22,7 @@ namespace krys::boo
     bool _isPending {true};
     mutable float _scaleFactor {1};
     CachedResourceHandle<CachedImage> _cachedImage;
+    mutable Maybe<bool> _isRenderSVGResource;
     FloatSize _containerSize;
 
   public:
@@ -62,6 +69,16 @@ namespace krys::boo
 
   private:
     StyleCachedImage(style::URL &&, Ref<css::ImageValue> &&, float) noexcept;
+
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      UncheckedRenderSVGResource(dom::DocumentOrShadowRoot &,
+                                 const dom::DOMStringAtom &fragment) const noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      UncheckedRenderSVGResource(const RenderElement *) const noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      LegacyRenderSVGResource(const RenderElement *) const noexcept;
+    // FIXME: The layer-based engine's resource (renderSVGResource) isn't ported.
+    KRYS_NODISCARD bool IsRenderSVGResource(const RenderElement *) const noexcept;
     StyleCachedImage(const style::URL &, const Ref<css::ImageValue> &, float) noexcept;
   };
 }

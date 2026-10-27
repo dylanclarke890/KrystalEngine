@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGMarkerData.hpp"
 
 namespace krys::boo
 {
@@ -12,7 +13,7 @@ namespace krys::boo
 
   private:
     List<FloatPoint> _zeroLengthLinecapLocations;
-    // FIXME: The marker positions (m_markerPositions, SVGMarkerData), with markers (B11f).
+    List<MarkerPosition> _markerPositions;
 
   public:
     LegacyRenderSVGPath(svg::SVGGraphicsElement &, RenderStyle &&) noexcept;
@@ -42,6 +43,10 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect ZeroLengthSubpathRect(const FloatPoint &, float) const noexcept;
     void UpdateZeroLengthSubpaths() noexcept;
     void StrokeZeroLengthSubpaths(GraphicsContext &) const noexcept;
+
+    KRYS_NODISCARD bool ShouldGenerateMarkerPositions() const noexcept;
+    void ProcessMarkerPositions() noexcept;
+    KRYS_NODISCARD FloatRect MarkerRect(RepaintRectCalculation, float strokeWidth) const noexcept;
 
     KRYS_NODISCARD bool IsRenderingDisabled() const noexcept override;
   };

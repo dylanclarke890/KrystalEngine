@@ -11,6 +11,8 @@ namespace krys::boo::svg
   {
     /// @brief The `class` attribute, shared with HTML.
     KRYS_NODISCARD static const dom::QualifiedName &ClassAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ClipPathUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ClipRuleAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &CxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &CyAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &DAttr() noexcept;
@@ -23,8 +25,14 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &HrefAttr() noexcept;
     /// @brief The `id` attribute, shared with HTML.
     KRYS_NODISCARD static const dom::QualifiedName &IdAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MarkerHeightAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MarkerUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MarkerWidthAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MaskContentUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MaskUnitsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &MediaAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &OffsetAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &OrientAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PathLengthAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PatternContentUnitsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PatternTransformAttr() noexcept;
@@ -32,6 +40,8 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &PointsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PreserveAspectRatioAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &RefXAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &RefYAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RelAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RequiredExtensionsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RxAttr() noexcept;

@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGSymbolElement.hpp"
@@ -390,6 +391,28 @@ namespace krys::boo::svg
         }
       }
     }
+  }
+
+  Path SVGUseElement::ToClipPath() noexcept
+  {
+    auto targetClone = DynamicDowncast<SVGGraphicsElement>(TargetClone().get());
+    if (!targetClone)
+    {
+      return {};
+    }
+
+    if (!IsDirectReference(*targetClone))
+    {
+      // Spec: Indirect references are an error (14.3.5)
+      return {};
+    }
+
+    Path path = targetClone->ToClipPath();
+    SVGLengthContext lengthContext(this);
+    // FIXME: Find a way to do this without manual resolution of x/y here. It's potentially incorrect.
+    path.Translate(FloatSize(X().Value(lengthContext), Y().Value(lengthContext)));
+    path.Transform(AnimatedLocalTransform());
+    return path;
   }
 
   RefPtr<SVGElement> SVGUseElement::ClipChild() const noexcept

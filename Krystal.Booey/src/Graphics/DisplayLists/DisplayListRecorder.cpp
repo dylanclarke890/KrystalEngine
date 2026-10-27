@@ -211,6 +211,13 @@ namespace krys::boo::display_list
     CurrentState().ClipBounds.Intersect(CurrentState().Ctm.MapRect(path.FastBoundingRect()));
   }
 
+  void Recorder::UpdateStateForClipToImageBuffer(const FloatRect &rect) noexcept
+  {
+    AppendStateChangeItemIfNecessary(); // Conservative: we do not know if the clip application might use
+                                        // state such as antialiasing.
+    CurrentState().ClipBounds.Intersect(CurrentState().Ctm.MapRect(rect));
+  }
+
   IntRect Recorder::ClipBounds() const noexcept
   {
     if (auto inverse = CurrentState().Ctm.Inverse())

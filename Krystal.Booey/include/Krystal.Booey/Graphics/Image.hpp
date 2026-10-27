@@ -66,6 +66,10 @@ namespace krys::boo
     {
       return false;
     }
+    KRYS_NODISCARD virtual bool IsSVGResourceImage() const noexcept
+    {
+      return false;
+    }
     KRYS_NODISCARD bool DrawsSVGImage() const noexcept
     {
       return IsSVGImage() || IsSVGImageForContainer();

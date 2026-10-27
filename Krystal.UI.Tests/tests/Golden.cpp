@@ -270,6 +270,11 @@ namespace krys::ui::tests
     CheckPage("svg-paint-servers", 360u, 240u);
   }
 
+  TEST_CASE("Golden: SVG clipping, masking and markers", "[UI][GPU][Golden]")
+  {
+    CheckPage("svg-clip-mask-markers", 360u, 240u);
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);

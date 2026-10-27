@@ -183,6 +183,13 @@ namespace krys::boo
       return ExpandedIntSize(size * scale);
     }
 
+    KRYS_NODISCARD IntRect ScaledImageBufferRect(const FloatRect &rect, const FloatSize &scale) noexcept
+    {
+      auto scaledRect = rect;
+      scaledRect.Scale(scale);
+      return EnclosingIntRect(scaledRect);
+    }
+
     KRYS_NODISCARD FloatSize ClampingScaleForImageBufferSize(const FloatSize &size) noexcept
     {
       FloatSize clampingScale(1, 1);
@@ -219,6 +226,35 @@ namespace krys::boo
     // 'expandedScaledSize' is mapped to 'size'. So use 'expandedScaledSize / size'
     // not 'scale' because they are not necessarily equal.
     imageBuffer->Context().Scale(FloatSize(expandedScaledSize) / size);
+    return imageBuffer;
+  }
+
+  RefPtr<ImageBuffer> GraphicsContext::CreateScaledImageBuffer(const FloatRect &rect,
+                                                               const FloatSize &scale) const noexcept
+  {
+    auto expandedScaledRect = ScaledImageBufferRect(rect, scale);
+    if (expandedScaledRect.IsEmpty())
+    {
+      return nullptr;
+    }
+
+    auto clampingScale = ClampingScaleForImageBufferSize(FloatSize(expandedScaledRect.Size()));
+
+    auto imageBuffer = CreateImageBuffer(FloatSize(expandedScaledRect.Size()) * clampingScale, 1);
+    if (!imageBuffer)
+    {
+      return nullptr;
+    }
+
+    imageBuffer->Context().Scale(clampingScale);
+
+    // 'rect' is mapped to a rectangle inside expandedScaledRect.
+    imageBuffer->Context().Translate(static_cast<float>(-expandedScaledRect.X()),
+                                     static_cast<float>(-expandedScaledRect.Y()));
+
+    // The size of this rectangle is not necessarily equal to expandedScaledRect.size().
+    // So use 'scale' not 'expandedScaledRect.size() / rect.size()'.
+    imageBuffer->Context().Scale(scale);
     return imageBuffer;
   }
 

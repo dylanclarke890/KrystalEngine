@@ -157,6 +157,7 @@ namespace krys::ui
     {
       EndTransparencyLayer();
     }
+    EndImageClips();
     _renderer.Restore();
   }
 
@@ -175,6 +176,7 @@ namespace krys::ui
       return;
     }
 
+    EndImageClips();
     GraphicsContext::Restore(purpose);
 
     if (!_strokeStack.empty())
@@ -490,6 +492,32 @@ namespace krys::ui
     _renderer.ClipPath(ToPath2D(path), ToFillRule(clipRule));
   }
 
+  void GraphicsContextRender2D::ClipToImageBuffer(boo::ImageBuffer &image,
+                                                  const boo::FloatRect &destination) noexcept
+  {
+    // As Skia's clip shader, which leaves nothing outside the image. Render2D can't clip to a texture, so
+    // what's drawn until this state ends goes into a layer, which the image's alpha masks as it ends.
+    IntersectClipBounds(destination);
+    _renderer.ClipRect(ToRect2D(destination));
+
+    auto *commands = _renderer.GetCommandBuffer();
+    const auto texture =
+      _imageBuffers && commands ? _imageBuffers->Render(image, *commands) : gfx::TextureHandle {};
+    if (!texture.IsValid())
+    {
+      IntersectClipBounds({});
+      _renderer.ClipRect({});
+      return;
+    }
+
+    PrepareDraw(false);
+    _imageClips.push_back({.Texture = texture,
+                           .Destination = ToRect2D({destination.Location(), image.LogicalSize()}),
+                           .Transform = _renderer.GetTransform(),
+                           .StackSize = StackSize()});
+    _renderer.BeginLayer(1.f);
+  }
+
   boo::IntRect GraphicsContextRender2D::ClipBounds() const noexcept
   {
     if (auto inverse = GetCTM().Inverse())
@@ -625,6 +653,7 @@ namespace krys::ui
 
   void GraphicsContextRender2D::EndTransparencyLayer() noexcept
   {
+    EndImageClips();
     GraphicsContext::EndTransparencyLayer();
     _renderer.EndLayer();
     if (!_clipBoundsStack.empty())
@@ -1018,5 +1047,21 @@ namespace krys::ui
   void GraphicsContextRender2D::IntersectClipBounds(const boo::FloatRect &rect) noexcept
   {
     _clipBounds.Intersect(GetCTM().MapRect(rect));
+  }
+
+  void GraphicsContextRender2D::EndImageClips() noexcept
+  {
+    // Ends the image clips made in the current state, innermost first.
+    while (!_imageClips.empty() && _imageClips.back().StackSize >= StackSize())
+    {
+      const auto clip = _imageClips.back();
+      _imageClips.pop_back();
+      _renderer.SetTransform(clip.Transform);
+      _renderer.SetBlendMode(BlendMode::Normal);
+      _renderer.SetCompositeOperator(gfx::CompositeOperator2D::DestinationIn);
+      _renderer.ClearDropShadow();
+      _renderer.DrawImage(clip.Texture, clip.Destination, {.Filter = ImageFilter()});
+      _renderer.EndLayer();
+    }
   }
 }

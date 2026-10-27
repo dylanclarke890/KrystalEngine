@@ -26,6 +26,7 @@
 namespace krys::boo::dom
 {
   class Document;
+  class DocumentOrShadowRoot;
   class Element;
   class Node;
   class Position;
@@ -60,6 +61,7 @@ namespace krys::boo
   class RenderTreeBuilder;
   class RenderView;
   class LocalFrameViewLayoutContext;
+  class ReferencedSVGResources;
   class RenderGeometryMap;
   class TransformState;
   class TransformationMatrix;
@@ -1429,6 +1431,7 @@ namespace krys::boo
     KRYS_NODISCARD dom::Element *NonPseudoElement() const noexcept;
 
     KRYS_NODISCARD dom::Document &GetDocument() const noexcept;
+    KRYS_NODISCARD dom::DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @brief The style the object is rendered with: an element's own, or a text's parent's.
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
@@ -1665,7 +1668,10 @@ namespace krys::boo
       bool PreferredLogicalWidthsNeedUpdateIsMarkOnlyThis {false};
       EnumSet<style::MarginTrimSide> TrimmedMargins;
       bool HasOutlineAutoAncestor {false};
-      // FIXME: Reflections and referenced SVG resources, once there are any.
+      // FIXME: Reflections, once there are any.
+
+      // From RenderElement
+      UniquePtr<boo::ReferencedSVGResources> ReferencedSVGResources;
       WeakPtr<RenderBlockFlow> BackdropRenderer;
 
       // From RenderBox

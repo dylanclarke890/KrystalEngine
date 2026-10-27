@@ -7,13 +7,14 @@
 
 namespace krys::boo
 {
+  class LegacyRenderSVGResourceClipper;
   class LegacyRenderSVGResourceContainer;
+  class LegacyRenderSVGResourceMarker;
+  class LegacyRenderSVGResourceMasker;
   class RenderElement;
   class RenderStyle;
 
   // Holds a set of resources associated with a RenderObject
-  // FIXME: The clipper, filter and masker (ClipperFilterMaskerData), with clipping and masking (B11f) and
-  // filters (B11h); the markers (MarkerData, markerReverseStart), with markers (B11f).
   class SVGResources
   {
     friend class SVGResourcesCycleSolver;
@@ -24,6 +25,28 @@ namespace krys::boo
 
   private:
     // From SVG 1.1 2nd Edition
+    // clipper: 'container elements' and 'graphics elements'
+    // filter:  'container elements' and 'graphics elements'
+    // masker:  'container elements' and 'graphics elements'
+    // -> a, circle, defs, ellipse, glyph, g, image, line, marker, mask, missing-glyph, path, pattern,
+    // polygon, polyline, rect, svg, switch, symbol, text, use
+    // FIXME: The filter, with filters (B11h).
+    struct ClipperFilterMaskerData
+    {
+      WeakPtr<LegacyRenderSVGResourceClipper> Clipper;
+      WeakPtr<LegacyRenderSVGResourceMasker> Masker;
+    };
+
+    // From SVG 1.1 2nd Edition
+    // marker: line, path, polygon, polyline
+    struct MarkerData
+    {
+      WeakPtr<LegacyRenderSVGResourceMarker> MarkerStart;
+      WeakPtr<LegacyRenderSVGResourceMarker> MarkerMid;
+      WeakPtr<LegacyRenderSVGResourceMarker> MarkerEnd;
+    };
+
+    // From SVG 1.1 2nd Edition
     // fill:       'shapes' and 'text content elements'
     // stroke:     'shapes' and 'text content elements'
     // -> altGlyph, circle, ellipse, line, path, polygon, polyline, rect, text, textPath, tref, tspan
@@ -33,6 +56,8 @@ namespace krys::boo
       WeakPtr<LegacyRenderSVGResourceContainer> Stroke;
     };
 
+    UniquePtr<ClipperFilterMaskerData> _clipperFilterMaskerData;
+    UniquePtr<MarkerData> _markerData;
     UniquePtr<FillStrokeData> _fillStrokeData;
     WeakPtr<LegacyRenderSVGResourceContainer> _linkedResource;
     bool _inLayoutForDifferentRoot {false};
@@ -43,6 +68,17 @@ namespace krys::boo
     KRYS_NODISCARD static UniquePtr<SVGResources> BuildCachedResources(const RenderElement &,
                                                                        const RenderStyle &) noexcept;
     void LayoutDifferentRootIfNeeded(const RenderElement &resourcesClient) noexcept;
+
+    KRYS_NODISCARD bool MarkerReverseStart() const noexcept;
+
+    // Ordinary resources
+    KRYS_NODISCARD LegacyRenderSVGResourceClipper *Clipper() const noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceMasker *Masker() const noexcept;
+    // FIXME: The filter, with filters (B11h).
+
+    KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerStart() const noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerMid() const noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerEnd() const noexcept;
 
     // Paint servers
     KRYS_NODISCARD LegacyRenderSVGResourceContainer *Fill() const noexcept;
@@ -61,10 +97,20 @@ namespace krys::boo
 
   private:
     // Only used by SVGResourcesCache cycle detection logic
+    void ResetClipper() noexcept;
+    void ResetMarkerStart() noexcept;
+    void ResetMarkerMid() noexcept;
+    void ResetMarkerEnd() noexcept;
+    void ResetMasker() noexcept;
     void ResetFill() noexcept;
     void ResetStroke() noexcept;
     void ResetLinkedResource() noexcept;
 
+    bool SetClipper(LegacyRenderSVGResourceClipper *) noexcept;
+    bool SetMarkerStart(LegacyRenderSVGResourceMarker *) noexcept;
+    bool SetMarkerMid(LegacyRenderSVGResourceMarker *) noexcept;
+    bool SetMarkerEnd(LegacyRenderSVGResourceMarker *) noexcept;
+    bool SetMasker(LegacyRenderSVGResourceMasker *) noexcept;
     bool SetFill(LegacyRenderSVGResourceContainer *) noexcept;
     bool SetStroke(LegacyRenderSVGResourceContainer *) noexcept;
     bool SetLinkedResource(LegacyRenderSVGResourceContainer *) noexcept;
