@@ -150,6 +150,8 @@ namespace krys::boo
     SetForScope change(_inLayout, true);
     krys_debug_assert(NeedsLayout());
 
+    _resourcesNeedingToInvalidateClients.clear();
+
     // Arbitrary affine transforms are incompatible with RenderLayoutState.
     LayoutStateDisabler layoutStateDisabler(View().FrameView().LayoutContext());
 
@@ -167,8 +169,26 @@ namespace krys::boo
     SVGRenderSupport::LayoutChildren(*this,
                                      needsLayout || SVGRenderSupport::FiltersForceContainerLayout(*this));
 
-    // FIXME: Invalidate the clients of the resources that asked for it during layout, and lay the children
-    // out again, with resources (B11e).
+    std::erase_if(_resourcesNeedingToInvalidateClients,
+                  [](const WeakPtr<LegacyRenderSVGResourceContainer> &resource) { return !resource; });
+    if (!_resourcesNeedingToInvalidateClients.empty())
+    {
+      // Invalidate resource clients, which may mark some nodes for layout.
+      auto resources = _resourcesNeedingToInvalidateClients;
+      for (auto &resource : resources)
+      {
+        if (!resource)
+        {
+          continue;
+        }
+        resource->RemoveAllClientsFromCacheAndMarkForInvalidation();
+        SVGResourcesCache::ClientStyleChanged(*resource, style::DifferenceResult::Layout, nullptr,
+                                              resource->Style());
+      }
+
+      _isLayoutSizeChanged = false;
+      SVGRenderSupport::LayoutChildren(*this, false);
+    }
 
     // At this point LayoutRepainter already grabbed the old bounds,
     // recalculate them now so repaintAfterLayout() uses the new bounds.
@@ -316,19 +336,19 @@ namespace krys::boo
   {
     RenderBlock::RemovePercentHeightDescendant(const_cast<LegacyRenderSVGRoot &>(*this));
 
-    // FIXME: SVGResourcesCache::clientDestroyed, with resources (B11e).
+    SVGResourcesCache::ClientDestroyed(*this);
     RenderReplaced::WillBeDestroyed();
   }
 
   void LegacyRenderSVGRoot::InsertedIntoTree() noexcept
   {
     RenderReplaced::InsertedIntoTree();
-    // FIXME: SVGResourcesCache::clientWasAddedToTree, with resources (B11e).
+    SVGResourcesCache::ClientWasAddedToTree(*this);
   }
 
   void LegacyRenderSVGRoot::WillBeRemovedFromTree() noexcept
   {
-    // FIXME: SVGResourcesCache::clientWillBeRemovedFromTree, with resources (B11e).
+    SVGResourcesCache::ClientWillBeRemovedFromTree(*this);
     RenderReplaced::WillBeRemovedFromTree();
   }
 
@@ -346,7 +366,7 @@ namespace krys::boo
     }
 
     RenderReplaced::StyleDidChange(diff, oldStyle);
-    // FIXME: SVGResourcesCache::clientStyleChanged, with resources (B11e).
+    SVGResourcesCache::ClientStyleChanged(*this, diff, oldStyle, Style());
   }
 
   // RenderBox methods will expect coordinates w/o any transforms in coordinates
@@ -611,5 +631,21 @@ namespace krys::boo
   bool LegacyRenderSVGRoot::HasRelativeDimensions() const noexcept
   {
     return false;
+  }
+
+  void
+    LegacyRenderSVGRoot::AddResourceForClientInvalidation(LegacyRenderSVGResourceContainer *resource) noexcept
+  {
+    auto *svgRoot = SVGRenderSupport::FindTreeRootObject(*resource);
+    if (!svgRoot)
+    {
+      return;
+    }
+    auto &resources = svgRoot->_resourcesNeedingToInvalidateClients;
+    if (std::ranges::none_of(resources, [&](const WeakPtr<LegacyRenderSVGResourceContainer> &weakResource)
+                             { return weakResource.get() == resource; }))
+    {
+      resources.push_back(CreateWeakPtr(resource));
+    }
   }
 }

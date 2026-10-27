@@ -776,6 +776,15 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.hpp
   include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp
   include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceRadialGradient.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCycleSolver.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp
   include/Krystal.Booey/Rendering/PointerEventsHitRules.hpp
   include/Krystal.Booey/Rendering/SVG/SVGPathData.hpp
   include/Krystal.Booey/Rendering/SVG/SVGSubpathData.hpp
@@ -1534,8 +1543,10 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp
   include/Krystal.Booey/Graphics/GraphicsStyle.hpp
   include/Krystal.Booey/Graphics/NullGraphicsContext.hpp
+  include/Krystal.Booey/Graphics/Pattern.hpp
   include/Krystal.Booey/Graphics/SourceBrush.hpp
   include/Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp
+  include/Krystal.Booey/Graphics/SourceImage.hpp
 
   # Paint plumbing, layers and backgrounds (G4c1)
   include/Krystal.Booey/Graphics/GeneratedImage.hpp
@@ -2727,6 +2738,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.cpp
   src/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
   src/Rendering/SVG/Legacy/LegacyRenderSVGResource.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceRadialGradient.cpp
+  src/Rendering/SVG/Legacy/SVGResources.cpp
+  src/Rendering/SVG/Legacy/SVGResourcesCache.cpp
+  src/Rendering/SVG/Legacy/SVGResourcesCycleSolver.cpp
+  src/Rendering/SVG/RenderSVGGradientStop.cpp
   src/Rendering/PointerEventsHitRules.cpp
   src/Rendering/SVG/SVGPathData.cpp
   src/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.cpp
@@ -2986,7 +3006,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/GraphicsStyle.cpp
   src/Graphics/GraphicsTypes.cpp
   src/Graphics/RotationDirection.cpp
+  src/Graphics/Pattern.cpp
   src/Graphics/SourceBrush.cpp
+  src/Graphics/SourceImage.cpp
 
   # Paint plumbing, layers and backgrounds (G4c1)
   src/Graphics/GeneratedImage.cpp
@@ -3864,6 +3886,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGDefsElement.hpp
       include/Krystal.Booey/SVG/SVGDescElement.hpp
       include/Krystal.Booey/SVG/SVGDocument.hpp
+      include/Krystal.Booey/SVG/SVGDocumentExtensions.hpp
       include/Krystal.Booey/SVG/SVGElement.hpp
       include/Krystal.Booey/SVG/SVGElementRareData.hpp
       include/Krystal.Booey/SVG/SVGEllipseElement.hpp
@@ -3872,6 +3895,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGGElement.hpp
       include/Krystal.Booey/SVG/SVGGeometryElement.hpp
       include/Krystal.Booey/SVG/SVGGraphicsElement.hpp
+      include/Krystal.Booey/SVG/SVGGradientElement.hpp
       include/Krystal.Booey/SVG/SVGImageElement.hpp
       include/Krystal.Booey/SVG/SVGImageLoader.hpp
       include/Krystal.Booey/SVG/SVGLength.hpp
@@ -3879,6 +3903,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGLengthList.hpp
       include/Krystal.Booey/SVG/SVGLengthValue.hpp
       include/Krystal.Booey/SVG/SVGLineElement.hpp
+      include/Krystal.Booey/SVG/SVGLinearGradientElement.hpp
       include/Krystal.Booey/SVG/SVGLocatable.hpp
       include/Krystal.Booey/SVG/SVGMarkerTypes.hpp
       include/Krystal.Booey/SVG/SVGMatrix.hpp
@@ -3892,15 +3917,18 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGPolygonElement.hpp
       include/Krystal.Booey/SVG/SVGPolyElement.hpp
       include/Krystal.Booey/SVG/SVGPathElement.hpp
+      include/Krystal.Booey/SVG/SVGPatternElement.hpp
       include/Krystal.Booey/SVG/SVGAElement.hpp
       include/Krystal.Booey/SVG/SVGViewElement.hpp
       include/Krystal.Booey/SVG/SVGViewSpec.hpp
       include/Krystal.Booey/SVG/SVGPolylineElement.hpp
       include/Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp
       include/Krystal.Booey/SVG/SVGPreserveAspectRatioValue.hpp
+      include/Krystal.Booey/SVG/SVGRadialGradientElement.hpp
       include/Krystal.Booey/SVG/SVGRect.hpp
       include/Krystal.Booey/SVG/SVGRectElement.hpp
       include/Krystal.Booey/SVG/SVGScriptElement.hpp
+      include/Krystal.Booey/SVG/SVGStopElement.hpp
       include/Krystal.Booey/SVG/SVGStringList.hpp
       include/Krystal.Booey/SVG/SVGStyleElement.hpp
       include/Krystal.Booey/SVG/SVGSvgElement.hpp
@@ -3918,6 +3946,10 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/SVGUseElement.hpp
       include/Krystal.Booey/SVG/SVGZoomAndPan.hpp
       include/Krystal.Booey/SVG/SVGZoomAndPanType.hpp
+      include/Krystal.Booey/SVG/GradientAttributes.hpp
+      include/Krystal.Booey/SVG/LinearGradientAttributes.hpp
+      include/Krystal.Booey/SVG/PatternAttributes.hpp
+      include/Krystal.Booey/SVG/RadialGradientAttributes.hpp
 
       # Types
       include/Krystal.Booey/Types/IsEOF.hpp
@@ -4238,12 +4270,14 @@ target_sources(Krystal.Booey
     src/SVG/SVGDefsElement.cpp
     src/SVG/SVGDescElement.cpp
     src/SVG/SVGElement.cpp
+    src/SVG/SVGDocumentExtensions.cpp
     src/SVG/SVGEllipseElement.cpp
     src/SVG/SVGFitToViewBox.cpp
     src/SVG/SVGForeignObjectElement.cpp
     src/SVG/SVGGElement.cpp
     src/SVG/SVGGeometryElement.cpp
     src/SVG/SVGGraphicsElement.cpp
+    src/SVG/SVGGradientElement.cpp
     src/SVG/SVGImageElement.cpp
     src/SVG/SVGImageLoader.cpp
     src/SVG/SVGLength.cpp
@@ -4251,6 +4285,7 @@ target_sources(Krystal.Booey
     src/SVG/SVGLengthList.cpp
     src/SVG/SVGLengthValue.cpp
     src/SVG/SVGLineElement.cpp
+    src/SVG/SVGLinearGradientElement.cpp
     src/SVG/SVGLocatable.cpp
     src/SVG/SVGMetadataElement.cpp
     src/SVG/SVGNames.cpp
@@ -4259,13 +4294,16 @@ target_sources(Krystal.Booey
     src/SVG/SVGPolygonElement.cpp
     src/SVG/SVGPolyElement.cpp
     src/SVG/SVGPathElement.cpp
+    src/SVG/SVGPatternElement.cpp
     src/SVG/SVGAElement.cpp
     src/SVG/SVGViewElement.cpp
     src/SVG/SVGViewSpec.cpp
     src/SVG/SVGPolylineElement.cpp
     src/SVG/SVGPreserveAspectRatioValue.cpp
+    src/SVG/SVGRadialGradientElement.cpp
     src/SVG/SVGRectElement.cpp
     src/SVG/SVGScriptElement.cpp
+    src/SVG/SVGStopElement.cpp
     src/SVG/SVGStringList.cpp
     src/SVG/SVGStyleElement.cpp
     src/SVG/SVGSvgElement.cpp

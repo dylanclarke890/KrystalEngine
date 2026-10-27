@@ -6,7 +6,9 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
@@ -592,8 +594,12 @@ namespace krys::boo::svg
 
     if (attrName == SVGNames::IdAttr())
     {
-      // FIXME: Notify resources about id changes (LegacyRenderSVGResourceContainer::idChanged), with paint
-      // servers (B11e).
+      // Notify resources about id changes, this is important as we cache resources by id in
+      // SVGDocumentExtensions
+      if (auto *container = DynamicDowncast<LegacyRenderSVGResourceContainer>(Renderer()))
+      {
+        container->IdChanged();
+      }
       if (IsConnected())
       {
         BuildPendingResourcesIfNeeded();
@@ -651,8 +657,13 @@ namespace krys::boo::svg
       if (clientElement->HasPendingResources())
       {
         clientElement->BuildPendingResource();
-        // FIXME: Mark the clients of the resource containers around the element's renderer for repaint
-        // (LegacyRenderSVGResourceContainer::markAllClientsForRepaint), with paint servers (B11e).
+        if (auto *renderer = clientElement->Renderer())
+        {
+          for (auto &ancestor : AncestorsOfType<LegacyRenderSVGResourceContainer>(*renderer))
+          {
+            ancestor.MarkAllClientsForRepaint();
+          }
+        }
         treeScope.ClearHasPendingSVGResourcesIfPossible(*clientElement);
       }
     }

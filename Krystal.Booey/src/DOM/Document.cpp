@@ -126,6 +126,7 @@
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
@@ -1644,6 +1645,15 @@ namespace krys::boo::dom
     {
       _intersectionObserversInitialUpdateTimer.StartOneShot(IntersectionObserversInitialUpdateDelay);
     }
+  }
+
+  svg::SVGDocumentExtensions &Document::SVGExtensions() noexcept
+  {
+    if (!_svgExtensions)
+    {
+      _svgExtensions = CreateUnique<svg::SVGDocumentExtensions>(*this);
+    }
+    return *_svgExtensions;
   }
 
   IntersectionObserverData &Document::EnsureIntersectionObserverData() noexcept

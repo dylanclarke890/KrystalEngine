@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
@@ -55,8 +56,7 @@ namespace krys::boo
 
   void RenderSVGBlock::WillBeDestroyed() noexcept
   {
-    // FIXME: Tell the resources cache the renderer was destroyed (SVGResourcesCache::clientDestroyed), with
-    // resources (B11e).
+    SVGResourcesCache::ClientDestroyed(*this);
     RenderBlockFlow::WillBeDestroyed();
   }
 
@@ -67,8 +67,7 @@ namespace krys::boo
       InvalidateCachedBoundaries();
     }
     RenderBlockFlow::StyleDidChange(diff, oldStyle);
-    // FIXME: Tell the resources cache the style changed (SVGResourcesCache::clientStyleChanged), with
-    // resources (B11e).
+    SVGResourcesCache::ClientStyleChanged(*this, diff, oldStyle, Style());
   }
 
   void RenderSVGBlock::ComputeOverflow(LayoutUnit oldClientAfterEdge,

@@ -265,6 +265,11 @@ namespace krys::ui::tests
               });
   }
 
+  TEST_CASE("Golden: SVG paint servers", "[UI][GPU][Golden]")
+  {
+    CheckPage("svg-paint-servers", 360u, 240u);
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);

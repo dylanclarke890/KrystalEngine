@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderSVG.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 
 namespace krys::boo
 {
@@ -11,21 +12,23 @@ namespace krys::boo
   void RenderTreeBuilder::SVG::Attach(LegacyRenderSVGRoot &parent, RenderPtr<RenderObject> child,
                                       RenderObject *beforeChild) noexcept
   {
+    auto &childToAdd = *child;
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
-    // FIXME: SVGResourcesCache::clientWasAddedToTree, with resources (B11e).
+    SVGResourcesCache::ClientWasAddedToTree(childToAdd);
   }
 
   void RenderTreeBuilder::SVG::Attach(LegacyRenderSVGContainer &parent, RenderPtr<RenderObject> child,
                                       RenderObject *beforeChild) noexcept
   {
+    auto &childToAdd = *child;
     _builder.AttachToRenderElement(parent, krys::move(child), beforeChild);
-    // FIXME: SVGResourcesCache::clientWasAddedToTree, with resources (B11e).
+    SVGResourcesCache::ClientWasAddedToTree(childToAdd);
   }
 
   RenderPtr<RenderObject> RenderTreeBuilder::SVG::Detach(LegacyRenderSVGRoot &parent, RenderObject &child,
                                                          WillBeDestroyed willBeDestroyed) noexcept
   {
-    // FIXME: SVGResourcesCache::clientWillBeRemovedFromTree, with resources (B11e).
+    SVGResourcesCache::ClientWillBeRemovedFromTree(child);
     return _builder.DetachFromRenderElement(parent, child, willBeDestroyed);
   }
 
@@ -33,7 +36,7 @@ namespace krys::boo
                                                          RenderObject &child,
                                                          WillBeDestroyed willBeDestroyed) noexcept
   {
-    // FIXME: SVGResourcesCache::clientWillBeRemovedFromTree, with resources (B11e).
+    SVGResourcesCache::ClientWillBeRemovedFromTree(child);
     return _builder.DetachFromRenderElement(parent, child, willBeDestroyed);
   }
 }

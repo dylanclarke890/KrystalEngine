@@ -17,6 +17,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
@@ -289,7 +291,10 @@ namespace krys::boo
     void InvalidateResourcesOfChildren(RenderElement &renderer) noexcept
     {
       krys_debug_assert(!renderer.NeedsLayout());
-      // FIXME: Mark this renderer's resources for invalidation (SVGResourcesCache), with resources (B11e).
+      if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer))
+      {
+        resources->RemoveClientFromCacheAndMarkForInvalidation(renderer, false);
+      }
 
       for (auto &child : ChildrenOfType<RenderElement>(renderer))
       {
@@ -333,10 +338,12 @@ namespace krys::boo
     return false;
   }
 
-  void SVGRenderSupport::LayoutDifferentRootIfNeeded(const RenderElement &) noexcept
+  void SVGRenderSupport::LayoutDifferentRootIfNeeded(const RenderElement &renderer) noexcept
   {
-    // FIXME: Lay out the resources' roots when they differ (SVGResources::layoutDifferentRootIfNeeded), with
-    // resources (B11e).
+    if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer))
+    {
+      resources->LayoutDifferentRootIfNeeded(renderer);
+    }
   }
 
   void SVGRenderSupport::LayoutChildren(RenderElement &start, bool selfNeedsLayout) noexcept

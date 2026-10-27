@@ -99,6 +99,7 @@ namespace krys::boo::css::calc
 
 namespace krys::boo::svg
 {
+  class SVGDocumentExtensions;
   class SVGElement;
 }
 
@@ -279,6 +280,7 @@ namespace krys::boo::dom
     // root the document is.
     List<WeakPtr<IntersectionObserver>> _intersectionObservers;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
+    UniquePtr<svg::SVGDocumentExtensions> _svgExtensions;
     // The intersection observer that loads the lazily loaded images, made on first use.
     UniquePtr<html::LazyLoadImageObserver> _lazyLoadImageObserver;
     // The relevancy of the elements with `content-visibility: auto`, made on first use, and the reasons to
@@ -844,6 +846,12 @@ namespace krys::boo::dom
     {
       return _intersectionObserverData.get();
     }
+    /// @brief What the document keeps for its SVG content, made on first use.
+    KRYS_NODISCARD svg::SVGDocumentExtensions *SVGExtensionsIfExists() const noexcept
+    {
+      return _svgExtensions.get();
+    }
+    KRYS_NODISCARD svg::SVGDocumentExtensions &SVGExtensions() noexcept;
     /// @brief The observer that loads the document's lazily loaded images, made on first use.
     KRYS_NODISCARD html::LazyLoadImageObserver &GetLazyLoadImageObserver() noexcept;
 

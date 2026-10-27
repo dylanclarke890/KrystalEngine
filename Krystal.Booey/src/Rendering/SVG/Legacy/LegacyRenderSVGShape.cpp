@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGPathData.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
@@ -155,7 +156,7 @@ namespace krys::boo
     }
 
     // Invalidate all resources of this client if our layout changed.
-    // FIXME: SVGResourcesCache::clientLayoutChanged, with resources (B11e).
+    SVGResourcesCache::ClientLayoutChanged(*this);
 
     // If our bounds changed, notify the parents.
     if (updateCachedBoundariesInParents)

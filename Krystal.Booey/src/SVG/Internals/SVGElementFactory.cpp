@@ -7,13 +7,17 @@
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGGElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
+#include "Krystal.Booey/SVG/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolygonElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolylineElement.hpp"
+#include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGStyleElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGSwitchElement.hpp"
@@ -119,11 +123,22 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGViewElement>(document);
       }
-      // FIXME: The gradients, their stops and <pattern>, with paint servers (B11e).
       case TagName::linearGradient:
+      {
+        return CreateRefPtr<SVGLinearGradientElement>(document);
+      }
       case TagName::radialGradient:
+      {
+        return CreateRefPtr<SVGRadialGradientElement>(document);
+      }
       case TagName::stop:
+      {
+        return CreateRefPtr<SVGStopElement>(document);
+      }
       case TagName::pattern:
+      {
+        return CreateRefPtr<SVGPatternElement>(document);
+      }
       // FIXME: <clipPath>, <mask> and <marker> (B11f).
       case TagName::clipPath:
       case TagName::mask:

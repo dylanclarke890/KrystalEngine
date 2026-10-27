@@ -70,6 +70,7 @@ namespace krys::boo
     bool _renderBlockShouldForceRelayoutChildren {false};
     bool _renderBoxHasShapeOutsideInfo {false};
     bool _hasPausedImageAnimations {false};
+    bool _hasCachedSVGResource {false};
 
   public:
     /// @brief Displays that get a block flow instead of their usual renderer.
@@ -245,6 +246,15 @@ namespace krys::boo
     void SetHasPausedImageAnimations(bool b) noexcept
     {
       _hasPausedImageAnimations = b;
+    }
+
+    void SetHasCachedSVGResource(bool b) noexcept
+    {
+      _hasCachedSVGResource = b;
+    }
+    KRYS_NODISCARD bool HasCachedSVGResource() const noexcept
+    {
+      return _hasCachedSVGResource;
     }
 
     /// @brief Repaints only if the old and new rects differ: what changed between them, or both whole.

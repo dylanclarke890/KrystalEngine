@@ -28,6 +28,11 @@ namespace krys::boo::style
   class Scope;
 }
 
+namespace krys::boo
+{
+  class LegacyRenderSVGResourceContainer;
+}
+
 namespace krys::boo::svg
 {
   class SVGElement;
@@ -169,6 +174,11 @@ namespace krys::boo::dom
 
     // An SVG element that refers to an id no element in this tree has yet waits for it as a pending resource;
     // when an element takes the id, the waiting elements are rebuilt (SVGElement::BuildPendingResource).
+
+    void AddSVGResource(const DOMStringAtom &id, LegacyRenderSVGResourceContainer &) noexcept;
+    void RemoveSVGResource(const DOMStringAtom &id) noexcept;
+    KRYS_NODISCARD LegacyRenderSVGResourceContainer *
+      LookupLegacySVGResourceById(const DOMStringAtom &id) const noexcept;
 
     void AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept;
     KRYS_NODISCARD bool IsIdOfPendingSVGResource(const DOMStringAtom &id) const noexcept;

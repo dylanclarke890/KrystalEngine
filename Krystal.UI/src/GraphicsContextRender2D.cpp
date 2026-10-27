@@ -705,6 +705,10 @@ namespace krys::ui
   GraphicsContextRender2D::Brush GraphicsContextRender2D::FillBrushPaint() const noexcept
   {
     const auto &brush = FillBrush();
+    if (auto *pattern = brush.GetPattern())
+    {
+      return PatternBrushPaint(*pattern);
+    }
     if (auto *gradient = brush.GetGradient())
     {
       return {.Gradient = ToGradient2D(*gradient, Alpha()),
@@ -716,12 +720,49 @@ namespace krys::ui
   GraphicsContextRender2D::Brush GraphicsContextRender2D::StrokeBrushPaint() const noexcept
   {
     const auto &brush = StrokeBrush();
+    if (auto *pattern = brush.GetPattern())
+    {
+      return PatternBrushPaint(*pattern);
+    }
     if (auto *gradient = brush.GetGradient())
     {
       return {.Gradient = ToGradient2D(*gradient, Alpha()),
               .GradientSpace = ToTransform2D(brush.GradientSpaceTransform())};
     }
     return {.Colour = ToColour(brush.GetColor(), Alpha())};
+  }
+
+  GraphicsContextRender2D::Brush
+    GraphicsContextRender2D::PatternBrushPaint(const boo::Pattern &pattern) const noexcept
+  {
+    // As Skia's: the whole tile image is the tile, placed by the pattern space transform.
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands)
+    {
+      return {};
+    }
+    gfx::TextureHandle texture;
+    if (auto *imageBuffer = pattern.TileImage().ImageBufferIfExists())
+    {
+      texture = _imageBuffers->Render(*imageBuffer, *commands);
+    }
+    else if (auto *nativeImage = pattern.TileImage().NativeImageIfExists())
+    {
+      texture = _imageBuffers->Upload(*nativeImage);
+    }
+    if (!texture.IsValid())
+    {
+      return {};
+    }
+    const auto size = pattern.TileImage().Size();
+    return {.Pattern = gfx::ImagePattern2D {
+              .Texture = texture,
+              .PatternSpace = ToTransform2D(pattern.PatternSpaceTransform()),
+              .TileSize = {static_cast<float>(size.Width()), static_cast<float>(size.Height())},
+              .Filter = ImageFilter(),
+              .Opacity = Alpha(),
+              .RepeatX = pattern.RepeatX(),
+              .RepeatY = pattern.RepeatY()}};
   }
 
   gfx::StrokeStyle GraphicsContextRender2D::CurrentStrokeStyle(float width) const noexcept

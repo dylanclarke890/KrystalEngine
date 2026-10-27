@@ -3,7 +3,9 @@
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/RenderReplaced.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::svg
 {
@@ -12,6 +14,8 @@ namespace krys::boo::svg
 
 namespace krys::boo
 {
+  class LegacyRenderSVGResourceContainer;
+
   /// @brief The renderer of an outermost `<svg>`: a replaced box that lays out and paints its SVG children.
   class LegacyRenderSVGRoot final : public RenderReplaced
   {
@@ -25,8 +29,7 @@ namespace krys::boo
     mutable Markable<FloatRect> _accurateRepaintBoundingBox {};
     mutable AffineTransform _localToParentTransform {};
     AffineTransform _localToBorderBoxTransform {};
-    // FIXME: The resources needing to invalidate their clients (m_resourcesNeedingToInvalidateClients), with
-    // resources (B11e).
+    List<WeakPtr<LegacyRenderSVGResourceContainer>> _resourcesNeedingToInvalidateClients;
 
     bool _inLayout {false};
     bool _isLayoutSizeChanged : 1 {false};
@@ -79,7 +82,7 @@ namespace krys::boo
       return _localToBorderBoxTransform;
     }
 
-    // FIXME: addResourceForClientInvalidation, with resources (B11e).
+    static void AddResourceForClientInvalidation(LegacyRenderSVGResourceContainer *) noexcept;
 
   private:
     void GetElement() const = delete;

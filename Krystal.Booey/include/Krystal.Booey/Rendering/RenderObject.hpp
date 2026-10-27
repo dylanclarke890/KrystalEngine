@@ -1053,6 +1053,10 @@ namespace krys::boo
     {
       return _type == Type::SVGInlineText;
     }
+    KRYS_NODISCARD bool IsRenderSVGGradientStop() const noexcept
+    {
+      return _type == Type::SVGGradientStop;
+    }
     KRYS_NODISCARD bool IsLegacyRenderSVGImage() const noexcept
     {
       return _type == Type::LegacySVGImage;

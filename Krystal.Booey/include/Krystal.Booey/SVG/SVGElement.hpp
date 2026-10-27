@@ -378,6 +378,11 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Line;
     }
 
+    KRYS_NODISCARD bool IsSVGLinearGradientElement() const noexcept
+    {
+      return _interface == SVGElementInterface::LinearGradient;
+    }
+
     KRYS_NODISCARD bool IsSVGMetadataElement() const noexcept
     {
       return _interface == SVGElementInterface::Metadata;
@@ -386,6 +391,11 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsSVGPathElement() const noexcept
     {
       return _interface == SVGElementInterface::Path;
+    }
+
+    KRYS_NODISCARD bool IsSVGPatternElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Pattern;
     }
 
     KRYS_NODISCARD bool IsSVGPolygonElement() const noexcept
@@ -398,6 +408,11 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Polyline;
     }
 
+    KRYS_NODISCARD bool IsSVGRadialGradientElement() const noexcept
+    {
+      return _interface == SVGElementInterface::RadialGradient;
+    }
+
     KRYS_NODISCARD bool IsSVGRectElement() const noexcept
     {
       return _interface == SVGElementInterface::Rect;
@@ -406,6 +421,11 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsSVGScriptElement() const noexcept
     {
       return _interface == SVGElementInterface::Script;
+    }
+
+    KRYS_NODISCARD bool IsSVGStopElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Stop;
     }
 
     KRYS_NODISCARD bool IsSVGStyleElement() const noexcept

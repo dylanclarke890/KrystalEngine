@@ -6,10 +6,12 @@ namespace krys::boo
 {
   class LegacyRenderSVGContainer;
   class LegacyRenderSVGImage;
+  class LegacyRenderSVGResourceContainer;
   class LegacyRenderSVGRoot;
   class LegacyRenderSVGShape;
   class RenderElement;
   class RenderObject;
+  class RenderSVGGradientStop;
 
   namespace svg
   {
@@ -23,7 +25,9 @@ namespace krys::boo
   void WriteSVGImage(TextStream &, const LegacyRenderSVGImage &, EnumSet<RenderAsTextFlag>) noexcept;
   void WriteSVGPaintingFeatures(TextStream &, const RenderElement &, EnumSet<RenderAsTextFlag>) noexcept;
   void WriteResources(TextStream &, const RenderObject &, EnumSet<RenderAsTextFlag>) noexcept;
-  // FIXME: Resource containers and gradient stops (writeSVGResourceContainer, writeSVGGradientStop), with
-  // paint servers (B11e); text (writeSVGText, writeSVGInlineText), with text (B11g).
+  void WriteSVGResourceContainer(TextStream &, const LegacyRenderSVGResourceContainer &,
+                                 EnumSet<RenderAsTextFlag>) noexcept;
+  void WriteSVGGradientStop(TextStream &, const RenderSVGGradientStop &, EnumSet<RenderAsTextFlag>) noexcept;
+  // FIXME: Text (writeSVGText, writeSVGInlineText), with text (B11g).
   void WriteSVGGraphicsElement(TextStream &, const svg::SVGGraphicsElement &) noexcept;
 }

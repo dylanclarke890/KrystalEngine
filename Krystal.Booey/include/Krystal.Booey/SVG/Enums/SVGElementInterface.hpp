@@ -18,12 +18,16 @@ namespace krys::boo::svg
     Geometry,
     Image,
     Line,
+    LinearGradient,
     Metadata,
     Path,
+    Pattern,
     Polygon,
     Polyline,
+    RadialGradient,
     Rect,
     Script,
+    Stop,
     Switch,
     Style,
     Svg,
@@ -35,4 +39,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 26uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 30uz);

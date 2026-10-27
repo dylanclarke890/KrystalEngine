@@ -13,13 +13,17 @@
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGGElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
+#include "Krystal.Booey/SVG/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolygonElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolylineElement.hpp"
+#include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGStyleElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGSwitchElement.hpp"
@@ -61,12 +65,16 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGGElement>(*document, u8"g"));
     CHECK(IsCreated<SVGImageElement>(*document, u8"image"));
     CHECK(IsCreated<SVGLineElement>(*document, u8"line"));
+    CHECK(IsCreated<SVGLinearGradientElement>(*document, u8"linearGradient"));
     CHECK(IsCreated<SVGMetadataElement>(*document, u8"metadata"));
     CHECK(IsCreated<SVGPathElement>(*document, u8"path"));
+    CHECK(IsCreated<SVGPatternElement>(*document, u8"pattern"));
     CHECK(IsCreated<SVGPolygonElement>(*document, u8"polygon"));
     CHECK(IsCreated<SVGPolylineElement>(*document, u8"polyline"));
+    CHECK(IsCreated<SVGRadialGradientElement>(*document, u8"radialGradient"));
     CHECK(IsCreated<SVGRectElement>(*document, u8"rect"));
     CHECK(IsCreated<SVGScriptElement>(*document, u8"script"));
+    CHECK(IsCreated<SVGStopElement>(*document, u8"stop"));
     CHECK(IsCreated<SVGStyleElement>(*document, u8"style"));
     CHECK(IsCreated<SVGSvgElement>(*document, u8"svg"));
     CHECK(IsCreated<SVGSwitchElement>(*document, u8"switch"));
@@ -76,10 +84,9 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGViewElement>(*document, u8"view"));
 
     // The elements that aren't ported yet, the SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
-    for (auto localName :
-         {u8"linearGradient", u8"stop", u8"clipPath", u8"text", u8"filter", u8"feGaussianBlur", u8"animate",
-          u8"set", u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor",
-          u8"animateColor", u8"div", u8"x"})
+    for (auto localName : {u8"clipPath", u8"text", u8"filter", u8"feGaussianBlur", u8"animate", u8"set",
+                           u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor",
+                           u8"animateColor", u8"div", u8"x"})
     {
       CAPTURE(css::tests::ToNarrow(localName));
       CHECK(IsCreated<SVGUnknownElement>(*document, localName));

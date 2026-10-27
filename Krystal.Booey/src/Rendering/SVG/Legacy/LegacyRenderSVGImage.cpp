@@ -15,6 +15,8 @@
 #include "Krystal.Booey/Rendering/RenderImageResource.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
@@ -200,7 +202,7 @@ namespace krys::boo
     }
 
     // Invalidate all resources of this client if our layout changed.
-    // FIXME: SVGResourcesCache::clientLayoutChanged, with resources (B11e).
+    SVGResourcesCache::ClientLayoutChanged(*this);
 
     // If our bounds changed, notify the parents.
     if (transformOrBoundariesUpdate)
@@ -334,8 +336,10 @@ namespace krys::boo
 
     // The image resource defaults to nullImage until the resource arrives.
     // This empty image may be cached by SVG resources which must be invalidated.
-    // FIXME: Remove the renderer from its resources' caches (removeClientFromCacheAndMarkForInvalidation),
-    // with resources (B11e).
+    if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*this))
+    {
+      resources->RemoveClientFromCacheAndMarkForInvalidation(*this);
+    }
 
     // Eventually notify parent resources, that we've changed.
     LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(*this, false);

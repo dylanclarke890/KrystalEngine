@@ -21,8 +21,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/HexNumber.hpp"
@@ -479,8 +481,16 @@ namespace krys::boo
       Write(ts, *svgShape, behavior);
       return;
     }
-    // FIXME: Resource containers and gradient stops write themselves (writeSVGRenderer), with paint servers
-    // (B11e).
+    if (auto *svgGradientStop = DynamicDowncast<RenderSVGGradientStop>(renderer))
+    {
+      WriteSVGGradientStop(ts, *svgGradientStop, behavior);
+      return;
+    }
+    if (auto *svgResourceContainer = DynamicDowncast<LegacyRenderSVGResourceContainer>(renderer))
+    {
+      WriteSVGResourceContainer(ts, *svgResourceContainer, behavior);
+      return;
+    }
     if (auto *svgContainer = DynamicDowncast<LegacyRenderSVGContainer>(renderer))
     {
       WriteSVGContainer(ts, *svgContainer, behavior);

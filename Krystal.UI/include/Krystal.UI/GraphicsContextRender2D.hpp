@@ -140,14 +140,22 @@ namespace krys::ui
       SRGBA<uint8> Colour {};
       Maybe<gfx::Gradient2D> Gradient;
       gfx::Transform2D GradientSpace {};
+      Maybe<gfx::ImagePattern2D> Pattern;
 
       KRYS_NODISCARD gfx::Paint2D Paint() const noexcept
       {
+        if (Pattern)
+        {
+          return gfx::Paint2D(*Pattern);
+        }
         return Gradient ? gfx::Paint2D(*Gradient, GradientSpace) : gfx::Paint2D(Colour);
       }
     };
 
     KRYS_NODISCARD Brush FillBrushPaint() const noexcept;
+    /// @brief A brush's pattern as a repeated image: its tile rendered into a texture; a transparent
+    /// colour when there's no texture.
+    KRYS_NODISCARD Brush PatternBrushPaint(const boo::Pattern &) const noexcept;
     KRYS_NODISCARD Brush StrokeBrushPaint() const noexcept;
     KRYS_NODISCARD gfx::StrokeStyle CurrentStrokeStyle(float width) const noexcept;
 

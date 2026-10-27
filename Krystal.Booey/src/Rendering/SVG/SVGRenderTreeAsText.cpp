@@ -7,19 +7,27 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceRadialGradient.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
+#include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 #include "Krystal.Booey/SVG/SVGPolyElement.hpp"
+#include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
+#include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo
 {
@@ -72,6 +80,18 @@ namespace krys::boo
       return ts;
     }
 
+    TextStream &operator<<(TextStream &ts, const svg::SVGUnitTypes::SVGUnitType &unitType) noexcept
+    {
+      ts << svg::SVGPropertyTraits<svg::SVGUnitTypes::SVGUnitType>::ToString(unitType);
+      return ts;
+    }
+
+    TextStream &operator<<(TextStream &ts, const svg::SVGSpreadMethodType &type) noexcept
+    {
+      ts << text::ToASCIIUpper(svg::SVGPropertyTraits<svg::SVGSpreadMethodType>::ToString(type));
+      return ts;
+    }
+
     template <typename ValueType>
     void WriteNameValuePair(TextStream &ts, utf8_stringview name, const ValueType &value) noexcept
     {
@@ -110,7 +130,24 @@ namespace krys::boo
         return;
       }
 
-      // FIXME: Patterns and gradients, with their types and ids, with paint servers (B11e).
+      auto resourceType = resource.ResourceType();
+      if (resourceType == RenderSVGResourceType::PatternResourceType)
+      {
+        ts << u8"[type=PATTERN]";
+      }
+      else if (resourceType == RenderSVGResourceType::LinearGradientResourceType)
+      {
+        ts << u8"[type=LINEAR-GRADIENT]";
+      }
+      else if (resourceType == RenderSVGResourceType::RadialGradientResourceType)
+      {
+        ts << u8"[type=RADIAL-GRADIENT]";
+      }
+
+      // All other resources derive from LegacyRenderSVGResourceContainer.
+      // FIXME: This should use a safe cast.
+      const auto &container = static_cast<const LegacyRenderSVGResourceContainer &>(resource);
+      ts << u8" [id=\"" << container.GetElement().Id() << u8"\"]";
     }
 
     void WriteSVGFillPaintingResource(TextStream &ts, const RenderElement &renderer,
@@ -330,6 +367,101 @@ namespace krys::boo
         Write(ts, child, behavior);
       }
     }
+  }
+
+  namespace
+  {
+    void WriteCommonGradientProperties(TextStream &ts, svg::SVGSpreadMethodType spreadMethod,
+                                       const AffineTransform &gradientTransform,
+                                       svg::SVGUnitTypes::SVGUnitType gradientUnits) noexcept
+    {
+      WriteNameValuePair(ts, u8"gradientUnits", gradientUnits);
+
+      if (spreadMethod != svg::SVGSpreadMethodPad)
+      {
+        ts << u8" [spreadMethod=" << spreadMethod << ']';
+      }
+
+      if (!gradientTransform.IsIdentity())
+      {
+        ts << u8" [gradientTransform=" << gradientTransform << ']';
+      }
+    }
+  }
+
+  void WriteSVGResourceContainer(TextStream &ts, const LegacyRenderSVGResourceContainer &resource,
+                                 EnumSet<RenderAsTextFlag> behavior) noexcept
+  {
+    WriteStandardPrefix(ts, resource, behavior);
+
+    auto id = resource.GetElement().Id();
+    WriteNameAndQuotedValue(ts, u8"id", id);
+
+    // FIXME: Maskers, filters, clippers and markers, with clipping, masking and markers (B11f) and filters
+    // (B11h).
+    if (auto *pattern = DynamicDowncast<const LegacyRenderSVGResourcePattern>(resource))
+    {
+      // Dump final results that are used for rendering. No use in asking SVGPatternElement for its
+      // patternUnits(), as it may link to other patterns using xlink:href, we need to build the full
+      // inheritance chain, aka. collectPatternProperties()
+      svg::PatternAttributes attributes;
+      pattern->CollectPatternAttributes(attributes);
+
+      WriteNameValuePair(ts, u8"patternUnits", attributes.PatternUnits());
+      WriteNameValuePair(ts, u8"patternContentUnits", attributes.PatternContentUnits());
+
+      AffineTransform transform = attributes.PatternTransform();
+      if (!transform.IsIdentity())
+      {
+        ts << u8" [patternTransform=" << transform << ']';
+      }
+      ts << '\n';
+    }
+    else if (auto *linearGradient = DynamicDowncast<const LegacyRenderSVGResourceLinearGradient>(resource))
+    {
+      // Dump final results that are used for rendering. No use in asking SVGGradientElement for its
+      // gradientUnits(), as it may link to other gradients using xlink:href, we need to build the full
+      // inheritance chain, aka. collectGradientProperties()
+      svg::LinearGradientAttributes attributes;
+      (void)linearGradient->LinearGradientElement().CollectGradientAttributes(attributes);
+      WriteCommonGradientProperties(ts, attributes.SpreadMethod(), attributes.GradientTransform(),
+                                    attributes.GradientUnits());
+
+      ts << u8" [start=" << linearGradient->StartPoint(attributes) << u8"] [end="
+         << linearGradient->EndPoint(attributes) << u8"]\n";
+    }
+    else if (auto *radialGradient = DynamicDowncast<const LegacyRenderSVGResourceRadialGradient>(resource))
+    {
+      // Dump final results that are used for rendering. No use in asking SVGGradientElement for its
+      // gradientUnits(), as it may link to other gradients using xlink:href, we need to build the full
+      // inheritance chain, aka. collectGradientProperties()
+      svg::RadialGradientAttributes attributes;
+      (void)radialGradient->RadialGradientElement().CollectGradientAttributes(attributes);
+      WriteCommonGradientProperties(ts, attributes.SpreadMethod(), attributes.GradientTransform(),
+                                    attributes.GradientUnits());
+
+      FloatPoint focalPoint = radialGradient->FocalPoint(attributes);
+      FloatPoint centerPoint = radialGradient->CenterPoint(attributes);
+      float radius = radialGradient->Radius(attributes);
+      float focalRadius = radialGradient->FocalRadius(attributes);
+
+      ts << u8" [center=" << centerPoint << u8"] [focal=" << focalPoint << u8"] [radius=" << radius
+         << u8"] [focalRadius=" << focalRadius << u8"]\n";
+    }
+    else
+    {
+      ts << '\n';
+    }
+    WriteChildren(ts, resource, behavior);
+  }
+
+  void WriteSVGGradientStop(TextStream &ts, const RenderSVGGradientStop &stop,
+                            EnumSet<RenderAsTextFlag> behavior) noexcept
+  {
+    WriteStandardPrefix(ts, stop, behavior);
+
+    ts << u8" [offset=" << stop.GetElement().Offset() << u8"] [color="
+       << stop.GetElement().StopColorIncludingOpacity() << u8"]\n";
   }
 
   void WriteSVGContainer(TextStream &ts, const LegacyRenderSVGContainer &container,

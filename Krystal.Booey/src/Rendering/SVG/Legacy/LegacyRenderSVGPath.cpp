@@ -74,7 +74,10 @@ namespace krys::boo
       {
         context.SetFillGradient(ShareRef(*gradient), context.StrokeGradientSpaceTransform());
       }
-      // FIXME: The stroke pattern (strokePattern), with patterns (B11e).
+      else if (auto *pattern = context.StrokePattern())
+      {
+        context.SetFillPattern(ShareRef(*pattern));
+      }
       else
       {
         context.SetFillColor(context.StrokeColor());

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Style/Values/Borders/Shadow.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -115,8 +116,7 @@ namespace krys::boo
 
   void LegacyRenderSVGModelObject::WillBeDestroyed() noexcept
   {
-    // FIXME: Tell the resources cache the client is gone (SVGResourcesCache::clientDestroyed), with resources
-    // (B11e).
+    SVGResourcesCache::ClientDestroyed(*this);
     RenderElement::WillBeDestroyed();
   }
 
@@ -132,8 +132,7 @@ namespace krys::boo
       }
     }
     RenderElement::StyleDidChange(diff, oldStyle);
-    // FIXME: Tell the resources cache the style changed (SVGResourcesCache::clientStyleChanged), with
-    // resources (B11e).
+    SVGResourcesCache::ClientStyleChanged(*this, diff, oldStyle, Style());
   }
 
   bool LegacyRenderSVGModelObject::NodeAtPoint(const HitTestRequest &, HitTestResult &,

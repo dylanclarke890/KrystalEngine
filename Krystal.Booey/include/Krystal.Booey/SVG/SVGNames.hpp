@@ -14,12 +14,21 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &CxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &CyAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &DAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FrAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FxAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FyAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &GradientTransformAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &GradientUnitsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &HeightAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &HrefAttr() noexcept;
     /// @brief The `id` attribute, shared with HTML.
     KRYS_NODISCARD static const dom::QualifiedName &IdAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &MediaAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &OffsetAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PathLengthAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PatternContentUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PatternTransformAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PatternUnitsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PointsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PreserveAspectRatioAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RAttr() noexcept;
@@ -27,6 +36,7 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &RequiredExtensionsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RyAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SpreadMethodAttr() noexcept;
     /// @brief The `style` attribute, shared with HTML.
     KRYS_NODISCARD static const dom::QualifiedName &StyleAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &SystemLanguageAttr() noexcept;
@@ -39,9 +49,9 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &X1Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &X2Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &XAttr() noexcept;
-    KRYS_NODISCARD static const dom::QualifiedName &YAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &Y1Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &Y2Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &YAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &ZoomAndPanAttr() noexcept;
   };
 

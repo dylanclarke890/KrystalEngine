@@ -136,6 +136,11 @@ namespace krys::boo
       _fillBrush.SetGradient(krys::move(gradient), spaceTransform);
       _changeFlags.Add(Change::FillBrush);
     }
+    void SetFillPattern(Ref<Pattern> &&pattern) noexcept
+    {
+      _fillBrush.SetPattern(krys::move(pattern));
+      _changeFlags.Add(Change::FillBrush);
+    }
 
     KRYS_NODISCARD WindRule FillRule() const noexcept
     {
@@ -165,6 +170,11 @@ namespace krys::boo
     void SetStrokeGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform) noexcept
     {
       _strokeBrush.SetGradient(krys::move(gradient), spaceTransform);
+      _changeFlags.Add(Change::StrokeBrush);
+    }
+    void SetStrokePattern(Ref<Pattern> &&pattern) noexcept
+    {
+      _strokeBrush.SetPattern(krys::move(pattern));
       _changeFlags.Add(Change::StrokeBrush);
     }
 

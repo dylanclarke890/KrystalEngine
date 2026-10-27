@@ -116,6 +116,10 @@ namespace krys::boo
     {
       return FillBrush().GetGradient();
     }
+    KRYS_NODISCARD Pattern *FillPattern() const noexcept
+    {
+      return FillBrush().GetPattern();
+    }
     KRYS_NODISCARD const AffineTransform &FillGradientSpaceTransform() const noexcept
     {
       return FillBrush().GradientSpaceTransform();
@@ -133,6 +137,11 @@ namespace krys::boo
     void SetFillGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform = {}) noexcept
     {
       _state.SetFillGradient(krys::move(gradient), spaceTransform);
+      DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::FillBrush));
+    }
+    void SetFillPattern(Ref<Pattern> &&pattern) noexcept
+    {
+      _state.SetFillPattern(krys::move(pattern));
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::FillBrush));
     }
 
@@ -158,6 +167,10 @@ namespace krys::boo
     {
       return StrokeBrush().GetGradient();
     }
+    KRYS_NODISCARD Pattern *StrokePattern() const noexcept
+    {
+      return StrokeBrush().GetPattern();
+    }
     KRYS_NODISCARD const AffineTransform &StrokeGradientSpaceTransform() const noexcept
     {
       return StrokeBrush().GradientSpaceTransform();
@@ -175,6 +188,11 @@ namespace krys::boo
     void SetStrokeGradient(Ref<Gradient> &&gradient, const AffineTransform &spaceTransform = {}) noexcept
     {
       _state.SetStrokeGradient(krys::move(gradient), spaceTransform);
+      DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::StrokeBrush));
+    }
+    void SetStrokePattern(Ref<Pattern> &&pattern) noexcept
+    {
+      _state.SetStrokePattern(krys::move(pattern));
       DidUpdateSingleState(_state, GraphicsContextState::ToIndex(GraphicsContextState::Change::StrokeBrush));
     }
 

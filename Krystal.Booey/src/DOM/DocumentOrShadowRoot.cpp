@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -30,7 +31,7 @@ namespace krys::boo::dom
 
     HashMap<DOMStringAtom, WeakSVGElementSet> PendingResources;
     HashMap<DOMStringAtom, WeakSVGElementSet> PendingResourcesForRemoval;
-    // FIXME: The legacy resources by id (LegacyRenderSVGResourceContainer), with paint servers (B11e).
+    HashMap<DOMStringAtom, WeakPtr<LegacyRenderSVGResourceContainer>> LegacyResources;
 
     SVGResourcesMap() noexcept = default;
   };
@@ -74,6 +75,45 @@ namespace krys::boo::dom
       _svgResourcesMap = CreateUnique<SVGResourcesMap>();
     }
     return *_svgResourcesMap;
+  }
+
+  void DocumentOrShadowRoot::AddSVGResource(const DOMStringAtom &id,
+                                            LegacyRenderSVGResourceContainer &resource) noexcept
+  {
+    if (id.View().empty())
+    {
+      return;
+    }
+
+    // Replaces resource if already present, to handle potential id changes
+    GetSVGResourcesMap().LegacyResources.insert_or_assign(id, CreateWeakPtr(&resource));
+  }
+
+  void DocumentOrShadowRoot::RemoveSVGResource(const DOMStringAtom &id) noexcept
+  {
+    if (id.View().empty())
+    {
+      return;
+    }
+
+    GetSVGResourcesMap().LegacyResources.erase(id);
+  }
+
+  LegacyRenderSVGResourceContainer *
+    DocumentOrShadowRoot::LookupLegacySVGResourceById(const DOMStringAtom &id) const noexcept
+  {
+    if (id.View().empty())
+    {
+      return nullptr;
+    }
+
+    auto &resources = GetSVGResourcesMap().LegacyResources;
+    if (auto it = resources.find(id); it != resources.end())
+    {
+      return it->second.get();
+    }
+
+    return nullptr;
   }
 
   void DocumentOrShadowRoot::AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept

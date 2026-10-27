@@ -303,6 +303,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/WOFFFileFormat.cpp
 		tests/Graphics/DoublePoint.cpp
 		tests/Graphics/FloatPoint.cpp
+		tests/Graphics/Pattern.cpp
 		tests/Graphics/FloatPoint3D.cpp
 		tests/Graphics/FloatQuad.cpp
 		tests/Graphics/FloatRect.cpp
@@ -438,6 +439,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGContainer.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceGradient.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
 		tests/Rendering/RenderBlockFlow.cpp
 		tests/Rendering/PositionedLayoutConstraints.cpp
 		tests/Rendering/FloatingObjects.cpp
@@ -686,6 +689,7 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGURIReference.cpp
 		tests/SVG/Graphics/SVGImage.cpp
 		tests/SVG/SVGUseElement.cpp
+		tests/SVG/SVGGradientElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 		tests/XML/XMLDocumentParser.cpp

@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/Pattern.hpp"
 #include "Krystal.Booey/Graphics/SourceBrushLogicalGradient.hpp"
 
 namespace krys
@@ -16,7 +17,7 @@ namespace krys::boo
   class SourceBrush
   {
   public:
-    using OptionalPatternGradient = Variant<std::monostate, SourceBrushLogicalGradient>;
+    using OptionalPatternGradient = Variant<std::monostate, SourceBrushLogicalGradient, Ref<Pattern>>;
 
   private:
     boo::Color _color {boo::Color::black};
@@ -44,9 +45,11 @@ namespace krys::boo
     KRYS_NODISCARD Maybe<PackedColour::RGBA> PackedColor() const noexcept;
 
     KRYS_NODISCARD boo::Gradient *GetGradient() const noexcept;
+    KRYS_NODISCARD boo::Pattern *GetPattern() const noexcept;
     KRYS_NODISCARD const AffineTransform &GradientSpaceTransform() const noexcept;
 
     void SetGradient(Ref<boo::Gradient> &&, const AffineTransform &spaceTransform = {}) noexcept;
+    void SetPattern(Ref<boo::Pattern> &&) noexcept;
 
     KRYS_NODISCARD bool IsVisible() const noexcept
     {
@@ -59,7 +62,24 @@ namespace krys::boo
 
     KRYS_NODISCARD friend bool operator==(const SourceBrush &a, const SourceBrush &b) noexcept
     {
-      return a._color == b._color && a._patternGradient == b._patternGradient;
+      // Patterns compare by identity.
+      auto patternGradientEqual = [](const OptionalPatternGradient &a, const OptionalPatternGradient &b)
+      {
+        if (a.index() != b.index())
+        {
+          return false;
+        }
+        if (auto *aGradient = std::get_if<SourceBrushLogicalGradient>(&a))
+        {
+          return *aGradient == std::get<SourceBrushLogicalGradient>(b);
+        }
+        if (auto *aPattern = std::get_if<Ref<boo::Pattern>>(&a))
+        {
+          return aPattern->get() == std::get<Ref<boo::Pattern>>(b).get();
+        }
+        return true;
+      };
+      return a._color == b._color && patternGradientEqual(a._patternGradient, b._patternGradient);
     }
   };
 

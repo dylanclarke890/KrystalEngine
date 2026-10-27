@@ -4,9 +4,12 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 
@@ -76,8 +79,11 @@ namespace krys::boo
         return colorResource;
       }
 
-      // FIXME: The gradient or pattern the paint references (SVGResourcesCache), with paint servers (B11e).
       LegacyRenderSVGResource *uriResource = nullptr;
+      if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer))
+      {
+        uriResource = applyToFill ? resources->Fill() : resources->Stroke();
+      }
 
       // If the requested resource is not available, return the color resource or 'none'.
       if (!uriResource)
@@ -231,8 +237,12 @@ namespace krys::boo
     {
       RemoveFromCacheAndInvalidateDependencies(*current, needsLayout, visitedRenderers);
 
-      // FIXME: Stop at a resource container, which processes the rest of the ancestors
-      // (LegacyRenderSVGResourceContainer), with resources (B11e).
+      if (auto *container = DynamicDowncast<LegacyRenderSVGResourceContainer>(*current))
+      {
+        // This will process the rest of the ancestors.
+        container->RemoveAllClientsFromCacheAndMarkForInvalidationIfNeeded(true, visitedRenderers);
+        break;
+      }
 
       current = current->Parent();
     }

@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
@@ -153,7 +154,7 @@ namespace krys::boo
     }
 
     // Invalidate all resources of this client if our layout changed.
-    // FIXME: SVGResourcesCache::clientLayoutChanged, with resources (B11e).
+    SVGResourcesCache::ClientLayoutChanged(*this);
 
     repainter.RepaintAfterLayout();
   }

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGVisitedRendererTracking.hpp"
@@ -86,7 +87,7 @@ namespace krys::boo
                                               || SVGRenderSupport::FiltersForceContainerLayout(*this));
 
     // Invalidate all resources of this client if our layout changed.
-    // FIXME: SVGResourcesCache::clientLayoutChanged, with resources (B11e).
+    SVGResourcesCache::ClientLayoutChanged(*this);
 
     // At this point LayoutRepainter already grabbed the old bounds,
     // recalculate them now so repaintAfterLayout() uses the new bounds.
