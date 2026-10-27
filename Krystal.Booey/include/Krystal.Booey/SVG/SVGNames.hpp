@@ -16,6 +16,8 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &CxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &CyAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &DAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &DxAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &DyAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &FrAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &FxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &FyAttr() noexcept;
@@ -30,7 +32,9 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &MarkerWidthAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &MaskContentUnitsAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &MaskUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &LengthAdjustAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &MediaAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &MethodAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &OffsetAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &OrientAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &PathLengthAttr() noexcept;
@@ -44,13 +48,17 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &RefYAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RelAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RequiredExtensionsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &RotateAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RxAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &RyAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SpacingAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &SpreadMethodAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &StartOffsetAttr() noexcept;
     /// @brief The `style` attribute, shared with HTML.
     KRYS_NODISCARD static const dom::QualifiedName &StyleAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &SystemLanguageAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &TargetAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &TextLengthAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &TitleAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &TransformAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &TypeAttr() noexcept;

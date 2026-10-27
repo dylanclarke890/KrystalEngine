@@ -12,6 +12,8 @@ namespace krys::boo
   class RenderElement;
   class RenderObject;
   class RenderSVGGradientStop;
+  class RenderSVGInlineText;
+  class RenderSVGText;
 
   namespace svg
   {
@@ -28,6 +30,7 @@ namespace krys::boo
   void WriteSVGResourceContainer(TextStream &, const LegacyRenderSVGResourceContainer &,
                                  EnumSet<RenderAsTextFlag>) noexcept;
   void WriteSVGGradientStop(TextStream &, const RenderSVGGradientStop &, EnumSet<RenderAsTextFlag>) noexcept;
-  // FIXME: Text (writeSVGText, writeSVGInlineText), with text (B11g).
+  void WriteSVGText(TextStream &, const RenderSVGText &, EnumSet<RenderAsTextFlag>) noexcept;
+  void WriteSVGInlineText(TextStream &, const RenderSVGInlineText &, EnumSet<RenderAsTextFlag>) noexcept;
   void WriteSVGGraphicsElement(TextStream &, const svg::SVGGraphicsElement &) noexcept;
 }

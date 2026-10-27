@@ -44,8 +44,10 @@ namespace krys::boo
     }
 
     float textPaintingScale = 1;
-    // FIXME: The text painting scale (computeTextPaintingScale), with text (B11g).
-    (void)resourceMode;
+    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+    {
+      textPaintingScale = ComputeTextPaintingScale(renderer);
+    }
 
     return {objectBoundingBox, textPaintingScale};
   }

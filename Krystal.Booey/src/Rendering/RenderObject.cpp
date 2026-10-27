@@ -1828,8 +1828,10 @@ namespace krys::boo
   void RenderObject::InsertedIntoTree() noexcept
   {
     // FIXME: We should ASSERT(isRooted()) here but generated content makes some out-of-order insertion.
-    // FIXME: Dirty the line from the changed child in SVG parents with inline children, with SVG text's line
-    // boxes (B11g).
+    if (!IsFloating() && Parent()->IsSVGRenderer() && Parent()->ChildrenInline())
+    {
+      Parent()->DirtyLineFromChangedChild();
+    }
   }
 
   void RenderObject::WillBeRemovedFromTree() noexcept

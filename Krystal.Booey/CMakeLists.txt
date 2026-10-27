@@ -2015,6 +2015,52 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/ContentVisibilityAutoStateChangeEvent.hpp
   include/Krystal.Booey/DOM/ContentVisibilityDocumentState.hpp
   include/Krystal.Booey/DOM/Enums/ContentRelevancy.hpp
+  include/Krystal.Booey/Core/BidiContext.hpp
+  include/Krystal.Booey/Core/BidiResolver.hpp
+  include/Krystal.Booey/Core/BidiRunList.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorBoxLegacyPath.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBoxLegacyPath.hpp
+  include/Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp
+  include/Krystal.Booey/Rendering/BidiRun.hpp
+  include/Krystal.Booey/Rendering/LegacyInlineBox.hpp
+  include/Krystal.Booey/Rendering/LegacyInlineFlowBox.hpp
+  include/Krystal.Booey/Rendering/LegacyInlineIterator.hpp
+  include/Krystal.Booey/Rendering/LegacyInlineTextBox.hpp
+  include/Krystal.Booey/Rendering/LegacyLineLayout.hpp
+  include/Krystal.Booey/Rendering/LegacyRootInlineBox.hpp
+  include/Krystal.Booey/Rendering/Line/BreakingContext.hpp
+  include/Krystal.Booey/Rendering/Line/LineBreaker.hpp
+  include/Krystal.Booey/Rendering/Line/LineInfo.hpp
+  include/Krystal.Booey/Rendering/Line/LineInlineHeaders.hpp
+  include/Krystal.Booey/Rendering/Line/LineWidth.hpp
+  include/Krystal.Booey/Rendering/Line/TrailingObjects.hpp
+  include/Krystal.Booey/Rendering/RenderLineBoxList.hpp
+  include/Krystal.Booey/Rendering/RenderTextLineBoxes.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGTSpan.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGText.hpp
+  include/Krystal.Booey/Rendering/SVG/RenderSVGTextPath.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGInlineFlowBox.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGInlineTextBox.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGRootInlineBox.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextBoxPainter.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextChunkBuilder.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributes.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextLayoutAttributesBuilder.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextLayoutEngine.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextLayoutEngineBaseline.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextLayoutEngineSpacing.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextMetrics.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextMetricsBuilder.hpp
+  include/Krystal.Booey/Rendering/SVG/SVGTextQuery.hpp
+  include/Krystal.Booey/SVG/SVGTSpanElement.hpp
+  include/Krystal.Booey/SVG/SVGTextContentElement.hpp
+  include/Krystal.Booey/SVG/SVGTextElement.hpp
+  include/Krystal.Booey/SVG/SVGTextPathElement.hpp
+  include/Krystal.Booey/SVG/SVGTextPositioningElement.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3350,6 +3396,44 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Content visibility (B5d)
   src/DOM/ContentVisibilityAutoStateChangeEvent.cpp
   src/DOM/ContentVisibilityDocumentState.cpp
+  src/Core/BidiContext.cpp
+  src/Layout/Integration/Inline/InlineIteratorSVGTextBox.cpp
+  src/Rendering/BidiRun.cpp
+  src/Rendering/LegacyInlineBox.cpp
+  src/Rendering/LegacyInlineFlowBox.cpp
+  src/Rendering/LegacyInlineIterator.cpp
+  src/Rendering/LegacyInlineTextBox.cpp
+  src/Rendering/LegacyLineLayout.cpp
+  src/Rendering/LegacyRootInlineBox.cpp
+  src/Rendering/Line/BreakingContext.cpp
+  src/Rendering/Line/LineBreaker.cpp
+  src/Rendering/Line/LineWidth.cpp
+  src/Rendering/Line/TrailingObjects.cpp
+  src/Rendering/RenderLineBoxList.cpp
+  src/Rendering/RenderTextLineBoxes.cpp
+  src/Rendering/SVG/RenderSVGInline.cpp
+  src/Rendering/SVG/RenderSVGInlineText.cpp
+  src/Rendering/SVG/RenderSVGText.cpp
+  src/Rendering/SVG/RenderSVGTextPath.cpp
+  src/Rendering/SVG/SVGInlineFlowBox.cpp
+  src/Rendering/SVG/SVGInlineTextBox.cpp
+  src/Rendering/SVG/SVGRootInlineBox.cpp
+  src/Rendering/SVG/SVGTextBoxPainter.cpp
+  src/Rendering/SVG/SVGTextChunk.cpp
+  src/Rendering/SVG/SVGTextChunkBuilder.cpp
+  src/Rendering/SVG/SVGTextLayoutAttributes.cpp
+  src/Rendering/SVG/SVGTextLayoutAttributesBuilder.cpp
+  src/Rendering/SVG/SVGTextLayoutEngine.cpp
+  src/Rendering/SVG/SVGTextLayoutEngineBaseline.cpp
+  src/Rendering/SVG/SVGTextLayoutEngineSpacing.cpp
+  src/Rendering/SVG/SVGTextMetrics.cpp
+  src/Rendering/SVG/SVGTextMetricsBuilder.cpp
+  src/Rendering/SVG/SVGTextQuery.cpp
+  src/SVG/SVGTSpanElement.cpp
+  src/SVG/SVGTextContentElement.cpp
+  src/SVG/SVGTextElement.cpp
+  src/SVG/SVGTextPathElement.cpp
+  src/SVG/SVGTextPositioningElement.cpp
 )
 
 target_precompile_headers(Krystal.Booey

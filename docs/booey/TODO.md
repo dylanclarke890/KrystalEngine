@@ -82,6 +82,8 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 - **SVG elements** — `SVGElementFactory` returns null for unknown elements (`SVG/Internals/SVGElementFactory.hpp`).
 - **Stale SVG FIXMEs** (found in B11d) — four FIXMEs wait for SVG parts that are done: invalidating `<use>` instances in `src/DOM/StyledElement.cpp`, foreign objects in `src/Rendering/RenderElement.cpp`, SVG roots in `src/Rendering/Updating/RenderTreeBuilder.cpp`, and `zoomAndPan="disabled"` in standalone SVG documents in `src/Page/LocalFrame.cpp`. Each needs checking against upstream, then porting or removing.
+- **Stroked text** (found in B11g) — Krystal.UI's `GraphicsContextRender2D::DrawGlyphs` draws only `TextDrawingMode::Fill`, so SVG text's `stroke` (and any stroked text) doesn't draw; Render2D's `FontFace2D::GlyphPath` could give the glyph outlines to stroke (`docs/gfx/DESIGN.md` lists stroked text as unsupported).
+- **SVG text** (B11g) — `RenderSVGText::DecoratedBoundingBox` is the accurate repaint rect (FIXME; upstream's `SVGBoundingBoxComputation` is the layer-based engine's); the inline formatting context's SVG text path (`Settings::UseIFCForSVGText`) has no tests; SVG fonts' `<font-face>` decoration metrics (FIXMEs in `SVGTextBoxPainter.cpp`).
 - **MathML elements** — `TODO(impl): MATHML-ELEMENTS`.
 
 ## Krystal.Core

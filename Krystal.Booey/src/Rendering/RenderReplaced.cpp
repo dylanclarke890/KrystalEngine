@@ -148,7 +148,11 @@ namespace krys::boo
 
   void RenderReplaced::WillBeDestroyed() noexcept
   {
-    // FIXME: Dirty the parent's legacy line boxes (dirtyLineFromChangedChild), once there's SVG text.
+    if (!RenderTreeBeingDestroyed() && Parent())
+    {
+      Parent()->DirtyLineFromChangedChild();
+    }
+
     RenderBox::WillBeDestroyed();
   }
 

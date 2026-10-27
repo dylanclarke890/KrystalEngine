@@ -208,6 +208,12 @@ namespace krys::boo::layout_integration
     _inlineBoxIndexCache = nullptr;
   }
 
+  const List<SVGTextFragment> &InlineContent::SvgTextFragments(size_t index) const noexcept
+  {
+    krys_assert(_svgTextFragmentsForBoxes.size() > index);
+    return _svgTextFragmentsForBoxes[index];
+  }
+
   void InlineContent::ShrinkToFit() noexcept
   {
     _displayContent.BoxList.shrink_to_fit();

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/InlineItemsBuilder.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Invalidation/InlineInvalidation.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContent.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentBuilder.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp"
@@ -19,6 +20,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutInlineTextBox.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/FloatingObjects.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
@@ -34,6 +36,8 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGBlock.hpp"
+#include "Krystal.Core/Types/SmallList.hpp"
 
 #include <ranges>
 
@@ -305,10 +309,12 @@ namespace krys::boo::layout_integration
         layout::InlineFormattingUtils::SnapDirection::Floor);
     }
 
-    // FIXME: SVG blocks other than foreign objects use legacy line layout unless the setting says otherwise,
-    // with text (B11g).
-    KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept
+    KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &rootContainer) noexcept
     {
+      if (Is<RenderSVGBlock>(rootContainer) && !rootContainer.IsLegacyRenderSVGForeignObject())
+      {
+        return rootContainer.GetDocument().GetSettings().UseIFCForSVGText;
+      }
       return true;
     }
 
@@ -1154,6 +1160,79 @@ namespace krys::boo::layout_integration
         continue;
       }
     }
+  }
+
+  FloatRect LineLayout::ApplySVGTextFragments(SVGTextFragmentMap &&fragmentMap) noexcept
+  {
+    auto &boxes = _inlineContent->DisplayContent().BoxList;
+    auto &lines = _inlineContent->DisplayContent().LineList;
+    auto &fragments = _inlineContent->SvgTextFragmentsForBoxes();
+    fragments.resize(_inlineContent->DisplayContent().BoxList.size());
+
+    FloatRect fullBoundaries;
+
+    struct Parent
+    {
+      size_t Index;
+      FloatRect Boundaries;
+    };
+    SmallList<Parent, 8> parentStack;
+
+    auto popParent = [&](const layout::Box *parent)
+    {
+      while (!parentStack.empty() && &boxes[parentStack.back().Index].LayoutBox() != parent)
+      {
+        auto boundaries = parentStack.back().Boundaries;
+        boxes[parentStack.back().Index].SetRect(boundaries, boundaries);
+        parentStack.pop_back();
+        if (!parentStack.empty())
+        {
+          parentStack.back().Boundaries.Unite(boundaries);
+        }
+        else
+        {
+          fullBoundaries = boundaries;
+        }
+      }
+    };
+
+    for (size_t i = 0; i < boxes.size(); ++i)
+    {
+      popParent(&boxes[i].LayoutBox().Parent());
+
+      auto textBox = inline_iterator::SVGTextBoxFor(*_inlineContent, i);
+      if (!textBox)
+      {
+        parentStack.push_back({i, {}});
+        continue;
+      }
+
+      auto it = fragmentMap.find(inline_iterator::MakeKey(*textBox));
+      if (it != fragmentMap.end())
+      {
+        fragments[i] = krys::move(it->second);
+      }
+
+      auto boundaries = textBox->CalculateBoundariesIncludingSVGTransform();
+      boxes[i].SetRect(boundaries, boundaries);
+      parentStack.back().Boundaries.Unite(boundaries);
+    }
+
+    popParent(nullptr);
+
+    // Move so the top-left text box is at (0, 0).
+    for (auto &box : boxes)
+    {
+      box.MoveHorizontally(-fullBoundaries.X());
+      box.MoveVertically(-fullBoundaries.Y());
+    }
+
+    if (lines.size())
+    {
+      lines[0].SetLineBoxRectForSVGText(FloatRect {{}, fullBoundaries.Size()});
+    }
+
+    return fullBoundaries;
   }
 
   void LineLayout::PreparePlacedFloats() noexcept

@@ -467,9 +467,34 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Symbol;
     }
 
+    KRYS_NODISCARD bool IsSVGTextContentElement() const noexcept
+    {
+      return HasFlag(_flags, SVGElementFlags::IsSvgTextContentElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGTextElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Text;
+    }
+
+    KRYS_NODISCARD bool IsSVGTextPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::TextPath;
+    }
+
+    KRYS_NODISCARD bool IsSVGTextPositioningElement() const noexcept
+    {
+      return HasFlag(_flags, SVGElementFlags::IsSvgTextPositioningElement);
+    }
+
     KRYS_NODISCARD bool IsSVGTitleElement() const noexcept
     {
       return _interface == SVGElementInterface::Title;
+    }
+
+    KRYS_NODISCARD bool IsSVGTSpanElement() const noexcept
+    {
+      return _interface == SVGElementInterface::TSpan;
     }
 
     // NOTE: SVGUnknownElement type check is not needed here as Node already has it.

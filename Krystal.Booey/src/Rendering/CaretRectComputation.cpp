@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
@@ -10,6 +11,8 @@
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Core/Text/CodePointIterator.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -170,6 +173,47 @@ namespace krys::boo
       return LayoutRect(writingMode.IsHorizontal() ? rect : rect.TransposedRect());
     }
 
+    KRYS_NODISCARD LayoutRect ComputeCaretRectForSVGInlineText(const InlineBoxAndOffset &boxAndOffset,
+                                                               CaretRectMode) noexcept
+    {
+      auto &box = boxAndOffset.Box;
+      auto caretOffset = boxAndOffset.Offset;
+      if (!box || !box->IsSVGText())
+      {
+        return {};
+      }
+
+      inline_iterator::SVGTextBoxIterator textBox(*box);
+      if (!textBox)
+      {
+        return {};
+      }
+
+      if (caretOffset < textBox->Start() || caretOffset > textBox->Start() + textBox->Length())
+      {
+        return {};
+      }
+
+      const auto &text = textBox->Renderer().Text();
+
+      // Use the edge of the selection rect to determine the caret rect.
+      if (caretOffset < textBox->Start() + textBox->Length())
+      {
+        auto next =
+          caretOffset
+          + krys::text::DecodeUTF8(Span<const char8>(text.data() + caretOffset, text.size() - caretOffset))
+              .Length;
+        LayoutRect rect = textBox->LocalSelectionRect(caretOffset, next);
+        LayoutUnit x = !textBox->IsInlineFlipped() ? rect.X() : rect.MaxX();
+        return LayoutRect(x, rect.Y(), CaretWidth(), rect.Height());
+      }
+
+      auto previous = static_cast<uint32>(krys::text::PreviousCodePointStart(text, caretOffset));
+      LayoutRect rect = textBox->LocalSelectionRect(previous, caretOffset);
+      LayoutUnit x = !textBox->IsInlineFlipped() ? rect.MaxX() : rect.X();
+      return {x, rect.Y(), CaretWidth(), rect.Height()};
+    }
+
     KRYS_NODISCARD LayoutRect ComputeCaretRectForText(const InlineBoxAndOffset &boxAndOffset,
                                                       CaretRectMode caretRectMode) noexcept
     {
@@ -190,7 +234,7 @@ namespace krys::boo
           return 0;
         }
 
-        auto selectableRange = textBox->ModernPath().SelectableRange();
+        auto selectableRange = textBox->SelectableRange();
         auto [startOffset, endOffset] = [&]
         {
           if (textBox->Direction() == TextDirection::RTL)
@@ -345,7 +389,10 @@ namespace krys::boo
   LayoutRect ComputeLocalCaretRect(const RenderObject &renderer, const InlineBoxAndOffset &boxAndOffset,
                                    CaretRectMode caretRectMode) noexcept
   {
-    // FIXME: SVG inline text (computeCaretRectForSVGInlineText), once there's SVG text.
+    if (Is<RenderSVGInlineText>(renderer))
+    {
+      return ComputeCaretRectForSVGInlineText(boxAndOffset, caretRectMode);
+    }
 
     if (Is<RenderText>(renderer))
     {

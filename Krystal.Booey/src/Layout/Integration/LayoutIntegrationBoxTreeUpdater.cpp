@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -230,7 +231,10 @@ namespace krys::boo::layout_integration
           {
             return renderInline->Parent()->Style().Display() == DisplayType::Ruby;
           }
-          // FIXME: Only inline for SVG inlines (RenderSVGInline), once there's SVG rendering.
+          if (Is<RenderSVGInline>(*renderInline))
+          {
+            return display == DisplayType::Inline;
+          }
           return styleToAdjust.IsDisplayInlineType();
         };
 

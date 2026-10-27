@@ -30,7 +30,7 @@ namespace krys::boo
     void Layout() noexcept override;
     void StyleDidChange(style::Difference, const RenderStyle *oldStyle) noexcept final;
 
-    // FIXME: computeTextPaintingScale, with text (B11g).
+    KRYS_NODISCARD static float ComputeTextPaintingScale(const RenderElement &) noexcept;
     KRYS_NODISCARD static AffineTransform
       TransformOnNonScalingStroke(RenderObject *, const AffineTransform &resourceTransform) noexcept;
 

@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 
 namespace krys::boo::inline_iterator
 {
@@ -24,7 +25,7 @@ namespace krys::boo::inline_iterator
 
   TextBoxIterator &TextBoxIterator::TraverseNextTextBox() noexcept
   {
-    _box._path.TraverseNextTextBox();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextTextBox(); });
     return *this;
   }
 
@@ -34,9 +35,19 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->TextBoxesFor(text);
     }
+    if (auto *svgText = DynamicDowncast<RenderSVGInlineText>(text))
+    {
+      return TextBoxIterator {BoxLegacyPath {svgText->FirstLegacyTextBox()}};
+    }
+
     // During teardown we may hit this codepath _after_ the display content is destroyed (e.g. calling repaint
     // on RenderText).
-    return {};
+    return TextBoxIterator {BoxLegacyPath {nullptr}};
+  }
+
+  TextBoxIterator TextBoxFor(const LegacyInlineTextBox *legacyInlineTextBox) noexcept
+  {
+    return TextBoxIterator {BoxLegacyPath {legacyInlineTextBox}};
   }
 
   TextBoxIterator TextBoxFor(const layout_integration::InlineContent &content,

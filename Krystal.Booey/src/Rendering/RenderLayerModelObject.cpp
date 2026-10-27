@@ -303,6 +303,11 @@ namespace krys::boo
     return SnapRectToDevicePixels(LayoutRect(rect), renderer.GetDocument().DeviceScaleFactor());
   }
 
+  Maybe<LayoutRect> RenderLayerModelObject::CachedLayerClippedOverflowRect() const noexcept
+  {
+    return HasLayer() ? Layer()->CachedClippedOverflowRect() : null;
+  }
+
   LegacyRenderSVGResourceClipper *RenderLayerModelObject::LegacySVGClipperResourceFromStyle() const noexcept
   {
     if (auto clipPath = Style().GetClipPath().TryReference())

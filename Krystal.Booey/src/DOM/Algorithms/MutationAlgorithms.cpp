@@ -15,6 +15,8 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -130,6 +132,19 @@ namespace krys::boo::dom
       {
       }
     };
+  }
+
+  namespace
+  {
+    void RebuildSVGExtensionsElementsIfNecessary(ContainerNode &parent) noexcept
+    {
+      auto *extensions = parent.NodeDocument().SVGExtensionsIfExists();
+      auto *svgHost = DynamicDowncast<svg::SVGElement>(TreeQueries::ShadowHost(parent));
+      if (extensions && !(svgHost && Is<svg::SVGUseElement>(*svgHost)))
+      {
+        extensions->RebuildElements();
+      }
+    }
   }
 
   ExceptionOr<void> MutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
@@ -386,6 +401,8 @@ namespace krys::boo::dom
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);
+
+    RebuildSVGExtensionsElementsIfNecessary(parent);
 
     SmallNodeList staticNodeList;
     for (auto &target : nodes)
@@ -883,6 +900,8 @@ namespace krys::boo::dom
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);
+
+    RebuildSVGExtensionsElementsIfNecessary(parent);
 
     return {};
   }

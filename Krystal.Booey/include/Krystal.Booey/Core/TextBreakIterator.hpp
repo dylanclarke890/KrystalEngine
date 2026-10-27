@@ -297,7 +297,7 @@ namespace krys::boo
 
   private:
     utf8_stringview _stringView;
-    StringAtom _locale;
+    StringAtom _locale {StringAtom::Null()};
     Maybe<CachedTextBreakIterator> _iterator;
     const char8 *_cachedPriorContext {nullptr};
     TextBreakLineBehavior _mode {TextBreakLineBehavior::Default};

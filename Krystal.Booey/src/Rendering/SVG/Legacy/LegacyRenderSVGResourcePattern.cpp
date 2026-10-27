@@ -133,8 +133,14 @@ namespace krys::boo
 
     // Account for text drawing resetting the context to non-scaled, see
     // SVGInlineTextBox::paintTextWithShadows.
-    // FIXME: The text painting scale (computeTextPaintingScale), with text (B11g).
-    (void)resourceMode;
+    if (resourceMode.Contains(RenderSVGResourceMode::ApplyToText))
+    {
+      auto textScale = ComputeTextPaintingScale(renderer);
+      if (textScale != 1)
+      {
+        patternData->Transform.Scale(textScale);
+      }
+    }
 
     // Build pattern.
     Ref<ImageBuffer> tile = krys::move(tileImage);

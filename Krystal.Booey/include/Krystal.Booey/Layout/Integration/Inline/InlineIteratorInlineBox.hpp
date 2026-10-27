@@ -19,11 +19,17 @@ namespace krys::boo::inline_iterator
   class InlineBox : public Box
   {
   public:
-    explicit InlineBox(BoxModernPath &&path) noexcept : Box(krys::move(path))
+    explicit InlineBox(PathVariant &&path) noexcept : Box(krys::move(path))
     {
     }
 
     KRYS_NODISCARD const RenderBoxModelObject &Renderer() const noexcept;
+
+    // FIXME: Remove. For intermediate porting steps only.
+    KRYS_NODISCARD const LegacyInlineFlowBox *GetLegacyInlineBox() const noexcept
+    {
+      return Downcast<LegacyInlineFlowBox>(Box::GetLegacyInlineBox());
+    }
 
     /// @brief Whether each edge closes the inline box (rather than continuing on another line).
     KRYS_NODISCARD RectEdges<bool> ClosedEdges() const noexcept;
@@ -47,7 +53,7 @@ namespace krys::boo::inline_iterator
   {
   public:
     InlineBoxIterator() noexcept = default;
-    explicit InlineBoxIterator(BoxModernPath &&path) noexcept : BoxIterator(krys::move(path))
+    explicit InlineBoxIterator(Box::PathVariant &&path) noexcept : BoxIterator(krys::move(path))
     {
     }
     explicit InlineBoxIterator(const Box &box) noexcept : BoxIterator(box)
@@ -75,6 +81,7 @@ namespace krys::boo::inline_iterator
 
   KRYS_NODISCARD InlineBoxIterator LineLeftmostInlineBoxFor(const RenderInline &renderInline) noexcept;
   KRYS_NODISCARD InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept;
+  KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const LegacyInlineFlowBox &legacyInlineFlowBox) noexcept;
   KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,
                                                 const inline_display::Box &box) noexcept;
   KRYS_NODISCARD InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,

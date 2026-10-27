@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
 #include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -214,6 +215,19 @@ namespace krys::boo
                                             renderer->Style());
       renderer->SetNeedsLayout();
     }
+  }
+
+  float LegacyRenderSVGResourceContainer::ComputeTextPaintingScale(const RenderElement &renderer) noexcept
+  {
+    // This method should only be called for RenderObjects that deal with text rendering. Cmp.
+    // RenderObject.h's is*() methods.
+    krys_debug_assert(renderer.IsRenderSVGText() || renderer.IsRenderSVGTextPath()
+                      || renderer.IsRenderSVGInline());
+
+    // In text drawing, the scaling part of the graphics context CTM is removed, compare
+    // SVGInlineTextBox::paintTextWithShadows. So, we use that scaling factor here, too, and then push it down
+    // to pattern or gradient space in order to keep the pattern or gradient correctly scaled.
+    return SVGRenderingContext::CalculateScreenFontSizeScalingFactor(renderer);
   }
 
   // FIXME: This does not belong here.

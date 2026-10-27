@@ -31,7 +31,10 @@
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGSwitchElement.hpp"
 #include "Krystal.Booey/SVG/SVGSymbolElement.hpp"
+#include "Krystal.Booey/SVG/SVGTextElement.hpp"
+#include "Krystal.Booey/SVG/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
+#include "Krystal.Booey/SVG/SVGTSpanElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnknownElement.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGViewElement.hpp"
@@ -85,14 +88,17 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGSvgElement>(*document, u8"svg"));
     CHECK(IsCreated<SVGSwitchElement>(*document, u8"switch"));
     CHECK(IsCreated<SVGSymbolElement>(*document, u8"symbol"));
+    CHECK(IsCreated<SVGTextElement>(*document, u8"text"));
+    CHECK(IsCreated<SVGTextPathElement>(*document, u8"textPath"));
     CHECK(IsCreated<SVGTitleElement>(*document, u8"title"));
+    CHECK(IsCreated<SVGTSpanElement>(*document, u8"tspan"));
     CHECK(IsCreated<SVGUseElement>(*document, u8"use"));
     CHECK(IsCreated<SVGViewElement>(*document, u8"view"));
 
     // The elements that aren't ported yet, the SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
     for (auto localName :
-         {u8"text", u8"filter", u8"feGaussianBlur", u8"animate", u8"set", u8"font", u8"font-face",
-          u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
+         {u8"filter", u8"feGaussianBlur", u8"animate", u8"set", u8"font", u8"font-face", u8"missing-glyph",
+          u8"altGlyph", u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
     {
       CAPTURE(css::tests::ToNarrow(localName));
       CHECK(IsCreated<SVGUnknownElement>(*document, localName));

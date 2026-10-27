@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
@@ -18,6 +21,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
@@ -512,6 +517,138 @@ namespace krys::boo
     ts << '\n';
     WriteResources(ts, container, behavior);
     WriteChildren(ts, container, behavior);
+  }
+
+  namespace
+  {
+    void WriteRenderSVGTextBox(TextStream &ts, const RenderSVGText &text) noexcept
+    {
+      auto box = inline_iterator::FirstRootInlineBoxFor(text);
+      if (!box)
+      {
+        return;
+      }
+
+      ts << ' '
+         << EnclosingIntRect(
+              FloatRect(FloatPoint(text.Location()), FloatSize(box->LogicalWidth(), box->LogicalHeight())));
+
+      // FIXME: Remove this hack, once the new text layout engine is completly landed. We want to preserve the
+      // old layout test results for now.
+      ts << u8" contains 1 chunk(s)";
+
+      if (text.Parent()
+          && (text.Parent()->Style().VisitedDependentColor(css::PropertyId::Color)
+              != text.Style().VisitedDependentColor(css::PropertyId::Color)))
+      {
+        WriteNameValuePair(
+          ts, u8"color",
+          SerialisationForRenderTreeAsText(text.Style().VisitedDependentColor(css::PropertyId::Color)));
+      }
+    }
+
+    void WriteSVGInlineTextBox(TextStream &ts, const inline_iterator::SVGTextBox &textBox) noexcept
+    {
+      auto &fragments = textBox.TextFragments();
+      if (fragments.empty())
+      {
+        return;
+      }
+
+      auto &style = textBox.Renderer().Style();
+      utf8_stringview text = textBox.Renderer().Text();
+
+      TextStream::IndentScope indentScope(ts);
+
+      auto fragmentsSize = static_cast<uint32>(fragments.size());
+      for (uint32 i = 0; i < fragmentsSize; ++i)
+      {
+        auto &fragment = fragments[i];
+        ts << Indent;
+
+        uint32 startOffset = fragment.CharacterOffset;
+        uint32 endOffset = fragment.CharacterOffset + fragment.Length;
+
+        // FIXME: Remove this hack, once the new text layout engine is completly landed. We want to preserve
+        // the old layout test results for now.
+        ts << u8"chunk 1 ";
+        auto anchor = style.GetTextAnchor();
+        bool isVerticalText = textBox.Renderer().GetWritingMode().IsVertical();
+        if (anchor == TextAnchor::Middle)
+        {
+          ts << u8"(middle anchor";
+          if (isVerticalText)
+          {
+            ts << u8", vertical";
+          }
+          ts << u8") ";
+        }
+        else if (anchor == TextAnchor::End)
+        {
+          ts << u8"(end anchor";
+          if (isVerticalText)
+          {
+            ts << u8", vertical";
+          }
+          ts << u8") ";
+        }
+        else if (isVerticalText)
+        {
+          ts << u8"(vertical) ";
+        }
+        startOffset -= textBox.Start();
+        endOffset -= textBox.Start();
+        // </hack>
+
+        ts << u8"text run " << i + 1 << u8" at (" << fragment.X << ',' << fragment.Y << ')';
+        ts << u8" startOffset " << startOffset << u8" endOffset " << endOffset;
+        if (isVerticalText)
+        {
+          ts << u8" height " << fragment.Height;
+        }
+        else
+        {
+          ts << u8" width " << fragment.Width;
+        }
+
+        if (!textBox.IsLeftToRightDirection())
+        {
+          ts << u8" RTL";
+        }
+
+        ts << u8": " << QuoteAndEscapeNonPrintables(text.substr(fragment.CharacterOffset, fragment.Length))
+           << '\n';
+      }
+    }
+
+    void WriteSVGInlineTextBoxes(TextStream &ts, const RenderSVGInlineText &text) noexcept
+    {
+      for (auto &box : inline_iterator::SVGTextBoxesFor(text))
+      {
+        WriteSVGInlineTextBox(ts, box);
+      }
+    }
+  }
+
+  void WriteSVGText(TextStream &ts, const RenderSVGText &text, EnumSet<RenderAsTextFlag> behavior) noexcept
+  {
+    WriteStandardPrefix(ts, text, behavior);
+    WriteRenderSVGTextBox(ts, text);
+    ts << '\n';
+    WriteResources(ts, text, behavior);
+    WriteChildren(ts, text, behavior);
+  }
+
+  void WriteSVGInlineText(TextStream &ts, const RenderSVGInlineText &text,
+                          EnumSet<RenderAsTextFlag> behavior) noexcept
+  {
+    WriteStandardPrefix(ts, text, behavior);
+    ts << ' '
+       << EnclosingIntRect(
+            FloatRect(FloatPoint(text.FirstRunLocation()), text.FloatLinesBoundingBox().Size()))
+       << '\n';
+    WriteResources(ts, text, behavior);
+    WriteSVGInlineTextBoxes(ts, text);
   }
 
   void WriteSVGImage(TextStream &ts, const LegacyRenderSVGImage &image,

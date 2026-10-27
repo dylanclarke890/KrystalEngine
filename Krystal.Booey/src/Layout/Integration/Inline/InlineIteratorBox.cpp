@@ -78,19 +78,24 @@ namespace krys::boo::inline_iterator
       return true;
     }
 
-    return _box._path == other._box._path;
+    return _box._pathVariant == other._box._pathVariant;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    _box._path.TraverseNextBoxOnLine();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLine(); });
     return *this;
   }
 
   BoxIterator &BoxIterator::TraverseLineRightwardOnLineSkippingChildren() noexcept
   {
-    _box._path.TraverseNextBoxOnLineSkippingChildren();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextBoxOnLineSkippingChildren(); });
     return *this;
+  }
+
+  bool Box::IsSVGText() const noexcept
+  {
+    return IsText() && Renderer().IsRenderSVGInlineText();
   }
 
   WritingMode Box::GetWritingMode() const noexcept
@@ -142,7 +147,8 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator Box::ParentInlineBox() const noexcept
   {
-    return InlineBoxIterator {_path.ParentInlineBox()};
+    return SwitchOn(_pathVariant,
+                    [](const auto &path) { return InlineBoxIterator {path.ParentInlineBox()}; });
   }
 
   RenderObjectHighlightState Box::SelectionState() const noexcept
@@ -162,7 +168,14 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator Box::GetLineBox() const noexcept
   {
-    return LineBoxIterator {LineBoxIteratorModernPath {_path.GetInlineContent(), _path.GetBox().LineIndex()}};
+    return SwitchOn(
+      _pathVariant, [](const BoxLegacyPath &path)
+      { return LineBoxIterator {LineBoxIteratorLegacyPath {&path.RootInlineBox()}}; },
+      [](const BoxModernPath &path)
+      {
+        return LineBoxIterator {
+          LineBoxIteratorModernPath {path.GetInlineContent(), path.GetBox().LineIndex()}};
+      });
   }
 
   FloatRect Box::VisualRect() const noexcept
@@ -174,13 +187,13 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineRightwardOnLine() noexcept
   {
-    _box._path.TraverseNextLeafOnLine();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextLeafOnLine(); });
     return *this;
   }
 
   LeafBoxIterator &LeafBoxIterator::TraverseLineLeftwardOnLine() noexcept
   {
-    _box._path.TraversePreviousLeafOnLine();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousLeafOnLine(); });
     return *this;
   }
 

@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Text/TextUtil.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLogicalOrderTraversal.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/LineSelection.hpp"
@@ -19,11 +20,13 @@
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BreakablePositions.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
+#include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Style/Values/Text/TabSize.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -1266,6 +1269,13 @@ namespace krys::boo
     return i;
   }
 
+  bool RenderText::IsHangableStopOrComma(char32 c) noexcept
+  {
+    return c == 0x002C || c == 0x002E || c == 0x060C || c == 0x06D4 || c == 0x3001 || c == 0x3002
+           || c == 0xFF0C || c == 0xFF0E || c == 0xFE50 || c == 0xFE51 || c == 0xFE52 || c == 0xFF61
+           || c == 0xFF64;
+  }
+
   size_t RenderText::LastCharacterIndexStrippingSpaces() const noexcept
   {
     if (_text.empty())
@@ -1937,9 +1947,10 @@ namespace krys::boo
   {
     for (auto &textBox : inline_iterator::TextBoxesFor(*this))
     {
-      // FIXME: SVG text boxes' transforms (calculateBoundariesIncludingSVGTransform), once there's SVG.
-      quads.push_back(LocalToAbsoluteQuad(textBox.VisualRectIgnoringBlockDirection(),
-                                          MapCoordinatesMode::UseTransforms, wasFixed));
+      auto *svgTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(textBox);
+      auto boundaries = svgTextBox ? svgTextBox->CalculateBoundariesIncludingSVGTransform()
+                                   : textBox.VisualRectIgnoringBlockDirection();
+      quads.push_back(LocalToAbsoluteQuad(boundaries, MapCoordinatesMode::UseTransforms, wasFixed));
     }
   }
 
@@ -1947,32 +1958,14 @@ namespace krys::boo
 
   namespace
   {
-    KRYS_NODISCARD LayoutRect SnappedSelectionRect(const LayoutRect &selectionRect, float logicalRight,
-                                                   WritingMode writingMode) noexcept
-    {
-      auto snappedSelectionRect = EnclosingIntRect(selectionRect);
-      LayoutUnit logicalWidth {snappedSelectionRect.Width()};
-      if (static_cast<float>(snappedSelectionRect.X()) > logicalRight)
-      {
-        logicalWidth = 0_lu;
-      }
-      else if (static_cast<float>(snappedSelectionRect.MaxX()) > logicalRight)
-      {
-        logicalWidth = LayoutUnit {logicalRight - static_cast<float>(snappedSelectionRect.X())};
-      }
-
-      if (writingMode.IsHorizontal())
-      {
-        return {LayoutUnit {snappedSelectionRect.X()}, selectionRect.Y(), logicalWidth,
-                selectionRect.Height()};
-      }
-      return {selectionRect.Y(), LayoutUnit {snappedSelectionRect.X()}, selectionRect.Height(), logicalWidth};
-    }
-
-    // FIXME: SVG text boxes (localSelectionRect), once there's SVG text.
     KRYS_NODISCARD LayoutRect SelectionRectForTextBox(const inline_iterator::TextBox &textBox,
                                                       uint32 rangeStart, uint32 rangeEnd) noexcept
     {
+      if (auto *svgTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(textBox))
+      {
+        return svgTextBox->LocalSelectionRect(rangeStart, rangeEnd);
+      }
+
       bool isCaretCase = rangeStart == rangeEnd;
 
       auto [clampedStart, clampedEnd] = textBox.SelectableRange().Clamp(rangeStart, rangeEnd);
@@ -2085,7 +2078,6 @@ namespace krys::boo
       return boxSelectionRect;
     }
 
-    // FIXME: SVG text boxes (localSelectionRect), once there's SVG text.
     KRYS_NODISCARD List<LayoutRect> CharacterRects(const inline_iterator::TextBox &run, uint32 rangeStart,
                                                    uint32 rangeEnd) noexcept
     {
@@ -2093,6 +2085,25 @@ namespace krys::boo
       if (clampedStart >= clampedEnd)
       {
         return {};
+      }
+
+      if (auto *svgTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(run))
+      {
+        // Offsets are relative to the box; step one code point at a time through the renderer's text.
+        const auto &text = svgTextBox->Renderer().Text();
+        List<LayoutRect> rects;
+        for (uint32 index = clampedStart; index < clampedEnd;)
+        {
+          auto textOffset = svgTextBox->Start() + index;
+          auto next =
+            index
+            + krys::text::DecodeUTF8(Span<const char8>(text.data() + textOffset, text.size() - textOffset))
+                .Length;
+          rects.push_back(
+            svgTextBox->LocalSelectionRect(svgTextBox->Start() + index, svgTextBox->Start() + next));
+          index = next;
+        }
+        return rects;
       }
 
       auto lineSelectionRect = LineSelection::LogicalRect(*run.GetLineBox());
@@ -2172,8 +2183,9 @@ namespace krys::boo
 
       if (start <= textBox.Start() && textBox.End() <= end)
       {
-        // FIXME: SVG text boxes' transforms (calculateBoundariesIncludingSVGTransform), once there's SVG.
-        auto boundaries = textBox.VisualRectIgnoringBlockDirection();
+        auto *svgTextBox = DynamicDowncast<inline_iterator::SVGTextBox>(textBox);
+        auto boundaries = svgTextBox ? svgTextBox->CalculateBoundariesIncludingSVGTransform()
+                                     : textBox.VisualRectIgnoringBlockDirection();
 
         if (useSelectionHeight)
         {

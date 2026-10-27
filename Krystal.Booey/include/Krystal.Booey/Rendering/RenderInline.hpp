@@ -2,18 +2,24 @@
 
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderLineBoxList.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
+  class LegacyInlineFlowBox;
+
   /// @brief An inline box.
-  // FIXME: Line boxes, continuations and the geometry come with layout.
   class RenderInline : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderInline);
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(RenderInline);
+
+  private:
+    RenderLineBoxList _legacyLineBoxes;
 
   public:
     void Paint(PaintInfo &, const LayoutPoint &) noexcept override;
@@ -119,9 +125,39 @@ namespace krys::boo
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxWidth() const noexcept;
     KRYS_NODISCARD LayoutUnit InnerPaddingBoxHeight() const noexcept;
 
+    LegacyInlineFlowBox *CreateAndAppendInlineFlowBox() noexcept;
+
+    KRYS_NODISCARD RenderLineBoxList &LegacyLineBoxes() noexcept
+    {
+      return _legacyLineBoxes;
+    }
+    KRYS_NODISCARD const RenderLineBoxList &LegacyLineBoxes() const noexcept
+    {
+      return _legacyLineBoxes;
+    }
+    void DeleteLegacyLineBoxes() noexcept;
+    KRYS_NODISCARD LegacyInlineFlowBox *FirstLegacyInlineBox() const noexcept
+    {
+      return _legacyLineBoxes.FirstLegacyLineBox();
+    }
+    KRYS_NODISCARD LegacyInlineFlowBox *LastLegacyInlineBox() const noexcept
+    {
+      return _legacyLineBoxes.LastLegacyLineBox();
+    }
+
   protected:
+    void WillBeDestroyed() noexcept override;
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void UpdateFromStyle() noexcept override;
+
+    /// @brief Subclassed by RenderSVGInline.
+    KRYS_NODISCARD virtual UniquePtr<LegacyInlineFlowBox> CreateInlineFlowBox() noexcept;
+
+  private:
+    void DirtyLineFromChangedChild() noexcept final
+    {
+      _legacyLineBoxes.DirtyLineFromChangedChild(*this);
+    }
   };
 
   /// @brief Whether @p renderer holds nothing but collapsible whitespace (and floating or out-of-flow boxes).

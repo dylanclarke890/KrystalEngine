@@ -20,6 +20,9 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
@@ -256,7 +259,11 @@ namespace krys::boo
     }
     // FIXME: A beforeChild that's a column spanner, once there are multi-column flows.
 
-    // FIXME: SVG text (RenderSVGText), with text (B11g).
+    if (auto *text = DynamicDowncast<RenderSVGText>(parent))
+    {
+      SVGBuilder().Attach(*text, krys::move(child), beforeChild);
+      return;
+    }
 
     if (parent.Style().Display() == DisplayType::Ruby || parent.Style().Display() == DisplayType::RubyBlock)
     {
@@ -331,7 +338,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: SVG inlines (RenderSVGInline), with text (B11g).
+    if (auto *svgInline = DynamicDowncast<RenderSVGInline>(parent))
+    {
+      SVGBuilder().Attach(*svgInline, krys::move(child), beforeChild);
+      return;
+    }
 
     if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(parent))
     {
@@ -385,7 +396,10 @@ namespace krys::boo
     krys_debug_assert(!parent.BeingDestroyed());
     krys_debug_assert(!child.BeingDestroyed());
 
-    // FIXME: SVG text (RenderSVGText), with text (B11g).
+    if (auto *text = DynamicDowncast<RenderSVGText>(parent))
+    {
+      return SVGBuilder().Detach(*text, child, willBeDestroyed);
+    }
 
     if (auto *menuList = DynamicDowncast<RenderMenuList>(parent))
     {
@@ -407,7 +421,10 @@ namespace krys::boo
       return DetachFromRenderGrid(*grid, child, willBeDestroyed);
     }
 
-    // FIXME: SVG inlines (RenderSVGInline), with text (B11g).
+    if (auto *svgInline = DynamicDowncast<RenderSVGInline>(parent))
+    {
+      return SVGBuilder().Detach(*svgInline, child, willBeDestroyed);
+    }
 
     if (auto *container = DynamicDowncast<LegacyRenderSVGContainer>(parent))
     {
@@ -1143,7 +1160,10 @@ namespace krys::boo
       child.SetNeedsLayoutAndPreferredWidthsUpdate();
     }
 
-    // FIXME: The legacy text boxes of SVG text, once there's SVG.
+    if (auto *textRenderer = DynamicDowncast<RenderSVGInlineText>(child))
+    {
+      textRenderer->RemoveAndDestroyLegacyTextBoxes();
+    }
 
     if (auto *listItemRenderer = DynamicDowncast<RenderListItem>(child);
         listItemRenderer && isInternalMove == RenderTreeBuilder::IsInternalMove::No)

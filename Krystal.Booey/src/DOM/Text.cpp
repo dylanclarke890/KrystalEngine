@@ -3,6 +3,9 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -60,10 +63,24 @@ namespace krys::boo::dom
     return Downcast<RenderText>(Node::Renderer());
   }
 
+  namespace
+  {
+    KRYS_NODISCARD bool IsSVGText(const Text &text) noexcept
+    {
+      krys_debug_assert(text.ParentNode());
+      auto *parentElement = DynamicDowncast<svg::SVGElement>(*text.ParentNode());
+      return parentElement && !Is<svg::SVGForeignObjectElement>(*parentElement);
+    }
+  }
+
   RenderPtr<RenderText> Text::CreateTextRenderer(const RenderStyle &) noexcept
   {
-    // FIXME: SVG text (RenderSVGInlineText) and text-combine-upright (RenderCombineText), once there are
-    // those renderers.
+    if (IsSVGText(*this))
+    {
+      return CreateRenderer<RenderSVGInlineText>(*this, Data());
+    }
+
+    // FIXME: text-combine-upright (RenderCombineText), once there's that renderer.
     return CreateRenderer<RenderText>(RenderObject::Type::Text, *this, Data());
   }
 

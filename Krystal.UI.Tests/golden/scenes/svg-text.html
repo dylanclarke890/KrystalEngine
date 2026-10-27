@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<!-- The "svg-text" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  svg { position: absolute; font-family: "Liberation Sans"; }
+</style>
+</head>
+<body>
+  <!-- Plain text, a tspan with its own fill and weight, a stroke and a gradient fill, and the three anchors. -->
+  <svg style="left: 8px; top: 8px" width="168" height="104">
+    <defs>
+      <linearGradient id="sunset"><stop offset="0" stop-color="#ef476f" /><stop offset="1" stop-color="#ffd166" /></linearGradient>
+    </defs>
+    <text x="8" y="20" font-size="16" fill="#073b4c">Hello <tspan fill="#ef476f" font-weight="bold">SVG</tspan> text</text>
+    <text x="8" y="46" font-size="22" font-weight="bold" fill="url(#sunset)" stroke="#073b4c" stroke-width="1">Gradient</text>
+    <line x1="84" y1="56" x2="84" y2="100" stroke="#cccccc" />
+    <text x="84" y="68" font-size="12" text-anchor="start" fill="#118ab2">start</text>
+    <text x="84" y="82" font-size="12" text-anchor="middle" fill="#118ab2">middle</text>
+    <text x="84" y="96" font-size="12" text-anchor="end" fill="#118ab2">end</text>
+  </svg>
+
+  <!-- Per-character positions: an x list, dy steps and rotations. -->
+  <svg style="left: 184px; top: 8px" width="168" height="104">
+    <text x="8 28 48 68 88 108 128" y="24" font-size="18" fill="#06d6a0">spaced!</text>
+    <text x="8" y="56" font-size="16" dy="0 -4 -4 -4 4 4 4" fill="#ef476f">wavy text</text>
+    <text x="8" y="92" font-size="16" rotate="0 15 30 45 60 75 90" fill="#118ab2">rotated</text>
+  </svg>
+
+  <!-- Text on a curved path, with a start offset, and textLength stretching spacing and glyphs. -->
+  <svg style="left: 8px; top: 128px" width="168" height="104">
+    <path id="arc" d="M 12 88 Q 84 -8 156 88" fill="none" stroke="#dddddd" />
+    <text font-size="15" fill="#073b4c"><textPath href="#arc" startOffset="12">Along a curved path</textPath></text>
+  </svg>
+
+  <svg style="left: 184px; top: 128px" width="168" height="104">
+    <rect x="8" y="12" width="152" height="26" fill="none" stroke="#dddddd" />
+    <text x="8" y="31" font-size="16" textLength="152" lengthAdjust="spacing" fill="#073b4c">spacing</text>
+    <rect x="8" y="56" width="152" height="26" fill="none" stroke="#dddddd" />
+    <text x="8" y="75" font-size="16" textLength="152" lengthAdjust="spacingAndGlyphs" fill="#073b4c">glyphs</text>
+  </svg>
+</body>
+</html>

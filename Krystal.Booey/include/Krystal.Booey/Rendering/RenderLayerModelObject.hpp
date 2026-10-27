@@ -6,6 +6,7 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
@@ -32,6 +33,8 @@ namespace krys::boo
     {
       return _layer.get();
     }
+
+    KRYS_NODISCARD Maybe<LayoutRect> CachedLayerClippedOverflowRect() const noexcept;
 
     void StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept override;
     void StyleDidChange(style::Difference diff, const RenderStyle *oldStyle) noexcept override;

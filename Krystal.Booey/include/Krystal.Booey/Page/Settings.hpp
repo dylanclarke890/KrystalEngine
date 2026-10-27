@@ -40,6 +40,8 @@ namespace krys::boo
     bool ThumbAndTrackPseudoElementsEnabled {false};
     /// @brief The `spring()` easing function.
     bool SpringTimingFunctionEnabled {false};
+    /// @brief Laying out SVG text with the inline formatting context, rather than the legacy line layout.
+    bool UseIFCForSVGText {false};
 
     // Embedder features.
 

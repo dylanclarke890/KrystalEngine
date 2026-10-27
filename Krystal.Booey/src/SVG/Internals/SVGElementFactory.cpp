@@ -25,7 +25,10 @@
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGSwitchElement.hpp"
 #include "Krystal.Booey/SVG/SVGSymbolElement.hpp"
+#include "Krystal.Booey/SVG/SVGTextElement.hpp"
+#include "Krystal.Booey/SVG/SVGTextPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
+#include "Krystal.Booey/SVG/SVGTSpanElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnknownElement.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "Krystal.Booey/SVG/SVGViewElement.hpp"
@@ -154,10 +157,18 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGMarkerElement>(document);
       }
-      // FIXME: <text>, <tspan> and <textPath>, with text (B11g).
       case TagName::text:
+      {
+        return CreateRefPtr<SVGTextElement>(document);
+      }
       case TagName::tspan:
+      {
+        return CreateRefPtr<SVGTSpanElement>(document);
+      }
       case TagName::textPath:
+      {
+        return CreateRefPtr<SVGTextPathElement>(document);
+      }
       // FIXME: <filter> and the filter primitives, with filters (B11h).
       case TagName::filter:
       case TagName::feBlend:

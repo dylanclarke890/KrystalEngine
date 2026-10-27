@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Layout/Integration/LayoutIntegrationBoxGeometryUpdater.hpp"
 #include "Krystal.Booey/Layout/LayoutState.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGTextChunk.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -52,7 +53,7 @@ namespace krys::boo::layout_integration
   /// @brief Lays out a block container's inline content with the inline formatting context and hands the
   /// result to the render tree: the lines and boxes, the geometry of the boxes in it, its height and
   /// baselines.
-  // FIXME: Pagination and SVG text, once there are those.
+  // FIXME: Pagination, once there is any.
   class LineLayout final : public CanMakeCheckedPtr<LineLayout>
   {
     KRYS_NON_COPY_MOVABLE(LineLayout);
@@ -176,6 +177,8 @@ namespace krys::boo::layout_integration
 
     /// @note This is temporary, required by partial bailout check.
     KRYS_NODISCARD bool ContentNeedsVisualReordering() const noexcept;
+
+    KRYS_NODISCARD FloatRect ApplySVGTextFragments(SVGTextFragmentMap &&fragmentMap) noexcept;
 
     KRYS_NODISCARD bool HasBlocks() const noexcept;
 

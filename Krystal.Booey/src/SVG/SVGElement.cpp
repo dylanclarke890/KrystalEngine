@@ -13,6 +13,7 @@
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElementRareData.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
@@ -93,8 +94,10 @@ namespace krys::boo::svg
       _svgRareData = nullptr;
     }
 
-    // FIXME: Leave the document's elements to rebuild (SVGDocumentExtensions), with the first element that
-    // references another (<textPath>, B11g).
+    if (auto *extensions = NodeDocument().SVGExtensionsIfExists())
+    {
+      extensions->RemoveElementToRebuild(*this);
+    }
 
     if (HasPendingResources())
     {
@@ -190,15 +193,19 @@ namespace krys::boo::svg
       TreeScopeForSVGReferences().RemoveElementFromPendingSVGResources(*this);
     }
 
-    if (oldAncestor.IsConnected() && _svgRareData)
+    if (oldAncestor.IsConnected())
     {
-      for (auto &element : CopyToRefs(_svgRareData->TakeReferencingElements()))
+      auto &extensions = NodeDocument().SVGExtensions();
+      if (_svgRareData)
       {
-        // FIXME: Add the element to the document's elements to rebuild (SVGDocumentExtensions), with the
-        // first element that references another (<textPath>, B11g).
-        element->ClearTarget();
+        for (auto &element : CopyToRefs(_svgRareData->TakeReferencingElements()))
+        {
+          extensions.AddElementToRebuild(*element);
+          element->ClearTarget();
+        }
+        krys_assert(_svgRareData->ReferencingElements().empty());
       }
-      krys_assert(_svgRareData->ReferencingElements().empty());
+      extensions.RemoveElementToRebuild(*this);
     }
     InvalidateInstances();
 
@@ -424,9 +431,7 @@ namespace krys::boo::svg
 
     if (name == SVGNames::IdAttr())
     {
-      // FIXME: Rebuild the references to the element
-      // (SVGDocumentExtensions::rebuildAllElementReferencesForTarget), with the first element that references
-      // another (<textPath>, B11g).
+      NodeDocument().SVGExtensions().RebuildAllElementReferencesForTarget(*this);
     }
     else if (name == SVGNames::ClassAttr())
     {

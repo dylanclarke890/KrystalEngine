@@ -275,6 +275,12 @@ namespace krys::ui::tests
     CheckPage("svg-clip-mask-markers", 360u, 240u);
   }
 
+  TEST_CASE("Golden: SVG text", "[UI][GPU][Golden]")
+  {
+    // Chrome's golden is only reported: its glyphs are DirectWrite's.
+    CheckPage("svg-text", 360u, 240u, true);
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);

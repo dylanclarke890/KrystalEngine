@@ -313,6 +313,11 @@ namespace krys::boo::inline_iterator
       return GetBox().IsFirstFormattedLine();
     }
 
+    KRYS_NODISCARD const List<SVGTextFragment> &SvgTextFragments() const noexcept
+    {
+      return _inlineContent->SvgTextFragments(_boxIndex);
+    }
+
     KRYS_NODISCARD friend bool operator==(const BoxModernPath &a, const BoxModernPath &b) noexcept
     {
       return a._inlineContent.get() == b._inlineContent.get() && a._boxIndex == b._boxIndex;

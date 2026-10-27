@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Layout/LayoutTree/LayoutBoxInlines.hpp"
 #include "Krystal.Booey/Layout/LayoutTree/LayoutElementBox.hpp"
 #include "Krystal.Booey/Rendering/InlineWalker.hpp"
+#include "Krystal.Booey/Rendering/LegacyRootInlineBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderDeprecatedFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
@@ -431,6 +432,16 @@ namespace krys::boo::layout_integration
         if (auto *inlineLayout = blockFlow->InlineLayout())
         {
           return inlineLayout->LastLineBaseline().value_or(0_lu);
+        }
+
+        if (blockFlow->SvgTextLayout())
+        {
+          auto &style = blockFlow->FirstLineStyle();
+          // LegacyInlineFlowBox::PlaceBoxesInBlockDirection will flip lines in case of verticalLR mode, so we
+          // can assume verticalRL for now.
+          return LayoutUnit(
+            blockFlow->LegacyRootBox()->LogicalTop()
+            + style.MetricsOfPrimaryFont().IntAscent(blockFlow->LegacyRootBox()->BaselineType()));
         }
 
         krys_debug_assert(false);
@@ -881,7 +892,11 @@ namespace krys::boo::layout_integration
     auto &rootRenderer = RootRenderer();
     auto writingMode = GetWritingMode();
 
-    // FIXME: SVG text is laid out unconstrained, once there's SVG text.
+    if (rootRenderer.IsRenderSVGText())
+    {
+      auto horizontalConstraints = layout::HorizontalConstraints {0_lu, LayoutUnit::Max()};
+      return {{horizontalConstraints, 0_lu}, 0_lu, rootRenderer.Size()};
+    }
 
     auto padding = LogicalPadding(rootRenderer, availableWidth, writingMode);
     auto border = LogicalBorder(rootRenderer, writingMode);

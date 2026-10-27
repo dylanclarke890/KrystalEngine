@@ -336,5 +336,16 @@ namespace krys::boo::inline_display
     {
       _scrollableOverflow = scrollableOverflow;
     }
+
+    void SetLineBoxRectForSVGText(const FloatRect &rect) noexcept
+    {
+      _lineBoxRect = rect;
+      _scrollableOverflow = rect;
+      _contentOverflow = rect;
+      _inkOverflow = rect;
+      _lineBoxLogicalRect = _isHorizontal ? rect : rect.TransposedRect();
+      _enclosingLogicalTopAndBottom.Top = _lineBoxLogicalRect.Y();
+      _enclosingLogicalTopAndBottom.Bottom = _lineBoxLogicalRect.MaxY();
+    }
   };
 }

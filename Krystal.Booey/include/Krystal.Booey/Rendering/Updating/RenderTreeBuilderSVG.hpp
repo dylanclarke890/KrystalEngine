@@ -6,9 +6,10 @@ namespace krys::boo
 {
   class LegacyRenderSVGContainer;
   class LegacyRenderSVGRoot;
+  class RenderSVGInline;
+  class RenderSVGText;
 
   /// @brief Attaches and detaches the children of SVG renderers.
-  // FIXME: SVG text and inlines (RenderSVGText, RenderSVGInline), with text (B11g).
   class RenderTreeBuilder::SVG
   {
     KRYS_NON_COPY_MOVABLE(SVG);
@@ -23,10 +24,16 @@ namespace krys::boo
                 RenderObject *beforeChild) noexcept;
     void Attach(LegacyRenderSVGContainer &parent, RenderPtr<RenderObject> child,
                 RenderObject *beforeChild) noexcept;
+    void Attach(RenderSVGInline &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
+    void Attach(RenderSVGText &parent, RenderPtr<RenderObject> child, RenderObject *beforeChild) noexcept;
 
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(LegacyRenderSVGRoot &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
     KRYS_NODISCARD RenderPtr<RenderObject> Detach(LegacyRenderSVGContainer &parent, RenderObject &child,
+                                                  WillBeDestroyed willBeDestroyed) noexcept;
+    KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderSVGText &parent, RenderObject &child,
+                                                  WillBeDestroyed willBeDestroyed) noexcept;
+    KRYS_NODISCARD RenderPtr<RenderObject> Detach(RenderSVGInline &parent, RenderObject &child,
                                                   WillBeDestroyed willBeDestroyed) noexcept;
   };
 }

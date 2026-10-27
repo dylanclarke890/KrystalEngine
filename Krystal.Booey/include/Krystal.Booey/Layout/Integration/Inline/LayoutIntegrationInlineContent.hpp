@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Layout/FormattingContexts/Inline/Display/InlineDisplayContent.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGTextFragment.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -49,6 +50,8 @@ namespace krys::boo::layout_integration
     bool _hasMultilinePaintOverlap {false};
     bool _hasBlockLevelBoxes {false};
     bool _hasPaintedInlineLevelBoxes {false};
+
+    List<List<SVGTextFragment>> _svgTextFragmentsForBoxes;
 
   public:
     explicit InlineContent(const RenderBlockFlow &formattingContextRoot) noexcept;
@@ -133,6 +136,12 @@ namespace krys::boo::layout_integration
     KRYS_NODISCARD const RenderBlockFlow &FormattingContextRoot() const noexcept
     {
       return *_formattingContextRoot;
+    }
+
+    KRYS_NODISCARD const List<SVGTextFragment> &SvgTextFragments(size_t boxIndex) const noexcept;
+    KRYS_NODISCARD List<List<SVGTextFragment>> &SvgTextFragmentsForBoxes() noexcept
+    {
+      return _svgTextFragmentsForBoxes;
     }
 
     void ShrinkToFit() noexcept;

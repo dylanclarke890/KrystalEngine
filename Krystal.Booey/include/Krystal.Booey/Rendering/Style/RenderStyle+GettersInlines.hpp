@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 
 #define RENDER_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP 1
@@ -872,5 +873,12 @@ namespace krys::boo
     RenderStyle::GridTemplateList(style::GridTrackSizingDirection direction) const noexcept
   {
     return direction == style::GridTrackSizingDirection::Columns ? GridTemplateColumns() : GridTemplateRows();
+  }
+
+  /// @brief Whether @p style leaves its renderer visible to @p request (ignoring pointer-events).
+  KRYS_NODISCARD inline bool IsVisibleToHitTesting(const RenderStyle &style,
+                                                   const HitTestRequest &request) noexcept
+  {
+    return (request.UserTriggered() ? style.UsedVisibility() : style.GetVisibility()) == Visibility::Visible;
   }
 }

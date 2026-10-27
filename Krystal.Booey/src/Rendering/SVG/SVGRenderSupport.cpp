@@ -21,6 +21,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/Style/Values/Shapes/WindRuleComputation.hpp"
 #include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
@@ -150,7 +151,10 @@ namespace krys::boo
         return !shape->IsRenderingDisabled();
       }
 
-      // FIXME: Text with a valid object bounding box (RenderSVGText), with text (B11g).
+      if (auto *text = DynamicDowncast<RenderSVGText>(object))
+      {
+        return text->IsObjectBoundingBoxValid();
+      }
 
       if (auto *container = DynamicDowncast<LegacyRenderSVGContainer>(object))
       {
@@ -363,7 +367,10 @@ namespace krys::boo
       {
         // If the transform changed we need to update the text metrics (note: this also happens for
         // layoutSizeChanged=true).
-        // FIXME: Update text's metrics (RenderSVGText::setNeedsTextMetricsUpdate), with text (B11g).
+        if (auto *text = DynamicDowncast<RenderSVGText>(child))
+        {
+          text->SetNeedsTextMetricsUpdate();
+        }
         needsLayout = true;
       }
 
@@ -380,7 +387,11 @@ namespace krys::boo
           {
             shape->SetNeedsShapeUpdate();
           }
-          // FIXME: Update text's metrics and positioning values (RenderSVGText), with text (B11g).
+          else if (auto *svgText = DynamicDowncast<RenderSVGText>(child))
+          {
+            svgText->SetNeedsTextMetricsUpdate();
+            svgText->SetNeedsPositioningValuesUpdate();
+          }
 
           child.SetNeedsTransformUpdate();
           needsLayout = true;

@@ -45,12 +45,14 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator InlineBox::FirstLeafBox() const noexcept
   {
-    return LeafBoxIterator {_path.FirstLeafBoxForInlineBox()};
+    return SwitchOn(_pathVariant,
+                    [](const auto &path) { return LeafBoxIterator {path.FirstLeafBoxForInlineBox()}; });
   }
 
   LeafBoxIterator InlineBox::LastLeafBox() const noexcept
   {
-    return LeafBoxIterator {_path.LastLeafBoxForInlineBox()};
+    return SwitchOn(_pathVariant,
+                    [](const auto &path) { return LeafBoxIterator {path.LastLeafBoxForInlineBox()}; });
   }
 
   LeafBoxIterator InlineBox::EndLeafBox() const noexcept
@@ -80,13 +82,13 @@ namespace krys::boo::inline_iterator
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineRightward() noexcept
   {
-    _box._path.TraverseNextInlineBox();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraverseNextInlineBox(); });
     return *this;
   }
 
   InlineBoxIterator &InlineBoxIterator::TraverseInlineBoxLineLeftward() noexcept
   {
-    _box._path.TraversePreviousInlineBox();
+    SwitchOn(_box._pathVariant, [](auto &path) { path.TraversePreviousInlineBox(); });
     return *this;
   }
 
@@ -96,7 +98,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstInlineBoxFor(renderInline);
     }
-    return {};
+    return InlineBoxIterator {BoxLegacyPath {renderInline.FirstLegacyInlineBox()}};
   }
 
   InlineBoxIterator FirstRootInlineBoxFor(const RenderBlockFlow &block) noexcept
@@ -105,7 +107,12 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstRootInlineBox();
     }
-    return {};
+    return InlineBoxIterator {BoxLegacyPath {block.LegacyRootBox()}};
+  }
+
+  InlineBoxIterator InlineBoxFor(const LegacyInlineFlowBox &legacyInlineFlowBox) noexcept
+  {
+    return InlineBoxIterator {BoxLegacyPath {&legacyInlineFlowBox}};
   }
 
   InlineBoxIterator InlineBoxFor(const layout_integration::InlineContent &content,

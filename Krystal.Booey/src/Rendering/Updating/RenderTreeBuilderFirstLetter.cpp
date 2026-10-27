@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
@@ -126,7 +127,10 @@ namespace krys::boo
       {
         return false;
       }
-      // FIXME: SVG text, once there's SVG.
+      if (Is<RenderSVGText>(block))
+      {
+        return false;
+      }
       return block.CanHaveGeneratedChildren();
     }
   }

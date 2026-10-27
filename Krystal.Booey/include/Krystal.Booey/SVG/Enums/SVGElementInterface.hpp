@@ -35,11 +35,14 @@ namespace krys::boo::svg
     Style,
     Svg,
     Symbol,
+    Text,
+    TextPath,
     Title,
+    TSpan,
     Unknown,
     Use,
     View,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 33uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 36uz);

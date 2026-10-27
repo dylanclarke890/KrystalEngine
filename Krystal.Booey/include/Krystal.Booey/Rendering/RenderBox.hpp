@@ -846,6 +846,7 @@ namespace krys::boo
     // The offset is in the block direction (y for horizontal writing modes, x for vertical writing modes).
     KRYS_NODISCARD LayoutUnit FlipForWritingMode(LayoutUnit position) const noexcept;
     KRYS_NODISCARD LayoutPoint FlipForWritingMode(const LayoutPoint &position) const noexcept;
+    KRYS_NODISCARD FloatPoint FlipForWritingMode(const FloatPoint &position) const noexcept;
     KRYS_NODISCARD LayoutSize FlipForWritingMode(const LayoutSize &offset) const noexcept;
     void FlipForWritingMode(LayoutRect &rect) const noexcept;
     void FlipForWritingMode(FloatRect &rect) const noexcept;

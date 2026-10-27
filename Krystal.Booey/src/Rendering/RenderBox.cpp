@@ -5367,6 +5367,16 @@ namespace krys::boo
                                      : LayoutPoint(Width() - position.X(), position.Y());
   }
 
+  FloatPoint RenderBox::FlipForWritingMode(const FloatPoint &position) const noexcept
+  {
+    if (!Style().GetWritingMode().IsBlockFlipped())
+    {
+      return position;
+    }
+    return IsHorizontalWritingMode() ? FloatPoint(position.X(), Height().ToFloat() - position.Y())
+                                     : FloatPoint(Width().ToFloat() - position.X(), position.Y());
+  }
+
   LayoutSize RenderBox::FlipForWritingMode(const LayoutSize &offset) const noexcept
   {
     if (!Style().GetWritingMode().IsBlockFlipped())

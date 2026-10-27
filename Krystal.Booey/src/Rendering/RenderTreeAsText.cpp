@@ -25,6 +25,8 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/HexNumber.hpp"
@@ -501,12 +503,21 @@ namespace krys::boo
       Write(ts, *svgRoot, behavior);
       return;
     }
+    if (auto *text = DynamicDowncast<RenderSVGText>(renderer))
+    {
+      WriteSVGText(ts, *text, behavior);
+      return;
+    }
+    if (auto *inlineText = DynamicDowncast<RenderSVGInlineText>(renderer))
+    {
+      WriteSVGInlineText(ts, *inlineText, behavior);
+      return;
+    }
     if (auto *svgImage = DynamicDowncast<LegacyRenderSVGImage>(renderer))
     {
       WriteSVGImage(ts, *svgImage, behavior);
       return;
     }
-    // FIXME: Text writes itself (writeSVGRenderer), with text (B11g).
 
     ts << Indent;
     RenderTreeAsText::WriteRenderObject(ts, renderer, behavior);

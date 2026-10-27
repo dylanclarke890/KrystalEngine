@@ -2,7 +2,9 @@
 
 #include "Krystal.Booey/Graphics/FontBaseline.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorBox.hpp"
+#include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorLineBoxLegacyPath.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::inline_iterator
 {
@@ -164,21 +166,24 @@ namespace krys::boo::inline_iterator
   {
     friend class LineBoxIterator;
 
+  public:
+    using PathVariant = Variant<LineBoxIteratorModernPath, LineBoxIteratorLegacyPath>;
+
   private:
-    LineBoxIteratorModernPath _path;
+    PathVariant _pathVariant;
 
   public:
-    explicit LineBox(LineBoxIteratorModernPath &&path) noexcept : _path(krys::move(path))
+    explicit LineBox(PathVariant &&path) noexcept : _pathVariant(krys::move(path))
     {
     }
 
     KRYS_NODISCARD float LogicalTop() const noexcept
     {
-      return _path.LogicalTop();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalTop(); });
     }
     KRYS_NODISCARD float LogicalBottom() const noexcept
     {
-      return _path.LogicalBottom();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalBottom(); });
     }
     KRYS_NODISCARD float LogicalHeight() const noexcept
     {
@@ -186,24 +191,28 @@ namespace krys::boo::inline_iterator
     }
     KRYS_NODISCARD float LogicalWidth() const noexcept
     {
-      return _path.LogicalWidth();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LogicalWidth(); });
     }
 
     KRYS_NODISCARD float ContentLogicalTop() const noexcept
     {
-      return _path.ContentLogicalTop();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ContentLogicalTop(); });
     }
     KRYS_NODISCARD float ContentLogicalBottom() const noexcept
     {
-      return _path.ContentLogicalBottom();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ContentLogicalBottom(); });
     }
     KRYS_NODISCARD float ContentLogicalLeft() const noexcept
     {
-      return _path.ContentLogicalLeft();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ContentLogicalLeft(); });
     }
     KRYS_NODISCARD float ContentLogicalRight() const noexcept
     {
-      return _path.ContentLogicalRight();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ContentLogicalRight(); });
     }
     KRYS_NODISCARD float ContentLogicalWidth() const noexcept
     {
@@ -216,35 +225,41 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD float ContentLogicalTopAdjustedForPrecedingLineBox() const noexcept
     {
-      return _path.ContentLogicalTopAdjustedForPrecedingLineBox();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
+                      { return path.ContentLogicalTopAdjustedForPrecedingLineBox(); });
     }
     KRYS_NODISCARD float ContentLogicalBottomAdjustedForFollowingLineBox() const noexcept
     {
-      return _path.ContentLogicalBottomAdjustedForFollowingLineBox();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto)
+                      { return path.ContentLogicalBottomAdjustedForFollowingLineBox(); });
     }
 
     KRYS_NODISCARD float InkOverflowLogicalTop() const noexcept
     {
-      return _path.InkOverflowLogicalTop();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.InkOverflowLogicalTop(); });
     }
     KRYS_NODISCARD float InkOverflowLogicalBottom() const noexcept
     {
-      return _path.InkOverflowLogicalBottom();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.InkOverflowLogicalBottom(); });
     }
     KRYS_NODISCARD float ScrollableOverflowTop() const noexcept
     {
-      return _path.ScrollableOverflowTop();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ScrollableOverflowTop(); });
     }
     KRYS_NODISCARD float ScrollableOverflowBottom() const noexcept
     {
-      return _path.ScrollableOverflowBottom();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.ScrollableOverflowBottom(); });
     }
 
     KRYS_NODISCARD const RenderStyle &Style() const noexcept;
 
     KRYS_NODISCARD bool HasEllipsis() const noexcept
     {
-      return _path.HasEllipsis();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.HasEllipsis(); });
     }
     enum class AdjustedForSelection : bool
     {
@@ -259,31 +274,34 @@ namespace krys::boo::inline_iterator
     KRYS_NODISCARD TextRun EllipsisText() const noexcept
     {
       krys_debug_assert(HasEllipsis());
-      return _path.EllipsisText();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.EllipsisText(); });
     }
 
     KRYS_NODISCARD const RenderBlockFlow &FormattingContextRoot() const noexcept
     {
-      return _path.FormattingContextRoot();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.FormattingContextRoot(); });
     }
 
     KRYS_NODISCARD bool IsHorizontal() const noexcept
     {
-      return _path.IsHorizontal();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.IsHorizontal(); });
     }
     KRYS_NODISCARD FontBaseline BaselineType() const noexcept
     {
-      return _path.BaselineType();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.BaselineType(); });
     }
 
     KRYS_NODISCARD bool IsFirst() const noexcept;
     KRYS_NODISCARD bool IsFirstAfterPageBreak() const noexcept
     {
-      return _path.IsFirstAfterPageBreak();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.IsFirstAfterPageBreak(); });
     }
     KRYS_NODISCARD bool HasBlockContent() const noexcept
     {
-      return _path.HasBlockLevelBox();
+      return SwitchOn(_pathVariant,
+                      [&](const auto &path) -> decltype(auto) { return path.HasBlockLevelBox(); });
     }
     KRYS_NODISCARD LeafBoxIterator BlockLevelBox() const noexcept;
 
@@ -300,7 +318,7 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD size_t LineIndex() const noexcept
     {
-      return _path.LineIndex();
+      return SwitchOn(_pathVariant, [&](const auto &path) -> decltype(auto) { return path.LineIndex(); });
     }
   };
 
@@ -316,10 +334,10 @@ namespace krys::boo::inline_iterator
 
   public:
     /// @brief An iterator at the end.
-    LineBoxIterator() noexcept : _lineBox(LineBoxIteratorModernPath {})
+    LineBoxIterator() noexcept : _lineBox(LineBoxIteratorLegacyPath {nullptr})
     {
     }
-    explicit LineBoxIterator(LineBoxIteratorModernPath &&path) noexcept : _lineBox(krys::move(path))
+    explicit LineBoxIterator(LineBox::PathVariant &&path) noexcept : _lineBox(krys::move(path))
     {
     }
     explicit LineBoxIterator(const LineBox &lineBox) noexcept : _lineBox(lineBox)
@@ -345,7 +363,7 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD bool operator==(const LineBoxIterator &other) const noexcept
     {
-      return _lineBox._path == other._lineBox._path;
+      return _lineBox._pathVariant == other._lineBox._pathVariant;
     }
     KRYS_NODISCARD bool operator==(EndLineBoxIterator) const noexcept
     {
@@ -363,7 +381,7 @@ namespace krys::boo::inline_iterator
 
     KRYS_NODISCARD bool AtEnd() const noexcept
     {
-      return _lineBox._path.AtEnd();
+      return SwitchOn(_lineBox._pathVariant, [](const auto &path) { return path.AtEnd(); });
     }
   };
 

@@ -77,7 +77,8 @@ namespace krys::boo::inline_iterator
   {
     krys_debug_assert(HasEllipsis());
 
-    auto visualRect = _path.EllipsisVisualRectIgnoringBlockDirection();
+    auto visualRect = SwitchOn(_pathVariant, [](const auto &path)
+                               { return path.EllipsisVisualRectIgnoringBlockDirection(); });
 
     // FIXME: Add pixel snapping here.
     if (adjustedForSelection == AdjustedForSelection::No)
@@ -139,12 +140,12 @@ namespace krys::boo::inline_iterator
 
   LeafBoxIterator LineBox::LineLeftmostLeafBox() const noexcept
   {
-    return LeafBoxIterator {_path.FirstLeafBox()};
+    return SwitchOn(_pathVariant, [](const auto &path) { return LeafBoxIterator {path.FirstLeafBox()}; });
   }
 
   LeafBoxIterator LineBox::LineRightmostLeafBox() const noexcept
   {
-    return LeafBoxIterator {_path.LastLeafBox()};
+    return SwitchOn(_pathVariant, [](const auto &path) { return LeafBoxIterator {path.LastLeafBox()}; });
   }
 
   LeafBoxIterator LineBox::LogicalLeftmostLeafBox() const noexcept
@@ -176,13 +177,13 @@ namespace krys::boo::inline_iterator
 
   LineBoxIterator &LineBoxIterator::TraverseNext() noexcept
   {
-    _lineBox._path.TraverseNext();
+    SwitchOn(_lineBox._pathVariant, [](auto &path) { path.TraverseNext(); });
     return *this;
   }
 
   LineBoxIterator &LineBoxIterator::TraversePrevious() noexcept
   {
-    _lineBox._path.TraversePrevious();
+    SwitchOn(_lineBox._pathVariant, [](auto &path) { path.TraversePrevious(); });
     return *this;
   }
 
@@ -192,7 +193,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->FirstLineBox();
     }
-    return {};
+    return LineBoxIterator {LineBoxIteratorLegacyPath {flow.LegacyRootBox()}};
   }
 
   LineBoxIterator LastLineBoxFor(const RenderBlockFlow &flow) noexcept
@@ -201,7 +202,7 @@ namespace krys::boo::inline_iterator
     {
       return lineLayout->LastLineBox();
     }
-    return {};
+    return LineBoxIterator {LineBoxIteratorLegacyPath {flow.LegacyRootBox()}};
   }
 
   LineBoxIterator LineBoxFor(const layout_integration::InlineContent &inlineContent,

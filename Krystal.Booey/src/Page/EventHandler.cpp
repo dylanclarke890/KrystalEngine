@@ -3018,8 +3018,7 @@ namespace krys::boo
     UpdateSelectionForMouseDrag(result);
   }
 
-  // FIXME: SVG text (keeping the selection in the containing block), image overlays
-  // (shouldExtendSelectionToTargetNode), once there are any.
+  // FIXME: Image overlays (shouldExtendSelectionToTargetNode), once there are any.
   void EventHandler::UpdateSelectionForMouseDrag(const HitTestResult &hitTestResult) noexcept
   {
     if (!MouseDownMayStartSelect())
@@ -3047,6 +3046,22 @@ namespace krys::boo
     // done in HandleMousePressEvent, but not if the mouse press was on an existing selection.
     VisibleSelection oldSelection = selection.Selection();
     auto newSelection = oldSelection;
+
+    // Special case to limit selection to the containing block for SVG text.
+    // FIXME: Isn't there a better non-SVG-specific way to do this?
+    if (RefPtr<dom::Node> selectionBaseNode = ShareRefPtr(newSelection.Base().DeprecatedNode()))
+    {
+      if (auto *selectionBaseRenderer = selectionBaseNode->Renderer())
+      {
+        if (selectionBaseRenderer->IsRenderSVGText())
+        {
+          if (target->Renderer()->ContainingBlock() != selectionBaseRenderer->ContainingBlock())
+          {
+            return;
+          }
+        }
+      }
+    }
 
     if (_selectionInitiationState == HaveNotStartedSelection && !DispatchSelectStart(target.get()))
     {

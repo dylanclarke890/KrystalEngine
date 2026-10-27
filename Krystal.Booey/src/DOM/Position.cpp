@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGTextElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <climits>
 #include <unicode/utf8.h>
@@ -755,8 +756,8 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD bool IsNonTextSVGElement(const Node &node) noexcept
     {
-      // FIXME: SVG text elements have caret positions, once there are SVG text renderers.
-      return Is<svg::SVGElement>(node);
+      auto *svgElement = DynamicDowncast<svg::SVGElement>(node);
+      return svgElement && !Is<svg::SVGTextElement>(*svgElement);
     }
   }
 

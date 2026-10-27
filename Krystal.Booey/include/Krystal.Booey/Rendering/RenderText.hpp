@@ -40,7 +40,11 @@ namespace krys::boo
     // The text before the text transform and text security, when they changed it.
     Maybe<utf8_string> _originalText;
     RenderInline *_inlineWrapperForDisplayContents {nullptr};
+
+  protected:
     Maybe<bool> _canUseSimplifiedTextMeasuring;
+
+  private:
     Maybe<bool> _hasPositionDependentContentWidth;
     Maybe<bool> _hasStrongDirectionalityContent;
     bool _useBackslashAsYenSymbol {false};
@@ -74,7 +78,7 @@ namespace krys::boo
     KRYS_NODISCARD const layout::InlineTextBox *LayoutBox() const noexcept;
 
     /// @brief The bounding box of the text's line boxes.
-    KRYS_NODISCARD IntRect LinesBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual IntRect LinesBoundingBox() const noexcept;
     /// @brief The location of the text's first text box.
     KRYS_NODISCARD IntPoint FirstRunLocation() const noexcept;
 
@@ -100,6 +104,7 @@ namespace krys::boo
     KRYS_NODISCARD float HangablePunctuationEndWidth(size_t index) const noexcept;
     KRYS_NODISCARD size_t FirstCharacterIndexStrippingSpaces() const noexcept;
     KRYS_NODISCARD size_t LastCharacterIndexStrippingSpaces() const noexcept;
+    KRYS_NODISCARD static bool IsHangableStopOrComma(char32 c) noexcept;
 
     KRYS_NODISCARD float MinLogicalWidth() const noexcept;
     KRYS_NODISCARD float MaxLogicalWidth() const noexcept;

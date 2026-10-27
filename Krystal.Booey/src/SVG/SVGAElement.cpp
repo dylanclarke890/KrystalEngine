@@ -10,8 +10,10 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
+#include "Krystal.Booey/SVG/SVGTextContentElement.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::svg
@@ -93,7 +95,12 @@ namespace krys::boo::svg
 
   RenderPtr<RenderElement> SVGAElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: An inline renderer (RenderSVGInline) inside text content elements, with text (B11g).
+    auto *svgParent = DynamicDowncast<SVGElement>(ParentNode());
+    if (svgParent && Is<SVGTextContentElement>(*svgParent))
+    {
+      return CreateRenderer<RenderSVGInline>(RenderObject::Type::SVGInline, *this, krys::move(style));
+    }
+
     return CreateRenderer<LegacyRenderSVGTransformableContainer>(*this, krys::move(style));
   }
 
