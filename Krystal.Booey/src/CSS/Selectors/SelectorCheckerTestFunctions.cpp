@@ -9,6 +9,7 @@
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextFormControlElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
@@ -61,14 +62,16 @@ namespace krys::boo::css
 
   bool IsLink(const dom::Element &element) noexcept
   {
+    // Links in SVG images aren't links (shouldProhibitLinks).
     if (IsHTMLElement(element, html::TagName::a) || IsHTMLElement(element, html::TagName::area))
     {
-      return element.HasAttribute(u8"href");
+      return element.HasAttribute(u8"href") && !svg::IsInSVGImage(&element);
     }
     if (element.NamespaceURI().View() == infra::Namespaces::SVG && element.LocalName().View() == u8"a")
     {
-      return element.HasAttribute(u8"href")
-             || element.HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href");
+      return (element.HasAttribute(u8"href")
+              || element.HasAttributeNS(dom::DOMStringAtom(infra::Namespaces::XLink), u8"href"))
+             && !svg::IsInSVGImage(&element);
     }
     return false;
   }

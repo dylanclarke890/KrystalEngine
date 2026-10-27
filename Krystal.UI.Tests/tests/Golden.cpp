@@ -255,6 +255,16 @@ namespace krys::ui::tests
     CheckPage("svg-content", 360u, 240u);
   }
 
+  TEST_CASE("Golden: SVG images", "[UI][GPU][Golden]")
+  {
+    CheckPage("svg-images", 360u, 240u, false,
+              [](View &view)
+              {
+                boo::html::EventLoop::Current().RunUntilIdle();
+                view.UpdateRendering();
+              });
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);

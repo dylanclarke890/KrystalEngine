@@ -37,6 +37,7 @@ namespace krys::boo::dom
   class DocumentOrShadowRoot;
   class Element;
   class Node;
+  class ProcessingInstruction;
   class ShadowRoot;
 }
 
@@ -122,6 +123,7 @@ namespace krys::boo::style
     // elements and when it is safe to execute scripts.
     List<WeakPtr<const dom::Element>> _elementsInHeadWithPendingSheets;
     List<WeakPtr<const dom::Element>> _elementsInBodyWithPendingSheets;
+    List<WeakPtr<const dom::ProcessingInstruction>> _processingInstructionsWithPendingSheets;
 
     List<WeakPtr<dom::Node>> _styleSheetCandidateNodes;
 
@@ -188,11 +190,15 @@ namespace krys::boo::style
 
     void AddPendingSheet(const dom::Element &element) noexcept;
     void RemovePendingSheet(const dom::Element &element) noexcept;
+    void AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
+    void RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept;
     KRYS_NODISCARD bool HasPendingSheets() const noexcept;
     KRYS_NODISCARD bool HasPendingSheetsBeforeBody() const noexcept;
     KRYS_NODISCARD bool HasPendingSheetsInBody() const noexcept;
     KRYS_NODISCARD bool HasPendingSheet(const dom::Element &element) const noexcept;
     KRYS_NODISCARD bool HasPendingSheetInBody(const dom::Element &element) const noexcept;
+    KRYS_NODISCARD bool
+      HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept;
 
     KRYS_NODISCARD bool ActiveStyleSheetsContains(const css::CSSStyleSheet &sheet) const noexcept;
 

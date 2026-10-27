@@ -434,9 +434,35 @@ namespace krys::boo::svg
       return viewBox;
     }
 
-    // FIXME: If no viewBox is specified but non-relative width/height values, then we should always
-    // synthesize a viewBox if we're embedded through a SVGImage, once there are SVG images (B11d).
-    return {};
+    auto isEmbeddedThroughSVGImage = [this](const RenderElement *renderer) -> bool
+    {
+      auto isDocumentElement = NodeDocument().DocumentElement().get() == this;
+      if (!isDocumentElement)
+      {
+        return false;
+      }
+
+      if (!renderer)
+      {
+        return false;
+      }
+
+      if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(*renderer))
+      {
+        return svgRoot->IsEmbeddedThroughSVGImage();
+      }
+
+      return false;
+    };
+
+    if (!isEmbeddedThroughSVGImage(Renderer()))
+    {
+      return {};
+    }
+
+    // If no viewBox is specified but non-relative width/height values, then we
+    // should always synthesize a viewBox if we're embedded through a SVGImage.
+    return {0, 0, IntrinsicWidth(), IntrinsicHeight()};
   }
 
   FloatSize SVGSvgElement::CurrentViewportSizeExcludingZoom() const noexcept

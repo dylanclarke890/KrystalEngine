@@ -19,6 +19,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/TextPainter.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -388,7 +390,18 @@ namespace krys::boo
   // See: https://github.com/w3c/csswg-drafts/issues/11236#issuecomment-2718502765
   bool RenderImage::ShouldRespectZeroIntrinsicWidth() const noexcept
   {
-    // FIXME: SVG images whose root has an intrinsic width, once there are SVG images.
+    auto *cachedImage = GetCachedImage();
+    if (!cachedImage)
+    {
+      return false;
+    }
+    if (auto *svgImage = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()))
+    {
+      if (auto rootElement = svgImage->RootElement())
+      {
+        return rootElement->HasIntrinsicWidth();
+      }
+    }
     return false;
   }
 
@@ -782,7 +795,22 @@ namespace krys::boo
 
   bool RenderImage::ShouldInvalidatePreferredWidths() const noexcept
   {
-    // FIXME: SVG images with an embedded content box, once there are SVG images.
-    return RenderReplaced::ShouldInvalidatePreferredWidths();
+    if (RenderReplaced::ShouldInvalidatePreferredWidths())
+    {
+      return true;
+    }
+    return EmbeddedContentBox();
+  }
+
+  RenderBox *RenderImage::EmbeddedContentBox() const noexcept
+  {
+    if (auto *cachedImage = GetCachedImage())
+    {
+      if (auto *image = DynamicDowncast<svg::SVGImage>(cachedImage->GetImage()))
+      {
+        return image->EmbeddedContentBox();
+      }
+    }
+    return nullptr;
   }
 }

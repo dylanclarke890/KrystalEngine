@@ -130,6 +130,7 @@
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
+#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -2838,6 +2839,17 @@ namespace krys::boo::dom
 
       Highlight::RepaintRange(highlightRange->Range());
     }
+  }
+
+  ExceptionOr<void> Document::SetXMLVersion(DOMString &&version) noexcept
+  {
+    if (!xml::XMLDocumentParser::SupportsXMLVersion(version))
+    {
+      return Exception {ExceptionCode::NotSupportedError};
+    }
+
+    _xmlVersion = krys::move(version);
+    return {};
   }
 
   void Document::FinishedParsing() noexcept

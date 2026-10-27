@@ -54,6 +54,10 @@ find_package(JPEG REQUIRED)
 find_package(WebP CONFIG REQUIRED)
 target_link_libraries(Krystal.Booey PRIVATE PNG::PNG JPEG::JPEG WebP::webp WebP::webpdemux)
 
+# XML documents and SVG images: libxml2, without encodings of its own (documents arrive decoded) or compression.
+find_package(LibXml2 REQUIRED)
+target_link_libraries(Krystal.Booey PRIVATE LibXml2::LibXml2)
+
 # WOFF fonts: WOFF 2 with google/woff2 (static libraries without a CMake package) over Brotli, WOFF 1 with zlib.
 find_package(ZLIB REQUIRED)
 find_package(unofficial-brotli CONFIG REQUIRED)
@@ -1638,6 +1642,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp
   include/Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp
+  include/Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp
+  include/Krystal.Booey/Loader/Cache/CachedSVGDocumentClient.hpp
   include/Krystal.Booey/Loader/Cache/MemoryCache.hpp
   include/Krystal.Booey/Loader/FetchOptions.hpp
   include/Krystal.Booey/Loader/LoaderStrategy.hpp
@@ -2595,6 +2601,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/PathStream.cpp
   src/Graphics/PathTraversalState.cpp
   src/SVG/Internals/SVGPathBuilder.cpp
+  src/SVG/Graphics/SVGImage.cpp
+  src/SVG/Graphics/SVGImageCache.cpp
+  src/SVG/Graphics/SVGImageForContainer.cpp
   src/Style/Values/Shapes/BasicShape.cpp
   src/Style/Values/Shapes/CircleFunction.cpp
   src/Style/Values/Shapes/EllipseFunction.cpp
@@ -3055,6 +3064,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Loader/Cache/CachedImage.cpp
   src/Loader/Cache/CachedResource.cpp
   src/Loader/Cache/CachedResourceLoader.cpp
+  src/Loader/Cache/CachedSVGDocument.cpp
   src/Loader/Cache/MemoryCache.cpp
   src/Platform/Network/DataURLDecoder.cpp
   src/Platform/PlatformStrategies.cpp
@@ -3535,6 +3545,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Document.hpp
       include/Krystal.Booey/DOM/DocumentFragment.hpp
       include/Krystal.Booey/DOM/DocumentOrShadowRoot.hpp
+      include/Krystal.Booey/DOM/DocumentParser.hpp
       include/Krystal.Booey/DOM/DocumentType.hpp
       include/Krystal.Booey/DOM/DOMImplementation.hpp
       include/Krystal.Booey/DOM/DOMTokenList.hpp
@@ -3813,6 +3824,10 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/SVG/Internals/SVGPathStringViewSource.hpp
       include/Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp
       include/Krystal.Booey/SVG/Internals/SVGPathTraversalStateBuilder.hpp
+      include/Krystal.Booey/SVG/Graphics/SVGImage.hpp
+      include/Krystal.Booey/SVG/Graphics/SVGImageCache.hpp
+      include/Krystal.Booey/SVG/Graphics/SVGImageClients.hpp
+      include/Krystal.Booey/SVG/Graphics/SVGImageForContainer.hpp
       include/Krystal.Booey/DOM/Dicts/DOMPointInit.hpp
       include/Krystal.Booey/SVG/Properties/SVGAnimatedDecoratedProperty.hpp
       include/Krystal.Booey/SVG/Properties/SVGAnimatedPrimitiveProperty.hpp
@@ -3915,6 +3930,11 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/URL/URL.hpp
       include/Krystal.Booey/URL/URLHash.hpp
       include/Krystal.Booey/URL/URLParser.hpp
+
+      # XML
+      include/Krystal.Booey/XML/Parser/XMLDocumentParser.hpp
+      include/Krystal.Booey/XML/Parser/XMLDocumentParserScope.hpp
+      include/Krystal.Booey/XML/XMLErrors.hpp
 
   PRIVATE
     # ${KRYSTAL_BOOEY_GENERATED_SOURCES}
@@ -4030,6 +4050,7 @@ target_sources(Krystal.Booey
     src/DOM/Document.cpp
     src/DOM/DocumentFragment.cpp
     src/DOM/DocumentOrShadowRoot.cpp
+    src/DOM/DocumentParser.cpp
     src/DOM/DocumentType.cpp
     src/DOM/HTMLDocument.cpp
     src/DOM/DOMImplementation.cpp
@@ -4263,4 +4284,10 @@ target_sources(Krystal.Booey
     # URL
     src/URL/URL.cpp
     src/URL/URLParser.cpp
+
+    # XML
+    src/XML/Parser/XMLDocumentParser.cpp
+    src/XML/Parser/XMLDocumentParserLibxml2.cpp
+    src/XML/Parser/XMLDocumentParserScope.cpp
+    src/XML/XMLErrors.cpp
 )

@@ -4,6 +4,56 @@
 
 namespace krys::boo
 {
+  namespace
+  {
+    // https://www.rfc-editor.org/rfc/rfc7230#section-3.2.6
+    KRYS_NODISCARD bool IsValidHTTPToken(utf8_stringview value) noexcept
+    {
+      if (value.empty())
+      {
+        return false;
+      }
+      return std::ranges::all_of(value,
+                                 [](char8 c)
+                                 {
+                                   return text::IsASCIIAlphanumeric(c)
+                                          || utf8_stringview(u8"!#$%&'*+-.^_`|~").find(c)
+                                               != utf8_stringview::npos;
+                                 });
+    }
+
+    KRYS_NODISCARD bool IsValidMIMETypeWithSuffix(utf8_stringview mimeType, utf8_stringview suffix) noexcept
+    {
+      if (mimeType.size() < suffix.size()
+          || !text::IsASCIICaselessEqual(mimeType.substr(mimeType.size() - suffix.size()), suffix))
+      {
+        return false;
+      }
+
+      if (mimeType.size() < suffix.size() + 2)
+      {
+        return false;
+      }
+
+      auto slashPosition = mimeType.find(u8'/');
+      if (slashPosition == utf8_stringview::npos || slashPosition <= 0)
+      {
+        return false;
+      }
+
+      auto type = mimeType.substr(0, slashPosition);
+      if (!IsValidHTTPToken(type))
+      {
+        return false;
+      }
+
+      // Assume the suffix is already a valid HTTP token and avoid checking it.
+      auto subtypeExcludingSuffix =
+        mimeType.substr(slashPosition + 1, mimeType.size() - slashPosition - 1 - suffix.size());
+      return IsValidHTTPToken(subtypeExcludingSuffix);
+    }
+  }
+
   // FIXME: The system's types for other extensions (the registry's content types on Windows), through the
   // host.
   utf8_string MIMETypeRegistry::MIMETypeForExtension(utf8_stringview extension) noexcept
@@ -76,6 +126,18 @@ namespace krys::boo
 
   bool MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept
   {
-    return IsSupportedImageMIMEType(mimeType);
+    return IsSupportedImageMIMEType(mimeType)
+           || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/svg+xml"));
+  }
+
+  bool MIMETypeRegistry::IsXMLMIMEType(utf8_stringview mimeType) noexcept
+  {
+    if (text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"text/xml"))
+        || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"application/xml")))
+    {
+      return true;
+    }
+
+    return IsValidMIMETypeWithSuffix(mimeType, u8"+xml");
   }
 }

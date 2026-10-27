@@ -5,6 +5,8 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
@@ -65,8 +67,11 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Tell the page an SVG image finished loading an image (didFinishLoadingImageForSVGImage), with
-    // SVG images (B11d).
+    if (auto *page = ImageElement().NodeDocument().GetPage())
+    {
+      page->GetChromeClient().DidFinishLoadingImageForSVGImage(ImageElement());
+    }
+
     LegacyRenderSVGModelObject::NotifyFinished(newImage);
   }
 

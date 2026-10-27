@@ -400,6 +400,22 @@ namespace krys::boo::style
     DidRemovePendingStylesheet();
   }
 
+  void Scope::AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  {
+    krys_debug_assert(!HasPendingSheet(processingInstruction));
+
+    _processingInstructionsWithPendingSheets.push_back(CreateWeakPtr(&processingInstruction));
+  }
+
+  void Scope::RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  {
+    krys_debug_assert(HasPendingSheet(processingInstruction));
+
+    Remove(_processingInstructionsWithPendingSheets, processingInstruction);
+
+    DidRemovePendingStylesheet();
+  }
+
   bool Scope::HasPendingSheets() const noexcept
   {
     return HasPendingSheetsBeforeBody() || !IsEmptyIgnoringNullReferences(_elementsInBodyWithPendingSheets);
@@ -407,8 +423,8 @@ namespace krys::boo::style
 
   bool Scope::HasPendingSheetsBeforeBody() const noexcept
   {
-    // FIXME: Also processing instructions with pending sheets, once xml-stylesheet loads.
-    return !IsEmptyIgnoringNullReferences(_elementsInHeadWithPendingSheets);
+    return !IsEmptyIgnoringNullReferences(_elementsInHeadWithPendingSheets)
+           || !IsEmptyIgnoringNullReferences(_processingInstructionsWithPendingSheets);
   }
 
   bool Scope::HasPendingSheetsInBody() const noexcept
@@ -439,6 +455,11 @@ namespace krys::boo::style
   bool Scope::HasPendingSheetInBody(const dom::Element &element) const noexcept
   {
     return Contains(_elementsInBodyWithPendingSheets, element);
+  }
+
+  bool Scope::HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept
+  {
+    return Contains(_processingInstructionsWithPendingSheets, processingInstruction);
   }
 
   void Scope::AddStyleSheetCandidateNode(dom::Node &node, bool createdByParser) noexcept
@@ -496,9 +517,20 @@ namespace krys::boo::style
       auto &node = *candidate;
 
       RefPtr<css::StyleSheet> sheet;
-      if (Is<dom::ProcessingInstruction>(node))
+      if (auto *processingInstruction = DynamicDowncast<dom::ProcessingInstruction>(node))
       {
-        // FIXME: xml-stylesheet processing instructions, once they load style sheets.
+        if (!processingInstruction->IsCSS())
+        {
+          continue;
+        }
+        // We don't support linking to embedded CSS stylesheets, see
+        // <https://bugs.webkit.org/show_bug.cgi?id=49281> for discussion.
+        sheet = ShareRefPtr(processingInstruction->Sheet());
+        if (sheet)
+        {
+          styleSheetsForStyleSheetsList.push_back(sheet);
+          sheets.push_back(krys::move(sheet));
+        }
         continue;
       }
 

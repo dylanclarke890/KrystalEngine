@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -210,5 +212,39 @@ layer at (0,0) size 800x104
     (void)clone->DispatchEvent(*CreateRef<dom::Event>(dom::DOMStringAtom(u8"ping")));
     CHECK(before == 2);
     CHECK(after == 1);
+  }
+
+  TEST_CASE("SVGUseElement: references to other files", "[SVG][SVGUseElement]")
+  {
+    boo::tests::LoaderFixture loader;
+    loader.Strategy.AddText(
+      u8"file:///defs.svg",
+      u8R"svg(<svg xmlns="http://www.w3.org/2000/svg"><rect id="r" width="7" height="3"/></svg>)svg",
+      u8"image/svg+xml");
+    boo::tests::PageInFrameFixture fixture(
+      u8R"html(<svg><use id=u href="file:///defs.svg#r" /><use id=missing href="file:///none.svg#r" /></svg>)html");
+    auto &use = ById<SVGUseElement>(*fixture.Document, u8"u");
+    auto &missing = ById<SVGUseElement>(*fixture.Document, u8"missing");
+    auto events = boo::tests::LoadEvents::ListenTo(use);
+    auto missingEvents = boo::tests::LoadEvents::ListenTo(missing);
+
+    // The other file loads once, as an SVG document of its own; its element is instanced.
+    boo::tests::RunNetworkingTasks();
+    CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///defs.svg#r", u8"file:///none.svg#r"});
+    CHECK(events->Loads == 1);
+    (void)fixture.Document->UpdateLayout();
+    auto *root = use.UserAgentShadowRoot();
+    REQUIRE(root);
+    auto *clone = DynamicDowncast<SVGElement>(root->FirstChild());
+    REQUIRE(clone);
+    CHECK(Is<SVGRectElement>(*clone));
+    CHECK(&clone->NodeDocument() == fixture.Document.get());
+    CHECK(clone->GetAttribute(u8"width") == u8"7");
+
+    // A file that doesn't load fires error and instances nothing.
+    CHECK(missingEvents->Errors == 1);
+    CHECK(missingEvents->Loads == 0);
+    auto *missingRoot = missing.UserAgentShadowRoot();
+    CHECK((!missingRoot || !missingRoot->FirstChild()));
   }
 }

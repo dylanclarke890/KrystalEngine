@@ -187,6 +187,11 @@ namespace krys::boo
   {
     if (!_renderingUpdateDepth)
     {
+      if (_chromeClient->ScheduleRenderingUpdate())
+      {
+        return;
+      }
+
       // FIXME: The rendering update scheduler (display refresh), once the host reports refreshes: the host
       // runs a scheduled update at its next frame.
       _renderingUpdateIsScheduled = true;

@@ -7,6 +7,8 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImageCache.hpp"
 
 namespace krys::boo
 {
@@ -63,6 +65,13 @@ namespace krys::boo
   {
     krys_debug_assert(client.ResourceClientType() == CachedImageClient::ExpectedType());
 
+    _pendingContainerContextRequests.erase(&static_cast<CachedImageClient &>(client));
+
+    if (_svgImageCache)
+    {
+      _svgImageCache->RemoveClientFromCache(&static_cast<CachedImageClient &>(client));
+    }
+
     CachedResource::DidRemoveClient(client);
 
     static_cast<CachedImageClient &>(client).DidRemoveCachedImageClient(*this);
@@ -105,7 +114,7 @@ namespace krys::boo
     return &Image::NullImage();
   }
 
-  Image *CachedImage::ImageForRenderer(const RenderObject *) noexcept
+  Image *CachedImage::ImageForRenderer(const RenderObject *renderer) noexcept
   {
     if (ErrorOccurred() && _shouldPaintBrokenImage)
     {
@@ -120,34 +129,54 @@ namespace krys::boo
       return &Image::NullImage();
     }
 
-    // FIXME: SVG images' per-renderer images (SVGImageCache).
+    if (_image->DrawsSVGImage())
+    {
+      if (auto *image = _svgImageCache->ImageForRenderer(renderer); image != &Image::NullImage())
+      {
+        return image;
+      }
+    }
     return _image.get();
   }
 
-  void CachedImage::SetContainerContextForClient(const CachedImageClient &, const LayoutSize &containerSize,
-                                                 float, const url::URL &) noexcept
+  void CachedImage::SetContainerContextForClient(const CachedImageClient &client,
+                                                 const LayoutSize &containerSize, float containerZoom,
+                                                 const url::URL &imageURL) noexcept
   {
     if (containerSize.IsEmpty())
     {
       return;
     }
-    // FIXME: Queue the request until the image exists, and SVG images' per-client container contexts.
-    if (!_image)
+    krys_debug_assert(containerZoom);
+    RefPtr<Image> image = _image;
+    if (!image)
     {
+      _pendingContainerContextRequests.insert_or_assign(
+        &client, ContainerContext {containerSize, containerZoom, imageURL});
       return;
     }
 
-    _image->SetContainerSize(FloatSize(containerSize));
+    if (!image->DrawsSVGImage())
+    {
+      image->SetContainerSize(FloatSize(containerSize));
+      return;
+    }
+
+    _svgImageCache->SetContainerContextForClient(client, containerSize, containerZoom, imageURL);
   }
 
-  FloatSize CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType) const noexcept
+  FloatSize CachedImage::ImageSizeForRenderer(const RenderElement *renderer, SizeType sizeType) const noexcept
   {
     if (!_image)
     {
       return {};
     }
 
-    // FIXME: SVG images' used sizes (SVGImageCache).
+    if (_image->DrawsSVGImage() && sizeType == UsedSize)
+    {
+      return _svgImageCache->ImageSizeForRenderer(renderer);
+    }
+
     return _image->Size(renderer ? renderer->GetImageOrientation()
                                  : boo::ImageOrientation(boo::ImageOrientation::Orientation::FromImage));
   }
@@ -218,8 +247,26 @@ namespace krys::boo
 
     _imageObserver = CachedImageObserver::Create(*this);
 
-    // FIXME: SVG and PDF images (Image::create picks by MIME type).
-    _image = BitmapImage::Create(_imageObserver.get());
+    _image = Image::Create(*_imageObserver);
+
+    if (RefPtr<Image> image = _image)
+    {
+      if (auto *svgImage = DynamicDowncast<svg::SVGImage>(*image))
+      {
+        _svgImageCache = CreateUnique<svg::SVGImageCache>(svgImage);
+      }
+
+      // Send queued container size requests.
+      if (image->UsesContainerSize())
+      {
+        for (auto &[client, context] : _pendingContainerContextRequests)
+        {
+          SetContainerContextForClient(*client, context.ContainerSize, context.ContainerZoom,
+                                       context.ImageURL);
+        }
+      }
+      _pendingContainerContextRequests.clear();
+    }
   }
 
   CachedImage::CachedImageObserver::CachedImageObserver(CachedImage &image) noexcept

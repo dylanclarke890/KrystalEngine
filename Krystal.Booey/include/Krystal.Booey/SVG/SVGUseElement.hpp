@@ -1,14 +1,23 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedSVGDocumentClient.hpp"
 #include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
 #include "Krystal.Booey/SVG/SVGURIReference.hpp"
+
+namespace krys::boo
+{
+  class CachedSVGDocument;
+}
 
 namespace krys::boo::svg
 {
   /// @brief The `<use>` element: draws a copy of another element, cloned into its user agent shadow tree
   /// (its instances) and kept in step with the original.
   /// @see https://svgwg.org/svg2-draft/struct.html#UseElement
-  class SVGUseElement final : public SVGGraphicsElement, public SVGURIReference
+  class SVGUseElement final : public SVGGraphicsElement,
+                              public SVGURIReference,
+                              private CachedSVGDocumentClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGUseElement);
 
@@ -21,11 +30,11 @@ namespace krys::boo::svg
     bool _haveFiredLoadEvent {false};
     bool _errorOccurred {false};
     bool _shadowTreeNeedsUpdate {true};
-    // FIXME: The external document of a reference to another file (CachedSVGDocument), with XML and SVG
-    // documents (B11d).
+    CachedResourceHandle<CachedSVGDocument> _externalDocument;
 
   public:
     explicit SVGUseElement(dom::Document &document) noexcept;
+    ~SVGUseElement() noexcept override;
 
     void InvalidateShadowTree() noexcept;
     void UpdateUserAgentShadowTree() noexcept final;
@@ -83,6 +92,8 @@ namespace krys::boo::svg
     // FIXME: The clip path of a <use> in a <clipPath> (toClipPath), with clipping (B11f).
     KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept final;
 
+    void NotifyFinished(CachedResource &) noexcept final;
+    KRYS_NODISCARD dom::Document *ExternalDocument() const noexcept;
     void UpdateExternalDocument() noexcept;
 
     KRYS_NODISCARD FloatRect GetBBox(StyleUpdateStrategy = AllowStyleUpdate) noexcept final;

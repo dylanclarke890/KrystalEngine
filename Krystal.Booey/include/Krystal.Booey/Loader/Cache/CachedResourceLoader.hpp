@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceHandle.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
 #include "Krystal.Booey/Platform/Network/ResourceError.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
@@ -78,6 +79,8 @@ namespace krys::boo
       RequestCSSStyleSheet(CachedResourceRequest &&) noexcept;
     ResourceErrorOr<CachedResourceHandle<CachedFont>> RequestFont(CachedResourceRequest &&,
                                                                   bool isSVG) noexcept;
+    ResourceErrorOr<CachedResourceHandle<CachedSVGDocument>>
+      RequestSVGDocument(CachedResourceRequest &&) noexcept;
 
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(utf8_stringview url) const noexcept;
     KRYS_NODISCARD boo::CachedResource *GetCachedResource(const url::URL &url) const noexcept;

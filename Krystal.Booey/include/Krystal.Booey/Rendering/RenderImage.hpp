@@ -107,6 +107,7 @@ namespace krys::boo
     void WillBeDestroyed() noexcept override;
 
     KRYS_NODISCARD bool ShouldInvalidatePreferredWidths() const noexcept final;
+    KRYS_NODISCARD RenderBox *EmbeddedContentBox() const noexcept final;
     KRYS_NODISCARD FloatSize ComputeIntrinsicSize() const noexcept final;
     KRYS_NODISCARD FloatSize PreferredAspectRatio() const noexcept final;
 

@@ -85,6 +85,11 @@ namespace krys::boo::html
   class HTMLTreeBuilder;
 }
 
+namespace krys::boo::xml
+{
+  class XMLDocumentParser;
+}
+
 namespace krys::boo::dom
 {
   class ElementRareData;
@@ -113,6 +118,7 @@ namespace krys::boo::dom
 
     friend class html::HTMLElementStack;
     friend class html::HTMLTreeBuilder;
+    friend class xml::XMLDocumentParser;
 
     friend class ::krys::boo::RenderTreeUpdater;
 

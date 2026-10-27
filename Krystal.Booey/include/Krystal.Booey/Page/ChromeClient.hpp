@@ -11,10 +11,16 @@
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
+namespace krys::boo::svg
+{
+  class SVGImageElement;
+}
+
 namespace krys::boo
 {
   class GraphicsLayer;
   class GraphicsLayerFactory;
+  class IntRect;
   class LocalFrame;
   class Color;
   class ColorChooserClient;
@@ -23,8 +29,8 @@ namespace krys::boo
 
   /// @brief What a page asks of its host: the window's side of the page.
   // FIXME: The rest of the chrome client: windows and dialogs, the status bar, tooltips, cursors,
-  // scrolling and repainting the host's view, search popups and the other compositing hooks (layer flushes,
-  // compositing triggers, display refresh monitors), once there are any.
+  // scrolling the host's view, search popups and the other compositing hooks (layer flushes, compositing
+  // triggers, display refresh monitors), once there are any.
   class ChromeClient
   {
     KRYS_NON_COPY_MOVABLE(ChromeClient);
@@ -135,6 +141,30 @@ namespace krys::boo
       (void)lineNumber;
       (void)columnNumber;
       (void)sourceID;
+    }
+
+    /// @brief Called when @p rect (in the main frame's view) needs repainting.
+    virtual void InvalidateContentsAndRootView(const IntRect &rect) noexcept
+    {
+      (void)rect;
+    }
+
+    /// @brief Asks the client to schedule the page's next rendering update.
+    /// @return Whether the client scheduled it; if not, the page waits for the host's next frame.
+    virtual bool ScheduleRenderingUpdate() noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether this is the chrome client of an SVG image's page.
+    KRYS_NODISCARD virtual bool IsSVGImageChromeClient() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Called when an `<image>` in the page has loaded its image.
+    virtual void DidFinishLoadingImageForSVGImage(svg::SVGImageElement &) noexcept
+    {
     }
 
     /// @brief Pass nullptr as the GraphicsLayer to detach the root layer.

@@ -57,6 +57,7 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
@@ -2232,10 +2233,16 @@ namespace krys::boo
 
     Repaint();
 
-    // FIXME: SVG images schedule their start (scheduleStartAnimation), once there are SVG images.
-    if (auto *image = cachedImage.GetImage())
+    if (RefPtr<Image> image = ShareRefPtr(cachedImage.GetImage()))
     {
-      image->StartAnimation();
+      if (auto *svgImage = DynamicDowncast<svg::SVGImage>(*image))
+      {
+        svgImage->ScheduleStartAnimation();
+      }
+      else
+      {
+        image->StartAnimation();
+      }
     }
 
     // For directly-composited animated GIFs it does not suffice to call repaint() to resume animation. We

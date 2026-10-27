@@ -684,7 +684,9 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGTests.cpp
 		tests/SVG/SVGTransformList.cpp
 		tests/SVG/SVGURIReference.cpp
+		tests/SVG/Graphics/SVGImage.cpp
 		tests/SVG/SVGUseElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
+		tests/XML/XMLDocumentParser.cpp
 )

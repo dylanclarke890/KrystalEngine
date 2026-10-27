@@ -19,6 +19,7 @@
 #include "Krystal.Booey/Loader/HistoryController.hpp"
 #include "Krystal.Booey/Loader/NavigationAction.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -510,11 +511,21 @@ namespace krys::boo
       _history->SaveDocumentState();
       _frame.GetNavigationScheduler().Cancel();
       auto *currentDocument = _frame.Document();
-      DispatchUnloadEvents(currentDocument
-                               && currentDocument->GetBackForwardCacheState()
-                                    == dom::BackForwardCacheState::NotInBackForwardCache
-                             ? UnloadEventPolicy::UnloadAndPageHide
-                             : UnloadEventPolicy::UnloadOnly);
+      UnloadEventPolicy unloadEventPolicy;
+      if (_frame.GetPage() && _frame.GetPage()->GetChromeClient().IsSVGImageChromeClient())
+      {
+        // If this is the SVGDocument of an SVGImage, no need to dispatch events or recalcStyle.
+        unloadEventPolicy = UnloadEventPolicy::None;
+      }
+      else
+      {
+        unloadEventPolicy = currentDocument
+                                && currentDocument->GetBackForwardCacheState()
+                                     == dom::BackForwardCacheState::NotInBackForwardCache
+                              ? UnloadEventPolicy::UnloadAndPageHide
+                              : UnloadEventPolicy::UnloadOnly;
+      }
+      DispatchUnloadEvents(unloadEventPolicy);
     }
     // The unload handlers may have started another load.
     if (_provisionalDocumentLoader != loader)

@@ -13,14 +13,19 @@ namespace krys::boo::html
   class HTMLDocumentParser;
 }
 
+namespace krys::boo::xml
+{
+  class XMLDocumentParser;
+}
+
 namespace krys::boo
 {
   class LocalFrame;
 
   /// @brief Writes a loaded document into its frame: makes the document (and its window), gives it to the
   /// frame, and feeds its bytes to the parser.
-  // FIXME: Encodings other than UTF-8 (a TextResourceDecoder), documents other than HTML (text, images,
-  // XML), once there are those.
+  // FIXME: Encodings other than UTF-8 (a TextResourceDecoder), text, image and media documents, once there
+  // are those.
   class DocumentWriter
   {
     KRYS_NON_COPY_MOVABLE(DocumentWriter);
@@ -36,6 +41,7 @@ namespace krys::boo
   private:
     WeakPtr<LocalFrame> _frame;
     RefPtr<html::HTMLDocumentParser> _parser;
+    RefPtr<xml::XMLDocumentParser> _xmlParser;
     utf8_string _mimeType;
     State _state {State::NotStarted};
     bool _hasReceivedSomeData {false};

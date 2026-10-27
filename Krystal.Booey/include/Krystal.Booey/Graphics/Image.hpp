@@ -22,9 +22,8 @@ namespace krys::boo
   class GraphicsContext;
   class NativeImage;
 
-  /// @brief Something drawable as an image: a bitmap image or a generated image (a gradient).
-  /// FIXME: SVG and PDF images, the image adapter, animation controls and the asynchronous animation start
-  /// (G7d).
+  /// @brief Something drawable as an image: a bitmap image, an SVG image or a generated image (a gradient).
+  /// FIXME: PDF images, the image adapter, animation controls and the asynchronous animation start (G7d).
   class Image : public RefCounted<Image>, public CanMakeWeakPtr<Image>
   {
     friend class GraphicsContext;
@@ -44,6 +43,9 @@ namespace krys::boo
 
     virtual ~Image() noexcept;
 
+    /// @brief The image for @p observer's resource: an SVG image for SVG, a bitmap image for the rest.
+    KRYS_NODISCARD static RefPtr<Image> Create(ImageObserver &observer) noexcept;
+
     KRYS_NODISCARD virtual bool IsBitmapImage() const noexcept
     {
       return false;
@@ -55,6 +57,18 @@ namespace krys::boo
     KRYS_NODISCARD virtual bool IsGradientImage() const noexcept
     {
       return false;
+    }
+    KRYS_NODISCARD virtual bool IsSVGImage() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD virtual bool IsSVGImageForContainer() const noexcept
+    {
+      return false;
+    }
+    KRYS_NODISCARD bool DrawsSVGImage() const noexcept
+    {
+      return IsSVGImage() || IsSVGImageForContainer();
     }
 
     KRYS_NODISCARD virtual uint32 FrameCount() const noexcept

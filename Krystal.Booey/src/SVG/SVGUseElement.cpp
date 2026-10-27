@@ -1,12 +1,16 @@
 ﻿#include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedSVGDocument.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
@@ -76,6 +80,19 @@ namespace krys::boo::svg
       PropertyRegistry::RegisterProperty<&SVGUseElement::_width>(SVGNames::WidthAttr());
       PropertyRegistry::RegisterProperty<&SVGUseElement::_height>(SVGNames::HeightAttr());
     }
+  }
+
+  SVGUseElement::~SVGUseElement() noexcept
+  {
+    if (CachedResourceHandle externalDocument = _externalDocument)
+    {
+      externalDocument->RemoveClient(*this);
+    }
+  }
+
+  dom::Document *SVGUseElement::ExternalDocument() const noexcept
+  {
+    return _externalDocument ? _externalDocument->Document() : nullptr;
   }
 
   void SVGUseElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -528,9 +545,8 @@ namespace krys::boo::svg
     const SVGUseElement &original =
       correspondingElement ? Downcast<SVGUseElement>(*correspondingElement) : *this;
 
-    // FIXME: The element in the external document of a reference to another file, with XML and SVG
-    // documents (B11d).
-    auto targetResult = TargetElementFromIRIString(original.Href(), original.TreeScope());
+    auto targetResult = TargetElementFromIRIString(original.Href(), original.TreeScope(),
+                                                   ShareRefPtr(original.ExternalDocument()));
     if (targetID)
     {
       *targetID = krys::move(targetResult.Identifier);
@@ -737,10 +753,68 @@ namespace krys::boo::svg
     return targetClone && targetClone->HasRelativeLengths();
   }
 
+  void SVGUseElement::NotifyFinished(CachedResource &resource) noexcept
+  {
+    InvalidateShadowTree();
+    if (resource.ErrorOccurred())
+    {
+      SetErrorOccurred(true);
+      auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Error), false, false);
+      (void)DispatchEvent(*event);
+    }
+    else if (!resource.GetResourceError().IsCancellation())
+    {
+      SVGURIReference::DispatchLoadEvent();
+    }
+  }
+
   void SVGUseElement::UpdateExternalDocument() noexcept
   {
-    // FIXME: Load the document of a reference to another file (requestSVGDocument), dispatching load and
-    // error events when it finishes (notifyFinished), with XML and SVG documents (B11d). Until then such a
-    // reference finds no target.
+    url::URL externalDocumentURL;
+    Ref<dom::Document> document = ShareRef(NodeDocument());
+    // FIXME: This early exit should be removed once the assert(!url.ProtocolIsData()) is removed from
+    // IsExternalURIReference().
+    if (document->CompleteURL(Href()).ProtocolIsData())
+    {
+      return;
+    }
+    if (IsConnected() && IsExternalURIReference(Href(), *document))
+    {
+      externalDocumentURL = document->CompleteURL(Href());
+      if (!externalDocumentURL.HasFragmentIdentifier())
+      {
+        externalDocumentURL = url::URL();
+      }
+    }
+
+    if (externalDocumentURL == (_externalDocument ? _externalDocument->URL() : url::URL()))
+    {
+      return;
+    }
+
+    if (CachedResourceHandle externalDocument = _externalDocument)
+    {
+      externalDocument->RemoveClient(*this);
+    }
+
+    if (externalDocumentURL.IsNull())
+    {
+      _externalDocument = nullptr;
+    }
+    else
+    {
+      // FIXME: The fetch mode (same origin), destination (image) and content sniffing policy, once requests
+      // carry them.
+      CachedResourceRequest request(ResourceRequest(krys::move(externalDocumentURL)),
+                                    CachedResourceLoader::DefaultCachedResourceOptions());
+      auto requested = document->GetCachedResourceLoader().RequestSVGDocument(krys::move(request));
+      _externalDocument = requested ? *requested : CachedResourceHandle<CachedSVGDocument>();
+      if (CachedResourceHandle externalDocument = _externalDocument)
+      {
+        externalDocument->AddClient(*this);
+      }
+    }
+
+    InvalidateShadowTree();
   }
 }

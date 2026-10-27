@@ -6,8 +6,8 @@
 namespace krys::boo
 {
   /// @brief Which MIME types Booey supports.
-  // FIXME: The rest of the registry (non-image types, extensions for types), and SVG, AVIF and video types
-  // once they're supported.
+  // FIXME: The rest of the registry (non-image types, extensions for types), and AVIF and video types once
+  // they're supported.
   struct MIMETypeRegistry
   {
     /// @brief The MIME type of files with @p extension (without its dot, ignoring case), or empty if it isn't
@@ -26,5 +26,9 @@ namespace krys::boo
 
     /// @brief Whether an image, video or SVG of type @p mimeType can be shown.
     KRYS_NODISCARD static bool IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept;
+
+    /// @brief Whether @p mimeType is an XML type: `text/xml`, `application/xml` or a type ending in `+xml`,
+    /// ignoring case.
+    KRYS_NODISCARD static bool IsXMLMIMEType(utf8_stringview mimeType) noexcept;
   };
 }

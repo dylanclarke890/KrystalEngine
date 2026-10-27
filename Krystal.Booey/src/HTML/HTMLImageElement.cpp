@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/HTMLImageLoader.hpp"
@@ -565,7 +566,12 @@ namespace krys::boo::html
       return 1.0f;
     }
 
-    // FIXME: SVG images draw at 1x, once there are SVG images.
+    RefPtr<Image> image = ShareRefPtr(_imageLoader->Image()->GetImage());
+    if (image && image->DrawsSVGImage())
+    {
+      return 1.0f;
+    }
+
     return _imageDevicePixelRatio;
   }
 

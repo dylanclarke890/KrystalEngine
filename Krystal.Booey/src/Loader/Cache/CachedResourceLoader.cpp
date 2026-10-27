@@ -2,14 +2,17 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo
 {
   namespace
   {
     KRYS_NODISCARD CachedResourceHandle<CachedResource>
-      CreateResource(CachedResource::Type type, CachedResourceRequest &&request) noexcept
+      CreateResource(CachedResource::Type type, CachedResourceRequest &&request, Settings &settings) noexcept
     {
       switch (type)
       {
@@ -26,6 +29,12 @@ namespace krys::boo
         case CachedResource::Type::FontResource:
         {
           Ref<CachedResource> resource = AdoptRef(*new CachedFont(krys::move(request)));
+          return CachedResourceHandle<CachedResource>(resource.get());
+        }
+        case CachedResource::Type::SVGDocumentResource:
+        {
+          Ref<CachedResource> resource =
+            AdoptRef(*new CachedSVGDocument(krys::move(request), ShareRef(settings)));
           return CachedResourceHandle<CachedResource>(resource.get());
         }
         default:
@@ -119,6 +128,17 @@ namespace krys::boo
     return CachedResourceHandle<CachedFont>(Downcast<CachedFont>(resource->get()));
   }
 
+  ResourceErrorOr<CachedResourceHandle<CachedSVGDocument>>
+    CachedResourceLoader::RequestSVGDocument(CachedResourceRequest &&request) noexcept
+  {
+    auto resource = RequestResource(CachedResource::Type::SVGDocumentResource, krys::move(request));
+    if (!resource)
+    {
+      return Unexpected(resource.error());
+    }
+    return CachedResourceHandle<CachedSVGDocument>(Downcast<CachedSVGDocument>(resource->get()));
+  }
+
   ResourceErrorOr<CachedResourceHandle<CachedResource>>
     CachedResourceLoader::RequestResource(CachedResource::Type type, CachedResourceRequest &&request,
                                           ImageLoading imageLoading) noexcept
@@ -133,6 +153,18 @@ namespace krys::boo
     if (!url.IsValid())
     {
       return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url, u8"URL is invalid"));
+    }
+
+    // SVG Images have unique security rules that prevent all subresource requests except for data urls.
+    if (type != CachedResource::Type::MainResource)
+    {
+      if (auto *page = Frame()->GetPage();
+          page && page->GetChromeClient().IsSVGImageChromeClient() && !url.ProtocolIsData())
+      {
+        return Unexpected(ResourceError(utf8_string(ErrorDomainBooeyInternal), 0, url,
+                                        u8"Not allowed to request resource",
+                                        ResourceError::Type::AccessControl));
+      }
     }
 
     // FIXME: Content security policy, mixed content and the other checks before a request (canRequest),
@@ -207,7 +239,9 @@ namespace krys::boo
     krys_debug_assert(!request.AllowsCaching()
                       || !memoryCache.ResourceForRequest(request.GetResourceRequest()));
 
-    auto resource = CreateResource(type, krys::move(request));
+    auto *document = GetDocument();
+    auto resource =
+      CreateResource(type, krys::move(request), document ? document->GetSettings() : Settings::Default());
 
     if (resource->AllowsCaching())
     {

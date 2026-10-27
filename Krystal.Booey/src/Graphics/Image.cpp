@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <cmath>
@@ -22,6 +23,18 @@ namespace krys::boo
   void Image::SetImageObserver(RefPtr<ImageObserver> &&observer) noexcept
   {
     _imageObserver = observer;
+  }
+
+  RefPtr<Image> Image::Create(ImageObserver &observer) noexcept
+  {
+    auto mimeType = observer.MimeType();
+    if (mimeType == u8"image/svg+xml")
+    {
+      return svg::SVGImage::Create(&observer);
+    }
+
+    // FIXME: PDF images, once there are any.
+    return BitmapImage::Create(&observer);
   }
 
   Image &Image::NullImage() noexcept
@@ -352,6 +365,14 @@ namespace krys::boo
     else if (image.IsGradientImage())
     {
       ts << "gradient image";
+    }
+    else if (image.IsSVGImage())
+    {
+      ts << "svg image";
+    }
+    else if (image.IsSVGImageForContainer())
+    {
+      ts << "svg image for container";
     }
 
     image.Dump(ts);

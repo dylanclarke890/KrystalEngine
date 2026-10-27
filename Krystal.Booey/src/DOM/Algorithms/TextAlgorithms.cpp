@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
+#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
@@ -56,6 +57,10 @@ namespace krys::boo::dom
     if (auto *text = DynamicDowncast<Text>(node))
     {
       text->UpdateRendererAfterContentChange(offset, count);
+    }
+    else if (auto *processingInstruction = DynamicDowncast<ProcessingInstruction>(node))
+    {
+      processingInstruction->CheckStyleSheet();
     }
 
     if (auto parent = node.ParentNode())

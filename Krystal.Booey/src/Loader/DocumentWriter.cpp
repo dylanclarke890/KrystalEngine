@@ -1,10 +1,12 @@
 ﻿#include "Krystal.Booey/Loader/DocumentWriter.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
+#include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -48,7 +50,14 @@ namespace krys::boo
   }
 
   DocumentWriter::DocumentWriter() noexcept = default;
-  DocumentWriter::~DocumentWriter() noexcept = default;
+  DocumentWriter::~DocumentWriter() noexcept
+  {
+    // A parser is detached before its last reference goes.
+    if (RefPtr<xml::XMLDocumentParser> parser = krys::move(_xmlParser))
+    {
+      parser->Detach();
+    }
+  }
 
   void DocumentWriter::SetFrame(LocalFrame &frame) noexcept
   {
@@ -66,12 +75,12 @@ namespace krys::boo
     // Create a new document before clearing the frame.
     // FIXME: Reusing the initial empty document's window for a document of the same origin
     // (takeDOMWindowFrom), once there are origins.
-    auto document = CreateRef<dom::HTMLDocument>();
-    if (!url.IsNull())
-    {
-      document->SetURL(url::URL(url));
-    }
+    auto document = dom::DOMImplementation::CreateDocument(_mimeType, url);
 
+    if (RefPtr<xml::XMLDocumentParser> parser = krys::move(_xmlParser))
+    {
+      parser->Detach();
+    }
     _pendingBytes.clear();
     _hasReceivedSomeData = false;
 
@@ -91,7 +100,14 @@ namespace krys::boo
     // The document is loading until its parser finishes.
     document->SetParsing(true);
     dom::DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
-    _parser = CreateRef<html::HTMLDocumentParser>(*document);
+    if (auto *htmlDocument = DynamicDowncast<dom::HTMLDocument>(document.get()))
+    {
+      _parser = CreateRef<html::HTMLDocumentParser>(*htmlDocument);
+    }
+    else
+    {
+      _xmlParser = xml::XMLDocumentParser::Create(*document);
+    }
     _state = State::Started;
     return true;
   }
@@ -99,7 +115,7 @@ namespace krys::boo
   void DocumentWriter::AddData(Span<const uint8> data) noexcept
   {
     krys_assert(_state != State::NotStarted);
-    if (_state == State::Finished || !_parser)
+    if (_state == State::Finished || (!_parser && !_xmlParser))
     {
       return;
     }
@@ -139,6 +155,11 @@ namespace krys::boo
       }
     }
 
+    if (RefPtr<xml::XMLDocumentParser> xmlParser = _xmlParser)
+    {
+      xmlParser->Append(ReplaceInvalidUTF8(krys::move(chunk)));
+      return;
+    }
     _parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(chunk)));
     _parser->PumpTokenizer();
   }
@@ -150,16 +171,27 @@ namespace krys::boo
     _state = State::Finished;
 
     RefPtr<LocalFrame> protectedFrame = ShareRefPtr(_frame.get());
-    RefPtr<html::HTMLDocumentParser> parser = krys::move(_parser);
-    if (!parser)
+    if (RefPtr<xml::XMLDocumentParser> xmlParser = krys::move(_xmlParser))
     {
-      return;
+      _hasReceivedSomeData = true;
+      xmlParser->Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)));
+      _pendingBytes.clear();
+      xmlParser->Finish();
+      xmlParser->Detach();
     }
+    else
+    {
+      RefPtr<html::HTMLDocumentParser> parser = krys::move(_parser);
+      if (!parser)
+      {
+        return;
+      }
 
-    _hasReceivedSomeData = true;
-    parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
-    _pendingBytes.clear();
-    parser->PumpTokenizer();
+      _hasReceivedSomeData = true;
+      parser->InputStream().Append(ReplaceInvalidUTF8(krys::move(_pendingBytes)), IsEOF(true));
+      _pendingBytes.clear();
+      parser->PumpTokenizer();
+    }
 
     if (protectedFrame)
     {

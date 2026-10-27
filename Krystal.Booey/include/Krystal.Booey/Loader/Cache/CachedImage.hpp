@@ -4,8 +4,15 @@
 #include "Krystal.Booey/Graphics/ImageObserver.hpp"
 #include "Krystal.Booey/Graphics/LayoutSize.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResource.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo::svg
+{
+  class SVGImageCache;
+}
 
 namespace krys::boo
 {
@@ -16,8 +23,8 @@ namespace krys::boo
   class RenderObject;
 
   /// @brief A cached image: the encoded data a load brought, and the image made from it.
-  // FIXME: SVG images and their per-client caches, the broken image (G7c), the image data update back-off
-  // for streamed data, and asynchronous decoding's waiting clients.
+  // FIXME: The broken image (G7c), the image data update back-off for streamed data, and asynchronous
+  // decoding's waiting clients.
   class CachedImage final : public CachedResource
   {
     friend class MemoryCache;
@@ -67,8 +74,17 @@ namespace krys::boo
       KRYS_NODISCARD bool AllowsAnimation(const Image &) const noexcept final;
     };
 
+    struct ContainerContext
+    {
+      LayoutSize ContainerSize;
+      float ContainerZoom;
+      url::URL ImageURL;
+    };
+
     RefPtr<CachedImageObserver> _imageObserver;
     RefPtr<Image> _image;
+    UniquePtr<svg::SVGImageCache> _svgImageCache;
+    HashMap<const CachedImageClient *, ContainerContext> _pendingContainerContextRequests;
     bool _shouldPaintBrokenImage {true};
     bool _allowsOrientationOverride {true};
 

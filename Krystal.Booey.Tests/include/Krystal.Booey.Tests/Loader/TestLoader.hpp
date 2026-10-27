@@ -79,13 +79,15 @@ namespace krys::boo::tests
   private:
     void Complete(const url::URL &url, const Func<void(LoadResult &&)> &completionHandler) noexcept
     {
-      auto found = Resources.find(url.String());
+      // As a network or file load would, the strategy ignores the URL's fragment.
+      auto key = url.StringWithoutFragmentIdentifier();
+      auto found = Resources.find(key);
       if (found == Resources.end())
       {
         completionHandler(Unexpected(ResourceError(u8"Test", 404, url, u8"Not found")));
         return;
       }
-      auto mimeType = MimeTypes.find(url.String());
+      auto mimeType = MimeTypes.find(key);
       completionHandler(LoadedResource {
         .Response =
           ResourceResponse(url, mimeType != MimeTypes.end() ? mimeType->second : utf8_string(u8"image/png"),

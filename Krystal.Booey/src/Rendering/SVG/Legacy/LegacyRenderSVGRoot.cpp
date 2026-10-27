@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Booey/SVG/Graphics/SVGImage.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -113,8 +114,7 @@ namespace krys::boo
 
   bool LegacyRenderSVGRoot::IsEmbeddedThroughSVGImage() const noexcept
   {
-    // FIXME: Whether the <svg> is in an SVG image (isInSVGImage), with SVG images (B11d).
-    return false;
+    return svg::IsInSVGImage(&SvgSvgElement());
   }
 
   LayoutUnit LegacyRenderSVGRoot::ComputeReplacedLogicalWidth(

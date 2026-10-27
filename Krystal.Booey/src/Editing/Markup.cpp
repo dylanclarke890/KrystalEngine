@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/SimpleRange.hpp"
@@ -35,6 +36,7 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
 #include <algorithm>
 #include <ranges>
 
@@ -1764,12 +1766,20 @@ namespace krys::boo
     return markup;
   }
 
-  // FIXME: Parsing XML for documents that aren't HTML (parseXML), with XML documents; and the template
-  // document for contexts that are templates.
+  // FIXME: The template document for contexts that are templates.
   dom::ExceptionOr<Ref<dom::DocumentFragment>> CreateContextualFragment(dom::Element &element,
                                                                         utf8_stringview markup) noexcept
   {
-    auto fragment = ParseHTMLIntoFragment(element.NodeDocument(), markup, element);
+    auto &document = element.NodeDocument();
+    Ref<dom::DocumentFragment> fragment = document.CreateDocumentFragment();
+    if (Is<dom::HTMLDocument>(document))
+    {
+      fragment = ParseHTMLIntoFragment(document, markup, element);
+    }
+    else if (!xml::XMLDocumentParser::ParseDocumentFragment(markup, *fragment, &element))
+    {
+      return dom::Exception {dom::ExceptionCode::SyntaxError};
+    }
 
     // We need to pop <html> and <body> elements and remove <head> to
     // accommodate folks passing complete HTML documents to make the

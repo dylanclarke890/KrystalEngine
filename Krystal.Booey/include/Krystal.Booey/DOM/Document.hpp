@@ -192,13 +192,25 @@ namespace krys::boo::dom
 
     friend class ::krys::boo::RenderTreeUpdater;
 
+  public:
+    enum class StandaloneStatus : uint8
+    {
+      Unspecified,
+      Standalone,
+      NotStandalone
+    };
+
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
     DOMString _contentType {u8"application/xml"};
+    DOMString _xmlEncoding;
+    DOMString _xmlVersion {u8"1.0"};
+    StandaloneStatus _xmlStandalone {StandaloneStatus::Unspecified};
     List<Range *> _liveRanges;
     List<NodeIterator *> _nodeIterators;
     bool _allowDeclarativeShadowRoots : 1 {false};
+    bool _hasXMLDeclaration : 1 {false};
     QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
     DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
     html::DocumentReadyState _currentDocumentReadiness
@@ -1745,6 +1757,46 @@ namespace krys::boo::dom
     /// @brief Returns the first element within node’s descendants whose ID is `elementId`.
     /// @see https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid
     RefPtr<const Element> GetElementById(DOMStringView elementId) const noexcept;
+
+#pragma endregion
+
+#pragma region XML Declaration
+
+    KRYS_NODISCARD const DOMString &XMLEncoding() const noexcept
+    {
+      return _xmlEncoding;
+    }
+    KRYS_NODISCARD const DOMString &XMLVersion() const noexcept
+    {
+      return _xmlVersion;
+    }
+    KRYS_NODISCARD bool XMLStandalone() const noexcept
+    {
+      return _xmlStandalone == StandaloneStatus::Standalone;
+    }
+    KRYS_NODISCARD StandaloneStatus XMLStandaloneStatus() const noexcept
+    {
+      return _xmlStandalone;
+    }
+    KRYS_NODISCARD bool HasXMLDeclaration() const noexcept
+    {
+      return _hasXMLDeclaration;
+    }
+
+    /// @brief Only to be set from the XML parser.
+    void SetXMLEncoding(DOMString &&encoding) noexcept
+    {
+      _xmlEncoding = krys::move(encoding);
+    }
+    ExceptionOr<void> SetXMLVersion(DOMString &&version) noexcept;
+    void SetXMLStandalone(bool standalone) noexcept
+    {
+      _xmlStandalone = standalone ? StandaloneStatus::Standalone : StandaloneStatus::NotStandalone;
+    }
+    void SetHasXMLDeclaration(bool hasXMLDeclaration) noexcept
+    {
+      _hasXMLDeclaration = hasXMLDeclaration;
+    }
 
 #pragma endregion
 

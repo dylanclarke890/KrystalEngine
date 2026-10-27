@@ -17,9 +17,11 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/ScrollAlignment.hpp"
@@ -139,6 +141,10 @@ namespace krys::boo
     // The host paints the damage in its next frame.
     if (auto *frame = _frame.get())
     {
+      if (auto *page = frame->GetPage())
+      {
+        page->GetChromeClient().InvalidateContentsAndRootView(damage);
+      }
       if (auto *document = frame->Document())
       {
         document->ScheduleRenderingUpdate({});
@@ -1127,8 +1133,7 @@ namespace krys::boo
 
     // To combat the inability to scroll on a page with overflow:hidden on the root when scaled, disregard
     // hidden when there is a frameScaleFactor that is greater than one on the main frame.
-    // FIXME: Also when there's a header or footer, once there are those; embedded SVG documents, once there's
-    // SVG rendering.
+    // FIXME: Also when there's a header or footer, once there are those.
     bool overrideHidden = Frame().FrameScaleFactor() > 1;
 
     Overflow overflowX = renderer.Style().OverflowX();
@@ -2815,6 +2820,12 @@ namespace krys::boo
 
     auto *renderView = GetRenderView();
     if (!renderView)
+    {
+      return;
+    }
+
+    auto *page = Frame().GetPage();
+    if (page && page->GetChromeClient().IsSVGImageChromeClient())
     {
       return;
     }

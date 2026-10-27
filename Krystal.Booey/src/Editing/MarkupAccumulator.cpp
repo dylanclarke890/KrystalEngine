@@ -184,10 +184,29 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: The XML declaration (hasXMLDeclaration, xmlVersion, xmlEncoding, xmlStandalone), with XML
-    // documents.
-    void AppendXMLDeclaration(utf8_string &, const dom::Document &) noexcept
+    void AppendXMLDeclaration(utf8_string &result, const dom::Document &document) noexcept
     {
+      if (!document.HasXMLDeclaration())
+      {
+        return;
+      }
+
+      const auto &encoding = document.XMLEncoding();
+      bool isStandaloneSpecified =
+        document.XMLStandaloneStatus() != dom::Document::StandaloneStatus::Unspecified;
+
+      result.append(u8"<?xml version=\"");
+      result.append(document.XMLVersion());
+      if (!encoding.empty())
+      {
+        result.append(u8"\" encoding=\"");
+        result.append(encoding);
+      }
+      if (isStandaloneSpecified)
+      {
+        result.append(document.XMLStandalone() ? u8"\" standalone=\"yes" : u8"\" standalone=\"no");
+      }
+      result.append(u8"\"?>");
     }
 
     void AppendDocumentType(utf8_string &result, const dom::DocumentType &documentType) noexcept
