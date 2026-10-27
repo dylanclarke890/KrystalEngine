@@ -13,6 +13,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::dom
@@ -116,6 +117,13 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#deactivate-an-event-handler
     void SetEventHandlerValue(DOMStringAtom name, Func<void(Event &)> &&value) noexcept;
 
+    /// @brief The target's event listener list, in the order they were added.
+    /// @see https://dom.spec.whatwg.org/#eventtarget-event-listener-list
+    KRYS_NODISCARD Span<const Ref<EventListener>> EventListeners() const noexcept
+    {
+      return _eventListenerList;
+    }
+
   protected:
     /// @brief The last reference was dropped: deletes the target, unless something else keeps it (a document
     /// that nodes still refer to).
@@ -124,16 +132,16 @@ namespace krys::boo::dom
       delete this;
     }
 
-    /// @brief A listener for events of type @p type was added.
-    virtual void DidAddEventListener(DOMStringAtom type) noexcept
+    /// @brief @p listener was added to the target's listeners.
+    virtual void DidAddEventListener(const EventListener &listener) noexcept
     {
-      (void)type;
+      (void)listener;
     }
 
-    /// @brief A listener for events of type @p type was removed.
-    virtual void DidRemoveEventListener(DOMStringAtom type) noexcept
+    /// @brief @p listener was removed from the target's listeners.
+    virtual void DidRemoveEventListener(const EventListener &listener) noexcept
     {
-      (void)type;
+      (void)listener;
     }
 
     /// @see https://dom.spec.whatwg.org/#get-the-parent

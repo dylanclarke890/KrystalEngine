@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Page/IntersectionObserverMarginBox.hpp"
+#include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -34,5 +35,11 @@ namespace krys::boo
     /// @brief An intersection observer's scroll margin, which grows the clips of the scroll containers on the
     /// way.
     Maybe<IntersectionObserverMarginBox> ScrollMargin {};
+
+    KRYS_NODISCARD RepaintRectCalculation GetRepaintRectCalculation() const noexcept
+    {
+      return Options.Contains(Option::CalculateAccurateRepaintRect) ? RepaintRectCalculation::Accurate
+                                                                    : RepaintRectCalculation::Fast;
+    }
   };
 }

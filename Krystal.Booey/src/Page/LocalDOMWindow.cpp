@@ -84,17 +84,17 @@ namespace krys::boo
     std::erase(AllWindows(), this);
   }
 
-  void LocalDOMWindow::DidAddEventListener(dom::DOMStringAtom type) noexcept
+  void LocalDOMWindow::DidAddEventListener(const dom::EventListener &listener) noexcept
   {
-    if (IsGamepadEventType(type))
+    if (IsGamepadEventType(listener.Type()))
     {
       IncrementGamepadEventListenerCount();
     }
   }
 
-  void LocalDOMWindow::DidRemoveEventListener(dom::DOMStringAtom type) noexcept
+  void LocalDOMWindow::DidRemoveEventListener(const dom::EventListener &listener) noexcept
   {
-    if (IsGamepadEventType(type))
+    if (IsGamepadEventType(listener.Type()))
     {
       DecrementGamepadEventListenerCount();
     }

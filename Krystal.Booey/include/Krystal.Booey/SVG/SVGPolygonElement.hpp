@@ -1,15 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGPolyElement.hpp"
 
 namespace krys::boo::svg
 {
-  class SVGPolygonElement : public SVGElement
+  /// @brief The `<polygon>` element: a closed shape through a list of points.
+  /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGPolygonElement
+  class SVGPolygonElement final : public SVGPolyElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGPolygonElement);
 
   public:
-    SVGPolygonElement(dom::Document &document) noexcept;
+    explicit SVGPolygonElement(dom::Document &document) noexcept;
   };
 }
 

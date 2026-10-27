@@ -53,6 +53,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/DateTimeChooserOverlay.hpp
       include/Krystal.UI/Overlay.hpp
       include/Krystal.UI/PopupMenuOverlay.hpp
+      include/Krystal.UI/PathStrokerStrategy.hpp
       include/Krystal.UI/Render2DConversions.hpp
       include/Krystal.UI/SystemPasteboardStrategy.hpp
       include/Krystal.UI/View.hpp
@@ -79,6 +80,7 @@ target_sources(Krystal.UI
     src/DateTimeChooserOverlay.cpp
     src/Overlay.cpp
     src/PopupMenuOverlay.cpp
+    src/PathStrokerStrategy.cpp
     src/Render2DConversions.cpp
     src/SystemPasteboardStrategy.cpp
     src/View.cpp

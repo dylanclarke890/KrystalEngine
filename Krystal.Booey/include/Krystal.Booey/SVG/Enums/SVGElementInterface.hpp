@@ -7,6 +7,7 @@ namespace krys::boo::svg
   enum class SVGElementInterface : uint8
   {
     None,
+    A,
     Circle,
     Defs,
     Desc,
@@ -18,6 +19,7 @@ namespace krys::boo::svg
     Image,
     Line,
     Metadata,
+    Path,
     Polygon,
     Polyline,
     Rect,
@@ -29,7 +31,8 @@ namespace krys::boo::svg
     Title,
     Unknown,
     Use,
+    View,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 23uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 26uz);

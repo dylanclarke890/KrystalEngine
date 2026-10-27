@@ -37,6 +37,8 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Booey/Style/Values/Scrollbars/ScrollbarWidth.hpp"
+#include "Krystal.Booey/SVG/SVGDocument.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/URL/URLParser.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -2646,6 +2648,18 @@ namespace krys::boo
     // FIXME: The text indicator, once there's one.
   }
 
+  namespace
+  {
+    KRYS_NODISCARD RefPtr<svg::SVGSvgElement> SVGRootElement(const dom::Document &document) noexcept
+    {
+      auto documentElement = document.DocumentElement();
+      auto *svgElement = documentElement ? DynamicDowncast<svg::SVGElement>(*documentElement) : nullptr;
+      return svgElement
+               ? ShareRefPtr(DynamicDowncast<svg::SVGSvgElement>(const_cast<svg::SVGElement &>(*svgElement)))
+               : nullptr;
+    }
+  }
+
   bool LocalFrameView::ScrollToFragment(const url::URL &url) noexcept
   {
     krys_assert(Frame().Document());
@@ -2671,7 +2685,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Resetting the scroll anchor (resetScrollAnchor), once there's scroll anchoring.
+    ResetScrollAnchor();
     return false;
   }
 
@@ -2691,12 +2705,30 @@ namespace krys::boo
     // Setting to null will clear the current target.
     document.SetCSSTarget(anchorElement.get());
 
-    // FIXME: SVG documents' own fragments (SVGSVGElement::scrollToFragment), with SVG.
-    // Implement the rule that "" and "top" both mean top of page as in other browsers.
-    if (!anchorElement
-        && !(fragmentIdentifier.empty()
-             || text::IsASCIICaselessEqual(fragmentIdentifier, utf8_stringview(u8"top"))))
+    if (Is<svg::SVGDocument>(document))
     {
+      if (fragmentIdentifier.empty())
+      {
+        return false;
+      }
+      if (auto rootElement = SVGRootElement(document))
+      {
+        if (rootElement->ScrollToFragment(fragmentIdentifier))
+        {
+          return true;
+        }
+        // If SVG failed to scrollToAnchor() and anchorElement is null, no other scrolling will be possible.
+        if (!anchorElement)
+        {
+          return false;
+        }
+      }
+    }
+    else if (!anchorElement
+             && !(fragmentIdentifier.empty()
+                  || text::IsASCIICaselessEqual(fragmentIdentifier, utf8_stringview(u8"top"))))
+    {
+      // Implement the rule that "" and "top" both mean top of page as in other browsers.
       return false;
     }
 
@@ -3056,5 +3088,27 @@ namespace krys::boo
   IntRect LocalFrameView::ContentsToWindow(const IntRect &rect) const noexcept
   {
     return ContentsToView(rect);
+  }
+
+  void LocalFrameView::ResetScrollAnchor() noexcept
+  {
+    krys_assert(Frame().Document());
+    auto &document = *Frame().Document();
+
+    // If CSS target was set previously, we want to set it to 0, recalc
+    // and possibly repaint because :target pseudo class may have been
+    // set (see bug 11321).
+    document.SetCSSTarget(nullptr);
+
+    if (Is<svg::SVGDocument>(document))
+    {
+      if (auto rootElement = SVGRootElement(document))
+      {
+        // We need to update the layout before resetScrollAnchor(), otherwise we
+        // could really mess things up if resetting the anchor comes at a bad moment.
+        (void)document.UpdateStyleIfNeeded();
+        rootElement->ResetScrollAnchor();
+      }
+    }
   }
 }

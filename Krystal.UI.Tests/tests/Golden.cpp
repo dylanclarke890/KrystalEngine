@@ -245,6 +245,16 @@ namespace krys::ui::tests
     CheckPage("filters", 360u, 240u);
   }
 
+  TEST_CASE("Golden: inline SVG", "[UI][GPU][Golden]")
+  {
+    CheckPage("svg", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: SVG instances and embedded content", "[UI][GPU][Golden]")
+  {
+    CheckPage("svg-content", 360u, 240u);
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);

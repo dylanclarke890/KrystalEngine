@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/SVGLocatable.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
@@ -75,8 +76,7 @@ namespace krys::boo::svg
       return FloatRect();
     }
 
-    // FIXME: The renderer's object bounding box, once there are SVG renderers (B11b).
-    return FloatRect();
+    return element->Renderer()->ObjectBoundingBox();
   }
 
   AffineTransform SVGLocatable::ComputeCTM(SVGElement *element, CTMScope mode,

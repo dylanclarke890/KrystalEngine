@@ -35,7 +35,7 @@ namespace krys::boo::svg::tests
                                                        dom::DOMStringAtom::Null())
           == PropertyId::TransformOrigin);
     CHECK(SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"d"), dom::DOMStringAtom::Null())
-          == PropertyId::Invalid);
+          == PropertyId::D);
     CHECK(
       SVGElement::CssPropertyIdForSVGAttributeName(dom::DOMStringAtom(u8"href"), dom::DOMStringAtom::Null())
       == PropertyId::Invalid);

@@ -44,6 +44,7 @@
 #include "Krystal.UI/FileLoaderStrategy.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "Krystal.UI/Input.hpp"
+#include "Krystal.UI/PathStrokerStrategy.hpp"
 #include "Krystal.UI/PopupMenuOverlay.hpp"
 #include "Krystal.UI/SystemPasteboardStrategy.hpp"
 #include <algorithm>
@@ -578,6 +579,11 @@ namespace krys::ui
     {
       static SystemPasteboardStrategy systemPasteboard;
       strategies.SetPasteboardStrategy(&systemPasteboard);
+    }
+    if (!strategies.GetPathStrokeStrategy())
+    {
+      static PathStrokerStrategy pathStroker;
+      strategies.SetPathStrokeStrategy(&pathStroker);
     }
 
     _chromeClient->SetView(this);

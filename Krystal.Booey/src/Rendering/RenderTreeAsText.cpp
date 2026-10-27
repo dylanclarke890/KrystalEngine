@@ -19,6 +19,11 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
+#include "Krystal.Booey/Rendering/SVG/SVGRenderTreeAsText.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/HexNumber.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
@@ -469,7 +474,29 @@ namespace krys::boo
 
   void Write(TextStream &ts, const RenderObject &renderer, EnumSet<RenderAsTextFlag> behavior) noexcept
   {
-    // FIXME: SVG renderers write themselves (writeSVGRenderer), once there's SVG.
+    if (auto *svgShape = DynamicDowncast<LegacyRenderSVGShape>(renderer))
+    {
+      Write(ts, *svgShape, behavior);
+      return;
+    }
+    // FIXME: Resource containers and gradient stops write themselves (writeSVGRenderer), with paint servers
+    // (B11e).
+    if (auto *svgContainer = DynamicDowncast<LegacyRenderSVGContainer>(renderer))
+    {
+      WriteSVGContainer(ts, *svgContainer, behavior);
+      return;
+    }
+    if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(renderer))
+    {
+      Write(ts, *svgRoot, behavior);
+      return;
+    }
+    if (auto *svgImage = DynamicDowncast<LegacyRenderSVGImage>(renderer))
+    {
+      WriteSVGImage(ts, *svgImage, behavior);
+      return;
+    }
+    // FIXME: Text writes itself (writeSVGRenderer), with text (B11g).
 
     ts << Indent;
     RenderTreeAsText::WriteRenderObject(ts, renderer, behavior);
@@ -491,8 +518,7 @@ namespace krys::boo
       Write(ts, child, behavior);
     }
 
-    // FIXME: The render trees of frames (RenderWidget), and the resources of SVG renderers, once there are
-    // any.
+    // FIXME: The render trees of frames (RenderWidget), once there are any.
   }
 
   namespace

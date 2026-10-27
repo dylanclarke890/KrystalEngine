@@ -99,7 +99,8 @@ namespace krys::boo::svg
                        SVGAnimatedAngleOrientAccessor<TOwner>::template Singleton<property1, property2>());
     }
 
-    // FIXME: SVGAnimatedPathSegList comes with <path> (B11b).
+    // FIXME: <path>'s `d` as an animated property (SVGAnimatedPathSegList, without the segment list SVG 2
+    // removed), with SMIL (B11i).
 
     template <Ref<SVGAnimatedPointList> TOwner::*property>
     static void RegisterProperty(const dom::QualifiedName &attributeName) noexcept

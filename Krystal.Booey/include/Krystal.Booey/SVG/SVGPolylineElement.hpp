@@ -1,15 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGPolyElement.hpp"
 
 namespace krys::boo::svg
 {
-  class SVGPolylineElement : public SVGElement
+  /// @brief The `<polyline>` element: an open shape through a list of points.
+  /// @see https://svgwg.org/svg2-draft/shapes.html#InterfaceSVGPolylineElement
+  class SVGPolylineElement final : public SVGPolyElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGPolylineElement);
 
   public:
-    SVGPolylineElement(dom::Document &document) noexcept;
+    explicit SVGPolylineElement(dom::Document &document) noexcept;
   };
 }
 

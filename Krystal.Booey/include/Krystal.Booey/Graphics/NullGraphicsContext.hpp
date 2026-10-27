@@ -96,16 +96,16 @@ namespace krys::boo
                           boo::StrokeStyle) noexcept final
     {
     }
-    void SetLineCap(LineCap) noexcept final
+    void SetLineCap(LineCap) noexcept override
     {
     }
-    void SetLineDash(const DashArray &, float) noexcept final
+    void SetLineDash(const DashArray &, float) noexcept override
     {
     }
-    void SetLineJoin(LineJoin) noexcept final
+    void SetLineJoin(LineJoin) noexcept override
     {
     }
-    void SetMiterLimit(float) noexcept final
+    void SetMiterLimit(float) noexcept override
     {
     }
     void ClipOut(const Path &) noexcept final

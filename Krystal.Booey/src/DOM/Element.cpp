@@ -3114,9 +3114,14 @@ namespace krys::boo::dom
       return TreeQueries::IsShadowIncludingInclusiveAncestor(ancestorRoot, node);
     }
 
+    KRYS_NODISCARD const svg::SVGElement *ElementWithSVGLayoutBox(const Element &element) noexcept
+    {
+      auto *svg = DynamicDowncast<svg::SVGElement>(element);
+      return svg && svg->HasAssociatedSVGLayoutBox() ? svg : nullptr;
+    }
+
     KRYS_NODISCARD bool ShouldObtainBoundsFromBoxModel(const Element &element) noexcept
     {
-      // FIXME: SVG renderers (RenderSVGModelObject), once there's SVG.
       return element.Renderer() && element.Renderer()->IsRenderBoxModelObject();
     }
 
@@ -3136,9 +3141,15 @@ namespace krys::boo::dom
 
     List<FloatQuad> quads;
 
-    // FIXME: SVG elements' bounding boxes, and the option and optgroup elements of list boxes, once there's
-    // SVG and form controls.
-    if (ShouldObtainBoundsFromBoxModel(*this))
+    // FIXME: The option and optgroup elements of list boxes, once there are form controls.
+    if (auto *svgElement = ElementWithSVGLayoutBox(*this))
+    {
+      if (auto localRect = svgElement->GetBoundingBox())
+      {
+        quads.push_back(renderer->LocalToAbsoluteQuad(*localRect));
+      }
+    }
+    else if (ShouldObtainBoundsFromBoxModel(*this))
     {
       renderer->AbsoluteQuads(quads);
     }
@@ -3158,9 +3169,15 @@ namespace krys::boo::dom
   {
     auto *renderer = Renderer();
     List<FloatQuad> quads;
-    // FIXME: SVG elements' bounding boxes, and the option and optgroup elements of list boxes, once there's
-    // SVG and form controls.
-    if (ShouldObtainBoundsFromBoxModel(*this))
+    // FIXME: The option and optgroup elements of list boxes, once there are form controls.
+    if (auto *svgElement = ElementWithSVGLayoutBox(*this))
+    {
+      if (auto localRect = svgElement->GetBoundingBox())
+      {
+        quads.push_back(renderer->LocalToAbsoluteQuad(*localRect));
+      }
+    }
+    else if (ShouldObtainBoundsFromBoxModel(*this))
     {
       renderer->AbsoluteQuads(quads);
     }

@@ -4,12 +4,20 @@
 
 namespace krys::boo::svg
 {
-  class SVGDescElement : public SVGElement
+  /// @brief The `<desc>` element: a description of its parent, never rendered.
+  /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGDescElement
+  class SVGDescElement final : public SVGElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGDescElement);
 
   public:
-    SVGDescElement(dom::Document &document) noexcept;
+    explicit SVGDescElement(dom::Document &document) noexcept;
+
+  private:
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
+    {
+      return false;
+    }
   };
 }
 

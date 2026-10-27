@@ -6,6 +6,11 @@
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   enum class PrintColorAdjust : bool
@@ -760,6 +765,8 @@ namespace krys::boo
     CrispEdges,
     Pixelated
   };
+
+  TextStream &operator<<(TextStream &ts, ImageRendering imageRendering) noexcept;
 
   enum class Order : bool
   {

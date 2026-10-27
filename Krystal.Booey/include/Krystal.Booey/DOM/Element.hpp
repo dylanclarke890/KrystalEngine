@@ -258,6 +258,13 @@ namespace krys::boo::dom
     /// @brief Attaches a user agent shadow root to the element, which must have no shadow root.
     dom::ShadowRoot &CreateUserAgentShadowRoot() noexcept;
 
+    /// @brief Builds the element's user agent shadow tree, if the document has it pending
+    /// (`Document::AddElementWithPendingUserAgentShadowTreeUpdate`); called before the document's style is
+    /// resolved.
+    virtual void UpdateUserAgentShadowTree() noexcept
+    {
+    }
+
     /// @brief The name of the user agent part the element is (its `useragentpart` attribute), which user
     /// agent style sheets select it by as a pseudo-element of its host; null if it isn't one.
     KRYS_NODISCARD DOMStringAtom UserAgentPart() const noexcept;

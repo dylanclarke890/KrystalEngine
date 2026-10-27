@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
+#include "Krystal.Booey/SVG/SVGAElement.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
 #include "Krystal.Booey/SVG/SVGDescElement.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
+#include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolygonElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolylineElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
@@ -19,6 +21,7 @@
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnknownElement.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include "Krystal.Booey/SVG/SVGViewElement.hpp"
 
 namespace krys::boo::svg
 {
@@ -64,6 +67,10 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGMetadataElement>(document);
       }
+      case TagName::path:
+      {
+        return CreateRefPtr<SVGPathElement>(document);
+      }
       case TagName::polygon:
       {
         return CreateRefPtr<SVGPolygonElement>(document);
@@ -104,10 +111,14 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGUseElement>(document);
       }
-      // FIXME: <a>, <path> and <view>, with shapes and structure (B11b).
       case TagName::a:
-      case TagName::path:
+      {
+        return CreateRefPtr<SVGAElement>(document);
+      }
       case TagName::view:
+      {
+        return CreateRefPtr<SVGViewElement>(document);
+      }
       // FIXME: The gradients, their stops and <pattern>, with paint servers (B11e).
       case TagName::linearGradient:
       case TagName::radialGradient:

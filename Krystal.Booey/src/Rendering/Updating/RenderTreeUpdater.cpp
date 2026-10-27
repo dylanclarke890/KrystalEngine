@@ -15,6 +15,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdaterGeneratedContent.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
@@ -293,13 +294,17 @@ namespace krys::boo
 
       auto &element = Downcast<dom::Element>(node);
 
-      // FIXME: SVG renderer updates, once there are SVG renderers.
+      bool needsSVGRendererUpdate = element.NeedsSVGRendererUpdate();
+      if (needsSVGRendererUpdate)
+      {
+        UpdateSVGRenderer(element);
+      }
 
       auto *elementUpdate = _styleUpdate->GetElementUpdate(element);
 
       // We hop through display: contents elements in findRenderingRoot, so
       // there may be other updates down the tree.
-      if (!elementUpdate && !element.HasDisplayContents())
+      if (!elementUpdate && !element.HasDisplayContents() && !needsSVGRendererUpdate)
       {
         StorePreviousRenderer(element);
         it.TraverseNextSkippingChildren();
@@ -440,6 +445,20 @@ namespace krys::boo
     auto oldStyle = RenderStyle::Clone(renderer.Style());
     renderer.SetStyle(krys::move(newStyle), minimalStyleDifference);
     _builder->NormalizeTreeAfterStyleChange(renderer, oldStyle);
+  }
+
+  void RenderTreeUpdater::UpdateSVGRenderer(dom::Element &element) noexcept
+  {
+    krys_debug_assert(element.NeedsSVGRendererUpdate());
+    element.SetNeedsSVGRendererUpdate(false);
+
+    auto *renderer = element.Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(*renderer);
   }
 
   void RenderTreeUpdater::UpdateElementRenderer(dom::Element &element,

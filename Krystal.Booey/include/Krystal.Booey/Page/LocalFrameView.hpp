@@ -738,6 +738,9 @@ namespace krys::boo
     /// @return Whether there was something to scroll to.
     bool ScrollToAnchorFragment(dom::DOMStringView fragmentIdentifier) noexcept;
 
+    /// @brief Clears the document's target, and an SVG document's view from its fragment.
+    void ResetScrollAnchor() noexcept;
+
     /// @brief Keeps @p anchorNode in view as layout changes (null stops it), scrolling to it now.
     void MaintainScrollPositionAtAnchor(dom::ContainerNode *anchorNode) noexcept;
 

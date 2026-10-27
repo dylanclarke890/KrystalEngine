@@ -40,7 +40,13 @@ namespace krys::boo::dom
     /// @brief Set on an SVG element when one of its properties has changed since the attribute it reflects
     /// was last written; see `Element::SynchronizeAllAttributes`.
     AnimatedSVGAttributesAreDirty = 1 << 20,
+    /// @brief Set on an SVG element whose renderer needs laying out again after a change to the element; see
+    /// `style::Update::AddSVGRendererUpdate`.
+    NeedsSVGRendererUpdate = 1 << 21,
+    /// @brief Set on an SVG element waiting for an id as a pending resource of its tree scope; see
+    /// `DocumentOrShadowRoot::AddPendingSVGResource`.
+    HasPendingResources = 1 << 22,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 21u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 23u);

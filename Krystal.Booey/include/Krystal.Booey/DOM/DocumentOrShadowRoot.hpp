@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Graphics/LayoutPoint.hpp"
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Core/Attributes.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::html
 {
@@ -26,6 +28,11 @@ namespace krys::boo::style
   class Scope;
 }
 
+namespace krys::boo::svg
+{
+  class SVGElement;
+}
+
 namespace krys::boo::dom
 {
   class ContainerNode;
@@ -34,6 +41,7 @@ namespace krys::boo::dom
   class IdTargetObserverRegistry;
   class RadioButtonGroups;
   class NodeAlgorithms;
+  struct SVGResourcesMap;
 
   template <typename>
   class ExceptionOr;
@@ -56,6 +64,7 @@ namespace krys::boo::dom
     UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;
     UniquePtr<dom::RadioButtonGroups> _radioButtonGroups;
+    mutable UniquePtr<SVGResourcesMap> _svgResourcesMap;
 
   protected:
     /// @brief Created by the document or shadow root's constructor.
@@ -155,5 +164,27 @@ namespace krys::boo::dom
     {
       return *_styleScope;
     }
+
+#pragma region SVG Pending Resources
+
+    // An SVG element that refers to an id no element in this tree has yet waits for it as a pending resource;
+    // when an element takes the id, the waiting elements are rebuilt (SVGElement::BuildPendingResource).
+
+    void AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept;
+    KRYS_NODISCARD bool IsIdOfPendingSVGResource(const DOMStringAtom &id) const noexcept;
+    KRYS_NODISCARD bool IsPendingSVGResource(svg::SVGElement &element,
+                                             const DOMStringAtom &id) const noexcept;
+    void ClearHasPendingSVGResourcesIfPossible(svg::SVGElement &element) noexcept;
+    void RemoveElementFromPendingSVGResources(svg::SVGElement &element) noexcept;
+    List<WeakPtr<svg::SVGElement>> RemovePendingSVGResource(const DOMStringAtom &id) noexcept;
+    void MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept;
+    KRYS_NODISCARD RefPtr<svg::SVGElement>
+      TakeElementFromPendingSVGResourcesForRemovalMap(const DOMStringAtom &id) noexcept;
+
+#pragma endregion
+
+  private:
+    KRYS_NODISCARD SVGResourcesMap &GetSVGResourcesMap() const noexcept;
+    KRYS_NODISCARD bool IsElementWithPendingSVGResources(svg::SVGElement &element) const noexcept;
   };
 }

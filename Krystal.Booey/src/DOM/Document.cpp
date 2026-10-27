@@ -128,6 +128,8 @@
 #include "Krystal.Booey/Style/Update.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
+#include "Krystal.Booey/SVG/SVGTitleElement.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -608,14 +610,49 @@ namespace krys::boo::dom
     krys_not_implemented();
   }
 
+  namespace
+  {
+    // The first SVG title element that is a child of the document element.
+    template <typename TElement>
+    KRYS_NODISCARD auto *FirstSVGTitleChild(TElement &documentElement) noexcept
+    {
+      using Title = match_constness_t<TElement, svg::SVGTitleElement>;
+      for (auto *child = TreeQueries::FirstElementChild(documentElement); child;
+           child = TreeQueries::NextElementSibling(*child))
+      {
+        if (auto *svgChild = DynamicDowncast<svg::SVGElement>(*child))
+        {
+          if (auto *title = DynamicDowncast<svg::SVGTitleElement>(*svgChild))
+          {
+            return static_cast<Title *>(title);
+          }
+        }
+      }
+      return static_cast<Title *>(nullptr);
+    }
+
+    KRYS_NODISCARD bool IsSVGSvgElement(const Element *element) noexcept
+    {
+      auto *svgElement = element ? DynamicDowncast<svg::SVGElement>(*element) : nullptr;
+      return svgElement && Is<svg::SVGSvgElement>(*svgElement);
+    }
+  }
+
   DOMString Document::Title() const noexcept
   {
     auto documentElement = DocumentElement();
-    if (Is<svg::SVGElement>(*documentElement))
+    if (IsSVGSvgElement(documentElement.get()))
     {
-      // TODO(DOCUMENT, SVG): If the document element is an SVG svg element, then let value be the child text
-      // content of the first SVG title element that is a child of the document element.
-      // return StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
+      // If the document element is an SVG svg element, then let value be the child text content of the first
+      // SVG title element that is a child of the document element.
+      auto *title = FirstSVGTitleChild(*documentElement);
+      if (!title)
+      {
+        return {};
+      }
+
+      return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
+        TextAlgorithms::ChildTextContent(*title));
     }
     else
     {
@@ -628,24 +665,38 @@ namespace krys::boo::dom
       return infra::StringAlgorithms::StripAndCollapseASCIIWhitespace(
         TextAlgorithms::ChildTextContent(*title));
     }
-
-    return {};
   }
 
   ExceptionOr<void> Document::Title(DOMString &&value) noexcept
   {
     html::CEReactionsScope ceReactions;
     auto documentElement = DocumentElement();
-    if (Is<svg::SVGElement>(*documentElement))
+    if (IsSVGSvgElement(documentElement.get()))
     {
-      // TODO(DOCUMENT, SVG) - If the document element is an SVG svg element
       // If there is an SVG title element that is a child of the document element, let element be the first
       // such element. Otherwise:
-      //   Let element be the result of creating an element given the document element's node document,
-      //   "title", and the SVG namespace. Insert element as the first child of the document element.
+      RefPtr<Element> title = ShareRefPtr(FirstSVGTitleChild(*documentElement));
+      if (!title)
+      {
+        // Let element be the result of creating an element given the document element's node document,
+        // "title", and the SVG namespace. Insert element as the first child of the document element.
+        title = ElementFactory::Create(*this, {infra::Namespaces::SVG, DOMStringAtom::Null(), u8"title"});
+
+        if (auto insert =
+              MutationAlgorithms::PreInsert(*title, *documentElement, documentElement->FirstChild());
+            insert.HasException())
+        {
+          return insert.ReleaseException();
+        }
+      }
+
       // String replace all with the given value within element.
+      if (auto replace = NodeAlgorithms::StringReplaceAll(krys::move(value), *title); replace.HasException())
+      {
+        return replace.ReleaseException();
+      }
     }
-    else if (documentElement->NamespaceURI() == infra::Namespaces::HTML)
+    else if (documentElement && documentElement->NamespaceURI() == infra::Namespaces::HTML)
     {
       auto head = Head();
       auto title = html::DOMTreeAccessors::GetTitleElement(*this);
@@ -3767,23 +3818,21 @@ namespace krys::boo::dom
     }
   }
 
-  void Document::AddElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept
+  void Document::AddElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept
   {
     krys_debug_assert(&element.NodeDocument() == this);
     krys_debug_assert(!HasElementWithPendingUserAgentShadowTreeUpdate(element));
-    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(
-      WeakPtr<html::HTMLInputElement>::WithRef(element));
+    _elementsWithPendingUserAgentShadowTreeUpdates.push_back(WeakPtr<Element>::WithRef(element));
   }
 
-  void Document::RemoveElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept
+  void Document::RemoveElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept
   {
     krys_debug_assert(&element.NodeDocument() == this);
     std::erase_if(_elementsWithPendingUserAgentShadowTreeUpdates,
                   [&](const auto &entry) { return !entry || entry.get() == &element; });
   }
 
-  bool
-    Document::HasElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) const noexcept
+  bool Document::HasElementWithPendingUserAgentShadowTreeUpdate(Element &element) const noexcept
   {
     return std::ranges::any_of(_elementsWithPendingUserAgentShadowTreeUpdates,
                                [&](const auto &entry) { return entry.get() == &element; });
@@ -3803,7 +3852,7 @@ namespace krys::boo::dom
     auto pendingUserAgentShadowTreeUpdates = _elementsWithPendingUserAgentShadowTreeUpdates;
     for (auto &weakElement : pendingUserAgentShadowTreeUpdates)
     {
-      if (RefPtr<html::HTMLInputElement> element = ShareRefPtr(weakElement.get()))
+      if (RefPtr<Element> element = ShareRefPtr(weakElement.get()))
       {
         element->UpdateUserAgentShadowTree();
       }
@@ -3920,6 +3969,16 @@ namespace krys::boo::dom
     }
 
     EnsurePendingRenderTreeUpdate().AddText(text, {offsetOfReplacedText, lengthOfReplacedText, null});
+  }
+
+  void Document::UpdateSVGRenderer(svg::SVGElement &element) noexcept
+  {
+    if (!HasLivingRenderTree())
+    {
+      return;
+    }
+
+    EnsurePendingRenderTreeUpdate().AddSVGRendererUpdate(element);
   }
 
   style::Update &Document::EnsurePendingRenderTreeUpdate() noexcept

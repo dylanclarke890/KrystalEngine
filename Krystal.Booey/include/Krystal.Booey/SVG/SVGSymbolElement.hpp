@@ -1,15 +1,26 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGFitToViewBox.hpp"
+#include "Krystal.Booey/SVG/SVGGraphicsElement.hpp"
 
 namespace krys::boo::svg
 {
-  class SVGSymbolElement : public SVGElement
+  /// @brief The `<symbol>` element: graphics drawn only where `<use>` instantiates them.
+  /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGSymbolElement
+  class SVGSymbolElement final : public SVGGraphicsElement, public SVGFitToViewBox
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGSymbolElement);
 
   public:
-    SVGSymbolElement(dom::Document &document) noexcept;
+    explicit SVGSymbolElement(dom::Document &document) noexcept;
+
+    using PropertyRegistry = SVGPropertyOwnerRegistry<SVGSymbolElement, SVGGraphicsElement, SVGFitToViewBox>;
+
+  private:
+    void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
+                          Maybe<dom::DOMStringView> value) noexcept override;
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
+    KRYS_NODISCARD bool SelfHasRelativeLengths() const noexcept override;
   };
 }
 

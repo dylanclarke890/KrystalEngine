@@ -75,7 +75,8 @@ namespace krys::boo::svg
     }
   };
 
-  // FIXME: SVGAnimatedPathSegListAccessor comes with <path> (B11b).
+  // FIXME: An accessor for <path>'s `d` as an animated property (SVGAnimatedPathSegListAccessor, without the
+  // segment list SVG 2 removed), with SMIL (B11i).
 }
 
 #undef KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Graphics/Transforms/TransformState.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
@@ -278,6 +279,73 @@ namespace krys::boo
     return CanHaveChildren();
   }
 
+  void RenderObject::SetNeedsBoundariesUpdate() noexcept
+  {
+  }
+
+  void RenderObject::InvalidateCachedBoundaries() noexcept
+  {
+    for (auto *renderer = this; renderer && renderer->IsSVGRenderer(); renderer = renderer->Parent())
+    {
+      if (renderer->UsesBoundaryCaching())
+      {
+        renderer->SetNeedsBoundariesUpdate();
+        break;
+      }
+    }
+  }
+
+  bool RenderObject::UsesBoundaryCaching() const noexcept
+  {
+    return (_typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::Replaced
+            && _typeSpecificFlags.ReplacedFlags().Contains(ReplacedFlag::UsesBoundaryCaching))
+           || (_typeSpecificFlags.GetKind() == TypeSpecificFlags::Kind::SVGModelObject
+               && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::UsesBoundaryCaching));
+  }
+
+  FloatRect RenderObject::ObjectBoundingBox() const noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  FloatRect RenderObject::StrokeBoundingBox() const noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  // Returns the smallest rectangle enclosing all of the painted content
+  // respecting clipping, masking, filters, opacity, stroke-width and markers
+  FloatRect RenderObject::RepaintRectInLocalCoordinates(RepaintRectCalculation) const noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  FloatRect RenderObject::DecoratedBoundingBox() const noexcept
+  {
+    krys_debug_assert(false);
+    return {};
+  }
+
+  AffineTransform RenderObject::LocalTransform() const noexcept
+  {
+    return {};
+  }
+
+  const AffineTransform &RenderObject::LocalToParentTransform() const noexcept
+  {
+    return AffineTransform::Identity;
+  }
+
+  bool RenderObject::NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &,
+                                      HitTestAction) noexcept
+  {
+    krys_debug_assert(false);
+    return false;
+  }
+
   bool RenderObject::IsDocumentElementRenderer() const noexcept
   {
     return GetDocument().DocumentElement().get() == &_node;
@@ -365,7 +433,7 @@ namespace krys::boo
 
   bool RenderObject::IsTransformed() const noexcept
   {
-    // FIXME: SVG transforms too, once there's SVG.
+    // FIXME: SVG transforms (hasSVGTransform) come with the layer-based SVG engine.
     return HasTransformRelatedProperty() && Style().AffectsTransform();
   }
 
@@ -1478,6 +1546,11 @@ namespace krys::boo
     return ClippedOverflowRect(nullptr, VisibleRectContextForSpatialNavigation());
   }
 
+  LayoutRect RenderObject::AbsoluteClippedOverflowRectForRenderTreeAsText() const noexcept
+  {
+    return ClippedOverflowRect(nullptr, VisibleRectContextForRenderTreeAsText());
+  }
+
   IntRect RenderObject::PixelSnappedAbsoluteClippedOverflowRect() const noexcept
   {
     return SnappedIntRect(AbsoluteClippedOverflowRectForRepaint());
@@ -1556,6 +1629,15 @@ namespace krys::boo
       .ClippedOverflowRect;
   }
 
+  FloatRect
+    RenderObject::ComputeFloatRectForRepaint(const FloatRect &rect,
+                                             const RenderLayerModelObject *repaintContainer) const noexcept
+  {
+    auto result = ComputeFloatVisibleRectInContainer(rect, repaintContainer, VisibleRectContextForRepaint());
+    krys_assert(result.has_value());
+    return *result;
+  }
+
   auto RenderObject::ComputeVisibleRectsInContainer(const RepaintRects &rects,
                                                     const RenderLayerModelObject *container,
                                                     VisibleRectContext context) const noexcept
@@ -1589,6 +1671,14 @@ namespace krys::boo
     return parent->ComputeVisibleRectsInContainer(adjustedRects, container, context);
   }
 
+  Maybe<FloatRect> RenderObject::ComputeFloatVisibleRectInContainer(const FloatRect &,
+                                                                    const RenderLayerModelObject *,
+                                                                    VisibleRectContext) const noexcept
+  {
+    krys_debug_assert(false);
+    return FloatRect();
+  }
+
   VisibleRectContext RenderObject::VisibleRectContextForRepaint() noexcept
   {
     return {.HasPositionFixedDescendant = false,
@@ -1606,6 +1696,17 @@ namespace krys::boo
             .Options = {VisibleRectContext::Option::ApplyContainerClip,
                         VisibleRectContext::Option::ApplyCompositedContainerScrolls,
                         VisibleRectContext::Option::ApplyCompositedClips}};
+  }
+
+  VisibleRectContext RenderObject::VisibleRectContextForRenderTreeAsText() noexcept
+  {
+    return {.HasPositionFixedDescendant = false,
+            .DirtyRectIsFlipped = false,
+            .DescendantNeedsEnclosingIntRect = false,
+            .Options = {VisibleRectContext::Option::ApplyContainerClip,
+                        VisibleRectContext::Option::ApplyCompositedContainerScrolls,
+                        VisibleRectContext::Option::ApplyCompositedClips,
+                        VisibleRectContext::Option::CalculateAccurateRepaintRect}};
   }
 
   bool RenderObject::HasSelfPaintingLayer() const noexcept
@@ -1726,14 +1827,16 @@ namespace krys::boo
   void RenderObject::InsertedIntoTree() noexcept
   {
     // FIXME: We should ASSERT(isRooted()) here but generated content makes some out-of-order insertion.
-    // FIXME: Dirty the line from the changed child in SVG parents with inline children, once there are any.
+    // FIXME: Dirty the line from the changed child in SVG parents with inline children, with SVG text's line
+    // boxes (B11g).
   }
 
   void RenderObject::WillBeRemovedFromTree() noexcept
   {
     // FIXME: We should ASSERT(isRooted()) but we have some out-of-order removals which would need to be fixed
     // first.
-    // FIXME: Update cached boundaries in SVG renderers, if a child is removed, once there are any.
+    // Update cached boundaries in SVG renderers, if a child is removed.
+    Parent()->InvalidateCachedBoundaries();
   }
 
   void RenderObject::Destroy() noexcept
@@ -1798,7 +1901,10 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: SVG roots, once there's SVG.
+    if (renderer.IsLegacyRenderSVGRoot())
+    {
+      return true;
+    }
 
     if (!renderer.HasNonVisibleOverflow())
     {

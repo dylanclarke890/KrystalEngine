@@ -19,7 +19,7 @@ namespace krys::boo
 
   /// @brief Builds and tears down the render tree: attaches renderers to their parents, wrapping them in the
   /// anonymous boxes the CSS box tree needs, and detaches and destroys them, cleaning the wrappers up.
-  // FIXME: The multi-column, form control, SVG and MathML builders come with their renderers. There are
+  // FIXME: The multi-column and MathML builders come with their renderers. There are
   // no continuations: blocks in inlines are laid out in inline layout
   // (`blocksInInlineLayoutEnabled`, on by default upstream).
   class RenderTreeBuilder
@@ -65,6 +65,7 @@ namespace krys::boo
     class Inline;
     class List;
     class Ruby;
+    class SVG;
     class Table;
 
   private:
@@ -80,6 +81,7 @@ namespace krys::boo
     UniquePtr<List> _listBuilder;
     UniquePtr<Ruby> _rubyBuilder;
     UniquePtr<FormControls> _formControlsBuilder;
+    UniquePtr<SVG> _svgBuilder;
     IsInternalMove _internalMovesType {IsInternalMove::No};
     TearDownType _tearDownType {TearDownType::Root};
     const RenderElement *_subtreeDestroyRoot {nullptr};
@@ -205,6 +207,10 @@ namespace krys::boo
     KRYS_NODISCARD FormControls &FormControlsBuilder() noexcept
     {
       return *_formControlsBuilder;
+    }
+    KRYS_NODISCARD SVG &SVGBuilder() noexcept
+    {
+      return *_svgBuilder;
     }
   };
 }

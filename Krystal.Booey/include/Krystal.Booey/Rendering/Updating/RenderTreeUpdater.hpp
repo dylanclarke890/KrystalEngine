@@ -87,6 +87,7 @@ namespace krys::boo
   private:
     void UpdateRebuildRoots() noexcept;
     void UpdateRenderTree(dom::ContainerNode &root) noexcept;
+    void UpdateSVGRenderer(dom::Element &element) noexcept;
     void UpdateElementRenderer(dom::Element &element, const style::ElementUpdate &elementUpdate) noexcept;
     void UpdateRendererStyle(RenderElement &renderer, RenderStyle &&newStyle,
                              style::DifferenceResult minimalStyleDifference) noexcept;

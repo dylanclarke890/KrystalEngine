@@ -686,8 +686,8 @@ namespace krys::boo
     KRYS_NODISCARD DOMSelection *GetSelection() const noexcept;
 
   protected:
-    void DidAddEventListener(dom::DOMStringAtom type) noexcept final;
-    void DidRemoveEventListener(dom::DOMStringAtom type) noexcept final;
+    void DidAddEventListener(const dom::EventListener &listener) noexcept final;
+    void DidRemoveEventListener(const dom::EventListener &listener) noexcept final;
 
   private:
     void IncrementGamepadEventListenerCount() noexcept;

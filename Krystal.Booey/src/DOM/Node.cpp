@@ -26,6 +26,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include <tuple>
 
 namespace krys::boo::dom
@@ -72,6 +73,20 @@ namespace krys::boo::dom
       }
     }
     return NodeDocument();
+  }
+
+  DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
+  {
+    if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
+        shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent)
+    {
+      if (auto *host = DynamicDowncast<svg::SVGElement>(shadowRoot->Host());
+          host && Is<svg::SVGUseElement>(*host))
+      {
+        return host->TreeScope();
+      }
+    }
+    return TreeScope();
   }
 
   boo::RenderBox *Node::GetRenderBox() const noexcept

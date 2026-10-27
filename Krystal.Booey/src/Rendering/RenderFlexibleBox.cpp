@@ -183,11 +183,15 @@ namespace krys::boo
       return normalBehavior;
     }
 
-    // FIXME: SVG roots, which may have an intrinsic aspect ratio but no intrinsic size, once there's SVG
-    // (isSVGRootWithIntrinsicAspectRatio).
-    KRYS_NODISCARD bool IsSVGRootWithIntrinsicAspectRatio(const RenderBox &) noexcept
+    KRYS_NODISCARD bool IsSVGRootWithIntrinsicAspectRatio(const RenderBox &flexItem) noexcept
     {
-      return false;
+      if (!flexItem.IsLegacyRenderSVGRoot())
+      {
+        return false;
+      }
+      // It's common for some replaced elements, such as SVGs, to have intrinsic aspect ratios but no
+      // intrinsic sizes. That's why it isn't enough just to check for intrinsic sizes in those cases.
+      return Downcast<RenderReplaced>(flexItem).ComputeIntrinsicAspectRatio() > 0;
     }
 
     KRYS_NODISCARD bool FlexItemHasAspectRatio(const RenderBox &flexItem) noexcept
@@ -1582,7 +1586,10 @@ namespace krys::boo
     {
       auto flexItemIntrinsicSize =
         LayoutSize {flexItem.IntrinsicLogicalWidth(), flexItem.IntrinsicLogicalHeight()};
-      // FIXME: SVG roots compute their intrinsic aspect ratio, once there's SVG.
+      if (flexItem.IsLegacyRenderSVGRoot())
+      {
+        return Downcast<RenderReplaced>(flexItem).ComputeIntrinsicAspectRatio();
+      }
       if (flexItem.Style().GetAspectRatio().IsRatio()
           || (flexItem.Style().GetAspectRatio().IsAutoAndRatio() && flexItemIntrinsicSize.IsEmpty()))
       {

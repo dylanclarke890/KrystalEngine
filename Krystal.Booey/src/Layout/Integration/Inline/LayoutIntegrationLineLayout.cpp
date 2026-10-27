@@ -306,7 +306,7 @@ namespace krys::boo::layout_integration
     }
 
     // FIXME: SVG blocks other than foreign objects use legacy line layout unless the setting says otherwise,
-    // once there's SVG.
+    // with text (B11g).
     KRYS_NODISCARD bool CanUseForLineLayout(const RenderBlockFlow &) noexcept
     {
       return true;
@@ -440,7 +440,13 @@ namespace krys::boo::layout_integration
     if (!renderer.IsInline())
     {
       // IFC may contain block level boxes (floats and out-of-flow boxes).
-      // FIXME: SVG blocks and frame sets, once there are any.
+      if (renderer.IsRenderSVGBlock())
+      {
+        // SVG content inside svg root shows up as block (see RenderSVGBlock). We only support inline root svg
+        // as "atomic content".
+        return {};
+      }
+      // FIXME: Frame sets, once there are any.
       auto adjustedContainingBlock = [&]() -> RenderBlockFlow *
       {
         if (renderer.IsOutOfFlowPositioned())

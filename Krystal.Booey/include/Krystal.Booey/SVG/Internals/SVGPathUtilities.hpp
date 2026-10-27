@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/Graphics/FloatPoint.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathConsumer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
@@ -14,8 +15,7 @@ namespace krys::boo::svg
 {
   class SVGPathByteStream;
 
-  // FIXME: The SVGPathSegList, accumulation (`addToSVGPathByteStream`) and traversal helpers aren't ported
-  // yet; they need the SVG DOM and SVG animation.
+  // FIXME: Accumulation (`addToSVGPathByteStream`), with SMIL (B11i).
 
   // String/SVGPathByteStream -> Path
   KRYS_NODISCARD Path BuildPathFromString(dom::DOMStringView d) noexcept;
@@ -37,4 +37,9 @@ namespace krys::boo::svg
 
   KRYS_NODISCARD Maybe<SVGPathByteStream>
     ConvertSVGPathByteStreamToAbsoluteCoordinates(const SVGPathByteStream &stream) noexcept;
+
+  // SVGPathByteStream traversal
+  KRYS_NODISCARD float GetTotalLengthOfSVGPathByteStream(const SVGPathByteStream &) noexcept;
+  KRYS_NODISCARD FloatPoint GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &,
+                                                                float length) noexcept;
 }

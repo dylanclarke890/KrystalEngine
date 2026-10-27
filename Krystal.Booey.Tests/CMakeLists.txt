@@ -435,6 +435,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/OutlinePainter.cpp
 		tests/Rendering/RenderLayerScrollableArea.cpp
 		tests/Rendering/RenderTreeAsText.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGContainer.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGRoot.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGShape.cpp
 		tests/Rendering/RenderBlockFlow.cpp
 		tests/Rendering/PositionedLayoutConstraints.cpp
 		tests/Rendering/FloatingObjects.cpp
@@ -670,11 +673,18 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGPointList.cpp
 		tests/SVG/SVGPreserveAspectRatioValue.cpp
 		tests/SVG/SVGStringList.cpp
+		tests/SVG/SVGAElement.cpp
+		tests/SVG/SVGForeignObjectElement.cpp
+		tests/SVG/SVGGeometryElement.cpp
+		tests/SVG/SVGImageElement.cpp
+		tests/SVG/SVGPathElement.cpp
 		tests/SVG/SVGStyleElement.cpp
 		tests/SVG/SVGSvgElement.cpp
+		tests/SVG/SVGViewElement.cpp
 		tests/SVG/SVGTests.cpp
 		tests/SVG/SVGTransformList.cpp
 		tests/SVG/SVGURIReference.cpp
+		tests/SVG/SVGUseElement.cpp
 		tests/URL/URL.cpp
 		tests/URL/WPT.cpp
 )

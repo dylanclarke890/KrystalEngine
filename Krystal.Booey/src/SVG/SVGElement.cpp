@@ -6,6 +6,8 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
@@ -47,7 +49,9 @@ namespace krys::boo::svg
   SVGElement::SVGElement(dom::Document &document, UniquePtr<SVGPropertyRegistry> &&propertyRegistry,
                          SVGElementInterface interface, SVGElementFlags flags,
                          dom::NodeFlags nodeFlags) noexcept
-      : StyledElement(document, dom::NullQualifiedName(), dom::NodeFlags::IsSVGElement | nodeFlags),
+      : StyledElement(document, dom::NullQualifiedName(),
+                      dom::NodeFlags::IsSVGElement | dom::NodeFlags::HasCustomStyleResolveCallbacks
+                        | nodeFlags),
         _flags(flags), _interface(interface), _propertyRegistry(krys::move(propertyRegistry)),
         _className(SVGAnimatedString::Create(this))
   {
@@ -78,12 +82,23 @@ namespace krys::boo::svg
       {
         instance->_svgRareData->SetCorrespondingElement(nullptr);
       }
-      krys_assert(!_svgRareData->CorrespondingElement());
+      // NOTE: a document's nodes are destroyed with it without being removed, so an instance can be destroyed
+      // while it's still in its <use> element's shadow tree; it leaves its original's instances.
+      if (auto *correspondingElement = _svgRareData->CorrespondingElement())
+      {
+        correspondingElement->EnsureSVGRareData().RemoveInstance(*this);
+      }
       _svgRareData = nullptr;
     }
 
-    // FIXME: Leave the document's elements to rebuild (SVGDocumentExtensions) with <use> (B11c), and its
-    // pending resources with paint servers (B11e).
+    // FIXME: Leave the document's elements to rebuild (SVGDocumentExtensions), with the first element that
+    // references another (<textPath>, B11g).
+
+    if (HasPendingResources())
+    {
+      TreeScopeForSVGReferences().RemoveElementFromPendingSVGResources(*this);
+      krys_debug_assert(!HasPendingResources());
+    }
   }
 
   SVGElementRareData &SVGElement::EnsureSVGRareData() noexcept
@@ -168,27 +183,28 @@ namespace krys::boo::svg
       }
     }
 
-    // FIXME: Leave the tree scope's pending resources, with paint servers (B11e).
+    if (HasPendingResources())
+    {
+      TreeScopeForSVGReferences().RemoveElementFromPendingSVGResources(*this);
+    }
 
     if (oldAncestor.IsConnected() && _svgRareData)
     {
       for (auto &element : CopyToRefs(_svgRareData->TakeReferencingElements()))
       {
-        // FIXME: Add the element to the document's elements to rebuild (SVGDocumentExtensions), with <use>
-        // (B11c).
+        // FIXME: Add the element to the document's elements to rebuild (SVGDocumentExtensions), with the
+        // first element that references another (<textPath>, B11g).
         element->ClearTarget();
       }
       krys_assert(_svgRareData->ReferencingElements().empty());
     }
     InvalidateInstances();
 
-    if (isSubtreeRoot)
+    // NOTE: every node removed with the subtree is told its subtree root's old parent.
+    auto *oldShadowRoot = DynamicDowncast<dom::ShadowRoot>(oldAncestor);
+    if (oldShadowRoot && oldShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
     {
-      auto *oldShadowRoot = DynamicDowncast<dom::ShadowRoot>(oldAncestor);
-      if (oldShadowRoot && oldShadowRoot->Mode() == dom::ShadowRootMode::UserAgent)
-      {
-        SetCorrespondingElement(nullptr);
-      }
+      SetCorrespondingElement(nullptr);
     }
   }
 
@@ -384,7 +400,8 @@ namespace krys::boo::svg
     if (name == SVGNames::IdAttr())
     {
       // FIXME: Rebuild the references to the element
-      // (SVGDocumentExtensions::rebuildAllElementReferencesForTarget), with <use> (B11c).
+      // (SVGDocumentExtensions::rebuildAllElementReferencesForTarget), with the first element that references
+      // another (<textPath>, B11g).
     }
     else if (name == SVGNames::ClassAttr())
     {
@@ -480,6 +497,78 @@ namespace krys::boo::svg
     return dom::DOMStringAtom {_className->CurrentValue()};
   }
 
+  bool SVGElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  {
+    auto *svgChild = DynamicDowncast<SVGElement>(child);
+    if (!svgChild)
+    {
+      return false;
+    }
+
+    switch (svgChild->TagQualifiedName().TagName())
+    {
+      case html::TagName::textPath:
+      case html::TagName::tspan:
+      {
+        return false;
+      }
+      default:
+      {
+        break;
+      }
+    }
+    return svgChild->IsValid();
+  }
+
+  bool SVGElement::RendererIsNeeded(const RenderStyle &style) noexcept
+  {
+    // http://www.w3.org/TR/SVG/extend.html#PrivateData
+    // Prevent anything other than SVG renderers from appearing in our render tree
+    // Spec: SVG allows inclusion of elements from foreign namespaces anywhere
+    // with the SVG content. In general, the SVG user agent will include the unknown
+    // elements in the DOM but will otherwise ignore unknown elements.
+    auto *parent = dom::TreeQueries::ParentOrShadowHostElement(*this);
+    if (!parent || Is<SVGElement>(*parent))
+    {
+      return dom::StyledElement::RendererIsNeeded(style);
+    }
+
+    return false;
+  }
+
+  void SVGElement::UpdateSVGRendererForElementChange() noexcept
+  {
+    NodeDocument().UpdateSVGRenderer(*this);
+  }
+
+  Maybe<FloatRect> SVGElement::GetBoundingBox() const noexcept
+  {
+    if (Is<SVGGraphicsElement>(*this))
+    {
+      if (auto *renderer = Renderer())
+      {
+        return renderer->ObjectBoundingBox();
+      }
+    }
+    return null;
+  }
+
+  bool SVGElement::HasAssociatedSVGLayoutBox() const noexcept
+  {
+    if (!Renderer())
+    {
+      return false;
+    }
+
+    // Legacy SVG engine specific condition.
+    if (Renderer()->IsLegacyRenderSVGRoot())
+    {
+      return false;
+    }
+
+    return true;
+  }
+
   void SVGElement::SVGAttributeChanged(const dom::QualifiedName &attrName) noexcept
   {
     auto propId = CssPropertyIdForSVGAttributeName(attrName.LocalName(), attrName.NamespaceURI());
@@ -503,8 +592,12 @@ namespace krys::boo::svg
 
     if (attrName == SVGNames::IdAttr())
     {
-      // FIXME: Notify resources about id changes (LegacyRenderSVGResourceContainer::idChanged) and build the
-      // pending resources that wait for the element, with paint servers (B11e).
+      // FIXME: Notify resources about id changes (LegacyRenderSVGResourceContainer::idChanged), with paint
+      // servers (B11e).
+      if (IsConnected())
+      {
+        BuildPendingResourcesIfNeeded();
+      }
       InvalidateInstances();
       return;
     }
@@ -525,7 +618,102 @@ namespace krys::boo::svg
       parentElement->UpdateRelativeLengthsInformationForChild(HasRelativeLengths(), *this);
     }
 
-    // FIXME: Build the pending resources that wait for the element, with paint servers (B11e).
+    // NOTE: the pending resources that wait for the element are built in its post-connection steps.
+  }
+
+  void SVGElement::OnPostConnection() noexcept
+  {
+    StyledElement::OnPostConnection();
+    BuildPendingResourcesIfNeeded();
+  }
+
+  void SVGElement::BuildPendingResourcesIfNeeded() noexcept
+  {
+    if (!NeedsPendingResourceHandling() || !IsConnected() || IsInShadowTree())
+    {
+      return;
+    }
+
+    auto &treeScope = TreeScopeForSVGReferences();
+    auto resourceId = dom::DOMStringAtom(Id());
+    if (!treeScope.IsIdOfPendingSVGResource(resourceId))
+    {
+      return;
+    }
+
+    treeScope.MarkPendingSVGResourcesForRemoval(resourceId);
+
+    // Rebuild pending resources for each client of a pending resource that is being removed.
+    while (RefPtr<SVGElement> clientElement =
+             treeScope.TakeElementFromPendingSVGResourcesForRemovalMap(resourceId))
+    {
+      krys_debug_assert(clientElement->HasPendingResources());
+      if (clientElement->HasPendingResources())
+      {
+        clientElement->BuildPendingResource();
+        // FIXME: Mark the clients of the resource containers around the element's renderer for repaint
+        // (LegacyRenderSVGResourceContainer::markAllClientsForRepaint), with paint servers (B11e).
+        treeScope.ClearHasPendingSVGResourcesIfPossible(*clientElement);
+      }
+    }
+  }
+
+  Maybe<style::UnadjustedStyle>
+    SVGElement::ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
+                                   const RenderStyle *) noexcept
+  {
+    // If the element is in a <use> tree we get the style from the definition tree.
+    if (RefPtr<SVGElement> styleElement = ShareRefPtr(CorrespondingElement()))
+    {
+      auto styleElementResolutionContext = resolutionContext;
+      // Can't use the state since we are going to another part of the tree.
+      styleElementResolutionContext.SelectorMatchingState = nullptr;
+      styleElementResolutionContext.IsSVGUseTreeRoot = true;
+      return styleElement->ResolveStyle(styleElementResolutionContext);
+    }
+
+    return ResolveStyle(resolutionContext);
+  }
+
+  void SVGElement::DidAddEventListener(const dom::EventListener &listener) noexcept
+  {
+    StyledElement::DidAddEventListener(listener);
+
+    if (dom::TreeQueries::ContainingShadowRoot(*this))
+    {
+      return;
+    }
+
+    // Add event listener to all shadow tree DOM element instances
+    krys_debug_assert(!InstanceUpdatesBlocked());
+    for (auto &instance : Instances())
+    {
+      krys_debug_assert(instance->CorrespondingElement() == this);
+      krys_debug_assert(instance->IsInUserAgentShadowTree());
+      instance->AddEventListener(
+        listener.Type(), ShareRef(*listener.Callback()),
+        dom::AddEventListenerOptions {
+          {listener.Capture()}, listener.Once(), listener.Passive(), ShareRefPtr(listener.Signal())});
+    }
+  }
+
+  void SVGElement::DidRemoveEventListener(const dom::EventListener &listener) noexcept
+  {
+    StyledElement::DidRemoveEventListener(listener);
+
+    if (dom::TreeQueries::ContainingShadowRoot(*this))
+    {
+      return;
+    }
+
+    // Remove event listener from all shadow tree DOM element instances
+    krys_debug_assert(!InstanceUpdatesBlocked());
+    for (auto &instance : Instances())
+    {
+      krys_debug_assert(instance->CorrespondingElement() == this);
+      krys_debug_assert(instance->IsInUserAgentShadowTree());
+      instance->RemoveEventListener(listener.Type(), ShareRef(*listener.Callback()), listener.Capture());
+    }
   }
 
   void SVGElement::OnChildrenChanged() noexcept
@@ -611,8 +799,10 @@ namespace krys::boo::svg
 
     for (auto &instance : Instances())
     {
-      // FIXME: Invalidate the shadow tree of the instance's <use> element (CorrespondingUseElement), with
-      // <use> (B11c).
+      if (RefPtr<SVGUseElement> useElement = ShareRefPtr(instance->CorrespondingUseElement()))
+      {
+        useElement->InvalidateShadowTree();
+      }
       instance->SetCorrespondingElement(nullptr);
     }
   }
@@ -655,6 +845,7 @@ namespace krys::boo::svg
       {u8"cursor", css::PropertyId::Cursor},
       {u8"cx", css::PropertyId::Cx},
       {u8"cy", css::PropertyId::Cy},
+      {u8"d", css::PropertyId::D},
       {u8"direction", css::PropertyId::Direction},
       {u8"display", css::PropertyId::Display},
       {u8"dominant-baseline", css::PropertyId::DominantBaseline},

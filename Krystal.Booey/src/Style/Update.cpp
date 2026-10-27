@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo::style
 {
@@ -112,6 +113,14 @@ namespace krys::boo::style
     _initialContainingBlockUpdate = krys::move(style);
   }
 
+  void Update::AddSVGRendererUpdate(svg::SVGElement &element) noexcept
+  {
+    auto *parent = dom::ComposedTreeAncestors(element).First();
+    _roots.remove(ShareRefPtr<dom::ContainerNode>(&element));
+    AddPossibleRoot(parent);
+    element.SetNeedsSVGRendererUpdate(true);
+  }
+
   void Update::AddPossibleRoot(dom::Element *element) noexcept
   {
     if (!element)
@@ -119,8 +128,7 @@ namespace krys::boo::style
       _roots.add(ShareRefPtr<dom::ContainerNode>(_document.get()));
       return;
     }
-    // FIXME: Elements that need an SVG renderer update aren't roots either, once there are SVG renderers.
-    if (_elements.contains(ShareRefPtr<const dom::Element>(element)))
+    if (element->NeedsSVGRendererUpdate() || _elements.contains(ShareRefPtr<const dom::Element>(element)))
     {
       return;
     }

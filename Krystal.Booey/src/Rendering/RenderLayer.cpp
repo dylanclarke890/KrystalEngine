@@ -2460,8 +2460,9 @@ namespace krys::boo
 
   void RenderLayer::UpdateAncestorDependentState() noexcept
   {
-    // FIXME: The enclosing SVG hidden or resource container, and whether the layer is inside an SVG foreign
-    // object (which makes it self-painting), once there's SVG.
+    // FIXME: The enclosing SVG hidden or resource container, with the layer-based SVG engine, and whether the
+    // layer is inside an SVG foreign object (whose scrolling isn't composited), once there's composited
+    // scrolling.
   }
 
   void RenderLayer::UpdateDescendantDependentFlags() noexcept
@@ -3177,7 +3178,10 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: SVG roots with reference filters paint them themselves, once there's SVG.
+    if (Renderer().IsLegacyRenderSVGRoot() && filter.IsReferenceFilter())
+    {
+      return false;
+    }
 
     if (RenderLayerFilters::IsIdentity(Renderer()))
     {
@@ -3434,8 +3438,7 @@ namespace krys::boo
   {
     // FIXME: This really needs to know if there are transforms on this layer and any of the layers between it
     // and the ancestor in question.
-    // FIXME: SVG roots too, once there's SVG.
-    return !IsTransformed();
+    return !IsTransformed() && !Renderer().IsLegacyRenderSVGRoot();
   }
 
   bool RenderLayer::CanUseOffsetFromAncestor(const RenderLayer &ancestor) const noexcept
@@ -5219,9 +5222,8 @@ namespace krys::boo
       auto snappedClipRect = SnapRectToDevicePixelsIfNeeded(adjustedClipRect, Renderer());
       context.Clip(snappedClipRect);
 
-      // FIXME: Legacy SVG roots directly under the view don't composite with their blend mode, once there's
-      // SVG.
-      bool usesCompositeOperation = HasBlendMode();
+      bool usesCompositeOperation =
+        HasBlendMode() && !(Renderer().IsLegacyRenderSVGRoot() && Parent() && Parent()->IsRenderViewLayer());
       if (usesCompositeOperation)
       {
         context.SetCompositeOperation(context.CompositeOperation(), GetBlendMode());

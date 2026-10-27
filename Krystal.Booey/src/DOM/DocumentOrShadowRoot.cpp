@@ -16,9 +16,224 @@
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
+  using WeakSVGElementSet = List<WeakPtr<svg::SVGElement>>;
+
+  struct SVGResourcesMap
+  {
+    KRYS_NON_COPYABLE(SVGResourcesMap);
+
+    HashMap<DOMStringAtom, WeakSVGElementSet> PendingResources;
+    HashMap<DOMStringAtom, WeakSVGElementSet> PendingResourcesForRemoval;
+    // FIXME: The legacy resources by id (LegacyRenderSVGResourceContainer), with paint servers (B11e).
+
+    SVGResourcesMap() noexcept = default;
+  };
+
+  namespace
+  {
+    // The sets are lists: an element is in one at most once, and elements that have gone are ignored.
+    void AddToSet(WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    {
+      std::erase_if(set, [](const WeakPtr<svg::SVGElement> &weakElement) { return !weakElement; });
+      if (std::ranges::none_of(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+                               { return weakElement.get() == &element; }))
+      {
+        set.push_back(CreateWeakPtr(&element));
+      }
+    }
+
+    void RemoveFromSet(WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    {
+      std::erase_if(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+                    { return !weakElement || weakElement.get() == &element; });
+    }
+
+    KRYS_NODISCARD bool SetContains(const WeakSVGElementSet &set, svg::SVGElement &element) noexcept
+    {
+      return std::ranges::any_of(set, [&](const WeakPtr<svg::SVGElement> &weakElement)
+                                 { return weakElement.get() == &element; });
+    }
+
+    KRYS_NODISCARD bool IsEmptyIgnoringNullReferences(const WeakSVGElementSet &set) noexcept
+    {
+      return std::ranges::none_of(set, [](const WeakPtr<svg::SVGElement> &weakElement)
+                                  { return static_cast<bool>(weakElement); });
+    }
+  }
+
+  SVGResourcesMap &DocumentOrShadowRoot::GetSVGResourcesMap() const noexcept
+  {
+    if (!_svgResourcesMap)
+    {
+      _svgResourcesMap = CreateUnique<SVGResourcesMap>();
+    }
+    return *_svgResourcesMap;
+  }
+
+  void DocumentOrShadowRoot::AddPendingSVGResource(const DOMStringAtom &id, svg::SVGElement &element) noexcept
+  {
+    if (id.View().empty())
+    {
+      return;
+    }
+
+    AddToSet(GetSVGResourcesMap().PendingResources[id], element);
+
+    element.SetHasPendingResources();
+  }
+
+  bool DocumentOrShadowRoot::IsIdOfPendingSVGResource(const DOMStringAtom &id) const noexcept
+  {
+    if (id.View().empty())
+    {
+      return false;
+    }
+
+    return GetSVGResourcesMap().PendingResources.contains(id);
+  }
+
+  bool DocumentOrShadowRoot::IsElementWithPendingSVGResources(svg::SVGElement &element) const noexcept
+  {
+    // This algorithm takes time proportional to the number of pending resources and need not.
+    // If performance becomes an issue we can keep a counted set of elements and answer the question
+    // efficiently.
+    return std::ranges::any_of(GetSVGResourcesMap().PendingResources,
+                               [&](const auto &entry) { return SetContains(entry.second, element); });
+  }
+
+  bool DocumentOrShadowRoot::IsPendingSVGResource(svg::SVGElement &element,
+                                                  const DOMStringAtom &id) const noexcept
+  {
+    if (id.View().empty())
+    {
+      return false;
+    }
+
+    auto &pendingResources = GetSVGResourcesMap().PendingResources;
+    auto it = pendingResources.find(id);
+    if (it == pendingResources.end())
+    {
+      return false;
+    }
+
+    return SetContains(it->second, element);
+  }
+
+  void DocumentOrShadowRoot::ClearHasPendingSVGResourcesIfPossible(svg::SVGElement &element) noexcept
+  {
+    if (!IsElementWithPendingSVGResources(element))
+    {
+      element.ClearHasPendingResources();
+    }
+  }
+
+  void DocumentOrShadowRoot::RemoveElementFromPendingSVGResources(svg::SVGElement &element) noexcept
+  {
+    auto &map = GetSVGResourcesMap();
+    if (!map.PendingResources.empty() && element.HasPendingResources())
+    {
+      List<DOMStringAtom> toBeRemoved;
+      for (auto &[id, elements] : map.PendingResources)
+      {
+        RemoveFromSet(elements, element);
+        if (IsEmptyIgnoringNullReferences(elements))
+        {
+          toBeRemoved.push_back(id);
+        }
+      }
+
+      ClearHasPendingSVGResourcesIfPossible(element);
+
+      // We use RemovePendingSVGResource here because it deals with set lifetime correctly.
+      for (auto &id : toBeRemoved)
+      {
+        std::ignore = RemovePendingSVGResource(id);
+      }
+    }
+
+    if (!map.PendingResourcesForRemoval.empty())
+    {
+      List<DOMStringAtom> toBeRemoved;
+      for (auto &[id, elements] : map.PendingResourcesForRemoval)
+      {
+        RemoveFromSet(elements, element);
+        if (IsEmptyIgnoringNullReferences(elements))
+        {
+          toBeRemoved.push_back(id);
+        }
+      }
+
+      // We erase from PendingResourcesForRemoval here because it deals with set lifetime correctly.
+      for (auto &id : toBeRemoved)
+      {
+        map.PendingResourcesForRemoval.erase(id);
+      }
+    }
+  }
+
+  List<WeakPtr<svg::SVGElement>>
+    DocumentOrShadowRoot::RemovePendingSVGResource(const DOMStringAtom &id) noexcept
+  {
+    auto &pendingResources = GetSVGResourcesMap().PendingResources;
+    auto node = pendingResources.extract(id);
+    return node ? krys::move(node.mapped()) : WeakSVGElementSet {};
+  }
+
+  void DocumentOrShadowRoot::MarkPendingSVGResourcesForRemoval(const DOMStringAtom &id) noexcept
+  {
+    if (id.View().empty())
+    {
+      return;
+    }
+
+    krys_debug_assert(!GetSVGResourcesMap().PendingResourcesForRemoval.contains(id));
+
+    auto existing = RemovePendingSVGResource(id);
+    if (!IsEmptyIgnoringNullReferences(existing))
+    {
+      GetSVGResourcesMap().PendingResourcesForRemoval.emplace(id, krys::move(existing));
+    }
+  }
+
+  RefPtr<svg::SVGElement>
+    DocumentOrShadowRoot::TakeElementFromPendingSVGResourcesForRemovalMap(const DOMStringAtom &id) noexcept
+  {
+    if (id.View().empty())
+    {
+      return nullptr;
+    }
+
+    auto &pendingResourcesForRemoval = GetSVGResourcesMap().PendingResourcesForRemoval;
+    auto it = pendingResourcesForRemoval.find(id);
+    if (it == pendingResourcesForRemoval.end())
+    {
+      return nullptr;
+    }
+
+    auto &resourceSet = it->second;
+    std::erase_if(resourceSet, [](const WeakPtr<svg::SVGElement> &weakElement) { return !weakElement; });
+    if (resourceSet.empty())
+    {
+      return nullptr;
+    }
+    RefPtr<svg::SVGElement> firstElement = ShareRefPtr(resourceSet.front().get());
+
+    RemoveFromSet(resourceSet, *firstElement);
+
+    if (IsEmptyIgnoringNullReferences(resourceSet))
+    {
+      pendingResourcesForRemoval.erase(it);
+    }
+
+    return firstElement;
+  }
+
   DocumentOrShadowRoot::DocumentOrShadowRoot(ContainerNode &rootNode,
                                              RefPtr<html::CustomElementRegistry> &&registry) noexcept
       : _rootNode(rootNode), _customElementRegistry(krys::move(registry)),

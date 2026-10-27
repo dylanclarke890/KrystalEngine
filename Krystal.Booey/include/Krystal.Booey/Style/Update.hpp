@@ -23,6 +23,11 @@ namespace krys::boo::dom
   class Text;
 }
 
+namespace krys::boo::svg
+{
+  class SVGElement;
+}
+
 namespace krys::boo::style
 {
   /// @brief The new style of an element and how it changed.
@@ -104,6 +109,7 @@ namespace krys::boo::style
     void AddElement(dom::Element &element, dom::Element *parent, ElementUpdate &&elementUpdate) noexcept;
     void AddText(dom::Text &text, dom::Element *parent, TextUpdate &&textUpdate) noexcept;
     void AddText(dom::Text &text, TextUpdate &&textUpdate) noexcept;
+    void AddSVGRendererUpdate(svg::SVGElement &element) noexcept;
     void AddInitialContainingBlockUpdate(UniquePtr<RenderStyle> style) noexcept;
 
   private:

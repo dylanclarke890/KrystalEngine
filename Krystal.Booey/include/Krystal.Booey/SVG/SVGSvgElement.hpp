@@ -24,6 +24,8 @@ namespace krys::boo::svg
   class SVGNumber;
   class SVGRect;
   class SVGTransform;
+  class SVGViewElement;
+  class SVGViewSpec;
 
   /// @brief The `<svg>` element: a viewport, the root of an SVG document fragment when it's outermost.
   /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGSVGElement
@@ -38,6 +40,11 @@ namespace krys::boo::svg
     Ref<SVGAnimatedLength> _y;
     Ref<SVGAnimatedLength> _width;
     Ref<SVGAnimatedLength> _height;
+
+    bool _useCurrentView {false};
+    RefPtr<SVGViewSpec> _viewSpec;
+    dom::DOMString _currentViewFragmentIdentifier;
+    WeakPtr<SVGViewElement> _currentViewElement;
 
   public:
     explicit SVGSvgElement(dom::Document &document) noexcept;
@@ -59,6 +66,15 @@ namespace krys::boo::svg
     {
       return _currentTranslate->Value();
     }
+
+    /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getIntersectionList
+    KRYS_NODISCARD Ref<dom::NodeList> GetIntersectionList(SVGRect &, SVGElement *referenceElement) noexcept;
+    /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__getEnclosureList
+    KRYS_NODISCARD Ref<dom::NodeList> GetEnclosureList(SVGRect &, SVGElement *referenceElement) noexcept;
+    /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkIntersection
+    KRYS_NODISCARD static bool CheckIntersection(Ref<SVGElement> &&, SVGRect &) noexcept;
+    /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__checkEnclosure
+    KRYS_NODISCARD static bool CheckEnclosure(Ref<SVGElement> &&, SVGRect &) noexcept;
 
     /// @see https://svgwg.org/svg2-draft/struct.html#__svg__SVGSVGElement__deselectAll
     void DeselectAll() noexcept;
@@ -99,6 +115,17 @@ namespace krys::boo::svg
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGSvgElement, SVGGraphicsElement, SVGFitToViewBox>;
 
+    /// @brief Whether the `<svg>` is shown with the view a fragment identifier gave it.
+    KRYS_NODISCARD bool UseCurrentView() const noexcept
+    {
+      return _useCurrentView;
+    }
+    /// @brief The view a fragment identifier gives the `<svg>`, created when first asked for.
+    SVGViewSpec &CurrentView() noexcept;
+
+    bool ScrollToFragment(dom::DOMStringView fragmentIdentifier) noexcept;
+    void ResetScrollAnchor() noexcept;
+
     void SetCurrentTranslate(const FloatPoint &translation) noexcept; // Used to pan.
     void UpdateCurrentTranslate() noexcept;
 
@@ -112,6 +139,8 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD AffineTransform ViewBoxToViewTransform(float viewWidth, float viewHeight) const noexcept;
     KRYS_NODISCARD bool HasTransformRelatedAttributes() const noexcept final;
+
+    void InheritViewAttributes(const SVGViewElement &) noexcept;
 
     KRYS_NODISCARD const SVGLengthValue &X() const noexcept
     {
@@ -155,6 +184,9 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept final;
 
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
+
   private:
     KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept override;
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -164,6 +196,15 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsValid() const noexcept override;
 
     KRYS_NODISCARD LocalFrame *FrameForCurrentScale() const noexcept;
+
+    KRYS_NODISCARD Ref<dom::NodeList>
+      CollectIntersectionOrEnclosureList(SVGRect &, SVGElement *,
+                                         bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept;
+
+    KRYS_NODISCARD RefPtr<SVGViewElement>
+      FindViewAnchor(dom::DOMStringView fragmentIdentifier) const noexcept;
+    KRYS_NODISCARD SVGSvgElement *FindRootAnchor(const SVGViewElement *) const noexcept;
+    KRYS_NODISCARD SVGSvgElement *FindRootAnchor(dom::DOMStringView) const noexcept;
   };
 }
 

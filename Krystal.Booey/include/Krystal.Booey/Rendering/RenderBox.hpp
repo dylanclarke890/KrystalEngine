@@ -253,8 +253,18 @@ namespace krys::boo
 
 #pragma region Repaint
 
-    KRYS_NODISCARD
-    LayoutRect OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept final;
+    KRYS_NODISCARD FloatRect RepaintRectInLocalCoordinates(
+      RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept override
+    {
+      return BorderBoxRect();
+    }
+    KRYS_NODISCARD FloatRect ObjectBoundingBox() const noexcept override
+    {
+      return BorderBoxRect();
+    }
+
+    KRYS_NODISCARD LayoutRect
+      OutlineBoundsForRepaint(const RenderLayerModelObject *repaintContainer) const noexcept final;
     KRYS_NODISCARD Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept override;

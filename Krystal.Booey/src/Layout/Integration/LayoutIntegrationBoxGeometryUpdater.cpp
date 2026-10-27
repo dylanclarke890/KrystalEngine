@@ -25,6 +25,7 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Shapes/ShapeOutsideInfo.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 
 namespace krys::boo::layout_integration
 {
@@ -255,10 +256,10 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: Iframes, embedded objects, SVG roots, canvases and view transition captures have no baseline;
-      // images, attachments, buttons, list boxes, file upload controls and sliders have their own, once there
-      // are those renderers.
-      if (Is<RenderTextControlMultiLine>(renderBox))
+      // FIXME: Iframes, embedded objects, canvases and view transition captures have no baseline; images,
+      // attachments, buttons, list boxes, file upload controls and sliders have their own, once there are
+      // those renderers.
+      if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderTextControlMultiLine>(renderBox))
       {
         return null;
       }

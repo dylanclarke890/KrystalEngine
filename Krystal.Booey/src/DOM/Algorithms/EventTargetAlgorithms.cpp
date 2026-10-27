@@ -118,7 +118,7 @@ namespace krys::boo::dom
       return false;
     }
     eventTarget._eventListenerList.push_back(ShareRef(listener));
-    eventTarget.DidAddEventListener(listener.Type());
+    eventTarget.DidAddEventListener(listener);
 
     if (listener.Signal() != nullptr)
     {
@@ -153,9 +153,9 @@ namespace krys::boo::dom
     if (existing != eventTarget._eventListenerList.end())
     {
       // Erasing it may drop the listener's last reference.
-      auto type = listener.Type();
+      Ref<EventListener> protectedListener = ShareRef(listener);
       eventTarget._eventListenerList.erase(existing);
-      eventTarget.DidRemoveEventListener(type);
+      eventTarget.DidRemoveEventListener(listener);
     }
   }
 

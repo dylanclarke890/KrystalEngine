@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/MemoryCache.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <algorithm>
@@ -376,7 +377,12 @@ namespace krys::boo
       return &renderImage->ImageResource();
     }
 
-    // FIXME: SVG images and video posters, once they have renderers.
+    if (auto *svgImage = DynamicDowncast<LegacyRenderSVGImage>(*renderer))
+    {
+      return &svgImage->ImageResource();
+    }
+
+    // FIXME: Video posters, once they have renderers.
     return nullptr;
   }
 

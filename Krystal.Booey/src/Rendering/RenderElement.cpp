@@ -57,6 +57,8 @@
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 
 namespace krys::boo
 {
@@ -2303,11 +2305,44 @@ namespace krys::boo
     return ReferenceBoxRect(TransformBoxToCSSBoxType(style.GetTransformBox()));
   }
 
-  FloatRect RenderElement::ReferenceBoxRect(CSSBoxType) const noexcept
+  FloatRect RenderElement::ReferenceBoxRect(CSSBoxType boxType) const noexcept
   {
     // CSS box model code is implemented in RenderBox::referenceBoxRect().
-    // FIXME: The reference boxes of SVG renderers, once there's SVG.
-    return {};
+    if (GetElement() && !Is<svg::SVGElement>(GetElement()))
+    {
+      return {};
+    }
+
+    auto determineSVGViewport = [&]
+    {
+      auto *viewportElement = Downcast<svg::SVGElement>(GetElement());
+      krys_assert(viewportElement);
+      auto viewportSize = svg::SVGLengthContext(viewportElement).ViewportSize().value_or(FloatSize {});
+      return FloatRect {{}, viewportSize};
+    };
+
+    switch (boxType)
+    {
+      case CSSBoxType::ContentBox:
+      case CSSBoxType::PaddingBox:
+      case CSSBoxType::FillBox:
+      {
+        return ObjectBoundingBox();
+      }
+      case CSSBoxType::BoxMissing:
+      case CSSBoxType::BorderBox:
+      case CSSBoxType::MarginBox:
+      case CSSBoxType::StrokeBox:
+      {
+        return StrokeBoundingBox();
+      }
+      case CSSBoxType::ViewBox:
+      {
+        return determineSVGViewport();
+      }
+    }
+
+    krys_unreachable();
   }
 
   namespace
@@ -2795,7 +2830,14 @@ namespace krys::boo
     KRYS_NODISCARD bool GetLeadingCorner(const RenderElement &renderer, FloatPoint &point,
                                          bool &insideFixed) noexcept
     {
-      // FIXME: SVG renderers' stroke bounding boxes, once there's SVG.
+      if (renderer.IsSVGRenderer())
+      {
+        point = renderer.LocalToAbsoluteQuad(renderer.StrokeBoundingBox(), MapCoordinatesMode::UseTransforms)
+                  .BoundingBox()
+                  .MinXMinYCorner();
+        return true;
+      }
+
       if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
       {
         point = renderer.LocalToAbsolute(FloatPoint(), MapCoordinatesMode::UseTransforms, &insideFixed);
@@ -2878,7 +2920,14 @@ namespace krys::boo
     KRYS_NODISCARD bool GetTrailingCorner(const RenderElement &renderer, FloatPoint &point,
                                           bool &insideFixed) noexcept
     {
-      // FIXME: SVG renderers' stroke bounding boxes, once there's SVG.
+      if (renderer.IsSVGRenderer())
+      {
+        point = renderer.LocalToAbsoluteQuad(renderer.StrokeBoundingBox(), MapCoordinatesMode::UseTransforms)
+                  .BoundingBox()
+                  .MaxXMaxYCorner();
+        return true;
+      }
+
       if (!renderer.IsInline() || renderer.IsBlockLevelReplacedOrAtomicInline())
       {
         point = renderer.LocalToAbsolute(FloatPoint(Downcast<RenderBox>(renderer).Size()),

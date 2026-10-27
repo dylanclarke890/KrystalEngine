@@ -502,7 +502,7 @@ namespace krys::boo::html
     void EndEditing() noexcept;
 
     /// @brief Creates the type's shadow tree, which inserting the element into a document left pending.
-    void UpdateUserAgentShadowTree() noexcept;
+    void UpdateUserAgentShadowTree() noexcept override;
 
     KRYS_NODISCARD HTMLElement *ContainerElement() const noexcept;
     KRYS_NODISCARD HTMLElement *InnerBlockElement() const noexcept;

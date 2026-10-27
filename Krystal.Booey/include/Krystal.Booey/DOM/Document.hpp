@@ -97,6 +97,11 @@ namespace krys::boo::css::calc
   struct RandomCachingKey;
 }
 
+namespace krys::boo::svg
+{
+  class SVGElement;
+}
+
 namespace krys::boo::html
 {
   class CustomElementAlgorithms;
@@ -335,7 +340,7 @@ namespace krys::boo::dom
     List<WeakPtr<Element>> _autofocusCandidates;
     mutable HashMap<utf8_string, UniquePtr<Locale>> _localeCache;
     // The inputs inserted without their user agent shadow tree, which the next style resolution creates.
-    List<WeakPtr<html::HTMLInputElement>> _elementsWithPendingUserAgentShadowTreeUpdates;
+    List<WeakPtr<Element>> _elementsWithPendingUserAgentShadowTreeUpdates;
     bool _autofocusProcessed {false};
     // FIXME: Documents create their render trees on their first style resolution, which is a rebuild.
     bool _needsFullStyleRebuild {true};
@@ -1126,10 +1131,9 @@ namespace krys::boo::dom
       return _inStyleRecalc;
     }
 
-    void AddElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept;
-    void RemoveElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) noexcept;
-    KRYS_NODISCARD bool
-      HasElementWithPendingUserAgentShadowTreeUpdate(html::HTMLInputElement &element) const noexcept;
+    void AddElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept;
+    void RemoveElementWithPendingUserAgentShadowTreeUpdate(Element &element) noexcept;
+    KRYS_NODISCARD bool HasElementWithPendingUserAgentShadowTreeUpdate(Element &element) const noexcept;
 
     /// @brief Whether the document is laid out in the middle of a style update, for container queries.
     KRYS_NODISCARD bool IsInStyleInterleavedLayout() const noexcept
@@ -1435,6 +1439,8 @@ namespace krys::boo::dom
     /// @brief Schedules an update of @p text's renderer after @p lengthOfReplacedText bytes from
     /// @p offsetOfReplacedText were replaced.
     void UpdateTextRenderer(Text &text, uint32 offsetOfReplacedText, uint32 lengthOfReplacedText) noexcept;
+    /// @brief Schedules laying out @p element's renderer again after a change to the element.
+    void UpdateSVGRenderer(svg::SVGElement &element) noexcept;
 
     /// @brief Makes the document's window: the document must be in a frame, and not have one yet.
     void CreateDOMWindow() noexcept;

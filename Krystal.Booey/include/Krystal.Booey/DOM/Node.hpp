@@ -273,6 +273,22 @@ namespace krys::boo::dom
       }
     }
 
+    KRYS_NODISCARD bool NeedsSVGRendererUpdate() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+    }
+    void SetNeedsSVGRendererUpdate(bool flag) noexcept
+    {
+      if (flag)
+      {
+        SetNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+      }
+      else
+      {
+        ClearNodeFlag(NodeFlags::NeedsSVGRendererUpdate);
+      }
+    }
+
     /// @brief Whether a descendant's style needs resolving again.
     KRYS_NODISCARD bool ChildNeedsStyleRecalc() const noexcept
     {
@@ -475,6 +491,10 @@ namespace krys::boo::dom
     /// @brief The document or shadow root of the tree this node is in: its shadow root's when its root is
     /// one, its document's otherwise (even while it's disconnected).
     KRYS_NODISCARD DocumentOrShadowRoot &TreeScope() const noexcept;
+
+    /// @brief The tree scope the node's SVG references are looked up in: its own, or, inside a `<use>`
+    /// element's shadow tree, the `<use>` element's.
+    KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept

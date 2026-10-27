@@ -19,9 +19,8 @@ namespace krys::boo
   class PathTraversalState;
 
   /// @brief A path made of line, curve, arc and shape segments.
-  /// FIXME: Stroke hit testing (`strokeContains`), stroke bounds (`strokeBoundingRect`) and the platform path
-  /// (`platformPath`, used where a segment can't produce elements or be transformed, and by `addPath`) come
-  /// with the graphics backend.
+  /// FIXME: The platform path (`platformPath`, used where a segment can't produce elements or be transformed,
+  /// and by `addPath`) comes with the graphics backend.
   class Path
   {
   public:
@@ -66,6 +65,11 @@ namespace krys::boo
 
     /// @brief Whether @p point is inside the path, filled with @p rule; curves are flattened into lines.
     KRYS_NODISCARD bool Contains(const FloatPoint &point, WindRule rule = WindRule::NonZero) const noexcept;
+    /// @brief Whether @p point is inside the path stroked as @p strokeStyleApplier sets up a graphics
+    /// context, as the host's @ref PathStrokeStrategy strokes it.
+    KRYS_NODISCARD bool
+      StrokeContains(const FloatPoint &point,
+                     const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept;
     void Clear() noexcept;
 
     void Translate(const FloatSize &delta) noexcept;
@@ -98,6 +102,10 @@ namespace krys::boo
 
     KRYS_NODISCARD FloatRect FastBoundingRect() const noexcept;
     KRYS_NODISCARD FloatRect BoundingRect() const noexcept;
+    /// @brief The bounds of the path stroked as @p strokeStyleApplier sets up a graphics context (a solid
+    /// stroke 1 wide without one), as the host's @ref PathStrokeStrategy strokes it.
+    KRYS_NODISCARD FloatRect
+      StrokeBoundingRect(const Func<void(GraphicsContext &)> &strokeStyleApplier = {}) const noexcept;
 
   private:
     PathImpl &SetImpl(Ref<PathImpl> &&) noexcept;

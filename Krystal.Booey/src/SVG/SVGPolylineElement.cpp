@@ -3,7 +3,7 @@
 namespace krys::boo::svg
 {
   SVGPolylineElement::SVGPolylineElement(dom::Document &document) noexcept
-      : SVGElement(document, SVGElementInterface::Polyline)
+      : SVGPolyElement(document, SVGElementInterface::Polyline)
   {
   }
 }

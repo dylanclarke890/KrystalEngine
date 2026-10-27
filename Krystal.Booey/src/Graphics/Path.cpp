@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Graphics/PathImpl.hpp"
 
+#include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/PathStream.hpp"
 #include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
+#include "Krystal.Booey/Platform/PathStrokeStrategy.hpp"
+#include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
@@ -426,8 +429,30 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Segments that can't be transformed (arcs and ellipses under some transforms) need a platform
-    // path.
+    // There's no platform path to transform the segments that can't be transformed themselves, so the path is
+    // rebuilt from its elements, transformed.
+    // FIXME: The segments that can't produce elements either (see ApplyElements) need a platform path;
+    // they're dropped.
+    Path transformed;
+    ApplyElements(
+      [&](const PathElement &element)
+      {
+        const auto &points = element.Points;
+        switch (element.ElementType)
+        {
+          case PathElement::Type::MoveToPoint:    transformed.MoveTo(transform.MapPoint(points[0])); break;
+          case PathElement::Type::AddLineToPoint: transformed.AddLineTo(transform.MapPoint(points[0])); break;
+          case PathElement::Type::AddQuadCurveToPoint:
+            transformed.AddQuadCurveTo(transform.MapPoint(points[0]), transform.MapPoint(points[1]));
+            break;
+          case PathElement::Type::AddCurveToPoint:
+            transformed.AddBezierCurveTo(transform.MapPoint(points[0]), transform.MapPoint(points[1]),
+                                         transform.MapPoint(points[2]));
+            break;
+          case PathElement::Type::CloseSubpath: transformed.CloseSubpath(); break;
+        }
+      });
+    *this = krys::move(transformed);
   }
 
   Maybe<PathSegment> Path::SingleSegment() const noexcept
@@ -571,6 +596,84 @@ namespace krys::boo
     }
 
     return {};
+  }
+
+  namespace
+  {
+    // Collects what a stroke style applier sets, as a scratch platform context would.
+    class StrokeStyleCollector final : public NullGraphicsContext
+    {
+    public:
+      PathStrokeStyle Style;
+
+      explicit StrokeStyleCollector(const Func<void(GraphicsContext &)> &strokeStyleApplier) noexcept
+      {
+        SetStrokeThickness(Style.Thickness);
+        if (strokeStyleApplier)
+        {
+          strokeStyleApplier(*this);
+        }
+        Style.Thickness = StrokeThickness();
+      }
+
+    private:
+      void SetLineCap(LineCap lineCap) noexcept final
+      {
+        Style.Cap = lineCap;
+      }
+      void SetLineDash(const DashArray &dashes, float dashOffset) noexcept final
+      {
+        Style.Dashes = dashes;
+        Style.DashOffset = dashOffset;
+      }
+      void SetLineJoin(LineJoin lineJoin) noexcept final
+      {
+        Style.Join = lineJoin;
+      }
+      void SetMiterLimit(float miterLimit) noexcept final
+      {
+        Style.MiterLimit = miterLimit;
+      }
+    };
+  }
+
+  bool Path::StrokeContains(const FloatPoint &point,
+                            const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept
+  {
+    krys_debug_assert(strokeStyleApplier);
+
+    if (IsEmpty())
+    {
+      return false;
+    }
+
+    auto *strategy = PlatformStrategies::Singleton().GetPathStrokeStrategy();
+    if (!strategy)
+    {
+      return false;
+    }
+
+    StrokeStyleCollector collector(strokeStyleApplier);
+    return strategy->StrokeContains(*this, point, collector.Style);
+  }
+
+  FloatRect Path::StrokeBoundingRect(const Func<void(GraphicsContext &)> &strokeStyleApplier) const noexcept
+  {
+    if (IsEmpty())
+    {
+      return {};
+    }
+
+    StrokeStyleCollector collector(strokeStyleApplier);
+    if (auto *strategy = PlatformStrategies::Singleton().GetPathStrokeStrategy())
+    {
+      return strategy->StrokeBoundingRect(*this, collector.Style);
+    }
+
+    // Without the host's stroker, half the stroke on each side of the fill.
+    auto rect = BoundingRect();
+    rect.Inflate(collector.Style.Thickness / 2);
+    return rect;
   }
 
   TextStream &operator<<(TextStream &ts, const Path &path) noexcept

@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/OutlineValue.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 
 namespace krys::boo
@@ -287,7 +288,11 @@ namespace krys::boo
                                              const LayoutPoint &additionalOffset,
                                              const RenderLayerModelObject *paintContainer) noexcept
   {
-    // FIXME: SVG renderers' focus ring rects (addFocusRingRects), once there's SVG painting.
+    if (const auto *svgRenderer = DynamicDowncast<LegacyRenderSVGModelObject>(renderer))
+    {
+      svgRenderer->AddFocusRingRects(rects, additionalOffset, paintContainer);
+      return;
+    }
     if (const auto *renderInline = DynamicDowncast<RenderInline>(renderer))
     {
       CollectFocusRingRectsForInline(*renderInline, rects, additionalOffset, paintContainer);

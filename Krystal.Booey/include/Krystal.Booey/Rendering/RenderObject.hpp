@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImageClient.hpp"
 #include "Krystal.Booey/Rendering/RenderObjectHighlightState.hpp"
+#include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
@@ -39,6 +40,7 @@ namespace krys::boo::layout
 
 namespace krys::boo
 {
+  class AffineTransform;
   class ControlPart;
   class FloatPoint;
   class HitTestLocation;
@@ -568,6 +570,7 @@ namespace krys::boo
     /// @brief The renderer's clipped overflow rect in the view's coordinates, clipped as composited, as
     /// spatial navigation tests whether it's on screen.
     KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForSpatialNavigation() const noexcept;
+    KRYS_NODISCARD LayoutRect AbsoluteClippedOverflowRectForRenderTreeAsText() const noexcept;
     KRYS_NODISCARD IntRect PixelSnappedAbsoluteClippedOverflowRect() const noexcept;
 
     KRYS_NODISCARD virtual LayoutRect ClippedOverflowRect(const RenderLayerModelObject *repaintContainer,
@@ -586,6 +589,8 @@ namespace krys::boo
                                              VisibleRectContext context) const noexcept;
     KRYS_NODISCARD LayoutRect ComputeRectForRepaint(
       const LayoutRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
+    KRYS_NODISCARD FloatRect ComputeFloatRectForRepaint(
+      const FloatRect &rect, const RenderLayerModelObject *repaintContainer) const noexcept;
 
     KRYS_NODISCARD virtual RepaintRects
       RectsForRepaintingAfterLayout(const RenderLayerModelObject *repaintContainer,
@@ -597,9 +602,14 @@ namespace krys::boo
     KRYS_NODISCARD virtual Maybe<RepaintRects>
       ComputeVisibleRectsInContainer(const RepaintRects &rects, const RenderLayerModelObject *container,
                                      VisibleRectContext context) const noexcept;
+    /// @brief `ComputeVisibleRectsInContainer` for SVG renderers, which map float rects.
+    KRYS_NODISCARD virtual Maybe<FloatRect>
+      ComputeFloatVisibleRectInContainer(const FloatRect &rect, const RenderLayerModelObject *container,
+                                         VisibleRectContext context) const noexcept;
 
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRepaint() noexcept;
     KRYS_NODISCARD static VisibleRectContext VisibleRectContextForSpatialNavigation() noexcept;
+    KRYS_NODISCARD static VisibleRectContext VisibleRectContextForRenderTreeAsText() noexcept;
 
     /// @brief Whether the renderer has a layer that paints itself.
     KRYS_NODISCARD bool HasSelfPaintingLayer() const noexcept;
@@ -984,6 +994,164 @@ namespace krys::boo
     {
       return IsRenderSVGModelObject() || IsLegacyRenderSVGModelObject();
     }
+    KRYS_NODISCARD bool IsRenderSVGBlock() const noexcept
+    {
+      return IsRenderBlockFlow() && _typeSpecificFlags.BlockFlowFlags().Contains(BlockFlowFlag::IsSVGBlock);
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGRoot() const noexcept
+    {
+      return _type == Type::LegacySVGRoot;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGContainer() const noexcept
+    {
+      return IsLegacyRenderSVGModelObject()
+             && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsContainer);
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGTransformableContainer() const noexcept
+    {
+      return _type == Type::LegacySVGTransformableContainer;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGViewportContainer() const noexcept
+    {
+      return _type == Type::LegacySVGViewportContainer;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGHiddenContainer() const noexcept
+    {
+      return IsLegacyRenderSVGModelObject()
+             && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsHiddenContainer);
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGPath() const noexcept
+    {
+      return _type == Type::LegacySVGPath;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGShape() const noexcept
+    {
+      return IsLegacyRenderSVGModelObject()
+             && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsShape);
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGRect() const noexcept
+    {
+      return _type == Type::LegacySVGRect;
+    }
+    KRYS_NODISCARD bool IsRenderSVGText() const noexcept
+    {
+      return _type == Type::SVGText;
+    }
+    KRYS_NODISCARD bool IsRenderSVGTextPath() const noexcept
+    {
+      return _type == Type::SVGTextPath;
+    }
+    KRYS_NODISCARD bool IsRenderSVGTSpan() const noexcept
+    {
+      return _type == Type::SVGTSpan;
+    }
+    KRYS_NODISCARD bool IsRenderSVGInline() const noexcept
+    {
+      return _type == Type::SVGInline || _type == Type::SVGTSpan || _type == Type::SVGTextPath;
+    }
+    KRYS_NODISCARD bool IsRenderSVGInlineText() const noexcept
+    {
+      return _type == Type::SVGInlineText;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGImage() const noexcept
+    {
+      return _type == Type::LegacySVGImage;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGForeignObject() const noexcept
+    {
+      return _type == Type::LegacySVGForeignObject;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceContainer() const noexcept
+    {
+      return IsLegacyRenderSVGModelObject()
+             && _typeSpecificFlags.SVGFlags().Contains(SVGModelObjectFlag::IsResourceContainer);
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceFilter() const noexcept
+    {
+      return _type == Type::LegacySVGResourceFilter;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceClipper() const noexcept
+    {
+      return _type == Type::LegacySVGResourceClipper;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceMarker() const noexcept
+    {
+      return _type == Type::LegacySVGResourceMarker;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceMasker() const noexcept
+    {
+      return _type == Type::LegacySVGResourceMasker;
+    }
+    KRYS_NODISCARD bool IsLegacyRenderSVGResourceFilterPrimitive() const noexcept
+    {
+      return _type == Type::LegacySVGResourceFilterPrimitive;
+    }
+    KRYS_NODISCARD bool IsSVGRenderer() const noexcept
+    {
+      return IsLegacyRenderSVGRoot() || IsLegacyRenderSVGModelObject() || IsRenderSVGBlock()
+             || IsRenderSVGInline();
+    }
+
+    // FIXME: Those belong into a SVG specific base-class for all renderers (see above)
+    // Unfortunately we don't have such a class yet, because it's not possible for all renderers
+    // to inherit from RenderSVGObject -> RenderObject (some need RenderBlock inheritance for instance)
+    void InvalidateCachedBoundaries() noexcept;
+    KRYS_NODISCARD bool UsesBoundaryCaching() const noexcept;
+    virtual void SetNeedsBoundariesUpdate() noexcept;
+    virtual void SetNeedsTransformUpdate() noexcept
+    {
+    }
+
+    // Per SVG 1.1 objectBoundingBox ignores clipping, masking, filter effects, opacity and stroke-width.
+    // This is used for all computation of objectBoundingBox relative units and by SVGLocatable::getBBox().
+    // NOTE: Markers are not specifically ignored here by SVG 1.1 spec, but we ignore them
+    // since stroke-width is ignored (and marker size can depend on stroke-width).
+    // objectBoundingBox is returned local coordinates.
+    // The name objectBoundingBox is taken from the SVG 1.1 spec.
+    KRYS_NODISCARD virtual FloatRect ObjectBoundingBox() const noexcept;
+    KRYS_NODISCARD virtual FloatRect StrokeBoundingBox() const noexcept;
+
+    // The objectBoundingBox of a SVG container is affected by the transformations applied on its children --
+    // the container bounding box is a union of all child bounding boxes, mapped through their transformation
+    // matrices.
+    //
+    // This method ignores all transformations and computes the objectBoundingBox, without mapping through
+    // the child transformation matrices. The SVG render tree is constructed in such a way, that it can be
+    // mapped to CSS equivalents: The SVG render tree underneath the outermost <svg> behaves as a set of
+    // absolutely positioned, possibly nested, boxes. They are laid out in such a way that transformations do
+    // NOT affect layout, as in HTML/CSS world, but take affect during painting, hit-testing etc. This allows
+    // to minimize the amount of re-layouts when animating transformations in SVG (not using CSS
+    // Animations/Transitions / Web Animations, but e.g. SMIL <animateTransform>, JS, ...).
+    KRYS_NODISCARD virtual FloatRect ObjectBoundingBoxWithoutTransformations() const noexcept
+    {
+      return ObjectBoundingBox();
+    }
+
+    // Returns the smallest rectangle enclosing all of the painted content
+    // respecting clipping, masking, filters, opacity, stroke-width and markers
+    // This returns approximate rectangle for SVG renderers when RepaintRectCalculation::Fast is specified.
+    KRYS_NODISCARD virtual FloatRect
+      RepaintRectInLocalCoordinates(RepaintRectCalculation = RepaintRectCalculation::Fast) const noexcept;
+
+    // Returns the bounding box including fill, stroke, and markers.
+    // This is the geometric visual extent, used for masks/gradients/clippers.
+    // Unlike repaintRectInLocalCoordinates, this is always accurate.
+    KRYS_NODISCARD virtual FloatRect DecoratedBoundingBox() const noexcept;
+
+    // This only returns the transform="" value from the element
+    // most callsites want localToParentTransform() instead.
+    KRYS_NODISCARD virtual AffineTransform LocalTransform() const noexcept;
+
+    // Returns the full transform mapping from local coordinates to local coords for the parent SVG renderer
+    // This includes any viewport transforms and x/y offsets as well as the transform="" value off the
+    // element.
+    KRYS_NODISCARD virtual const AffineTransform &LocalToParentTransform() const noexcept;
+
+    // SVG uses FloatPoint precise hit testing, and passes the point in parent
+    // coordinates instead of in repaint container coordinates.  Eventually the
+    // rest of the rendering tree will move to a similar model.
+    virtual bool NodeAtFloatPoint(const HitTestRequest &, HitTestResult &, const FloatPoint &pointInParent,
+                                  HitTestAction) noexcept;
 
     KRYS_NODISCARD bool IsAnonymous() const noexcept
     {

@@ -659,8 +659,7 @@ namespace krys::boo
       }
     }
     // Figure out if we need to compute an intrinsic ratio.
-    // FIXME: SVG roots always compute one, once there's SVG.
-    if (!RenderBox::HasIntrinsicAspectRatio())
+    if (!RenderBox::HasIntrinsicAspectRatio() && !IsLegacyRenderSVGRoot())
     {
       return preferredAspectRatio;
     }
@@ -746,13 +745,17 @@ namespace krys::boo
     return LayoutUnit(logicalHeight * aspectRatio);
   }
 
-  static bool HasIntrinsicSize(RenderBox *, bool hasIntrinsicWidth, bool hasIntrinsicHeight) noexcept
+  static bool HasIntrinsicSize(RenderBox *contentRenderer, bool hasIntrinsicWidth,
+                               bool hasIntrinsicHeight) noexcept
   {
     if (hasIntrinsicWidth && hasIntrinsicHeight)
     {
       return true;
     }
-    // FIXME: SVG roots may have only one of them, once there's SVG.
+    if (hasIntrinsicWidth || hasIntrinsicHeight)
+    {
+      return contentRenderer && contentRenderer->IsLegacyRenderSVGRoot();
+    }
     return false;
   }
 

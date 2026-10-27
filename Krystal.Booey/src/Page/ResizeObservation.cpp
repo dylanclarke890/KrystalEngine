@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo
 {
@@ -32,7 +33,20 @@ namespace krys::boo
 
   Maybe<ResizeObservation::BoxSizes> ResizeObservation::ComputeObservedSizes() const noexcept
   {
-    // FIXME: SVG elements with a layout box report their bounding box, once there's SVG.
+    if (auto *svg = DynamicDowncast<svg::SVGElement>(*_target))
+    {
+      if (svg->HasAssociatedSVGLayoutBox())
+      {
+        LayoutSize size;
+        if (auto svgRect = svg->GetBoundingBox())
+        {
+          size.SetWidth(svgRect->Width());
+          size.SetHeight(svgRect->Height());
+        }
+        return BoxSizes {size, size, size};
+      }
+    }
+
     if (auto *box = _target->GetRenderBox())
     {
       if (box->IsSkippedContent())

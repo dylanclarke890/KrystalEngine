@@ -4,12 +4,12 @@
 #include "Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationLineLayout.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderButton.hpp"
-#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
+#include "Krystal.Booey/Rendering/RenderMenuList.hpp"
 #include "Krystal.Booey/Rendering/RenderTable.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Booey/Rendering/RenderTableRow.hpp"
@@ -18,6 +18,8 @@
 #include "Krystal.Booey/Rendering/RenderTextFragment.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlock.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderFirstLetter.hpp"
@@ -25,6 +27,7 @@
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderInline.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderList.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderRuby.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderSVG.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilderTable.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 
@@ -131,7 +134,8 @@ namespace krys::boo
       : _view(view), _tableBuilder(CreateUnique<Table>(*this)), _blockBuilder(CreateUnique<Block>(*this)),
         _blockFlowBuilder(CreateUnique<BlockFlow>(*this)), _inlineBuilder(CreateUnique<Inline>(*this)),
         _firstLetterBuilder(CreateUnique<FirstLetter>(*this)), _listBuilder(CreateUnique<List>(*this)),
-        _rubyBuilder(CreateUnique<Ruby>(*this)), _formControlsBuilder(CreateUnique<FormControls>(*this))
+        _rubyBuilder(CreateUnique<Ruby>(*this)), _formControlsBuilder(CreateUnique<FormControls>(*this)),
+        _svgBuilder(CreateUnique<SVG>(*this))
   {
     krys_assert(!s_current || &_view != &s_current->_view);
     _previous = s_current;
@@ -252,8 +256,7 @@ namespace krys::boo
     }
     // FIXME: A beforeChild that's a column spanner, once there are multi-column flows.
 
-    // FIXME: SVG text, buttons, menu lists, SVG containers and roots and MathML, once there are their
-    // renderers and builders.
+    // FIXME: SVG text (RenderSVGText), with text (B11g).
 
     if (parent.Style().Display() == DisplayType::Ruby || parent.Style().Display() == DisplayType::RubyBlock)
     {
@@ -322,6 +325,20 @@ namespace krys::boo
       return;
     }
 
+    if (auto *container = DynamicDowncast<LegacyRenderSVGContainer>(parent))
+    {
+      SVGBuilder().Attach(*container, krys::move(child), beforeChild);
+      return;
+    }
+
+    // FIXME: SVG inlines (RenderSVGInline), with text (B11g).
+
+    if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(parent))
+    {
+      SVGBuilder().Attach(*svgRoot, krys::move(child), beforeChild);
+      return;
+    }
+
     if (auto *gridParent = DynamicDowncast<RenderGrid>(parent))
     {
       AttachToRenderGrid(*gridParent, krys::move(child), beforeChild);
@@ -368,7 +385,7 @@ namespace krys::boo
     krys_debug_assert(!parent.BeingDestroyed());
     krys_debug_assert(!child.BeingDestroyed());
 
-    // FIXME: SVG text and SVG inlines, containers and roots, once there are their renderers and builders.
+    // FIXME: SVG text (RenderSVGText), with text (B11g).
 
     if (auto *menuList = DynamicDowncast<RenderMenuList>(parent))
     {
@@ -388,6 +405,18 @@ namespace krys::boo
     if (auto *grid = DynamicDowncast<RenderGrid>(parent))
     {
       return DetachFromRenderGrid(*grid, child, willBeDestroyed);
+    }
+
+    // FIXME: SVG inlines (RenderSVGInline), with text (B11g).
+
+    if (auto *container = DynamicDowncast<LegacyRenderSVGContainer>(parent))
+    {
+      return SVGBuilder().Detach(*container, child, willBeDestroyed);
+    }
+
+    if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(parent))
+    {
+      return SVGBuilder().Detach(*svgRoot, child, willBeDestroyed);
     }
 
     if (auto *block = DynamicDowncast<RenderBlock>(parent))

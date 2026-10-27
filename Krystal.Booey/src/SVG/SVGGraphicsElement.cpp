@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Graphics/Transforms/TransformationMatrix.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGPath.hpp"
 #include "Krystal.Booey/Rendering/TransformOperationData.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
@@ -118,8 +119,11 @@ namespace krys::boo::svg
       krys_debug_assert(attributeName == SVGNames::TransformAttr());
       InstanceInvalidationGuard guard(*this);
 
-      // FIXME: Mark the renderer's transform for an update and update the renderer (setNeedsTransformUpdate,
-      // updateSVGRendererForElementChange), once there are SVG renderers (B11b).
+      if (auto *renderer = Renderer())
+      {
+        renderer->SetNeedsTransformUpdate();
+        UpdateSVGRendererForElementChange();
+      }
       return;
     }
 
@@ -145,5 +149,10 @@ namespace krys::boo::svg
   FloatRect SVGGraphicsElement::GetBBox(StyleUpdateStrategy styleUpdateStrategy) noexcept
   {
     return SVGTransformable::GetBBox(this, styleUpdateStrategy);
+  }
+
+  RenderPtr<RenderElement> SVGGraphicsElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<LegacyRenderSVGPath>(*this, krys::move(style));
   }
 }

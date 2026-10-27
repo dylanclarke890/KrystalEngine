@@ -156,7 +156,12 @@ namespace krys::boo
           return false;
         }
 
-        // FIXME: Fragmented flows and SVG roots, once there are any.
+        // FIXME: Fragmented flows, once there are any.
+
+        if (current->IsLegacyRenderSVGRoot())
+        {
+          return false;
+        }
 
         if (current == &ancestor)
         {

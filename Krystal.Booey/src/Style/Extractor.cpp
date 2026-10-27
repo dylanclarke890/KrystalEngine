@@ -20,6 +20,7 @@
 #include "Krystal.Booey/Style/ScopeRuleSets.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style
@@ -450,9 +451,14 @@ namespace krys::boo::style
 
       UpdateStyleIfNeededForProperty(*element, propertyID);
       const auto *renderer = ComputeRenderer();
-      // FIXME: SVG conditional processing. Upstream returns no display value for an SVG element without a
-      // renderer that isn't valid (`SVGElement::isValid`, false when its conditional processing attributes
-      // don't match).
+      if (propertyID == css::PropertyId::Display && !renderer)
+      {
+        auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+        if (svgElement && !svgElement->IsValid())
+        {
+          return nullptr;
+        }
+      }
 
       style = ComputeRenderStyleForProperty(*element, _pseudoElementIdentifier, propertyID, ownedStyle);
 

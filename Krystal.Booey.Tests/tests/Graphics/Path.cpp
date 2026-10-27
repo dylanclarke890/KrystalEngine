@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/Graphics/Path.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Graphics/TestPathStrokeStrategy.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include <cmath>
@@ -188,5 +190,69 @@ namespace krys::boo::tests
       CHECK(rounded.Contains({20, 1}));
       CHECK_FALSE(rounded.Contains({1, 1}));
     }
+  }
+
+  TEST_CASE("Path: strokes", "[Graphics][Path]")
+  {
+    Path line;
+    line.MoveTo({10, 10});
+    line.AddLineTo({50, 10});
+
+    auto applier = [](GraphicsContext &context)
+    {
+      context.SetStrokeThickness(4);
+      context.SetLineCap(LineCap::Round);
+      context.SetLineJoin(LineJoin::Bevel);
+      context.SetMiterLimit(2);
+      context.SetLineDash(DashArray {3, 1}, 2);
+    };
+
+    SECTION("without the host's stroker, nothing is inside a stroke and its bounds are estimated")
+    {
+      CHECK_FALSE(line.StrokeContains({30, 10}, applier));
+      CHECK(line.StrokeBoundingRect(applier) == FloatRect(8, 8, 44, 4));
+      // Without an applier, the stroke is a solid one 1 wide.
+      CHECK(line.StrokeBoundingRect() == FloatRect(9.5f, 9.5f, 41, 1));
+    }
+
+    SECTION("the host's stroker is asked with the style the applier set")
+    {
+      PathStrokeStrategyScope scope;
+      CHECK(line.StrokeContains({30, 11}, applier));
+      CHECK_FALSE(line.StrokeContains({30, 13}, applier));
+      const auto &style = scope.Strategy.LastStyle;
+      CHECK(style.Thickness == 4);
+      CHECK(style.Cap == LineCap::Round);
+      CHECK(style.Join == LineJoin::Bevel);
+      CHECK(style.MiterLimit == 2);
+      CHECK(style.Dashes == DashArray {3, 1});
+      CHECK(style.DashOffset == 2);
+
+      CHECK(line.StrokeBoundingRect() == FloatRect(9.5f, 9.5f, 41, 1));
+      CHECK(scope.Strategy.LastStyle.Dashes.isEmpty());
+
+      // An empty path has no stroke.
+      CHECK_FALSE(Path().StrokeContains({0, 0}, applier));
+      CHECK(Path().StrokeBoundingRect(applier) == FloatRect());
+    }
+  }
+
+  TEST_CASE("Path: transforming segments that can't be transformed themselves", "[Graphics][Path]")
+  {
+    // A rect under a transform isn't a rect, so the path is rebuilt from its elements.
+    Path rect;
+    rect.AddRect({10, 8, 20, 48});
+    rect.Transform(AffineTransform().Scale(3, 1));
+    CHECK(rect.BoundingRect() == FloatRect(30, 8, 60, 48));
+    CHECK(ElementTypes(rect)
+          == List<ElementType> {ElementType::MoveToPoint, ElementType::AddLineToPoint,
+                                ElementType::AddLineToPoint, ElementType::AddLineToPoint,
+                                ElementType::CloseSubpath});
+
+    Path ellipse;
+    ellipse.MoveTo({0, 0});
+    ellipse.AddEllipseInRect({0, 0, 10, 10});
+    ellipse.Transform(AffineTransform::MakeTranslation({5, 5}));
+    CHECK(ellipse.BoundingRect() == FloatRect(5, 5, 10, 10));
   }
 }

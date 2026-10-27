@@ -3,7 +3,9 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey.Tests/SVG/TestSVGElement.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix2DInit.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
@@ -216,10 +218,11 @@ namespace krys::boo::svg::tests
     REQUIRE(s.Renderer() != nullptr);
     REQUIRE(t.Renderer() != nullptr);
 
-    // The attribute's transform, about the transform origin (0 0 for an outermost <svg>).
+    // The attribute's transform, about the transform origin.
     CHECK(s.AnimatedLocalTransform() == AffineTransform(1, 0, 0, 1, 5, 6));
-    // The transform property wins over the attribute.
-    CHECK(t.AnimatedLocalTransform() == AffineTransform(2, 0, 0, 2, 0, 0));
+    // The transform property wins over the attribute, about the transform origin: the centre of the
+    // 300x150 box (the user agent sheet's 0 0 is only for an <svg> inside SVG).
+    CHECK(t.AnimatedLocalTransform() == AffineTransform(2, 0, 0, 2, -150, -75));
 
     // The supplemental transform comes first.
     s.EnsureSupplementalTransform()->Scale(3);
@@ -286,5 +289,59 @@ namespace krys::boo::svg::tests
     REQUIRE(inner.Renderer()->Style().ComputedFontSize() == 20);
     CHECK(SVGLengthValue(SVGLengthMode::Other, u8"2em").Value(context) == 20);
     CHECK(SVGLengthValue(SVGLengthMode::Other, u8"1rem").Value(context) == 16);
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "SVGSVGElement: renderer queries", "[SVG][SVGSVGElement]")
+  {
+    ResolverFixture fixture {
+      u8R"html(<!DOCTYPE html><body style="margin: 0"><div style="height: 20px"></div>)html"
+      u8R"html(<svg id=s width=200 height=100 viewBox="0 0 100 50" style="padding: 5px; display: block">)html"
+      u8R"html(<rect id=a x=10 y=10 width=20 height=20 /><rect id=b x=50 y=10 width=20 height=20 />)html"
+      u8R"html(<svg id=inner x=60 y=0 width=40 height=30><g id=g><rect id=c width=5 height=5 /></g></svg>)html"
+      u8R"html(</svg></body>)html"};
+    (void)fixture.Document->UpdateLayout();
+    auto &s = SvgById(*fixture.Document, u8"s");
+    auto &inner = SvgById(*fixture.Document, u8"inner");
+
+    // The viewport is the root's content box, or an inner <svg>'s viewport.
+    CHECK(s.CurrentViewportSizeExcludingZoom() == FloatSize(200, 100));
+    CHECK(inner.CurrentViewportSizeExcludingZoom() == FloatSize(40, 30));
+
+    // The screen CTM of the outermost <svg> maps through its place on the page and its view box.
+    CHECK(s.GetScreenCTM() == AffineTransform(2, 0, 0, 2, 5, 25));
+    auto &rect = Downcast<SVGGraphicsElement>(Downcast<SVGElement>(*fixture.Document->GetElementById(u8"c")));
+    CHECK(rect.GetScreenCTM() == AffineTransform(2, 0, 0, 2, 125, 25));
+
+    // The graphics elements whose repaint rects intersect or are enclosed by a rect. Each rect is mapped by
+    // the transforms up to and including its nearest viewport element's: for the outermost <svg>, through its
+    // place on the page (a at (25,45) size 40x40, b at (105,45)), and for the inner one, only by its x and y
+    // (c at (60,0) size 5x5).
+    auto query = SVGRect::Create(FloatRect(0, 40, 70, 60));
+    auto intersecting = s.GetIntersectionList(*query, nullptr);
+    REQUIRE(intersecting->Length() == 1);
+    CHECK(intersecting->Item(0).get() == fixture.Document->GetElementById(u8"a").get());
+    auto wide = SVGRect::Create(FloatRect(20, 0, 140, 90));
+    CHECK(s.GetIntersectionList(*wide, nullptr)->Length() == 3);
+    CHECK(s.GetEnclosureList(*wide, nullptr)->Length() == 3);
+    auto narrow = SVGRect::Create(FloatRect(30, 0, 140, 90));
+    CHECK(s.GetEnclosureList(*narrow, nullptr)->Length() == 2);
+    auto &g = Downcast<SVGElement>(*fixture.Document->GetElementById(u8"g"));
+    CHECK(s.GetIntersectionList(*wide, &g)->Length() == 1);
+    CHECK(SVGSvgElement::CheckEnclosure(
+      ShareRef(Downcast<SVGElement>(*fixture.Document->GetElementById(u8"b"))), *wide));
+    auto far = SVGRect::Create(FloatRect(300, 300, 5, 5));
+    CHECK_FALSE(SVGSvgElement::CheckIntersection(
+      ShareRef(Downcast<SVGElement>(*fixture.Document->GetElementById(u8"a"))), *far));
+
+    // Elements' boxes are their object bounding boxes, mapped to the page.
+    auto clientRect = fixture.Document->GetElementById(u8"b")->GetBoundingClientRect();
+    CHECK(clientRect->X() == 105);
+    CHECK(clientRect->Y() == 45);
+    CHECK(clientRect->Width() == 40);
+    CHECK(clientRect->Height() == 40);
+    // The outermost <svg>'s is its CSS box.
+    auto svgRect = s.GetBoundingClientRect();
+    CHECK(svgRect->Width() == 210);
+    CHECK(svgRect->Height() == 110);
   }
 }

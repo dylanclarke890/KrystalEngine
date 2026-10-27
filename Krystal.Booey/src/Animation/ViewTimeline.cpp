@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGModelObject.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRange.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthWrapperDeprecatedCSSValueConversion.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollPadding.hpp"
@@ -421,12 +422,15 @@ namespace krys::boo
       subjectOffset -=
         scrollDirection.IsVertical ? scrollerPaddingBoxOrigin.Y() : scrollerPaddingBoxOrigin.X();
 
-      // FIXME: The bounds of SVG subjects, once there are SVG renderers.
       auto subjectBounds = [&]() -> FloatSize
       {
         if (const auto *subjectRenderBoxModelObject = DynamicDowncast<RenderBoxModelObject>(subjectRenderer))
         {
           return FloatSize(subjectRenderBoxModelObject->BorderBoundingBox().Size());
+        }
+        if (Is<LegacyRenderSVGModelObject>(subjectRenderer))
+        {
+          return subjectRenderer->ObjectBoundingBox().Size();
         }
         return {};
       }();

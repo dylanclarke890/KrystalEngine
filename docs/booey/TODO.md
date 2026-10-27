@@ -80,7 +80,7 @@ Open work outside the WebKit port's current slice. Port-specific detail (verdict
 
 ## SVG and MathML
 
-- **SVG elements** — `SVGElementFactory` returns null for unknown elements (`SVG/Internals/SVGElementFactory.hpp`); document `title` for SVG documents (`src/DOM/Document.cpp`); `<use>` instances.
+- **SVG elements** — `SVGElementFactory` returns null for unknown elements (`SVG/Internals/SVGElementFactory.hpp`).
 - **MathML elements** — `TODO(impl): MATHML-ELEMENTS`.
 
 ## Krystal.Core

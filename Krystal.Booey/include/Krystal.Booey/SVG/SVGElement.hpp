@@ -149,6 +149,8 @@ namespace krys::boo::svg
       return true;
     }
 
+    KRYS_NODISCARD bool ChildShouldCreateRenderer(const dom::Node &) const noexcept override;
+
     /// @brief Reacts to the attribute @p attributeName, or the property that reflects it, having changed.
     virtual void SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept;
 
@@ -166,6 +168,13 @@ namespace krys::boo::svg
 
     void SetAnimatedSVGAttributesAreDirty() noexcept;
     void SetPresentationalHintStyleIsDirty() noexcept;
+    void UpdateSVGRendererForElementChange() noexcept;
+
+    /// @brief The object bounding box of a rendered graphics element, in its renderer's local coordinates.
+    KRYS_NODISCARD Maybe<FloatRect> GetBoundingBox() const noexcept;
+    /// @brief Whether the element's renderer is one inside an SVG renderer tree (not the outermost `<svg>`'s
+    /// box), whose bounds come from SVG geometry rather than the box model.
+    KRYS_NODISCARD bool HasAssociatedSVGLayoutBox() const noexcept;
 
     /// @brief The element's instances: the clones made of it in the shadow trees of `<use>` elements.
     KRYS_NODISCARD List<Ref<SVGElement>> Instances() const noexcept;
@@ -181,6 +190,30 @@ namespace krys::boo::svg
     void SetCorrespondingElement(SVGElement *correspondingElement) noexcept;
 
     KRYS_NODISCARD virtual bool HaveLoadedRequiredResources() noexcept;
+
+    /// @brief Whether the element waits for ids as a pending resource of its tree scope.
+    KRYS_NODISCARD bool HasPendingResources() const noexcept
+    {
+      return HasNodeFlag(dom::NodeFlags::HasPendingResources);
+    }
+    void SetHasPendingResources() noexcept
+    {
+      SetNodeFlag(dom::NodeFlags::HasPendingResources);
+    }
+    void ClearHasPendingResources() noexcept
+    {
+      ClearNodeFlag(dom::NodeFlags::HasPendingResources);
+    }
+
+    /// @brief Rebuilds what the element made from the resources it was waiting for, now that an element has
+    /// taken their id.
+    virtual void BuildPendingResource() noexcept
+    {
+    }
+
+    KRYS_NODISCARD Maybe<style::UnadjustedStyle>
+      ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
+                         const RenderStyle *shadowHostStyle) noexcept override;
 
     void CallClearTarget() noexcept
     {
@@ -259,8 +292,19 @@ namespace krys::boo::svg
                                                 css::MutableStyleProperties &style) noexcept override;
 
     void OnInsert() noexcept override;
+    void OnPostConnection() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    void DidAddEventListener(const dom::EventListener &listener) noexcept override;
+    void DidRemoveEventListener(const dom::EventListener &listener) noexcept override;
+
+    KRYS_NODISCARD virtual bool NeedsPendingResourceHandling() const noexcept
+    {
+      return true;
+    }
     void OnChildrenChanged() noexcept override;
+
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept override;
 
     KRYS_NODISCARD virtual bool SelfHasRelativeLengths() const noexcept
     {
@@ -278,6 +322,11 @@ namespace krys::boo::svg
 #pragma endregion
 
 #pragma region Type Checks
+
+    KRYS_NODISCARD bool IsSVGAElement() const noexcept
+    {
+      return _interface == SVGElementInterface::A;
+    }
 
     KRYS_NODISCARD bool IsSVGCircleElement() const noexcept
     {
@@ -334,6 +383,11 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Metadata;
     }
 
+    KRYS_NODISCARD bool IsSVGPathElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Path;
+    }
+
     KRYS_NODISCARD bool IsSVGPolygonElement() const noexcept
     {
       return _interface == SVGElementInterface::Polygon;
@@ -386,6 +440,11 @@ namespace krys::boo::svg
       return _interface == SVGElementInterface::Use;
     }
 
+    KRYS_NODISCARD bool IsSVGViewElement() const noexcept
+    {
+      return _interface == SVGElementInterface::View;
+    }
+
 #pragma endregion
 
   private:
@@ -395,6 +454,8 @@ namespace krys::boo::svg
     virtual void ClearTarget() noexcept
     {
     }
+
+    void BuildPendingResourcesIfNeeded() noexcept;
   };
 
   class SVGElement::InstanceInvalidationGuard

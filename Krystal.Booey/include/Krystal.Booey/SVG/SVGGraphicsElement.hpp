@@ -72,6 +72,10 @@ namespace krys::boo::svg
       _shouldIsolateBlending = isolate;
     }
 
+    // "base class" methods for all the elements which render as paths
+    // FIXME: The element's path as a clip path (toClipPath), with clipping (B11f).
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
+
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGGraphicsElement, SVGElement, SVGTests>;
 
     KRYS_NODISCARD const SVGTransformList &Transform() const noexcept

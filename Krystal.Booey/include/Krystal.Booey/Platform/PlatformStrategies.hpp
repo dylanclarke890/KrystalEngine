@@ -6,6 +6,7 @@ namespace krys::boo
 {
   class LoaderStrategy;
   class PasteboardStrategy;
+  class PathStrokeStrategy;
   class StorageProvider;
 
   /// @brief The strategies the host provides for what Booey can't do itself.
@@ -15,6 +16,7 @@ namespace krys::boo
   private:
     LoaderStrategy *_loaderStrategy {nullptr};
     PasteboardStrategy *_pasteboardStrategy {nullptr};
+    PathStrokeStrategy *_pathStrokeStrategy {nullptr};
     StorageProvider *_storageProvider {nullptr};
 
   public:
@@ -39,6 +41,17 @@ namespace krys::boo
     void SetPasteboardStrategy(PasteboardStrategy *pasteboardStrategy) noexcept
     {
       _pasteboardStrategy = pasteboardStrategy;
+    }
+
+    /// @brief How strokes become geometry; null until the host sets one, and then nothing is inside a stroke
+    /// and strokes' bounds are estimated.
+    KRYS_NODISCARD PathStrokeStrategy *GetPathStrokeStrategy() const noexcept
+    {
+      return _pathStrokeStrategy;
+    }
+    void SetPathStrokeStrategy(PathStrokeStrategy *pathStrokeStrategy) noexcept
+    {
+      _pathStrokeStrategy = pathStrokeStrategy;
     }
 
     /// @brief Where origins' local storage is kept; null until the host sets one, and then it's kept in

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/PathTraversalState.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathAbsoluteConverter.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathBlender.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathBuilder.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStreamSource.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathParser.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathStringViewSource.hpp"
+#include "Krystal.Booey/SVG/Internals/SVGPathTraversalStateBuilder.hpp"
 
 namespace krys::boo::svg
 {
@@ -110,5 +112,37 @@ namespace krys::boo::svg
     }
 
     return result;
+  }
+
+  float GetTotalLengthOfSVGPathByteStream(const SVGPathByteStream &stream) noexcept
+  {
+    if (stream.IsEmpty())
+    {
+      return 0;
+    }
+
+    PathTraversalState traversalState(PathTraversalState::Action::TotalLength);
+
+    SVGPathTraversalStateBuilder builder(traversalState);
+
+    SVGPathByteStreamSource source(stream);
+    (void)SVGPathParser::Parse(source, builder);
+    return builder.TotalLength();
+  }
+
+  FloatPoint GetPointAtLengthOfSVGPathByteStream(const SVGPathByteStream &stream, float length) noexcept
+  {
+    if (stream.IsEmpty())
+    {
+      return {};
+    }
+
+    PathTraversalState traversalState(PathTraversalState::Action::VectorAtLength);
+
+    SVGPathTraversalStateBuilder builder(traversalState, length);
+
+    SVGPathByteStreamSource source(stream);
+    (void)SVGPathParser::Parse(source, builder);
+    return builder.CurrentPoint();
   }
 }

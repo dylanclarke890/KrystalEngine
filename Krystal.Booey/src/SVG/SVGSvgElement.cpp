@@ -1,9 +1,17 @@
 ﻿#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix2DInit.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Internals/NodeList/StaticNodeList.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderDescendantIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
 #include "Krystal.Booey/SVG/SVGLength.hpp"
@@ -13,6 +21,9 @@
 #include "Krystal.Booey/SVG/SVGNumber.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
 #include "Krystal.Booey/SVG/SVGTransform.hpp"
+#include "Krystal.Booey/SVG/SVGTransformList.hpp"
+#include "Krystal.Booey/SVG/SVGViewElement.hpp"
+#include "Krystal.Booey/SVG/SVGViewSpec.hpp"
 #include <cmath>
 
 namespace krys::boo::svg
@@ -37,7 +48,24 @@ namespace krys::boo::svg
     }
   }
 
-  SVGSvgElement::~SVGSvgElement() noexcept = default;
+  SVGSvgElement::~SVGSvgElement() noexcept
+  {
+    if (auto viewSpec = _viewSpec)
+    {
+      viewSpec->ResetContextElement();
+    }
+    // FIXME: Unregister from the document's suspension callbacks and remove the time container, with SMIL
+    // (B11i).
+  }
+
+  SVGViewSpec &SVGSvgElement::CurrentView() noexcept
+  {
+    if (!_viewSpec)
+    {
+      _viewSpec = SVGViewSpec::Create(*this);
+    }
+    return *_viewSpec;
+  }
 
   LocalFrame *SVGSvgElement::FrameForCurrentScale() const noexcept
   {
@@ -84,8 +112,11 @@ namespace krys::boo::svg
       return;
     }
 
-    // FIXME: Update the renderer, and repaint the view when this is the document element
-    // (updateSVGRendererForElementChange), once there are SVG renderers (B11b).
+    UpdateSVGRendererForElementChange();
+    if (ParentNode() == &NodeDocument() && NodeDocument().GetRenderView())
+    {
+      NodeDocument().GetRenderView()->Repaint();
+    }
   }
 
   void SVGSvgElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -126,20 +157,112 @@ namespace krys::boo::svg
       InstanceInvalidationGuard guard(*this);
       SetPresentationalHintStyleIsDirty();
 
-      // FIXME: Lay out the view of an SVG document embedded through a frame when its width or height changes,
-      // and update the renderer (updateSVGRendererForElementChange), once there are SVG renderers (B11b).
+      UpdateSVGRendererForElementChange();
       return;
     }
 
     if (SVGFitToViewBox::IsKnownAttribute(attributeName))
     {
-      // FIXME: Mark the renderer's transform for an update, lay out the root if its intrinsic size changed
-      // and update the renderer (setNeedsTransformUpdate, setNeedsLayoutIfNeededAfterIntrinsicSizeChange,
-      // updateSVGRendererForElementChange), once there are SVG renderers (B11b).
+      if (auto *renderer = Renderer())
+      {
+        renderer->SetNeedsTransformUpdate();
+        if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(*renderer))
+        {
+          svgRoot->SetNeedsLayoutIfNeededAfterIntrinsicSizeChange();
+        }
+      }
+
+      UpdateSVGRendererForElementChange();
       return;
     }
 
     SVGGraphicsElement::SVGAttributeChanged(attributeName);
+  }
+
+  bool SVGSvgElement::RendererIsNeeded(const RenderStyle &style) noexcept
+  {
+    if (!IsValid())
+    {
+      return false;
+    }
+    // FIXME: We should respect display: none on the documentElement svg element
+    // but many things in FrameView and SVGImage depend on the LegacyRenderSVGRoot when
+    // they should instead depend on the RenderView.
+    // https://bugs.webkit.org/show_bug.cgi?id=103493
+    if (NodeDocument().DocumentElement().get() == this)
+    {
+      return true;
+    }
+    return dom::StyledElement::RendererIsNeeded(style);
+  }
+
+  RenderPtr<RenderElement> SVGSvgElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    if (IsOutermostSVGSVGElement())
+    {
+      return CreateRenderer<LegacyRenderSVGRoot>(*this, krys::move(style));
+    }
+
+    return CreateRenderer<LegacyRenderSVGViewportContainer>(*this, krys::move(style));
+  }
+
+  namespace
+  {
+    constexpr EnumSet<dom::LayoutOptions> SvgQueryLayoutOptions {
+      dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+      dom::LayoutOptions::TreatContentVisibilityAutoAsVisible};
+
+    bool CheckIntersectionWithoutUpdatingLayout(SVGElement &element, SVGRect &rect) noexcept
+    {
+      return LegacyRenderSVGModelObject::CheckIntersection(element.Renderer(), rect.Value());
+    }
+
+    bool CheckEnclosureWithoutUpdatingLayout(SVGElement &element, SVGRect &rect) noexcept
+    {
+      return LegacyRenderSVGModelObject::CheckEnclosure(element.Renderer(), rect.Value());
+    }
+  }
+
+  Ref<dom::NodeList> SVGSvgElement::GetIntersectionList(SVGRect &rect, SVGElement *referenceElement) noexcept
+  {
+    (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, this);
+    return CollectIntersectionOrEnclosureList(rect, referenceElement, CheckIntersectionWithoutUpdatingLayout);
+  }
+
+  Ref<dom::NodeList> SVGSvgElement::GetEnclosureList(SVGRect &rect, SVGElement *referenceElement) noexcept
+  {
+    (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, this);
+    return CollectIntersectionOrEnclosureList(rect, referenceElement, CheckEnclosureWithoutUpdatingLayout);
+  }
+
+  bool SVGSvgElement::CheckIntersection(Ref<SVGElement> &&element, SVGRect &rect) noexcept
+  {
+    (void)element->NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, element.get());
+    return CheckIntersectionWithoutUpdatingLayout(*element, rect);
+  }
+
+  bool SVGSvgElement::CheckEnclosure(Ref<SVGElement> &&element, SVGRect &rect) noexcept
+  {
+    (void)element->NodeDocument().UpdateLayoutIgnorePendingStylesheets(SvgQueryLayoutOptions, element.get());
+    return CheckEnclosureWithoutUpdatingLayout(*element, rect);
+  }
+
+  Ref<dom::NodeList>
+    SVGSvgElement::CollectIntersectionOrEnclosureList(SVGRect &rect, SVGElement *referenceElement,
+                                                      bool (*checkFunction)(SVGElement &, SVGRect &)) noexcept
+  {
+    dom::SmallNodeList elements;
+    dom::ContainerNode &root =
+      referenceElement ? static_cast<dom::ContainerNode &>(*referenceElement) : *this;
+    for (auto *node = root.FirstChild(); node; node = dom::TreeQueries::Next(*node, &root))
+    {
+      auto *element = DynamicDowncast<SVGElement>(*node);
+      if (element && checkFunction(*element, rect))
+      {
+        elements.push_back(ShareRef(*element));
+      }
+    }
+    return AdoptRef(*new dom::StaticNodeList(krys::move(elements)));
   }
 
   void SVGSvgElement::DeselectAll() noexcept
@@ -232,9 +355,38 @@ namespace krys::boo::svg
     }
     else if (mode == CTMScope::ScreenScope)
     {
-      // FIXME: Translate to the renderer's place in its CSS parent coordinate space (mapping through the
-      // root's localToBorderBoxTransform, excluding zoom, less the view box transform's translation and the
-      // view's scroll position), once there are SVG renderers (B11b).
+      if (auto *renderer = Renderer())
+      {
+        FloatPoint location;
+        float zoomFactor = 1;
+
+        // At the SVG/HTML boundary (aka LegacyRenderSVGRoot), we apply the localToBorderBoxTransform
+        // to map an element from SVG viewport coordinates to CSS box coordinates.
+        // LegacyRenderSVGRoot's localToAbsolute method expects CSS box coordinates.
+        // We also need to adjust for the zoom level factored into CSS coordinates (bug #96361).
+        if (auto *legacyRenderSVGRoot = DynamicDowncast<LegacyRenderSVGRoot>(*renderer))
+        {
+          location = legacyRenderSVGRoot->LocalToBorderBoxTransform().MapPoint(location);
+          zoomFactor = 1 / renderer->Style().UsedZoom();
+        }
+
+        // Translate in our CSS parent coordinate space
+        // FIXME: This doesn't work correctly with CSS transforms.
+        location = renderer->LocalToAbsolute(location, MapCoordinatesMode::UseTransforms);
+        location.Scale(zoomFactor);
+
+        // Be careful here! localToBorderBoxTransform() included the x/y offset coming from the
+        // viewBoxToViewTransform(), so we have to subtract it here (original cause of bug #27183)
+        transform.Translate(location.X() - viewBoxTransform.E(), location.Y() - viewBoxTransform.F());
+
+        // Respect scroll offset.
+        if (auto *view = NodeDocument().View())
+        {
+          LayoutPoint scrollPosition = view->GetScrollPosition();
+          scrollPosition.Scale(zoomFactor);
+          transform.Translate(-scrollPosition);
+        }
+      }
     }
 
     return transform.Multiply(viewBoxTransform);
@@ -267,8 +419,14 @@ namespace krys::boo::svg
 
   FloatRect SVGSvgElement::CurrentViewBoxRect() const noexcept
   {
-    // FIXME: The view box of the current view (SVGViewSpec), when a fragment identifier picks one, with
-    // <view> (B11b).
+    if (_useCurrentView)
+    {
+      if (auto viewSpec = _viewSpec)
+      {
+        return viewSpec->ViewBox();
+      }
+      return {};
+    }
 
     auto viewBox = ViewBox();
     if (!viewBox.IsEmpty())
@@ -285,8 +443,22 @@ namespace krys::boo::svg
   {
     FloatSize viewportSize;
 
-    // FIXME: The root renderer's content box size excluding zoom, or the viewport container's viewport size,
-    // once there are SVG renderers (B11b).
+    if (Renderer())
+    {
+      if (auto *svgRoot = DynamicDowncast<LegacyRenderSVGRoot>(Renderer()))
+      {
+        viewportSize = svgRoot->ContentBoxRect().Size() / svgRoot->Style().UsedZoom();
+      }
+      else if (auto *svgViewportContainer = DynamicDowncast<LegacyRenderSVGViewportContainer>(Renderer()))
+      {
+        viewportSize = svgViewportContainer->Viewport().Size();
+      }
+      else
+      {
+        krys_debug_assert(false);
+        return {};
+      }
+    }
 
     if (!viewportSize.IsEmpty())
     {
@@ -335,9 +507,17 @@ namespace krys::boo::svg
 
   AffineTransform SVGSvgElement::ViewBoxToViewTransform(float viewWidth, float viewHeight) const noexcept
   {
-    // FIXME: The current view's aspect ratio and transform (SVGViewSpec), with <view> (B11b).
-    return SVGFitToViewBox::ViewBoxToViewTransform(CurrentViewBoxRect(), PreserveAspectRatio(), viewWidth,
-                                                   viewHeight);
+    if (!_useCurrentView || !_viewSpec)
+    {
+      return SVGFitToViewBox::ViewBoxToViewTransform(CurrentViewBoxRect(), PreserveAspectRatio(), viewWidth,
+                                                     viewHeight);
+    }
+
+    auto viewSpec = _viewSpec;
+    AffineTransform transform = SVGFitToViewBox::ViewBoxToViewTransform(
+      CurrentViewBoxRect(), viewSpec->PreserveAspectRatio(), viewWidth, viewHeight);
+    transform *= viewSpec->Transform()->Concatenate();
+    return transform;
   }
 
   // getElementById on SVGSVGElement is restricted to only the child subtree defined by the <svg> element.
@@ -355,5 +535,182 @@ namespace krys::boo::svg
   bool SVGSvgElement::IsValid() const noexcept
   {
     return SVGTests::IsValid();
+  }
+
+  bool SVGSvgElement::ScrollToFragment(dom::DOMStringView fragmentIdentifier) noexcept
+  {
+    auto *renderer = Renderer();
+
+    auto view = _viewSpec;
+    if (view)
+    {
+      view->Reset();
+    }
+
+    bool hadUseCurrentView = _useCurrentView;
+    _useCurrentView = false;
+
+    auto invalidateView = [](RenderElement &renderer)
+    {
+      LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(renderer);
+    };
+
+    if (fragmentIdentifier.starts_with(u8"svgView("))
+    {
+      if (!view)
+      {
+        view = ShareRefPtr(&CurrentView()); // Create the SVGViewSpec.
+      }
+      if (view->ParseViewSpec(fragmentIdentifier))
+      {
+        _useCurrentView = true;
+      }
+      else
+      {
+        view->Reset();
+      }
+      if (renderer && (hadUseCurrentView || _useCurrentView))
+      {
+        invalidateView(*renderer);
+      }
+      return _useCurrentView;
+    }
+
+    // Spec: If the SVG fragment identifier addresses a "view" element within an SVG document (e.g.,
+    // MyDrawing.svg#MyView) then the root 'svg' element is displayed in the SVG viewport. Any view
+    // specification attributes included on the given "view" element override the corresponding view
+    // specification attributes on the root 'svg' element.
+    if (auto viewElement = FindViewAnchor(fragmentIdentifier))
+    {
+      if (auto *rootElement = FindRootAnchor(viewElement.get()))
+      {
+        if (auto *currentViewElement = rootElement->_currentViewElement.get())
+        {
+          krys_debug_assert(currentViewElement->TargetElement() == rootElement);
+
+          // If the viewElement has changed, remove the link from the SVGViewElement to the previously
+          // selected SVGSVGElement.
+          if (currentViewElement != viewElement.get())
+          {
+            currentViewElement->ResetTargetElement();
+          }
+        }
+
+        if (rootElement->_currentViewElement.get() != viewElement.get())
+        {
+          rootElement->_currentViewElement = WeakPtr<SVGViewElement>::WithRef(*viewElement);
+          viewElement->SetTargetElement(*rootElement);
+        }
+
+        rootElement->InheritViewAttributes(*viewElement);
+        if (auto *rootRenderer = rootElement->Renderer())
+        {
+          invalidateView(*rootRenderer);
+        }
+        _currentViewFragmentIdentifier = dom::DOMString(fragmentIdentifier);
+        return true;
+      }
+    }
+
+    // FIXME: We need to decide which <svg> to focus on, and zoom to it.
+    // FIXME: We need to actually "highlight" the viewTarget(s).
+    return false;
+  }
+
+  void SVGSvgElement::ResetScrollAnchor() noexcept
+  {
+    if (!_useCurrentView && _currentViewFragmentIdentifier.empty())
+    {
+      return;
+    }
+
+    if (auto viewSpec = _viewSpec)
+    {
+      viewSpec->Reset();
+    }
+
+    if (!_currentViewFragmentIdentifier.empty())
+    {
+      if (auto *rootElement = FindRootAnchor(_currentViewFragmentIdentifier))
+      {
+        auto &view = rootElement->CurrentView();
+        view.SetViewBox(ViewBox());
+        view.SetPreserveAspectRatio(PreserveAspectRatio());
+        view.SetZoomAndPan(ZoomAndPan());
+        _currentViewFragmentIdentifier = {};
+      }
+    }
+
+    _useCurrentView = false;
+
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return;
+    }
+
+    LegacyRenderSVGResource::MarkForLayoutAndParentResourceInvalidation(*renderer);
+  }
+
+  void SVGSvgElement::InheritViewAttributes(const SVGViewElement &viewElement) noexcept
+  {
+    auto &view = CurrentView();
+    _useCurrentView = true;
+
+    auto noNamespace = dom::DOMStringAtom::Null();
+    if (viewElement.HasAttributeNS(noNamespace, SVGNames::ViewBoxAttr().LocalName()))
+    {
+      view.SetViewBox(viewElement.ViewBox());
+    }
+    else
+    {
+      view.SetViewBox(ViewBox());
+    }
+
+    if (viewElement.HasAttributeNS(noNamespace, SVGNames::PreserveAspectRatioAttr().LocalName()))
+    {
+      view.SetPreserveAspectRatio(viewElement.PreserveAspectRatio());
+    }
+    else
+    {
+      view.SetPreserveAspectRatio(PreserveAspectRatio());
+    }
+
+    if (viewElement.HasAttributeNS(noNamespace, SVGNames::ZoomAndPanAttr().LocalName()))
+    {
+      view.SetZoomAndPan(viewElement.ZoomAndPan());
+    }
+    else
+    {
+      view.SetZoomAndPan(ZoomAndPan());
+    }
+  }
+
+  RefPtr<SVGViewElement> SVGSvgElement::FindViewAnchor(dom::DOMStringView fragmentIdentifier) const noexcept
+  {
+    auto *anchor = NodeDocument().FindAnchor(fragmentIdentifier);
+    auto *svgAnchor = anchor ? DynamicDowncast<SVGElement>(*anchor) : nullptr;
+    return svgAnchor ? ShareRefPtr(DynamicDowncast<SVGViewElement>(*svgAnchor)) : nullptr;
+  }
+
+  SVGSvgElement *SVGSvgElement::FindRootAnchor(const SVGViewElement *viewElement) const noexcept
+  {
+    if (!viewElement)
+    {
+      return nullptr;
+    }
+
+    auto documentElement = viewElement->NodeDocument().DocumentElement();
+    auto *svgElement = documentElement ? DynamicDowncast<SVGElement>(*documentElement) : nullptr;
+    return svgElement ? DynamicDowncast<SVGSvgElement>(*svgElement) : nullptr;
+  }
+
+  SVGSvgElement *SVGSvgElement::FindRootAnchor(dom::DOMStringView fragmentIdentifier) const noexcept
+  {
+    if (auto viewElement = FindViewAnchor(fragmentIdentifier))
+    {
+      return FindRootAnchor(viewElement.get());
+    }
+    return nullptr;
   }
 }

@@ -229,7 +229,10 @@ namespace krys::boo::layout_integration
         return false;
       }
 
-      // FIXME: SVG roots are unsupported too, once there's SVG.
+      if (flexItem.IsLegacyRenderSVGRoot())
+      {
+        return false;
+      }
 
       if (flexItem.IsFlexibleBoxIncludingDeprecated())
       {

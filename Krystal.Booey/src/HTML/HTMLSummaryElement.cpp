@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
+#include "Krystal.Booey/SVG/SVGAElement.hpp"
 
 namespace krys::boo::html
 {
@@ -21,9 +22,10 @@ namespace krys::boo::html
         {
           return isInInteractiveContent;
         }
-        // FIXME: SVG a elements, once there's SVG.
+        auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
         if (auto *htmlElement = DynamicDowncast<HTMLElement>(*element);
-            htmlElement && htmlElement->IsInteractiveContent())
+            (htmlElement && htmlElement->IsInteractiveContent())
+            || (svgElement && Is<svg::SVGAElement>(*svgElement)))
         {
           isInInteractiveContent = true;
         }
