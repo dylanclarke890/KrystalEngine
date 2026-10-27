@@ -144,6 +144,23 @@ textarea.ime-field { height: 60px; resize: vertical; }
   border: 1px solid #c3cad8; border-radius: 6px; background: #ffffff; font: inherit; }
 div.drag-field { min-height: 60px; }
 
+/* SVG: icons drawn from symbols in their text's colour, SVG images, and an HTML box clipped to an SVG star. */
+.svg-sample .card { height: auto; min-width: 0; }
+.svg-defs { position: absolute; }
+.icons { color: #6f4e37; }
+.icon { width: 24px; height: 24px; margin-right: 8px; vertical-align: middle; }
+.icon.large { width: 48px; height: 48px; }
+.icon.leaf { color: #06a77d; }
+.svg-images img { margin-right: 12px; vertical-align: middle; }
+.svg-tiles { display: inline-block; width: 96px; height: 96px; border-radius: 12px; vertical-align: middle;
+  background: #fff4d1 url(images/beans.svg); }
+.clipped { display: inline-block; width: 80px; height: 80px; margin-left: 8px; vertical-align: top;
+  background: linear-gradient(135deg, #ffd166, #ef476f); clip-path: url(#star); }
+#svg-clipping { vertical-align: top; }
+#svg-text { font-size: 18px; fill: #1a2240; }
+#svg-text .curved { font-size: 16px; fill: #4f6df5; }
+#svg-text .accent { fill: #ef476f; font-weight: bold; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

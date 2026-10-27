@@ -710,6 +710,166 @@
     </div>
   </div>
 
+  <div id="svg">
+    <div class="row svg-sample">
+      <!-- Icons and shapes, inline: the icons are <symbol>s drawn by <use>, in the colour of their text
+           (currentColor), at any size; the shapes are the basic ones, filled, stroked and dashed. -->
+      <div class="card">
+        <h2>Icons and shapes</h2>
+        <svg width="0" height="0" class="svg-defs">
+          <symbol id="icon-bean" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="8" ry="11" transform="rotate(30 12 12)" fill="currentColor"/>
+            <path d="M 8 4 q 6 8 8 16" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          </symbol>
+          <symbol id="icon-leaf" viewBox="0 0 24 24">
+            <path d="M 4 20 C 4 8 12 4 21 3 C 20 12 16 20 4 20 Z" fill="currentColor"/>
+            <path d="M 4 20 L 14 10" stroke="#ffffff" stroke-width="1.5"/>
+          </symbol>
+        </svg>
+        <p class="icons">
+          <svg class="icon" id="icon-small"><use href="#icon-bean"/></svg>
+          <svg class="icon large"><use href="#icon-bean"/></svg>
+          <svg class="icon leaf"><use href="#icon-leaf"/></svg>
+          <svg class="icon large leaf"><use href="#icon-leaf"/></svg>
+        </p>
+        <svg class="shapes" id="svg-shapes" width="300" height="70" viewBox="0 0 300 70">
+          <rect x="2" y="5" width="60" height="60" rx="12" fill="#ffd166" stroke="#ef476f" stroke-width="3"/>
+          <circle cx="105" cy="35" r="30" fill="#06d6a0"/>
+          <polygon points="175,5 184,26 206,26 188,40 195,62 175,48 155,62 162,40 144,26 166,26" fill="#118ab2"/>
+          <polyline points="220,60 235,15 250,50 265,10 280,45 295,20" fill="none" stroke="#073b4c"
+            stroke-width="3" stroke-linejoin="round" stroke-dasharray="8 4"/>
+        </svg>
+      </div>
+      <!-- SVG files as images: in <img>s, at their own size and scaled, and repeated as a CSS background. -->
+      <div class="card">
+        <h2>SVG images</h2>
+        <p class="svg-images"><img id="svg-cup" src="images/cup.svg" alt="A cup"><img src="images/cup.svg"
+            width="96" alt="A larger cup"><span class="svg-tiles" id="svg-tiles"></span></p>
+      </div>
+      <!-- Paint servers: linear and radial gradients, a reflected one, a gradient on a stroke and a pattern of
+           dots. -->
+      <div class="card">
+        <h2>Gradients and patterns</h2>
+        <svg id="svg-paint" width="300" height="110" viewBox="0 0 300 110">
+          <defs>
+            <linearGradient id="sunrise" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffd166"/>
+              <stop offset="1" stop-color="#ef476f"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="0.35" cy="0.35" r="0.65">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset="1" stop-color="#118ab2"/>
+            </radialGradient>
+            <linearGradient id="stripes" x2="0.25" spreadMethod="reflect">
+              <stop offset="0" stop-color="#06d6a0"/>
+              <stop offset="1" stop-color="#073b4c"/>
+            </linearGradient>
+            <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="#fff4d1"/>
+              <circle cx="6" cy="6" r="3" fill="#ef476f"/>
+            </pattern>
+          </defs>
+          <rect x="2" y="2" width="64" height="64" rx="10" fill="url(#sunrise)"/>
+          <circle cx="110" cy="34" r="32" fill="url(#glow)"/>
+          <rect x="152" y="2" width="64" height="64" rx="10" fill="url(#stripes)"/>
+          <rect x="232" y="2" width="64" height="64" rx="10" fill="url(#dots)"/>
+          <path d="M 10 92 C 60 72 100 112 150 92 S 240 72 290 92" fill="none" stroke="url(#sunrise)"
+            stroke-width="8" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="row svg-sample">
+      <!-- Clipping and masking: an SVG image (<image>) clipped to a circle and a pattern faded out by a gradient
+           mask, in SVG; and an HTML box clipped to an SVG star (clip-path: url()). -->
+      <div class="card">
+        <h2>Clipping and masking</h2>
+        <svg id="svg-clipping" width="200" height="90" viewBox="0 0 200 90">
+          <defs>
+            <clipPath id="round">
+              <circle cx="45" cy="45" r="42"/>
+            </clipPath>
+            <linearGradient id="fade">
+              <stop offset="0.3" stop-color="#ffffff"/>
+              <stop offset="1" stop-color="#000000"/>
+            </linearGradient>
+            <mask id="fade-out">
+              <rect x="100" width="100" height="90" fill="url(#fade)"/>
+            </mask>
+            <clipPath id="star" clipPathUnits="objectBoundingBox">
+              <polygon points="0.5,0 0.62,0.35 1,0.38 0.7,0.6 0.8,1 0.5,0.77 0.2,1 0.3,0.6 0,0.38 0.38,0.35"/>
+            </clipPath>
+          </defs>
+          <g clip-path="url(#round)">
+            <rect width="90" height="90" fill="#fff4d1"/>
+            <image href="images/beans.svg" width="90" height="90"/>
+          </g>
+          <rect x="100" width="100" height="90" fill="url(#dots)" mask="url(#fade-out)"/>
+        </svg>
+        <div class="clipped" id="svg-clipped"></div>
+      </div>
+      <!-- Text: along a curve (<textPath>), and in runs of their own colour and weight (<tspan>). -->
+      <div class="card">
+        <h2>Text on a path</h2>
+        <svg id="svg-text" width="300" height="110" viewBox="0 0 300 110">
+          <path id="text-curve" d="M 10 80 Q 150 0 290 80" fill="none" stroke="#e3e7ef" stroke-width="2"/>
+          <text class="curved"><textPath href="#text-curve" startOffset="50%" text-anchor="middle">Freshly roasted,
+              ground and brewed</textPath></text>
+          <text x="150" y="104" text-anchor="middle">Single <tspan class="accent">origin</tspan>
+            beans</text>
+        </svg>
+      </div>
+      <!-- A filter and animations: a cup with a soft drop shadow (a <filter> of a blur, an offset and a merge),
+           whose steam rises and fades (<animate>), a bean turning (<animateTransform>) and a bean riding along a
+           path (<animateMotion>), all repeating forever. -->
+      <div class="card">
+        <h2>Filters and animation</h2>
+        <svg id="svg-animated" width="300" height="110" viewBox="0 0 300 110">
+          <defs>
+            <filter id="soft-shadow" x="-20%" y="-20%" width="150%" height="150%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="3" dy="4" result="shadow"/>
+              <feFlood flood-color="#1a2240" flood-opacity="0.35"/>
+              <feComposite in2="shadow" operator="in"/>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="svg-cup-filtered" filter="url(#soft-shadow)">
+            <path d="M 52 50 h 6 a 9 9 0 0 1 0 18 h -8" fill="none" stroke="#2b3fa8" stroke-width="4"/>
+            <path d="M 12 44 h 42 v 14 a 21 18 0 0 1 -42 0 Z" fill="#4f6df5"/>
+            <ellipse cx="33" cy="44" rx="21" ry="4" fill="#6f4e37"/>
+          </g>
+          <g fill="none" stroke="#8d99ae" stroke-width="3" stroke-linecap="round">
+            <path id="svg-steam" d="M 26 36 q -6 -8 0 -16 q 6 -8 0 -16">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+              <animateTransform attributeName="transform" type="translate" values="0 6;0 -2" dur="2s"
+                repeatCount="indefinite"/>
+            </path>
+            <path d="M 40 36 q -6 -8 0 -16 q 6 -8 0 -16">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+              <animateTransform attributeName="transform" type="translate" values="0 6;0 -2" dur="2s" begin="1s"
+                repeatCount="indefinite"/>
+            </path>
+          </g>
+          <use id="svg-spinning" href="#icon-bean" x="110" y="35" width="40" height="40" color="#6f4e37">
+            <animateTransform attributeName="transform" type="rotate" from="0 130 55" to="360 130 55" dur="3s"
+              repeatCount="indefinite"/>
+          </use>
+          <path id="bean-track" d="M 180 80 C 200 10 270 10 290 80" fill="none" stroke="#e3e7ef" stroke-width="2"
+            stroke-dasharray="4 4"/>
+          <use id="svg-riding" href="#icon-bean" x="-10" y="-10" width="20" height="20" color="#ef476f">
+            <animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;0" keyTimes="0;0.5;1"
+              calcMode="linear">
+              <mpath href="#bean-track"/>
+            </animateMotion>
+          </use>
+        </svg>
+      </div>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

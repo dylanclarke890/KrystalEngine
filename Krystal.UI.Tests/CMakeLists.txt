@@ -59,5 +59,6 @@ target_sources(Krystal.UI.Tests
     tests/PathStrokerStrategy.cpp
     tests/Render2DConversions.cpp
     tests/Repaint.cpp
+    tests/SVG.cpp
     tests/TextureMapperAnimation.cpp
 )
