@@ -22,6 +22,10 @@ namespace krys::boo
 namespace krys::boo::svg
 {
   class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
+  class SVGPropertyAnimatorFactory;
+  enum class AnimationMode : uint8;
+  enum class CalcMode : uint8;
   enum class CTMScope : bool;
   class SVGConditionalProcessingAttributes;
   class SVGElementRareData;
@@ -53,8 +57,7 @@ namespace krys::boo::svg
     bool _selfHasRelativeLengths : 1 {false};
     bool _hasInitializedRelativeLengthsState : 1 {false};
 
-    // FIXME: The animator factory of the element's presentation attributes (SVGPropertyAnimatorFactory), with
-    // SMIL (B11i).
+    const UniquePtr<SVGPropertyAnimatorFactory> _propertyAnimatorFactory;
 
     UniquePtr<SVGPropertyRegistry> _propertyRegistry;
     Ref<SVGAnimatedString> _className;
@@ -121,6 +124,16 @@ namespace krys::boo::svg
     }
 
 #pragma endregion
+
+    KRYS_NODISCARD virtual bool IsSVGAnimationElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSMILElement() const noexcept
+    {
+      return false;
+    }
 
     /// @brief Whether this is an `<svg>` element inside another SVG element.
     KRYS_NODISCARD bool IsInnerSVGSVGElement() const noexcept;
@@ -229,6 +242,17 @@ namespace krys::boo::svg
       ResolveCustomStyle(const style::ResolutionContext &resolutionContext,
                          const RenderStyle *shadowHostStyle) noexcept override;
 
+    /// @brief The animatable attribute named @p localName, or the null name if there's none.
+    KRYS_NODISCARD static dom::QualifiedName
+      AnimatableAttributeForName(dom::DOMStringView localName) noexcept;
+#if KRYS_DEBUG
+    KRYS_NODISCARD bool IsAnimatableAttribute(const dom::QualifiedName &) const noexcept;
+#endif
+
+    KRYS_NODISCARD css::MutableStyleProperties *AnimatedSMILStyleProperties() const noexcept;
+    KRYS_NODISCARD css::MutableStyleProperties &EnsureAnimatedSMILStyleProperties() noexcept;
+    void SetUseOverrideComputedStyle(bool) noexcept;
+
     void CallClearTarget() noexcept
     {
       ClearTarget();
@@ -247,6 +271,8 @@ namespace krys::boo::svg
     void DetachAllProperties() noexcept;
 
     KRYS_NODISCARD bool IsAnimatedPropertyAttribute(const dom::QualifiedName &attributeName) const noexcept;
+    KRYS_NODISCARD bool IsAnimatedAttribute(const dom::QualifiedName &attributeName) const noexcept;
+    KRYS_NODISCARD bool IsAnimatedStyleAttribute(const dom::QualifiedName &attributeName) const noexcept;
 
     /// @brief Writes the property that reflects @p name back to the attribute, if it has changed.
     void SynchronizeSVGAttribute(const dom::QualifiedName &name) noexcept;
@@ -256,6 +282,20 @@ namespace krys::boo::svg
 
     void CommitPropertyChange(SVGProperty *property) noexcept override;
     void CommitPropertyChange(SVGAnimatedProperty &animatedProperty) noexcept;
+
+    KRYS_NODISCARD SVGPropertyAnimatorFactory &PropertyAnimatorFactory() noexcept
+    {
+      return *_propertyAnimatorFactory;
+    }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &, AnimationMode,
+                                                               CalcMode, bool isAccumulated,
+                                                               bool isAdditive) noexcept;
+    void AnimatorWillBeDeleted(const dom::QualifiedName &) noexcept;
+
+    using Node::ComputedStyle;
+    KRYS_NODISCARD const RenderStyle *
+      ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept final;
 
     KRYS_NODISCARD const SVGElement *AttributeContextElement() const noexcept override
     {
@@ -285,6 +325,10 @@ namespace krys::boo::svg
 
   protected:
     void FinishParsingChildren() noexcept override;
+
+#if KRYS_DEBUG
+    KRYS_NODISCARD virtual bool FilterOutAnimatableAttribute(const dom::QualifiedName &) const noexcept;
+#endif
 
     /// @brief The attribute change steps of SVG elements, run for every change to one of the element's
     /// attributes. Overrides parse the attributes they reflect, then call their base's.
@@ -658,6 +702,8 @@ namespace krys::boo::svg
 #pragma endregion
 
   private:
+    void WillRecalcStyle(EnumSet<style::Change>) noexcept override;
+
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
 

@@ -99,8 +99,11 @@ namespace krys::boo::svg
                        SVGAnimatedAngleOrientAccessor<TOwner>::template Singleton<property1, property2>());
     }
 
-    // FIXME: <path>'s `d` as an animated property (SVGAnimatedPathSegList, without the segment list SVG 2
-    // removed), with SMIL (B11i).
+    template <Ref<SVGAnimatedPathSegList> TOwner::*property>
+    static void RegisterProperty(const dom::QualifiedName &attributeName) noexcept
+    {
+      RegisterProperty(attributeName, SVGAnimatedPathSegListAccessor<TOwner>::template Singleton<property>());
+    }
 
     template <Ref<SVGAnimatedPointList> TOwner::*property>
     static void RegisterProperty(const dom::QualifiedName &attributeName) noexcept
@@ -325,7 +328,27 @@ namespace krys::boo::svg
                                     [&](const auto *name) { return *name == attributeName; });
     }
 
-    // FIXME: createAnimator and appendAnimatedInstance come with SMIL (B11i).
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &attributeName,
+                                                               AnimationMode animationMode, CalcMode calcMode,
+                                                               bool isAccumulated,
+                                                               bool isAdditive) const noexcept override
+    {
+      RefPtr<SVGAttributeAnimator> animator;
+      LookupRecursivelyAndApply(attributeName,
+                                [&](auto &accessor)
+                                {
+                                  animator = accessor.CreateAnimator(_owner, attributeName, animationMode,
+                                                                     calcMode, isAccumulated, isAdditive);
+                                });
+      return animator;
+    }
+
+    void AppendAnimatedInstance(const dom::QualifiedName &attributeName,
+                                SVGAttributeAnimator &animator) const noexcept override
+    {
+      LookupRecursivelyAndApply(attributeName,
+                                [&](auto &accessor) { accessor.AppendAnimatedInstance(_owner, animator); });
+    }
 
   private:
     KRYS_NODISCARD static AttributeNameToAccessorMap &AttributeNameToAccessors() noexcept

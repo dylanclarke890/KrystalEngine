@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 #include "Krystal.Booey/SVG/SVGTests.hpp"
@@ -28,9 +30,10 @@ namespace krys::boo::svg
     List<WeakPtr<SVGElement>> _instances;
     WeakPtr<SVGElement> _correspondingElement;
     bool _instancesUpdatesBlocked : 1 {false};
-
-    // FIXME: The animated SMIL style properties and the computed style without them (the base value of a
-    // SMIL animation), with SMIL (B11i).
+    bool _useOverrideComputedStyle : 1 {false};
+    bool _needsOverrideComputedStyleUpdate : 1 {false};
+    RefPtr<css::MutableStyleProperties> _animatedSMILStyleProperties;
+    UniquePtr<RenderStyle> _overrideComputedStyle;
 
     UniquePtr<SVGConditionalProcessingAttributes> _conditionalProcessingAttributes;
 
@@ -115,6 +118,40 @@ namespace krys::boo::svg
     void SetCorrespondingElement(SVGElement *correspondingElement) noexcept
     {
       _correspondingElement = CreateWeakPtr(correspondingElement);
+    }
+
+    KRYS_NODISCARD css::MutableStyleProperties *AnimatedSMILStyleProperties() const noexcept
+    {
+      return _animatedSMILStyleProperties.get();
+    }
+
+    KRYS_NODISCARD css::MutableStyleProperties &EnsureAnimatedSMILStyleProperties() noexcept
+    {
+      if (!_animatedSMILStyleProperties)
+      {
+        _animatedSMILStyleProperties = css::MutableStyleProperties::Create(css::ParserMode::SVGAttribute);
+      }
+      return *_animatedSMILStyleProperties;
+    }
+
+    /// @brief The element's computed style without CSS animations, transitions or SMIL animations: the base
+    /// value of a SMIL animation.
+    KRYS_NODISCARD const RenderStyle *OverrideComputedStyle(dom::Element &,
+                                                            const RenderStyle *parentStyle) noexcept;
+
+    KRYS_NODISCARD bool UseOverrideComputedStyle() const noexcept
+    {
+      return _useOverrideComputedStyle;
+    }
+
+    void SetUseOverrideComputedStyle(bool value) noexcept
+    {
+      _useOverrideComputedStyle = value;
+    }
+
+    void SetNeedsOverrideComputedStyleUpdate() noexcept
+    {
+      _needsOverrideComputedStyleUpdate = true;
     }
 
     KRYS_NODISCARD SVGConditionalProcessingAttributes *

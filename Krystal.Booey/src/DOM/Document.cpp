@@ -2519,8 +2519,16 @@ namespace krys::boo::dom
       return;
     }
 
-    // FIXME: Elements' document suspension callbacks (media), view transitions, the page's overlay
-    // scrollbars, the composited layers' pending update and font loading, once there are those.
+    for (auto &weakElement : List<WeakPtr<Element>>(_documentSuspensionCallbackElements))
+    {
+      if (RefPtr element = ShareRefPtr(weakElement.get()))
+      {
+        element->PrepareForDocumentSuspension();
+      }
+    }
+
+    // FIXME: View transitions, the page's overlay scrollbars, the composited layers' pending update and font
+    // loading, once there are those.
     SuspendScheduledTasks(reason);
 
     // The frame's timers: the layout, the animations and autoscrolling stop.
@@ -2544,6 +2552,14 @@ namespace krys::boo::dom
       return;
     }
 
+    for (auto &weakElement : List<WeakPtr<Element>>(_documentSuspensionCallbackElements))
+    {
+      if (RefPtr element = ShareRefPtr(weakElement.get()))
+      {
+        element->ResumeFromDocumentSuspension();
+      }
+    }
+
     if (_timelinesController)
     {
       _timelinesController->ResumeAnimations();
@@ -2552,6 +2568,22 @@ namespace krys::boo::dom
     ResumeScheduledTasks(reason);
 
     _isSuspended = false;
+  }
+
+  void Document::RegisterForDocumentSuspensionCallbacks(Element &element) noexcept
+  {
+    std::erase_if(_documentSuspensionCallbackElements, [](const auto &weakElement) { return !weakElement; });
+    if (std::ranges::none_of(_documentSuspensionCallbackElements,
+                             [&](const auto &weakElement) { return weakElement.get() == &element; }))
+    {
+      _documentSuspensionCallbackElements.push_back(CreateWeakPtr(&element));
+    }
+  }
+
+  void Document::UnregisterForDocumentSuspensionCallbacks(Element &element) noexcept
+  {
+    std::erase_if(_documentSuspensionCallbackElements,
+                  [&](const auto &weakElement) { return !weakElement || weakElement.get() == &element; });
   }
 
   void Document::SuspendScheduledTasks(ReasonForSuspension reason) noexcept
@@ -2937,6 +2969,14 @@ namespace krys::boo::dom
   void Document::ImplicitClose() noexcept
   {
     Ref<Document> protectedThis = ShareRef(*this);
+    if (Frame())
+    {
+      if (auto *svgExtensions = SVGExtensionsIfExists())
+      {
+        svgExtensions->DispatchLoadEventToOutermostSVGElements();
+      }
+    }
+
     DispatchWindowLoadEvent();
     DispatchPageshowEvent(false);
 
@@ -2954,6 +2994,11 @@ namespace krys::boo::dom
     {
       view->LayoutContext().Layout();
       (void)view->LayoutContext().UpdateCompositingLayersAfterLayoutIfNeeded();
+    }
+
+    if (auto *svgExtensions = SVGExtensionsIfExists())
+    {
+      svgExtensions->StartAnimations();
     }
   }
 
@@ -3321,6 +3366,11 @@ namespace krys::boo::dom
 
   void Document::CommonTeardown() noexcept
   {
+    if (auto *svgExtensions = SVGExtensionsIfExists())
+    {
+      svgExtensions->PauseAnimations();
+    }
+
     // FIXME: The rest of the teardown shared by destruction and the last reference going, once there's any.
     auto intersectionObservers = _intersectionObservers;
     for (auto &weakIntersectionObserver : intersectionObservers)

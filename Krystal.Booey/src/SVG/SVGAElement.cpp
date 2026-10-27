@@ -3,7 +3,9 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
+#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -11,6 +13,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGTransformableContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInline.hpp"
+#include "Krystal.Booey/SVG/Animation/SVGSMILElement.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGTextContentElement.hpp"
@@ -142,8 +145,13 @@ namespace krys::boo::svg
 
     if (!url.empty() && url.front() == u8'#')
     {
-      // FIXME: An animation element the fragment names begins (SVGSMILElement::beginByLinkActivation) instead
-      // of the link being followed, with SMIL (B11i).
+      if (RefPtr targetElement = ShareRefPtr(DynamicDowncast<SVGSMILElement>(
+            dom::mixins::NonElementParentNode::GetElementById(TreeScope().RootNode(), url.substr(1)).get())))
+      {
+        targetElement->BeginByLinkActivation();
+        event.SetDefaultHandled();
+        return;
+      }
     }
 
     Ref<dom::Document> document = ShareRef(NodeDocument());

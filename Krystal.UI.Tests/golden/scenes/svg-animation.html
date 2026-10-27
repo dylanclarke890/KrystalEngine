@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<!-- The "svg-animation" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  svg { position: absolute; }
+</style>
+</head>
+<body>
+  <!-- Neither capture depends on the time: Chrome's is taken a few virtual seconds in, Krystal's straight away.
+       So animations hold a discrete or set value, or are half way through a very long duration that began long
+       ago (begin="-50000s" dur="100000s"), where a few seconds move them by about a hundredth of a unit. (An
+       interval that ended before the document began is never resolved, so nothing can be shown frozen.) -->
+
+  <!-- Attributes: a length half way, keyTimes and values, discrete values, the second repeat of an accumulating
+       animation half way, and a set. -->
+  <svg style="left: 8px; top: 8px" width="168" height="104">
+    <rect x="0" y="8" width="24" height="24" fill="#ef476f">
+      <animate attributeName="x" from="8" to="104" begin="-50000s" dur="100000s" />
+    </rect>
+    <rect x="8" y="40" width="8" height="24" fill="#ffd166">
+      <animate attributeName="width" values="8;80;120" keyTimes="0;0.25;1" begin="-50000s" dur="100000s" />
+    </rect>
+    <rect x="8" y="72" width="24" height="24" fill="#06d6a0">
+      <animate attributeName="x" values="8;56;104" calcMode="discrete" begin="-50000s" dur="100000s" />
+    </rect>
+    <rect x="136" y="8" width="24" height="8" fill="#118ab2">
+      <animate attributeName="height" from="0" to="16" accumulate="sum" repeatCount="3" begin="-150000s"
+               dur="100000s" />
+    </rect>
+    <rect x="136" y="96" width="24" height="8" fill="#073b4c">
+      <set attributeName="y" to="72" begin="-1s" />
+    </rect>
+  </svg>
+
+  <!-- Properties: a fill colour and an opacity half way, a stroke width set, and path data half way between
+       two shapes with the same commands. -->
+  <svg style="left: 184px; top: 8px" width="168" height="104">
+    <rect x="8" y="8" width="40" height="40" fill="#ff0000">
+      <animate attributeName="fill" from="#ff0000" to="#0000ff" begin="-50000s" dur="100000s" />
+    </rect>
+    <rect x="64" y="8" width="40" height="40" fill="#ef476f" opacity="1">
+      <animate attributeName="opacity" from="1" to="0.2" begin="-50000s" dur="100000s" />
+    </rect>
+    <rect x="120" y="12" width="32" height="32" fill="#ffd166" stroke="#073b4c" stroke-width="1">
+      <set attributeName="stroke-width" to="6" begin="-1s" />
+    </rect>
+    <path d="M 8 96 L 48 96 L 28 64 Z" fill="#06d6a0">
+      <animate attributeName="d" from="M 8 96 L 48 96 L 28 64 Z" to="M 8 96 L 160 96 L 84 56 Z"
+               begin="-50000s" dur="100000s" />
+    </path>
+  </svg>
+
+  <!-- Transforms: a rotation half way, a scale added to a translation, motion half way along a path turning
+       with it, and motion along the path an <mpath> references, half way through key points that cover its
+       first quarter. -->
+  <svg style="left: 8px; top: 128px" width="344" height="104">
+    <path id="track" d="M 200 80 Q 260 0 320 80" fill="none" stroke="#cccccc" stroke-width="2" />
+    <rect x="24" y="44" width="32" height="16" fill="#ef476f">
+      <animateTransform attributeName="transform" type="rotate" from="0 40 52" to="90 40 52" begin="-50000s"
+                        dur="100000s" />
+    </rect>
+    <rect x="-12" y="-12" width="24" height="24" fill="#ffd166" transform="translate(112 52)">
+      <animateTransform attributeName="transform" type="scale" from="1" to="3" additive="sum" begin="-50000s"
+                        dur="100000s" />
+    </rect>
+    <path d="M -10 -6 L 10 0 L -10 6 Z" fill="#118ab2">
+      <animateMotion path="M 200 80 Q 260 0 320 80" rotate="auto" begin="-50000s" dur="100000s" />
+    </path>
+    <circle r="6" fill="#073b4c">
+      <animateMotion keyPoints="0;0.25" keyTimes="0;1" calcMode="linear" begin="-50000s" dur="100000s">
+        <mpath href="#track" />
+      </animateMotion>
+    </circle>
+  </svg>
+</body>
+</html>

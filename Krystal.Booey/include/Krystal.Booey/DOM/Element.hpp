@@ -795,6 +795,15 @@ namespace krys::boo::dom
     {
     }
 
+    /// @brief Called when the element's document is suspended or resumed, if the element registered for it.
+    virtual void PrepareForDocumentSuspension() noexcept
+    {
+    }
+
+    virtual void ResumeFromDocumentSuspension() noexcept
+    {
+    }
+
     /// @brief Called around the element's style resolution, for elements with custom style resolve callbacks.
     virtual void WillRecalcStyle(EnumSet<style::Change>) noexcept;
     virtual void DidRecalcStyle(EnumSet<style::Change>) noexcept;

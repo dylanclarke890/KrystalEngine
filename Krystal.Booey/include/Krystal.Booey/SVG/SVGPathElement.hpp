@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathByteStream.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 #include "Krystal.Booey/SVG/SVGGeometryElement.hpp"
 
 namespace krys::boo::svg
@@ -13,8 +14,7 @@ namespace krys::boo::svg
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGPathElement);
 
   private:
-    // The path data of the `d` attribute.
-    SVGPathByteStream _pathByteStream;
+    Ref<SVGAnimatedPathSegList> _pathSegList;
 
   public:
     explicit SVGPathElement(dom::Document &document) noexcept;
@@ -49,8 +49,10 @@ namespace krys::boo::svg
 
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept final;
 
-    // FIXME: Tell <mpath> elements referencing the path when it changes, is inserted or is removed
-    // (invalidateMPathDependencies), with SMIL (B11i).
+    void InvalidateMPathDependencies() noexcept;
+
+    void OnInsert() noexcept final;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept final;
 
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,

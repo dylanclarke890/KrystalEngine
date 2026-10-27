@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
@@ -34,6 +35,7 @@ namespace krys::boo::svg
 
   private:
     RefPtr<Page> _page;
+    Timer _startAnimationTimer;
     FloatSize _intrinsicSize;
 
   public:
@@ -81,6 +83,8 @@ namespace krys::boo::svg
 
   private:
     explicit SVGImage(ImageObserver *) noexcept;
+
+    void StartAnimationTimerFired() noexcept;
 
     KRYS_NODISCARD utf8_string FilenameExtension() const noexcept final;
 

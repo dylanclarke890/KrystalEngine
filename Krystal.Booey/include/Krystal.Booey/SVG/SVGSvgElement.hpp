@@ -18,6 +18,7 @@ namespace krys::boo
 
 namespace krys::boo::svg
 {
+  class SMILTimeContainer;
   class SVGAngle;
   class SVGLength;
   class SVGMatrix;
@@ -45,6 +46,7 @@ namespace krys::boo::svg
     RefPtr<SVGViewSpec> _viewSpec;
     dom::DOMString _currentViewFragmentIdentifier;
     WeakPtr<SVGViewElement> _currentViewElement;
+    Ref<SMILTimeContainer> _timeContainer;
 
   public:
     explicit SVGSvgElement(dom::Document &document) noexcept;
@@ -111,7 +113,26 @@ namespace krys::boo::svg
     {
     }
 
+    /// @see https://svgwg.org/specs/animations/#__svg__SVGSVGElement__pauseAnimations
+    void PauseAnimations() noexcept;
+    /// @see https://svgwg.org/specs/animations/#__svg__SVGSVGElement__unpauseAnimations
+    void UnpauseAnimations() noexcept;
+    /// @see https://svgwg.org/specs/animations/#__svg__SVGSVGElement__animationsPaused
+    KRYS_NODISCARD bool AnimationsPaused() const noexcept;
+
+    /// @see https://svgwg.org/specs/animations/#__svg__SVGSVGElement__getCurrentTime
+    KRYS_NODISCARD float GetCurrentTime() const noexcept;
+    /// @see https://svgwg.org/specs/animations/#__svg__SVGSVGElement__setCurrentTime
+    void SetCurrentTime(float seconds) noexcept;
+
 #pragma endregion
+
+    KRYS_NODISCARD bool HasActiveAnimation() const noexcept;
+
+    KRYS_NODISCARD SMILTimeContainer &TimeContainer() noexcept
+    {
+      return *_timeContainer;
+    }
 
     using PropertyRegistry = SVGPropertyOwnerRegistry<SVGSvgElement, SVGGraphicsElement, SVGFitToViewBox>;
 
@@ -188,6 +209,13 @@ namespace krys::boo::svg
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&) noexcept override;
 
   private:
+    void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnAdopt(dom::Document &oldDocument) noexcept override;
+
+    void PrepareForDocumentSuspension() noexcept override;
+    void ResumeFromDocumentSuspension() noexcept override;
+
     KRYS_NODISCARD AffineTransform LocalCoordinateSpaceTransform(CTMScope) const noexcept override;
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept override;

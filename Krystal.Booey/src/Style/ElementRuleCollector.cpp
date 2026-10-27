@@ -1103,8 +1103,14 @@ namespace krys::boo::style
                                 isInlineStyleCacheable, FromStyleAttribute::Yes);
     }
 
-    // FIXME: SVG elements' animated SMIL style properties, once there is SMIL.
-    (void)includeSMILProperties;
+    if (includeSMILProperties)
+    {
+      if (auto *svgElement = DynamicDowncast<svg::SVGElement>(Element()))
+      {
+        AddElementStyleProperties(svgElement->AnimatedSMILStyleProperties(),
+                                  RuleSet::CascadeLayerPriorityForUnlayered, IsCacheable::No);
+      }
+    }
   }
 
   void ElementRuleCollector::AddMatchedProperties(MatchedProperties &&matchedProperties,

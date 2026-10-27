@@ -243,6 +243,7 @@ namespace krys::boo::dom
     BackForwardCacheState _backForwardCacheState {BackForwardCacheState::NotInBackForwardCache};
     Maybe<ReasonForSuspension> _reasonForSuspendingActiveDOMObjects;
     bool _isSuspended {false};
+    List<WeakPtr<Element>> _documentSuspensionCallbackElements;
     bool _scheduledTasksAreSuspended {false};
     bool _activeDOMObjectsAreSuspended {false};
     bool _activeDOMObjectsAreStopped {false};
@@ -1364,6 +1365,11 @@ namespace krys::boo::dom
     /// animation frame callbacks, animations and layout stop, until it's resumed for the same @p reason.
     void Suspend(ReasonForSuspension reason) noexcept;
     void Resume(ReasonForSuspension reason) noexcept;
+
+    /// @brief Calls @p element's `PrepareForDocumentSuspension` and `ResumeFromDocumentSuspension` when the
+    /// document is suspended and resumed.
+    void RegisterForDocumentSuspensionCallbacks(Element &element) noexcept;
+    void UnregisterForDocumentSuspensionCallbacks(Element &element) noexcept;
 
     KRYS_NODISCARD bool IsSuspended() const noexcept
     {

@@ -10,6 +10,9 @@
 namespace krys::boo::svg
 {
   class SVGAnimatedProperty;
+  class SVGAttributeAnimator;
+  enum class AnimationMode : uint8;
+  enum class CalcMode : uint8;
   class SVGProperty;
 
   /// @brief An element's registry of the properties that reflect its attributes.
@@ -33,6 +36,11 @@ namespace krys::boo::svg
     KRYS_NODISCARD virtual bool
       IsAnimatedStylePropertyAttribute(const dom::QualifiedName &) const noexcept = 0;
 
-    // FIXME: createAnimator and appendAnimatedInstance come with SMIL (B11i).
+    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator> CreateAnimator(const dom::QualifiedName &,
+                                                                       AnimationMode, CalcMode,
+                                                                       bool isAccumulated,
+                                                                       bool isAdditive) const noexcept = 0;
+    virtual void AppendAnimatedInstance(const dom::QualifiedName &attributeName,
+                                        SVGAttributeAnimator &) const noexcept = 0;
   };
 }

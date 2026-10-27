@@ -15,8 +15,6 @@ namespace krys::boo::svg
 {
   class SVGPathByteStream;
 
-  // FIXME: Accumulation (`addToSVGPathByteStream`), with SMIL (B11i).
-
   // String/SVGPathByteStream -> Path
   KRYS_NODISCARD Path BuildPathFromString(dom::DOMStringView d) noexcept;
   KRYS_NODISCARD Path BuildPathFromByteStream(const SVGPathByteStream &stream) noexcept;
@@ -34,6 +32,9 @@ namespace krys::boo::svg
   KRYS_NODISCARD bool BuildAnimatedSVGPathByteStream(const SVGPathByteStream &fromStream,
                                                      const SVGPathByteStream &toStream,
                                                      SVGPathByteStream &result, float progress) noexcept;
+  KRYS_NODISCARD bool AddToSVGPathByteStream(SVGPathByteStream &streamToAppendTo,
+                                             const SVGPathByteStream &byStream,
+                                             uint32 repeatCount = 1) noexcept;
 
   KRYS_NODISCARD Maybe<SVGPathByteStream>
     ConvertSVGPathByteStreamToAbsoluteCoordinates(const SVGPathByteStream &stream) noexcept;

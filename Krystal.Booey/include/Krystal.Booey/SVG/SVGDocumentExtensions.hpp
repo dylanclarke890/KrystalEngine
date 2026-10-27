@@ -19,11 +19,11 @@ namespace krys::boo::dom
 namespace krys::boo::svg
 {
   class SVGElement;
+  class SVGSvgElement;
 
-  /// @brief What a document keeps for its SVG content.
-  /// FIXME: The time containers and animations (addTimeContainer, startAnimations, pauseAnimations,
-  /// unpauseAnimations, dispatchLoadEventToOutermostSVGElements), with SMIL (B11i); reportWarning and
-  /// reportError.
+  /// @brief What a document keeps for its SVG content: its resources, the elements whose references wait to
+  /// be rebuilt, and its `<svg>` elements' time containers.
+  /// FIXME: reportWarning and reportError, once there's a console.
   class SVGDocumentExtensions final
   {
     KRYS_NON_COPY_MOVABLE(SVGDocumentExtensions);
@@ -32,6 +32,9 @@ namespace krys::boo::svg
     WeakPtr<dom::Document> _document;
     UniquePtr<SVGResourcesCache> _resourcesCache;
     List<Ref<SVGElement>> _rebuildElements;
+    // For SVG 1.2 support this will need to be made more general.
+    List<WeakPtr<SVGSvgElement>> _timeContainers;
+    bool _areAnimationsPaused;
 
   public:
     explicit SVGDocumentExtensions(dom::Document &) noexcept;
@@ -47,6 +50,20 @@ namespace krys::boo::svg
     void AddElementToRebuild(SVGElement &element) noexcept;
     void RemoveElementToRebuild(SVGElement &element) noexcept;
     void RebuildElements() noexcept;
+
+    void AddTimeContainer(SVGSvgElement &) noexcept;
+    void RemoveTimeContainer(SVGSvgElement &) noexcept;
+    KRYS_NODISCARD List<Ref<SVGSvgElement>> TimeContainers() const noexcept;
+
+    void StartAnimations() noexcept;
+    void PauseAnimations() noexcept;
+    void UnpauseAnimations() noexcept;
+    void DispatchLoadEventToOutermostSVGElements() noexcept;
+
+    KRYS_NODISCARD bool AreAnimationsPaused() const noexcept
+    {
+      return _areAnimationsPaused;
+    }
 
     void ClearTargetDependencies(SVGElement &referencedElement) noexcept;
     void RebuildAllElementReferencesForTarget(SVGElement &referencedElement) noexcept;

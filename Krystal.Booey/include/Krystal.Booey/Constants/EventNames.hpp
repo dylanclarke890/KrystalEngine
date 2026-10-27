@@ -14,6 +14,9 @@ namespace krys::boo::EventNames
   constexpr utf8_stringview FormData = u8"formdata";
   constexpr utf8_stringview Select = u8"select";
   constexpr utf8_stringview Load = u8"load";
+  constexpr utf8_stringview BeginEvent = u8"beginEvent";
+  constexpr utf8_stringview EndEvent = u8"endEvent";
+  constexpr utf8_stringview RepeatEvent = u8"repeatEvent";
   constexpr utf8_stringview DOMContentLoaded = u8"DOMContentLoaded";
   constexpr utf8_stringview PageShow = u8"pageshow";
   constexpr utf8_stringview PopState = u8"popstate";

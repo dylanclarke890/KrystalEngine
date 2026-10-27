@@ -5,6 +5,7 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/Style/RuleSetBuilder.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 
@@ -106,8 +107,11 @@ namespace krys::boo::style
       {
         return false;
       }
-      // FIXME: Also SVG animatable attributes (SVGElement::animatableAttributeForName), once SVG animation
-      // exists.
+      if (svg::SVGElement::AnimatableAttributeForName(attributeSelector.Attribute().LocalName().View())
+          != dom::NullQualifiedName())
+      {
+        return false;
+      }
       return true;
     }
   }

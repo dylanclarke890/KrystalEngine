@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 
 namespace krys::boo
 {
@@ -57,7 +58,11 @@ namespace krys::boo
     RefPtr<dom::Document> document = _document;
     krys_debug_assert(document->View() == _view.get());
 
-    // FIXME: SVG animations' unpausing, once there are any.
+    if (auto *svgExtensions = document->SVGExtensionsIfExists())
+    {
+      svgExtensions->UnpauseAnimations();
+    }
+
     document->Resume(dom::ReasonForSuspension::BackForwardCache);
 
     if (auto *frame = document->Frame())

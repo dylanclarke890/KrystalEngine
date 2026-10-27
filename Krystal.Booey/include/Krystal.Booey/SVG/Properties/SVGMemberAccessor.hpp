@@ -2,8 +2,10 @@
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::svg
 {
@@ -50,8 +52,15 @@ namespace krys::boo::svg
       return {};
     }
 
-    // FIXME: createAnimator and appendAnimatedInstance, which make the animators of the property, come with
-    // SMIL (B11i).
+    KRYS_NODISCARD virtual RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &, const dom::QualifiedName &, AnimationMode, CalcMode, bool, bool) const noexcept
+    {
+      return nullptr;
+    }
+
+    virtual void AppendAnimatedInstance(TOwner &, SVGAttributeAnimator &) const noexcept
+    {
+    }
 
   protected:
     SVGMemberAccessor() noexcept = default;

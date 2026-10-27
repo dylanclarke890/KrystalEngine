@@ -6,6 +6,9 @@
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateMotionElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateTransformElement.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
@@ -45,6 +48,7 @@
 #include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
 #include "Krystal.Booey/SVG/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
+#include "Krystal.Booey/SVG/SVGMPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolygonElement.hpp"
@@ -52,6 +56,7 @@
 #include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/SVGSetElement.hpp"
 #include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGStyleElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
@@ -149,9 +154,16 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGFETileElement>(*document, u8"feTile"));
     CHECK(IsCreated<SVGFETurbulenceElement>(*document, u8"feTurbulence"));
 
-    // The elements that aren't ported yet, the SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
-    for (auto localName : {u8"animate", u8"set", u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph",
-                           u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
+    // Animation.
+    CHECK(IsCreated<SVGAnimateElement>(*document, u8"animate"));
+    CHECK(IsCreated<SVGAnimateMotionElement>(*document, u8"animateMotion"));
+    CHECK(IsCreated<SVGAnimateTransformElement>(*document, u8"animateTransform"));
+    CHECK(IsCreated<SVGMPathElement>(*document, u8"mpath"));
+    CHECK(IsCreated<SVGSetElement>(*document, u8"set"));
+
+    // The SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
+    for (auto localName : {u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph", u8"tref", u8"cursor",
+                           u8"animateColor", u8"div", u8"x"})
     {
       CAPTURE(css::tests::ToNarrow(localName));
       CHECK(IsCreated<SVGUnknownElement>(*document, localName));

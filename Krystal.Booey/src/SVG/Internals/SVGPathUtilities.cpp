@@ -92,6 +92,26 @@ namespace krys::boo::svg
     return SVGPathBlender::BlendAnimatedPath(fromSource, toSource, builder, progress);
   }
 
+  bool AddToSVGPathByteStream(SVGPathByteStream &streamToAppendTo, const SVGPathByteStream &byStream,
+                              uint32 repeatCount) noexcept
+  {
+    // The byStream will be blended with streamToAppendTo. So streamToAppendTo has to have elements.
+    if (streamToAppendTo.IsEmpty() || byStream.IsEmpty())
+    {
+      return true;
+    }
+
+    // builder is the destination of blending fromSource and bySource. The stream of builder
+    // (i.e. streamToAppendTo) has to be cleared before calling addAnimatedPath.
+    SVGPathByteStreamBuilder builder(streamToAppendTo);
+
+    SVGPathByteStream fromStreamCopy = krys::move(streamToAppendTo);
+
+    SVGPathByteStreamSource fromSource(fromStreamCopy);
+    SVGPathByteStreamSource bySource(byStream);
+    return SVGPathBlender::AddAnimatedPath(fromSource, bySource, builder, repeatCount);
+  }
+
   Maybe<SVGPathByteStream>
     ConvertSVGPathByteStreamToAbsoluteCoordinates(const SVGPathByteStream &stream) noexcept
   {

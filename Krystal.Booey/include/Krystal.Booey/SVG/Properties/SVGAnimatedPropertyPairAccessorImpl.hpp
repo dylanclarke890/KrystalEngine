@@ -2,10 +2,8 @@
 
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyAccessorImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyPairAccessor.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyPairAnimatorImpl.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
-
-// FIXME: Each accessor makes the animator of its pair (createAnimator) and adds the instances of a <use>
-// element to it (appendAnimatedInstance), with SMIL (B11i).
 
 namespace krys::boo::svg
 {
@@ -63,6 +61,20 @@ namespace krys::boo::svg
         dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return type == SVGMarkerOrientAuto || type == SVGMarkerOrientAutoStartReverse ? string2 : string1;
     }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      return SVGAnimatedAngleOrientAnimator::Create(attributeName, Property1(owner), Property2(owner),
+                                                    animationMode, calcMode, isAccumulated, isAdditive);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedAngleOrientAnimator &>(animator).AppendAnimatedInstance(Property1(owner),
+                                                                                     Property2(owner));
+    }
   };
 
   /// @brief Reaches a pair of animated integers reflecting one attribute (`order`).
@@ -101,6 +113,20 @@ namespace krys::boo::svg
         dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return string1 == string2 ? string1 : string1 + u8", " + string2;
     }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      return SVGAnimatedIntegerPairAnimator::Create(attributeName, Property1(owner), Property2(owner),
+                                                    animationMode, calcMode, isAccumulated, isAdditive);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedIntegerPairAnimator &>(animator).AppendAnimatedInstance(Property1(owner),
+                                                                                     Property2(owner));
+    }
   };
 
   /// @brief Reaches a pair of animated numbers reflecting one attribute (`stdDeviation`, `radius`, ...).
@@ -138,6 +164,20 @@ namespace krys::boo::svg
       dom::DOMString string2 =
         dirty2 ? *Property2(owner)->Synchronize() : Property2(owner)->BaseValAsString();
       return string1 == string2 ? string1 : string1 + u8", " + string2;
+    }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      return SVGAnimatedNumberPairAnimator::Create(attributeName, Property1(owner), Property2(owner),
+                                                   animationMode, calcMode, isAccumulated, isAdditive);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedNumberPairAnimator &>(animator).AppendAnimatedInstance(Property1(owner),
+                                                                                    Property2(owner));
     }
   };
 }

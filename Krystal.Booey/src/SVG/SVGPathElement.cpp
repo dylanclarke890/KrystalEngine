@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Style/Values/Shapes/PathComputation.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
+#include "Krystal.Booey/SVG/SVGMPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGNames.hpp"
 #include "Krystal.Booey/SVG/SVGPoint.hpp"
 
@@ -20,8 +21,15 @@ namespace krys::boo::svg
   }
 
   SVGPathElement::SVGPathElement(dom::Document &document) noexcept
-      : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Path)
+      : SVGGeometryElement(document, CreateUnique<PropertyRegistry>(*this), SVGElementInterface::Path),
+        _pathSegList(SVGAnimatedPathSegList::Create(this))
   {
+    static bool didRegistration = false;
+    if (!didRegistration) KRYS_UNLIKELY
+    {
+      didRegistration = true;
+      PropertyRegistry::RegisterProperty<&SVGPathElement::_pathSegList>(SVGNames::DAttr());
+    }
   }
 
   void SVGPathElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
@@ -32,9 +40,9 @@ namespace krys::boo::svg
       auto string = value.value_or(dom::DOMStringView {});
       if (string.empty())
       {
-        _pathByteStream.Clear();
+        _pathSegList->BaseVal()->ClearByteStreamData();
       }
-      else if (!BuildSVGPathByteStreamFromString(string, _pathByteStream, PathParsingMode::UnalteredParsing))
+      else if (!_pathSegList->BaseVal()->Parse(string))
       {
         // FIXME: Report "Problem parsing d="value"" to the console, once there's one.
       }
@@ -45,9 +53,11 @@ namespace krys::boo::svg
 
   void SVGPathElement::SVGAttributeChanged(const dom::QualifiedName &attributeName) noexcept
   {
-    if (attributeName == SVGNames::DAttr())
+    if (PropertyRegistry::IsKnownAttribute(attributeName))
     {
+      krys_debug_assert(attributeName == SVGNames::DAttr());
       InstanceInvalidationGuard guard(*this);
+      InvalidateMPathDependencies();
 
       if (auto *path = DynamicDowncast<LegacyRenderSVGPath>(Renderer()))
       {
@@ -121,7 +131,7 @@ namespace krys::boo::svg
       return SVGPathByteStream::Empty();
     }
 
-    return _pathByteStream;
+    return _pathSegList->CurrentPathByteStream();
   }
 
   Path SVGPathElement::GetPath() const noexcept
@@ -135,7 +145,7 @@ namespace krys::boo::svg
       return {};
     }
 
-    return BuildPathFromByteStream(_pathByteStream);
+    return _pathSegList->CurrentPath();
   }
 
   void SVGPathElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
@@ -169,13 +179,39 @@ namespace krys::boo::svg
       CssPropertyIdForSVGAttributeName(SVGNames::DAttr().LocalName(), dom::DOMStringAtom::Null());
     // The fill rule value passed here is not relevant for the `d` property.
     auto cssPathValue = css::PathValue::Create(css::PathFunction {
-      .Parameters = css::Path {.FillRule = css::FillRule {css::keywords::Nonzero {}},
-                               .Data = css::Path::PathData {.ByteStream = _pathByteStream}}});
+      .Parameters =
+        css::Path {.FillRule = css::FillRule {css::keywords::Nonzero {}},
+                   .Data = css::Path::PathData {.ByteStream = _pathSegList->CurrentPathByteStream()}}});
     AddPropertyToPresentationalHintStyle(style, property, krys::move(cssPathValue));
+  }
+
+  void SVGPathElement::InvalidateMPathDependencies() noexcept
+  {
+    // <mpath> can only reference <path> but this dependency is not handled in
+    // markForLayoutAndParentResourceInvalidation so we update any mpath dependencies manually.
+    for (auto &element : ReferencingElements())
+    {
+      if (auto *mpathElement = DynamicDowncast<SVGMPathElement>(element.get()))
+      {
+        mpathElement->TargetPathChanged();
+      }
+    }
+  }
+
+  void SVGPathElement::OnInsert() noexcept
+  {
+    SVGGeometryElement::OnInsert();
+    InvalidateMPathDependencies();
+  }
+
+  void SVGPathElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    SVGGeometryElement::OnRemove(isSubtreeRoot, oldAncestor);
+    InvalidateMPathDependencies();
   }
 
   void SVGPathElement::PathDidChange() noexcept
   {
-    // FIXME: Tell the <mpath> elements referencing the path (invalidateMPathDependencies), with SMIL (B11i).
+    InvalidateMPathDependencies();
   }
 }

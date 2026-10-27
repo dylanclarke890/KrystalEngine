@@ -12,8 +12,10 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResource.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGViewportContainer.hpp"
+#include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGAngle.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGLength.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGMatrix.hpp"
@@ -33,10 +35,11 @@ namespace krys::boo::svg
         SVGFitToViewBox(this), _x(SVGAnimatedLength::Create(this, SVGLengthMode::Width)),
         _y(SVGAnimatedLength::Create(this, SVGLengthMode::Height)),
         _width(SVGAnimatedLength::Create(this, SVGLengthMode::Width, u8"100%")),
-        _height(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"100%"))
+        _height(SVGAnimatedLength::Create(this, SVGLengthMode::Height, u8"100%")),
+        _timeContainer(SMILTimeContainer::Create(*this))
   {
-    // FIXME: Register for the document's suspension callbacks (to pause and resume animations), and create
-    // the time container, with SMIL (B11i).
+    document.RegisterForDocumentSuspensionCallbacks(*this);
+
     static bool didRegistration = false;
     if (!didRegistration) KRYS_UNLIKELY
     {
@@ -54,8 +57,101 @@ namespace krys::boo::svg
     {
       viewSpec->ResetContextElement();
     }
-    // FIXME: Unregister from the document's suspension callbacks and remove the time container, with SMIL
-    // (B11i).
+    auto &document = NodeDocument();
+    document.UnregisterForDocumentSuspensionCallbacks(*this);
+    if (auto *extensions = document.SVGExtensionsIfExists())
+    {
+      extensions->RemoveTimeContainer(*this);
+    }
+  }
+
+  void SVGSvgElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    oldDocument.UnregisterForDocumentSuspensionCallbacks(*this);
+    NodeDocument().RegisterForDocumentSuspensionCallbacks(*this);
+    SVGGraphicsElement::OnAdopt(oldDocument);
+  }
+
+  void SVGSvgElement::OnInsert() noexcept
+  {
+    if (IsConnected())
+    {
+      Ref document = ShareRef(NodeDocument());
+      auto &svgExtensions = document->SVGExtensions();
+      svgExtensions.AddTimeContainer(*this);
+      if (!svgExtensions.AreAnimationsPaused())
+      {
+        UnpauseAnimations();
+      }
+
+      // Animations are started at the end of document parsing and after firing the load event,
+      // but if we miss that train (deferred programmatic element insertion for example) we need
+      // to initialize the time container here.
+      if (!document->Parsing() && document->LoadEventFinished())
+      {
+        _timeContainer->Begin();
+      }
+    }
+    SVGGraphicsElement::OnInsert();
+  }
+
+  void SVGSvgElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    if (oldAncestor.IsConnected() && !IsConnected())
+    {
+      NodeDocument().SVGExtensions().RemoveTimeContainer(*this);
+      PauseAnimations();
+    }
+    SVGGraphicsElement::OnRemove(isSubtreeRoot, oldAncestor);
+  }
+
+  void SVGSvgElement::PauseAnimations() noexcept
+  {
+    Ref timeContainer = _timeContainer;
+    if (!timeContainer->IsPaused())
+    {
+      timeContainer->Pause();
+    }
+  }
+
+  void SVGSvgElement::UnpauseAnimations() noexcept
+  {
+    Ref timeContainer = _timeContainer;
+    if (timeContainer->IsPaused())
+    {
+      timeContainer->Resume();
+    }
+  }
+
+  bool SVGSvgElement::AnimationsPaused() const noexcept
+  {
+    return _timeContainer->IsPaused();
+  }
+
+  bool SVGSvgElement::HasActiveAnimation() const noexcept
+  {
+    return _timeContainer->IsActive();
+  }
+
+  float SVGSvgElement::GetCurrentTime() const noexcept
+  {
+    return static_cast<float>(_timeContainer->Elapsed().Value());
+  }
+
+  void SVGSvgElement::SetCurrentTime(float seconds) noexcept
+  {
+    krys_debug_assert(std::isfinite(seconds));
+    _timeContainer->SetElapsed(std::max(seconds, 0.0f));
+  }
+
+  void SVGSvgElement::PrepareForDocumentSuspension() noexcept
+  {
+    PauseAnimations();
+  }
+
+  void SVGSvgElement::ResumeFromDocumentSuspension() noexcept
+  {
+    UnpauseAnimations();
   }
 
   SVGViewSpec &SVGSvgElement::CurrentView() noexcept

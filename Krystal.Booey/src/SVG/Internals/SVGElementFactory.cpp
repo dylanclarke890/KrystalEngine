@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.Booey/SVG/SVGAElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateMotionElement.hpp"
+#include "Krystal.Booey/SVG/SVGAnimateTransformElement.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGClipPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
@@ -39,6 +42,7 @@
 #include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
 #include "Krystal.Booey/SVG/SVGMaskElement.hpp"
 #include "Krystal.Booey/SVG/SVGMetadataElement.hpp"
+#include "Krystal.Booey/SVG/SVGMPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPathElement.hpp"
 #include "Krystal.Booey/SVG/SVGPatternElement.hpp"
 #include "Krystal.Booey/SVG/SVGPolygonElement.hpp"
@@ -46,6 +50,7 @@
 #include "Krystal.Booey/SVG/SVGRadialGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGRectElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
+#include "Krystal.Booey/SVG/SVGSetElement.hpp"
 #include "Krystal.Booey/SVG/SVGStopElement.hpp"
 #include "Krystal.Booey/SVG/SVGStyleElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
@@ -299,14 +304,25 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGFETurbulenceElement>(document);
       }
-      // FIXME: The animation elements, with SMIL (B11i).
       case TagName::animate:
+      {
+        return CreateRefPtr<SVGAnimateElement>(document);
+      }
       case TagName::animateMotion:
+      {
+        return CreateRefPtr<SVGAnimateMotionElement>(document);
+      }
       case TagName::animateTransform:
+      {
+        return CreateRefPtr<SVGAnimateTransformElement>(document);
+      }
       case TagName::set:
+      {
+        return CreateRefPtr<SVGSetElement>(document);
+      }
       case TagName::mpath:
       {
-        return CreateRefPtr<SVGUnknownElement>(document);
+        return CreateRefPtr<SVGMPathElement>(document);
       }
     }
 

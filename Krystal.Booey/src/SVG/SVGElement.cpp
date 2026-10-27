@@ -11,8 +11,10 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGProperty.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGPropertyAnimatorFactory.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwnerRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElementRareData.hpp"
@@ -23,6 +25,7 @@
 #include "Krystal.Booey/SVG/SVGSymbolElement.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
+#include <algorithm>
 
 namespace krys::boo::svg
 {
@@ -56,8 +59,9 @@ namespace krys::boo::svg
       : StyledElement(document, dom::NullQualifiedName(),
                       dom::NodeFlags::IsSVGElement | dom::NodeFlags::HasCustomStyleResolveCallbacks
                         | nodeFlags),
-        _flags(flags), _interface(interface), _propertyRegistry(krys::move(propertyRegistry)),
-        _className(SVGAnimatedString::Create(this))
+        _flags(flags), _interface(interface),
+        _propertyAnimatorFactory(CreateUnique<SVGPropertyAnimatorFactory>()),
+        _propertyRegistry(krys::move(propertyRegistry)), _className(SVGAnimatedString::Create(this))
   {
     static bool didRegistration = false;
     if (!didRegistration) KRYS_UNLIKELY
@@ -81,7 +85,12 @@ namespace krys::boo::svg
   {
     if (_svgRareData)
     {
-      krys_assert(CopyToRefs(_svgRareData->ReferencingElements()).empty());
+      // NOTE: a document's nodes are destroyed with it without being removed, and an element before its
+      // children, so an element can be destroyed while its descendants still reference it (an animation
+      // element's target is its parent by default); their references are dropped.
+      auto referencingElements = CopyToRefs(_svgRareData->TakeReferencingElements());
+      krys_assert(std::ranges::all_of(referencingElements,
+                                      [&](const auto &element) { return element->IsDescendantOf(*this); }));
       for (auto &instance : Instances())
       {
         instance->_svgRareData->SetCorrespondingElement(nullptr);
@@ -104,6 +113,20 @@ namespace krys::boo::svg
     {
       TreeScopeForSVGReferences().RemoveElementFromPendingSVGResources(*this);
       krys_debug_assert(!HasPendingResources());
+    }
+  }
+
+  void SVGElement::WillRecalcStyle(EnumSet<style::Change> change) noexcept
+  {
+    if (!_svgRareData || StyleResolutionShouldRecompositeLayer())
+    {
+      return;
+    }
+    // If the style changes because of a regular property change (not induced by SMIL animations themselves)
+    // reset the "computed style without SMIL style properties", so the base value change gets reflected.
+    if (!change.IsEmpty() || NeedsStyleRecalc())
+    {
+      _svgRareData->SetNeedsOverrideComputedStyleUpdate();
     }
   }
 
@@ -467,6 +490,237 @@ namespace krys::boo::svg
       SVGAttributeChanged(name);
     }
   }
+
+  bool SVGElement::IsAnimatedAttribute(const dom::QualifiedName &attributeName) const noexcept
+  {
+    return SVGPropertyAnimatorFactory::IsKnownAttribute(attributeName)
+           || IsAnimatedPropertyAttribute(attributeName);
+  }
+
+  bool SVGElement::IsAnimatedStyleAttribute(const dom::QualifiedName &attributeName) const noexcept
+  {
+    return SVGPropertyAnimatorFactory::IsKnownAttribute(attributeName)
+           || _propertyRegistry->IsAnimatedStylePropertyAttribute(attributeName);
+  }
+
+  RefPtr<SVGAttributeAnimator> SVGElement::CreateAnimator(const dom::QualifiedName &attributeName,
+                                                          AnimationMode animationMode, CalcMode calcMode,
+                                                          bool isAccumulated, bool isAdditive) noexcept
+  {
+    // Property animator, e.g. "fill" or "fill-opacity".
+    if (auto animator = PropertyAnimatorFactory().CreateAnimator(attributeName, animationMode, calcMode,
+                                                                 isAccumulated, isAdditive))
+    {
+      return animator;
+    }
+
+    // Animated property animator.
+    RefPtr animator =
+      _propertyRegistry->CreateAnimator(attributeName, animationMode, calcMode, isAccumulated, isAdditive);
+    if (!animator)
+    {
+      return animator;
+    }
+    for (auto &instance : Instances())
+    {
+      instance->_propertyRegistry->AppendAnimatedInstance(attributeName, *animator);
+    }
+    return animator;
+  }
+
+  void SVGElement::AnimatorWillBeDeleted(const dom::QualifiedName &attributeName) noexcept
+  {
+    PropertyAnimatorFactory().AnimatorWillBeDeleted(attributeName);
+  }
+
+  css::MutableStyleProperties *SVGElement::AnimatedSMILStyleProperties() const noexcept
+  {
+    if (_svgRareData)
+    {
+      return _svgRareData->AnimatedSMILStyleProperties();
+    }
+    return nullptr;
+  }
+
+  css::MutableStyleProperties &SVGElement::EnsureAnimatedSMILStyleProperties() noexcept
+  {
+    return EnsureSVGRareData().EnsureAnimatedSMILStyleProperties();
+  }
+
+  void SVGElement::SetUseOverrideComputedStyle(bool value) noexcept
+  {
+    if (_svgRareData)
+    {
+      _svgRareData->SetUseOverrideComputedStyle(value);
+    }
+  }
+
+  const RenderStyle *SVGElementRareData::OverrideComputedStyle(dom::Element &element,
+                                                               const RenderStyle *parentStyle) noexcept
+  {
+    if (!_useOverrideComputedStyle)
+    {
+      return nullptr;
+    }
+    if (!_overrideComputedStyle || _needsOverrideComputedStyleUpdate)
+    {
+      // The style computed here contains no CSS Animations/Transitions or SMIL induced rules - this is needed
+      // to compute the "base value" for the SMIL animation sandwhich model.
+      _overrideComputedStyle =
+        element.StyleResolver()
+          .StyleForElement(element, {parentStyle}, RuleMatchingBehavior::MatchAllRulesExcludingSMIL)
+          .Style;
+      _needsOverrideComputedStyleUpdate = false;
+    }
+    krys_debug_assert(_overrideComputedStyle);
+    return _overrideComputedStyle.get();
+  }
+
+  const RenderStyle *
+    SVGElement::ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    if (!_svgRareData || !_svgRareData->UseOverrideComputedStyle())
+    {
+      return Element::ComputedStyle(pseudoElementIdentifier);
+    }
+
+    const RenderStyle *parentStyle = nullptr;
+    if (RefPtr parent = ShareRefPtr(dom::TreeQueries::ParentOrShadowHostElement(*this)))
+    {
+      if (auto *renderer = parent->Renderer())
+      {
+        parentStyle = &renderer->Style();
+      }
+    }
+
+    return _svgRareData->OverrideComputedStyle(*this, parentStyle);
+  }
+
+  dom::QualifiedName SVGElement::AnimatableAttributeForName(dom::DOMStringView localName) noexcept
+  {
+    static const NeverDestroyed<HashMap<dom::DOMStringView, dom::QualifiedName>> animatableAttributes = []
+    {
+      const Array names {
+        &SVGNames::ClassAttr(),
+        &SVGNames::AmplitudeAttr(),
+        &SVGNames::AzimuthAttr(),
+        &SVGNames::BaseFrequencyAttr(),
+        &SVGNames::BiasAttr(),
+        &SVGNames::ClipPathUnitsAttr(),
+        &SVGNames::CxAttr(),
+        &SVGNames::CyAttr(),
+        &SVGNames::DiffuseConstantAttr(),
+        &SVGNames::DivisorAttr(),
+        &SVGNames::DxAttr(),
+        &SVGNames::DyAttr(),
+        &SVGNames::EdgeModeAttr(),
+        &SVGNames::ElevationAttr(),
+        &SVGNames::ExponentAttr(),
+        &SVGNames::FilterUnitsAttr(),
+        &SVGNames::FxAttr(),
+        &SVGNames::FyAttr(),
+        &SVGNames::GradientTransformAttr(),
+        &SVGNames::GradientUnitsAttr(),
+        &SVGNames::HeightAttr(),
+        &SVGNames::In2Attr(),
+        &SVGNames::InAttr(),
+        &SVGNames::InterceptAttr(),
+        &SVGNames::K1Attr(),
+        &SVGNames::K2Attr(),
+        &SVGNames::K3Attr(),
+        &SVGNames::K4Attr(),
+        &SVGNames::KernelMatrixAttr(),
+        &SVGNames::KernelUnitLengthAttr(),
+        &SVGNames::LengthAdjustAttr(),
+        &SVGNames::LimitingConeAngleAttr(),
+        &SVGNames::MarkerHeightAttr(),
+        &SVGNames::MarkerUnitsAttr(),
+        &SVGNames::MarkerWidthAttr(),
+        &SVGNames::MaskContentUnitsAttr(),
+        &SVGNames::MaskUnitsAttr(),
+        &SVGNames::MethodAttr(),
+        &SVGNames::ModeAttr(),
+        &SVGNames::NumOctavesAttr(),
+        &SVGNames::OffsetAttr(),
+        &SVGNames::OperatorAttr(),
+        &SVGNames::OrderAttr(),
+        &SVGNames::OrientAttr(),
+        &SVGNames::PathLengthAttr(),
+        &SVGNames::PatternContentUnitsAttr(),
+        &SVGNames::PatternTransformAttr(),
+        &SVGNames::PatternUnitsAttr(),
+        &SVGNames::PointsAtXAttr(),
+        &SVGNames::PointsAtYAttr(),
+        &SVGNames::PointsAtZAttr(),
+        &SVGNames::PreserveAlphaAttr(),
+        &SVGNames::PreserveAspectRatioAttr(),
+        &SVGNames::PrimitiveUnitsAttr(),
+        &SVGNames::RadiusAttr(),
+        &SVGNames::RAttr(),
+        &SVGNames::RefXAttr(),
+        &SVGNames::RefYAttr(),
+        &SVGNames::ResultAttr(),
+        &SVGNames::RotateAttr(),
+        &SVGNames::RxAttr(),
+        &SVGNames::RyAttr(),
+        &SVGNames::ScaleAttr(),
+        &SVGNames::SeedAttr(),
+        &SVGNames::SlopeAttr(),
+        &SVGNames::SpacingAttr(),
+        &SVGNames::SpecularConstantAttr(),
+        &SVGNames::SpecularExponentAttr(),
+        &SVGNames::SpreadMethodAttr(),
+        &SVGNames::StartOffsetAttr(),
+        &SVGNames::StdDeviationAttr(),
+        &SVGNames::StitchTilesAttr(),
+        &SVGNames::SurfaceScaleAttr(),
+        &SVGNames::TableValuesAttr(),
+        &SVGNames::TargetAttr(),
+        &SVGNames::TargetXAttr(),
+        &SVGNames::TargetYAttr(),
+        &SVGNames::TransformAttr(),
+        &SVGNames::TypeAttr(),
+        &SVGNames::ValuesAttr(),
+        &SVGNames::ViewBoxAttr(),
+        &SVGNames::WidthAttr(),
+        &SVGNames::X1Attr(),
+        &SVGNames::X2Attr(),
+        &SVGNames::XAttr(),
+        &SVGNames::XChannelSelectorAttr(),
+        &SVGNames::Y1Attr(),
+        &SVGNames::Y2Attr(),
+        &SVGNames::YAttr(),
+        &SVGNames::YChannelSelectorAttr(),
+        &SVGNames::ZAttr(),
+        &SVGNames::HrefAttr(),
+      };
+      HashMap<dom::DOMStringView, dom::QualifiedName> map;
+      for (const auto *name : names)
+      {
+        KRYS_MAYBE_UNUSED auto [iterator, isNewEntry] = map.try_emplace(name->LocalName().View(), *name);
+        krys_debug_assert(isNewEntry);
+      }
+      return map;
+    }();
+    auto iterator = animatableAttributes->find(localName);
+    return iterator != animatableAttributes->end() ? iterator->second : dom::NullQualifiedName();
+  }
+
+#if KRYS_DEBUG
+  bool SVGElement::IsAnimatableAttribute(const dom::QualifiedName &name) const noexcept
+  {
+    if (AnimatableAttributeForName(name.LocalName().View()) == name)
+    {
+      return !FilterOutAnimatableAttribute(name);
+    }
+    return false;
+  }
+
+  bool SVGElement::FilterOutAnimatableAttribute(const dom::QualifiedName &) const noexcept
+  {
+    return false;
+  }
+#endif
 
   void SVGElement::SynchronizeSVGAttribute(const dom::QualifiedName &name) noexcept
   {

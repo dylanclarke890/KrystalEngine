@@ -1,11 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAttributeAnimator.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGPropertyOwner.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include <algorithm>
 
 namespace krys::boo::svg
 {
@@ -17,6 +20,7 @@ namespace krys::boo::svg
   {
   protected:
     WeakPtr<SVGElement> _contextElement;
+    List<WeakPtr<SVGAttributeAnimator>> _animators;
 
   public:
     ~SVGAnimatedProperty() noexcept override = default;
@@ -60,11 +64,36 @@ namespace krys::boo::svg
     }
 
     // Control the animation life cycle.
-    // FIXME: The animators that start and stop animations, and the instances of a <use> element that share
-    // them, come with SMIL (B11i). Until then nothing animates.
     KRYS_NODISCARD bool IsAnimating() const noexcept
     {
-      return false;
+      return std::ranges::any_of(_animators, [](const auto &animator) { return !!animator; });
+    }
+
+    virtual void StartAnimation(SVGAttributeAnimator &animator) noexcept
+    {
+      std::erase_if(_animators, [](const auto &weakAnimator) { return !weakAnimator; });
+      if (std::ranges::none_of(_animators,
+                               [&](const auto &weakAnimator) { return weakAnimator.get() == &animator; }))
+      {
+        _animators.push_back(CreateWeakPtr(&animator));
+      }
+    }
+
+    virtual void StopAnimation(SVGAttributeAnimator &animator) noexcept
+    {
+      std::erase_if(_animators, [&](const auto &weakAnimator)
+                    { return !weakAnimator || weakAnimator.get() == &animator; });
+    }
+
+    // Attach/Detach the animVal of the target element's property by the instance element's property.
+    virtual void InstanceStartAnimation(SVGAttributeAnimator &animator, SVGAnimatedProperty &) noexcept
+    {
+      StartAnimation(animator);
+    }
+
+    virtual void InstanceStopAnimation(SVGAttributeAnimator &animator) noexcept
+    {
+      StopAnimation(animator);
     }
 
   protected:

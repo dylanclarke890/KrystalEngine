@@ -1,12 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyAccessor.hpp"
+#include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyAnimatorImpl.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedPropertyImpl.hpp"
 
-// FIXME: Each accessor makes the animator of its property type (createAnimator) and adds the instances of a
-// <use> element to it (appendAnimatedInstance), with SMIL (B11i).
-
-#define KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(AccessorName, AnimatedPropertyType)                              \
+#define KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(AccessorName, AnimatedPropertyType, AnimatorType)                \
   template <typename TOwner>                                                                                 \
   class AccessorName final : public SVGAnimatedPropertyAccessor<TOwner, AnimatedPropertyType>                \
   {                                                                                                          \
@@ -20,22 +18,42 @@
     {                                                                                                        \
       return Base::template Singleton<AccessorName, property>();                                             \
     }                                                                                                        \
+                                                                                                             \
+  private:                                                                                                   \
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>                                                              \
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,    \
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final            \
+    {                                                                                                        \
+      return AnimatorType::Create(attributeName, Base::Property(owner), animationMode, calcMode,             \
+                                  isAccumulated, isAdditive);                                                \
+    }                                                                                                        \
+                                                                                                             \
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final          \
+    {                                                                                                        \
+      static_cast<AnimatorType &>(animator).AppendAnimatedInstance(Base::Property(owner));                   \
+    }                                                                                                        \
   };
 
 namespace krys::boo::svg
 {
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedAngleAccessor, SVGAnimatedAngle)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedBooleanAccessor, SVGAnimatedBoolean)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedIntegerAccessor, SVGAnimatedInteger)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedLengthListAccessor, SVGAnimatedLengthList)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedNumberAccessor, SVGAnimatedNumber)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedNumberListAccessor, SVGAnimatedNumberList)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedPointListAccessor, SVGAnimatedPointList)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedOrientTypeAccessor, SVGAnimatedOrientType)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedPreserveAspectRatioAccessor, SVGAnimatedPreserveAspectRatio)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedRectAccessor, SVGAnimatedRect)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedStringAccessor, SVGAnimatedString)
-  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedTransformListAccessor, SVGAnimatedTransformList)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedAngleAccessor, SVGAnimatedAngle, SVGAnimatedAngleAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedBooleanAccessor, SVGAnimatedBoolean,
+                                      SVGAnimatedBooleanAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedIntegerAccessor, SVGAnimatedInteger,
+                                      SVGAnimatedIntegerAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedNumberAccessor, SVGAnimatedNumber, SVGAnimatedNumberAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedNumberListAccessor, SVGAnimatedNumberList,
+                                      SVGAnimatedNumberListAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedPointListAccessor, SVGAnimatedPointList,
+                                      SVGAnimatedPointListAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedOrientTypeAccessor, SVGAnimatedOrientType,
+                                      SVGAnimatedOrientTypeAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedPreserveAspectRatioAccessor, SVGAnimatedPreserveAspectRatio,
+                                      SVGAnimatedPreserveAspectRatioAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedRectAccessor, SVGAnimatedRect, SVGAnimatedRectAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedStringAccessor, SVGAnimatedString, SVGAnimatedStringAnimator)
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedTransformListAccessor, SVGAnimatedTransformList,
+                                      SVGAnimatedTransformListAnimator)
 
   template <typename TOwner>
   class SVGAnimatedLengthAccessor final : public SVGAnimatedPropertyAccessor<TOwner, SVGAnimatedLength>
@@ -56,6 +74,50 @@ namespace krys::boo::svg
     {
       return true;
     }
+
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      SVGLengthMode lengthMode = Base::Property(owner)->BaseVal()->Value().LengthMode();
+      return SVGAnimatedLengthAnimator::Create(attributeName, Base::Property(owner), animationMode, calcMode,
+                                               isAccumulated, isAdditive, lengthMode);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedLengthAnimator &>(animator).AppendAnimatedInstance(Base::Property(owner));
+    }
+  };
+
+  template <typename TOwner>
+  class SVGAnimatedLengthListAccessor final
+      : public SVGAnimatedPropertyAccessor<TOwner, SVGAnimatedLengthList>
+  {
+    using Base = SVGAnimatedPropertyAccessor<TOwner, SVGAnimatedLengthList>;
+
+  public:
+    using Base::Base;
+
+    template <Ref<SVGAnimatedLengthList> TOwner::*property>
+    KRYS_NODISCARD static const SVGMemberAccessor<TOwner> &Singleton() noexcept
+    {
+      return Base::template Singleton<SVGAnimatedLengthListAccessor, property>();
+    }
+
+  private:
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      return SVGAnimatedLengthListAnimator::Create(attributeName, Base::Property(owner), animationMode,
+                                                   calcMode, isAccumulated, isAdditive, SVGLengthMode::Width);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedLengthListAnimator &>(animator).AppendAnimatedInstance(Base::Property(owner));
+    }
   };
 
   /// @brief Reaches an animated enumeration; @p TEnum is the enumeration's type, which its animator needs.
@@ -73,10 +135,25 @@ namespace krys::boo::svg
     {
       return Base::template Singleton<SVGAnimatedEnumerationAccessor, property>();
     }
+
+  private:
+    KRYS_NODISCARD RefPtr<SVGAttributeAnimator>
+      CreateAnimator(TOwner &owner, const dom::QualifiedName &attributeName, AnimationMode animationMode,
+                     CalcMode calcMode, bool isAccumulated, bool isAdditive) const noexcept final
+    {
+      return SVGAnimatedEnumerationAnimator<TEnum>::Create(
+        attributeName, Base::Property(owner), animationMode, calcMode, isAccumulated, isAdditive);
+    }
+
+    void AppendAnimatedInstance(TOwner &owner, SVGAttributeAnimator &animator) const noexcept final
+    {
+      static_cast<SVGAnimatedEnumerationAnimator<TEnum> &>(animator).AppendAnimatedInstance(
+        Base::Property(owner));
+    }
   };
 
-  // FIXME: An accessor for <path>'s `d` as an animated property (SVGAnimatedPathSegListAccessor, without the
-  // segment list SVG 2 removed), with SMIL (B11i).
+  KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR(SVGAnimatedPathSegListAccessor, SVGAnimatedPathSegList,
+                                      SVGAnimatedPathSegListAnimator)
 }
 
 #undef KRYS_SVG_ANIMATED_PROPERTY_ACCESSOR

@@ -92,6 +92,49 @@ namespace krys::boo::svg
       return IsAnimating() ? *_animVal : *_baseVal;
     }
 
+    // Controlling the animation.
+    void StartAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      if (_animVal)
+      {
+        *_animVal = *_baseVal;
+      }
+      else
+      {
+        EnsureAnimVal();
+      }
+      SVGAnimatedProperty::StartAnimation(animator);
+    }
+
+    void StopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::StopAnimation(animator);
+      if (_animVal)
+      {
+        *_animVal = *_baseVal;
+      }
+    }
+
+    // Controlling the instance animation.
+    void InstanceStartAnimation(SVGAttributeAnimator &animator,
+                                SVGAnimatedProperty &animated) noexcept override
+    {
+      if (!IsAnimating())
+      {
+        _animVal = static_cast<SVGAnimatedPropertyList &>(animated).AnimVal();
+      }
+      SVGAnimatedProperty::InstanceStartAnimation(animator, animated);
+    }
+
+    void InstanceStopAnimation(SVGAttributeAnimator &animator) noexcept override
+    {
+      SVGAnimatedProperty::InstanceStopAnimation(animator);
+      if (!IsAnimating())
+      {
+        _animVal = nullptr;
+      }
+    }
+
   protected:
     template <typename... TArgs>
     SVGAnimatedPropertyList(SVGElement *contextElement, TArgs &&...arguments) noexcept

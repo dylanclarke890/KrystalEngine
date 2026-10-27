@@ -11,6 +11,7 @@
 #include "Krystal.Booey/SVG/SVGLengthList.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerTypes.hpp"
 #include "Krystal.Booey/SVG/SVGNumberList.hpp"
+#include "Krystal.Booey/SVG/SVGPathSegList.hpp"
 #include "Krystal.Booey/SVG/SVGPointList.hpp"
 #include "Krystal.Booey/SVG/SVGPreserveAspectRatio.hpp"
 #include "Krystal.Booey/SVG/SVGRect.hpp"
@@ -32,6 +33,28 @@ namespace krys::boo::svg
   using SVGAnimatedNumberList = SVGAnimatedPropertyList<SVGNumberList>;
   using SVGAnimatedPointList = SVGAnimatedPropertyList<SVGPointList>;
   using SVGAnimatedTransformList = SVGAnimatedPropertyList<SVGTransformList>;
+
+  class SVGAnimatedPathSegList : public SVGAnimatedPropertyList<SVGPathSegList>
+  {
+    using Base = SVGAnimatedPropertyList<SVGPathSegList>;
+    using Base::Base;
+
+  public:
+    KRYS_NODISCARD static Ref<SVGAnimatedPathSegList> Create(SVGElement *contextElement) noexcept
+    {
+      return AdoptRef(*new SVGAnimatedPathSegList(contextElement));
+    }
+
+    KRYS_NODISCARD const SVGPathByteStream &CurrentPathByteStream() const noexcept
+    {
+      return IsAnimating() ? AnimVal()->PathByteStream() : BaseVal()->PathByteStream();
+    }
+
+    KRYS_NODISCARD Path CurrentPath() const noexcept
+    {
+      return IsAnimating() ? AnimVal()->GetPath() : BaseVal()->GetPath();
+    }
+  };
 
   class SVGAnimatedOrientType : public SVGAnimatedEnumeration
   {

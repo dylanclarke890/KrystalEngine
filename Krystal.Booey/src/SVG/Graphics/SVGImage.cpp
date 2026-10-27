@@ -20,7 +20,8 @@
 
 namespace krys::boo::svg
 {
-  SVGImage::SVGImage(ImageObserver *observer) noexcept : Image(observer)
+  SVGImage::SVGImage(ImageObserver *observer) noexcept
+      : Image(observer), _startAnimationTimer(*this, &SVGImage::StartAnimationTimerFired)
   {
   }
 
@@ -338,22 +339,51 @@ namespace krys::boo::svg
     }
   }
 
-  // FIXME: Starting, pausing and resuming the document's animations (the time container's
-  // pauseAnimations, unpauseAnimations and setCurrentTime), with SMIL (B11i).
+  void SVGImage::StartAnimationTimerFired() noexcept
+  {
+    StartAnimation();
+  }
+
   void SVGImage::ScheduleStartAnimation() noexcept
   {
+    RefPtr<SVGSvgElement> rootElement = RootElement();
+    if (!rootElement || !rootElement->AnimationsPaused())
+    {
+      return;
+    }
+    _startAnimationTimer.StartOneShot({});
   }
 
   void SVGImage::StartAnimation() noexcept
   {
+    RefPtr<SVGSvgElement> rootElement = RootElement();
+    if (!rootElement || !rootElement->AnimationsPaused())
+    {
+      return;
+    }
+    rootElement->UnpauseAnimations();
+    rootElement->SetCurrentTime(0);
   }
 
   void SVGImage::ResumeAnimation() noexcept
   {
+    RefPtr<SVGSvgElement> rootElement = RootElement();
+    if (!rootElement || !rootElement->AnimationsPaused())
+    {
+      return;
+    }
+    rootElement->UnpauseAnimations();
   }
 
   void SVGImage::StopAnimation() noexcept
   {
+    _startAnimationTimer.Stop();
+    RefPtr<SVGSvgElement> rootElement = RootElement();
+    if (!rootElement)
+    {
+      return;
+    }
+    rootElement->PauseAnimations();
   }
 
   void SVGImage::ResetAnimation() noexcept
@@ -363,7 +393,12 @@ namespace krys::boo::svg
 
   bool SVGImage::IsAnimating() const noexcept
   {
-    return false;
+    RefPtr<SVGSvgElement> rootElement = RootElement();
+    if (!rootElement)
+    {
+      return false;
+    }
+    return rootElement->HasActiveAnimation();
   }
 
   EncodedDataStatus SVGImage::DataChanged(bool allDataReceived) noexcept

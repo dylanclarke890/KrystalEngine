@@ -8,6 +8,9 @@ namespace krys::boo::svg
   {
     None,
     A,
+    Animate,
+    AnimateMotion,
+    AnimateTransform,
     Circle,
     ClipPath,
     Defs,
@@ -49,6 +52,7 @@ namespace krys::boo::svg
     Marker,
     Mask,
     Metadata,
+    MPath,
     Path,
     Pattern,
     Polygon,
@@ -56,6 +60,7 @@ namespace krys::boo::svg
     RadialGradient,
     Rect,
     Script,
+    Set,
     Stop,
     Switch,
     Style,
@@ -71,4 +76,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 62uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 67uz);

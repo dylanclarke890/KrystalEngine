@@ -286,6 +286,13 @@ namespace krys::ui::tests
     CheckPage("svg-filters", 360u, 240u);
   }
 
+  TEST_CASE("Golden: SVG animation", "[UI][GPU][Golden]")
+  {
+    // Each animation is frozen, holds a discrete value or is half way through a very long one, so neither
+    // capture depends on the time.
+    CheckPage("svg-animation", 360u, 240u);
+  }
+
   TEST_CASE("Golden: backdrop filters", "[UI][GPU][Golden]")
   {
     CheckPage("backdrop", 360u, 240u);
