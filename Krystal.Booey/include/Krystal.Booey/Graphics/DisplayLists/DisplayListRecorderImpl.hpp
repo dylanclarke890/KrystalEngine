@@ -93,6 +93,8 @@ namespace krys::boo::display_list
     void DrawPattern(NativeImage &, const FloatRect &destRect, const FloatRect &tileRect,
                      const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
                      ImagePaintingOptions) noexcept final;
+    void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect, Filter &,
+                                 FilterResults &) noexcept override;
     void DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
                          ImagePaintingOptions) noexcept final;
     void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,

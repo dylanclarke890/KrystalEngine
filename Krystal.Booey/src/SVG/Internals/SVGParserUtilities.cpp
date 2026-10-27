@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/SVG/Internals/SVGParserUtilities.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include <charconv>
 #include <cmath>
 
 namespace krys::boo::svg
@@ -214,6 +215,24 @@ namespace krys::boo::svg
     SkipOptionalSVGSpacesOrDelimiter(buffer);
 
     return flag;
+  }
+
+  float ToFloatOrZero(dom::DOMStringView string) noexcept
+  {
+    while (!string.empty() && text::IsASCIIWhitespace(string.front()))
+    {
+      string.remove_prefix(1);
+    }
+    if (!string.empty() && string.front() == u8'+')
+    {
+      string.remove_prefix(1);
+    }
+
+    float value = 0;
+    auto first = reinterpret_cast<const char *>(string.data());
+    auto last = first + string.size();
+    auto result = std::from_chars(first, last, value);
+    return result.ec == std::errc {} && result.ptr == last ? value : 0;
   }
 
   Maybe<std::pair<float, float>> ParseNumberOptionalNumber(dom::DOMStringView string) noexcept

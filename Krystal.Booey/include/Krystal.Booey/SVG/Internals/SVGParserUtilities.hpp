@@ -29,6 +29,9 @@ namespace krys::boo::svg
 
   KRYS_NODISCARD Maybe<std::pair<float, float>> ParseNumberOptionalNumber(dom::DOMStringView string) noexcept;
 
+  /// @brief The number `string` is, after any leading whitespace; 0 if it isn't one.
+  KRYS_NODISCARD float ToFloatOrZero(dom::DOMStringView string) noexcept;
+
   KRYS_NODISCARD Maybe<bool> ParseArcFlag(dom::DOMStringView &buffer) noexcept;
 
   KRYS_NODISCARD Maybe<FloatPoint> ParsePoint(dom::DOMStringView string) noexcept;

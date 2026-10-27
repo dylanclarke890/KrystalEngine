@@ -71,6 +71,58 @@ namespace krys::boo::svg
     KRYS_NODISCARD static const dom::QualifiedName &Y2Attr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &YAttr() noexcept;
     KRYS_NODISCARD static const dom::QualifiedName &ZoomAndPanAttr() noexcept;
+
+    // Filters
+    KRYS_NODISCARD static const dom::QualifiedName &AmplitudeAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &AzimuthAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &BaseFrequencyAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &BiasAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &CrossoriginAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &DiffuseConstantAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &DivisorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &EdgeModeAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ElevationAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ExponentAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FilterUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FloodColorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &FloodOpacityAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &In2Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &InAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &InterceptAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &K1Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &K2Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &K3Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &K4Attr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &KernelMatrixAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &KernelUnitLengthAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &LightingColorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &LimitingConeAngleAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ModeAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &NumOctavesAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &OperatorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &OrderAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PointsAtXAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PointsAtYAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PointsAtZAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PreserveAlphaAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &PrimitiveUnitsAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &RadiusAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ResultAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ScaleAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SeedAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SlopeAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SpecularConstantAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SpecularExponentAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &StdDeviationAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &StitchTilesAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &SurfaceScaleAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &TableValuesAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &TargetXAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &TargetYAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ValuesAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &XChannelSelectorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &YChannelSelectorAttr() noexcept;
+    KRYS_NODISCARD static const dom::QualifiedName &ZAttr() noexcept;
   };
 
   /// @brief The names of the XLink attributes SVG uses, in the XLink namespace with the `xlink` prefix.

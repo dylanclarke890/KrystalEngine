@@ -5,6 +5,32 @@
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
 #include "Krystal.Booey/SVG/SVGDescElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEBlendElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEColorMatrixElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEComponentTransferElement.hpp"
+#include "Krystal.Booey/SVG/SVGFECompositeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEConvolveMatrixElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDiffuseLightingElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDisplacementMapElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDistantLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDropShadowElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFloodElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncAElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncBElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncGElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncRElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEGaussianBlurElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEImageElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMergeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMergeNodeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMorphologyElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEOffsetElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEPointLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFESpecularLightingElement.hpp"
+#include "Krystal.Booey/SVG/SVGFESpotLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFETileElement.hpp"
+#include "Krystal.Booey/SVG/SVGFETurbulenceElement.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGGElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
@@ -169,33 +195,110 @@ namespace krys::boo::svg
       {
         return CreateRefPtr<SVGTextPathElement>(document);
       }
-      // FIXME: <filter> and the filter primitives, with filters (B11h).
       case TagName::filter:
+      {
+        return CreateRefPtr<SVGFilterElement>(document);
+      }
       case TagName::feBlend:
+      {
+        return CreateRefPtr<SVGFEBlendElement>(document);
+      }
       case TagName::feColorMatrix:
+      {
+        return CreateRefPtr<SVGFEColorMatrixElement>(document);
+      }
       case TagName::feComponentTransfer:
+      {
+        return CreateRefPtr<SVGFEComponentTransferElement>(document);
+      }
       case TagName::feComposite:
+      {
+        return CreateRefPtr<SVGFECompositeElement>(document);
+      }
       case TagName::feConvolveMatrix:
+      {
+        return CreateRefPtr<SVGFEConvolveMatrixElement>(document);
+      }
       case TagName::feDiffuseLighting:
+      {
+        return CreateRefPtr<SVGFEDiffuseLightingElement>(document);
+      }
       case TagName::feDisplacementMap:
+      {
+        return CreateRefPtr<SVGFEDisplacementMapElement>(document);
+      }
       case TagName::feDistantLight:
+      {
+        return CreateRefPtr<SVGFEDistantLightElement>(document);
+      }
       case TagName::feDropShadow:
+      {
+        return CreateRefPtr<SVGFEDropShadowElement>(document);
+      }
       case TagName::feFlood:
+      {
+        return CreateRefPtr<SVGFEFloodElement>(document);
+      }
       case TagName::feFuncA:
+      {
+        return CreateRefPtr<SVGFEFuncAElement>(document);
+      }
       case TagName::feFuncB:
+      {
+        return CreateRefPtr<SVGFEFuncBElement>(document);
+      }
       case TagName::feFuncG:
+      {
+        return CreateRefPtr<SVGFEFuncGElement>(document);
+      }
       case TagName::feFuncR:
+      {
+        return CreateRefPtr<SVGFEFuncRElement>(document);
+      }
       case TagName::feGaussianBlur:
+      {
+        return CreateRefPtr<SVGFEGaussianBlurElement>(document);
+      }
       case TagName::feImage:
+      {
+        return CreateRefPtr<SVGFEImageElement>(document);
+      }
       case TagName::feMerge:
+      {
+        return CreateRefPtr<SVGFEMergeElement>(document);
+      }
       case TagName::feMergeNode:
+      {
+        return CreateRefPtr<SVGFEMergeNodeElement>(document);
+      }
       case TagName::feMorphology:
+      {
+        return CreateRefPtr<SVGFEMorphologyElement>(document);
+      }
       case TagName::feOffset:
+      {
+        return CreateRefPtr<SVGFEOffsetElement>(document);
+      }
       case TagName::fePointLight:
+      {
+        return CreateRefPtr<SVGFEPointLightElement>(document);
+      }
       case TagName::feSpecularLighting:
+      {
+        return CreateRefPtr<SVGFESpecularLightingElement>(document);
+      }
       case TagName::feSpotLight:
+      {
+        return CreateRefPtr<SVGFESpotLightElement>(document);
+      }
       case TagName::feTile:
+      {
+        return CreateRefPtr<SVGFETileElement>(document);
+      }
       case TagName::feTurbulence:
+      {
+        return CreateRefPtr<SVGFETurbulenceElement>(document);
+      }
       // FIXME: The animation elements, with SMIL (B11i).
       case TagName::animate:
       case TagName::animateMotion:

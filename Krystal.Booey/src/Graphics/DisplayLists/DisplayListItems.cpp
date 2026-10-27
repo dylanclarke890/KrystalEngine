@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Core/Colour/ColourTextStream.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
@@ -564,6 +566,47 @@ namespace krys::boo::display_list
       ts.DumpProperty(u8"image-buffer-identifier", _imageBuffer->GetRenderingResourceIdentifier());
     }
     ts.DumpProperty(u8"dest-rect", DestinationRect());
+  }
+
+  DrawFilteredImageBuffer::DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage,
+                                                   const FloatRect &sourceImageRect, Filter &filter) noexcept
+      : _sourceImage(krys::move(sourceImage)), _sourceImageRect(sourceImageRect), _filter(ShareRef(filter))
+  {
+  }
+
+  DrawFilteredImageBuffer::DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept = default;
+  DrawFilteredImageBuffer::DrawFilteredImageBuffer(DrawFilteredImageBuffer &&) noexcept = default;
+  DrawFilteredImageBuffer &
+    DrawFilteredImageBuffer::operator=(const DrawFilteredImageBuffer &) noexcept = default;
+  DrawFilteredImageBuffer &DrawFilteredImageBuffer::operator=(DrawFilteredImageBuffer &&) noexcept = default;
+  DrawFilteredImageBuffer::~DrawFilteredImageBuffer() noexcept = default;
+
+  ImageBuffer *DrawFilteredImageBuffer::SourceImage() const noexcept
+  {
+    return _sourceImage.get();
+  }
+
+  Filter &DrawFilteredImageBuffer::GetFilter() const noexcept
+  {
+    return *_filter;
+  }
+
+  void DrawFilteredImageBuffer::Apply(GraphicsContext &context) const noexcept
+  {
+    FilterResults results;
+    context.DrawFilteredImageBuffer(_sourceImage.get(), _sourceImageRect, *_filter, results);
+  }
+
+  void DrawFilteredImageBuffer::Dump(TextStream &ts, EnumSet<AsTextFlag> flags) const noexcept
+  {
+    if (flags.Contains(AsTextFlag::IncludeResourceIdentifiers))
+    {
+      if (_sourceImage)
+      {
+        ts.DumpProperty(u8"source-image-identifier", _sourceImage->GetRenderingResourceIdentifier());
+      }
+    }
+    ts.DumpProperty(u8"source-image-rect", SourceImageRect());
   }
 
   DrawImageBuffer::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,

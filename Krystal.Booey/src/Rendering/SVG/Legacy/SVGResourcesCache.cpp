@@ -81,10 +81,10 @@ namespace krys::boo
       return resource && resource->ResourceType() == RenderSVGResourceType::PatternResourceType;
     }
 
-    // FIXME: The filter, with filters (B11h).
     KRYS_NODISCARD bool HasResourcesRequiringRemovalOnClientLayoutChange(SVGResources &resources) noexcept
     {
-      return resources.Masker() || HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Fill())
+      return resources.Masker() || resources.Filter()
+             || HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Fill())
              || HasPaintResourceRequiringRemovalOnClientLayoutChange(resources.Stroke());
     }
 
@@ -121,8 +121,8 @@ namespace krys::boo
 
     // Invalidate the resources if either the RenderElement itself changed,
     // or we have filter resources, which could depend on the layout of children.
-    // FIXME: Or it has a filter, with filters (B11h).
-    if (renderer.SelfNeedsLayout() && HasResourcesRequiringRemovalOnClientLayoutChange(*resources))
+    if ((renderer.SelfNeedsLayout() || resources->Filter())
+        && HasResourcesRequiringRemovalOnClientLayoutChange(*resources))
     {
       resources->RemoveClientFromCacheAndMarkForInvalidation(renderer, false);
     }
@@ -179,7 +179,10 @@ namespace krys::boo
         return true;
       }
 
-      // FIXME: The filter, with filters (B11h).
+      if (oldStyle->GetFilter() != newStyle.GetFilter())
+      {
+        return true;
+      }
 
       if (oldStyle->Fill().UrlDisregardingType() != newStyle.Fill().UrlDisregardingType())
       {

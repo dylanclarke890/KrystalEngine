@@ -105,12 +105,17 @@ namespace krys::boo
     return normalizedValues;
   }
 
+  bool FEColorMatrix::ResultIsAlphaImage(Span<const Ref<FilterImage>>) const noexcept
+  {
+    return _type == ColorMatrixType::FECOLORMATRIX_TYPE_LUMINANCETOALPHA;
+  }
+
   EnumSet<FilterRenderingMode> FEColorMatrix::SupportedFilterRenderingModes(
     EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
   {
-    // The graphics context applies a matrix, a saturation or a hue rotation; luminance to alpha needs an
-    // image.
-    EnumSet<FilterRenderingMode> modes;
+    // The accelerated backend applies every type. The graphics context applies a matrix, a saturation or a
+    // hue rotation; luminance to alpha needs an image.
+    EnumSet<FilterRenderingMode> modes = FilterRenderingMode::Accelerated;
     if (_type == ColorMatrixType::FECOLORMATRIX_TYPE_MATRIX
         || _type == ColorMatrixType::FECOLORMATRIX_TYPE_SATURATE
         || _type == ColorMatrixType::FECOLORMATRIX_TYPE_HUEROTATE)

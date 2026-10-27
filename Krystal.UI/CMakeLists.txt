@@ -46,6 +46,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/FileStorageProvider.hpp
       include/Krystal.UI/FontFaceCache.hpp
       include/Krystal.UI/GamepadProvider.hpp
+      include/Krystal.UI/FilterGraph2DBuilder.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
@@ -73,6 +74,7 @@ target_sources(Krystal.UI
     src/FileStorageProvider.cpp
     src/FontFaceCache.cpp
     src/GamepadProvider.cpp
+    src/FilterGraph2DBuilder.cpp
     src/GraphicsContextRender2D.cpp
     src/ImageBufferTextures.cpp
     src/Input.cpp

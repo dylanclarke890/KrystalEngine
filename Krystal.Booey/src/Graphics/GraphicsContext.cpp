@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
@@ -274,6 +276,26 @@ namespace krys::boo
                                         ImagePaintingOptions imagePaintingOptions) noexcept
   {
     DrawImageBuffer(image, destination, FloatRect({}, image.LogicalSize()), imagePaintingOptions);
+  }
+
+  void GraphicsContext::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+                                                Filter &filter, FilterResults &results) noexcept
+  {
+    auto result = filter.Apply(sourceImage, sourceImageRect, results);
+    if (!result)
+    {
+      return;
+    }
+
+    RefPtr imageBuffer = ShareRefPtr(filter.FilterResultBuffer(*result));
+    if (!imageBuffer)
+    {
+      return;
+    }
+
+    Scale({1 / filter.FilterScale().Width(), 1 / filter.FilterScale().Height()});
+    DrawImageBuffer(*imageBuffer, FloatRect(result->AbsoluteImageRect()));
+    Scale(filter.FilterScale());
   }
 
   void GraphicsContext::DrawImageBuffer(ImageBuffer &, const FloatRect &, const FloatRect &,

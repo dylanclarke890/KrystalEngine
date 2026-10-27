@@ -22,6 +22,23 @@ namespace krys::boo
                                                          "difference"};
   }
 
+  bool ParseBlendMode(utf8_stringview name, BlendMode &blendMode) noexcept
+  {
+    for (auto i = static_cast<uint32>(BlendMode::Normal); i <= static_cast<uint32>(BlendMode::PlusLighter);
+         ++i)
+    {
+      auto mode = static_cast<BlendMode>(i);
+      auto modeName = BlendModeName(mode);
+      if (std::ranges::equal(name, modeName, {}, {}, [](char c) { return static_cast<char8>(c); }))
+      {
+        blendMode = mode;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   std::string_view CompositeOperatorName(CompositeOperator op, BlendMode blendOp) noexcept
   {
     krys_debug_assert(static_cast<uint32>(op) < std::size(compositeOperatorNames));

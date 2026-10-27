@@ -1,4 +1,4 @@
-﻿add_executable(Krystal.Booey.Tests)
+add_executable(Krystal.Booey.Tests)
 
 # Third-party - RapidJSON (WPT URL test data)
 find_package(RapidJSON CONFIG REQUIRED)
@@ -313,6 +313,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/FontPaletteValues.cpp
 		tests/Graphics/FontTaggedSettings.cpp
 		tests/Graphics/Transforms/TransformOperations.cpp
+		tests/Graphics/Filters/FilterEffect.cpp
 		tests/Graphics/Filters/FilterOperations.cpp
 		tests/Graphics/Gradient.cpp
 		tests/Graphics/RoundedRect.cpp
@@ -445,6 +446,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.cpp
 		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourcePattern.cpp
+		tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp
 		tests/Rendering/RenderBlockFlow.cpp
 		tests/Rendering/PositionedLayoutConstraints.cpp
 		tests/Rendering/FloatingObjects.cpp
@@ -694,6 +696,8 @@ target_sources(Krystal.Booey.Tests
 		tests/SVG/SVGTransformList.cpp
 		tests/SVG/SVGURIReference.cpp
 		tests/SVG/Graphics/SVGImage.cpp
+		tests/SVG/Graphics/Filters/SVGFilterRenderer.cpp
+		tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp
 		tests/SVG/SVGUseElement.cpp
 		tests/SVG/SVGGradientElement.cpp
 		tests/URL/URL.cpp

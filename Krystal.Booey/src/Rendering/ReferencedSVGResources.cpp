@@ -3,9 +3,12 @@
 #include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGResourceElementClient.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
@@ -102,7 +105,20 @@ namespace krys::boo
       }
     }
 
-    // FIXME: The reference filters, with filters (B11h).
+    if (style.HasFilter())
+    {
+      const auto &filter = style.GetFilter();
+      for (const auto &value : filter)
+      {
+        if (auto *referenceFilterOperation = DynamicDowncast<style::ReferenceFilterOperation>(value.Get()))
+        {
+          if (!referenceFilterOperation->Fragment().View().empty())
+          {
+            referencedResources.push_back({referenceFilterOperation->Fragment(), {html::TagName::filter}});
+          }
+        }
+      }
+    }
 
     return referencedResources;
   }
@@ -171,6 +187,18 @@ namespace krys::boo
     }
 
     return nullptr;
+  }
+
+  RefPtr<svg::SVGFilterElement> ReferencedSVGResources::ReferencedFilterElement(
+    dom::DocumentOrShadowRoot &treeScope, const style::ReferenceFilterOperation &referenceFilter) noexcept
+  {
+    if (referenceFilter.Fragment().View().empty())
+    {
+      return nullptr;
+    }
+
+    auto element = ElementForResourceID(treeScope, referenceFilter.Fragment(), html::TagName::filter);
+    return ShareRefPtr(DynamicDowncast<svg::SVGFilterElement>(element.get()));
   }
 
   LegacyRenderSVGResourceClipper *

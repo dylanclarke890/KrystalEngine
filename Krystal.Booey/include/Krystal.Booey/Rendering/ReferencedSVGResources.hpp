@@ -17,12 +17,14 @@ namespace krys::boo::dom
 
 namespace krys::boo::style
 {
+  class ReferenceFilterOperation;
   struct ReferencePath;
 }
 
 namespace krys::boo::svg
 {
   class SVGElement;
+  class SVGFilterElement;
 }
 
 namespace krys::boo
@@ -33,8 +35,8 @@ namespace krys::boo
   class RenderElement;
   class RenderStyle;
 
-  /// @brief The SVG elements a renderer's style refers to (a `clip-path: url()`), which tell it when they
-  /// change.
+  /// @brief The SVG elements a renderer's style refers to (a `clip-path: url()` or `filter: url()`), which
+  /// tell it when they change.
   class ReferencedSVGResources
   {
     KRYS_NON_COPY_MOVABLE(ReferencedSVGResources);
@@ -59,7 +61,8 @@ namespace krys::boo
     // Legacy: Clipping needs a renderer, filters use an element.
     KRYS_NODISCARD static LegacyRenderSVGResourceClipper *
       ReferencedClipperRenderer(dom::DocumentOrShadowRoot &, const style::ReferencePath &) noexcept;
-    // FIXME: The filter element a reference filter refers to (referencedFilterElement), with filters (B11h).
+    KRYS_NODISCARD static RefPtr<svg::SVGFilterElement>
+      ReferencedFilterElement(dom::DocumentOrShadowRoot &, const style::ReferenceFilterOperation &) noexcept;
 
     KRYS_NODISCARD static LegacyRenderSVGResourceContainer *
       ReferencedRenderResource(dom::DocumentOrShadowRoot &, const dom::DOMStringAtom &fragment) noexcept;

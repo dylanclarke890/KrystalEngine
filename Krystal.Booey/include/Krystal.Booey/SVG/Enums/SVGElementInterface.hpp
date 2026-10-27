@@ -13,6 +13,32 @@ namespace krys::boo::svg
     Defs,
     Desc,
     Ellipse,
+    FEBlend,
+    FEColorMatrix,
+    FEComponentTransfer,
+    FEComposite,
+    FEConvolveMatrix,
+    FEDiffuseLighting,
+    FEDisplacementMap,
+    FEDistantLight,
+    FEDropShadow,
+    FEFlood,
+    FEFuncA,
+    FEFuncB,
+    FEFuncG,
+    FEFuncR,
+    FEGaussianBlur,
+    FEImage,
+    FEMerge,
+    FEMergeNode,
+    FEMorphology,
+    FEOffset,
+    FEPointLight,
+    FESpecularLighting,
+    FESpotLight,
+    FETile,
+    FETurbulence,
+    Filter,
     ForeignObject,
     G,
     Graphics,
@@ -45,4 +71,4 @@ namespace krys::boo::svg
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 36uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::svg::SVGElementInterface, 62uz);

@@ -19,8 +19,8 @@ namespace krys::boo
   private:
     dom::DOMStringAtom _id;
     HashSet<RenderElement *> _clients;
-    // FIXME: The layers filtered from HTML (m_clientLayers, addClientRenderLayer, removeClientRenderLayer,
-    // markAllClientLayersForInvalidation), with filters from HTML (B11h).
+    /// @brief The layers filtered from HTML by the resource; each removes itself before it goes.
+    HashSet<RenderLayer *> _clientLayers;
     bool _registered {false};
     bool _isInvalidating {false};
 
@@ -41,6 +41,10 @@ namespace krys::boo
 
     void IdChanged() noexcept;
     void MarkAllClientsForRepaint() noexcept;
+
+    void AddClientRenderLayer(RenderLayer &) noexcept;
+    void RemoveClientRenderLayer(RenderLayer &) noexcept;
+    void MarkAllClientLayersForInvalidation() noexcept;
 
   protected:
     LegacyRenderSVGResourceContainer(Type, svg::SVGElement &, RenderStyle &&) noexcept;

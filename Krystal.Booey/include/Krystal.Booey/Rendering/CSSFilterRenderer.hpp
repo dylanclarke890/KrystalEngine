@@ -18,9 +18,7 @@ namespace krys::boo
   }
 
   /// @brief The filter a `filter` property (or a list of filter operations) builds: a filter effect per
-  /// function, after the source graphic.
-  // FIXME: Reference filters (`filter: url()`, SVGFilterRenderer), once there's SVG; applying the filter in
-  // software (apply), once filters can be.
+  /// function, after the source graphic; a `url()` function is the SVG filter it refers to.
   class CSSFilterRenderer final : public Filter
   {
   private:
@@ -59,6 +57,7 @@ namespace krys::boo
 
     KRYS_NODISCARD FilterEffectVector EffectsOfType(FilterFunction::Type filterType) const noexcept final;
 
+    KRYS_NODISCARD RefPtr<FilterImage> Apply(FilterImage *sourceImage, FilterResults &results) noexcept final;
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FilterStyle &sourceStyle) const noexcept final;
 

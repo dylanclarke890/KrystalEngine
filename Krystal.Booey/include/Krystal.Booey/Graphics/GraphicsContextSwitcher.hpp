@@ -9,11 +9,10 @@
 namespace krys::boo
 {
   class Filter;
+  class FilterResults;
   class GraphicsContext;
 
   /// @brief Where a filtered source is drawn, and how its result reaches the destination context.
-  // FIXME: Drawing the source into an image buffer and applying the filter to it
-  // (ImageBufferContextSwitcher), once filters can be applied in software.
   class GraphicsContextSwitcher
   {
     KRYS_NON_COPY_MOVABLE(GraphicsContextSwitcher);
@@ -23,10 +22,10 @@ namespace krys::boo
 
   public:
     /// @brief A switcher that applies @p filter as it's drawn: through the graphics context when the filter
-    /// supports it; otherwise null.
+    /// supports it; otherwise to an image buffer the source is drawn into.
     KRYS_NODISCARD static UniquePtr<GraphicsContextSwitcher>
       Create(GraphicsContext &destinationContext, const FloatRect &sourceImageRect,
-             RefPtr<Filter> &&filter = nullptr) noexcept;
+             RefPtr<Filter> &&filter = nullptr, FilterResults *results = nullptr) noexcept;
 
     virtual ~GraphicsContextSwitcher() noexcept = default;
 

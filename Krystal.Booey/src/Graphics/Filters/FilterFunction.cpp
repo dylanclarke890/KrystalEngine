@@ -1,8 +1,14 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/FilterFunction.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
 namespace krys::boo
 {
+  RefPtr<FilterImage> FilterFunction::Apply(const Filter &, FilterImage &, FilterResults &) noexcept
+  {
+    return nullptr;
+  }
+
   utf8_stringview FilterFunction::FilterName(Type type) noexcept
   {
     switch (type)

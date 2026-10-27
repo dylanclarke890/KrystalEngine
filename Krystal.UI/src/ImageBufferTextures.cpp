@@ -15,6 +15,7 @@ namespace krys::ui
 
   ImageBufferTextures::~ImageBufferTextures() noexcept
   {
+    _filters = nullptr;
     _renderers.clear();
     for (const auto &pooled : _pool)
     {
@@ -142,6 +143,20 @@ namespace krys::ui
 
     _uploaded[identifier] = {.Image = WeakPtr<boo::NativeImage>::WithRef(image), .Texture = *texture};
     return *texture;
+  }
+
+  gfx::FilterRenderer2D *ImageBufferTextures::Filters() noexcept
+  {
+    if (!_filters)
+    {
+      auto filters = gfx::FilterRenderer2D::Create(_device);
+      if (!filters)
+      {
+        return nullptr;
+      }
+      _filters = krys::move(*filters);
+    }
+    return _filters.get();
   }
 
   void ImageBufferTextures::Release() noexcept

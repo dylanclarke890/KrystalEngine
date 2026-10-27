@@ -23,7 +23,8 @@ namespace krys::boo
   bool FEDropShadow::operator==(const FEDropShadow &other) const noexcept
   {
     return FilterEffect::operator==(other) && _stdX == other._stdX && _stdY == other._stdY && _dx == other._dx
-           && _dy == other._dy && _shadowColor == other._shadowColor && _shadowOpacity == other._shadowOpacity;
+           && _dy == other._dy && _shadowColor == other._shadowColor
+           && _shadowOpacity == other._shadowOpacity;
   }
 
   bool FEDropShadow::SetStdDeviationX(float stdX) noexcept
@@ -115,11 +116,12 @@ namespace krys::boo
     return {top, right, bottom, left};
   }
 
-  EnumSet<FilterRenderingMode>
-    FEDropShadow::SupportedFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
+  EnumSet<FilterRenderingMode> FEDropShadow::SupportedFilterRenderingModes(
+    EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
   {
-    // The graphics context blurs a shadow by one standard deviation, the same along both axes.
-    EnumSet<FilterRenderingMode> modes;
+    // The accelerated backend draws any shadow. The graphics context blurs a shadow by one standard
+    // deviation, the same along both axes.
+    EnumSet<FilterRenderingMode> modes = FilterRenderingMode::Accelerated;
     if (_stdX == _stdY)
     {
       modes.Add(FilterRenderingMode::GraphicsContext);
@@ -127,7 +129,8 @@ namespace krys::boo
     return modes & preferredFilterRenderingModes;
   }
 
-  Maybe<GraphicsStyle> FEDropShadow::CreateGraphicsStyle(GraphicsContext &, const Filter &filter) const noexcept
+  Maybe<GraphicsStyle> FEDropShadow::CreateGraphicsStyle(GraphicsContext &,
+                                                         const Filter &filter) const noexcept
   {
     krys_debug_assert(_stdX == _stdY);
 
@@ -139,7 +142,8 @@ namespace krys::boo
                                _shadowOpacity};
   }
 
-  TextStream &FEDropShadow::ExternalRepresentation(TextStream &ts, FilterRepresentation representation) const noexcept
+  TextStream &FEDropShadow::ExternalRepresentation(TextStream &ts,
+                                                   FilterRepresentation representation) const noexcept
   {
     ts << Indent << u8"[feDropShadow";
     FilterEffect::ExternalRepresentation(ts, representation);

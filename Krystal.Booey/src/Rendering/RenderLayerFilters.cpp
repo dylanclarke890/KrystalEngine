@@ -1,12 +1,16 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerFilters.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
 namespace krys::boo
@@ -46,17 +50,57 @@ namespace krys::boo
     return _targetSwitcher && _targetSwitcher->HasSourceImage();
   }
 
-  void RenderLayerFilters::UpdateReferenceFilterClients(const style::Filter &) noexcept
+  void RenderLayerFilters::UpdateReferenceFilterClients(const style::Filter &filter) noexcept
   {
     RemoveReferenceFilterClients();
 
-    // FIXME: Watching the SVG filter documents and elements a reference filter names, so the layer repaints
-    // when they change, once there's SVG.
+    for (const auto &value : filter)
+    {
+      auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(value.Get());
+      if (!referenceOperation)
+      {
+        continue;
+      }
+
+      // FIXME: An external reference (an SVG document a reference filter loads), waited on with
+      // notifyFinished, once reference filters load their documents.
+
+      // Reference is internal; add layer as a client so we can trigger filter repaint on SVG attribute
+      // change.
+      auto *layer = _layer.get();
+      if (!layer)
+      {
+        continue;
+      }
+      auto filterElement = dom::mixins::NonElementParentNode::GetElementById(
+        layer->Renderer().GetDocument(), referenceOperation->Fragment().View());
+      if (!filterElement)
+      {
+        continue;
+      }
+      auto *renderer = DynamicDowncast<LegacyRenderSVGResourceFilter>(filterElement->Renderer());
+      if (!renderer)
+      {
+        continue;
+      }
+      renderer->AddClientRenderLayer(*layer);
+      _internalSVGReferences.push_back(Ref<dom::Element>(filterElement));
+    }
   }
 
   void RenderLayerFilters::RemoveReferenceFilterClients() noexcept
   {
-    // FIXME: The SVG filter documents and elements, once there's SVG.
+    if (auto *layer = _layer.get())
+    {
+      for (const auto &filterElement : _internalSVGReferences)
+      {
+        if (auto *renderer = filterElement->Renderer())
+        {
+          Downcast<LegacyRenderSVGResourceContainer>(*renderer).RemoveClientRenderLayer(*layer);
+        }
+      }
+    }
+    _internalSVGReferences.clear();
   }
 
   bool RenderLayerFilters::IsIdentity(RenderElement &renderer) noexcept

@@ -1,4 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
@@ -101,7 +104,7 @@ namespace krys::boo
   {
     // FIXME: Style invalidation should either be a pre-layout task or this function
     // should never get called while in layout. See webkit.org/b/208903.
-    if (_clients.empty() || _isInvalidating)
+    if ((_clients.empty() && _clientLayers.empty()) || _isInvalidating)
     {
       return;
     }
@@ -143,7 +146,48 @@ namespace krys::boo
                                                                                   visitedRenderers);
     }
 
-    // FIXME: markAllClientLayersForInvalidation, with filters from HTML (B11h).
+    MarkAllClientLayersForInvalidation();
+  }
+
+  void LegacyRenderSVGResourceContainer::MarkAllClientLayersForInvalidation() noexcept
+  {
+    if (_clientLayers.empty())
+    {
+      return;
+    }
+
+    auto &document = (*_clientLayers.begin())->Renderer().GetDocument();
+    if (!document.View() || document.RenderTreeBeingDestroyed())
+    {
+      return;
+    }
+
+    auto inLayout = document.View()->LayoutContext().IsInLayout();
+    for (auto *clientLayer : _clientLayers)
+    {
+      // FIXME: We should not get here while in layout. See webkit.org/b/208903.
+      // Repaint should also be triggered through some other means.
+      if (inLayout)
+      {
+        clientLayer->Renderer().Repaint();
+        continue;
+      }
+      if (auto *enclosingElement = clientLayer->EnclosingElement())
+      {
+        enclosingElement->InvalidateStyleAndLayerComposition();
+      }
+      clientLayer->Renderer().Repaint();
+    }
+  }
+
+  void LegacyRenderSVGResourceContainer::AddClientRenderLayer(RenderLayer &client) noexcept
+  {
+    _clientLayers.insert(&client);
+  }
+
+  void LegacyRenderSVGResourceContainer::RemoveClientRenderLayer(RenderLayer &client) noexcept
+  {
+    _clientLayers.erase(&client);
   }
 
   void LegacyRenderSVGResourceContainer::MarkClientForInvalidation(RenderObject &client,

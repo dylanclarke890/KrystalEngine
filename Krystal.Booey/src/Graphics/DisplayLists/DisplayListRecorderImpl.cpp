@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 
 namespace krys::boo::display_list
 {
@@ -202,6 +203,14 @@ namespace krys::boo::display_list
     AppendStateChangeItemIfNecessary();
     _items.push_back(display_list::DrawPatternNativeImage(image, destRect, tileRect, patternTransform, phase,
                                                           spacing, options));
+  }
+
+  void RecorderImpl::DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+                                             Filter &filter, FilterResults &) noexcept
+  {
+    AppendStateChangeItemIfNecessary();
+    _items.push_back(
+      display_list::DrawFilteredImageBuffer(ShareRefPtr(sourceImage), sourceImageRect, filter));
   }
 
   void RecorderImpl::DrawImageBuffer(ImageBuffer &imageBuffer, const FloatRect &destRect,

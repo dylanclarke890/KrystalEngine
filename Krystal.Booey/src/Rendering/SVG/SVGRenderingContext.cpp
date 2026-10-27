@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
@@ -38,7 +39,8 @@ namespace krys::boo
 
   SVGRenderingContext::SVGRenderingContext(SVGRenderingContext &&other) noexcept
       : _renderer {other._renderer}, _paintInfo {other._paintInfo}, _savedContext {other._savedContext},
-        _savedPaintRect {other._savedPaintRect}, _renderingFlags {std::exchange(other._renderingFlags, {})},
+        _filter {other._filter}, _savedPaintRect {other._savedPaintRect},
+        _renderingFlags {std::exchange(other._renderingFlags, {})},
         _pathClippingIsEntirelyWithinRendererContents {other._pathClippingIsEntirelyWithinRendererContents}
   {
   }
@@ -56,7 +58,9 @@ namespace krys::boo
 
     if (_renderingFlags.Contains(RenderingFlag::EndFilterLayer))
     {
-      // FIXME: Apply the filter (LegacyRenderSVGResourceFilter::postApplyResource), with filters (B11h).
+      krys_debug_assert(_filter);
+      GraphicsContext *contextPtr = &_paintInfo->Context();
+      _filter->PostApplyResource(*_renderer, contextPtr, {}, nullptr, nullptr);
       _paintInfo->SetContext(*_savedContext);
       _paintInfo->Rect = _savedPaintRect;
     }
@@ -185,11 +189,30 @@ namespace krys::boo
         result.Contains(LegacyRenderSVGResource::ApplyResult::ClipContainsRendererContent);
     }
 
-    // FIXME: The filter (LegacyRenderSVGResourceFilter::applyResource and the filter's drawing region), with
-    // filters (B11h).
-    if (!isRenderingMask && style.GetFilter().IsReferenceFilter())
+    if (!isRenderingMask)
     {
-      return;
+      _filter = resources->Filter();
+      if (_filter && !_filter->IsIdentity())
+      {
+        _savedContext = &_paintInfo->Context();
+        _savedPaintRect = _paintInfo->Rect;
+        // Return with false here may mean that we don't need to draw the content
+        // (because it was either drawn before or empty) but we still need to apply the filter.
+        _renderingFlags.Add(RenderingFlag::EndFilterLayer);
+        GraphicsContext *contextPtr = &_paintInfo->Context();
+        auto result = _filter->ApplyResource(*_renderer, style, contextPtr, {});
+        _paintInfo->SetContext(*contextPtr);
+        if (!ResourceWasApplied(result))
+        {
+          return;
+        }
+
+        // Since we're caching the resulting bitmap and do not invalidate it on repaint rect
+        // changes, we need to paint the whole filter region. Otherwise, elements not visible
+        // at the time of the initial paint (due to scrolling, window size, etc.) will never
+        // be drawn.
+        _paintInfo->Rect = LayoutRect(IntRect(_filter->DrawingRegion(*_renderer)));
+      }
     }
 
     _renderingFlags.Add(RenderingFlag::RenderingPrepared);

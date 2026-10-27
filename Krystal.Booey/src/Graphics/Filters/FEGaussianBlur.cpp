@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Core/Assert.hpp"
-#include "Krystal.Core/Text/TextStream.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/TextStream.hpp"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -132,11 +132,17 @@ namespace krys::boo
     return {outsetSize.Height(), outsetSize.Width(), outsetSize.Height(), outsetSize.Width()};
   }
 
-  EnumSet<FilterRenderingMode>
-    FEGaussianBlur::SupportedFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
+  bool FEGaussianBlur::ResultIsAlphaImage(Span<const Ref<FilterImage>> inputs) const noexcept
   {
-    // The graphics context blurs by one standard deviation, the same along both axes.
-    EnumSet<FilterRenderingMode> modes;
+    return inputs[0]->IsAlphaImage();
+  }
+
+  EnumSet<FilterRenderingMode> FEGaussianBlur::SupportedFilterRenderingModes(
+    EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
+  {
+    // The accelerated backend blurs with any edge mode. The graphics context blurs by one standard deviation,
+    // the same along both axes.
+    EnumSet<FilterRenderingMode> modes = FilterRenderingMode::Accelerated;
     if (_stdX == _stdY && _edgeMode == EdgeModeType::None)
     {
       modes.Add(FilterRenderingMode::GraphicsContext);
@@ -144,14 +150,16 @@ namespace krys::boo
     return modes & preferredFilterRenderingModes;
   }
 
-  Maybe<GraphicsStyle> FEGaussianBlur::CreateGraphicsStyle(GraphicsContext &, const Filter &filter) const noexcept
+  Maybe<GraphicsStyle> FEGaussianBlur::CreateGraphicsStyle(GraphicsContext &,
+                                                           const Filter &filter) const noexcept
   {
     // The blur radius, twice the standard deviation, as shadows have it.
     auto stdDeviation = filter.ResolvedSize({_stdX, _stdY});
     return GraphicsGaussianBlur {stdDeviation * 2.f};
   }
 
-  TextStream &FEGaussianBlur::ExternalRepresentation(TextStream &ts, FilterRepresentation representation) const noexcept
+  TextStream &FEGaussianBlur::ExternalRepresentation(TextStream &ts,
+                                                     FilterRepresentation representation) const noexcept
   {
     ts << Indent << u8"[feGaussianBlur";
     FilterEffect::ExternalRepresentation(ts, representation);

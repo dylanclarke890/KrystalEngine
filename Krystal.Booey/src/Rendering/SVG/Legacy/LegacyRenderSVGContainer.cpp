@@ -11,6 +11,8 @@
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
@@ -111,8 +113,8 @@ namespace krys::boo
 
   bool LegacyRenderSVGContainer::SelfWillPaint() noexcept
   {
-    // FIXME: Whether the container has a filter resource (SVGResourcesCache), with filters (B11h).
-    return false;
+    auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*this);
+    return resources && resources->Filter();
   }
 
   void LegacyRenderSVGContainer::Paint(PaintInfo &paintInfo, const LayoutPoint &) noexcept

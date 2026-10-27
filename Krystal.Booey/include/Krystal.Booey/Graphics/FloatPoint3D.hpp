@@ -4,6 +4,11 @@
 #include "Krystal.Core/Attributes.hpp"
 #include <cmath>
 
+namespace krys
+{
+  class TextStream;
+}
+
 namespace krys::boo
 {
   /// @brief A point (or vector) in 3D floating point coordinates.
@@ -201,4 +206,6 @@ namespace krys::boo
   {
     return (*this - a).Length();
   }
+
+  TextStream &operator<<(TextStream &ts, const FloatPoint3D &point) noexcept;
 }

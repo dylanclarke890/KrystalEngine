@@ -12,6 +12,7 @@ namespace krys::boo
 {
   class GraphicsContext;
   class ImageBuffer;
+  class LegacyRenderSVGResourceFilter;
   class RenderElement;
   class RenderObject;
   struct PaintInfo;
@@ -48,6 +49,7 @@ namespace krys::boo
     RenderElement *_renderer {nullptr};
     PaintInfo *_paintInfo {nullptr};
     GraphicsContext *_savedContext {nullptr};
+    LegacyRenderSVGResourceFilter *_filter {nullptr};
     LayoutRect _savedPaintRect;
     // To properly revert partially successful initializtions in the destructor, we record all successful
     // steps.

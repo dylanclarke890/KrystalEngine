@@ -1,4 +1,4 @@
-add_library(Krystal.Gfx)
+﻿add_library(Krystal.Gfx)
 
 target_link_libraries(Krystal.Gfx 
   PUBLIC
@@ -66,6 +66,8 @@ target_sources(Krystal.Gfx
       include/Krystal.Gfx/Render2D/AtlasPages.hpp
       include/Krystal.Gfx/Render2D/CoverageBlur.hpp
       include/Krystal.Gfx/Render2D/Dashing.hpp
+      include/Krystal.Gfx/Render2D/FilterGraph2D.hpp
+      include/Krystal.Gfx/Render2D/FilterRenderer2D.hpp
       include/Krystal.Gfx/Render2D/Flattening.hpp
       include/Krystal.Gfx/Render2D/FontFace2D.hpp
       include/Krystal.Gfx/Render2D/GlyphAtlas.hpp
@@ -92,6 +94,7 @@ target_sources(Krystal.Gfx
     # Render2D
     src/Render2D/AtlasPages.cpp
     src/Render2D/CoverageBlur.cpp
+    src/Render2D/FilterRenderer2D.cpp
     src/Render2D/FontFace2D.cpp
     src/Render2D/GlyphAtlas.cpp
     src/Render2D/Gradient2D.cpp

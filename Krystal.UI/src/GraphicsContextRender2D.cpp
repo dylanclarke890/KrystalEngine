@@ -1,10 +1,14 @@
 ﻿#include "Krystal.UI/GraphicsContextRender2D.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.UI/FilterGraph2DBuilder.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
 #include <cmath>
@@ -902,6 +906,45 @@ namespace krys::ui
     boo::FloatRect sourceScaled = source;
     sourceScaled.Scale(image.ResolutionScale());
     DrawTexture(texture, sourceScaled, destination, options);
+  }
+
+  void GraphicsContextRender2D::DrawFilteredImageBuffer(boo::ImageBuffer *sourceImage,
+                                                        const boo::FloatRect &sourceImageRect,
+                                                        boo::Filter &filter, boo::FilterResults &) noexcept
+  {
+    auto *commands = _renderer.GetCommandBuffer();
+    if (!_imageBuffers || !commands)
+    {
+      return;
+    }
+    auto *filters = _imageBuffers->Filters();
+    if (!filters)
+    {
+      return;
+    }
+
+    // The effects' results are nodes of the graph rather than pixels, so the results are this draw's own.
+    FilterGraph2DBuilder builder(*_imageBuffers, *commands);
+    boo::FilterResults results([&](const boo::FilterEffect &effect)
+                               { return builder.CreateApplier(effect); });
+    auto result = filter.Apply(sourceImage, sourceImageRect, results);
+    if (!result || !builder.Finish(*result))
+    {
+      return;
+    }
+
+    auto rendered = filters->Render(*commands, builder.Graph());
+    if (!rendered)
+    {
+      return;
+    }
+
+    const auto &region = rendered->Region;
+    const boo::FloatRect source(0.f, 0.f, static_cast<float>(region.Width),
+                                static_cast<float>(region.Height));
+    Scale({1 / filter.FilterScale().Width(), 1 / filter.FilterScale().Height()});
+    DrawTexture(rendered->Texture, source, boo::FloatRect(result->AbsoluteImageRect()), {});
+    Scale(filter.FilterScale());
   }
 
   void GraphicsContextRender2D::DrawPattern(boo::ImageBuffer &image, const boo::FloatRect &destRect,

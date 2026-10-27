@@ -15,6 +15,8 @@ namespace krys
 namespace krys::boo
 {
   class Filter;
+  class FilterImage;
+  class FilterResults;
   class GraphicsContext;
 
   enum class FilterRepresentation : uint8
@@ -24,8 +26,6 @@ namespace krys::boo
   };
 
   /// @brief A step of a filter: a whole filter (a chain of functions), or one filter effect.
-  // FIXME: Applying functions in software or with an accelerated backend (apply, FilterImage, FilterResults),
-  // once there's a rendering mode other than the graphics context.
   class FilterFunction : public RefCounted<FilterFunction>
   {
   public:
@@ -101,12 +101,16 @@ namespace krys::boo
       return FilterName(_filterType);
     }
 
-    /// @brief The rendering modes the function supports, of @p preferredFilterRenderingModes.
-    KRYS_NODISCARD virtual EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
-      EnumSet<FilterRenderingMode> /*preferredFilterRenderingModes*/) const noexcept
+    /// @brief The rendering modes the function supports, of @p preferredFilterRenderingModes: by default,
+    /// the accelerated backend, which applies every effect.
+    KRYS_NODISCARD virtual EnumSet<FilterRenderingMode>
+      SupportedFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
     {
-      return FilterRenderingMode::Software;
+      return EnumSet<FilterRenderingMode> {FilterRenderingMode::Accelerated} & preferredFilterRenderingModes;
     }
+    /// @brief The function applied to @p input; null when it can't be.
+    KRYS_NODISCARD virtual RefPtr<FilterImage> Apply(const Filter &, FilterImage &input,
+                                                     FilterResults &) noexcept;
     /// @brief The styles that apply the function in the graphics context, following @p input.
     KRYS_NODISCARD virtual FilterStyleVector CreateFilterStyles(GraphicsContext &, const Filter &,
                                                                 const FilterStyle & /*input*/) const noexcept

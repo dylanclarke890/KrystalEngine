@@ -30,6 +30,7 @@ namespace krys::boo::display_list
   class ConcatenateCTM;
   class DrawDotsForDocumentMarker;
   class DrawEllipse;
+  class DrawFilteredImageBuffer;
   class DrawFocusRingPath;
   class DrawFocusRingRects;
   class DrawGlyphs;
@@ -75,15 +76,15 @@ namespace krys::boo::display_list
   class EndPage;
   class SetURLForRect;
 
-  // FIXME: The filter and system image items (DrawFilteredImageBuffer, DrawSystemImage).
+  // FIXME: The system image item (DrawSystemImage).
   using Item =
     Variant<ApplyDeviceScaleFactor, BeginTransparencyLayer, BeginTransparencyLayerWithCompositeMode,
             ClearRect, Clip, ClipRoundedRect, ClipOut, ClipOutRoundedRect, ClipOutToPath, ClipPath,
             ClipToImageBuffer, ConcatenateCTM, DrawControlPart, DrawDotsForDocumentMarker, DrawEllipse,
-            DrawFocusRingPath, DrawFocusRingRects, DrawGlyphs, DrawDisplayList, DrawImageBuffer,
-            DrawNativeImage, DrawPatternNativeImage, DrawPatternImageBuffer, DrawPlaceholder, DrawLine,
-            DrawLinesForText, DrawPath, DrawRect, EndTransparencyLayer, FillCompositedRect, FillEllipse,
-            FillPath, FillRect, FillRectWithColor, FillRectWithGradient,
+            DrawFilteredImageBuffer, DrawFocusRingPath, DrawFocusRingRects, DrawGlyphs, DrawDisplayList,
+            DrawImageBuffer, DrawNativeImage, DrawPatternNativeImage, DrawPatternImageBuffer, DrawPlaceholder,
+            DrawLine, DrawLinesForText, DrawPath, DrawRect, EndTransparencyLayer, FillCompositedRect,
+            FillEllipse, FillPath, FillRect, FillRectWithColor, FillRectWithGradient,
             FillRectWithGradientAndSpaceTransform, FillRectWithRoundedHole, FillRoundedRect, ResetClip,
             Restore, Rotate, Save, Scale, SetCTM, SetInlineFillColor, SetInlineStroke, SetLineCap,
             SetLineDash, SetLineJoin, SetMiterLimit, SetState, StrokeEllipse, StrokePath, StrokeRect,

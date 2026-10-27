@@ -60,6 +60,7 @@ target_sources(Krystal.Gfx.Tests
 
     # Render2D
     tests/Render2D/CoverageBlur.cpp
+    tests/Render2D/FilterRenderer2D.cpp
     tests/Render2D/FontFace2D.cpp
     tests/Render2D/GlyphAtlas.cpp
     tests/Render2D/Golden.cpp

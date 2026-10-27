@@ -1,23 +1,15 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/Core/BoxExtents.hpp"
-#include "Krystal.Booey/Graphics/FloatSize.hpp"
+#include "Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterEffect.hpp"
+#include "Krystal.Booey/Graphics/FloatSize.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo
 {
-  /// @brief How a filter primitive reads past its input's edges.
-  enum class EdgeModeType : uint8
-  {
-    Unknown,
-    Duplicate,
-    Wrap,
-    None
-  };
-
   /// @brief The Gaussian blur filter effect.
   class FEGaussianBlur final : public FilterEffect
   {
@@ -68,13 +60,16 @@ namespace krys::boo
     KRYS_NODISCARD FloatRect CalculateImageRect(const Filter &filter, Span<const FloatRect> inputImageRects,
                                                 const FloatRect &primitiveSubregion) const noexcept override;
 
-    KRYS_NODISCARD EnumSet<FilterRenderingMode>
-      SupportedFilterRenderingModes(EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept override;
+    KRYS_NODISCARD bool ResultIsAlphaImage(Span<const Ref<FilterImage>> inputs) const noexcept override;
+
+    KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
+      EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept override;
 
     KRYS_NODISCARD Maybe<GraphicsStyle> CreateGraphicsStyle(GraphicsContext &context,
                                                             const Filter &filter) const noexcept override;
 
-    TextStream &ExternalRepresentation(TextStream &ts, FilterRepresentation representation) const noexcept override;
+    TextStream &ExternalRepresentation(TextStream &ts,
+                                       FilterRepresentation representation) const noexcept override;
   };
 }
 

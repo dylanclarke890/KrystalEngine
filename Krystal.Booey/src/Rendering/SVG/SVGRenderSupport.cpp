@@ -14,6 +14,7 @@
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGForeignObject.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGShape.hpp"
@@ -464,7 +465,10 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The filter's resource bounding box, with filters (B11h).
+    if (auto *filter = resources->Filter())
+    {
+      repaintRect = filter->ResourceBoundingBox(renderer, repaintRectCalculation);
+    }
 
     if (auto *clipper = resources->Clipper())
     {
@@ -486,8 +490,13 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Whether the container has a filter resource (SVGResourcesCache), with filters (B11h).
-    return false;
+    auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer);
+    if (!resources || !resources->Filter())
+    {
+      return false;
+    }
+
+    return true;
   }
 
   namespace

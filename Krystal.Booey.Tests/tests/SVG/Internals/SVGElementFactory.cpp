@@ -11,6 +11,32 @@
 #include "Krystal.Booey/SVG/SVGDefsElement.hpp"
 #include "Krystal.Booey/SVG/SVGDescElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEBlendElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEColorMatrixElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEComponentTransferElement.hpp"
+#include "Krystal.Booey/SVG/SVGFECompositeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEConvolveMatrixElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDiffuseLightingElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDisplacementMapElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDistantLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEDropShadowElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFloodElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncAElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncBElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncGElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEFuncRElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEGaussianBlurElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEImageElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMergeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMergeNodeElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEMorphologyElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEOffsetElement.hpp"
+#include "Krystal.Booey/SVG/SVGFEPointLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFESpecularLightingElement.hpp"
+#include "Krystal.Booey/SVG/SVGFESpotLightElement.hpp"
+#include "Krystal.Booey/SVG/SVGFETileElement.hpp"
+#include "Krystal.Booey/SVG/SVGFETurbulenceElement.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 #include "Krystal.Booey/SVG/SVGGElement.hpp"
 #include "Krystal.Booey/SVG/SVGImageElement.hpp"
@@ -95,10 +121,37 @@ namespace krys::boo::svg::tests
     CHECK(IsCreated<SVGUseElement>(*document, u8"use"));
     CHECK(IsCreated<SVGViewElement>(*document, u8"view"));
 
+    // Filters.
+    CHECK(IsCreated<SVGFilterElement>(*document, u8"filter"));
+    CHECK(IsCreated<SVGFEBlendElement>(*document, u8"feBlend"));
+    CHECK(IsCreated<SVGFEColorMatrixElement>(*document, u8"feColorMatrix"));
+    CHECK(IsCreated<SVGFEComponentTransferElement>(*document, u8"feComponentTransfer"));
+    CHECK(IsCreated<SVGFECompositeElement>(*document, u8"feComposite"));
+    CHECK(IsCreated<SVGFEConvolveMatrixElement>(*document, u8"feConvolveMatrix"));
+    CHECK(IsCreated<SVGFEDiffuseLightingElement>(*document, u8"feDiffuseLighting"));
+    CHECK(IsCreated<SVGFEDisplacementMapElement>(*document, u8"feDisplacementMap"));
+    CHECK(IsCreated<SVGFEDistantLightElement>(*document, u8"feDistantLight"));
+    CHECK(IsCreated<SVGFEDropShadowElement>(*document, u8"feDropShadow"));
+    CHECK(IsCreated<SVGFEFloodElement>(*document, u8"feFlood"));
+    CHECK(IsCreated<SVGFEFuncAElement>(*document, u8"feFuncA"));
+    CHECK(IsCreated<SVGFEFuncBElement>(*document, u8"feFuncB"));
+    CHECK(IsCreated<SVGFEFuncGElement>(*document, u8"feFuncG"));
+    CHECK(IsCreated<SVGFEFuncRElement>(*document, u8"feFuncR"));
+    CHECK(IsCreated<SVGFEGaussianBlurElement>(*document, u8"feGaussianBlur"));
+    CHECK(IsCreated<SVGFEImageElement>(*document, u8"feImage"));
+    CHECK(IsCreated<SVGFEMergeElement>(*document, u8"feMerge"));
+    CHECK(IsCreated<SVGFEMergeNodeElement>(*document, u8"feMergeNode"));
+    CHECK(IsCreated<SVGFEMorphologyElement>(*document, u8"feMorphology"));
+    CHECK(IsCreated<SVGFEOffsetElement>(*document, u8"feOffset"));
+    CHECK(IsCreated<SVGFEPointLightElement>(*document, u8"fePointLight"));
+    CHECK(IsCreated<SVGFESpecularLightingElement>(*document, u8"feSpecularLighting"));
+    CHECK(IsCreated<SVGFESpotLightElement>(*document, u8"feSpotLight"));
+    CHECK(IsCreated<SVGFETileElement>(*document, u8"feTile"));
+    CHECK(IsCreated<SVGFETurbulenceElement>(*document, u8"feTurbulence"));
+
     // The elements that aren't ported yet, the SVG 1.1 elements SVG 2 removed, and names SVG doesn't have.
-    for (auto localName :
-         {u8"filter", u8"feGaussianBlur", u8"animate", u8"set", u8"font", u8"font-face", u8"missing-glyph",
-          u8"altGlyph", u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
+    for (auto localName : {u8"animate", u8"set", u8"font", u8"font-face", u8"missing-glyph", u8"altGlyph",
+                           u8"tref", u8"cursor", u8"animateColor", u8"div", u8"x"})
     {
       CAPTURE(css::tests::ToNarrow(localName));
       CHECK(IsCreated<SVGUnknownElement>(*document, localName));

@@ -603,6 +603,35 @@ namespace krys::boo::display_list
     void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
   };
 
+  class DrawFilteredImageBuffer
+  {
+  private:
+    RefPtr<ImageBuffer> _sourceImage;
+    FloatRect _sourceImageRect;
+    Ref<Filter> _filter;
+
+  public:
+    static constexpr std::string_view Name = "draw-filtered-image-buffer";
+
+    DrawFilteredImageBuffer(RefPtr<ImageBuffer> &&sourceImage, const FloatRect &sourceImageRect,
+                            Filter &filter) noexcept;
+    DrawFilteredImageBuffer(const DrawFilteredImageBuffer &) noexcept;
+    DrawFilteredImageBuffer(DrawFilteredImageBuffer &&) noexcept;
+    DrawFilteredImageBuffer &operator=(const DrawFilteredImageBuffer &) noexcept;
+    DrawFilteredImageBuffer &operator=(DrawFilteredImageBuffer &&) noexcept;
+    ~DrawFilteredImageBuffer() noexcept;
+
+    KRYS_NODISCARD ImageBuffer *SourceImage() const noexcept;
+    KRYS_NODISCARD FloatRect SourceImageRect() const noexcept
+    {
+      return _sourceImageRect;
+    }
+    KRYS_NODISCARD Filter &GetFilter() const noexcept;
+
+    void Apply(GraphicsContext &) const noexcept;
+    void Dump(TextStream &, EnumSet<AsTextFlag>) const noexcept;
+  };
+
   class DrawImageBuffer
   {
   private:

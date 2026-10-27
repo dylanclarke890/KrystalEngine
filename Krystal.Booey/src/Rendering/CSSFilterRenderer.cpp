@@ -2,12 +2,18 @@
 #include "Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEDropShadow.hpp"
 #include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterOperations.hpp"
 #include "Krystal.Booey/Graphics/Filters/SourceGraphic.hpp"
+#include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/DropShadowFilterOperationWithStyleColor.hpp"
+#include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
+#include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Core/Colour/ColourMatrix.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
 
@@ -168,6 +174,75 @@ namespace krys::boo
 
       return FEColorMatrix::Create(ColorMatrixType::FECOLORMATRIX_TYPE_MATRIX, krys::move(inputParameters));
     }
+
+    KRYS_NODISCARD RefPtr<svg::SVGFilterElement>
+      ReferenceFilterElement(const style::ReferenceFilterOperation &filterOperation,
+                             RenderElement &renderer) noexcept
+    {
+      auto filterElement = ReferencedSVGResources::ReferencedFilterElement(
+        renderer.TreeScopeForSVGReferences(), filterOperation);
+
+      if (!filterElement)
+      {
+        // Although we did not find the referenced filter, it might exist later in the document.
+        // FIXME: This skips anonymous RenderObjects. <https://webkit.org/b/131085>
+        // FIXME: Unclear if this does anything.
+        return nullptr;
+      }
+
+      return filterElement;
+    }
+
+    KRYS_NODISCARD bool IsIdentityReferenceFilter(const style::ReferenceFilterOperation &filterOperation,
+                                                  RenderElement &renderer) noexcept
+    {
+      auto filterElement = ReferenceFilterElement(filterOperation, renderer);
+      if (!filterElement)
+      {
+        return false;
+      }
+
+      return SVGFilterRenderer::IsIdentity(*filterElement);
+    }
+
+    KRYS_NODISCARD IntOutsets
+      CalculateReferenceFilterOutsets(const style::ReferenceFilterOperation &filterOperation,
+                                      RenderElement &renderer, const FloatRect &targetBoundingBox) noexcept
+    {
+      auto filterElement = ReferenceFilterElement(filterOperation, renderer);
+      if (!filterElement)
+      {
+        return {};
+      }
+
+      return SVGFilterRenderer::CalculateOutsets(*filterElement, targetBoundingBox);
+    }
+
+    KRYS_NODISCARD RefPtr<SVGFilterRenderer>
+      CreateReferenceFilter(const CSSFilterRenderer &filter,
+                            const style::ReferenceFilterOperation &filterOperation, RenderElement &renderer,
+                            EnumSet<FilterRenderingMode> preferredRenderingModes,
+                            const GraphicsContext &destinationContext) noexcept
+    {
+      auto filterElement = ReferenceFilterElement(filterOperation, renderer);
+      if (!filterElement)
+      {
+        return nullptr;
+      }
+
+      auto *contextElement = DynamicDowncast<svg::SVGElement>(renderer.GetElement());
+
+      auto geometry = filter.Geometry();
+      geometry.FilterRegion = svg::SVGLengthContext::ResolveRectangle(
+        contextElement, *filterElement, filterElement->FilterUnits(), filter.ReferenceBox());
+      if (geometry.FilterRegion.IsEmpty())
+      {
+        return nullptr;
+      }
+
+      return SVGFilterRenderer::Create(contextElement, *filterElement, geometry, preferredRenderingModes,
+                                       destinationContext);
+    }
   }
 
   template <typename TFilter>
@@ -241,10 +316,10 @@ namespace krys::boo
     ClampFilterRegionIfNeeded();
   }
 
-  RefPtr<FilterFunction> CSSFilterRenderer::BuildFilterFunction(RenderElement &renderer,
-                                                                const FilterOperation &operation,
-                                                                EnumSet<FilterRenderingMode>,
-                                                                const GraphicsContext &) noexcept
+  RefPtr<FilterFunction>
+    CSSFilterRenderer::BuildFilterFunction(RenderElement &renderer, const FilterOperation &operation,
+                                           EnumSet<FilterRenderingMode> preferredRenderingModes,
+                                           const GraphicsContext &destinationContext) noexcept
   {
     switch (operation.GetType())
     {
@@ -286,8 +361,8 @@ namespace krys::boo
         return CreateSepiaEffect(Downcast<BasicColorMatrixFilterOperation>(operation));
 
       case FilterOperation::Type::Reference:
-        // FIXME: Reference filters (createReferenceFilter, SVGFilterRenderer), once there's SVG.
-        break;
+        return CreateReferenceFilter(*this, Downcast<style::ReferenceFilterOperation>(operation), renderer,
+                                     preferredRenderingModes, destinationContext);
 
       default: break;
     }
@@ -339,7 +414,11 @@ namespace krys::boo
         continue;
       }
 
-      // FIXME: The effects of reference filters (SVGFilterRenderer), once there's SVG.
+      if (auto *filter = DynamicDowncast<SVGFilterRenderer>(*function))
+      {
+        auto filterEffects = filter->EffectsOfType(filterType);
+        effects.insert(effects.end(), filterEffects.begin(), filterEffects.end());
+      }
     }
 
     return effects;
@@ -356,6 +435,29 @@ namespace krys::boo
     }
 
     return modes;
+  }
+
+  RefPtr<FilterImage> CSSFilterRenderer::Apply(FilterImage *sourceImage, FilterResults &results) noexcept
+  {
+    krys_debug_assert(FilterRenderingModes().Contains(FilterRenderingMode::Accelerated));
+
+    if (!sourceImage)
+    {
+      return nullptr;
+    }
+
+    RefPtr<FilterImage> result = ShareRefPtr(sourceImage);
+
+    for (const auto &function : _functions)
+    {
+      result = function->Apply(*this, *result, results);
+      if (!result)
+      {
+        return nullptr;
+      }
+    }
+
+    return result;
   }
 
   FilterStyleVector CSSFilterRenderer::CreateFilterStyles(GraphicsContext &context,
@@ -392,7 +494,7 @@ namespace krys::boo
     ClampFilterRegionIfNeeded();
   }
 
-  bool CSSFilterRenderer::IsIdentity(RenderElement &, const style::Filter &filter) noexcept
+  bool CSSFilterRenderer::IsIdentity(RenderElement &renderer, const style::Filter &filter) noexcept
   {
     if (filter.HasFilterThatShouldBeRestrictedBySecurityOrigin())
     {
@@ -402,10 +504,12 @@ namespace krys::boo
     for (const auto &value : filter)
     {
       const auto &operation = value.Get();
-      // FIXME: A reference filter is the identity when its SVG filter is (isIdentityReferenceFilter), once
-      // there's SVG; until then it applies nothing.
-      if (operation.GetType() == FilterOperation::Type::Reference)
+      if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
       {
+        if (!IsIdentityReferenceFilter(*referenceOperation, renderer))
+        {
+          return false;
+        }
         continue;
       }
 
@@ -418,7 +522,7 @@ namespace krys::boo
     return true;
   }
 
-  bool CSSFilterRenderer::IsIdentity(RenderElement &, const FilterOperations &operations) noexcept
+  bool CSSFilterRenderer::IsIdentity(RenderElement &renderer, const FilterOperations &operations) noexcept
   {
     if (operations.HasFilterThatShouldBeRestrictedBySecurityOrigin())
     {
@@ -427,9 +531,12 @@ namespace krys::boo
 
     for (const auto &operation : operations)
     {
-      // FIXME: Reference filters, as above.
-      if (operation->GetType() == FilterOperation::Type::Reference)
+      if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(*operation))
       {
+        if (!IsIdentityReferenceFilter(*referenceOperation, renderer))
+        {
+          return false;
+        }
         continue;
       }
 
@@ -442,28 +549,39 @@ namespace krys::boo
     return true;
   }
 
-  IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &, const style::Filter &filter,
-                                                 const FloatRect &) noexcept
+  IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &renderer, const style::Filter &filter,
+                                                 const FloatRect &targetBoundingBox) noexcept
   {
     IntOutsets outsets;
 
     for (const auto &value : filter)
     {
-      // FIXME: A reference filter's outsets (calculateReferenceFilterOutsets), once there's SVG.
-      outsets += value.Get().Outsets();
+      const auto &operation = value.Get();
+      if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(operation))
+      {
+        outsets += CalculateReferenceFilterOutsets(*referenceOperation, renderer, targetBoundingBox);
+        continue;
+      }
+
+      outsets += operation.Outsets();
     }
 
     return outsets;
   }
 
-  IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &, const FilterOperations &operations,
-                                                 const FloatRect &) noexcept
+  IntOutsets CSSFilterRenderer::CalculateOutsets(RenderElement &renderer, const FilterOperations &operations,
+                                                 const FloatRect &targetBoundingBox) noexcept
   {
     IntOutsets outsets;
 
     for (const auto &operation : operations)
     {
-      // FIXME: A reference filter's outsets, as above.
+      if (auto *referenceOperation = DynamicDowncast<style::ReferenceFilterOperation>(*operation))
+      {
+        outsets += CalculateReferenceFilterOutsets(*referenceOperation, renderer, targetBoundingBox);
+        continue;
+      }
+
       outsets += operation->Outsets();
     }
 

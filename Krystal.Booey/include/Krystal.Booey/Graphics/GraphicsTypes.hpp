@@ -146,7 +146,11 @@ namespace krys::boo
   /// @brief The name of @p op, or of @p blendOp when it isn't `normal`.
   KRYS_NODISCARD std::string_view CompositeOperatorName(CompositeOperator op, BlendMode blendOp) noexcept;
 
-  // FIXME: `parseBlendMode` and `parseCompositeAndBlendOperator` come with the canvas 2D context.
+  /// @brief Sets @p blendMode to the blend mode named @p name.
+  /// @return False, leaving @p blendMode as it is, if @p name isn't a blend mode.
+  bool ParseBlendMode(utf8_stringview name, BlendMode &blendMode) noexcept;
+
+  // FIXME: `parseCompositeAndBlendOperator` comes with the canvas 2D context.
 }
 
 namespace krys::boo

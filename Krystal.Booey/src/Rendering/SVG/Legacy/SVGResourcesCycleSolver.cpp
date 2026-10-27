@@ -131,9 +131,10 @@ namespace krys::boo
         }
         break;
       }
-      // FIXME: Filters, with filters (B11h).
       case RenderSVGResourceType::FilterResourceType:
       {
+        krys_debug_assert(&resourceLeadingToCycle == resources.Filter());
+        resources.ResetFilter();
         break;
       }
       case RenderSVGResourceType::ClipperResourceType:

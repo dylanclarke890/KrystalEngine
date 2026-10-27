@@ -1,4 +1,4 @@
-add_library(Krystal.Booey STATIC)
+﻿add_library(Krystal.Booey STATIC)
 
 target_link_libraries(Krystal.Booey
   PUBLIC 
@@ -1819,7 +1819,32 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp
   include/Krystal.Booey/Graphics/Filters/FilterStyle.hpp
   include/Krystal.Booey/Graphics/Filters/SourceGraphic.hpp
+  include/Krystal.Booey/Graphics/Filters/DistantLightSource.hpp
+  include/Krystal.Booey/Graphics/Filters/FEBlend.hpp
+  include/Krystal.Booey/Graphics/Filters/FEComponentTransfer.hpp
+  include/Krystal.Booey/Graphics/Filters/FEComposite.hpp
+  include/Krystal.Booey/Graphics/Filters/FEConvolveMatrix.hpp
+  include/Krystal.Booey/Graphics/Filters/FEDiffuseLighting.hpp
+  include/Krystal.Booey/Graphics/Filters/FEDisplacementMap.hpp
+  include/Krystal.Booey/Graphics/Filters/FEFlood.hpp
+  include/Krystal.Booey/Graphics/Filters/FEImage.hpp
+  include/Krystal.Booey/Graphics/Filters/FELighting.hpp
+  include/Krystal.Booey/Graphics/Filters/FEMerge.hpp
+  include/Krystal.Booey/Graphics/Filters/FEMorphology.hpp
+  include/Krystal.Booey/Graphics/Filters/FEOffset.hpp
+  include/Krystal.Booey/Graphics/Filters/FESpecularLighting.hpp
+  include/Krystal.Booey/Graphics/Filters/FETile.hpp
+  include/Krystal.Booey/Graphics/Filters/FETurbulence.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterEffectApplier.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterImage.hpp
+  include/Krystal.Booey/Graphics/Filters/FilterResults.hpp
+  include/Krystal.Booey/Graphics/Filters/LightSource.hpp
+  include/Krystal.Booey/Graphics/Filters/PointLightSource.hpp
+  include/Krystal.Booey/Graphics/Filters/SourceAlpha.hpp
+  include/Krystal.Booey/Graphics/Filters/SpotLightSource.hpp
+  include/Krystal.Booey/Graphics/DestinationColorSpace.hpp
   include/Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp
+  include/Krystal.Booey/Graphics/ImageBufferContextSwitcher.hpp
   include/Krystal.Booey/Graphics/TransparencyLayerContextSwitcher.hpp
   include/Krystal.Booey/Rendering/CSSFilterRenderer.hpp
   include/Krystal.Booey/Rendering/RenderLayerFilters.hpp
@@ -2061,6 +2086,44 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/SVG/SVGTextElement.hpp
   include/Krystal.Booey/SVG/SVGTextPathElement.hpp
   include/Krystal.Booey/SVG/SVGTextPositioningElement.hpp
+
+  # SVG filters (B11h)
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp
+  include/Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilterPrimitive.hpp
+  include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterEffectGraph.hpp
+  include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterExpression.hpp
+  include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterGraph.hpp
+  include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterPrimitiveGraph.hpp
+  include/Krystal.Booey/SVG/Graphics/Filters/SVGFilterRenderer.hpp
+  include/Krystal.Booey/SVG/SVGComponentTransferFunctionElement.hpp
+  include/Krystal.Booey/SVG/SVGFEBlendElement.hpp
+  include/Krystal.Booey/SVG/SVGFEColorMatrixElement.hpp
+  include/Krystal.Booey/SVG/SVGFEComponentTransferElement.hpp
+  include/Krystal.Booey/SVG/SVGFECompositeElement.hpp
+  include/Krystal.Booey/SVG/SVGFEConvolveMatrixElement.hpp
+  include/Krystal.Booey/SVG/SVGFEDiffuseLightingElement.hpp
+  include/Krystal.Booey/SVG/SVGFEDisplacementMapElement.hpp
+  include/Krystal.Booey/SVG/SVGFEDistantLightElement.hpp
+  include/Krystal.Booey/SVG/SVGFEDropShadowElement.hpp
+  include/Krystal.Booey/SVG/SVGFEFloodElement.hpp
+  include/Krystal.Booey/SVG/SVGFEFuncAElement.hpp
+  include/Krystal.Booey/SVG/SVGFEFuncBElement.hpp
+  include/Krystal.Booey/SVG/SVGFEFuncGElement.hpp
+  include/Krystal.Booey/SVG/SVGFEFuncRElement.hpp
+  include/Krystal.Booey/SVG/SVGFEGaussianBlurElement.hpp
+  include/Krystal.Booey/SVG/SVGFEImageElement.hpp
+  include/Krystal.Booey/SVG/SVGFELightElement.hpp
+  include/Krystal.Booey/SVG/SVGFEMergeElement.hpp
+  include/Krystal.Booey/SVG/SVGFEMergeNodeElement.hpp
+  include/Krystal.Booey/SVG/SVGFEMorphologyElement.hpp
+  include/Krystal.Booey/SVG/SVGFEOffsetElement.hpp
+  include/Krystal.Booey/SVG/SVGFEPointLightElement.hpp
+  include/Krystal.Booey/SVG/SVGFESpecularLightingElement.hpp
+  include/Krystal.Booey/SVG/SVGFESpotLightElement.hpp
+  include/Krystal.Booey/SVG/SVGFETileElement.hpp
+  include/Krystal.Booey/SVG/SVGFETurbulenceElement.hpp
+  include/Krystal.Booey/SVG/SVGFilterElement.hpp
+  include/Krystal.Booey/SVG/SVGFilterPrimitiveStandardAttributes.hpp
 )
 
 set(KRYSTAL_BOOEY_CSS_SOURCES
@@ -3251,7 +3314,30 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/Filters/FilterEffect.cpp
   src/Graphics/Filters/FilterFunction.cpp
   src/Graphics/Filters/SourceGraphic.cpp
+  src/Graphics/Filters/DistantLightSource.cpp
+  src/Graphics/Filters/FEBlend.cpp
+  src/Graphics/Filters/FEComponentTransfer.cpp
+  src/Graphics/Filters/FEComposite.cpp
+  src/Graphics/Filters/FEConvolveMatrix.cpp
+  src/Graphics/Filters/FEDiffuseLighting.cpp
+  src/Graphics/Filters/FEDisplacementMap.cpp
+  src/Graphics/Filters/FEFlood.cpp
+  src/Graphics/Filters/FEImage.cpp
+  src/Graphics/Filters/FELighting.cpp
+  src/Graphics/Filters/FEMerge.cpp
+  src/Graphics/Filters/FEMorphology.cpp
+  src/Graphics/Filters/FEOffset.cpp
+  src/Graphics/Filters/FESpecularLighting.cpp
+  src/Graphics/Filters/FETile.cpp
+  src/Graphics/Filters/FETurbulence.cpp
+  src/Graphics/Filters/FilterImage.cpp
+  src/Graphics/Filters/FilterResults.cpp
+  src/Graphics/Filters/PointLightSource.cpp
+  src/Graphics/Filters/SourceAlpha.cpp
+  src/Graphics/Filters/SpotLightSource.cpp
+  src/Graphics/DestinationColorSpace.cpp
   src/Graphics/GraphicsContextSwitcher.cpp
+  src/Graphics/ImageBufferContextSwitcher.cpp
   src/Graphics/TransparencyLayerContextSwitcher.cpp
   src/Rendering/CSSFilterRenderer.cpp
   src/Rendering/RenderLayerFilters.cpp
@@ -3434,6 +3520,36 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/SVG/SVGTextElement.cpp
   src/SVG/SVGTextPathElement.cpp
   src/SVG/SVGTextPositioningElement.cpp
+
+  # SVG filters (B11h)
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp
+  src/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilterPrimitive.cpp
+  src/SVG/Graphics/Filters/SVGFilterRenderer.cpp
+  src/SVG/SVGComponentTransferFunctionElement.cpp
+  src/SVG/SVGFEBlendElement.cpp
+  src/SVG/SVGFEColorMatrixElement.cpp
+  src/SVG/SVGFEComponentTransferElement.cpp
+  src/SVG/SVGFECompositeElement.cpp
+  src/SVG/SVGFEConvolveMatrixElement.cpp
+  src/SVG/SVGFEDiffuseLightingElement.cpp
+  src/SVG/SVGFEDisplacementMapElement.cpp
+  src/SVG/SVGFEDistantLightElement.cpp
+  src/SVG/SVGFEDropShadowElement.cpp
+  src/SVG/SVGFEFloodElement.cpp
+  src/SVG/SVGFEGaussianBlurElement.cpp
+  src/SVG/SVGFEImageElement.cpp
+  src/SVG/SVGFELightElement.cpp
+  src/SVG/SVGFEMergeElement.cpp
+  src/SVG/SVGFEMergeNodeElement.cpp
+  src/SVG/SVGFEMorphologyElement.cpp
+  src/SVG/SVGFEOffsetElement.cpp
+  src/SVG/SVGFEPointLightElement.cpp
+  src/SVG/SVGFESpecularLightingElement.cpp
+  src/SVG/SVGFESpotLightElement.cpp
+  src/SVG/SVGFETileElement.cpp
+  src/SVG/SVGFETurbulenceElement.cpp
+  src/SVG/SVGFilterElement.cpp
+  src/SVG/SVGFilterPrimitiveStandardAttributes.cpp
 )
 
 target_precompile_headers(Krystal.Booey

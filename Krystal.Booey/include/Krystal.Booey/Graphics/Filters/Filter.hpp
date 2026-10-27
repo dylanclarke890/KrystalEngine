@@ -9,6 +9,9 @@
 namespace krys::boo
 {
   class FilterEffect;
+  class FilterImage;
+  class FilterResults;
+  class ImageBuffer;
 
   using FilterEffectVector = List<Ref<FilterEffect>>;
 
@@ -21,8 +24,6 @@ namespace krys::boo
   };
 
   /// @brief A whole filter: functions applied one after another, over a region.
-  // FIXME: Applying the filter to an image buffer (apply, filterResultBuffer) and the rendering mode it's
-  // applied in (renderingMode), once there's a rendering mode other than the graphics context.
   class Filter : public FilterFunction
   {
   private:
@@ -87,19 +88,29 @@ namespace krys::boo
     /// @return Whether it did.
     bool ClampFilterRegionIfNeeded() noexcept;
 
+    /// @brief The filter applied to @p sourceImage, which holds @p sourceImageRect (in filter coordinates);
+    /// null when it can't be.
+    KRYS_NODISCARD RefPtr<FilterImage> Apply(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+                                             FilterResults &results) noexcept;
+
     /// @brief The styles that apply the filter in the graphics context, the last function's first: each is a
     /// transparency layer, the first outermost.
     KRYS_NODISCARD FilterStyleVector CreateFilterStyles(GraphicsContext &context,
                                                         const FloatRect &sourceImageRect) const noexcept;
 
+    /// @brief The image buffer holding @p filterImage's pixels; null when an accelerated backend holds them.
+    KRYS_NODISCARD ImageBuffer *FilterResultBuffer(FilterImage &filterImage) const noexcept;
+
   protected:
     explicit Filter(FilterFunction::Type type) noexcept;
     Filter(FilterFunction::Type type, const FilterGeometry &geometry) noexcept;
 
+    KRYS_NODISCARD virtual RefPtr<FilterImage> Apply(FilterImage *sourceImage, FilterResults &) noexcept = 0;
     KRYS_NODISCARD virtual FilterStyleVector
       CreateFilterStyles(GraphicsContext &, const FilterStyle &sourceStyle) const noexcept = 0;
 
   private:
+    using FilterFunction::Apply;
     using FilterFunction::CreateFilterStyles;
   };
 }

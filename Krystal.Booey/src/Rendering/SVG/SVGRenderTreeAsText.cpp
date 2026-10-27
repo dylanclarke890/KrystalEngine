@@ -2,16 +2,19 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/NullGraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorInlineBox.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorSVGTextBox.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGContainer.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceLinearGradient.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
@@ -23,9 +26,11 @@
 #include "Krystal.Booey/Rendering/SVG/RenderSVGGradientStop.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
 #include "Krystal.Booey/Rendering/SVG/RenderSVGText.hpp"
+#include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGPathUtilities.hpp"
 #include "Krystal.Booey/SVG/SVGCircleElement.hpp"
 #include "Krystal.Booey/SVG/SVGEllipseElement.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGLengthContext.hpp"
 #include "Krystal.Booey/SVG/SVGLinearGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGLineElement.hpp"
@@ -419,7 +424,27 @@ namespace krys::boo
       WriteNameValuePair(ts, u8"maskContentUnits", masker->MaskContentUnits());
       ts << '\n';
     }
-    // FIXME: Filters (their units and their filter graph), with filters (B11h).
+    else if (auto *filter = DynamicDowncast<const LegacyRenderSVGResourceFilter>(resource))
+    {
+      WriteNameValuePair(ts, u8"filterUnits", filter->FilterUnits());
+      WriteNameValuePair(ts, u8"primitiveUnits", filter->PrimitiveUnits());
+      ts << '\n';
+      // Creating a placeholder filter which is passed to the builder.
+      Ref<svg::SVGFilterElement> filterElement = ShareRef(filter->FilterElement());
+      NullGraphicsContext nullContext;
+      auto placeholderFilter = SVGFilterRenderer::Create(filterElement.get(), *filterElement,
+                                                         {
+                                                           .ReferenceBox = {},
+                                                           .FilterRegion = {},
+                                                           .Scale = {1, 1},
+                                                         },
+                                                         {FilterRenderingMode::Accelerated}, nullContext);
+      if (placeholderFilter)
+      {
+        TextStream::IndentScope indentScope(ts);
+        placeholderFilter->ExternalRepresentation(ts, FilterRepresentation::TestOutput);
+      }
+    }
     else if (auto *clipper = DynamicDowncast<const LegacyRenderSVGResourceClipper>(resource))
     {
       WriteNameValuePair(ts, u8"clipPathUnits", clipper->ClipPathUnits());
@@ -713,6 +738,26 @@ namespace krys::boo
         ts << ' ' << clipper->ResourceBoundingBox(renderer, RepaintRectCalculation::Accurate) << '\n';
       }
     }
-    // FIXME: The filter the renderer references, with filters (B11h).
+    if (style.HasFilter())
+    {
+      const auto &filterOperations = style.GetFilter();
+      if (filterOperations.size() == 1)
+      {
+        if (auto *referenceFilterOperation =
+              DynamicDowncast<style::ReferenceFilterOperation>(filterOperations.begin()->Get()))
+        {
+          auto id = referenceFilterOperation->Fragment();
+          if (auto *filter = GetRenderSVGResourceById<LegacyRenderSVGResourceFilter>(
+                renderer.TreeScopeForSVGReferences(), id))
+          {
+            ts << Indent << ' ';
+            WriteNameAndQuotedValue(ts, u8"filter", id.View());
+            ts << ' ';
+            WriteStandardPrefix(ts, *filter, behavior, WriteIndentOrNot::No);
+            ts << ' ' << filter->ResourceBoundingBox(renderer, RepaintRectCalculation::Accurate) << '\n';
+          }
+        }
+      }
+    }
   }
 }

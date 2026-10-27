@@ -8,9 +8,15 @@
 #include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class Element;
+}
 
 namespace krys::boo
 {
@@ -41,6 +47,8 @@ namespace krys::boo
 
     RefPtr<CSSFilterRenderer> _filter;
     UniquePtr<GraphicsContextSwitcher> _targetSwitcher;
+
+    List<Ref<dom::Element>> _internalSVGReferences;
 
   public:
     KRYS_NODISCARD static Ref<RenderLayerFilters> Create(RenderLayer &layer, FloatSize scale) noexcept;

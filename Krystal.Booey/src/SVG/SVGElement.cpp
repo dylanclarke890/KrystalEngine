@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/Transforms/AffineTransform.hpp"
 #include "Krystal.Booey/Rendering/RenderAncestorIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/SVG/Properties/SVGAnimatedProperty.hpp"
@@ -159,6 +160,22 @@ namespace krys::boo::svg
 
     // This is true whenever this is the outermost SVG, even if there are HTML elements outside it
     return !Is<SVGElement>(*parent);
+  }
+
+  boo::ColorInterpolation SVGElement::GetColorInterpolation() const noexcept
+  {
+    if (auto *renderer = Renderer())
+    {
+      return renderer->Style().ColorInterpolationFilters();
+    }
+
+    // Try to determine the property value from the computed style.
+    if (const auto *style = const_cast<SVGElement *>(this)->ComputedStyle(null))
+    {
+      return style->ColorInterpolationFilters();
+    }
+
+    return boo::ColorInterpolation::Auto;
   }
 
   void SVGElement::ReportAttributeParsingError(SVGParsingError error, const dom::QualifiedName &name,

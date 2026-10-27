@@ -1,12 +1,20 @@
 ﻿#include "Krystal.UI/GraphicsContextRender2D.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/Filters/DistantLightSource.hpp"
+#include "Krystal.Booey/Graphics/Filters/FEColorMatrix.hpp"
+#include "Krystal.Booey/Graphics/Filters/FEDiffuseLighting.hpp"
+#include "Krystal.Booey/Graphics/Filters/FEGaussianBlur.hpp"
+#include "Krystal.Booey/Graphics/Filters/FEOffset.hpp"
+#include "Krystal.Booey/Graphics/Filters/SourceGraphic.hpp"
 #include "Krystal.Booey/Graphics/FloatRoundedRect.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
+#include "Krystal.Booey/Graphics/GraphicsContextSwitcher.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Rendering/CSSFilterRenderer.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.UI/Render2DConversions.hpp"
 #include <filesystem>
@@ -669,6 +677,72 @@ namespace krys::ui::tests
       CHECK(replayed[3][3] == 0u);
       CHECK(replayed[4] == blue);
       CHECK(replayed[Width + 5] == blue);
+    }
+  }
+
+  TEST_CASE_METHOD(ReplayFixture, "GraphicsContextRender2D: applies filters to image buffers on the GPU",
+                   "[UI][GPU]")
+  {
+    // An 8 by 8 red square, drawn into the image buffer a filter switcher draws its source into, filtered
+    // over a 32 by 32 region.
+    auto filtered = [&](List<Ref<boo::FilterFunction>> &&effects)
+    {
+      effects.insert(effects.begin(), boo::SourceGraphic::Create());
+      const boo::FloatRect region {0, 0, 32, 32};
+      auto filter = boo::CSSFilterRenderer::Create(krys::move(effects), {region, region, {1, 1}},
+                                                   boo::FilterRenderingMode::Accelerated);
+      return Replayed(
+        [&](boo::GraphicsContext &context)
+        {
+          auto switcher = boo::GraphicsContextSwitcher::Create(context, region, RefPtr<boo::Filter>(filter));
+          REQUIRE(switcher);
+          switcher->BeginClipAndDrawSourceImage(context, region, region);
+          switcher->DrawingContext(context)->FillRect({0, 0, 8, 8}, boo::Color(SRGBA<uint8> {255, 0, 0}));
+          switcher->EndClipAndDrawSourceImage(context);
+        });
+    };
+    constexpr Pixel red {255, 0, 0, 255};
+    constexpr Pixel clear {0, 0, 0, 0};
+
+    SECTION("Offset moves the source")
+    {
+      auto replayed = filtered({boo::FEOffset::Create(4, 2)});
+      CHECK(replayed[3 * Width + 5] == red);
+      CHECK(replayed[9 * Width + 11] == red);
+      CHECK(replayed[0] == clear);
+    }
+
+    SECTION("Luminance to alpha, which the graphics context can't apply")
+    {
+      auto replayed =
+        filtered({boo::FEColorMatrix::Create(boo::ColorMatrixType::FECOLORMATRIX_TYPE_LUMINANCETOALPHA, {})});
+      CHECK(replayed[Width + 1] == Pixel {0, 0, 0, 54});
+      CHECK(replayed[9 * Width + 9] == clear);
+    }
+
+    SECTION("An uneven blur spreads across only")
+    {
+      auto replayed = filtered({boo::FEGaussianBlur::Create(2, 0, boo::EdgeModeType::None)});
+      CHECK(replayed[4 * Width + 9][3] > 0u);
+      CHECK(replayed[4 * Width + 9][3] < 255u);
+      CHECK(replayed[9 * Width + 4] == clear);
+    }
+
+    SECTION("Diffuse lighting from overhead lights the whole region")
+    {
+      auto replayed = filtered({boo::FEDiffuseLighting::Create(boo::Color(SRGBA<uint8> {0, 255, 0}), 1, 1, 0,
+                                                               0, boo::DistantLightSource::Create(0, 90))});
+      CHECK(replayed[20 * Width + 20] == Pixel {0, 255, 0, 255});
+      CHECK(replayed[40 * Width + 40] == clear);
+    }
+
+    SECTION("Effects in linear RGB convert back to sRGB")
+    {
+      auto offset = boo::FEOffset::Create(0, 0);
+      offset->SetOperatingColorSpace(boo::DestinationColorSpace::LinearSRGB());
+      auto replayed = filtered({krys::move(offset)});
+      CHECK(replayed[Width + 1][0] >= 252u);
+      CHECK(replayed[Width + 1][3] == 255u);
     }
   }
 }

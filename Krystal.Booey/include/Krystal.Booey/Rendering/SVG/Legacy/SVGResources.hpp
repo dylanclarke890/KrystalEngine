@@ -8,6 +8,7 @@
 namespace krys::boo
 {
   class LegacyRenderSVGResourceClipper;
+  class LegacyRenderSVGResourceFilter;
   class LegacyRenderSVGResourceContainer;
   class LegacyRenderSVGResourceMarker;
   class LegacyRenderSVGResourceMasker;
@@ -30,10 +31,10 @@ namespace krys::boo
     // masker:  'container elements' and 'graphics elements'
     // -> a, circle, defs, ellipse, glyph, g, image, line, marker, mask, missing-glyph, path, pattern,
     // polygon, polyline, rect, svg, switch, symbol, text, use
-    // FIXME: The filter, with filters (B11h).
     struct ClipperFilterMaskerData
     {
       WeakPtr<LegacyRenderSVGResourceClipper> Clipper;
+      WeakPtr<LegacyRenderSVGResourceFilter> Filter;
       WeakPtr<LegacyRenderSVGResourceMasker> Masker;
     };
 
@@ -74,7 +75,7 @@ namespace krys::boo
     // Ordinary resources
     KRYS_NODISCARD LegacyRenderSVGResourceClipper *Clipper() const noexcept;
     KRYS_NODISCARD LegacyRenderSVGResourceMasker *Masker() const noexcept;
-    // FIXME: The filter, with filters (B11h).
+    KRYS_NODISCARD LegacyRenderSVGResourceFilter *Filter() const noexcept;
 
     KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerStart() const noexcept;
     KRYS_NODISCARD LegacyRenderSVGResourceMarker *MarkerMid() const noexcept;
@@ -98,6 +99,7 @@ namespace krys::boo
   private:
     // Only used by SVGResourcesCache cycle detection logic
     void ResetClipper() noexcept;
+    void ResetFilter() noexcept;
     void ResetMarkerStart() noexcept;
     void ResetMarkerMid() noexcept;
     void ResetMarkerEnd() noexcept;
@@ -107,6 +109,7 @@ namespace krys::boo
     void ResetLinkedResource() noexcept;
 
     bool SetClipper(LegacyRenderSVGResourceClipper *) noexcept;
+    bool SetFilter(LegacyRenderSVGResourceFilter *) noexcept;
     bool SetMarkerStart(LegacyRenderSVGResourceMarker *) noexcept;
     bool SetMarkerMid(LegacyRenderSVGResourceMarker *) noexcept;
     bool SetMarkerEnd(LegacyRenderSVGResourceMarker *) noexcept;

@@ -1,14 +1,18 @@
 ﻿#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/Style/ReferenceFilterOperation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMarker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
+#include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
+#include "Krystal.Booey/SVG/SVGFilterElement.hpp"
 #include "Krystal.Booey/SVG/SVGGradientElement.hpp"
 #include "Krystal.Booey/SVG/SVGMarkerElement.hpp"
 #include "Krystal.Booey/SVG/SVGPatternElement.hpp"
@@ -120,13 +124,13 @@ namespace krys::boo
       }
     }
 
-    // FIXME: <filter>, with filters (B11h).
     KRYS_NODISCARD bool IsChainableResourceTag(html::TagName tagName) noexcept
     {
       using html::TagName;
 
       switch (tagName)
       {
+        case TagName::filter:
         case TagName::linearGradient:
         case TagName::pattern:
         case TagName::radialGradient:
@@ -151,6 +155,10 @@ namespace krys::boo
       {
         target = svgGradient->Href();
       }
+      else if (auto *svgFilter = DynamicDowncast<svg::SVGFilterElement>(element))
+      {
+        target = svgFilter->Href();
+      }
       else
       {
         krys_debug_assert(false);
@@ -170,6 +178,11 @@ namespace krys::boo
       if (Is<svg::SVGGradientElement>(element))
       {
         return Is<svg::SVGGradientElement>(linkedResource);
+      }
+
+      if (Is<svg::SVGFilterElement>(element))
+      {
+        return Is<svg::SVGFilterElement>(linkedResource);
       }
 
       krys_debug_assert(false);
@@ -250,7 +263,26 @@ namespace krys::boo
         }
       }
 
-      // FIXME: The filter (a single reference filter operation), with filters (B11h).
+      if (style.HasFilter())
+      {
+        const auto &filterOperations = style.GetFilter();
+        if (filterOperations.size() == 1)
+        {
+          if (auto *referenceFilterOperation =
+                DynamicDowncast<style::ReferenceFilterOperation>(filterOperations.begin()->Get()))
+          {
+            const auto &id = referenceFilterOperation->Fragment();
+            if (auto *filter = GetRenderSVGResourceById<LegacyRenderSVGResourceFilter>(treeScope, id))
+            {
+              ensureResources(foundResources).SetFilter(filter);
+            }
+            else
+            {
+              treeScope.AddPendingSVGResource(id, *element);
+            }
+          }
+        }
+      }
 
       if (style.HasPositionedMask())
       {
@@ -379,7 +411,7 @@ namespace krys::boo
     {
       layoutDifferentRootIfNeeded(_clipperFilterMaskerData->Clipper.get());
       layoutDifferentRootIfNeeded(_clipperFilterMaskerData->Masker.get());
-      // FIXME: The filter, with filters (B11h).
+      layoutDifferentRootIfNeeded(_clipperFilterMaskerData->Filter.get());
     }
 
     if (_markerData)
@@ -409,6 +441,11 @@ namespace krys::boo
   LegacyRenderSVGResourceMasker *SVGResources::Masker() const noexcept
   {
     return _clipperFilterMaskerData ? _clipperFilterMaskerData->Masker.get() : nullptr;
+  }
+
+  LegacyRenderSVGResourceFilter *SVGResources::Filter() const noexcept
+  {
+    return _clipperFilterMaskerData ? _clipperFilterMaskerData->Filter.get() : nullptr;
   }
 
   LegacyRenderSVGResourceMarker *SVGResources::MarkerStart() const noexcept
@@ -463,6 +500,10 @@ namespace krys::boo
       if (auto *clipper = _clipperFilterMaskerData->Clipper.get())
       {
         clipper->RemoveClientFromCacheAndMarkForInvalidation(renderer, markForInvalidation);
+      }
+      if (auto *filter = _clipperFilterMaskerData->Filter.get())
+      {
+        filter->RemoveClientFromCacheAndMarkForInvalidation(renderer, markForInvalidation);
       }
       if (auto *masker = _clipperFilterMaskerData->Masker.get())
       {
@@ -581,9 +622,18 @@ namespace krys::boo
         }
         break;
       }
-      // FIXME: Filters, with filters (B11h).
       case RenderSVGResourceType::FilterResourceType:
       {
+        if (!_clipperFilterMaskerData)
+        {
+          break;
+        }
+        if (_clipperFilterMaskerData->Filter.get() == &resource)
+        {
+          resource.RemoveAllClientsFromCacheAndMarkForInvalidation();
+          _clipperFilterMaskerData->Filter = nullptr;
+          foundResources = true;
+        }
         break;
       }
       case RenderSVGResourceType::ClipperResourceType:
@@ -630,6 +680,10 @@ namespace krys::boo
       if (auto *clipper = _clipperFilterMaskerData->Clipper.get())
       {
         set.insert(clipper);
+      }
+      if (auto *filter = _clipperFilterMaskerData->Filter.get())
+      {
+        set.insert(filter);
       }
       if (auto *masker = _clipperFilterMaskerData->Masker.get())
       {
@@ -685,6 +739,27 @@ namespace krys::boo
     krys_debug_assert(_clipperFilterMaskerData);
     krys_debug_assert(_clipperFilterMaskerData->Clipper);
     _clipperFilterMaskerData->Clipper = nullptr;
+  }
+
+  bool SVGResources::SetFilter(LegacyRenderSVGResourceFilter *filter) noexcept
+  {
+    krys_debug_assert(filter);
+    krys_debug_assert(filter->ResourceType() == RenderSVGResourceType::FilterResourceType);
+
+    if (!_clipperFilterMaskerData)
+    {
+      _clipperFilterMaskerData = CreateUnique<ClipperFilterMaskerData>();
+    }
+
+    _clipperFilterMaskerData->Filter = CreateWeakPtr(filter);
+    return true;
+  }
+
+  void SVGResources::ResetFilter() noexcept
+  {
+    krys_debug_assert(_clipperFilterMaskerData);
+    krys_debug_assert(_clipperFilterMaskerData->Filter);
+    _clipperFilterMaskerData->Filter = nullptr;
   }
 
   bool SVGResources::SetMarkerStart(LegacyRenderSVGResourceMarker *markerStart) noexcept

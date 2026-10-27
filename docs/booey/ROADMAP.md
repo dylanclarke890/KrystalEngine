@@ -898,7 +898,7 @@ B11b is about 4.6k lines of renderer and 2.2k of elements upstream, with about 2
 - **Mask clips** (the user's choice, 2026-10-27): upstream's `GraphicsContext::clipToImageBuffer` and its display list item; Krystal.UI clips to the destination, opens a layer, and at the restore that ends the clip draws the buffer's texture over it with `DestinationIn`.
 - **Fixed:** `RenderElement::StyleDidChange` never told SVG renderers' resources of style changes (`SVGRenderSupport::StyleChanged`); five files' missing includes, exposed by the unity batches moving.
 - **Reference paths:** an `offset-path: url()` takes the referenced SVG path or geometry element's path (`ReferencePathOperation`); a `clip-path: url()` clips through the clipper.
-- **Not done:** a `mask-image: url()` to a `<mask>` masks by alpha, not luminance (as upstream); filters wait for B11h.
+- **Not done:** a `mask-image: url()` to a `<mask>` masks by alpha, not luminance (as upstream); filters came with B11h.
 - **Krystal.UI:** the `svg-clip-mask-markers` golden.
 - **Tests:** Booey: `tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.cpp`, `LegacyRenderSVGResourceMasker.cpp`, `LegacyRenderSVGResourceMarker.cpp`, `tests/SVG/SVGMarkerElement.cpp`, references in `tests/Style/Values/Motion/Motion.cpp`; 2920 cases pass. Krystal.UI: 128 cases pass.
 
@@ -909,3 +909,16 @@ B11b is about 4.6k lines of renderer and 2.2k of elements upstream, with about 2
 - **Not done:** Krystal.UI ignores stroked text, so SVG text strokes don't draw (`TODO.md`); `RenderSVGText`'s decorated bounding box is its repaint rect (no `SVGBoundingBoxComputation`); the inline formatting context's path compiles but isn't tested.
 - **Krystal.UI:** the `svg-text` golden (Chrome's only reported).
 - **Tests:** Booey: `tests/Rendering/SVG/RenderSVGText.cpp`, `tests/SVG/SVGTextContentElement.cpp`, the factory's new elements; 2927 cases pass. Krystal.UI: 129 cases pass.
+
+### B11h as split (2026-10-27)
+
+In one part, by the user's choice (2026-10-27). The seam (the user's choice, 2026-10-27): upstream's display list path, `GraphicsContext::drawFilteredImageBuffer` (and its display list item) with the filter's effects as data, which Krystal.UI evaluates on the GPU with Render2D's filter primitives, as upstream's GPU process does with Core Image; Booey's effects stay platform-neutral.
+
+### B11h as built (2026-10-27)
+
+- **Booey** (the ledger entry is *SVG filters* in `docs/booey/PORTING.md`): `DestinationColorSpace`, `FilterImage` and `FilterResults`; every filter effect (blend, colour matrix, component transfer, composite, convolve matrix, diffuse and specular lighting with distant, point and spot lights, displacement map, drop shadow, flood, Gaussian blur, image, merge, morphology, offset, tile, turbulence, source alpha) applying through the accelerated backend; `GraphicsContext::DrawFilteredImageBuffer` and its display list item, with `ImageBufferContextSwitcher`; `SVGFilterRenderer` with its graph and expression; `<filter>` and the 25 primitive, transfer function and light elements; `LegacyRenderSVGResourceFilter` and its primitive renderer, with `filter` in `SVGResources`, the cache, the cycle solver, the rendering context and the render tree dumps; `filter: url()` from HTML (`CSSFilterRenderer`'s reference filters, `RenderLayerFilters`' client layers). CSS's uneven blurs and `luminanceToAlpha` are drawn now, on the accelerated path. In one part, by the user's choice (2026-10-27).
+- **Fixed:** upstream's `SVGFETurbulenceElement` turned stitching on for `stitchTiles="noStitch"` when the attribute changed.
+- **Not done:** an external `filter: url(doc.svg#f)` isn't loaded; parse warnings have no console.
+- **Krystal.Gfx:** `FilterGraph2D` and `FilterRenderer2D`, a node per effect over pooled float textures.
+- **Krystal.UI:** `FilterGraph2DBuilder` turns a filter's effects into a graph for `DrawFilteredImageBuffer`; the `svg-filters` golden (mean difference 0.79 from Chrome).
+- **Tests:** Booey: `tests/SVG/Graphics/Filters/SVGFilterRenderer.cpp`, `tests/SVG/SVGFilterPrimitiveStandardAttributes.cpp`, `tests/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.cpp`, `tests/Graphics/Filters/FilterEffect.cpp`, the factory's new elements; 2953 cases pass. Krystal.Gfx: `tests/Render2D/FilterRenderer2D.cpp`; 142 pass. Krystal.UI: 131 pass.

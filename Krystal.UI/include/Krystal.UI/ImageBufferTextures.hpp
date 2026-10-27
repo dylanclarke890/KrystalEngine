@@ -4,6 +4,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
+#include "Krystal.Gfx/Render2D/FilterRenderer2D.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 
 namespace krys::boo
@@ -51,6 +52,8 @@ namespace krys::ui
     };
     /// @brief The native images uploaded, by rendering resource identifier.
     HashMap<uint64, UploadedImage> _uploaded;
+    /// @brief Evaluates filter graphs, made on first use.
+    UniquePtr<gfx::FilterRenderer2D> _filters;
 
   public:
     ImageBufferTextures(gfx::Device &device, FontFaceCache &fonts) noexcept;
@@ -69,6 +72,10 @@ namespace krys::ui
     /// @brief A texture holding @p image's pixels (premultiplied), uploaded on first use and kept until a
     /// replay ends after the image is gone; invalid if it can't be.
     KRYS_NODISCARD gfx::TextureHandle Upload(boo::NativeImage &image) noexcept;
+
+    /// @brief The renderer that evaluates filter graphs into the replay's command buffer; null if it can't be
+    /// made.
+    KRYS_NODISCARD gfx::FilterRenderer2D *Filters() noexcept;
 
     /// @brief Ends a replay: its textures can be reused by the next, and the textures of native images that
     /// are gone are destroyed.

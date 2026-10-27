@@ -131,6 +131,10 @@ namespace krys::ui
     void DrawPattern(boo::ImageBuffer &, const boo::FloatRect &destRect, const boo::FloatRect &tileRect,
                      const boo::AffineTransform &patternTransform, const boo::FloatPoint &phase,
                      const boo::FloatSize &spacing, boo::ImagePaintingOptions = {}) noexcept override;
+    /// @brief Applies @p filter on the GPU: its effects become a Render2D filter graph, evaluated into the
+    /// replay's command buffer ahead of its passes.
+    void DrawFilteredImageBuffer(boo::ImageBuffer *sourceImage, const boo::FloatRect &sourceImageRect,
+                                 boo::Filter &filter, boo::FilterResults &results) noexcept override;
 
     void DrawFocusRing(const boo::Path &, float outlineWidth, const boo::Color &) noexcept override;
     void DrawFocusRing(const List<boo::FloatRect> &, float outlineOffset, float outlineWidth,

@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterImage.hpp"
+#include "Krystal.Booey/Graphics/Filters/FilterResults.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include <algorithm>
 
@@ -61,6 +63,33 @@ namespace krys::boo
     _filterRenderingModes = SupportedFilterRenderingModes(preferredFilterRenderingModes);
     // There's no software rendering, so some mode the page prefers must be supported.
     krys_debug_assert(!_filterRenderingModes.IsEmpty());
+  }
+
+  RefPtr<FilterImage> Filter::Apply(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+                                    FilterResults &results) noexcept
+  {
+    RefPtr<FilterImage> input;
+
+    if (sourceImage)
+    {
+      auto absoluteSourceImageRect = EnclosingIntRect(ScaledByFilterScale(sourceImageRect));
+      input = FilterImage::Create(_geometry.FilterRegion, sourceImageRect, absoluteSourceImageRect,
+                                  ShareRef(*sourceImage));
+    }
+
+    auto result = Apply(input.get(), results);
+    if (!result)
+    {
+      return nullptr;
+    }
+
+    result->TransformToColorSpace(DestinationColorSpace::SRGB());
+    return result;
+  }
+
+  ImageBuffer *Filter::FilterResultBuffer(FilterImage &filterImage) const noexcept
+  {
+    return filterImage.GetImageBuffer();
   }
 
   FilterStyleVector Filter::CreateFilterStyles(GraphicsContext &context,

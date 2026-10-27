@@ -53,6 +53,8 @@ namespace krys::boo
       return AreEqual<FEColorMatrix>(*this, other);
     }
 
+    KRYS_NODISCARD bool ResultIsAlphaImage(Span<const Ref<FilterImage>> inputs) const noexcept override;
+
     KRYS_NODISCARD EnumSet<FilterRenderingMode> SupportedFilterRenderingModes(
       EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept override;
 

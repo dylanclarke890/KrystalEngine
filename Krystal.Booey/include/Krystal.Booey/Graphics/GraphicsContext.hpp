@@ -18,6 +18,8 @@
 
 namespace krys::boo
 {
+  class Filter;
+  class FilterResults;
   class FloatRoundedRect;
   class Font;
   class FontCascade;
@@ -41,8 +43,8 @@ namespace krys::boo
 
   /// @brief Where painting goes: state (brushes, shadows, compositing, transforms, clips) and the drawing
   /// operations, implemented by display list recorders and drawing backends.
-  /// FIXME: Filters, system images and video frames (`drawConsumingImageBuffer`, `drawFilteredImageBuffer`,
-  /// `drawSystemImage`, `drawVideoFrame`, `clipToImageBuffer` and the fill and stroke patterns).
+  /// FIXME: System images and video frames (`drawConsumingImageBuffer`, `drawSystemImage`, `drawVideoFrame`,
+  /// `clipToImageBuffer` and the fill and stroke patterns).
   /// FIXME: Bidirectional text runs (`drawBidiText`) need a bidi resolver over text runs.
   class GraphicsContext
   {
@@ -490,6 +492,11 @@ namespace krys::boo
     /// buffer's native image); display list recorders record the draw and drawing backends render the buffer.
     virtual void DrawImageBuffer(ImageBuffer &, const FloatRect &destination, const FloatRect &source,
                                  ImagePaintingOptions = {}) noexcept;
+
+    /// @brief Draws @p filter applied to @p sourceImage, which holds @p sourceImageRect (in filter
+    /// coordinates), with @p results caching the filter's effects.
+    virtual void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect,
+                                         Filter &filter, FilterResults &results) noexcept;
 
     /// @brief Fills @p destRect with @p tileRect of the buffer, repeated: tiles are mapped by @p
     /// patternTransform, start at @p phase (where the buffer's origin goes) and are @p spacing apart.

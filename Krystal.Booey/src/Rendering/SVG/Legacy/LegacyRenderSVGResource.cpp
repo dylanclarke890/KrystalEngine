@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceClipper.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceMasker.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceSolidColor.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGRoot.hpp"
@@ -144,7 +145,10 @@ namespace krys::boo
     {
       if (auto *resources = SVGResourcesCache::CachedResourcesForRenderer(renderer))
       {
-        // FIXME: The filter, with filters (B11h).
+        if (auto *filter = resources->Filter())
+        {
+          filter->RemoveClientFromCacheAndMarkForInvalidation(renderer);
+        }
 
         if (auto *masker = resources->Masker())
         {

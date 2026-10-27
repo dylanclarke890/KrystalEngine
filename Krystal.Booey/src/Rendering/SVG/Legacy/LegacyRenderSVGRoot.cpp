@@ -13,6 +13,8 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceContainer.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGResourceFilter.hpp"
+#include "Krystal.Booey/Rendering/SVG/Legacy/SVGResources.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/SVG/SVGRenderSupport.hpp"
@@ -283,11 +285,14 @@ namespace krys::boo
     }
 
     // Don't paint if we don't have kids, except if we have filters we should paint those.
-    // FIXME: Paint a filter without children (SVGResourcesCache), with filters (B11h).
     // FIXME: The page's relevant repainted and unpainted objects come with paint milestones.
     if (!FirstChild())
     {
-      return;
+      auto *resources = SVGResourcesCache::CachedResourcesForRenderer(*this);
+      if (!resources || !resources->Filter())
+      {
+        return;
+      }
     }
 
     // Make a copy of the PaintInfo because applyTransform will modify the damage rect.

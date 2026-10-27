@@ -16,6 +16,7 @@
 namespace krys::boo
 {
   class AffineTransform;
+  enum class ColorInterpolation : uint8;
 }
 
 namespace krys::boo::svg
@@ -71,6 +72,15 @@ namespace krys::boo::svg
   public:
     explicit SVGElement(dom::Document &document) noexcept;
     ~SVGElement() noexcept override;
+
+    /// @brief The element's interface, which its tag name selects.
+    KRYS_NODISCARD SVGElementInterface Interface() const noexcept
+    {
+      return _interface;
+    }
+
+    /// @brief The colour space the element's filter effects operate in: its `color-interpolation-filters`.
+    KRYS_NODISCARD boo::ColorInterpolation GetColorInterpolation() const noexcept;
 
 #pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
 
@@ -355,6 +365,142 @@ namespace krys::boo::svg
     KRYS_NODISCARD bool IsSVGEllipseElement() const noexcept
     {
       return _interface == SVGElementInterface::Ellipse;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEBlendElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEBlend;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEColorMatrixElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEColorMatrix;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEComponentTransferElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEComponentTransfer;
+    }
+
+    KRYS_NODISCARD bool IsSVGFECompositeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEComposite;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEConvolveMatrixElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEConvolveMatrix;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDiffuseLightingElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDiffuseLighting;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDisplacementMapElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDisplacementMap;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDistantLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDistantLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEDropShadowElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEDropShadow;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFloodElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFlood;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncAElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncA;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncBElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncB;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncGElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncG;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEFuncRElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEFuncR;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEGaussianBlurElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEGaussianBlur;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEImageElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEImage;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMergeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMerge;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMergeNodeElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMergeNode;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEMorphologyElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEMorphology;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEOffsetElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEOffset;
+    }
+
+    KRYS_NODISCARD bool IsSVGFEPointLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FEPointLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFESpecularLightingElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FESpecularLighting;
+    }
+
+    KRYS_NODISCARD bool IsSVGFESpotLightElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FESpotLight;
+    }
+
+    KRYS_NODISCARD bool IsSVGFETileElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FETile;
+    }
+
+    KRYS_NODISCARD bool IsSVGFETurbulenceElement() const noexcept
+    {
+      return _interface == SVGElementInterface::FETurbulence;
+    }
+
+    KRYS_NODISCARD bool IsSVGFilterElement() const noexcept
+    {
+      return _interface == SVGElementInterface::Filter;
+    }
+
+    /// @brief Whether the element is a filter primitive.
+    KRYS_NODISCARD virtual bool IsFilterEffect() const noexcept
+    {
+      return false;
     }
 
     KRYS_NODISCARD bool IsSVGForeignObjectElement() const noexcept

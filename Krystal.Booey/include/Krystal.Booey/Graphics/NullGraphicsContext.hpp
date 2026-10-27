@@ -214,6 +214,9 @@ namespace krys::boo
                          ImagePaintingOptions = {}) noexcept final
     {
     }
+    void DrawFilteredImageBuffer(ImageBuffer *, const FloatRect &, Filter &, FilterResults &) noexcept final
+    {
+    }
     void DrawPattern(ImageBuffer &, const FloatRect &, const FloatRect &, const AffineTransform &,
                      const FloatPoint &, const FloatSize &, ImagePaintingOptions = {}) noexcept final
     {

@@ -179,8 +179,8 @@ namespace krys::boo
 
   EnumSet<FilterRenderingMode> Page::PreferredFilterRenderingModes(const GraphicsContext &) const noexcept
   {
-    // FIXME: Software and accelerated filter rendering, once there's either.
-    return FilterRenderingMode::GraphicsContext;
+    // There's no software rendering: the drawing backend applies filters on the GPU.
+    return {FilterRenderingMode::Accelerated, FilterRenderingMode::GraphicsContext};
   }
 
   void Page::ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps) noexcept

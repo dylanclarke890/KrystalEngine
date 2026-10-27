@@ -15,8 +15,9 @@ namespace krys::boo
   EnumSet<FilterRenderingMode> SourceGraphic::SupportedFilterRenderingModes(
     EnumSet<FilterRenderingMode> preferredFilterRenderingModes) const noexcept
   {
-    // What's drawn is the graphics context's own source: nothing to apply.
-    return EnumSet<FilterRenderingMode> {FilterRenderingMode::GraphicsContext}
+    // In the graphics context, what's drawn is the context's own source: nothing to apply.
+    return EnumSet<FilterRenderingMode> {FilterRenderingMode::Accelerated,
+                                         FilterRenderingMode::GraphicsContext}
            & preferredFilterRenderingModes;
   }
 
