@@ -872,10 +872,11 @@ namespace krys::ui
       boo::FloatSize(static_cast<float>(size.Width()), static_cast<float>(size.Height())));
     if (auto *view = _frame->View())
     {
-      // The composited layers paint into the recording too.
+      // The composited layers paint into the recording too, as a snapshot: canvases that show their pixels
+      // as layer contents paint them.
       auto paintBehavior = view->GetPaintBehavior();
       auto flattened = paintBehavior;
-      flattened.Add(boo::PaintBehavior::FlattenCompositingLayers);
+      flattened.Add({boo::PaintBehavior::FlattenCompositingLayers, boo::PaintBehavior::Snapshotting});
       view->SetPaintBehavior(flattened);
       view->Paint(recorder, boo::IntRect(0, 0, size.Width(), size.Height()));
       view->SetPaintBehavior(paintBehavior);

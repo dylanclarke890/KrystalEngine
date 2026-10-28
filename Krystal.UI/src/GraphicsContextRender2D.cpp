@@ -865,7 +865,11 @@ namespace krys::ui
       }
     }
 
-    DrawTexture(texture, normalizedSrcRect, normalizedDestRect, options);
+    const auto &platformImage = image.GetPlatformImage();
+    const auto alpha = platformImage->External() && !platformImage->PremultipliedAlpha()
+                         ? AlphaPremultiplication::Unpremultiplied
+                         : AlphaPremultiplication::Premultiplied;
+    DrawTexture(texture, normalizedSrcRect, normalizedDestRect, options, alpha);
   }
 
   void GraphicsContextRender2D::DrawPattern(boo::NativeImage &image, const boo::FloatRect &destRect,
@@ -969,7 +973,8 @@ namespace krys::ui
 
   void GraphicsContextRender2D::DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
                                             const boo::FloatRect &destination,
-                                            boo::ImagePaintingOptions options) noexcept
+                                            boo::ImagePaintingOptions options,
+                                            AlphaPremultiplication alpha) noexcept
   {
     boo::InterpolationQualityMaintainer interpolationQualityForThisScope(*this,
                                                                          options.GetInterpolationQuality());
@@ -977,7 +982,7 @@ namespace krys::ui
     _renderer.Save();
     PrepareImageDraw(options);
     _renderer.DrawImage(texture, ToRect2D(source), ToRect2D(destination),
-                        {.Filter = ImageFilter(), .Opacity = Alpha()});
+                        {.Filter = ImageFilter(), .Alpha = alpha, .Opacity = Alpha()});
     _renderer.Restore();
   }
 

@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 
 namespace krys::ui
@@ -386,6 +387,16 @@ namespace krys::ui
     SetContentsToPlatformLayer(_compositedImage.get(), ContentsLayerPurpose::Image);
     NotifyChange(ContentChange);
     GraphicsLayer::SetContentsToImage(image);
+  }
+
+  void GraphicsLayerTextureMapper::SetContentsDisplayDelegate(
+    RefPtr<boo::GraphicsLayerContentsDisplayDelegate> &&delegate, ContentsLayerPurpose purpose) noexcept
+  {
+    // Krystal.UI makes every delegate its layers are given.
+    auto *platformLayer =
+      delegate ? static_cast<PlatformLayerDisplayDelegate &>(*delegate).PlatformLayer() : nullptr;
+    SetContentsToPlatformLayer(platformLayer, purpose);
+    _contentsDisplayDelegate = krys::move(delegate);
   }
 
   void GraphicsLayerTextureMapper::SetContentsToPlatformLayer(TextureMapperPlatformLayer *platformLayer,

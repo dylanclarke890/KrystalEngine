@@ -27,6 +27,7 @@
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
+#include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Editor/PageDragAndDrop.hpp"
 #include "Krystal.Editor/PageGamepads.hpp"
 #include "Krystal.Editor/PageObservers.hpp"
@@ -97,6 +98,7 @@ namespace krys
     UniquePtr<editor::PageTextInput> _textInput;
     /// @brief The page's drag and drop sample from C++, made once it has loaded.
     UniquePtr<editor::PageDragAndDrop> _dragAndDrop;
+    UniquePtr<editor::PageCube> _cube;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -148,6 +150,7 @@ namespace krys
       _gamepads = nullptr;
       _textInput = nullptr;
       _dragAndDrop = nullptr;
+      _cube = nullptr;
       _pageView = nullptr;
       if (_previousGamepadProvider)
       {
@@ -471,6 +474,10 @@ namespace krys
           _gamepadProvider->Update(_pageTime);
         }
         _pageView->GamepadInput(_context->Input->GetGamepads(), _pageTime);
+        if (_cube)
+        {
+          _cube->Update(static_cast<float>(dt.count()));
+        }
         _pageView->Update(_pageTime);
       }
       UpdateTextInput();
@@ -481,6 +488,12 @@ namespace krys
       if (!_renderer || _width == 0u || _height == 0u)
       {
         return;
+      }
+
+      // The page's live 3D view is drawn into its texture before the page is painted.
+      if (_cube && _view == EditorView::Page)
+      {
+        _cube->Render(commands);
       }
 
       _renderer->Begin(commands, {.Swapchain = _context->Swapchain,
@@ -580,6 +593,11 @@ namespace krys
           _textInput = event.FromBackForwardCache ? CreateUnique<editor::PageTextInput>(document) : nullptr;
           _dragAndDrop =
             event.FromBackForwardCache ? CreateUnique<editor::PageDragAndDrop>(document) : nullptr;
+          _cube = nullptr;
+          if (event.FromBackForwardCache)
+          {
+            _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
+          }
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
@@ -589,6 +607,8 @@ namespace krys
           _gamepads = CreateUnique<editor::PageGamepads>(document);
           _textInput = CreateUnique<editor::PageTextInput>(document);
           _dragAndDrop = CreateUnique<editor::PageDragAndDrop>(document);
+          _cube = nullptr;
+          _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;

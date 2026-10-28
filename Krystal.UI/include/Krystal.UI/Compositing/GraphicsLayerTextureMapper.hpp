@@ -15,7 +15,7 @@ namespace krys::ui
 
   /// @brief Krystal.UI's graphics layer: it commits its changes to its `TextureMapperLayer` when it's
   /// flushed, and paints its contents into tiles that cover what's visible of it.
-  // FIXME: Contents display delegates (canvas and video).
+  // FIXME: Contents scaling filters (`image-rendering` on composited images and canvases).
   class GraphicsLayerTextureMapper final : public boo::GraphicsLayer,
                                            public TextureMapperPlatformLayer::Client
   {
@@ -68,6 +68,8 @@ namespace krys::ui
     boo::Color _debugBorderColor;
     float _debugBorderWidth {0};
     TextureMapperPlatformLayer *_contentsLayer {nullptr};
+    // Keeps the platform layer it shows alive.
+    RefPtr<boo::GraphicsLayerContentsDisplayDelegate> _contentsDisplayDelegate;
     boo::FloatRect _needsDisplayRect;
     TextureMapperAnimations _animations;
     MonotonicTime::duration _animationStartTime {};
@@ -120,6 +122,8 @@ namespace krys::ui
     void SetContentsToSolidColor(const boo::Color &color) noexcept override;
     void SetContentsToPlatformLayer(TextureMapperPlatformLayer *platformLayer,
                                     ContentsLayerPurpose purpose) noexcept;
+    void SetContentsDisplayDelegate(RefPtr<boo::GraphicsLayerContentsDisplayDelegate> &&delegate,
+                                    ContentsLayerPurpose purpose) noexcept override;
     KRYS_NODISCARD bool UsesContentsLayer() const noexcept override
     {
       return _contentsLayer != nullptr;

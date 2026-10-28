@@ -939,6 +939,25 @@
     </div>
   </div>
 
+  <div id="engine-texture">
+    <div class="row engine-texture-sample">
+      <!-- A live 3D view: the editor draws a cube into a texture each frame and hands it to the canvas's
+           "krystal-texture" context, so the compositor shows it as the canvas's layer, clipped to its rounded
+           corners like an image. Dragging it turns the cube. -->
+      <div class="card">
+        <h2>A live 3D view</h2>
+        <canvas id="cube" width="480" height="480"></canvas>
+        <p id="cube-angle">Drag the cube to turn it.</p>
+      </div>
+      <!-- The same texture, fitted into a wide box and faded: the canvas places it like an image. -->
+      <div class="card">
+        <h2>Placed like an image</h2>
+        <canvas id="cube-strip" width="480" height="480"></canvas>
+        <p>The same texture in a wide box, with object-fit: cover and opacity.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
+#include "Krystal.UI/Compositing/EngineTextureLayer.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
 
 namespace krys::ui
@@ -102,6 +103,13 @@ namespace krys::ui
 
   gfx::TextureHandle ImageBufferTextures::Upload(boo::NativeImage &image) noexcept
   {
+    // An engine texture is drawn as it is.
+    if (const auto &platformImage = image.GetPlatformImage(); platformImage && platformImage->External())
+    {
+      // Krystal.UI makes every external image.
+      return static_cast<EngineTextureImage &>(*platformImage->External()).Texture().Handle();
+    }
+
     const auto identifier = image.GetRenderingResourceIdentifier().ToUInt64();
     if (const auto found = _uploaded.find(identifier); found != _uploaded.end())
     {

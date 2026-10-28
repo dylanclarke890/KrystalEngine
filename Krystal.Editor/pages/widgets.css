@@ -168,6 +168,15 @@ div.drag-field { min-height: 60px; }
 .math-sample math[display=block] { margin: 8px 0; }
 .math-sample p { margin: 8px 0 0; font-size: 13px; line-height: 22px; }
 
+/* Engine textures: canvases the editor draws into, rounded and clipped like images. */
+.engine-texture-sample .card { height: auto; min-width: 0; }
+#cube { display: block; width: 240px; height: 240px; border-radius: 24px; background: #073b4c;
+  cursor: grab; touch-action: none; }
+#cube:active { cursor: grabbing; }
+#cube-strip { display: block; width: 320px; height: 120px; border-radius: 12px; object-fit: cover;
+  background: #073b4c; opacity: 0.8; }
+.engine-texture-sample p { margin: 8px 0 0; font-size: 13px; line-height: 22px; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

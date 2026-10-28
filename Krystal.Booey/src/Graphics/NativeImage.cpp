@@ -45,7 +45,7 @@ namespace krys::boo
 
   Maybe<Color> NativeImage::SinglePixelSolidColor() const noexcept
   {
-    if (Size() != IntSize(1, 1))
+    if (Size() != IntSize(1, 1) || _platformImage->External())
     {
       return null;
     }

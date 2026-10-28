@@ -70,7 +70,8 @@ namespace krys::ui
                                            gfx::CommandBuffer &commands) noexcept;
 
     /// @brief A texture holding @p image's pixels (premultiplied), uploaded on first use and kept until a
-    /// replay ends after the image is gone; invalid if it can't be.
+    /// replay ends after the image is gone; invalid if it can't be. An engine texture's image is its texture,
+    /// premultiplied or not as its image says.
     KRYS_NODISCARD gfx::TextureHandle Upload(boo::NativeImage &image) noexcept;
 
     /// @brief The renderer that evaluates filter graphs into the replay's command buffer; null if it can't be

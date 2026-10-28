@@ -85,6 +85,10 @@ namespace krys::ui
     void DrawTexture(const BitmapTexture &texture, const boo::FloatRect &target,
                      const boo::TransformationMatrix &modelViewMatrix = {}, float opacity = 1.0f,
                      AllEdgesExposed allEdgesExposed = AllEdgesExposed::Yes) noexcept;
+    /// @brief Draws a texture the mapper doesn't own, whose alpha is @p alpha.
+    void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &target,
+                     const boo::TransformationMatrix &modelViewMatrix, float opacity,
+                     AlphaPremultiplication alpha) noexcept;
     void DrawSolidColor(const boo::FloatRect &rect, const boo::TransformationMatrix &matrix,
                         const boo::Color &color, bool isBlendingAllowed) noexcept;
 

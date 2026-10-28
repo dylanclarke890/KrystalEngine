@@ -29,8 +29,21 @@ namespace krys::boo
     }
   };
 
+  /// @brief An image the host holds outside Booey, such as a texture on its GPU: only the host's renderer
+  /// can draw it, and Booey can't read its pixels.
+  class ExternalImage : public RefCounted<ExternalImage>
+  {
+    KRYS_NON_COPY_MOVABLE(ExternalImage);
+
+  public:
+    virtual ~ExternalImage() noexcept = default;
+
+  protected:
+    ExternalImage() noexcept = default;
+  };
+
   /// @brief The platform's image: decoded sRGB pixels in memory, which the host's renderer uploads when it
-  /// draws them.
+  /// draws them, or an image the host holds itself.
   /// @note What `NativeImage` wraps, as Skia's `SkImage` or Cairo's surface does.
   class PlatformImage final : public RefCounted<PlatformImage>
   {
@@ -38,7 +51,8 @@ namespace krys::boo
 
   private:
     IntSize _size;
-    Ref<PixelData> _pixels;
+    RefPtr<PixelData> _pixels;
+    RefPtr<ExternalImage> _external;
     bool _premultipliedAlpha;
 
   public:
@@ -47,15 +61,31 @@ namespace krys::boo
     {
     }
 
+    PlatformImage(const IntSize &size, Ref<ExternalImage> &&external, bool premultipliedAlpha) noexcept
+        : _size(size), _external(krys::move(external)), _premultipliedAlpha(premultipliedAlpha)
+    {
+    }
+
     KRYS_NODISCARD const IntSize &Size() const noexcept
     {
       return _size;
     }
 
-    /// @brief The pixels, `Size().Width()` a row, as ARGB (alpha in the high byte).
+    /// @brief The pixels, `Size().Width()` a row, as ARGB (alpha in the high byte); empty for an external
+    /// image.
     KRYS_NODISCARD Span<const uint32> Pixels() const noexcept
     {
+      if (!_pixels)
+      {
+        return {};
+      }
       return {_pixels->Pixels.data(), static_cast<size_t>(_size.UnclampedArea())};
+    }
+
+    /// @brief The host's image, if this is one.
+    KRYS_NODISCARD ExternalImage *External() const noexcept
+    {
+      return _external.get();
     }
 
     KRYS_NODISCARD bool PremultipliedAlpha() const noexcept

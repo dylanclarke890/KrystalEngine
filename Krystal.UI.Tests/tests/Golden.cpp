@@ -6,13 +6,16 @@
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
+#include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
 #include <string>
 #include <unicode/uloc.h>
@@ -28,10 +31,14 @@ namespace krys::ui::tests
     /// @brief Chrome antialiases, blurs and dithers a little differently, so its golden is checked loosely.
     constexpr uint32 ChromeTolerance = 24u;
 
+    /// @brief Run on the view, with the device it's painted with, before it's painted; the textures it adds
+    /// to the list are destroyed once the page is painted.
+    using PageSetup = Func<void(View &, gfx::Device &, List<gfx::TextureHandle> &)>;
+
     /// @brief Paints the page golden `golden/scenes/<name>.html` through a `View` of its size, after @p setup
     /// (input, say) if given.
     KRYS_NODISCARD GoldenImage Render(gfx::Device &device, gfx::Renderer2D &renderer, const std::string &name,
-                                      uint32 width, uint32 height, const Func<void(View &)> &setup)
+                                      uint32 width, uint32 height, const PageSetup &setup)
     {
       // Liberation Sans, as the scenes name it.
       static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
@@ -47,10 +54,11 @@ namespace krys::ui::tests
         view.UpdateRendering();
         boo::html::EventLoop::Current().RunUntilIdle();
       }
+      List<gfx::TextureHandle> textures;
       if (setup)
       {
         view.UpdateRendering();
-        setup(view);
+        setup(view, device, textures);
       }
 
       auto target =
@@ -77,6 +85,10 @@ namespace krys::ui::tests
       device.ReadTexture(*target, gfx::TextureRegion::Whole2D(width, height),
                          Span<byte>(reinterpret_cast<byte *>(image.Pixels.data()), image.Pixels.size() * 4u));
       device.Destroy(*target);
+      for (auto texture : textures)
+      {
+        device.Destroy(texture);
+      }
       return image;
     }
 
@@ -85,8 +97,8 @@ namespace krys::ui::tests
     /// @param chromeReportOnly Whether Chrome's golden is only reported, not checked: where Chrome's
     /// rendering follows its own algorithm rather than the one ported (border image tiling).
     /// @param setup Run on the view before it's painted, if given.
-    void CheckPage(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly = false,
-                   const Func<void(View &)> &setup = {})
+    void CheckPageOnDevice(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly,
+                           const PageSetup &setup)
     {
       // Pages draw in many small batches (a tile, a clip, a gradient each), so they get a full frame's
       // memory.
@@ -138,6 +150,50 @@ namespace krys::ui::tests
       // within a step or so.
       CHECK(comparison.PixelsOver <= comparison.PixelCount / 200u);
       CHECK(comparison.MeanDifference < 1.5);
+    }
+
+    /// @brief A 40 by 20 texture of the engine textures scene's pattern: blue on the left, orange on the
+    /// right, half transparent at the bottom right.
+    KRYS_NODISCARD gfx::TextureHandle CreateEngineTexture(gfx::Device &device, bool premultiplied)
+    {
+      constexpr uint32 width = 40u;
+      constexpr uint32 height = 20u;
+      auto texture = device.CreateTexture({.Format = gfx::TextureFormat::BGRA8Unorm,
+                                           .Width = width,
+                                           .Height = height,
+                                           .Usage = gfx::TextureUsage::Sampled,
+                                           .DebugName = u8"Golden.EngineTexture"});
+      if (!texture)
+      {
+        return {};
+      }
+      // ARGB in a 32-bit value is BGRA in memory.
+      const uint32 halfOrange = premultiplied ? 0x80'77'3B'19u : 0x80'EE'77'33u;
+      List<uint32> pixels(static_cast<size_t>(width) * height);
+      for (uint32 y = 0; y < height; ++y)
+      {
+        for (uint32 x = 0; x < width; ++x)
+        {
+          pixels[y * width + x] = x < 20u ? 0xFF'33'66'99u : (y < 10u ? 0xFF'EE'77'33u : halfOrange);
+        }
+      }
+      device.WriteTexture(*texture, gfx::TextureRegion::Whole2D(width, height),
+                          {reinterpret_cast<const byte *>(pixels.data()), pixels.size() * sizeof(uint32)});
+      return *texture;
+    }
+
+    void CheckPage(const std::string &name, uint32 width, uint32 height, bool chromeReportOnly = false,
+                   const Func<void(View &)> &setup = {})
+    {
+      PageSetup pageSetup;
+      if (setup)
+      {
+        pageSetup = [&](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+        {
+          setup(view);
+        };
+      }
+      CheckPageOnDevice(name, width, height, chromeReportOnly, pageSetup);
     }
   }
 
@@ -473,5 +529,34 @@ namespace krys::ui::tests
                 boo::html::EventLoop::Current().RunUntilIdle();
                 view.UpdateRendering();
               });
+  }
+
+  TEST_CASE("Golden: engine textures", "[UI][GPU][Golden]")
+  {
+    // Each canvas shows a texture of the pattern the scene's script draws for Chrome; half of them declare
+    // their alpha unpremultiplied, which must look the same.
+    CheckPageOnDevice(
+      "engine-textures", 360u, 200u, false,
+      [](View &view, gfx::Device &device, List<gfx::TextureHandle> &textures)
+      {
+        for (auto id : {u8"natural", u8"stretched", u8"contain", u8"cover", u8"turned", u8"faded"})
+        {
+          const bool premultiplied = id != utf8_stringview(u8"contain") && id != utf8_stringview(u8"turned");
+          auto texture = CreateEngineTexture(device, premultiplied);
+          REQUIRE(texture.IsValid());
+          textures.push_back(texture);
+          auto *canvas =
+            DynamicDowncast<boo::html::HTMLCanvasElement>(view.Document().GetElementById(id).get());
+          REQUIRE(canvas);
+          auto context = canvas->GetContext(boo::html::EngineTextureRenderingContext::ContextType);
+          REQUIRE(context);
+          auto &textureContext = Downcast<boo::html::EngineTextureRenderingContext>(*context);
+          textureContext.SetTexture(EngineTexture::Create(
+            texture, {40, 20},
+            premultiplied ? AlphaPremultiplication::Premultiplied : AlphaPremultiplication::Unpremultiplied));
+          textureContext.TextureChanged();
+        }
+        view.UpdateRendering();
+      });
   }
 }

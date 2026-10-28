@@ -173,6 +173,21 @@ namespace krys::ui
     _renderer->Restore();
   }
 
+  void TextureMapper::DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &targetRect,
+                                  const boo::TransformationMatrix &modelViewMatrix, float opacity,
+                                  AlphaPremultiplication alpha) noexcept
+  {
+    if (!texture.IsValid() || ClipBounds().IsEmpty())
+    {
+      return;
+    }
+
+    _renderer->Save();
+    SetTransform(modelViewMatrix);
+    _renderer->DrawImage(texture, ToRect2D(targetRect), {.Alpha = alpha, .Opacity = opacity});
+    _renderer->Restore();
+  }
+
   void TextureMapper::DrawSolidColor(const boo::FloatRect &rect, const boo::TransformationMatrix &matrix,
                                      const boo::Color &color, bool) noexcept
   {

@@ -179,7 +179,8 @@ namespace krys::ui
 
     /// @brief Draws @p source of @p texture into @p destination, as an image is drawn.
     void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &source,
-                     const boo::FloatRect &destination, boo::ImagePaintingOptions options) noexcept;
+                     const boo::FloatRect &destination, boo::ImagePaintingOptions options,
+                     AlphaPremultiplication alpha = AlphaPremultiplication::Premultiplied) noexcept;
     /// @brief Fills @p destRect with @p tileRect of @p texture (of @p size), repeated, as an image pattern.
     void DrawTexturePattern(gfx::TextureHandle texture, const boo::FloatSize &size,
                             const boo::FloatRect &destRect, const boo::FloatRect &tileRect,

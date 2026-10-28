@@ -2,21 +2,26 @@
 #include "Krystal.Booey/Animation/DocumentTimeline.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Rendering/RenderLayer.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
+#include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
 #include <chrono>
 #include <filesystem>
@@ -68,6 +73,11 @@ namespace krys::ui::tests
         _device->Destroy(_target);
       }
 
+      KRYS_NODISCARD gfx::Device &Device() const noexcept
+      {
+        return *_device;
+      }
+
       /// @brief The page as the host shows it: its layers composited.
       KRYS_NODISCARD GoldenImage Painted(View &view)
       {
@@ -105,12 +115,23 @@ namespace krys::ui::tests
         return Draw([&] { view.Replay(*displayList, *_renderer); });
       }
 
+      /// @brief The page as the host shows it, after @p before records the host's own drawing into the
+      /// frame's commands.
+      KRYS_NODISCARD GoldenImage PaintedAfter(View &view, const Func<void(gfx::CommandBuffer &)> &before)
+      {
+        return Draw([&] { view.Paint(*_renderer); }, before);
+      }
+
     private:
       template <typename TDraw>
-      KRYS_NODISCARD GoldenImage Draw(TDraw &&draw)
+      KRYS_NODISCARD GoldenImage Draw(TDraw &&draw, const Func<void(gfx::CommandBuffer &)> &before = {})
       {
         _device->BeginFrame();
         auto &commands = _device->GetCommandBuffer();
+        if (before)
+        {
+          before(commands);
+        }
         _renderer->Begin(commands, {.Texture = _target,
                                     .Width = _width,
                                     .Height = _height,
@@ -1224,5 +1245,155 @@ namespace krys::ui::tests
     }
     CHECK(view.ScrollPosition().Y() == scrolled);
     CHECK(view.Document().Selection().IsRange());
+  }
+
+  TEST_CASE("View: a texture canvas redraws its texture without repainting the page", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }</style><p>Text beside it</p>"
+      u8"<canvas id=canvas width=4 height=2 style='width: 80px; height: 40px'></canvas>");
+    WaitForLoad(view);
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      return fixture.Painted(view);
+    };
+    (void)frame();
+
+    // A 4 by 2 texture of one colour, which the host draws into.
+    auto &device = fixture.Device();
+    auto texture = device.CreateTexture({.Format = gfx::TextureFormat::BGRA8Unorm,
+                                         .Width = 4u,
+                                         .Height = 2u,
+                                         .Usage = gfx::TextureUsage::Sampled,
+                                         .DebugName = u8"Repaint.EngineTexture"});
+    REQUIRE(texture.has_value());
+    auto fill = [&](uint32 argb)
+    {
+      List<uint32> pixels(8u, argb);
+      device.WriteTexture(*texture, gfx::TextureRegion::Whole2D(4u, 2u),
+                          {reinterpret_cast<const byte *>(pixels.data()), pixels.size() * sizeof(uint32)});
+    };
+    fill(0xFF'33'66'99u);
+
+    auto canvas = view.Document().GetElementById(u8"canvas");
+    auto context = Downcast<boo::html::HTMLCanvasElement>(*canvas).GetContext(
+      boo::html::EngineTextureRenderingContext::ContextType);
+    REQUIRE(context);
+    auto &textureContext = Downcast<boo::html::EngineTextureRenderingContext>(*context);
+    textureContext.SetTexture(EngineTexture::Create(*texture, {4, 2}));
+    auto before = frame();
+    // Composited and painted the whole page again, which draws the texture as an image, the page is the
+    // same.
+    CheckNoStalePixels(fixture, view, "texture-canvas");
+
+    TrackedRepaints repaints(view);
+    repaints.Reset();
+
+    // The host draws into the texture and says so: only the canvas's contents are redrawn.
+    fill(0xFF'EE'77'33u);
+    textureContext.TextureChanged();
+    auto after = frame();
+    CHECK(repaints.Bounds().IsEmpty());
+    auto &canvasLayer = repaints.LayerOf(u8"canvas");
+    CHECK_FALSE(canvasLayer.DrawsContent());
+    CHECK(repaints.Bounds(canvasLayer) == canvasLayer.ContentsRect());
+    auto changed = CompareImages(before, after, 2u);
+    CHECK(changed.PixelsOver == 80u * 40u);
+    CheckNoStalePixels(fixture, view, "texture-canvas-changed");
+
+    textureContext.SetTexture(nullptr);
+    (void)frame();
+    device.Destroy(*texture);
+  }
+
+  TEST_CASE("View: the editor page's live 3D view", "[UI][GPU]")
+  {
+    RepaintFixture fixture(1'200u, 600u);
+    View view({1'200, 600});
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes it once the page has loaded, on the device it paints with.
+    editor::PageCube cube(document, fixture.Device());
+
+    auto canvas = document.GetElementById(u8"cube");
+    REQUIRE(canvas);
+    auto rect = canvas->GetBoundingClientRect();
+    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(rect->Top()) - 40));
+    view.UpdateRendering();
+    rect = canvas->GetBoundingClientRect();
+    REQUIRE(rect->Width() == 240);
+    REQUIRE(rect->Height() == 240);
+    const auto left = static_cast<uint32>(rect->Left());
+    const auto top = static_cast<uint32>(rect->Top());
+    const auto centre = boo::IntPoint(static_cast<int32>(left + 120u), static_cast<int32>(top + 120u));
+
+    // Each frame, the cube is drawn into its texture before the page is painted.
+    auto frame = [&]
+    {
+      return fixture.PaintedAfter(view, [&](gfx::CommandBuffer &commands) { cube.Render(commands); });
+    };
+    auto pixel = [](const GoldenImage &image, uint32 x, uint32 y)
+    {
+      return image.Pixels[y * image.Width + x];
+    };
+    // #073b4c, the canvas's background, opaque.
+    constexpr Array<uint8, 4> canvasBackground {0x07, 0x3B, 0x4C, 0xFF};
+
+    auto before = frame();
+    // The cube is in the middle of the canvas, its background around it, and the corners are rounded off.
+    CHECK(pixel(before, left + 120u, top + 120u) != canvasBackground);
+    CHECK(pixel(before, left + 6u, top + 120u) == canvasBackground);
+    CHECK(pixel(before, left + 1u, top + 1u) != canvasBackground);
+    // The same texture fills the wide canvas too.
+    auto strip = document.GetElementById(u8"cube-strip")->GetBoundingClientRect();
+    CHECK(pixel(before, static_cast<uint32>(strip->Left() + strip->Width() / 2),
+                static_cast<uint32>(strip->Top() + strip->Height() / 2))
+          != canvasBackground);
+
+    // Dragging it turns the cube.
+    view.MouseMoved(centre);
+    view.MousePressed(centre, pal::MouseButton::Left);
+    view.MouseMoved(boo::IntPoint(centre.X() + 30, centre.Y()));
+    view.MouseMoved(boo::IntPoint(centre.X() + 60, centre.Y() + 20));
+    view.MouseReleased(boo::IntPoint(centre.X() + 60, centre.Y() + 20), pal::MouseButton::Left);
+    auto label = document.GetElementById(u8"cube-angle")->TextContent().value_or(boo::dom::DOMString {});
+    CHECK(std::string(label.begin(), label.end()).starts_with("Turned "));
+    auto after = frame();
+    CHECK(CompareImages(before, after, 2u).PixelsOver > 1'000u);
+
+    // Painted again whole, which draws the texture as an image, the canvases are as composited. (The page's
+    // frosted badge, a backdrop filter, isn't compared: its blur differs a little between the two.)
+    auto repainted = fixture.Repainted(view);
+    auto sameWithin = [&](const boo::dom::DOMRectReadOnly &area)
+    {
+      uint32 differing = 0u;
+      for (auto y = static_cast<uint32>(area.Top()); y < static_cast<uint32>(area.Bottom()); ++y)
+      {
+        for (auto x = static_cast<uint32>(area.Left()); x < static_cast<uint32>(area.Right()); ++x)
+        {
+          const auto &a = pixel(after, x, y);
+          const auto &b = pixel(repainted, x, y);
+          for (size_t channel = 0; channel < 4u; ++channel)
+          {
+            if (std::abs(int32(a[channel]) - int32(b[channel])) > 2)
+            {
+              ++differing;
+              break;
+            }
+          }
+        }
+      }
+      return differing;
+    };
+    CHECK(sameWithin(*canvas->GetBoundingClientRect()) == 0u);
+    CHECK(sameWithin(*document.GetElementById(u8"cube-strip")->GetBoundingClientRect()) == 0u);
   }
 }

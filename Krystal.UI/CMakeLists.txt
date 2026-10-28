@@ -33,7 +33,9 @@ target_sources(Krystal.UI
     FILES
       include/Krystal.UI/Compositing/BitmapTexture.hpp
       include/Krystal.UI/Compositing/BitmapTexturePool.hpp
+      include/Krystal.UI/Compositing/EngineTextureLayer.hpp
       include/Krystal.UI/Compositing/GraphicsLayerTextureMapper.hpp
+      include/Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp
       include/Krystal.UI/Compositing/TextureMapper.hpp
       include/Krystal.UI/Compositing/TextureMapperAnimation.hpp
       include/Krystal.UI/Compositing/TextureMapperBackingStore.hpp
@@ -48,6 +50,7 @@ target_sources(Krystal.UI
       include/Krystal.UI/GamepadProvider.hpp
       include/Krystal.UI/FilterGraph2DBuilder.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
+      include/Krystal.UI/EngineTexture.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
       include/Krystal.UI/ColorChooserOverlay.hpp
@@ -76,6 +79,7 @@ target_sources(Krystal.UI
     src/GamepadProvider.cpp
     src/FilterGraph2DBuilder.cpp
     src/GraphicsContextRender2D.cpp
+    src/EngineTexture.cpp
     src/ImageBufferTextures.cpp
     src/Input.cpp
     src/ColorChooserOverlay.cpp
