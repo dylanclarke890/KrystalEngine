@@ -1,15 +1,50 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
+#include "Krystal.Booey/HTML/CanvasBase.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+
+namespace krys::boo
+{
+  class GraphicsContext;
+}
 
 namespace krys::boo::html
 {
+  /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
+  /// fallback content, which isn't rendered.
   /// @see https://html.spec.whatwg.org/#htmlcanvaselement
-  class HTMLCanvasElement : public HTMLElement
+  class HTMLCanvasElement : public HTMLElement, public CanvasBase
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLCanvasElement);
 
+  private:
+    bool _isSnapshotting {false};
+    UniquePtr<CanvasRenderingContext> _context;
+
   public:
+    // These values come from the HTML standard.
+    static constexpr uint32 DefaultWidth = 300;
+    static constexpr uint32 DefaultHeight = 150;
+
+    HTMLCanvasElement(dom::Document &document) noexcept;
+    ~HTMLCanvasElement() noexcept override;
+
+    void AddRef() const noexcept final
+    {
+      HTMLElement::AddRef();
+    }
+    void SubRef() const noexcept final
+    {
+      HTMLElement::SubRef();
+    }
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return HTMLElement::GetRefCount();
+    }
+
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
     {
       return false;
@@ -19,50 +54,94 @@ namespace krys::boo::html
       return false;
     }
 
-    HTMLCanvasElement(dom::Document &document) noexcept;
-
+    /// @brief A canvas is always replaced: the host draws into it, as scripts would.
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
     {
-      // FIXME: A canvas is replaced when scripting is enabled for it; there is no scripting yet.
-      return false;
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsHTMLCanvasElement() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD CanvasRenderingContext *RenderingContext() const noexcept final
+    {
+      return _context.get();
     }
 
 #pragma region HTMLCanvasElement - https://html.spec.whatwg.org/#htmlcanvaselement
 
     /// @see https://html.spec.whatwg.org/#dom-canvas-width
-    KRYS_NODISCARD uint32 Width() const noexcept;
+    KRYS_NODISCARD uint32 Width() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-canvas-width
     void Width(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-canvas-height
-    KRYS_NODISCARD uint32 Height() const noexcept;
+    KRYS_NODISCARD uint32 Height() const noexcept final;
 
     /// @see https://html.spec.whatwg.org/#dom-canvas-height
     void Height(uint32 value) noexcept;
 
-    // TODO(HTMLCANVAS, HTML): Implement the context attribute and related APIs.
-    // RenderingContext? getContext(dom::DOMString contextId, optional any options = null);
-    //
-    // USVString toDataURL(optional dom::DOMString type = "image/png", optional any quality);
-    // undefined toBlob(BlobCallback _callback, optional dom::DOMString type = "image/png",
-    //                   optional any quality);
-    // OffscreenCanvas transferControlToOffscreen();
+    /// @brief The canvas's context of type @p contextId, made on the first call; null if the canvas already
+    /// has a context of another type, or there's no such type.
+    /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
+    // TODO(HTMLCANVAS, HTML): The engine texture context (B13c) and the 2D context (B14).
+    KRYS_NODISCARD RefPtr<CanvasRenderingContext> GetContext(dom::DOMStringView contextId) noexcept;
+
+    // toDataURL() and toBlob() come with the 2D context; transferControlToOffscreen() isn't planned.
 
 #pragma endregion
 
+    void DidDraw(const Maybe<FloatRect> &rect) noexcept final;
+
+    /// @brief Paints the context's pixels into @p rect, when they aren't shown as the layer's contents.
+    void Paint(GraphicsContext &context, const LayoutRect &rect) noexcept;
+
+    void SetIsSnapshotting(bool isSnapshotting) noexcept
+    {
+      _isSnapshotting = isSnapshotting;
+    }
+    KRYS_NODISCARD bool IsSnapshotting() const noexcept
+    {
+      return _isSnapshotting;
+    }
+
   protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;
     void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
                                                 dom::DOMStringView value,
                                                 css::MutableStyleProperties &style) noexcept override;
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
+  private:
+    void DidUpdateSizeProperties() noexcept;
+
+    /// @brief Whether the context's pixels are shown as the canvas's layer contents.
+    KRYS_NODISCARD bool UsesContentsAsLayerContents() const noexcept;
+
+    KRYS_NODISCARD Maybe<FloatRect>
+      ComputeDirtyRectangleIfNeeded(const Maybe<FloatRect> &rect) const noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLCanvasElement)
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLCanvasElement();
+  }
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    auto *element = krys::DynamicDowncast<krys::boo::html::HTMLElement>(target);
+    return element && element->IsHTMLCanvasElement();
+  }
+  KRYS_NODISCARD static bool IsType(const krys::boo::html::CanvasBase &target) noexcept
   {
     return target.IsHTMLCanvasElement();
   }

@@ -6,8 +6,8 @@
 namespace krys::boo
 {
   /// @brief A `-webkit-canvas()` image: the contents of a named CSS canvas.
-  /// FIXME: Observing the document's CSS canvas element (`CanvasObserver`, `element`) and drawing come with
-  /// `HTMLCanvasElement`.
+  /// FIXME: Observing the document's CSS canvas element (`CanvasObserver`, `element`) and drawing need the
+  /// document's CSS canvases (`getCSSCanvasContext`), which only scripts make.
   class StyleCanvasImage final : public StyleGeneratedImage
   {
   private:

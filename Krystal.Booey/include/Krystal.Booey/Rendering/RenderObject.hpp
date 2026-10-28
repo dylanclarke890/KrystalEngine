@@ -924,6 +924,10 @@ namespace krys::boo
     {
       return _type == Type::TableRow;
     }
+    KRYS_NODISCARD bool IsRenderHTMLCanvas() const noexcept
+    {
+      return _type == Type::HTMLCanvas;
+    }
     KRYS_NODISCARD bool IsTablePart() const noexcept
     {
       return IsRenderTableCell() || IsRenderTableCol() || IsRenderTableCaption() || IsRenderTableRow()

@@ -2,10 +2,12 @@
 #include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/Layout/Integration/Inline/InlineIteratorTextBox.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -17,6 +19,8 @@
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
+#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
@@ -1052,8 +1056,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Canvases, video, embedded objects and iframes too, once there are any.
-    return Renderer().HasNonVisibleOverflow()
+    // FIXME: Video, embedded objects and iframes too, once there are any.
+    return Renderer().HasNonVisibleOverflow() || Renderer().IsRenderHTMLCanvas()
            || (Renderer().Style().SpecifiesColumns() && !IsRenderViewLayer())
            || Renderer().IsRenderFragmentedFlow();
   }
@@ -2658,9 +2662,9 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Canvases, video, embedded objects and iframes too, once there are any.
+    // FIXME: Video, embedded objects and iframes too, once there are any.
     return HasOverlayScrollbars() || HasCompositedScrollableOverflow() || Renderer().IsRenderTableRow()
-           || Renderer().IsRenderFragmentedFlow();
+           || Renderer().IsRenderHTMLCanvas() || Renderer().IsRenderFragmentedFlow();
   }
 
   void RenderLayer::UpdateSelfPaintingLayer() noexcept
@@ -2690,6 +2694,34 @@ namespace krys::boo
       // FIXME: Update the float painter of a floating box (updateFloatPainterAfterSelfPaintingLayerChange),
       // once floats track it.
     }
+  }
+
+  bool RenderLayer::IsBitmapOnly() const noexcept
+  {
+    if (HasVisibleBoxDecorationsOrBackground())
+    {
+      return false;
+    }
+
+    if (Is<RenderHTMLCanvas>(Renderer()))
+    {
+      return true;
+    }
+
+    if (auto *imageRenderer = DynamicDowncast<RenderImage>(Renderer()))
+    {
+      if (auto *cachedImage = imageRenderer->GetCachedImage())
+      {
+        if (!cachedImage->HasImage())
+        {
+          return false;
+        }
+        return Is<BitmapImage>(cachedImage->ImageForRenderer(imageRenderer));
+      }
+      return false;
+    }
+
+    return false;
   }
 
   bool RenderLayer::HasVisibleBoxDecorationsOrBackground() const noexcept

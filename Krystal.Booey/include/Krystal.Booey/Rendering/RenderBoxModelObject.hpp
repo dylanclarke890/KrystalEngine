@@ -211,13 +211,9 @@ namespace krys::boo
     KRYS_NODISCARD bool FixedBackgroundPaintsInLocalCoordinates() const noexcept;
 
     /// @brief How @p image is interpolated when drawn at @p size.
-    /// FIXME: The image quality controller (low quality while an image is resized live) comes with bitmap
-    /// images.
-    KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &, const void *,
-                                                                   const LayoutSize &) const noexcept
-    {
-      return InterpolationQuality::Default;
-    }
+    KRYS_NODISCARD InterpolationQuality ChooseInterpolationQuality(GraphicsContext &, Image &image,
+                                                                   const void *layer,
+                                                                   const LayoutSize &size) const noexcept;
 
     /// @brief Whether every side of the border is opaque and at least two device pixels wide (at
     /// @p contextScale), so the background's edge needn't show beneath it.

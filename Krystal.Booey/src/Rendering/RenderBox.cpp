@@ -3959,8 +3959,8 @@ namespace krys::boo
 
   bool RenderBox::HasIntrinsicAspectRatio() const noexcept
   {
-    // FIXME: Video, canvas and view transition captures, once they have renderers.
-    return IsBlockLevelReplacedOrAtomicInline() && IsRenderImage();
+    // FIXME: Video and view transition captures, once they have renderers.
+    return IsBlockLevelReplacedOrAtomicInline() && (IsRenderImage() || IsRenderHTMLCanvas());
   }
 
 #pragma endregion

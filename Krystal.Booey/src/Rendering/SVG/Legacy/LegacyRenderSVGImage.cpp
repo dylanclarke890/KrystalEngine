@@ -9,6 +9,7 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/LayoutRepainter.hpp"
 #include "Krystal.Booey/Rendering/PaintInfo.hpp"
 #include "Krystal.Booey/Rendering/PointerEventsHitRules.hpp"
@@ -25,32 +26,6 @@
 
 namespace krys::boo
 {
-  namespace
-  {
-    // FIXME: The image quality controller (ImageQualityController::chooseInterpolationQualityForSVG) comes
-    // with bitmap images; this is its choice for SVG images.
-    KRYS_NODISCARD InterpolationQuality ChooseInterpolationQualityForSVG(GraphicsContext &context,
-                                                                         const RenderElement &renderElement,
-                                                                         Image &image) noexcept
-    {
-      // If the image is not a bitmap image, then none of this is relevant and we just paint at high quality.
-      if (!image.IsBitmapImage() || context.PaintingDisabled())
-      {
-        return InterpolationQuality::Default;
-      }
-
-      switch (renderElement.Style().GetImageRendering())
-      {
-        case ImageRendering::OptimizeSpeed:   return InterpolationQuality::Low;
-        case ImageRendering::CrispEdges:
-        case ImageRendering::Pixelated:       return InterpolationQuality::DoNotInterpolate;
-        case ImageRendering::OptimizeQuality:
-        case ImageRendering::Auto:            break;
-      }
-      return InterpolationQuality::Default;
-    }
-  }
-
   LegacyRenderSVGImage::LegacyRenderSVGImage(svg::SVGImageElement &element, RenderStyle &&style) noexcept
       : LegacyRenderSVGModelObject(Type::LegacySVGImage, element, krys::move(style),
                                    {SVGModelObjectFlag::UsesBoundaryCaching}),
@@ -267,8 +242,9 @@ namespace krys::boo
     ImageElement().PreserveAspectRatio().TransformRect(destRect, srcRect);
 
     // FIXME: The HDR content and dynamic range limit options, once there are any.
-    ImagePaintingOptions options = {GetImageOrientation(),
-                                    ChooseInterpolationQualityForSVG(paintInfo.Context(), *this, *image)};
+    ImagePaintingOptions options = {
+      GetImageOrientation(),
+      ImageQualityController::ChooseInterpolationQualityForSVG(paintInfo.Context(), *this, *image)};
 
     auto &context = paintInfo.Context();
     (void)context.DrawImage(*image, destRect, srcRect, options);

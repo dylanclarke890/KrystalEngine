@@ -502,5 +502,19 @@ namespace krys::boo
       const RenderLayer *compositedAncestor, const LayoutRect &parentGraphicsLayerRect) const noexcept;
   };
 
+  /// @brief How a canvas's pixels reach the screen.
+  enum class CanvasCompositingStrategy : uint8
+  {
+    /// Painted into the layer of the box it's in, like other content.
+    CanvasPaintedToEnclosingLayer,
+    /// Painted into a compositing layer of its own.
+    CanvasPaintedToLayer,
+    /// Shown as its compositing layer's contents, drawn by its context.
+    CanvasAsLayerContents
+  };
+  /// @brief How @p renderer, a canvas's, is composited.
+  KRYS_NODISCARD CanvasCompositingStrategy
+    GetCanvasCompositingStrategy(const RenderObject &renderer) noexcept;
+
   TextStream &operator<<(TextStream &ts, const RenderLayerBacking &backing) noexcept;
 }

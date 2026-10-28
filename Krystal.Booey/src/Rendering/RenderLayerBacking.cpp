@@ -8,12 +8,14 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Platform/Scrollbar.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
 #include "Krystal.Booey/Rendering/BorderShape.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
@@ -35,6 +37,22 @@
 
 namespace krys::boo
 {
+  CanvasCompositingStrategy GetCanvasCompositingStrategy(const RenderObject &renderer) noexcept
+  {
+    krys_debug_assert(renderer.IsRenderHTMLCanvas());
+    auto *context = Downcast<RenderHTMLCanvas>(renderer).CanvasElement().RenderingContext();
+    if (!context)
+    {
+      return CanvasCompositingStrategy::CanvasPaintedToEnclosingLayer;
+    }
+    if (context->DelegatesDisplay())
+    {
+      return CanvasCompositingStrategy::CanvasAsLayerContents;
+    }
+    // FIXME: An accelerated 2D context is painted to a layer of its own, once there's one.
+    return CanvasCompositingStrategy::CanvasPaintedToEnclosingLayer;
+  }
+
   // This acts as a cache of what we know about what is painting into this RenderLayerBacking.
   class PaintedContentsInfo
   {
@@ -3188,7 +3206,7 @@ namespace krys::boo
 
   bool RenderLayerBacking::IsBitmapOnly() const noexcept
   {
-    return _owningLayer.CanPaintTransparencyWithSetOpacity();
+    return _owningLayer.IsBitmapOnly();
   }
 
   bool RenderLayerBacking::IsUnscaledBitmapOnly() const noexcept

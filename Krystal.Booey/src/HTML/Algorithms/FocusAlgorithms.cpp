@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
@@ -109,8 +110,26 @@ namespace krys::boo::html
         style = const_cast<dom::Element &>(element).ResolveComputedStyle(
           dom::Element::ResolveComputedStyleMode::RenderedOnly);
       }
-      // FIXME: Relevant canvas fallback content, once there's canvas.
       return style && style->Display() != DisplayType::None && style->GetVisibility() == Visibility::Visible;
+    }
+
+    /// @brief Whether @p element is a canvas's fallback content, which isn't rendered, while the canvas is
+    /// not being rendered either.
+    /// @see https://html.spec.whatwg.org/#being-used-as-relevant-canvas-fallback-content
+    KRYS_NODISCARD bool IsIrrelevantCanvasFallbackContent(const dom::Element &element) noexcept
+    {
+      if (element.Renderer())
+      {
+        return false;
+      }
+      for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+      {
+        if (auto *canvas = DynamicDowncast<HTMLCanvasElement>(*ancestor))
+        {
+          return !IsBeingRendered(*canvas);
+        }
+      }
+      return false;
     }
 
     KRYS_NODISCARD bool IsShadowHostThatDelegatesFocus(const dom::Element &element) noexcept
@@ -244,6 +263,11 @@ namespace krys::boo::html
     {
       auto image = area->ImageElement();
       return image && IsBeingRendered(*image);
+    }
+    // Fallback content isn't rendered, but it's focusable while its canvas is rendered.
+    if (IsIrrelevantCanvasFallbackContent(element))
+    {
+      return false;
     }
     return IsBeingRendered(element);
   }

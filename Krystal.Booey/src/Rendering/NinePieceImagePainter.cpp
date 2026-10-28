@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Core/BoxExtents.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
+#include "Krystal.Booey/Rendering/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImage.hpp"
@@ -244,22 +245,6 @@ namespace krys::boo
       return scales;
     }
 
-    /// The interpolation an image is drawn with by `image-rendering`.
-    /// FIXME: The image quality controller (ImageQualityController::interpolationQualityFromStyle) comes with
-    /// bitmap images; this is its mapping.
-    KRYS_NODISCARD InterpolationQuality InterpolationQualityFromStyle(const RenderStyle &style) noexcept
-    {
-      switch (style.GetImageRendering())
-      {
-        case ImageRendering::OptimizeSpeed:   return InterpolationQuality::Low;
-        case ImageRendering::CrispEdges:
-        case ImageRendering::Pixelated:       return InterpolationQuality::DoNotInterpolate;
-        case ImageRendering::OptimizeQuality:
-        case ImageRendering::Auto:            break;
-      }
-      return InterpolationQuality::Default;
-    }
-
     KRYS_NODISCARD Image::TileRule ToTileRule(NinePieceImageRule rule) noexcept
     {
       return static_cast<Image::TileRule>(rule);
@@ -297,8 +282,8 @@ namespace krys::boo
         return;
       }
 
-      InterpolationQualityMaintainer interpolationMaintainer(graphicsContext,
-                                                             InterpolationQualityFromStyle(style));
+      InterpolationQualityMaintainer interpolationMaintainer(
+        graphicsContext, ImageQualityController::InterpolationQualityFromStyle(style));
 
       for (int32 index = MinPiece; index < MaxPiece; ++index)
       {

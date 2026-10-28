@@ -11,6 +11,7 @@
 #include "Krystal.Booey/Rendering/PositionedLayoutConstraints.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderFlexibleBox.hpp"
+#include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
@@ -28,7 +29,12 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldRepaintOnSizeChange(RenderReplaced &renderer) noexcept
     {
-      // FIXME: Canvases, and excluding media, once they have renderers.
+      if (Is<RenderHTMLCanvas>(renderer))
+      {
+        return true;
+      }
+
+      // FIXME: Excluding media, once it has renderers.
       if (auto *renderImage = DynamicDowncast<RenderImage>(renderer);
           renderImage && !renderImage->IsShowingMissingOrImageError())
       {

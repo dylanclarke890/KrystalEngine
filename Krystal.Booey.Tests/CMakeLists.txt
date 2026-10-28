@@ -393,6 +393,8 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderIterator.cpp
 		tests/Rendering/RenderCounter.cpp
 		tests/Rendering/RenderLayer.cpp
+		tests/Rendering/RenderHTMLCanvas.cpp
+		tests/Rendering/ImageQualityController.cpp
 		tests/Rendering/HitTestResult.cpp
 		tests/DOM/KeyboardEvent.cpp
 		tests/DOM/EventListenerHandle.cpp
@@ -489,6 +491,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Parser/HTMLSrcsetParser.cpp
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/HTMLImageElement.cpp
+		tests/HTML/HTMLCanvasElement.cpp
 		tests/HTML/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibilityDocumentState.cpp
 		tests/Rendering/LineClampUpdater.cpp

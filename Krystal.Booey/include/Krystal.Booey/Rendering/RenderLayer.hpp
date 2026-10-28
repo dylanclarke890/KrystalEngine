@@ -1140,12 +1140,12 @@ namespace krys::boo
     KRYS_NODISCARD bool PaintsWithTransparency(EnumSet<PaintBehavior>) const noexcept;
     KRYS_NODISCARD bool HasNonOpacityTransparency() const noexcept;
     /// @brief Whether the layer's opacity can be applied as an alpha rather than a transparency layer.
-    /// FIXME: Only bitmap-only layers (isBitmapOnly: canvases and bitmap images) can, which come with images;
-    /// always false.
     KRYS_NODISCARD bool CanPaintTransparencyWithSetOpacity() const noexcept
     {
-      return false;
+      return IsBitmapOnly() && !HasNonOpacityTransparency() && !HasFilter();
     }
+    /// @brief Whether the layer paints nothing but a canvas or a bitmap image.
+    KRYS_NODISCARD bool IsBitmapOnly() const noexcept;
 
     /// @brief The transform the layer paints with, flattened to 2D when flattening compositing layers.
     KRYS_NODISCARD TransformationMatrix RenderableTransform(EnumSet<PaintBehavior>) const noexcept;

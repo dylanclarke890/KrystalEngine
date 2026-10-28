@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Scrolling/ScrollingConstraints.hpp"
 #include "Krystal.Booey/Rendering/BorderEdge.hpp"
+#include "Krystal.Booey/Rendering/ImageQualityController.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerScrollableArea.hpp"
@@ -1220,6 +1221,13 @@ namespace krys::boo
     // Only a composited root layer paints its fixed background in its own coordinates; there's no
     // compositing.
     return false;
+  }
+
+  InterpolationQuality RenderBoxModelObject::ChooseInterpolationQuality(GraphicsContext &context,
+                                                                        Image &image, const void *,
+                                                                        const LayoutSize &) const noexcept
+  {
+    return ImageQualityController::ChooseInterpolationQuality(context, *this, image);
   }
 
   bool RenderBoxModelObject::BorderObscuresBackgroundEdge(const FloatSize &contextScale) const noexcept
