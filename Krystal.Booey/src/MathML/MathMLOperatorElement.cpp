@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/MathML/MathMLOperatorElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include "Krystal.Core/Text/Unicode.hpp"
@@ -227,6 +229,19 @@ namespace krys::boo::mathml
     return CachedMathMLLength(MathMLNames::MaxsizeAttr(), _maxSize);
   }
 
+  void MathMLOperatorElement::UpdateRendererFromElement() noexcept
+  {
+    if (auto *renderer = Renderer())
+    {
+      Downcast<RenderMathMLOperator>(*renderer).UpdateFromElement();
+    }
+  }
+
+  RenderPtr<RenderElement> MathMLOperatorElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<RenderMathMLOperator>(*this, krys::move(style));
+  }
+
   void MathMLOperatorElement::OnChildrenChanged() noexcept
   {
     _operatorChar.reset();
@@ -247,10 +262,12 @@ namespace krys::boo::mathml
     else if (name == MathMLNames::LspaceAttr())
     {
       _leadingSpace.reset();
+      UpdateRendererFromElement();
     }
     else if (name == MathMLNames::RspaceAttr())
     {
       _trailingSpace.reset();
+      UpdateRendererFromElement();
     }
     else if (name == MathMLNames::MinsizeAttr())
     {
@@ -263,10 +280,12 @@ namespace krys::boo::mathml
     else if (name == MathMLNames::StretchyAttr())
     {
       _properties.DirtyFlags |= MathMLOperatorDictionary::Stretchy;
+      UpdateRendererFromElement();
     }
     else if (name == MathMLNames::MovablelimitsAttr())
     {
       _properties.DirtyFlags |= MathMLOperatorDictionary::MovableLimits;
+      UpdateRendererFromElement();
     }
     else if (name == MathMLNames::AccentAttr())
     {

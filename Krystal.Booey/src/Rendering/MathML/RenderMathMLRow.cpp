@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp"
 #include "Krystal.Booey/MathML/MathMLRowElement.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include <algorithm>
 #include <cmath>
@@ -33,14 +34,32 @@ namespace krys::boo
         .ToFloat()));
   }
 
+  namespace
+  {
+    KRYS_NODISCARD RenderMathMLOperator *ToVerticalStretchyOperator(RenderBox *box) noexcept
+    {
+      if (auto *mathMLBlock = DynamicDowncast<RenderMathMLBlock>(box))
+      {
+        auto *renderOperator = mathMLBlock->UnembellishedOperator();
+        if (renderOperator && renderOperator->IsStretchy() && renderOperator->IsVertical())
+        {
+          return renderOperator;
+        }
+      }
+      return nullptr;
+    }
+  }
+
   void RenderMathMLRow::StretchVerticalOperatorsAndLayoutChildren() noexcept
   {
     // First calculate stretch ascent and descent.
-    // FIXME: Vertical stretchy operators are skipped here and stretched to the row's ascent and descent, once
-    // there's RenderMathMLOperator (B12d).
     LayoutUnit stretchAscent, stretchDescent;
     for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
     {
+      if (ToVerticalStretchyOperator(child))
+      {
+        continue;
+      }
       child->LayoutIfNeeded();
       LayoutUnit childAscent = AscentForChild(*child) + child->MarginBefore();
       LayoutUnit childDescent = child->LogicalHeight() + child->MarginLogicalHeight() - childAscent;
@@ -52,6 +71,17 @@ namespace krys::boo
       // We ensure a minimal stretch size.
       stretchAscent = LayoutUnit(Style().ComputedFontSize());
       stretchDescent = 0;
+    }
+
+    // Next, we stretch the vertical operators.
+    for (auto *child = FirstInFlowChildBox(); child; child = child->NextInFlowSiblingBox())
+    {
+      if (auto *renderOperator = ToVerticalStretchyOperator(child))
+      {
+        renderOperator->StretchTo(stretchAscent, stretchDescent);
+        renderOperator->LayoutIfNeeded();
+        child->LayoutIfNeeded();
+      }
     }
   }
 

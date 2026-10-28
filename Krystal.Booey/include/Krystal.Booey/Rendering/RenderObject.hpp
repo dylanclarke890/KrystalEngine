@@ -1022,6 +1022,10 @@ namespace krys::boo
     {
       return _type == Type::MathMLMath;
     }
+    KRYS_NODISCARD bool IsRenderMathMLOperator() const noexcept
+    {
+      return _type == Type::MathMLOperator;
+    }
     KRYS_NODISCARD bool IsRenderMathMLPadded() const noexcept
     {
       return _type == Type::MathMLPadded;

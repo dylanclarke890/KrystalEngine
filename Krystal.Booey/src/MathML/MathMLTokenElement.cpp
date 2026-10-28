@@ -26,10 +26,8 @@ namespace krys::boo::mathml
 
   RenderPtr<RenderElement> MathMLTokenElement::CreateElementRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: <mo> is a token until it's made a RenderMathMLOperator (B12d).
     krys_debug_assert(HasTagName(html::TagName::mi) || HasTagName(html::TagName::mn)
-                      || HasTagName(html::TagName::ms) || HasTagName(html::TagName::mtext)
-                      || HasTagName(html::TagName::mo));
+                      || HasTagName(html::TagName::ms) || HasTagName(html::TagName::mtext));
 
     return CreateRenderer<RenderMathMLToken>(RenderObject::Type::MathMLToken, *this, krys::move(style));
   }

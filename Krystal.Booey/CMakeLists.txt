@@ -4058,8 +4058,10 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/MathML/MathMLUnderOverElement.hpp
       include/Krystal.Booey/MathML/MathMLUnknownElement.hpp
       include/Krystal.Booey/Rendering/MathML/MathVariant.hpp
+      include/Krystal.Booey/Rendering/MathML/MathOperator.hpp
       include/Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp
       include/Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp
       include/Krystal.Booey/Rendering/MathML/RenderMathMLPadded.hpp
       include/Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp
       include/Krystal.Booey/Rendering/MathML/RenderMathMLSpace.hpp
@@ -4538,8 +4540,10 @@ target_sources(Krystal.Booey
     src/MathML/MathMLTokenElement.cpp
     src/MathML/MathMLUnderOverElement.cpp
     src/Rendering/MathML/MathVariant.cpp
+    src/Rendering/MathML/MathOperator.cpp
     src/Rendering/MathML/RenderMathMLBlock.cpp
     src/Rendering/MathML/RenderMathMLMath.cpp
+    src/Rendering/MathML/RenderMathMLOperator.cpp
     src/Rendering/MathML/RenderMathMLPadded.cpp
     src/Rendering/MathML/RenderMathMLRow.cpp
     src/Rendering/MathML/RenderMathMLSpace.cpp

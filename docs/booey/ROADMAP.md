@@ -988,3 +988,10 @@ MathML. Booey already has the HTML parser's MathML steps (foreign content, `anno
 - **Dropped:** `MathMLStyle` (only `mathvariant`, which Core doesn't use: B12a, B12b) with the token renderer's glyph path; `RenderTreeBuilderMathML` (only `<mfenced>`).
 - **For B12d:** `RenderMathMLRow::StretchVerticalOperatorsAndLayoutChildren` has the FIXME for stretching vertical operators, `RenderMathMLBlock::UnembellishedOperator` returns null until there are operators, and `MathMLTokenElement::CreateElementRenderer` allows `<mo>` until it has its own renderer.
 - **Tests:** Booey: `tests/Rendering/MathML/RenderMathMLBlock.cpp`, `RenderMathMLRow.cpp`, `RenderMathMLSpace.cpp`, `RenderMathMLPadded.cpp`, `RenderMathMLToken.cpp`; 3006 cases pass. Krystal.UI: 133 cases pass.
+
+### B12d as built (2026-10-27)
+
+- **Booey** (the ledger entry is *MathML operators* in `docs/booey/PORTING.md`): `MathOperator` (size variants, glyph assemblies from the MATH table or Unicode's bracket pieces, display-style large operators, the scaled radical, painting) and `RenderMathMLOperator` (dictionary and attribute spacing, `stretchy`, `symmetric`, `largeop`, `movablelimits`, `minsize` and `maxsize`); `<mo>` makes one, and rows stretch their vertical operators to the other children's ascent and descent.
+- **Dropped:** `RenderMathMLFencedOperator` (only `<mfenced>`), and with it the operator's anonymous constructor and virtuals.
+- **For B12e:** horizontal stretching (`RenderMathMLOperator::StretchTo(width)`, `SetStretchWidthLocked`) waits for `<munder>` and `<mover>`; `UnembellishedOperator` is only the operator's own until fractions, scripts and under and over pass theirs through; `ShouldMoveLimits` and `ItalicCorrection` wait for the script layouts; the radical's `MathOperator` waits for roots.
+- **Tests:** Booey: `tests/Rendering/MathML/RenderMathMLOperator.cpp`; 3011 cases pass. Krystal.UI: 133 cases pass.

@@ -58,10 +58,8 @@ namespace krys::boo::mathml
     KRYS_NODISCARD const Length &MinSize() noexcept;
     KRYS_NODISCARD const Length &MaxSize() noexcept;
 
-    // FIXME: The element is made a RenderMathMLOperator (B12d), which is updated when lspace, rspace,
-    // stretchy or movablelimits change; until then it's laid out as a token.
-
   private:
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
     void OnChildrenChanged() noexcept final;
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
@@ -69,6 +67,7 @@ namespace krys::boo::mathml
     KRYS_NODISCARD MathMLOperatorDictionary::Property ComputeDictionaryProperty() noexcept;
     KRYS_NODISCARD const MathMLOperatorDictionary::Property &DictionaryProperty() noexcept;
     void ComputeOperatorFlag(MathMLOperatorDictionary::Flag flag) noexcept;
+    void UpdateRendererFromElement() noexcept;
   };
 }
 
