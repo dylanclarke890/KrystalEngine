@@ -40,6 +40,7 @@ namespace krys::text
   constexpr char32 HiraganaLetterSmallA = 0x3041;
   constexpr char32 HorizontalEllipsis = 0x2026;
   constexpr char32 Hyphen = 0x2010;
+  constexpr char32 HyphenMinus = 0x002D;
   constexpr char32 IdeographicSpace = 0x3000;
   constexpr char32 InhibitArabicFormShaping = 0x206C;
   constexpr char32 InhibitSymmetricSwapping = 0x206A;
@@ -53,6 +54,7 @@ namespace krys::text
   constexpr char32 LeftToRightOverride = 0x202D;
   constexpr char32 LineSeparator = 0x2028;
   constexpr char32 MediumShade = 0x2592;
+  constexpr char32 MinusSign = 0x2212;
   constexpr char32 NarrowNoBreakSpace = 0x202F;
   constexpr char32 NationalDigitShapes = 0x206E;
   constexpr char32 NewlineCharacter = 0x000A;

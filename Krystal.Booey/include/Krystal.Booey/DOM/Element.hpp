@@ -777,7 +777,7 @@ namespace krys::boo::dom
 
     /// @brief Whether @p child, a child of the element in the composed tree, gets a renderer when the element
     /// has one.
-    // FIXME: The overrides (media, SVG, MathML, ...) come with their renderers.
+    // FIXME: The overrides (media, ...) come with their renderers.
     KRYS_NODISCARD virtual bool ChildShouldCreateRenderer(const Node &) const noexcept
     {
       return true;

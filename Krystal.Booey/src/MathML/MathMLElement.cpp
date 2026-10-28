@@ -1,57 +1,126 @@
 ﻿#include "Krystal.Booey/MathML/MathMLElement.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
+#include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <charconv>
-#include <format>
 
 namespace krys::boo::mathml
 {
-  MathMLElement::MathMLElement(dom::Document &document) noexcept
-      : StyledElement(document, dom::NullQualifiedName(), dom::NodeFlags::IsMathMLElement)
+  namespace
   {
+    // The largest value a non-negative integer reflects as.
+    // https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes:idl-unsigned-long
+    constexpr uint32 MaxHTMLNonNegativeInteger = 2'147'483'647;
+    // The largest rowspan a table cell takes, as HTML's.
+    constexpr uint32 MaxMathMLRowspan = 65'534;
+
+    KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(dom::DOMStringView value, uint32 defaultValue) noexcept
+    {
+      auto result = html::Numbers::ParseNonNegativeInteger(value);
+      if (!result.Success() || result.Value > MaxHTMLNonNegativeInteger)
+      {
+        return defaultValue;
+      }
+      return static_cast<uint32>(result.Value);
+    }
+  }
+
+  MathMLElement::MathMLElement(dom::Document &document, MathMLElementInterface interface,
+                               dom::NodeFlags nodeFlags) noexcept
+      : StyledElement(document, dom::NullQualifiedName(), nodeFlags | dom::NodeFlags::IsMathMLElement),
+        _interface(interface)
+  {
+  }
+
+  uint32 MathMLElement::ColSpan() const noexcept
+  {
+    if (!HasTagName(html::TagName::mtd))
+    {
+      return 1u;
+    }
+    auto colSpanValue = AttributeValue(MathMLNames::ColumnspanAttr()).value_or(dom::DOMString {});
+    return std::max(1u, LimitToOnlyHTMLNonNegative(colSpanValue, 1u));
+  }
+
+  uint32 MathMLElement::RowSpan() const noexcept
+  {
+    if (!HasTagName(html::TagName::mtd))
+    {
+      return 1u;
+    }
+    auto rowSpanValue = AttributeValue(MathMLNames::RowspanAttr()).value_or(dom::DOMString {});
+    return std::max(1u, std::min(LimitToOnlyHTMLNonNegative(rowSpanValue, 1u), MaxMathMLRowspan));
+  }
+
+  Maybe<dom::DOMString> MathMLElement::AttributeValue(const dom::QualifiedName &name) const noexcept
+  {
+    return GetAttributeNS(name.NamespaceURI(), name.LocalName());
+  }
+
+  void MathMLElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                         Maybe<dom::DOMStringView> value,
+                                         dom::DOMStringAtom namespaceURI) noexcept
+  {
+    AttributeChanged(dom::QualifiedName {namespaceURI, dom::DOMStringAtom::Null(), localName}, oldValue,
+                     value);
+  }
+
+  void MathMLElement::AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
+                                       Maybe<dom::DOMStringView> value) noexcept
+  {
+    if (name == MathMLNames::ColumnspanAttr() || name == MathMLNames::RowspanAttr())
+    {
+      if (auto *cell = DynamicDowncast<RenderTableCell>(Renderer()); cell && HasTagName(html::TagName::mtd))
+      {
+        cell->ColSpanOrRowSpanChanged();
+      }
+    }
+
+    StyledElement::OnAttributeChanged(name.LocalName(), oldValue, value, name.NamespaceURI());
   }
 
 #pragma region Presentational hints
 
   namespace
   {
-    KRYS_NODISCARD bool IsOneOf(dom::DOMStringView value,
-                                std::initializer_list<dom::DOMStringView> values) noexcept
+    KRYS_NODISCARD bool EndsWithIgnoringASCIICase(dom::DOMStringView value,
+                                                  dom::DOMStringView suffix) noexcept
     {
-      return std::ranges::find(values, value) != values.end();
+      return value.size() >= suffix.size()
+             && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value.substr(value.size() - suffix.size()),
+                                                                   suffix);
     }
 
-    KRYS_NODISCARD css::CSSOMString ConvertMathSizeIfNeeded(dom::DOMStringView value) noexcept
+    KRYS_NODISCARD bool IsDisallowedMathSizeAttribute(dom::DOMStringView value) noexcept
     {
-      if (value == u8"small")
+      // FIXME: The CSS parser sometimes accept non-zero <number> font-size values on MathML elements, so
+      // explicitly disallow them.
+      auto number = value;
+      while (!number.empty() && text::IsUnicodeCompatibleASCIIWhitespace(number.front()))
       {
-        return u8"0.75em";
+        number.remove_prefix(1);
       }
-      if (value == u8"normal")
+      double unused {};
+      const auto *first = reinterpret_cast<const char *>(number.data());
+      const auto *last = first + number.size();
+      auto result = std::from_chars(first, last, unused);
+      if (!number.empty() && result.ec == std::errc {} && result.ptr == last && value != u8"0")
       {
-        return u8"1em";
-      }
-      if (value == u8"big")
-      {
-        return u8"1.5em";
+        return true;
       }
 
-      // FIXME: mathsize accepts any MathML length, including named spaces (see parseMathMLLength).
-      // FIXME: Might be better to use double than float.
-      // FIXME: Might be better to use "shortest" numeric formatting instead of fixed width.
-      float unitlessValue {};
-      const auto *first = reinterpret_cast<const char *>(value.data());
-      const auto *last = first + value.size();
-      auto result = std::from_chars(first, last, unitlessValue);
-      if (result.ec != std::errc {} || result.ptr != last)
-      {
-        return css::CSSOMString(value);
-      }
-      auto percentage = std::format("{:.3f}%", unitlessValue * 100);
-      return css::CSSOMString(reinterpret_cast<const char8 *>(percentage.data()), percentage.size());
+      // Keywords from CSS font-size are disallowed.
+      return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"medium")
+             || EndsWithIgnoringASCIICase(value, u8"large") || EndsWithIgnoringASCIICase(value, u8"small")
+             || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"smaller")
+             || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"larger")
+             || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"math");
     }
 
     enum class ScriptLevelSyntax : uint8
@@ -66,9 +135,12 @@ namespace krys::boo::mathml
                                                          dom::DOMStringAtom namespaceURI) const noexcept
   {
     if (namespaceURI == dom::DOMStringAtom::Null()
-        && IsOneOf(localName.View(), {u8"background", u8"color", u8"dir", u8"fontfamily", u8"fontsize",
-                                      u8"fontstyle", u8"fontweight", u8"mathbackground", u8"mathcolor",
-                                      u8"mathsize", u8"displaystyle", u8"scriptlevel"}))
+        && (localName == MathMLNames::DirAttr().LocalName()
+            || localName == MathMLNames::MathbackgroundAttr().LocalName()
+            || localName == MathMLNames::MathcolorAttr().LocalName()
+            || localName == MathMLNames::MathsizeAttr().LocalName()
+            || localName == MathMLNames::DisplaystyleAttr().LocalName()
+            || localName == MathMLNames::ScriptlevelAttr().LocalName()))
     {
       return true;
     }
@@ -87,28 +159,30 @@ namespace krys::boo::mathml
     }
 
     auto string = css::CSSOMString(value);
-    if (localName == u8"mathbackground")
+    if (localName == MathMLNames::MathbackgroundAttr().LocalName())
     {
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::BackgroundColor, string);
       return;
     }
-    if (localName == u8"mathsize")
+    if (localName == MathMLNames::MathsizeAttr().LocalName())
     {
-      // The coreMathMLEnabled setting is off by default.
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontSize, ConvertMathSizeIfNeeded(value));
+      if (!IsDisallowedMathSizeAttribute(value))
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontSize, string);
+      }
       return;
     }
-    if (localName == u8"mathcolor")
+    if (localName == MathMLNames::MathcolorAttr().LocalName())
     {
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::Color, string);
       return;
     }
-    if (localName == u8"dir")
+    if (localName == MathMLNames::DirAttr().LocalName())
     {
       AddPropertyToPresentationalHintStyle(style, css::PropertyId::Direction, string);
       return;
     }
-    if (localName == u8"displaystyle")
+    if (localName == MathMLNames::DisplaystyleAttr().LocalName())
     {
       if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"false"))
       {
@@ -121,7 +195,7 @@ namespace krys::boo::mathml
       return;
     }
     // https://w3c.github.io/mathml-core/#dfn-scriptlevel
-    if (localName == u8"scriptlevel")
+    if (localName == MathMLNames::ScriptlevelAttr().LocalName())
     {
       auto view = value;
 
@@ -175,37 +249,14 @@ namespace krys::boo::mathml
       return;
     }
 
-    // FIXME: The following are deprecated attributes that should lose if there is a conflict with a
-    // non-deprecated attribute.
-    if (localName == u8"fontsize")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontSize, string);
-    }
-    else if (localName == u8"background")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::BackgroundColor, string);
-    }
-    else if (localName == u8"color")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::Color, string);
-    }
-    else if (localName == u8"fontstyle")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontStyle, string);
-    }
-    else if (localName == u8"fontweight")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontWeight, string);
-    }
-    else if (localName == u8"fontfamily")
-    {
-      AddPropertyToPresentationalHintStyle(style, css::PropertyId::FontFamily, string);
-    }
-    else
-    {
-      StyledElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
-    }
+    StyledElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion
+
+  bool MathMLElement::ChildShouldCreateRenderer(const dom::Node &child) const noexcept
+  {
+    // In general, only MathML children are allowed. Text nodes are only visible in token MathML elements.
+    return Is<MathMLElement>(child);
+  }
 }

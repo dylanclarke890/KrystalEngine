@@ -11,7 +11,7 @@
 #include "Krystal.Booey/HTML/Internals/HTMLElementFactory.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/MathML/Internals/MathMLElementFactory.hpp"
-#include "Krystal.Booey/MathML/MathMLElement.hpp"
+#include "Krystal.Booey/MathML/MathMLUnknownElement.hpp"
 #include "Krystal.Booey/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGUnknownElement.hpp"
@@ -78,7 +78,13 @@ namespace krys::boo::dom
     }
     else if (name.NamespaceURI() == infra::Namespaces::MathML)
     {
-      result = mathml::MathMLElementFactory::TryCreate(document, name);
+      // MathML's tag names are case-sensitive.
+      result = mathml::MathMLElementFactory::TryCreate(document, name.TagName());
+
+      if (result == nullptr)
+      {
+        result = CreateRefPtr<mathml::MathMLUnknownElement>(document);
+      }
     }
 
     if (result == nullptr)

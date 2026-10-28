@@ -657,6 +657,9 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/PresentationalHints.cpp
 		tests/HTML/ValidatedFormListedElement.cpp
 		tests/MathML/MathMLElement.cpp
+		tests/MathML/Internals/MathMLElementFactory.cpp
+		tests/MathML/MathMLOperatorElement.cpp
+		tests/MathML/MathMLPresentationElement.cpp
 		tests/HTML/Parser/HTMLCharacterReference.cpp
 		tests/HTML/Parser/HTMLDocumentParser.cpp
 		tests/HTML/Parser/HTMLElementStack.cpp

@@ -29,7 +29,8 @@ namespace krys::boo::style
   css::StyleSheetContents *UserAgentStyle::QuirksStyleSheet;
   css::StyleSheetContents *UserAgentStyle::SVGStyleSheet;
   css::StyleSheetContents *UserAgentStyle::MathMLStyleSheet;
-  css::StyleSheetContents *UserAgentStyle::MathMLLegacyFontSizeMathStyleSheet;
+  css::StyleSheetContents *UserAgentStyle::MathMLCoreExtrasStyleSheet;
+  css::StyleSheetContents *UserAgentStyle::MathMLFontSizeMathStyleSheet;
   css::StyleSheetContents *UserAgentStyle::MediaQueryStyleSheet;
   css::StyleSheetContents *UserAgentStyle::PopoverStyleSheet;
   css::StyleSheetContents *UserAgentStyle::HorizontalFormControlsStyleSheet;
@@ -217,12 +218,15 @@ namespace krys::boo::style
         AddToDefaultStyle(*MathMLStyleSheet);
       }
 
-      // FIXME: The MathML Core extras and font-size: math style sheets, once there are settings
-      // (CoreMathMLEnabled and CSSMathDepthEnabled are off by default).
-      if (!MathMLLegacyFontSizeMathStyleSheet)
+      if (!MathMLCoreExtrasStyleSheet)
       {
-        MathMLLegacyFontSizeMathStyleSheet = ParseUASheet(css::MathMLLegacyFontSizeMathUserAgentStyleSheet);
-        AddToDefaultStyle(*MathMLLegacyFontSizeMathStyleSheet);
+        MathMLCoreExtrasStyleSheet = ParseUASheet(css::MathMLCoreExtrasUserAgentStyleSheet);
+        AddToDefaultStyle(*MathMLCoreExtrasStyleSheet);
+      }
+      if (!MathMLFontSizeMathStyleSheet)
+      {
+        MathMLFontSizeMathStyleSheet = ParseUASheet(css::MathMLFontSizeMathUserAgentStyleSheet);
+        AddToDefaultStyle(*MathMLFontSizeMathStyleSheet);
       }
     }
 

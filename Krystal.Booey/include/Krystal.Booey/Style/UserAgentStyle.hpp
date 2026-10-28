@@ -30,7 +30,8 @@ namespace krys::boo::style
     static css::StyleSheetContents *QuirksStyleSheet;
     static css::StyleSheetContents *SVGStyleSheet;
     static css::StyleSheetContents *MathMLStyleSheet;
-    static css::StyleSheetContents *MathMLLegacyFontSizeMathStyleSheet;
+    static css::StyleSheetContents *MathMLCoreExtrasStyleSheet;
+    static css::StyleSheetContents *MathMLFontSizeMathStyleSheet;
     static css::StyleSheetContents *MediaQueryStyleSheet;
     static css::StyleSheetContents *HorizontalFormControlsStyleSheet;
     static css::StyleSheetContents *PopoverStyleSheet;

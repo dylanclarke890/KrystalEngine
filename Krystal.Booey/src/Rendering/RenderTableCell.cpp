@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.Booey/MathML/MathMLElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/LocalFrameViewLayoutContext.hpp"
 #include "Krystal.Booey/Rendering/BackgroundPainter.hpp"
@@ -323,7 +324,11 @@ namespace krys::boo
     {
       return std::min<uint32>(cell->ColSpan(), MaxColumnIndex);
     }
-    // FIXME: MathML table cells (mtd), once there's MathML.
+    auto *mathMLElement = DynamicDowncast<mathml::MathMLElement>(*GetElement());
+    if (mathMLElement && mathMLElement->HasTagName(html::TagName::mtd))
+    {
+      return std::min<uint32>(mathMLElement->ColSpan(), MaxColumnIndex);
+    }
     return 1;
   }
 
@@ -339,7 +344,11 @@ namespace krys::boo
       auto rowSpan = cell->RowSpan();
       return std::min<uint32>(rowSpan ? rowSpan : MaxRowspan, RenderTableRow::MaxRowIndex);
     }
-    // FIXME: MathML table cells (mtd), once there's MathML.
+    auto *mathMLElement = DynamicDowncast<mathml::MathMLElement>(*GetElement());
+    if (mathMLElement && mathMLElement->HasTagName(html::TagName::mtd))
+    {
+      return std::min<uint32>(mathMLElement->RowSpan(), RenderTableRow::MaxRowIndex);
+    }
     return 1;
   }
 

@@ -174,6 +174,32 @@ namespace krys::boo::html
     font_face_uri,
     missing_glyph,
     annotation_xml,
+    // MathML
+    annotation,
+    maction,
+    menclose,
+    merror,
+    mfrac,
+    mmultiscripts,
+    mover,
+    mpadded,
+    mphantom,
+    mprescripts,
+    mroot,
+    mrow,
+    mspace,
+    msqrt,
+    mstyle,
+    msub,
+    msubsup,
+    msup,
+    mtable,
+    mtd,
+    mtr,
+    munder,
+    munderover,
+    none,
+    semantics,
     // SVG
     animate,
     animateMotion,
@@ -231,7 +257,7 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TagName, 217u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TagName, 242u);
 
 namespace krys::boo::html
 {
@@ -398,6 +424,14 @@ namespace krys::boo::html
       }
       case 3:
       {
+        if (name == u8"mtr")
+        {
+          return TagName::mtr;
+        }
+        if (name == u8"mtd")
+        {
+          return TagName::mtd;
+        }
         if (name == u8"bdi")
         {
           return TagName::bdi;
@@ -498,6 +532,22 @@ namespace krys::boo::html
       }
       case 4:
       {
+        if (name == u8"none")
+        {
+          return TagName::none;
+        }
+        if (name == u8"msup")
+        {
+          return TagName::msup;
+        }
+        if (name == u8"msub")
+        {
+          return TagName::msub;
+        }
+        if (name == u8"mrow")
+        {
+          return TagName::mrow;
+        }
         if (name == u8"abbr")
         {
           return TagName::abbr;
@@ -630,6 +680,22 @@ namespace krys::boo::html
       }
       case 5:
       {
+        if (name == u8"msqrt")
+        {
+          return TagName::msqrt;
+        }
+        if (name == u8"mroot")
+        {
+          return TagName::mroot;
+        }
+        if (name == u8"mover")
+        {
+          return TagName::mover;
+        }
+        if (name == u8"mfrac")
+        {
+          return TagName::mfrac;
+        }
         if (name == u8"aside")
         {
           return TagName::aside;
@@ -726,6 +792,26 @@ namespace krys::boo::html
       }
       case 6:
       {
+        if (name == u8"munder")
+        {
+          return TagName::munder;
+        }
+        if (name == u8"mtable")
+        {
+          return TagName::mtable;
+        }
+        if (name == u8"mstyle")
+        {
+          return TagName::mstyle;
+        }
+        if (name == u8"mspace")
+        {
+          return TagName::mspace;
+        }
+        if (name == u8"merror")
+        {
+          return TagName::merror;
+        }
         if (name == u8"applet")
         {
           return TagName::applet;
@@ -846,6 +932,18 @@ namespace krys::boo::html
       }
       case 7:
       {
+        if (name == u8"msubsup")
+        {
+          return TagName::msubsup;
+        }
+        if (name == u8"mpadded")
+        {
+          return TagName::mpadded;
+        }
+        if (name == u8"maction")
+        {
+          return TagName::maction;
+        }
         if (name == u8"acronym")
         {
           return TagName::acronym;
@@ -950,6 +1048,14 @@ namespace krys::boo::html
       }
       case 8:
       {
+        if (name == u8"mphantom")
+        {
+          return TagName::mphantom;
+        }
+        if (name == u8"menclose")
+        {
+          return TagName::menclose;
+        }
         if (name == u8"basefont")
         {
           return TagName::basefont;
@@ -1022,6 +1128,10 @@ namespace krys::boo::html
       }
       case 9:
       {
+        if (name == u8"semantics")
+        {
+          return TagName::semantics;
+        }
         if (name == u8"plaintext")
         {
           return TagName::plaintext;
@@ -1034,6 +1144,14 @@ namespace krys::boo::html
       }
       case 10:
       {
+        if (name == u8"munderover")
+        {
+          return TagName::munderover;
+        }
+        if (name == u8"annotation")
+        {
+          return TagName::annotation;
+        }
         if (name == u8"attachment")
         {
           return TagName::attachment;
@@ -1050,6 +1168,10 @@ namespace krys::boo::html
       }
       case 11:
       {
+        if (name == u8"mprescripts")
+        {
+          return TagName::mprescripts;
+        }
         if (name == u8"feComposite")
         {
           return TagName::feComposite;
@@ -1086,6 +1208,10 @@ namespace krys::boo::html
       }
       case 13:
       {
+        if (name == u8"mmultiscripts")
+        {
+          return TagName::mmultiscripts;
+        }
         if (name == u8"color-profile")
         {
           return TagName::color_profile;

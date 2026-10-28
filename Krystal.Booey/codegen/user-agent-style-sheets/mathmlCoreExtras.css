@@ -23,22 +23,15 @@
  */
 
 /* https://w3c.github.io/mathml-core/#user-agent-stylesheet */
-/* This file contains the legacy styles that should be applied if CSSMathDepthEnabled if disabled. */
+/* This file contains the styles that should be gated by the preference CoreMathMLEnabled */
 
 @namespace "http://www.w3.org/1998/Math/MathML";
 
-/* Other rules for scriptlevel, displaystyle and math-shift */
-mroot > :not(:first-child) {
-    font-size: 0.5041em; /* This 0.71^2 since the scriptlevel is incremented by 2 in the index. */
+/* <mrow>-like elements */
+semantics > :not(:first-child) {
+  display: none;
 }
 
-msub > :not(:first-child),
-msup > :not(:first-child),
-msubsup > :not(:first-child),
-mmultiscripts > :not(:first-child),
-munder > :not(:first-child),
-mover > :not(:first-child),
-munderover > :not(:first-child) {
-    font-size: 0.71em;
+maction > :not(:first-child) {
+  display: none;
 }
-

@@ -153,8 +153,10 @@ namespace krys::boo::style::tests
         document->CreateElementNS(dom::DOMStringAtom(infra::Namespaces::MathML), u8"math").ReleaseValue();
       UserAgentStyle::EnsureDefaultStyleSheetsForElement(*math);
       RequireFullyParsed(css::MathMLUserAgentStyleSheet, UserAgentStyle::MathMLStyleSheet);
-      RequireFullyParsed(css::MathMLLegacyFontSizeMathUserAgentStyleSheet,
-                         UserAgentStyle::MathMLLegacyFontSizeMathStyleSheet);
+      RequireFullyParsed(css::MathMLCoreExtrasUserAgentStyleSheet,
+                         UserAgentStyle::MathMLCoreExtrasStyleSheet);
+      RequireFullyParsed(css::MathMLFontSizeMathUserAgentStyleSheet,
+                         UserAgentStyle::MathMLFontSizeMathStyleSheet);
     }
 
     SECTION("Form controls and popovers")
