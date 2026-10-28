@@ -91,8 +91,8 @@ namespace krys::boo
   /// order.
   ///
   /// There is one RenderLayerCompositor per RenderView.
-  // FIXME: The scrolling coordinator and asynchronous scrolling, iframes and plug-ins, video, canvas and
-  // model elements, view transitions, page overlays, event regions, rubber banding (overhang areas, headers
+  // FIXME: The scrolling coordinator and asynchronous scrolling, iframes and plug-ins, video and model
+  // elements, view transitions, page overlays, event regions, rubber banding (overhang areas, headers
   // and footers), tiled backings, settings and the compositing policy under memory pressure, once there are
   // any.
   class RenderLayerCompositor final : public GraphicsLayerClient,
@@ -563,6 +563,7 @@ namespace krys::boo
       RequiresCompositingForTransform(const RenderLayerModelObject &renderer) const noexcept;
     KRYS_NODISCARD bool
       RequiresCompositingForBackfaceVisibility(const RenderLayerModelObject &renderer) const noexcept;
+    KRYS_NODISCARD bool RequiresCompositingForCanvas(const RenderLayerModelObject &renderer) const noexcept;
     KRYS_NODISCARD bool RequiresCompositingForFilters(const RenderLayerModelObject &renderer) const noexcept;
     KRYS_NODISCARD bool
       RequiresCompositingForWillChange(const RenderLayerModelObject &renderer) const noexcept;

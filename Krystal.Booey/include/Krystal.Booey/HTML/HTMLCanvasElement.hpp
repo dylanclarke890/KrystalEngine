@@ -13,6 +13,8 @@ namespace krys::boo
 
 namespace krys::boo::html
 {
+  class EngineTextureRenderingContext;
+
   /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
   /// fallback content, which isn't rendered.
   /// @see https://html.spec.whatwg.org/#htmlcanvaselement
@@ -87,7 +89,8 @@ namespace krys::boo::html
     /// @brief The canvas's context of type @p contextId, made on the first call; null if the canvas already
     /// has a context of another type, or there's no such type.
     /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
-    // TODO(HTMLCANVAS, HTML): The engine texture context (B13c) and the 2D context (B14).
+    /// @note The engine texture context is `"krystal-texture"`.
+    // TODO(HTMLCANVAS, HTML): The 2D context (B14).
     KRYS_NODISCARD RefPtr<CanvasRenderingContext> GetContext(dom::DOMStringView contextId) noexcept;
 
     // toDataURL() and toBlob() come with the 2D context; transferControlToOffscreen() isn't planned.
@@ -121,6 +124,8 @@ namespace krys::boo::html
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
+    KRYS_NODISCARD EngineTextureRenderingContext *CreateContextEngineTexture() noexcept;
+
     void DidUpdateSizeProperties() noexcept;
 
     /// @brief Whether the context's pixels are shown as the canvas's layer contents.

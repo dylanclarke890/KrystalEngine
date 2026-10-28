@@ -103,6 +103,7 @@ namespace krys::boo
     bool _backgroundLayerPaintsFixedRootBackground {false};
     bool _requiresBackgroundLayer {false};
     bool _hasSubpixelRounding {false};
+    bool _shouldPaintUsingCompositeCopy {false};
 
   public:
     explicit RenderLayerBacking(RenderLayer &layer) noexcept;
@@ -442,6 +443,8 @@ namespace krys::boo
     bool UpdateBackdropRoot() noexcept;
     void UpdateBlendMode(const RenderStyle &style) noexcept;
     void UpdateContentsScalingFilters(const RenderStyle &style) noexcept;
+    /// @brief Whether the layer's contents are a canvas context's display delegate.
+    KRYS_NODISCARD bool ShouldSetContentsDisplayDelegate() const noexcept;
 
     // Return the opacity value that this layer should use for compositing.
     KRYS_NODISCARD float CompositingOpacity(float rendererOpacity) const noexcept;

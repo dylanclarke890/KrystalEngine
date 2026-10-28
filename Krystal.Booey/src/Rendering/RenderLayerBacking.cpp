@@ -769,9 +769,37 @@ namespace krys::boo
     }
   }
 
-  void RenderLayerBacking::UpdateContentsScalingFilters(const RenderStyle &) noexcept
+  bool RenderLayerBacking::ShouldSetContentsDisplayDelegate() const noexcept
   {
-    // FIXME: Canvases composited as layer contents, once there are canvases.
+    if (!Renderer().IsRenderHTMLCanvas())
+    {
+      return false;
+    }
+
+    return GetCanvasCompositingStrategy(Renderer()) == CanvasCompositingStrategy::CanvasAsLayerContents;
+  }
+
+  void RenderLayerBacking::UpdateContentsScalingFilters(const RenderStyle &style) noexcept
+  {
+    if (!Renderer().IsRenderHTMLCanvas()
+        || GetCanvasCompositingStrategy(Renderer()) != CanvasCompositingStrategy::CanvasAsLayerContents)
+    {
+      return;
+    }
+    auto minificationFilter = GraphicsLayer::ScalingFilter::Linear;
+    auto magnificationFilter = GraphicsLayer::ScalingFilter::Linear;
+    switch (style.GetImageRendering())
+    {
+      case ImageRendering::CrispEdges:
+      case ImageRendering::Pixelated:
+        // FIXME: In order to match other code-paths, we treat these the same.
+        minificationFilter = GraphicsLayer::ScalingFilter::Nearest;
+        magnificationFilter = GraphicsLayer::ScalingFilter::Nearest;
+        break;
+      default: break;
+    }
+    _graphicsLayer->SetContentsMinificationFilter(minificationFilter);
+    _graphicsLayer->SetContentsMagnificationFilter(magnificationFilter);
   }
 
   namespace
@@ -1112,8 +1140,26 @@ namespace krys::boo
       layerConfigChanged = true;
     }
 
-    // FIXME: Canvases painted with a composite copy, plug-ins, video, remote frames, canvases composited as
-    // layer contents, models and widgets' content layers, once there are any.
+    bool shouldPaintUsingCompositeCopy =
+      unscaledBitmap && Is<RenderHTMLCanvas>(Renderer()) && _owningLayer.HasVisibleContent();
+    if (shouldPaintUsingCompositeCopy != _shouldPaintUsingCompositeCopy)
+    {
+      _shouldPaintUsingCompositeCopy = shouldPaintUsingCompositeCopy;
+      _graphicsLayer->SetShouldPaintUsingCompositeCopy(shouldPaintUsingCompositeCopy);
+      layerConfigChanged = true;
+    }
+
+    // FIXME: Plug-ins, video, remote frames, models and widgets' content layers, once there are any.
+    if (ShouldSetContentsDisplayDelegate())
+    {
+      auto &canvas = Downcast<html::HTMLCanvasElement>(*Renderer().GetElement());
+      if (auto *context = canvas.RenderingContext())
+      {
+        context->SetContentsToLayer(*_graphicsLayer);
+      }
+
+      layerConfigChanged = true;
+    }
 
     if (UpdateBackdropRoot())
     {
@@ -3148,7 +3194,13 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Video and canvases composited as layer contents, once there are any.
+    // FIXME: Video, once there's video.
+
+    if (Is<RenderHTMLCanvas>(Renderer())
+        && GetCanvasCompositingStrategy(Renderer()) == CanvasCompositingStrategy::CanvasAsLayerContents)
+    {
+      return _owningLayer.HasVisibleBoxDecorationsOrBackground();
+    }
 
     return true;
   }
@@ -3211,8 +3263,7 @@ namespace krys::boo
 
   bool RenderLayerBacking::IsUnscaledBitmapOnly() const noexcept
   {
-    // FIXME: Canvases, once there are canvases.
-    if (!Is<RenderImage>(Renderer()))
+    if (!Is<RenderImage>(Renderer()) && !Is<RenderHTMLCanvas>(Renderer()))
     {
       return false;
     }
@@ -3233,31 +3284,43 @@ namespace krys::boo
       return false;
     }
 
-    auto *imageRenderer = DynamicDowncast<RenderImage>(Renderer());
-    if (auto *cachedImage = imageRenderer->GetCachedImage())
+    if (auto *imageRenderer = DynamicDowncast<RenderImage>(Renderer()))
     {
-      if (!cachedImage->HasImage())
+      if (auto *cachedImage = imageRenderer->GetCachedImage())
       {
-        return false;
-      }
+        if (!cachedImage->HasImage())
+        {
+          return false;
+        }
 
-      auto *image = DynamicDowncast<BitmapImage>(cachedImage->ImageForRenderer(imageRenderer));
-      if (!image)
-      {
-        return false;
-      }
+        auto *image = DynamicDowncast<BitmapImage>(cachedImage->ImageForRenderer(imageRenderer));
+        if (!image)
+        {
+          return false;
+        }
 
-      if (image->CurrentFrameOrientation() != ImageOrientation::Orientation::None)
-      {
-        return false;
-      }
+        if (image->CurrentFrameOrientation() != ImageOrientation::Orientation::None)
+        {
+          return false;
+        }
 
-      return contents.Size() == LayoutSize(image->Size());
+        return contents.Size() == LayoutSize(image->Size());
+      }
+      return false;
     }
-    return false;
+
+    if (Renderer().Style().GetImageRendering() == ImageRendering::CrispEdges
+        || Renderer().Style().GetImageRendering() == ImageRendering::Pixelated)
+    {
+      return false;
+    }
+
+    auto &canvasRenderer = Downcast<RenderHTMLCanvas>(Renderer());
+    return SnappedIntRect(contents).Size() == canvasRenderer.CanvasElement().Size();
   }
 
-  void RenderLayerBacking::ContentChanged(ContentChangeType changeType, const Maybe<FloatRect> &) noexcept
+  void RenderLayerBacking::ContentChanged(ContentChangeType changeType,
+                                          const Maybe<FloatRect> &dirtyRect) noexcept
   {
     PaintedContentsInfo contentsInfo(*this);
     if (changeType == ContentChangeType::Image || changeType == ContentChangeType::Canvas)
@@ -3291,7 +3354,25 @@ namespace krys::boo
       _owningLayer.SetNeedsCompositingConfigurationUpdate();
     }
 
-    // FIXME: Canvases composited as layer contents, once there are canvases.
+    if ((changeType == ContentChangeType::Canvas || changeType == ContentChangeType::CanvasPixels)
+        && Renderer().IsRenderHTMLCanvas()
+        && GetCanvasCompositingStrategy(Renderer()) == CanvasCompositingStrategy::CanvasAsLayerContents)
+    {
+      if (changeType == ContentChangeType::Canvas)
+      {
+        Compositor().ScheduleCompositingLayerUpdate();
+      }
+
+      if (dirtyRect)
+      {
+        _graphicsLayer->SetContentsNeedsDisplayInRect(*dirtyRect);
+      }
+      else
+      {
+        _graphicsLayer->SetContentsNeedsDisplay();
+      }
+      return;
+    }
   }
 
   void RenderLayerBacking::UpdateImageContents(PaintedContentsInfo &contentsInfo) noexcept

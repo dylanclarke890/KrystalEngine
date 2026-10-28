@@ -1856,6 +1856,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Compositing (G12)
   include/Krystal.Booey/Graphics/ContentsFormat.hpp
   include/Krystal.Booey/Graphics/GraphicsLayer.hpp
+  include/Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp
   include/Krystal.Booey/Graphics/GraphicsLayerAnimation.hpp
   include/Krystal.Booey/Graphics/GraphicsLayerAnimationValue.hpp
   include/Krystal.Booey/Graphics/GraphicsLayerClient.hpp
@@ -3954,6 +3955,8 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/CanvasBase.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp
       include/Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp
+      include/Krystal.Booey/HTML/Canvas/EngineTexture.hpp
+      include/Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp
       include/Krystal.Booey/HTML/HTMLCanvasElement.hpp
       include/Krystal.Booey/HTML/HTMLDataElement.hpp
       include/Krystal.Booey/HTML/HTMLDataListElement.hpp
@@ -4467,6 +4470,7 @@ target_sources(Krystal.Booey
     src/HTML/CanvasBase.cpp
     src/HTML/Canvas/CanvasRenderingContext.cpp
     src/HTML/Canvas/GPUBasedCanvasRenderingContext.cpp
+    src/HTML/Canvas/EngineTextureRenderingContext.cpp
     src/HTML/HTMLCanvasElement.cpp
     src/HTML/HTMLDataElement.cpp
     src/HTML/HTMLDataListElement.cpp

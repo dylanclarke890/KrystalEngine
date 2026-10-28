@@ -1,7 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 
 namespace krys::boo::tests
@@ -17,6 +19,17 @@ namespace krys::boo::tests
         return Downcast<html::HTMLCanvasElement>(ById(id));
       }
     };
+
+    KRYS_NODISCARD size_t Count(const utf8_string &text, utf8_stringview part) noexcept
+    {
+      size_t count = 0;
+      for (auto position = text.find(part); position != utf8_string::npos;
+           position = text.find(part, position + 1))
+      {
+        ++count;
+      }
+      return count;
+    }
   }
 
   TEST_CASE("HTMLCanvasElement: the width and height and the canvas's size", "[HTML][HTMLCanvasElement]")
@@ -66,13 +79,45 @@ namespace krys::boo::tests
     CanvasFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &canvas = fixture.Canvas(u8"canvas");
 
-    // There are no contexts yet, and WebGL, WebGPU and bitmap renderers aren't planned.
+    // WebGL, WebGPU and bitmap renderers aren't planned.
     CHECK(canvas.RenderingContext() == nullptr);
     for (auto type : {u8"2d", u8"webgl", u8"webgl2", u8"webgpu", u8"bitmaprenderer", u8"unknown"})
     {
       CHECK(canvas.GetContext(type) == nullptr);
     }
     CHECK(canvas.RenderingContext() == nullptr);
+
+    // The engine texture context is made once, and then it's the only context there is.
+    auto context = canvas.GetContext(u8"krystal-texture");
+    REQUIRE(context);
+    CHECK(context->IsEngineTexture());
+    CHECK(context->IsGPUBased());
+    CHECK(context->DelegatesDisplay());
+    CHECK(&context->GetCanvasBase() == &canvas);
+    CHECK(canvas.RenderingContext() == context.get());
+    CHECK(canvas.GetContext(u8"krystal-texture") == context);
+    CHECK(canvas.GetContext(u8"2d") == nullptr);
+  }
+
+  TEST_CASE("HTMLCanvasElement: a texture canvas painted rather than composited", "[HTML][HTMLCanvasElement]")
+  {
+    CanvasFixture fixture(u8"<canvas id=canvas width=40 height=20 style='width:80px'></canvas>");
+    auto &canvas = fixture.Canvas(u8"canvas");
+    auto &context = Downcast<html::EngineTextureRenderingContext>(*canvas.GetContext(u8"krystal-texture"));
+
+    // Without a texture, the canvas is transparent black and nothing is drawn.
+    CHECK(
+      context.IsSurfaceBufferTransparentBlack(html::CanvasRenderingContext::SurfaceBuffer::DisplayBuffer));
+    CHECK(Count(fixture.Painted(), u8"draw-native-image") == 0u);
+
+    // Its texture is drawn as an image, scaled to the canvas's box.
+    auto texture = AdoptRef(*new FakeEngineTexture({40, 20}));
+    context.SetTexture(texture);
+    CHECK(context.Texture() == texture.get());
+    auto painted = fixture.Painted();
+    CHECK(Count(painted, u8"draw-native-image") == 1u);
+    CHECK(Count(painted, u8"(source-rect at (0,0) size 40x20)") == 1u);
+    CHECK(Count(painted, u8"(dest-rect at (8,8) size 80x40)") == 1u);
   }
 
   TEST_CASE("HTMLCanvasElement: always replaced, its children fallback content", "[HTML][HTMLCanvasElement]")

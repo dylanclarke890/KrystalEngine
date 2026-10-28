@@ -2,8 +2,9 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
-#include "Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 
@@ -39,9 +40,33 @@ namespace krys::boo::html
     Reflection::Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
   }
 
-  RefPtr<CanvasRenderingContext> HTMLCanvasElement::GetContext(dom::DOMStringView) noexcept
+  RefPtr<CanvasRenderingContext> HTMLCanvasElement::GetContext(dom::DOMStringView contextId) noexcept
   {
+    if (contextId == EngineTextureRenderingContext::ContextType)
+    {
+      if (_context)
+      {
+        return ShareRefPtr(DynamicDowncast<EngineTextureRenderingContext>(_context.get()));
+      }
+      return ShareRefPtr(CreateContextEngineTexture());
+    }
     return nullptr;
+  }
+
+  EngineTextureRenderingContext *HTMLCanvasElement::CreateContextEngineTexture() noexcept
+  {
+    krys_debug_assert(!_context);
+    auto context = CreateUnique<EngineTextureRenderingContext>(*this);
+    auto *engineTextureContext = context.get();
+    _context = krys::move(context);
+
+    // Need to make sure a RenderLayer and compositing layer get created for the Canvas.
+    InvalidateStyleAndLayerComposition();
+    if (auto *box = GetRenderBox())
+    {
+      box->ContentChanged(ContentChangeType::Canvas);
+    }
+    return engineTextureContext;
   }
 
 #pragma endregion
@@ -138,7 +163,7 @@ namespace krys::boo::html
     return renderBox->HasAcceleratedCompositing() && _context->DelegatesDisplay();
   }
 
-  void HTMLCanvasElement::Paint(GraphicsContext &context, const LayoutRect &) noexcept
+  void HTMLCanvasElement::Paint(GraphicsContext &context, const LayoutRect &rect) noexcept
   {
     if (!_context || context.PaintingDisabled())
     {
@@ -151,7 +176,24 @@ namespace krys::boo::html
       return;
     }
 
-    // TODO(HTMLCANVAS, HTML): Draw the context's display buffer, once a context has one (B13c, B14).
+    if (_context->IsSurfaceBufferTransparentBlack(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
+    {
+      const bool skipTransparentBlackDraw =
+        context.GetCompositeMode() == CompositeMode {CompositeOperator::SourceOver, BlendMode::Normal};
+      if (!skipTransparentBlackDraw)
+      {
+        context.FillRect(FloatRect(SnappedIntRect(rect)), Color::transparentBlack);
+      }
+      return;
+    }
+
+    if (auto image =
+          _context->SurfaceBufferToNativeImage(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
+    {
+      context.DrawNativeImage(*image, FloatRect(SnappedIntRect(rect)),
+                              FloatRect({}, FloatSize(image->Size())),
+                              ImagePaintingOptions(context.CompositeOperation()));
+    }
   }
 
 #pragma endregion

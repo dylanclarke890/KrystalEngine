@@ -1,12 +1,15 @@
 ﻿#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Animation/CSSAnimation.hpp"
 #include "Krystal.Booey/Animation/KeyframeEffect.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerFactory.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -36,7 +39,10 @@ namespace krys::boo::tests
     {
     public:
       List<FloatRect> NeedsDisplayRects;
+      List<FloatRect> ContentsNeedsDisplayRects;
       List<LayerAnimation> Animations;
+      RefPtr<GraphicsLayerContentsDisplayDelegate> Delegate;
+      ContentsLayerPurpose Purpose {ContentsLayerPurpose::None};
 
       CompositingTestLayer(Type type, GraphicsLayerClient &client) noexcept : GraphicsLayer(type, client)
       {
@@ -55,6 +61,28 @@ namespace krys::boo::tests
       void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
       {
         NeedsDisplayRects.push_back(rect);
+      }
+
+      void SetContentsNeedsDisplay() noexcept final
+      {
+        ContentsNeedsDisplayRects.push_back(ContentsRect());
+      }
+
+      void SetContentsNeedsDisplayInRect(const FloatRect &rect) noexcept final
+      {
+        ContentsNeedsDisplayRects.push_back(rect);
+      }
+
+      void SetContentsDisplayDelegate(RefPtr<GraphicsLayerContentsDisplayDelegate> &&delegate,
+                                      ContentsLayerPurpose purpose) noexcept final
+      {
+        Delegate = krys::move(delegate);
+        Purpose = Delegate ? purpose : ContentsLayerPurpose::None;
+      }
+
+      KRYS_NODISCARD bool UsesContentsLayer() const noexcept final
+      {
+        return Delegate != nullptr;
       }
 
       bool AddAnimation(const GraphicsLayerKeyframeValueList &values, const GraphicsLayerAnimation *,
@@ -440,5 +468,77 @@ namespace krys::boo::tests
     fixture.ById(u8"inner").SetAttribute(u8"style", u8"width:10px;height:10px;background:green");
     fixture.TestPage->UpdateRendering();
     CHECK_FALSE(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: a texture canvas's layer shows its texture",
+            "[Rendering][RenderLayerCompositor][Canvas]")
+  {
+    CompositingFixture fixture(u8"<canvas id=canvas width=40 height=20 style='width:80px;height:80px;"
+                               u8"object-fit:contain'></canvas><canvas id=plain></canvas>");
+    auto &canvas = Downcast<html::HTMLCanvasElement>(fixture.ById(u8"canvas"));
+
+    // A canvas without a context has no layer of its own.
+    CHECK(Downcast<RenderLayerModelObject>(*fixture.ById(u8"plain").Renderer()).Layer() == nullptr);
+
+    auto context = canvas.GetContext(html::EngineTextureRenderingContext::ContextType);
+    REQUIRE(context);
+    CHECK(canvas.GetContext(html::EngineTextureRenderingContext::ContextType) == context);
+    CHECK(canvas.GetContext(u8"2d") == nullptr);
+    auto &textureContext = Downcast<html::EngineTextureRenderingContext>(*context);
+    CHECK(GetCanvasCompositingStrategy(*canvas.Renderer())
+          == CanvasCompositingStrategy::CanvasAsLayerContents);
+
+    // The context composites the canvas, before it has a texture.
+    fixture.TestPage->UpdateRendering();
+    auto &layer = fixture.LayerOf(u8"canvas");
+    REQUIRE(layer.IsComposited());
+    CHECK(fixture.Compositor().ReasonsForCompositing(layer).Contains(CompositingReason::Canvas));
+    CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
+
+    // Its texture's delegate is the layer's contents, placed by object-fit, and nothing else is painted.
+    auto texture = AdoptRef(*new FakeEngineTexture({40, 20}));
+    textureContext.SetTexture(texture);
+    fixture.TestPage->UpdateRendering();
+    auto &graphicsLayer = fixture.GraphicsLayerOf(u8"canvas");
+    CHECK(graphicsLayer.Delegate == texture->Delegate.get());
+    CHECK(graphicsLayer.Purpose == GraphicsLayer::ContentsLayerPurpose::Canvas);
+    CHECK(graphicsLayer.ContentsRect() == FloatRect(0, 20, 80, 40));
+    CHECK_FALSE(graphicsLayer.DrawsContent());
+    CHECK(graphicsLayer.ContentsMagnificationFilter() == GraphicsLayer::ScalingFilter::Linear);
+
+    SECTION("a change to the texture redisplays the contents, not the layer")
+    {
+      graphicsLayer.NeedsDisplayRects.clear();
+      graphicsLayer.ContentsNeedsDisplayRects.clear();
+      textureContext.TextureChanged(IntRect(10, 0, 20, 10));
+      textureContext.TextureChanged();
+      CHECK(graphicsLayer.ContentsNeedsDisplayRects.size() == 2);
+      CHECK(graphicsLayer.NeedsDisplayRects.empty());
+    }
+
+    SECTION("pixelated canvases are scaled without interpolation")
+    {
+      REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"image-rendering:pixelated").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMagnificationFilter()
+            == GraphicsLayer::ScalingFilter::Nearest);
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMinificationFilter()
+            == GraphicsLayer::ScalingFilter::Nearest);
+    }
+
+    SECTION("a border is painted beneath the texture")
+    {
+      REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"border:2px solid").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").DrawsContent());
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsRect() == FloatRect(2, 2, 40, 20));
+    }
+
+    SECTION("removing the texture removes the contents")
+    {
+      textureContext.SetTexture(nullptr);
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
+    }
   }
 }

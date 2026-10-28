@@ -4,12 +4,19 @@
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo
+{
+  class GraphicsLayer;
+  class GraphicsLayerContentsDisplayDelegate;
+  class NativeImage;
+}
 
 namespace krys::boo::html
 {
   /// @brief A canvas's rendering context, which draws its pixels. Owned by its canvas; references to it keep
   /// the canvas alive.
-  // FIXME: The layer contents delegate comes with compositing canvases.
   class CanvasRenderingContext
   {
     KRYS_NON_COPY_MOVABLE(CanvasRenderingContext);
@@ -58,6 +65,23 @@ namespace krys::boo::html
 
     /// @brief Whether the context's pixels are shown as its canvas's layer contents rather than painted.
     KRYS_NODISCARD bool DelegatesDisplay() const noexcept;
+
+    // A GPU-based context draws to its drawing buffer, which becomes the display buffer the compositor shows.
+    // Readbacks read the drawing buffer; painting reads the display buffer.
+    enum class SurfaceBuffer : uint8
+    {
+      DrawingBuffer,
+      DisplayBuffer
+    };
+
+    /// @brief The pixels of @p buffer, as an image, or null if there are none.
+    KRYS_NODISCARD virtual RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept;
+    KRYS_NODISCARD virtual bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept;
+
+    /// @brief What shows the context's pixels as a layer's contents.
+    KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
+      LayerContentsDisplayDelegate() noexcept;
+    virtual void SetContentsToLayer(GraphicsLayer &layer) noexcept;
 
   protected:
     CanvasRenderingContext(CanvasBase &canvas, Type type) noexcept;

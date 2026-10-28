@@ -37,6 +37,7 @@ namespace krys::boo
   class GraphicsLayerFactory;
   class GraphicsLayerKeyframeValueList;
   class Image;
+  class GraphicsLayerContentsDisplayDelegate;
   class ImageBuffer;
 
   using TileCoverage = uint32;
@@ -45,8 +46,8 @@ namespace krys::boo
 
   /// @brief An abstraction for a rendering surface with backing store, which may have associated
   /// transformation and animations.
-  // FIXME: Event regions (EventRegion), once there's touch and interaction region tracking; contents display
-  // delegates (canvas, video and model contents) and video gravity, once there are canvases and videos; tiled
+  // FIXME: Event regions (EventRegion), once there's touch and interaction region tracking; asynchronous
+  // contents display delegates and video gravity, once there are videos; tiled
   // backings (TiledBacking), which only Core Animation's layers have; threaded animations
   // (AcceleratedEffectStack), with threaded compositing; scrolling node IDs, with async scrolling.
   class GraphicsLayer : public RefCounted<GraphicsLayer>, public CanMakeWeakPtr<GraphicsLayer>
@@ -632,6 +633,12 @@ namespace krys::boo
 
     // Pass an invalid color to remove the contents layer.
     virtual void SetContentsToSolidColor(const Color &) noexcept
+    {
+    }
+
+    /// @brief Shows what @p delegate displays as the layer's contents, or removes them if it's null.
+    virtual void SetContentsDisplayDelegate(RefPtr<GraphicsLayerContentsDisplayDelegate> &&,
+                                            ContentsLayerPurpose) noexcept
     {
     }
     KRYS_NODISCARD virtual bool UsesContentsLayer() const noexcept

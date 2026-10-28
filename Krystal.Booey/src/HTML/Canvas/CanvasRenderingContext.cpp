@@ -1,4 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
 
 namespace krys::boo::html
 {
@@ -11,5 +14,26 @@ namespace krys::boo::html
   {
     // FIXME: An accelerated 2D context delegates its display too, once there's one.
     return IsGPUBased();
+  }
+
+  RefPtr<NativeImage> CanvasRenderingContext::SurfaceBufferToNativeImage(SurfaceBuffer) noexcept
+  {
+    return nullptr;
+  }
+
+  bool CanvasRenderingContext::IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept
+  {
+    return false;
+  }
+
+  RefPtr<GraphicsLayerContentsDisplayDelegate> CanvasRenderingContext::LayerContentsDisplayDelegate() noexcept
+  {
+    return nullptr;
+  }
+
+  void CanvasRenderingContext::SetContentsToLayer(GraphicsLayer &layer) noexcept
+  {
+    layer.SetContentsDisplayDelegate(LayerContentsDisplayDelegate(),
+                                     GraphicsLayer::ContentsLayerPurpose::Canvas);
   }
 }

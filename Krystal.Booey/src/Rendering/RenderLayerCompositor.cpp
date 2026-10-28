@@ -2933,11 +2933,11 @@ namespace krys::boo
     }
 
     // The root layer always has a compositing layer, but it may not have backing.
-    // FIXME: Canvas, video, model, frame and plug-in reasons, once there are any.
+    // FIXME: Video, model, frame and plug-in reasons, once there are any.
     if (RequiresCompositingForTransform(renderer) || RequiresCompositingForAnimation(renderer)
         || RequiresCompositingForPosition(renderer, *renderer.Layer(), queryData)
-        || RequiresCompositingForFilters(renderer) || RequiresCompositingForWillChange(renderer)
-        || RequiresCompositingForBackfaceVisibility(renderer)
+        || RequiresCompositingForCanvas(renderer) || RequiresCompositingForFilters(renderer)
+        || RequiresCompositingForWillChange(renderer) || RequiresCompositingForBackfaceVisibility(renderer)
         || RequiresCompositingForOverflowScrolling(*renderer.Layer(), queryData)
         || RequiresCompositingForAnchorPositioning(*renderer.Layer()))
     {
@@ -2982,8 +2982,8 @@ namespace krys::boo
     if (layer.IsRenderViewLayer() || layer.Transform() // note: excludes perspective and transformStyle3D.
         || RequiresCompositingForAnimation(renderer)
         || RequiresCompositingForPosition(renderer, layer, queryData)
-        || RequiresCompositingForFilters(renderer) || RequiresCompositingForWillChange(renderer)
-        || RequiresCompositingForBackfaceVisibility(renderer)
+        || RequiresCompositingForCanvas(renderer) || RequiresCompositingForFilters(renderer)
+        || RequiresCompositingForWillChange(renderer) || RequiresCompositingForBackfaceVisibility(renderer)
         || RequiresCompositingForOverflowScrolling(layer, queryData)
         || RequiresCompositingForAnchorPositioning(layer) || NeedsContentsCompositingLayer(layer)
         || renderer.IsTransparent() || renderer.HasMask() || renderer.HasFilter()
@@ -3035,6 +3035,12 @@ namespace krys::boo
     if (RequiresCompositingForTransform(renderer))
     {
       reasons.Add(CompositingReason::Transform3D);
+    }
+
+    // FIXME: Video, model and plug-in reasons, once there are any.
+    if (RequiresCompositingForCanvas(renderer))
+    {
+      reasons.Add(CompositingReason::Canvas);
     }
 
     if ((CanRender3DTransforms() && renderer.Style().GetBackfaceVisibility() == BackfaceVisibility::Hidden))
@@ -3434,6 +3440,29 @@ namespace krys::boo
       return style.GetTransform().IsRepresentableIn2D() && style.GetTranslate().IsRepresentableIn2D()
              && style.GetScale().IsRepresentableIn2D() && style.GetRotate().IsRepresentableIn2D();
     }
+  }
+
+  bool
+    RenderLayerCompositor::RequiresCompositingForCanvas(const RenderLayerModelObject &renderer) const noexcept
+  {
+    if (!renderer.IsRenderHTMLCanvas())
+    {
+      return false;
+    }
+
+    // Small canvases are composited too.
+    auto compositingStrategy = GetCanvasCompositingStrategy(renderer);
+    if (compositingStrategy == CanvasCompositingStrategy::CanvasAsLayerContents)
+    {
+      return true;
+    }
+
+    if (_compositingPolicy == CompositingPolicy::Normal)
+    {
+      return compositingStrategy == CanvasCompositingStrategy::CanvasPaintedToLayer;
+    }
+
+    return false;
   }
 
   bool RenderLayerCompositor::RequiresCompositingForTransform(
