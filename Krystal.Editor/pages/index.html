@@ -870,6 +870,75 @@
     </div>
   </div>
 
+  <div id="mathml">
+    <div class="row math-sample">
+      <!-- Formulas, in the math font: the quadratic formula in display style, a fraction over a radical with
+           scripts, and the same formula inline in a sentence, where it's set smaller to sit in the line. -->
+      <div class="card">
+        <h2>Formulas</h2>
+        <math display="block" id="math-quadratic">
+          <mi>x</mi><mo>=</mo>
+          <mfrac id="math-fraction">
+            <mrow><mo>&#x2212;</mo><mi>b</mi><mo>&#x00B1;</mo>
+              <msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>a</mi><mi>c</mi></msqrt></mrow>
+            <mrow><mn>2</mn><mi>a</mi></mrow>
+          </mfrac>
+        </math>
+        <p>Inline, <math><mi>x</mi><mo>=</mo><mfrac id="math-inline-fraction"><mrow><mo>&#x2212;</mo><mi>b</mi>
+          <mo>&#x00B1;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>a</mi><mi>c</mi>
+          </msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></math> sits in its line.</p>
+      </div>
+      <!-- Large operators: in display style a sum and an integral are drawn large, with limits under and over the
+           sum; inline, they stay small and the limits move to their side. -->
+      <div class="card">
+        <h2>Sums and integrals</h2>
+        <math display="block" id="math-sum">
+          <munderover><mo id="math-sigma">&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow>
+            <mi id="math-upper">n</mi></munderover>
+          <msup><mi>k</mi><mn>2</mn></msup><mo>=</mo>
+          <mfrac><mrow><mi>n</mi><mo>(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>(</mo><mn>2</mn><mi>n</mi><mo>+</mo>
+            <mn>1</mn><mo>)</mo></mrow><mn>6</mn></mfrac>
+        </math>
+        <math display="block">
+          <msubsup><mo id="math-integral">&#x222B;</mo><mn>0</mn><mi>&#x03C0;</mi></msubsup>
+          <mi>sin</mi><mo>&#x2061;</mo><mspace width="0.1667em"></mspace><mi>x</mi><mspace width="0.1667em"></mspace><mi>d</mi><mi>x</mi>
+          <mo>=</mo><mn>2</mn>
+        </math>
+        <p>Inline, <math><munderover><mo id="math-inline-sigma">&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn>
+          </mrow><mi id="math-inline-upper">n</mi></munderover><mi>k</mi></math> and <math><msubsup>
+          <mo id="math-inline-integral">&#x222B;</mo><mn>0</mn><mn>1</mn></msubsup><mi>f</mi></math> stay small.</p>
+      </div>
+      <!-- Brackets stretched around a matrix (<mtable>), radicals nested in radicals with an index (<mroot>),
+           and identifiers with scripts before and after them (<mmultiscripts>), and an accent over a vector. -->
+      <div class="card">
+        <h2>Matrices, roots and scripts</h2>
+        <math display="block">
+          <mi>A</mi><mo>=</mo>
+          <mrow>
+            <mo id="math-bracket">[</mo>
+            <mtable id="math-matrix">
+              <mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><msub><mi>a</mi><mn>1</mn></msub></mtd></mtr>
+              <mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><msub><mi>a</mi><mn>2</mn></msub></mtd></mtr>
+              <mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>
+            </mtable>
+            <mo>]</mo>
+          </mrow>
+        </math>
+        <math display="block">
+          <mroot id="math-root"><mrow><mn>1</mn><mo>+</mo><msqrt id="math-nested"><mn>1</mn><mo>+</mo>
+            <msqrt id="math-innermost"><mi>x</mi></msqrt></msqrt></mrow><mn>3</mn></mroot>
+          <mo>,</mo>
+          <mmultiscripts><mi id="math-c">C</mi><mi id="math-k">k</mi><none></none><mprescripts></mprescripts>
+            <mi id="math-n">n</mi><none></none></mmultiscripts>
+          <mo>,</mo>
+          <msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup>
+          <mo>,</mo>
+          <mover accent="true"><mi>v</mi><mo>&#x2192;</mo></mover>
+        </math>
+      </div>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

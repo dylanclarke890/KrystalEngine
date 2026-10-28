@@ -37,14 +37,14 @@ namespace krys::boo::mathml
       return _scriptType;
     }
 
-    // FIXME: The element is made a RenderMathMLScripts (B12e); until then it's laid out as a row.
-
   protected:
     MathMLScriptsElement(dom::Document &document, ScriptType scriptType,
                          MathMLElementInterface interface) noexcept
         : MathMLRowElement(document, interface), _scriptType(scriptType)
     {
     }
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
   };
 }
 

@@ -314,6 +314,12 @@ namespace krys::ui::tests
     CheckPage("tables", 360u, 240u);
   }
 
+  TEST_CASE("Golden: MathML", "[UI][GPU][Golden]")
+  {
+    // Both draw STIX Two Math, but Chrome's glyphs are DirectWrite's, so its golden is only reported.
+    CheckPage("mathml", 360u, 240u, true);
+  }
+
   TEST_CASE("Golden: focus rings", "[UI][GPU][Golden]")
   {
     // Both follow rounded corners, but Chrome draws its own ring (its width and placement), while the page

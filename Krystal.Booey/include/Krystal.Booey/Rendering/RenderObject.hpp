@@ -1018,9 +1018,17 @@ namespace krys::boo
         default:                    return false;
       }
     }
+    KRYS_NODISCARD bool IsRenderMathMLFraction() const noexcept
+    {
+      return _type == Type::MathMLFraction;
+    }
     KRYS_NODISCARD bool IsRenderMathMLMath() const noexcept
     {
       return _type == Type::MathMLMath;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLMenclose() const noexcept
+    {
+      return _type == Type::MathMLMenclose;
     }
     KRYS_NODISCARD bool IsRenderMathMLOperator() const noexcept
     {
@@ -1030,6 +1038,14 @@ namespace krys::boo
     {
       return _type == Type::MathMLPadded;
     }
+    KRYS_NODISCARD bool IsRenderMathMLRoot() const noexcept
+    {
+      return _type == Type::MathMLRoot;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLScripts() const noexcept
+    {
+      return _type == Type::MathMLScripts;
+    }
     KRYS_NODISCARD bool IsRenderMathMLSpace() const noexcept
     {
       return _type == Type::MathMLSpace;
@@ -1037,6 +1053,10 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderMathMLToken() const noexcept
     {
       return _type == Type::MathMLToken || _type == Type::MathMLOperator;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLUnderOver() const noexcept
+    {
+      return _type == Type::MathMLUnderOver;
     }
     KRYS_NODISCARD bool IsLegacyRenderSVGModelObject() const noexcept
     {

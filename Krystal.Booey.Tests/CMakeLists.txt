@@ -88,6 +88,7 @@ target_sources(Krystal.Booey.Tests
 		include/Krystal.Booey.Tests/CSS/SelectorTestUtils.hpp
 		include/Krystal.Booey.Tests/Animation/AnimationTestUtils.hpp
 		include/Krystal.Booey.Tests/CSS/ValueTestUtils.hpp
+		include/Krystal.Booey.Tests/Rendering/MathML/MathMLTestUtils.hpp
 		include/Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/BuilderTestUtils.hpp
 		include/Krystal.Booey.Tests/Style/ResolverTestUtils.hpp
@@ -660,11 +661,16 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/OpenType/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
 		tests/Rendering/MathML/RenderMathMLBlock.cpp
+		tests/Rendering/MathML/RenderMathMLFraction.cpp
+		tests/Rendering/MathML/RenderMathMLMenclose.cpp
 		tests/Rendering/MathML/RenderMathMLOperator.cpp
 		tests/Rendering/MathML/RenderMathMLPadded.cpp
+		tests/Rendering/MathML/RenderMathMLRoot.cpp
 		tests/Rendering/MathML/RenderMathMLRow.cpp
+		tests/Rendering/MathML/RenderMathMLScripts.cpp
 		tests/Rendering/MathML/RenderMathMLSpace.cpp
 		tests/Rendering/MathML/RenderMathMLToken.cpp
+		tests/Rendering/MathML/RenderMathMLUnderOver.cpp
 		tests/MathML/Internals/MathMLElementFactory.cpp
 		tests/MathML/MathMLOperatorElement.cpp
 		tests/MathML/MathMLPresentationElement.cpp

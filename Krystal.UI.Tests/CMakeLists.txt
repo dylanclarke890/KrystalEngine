@@ -55,6 +55,7 @@ target_sources(Krystal.UI.Tests
     tests/GamepadProvider.cpp
     tests/Golden.cpp
     tests/GraphicsContextRender2D.cpp
+    tests/MathML.cpp
     tests/View.cpp
     tests/PathStrokerStrategy.cpp
     tests/Render2DConversions.cpp

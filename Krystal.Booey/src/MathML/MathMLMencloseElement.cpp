@@ -1,5 +1,8 @@
 ﻿#include "Krystal.Booey/MathML/MathMLMencloseElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLMenclose.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::mathml
@@ -133,8 +136,18 @@ namespace krys::boo::mathml
     if (name == MathMLNames::NotationAttr())
     {
       _notationFlags.reset();
+      if (auto *renderer = Renderer())
+      {
+        renderer->SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
     }
 
     MathMLRowElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLMencloseElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::menclose));
+    return CreateRenderer<RenderMathMLMenclose>(*this, krys::move(style));
   }
 }

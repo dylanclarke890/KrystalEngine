@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/MathML/MathMLFractionElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLFraction.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 
 namespace krys::boo::mathml
 {
@@ -23,5 +25,11 @@ namespace krys::boo::mathml
     }
 
     MathMLRowElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLFractionElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::mfrac));
+    return CreateRenderer<RenderMathMLFraction>(*this, krys::move(style));
   }
 }

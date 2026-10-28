@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/MathML/MathMLUnderOverElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLUnderOver.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
 
 namespace krys::boo::mathml
 {
@@ -39,5 +41,12 @@ namespace krys::boo::mathml
     }
 
     MathMLScriptsElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLUnderOverElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::munder) || HasTagName(html::TagName::mover)
+                      || HasTagName(html::TagName::munderover));
+    return CreateRenderer<RenderMathMLUnderOver>(*this, krys::move(style));
   }
 }

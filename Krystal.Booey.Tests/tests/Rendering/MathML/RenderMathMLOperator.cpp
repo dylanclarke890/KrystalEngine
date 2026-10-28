@@ -1,25 +1,18 @@
 ﻿#include "Krystal.Booey/Rendering/MathML/RenderMathMLOperator.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/MathML/MathMLTestUtils.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Graphics/FontCascade.hpp"
-#include "Krystal.Booey/Graphics/FontDatabase.hpp"
 #include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
-#include "Krystal.Booey/Graphics/WOFFFileFormat.hpp"
 #include "Krystal.Booey/MathML/MathMLOperatorElement.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Platform/SharedBuffer.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstring>
-#include <filesystem>
 #include <format>
-#include <fstream>
-#include <iterator>
-#include <string>
 
 namespace krys::boo::tests
 {
@@ -27,26 +20,6 @@ namespace krys::boo::tests
 
   namespace
   {
-    /// @brief Registers the web-platform-tests math font @p name, whose family is its name.
-    void RegisterMathFont(const char *name) noexcept
-    {
-      const auto *family = reinterpret_cast<const char8 *>(name);
-      if (!FontDatabase::Singleton().FacesInFamily(utf8_stringview(family, std::strlen(name))).empty())
-      {
-        return;
-      }
-      std::ifstream stream(std::filesystem::path {KRYS_BOOEY_TESTS_DATA_DIR} / "fonts" / "math"
-                             / (std::string {name} + ".woff"),
-                           std::ios::binary);
-      REQUIRE(stream);
-      List<uint8> bytes {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
-      RefPtr<SharedBuffer> buffer = SharedBuffer::Create(krys::move(bytes));
-      REQUIRE(ConvertWOFFToSfntIfNecessary(buffer));
-      auto span = buffer->GetSpan();
-      const auto *data = reinterpret_cast<const byte *>(span.data());
-      REQUIRE(FontDatabase::Singleton().AddFontData(List<byte>(data, data + span.size())) == 1u);
-    }
-
     /// @brief A document whose formulas are in the 10px font `stretchy` (a hundredth of a pixel a unit): its
     /// vertical size variants of U+295C are 10px to 40px tall and its horizontal ones of U+295A 10px to 40px
     /// wide, and both are assembled from 50px.

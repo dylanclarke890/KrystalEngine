@@ -30,8 +30,10 @@ namespace krys::boo::mathml
       return _rootType;
     }
 
-    // FIXME: The element is made a RenderMathMLRoot (B12e), whose radical operator is reset and layout
-    // invalidated when the element's children change; until then it's laid out as a row.
+  private:
+    void OnChildrenChanged() noexcept final;
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
   };
 }
 

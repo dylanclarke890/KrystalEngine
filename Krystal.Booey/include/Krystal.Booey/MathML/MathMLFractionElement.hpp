@@ -21,9 +21,8 @@ namespace krys::boo::mathml
 
     KRYS_NODISCARD const Length &LineThickness() noexcept;
 
-    // FIXME: The element is made a RenderMathMLFraction (B12e); until then it's laid out as a row.
-
   private:
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept final;
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,
                           Maybe<dom::DOMStringView> value) noexcept final;
   };
