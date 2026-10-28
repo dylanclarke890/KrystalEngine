@@ -17,8 +17,8 @@ namespace krys::boo
   /// @brief The weights, widths and slopes a face provides, for font matching: its own style.
   KRYS_NODISCARD FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept;
 
-  /// @brief The fonts documents can use: the faces of the font files the host registers, by family, and the
-  /// bundled Liberation Sans, the last resort.
+  /// @brief The fonts documents can use: the faces of the font files the host registers, by family, the
+  /// bundled Liberation Sans, the last resort, and the bundled STIX Two Math, for `font-family: math`.
   /// @note The database is process-wide. Families are matched ASCII case-insensitively.
   class FontDatabase final
   {
@@ -30,6 +30,7 @@ namespace krys::boo
     HashMap<utf8_string, List<Ref<text::FreeTypeFace>>> _families;
     List<std::filesystem::path> _registeredFiles;
     Ref<text::FreeTypeFace> _bundledFace;
+    Ref<text::FreeTypeFace> _bundledMathFace;
     uint32 _generation {0};
 
   public:
@@ -61,7 +62,7 @@ namespace krys::boo
     /// @brief The names of the registered families, as the fonts give them.
     KRYS_NODISCARD List<utf8_string> Families() const noexcept;
 
-    /// @brief Every registered face, in registration order (the bundled face first).
+    /// @brief Every registered face, in registration order (the bundled faces first).
     KRYS_NODISCARD Span<const Ref<text::FreeTypeFace>> Faces() const noexcept
     {
       return _faces;
@@ -71,6 +72,12 @@ namespace krys::boo
     KRYS_NODISCARD text::FreeTypeFace &BundledFace() const noexcept
     {
       return *_bundledFace;
+    }
+
+    /// @brief The bundled STIX Two Math, a font with an OpenType MATH table.
+    KRYS_NODISCARD text::FreeTypeFace &BundledMathFace() const noexcept
+    {
+      return *_bundledMathFace;
     }
 
     /// @brief Increases whenever fonts are registered.

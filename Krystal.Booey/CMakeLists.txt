@@ -177,7 +177,7 @@ add_custom_command(
 )
 
 # The bundled fonts, embedded as byte arrays (codegen/bundled_fonts.py)
-set(KRYSTAL_BOOEY_BUNDLED_FONTS_DIR "${CMAKE_SOURCE_DIR}/third-party/liberation-fonts")
+set(KRYSTAL_BOOEY_BUNDLED_FONTS_DIR "${CMAKE_SOURCE_DIR}/third-party")
 set(KRYSTAL_BOOEY_BUNDLED_FONTS_OUTPUTS
   ${KRYSTAL_BOOEY_HEADER_OUTPUT_DIR}/Krystal.Booey/Graphics/BundledFonts.hpp
   ${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}/Graphics/BundledFonts.cpp
@@ -192,7 +192,8 @@ add_custom_command(
       --output-sources-dir=${KRYSTAL_BOOEY_SOURCES_OUTPUT_DIR}
   DEPENDS
     "${KRYSTAL_BOOEY_CODEGEN_DIR}/bundled_fonts.py"
-    "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/LiberationSans-Regular.ttf"
+    "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/liberation-fonts/LiberationSans-Regular.ttf"
+    "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/stix-two-fonts/STIXTwoMath-Regular.otf"
   COMMENT
     "Embedding Krystal.Booey's bundled fonts..."
   VERBATIM
@@ -1024,6 +1025,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Graphics/Font.hpp
   include/Krystal.Booey/Graphics/FontDatabase.hpp
   include/Krystal.Booey/Graphics/FontPlatformData.hpp
+  include/Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp
   include/Krystal.Booey/Graphics/Glyph.hpp
   include/Krystal.Booey/Graphics/GlyphMetricsMap.hpp
   include/Krystal.Booey/Graphics/GlyphPage.hpp
@@ -3076,6 +3078,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Graphics/Font.cpp
   src/Graphics/FontDatabase.cpp
   src/Graphics/FontPlatformData.cpp
+  src/Graphics/OpenType/OpenTypeMathData.cpp
 
   # Font selection (t2b)
   src/CSS/CSSFontSelector.cpp
@@ -4054,6 +4057,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/MathML/MathMLTokenElement.hpp
       include/Krystal.Booey/MathML/MathMLUnderOverElement.hpp
       include/Krystal.Booey/MathML/MathMLUnknownElement.hpp
+      include/Krystal.Booey/Rendering/MathML/MathVariant.hpp
 
       # SVG
       include/Krystal.Booey/CSS/DOMMatrix2DInit.hpp
@@ -4526,6 +4530,7 @@ target_sources(Krystal.Booey
     src/MathML/MathMLSpaceElement.cpp
     src/MathML/MathMLTokenElement.cpp
     src/MathML/MathMLUnderOverElement.cpp
+    src/Rendering/MathML/MathVariant.cpp
 
     # SVG
     src/SVG/Animation/SMILTime.cpp

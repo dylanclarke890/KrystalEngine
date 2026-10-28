@@ -22,6 +22,7 @@
 #include "Krystal.Booey/Rendering/HitTestSource.hpp"
 #include "Krystal.Booey/Rendering/LegacyInlineTextBox.hpp"
 #include "Krystal.Booey/Rendering/Line/WordTrailingSpace.hpp"
+#include "Krystal.Booey/Rendering/MathML/MathVariant.hpp"
 #include "Krystal.Booey/Rendering/RenderBlockFlow.hpp"
 #include "Krystal.Booey/Rendering/RenderInline.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
@@ -199,6 +200,26 @@ namespace krys::boo
       return krys::move(result).ToString();
     }
 
+    // https://w3c.github.io/mathml-core/#math-auto-transform
+    KRYS_NODISCARD utf8_string ConvertToMathAuto(utf8_stringview string) noexcept
+    {
+      if (!string.empty())
+      {
+        auto decoded = text::DecodeUTF8(Span<const char8>(string.data(), string.size()));
+        if (decoded.IsValid && decoded.Length == string.size())
+        {
+          char32 transformedCodePoint = MathVariantMapCodePoint(decoded.CodePoint, MathVariant::Italic);
+          if (transformedCodePoint != decoded.CodePoint)
+          {
+            StringBuilder result;
+            result.Append(transformedCodePoint);
+            return krys::move(result).ToString();
+          }
+        }
+      }
+      return utf8_string(string);
+    }
+
     KRYS_NODISCARD bool IsInlineFlowOrEmptyText(const RenderObject &renderer) noexcept
     {
       if (Is<RenderInline>(renderer))
@@ -300,8 +321,10 @@ namespace krys::boo
       modified = ConvertToFullSizeKana(modified);
     }
 
-    // FIXME: math-auto (the italic mathematical variant of single code points), once there are MathML
-    // variants.
+    if (transform.Contains(style::TextTransformValue::MathAuto))
+    {
+      modified = ConvertToMathAuto(modified);
+    }
 
     return modified;
   }

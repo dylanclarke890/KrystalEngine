@@ -974,3 +974,10 @@ MathML. Booey already has the HTML parser's MathML steps (foreign content, `anno
 - **Out:** selecting children of `<semantics>` and `<maction>`, a class of its own for annotations, `href`, and MathML 3's elements and attributes (decision 1).
 - **Krystal.Core:** `text::HyphenMinus` and `MinusSign`.
 - **Tests:** Booey: `tests/MathML/MathMLElement.cpp`, `Internals/MathMLElementFactory.cpp`, `MathMLPresentationElement.cpp`, `MathMLOperatorElement.cpp`; 2986 cases pass. Krystal.UI: 133 cases pass.
+
+### B12b as built (2026-10-27)
+
+- **Booey** (the ledger entry is *Math fonts* in `docs/booey/PORTING.md`): `OpenTypeMathData` over HarfBuzz (decision 3) with `Font::MathData`; `MathVariant` and `text-transform: math-auto`, with `mi { text-transform: math-auto; }` in the MathML sheet, as MathML Core's.
+- **The math font** (the user's choice, 2026-10-27): STIX Two Math 2.13 b171 embedded in Booey beside Liberation Sans (`third-party/stix-two-fonts/`, `codegen/bundled_fonts.py`), so `font-family: math` finds it with no host setup; it's the last fallback, after Liberation Sans.
+- **For B12c:** italics come from `math-auto`, so `RenderMathMLToken`'s own `mathvariant` glyph mapping isn't needed.
+- **Tests:** Booey: `tests/Graphics/OpenType/OpenTypeMathData.cpp` over six of WPT's math fonts, `tests/Rendering/MathML/MathVariant.cpp`; 2995 cases pass. Krystal.UI: 133 cases pass.

@@ -1,6 +1,8 @@
 ﻿#include "Krystal.Booey/Graphics/FontPlatformData.hpp"
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
+#include <hb-ot.h>
+#include <hb.h>
 
 namespace krys::boo
 {
@@ -77,6 +79,22 @@ namespace krys::boo
            && _syntheticOblique == other._syntheticOblique && _isColorBitmapFont == other._isColorBitmapFont
            && _orientation == other._orientation && _widthVariant == other._widthVariant
            && _textRenderingMode == other._textRenderingMode;
+  }
+
+  text::HbUniquePtr<hb_font_t> FontPlatformData::CreateOpenTypeMathHarfBuzzFont() const noexcept
+  {
+    if (!_face)
+    {
+      return nullptr;
+    }
+
+    auto *face = _face->HarfBuzzFace();
+    if (!face || !hb_ot_math_has_data(face))
+    {
+      return nullptr;
+    }
+
+    return text::HbUniquePtr<hb_font_t>(hb_font_create(face));
   }
 
   Maybe<List<byte>> FontPlatformData::OpenTypeTable(uint32 table) const noexcept

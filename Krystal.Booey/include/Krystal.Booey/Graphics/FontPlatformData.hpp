@@ -9,6 +9,7 @@
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include "Krystal.Text/FreeTypeFace.hpp"
+#include "Krystal.Text/HarfBuzz.hpp"
 
 namespace krys::boo
 {
@@ -114,6 +115,9 @@ namespace krys::boo
     {
       return false;
     }
+
+    /// @brief A HarfBuzz font in the face's units for reading its MATH table, or null if it doesn't have one.
+    KRYS_NODISCARD text::HbUniquePtr<hb_font_t> CreateOpenTypeMathHarfBuzzFont() const noexcept;
 
     /// @brief The contents of the OpenType table @p table, or null if the font doesn't have it.
     KRYS_NODISCARD Maybe<List<byte>> OpenTypeTable(uint32 table) const noexcept;

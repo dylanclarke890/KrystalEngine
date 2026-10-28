@@ -344,6 +344,24 @@ namespace krys::boo
     return *derivedFontData.BrokenIdeographFont;
   }
 
+  const OpenTypeMathData *Font::MathData() const noexcept
+  {
+    if (IsInterstitial())
+    {
+      return nullptr;
+    }
+    if (!_mathDataChecked)
+    {
+      _mathDataChecked = true;
+      auto mathData = OpenTypeMathData::Create(_platformData);
+      if (mathData->HasMathData())
+      {
+        _mathData = krys::move(mathData);
+      }
+    }
+    return _mathData.get();
+  }
+
   bool Font::IsProbablyOnlyUsedToRenderIcons() const noexcept
   {
     // FIXME: Not implemented yet.

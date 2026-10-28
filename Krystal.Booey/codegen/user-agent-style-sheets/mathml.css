@@ -108,6 +108,10 @@ ms, mtext, mi, mn, mo, annotation, mtd {
     white-space: nowrap !important;
 }
 
+mi {
+    text-transform: math-auto;
+}
+
 /* Tables */
 mtable {
     display: inline-table;

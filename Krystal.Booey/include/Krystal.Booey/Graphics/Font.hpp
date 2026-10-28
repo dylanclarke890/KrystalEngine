@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GlyphMetricsMap.hpp"
 #include "Krystal.Booey/Graphics/GlyphPage.hpp"
+#include "Krystal.Booey/Graphics/OpenType/OpenTypeMathData.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -141,6 +142,8 @@ namespace krys::boo
 
     mutable UniquePtr<DerivedFonts> _derivedFontData;
     mutable text::HbUniquePtr<hb_font_t> _harfBuzzFont;
+    mutable RefPtr<OpenTypeMathData> _mathData;
+    mutable bool _mathDataChecked {false};
 
     Glyph _spaceGlyph {0};
     Glyph _zeroWidthSpaceGlyph {0};
@@ -183,6 +186,9 @@ namespace krys::boo
     {
       return _platformData;
     }
+
+    /// @brief The font's OpenType MATH table, or null if it doesn't have one.
+    KRYS_NODISCARD const OpenTypeMathData *MathData() const noexcept;
 
     KRYS_NODISCARD const Font *SmallCapsFont(const FontDescription &fontDescription) const noexcept;
     KRYS_NODISCARD const Font &NoSynthesizableFeaturesFont() const noexcept;

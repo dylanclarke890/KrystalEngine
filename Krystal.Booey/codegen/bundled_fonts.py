@@ -5,9 +5,10 @@ import pathlib
 
 FILE_NAME = "BundledFonts"
 
-# (C++ function name, font file name)
+# (C++ function name, font file under the fonts directory)
 FONTS = [
-    ("LiberationSansRegular", "LiberationSans-Regular.ttf"),
+    ("LiberationSansRegular", "liberation-fonts/LiberationSans-Regular.ttf"),
+    ("STIXTwoMathRegular", "stix-two-fonts/STIXTwoMath-Regular.otf"),
 ]
 
 BYTES_PER_LINE = 24
@@ -15,7 +16,7 @@ BYTES_PER_LINE = 24
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Embed the bundled fonts.")
-    parser.add_argument("--fonts-dir", required=True, help="Directory containing the font files.")
+    parser.add_argument("--fonts-dir", required=True, help="Directory containing the font directories (third-party/).")
     parser.add_argument("--output-headers-dir", required=True, help="Output directory for the generated header.")
     parser.add_argument("--output-sources-dir", required=True, help="Output directory for the generated source.")
     return parser.parse_args()
@@ -42,7 +43,7 @@ def generate_header() -> str:
         "{",
     ]
     for function_name, file_name in FONTS:
-        lines.append(f"  /// @brief The contents of `{file_name}`.")
+        lines.append(f"  /// @brief The contents of `{pathlib.PurePosixPath(file_name).name}`.")
         lines.append(f"  KRYS_NODISCARD Span<const byte> Bundled{function_name}() noexcept;")
     lines.append("}")
     lines.append("")

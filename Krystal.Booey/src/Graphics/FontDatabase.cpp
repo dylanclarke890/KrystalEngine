@@ -26,18 +26,20 @@ namespace krys::boo
     return capabilities;
   }
 
-  KRYS_NODISCARD static Ref<text::FreeTypeFace> CreateBundledFace() noexcept
+  KRYS_NODISCARD static Ref<text::FreeTypeFace> CreateBundledFace(Span<const byte> data) noexcept
   {
-    auto face =
-      text::FreeTypeFace::Create(text::FontFileData::CreateStatic(BundledLiberationSansRegular()), 0);
+    auto face = text::FreeTypeFace::Create(text::FontFileData::CreateStatic(data), 0);
     krys_assert_msg(face, "the bundled font can be read");
     Ref<text::FreeTypeFace> result = krys::move(face);
     return result;
   }
 
-  FontDatabase::FontDatabase() noexcept : _bundledFace(CreateBundledFace())
+  FontDatabase::FontDatabase() noexcept
+      : _bundledFace(CreateBundledFace(BundledLiberationSansRegular())),
+        _bundledMathFace(CreateBundledFace(BundledSTIXTwoMathRegular()))
   {
     AddFace(Ref {_bundledFace});
+    AddFace(Ref {_bundledMathFace});
   }
 
   FontDatabase &FontDatabase::Singleton() noexcept
