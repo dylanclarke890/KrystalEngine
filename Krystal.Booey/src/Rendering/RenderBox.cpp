@@ -2264,7 +2264,12 @@ namespace krys::boo
       {
         return true;
       }
-      // FIXME: MathML blocks take the size of their content, once there's MathML.
+      // RenderMathMLBlocks take the size of their content so we must not adjust the margin to fill the
+      // container size.
+      if (containingBlock.IsRenderMathMLBlock())
+      {
+        return true;
+      }
       if (hasPerpendicularContainingBlock)
       {
         return true;
@@ -2708,7 +2713,11 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: MathML blocks take the size of their content, not of their container, once there's MathML.
+    // RenderMathMLBlocks take the size of their content, not of their container.
+    if (Parent()->IsRenderMathMLBlock())
+    {
+      return true;
+    }
 
     // Flexible box items should shrink wrap, so we lay them out at their intrinsic widths.
     // In the case of columns that have a stretch alignment, we layout at the stretched size
@@ -3690,8 +3699,7 @@ namespace krys::boo
 
   bool RenderBox::AvoidsFloats() const noexcept
   {
-    // FIXME: MathML blocks, once there's MathML.
-    if (Is<RenderReplaced>(*this) || IsLegend())
+    if (Is<RenderReplaced>(*this) || IsLegend() || IsRenderMathMLBlock())
     {
       return true;
     }

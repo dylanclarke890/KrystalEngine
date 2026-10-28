@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/MathML/MathMLRowElement.hpp"
 #include "Krystal.Booey/MathML/MathMLOperatorElement.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp"
 
 namespace krys::boo::mathml
 {
@@ -22,5 +23,10 @@ namespace krys::boo::mathml
     }
 
     MathMLPresentationElement::OnChildrenChanged();
+  }
+
+  RenderPtr<RenderElement> MathMLRowElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    return CreateRenderer<RenderMathMLRow>(RenderObject::Type::MathMLRow, *this, krys::move(style));
   }
 }

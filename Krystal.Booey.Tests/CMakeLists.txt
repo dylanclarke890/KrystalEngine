@@ -659,6 +659,11 @@ target_sources(Krystal.Booey.Tests
 		tests/MathML/MathMLElement.cpp
 		tests/Graphics/OpenType/OpenTypeMathData.cpp
 		tests/Rendering/MathML/MathVariant.cpp
+		tests/Rendering/MathML/RenderMathMLBlock.cpp
+		tests/Rendering/MathML/RenderMathMLPadded.cpp
+		tests/Rendering/MathML/RenderMathMLRow.cpp
+		tests/Rendering/MathML/RenderMathMLSpace.cpp
+		tests/Rendering/MathML/RenderMathMLToken.cpp
 		tests/MathML/Internals/MathMLElementFactory.cpp
 		tests/MathML/MathMLOperatorElement.cpp
 		tests/MathML/MathMLPresentationElement.cpp

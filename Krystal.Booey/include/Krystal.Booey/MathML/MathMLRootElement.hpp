@@ -30,8 +30,8 @@ namespace krys::boo::mathml
       return _rootType;
     }
 
-    // FIXME: The element is made a RenderMathMLRoot, whose radical operator is reset and layout invalidated
-    // when the element's children change, once there are MathML renderers.
+    // FIXME: The element is made a RenderMathMLRoot (B12e), whose radical operator is reset and layout
+    // invalidated when the element's children change; until then it's laid out as a row.
   };
 }
 

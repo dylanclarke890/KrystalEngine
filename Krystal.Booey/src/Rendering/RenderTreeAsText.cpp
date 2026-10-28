@@ -294,7 +294,28 @@ namespace krys::boo
         ts << ']';
       }
 
-      // FIXME: The padding of MathML blocks, once there's MathML.
+      // We want to show any layout padding, both CSS padding and intrinsic padding, so we can't just check
+      // o.style().hasPadding().
+      if (o.IsRenderMathMLBlock()
+          && (box->PaddingTop() || box->PaddingRight() || box->PaddingBottom() || box->PaddingLeft()))
+      {
+        ts << " [";
+        LayoutUnit cssTop = box->ComputedCSSPaddingTop();
+        LayoutUnit cssRight = box->ComputedCSSPaddingRight();
+        LayoutUnit cssBottom = box->ComputedCSSPaddingBottom();
+        LayoutUnit cssLeft = box->ComputedCSSPaddingLeft();
+        if (box->PaddingTop() != cssTop || box->PaddingRight() != cssRight
+            || box->PaddingBottom() != cssBottom || box->PaddingLeft() != cssLeft)
+        {
+          ts << "intrinsic ";
+          if (cssTop || cssRight || cssBottom || cssLeft)
+          {
+            ts << "+ CSS ";
+          }
+        }
+        ts << "padding: " << RoundToInt(box->PaddingTop()) << ' ' << RoundToInt(box->PaddingRight()) << ' '
+           << RoundToInt(box->PaddingBottom()) << ' ' << RoundToInt(box->PaddingLeft()) << ']';
+      }
     }
 
     if (auto *cell = DynamicDowncast<RenderTableCell>(o))

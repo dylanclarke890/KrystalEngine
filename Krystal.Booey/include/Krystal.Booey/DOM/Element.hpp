@@ -768,7 +768,7 @@ namespace krys::boo::dom
 
     /// @brief The renderer the element gets with @p style, or null if it gets none.
     // FIXME: The insertion position in the render tree, and the overrides that need renderer classes (images,
-    // line breaks, form controls, media, frames, MathML, SVG, ...).
+    // line breaks, form controls, media, frames, SVG, ...).
     KRYS_NODISCARD virtual RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept;
 
     /// @brief Whether the element would have a renderer with @p style.

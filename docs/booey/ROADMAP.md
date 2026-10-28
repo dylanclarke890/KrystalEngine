@@ -981,3 +981,10 @@ MathML. Booey already has the HTML parser's MathML steps (foreign content, `anno
 - **The math font** (the user's choice, 2026-10-27): STIX Two Math 2.13 b171 embedded in Booey beside Liberation Sans (`third-party/stix-two-fonts/`, `codegen/bundled_fonts.py`), so `font-family: math` finds it with no host setup; it's the last fallback, after Liberation Sans.
 - **For B12c:** italics come from `math-auto`, so `RenderMathMLToken`'s own `mathvariant` glyph mapping isn't needed.
 - **Tests:** Booey: `tests/Graphics/OpenType/OpenTypeMathData.cpp` over six of WPT's math fonts, `tests/Rendering/MathML/MathVariant.cpp`; 2995 cases pass. Krystal.UI: 133 cases pass.
+
+### B12c as built (2026-10-27)
+
+- **Booey** (the ledger entry is *MathML renderers* in `docs/booey/PORTING.md`): `RenderMathMLBlock` with `RenderMathMLTable` and `ToUserUnits`, `RenderMathMLRow`, `RenderMathMLMath`, `RenderMathMLToken`, `RenderMathMLSpace` and `RenderMathMLPadded`; the elements make them (fractions, roots, scripts, under and over and `<menclose>` are rows, and `<mo>` a token, until B12d and B12e); MathML blocks in `RenderBox`, `RenderElement`, the tree dump and the layout integration, where `<math>` is an atomic inline box on its first line's baseline. Formulas of tokens, spaces and padded rows lay out inline and as display blocks.
+- **Dropped:** `MathMLStyle` (only `mathvariant`, which Core doesn't use: B12a, B12b) with the token renderer's glyph path; `RenderTreeBuilderMathML` (only `<mfenced>`).
+- **For B12d:** `RenderMathMLRow::StretchVerticalOperatorsAndLayoutChildren` has the FIXME for stretching vertical operators, `RenderMathMLBlock::UnembellishedOperator` returns null until there are operators, and `MathMLTokenElement::CreateElementRenderer` allows `<mo>` until it has its own renderer.
+- **Tests:** Booey: `tests/Rendering/MathML/RenderMathMLBlock.cpp`, `RenderMathMLRow.cpp`, `RenderMathMLSpace.cpp`, `RenderMathMLPadded.cpp`, `RenderMathMLToken.cpp`; 3006 cases pass. Krystal.UI: 133 cases pass.

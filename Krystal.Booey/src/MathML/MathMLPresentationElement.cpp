@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/MathML/MathMLPresentationElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include <charconv>
 #include <cmath>
@@ -13,7 +14,15 @@ namespace krys::boo::mathml
   {
   }
 
-  // FIXME: <mtable> is made a RenderMathMLTable, once there are MathML renderers.
+  RenderPtr<RenderElement> MathMLPresentationElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    if (HasTagName(html::TagName::mtable))
+    {
+      return CreateRenderer<RenderMathMLTable>(*this, krys::move(style));
+    }
+
+    return MathMLElement::CreateElementRenderer(krys::move(style));
+  }
 
   MathMLElement::BooleanValue
     MathMLPresentationElement::CachedBooleanAttribute(const dom::QualifiedName &name,

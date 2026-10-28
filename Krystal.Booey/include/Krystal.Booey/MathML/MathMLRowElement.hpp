@@ -19,6 +19,6 @@ namespace krys::boo::mathml
   protected:
     void OnChildrenChanged() noexcept override;
 
-    // FIXME: The element is made a RenderMathMLRow, once there are MathML renderers.
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
   };
 }

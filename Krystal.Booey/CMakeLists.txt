@@ -4058,6 +4058,12 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/MathML/MathMLUnderOverElement.hpp
       include/Krystal.Booey/MathML/MathMLUnknownElement.hpp
       include/Krystal.Booey/Rendering/MathML/MathVariant.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLBlock.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLMath.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLPadded.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLRow.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLSpace.hpp
+      include/Krystal.Booey/Rendering/MathML/RenderMathMLToken.hpp
 
       # SVG
       include/Krystal.Booey/CSS/DOMMatrix2DInit.hpp
@@ -4520,6 +4526,7 @@ target_sources(Krystal.Booey
     src/MathML/Internals/MathMLElementFactory.cpp
     src/MathML/MathMLElement.cpp
     src/MathML/MathMLFractionElement.cpp
+    src/MathML/MathMLMathElement.cpp
     src/MathML/MathMLMencloseElement.cpp
     src/MathML/MathMLNames.cpp
     src/MathML/MathMLOperatorDictionary.cpp
@@ -4531,6 +4538,12 @@ target_sources(Krystal.Booey
     src/MathML/MathMLTokenElement.cpp
     src/MathML/MathMLUnderOverElement.cpp
     src/Rendering/MathML/MathVariant.cpp
+    src/Rendering/MathML/RenderMathMLBlock.cpp
+    src/Rendering/MathML/RenderMathMLMath.cpp
+    src/Rendering/MathML/RenderMathMLPadded.cpp
+    src/Rendering/MathML/RenderMathMLRow.cpp
+    src/Rendering/MathML/RenderMathMLSpace.cpp
+    src/Rendering/MathML/RenderMathMLToken.cpp
 
     # SVG
     src/SVG/Animation/SMILTime.cpp

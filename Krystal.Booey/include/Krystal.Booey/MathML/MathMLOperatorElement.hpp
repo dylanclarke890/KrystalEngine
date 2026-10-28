@@ -58,8 +58,8 @@ namespace krys::boo::mathml
     KRYS_NODISCARD const Length &MinSize() noexcept;
     KRYS_NODISCARD const Length &MaxSize() noexcept;
 
-    // FIXME: The element is made a RenderMathMLOperator, which is updated when lspace, rspace, stretchy or
-    // movablelimits change, once there are MathML renderers.
+    // FIXME: The element is made a RenderMathMLOperator (B12d), which is updated when lspace, rspace,
+    // stretchy or movablelimits change; until then it's laid out as a token.
 
   private:
     void OnChildrenChanged() noexcept final;

@@ -275,8 +275,6 @@ namespace krys::boo
       View,
       ViewTransitionCapture,
       MathMLBlock,
-      MathMLFenced,
-      MathMLFencedOperator,
       MathMLFraction,
       MathMLMath,
       MathMLMenclose,
@@ -904,7 +902,7 @@ namespace krys::boo
     }
     KRYS_NODISCARD bool IsRenderTable() const noexcept
     {
-      return _type == Type::Table;
+      return _type == Type::Table || _type == Type::MathMLTable;
     }
     KRYS_NODISCARD bool IsRenderTableCell() const noexcept
     {
@@ -981,6 +979,60 @@ namespace krys::boo
     KRYS_NODISCARD bool IsRenderQuote() const noexcept
     {
       return _type == Type::Quote;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLBlock() const noexcept
+    {
+      switch (_type)
+      {
+        case Type::MathMLBlock:
+        case Type::MathMLFraction:
+        case Type::MathMLMath:
+        case Type::MathMLMenclose:
+        case Type::MathMLOperator:
+        case Type::MathMLPadded:
+        case Type::MathMLRoot:
+        case Type::MathMLRow:
+        case Type::MathMLScripts:
+        case Type::MathMLSpace:
+        case Type::MathMLToken:
+        case Type::MathMLUnderOver: return true;
+        default:                    return false;
+      }
+    }
+    KRYS_NODISCARD bool IsRenderMathMLTable() const noexcept
+    {
+      return _type == Type::MathMLTable;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLRow() const noexcept
+    {
+      switch (_type)
+      {
+        case Type::MathMLMath:
+        case Type::MathMLMenclose:
+        case Type::MathMLPadded:
+        case Type::MathMLRoot:
+        case Type::MathMLRow:
+        case Type::MathMLFraction:
+        case Type::MathMLScripts:
+        case Type::MathMLUnderOver: return true;
+        default:                    return false;
+      }
+    }
+    KRYS_NODISCARD bool IsRenderMathMLMath() const noexcept
+    {
+      return _type == Type::MathMLMath;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLPadded() const noexcept
+    {
+      return _type == Type::MathMLPadded;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLSpace() const noexcept
+    {
+      return _type == Type::MathMLSpace;
+    }
+    KRYS_NODISCARD bool IsRenderMathMLToken() const noexcept
+    {
+      return _type == Type::MathMLToken || _type == Type::MathMLOperator;
     }
     KRYS_NODISCARD bool IsLegacyRenderSVGModelObject() const noexcept
     {

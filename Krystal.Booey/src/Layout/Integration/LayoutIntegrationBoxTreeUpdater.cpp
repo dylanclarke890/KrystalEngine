@@ -210,8 +210,7 @@ namespace krys::boo::layout_integration
           styleToAdjust.SetOverflowY(anonBlockParentStyle.OverflowY());
         }
 
-        // FIXME: MathML math boxes too, once there's MathML rendering.
-        if (renderer.IsRenderTextControl())
+        if (renderer.IsRenderTextControl() || renderer.IsRenderMathMLMath())
         {
           // Something like <input style="appearance:none; display:table-header-group"> confuses IFC.
           if (styleToAdjust.IsInternalTableBox() || styleToAdjust.Display() == DisplayType::TableCaption)

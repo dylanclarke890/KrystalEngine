@@ -30,7 +30,7 @@ namespace krys::boo::mathml
     KRYS_NODISCARD const Length &Lspace() noexcept;
     KRYS_NODISCARD const Length &Voffset() noexcept;
 
-    // FIXME: The element is made a RenderMathMLPadded, once there are MathML renderers.
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,

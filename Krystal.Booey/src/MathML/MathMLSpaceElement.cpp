@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/MathML/MathMLSpaceElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLSpace.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::mathml
@@ -49,5 +50,11 @@ namespace krys::boo::mathml
     }
 
     MathMLPresentationElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLSpaceElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::mspace));
+    return CreateRenderer<RenderMathMLSpace>(*this, krys::move(style));
   }
 }

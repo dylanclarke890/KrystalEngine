@@ -37,7 +37,7 @@ namespace krys::boo::mathml
       return _scriptType;
     }
 
-    // FIXME: The element is made a RenderMathMLScripts, once there are MathML renderers.
+    // FIXME: The element is made a RenderMathMLScripts (B12e); until then it's laid out as a row.
 
   protected:
     MathMLScriptsElement(dom::Document &document, ScriptType scriptType,

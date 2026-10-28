@@ -21,6 +21,8 @@ namespace krys::boo::mathml
     /// @return A length of type `ParsingFailed` if @p string isn't one.
     KRYS_NODISCARD static Length ParseMathMLLength(dom::DOMStringView string) noexcept;
 
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+
   protected:
     KRYS_NODISCARD static Maybe<bool> ToOptionalBool(BooleanValue value) noexcept
     {

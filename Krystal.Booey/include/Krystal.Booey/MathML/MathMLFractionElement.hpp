@@ -21,7 +21,7 @@ namespace krys::boo::mathml
 
     KRYS_NODISCARD const Length &LineThickness() noexcept;
 
-    // FIXME: The element is made a RenderMathMLFraction, once there are MathML renderers.
+    // FIXME: The element is made a RenderMathMLFraction (B12e); until then it's laid out as a row.
 
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,

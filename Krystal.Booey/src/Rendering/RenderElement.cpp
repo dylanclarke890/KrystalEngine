@@ -1618,10 +1618,11 @@ namespace krys::boo
 
   bool RenderElement::IsAnonymousBlock() const noexcept
   {
-    // FIXME: MathML blocks, multi-column sets, once there are any.
+    // FIXME: Multi-column sets, once there are any.
     return IsAnonymous() && (Style().Display() == DisplayType::Block || Style().Display() == DisplayType::Box)
-           && !Style().GetPseudoElementType() && IsRenderBlock() && !IsRenderListMarker()
-           && !IsRenderFragmentedFlow() && !IsRenderView() && !IsViewTransitionContainingBlock();
+           && !Style().GetPseudoElementType() && IsRenderBlock() && !IsRenderMathMLBlock()
+           && !IsRenderListMarker() && !IsRenderFragmentedFlow() && !IsRenderView()
+           && !IsViewTransitionContainingBlock();
   }
 
   bool RenderElement::IsBlockContainer() const noexcept

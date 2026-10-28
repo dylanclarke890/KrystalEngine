@@ -18,10 +18,11 @@ namespace krys::boo::mathml
     {
     }
 
-    // FIXME: The element is made a RenderMathMLToken, whose content is updated when the element's renderers
-    // are attached and when its children change, once there are MathML renderers.
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
+    void DidAttachRenderers() noexcept override;
 
   protected:
+    void OnChildrenChanged() noexcept override;
     KRYS_NODISCARD bool
       HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
                                          dom::DOMStringAtom namespaceURI) const noexcept override;

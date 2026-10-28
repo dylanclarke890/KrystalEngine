@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/MathML/MathMLPaddedElement.hpp"
 #include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLPadded.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 
 namespace krys::boo::mathml
@@ -69,5 +70,11 @@ namespace krys::boo::mathml
     }
 
     MathMLRowElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLPaddedElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::mpadded));
+    return CreateRenderer<RenderMathMLPadded>(*this, krys::move(style));
   }
 }

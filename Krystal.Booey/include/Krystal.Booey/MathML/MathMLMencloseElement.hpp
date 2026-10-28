@@ -37,7 +37,7 @@ namespace krys::boo::mathml
 
     KRYS_NODISCARD bool HasNotation(MencloseNotationFlag notationFlag) noexcept;
 
-    // FIXME: The element is made a RenderMathMLMenclose, once there are MathML renderers.
+    // FIXME: The element is made a RenderMathMLMenclose (B12e); until then it's laid out as a row.
 
   private:
     void AttributeChanged(const dom::QualifiedName &name, Maybe<dom::DOMStringView> oldValue,

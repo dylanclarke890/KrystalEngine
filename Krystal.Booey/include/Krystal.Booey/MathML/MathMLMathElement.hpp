@@ -16,8 +16,7 @@ namespace krys::boo::mathml
     {
     }
 
-    // FIXME: The element is made a RenderMathMLMath, and resolves its MathML style tree once its renderers
-    // are attached, once there are MathML renderers.
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
   };
 }
 

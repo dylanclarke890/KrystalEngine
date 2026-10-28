@@ -295,7 +295,10 @@ namespace krys::boo::layout_integration
         return null;
       }
 
-      // FIXME: MathML blocks use their first line's baseline, once there's MathML layout.
+      if (renderBox.IsRenderMathMLBlock())
+      {
+        return renderBox.FirstLineBaseline();
+      }
 
       if (Is<RenderTable>(renderBox))
       {
@@ -466,11 +469,11 @@ namespace krys::boo::layout_integration
           return !renderListMarker->IsImage();
         }
 
-        // FIXME: List boxes, sliders, attachments, MathML blocks and buttons, once there are those renderers.
+        // FIXME: List boxes, sliders, attachments and buttons, once there are those renderers.
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
             || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
             || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
-            || Is<RenderDeprecatedFlexibleBox>(renderBox))
+            || Is<RenderDeprecatedFlexibleBox>(renderBox) || renderBox.IsRenderMathMLBlock())
         {
           // These are special RenderBlock renderers that override the default baseline position behavior of
           // the inline block box.
