@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Platform/PathStrokeStrategy.hpp"
 #include "Krystal.Booey/Platform/PlatformStrategies.hpp"
 #include "Krystal.Core/Text/TextStream.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo
 {
@@ -229,13 +230,17 @@ namespace krys::boo
     }
 
     // FIXME: This should inspect the incoming path and add just the segments if possible.
-    // FIXME: Without a platform path, only segments that can be transformed are added.
-    for (auto segment : path.Segments())
+    // Without a platform path, the path is transformed on its own (segments that can't be transformed become
+    // their elements) and its segments added.
+    Path transformed(path);
+    transformed.Transform(transform);
+    if (IsEmpty())
     {
-      if (segment.Transform(transform))
-      {
-        EnsureImpl().AddSegment(krys::move(segment));
-      }
+      SetImpl(Ref<PathImpl> {PathStream::Create()});
+    }
+    for (auto segment : transformed.Segments())
+    {
+      EnsureImpl().AddSegment(krys::move(segment));
     }
   }
 
@@ -357,15 +362,51 @@ namespace krys::boo
       return;
     }
 
-    // There's no platform path to flatten the segments that can't produce elements, so rects become lines and
+    // There's no platform path to flatten the segments that can't produce elements, so rects become lines,
     // rounded rects and ellipses become beziers, as a platform path preferring them adds them
-    // (PathImpl::BeziersForRoundedRect).
-    // FIXME: Arcs, closed arcs, rotated ellipses and continuous rounded rects need a platform path; they
-    // apply nothing.
-    ApplySegments(
-      [&applier](const PathSegment &segment)
+    // (PathImpl::BeziersForRoundedRect), and arcs become beziers after the current point.
+    // FIXME: Continuous rounded rects need a platform path; they apply nothing.
+    Maybe<FloatPoint> currentPoint;
+    FloatPoint subpathStart;
+    PathElementApplier tracking = [&](const PathElement &element)
+    {
+      switch (element.ElementType)
       {
+        case PathElement::Type::MoveToPoint:
+          subpathStart = element.Points[0];
+          currentPoint = element.Points[0];
+          break;
+        case PathElement::Type::AddLineToPoint:      currentPoint = element.Points[0]; break;
+        case PathElement::Type::AddQuadCurveToPoint: currentPoint = element.Points[1]; break;
+        case PathElement::Type::AddCurveToPoint:     currentPoint = element.Points[2]; break;
+        case PathElement::Type::CloseSubpath:        currentPoint = subpathStart; break;
+      }
+      applier(element);
+    };
+    ApplySegments(
+      [&tracking, &currentPoint](const PathSegment &segment)
+      {
+        const auto &applier = tracking;
         if (segment.ApplyElements(applier))
+        {
+          return;
+        }
+
+        const bool flattened =
+          SwitchOn(segment.GetData(),
+                   [&]<typename TData>(const TData &data)
+                   {
+                     if constexpr (requires { data.ApplyFlattenedElements(currentPoint, applier); })
+                     {
+                       data.ApplyFlattenedElements(currentPoint, applier);
+                       return true;
+                     }
+                     else
+                     {
+                       return false;
+                     }
+                   });
+        if (flattened)
         {
           return;
         }

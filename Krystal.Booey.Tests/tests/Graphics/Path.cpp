@@ -255,4 +255,93 @@ namespace krys::boo::tests
     ellipse.Transform(AffineTransform::MakeTranslation({5, 5}));
     CHECK(ellipse.BoundingRect() == FloatRect(5, 5, 10, 10));
   }
+
+  TEST_CASE("Path: arcs without a platform path", "[Graphics][Path]")
+  {
+    constexpr float pi = std::numbers::pi_v<float>;
+
+    SECTION("an arc is a move and beziers of at most a quarter turn")
+    {
+      Path circle;
+      circle.AddArc({50, 50}, 10, 0, 2 * pi, RotationDirection::Clockwise);
+      CHECK(ElementTypes(circle)
+            == List<ElementType> {ElementType::MoveToPoint, ElementType::AddCurveToPoint,
+                                  ElementType::AddCurveToPoint, ElementType::AddCurveToPoint,
+                                  ElementType::AddCurveToPoint});
+      CHECK(circle.Contains({50, 50}));
+      CHECK(circle.Contains({59, 50}));
+      CHECK_FALSE(circle.Contains({59, 59}));
+
+      // The end point is y-down: a quarter turn clockwise from the right is at the bottom.
+      Path quarter;
+      quarter.AddArc({0, 0}, 10, 0, pi / 2, RotationDirection::Clockwise);
+      CHECK(quarter.CurrentPoint().X() == Approx(0).margin(1e-4));
+      CHECK(quarter.CurrentPoint().Y() == Approx(10));
+    }
+
+    SECTION("after a current point, an arc starts with a line")
+    {
+      Path path;
+      path.MoveTo({0, 0});
+      path.AddArc({20, 0}, 5, pi, 0, RotationDirection::Counterclockwise);
+      auto types = ElementTypes(path);
+      REQUIRE(types.size() >= 3u);
+      CHECK(types[0] == ElementType::MoveToPoint);
+      CHECK(types[1] == ElementType::AddLineToPoint);
+      CHECK(types[2] == ElementType::AddCurveToPoint);
+      // With y down, anticlockwise from the left to the right goes under the bottom.
+      CHECK(path.Contains({20, 3}));
+      CHECK_FALSE(path.Contains({20, -3}));
+    }
+
+    SECTION("arcTo rounds the corner between its lines")
+    {
+      Path path;
+      path.MoveTo({0, 0});
+      path.AddLineTo({20, 0});
+      path.AddArcTo({40, 0}, {40, 40}, 10);
+      CHECK(path.CurrentPoint().X() == Approx(40));
+      CHECK(path.CurrentPoint().Y() == Approx(10));
+      path.AddLineTo({40, 40});
+      path.AddLineTo({0, 40});
+      path.CloseSubpath();
+      // The corner is cut off.
+      CHECK(path.Contains({35, 5}));
+      CHECK_FALSE(path.Contains({39.5f, 0.5f}));
+
+      // Parallel lines make a line to the corner.
+      Path straight;
+      straight.MoveTo({0, 0});
+      straight.AddArcTo({10, 0}, {20, 0}, 5);
+      CHECK(straight.CurrentPoint() == FloatPoint(10, 0));
+    }
+
+    SECTION("rotated ellipses rotate about their centres, in radians")
+    {
+      Path ellipse;
+      ellipse.AddEllipse({50, 50}, 20, 5, pi / 2, 0, 2 * pi, RotationDirection::Clockwise);
+      CHECK(ellipse.Contains({50, 65}));
+      CHECK_FALSE(ellipse.Contains({65, 50}));
+      CHECK(ellipse.CurrentPoint().X() == Approx(50).margin(1e-3));
+      CHECK(ellipse.CurrentPoint().Y() == Approx(70));
+    }
+
+    SECTION("transforming an arc keeps it")
+    {
+      Path circle;
+      circle.AddArc({0, 0}, 10, 0, 2 * pi, RotationDirection::Clockwise);
+      circle.Transform(AffineTransform::MakeTranslation({100, 0}));
+      CHECK(circle.Contains({100, 0}));
+      CHECK_FALSE(circle.Contains({0, 0}));
+    }
+
+    SECTION("adding a path to an empty one")
+    {
+      Path rect;
+      rect.AddRect({0, 0, 10, 10});
+      Path path;
+      path.AddPath(rect, AffineTransform::MakeTranslation({5, 0}));
+      CHECK(path.FastBoundingRect() == FloatRect(5, 0, 10, 10));
+    }
+  }
 }

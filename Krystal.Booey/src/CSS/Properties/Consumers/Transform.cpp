@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
@@ -10,10 +11,14 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -504,5 +509,41 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return ValueList::CreateSpaceSeparated(krys::move(x));
+  }
+
+  Maybe<style::Transform> ParseTransformRaw(const CSSOMString &string, const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto parsedValue = PropertyParsing::ConsumeTransform(range, state);
+    if (!parsedValue)
+    {
+      return null;
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return null;
+    }
+
+    auto dummyStyle = RenderStyle::Create();
+    auto dummyState = CreateUnique<style::BuilderState>(dummyStyle);
+
+    if (!parsedValue->CanResolveDependenciesWith(dummyState->CssToLengthConversionData()))
+    {
+      return null;
+    }
+
+    return style::ConvertCSSValueToStyle<style::Transform>(*dummyState, *parsedValue);
   }
 }

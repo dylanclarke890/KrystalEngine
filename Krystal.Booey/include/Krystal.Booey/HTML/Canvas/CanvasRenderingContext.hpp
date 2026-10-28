@@ -8,8 +8,10 @@
 
 namespace krys::boo
 {
+  class DestinationColorSpace;
   class GraphicsLayer;
   class GraphicsLayerContentsDisplayDelegate;
+  class ImageBuffer;
   class NativeImage;
 }
 
@@ -74,6 +76,13 @@ namespace krys::boo::html
       DisplayBuffer
     };
 
+    /// @brief Forgets the area drawn since the canvas was last painted.
+    virtual void ClearAccumulatedDirtyRect() noexcept
+    {
+    }
+
+    /// @brief The image buffer holding @p buffer's pixels: the canvas's, unless the context keeps its own.
+    KRYS_NODISCARD virtual RefPtr<ImageBuffer> SurfaceBufferToImageBuffer(SurfaceBuffer) noexcept;
     /// @brief The pixels of @p buffer, as an image, or null if there are none.
     KRYS_NODISCARD virtual RefPtr<NativeImage> SurfaceBufferToNativeImage(SurfaceBuffer) noexcept;
     KRYS_NODISCARD virtual bool IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept;
@@ -82,6 +91,10 @@ namespace krys::boo::html
     KRYS_NODISCARD virtual RefPtr<GraphicsLayerContentsDisplayDelegate>
       LayerContentsDisplayDelegate() noexcept;
     virtual void SetContentsToLayer(GraphicsLayer &layer) noexcept;
+
+    // FIXME: The canvas's preparation for display and its deferred operations (B14b), and its pixel format.
+    KRYS_NODISCARD virtual DestinationColorSpace ColorSpace() const noexcept;
+    KRYS_NODISCARD virtual bool WillReadFrequently() const noexcept;
 
   protected:
     CanvasRenderingContext(CanvasBase &canvas, Type type) noexcept;

@@ -39,6 +39,36 @@ namespace krys::boo
     return false;
   }
 
+  bool ParseCompositeAndBlendOperator(utf8_stringview name, CompositeOperator &op,
+                                      BlendMode &blendOp) noexcept
+  {
+    for (uint32 i = 0; i < std::size(compositeOperatorNames); ++i)
+    {
+      // `darker` isn't a standard operator, and `difference` is a blend mode.
+      const auto candidate = static_cast<CompositeOperator>(i);
+      if (candidate == CompositeOperator::PlusDarker || candidate == CompositeOperator::Difference)
+      {
+        continue;
+      }
+      if (std::ranges::equal(name, compositeOperatorNames[i], {}, {},
+                             [](char c) { return static_cast<char8>(c); }))
+      {
+        op = candidate;
+        blendOp = BlendMode::Normal;
+        return true;
+      }
+    }
+
+    if (ParseBlendMode(name, blendOp))
+    {
+      // For now, blending will always assume source-over. This will be fixed in the future
+      op = CompositeOperator::SourceOver;
+      return true;
+    }
+
+    return false;
+  }
+
   std::string_view CompositeOperatorName(CompositeOperator op, BlendMode blendOp) noexcept
   {
     krys_debug_assert(static_cast<uint32>(op) < std::size(compositeOperatorNames));

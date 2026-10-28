@@ -150,7 +150,11 @@ namespace krys::boo
   /// @return False, leaving @p blendMode as it is, if @p name isn't a blend mode.
   bool ParseBlendMode(utf8_stringview name, BlendMode &blendMode) noexcept;
 
-  // FIXME: `parseCompositeAndBlendOperator` comes with the canvas 2D context.
+  /// @brief Sets @p op and @p blendOp to the compositing operator or blend mode named @p name (a blend mode
+  /// composites with `source-over`), as `globalCompositeOperation` names them.
+  /// @return False, leaving both as they are, if @p name is neither.
+  bool ParseCompositeAndBlendOperator(utf8_stringview name, CompositeOperator &op,
+                                      BlendMode &blendOp) noexcept;
 }
 
 namespace krys::boo

@@ -126,6 +126,11 @@ namespace krys::boo
                                 FloatRect &boundingRect) const noexcept;
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
+
+    /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
+    /// (none at the start of a path), as a platform path adds it.
+    void ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                const PathElementApplier &applier) const noexcept;
   };
 
   struct PathArc
@@ -149,6 +154,11 @@ namespace krys::boo
                                 FloatRect &boundingRect) const noexcept;
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
+
+    /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
+    /// (none at the start of a path), as a platform path adds it.
+    void ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                const PathElementApplier &applier) const noexcept;
   };
 
   struct PathClosedArc
@@ -168,6 +178,11 @@ namespace krys::boo
                                 FloatRect &boundingRect) const noexcept;
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
+
+    /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
+    /// (none at the start of a path), as a platform path adds it.
+    void ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                const PathElementApplier &applier) const noexcept;
   };
 
   struct PathEllipse
@@ -193,6 +208,11 @@ namespace krys::boo
                                 FloatRect &boundingRect) const noexcept;
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
+
+    /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
+    /// (none at the start of a path), as a platform path adds it.
+    void ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                const PathElementApplier &applier) const noexcept;
   };
 
   struct PathEllipseInRect
@@ -406,6 +426,11 @@ namespace krys::boo
                                 FloatRect &boundingRect) const noexcept;
     void ExtendBoundingRect(const FloatPoint &currentPoint, const FloatPoint &lastMoveToPoint,
                             FloatRect &boundingRect) const noexcept;
+
+    /// @brief Applies the segment as elements, its curves as cubic béziers, after the path's @p currentPoint
+    /// (none at the start of a path), as a platform path adds it.
+    void ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                const PathElementApplier &applier) const noexcept;
   };
 
   struct PathCloseSubpath

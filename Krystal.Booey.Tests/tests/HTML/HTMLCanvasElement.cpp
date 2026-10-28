@@ -81,7 +81,7 @@ namespace krys::boo::tests
 
     // WebGL, WebGPU and bitmap renderers aren't planned.
     CHECK(canvas.RenderingContext() == nullptr);
-    for (auto type : {u8"2d", u8"webgl", u8"webgl2", u8"webgpu", u8"bitmaprenderer", u8"unknown"})
+    for (auto type : {u8"webgl", u8"webgl2", u8"webgpu", u8"bitmaprenderer", u8"unknown"})
     {
       CHECK(canvas.GetContext(type) == nullptr);
     }

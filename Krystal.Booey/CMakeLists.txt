@@ -1055,6 +1055,8 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/DOMRectReadOnly.hpp
   include/Krystal.Booey/DOM/DOMRect.hpp
   include/Krystal.Booey/DOM/DOMRectList.hpp
+  include/Krystal.Booey/DOM/DOMPointReadOnly.hpp
+  include/Krystal.Booey/DOM/DOMPoint.hpp
   include/Krystal.Booey/DOM/Dicts/DOMRectInit.hpp
   include/Krystal.Booey/DOM/UserActionElementSet.hpp
   include/Krystal.Booey/Rendering/HitTestRequest.hpp
@@ -3052,6 +3054,9 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   # Interaction state
   src/DOM/UserActionElementSet.cpp
   src/DOM/DOMRectList.cpp
+  src/DOM/DOMPointReadOnly.cpp
+  src/CSS/DOMMatrixReadOnly.cpp
+  src/CSS/DOMMatrix.cpp
   src/HTML/Algorithms/FocusAlgorithms.cpp
   src/HTML/Algorithms/HyperlinkAlgorithms.cpp
   src/DOM/Highlight.cpp
@@ -3957,6 +3962,22 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Canvas/GPUBasedCanvasRenderingContext.hpp
       include/Krystal.Booey/HTML/Canvas/EngineTexture.hpp
       include/Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasDirection.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasFillRule.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasLineCap.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasLineJoin.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasTextAlign.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasTextBaseline.hpp
+      include/Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp
+      include/Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasPath.hpp
+      include/Krystal.Booey/HTML/Canvas/Path2D.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasGradient.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasPattern.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasStyle.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp
       include/Krystal.Booey/HTML/HTMLCanvasElement.hpp
       include/Krystal.Booey/HTML/HTMLDataElement.hpp
       include/Krystal.Booey/HTML/HTMLDataListElement.hpp
@@ -4084,6 +4105,9 @@ target_sources(Krystal.Booey
 
       # SVG
       include/Krystal.Booey/CSS/DOMMatrix2DInit.hpp
+      include/Krystal.Booey/CSS/DOMMatrixInit.hpp
+      include/Krystal.Booey/CSS/DOMMatrixReadOnly.hpp
+      include/Krystal.Booey/CSS/DOMMatrix.hpp
       include/Krystal.Booey/SVG/Enums/SVGElementFlags.hpp
       include/Krystal.Booey/SVG/Enums/SVGElementInterface.hpp
       include/Krystal.Booey/SVG/Animation/SMILTime.hpp
@@ -4471,6 +4495,14 @@ target_sources(Krystal.Booey
     src/HTML/Canvas/CanvasRenderingContext.cpp
     src/HTML/Canvas/GPUBasedCanvasRenderingContext.cpp
     src/HTML/Canvas/EngineTextureRenderingContext.cpp
+    src/HTML/Canvas/PredefinedColorSpace.cpp
+    src/HTML/Canvas/CanvasPath.cpp
+    src/HTML/Canvas/Path2D.cpp
+    src/HTML/Canvas/CanvasGradient.cpp
+    src/HTML/Canvas/CanvasPattern.cpp
+    src/HTML/Canvas/CanvasStyle.cpp
+    src/HTML/Canvas/CanvasRenderingContext2DBase.cpp
+    src/HTML/Canvas/CanvasRenderingContext2D.cpp
     src/HTML/HTMLCanvasElement.cpp
     src/HTML/HTMLDataElement.cpp
     src/HTML/HTMLDataListElement.cpp

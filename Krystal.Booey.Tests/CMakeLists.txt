@@ -1,4 +1,4 @@
-add_executable(Krystal.Booey.Tests)
+﻿add_executable(Krystal.Booey.Tests)
 
 # Third-party - RapidJSON (WPT URL test data)
 find_package(RapidJSON CONFIG REQUIRED)
@@ -126,6 +126,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSComputedStyleDeclaration.cpp
 		tests/CSS/CSSStyleProperties.cpp
 		tests/CSS/CSSStyleSheet.cpp
+		tests/CSS/DOMMatrix.cpp
 		tests/CSS/CSSStyleSheetObservableArray.cpp
 		tests/CSS/Descriptors/PropertySetCSSDescriptors.cpp
 		tests/CSS/Media/MediaList.cpp
@@ -492,6 +493,8 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Parser/SizesAttributeParser.cpp
 		tests/HTML/HTMLImageElement.cpp
 		tests/HTML/HTMLCanvasElement.cpp
+		tests/HTML/Canvas/CanvasRenderingContext2D.cpp
+		tests/HTML/Canvas/Path2D.cpp
 		tests/HTML/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibilityDocumentState.cpp
 		tests/Rendering/LineClampUpdater.cpp

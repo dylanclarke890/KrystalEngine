@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/Graphics/LayoutRect.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp"
 #include "Krystal.Booey/HTML/CanvasBase.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
@@ -13,6 +14,7 @@ namespace krys::boo
 
 namespace krys::boo::html
 {
+  class CanvasRenderingContext2D;
   class EngineTextureRenderingContext;
 
   /// @brief A `<canvas>`: a replaced element whose pixels a rendering context draws. Its children are
@@ -24,6 +26,7 @@ namespace krys::boo::html
 
   private:
     bool _isSnapshotting {false};
+    mutable bool _didClearImageBuffer {false};
     UniquePtr<CanvasRenderingContext> _context;
 
   public:
@@ -90,14 +93,23 @@ namespace krys::boo::html
     /// has a context of another type, or there's no such type.
     /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
     /// @note The engine texture context is `"krystal-texture"`.
-    // TODO(HTMLCANVAS, HTML): The 2D context (B14).
     KRYS_NODISCARD RefPtr<CanvasRenderingContext> GetContext(dom::DOMStringView contextId) noexcept;
 
-    // toDataURL() and toBlob() come with the 2D context; transferControlToOffscreen() isn't planned.
+    /// @brief The canvas's 2D context, made with @p settings on the first call; null if the canvas has a
+    /// context of another type.
+    /// @see https://html.spec.whatwg.org/#dom-canvas-getcontext
+    KRYS_NODISCARD RefPtr<CanvasRenderingContext2D>
+      GetContext2d(CanvasRenderingContext2DSettings &&settings = {}) noexcept;
+
+    KRYS_NODISCARD static bool Is2dType(dom::DOMStringView type) noexcept;
+
+    // TODO(HTMLCANVAS, HTML): toDataURL() and toBlob() (B14e); transferControlToOffscreen() isn't planned.
 
 #pragma endregion
 
     void DidDraw(const Maybe<FloatRect> &rect) noexcept final;
+
+    KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept final;
 
     /// @brief Paints the context's pixels into @p rect, when they aren't shown as the layer's contents.
     void Paint(GraphicsContext &context, const LayoutRect &rect) noexcept;
@@ -124,7 +136,12 @@ namespace krys::boo::html
     KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
   private:
+    KRYS_NODISCARD CanvasRenderingContext2D *
+      CreateContext2d(CanvasRenderingContext2DSettings &&settings) noexcept;
     KRYS_NODISCARD EngineTextureRenderingContext *CreateContextEngineTexture() noexcept;
+
+    void CreateImageBuffer() const noexcept final;
+    void ClearImageBuffer() const noexcept;
 
     void DidUpdateSizeProperties() noexcept;
 

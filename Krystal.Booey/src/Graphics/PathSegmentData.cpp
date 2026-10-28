@@ -315,34 +315,154 @@ namespace krys::boo
     EndPoint = transform.MapPoint(EndPoint);
   }
 
-  KRYS_NODISCARD static float AngleOfLine(const FloatPoint &p1, const FloatPoint &p2) noexcept
+  namespace
   {
-    if (abs(p1.X() - p2.X()) < 0.00001)
+    // The arc an arcTo adds: from the tangent point on the line in, round to the tangent point on the line
+    // out.
+    struct ArcToGeometry
     {
-      return p1.Y() - p2.Y() >= 0 ? std::numbers::pi_v<float> / 2 : 3 * std::numbers::pi_v<float> / 2;
+      FloatPoint StartTangent;
+      FloatPoint EndTangent;
+      FloatPoint Center;
+      float StartAngle;
+      float EndAngle;
+      RotationDirection Direction;
+    };
+
+    // Nothing when the lines are parallel or the radius is zero, in which case the arc is a line to the
+    // corner, as a platform path makes it.
+    KRYS_NODISCARD Maybe<ArcToGeometry> ComputeArcToGeometry(const FloatPoint &currentPoint,
+                                                             const FloatPoint &corner, const FloatPoint &next,
+                                                             float radius) noexcept
+    {
+      const FloatSize in = currentPoint - corner;
+      const FloatSize out = next - corner;
+      const float inLength = std::hypot(in.Width(), in.Height());
+      const float outLength = std::hypot(out.Width(), out.Height());
+      if (!radius || !inLength || !outLength)
+      {
+        return null;
+      }
+
+      const FloatSize inUnit = in / inLength;
+      const FloatSize outUnit = out / outLength;
+      const float cross = inUnit.Width() * outUnit.Height() - inUnit.Height() * outUnit.Width();
+      if (std::abs(cross) < 1e-6f)
+      {
+        return null;
+      }
+
+      // The angle at the corner between the two lines.
+      const float cosine =
+        std::clamp(inUnit.Width() * outUnit.Width() + inUnit.Height() * outUnit.Height(), -1.f, 1.f);
+      const float halfAngle = std::acos(cosine) / 2;
+      const float tangentDistance = radius / std::tan(halfAngle);
+      const float centerDistance = radius / std::sin(halfAngle);
+
+      FloatSize bisector = inUnit + outUnit;
+      bisector = bisector / std::hypot(bisector.Width(), bisector.Height());
+
+      ArcToGeometry geometry;
+      geometry.StartTangent = corner + inUnit * tangentDistance;
+      geometry.EndTangent = corner + outUnit * tangentDistance;
+      geometry.Center = corner + bisector * centerDistance;
+      geometry.StartAngle = std::atan2(geometry.StartTangent.Y() - geometry.Center.Y(),
+                                       geometry.StartTangent.X() - geometry.Center.X());
+      geometry.EndAngle = std::atan2(geometry.EndTangent.Y() - geometry.Center.Y(),
+                                     geometry.EndTangent.X() - geometry.Center.X());
+      // The arc is the shorter way round: clockwise (with y down) when the path turns that way at the corner.
+      geometry.Direction = cross < 0 ? RotationDirection::Clockwise : RotationDirection::Counterclockwise;
+      return geometry;
     }
-    return std::atan2(p1.Y() - p2.Y(), p1.X() - p2.X());
-  }
 
-  KRYS_NODISCARD static FloatPoint CalculateArcToEndPoint(const FloatPoint &currentPoint,
-                                                          const FloatPoint &controlPoint1,
-                                                          const FloatPoint &controlPoint2,
-                                                          float radius) noexcept
-  {
-    float angle1 = AngleOfLine(currentPoint, controlPoint1);
-    float angle2 = AngleOfLine(controlPoint1, controlPoint2);
-    float angleBteweenLines = angle2 - angle1;
-
-    if (abs(angleBteweenLines) < 0.00001 || abs(angleBteweenLines) >= std::numbers::pi_v<float> / 2)
+    KRYS_NODISCARD FloatPoint CalculateArcToEndPoint(const FloatPoint &currentPoint,
+                                                     const FloatPoint &controlPoint1,
+                                                     const FloatPoint &controlPoint2, float radius) noexcept
     {
+      if (auto geometry = ComputeArcToGeometry(currentPoint, controlPoint1, controlPoint2, radius))
+      {
+        return geometry->EndTangent;
+      }
       return controlPoint1;
     }
 
-    float adjacent = abs(radius / std::tan(angleBteweenLines / 2));
+    // The point at the angle on an ellipse, rotated by the rotation (in radians) about its center.
+    KRYS_NODISCARD FloatPoint EllipsePoint(const FloatPoint &center, float radiusX, float radiusY,
+                                           float rotation, float angle) noexcept
+    {
+      const float x = radiusX * std::cos(angle);
+      const float y = radiusY * std::sin(angle);
+      const float cosine = std::cos(rotation);
+      const float sine = std::sin(rotation);
+      return {center.X() + x * cosine - y * sine, center.Y() + x * sine + y * cosine};
+    }
 
-    float x = controlPoint1.X() + adjacent * std::cos(angle2);
-    float y = controlPoint1.Y() - adjacent * std::sin(angle2);
-    return {x, y};
+    // Applies an arc of an ellipse as cubic beziers of at most a quarter turn each, after a line from the
+    // current point to its start (or a move to it, when there is none).
+    void ApplyEllipseArcElements(const Maybe<FloatPoint> &currentPoint, const FloatPoint &center,
+                                 float radiusX, float radiusY, float rotation, float startAngle,
+                                 float endAngle, RotationDirection direction,
+                                 const PathElementApplier &applier) noexcept
+    {
+      constexpr float twoPi = 2 * std::numbers::pi_v<float>;
+      // As a platform path sweeps: the other way round is through a whole turn less the difference.
+      if (direction == RotationDirection::Clockwise && startAngle > endAngle)
+      {
+        endAngle = startAngle + (twoPi - std::fmod(startAngle - endAngle, twoPi));
+      }
+      else if (direction == RotationDirection::Counterclockwise && startAngle < endAngle)
+      {
+        endAngle = startAngle - (twoPi - std::fmod(endAngle - startAngle, twoPi));
+      }
+      const float sweep = std::clamp(endAngle - startAngle, -twoPi, twoPi);
+
+      const auto start = EllipsePoint(center, radiusX, radiusY, rotation, startAngle);
+      applier({currentPoint ? PathElement::Type::AddLineToPoint : PathElement::Type::MoveToPoint, {start}});
+      if (!sweep)
+      {
+        return;
+      }
+
+      const auto pieces = std::max(1, static_cast<int32>(std::ceil(std::abs(sweep) / (twoPi / 4) - 1e-4f)));
+      const float step = sweep / static_cast<float>(pieces);
+      // The control points' distance along the tangents, for a unit circle.
+      const float handle = 4.f / 3.f * std::tan(step / 4);
+      const float cosine = std::cos(rotation);
+      const float sine = std::sin(rotation);
+      auto map = [&](float x, float y) -> FloatPoint
+      {
+        x *= radiusX;
+        y *= radiusY;
+        return {center.X() + x * cosine - y * sine, center.Y() + x * sine + y * cosine};
+      };
+      for (int32 i = 0; i < pieces; ++i)
+      {
+        const float from = startAngle + step * static_cast<float>(i);
+        const float to = from + step;
+        const float cosFrom = std::cos(from);
+        const float sinFrom = std::sin(from);
+        const float cosTo = std::cos(to);
+        const float sinTo = std::sin(to);
+        applier({PathElement::Type::AddCurveToPoint,
+                 {map(cosFrom - handle * sinFrom, sinFrom + handle * cosFrom),
+                  map(cosTo + handle * sinTo, sinTo - handle * cosTo), map(cosTo, sinTo)}});
+      }
+    }
+
+    // Applies an arcTo from the current point: a line to the first tangent point and the arc, or a line to
+    // the corner when there is no arc.
+    void ApplyArcToElements(const FloatPoint &currentPoint, const FloatPoint &corner, const FloatPoint &next,
+                            float radius, const PathElementApplier &applier) noexcept
+    {
+      auto geometry = ComputeArcToGeometry(currentPoint, corner, next, radius);
+      if (!geometry)
+      {
+        applier({PathElement::Type::AddLineToPoint, {corner}});
+        return;
+      }
+      ApplyEllipseArcElements(currentPoint, geometry->Center, radius, radius, 0, geometry->StartAngle,
+                              geometry->EndAngle, geometry->Direction, applier);
+    }
   }
 
   FloatPoint PathArcTo::CalculateEndPoint(const FloatPoint &currentPoint, FloatPoint &) const noexcept
@@ -370,8 +490,8 @@ namespace krys::boo
 
   FloatPoint PathArc::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
   {
-    lastMoveToPoint = Center + FloatSize {Radius * std::cos(StartAngle), -Radius * std::sin(StartAngle)};
-    return Center + FloatSize {Radius * std::cos(EndAngle), -Radius * std::sin(EndAngle)};
+    lastMoveToPoint = EllipsePoint(Center, Radius, Radius, 0, StartAngle);
+    return EllipsePoint(Center, Radius, Radius, 0, EndAngle);
   }
 
   Maybe<FloatPoint> PathArc::TryGetEndPointWithoutContext() const noexcept
@@ -455,8 +575,7 @@ namespace krys::boo
 
   FloatPoint PathClosedArc::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
   {
-    lastMoveToPoint =
-      Arc.Center + FloatSize {Arc.Radius * std::cos(Arc.StartAngle), -Arc.Radius * std::sin(Arc.StartAngle)};
+    lastMoveToPoint = EllipsePoint(Arc.Center, Arc.Radius, Arc.Radius, 0, Arc.StartAngle);
     return lastMoveToPoint;
   }
 
@@ -481,16 +600,8 @@ namespace krys::boo
 
   FloatPoint PathEllipse::CalculateEndPoint(const FloatPoint &, FloatPoint &lastMoveToPoint) const noexcept
   {
-    lastMoveToPoint = Center + FloatSize {RadiusX * std::cos(StartAngle), -RadiusY * std::sin(StartAngle)};
-    auto endPoint = Center + FloatSize {RadiusX * std::cos(EndAngle), -RadiusY * std::sin(EndAngle)};
-    if (!Rotation)
-    {
-      return endPoint;
-    }
-
-    auto rotation = AffineTransform::MakeRotation(deg2rad(this->Rotation));
-    lastMoveToPoint = rotation.MapPoint(lastMoveToPoint);
-    return rotation.MapPoint(endPoint);
+    lastMoveToPoint = EllipsePoint(Center, RadiusX, RadiusY, Rotation, StartAngle);
+    return EllipsePoint(Center, RadiusX, RadiusY, Rotation, EndAngle);
   }
 
   Maybe<FloatPoint> PathEllipse::TryGetEndPointWithoutContext() const noexcept
@@ -511,8 +622,10 @@ namespace krys::boo
       return;
     }
 
+    // The rotation is in radians, about the centre.
     auto rect = FloatRect {minXMinYCorner, maxXMaxYCorner};
-    auto rotation = AffineTransform::MakeRotation(deg2rad(this->Rotation));
+    AffineTransform rotation;
+    rotation.Translate(Center.X(), Center.Y()).RotateRadians(this->Rotation).Translate(-Center.X(), -Center.Y());
     rect = rotation.MapRect(rect);
     boundingRect.UniteEvenIfEmpty(rect);
   }
@@ -894,5 +1007,45 @@ namespace krys::boo
   TextStream &operator<<(TextStream &ts, const PathCloseSubpath &) noexcept
   {
     return ts << "close subpath";
+  }
+
+  void PathArcTo::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                         const PathElementApplier &applier) const noexcept
+  {
+    // From an empty path, the arc starts at its corner.
+    if (!currentPoint)
+    {
+      applier({PathElement::Type::MoveToPoint, {ControlPoint1}});
+      return;
+    }
+    ApplyArcToElements(*currentPoint, ControlPoint1, ControlPoint2, Radius, applier);
+  }
+
+  void PathArc::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                       const PathElementApplier &applier) const noexcept
+  {
+    ApplyEllipseArcElements(currentPoint, Center, Radius, Radius, 0, StartAngle, EndAngle, Direction,
+                            applier);
+  }
+
+  void PathClosedArc::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                             const PathElementApplier &applier) const noexcept
+  {
+    Arc.ApplyFlattenedElements(currentPoint, applier);
+    applier({PathElement::Type::CloseSubpath, {}});
+  }
+
+  void PathEllipse::ApplyFlattenedElements(const Maybe<FloatPoint> &currentPoint,
+                                           const PathElementApplier &applier) const noexcept
+  {
+    ApplyEllipseArcElements(currentPoint, Center, RadiusX, RadiusY, Rotation, StartAngle, EndAngle, Direction,
+                            applier);
+  }
+
+  void PathDataArc::ApplyFlattenedElements(const Maybe<FloatPoint> &,
+                                           const PathElementApplier &applier) const noexcept
+  {
+    applier({PathElement::Type::MoveToPoint, {Start}});
+    ApplyArcToElements(Start, ControlPoint1, ControlPoint2, Radius, applier);
   }
 }

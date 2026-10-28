@@ -1,9 +1,17 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::style
+{
+  struct Transform;
+}
 
 namespace krys::boo::css
 {
+  struct ParserContext;
   class TokenRange;
   class Value;
   struct PropertyParserState;
@@ -27,7 +35,10 @@ namespace krys::boo::css
     // MARK: <'rotate'> consuming (Value)
     KRYS_NODISCARD RefPtr<Value> ConsumeRotate(TokenRange &tokens, PropertyParserState &state) noexcept;
 
-    // FIXME: Add `ParseTransformRaw` (<'transform'> parsing to a `style::Transform`) once `style::Transform`,
-    // `style::BuilderState` and the generated `PropertyParsing::ConsumeTransform` are available.
+    // MARK: <'transform'> parsing (raw)
+    /// @brief Parses @p string as a whole `transform` value into its style value, or nothing if it doesn't
+    /// parse or its lengths need a style to resolve (`em`, viewport units, ...).
+    KRYS_NODISCARD Maybe<style::Transform> ParseTransformRaw(const CSSOMString &string,
+                                                             const ParserContext &context) noexcept;
   }
 }
