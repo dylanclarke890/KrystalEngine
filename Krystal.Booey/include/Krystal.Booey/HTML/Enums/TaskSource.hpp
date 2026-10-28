@@ -28,7 +28,9 @@ namespace krys::boo::html
     InternalAsyncTask,
     /// @see https://w3c.github.io/gamepad/#dfn-gamepad-task-source
     Gamepad,
+    /// @see https://html.spec.whatwg.org/#canvas-blob-serialisation-task-source
+    CanvasBlobSerialization,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 10uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::TaskSource, 11uz);

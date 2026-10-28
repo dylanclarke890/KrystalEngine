@@ -51,6 +51,8 @@ target_sources(Krystal.UI
       include/Krystal.UI/FilterGraph2DBuilder.hpp
       include/Krystal.UI/GraphicsContextRender2D.hpp
       include/Krystal.UI/EngineTexture.hpp
+      include/Krystal.UI/ImageBufferRender2DBackend.hpp
+      include/Krystal.UI/TextureImage.hpp
       include/Krystal.UI/ImageBufferTextures.hpp
       include/Krystal.UI/Input.hpp
       include/Krystal.UI/ColorChooserOverlay.hpp
@@ -80,6 +82,7 @@ target_sources(Krystal.UI
     src/FilterGraph2DBuilder.cpp
     src/GraphicsContextRender2D.cpp
     src/EngineTexture.cpp
+    src/ImageBufferRender2DBackend.cpp
     src/ImageBufferTextures.cpp
     src/Input.cpp
     src/ColorChooserOverlay.cpp

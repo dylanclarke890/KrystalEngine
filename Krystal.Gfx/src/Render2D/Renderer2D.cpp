@@ -1176,6 +1176,18 @@ void main()
     AddClip({.Rect = rect, .Radii = {}}, false);
   }
 
+  Renderer2D::ClipState Renderer2D::GetClip() const noexcept
+  {
+    return {.Bounds = _state.Clip, .Chain = _state.Chain};
+  }
+
+  void Renderer2D::SetClip(const ClipState &clip) noexcept
+  {
+    krys_debug_assert(clip.Chain == NoChain || clip.Chain < _chains.size());
+    _state.Clip = clip.Bounds;
+    _state.Chain = clip.Chain;
+  }
+
   void Renderer2D::ClipRoundedRect(const RoundedRect2D &rect) noexcept
   {
     if (rect.Radii == CornerRadii2D {})

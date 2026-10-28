@@ -12,9 +12,7 @@ namespace krys::ui
   /// alpha, drop shadows and blend modes apply to each draw, and lines, rects and text lines are drawn as
   /// Skia draws them.
   /// @note Draws between `Renderer2D::Begin` and `End`; the renderer's state is saved on construction and
-  /// restored on destruction.
-  /// FIXME: Compositing operators other than source-over (`Copy`, `Clear` and the rest, `clearRect`) and
-  /// resetting the clip need Render2D support; they draw as source-over and do nothing.
+  /// restored on destruction. Resetting the clip brings back the renderer's clip at construction.
   class GraphicsContextRender2D final : public boo::GraphicsContext
   {
   private:
@@ -49,6 +47,9 @@ namespace krys::ui
     List<LayerState> _layerStack;
     // Clip bounds in target pixels, for `ClipBounds`.
     boo::FloatRect _clipBounds;
+    // The clip the context was made with, which resetting the clip brings back.
+    boo::FloatRect _initialClipBounds;
+    gfx::Renderer2D::ClipState _initialClip;
     List<boo::FloatRect> _clipBoundsStack;
     List<ImageClip> _imageClips;
 

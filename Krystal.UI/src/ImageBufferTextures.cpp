@@ -6,6 +6,8 @@
 #include "Krystal.Core/Colour/ColourUtilities.hpp"
 #include "Krystal.UI/Compositing/EngineTextureLayer.hpp"
 #include "Krystal.UI/GraphicsContextRender2D.hpp"
+#include "Krystal.UI/ImageBufferRender2DBackend.hpp"
+#include "Krystal.UI/TextureImage.hpp"
 
 namespace krys::ui
 {
@@ -31,13 +33,25 @@ namespace krys::ui
   gfx::TextureHandle ImageBufferTextures::Render(boo::ImageBuffer &buffer,
                                                  gfx::CommandBuffer &commands) noexcept
   {
+    // Krystal.UI makes every accelerated buffer. Painting it draws everything drawn so far.
+    if (buffer.GetRenderingMode() == boo::RenderingMode::Accelerated)
+    {
+      auto *accelerated = static_cast<ImageBufferRender2DBackend *>(buffer.Backend());
+      if (!accelerated)
+      {
+        return {};
+      }
+      accelerated->FlushContext();
+      return Render(*accelerated, commands);
+    }
+
     const auto identifier = buffer.GetRenderingResourceIdentifier().ToUInt64();
     if (const auto found = _rendered.find(identifier); found != _rendered.end())
     {
       return found->second;
     }
 
-    // Every image buffer records into a display list.
+    // Every other image buffer records into a display list.
     auto *backend = static_cast<boo::ImageBufferDisplayListBackend *>(buffer.Backend());
     const auto size = buffer.BackendSize();
     if (!backend || size.IsEmpty())
@@ -81,6 +95,20 @@ namespace krys::ui
     return texture;
   }
 
+  gfx::TextureHandle ImageBufferTextures::Render(ImageBufferRender2DBackend &backend,
+                                                 gfx::CommandBuffer &commands) noexcept
+  {
+    auto *renderer = RendererForDepth();
+    if (!renderer)
+    {
+      return {};
+    }
+    ++_depth;
+    const auto texture = backend.Render(*renderer, _fonts, *this, commands);
+    --_depth;
+    return texture;
+  }
+
   gfx::TextureHandle ImageBufferTextures::Copy(gfx::TextureHandle texture, const gfx::Rect2D &source,
                                                uint32 width, uint32 height,
                                                gfx::CommandBuffer &commands) noexcept
@@ -103,11 +131,11 @@ namespace krys::ui
 
   gfx::TextureHandle ImageBufferTextures::Upload(boo::NativeImage &image) noexcept
   {
-    // An engine texture is drawn as it is.
+    // An engine texture or a snapshot is drawn as it is.
     if (const auto &platformImage = image.GetPlatformImage(); platformImage && platformImage->External())
     {
       // Krystal.UI makes every external image.
-      return static_cast<EngineTextureImage &>(*platformImage->External()).Texture().Handle();
+      return static_cast<TextureImage &>(*platformImage->External()).Handle();
     }
 
     const auto identifier = image.GetRenderingResourceIdentifier().ToUInt64();

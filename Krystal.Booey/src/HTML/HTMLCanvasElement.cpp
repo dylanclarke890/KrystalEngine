@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/FileAPI/Blob.hpp"
+#include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
@@ -7,8 +9,11 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
@@ -88,8 +93,8 @@ namespace krys::boo::html
     auto *context2d = context.get();
     _context = krys::move(context);
 
-    // FIXME: Make sure a RenderLayer and compositing layer get created for the canvas, once the 2D context
-    // composites (B14b).
+    // Need to make sure a RenderLayer and compositing layer get created for the Canvas.
+    InvalidateStyleAndLayerComposition();
     return context2d;
   }
 
@@ -148,8 +153,7 @@ namespace krys::boo::html
 
   void HTMLCanvasElement::DidDraw(const Maybe<FloatRect> &rect) noexcept
   {
-    // FIXME: The copied image a canvas is drawn from elsewhere (B14c) is cleared here too.
-    _didClearImageBuffer = false;
+    ClearCopiedImage();
     if (auto *renderer = GetRenderBox())
     {
       auto dirtyRect = ComputeDirtyRectangleIfNeeded(rect);
@@ -195,7 +199,7 @@ namespace krys::boo::html
     SetSize(newSize);
     SetHasCreatedImageBuffer(false);
     std::ignore = SetImageBuffer(nullptr);
-    _didClearImageBuffer = false;
+    ClearCopiedImage();
 
     if (auto *context = DynamicDowncast<GPUBasedCanvasRenderingContext>(_context.get()))
     {
@@ -227,7 +231,51 @@ namespace krys::boo::html
     _didClearImageBuffer = true;
     std::ignore = SetImageBuffer(AllocateImageBuffer());
 
-    // FIXME: Recalculate compositing requirements when the buffer is accelerated (B14b).
+    if (_context && _context->Is2d())
+    {
+      // Recalculate compositing requirements if acceleration state changed.
+      const_cast<HTMLCanvasElement *>(this)->InvalidateStyleAndLayerComposition();
+      if (auto *renderer = GetRenderBox())
+      {
+        if (UsesContentsAsLayerContents())
+        {
+          renderer->ContentChanged(ContentChangeType::Canvas);
+        }
+      }
+    }
+  }
+
+  bool HTMLCanvasElement::NeedsPreparationForDisplay() const noexcept
+  {
+    return _context && _context->NeedsPreparationForDisplay();
+  }
+
+  void HTMLCanvasElement::PrepareForDisplay() noexcept
+  {
+    krys_debug_assert(NeedsPreparationForDisplay());
+    if (_context)
+    {
+      _context->PrepareForDisplay();
+    }
+  }
+
+  Image *HTMLCanvasElement::CopiedImage() const noexcept
+  {
+    if (!_copiedImage)
+    {
+      auto buffer = const_cast<HTMLCanvasElement *>(this)->MakeRenderingResultsAvailable();
+      if (buffer)
+      {
+        _copiedImage = BitmapImage::Create(buffer->CopyNativeImage());
+      }
+    }
+    return _copiedImage.get();
+  }
+
+  void HTMLCanvasElement::ClearCopiedImage() const noexcept
+  {
+    _copiedImage = nullptr;
+    _didClearImageBuffer = false;
   }
 
   void HTMLCanvasElement::ClearImageBuffer() const noexcept
@@ -248,6 +296,11 @@ namespace krys::boo::html
   const css::ParserContext &HTMLCanvasElement::CssParserContext() const noexcept
   {
     return NodeDocument().CssParserContext();
+  }
+
+  dom::Document *HTMLCanvasElement::CanvasDocument() const noexcept
+  {
+    return &NodeDocument();
   }
 
   bool HTMLCanvasElement::UsesContentsAsLayerContents() const noexcept
@@ -281,6 +334,11 @@ namespace krys::boo::html
     if (UsesContentsAsLayerContents() && !NodeDocument().Printing() && !_isSnapshotting)
     {
       return;
+    }
+
+    if (_context->CompositingResultsNeedUpdating())
+    {
+      _context->PrepareForDisplay();
     }
 
     if (_context->IsSurfaceBufferTransparentBlack(CanvasRenderingContext::SurfaceBuffer::DisplayBuffer))
@@ -375,4 +433,73 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  KRYS_NODISCARD static dom::DOMString ToEncodingMimeType(dom::DOMStringView mimeType) noexcept
+  {
+    if (!MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(mimeType))
+    {
+      return u8"image/png";
+    }
+    return text::ToASCIILower(mimeType);
+  }
+
+  // https://html.spec.whatwg.org/multipage/canvas.html#a-serialisation-of-the-bitmap-as-a-file
+  KRYS_NODISCARD static Maybe<double> QualityInRange(Maybe<double> quality) noexcept
+  {
+    if (!quality || *quality < 0 || *quality > 1)
+    {
+      return null;
+    }
+    return quality;
+  }
+
+  dom::DOMString HTMLCanvasElement::ToDataURL(dom::DOMStringView mimeType, Maybe<double> quality) noexcept
+  {
+    if (Size().IsEmpty())
+    {
+      return u8"data:,";
+    }
+
+    auto encodingMIMEType = ToEncodingMimeType(mimeType);
+    auto buffer = MakeRenderingResultsAvailable();
+    if (!buffer)
+    {
+      return u8"data:,";
+    }
+    return buffer->ToDataURL(encodingMIMEType, QualityInRange(quality));
+  }
+
+  void HTMLCanvasElement::ToBlob(Func<void(RefPtr<Blob> &&)> &&callback, dom::DOMStringView mimeType,
+                                 Maybe<double> quality) noexcept
+  {
+    auto &document = NodeDocument();
+    auto scheduleCallback = [&](RefPtr<Blob> &&blob)
+    {
+      EventLoop::Current().QueueTask(TaskSource::CanvasBlobSerialization, document,
+                                     [callback = krys::move(callback), blob = krys::move(blob)]() mutable
+                                     { callback(krys::move(blob)); });
+    };
+
+    if (Size().IsEmpty())
+    {
+      scheduleCallback(nullptr);
+      return;
+    }
+
+    auto encodingMIMEType = ToEncodingMimeType(mimeType);
+    auto buffer = MakeRenderingResultsAvailable();
+    if (!buffer)
+    {
+      scheduleCallback(nullptr);
+      return;
+    }
+
+    auto blobData = buffer->ToData(encodingMIMEType, QualityInRange(quality));
+    RefPtr<Blob> blob;
+    if (!blobData.empty())
+    {
+      blob = Blob::Create(krys::move(blobData), encodingMIMEType);
+    }
+    scheduleCallback(krys::move(blob));
+  }
 }

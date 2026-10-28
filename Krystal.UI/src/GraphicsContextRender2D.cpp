@@ -149,7 +149,8 @@ namespace krys::ui
   GraphicsContextRender2D::GraphicsContextRender2D(gfx::Renderer2D &renderer, FontFaceCache &fonts,
                                                    const boo::FloatRect &bounds,
                                                    ImageBufferTextures *imageBuffers) noexcept
-      : _renderer(renderer), _fonts(fonts), _imageBuffers(imageBuffers), _clipBounds(bounds)
+      : _renderer(renderer), _fonts(fonts), _imageBuffers(imageBuffers), _clipBounds(bounds),
+        _initialClipBounds(bounds), _initialClip(renderer.GetClip())
   {
     _renderer.Save();
   }
@@ -396,9 +397,16 @@ namespace krys::ui
     _renderer.Restore();
   }
 
-  void GraphicsContextRender2D::ClearRect(const boo::FloatRect &) noexcept
+  void GraphicsContextRender2D::ClearRect(const boo::FloatRect &rect) noexcept
   {
-    // FIXME: Clearing needs the clear compositing operator.
+    // As Skia clears: the rect, transformed and clipped, becomes transparent black, whatever the alpha,
+    // shadow and compositing.
+    _renderer.Save();
+    _renderer.ClearDropShadow();
+    _renderer.SetBlendMode(BlendMode::Normal);
+    _renderer.SetCompositeOperator(gfx::CompositeOperator2D::Clear);
+    _renderer.FillRect(ToRect2D(rect), SRGBA<uint8> {0, 0, 0, 255});
+    _renderer.Restore();
   }
 
   void GraphicsContextRender2D::StrokeRect(const boo::FloatRect &boundaries, float lineWidth) noexcept
@@ -444,7 +452,8 @@ namespace krys::ui
 
   void GraphicsContextRender2D::ResetClip() noexcept
   {
-    // FIXME: Render2D can't reset its clip.
+    _clipBounds = _initialClipBounds;
+    _renderer.SetClip(_initialClip);
   }
 
   void GraphicsContextRender2D::Clip(const boo::FloatRect &rect) noexcept
@@ -531,11 +540,44 @@ namespace krys::ui
     return boo::EnclosingIntRect(_clipBounds);
   }
 
+  /// @brief Appends @p path to @p into, moved by @p offset.
+  static void AppendTranslated(gfx::Path2D &into, const gfx::Path2D &path, Vec2f offset) noexcept
+  {
+    auto points = path.Points();
+    size_t next = 0;
+    for (auto verb : path.Verbs())
+    {
+      switch (verb)
+      {
+        case gfx::PathVerb::MoveTo:
+          into.MoveTo(points[next] + offset);
+          next += 1;
+          break;
+        case gfx::PathVerb::LineTo:
+          into.LineTo(points[next] + offset);
+          next += 1;
+          break;
+        case gfx::PathVerb::QuadTo:
+          into.QuadTo(points[next] + offset, points[next + 1] + offset);
+          next += 2;
+          break;
+        case gfx::PathVerb::CubicTo:
+          into.CubicTo(points[next] + offset, points[next + 1] + offset, points[next + 2] + offset);
+          next += 3;
+          break;
+        case gfx::PathVerb::Close: into.Close(); break;
+      }
+    }
+  }
+
   void GraphicsContextRender2D::DrawGlyphs(const boo::Font &font, Span<const boo::GlyphBufferGlyph> glyphs,
                                            Span<const boo::GlyphBufferAdvance> advances,
                                            const boo::FloatPoint &position, boo::FontSmoothingMode) noexcept
   {
-    if (!GetTextDrawingMode().Contains(boo::TextDrawingMode::Fill) || glyphs.empty())
+    const auto mode = GetTextDrawingMode();
+    const bool fill = mode.Contains(boo::TextDrawingMode::Fill);
+    const bool stroke = mode.Contains(boo::TextDrawingMode::Stroke);
+    if ((!fill && !stroke) || glyphs.empty())
     {
       return;
     }
@@ -571,8 +613,24 @@ namespace krys::ui
     }
 
     PrepareDraw();
-    _renderer.DrawGlyphs(*face, font.PlatformData().Size(), glyphIndices, positions, ToVec2f(position),
-                         FillBrushPaint().Paint());
+    const float size = font.PlatformData().Size();
+    if (fill)
+    {
+      _renderer.DrawGlyphs(*face, size, glyphIndices, positions, ToVec2f(position), FillBrushPaint().Paint());
+    }
+    if (stroke)
+    {
+      // Stroked glyphs are their outlines, stroked as one path.
+      gfx::Path2D outlines;
+      for (size_t i = 0; i < glyphIndices.size(); ++i)
+      {
+        AppendTranslated(outlines, face->GlyphPath(glyphIndices[i], size), ToVec2f(position) + positions[i]);
+      }
+      if (!outlines.IsEmpty())
+      {
+        _renderer.StrokePath(outlines, CurrentStrokeStyle(StrokeThickness()), StrokeBrushPaint().Paint());
+      }
+    }
 
     if (isVertical)
     {

@@ -124,6 +124,23 @@ namespace krys::boo
                                [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
   }
 
+  bool MIMETypeRegistry::IsSupportedImageMIMETypeForEncoding(utf8_stringview mimeType) noexcept
+  {
+    constexpr utf8_stringview supportedTypes[] = {
+      u8"image/png",
+      u8"image/jpeg",
+      u8"image/webp",
+    };
+    return std::ranges::any_of(supportedTypes,
+                               [&](auto type) { return text::IsASCIICaselessEqual(mimeType, type); });
+  }
+
+  bool MIMETypeRegistry::IsJPEGMIMEType(utf8_stringview mimeType) noexcept
+  {
+    return text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/jpeg"))
+           || text::IsASCIICaselessEqual(mimeType, utf8_stringview(u8"image/jpg"));
+  }
+
   bool MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept
   {
     return IsSupportedImageMIMEType(mimeType)

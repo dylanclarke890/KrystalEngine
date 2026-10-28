@@ -24,6 +24,12 @@ namespace krys::boo
     /// case.
     KRYS_NODISCARD static bool IsSupportedImageMIMEType(utf8_stringview mimeType) noexcept;
 
+    /// @brief Whether the image encoders support @p mimeType (PNG, JPEG and WebP), ignoring case.
+    KRYS_NODISCARD static bool IsSupportedImageMIMETypeForEncoding(utf8_stringview mimeType) noexcept;
+
+    /// @brief Whether @p mimeType is JPEG's, ignoring case.
+    KRYS_NODISCARD static bool IsJPEGMIMEType(utf8_stringview mimeType) noexcept;
+
     /// @brief Whether an image, video or SVG of type @p mimeType can be shown.
     KRYS_NODISCARD static bool IsSupportedImageVideoOrSVGMIMEType(utf8_stringview mimeType) noexcept;
 

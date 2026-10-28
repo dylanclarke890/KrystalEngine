@@ -1,0 +1,56 @@
+﻿<!doctype html>
+<!-- The "canvas-filters" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, drawing into
+     the canvas with the 2D context's calls the script below makes for Chrome. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  canvas { display: block; margin: 10px; background: #e6eef5; }
+</style>
+</head>
+<body>
+  <canvas id="canvas" width="340" height="180"></canvas>
+  <script>
+    const context = document.getElementById("canvas").getContext("2d");
+
+    // Blurred.
+    context.filter = "blur(4px)";
+    context.fillStyle = "#336699";
+    context.fillRect(20, 20, 80, 60);
+
+    // A drop shadow under a circle.
+    context.filter = "drop-shadow(6px 6px 3px rgba(0, 0, 0, 0.6))";
+    context.fillStyle = "#ee7733";
+    context.beginPath();
+    context.arc(160, 50, 30, 0, 2 * Math.PI);
+    context.fill();
+
+    // A gradient made grey.
+    const gradient = context.createLinearGradient(220, 0, 320, 0);
+    gradient.addColorStop(0, "#ff0000");
+    gradient.addColorStop(1, "#0000ff");
+    context.filter = "grayscale(1)";
+    context.fillStyle = gradient;
+    context.fillRect(220, 20, 100, 60);
+
+    // Faded, and turned.
+    context.filter = "opacity(0.5)";
+    context.fillStyle = "#118833";
+    context.fillRect(20, 110, 80, 50);
+    context.filter = "hue-rotate(180deg)";
+    context.fillStyle = "#cc3333";
+    context.fillRect(120, 110, 80, 50);
+
+    // A stroke blurred and shadowed, then nothing filtered.
+    context.filter = "blur(1px) drop-shadow(3px 3px 0 #224422)";
+    context.lineWidth = 6;
+    context.strokeStyle = "#884488";
+    context.strokeRect(230, 110, 80, 50);
+    context.filter = "none";
+    context.fillStyle = "#222222";
+    context.fillRect(260, 128, 20, 14);
+  </script>
+</body>
+</html>

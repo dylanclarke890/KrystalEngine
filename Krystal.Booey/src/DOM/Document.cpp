@@ -58,6 +58,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -69,6 +70,7 @@
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
@@ -87,6 +89,7 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
 #include "Krystal.Booey/Modules/Gamepad/NavigatorGamepad.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DOMSelection.hpp"
 #include "Krystal.Booey/Page/EditorClient.hpp"
 #include "Krystal.Booey/Page/History.hpp"
@@ -1520,6 +1523,12 @@ namespace krys::boo::dom
     return frame ? frame->GetPage() : nullptr;
   }
 
+  GraphicsClient *Document::GetGraphicsClient() const noexcept
+  {
+    auto *page = GetPage();
+    return page ? &page->GetChromeClient() : nullptr;
+  }
+
   html::DocumentVisibilityState Document::VisibilityState() const noexcept
   {
     // The visibility of the document is inherited from the visibility of the page. If there is no page
@@ -1569,6 +1578,60 @@ namespace krys::boo::dom
     {
       _intersectionObservers.erase(it);
     }
+  }
+
+  void Document::PrepareCanvasesForDisplayOrFlushIfNeeded() noexcept
+  {
+    auto contexts = std::exchange(_canvasContextsToPrepare, {});
+    for (auto &weakContext : contexts)
+    {
+      auto *context = weakContext.get();
+      if (!context)
+      {
+        continue;
+      }
+      Ref<html::CanvasBase> canvas = ShareRef(context->GetCanvasBase());
+
+      context->SetIsInPreparationForDisplayOrFlush(false);
+
+      // Some canvas contexts hold memory that should be periodically freed.
+      if (context->HasDeferredOperations())
+      {
+        context->FlushDeferredOperations();
+      }
+
+      // Some canvases need to do work when rendering has finished but before their content is composited.
+      if (auto *htmlCanvas = DynamicDowncast<html::HTMLCanvasElement>(*canvas))
+      {
+        if (htmlCanvas->NeedsPreparationForDisplay())
+        {
+          htmlCanvas->PrepareForDisplay();
+        }
+      }
+    }
+  }
+
+  void Document::AddCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept
+  {
+    if (context.HasDeferredOperations() || context.NeedsPreparationForDisplay())
+    {
+      const bool shouldSchedule = std::ranges::none_of(_canvasContextsToPrepare, [](const auto &weakContext)
+                                                       { return weakContext.get() != nullptr; });
+      _canvasContextsToPrepare.push_back(CreateWeakPtr(&context));
+      context.SetIsInPreparationForDisplayOrFlush(true);
+      if (shouldSchedule)
+      {
+        ScheduleRenderingUpdate({RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush});
+      }
+    }
+  }
+
+  void
+    Document::RemoveCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept
+  {
+    std::erase_if(_canvasContextsToPrepare,
+                  [&](const auto &weakContext) { return weakContext.get() == &context; });
+    context.SetIsInPreparationForDisplayOrFlush(false);
   }
 
   void Document::UpdateIntersectionObservations() noexcept

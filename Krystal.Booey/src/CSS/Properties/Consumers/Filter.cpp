@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Filter.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
@@ -16,6 +18,9 @@
 #include "Krystal.Booey/CSS/Values/FilterEffects/FilterFunctionDescriptor.hpp"
 #include "Krystal.Booey/CSS/Values/FilterValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Values/FilterEffects/Filter.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -616,5 +621,40 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return nullptr;
+  }
+
+  // MARK: <'filter'> parsing (raw)
+
+  Maybe<style::Filter> ParseFilterValueListOrNoneRaw(const CSSOMString &string, const ParserContext &context,
+                                                     const dom::Document &document,
+                                                     RenderStyle &style) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto filter = ConsumeUnresolvedFilter(range, state);
+    if (!filter)
+    {
+      return {};
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return {};
+    }
+
+    // A builder state can't live on the stack.
+    auto builderState =
+      CreateUnique<style::BuilderState>(style, style::BuilderContext {.Document = ShareRefPtr(&document)});
+    return style::ConvertToStyle(*filter, *builderState);
   }
 }

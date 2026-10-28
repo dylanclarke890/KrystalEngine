@@ -16,10 +16,11 @@ namespace krys::boo
 namespace krys::ui
 {
   class FontFaceCache;
+  class ImageBufferRender2DBackend;
 
-  /// @brief Renders Booey's image buffers, which record their drawing into display lists, into textures for
-  /// a replay to draw: each buffer once per replay, through renderers of its own that record into the
-  /// replay's command buffer ahead of its passes.
+  /// @brief Renders Booey's image buffers into textures for a replay to draw, through renderers of its own
+  /// that record into the replay's command buffer ahead of its passes: a buffer that records into a display
+  /// list once per replay, and an accelerated buffer into the texture it keeps.
   /// @note Textures are pooled by size and reused by later replays: the device runs its commands in order, so
   /// a texture drawn in one replay is done with before the next draws into it again (OpenGL).
   /// @note Also uploads native images (decoded pixels) into textures, kept for as long as the images live.
@@ -62,6 +63,10 @@ namespace krys::ui
     /// @brief A texture holding what @p buffer recorded, at its backend size, rendered on first use in this
     /// replay into @p commands; invalid if it can't be.
     KRYS_NODISCARD gfx::TextureHandle Render(boo::ImageBuffer &buffer, gfx::CommandBuffer &commands) noexcept;
+    /// @brief The texture an accelerated buffer keeps, with what's been flushed rendered into it in
+    /// @p commands; invalid if it can't be.
+    KRYS_NODISCARD gfx::TextureHandle Render(ImageBufferRender2DBackend &backend,
+                                             gfx::CommandBuffer &commands) noexcept;
 
     /// @brief A texture of @p width by @p height holding @p source of @p texture, stretched to fill it; for
     /// pattern tiles that are part of an image.

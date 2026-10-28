@@ -1,4 +1,6 @@
-#include "Krystal.Booey/HTML/CanvasBase.hpp"
+﻿#include "Krystal.Booey/HTML/CanvasBase.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextStateSaver.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
@@ -35,8 +37,51 @@ namespace krys::boo::html
     return _imageBuffer.get();
   }
 
+  RefPtr<ImageBuffer> CanvasBase::MakeRenderingResultsAvailable() noexcept
+  {
+    if (auto *context = RenderingContext())
+    {
+      return context->SurfaceBufferToImageBuffer(CanvasRenderingContext::SurfaceBuffer::DrawingBuffer);
+    }
+    return ShareRefPtr(Buffer());
+  }
+
   void CanvasBase::DidDraw(const Maybe<FloatRect> &) noexcept
   {
+    AddCanvasNeedingPreparationForDisplayOrFlush();
+  }
+
+  void CanvasBase::AddCanvasNeedingPreparationForDisplayOrFlush() noexcept
+  {
+    auto *context = RenderingContext();
+    if (!context || context->IsInPreparationForDisplayOrFlush())
+    {
+      return;
+    }
+    if (auto *document = CanvasDocument())
+    {
+      document->AddCanvasNeedingPreparationForDisplayOrFlush(*context);
+    }
+  }
+
+  void CanvasBase::RemoveCanvasNeedingPreparationForDisplayOrFlush() noexcept
+  {
+    auto *context = RenderingContext();
+    if (!context || !context->IsInPreparationForDisplayOrFlush())
+    {
+      return;
+    }
+    if (auto *document = CanvasDocument())
+    {
+      document->RemoveCanvasNeedingPreparationForDisplayOrFlush(*context);
+    }
+  }
+
+  bool CanvasBase::ShouldAccelerate(uint64 area) const noexcept
+  {
+    // Accelerated drawing is on, and there's no minimum area: the host's backend draws every canvas, there
+    // being no unaccelerated one.
+    return area > 0;
   }
 
   void CanvasBase::SetSize(const IntSize &size) noexcept
@@ -73,8 +118,17 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    // FIXME: The host's accelerated buffer (B14b), in the context's colour space.
-    return ImageBuffer::Create(FloatSize(_size), 1);
+    auto *context = RenderingContext();
+    // FIXME: A context that will read frequently draws unaccelerated, once there's an unaccelerated backend
+    // to read from.
+    const auto renderingMode =
+      ShouldAccelerate(area) ? RenderingMode::Accelerated : RenderingMode::Unaccelerated;
+    // FIXME: The context's pixel format (sRGB, 8 bits a channel).
+    auto colorSpace = context ? context->ColorSpace() : DestinationColorSpace::SRGB();
+
+    auto *document = CanvasDocument();
+    return ImageBuffer::Create(FloatSize(_size), renderingMode, RenderingPurpose::Canvas, 1, colorSpace,
+                               document ? document->GetGraphicsClient() : nullptr);
   }
 
   void CanvasBase::ResetGraphicsContextState() const noexcept

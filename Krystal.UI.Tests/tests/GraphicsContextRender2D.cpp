@@ -281,6 +281,45 @@ namespace krys::ui::tests
       CHECK(replayed == direct);
     }
 
+    SECTION("Clearing a rect and resetting the clip")
+    {
+      auto replayed = Replayed(
+        [](boo::GraphicsContext &context)
+        {
+          context.FillRect({0, 0, 60, 40}, boo::Color::blue);
+          // Clearing ignores the alpha and shadow, and keeps to the transform and clip.
+          context.Save();
+          context.SetAlpha(0.5f);
+          context.SetDropShadow({.Offset = {4, 4}, .Radius = 2, .Color = boo::Color::red});
+          context.Translate(5, 5);
+          context.Clip({0, 0, 20, 30});
+          context.ClearRect({10, 10, 40, 10});
+          context.Restore();
+          // Resetting the clip brings back the context's own, for the rest of the state.
+          context.Save();
+          context.Clip({0, 0, 10, 10});
+          context.ResetClip();
+          context.FillRect({60, 0, 20, 20}, boo::Color::red);
+          context.Restore();
+        });
+      auto direct = Draw(
+        [](gfx::Renderer2D &renderer)
+        {
+          renderer.FillRect({0, 0, 60, 40}, SRGBA<uint8> {0, 0, 255, 255});
+          renderer.Save();
+          renderer.Translate(5, 5);
+          renderer.ClipRect({0, 0, 20, 30});
+          renderer.SetCompositeOperator(gfx::CompositeOperator2D::Clear);
+          renderer.FillRect({10, 10, 40, 10}, SRGBA<uint8> {0, 0, 0, 255});
+          renderer.Restore();
+          renderer.FillRect({60, 0, 20, 20}, SRGBA<uint8> {255, 0, 0, 255});
+        });
+      CHECK(replayed == direct);
+      // The cleared rect is transparent.
+      CHECK(replayed[static_cast<size_t>(20) * Width + 20][3] == 0u);
+      CHECK(replayed[static_cast<size_t>(20) * Width + 40][3] == 255u);
+    }
+
     SECTION("Transparency layers with opacity and blend modes")
     {
       auto replayed = Replayed(

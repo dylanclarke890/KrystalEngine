@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Core/BidiResolver.hpp"
 #include "Krystal.Booey/Graphics/Controls/ControlPart.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/Filters/Filter.hpp"
@@ -8,6 +9,7 @@
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
 #include "Krystal.Booey/Graphics/Path.hpp"
+#include "Krystal.Booey/Graphics/TextRunIterator.hpp"
 #include <cmath>
 
 namespace krys::boo
@@ -129,6 +131,41 @@ namespace krys::boo
   {
     // Display list recording for text content is done at glyphs level. See GraphicsContext::drawGlyphs.
     return font.DrawText(*this, run, point, from, to);
+  }
+
+  void GraphicsContext::DrawBidiText(const FontCascade &font, const TextRun &run, const FloatPoint &point,
+                                     FontCascade::CustomFontNotReadyAction customFontNotReadyAction) noexcept
+  {
+    BidiResolver<TextRunIterator, BidiCharacterRun> bidiResolver;
+    bidiResolver.SetStatus(BidiStatus(run.Direction(), run.DirectionalOverride()));
+    bidiResolver.SetPositionIgnoringNestedIsolates(TextRunIterator(&run, 0));
+
+    // FIXME: This ownership should be reversed. We should pass BidiRunList
+    // to BidiResolver in createBidiRunsForLine.
+    auto &bidiRuns = bidiResolver.Runs();
+    bidiResolver.CreateBidiRunsForLine(TextRunIterator(&run, run.Length()));
+
+    if (!bidiRuns.RunCount())
+    {
+      return;
+    }
+
+    auto currentPoint = point;
+    auto *bidiRun = bidiRuns.FirstRun();
+    while (bidiRun)
+    {
+      auto subrun = run.SubRun(bidiRun->Start(), bidiRun->Stop() - bidiRun->Start());
+      bool isRTL = bidiRun->Level() % 2;
+      subrun.SetDirection(isRTL ? TextDirection::RTL : TextDirection::LTR);
+      subrun.SetDirectionalOverride(bidiRun->DirOverride(false));
+
+      std::ignore = font.DrawText(*this, subrun, currentPoint, 0, null, customFontNotReadyAction);
+      currentPoint.Move(font.Width(subrun), 0);
+
+      bidiRun = bidiRun->Next();
+    }
+
+    bidiRuns.Clear();
   }
 
   void GraphicsContext::DrawEmphasisMarks(const FontCascade &font, const TextRun &run, const StringAtom &mark,

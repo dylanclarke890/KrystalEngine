@@ -11,6 +11,7 @@
 namespace krys::boo
 {
   class GraphicsContextStateSaver;
+  class Image;
   class ImageBuffer;
 }
 
@@ -19,13 +20,17 @@ namespace krys::boo::css
   struct ParserContext;
 }
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::html
 {
   class CanvasRenderingContext;
 
   /// @brief What a canvas is to its rendering context: its size, the image buffer a 2D context draws into,
   /// and where its drawing is reported.
-  // FIXME: Readbacks come with the GPU bitmap (B14b) and pixel buffers (B14c).
   class CanvasBase : public AbstractRefCounted
   {
   private:
@@ -66,8 +71,17 @@ namespace krys::boo::html
       return _hasCreatedImageBuffer;
     }
 
+    /// @brief The buffer holding what the context has drawn, ready to be read or drawn from.
+    KRYS_NODISCARD RefPtr<ImageBuffer> MakeRenderingResultsAvailable() noexcept;
+
+    /// @brief An image of what's drawn, copied when it's first asked for after a draw.
+    KRYS_NODISCARD virtual Image *CopiedImage() const noexcept = 0;
+    virtual void ClearCopiedImage() const noexcept = 0;
+
     /// @brief The parser context colours given to the context are parsed in.
     KRYS_NODISCARD virtual const css::ParserContext &CssParserContext() const noexcept = 0;
+    /// @brief The document the canvas belongs to (its script execution context), if any.
+    KRYS_NODISCARD virtual dom::Document *CanvasDocument() const noexcept = 0;
 
     /// @brief Returns the buffer's graphics context to the state it was made with.
     void ResetGraphicsContextState() const noexcept;
@@ -81,6 +95,12 @@ namespace krys::boo::html
     explicit CanvasBase(IntSize size) noexcept;
 
     void SetSize(const IntSize &size) noexcept;
+
+    /// @brief Whether a buffer of @p area pixels is accelerated.
+    KRYS_NODISCARD bool ShouldAccelerate(uint64 area) const noexcept;
+
+    void AddCanvasNeedingPreparationForDisplayOrFlush() noexcept;
+    void RemoveCanvasNeedingPreparationForDisplayOrFlush() noexcept;
 
     /// @brief A new buffer of the canvas's size for its context, or null if the canvas is empty or too large.
     KRYS_NODISCARD RefPtr<ImageBuffer> AllocateImageBuffer() const noexcept;

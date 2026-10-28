@@ -177,6 +177,19 @@ div.drag-field { min-height: 60px; }
   background: #073b4c; opacity: 0.8; }
 .engine-texture-sample p { margin: 8px 0 0; font-size: 13px; line-height: 22px; }
 
+/* Canvas 2D: a chart the editor draws, and a drawing pad. */
+.canvas-2d-sample .card { height: auto; min-width: 0; }
+#chart { display: block; width: 320px; height: 160px; border-radius: 12px; background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dfe5f1; }
+#chart-tile { display: none; }
+#pad { display: block; width: 320px; height: 200px; border-radius: 12px; background: #ffffff;
+  box-shadow: inset 0 0 0 1px #dfe5f1;
+  cursor: crosshair; touch-action: none; }
+.pad-tools { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+#pad-palette { display: block; width: 200px; height: 28px; border-radius: 6px; cursor: pointer; }
+#pad-colour { display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: #1a2240; }
+.canvas-2d-sample p { margin: 8px 0 0; font-size: 13px; line-height: 22px; }
+
 /* Touch gestures: tiles in a box that pans both ways. */
 .pan-area { height: 160px; overflow: auto; border-radius: 12px; background: #e3e7ef; }
 .tiles { width: 1600px; height: 640px;

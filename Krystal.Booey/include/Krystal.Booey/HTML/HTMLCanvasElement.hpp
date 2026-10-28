@@ -5,10 +5,12 @@
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp"
 #include "Krystal.Booey/HTML/CanvasBase.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo
 {
+  class Blob;
   class GraphicsContext;
 }
 
@@ -28,6 +30,7 @@ namespace krys::boo::html
     bool _isSnapshotting {false};
     mutable bool _didClearImageBuffer {false};
     UniquePtr<CanvasRenderingContext> _context;
+    mutable RefPtr<Image> _copiedImage;
 
   public:
     // These values come from the HTML standard.
@@ -103,13 +106,31 @@ namespace krys::boo::html
 
     KRYS_NODISCARD static bool Is2dType(dom::DOMStringView type) noexcept;
 
-    // TODO(HTMLCANVAS, HTML): toDataURL() and toBlob() (B14e); transferControlToOffscreen() isn't planned.
+    /// @brief The canvas's pixels as a `data:` URL of an image of @p mimeType (PNG, JPEG or WebP; PNG for any
+    /// other), at @p quality (0 to 1) for JPEG and WebP; `data:,` if the canvas has no pixels.
+    /// @see https://html.spec.whatwg.org/#dom-canvas-todataurl
+    KRYS_NODISCARD dom::DOMString ToDataURL(dom::DOMStringView mimeType = {},
+                                            Maybe<double> quality = {}) noexcept;
+    /// @brief Encodes the canvas's pixels as ToDataURL does, and calls @p callback with them as a `Blob`
+    /// (null if the canvas has no pixels) in a task.
+    /// @see https://html.spec.whatwg.org/#dom-canvas-toblob
+    void ToBlob(Func<void(RefPtr<Blob> &&)> &&callback, dom::DOMStringView mimeType = {},
+                Maybe<double> quality = {}) noexcept;
+
+    // transferControlToOffscreen() isn't planned.
 
 #pragma endregion
 
     void DidDraw(const Maybe<FloatRect> &rect) noexcept final;
 
     KRYS_NODISCARD const css::ParserContext &CssParserContext() const noexcept final;
+    KRYS_NODISCARD dom::Document *CanvasDocument() const noexcept final;
+
+    /// @brief Whether the context has work to do before its pixels are composited.
+    // FIXME: A canvas moved to another document moves its context's preparation with it, once nodes are told
+    // they've moved.
+    KRYS_NODISCARD bool NeedsPreparationForDisplay() const noexcept;
+    void PrepareForDisplay() noexcept;
 
     /// @brief Paints the context's pixels into @p rect, when they aren't shown as the layer's contents.
     void Paint(GraphicsContext &context, const LayoutRect &rect) noexcept;
@@ -142,6 +163,9 @@ namespace krys::boo::html
 
     void CreateImageBuffer() const noexcept final;
     void ClearImageBuffer() const noexcept;
+
+    KRYS_NODISCARD Image *CopiedImage() const noexcept final;
+    void ClearCopiedImage() const noexcept final;
 
     void DidUpdateSizeProperties() noexcept;
 

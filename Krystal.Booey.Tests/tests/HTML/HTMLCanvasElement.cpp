@@ -2,8 +2,11 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
+#include "Krystal.Booey/FileAPI/Blob.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Rendering/RenderHTMLCanvas.hpp"
 
 namespace krys::boo::tests
@@ -153,6 +156,55 @@ namespace krys::boo::tests
       REQUIRE_FALSE(fixture.ById(u8"button").SetAttribute(u8"style", u8"display:none").HasException());
       fixture.Document->UpdateStyleIfNeeded();
       CHECK_FALSE(html::FocusAlgorithms::IsFocusableArea(fixture.ById(u8"button")));
+    }
+  }
+
+  TEST_CASE("HTMLCanvasElement: serialised as a file", "[HTML][HTMLCanvasElement]")
+  {
+    CanvasFixture fixture(u8"<canvas id=canvas width=4 height=3></canvas><canvas id=empty width=0></canvas>");
+    auto &canvas = fixture.Canvas(u8"canvas");
+    // Without a host, the pixels read back as transparent black, but they're still encoded.
+    std::ignore = canvas.GetContext2d();
+
+    SECTION("data URLs")
+    {
+      CHECK(canvas.ToDataURL().starts_with(u8"data:image/png;base64,iVBORw0KGgo"));
+      CHECK(canvas.ToDataURL(u8"image/jpeg", 0.5).starts_with(u8"data:image/jpeg;base64,/9j/"));
+      CHECK(canvas.ToDataURL(u8"IMAGE/WEBP").starts_with(u8"data:image/webp;base64,UklGR"));
+      // Types the encoders don't have are PNG.
+      CHECK(canvas.ToDataURL(u8"image/gif").starts_with(u8"data:image/png;base64,"));
+      // A canvas without pixels has none to encode.
+      CHECK(fixture.Canvas(u8"empty").ToDataURL() == u8"data:,");
+    }
+
+    SECTION("blobs, in a task")
+    {
+      RefPtr<Blob> blob;
+      bool called = false;
+      canvas.ToBlob(
+        [&](RefPtr<Blob> &&result)
+        {
+          called = true;
+          blob = krys::move(result);
+        },
+        u8"image/jpeg");
+      CHECK_FALSE(called);
+      html::EventLoop::Current().RunUntilIdle();
+      REQUIRE(called);
+      REQUIRE(blob);
+      CHECK(blob->Type() == u8"image/jpeg");
+      CHECK(blob->Size() > 0u);
+
+      called = false;
+      fixture.Canvas(u8"empty").ToBlob(
+        [&](RefPtr<Blob> &&result)
+        {
+          called = true;
+          blob = krys::move(result);
+        });
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(called);
+      CHECK_FALSE(blob);
     }
   }
 }

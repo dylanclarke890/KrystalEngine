@@ -6,17 +6,24 @@
 #include "Krystal.Booey/Editing/CompositionUnderline.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/ImageData.hpp"
+#include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
+#include <numbers>
 #include <string>
 #include <unicode/uloc.h>
 
@@ -558,5 +565,242 @@ namespace krys::ui::tests
         }
         view.UpdateRendering();
       });
+  }
+
+  TEST_CASE("Golden: canvas 2D", "[UI][GPU][Golden]")
+  {
+    // The calls the scene's script makes for Chrome, in two rendering updates.
+    CheckPageOnDevice("canvas-2d", 360u, 200u, false,
+                      [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+                      {
+                        using boo::dom::DOMString;
+                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                          view.Document().GetElementById(u8"canvas").get());
+                        REQUIRE(canvas);
+                        auto context = canvas->GetContext2d();
+                        REQUIRE(context);
+
+                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->FillRect(10, 10, 60, 40);
+                        context->SetFillStyle(DOMString(u8"rgba(238, 119, 51, 0.6)"));
+                        context->FillRect(40, 30, 60, 40);
+                        context->SetLineWidth(4);
+                        context->SetStrokeStyle(DOMString(u8"#224422"));
+                        context->StrokeRect(10, 90, 90, 40);
+
+                        auto linear = context->CreateLinearGradient(120, 0, 220, 0).ReleaseValue();
+                        std::ignore = linear->AddColorStop(0, u8"#ff0000");
+                        std::ignore = linear->AddColorStop(1, u8"#0000ff");
+                        context->SetFillStyle(krys::move(linear));
+                        context->FillRect(120, 10, 100, 40);
+                        auto radial = context->CreateRadialGradient(170, 110, 5, 170, 110, 40).ReleaseValue();
+                        std::ignore = radial->AddColorStop(0, u8"#ffffff");
+                        std::ignore = radial->AddColorStop(1, u8"#008800");
+                        context->SetFillStyle(krys::move(radial));
+                        context->BeginPath();
+                        std::ignore = context->Arc(170, 110, 40, 0, 2 * std::numbers::pi_v<float>);
+                        context->Fill();
+
+                        context->Save();
+                        context->Translate(280, 50);
+                        context->Rotate(std::numbers::pi / 8);
+                        context->BeginPath();
+                        context->Rect(-30, -30, 60, 60);
+                        context->Clip();
+                        context->SetLineWidth(8);
+                        context->SetLineJoin(boo::html::CanvasLineJoin::Round);
+                        context->SetStrokeStyle(DOMString(u8"#880088"));
+                        view.UpdateRendering();
+
+                        context->BeginPath();
+                        context->MoveTo(-40, 20);
+                        context->LineTo(0, -20);
+                        context->LineTo(40, 20);
+                        context->Stroke();
+                        context->Restore();
+
+                        context->SetLineWidth(6);
+                        context->SetLineCap(boo::html::CanvasLineCap::Round);
+                        context->SetLineDash({12, 10});
+                        context->SetStrokeStyle(DOMString(u8"#cc3333"));
+                        context->BeginPath();
+                        context->MoveTo(240, 110);
+                        context->LineTo(330, 110);
+                        context->Stroke();
+                        context->SetGlobalAlpha(0.5f);
+                        context->SetFillStyle(DOMString(u8"#000000"));
+                        context->BeginPath();
+                        std::ignore =
+                          context->RoundRect(240, 125, 90, 45, boo::html::CanvasPath::RadiusVariant(12.0));
+                        context->Fill();
+                        context->ClearRect(270, 140, 30, 15);
+                        view.UpdateRendering();
+                      });
+  }
+
+  TEST_CASE("Golden: canvas images", "[UI][GPU][Golden]")
+  {
+    // The calls the scene's script makes for Chrome once the photo has loaded.
+    CheckPageOnDevice(
+      "canvas-images", 360u, 200u, false,
+      [](View &view, gfx::Device &device, List<gfx::TextureHandle> &)
+      {
+        using boo::dom::DOMString;
+        // The canvases are read back and drawn into each other before the view first paints.
+        view.SetDevice(device);
+        auto &document = view.Document();
+        auto *canvas =
+          DynamicDowncast<boo::html::HTMLCanvasElement>(document.GetElementById(u8"canvas").get());
+        auto *tileCanvas =
+          DynamicDowncast<boo::html::HTMLCanvasElement>(document.GetElementById(u8"tile").get());
+        auto *photo = DynamicDowncast<boo::html::HTMLImageElement>(document.GetElementById(u8"photo").get());
+        REQUIRE(canvas);
+        REQUIRE(tileCanvas);
+        REQUIRE(photo);
+        REQUIRE(photo->Complete());
+        auto context = canvas->GetContext2d();
+        auto tile = tileCanvas->GetContext2d();
+        REQUIRE(context);
+        REQUIRE(tile);
+
+        REQUIRE_FALSE(context->DrawImage(ShareRefPtr(photo), 10, 10).HasException());
+        REQUIRE_FALSE(context->DrawImage(ShareRefPtr(photo), 70, 10, 96, 64).HasException());
+        REQUIRE_FALSE(context->DrawImage(ShareRefPtr(photo), 12, 8, 24, 16, 180, 10, 48, 32).HasException());
+
+        tile->SetFillStyle(DOMString(u8"#336699"));
+        tile->FillRect(0, 0, 16, 16);
+        tile->SetFillStyle(DOMString(u8"#ee7733"));
+        tile->FillRect(0, 0, 8, 8);
+        tile->FillRect(8, 8, 8, 8);
+        auto pattern = context->CreatePattern(ShareRefPtr(tileCanvas), u8"repeat");
+        REQUIRE_FALSE(pattern.HasException());
+        REQUIRE(pattern.Value());
+        context->SetFillStyle(Ref<boo::html::CanvasPattern>(pattern.Value()));
+        context->FillRect(240, 10, 90, 64);
+
+        tile->SetFillStyle(DOMString(u8"#22aa55"));
+        tile->FillRect(0, 0, 16, 16);
+        REQUIRE_FALSE(context->DrawImage(ShareRefPtr(tileCanvas), 10, 90, 32, 32).HasException());
+        REQUIRE_FALSE(context->DrawImage(ShareRefPtr(canvas), 70, 10, 96, 64, 60, 90, 48, 32).HasException());
+
+        auto pixels = context->CreateImageData(64, 40, {});
+        REQUIRE_FALSE(pixels.HasException());
+        auto bytes = pixels.Value()->Data().AsUint8ClampedArray();
+        for (size_t y = 0; y < 40u; ++y)
+        {
+          for (size_t x = 0; x < 64u; ++x)
+          {
+            const auto i = (y * 64u + x) * 4u;
+            bytes->Set(i, static_cast<double>(x * 4u));
+            bytes->Set(i + 1, static_cast<double>(y * 6u));
+            bytes->Set(i + 2, 160);
+            bytes->Set(i + 3, x < 32u ? 255 : 128);
+          }
+        }
+        context->PutImageData(*pixels.Value(), 130, 90);
+
+        auto read = context->GetImageData(10, 10, 48, 32, {});
+        REQUIRE_FALSE(read.HasException());
+        context->PutImageData(*read.Value(), 210, 90);
+        view.UpdateRendering();
+      });
+  }
+
+  TEST_CASE("Golden: canvas text", "[UI][GPU][Golden]")
+  {
+    // The calls the scene's script makes for Chrome once Ahem has loaded. Its boxes lay out as Chrome's do,
+    // but Chrome's golden is only reported: its DirectWrite glyphs leave a seam between them (see "Golden:
+    // text").
+    CheckPageOnDevice("canvas-text", 360u, 200u, true,
+                      [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+                      {
+                        using boo::dom::DOMString;
+                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                          view.Document().GetElementById(u8"canvas").get());
+                        REQUIRE(canvas);
+                        auto context = canvas->GetContext2d();
+                        REQUIRE(context);
+
+                        context->SetFont(u8"40px Ahem");
+                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->FillText(u8"Fill", 10, 50);
+                        context->SetLineWidth(2);
+                        context->SetStrokeStyle(DOMString(u8"#cc3333"));
+                        context->StrokeText(u8"Line", 10, 100);
+
+                        auto gradient = context->CreateLinearGradient(190, 0, 330, 0).ReleaseValue();
+                        std::ignore = gradient->AddColorStop(0, u8"#ff0000");
+                        std::ignore = gradient->AddColorStop(1, u8"#0000ff");
+                        context->SetFillStyle(krys::move(gradient));
+                        context->SetFont(u8"30px Ahem");
+                        context->FillText(u8"Grad", 200, 45);
+
+                        context->SetFillStyle(DOMString(u8"#118833"));
+                        context->SetFont(u8"20px Ahem");
+                        context->SetTextAlign(boo::html::CanvasTextAlign::Center);
+                        context->SetTextBaseline(boo::html::CanvasTextBaseline::Middle);
+                        context->FillText(u8"Mid", 260, 90);
+
+                        context->SetTextAlign(boo::html::CanvasTextAlign::Start);
+                        context->SetTextBaseline(boo::html::CanvasTextBaseline::Alphabetic);
+                        context->SetFillStyle(DOMString(u8"#884488"));
+                        context->FillText(u8"Squeeze", 10, 150, 70.0);
+                        context->SetLetterSpacing(u8"6px");
+                        context->FillText(u8"ab", 100, 150);
+                        context->SetLetterSpacing(u8"0px");
+
+                        context->SetDirection(boo::html::CanvasDirection::Rtl);
+                        context->SetFillStyle(DOMString(u8"#ee7733"));
+                        context->FillText(u8"abc", 330, 170);
+                        view.UpdateRendering();
+                      });
+  }
+
+  TEST_CASE("Golden: canvas filters", "[UI][GPU][Golden]")
+  {
+    // The calls the scene's script makes for Chrome.
+    CheckPageOnDevice("canvas-filters", 360u, 200u, false,
+                      [](View &view, gfx::Device &, List<gfx::TextureHandle> &)
+                      {
+                        using boo::dom::DOMString;
+                        auto *canvas = DynamicDowncast<boo::html::HTMLCanvasElement>(
+                          view.Document().GetElementById(u8"canvas").get());
+                        REQUIRE(canvas);
+                        auto context = canvas->GetContext2d();
+                        REQUIRE(context);
+
+                        context->SetFilterString(u8"blur(4px)");
+                        context->SetFillStyle(DOMString(u8"#336699"));
+                        context->FillRect(20, 20, 80, 60);
+
+                        context->SetFilterString(u8"drop-shadow(6px 6px 3px rgba(0, 0, 0, 0.6))");
+                        context->SetFillStyle(DOMString(u8"#ee7733"));
+                        context->BeginPath();
+                        std::ignore = context->Arc(160, 50, 30, 0, 2 * std::numbers::pi_v<float>);
+                        context->Fill();
+
+                        auto gradient = context->CreateLinearGradient(220, 0, 320, 0).ReleaseValue();
+                        std::ignore = gradient->AddColorStop(0, u8"#ff0000");
+                        std::ignore = gradient->AddColorStop(1, u8"#0000ff");
+                        context->SetFilterString(u8"grayscale(1)");
+                        context->SetFillStyle(krys::move(gradient));
+                        context->FillRect(220, 20, 100, 60);
+
+                        context->SetFilterString(u8"opacity(0.5)");
+                        context->SetFillStyle(DOMString(u8"#118833"));
+                        context->FillRect(20, 110, 80, 50);
+                        context->SetFilterString(u8"hue-rotate(180deg)");
+                        context->SetFillStyle(DOMString(u8"#cc3333"));
+                        context->FillRect(120, 110, 80, 50);
+
+                        context->SetFilterString(u8"blur(1px) drop-shadow(3px 3px 0 #224422)");
+                        context->SetLineWidth(6);
+                        context->SetStrokeStyle(DOMString(u8"#884488"));
+                        context->StrokeRect(230, 110, 80, 50);
+                        context->SetFilterString(u8"none");
+                        context->SetFillStyle(DOMString(u8"#222222"));
+                        context->FillRect(260, 128, 20, 14);
+                        view.UpdateRendering();
+                      });
   }
 }

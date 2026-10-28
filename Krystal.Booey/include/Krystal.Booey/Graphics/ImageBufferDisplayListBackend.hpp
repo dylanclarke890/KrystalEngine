@@ -8,13 +8,15 @@ namespace krys::boo
 {
   /// @brief An image buffer backend that records what's drawn into a display list, for a drawing backend to
   /// render when it draws the buffer.
-  /// @note It's the only backend: Krystal.UI renders the recorded drawing into a texture.
+  /// @note Krystal.UI renders the recorded drawing into a texture each time it draws the buffer.
   class ImageBufferDisplayListBackend final : public ImageBufferBackend
   {
   private:
     display_list::RecorderImpl _drawingContext;
 
   public:
+    static constexpr RenderingMode BackendRenderingMode = RenderingMode::DisplayList;
+
     KRYS_NODISCARD static UniquePtr<ImageBufferDisplayListBackend> Create(const Parameters &) noexcept;
 
     KRYS_NODISCARD GraphicsContext &Context() noexcept override;

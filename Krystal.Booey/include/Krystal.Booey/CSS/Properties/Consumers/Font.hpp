@@ -11,8 +11,14 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/Variant.hpp"
 
+namespace krys::boo::dom
+{
+  class Document;
+}
+
 namespace krys::boo::css
 {
+  enum class ParserMode : uint8;
   class TokenRange;
   class PrimitiveValue;
   class Value;
@@ -74,8 +80,12 @@ namespace krys::boo::css
     KRYS_NODISCARD Maybe<UnresolvedFont> ConsumeUnresolvedFont(TokenRange &tokens,
                                                                PropertyParserState &state) noexcept;
 
-    // FIXME: Add `ParseUnresolvedFont` (string → `UnresolvedFont`, for the canvas 2D context's `font`) once
-    // `ScriptExecutionContext` and `Document` are available.
+    /// @brief Parses @p string as a `font` shorthand, in @p document's parser mode unless
+    /// @p parserModeOverride gives one; empty if it isn't one (`inherit` and `initial` aren't).
+    /// @note What the canvas 2D context's `font` is set with.
+    KRYS_NODISCARD Maybe<UnresolvedFont>
+      ParseUnresolvedFont(const CSSOMString &string, const dom::Document &document,
+                          Maybe<ParserMode> parserModeOverride = {}) noexcept;
 
     // MARK: 'font-style'
     // https://drafts.csswg.org/css-fonts-4/#font-style-prop

@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<!-- The "canvas-text" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, drawing into
+     the canvas with the 2D context's calls the script below makes for Chrome once Ahem has loaded. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Ahem; src: url("fonts/Ahem.woff2") format("woff2"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  canvas { display: block; margin: 10px; background: #e6eef5; }
+  /* Laying this out loads Ahem. */
+  #load { position: absolute; top: 0; left: 0; font: 1px Ahem; visibility: hidden; }
+</style>
+</head>
+<body>
+  <canvas id="canvas" width="340" height="180"></canvas>
+  <span id="load">x</span>
+  <script>
+    document.fonts.load("20px Ahem").then(() => {
+      const context = document.getElementById("canvas").getContext("2d");
+
+      // Filled and stroked: Ahem's glyphs are boxes, 0.8em above the baseline.
+      context.font = "40px Ahem";
+      context.fillStyle = "#336699";
+      context.fillText("Fill", 10, 50);
+      context.lineWidth = 2;
+      context.strokeStyle = "#cc3333";
+      context.strokeText("Line", 10, 100);
+
+      // A gradient through the text.
+      const gradient = context.createLinearGradient(190, 0, 330, 0);
+      gradient.addColorStop(0, "#ff0000");
+      gradient.addColorStop(1, "#0000ff");
+      context.fillStyle = gradient;
+      context.font = "30px Ahem";
+      context.fillText("Grad", 200, 45);
+
+      // Centred on its middle.
+      context.fillStyle = "#118833";
+      context.font = "20px Ahem";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText("Mid", 260, 90);
+
+      // Squeezed into a maximum width, and spaced out.
+      context.textAlign = "start";
+      context.textBaseline = "alphabetic";
+      context.fillStyle = "#884488";
+      context.fillText("Squeeze", 10, 150, 70);
+      context.letterSpacing = "6px";
+      context.fillText("ab", 100, 150);
+      context.letterSpacing = "0px";
+
+      // Right to left, so it starts at the right.
+      context.direction = "rtl";
+      context.fillStyle = "#ee7733";
+      context.fillText("abc", 330, 170);
+    });
+  </script>
+</body>
+</html>

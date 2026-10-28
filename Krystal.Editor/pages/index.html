@@ -958,6 +958,31 @@
     </div>
   </div>
 
+  <div id="canvas-2d">
+    <div class="row canvas-2d-sample">
+      <!-- A chart drawn with the canvas 2D context from the editor's data: dashed grid lines, a gradient filled
+           under a line, labels in the page's font and a bar filled with a pattern drawn into another canvas.
+           The editor redraws it each second as a new value comes in. -->
+      <div class="card">
+        <h2>A live chart</h2>
+        <canvas id="chart" width="640" height="320"></canvas>
+        <canvas id="chart-tile" width="12" height="12"></canvas>
+        <p id="chart-caption">Cups an hour.</p>
+      </div>
+      <!-- A drawing pad that keeps the strokes pointers draw on it. The palette's colours are read back from
+           its pixels (getImageData) as they're picked. -->
+      <div class="card">
+        <h2>A drawing pad</h2>
+        <canvas id="pad" width="320" height="200"></canvas>
+        <div class="pad-tools">
+          <canvas id="pad-palette" width="200" height="28"></canvas>
+          <span id="pad-colour"></span>
+          <button id="pad-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
        auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
        go; the editor's header shows the chapter most in view, which an intersection observer finds. -->

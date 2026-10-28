@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerFloatAnimationValue.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayerTransformAnimationValue.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -49,7 +50,13 @@ namespace krys::boo
     {
       return CanvasCompositingStrategy::CanvasAsLayerContents;
     }
-    // FIXME: An accelerated 2D context is painted to a layer of its own, once there's one.
+    if (auto *context2D = DynamicDowncast<html::CanvasRenderingContext2DBase>(*context))
+    {
+      if (context2D->IsAccelerated())
+      {
+        return CanvasCompositingStrategy::CanvasPaintedToLayer;
+      }
+    }
     return CanvasCompositingStrategy::CanvasPaintedToEnclosingLayer;
   }
 

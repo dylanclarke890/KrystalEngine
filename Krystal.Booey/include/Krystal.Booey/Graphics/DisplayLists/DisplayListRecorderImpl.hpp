@@ -95,8 +95,9 @@ namespace krys::boo::display_list
                      ImagePaintingOptions) noexcept final;
     void DrawFilteredImageBuffer(ImageBuffer *sourceImage, const FloatRect &sourceImageRect, Filter &,
                                  FilterResults &) noexcept override;
+    /// @note Not final: an accelerated buffer's recorder draws a copy of an accelerated source.
     void DrawImageBuffer(ImageBuffer &, const FloatRect &destRect, const FloatRect &srcRect,
-                         ImagePaintingOptions) noexcept final;
+                         ImagePaintingOptions) noexcept override;
     void DrawPattern(ImageBuffer &, const FloatRect &destRect, const FloatRect &tileRect,
                      const AffineTransform &, const FloatPoint &phase, const FloatSize &spacing,
                      ImagePaintingOptions) noexcept final;

@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Platform/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/DateTimeChooser.hpp"
+#include "Krystal.Booey/Platform/GraphicsClient.hpp"
 #include "Krystal.Booey/Platform/PopupMenu.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -27,11 +28,11 @@ namespace krys::boo
   class DateTimeChooserClient;
   class PopupMenuClient;
 
-  /// @brief What a page asks of its host: the window's side of the page.
+  /// @brief What a page asks of its host: the window's side of the page, and its graphics.
   // FIXME: The rest of the chrome client: windows and dialogs, the status bar, tooltips, cursors,
   // scrolling the host's view, search popups and the other compositing hooks (layer flushes, compositing
   // triggers, display refresh monitors), once there are any.
-  class ChromeClient
+  class ChromeClient : public GraphicsClient
   {
     KRYS_NON_COPY_MOVABLE(ChromeClient);
 
@@ -174,6 +175,21 @@ namespace krys::boo
     /// page isn't composited.
     KRYS_NODISCARD virtual GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept
     {
+      return nullptr;
+    }
+
+    /// @brief Makes an image buffer with the host's own backend; null when the host has none for @p mode, so
+    /// the buffer gets one of the page's (a display list).
+    KRYS_NODISCARD RefPtr<ImageBuffer>
+      CreateImageBuffer(const FloatSize &size, RenderingMode mode, RenderingPurpose purpose,
+                        float resolutionScale,
+                        const DestinationColorSpace &colorSpace) const noexcept override
+    {
+      (void)size;
+      (void)mode;
+      (void)purpose;
+      (void)resolutionScale;
+      (void)colorSpace;
       return nullptr;
     }
 

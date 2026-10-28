@@ -27,6 +27,7 @@
 #include "Krystal.Editor/BeanRating.hpp"
 #include "Krystal.Editor/BooeyScene.hpp"
 #include "Krystal.Editor/PageAnimations.hpp"
+#include "Krystal.Editor/PageCanvas2D.hpp"
 #include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Editor/PageDragAndDrop.hpp"
 #include "Krystal.Editor/PageGamepads.hpp"
@@ -99,6 +100,7 @@ namespace krys
     /// @brief The page's drag and drop sample from C++, made once it has loaded.
     UniquePtr<editor::PageDragAndDrop> _dragAndDrop;
     UniquePtr<editor::PageCube> _cube;
+    UniquePtr<editor::PageCanvas2D> _canvas2D;
     /// @brief The last load's events, which the pages show in their `#load-events` element.
     utf8_string _loadEvents;
     /// @brief The page's time, which only moves while the editor runs (Booey's timers follow it).
@@ -151,6 +153,7 @@ namespace krys
       _textInput = nullptr;
       _dragAndDrop = nullptr;
       _cube = nullptr;
+      _canvas2D = nullptr;
       _pageView = nullptr;
       if (_previousGamepadProvider)
       {
@@ -478,6 +481,10 @@ namespace krys
         {
           _cube->Update(static_cast<float>(dt.count()));
         }
+        if (_canvas2D)
+        {
+          _canvas2D->Update(static_cast<float>(dt.count()));
+        }
         _pageView->Update(_pageTime);
       }
       UpdateTextInput();
@@ -598,6 +605,7 @@ namespace krys
           {
             _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
           }
+          _canvas2D = event.FromBackForwardCache ? CreateUnique<editor::PageCanvas2D>(document) : nullptr;
           break;
         case ui::LoadEventType::Finished:
           _loadEvents += u8", finished";
@@ -609,6 +617,7 @@ namespace krys
           _dragAndDrop = CreateUnique<editor::PageDragAndDrop>(document);
           _cube = nullptr;
           _cube = CreateUnique<editor::PageCube>(document, *_context->Device);
+          _canvas2D = CreateUnique<editor::PageCanvas2D>(document);
           _context->Logger->Info("Loaded {}", Narrow(document.GetURL().String()));
           ShowGuide(document.GetURL());
           break;

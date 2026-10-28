@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 
 namespace krys::boo::html
 {
@@ -14,7 +15,10 @@ namespace krys::boo::html
 
   bool CanvasRenderingContext::DelegatesDisplay() const noexcept
   {
-    // FIXME: An accelerated 2D context delegates its display too, once there's one.
+    if (auto *context2D = DynamicDowncast<CanvasRenderingContext2DBase>(*this))
+    {
+      return context2D->IsAccelerated();
+    }
     return IsGPUBased();
   }
 

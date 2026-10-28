@@ -4,6 +4,7 @@
 #include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/FloatSegment.hpp"
+#include "Krystal.Booey/Graphics/FontCascade.hpp"
 #include "Krystal.Booey/Graphics/GlyphBufferMembers.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContextState.hpp"
 #include "Krystal.Booey/Graphics/Image.hpp"
@@ -45,7 +46,6 @@ namespace krys::boo
   /// operations, implemented by display list recorders and drawing backends.
   /// FIXME: System images and video frames (`drawConsumingImageBuffer`, `drawSystemImage`, `drawVideoFrame`,
   /// `clipToImageBuffer` and the fill and stroke patterns).
-  /// FIXME: Bidirectional text runs (`drawBidiText`) need a bidi resolver over text runs.
   class GraphicsContext
   {
     KRYS_NON_COPYABLE(GraphicsContext);
@@ -528,6 +528,11 @@ namespace krys::boo
     /// @return How far the first glyph drawn is from @p point.
     virtual FloatSize DrawText(const FontCascade &, const TextRun &, const FloatPoint &, uint32 from = 0,
                                Maybe<uint32> to = null) noexcept;
+    /// @brief Draws @p run at @p point, split into runs of one direction by the bidi algorithm (from the
+    /// run's direction and override) and drawn in visual order.
+    virtual void DrawBidiText(const FontCascade &, const TextRun &, const FloatPoint &,
+                              FontCascade::CustomFontNotReadyAction =
+                                FontCascade::CustomFontNotReadyAction::DoNotPaintIfFontNotReady) noexcept;
     virtual void DrawEmphasisMarks(const FontCascade &, const TextRun &, const StringAtom &mark,
                                    const FloatPoint &, uint32 from = 0, Maybe<uint32> to = null) noexcept;
     virtual void DrawGlyphs(const Font &, Span<const GlyphBufferGlyph>, Span<const GlyphBufferAdvance>,

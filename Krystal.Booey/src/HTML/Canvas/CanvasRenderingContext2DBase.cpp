@@ -1,17 +1,47 @@
 ﻿#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp"
 #include "Krystal.Booey/CSS/DOMMatrix.hpp"
+#include "Krystal.Booey/CSS/Markup.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypesSerialisation.hpp"
+#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/BitmapImage.hpp"
+#include "Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp"
 #include "Krystal.Booey/Graphics/DashArray.hpp"
 #include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
+#include "Krystal.Booey/Graphics/Filters/Filter.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/Graphics/Gradient.hpp"
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerContentsDisplayDelegate.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
+#include "Krystal.Booey/Graphics/IntRect.hpp"
+#include "Krystal.Booey/Graphics/NativeImage.hpp"
+#include "Krystal.Booey/Graphics/Path.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
+#include "Krystal.Booey/Graphics/PixelBufferConversion.hpp"
+#include "Krystal.Booey/Graphics/SourceImage.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasFilterContextSwitcher.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasGradient.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasPattern.hpp"
 #include "Krystal.Booey/HTML/Canvas/Path2D.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/ImageData.hpp"
+#include "Krystal.Booey/HTML/TextMetrics.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
+#include "Krystal.Booey/SVG/SVGImageElement.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/Visitor.hpp"
 #include <cmath>
 
 namespace krys::boo::html
@@ -165,11 +195,62 @@ namespace krys::boo::html
 #endif
   }
 
+  bool CanvasRenderingContext2DBase::IsAccelerated() const noexcept
+  {
+    // The buffer's mode is the drawing context's.
+    if (!GetCanvasBase().HasCreatedImageBuffer())
+    {
+      return false;
+    }
+    auto *buffer = GetCanvasBase().Buffer();
+    return buffer && buffer->GetRenderingMode() == RenderingMode::Accelerated;
+  }
+
   bool CanvasRenderingContext2DBase::IsSurfaceBufferTransparentBlack(SurfaceBuffer) const noexcept
   {
     // Before the first draw (or first access to the drawing buffer), the drawing buffer is transparent black.
     // Currently the canvas does not support alpha == false.
     return !GetCanvasBase().HasCreatedImageBuffer();
+  }
+
+  RefPtr<GraphicsLayerContentsDisplayDelegate>
+    CanvasRenderingContext2DBase::LayerContentsDisplayDelegate() noexcept
+  {
+    if (auto *buffer = GetCanvasBase().Buffer())
+    {
+      return buffer->LayerContentsDisplayDelegate();
+    }
+    return nullptr;
+  }
+
+  bool CanvasRenderingContext2DBase::HasDeferredOperations() const noexcept
+  {
+    // Any draw may linger in the backend until it's flushed, holding references to the images it draws,
+    // which a 2D context can change. Lingering draws aren't held forever: the context takes part in the
+    // canvas preparation phase after any change.
+    return _hasDeferredOperations;
+  }
+
+  void CanvasRenderingContext2DBase::FlushDeferredOperations() noexcept
+  {
+    _hasDeferredOperations = false;
+    if (auto *buffer = GetCanvasBase().Buffer())
+    {
+      std::ignore = buffer->FlushDrawingContextAsync();
+    }
+  }
+
+  bool CanvasRenderingContext2DBase::NeedsPreparationForDisplay() const noexcept
+  {
+    return IsAccelerated();
+  }
+
+  void CanvasRenderingContext2DBase::PrepareForDisplay() noexcept
+  {
+    if (auto *buffer = GetCanvasBase().Buffer())
+    {
+      buffer->PrepareForDisplay();
+    }
   }
 
   void CanvasRenderingContext2DBase::Reset() noexcept
@@ -181,12 +262,16 @@ namespace krys::boo::html
 
     _path.Clear();
     _unrealizedSaveCount = 0;
+    _hasDeferredOperations = false;
     ClearAccumulatedDirtyRect();
     if (auto *c = ExistingDrawingContext())
     {
       GetCanvasBase().ResetGraphicsContextState();
       c->ClearRect(FloatRect {{}, FloatSize(GetCanvasBase().Size())});
+      // The canvas is cleared: it's drawn.
+      DidDrawEntireCanvas(DefaultDidDrawOptions() | DidDrawOption::PreserveCachedContents);
     }
+    _cachedContents.emplace<CachedContentsTransparent>();
   }
 
   CanvasRenderingContext2DBase::State::State() noexcept
@@ -196,7 +281,10 @@ namespace krys::boo::html
         TransformInverse(AffineTransform {}), LineDashOffset(0), ImageSmoothingEnabled(true),
         ImageSmoothingQuality(DefaultSmoothingQuality), TextAlign(StartTextAlign),
         TextBaseline(AlphabeticTextBaseline), Direction(Direction::Inherit), FilterString(u8"none"),
-        LetterSpacing(u8"0px"), WordSpacing(u8"0px"), UnparsedFont(DefaultFont)
+        Filter(css::keywords::None {}), LetterSpacing(u8"0px"), WordSpacing(u8"0px"),
+        UnparsedFont(DefaultFont), FontKerning(CanvasFontKerning::Auto),
+        FontStretch(CanvasFontStretch::Normal), FontVariantCaps(CanvasFontVariantCaps::Normal),
+        TextRendering(CanvasTextRendering::Auto), Lang(u8"inherit")
   {
   }
 
@@ -288,7 +376,8 @@ namespace krys::boo::html
     c->Restore();
   }
 
-  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color, dom::DOMString &&unparsedColor) noexcept
+  void CanvasRenderingContext2DBase::SetStrokeColorImpl(Color &&color,
+                                                        dom::DOMString &&unparsedColor) noexcept
   {
     krys_debug_assert(color.IsValid());
     if (GetState().StrokeStyle.GetColor() == color)
@@ -841,6 +930,12 @@ namespace krys::boo::html
 
   void CanvasRenderingContext2DBase::FillInternal(const Path &path, CanvasFillRule windingRule) noexcept
   {
+    UniquePtr<CanvasFilterContextSwitcher> targetSwitcher;
+    if (!GetState().Filter.IsNone())
+    {
+      targetSwitcher = CanvasFilterContextSwitcher::Create(*this, path.FastBoundingRect());
+    }
+
     auto *c = EffectiveDrawingContext();
     if (!c)
     {
@@ -885,13 +980,21 @@ namespace krys::boo::html
       c->FillPath(path);
     }
 
-    DidDraw(repaintEntireCanvas, [&] { return path.FastBoundingRect(); });
+    DidDraw(repaintEntireCanvas,
+            [&] { return targetSwitcher ? targetSwitcher->ExpandedBounds() : path.FastBoundingRect(); });
 
     c->SetFillRule(savedFillRule);
   }
 
   void CanvasRenderingContext2DBase::StrokeInternal(const Path &path) noexcept
   {
+    UniquePtr<CanvasFilterContextSwitcher> targetSwitcher;
+    if (!GetState().Filter.IsNone())
+    {
+      targetSwitcher =
+        CanvasFilterContextSwitcher::Create(*this, InflatedStrokeRect(path.FastBoundingRect()));
+    }
+
     auto *c = EffectiveDrawingContext();
     if (!c)
     {
@@ -933,7 +1036,12 @@ namespace krys::boo::html
       c->StrokePath(path);
     }
 
-    DidDraw(repaintEntireCanvas, [&] { return InflatedStrokeRect(path.FastBoundingRect()); });
+    DidDraw(repaintEntireCanvas,
+            [&]
+            {
+              return targetSwitcher ? targetSwitcher->ExpandedBounds()
+                                    : InflatedStrokeRect(path.FastBoundingRect());
+            });
   }
 
   void CanvasRenderingContext2DBase::ClipInternal(const Path &path, CanvasFillRule windingRule) noexcept
@@ -1112,6 +1220,8 @@ namespace krys::boo::html
     FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
                    static_cast<float>(height));
 
+    auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, rect);
+
     auto *c = EffectiveDrawingContext();
     if (!c)
     {
@@ -1165,7 +1275,7 @@ namespace krys::boo::html
       c->FillRect(rect);
     }
 
-    DidDraw(repaintEntireCanvas, rect);
+    DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : rect);
   }
 
   void CanvasRenderingContext2DBase::StrokeRect(double x, double y, double width, double height) noexcept
@@ -1179,6 +1289,8 @@ namespace krys::boo::html
                    static_cast<float>(height));
     FloatRect inflatedStrokeRect = rect;
     inflatedStrokeRect.Inflate(static_cast<float>(GetState().LineWidth / 2));
+
+    auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, inflatedStrokeRect);
 
     auto *c = EffectiveDrawingContext();
     if (!c)
@@ -1221,7 +1333,7 @@ namespace krys::boo::html
       c->StrokeRect(rect, lineWidth);
     }
 
-    DidDraw(repaintEntireCanvas, inflatedStrokeRect);
+    DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : inflatedStrokeRect);
   }
 
   void CanvasRenderingContext2DBase::SetShadow(const FloatSize &offset, float blur,
@@ -1436,6 +1548,901 @@ namespace krys::boo::html
     return CanvasGradient::Create(FloatPoint(x, y), angleInRadians);
   }
 
+  dom::ExceptionOr<RefPtr<CanvasPattern>>
+    CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource &&image,
+                                                dom::DOMStringView repetition) noexcept
+  {
+    bool repeatX, repeatY;
+    if (!CanvasPattern::ParseRepetitionType(repetition, repeatX, repeatY))
+    {
+      return dom::Exception {dom::ExceptionCode::SyntaxError};
+    }
+
+    return SwitchOn(image, [&](auto &element) -> dom::ExceptionOr<RefPtr<CanvasPattern>>
+                    { return this->CreatePattern(*element, repeatX, repeatY); });
+  }
+
+  dom::ExceptionOr<RefPtr<CanvasPattern>>
+    CanvasRenderingContext2DBase::CreatePattern(CachedImage &cachedImage, RenderElement *renderer,
+                                                bool repeatX, bool repeatY) noexcept
+  {
+    RefPtr<Image> image = ShareRefPtr(cachedImage.ImageForRenderer(renderer));
+    if (!image)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    auto nativeImage = image->GetNativeImage();
+    if (!nativeImage)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    return RefPtr<CanvasPattern> {
+      CanvasPattern::Create(SourceImage(Ref<NativeImage>(krys::move(nativeImage))), repeatX, repeatY)};
+  }
+
+  dom::ExceptionOr<RefPtr<CanvasPattern>>
+    CanvasRenderingContext2DBase::CreatePattern(HTMLImageElement &imageElement, bool repeatX,
+                                                bool repeatY) noexcept
+  {
+    auto *cachedImage = imageElement.GetCachedImage();
+
+    // If the image loading hasn't started or the image is not complete, it is not fully decodable.
+    if (!cachedImage || !imageElement.Complete())
+    {
+      return RefPtr<CanvasPattern> {};
+    }
+
+    if (cachedImage->ErrorOccurred())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    if (cachedImage->GetStatus() == CachedResource::LoadError)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    // Image may have a zero-width or a zero-height.
+    float intrinsicWidth = 0;
+    float intrinsicHeight = 0;
+    FloatSize intrinsicRatio;
+    cachedImage->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
+    if (intrinsicWidth == 0 || intrinsicHeight == 0)
+    {
+      return RefPtr<CanvasPattern> {};
+    }
+
+    return CreatePattern(*cachedImage, imageElement.Renderer(), repeatX, repeatY);
+  }
+
+  dom::ExceptionOr<RefPtr<CanvasPattern>>
+    CanvasRenderingContext2DBase::CreatePattern(svg::SVGImageElement &imageElement, bool repeatX,
+                                                bool repeatY) noexcept
+  {
+    auto *cachedImage = imageElement.GetCachedImage();
+
+    // The image loading hasn't started.
+    if (!cachedImage)
+    {
+      return RefPtr<CanvasPattern> {};
+    }
+
+    if (cachedImage->ErrorOccurred())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    // The image loading has started but it is not complete.
+    if (!cachedImage->GetImage())
+    {
+      return RefPtr<CanvasPattern> {};
+    }
+
+    // Image may have a zero-width or a zero-height.
+    float intrinsicWidth = 0;
+    float intrinsicHeight = 0;
+    FloatSize intrinsicRatio;
+    cachedImage->ComputeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
+    if (intrinsicWidth == 0 || intrinsicHeight == 0)
+    {
+      return RefPtr<CanvasPattern> {};
+    }
+
+    return CreatePattern(*cachedImage, imageElement.Renderer(), repeatX, repeatY);
+  }
+
+  dom::ExceptionOr<RefPtr<CanvasPattern>>
+    CanvasRenderingContext2DBase::CreatePattern(CanvasBase &canvas, bool repeatX, bool repeatY) noexcept
+  {
+    if (!canvas.Width() || !canvas.Height())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+    auto *copiedImage = canvas.CopiedImage();
+
+    if (!copiedImage)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    auto nativeImage = copiedImage->GetNativeImage();
+    if (!nativeImage)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    return RefPtr<CanvasPattern> {
+      CanvasPattern::Create(SourceImage(Ref<NativeImage>(krys::move(nativeImage))), repeatX, repeatY)};
+  }
+
+  enum class ImageSizeType : uint8
+  {
+    AfterDevicePixelRatio,
+    BeforeDevicePixelRatio
+  };
+
+  KRYS_NODISCARD static LayoutSize
+    Size(CachedImage *cachedImage, RenderElement *renderer,
+         ImageSizeType sizeType = ImageSizeType::BeforeDevicePixelRatio) noexcept
+  {
+    if (!cachedImage)
+    {
+      return {};
+    }
+    LayoutSize size = cachedImage->ImageSizeForRenderer(renderer, 1.0f); // FIXME: Not sure about this.
+    if (auto *renderImage = DynamicDowncast<RenderImage>(renderer);
+        sizeType == ImageSizeType::AfterDevicePixelRatio && renderImage && cachedImage->GetImage()
+        && !cachedImage->GetImage()->HasRelativeWidth())
+    {
+      size.Scale(renderImage->ImageDevicePixelRatio());
+    }
+    return size;
+  }
+
+  KRYS_NODISCARD static LayoutSize
+    Size(HTMLImageElement &element, ImageSizeType sizeType = ImageSizeType::BeforeDevicePixelRatio) noexcept
+  {
+    return Size(element.GetCachedImage(), element.Renderer(), sizeType);
+  }
+
+  KRYS_NODISCARD static LayoutSize
+    Size(svg::SVGImageElement &element,
+         ImageSizeType sizeType = ImageSizeType::BeforeDevicePixelRatio) noexcept
+  {
+    return Size(element.GetCachedImage(), element.Renderer(), sizeType);
+  }
+
+  KRYS_NODISCARD static FloatSize Size(CanvasBase &canvas) noexcept
+  {
+    return FloatSize(canvas.Size());
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float dx,
+                                                                 float dy) noexcept
+  {
+    return SwitchOn(
+      image,
+      [&](RefPtr<HTMLImageElement> &imageElement) -> dom::ExceptionOr<void>
+      {
+        LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
+        LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
+        return this->DrawImage(*imageElement,
+                               FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
+                               FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
+      },
+      [&](RefPtr<svg::SVGImageElement> &imageElement) -> dom::ExceptionOr<void>
+      {
+        LayoutSize destRectSize = Size(*imageElement, ImageSizeType::AfterDevicePixelRatio);
+        LayoutSize sourceRectSize = Size(*imageElement, ImageSizeType::BeforeDevicePixelRatio);
+        return this->DrawImage(*imageElement,
+                               FloatRect {0, 0, sourceRectSize.Width(), sourceRectSize.Height()},
+                               FloatRect {dx, dy, destRectSize.Width(), destRectSize.Height()});
+      },
+      [&](auto &element) -> dom::ExceptionOr<void>
+      {
+        FloatSize elementSize = FloatSize(Size(*element));
+        return this->DrawImage(*element, FloatRect {0, 0, elementSize.Width(), elementSize.Height()},
+                               FloatRect {dx, dy, elementSize.Width(), elementSize.Height()});
+      });
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float dx,
+                                                                 float dy, float dw, float dh) noexcept
+  {
+    return SwitchOn(image,
+                    [&](auto &element) -> dom::ExceptionOr<void>
+                    {
+                      FloatSize elementSize = FloatSize(Size(*element));
+                      return this->DrawImage(*element,
+                                             FloatRect {0, 0, elementSize.Width(), elementSize.Height()},
+                                             FloatRect {dx, dy, dw, dh});
+                    });
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float sx,
+                                                                 float sy, float sw, float sh, float dx,
+                                                                 float dy, float dw, float dh) noexcept
+  {
+    return SwitchOn(
+      image, [&](auto &element) -> dom::ExceptionOr<void>
+      { return this->DrawImage(*element, FloatRect {sx, sy, sw, sh}, FloatRect {dx, dy, dw, dh}); });
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
+                                                                 const FloatRect &srcRect,
+                                                                 const FloatRect &dstRect) noexcept
+  {
+    return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(HTMLImageElement &imageElement,
+                                                                 const FloatRect &srcRect,
+                                                                 const FloatRect &dstRect,
+                                                                 const CompositeOperator &op,
+                                                                 const BlendMode &blendMode) noexcept
+  {
+    if (!imageElement.Complete())
+    {
+      return {};
+    }
+
+    auto *cachedImage = imageElement.GetCachedImage();
+    if (!cachedImage)
+    {
+      return {};
+    }
+
+    if (cachedImage->GetStatus() == CachedResource::DecodeError)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError,
+                             u8"The HTMLImageElement provided is in the 'broken' state."};
+    }
+
+    auto imageRect =
+      FloatRect(FloatPoint(), FloatSize(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
+
+    // FIXME: The computed style's orientation for an image without a renderer.
+    auto orientation = ImageOrientation(ImageOrientation::Orientation::FromImage);
+    if (auto *renderer = imageElement.Renderer())
+    {
+      orientation = renderer->GetImageOrientation();
+    }
+
+    return DrawImage(imageElement.NodeDocument(), *cachedImage, imageElement.Renderer(), imageRect, srcRect,
+                     dstRect, op, blendMode, orientation);
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(svg::SVGImageElement &imageElement,
+                                                                 const FloatRect &srcRect,
+                                                                 const FloatRect &dstRect) noexcept
+  {
+    return DrawImage(imageElement, srcRect, dstRect, GetState().GlobalComposite, GetState().GlobalBlend);
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(svg::SVGImageElement &imageElement,
+                                                                 const FloatRect &srcRect,
+                                                                 const FloatRect &dstRect,
+                                                                 const CompositeOperator &op,
+                                                                 const BlendMode &blendMode) noexcept
+  {
+    auto *cachedImage = imageElement.GetCachedImage();
+    if (!cachedImage)
+    {
+      return {};
+    }
+
+    if (cachedImage->GetStatus() == CachedResource::DecodeError)
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError,
+                             u8"The SVGImageElement provided is in the 'broken' state."};
+    }
+
+    auto imageRect =
+      FloatRect(FloatPoint(), FloatSize(Size(imageElement, ImageSizeType::BeforeDevicePixelRatio)));
+
+    return DrawImage(imageElement.NodeDocument(), *cachedImage, imageElement.Renderer(), imageRect, srcRect,
+                     dstRect, op, blendMode);
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(
+    dom::Document &, CachedImage &cachedImage, const RenderObject *renderer, const FloatRect &imageRect,
+    const FloatRect &srcRect, const FloatRect &dstRect, const CompositeOperator &op,
+    const BlendMode &blendMode, ImageOrientation orientation) noexcept
+  {
+    if (!std::isfinite(dstRect.X()) || !std::isfinite(dstRect.Y()) || !std::isfinite(dstRect.Width())
+        || !std::isfinite(dstRect.Height()) || !std::isfinite(srcRect.X()) || !std::isfinite(srcRect.Y())
+        || !std::isfinite(srcRect.Width()) || !std::isfinite(srcRect.Height()))
+    {
+      return {};
+    }
+
+    if (!srcRect.Width() || !srcRect.Height())
+    {
+      return {};
+    }
+
+    if (!dstRect.Width() || !dstRect.Height())
+    {
+      return {};
+    }
+
+    auto normalizedSrcRect = NormaliseRect(srcRect);
+    auto normalizedDstRect = NormaliseRect(dstRect);
+
+    if (normalizedSrcRect.IsEmpty())
+    {
+      return {};
+    }
+
+    if (normalizedDstRect.IsEmpty())
+    {
+      return {};
+    }
+
+    auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, normalizedDstRect);
+
+    auto *c = EffectiveDrawingContext();
+    if (!c)
+    {
+      return {};
+    }
+    if (!HasInvertibleTransform()) KRYS_UNLIKELY
+    {
+      return {};
+    }
+
+    RefPtr<Image> image = ShareRefPtr(cachedImage.ImageForRenderer(renderer));
+    if (!image)
+    {
+      return {};
+    }
+
+    auto observer = image->GetImageObserver();
+    auto shouldPostProcess = true;
+
+    if (image->DrawsSVGImage())
+    {
+      image->SetImageObserver(nullptr);
+      image->SetContainerSize(imageRect.Size());
+    }
+
+    if (auto *bitmap = DynamicDowncast<BitmapImage>(*image))
+    {
+      // Drawing an animated image to a canvas should draw the first frame.
+      if (image->IsAnimated())
+      {
+        RefPtr<BitmapImage> bitmapImage = BitmapImage::Create(bitmap->GetNativeImage());
+        if (!bitmapImage)
+        {
+          return {};
+        }
+        image = krys::move(bitmapImage);
+      }
+
+      shouldPostProcess = false;
+    }
+
+    ImagePaintingOptions options = {op, blendMode, orientation};
+
+    bool repaintEntireCanvas = false;
+    if (RectContainsCanvas(normalizedDstRect))
+    {
+      std::ignore = c->DrawImage(*image, normalizedDstRect, normalizedSrcRect, options);
+      repaintEntireCanvas = true;
+    }
+    else if (IsFullCanvasCompositeMode(op))
+    {
+      FullCanvasCompositedDrawImage(*image, normalizedDstRect, normalizedSrcRect, op);
+      repaintEntireCanvas = true;
+    }
+    else if (op == CompositeOperator::Copy)
+    {
+      ClearCanvas();
+      std::ignore = c->DrawImage(*image, normalizedDstRect, normalizedSrcRect, options);
+      repaintEntireCanvas = true;
+    }
+    else
+    {
+      std::ignore = c->DrawImage(*image, normalizedDstRect, normalizedSrcRect, options);
+    }
+
+    DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : normalizedDstRect,
+            shouldPostProcess ? DefaultDidDrawOptions() : DefaultDidDrawOptionsWithoutPostProcessing());
+
+    if (image->DrawsSVGImage())
+    {
+      image->SetImageObserver(krys::move(observer));
+    }
+
+    return {};
+  }
+
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasBase &sourceCanvas,
+                                                                 const FloatRect &srcRect,
+                                                                 const FloatRect &dstRect) noexcept
+  {
+    FloatRect srcCanvasRect = FloatRect(FloatPoint(), FloatSize(sourceCanvas.Size()));
+
+    if (!srcCanvasRect.Width() || !srcCanvasRect.Height())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    if (!srcRect.Width() || !srcRect.Height())
+    {
+      return {};
+    }
+
+    auto normalizedSrcRect = NormaliseRect(srcRect);
+    auto normalizedDstRect = NormaliseRect(dstRect);
+
+    if (normalizedSrcRect.IsEmpty())
+    {
+      return {};
+    }
+
+    if (normalizedDstRect.IsEmpty())
+    {
+      return {};
+    }
+
+    auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, normalizedDstRect);
+
+    auto *c = EffectiveDrawingContext();
+    if (!c)
+    {
+      return {};
+    }
+    if (!HasInvertibleTransform()) KRYS_UNLIKELY
+    {
+      return {};
+    }
+
+    Ref<CanvasBase> protectedCanvas = ShareRef(sourceCanvas);
+
+    RefPtr<ImageBuffer> buffer = sourceCanvas.MakeRenderingResultsAvailable();
+    if (!buffer)
+    {
+      return {};
+    }
+
+    bool repaintEntireCanvas = false;
+    if (RectContainsCanvas(normalizedDstRect))
+    {
+      c->DrawImageBuffer(*buffer, normalizedDstRect, normalizedSrcRect,
+                         {GetState().GlobalComposite, GetState().GlobalBlend});
+      repaintEntireCanvas = true;
+    }
+    else if (IsFullCanvasCompositeMode(GetState().GlobalComposite))
+    {
+      FullCanvasCompositedDrawImage(*buffer, normalizedDstRect, normalizedSrcRect,
+                                    GetState().GlobalComposite);
+      repaintEntireCanvas = true;
+    }
+    else if (GetState().GlobalComposite == CompositeOperator::Copy)
+    {
+      if (&sourceCanvas == &GetCanvasBase())
+      {
+        if (auto copy = c->CreateImageBuffer(normalizedSrcRect.Size(), 1))
+        {
+          copy->Context().DrawImageBuffer(*buffer, -normalizedSrcRect.Location());
+          ClearCanvas();
+          c->DrawImageBuffer(*copy, normalizedDstRect, {{}, normalizedSrcRect.Size()},
+                             {GetState().GlobalComposite, GetState().GlobalBlend});
+        }
+      }
+      else
+      {
+        ClearCanvas();
+        c->DrawImageBuffer(*buffer, normalizedDstRect, normalizedSrcRect,
+                           {GetState().GlobalComposite, GetState().GlobalBlend});
+      }
+      repaintEntireCanvas = true;
+    }
+    else
+    {
+      c->DrawImageBuffer(*buffer, normalizedDstRect, normalizedSrcRect,
+                         {GetState().GlobalComposite, GetState().GlobalBlend});
+    }
+
+    auto *sourceContext = sourceCanvas.RenderingContext();
+    auto shouldUseDrawOptionsWithoutPostProcessing = sourceContext && sourceContext->Is2d();
+    DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : normalizedDstRect,
+            shouldUseDrawOptionsWithoutPostProcessing ? DefaultDidDrawOptionsWithoutPostProcessing()
+                                                      : DefaultDidDrawOptions());
+
+    return {};
+  }
+
+  Path CanvasRenderingContext2DBase::TransformAreaToDevice(const Path &path) const noexcept
+  {
+    Path transformed(path);
+    transformed.Transform(GetState().Transform);
+    transformed.Transform(BaseTransform());
+    return transformed;
+  }
+
+  Path CanvasRenderingContext2DBase::TransformAreaToDevice(const FloatRect &rect) const noexcept
+  {
+    Path path;
+    path.AddRect(rect);
+    return TransformAreaToDevice(path);
+  }
+
+  IntRect CanvasRenderingContext2DBase::CalculateCompositingBufferRect(const FloatRect &area,
+                                                                       IntSize *croppedOffset) noexcept
+  {
+    IntRect canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
+                       static_cast<int32>(GetCanvasBase().Height()));
+    canvasRect = BaseTransform().MapRect(canvasRect);
+    Path path = TransformAreaToDevice(area);
+    IntRect bufferRect = EnclosingIntRect(path.FastBoundingRect());
+    IntPoint originalLocation = bufferRect.Location();
+    bufferRect.Intersect(canvasRect);
+    if (croppedOffset)
+    {
+      *croppedOffset = originalLocation - bufferRect.Location();
+    }
+    return bufferRect;
+  }
+
+  void CanvasRenderingContext2DBase::CompositeBuffer(ImageBuffer &buffer, const IntRect &bufferRect,
+                                                     CompositeOperator op) noexcept
+  {
+    IntRect canvasRect(0, 0, static_cast<int32>(GetCanvasBase().Width()),
+                       static_cast<int32>(GetCanvasBase().Height()));
+    canvasRect = BaseTransform().MapRect(canvasRect);
+
+    auto *c = EffectiveDrawingContext();
+    if (!c)
+    {
+      return;
+    }
+
+    c->Save();
+    c->SetCTM(AffineTransform());
+    c->SetCompositeOperation(op);
+
+    c->Save();
+    c->ClipOut(FloatRect(bufferRect));
+    c->ClearRect(FloatRect(canvasRect));
+    c->Restore();
+    c->DrawImageBuffer(buffer, FloatPoint(bufferRect.Location()),
+                       ImagePaintingOptions(GetState().GlobalComposite));
+    c->Restore();
+  }
+
+  static void DrawImageToContext(Image &image, GraphicsContext &context, const FloatRect &dest,
+                                 const FloatRect &src, ImagePaintingOptions options) noexcept
+  {
+    std::ignore = context.DrawImage(image, dest, src, options);
+  }
+
+  static void DrawImageToContext(ImageBuffer &imageBuffer, GraphicsContext &context, const FloatRect &dest,
+                                 const FloatRect &src, ImagePaintingOptions options) noexcept
+  {
+    context.DrawImageBuffer(imageBuffer, dest, src, options);
+  }
+
+  template <typename T>
+  void CanvasRenderingContext2DBase::FullCanvasCompositedDrawImage(T &image, const FloatRect &dest,
+                                                                   const FloatRect &src,
+                                                                   CompositeOperator op) noexcept
+  {
+    krys_debug_assert(IsFullCanvasCompositeMode(op));
+
+    IntSize croppedOffset;
+    auto bufferRect = CalculateCompositingBufferRect(dest, &croppedOffset);
+    if (bufferRect.IsEmpty())
+    {
+      ClearCanvas();
+      return;
+    }
+
+    auto *c = EffectiveDrawingContext();
+    if (!c)
+    {
+      return;
+    }
+
+    auto buffer = c->CreateImageBuffer(FloatSize(bufferRect.Size()));
+    if (!buffer)
+    {
+      return;
+    }
+
+    FloatRect adjustedDest = dest;
+    adjustedDest.SetLocation(FloatPoint(0, 0));
+    AffineTransform effectiveTransform = c->GetCTM();
+    IntRect transformedAdjustedRect = EnclosingIntRect(effectiveTransform.MapRect(adjustedDest));
+    buffer->Context().Translate(FloatPoint(-transformedAdjustedRect.Location()));
+    buffer->Context().Translate(FloatSize(croppedOffset));
+    buffer->Context().ConcatCTM(effectiveTransform);
+    DrawImageToContext(image, buffer->Context(), adjustedDest, src,
+                       ImagePaintingOptions(CompositeOperator::SourceOver));
+
+    CompositeBuffer(*buffer, bufferRect, op);
+  }
+
+  // The area of image data a put of 60 by 60 pixels or less keeps, so that reading it back needn't read the
+  // buffer.
+  static constexpr uint32 PutImageDataCacheAreaLimit = 60 * 60;
+
+  dom::ExceptionOr<Ref<ImageData>>
+    CanvasRenderingContext2DBase::CreateImageData(ImageData &existingImageData) const noexcept
+  {
+    return ImageData::Create(static_cast<uint32>(existingImageData.Width()),
+                             static_cast<uint32>(existingImageData.Height()), existingImageData.ColorSpace());
+  }
+
+  dom::ExceptionOr<Ref<ImageData>>
+    CanvasRenderingContext2DBase::CreateImageData(int32 sw, int32 sh,
+                                                  Maybe<ImageDataSettings> settings) const noexcept
+  {
+    if (!sw || !sh)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+
+    return ImageData::Create(static_cast<uint32>(std::abs(static_cast<int64>(sw))),
+                             static_cast<uint32>(std::abs(static_cast<int64>(sh))), _settings.ColorSpace,
+                             settings);
+  }
+
+  void CanvasRenderingContext2DBase::EvictCachedImageData() noexcept
+  {
+    _cachedContents.emplace<CachedContentsUnknown>();
+  }
+
+  CanvasRenderingContext2DBase::CachedContentsImageData::CachedContentsImageData(
+    CanvasRenderingContext2DBase &context, Ref<ByteArrayPixelBuffer> imageData) noexcept
+      : Pixels(krys::move(imageData)),
+        EvictionTimer(CreateUnique<Timer>(context, &CanvasRenderingContext2DBase::EvictCachedImageData))
+  {
+    EvictionTimer->StartOneShot(std::chrono::seconds(5));
+  }
+
+  RefPtr<ByteArrayPixelBuffer> CanvasRenderingContext2DBase::CacheImageDataIfPossible(
+    const ImageData &imageData, const IntRect &sourceRect, const IntPoint &destinationPosition) noexcept
+  {
+    if (!destinationPosition.IsZero() || !sourceRect.Location().IsZero()
+        || sourceRect.Size() != imageData.Size() || sourceRect.Size() != GetCanvasBase().Size())
+    {
+      return nullptr;
+    }
+
+    auto size = imageData.Size();
+    if (size.UnclampedArea() > PutImageDataCacheAreaLimit)
+    {
+      return nullptr;
+    }
+
+    if (imageData.ColorSpace() != _settings.ColorSpace)
+    {
+      return nullptr;
+    }
+
+    if (imageData.PixelFormat() != ImageDataPixelFormat::RgbaUnorm8)
+    {
+      return nullptr;
+    }
+
+    // Consider:
+    //   * Real putImageData needs premultiply step.
+    //   * Retrieve from cache needs to ensure premultiply + unpremultiply was made to simulate the real
+    //     putImageData.
+    //   * Caching needs at least a memcpy here.
+    // Instead of doing the plain memcpy, copy by doing premultiply here.
+    // This computation can be used for cache retrieval as well as the real putImageData.
+    // We're not doing RGBA -> BGRA swizzle here, as that is not needed for cache retrieval and
+    // the swizzle copy can be made at the putImageData copy site.
+    auto colorSpace = ToDestinationColorSpace(imageData.ColorSpace());
+    uint32 bytesPerRow = static_cast<uint32>(size.Width()) * 4u;
+    PixelBufferFormat cachedFormat {AlphaPremultiplication::Premultiplied, PixelFormat::RGBA8, colorSpace};
+    auto cachedBuffer = ByteArrayPixelBuffer::TryCreate(cachedFormat, size);
+    if (!cachedBuffer)
+    {
+      return nullptr;
+    }
+    auto dataAsUint8ClampedArray = imageData.Data().AsUint8ClampedArray();
+    ConstPixelBufferConversionView source {
+      .Format = {AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8, colorSpace},
+      .BytesPerRow = bytesPerRow,
+      .Rows = dataAsUint8ClampedArray->GetSpan(),
+    };
+    PixelBufferConversionView destination {
+      .Format = cachedFormat,
+      .BytesPerRow = bytesPerRow,
+      .Rows = cachedBuffer->Data().MutableSpan(),
+    };
+    ConvertImagePixels(source, destination, size);
+    _cachedContents.emplace<CachedContentsImageData>(*this, Ref<ByteArrayPixelBuffer>(cachedBuffer));
+    return cachedBuffer;
+  }
+
+  RefPtr<ImageData> CanvasRenderingContext2DBase::MakeImageDataIfContentsCached(
+    const IntRect &sourceRect, PredefinedColorSpace colorSpace) const noexcept
+  {
+    if (std::holds_alternative<CachedContentsTransparent>(_cachedContents))
+    {
+      return ImageData::Create(sourceRect.Size(), colorSpace);
+    }
+    if (std::holds_alternative<CachedContentsUnknown>(_cachedContents))
+    {
+      return nullptr;
+    }
+    // Always consume the cached image data.
+    Ref<ByteArrayPixelBuffer> pixelBuffer =
+      krys::move(std::get<CachedContentsImageData>(_cachedContents).Pixels);
+    _cachedContents.emplace<CachedContentsUnknown>();
+
+    if (sourceRect != IntRect {{}, GetCanvasBase().Size()})
+    {
+      return nullptr;
+    }
+
+    if (GetCanvasBase().Size() != pixelBuffer->Size())
+    {
+      return nullptr;
+    }
+
+    if (colorSpace != _settings.ColorSpace)
+    {
+      return nullptr;
+    }
+
+    auto size = pixelBuffer->Size();
+    auto data = pixelBuffer->TakeData();
+    uint32 bytesPerRow = static_cast<uint32>(size.Width()) * 4u;
+    ConstPixelBufferConversionView source {
+      .Format = pixelBuffer->Format(),
+      .BytesPerRow = bytesPerRow,
+      .Rows = data->GetSpan(),
+    };
+    PixelBufferConversionView destination {
+      .Format = {AlphaPremultiplication::Unpremultiplied, PixelFormat::RGBA8,
+                 pixelBuffer->Format().ColorSpace},
+      .BytesPerRow = bytesPerRow,
+      .Rows = data->MutableSpan(),
+    };
+    ConvertImagePixels(source, destination, size);
+    return ImageData::Create(size, ImageDataArray(krys::move(data)), _settings.ColorSpace);
+  }
+
+  dom::ExceptionOr<Ref<ImageData>>
+    CanvasRenderingContext2DBase::GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
+                                               Maybe<ImageDataSettings> settings) const noexcept
+  {
+    if (!sw || !sh)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+
+    // FIXME: A canvas tainted by cross-origin data throws a SecurityError, once there are origins.
+
+    if (sw < 0)
+    {
+      sx += sw;
+      sw = -sw;
+    }
+    if (sh < 0)
+    {
+      sy += sh;
+      sh = -sh;
+    }
+
+    IntRect imageDataRect {sx, sy, sw, sh};
+    auto outputImageDataPixelFormat = settings ? settings->Format : ImageDataPixelFormat::RgbaUnorm8;
+    auto outputPixelFormat = ToPixelFormat(outputImageDataPixelFormat);
+
+    auto computedColorSpace = ImageData::ComputeColorSpace(settings, _settings.ColorSpace);
+
+    if (outputImageDataPixelFormat == ImageDataPixelFormat::RgbaUnorm8)
+    {
+      if (auto imageData = MakeImageDataIfContentsCached(imageDataRect, computedColorSpace))
+      {
+        return Ref<ImageData>(krys::move(imageData));
+      }
+    }
+
+    RefPtr<ImageBuffer> buffer = GetCanvasBase().MakeRenderingResultsAvailable();
+    if (!buffer)
+    {
+      return ImageData::Create(static_cast<uint32>(imageDataRect.Width()),
+                               static_cast<uint32>(imageDataRect.Height()), _settings.ColorSpace, settings);
+    }
+
+    PixelBufferFormat format {AlphaPremultiplication::Unpremultiplied, outputPixelFormat,
+                              ToDestinationColorSpace(computedColorSpace)};
+    RefPtr<PixelBuffer> pixelBuffer = buffer->GetPixelBuffer(format, imageDataRect);
+    if (!pixelBuffer)
+    {
+      // FIXME: A console message: "Unable to get image data from canvas. Requested size was w x h".
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
+    krys_debug_assert(pixelBuffer->Format().ColorSpace == ToDestinationColorSpace(computedColorSpace));
+
+    if (auto imageData =
+          ImageData::Create(Ref<PixelBuffer>(krys::move(pixelBuffer)), outputImageDataPixelFormat))
+    {
+      return Ref<ImageData>(krys::move(imageData));
+    }
+
+    return dom::Exception {dom::ExceptionCode::InvalidStateError};
+  }
+
+  void CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy) noexcept
+  {
+    PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
+  }
+
+  KRYS_NODISCARD static IntRect ComputeImageDataRect(const ImageBuffer &buffer, IntSize sourceSize,
+                                                     IntRect &destRect, IntPoint destOffset) noexcept
+  {
+    destRect.Intersect(IntRect {{}, sourceSize});
+    destRect.MoveBy(destOffset);
+    destRect.Intersect(IntRect {{}, buffer.TruncatedLogicalSize()});
+    if (destRect.IsEmpty())
+    {
+      return destRect;
+    }
+    IntRect sourceRect {destRect};
+    sourceRect.MoveBy(-destOffset);
+    sourceRect.Intersect(IntRect {{}, sourceSize});
+    return sourceRect;
+  }
+
+  void CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy, int32 dirtyX,
+                                                  int32 dirtyY, int32 dirtyWidth, int32 dirtyHeight) noexcept
+  {
+    RefPtr<ImageBuffer> buffer = ShareRefPtr(GetCanvasBase().Buffer());
+    if (!buffer)
+    {
+      return;
+    }
+
+    if (data.Data().IsDetached())
+    {
+      return;
+    }
+
+    if (dirtyWidth < 0)
+    {
+      dirtyX += dirtyWidth;
+      dirtyWidth = -dirtyWidth;
+    }
+
+    if (dirtyHeight < 0)
+    {
+      dirtyY += dirtyHeight;
+      dirtyHeight = -dirtyHeight;
+    }
+
+    IntPoint destOffset {dx, dy};
+    IntRect destRect {dirtyX, dirtyY, dirtyWidth, dirtyHeight};
+    IntRect sourceRect = ComputeImageDataRect(*buffer, data.Size(), destRect, destOffset);
+
+    EnumSet<DidDrawOption> options; // ignore transform, shadow, clip, and post-processing
+    if (!sourceRect.IsEmpty())
+    {
+      RefPtr<PixelBuffer> pixelBuffer = CacheImageDataIfPossible(data, sourceRect, destOffset);
+      if (pixelBuffer)
+      {
+        options.Add(DidDrawOption::PreserveCachedContents);
+      }
+      else
+      {
+        pixelBuffer = data.GetByteArrayPixelBuffer();
+      }
+      buffer->PutPixelBuffer(*pixelBuffer, sourceRect, destOffset);
+    }
+
+    DidDraw(FloatRect {destRect}, options);
+  }
+
   void CanvasRenderingContext2DBase::DidDrawEntireCanvas(EnumSet<DidDrawOption> options) noexcept
   {
     DidDraw(BackingStoreBounds(), options);
@@ -1443,11 +2450,18 @@ namespace krys::boo::html
 
   void CanvasRenderingContext2DBase::DidDraw(Maybe<FloatRect> rect, EnumSet<DidDrawOption> options) noexcept
   {
+    if (!options.Contains(DidDrawOption::PreserveCachedContents))
+    {
+      _cachedContents.emplace<CachedContentsUnknown>();
+    }
+
     auto *context = EffectiveDrawingContext();
     if (!context)
     {
       return;
     }
+
+    _hasDeferredOperations = true;
 
     if (!rect)
     {
@@ -1563,7 +2577,48 @@ namespace krys::boo::html
 
   GraphicsContext *CanvasRenderingContext2DBase::EffectiveDrawingContext() const noexcept
   {
-    return DrawingContext();
+    auto *context = DrawingContext();
+    if (!context)
+    {
+      return nullptr;
+    }
+    if (auto targetSwitcher = GetState().TargetSwitcher)
+    {
+      return targetSwitcher->DrawingContext();
+    }
+    return context;
+  }
+
+  RefPtr<Filter> CanvasRenderingContext2DBase::CreateFilter(const FloatRect &) const noexcept
+  {
+    return nullptr;
+  }
+
+  void CanvasRenderingContext2DBase::SetFilterString(dom::DOMStringView filterString) noexcept
+  {
+    if (GetState().FilterString == filterString)
+    {
+      return;
+    }
+
+    // Spec: context.filter = "" should leave the current filter unchanged.
+    if (filterString.empty())
+    {
+      return;
+    }
+
+    auto filter = SetFilterStringWithoutUpdatingStyle(filterString);
+    if (!filter)
+    {
+      return;
+    }
+
+    RealizeSaves();
+
+    // Spec: context.filter = "none" filters will be disabled for the context.
+    // Spec: Only parseable inputs should change the current filter.
+    ModifiableState().FilterString = dom::DOMString(filterString);
+    ModifiableState().Filter = krys::move(*filter);
   }
 
   AffineTransform CanvasRenderingContext2DBase::BaseTransform() const noexcept
@@ -1694,5 +2749,696 @@ namespace krys::boo::html
   bool CanvasRenderingContext2DBase::WillReadFrequently() const noexcept
   {
     return _settings.WillReadFrequently;
+  }
+
+  // MARK: - Text
+
+  dom::DOMString CanvasRenderingContext2DBase::State::FontString() const noexcept
+  {
+    if (!Font.Realized())
+    {
+      return dom::DOMString(DefaultFont);
+    }
+
+    StringBuilder serializedFont;
+    const auto &font = Font.GetFontDescription();
+
+    auto italic = font.FontStyleSlope() ? utf8_stringview {u8"italic "} : utf8_stringview {};
+    auto smallCaps = font.VariantCaps() == boo::FontVariantCaps::Small ? utf8_stringview {u8"small-caps "}
+                                                                       : utf8_stringview {};
+    serializedFont.Append(italic, smallCaps);
+    auto weight = static_cast<int32>(static_cast<float>(font.Weight()));
+    if (weight == static_cast<int32>(static_cast<float>(BoldWeightValue())))
+    {
+      serializedFont.Append(u8"bold ");
+    }
+    else if (weight != static_cast<int32>(static_cast<float>(NormalWeightValue())))
+    {
+      serializedFont.Append(weight, u8" ");
+    }
+    serializedFont.Append(font.ComputedSize(), u8"px");
+
+    for (uint32 i = 0; i < font.FamilyCount(); ++i)
+    {
+      auto family = font.FamilyAt(i).View();
+      if (family.starts_with(u8"-webkit-"))
+      {
+        family = family.substr(8);
+      }
+
+      auto separator = i ? utf8_stringview {u8", "} : utf8_stringview {u8" "};
+      serializedFont.Append(separator, css::SerialiseFontFamily(css::CSSOMString(family)));
+    }
+
+    return krys::move(serializedFont).ToString();
+  }
+
+  CanvasRenderingContext2DBase::FontProxy::~FontProxy() noexcept
+  {
+    if (Realized())
+    {
+      _font.GetFontSelector()->UnregisterForInvalidationCallbacks(*this);
+    }
+  }
+
+  CanvasRenderingContext2DBase::FontProxy::FontProxy(const FontProxy &other) noexcept
+      : FontSelectorClient(), _font(other._font)
+  {
+    if (Realized())
+    {
+      _font.GetFontSelector()->RegisterForInvalidationCallbacks(*this);
+    }
+  }
+
+  auto CanvasRenderingContext2DBase::FontProxy::operator=(const FontProxy &other) noexcept -> FontProxy &
+  {
+    if (Realized())
+    {
+      _font.GetFontSelector()->UnregisterForInvalidationCallbacks(*this);
+    }
+
+    _font = other._font;
+
+    if (Realized())
+    {
+      _font.GetFontSelector()->RegisterForInvalidationCallbacks(*this);
+    }
+
+    return *this;
+  }
+
+  void CanvasRenderingContext2DBase::FontProxy::Update(FontSelector &selector) noexcept
+  {
+    // This is an invariant. We should only ever be registered for callbacks on the font's selector.
+    krys_debug_assert(&selector == _font.GetFontSelector());
+    if (Realized())
+    {
+      _font.GetFontSelector()->UnregisterForInvalidationCallbacks(*this);
+    }
+    _font.Update(ShareRefPtr(&selector));
+    if (Realized())
+    {
+      _font.GetFontSelector()->RegisterForInvalidationCallbacks(*this);
+    }
+    krys_debug_assert(&selector == _font.GetFontSelector());
+  }
+
+  void CanvasRenderingContext2DBase::FontProxy::FontsNeedUpdate(FontSelector &selector) noexcept
+  {
+    krys_debug_assert(&selector == _font.GetFontSelector());
+    krys_debug_assert(Realized());
+
+    Update(selector);
+  }
+
+  void CanvasRenderingContext2DBase::FontProxy::Initialize(FontSelector &fontSelector,
+                                                           const FontCascade &fontCascade) noexcept
+  {
+    // Beware! _font.GetFontSelector() might not point to the document's font selector!
+    krys_debug_assert(fontCascade.GetFontSelector() == &fontSelector);
+    if (Realized())
+    {
+      _font.GetFontSelector()->UnregisterForInvalidationCallbacks(*this);
+    }
+    _font = fontCascade;
+    _font.Update(ShareRefPtr(&fontSelector));
+    krys_debug_assert(&fontSelector == _font.GetFontSelector());
+    _font.GetFontSelector()->RegisterForInvalidationCallbacks(*this);
+  }
+
+  const FontMetrics &CanvasRenderingContext2DBase::FontProxy::MetricsOfPrimaryFont() const noexcept
+  {
+    return _font.MetricsOfPrimaryFont();
+  }
+
+  const FontCascadeDescription &CanvasRenderingContext2DBase::FontProxy::GetFontDescription() const noexcept
+  {
+    return _font.GetFontDescription();
+  }
+
+  float CanvasRenderingContext2DBase::FontProxy::Width(const TextRun &textRun,
+                                                       GlyphOverflow *overflow) const noexcept
+  {
+    return _font.Width(textRun, nullptr, overflow);
+  }
+
+  void CanvasRenderingContext2DBase::FontProxy::DrawBidiText(
+    GraphicsContext &context, const TextRun &run, const FloatPoint &point,
+    FontCascade::CustomFontNotReadyAction action) const noexcept
+  {
+    context.DrawBidiText(_font, run, point, action);
+  }
+
+  // FIXME: The HTML spec currently doesn't define how <length> units should be resolved, so we only
+  // allow units where the resolution is straightforward. See https://github.com/whatwg/html/issues/10893.
+  KRYS_NODISCARD static bool UnitAllowedForSpacing(css::LengthUnit lengthUnit) noexcept
+  {
+    using enum css::LengthUnit;
+
+    switch (lengthUnit)
+    {
+      case Px:
+      case Cm:
+      case Mm:
+      case Q:
+      case In:
+      case Pt:
+      case Pc:
+      case Em:
+      case QuirkyEm:
+      case Ex:
+      case Cap:
+      case Ch:
+      case Ic:
+      case Rcap:
+      case Rch:
+      case Rem:
+      case Rex:
+      case Ric:      return true;
+
+      case Lh:
+      case Rlh:
+      case Vw:
+      case Vh:
+      case Vmin:
+      case Vmax:
+      case Vb:
+      case Vi:
+      case Svw:
+      case Svh:
+      case Svmin:
+      case Svmax:
+      case Svb:
+      case Svi:
+      case Lvw:
+      case Lvh:
+      case Lvmin:
+      case Lvmax:
+      case Lvb:
+      case Lvi:
+      case Dvw:
+      case Dvh:
+      case Dvmin:
+      case Dvmax:
+      case Dvb:
+      case Dvi:
+      case Cqw:
+      case Cqh:
+      case Cqi:
+      case Cqb:
+      case Cqmin:
+      case Cqmax:    return false;
+    }
+
+    krys_assert(false);
+    return false;
+  }
+
+  namespace
+  {
+    struct ParsedSpacing
+    {
+      dom::DOMString Serialised;
+      double Pixels;
+    };
+  }
+
+  /// @brief @p spacing parsed as a CSS length and resolved against @p fontCascade; empty if it isn't one, or
+  /// has a unit spacing doesn't allow.
+  KRYS_NODISCARD static Maybe<ParsedSpacing> ParseSpacing(dom::DOMStringView spacing,
+                                                          css::PropertyId property,
+                                                          const FontCascade &fontCascade) noexcept
+  {
+    css::InputStream inputStream {css::CSSOMString(spacing)};
+    css::Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto tokenRange = tokenizer.Tokens();
+    tokenRange.DiscardWhitespace();
+
+    auto parserContext = css::ParserContext {css::ParserMode::HTMLStandard};
+    auto parserState = css::PropertyParserState {.Context = parserContext};
+
+    auto parsedValue = css::MetaConsumer<css::Length<>>::Consume(tokenRange, parserState);
+    if (!parsedValue)
+    {
+      return null;
+    }
+    tokenRange.DiscardWhitespace();
+    if (!tokenRange.IsAtEnd())
+    {
+      return null;
+    }
+    auto rawLength = parsedValue->GetRaw();
+    if (!rawLength)
+    {
+      return null;
+    }
+    if (!UnitAllowedForSpacing(rawLength->Unit))
+    {
+      return null;
+    }
+
+    double pixels =
+      style::ComputeUnzoomedNonCalcLengthDouble(rawLength->Value, rawLength->Unit, property, &fontCascade);
+
+    StringBuilder serialised;
+    css::Serialise(serialised, css::DefaultSerialisationContext(), *rawLength);
+    return ParsedSpacing {.Serialised = krys::move(serialised).ToString(), .Pixels = pixels};
+  }
+
+  void CanvasRenderingContext2DBase::SetLetterSpacing(dom::DOMStringView letterSpacing) noexcept
+  {
+    if (GetState().LetterSpacing == letterSpacing)
+    {
+      return;
+    }
+    RealizeSaves();
+
+    auto spacing =
+      ParseSpacing(letterSpacing, css::PropertyId::LetterSpacing, GetFontProxy()->GetFontCascade());
+    if (!spacing)
+    {
+      return;
+    }
+
+    ModifiableState().LetterSpacing = krys::move(spacing->Serialised);
+    ModifiableState().Font.SetLetterSpacing(static_cast<float>(spacing->Pixels));
+  }
+
+  void CanvasRenderingContext2DBase::SetWordSpacing(dom::DOMStringView wordSpacing) noexcept
+  {
+    if (GetState().WordSpacing == wordSpacing)
+    {
+      return;
+    }
+    RealizeSaves();
+
+    auto spacing = ParseSpacing(wordSpacing, css::PropertyId::WordSpacing, GetFontProxy()->GetFontCascade());
+    if (!spacing)
+    {
+      return;
+    }
+
+    ModifiableState().WordSpacing = krys::move(spacing->Serialised);
+    ModifiableState().Font.SetWordSpacing(static_cast<float>(spacing->Pixels));
+  }
+
+  KRYS_NODISCARD static Kerning ToKerning(CanvasFontKerning fontKerning) noexcept
+  {
+    switch (fontKerning)
+    {
+      case CanvasFontKerning::Auto:   return Kerning::Auto;
+      case CanvasFontKerning::Normal: return Kerning::Normal;
+      case CanvasFontKerning::None:   return Kerning::NoShift;
+    }
+    krys_debug_assert(false);
+    return Kerning::Auto;
+  }
+
+  KRYS_NODISCARD static FontSelectionValue ToFontWidth(CanvasFontStretch fontStretch) noexcept
+  {
+    switch (fontStretch)
+    {
+      case CanvasFontStretch::UltraCondensed: return UltraCondensedWidthValue();
+      case CanvasFontStretch::ExtraCondensed: return ExtraCondensedWidthValue();
+      case CanvasFontStretch::Condensed:      return CondensedWidthValue();
+      case CanvasFontStretch::SemiCondensed:  return SemiCondensedWidthValue();
+      case CanvasFontStretch::Normal:         return NormalWidthValue();
+      case CanvasFontStretch::SemiExpanded:   return SemiExpandedWidthValue();
+      case CanvasFontStretch::Expanded:       return ExpandedWidthValue();
+      case CanvasFontStretch::ExtraExpanded:  return ExtraExpandedWidthValue();
+      case CanvasFontStretch::UltraExpanded:  return UltraExpandedWidthValue();
+    }
+    krys_debug_assert(false);
+    return NormalWidthValue();
+  }
+
+  KRYS_NODISCARD static CanvasFontStretch FromFontWidth(FontSelectionValue width) noexcept
+  {
+    for (auto fontStretch :
+         {CanvasFontStretch::UltraCondensed, CanvasFontStretch::ExtraCondensed, CanvasFontStretch::Condensed,
+          CanvasFontStretch::SemiCondensed, CanvasFontStretch::SemiExpanded, CanvasFontStretch::Expanded,
+          CanvasFontStretch::ExtraExpanded, CanvasFontStretch::UltraExpanded})
+    {
+      if (ToFontWidth(fontStretch) == width)
+      {
+        return fontStretch;
+      }
+    }
+    return CanvasFontStretch::Normal;
+  }
+
+  KRYS_NODISCARD static boo::FontVariantCaps ToFontVariantCaps(CanvasFontVariantCaps fontVariantCaps) noexcept
+  {
+    switch (fontVariantCaps)
+    {
+      case CanvasFontVariantCaps::Normal:        return boo::FontVariantCaps::Normal;
+      case CanvasFontVariantCaps::SmallCaps:     return boo::FontVariantCaps::Small;
+      case CanvasFontVariantCaps::AllSmallCaps:  return boo::FontVariantCaps::AllSmall;
+      case CanvasFontVariantCaps::PetiteCaps:    return boo::FontVariantCaps::Petite;
+      case CanvasFontVariantCaps::AllPetiteCaps: return boo::FontVariantCaps::AllPetite;
+      case CanvasFontVariantCaps::Unicase:       return boo::FontVariantCaps::Unicase;
+      case CanvasFontVariantCaps::TitlingCaps:   return boo::FontVariantCaps::Titling;
+    }
+    krys_debug_assert(false);
+    return boo::FontVariantCaps::Normal;
+  }
+
+  KRYS_NODISCARD static CanvasFontVariantCaps
+    FromFontVariantCaps(boo::FontVariantCaps fontVariantCaps) noexcept
+  {
+    switch (fontVariantCaps)
+    {
+      case boo::FontVariantCaps::Normal:    return CanvasFontVariantCaps::Normal;
+      case boo::FontVariantCaps::Small:     return CanvasFontVariantCaps::SmallCaps;
+      case boo::FontVariantCaps::AllSmall:  return CanvasFontVariantCaps::AllSmallCaps;
+      case boo::FontVariantCaps::Petite:    return CanvasFontVariantCaps::PetiteCaps;
+      case boo::FontVariantCaps::AllPetite: return CanvasFontVariantCaps::AllPetiteCaps;
+      case boo::FontVariantCaps::Unicase:   return CanvasFontVariantCaps::Unicase;
+      case boo::FontVariantCaps::Titling:   return CanvasFontVariantCaps::TitlingCaps;
+    }
+    krys_debug_assert(false);
+    return CanvasFontVariantCaps::Normal;
+  }
+
+  KRYS_NODISCARD static TextRenderingMode ToTextRenderingMode(CanvasTextRendering textRendering) noexcept
+  {
+    switch (textRendering)
+    {
+      case CanvasTextRendering::Auto:               return TextRenderingMode::Auto;
+      case CanvasTextRendering::OptimizeSpeed:      return TextRenderingMode::OptimizeSpeed;
+      case CanvasTextRendering::OptimizeLegibility: return TextRenderingMode::OptimizeLegibility;
+      case CanvasTextRendering::GeometricPrecision: return TextRenderingMode::GeometricPrecision;
+    }
+    krys_debug_assert(false);
+    return TextRenderingMode::Auto;
+  }
+
+  void CanvasRenderingContext2DBase::ApplyTextDrawingStyles(FontCascadeDescription &fontDescription,
+                                                            bool includeFontLonghands) const noexcept
+  {
+    const auto &state = GetState();
+    fontDescription.SetKerning(ToKerning(state.FontKerning));
+    fontDescription.SetTextRenderingMode(ToTextRenderingMode(state.TextRendering));
+    // An empty language is explicitly unknown.
+    fontDescription.SetSpecifiedLocale(state.Lang == u8"inherit" ? InheritedLanguage()
+                                                                 : StringAtom(state.Lang));
+    if (includeFontLonghands)
+    {
+      fontDescription.SetWidth(ToFontWidth(state.FontStretch));
+      fontDescription.SetVariantCaps(ToFontVariantCaps(state.FontVariantCaps));
+    }
+  }
+
+  void CanvasRenderingContext2DBase::TakeFontLonghands(const FontCascadeDescription &fontDescription) noexcept
+  {
+    auto &state = ModifiableState();
+    state.FontStretch = FromFontWidth(fontDescription.Width());
+    state.FontVariantCaps = FromFontVariantCaps(fontDescription.VariantCaps());
+  }
+
+  StringAtom CanvasRenderingContext2DBase::InheritedLanguage() const noexcept
+  {
+    return StringAtom::Empty();
+  }
+
+  void CanvasRenderingContext2DBase::UpdateFontForTextDrawingStyles() noexcept
+  {
+    auto &font = ModifiableState().Font;
+    if (!font.Realized())
+    {
+      return;
+    }
+
+    auto fontDescription = FontCascadeDescription(font.GetFontDescription());
+    ApplyTextDrawingStyles(fontDescription);
+
+    auto &fontSelector = *font.GetFontCascade().GetFontSelector();
+    auto fontCascade = FontCascade(krys::move(fontDescription), font.GetFontCascade());
+    fontCascade.Update(ShareRefPtr(&fontSelector));
+    font.Initialize(fontSelector, fontCascade);
+  }
+
+  void CanvasRenderingContext2DBase::SetLang(dom::DOMStringView lang) noexcept
+  {
+    if (GetState().Lang == lang)
+    {
+      return;
+    }
+    // Set the font first: one set later would undo the styles set before it.
+    std::ignore = GetFontProxy();
+    RealizeSaves();
+    ModifiableState().Lang = dom::DOMString(lang);
+    UpdateFontForTextDrawingStyles();
+  }
+
+  void CanvasRenderingContext2DBase::SetFontKerning(CanvasFontKerning fontKerning) noexcept
+  {
+    if (GetState().FontKerning == fontKerning)
+    {
+      return;
+    }
+    std::ignore = GetFontProxy();
+    RealizeSaves();
+    ModifiableState().FontKerning = fontKerning;
+    UpdateFontForTextDrawingStyles();
+  }
+
+  void CanvasRenderingContext2DBase::SetFontStretch(CanvasFontStretch fontStretch) noexcept
+  {
+    if (GetState().FontStretch == fontStretch)
+    {
+      return;
+    }
+    std::ignore = GetFontProxy();
+    RealizeSaves();
+    ModifiableState().FontStretch = fontStretch;
+    UpdateFontForTextDrawingStyles();
+  }
+
+  void CanvasRenderingContext2DBase::SetFontVariantCaps(CanvasFontVariantCaps fontVariantCaps) noexcept
+  {
+    if (GetState().FontVariantCaps == fontVariantCaps)
+    {
+      return;
+    }
+    std::ignore = GetFontProxy();
+    RealizeSaves();
+    ModifiableState().FontVariantCaps = fontVariantCaps;
+    UpdateFontForTextDrawingStyles();
+  }
+
+  void CanvasRenderingContext2DBase::SetTextRendering(CanvasTextRendering textRendering) noexcept
+  {
+    if (GetState().TextRendering == textRendering)
+    {
+      return;
+    }
+    std::ignore = GetFontProxy();
+    RealizeSaves();
+    ModifiableState().TextRendering = textRendering;
+    UpdateFontForTextDrawingStyles();
+  }
+
+  bool CanvasRenderingContext2DBase::CanDrawText(double x, double y, bool fill,
+                                                 Maybe<double> maxWidth) noexcept
+  {
+    if (!GetFontProxy()->Realized())
+    {
+      return false;
+    }
+
+    auto *c = EffectiveDrawingContext();
+    if (!c)
+    {
+      return false;
+    }
+    if (!HasInvertibleTransform()) KRYS_UNLIKELY
+    {
+      return false;
+    }
+    if (!std::isfinite(x) || !std::isfinite(y))
+    {
+      return false;
+    }
+    if (maxWidth && (!std::isfinite(*maxWidth) || *maxWidth <= 0))
+    {
+      return false;
+    }
+
+    // If gradient size is zero, nothing would be painted.
+    auto *gradient = c->StrokeGradient();
+    if (!fill && gradient && gradient->IsZeroSize())
+    {
+      return false;
+    }
+
+    gradient = c->FillGradient();
+    if (fill && gradient && gradient->IsZeroSize())
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  KRYS_NODISCARD static constexpr bool IsSpaceThatNeedsReplacing(char8 c) noexcept
+  {
+    // According to specification all space characters should be replaced with 0x0020 space character.
+    // http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#text-preparation-algorithm
+    // The space characters according to specification are : U+0020, U+0009, U+000A, U+000C, and U+000D.
+    // http://www.whatwg.org/specs/web-apps/current-work/multipage/common-microsyntaxes.html#space-character
+    // This function returns true for 0x000B also, so that this is backward compatible.
+    // Otherwise, the test LayoutTests/canvas/philip/tests/2d.text.draw.space.collapse.space.html will fail
+    return c == 0x0009 || c == 0x000A || c == 0x000B || c == 0x000C || c == 0x000D;
+  }
+
+  dom::DOMString CanvasRenderingContext2DBase::NormalizeSpaces(dom::DOMStringView text) noexcept
+  {
+    auto normalized = dom::DOMString(text);
+    for (auto &c : normalized)
+    {
+      if (IsSpaceThatNeedsReplacing(c))
+      {
+        c = u8' ';
+      }
+    }
+    return normalized;
+  }
+
+  void CanvasRenderingContext2DBase::DrawTextUnchecked(const TextRun &textRun, double x, double y, bool fill,
+                                                       Maybe<double> maxWidth) noexcept
+  {
+    const auto &measuringFontProxy = *GetFontProxy();
+
+    // FIXME: Need to turn off font smoothing.
+    float fontWidth = measuringFontProxy.Width(textRun);
+    const auto &fontMetrics = measuringFontProxy.MetricsOfPrimaryFont();
+
+    bool useMaxWidth = maxWidth && *maxWidth < fontWidth;
+    float width = useMaxWidth ? static_cast<float>(*maxWidth) : fontWidth;
+    auto location = FloatPoint(static_cast<float>(x), static_cast<float>(y));
+    location += TextOffset(width, textRun.Direction());
+
+    // The slop built in to this mask rect matches the heuristic used in FontCGWin.cpp for GDI text.
+    auto textRect = FloatRect(
+      location.X() - static_cast<float>(fontMetrics.IntHeight()) / 2,
+      location.Y() - static_cast<float>(fontMetrics.IntAscent() + fontMetrics.IntLineGap()),
+      width + static_cast<float>(fontMetrics.IntHeight()), static_cast<float>(fontMetrics.IntLineSpacing()));
+    if (!fill)
+    {
+      textRect = InflatedStrokeRect(textRect);
+    }
+
+    auto targetSwitcher = CanvasFilterContextSwitcher::Create(*this, textRect);
+
+    // FIXME: Need to refetch fontProxy. CanvasFilterContextSwitcher might have called save().
+    auto *c = EffectiveDrawingContext();
+    const auto &fontProxy = *GetFontProxy();
+
+    c->SetTextDrawingMode(fill ? TextDrawingMode::Fill : TextDrawingMode::Stroke);
+
+    GraphicsContextStateSaver stateSaver(*c);
+    if (useMaxWidth)
+    {
+      c->Translate(location);
+      // We draw when fontWidth is 0 so compositing operations (eg, a "copy" op) still work.
+      c->Scale(FloatSize((fontWidth > 0 ? (width / fontWidth) : 0), 1));
+      location = FloatPoint();
+    }
+
+    bool repaintEntireCanvas = false;
+    if (IsFullCanvasCompositeMode(GetState().GlobalComposite))
+    {
+      BeginCompositeLayer();
+      fontProxy.DrawBidiText(*c, textRun, location,
+                             FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady);
+      EndCompositeLayer();
+      repaintEntireCanvas = true;
+    }
+    else if (GetState().GlobalComposite == CompositeOperator::Copy)
+    {
+      ClearCanvas();
+      fontProxy.DrawBidiText(*c, textRun, location,
+                             FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady);
+      repaintEntireCanvas = true;
+    }
+    else
+    {
+      fontProxy.DrawBidiText(*c, textRun, location,
+                             FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady);
+    }
+
+    DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : textRect);
+  }
+
+  Ref<TextMetrics> CanvasRenderingContext2DBase::MeasureTextInternal(const TextRun &textRun) noexcept
+  {
+    auto metrics = TextMetrics::Create();
+
+    const auto &font = *GetFontProxy();
+    const auto &fontMetrics = font.MetricsOfPrimaryFont();
+
+    GlyphOverflow glyphOverflow;
+    glyphOverflow.ComputeBounds = true;
+    float fontWidth = font.Width(textRun, &glyphOverflow);
+    metrics->SetWidth(fontWidth);
+
+    auto offset = TextOffset(fontWidth, textRun.Direction());
+    auto ascent = fontMetrics.Ascent();
+    auto descent = fontMetrics.Descent();
+
+    metrics->SetActualBoundingBoxAscent(glyphOverflow.Top.ToFloat() - offset.Y());
+    metrics->SetActualBoundingBoxDescent(glyphOverflow.Bottom.ToFloat() + offset.Y());
+    metrics->SetFontBoundingBoxAscent(static_cast<float>(fontMetrics.IntAscent()) - offset.Y());
+    metrics->SetFontBoundingBoxDescent(static_cast<float>(fontMetrics.IntDescent()) + offset.Y());
+    metrics->SetEmHeightAscent(ascent - offset.Y());
+    metrics->SetEmHeightDescent(descent + offset.Y());
+    metrics->SetHangingBaseline(ascent - offset.Y());
+    metrics->SetAlphabeticBaseline(-offset.Y());
+    metrics->SetIdeographicBaseline(-descent - offset.Y());
+
+    metrics->SetActualBoundingBoxLeft(glyphOverflow.Left.ToFloat() - offset.X());
+    metrics->SetActualBoundingBoxRight(fontWidth + glyphOverflow.Right.ToFloat() + offset.X());
+
+    return metrics;
+  }
+
+  FloatPoint CanvasRenderingContext2DBase::TextOffset(float width, TextDirection direction) noexcept
+  {
+    const auto &fontMetrics = GetFontProxy()->MetricsOfPrimaryFont();
+    FloatPoint offset;
+
+    switch (GetState().TextBaseline)
+    {
+      case TopTextBaseline:
+      case HangingTextBaseline:     offset.SetY(static_cast<float>(fontMetrics.IntAscent())); break;
+      case BottomTextBaseline:
+      case IdeographicTextBaseline: offset.SetY(static_cast<float>(-fontMetrics.IntDescent())); break;
+      case MiddleTextBaseline:
+        offset.SetY(static_cast<float>(fontMetrics.IntHeight() / 2 - fontMetrics.IntDescent()));
+        break;
+      case AlphabeticTextBaseline:
+      default:                     break;
+    }
+
+    bool isRTL = direction == TextDirection::RTL;
+    auto align = GetState().TextAlign;
+    if (align == StartTextAlign)
+    {
+      align = isRTL ? RightTextAlign : LeftTextAlign;
+    }
+    else if (align == EndTextAlign)
+    {
+      align = isRTL ? LeftTextAlign : RightTextAlign;
+    }
+
+    switch (align)
+    {
+      case CenterTextAlign: offset.SetX(-width / 2); break;
+      case RightTextAlign:  offset.SetX(-width); break;
+      default:              break;
+    }
+    return offset;
   }
 }

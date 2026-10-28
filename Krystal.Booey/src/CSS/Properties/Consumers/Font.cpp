@@ -1,6 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Font.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/PrimitiveValueMappings.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
@@ -27,6 +31,7 @@
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/CSS/WebKitFontFamilyNames.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Graphics/FontTaggedSettings.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
@@ -411,6 +416,22 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   // MARK: 'font' (shorthand)
+
+  Maybe<UnresolvedFont> ParseUnresolvedFont(const CSSOMString &string, const dom::Document &document,
+                                            Maybe<ParserMode> parserModeOverride) noexcept
+  {
+    auto parserContext =
+      ParserContext(parserModeOverride ? *parserModeOverride : StrictToParserMode(!document.InQuirksMode()));
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = parserContext};
+    return ConsumeUnresolvedFont(range, state);
+  }
 
   Maybe<UnresolvedFont> ConsumeUnresolvedFont(TokenRange &tokens, PropertyParserState &state) noexcept
   {

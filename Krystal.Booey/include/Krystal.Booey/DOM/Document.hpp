@@ -54,6 +54,7 @@ namespace krys::boo
   class DOMSelection;
   class Editor;
   class FrameSelection;
+  class GraphicsClient;
   class HitTestLocation;
   class HitTestRequest;
   class HitTestResult;
@@ -105,6 +106,7 @@ namespace krys::boo::svg
 
 namespace krys::boo::html
 {
+  class CanvasRenderingContext;
   class CustomElementAlgorithms;
   class CustomElementRegistry;
   class FocusAlgorithms;
@@ -281,6 +283,9 @@ namespace krys::boo::dom
     // root the document is.
     List<WeakPtr<IntersectionObserver>> _intersectionObservers;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
+    // Collection of canvas contexts that need periodic work in "PrepareCanvasesForDisplayOrFlush" phase of
+    // the rendering update.
+    List<WeakPtr<html::CanvasRenderingContext>> _canvasContextsToPrepare;
     UniquePtr<svg::SVGDocumentExtensions> _svgExtensions;
     // The intersection observer that loads the lazily loaded images, made on first use.
     UniquePtr<html::LazyLoadImageObserver> _lazyLoadImageObserver;
@@ -838,6 +843,14 @@ namespace krys::boo::dom
     void UpdateIntersectionObservations() noexcept;
     void UpdateIntersectionObservations(
       const List<WeakPtr<IntersectionObserver>> &intersectionObservers) noexcept;
+
+    /// @brief The rendering update's canvas step: flushes the deferred drawing of the canvases that have any,
+    /// and prepares those whose pixels the compositor shows, before it composites them.
+    void PrepareCanvasesForDisplayOrFlushIfNeeded() noexcept;
+    /// @brief Adds @p context to the canvases the next rendering update prepares, if it needs preparing;
+    /// schedules the update.
+    void AddCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept;
+    void RemoveCanvasNeedingPreparationForDisplayOrFlush(html::CanvasRenderingContext &context) noexcept;
     /// @brief Schedules the first observations of a newly observed target: in the next rendering update once
     /// the document has loaded, or after a delay while it's loading.
     void ScheduleInitialIntersectionObservationUpdate() noexcept;
@@ -1204,6 +1217,8 @@ namespace krys::boo::dom
     KRYS_NODISCARD LocalFrame *Frame() const noexcept;
     /// @brief The page of the document's frame, if any.
     KRYS_NODISCARD boo::Page *GetPage() const noexcept;
+    /// @brief The host's graphics, which make the document's accelerated image buffers; null without a page.
+    KRYS_NODISCARD GraphicsClient *GetGraphicsClient() const noexcept;
     /// @brief The document's window (its relevant global object), if it has been in a frame; it keeps it
     /// after leaving the frame.
     KRYS_NODISCARD LocalDOMWindow *Window() const noexcept;

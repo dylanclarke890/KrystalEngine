@@ -39,6 +39,7 @@
 #include "Krystal.PAL/TextInput.hpp"
 #include "Krystal.UI/Compositing/TextureMapper.hpp"
 #include "Krystal.UI/FontFaceCache.hpp"
+#include "Krystal.UI/ImageBufferRender2DBackend.hpp"
 #include "Krystal.UI/ImageBufferTextures.hpp"
 #include "Krystal.UI/Overlay.hpp"
 #include <chrono>
@@ -158,6 +159,9 @@ namespace krys::ui
     FrameLoaderClient *_frameLoaderClient {nullptr};
     /// @brief The page's drag client, which the page owns: it starts the view's drag.
     DragClient *_dragClient {nullptr};
+    /// @brief The page's accelerated image buffers (its canvases' bitmaps), whose textures go with the view.
+    UniquePtr<AcceleratedImageBuffers> _acceleratedImageBuffers {
+      CreateUnique<AcceleratedImageBuffers>(_fonts)};
     /// @brief The page's session history, which the page shares.
     Ref<boo::BackForwardList> _backForwardList;
     Ref<boo::Page> _page;
@@ -454,6 +458,10 @@ namespace krys::ui
     /// @brief Paints the page into @p renderer, between its `Begin` and `End`: the page's layer tree is
     /// flushed, the parts of its layers that changed are painted again, and the layers are composited.
     void Paint(gfx::Renderer2D &renderer) noexcept;
+    /// @brief Gives the view the device it will paint with before it first paints, so that the page's
+    /// canvases can be read back (`getImageData`) and drawn into each other from the start; without it, they
+    /// can be once the view has painted. The view keeps the first device it's given or painted with.
+    void SetDevice(gfx::Device &device) noexcept;
     /// @brief Whether the page has changed since it was last painted (or never was).
     KRYS_NODISCARD bool NeedsPaint() const noexcept;
 

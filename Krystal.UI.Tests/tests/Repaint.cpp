@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Graphics/GraphicsLayer.hpp"
+#include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
@@ -16,10 +17,12 @@
 #include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
 #include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Editor/PageCanvas2D.hpp"
 #include "Krystal.Editor/PageCube.hpp"
 #include "Krystal.Gfx.Tests/Golden.hpp"
 #include "Krystal.Gfx.Tests/TestDevice.hpp"
 #include "Krystal.Gfx/Render2D/Renderer2D.hpp"
+#include "Krystal.UI.Tests/RepaintFixture.hpp"
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
@@ -36,138 +39,6 @@ namespace krys::ui::tests
 
   namespace
   {
-    /// @brief Paints a view into a target of its size the way a host does each frame (`View::Paint`, which
-    /// composites the page's layers, repainting only what changed in them), and as a full repaint of the page
-    /// (`Record` and `Replay`), to compare.
-    class RepaintFixture
-    {
-      KRYS_NON_COPY_MOVABLE(RepaintFixture);
-
-    private:
-      UniquePtr<gfx::Device> _device;
-      UniquePtr<gfx::Renderer2D> _renderer;
-      gfx::TextureHandle _target;
-      uint32 _width;
-      uint32 _height;
-
-    public:
-      RepaintFixture(uint32 width, uint32 height)
-          : _device(CreateTestDevice(gfx::DeviceDesc {}.TransientMemoryPerFrame)), _width(width),
-            _height(height)
-      {
-        auto renderer = gfx::Renderer2D::Create(*_device);
-        REQUIRE(renderer.has_value());
-        _renderer = krys::move(*renderer);
-        auto target =
-          _device->CreateTexture({.Format = gfx::TextureFormat::RGBA8Unorm,
-                                  .Width = width,
-                                  .Height = height,
-                                  .Usage = gfx::TextureUsage::RenderTarget | gfx::TextureUsage::Sampled,
-                                  .DebugName = u8"Repaint"});
-        REQUIRE(target.has_value());
-        _target = *target;
-      }
-
-      ~RepaintFixture() noexcept
-      {
-        _device->Destroy(_target);
-      }
-
-      KRYS_NODISCARD gfx::Device &Device() const noexcept
-      {
-        return *_device;
-      }
-
-      /// @brief The page as the host shows it: its layers composited.
-      KRYS_NODISCARD GoldenImage Painted(View &view)
-      {
-        return Draw([&] { view.Paint(*_renderer); });
-      }
-
-      /// @brief The page composited where the host draws it: `offset` into the target.
-      KRYS_NODISCARD GoldenImage PaintedAt(View &view, Vec2f offset)
-      {
-        return Draw(
-          [&]
-          {
-            _renderer->Translate(offset.x, offset.y);
-            view.Paint(*_renderer);
-          });
-      }
-
-      /// @brief The whole page painted again.
-      KRYS_NODISCARD GoldenImage Repainted(View &view)
-      {
-        // Animations that run on layers don't update the page's style each frame: resolve it at the current
-        // time, so the whole page paints what the layers show.
-        if (auto *timeline = view.Document().ExistingTimeline())
-        {
-          for (const auto &animation : timeline->RelevantAnimations())
-          {
-            if (auto *effect = animation->GetKeyframeEffect())
-            {
-              effect->Invalidate();
-            }
-          }
-        }
-        (void)view.Document().UpdateLayout();
-        auto displayList = view.Record();
-        return Draw([&] { view.Replay(*displayList, *_renderer); });
-      }
-
-      /// @brief The page as the host shows it, after @p before records the host's own drawing into the
-      /// frame's commands.
-      KRYS_NODISCARD GoldenImage PaintedAfter(View &view, const Func<void(gfx::CommandBuffer &)> &before)
-      {
-        return Draw([&] { view.Paint(*_renderer); }, before);
-      }
-
-    private:
-      template <typename TDraw>
-      KRYS_NODISCARD GoldenImage Draw(TDraw &&draw, const Func<void(gfx::CommandBuffer &)> &before = {})
-      {
-        _device->BeginFrame();
-        auto &commands = _device->GetCommandBuffer();
-        if (before)
-        {
-          before(commands);
-        }
-        _renderer->Begin(commands, {.Texture = _target,
-                                    .Width = _width,
-                                    .Height = _height,
-                                    .Format = gfx::TextureFormat::RGBA8Unorm,
-                                    .ClearColour = Array<float, 4> {0.f, 0.f, 0.f, 0.f}});
-        draw();
-        _renderer->End();
-        _device->Submit(commands);
-        _device->EndFrame();
-
-        GoldenImage image {.Width = _width, .Height = _height, .Pixels = {}};
-        image.Pixels.resize(static_cast<size_t>(_width) * _height);
-        _device->ReadTexture(
-          _target, gfx::TextureRegion::Whole2D(_width, _height),
-          Span<byte>(reinterpret_cast<byte *>(image.Pixels.data()), image.Pixels.size() * 4u));
-        return image;
-      }
-    };
-
-    /// @brief Checks the page the host shows after a change against the whole page painted again: no stale
-    /// pixels.
-    void CheckNoStalePixels(RepaintFixture &fixture, View &view, const std::string &step)
-    {
-      auto painted = fixture.Painted(view);
-      auto repainted = fixture.Repainted(view);
-      auto comparison = CompareImages(painted, repainted, 2u);
-      INFO(step << ": largest difference " << comparison.LargestDifference << ", " << comparison.PixelsOver
-                << " pixels over 2");
-      if (comparison.PixelsOver > 0u)
-      {
-        (void)SavePng(GoldenOutputDirectory() / ("repaint." + step + ".painted.png"), painted);
-        (void)SavePng(GoldenOutputDirectory() / ("repaint." + step + ".repainted.png"), repainted);
-      }
-      CHECK(comparison.PixelsOver == 0u);
-    }
-
     /// @brief Writes a 1x1 GIF of two frames, red then blue, 100ms each, repeating forever, to @p path.
     void WriteAnimatedGif(const std::filesystem::path &path)
     {
@@ -1311,6 +1182,49 @@ namespace krys::ui::tests
     device.Destroy(*texture);
   }
 
+  TEST_CASE("View: a 2D canvas redraws its contents without repainting the page", "[UI][GPU]")
+  {
+    RepaintFixture fixture(200u, 100u);
+    View view({200, 100});
+    view.LoadHTML(
+      u8"<!DOCTYPE html><style>body { margin: 0; background: #f4f4f4 }</style><p>Text beside it</p>"
+      u8"<canvas id=canvas width=40 height=20 style='width: 80px; height: 40px'></canvas>");
+    WaitForLoad(view);
+    auto time = boo::html::EventLoop::Current().Now() + 1s;
+    auto frame = [&]
+    {
+      time += 16ms;
+      (void)view.Update(time);
+      return fixture.Painted(view);
+    };
+    (void)frame();
+
+    auto &canvas = Downcast<boo::html::HTMLCanvasElement>(*view.Document().GetElementById(u8"canvas"));
+    auto context = canvas.GetContext2d();
+    REQUIRE(context);
+    context->SetFillStyle(boo::dom::DOMString(u8"#336699"));
+    context->FillRect(0, 0, 40, 20);
+    auto before = frame();
+    // Composited and painted the whole page again, which draws the canvas's texture as an image, the page is
+    // the same.
+    CheckNoStalePixels(fixture, view, "2d-canvas");
+
+    TrackedRepaints repaints(view);
+    repaints.Reset();
+
+    // Drawing redraws only the canvas's contents.
+    context->SetFillStyle(boo::dom::DOMString(u8"#ee7733"));
+    context->FillRect(0, 0, 40, 20);
+    auto after = frame();
+    CHECK(repaints.Bounds().IsEmpty());
+    auto &canvasLayer = repaints.LayerOf(u8"canvas");
+    CHECK_FALSE(canvasLayer.DrawsContent());
+    CHECK(repaints.Bounds(canvasLayer) == canvasLayer.ContentsRect());
+    auto changed = CompareImages(before, after, 2u);
+    CHECK(changed.PixelsOver == 80u * 40u);
+    CheckNoStalePixels(fixture, view, "2d-canvas-changed");
+  }
+
   TEST_CASE("View: the editor page's live 3D view", "[UI][GPU]")
   {
     RepaintFixture fixture(1'200u, 600u);
@@ -1395,5 +1309,100 @@ namespace krys::ui::tests
     };
     CHECK(sameWithin(*canvas->GetBoundingClientRect()) == 0u);
     CHECK(sameWithin(*document.GetElementById(u8"cube-strip")->GetBoundingClientRect()) == 0u);
+  }
+
+  TEST_CASE("View: the editor page's canvas 2D sample", "[UI][GPU]")
+  {
+    RepaintFixture fixture(1'200u, 600u);
+    View view({1'200, 600});
+    REQUIRE(
+      view.LoadFile(gfx::tests::GoldenDirectory() / ".." / ".." / "Krystal.Editor" / "pages" / "index.html")
+        .has_value());
+    WaitForLoad(view);
+    auto &document = view.Document();
+    // As the editor makes it once the page has loaded; its readbacks need the device the view paints with.
+    view.SetDevice(fixture.Device());
+    editor::PageCanvas2D sample(document);
+
+    auto chart = document.GetElementById(u8"chart");
+    REQUIRE(chart);
+    auto rect = chart->GetBoundingClientRect();
+    view.ScrollTo(boo::IntPoint(0, view.ScrollPosition().Y() + static_cast<int32>(rect->Top()) - 40));
+    view.UpdateRendering();
+    rect = chart->GetBoundingClientRect();
+    REQUIRE(rect->Width() == 320);
+    REQUIRE(rect->Height() == 160);
+
+    auto pixel = [](const GoldenImage &image, double x, double y)
+    {
+      return image.Pixels[static_cast<uint32>(y) * image.Width + static_cast<uint32>(x)];
+    };
+    constexpr Array<uint8, 4> white {0xFF, 0xFF, 0xFF, 0xFF};
+
+    // The chart: the newest value's bar is filled with its pattern, and it's redrawn as values come in.
+    view.UpdateRendering();
+    auto before = fixture.Painted(view);
+    const auto barX = rect->Left() + 296;
+    const auto barY = rect->Top() + 139;
+    CHECK(pixel(before, barX, barY) != white);
+    CHECK(pixel(before, rect->Left() + 300, rect->Top() + 6) == white);
+    const auto values = sample.Values();
+    sample.Update(1.f);
+    CHECK(sample.Values() != values);
+    CHECK(sample.Values()[0] == values[1]);
+    view.UpdateRendering();
+    auto after = fixture.Painted(view);
+    CHECK(CompareImages(before, after, 2u).PixelsOver > 100u);
+
+    // The pad keeps what's drawn on it.
+    auto pad = document.GetElementById(u8"pad")->GetBoundingClientRect();
+    const auto from =
+      boo::IntPoint(static_cast<int32>(pad->Left() + 40), static_cast<int32>(pad->Top() + 100));
+    const auto to =
+      boo::IntPoint(static_cast<int32>(pad->Left() + 200), static_cast<int32>(pad->Top() + 100));
+    view.MouseMoved(from);
+    view.MousePressed(from, pal::MouseButton::Left);
+    view.MouseMoved(boo::IntPoint(from.X() + 80, from.Y()));
+    view.MouseMoved(to);
+    view.MouseReleased(to, pal::MouseButton::Left);
+    view.UpdateRendering();
+    auto drawn = fixture.Painted(view);
+    // #1a2240, the default colour.
+    CHECK(pixel(drawn, pad->Left() + 120, pad->Top() + 100) == Array<uint8, 4> {0x1A, 0x22, 0x40, 0xFF});
+    CHECK(pixel(drawn, pad->Left() + 120, pad->Top() + 40) == white);
+
+    // A colour picked from the palette's pixels draws the next stroke.
+    auto palette = document.GetElementById(u8"pad-palette")->GetBoundingClientRect();
+    const auto red =
+      boo::IntPoint(static_cast<int32>(palette->Left() + 2), static_cast<int32>(palette->Top() + 14));
+    view.MouseMoved(red);
+    view.MousePressed(red, pal::MouseButton::Left);
+    view.MouseReleased(red, pal::MouseButton::Left);
+    auto swatch = document.GetElementById(u8"pad-colour")
+                    ->GetAttribute(boo::dom::DOMStringAtom(u8"style"))
+                    .value_or(boo::dom::DOMString {});
+    CHECK(std::string(swatch.begin(), swatch.end()).starts_with("background: rgb("));
+    const auto below = boo::IntPoint(from.X(), from.Y() + 40);
+    view.MouseMoved(below);
+    view.MousePressed(below, pal::MouseButton::Left);
+    view.MouseMoved(boo::IntPoint(to.X(), below.Y()));
+    view.MouseReleased(boo::IntPoint(to.X(), below.Y()), pal::MouseButton::Left);
+    view.UpdateRendering();
+    auto picked = fixture.Painted(view);
+    const auto stroke = pixel(picked, pad->Left() + 120, pad->Top() + 140);
+    CHECK(stroke[0] > 200);
+    CHECK(stroke[2] < 80);
+
+    // Clearing empties it.
+    auto clear = document.GetElementById(u8"pad-clear")->GetBoundingClientRect();
+    const auto button = boo::IntPoint(static_cast<int32>(clear->Left() + clear->Width() / 2),
+                                      static_cast<int32>(clear->Top() + clear->Height() / 2));
+    view.MouseMoved(button);
+    view.MousePressed(button, pal::MouseButton::Left);
+    view.MouseReleased(button, pal::MouseButton::Left);
+    view.UpdateRendering();
+    auto cleared = fixture.Painted(view);
+    CHECK(pixel(cleared, pad->Left() + 120, pad->Top() + 100) == white);
+    CHECK(pixel(cleared, pad->Left() + 120, pad->Top() + 140) == white);
   }
 }

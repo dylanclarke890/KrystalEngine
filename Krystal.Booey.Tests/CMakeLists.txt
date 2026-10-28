@@ -325,6 +325,9 @@ target_sources(Krystal.Booey.Tests
 		tests/Graphics/BitmapImage.cpp
 		tests/Graphics/GraphicsContext.cpp
 		tests/Graphics/GraphicsLayer.cpp
+		tests/Graphics/ImageBuffer.cpp
+		tests/Graphics/ImageBufferUtilities.cpp
+		tests/Graphics/PixelBuffer.cpp
 		tests/Style/Values/Shapes/Shapes.cpp
 		tests/Style/Values/Masking/Masking.cpp
 		tests/Style/Values/Motion/Motion.cpp
@@ -386,6 +389,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/CSSFontSelector.cpp
 		tests/CSS/Font/FontFace.cpp
 		tests/Graphics/FontDatabase.cpp
+		tests/Graphics/TextRunIterator.cpp
 		tests/Graphics/WidthIterator.cpp
 		tests/Page/LocalFrameView.cpp
 		tests/Page/LocalFrameViewScrolling.cpp
@@ -494,6 +498,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLImageElement.cpp
 		tests/HTML/HTMLCanvasElement.cpp
 		tests/HTML/Canvas/CanvasRenderingContext2D.cpp
+		tests/HTML/ImageData.cpp
 		tests/HTML/Canvas/Path2D.cpp
 		tests/HTML/LazyLoadImageObserver.cpp
 		tests/DOM/ContentVisibilityDocumentState.cpp

@@ -21,6 +21,7 @@ namespace krys::boo
 namespace krys::ui
 {
   class FontFaceCache;
+  class ImageBufferRender2DBackend;
   class ImageBufferTextures;
 
   /// @brief Draws a composited layer tree with Render2D: the layers' textures, solid colours and borders,
@@ -89,6 +90,9 @@ namespace krys::ui
     void DrawTexture(gfx::TextureHandle texture, const boo::FloatRect &target,
                      const boo::TransformationMatrix &modelViewMatrix, float opacity,
                      AlphaPremultiplication alpha) noexcept;
+    /// @brief The texture an accelerated image buffer keeps, with what's been flushed rendered into it ahead
+    /// of the frame's passes; invalid if it can't be. Between `BeginPainting` and `EndPainting`.
+    KRYS_NODISCARD gfx::TextureHandle RenderImageBuffer(ImageBufferRender2DBackend &backend) noexcept;
     void DrawSolidColor(const boo::FloatRect &rect, const boo::TransformationMatrix &matrix,
                         const boo::Color &color, bool isBlendingAllowed) noexcept;
 

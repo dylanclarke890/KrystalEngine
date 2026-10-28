@@ -55,11 +55,12 @@ namespace krys::boo
     IntersectionObservations,
     SnapshottedScrollOffsets,
     CursorUpdate,
+    PrepareCanvasesForDisplayOrFlush,
     LayerFlush,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 15uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::RenderingUpdateStep, 16uz);
 
 namespace krys::boo
 {

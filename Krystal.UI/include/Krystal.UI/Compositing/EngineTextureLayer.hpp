@@ -4,6 +4,7 @@
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.UI/Compositing/PlatformLayerDisplayDelegate.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
+#include "Krystal.UI/TextureImage.hpp"
 
 namespace krys::ui
 {
@@ -45,7 +46,7 @@ namespace krys::ui
   };
 
   /// @brief An engine texture as an image's platform image, drawn by the renderer without a copy.
-  class EngineTextureImage final : public boo::ExternalImage
+  class EngineTextureImage final : public TextureImage
   {
   private:
     Ref<EngineTexture> _texture;
@@ -58,6 +59,11 @@ namespace krys::ui
     KRYS_NODISCARD EngineTexture &Texture() const noexcept
     {
       return *_texture;
+    }
+
+    KRYS_NODISCARD gfx::TextureHandle Handle() const noexcept override
+    {
+      return _texture->Handle();
     }
   };
 }

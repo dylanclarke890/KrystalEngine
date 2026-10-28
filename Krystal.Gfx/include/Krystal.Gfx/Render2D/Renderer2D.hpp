@@ -697,6 +697,18 @@ namespace krys::gfx
     /// @brief Clips out a path in the current coordinates.
     void ClipOutPath(const Path2D &path, FillRule rule) noexcept;
 
+    /// @brief A clip as it was at some point in a frame: its bounds and its shape clips.
+    struct ClipState
+    {
+      PixelRect2D Bounds {};
+      uint32 Chain {NoChain};
+    };
+    /// @brief The clip in effect, which `SetClip` can bring back later in the same frame.
+    KRYS_NODISCARD ClipState GetClip() const noexcept;
+    /// @brief Replaces the clip with one `GetClip` returned earlier in the frame, widening it as well as
+    /// narrowing it; `Restore` brings back the clip saved before.
+    void SetClip(const ClipState &clip) noexcept;
+
     void FillRect(const Rect2D &rect, const Paint2D &paint) noexcept;
     /// @brief Fills a rounded rect. Negative radii are treated as zero, and radii that don't fit are scaled
     /// down together until they do, as CSS does for `border-radius`.

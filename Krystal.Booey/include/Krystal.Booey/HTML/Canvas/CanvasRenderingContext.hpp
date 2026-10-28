@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/HTML/CanvasBase.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
@@ -19,7 +20,7 @@ namespace krys::boo::html
 {
   /// @brief A canvas's rendering context, which draws its pixels. Owned by its canvas; references to it keep
   /// the canvas alive.
-  class CanvasRenderingContext
+  class CanvasRenderingContext : public CanMakeWeakPtr<CanvasRenderingContext>
   {
     KRYS_NON_COPY_MOVABLE(CanvasRenderingContext);
 
@@ -33,6 +34,7 @@ namespace krys::boo::html
   private:
     CanvasBase &_canvas;
     const Type _type;
+    bool _isInPreparationForDisplayOrFlush {false};
 
   public:
     virtual ~CanvasRenderingContext() noexcept = default;
@@ -44,6 +46,10 @@ namespace krys::boo::html
     void SubRef() const noexcept
     {
       _canvas.SubRef();
+    }
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept
+    {
+      return _canvas.GetRefCount();
     }
 
     KRYS_NODISCARD CanvasBase &GetCanvasBase() const noexcept
@@ -92,7 +98,39 @@ namespace krys::boo::html
       LayerContentsDisplayDelegate() noexcept;
     virtual void SetContentsToLayer(GraphicsLayer &layer) noexcept;
 
-    // FIXME: The canvas's preparation for display and its deferred operations (B14b), and its pixel format.
+    /// @brief Whether drawing waits to be flushed in the rendering update.
+    KRYS_NODISCARD virtual bool HasDeferredOperations() const noexcept
+    {
+      return false;
+    }
+    virtual void FlushDeferredOperations() noexcept
+    {
+    }
+
+    KRYS_NODISCARD virtual bool CompositingResultsNeedUpdating() const noexcept
+    {
+      return false;
+    }
+    /// @brief Whether the context has work to do after the rendering update and before its pixels are
+    /// composited.
+    KRYS_NODISCARD virtual bool NeedsPreparationForDisplay() const noexcept
+    {
+      return false;
+    }
+    virtual void PrepareForDisplay() noexcept
+    {
+    }
+
+    void SetIsInPreparationForDisplayOrFlush(bool flag) noexcept
+    {
+      _isInPreparationForDisplayOrFlush = flag;
+    }
+    KRYS_NODISCARD bool IsInPreparationForDisplayOrFlush() const noexcept
+    {
+      return _isInPreparationForDisplayOrFlush;
+    }
+
+    // FIXME: The pixel format (sRGB, 8 bits a channel).
     KRYS_NODISCARD virtual DestinationColorSpace ColorSpace() const noexcept;
     KRYS_NODISCARD virtual bool WillReadFrequently() const noexcept;
 

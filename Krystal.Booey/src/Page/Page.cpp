@@ -39,6 +39,7 @@ namespace krys::boo
       RenderingUpdateStep::FocusFixup,
       RenderingUpdateStep::SnapshottedScrollOffsets,
       RenderingUpdateStep::CursorUpdate,
+      RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
       RenderingUpdateStep::LayerFlush};
   }
 
@@ -314,6 +315,9 @@ namespace krys::boo
 
     LayoutIfNeeded({dom::LayoutOptions::UpdateCompositingLayers});
     DoAfterUpdateRendering();
+
+    RunProcessingStep(RenderingUpdateStep::PrepareCanvasesForDisplayOrFlush,
+                      [](dom::Document &document) { document.PrepareCanvasesForDisplayOrFlushIfNeeded(); });
 
     ForEachDocument(
       [](dom::Document &document)

@@ -130,6 +130,17 @@ namespace krys::ui
     _clipBounds.clear();
   }
 
+  gfx::TextureHandle TextureMapper::RenderImageBuffer(ImageBufferRender2DBackend &backend) noexcept
+  {
+    krys_debug_assert(_renderer);
+    auto *commands = _renderer ? _renderer->GetCommandBuffer() : nullptr;
+    if (!commands || !_imageBuffers)
+    {
+      return {};
+    }
+    return _imageBuffers->Render(backend, *commands);
+  }
+
   void TextureMapper::SetTransform(const boo::TransformationMatrix &matrix) noexcept
   {
     _renderer->SetTransform(_baseTransform * ToTransform2D(matrix));

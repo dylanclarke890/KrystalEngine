@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/PointerEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Graphics/DestinationColorSpace.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
 #include "Krystal.Booey/Graphics/FontCache.hpp"
 #include "Krystal.Booey/Graphics/FontDatabase.hpp"
@@ -240,6 +241,19 @@ namespace krys::ui
     void AttachRootGraphicsLayer(boo::LocalFrame &, boo::GraphicsLayer *layer) noexcept override
     {
       _rootLayer = layer ? &Downcast<GraphicsLayerTextureMapper>(*layer) : nullptr;
+    }
+
+    KRYS_NODISCARD RefPtr<boo::ImageBuffer>
+      CreateImageBuffer(const boo::FloatSize &size, boo::RenderingMode mode, boo::RenderingPurpose purpose,
+                        float resolutionScale, const boo::DestinationColorSpace &) const noexcept override
+    {
+      // Accelerated buffers draw into textures with Render2D; the rest record into display lists.
+      // FIXME: The colour space (sRGB, 8 bits a channel).
+      if (!_view || mode != boo::RenderingMode::Accelerated)
+      {
+        return nullptr;
+      }
+      return _view->_acceleratedImageBuffers->Create(size, purpose, resolutionScale);
     }
 
     KRYS_NODISCARD boo::GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept override
@@ -901,6 +915,11 @@ namespace krys::ui
     return _needsPaint || (view && view->HasDamage()) || (_overlay && _overlay->ContentView().NeedsPaint());
   }
 
+  void View::SetDevice(gfx::Device &device) noexcept
+  {
+    _acceleratedImageBuffers->SetDevice(device);
+  }
+
   void View::Paint(gfx::Renderer2D &renderer) noexcept
   {
     const auto size = ViewportSize();
@@ -909,6 +928,9 @@ namespace krys::ui
     {
       return;
     }
+    SetDevice(renderer.GetDevice());
+    // The host has run the last frame's commands, which may have drawn canvases' snapshots now gone.
+    _acceleratedImageBuffers->DestroyRetiredTextures();
 
     if (!_textureMapper)
     {
@@ -1022,6 +1044,7 @@ namespace krys::ui
   void View::Replay(const boo::display_list::DisplayList &displayList, gfx::Renderer2D &renderer) noexcept
   {
     const auto size = ViewportSize();
+    SetDevice(renderer.GetDevice());
     if (!_imageBuffers)
     {
       _imageBuffers = CreateUnique<ImageBufferTextures>(renderer.GetDevice(), _fonts);

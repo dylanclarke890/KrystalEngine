@@ -1043,7 +1043,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Text measurement (t3a)
   include/Krystal.Booey/Graphics/GlyphBuffer.hpp
   include/Krystal.Booey/Graphics/GlyphBufferMembers.hpp
+  include/Krystal.Booey/Graphics/ImageBufferUtilities.hpp
   include/Krystal.Booey/Graphics/TextRun.hpp
+  include/Krystal.Booey/Graphics/TextRunIterator.hpp
   include/Krystal.Booey/Graphics/WidthCache.hpp
   include/Krystal.Booey/Graphics/WidthIterator.hpp
 
@@ -1574,8 +1576,16 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   # Image buffers and patterns (G4c3)
   include/Krystal.Booey/Graphics/ImageBuffer.hpp
   include/Krystal.Booey/Graphics/ImageBufferBackend.hpp
+  include/Krystal.Booey/Graphics/RenderingMode.hpp
+  include/Krystal.Booey/Platform/GraphicsClient.hpp
   include/Krystal.Booey/Graphics/ImageBufferDisplayListBackend.hpp
   include/Krystal.Booey/Graphics/RenderingResourceIdentifier.hpp
+  include/Krystal.Booey/Graphics/PixelFormat.hpp
+  include/Krystal.Booey/Graphics/PixelBufferFormat.hpp
+  include/Krystal.Booey/Graphics/PixelBuffer.hpp
+  include/Krystal.Booey/Graphics/ByteArrayPixelBuffer.hpp
+  include/Krystal.Booey/Graphics/PixelBufferConversion.hpp
+  include/Krystal.Booey/DOM/Types/Uint8ClampedArray.hpp
   # Text and inline boxes (G4d1)
   include/Krystal.Booey/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.hpp
   include/Krystal.Booey/Rendering/InlineBoxPainter.hpp
@@ -3154,8 +3164,15 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
 
   # Image buffers and patterns (G4c3)
   src/Graphics/ImageBuffer.cpp
+  src/Graphics/ImageBufferUtilities.cpp
+  src/Graphics/RenderingMode.cpp
   src/Graphics/ImageBufferBackend.cpp
   src/Graphics/ImageBufferDisplayListBackend.cpp
+  src/Graphics/PixelFormat.cpp
+  src/Graphics/PixelBufferFormat.cpp
+  src/Graphics/PixelBuffer.cpp
+  src/Graphics/ByteArrayPixelBuffer.cpp
+  src/Graphics/PixelBufferConversion.cpp
   # Text and inline boxes (G4d1)
   src/Layout/Integration/Inline/LayoutIntegrationInlineContentPainter.cpp
   src/Rendering/InlineBoxPainter.cpp
@@ -3963,11 +3980,17 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Canvas/EngineTexture.hpp
       include/Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasDirection.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasFontKerning.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasFontStretch.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasFontVariantCaps.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasFilterContextSwitcher.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasLayerContextSwitcher.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasFillRule.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasLineCap.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasLineJoin.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasTextAlign.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasTextBaseline.hpp
+      include/Krystal.Booey/HTML/Canvas/CanvasTextRendering.hpp
       include/Krystal.Booey/HTML/Canvas/ImageSmoothingQuality.hpp
       include/Krystal.Booey/HTML/Canvas/PredefinedColorSpace.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DSettings.hpp
@@ -3978,6 +4001,11 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Canvas/CanvasStyle.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2DBase.hpp
       include/Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp
+      include/Krystal.Booey/HTML/ImageDataPixelFormat.hpp
+      include/Krystal.Booey/HTML/ImageDataSettings.hpp
+      include/Krystal.Booey/HTML/ImageDataArray.hpp
+      include/Krystal.Booey/HTML/ImageData.hpp
+      include/Krystal.Booey/HTML/TextMetrics.hpp
       include/Krystal.Booey/HTML/HTMLCanvasElement.hpp
       include/Krystal.Booey/HTML/HTMLDataElement.hpp
       include/Krystal.Booey/HTML/HTMLDataListElement.hpp
@@ -4501,8 +4529,11 @@ target_sources(Krystal.Booey
     src/HTML/Canvas/CanvasGradient.cpp
     src/HTML/Canvas/CanvasPattern.cpp
     src/HTML/Canvas/CanvasStyle.cpp
+    src/HTML/Canvas/CanvasLayerContextSwitcher.cpp
+    src/HTML/Canvas/CanvasFilterContextSwitcher.cpp
     src/HTML/Canvas/CanvasRenderingContext2DBase.cpp
     src/HTML/Canvas/CanvasRenderingContext2D.cpp
+    src/HTML/ImageData.cpp
     src/HTML/HTMLCanvasElement.cpp
     src/HTML/HTMLDataElement.cpp
     src/HTML/HTMLDataListElement.cpp
