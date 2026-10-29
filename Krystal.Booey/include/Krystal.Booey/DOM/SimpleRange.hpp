@@ -232,4 +232,33 @@ namespace krys::boo::dom
   {
     return IntersectingNodeRange(range);
   }
+
+  class IntersectingNodeRangeWithQuirk
+  {
+  private:
+    SimpleRange _range;
+
+  public:
+    explicit IntersectingNodeRangeWithQuirk(const SimpleRange &range) noexcept : _range(range)
+    {
+    }
+
+    KRYS_NODISCARD IntersectingNodeIterator begin() const noexcept
+    {
+      return {_range, IntersectingNodeIterator::DeprecatedZeroOffsetStartQuirk};
+    }
+    KRYS_NODISCARD static constexpr std::nullptr_t end() noexcept
+    {
+      return nullptr;
+    }
+  };
+
+  /// @brief The nodes a range intersects, starting with its start container when the range starts at its
+  /// offset 0 and the container has no children.
+  /// FIXME: Deprecated since it silently defaults to ComposedTree.
+  KRYS_NODISCARD inline IntersectingNodeRangeWithQuirk
+    IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(const SimpleRange &range) noexcept
+  {
+    return IntersectingNodeRangeWithQuirk(range);
+  }
 }

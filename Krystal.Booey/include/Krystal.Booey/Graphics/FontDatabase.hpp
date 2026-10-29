@@ -18,7 +18,8 @@ namespace krys::boo
   KRYS_NODISCARD FontSelectionCapabilities CapabilitiesOfFace(const text::FreeTypeFace &face) noexcept;
 
   /// @brief The fonts documents can use: the faces of the font files the host registers, by family, the
-  /// bundled Liberation Sans, the last resort, and the bundled STIX Two Math, for `font-family: math`.
+  /// bundled Liberation Sans, the last resort, the bundled Noto Sans Arabic, the last resort for Arabic, and
+  /// the bundled STIX Two Math, for `font-family: math`.
   /// @note The database is process-wide. Families are matched ASCII case-insensitively.
   class FontDatabase final
   {
@@ -30,6 +31,7 @@ namespace krys::boo
     HashMap<utf8_string, List<Ref<text::FreeTypeFace>>> _families;
     List<std::filesystem::path> _registeredFiles;
     Ref<text::FreeTypeFace> _bundledFace;
+    Ref<text::FreeTypeFace> _bundledArabicFace;
     Ref<text::FreeTypeFace> _bundledMathFace;
     uint32 _generation {0};
 
@@ -72,6 +74,12 @@ namespace krys::boo
     KRYS_NODISCARD text::FreeTypeFace &BundledFace() const noexcept
     {
       return *_bundledFace;
+    }
+
+    /// @brief The bundled Noto Sans Arabic, used for the Arabic script when no registered font has it.
+    KRYS_NODISCARD text::FreeTypeFace &BundledArabicFace() const noexcept
+    {
+      return *_bundledArabicFace;
     }
 
     /// @brief The bundled STIX Two Math, a font with an OpenType MATH table.

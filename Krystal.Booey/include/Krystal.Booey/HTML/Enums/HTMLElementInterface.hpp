@@ -11,6 +11,7 @@ namespace krys::boo::html
     Area,
     Audio,
     Base,
+    BDI,
     Body,
     BR,
     Button,
@@ -81,4 +82,4 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 72u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 73u);

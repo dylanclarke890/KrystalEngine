@@ -591,9 +591,10 @@ namespace krys::boo
           auto &fontCascade = style.GetFontCascade();
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
-          // FIXME: Bidi alt text (drawBidiText, respecting direction overrides), and the display string
-          // modified by the document's encoding.
-          auto textRun = RenderBlock::ConstructTextRun(_altText, style);
+          // FIXME: The display string modified by the document's encoding.
+          auto textRun = RenderBlock::ConstructTextRun(
+            _altText, style, ExpansionBehavior::DefaultBehavior(),
+            {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});
           auto textWidth = LayoutUnit {fontCascade.Width(textRun)};
 
           auto hasRoomForAltText = [&]
@@ -622,7 +623,7 @@ namespace krys::boo
               {
                 contentHorizontalOffset += contentSize.Width() - textWidth;
               }
-              (void)context.DrawText(
+              context.DrawBidiText(
                 fontCascade, textRun,
                 FloatPoint(paintOffset + LayoutPoint {contentHorizontalOffset, contentVerticalOffset}));
             }
@@ -646,7 +647,7 @@ namespace krys::boo
                                                         LayoutUnit(contentLogicalHeight)});
               context.ConcatCTM(Rotation(rotationRect, RotationDirection::Clockwise));
               auto textOrigin = LayoutPoint {visualLeft, adjustedPaintOffset.Y() + fontMetrics.IntAscent()};
-              (void)context.DrawText(fontCascade, textRun, FloatPoint(textOrigin));
+              context.DrawBidiText(fontCascade, textRun, FloatPoint(textOrigin));
               context.ConcatCTM(Rotation(rotationRect, RotationDirection::Counterclockwise));
             }
           }

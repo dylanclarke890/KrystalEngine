@@ -16,6 +16,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/StyledElement.hpp"
@@ -58,21 +59,6 @@ namespace krys::boo::style
         return *properties.release();
       }();
       return declaration;
-    }
-
-    /// @brief The directionality of @p element if its `dir` attribute is in the auto state.
-    /// @see https://html.spec.whatwg.org/#the-directionality
-    KRYS_NODISCARD Maybe<TextDirection>
-      ComputeTextDirectionIfDirIsAuto(const html::HTMLElement &element) noexcept
-    {
-      auto dir = element.GetAttribute(u8"dir");
-      if (!dir || !text::IsASCIICaselessEqual(dom::DOMStringView(*dir), dom::DOMStringView(u8"auto")))
-      {
-        return {};
-      }
-      // FIXME: The auto directionality (the first strong character of the element's text), once there is bidi
-      // data. Until then it is always the fallback, 'ltr', as for :dir().
-      return TextDirection::LTR;
     }
   }
 
@@ -1062,7 +1048,7 @@ namespace krys::boo::style
 
       if (auto *htmlElement = DynamicDowncast<html::HTMLElement>(*styledElement))
       {
-        if (auto textDirection = ComputeTextDirectionIfDirIsAuto(*htmlElement))
+        if (auto textDirection = dom::ComputeTextDirectionIfDirIsAuto(*htmlElement))
         {
           auto &properties =
             *textDirection == TextDirection::LTR ? LeftToRightDeclaration() : RightToLeftDeclaration();

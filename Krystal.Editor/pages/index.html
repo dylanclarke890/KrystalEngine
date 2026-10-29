@@ -516,6 +516,34 @@
   </div>
 
   <div class="row">
+    <!-- Right to left: the paragraphs are editable. The arrows move the caret by the paragraph's direction
+         (in the Hebrew one, right goes back), through the runs of the other direction, and a double click
+         selects a word and the space after it. -->
+    <div class="card bidi" id="bidi-text" contenteditable>
+      <p>Arabic in English: <span lang="ar">مرحبا بالعالم</span> means "hello, world".</p>
+      <p dir="rtl" lang="he">עברית מימין לשמאל, עם English בפנים ומספרים כמו 2026.</p>
+    </div>
+    <!-- Direction: the fields take their direction from what's typed (dir=auto), turning right to left at a
+         first Hebrew or Arabic letter. Ctrl with the right Shift makes the focused field right to left, and with
+         the left Shift left to right. -->
+    <div class="card bidi-fields" tabindex="0">
+      <h2>Direction</h2>
+      <input id="bidi-field" dir="auto" placeholder="Type in Hebrew or Arabic">
+      <textarea id="bidi-area" dir="auto">שלום, and hello.</textarea>
+    </div>
+    <!-- Scores: each name is isolated in a <bdi>, so a right-to-left name doesn't pull the score after it into
+         its run. -->
+    <div class="card scores" tabindex="0">
+      <h2>Scores</h2>
+      <ol>
+        <li><bdi>Alex</bdi>: 90 points</li>
+        <li><bdi id="bidi-name">יעל</bdi>: 85 points</li>
+        <li><bdi>إيمان</bdi>: 80 points</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
     <!-- Resize observer: the editor observes this card's content box, which grows and shrinks with the window,
          and shows its size. -->
     <div class="card observed" id="resize-card" tabindex="0">

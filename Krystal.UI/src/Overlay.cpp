@@ -20,8 +20,15 @@ namespace krys::ui
     owner.OverlayHidden(overlay);
   }
 
+  int32 Overlay::AlignedLeft(const boo::IntRect &controlRect, int32 width, int32 viewportWidth,
+                             bool rightToLeft) noexcept
+  {
+    auto x = rightToLeft ? controlRect.MaxX() - width : controlRect.X();
+    return std::clamp(x, 0, std::max(0, viewportWidth - width));
+  }
+
   boo::IntRect Overlay::Place(const boo::IntRect &controlRect, const boo::IntSize &size,
-                              const boo::IntSize &viewportSize) noexcept
+                              const boo::IntSize &viewportSize, bool rightToLeft) noexcept
   {
     auto height = size.Height();
     auto spaceBelow = std::max(0, viewportSize.Height() - controlRect.MaxY());
@@ -37,7 +44,7 @@ namespace krys::ui
       height = std::min(height, std::max(spaceBelow, 1));
     }
     auto width = std::min(size.Width(), std::max(viewportSize.Width(), 1));
-    auto x = std::clamp(controlRect.X(), 0, std::max(0, viewportSize.Width() - width));
+    auto x = AlignedLeft(controlRect, width, viewportSize.Width(), rightToLeft);
     return boo::IntRect(x, y, std::max(width, 1), std::max(height, 1));
   }
 

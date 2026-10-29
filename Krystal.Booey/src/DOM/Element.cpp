@@ -17,6 +17,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
@@ -50,6 +51,7 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -233,6 +235,52 @@ namespace krys::boo::dom
   {
     return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::Update)
            != Editability::ReadOnly;
+  }
+
+  bool Element::HasValidTextDirectionState() const noexcept
+  {
+    return ElementHasValidTextDirectionState(*this);
+  }
+
+  bool Element::HasAutoTextDirectionState() const noexcept
+  {
+    return ElementHasAutoTextDirectionState(*this);
+  }
+
+  void Element::UpdateEffectiveTextDirection() noexcept
+  {
+    auto textDirectionState = ElementTextDirectionState(*this);
+    UpdateEffectiveTextDirectionState(*this, textDirectionState);
+  }
+
+  void Element::UpdateEffectiveTextDirectionIfNeeded() noexcept
+  {
+    if (SelfOrPrecedingNodesAffectDirAuto()) KRYS_UNLIKELY
+    {
+      UpdateEffectiveTextDirection();
+      return;
+    }
+
+    auto *parent = TreeQueries::ParentOrShadowHostElement(*this);
+    if (!(parent && parent->UsesEffectiveTextDirection()))
+    {
+      return;
+    }
+
+    if (HasAttribute(u8"dir") || TreeQueries::GetShadowRoot(*this))
+    {
+      UpdateEffectiveTextDirection();
+      return;
+    }
+
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*this); input && input->IsTelephoneField())
+    {
+      UpdateEffectiveTextDirection();
+      return;
+    }
+
+    SetUsesEffectiveTextDirection(parent->UsesEffectiveTextDirection());
+    SetEffectiveTextDirection(parent->EffectiveTextDirection());
   }
 
   bool Element::HasCustomState(DOMStringAtom state) const noexcept
@@ -2505,6 +2553,10 @@ namespace krys::boo::dom
 
       SlotAlgorithms::AssignSlot(*this);
     }
+    else if (localName == Attributes::Dir)
+    {
+      TextDirectionStateChanged(*this, ParseTextDirectionState(value));
+    }
     else if (localName.View() == u8"part")
     {
       if (NeedsStyleInvalidation() && IsInShadowTree())
@@ -3485,7 +3537,12 @@ namespace krys::boo::dom
 
     if (auto *renderer = RenderBoxOf(*this))
     {
+      // The left border, and a vertical scrollbar placed between it and the padding.
       auto clientLeft = LayoutUnit(RoundToInt(renderer->ClientLeft()));
+      if (renderer->Style().ShouldPlaceVerticalScrollbarOnLeft())
+      {
+        clientLeft += renderer->VerticalScrollbarWidth();
+      }
       return ConvertToNonSubpixelValue(
         AdjustLayoutUnitForAbsoluteZoom(clientLeft, renderer->Style()).ToDouble());
     }

@@ -159,6 +159,11 @@ namespace krys::boo::html
       return true;
     }
 
+    KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final
+    {
+      return true;
+    }
+
     KRYS_NODISCARD bool ShouldUseInputMethod() noexcept final
     {
       return true;

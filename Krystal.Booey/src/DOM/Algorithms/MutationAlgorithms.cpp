@@ -17,6 +17,7 @@
 #include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -400,7 +401,13 @@ namespace krys::boo::dom
                                                           ShareRefPtr(previousSibling), ShareRefPtr(child));
     }
 
-    ExtensibilityHooks::NodeChildrenChanged(parent);
+    bool onlyReplacedElementsInserted = std::ranges::all_of(nodes,
+                                                            [](const Ref<Node> &node)
+                                                            {
+                                                              auto *element = DynamicDowncast<Element>(*node);
+                                                              return element && element->IsReplaced();
+                                                            });
+    ExtensibilityHooks::NodeChildrenChanged(parent, onlyReplacedElementsInserted);
 
     RebuildSVGExtensionsElementsIfNecessary(parent);
 

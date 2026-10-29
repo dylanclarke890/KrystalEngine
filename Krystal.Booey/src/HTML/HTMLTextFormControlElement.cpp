@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -1018,6 +1019,36 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTextFormControlElement::DirectionForFormData() const noexcept
   {
-    return css::EffectiveTextDirection(*this) == TextDirection::LTR ? u8"ltr" : u8"rtl";
+    auto direction = [this]
+    {
+      for (auto *element = static_cast<const dom::Element *>(this); element;
+           element = element->ParentElement())
+      {
+        if (!Is<HTMLElement>(*element))
+        {
+          continue;
+        }
+        auto value = element->GetAttribute(u8"dir");
+        if (!value)
+        {
+          continue;
+        }
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"rtl"))
+        {
+          return TextDirection::RTL;
+        }
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"ltr"))
+        {
+          return TextDirection::LTR;
+        }
+        if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, u8"auto"))
+        {
+          return dom::ComputeAutoDirectionality(*element).value_or(TextDirection::LTR);
+        }
+      }
+      return TextDirection::LTR;
+    }();
+
+    return direction == TextDirection::LTR ? u8"ltr" : u8"rtl";
   }
 }

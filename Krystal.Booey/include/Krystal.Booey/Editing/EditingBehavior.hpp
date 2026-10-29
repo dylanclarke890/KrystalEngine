@@ -104,6 +104,12 @@ namespace krys::boo
       return _type == EditingBehaviorType::Windows;
     }
 
+    // On Windows, double-clicking a word selects the whitespace after it too.
+    KRYS_NODISCARD constexpr bool ShouldSelectTrailingWhitespaceOnDoubleClick() const noexcept
+    {
+      return _type == EditingBehaviorType::Windows;
+    }
+
     // On iOS the last entered character in a secure filed is shown momentarily, removing and adding back the
     // space when deleting password cause space been showed insecurely.
     KRYS_NODISCARD constexpr bool ShouldRebalanceWhiteSpacesInSecureField() const noexcept

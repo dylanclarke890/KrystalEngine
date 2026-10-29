@@ -1899,6 +1899,20 @@ namespace krys::ui
       return true;
     }
 
+    // Ctrl with a Shift key on its own chooses the direction of the text being edited, when they're let go:
+    // the right Shift right to left, the left one left to right. Any other key on the way cancels it.
+    bool isShift = key == pal::Key::Shift || key == pal::Key::RightShift;
+    if (isShift && modifiers.Contains(pal::KeyModifier::Control) && !modifiers.Contains(pal::KeyModifier::Alt)
+        && !modifiers.Contains(pal::KeyModifier::Meta))
+    {
+      _pendingTextDirection =
+        key == pal::Key::RightShift ? boo::WritingDirection::RightToLeft : boo::WritingDirection::LeftToRight;
+    }
+    else if (!isShift && key != pal::Key::Control && key != pal::Key::RightControl)
+    {
+      _pendingTextDirection = null;
+    }
+
     auto event = input::KeyboardEvent(boo::PlatformEvent::Type::KeyDown, key, modifiers, text, isAutoRepeat);
     _heldKeyValues.insert_or_assign(key, event.Key());
     bool handled = _frame->GetEventHandler().KeyEvent(event);
@@ -1937,6 +1951,17 @@ namespace krys::ui
     }
     bool handled = _frame->GetEventHandler().KeyEvent(
       input::KeyboardEvent(boo::PlatformEvent::Type::KeyUp, key, modifiers, {}, false, keyValue));
+
+    if (_pendingTextDirection
+        && (key == pal::Key::Shift || key == pal::Key::RightShift || key == pal::Key::Control
+            || key == pal::Key::RightControl))
+    {
+      auto direction = *std::exchange(_pendingTextDirection, null);
+      if (auto *document = _frame->Document(); document && document->GetEditor().CanEdit())
+      {
+        document->GetEditor().SetBaseWritingDirection(direction);
+      }
+    }
     PerformMicrotaskCheckpoint();
     return handled;
   }

@@ -637,7 +637,8 @@ namespace krys::boo
 
     _spaceWidth = PlatformWidthForGlyph(static_cast<Glyph>(freeTypeFace.GlyphIndex(text::Space)));
 
-    _syntheticBoldOffset = _platformData.SyntheticBold() ? 1.0f : 0.f;
+    // Synthetic bold emboldens the glyphs as they're drawn but keeps their advances, as Chrome does.
+    _syntheticBoldOffset = 0.f;
 
     // Disable antialiasing for the Ahem font because many tests require this.
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(freeTypeFace.FamilyName(), u8"Ahem"))

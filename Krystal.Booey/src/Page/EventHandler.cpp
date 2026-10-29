@@ -2106,12 +2106,15 @@ namespace krys::boo
       return CharacterCount(*range, TextIteratorBehavior::EmitsCharactersBetweenAllVisiblePositions);
     }
 
-    // FIXME: The editor's isSelectTrailingWhitespaceEnabled, with the editor; off, as its client's default
-    // is.
-    KRYS_NODISCARD AppendTrailingWhitespace
-      AppendTrailingWhitespaceForEvent(const MouseEventWithHitTestResults &) noexcept
+    KRYS_NODISCARD AppendTrailingWhitespace AppendTrailingWhitespaceForEvent(
+      const LocalFrame &frame, const MouseEventWithHitTestResults &event) noexcept
     {
-      return DontAppendTrailingWhitespace;
+      auto *document = frame.Document();
+      return event.Event().ClickCount() == 2 && document
+                 && EditingBehavior(document->GetSettings().EditingBehaviorType)
+                      .ShouldSelectTrailingWhitespaceOnDoubleClick()
+               ? ShouldAppendTrailingWhitespace
+               : DontAppendTrailingWhitespace;
     }
   }
 
@@ -2301,8 +2304,8 @@ namespace krys::boo
         && !doc->Selection().Contains(viewportPos))
     {
       _mouseDownMayStartSelect = true; // context menu events are always allowed to perform a selection
-      SelectClosestContextualWordOrLinkFromHitTestResult(mouseEvent.GetHitTestResult(),
-                                                         AppendTrailingWhitespaceForEvent(mouseEvent));
+      SelectClosestContextualWordOrLinkFromHitTestResult(
+        mouseEvent.GetHitTestResult(), AppendTrailingWhitespaceForEvent(_frame, mouseEvent));
     }
 
     return !DispatchMouseEvent(dom::DOMStringAtom(EventNames::ContextMenu), mouseEvent.TargetNode(), 0, event,
@@ -2660,7 +2663,8 @@ namespace krys::boo
     }
     else if (MouseDownMayStartSelect())
     {
-      SelectClosestWordFromHitTestResult(event.GetHitTestResult(), AppendTrailingWhitespaceForEvent(event));
+      SelectClosestWordFromHitTestResult(event.GetHitTestResult(),
+                                         AppendTrailingWhitespaceForEvent(_frame, event));
     }
 
     return true;

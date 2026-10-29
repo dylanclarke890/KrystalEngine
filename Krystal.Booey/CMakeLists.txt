@@ -193,6 +193,7 @@ add_custom_command(
   DEPENDS
     "${KRYSTAL_BOOEY_CODEGEN_DIR}/bundled_fonts.py"
     "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/liberation-fonts/LiberationSans-Regular.ttf"
+    "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/noto-sans-arabic/NotoSansArabic-Regular.ttf"
     "${KRYSTAL_BOOEY_BUNDLED_FONTS_DIR}/stix-two-fonts/STIXTwoMath-Regular.otf"
   COMMENT
     "Embedding Krystal.Booey's bundled fonts..."
@@ -3812,6 +3813,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/DOMImplementation.hpp
       include/Krystal.Booey/DOM/DOMTokenList.hpp
       include/Krystal.Booey/DOM/Element.hpp
+      include/Krystal.Booey/DOM/ElementTextDirection.hpp
       include/Krystal.Booey/DOM/EventListenerHandle.hpp
       include/Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp
       include/Krystal.Booey/DOM/Enums/CommandType.hpp
@@ -3970,6 +3972,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLAreaElement.hpp
       include/Krystal.Booey/HTML/HTMLAudioElement.hpp
       include/Krystal.Booey/HTML/HTMLBaseElement.hpp
+      include/Krystal.Booey/HTML/HTMLBDIElement.hpp
       include/Krystal.Booey/HTML/HTMLBodyElement.hpp
       include/Krystal.Booey/HTML/HTMLBRElement.hpp
       include/Krystal.Booey/HTML/HTMLWBRElement.hpp
@@ -4431,6 +4434,7 @@ target_sources(Krystal.Booey
     src/DOM/DOMImplementation.cpp
     src/DOM/DOMTokenList.cpp
     src/DOM/Element.cpp
+    src/DOM/ElementTextDirection.cpp
     src/DOM/Event.cpp
     src/DOM/EventListenerHandle.cpp
     src/DOM/EventTarget.cpp
@@ -4515,6 +4519,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLAreaElement.cpp
     src/HTML/HTMLAudioElement.cpp
     src/HTML/HTMLBaseElement.cpp
+    src/HTML/HTMLBDIElement.cpp
     src/HTML/HTMLBodyElement.cpp
     src/HTML/HTMLBRElement.cpp
     src/HTML/HTMLWBRElement.cpp

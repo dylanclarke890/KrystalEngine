@@ -24,6 +24,7 @@
 #include "Krystal.Booey/Rendering/ReferencedSVGResources.hpp"
 #include "Krystal.Booey/Rendering/RenderBlock.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderBoxModelObject.hpp"
 #include "Krystal.Booey/Rendering/RenderChildIterator.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/RenderGrid.hpp"
@@ -38,6 +39,7 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
 {
@@ -1110,6 +1112,167 @@ namespace krys::boo
   {
     return HasLayer()
            && static_cast<const RenderLayerModelObject &>(*this).Layer()->ParticipatesInPreserve3D();
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD List<FloatRect>
+      AbsoluteRectsForRangeInText(const dom::SimpleRange &range, dom::Text &node,
+                                  EnumSet<RenderObject::BoundingRectBehavior> behavior) noexcept
+    {
+      auto *renderer = node.Renderer();
+      if (!renderer)
+      {
+        return {};
+      }
+
+      auto offsetRange = dom::CharacterDataOffsetRange(range, node);
+      auto textQuads = renderer->AbsoluteQuadsForRange(static_cast<uint32>(offsetRange.Start),
+                                                       static_cast<uint32>(offsetRange.End), behavior);
+
+      if (behavior.Contains(RenderObject::BoundingRectBehavior::RespectClipping))
+      {
+        auto absoluteClippedOverflowRect = FloatRect(renderer->AbsoluteClippedOverflowRectForRepaint());
+        List<FloatRect> rects;
+        for (auto &quad : textQuads)
+        {
+          auto clippedRect = Intersection(quad.BoundingBox(), absoluteClippedOverflowRect);
+          if (!clippedRect.IsEmpty())
+          {
+            rects.push_back(clippedRect);
+          }
+        }
+        return rects;
+      }
+
+      return BoundingBoxes(textQuads);
+    }
+
+    KRYS_NODISCARD RefPtr<dom::Node> NodeAfter(const dom::BoundaryPoint &point) noexcept
+    {
+      if (auto node = point.Container->TraverseToChildAt(static_cast<uint32>(point.Offset + 1)))
+      {
+        return ShareRefPtr(node);
+      }
+      return ShareRefPtr(point.Container.get());
+    }
+
+    enum class CoordinateSpace : uint8
+    {
+      Client,
+      Absolute
+    };
+
+    KRYS_NODISCARD List<FloatRect>
+      BorderAndTextRects(const dom::SimpleRange &range, CoordinateSpace space,
+                         EnumSet<RenderObject::BoundingRectBehavior> behavior) noexcept
+    {
+      List<FloatRect> rects;
+
+      (void)range.Start.GetDocument().UpdateLayoutIgnorePendingStylesheets();
+
+      bool useVisibleBounds = behavior.Contains(RenderObject::BoundingRectBehavior::UseVisibleBounds);
+
+      HashSet<const dom::Element *> selectedElementsSet;
+      for (auto &node : dom::IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(range))
+      {
+        if (auto *element = DynamicDowncast<dom::Element>(node))
+        {
+          selectedElementsSet.insert(element);
+        }
+      }
+
+      // Don't include elements at the end of the range that are only partially selected.
+      // FIXME: What about the start of the range? The asymmetry here does not make sense. Seems likely this
+      // logic is not quite right in other respects, too.
+      if (auto lastNode = NodeAfter(range.End))
+      {
+        auto *ancestor = DynamicDowncast<dom::Element>(*lastNode);
+        if (!ancestor)
+        {
+          ancestor = lastNode->ParentElement();
+        }
+        for (; ancestor; ancestor = ancestor->ParentElement())
+        {
+          selectedElementsSet.erase(ancestor);
+        }
+      }
+
+      for (auto &node : dom::IntersectingNodesWithDeprecatedZeroOffsetStartQuirk(range))
+      {
+        auto *element = DynamicDowncast<dom::Element>(node);
+        if (element && selectedElementsSet.contains(element)
+            && (useVisibleBounds || !node.ParentElement()
+                || !selectedElementsSet.contains(node.ParentElement())))
+        {
+          auto *renderer = DynamicDowncast<RenderBoxModelObject>(element->Renderer());
+          if (!renderer)
+          {
+            continue;
+          }
+          if (useVisibleBounds)
+          {
+            auto localBounds = renderer->BorderBoundingBox();
+            auto rootClippedBounds = renderer->ComputeVisibleRectsInContainer(
+              RenderObject::RepaintRects(localBounds), &renderer->View(),
+              {.Options = {VisibleRectContext::Option::UseEdgeInclusiveIntersection,
+                           VisibleRectContext::Option::ApplyCompositedClips,
+                           VisibleRectContext::Option::ApplyCompositedContainerScrolls}});
+            if (!rootClippedBounds)
+            {
+              continue;
+            }
+            auto snappedBounds = SnapRectToDevicePixels(rootClippedBounds->ClippedOverflowRect,
+                                                        node.NodeDocument().DeviceScaleFactor());
+            if (space == CoordinateSpace::Client)
+            {
+              node.NodeDocument().ConvertAbsoluteToClientRect(snappedBounds, renderer->Style());
+            }
+            rects.push_back(snappedBounds);
+            continue;
+          }
+
+          List<FloatQuad> elementQuads;
+          renderer->AbsoluteQuads(elementQuads);
+          if (space == CoordinateSpace::Client)
+          {
+            node.NodeDocument().ConvertAbsoluteToClientQuads(elementQuads, renderer->Style());
+          }
+          auto boxes = BoundingBoxes(elementQuads);
+          rects.insert(rects.end(), boxes.begin(), boxes.end());
+        }
+        else if (auto *textNode = DynamicDowncast<dom::Text>(node))
+        {
+          if (auto *renderer = textNode->Renderer())
+          {
+            auto clippedRects = AbsoluteRectsForRangeInText(range, *textNode, behavior);
+            if (space == CoordinateSpace::Client)
+            {
+              node.NodeDocument().ConvertAbsoluteToClientRects(clippedRects, renderer->Style());
+            }
+            rects.insert(rects.end(), clippedRects.begin(), clippedRects.end());
+          }
+        }
+      }
+
+      if (behavior.Contains(RenderObject::BoundingRectBehavior::IgnoreTinyRects))
+      {
+        std::erase_if(rects, [](const FloatRect &rect) { return rect.Area() <= 1; });
+      }
+
+      return rects;
+    }
+  }
+
+  List<FloatRect> RenderObject::AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
+                                                           EnumSet<BoundingRectBehavior> behavior) noexcept
+  {
+    return BorderAndTextRects(range, CoordinateSpace::Absolute, behavior);
+  }
+
+  List<FloatRect> RenderObject::ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept
+  {
+    return BorderAndTextRects(range, CoordinateSpace::Client, {});
   }
 
   List<FloatQuad> RenderObject::AbsoluteTextQuads(const dom::SimpleRange &range,

@@ -243,7 +243,7 @@ namespace krys::boo::css
 
   bool MatchesDirPseudoClass(const dom::Element &element, const CSSOMStringAtom &argument) noexcept
   {
-    switch (EffectiveTextDirection(element))
+    switch (element.EffectiveTextDirection())
     {
       case TextDirection::LTR:
         return text::IsASCIICaselessEqual(argument.View(), dom::DOMStringView(u8"ltr"));
@@ -282,38 +282,5 @@ namespace krys::boo::css
     // Otherwise, the document's pragma-set default language, if any.
     // FIXME: The Content-Language header, once responses have headers.
     return element.NodeDocument().ContentLanguage();
-  }
-
-  TextDirection EffectiveTextDirection(const dom::Element &element) noexcept
-  {
-    for (auto *ancestor = &element; ancestor;
-         ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
-    {
-      if (!Is<html::HTMLElement>(*ancestor))
-      {
-        continue;
-      }
-      auto dir =
-        text::ToASCIILower(dom::DOMStringView(ancestor->GetAttribute(u8"dir").value_or(dom::DOMString())));
-      if (dir == u8"ltr")
-      {
-        return TextDirection::LTR;
-      }
-      if (dir == u8"rtl")
-      {
-        return TextDirection::RTL;
-      }
-      if (dir == u8"auto" || (dir.empty() && IsHTMLElement(*ancestor, html::TagName::bdi)))
-      {
-        // FIXME: Auto directionality (the first strong character of the text), once there is bidi data.
-        return TextDirection::LTR;
-      }
-      if (auto *input = DynamicDowncastHTML<html::HTMLInputElement>(*ancestor);
-          input && input->IsTelephoneField())
-      {
-        return TextDirection::LTR;
-      }
-    }
-    return TextDirection::LTR;
   }
 }

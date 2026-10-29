@@ -259,6 +259,12 @@ div.drag-field { min-height: 60px; }
 .selection img { width: 24px; height: 16px; vertical-align: middle; }
 .caret { cursor: text; caret-color: #7b2cbf; }
 .caret p { margin: 0 0 8px; font-size: 13px; line-height: 18px; }
+.bidi { cursor: text; }
+.bidi p { margin: 0 0 8px; font-size: 15px; line-height: 22px; }
+.bidi-fields input, .bidi-fields textarea { display: block; box-sizing: border-box; width: 100%; margin: 0 0 8px;
+  font: 14px sans-serif; }
+.bidi-fields textarea { height: 48px; resize: none; }
+.scores ol { margin: 0; padding-inline-start: 24px; font-size: 14px; line-height: 22px; }
 .order { font-size: 13px; line-height: 18px; }
 /* The form spans the page and grows with its contents (more specific than `.card`, which sets a height). */
 .card.order { width: 100%; height: auto; }

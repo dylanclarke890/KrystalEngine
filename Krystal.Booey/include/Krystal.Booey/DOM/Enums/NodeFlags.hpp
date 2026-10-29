@@ -46,7 +46,15 @@ namespace krys::boo::dom
     /// @brief Set on an SVG element waiting for an id as a pending resource of its tree scope; see
     /// `DocumentOrShadowRoot::AddPendingSVGResource`.
     HasPendingResources = 1 << 22,
+    /// @brief Set on a node whose text may decide the auto directionality of an ancestor (an element whose
+    /// `dir` is `auto`, or a `<bdi>`), and on that element; see `ElementTextDirection.hpp`.
+    SelfOrPrecedingNodesAffectDirAuto = 1 << 23,
+    /// @brief Set on a node whose directionality is kept (`EffectiveTextDirectionIsRTL`) rather than the
+    /// document element's.
+    UsesEffectiveTextDirection = 1 << 24,
+    /// @brief The kept directionality, set when it's right to left.
+    EffectiveTextDirectionIsRTL = 1 << 25,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 23u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 26u);

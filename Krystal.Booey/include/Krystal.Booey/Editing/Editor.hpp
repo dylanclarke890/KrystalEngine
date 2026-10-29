@@ -33,9 +33,15 @@ namespace krys::boo::dom
   struct SimpleRange;
 }
 
+namespace krys::boo::css
+{
+  class StyleProperties;
+}
+
 namespace krys::boo
 {
   class CompositeEditCommand;
+  class EditingStyle;
   class EditCommandComposition;
   class EditorClient;
   class EditorInternalCommand;
@@ -48,6 +54,7 @@ namespace krys::boo
   enum class RevealExtentOption : bool;
   enum class SelectionDirection : uint8;
   enum class TextGranularity : uint8;
+  enum class WritingDirection : uint8;
 
   enum class EditorCommandSource : uint8
   {
@@ -289,6 +296,24 @@ namespace krys::boo
     KRYS_NODISCARD bool SmartInsertDeleteEnabled() noexcept;
     KRYS_NODISCARD bool CanSmartCopyOrDelete() noexcept;
     KRYS_NODISCARD Maybe<dom::SimpleRange> SelectedRange() noexcept;
+
+    /// @brief Applies @p style to the selected content, or, at a caret, to what's typed next (its block
+    /// properties apply to the paragraph straight away). `beforeinput` and `input` are fired at the editing
+    /// host around it.
+    void ApplyStyle(const css::StyleProperties *style, EditAction editingAction) noexcept;
+    void ApplyStyle(RefPtr<EditingStyle> &&style, EditAction editingAction) noexcept;
+    /// @brief Applies @p style to the paragraphs the selection touches.
+    void ApplyParagraphStyle(const css::StyleProperties *style, EditAction editingAction) noexcept;
+    /// @brief `ApplyStyle`, when @p style has properties and the selection is richly editable.
+    void ApplyStyleToSelection(const css::StyleProperties *style, EditAction editingAction) noexcept;
+    /// @brief `ApplyParagraphStyle`, when @p style has properties and the selection is richly editable.
+    void ApplyParagraphStyleToSelection(const css::StyleProperties *style, EditAction editingAction) noexcept;
+    /// @brief Merges @p style into the typing style, applying its block properties to the paragraph.
+    void ComputeAndSetTypingStyle(EditingStyle &style, EditAction editingAction) noexcept;
+
+    /// @brief Sets the base direction of the focused text field (its `dir` attribute), or of the paragraphs
+    /// the selection touches (their `direction`). A text field ignores `WritingDirection::Natural`.
+    void SetBaseWritingDirection(WritingDirection direction) noexcept;
 
     /// @brief Inserts typed text, firing `textInput` at the event's target first.
     bool InsertText(utf8_stringview text, dom::Event *triggeringEvent,

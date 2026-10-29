@@ -369,14 +369,14 @@ namespace krys::boo
     auto &database = FontDatabase::Singleton();
 
     // The registered faces that have every character, the best match for the description first (the earliest
-    // registered when they match as well); the bundled faces are the last to try, the math face after the
-    // text face.
+    // registered when they match as well); the bundled faces are the last to try: the text face, then the
+    // Arabic face, then the math face.
     List<text::FreeTypeFace *> candidates;
     List<FontSelectionCapabilities> capabilities;
     for (auto &face : database.Faces())
     {
-      if (face.get() == &database.BundledFace() || face.get() == &database.BundledMathFace()
-          || !FaceHasCharacters(*face, characterCluster))
+      if (face.get() == &database.BundledFace() || face.get() == &database.BundledArabicFace()
+          || face.get() == &database.BundledMathFace() || !FaceHasCharacters(*face, characterCluster))
       {
         continue;
       }
@@ -393,6 +393,10 @@ namespace krys::boo
     else if (FaceHasCharacters(database.BundledFace(), characterCluster))
     {
       face = &database.BundledFace();
+    }
+    else if (FaceHasCharacters(database.BundledArabicFace(), characterCluster))
+    {
+      face = &database.BundledArabicFace();
     }
     else if (FaceHasCharacters(database.BundledMathFace(), characterCluster))
     {

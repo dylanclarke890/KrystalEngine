@@ -851,6 +851,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::Video;
     }
 
+    KRYS_NODISCARD bool IsHTMLBDIElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::BDI;
+    }
+
     KRYS_NODISCARD bool IsHTMLWBRElement() const noexcept
     {
       return _interface == HTMLElementInterface::WBR;

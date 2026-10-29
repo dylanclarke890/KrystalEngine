@@ -257,9 +257,12 @@ namespace krys::ui
 
     auto locale = boo::Locale::Create(_parameters.Locale);
 
-    utf8_string html = u8"<!DOCTYPE html><style>"
-                       u8"html { width: max-content; margin: 0; border: 1px solid GrayText; cursor: default;"
-                       u8" background: Canvas; color: CanvasText; font: 13px sans-serif;";
+    // A right-to-left input's picker is mirrored: the week runs from the right, and the button for the
+    // previous page is on the right (its arrow, a mirrored character, points right).
+    bool rightToLeft = _parameters.IsAnchorElementRTL;
+    utf8_string html = rightToLeft ? u8"<!DOCTYPE html><html dir=rtl><style>" : u8"<!DOCTYPE html><style>";
+    html += u8"html { width: max-content; margin: 0; border: 1px solid GrayText; cursor: default;"
+            u8" background: Canvas; color: CanvasText; font: 13px sans-serif;";
     if (_parameters.UseDarkAppearance)
     {
       html += u8" color-scheme: dark;";
@@ -277,7 +280,9 @@ namespace krys::ui
       u8".today { font-weight: bold; }\n"
       u8".selected { outline: 1px solid Highlight; outline-offset: -1px; }\n"
       u8".highlighted { background: Highlight; color: HighlightText; }\n"
-      u8"</style><body><div class=header><span class=nav data-action=-1>&lt;</span><span>";
+      u8"</style><body><div class=header><span class=nav data-action=-1>";
+    html += u8"&lt;</span><span>";
+    utf8_string nextButton = u8"</span><span class=nav data-action=1>&gt;</span></div><table>";
 
     auto cellClasses = [&](int32 value, bool other)
     {
@@ -308,7 +313,7 @@ namespace krys::ui
     if (_mode == Mode::Months)
     {
       html += Number(1'970 + _page);
-      html += u8"</span><span class=nav data-action=1>&gt;</span></div><table>";
+      html += nextButton;
       auto &labels = locale->ShortStandAloneMonthLabels();
       for (int32 row = 0; row < 4; ++row)
       {
@@ -334,7 +339,8 @@ namespace krys::ui
         month = *date;
       }
       AppendEscaped(html, locale->FormatDateTime(month));
-      html += u8"</span><span class=nav data-action=1>&gt;</span></div><table><tr>";
+      html += nextButton;
+      html += u8"<tr>";
 
       // Weeks start on Monday, as ISO weeks do.
       auto firstWeekDay = _mode == Mode::Weeks ? 1 : 0;
@@ -419,7 +425,7 @@ namespace krys::ui
         contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
       }
     }
-    _rect = Place(_parameters.AnchorRectInRootView, contentSize, viewport);
+    _rect = Place(_parameters.AnchorRectInRootView, contentSize, viewport, rightToLeft);
     _view->Resize(_rect.Size());
 
     SetHighlightedClass(_highlighted, true);
@@ -552,10 +558,12 @@ namespace krys::ui
   bool DateTimeChooserOverlay::KeyPressed(pal::Key key, pal::KeyModifiers) noexcept
   {
     bool months = _mode == Mode::Months;
+    // Mirrored, the left arrow goes on to the next day and the right one back.
+    auto forward = _parameters.IsAnchorElementRTL ? -1 : 1;
     switch (key)
     {
-      case pal::Key::LeftArrow:   Highlight(_highlighted - 1); return true;
-      case pal::Key::RightArrow:  Highlight(_highlighted + 1); return true;
+      case pal::Key::LeftArrow:   Highlight(_highlighted - forward); return true;
+      case pal::Key::RightArrow:  Highlight(_highlighted + forward); return true;
       case pal::Key::UpArrow:     Highlight(_highlighted - (months ? 3 : 7)); return true;
       case pal::Key::DownArrow:   Highlight(_highlighted + (months ? 3 : 7)); return true;
       case pal::Key::PageUp:      TurnPage(-1); return true;

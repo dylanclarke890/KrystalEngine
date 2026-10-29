@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/InputType.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/Core/WritingMode.hpp"
+#include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -818,6 +820,8 @@ namespace krys::boo::html
     bool wasInRange = IsInRange(element->Value());
     bool inRange = IsInRange(sanitizedValue);
 
+    auto oldDirection = dom::ComputeTextDirectionIfDirIsAuto(*element);
+
     Maybe<style::PseudoClassChangeInvalidation> styleInvalidation;
     if (wasInRange != inRange)
     {
@@ -829,7 +833,11 @@ namespace krys::boo::html
 
     element->SetValueInternal(sanitizedValue, eventBehavior);
 
-    // FIXME: Updating the auto directionality the value decides, once there's auto directionality.
+    if (oldDirection.value_or(TextDirection::LTR)
+        != dom::ComputeTextDirectionIfDirIsAuto(*element).value_or(TextDirection::LTR))
+    {
+      element->InvalidateStyleInternal();
+    }
 
     switch (eventBehavior)
     {

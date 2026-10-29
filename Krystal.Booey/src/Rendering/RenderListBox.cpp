@@ -561,7 +561,8 @@ namespace krys::boo
     Color textColor = itemStyle->VisitedDependentColorWithColorFilter(css::PropertyId::Color);
     if (optionElement && optionElement->Selected())
     {
-      if (GetDocument().Selection().IsFocusedAndActive() && GetDocument().FocusedElement() == &SelectElement())
+      if (GetDocument().Selection().IsFocusedAndActive()
+          && GetDocument().FocusedElement() == &SelectElement())
       {
         textColor = theme.ActiveListBoxSelectionForegroundColor(StyleColorOptions());
       }
@@ -605,8 +606,7 @@ namespace krys::boo
     }
 
     // Draw the item text
-    // FIXME: Draw it bidi (drawBidiText), once the graphics context resolves bidi runs.
-    (void)context.DrawText(
+    context.DrawBidiText(
       itemFont, textRun,
       FloatPoint(RoundedIntPoint(isHorizontalWritingMode ? r.Location() : r.MaxXMinYCorner())));
   }
@@ -627,7 +627,8 @@ namespace krys::boo
     if (auto *option = DynamicDowncast<html::HTMLOptionElement>(*listItemElement);
         option && option->Selected())
     {
-      if (GetDocument().Selection().IsFocusedAndActive() && GetDocument().FocusedElement() == &SelectElement())
+      if (GetDocument().Selection().IsFocusedAndActive()
+          && GetDocument().FocusedElement() == &SelectElement())
       {
         backColor = theme.ActiveListBoxSelectionBackgroundColor(StyleColorOptions());
       }

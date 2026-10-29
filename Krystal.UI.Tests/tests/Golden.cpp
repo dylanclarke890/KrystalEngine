@@ -23,7 +23,11 @@
 #include "Krystal.UI.Tests/ViewTestUtils.hpp"
 #include "Krystal.UI/EngineTexture.hpp"
 #include "Krystal.UI/View.hpp"
+#include <cmath>
+#include <format>
+#include <fstream>
 #include <numbers>
+#include <sstream>
 #include <string>
 #include <unicode/uloc.h>
 
@@ -202,6 +206,120 @@ namespace krys::ui::tests
       }
       CheckPageOnDevice(name, width, height, chromeReportOnly, pageSetup);
     }
+
+    /// @brief How far a client rect's edges may be from Chrome's: layout is the same, but positions are
+    /// rounded a little differently.
+    constexpr double ChromeRectTolerance = 1.0;
+
+    /// @brief @p rects with the ones that touch on the same line merged: Chrome reports an inline box's
+    /// pieces separately where they're reordered by bidi, though it draws them as one box.
+    KRYS_NODISCARD List<Array<double, 4>> MergeTouchingRects(const List<Array<double, 4>> &rects)
+    {
+      constexpr double epsilon = 0.01;
+      List<Array<double, 4>> merged;
+      for (const auto &rect : rects)
+      {
+        if (!merged.empty())
+        {
+          auto &last = merged.back();
+          bool sameLine = std::abs(last[1] - rect[1]) < epsilon && std::abs(last[3] - rect[3]) < epsilon;
+          if (sameLine && std::abs(last[0] + last[2] - rect[0]) < epsilon)
+          {
+            last[2] += rect[2];
+            continue;
+          }
+          if (sameLine && std::abs(rect[0] + rect[2] - last[0]) < epsilon)
+          {
+            last[0] = rect[0];
+            last[2] += rect[2];
+            continue;
+          }
+        }
+        merged.push_back(rect);
+      }
+      return merged;
+    }
+
+    /// @brief Checks the client rects of the page golden's elements against Chrome's
+    /// (`golden/<name>.chrome-rects.txt`, lines of "id x y width height" that
+    /// `tools/golden/capture_chrome.py` records), laid out in a view of the scene's size.
+    void CheckRectsAgainstChrome(const std::string &name, uint32 width, uint32 height)
+    {
+      std::ifstream file(GoldenDirectory() / (name + ".chrome-rects.txt"));
+      REQUIRE(file);
+      List<Pair<std::string, List<Array<double, 4>>>> expected;
+      for (std::string line; std::getline(file, line);)
+      {
+        std::istringstream stream(line);
+        std::string id;
+        Array<double, 4> rect {};
+        if (!(stream >> id >> rect[0] >> rect[1] >> rect[2] >> rect[3]))
+        {
+          continue;
+        }
+        if (expected.empty() || expected.back().first != id)
+        {
+          expected.push_back({id, {}});
+        }
+        expected.back().second.push_back(rect);
+      }
+      REQUIRE_FALSE(expected.empty());
+
+      static const auto fonts = View::AddFontDirectory(std::filesystem::path {KRYS_UI_TESTS_FONTS_DIR});
+      (void)fonts;
+      View view({static_cast<int32>(width), static_cast<int32>(height)});
+      REQUIRE(LoadAndSettle(view, GoldenDirectory() / "scenes" / (name + ".html")));
+
+      auto describe = [](const Array<double, 4> &rect)
+      {
+        return std::format("({} {} {} {})", rect[0], rect[1], rect[2], rect[3]);
+      };
+      std::string mismatches;
+      for (const auto &[id, chromeRectList] : expected)
+      {
+        auto chromeRects = MergeTouchingRects(chromeRectList);
+        auto element = view.Document().GetElementById(boo::dom::DOMString(id.begin(), id.end()));
+        if (!element)
+        {
+          mismatches += std::format("{}: no element\n", id);
+          continue;
+        }
+        auto rects = element->GetClientRects();
+        List<Array<double, 4>> actual;
+        for (uint32 index = 0; index < rects->Length(); ++index)
+        {
+          auto *rect = rects->Item(index);
+          actual.push_back({rect->X(), rect->Y(), rect->Width(), rect->Height()});
+        }
+        actual = MergeTouchingRects(actual);
+        bool matches = actual.size() == chromeRects.size();
+        for (size_t index = 0; matches && index < actual.size(); ++index)
+        {
+          for (size_t component = 0; component < 4; ++component)
+          {
+            matches =
+              matches
+              && std::abs(actual[index][component] - chromeRects[index][component]) <= ChromeRectTolerance;
+          }
+        }
+        if (!matches)
+        {
+          std::string line = std::format("{}: Chrome", id);
+          for (const auto &rect : chromeRects)
+          {
+            line += " " + describe(rect);
+          }
+          line += ", Booey";
+          for (const auto &rect : actual)
+          {
+            line += " " + describe(rect);
+          }
+          mismatches += line + "\n";
+        }
+      }
+      INFO(name << "'s client rects that differ from Chrome's:\n" << mismatches);
+      CHECK(mismatches.empty());
+    }
   }
 
   TEST_CASE("Golden: backgrounds", "[UI][GPU][Golden]")
@@ -231,6 +349,29 @@ namespace krys::ui::tests
     // Chrome on Windows rasterises glyphs with DirectWrite, whose hinting and contrast differ from
     // FreeType's, so its golden is only reported.
     CheckPage("text", 360u, 200u, true);
+  }
+
+  TEST_CASE("Golden: bidi text", "[UI][GPU][Golden]")
+  {
+    // Mixed-direction text: Chrome's glyphs are DirectWrite's, so its golden is only reported; its layout is
+    // checked through the elements' client rects.
+    CheckPage("bidi-text", 360u, 340u, true);
+    CheckRectsAgainstChrome("bidi-text", 360u, 340u);
+  }
+
+  TEST_CASE("Golden: bidi layout", "[UI][GPU][Golden]")
+  {
+    // Right-to-left boxes: lists, tables, flex, grid, floats, positioning, inline blocks and a scroller.
+    // Chrome's text is DirectWrite's, so its golden is only reported; its layout is checked through the
+    // elements' client rects.
+    CheckPage("bidi-layout", 360u, 240u, true);
+    CheckRectsAgainstChrome("bidi-layout", 360u, 240u);
+  }
+
+  TEST_CASE("Golden: bidi controls", "[UI][GPU][Golden]")
+  {
+    // Form controls in right-to-left content; the theme isn't Chrome's, so its golden is only reported.
+    CheckPage("bidi-controls", 360u, 240u, true);
   }
 
   TEST_CASE("Golden: selection", "[UI][GPU][Golden]")
@@ -500,6 +641,62 @@ namespace krys::ui::tests
                   Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
                 input.Click();
                 REQUIRE(view.ShownOverlay());
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: right-to-left select popup", "[UI][GPU][Golden]")
+  {
+    // Mirrored for the right-to-left select; Chrome draws its own popup in a window, so there's no Chrome
+    // golden.
+    CheckPage("bidi-select-popup", 240u, 200u, true,
+              [](View &view)
+              {
+                auto select = view.Document().GetElementById(u8"fruit");
+                REQUIRE(select);
+                auto box = select->GetBoundingClientRect();
+                boo::IntPoint inside(static_cast<int32>(box->X()) + 5, static_cast<int32>(box->Y()) + 5);
+                view.MousePressed(inside, pal::MouseButton::Left);
+                view.MouseReleased(inside, pal::MouseButton::Left);
+                REQUIRE(view.ShownOverlay());
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: right-to-left date picker", "[UI][GPU][Golden]")
+  {
+    // Mirrored for the right-to-left input; Chrome draws its own picker in a window, so there's no Chrome
+    // golden.
+    USEnglishScope english;
+    CheckPage("bidi-date-picker", 280u, 260u, true,
+              [](View &view)
+              {
+                auto &input =
+                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"date"));
+                input.Click();
+                REQUIRE(view.ShownOverlay());
+                // Mirrored, the left arrow moves on: the highlight moves to the 12th.
+                for (int32 i = 0; i < 5; ++i)
+                {
+                  (void)view.KeyPressed(pal::Key::LeftArrow);
+                }
+                view.UpdateRendering();
+              });
+  }
+
+  TEST_CASE("Golden: right-to-left color picker", "[UI][GPU][Golden]")
+  {
+    // Mirrored for the right-to-left input; Chrome draws its own picker in a window, so there's no Chrome
+    // golden.
+    CheckPage("bidi-color-picker", 240u, 200u, true,
+              [](View &view)
+              {
+                auto &input =
+                  Downcast<boo::html::HTMLInputElement>(*view.Document().GetElementById(u8"color"));
+                input.Click();
+                REQUIRE(view.ShownOverlay());
+                // Mirrored, the left arrow moves on, to the next swatch.
+                (void)view.KeyPressed(pal::Key::LeftArrow);
                 view.UpdateRendering();
               });
   }
@@ -802,5 +999,25 @@ namespace krys::ui::tests
                         context->FillRect(260, 128, 20, 14);
                         view.UpdateRendering();
                       });
+  }
+
+  TEST_CASE("Golden: a page whose web font is in the memory cache lays out as with a fresh one",
+            "[UI][Golden][!shouldfail]")
+  {
+    // FIXME: A page whose @font-face font comes from the memory cache keeps table cells' preferred widths
+    // from before the font applied, so its table is sized differently from a page whose font loads (by a
+    // fifth of a pixel a cell here); setting the cells' text again fixes it. "Golden: bidi layout" fails when
+    // any page was loaded before it in the process. See docs/booey/TODO.md.
+    auto td3 = []
+    {
+      View view({360, 240});
+      REQUIRE(LoadAndSettle(view, GoldenDirectory() / "scenes" / "bidi-layout.html"));
+      return view.Document().GetElementById(u8"td3")->GetBoundingClientRect()->Width();
+    };
+    auto first = td3();
+    auto second = td3();
+    // Chrome's width, which the first load matches.
+    CHECK(std::abs(first - 69.96875) < 0.05);
+    CHECK(std::abs(second - 69.96875) < 0.05);
   }
 }

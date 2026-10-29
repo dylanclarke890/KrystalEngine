@@ -40,6 +40,7 @@ namespace krys::boo::html
 
     // ColorChooserClient functions:
     KRYS_NODISCARD bool SupportsAlpha() const noexcept final;
+    KRYS_NODISCARD bool IsElementRTL() const noexcept final;
     KRYS_NODISCARD List<Color> SuggestedColors() const noexcept final;
 
   private:

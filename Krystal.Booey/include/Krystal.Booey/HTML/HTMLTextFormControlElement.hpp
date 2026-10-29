@@ -166,6 +166,10 @@ namespace krys::boo::html
     void ScheduleSelectEvent() noexcept;
 
     KRYS_NODISCARD virtual dom::DOMString Value() const noexcept = 0;
+
+    /// @brief Whether the control's auto directionality comes from its value rather than its text.
+    /// @see https://html.spec.whatwg.org/#auto-directionality-form-associated-elements
+    KRYS_NODISCARD virtual bool DirAutoUsesValue() const noexcept = 0;
     virtual dom::ExceptionOr<void> SetValue(
       dom::DOMStringView value,
       TextFieldEventBehavior eventBehavior = TextFieldEventBehavior::DispatchNoEvent,

@@ -36,6 +36,8 @@ namespace krys::ui
     boo::Color _selectedColor;
     int32 _highlightedIndex {-1};
     bool _visible {false};
+    /// @brief Whether the control lays out right to left, so the overlay is mirrored.
+    bool _rightToLeft {false};
 
   public:
     /// @brief Makes the picker, and shows it with @p initialColor chosen.

@@ -51,9 +51,15 @@ namespace krys::ui
 
     /// @brief Where an overlay of @p size goes for a control at @p controlRect, in a viewport of
     /// @p viewportSize: below the control if it fits, else wherever there's more room, shrunk to fit there;
-    /// and at the control's left edge, kept in the viewport.
+    /// and at the control's left edge (its right edge if @p rightToLeft), kept in the viewport.
     KRYS_NODISCARD static boo::IntRect Place(const boo::IntRect &controlRect, const boo::IntSize &size,
-                                             const boo::IntSize &viewportSize) noexcept;
+                                             const boo::IntSize &viewportSize,
+                                             bool rightToLeft = false) noexcept;
+    /// @brief The left of an overlay @p width wide for a control at @p controlRect: lined up with the
+    /// control's left edge, or its right edge if @p rightToLeft, and kept in a viewport @p viewportWidth
+    /// wide.
+    KRYS_NODISCARD static int32 AlignedLeft(const boo::IntRect &controlRect, int32 width, int32 viewportWidth,
+                                            bool rightToLeft) noexcept;
 
     /// @brief The element at @p point in @p view, or its nearest ancestor, with the attribute @p name.
     KRYS_NODISCARD static boo::dom::Element *ElementWithAttributeAt(View &view, const boo::IntPoint &point,

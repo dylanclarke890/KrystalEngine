@@ -395,6 +395,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Page/LocalFrameViewScrolling.cpp
 		tests/Rendering/RenderBox.cpp
 		tests/Rendering/RenderElement.cpp
+		tests/Rendering/RenderImage.cpp
 		tests/Rendering/RenderIterator.cpp
 		tests/Rendering/RenderCounter.cpp
 		tests/Rendering/RenderLayer.cpp
@@ -605,6 +606,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DOMTokenList.cpp
 		tests/DOM/Element.cpp
 		tests/DOM/ElementCSSOMView.cpp
+		tests/DOM/ElementTextDirection.cpp
 		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp

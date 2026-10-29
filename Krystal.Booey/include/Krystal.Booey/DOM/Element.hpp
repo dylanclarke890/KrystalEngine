@@ -814,6 +814,22 @@ namespace krys::boo::dom
       return false;
     }
 
+    /// @brief Whether the element's `dir` attribute is `ltr`, `rtl` or `auto`.
+    KRYS_NODISCARD bool HasValidTextDirectionState() const noexcept;
+
+    /// @brief Whether the element's directionality is its auto directionality.
+    /// @see https://html.spec.whatwg.org/#auto-directionality
+    KRYS_NODISCARD bool HasAutoTextDirectionState() const noexcept;
+
+    /// @brief Updates the directionality of the element, of what it decides, and of its ancestors whose auto
+    /// directionality it decides.
+    /// @see https://html.spec.whatwg.org/#the-directionality
+    void UpdateEffectiveTextDirection() noexcept;
+
+    /// @brief Takes the parent's directionality, or updates the element's own if it may differ; called as
+    /// the element is inserted.
+    void UpdateEffectiveTextDirectionIfNeeded() noexcept;
+
     /// @brief Whether the element takes text from the host's input method while it's focused: it's editable,
     /// or a text field (not a password field).
     KRYS_NODISCARD virtual bool ShouldUseInputMethod() noexcept;

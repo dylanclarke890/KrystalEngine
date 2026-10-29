@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Editing/EditorTestUtils.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
@@ -153,5 +154,13 @@ layer at (0,0) size 400x44
     // Shift and the arrow keys extend the selection from the anchor.
     CHECK(PressKey(fixture, u8"ArrowDown", u8"Down", vk::Down, {PlatformEvent::Modifier::ShiftKey}));
     CHECK(select.SelectedOptions()->Length() == 3uz);
+  }
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "RenderListBox: items of both directions are drawn in visual order",
+                   "[Rendering][RenderListBox]")
+  {
+    // "ab", then Hebrew shin and lamed: the Hebrew is drawn right to left, lamed first.
+    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><select size=2><option>abשל</option></select>");
+    CHECK(boo::tests::DrawnText(*fixture.PaintedDisplayList(), u8"של") == u8"לש");
   }
 }

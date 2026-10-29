@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/ClipboardEvent.hpp"
@@ -12,9 +13,11 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/TextEvent.hpp"
+#include "Krystal.Booey/Editing/ApplyStyleCommand.hpp"
 #include "Krystal.Booey/Editing/CompositeEditCommand.hpp"
 #include "Krystal.Booey/Editing/DeleteSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/EditingStyle.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Editing/RenderedPosition.hpp"
@@ -23,6 +26,7 @@
 #include "Krystal.Booey/Editing/TypingCommand.hpp"
 #include "Krystal.Booey/Editing/VisibleUnits.hpp"
 #include "Krystal.Booey/Editing/WebContentReader.hpp"
+#include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/Graphics/IntRect.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -68,6 +72,24 @@ namespace krys::boo
       }
       krys_debug_assert(false);
       return {};
+    }
+
+    KRYS_NODISCARD Maybe<dom::DOMString>
+      InputEventDataForEditingStyleAndAction(const css::StyleProperties *style, EditAction action) noexcept
+    {
+      if (!style)
+      {
+        return null;
+      }
+
+      switch (action)
+      {
+        case EditAction::SetColor: return dom::DOMString(style->GetPropertyValue(css::PropertyId::Color));
+        case EditAction::SetInlineWritingDirection:
+        case EditAction::SetBlockWritingDirection:
+          return dom::DOMString(style->GetPropertyValue(css::PropertyId::Direction));
+        default: return null;
+      }
     }
 
     bool DispatchBeforeInputEvent(dom::Element &element, utf8_stringview inputType,
@@ -939,6 +961,183 @@ namespace krys::boo
   bool Editor::CanEditRichly() const noexcept
   {
     return _document.Selection().Selection().IsContentRichlyEditable();
+  }
+
+  void Editor::ApplyStyle(const css::StyleProperties *style, EditAction editingAction) noexcept
+  {
+    if (style)
+    {
+      ApplyStyle(EditingStyle::Create(style), editingAction);
+    }
+  }
+
+  void Editor::ApplyStyle(RefPtr<EditingStyle> &&style, EditAction editingAction) noexcept
+  {
+    if (!style)
+    {
+      return;
+    }
+
+    auto &selection = _document.Selection();
+    if (selection.IsNone())
+    {
+      return;
+    }
+
+    auto inputTypeName = InputTypeNameForEditingAction(editingAction);
+    auto isInputMethodComposing = IsInputMethodComposingForEditingAction(editingAction)
+                                    ? dom::IsInputMethodComposing::Yes
+                                    : dom::IsInputMethodComposing::No;
+    auto inputEventData = InputEventDataForEditingStyleAndAction(style->Style(), editingAction);
+    RefPtr<dom::Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
+
+    if (element && !DispatchBeforeInputEvent(*element, inputTypeName, isInputMethodComposing, inputEventData))
+    {
+      return;
+    }
+
+    if (selection.IsNone())
+    {
+      return;
+    }
+
+    if (selection.IsCaret())
+    {
+      ComputeAndSetTypingStyle(*style, editingAction);
+    }
+    else
+    {
+      ApplyStyleCommand::Create(_document, style.get(), editingAction)->Apply();
+    }
+
+    if (element)
+    {
+      DispatchInputEvent(*element, inputTypeName, isInputMethodComposing, krys::move(inputEventData));
+    }
+  }
+
+  void Editor::ApplyParagraphStyle(const css::StyleProperties *style, EditAction editingAction) noexcept
+  {
+    if (!style)
+    {
+      return;
+    }
+
+    auto &selection = _document.Selection();
+    if (selection.IsNone())
+    {
+      return;
+    }
+
+    auto inputTypeName = InputTypeNameForEditingAction(editingAction);
+    auto isInputMethodComposing = IsInputMethodComposingForEditingAction(editingAction)
+                                    ? dom::IsInputMethodComposing::Yes
+                                    : dom::IsInputMethodComposing::No;
+    auto inputEventData = InputEventDataForEditingStyleAndAction(style, editingAction);
+    RefPtr<dom::Element> element = ShareRefPtr(selection.Selection().RootEditableElement());
+    if (element && !DispatchBeforeInputEvent(*element, inputTypeName, isInputMethodComposing, inputEventData))
+    {
+      return;
+    }
+    if (selection.IsNone())
+    {
+      return;
+    }
+
+    ApplyStyleCommand::Create(_document, EditingStyle::Create(style).get(), editingAction,
+                              ApplyStylePropertyLevel::ForceBlock)
+      ->Apply();
+
+    if (element)
+    {
+      DispatchInputEvent(*element, inputTypeName, isInputMethodComposing, krys::move(inputEventData));
+    }
+  }
+
+  void Editor::ApplyStyleToSelection(const css::StyleProperties *style, EditAction editingAction) noexcept
+  {
+    if (!style || !style->PropertyCount() || !CanEditRichly())
+    {
+      return;
+    }
+    ApplyStyle(style, editingAction);
+  }
+
+  void Editor::ApplyParagraphStyleToSelection(const css::StyleProperties *style,
+                                              EditAction editingAction) noexcept
+  {
+    if (!style || !style->PropertyCount() || !CanEditRichly())
+    {
+      return;
+    }
+    ApplyParagraphStyle(style, editingAction);
+  }
+
+  void Editor::ComputeAndSetTypingStyle(EditingStyle &style, EditAction editingAction) noexcept
+  {
+    auto &selection = _document.Selection();
+    if (style.IsEmpty())
+    {
+      selection.ClearTypingStyle();
+      return;
+    }
+
+    // Calculate the current typing style.
+    RefPtr<EditingStyle> typingStyle;
+    if (auto *existingTypingStyle = selection.TypingStyle())
+    {
+      typingStyle = existingTypingStyle->Copy();
+    }
+    else
+    {
+      typingStyle = EditingStyle::Create();
+    }
+    typingStyle->OverrideTypingStyleAt(style, selection.Selection().VisibleStart().DeepEquivalent());
+
+    // Handle block styles, substracting these from the typing style.
+    auto blockStyle = typingStyle->ExtractAndRemoveBlockProperties();
+    if (!blockStyle->IsEmpty())
+    {
+      ApplyStyleCommand::Create(_document, blockStyle.get(), editingAction)->Apply();
+    }
+
+    // Set the remaining style as the typing style.
+    selection.SetTypingStyle(krys::move(typingStyle));
+  }
+
+  void Editor::SetBaseWritingDirection(WritingDirection direction) noexcept
+  {
+    if (auto *focusedElement = DynamicDowncast<html::HTMLTextFormControlElement>(_document.FocusedElement());
+        focusedElement && focusedElement->IsTextField())
+    {
+      if (direction == WritingDirection::Natural)
+      {
+        return;
+      }
+
+      auto element = ShareRef(*focusedElement);
+      auto directionValue = direction == WritingDirection::LeftToRight ? u8"ltr" : u8"rtl";
+      auto writingDirectionInputTypeName =
+        InputTypeNameForEditingAction(EditAction::SetBlockWritingDirection);
+      if (!DispatchBeforeInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
+                                    dom::DOMString(directionValue)))
+      {
+        return;
+      }
+
+      (void)element->SetAttribute(dom::DOMStringAtom(u8"dir"), dom::DOMString(directionValue));
+      DispatchInputEvent(*element, writingDirectionInputTypeName, dom::IsInputMethodComposing::No,
+                         dom::DOMString(directionValue));
+      (void)_document.UpdateStyleIfNeeded();
+      return;
+    }
+
+    auto style = css::MutableStyleProperties::Create();
+    (void)style->SetProperty(css::PropertyId::Direction,
+                             direction == WritingDirection::LeftToRight   ? css::ValueId::Ltr
+                             : direction == WritingDirection::RightToLeft ? css::ValueId::Rtl
+                                                                          : css::ValueId::Inherit);
+    ApplyParagraphStyleToSelection(style.get(), EditAction::SetBlockWritingDirection);
   }
 
   bool Editor::CanDelete() const noexcept

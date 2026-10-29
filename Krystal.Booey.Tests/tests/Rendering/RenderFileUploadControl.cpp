@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Rendering/RenderFileUploadControl.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -105,6 +106,16 @@ layer at (0,0) size 800x38
       many.SetFiles(Files({u8"C:/drops/a.txt", u8"C:/drops/b.txt"}));
       CHECK(Downcast<RenderFileUploadControl>(*many.Renderer()).FileTextValue() == u8"2 files");
       CHECK(PaintedRuns(fixture).starts_with("21@130,12"));
+    }
+
+    SECTION("A file name of both directions is drawn in visual order")
+    {
+      // "ab", then Hebrew shin and lamed: the Hebrew is drawn right to left, lamed first.
+      one.SetFiles(Files({u8"C:/drops/abשל"}));
+      (void)fixture.Document->UpdateLayout();
+      display_list::RecorderImpl recorder(FloatSize(800, 600));
+      fixture.Frame->View()->Paint(recorder, IntRect(0, 0, 800, 600));
+      CHECK(boo::tests::DrawnText(*recorder.TakeDisplayList(), u8"של") == u8"לש");
     }
 
     SECTION("The button follows the input's multiple and disabled")

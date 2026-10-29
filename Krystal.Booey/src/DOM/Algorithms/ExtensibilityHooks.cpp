@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
@@ -29,6 +30,41 @@ namespace krys::boo::dom
       if (id && !id->empty())
       {
         scope.IdTargetObserverRegistry().NotifyObservers(*element, DOMStringAtom(*id));
+      }
+    }
+
+    /// @brief Forgets the directionality @p element kept from the parent it left.
+    void ResetEffectiveTextDirectionAfterRemoval(Element &element) noexcept
+    {
+      if (element.UsesEffectiveTextDirection()) KRYS_UNLIKELY
+      {
+        if (!element.HasValidTextDirectionState())
+        {
+          if (auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+              !(parent && parent->UsesEffectiveTextDirection()))
+          {
+            element.SetUsesEffectiveTextDirection(false);
+          }
+        }
+      }
+    }
+
+    /// @brief Updates the directionality of @p element as it joins its parent.
+    void UpdateEffectiveTextDirectionAfterInsertion(Element &element) noexcept
+    {
+      // A slot's directionality is updated once it's inserted, from its assigned nodes.
+      if (!Is<html::HTMLSlotElement>(element))
+      {
+        element.UpdateEffectiveTextDirectionIfNeeded();
+      }
+    }
+
+    void UpdateSlotEffectiveTextDirectionAfterInsertion(Node &node) noexcept
+    {
+      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(node);
+          slot && slot->SelfOrPrecedingNodesAffectDirAuto())
+      {
+        slot->UpdateEffectiveTextDirection();
       }
     }
   }
@@ -76,7 +112,12 @@ namespace krys::boo::dom
     {
       NotifyIdTargetObservers(insertedNode, insertedNode.TreeScope());
     }
+    if (auto *element = DynamicDowncast<Element>(insertedNode))
+    {
+      UpdateEffectiveTextDirectionAfterInsertion(*element);
+    }
     insertedNode.OnInsert();
+    UpdateSlotEffectiveTextDirectionAfterInsertion(insertedNode);
   }
 
   void ExtensibilityHooks::NodePostConnection(Node &connectedNode) noexcept
@@ -84,9 +125,20 @@ namespace krys::boo::dom
     connectedNode.OnPostConnection();
   }
 
-  void ExtensibilityHooks::NodeChildrenChanged(ContainerNode &node) noexcept
+  void ExtensibilityHooks::NodeChildrenChanged(ContainerNode &node,
+                                               bool onlyReplacedElementsInserted) noexcept
   {
     node.OnChildrenChanged();
+
+    if (node.NodeDocument().IsDirAttributeDirty()) KRYS_UNLIKELY
+    {
+      // Inserting a replaced Element (image, canvas, input, etc) should be treated as a neutral character.
+      if (auto *element = DynamicDowncast<Element>(node);
+          element && element->SelfOrPrecedingNodesAffectDirAuto() && !onlyReplacedElementsInserted)
+      {
+        element->UpdateEffectiveTextDirection();
+      }
+    }
   }
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
@@ -121,7 +173,13 @@ namespace krys::boo::dom
       NotifyIdTargetObservers(movedNode, oldScope);
       NotifyIdTargetObservers(movedNode, newScope);
     }
+    if (auto *element = DynamicDowncast<Element>(movedNode))
+    {
+      ResetEffectiveTextDirectionAfterRemoval(*element);
+      UpdateEffectiveTextDirectionAfterInsertion(*element);
+    }
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
+    UpdateSlotEffectiveTextDirectionAfterInsertion(movedNode);
   }
 
   void ExtensibilityHooks::DestroyRenderTreeIfNeeded(Node &child) noexcept
@@ -155,6 +213,7 @@ namespace krys::boo::dom
       element->SetSavedLayerScrollPosition({});
       element->ClearBeforePseudoElement();
       element->ClearAfterPseudoElement();
+      ResetEffectiveTextDirectionAfterRemoval(*element);
 
       if (wasConnected)
       {

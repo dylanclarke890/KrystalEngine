@@ -1,9 +1,11 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Layout/LayoutTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 
@@ -59,6 +61,36 @@ namespace krys::boo::dom::tests
       CHECK(RectIs(*target.GetBoundingClientRect(), 127, 227, 20, 10));
       fixture.ById(u8"s").ScrollTo(10, 20);
       CHECK(RectIs(*target.GetBoundingClientRect(), 117, 207, 20, 10));
+    }
+
+    SECTION("A range's client rects")
+    {
+      auto &document = box.NodeDocument();
+      auto &text = *fixture.ById(u8"inl").FirstChild();
+
+      // The text a range covers, a rect per box.
+      auto range = document.CreateRange();
+      REQUIRE_FALSE(range->SetStart(text, 0).HasException());
+      REQUIRE_FALSE(range->SetEnd(text, 2).HasException());
+      auto rects = range->GetClientRects();
+      REQUIRE(rects->Length() == 1u);
+      CHECK(RectIs(*rects->Item(0), 0, 0, 20, 10));
+      CHECK(RectIs(*range->GetBoundingClientRect(), 0, 0, 20, 10));
+
+      // An element it selects wholly gives its border box, and its contents nothing more.
+      REQUIRE_FALSE(range->SelectNode(box).HasException());
+      rects = range->GetClientRects();
+      REQUIRE(rects->Length() == 1u);
+      CHECK(RectIs(*rects->Item(0), 20, 30, 60, 40));
+
+      // Text across two lines: a rect on each, and the bounding rect around both.
+      REQUIRE_FALSE(range->SetStart(text, 0).HasException());
+      REQUIRE_FALSE(range->SetEnd(text, 5).HasException());
+      rects = range->GetClientRects();
+      REQUIRE(rects->Length() == 2u);
+      CHECK(rects->Item(1)->Y() == 10);
+      CHECK(RectIs(*rects->Item(1), 0, 10, 20, 10));
+      CHECK(range->GetBoundingClientRect()->Height() == 20);
     }
 
     SECTION("Elements without boxes")
@@ -212,5 +244,60 @@ namespace krys::boo::dom::tests
       CHECK(s.ScrollTop() == 130);
       CHECK(s.ScrollLeft() == 80);
     }
+  }
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Element: CSSOM View scrolling right to left",
+                   "[DOM][Element][CSSOMView]")
+  {
+    // The values are Chrome's for the same page.
+    ResolverFixture fixture {
+      u8"<!DOCTYPE html><style>body { margin: 0 }"
+      u8"#s { direction: rtl; width: 100px; height: 40px; overflow: auto; scrollbar-width: none;"
+      u8" white-space: nowrap }"
+      u8"#s span { display: inline-block; width: 60px; height: 20px }"
+      u8"#v { direction: rtl; width: 100px; height: 40px; overflow: scroll }"
+      u8"#v div { width: 300px; height: 100px }</style>"
+      u8"<div id=s><span id=a></span><span id=b></span><span id=c></span><span id=d></span>"
+      u8"<span id=e></span></div><div id=v><div id=vc></div></div>"};
+    auto &s = fixture.ById(u8"s");
+    auto x = [&](dom::DOMStringView id)
+    {
+      return fixture.ById(id).GetBoundingClientRect()->X();
+    };
+
+    // A right-to-left scroller starts scrolled to its right edge, which is 0; scrolling left is negative.
+    CHECK(s.ScrollLeft() == 0);
+    CHECK(s.ScrollWidth() == 300);
+    CHECK(s.ClientWidth() == 100);
+    CHECK(x(u8"a") == 40);
+    CHECK(x(u8"e") == -200);
+
+    s.SetScrollLeft(-100);
+    CHECK(s.ScrollLeft() == -100);
+    CHECK(x(u8"a") == 140);
+    s.SetScrollLeft(50);
+    CHECK(s.ScrollLeft() == 0);
+    s.SetScrollLeft(-1'000);
+    CHECK(s.ScrollLeft() == -200);
+    CHECK(x(u8"e") == 0);
+
+    // The inline start of a right-to-left box is its right.
+    s.ScrollTo(0, 0);
+    ScrollIntoViewOptions options;
+    options.InlinePosition = ScrollLogicalPosition::Start;
+    fixture.ById(u8"c").ScrollIntoView(options);
+    CHECK(s.ScrollLeft() == -120);
+    CHECK(x(u8"c") == 40);
+    options.InlinePosition = ScrollLogicalPosition::End;
+    fixture.ById(u8"c").ScrollIntoView(options);
+    CHECK(s.ScrollLeft() == -80);
+    CHECK(x(u8"c") == 0);
+
+    // Its vertical scrollbar is on the left, and its content starts on the right.
+    auto &v = fixture.ById(u8"v");
+    CHECK(v.ClientLeft() > 0);
+    CHECK(v.ClientLeft() + v.ClientWidth() == 100);
+    CHECK(v.ScrollLeft() == 0);
+    auto content = fixture.ById(u8"vc").GetBoundingClientRect();
+    CHECK(content->X() + content->Width() == 100);
   }
 }

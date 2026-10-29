@@ -32,4 +32,19 @@ namespace krys::boo
     }
     return null;
   }
+
+  Maybe<TextDirection> DefaultWritingDirection(utf8_stringview content) noexcept
+  {
+    for (text::CodePointIterator it {content}; !it.AtEnd(); ++it)
+    {
+      switch (u_charDirection(static_cast<UChar32>(*it)))
+      {
+        case U_LEFT_TO_RIGHT:        return TextDirection::LTR;
+        case U_RIGHT_TO_LEFT:
+        case U_RIGHT_TO_LEFT_ARABIC: return TextDirection::RTL;
+        default:                     break;
+      }
+    }
+    return null;
+  }
 }

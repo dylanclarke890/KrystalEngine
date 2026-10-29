@@ -8,6 +8,7 @@ FILE_NAME = "BundledFonts"
 # (C++ function name, font file under the fonts directory)
 FONTS = [
     ("LiberationSansRegular", "liberation-fonts/LiberationSans-Regular.ttf"),
+    ("NotoSansArabicRegular", "noto-sans-arabic/NotoSansArabic-Regular.ttf"),
     ("STIXTwoMathRegular", "stix-two-fonts/STIXTwoMath-Regular.otf"),
 ]
 

@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<!-- The "bidi-editing" scene: Krystal.UI.Tests/tests/BidiEditing.cpp moves the caret through its editable
+     paragraphs as the script below does in Chrome when it loads the scene with "?record", and compares the
+     selections with Chrome's (bidi-editing.chrome-editing.txt). Each line there is an operation and the selection
+     after it: "set <node> <offset>" or "modify <alter> <direction> <granularity>", then "=>", the anchor and focus
+     as <element id>/<child index>...:<offset in UTF-16 code units>, and the x of a collapsed selection's caret (or
+     "-"). -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: "Noto Sans Arabic"; src: url("../../../third-party/noto-sans-arabic/NotoSansArabic-Regular.ttf"); }
+  html { width: 360px; background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 16px/24px "Liberation Sans", "Noto Sans Arabic"; color: #222222; }
+  p { margin: 0 0 4px; width: 300px; background: #f2f4f8; outline: none; }
+</style>
+</head>
+<body>
+  <p id=l1 contenteditable>abc אבג def</p>
+  <p id=r1 contenteditable dir=rtl>אבג abc דהו</p>
+  <p id=r2 contenteditable dir=rtl>אבג 123 דהו</p>
+  <p id=a1 contenteditable dir=rtl>مرحبا hello</p>
+  <p id=l2 contenteditable>x <b>אבג</b> y</p>
+  <script>
+    if (location.search === "?record") {
+      window.addEventListener("load", () => document.fonts.ready.then(() => {
+        const selection = getSelection();
+        const path = (node) => {
+          const parts = [];
+          while (!node.id) {
+            parts.unshift([...node.parentNode.childNodes].indexOf(node));
+            node = node.parentNode;
+          }
+          return [node.id, ...parts].join("/");
+        };
+        const state = () => {
+          let x = "-";
+          if (selection.isCollapsed)
+            x = selection.getRangeAt(0).getBoundingClientRect().x.toFixed(2);
+          return `${path(selection.anchorNode)}:${selection.anchorOffset} ${path(selection.focusNode)}:${selection.focusOffset} ${x}`;
+        };
+        const lines = [];
+        const set = (id, offset) => {
+          const text = document.getElementById(id).firstChild;
+          selection.collapse(text, offset);
+          lines.push(`set ${path(text)} ${offset} => ${state()}`);
+        };
+        const modify = (alter, direction, granularity, times) => {
+          for (let i = 0; i < times; ++i) {
+            selection.modify(alter, direction, granularity);
+            lines.push(`modify ${alter} ${direction} ${granularity} => ${state()}`);
+          }
+        };
+        for (const paragraph of document.querySelectorAll("p")) {
+          const id = paragraph.id;
+          const length = paragraph.textContent.length;
+          set(id, 0); modify("move", "right", "character", length + 2);
+          set(id, 0); modify("move", "left", "character", length + 2);
+          set(id, 0); modify("move", "forward", "character", length + 1);
+          set(id, 0); modify("move", "right", "word", 5);
+          set(id, 0); modify("move", "left", "word", 5);
+          set(id, 2); modify("move", "left", "lineboundary", 1);
+          set(id, 2); modify("move", "right", "lineboundary", 1);
+          set(id, 2); modify("extend", "right", "character", 5);
+          set(id, 2); modify("extend", "left", "character", 5);
+        }
+        document.documentElement.setAttribute("data-record-editing", lines.join("\n"));
+      }));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+﻿<!doctype html>
+<!-- The "bidi-layout" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, and compares the
+     client rects of its elements with ids against Chrome's (bidi-layout.chrome-rects.txt, which the script
+     below writes when Chrome loads the scene with "?record"). Every box is right to left. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  html { width: 360px; background: #ffffff; overflow: hidden; }
+  body { margin: 8px; width: 344px; font: 12px/16px "Liberation Sans"; color: #222222; }
+  main { display: block; direction: rtl; }
+  .row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .row > * { flex: 1; background: #f2f4f8; margin: 0; }
+  ul, ol { padding-inline-start: 22px; }
+  li { background: #e6eef5; }
+  table { border-collapse: collapse; }
+  td { border: 1px solid #118ab2; padding: 1px 4px; }
+  .flex { display: flex; gap: 4px; }
+  .flex > div, .grid > div { background: #ffd166; height: 16px; }
+  .grid { display: grid; grid-template-columns: 30px 50px; gap: 4px; }
+  .floats { height: 40px; }
+  .start { float: inline-start; width: 30px; height: 16px; background: #06d6a0; }
+  .end { float: inline-end; width: 20px; height: 16px; background: #ef476f; }
+  .positioned { position: relative; height: 36px; }
+  .abs { position: absolute; inset-inline-start: 6px; top: 2px; width: 24px; height: 12px; background: #118ab2; }
+  .abs-end { position: absolute; inset-inline-end: 6px; bottom: 2px; width: 24px; height: 12px; background: #ef476f; }
+  .indent { text-indent: 20px; margin-inline-start: 10px; padding-inline-end: 6px; border-inline-start: 3px solid #4f6df5; }
+  .ib { display: inline-block; width: 30px; height: 12px; background: #06d6a0; margin-inline-end: 4px; }
+  .scroller { overflow: auto; scrollbar-width: none; white-space: nowrap; height: 18px; }
+  .scroller span { display: inline-block; width: 60px; background: #ffd166; }
+</style>
+</head>
+<body><main>
+  <div class=row>
+    <ul id=ul><li id=li1>one</li><li id=li2>two <span id=li2s>שתיים</span></li></ul>
+    <ol id=ol start=8><li id=oli1>eight</li><li id=oli2>nine</li></ol>
+  </div>
+  <div class=row>
+    <table id=table><tr><td id=td1>a</td><td id=td2>bb</td><td id=td3>ccc</td></tr><tr><td id=td4 colspan=2>dd</td><td id=td5>e</td></tr></table>
+    <div><div class=flex id=flex><div id=fx1 style="width: 20px"></div><div id=fx2 style="width: 30px"></div><div id=fx3 style="width: 10px; margin-inline-start: auto"></div></div></div>
+  </div>
+  <div class=row>
+    <div class=grid id=grid><div id=gr1></div><div id=gr2></div><div id=gr3 style="grid-column: 2"></div></div>
+    <div class=floats id=floats><div class=start id=fl1></div><div class=end id=fl2></div><div class=start id=fl3></div><span id=flt>text beside</span></div>
+  </div>
+  <div class=row>
+    <div class=positioned id=pos><div class=abs id=abs1></div><div class=abs-end id=abs2></div></div>
+    <p class=indent id=indent><span id=in1>indented</span> text that wraps onto <span id=in2>lines</span></p>
+  </div>
+  <div class=row>
+    <div id=ibs><span class=ib id=ib1></span><span class=ib id=ib2></span><span id=ibt>after</span></div>
+    <div class=scroller id=scroller><span id=sc1>first</span><span id=sc2>second</span><span id=sc3>third</span></div>
+  </div>
+  <div class=row>
+    <div id=ltr-in-rtl dir=ltr><span id=lr1>left</span> to <span id=lr2>right</span></div>
+    <div id=margins><div id=mg1 style="margin-inline-start: 12px; background: #06d6a0; height: 10px"></div><div id=mg2 style="width: 40px; margin-inline: auto 0; background: #ef476f; height: 10px"></div></div>
+  </div>
+  </main>
+  <script>
+    if (location.search === "?record") {
+      window.addEventListener("load", () => document.fonts.ready.then(() => {
+        const lines = [];
+        for (const element of document.querySelectorAll("body [id]")) {
+          for (const rect of element.getClientRects())
+            lines.push(`${element.id} ${rect.x} ${rect.y} ${rect.width} ${rect.height}`);
+        }
+        document.documentElement.setAttribute("data-record-rects", lines.join("\n"));
+      }));
+    }
+  </script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 
 #include "Krystal.Booey/DOM/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/BoundaryPoint.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
+#include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -101,6 +103,15 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-range-stringifier
     KRYS_NODISCARD ExceptionOr<DOMString> ToString() const noexcept;
+
+    /// @see https://drafts.csswg.org/cssom-view/#dom-range-getclientrects
+    KRYS_NODISCARD Ref<DOMRectList> GetClientRects() const noexcept;
+
+    /// @see https://drafts.csswg.org/cssom-view/#dom-range-getboundingclientrect
+    KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() const noexcept;
+
+    /// @brief The union of @p range's client rects, ignoring empty ones.
+    KRYS_NODISCARD static Ref<DOMRect> BoundingClientRect(const SimpleRange &range) noexcept;
 
 #pragma endregion
 

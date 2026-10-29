@@ -430,6 +430,7 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsRadioButton() const noexcept;
     KRYS_NODISCARD bool IsTextField() const noexcept final;
     KRYS_NODISCARD bool ShouldUseInputMethod() noexcept final;
+    KRYS_NODISCARD bool DirAutoUsesValue() const noexcept final;
     KRYS_NODISCARD bool IsSearchField() const noexcept;
     KRYS_NODISCARD bool IsInputTypeHidden() const noexcept;
     KRYS_NODISCARD bool IsPasswordField() const noexcept;

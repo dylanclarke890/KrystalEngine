@@ -1562,6 +1562,13 @@ namespace krys::boo::dom
           return {textBox, caretOffset};
         }
 
+        // Boxes come line by line, from line-left to line-right. Where two boxes on a line meet at the caret,
+        // it belongs to the leftmost, whichever way the boxes run; affinity only chooses between lines.
+        if (candidate && candidate->LineIndex() == textBox->LineIndex())
+        {
+          continue;
+        }
+
         if ((caretOffset == caretMaxOffset) ^ (affinity == Affinity::Downstream))
         {
           break;
@@ -1587,6 +1594,12 @@ namespace krys::boo::dom
       if (candidate && !candidate->NextTextBox() && affinity == Affinity::Downstream)
       {
         textBox = SearchAheadForBetterMatch(*textRenderer);
+        if (textBox && textBox->LineIndex() == candidate->LineIndex()
+            && textBox->LogicalLeftIgnoringInlineDirection()
+                 > candidate->LogicalLeftIgnoringInlineDirection())
+        {
+          textBox = {};
+        }
         if (textBox)
         {
           caretOffset = textBox->MinimumCaretOffset();
@@ -1632,148 +1645,6 @@ namespace krys::boo::dom
     if (!box)
     {
       return {{}, caretOffset};
-    }
-
-    uint8 level = box->BidiLevel();
-
-    if (box->Direction() == primaryDirection)
-    {
-      if (caretOffset == box->RightmostCaretOffset())
-      {
-        auto nextBox = box->NextLineRightwardOnLine();
-        if (!nextBox || nextBox->BidiLevel() >= level)
-        {
-          return {box, caretOffset};
-        }
-
-        level = nextBox->BidiLevel();
-
-        auto previousRun = box->NextLineLeftwardOnLine();
-        for (; previousRun; previousRun.TraverseLineLeftwardOnLine())
-        {
-          if (previousRun->BidiLevel() <= level)
-          {
-            break;
-          }
-        }
-
-        if (previousRun && previousRun->BidiLevel() == level) // For example, abc FED 123 ^ CBA
-        {
-          return {box, caretOffset};
-        }
-
-        // For example, abc 123 ^ CBA
-        for (; nextBox; nextBox.TraverseLineRightwardOnLine())
-        {
-          if (nextBox->BidiLevel() < level)
-          {
-            break;
-          }
-          box = nextBox;
-        }
-        caretOffset = box->RightmostCaretOffset();
-      }
-      else
-      {
-        auto previousRun = box->NextLineLeftwardOnLine();
-        if (!previousRun || previousRun->BidiLevel() >= level)
-        {
-          return {box, caretOffset};
-        }
-
-        level = previousRun->BidiLevel();
-
-        auto nextBox = box->NextLineRightwardOnLine();
-        for (; nextBox; nextBox.TraverseLineRightwardOnLine())
-        {
-          if (nextBox->BidiLevel() <= level)
-          {
-            break;
-          }
-        }
-
-        if (nextBox && nextBox->BidiLevel() == level)
-        {
-          return {box, caretOffset};
-        }
-
-        for (; previousRun; previousRun.TraverseLineLeftwardOnLine())
-        {
-          if (previousRun->BidiLevel() < level)
-          {
-            break;
-          }
-          box = previousRun;
-        }
-
-        caretOffset = box->LeftmostCaretOffset();
-      }
-      return {box, caretOffset};
-    }
-
-    if (caretOffset == box->LeftmostCaretOffset())
-    {
-      auto previousRun = box->NextLineLeftwardOnLineIgnoringLineBreak();
-      if (!previousRun || previousRun->BidiLevel() < level)
-      {
-        // Left edge of a secondary box. Set to the right edge of the entire box.
-        for (auto nextBox = box->NextLineRightwardOnLineIgnoringLineBreak(); nextBox;
-             nextBox.TraverseLineRightwardOnLineIgnoringLineBreak())
-        {
-          if (nextBox->BidiLevel() < level)
-          {
-            break;
-          }
-          box = nextBox;
-        }
-        caretOffset = box->RightmostCaretOffset();
-      }
-      else if (previousRun->BidiLevel() > level)
-      {
-        // Right edge of a "tertiary" box. Set to the left edge of that box.
-        for (auto tertiaryRun = box->NextLineLeftwardOnLineIgnoringLineBreak(); tertiaryRun;
-             tertiaryRun.TraverseLineLeftwardOnLineIgnoringLineBreak())
-        {
-          if (tertiaryRun->BidiLevel() <= level)
-          {
-            break;
-          }
-          box = tertiaryRun;
-        }
-        caretOffset = box->LeftmostCaretOffset();
-      }
-    }
-    else
-    {
-      auto nextBox = box->NextLineRightwardOnLineIgnoringLineBreak();
-      if (!nextBox || nextBox->BidiLevel() < level)
-      {
-        // Right edge of a secondary box. Set to the left edge of the entire box.
-        for (auto previousRun = box->NextLineLeftwardOnLineIgnoringLineBreak(); previousRun;
-             previousRun.TraverseLineLeftwardOnLineIgnoringLineBreak())
-        {
-          if (previousRun->BidiLevel() < level)
-          {
-            break;
-          }
-          box = previousRun;
-        }
-        caretOffset = box->LeftmostCaretOffset();
-      }
-      else if (nextBox->BidiLevel() > level)
-      {
-        // Left edge of a "tertiary" box. Set to the right edge of that box.
-        for (auto tertiaryRun = box->NextLineRightwardOnLineIgnoringLineBreak(); tertiaryRun;
-             tertiaryRun.TraverseLineRightwardOnLineIgnoringLineBreak())
-        {
-          if (tertiaryRun->BidiLevel() <= level)
-          {
-            break;
-          }
-          box = tertiaryRun;
-        }
-        caretOffset = box->RightmostCaretOffset();
-      }
     }
 
     return {box, caretOffset};

@@ -1,9 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
+#include "Krystal.Booey/Graphics/DisplayLists/DisplayListItems.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/Graphics/Font.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Core/Text/CodePointIterator.hpp"
 
 namespace krys::boo::tests
 {
@@ -30,14 +34,20 @@ namespace krys::boo::tests
       Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
     }
 
-    /// @brief The display list of the whole view, laid out, as text.
-    KRYS_NODISCARD utf8_string Painted() noexcept
+    /// @brief The display list of the whole view, laid out.
+    KRYS_NODISCARD Ref<const display_list::DisplayList> PaintedDisplayList() noexcept
     {
       (void)Document->UpdateLayout();
       display_list::RecorderImpl recorder(
         FloatSize(static_cast<float>(ViewSize.Width()), static_cast<float>(ViewSize.Height())));
       Frame->View()->PaintContents(recorder, IntRect(IntPoint(), ViewSize));
-      return recorder.TakeDisplayList()->AsText({});
+      return recorder.TakeDisplayList();
+    }
+
+    /// @brief The display list of the whole view, laid out, as text.
+    KRYS_NODISCARD utf8_string Painted() noexcept
+    {
+      return PaintedDisplayList()->AsText({});
     }
   };
 
@@ -85,5 +95,46 @@ namespace krys::boo::tests
            + u8R"()
   (composite-operation copy)
   (blend-mode normal)))";
+  }
+  /// @brief The text @p displayList's glyph runs draw, in drawing order, read back through each run's font as
+  /// characters of @p alphabet; runs are separated by `|`. A glyph that's none of @p alphabet's characters
+  /// reads as `?`, and runs with none of them are left out.
+  /// @note Glyphs are drawn left to right, so right-to-left text drawn in visual order reads reversed.
+  KRYS_NODISCARD inline utf8_string DrawnText(const display_list::DisplayList &displayList,
+                                              utf8_stringview alphabet) noexcept
+  {
+    utf8_string text;
+    for (const auto &item : displayList.Items())
+    {
+      auto *glyphs = std::get_if<display_list::DrawGlyphs>(&item);
+      if (!glyphs)
+      {
+        continue;
+      }
+      auto font = glyphs->GetFont();
+      utf8_string run;
+      bool known = false;
+      for (auto glyph : glyphs->Glyphs())
+      {
+        utf8_stringview character = u8"?";
+        for (text::CodePointIterator it {alphabet}; !it.AtEnd(); ++it)
+        {
+          if (font->GlyphForCharacter(*it) == glyph)
+          {
+            auto next = it;
+            ++next;
+            character = alphabet.substr(it.CodeUnitsSince(alphabet.data()), next.CodeUnitsSince(it));
+            known = true;
+            break;
+          }
+        }
+        run += character;
+      }
+      if (known)
+      {
+        text += (text.empty() ? u8"" : u8"|") + run;
+      }
+    }
+    return text;
   }
 }

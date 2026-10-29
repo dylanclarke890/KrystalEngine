@@ -79,7 +79,4 @@ namespace krys::boo::css
   /// (crossing shadow boundaries); empty if there is none.
   /// @see https://html.spec.whatwg.org/#language
   KRYS_NODISCARD dom::DOMString EffectiveLang(const dom::Element &element) noexcept;
-
-  /// @see https://html.spec.whatwg.org/#the-directionality
-  KRYS_NODISCARD TextDirection EffectiveTextDirection(const dom::Element &element) noexcept;
 }

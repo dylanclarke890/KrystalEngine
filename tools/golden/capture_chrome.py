@@ -5,16 +5,26 @@ with software rasterisation, into <golden>/<name>.chrome.png. The golden directo
 unless --golden names another (Krystal.UI.Tests/golden for the page goldens). The viewport's size comes from
 the scene's <html data-width="..." data-height="...">.
 
+A scene whose script records something when loaded with "?record" (setting data-record-<kind> on its <html>, to
+lines of text) also gets <golden>/<name>.chrome-<kind>.txt for each, read from Chrome's DOM: the client rects
+of its elements with ids ("rects", lines of "id x y width height"), say.
+
+A scene that lists input actions (see cdp.py) also gets <golden>/<name>.chrome-input.txt: the actions, sent to
+Chrome as real input, each with the state the scene's recordState() gives after it.
+
 Usage: python tools/golden/capture_chrome.py [scene names...] [--golden DIR] [--chrome PATH]
 """
 
 import argparse
+import html as html_module
 import pathlib
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+
+import cdp
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_GOLDEN = ROOT / "Krystal.Gfx.Tests" / "golden"
@@ -71,6 +81,46 @@ def capture(chrome, golden, scene):
     print(f"{scene.stem}: {output.relative_to(ROOT)} ({width}x{height})")
 
 
+def capture_records(chrome, golden, scene):
+    width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
+    with tempfile.TemporaryDirectory() as profile:
+        result = subprocess.run(
+            [
+                str(chrome),
+                "--headless=new",
+                "--disable-gpu",
+                "--no-first-run",
+                "--hide-scrollbars",
+                "--force-device-scale-factor=1",
+                "--allow-file-access-from-files",
+                "--virtual-time-budget=5000",
+                f"--user-data-dir={profile}",
+                f"--window-size={width},{height}",
+                "--dump-dom",
+                scene.as_uri() + "?record",
+            ],
+            check=True,
+            capture_output=True,
+        )
+    dom = result.stdout.decode("utf-8")
+    records = re.findall(r'data-record-([a-z]+)="([^"]*)"', dom)
+    if not records:
+        sys.exit(f"{scene.stem}: Chrome's DOM has no data-record-* attributes.")
+    for kind, value in records:
+        output = golden / f"{scene.stem}.chrome-{kind}.txt"
+        text = html_module.unescape(value).strip()
+        output.write_text(text + "\n", encoding="utf-8", newline="\n")
+        print(f"{scene.stem}: {output.relative_to(ROOT)} ({len(text.splitlines())} lines)")
+
+
+def capture_input(chrome, golden, scene):
+    width, height = scene_size(scene.read_text(encoding="utf-8-sig"))
+    lines = cdp.run_actions(chrome, scene, width, height)
+    output = golden / f"{scene.stem}.chrome-input.txt"
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+    print(f"{scene.stem}: {output.relative_to(ROOT)} ({len(lines)} actions)")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("scenes", nargs="*", help="scene names (default: all)")
@@ -87,6 +137,11 @@ def main():
         if not scene.exists():
             sys.exit(f"No scene {scene.relative_to(ROOT)}.")
         capture(chrome, golden, scene)
+        html = scene.read_text(encoding="utf-8-sig")
+        if '"?record"' in html:
+            capture_records(chrome, golden, scene)
+        if cdp.actions_of(html):
+            capture_input(chrome, golden, scene)
 
 
 if __name__ == "__main__":

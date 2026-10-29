@@ -27,6 +27,11 @@ namespace krys::boo::html
     return ToDecimalString(_clickLocation.X()) + u8"," + ToDecimalString(_clickLocation.Y());
   }
 
+  bool ImageInputType::DirAutoUsesValue() const noexcept
+  {
+    return false;
+  }
+
   bool ImageInputType::AppendFormData(DOMFormData &formData) const noexcept
   {
     krys_debug_assert(Element());

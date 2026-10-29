@@ -324,6 +324,9 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#page-showing
     bool _pageShowing {false};
     bool _loadEventFinished {false};
+    /// @brief Set once an element with a `dir` attribute or a `<bdi>` is made, after which changes to
+    /// children may change an ancestor's auto directionality.
+    bool _isDirAttributeDirty {false};
     /// @brief Things other than loads that delay the document's load event.
     uint32 _loadEventDelayCount {0};
     /// @see https://html.spec.whatwg.org/#unload-counter
@@ -1306,6 +1309,16 @@ namespace krys::boo::dom
       return _contentLanguage;
     }
     void SetContentLanguage(DOMString &&language) noexcept;
+
+    /// @brief Whether an element with a `dir` attribute or a `<bdi>` has been made in the document.
+    KRYS_NODISCARD bool IsDirAttributeDirty() const noexcept
+    {
+      return _isDirAttributeDirty;
+    }
+    void SetIsDirAttributeDirty() noexcept
+    {
+      _isDirAttributeDirty = true;
+    }
 
     /// @brief The window's `Location`, while the document is fully active; null otherwise.
     /// @see https://html.spec.whatwg.org/#dom-document-location

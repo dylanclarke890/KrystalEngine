@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/Platform/DragImage.hpp"
 #include "catch2/catch_approx.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
@@ -204,6 +205,12 @@ namespace krys::boo::tests
       CHECK(Contains<display_list::DrawGlyphs>(labelled));
       // Without a label, the URL is the label, alone.
       CHECK(DragImageSize(unlabelled).Height() < DragImageSize(labelled).Height());
+
+      // A label of both directions is drawn in visual order: the Hebrew right to left, lamed first (twice:
+      // the label's text is doubled, in two colours).
+      auto bidi = CreateDragImageForLink(fixture.ById(u8"link"), url, u8"abשל", 1).DragImage;
+      REQUIRE(bidi);
+      CHECK(DrawnText(*DisplayListOf(bidi), u8"של") == u8"לש|לש");
 
       utf8_string longLabel(200, u8'x');
       auto clipped = CreateDragImageForLink(fixture.ById(u8"link"), url, longLabel, 1).DragImage;

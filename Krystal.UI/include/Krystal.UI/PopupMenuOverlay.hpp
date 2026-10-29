@@ -35,6 +35,8 @@ namespace krys::ui
     List<RefPtr<boo::dom::Element>> _itemElements;
     int32 _highlightedIndex {-1};
     bool _visible {false};
+    /// @brief Whether the control lays out right to left, so the overlay is mirrored.
+    bool _rightToLeft {false};
 
   public:
     PopupMenuOverlay(View &owner, boo::PopupMenuClient &client) noexcept;

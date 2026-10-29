@@ -1,0 +1,104 @@
+﻿<!doctype html>
+<!-- The "bidi-input" scene: Krystal.UI.Tests/tests/BidiEditing.cpp sends its actions (the x-actions block) to a
+     View as real input, as tools/golden/capture_chrome.py does to Chrome, and compares the state after each with
+     Chrome's (bidi-input.chrome-input.txt). A state is the anchor and focus (<element id>/<child index>...:<offset
+     in UTF-16 code units>), a collapsed selection's caret x (or "-"), the selection's client rects ("x,y,w,h"
+     joined by ";", or "-"), and the text of the paragraph holding the focus. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: "Noto Sans Arabic"; src: url("../../../third-party/noto-sans-arabic/NotoSansArabic-Regular.ttf"); }
+  html { width: 360px; background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 16px/24px "Liberation Sans", "Noto Sans Arabic"; color: #222222; }
+  p { margin: 0 0 4px; width: 300px; background: #f2f4f8; outline: none; }
+</style>
+</head>
+<body>
+  <p id=s1 contenteditable>abc אבג def</p>
+  <p id=s2 contenteditable dir=rtl>אבג abc דהו</p>
+  <p id=s3 contenteditable dir=rtl>مرحبا hello</p>
+  <p id=t1 contenteditable>abc אבג</p>
+  <p id=t2 contenteditable dir=rtl>אבג abc</p>
+  <script type="text/x-actions">
+    click 20 20
+    click 40 20
+    click 62 20
+    click 66 20
+    click 200 20
+    dblclick 50 20
+    dblclick 80 20
+    drag 20 20 50 20
+    click 120 20
+    drag 50 20 80 20
+    click 24 20
+    shiftclick 75 20
+    click 300 48
+    click 279 48
+    click 262 48
+    click 253 48
+    click 240 48
+    click 100 48
+    dblclick 264 48
+    dblclick 290 48
+    click 100 48
+    drag 300 48 260 48
+    click 120 48
+    drag 260 48 230 48
+    click 296 48
+    shiftclick 255 48
+    click 300 76
+    click 250 76
+    click 240 76
+    click 100 76
+    dblclick 252 76
+    drag 290 76 250 76
+    click 200 104
+    type x
+    type ש
+    key Backspace
+    key Backspace
+    click 39 104
+    type Z
+    key Delete
+    key Backspace
+    click 100 132
+    type d
+    type ה
+    key Backspace
+    click 300 132
+    type a
+    key Delete
+    key Backspace
+  </script>
+  <script>
+    function recordState() {
+      const selection = getSelection();
+      const path = (node) => {
+        const parts = [];
+        while (!node.id) {
+          parts.unshift([...node.parentNode.childNodes].indexOf(node));
+          node = node.parentNode;
+        }
+        return [node.id, ...parts].join("/");
+      };
+      if (!selection.rangeCount)
+        return "none none - - text=";
+      const range = selection.getRangeAt(0);
+      let x = "-";
+      let rects = "-";
+      if (selection.isCollapsed)
+        x = range.getBoundingClientRect().x.toFixed(2);
+      else
+        rects = [...range.getClientRects()].map((r) => [r.x, r.y, r.width, r.height].map((v) => v.toFixed(2)).join(",")).join(";") || "-";
+      let paragraph = selection.focusNode;
+      while (paragraph && paragraph.nodeName !== "P")
+        paragraph = paragraph.parentNode;
+      const text = paragraph ? paragraph.textContent : "";
+      return `${path(selection.anchorNode)}:${selection.anchorOffset} ${path(selection.focusNode)}:${selection.focusOffset} ${x} ${rects} text=${text}`;
+    }
+  </script>
+</body>
+</html>

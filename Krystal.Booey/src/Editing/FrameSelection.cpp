@@ -1120,14 +1120,31 @@ namespace krys::boo
         }
         else
         {
-          pos = VisiblePosition(_selection.Extent(), _selection.GetAffinity()).Right(true, reachedBoundary);
+          // The caret moves logically, by the enclosing block's direction, rather than visually through runs
+          // of the other direction.
+          VisiblePosition current(_selection.Extent(), _selection.GetAffinity());
+          if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+          {
+            pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
+          }
+          else
+          {
+            pos = current.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
+          }
         }
         break;
       case TextGranularity::WordGranularity:
       {
-        bool skipsSpaceWhenMovingRight = Behavior(_document).ShouldSkipSpaceWhenMovingRight();
+        // Like characters, words are moved through logically.
         VisiblePosition currentPosition(_selection.Extent(), _selection.GetAffinity());
-        pos = RightWordPosition(currentPosition, skipsSpaceWhenMovingRight);
+        if (DirectionOfEnclosingBlock() == TextDirection::LTR)
+        {
+          pos = NextWordPositionForPlatform(currentPosition);
+        }
+        else
+        {
+          pos = PreviousWordPosition(currentPosition);
+        }
         if (reachedBoundary)
         {
           *reachedBoundary = pos == currentPosition;
@@ -1362,14 +1379,31 @@ namespace krys::boo
         }
         else
         {
-          pos = VisiblePosition(_selection.Extent(), _selection.GetAffinity()).Left(true, reachedBoundary);
+          // The caret moves logically, by the enclosing block's direction, rather than visually through runs
+          // of the other direction.
+          VisiblePosition current(_selection.Extent(), _selection.GetAffinity());
+          if (DirectionOfEnclosingBlock() == TextDirection::RTL)
+          {
+            pos = current.Next(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
+          }
+          else
+          {
+            pos = current.Previous(EditingBoundaryCrossingRule::CannotCrossEditingBoundary, reachedBoundary);
+          }
         }
         break;
       case TextGranularity::WordGranularity:
       {
-        bool skipsSpaceWhenMovingRight = Behavior(_document).ShouldSkipSpaceWhenMovingRight();
+        // Like characters, words are moved through logically.
         VisiblePosition currentPosition(_selection.Extent(), _selection.GetAffinity());
-        pos = LeftWordPosition(currentPosition, skipsSpaceWhenMovingRight);
+        if (DirectionOfEnclosingBlock() == TextDirection::RTL)
+        {
+          pos = NextWordPositionForPlatform(currentPosition);
+        }
+        else
+        {
+          pos = PreviousWordPosition(currentPosition);
+        }
         if (reachedBoundary)
         {
           *reachedBoundary = pos == currentPosition;

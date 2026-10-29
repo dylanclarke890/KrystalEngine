@@ -279,6 +279,13 @@ namespace krys::boo::html
     return view->ContentsToView(renderer->AbsoluteBoundingBoxRect());
   }
 
+  bool ColorInputType::IsElementRTL() const noexcept
+  {
+    krys_debug_assert(Element());
+    auto *renderer = Element()->Renderer();
+    return renderer && renderer->Style().GetWritingMode().ComputedTextDirection() == TextDirection::RTL;
+  }
+
   bool ColorInputType::SupportsAlpha() const noexcept
   {
     return false;

@@ -25,6 +25,7 @@ namespace krys::boo
   class RenderBox;
   class RenderObject;
   class RenderStyle;
+  enum class TextDirection : bool;
 }
 
 namespace krys::boo::dom
@@ -270,6 +271,45 @@ namespace krys::boo::dom
       else
       {
         ClearNodeFlag(NodeFlags::ContainsSelectionEndPoint);
+      }
+    }
+
+    /// @brief Whether the node's text may decide the auto directionality of an ancestor.
+    KRYS_NODISCARD bool SelfOrPrecedingNodesAffectDirAuto() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+    }
+    void SetSelfOrPrecedingNodesAffectDirAuto(bool flag) noexcept
+    {
+      if (flag)
+      {
+        SetNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+      }
+      else
+      {
+        ClearNodeFlag(NodeFlags::SelfOrPrecedingNodesAffectDirAuto);
+      }
+    }
+
+    /// @brief The node's directionality: its own if it keeps one, otherwise the document element's.
+    /// @see https://html.spec.whatwg.org/#the-directionality
+    KRYS_NODISCARD TextDirection EffectiveTextDirection() const noexcept;
+    void SetEffectiveTextDirection(TextDirection direction) noexcept;
+
+    /// @brief Whether the node keeps a directionality of its own.
+    KRYS_NODISCARD bool UsesEffectiveTextDirection() const noexcept
+    {
+      return HasNodeFlag(NodeFlags::UsesEffectiveTextDirection);
+    }
+    void SetUsesEffectiveTextDirection(bool value) noexcept
+    {
+      if (value)
+      {
+        SetNodeFlag(NodeFlags::UsesEffectiveTextDirection);
+      }
+      else
+      {
+        ClearNodeFlag(NodeFlags::UsesEffectiveTextDirection);
       }
     }
 

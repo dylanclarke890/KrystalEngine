@@ -47,4 +47,21 @@ namespace krys::ui::tests
     {
     }
   }
+  /// @brief Loads the page at @p file into @p view and lets its resources load, as Chrome's capture does:
+  /// images and style sheets load as networking tasks, and web fonts once laying text out asks for them.
+  /// @return Whether the page loaded.
+  inline bool LoadAndSettle(View &view, const std::filesystem::path &file) noexcept
+  {
+    if (!view.LoadFile(file).has_value())
+    {
+      return false;
+    }
+    WaitForLoad(view);
+    for (int32 pass = 0; pass < 4; ++pass)
+    {
+      view.UpdateRendering();
+      boo::html::EventLoop::Current().RunUntilIdle();
+    }
+    return true;
+  }
 }

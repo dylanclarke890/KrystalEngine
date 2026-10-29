@@ -277,8 +277,9 @@ namespace krys::boo::dom
   void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
   {
     auto slottables = FindSlottables(slot);
-    if (!std::ranges::equal(slottables, slot._assignedNodes,
-                            [](const auto &a, const auto &b) { return a.get() == b.get(); }))
+    bool assignedNodesChanged = !std::ranges::equal(
+      slottables, slot._assignedNodes, [](const auto &a, const auto &b) { return a.get() == b.get(); });
+    if (assignedNodesChanged)
     {
       SignalSlotChange(slot);
 
@@ -306,6 +307,11 @@ namespace krys::boo::dom
       {
         text->_assignedSlot = CreateWeakPtr(&slot);
       }
+    }
+
+    if (assignedNodesChanged && slot.SelfOrPrecedingNodesAffectDirAuto())
+    {
+      slot.UpdateEffectiveTextDirection();
     }
   }
 

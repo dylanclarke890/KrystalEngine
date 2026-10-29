@@ -526,6 +526,38 @@ namespace krys::boo::tests
     CHECK(window.DevicePixelRatio() == 3);
   }
 
+  TEST_CASE("A right-to-left window's scrolling", "[Page][LocalDOMWindow]")
+  {
+    // As Chrome: the viewport starts at its right edge, which is 0, and scrolls left to negative positions;
+    // its vertical scrollbar stays on the right.
+    WindowFixture fixture(
+      u8"<!DOCTYPE html><html dir=rtl><style>body { margin: 0 }"
+      u8" #wide { width: 1000px; height: 1000px } #start { width: 10px; height: 10px }</style>"
+      u8"<div id=wide><div id=start></div></div></html>");
+    auto &window = fixture.Window();
+    auto &root = *fixture.Document->DocumentElement();
+    auto start = [&]
+    {
+      return fixture.Document->GetElementById(u8"start")->GetBoundingClientRect()->X();
+    };
+
+    auto clientWidth = root.ClientWidth();
+    CHECK(clientWidth < 200);
+    CHECK(window.ScrollX() == 0);
+    CHECK(start() == clientWidth - 10);
+    CHECK(root.ScrollWidth() == 1'000);
+
+    window.ScrollTo(-500, 0);
+    CHECK(window.ScrollX() == -500);
+    CHECK(start() == clientWidth - 10 + 500);
+    window.ScrollTo(-100'000, 0);
+    CHECK(window.ScrollX() == -(1'000 - clientWidth));
+    CHECK(root.ScrollLeft() == -(1'000 - clientWidth));
+    CHECK(start() == 990);
+    window.ScrollTo(100, 0);
+    CHECK(window.ScrollX() == 0);
+  }
+
   TEST_CASE("A window's screen and the host's window", "[Page][LocalDOMWindow]")
   {
     WindowFixture fixture;

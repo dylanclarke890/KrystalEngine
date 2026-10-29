@@ -12,6 +12,7 @@
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLAudioElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
@@ -91,7 +92,6 @@ namespace krys::boo::html
       case TagName::article:
       case TagName::aside:
       case TagName::b:
-      case TagName::bdi:
       case TagName::bdo:
       case TagName::cite:
       case TagName::code:
@@ -125,6 +125,10 @@ namespace krys::boo::html
       case TagName::var:
       {
         return CreateRefPtr<HTMLElement>(document);
+      }
+      case TagName::bdi:
+      {
+        return CreateRefPtr<HTMLBDIElement>(document);
       }
       case TagName::wbr:
       {

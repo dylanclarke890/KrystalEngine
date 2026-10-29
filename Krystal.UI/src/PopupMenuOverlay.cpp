@@ -139,10 +139,14 @@ namespace krys::ui
     auto menuStyle = _client->MenuStyle();
     auto paddingLeft = _client->ClientPaddingLeft().ToInt();
     auto paddingRight = _client->ClientPaddingRight().ToInt();
+    _rightToLeft = menuStyle.GetTextDirection() == boo::TextDirection::RTL;
 
-    utf8_string html = u8"<!DOCTYPE html><style>"
-                       u8"html { width: max-content; min-width: 100%; box-sizing: border-box; margin: 0;"
-                       u8" border: 1px solid GrayText; cursor: default; background: ";
+    // A right-to-left select's popup is mirrored: its items line up on the right.
+    utf8_string html = _rightToLeft
+                         ? u8"<!DOCTYPE html><html dir=rtl><style>"
+                         : u8"<!DOCTYPE html><style>"
+                           u8"html { width: max-content; min-width: 100%; box-sizing: border-box; margin: 0;"
+                           u8" border: 1px solid GrayText; cursor: default; background: ";
     html += ToCSS(menuStyle.BackgroundColor());
     html += u8"; color: ";
     html += ToCSS(menuStyle.ForegroundColor());
@@ -195,9 +199,11 @@ namespace krys::ui
       {
         html += u8"; visibility: hidden";
       }
-      if (itemStyle.GetTextDirection() == boo::TextDirection::RTL)
+      // An item in the other direction runs and lines up its own way.
+      if (itemStyle.GetTextDirection() != menuStyle.GetTextDirection())
       {
-        html += u8"; direction: rtl";
+        html += itemStyle.GetTextDirection() == boo::TextDirection::RTL ? u8"; direction: rtl"
+                                                                        : u8"; direction: ltr";
       }
       html += u8"\"";
       auto toolTip = _client->ItemToolTip(index);
@@ -280,7 +286,7 @@ namespace krys::ui
       height = std::min(height, std::max(spaceBelow, 1));
     }
     width = std::min(std::max(contentSize.Width(), width), std::max(viewport.Width(), 1));
-    auto x = std::clamp(_controlRect.X(), 0, std::max(0, viewport.Width() - width));
+    auto x = AlignedLeft(_controlRect, width, viewport.Width(), _rightToLeft);
     _rect = boo::IntRect(x, y, width, std::max(height, 1));
     _view->Resize(_rect.Size());
 

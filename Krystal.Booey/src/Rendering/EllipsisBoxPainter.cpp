@@ -74,8 +74,7 @@ namespace krys::boo
       textOrigin.SetX(RoundToDevicePixel(LayoutUnit {textOrigin.X()}, deviceScaleFactor));
     }
 
-    // FIXME: The ellipsis is drawn as one run (drawBidiText waits for a bidi resolver over text runs).
-    context.DrawText(lineStyle.GetFontCascade(), _lineBox.EllipsisText(), textOrigin);
+    context.DrawBidiText(lineStyle.GetFontCascade(), _lineBox.EllipsisText(), textOrigin);
 
     if (textColor != context.FillColor())
     {

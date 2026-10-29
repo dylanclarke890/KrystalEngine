@@ -218,14 +218,13 @@ namespace krys::boo
       return result;
     }
 
-    // FIXME: Text of more than one direction is drawn in logical order, without bidi reordering.
     void DrawTextAtPoint(GraphicsContext &context, utf8_stringview text, const IntPoint &point,
                          const FontCascade &font, const Color &color) noexcept
     {
       TextRun run(text);
 
       context.SetFillColor(color);
-      (void)font.DrawText(context, run, FloatPoint(point));
+      context.DrawBidiText(font, run, FloatPoint(point));
     }
 
     void DrawDoubledTextAtPoint(GraphicsContext &context, utf8_stringview text, const IntPoint &point,

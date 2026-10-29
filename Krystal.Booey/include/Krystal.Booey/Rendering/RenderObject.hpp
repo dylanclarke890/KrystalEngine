@@ -1462,6 +1462,14 @@ namespace krys::boo
     /// @brief The quads, in absolute coordinates, of the text and line breaks @p range covers.
     KRYS_NODISCARD static List<FloatQuad>
       AbsoluteTextQuads(const dom::SimpleRange &range, EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+    /// @brief The border boxes of the elements @p range wholly selects (outermost only) and the rects of the
+    /// text it covers, in absolute coordinates.
+    KRYS_NODISCARD static List<FloatRect>
+      AbsoluteBorderAndTextRects(const dom::SimpleRange &range,
+                                 EnumSet<BoundingRectBehavior> behavior = {}) noexcept;
+    /// @brief `AbsoluteBorderAndTextRects` in client coordinates, as `Range`'s `getClientRects()` returns
+    /// them.
+    KRYS_NODISCARD static List<FloatRect> ClientBorderAndTextRects(const dom::SimpleRange &range) noexcept;
 
     /// @brief The bounding box of the renderer in absolute coordinates.
     KRYS_NODISCARD IntRect AbsoluteBoundingBoxRect(bool useTransforms = true,

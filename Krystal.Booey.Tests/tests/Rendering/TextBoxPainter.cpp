@@ -39,11 +39,11 @@ namespace krys::boo::tests
   (font-smoothing-mode auto)
   (length 4))
 (draw-glyphs
-  (local-anchor (47.59,22))
+  (local-anchor (43.59,22))
   (font-smoothing-mode auto)
   (length 1))
 (draw-glyphs
-  (local-anchor (52.04,22))
+  (local-anchor (48.04,22))
   (font-smoothing-mode auto)
   (length 3)))");
   }

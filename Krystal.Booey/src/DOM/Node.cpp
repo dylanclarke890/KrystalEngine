@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -102,6 +103,35 @@ namespace krys::boo::dom
     }
     auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
     return shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent;
+  }
+
+  TextDirection Node::EffectiveTextDirection() const noexcept
+  {
+    if (UsesEffectiveTextDirection())
+    {
+      return HasNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL) ? TextDirection::RTL : TextDirection::LTR;
+    }
+
+    // The document element's directionality, if it's an HTML element that keeps one.
+    auto documentElement = NodeDocument().DocumentElement();
+    if (documentElement && documentElement.get() != this && documentElement->IsHTMLElement()
+        && documentElement->UsesEffectiveTextDirection())
+    {
+      return documentElement->EffectiveTextDirection();
+    }
+    return TextDirection::LTR;
+  }
+
+  void Node::SetEffectiveTextDirection(TextDirection direction) noexcept
+  {
+    if (direction == TextDirection::RTL)
+    {
+      SetNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+    }
+    else
+    {
+      ClearNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+    }
   }
 
 #pragma region Node

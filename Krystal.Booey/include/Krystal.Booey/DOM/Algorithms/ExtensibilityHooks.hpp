@@ -22,8 +22,10 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-post-connection-ext
     static void NodePostConnection(Node &connectedNode) noexcept;
 
+    /// @param onlyReplacedElementsInserted Whether the change inserted replaced elements and nothing else,
+    /// which is neutral to the auto directionality of the node.
     /// @see https://dom.spec.whatwg.org/#concept-node-children-changed-ext
-    static void NodeChildrenChanged(ContainerNode &node) noexcept;
+    static void NodeChildrenChanged(ContainerNode &node, bool onlyReplacedElementsInserted = false) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-move-ext
     static void NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;

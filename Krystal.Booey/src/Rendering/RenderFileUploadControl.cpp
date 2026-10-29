@@ -219,9 +219,7 @@ namespace krys::boo
         paintInfo.Context().Translate(-FloatPoint(textOrigin));
       }
 
-      // FIXME: Text of more than one direction is drawn in logical order (drawBidiText), with bidi reordering
-      // of text runs.
-      (void)paintInfo.Context().DrawText(font, textRun, FloatPoint(textOrigin));
+      paintInfo.Context().DrawBidiText(font, textRun, FloatPoint(textOrigin));
     }
 
     // FIXME: The file icon, drawn after the button (inputElement().icon()), with the host's file icons.

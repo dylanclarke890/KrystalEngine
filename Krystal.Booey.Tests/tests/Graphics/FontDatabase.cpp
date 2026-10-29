@@ -23,6 +23,13 @@ namespace krys::boo::tests
     CHECK_FALSE(bundled.IsFixedPitch());
     CHECK(database.Faces().front().get() == &bundled);
 
+    // The bundled Noto Sans Arabic, the last resort for Arabic, is registered after it.
+    auto &arabic = database.BundledArabicFace();
+    CHECK(arabic.FamilyName() == u8"Noto Sans Arabic");
+    CHECK(arabic.StyleName() == u8"Regular");
+    CHECK(arabic.GlyphIndex(U'ا'));
+    CHECK(database.Faces()[1].get() == &arabic);
+
     // Families match ASCII case-insensitively.
     auto faces = database.FacesInFamily(u8"liberation SANS");
     REQUIRE(faces.size() == 1u);

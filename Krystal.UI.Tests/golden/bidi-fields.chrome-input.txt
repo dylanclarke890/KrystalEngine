@@ -1,0 +1,35 @@
+click 300 21 => i1:0 i1:0 - - text=אבג abc דהו
+click 279 21 => i1:3 i1:3 - - text=אבג abc דהו
+click 262 21 => i1:6 i1:6 - - text=אבג abc דהו
+click 240 21 => i1:8 i1:8 - - text=אבג abc דהו
+click 100 21 => i1:11 i1:11 - - text=אבג abc דהו
+key ArrowLeft => i1:11 i1:11 - - text=אבג abc דהו
+key ArrowLeft => i1:11 i1:11 - - text=אבג abc דהו
+key ArrowRight => i1:10 i1:10 - - text=אבג abc דהו
+key Home => i1:0 i1:0 - - text=אבג abc דהו
+key End => i1:11 i1:11 - - text=אבג abc דהו
+key ArrowRight shift => i1:10 i1:11 - - text=אבג abc דהו
+key ArrowRight shift => i1:9 i1:11 - - text=אבג abc דהו
+dblclick 264 21 => i1:4 i1:8 - - text=אבג abc דהו
+click 296 21 => i1:1 i1:1 - - text=אבג abc דהו
+type x => i1:2 i1:2 - - text=אxבג abc דהו
+type ש => i1:3 i1:3 - - text=אxשבג abc דהו
+key Backspace => i1:2 i1:2 - - text=אxבג abc דהו
+key Backspace => i1:1 i1:1 - - text=אבג abc דהו
+click 40 51 => i2:4 i2:4 - - text=abc אבג def
+click 62 51 => i2:5 i2:5 - - text=abc אבג def
+key ArrowRight => i2:6 i2:6 - - text=abc אבג def
+key ArrowRight => i2:7 i2:7 - - text=abc אבג def
+key ArrowLeft shift => i2:6 i2:7 - - text=abc אבג def
+drag 20 51 50 51 => i2:1 i2:6 - - text=abc אבג def
+click 200 51 => i2:11 i2:11 - - text=abc אבג def
+type ה => i2:12 i2:12 - - text=abc אבג defה
+key Backspace => i2:11 i2:11 - - text=abc אבג def
+click 300 77 => x1:0 x1:0 - - text=אבג abc\nדהו 123
+click 262 77 => x1:6 x1:6 - - text=אבג abc\nדהו 123
+click 100 77 => x1:7 x1:7 - - text=אבג abc\nדהו 123
+click 300 101 => x1:9 x1:9 - - text=אבג abc\nדהו 123
+key ArrowLeft => x1:10 x1:10 - - text=אבג abc\nדהו 123
+key End => x1:15 x1:15 - - text=אבג abc\nדהו 123
+type 4 => x1:16 x1:16 - - text=אבג abc\nדהו 1234
+key Backspace => x1:15 x1:15 - - text=אבג abc\nדהו 123

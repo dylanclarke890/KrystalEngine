@@ -15,6 +15,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -805,6 +806,24 @@ namespace krys::boo::dom
     }
 
     return true;
+  }
+
+  Ref<DOMRectList> Range::GetClientRects() const noexcept
+  {
+    (void)_start.Container->NodeDocument().UpdateLayout();
+    return DOMRectList::Create(RenderObject::ClientBorderAndTextRects(MakeSimpleRange(*this)));
+  }
+
+  Ref<DOMRect> Range::GetBoundingClientRect() const noexcept
+  {
+    return BoundingClientRect(MakeSimpleRange(*this));
+  }
+
+  Ref<DOMRect> Range::BoundingClientRect(const SimpleRange &range) noexcept
+  {
+    (void)range.Start.GetDocument().UpdateLayout();
+    auto rects = RenderObject::ClientBorderAndTextRects(range);
+    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const FloatRect>(rects)));
   }
 
   ExceptionOr<DOMString> Range::ToString() const noexcept

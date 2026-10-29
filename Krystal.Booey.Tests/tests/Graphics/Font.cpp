@@ -124,14 +124,13 @@ namespace krys::boo::tests
 
   TEST_CASE("Font: synthesis and derived fonts", "[Graphics][Font]")
   {
-    SECTION("Synthetic bold widens glyphs by a pixel")
+    SECTION("Synthetic bold keeps the glyphs' advances")
     {
       auto font = CreateFont(Ahem(), 16, true);
-      CHECK(font->SyntheticBoldOffset() == 1);
-      CHECK(font->WidthForGlyph(58) == 17);
-      CHECK(font->WidthForGlyph(58, Font::SyntheticBoldInclusion::Exclude) == 16);
-      CHECK(font->SpaceWidth() == 17);
-      CHECK(font->SpaceWidth(Font::SyntheticBoldInclusion::Exclude) == 16);
+      CHECK(font->PlatformData().SyntheticBold());
+      CHECK(font->SyntheticBoldOffset() == 0);
+      CHECK(font->WidthForGlyph(58) == 16);
+      CHECK(font->SpaceWidth() == 16);
     }
 
     SECTION("Synthetic oblique slants the ink")

@@ -18,6 +18,8 @@ namespace krys::boo
     virtual void DidEndChooser() noexcept = 0;
     KRYS_NODISCARD virtual IntRect ElementRectRelativeToRootView() const noexcept = 0;
     KRYS_NODISCARD virtual bool SupportsAlpha() const noexcept = 0;
+    /// @brief Whether the input lays out right to left, so its picker is mirrored.
+    KRYS_NODISCARD virtual bool IsElementRTL() const noexcept = 0;
     KRYS_NODISCARD virtual List<Color> SuggestedColors() const noexcept = 0;
   };
 }

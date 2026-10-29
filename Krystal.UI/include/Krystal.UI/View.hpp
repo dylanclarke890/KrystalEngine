@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Editing/WritingDirection.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayList.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
 #include "Krystal.Booey/Graphics/IntSize.hpp"
@@ -186,6 +187,9 @@ namespace krys::ui
     bool _focused {true};
     /// @brief The `key` of each key held, which its release reports too.
     HashMap<pal::Key, utf8_string> _heldKeyValues;
+    /// @brief The text direction Ctrl with a Shift key chose, applied when they're let go unless another key
+    /// is pressed first.
+    Maybe<boo::WritingDirection> _pendingTextDirection;
     /// @brief The overlay open over the page (a menu list's popup, a picker), if any.
     RefPtr<Overlay> _overlay;
     /// @brief Whether a button was held as the overlay opened: its release goes to the page.

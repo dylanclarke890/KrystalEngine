@@ -36,9 +36,11 @@ namespace krys::boo
 
   FontDatabase::FontDatabase() noexcept
       : _bundledFace(CreateBundledFace(BundledLiberationSansRegular())),
+        _bundledArabicFace(CreateBundledFace(BundledNotoSansArabicRegular())),
         _bundledMathFace(CreateBundledFace(BundledSTIXTwoMathRegular()))
   {
     AddFace(Ref {_bundledFace});
+    AddFace(Ref {_bundledArabicFace});
     AddFace(Ref {_bundledMathFace});
   }
 

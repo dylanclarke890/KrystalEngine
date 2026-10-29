@@ -475,7 +475,10 @@ namespace krys::boo::html
     SetLastChangeWasNotUserEdit();
     SetFormControlValueMatchesRenderer(false);
     _inputType->SetValue(sanitizedValue, valueChanged, eventBehavior, selection);
-    // FIXME: Auto directionality (updateEffectiveTextDirection), with dir=auto.
+    if (SelfOrPrecedingNodesAffectDirAuto())
+    {
+      UpdateEffectiveTextDirection();
+    }
 
     if (valueChanged && eventBehavior == TextFieldEventBehavior::DispatchNoEvent)
     {
@@ -866,6 +869,11 @@ namespace krys::boo::html
     return _inputType->IsTelephoneField();
   }
 
+  bool HTMLInputElement::DirAutoUsesValue() const noexcept
+  {
+    return _inputType->DirAutoUsesValue();
+  }
+
   bool HTMLInputElement::IsURLField() const noexcept
   {
     return _inputType->IsURLField();
@@ -939,8 +947,12 @@ namespace krys::boo::html
   void HTMLInputElement::SubtreeHasChanged() noexcept
   {
     _inputType->SubtreeHasChanged();
-    // FIXME: Auto directionality, which typing doesn't update through childrenChanged
-    // (updateEffectiveTextDirection), with dir=auto.
+    // When typing in an input field, childrenChanged is not called, so we need to force the directionality
+    // check.
+    if (SelfOrPrecedingNodesAffectDirAuto())
+    {
+      UpdateEffectiveTextDirection();
+    }
   }
 
   void HTMLInputElement::HandleFocusEvent(dom::Node *oldFocusedNode) noexcept
@@ -1610,7 +1622,9 @@ namespace krys::boo::html
 
     _inputType->RemoveShadowSubtree();
     _inputType->DetachFromElement();
+    auto oldType = _inputType->GetType();
 
+    bool didDirAutoUseValue = _inputType->DirAutoUsesValue();
     bool previouslySelectable = _inputType->SupportsSelectionAPI();
 
     _inputType = krys::move(newType);
@@ -1626,8 +1640,12 @@ namespace krys::boo::html
     }
     _inputType->CreateShadowSubtreeIfNeeded();
 
-    // FIXME: Auto directionality when the type changes to or from tel (updateEffectiveTextDirection), with
-    // dir=auto.
+    // https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
+    if (oldType == InputType::Type::Telephone || _inputType->GetType() == InputType::Type::Telephone
+        || (HasAutoTextDirectionState() && didDirAutoUseValue != _inputType->DirAutoUsesValue()))
+    {
+      UpdateEffectiveTextDirection();
+    }
 
     if (didSupportReadOnly != willSupportReadOnly && HasAttribute(u8"readonly")) KRYS_UNLIKELY
     {
@@ -1745,7 +1763,10 @@ namespace krys::boo::html
         SetFormControlValueMatchesRenderer(false);
       }
       UpdateValidity();
-      // FIXME: Auto directionality, with dir=auto.
+      if (SelfOrPrecedingNodesAffectDirAuto())
+      {
+        UpdateEffectiveTextDirection();
+      }
       _valueAttributeWasUpdatedAfterParsing = !_parsingInProgress;
     }
     else if (localName == u8"name")

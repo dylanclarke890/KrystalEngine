@@ -155,8 +155,9 @@ namespace krys::boo::tests
       fixture.Click(28, 10, 2);
       CHECK(fixture.Selection().IsRange());
       CHECK(fixture.Selection().Granularity() == TextGranularity::WordGranularity);
+      // With the space after it, as Windows' editing behaviour does.
       CHECK(fixture.StartOffset() == 4);
-      CHECK(fixture.EndOffset() == 9);
+      CHECK(fixture.EndOffset() == 10);
 
       // Dragging after it extends by words.
       fixture.Press(28, 10, 2);

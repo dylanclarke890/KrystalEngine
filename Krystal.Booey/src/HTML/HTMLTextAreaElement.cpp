@@ -122,8 +122,11 @@ namespace krys::boo::html
     {
       NodeDocument().GetEditor().TextDidChangeInTextArea(*this);
     }
-    // FIXME: Auto directionality, which typing doesn't update through childrenChanged
-    // (updateEffectiveTextDirection), with dir=auto.
+    // When typing in a textarea, childrenChanged is not called, so we need to force the directionality check.
+    if (SelfOrPrecedingNodesAffectDirAuto())
+    {
+      UpdateEffectiveTextDirection();
+    }
   }
 
   void HTMLTextAreaElement::HandleBeforeTextInsertedEvent(dom::BeforeTextInsertedEvent &event) const noexcept
@@ -383,7 +386,10 @@ namespace krys::boo::html
     SetLastChangeWasNotUserEdit();
     UpdatePlaceholderVisibility();
     InvalidateStyleForSubtree();
-    // FIXME: Auto directionality (updateEffectiveTextDirection), with dir=auto.
+    if (SelfOrPrecedingNodesAffectDirAuto())
+    {
+      UpdateEffectiveTextDirection();
+    }
     SetFormControlValueMatchesRenderer(true);
 
     auto endOfString = static_cast<uint32>(_value.size());

@@ -110,17 +110,19 @@ namespace krys::ui
       _colors.push_back(ColorFromHex(hex));
     }
 
-    utf8_string html = u8"<!DOCTYPE html><style>"
-                       u8"html { width: max-content; margin: 0; border: 1px solid GrayText; cursor: default;"
-                       u8" background: Canvas; color: CanvasText; font: 13px sans-serif; }\n"
-                       u8"body { margin: 0; padding: 4px; display: grid; gap: 2px;"
-                       u8" grid-template-columns: repeat("
-                       + Number(Columns)
-                       + u8", 18px); }\n"
-                         u8".swatch { height: 18px; box-sizing: border-box; border: 1px solid GrayText; }\n"
-                         u8".selected { outline: 2px solid CanvasText; outline-offset: -2px; }\n"
-                         u8".highlighted { border: 2px solid Highlight; }\n"
-                         u8"</style><body>";
+    // A right-to-left input's picker is mirrored: the swatches run from the right.
+    _rightToLeft = _client->IsElementRTL();
+    utf8_string html = _rightToLeft ? u8"<!DOCTYPE html><html dir=rtl><style>" : u8"<!DOCTYPE html><style>";
+    html += u8"html { width: max-content; margin: 0; border: 1px solid GrayText; cursor: default;"
+            u8" background: Canvas; color: CanvasText; font: 13px sans-serif; }\n"
+            u8"body { margin: 0; padding: 4px; display: grid; gap: 2px;"
+            u8" grid-template-columns: repeat("
+            + Number(Columns)
+            + u8", 18px); }\n"
+              u8".swatch { height: 18px; box-sizing: border-box; border: 1px solid GrayText; }\n"
+              u8".selected { outline: 2px solid CanvasText; outline-offset: -2px; }\n"
+              u8".highlighted { border: 2px solid Highlight; }\n"
+              u8"</style><body>";
     _highlightedIndex = -1;
     for (size_t i = 0; i < _colors.size(); ++i)
     {
@@ -177,7 +179,7 @@ namespace krys::ui
         contentSize = boo::IntSize(box->Width().ToInt(), box->Height().ToInt());
       }
     }
-    _rect = Place(_client->ElementRectRelativeToRootView(), contentSize, viewport);
+    _rect = Place(_client->ElementRectRelativeToRootView(), contentSize, viewport, _rightToLeft);
     _view->Resize(_rect.Size());
 
     auto highlighted = std::exchange(_highlightedIndex, -1);
@@ -275,8 +277,8 @@ namespace krys::ui
     };
     switch (key)
     {
-      case pal::Key::LeftArrow:   move(-1); return true;
-      case pal::Key::RightArrow:  move(1); return true;
+      case pal::Key::LeftArrow:   move(_rightToLeft ? 1 : -1); return true;
+      case pal::Key::RightArrow:  move(_rightToLeft ? -1 : 1); return true;
       case pal::Key::UpArrow:     move(-Columns); return true;
       case pal::Key::DownArrow:   move(Columns); return true;
       case pal::Key::Enter:

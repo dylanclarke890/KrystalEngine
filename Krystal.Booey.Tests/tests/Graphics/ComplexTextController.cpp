@@ -123,6 +123,43 @@ namespace krys::boo::tests
       CHECK(advances[0] + advances[2] + advances[4] + advances[6] == Catch::Approx(total));
     }
 
+    SECTION("Arabic falls back to the bundled Arabic face and joins")
+    {
+      // Seen, lam, alef, meem.
+      auto run = Rtl(u8"سلام");
+      ComplexTextController controller {liberation, run};
+      GlyphBuffer buffer;
+      HashSet<RefPtr<const Font>> fallbackFonts;
+      controller.Advance(run.Length(), &buffer, GlyphIterationStyle::IncludePartialGlyphs, &fallbackFonts);
+      REQUIRE(fallbackFonts.size() == 1);
+      auto &arabic = **fallbackFonts.begin();
+      CHECK(arabic.PlatformData().Face() == &FontDatabase::Singleton().BundledArabicFace());
+
+      // One glyph a letter (the font draws lam-alef as two joined glyphs), emitted in string order.
+      REQUIRE(buffer.Size() == 4);
+      CHECK(buffer.UncheckedStringOffsetAt(0) == 0);
+      CHECK(buffer.UncheckedStringOffsetAt(1) == 2);
+      CHECK(buffer.UncheckedStringOffsetAt(2) == 4);
+      CHECK(buffer.UncheckedStringOffsetAt(3) == 6);
+      // Seen is initial, lam medial and alef final; alef doesn't join to what follows it, so meem is
+      // isolated.
+      CHECK(buffer.GlyphAt(0) != arabic.GlyphForCharacter(U'س'));
+      CHECK(buffer.GlyphAt(1) != arabic.GlyphForCharacter(U'ل'));
+      CHECK(buffer.GlyphAt(2) != arabic.GlyphForCharacter(U'ا'));
+      CHECK(buffer.GlyphAt(3) == arabic.GlyphForCharacter(U'م'));
+
+      // Marks don't advance: beh with fatha is as wide as beh.
+      auto beh = Rtl(u8"ب");
+      auto behWithFatha = Rtl(u8"بَ");
+      CHECK(liberation.Width(behWithFatha) == Catch::Approx(liberation.Width(beh)));
+
+      // Arabic-Indic digits come from the Arabic face too.
+      CHECK(liberation.Width(Rtl(u8"٣")) > 0);
+      auto font = liberation.FontForCombiningCharacterSequence(u8"٣");
+      REQUIRE(font);
+      CHECK(font->PlatformData().Face() == &FontDatabase::Singleton().BundledArabicFace());
+    }
+
     SECTION("Marks don't advance")
     {
       // Shin with qamats, then lamed.

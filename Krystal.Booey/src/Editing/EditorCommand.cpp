@@ -1,4 +1,5 @@
-﻿#include "Krystal.Booey/DOM/Document.hpp"
+﻿#include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/TextEvent.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -86,6 +87,35 @@ namespace krys::boo
     }
 
     // Execute command functions
+
+    bool ExecuteMakeTextWritingDirectionLeftToRight(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                                    utf8_stringview) noexcept
+    {
+      auto style = css::MutableStyleProperties::Create();
+      (void)style->SetProperty(css::PropertyId::UnicodeBidi, css::ValueId::Embed);
+      (void)style->SetProperty(css::PropertyId::Direction, css::ValueId::Ltr);
+      frame.Document()->GetEditor().ApplyStyle(style.get(), EditAction::SetInlineWritingDirection);
+      return true;
+    }
+
+    bool ExecuteMakeTextWritingDirectionNatural(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                                utf8_stringview) noexcept
+    {
+      auto style = css::MutableStyleProperties::Create();
+      (void)style->SetProperty(css::PropertyId::UnicodeBidi, css::ValueId::Normal);
+      frame.Document()->GetEditor().ApplyStyle(style.get(), EditAction::SetInlineWritingDirection);
+      return true;
+    }
+
+    bool ExecuteMakeTextWritingDirectionRightToLeft(LocalFrame &frame, dom::Event *, EditorCommandSource,
+                                                    utf8_stringview) noexcept
+    {
+      auto style = css::MutableStyleProperties::Create();
+      (void)style->SetProperty(css::PropertyId::UnicodeBidi, css::ValueId::Embed);
+      (void)style->SetProperty(css::PropertyId::Direction, css::ValueId::Rtl);
+      frame.Document()->GetEditor().ApplyStyle(style.get(), EditAction::SetInlineWritingDirection);
+      return true;
+    }
 
     bool ExecuteMoveBackward(LocalFrame &frame, dom::Event *, EditorCommandSource, utf8_stringview) noexcept
     {
@@ -1039,6 +1069,15 @@ namespace krys::boo
       {u8"InsertText",
        {ExecuteInsertText, Supported, EnabledInEditableText, IsTextInsertion,
         DoNotAllowExecutionWhenDisabled}},
+      {u8"MakeTextWritingDirectionLeftToRight",
+       {ExecuteMakeTextWritingDirectionLeftToRight, SupportedFromMenuOrKeyBinding,
+        EnabledInRichlyEditableText, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"MakeTextWritingDirectionNatural",
+       {ExecuteMakeTextWritingDirectionNatural, SupportedFromMenuOrKeyBinding, EnabledInRichlyEditableText,
+        IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
+      {u8"MakeTextWritingDirectionRightToLeft",
+       {ExecuteMakeTextWritingDirectionRightToLeft, SupportedFromMenuOrKeyBinding,
+        EnabledInRichlyEditableText, IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},
       {u8"MoveBackward",
        {ExecuteMoveBackward, SupportedFromMenuOrKeyBinding, EnabledInEditableTextOrCaretBrowsing,
         IsNotTextInsertion, DoNotAllowExecutionWhenDisabled}},

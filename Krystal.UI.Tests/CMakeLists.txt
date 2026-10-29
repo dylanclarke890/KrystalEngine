@@ -47,6 +47,7 @@ target_sources(Krystal.UI.Tests
     ${CMAKE_SOURCE_DIR}/Krystal.Gfx.Tests/src/Golden.cpp
 
     tests/Benchmark.cpp
+    tests/BidiEditing.cpp
     tests/Canvas2D.cpp
     tests/Compositing.cpp
     tests/Gamepads.cpp

@@ -191,7 +191,8 @@ namespace krys::boo::style::tests
     SECTION(":dir() follows the ancestors' dir")
     {
       REQUIRE_FALSE(d.SetAttribute(u8"dir", u8"rtl").HasException());
-      CHECK(p.StyleValidity() == Validity::ElementInvalid);
+      // Its direction changes, which restyles its subtree.
+      CHECK(p.StyleValidity() == Validity::SubtreeInvalid);
       CHECK(own.StyleValidity() == Validity::Valid);
       document.UpdateStyleIfNeeded();
       CHECK(IsBlue(p));
