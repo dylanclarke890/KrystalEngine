@@ -75,7 +75,7 @@ namespace krys::boo
     KRYS_NODISCARD bool ShouldEnableSubpixelPrecisionForTextDump(const dom::Document &) noexcept
     {
       // FIXME: Documents with rendered outermost <svg> elements in the layer-based SVG engine dump with
-      // subpixel precision, once there's SVG.
+      // subpixel precision.
       return false;
     }
   }
@@ -155,7 +155,7 @@ namespace krys::boo
       if (!tagName.empty())
       {
         ts << " {" << tagName << '}';
-        // FIXME: Flag empty or unstyled Apple-style-spans (an editing artifact), once there's editing.
+        // FIXME: Flag empty or unstyled Apple-style-spans (an editing artifact).
       }
     }
 
@@ -196,11 +196,11 @@ namespace krys::boo
       ts << ' ' << EnclosingIntRect(r);
     }
 
-    // FIXME: The SVG painting features of SVG renderers, once there's SVG.
+    // FIXME: The SVG painting features of SVG renderers.
 
     if (auto *renderElement = DynamicDowncast<RenderElement>(o))
     {
-      // FIXME: The file name of file upload controls, once there are any.
+      // FIXME: The file name of file upload controls.
 
       if (renderElement->Parent())
       {
@@ -451,7 +451,7 @@ namespace krys::boo
         }
       }
 
-      // FIXME: The visual overflow of SVG renderers, once there's SVG.
+      // FIXME: The visual overflow of SVG renderers.
     }
   }
 
@@ -636,7 +636,7 @@ namespace krys::boo
         ts << " layerType: foreground only";
       }
 
-      // FIXME: Composited layers (ShowCompositedLayers), once there's compositing.
+      // FIXME: Composited layers (ShowCompositedLayers).
 
       if (layer.IsolatesBlending())
       {
@@ -826,7 +826,7 @@ namespace krys::boo
 
       RenderLayer &layer = *renderer.Layer();
       WriteLayers(ts, layer, layer, layer.Rect(), behavior);
-      // FIXME: The caret or selection (writeSelection), once there's editing.
+      // FIXME: The caret or selection (writeSelection).
       return ts.Release();
     }
   }

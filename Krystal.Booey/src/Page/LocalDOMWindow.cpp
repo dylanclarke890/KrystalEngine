@@ -310,8 +310,8 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Only if the page is script-closable (opened by script, or with one session history entry, which
-    // a page always has until there's history (B3c)); a warning on the console otherwise.
+    // FIXME: Only if the page is script-closable (opened by script, or with one session history entry); a
+    // warning on the console otherwise.
 
     // The page may ask to stay.
     if (auto *frame = Frame(); frame && !frame->Loader().ShouldClose())
@@ -351,7 +351,7 @@ namespace krys::boo
     {
       return;
     }
-    // FIXME: Stop loading this's navigable, once there's document loading (B3b).
+    // FIXME: Stop loading this's navigable.
   }
 
   void LocalDOMWindow::Focus() noexcept

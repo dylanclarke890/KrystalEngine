@@ -103,7 +103,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*text).HasException());
   }
 
-  // TODO(test): check that mutation records are queued for the text nodes whose data is changed by SplitText.
+  // FIXME: Check that mutation records are queued for the text nodes whose data is changed by SplitText.
 
   TEST_CASE("Text::WholeText", "[HTML][Text]")
   {

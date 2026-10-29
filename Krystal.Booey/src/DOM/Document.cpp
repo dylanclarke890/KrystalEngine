@@ -337,7 +337,7 @@ namespace krys::boo::dom
 
   DOMString Document::CharacterSet() const noexcept
   {
-    // TODO(DOCUMENT, ENCODING): pass encoding to document on creation
+    // FIXME: Pass encoding to document on creation
     return u8"UTF-8";
   }
 
@@ -577,8 +577,8 @@ namespace krys::boo::dom
 
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
   {
-    // TODO(DOCUMENT, EVENTS): create correct event based on 'interface'
-    // TODO(DOCUMENT, EVENTS): set initialized to true and isTrusted to false.
+    // FIXME: Create correct event based on 'interface'
+    // FIXME: Set initialized to true and isTrusted to false.
     return CreateRef<Event>(interface);
   }
 
@@ -807,44 +807,44 @@ namespace krys::boo::dom
     return html::DOMTreeAccessors::GetHeadElement(*this);
   }
 
-  // TODO(DOCUMENT, HTML): Document::Images
+  // FIXME: Document::Images
   // Ref<HTMLCollection> Document::Images() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): Document::Embeds
+  // FIXME: Document::Embeds
   // Ref<HTMLCollection> Document::Embeds() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): Document::Plugins
+  // FIXME: Document::Plugins
   // Ref<HTMLCollection> Document::Plugins() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): Document::Links
+  // FIXME: Document::Links
   // Ref<HTMLCollection> Document::Links() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): Document::Forms
+  // FIXME: Document::Forms
   // Ref<HTMLCollection> Document::Forms() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): Document::Scripts
+  // FIXME: Document::Scripts
   // Ref<HTMLCollection> Document::Scripts() noexcept
   // {
   // }
 
-  // TODO(DOCUMENT, HTML): GetElementsByName
+  // FIXME: GetElementsByName
   // Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
   //{
   //}
 
   html::HTMLOrSVGScriptElement Document::CurrentScript() noexcept
   {
-    // TODO(DOCUMENT, HTML): Current running script (will we even support this?)
+    // FIXME: Current running script (will we even support this?)
     return {};
   }
 
@@ -1363,8 +1363,7 @@ namespace krys::boo::dom
     {
       _hoveredElement = ShareRefPtr(_hoveredElement->ParentElement());
     }
-    // FIXME: Schedule a hover state update (the event handler's scheduleHoverStateUpdate), once there's input
-    // handling.
+    // FIXME: Schedule a hover state update (the event handler's scheduleHoverStateUpdate).
   }
 
   bool Document::HasFocus() const noexcept
@@ -2058,7 +2057,6 @@ namespace krys::boo::dom
     krys_assert(&element.NodeDocument() == this && !element.IsInTopLayer());
     KRYS_MAYBE_UNUSED auto result = _topLayerElements.add(ShareRef(element));
     krys_assert(result.second);
-    // FIXME: The auto popover list, with popovers (B4d).
   }
 
   void Document::RemoveTopLayerElement(Element &element) noexcept
@@ -2068,7 +2066,6 @@ namespace krys::boo::dom
     _topLayerPendingRemovals.remove(protectedElement);
     KRYS_MAYBE_UNUSED bool didRemove = _topLayerElements.remove(protectedElement);
     krys_assert(didRemove);
-    // FIXME: The auto popover list, with popovers (B4d).
   }
 
   bool Document::IsPendingTopLayerRemoval(const Element &element) const noexcept
@@ -2497,7 +2494,7 @@ namespace krys::boo::dom
     }
 
     SetURL(url::URL(url));
-    // FIXME: The outgoing referrer and the document loader's request URL, once there are those.
+    // FIXME: The outgoing referrer and the document loader's request URL.
   }
 
   int32 Document::CircularSequentialID() noexcept
@@ -3356,7 +3353,7 @@ namespace krys::boo::dom
         builder.Destroy(*_renderView->FirstChild());
       }
 
-      // FIXME: Delete the layout context's detached renderers, once there's layout.
+      // FIXME: Delete the layout context's detached renderers.
 
       _renderView->Destroy();
     }
@@ -3383,7 +3380,7 @@ namespace krys::boo::dom
     _frame = WeakPtr<LocalFrame>::WithRef(frame);
 
     // FIXME: The document loader's writer makes the window as it makes the document, reusing the initial
-    // empty document's (takeDOMWindowFrom), once there's document loading (B3b).
+    // empty document's (takeDOMWindowFrom).
     if (!_domWindow)
     {
       CreateDOMWindow();
@@ -3399,8 +3396,8 @@ namespace krys::boo::dom
 
   void Document::WillBeRemovedFromFrame() noexcept
   {
-    // FIXME: Unload, page hide and the other steps of unloading the document, once there's navigation; the
-    // back/forward cache suspends the document's active objects rather than stopping them (B3d).
+    // FIXME: Unload, page hide and the other steps of unloading the document; the back/forward cache suspends
+    // the document's active objects rather than stopping them.
     StopActiveDOMObjects();
     _selection->WillBeRemovedFromFrame();
 
@@ -3555,8 +3552,7 @@ namespace krys::boo::dom
 
   void Document::UpdateAnimationsAndSendEvents() noexcept
   {
-    // FIXME: The window's frozen timestamp, once there's a window; the rendering update's timestamp stands
-    // in.
+    // FIXME: The window's frozen timestamp; the rendering update's timestamp stands in.
     auto *page = GetPage();
     if (!page)
     {
@@ -3605,7 +3601,7 @@ namespace krys::boo::dom
     {
       return false;
     }
-    // FIXME: Wait until the view is visually non-empty, once there's painting.
+    // FIXME: Wait until the view is visually non-empty.
     return true;
   }
 
@@ -3880,8 +3876,8 @@ namespace krys::boo::dom
 
   void Document::ScheduleStyleRecalc() noexcept
   {
-    // FIXME: Not in the back/forward cache, once there's navigation.
-    if (_styleRecalcTimer.IsActive())
+    if (_styleRecalcTimer.IsActive()
+        || _backForwardCacheState != BackForwardCacheState::NotInBackForwardCache)
     {
       return;
     }

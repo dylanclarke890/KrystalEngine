@@ -9,7 +9,7 @@ namespace krys::boo::css
 {
   namespace
   {
-    // TODO: replace with a shared UTF-8 code point iterator once one exists in Krystal.Core/Text.
+    // FIXME: Replace with a shared UTF-8 code point iterator once one exists in Krystal.Core/Text.
     template <typename F>
     void ForEachCodePoint(CSSOMStringView string, F &&callback) noexcept
     {

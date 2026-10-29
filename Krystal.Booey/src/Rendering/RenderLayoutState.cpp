@@ -11,8 +11,7 @@ namespace krys::boo
 #endif
   {
     // FIXME: Start from the container's absolute position, clipped and scrolled by it when it clips its
-    // overflow (localToAbsolute, cachedSizeForOverflowClip, scrollPosition), once there's geometry mapping
-    // and scrolling.
+    // overflow (localToAbsolute, cachedSizeForOverflowClip, scrollPosition).
     if (_isPaginated)
     {
       // This is just a flag for known page height (see
@@ -43,17 +42,16 @@ namespace krys::boo
   void RenderLayoutState::ComputeOffsets(const RenderLayoutState &ancestor,
                                          KRYS_MAYBE_UNUSED RenderBox &renderer, LayoutSize offset) noexcept
   {
-    // FIXME: Fixed positioned boxes start from the view's absolute position (localToAbsolute), once there's
-    // geometry mapping.
+    // FIXME: Fixed positioned boxes start from the view's absolute position (localToAbsolute).
     _paintOffset = ancestor.PaintOffset() + offset;
 
     // FIXME: Out-of-flow boxes inside an in-flow positioned inline move with it
-    // (offsetForInFlowPositionedInline), once there's inline layout.
+    // (offsetForInFlowPositionedInline).
 
     _layoutOffset = _paintOffset;
 
     // FIXME: In-flow positioned boxes with a layer move by the layer's offset, and boxes that clip their
-    // overflow by their scroll position, once there are layers and scrolling.
+    // overflow by their scroll position.
 
     _layoutDelta = ancestor.LayoutDelta();
 #if KRYS_DEBUG
@@ -75,7 +73,7 @@ namespace krys::boo
     }
 
     // FIXME: Intersect with the box's overflow clip at its scroll position (scrollPosition,
-    // cachedSizeForOverflowClip), once there's scrolling.
+    // cachedSizeForOverflowClip).
   }
 
   void RenderLayoutState::ComputePaginationInformation(

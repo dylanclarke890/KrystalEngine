@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
@@ -143,5 +144,24 @@ namespace krys::boo::tests
     CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::InBackForwardCache);
     document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
     CHECK(document.GetBackForwardCacheState() == dom::BackForwardCacheState::NotInBackForwardCache);
+  }
+
+  TEST_CASE("A document in the back/forward cache doesn't recalculate its style",
+            "[DOM][Document][Suspension]")
+  {
+    SuspensionFixture fixture;
+    auto &document = fixture.Document();
+    auto &eventLoop = html::EventLoop::Current();
+    document.UpdateStyleIfNeeded();
+
+    document.SetBackForwardCacheState(dom::BackForwardCacheState::InBackForwardCache);
+    (void)document.Body()->FirstElementChild()->SetAttribute(u8"style", u8"color: blue");
+    eventLoop.RunUntilIdle();
+    CHECK(document.HasPendingStyleRecalc());
+
+    // Leaving the cache schedules it.
+    document.SetBackForwardCacheState(dom::BackForwardCacheState::NotInBackForwardCache);
+    eventLoop.RunUntilIdle();
+    CHECK_FALSE(document.HasPendingStyleRecalc());
   }
 }

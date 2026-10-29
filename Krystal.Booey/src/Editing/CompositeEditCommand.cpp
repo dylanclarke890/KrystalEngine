@@ -97,7 +97,7 @@ namespace krys::boo
   }
 
   // FIXME: Stopping scrolling as content size changes during the undo
-  // (prohibitScrollingWhenChangingContentSize), with scrolling.
+  // (prohibitScrollingWhenChangingContentSize).
   void EditCommandComposition::Unapply(AddToUndoStack addToUndoStack) noexcept
   {
     if (!_document->Frame())
@@ -216,8 +216,8 @@ namespace krys::boo
   }
 
   // FIXME: Stopping scrolling as content size changes during the command
-  // (prohibitScrollingWhenChangingContentSize), with scrolling; and queueing the events the command fires
-  // until it's done (EventQueueScope), with a scoped event queue.
+  // (prohibitScrollingWhenChangingContentSize); and queueing the events the command fires until it's done
+  // (EventQueueScope), with a scoped event queue.
   void CompositeEditCommand::Apply() noexcept
   {
     if (!EndingSelection().IsContentRichlyEditable())

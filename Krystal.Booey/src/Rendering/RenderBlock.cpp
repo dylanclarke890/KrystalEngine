@@ -755,7 +755,7 @@ namespace krys::boo
         }
         firstLetter = current.NextSibling();
       }
-      // FIXME: Menu lists, once there are form controls.
+      // FIXME: Menu lists.
       else if (current.IsBlockLevelReplacedOrAtomicInline() || current.IsRenderButton())
       {
         break;
@@ -879,13 +879,13 @@ namespace krys::boo
     {
       return true;
     }
-    // FIXME: SVG foreign objects, once there's SVG.
     return IsNonReplacedAtomicInlineLevelBox()
            || style.IsDisplayFlexibleBoxIncludingDeprecatedOrGridFormattingContextBox()
            || IsFlexItemIncludingDeprecated() || IsRenderTable() || IsRenderTableCell()
            || IsRenderTableCaption() || IsFieldset() || IsDocumentElementRenderer()
-           || IsRenderFragmentedFlow() || style.SpecifiesColumns() || style.GetColumnSpan() == ColumnSpan::All
-           || style.Display() == DisplayType::FlowRoot || EstablishesIndependentFormattingContext();
+           || IsRenderFragmentedFlow() || IsLegacyRenderSVGForeignObject() || style.SpecifiesColumns()
+           || style.GetColumnSpan() == ColumnSpan::All || style.Display() == DisplayType::FlowRoot
+           || EstablishesIndependentFormattingContext();
   }
 
   void RenderBlock::StyleWillChange(style::Difference diff, const RenderStyle &newStyle) noexcept
@@ -1555,8 +1555,8 @@ namespace krys::boo
 
   bool RenderBlock::HasLineIfEmpty() const noexcept
   {
-    // FIXME: A root editable element has a line even when empty, once there's editing.
-    return false;
+    auto *element = GetElement();
+    return element && element->IsRootEditableElement();
   }
 
   Maybe<LayoutUnit> RenderBlock::FirstLineBaseline() const noexcept
@@ -1719,7 +1719,7 @@ namespace krys::boo
   void RenderBlock::UpdateDescendantTransformsAfterLayout() noexcept
   {
     // FIXME: Update the transforms of the boxes whose transform depends on this container's size
-    // (takeBoxesNeedingTransformUpdateAfterContainerLayout), once there are motion paths.
+    // (takeBoxesNeedingTransformUpdateAfterContainerLayout).
   }
 
   void RenderBlock::LayoutExcludedChildren(RelayoutChildren) noexcept
@@ -2185,7 +2185,7 @@ namespace krys::boo
     paintInfoForChildren.Phase = phaseForChildren();
     paintInfoForChildren.UpdateSubtreePaintRootForChildren(this);
 
-    // FIXME: Event regions (EventRegionIncludeBackground) come with hit testing.
+    // FIXME: Event regions (EventRegionIncludeBackground), once there are event regions.
 
     return paintInfoForChildren;
   }
@@ -2287,13 +2287,13 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The accessibility and event region phases come with hit testing.
+    // FIXME: The accessibility and event region phases.
 
     // Adjust our painting position if we're inside a scrolled layer (e.g., an overflow:auto div).
     LayoutPoint scrolledOffset = paintOffset;
     scrolledOffset.MoveBy(-GetScrollPosition());
 
-    // FIXME: Column rules (paintColumnRules) come with borders.
+    // FIXME: Column rules (paintColumnRules), once there's multi-column layout.
 
     // Done with backgrounds, borders and column rules.
     if (paintPhase == PaintPhase::BlockBackground)

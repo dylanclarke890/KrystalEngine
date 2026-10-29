@@ -319,8 +319,7 @@ namespace krys::boo::style
 
   void Styleable::CancelStyleOriginatedAnimations() const noexcept
   {
-    // FIXME: Not canceling style-originated animations when entering the back/forward cache, once there's
-    // navigation.
+    // FIXME: Not canceling style-originated animations when entering the back/forward cache.
     CancelStyleOriginatedAnimations({});
     if (auto *styleOriginatedTimelinesController =
           Element.NodeDocument().GetStyleOriginatedTimelinesController())

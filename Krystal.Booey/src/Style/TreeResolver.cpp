@@ -373,7 +373,7 @@ namespace krys::boo::style
 
     if (!AffectsRenderedSubtree(element, *update.Style))
     {
-      // FIXME: Clear the last style change event style, with animations.
+      // FIXME: Clear the last style change event style.
       if (update.Style->Display() == DisplayType::None && element.HasDisplayNone())
       {
         return {krys::move(update), DescendantsToResolve::None};
@@ -2448,8 +2448,7 @@ namespace krys::boo::style
   {
     ++ResolutionNestingDepth;
 
-    // FIXME: Suspend the loader's pending requests and the page's memory cache client calls, once there's a
-    // loader and a page.
+    // FIXME: Suspend the loader's pending requests and the page's memory cache client calls.
   }
 
   PostResolutionCallbackDisabler::~PostResolutionCallbackDisabler() noexcept

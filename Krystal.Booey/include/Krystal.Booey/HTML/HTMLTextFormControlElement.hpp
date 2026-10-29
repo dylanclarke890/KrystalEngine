@@ -49,8 +49,8 @@ namespace krys::boo::html
   /// in its user agent shadow tree, which the user edits, and its selection is the frame's selection there
   /// while it's focused (and a cached one while it isn't).
   /// @note Selection offsets are UTF-8 byte offsets into the value, as offsets in the DOM are.
-  // FIXME: Hiding the placeholder while a pen hovers (the hover's pointer type), with pointer events; the
-  // spelling markers (effectiveSpellcheckAttributeChanged), with spelling.
+  // FIXME: Hiding the placeholder while a pen hovers (the hover's pointer type); the spelling markers
+  // (effectiveSpellcheckAttributeChanged), with spelling.
   class HTMLTextFormControlElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTextFormControlElement);

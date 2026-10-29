@@ -24,5 +24,5 @@ namespace krys::boo::dom::tests
             == ExceptionCode::InvalidCharacterError);
   }
 
-  // TODO(test): add tests for CreateDocument and CreateHTMLDocument
+  // FIXME: Add tests for CreateDocument and CreateHTMLDocument
 }

@@ -81,7 +81,7 @@ namespace krys::boo::dom
       return true;
     }
 
-    // TODO: we need to iterate over codepoints instead of decoding the entire string at once
+    // FIXME: We need to iterate over codepoints instead of decoding the entire string at once
     auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
     krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
 
@@ -241,7 +241,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    // TODO(fix): We can't guarantee that the name is valid UTF-8, validate before converting.
+    // FIXME: We can't guarantee that the name is valid UTF-8, validate before converting.
     auto decodeResult = krys::text::Decode<krys::text::UTF8>(name);
     krys_debug_assert(decodeResult.Error == krys::text::DecodeError::None);
     auto &utf32 = decodeResult.Output;

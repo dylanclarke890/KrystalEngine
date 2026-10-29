@@ -35,7 +35,7 @@ namespace krys::boo
   /// @brief A form's submission: its method, action, target and encoded data, which the host navigates to.
   /// @see https://html.spec.whatwg.org/#form-submission-algorithm
   // FIXME: The form state (FormState, the text field values the host's autofill reads), the referrer, origin
-  // and opener policies, and history locking, once there's navigation.
+  // and opener policies, and history locking.
   class FormSubmission : public RefCounted<FormSubmission>, public CanMakeWeakPtr<FormSubmission>
   {
   public:

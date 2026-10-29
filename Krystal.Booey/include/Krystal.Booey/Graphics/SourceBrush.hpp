@@ -13,7 +13,6 @@ namespace krys
 namespace krys::boo
 {
   /// @brief What a fill or stroke paints with: a colour or a gradient.
-  /// FIXME: Patterns (`Pattern`, `setPattern`) come with images.
   class SourceBrush
   {
   public:

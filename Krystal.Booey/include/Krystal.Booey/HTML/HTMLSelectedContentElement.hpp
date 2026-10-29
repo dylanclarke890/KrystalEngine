@@ -14,7 +14,7 @@ namespace krys::boo::html
   public:
     HTMLSelectedContentElement(dom::Document &document) noexcept;
 
-    // TODO(HTMLSelectedContentElement): implement disabled properly
+    // FIXME: Implement disabled properly
     KRYS_NODISCARD bool Disabled() const noexcept
     {
       return false;

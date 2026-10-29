@@ -87,7 +87,7 @@ namespace krys::ui
              .Colour = ToColour(shadow.GetColor())});
         }
         default:
-          // FIXME: Reference filters, once there are SVG filters; the rest are identities.
+          // FIXME: Reference filters; the rest are identities.
           return null;
       }
     }

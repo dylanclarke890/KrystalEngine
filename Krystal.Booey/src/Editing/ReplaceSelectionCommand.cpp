@@ -1963,7 +1963,7 @@ namespace krys::boo
     }
   }
 
-  // FIXME: An editing text node (createEditingTextNode, which echoes passwords), with password fields.
+  // FIXME: An editing text node (createEditingTextNode, which echoes passwords).
   void ReplaceSelectionCommand::AddSpacesForSmartReplace() noexcept
   {
     VisiblePosition startOfInsertedContent = PositionAtStartOfInsertedContent();

@@ -7,7 +7,7 @@ namespace krys::boo
 {
   /// @brief A `filter()` image: an image with filters applied.
   /// FIXME: Tracking the input image's cached image (`CachedImageClient`, `imageChanged`), loading reference
-  /// filters' documents and drawing come with the resource loader and the graphics backend.
+  /// filters' documents and drawing.
   class StyleFilterImage final : public StyleGeneratedImage
   {
   private:

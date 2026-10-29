@@ -55,7 +55,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-onabort
-    // TODO(impl): ABORT - attribute EventHandler onabort;
+    // FIXME: attribute EventHandler onabort;
 
 #pragma endregion
   };

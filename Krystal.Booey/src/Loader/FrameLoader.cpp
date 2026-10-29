@@ -329,7 +329,7 @@ namespace krys::boo
       return;
     }
     _shouldRestoreScrollPositionAndViewState = false;
-    // FIXME: Unless the Navigation API suppresses it (B3e).
+    // FIXME: Unless the Navigation API suppresses it.
     _history->RestoreScrollPositionAndViewState();
   }
 
@@ -1378,7 +1378,7 @@ namespace krys::boo
   {
     // We don't do this if we are submitting a form with method other than "GET", explicitly reloading, or if
     // the URL does not have a fragment.
-    // FIXME: The back and forward cache, framesets and the initial empty document, once there are any.
+    // FIXME: The back and forward cache, framesets and the initial empty document.
     return (!isFormSubmission || text::IsASCIICaselessEqual(httpMethod, utf8_stringview(u8"get")))
            && !IsReload(loadType) && loadType != FrameLoadType::Same
            && !ShouldReload(_frame.Document()->GetURL(), url);

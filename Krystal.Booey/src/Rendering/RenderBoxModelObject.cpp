@@ -81,7 +81,7 @@ namespace krys::boo
 
   void RenderBoxModelObject::WillBeDestroyed() noexcept
   {
-    // FIXME: The image quality controller, once there's painting.
+    // FIXME: The image quality controller.
     if (IsFirstLetter())
     {
       GetFirstLetterRemainingTextMap().erase(this);
@@ -979,7 +979,7 @@ namespace krys::boo
         referencePoint.Move(-renderBox->BorderLeft(), -renderBox->BorderTop());
       }
       // FIXME: Inside an inline formatting context, the position of the inline offset parent's first inline
-      // box (firstInlineBoxTopLeft), once there's inline layout.
+      // box (firstInlineBoxTopLeft).
 
       // FIXME: Also when the renderer is in a fragmented flow, once there are fragmented flows.
       if (!IsOutOfFlowPositioned())

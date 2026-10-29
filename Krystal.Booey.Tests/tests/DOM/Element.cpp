@@ -86,7 +86,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(classList.Contains(u8"bar"));
   }
 
-  // TODO(test): SLOTTABLES
+  // FIXME: Tests for slottables.
   // TEST_CASE("Element::Slot", "[HTML][Element]")
 
   TEST_CASE("Element::HasAttributes", "[HTML][Element]")
@@ -447,14 +447,14 @@ namespace krys::boo::dom::tests
     }
   }
 
-  // TODO(test): SHADOW-ROOT
+  // FIXME: Tests for shadow roots.
   // TEST_CASE("Element::AttachShadow", "[HTML][Element]")
   // TEST_CASE("Element::ShadowRoot", "[HTML][Element]")
 
-  // TODO(test): CUSTOM-ELEMENTS
+  // FIXME: Tests for custom elements.
   // TEST_CASE("Element::CustomElementRegistry", "[HTML][Element]")
 
-  // TODO(test): CSS-SELECTORS:
+  // FIXME: Tests for CSS selectors:
   // TEST_CASE("Element::Matches", "[HTML][Element]")
   // TEST_CASE("Element::Closest", "[HTML][Element]")
   // TEST_CASE("Element::WebkitMatchesSelector", "[HTML][Element]")

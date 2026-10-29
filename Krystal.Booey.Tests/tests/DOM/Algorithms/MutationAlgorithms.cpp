@@ -14,7 +14,7 @@
 
 namespace krys::boo::dom::tests
 {
-  // TODO(test): SLOTTABLES - no test coverage for these parts of the algorithms since we don't have slot
+  // FIXME: No test coverage for these parts of the algorithms since we don't have slot
   // elements yet, but should be added once they are implemented.
 
   TEST_CASE("MutationAlgorithms::EnsurePreInsertValidity", "[HTML][MutationAlgorithms]")
@@ -347,7 +347,7 @@ namespace krys::boo::dom::tests
       REQUIRE(document->LastChild() == element.get());
       REQUIRE_FALSE(docFragment->HasChildNodes());
 
-      // TODO(test): MUTATION-OBSERVERS - need to test that a mutation record is queued for the nodes removed
+      // FIXME: Need to test that a mutation record is queued for the nodes removed
       // from the DocumentFragment.
 
       REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
@@ -400,10 +400,10 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
     // SECTION("Inserting a node with SuppressObservers(false) queues a mutation record")
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
     // SECTION("Inserting a node with SuppressObservers(true) does not queue a mutation record")
   }
 
@@ -561,9 +561,9 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(anotherElement->RemoveChild(*child2).HasException());
     }
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
 
-    // TODO(test): LIVE-RANGES
+    // FIXME: Tests for live ranges.
   }
 
   TEST_CASE("MutationAlgorithms::Replace", "[HTML][MutationAlgorithms]")
@@ -766,7 +766,7 @@ namespace krys::boo::dom::tests
       }
     }
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
   }
 
   TEST_CASE("MutationAlgorithms::ReplaceAll", "[HTML][MutationAlgorithms]")
@@ -817,7 +817,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(element->RemoveChild(*newChild2).HasException());
     }
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
   }
 
   TEST_CASE("MutationAlgorithms::PreRemove", "[HTML][MutationAlgorithms]")
@@ -848,17 +848,17 @@ namespace krys::boo::dom::tests
     auto document = CreateRef<Document>();
     auto element = CreateRef<TestElement>(*document);
 
-    // TODO(test): LIVE-RANGES
+    // FIXME: Tests for live ranges.
     // SECTION("Removing a node that's contained in a range updates the offsets of the range")
 
-    // TODO(test): NODE-ITERATORS
+    // FIXME: Tests for node iterators.
     // SECTION("Removing a node which is an inclusive ancestor of a node iterators root updates the iterator
     // pointer")
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
     // SECTION("Removing a node with SuppressObservers(false) queues a mutation record")
 
-    // TODO(test): MUTATION-OBSERVERS
+    // FIXME: Tests for the mutation records queued.
     // SECTION("Removing a node with SuppressObservers(true) does not queue a mutation record")
 
     SECTION("Otherwise, the node is removed from the parent and returned")

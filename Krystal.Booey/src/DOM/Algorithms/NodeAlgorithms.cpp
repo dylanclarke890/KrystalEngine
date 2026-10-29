@@ -184,7 +184,7 @@ namespace krys::boo::dom
         docCopy._customElementRegistry = doc._customElementRegistry;
       }
 
-      // TODO(feat): DOM - Set copy's encoding
+      // FIXME: Set copy's encoding
       // SPEC-VIOLATION(URL): Set the origin on the cloned document to the origin of the original document.
     }
     else if (Is<DocumentType>(node))
@@ -561,7 +561,7 @@ namespace krys::boo::dom
       classes = OrderedSet::Parser(classNames.View());
     }
 
-    if (classes.empty()) // TODO(perf): MINOR - return an empty collection instead.
+    if (classes.empty()) // FIXME: Performance: return an empty collection instead.
     {
       return CreateRef<StaticHTMLCollection>(SmallElementList {});
     }
@@ -577,7 +577,7 @@ namespace krys::boo::dom
             return false;
           }
 
-          // TODO(perf): MINOR - this is terrible for performance but eh, it's quirks mode.
+          // FIXME: This is terrible for performance but eh, it's quirks mode.
           auto elementClasses =
             OrderedSet::Parser(krys::text::ToASCIILower(*element.GetAttribute(u8"class")));
           return std::ranges::all_of(classesQuery,

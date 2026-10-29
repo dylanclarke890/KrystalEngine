@@ -24,7 +24,7 @@ namespace krys::boo::layout_integration
 {
   /// @brief Lays out a flex container's content with the flex formatting context and copies the result back
   /// to the render tree.
-  // FIXME: Painting and hit testing (paint, hitTest), once there are those.
+  // FIXME: Painting and hit testing (paint, hitTest).
   class FlexLayout
   {
     KRYS_NON_COPY_MOVABLE(FlexLayout);

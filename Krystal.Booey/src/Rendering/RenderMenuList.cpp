@@ -390,7 +390,7 @@ namespace krys::boo
 
   void RenderMenuList::ValueChanged(uint32 listIndex, bool fireOnChange) noexcept
   {
-    // FIXME: Check that a page navigation has not occurred while the popup was up, once there is navigation.
+    // FIXME: Check that a page navigation has not occurred while the popup was up.
     auto &select = SelectElement();
     select.OptionSelectedByUser(select.ListToOptionIndex(static_cast<int32>(listIndex)), fireOnChange);
   }

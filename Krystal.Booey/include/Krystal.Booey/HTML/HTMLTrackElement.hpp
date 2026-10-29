@@ -55,7 +55,7 @@ namespace krys::boo::html
       return _readyState;
     }
 
-    // TODO(HTMLTrackElement, HTML): implement Track().
+    // FIXME: Implement Track().
     // readonly attribute TextTrack track;
 
 #pragma endregion

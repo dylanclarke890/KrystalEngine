@@ -120,7 +120,7 @@ namespace krys::boo::infra
     static void AdvancePositionWhile(dom::DOMStringView input, position_variable &position,
                                      TFunc &&condition) noexcept
     {
-      // TODO(fix): STRINGS - we're not iterating over code points properly here. we need a way of just
+      // FIXME: We're not iterating over code points properly here. we need a way of just
       // iterating over code points in a UTF-8 string instead of having to
       while (position != input.end() && condition(*position))
       {

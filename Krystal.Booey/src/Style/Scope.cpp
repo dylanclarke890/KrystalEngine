@@ -660,8 +660,7 @@ namespace krys::boo::style
   {
     krys_debug_assert(!_pendingUpdate);
 
-    // FIXME: Wait for a living render tree, and defer the update while style is being resolved, once there is
-    // a render tree and style resolution.
+    // FIXME: Wait for a living render tree, and defer the update while style is being resolved.
 
     auto collection = CollectActiveStyleSheets();
 

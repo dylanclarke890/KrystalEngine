@@ -779,8 +779,7 @@ namespace krys::boo
   // containingBlock() skips to the non-anonymous containing block.
   // This does mean that computeOutOfFlowPositionedLogicalWidth and computeOutOfFlowPositionedLogicalHeight
   // have to use container().
-  // FIXME: The repaint container variant (container(repaintContainer, repaintContainerSkipped)), once there's
-  // painting.
+  // FIXME: The repaint container variant (container(repaintContainer, repaintContainerSkipped)).
   namespace
   {
     RenderElement *ContainerForElement(const RenderObject &renderer,
@@ -2090,7 +2089,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Layer-aware SVG renderers, once there's SVG.
+    // FIXME: Layer-aware SVG renderers.
 
     // Table parts can't be relayout roots since the table is responsible for layouting all the parts.
     if (renderer.IsTablePart())

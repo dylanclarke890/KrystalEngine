@@ -519,7 +519,7 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
     KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(DOMStringView &html) noexcept;
 
-    // TODO(DOCUMENT, HTML): check - do we need to implement these?
+    // FIXME: Check - do we need to implement these?
     // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
 
     /// @see https://html.spec.whatwg.org/#dom-document-location
@@ -545,7 +545,7 @@ namespace krys::boo::dom
 
     // DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
 
-    // TODO(DOCUMENT, HTML): implement this getter:
+    // FIXME: Implement this getter:
     // getter object (DOMString name);
 
     /// @see https://html.spec.whatwg.org/#document.title
@@ -1118,8 +1118,6 @@ namespace krys::boo::dom
     }
 
     /// @brief Run when the parser stops parsing the document: its frame's loader scrolls to the fragment.
-    // FIXME: The rest of the end (https://html.spec.whatwg.org/#the-end): readiness, DOMContentLoaded and the
-    // load event, with document loading (B3).
     void FinishedParsing() noexcept;
 
     /// @brief Whether the latest focus change the user made was by clicking.
@@ -1137,7 +1135,7 @@ namespace krys::boo::dom
 
     /// @brief The used style of the initial containing block: its computed style, with the writing mode and
     /// direction propagated from the document element or `<body>`.
-    // FIXME: The style of the render view, once there is one.
+    // FIXME: The style of the render view.
     KRYS_NODISCARD const RenderStyle &RenderViewStyle() const noexcept;
 
     enum class ResolveStyleType : bool

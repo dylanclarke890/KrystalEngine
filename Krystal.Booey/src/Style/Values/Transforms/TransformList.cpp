@@ -103,8 +103,8 @@ namespace krys::boo::style
                                                                    });
     }
 
-    // FIXME: Blend against the border box of the interpolation client's renderer, once there's an
-    // interpolation context and render tree. Until then, size-dependent functions blend against an empty box.
+    // FIXME: Blend against the border box of the interpolation client's renderer; until then, size-dependent
+    // functions blend against an empty box.
     LayoutSize boxSize;
 
     bool shouldFallBackToDiscrete = ShouldFallBackToDiscreteInterpolation(from, to, boxSize);
@@ -151,8 +151,7 @@ namespace krys::boo::style
     }
 
     // FIXME: Use the interpolation client's precomputed prefix of shared primitives (for `transform`, when
-    // not accumulating), once there's an interpolation context. Until then the prefix comes from the two
-    // lists.
+    // not accumulating); until then the prefix comes from the two lists.
     Maybe<uint32> prefixLengthFromContext;
 
     auto prefixLength = [&]() -> Maybe<uint32>

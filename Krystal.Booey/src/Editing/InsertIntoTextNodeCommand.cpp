@@ -27,8 +27,7 @@ namespace krys::boo
     krys_debug_assert(!_text.empty());
   }
 
-  // FIXME: Password echo (revealing the last typed character of a password for a moment), with password
-  // fields.
+  // FIXME: Password echo (revealing the last typed character of a password for a moment).
   void InsertIntoTextNodeCommand::DoApply() noexcept
   {
     if (!_node->HasEditableStyle())

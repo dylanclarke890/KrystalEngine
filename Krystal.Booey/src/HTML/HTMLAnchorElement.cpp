@@ -152,7 +152,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAnchorElement::ReferrerPolicy() const noexcept
   {
-    // TODO(HTMLANCHORELEMENT, HTML): ReferrerPolicy should be limited to known values
+    // FIXME: ReferrerPolicy should be limited to known values
     return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
   }
 

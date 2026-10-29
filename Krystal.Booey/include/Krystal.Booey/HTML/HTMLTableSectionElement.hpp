@@ -14,7 +14,7 @@ namespace krys::boo::html
 
 #pragma region HTMLTableSectionElement - https://html.spec.whatwg.org/#htmltablesectionelement
 
-    // TODO(HTMLTableSectionElement, HTML): Implement api.
+    // FIXME: Implement api.
 
 #pragma endregion
 

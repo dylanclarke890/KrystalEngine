@@ -28,8 +28,8 @@ namespace krys::boo::css::calc
         return it->second;
       }
 
-      // TODO: upstream uses a cryptographically random unit interval (noting it probably doesn't need to be);
-      // a per-thread Mersenne Twister is enough here.
+      // FIXME: Upstream uses a cryptographically random unit interval (noting it probably doesn't need to
+      // be); a per-thread Mersenne Twister is enough here.
       thread_local std::mt19937_64 generator {std::random_device {}()};
       std::uniform_real_distribution<double> distribution {0.0, 1.0};
 

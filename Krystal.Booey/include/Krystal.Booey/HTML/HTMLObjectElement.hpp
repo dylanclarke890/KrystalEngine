@@ -56,7 +56,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-object-height
     void Height(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLObjectElement, HTML):
+    // FIXME: The rest of the interface:
     // readonly attribute Document? contentDocument;
     // readonly attribute WindowProxy? contentWindow;
     // Document? getSVGDocument();

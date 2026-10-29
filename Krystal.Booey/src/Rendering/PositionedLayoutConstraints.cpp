@@ -1014,7 +1014,7 @@ namespace krys::boo
     // of the first line box when really it should use the last line box. When
     // this is fixed elsewhere, this adjustment should be removed.
     // FIXME: Move the box by the distance between the first and last inline boxes of an RTL inline
-    // container (lineLeftmostInlineBoxFor), once there's inline layout.
+    // container (lineLeftmostInlineBoxFor).
   }
 
   namespace

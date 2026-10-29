@@ -221,14 +221,14 @@ namespace krys::boo
     // FIXME: webkit.org/b/182909.
     tearDownSubTreeIfApplicable();
 
-    // FIXME: Renderers detached during layout wait in the layout context's detached renderer list, once
-    // there's layout. Until then `toDestroy` is destroyed here.
+    // FIXME: Renderers detached during layout wait in the layout context's detached renderer list; for now
+    // `toDestroy` is destroyed here.
   }
 
   void RenderTreeBuilder::Attach(RenderElement &parent, RenderPtr<RenderObject> child,
                                  RenderObject *beforeChild) noexcept
   {
-    // FIXME: Report visually non-empty content to the view, once there's painting.
+    // FIXME: Report visually non-empty content to the view.
     krys_debug_assert(!parent.BeingDestroyed());
     krys_debug_assert(child);
     AttachInternal(parent, krys::move(child), beforeChild);
@@ -474,7 +474,7 @@ namespace krys::boo
   void RenderTreeBuilder::AttachToRenderElementInternal(RenderElement &parent, RenderPtr<RenderObject> child,
                                                         RenderObject *beforeChild) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree, once there's layout.
+    // FIXME: Assert layout isn't mutating the render tree.
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(!child->Parent());
     krys_debug_assert(
@@ -583,7 +583,7 @@ namespace krys::boo
     // positioned renderer maps don't become stale. It would be too slow to do the map lookup on each call.
     krys_debug_assert(&from == child.Parent());
     krys_debug_assert(!beforeChild || &to == beforeChild->Parent());
-    // FIXME: Remove percent height descendants, once there's layout.
+    // FIXME: Remove percent height descendants.
     if (normalizeAfterInsertion == NormalizeAfterInsertion::Yes
         && (to.IsRenderBlock() || to.IsRenderInline()))
     {
@@ -1003,7 +1003,7 @@ namespace krys::boo
 
     auto isAnonymousAndSafeToDelete = [](const RenderElement &renderer)
     {
-      // FIXME: SVG viewport containers, once there are any.
+      // FIXME: SVG viewport containers.
       return renderer.IsAnonymous() && !renderer.IsRenderView() && !renderer.IsRenderFragmentedFlow();
     };
 
@@ -1106,7 +1106,7 @@ namespace krys::boo
 
   void RenderTreeBuilder::UpdateAfterDescendants(RenderElement &renderer) noexcept
   {
-    // FIXME: SVG roots, once there are SVG renderers.
+    // FIXME: Layer-based SVG roots.
 
     // Do not early return here in any case. For example, RenderListItem derives
     // from RenderBlockFlow and indirectly from RenderBlock thus fulfilling all
@@ -1119,7 +1119,7 @@ namespace krys::boo
     {
       ListBuilder().UpdateItemMarker(*listItem);
     }
-    // FIXME: Multi-column flows and form controls, once there are their builders.
+    // FIXME: Multi-column flows and form controls (their builders' updateAfterDescendants).
   }
 
   RenderPtr<RenderObject> RenderTreeBuilder::DetachFromRenderGrid(RenderGrid &parent, RenderObject &child,
@@ -1176,7 +1176,7 @@ namespace krys::boo
                                                                      RenderObject &child,
                                                                      WillBeDestroyed willBeDestroyed) noexcept
   {
-    // FIXME: Assert layout isn't mutating the render tree, once there's layout.
+    // FIXME: Assert layout isn't mutating the render tree.
     krys_debug_assert(parent.CanHaveChildren() || parent.CanHaveGeneratedChildren());
     krys_debug_assert(child.Parent() == &parent);
 

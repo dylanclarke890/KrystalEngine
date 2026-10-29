@@ -29,7 +29,7 @@ namespace krys::boo::layout
       case WhiteSpaceCollapse::PreserveBreaks: return WhiteSpaceCollapseBehavior::CollapseWhitespaceSequence;
       case WhiteSpaceCollapse::Preserve:
       case WhiteSpaceCollapse::BreakSpaces:
-        // TODO: WhiteSpaceCollapse::PreserveSpaces should also be handled this way.
+        // FIXME: WhiteSpaceCollapse::PreserveSpaces should also be handled this way.
         // WhiteSpaceCollapse::Preserve and WhiteSpaceCollapse::BreakSpaces
         // have the same text breaking positions so we don't need to recalculate
         // breaking points when switching between these behaviors.

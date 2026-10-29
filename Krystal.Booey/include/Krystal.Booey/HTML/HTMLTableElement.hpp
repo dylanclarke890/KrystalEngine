@@ -15,7 +15,7 @@ namespace krys::boo::html
 
 #pragma region HTMLTableElement - https://html.spec.whatwg.org/#htmltableelement
 
-    // TODO(HTMLTableElement, HTML): Implement Caption(), CreateCaption(), DeleteCaption(), THead(),
+    // FIXME: Implement Caption(), CreateCaption(), DeleteCaption(), THead(),
     // CreateTHead(), DeleteTHead(),
     // [CEReactions] attribute HTMLTableCaptionElement? caption;
     // HTMLTableCaptionElement createCaption();

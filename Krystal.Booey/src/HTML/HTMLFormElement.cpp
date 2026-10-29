@@ -249,7 +249,7 @@ namespace krys::boo::html
 
   void HTMLFormElement::SubmitFromJavaScript() noexcept
   {
-    // FIXME: Whether a user gesture is being processed (UserGestureIndicator), once there are gestures.
+    // FIXME: Whether a user gesture is being processed (UserGestureIndicator).
     Submit(nullptr, false, FormSubmissionTrigger::SubmittedByJavaScript);
   }
 
@@ -568,7 +568,7 @@ namespace krys::boo::html
     }
 
     // FIXME: The rel attribute's noopener, noreferrer and opener, which set the submission's opener and
-    // referrer policies, once there's navigation.
+    // referrer policies.
 
     _plannedFormSubmission = CreateWeakPtr(formSubmission.get());
 

@@ -78,7 +78,8 @@ namespace krys::boo::html
 
   /// @brief What a 2D context draws images from.
   /// @see https://html.spec.whatwg.org/#canvasimagesource
-  // FIXME: `<video>` (B15); `ImageBitmap`, `OffscreenCanvas` and video frames aren't planned.
+  // FIXME: `<video>`, once there are media elements; `ImageBitmap`, `OffscreenCanvas` and video frames aren't
+  // planned.
   using CanvasImageSource =
     Variant<RefPtr<HTMLImageElement>, RefPtr<svg::SVGImageElement>, RefPtr<HTMLCanvasElement>>;
 

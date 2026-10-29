@@ -161,7 +161,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-img-fetchpriority
     void FetchPriority(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLIMAGEELEMENT, HTML): Promise<undefined> decode();
+    // FIXME: Promise<undefined> decode();
 
 #pragma endregion
 

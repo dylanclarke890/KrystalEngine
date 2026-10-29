@@ -139,7 +139,7 @@ namespace krys::boo
     auto dirtyFilterRegion = dirtyRect;
     auto filterRegion = dirtyRect;
 
-    // FIXME: SVG shapes' filter regions (their object bounding boxes), once there's SVG.
+    // FIXME: SVG shapes' filter regions (their object bounding boxes).
     if (!outsets.IsZero())
     {
       // FIXME: This flipping was added for drop-shadow, but it's not obvious that it's correct.
@@ -216,7 +216,7 @@ namespace krys::boo
 
     if (!_targetSwitcher || hasUpdatedBackingStore)
     {
-      // FIXME: SVG shapes' source image rects (their object bounding boxes), once there's SVG.
+      // FIXME: SVG shapes' source image rects (their object bounding boxes).
       auto sourceImageRect = FloatRect(dirtyFilterRegion);
       _targetSwitcher = GraphicsContextSwitcher::Create(context, sourceImageRect, filter);
     }

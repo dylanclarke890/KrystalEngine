@@ -96,7 +96,7 @@ namespace krys::boo
 
   /// @brief A request to load a URL into a frame: what's loaded, from which document, into which browsing
   /// context.
-  // FIXME: History locking, client redirects and the security origin, once there's history.
+  // FIXME: History locking, client redirects and the security origin.
   class FrameLoadRequest : public FrameLoadRequestBase
   {
   private:

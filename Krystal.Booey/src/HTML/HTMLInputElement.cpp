@@ -19,6 +19,7 @@
 #include "Krystal.Booey/HTML/RadioInputType.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
 #include "Krystal.Booey/HTML/TextInputType.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
@@ -1057,7 +1058,12 @@ namespace krys::boo::html
                             u8"Input showPicker() cannot be used on immutable controls.");
     }
 
-    // FIXME: Require transient activation (NotAllowedError), once there is user activation.
+    auto *window = NodeDocument().Window();
+    if (!window || !window->ConsumeTransientActivation())
+    {
+      return dom::Exception(dom::ExceptionCode::NotAllowedError,
+                            u8"Input showPicker() requires a user gesture.");
+    }
 
     _inputType->ShowPicker();
     return {};
@@ -1103,7 +1109,7 @@ namespace krys::boo::html
   {
     HTMLTextFormControlElement::DidAttachRenderers();
 
-    // FIXME: Attaching the type (InputType::attach, for image buttons' loaders), with image buttons.
+    // FIXME: Attaching the type (InputType::attach, for image buttons' loaders).
 
     if (NodeDocument().FocusedElement() == this)
     {

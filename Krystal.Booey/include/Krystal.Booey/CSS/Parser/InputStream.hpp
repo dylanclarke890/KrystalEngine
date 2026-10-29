@@ -14,7 +14,7 @@ namespace krys::boo::css
   class InputStream
   {
   private:
-    // TODO(perf): a lot of text is just plain ASCII, we should optimize for that case.
+    // FIXME: A lot of text is just plain ASCII, we should optimize for that case.
     utf32_string _data;
     size_t _readPosition {0uz};
     SourceLocation _currentLocation;

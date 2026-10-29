@@ -31,8 +31,6 @@ namespace krys::boo
 
   /// @brief A layer's filter as it paints: built from the renderer's `filter`, applied around what the layer
   /// draws.
-  // FIXME: Reference filters (the SVG filter elements and documents they reference, notifyFinished), once
-  // there's SVG.
   class RenderLayerFilters final : public RefCounted<RenderLayerFilters>
   {
   private:

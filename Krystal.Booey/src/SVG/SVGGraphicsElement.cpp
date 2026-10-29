@@ -65,8 +65,7 @@ namespace krys::boo::svg
     {
       // Note: objectBoundingBox is an emptyRect for elements like pattern or clipPath.
       // See the "Object bounding box units" section of http://dev.w3.org/csswg/css3-transforms/
-      // FIXME: The motion path data of the renderer (TransformOperationData's renderer constructor), once
-      // there are motion paths.
+      // FIXME: The motion path data of the renderer (TransformOperationData's renderer constructor).
       auto transform = style::TransformResolver::ComputeTransform(
         *style, TransformOperationData(renderer->TransformReferenceBoxRect()));
 

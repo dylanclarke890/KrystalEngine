@@ -262,7 +262,7 @@ namespace krys::boo::html
   void BaseDateAndTimeInputType::HandleActivationBehavior(dom::Event &event) noexcept
   {
     krys_debug_assert(Element());
-    // FIXME: Only while processing a user gesture (UserGestureIndicator), once there are gestures.
+    // FIXME: Only while processing a user gesture (UserGestureIndicator).
     if (!Element()->Renderer() || !Element()->IsMutable())
     {
       return;

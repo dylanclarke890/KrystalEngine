@@ -8,6 +8,7 @@
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
 #include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::tests
@@ -349,11 +350,17 @@ namespace krys::boo::tests
   {
     FrameFixture fixture {u8R"(<!DOCTYPE html><style>
       @media (prefers-color-scheme: dark) { p { color: rgb(0, 0, 255) } }
-    </style><p id=p>x</p>)"};
+      #set { list-style-image: image-set(url(https://example.com/a.png) 1x, url(https://example.com/b.png) 2x) }
+    </style><p id=p>x</p><div id=set></div>)"};
     auto &document = *fixture.Document;
     document.UpdateStyleIfNeeded();
     CHECK(EqualIgnoringSemanticColor(fixture.Rendered(u8"p").GetColor(), Black));
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 1);
+    auto imageSet = [&]() -> StyleImageSet &
+    {
+      return Downcast<StyleImageSet>(*fixture.Rendered(u8"set").ListStyleImage().TryStyleImage());
+    };
+    CHECK(imageSet().SelectBestFitImage(document).ScaleFactor == 1);
 
     auto hiDPI = document.Window()->MatchMedia(u8"(resolution: 2x)");
     CHECK_FALSE(hiDPI->Matches());
@@ -368,6 +375,8 @@ namespace krys::boo::tests
     CHECK(fixture.Rendered(u8"p").GetColor() == Blue);
     CHECK(document.DeviceScaleFactor() == 2);
     CHECK(document.RenderViewStyle().DeviceScaleFactor() == 2);
+    // An image set picks the image for the device scale factor.
+    CHECK(imageSet().SelectBestFitImage(document).ScaleFactor == 2);
 
     document.EvaluateMediaQueriesAndReportChanges();
     CHECK(hiDPI->Matches());

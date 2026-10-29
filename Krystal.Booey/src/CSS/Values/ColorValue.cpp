@@ -30,7 +30,7 @@ namespace krys::boo::css
 
   ColorValue::ColorValue(StaticValueTag, boo::Color color) noexcept : ColorValue(krys::move(color))
   {
-    // TODO: make static values like upstream (a reference count reserved for static values that are never
+    // FIXME: Make static values like upstream (a reference count reserved for static values that are never
     // destroyed). For now, the extra reference is never released.
     AddRef();
   }

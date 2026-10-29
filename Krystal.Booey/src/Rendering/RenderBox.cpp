@@ -354,8 +354,7 @@ namespace krys::boo
       RenderBlock::ClearPercentHeightDescendantsFrom(*this);
     }
 
-    // FIXME: The scrollable area's scroll position, scrollbar placement, width and colour, once there are
-    // layers.
+    // FIXME: The scrollable area's scroll position, scrollbar placement, width and colour.
 
     // Our opaqueness might have changed without triggering layout.
     if (diff >= style::DifferenceResult::Repaint && diff <= style::DifferenceResult::RepaintLayer)
@@ -1477,7 +1476,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: The layout state, once there is one.
+    // FIXME: The layout state.
     while (child)
     {
       if (child->NeedsLayout())
@@ -1716,7 +1715,7 @@ namespace krys::boo
                                                            MinimumSizeIsAutomaticContentBased minimumSizeType,
                                                            ConstrainDimension dimension) const noexcept
   {
-    // TODO: Here we use isSpecified() to present the definite value. This is not quite correct, for the
+    // FIXME: Here we use isSpecified() to present the definite value. This is not quite correct, for the
     // definite value should also include a size of the initial containing block and the “stretch-fit” sizing
     // of non-replaced blocks if they have definite values. See https://www.w3.org/TR/css-sizing-3/#definite
     const RenderStyle &styleToUse = Style();
@@ -2776,7 +2775,7 @@ namespace krys::boo
     {
       intrinsicHeight = *height;
     }
-    // FIXME: Menu lists keep their theme's height, once there are form controls.
+    // FIXME: Menu lists keep their theme's height.
 
     // We need the exact width of border and padding here, yet we can't use borderAndPadding* interfaces.
     // Because these interfaces evetually call borderAfter/Before, and RenderBlock::borderBefore
@@ -4044,7 +4043,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Editable elements too (hasEditableStyle), once there's editing.
+    // FIXME: Editable elements too (hasEditableStyle).
     return false;
   }
 
@@ -4078,8 +4077,7 @@ namespace krys::boo
       return true;
     }
 
-    // FIXME: Autoscrolling near the edge of a box (the start box and the wheel event's point), once there's
-    // autoscrolling.
+    // FIXME: Autoscrolling near the edge of a box (the start box and the wheel event's point).
     RenderBlock *nextScrollBlock = ContainingBlock();
 
     if (nextScrollBlock && !nextScrollBlock->IsRenderView())
@@ -4264,7 +4262,7 @@ namespace krys::boo
              || (overflow == Overflow::Hidden && !gutter.IsAuto());
     };
 
-    // FIXME: Overlay scrollbars (canUseOverlayScrollbars), once there are scrollbars.
+    // FIXME: Overlay scrollbars (canUseOverlayScrollbars).
     if (IsHorizontalWritingMode()
         && (Style().OverflowY() == Overflow::Scroll
             || shouldIncludeScrollbarGutter(Style().GetScrollbarGutter(), HasScrollableOverflowY(),
@@ -4435,7 +4433,7 @@ namespace krys::boo
 
     if (repaintContainer != this)
     {
-      // FIXME: The geometry map, once there is one.
+      // FIXME: The geometry map.
       auto containerRelativeQuad = LocalToContainerQuad(FloatQuad(FloatRect(box)), repaintContainer);
       box = LayoutRect(containerRelativeQuad.BoundingBox());
     }
@@ -5035,7 +5033,7 @@ namespace krys::boo
 
     // Update our visual overflow in case the child spills out the block, but only if we were going to paint
     // the child block ourselves.
-    // FIXME: Children with a self-painting layer paint themselves, once there are layers.
+    // FIXME: Children with a self-painting layer paint themselves.
     auto childVisualOverflowRect = renderer.VisualOverflowRectForPropagation(Style().GetWritingMode());
     childVisualOverflowRect.Move(offsetFromThis);
     AddVisualOverflow(childVisualOverflowRect);
@@ -5240,7 +5238,7 @@ namespace krys::boo
 
     // While a stickily positioned renderer is also inflow positioned, they stretch the overflow rect with
     // their inflow geometry (as opposed to the paint geometry) because they are not stationary.
-    // FIXME: Transforms (the transform from the container), once there's painting.
+    // FIXME: Transforms (the transform from the container).
     bool paintGeometryAffectsLayoutOverflow = IsInFlowPositioned() && !IsStickilyPositioned();
     if (paintGeometryAffectsLayoutOverflow)
     {
@@ -5990,8 +5988,7 @@ namespace krys::boo
                                  const FloatRect &boundingBox,
                                  EnumSet<style::TransformResolverOption> options) const noexcept
   {
-    // FIXME: The motion path data of the box (TransformOperationData's renderer constructor), once there are
-    // motion paths.
+    // FIXME: The motion path data of the box (TransformOperationData's renderer constructor).
     style::TransformResolver::ApplyTransform(t, style, TransformOperationData(boundingBox), options);
   }
 
@@ -6469,7 +6466,7 @@ namespace krys::boo
 
     paintInfo.Context().Clip(clipRect);
 
-    // FIXME: Event and accessibility region clips (regionContext) come with hit testing.
+    // FIXME: Event and accessibility region clips (regionContext).
 
     return true;
   }

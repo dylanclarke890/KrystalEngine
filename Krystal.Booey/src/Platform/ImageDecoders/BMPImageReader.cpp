@@ -415,7 +415,7 @@ namespace krys::boo
     // Reject the following valid bitmap types that we don't currently bother
     // decoding.  Few other people decode these either, they're unlikely to be
     // in much use.
-    // TODO(pkasting): Consider supporting these someday.
+    // FIXME: Consider supporting these someday.
     //   * Bitmaps larger than 2^16 pixels in either dimension (Windows
     //     probably doesn't draw these well anyway, and the decoded data would
     //     take a lot of memory).

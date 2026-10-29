@@ -43,7 +43,7 @@ namespace krys::boo
     return CreateRef<InsertTextCommand>(document, text, krys::move(markerSupplier), editingAction);
   }
 
-  // FIXME: An editing text node (createEditingTextNode, which echoes passwords), with password fields.
+  // FIXME: An editing text node (createEditingTextNode, which echoes passwords).
   dom::Position InsertTextCommand::PositionInsideTextNode(const dom::Position &position) noexcept
   {
     dom::Position pos = position;

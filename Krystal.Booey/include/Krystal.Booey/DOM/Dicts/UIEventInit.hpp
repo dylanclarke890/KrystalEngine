@@ -6,7 +6,7 @@
 namespace krys::boo::dom
 {
   /// @see https://w3c.github.io/uievents/#dictdef-uieventinit
-  // FIXME: The view, once there's a Window.
+  // FIXME: The view (a Window).
   struct UIEventInit : EventInit
   {
     int32 Detail {0};

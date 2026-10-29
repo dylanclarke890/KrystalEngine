@@ -631,7 +631,7 @@ namespace krys::boo
     {
       return false;
     }
-    // FIXME: Editing text always gets a renderer, once there's editing.
+    // FIXME: Editing text always gets a renderer.
     if (!textNode.Length())
     {
       return false;

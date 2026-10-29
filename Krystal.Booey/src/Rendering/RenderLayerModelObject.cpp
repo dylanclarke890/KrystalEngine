@@ -142,7 +142,7 @@ namespace krys::boo
 
     if (RequiresLayer())
     {
-      // FIXME: No layers inside hidden SVG subtrees (layerCreationAllowedForSubtree), once there's SVG.
+      // FIXME: No layers inside hidden SVG subtrees (layerCreationAllowedForSubtree).
       if (!Layer())
       {
         if (s_wasFloating && IsFloating())
@@ -207,7 +207,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Scrollbar steps and scroll snap containers, once there's scrolling.
+    // FIXME: Scrollbar steps, and scroll snap containers once there's scroll snapping.
   }
 
   bool RenderLayerModelObject::ApplyCachedClipAndScrollPosition(RepaintRects &,
@@ -229,7 +229,7 @@ namespace krys::boo
   void RenderLayerModelObject::UpdateLayerTransform() noexcept
   {
     // FIXME: Boxes with an offset path that depends on the containing block's layout update after it
-    // (setBoxNeedsTransformUpdateAfterContainerLayout), once there are motion paths.
+    // (setBoxNeedsTransformUpdateAfterContainerLayout).
     // Transform-origin depends on box size, so we need to update the layer transform after layout.
     if (HasLayer())
     {

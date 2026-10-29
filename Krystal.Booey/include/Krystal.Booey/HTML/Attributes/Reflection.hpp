@@ -24,7 +24,7 @@ namespace krys::boo::html
   template <typename T>
   concept ReflectURLType = OneOf<T, dom::USVString>;
 
-  // TODO(CONTENT-ATTRIBUTE-REFLECTION, HTML): FrozenArray<T>? is also one of the possible types.
+  // FIXME: FrozenArray<T>? is also one of the possible types.
   // NOTE: DOMTokenList is also a possible type for reflection but it just consists of returning a
   // DOMTokenList, would be harder to handle here.
   template <typename T>
@@ -639,7 +639,7 @@ namespace krys::boo::html
     KRYS_NODISCARD static Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS - the internals' ARIA attributes, with accessibility.
+      // FIXME: The internals' ARIA attributes, with accessibility.
       (void)internals;
       (void)name;
       return null;
@@ -649,7 +649,7 @@ namespace krys::boo::html
     static void SetContentAttribute(ElementInternals &internals, dom::DOMStringAtom name,
                                     dom::DOMString &&value) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // FIXME: The internals' ARIA attributes, with accessibility.
       (void)internals;
       (void)name;
       (void)value;
@@ -658,7 +658,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     static void DeleteContentAttribute(ElementInternals &internals, dom::DOMStringAtom name) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // FIXME: The internals' ARIA attributes, with accessibility.
       (void)internals;
       (void)name;
     }

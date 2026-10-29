@@ -25,7 +25,7 @@ namespace krys::boo::html
       return true;
     }
 
-    // TODO(HTMLMediaElement, HTML): Implement the media element API.
+    // FIXME: Implement the media element API.
   };
 }
 

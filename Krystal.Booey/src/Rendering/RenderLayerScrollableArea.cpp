@@ -251,7 +251,7 @@ namespace krys::boo
     }
 
     const auto *repaintContainer = renderer.ContainerForRepaint().Renderer;
-    // FIXME: The caret rect needs to be invalidated after scrolling, once there's selection.
+    // FIXME: The caret rect needs to be invalidated after scrolling.
 
     auto cachedRect = _layer.CachedClippedOverflowRect();
     auto rectForRepaint = cachedRect ? *cachedRect : renderer.ClippedOverflowRectForRepaint(repaintContainer);
@@ -445,7 +445,7 @@ namespace krys::boo
   {
     // Overflow scrolls on layers whenever the page composites, as asyncOverflowScrollingEnabled has it for
     // the compositing drawing areas.
-    // FIXME: Not inside SVG foreign objects, once there are any.
+    // FIXME: Not inside SVG foreign objects.
     auto &renderer = _layer.Renderer();
     bool isVisible = renderer.Style().UsedVisibility() == Visibility::Visible;
     if (_layer.Compositor().HasAcceleratedCompositing())
@@ -1024,7 +1024,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: List boxes handle their scrollbars by themselves, once there are list boxes.
+    // FIXME: List boxes handle their scrollbars by themselves.
 
     bool hadVerticalScrollbar = HasVerticalScrollbar();
     UpdateScrollbarPresenceAndState();
@@ -1047,7 +1047,7 @@ namespace krys::boo
     RenderBox *box = _layer.GetRenderBox();
     krys_debug_assert(box);
 
-    // FIXME: List boxes handle their scrollbars by themselves, once there are list boxes.
+    // FIXME: List boxes handle their scrollbars by themselves.
 
     bool hadHorizontalScrollbar = HasHorizontalScrollbar();
     bool hadVerticalScrollbar = HasVerticalScrollbar();

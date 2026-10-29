@@ -16,7 +16,7 @@ namespace krys::boo::dom
 {
   /// @brief An event at a point on the screen: its coordinates in the screen, the viewport, the page, the
   /// target and its layer.
-  // FIXME: The view is the frame view the event happened in; it becomes the Window, once there's one.
+  // FIXME: The view is the frame view the event happened in rather than its Window.
   class MouseRelatedEvent : public UIEventWithKeyState
   {
   public:

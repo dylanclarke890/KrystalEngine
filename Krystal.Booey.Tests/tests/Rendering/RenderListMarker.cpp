@@ -19,7 +19,7 @@ namespace krys::boo::tests
     }
   }
 
-  // FIXME: The markers' positions, once there's inline layout.
+  // FIXME: The markers' positions aren't checked.
   TEST_CASE_METHOD(css::tests::ValueFixture, "RenderListMarker: layout", "[Rendering][RenderListMarker]")
   {
     ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>

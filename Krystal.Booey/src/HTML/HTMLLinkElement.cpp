@@ -658,7 +658,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLLinkElement::CrossOrigin() const noexcept
   {
-    // TODO(HTMLLINKELEMENT, HTML): This is an enumerated attribute but I don't know the states/keywords.
+    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
     return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin");
   }
 
@@ -679,7 +679,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::As() const noexcept
   {
-    // TODO(HTMLLINKELEMENT, HTML): This is an enumerated attribute but I don't know the states/keywords.
+    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
     return Reflection::Reflect<dom::DOMString>(*this, u8"as").value_or(u8"");
   }
 
@@ -770,7 +770,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
   {
-    // TODO(HTMLLINKELEMENT, HTML): This is an enumerated attribute but I don't know the states/keywords.
+    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
     return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
   }
 
@@ -791,7 +791,7 @@ namespace krys::boo::html
 
   bool HTMLLinkElement::Disabled() const noexcept
   {
-    // TODO(HTMLLINKELEMENT, HTML): Whenever the disabled attribute is removed, set the link element's
+    // FIXME: Whenever the disabled attribute is removed, set the link element's
     // explicitly enabled attribute to true. This is more than just changing this method because the attribute
     // can be set in other ways.
     return Reflection::Reflect<bool>(*this, u8"disabled");
@@ -804,7 +804,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::FetchPriority() const noexcept
   {
-    // TODO(HTMLLINKELEMENT, HTML): This is an enumerated attribute but I don't know the states/keywords.
+    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
     return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
   }
 

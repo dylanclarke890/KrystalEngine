@@ -1338,7 +1338,6 @@ namespace krys::boo
     return true;
   }
 
-  // FIXME: Drops, which the drag controller handles, with drag and drop.
   bool Editor::HandleTextEvent(dom::TextEvent &event) noexcept
   {
     // Default event handling for Drag and Drop will be handled by DragController
@@ -1451,7 +1450,7 @@ namespace krys::boo
     DeleteSelectionWithSmartDelete(CanSmartCopyOrDelete());
   }
 
-  // FIXME: Waiting for the inserted images to load before revealing the selection, with image loading;
+  // FIXME: Waiting for the inserted images to load before revealing the selection;
   // accessibility's notifications of the pasted text, with accessibility; and checking the spelling of the
   // editable root, with text checking.
   void Editor::ReplaceSelectionWithFragment(dom::DocumentFragment &fragment, bool selectReplacement,

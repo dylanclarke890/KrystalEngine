@@ -38,9 +38,7 @@ namespace krys::boo
 
   /// @brief A renderer that generates a box: its frame rect (relative to its container), margins, overflow
   /// and the computation of its sizes.
-  // FIXME: Hit testing, scrolling (and autoscrolling), the coordinate mapping, the shape
-  // outside, fragmentation, and the sizing of out-of-flow positioned boxes (PositionedLayoutConstraints) come
-  // with hit testing, scrolling and the later layout slices.
+  // FIXME: Fragmentation.
   class RenderBox : public RenderBoxModelObject
   {
     KRYS_NON_COPY_MOVABLE(RenderBox);
@@ -363,7 +361,6 @@ namespace krys::boo
 
     // scrollWidth/scrollHeight will be the same as clientWidth/clientHeight unless the
     // object has overflow:hidden/scroll/auto specified and also has overflow.
-    // FIXME: scrollLeft/Top, the scroll position and setting it, once there's scrolling.
     KRYS_NODISCARD virtual int32 ScrollWidth() const noexcept;
     KRYS_NODISCARD virtual int32 ScrollHeight() const noexcept;
 

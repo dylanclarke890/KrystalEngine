@@ -119,7 +119,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLImageElement::CrossOrigin() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): CrossOrigin() is limited to known values.
+    // FIXME: CrossOrigin() is limited to known values.
     return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin");
   }
 
@@ -329,7 +329,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): ReferrerPolicy() is limited to known values.
+    // FIXME: ReferrerPolicy() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
   }
 
@@ -340,7 +340,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Decoding() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): Decoding() is limited to known values.
+    // FIXME: Decoding() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"decoding").value_or(u8"");
   }
 
@@ -363,7 +363,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::FetchPriority() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): FetchPriority() is limited to known values.
+    // FIXME: FetchPriority() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
   }
 
@@ -732,7 +732,7 @@ namespace krys::boo::html
         LoadDeferredImage();
       }
     }
-    // FIXME: usemap, referrerpolicy and crossorigin, once there are image maps and network loads.
+    // FIXME: referrerpolicy and crossorigin, once there are network loads.
   }
 
   void HTMLImageElement::OnInsert() noexcept

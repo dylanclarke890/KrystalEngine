@@ -26,8 +26,7 @@ namespace krys::boo
 
   /// @brief Paints an inline box's decorations: its box shadows, backgrounds and borders, on each line it's
   /// split across.
-  /// FIXME: Masks (`paintMask`: `mask-image` and `mask-border`) come with masks; accessibility bounds come
-  /// with accessibility.
+  /// FIXME: Accessibility bounds come with accessibility.
   class InlineBoxPainter
   {
     KRYS_NON_COPY_MOVABLE(InlineBoxPainter);

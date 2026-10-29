@@ -865,7 +865,7 @@ namespace krys::boo::layout
         krys_debug_assert(start != range.StartIndex());
         innerSlidingWidth.AdvanceStartTo(start);
         auto candidateLineWidth = ComputeLineWidthFromSlidingWidth(textIndent, innerSlidingWidth);
-        // TODO: update candidateLineWidth here using state[startIndex].lineEnd.offset.
+        // FIXME: Update candidateLineWidth here using state[startIndex].lineEnd.offset.
         auto candidateLineCost = ComputeCostPretty(candidateLineWidth.ToFloat(), idealLineWidth, breakIndex,
                                                    numberOfBreakOpportunities);
         auto accumulatedCost = candidateLineCost + state[startIndex].AccumulatedCost;

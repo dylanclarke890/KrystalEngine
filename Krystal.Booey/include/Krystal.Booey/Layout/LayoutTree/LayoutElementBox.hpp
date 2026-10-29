@@ -35,7 +35,7 @@ namespace krys::boo::layout
     {
       LayoutSize IntrinsicSize;
       Maybe<LayoutUnit> IntrinsicRatio {};
-      // FIXME: The cached image, once there's image loading.
+      // FIXME: The cached image.
     };
 
   private:

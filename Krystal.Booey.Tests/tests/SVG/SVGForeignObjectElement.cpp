@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/LegacyRenderSVGForeignObject.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
@@ -79,5 +80,36 @@ layer at (0,0) size 200x100
     CHECK(painted.find(u8"(clip\n  (rect at (0,0) size 40x30))") != utf8_string::npos);
     CHECK(painted.find(u8"(begin-transparency-layer") != utf8_string::npos);
     CHECK(painted.find(u8"(rect at (0,0) size 20x10)\n  (color #00FF00)") != utf8_string::npos);
+  }
+
+  TEST_CASE("SVGForeignObjectElement: positioned content", "[SVG][SVGForeignObjectElement]")
+  {
+    PageInFrameFixture fixture(
+      u8R"html(<body style="margin: 0"><svg style="display: block" width=200 height=100>)html"
+      u8R"html(<foreignObject id=fo x=50 y=20 width=100 height=50><div style="height: 10px"></div>)html"
+      u8R"html(<div id=abs style="position: absolute; left: 5px; top: 7px; width: 10px; height: 10px"></div>)html"
+      u8R"html(</foreignObject></svg></body>)html");
+    (void)fixture.Document->UpdateLayout();
+
+    // A foreign object is the containing block of the positioned boxes in it.
+    auto &box = Downcast<RenderBox>(*fixture.ById(u8"abs").Renderer());
+    CHECK(static_cast<RenderObject *>(box.ContainingBlock()) == fixture.ById(u8"fo").Renderer());
+    CHECK(box.Location() == LayoutPoint(5, 7));
+    CHECK(box.LocalToAbsolute() == FloatPoint(55, 27));
+  }
+
+  // FIXME: The layers of positioned boxes in a foreign object aren't painted, and are hit tested at their
+  // location in the page rather than in the foreign object.
+  TEST_CASE("SVGForeignObjectElement: positioned content paints and is hit",
+            "[SVG][SVGForeignObjectElement][!shouldfail]")
+  {
+    PageInFrameFixture fixture(
+      u8R"html(<body style="margin: 0"><svg style="display: block" width=200 height=100>)html"
+      u8R"html(<foreignObject x=50 y=20 width=100 height=50>)html"
+      u8R"html(<div id=abs style="position: absolute; left: 5px; top: 7px; width: 10px; height: 10px; background: #00ff00"></div>)html"
+      u8R"html(</foreignObject></svg></body>)html");
+
+    CHECK(fixture.Painted().find(u8"#00FF00") != utf8_string::npos);
+    CHECK(fixture.Document->ElementFromPoint(57, 29).get() == &fixture.ById(u8"abs"));
   }
 }

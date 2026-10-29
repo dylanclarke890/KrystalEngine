@@ -145,7 +145,7 @@ namespace krys::boo::dom
       return appendResult.ReleaseException();
     }
 
-    // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
+    // FIXME: Doc’s origin is this’s associated document’s origin.
 
     return AdoptRef<Document>(*document.release());
   }

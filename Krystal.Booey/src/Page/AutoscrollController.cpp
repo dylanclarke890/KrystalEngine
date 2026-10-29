@@ -36,7 +36,7 @@ namespace krys::boo
     return false;
   }
 
-  // FIXME: List boxes (RenderListBox), with form controls.
+  // FIXME: List boxes (RenderListBox).
   void AutoscrollController::StartAutoscrollForSelection(RenderObject *renderer) noexcept
   {
     // We don't want to trigger the autoscroll or the panScroll if it's already active

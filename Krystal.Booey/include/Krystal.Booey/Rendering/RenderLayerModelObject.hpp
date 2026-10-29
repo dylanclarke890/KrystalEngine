@@ -14,8 +14,7 @@ namespace krys::boo
   class LegacyRenderSVGResourceClipper;
 
   /// @brief A renderer that may have a layer.
-  // FIXME: Viewport-constrained objects and SVG (transforms, resources, clipping) come with scrolling and
-  // SVG.
+  // FIXME: The layer-based SVG engine's transforms, resources and clipping.
   class RenderLayerModelObject : public RenderElement
   {
     KRYS_NON_COPY_MOVABLE(RenderLayerModelObject);
@@ -67,7 +66,7 @@ namespace krys::boo
 
     KRYS_NODISCARD bool ShouldUsePositionedClipping() const noexcept
     {
-      // FIXME: SVG foreign objects too, once there's SVG.
+      // FIXME: Layer-based SVG foreign objects too.
       return IsAbsolutelyPositioned();
     }
 

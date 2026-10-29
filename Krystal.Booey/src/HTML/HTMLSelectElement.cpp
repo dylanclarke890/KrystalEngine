@@ -17,6 +17,7 @@
 #include "Krystal.Booey/HTML/HTMLOptionsCollection.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -2041,13 +2042,23 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLSelectElement::ShowPicker() noexcept
   {
+    if (!NodeDocument().Frame())
+    {
+      return {};
+    }
+
     if (!IsMutable())
     {
       return dom::Exception(dom::ExceptionCode::InvalidStateError,
                             u8"Select showPicker() cannot be used on immutable controls.");
     }
 
-    // FIXME: Require transient activation (NotAllowedError), once there is user activation.
+    auto *window = NodeDocument().Window();
+    if (!window || !window->ConsumeTransientActivation())
+    {
+      return dom::Exception(dom::ExceptionCode::NotAllowedError,
+                            u8"Select showPicker() requires a user gesture.");
+    }
 
     ShowPopup();
     return {};

@@ -2012,8 +2012,7 @@ namespace krys::boo
     // Don't clip out the table's side of the collapsed borders if we're in the paint phase that will ask the
     // sections to paint them. Likewise, if we're self-painting we avoid clipping them out as the clip rect
     // that will be passed down to child layers from RenderLayer will do that instead.
-    // FIXME: The paint phase that paints the collapsed borders (PaintPhase::ChildBlockBackgrounds), once
-    // there's painting.
+    // FIXME: The paint phase that paints the collapsed borders (PaintPhase::ChildBlockBackgrounds).
     if (Layer() && Layer()->IsSelfPaintingLayer())
     {
       rect = BorderBoxRect();

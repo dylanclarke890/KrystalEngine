@@ -202,8 +202,7 @@ namespace krys::boo
     KRYS_NODISCARD bool IsScrollableOrRubberbandable() const noexcept override;
 
     /// @brief Paints the scrollbars and the scroll corner, at @p paintOffset.
-    // FIXME: Overlay scrollbars' second pass and the resizer (paintResizer), once there are overlay
-    // scrollbars and resizers.
+    // FIXME: Overlay scrollbars' second pass, once there are overlay scrollbars.
     void PaintOverflowControls(GraphicsContext &context, EnumSet<PaintBehavior> paintBehavior,
                                const IntPoint &paintOffset, const IntRect &damageRect) noexcept;
     void PaintScrollCorner(GraphicsContext &context, const IntPoint &paintOffset,

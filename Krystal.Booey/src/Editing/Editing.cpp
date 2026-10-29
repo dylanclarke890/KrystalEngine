@@ -1247,7 +1247,7 @@ namespace krys::boo
     return CreateTabSpanElement(document, *document.CreateTextNode(krys::move(tabText)));
   }
 
-  // FIXME: An editing text node (createEditingTextNode, which echoes passwords), with password fields.
+  // FIXME: An editing text node (createEditingTextNode, which echoes passwords).
   Ref<dom::Element> CreateTabSpanElement(dom::Document &document) noexcept
   {
     return CreateTabSpanElement(document, *document.CreateTextNode(u8"\t"));

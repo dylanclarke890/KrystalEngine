@@ -1487,7 +1487,7 @@ namespace krys::boo::html
         BEGIN_STATE(SelfClosingStartTag)
           if (character == GreaterThanSign)
           {
-            // TODO: check that checking this token is a start tag is correct.
+            // FIXME: Check that checking this token is a start tag is correct.
             if (_token.Type() == HTMLTokenType::StartTag)
             {
               _token.SetSelfClosingFlag();

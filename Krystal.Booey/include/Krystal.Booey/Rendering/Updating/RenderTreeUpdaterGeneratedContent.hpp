@@ -13,7 +13,7 @@ namespace krys::boo
 
   /// @brief Updates the `::before` and `::after` pseudo-elements of the elements being updated, their content
   /// renderers, and the quotes and counters.
-  // FIXME: Image content (RenderImage) and writing suggestions come with images and editing.
+  // FIXME: Writing suggestions.
   class RenderTreeUpdater::GeneratedContent
   {
     KRYS_NON_COPY_MOVABLE(GeneratedContent);

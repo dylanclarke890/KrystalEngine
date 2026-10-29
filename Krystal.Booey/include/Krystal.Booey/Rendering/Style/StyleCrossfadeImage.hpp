@@ -8,7 +8,7 @@ namespace krys::boo
 
   /// @brief A `cross-fade()` image.
   /// FIXME: Tracking the input images' cached images (`CachedImageClient`, `imageChanged`) and drawing
-  /// (`CrossfadeGeneratedImage`) come with the resource loader and the graphics backend.
+  /// (`CrossfadeGeneratedImage`).
   class StyleCrossfadeImage final : public StyleGeneratedImage
   {
   private:

@@ -145,7 +145,7 @@ namespace krys::boo::layout
 
   Maybe<LayoutUnit> PlacedFloats::LowestPositionOnBlockAxis(boo::Clear type) const noexcept
   {
-    // TODO: Currently this is only called once for each formatting context root with floats per layout.
+    // FIXME: Currently this is only called once for each formatting context root with floats per layout.
     // Cache the value if we end up calling it more frequently (and update it at append/remove).
     auto lowestBlockAxisPosition = Maybe<LayoutUnit> {};
     for (auto &floatItem : _list)

@@ -8,6 +8,7 @@
 #include "Krystal.Booey/HTML/Shadow/DateTimeEditElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Platform/DateTimeChooser.hpp"
 #include "Krystal.Booey/Platform/DateTimeChooserClient.hpp"
@@ -22,6 +23,13 @@ namespace krys::boo::tests
 
   namespace
   {
+    /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
+    KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
+    {
+      input.NodeDocument().Window()->NotifyActivated();
+      return input.ShowPicker();
+    }
+
     /// @brief A date chooser that records how it's shown.
     struct RecordingDateTimeChooser final : DateTimeChooser
     {
@@ -440,7 +448,7 @@ namespace krys::boo::tests
 
     SECTION("showPicker() shows it with the input's value and range")
     {
-      CHECK_FALSE(input.ShowPicker().HasException());
+      CHECK_FALSE(ShowPicker(input).HasException());
       REQUIRE(client->Chooser);
       REQUIRE(client->Chooser->Parameters);
       auto &parameters = *client->Chooser->Parameters;
@@ -459,6 +467,18 @@ namespace krys::boo::tests
       CHECK(Shown(input) == u8"04/01/2026");
       CHECK(inputs->Count == 1);
       CHECK(changes->Count == 1);
+    }
+
+    SECTION("showPicker() needs a user gesture, which it uses up")
+    {
+      auto result = input.ShowPicker();
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+      CHECK_FALSE(client->Chooser);
+
+      CHECK_FALSE(ShowPicker(input).HasException());
+      CHECK(client->Chooser);
+      CHECK(input.ShowPicker().HasException());
     }
 
     SECTION("a click shows it; leaving the fields ends it")
@@ -486,7 +506,7 @@ namespace krys::boo::tests
 
     SECTION("hiding the input ends it")
     {
-      CHECK_FALSE(input.ShowPicker().HasException());
+      CHECK_FALSE(ShowPicker(input).HasException());
       REQUIRE(client->Chooser);
       (void)input.SetAttribute(u8"style", u8"display:none");
       (void)fixture.Document->UpdateLayout();
@@ -496,9 +516,9 @@ namespace krys::boo::tests
     SECTION("read-only inputs and times have none")
     {
       (void)input.SetAttribute(u8"readonly", u8"");
-      CHECK(input.ShowPicker().HasException());
+      CHECK(ShowPicker(input).HasException());
       auto &time = fixture.Input(u8"time");
-      CHECK_FALSE(time.ShowPicker().HasException());
+      CHECK_FALSE(ShowPicker(time).HasException());
       CHECK_FALSE(client->Chooser);
     }
   }

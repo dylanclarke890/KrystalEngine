@@ -98,13 +98,12 @@ namespace krys::boo
     return result;
   }
 
-  void StyleImageSet::UpdateDeviceScaleFactor(const dom::Document &) noexcept
+  void StyleImageSet::UpdateDeviceScaleFactor(const dom::Document &document) noexcept
   {
     // FIXME: In the future, we want to take much more than deviceScaleFactor into acount here.
     // All forms of scale should be included: Page::pageScaleFactor(), Frame::pageZoomFactor(),
     // and any CSS transforms. https://bugs.webkit.org/show_bug.cgi?id=81698
-    // FIXME: Use the page's device scale factor, once documents have a page.
-    float deviceScaleFactor = 1;
+    float deviceScaleFactor = document.DeviceScaleFactor();
     if (deviceScaleFactor == _deviceScaleFactor)
     {
       return;

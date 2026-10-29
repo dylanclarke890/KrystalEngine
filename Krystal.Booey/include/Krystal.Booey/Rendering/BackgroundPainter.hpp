@@ -60,8 +60,7 @@ namespace krys::boo
 
   /// @brief Paints a box's backgrounds: its colour and images, layer by layer, clipped and positioned as
   /// their properties say, and the root's background over the canvas.
-  /// FIXME: Mask layers (`mask-image`) come with masks; `background-clip: text` and `border-area` come with
-  /// text painting.
+  /// FIXME: `background-clip: text` and `border-area`.
   class BackgroundPainter
   {
   private:

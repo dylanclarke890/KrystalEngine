@@ -252,8 +252,8 @@ namespace krys::boo
       },
       [&](const style::ShapeOutside::Image &)
       {
-        // FIXME: The image's raster shape (createRasterShape, with the shape-image-threshold), once there's
-        // image loading and drawing. ShapeOutsideInfo isn't enabled for images until then.
+        // FIXME: The image's raster shape (createRasterShape, with the shape-image-threshold).
+        // ShapeOutsideInfo isn't enabled for images until then.
         krys_debug_assert(false);
         return LayoutShape::CreateBoxShape(LayoutRoundedRect {LayoutRect {}}, writingMode, 0);
       },

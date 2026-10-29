@@ -1141,7 +1141,6 @@ namespace krys::boo::svg
       return css::PropertyId::Invalid;
     }
 
-    // FIXME: `d` maps to the d property (as a `path()` value), once there's SVGPathElement.
     static const HashMap<dom::DOMStringView, css::PropertyId> map {
       {u8"alignment-baseline", css::PropertyId::AlignmentBaseline},
       {u8"baseline-shift", css::PropertyId::BaselineShift},

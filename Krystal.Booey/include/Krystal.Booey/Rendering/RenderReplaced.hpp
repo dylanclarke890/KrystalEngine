@@ -16,7 +16,7 @@ namespace krys::boo
   };
 
   /// @brief A box whose content is outside CSS: images, media, frames, form controls.
-  // FIXME: Hit testing; media and the other replaced elements come with their renderers.
+  // FIXME: Media and the other replaced elements come with their renderers.
   class RenderReplaced : public RenderBox
   {
     KRYS_NON_COPY_MOVABLE(RenderReplaced);

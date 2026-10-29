@@ -61,7 +61,7 @@ namespace krys::boo::html::tests
 
       SECTION("USVString")
       {
-        // TODO(USVString) - implement when USVString is implemented.
+        // FIXME: Implement when USVString is implemented.
       }
 
       SECTION("bool")
@@ -223,7 +223,7 @@ namespace krys::boo::html::tests
   {
     SECTION("USVString")
     {
-      // TODO(USVString) - implement when USVString is implemented.
+      // FIXME: Implement when USVString is implemented.
     }
   }
 

@@ -3,6 +3,7 @@
 #include "Krystal.Booey.Tests/Loader/PageInFrameFixture.hpp"
 #include "Krystal.Booey.Tests/Loader/TestLoader.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Rendering/RenderTreeAsText.hpp"
@@ -82,6 +83,12 @@ layer at (0,0) size 800x104
     REQUIRE(clone);
     CHECK(clone->GetAttribute(u8"width") == dom::DOMString(u8"15"));
     CHECK(Downcast<SVGRectElement>(*clone).Width().ValueInSpecifiedUnits() == 15);
+
+    // So do changes to its inline style through the CSSOM.
+    REQUIRE_FALSE(rect.Style().SetProperty(u8"fill", u8"blue", u8"").HasException());
+    clone = TargetClone(fixture, use);
+    REQUIRE(clone);
+    CHECK(clone->GetAttribute(u8"style") == dom::DOMString(u8"fill: blue;"));
 
     // A new target is followed too.
     (void)use.SetAttribute(u8"href", u8"#missing");

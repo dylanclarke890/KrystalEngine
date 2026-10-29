@@ -10,7 +10,7 @@ namespace krys::boo::style
 {
   /// @brief A `url(#filter)` reference to an SVG filter element.
   /// @note FIXME: `loadExternalDocumentIfNeeded` and `cachedSVGDocumentReference` (filters in other
-  /// documents) come with the resource loader and SVG documents.
+  /// documents).
   class ReferenceFilterOperation final : public FilterOperation
   {
   private:

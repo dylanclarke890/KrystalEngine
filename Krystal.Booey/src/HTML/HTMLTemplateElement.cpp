@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  // TODO(HTMLTemplateElement): Implement the HTMLTemplateElement constructor in a spec compliant way.
+  // FIXME: Implement the HTMLTemplateElement constructor in a spec compliant way.
 
   HTMLTemplateElement::HTMLTemplateElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Template),

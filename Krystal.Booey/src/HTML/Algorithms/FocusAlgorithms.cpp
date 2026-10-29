@@ -276,7 +276,7 @@ namespace krys::boo::html
                                                dom::FocusTrigger focusTrigger) noexcept
   {
     // An `area` element stands for its shapes, as the focusable areas of its image.
-    // FIXME: The scrollable regions of elements, once there's scrolling.
+    // FIXME: The scrollable regions of elements.
 
     // If focus target is the document element of its Document: return the Document's viewport.
     if (&focusTarget == dom::TreeQueries::DocumentElement(focusTarget.NodeDocument()))
@@ -457,7 +457,7 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: The shapes of `area` elements and scrollable regions, once there are image maps and scrolling.
+    // FIXME: The shapes of `area` elements and scrollable regions.
 
     auto oldChain = currentlyFocusedArea ? GetFocusChain(*currentlyFocusedArea) : FocusChain {};
     if (std::ranges::none_of(oldChain, [&](const Ref<dom::Node> &entry) { return entry.get() == target; }))
@@ -513,7 +513,7 @@ namespace krys::boo::html
         formControlElement->DispatchFormControlChangeEvent();
       }
 
-      // FIXME: Fire blur at a document's Window, once there's a Window.
+      // FIXME: Fire blur at a document's Window.
       RefPtr<dom::Element> blurEventTarget = ShareRefPtr(DynamicDowncast<dom::Element>(*entry));
 
       dom::EventTarget *relatedBlurTarget = nullptr;
@@ -531,7 +531,7 @@ namespace krys::boo::html
     }
 
     // FIXME: Apply platform-specific conventions for focusing the new focus target (selecting a text
-    // control's contents), once there's editing.
+    // control's contents).
     (void)newFocusTarget;
 
     for (size_t i = newChain.size(); i-- > 0;)
@@ -545,12 +545,12 @@ namespace krys::boo::html
                                                       : static_cast<dom::Node *>(&document);
         if (focusedArea != entry.get())
         {
-          // FIXME: Set the navigation API's focus changed during ongoing navigation, once there's a Window.
+          // FIXME: Set the navigation API's focus changed during ongoing navigation.
           DesignateFocusedArea(document, element, options.Visibility);
         }
       }
 
-      // FIXME: Fire focus at a document's Window, once there's a Window.
+      // FIXME: Fire focus at a document's Window.
       auto *focusEventTarget = DynamicDowncast<dom::Element>(*entry);
 
       dom::EventTarget *relatedFocusTarget = nullptr;
@@ -579,7 +579,7 @@ namespace krys::boo::html
     {
       event._relatedTarget = ShareRefPtr(relatedTarget);
       event._composed = true;
-      // FIXME: The view, once there's a Window.
+      // FIXME: The view (the Window).
     };
     (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, initialize);
 
@@ -669,8 +669,7 @@ namespace krys::boo::html
 
     // 4. If topDocument's focused area is not topDocument itself, or topDocument has non-null target element,
     // then: empty candidates, set topDocument's autofocus processed flag to true, and return.
-    // FIXME: The target element, once there are fragments.
-    if (topDocument.FocusedElement())
+    if (topDocument.FocusedElement() || topDocument.CSSTarget())
     {
       candidates.clear();
       topDocument.SetAutofocusProcessed();
@@ -705,7 +704,8 @@ namespace krys::boo::html
       // 6. Remove element from candidates.
       candidates.erase(candidates.begin());
 
-      // FIXME: 7. The inclusive ancestor documents' target elements, once there are fragments.
+      // 7. If any of doc's inclusive ancestor documents has a non-null target element, continue. Without
+      // nested navigables doc is topDocument, whose target element step 4 checked.
 
       // 8. Let target be element.
       // 9. If target is not a focusable area, then set target to the result of getting the focusable area for
@@ -1256,7 +1256,7 @@ namespace krys::boo::html
     {
       fire(dom::DOMStringAtom(u8"blur"), *focusedElement);
     }
-    // FIXME: Fire `focus` or `blur` at the document's Window, once there's a Window.
+    // FIXME: Fire `focus` or `blur` at the document's Window.
     if (focused && focusedElement)
     {
       fire(dom::DOMStringAtom(u8"focus"), *focusedElement);

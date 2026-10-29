@@ -20,7 +20,7 @@ namespace krys::boo::html
   bool RenderBlocking::IsRenderBlocked(const dom::Document &document) noexcept
   {
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
-    // TODO(DOCUMENT, RENDER-BLOCKING): And if the current high resolution time given document's relevant
+    // FIXME: And if the current high resolution time given document's relevant
     // global object has not exceeded an implementation-defined timeout value. -
     // https://html.spec.whatwg.org/#render-blocked
   }

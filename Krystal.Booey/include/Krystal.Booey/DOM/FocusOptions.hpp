@@ -53,7 +53,6 @@ namespace krys::boo::dom
 
   /// @brief How to focus an element: the `FocusOptions` dictionary and the engine's own options.
   /// @see https://html.spec.whatwg.org/#focusoptions
-  // FIXME: The selection restoration mode, once there's editing.
   struct FocusOptions
   {
     /// @brief What focusing an element with a selection of its own (a text control) does with it.

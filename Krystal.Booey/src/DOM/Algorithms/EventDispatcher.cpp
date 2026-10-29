@@ -445,7 +445,7 @@ namespace krys::boo::dom
       //   global object.
       //   Set legacyOutputDidListenersThrowFlag if given.
 
-      // TODO(impl): LOGGING - we should probably have some way to report exceptions that occur during event
+      // FIXME: We should probably have some way to report exceptions that occur during event
       // listener invocations, even if we don't have JS objects or realms.
 
       {

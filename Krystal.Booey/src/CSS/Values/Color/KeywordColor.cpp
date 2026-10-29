@@ -63,7 +63,7 @@ namespace krys::boo::css
   {
     krys_debug_assert(IsAbsoluteColorKeyword(keyword));
 
-    // TODO: Investigate if this should be a constexpr map for performance.
+    // FIXME: Investigate if this should be a constexpr map for performance.
 
     if (auto namedColor = FindColor(ToString(keyword)))
     {

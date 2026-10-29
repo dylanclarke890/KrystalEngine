@@ -8,7 +8,7 @@ namespace krys::boo
 {
   /// @brief An image in a `cursor` value, with its hot spot.
   /// FIXME: Tracking the `<cursor>` SVG elements the URL refers to (`cursorElementRemoved`,
-  /// `cursorElementChanged`, `updateCursorElement`) comes with SVG.
+  /// `cursorElementChanged`, `updateCursorElement`), once there's `SVGCursorElement`.
   class StyleCursorImage final : public StyleMultiImage
   {
   private:

@@ -33,13 +33,13 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::VideoWidth() const noexcept
   {
-    // TODO(HTMLVideoElement, HTML): Implement VideoWidth()
+    // FIXME: Implement VideoWidth()
     return 0u;
   }
 
   uint32 HTMLVideoElement::VideoHeight() const noexcept
   {
-    // TODO(HTMLVideoElement, HTML): Implement VideoHeight()
+    // FIXME: Implement VideoHeight()
     return 0u;
   }
 

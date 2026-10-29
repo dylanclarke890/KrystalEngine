@@ -17,8 +17,7 @@ namespace krys::boo
 {
   /// @brief A navigation as the host is asked about it: the URL, what started it (a link, a form) and the
   /// input event that did.
-  // FIXME: User gestures, back and forward items, the requester's origin and the Navigation API's type, once
-  // there's history and scripting.
+  // FIXME: User gestures, back and forward items and the requester's origin.
   class NavigationAction : public FrameLoadRequestBase
   {
   public:

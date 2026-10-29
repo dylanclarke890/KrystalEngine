@@ -113,7 +113,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLScriptElement::Text() const noexcept
   {
-    // TODO(HTMLSCRIPTELEMENT): Implement the text attribute.
+    // FIXME: Implement the text attribute.
     krys_not_implemented();
   }
 
@@ -121,7 +121,7 @@ namespace krys::boo::html
   {
     (void)value;
     krys_not_implemented();
-    // TODO(HTMLSCRIPTELEMENT): Implement the text attribute.
+    // FIXME: Implement the text attribute.
   }
 
 #pragma endregion

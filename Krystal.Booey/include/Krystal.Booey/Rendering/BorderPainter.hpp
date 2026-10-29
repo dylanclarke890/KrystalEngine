@@ -19,7 +19,6 @@ namespace krys::boo
 
   /// @brief Paints a box's border: its image, or each side in its style, joined at the corners and following
   /// the border radii.
-  /// FIXME: `mask-border` (the mask border overload of `paintNinePieceImage`) comes with masks.
   class BorderPainter
   {
     friend class OutlinePainter;

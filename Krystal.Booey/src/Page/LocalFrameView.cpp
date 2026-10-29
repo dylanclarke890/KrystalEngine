@@ -115,8 +115,7 @@ namespace krys::boo
 
     ViewportContentsChanged();
 
-    // FIXME: Tell the document its view changed size (resize events) and update the viewport-constrained
-    // objects and intersection observers, once there's a window and layout.
+    // FIXME: Tell the document its view changed size (didChangeViewSize).
   }
 
   void LocalFrameView::Resize(const IntSize &size) noexcept
@@ -1808,8 +1807,7 @@ namespace krys::boo
       SetScrollPosition(clampedScrollPosition, ScrollPositionChangeOptions::CreateProgrammatic());
     }
 
-    // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect), once
-    // there's a client.
+    // FIXME: Scrolling the client's containing scroll views (scrollContainingScrollViewsToRevealRect).
   }
 
   LayoutRect LocalFrameView::GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,
@@ -2232,8 +2230,7 @@ namespace krys::boo
 
     _scrollPosition = newPosition;
 
-    // FIXME: Suppressed scrollbars and deferring the update while the contents size changes, once there are
-    // scrollbars.
+    // FIXME: Suppressed scrollbars and deferring the update while the contents size changes.
 
     // completeUpdatesAfterScrollTo: the fixed layers move with the scroll position, then the painted contents
     // move.
@@ -2258,7 +2255,7 @@ namespace krys::boo
 
   void LocalFrameView::ScrollPositionChanged(const ScrollPosition &, const ScrollPosition &) noexcept
   {
-    // FIXME: Throttling the scroll events (eventThrottlingDelay), once there's a client.
+    // FIXME: Throttling the scroll events (eventThrottlingDelay).
     ScheduleScrollEvent();
 
     if (auto *renderView = GetRenderViewForUpdate())
@@ -2956,7 +2953,7 @@ namespace krys::boo
     }
     ScrollRectToVisible(rect, renderer, insideFixed, options);
 
-    // FIXME: Telling accessibility (handleScrolledToAnchor), with accessibility (B17).
+    // FIXME: Telling accessibility (handleScrolledToAnchor), with accessibility.
 
     // scrollRectToVisible can call into setScrollPosition(), which resets _maintainScrollPositionAnchor.
     _maintainScrollPositionAnchor = CreateWeakPtr(anchorNode.get());

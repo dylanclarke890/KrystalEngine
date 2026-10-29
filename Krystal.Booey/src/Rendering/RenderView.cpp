@@ -44,7 +44,7 @@ namespace krys::boo
     // init RenderObject attributes
     SetInline(false);
 
-    // FIXME: The preferred widths, once there's layout.
+    // FIXME: The preferred widths.
 
     SetPositionState(PositionType::Absolute); // to 0,0 :)
 
@@ -197,7 +197,7 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: SVG roots with a clip path (isRenderOrLegacyRenderSVGRoot), once there's SVG.
+      // FIXME: SVG roots with a clip path (isRenderOrLegacyRenderSVGRoot).
 
       auto *rendererForBackground = rootElement.View().RendererForRootBackground();
       if (!rendererForBackground)
@@ -364,7 +364,7 @@ namespace krys::boo
 
       for (auto &box : ChildrenOfType<RenderBox>(*this))
       {
-        // FIXME: SVG roots too, once there's SVG.
+        // FIXME: SVG roots too.
         if (box.HasRelativeLogicalHeight() || box.Style().LogicalHeight().IsPercentOrCalculated()
             || box.Style().LogicalMinHeight().IsPercentOrCalculated()
             || box.Style().LogicalMaxHeight().IsPercentOrCalculated())
@@ -849,6 +849,6 @@ namespace krys::boo
       RemoveRendererWithPausedImageAnimations(*renderer, *image);
     }
 
-    // FIXME: SVG elements with paused animations, once there's SVG.
+    // FIXME: SVG elements with paused animations.
   }
 }

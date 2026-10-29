@@ -1195,7 +1195,7 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetActive(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance, once there are renderers.
+    // FIXME: Repaint elements with a used appearance.
   }
 
   bool Element::CanContainRangeEndPoint() const noexcept
@@ -1329,7 +1329,7 @@ namespace krys::boo::dom
       NodeDocument().UserActionElements().SetHovered(*this, value);
     }
 
-    // FIXME: Repaint elements with a used appearance whose theme supports hover, once there are renderers.
+    // FIXME: Repaint elements with a used appearance whose theme supports hover.
   }
 
   void Element::ClearHoverAndActiveStatusBeforeDetachingRenderer() noexcept
@@ -3193,7 +3193,7 @@ namespace krys::boo::dom
 
     List<FloatQuad> quads;
 
-    // FIXME: The option and optgroup elements of list boxes, once there are form controls.
+    // FIXME: The option and optgroup elements of list boxes.
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
@@ -3221,7 +3221,7 @@ namespace krys::boo::dom
   {
     auto *renderer = Renderer();
     List<FloatQuad> quads;
-    // FIXME: The option and optgroup elements of list boxes, once there are form controls.
+    // FIXME: The option and optgroup elements of list boxes.
     if (auto *svgElement = ElementWithSVGLayoutBox(*this))
     {
       if (auto localRect = svgElement->GetBoundingBox())
@@ -3271,7 +3271,7 @@ namespace krys::boo::dom
 
     document.UpdateLayoutIgnorePendingStylesheets();
 
-    // FIXME: Scroll a list box to the option or optgroup, once there are form controls.
+    // FIXME: Scroll a list box to the option or optgroup.
     auto *renderer = Renderer();
     if (!renderer)
     {

@@ -18,9 +18,8 @@ namespace krys::boo
   class PlatformWheelEvent;
   /// @brief Something that scrolls: a scroll position within its contents, its scroll origin, and its
   /// scrollbars.
-  // FIXME: The scroll animator and scrollbars controller, touch scrolling, scroll snapping, scroll anchoring,
-  // rubber-banding and compositing layers come with animations, touch, snapping and compositing: scrolls are
-  // immediate.
+  // FIXME: The scroll animator and scrollbars controller, scroll snapping, scroll anchoring, rubber-banding
+  // and compositing layers: scrolls are immediate.
   class ScrollableArea : public CanMakeWeakPtr<ScrollableArea>, public CanMakeCheckedPtr<ScrollableArea>
   {
     KRYS_NON_COPY_MOVABLE(ScrollableArea);

@@ -134,9 +134,9 @@ namespace krys
       return krys::SwitchOn(_value, std::forward<F>(functors)...);
     }
 
-    // TODO: Add `HoldsAlternativeFromOriginalList` that checks all flattened alternatives for the provided
+    // FIXME: Add `HoldsAlternativeFromOriginalList` that checks all flattened alternatives for the provided
     // type.
-    // TODO: Add `SwitchOnOriginalList` that reconstructs extracted values.
+    // FIXME: Add `SwitchOnOriginalList` that reconstructs extracted values.
 
     KRYS_NODISCARD bool operator==(const FlatteningVariantAdaptor &) const noexcept = default;
   };

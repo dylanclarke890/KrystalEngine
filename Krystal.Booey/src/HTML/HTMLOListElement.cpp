@@ -82,7 +82,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLOListElement::Type() const noexcept
   {
-    // TODO(HTMLOLISTLEMENT, HTML): Type is an enumerated attribute.
+    // FIXME: Type is an enumerated attribute.
     return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 

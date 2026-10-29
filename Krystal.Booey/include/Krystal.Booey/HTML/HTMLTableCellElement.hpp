@@ -32,7 +32,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-tdth-headers
     void Headers(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLTableCellElement, HTML): Implement CellIndex().
+    // FIXME: Implement CellIndex().
     /// @see https://html.spec.whatwg.org/#dom-tdth-cellindex
     // KRYS_NODISCARD int32 CellIndex() const noexcept;
 

@@ -45,7 +45,7 @@ namespace krys::boo::style
 
   /// @brief One layer of an element's mask: the `mask-*` values at one index.
   /// @note The generated `FillRepeat()` setter hides that type inside the class.
-  /// FIXME: `hasOpaqueImage` comes with the renderer (it asks the image whether it's known to be opaque).
+  /// FIXME: `hasOpaqueImage` (it asks the image whether it's known to be opaque).
   struct MaskLayer
   {
   private:

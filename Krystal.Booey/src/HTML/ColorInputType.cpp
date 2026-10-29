@@ -170,7 +170,7 @@ namespace krys::boo::html
       return;
     }
 
-    // FIXME: Only while processing a user gesture (UserGestureIndicator), once there are gestures.
+    // FIXME: Only while processing a user gesture (UserGestureIndicator).
 
     ShowPicker();
     event.SetDefaultHandled();

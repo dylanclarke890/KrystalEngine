@@ -891,7 +891,7 @@ namespace krys::boo
   {
     _mouseMoveTargetOverride = nullptr;
 
-    // FIXME: The window's last user click event (updateLastUserClickEvent), once there's a Window.
+    // FIXME: The window's last user click event (updateLastUserClickEvent).
     UpdateMouseEventTargetNode(eventType, targetNode, platformMouseEvent, fireMouseOverOut);
 
     bool isMouseDownEvent = eventType == EventNames::MouseDown;
@@ -1221,7 +1221,7 @@ namespace krys::boo
   bool EventHandler::DefaultKeyboardScrollEventHandler(dom::KeyboardEvent &, ScrollLogicalDirection direction,
                                                        ScrollGranularity granularity) noexcept
   {
-    // FIXME: Animated keyboard scrolling (keyboardScrollRecursively), once there are animations.
+    // FIXME: Animated keyboard scrolling (keyboardScrollRecursively), once there are scroll animations.
     return LogicalScrollRecursively(direction, granularity);
   }
 
@@ -1277,7 +1277,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Animated keyboard scrolling (keyboardScroll), once there are animations.
+    // FIXME: Animated keyboard scrolling (keyboardScroll), once there are scroll animations.
     return view->LogicalScroll(direction, ScrollGranularity::Page);
   }
 
@@ -1337,7 +1337,7 @@ namespace krys::boo
 
     if (node)
     {
-      // FIXME: List boxes, which scroll themselves, once there are list boxes.
+      // FIXME: List boxes, which scroll themselves.
       auto *r = node->Renderer();
       if (r && r->EnclosingBox().Scroll(direction, granularity))
       {
@@ -1426,8 +1426,8 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Tabs can be used in design mode editing, once there's editing; whether the page lets Tab cycle
-    // through elements (tabKeyCyclesThroughElements), once the host can say.
+    // FIXME: Tabs can be used in design mode editing; whether the page lets Tab cycle through elements
+    // (tabKeyCyclesThroughElements), once the host can say.
     return html::FocusAlgorithms::SequentialNavigation(
       *document, event.ShiftKey() ? dom::FocusDirection::Backward : dom::FocusDirection::Forward);
   }
@@ -1445,7 +1445,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Whether the chrome sets cursors (supportsSettingCursor), once there's a chrome client.
+    // FIXME: Whether the chrome sets cursors (supportsSettingCursor).
     _hasScheduledCursorUpdate = true;
     page->ScheduleRenderingUpdate({RenderingUpdateStep::CursorUpdate});
   }
@@ -1470,8 +1470,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Whether the chrome wants fake mouse moves (shouldDispatchFakeMouseMoveEvents), once there's a
-    // chrome client.
+    // FIXME: Whether the chrome wants fake mouse moves (shouldDispatchFakeMouseMoveEvents).
 
     // If the content has ever taken longer than fakeMouseMoveShortInterval we
     // reschedule the timer and use a longer time. This will cause the content
@@ -1578,8 +1577,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Editable links (hasEditableStyle and the editable link behavior setting) and submit images, with
-    // editing and forms.
+    // FIXME: Editable links (hasEditableStyle and the editable link behavior setting) and submit images.
     return isOverLink;
   }
 
@@ -2838,8 +2836,8 @@ namespace krys::boo
     return _mouseDownMayStartSelect;
   }
 
-  // FIXME: Widgets, SVG panning and the scrollbar corner (isPointInScrollbarCorner), with widgets, SVG and
-  // resizers; image overlays' text, once there are image overlays.
+  // FIXME: Widgets, SVG panning and the scrollbar corner (isPointInScrollbarCorner); image overlays' text,
+  // once there are image overlays.
   bool EventHandler::HandleMousePressEvent(const MouseEventWithHitTestResults &event) noexcept
   {
     Ref<LocalFrame> frame = ShareRef(_frame);

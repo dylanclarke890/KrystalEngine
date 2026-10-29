@@ -100,7 +100,7 @@ namespace krys::boo::html
 
   RenderPtr<RenderElement> ImageInputType::CreateInputRenderer(RenderStyle &&style) noexcept
   {
-    // FIXME: The image's renderer (RenderImage, with its image loader and alt text), with image buttons.
+    // FIXME: The image's renderer (RenderImage, with its image loader and alt text).
     return InputType::CreateInputRenderer(krys::move(style));
   }
 }

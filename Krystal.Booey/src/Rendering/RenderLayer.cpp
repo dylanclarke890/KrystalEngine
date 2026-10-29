@@ -1851,7 +1851,7 @@ namespace krys::boo
         }
       }
       // FIXME: Move out-of-flow boxes inside an in-flow positioned inline with it
-      // (offsetForInFlowPositionedInline), once there's inline layout.
+      // (offsetForInFlowPositionedInline).
     }
     else if (auto *parentLayer = Parent())
     {
@@ -1910,7 +1910,7 @@ namespace krys::boo
 
   bool RenderLayer::ShouldRepaintAfterLayout() const noexcept
   {
-    // FIXME: SVG containers never repaint after layout (only their contents do), once there's SVG.
+    // FIXME: SVG containers never repaint after layout (only their contents do).
     if (_repaintStatus == RepaintStatus::NeedsNormalRepaint
         || _repaintStatus == RepaintStatus::NeedsFullRepaint)
     {
@@ -2808,7 +2808,7 @@ namespace krys::boo
       // Visibility and scrollability are input to canUseCompositedScrolling().
       if (_scrollableArea)
       {
-        // FIXME: Invalidate the scroll corner when the writing mode changes, once there's painting.
+        // FIXME: Invalidate the scroll corner when the writing mode changes.
         if (visibilityChanged || oldStyle->IsOverflowVisible() != Renderer().Style().IsOverflowVisible())
         {
           _scrollableArea->ComputeHasCompositedScrollableOverflow(
@@ -2882,11 +2882,11 @@ namespace krys::boo
     }
 
     // FIXME: Snap the reference box to device pixels when the renderer needs it
-    // (snapRectToDevicePixelsIfNeeded), once there's painting.
+    // (snapRectToDevicePixelsIfNeeded).
     auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
     Renderer().ApplyTransform(transform, style, referenceBoxRect, options);
 
-    // FIXME: 3D rendering (canRender3DTransforms), once there's compositing.
+    // FIXME: 3D rendering (canRender3DTransforms).
     MakeMatrixRenderable(transform, false);
   }
 
@@ -3022,8 +3022,7 @@ namespace krys::boo
     const auto &style = Renderer().Style();
     auto referenceBoxRect = Renderer().TransformReferenceBoxRect(style);
 
-    // FIXME: Snap the origin to device pixels when the renderer needs it (rendererNeedsPixelSnapping), once
-    // there's painting.
+    // FIXME: Snap the origin to device pixels when the renderer needs it (rendererNeedsPixelSnapping).
     return style::TransformResolver::ComputeTransformOrigin(style, referenceBoxRect);
   }
 
@@ -3760,7 +3759,7 @@ namespace krys::boo
         AccumulateOffsetTowardsAncestor(currLayer, ancestorLayer, locationInLayerCoords, adjustForColumns);
     }
 
-    // FIXME: Snap the whole SVG subtree as one block, once there's SVG.
+    // FIXME: Snap the whole SVG subtree as one block.
     return locationInLayerCoords;
   }
 
@@ -3937,7 +3936,7 @@ namespace krys::boo
       // It would be better for callers to transform rects into the coordinate space of the nearest clipped
       // layer, apply the clip in local space, and then repeat until the required coordinate space is reached.
       // FIXME: Transform the clips into the root's coordinates (localToContainerQuad) when the offset can't
-      // be used, once there's geometry mapping.
+      // be used.
 
       auto offset = ToLayoutPoint(OffsetFromAncestor(clipRectsContext.RootLayer, AdjustForColumns));
 
@@ -4298,8 +4297,7 @@ namespace krys::boo
     LayoutRect result;
     if (auto *renderInline = DynamicDowncast<RenderInline>(Renderer()); renderInline && Renderer().IsInline())
     {
-      // FIXME: The visual overflow of the inline's lines (linesVisualOverflowBoundingBox), once there's
-      // inline layout.
+      // FIXME: The visual overflow of the inline's lines (linesVisualOverflowBoundingBox).
       result = LayoutRect(LayoutPoint(), LayoutSize(renderInline->LinesBoundingBox().Size()));
     }
     else if (auto *tableRow = DynamicDowncast<RenderTableRow>(Renderer()))
@@ -4522,8 +4520,8 @@ namespace krys::boo
 
     if (!hadScrollableArea)
     {
-      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's
-      // compositing.
+      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's async
+      // scrolling.
       _scrollableArea->RestoreScrollPosition();
     }
 
@@ -4560,8 +4558,8 @@ namespace krys::boo
     else
     {
       ClearLayerScrollableArea();
-      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's
-      // compositing.
+      // FIXME: The compositing configuration update for asynchronous overflow scrolling, once there's async
+      // scrolling.
     }
 
     // FIXME: Tell the inspector the scrollbars changed, once there's an inspector.
@@ -4977,7 +4975,7 @@ namespace krys::boo
       }
     }
 
-    // FIXME: Boxes being autoscrolled (autoscrollInProgress), once there's autoscrolling.
+    // FIXME: Boxes being autoscrolled (autoscrollInProgress).
 
     auto &box = *GetRenderBox();
 
@@ -5470,7 +5468,7 @@ namespace krys::boo
           paintBehavior.Add(PaintBehavior::CompositedOverflowScrollContent);
         }
 
-        // FIXME: SVG viewport clipping (shouldApplyViewportClip) comes with SVG.
+        // FIXME: SVG viewport clipping (shouldApplyViewportClip).
 
         // Push the parent coordinate space's clip.
         Parent()->ClipToRect(context, stateSaver, paintingInfo, paintBehavior, clipRect);
@@ -5532,7 +5530,7 @@ namespace krys::boo
                                   const LayerPaintingInfo &paintingInfo, EnumSet<PaintLayerFlag> &,
                                   const LayoutSize &offsetFromRoot) noexcept
   {
-    // FIXME: Event region clips (CollectingEventRegion) come with hit testing.
+    // FIXME: Event region clips (CollectingEventRegion), once there are event regions.
     if (!Renderer().HasClipPath() || context.PaintingDisabled() || paintingInfo.PaintDirtyRect.IsEmpty())
     {
       return;
@@ -5705,7 +5703,7 @@ namespace krys::boo
         return false;
       }
 
-      // FIXME: Hidden SVG containers and SVG resource layers (painted indirectly), once there's SVG.
+      // FIXME: Hidden SVG containers and SVG resource layers (painted indirectly).
       return _hasVisibleContent;
     };
 
@@ -5843,7 +5841,7 @@ namespace krys::boo
 
     LayoutSize offsetFromRoot = OffsetFromAncestor(paintingInfo.RootLayer);
 
-    // FIXME: Font subpixel quantization (setupFontSubpixelQuantization) comes with text painting.
+    // FIXME: Font subpixel quantization (setupFontSubpixelQuantization).
 
     // FIXME: Clip paths and filters in a fragmented flow use the column-aware offset
     // (enclosingFragmentedFlow), once there's fragmentation.
@@ -6020,7 +6018,7 @@ namespace krys::boo
         PaintList(PositiveZOrderLayers(), currentContext, localPaintingInfo, localPaintFlags);
       }
 
-      // FIXME: Overlay scrollbars (paintOverflowControlsForFragments) come with scrollbars.
+      // FIXME: Overlay scrollbars (paintOverflowControlsForFragments).
 
       if (filterContext)
       {
@@ -6275,7 +6273,7 @@ namespace krys::boo
     bool selectionAndBackgroundsOnly =
       localPaintingInfo.PaintBehavior.Contains(PaintBehavior::SelectionAndBackgroundsOnly);
 
-    // FIXME: SVG renderers that aren't containers (painted in the foreground phase only), once there's SVG.
+    // FIXME: SVG renderers that aren't containers (painted in the foreground phase only).
 
     if (!selectionOnly)
     {
@@ -6432,7 +6430,7 @@ namespace krys::boo
     }
 
     /// @brief The nearest link at or above @p node in the composed tree.
-    // FIXME: Images (which are never the link: an image map's area is) come with images.
+    // FIXME: Images (which are never the link: an image map's area is).
     KRYS_NODISCARD dom::Element *EnclosingLinkEventParentOrSelf(dom::Node &node) noexcept
     {
       for (dom::Node *current = &node; current; current = current->ParentInComposedTree())

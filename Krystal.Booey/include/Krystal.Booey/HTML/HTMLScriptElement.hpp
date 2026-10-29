@@ -86,7 +86,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-script-text
     void Text(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLSCRIPTELEMENT, HTML): Implement Supports().
+    // FIXME: Implement Supports().
     // static boolean supports(dom::DOMString type);
 
 #pragma endregion

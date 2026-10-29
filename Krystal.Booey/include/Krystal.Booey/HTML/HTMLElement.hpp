@@ -249,7 +249,7 @@ namespace krys::boo::html
 
 #pragma endregion
 
-    // TODO(HTMLELEMENT, HTML): HTMLElement mixins:
+    // FIXME: HTMLElement mixins:
     // HTMLElement includes ElementContentEditable;
 
     /// @brief The editability of @p node from the `contenteditable` attributes of it and its ancestors, for
@@ -357,7 +357,7 @@ namespace krys::boo::html
     {
       FocusAlgorithms::AutofocusInsertionSteps(*this);
 
-      // TODO(HTMLELEMENT): Implement the insertion steps for an HTMLElement.
+      // FIXME: Implement the insertion steps for an HTMLElement.
       // If insertedNode is a form-associated element or the ancestor of a form-associated element:
       // - If the form-associated element's parser inserted flag is set, then return.
       // - Reset the form owner of the form-associated element.
@@ -370,7 +370,7 @@ namespace krys::boo::html
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
-      // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
+      // FIXME: Implement the removal steps for an HTMLElement.
 
       // Let document be removedNode's node document.
 
@@ -401,7 +401,7 @@ namespace krys::boo::html
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
-      // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
+      // FIXME: Implement the move steps for an HTMLElement.
 
       // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
       // element moving steps for movedNode's local name, then run the corresponding HTML element moving steps

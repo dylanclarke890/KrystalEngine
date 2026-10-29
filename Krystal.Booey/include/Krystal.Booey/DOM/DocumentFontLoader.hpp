@@ -21,7 +21,7 @@ namespace krys::boo
 
     /// @brief Requests a document's web fonts, and begins loading them soon after something first needs them.
     /// @note Owned by its document.
-    // FIXME: Counting the fonts waiting to load as requests that hold back the load event, once there's one.
+    // FIXME: Counting the fonts waiting to load as requests that hold back the load event.
     class DocumentFontLoader : public CanMakeWeakPtr<DocumentFontLoader>
     {
       KRYS_NON_COPY_MOVABLE(DocumentFontLoader);

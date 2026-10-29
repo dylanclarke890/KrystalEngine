@@ -8,7 +8,7 @@
 namespace krys::boo
 {
   /// @brief A `display: -webkit-box` container.
-  // FIXME: The legacy box layout comes with layout.
+  // FIXME: The legacy box layout.
   class RenderDeprecatedFlexibleBox final : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderDeprecatedFlexibleBox);

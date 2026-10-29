@@ -107,7 +107,7 @@ namespace krys::boo::css
       return nullptr;
     }
 
-    // FIXME: Pass whether the cached sheet is CORS-same-origin, once the loader is ported.
+    // FIXME: Pass whether the cached sheet is CORS-same-origin, once there are origins.
     Maybe<bool> isOriginClean;
 
     if (!_styleSheetCSSOMWrapper)

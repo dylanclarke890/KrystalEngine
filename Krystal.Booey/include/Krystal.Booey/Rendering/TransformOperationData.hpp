@@ -7,7 +7,7 @@ namespace krys::boo
 {
   /// @brief What a transform or motion path needs to know about the box it applies to.
   /// FIXME: Construction from a renderer (which fills in the motion path data and whether it's an SVG
-  /// renderer) comes with the renderer.
+  /// renderer).
   struct TransformOperationData
   {
     FloatRect BoundingBox;

@@ -72,8 +72,8 @@ namespace krys::boo::html
                     HitTestRequest = {}) noexcept override;
 
   private:
-    // FIXME: Releasing the capture when a popup opens (PopupOpeningObserver::willOpenPopup), with popups
-    // (G14d3); when the renderer is detached (willDetachRenderers), once there's a hook.
+    // FIXME: Releasing the capture when a popup opens (PopupOpeningObserver::willOpenPopup), and when the
+    // renderer is detached (willDetachRenderers), once there's a hook.
     void DoStepAction(int32) noexcept;
     void StartRepeatingTimer() noexcept;
     void StopRepeatingTimer() noexcept;

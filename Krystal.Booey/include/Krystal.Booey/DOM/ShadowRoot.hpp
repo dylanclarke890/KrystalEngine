@@ -89,7 +89,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD Element *Host() const noexcept;
 
-    // TODO(impl): SHADOW-ROOT - The onslotchange attribute is an event handler IDL attribute for the
+    // FIXME: The onslotchange attribute is an event handler IDL attribute for the
     // onslotchange event handler, whose event handler event type is slotchange.
 
 #pragma endregion

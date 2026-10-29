@@ -14,7 +14,7 @@ namespace krys::boo::html
 
 #pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
 
-    // TODO(HTMLTableRowElement, HTML): Implement api.
+    // FIXME: Implement api.
 
 #pragma endregion
 

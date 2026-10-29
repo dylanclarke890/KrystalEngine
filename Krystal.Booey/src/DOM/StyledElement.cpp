@@ -13,6 +13,7 @@
 #include "Krystal.Booey/Style/AttributeChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -250,7 +251,10 @@ namespace krys::boo::dom
 
     Node::InvalidateStyle(validity);
 
-    // FIXME: Invalidate the instances of SVG elements, once there are SVG <use> instances.
+    if (auto *svgElement = DynamicDowncast<svg::SVGElement>(*this))
+    {
+      svgElement->InvalidateInstances();
+    }
 
     // In the rare case of selectors like "[style] ~ div" we need to synchronize immediately to invalidate.
     if (selectorsForStyleAttribute == style::SelectorsForStyleAttribute::NonSubjectPosition)

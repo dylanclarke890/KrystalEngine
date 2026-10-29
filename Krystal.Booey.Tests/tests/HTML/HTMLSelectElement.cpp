@@ -8,6 +8,7 @@
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionsCollection.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/PlatformKeyboardEvent.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 
@@ -280,5 +281,29 @@ namespace krys::boo::tests
       CHECK(select.SelectedIndex() == 3);
       CHECK(change->Count == 2);
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: showPicker()", "[HTML][HTMLSelectElement]")
+  {
+    EditorFixture fixture(u8"<select id=s><option>Apple</option><option>Cherry</option></select>");
+    auto &select = SelectById(fixture, u8"s");
+    auto &window = *fixture.Document->Window();
+
+    // Without a user gesture it's not allowed.
+    auto result = select.ShowPicker();
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+
+    // A gesture allows one call, which uses it up.
+    window.NotifyActivated();
+    CHECK_FALSE(select.ShowPicker().HasException());
+    CHECK_FALSE(window.HasTransientActivation());
+
+    // A disabled select has none, gesture or not.
+    (void)select.SetAttribute(u8"disabled", u8"");
+    window.NotifyActivated();
+    auto disabled = select.ShowPicker();
+    REQUIRE(disabled.HasException());
+    CHECK(disabled.GetException().Code() == dom::ExceptionCode::InvalidStateError);
   }
 }

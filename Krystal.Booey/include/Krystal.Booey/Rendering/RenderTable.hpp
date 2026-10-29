@@ -25,7 +25,6 @@ namespace krys::boo
   };
 
   /// @brief A table: its sections, columns and captions, its column structure and its collapsed borders.
-  // FIXME: Masks (paintMask), once there are those.
   class RenderTable : public RenderBlock
   {
     KRYS_NON_COPY_MOVABLE(RenderTable);

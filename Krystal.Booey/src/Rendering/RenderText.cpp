@@ -502,7 +502,7 @@ namespace krys::boo
 
   void RenderText::WillBeDestroyed() noexcept
   {
-    // FIXME: The secure text timer, once there's editing.
+    // FIXME: The secure text timer.
 
     SetInlineWrapperForDisplayContents(nullptr);
 
@@ -622,7 +622,7 @@ namespace krys::boo
   void RenderText::SecureText(char32 maskingCharacter) noexcept
   {
     // This hides the text by replacing all the characters with the masking character.
-    // FIXME: Revealing the last typed character (the secure text timer), once there's editing.
+    // FIXME: Revealing the last typed character (the secure text timer).
     StringBuilder masked;
     for (text::CodePointIterator it(utf8_stringview {_text}); !it.AtEnd(); ++it)
     {

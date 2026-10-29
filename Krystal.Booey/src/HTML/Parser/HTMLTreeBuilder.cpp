@@ -176,7 +176,7 @@ namespace krys::boo::html
     {
       _openElementStack.Pop();
 
-      // TODO(HTMLTREEBUILDER, SVG): Implement the following steps from the HTML specification:
+      // FIXME: Implement the following steps from the HTML specification:
       // Let the old insertion point have the same value as the current insertion point. Let the insertion
       // point be just before the next input character.
       //
@@ -437,7 +437,7 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Implement parse error handling/logging.
+    // FIXME: Implement parse error handling/logging.
     (void)token;
   }
 
@@ -823,7 +823,7 @@ namespace krys::boo::html
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
-            // TODO(HTMLTREEBUILDER, HTML): If the active speculative HTML parser is null:
+            // FIXME: If the active speculative HTML parser is null:
             // If the element has a charset attribute, and getting an encoding from its value results in an
             // encoding, and the confidence is currently tentative, then change the encoding to the resulting
             // encoding.
@@ -925,7 +925,7 @@ namespace krys::boo::html
               return;
             }
 
-            // TODO(HTMLTREEBUILDER): InHeadMode - Rest of logic for <template> start tags.
+            // FIXME: InHeadMode - Rest of logic for <template> start tags.
 
             return;
           }
@@ -2244,7 +2244,7 @@ namespace krys::boo::html
       {
         if (token.Name().View() == u8"script")
         {
-          // TODO(HTMLTREEBUILDER): TextMode - HTMLScriptElement end tag handling
+          // FIXME: TextMode - HTMLScriptElement end tag handling
         }
 
         _openElementStack.Pop();
@@ -3547,7 +3547,7 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::StopParsing() noexcept
   {
-    // TODO(HTMLTREEBUILDER): StopParsing - implement required steps.
+    // FIXME: StopParsing - implement required steps.
     _openElementStack.PopAll();
 
     if (!_context.has_value())
@@ -3702,7 +3702,7 @@ namespace krys::boo::html
     }
 
     auto &htmlTarget = Downcast<HTMLElement>(target);
-    // TODO(HTMLTREEBUILDER): AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
+    // FIXME: AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
     // way to get it from the element.
     auto tagName = ParseTagName(htmlTarget.LocalName().View());
 
@@ -3820,7 +3820,7 @@ namespace krys::boo::html
     if (!_openElementStack.IsEmpty()
         && adjustedInsertionLocation.Parent == &_openElementStack.Top().Element())
     {
-      // TODO(HTMLTREEBUILDER): Implement root insertion target.
+      // FIXME: Implement root insertion target.
     }
 
     // SPEC(4): Return the adjustedInsertionLocation.
@@ -4012,16 +4012,16 @@ namespace krys::boo::html
     // agent's custom element reactions stack, and invoke custom element reactions in queue.
     reactionStack.reset();
 
-    // TODO(HTMLTREEBUILDER): CreateElement - xmlns attribute parse error
+    // FIXME: CreateElement - xmlns attribute parse error
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
     // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
     //
-    // TODO(HTMLTREEBUILDER): CreateElement - resettable element
+    // FIXME: CreateElement - resettable element
     // If element is a resettable element and not a form-associated custom element, then invoke its reset
     // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
     //
-    // TODO(HTMLTREEBUILDER): CreateElement - form-associated element
+    // FIXME: CreateElement - form-associated element
     // If element is a form-associated element and not a form-associated custom element, the form element
     // pointer is not null, there is no template element on the stack of open elements, element is either not
     // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element

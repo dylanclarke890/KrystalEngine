@@ -19,7 +19,7 @@ namespace krys
   {
     static void AssertAccess() noexcept
     {
-      // TODO: Implement a proper main thread check for the target platform.
+      // FIXME: Implement a proper main thread check for the target platform.
       // krys_assert(isMainThread());
     }
   };
@@ -28,7 +28,7 @@ namespace krys
   {
     static void AssertAccess() noexcept
     {
-      // TODO: Implement a proper main run loop check for the target platform.
+      // FIXME: Implement a proper main run loop check for the target platform.
       // krys_assert(isMainRunLoop());
     }
   };

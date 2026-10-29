@@ -199,4 +199,23 @@ layer at (0,0) size 800x600
   (composite-operation source-over)
   (blend-mode normal)))");
   }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "RenderBlockFlow: an empty editable block has a line",
+                   "[Rendering][RenderBlockFlow][Editing]")
+  {
+    ResolverFixture fixture {u8R"html(<!DOCTYPE html><style>
+      body { margin: 0; font: 10px/20px sans-serif }
+      table { border-spacing: 0 }
+      td { padding: 0 }
+    </style><body><div id=root contenteditable></div><div id=plain></div>
+    <div contenteditable><div id=nested></div><table><tr><td id=cell></td></tr></table></div></body>)html"};
+    (void)fixture.Document->UpdateLayout();
+
+    // An editing root keeps a line for the caret; a block that isn't editable doesn't.
+    CHECK(BoxOf(fixture, u8"root").Height() == 20);
+    CHECK(BoxOf(fixture, u8"plain").Height() == 0);
+    // Inside the root, an editable table cell has a line too, but a block doesn't.
+    CHECK(BoxOf(fixture, u8"nested").Height() == 0);
+    CHECK(BoxOf(fixture, u8"cell").Height() == 20);
+  }
 }

@@ -1042,7 +1042,7 @@ namespace krys::boo
       {
         *reachedBoundary = false;
       }
-      // TODO: this is the current behavior that might need to be fixed.
+      // FIXME: This is the current behavior that might need to be fixed.
       // Please refer to https://bugs.webkit.org/show_bug.cgi?id=49107 for detail.
       VisiblePosition visPos = StartPositionForLine(c, mode);
 
@@ -1167,7 +1167,7 @@ namespace krys::boo
       {
         *reachedBoundary = false;
       }
-      // TODO: this is the current behavior that might need to be fixed.
+      // FIXME: This is the current behavior that might need to be fixed.
       // Please refer to https://bugs.webkit.org/show_bug.cgi?id=49107 for detail.
       VisiblePosition visPos = EndPositionForLine(c, mode);
 

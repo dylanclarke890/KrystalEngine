@@ -181,7 +181,7 @@ namespace krys
                                                               ClampedComponent<ColourType, 2>(c3), alpha});
   }
 
-  // TODO: enable if asserts are enabled
+  // FIXME: Enable if asserts are enabled
 #if 0
 
   template <typename ColourType>

@@ -210,6 +210,26 @@ namespace krys::boo::tests
       CHECK(document->AutofocusProcessed());
     }
 
+    SECTION("not when the document has a target element")
+    {
+      auto page = Page::Create();
+      page->MainFrame().CreateView({200, 100});
+      auto document = CreateRef<dom::HTMLDocument>();
+      page->MainFrame().SetDocument(ShareRefPtr<dom::Document>(document.get()));
+      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      parser->InputStream().Append(
+        u8"<!DOCTYPE html><div id=auto autofocus tabindex=0></div><div id=target></div>", IsEOF(true));
+      parser->PumpTokenizer();
+      REQUIRE(document->AutofocusCandidates().size() == 1);
+
+      // As when the URL's fragment names an element.
+      document->SetCSSTarget(document->GetElementById(u8"target").get());
+      page->UpdateRendering();
+      CHECK_FALSE(document->FocusedElement());
+      CHECK(document->AutofocusProcessed());
+      CHECK(document->AutofocusCandidates().empty());
+    }
+
     SECTION("only in a document shown in a frame")
     {
       auto document = CreateRef<dom::HTMLDocument>();

@@ -612,7 +612,7 @@ namespace krys::boo::dom::tests
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
 
-    // TODO(test): Test with ShadowRoot when implemented
+    // FIXME: Test with ShadowRoot when implemented
 
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());

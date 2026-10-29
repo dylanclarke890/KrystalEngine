@@ -278,7 +278,7 @@ namespace krys::boo
         return blockFlowParent;
       }
       // FIXME: The containing block of an inline box parent, when blocks are in inline layout
-      // (blocksInInlineLayoutEnabled), once there's inline layout.
+      // (blocksInInlineLayoutEnabled).
       // We should not process floats if the parent node is not a RenderBlock. Otherwise, we will add
       // floats in an invalid context. This will cause a crash arising from a bad cast on the parent.
       // See <rdar://problem/8049753>, where float property is applied on a text node in a SVG.

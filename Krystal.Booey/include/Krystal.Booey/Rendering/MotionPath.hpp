@@ -26,7 +26,7 @@ namespace krys::boo
   };
 
   /// @brief Resolves `offset-path` operations into paths and applies motion path transforms.
-  /// FIXME: `motionPathDataForRenderer` comes with the renderer.
+  /// FIXME: `motionPathDataForRenderer`.
   class MotionPath
   {
   public:

@@ -211,7 +211,7 @@ namespace krys::boo::html
 
     void SetIndeterminate(bool newValue) noexcept;
 
-    // TODO(HTMLINPUT, HTML): Implement List().
+    // FIXME: Implement List().
     // readonly attribute HTMLDataListElement? list;
 
     /// @see https://html.spec.whatwg.org/#dom-input-max

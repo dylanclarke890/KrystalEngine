@@ -26,8 +26,7 @@ namespace krys::boo
     FloatRect _objectBoundingBox;
     FloatRect _repaintBoundingBox;
     const UniquePtr<RenderImageResource> _imageResource;
-    // FIXME: The foreground buffered for buffered-rendering: static (m_bufferedForeground), once there are
-    // image buffers.
+    // FIXME: The foreground buffered for buffered-rendering: static (m_bufferedForeground).
 
   public:
     LegacyRenderSVGImage(svg::SVGImageElement &, RenderStyle &&) noexcept;

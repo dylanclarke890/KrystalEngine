@@ -298,7 +298,7 @@ namespace krys::boo
       CollectFocusRingRectsForInline(*renderInline, rects, additionalOffset, paintContainer);
       return;
     }
-    // FIXME: List boxes' focus ring rects (collectFocusRingRectsForListBox), once there are list boxes.
+    // FIXME: List boxes' focus ring rects (collectFocusRingRectsForListBox).
     if (const auto *block = DynamicDowncast<RenderBlock>(renderer))
     {
       if (CollectFocusRingRectsForBlock(*block, rects, additionalOffset, paintContainer))

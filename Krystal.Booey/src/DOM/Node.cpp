@@ -316,7 +316,7 @@ namespace krys::boo::dom
         }
 
         (void)element1;
-        // TODO: are we missing part of the implementation here? element1 is not referenced
+        // FIXME: Are we missing part of the implementation here? element1 is not referenced
       }
     }
 
@@ -670,7 +670,7 @@ namespace krys::boo::dom
         return Node::Editability::ReadOnly;
       }
 
-      // FIXME: A page that's editable as a whole (`Page::isEditable`), once there's a page.
+      // FIXME: A page that's editable as a whole (`Page::isEditable`).
       switch (style.UsedUserModify())
       {
         case UserModify::ReadOnly:               return Node::Editability::ReadOnly;

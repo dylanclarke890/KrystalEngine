@@ -326,7 +326,7 @@ namespace krys::text
     return ToASCIILower(static_cast<char32>(c)) == ToASCIILower(static_cast<char32>(expected));
   }
 
-  // TODO: this is a bit clunky to use with string literals as they don't have .length etc., rework slightly
+  // FIXME: This is a bit clunky to use with string literals as they don't have .length etc., rework slightly
   // to account for this
   template <typename A, typename B>
   KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(A &&a, B &&b) noexcept

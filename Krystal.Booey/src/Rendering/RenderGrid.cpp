@@ -264,7 +264,7 @@ namespace krys::boo
     // row track's size, which it was estimated during the first cycle of the sizing
     // algorithm. Hence we need to repeat computeUsedBreadthOfGridTracks for both,
     // columns and rows, to determine the final values.
-    // TODO (lajava): orthogonal flows is just one of the cases which may require
+    // FIXME: Orthogonal flows is just one of the cases which may require
     // a new cycle of the sizing algorithm; there may be more. In addition, not all the
     // cases with orthogonal flows require this extra cycle; we need a more specific
     // condition to detect whether grid item's min-content contribution has changed or not.

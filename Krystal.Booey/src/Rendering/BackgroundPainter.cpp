@@ -268,8 +268,7 @@ namespace krys::boo
     bool shouldPaintBackgroundImage = bgImage && bgImage->CanRender(&_renderer, style.UsedZoom());
 
     // FIXME: Contentful paint detection and asynchronous image decoding (detectingContentfulPaint,
-    // invalidatingImagesWithAsyncDecodes) come with loaded images; printing's forced white backgrounds come
-    // with printing.
+    // invalidatingImagesWithAsyncDecodes); printing's forced white backgrounds come with printing.
 
     bool baseBgColorOnly = (baseBgColorUsage == BaseBackgroundColorOnly);
     if (baseBgColorOnly && (!isRoot || !layer.IsLast || bgColor.IsOpaque()))
@@ -437,12 +436,12 @@ namespace krys::boo
         break;
       }
       case FillBox::Text:
-        // FIXME: Clipping to the text (a mask of the box's text, painted with the text clip phase) comes with
-        // text painting; the background isn't clipped meanwhile.
+        // FIXME: Clipping to the text (a mask of the box's text, painted with the text clip phase); the
+        // background isn't clipped meanwhile.
         break;
       case FillBox::BorderArea:
-        // FIXME: Clipping to the border area (the border's path, or a mask of the border) comes with borders;
-        // the background isn't clipped meanwhile.
+        // FIXME: Clipping to the border area (the border's path, or a mask of the border); the background
+        // isn't clipped meanwhile.
         break;
       case FillBox::NoClip: break;
     }
@@ -560,8 +559,8 @@ namespace krys::boo
                                      FloatPoint(ToLayoutPoint(geometry.RelativePhase())),
                                      FloatSize(geometry.TileSize), FloatSize(geometry.SpaceSize), options);
 
-        // FIXME: Asynchronous decoding and painted image bookkeeping (setHasEverPaintedImages, didPaintImage)
-        // come with loaded images.
+        // FIXME: Asynchronous decoding and painted image bookkeeping (setHasEverPaintedImages,
+        // didPaintImage).
       }
     }
   }
@@ -1307,8 +1306,7 @@ namespace krys::boo
       return false;
     }
 
-    // FIXME: Images whose foreground obscures their background (RenderImage::backgroundIsKnownToBeObscured)
-    // come with images.
+    // FIXME: Images whose foreground obscures their background (RenderImage::backgroundIsKnownToBeObscured).
 
     return true;
   }

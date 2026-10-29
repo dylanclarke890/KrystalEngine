@@ -971,7 +971,7 @@ class StylePropertyCodeGenProperties:
                 raise Exception(f"{key_path} must be one of {valid_kinds}.")
 
             # Default the `render-style-initial` function to constexpr if the values is an 'enum' or 'raw'.
-            # TODO: This should eventually be replaced by inspecting the grammar in inferring 'constexpr' as long as the grammar does
+            # FIXME: This should eventually be replaced by inspecting the grammar in inferring 'constexpr' as long as the grammar does
             # not rely on storing a variable number of elements or use <length-percentage>, <custom-ident>, <dashed-ident>, <string>.
             if "render-style-initial-constexpr" not in json_value:
                 if json_value["render-style-storage-kind"] in ["enum", "raw"]:
@@ -4883,12 +4883,12 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return f"ConsumePosition({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinColorConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # TODO: temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
+                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
                     return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{{builtin.allowed_types.replace(",", " |")}}}}})"
                 return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{}}}})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # TODO: temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
+                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
                     return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types.replace(",", " |")})"
                 return f"ConsumeImage({range_string}, {state_string}, AllowedImageType::None)"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore

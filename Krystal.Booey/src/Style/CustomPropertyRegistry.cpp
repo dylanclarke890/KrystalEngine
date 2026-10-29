@@ -181,7 +181,7 @@ namespace krys::boo::style
     const css::CSSOMStringAtom &) noexcept
   {
     // FIXME: Tell the keyframe effects targeting elements in the scope's document
-    // (`KeyframeEffect::customPropertyRegistrationDidChange`), once animations are ported.
+    // (`KeyframeEffect::customPropertyRegistrationDidChange`).
   }
 
   auto CustomPropertyRegistry::ParseInitialValue(const dom::Document &document,

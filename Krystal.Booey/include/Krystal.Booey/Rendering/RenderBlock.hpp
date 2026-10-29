@@ -32,8 +32,7 @@ namespace krys::boo
   };
 
   /// @brief A box that contains other boxes: a block container, flex, grid or table.
-  // FIXME: Floats, line boxes, continuations (and their outlines), fragmentation, carets and column rules
-  // come with the rest of layout, inline painting, editing and multi-column layout.
+  // FIXME: Continuations (and their outlines), fragmentation and column rules.
   KRYS_NODISCARD LayoutUnit BlockDirectionOffset(const RenderBlock &rootBlock,
                                                  const LayoutSize &offsetFromRootBlock) noexcept;
   KRYS_NODISCARD LayoutUnit InlineDirectionOffset(const RenderBlock &rootBlock,
@@ -297,7 +296,7 @@ namespace krys::boo
     /// @brief Whether @p locationInContainer is over one of the block's scrollbars, which @p result then
     /// names.
     virtual bool IsPointInOverflowControl(HitTestResult &result, const LayoutPoint &locationInContainer,
-                                  const LayoutPoint &accumulatedOffset) noexcept;
+                                          const LayoutPoint &accumulatedOffset) noexcept;
 
     bool NodeAtPoint(const HitTestRequest &request, HitTestResult &result,
                      const HitTestLocation &locationInContainer, const LayoutPoint &accumulatedOffset,

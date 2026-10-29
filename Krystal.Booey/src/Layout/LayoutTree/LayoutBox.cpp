@@ -305,7 +305,7 @@ namespace krys::boo::layout
     auto display = _style.Display();
     return display == DisplayType::Block || display == DisplayType::FlowRoot
            || display == DisplayType::ListItem || display == DisplayType::RubyBlock || IsInlineBlockBox()
-           || IsTableCell() || IsTableCaption(); // TODO && !replaced element
+           || IsTableCell() || IsTableCaption(); // FIXME: And not a replaced element.
   }
 
   bool Box::IsLayoutContainmentBox() const noexcept

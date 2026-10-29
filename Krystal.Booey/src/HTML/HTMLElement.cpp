@@ -257,7 +257,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::AccessKeyLabel() const noexcept
   {
-    // TODO(HTMLELEMENT, HTML): Implement AccessKeyLabel() method.
+    // FIXME: Implement AccessKeyLabel() method.
     return {};
   }
 
@@ -296,7 +296,7 @@ namespace krys::boo::html
       case AttributeState::False: return false;
       case AttributeState::Default:
       {
-        // TODO(HTMLELEMENT, SPELLCHECK, HTML): Implement default behavior for SpellCheck() getter.
+        // FIXME: Implement default behavior for SpellCheck() getter.
         // The spellcheck IDL attribute, on getting, must return true if the element's spellcheck content
         // attribute is in the True state, or if the element's spellcheck content attribute is in the Default
         // state and the element's default behavior is true-by-default, or if the element's spellcheck content
@@ -317,7 +317,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::WritingSuggestions() const noexcept
   {
-    // TODO(HTMLELEMENT, WRITINGSUGGESTIONS, HTML): Implement WritingSuggestions() method.
+    // FIXME: Implement WritingSuggestions() method.
     // Return this's computed writing suggestions value.
     return {};
   }
@@ -330,7 +330,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::Autocapitalize() const noexcept
   {
-    // TODO(HTMLELEMENT, AUTOCAPITALIZE, HTML): Implement Autocapitalize() method.
+    // FIXME: Implement Autocapitalize() method.
     // Let state be the own autocapitalization hint of this.
     // If state is Default, then return the empty string.
     // If state is None, then return "none".
@@ -347,7 +347,7 @@ namespace krys::boo::html
 
   bool HTMLElement::Autocorrect() const noexcept
   {
-    // TODO(HTMLELEMENT, AUTOCORRECT, HTML): Implement Autocorrect() method.
+    // FIXME: Implement Autocorrect() method.
     // The autocorrect getter steps are: return true if the element's used autocorrection state is On and
     // false if the element's used autocorrection state is Off
     return false;
@@ -440,14 +440,14 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::OuterText() const noexcept
   {
-    // TODO(HTMLELEMENT, HTML): Implement OuterText() method.
+    // FIXME: Implement OuterText() method.
     krys_not_implemented();
   }
 
   void HTMLElement::OuterText(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    // TODO(HTMLELEMENT, HTML): Implement OuterText() getter method.
+    // FIXME: Implement OuterText() getter method.
     (void)value;
     krys_not_implemented();
   }
@@ -1122,7 +1122,7 @@ namespace krys::boo::html
 
   dom::Node::Editability HTMLElement::EditabilityFromContentEditableAttr(const dom::Node &node) noexcept
   {
-    // FIXME: A page that's editable as a whole, once there's a page.
+    // FIXME: A page that's editable as a whole.
     auto *startElement = DynamicDowncast<dom::Element>(node);
     if (!startElement)
     {

@@ -27,7 +27,7 @@ namespace krys::boo::dom::tests
       REQUIRE(event->SrcElement() == nullptr);
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::CurrentTarget", "[HTML][Event]")
@@ -38,7 +38,7 @@ namespace krys::boo::dom::tests
       REQUIRE(event->CurrentTarget() == nullptr);
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::ComposedPath", "[HTML][Event]")
@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
       REQUIRE(composedPath.empty());
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::EventPhase", "[HTML][Event]")

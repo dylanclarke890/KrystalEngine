@@ -5,6 +5,7 @@
 #include "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Platform/ColorChooser.hpp"
 #include "Krystal.Booey/Platform/ColorChooserClient.hpp"
 
@@ -14,6 +15,13 @@ namespace krys::boo::tests
 
   namespace
   {
+    /// @brief Calls `showPicker()` on @p input during a user gesture, which it needs.
+    KRYS_NODISCARD dom::ExceptionOr<void> ShowPicker(HTMLInputElement &input) noexcept
+    {
+      input.NodeDocument().Window()->NotifyActivated();
+      return input.ShowPicker();
+    }
+
     /// @brief A colour chooser that records what it's told.
     struct RecordingColorChooser final : ColorChooser
     {
@@ -139,7 +147,7 @@ namespace krys::boo::tests
       // Setting the value tells the chooser; showing it again reattaches it.
       (void)input.SetValue(u8"#00ff00");
       CHECK(SerialisationForHTML(client->Chooser->Selected) == u8"#00ff00");
-      CHECK_FALSE(input.ShowPicker().HasException());
+      CHECK_FALSE(ShowPicker(input).HasException());
       CHECK(client->Chooser->Reattached == 1);
     }
 
@@ -152,7 +160,7 @@ namespace krys::boo::tests
       CHECK(client->Chooser->Ended);
       CHECK_FALSE(input.IsPresentingAttachedView());
 
-      CHECK_FALSE(input.ShowPicker().HasException());
+      CHECK_FALSE(ShowPicker(input).HasException());
       REQUIRE_FALSE(client->Chooser->Ended);
       (void)input.SetAttribute(u8"hidden", u8"");
       (void)fixture.Document->UpdateLayout();
@@ -164,7 +172,7 @@ namespace krys::boo::tests
       (void)input.SetAttribute(u8"disabled", u8"");
       input.Click();
       CHECK_FALSE(client->Chooser);
-      CHECK(input.ShowPicker().HasException());
+      CHECK(ShowPicker(input).HasException());
     }
   }
 }

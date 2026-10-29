@@ -8,7 +8,7 @@ namespace krys::boo::dom
 {
   /// @brief An event about the user interface: the base of focus, mouse and keyboard events.
   /// @see https://w3c.github.io/uievents/#interface-uievent
-  // FIXME: The view, once there's a Window.
+  // FIXME: The view (a Window).
   class UIEvent : public Event
   {
     friend class EventFactory;
@@ -32,7 +32,7 @@ namespace krys::boo::dom
 
     /// @note Legacy.
     /// @see https://w3c.github.io/uievents/#dom-uievent-inituievent
-    // FIXME: The view, once there's a Window.
+    // FIXME: The view (a Window).
     void InitUIEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
                      int32 detail = 0) noexcept
     {

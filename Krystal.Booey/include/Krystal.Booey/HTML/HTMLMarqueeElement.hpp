@@ -42,7 +42,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-marquee-width
     void Width(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLMarqueeElement, HTML): hspace, vspace, loop, scrollAmount, scrollDelay, trueSpeed, start() and
+    // FIXME: hspace, vspace, loop, scrollAmount, scrollDelay, trueSpeed, start() and
     // stop(). Marquees don't scroll (the -webkit-marquee properties are dropped).
 
   protected:

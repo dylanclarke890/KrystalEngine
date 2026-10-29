@@ -296,7 +296,7 @@ namespace krys::boo
 
     graphicsLayer->SetName(name);
 
-    // FIXME: Layer-based SVG (setShouldUpdateRootRelativeScaleFactor), once there's SVG.
+    // FIXME: Layer-based SVG (setShouldUpdateRootRelativeScaleFactor).
 
     return graphicsLayer;
   }
@@ -488,7 +488,7 @@ namespace krys::boo
       LayoutRect result = LayoutRect::InfiniteRect();
       if (renderer.HasNonVisibleOverflow())
       {
-        // FIXME: SVG model objects' overflow clip, once there's SVG.
+        // FIXME: SVG model objects' overflow clip.
         if (auto *box = DynamicDowncast<RenderBox>(renderer))
         {
           result = box->OverflowClipRect({});
@@ -1647,7 +1647,7 @@ namespace krys::boo
       }
       else
       {
-        // FIXME: SVG renderers' object bounding boxes, once there's SVG: a box's is its border box.
+        // FIXME: SVG renderers' object bounding boxes: a box's is its border box.
         auto boundingBox = GetRenderBox() ? FloatRect(GetRenderBox()->BorderBoxRect()) : FloatRect();
         backgroundPosition = boundingBox.Location();
         backgroundSize = boundingBox.Size();
@@ -2989,7 +2989,7 @@ namespace krys::boo
       return;
     }
 
-    // FIXME: Layer-based SVG (RenderSVGModelObject), once there's SVG.
+    // FIXME: Layer-based SVG (RenderSVGModelObject).
 
     if (request.HasPaintedContent == RequestState::Unknown)
     {
@@ -3979,7 +3979,7 @@ namespace krys::boo
   {
     // FIXME: Renderers captured in a view transition, once there are view transitions.
 
-    // FIXME: SVG renderers that are layer aware, once there's SVG.
+    // FIXME: SVG renderers that are layer aware.
     bool shouldApplyAnimationsToTargetRenderer = Renderer().IsRenderBox();
 
     bool hasOpacity = keyframes.ContainsProperty(css::PropertyId::Opacity);

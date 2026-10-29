@@ -838,7 +838,7 @@ namespace krys::boo
     /// the scrollbars.
     KRYS_NODISCARD IntRect RectToCopyOnScroll() const noexcept;
     /// @brief Scrolls to @p desiredPosition, within the scroll range.
-    // FIXME: Adding and removing scrollbars, once there are scrollbars.
+    // FIXME: Adding and removing scrollbars.
     void UpdateScrollbars(const ScrollPosition &desiredPosition) noexcept;
     void ScheduleScrollEvent() noexcept;
     KRYS_NODISCARD LayoutRect GetPossiblyFixedRectToExpose(const LayoutRect &visibleRect,

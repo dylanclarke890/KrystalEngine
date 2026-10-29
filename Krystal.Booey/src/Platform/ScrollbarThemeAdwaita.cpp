@@ -36,7 +36,7 @@ namespace krys::boo
   bool ScrollbarThemeAdwaita::UsesOverlayScrollbars() const noexcept
   {
     // Classic scrollbars (decided): overlay scrollbars fade in and out, which needs animations.
-    // FIXME: Overlay scrollbars, once there are animations.
+    // FIXME: Overlay scrollbars.
     return false;
   }
 

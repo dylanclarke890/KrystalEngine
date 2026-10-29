@@ -30,8 +30,8 @@ namespace krys::boo
   /// into segments that will fit within or around a shape. The line is defined by a pair of logical Y
   /// coordinates and the computed segments are returned as pairs of logical X coordinates. The BasicShape
   /// itself is defined in physical coordinates.
-  // FIXME: The shapes' display paths (buildDisplayPaths), for highlighting them, come with painting. Raster
-  // shapes (createRasterShape) come with image loading and drawing.
+  // FIXME: The shapes' display paths (buildDisplayPaths), for highlighting them, and raster shapes
+  // (createRasterShape).
   class LayoutShape : public RefCounted<LayoutShape>
   {
   private:

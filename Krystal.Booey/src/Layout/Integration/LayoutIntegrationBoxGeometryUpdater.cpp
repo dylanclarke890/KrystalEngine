@@ -93,7 +93,7 @@ namespace krys::boo::layout_integration
       return style::EvaluateMinimum<LayoutUnit>(paddingEdge, *availableWidth, usedZoom);
     }
 
-    // FIXME: The fieldset's intrinsic border (intrinsicBorderForFieldset), once there are form controls.
+    // FIXME: The fieldset's intrinsic border (intrinsicBorderForFieldset), once fieldsets have a renderer.
     inline void AdjustBorderForTableAndFieldset(const RenderBoxModelObject &renderer,
                                                 RectEdges<LayoutUnit> &borderWidths) noexcept
     {
@@ -220,7 +220,7 @@ namespace krys::boo::layout_integration
           continue;
         }
 
-        // FIXME: Menu lists, once there are menu lists.
+        // FIXME: Menu lists.
         if (Is<RenderFlexibleBox>(*inflowBox) || Is<RenderGrid>(*inflowBox) || Is<RenderBlockFlow>(*inflowBox)
             || Is<RenderTextControlInnerContainer>(*inflowBox))
         {
@@ -259,8 +259,7 @@ namespace krys::boo::layout_integration
       }
 
       // FIXME: Iframes, embedded objects and view transition captures have no baseline; images,
-      // attachments, buttons, list boxes, file upload controls and sliders have their own, once there are
-      // those renderers.
+      // attachments, buttons, list boxes, file upload controls and sliders have their own.
       if (Is<LegacyRenderSVGRoot>(renderBox) || Is<RenderHTMLCanvas>(renderBox)
           || Is<RenderTextControlMultiLine>(renderBox))
       {
@@ -453,7 +452,7 @@ namespace krys::boo::layout_integration
         return marginBoxBottom;
       }
 
-      // FIXME: Replaced boxes other than images, once there are any.
+      // FIXME: Replaced boxes other than images.
       return null;
     }
 
@@ -471,7 +470,7 @@ namespace krys::boo::layout_integration
           return !renderListMarker->IsImage();
         }
 
-        // FIXME: List boxes, sliders, attachments and buttons, once there are those renderers.
+        // FIXME: List boxes, sliders, attachments and buttons.
         if ((Is<RenderReplaced>(renderBox) && renderBox.Style().Display() == DisplayType::Inline)
             || Is<RenderTextControlMultiLine>(renderBox) || Is<RenderTable>(renderBox)
             || Is<RenderGrid>(renderBox) || Is<RenderFlexibleBox>(renderBox)
@@ -520,7 +519,7 @@ namespace krys::boo::layout_integration
             return SnapToInt(marginBoxLogicalHeight);
           }
 
-          // FIXME: Buttons use their content box bottom, once there are buttons.
+          // FIXME: Buttons use their content box bottom.
 
           return SnapToInt(marginBoxLogicalHeight);
         };

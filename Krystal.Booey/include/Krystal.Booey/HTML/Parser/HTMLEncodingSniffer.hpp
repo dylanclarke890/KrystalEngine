@@ -85,7 +85,7 @@ namespace krys::boo::html
           }
 
           return nullptr;
-          // TODO: fix this
+          // FIXME: Fix this
           // ASCIILiteral canonicalName = codecRegistry.LabelToName(charset);
           // if (canonicalName == u8"UTF-16LE" || canonicalName == u8"UTF-16BE")
           //{

@@ -13,7 +13,7 @@ The user's answers (2026-10-23):
 - **Content:** SVG, MathML, engine textures in pages, canvas 2D, video and audio.
 - **Components:** custom elements defined in C++.
 - **Sources:** local files and asset packs, and data the host fetches and pushes in; remote pages later.
-- **Also:** accessibility, drag and drop, right-to-left and bidi text, resize and intersection observers, the Web Animations API, dialogs, popovers and `<details>`.
+- **Also:** accessibility (dropped since, see *Not planned*), drag and drop, right-to-left and bidi text, resize and intersection observers, the Web Animations API, dialogs, popovers and `<details>`.
 - **Not needed:** iframes and a frame tree, printing.
 
 ## Slices
@@ -37,9 +37,8 @@ The user's answers (2026-10-23):
 | B12 | MathML: the elements (`mathml/`, the element factory, the `MATHML-ELEMENTS` TODOs) and their renderers (`rendering/mathml/`: fractions, scripts, roots, operators, tables), with the OpenType MATH table. | about 11k lines | MathML formulas lay out and paint as Chrome does. |
 | B13 | Engine textures in pages: an element (or a `<canvas>` context) that paints a GPU texture the host supplies by handle, composited, with damage when it changes. Krystal-specific. | new | A live engine view (a 3D preview) shows inside a page, laid out and clipped like an image. |
 | B14 | Canvas 2D: `<canvas>` and `CanvasRenderingContext2D` (paths, fills, strokes, text, images, `ImageData`, gradients, patterns, transforms, compositing) drawn through Render2D, used from C++. No WebGL. | about 10k to 15k lines | Canvas drawing from C++ matches Chrome's for the common calls. |
-| **Tier 4: international and accessible** | | | |
+| **Tier 4: international** | | | |
 | B15 | Right-to-left and bidi: `dir=auto` and `<bdi>` (bidi data), caret movement and selection in bidi text, checking inline layout and editing against Chrome in Arabic and Hebrew. | moderate, spread out | Mixed-direction text lays out, selects and edits as Chrome does. |
-| B16 | Accessibility: the accessibility object tree (`AXObjectCache` and its objects, roles, names), the controls' accessibility FIXMEs, and a Windows UI Automation bridge (new work: upstream's Windows side is nearly empty; a library such as AccessKit could provide it). | about 38k lines | A screen reader reads and moves through pages and their controls. |
 
 Afterwards: the MVC layer, on top of B1 to B3.
 
@@ -52,6 +51,8 @@ Afterwards: the MVC layer, on top of B1 to B3.
 ## Not planned
 
 From upstream, these stay out: JavaScript bindings, the JIT and scripting in general (`TODO.md`'s *Not supported*), workers, the APIs in `Modules/` (WebRTC, IndexedDB, WebAuthn, payments and the like), WebGL and WebGPU, content extensions and plugins, iframes and a frame tree, printing and pagination, and the iOS and macOS code.
+
+Accessibility (the accessibility object tree, `AXObjectCache`, ARIA, and a Windows UI Automation bridge; about 38k lines upstream) was B16 until 2026-10-28, when it was dropped from the roadmap by the user's choice. Its FIXMEs stay in the code as they are.
 
 ## B1 plan (2026-10-23)
 

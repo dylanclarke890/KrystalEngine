@@ -29,7 +29,7 @@ namespace krys::boo
 
   /// @brief Renders a text node (or anonymous text, such as generated content): its text, after the style's
   /// text transform and text security.
-  // FIXME: The secure text timer that reveals the last typed character comes with editing.
+  // FIXME: The secure text timer that reveals the last typed character.
   class RenderText : public RenderObject
   {
     KRYS_NON_COPY_MOVABLE(RenderText);

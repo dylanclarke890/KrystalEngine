@@ -105,8 +105,7 @@ namespace krys::boo::html
           {
             frame->GetEventHandler().SetCapturingMouseEventsElement(ShareRefPtr(this));
             _capturing = true;
-            // FIXME: Registering as a popup opening observer (Chrome::registerPopupOpeningObserver), with
-            // popups (G14d3).
+            // FIXME: Registering as a popup opening observer (Chrome::registerPopupOpeningObserver).
           }
         }
         auto oldUpDownState = _upDownState;

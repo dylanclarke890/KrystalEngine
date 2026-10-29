@@ -92,7 +92,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-iframe-loading
     void Loading(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLIFRAMEELEMENT, HTML): Implement the contentDocument, contentWindow and getSVGDocument()
+    // FIXME: Implement the contentDocument, contentWindow and getSVGDocument()
     // methods/attributes.
     // readonly attribute Document? contentDocument;
     // readonly attribute WindowProxy? contentWindow;

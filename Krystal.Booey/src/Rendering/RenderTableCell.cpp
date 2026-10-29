@@ -1791,7 +1791,11 @@ namespace krys::boo
 
   bool RenderTableCell::HasLineIfEmpty() const noexcept
   {
-    // FIXME: Editable cells have a line even when empty (hasEditableStyle), once there's editing.
+    if (GetElement() && GetElement()->HasEditableStyle())
+    {
+      return true;
+    }
+
     return RenderBlock::HasLineIfEmpty();
   }
 

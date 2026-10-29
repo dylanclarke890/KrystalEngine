@@ -61,7 +61,7 @@ namespace krys::boo::css
     constexpr static auto DefaultColorValue = CurrentColor {};
     constexpr static auto DefaultStdDeviationValue = LengthRaw<> {LengthUnit::Px, 0};
 
-    // TODO: expose predefined colors on Color as static members
+    // FIXME: Expose predefined colors on Color as static members
     // constexpr static auto InitialColorValueForInterpolation = Color::TransparentBlack;
     constexpr static auto InitialLengthValueForInterpolation = LengthRaw<> {LengthUnit::Px, 0};
 

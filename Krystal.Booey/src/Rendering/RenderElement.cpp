@@ -970,7 +970,7 @@ namespace krys::boo
 
   bool RenderElement::IsInsideEntirelyHiddenLayer() const noexcept
   {
-    // FIXME: Layers inside hidden SVG containers and resources, once there's SVG.
+    // FIXME: Layers inside hidden SVG containers and resources.
     return Style().UsedVisibility() != Visibility::Visible && !EnclosingLayer()->HasVisibleContent();
   }
 
@@ -1103,8 +1103,8 @@ namespace krys::boo
 
     // FIXME: Outline counting, once there's any.
 
-    // FIXME: A fixed root background composited on its own isn't slow, once there's compositing; and the
-    // setting for fixed backgrounds painting relative to the document, once there are settings for it.
+    // FIXME: A fixed root background composited on its own isn't slow; and the setting for fixed
+    // backgrounds painting relative to the document, once there are settings for it.
     bool newStyleSlowScroll =
       style::HasImageWithAttachment(newStyle.GetBackgroundLayers(), FillAttachment::FixedBackground);
 
@@ -1951,13 +1951,13 @@ namespace krys::boo
   bool RenderElement::MayContainOutOfFlowPositionedObjects(const RenderStyle *styleToUse) const noexcept
   {
     auto &style = styleToUse ? *styleToUse : Style();
-    // FIXME: SVG foreign objects, once there are SVG renderers.
     return IsRenderView()
            || (CanEstablishContainingBlockWithTransform()
                && (styleToUse ? styleToUse->HasTransformRelatedProperty() : HasTransformRelatedProperty()))
            || (style.HasBackdropFilter() && !IsDocumentElementRenderer())
-           || (style.HasFilter() && !IsDocumentElementRenderer()) || ShouldApplyLayoutContainment(styleToUse)
-           || ShouldApplyPaintContainment(styleToUse) || IsViewTransitionContainingBlock();
+           || (style.HasFilter() && !IsDocumentElementRenderer()) || IsLegacyRenderSVGForeignObject()
+           || ShouldApplyLayoutContainment(styleToUse) || ShouldApplyPaintContainment(styleToUse)
+           || IsViewTransitionContainingBlock();
   }
 
   bool RenderElement::CanContainAbsolutelyPositionedObjects(const RenderStyle *styleToUse) const noexcept
@@ -2051,7 +2051,7 @@ namespace krys::boo
       textRenderer->StyleDidChange(style::DifferenceResult::Equal, nullptr);
     }
 
-    // FIXME: Remove the layers created in hidden SVG subtrees, once there are layers.
+    // FIXME: Remove the layers created in hidden SVG subtrees.
   }
 
   RenderObject *RenderElement::AttachRendererInternal(RenderPtr<RenderObject> child,

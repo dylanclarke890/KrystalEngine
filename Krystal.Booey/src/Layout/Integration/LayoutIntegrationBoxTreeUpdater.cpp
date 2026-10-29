@@ -57,7 +57,7 @@ namespace krys::boo::layout_integration
                                            : layout::Box::NodeType::ReplacedElement;
         }
 
-        // FIXME: Buttons, menu lists, sliders and slider containers, once there are those renderers.
+        // FIXME: Buttons, menu lists, sliders and slider containers.
         if (Is<RenderTextControlInnerContainer>(renderer))
         {
           return layout::Box::NodeType::ImplicitFlexBox;

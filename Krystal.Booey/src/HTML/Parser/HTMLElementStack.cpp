@@ -48,7 +48,7 @@ namespace krys::boo::html
   {
     assert(!_items.empty());
 
-    // TODO(HTMLTREEBUILDER, HTML): When the current node is removed from the stack of open elements,
+    // FIXME: When the current node is removed from the stack of open elements,
     // process internal resource links given the current node's node document.
 
     Ref<dom::Element> back = ShareRef(Bottom().Element());

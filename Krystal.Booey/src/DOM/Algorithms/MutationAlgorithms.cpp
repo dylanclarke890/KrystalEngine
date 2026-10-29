@@ -594,7 +594,7 @@ namespace krys::boo::dom
       }
       node.SetParentNode(&newParent);
 
-      // TODO(impl): SLOTTABLES
+      // FIXME: Slot assignment on insertion:
       // If newParent is a shadow host whose shadow root’s slot assignment is "named" and node is a slottable,
       // then assign a slot for node.
       // If newParent’s root is a shadow root, and newParent is a slot whose assigned nodes is empty, then run
