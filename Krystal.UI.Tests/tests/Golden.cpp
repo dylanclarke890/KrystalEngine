@@ -1007,7 +1007,7 @@ namespace krys::ui::tests
     // FIXME: A page whose @font-face font comes from the memory cache keeps table cells' preferred widths
     // from before the font applied, so its table is sized differently from a page whose font loads (by a
     // fifth of a pixel a cell here); setting the cells' text again fixes it. "Golden: bidi layout" fails when
-    // any page was loaded before it in the process. See docs/booey/ROADMAP.md, Open work.
+    // any page was loaded before it in the process. See docs/booey/KNOWN-ISSUES.md.
     auto td3 = []
     {
       View view({360, 240});

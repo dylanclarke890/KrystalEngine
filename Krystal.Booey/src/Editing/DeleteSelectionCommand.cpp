@@ -1298,7 +1298,8 @@ namespace krys::boo
     }
   }
 
-  // FIXME: Not rebalancing whitespace in secure fields (-webkit-text-security), which isn't supported.
+  // Whitespace is rebalanced in secure fields (-webkit-text-security) too, as every editing behaviour but
+  // iOS's does.
   void DeleteSelectionCommand::DoApply() noexcept
   {
     // If selection has not been set to a custom selection when the command was created,

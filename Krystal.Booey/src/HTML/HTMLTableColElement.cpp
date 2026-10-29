@@ -32,7 +32,7 @@ namespace krys::boo::html
       }
     }
     // FIXME: Lay the column out again when its width attribute changes to a different integer
-    // (parseHTMLInteger), once there's an HTML integer parser.
+    // (parseHTMLInteger, which Numbers::ParseInteger provides).
   }
 
   uint32 HTMLTableColElement::Span() const noexcept

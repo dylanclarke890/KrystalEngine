@@ -365,7 +365,6 @@ namespace krys::boo::dom
     }
 
     /// @brief The object the node is rendered as, or null if it isn't rendered.
-    /// @note FIXME: Only elements have renderers until text renderers are ported.
     KRYS_NODISCARD RenderObject *Renderer() const noexcept
     {
       return _renderer;

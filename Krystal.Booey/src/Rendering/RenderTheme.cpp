@@ -280,7 +280,6 @@ namespace krys::boo
 
     if (const auto *input = DynamicDowncast<html::HTMLInputElement>(element))
     {
-      // FIXME: File inputs' buttons (isUploadButton), with file inputs.
       if (input->IsTextButton())
       {
         return StyleAppearance::Button;

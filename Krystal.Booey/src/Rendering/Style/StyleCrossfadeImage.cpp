@@ -36,8 +36,8 @@ namespace krys::boo
   {
     krys_debug_assert(EqualInputImages(from));
 
-    // FIXME: Blend the percentages once both input images have loaded (their cached images), once the
-    // resource loader is ported. Until then, they never have.
+    // FIXME: Blend the percentages once both input images have loaded (their cached images), once the image
+    // follows its inputs' cached images (see Load). Until then, they never have.
     return nullptr;
   }
 

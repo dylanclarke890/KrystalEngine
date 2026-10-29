@@ -320,8 +320,7 @@ namespace krys::boo
         if (rootBox && rootBox->HasLayer())
         {
           RenderLayer *layer = rootBox->Layer();
-          // FIXME: Backdrop roots (isBackdropRoot), once there are backdrop filters.
-          if (layer->IsolatesBlending())
+          if (layer->IsolatesBlending() || layer->IsBackdropRoot())
           {
             return false;
           }

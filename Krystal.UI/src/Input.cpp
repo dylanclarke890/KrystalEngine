@@ -228,7 +228,7 @@ namespace krys::ui::input
     }
     else
     {
-      // FIXME: Dead keys ("Dead"), once the platform layer reports them.
+      // FIXME: Dead keys ("Dead"), which the platform layer marks with KeyText::DeadKey.
       keyValue = u8"Unidentified";
     }
 

@@ -1284,7 +1284,7 @@ namespace krys::ui::tests
     CHECK(CompareImages(before, after, 2u).PixelsOver > 1'000u);
 
     // Painted again whole, which draws the texture as an image, the canvases are as composited. (The page's
-    // frosted badge, a backdrop filter, isn't compared: its blur differs a little between the two.)
+    // frosted badge, a backdrop filter, isn't compared: the whole repaint draws no backdrops.)
     auto repainted = fixture.Repainted(view);
     auto sameWithin = [&](const boo::dom::DOMRectReadOnly &area)
     {

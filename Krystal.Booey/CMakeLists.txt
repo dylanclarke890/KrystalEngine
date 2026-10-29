@@ -200,8 +200,7 @@ add_custom_command(
   VERBATIM
 )
 
-# CSS/Style files are only listed once they've been through the port ledger (docs/booey/PORTING.md).
-# Files on disk but not listed here haven't been reviewed yet and aren't built.
+# Every header and source is listed here; a file that isn't listed isn't built.
 set(KRYSTAL_BOOEY_CSS_HEADERS
   # Slice 1: Tokenizer
   include/Krystal.Booey/CSS/Parser/InputStream.hpp
