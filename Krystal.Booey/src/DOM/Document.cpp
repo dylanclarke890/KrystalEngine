@@ -11,10 +11,13 @@
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
 #include "Krystal.Booey/CSS/Media/MediaQueryList.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryMatcher.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/CSS/Values/Color/KeywordColor.hpp"
+#include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
+#include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -77,6 +80,7 @@
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMetaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
@@ -126,15 +130,17 @@
 #include "Krystal.Booey/Style/ResolveForDocument.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
+#include "Krystal.Booey/Style/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
 #include "Krystal.Booey/SVG/SVGScriptElement.hpp"
 #include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Booey/SVG/SVGTitleElement.hpp"
 #include "Krystal.Booey/XML/Parser/XMLDocumentParser.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
@@ -4236,7 +4242,7 @@ namespace krys::boo::dom
     {
       return _linkColor;
     }
-    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(*this, &style));
+    return css::ColorFromKeyword(css::ValueId::WebkitLink, StyleColorOptions(&style));
   }
 
   boo::Color Document::VisitedLinkColor(const RenderStyle &style) const noexcept
@@ -4245,8 +4251,8 @@ namespace krys::boo::dom
     {
       return _visitedLinkColor;
     }
-    return css::ColorFromKeyword(css::ValueId::WebkitLink, DocumentStyleColorOptions(*this, &style)
-                                                             | style::ColorOptions::ForVisitedLink);
+    return css::ColorFromKeyword(css::ValueId::WebkitLink,
+                                 StyleColorOptions(&style) | style::ColorOptions::ForVisitedLink);
   }
 
   boo::Color Document::ActiveLinkColor(const RenderStyle &style) const noexcept
@@ -4255,7 +4261,7 @@ namespace krys::boo::dom
     {
       return _activeLinkColor;
     }
-    return css::ColorFromKeyword(css::ValueId::WebkitActivelink, DocumentStyleColorOptions(*this, &style));
+    return css::ColorFromKeyword(css::ValueId::WebkitActivelink, StyleColorOptions(&style));
   }
 
   void Document::ResetLinkColor() noexcept
@@ -4271,6 +4277,170 @@ namespace krys::boo::dom
   void Document::ResetActiveLinkColor() noexcept
   {
     _activeLinkColor = {};
+  }
+
+  EnumSet<boo::ColorScheme> Document::ResolvedColorScheme(const RenderStyle *style) const noexcept
+  {
+    bool isNormal = !style || style->GetColorScheme().IsNormal();
+    return isNormal ? _colorScheme : style->GetColorScheme().GetColorScheme();
+  }
+
+  bool Document::UseDarkAppearance(const RenderStyle *style) const noexcept
+  {
+    auto colorScheme = ResolvedColorScheme(style);
+
+    if (colorScheme.Contains(boo::ColorScheme::Dark) && !colorScheme.Contains(boo::ColorScheme::Light))
+    {
+      return true;
+    }
+
+    bool pageUsesDarkAppearance = false;
+    if (auto *documentPage = GetPage())
+    {
+      pageUsesDarkAppearance = documentPage->UseDarkAppearance();
+    }
+
+    if (GetSettings().UseSystemAppearance)
+    {
+      return pageUsesDarkAppearance;
+    }
+
+    if (colorScheme.Contains(boo::ColorScheme::Dark))
+    {
+      return pageUsesDarkAppearance;
+    }
+
+    return false;
+  }
+
+  style::ColorOptions Document::StyleColorOptions(const RenderStyle *style) const noexcept
+  {
+    auto options = style::ColorOptions::None;
+    if (GetSettings().UseSystemAppearance)
+    {
+      options |= style::ColorOptions::UseSystemAppearance;
+    }
+    if (UseDarkAppearance(style))
+    {
+      options |= style::ColorOptions::UseDarkAppearance;
+    }
+    return options;
+  }
+
+  static void ProcessColorSchemeString(DOMStringView colorScheme,
+                                       const Func<void(DOMStringView key)> &callback) noexcept
+  {
+    size_t length = colorScheme.size();
+    for (size_t i = 0; i < length;)
+    {
+      // Skip to first non-separator.
+      while (i < length && text::IsASCIIWhitespace(colorScheme[i]))
+      {
+        ++i;
+      }
+      size_t keyBegin = i;
+
+      // Skip to first separator.
+      while (i < length && !text::IsASCIIWhitespace(colorScheme[i]))
+      {
+        ++i;
+      }
+      size_t keyEnd = i;
+
+      if (keyBegin == keyEnd)
+      {
+        continue;
+      }
+
+      callback(colorScheme.substr(keyBegin, keyEnd - keyBegin));
+    }
+  }
+
+  void Document::ProcessColorScheme(DOMStringView colorSchemeString) noexcept
+  {
+    EnumSet<boo::ColorScheme> colorScheme;
+    bool allowsTransformations = true;
+    bool autoEncountered = false;
+
+    ProcessColorSchemeString(colorSchemeString,
+                             [&](DOMStringView key)
+                             {
+                               if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"auto")))
+                               {
+                                 colorScheme = {};
+                                 allowsTransformations = true;
+                                 autoEncountered = true;
+                                 return;
+                               }
+
+                               if (autoEncountered)
+                               {
+                                 return;
+                               }
+
+                               if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"light")))
+                               {
+                                 colorScheme.Add(boo::ColorScheme::Light);
+                               }
+                               else if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"dark")))
+                               {
+                                 colorScheme.Add(boo::ColorScheme::Dark);
+                               }
+                               else if (text::IsASCIICaselessEqual(key, utf8_stringview(u8"only")))
+                               {
+                                 allowsTransformations = false;
+                               }
+                             });
+
+    // If the value was just "only", that is synonymous for "only light".
+    if (colorScheme.IsEmpty() && !allowsTransformations)
+    {
+      colorScheme.Add(boo::ColorScheme::Light);
+    }
+
+    _colorScheme = colorScheme;
+
+    if (auto *page = GetPage())
+    {
+      page->UpdateStyleAfterChangeInEnvironment();
+    }
+  }
+
+  void Document::MetaElementColorSchemeChanged() noexcept
+  {
+    auto &context = CssParserContext();
+
+    auto parseColorScheme = [&](const html::HTMLMetaElement &metaElement) -> Maybe<css::ColorScheme>
+    {
+      auto nameValue = metaElement.GetAttribute(u8"name");
+      if (!nameValue
+          || (!text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"color-scheme"))
+              && !text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"supported-color-schemes"))))
+      {
+        return null;
+      }
+      return css::PropertyParserHelpers::ParseUnresolvedColorScheme(
+        metaElement.GetAttribute(u8"content").value_or(u8""), context);
+    };
+
+    DOMString colorSchemeString;
+    for (auto &node : DescendantRange(*this))
+    {
+      auto *htmlElement = DynamicDowncast<html::HTMLElement>(node);
+      auto *metaElement = htmlElement ? DynamicDowncast<html::HTMLMetaElement>(*htmlElement) : nullptr;
+      if (!metaElement)
+      {
+        continue;
+      }
+      if (auto colorScheme = parseColorScheme(*metaElement))
+      {
+        StringBuilder builder;
+        css::Serialise(builder, css::DefaultSerialisationContext(), *colorScheme);
+        colorSchemeString = krys::move(builder).ToString();
+        break;
+      }
+    }
+    ProcessColorScheme(colorSchemeString);
   }
 
   double Document::LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept

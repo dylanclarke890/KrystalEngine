@@ -1,7 +1,5 @@
 ﻿#include "Krystal.Booey/Rendering/Style/BorderData.hpp"
 
-#include "Krystal.Booey/Style/Seam.hpp"
-
 namespace krys::boo
 {
   BorderData::BorderData() noexcept : BorderImage {StyleBorderImageData::Create()}

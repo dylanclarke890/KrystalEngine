@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Update.hpp"
 #include <algorithm>
 #include <ranges>
@@ -91,7 +90,7 @@ namespace krys::boo::style
 
     return css::mq::FeatureEvaluationContext {
       WeakRef<const dom::Document>::WithRef(document),
-      css::ToLengthConversionData {*containerStyle, rootStyle, containerParentStyle, RenderViewOf(document),
+      css::ToLengthConversionData {*containerStyle, rootStyle, containerParentStyle, document.GetRenderView(),
                                    container.get()},
       ShareCheckedPtr<const RenderElement>(container->Renderer())};
   }

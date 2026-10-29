@@ -80,8 +80,7 @@ Use Visual Studio's bundled CMake (`C:/Program Files/Microsoft Visual Studio/18/
 Project documents live in `docs/`, one folder per module; scripts live in `tools/`.
 
 - `docs/booey/PORTING.md`: the WebKit port ledger.
-- `docs/booey/TODO.md`: open work in Krystal.Booey outside the current port slice.
-- `docs/booey/ROADMAP.md`: the order of Booey's remaining slices (B1 onwards), with their plans.
+- `docs/booey/ROADMAP.md`: the order of Booey's remaining slices (B1 onwards), with their plans, and its open work outside them.
 - `docs/gfx/DESIGN.md`: the graphics redesign (draft).
 - `tools/graph.py`: walks WebKit's include graph for a port slice.
 

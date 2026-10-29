@@ -2,7 +2,6 @@
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css::mq
 {
@@ -71,7 +70,7 @@ namespace krys::boo::css::mq
 
       FeatureEvaluationContext context {
         WeakRef<const dom::Document>::WithRef(*document),
-        {*_rootElementStyle, _rootElementStyle, nullptr, RenderViewOf(*document)},
+        {*_rootElementStyle, _rootElementStyle, nullptr, document->GetRenderView()},
         nullptr};
       return EvaluateCondition(*query.Condition, context);
     }();

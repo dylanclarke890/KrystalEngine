@@ -31,7 +31,6 @@
 #include "Krystal.Booey/Rendering/Style/StyleTransformData.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleVisitedLinkColorData.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyle.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Backgrounds/FillLayers.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFamily.hpp"
 #include "Krystal.Booey/Style/Values/Fonts/FontFeatureSettings.hpp"

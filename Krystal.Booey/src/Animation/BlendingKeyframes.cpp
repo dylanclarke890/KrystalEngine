@@ -13,7 +13,6 @@
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Interpolation.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include <algorithm>
 
 namespace krys::boo

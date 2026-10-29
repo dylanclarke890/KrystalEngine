@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleCachedImage.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {

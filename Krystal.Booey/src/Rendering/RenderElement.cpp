@@ -55,7 +55,6 @@
 #include "Krystal.Booey/Style/PseudoElementRequest.hpp"
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Styleable.hpp"
 #include "Krystal.Booey/Style/Values/Images/ImageOrientation.hpp"
 #include "Krystal.Booey/Style/Values/ScrollSnap/ScrollMargin.hpp"
@@ -1735,7 +1734,7 @@ namespace krys::boo
       return color;
     }
 
-    auto options = DocumentStyleColorOptions(GetDocument(), &Style());
+    auto options = StyleColorOptions();
     if (GetDocument().Selection().IsFocusedAndActive())
     {
       return RenderTheme::Singleton().ActiveSelectionForegroundColor(options);
@@ -1835,7 +1834,7 @@ namespace krys::boo
       return {};
     }
 
-    auto options = DocumentStyleColorOptions(GetDocument(), &Style());
+    auto options = StyleColorOptions();
     auto &selection = GetDocument().Selection();
     if (selection.ShouldShowBlockCursor() && selection.IsCaret())
     {

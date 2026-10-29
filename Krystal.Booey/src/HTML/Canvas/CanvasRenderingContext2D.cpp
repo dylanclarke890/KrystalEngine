@@ -18,7 +18,6 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Style/ResolveForFont.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::html
 {
@@ -144,7 +143,7 @@ namespace krys::boo::html
     }
     context->DrawFocusRing(path, 1,
                            RenderTheme::Singleton().FocusRingColor(
-                             DocumentStyleColorOptions(element.NodeDocument(), canvas.ComputedStyle())));
+                             element.NodeDocument().StyleColorOptions(canvas.ComputedStyle())));
     DidDrawEntireCanvas();
   }
 

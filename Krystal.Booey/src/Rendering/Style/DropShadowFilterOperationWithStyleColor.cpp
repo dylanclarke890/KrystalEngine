@@ -3,7 +3,6 @@
 
 #include "Krystal.Booey/Graphics/Animation/AnimationUtilities.hpp"
 #include "Krystal.Booey/Graphics/Color/ColorBlending.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::style
 {

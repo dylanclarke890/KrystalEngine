@@ -52,15 +52,17 @@ namespace krys::boo::html
 
   protected:
     void OnInsert() noexcept override;
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
 
     void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
                             Maybe<dom::DOMStringView> value,
                             dom::DOMStringAtom namespaceURI) noexcept override;
 
   private:
-    /// @brief Runs the element's pragma directive, if it has one, while it's connected.
+    /// @brief Updates the document's colour schemes if the element's name is (or, as @p oldName, was)
+    /// `color-scheme`, and runs its pragma directive, if it has one, while it's connected.
     /// @see https://html.spec.whatwg.org/#pragma-directives
-    void Process() noexcept;
+    void Process(Maybe<dom::DOMStringView> oldName = null) noexcept;
   };
 }
 

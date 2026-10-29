@@ -36,6 +36,8 @@
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Platform/Timer.hpp"
 #include "Krystal.Booey/Rendering/RenderPtr.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
+#include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Booey/URL/URL.hpp"
 #include "Krystal.Core/Types/FixedVector.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
@@ -379,6 +381,8 @@ namespace krys::boo::dom
     boo::Color _linkColor;
     boo::Color _visitedLinkColor;
     boo::Color _activeLinkColor;
+    // The colour schemes from the document's `<meta name="color-scheme">`.
+    EnumSet<boo::ColorScheme> _colorScheme;
     /// @brief The nodes that refer to this document (all of them but the document itself): it lives while any
     /// do, even with no references left.
     uint32 _referencingNodeCount {0};
@@ -1666,6 +1670,21 @@ namespace krys::boo::dom
     void ResetLinkColor() noexcept;
     void ResetVisitedLinkColor() noexcept;
     void ResetActiveLinkColor() noexcept;
+
+    /// @brief The colour schemes @p style uses: its `color-scheme`, or the document's (from
+    /// `<meta name="color-scheme">`) when that's `normal`.
+    KRYS_NODISCARD EnumSet<boo::ColorScheme> ResolvedColorScheme(const RenderStyle *style) const noexcept;
+    /// @brief Whether @p style is drawn with the dark appearance: when its colour schemes are dark only, or
+    /// include dark and the page is dark.
+    KRYS_NODISCARD bool UseDarkAppearance(const RenderStyle *style) const noexcept;
+    /// @brief The options system and keyword colours are resolved with for @p style.
+    KRYS_NODISCARD style::ColorOptions StyleColorOptions(const RenderStyle *style) const noexcept;
+
+    /// @brief Sets the document's colour schemes from a `<meta name="color-scheme">`'s content.
+    void ProcessColorScheme(DOMStringView colorScheme) noexcept;
+    /// @brief Takes the document's colour schemes from its first `<meta name="color-scheme">` with a valid
+    /// content.
+    void MetaElementColorSchemeChanged() noexcept;
 
     /// @brief The base value of a `random()` shared between the elements of the document (`element-shared`).
     KRYS_NODISCARD double LookupCSSRandomBaseValue(const css::calc::RandomCachingKey &key) const noexcept;

@@ -20,7 +20,10 @@
 #include "Krystal.Booey/Page/PointerLockController.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo
 {
@@ -459,5 +462,36 @@ namespace krys::boo
   {
     _renderingUpdateRemainingSteps.Remove(step);
     ForEachRenderableDocument(perDocumentFunction);
+  }
+
+  KRYS_NODISCARD static const css::CSSOMStringAtom &ScreenAtom() noexcept
+  {
+    static MainThreadNeverDestroyed<css::CSSOMStringAtom> screen {u8"screen"};
+    return screen;
+  }
+
+  bool Page::UseDarkAppearance() const noexcept
+  {
+    auto *view = MainFrame().View();
+    if (!view || view->MediaType() != ScreenAtom())
+    {
+      return false;
+    }
+    return MainFrame().GetMediaEnvironment().UseDarkAppearance;
+  }
+
+  void Page::UpdateStyleAfterChangeInEnvironment() noexcept
+  {
+    ForEachDocument(
+      [](dom::Document &document)
+      {
+        if (auto *styleResolver = document.StyleScope().ResolverIfExists())
+        {
+          styleResolver->InvalidateMatchedDeclarationsCache();
+        }
+        document.ScheduleFullStyleRebuild();
+        document.StyleScope().DidChangeStyleSheetEnvironment();
+        document.ScheduleRenderingUpdate(RenderingUpdateStep::MediaQueryEvaluation);
+      });
   }
 }

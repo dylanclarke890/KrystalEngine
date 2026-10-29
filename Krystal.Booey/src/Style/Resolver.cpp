@@ -30,7 +30,6 @@
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/RuleSetBuilder.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/UserAgentStyle.hpp"
 #include "Krystal.Booey/Style/Values/Animations/Animation.hpp"
 #include "Krystal.Booey/Style/Values/Animations/SingleAnimationRangeName.hpp"

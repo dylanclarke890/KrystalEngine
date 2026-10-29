@@ -12,7 +12,6 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::tests
 {

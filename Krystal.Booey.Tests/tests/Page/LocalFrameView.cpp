@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/StyleImageSet.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::tests
 {
@@ -78,7 +77,6 @@ namespace krys::boo::tests
     CHECK(document->View() == &view);
     REQUIRE(document->HasLivingRenderTree());
     CHECK(view.GetRenderView() == document->GetRenderView());
-    CHECK(RenderViewOf(*document) == document->GetRenderView());
     CHECK(&document->GetRenderView()->GetDocument() == document.get());
     // Creating the render tree resolves the document's style.
     CHECK_FALSE(document->NeedsStyleRecalc());

@@ -42,7 +42,7 @@ namespace krys::boo::css
 
     if (value.BlendMode != BlendMode::Normal)
     {
-      builder.Append(ToLower(ToValueId(value.BlendMode)));
+      builder.Append(ToLower(boo::ToValueId(value.BlendMode)));
       builder.Append(u8", ");
     }
 

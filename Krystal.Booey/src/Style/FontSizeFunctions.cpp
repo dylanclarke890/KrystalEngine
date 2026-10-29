@@ -8,7 +8,6 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include <array>
 #include <cmath>
 #include <limits>

@@ -155,6 +155,7 @@ namespace krys::boo::xml
 
     int ReadFunc(void *context, char *, int) noexcept
     {
+      (void)context;
       // Do 0-byte reads in case of a null descriptor
       krys_debug_assert(context == &globalDescriptor);
       return 0;

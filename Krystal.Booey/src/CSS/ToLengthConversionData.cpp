@@ -5,7 +5,6 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo::css
 {
@@ -19,7 +18,7 @@ namespace krys::boo::css
   ToLengthConversionData::ToLengthConversionData(const RenderStyle &style,
                                                  style::BuilderState &builderState) noexcept
       : _style(&style), _rootStyle(builderState.RootElementStyle()),
-        _parentStyle(&builderState.ParentStyle()), _renderView(RenderViewOf(builderState.GetDocument())),
+        _parentStyle(&builderState.ParentStyle()), _renderView(builderState.GetDocument().GetRenderView()),
         _elementForContainerUnitResolution(ShareRefPtr(builderState.GetElement())),
         _styleBuilderState(ShareCheckedPtr(&builderState))
   {

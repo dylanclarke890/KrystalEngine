@@ -7,7 +7,6 @@
 #include "Krystal.Booey/Rendering/Style/StyleInvalidImage.hpp"
 #include "Krystal.Booey/Style/BuilderChecking.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::style

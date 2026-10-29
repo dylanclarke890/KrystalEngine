@@ -1,6 +1,5 @@
 ﻿#include "Krystal.Booey/Platform/SimpleCaretAnimator.hpp"
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 
 namespace krys::boo
 {

@@ -131,6 +131,10 @@ namespace krys::boo
       return *_mainFrame;
     }
 
+    /// @brief Whether the page is drawn with the dark appearance: the host's appearance, while the page is
+    /// shown on a screen.
+    KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+
     /// @brief The page's session history.
     KRYS_NODISCARD BackForwardController &BackForward() const noexcept
     {
@@ -217,6 +221,9 @@ namespace krys::boo
     /// @brief Asks for a rendering update at the next rendering opportunity, which runs (at least) the
     /// @p requestedSteps.
     void ScheduleRenderingUpdate(EnumSet<RenderingUpdateStep> requestedSteps = {}) noexcept;
+    /// @brief Restyles every document after something their styles depend on outside the style sheets
+    /// changed, and evaluates their media queries at the next rendering update.
+    void UpdateStyleAfterChangeInEnvironment() noexcept;
     /// @brief How the page's filters are applied when drawn into @p context: through the graphics context
     /// (there's no software or accelerated filter rendering).
     KRYS_NODISCARD EnumSet<FilterRenderingMode>

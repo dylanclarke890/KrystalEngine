@@ -14,7 +14,6 @@
 #include "Krystal.Booey/Rendering/RenderTheme.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorLayers.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorMix.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorResolutionState.hpp"

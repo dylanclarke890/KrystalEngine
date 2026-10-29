@@ -26,7 +26,6 @@
 #include "Krystal.Booey/Style/ExtractorGenerated.hpp"
 #include "Krystal.Booey/Style/ExtractorState.hpp"
 #include "Krystal.Booey/Style/OrderedNamedLinesCollector.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TransformResolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/CoordinatedValueListValue.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/KeywordCSSValueCreation.hpp"

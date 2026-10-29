@@ -14,7 +14,6 @@
 #include "Krystal.Booey/Style/MatchResult.hpp"
 #include "Krystal.Booey/Style/PropertyCascade.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Types.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include <string>

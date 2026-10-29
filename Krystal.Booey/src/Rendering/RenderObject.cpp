@@ -38,7 +38,6 @@
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+ContainmentInlines.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
 
 namespace krys::boo
@@ -128,12 +127,12 @@ namespace krys::boo
 
   bool RenderObject::UseDarkAppearance() const noexcept
   {
-    return DocumentUseDarkAppearance(GetDocument(), &Style());
+    return GetDocument().UseDarkAppearance(&Style());
   }
 
   style::ColorOptions RenderObject::StyleColorOptions() const noexcept
   {
-    return DocumentStyleColorOptions(GetDocument(), &Style());
+    return GetDocument().StyleColorOptions(&Style());
   }
 
   bool RenderObject::IsAtomicInlineLevelBox() const noexcept

@@ -429,6 +429,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Loader/HistoryController.cpp
 		tests/History/BackForwardList.cpp
 		tests/HTML/FormController.cpp
+		tests/DOM/DocumentColorScheme.cpp
 		tests/DOM/DocumentSuspension.cpp
 		tests/History/BackForwardCache.cpp
 		tests/Page/History.cpp

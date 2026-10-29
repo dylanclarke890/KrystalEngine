@@ -287,7 +287,6 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Style/Calc/Value.hpp
   include/Krystal.Booey/Style/ScopedName.hpp
   include/Krystal.Booey/Style/ScopeOrdinal.hpp
-  include/Krystal.Booey/Style/Seam.hpp
   include/Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp
   include/Krystal.Booey/Style/Values/Viewport/ZoomPrimitives.hpp
 
@@ -866,6 +865,9 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/Rendering/RenderButton.hpp
   include/Krystal.Booey/Rendering/RenderListBox.hpp
   include/Krystal.Booey/Rendering/RenderMenuList.hpp
+  include/Krystal.Booey/Platform/PopupMenu.hpp
+  include/Krystal.Booey/Platform/PopupMenuClient.hpp
+  include/Krystal.Booey/Platform/PopupMenuStyle.hpp
   include/Krystal.Booey/Rendering/RenderMeter.hpp
   include/Krystal.Booey/Rendering/RenderProgress.hpp
   include/Krystal.Booey/Rendering/RenderSlider.hpp
@@ -2192,7 +2194,6 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/Style/Calc/TreeCopy.cpp
   src/Style/Calc/TreeEvaluation.cpp
   src/Style/Calc/Value.cpp
-  src/Style/Seam.cpp
   src/Style/Values/Primitives/LengthResolution.cpp
 
   # Slice 3: Colour, layer 3c (calc parsing and the property-parser pieces it needs)

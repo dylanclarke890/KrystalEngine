@@ -2,7 +2,6 @@
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
 namespace krys::boo::css
@@ -45,7 +44,9 @@ namespace krys::boo::css
     Charset = charset;
     Mode = document.InQuirksMode() ? ParserMode::HTMLQuirks : ParserMode::HTMLStandard;
     IsHTMLDocument = Is<dom::HTMLDocument>(document);
-    HasDocumentSecurityOrigin = sheetBaseURL.IsNull() || DocumentCanRequest(document, BaseURL);
+    // FIXME: Whether the document's security origin can request the base URL, once there are origins;
+    // every URL can be requested until then.
+    HasDocumentSecurityOrigin = true;
 
     auto &settings = document.GetSettings();
     useSystemAppearance = settings.UseSystemAppearance;

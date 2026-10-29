@@ -3,7 +3,6 @@
 #include "Krystal.Booey/Graphics/WindRule.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/Style/SVGRenderStyleDefs.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGGlyphOrientationHorizontal.hpp"
 #include "Krystal.Booey/Style/Values/SVG/SVGGlyphOrientationVertical.hpp"
 

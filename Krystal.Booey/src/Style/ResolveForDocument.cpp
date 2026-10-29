@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Style/Adjuster.hpp"
 #include "Krystal.Booey/Style/FontSizeFunctions.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 

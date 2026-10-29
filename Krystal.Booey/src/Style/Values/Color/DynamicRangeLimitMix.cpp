@@ -1,7 +1,6 @@
 ﻿#include "Krystal.Booey/Style/Values/Color/DynamicRangeLimitMix.hpp"
 #include "Krystal.Booey/CSS/Values/Color/DynamicRangeLimitMix.hpp"
 #include "Krystal.Booey/Style/BuilderState.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Color/DynamicRangeLimit.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 

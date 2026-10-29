@@ -3,7 +3,8 @@
 #include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -350,9 +351,9 @@ namespace krys::boo::css::mq::Features
       u8"height", Dependency::Viewport, [](auto &context)
       {
         auto height = ViewOf(context).LayoutHeight();
-        if (auto *renderView = RenderViewOf(*context.Document))
+        if (auto *renderView = context.Document->GetRenderView())
         {
-          height = AdjustForAbsoluteZoom(height, *renderView);
+          height = AdjustForAbsoluteZoom(height, renderView->Style());
         }
         return LayoutUnit {height};
       }};
@@ -494,9 +495,9 @@ namespace krys::boo::css::mq::Features
       u8"width", Dependency::Viewport, [](auto &context)
       {
         auto width = ViewOf(context).LayoutWidth();
-        if (auto *renderView = RenderViewOf(*context.Document))
+        if (auto *renderView = context.Document->GetRenderView())
         {
-          width = AdjustForAbsoluteZoom(width, *renderView);
+          width = AdjustForAbsoluteZoom(width, renderView->Style());
         }
         return LayoutUnit {width};
       }};

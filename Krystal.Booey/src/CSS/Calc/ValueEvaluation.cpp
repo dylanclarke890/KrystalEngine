@@ -7,7 +7,6 @@
 #include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/Style/Calc/TreeConversion.hpp"
 #include "Krystal.Booey/Style/Calc/Value.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/LengthResolution.hpp"
 
 namespace krys::boo::css::calc

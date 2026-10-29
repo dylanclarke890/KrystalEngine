@@ -9,7 +9,6 @@
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include <algorithm>
 #include <utility>

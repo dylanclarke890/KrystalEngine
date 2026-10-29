@@ -2,7 +2,6 @@
 #include "Krystal.Booey/CSS/Values/GradientValue.hpp"
 #include "Krystal.Booey/Graphics/GradientImage.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesConversions.hpp"
 
 namespace krys::boo

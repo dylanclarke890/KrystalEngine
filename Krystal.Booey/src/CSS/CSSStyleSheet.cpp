@@ -17,7 +17,6 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/StyleSheetContentsCache.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Visitor.hpp"
@@ -385,12 +384,13 @@ namespace krys::boo::css
       return true;
     }
 
-    auto *document = OwnerDocument();
-    if (!document)
+    if (!OwnerDocument())
     {
       return false;
     }
-    return DocumentCanRequest(*document, baseURL);
+    // FIXME: Whether the document's security origin can request the sheet's URL, once there are origins;
+    // every URL can be requested until then.
+    return true;
   }
 
   dom::ExceptionOr<uint32> CSSStyleSheet::InsertRule(const CSSOMString &ruleString, uint32 index) noexcept

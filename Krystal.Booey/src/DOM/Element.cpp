@@ -80,7 +80,6 @@
 #include "Krystal.Booey/Style/ResolvedStyle.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
-#include "Krystal.Booey/Style/Seam.hpp"
 #include "Krystal.Booey/Style/TreeResolver.hpp"
 #include "Krystal.Booey/Style/Values/Primitives/NumericTypesEvaluation.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -3585,7 +3584,7 @@ namespace krys::boo::dom
     if ((!inQuirksMode && document.DocumentElement() == this)
         || (inQuirksMode && IsHTMLElement() && document.BodyOrFrameset() == this))
     {
-      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutWidth(), renderView);
+      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutWidth(), renderView.Style());
     }
 
     if (auto *renderer = RenderBoxOf(*this))
@@ -3636,7 +3635,7 @@ namespace krys::boo::dom
     if ((!inQuirksMode && document.DocumentElement() == this)
         || (inQuirksMode && IsHTMLElement() && document.BodyOrFrameset() == this))
     {
-      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutHeight(), renderView);
+      return AdjustForAbsoluteZoom(renderView.FrameView().LayoutHeight(), renderView.Style());
     }
 
     if (auto *renderer = RenderBoxOf(*this))
