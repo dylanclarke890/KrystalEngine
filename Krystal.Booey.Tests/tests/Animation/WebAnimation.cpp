@@ -8,9 +8,11 @@
 #include "Krystal.Booey/Animation/KeyframeEffectStack.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -103,10 +105,60 @@ namespace krys::boo::tests
     CHECK_FALSE(animation.IsRelevant());
     CHECK(animation.GlobalPosition() > 0);
 
-    // The document timeline's time is the host's time.
+    // The document timeline's time is the window's: the host's time since its time origin.
+    auto *window = fixture.Document->Window();
+    REQUIRE(window);
     auto timelineTime = fixture.Document->Timeline().CurrentTime();
     REQUIRE(timelineTime);
-    CHECK(timelineTime->Time()->count() == Catch::Approx(Seconds {html::EventLoop::Current().Now()}.count()));
+    CHECK(timelineTime->Time()->count() == Catch::Approx(window->NowTimestamp() / 1'000));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "WebAnimation: the document timeline counts from the time origin",
+                   "[Animation][WebAnimation]")
+  {
+    AnimationFixture fixture;
+    auto &animation = *fixture.Animation;
+    auto *window = fixture.Document->Window();
+    REQUIRE(window);
+    auto sinceOrigin = [window]
+    {
+      return Seconds {html::EventLoop::Current().Now() - window->TimeOrigin()}.count();
+    };
+
+    fixture.Frame(500ms);
+    auto timelineTime = fixture.Document->Timeline().CurrentTime();
+    REQUIRE(timelineTime);
+    CHECK(timelineTime->Time()->count() == Catch::Approx(sinceOrigin()));
+    CHECK(timelineTime->Time()->count() >= 0.5);
+
+    SECTION("An animation starts at the time it was played, on the same clock")
+    {
+      // Played after the last update, it becomes ready at that update's frozen time.
+      auto playedAt = sinceOrigin();
+      REQUIRE_FALSE(animation.Play().HasException());
+      fixture.Frame(100ms);
+      fixture.Frame();
+      REQUIRE(animation.StartTime());
+      CHECK(animation.StartTime()->Time()->count() == Catch::Approx(playedAt));
+      CHECK(fixture.CurrentTime() == Catch::Approx(0.1));
+    }
+
+    SECTION("A finish event carries the timeline's time")
+    {
+      Maybe<WebAnimationTime> eventTimelineTime;
+      auto handle = animation.AddEventListener(
+        u8"finish", [&](dom::Event &event)
+        { eventTimelineTime = static_cast<AnimationPlaybackEvent &>(event).TimelineTime(); });
+      REQUIRE_FALSE(animation.Play().HasException());
+      fixture.Frame();
+      fixture.Frame();
+      fixture.Frame(1'500ms);
+      fixture.Frame();
+      REQUIRE(eventTimelineTime);
+      REQUIRE(eventTimelineTime->Time());
+      CHECK(eventTimelineTime->Time()->count() == Catch::Approx(sinceOrigin()));
+    }
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "WebAnimation: playing", "[Animation][WebAnimation]")

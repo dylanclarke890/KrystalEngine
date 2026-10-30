@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -277,12 +278,14 @@ namespace krys::boo
 
   Seconds AnimationTimelinesController::LiveCurrentTime() const noexcept
   {
-    return Seconds {html::EventLoop::Current().Now()};
+    // The window's high-resolution time: the host's time since its time origin.
+    auto *window = _document.Window();
+    return window ? Seconds {std::chrono::duration<double, std::milli>(window->NowTimestamp())} : Seconds {0};
   }
 
   Maybe<Seconds> AnimationTimelinesController::CurrentTime(UseCachedCurrentTime useCachedCurrentTime) noexcept
   {
-    if (!_document.Frame())
+    if (!_document.Frame() || !_document.Window())
     {
       return null;
     }

@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `Document::UpdateAnimationsAndSendEvents` passes the page's last rendering update timestamp rather than the window's frozen one (FIXME in `Document.cpp`); the animation timelines run on the event loop's time rather than the window's.
 - `Document::EnsurePendingRenderTreeUpdate` doesn't schedule a rendering update, as upstream's does. A change to a text node's data that invalidates no style may therefore wait for something else to schedule an update; no test confirms it yet.
 - `Document::VisibilityState()` is hidden only without a page and visible otherwise, until hosts report visibility (FIXME in `Document.cpp`). Gamepad haptics therefore never stop on hide (FIXME in `GamepadHapticActuator.cpp`).
 - `Document::characterSet` is always UTF-8: the document's encoding isn't passed in at creation (FIXME in `Document.cpp`).

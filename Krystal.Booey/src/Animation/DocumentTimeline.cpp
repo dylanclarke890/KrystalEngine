@@ -9,7 +9,6 @@
 #include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
@@ -368,8 +367,11 @@ namespace krys::boo
       {
         if (auto *documentTimeline = DynamicDowncast<DocumentTimeline>(animation->Timeline()))
         {
-          auto currentTime = Seconds {html::EventLoop::Current().Now()};
-          return WebAnimationTime {documentTimeline->ConvertTimelineTimeToOriginRelativeTime(currentTime)};
+          if (auto timelineTime = documentTimeline->CurrentTime(); timelineTime && timelineTime->Time())
+          {
+            return WebAnimationTime {
+              documentTimeline->ConvertTimelineTimeToOriginRelativeTime(*timelineTime->Time())};
+          }
         }
         return null;
       }();
