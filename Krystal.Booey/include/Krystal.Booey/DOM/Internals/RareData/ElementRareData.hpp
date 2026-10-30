@@ -31,6 +31,7 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class DatasetDOMStringMap;
   class DOMTokenList;
   class Element;
   class PopoverData;
@@ -72,6 +73,7 @@ namespace krys::boo::dom
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
     UniquePtr<ResizeObserverData> _resizeObserverData;
     UniquePtr<DOMTokenList> _partList;
+    UniquePtr<DatasetDOMStringMap> _dataset;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
     Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
@@ -141,6 +143,13 @@ namespace krys::boo::dom
       return _partList.get();
     }
     void SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept;
+
+    /// @brief The element's `dataset`, once it's been asked for.
+    KRYS_NODISCARD DatasetDOMStringMap *Dataset() const noexcept
+    {
+      return _dataset.get();
+    }
+    void SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {
