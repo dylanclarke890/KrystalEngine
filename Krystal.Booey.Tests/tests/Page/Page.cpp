@@ -2,11 +2,15 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/Animation/DocumentTimeline.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -15,12 +19,17 @@
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGSvgElement.hpp"
 #include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::tests
 {
@@ -383,5 +392,107 @@ namespace krys::boo::tests
       REQUIRE_FALSE(clip.SetAttribute(u8"clipPathUnits", u8"objectBoundingBox").HasException());
       CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
     }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: visibility", "[Page][Visibility]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><p>text</p>"};
+    auto &page = *fixture.TestPage;
+    auto &document = *fixture.Document;
+    CHECK(page.IsVisible());
+    CHECK(document.VisibilityState() == html::DocumentVisibilityState::Visible);
+    CHECK_FALSE(document.Hidden());
+
+    List<bool> events;
+    auto handle = document.AddEventListener(dom::DOMStringAtom(EventNames::VisibilityChange),
+                                            [&](dom::Event &event) { events.push_back(event.Bubbles()); });
+
+    SECTION("Hiding and showing the page fire visibilitychange in a task")
+    {
+      page.SetIsVisible(false);
+      CHECK(document.VisibilityState() == html::DocumentVisibilityState::Hidden);
+      CHECK(document.Hidden());
+      CHECK(events.empty());
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(events == List<bool> {true});
+
+      // Hiding a hidden page changes nothing.
+      page.SetIsVisible(false);
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(events.size() == 1);
+
+      page.SetIsVisible(true);
+      CHECK(document.VisibilityState() == html::DocumentVisibilityState::Visible);
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK(events == List<bool> {true, true});
+    }
+
+    SECTION("A hidden page's animation frame callbacks wait for it to be shown")
+    {
+      uint32 calls = 0;
+      (void)document.RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+      page.SetIsVisible(false);
+      fixture.Frame(16ms);
+      page.UpdateRendering();
+      CHECK(calls == 0);
+
+      // A callback asked for while hidden waits too.
+      (void)document.RequestAnimationFrame([&](dom::DOMHighResTimeStamp) { ++calls; });
+      page.UpdateRendering();
+      CHECK(calls == 0);
+
+      page.SetIsVisible(true);
+      fixture.Frame(16ms);
+      page.UpdateRendering();
+      CHECK(calls == 2);
+    }
+
+    SECTION("A hidden page's document timeline stops")
+    {
+      fixture.Frame(16ms);
+      page.UpdateRendering();
+      page.SetIsVisible(false);
+      auto hiddenAt = document.Timeline().CurrentTime();
+      REQUIRE(hiddenAt);
+      fixture.Frame(500ms);
+      page.UpdateRendering();
+      CHECK(document.Timeline().CurrentTime() == hiddenAt);
+
+      page.SetIsVisible(true);
+      fixture.Frame(16ms);
+      page.UpdateRendering();
+      auto shownAt = document.Timeline().CurrentTime();
+      REQUIRE(shownAt);
+      CHECK(*shownAt->Time() > *hiddenAt->Time());
+    }
+
+    SECTION("Unless the setting is off")
+    {
+      SetForScope suspension(document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled, false);
+      fixture.Frame(16ms);
+      page.UpdateRendering();
+      page.SetIsVisible(false);
+      auto hiddenAt = document.Timeline().CurrentTime();
+      REQUIRE(hiddenAt);
+      fixture.Frame(500ms);
+      page.UpdateRendering();
+      auto later = document.Timeline().CurrentTime();
+      REQUIRE(later);
+      CHECK(*later->Time() > *hiddenAt->Time());
+      page.SetIsVisible(true);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: a hidden page pauses its SMIL animations",
+                   "[Page][Visibility]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><svg id=svg><rect width=10 height=10><animate attributeName=x "
+                         u8"from=0 to=10 dur=1s></animate></rect></svg>"};
+    auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(fixture.ById(u8"svg")));
+    CHECK_FALSE(svg.AnimationsPaused());
+    fixture.TestPage->SetIsVisible(false);
+    CHECK(svg.AnimationsPaused());
+    fixture.TestPage->SetIsVisible(true);
+    CHECK_FALSE(svg.AnimationsPaused());
   }
 }

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/SVG/Legacy/SVGResourcesCache.hpp"
 #include "Krystal.Booey/SVG/Animation/SMILTimeContainer.hpp"
 #include "Krystal.Booey/SVG/SVGElement.hpp"
@@ -12,10 +13,11 @@ namespace krys::boo::svg
 {
   namespace
   {
-    // FIXME: Also when the page isn't visible or image animation is off, once the page knows about those.
+    // FIXME: Also when image animation is off, once the page knows about that.
     KRYS_NODISCARD bool AnimationsPausedForDocument(dom::Document &document) noexcept
     {
-      return !document.GetPage();
+      auto *page = document.GetPage();
+      return !page || !page->IsVisible();
     }
   }
 

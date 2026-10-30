@@ -2335,6 +2335,16 @@ namespace krys::ui
     PerformMicrotaskCheckpoint();
   }
 
+  void View::SetVisible(bool visible) noexcept
+  {
+    _page->SetIsVisible(visible);
+  }
+
+  bool View::IsVisible() const noexcept
+  {
+    return _page->IsVisible();
+  }
+
   void View::SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept
   {
     _frameLoaderClient->SetNavigationHandler(krys::move(handler));

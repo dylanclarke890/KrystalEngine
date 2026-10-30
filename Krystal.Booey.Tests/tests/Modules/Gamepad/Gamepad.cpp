@@ -419,6 +419,15 @@ namespace krys::boo::tests
     fixture.Document->ResumeActiveDOMObjects(dom::ReasonForSuspension::BackForwardCache);
     runTasks();
     CHECK(results == List<std::string> {"fourth preempted"});
+
+    // Hiding the page stops the effect playing.
+    results.clear();
+    actuator->PlayEffect(GamepadHapticEffectType::DualRumble, {.Duration = 100}, record(u8"fifth"));
+    fixture.TestPage->SetIsVisible(false);
+    CHECK(provider.Stops == 3);
+    runTasks();
+    CHECK(results == List<std::string> {"fifth preempted"});
+    fixture.TestPage->SetIsVisible(true);
     provider.Disconnect(0);
   }
 }

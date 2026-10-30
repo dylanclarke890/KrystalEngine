@@ -1636,12 +1636,64 @@ namespace krys::boo::dom
   {
     // The visibility of the document is inherited from the visibility of the page. If there is no page
     // associated with the document, we will assume that the page is hidden, as specified by the spec.
-    if (!GetPage())
+    auto *page = GetPage();
+    if (!page)
     {
       return html::DocumentVisibilityState::Hidden;
     }
-    // FIXME: The page's visibility state, once the host reports it.
-    return html::DocumentVisibilityState::Visible;
+    return page->VisibilityState();
+  }
+
+  void Document::VisibilityStateChanged() noexcept
+  {
+    bool pageIsVisible = GetPage() && GetPage()->IsVisible();
+
+    // https://w3c.github.io/page-visibility/#reacting-to-visibilitychange-changes
+    if (!pageIsVisible)
+    {
+      _deferResizeEventForVisibilityChange = true;
+    }
+
+    html::EventLoop::Current().QueueTask(
+      html::TaskSource::UserInteraction, *this,
+      [protectedThis = ShareRef(*this)]
+      {
+        (void)EventDispatcher::DispatchToTarget(
+          *Event::Create(DOMStringAtom(EventNames::VisibilityChange), true, false), protectedThis.get());
+
+        bool pageIsVisible = protectedThis->GetPage() && protectedThis->GetPage()->IsVisible();
+        if (!pageIsVisible)
+        {
+          return;
+        }
+
+        protectedThis->_deferResizeEventForVisibilityChange = false;
+        if (protectedThis->_needsDOMWindowResizeEvent || protectedThis->_needsVisualViewportResizeEvent)
+        {
+          protectedThis->ScheduleRenderingUpdate(RenderingUpdateStep::Resize);
+        }
+      });
+
+    auto clients = _visibilityStateCallbackClients;
+    for (auto &client : clients)
+    {
+      if (auto *protectedClient = client.get())
+      {
+        protectedClient->VisibilityStateChanged();
+      }
+    }
+  }
+
+  void Document::RegisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept
+  {
+    std::erase_if(_visibilityStateCallbackClients, [](const auto &weakClient) { return !weakClient; });
+    _visibilityStateCallbackClients.push_back(CreateWeakPtr(&client));
+  }
+
+  void Document::UnregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept
+  {
+    std::erase_if(_visibilityStateCallbackClients,
+                  [&](const auto &weakClient) { return !weakClient || weakClient.get() == &client; });
   }
 
   CachedResourceLoader &Document::GetCachedResourceLoader() const noexcept
@@ -2114,8 +2166,12 @@ namespace krys::boo::dom
 
   void Document::RunResizeSteps() noexcept
   {
-    // FIXME: Deferring the resize events (shouldDeferResizeEvents, and while the document is hidden), once
-    // there are those.
+    // FIXME: Deferring the resize events while the page asks (shouldDeferResizeEvents), once it can.
+    if (_deferResizeEventForVisibilityChange)
+    {
+      return;
+    }
+
     // FIXME: The order of dispatching is not specified: https://github.com/WICG/visual-viewport/issues/65.
     if (_needsDOMWindowResizeEvent)
     {
@@ -2633,8 +2689,30 @@ namespace krys::boo::dom
     if (!_scriptedAnimationController)
     {
       _scriptedAnimationController = CreateUnique<ScriptedAnimationController>(*this);
+
+      // The page may have suspended its animation frame callbacks before the controller was made.
+      if (!GetPage() || GetPage()->ScriptedAnimationsSuspended())
+      {
+        _scriptedAnimationController->Suspend();
+      }
     }
     return _scriptedAnimationController->RegisterCallback(krys::move(callback));
+  }
+
+  void Document::SuspendScriptedAnimationControllerCallbacks() noexcept
+  {
+    if (_scriptedAnimationController)
+    {
+      _scriptedAnimationController->Suspend();
+    }
+  }
+
+  void Document::ResumeScriptedAnimationControllerCallbacks() noexcept
+  {
+    if (_scriptedAnimationController)
+    {
+      _scriptedAnimationController->Resume();
+    }
   }
 
   void Document::CancelAnimationFrame(int32 id) noexcept

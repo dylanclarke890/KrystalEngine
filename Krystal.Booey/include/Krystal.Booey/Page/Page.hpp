@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Enums/LayoutOptions.hpp"
 #include "Krystal.Booey/Graphics/Filters/FilterRenderingMode.hpp"
 #include "Krystal.Booey/History/BackForwardClient.hpp"
+#include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/Loader/LocalFrameLoaderClient.hpp"
 #include "Krystal.Booey/Page/ChromeClient.hpp"
 #include "Krystal.Booey/Page/DragClient.hpp"
@@ -91,6 +92,8 @@ namespace krys::boo
     float _pageScaleFactor {1};
     bool _renderingUpdateIsScheduled {false};
     bool _isClosing {false};
+    bool _isVisible {true};
+    bool _scriptedAnimationsSuspended {false};
     /// @brief The page's session storage (its top-level traversable's), by origin.
     HashMap<dom::DOMString, Ref<StorageArea>> _sessionStorageAreas;
     MonotonicTime::duration _lastRenderingUpdateTimestamp {};
@@ -134,6 +137,35 @@ namespace krys::boo
     /// @brief Whether the page is drawn with the dark appearance: the host's appearance, while the page is
     /// shown on a screen.
     KRYS_NODISCARD bool UseDarkAppearance() const noexcept;
+
+    /// @brief Shows or hides the page, as its host reports: hidden while its window is minimised or another
+    /// view is shown in its place. A hidden page suspends its animation frame callbacks and SMIL animations,
+    /// and its CSS animations unless `Settings::HiddenPageCSSAnimationSuspensionEnabled` is off; its
+    /// documents' visibility state follows it.
+    void SetIsVisible(bool isVisible) noexcept;
+
+    /// @brief Whether the page is shown; it is until its host hides it.
+    KRYS_NODISCARD bool IsVisible() const noexcept
+    {
+      return _isVisible;
+    }
+
+    /// @brief The visibility state of the page's documents.
+    /// @see https://html.spec.whatwg.org/#visibility-state
+    KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept
+    {
+      return _isVisible ? html::DocumentVisibilityState::Visible : html::DocumentVisibilityState::Hidden;
+    }
+
+    /// @brief Whether the page's animation frame callbacks are suspended; a document's controller made while
+    /// they are starts suspended.
+    KRYS_NODISCARD bool ScriptedAnimationsSuspended() const noexcept
+    {
+      return _scriptedAnimationsSuspended;
+    }
+
+    void SuspendScriptedAnimations() noexcept;
+    void ResumeScriptedAnimations() noexcept;
 
     /// @brief The page's session history.
     KRYS_NODISCARD BackForwardController &BackForward() const noexcept

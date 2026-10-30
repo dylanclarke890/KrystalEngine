@@ -21,6 +21,7 @@
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/DOM/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Booey/Graphics/DoublePoint.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
@@ -321,6 +322,9 @@ namespace krys::boo::dom
     bool _needsDOMWindowResizeEvent {false};
     bool _needsVisualViewportResizeEvent {false};
     bool _needsVisualViewportScrollEvent {false};
+    /// @brief Whether the resize events wait for the document to be shown again.
+    bool _deferResizeEventForVisibilityChange {false};
+    List<WeakPtr<VisibilityChangeClient>> _visibilityStateCallbackClients;
     /// @brief Whether the document's parser is running (a document a frame loads).
     bool _parsing {false};
     /// @see https://html.spec.whatwg.org/#page-showing
@@ -636,9 +640,19 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-document-visibilitystate
     KRYS_NODISCARD html::DocumentVisibilityState VisibilityState() const noexcept;
 
+    /// @brief Fires `visibilitychange` in a task and tells the registered clients, as the page is shown or
+    /// hidden.
+    /// @see https://html.spec.whatwg.org/#update-the-visibility-state
+    void VisibilityStateChanged() noexcept;
+
+    /// @brief Tells @p client whenever the document's visibility state changes, until it's unregistered or
+    /// destroyed.
+    void RegisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept;
+    void UnregisterForVisibilityStateChangedCallbacks(VisibilityChangeClient &client) noexcept;
+
     // special event handler IDL attributes that only apply to Document objects
     // [LegacyLenientThis] attribute EventHandler onreadystatechange;
-    // attribute EventHandler onvisibilitychange;
+    KRYS_DECLARE_EVENT_HANDLER(VisibilityChange, u8"visibilitychange")
 
 #pragma endregion
 
@@ -1366,6 +1380,10 @@ namespace krys::boo::dom
 
     /// @see https://html.spec.whatwg.org/#dom-animationframeprovider-requestanimationframe
     int32 RequestAnimationFrame(FrameRequestCallback &&callback) noexcept;
+
+    /// @brief Suspends the document's animation frame callbacks, as its page is hidden.
+    void SuspendScriptedAnimationControllerCallbacks() noexcept;
+    void ResumeScriptedAnimationControllerCallbacks() noexcept;
     /// @see https://html.spec.whatwg.org/#animationframeprovider-cancelanimationframe
     void CancelAnimationFrame(int32 id) noexcept;
     /// @brief Runs the animation frame callbacks with the window's frozen timestamp.
