@@ -9,7 +9,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - A hidden page doesn't hide its main frame's view, and a shown one doesn't resume its animated images, as upstream's do (FIXMEs in `Page.cpp`): views have no shown state and animated images pause only out of view.
-- `Document::characterSet` is always UTF-8: the document's encoding isn't passed in at creation (FIXME in `Document.cpp`).
 - `AbortSignal` keeps its source and dependent signals as weak pointers rather than following the specification's garbage collection rule.
 - Event listener callbacks that capture their own target keep it alive (there is no garbage collector); noted on `AddEventListener`.
 

@@ -174,6 +174,7 @@ namespace krys::boo::dom
       auto &docCopy = Downcast<Document>(*copy);
       docCopy._flags = doc._flags;
       docCopy._contentType = doc._contentType;
+      docCopy._encoding = doc._encoding;
       docCopy.SetQuirksMode(doc._quirksMode);
       docCopy.SetURL(url::URL(doc._url));
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Loader/DocumentWriter.hpp"
+#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
@@ -76,6 +77,8 @@ namespace krys::boo
     // FIXME: Reusing the initial empty document's window for a document of the same origin
     // (takeDOMWindowFrom), once there are origins.
     auto document = dom::DOMImplementation::CreateDocument(_mimeType, url);
+    // The writer decodes UTF-8 only.
+    document->SetEncoding(*EncodingRegistry().Find(u8"utf-8"));
 
     if (RefPtr<xml::XMLDocumentParser> parser = krys::move(_xmlParser))
     {
