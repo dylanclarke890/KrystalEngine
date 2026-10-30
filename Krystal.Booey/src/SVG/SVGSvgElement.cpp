@@ -646,11 +646,6 @@ namespace krys::boo::svg
   // See http://www.w3.org/TR/SVG11/struct.html#InterfaceSVGSVGElement
   RefPtr<dom::Element> SVGSvgElement::GetElementById(dom::DOMStringView id) noexcept
   {
-    if (id.empty())
-    {
-      return nullptr;
-    }
-
     return dom::mixins::NonElementParentNode::GetElementById(*this, id);
   }
 
