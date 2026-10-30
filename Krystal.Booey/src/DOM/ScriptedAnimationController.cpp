@@ -62,7 +62,8 @@ namespace krys::boo::dom
     }
   }
 
-  void ScriptedAnimationController::ServiceRequestAnimationFrameCallbacks(double timestamp) noexcept
+  void
+    ScriptedAnimationController::ServiceRequestAnimationFrameCallbacks(DOMHighResTimeStamp timestamp) noexcept
   {
     if (_callbackDataList.empty() || _suspendCount)
     {

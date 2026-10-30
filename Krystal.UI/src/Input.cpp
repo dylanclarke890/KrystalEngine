@@ -1,4 +1,5 @@
 ﻿#include "Krystal.UI/Input.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Platform/WindowsKeyboardCodes.hpp"
 #include "Krystal.Core/Text/CodePointIterator.hpp"
 #include <format>
@@ -243,7 +244,7 @@ namespace krys::ui::input
     return boo::PlatformKeyboardEvent(type, text.Text, text.UnmodifiedText, krys::move(keyValue),
                                       utf8_string(description.Code), krys::move(keyIdentifier),
                                       description.WindowsVirtualKeyCode, isAutoRepeat, description.IsKeypad,
-                                      isSystemKey, ToBooey(modifiers), MonotonicTime::Now());
+                                      isSystemKey, ToBooey(modifiers), boo::html::EventLoop::Current().Now());
   }
 
   namespace
@@ -255,7 +256,8 @@ namespace krys::ui::input
       InputMethodPlatformKeyboardEvent(utf8_string text, Maybe<List<boo::CompositionUnderline>> underlines,
                                        uint32 selectionStart, uint32 selectionLength) noexcept
           : PlatformKeyboardEvent(Type::KeyDown, text, text, u8"Unidentified", u8"Unidentified", u8"U+0000",
-                                  boo::vk::Process, false, false, false, {}, MonotonicTime::Now())
+                                  boo::vk::Process, false, false, false, {},
+                                  boo::html::EventLoop::Current().Now())
       {
         _handledByInputMethod = true;
         if (underlines)
@@ -281,7 +283,7 @@ namespace krys::ui::input
     auto keyIdentifier = KeyIdentifierForText(text);
     return boo::PlatformKeyboardEvent(boo::PlatformEvent::Type::Char, text, text, text, {},
                                       krys::move(keyIdentifier), 0, false, false, false, {},
-                                      MonotonicTime::Now());
+                                      boo::html::EventLoop::Current().Now());
   }
 
   List<boo::CompositionUnderline> CompositionUnderlines(utf8_stringview text,
@@ -389,6 +391,6 @@ namespace krys::ui::input
 
     // FIXME: The screen position, once the host reports where the page is on the screen.
     return boo::PlatformWheelEvent(point, point, deltaX, deltaY, wheelTicksX, wheelTicksY, granularity,
-                                   modifiers, MonotonicTime::Now());
+                                   modifiers, boo::html::EventLoop::Current().Now());
   }
 }

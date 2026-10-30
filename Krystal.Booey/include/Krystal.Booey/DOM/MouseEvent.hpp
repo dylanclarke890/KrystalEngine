@@ -58,7 +58,7 @@ namespace krys::boo::dom
     /// @brief A trusted event from its parts, with its client location rather than its window location.
     KRYS_NODISCARD static Ref<MouseEvent>
       Create(DOMStringAtom eventType, bool canBubble, bool isCancelable, bool isComposed,
-             DOMHighResTimeStamp timestamp, LocalFrameView *view, int32 detail, double screenX,
+             MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail, double screenX,
              double screenY, double clientX, double clientY, EnumSet<Modifier> modifiers, MouseButton button,
              uint16 buttons, SyntheticClickType syntheticClickType, EventTarget *relatedTarget) noexcept;
 

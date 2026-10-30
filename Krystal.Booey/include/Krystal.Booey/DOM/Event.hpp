@@ -6,11 +6,13 @@
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
+  class Document;
   class EventTarget;
 
   /// @see https://dom.spec.whatwg.org/#event
@@ -32,7 +34,7 @@ namespace krys::boo::dom
     DOMStringAtom _type;
     RefPtr<EventTarget> _target {nullptr};
     RefPtr<EventTarget> _currentTarget {nullptr};
-    DOMHighResTimeStamp _timeStamp {};
+    MonotonicTime::duration _createTime {};
     List<EventPathItem> _path;
     EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
     bool _isTrusted : 1 {false};
@@ -174,11 +176,16 @@ namespace krys::boo::dom
       return _isTrusted;
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-event-timestamp
-    KRYS_NODISCARD DOMHighResTimeStamp TimeStamp() const noexcept
+    /// @brief When the event was created, in the host's time.
+    KRYS_NODISCARD MonotonicTime::duration TimeStamp() const noexcept
     {
-      return _timeStamp;
+      return _createTime;
     }
+
+    /// @brief The event's creation time in milliseconds since the time origin of @p document's window; 0 if
+    /// it has none.
+    /// @see https://dom.spec.whatwg.org/#dom-event-timestamp
+    KRYS_NODISCARD DOMHighResTimeStamp TimeStampForBindings(const Document &document) const noexcept;
 
     /// @note Legacy.
     /// @see https://dom.spec.whatwg.org/#dom-event-initevent

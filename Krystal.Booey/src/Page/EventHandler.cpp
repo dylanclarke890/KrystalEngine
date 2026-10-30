@@ -23,6 +23,7 @@
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/Page/AutoscrollController.hpp"
@@ -1521,10 +1522,10 @@ namespace krys::boo
 
     // FIXME: Not while the page is hidden or its focus controller inactive, once there are those; the current
     // state of the modifier keys rather than the last mouse event's, once the host reports it.
-    PlatformMouseEvent fakeMouseMoveEvent(*_lastKnownMousePosition,
-                                          _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
-                                          MouseButton::None, PlatformEvent::Type::MouseMoved, 0,
-                                          _lastPlatformMouseEvent.Modifiers(), MonotonicTime::Now());
+    PlatformMouseEvent fakeMouseMoveEvent(
+      *_lastKnownMousePosition, _lastKnownMouseGlobalPosition.value_or(*_lastKnownMousePosition),
+      MouseButton::None, PlatformEvent::Type::MouseMoved, 0, _lastPlatformMouseEvent.Modifiers(),
+      html::EventLoop::Current().Now());
     (void)MouseMoved(fakeMouseMoveEvent);
   }
 
@@ -3336,11 +3337,10 @@ namespace krys::boo
     }
 
     auto dragEvent = dom::DragEvent::Create(
-      eventType, true, true, true, static_cast<dom::DOMHighResTimeStamp>(event.Timestamp().count()),
-      view.get(), 0, DoublePoint(FlooredIntPoint(event.GlobalPosition())),
-      DoublePoint(FlooredIntPoint(event.Position())), event.MovementDelta().X(), event.MovementDelta().Y(),
-      event.Modifiers(), MouseButton::Left, 0, nullptr, event.Force(), SyntheticClickType::NoTap,
-      &dataTransfer);
+      eventType, true, true, true, event.Timestamp(), view.get(), 0,
+      DoublePoint(FlooredIntPoint(event.GlobalPosition())), DoublePoint(FlooredIntPoint(event.Position())),
+      event.MovementDelta().X(), event.MovementDelta().Y(), event.Modifiers(), MouseButton::Left, 0, nullptr,
+      event.Force(), SyntheticClickType::NoTap, &dataTransfer);
 
     (void)dragTarget.DispatchEvent(*dragEvent);
 

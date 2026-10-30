@@ -243,9 +243,7 @@ namespace krys::boo::tests
     timeline->DetachFromDocument();
   }
 
-  // FIXME: `DOMHighResTimeStamp` is an integer; it's a double in milliseconds, so origin times (and the other
-  // high-resolution times) lose their fractions.
-  TEST_CASE("Animatable: DOMHighResTimeStamp is a double", "[Animation][Animatable][!shouldfail]")
+  TEST_CASE("Animatable: DOMHighResTimeStamp is a double", "[Animation][Animatable]")
   {
     CHECK(std::is_floating_point_v<dom::DOMHighResTimeStamp>);
   }

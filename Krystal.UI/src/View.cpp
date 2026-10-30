@@ -1432,7 +1432,7 @@ namespace krys::ui
     }
 
     boo::PlatformTouchEvent event(type, krys::move(points), input::ToBooey(input.Modifiers),
-                                  MonotonicTime::Now());
+                                  boo::html::EventLoop::Current().Now());
     // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
     if (type == boo::PlatformEvent::Type::TouchMove)
     {
@@ -1651,7 +1651,8 @@ namespace krys::ui
     auto point = boo::FlooredIntPoint(position);
     bool scrolled = _frame->GetEventHandler().HandleTouchScroll(boo::PlatformWheelEvent(
       point, point, static_cast<float>(delta.Width()), static_cast<float>(delta.Height()), 0, 0,
-      boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {}, MonotonicTime::Now()));
+      boo::PlatformWheelEventGranularity::ScrollByPixelWheelEvent, {},
+      boo::html::EventLoop::Current().Now()));
     PerformMicrotaskCheckpoint();
     _needsPaint = true;
     return scrolled;
@@ -1739,9 +1740,10 @@ namespace krys::ui
     auto event = [&](boo::PlatformEvent::Type type, boo::MouseButton button, uint16 buttons, int32 count)
     {
       // FIXME: The screen position, once the host reports where the page is on the screen.
-      return boo::PlatformMouseEvent(
-        boo::DoublePoint(point), boo::DoublePoint(point), button, type, count, {}, MonotonicTime::Now(),
-        buttons, {}, 0, boo::SyntheticClickType::OneFingerTap, pointerId, boo::dom::TouchPointerEventType());
+      return boo::PlatformMouseEvent(boo::DoublePoint(point), boo::DoublePoint(point), button, type, count,
+                                     {}, boo::html::EventLoop::Current().Now(), buttons, {}, 0,
+                                     boo::SyntheticClickType::OneFingerTap, pointerId,
+                                     boo::dom::TouchPointerEventType());
     };
 
     auto &handler = _frame->GetEventHandler();
@@ -1769,11 +1771,11 @@ namespace krys::ui
     boo::PlatformTouchPoint touchPoint(id, boo::PlatformTouchPoint::TouchReleased, position, position, {}, 0,
                                        0);
     // FIXME: The screen position, once the host reports where the page is on the screen.
-    boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), boo::MouseButton::Right,
-                                  boo::PlatformEvent::Type::MousePressed, 1, {}, MonotonicTime::Now(), 0, {},
-                                  0, boo::SyntheticClickType::NoTap,
-                                  boo::dom::PointerEvent::PointerIdForTouch(touchPoint),
-                                  boo::dom::TouchPointerEventType());
+    boo::PlatformMouseEvent event(
+      boo::DoublePoint(point), boo::DoublePoint(point), boo::MouseButton::Right,
+      boo::PlatformEvent::Type::MousePressed, 1, {}, boo::html::EventLoop::Current().Now(), 0, {}, 0,
+      boo::SyntheticClickType::NoTap, boo::dom::PointerEvent::PointerIdForTouch(touchPoint),
+      boo::dom::TouchPointerEventType());
     (void)_frame->GetEventHandler().SendContextMenuEvent(event);
     PerformMicrotaskCheckpoint();
   }
@@ -2627,7 +2629,7 @@ namespace krys::ui
   {
     // FIXME: The screen position, once the host reports where the page is on the screen.
     boo::PlatformMouseEvent event(boo::DoublePoint(point), boo::DoublePoint(point), button, type, clickCount,
-                                  modifiers, MonotonicTime::Now(), _buttons, movement);
+                                  modifiers, boo::html::EventLoop::Current().Now(), _buttons, movement);
     event.SetUnadjustedMovementDelta(unadjustedMovement);
     // Moves aren't merged, so each stands for itself alone (its pointermove's coalesced events).
     if (type == boo::PlatformEvent::Type::MouseMoved)
@@ -2645,7 +2647,7 @@ namespace krys::ui
     double force = input.Pressure ? *input.Pressure : (input.InContact ? 0.5 : 0);
     // FIXME: The screen position, once the host reports where the page is on the screen.
     boo::PlatformMouseEvent event(point, point, button, type, clickCount, input::ToBooey(input.Modifiers),
-                                  MonotonicTime::Now(), _penButtons, {}, force,
+                                  boo::html::EventLoop::Current().Now(), _penButtons, {}, force,
                                   boo::SyntheticClickType::NoTap, boo::PenPointerID,
                                   boo::dom::PenPointerEventType());
     event.SetPenOrientation({static_cast<int32>(std::round(input.TiltX)),

@@ -15,8 +15,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    constexpr auto TypeAheadTimeout = static_cast<dom::DOMHighResTimeStamp>(
-      std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::seconds(1)).count());
+    constexpr MonotonicTime::duration TypeAheadTimeout = std::chrono::seconds(1);
 
     /// @brief @p value in decimal, zero padded to @p width digits.
     KRYS_NODISCARD dom::DOMString PadNumber(int value, size_t width) noexcept

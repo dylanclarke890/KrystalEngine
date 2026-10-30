@@ -48,6 +48,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/CustomStateSet.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -1076,7 +1077,7 @@ namespace krys::boo::dom
       // as a separate event in other DOM-compliant browsers like Firefox, and so we do the same.
       Ref<MouseEvent> doubleClickEvent = MouseEvent::Create(
         DOMStringAtom(EventNames::DblClick), mouseEvent->Bubbles(), mouseEvent->Cancelable(), true,
-        MonotonicTime::Now().count(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
+        html::EventLoop::Current().Now(), mouseEvent->View(), mouseEvent->Detail(), mouseEvent->ScreenX(),
         mouseEvent->ScreenY(), mouseEvent->ClientX(), mouseEvent->ClientY(), mouseEvent->ModifierKeys(),
         mouseEvent->ButtonType(), mouseEvent->Buttons(), mouseEvent->GetSyntheticClickType(), relatedTarget);
 
