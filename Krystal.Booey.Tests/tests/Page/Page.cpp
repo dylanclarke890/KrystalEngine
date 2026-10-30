@@ -483,6 +483,42 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: a hidden page hides its main frame's view",
+                   "[Page][Visibility]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><p id=p>text</p>"};
+    auto &page = *fixture.TestPage;
+    auto &renderer = *fixture.ById(u8"p").Renderer();
+    CHECK(fixture.View().IsVisible());
+    CHECK_FALSE(fixture.View().IsOffscreen());
+    CHECK(renderer.IsVisibleIgnoringGeometry());
+
+    page.SetIsVisible(false);
+    CHECK_FALSE(fixture.View().IsVisible());
+    CHECK(fixture.View().IsOffscreen());
+    CHECK_FALSE(renderer.IsVisibleIgnoringGeometry());
+
+    page.SetIsVisible(true);
+    CHECK(fixture.View().IsVisible());
+    CHECK(renderer.IsVisibleIgnoringGeometry());
+
+    SECTION("A view made while the page is hidden starts hidden")
+    {
+      page.SetIsVisible(false);
+      page.MainFrame().CreateView({200, 100});
+      CHECK_FALSE(fixture.View().IsVisible());
+      page.SetIsVisible(true);
+      CHECK(fixture.View().IsVisible());
+    }
+
+    SECTION("A frame without a page shows its view")
+    {
+      auto frame = LocalFrame::Create();
+      frame->CreateView({200, 100});
+      CHECK(frame->View()->IsVisible());
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "Page: a hidden page pauses its SMIL animations",
                    "[Page][Visibility]")
   {

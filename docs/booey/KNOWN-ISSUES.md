@@ -6,10 +6,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ## DOM
 
-### Bugs
-
-- A hidden page doesn't hide its main frame's view, and a shown one doesn't resume its animated images, as upstream's do (FIXMEs in `Page.cpp`): views have no shown state and animated images pause only out of view.
-
 ### Missing
 
 - No Sanitizer API: no `setHTML()`, and `Document::ParseHTML` is a stub.

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderBox.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
@@ -24,7 +25,19 @@ namespace krys::boo::tests
 
     explicit PageInFrameFixture(utf8_string &&markup, IntSize viewSize = {200, 100},
                                 CachePolicy cachePolicy = CachePolicy::Verify) noexcept
-        : ViewSize(viewSize), Frame(LocalFrame::Create()), Document(CreateRef<dom::HTMLDocument>())
+        : PageInFrameFixture(LocalFrame::Create(), krys::move(markup), viewSize, cachePolicy)
+    {
+    }
+
+    /// @brief As above, in @p page's main frame.
+    PageInFrameFixture(Page &page, utf8_string &&markup, IntSize viewSize = {200, 100}) noexcept
+        : PageInFrameFixture(ShareRef(page.MainFrame()), krys::move(markup), viewSize, CachePolicy::Verify)
+    {
+    }
+
+    PageInFrameFixture(Ref<LocalFrame> frame, utf8_string &&markup, IntSize viewSize,
+                       CachePolicy cachePolicy) noexcept
+        : ViewSize(viewSize), Frame(krys::move(frame)), Document(CreateRef<dom::HTMLDocument>())
     {
       html::EventLoop::Current().RunUntilIdle();
       Frame->SetSubresourceCachePolicy(cachePolicy);

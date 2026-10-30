@@ -13,6 +13,7 @@
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Rendering/RenderImage.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
@@ -316,6 +317,39 @@ namespace krys::boo::tests
 
     // Scrolled back, it resumes.
     fixture.ById(u8"box").ScrollTo(0, 0);
+    CHECK_FALSE(renderer.HasPausedImageAnimations());
+    CHECK(image.IsAnimating());
+    loop.Run(start + 400ms);
+    CHECK(image.CurrentFrameIndex() == 2u);
+  }
+
+  TEST_CASE("HTMLImageElement: animations pause while the page is hidden", "[HTML][HTMLImageElement]")
+  {
+    using namespace std::chrono_literals;
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///a.gif"] = images::AnimatedGIF;
+
+    Ref<Page> page = Page::Create();
+    ImageFixture fixture(*page, u8"<img id=img src='file:///a.gif'>");
+    RunNetworkingTasks();
+    auto &loop = html::EventLoop::Current();
+    auto &image = Downcast<BitmapImage>(*fixture.Image(u8"img").GetImage());
+    auto &renderer = *fixture.Image(u8"img").Renderer();
+
+    auto start = loop.Now();
+    (void)fixture.Painted();
+    REQUIRE(image.IsAnimating());
+
+    // Hidden, the next frame finds the image invisible, and its animation pauses.
+    page->SetIsVisible(false);
+    loop.Run(start + 100ms);
+    CHECK(image.CurrentFrameIndex() == 1u);
+    CHECK(renderer.HasPausedImageAnimations());
+    loop.Run(start + 400ms);
+    CHECK(image.CurrentFrameIndex() == 1u);
+
+    // Shown, it resumes.
+    page->SetIsVisible(true);
     CHECK_FALSE(renderer.HasPausedImageAnimations());
     CHECK(image.IsAnimating());
     loop.Run(start + 400ms);

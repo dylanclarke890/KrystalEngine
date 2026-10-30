@@ -462,7 +462,11 @@ namespace krys::boo
     {
       ResumeScriptedAnimations();
 
-      // FIXME: Showing the main frame's view and resuming animated images, once views can be hidden.
+      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      {
+        view->Show();
+      }
+
       ForEachDocument(
         [](dom::Document &document)
         {
@@ -478,6 +482,8 @@ namespace krys::boo
             svgExtensions->UnpauseAnimations();
           }
         });
+
+      ResumeAnimatingImages();
     }
     else
     {
@@ -498,7 +504,10 @@ namespace krys::boo
         });
 
       SuspendScriptedAnimations();
-      // FIXME: Hiding the main frame's view, once views can be hidden.
+      if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+      {
+        view->Hide();
+      }
     }
 
     ForEachDocument([](dom::Document &document) { document.VisibilityStateChanged(); });
@@ -514,6 +523,16 @@ namespace krys::boo
   {
     _scriptedAnimationsSuspended = false;
     ForEachDocument([](dom::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
+  }
+
+  void Page::ResumeAnimatingImages() noexcept
+  {
+    // Drawing models which cache painted content while out-of-window require that we repaint animated images
+    // to kickstart the animation loop.
+    if (RefPtr<LocalFrameView> view = ShareRefPtr(_mainFrame->View()))
+    {
+      view->ResumeVisibleImageAnimationsIncludingSubframes();
+    }
   }
 
   void Page::ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept

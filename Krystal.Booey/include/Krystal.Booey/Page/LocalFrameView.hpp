@@ -135,6 +135,7 @@ namespace krys::boo
     bool _verticalScrollbarLock {false};
     bool _canHaveScrollbars {true};
     uint32 _updateScrollbarsPass {0};
+    bool _selfVisible {false};
     IntSize _lastUsedSizeForLayout;
     /// @brief The viewport's size and zoom when `resize` was last scheduled, or at the first layout.
     IntSize _lastViewportSize;
@@ -153,6 +154,30 @@ namespace krys::boo
 
     /// @brief The render view of the frame's document, if it has one.
     KRYS_NODISCARD const RenderView *GetRenderView() const noexcept;
+
+    /// @brief Shows the view; a view starts shown when its page is visible, and the page shows and hides its
+    /// main frame's view with it.
+    void Show() noexcept;
+    void Hide() noexcept;
+
+    KRYS_NODISCARD bool IsSelfVisible() const noexcept
+    {
+      return _selfVisible;
+    }
+
+    /// @brief Whether the view is actually visible.
+    // FIXME: And its parent is visible, once there are subframes.
+    KRYS_NODISCARD bool IsVisible() const noexcept
+    {
+      return _selfVisible;
+    }
+
+    /// @brief Whether the view is off screen (hidden): its renderers count as invisible, so their animated
+    /// images pause.
+    KRYS_NODISCARD bool IsOffscreen() const noexcept
+    {
+      return !IsVisible();
+    }
 
     KRYS_NODISCARD LocalFrameViewLayoutContext &LayoutContext() noexcept
     {
@@ -509,6 +534,7 @@ namespace krys::boo
     // FIXME: The visible viewport rect, once there's one.
     void ViewportContentsChanged() noexcept;
     void ResumeVisibleImageAnimations(const IntRect &visibleRect) noexcept;
+    void ResumeVisibleImageAnimationsIncludingSubframes() noexcept;
 
     // Conversions between the view's coordinates (its frame's, at the origin, as there's no widget tree) and
     // the contents'.
