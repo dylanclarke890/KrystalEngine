@@ -76,6 +76,13 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-storageevent-storagearea
     KRYS_NODISCARD Storage *StorageArea() const noexcept;
 
+    /// @note Legacy.
+    /// @see https://html.spec.whatwg.org/#dom-storageevent-initstorageevent
+    void InitStorageEvent(dom::DOMStringAtom type, bool bubbles = false, bool cancelable = false,
+                          Maybe<dom::DOMString> key = null, Maybe<dom::DOMString> oldValue = null,
+                          Maybe<dom::DOMString> newValue = null, dom::USVString url = {},
+                          Storage *storageArea = nullptr) noexcept;
+
     KRYS_NODISCARD bool IsStorageEvent() const noexcept final
     {
       return true;

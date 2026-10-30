@@ -2558,9 +2558,9 @@ Null or a `CustomElementRegistry` object registry [**is a global custom element 
   - [ ] 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and qualifiedName given "`attribute`".
   - [ ] 2. Return the result of creating an attribute given this, localName, namespace, and prefix.
 
-- [ ] [createEvent(interface)](https://dom.spec.whatwg.org/#dom-document-createevent) — The `createEvent(interface)` method steps are:
-  - [ ] 1. Let constructor be null.
-  - [ ] 2. If interface is an ASCII case-insensitive match for any of the strings in the first column in the following table, then set constructor to the interface in the second column on the same row as the matching string:
+- [x] [createEvent(interface)](https://dom.spec.whatwg.org/#dom-document-createevent) — The `createEvent(interface)` method steps are:
+  - [x] 1. Let constructor be null.
+  - [x] 2. If interface is an ASCII case-insensitive match for any of the strings in the first column in the following table, then set constructor to the interface in the second column on the same row as the matching string:
 
     | String | Interface | Notes |
     |---|---|---|
@@ -2586,14 +2586,14 @@ Null or a `CustomElementRegistry` object registry [**is a global custom element 
     | "`uievent`" | `UIEvent` | \[UIEVENTS\] |
     | "`uievents`" |  |  |
 
-  - [ ] 3. If constructor is null, then throw a "`NotSupportedError`" `DOMException`.
-  - [ ] 4. If the interface indicated by constructor is not exposed on the relevant global object of this, then throw a "`NotSupportedError`" `DOMException`.
-  - [ ] 5. Let event be the result of creating an event given constructor.
-  - [ ] 6. Initialize event’s `type` attribute to the empty string.
-  - [ ] 7. Initialize event’s `timeStamp` attribute to the result of calling current high resolution time with this’s relevant global object.
-  - [ ] 8. Initialize event’s `isTrusted` attribute to false.
-  - [ ] 9. Unset event’s initialized flag.
-  - [ ] 10. Return event.
+  - [x] 3. If constructor is null, then throw a "`NotSupportedError`" `DOMException`.
+  - [x] 4. If the interface indicated by constructor is not exposed on the relevant global object of this, then throw a "`NotSupportedError`" `DOMException`.
+  - [x] 5. Let event be the result of creating an event given constructor.
+  - [x] 6. Initialize event’s `type` attribute to the empty string.
+  - [x] 7. Initialize event’s `timeStamp` attribute to the result of calling current high resolution time with this’s relevant global object.
+  - [x] 8. Initialize event’s `isTrusted` attribute to false.
+  - [x] 9. Unset event’s initialized flag.
+  - [x] 10. Return event.
 
 > **Note:** Event constructors ought to be used instead.
 

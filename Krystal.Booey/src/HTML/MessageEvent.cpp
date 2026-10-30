@@ -28,4 +28,21 @@ namespace krys::boo::html
   {
     return _source.get();
   }
+
+  void MessageEvent::InitMessageEvent(dom::DOMStringAtom type, bool bubbles, bool cancelable,
+                                      RefPtr<SerializedScriptValue> data, dom::USVString origin,
+                                      dom::DOMString lastEventId, LocalDOMWindow *source) noexcept
+  {
+    if (_dispatched)
+    {
+      return;
+    }
+
+    Initialize(*this, type, bubbles, cancelable);
+
+    _data = krys::move(data);
+    _origin = krys::move(origin);
+    _lastEventId = krys::move(lastEventId);
+    _source = ShareRefPtr(source);
+  }
 }

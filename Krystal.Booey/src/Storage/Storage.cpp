@@ -187,4 +187,23 @@ namespace krys::boo
   {
     return _storageArea.get();
   }
+
+  void StorageEvent::InitStorageEvent(dom::DOMStringAtom type, bool bubbles, bool cancelable,
+                                      Maybe<dom::DOMString> key, Maybe<dom::DOMString> oldValue,
+                                      Maybe<dom::DOMString> newValue, dom::USVString url,
+                                      Storage *storageArea) noexcept
+  {
+    if (_dispatched)
+    {
+      return;
+    }
+
+    Initialize(*this, type, bubbles, cancelable);
+
+    _key = krys::move(key);
+    _oldValue = krys::move(oldValue);
+    _newValue = krys::move(newValue);
+    _url = krys::move(url);
+    _storageArea = ShareRefPtr(storageArea);
+  }
 }

@@ -4,10 +4,28 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
+#include "Krystal.Booey/DOM/CompositionEvent.hpp"
+#include "Krystal.Booey/DOM/CustomEvent.hpp"
+#include "Krystal.Booey/DOM/DragEvent.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
+#include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/TextEvent.hpp"
+#include "Krystal.Booey/DOM/TouchEvent.hpp"
+#include "Krystal.Booey/DOM/UIEvent.hpp"
+#include "Krystal.Booey/HTML/BeforeUnloadEvent.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Storage/Storage.hpp"
+#include "Krystal.Booey/Storage/StorageEvent.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -191,6 +209,129 @@ namespace krys::boo::dom::tests
       REQUIRE(sheetContext.BaseURL == u8"https://cdn.com/a.css");
       REQUIRE(sheetContext.Charset == u8"utf-8");
       REQUIRE(sheetContext.Mode == css::ParserMode::HTMLQuirks);
+    }
+  }
+
+  TEST_CASE("Document::CreateEvent creates the interface its table names", "[DOM][Document][Event]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto create = [&document](DOMStringView interface)
+    {
+      auto event = document->CreateEvent(interface);
+      REQUIRE_FALSE(event.HasException());
+      return event.ReleaseValue();
+    };
+
+    CHECK(Is<html::BeforeUnloadEvent>(*create(u8"beforeunloadevent")));
+    CHECK(Is<CompositionEvent>(*create(u8"compositionevent")));
+    CHECK(dynamic_cast<CustomEvent<RefPtr<html::SerializedScriptValue>> *>(&*create(u8"customevent")));
+    CHECK(Is<DragEvent>(*create(u8"dragevent")));
+    CHECK(Is<FocusEvent>(*create(u8"focusevent")));
+    CHECK(Is<html::HashChangeEvent>(*create(u8"hashchangeevent")));
+    CHECK(Is<KeyboardEvent>(*create(u8"keyboardevent")));
+    CHECK(Is<html::MessageEvent>(*create(u8"messageevent")));
+    CHECK(Is<MouseEvent>(*create(u8"mouseevent")));
+    CHECK(Is<MouseEvent>(*create(u8"mouseevents")));
+    CHECK(Is<StorageEvent>(*create(u8"storageevent")));
+    CHECK(Is<TextEvent>(*create(u8"textevent")));
+    CHECK(Is<TouchEvent>(*create(u8"touchevent")));
+    for (auto name : {u8"uievent", u8"uievents"})
+    {
+      auto event = create(name);
+      CHECK(dynamic_cast<UIEvent *>(&*event));
+      CHECK_FALSE(Is<MouseEvent>(*event));
+    }
+    for (auto name : {u8"event", u8"events", u8"htmlevents", u8"svgevents"})
+    {
+      auto event = create(name);
+      CHECK_FALSE(dynamic_cast<UIEvent *>(&*event));
+      CHECK_FALSE(Is<CompositionEvent>(*event));
+    }
+
+    SECTION("Case-insensitively")
+    {
+      CHECK(Is<MouseEvent>(*create(u8"MouseEvents")));
+      CHECK(Is<KeyboardEvent>(*create(u8"KEYBOARDEVENT")));
+    }
+  }
+
+  TEST_CASE("Document::CreateEvent throws for names outside its table", "[DOM][Document][Event]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    for (auto name : {u8"", u8"foo", u8"mouseeventz", u8"devicemotionevent", u8"deviceorientationevent",
+                      u8"wheelevent", u8"keyboardevents", u8"popstateevent", u8"mutationevent"})
+    {
+      auto event = document->CreateEvent(name);
+      REQUIRE(event.HasException());
+      CHECK(event.GetException().Code() == ExceptionCode::NotSupportedError);
+    }
+  }
+
+  TEST_CASE("Document::CreateEvent's event is untrusted and uninitialized", "[DOM][Document][Event]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto &loop = html::EventLoop::Current();
+    loop.Run(loop.Now() + std::chrono::milliseconds(3));
+    auto event = document->CreateEvent(u8"beforeunloadevent").ReleaseValue();
+
+    CHECK(event->Type().View().empty());
+    CHECK_FALSE(event->Bubbles());
+    CHECK_FALSE(event->Cancelable());
+    CHECK_FALSE(event->IsTrusted());
+    CHECK(event->TimeStamp() == loop.Now());
+
+    auto element = document->CreateElement(u8"div").ReleaseValue();
+    auto dispatched = element->DispatchEvent(*event);
+    REQUIRE(dispatched.HasException());
+    CHECK(dispatched.GetException().Code() == ExceptionCode::InvalidStateError);
+
+    event->InitEvent(DOMStringAtom(u8"custom"), true, true);
+    CHECK_FALSE(element->DispatchEvent(*event).HasException());
+  }
+
+  TEST_CASE("Document::CreateEvent with the legacy init methods", "[DOM][Document][Event]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+
+    SECTION("initMessageEvent")
+    {
+      auto event = document->CreateEvent(u8"messageevent").ReleaseValue();
+      auto &message = Downcast<html::MessageEvent>(*event);
+      message.InitMessageEvent(DOMStringAtom(u8"message"), true, false, nullptr, u8"https://example.com",
+                               u8"7");
+      CHECK(message.Type() == u8"message");
+      CHECK(message.Bubbles());
+      CHECK(message.Origin() == u8"https://example.com");
+      CHECK(message.LastEventId() == u8"7");
+      CHECK(message.Source() == nullptr);
+    }
+
+    SECTION("initStorageEvent")
+    {
+      auto event = document->CreateEvent(u8"storageevent").ReleaseValue();
+      auto &storage = Downcast<StorageEvent>(*event);
+      storage.InitStorageEvent(DOMStringAtom(u8"storage"), false, true, DOMString(u8"key"), null,
+                               DOMString(u8"value"), u8"https://example.com/");
+      CHECK(storage.Type() == u8"storage");
+      CHECK(storage.Cancelable());
+      CHECK(storage.Key() == DOMString(u8"key"));
+      CHECK_FALSE(storage.OldValue());
+      CHECK(storage.NewValue() == DOMString(u8"value"));
+      CHECK(storage.URL() == u8"https://example.com/");
+      CHECK(storage.StorageArea() == nullptr);
+    }
+
+    SECTION("Not while it's being dispatched")
+    {
+      auto event = document->CreateEvent(u8"storageevent").ReleaseValue();
+      auto &storage = Downcast<StorageEvent>(*event);
+      storage.InitStorageEvent(DOMStringAtom(u8"storage"));
+      auto element = document->CreateElement(u8"div").ReleaseValue();
+      auto handle =
+        element->AddEventListener<StorageEvent>(DOMStringAtom(u8"storage"), [](StorageEvent &dispatched)
+                                                { dispatched.InitStorageEvent(DOMStringAtom(u8"other")); });
+      CHECK_FALSE(element->DispatchEvent(storage).HasException());
+      CHECK(storage.Type() == u8"storage");
     }
   }
 }

@@ -70,6 +70,12 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-messageevent-source
     KRYS_NODISCARD LocalDOMWindow *Source() const noexcept;
 
+    /// @note Legacy. There are no message ports.
+    /// @see https://html.spec.whatwg.org/#dom-messageevent-initmessageevent
+    void InitMessageEvent(dom::DOMStringAtom type, bool bubbles = false, bool cancelable = false,
+                          RefPtr<SerializedScriptValue> data = nullptr, dom::USVString origin = {},
+                          dom::DOMString lastEventId = {}, LocalDOMWindow *source = nullptr) noexcept;
+
     KRYS_NODISCARD bool IsMessageEvent() const noexcept final
     {
       return true;
