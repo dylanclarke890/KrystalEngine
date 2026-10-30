@@ -78,6 +78,10 @@ namespace krys::boo::svg
       {
         _linkRelations.Add(SVGALinkRelation::Opener);
       }
+      if (_relList)
+      {
+        _relList->AssociatedAttributeValueChanged();
+      }
     }
 
     SVGURIReference::ParseAttribute(name, value);

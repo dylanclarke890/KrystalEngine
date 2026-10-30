@@ -112,6 +112,11 @@ namespace krys::boo::html
     void HtmlFor(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
   };
 }
 

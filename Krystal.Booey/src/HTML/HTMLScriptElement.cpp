@@ -71,6 +71,17 @@ namespace krys::boo::html
     return *_blocking;
   }
 
+  void HTMLScriptElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"blocking" && _blocking)
+    {
+      _blocking->AssociatedAttributeValueChanged();
+    }
+  }
+
   Maybe<dom::DOMString> HTMLScriptElement::CrossOrigin() const noexcept
   {
     return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"type");

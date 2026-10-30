@@ -139,6 +139,11 @@ namespace krys::boo::html
 
 #pragma endregion
 
+  protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
+
   private:
     KRYS_NODISCARD url::URL FullURL() const noexcept final;
     void SetFullURL(const url::URL &url) noexcept final;

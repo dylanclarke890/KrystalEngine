@@ -595,7 +595,8 @@ namespace krys::boo::dom
           return false;
         }
 
-        auto &classList = *element._domTokenList;
+        // The class list keeps the element's classes, parsed again only after the attribute changes.
+        auto &classList = const_cast<Element &>(element).ClassList();
         return std::ranges::all_of(classes,
                                    [&](const DOMString &className) { return classList.Contains(className); });
       });

@@ -189,6 +189,9 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-element-classlist
     KRYS_NODISCARD DOMTokenList &ClassList() noexcept;
 
+    /// @see https://drafts.csswg.org/css-shadow-parts/#dom-element-part
+    KRYS_NODISCARD DOMTokenList &Part() noexcept;
+
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
     void Slot(DOMString &&slot) noexcept;
 
