@@ -269,27 +269,17 @@ namespace krys::boo::dom
 
         thisElement.SynchronizeAllAttributes();
         otherElement.SynchronizeAllAttributes();
-        for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
+        // The attribute lists are sets: the same size, and each attribute of one is in the other.
+        if (thisElement._attributes.size() != otherElement._attributes.size())
         {
-          if (i >= otherElement._attributes.size())
-          {
-            return false;
-          }
+          return false;
+        }
 
-          auto &thisAttribute = thisElement._attributes[i];
-          auto &otherAttribute = otherElement._attributes[i];
-
-          if (thisAttribute->LocalName() != otherAttribute->LocalName())
-          {
-            return false;
-          }
-
-          if (thisAttribute->NamespaceURI() != otherAttribute->NamespaceURI())
-          {
-            return false;
-          }
-
-          if (thisAttribute->Value() != otherAttribute->Value())
+        for (auto &thisAttribute : thisElement._attributes)
+        {
+          auto *otherAttribute = ElementAlgorithms::GetAttributeByNamespace(
+            thisAttribute->NamespaceURI(), thisAttribute->LocalName(), otherElement);
+          if (otherAttribute == nullptr || thisAttribute->Value() != otherAttribute->Value())
           {
             return false;
           }
@@ -366,7 +356,7 @@ namespace krys::boo::dom
         otherChild = otherChild->NextSibling();
       }
 
-      if (otherChild != nullptr)
+      if (child != nullptr || otherChild != nullptr)
       {
         return false;
       }

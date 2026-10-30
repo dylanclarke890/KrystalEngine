@@ -375,7 +375,84 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Node->IsEqualNode(data.Node.get()));
     REQUIRE(data.Node->IsEqualNode(equalNode.get()));
 
-    // FIXME: Other test cases for equality.
+    auto create = [&data]
+    {
+      auto element = data.Document->CreateElement(u8"div");
+      REQUIRE_FALSE(element.HasException());
+      return element.ReleaseValue();
+    };
+    auto setAttribute = [](Element &element, DOMStringAtom name, DOMString &&value)
+    {
+      REQUIRE_FALSE(element.SetAttribute(name, krys::move(value)).HasException());
+    };
+
+    SECTION("Attributes in a different order")
+    {
+      auto a = create();
+      auto b = create();
+      setAttribute(*a, u8"x", u8"1");
+      setAttribute(*a, u8"y", u8"2");
+      setAttribute(*b, u8"y", u8"2");
+      setAttribute(*b, u8"x", u8"1");
+      CHECK(a->IsEqualNode(b.get()));
+      CHECK(b->IsEqualNode(a.get()));
+    }
+
+    SECTION("An attribute with a different value")
+    {
+      auto a = create();
+      auto b = create();
+      setAttribute(*a, u8"x", u8"1");
+      setAttribute(*b, u8"x", u8"2");
+      CHECK_FALSE(a->IsEqualNode(b.get()));
+    }
+
+    SECTION("An extra attribute")
+    {
+      auto a = create();
+      auto b = create();
+      setAttribute(*a, u8"x", u8"1");
+      setAttribute(*b, u8"x", u8"1");
+      setAttribute(*b, u8"y", u8"2");
+      CHECK_FALSE(a->IsEqualNode(b.get()));
+      CHECK_FALSE(b->IsEqualNode(a.get()));
+    }
+
+    SECTION("An attribute in another namespace")
+    {
+      auto a = create();
+      auto b = create();
+      setAttribute(*a, u8"x", u8"1");
+      REQUIRE_FALSE(b->SetAttributeNS(DOMStringAtom(u8"urn:x"), u8"p:x", u8"1").HasException());
+      CHECK_FALSE(a->IsEqualNode(b.get()));
+      CHECK_FALSE(b->IsEqualNode(a.get()));
+    }
+
+    SECTION("An extra child")
+    {
+      auto a = create();
+      auto b = create();
+      REQUIRE_FALSE(a->AppendChild(*create()).HasException());
+      REQUIRE_FALSE(b->AppendChild(*create()).HasException());
+      REQUIRE_FALSE(a->AppendChild(*data.Document->CreateTextNode(u8"t")).HasException());
+      CHECK_FALSE(a->IsEqualNode(b.get()));
+      CHECK_FALSE(b->IsEqualNode(a.get()));
+    }
+
+    SECTION("Children's attributes")
+    {
+      auto a = create();
+      auto b = create();
+      auto aChild = create();
+      auto bChild = create();
+      setAttribute(*aChild, u8"x", u8"1");
+      setAttribute(*bChild, u8"x", u8"1");
+      REQUIRE_FALSE(a->AppendChild(*aChild).HasException());
+      REQUIRE_FALSE(b->AppendChild(*bChild).HasException());
+      CHECK(a->IsEqualNode(b.get()));
+      setAttribute(*bChild, u8"x", u8"2");
+      CHECK_FALSE(a->IsEqualNode(b.get()));
+    }
   }
 
   TEST_CASE("Node::IsSameNode", "[HTML][Node]")
