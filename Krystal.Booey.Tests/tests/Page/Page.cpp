@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -17,7 +18,9 @@
 #include "Krystal.Booey/Page/VisualViewport.hpp"
 #include "Krystal.Booey/Platform/PlatformMouseEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::tests
 {
@@ -353,5 +356,32 @@ namespace krys::boo::tests
     CHECK(painted.starts_with(u8"\n(concatenate-ctm\n  (ctm {m=((2.00,0.00)(0.00,2.00)) t=(0.00,0.00)}))"));
     CHECK(painted.contains(u8"(rect at (0,0) size 100x50)"));
     CHECK(painted.contains(u8"(rect at (0,0) size 10x10)\n  (color #FF0000)"));
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "Page: a renderer-only change schedules a rendering update",
+                   "[Page][RenderingUpdate]")
+  {
+    PageFixture fixture {u8"<!DOCTYPE html><p id=p>old</p><svg><clipPath id=clip><rect width=10 height=10>"
+                         u8"</rect></clipPath></svg>"};
+    REQUIRE_FALSE(fixture.TestPage->IsRenderingUpdateScheduled());
+
+    SECTION("A text node's data")
+    {
+      auto &text = Downcast<dom::Text>(*fixture.ById(u8"p").FirstChild());
+      REQUIRE_FALSE(text.ReplaceData(0, 3, u8"new").HasException());
+      CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
+
+      fixture.Frame();
+      CHECK_FALSE(fixture.TestPage->IsRenderingUpdateScheduled());
+      REQUIRE(text.Renderer());
+      CHECK(text.Renderer()->Text() == u8"new");
+    }
+
+    SECTION("An SVG element's renderer")
+    {
+      auto &clip = fixture.ById(u8"clip");
+      REQUIRE_FALSE(clip.SetAttribute(u8"clipPathUnits", u8"objectBoundingBox").HasException());
+      CHECK(fixture.TestPage->IsRenderingUpdateScheduled());
+    }
   }
 }

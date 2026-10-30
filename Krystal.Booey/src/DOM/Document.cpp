@@ -4224,6 +4224,9 @@ namespace krys::boo::dom
     {
       _pendingRenderTreeUpdate = CreateUnique<style::Update>(*this);
     }
+
+    ScheduleRenderingUpdate({});
+
     return *_pendingRenderTreeUpdate;
   }
 
