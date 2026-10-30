@@ -3656,16 +3656,16 @@ namespace krys::boo::dom
 
   void Document::UpdateAnimationsAndSendEvents() noexcept
   {
-    // FIXME: The window's frozen timestamp; the rendering update's timestamp stands in.
-    auto *page = GetPage();
-    if (!page)
+    auto *window = Window();
+    if (!window)
     {
       return;
     }
 
     if (auto *timelinesController = TimelinesController())
     {
-      timelinesController->UpdateAnimationsAndSendEvents(Seconds {page->LastRenderingUpdateTimestamp()});
+      timelinesController->UpdateAnimationsAndSendEvents(
+        Seconds {std::chrono::duration<double, std::milli>(window->FrozenNowTimestamp())});
     }
   }
 

@@ -139,6 +139,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From WebKit
 
+- A replaced animation's `remove` event is scheduled at its document timeline's current time, converted to origin-relative time, as the specification has it; upstream converts the monotonic clock's time, which isn't on the timeline's clock.
 - SMIL frames are always 1/60 s apart; upstream throttles them in low power mode and under thermal mitigation.
 - `<svg>` begins its time container when it's inserted after the load event has finished (`LoadEventFinished`); there's no `processingLoadEvent` check.
 - `SVGAnimateMotionElement` rebuilds its motion path on every children change, where upstream rebuilds it only on removals.
