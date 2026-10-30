@@ -29,7 +29,6 @@ namespace krys::boo::dom
       registry = document.CustomElementRegistry();
     }
 
-    auto elementName = html::ParseTagName(krys::text::ToASCIILower(name.LocalName().View()));
     // NOTE: customized built-in elements aren't supported, so a definition is only looked up by the local
     // name, and `is` doesn't make an element a custom element.
     auto *definition = html::CustomElementAlgorithms::LookupCustomElementDefinition(
@@ -50,7 +49,8 @@ namespace krys::boo::dom
     }
     else if (name.NamespaceURI() == infra::Namespaces::HTML)
     {
-      result = html::HTMLElementFactory::TryCreate(document, elementName);
+      // HTML's tag names are case-sensitive; createElement lowercases them in HTML documents.
+      result = html::HTMLElementFactory::TryCreate(document, name.TagName());
 
       if (result == nullptr)
       {
