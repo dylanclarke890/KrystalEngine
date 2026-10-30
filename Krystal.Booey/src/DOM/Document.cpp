@@ -29,16 +29,21 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
+#include "Krystal.Booey/DOM/CompositionEvent.hpp"
 #include "Krystal.Booey/DOM/ContentVisibilityDocumentState.hpp"
+#include "Krystal.Booey/DOM/CustomEvent.hpp"
 #include "Krystal.Booey/DOM/DocumentFontLoader.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
+#include "Krystal.Booey/DOM/DragEvent.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/HighlightRegistry.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
@@ -49,7 +54,10 @@
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/TextEvent.hpp"
+#include "Krystal.Booey/DOM/TouchEvent.hpp"
 #include "Krystal.Booey/DOM/TreeWalker.hpp"
+#include "Krystal.Booey/DOM/UIEvent.hpp"
 #include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/DOM/VisitedLinkState.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
@@ -61,6 +69,7 @@
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/BeforeUnloadEvent.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp"
@@ -85,10 +94,13 @@
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
 #include "Krystal.Booey/HTML/LazyLoadImageObserver.hpp"
+#include "Krystal.Booey/HTML/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
 #include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/PopStateEvent.hpp"
+#include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedFontLoadRequest.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/NavigationScheduler.hpp"
@@ -123,6 +135,8 @@
 #include "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeBuilder.hpp"
 #include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Storage/Storage.hpp"
+#include "Krystal.Booey/Storage/StorageEvent.hpp"
 #include "Krystal.Booey/Style/Change.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
 #include "Krystal.Booey/Style/Relations.hpp"
@@ -581,11 +595,95 @@ namespace krys::boo::dom
     return AdoptRef<Attr>(*new Attr(*this, *nameResult));
   }
 
-  Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
+  namespace
   {
-    // FIXME: Create correct event based on 'interface'
-    // FIXME: Set initialized to true and isTrusted to false.
-    return CreateRef<Event>(interface);
+    /// @brief A new event of the interface that createEvent's table gives @p interface; null if none does.
+    KRYS_NODISCARD RefPtr<Event> CreateEventOfInterface(DOMStringView interface) noexcept
+    {
+      auto matches = [interface](DOMStringView name)
+      {
+        return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(interface, name);
+      };
+      DOMStringAtom empty(u8"");
+
+      if (matches(u8"beforeunloadevent"))
+      {
+        return CreateRef<html::BeforeUnloadEvent>();
+      }
+      if (matches(u8"compositionevent"))
+      {
+        return CreateRef<CompositionEvent>(empty);
+      }
+      if (matches(u8"customevent"))
+      {
+        return CreateRef<CustomEvent<RefPtr<html::SerializedScriptValue>>>(empty);
+      }
+      if (matches(u8"dragevent"))
+      {
+        return CreateRef<DragEvent>(empty);
+      }
+      if (matches(u8"event") || matches(u8"events") || matches(u8"htmlevents") || matches(u8"svgevents"))
+      {
+        return CreateRef<Event>(empty);
+      }
+      if (matches(u8"focusevent"))
+      {
+        return CreateRef<FocusEvent>(empty);
+      }
+      if (matches(u8"hashchangeevent"))
+      {
+        return CreateRef<html::HashChangeEvent>(empty);
+      }
+      if (matches(u8"keyboardevent"))
+      {
+        return CreateRef<KeyboardEvent>(empty);
+      }
+      if (matches(u8"messageevent"))
+      {
+        return CreateRef<html::MessageEvent>(empty);
+      }
+      if (matches(u8"storageevent"))
+      {
+        return CreateRef<StorageEvent>(empty);
+      }
+      if (matches(u8"mouseevent") || matches(u8"mouseevents"))
+      {
+        return CreateRef<MouseEvent>(empty);
+      }
+      if (matches(u8"textevent"))
+      {
+        return CreateRef<TextEvent>();
+      }
+      if (matches(u8"uievent") || matches(u8"uievents"))
+      {
+        return CreateRef<UIEvent>(empty);
+      }
+      if (matches(u8"touchevent"))
+      {
+        return CreateRef<TouchEvent>(empty);
+      }
+      // `devicemotionevent` and `deviceorientationevent` name interfaces that aren't exposed.
+      return nullptr;
+    }
+  }
+
+  ExceptionOr<Ref<Event>> Document::CreateEvent(DOMStringView interface) noexcept
+  {
+    RefPtr<Event> event = CreateEventOfInterface(interface);
+    if (!event)
+    {
+      return Exception {ExceptionCode::NotSupportedError};
+    }
+
+    // Its type is the empty string, its time now, and it's untrusted and uninitialized until an init method
+    // is called.
+    event->_type = DOMStringAtom(u8"");
+    event->_bubbles = false;
+    event->_cancellable = false;
+    event->_composed = false;
+    event->_isTrusted = false;
+    event->_initialized = false;
+    return ShareRef(*event);
   }
 
   Ref<Range> Document::CreateRange() noexcept

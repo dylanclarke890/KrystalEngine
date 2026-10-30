@@ -499,7 +499,7 @@ namespace krys::boo::dom
                                                             DOMStringAtom qualifiedName) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createevent
-    KRYS_NODISCARD Ref<Event> CreateEvent(DOMStringAtom interface) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Event>> CreateEvent(DOMStringView interface) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-createrange
     KRYS_NODISCARD Ref<Range> CreateRange() noexcept;

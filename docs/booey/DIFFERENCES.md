@@ -43,6 +43,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `ToggleEvent` has the specification's `source`, which upstream lacks, retargeted against the current target as `CommandEvent`'s is. `ToggleEventTask::Queue` keeps the latest toggle's source.
 - Element reflection holds one element per attribute, keyed by local name (`ExplicitlySetAttrElementsMap`), for `popovertarget` and `commandfor` only. There are no arrays of elements.
 - Maps that upstream keeps weakly (such as `AnchorPositionedToAnchorMap`) are keyed by address, with a weak pointer in each entry to tell a destroyed key from a new one at the same address.
+- `Document::CreateEvent` takes only the specification's names: upstream's extra `keyboardevents`, `mutationevent(s)`, `popstateevent` and `wheelevent` throw `NotSupportedError`, as do `devicemotionevent` and `deviceorientationevent`, whose interfaces aren't ported. A `customevent` is a `CustomEvent<RefPtr<SerializedScriptValue>>`, its detail standing for `any`.
 
 ## HTML parser
 
