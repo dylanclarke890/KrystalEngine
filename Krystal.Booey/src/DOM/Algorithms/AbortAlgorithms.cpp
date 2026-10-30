@@ -22,11 +22,13 @@ namespace krys::boo::dom
     {
       signal._abortAlgorithms.push_back(algorithm);
     }
+    signal.UpdateHeldBySources();
   }
 
   void AbortAlgorithms::Remove(const AbortAlgorithmCallback &algorithm, AbortSignal &signal) noexcept
   {
     std::erase(signal._abortAlgorithms, algorithm);
+    signal.UpdateHeldBySources();
   }
 
   void AbortAlgorithms::SignalAbort(AbortSignal &signal, Maybe<krys::Any> reason) noexcept
@@ -38,12 +40,18 @@ namespace krys::boo::dom
 
     signal._reason = reason.value_or(Exception {ExceptionCode::AbortError});
 
+    // An aborted signal can't abort again, so it lets go of its dependents and its sources.
+    auto dependentSignals = std::exchange(signal._dependentSignals, {});
+    DetachFromSources(signal);
+
     List<Ref<AbortSignal>> dependentSignalsToAbort {};
-    for (const auto &dependentSignal : signal._dependentSignals)
+    for (const auto &dependent : dependentSignals)
     {
-      if (!dependentSignal->Aborted())
+      auto *dependentSignal = dependent.Weak.get();
+      if (dependentSignal && !dependentSignal->Aborted())
       {
         dependentSignal->_reason = signal._reason;
+        DetachFromSources(*dependentSignal);
         dependentSignalsToAbort.push_back(ShareRef(*dependentSignal));
       }
     }
@@ -54,6 +62,19 @@ namespace krys::boo::dom
     {
       RunAbortSteps(*dependantSignal);
     }
+  }
+
+  void AbortAlgorithms::DetachFromSources(AbortSignal &signal) noexcept
+  {
+    for (auto &weakSource : signal._sourceSignals)
+    {
+      if (auto *source = weakSource.get())
+      {
+        std::erase_if(source->_dependentSignals, [&](const auto &dependent)
+                      { return !dependent.Weak || dependent.Weak.get() == &signal; });
+      }
+    }
+    signal._sourceSignals.clear();
   }
 
   void AbortAlgorithms::RunAbortSteps(AbortSignal &signal) noexcept
@@ -86,37 +107,34 @@ namespace krys::boo::dom
 
     resultSignal->_dependent = true;
 
+    // Links resultSignal and source, each once.
+    auto link = [&resultSignal](AbortSignal &source)
+    {
+      if (!std::ranges::any_of(resultSignal->_sourceSignals, [&](auto &s) { return s.get() == &source; }))
+      {
+        resultSignal->_sourceSignals.push_back(CreateWeakPtr(&source));
+      }
+      if (!std::ranges::any_of(source._dependentSignals,
+                               [&](auto &d) { return d.Weak.get() == resultSignal.get(); }))
+      {
+        source._dependentSignals.push_back({CreateWeakPtr(resultSignal.get()), nullptr});
+      }
+    };
+
     for (const auto &signal : signals)
     {
       if (!signal->_dependent)
       {
-        if (!std::ranges::any_of(resultSignal->_sourceSignals, [&](auto &s) { return s.get() == signal; }))
-        {
-          resultSignal->_sourceSignals.push_back(CreateWeakRef(*signal));
-        }
-        if (!std::ranges::any_of(signal->_dependentSignals, [&](auto &s) { return s.get() == resultSignal; }))
-        {
-          signal->_dependentSignals.push_back(CreateWeakRef(*resultSignal));
-        }
+        link(*signal);
       }
       else
       {
         for (const auto &sourceSignal : signal->_sourceSignals)
         {
-          if (auto srcSignal = sourceSignal.lock())
+          if (auto *source = sourceSignal.get())
           {
-            assert(!sourceSignal->Aborted() && !sourceSignal->_dependent);
-
-            if (!std::ranges::any_of(resultSignal->_sourceSignals,
-                                     [&](auto &s) { return s.get() == signal; }))
-            {
-              resultSignal->_sourceSignals.push_back(CreateWeakRef(*signal));
-            }
-            if (!std::ranges::any_of(signal->_dependentSignals,
-                                     [&](auto &s) { return s.get() == resultSignal; }))
-            {
-              signal->_dependentSignals.push_back(CreateWeakRef(*resultSignal));
-            }
+            krys_debug_assert(!source->Aborted() && !source->_dependent);
+            link(*source);
           }
         }
       }

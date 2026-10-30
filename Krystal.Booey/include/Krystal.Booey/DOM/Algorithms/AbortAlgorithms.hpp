@@ -34,5 +34,9 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#create-a-dependent-abort-signal
     static Ref<AbortSignal> CreateDependentAbortSignal(const List<Ref<AbortSignal>> &signals) noexcept;
+
+  private:
+    /// @brief Removes @p signal from its sources' dependents, and clears its sources.
+    static void DetachFromSources(AbortSignal &signal) noexcept;
   };
 }

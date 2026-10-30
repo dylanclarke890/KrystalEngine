@@ -15,10 +15,20 @@ namespace krys::boo::dom
     friend class AbortAlgorithms;
 
   private:
+    /// @brief A signal that depends on this one: held strongly while it has to stay alive for this signal to
+    /// abort it (while it has abort event listeners or abort algorithms).
+    /// @see https://dom.spec.whatwg.org/#abortsignal-garbage-collection
+    struct DependentSignal
+    {
+      WeakPtr<AbortSignal> Weak;
+      RefPtr<AbortSignal> Strong;
+    };
+
     krys::Any _reason;
     List<AbortAlgorithmCallback> _abortAlgorithms;
     List<WeakPtr<AbortSignal>> _sourceSignals;
-    List<WeakPtr<AbortSignal>> _dependentSignals;
+    List<DependentSignal> _dependentSignals;
+    uint32 _abortEventListenerCount {0};
     bool _dependent {false};
 
   public:
@@ -58,5 +68,13 @@ namespace krys::boo::dom
     // FIXME: attribute EventHandler onabort;
 
 #pragma endregion
+
+  private:
+    void DidAddEventListener(const EventListener &listener) noexcept final;
+    void DidRemoveEventListener(const EventListener &listener) noexcept final;
+
+    /// @brief Has the signal's sources hold it strongly while it must stay alive for them to abort it, and
+    /// weakly otherwise.
+    void UpdateHeldBySources() noexcept;
   };
 }

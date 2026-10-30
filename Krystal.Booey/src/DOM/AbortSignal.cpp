@@ -2,6 +2,7 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortController.hpp"
 #include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 
 namespace krys::boo::dom
@@ -38,5 +39,59 @@ namespace krys::boo::dom
   Ref<AbortSignal> AbortSignal::Any(const List<Ref<AbortSignal>> &signals) noexcept
   {
     return AbortAlgorithms::CreateDependentAbortSignal(signals);
+  }
+
+  void AbortSignal::DidAddEventListener(const EventListener &listener) noexcept
+  {
+    if (listener.Type() == EventNames::Abort)
+    {
+      ++_abortEventListenerCount;
+      UpdateHeldBySources();
+    }
+  }
+
+  void AbortSignal::DidRemoveEventListener(const EventListener &listener) noexcept
+  {
+    if (listener.Type() == EventNames::Abort && _abortEventListenerCount > 0)
+    {
+      --_abortEventListenerCount;
+      UpdateHeldBySources();
+    }
+  }
+
+  void AbortSignal::UpdateHeldBySources() noexcept
+  {
+    bool held = !Aborted() && (_abortEventListenerCount > 0 || !_abortAlgorithms.empty());
+
+    // A reference released here may be the signal's last; it goes once the caller is done with the signal.
+    List<RefPtr<AbortSignal>> released;
+    for (auto &weakSource : _sourceSignals)
+    {
+      auto *source = weakSource.get();
+      if (!source)
+      {
+        continue;
+      }
+      for (auto &dependent : source->_dependentSignals)
+      {
+        if (dependent.Weak.get() != this)
+        {
+          continue;
+        }
+        if (held)
+        {
+          dependent.Strong = ShareRefPtr(this);
+        }
+        else if (dependent.Strong)
+        {
+          released.push_back(krys::move(dependent.Strong));
+        }
+      }
+    }
+
+    if (!released.empty())
+    {
+      html::EventLoop::Current().QueueMicrotask([released = krys::move(released)] {});
+    }
   }
 }
