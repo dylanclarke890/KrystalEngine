@@ -71,6 +71,8 @@ target_precompile_headers(Krystal.Booey.Tests
     <Krystal.Booey/HTML/Parser/HTMLCharacterReference.hpp>
     <Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp>
     <Krystal.Booey/CSS/Values/ValuePool.hpp>
+
+    <Krystal.Booey.Tests/Style/ResolverTestUtils.hpp>
 )
 
 target_sources(Krystal.Booey.Tests

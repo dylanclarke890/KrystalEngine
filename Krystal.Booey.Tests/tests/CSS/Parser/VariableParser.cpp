@@ -11,12 +11,12 @@ namespace krys::boo::css::tests
   namespace
   {
     /// @brief Keeps the tokens alive for the range.
-    struct Tokens
+    struct TokenSource
     {
       InputStream Input;
       Tokenizer Tokenizer;
 
-      explicit Tokens(utf8_stringview css) : Input(CSSOMString(css)), Tokenizer(Input)
+      explicit TokenSource(utf8_stringview css) : Input(CSSOMString(css)), Tokenizer(Input)
       {
         Tokenizer.PumpTokenizer();
       }
@@ -30,13 +30,13 @@ namespace krys::boo::css::tests
     bool ContainsValidVariableReferences(utf8_stringview css,
                                          const ParserContext &context = StrictParserContext())
     {
-      Tokens tokens(css);
+      TokenSource tokens(css);
       return VariableParser::ContainsValidVariableReferences(tokens.Range(), context);
     }
 
     RefPtr<CustomPropertyValue> ParseDeclarationValue(utf8_stringview css)
     {
-      Tokens tokens(css);
+      TokenSource tokens(css);
       return VariableParser::ParseDeclarationValue(CSSOMStringAtom(u8"--x"), tokens.Range(),
                                                    StrictParserContext());
     }
@@ -46,7 +46,7 @@ namespace krys::boo::css::tests
   {
     auto isValid = [](utf8_stringview css)
     {
-      Tokens tokens(css);
+      TokenSource tokens(css);
       return VariableParser::IsValidVariableName(tokens.Range().Peek());
     };
 

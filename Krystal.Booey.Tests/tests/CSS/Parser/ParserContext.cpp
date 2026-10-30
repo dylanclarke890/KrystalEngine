@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePool.hpp"
@@ -7,13 +8,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    KRYS_NODISCARD std::string ToNarrow(CSSOMStringView str) noexcept
-    {
-      return std::string(reinterpret_cast<const char *>(str.data()), str.size());
-    }
-  }
 
   TEST_CASE("ParserContext(ParserMode, URL)", "[CSS][Parser][ParserContext]")
   {

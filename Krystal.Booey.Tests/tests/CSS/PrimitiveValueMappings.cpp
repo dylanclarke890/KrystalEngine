@@ -12,7 +12,7 @@ namespace krys::boo::css::tests
     {
       for (auto value : values)
       {
-        if (FromValueId<T>(ToValueId(value)) != value)
+        if (FromValueId<T>(boo::ToValueId(value)) != value)
         {
           return false;
         }

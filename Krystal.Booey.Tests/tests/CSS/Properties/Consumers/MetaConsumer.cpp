@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -10,19 +11,6 @@
 
 namespace krys::boo::css::tests
 {
-  namespace
-  {
-    struct Tokens
-    {
-      InputStream Input;
-      Tokenizer Tokenizer;
-
-      explicit Tokens(utf8_stringview css) : Input(CSSOMString(css)), Tokenizer(Input)
-      {
-        REQUIRE(Tokenizer.PumpTokenizer());
-      }
-    };
-  }
 
   TEST_CASE("MetaConsumer(Number token)", "[CSS][Properties][Consumers]")
   {

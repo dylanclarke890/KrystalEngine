@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ConsumerTestUtils.hpp"
 #include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -12,16 +13,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    struct Tokens
-    {
-      InputStream Input;
-      Tokenizer Tokenizer;
-
-      explicit Tokens(utf8_stringview css) : Input(CSSOMString(css)), Tokenizer(Input)
-      {
-        REQUIRE(Tokenizer.PumpTokenizer());
-      }
-    };
 
     template <typename... Ts>
     std::string ConsumeAndResolve(utf8_stringview css)

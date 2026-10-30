@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Values/VariableData.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 
@@ -7,10 +8,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD string ToNarrow(utf8_stringview str) noexcept
-    {
-      return string(reinterpret_cast<const char *>(str.data()), str.size());
-    }
 
     Ref<VariableData> MakeData(utf8_stringview css, const ParserContext &context = StrictParserContext())
     {

@@ -49,6 +49,7 @@ namespace krys::boo
   class RenderBlock;
   class RenderBoxModelObject;
   class RenderLayer;
+  class StyleImage;
   struct PaintInfo;
 
   /// @brief A renderer with its own style: an element's, or an anonymous box's.

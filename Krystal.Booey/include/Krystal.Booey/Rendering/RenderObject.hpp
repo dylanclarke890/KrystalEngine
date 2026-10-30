@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Rendering/RepaintRectCalculation.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyleConstants.hpp"
 #include "Krystal.Booey/Rendering/VisibleRectContext.hpp"
+#include "Krystal.Booey/Style/Values/Box/MarginTrim.hpp"
 #include "Krystal.Booey/Style/Values/Color/ColorOptions.hpp"
 #include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Attributes.hpp"

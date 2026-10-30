@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
 #include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Core/Text/StringBuilder.hpp"
@@ -10,10 +11,6 @@ namespace krys::boo::css::tests
 {
   namespace
   {
-    KRYS_NODISCARD string ToNarrow(utf8_stringview str) noexcept
-    {
-      return string(reinterpret_cast<const char *>(str.data()), str.size());
-    }
 
     KRYS_NODISCARD List<Token> Tokenize(utf8_stringview css) noexcept
     {
