@@ -12,6 +12,12 @@ namespace krys::boo::dom::mixins
 {
   RefPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
   {
+    // No element has the empty string as its ID.
+    if (id.empty())
+    {
+      return nullptr;
+    }
+
     auto descendants = DescendantRange(node);
 
     auto it = First(descendants,
