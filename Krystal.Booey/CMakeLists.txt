@@ -3812,6 +3812,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/DocumentParser.hpp
       include/Krystal.Booey/DOM/DocumentType.hpp
       include/Krystal.Booey/DOM/DOMImplementation.hpp
+      include/Krystal.Booey/DOM/DatasetDOMStringMap.hpp
       include/Krystal.Booey/DOM/DOMTokenList.hpp
       include/Krystal.Booey/DOM/Element.hpp
       include/Krystal.Booey/DOM/ElementTextDirection.hpp
@@ -4435,6 +4436,7 @@ target_sources(Krystal.Booey
     src/DOM/DocumentType.cpp
     src/DOM/HTMLDocument.cpp
     src/DOM/DOMImplementation.cpp
+    src/DOM/DatasetDOMStringMap.cpp
     src/DOM/DOMTokenList.cpp
     src/DOM/Element.cpp
     src/DOM/ElementTextDirection.cpp

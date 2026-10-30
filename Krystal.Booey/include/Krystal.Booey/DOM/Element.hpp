@@ -94,6 +94,7 @@ namespace krys::boo::xml
 
 namespace krys::boo::dom
 {
+  class DatasetDOMStringMap;
   class ElementRareData;
   class HTMLCollection;
   class NodeList;
@@ -193,6 +194,10 @@ namespace krys::boo::dom
 
     /// @see https://drafts.csswg.org/css-shadow-parts/#dom-element-part
     KRYS_NODISCARD DOMTokenList &Part() noexcept;
+
+    /// @brief The element's `data-*` attributes, by property name.
+    /// @see https://html.spec.whatwg.org/#dom-dataset
+    KRYS_NODISCARD DatasetDOMStringMap &Dataset() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-slot
     void Slot(DOMString &&slot) noexcept;

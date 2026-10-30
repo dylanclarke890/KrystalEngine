@@ -15,6 +15,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
@@ -1891,6 +1892,16 @@ namespace krys::boo::dom
       rareData.SetPartList(ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
     }
     return *rareData.PartList();
+  }
+
+  DatasetDOMStringMap &Element::Dataset() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.Dataset())
+    {
+      rareData.SetDataset(CreateUnique<DatasetDOMStringMap>(*this));
+    }
+    return *rareData.Dataset();
   }
 
   void Element::Slot(DOMString &&slot) noexcept

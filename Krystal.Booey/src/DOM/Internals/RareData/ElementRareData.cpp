@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/DOM/DatasetDOMStringMap.hpp"
 #include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
@@ -33,6 +34,11 @@ namespace krys::boo::dom
   void ElementRareData::SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept
   {
     _partList = krys::move(partList);
+  }
+
+  void ElementRareData::SetDataset(UniquePtr<DatasetDOMStringMap> &&dataset) noexcept
+  {
+    _dataset = krys::move(dataset);
   }
 
   void ElementRareData::SetCustomElementReactionQueue(
