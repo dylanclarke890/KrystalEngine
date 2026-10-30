@@ -13,7 +13,8 @@ namespace krys::boo::html::mixins
 {
   /// @brief The members HTML, SVG and MathML elements share: focus and the attributes behind it.
   /// @see https://html.spec.whatwg.org/#htmlorsvgormathmlelement
-  // FIXME: `dataset` and `nonce`.
+  /// @note `dataset` is `Element::Dataset()`.
+  // FIXME: `nonce`.
   class HTMLOrSVGOrMathMLElement
   {
   public:

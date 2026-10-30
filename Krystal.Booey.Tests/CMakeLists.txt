@@ -602,6 +602,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/CharacterData.cpp
 		tests/DOM/Comment.cpp
 		tests/DOM/ContainerNode.cpp
+		tests/DOM/DatasetDOMStringMap.cpp
 		tests/DOM/Document.cpp
 		tests/DOM/DocumentFragment.cpp
 		tests/DOM/DocumentType.cpp
