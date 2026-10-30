@@ -167,6 +167,9 @@ namespace krys::boo
     void SuspendScriptedAnimations() noexcept;
     void ResumeScriptedAnimations() noexcept;
 
+    /// @brief Resumes the paused animated images visible in the main frame's view.
+    void ResumeAnimatingImages() noexcept;
+
     /// @brief The page's session history.
     KRYS_NODISCARD BackForwardController &BackForward() const noexcept
     {

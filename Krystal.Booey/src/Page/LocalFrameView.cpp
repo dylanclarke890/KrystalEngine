@@ -64,16 +64,49 @@ namespace krys::boo
 
   LocalFrameView::~LocalFrameView() noexcept = default;
 
+  namespace
+  {
+    /// @brief Whether a new view for the frame starts shown: when its page is visible, or always for a frame
+    /// without a page, as nothing would show it.
+    KRYS_NODISCARD bool NewViewStartsShown(const LocalFrame &frame) noexcept
+    {
+      auto *page = frame.GetPage();
+      return !page || page->IsVisible();
+    }
+  }
+
   Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame) noexcept
   {
-    return AdoptRef(*new LocalFrameView(frame));
+    Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
+    if (NewViewStartsShown(frame))
+    {
+      view->Show();
+    }
+    return view;
   }
 
   Ref<LocalFrameView> LocalFrameView::Create(LocalFrame &frame, const IntSize &initialSize) noexcept
   {
     Ref<LocalFrameView> view = AdoptRef(*new LocalFrameView(frame));
     view->_frameRect = IntRect(view->_frameRect.Location(), initialSize);
+    if (NewViewStartsShown(frame))
+    {
+      view->Show();
+    }
     return view;
+  }
+
+  void LocalFrameView::Show() noexcept
+  {
+    // FIXME: Showing child views, once there are subframes.
+    _selfVisible = true;
+    // FIXME: Pausing speculative tiling for the main frame, once there's tiling.
+  }
+
+  void LocalFrameView::Hide() noexcept
+  {
+    // FIXME: Hiding child views, once there are subframes.
+    _selfVisible = false;
   }
 
   LocalFrame &LocalFrameView::Frame() const noexcept
@@ -125,7 +158,7 @@ namespace krys::boo
 
   void LocalFrameView::RepaintContentRectangle(const IntRect &rect) noexcept
   {
-    // FIXME: Not while updates are suppressed (shouldUpdate), once there's printing.
+    // Damage is kept while the view is off screen, so the host paints it once the view is shown.
     InvalidateRect(ContentsToView(rect));
   }
 
@@ -2281,6 +2314,12 @@ namespace krys::boo
 
     // When the viewport contents changes (scroll, resize, style recalc, layout, ...),
     // check if we should resume animated images.
+    // FIXME: Subframes, once there are any.
+    ResumeVisibleImageAnimations(VisibleContentRect());
+  }
+
+  void LocalFrameView::ResumeVisibleImageAnimationsIncludingSubframes() noexcept
+  {
     // FIXME: Subframes, once there are any.
     ResumeVisibleImageAnimations(VisibleContentRect());
   }

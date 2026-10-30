@@ -2139,7 +2139,10 @@ namespace krys::boo
     {
       return false;
     }
-    // FIXME: Off-screen frame views (isOffscreen), once a view can be off screen.
+    if (View().FrameView().IsOffscreen())
+    {
+      return false;
+    }
     return true;
   }
 

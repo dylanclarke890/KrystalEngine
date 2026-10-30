@@ -40,6 +40,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Touch pointer ids start at 3 (`PenPointerID + 1`); upstream's GLib ones start at 2 (`mousePointerID + 1`). Touch objects have the standard's `RadiusX()`/`RadiusY()`/`RotationAngle()`/`Force()` in place of the `webkit*` names.
 - Children are inserted one at a time, so the `AllChildrenRemoved`/`AllChildrenReplaced` change types are never produced: `replaceChildren` and `textContent` go through individual changes. Moves are a removal plus an insertion.
 - There's no `SpaceSplitString`: the class invalidation parses the classes from the old and new values each time.
+- A frame without a page gets a shown view, as nothing else would show it; upstream shows a new view only when its page is visible.
 - Every connected node is considered to be in a rendered document, so documents without a frame or view are styled too; upstream's `resolveStyle` returns without a render view.
 - `Document::NodeWillBeRemoved` runs before the removal and moves the hovered element and the active chain out of the removed subtree. Removing an element clears its pseudo-elements in the `ExtensibilityHooks::NodeRemoved` hook rather than in `removedFromAncestor`.
 - Custom elements are C++ `CustomElement` subclasses with virtual callbacks, so every callback reaction is enqueued (upstream skips callbacks a definition lacks). `ConnectedMoveCallback` (for `moveBefore()`) is enqueued as the specification has it, and defaults to `DisconnectedCallback` then `ConnectedCallback`.
@@ -181,6 +182,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From WebKit
 
+- A hidden (off-screen) view still collects damage; upstream drops repaints while a view is off screen (`shouldUpdate`) and relies on the platform's drawing area to repaint when it's shown, which Krystal.UI doesn't do.
 - `GraphicsContext::DrawGlyphs` is pure virtual: the drawing backend draws glyphs itself. `GraphicsContextRender2D` fills them through `Renderer2D::DrawGlyphs` and strokes them as one path of their outlines.
 - The base `GraphicsContext::DrawImageBuffer` and `DrawPattern(ImageBuffer &)` draw nothing (FIXME); display list recorders and Krystal.UI's context override them.
 - Image buffers record into a display list unless the host makes an accelerated buffer with its own backend (`GraphicsClient`), which the drawing backend renders; there's no bitmap backend. Colour spaces, pixel formats, volatility, cloning and serialisation are FIXMEs.
