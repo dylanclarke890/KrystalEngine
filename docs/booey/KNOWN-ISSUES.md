@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `Document::EnsurePendingRenderTreeUpdate` doesn't schedule a rendering update, as upstream's does. A change to a text node's data that invalidates no style may therefore wait for something else to schedule an update; no test confirms it yet.
 - `Document::VisibilityState()` is hidden only without a page and visible otherwise, until hosts report visibility (FIXME in `Document.cpp`). Gamepad haptics therefore never stop on hide (FIXME in `GamepadHapticActuator.cpp`).
 - `Document::characterSet` is always UTF-8: the document's encoding isn't passed in at creation (FIXME in `Document.cpp`).
 - `AbortSignal` keeps its source and dependent signals as weak pointers rather than following the specification's garbage collection rule.
