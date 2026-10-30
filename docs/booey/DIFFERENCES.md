@@ -25,6 +25,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `AbortSignal.timeout()`'s task always holds the signal strongly; the specification holds it only while the signal has `abort` listeners.
 - Customized built-in elements aren't supported, as upstream: `is` is ignored, so an element created with an `is` value and no matching autonomous definition is uncustomized where the specification makes it `undefined` (an upgrade candidate).
 - `Document::Body()` returns only `<body>`; the specification's body element can also be a `<frameset>`. `BodyOrFrameset()` includes both.
+- Markup is given as strings: there are no Trusted Types, so `innerHTML`, `outerHTML`, `insertAdjacentHTML()`, `setHTMLUnsafe()` and `parseHTMLUnsafe()` take no `TrustedHTML`. `Document::ParseHTMLUnsafe` takes the document whose settings the new one gets, which the specification finds from the current global object.
+- Setting `outerHTML` on an element whose parent is a `DocumentFragment` throws `NoModificationAllowedError`, as upstream and Chrome do; the specification parses the markup as if in a `<body>`. Setting it also merges the text nodes that end up next to each other where the element was, which the specification doesn't, as upstream and Chrome do.
 
 ### From WebKit
 
@@ -45,6 +47,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Element reflection holds one element per attribute, keyed by local name (`ExplicitlySetAttrElementsMap`), for `popovertarget` and `commandfor` only. There are no arrays of elements.
 - Maps that upstream keeps weakly (such as `AnchorPositionedToAnchorMap`) are keyed by address, with a weak pointer in each entry to tell a destroyed key from a new one at the same address.
 - `Document::CreateEvent` takes only the specification's names: upstream's extra `keyboardevents`, `mutationevent(s)`, `popstateevent` and `wheelevent` throw `NotSupportedError`, as do `devicemotionevent` and `deviceorientationevent`, whose interfaces aren't ported. A `customevent` is a `CustomEvent<RefPtr<SerializedScriptValue>>`, its detail standing for `any`.
+- Markup set with `innerHTML`, `outerHTML`, `insertAdjacentHTML()` and `setHTMLUnsafe()` is always parsed with the full fragment parser: there's no fast path for simple markup, no cache of the last `innerHTML` set, and no reused fragment. Replacing the children queues one mutation record through the specification's "replace all", where upstream gathers the removals and the insertion with a `ChildListMutationScope`.
 
 ## HTML parser
 

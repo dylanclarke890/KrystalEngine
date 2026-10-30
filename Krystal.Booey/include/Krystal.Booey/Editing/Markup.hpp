@@ -1,9 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/Editing/HTMLInterchange.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
@@ -74,6 +76,13 @@ namespace krys::boo
   KRYS_NODISCARD Ref<dom::DocumentFragment> CreateFragmentFromMarkup(dom::Document &document,
                                                                      utf8_stringview markup,
                                                                      utf8_stringview baseURL) noexcept;
+  /// @brief The markup, parsed as the children of @p contextElement, for `innerHTML`, `outerHTML`,
+  /// `insertAdjacentHTML()` and `setHTMLUnsafe()`: as HTML in an HTML document or when the policy says to,
+  /// and as XML otherwise, which throws a `SyntaxError` if it isn't well formed.
+  /// @see https://html.spec.whatwg.org/#fragment-parsing-algorithm-steps
+  KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
+    CreateFragmentForInnerOuterHTML(dom::Element &contextElement, utf8_stringview markup,
+                                    EnumSet<dom::ParserContentPolicy> parserContentPolicy = {}) noexcept;
   /// @see https://w3c.github.io/DOM-Parsing/#dom-range-createcontextualfragment
   KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
     CreateContextualFragment(dom::Element &element, utf8_stringview markup) noexcept;

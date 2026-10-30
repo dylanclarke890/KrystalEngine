@@ -1,9 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Dicts/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/DocumentOrShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Enums/ShadowRootMode.hpp"
 #include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
+#include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
+#include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::css
 {
@@ -94,6 +97,24 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region ShadowRoot (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
+
+    /// @brief Replaces the shadow root's children with @p markup parsed as HTML, with declarative shadow
+    /// roots.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView markup) noexcept;
+
+    /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml
+    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
+    KRYS_NODISCARD DOMString InnerHTML() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-innerhtml
+    ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
+
+#pragma endregion
+
 #pragma region DocumentOrShadowRoot Mixin (CSSOM) - https://drafts.csswg.org/cssom/#extensions-to-the-document-or-shadow-root-interface
 
     /// @brief The style sheets of the shadow root, in order.
@@ -120,6 +141,11 @@ namespace krys::boo::dom
     {
       _containsFocusedElement = flag;
     }
+
+  private:
+    /// @brief Replaces the shadow root's children with @p markup parsed in its host's context.
+    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup,
+                                                EnumSet<ParserContentPolicy> parserContentPolicy) noexcept;
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent

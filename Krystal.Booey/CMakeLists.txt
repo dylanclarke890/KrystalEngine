@@ -3800,6 +3800,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Dicts/ElementCreationOptions.hpp
       include/Krystal.Booey/DOM/Dicts/EventInit.hpp
       include/Krystal.Booey/DOM/Dicts/EventListenerOptions.hpp
+      include/Krystal.Booey/DOM/Dicts/GetHTMLOptions.hpp
       include/Krystal.Booey/DOM/Dicts/GetRootNodeOptions.hpp
       include/Krystal.Booey/DOM/Dicts/ImportNodeOptions.hpp
       include/Krystal.Booey/DOM/Dicts/MutationObserverInit.hpp
@@ -3874,6 +3875,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/Node.hpp
       include/Krystal.Booey/DOM/NodeIterator.hpp
       include/Krystal.Booey/DOM/NodeList.hpp
+      include/Krystal.Booey/DOM/ParserContentPolicy.hpp
       include/Krystal.Booey/DOM/ProcessingInstruction.hpp
       include/Krystal.Booey/DOM/PseudoElement.hpp
       include/Krystal.Booey/DOM/Range.hpp

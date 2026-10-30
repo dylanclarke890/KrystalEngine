@@ -9,18 +9,17 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - A hidden page doesn't hide its main frame's view, and a shown one doesn't resume its animated images, as upstream's do (FIXMEs in `Page.cpp`): views have no shown state and animated images pause only out of view.
-- Event listener callbacks that capture their own target keep it alive (there is no garbage collector); noted on `AddEventListener`.
 
 ### Missing
 
-- No markup-as-string APIs: `innerHTML`, `outerHTML`, `getHTML()`, `setHTMLUnsafe()`, `insertAdjacentHTML()`. Only `Document::ParseHTMLUnsafe` exists.
+- No Sanitizer API: no `setHTML()`, and `Document::ParseHTML` is a stub.
 - No `dataset`, no `document.lastModified`, and `title` is never shown (the chrome client has no tooltips). A language from a `Content-Language` response header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
 - The table APIs (`caption`, `createCaption()`, `rows`, `insertRow()`, ...) are FIXMEs in `HTMLTableElement.hpp`.
 - No Fullscreen API (`:fullscreen`).
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (no console; FIXMEs in `CustomElementInterface.cpp`).
-- `[CEReactions]` scopes are missing on members that aren't implemented yet (`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `setHTMLUnsafe`, `designMode`, `execCommand`, `document.open()`/`write()`, `<table>` members, the `ElementContentEditable` members `contentEditable`, `enterKeyHint` and `inputMode`, `nonce`, `DOMStringMap`).
+- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, `<table>` members, the `ElementContentEditable` members `contentEditable`, `enterKeyHint` and `inputMode`, `nonce`, `DOMStringMap`).
 - `ElementInternals` has no ARIA reflection members (`Reflection::GetContentAttribute` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
@@ -39,7 +38,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Parse errors aren't reported (no console, FIXME in `HTMLTreeBuilder.cpp`).
-- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: the rest of `<template>` start-tag handling in "in head", script end tags in "text", the stop-parsing steps, the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
+- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: the rest of `<template>` start-tag handling in "in head" (so no declarative shadow roots are attached, even by `setHTMLUnsafe()` and `parseHTMLUnsafe()`; test: `setHTMLUnsafe and parseHTMLUnsafe attach declarative shadow roots`, `[!shouldfail]`), script end tags in "text", the stop-parsing steps, the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `HTMLTreeBuilder.cpp`).
 
 ## HTML elements and forms
