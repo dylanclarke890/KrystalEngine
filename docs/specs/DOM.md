@@ -2139,7 +2139,7 @@ To [**set text content**](https://dom.spec.whatwg.org/#set-text-content) with a 
   - [ ] 1. If this is a shadow root, then throw a "`NotSupportedError`" `DOMException`.
   - [ ] 2. Return the result of cloning a node given this with subtree set to subtree.
 
-- [ ] [equals](https://dom.spec.whatwg.org/#concept-node-equals) — A node A equals a node B if all of the following conditions are true:
+- [x] [equals](https://dom.spec.whatwg.org/#concept-node-equals) — A node A equals a node B if all of the following conditions are true:
 
 - A and B implement the same interfaces.
 - The following are equal, switching on the interface A implements:
@@ -2154,7 +2154,7 @@ To [**set text content**](https://dom.spec.whatwg.org/#set-text-content) with a 
 - A and B have the same number of children.
 - Each child of A equals the child of B at the identical index.
 
-- [ ] [isEqualNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-isequalnode) — The `isEqualNode(otherNode)` method steps are to return true if otherNode is non-null and this equals otherNode; otherwise false.
+- [x] [isEqualNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-isequalnode) — The `isEqualNode(otherNode)` method steps are to return true if otherNode is non-null and this equals otherNode; otherwise false.
 
 - [ ] [isSameNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-issamenode) — The `isSameNode(otherNode)` method steps are to return true if otherNode is this; otherwise false.
 
