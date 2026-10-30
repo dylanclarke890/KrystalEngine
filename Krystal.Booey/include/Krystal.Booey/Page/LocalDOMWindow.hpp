@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/IdleCallbackController.hpp"
 #include "Krystal.Booey/DOM/ScriptedAnimationController.hpp"
+#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
@@ -100,13 +101,13 @@ namespace krys::boo
     /// @see https://w3c.github.io/hr-time/#dfn-get-time-origin-timestamp
     MonotonicTime::duration _timeOrigin {};
     /// @brief The timestamp of the rendering update in progress, if any.
-    Maybe<double> _frozenNowTimestamp;
+    Maybe<dom::DOMHighResTimeStamp> _frozenNowTimestamp;
     /// @brief When the window was last activated by the user, as a timestamp: positive infinity if it never
     /// was, negative infinity once an API consumed the activation.
     /// @see https://html.spec.whatwg.org/#last-activation-timestamp
-    double _lastActivationTimestamp;
+    dom::DOMHighResTimeStamp _lastActivationTimestamp;
     /// @see https://html.spec.whatwg.org/#last-history-action-activation-timestamp
-    double _lastHistoryActionActivationTimestamp;
+    dom::DOMHighResTimeStamp _lastHistoryActionActivationTimestamp;
     /// @see https://html.spec.whatwg.org/#concept-error-reporting-mode
     bool _errorReportingMode {false};
     /// @brief How many listeners for gamepad events the window has: it's registered with the gamepad
@@ -660,7 +661,7 @@ namespace krys::boo
 
     /// @brief Milliseconds since the window's time origin, in the host's time.
     /// @see https://w3c.github.io/hr-time/#dfn-current-high-resolution-time
-    KRYS_NODISCARD double NowTimestamp() const noexcept;
+    KRYS_NODISCARD dom::DOMHighResTimeStamp NowTimestamp() const noexcept;
 
     /// @brief The host's time as the window was made, which timestamps count from.
     KRYS_NODISCARD MonotonicTime::duration TimeOrigin() const noexcept
@@ -673,7 +674,7 @@ namespace krys::boo
     void UnfreezeNowTimestamp() noexcept;
 
     /// @brief The frozen timestamp during a rendering update; the current one otherwise.
-    KRYS_NODISCARD double FrozenNowTimestamp() const noexcept;
+    KRYS_NODISCARD dom::DOMHighResTimeStamp FrozenNowTimestamp() const noexcept;
 
     /// @brief The resolved values of @p element's properties, or of its pseudo-element @p pseudoElement (such
     /// as `::before`).

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Numeric.hpp"
@@ -18,7 +19,7 @@ namespace krys::boo::dom
 
   /// @brief Called with the frame's timestamp: milliseconds since the window's time origin.
   /// @see https://html.spec.whatwg.org/#framerequestcallback
-  using FrameRequestCallback = Func<void(double)>;
+  using FrameRequestCallback = Func<void(DOMHighResTimeStamp)>;
 
   /// @brief A document's animation frame callbacks (`requestAnimationFrame()`), run by the rendering update.
   /// @see https://html.spec.whatwg.org/#animation-frames
@@ -41,7 +42,7 @@ namespace krys::boo::dom
     List<CallbackData> _callbackDataList;
     CallbackId _nextCallbackId {0};
     uint32 _suspendCount {0};
-    double _lastAnimationFrameTimestamp {0};
+    DOMHighResTimeStamp _lastAnimationFrameTimestamp {0};
 
   public:
     explicit ScriptedAnimationController(Document &document) noexcept;
@@ -54,7 +55,7 @@ namespace krys::boo::dom
     /// @brief Runs the callbacks registered before this frame, with @p timestamp (milliseconds since the
     /// window's time origin).
     /// @see https://html.spec.whatwg.org/#run-the-animation-frame-callbacks
-    void ServiceRequestAnimationFrameCallbacks(double timestamp) noexcept;
+    void ServiceRequestAnimationFrameCallbacks(DOMHighResTimeStamp timestamp) noexcept;
 
     /// @brief Holds the callbacks back (while the document is suspended), until as many resumes.
     void Suspend() noexcept;

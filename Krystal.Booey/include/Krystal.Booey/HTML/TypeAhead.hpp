@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 #include "Krystal.Core/Types/String.hpp"
 
@@ -37,7 +37,7 @@ namespace krys::boo::html
 
   private:
     TypeAheadDataSource *_dataSource {nullptr};
-    dom::DOMHighResTimeStamp _lastTypeTime {};
+    MonotonicTime::duration _lastTypeTime {};
     char32 _repeatingChar {0};
     utf32_string _buffer;
 

@@ -42,7 +42,7 @@ namespace krys::boo::dom
         _deltaX(-event.DeltaX()), _deltaY(-event.DeltaY()), _deltaMode(DetermineDeltaMode(event)),
         _underlyingPlatformEvent(event)
   {
-    _timeStamp = static_cast<DOMHighResTimeStamp>(event.Timestamp().count());
+    _createTime = event.Timestamp();
   }
 
   Ref<WheelEvent> WheelEvent::Create(const PlatformWheelEvent &event, LocalFrameView *view,

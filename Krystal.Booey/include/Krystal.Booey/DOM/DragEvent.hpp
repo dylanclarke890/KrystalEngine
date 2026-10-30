@@ -27,7 +27,7 @@ namespace krys::boo::dom
     /// @brief A trusted drag event from its parts.
     KRYS_NODISCARD static Ref<DragEvent>
       Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed,
-             DOMHighResTimeStamp timestamp, LocalFrameView *view, int32 detail,
+             MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail,
              const DoublePoint &screenLocation, const DoublePoint &windowLocation, double movementX,
              double movementY, EnumSet<Modifier> modifiers, MouseButton button, uint16 buttons,
              EventTarget *relatedTarget, double force, SyntheticClickType syntheticClickType,

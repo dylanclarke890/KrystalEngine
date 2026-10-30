@@ -1,17 +1,32 @@
 ﻿#include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
+#include <algorithm>
 #include <cassert>
 
 namespace krys::boo::dom
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
-      : _type(type), _timeStamp(MonotonicTime::Now().count()), _bubbles(eventInitDict.Bubbles),
+      : _type(type), _createTime(html::EventLoop::Current().Now()), _bubbles(eventInitDict.Bubbles),
         _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
   {
     // The inner event creation steps set the initialized flag.
     _initialized = true;
+  }
+
+  DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept
+  {
+    auto *window = document.Window();
+    if (!window)
+    {
+      return 0;
+    }
+    return std::max(std::chrono::duration<double, std::milli>(_createTime - window->TimeOrigin()).count(),
+                    0.);
   }
 
   List<Ref<EventTarget>> Event::ComposedPath() const noexcept

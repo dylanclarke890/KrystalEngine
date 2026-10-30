@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
@@ -40,7 +41,7 @@ namespace krys::boo::dom
 
     /// @brief The milliseconds left in the idle period; 0 if it's over or the callback's timeout passed.
     /// @see https://w3c.github.io/requestidlecallback/#dom-idledeadline-timeremaining
-    KRYS_NODISCARD double TimeRemaining() const noexcept;
+    KRYS_NODISCARD DOMHighResTimeStamp TimeRemaining() const noexcept;
 
     /// @see https://w3c.github.io/requestidlecallback/#dom-idledeadline-didtimeout
     KRYS_NODISCARD bool DidTimeoutValue() const noexcept

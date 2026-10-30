@@ -65,8 +65,8 @@ namespace krys::boo
   LocalDOMWindow::LocalDOMWindow(dom::Document &document) noexcept
       : EventTarget(dom::EventTargetFlags::IsWindow), _document(WeakPtr<dom::Document>::WithRef(document)),
         _timeOrigin(html::EventLoop::Current().Now()),
-        _lastActivationTimestamp(std::numeric_limits<double>::infinity()),
-        _lastHistoryActionActivationTimestamp(std::numeric_limits<double>::infinity())
+        _lastActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity()),
+        _lastHistoryActionActivationTimestamp(std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())
   {
     krys_assert(document.Frame());
     AddLanguageChangeObserver(this, [this] { LanguagesChanged(); });
@@ -1119,9 +1119,9 @@ namespace krys::boo
     }
     // For each window in the frame tree (this one), if its last activation timestamp is not positive
     // infinity, set it to negative infinity.
-    if (_lastActivationTimestamp != std::numeric_limits<double>::infinity())
+    if (_lastActivationTimestamp != std::numeric_limits<dom::DOMHighResTimeStamp>::infinity())
     {
-      _lastActivationTimestamp = -std::numeric_limits<double>::infinity();
+      _lastActivationTimestamp = -std::numeric_limits<dom::DOMHighResTimeStamp>::infinity();
     }
     return true;
   }
@@ -1362,7 +1362,7 @@ namespace krys::boo
     }
   }
 
-  double LocalDOMWindow::NowTimestamp() const noexcept
+  dom::DOMHighResTimeStamp LocalDOMWindow::NowTimestamp() const noexcept
   {
     return std::chrono::duration<double, std::milli>(html::EventLoop::Current().Now() - _timeOrigin).count();
   }
@@ -1377,7 +1377,7 @@ namespace krys::boo
     _frozenNowTimestamp = null;
   }
 
-  double LocalDOMWindow::FrozenNowTimestamp() const noexcept
+  dom::DOMHighResTimeStamp LocalDOMWindow::FrozenNowTimestamp() const noexcept
   {
     return _frozenNowTimestamp.value_or(NowTimestamp());
   }

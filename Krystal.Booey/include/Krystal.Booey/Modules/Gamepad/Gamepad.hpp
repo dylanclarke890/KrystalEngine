@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadHapticEffectType.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/CanMakeWeakPtr.hpp"
@@ -78,7 +79,7 @@ namespace krys::boo
 
     /// @brief When its data last changed, in milliseconds since the time origin of its document's window.
     /// @see https://w3c.github.io/gamepad/#dom-gamepad-timestamp
-    KRYS_NODISCARD double Timestamp() const noexcept;
+    KRYS_NODISCARD dom::DOMHighResTimeStamp Timestamp() const noexcept;
 
     /// @brief Each axis's value, from -1 to 1, with right and down positive.
     /// @see https://w3c.github.io/gamepad/#dom-gamepad-axes

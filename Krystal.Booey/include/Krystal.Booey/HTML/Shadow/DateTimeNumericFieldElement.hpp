@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/HTML/Shadow/DateTimeFieldElement.hpp"
+#include "Krystal.Core/Time/MonotonicTime.hpp"
 
 namespace krys::boo::html
 {
@@ -25,7 +25,7 @@ namespace krys::boo::html
     int _value {0};
     bool _hasValue {false};
     dom::DOMString _typeAheadBuffer;
-    dom::DOMHighResTimeStamp _lastDigitCharTime {};
+    MonotonicTime::duration _lastDigitCharTime {};
 
   protected:
     DateTimeNumericFieldElement(dom::Document &document, DateTimeFieldElementFieldOwner &fieldOwner,

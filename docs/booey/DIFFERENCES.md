@@ -342,6 +342,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Touch panning calls `EventHandler::HandleTouchScroll()` (the wheel's default scrolling without the DOM `wheel` event), where upstream hosts send wheel events. Gestures (pan, fling, tap, long press, pinch) are recognised in Krystal.UI's `View`; Booey has none.
 - `Settings::AutoscrollForDragAndDropEnabled` is on by default (upstream's is on only on iOS).
 - `Gamepad.timestamp` is milliseconds from the window's time origin, not the monotonic clock.
+- Events are stamped with the host's time (`html::EventLoop::Current().Now()`), and so are the platform events that Krystal.UI and Booey make; upstream uses the real monotonic clock. `Event::TimeStampForBindings` takes the document rather than a script execution context, and its resolution isn't reduced (upstream rounds to 1 ms and Chrome to 100 µs): without script there are no timing attacks to guard against.
 - Links' drag images are a label (the text in bold over the URL in a rounded rectangle, truncated with `StringTruncator`), where the GLib port has none; Krystal.UI draws every drag image translucent (`DragController::DragImageAlpha`) and runs the drag loop itself rather than handing it to a system loop.
 - `ColorChooserClient::IsElementRTL` is Booey's: the host's select popup, date picker and colour picker overlays are mirrored for right-to-left controls, as Chrome's are.
 

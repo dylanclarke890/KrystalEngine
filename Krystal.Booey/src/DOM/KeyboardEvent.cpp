@@ -92,7 +92,7 @@ namespace krys::boo::dom
         _repeat(key.IsAutoRepeat())
   {
     _isTrusted = true;
-    _timeStamp = static_cast<DOMHighResTimeStamp>(key.Timestamp().count());
+    _createTime = key.Timestamp();
   }
 
   Ref<KeyboardEvent> KeyboardEvent::Create(const PlatformKeyboardEvent &key,

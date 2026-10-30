@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `DOMHighResTimeStamp` is a `size_t`; the specification's is a double in milliseconds, so fractions are lost wherever it is used (`DocumentTimelineOptions` uses a double meanwhile). Test: `Animatable: DOMHighResTimeStamp is a double` (`[!shouldfail]`, `tests/Animation/Animatable.cpp`).
 - `ElementFactory` lowercases HTML local names, so `createElementNS` in the HTML namespace makes `DIV` a div instead of an unknown element. Test: `ElementFactory: HTML's local names are case-sensitive` (`[!shouldfail]`, `tests/DOM/Internals/ElementFactory.cpp`).
 - `NonElementParentNode::GetElementById("")` finds the first element that has no id. Test: `NonElementParentNode::GetElementById finds nothing for the empty string` (`[!shouldfail]`, `tests/DOM/Mixins/NonElementParentNode.cpp`).
 - `Document::CreateEvent` makes a plain `Event` whose type is the interface name, for any name: it doesn't create the named interface, throw `NotSupportedError` for an unknown one, or set the initialized flag (FIXMEs in `Document.cpp`).

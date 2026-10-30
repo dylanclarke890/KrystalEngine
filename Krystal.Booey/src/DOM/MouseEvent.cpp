@@ -83,13 +83,13 @@ namespace krys::boo::dom
       eventType, init, view, event.GlobalPosition(), event.Position(), event.MovementDelta().X(),
       event.MovementDelta().Y(), event.Modifiers(), event.Button(), event.Buttons(), relatedTarget,
       event.Force(), event.GetSyntheticClickType(), coalescedEvents, predictedEvents, Simulated::No));
-    mouseEvent->_timeStamp = static_cast<DOMHighResTimeStamp>(event.Timestamp().count());
+    mouseEvent->_createTime = event.Timestamp();
     mouseEvent->_penOrientation = event.GetPenOrientation();
     return mouseEvent;
   }
 
   Ref<MouseEvent> MouseEvent::Create(DOMStringAtom eventType, bool canBubble, bool isCancelable,
-                                     bool isComposed, DOMHighResTimeStamp timestamp, LocalFrameView *view,
+                                     bool isComposed, MonotonicTime::duration timestamp, LocalFrameView *view,
                                      int32 detail, double screenX, double screenY, double clientX,
                                      double clientY, EnumSet<Modifier> modifiers, MouseButton button,
                                      uint16 buttons, SyntheticClickType syntheticClickType,
@@ -105,7 +105,7 @@ namespace krys::boo::dom
       eventType, init, view, {FiniteOrZero(screenX), FiniteOrZero(screenY)}, {}, 0, 0, modifiers, button,
       buttons, relatedTarget, 0, syntheticClickType, {}, {}, Simulated::No));
     mouseEvent->InitCoordinates({FiniteOrZero(clientX), FiniteOrZero(clientY)});
-    mouseEvent->_timeStamp = timestamp;
+    mouseEvent->_createTime = timestamp;
     return mouseEvent;
   }
 
@@ -134,7 +134,7 @@ namespace krys::boo::dom
     mouseEvent->_isTrusted = isTrusted;
     if (underlyingEvent)
     {
-      mouseEvent->_timeStamp = underlyingEvent->TimeStamp();
+      mouseEvent->_createTime = underlyingEvent->TimeStamp();
     }
 
     mouseEvent->SetUnderlyingEvent(underlyingEvent);

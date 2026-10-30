@@ -16,6 +16,7 @@
 #include "Krystal.Booey/Editing/MoveSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/ReplaceSelectionCommand.hpp"
 #include "Krystal.Booey/Editing/VisiblePosition.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
@@ -63,8 +64,8 @@ namespace krys::boo
     {
       return PlatformMouseEvent(DoublePoint(dragData.ClientPosition()),
                                 DoublePoint(dragData.GlobalPosition()), MouseButton::Left,
-                                PlatformEvent::Type::MouseMoved, 0, {}, MonotonicTime::Now(), 0, {},
-                                ForceAtClick, SyntheticClickType::NoTap);
+                                PlatformEvent::Type::MouseMoved, 0, {}, html::EventLoop::Current().Now(), 0,
+                                {}, ForceAtClick, SyntheticClickType::NoTap);
     }
 
     KRYS_NODISCARD RefPtr<dom::DocumentFragment> DocumentFragmentFromDragData(const DragData &dragData,

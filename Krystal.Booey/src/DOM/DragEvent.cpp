@@ -22,7 +22,7 @@ namespace krys::boo::dom
   DragEvent::~DragEvent() noexcept = default;
 
   Ref<DragEvent> DragEvent::Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed,
-                                   DOMHighResTimeStamp timestamp, LocalFrameView *view, int32 detail,
+                                   MonotonicTime::duration timestamp, LocalFrameView *view, int32 detail,
                                    const DoublePoint &screenLocation, const DoublePoint &windowLocation,
                                    double movementX, double movementY, EnumSet<Modifier> modifiers,
                                    MouseButton button, uint16 buttons, EventTarget *relatedTarget,
@@ -38,7 +38,7 @@ namespace krys::boo::dom
     Ref<DragEvent> event = AdoptRef(*new DragEvent(type, init, view, screenLocation, windowLocation,
                                                    movementX, movementY, modifiers, button, buttons,
                                                    relatedTarget, force, syntheticClickType, dataTransfer));
-    event->_timeStamp = timestamp;
+    event->_createTime = timestamp;
     return event;
   }
 }

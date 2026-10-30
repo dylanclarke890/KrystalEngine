@@ -9,8 +9,7 @@ namespace krys::boo::html
 {
   namespace
   {
-    constexpr auto TypeAheadTimeout = static_cast<dom::DOMHighResTimeStamp>(
-      std::chrono::duration_cast<MonotonicTime::duration>(std::chrono::seconds(1)).count());
+    constexpr MonotonicTime::duration TypeAheadTimeout = std::chrono::seconds(1);
 
     KRYS_NODISCARD bool IsSpaceOrNewline(char32 c) noexcept
     {

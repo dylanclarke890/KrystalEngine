@@ -29,7 +29,7 @@ namespace krys::boo
 
   Gamepad::~Gamepad() noexcept = default;
 
-  double Gamepad::Timestamp() const noexcept
+  dom::DOMHighResTimeStamp Gamepad::Timestamp() const noexcept
   {
     auto *document = _document.get();
     auto *window = document ? document->Window() : nullptr;

@@ -347,7 +347,7 @@ namespace krys::boo::dom
         _coalescedEvents(CreateCoalescedPointerEvents(type, button, mouseEvent, pointerId, pointerType)),
         _predictedEvents(CreatePredictedPointerEvents(type, button, mouseEvent, pointerId, pointerType))
   {
-    _timeStamp = mouseEvent.TimeStamp();
+    _createTime = mouseEvent.TimeStamp();
     _isTrusted = mouseEvent.IsTrusted();
 
     // A pen reports how it's held.
@@ -397,7 +397,7 @@ namespace krys::boo::dom
         _isPrimary(isPrimary), _fractionalCoordinatesAllowed(FractionalCoordinatesAllowedForType(type)),
         _coalescedEvents(coalescedEvents), _predictedEvents(predictedEvents)
   {
-    _timeStamp = static_cast<DOMHighResTimeStamp>(event.Timestamp().count());
+    _createTime = event.Timestamp();
   }
 
   PointerEvent::~PointerEvent() noexcept = default;

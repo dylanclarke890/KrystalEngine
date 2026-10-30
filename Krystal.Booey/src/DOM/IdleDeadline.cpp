@@ -3,7 +3,7 @@
 
 namespace krys::boo::dom
 {
-  double IdleDeadline::TimeRemaining() const noexcept
+  DOMHighResTimeStamp IdleDeadline::TimeRemaining() const noexcept
   {
     if (_didTimeout == DidTimeout::Yes)
     {
