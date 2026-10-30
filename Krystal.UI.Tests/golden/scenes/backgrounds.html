@@ -1,0 +1,28 @@
+﻿<!doctype html>
+<!-- The "backgrounds" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #e9ecf2; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; }
+</style>
+</head>
+<body>
+  <!-- Colours: square, circular and elliptical corners. -->
+  <div style="left: 16px; top: 16px; width: 96px; height: 64px; background: #ef476f"></div>
+  <div style="left: 128px; top: 16px; width: 96px; height: 64px; border-radius: 16px; background: #118ab2"></div>
+  <div style="left: 240px; top: 16px; width: 104px; height: 64px; border-radius: 40px / 20px; background: #06d6a0"></div>
+
+  <!-- Gradients: linear, radial and conic (rounded). -->
+  <div style="left: 16px; top: 96px; width: 96px; height: 64px; background: linear-gradient(135deg, #ffd166, #ef476f)"></div>
+  <div style="left: 128px; top: 96px; width: 96px; height: 64px; background: radial-gradient(circle at 30% 40%, #ffffff, #073b4c)"></div>
+  <div style="left: 240px; top: 96px; width: 104px; height: 64px; border-radius: 12px; background: conic-gradient(from 45deg, #ef476f, #ffd166, #06d6a0, #118ab2, #ef476f)"></div>
+
+  <!-- Tiles over a colour, the content box, and a positioned row of tiles. -->
+  <div style="left: 16px; top: 176px; width: 96px; height: 48px; background: linear-gradient(90deg, #073b4c 50%, transparent 50%) 0 0 / 16px 16px, #ffd166"></div>
+  <div style="left: 128px; top: 176px; width: 96px; height: 48px; padding: 8px; background: #118ab2 content-box"></div>
+  <div style="left: 240px; top: 176px; width: 104px; height: 48px; background: linear-gradient(#ef476f, #ffd166) center / 24px 24px repeat-x, #ffffff"></div>
+</body>
+</html>

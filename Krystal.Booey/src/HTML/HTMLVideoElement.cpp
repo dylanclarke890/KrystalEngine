@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
@@ -32,24 +33,24 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::VideoWidth() const noexcept
   {
-    // TODO(HTMLVideoElement, HTML): Implement VideoWidth()
+    // FIXME: Implement VideoWidth()
     return 0u;
   }
 
   uint32 HTMLVideoElement::VideoHeight() const noexcept
   {
-    // TODO(HTMLVideoElement, HTML): Implement VideoHeight()
+    // FIXME: Implement VideoHeight()
     return 0u;
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLVideoElement::Poster() const noexcept
+  dom::USVString HTMLVideoElement::Poster() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"poster");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster");
   }
 
-  dom::ExceptionOr<void> HTMLVideoElement::Poster(dom::USVString &&value) noexcept
+  void HTMLVideoElement::Poster(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"poster", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept
@@ -60,6 +61,46 @@ namespace krys::boo::html
   void HTMLVideoElement::PlaysInline(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"playsinline", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLVideoElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"width" || localName == u8"height"))
+    {
+      return true;
+    }
+    return HTMLMediaElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLVideoElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLMediaElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Width, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(value, AttributeOrEmpty(u8"height"), style);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Height, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(AttributeOrEmpty(u8"width"), value, style);
+      return;
+    }
+    HTMLMediaElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

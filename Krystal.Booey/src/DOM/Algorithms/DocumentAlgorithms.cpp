@@ -10,7 +10,9 @@
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 
 namespace krys::boo::dom
 {
@@ -29,7 +31,7 @@ namespace krys::boo::dom
   {
     if (std::holds_alternative<ElementCreationOptions>(options))
     {
-      auto &dict = std::get<ElementCreationOptions>(options);
+      auto dict = std::get<ElementCreationOptions>(options);
       if (dict.CustomElementRegistry != nullptr && dict.Is != DOMStringAtom::Null())
       {
         return Exception {ExceptionCode::NotSupportedError};
@@ -39,6 +41,12 @@ namespace krys::boo::dom
           && dict.CustomElementRegistry != document.CustomElementRegistry())
       {
         return Exception {ExceptionCode::NotSupportedError};
+      }
+
+      // NOTE: a null registry is taken as one not given, which leaves the document's.
+      if (dict.CustomElementRegistry == nullptr)
+      {
+        dict.CustomElementRegistry = document.CustomElementRegistry();
       }
 
       return dict;
@@ -85,12 +93,14 @@ namespace krys::boo::dom
 
     if (&document != &oldDocument)
     {
+      // The old document may have only the moving nodes to keep it.
+      auto protectedOldDocument = ShareRef(oldDocument);
       auto documentEffectiveGlobalRegistry =
         ShareRefPtr(html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document));
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
-        inclusiveDescendant._nodeDocument = ShareRefPtr(&document);
+        inclusiveDescendant.SetNodeDocument(document);
         if (Is<ShadowRoot>(inclusiveDescendant))
         {
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
@@ -109,7 +119,7 @@ namespace krys::boo::dom
           auto &elementInclusiveDescendant = Downcast<Element>(inclusiveDescendant);
           for (auto &attr : elementInclusiveDescendant._attributes)
           {
-            attr->_nodeDocument = ShareRefPtr(&document);
+            attr->SetNodeDocument(document);
           }
 
           auto registry = elementInclusiveDescendant.CustomElementRegistry();
@@ -120,10 +130,14 @@ namespace krys::boo::dom
         }
       }
 
-      // TODO(impl): CUSTOM-ELEMENTS
-      // For each inclusiveDescendant of node’s shadow-including inclusive descendants that is custom, in
-      // shadow-including tree order: enqueue a custom element callback reaction with inclusiveDescendant,
-      // callback name "adoptedCallback", and « oldDocument, document ».
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
+      {
+        if (auto *element = DynamicDowncast<Element>(inclusiveDescendant);
+            element && element->IsDefinedCustomElement())
+        {
+          html::CustomElementReactionQueue::EnqueueAdoptedCallbackIfNeeded(*element, oldDocument, document);
+        }
+      }
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
@@ -144,19 +158,32 @@ namespace krys::boo::dom
 
     document._currentDocumentReadiness = readiness;
 
-    // TODO(impl): DOCUMENT - If document is associated with an HTML parser:
-    // Let now be the current high resolution time given document's relevant global object.
-    // If readinessValue is "complete", and document's load timing info's DOM complete time is 0, then set
-    // document's load timing info's DOM complete time to now.
-    // Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive time
-    // is 0, then set document's load timing info's DOM interactive time to now.
+    // If document is associated with an HTML parser (a document a frame loads, with a window):
+    if (auto *window = document.Window(); window && document.Frame())
+    {
+      // Let now be the current high resolution time given document's relevant global object.
+      auto now = window->NowTimestamp();
+      // If readinessValue is "complete", and document's load timing info's DOM complete time is 0, then set
+      // document's load timing info's DOM complete time to now.
+      // Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive time
+      // is 0, then set document's load timing info's DOM interactive time to now.
+      if (readiness == html::DocumentReadyState::Complete && !document._loadTiming.DOMCompleteTime)
+      {
+        document._loadTiming.DOMCompleteTime = now;
+      }
+      else if (readiness == html::DocumentReadyState::Interactive && !document._loadTiming.DOMInteractiveTime)
+      {
+        document._loadTiming.DOMInteractiveTime = now;
+      }
+    }
 
     EventDispatcher::FireEvent(EventNames::ReadyStateChange, document);
   }
 
   bool DocumentAlgorithms::IsIFrameSrcdocDocument(const Document &document) noexcept
   {
-    // TODO(impl): DOCUMENT - this is a Document whose URL matches about:srcdoc.
+    // FIXME: This is a Document whose URL matches about:srcdoc.
+    (void)document;
     return false;
   }
 }

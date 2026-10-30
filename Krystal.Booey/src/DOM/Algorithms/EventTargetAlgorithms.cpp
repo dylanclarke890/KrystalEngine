@@ -52,8 +52,8 @@ namespace krys::boo::dom
   bool EventTargetAlgorithms::DefaultPassiveValue(const DOMStringAtom &type,
                                                   const EventTarget &eventTarget) noexcept
   {
-    if (type != EventNames::TouchStart || type != EventNames::TouchMove || type != EventNames::Wheel
-        || type != EventNames::MouseWheel)
+    if (type != EventNames::TouchStart && type != EventNames::TouchMove && type != EventNames::Wheel
+        && type != EventNames::MouseWheel)
     {
       return false;
     }
@@ -84,7 +84,7 @@ namespace krys::boo::dom
     return false;
   }
 
-  void EventTargetAlgorithms::AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
+  bool EventTargetAlgorithms::AddEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
   {
     // SPEC-VIOLATION(DOM, SERVICE-WORKERS): service workers currently not supported.
     // "If eventTarget is a ServiceWorkerGlobalScope object, its service worker’s script resource’s has ever
@@ -93,12 +93,12 @@ namespace krys::boo::dom
 
     if (listener.Signal() != nullptr && listener.Signal()->Aborted())
     {
-      return;
+      return false;
     }
 
     if (listener.Callback() == nullptr)
     {
-      return;
+      return false;
     }
 
     if (!listener.Passive().has_value())
@@ -113,10 +113,12 @@ namespace krys::boo::dom
     };
 
     if (const auto &existing = std::ranges::find_if(eventTarget._eventListenerList, std::move(AlreadyExists));
-        existing == eventTarget._eventListenerList.end())
+        existing != eventTarget._eventListenerList.end())
     {
-      eventTarget._eventListenerList.push_back(ShareRef(listener));
+      return false;
     }
+    eventTarget._eventListenerList.push_back(ShareRef(listener));
+    eventTarget.DidAddEventListener(listener);
 
     if (listener.Signal() != nullptr)
     {
@@ -133,6 +135,8 @@ namespace krys::boo::dom
         },
         *listener.Signal());
     }
+
+    return true;
   }
 
   void EventTargetAlgorithms::RemoveEventListener(EventTarget &eventTarget, EventListener &listener) noexcept
@@ -148,7 +152,10 @@ namespace krys::boo::dom
 
     if (existing != eventTarget._eventListenerList.end())
     {
+      // Erasing it may drop the listener's last reference.
+      Ref<EventListener> protectedListener = ShareRef(listener);
       eventTarget._eventListenerList.erase(existing);
+      eventTarget.DidRemoveEventListener(listener);
     }
   }
 
@@ -176,14 +183,15 @@ namespace krys::boo::dom
         return current;
       }
 
+      // Return A if its root is not a shadow root, or is a shadow-including inclusive ancestor of B.
       auto *currentNode = Downcast<Node>(current);
       auto &currentRoot = TreeQueries::Root(*currentNode);
-      if (!Is<ShadowRoot>(currentNode))
+      if (!Is<ShadowRoot>(currentRoot))
       {
         return current;
       }
 
-      if (bNode != nullptr && !TreeQueries::IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
+      if (bNode != nullptr && TreeQueries::IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
       {
         return current;
       }
@@ -192,9 +200,6 @@ namespace krys::boo::dom
       current = host;
     }
 
-    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
-    // compiler that current is always valid.
-    std::unreachable();
-    return current;
+    krys_unreachable();
   }
 }

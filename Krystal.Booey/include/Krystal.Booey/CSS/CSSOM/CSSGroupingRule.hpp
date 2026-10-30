@@ -1,88 +1,82 @@
-﻿/*
- * (C) 1999-2003 Lars Knoll (knoll@kde.org)
- * (C) 2002-2003 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2002-2020 Apple Inc. All rights reserved.
- * Copyright (C) 2006 Samuel Weinig (sam@webkit.org)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *
- * You should have received a copy of the GNU Library General Public License
- * along with this library; see the file COPYING.LIB.  If not, write to
- * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
- * Boston, MA 02110-1301, USA.
- */
+﻿#pragma once
 
-#pragma once
-
-#include <memory>
-#include <WebCore/CSSRule.h>
-#include <wtf/Vector.h>
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
 
 namespace krys::boo::css
 {
-
   class CSSRuleList;
-  class StyleRuleGroup;
+  class GroupRule;
 
+  /// @brief The base of the rules that contain other rules.
+  /// @see https://drafts.csswg.org/cssom/#the-cssgroupingrule-interface
   class CSSGroupingRule : public CSSRule
   {
-  public:
-    virtual ~CSSGroupingRule();
+  private:
+    Ref<css::GroupRule> _groupRule;
+    mutable List<RefPtr<CSSRule>> _childRuleCSSOMWrappers;
+    mutable UniquePtr<CSSRuleList> _ruleListCSSOMWrapper;
 
-    CSSRuleList &cssRules() const;
-    ExceptionOr<unsigned> insertRule(const String &rule, unsigned index);
-    ExceptionOr<void> deleteRule(unsigned index);
-    unsigned length() const;
-    CSSRule *item(unsigned index) const;
-    virtual bool isCSSConditionRule() const
+  protected:
+    CSSGroupingRule(css::GroupRule &groupRule, CSSStyleSheet *parent) noexcept;
+
+  public:
+    virtual ~CSSGroupingRule() noexcept;
+
+    KRYS_NODISCARD CSSRuleList &CssRules() const noexcept;
+
+    dom::ExceptionOr<uint32> InsertRule(const CSSOMString &rule, uint32 index) noexcept;
+    dom::ExceptionOr<void> DeleteRule(uint32 index) noexcept;
+
+    KRYS_NODISCARD uint32 Length() const noexcept;
+    KRYS_NODISCARD CSSRule *Item(uint32 index) const noexcept;
+
+    KRYS_NODISCARD virtual bool IsCSSConditionRule() const noexcept
     {
       return false;
     }
 
   protected:
-    CSSGroupingRule(StyleRuleGroup &, CSSStyleSheet *parent);
-    const StyleRuleGroup &groupRule() const
+    KRYS_NODISCARD const css::GroupRule &GetGroupRule() const noexcept
     {
-      return m_groupRule;
+      return *_groupRule;
     }
-    StyleRuleGroup &groupRule()
+
+    KRYS_NODISCARD css::GroupRule &GetGroupRule() noexcept
     {
-      return m_groupRule;
+      return *_groupRule;
     }
-    Ref<const StyleRuleGroup> protectedGroupRule() const;
-    Ref<StyleRuleGroup> protectedGroupRule();
-    void reattach(StyleRuleBase &) override;
-    void appendCSSTextForItems(StringBuilder &) const;
-    void appendCSSTextWithReplacementURLsForItems(StringBuilder &, const CSS::SerializationContext &) const;
-    RefPtr<StyleRuleWithNesting> prepareChildStyleRuleForNesting(StyleRule &) override;
+
+    void Reattach(Rule &rule) noexcept override;
+
+    void AppendCSSTextForItems(StringBuilder &builder) const noexcept;
+    void AppendCSSTextWithReplacementURLsForItems(StringBuilder &builder,
+                                                  const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD RefPtr<StyleRuleWithNesting>
+      PrepareChildStyleRuleForNesting(StyleRule &styleRule) noexcept override;
 
   private:
-    bool isGroupingRule() const final
+    KRYS_NODISCARD bool IsGroupingRule() const noexcept final
     {
       return true;
     }
-    void appendCSSTextForItemsInternal(StringBuilder &, StringBuilder &) const;
-    void cssTextForRules(StringBuilder &) const;
-    void cssTextForRulesWithReplacementURLs(StringBuilder &, const CSS::SerializationContext &) const;
 
-    Ref<StyleRuleGroup> m_groupRule;
-    mutable Vector<RefPtr<CSSRule>> m_childRuleCSSOMWrappers;
-    const std::unique_ptr<CSSRuleList> m_ruleListCSSOMWrapper;
+    static void AppendCSSTextForItemsInternal(StringBuilder &builder, const StringBuilder &rules) noexcept;
+    void CssTextForRules(StringBuilder &rules) const noexcept;
+    void CssTextForRulesWithReplacementURLs(StringBuilder &rules,
+                                            const SerialisationContext &context) const noexcept;
   };
-
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSGroupingRule)
-static bool isType(const WebCore::CSSRule &rule)
-{
-  return rule.isGroupingRule();
 }
-SPECIALIZE_TYPE_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSGroupingRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.IsGroupingRule();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

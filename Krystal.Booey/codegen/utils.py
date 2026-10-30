@@ -8,17 +8,20 @@ import textwrap
 from typing import Iterable
 
 
-def run_gperf(*, gperf_executable: str, filename: str, output_cpp_dir: str, remove_gperf_file: bool):
+def run_gperf(
+    *,
+    gperf_executable: str,
+    filename: str,
+    output_cpp_dir: str,
+    remove_gperf_file: bool,
+    options: list[str] = ["--key-positions=*", "-D", "-n", "-s", "2"],
+):
     """Runs gperf on the specified .gperf file to produce a .cpp file."""
 
     gperf_result_code = subprocess.call(
         [
             gperf_executable,
-            "--key-positions=*",
-            "-D",
-            "-n",
-            "-s",
-            "2",
+            *options,
             f"{filename}.gperf",
             f"--output-file={filename}.cpp",
         ]

@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/BoundaryPoint.hpp"
-#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Booey/DOM/SimpleRange.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/RefCounted.hpp"
 
 namespace krys::boo::dom
 {
@@ -22,6 +23,22 @@ namespace krys::boo::dom
 
   public:
     virtual ~AbstractRange() noexcept = default;
+
+    /// @brief Whether it's a live `Range`, which follows changes to the tree.
+    KRYS_NODISCARD virtual bool IsLiveRange() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD const BoundaryPoint &StartBoundaryPoint() const noexcept
+    {
+      return _start;
+    }
+
+    KRYS_NODISCARD const BoundaryPoint &EndBoundaryPoint() const noexcept
+    {
+      return _end;
+    }
 
 #pragma region AbstractRange - https://dom.spec.whatwg.org/#abstractrange
 
@@ -57,4 +74,10 @@ namespace krys::boo::dom
 
 #pragma endregion
   };
+
+  /// @brief The boundary points of @p range, as they are now.
+  KRYS_NODISCARD inline SimpleRange MakeSimpleRange(const AbstractRange &range) noexcept
+  {
+    return {range.StartBoundaryPoint(), range.EndBoundaryPoint()};
+  }
 }

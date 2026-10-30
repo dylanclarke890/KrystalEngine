@@ -1,0 +1,23 @@
+﻿<!doctype html>
+<!-- The "scrollbars" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, scrolled. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  /* The page overflows the view both ways, so the view has both scrollbars and the scroll corner. */
+  html { background: #f4f6fa; }
+  body { margin: 0; width: 480px; height: 400px; }
+  .box { position: absolute; top: 64px; box-sizing: border-box; width: 90px; height: 120px; background: #ffffff;
+         border: 2px solid #073b4c; }
+  .box div { width: 200px; height: 300px; background: linear-gradient(#ffd166, #118ab2); }
+</style>
+</head>
+<body>
+  <!-- Both scrollbars, always, with the scroll corner between them. -->
+  <div class="box" style="left: 24px; overflow: scroll"><div></div></div>
+  <!-- A vertical scrollbar only, scrolled down by the test. -->
+  <div id="scrolled" class="box" style="left: 132px; overflow-y: auto; overflow-x: hidden"><div></div></div>
+  <!-- A box that scrolls without scrollbars. -->
+  <div class="box" style="left: 240px; overflow: auto; scrollbar-width: none"><div></div></div>
+</body>
+</html>

@@ -1,68 +1,21 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/NumericCategory.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Range.hpp"
 #include "Krystal.Booey/CSS/Values/Units.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Enum.hpp"
 #include "Krystal.Core/Maths/Base.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Visitor.hpp"
-#include <cassert>
 
 namespace krys::boo::css
 {
-  // https://www.w3.org/TR/css-values-4/#numeric-types
-  enum class NumericTypeCategory : uint8
-  {
-    Integer,
-    Number,
-    Percentage,
-    Length,
-    Angle,
-    Time,
-    Frequency,
-    Resolution,
-    Flex,
-    LengthPercentage,
-    AnglePercentage,
-  };
-
-  template <typename>
-  struct UnitTraits;
-
-  template <typename T>
-  concept UnitEnum = IsEnum<T> && requires {
-    requires Integral<decltype(UnitTraits<T>::Count)>;
-    requires SameType<decltype(UnitTraits<T>::Canonical), const T>;
-    requires SameType<decltype(UnitTraits<T>::Category), const NumericTypeCategory>;
-    { UnitTraits<T>::Validate(std::declval<UnitType>()) } -> SameType<Maybe<T>>;
-  };
-
-  /// @brief Unit types where the type is a single value unit type. e.g. LengthUnit, AngleUnit
-  template <typename T>
-  concept SingleValueUnitEnum = UnitEnum<T> && requires { requires(UnitTraits<T>::Count == 1); };
-
-  /// @brief Unit types where the type is a composite of multiple other unit types. e.g. LengthPercentageUnit
-  template <typename T>
-  concept CompositeUnitEnum = UnitEnum<T> && requires { typename UnitTraits<T>::Composite; };
-
-  // Base template: handles cases where the second argument is not a tuple
-  template <typename T, typename Tuple>
-  struct ContainsInTuple : std::false_type
-  {
-  };
-
-  // Partial specialization: unpacks the tuple types and uses a fold expression
-  template <typename T, typename... Ts>
-  struct ContainsInTuple<T, std::tuple<Ts...>> : std::bool_constant<(std::is_same_v<T, Ts> || ...)>
-  {
-  };
-
-  template <typename T, typename CompositeParent>
-  concept NestedUnitEnumOf = UnitEnum<T> && CompositeUnitEnum<CompositeParent>
-                             && ContainsInTuple<T, typename UnitTraits<CompositeParent>::Composite>::value;
+  // MARK: - Unit Literal Type
 
   template <auto unitValue>
   requires UnitEnum<decltype(unitValue)>
@@ -130,7 +83,7 @@ namespace krys::boo::css
       return *this;
     }
 
-    constexpr ValueLiteral &operator-=(std::convertible_to<double> auto const &rhs)
+    constexpr ValueLiteral &operator-=(ConvertibleTo<double> auto const &rhs)
     {
       Value -= static_cast<double>(rhs);
       return *this;
@@ -215,7 +168,7 @@ namespace krys::boo::css
     }
     else if constexpr (NestedUnitEnumOf<T, U>)
     {
-      assert(IsUnit<T>(other));
+      krys_assert(IsUnit<T>(other));
       return UnitTraits<U>::template Downcast<T>(other);
     }
   }
@@ -259,7 +212,7 @@ namespace krys::boo::css
   requires NestedUnitEnumOf<T, U>
   KRYS_NODISCARD constexpr T UnitDowncast(U other) noexcept
   {
-    assert(IsUnit<T>(other));
+    krys_assert(IsUnit<T>(other));
     return UnitTraits<U>::template Downcast<T>(other);
   }
 
@@ -325,7 +278,7 @@ namespace krys::boo::css
     return false;
   }
 
-  constexpr utf8_stringview UnitString(IntegerUnit)
+  KRYS_NODISCARD constexpr utf8_stringview UnitString(IntegerUnit) noexcept
   {
     return u8"";
   }
@@ -335,7 +288,7 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 1uz;
     constexpr static auto Canonical = IntegerUnit::Integer;
-    constexpr static auto Category = NumericTypeCategory::Integer;
+    constexpr static auto Category = css::Category::Integer;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -390,7 +343,7 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 1uz;
     constexpr static auto Canonical = NumberUnit::Number;
-    constexpr static auto Category = NumericTypeCategory::Number;
+    constexpr static auto Category = css::Category::Number;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -446,7 +399,7 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 1uz;
     constexpr static auto Canonical = PercentageUnit::Percentage;
-    constexpr static auto Category = NumericTypeCategory::Percentage;
+    constexpr static auto Category = css::Category::Percentage;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -490,7 +443,7 @@ namespace krys::boo::css
       case AngleUnit::Turn: return UnitType::turn;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<AngleUnit> ToAngleUnit(UnitType cssUnit) noexcept
@@ -525,7 +478,7 @@ namespace krys::boo::css
         case AngleUnit::Turn: return turn2deg(value);
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == AngleUnit::Rad)
     {
@@ -537,7 +490,7 @@ namespace krys::boo::css
         case AngleUnit::Turn: return turn2rad(value);
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == AngleUnit::Grad)
     {
@@ -549,7 +502,7 @@ namespace krys::boo::css
         case AngleUnit::Turn: return turn2grad(value);
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == AngleUnit::Turn)
     {
@@ -561,7 +514,7 @@ namespace krys::boo::css
         case AngleUnit::Turn: return value;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
   }
 
@@ -572,9 +525,9 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 4uz;
     constexpr static auto Canonical = AngleUnit::Deg;
-    constexpr static auto Category = NumericTypeCategory::Angle;
+    constexpr static auto Category = css::Category::Angle;
 
-    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range)
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
       return true;
     }
@@ -613,6 +566,7 @@ namespace krys::boo::css
 
     // "font dependent" length units
     Em,
+    QuirkyEm,
     Ex,
     Lh,
     Cap,
@@ -666,114 +620,116 @@ namespace krys::boo::css
   {
     switch (lengthUnit)
     {
-      case LengthUnit::Px:    return UnitType::px;
-      case LengthUnit::Cm:    return UnitType::cm;
-      case LengthUnit::Mm:    return UnitType::mm;
-      case LengthUnit::Q:     return UnitType::Q;
-      case LengthUnit::In:    return UnitType::in;
-      case LengthUnit::Pt:    return UnitType::pt;
-      case LengthUnit::Pc:    return UnitType::pc;
-      case LengthUnit::Em:    return UnitType::em;
-      case LengthUnit::Ex:    return UnitType::ex;
-      case LengthUnit::Lh:    return UnitType::lh;
-      case LengthUnit::Cap:   return UnitType::cap;
-      case LengthUnit::Ch:    return UnitType::ch;
-      case LengthUnit::Ic:    return UnitType::ic;
-      case LengthUnit::Rcap:  return UnitType::rcap;
-      case LengthUnit::Rch:   return UnitType::rch;
-      case LengthUnit::Rem:   return UnitType::rem;
-      case LengthUnit::Rex:   return UnitType::rex;
-      case LengthUnit::Ric:   return UnitType::ric;
-      case LengthUnit::Rlh:   return UnitType::rlh;
-      case LengthUnit::Vw:    return UnitType::vw;
-      case LengthUnit::Vh:    return UnitType::vh;
-      case LengthUnit::Vmin:  return UnitType::vmin;
-      case LengthUnit::Vmax:  return UnitType::vmax;
-      case LengthUnit::Vb:    return UnitType::vb;
-      case LengthUnit::Vi:    return UnitType::vi;
-      case LengthUnit::Svw:   return UnitType::svw;
-      case LengthUnit::Svh:   return UnitType::svh;
-      case LengthUnit::Svmin: return UnitType::svmin;
-      case LengthUnit::Svmax: return UnitType::svmax;
-      case LengthUnit::Svb:   return UnitType::svb;
-      case LengthUnit::Svi:   return UnitType::svi;
-      case LengthUnit::Lvw:   return UnitType::lvw;
-      case LengthUnit::Lvh:   return UnitType::lvh;
-      case LengthUnit::Lvmin: return UnitType::lvmin;
-      case LengthUnit::Lvmax: return UnitType::lvmax;
-      case LengthUnit::Lvb:   return UnitType::lvb;
-      case LengthUnit::Lvi:   return UnitType::lvi;
-      case LengthUnit::Dvw:   return UnitType::dvw;
-      case LengthUnit::Dvh:   return UnitType::dvh;
-      case LengthUnit::Dvmin: return UnitType::dvmin;
-      case LengthUnit::Dvmax: return UnitType::dvmax;
-      case LengthUnit::Dvb:   return UnitType::dvb;
-      case LengthUnit::Dvi:   return UnitType::dvi;
-      case LengthUnit::Cqw:   return UnitType::cqw;
-      case LengthUnit::Cqh:   return UnitType::cqh;
-      case LengthUnit::Cqi:   return UnitType::cqi;
-      case LengthUnit::Cqb:   return UnitType::cqb;
-      case LengthUnit::Cqmin: return UnitType::cqmin;
-      case LengthUnit::Cqmax: return UnitType::cqmax;
+      case LengthUnit::Px:       return UnitType::px;
+      case LengthUnit::Cm:       return UnitType::cm;
+      case LengthUnit::Mm:       return UnitType::mm;
+      case LengthUnit::Q:        return UnitType::Q;
+      case LengthUnit::In:       return UnitType::in;
+      case LengthUnit::Pt:       return UnitType::pt;
+      case LengthUnit::Pc:       return UnitType::pc;
+      case LengthUnit::Em:       return UnitType::em;
+      case LengthUnit::QuirkyEm: return UnitType::QuirkyEm;
+      case LengthUnit::Ex:       return UnitType::ex;
+      case LengthUnit::Lh:       return UnitType::lh;
+      case LengthUnit::Cap:      return UnitType::cap;
+      case LengthUnit::Ch:       return UnitType::ch;
+      case LengthUnit::Ic:       return UnitType::ic;
+      case LengthUnit::Rcap:     return UnitType::rcap;
+      case LengthUnit::Rch:      return UnitType::rch;
+      case LengthUnit::Rem:      return UnitType::rem;
+      case LengthUnit::Rex:      return UnitType::rex;
+      case LengthUnit::Ric:      return UnitType::ric;
+      case LengthUnit::Rlh:      return UnitType::rlh;
+      case LengthUnit::Vw:       return UnitType::vw;
+      case LengthUnit::Vh:       return UnitType::vh;
+      case LengthUnit::Vmin:     return UnitType::vmin;
+      case LengthUnit::Vmax:     return UnitType::vmax;
+      case LengthUnit::Vb:       return UnitType::vb;
+      case LengthUnit::Vi:       return UnitType::vi;
+      case LengthUnit::Svw:      return UnitType::svw;
+      case LengthUnit::Svh:      return UnitType::svh;
+      case LengthUnit::Svmin:    return UnitType::svmin;
+      case LengthUnit::Svmax:    return UnitType::svmax;
+      case LengthUnit::Svb:      return UnitType::svb;
+      case LengthUnit::Svi:      return UnitType::svi;
+      case LengthUnit::Lvw:      return UnitType::lvw;
+      case LengthUnit::Lvh:      return UnitType::lvh;
+      case LengthUnit::Lvmin:    return UnitType::lvmin;
+      case LengthUnit::Lvmax:    return UnitType::lvmax;
+      case LengthUnit::Lvb:      return UnitType::lvb;
+      case LengthUnit::Lvi:      return UnitType::lvi;
+      case LengthUnit::Dvw:      return UnitType::dvw;
+      case LengthUnit::Dvh:      return UnitType::dvh;
+      case LengthUnit::Dvmin:    return UnitType::dvmin;
+      case LengthUnit::Dvmax:    return UnitType::dvmax;
+      case LengthUnit::Dvb:      return UnitType::dvb;
+      case LengthUnit::Dvi:      return UnitType::dvi;
+      case LengthUnit::Cqw:      return UnitType::cqw;
+      case LengthUnit::Cqh:      return UnitType::cqh;
+      case LengthUnit::Cqi:      return UnitType::cqi;
+      case LengthUnit::Cqb:      return UnitType::cqb;
+      case LengthUnit::Cqmin:    return UnitType::cqmin;
+      case LengthUnit::Cqmax:    return UnitType::cqmax;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<LengthUnit> ToLengthUnit(UnitType cssUnit) noexcept
   {
     switch (cssUnit)
     {
-      case UnitType::px:    return LengthUnit::Px;
-      case UnitType::cm:    return LengthUnit::Cm;
-      case UnitType::mm:    return LengthUnit::Mm;
-      case UnitType::Q:     return LengthUnit::Q;
-      case UnitType::in:    return LengthUnit::In;
-      case UnitType::pt:    return LengthUnit::Pt;
-      case UnitType::pc:    return LengthUnit::Pc;
-      case UnitType::em:    return LengthUnit::Em;
-      case UnitType::ex:    return LengthUnit::Ex;
-      case UnitType::lh:    return LengthUnit::Lh;
-      case UnitType::cap:   return LengthUnit::Cap;
-      case UnitType::ch:    return LengthUnit::Ch;
-      case UnitType::ic:    return LengthUnit::Ic;
-      case UnitType::rcap:  return LengthUnit::Rcap;
-      case UnitType::rch:   return LengthUnit::Rch;
-      case UnitType::rem:   return LengthUnit::Rem;
-      case UnitType::rex:   return LengthUnit::Rex;
-      case UnitType::ric:   return LengthUnit::Ric;
-      case UnitType::rlh:   return LengthUnit::Rlh;
-      case UnitType::vw:    return LengthUnit::Vw;
-      case UnitType::vh:    return LengthUnit::Vh;
-      case UnitType::vmin:  return LengthUnit::Vmin;
-      case UnitType::vmax:  return LengthUnit::Vmax;
-      case UnitType::vb:    return LengthUnit::Vb;
-      case UnitType::vi:    return LengthUnit::Vi;
-      case UnitType::svw:   return LengthUnit::Svw;
-      case UnitType::svh:   return LengthUnit::Svh;
-      case UnitType::svmin: return LengthUnit::Svmin;
-      case UnitType::svmax: return LengthUnit::Svmax;
-      case UnitType::svb:   return LengthUnit::Svb;
-      case UnitType::svi:   return LengthUnit::Svi;
-      case UnitType::lvw:   return LengthUnit::Lvw;
-      case UnitType::lvh:   return LengthUnit::Lvh;
-      case UnitType::lvmin: return LengthUnit::Lvmin;
-      case UnitType::lvmax: return LengthUnit::Lvmax;
-      case UnitType::lvb:   return LengthUnit::Lvb;
-      case UnitType::lvi:   return LengthUnit::Lvi;
-      case UnitType::dvw:   return LengthUnit::Dvw;
-      case UnitType::dvh:   return LengthUnit::Dvh;
-      case UnitType::dvmin: return LengthUnit::Dvmin;
-      case UnitType::dvmax: return LengthUnit::Dvmax;
-      case UnitType::dvb:   return LengthUnit::Dvb;
-      case UnitType::dvi:   return LengthUnit::Dvi;
-      case UnitType::cqw:   return LengthUnit::Cqw;
-      case UnitType::cqh:   return LengthUnit::Cqh;
-      case UnitType::cqi:   return LengthUnit::Cqi;
-      case UnitType::cqb:   return LengthUnit::Cqb;
-      case UnitType::cqmin: return LengthUnit::Cqmin;
-      case UnitType::cqmax: return LengthUnit::Cqmax;
-      default:              break;
+      case UnitType::px:       return LengthUnit::Px;
+      case UnitType::cm:       return LengthUnit::Cm;
+      case UnitType::mm:       return LengthUnit::Mm;
+      case UnitType::Q:        return LengthUnit::Q;
+      case UnitType::in:       return LengthUnit::In;
+      case UnitType::pt:       return LengthUnit::Pt;
+      case UnitType::pc:       return LengthUnit::Pc;
+      case UnitType::em:       return LengthUnit::Em;
+      case UnitType::QuirkyEm: return LengthUnit::QuirkyEm;
+      case UnitType::ex:       return LengthUnit::Ex;
+      case UnitType::lh:       return LengthUnit::Lh;
+      case UnitType::cap:      return LengthUnit::Cap;
+      case UnitType::ch:       return LengthUnit::Ch;
+      case UnitType::ic:       return LengthUnit::Ic;
+      case UnitType::rcap:     return LengthUnit::Rcap;
+      case UnitType::rch:      return LengthUnit::Rch;
+      case UnitType::rem:      return LengthUnit::Rem;
+      case UnitType::rex:      return LengthUnit::Rex;
+      case UnitType::ric:      return LengthUnit::Ric;
+      case UnitType::rlh:      return LengthUnit::Rlh;
+      case UnitType::vw:       return LengthUnit::Vw;
+      case UnitType::vh:       return LengthUnit::Vh;
+      case UnitType::vmin:     return LengthUnit::Vmin;
+      case UnitType::vmax:     return LengthUnit::Vmax;
+      case UnitType::vb:       return LengthUnit::Vb;
+      case UnitType::vi:       return LengthUnit::Vi;
+      case UnitType::svw:      return LengthUnit::Svw;
+      case UnitType::svh:      return LengthUnit::Svh;
+      case UnitType::svmin:    return LengthUnit::Svmin;
+      case UnitType::svmax:    return LengthUnit::Svmax;
+      case UnitType::svb:      return LengthUnit::Svb;
+      case UnitType::svi:      return LengthUnit::Svi;
+      case UnitType::lvw:      return LengthUnit::Lvw;
+      case UnitType::lvh:      return LengthUnit::Lvh;
+      case UnitType::lvmin:    return LengthUnit::Lvmin;
+      case UnitType::lvmax:    return LengthUnit::Lvmax;
+      case UnitType::lvb:      return LengthUnit::Lvb;
+      case UnitType::lvi:      return LengthUnit::Lvi;
+      case UnitType::dvw:      return LengthUnit::Dvw;
+      case UnitType::dvh:      return LengthUnit::Dvh;
+      case UnitType::dvmin:    return LengthUnit::Dvmin;
+      case UnitType::dvmax:    return LengthUnit::Dvmax;
+      case UnitType::dvb:      return LengthUnit::Dvb;
+      case UnitType::dvi:      return LengthUnit::Dvi;
+      case UnitType::cqw:      return LengthUnit::Cqw;
+      case UnitType::cqh:      return LengthUnit::Cqh;
+      case UnitType::cqi:      return LengthUnit::Cqi;
+      case UnitType::cqb:      return LengthUnit::Cqb;
+      case UnitType::cqmin:    return LengthUnit::Cqmin;
+      case UnitType::cqmax:    return LengthUnit::Cqmax;
+      default:                 break;
     }
 
     return null;
@@ -796,6 +752,7 @@ namespace krys::boo::css
         return false;
       }
       case LengthUnit::Em:
+      case LengthUnit::QuirkyEm:
       case LengthUnit::Ex:
       case LengthUnit::Lh:
       case LengthUnit::Cap:
@@ -842,7 +799,7 @@ namespace krys::boo::css
       }
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr bool IsFontRelativeLength(LengthUnit lengthUnit) noexcept
@@ -850,6 +807,7 @@ namespace krys::boo::css
     switch (lengthUnit)
     {
       case LengthUnit::Em:
+      case LengthUnit::QuirkyEm:
       case LengthUnit::Ex:
       case LengthUnit::Lh:
       case LengthUnit::Cap:
@@ -953,9 +911,9 @@ namespace krys::boo::css
   template <>
   struct UnitTraits<LengthUnit>
   {
-    constexpr static auto Count = 49uz;
+    constexpr static auto Count = 50uz;
     constexpr static auto Canonical = LengthUnit::Px;
-    constexpr static auto Category = NumericTypeCategory::Length;
+    constexpr static auto Category = css::Category::Length;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -978,6 +936,7 @@ namespace krys::boo::css
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Pt, pt)
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Pc, pc)
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Em, em)
+  KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::QuirkyEm, quirky_em)
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Ex, ex)
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Lh, lh)
   KRYS_DEFINE_CSS_UNIT_LITERAL(LengthUnit::Cap, cap)
@@ -1038,7 +997,7 @@ namespace krys::boo::css
       case TimeUnit::Ms: return UnitType::ms;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<TimeUnit> ToTimeUnit(UnitType cssUnit) noexcept
@@ -1067,7 +1026,7 @@ namespace krys::boo::css
         case TimeUnit::Ms: return value * secsPerMs;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == TimeUnit::Ms)
     {
@@ -1077,7 +1036,7 @@ namespace krys::boo::css
         case TimeUnit::Ms: return value;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
   }
 
@@ -1088,7 +1047,7 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 2uz;
     constexpr static auto Canonical = TimeUnit::S;
-    constexpr static auto Category = NumericTypeCategory::Time;
+    constexpr static auto Category = css::Category::Time;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -1130,7 +1089,7 @@ namespace krys::boo::css
       case FrequencyUnit::Khz: return UnitType::khz;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<FrequencyUnit> ToFrequencyUnit(UnitType cssUnit) noexcept
@@ -1159,7 +1118,7 @@ namespace krys::boo::css
         case FrequencyUnit::Khz: return value * hertzPerKilohertz;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == FrequencyUnit::Khz)
     {
@@ -1169,7 +1128,7 @@ namespace krys::boo::css
         case FrequencyUnit::Khz: return value;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
   }
 
@@ -1180,20 +1139,20 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 2uz;
     constexpr static auto Canonical = FrequencyUnit::Hz;
-    constexpr static auto Category = NumericTypeCategory::Frequency;
+    constexpr static auto Category = css::Category::Frequency;
 
-    static consteval bool IsValidRangeForCategory(Range) noexcept
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
       return true;
     }
 
-    constexpr static Maybe<FrequencyUnit> Validate(UnitType cssUnit) noexcept
+    KRYS_NODISCARD constexpr static Maybe<FrequencyUnit> Validate(UnitType cssUnit) noexcept
     {
       return ToFrequencyUnit(cssUnit);
     }
 
     template <FrequencyUnit To, typename T>
-    constexpr static T Convert(T value, FrequencyUnit unit) noexcept
+    KRYS_NODISCARD constexpr static T Convert(T value, FrequencyUnit unit) noexcept
     {
       return ConvertFrequency<To, T>(value, unit);
     }
@@ -1226,7 +1185,7 @@ namespace krys::boo::css
       case ResolutionUnit::Dpcm: return UnitType::dpcm;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<ResolutionUnit> ToResolutionUnit(UnitType cssUnit) noexcept
@@ -1259,7 +1218,7 @@ namespace krys::boo::css
         case ResolutionUnit::Dpcm: return value * dppxPerDpcm;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == ResolutionUnit::X)
     {
@@ -1271,7 +1230,7 @@ namespace krys::boo::css
         case ResolutionUnit::Dpcm: return value * dppxPerDpcm / dppxPerX;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == ResolutionUnit::Dpi)
     {
@@ -1283,7 +1242,7 @@ namespace krys::boo::css
         case ResolutionUnit::Dpcm: return value * dppxPerDpcm / dppxPerDpi;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
     else if constexpr (To == ResolutionUnit::Dpcm)
     {
@@ -1295,7 +1254,7 @@ namespace krys::boo::css
         case ResolutionUnit::Dpcm: return value;
       }
 
-      std::unreachable();
+      krys_unreachable();
     }
   }
 
@@ -1306,11 +1265,11 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 4uz;
     constexpr static auto Canonical = ResolutionUnit::Dppx;
-    constexpr static auto Category = NumericTypeCategory::Resolution;
+    constexpr static auto Category = css::Category::Resolution;
 
-    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range tokens) noexcept
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range range) noexcept
     {
-      return tokens.Min >= 0;
+      return range.Min >= 0;
     }
 
     KRYS_NODISCARD constexpr static Maybe<ResolutionUnit> Validate(UnitType cssUnit) noexcept
@@ -1371,7 +1330,7 @@ namespace krys::boo::css
   {
     constexpr static auto Count = 1uz;
     constexpr static auto Canonical = FlexUnit::Fr;
-    constexpr static auto Category = NumericTypeCategory::Flex;
+    constexpr static auto Category = css::Category::Flex;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -1428,7 +1387,7 @@ namespace krys::boo::css
       case AnglePercentageUnit::Percentage: return UnitType::Percentage;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<AnglePercentageUnit> ToAnglePercentageUnit(UnitType cssUnit) noexcept
@@ -1456,20 +1415,20 @@ namespace krys::boo::css
 
     constexpr static auto Count = UnitTraits<AngleUnit>::Count + UnitTraits<PercentageUnit>::Count;
     constexpr static auto Canonical = AnglePercentageUnit::Deg;
-    constexpr static auto Category = NumericTypeCategory::AnglePercentage;
+    constexpr static auto Category = css::Category::AnglePercentage;
 
-    KRYS_NODISCARD consteval static bool isValidRangeForCategory(Range) noexcept
+    KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
       return true;
     }
 
-    KRYS_NODISCARD constexpr static Maybe<AnglePercentageUnit> validate(UnitType cssUnit) noexcept
+    KRYS_NODISCARD constexpr static Maybe<AnglePercentageUnit> Validate(UnitType cssUnit) noexcept
     {
       return ToAnglePercentageUnit(cssUnit);
     }
 
     template <UnitEnum E>
-    KRYS_NODISCARD constexpr static AnglePercentageUnit upcast(E unit) noexcept
+    KRYS_NODISCARD constexpr static AnglePercentageUnit Upcast(E unit) noexcept
     {
       if constexpr (SameType<E, AngleUnit>)
       {
@@ -1501,8 +1460,10 @@ namespace krys::boo::css
       {
         return static_cast<AngleUnit>(unit);
       }
-      else if constexpr (std::same_as<E, PercentageUnit>)
+      else if constexpr (SameType<E, PercentageUnit>)
+      {
         return PercentageUnit::Percentage;
+      }
     }
 
     KRYS_NODISCARD constexpr static decltype(auto) SwitchOnUnitType(AnglePercentageUnit unit,
@@ -1537,6 +1498,7 @@ namespace krys::boo::css
     Pt,
     Pc,
     Em,
+    QuirkyEm,
     Ex,
     Lh,
     Cap,
@@ -1607,6 +1569,7 @@ namespace krys::boo::css
       case LengthPercentageUnit::Pt:         return UnitType::pt;
       case LengthPercentageUnit::Pc:         return UnitType::pc;
       case LengthPercentageUnit::Em:         return UnitType::em;
+      case LengthPercentageUnit::QuirkyEm:   return UnitType::QuirkyEm;
       case LengthPercentageUnit::Ex:         return UnitType::ex;
       case LengthPercentageUnit::Lh:         return UnitType::lh;
       case LengthPercentageUnit::Cap:        return UnitType::cap;
@@ -1651,7 +1614,7 @@ namespace krys::boo::css
       case LengthPercentageUnit::Percentage: return UnitType::Percentage;
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   KRYS_NODISCARD constexpr Maybe<LengthPercentageUnit> ToLengthPercentageUnit(UnitType cssUnit) noexcept
@@ -1666,6 +1629,7 @@ namespace krys::boo::css
       case UnitType::pt:         return LengthPercentageUnit::Pt;
       case UnitType::pc:         return LengthPercentageUnit::Pc;
       case UnitType::em:         return LengthPercentageUnit::Em;
+      case UnitType::QuirkyEm:   return LengthPercentageUnit::QuirkyEm;
       case UnitType::ex:         return LengthPercentageUnit::Ex;
       case UnitType::lh:         return LengthPercentageUnit::Lh;
       case UnitType::cap:        return LengthPercentageUnit::Cap;
@@ -1729,6 +1693,7 @@ namespace krys::boo::css
         return false;
       }
       case LengthPercentageUnit::Em:
+      case LengthPercentageUnit::QuirkyEm:
       case LengthPercentageUnit::Ex:
       case LengthPercentageUnit::Lh:
       case LengthPercentageUnit::Cap:
@@ -1775,7 +1740,7 @@ namespace krys::boo::css
       }
     }
 
-    std::unreachable();
+    krys_unreachable();
   }
 
   template <>
@@ -1785,7 +1750,7 @@ namespace krys::boo::css
 
     constexpr static auto Count = UnitTraits<LengthUnit>::Count + UnitTraits<PercentageUnit>::Count;
     constexpr static auto Canonical = LengthPercentageUnit::Px;
-    constexpr static auto Category = NumericTypeCategory::LengthPercentage;
+    constexpr static auto Category = css::Category::LengthPercentage;
 
     KRYS_NODISCARD consteval static bool IsValidRangeForCategory(Range) noexcept
     {
@@ -1853,6 +1818,13 @@ namespace krys::boo::css
   KRYS_NODISCARD constexpr utf8_stringview UnitString(CompositeUnitEnum auto unit) noexcept
   {
     return SwitchOnUnitType(unit, [](auto alternative) { return UnitString(alternative); });
+  }
+
+  template <auto unit, typename T>
+  KRYS_NODISCARD constexpr decltype(auto) ConvertToValueInUnitsOf(T value) noexcept
+  requires SameType<typename T::UnitType, decltype(unit)>
+  {
+    return UnitTraits<typename T::UnitType>::template Convert<unit>(value.Value, value.Unit);
   }
 
 #pragma endregion

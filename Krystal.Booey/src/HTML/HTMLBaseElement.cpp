@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
 namespace krys::boo::html
@@ -10,7 +11,7 @@ namespace krys::boo::html
 
 #pragma region HTMLBaseElement
 
-  dom::ExceptionOr<dom::USVString> HTMLBaseElement::Href() const noexcept
+  dom::USVString HTMLBaseElement::Href() const noexcept
   {
     // The href IDL attribute, on getting, must return the result of running the following algorithm:
     // Let document be element's node document.
@@ -20,11 +21,17 @@ namespace krys::boo::html
     // encoding. (Thus, the base element isn't affected by other base elements or itself.)
     // If urlRecord is failure, return url.
     // Return the serialization of urlRecord.
-
-    return Reflection::Reflect<dom::USVString>(*this, u8"href");
+    auto &document = NodeDocument();
+    auto url = GetAttribute(u8"href").value_or(dom::DOMString());
+    auto urlRecord = document.CompleteURL(url, document.FallbackBaseURL());
+    if (!urlRecord.IsValid())
+    {
+      return dom::USVString(krys::move(url));
+    }
+    return dom::USVString(urlRecord.String());
   }
 
-  dom::ExceptionOr<void> HTMLBaseElement::Href(dom::USVString &&value) noexcept
+  void HTMLBaseElement::Href(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectSetter<dom::USVString>(*this, u8"href", krys::move(value));
   }
@@ -40,4 +47,47 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  void HTMLBaseElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+
+    if (IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+
+    if (oldAncestor.IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    if (IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
+
+  void HTMLBaseElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                           Maybe<dom::DOMStringView> value,
+                                           dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+    if ((localName == u8"href" || localName == u8"target") && namespaceURI == dom::DOMStringAtom::Null()
+        && IsConnected())
+    {
+      NodeDocument().ProcessBaseElement();
+    }
+  }
 }

@@ -1,103 +1,154 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Commands/CommandType.hpp"
-#include "Krystal.Core/Maths/Vector.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/String.hpp"
-#include "Krystal.Gfx/Colour.hpp"
-#include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
-#include "Krystal.Gfx/Enums/FilterMode.hpp"
-#include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Gfx/Formats.hpp"
+#include "Krystal.Gfx/Handles.hpp"
+#include "Krystal.Gfx/Pipeline.hpp"
+#include "Krystal.Gfx/RenderPass.hpp"
+#include "Krystal.Gfx/Sampler.hpp"
+#include "Krystal.Gfx/Texture.hpp"
 
-namespace krys::Gfx::Commands
+/// @brief The commands a `CommandBuffer` records, as plain data for a device to replay.
+namespace krys::gfx::commands
 {
-  struct SetScissor
+  struct BeginRenderPass
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
-
-    Vec2 Position;
-    Vec2 Size;
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BeginRenderPass");
+    Array<ColourAttachment, MaxColourAttachments> ColourAttachments;
+    uint32 ColourAttachmentCount;
+    DepthStencilAttachment DepthStencil;
   };
 
-  struct ClearScissor
+  struct EndRenderPass
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("ClearScissor");
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::EndRenderPass");
   };
 
+  /// @brief Coordinates have a top-left origin, y pointing down, in pixels.
   struct SetViewport
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
-
-    Vec2 Position;
-    Vec2 Size;
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::SetViewport");
+    float X;
+    float Y;
+    float Width;
+    float Height;
+    float MinDepth;
+    float MaxDepth;
   };
 
-  struct BindRenderTarget
+  /// @brief Coordinates have a top-left origin, y pointing down, in pixels.
+  struct SetScissor
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
-
-    RenderTargetHandle RenderTarget;
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::SetScissor");
+    int32 X;
+    int32 Y;
+    uint32 Width;
+    uint32 Height;
   };
 
-  struct ClearRenderTarget
+  struct SetBlendConstant
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("ClearRenderTarget");
-
-    BufferBitFlags Clear {BufferBitFlags::All};
-    Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
-    float Depth {1.f};
-    uint32 Stencil {0u};
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::SetBlendConstant");
+    Array<float, 4> Constant;
   };
 
-  struct BlitRenderTarget
+  struct SetStencilReference
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("BlitRenderTarget");
-
-    RenderTargetHandle Source;
-    Vec2 SourcePosition;
-    Vec2 SourceSize;
-
-    RenderTargetHandle Destination;
-    Vec2 DestinationPosition;
-    Vec2 DestinationSize;
-
-    FilterMode Filter {FilterMode::Linear};
-    BufferBitFlags Mask {BufferBitFlags::Colour};
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::SetStencilReference");
+    uint32 Reference;
   };
 
-  struct CompositeRenderTargetWithOpacity
+  struct BindPipeline
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("CompositeRenderTargetWithOpacity");
-    RenderTargetHandle Source;
-    RenderTargetHandle Destination;
-    float Opacity {1.f};
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BindPipeline");
+    PipelineHandle Pipeline;
   };
 
-  struct CompositeRenderTarget
+  struct BindVertexBuffer
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("CompositeRenderTarget");
-    RenderTargetHandle Source;
-    RenderTargetHandle Destination;
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BindVertexBuffer");
+    uint32 Slot;
+    BufferHandle Buffer;
+    uint64 Offset;
   };
 
-  struct DrawShape2D
+  struct BindIndexBuffer
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawShape2D");
-
-    MeshHandle Mesh;
-    Gfx::TextureHandle Texture;
-    Mat4 Transform;
-    uint32 InstanceCount {1u};
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BindIndexBuffer");
+    BufferHandle Buffer;
+    gfx::IndexType IndexType;
+    uint64 Offset;
   };
 
-  struct DrawText
+  struct BindUniformBuffer
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BindUniformBuffer");
+    uint32 Slot;
+    BufferHandle Buffer;
+    uint64 Offset;
+    uint64 Size;
+  };
 
-    utf8_stringview Text;
-    Vec2 Position;
-    FontFamilyHandle FontFamily;
-    float FontSize {16.f};
-    Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
+  struct BindTexture
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BindTexture");
+    uint32 Slot;
+    TextureHandle Texture;
+    SamplerHandle Sampler;
+  };
+
+  struct Draw
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::Draw");
+    uint32 VertexCount;
+    uint32 InstanceCount;
+    uint32 FirstVertex;
+    uint32 FirstInstance;
+  };
+
+  struct DrawIndexed
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::DrawIndexed");
+    uint32 IndexCount;
+    uint32 InstanceCount;
+    uint32 FirstIndex;
+    int32 VertexOffset;
+    uint32 FirstInstance;
+  };
+
+  /// @brief Copies tightly packed texels from a buffer into a texture region.
+  struct CopyBufferToTexture
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::CopyBufferToTexture");
+    BufferHandle Source;
+    uint64 SourceOffset;
+    TextureHandle Destination;
+    TextureRegion Region;
+  };
+
+  /// @brief Copies a region of one texture into a region of another, scaling with the filter if the sizes
+  /// differ. Both regions are 2D, in a single mip level and layer.
+  struct BlitTexture
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::BlitTexture");
+    TextureHandle Source;
+    TextureRegion SourceRegion;
+    TextureHandle Destination;
+    TextureRegion DestinationRegion;
+    SamplerFilter Filter;
+  };
+
+  struct PushDebugGroup
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::PushDebugGroup");
+    /// @brief Null-terminated, truncated to fit.
+    Array<char, 64> Name;
+  };
+
+  struct PopDebugGroup
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("gfx::PopDebugGroup");
   };
 }

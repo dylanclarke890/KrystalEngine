@@ -297,4 +297,15 @@ namespace krys::boo::dom::tests
       REQUIRE(result.Value().LocalName().View() == u8"foo");
     }
   }
+
+  TEST_CASE("NameValidation::IsValidCustomElementName", "[HTML][NameValidation]")
+  {
+    REQUIRE(NameValidation::IsValidCustomElementName(u8"x-widget"));
+    REQUIRE(NameValidation::IsValidCustomElementName(u8"my-element-2"));
+    REQUIRE_FALSE(NameValidation::IsValidCustomElementName(u8"div"));
+    REQUIRE_FALSE(NameValidation::IsValidCustomElementName(u8"a"));
+    REQUIRE_FALSE(NameValidation::IsValidCustomElementName(u8"X-widget"));
+    REQUIRE_FALSE(NameValidation::IsValidCustomElementName(u8"x-Widget"));
+    REQUIRE_FALSE(NameValidation::IsValidCustomElementName(u8"font-face"));
+  }
 }

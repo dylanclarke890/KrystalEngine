@@ -13,7 +13,7 @@ namespace krys::boo::css
   struct PrimitiveNumericRaw
   {
     using UnitType = U;
-    using UnitTraits = UnitTraits<UnitType>;
+    using UnitTraits = css::UnitTraits<UnitType>;
     using ResolvedValueType = V;
 
     constexpr static auto Range = R;
@@ -99,7 +99,7 @@ namespace krys::boo::css
   {
     using ResolvedValueType = V;
     using UnitType = U;
-    using UnitTraits = UnitTraits<UnitType>;
+    using UnitTraits = css::UnitTraits<UnitType>;
 
     constexpr static auto Range = R;
     constexpr static auto Category = UnitTraits::Category;

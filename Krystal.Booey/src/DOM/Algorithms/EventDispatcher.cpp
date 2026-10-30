@@ -3,31 +3,63 @@
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/Event/EventListener.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/Page/LocalDOMWindow.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
 {
+  namespace
+  {
+    void CallDefaultEventHandlersInBubblingOrder(Event &event, Span<const Ref<Node>> path) noexcept
+    {
+      if (path.empty())
+      {
+        return;
+      }
+
+      // Non-bubbling events call only one default event handler, the one for the target.
+      path[0]->DefaultEventHandler(event);
+      krys_debug_assert(!event.DefaultPrevented());
+      if (event.DefaultHandled() || !event.Bubbles())
+      {
+        return;
+      }
+
+      for (size_t i = 1; i < path.size(); ++i)
+      {
+        path[i]->DefaultEventHandler(event);
+        krys_debug_assert(!event.DefaultPrevented());
+        if (event.DefaultHandled())
+        {
+          return;
+        }
+      }
+    }
+  }
+
   bool EventDispatcher::DispatchToTarget(Event &event, EventTarget *target, bool legacyTargetOverrideFlag,
                                          bool *legacyOutputDidListenersThrowFlag) noexcept
   {
     // NOTE: `target` is intentionally a raw pointer instead of a reference as we reassign the target later
     // on, would be a pain to do with a reference.
-    assert(target);
+    krys_debug_assert(target);
     event._dispatched = true;
+    auto *originalTarget = target;
 
     auto *targetOverride = target;
     if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
     {
-      assert(target->IsWindow());
-
-      // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window. Might implement in the future.
       // If legacy target override flag is given, let targetOverride be target’s associated Document.
-      assert(false && "Not implemented");
+      krys_debug_assert(target->IsWindow());
+      targetOverride = Downcast<LocalDOMWindow>(*target).Document();
+      krys_debug_assert(targetOverride);
     }
 
     EventTarget *activationTarget = nullptr;
@@ -74,7 +106,7 @@ namespace krys::boo::dom
 
           if (auto shadowRootParent = DynamicDowncast<ShadowRoot>(TreeQueries::Root(*nodeParent)))
           {
-            slotInClosedTree = shadowRootParent->Mode() == ShadowRootMode::Closed;
+            slotInClosedTree = shadowRootParent->Mode() != ShadowRootMode::Open;
           }
         }
 
@@ -196,6 +228,19 @@ namespace krys::boo::dom
       }
     }
 
+    // The nodes on the path, for their default event handlers.
+    List<Ref<Node>> defaultEventHandlerPath;
+    if (Is<Node>(originalTarget))
+    {
+      for (auto &structItem : event._path)
+      {
+        if (auto *node = DynamicDowncast<Node>(structItem.InvocationTarget()))
+        {
+          defaultEventHandlerPath.push_back(ShareRef(*node));
+        }
+      }
+    }
+
     event._eventPhase = EventPhaseType::NONE;
     event._currentTarget = nullptr;
     event._path.clear();
@@ -222,6 +267,14 @@ namespace krys::boo::dom
       }
     }
 
+    if (!event._canceled && !event._defaultHandled && !event._isDefaultEventHandlerIgnored)
+    {
+      auto finalTarget = event._target;
+      event.SetTarget(ShareRefPtr(originalTarget));
+      CallDefaultEventHandlersInBubblingOrder(event, defaultEventHandlerPath);
+      event.SetTarget(krys::move(finalTarget));
+    }
+
     return !event._canceled;
   }
 
@@ -239,7 +292,7 @@ namespace krys::boo::dom
 
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(invocationTargetNode))
       {
-        rootOfClosedTree = shadowRoot->Mode() == ShadowRootMode::Closed;
+        rootOfClosedTree = shadowRoot->Mode() != ShadowRootMode::Open;
       }
     }
 
@@ -261,7 +314,7 @@ namespace krys::boo::dom
 
     assert(lastNonNullShadowAdjustedTarget != event._path.rend());
 
-    event._target = ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget());
+    event.SetTarget(ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget()));
     event.RelatedTarget(pathStruct.RelatedTarget());
     event.TouchTargetList(pathStruct.TouchTargetList());
 
@@ -308,10 +361,26 @@ namespace krys::boo::dom
     }
   }
 
+  LocalDOMWindow *EventDispatcher::RelevantWindow(EventTarget &target) noexcept
+  {
+    if (auto *window = DynamicDowncast<LocalDOMWindow>(target))
+    {
+      return window;
+    }
+    if (auto *node = DynamicDowncast<Node>(target))
+    {
+      return node->NodeDocument().Window();
+    }
+    // FIXME: The other targets' globals (signals, media query lists), once they record their document.
+    return nullptr;
+  }
+
   bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
                                     EventPhaseType phase, bool invocationTargetInShadowTree,
                                     bool *legacyOutputDidListenersThrowFlag) noexcept
   {
+    (void)legacyOutputDidListenersThrowFlag;
+
     bool found = false;
 
     for (auto &listener : listeners)
@@ -343,20 +412,30 @@ namespace krys::boo::dom
         EventTargetAlgorithms::RemoveEventListener(*event._currentTarget, *listener);
       }
 
-      // SPEC-VIOLATION(HTML): realms/global objects currently not supported.
-      // Let global be listener callback’s associated realm’s global object.
+      // Let global be listener callback’s associated realm’s global object. Listeners are host code rather
+      // than script, so their global is the current target's: its window, or its node document's.
       // Let currentEvent be undefined.
-      // If global is a Window object :
+      // If global is a Window object:
       //   Set currentEvent to global’s current event.
       //   If invocationTargetInShadowTree is false, then set global’s current event to event.
+      RefPtr<LocalDOMWindow> global = ShareRefPtr(RelevantWindow(*event._currentTarget));
+      RefPtr<Event> currentEvent;
+      if (global)
+      {
+        currentEvent = global->_currentEvent;
+        if (!invocationTargetInShadowTree)
+        {
+          global->_currentEvent = ShareRefPtr(&event);
+        }
+      }
 
       if (listener->Passive() == true)
       {
         event._inPassiveListener = true;
       }
 
-      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
-      // If global is a Window object, then record timing info for event listener given event and listener.
+      // FIXME: If global is a Window object, then record timing info for event listener given event and
+      // listener, once there's event timing.
 
       // SPEC-VIOLATION(WEBIDL): this is javascript-specific and we don't have JS objects or exceptions, so
       // we'll just call the callback directly.
@@ -366,14 +445,21 @@ namespace krys::boo::dom
       //   global object.
       //   Set legacyOutputDidListenersThrowFlag if given.
 
-      // TODO(impl): LOGGING - we should probably have some way to report exceptions that occur during event
+      // FIXME: We should probably have some way to report exceptions that occur during event
       // listener invocations, even if we don't have JS objects or realms.
 
-      listener->Callback()->HandleEvent(event);
+      {
+        // The listener is host code, as script would be: the reactions of the methods it calls are its own.
+        html::CustomElementReactionStackSuspension suspension;
+        listener->Callback()->HandleEvent(event);
+      }
       event._inPassiveListener = false;
 
-      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
       // If global is a Window object, then set global’s current event to currentEvent.
+      if (global)
+      {
+        global->_currentEvent = krys::move(currentEvent);
+      }
 
       if (event._stopImmediatePropagation)
       {

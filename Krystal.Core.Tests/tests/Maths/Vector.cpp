@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Core/Maths/Vector.hpp"
-#include "Krystal.Core/Maths/Maths.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include "Krystal.Core/Maths/Maths.hpp"
 
 using namespace krys;
 

@@ -1,0 +1,28 @@
+﻿<!doctype html>
+<!-- The "decorations" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Italic.ttf"); font-weight: normal; font-style: italic; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf"); font-weight: bold; font-style: italic; }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 10px; font: 16px/22px "Liberation Sans"; color: #222222; }
+  p { margin: 0; }
+  .row span { margin-right: 10px; }
+  ul, ol { margin: 4px 0; padding-left: 28px; float: left; width: 130px; }
+  .clip { clear: both; width: 160px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .outline { outline: 2px solid #ef476f; }
+</style>
+</head>
+<body>
+  <p class="row"><span style="text-decoration: underline">gypsy jumps</span><span style="text-decoration: underline; text-decoration-skip-ink: none">gypsy</span><span style="text-decoration: line-through #ef476f">struck</span></p>
+  <p class="row"><span style="text-decoration: underline wavy #118ab2">wavy</span><span style="text-decoration: underline double">double</span><span style="text-decoration: overline 2px #06d6a0">over</span></p>
+  <ul><li>disc</li><li style="list-style-type: circle">circle</li><li style="list-style-type: square">square</li></ul>
+  <ol><li>first</li><li>second</li><li>third</li></ol>
+  <p class="clip">This line is far too long to fit in its box</p>
+  <p style="width: 200px; margin-top: 6px">Some text with <span class="outline">an outlined span that wraps</span> onto a second line.</p>
+</body>
+</html>

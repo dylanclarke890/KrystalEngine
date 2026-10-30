@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::css

@@ -12,8 +12,10 @@ target_sources(stb
       ${CMAKE_CURRENT_SOURCE_DIR}/..
     FILES
       stb_image.h
+      stb_image_write.h
       stb_rect_pack.h
   PRIVATE
     stb_image.cpp
+    stb_image_write.cpp
     stb_rect_pack.cpp
 )

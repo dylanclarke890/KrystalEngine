@@ -1,0 +1,83 @@
+﻿#pragma once
+
+#include "Krystal.Booey/Editing/EditingBehavior.hpp"
+#include "Krystal.Booey/Graphics/FontGenericFamilies.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo
+{
+  /// @brief The settings values that style resolution reads.
+  struct SettingsValues
+  {
+    int32 DefaultFontSize {16};
+    int32 DefaultFixedFontSize {13};
+    int32 MinimumFontSize {0};
+    int32 MinimumLogicalFontSize {0};
+    bool EvaluationTimeZoomEnabled {false};
+    /// @brief Whether characters no family has try the pictograph family before the registered fonts.
+    bool FontFallbackPrefersPictographs {false};
+    /// @brief The families the generic families resolve to; none by default, so they use the bundled font.
+    boo::FontGenericFamilies FontGenericFamilies;
+  };
+
+  /// @brief The host's settings for a document: the features without a specification it turns on, the
+  /// embedder features and the values style resolution reads. Standard features are always on.
+  /// @note Documents share the default settings unless the host gives them their own, and documents a
+  /// document creates share its settings. Changing the settings doesn't reparse style sheets that were
+  /// already parsed.
+  struct Settings : public RefCounted<Settings>
+  {
+    // Experimental features: these have no specification yet, or are WebKit's own.
+
+    /// @brief `color-layers()`.
+    bool CSSColorLayersEnabled {false};
+    /// @brief `transform-style: separated`.
+    bool CSSTransformStyleSeparatedEnabled {false};
+    /// @brief The `::thumb` and `::track` pseudo-elements.
+    bool ThumbAndTrackPseudoElementsEnabled {false};
+    /// @brief The `spring()` easing function.
+    bool SpringTimingFunctionEnabled {false};
+    /// @brief Laying out SVG text with the inline formatting context, rather than the legacy line layout.
+    bool UseIFCForSVGText {false};
+
+    // Embedder features.
+
+    /// @brief `-apple-color-filter`.
+    bool ColorFilterEnabled {false};
+    /// @brief The system `appearance` values (`default-button` and friends).
+    bool UseSystemAppearance {false};
+    /// @brief Moving a caret through content that isn't editable, with the keys that move one.
+    bool CaretBrowsingEnabled {false};
+    /// @brief Whether a drag and drop held near the edge of a box that scrolls scrolls it.
+    bool AutoscrollForDragAndDropEnabled {true};
+    /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
+    /// scrolling.
+    bool SpatialNavigationEnabled {false};
+    /// @brief Serializing attribute values without escaping `<` and `>`, as before the HTML standard changed.
+    bool HTMLLegacyAttributeValueSerializationEnabled {false};
+    /// @brief Copying the whole body turning its fixed and absolute positioning into relative positioning, so
+    /// the pasted copy stays in flow.
+    bool ShouldConvertPositionStyleOnCopy {false};
+    /// @brief Whether text areas can be resized (`resize: -internal-textarea-auto` is `both`).
+    bool TextAreasAreResizable {false};
+    /// @brief Whether text directives in a URL's fragment (`#:~:text=`) scroll to the text they indicate.
+    bool ScrollToTextFragmentEnabled {true};
+    /// @brief Whether the text a text directive indicates is highlighted (`::target-text`).
+    bool ScrollToTextFragmentMarkingEnabled {true};
+    /// @brief Whether form controls show dates and numbers in their element's language (its `lang`), rather
+    /// than the user interface's.
+    bool LangAttributeAwareFormControlUIEnabled {false};
+    /// @brief The platform whose editing and selection conventions documents follow.
+    boo::EditingBehaviorType EditingBehaviorType {boo::EditingBehaviorType::Windows};
+
+    SettingsValues Values;
+
+    KRYS_NODISCARD static Ref<Settings> Create() noexcept;
+
+    /// @brief The settings documents share unless the host gives them their own.
+    KRYS_NODISCARD static Settings &Default() noexcept;
+  };
+}

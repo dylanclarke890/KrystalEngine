@@ -27,7 +27,11 @@ target_sources(Krystal.PAL
     BASE_DIRS
       include
     FILES
+      include/Krystal.PAL/CursorShapes.hpp
+      include/Krystal.PAL/DragAndDrop.hpp
+      include/Krystal.PAL/KeyModifiers.hpp
       include/Krystal.PAL/Events.hpp
+      include/Krystal.PAL/Gamepad.hpp
       include/Krystal.PAL/Input.hpp
       include/Krystal.PAL/IWindow.hpp
       include/Krystal.PAL/Keyboard.hpp
@@ -35,6 +39,8 @@ target_sources(Krystal.PAL
       include/Krystal.PAL/Mouse.hpp
       include/Krystal.PAL/MouseButtons.hpp
       include/Krystal.PAL/Platform.hpp
+      include/Krystal.PAL/Pointer.hpp
+      include/Krystal.PAL/TextInput.hpp
 
 	PRIVATE 
     src/Events.cpp
@@ -46,11 +52,14 @@ target_sources(Krystal.PAL
 if(WIN32)
   target_sources(Krystal.PAL
     PRIVATE
+      include/Krystal.PAL/Win32/DropTarget.hpp
       include/Krystal.PAL/Win32/Utils.hpp
       include/Krystal.PAL/Win32/Win32Window.hpp
+      src/Win32/DropTarget.cpp
       src/Win32/Platform.cpp
       src/Win32/Utils.cpp
       src/Win32/Win32Window.cpp
+      src/Win32/XInputGamepadBackend.cpp
   )
 
   target_compile_definitions(Krystal.PAL 

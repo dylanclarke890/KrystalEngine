@@ -1,67 +1,48 @@
-/*
- * Copyright (C) 2021 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "CSSRule.h"
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
+  class FontPaletteValuesRule;
 
-  class DOMMapAdapter;
-  class StyleRuleCSSStyleProperties;
-  class StyleRuleFontPaletteValues;
-
+  /// @brief An `@font-palette-values` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-fonts/#om-fontpalettevalues
   class CSSFontPaletteValuesRule final : public CSSRule
   {
+  private:
+    Ref<css::FontPaletteValuesRule> _fontPaletteValuesRule;
+
+    CSSFontPaletteValuesRule(css::FontPaletteValuesRule &rule, CSSStyleSheet *parent) noexcept;
+
   public:
-    static Ref<CSSFontPaletteValuesRule> create(StyleRuleFontPaletteValues &rule, CSSStyleSheet *sheet)
-    {
-      return adoptRef(*new CSSFontPaletteValuesRule(rule, sheet));
-    }
+    ~CSSFontPaletteValuesRule() noexcept;
 
-    virtual ~CSSFontPaletteValuesRule();
+    KRYS_NODISCARD static Ref<CSSFontPaletteValuesRule> Create(css::FontPaletteValuesRule &rule,
+                                                               CSSStyleSheet *sheet) noexcept;
 
-    String name() const;
-    String fontFamily() const;
-    String basePalette() const;
-    String overrideColors() const;
+    KRYS_NODISCARD CSSOMString Name() const noexcept;
+    KRYS_NODISCARD CSSOMString FontFamily() const noexcept;
+    KRYS_NODISCARD CSSOMString BasePalette() const noexcept;
+    KRYS_NODISCARD CSSOMString OverrideColors() const noexcept;
 
   private:
-    CSSFontPaletteValuesRule(StyleRuleFontPaletteValues &, CSSStyleSheet *parent);
-
-    StyleRuleType styleRuleType() const final
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
-      return StyleRuleType::FontPaletteValues;
+      return RuleType::FontPaletteValues;
     }
-    String cssText() const final;
-    void reattach(StyleRuleBase &) final;
 
-    Ref<StyleRuleFontPaletteValues> m_fontPaletteValuesRule;
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    void Reattach(Rule &rule) noexcept final;
   };
+}
 
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_CSS_RULE(CSSFontPaletteValuesRule, StyleRuleType::FontPaletteValues)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSFontPaletteValuesRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::boo::css::RuleType::FontPaletteValues;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

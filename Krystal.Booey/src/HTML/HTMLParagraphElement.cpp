@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLParagraphElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -18,6 +20,44 @@ namespace krys::boo::html
   void HTMLParagraphElement::Align(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  void HTMLParagraphElement::CollectPresentationalHintsForAttribute(
+    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"align")
+    {
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"middle")
+          || infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"center"))
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitCenter);
+      }
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"left"))
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitLeft);
+      }
+      else if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, u8"right"))
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, css::ValueId::WebkitRight);
+      }
+      else
+      {
+        AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextAlign, ToCSSOMString(value));
+      }
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

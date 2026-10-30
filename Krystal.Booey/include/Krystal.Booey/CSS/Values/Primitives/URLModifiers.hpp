@@ -1,6 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
+
+namespace krys::boo
+{
+  struct ResourceLoaderOptions;
+}
 
 namespace krys::boo::css
 {
@@ -23,16 +29,17 @@ namespace krys::boo::css
             keywords::UnsafeUrl>;
   using URLReferrerPolicyFunction = FunctionNotation<ValueId::ReferrerPolicy, URLReferrerPolicyParameters>;
 
+  /// @brief The request modifiers of a `<url>`.
   // https://drafts.csswg.org/css-values-5/#typedef-request-url-modifier
   // <request-url-modifier> = <cross-origin-modifier> | <integrity-modifier> | <referrer-policy-modifier>
   struct URLModifiers
   {
-    Maybe<URLCrossOriginFunction> crossOrigin {};
-    Maybe<URLIntegrityFunction> integrity {};
-    Maybe<URLReferrerPolicyFunction> referrerPolicy {};
+    Maybe<URLCrossOriginFunction> CrossOrigin {};
+    Maybe<URLIntegrityFunction> Integrity {};
+    Maybe<URLReferrerPolicyFunction> ReferrerPolicy {};
 
     // This is not a parsed value, but is implicit from context the modifiers were parsed with.
-    // LoadedFromOpaqueSource loadedFromOpaqueSource {LoadedFromOpaqueSource::No};
+    boo::LoadedFromOpaqueSource LoadedFromOpaqueSource {boo::LoadedFromOpaqueSource::No};
 
     KRYS_NODISCARD bool operator==(const URLModifiers &) const noexcept = default;
   };
@@ -42,17 +49,21 @@ namespace krys::boo::css
   {
     if constexpr (I == 0)
     {
-      return value.crossOrigin;
+      return value.CrossOrigin;
     }
     else if constexpr (I == 1)
     {
-      return value.integrity;
+      return value.Integrity;
     }
     else if constexpr (I == 2)
     {
-      return value.referrerPolicy;
+      return value.ReferrerPolicy;
     }
   }
+
+  /// @brief Applies the URL request modifier steps of @p modifiers to @p loaderOptions.
+  void ApplyModifiersToLoaderOptions(const URLModifiers &modifiers,
+                                     ResourceLoaderOptions &loaderOptions) noexcept;
 }
 
 DEFINE_SPACE_SEPARATED_TUPLE_LIKE_CONFORMANCE(krys::boo::css::URLModifiers, 3uz)

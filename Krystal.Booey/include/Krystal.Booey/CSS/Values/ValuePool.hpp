@@ -1,9 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Color/ColorValue.hpp"
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Booey/CSS/Values/ColorValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Booey/Graphics/Color/Color.hpp"
 #include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include "Krystal.Core/Types/Array.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Utils/AlignedStorage.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
@@ -13,6 +18,7 @@ namespace krys::boo::css
   class ValueList;
   class ValuePool;
 
+  /// @brief The values shared by every pool: keywords, small integers, and the most common colours.
   class StaticValuePool
   {
     friend class PrimitiveValue;
@@ -20,13 +26,14 @@ namespace krys::boo::css
     friend class LazyNeverDestroyed<StaticValuePool>;
 
   private:
+    constexpr static size_t MaximumCacheableIntegerValue = 255uz;
+
     PrimitiveValue _implicitInitialValue;
 
     ColorValue _transparentColor;
     ColorValue _whiteColor;
     ColorValue _blackColor;
 
-    constexpr static size_t MaximumCacheableIntegerValue = 255uz;
     Array<AlignedStorage<PrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _pixelValues;
     Array<AlignedStorage<PrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _percentageValues;
     Array<AlignedStorage<PrimitiveValue>, MaximumCacheableIntegerValue + 1uz> _numberValues;
@@ -40,6 +47,42 @@ namespace krys::boo::css
 
   extern LazyNeverDestroyed<StaticValuePool> CommonValuePool;
 
+  /// @brief Caches values that are expensive to create or commonly repeated.
+  class ValuePool
+  {
+    KRYS_NON_COPYABLE(ValuePool);
+
+    // Lets `HashMap` use `DefaultHash<boo::Color>`.
+    struct ColorHash
+    {
+      KRYS_NODISCARD size_t operator()(const boo::Color &color) const noexcept
+      {
+        return DefaultHash<boo::Color>::Hash(color);
+      }
+    };
+
+  private:
+    HashMap<boo::Color, Ref<ColorValue>, ColorHash> _colorValueCache;
+    HashMap<CSSOMStringAtom, RefPtr<ValueList>> _fontFaceValueCache;
+    HashMap<CSSOMStringAtom, Ref<PrimitiveValue>> _fontFamilyValueCache;
+
+  public:
+    ValuePool() noexcept;
+    ~ValuePool() noexcept;
+
+    // FIXME: This function needs a name that make it clear that this is not the one and only CSSValuePool,
+    // rather the one that can be used only on the main thread.
+    // FIXME: Consider a design where the value pool thread-local storage so callers don't have to deal
+    // directly with the value pool at all.
+    KRYS_NODISCARD static ValuePool &MainThreadPool() noexcept;
+
+    void Drain() noexcept;
+
+    KRYS_NODISCARD Ref<ColorValue> CreateColorValue(const boo::Color &color) noexcept;
+    KRYS_NODISCARD RefPtr<ValueList> CreateFontFaceValue(const CSSOMStringAtom &string) noexcept;
+    KRYS_NODISCARD Ref<PrimitiveValue> CreateFontFamilyValue(const CSSOMStringAtom &familyName) noexcept;
+  };
+
   inline PrimitiveValue &PrimitiveValue::ImplicitInitialValue() noexcept
   {
     return CommonValuePool->_implicitInitialValue;
@@ -47,15 +90,7 @@ namespace krys::boo::css
 
   inline Ref<PrimitiveValue> PrimitiveValue::Create(css::ValueId identifier) noexcept
   {
-    krys_debug_assert(static_cast<underlying_t<css::ValueId>>(identifier) < TotalValueKeywords);
-
-    auto &value = *CommonValuePool->_identifierValues[static_cast<underlying_t<css::ValueId>>(identifier)];
-    return ShareRef(value);
+    krys_assert(ToUnderlying(identifier) < TotalValueKeywords);
+    return ShareRef(*CommonValuePool->_identifierValues[ToUnderlying(identifier)]);
   }
-
-  class ValuePool
-  {
-  public:
-    KRYS_NODISCARD static ValuePool &MainThreadPool() noexcept;
-  };
 }

@@ -2,7 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Color/Color.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
 
 namespace krys::boo::css
 {
@@ -10,31 +10,27 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
   struct TextShadow
   {
-    Maybe<Color> color;
-    SpaceSeparatedPoint<Length<AllUnzoomed>> location;
-    Maybe<Length<NonNegativeUnzoomed>> blur;
+    Markable<boo::css::Color> Color;
+    SpaceSeparatedPoint<Length<AllUnzoomed>> Location;
+    Markable<Length<NonNegativeUnzoomed>> Blur;
 
-    bool operator==(const TextShadow &) const = default;
+    KRYS_NODISCARD bool operator==(const TextShadow &) const noexcept = default;
   };
 
-  // <`text-shadow`> = none | <text-shadow>#
-  // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow
-  using TextShadowProperty = ListOrNone<CommaSeparatedList<TextShadow>>;
-
   template <size_t I>
-  const auto &get(const TextShadow &value)
+  KRYS_NODISCARD const auto &get(const TextShadow &value) noexcept
   {
     if constexpr (!I)
     {
-      return value.color;
+      return value.Color;
     }
     else if constexpr (I == 1)
     {
-      return value.location;
+      return value.Location;
     }
     else if constexpr (I == 2)
     {
-      return value.blur;
+      return value.Blur;
     }
   }
 }

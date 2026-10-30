@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypesCanonicalization.hpp"
 
 namespace krys::boo::css
@@ -39,7 +40,7 @@ namespace krys::boo::css
         return true;
       }
 
-      return false;
+      return mode == ParserMode::HTMLQuirks && Property::AcceptsQuirkyAngle(state.CurrentProperty);
     }
   };
 

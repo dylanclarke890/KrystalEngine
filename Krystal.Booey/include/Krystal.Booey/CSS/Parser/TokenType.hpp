@@ -57,7 +57,6 @@ namespace krys::boo::css
     Minus
   };
 
-  
   enum class BlockTokenType : uint8
   {
     None,

@@ -169,8 +169,9 @@ namespace krys::boo::html
 
       if constexpr (SameType<TContentAttributeValue, Maybe<dom::DOMString>>)
       {
-        return canonicalKeyword == dom::DOMStringAtom::Null() ? null
-                                                              : dom::DOMString(canonicalKeyword.View());
+        return canonicalKeyword == dom::DOMStringAtom::Null()
+                 ? Maybe<dom::DOMString>()
+                 : Maybe<dom::DOMString>(dom::DOMString(canonicalKeyword.View()));
       }
       else if constexpr (SameType<TContentAttributeValue, dom::DOMString>)
       {
@@ -221,8 +222,7 @@ namespace krys::boo::html
       {
         return Traits::InvalidValueDefault;
       }
-
-      if constexpr (CanReturnNullResolvedState<Traits>)
+      else if constexpr (CanReturnNullResolvedState<Traits>)
       {
         return null;
       }
@@ -364,6 +364,18 @@ namespace krys::boo::html
 
     constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
     constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"popover", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      AutoStateMapping(), KeywordStateMapping {u8"manual", AttributeState::Manual},
+      KeywordStateMapping {u8"hint", AttributeState::Hint}};
+
+    // The missing value default is the No Popover state (null).
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Manual;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
   };
 
   template <>

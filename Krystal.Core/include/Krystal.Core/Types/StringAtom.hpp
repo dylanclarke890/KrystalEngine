@@ -4,6 +4,7 @@
 #include "Krystal.Core/Hash.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/HashSet.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include <xutility>
 
@@ -154,9 +155,31 @@ namespace krys
       return a._ptr == b._ptr;
     }
 
+    /// @brief The interned string; empty for the null atom.
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {
-      return *_ptr;
+      return _ptr ? utf8_stringview {*_ptr} : utf8_stringview {};
+    }
+
+    /// @brief The interned string. Stays valid for the lifetime of the program.
+    KRYS_NODISCARD StringAtomStorage Storage() const noexcept
+    {
+      return _ptr;
+    }
+  };
+
+  /// @brief The null atom marks an empty `Markable<StringAtom>`.
+  template <>
+  struct MarkableTraits<StringAtom>
+  {
+    KRYS_NODISCARD static bool IsEmptyValue(const StringAtom &atom) noexcept
+    {
+      return atom == StringAtom::Null();
+    }
+
+    KRYS_NODISCARD static StringAtom EmptyValue() noexcept
+    {
+      return StringAtom::Null();
     }
   };
 }

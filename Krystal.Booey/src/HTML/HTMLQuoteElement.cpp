@@ -10,12 +10,12 @@ namespace krys::boo::html
 
 #pragma region HTMLQuoteElement
 
-  dom::ExceptionOr<dom::USVString> HTMLQuoteElement::Cite() const noexcept
+  dom::USVString HTMLQuoteElement::Cite() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
-  dom::ExceptionOr<void> HTMLQuoteElement::Cite(dom::USVString &&value) noexcept
+  void HTMLQuoteElement::Cite(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }

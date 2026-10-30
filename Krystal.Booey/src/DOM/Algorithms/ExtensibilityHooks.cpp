@@ -1,23 +1,100 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.Booey/Constants/Attributes.hpp"
-#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/UserActionElementSet.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/PointerCaptureController.hpp"
+#include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
 
 namespace krys::boo::dom
 {
-  void ExtensibilityHooks::NodeInserted(Node &insertedNode) noexcept
+  namespace
   {
-    auto *parent = insertedNode.ParentNode();
-    if (parent == nullptr)
+    /// @brief Tells @p scope's observers of @p node's ID (if it's an element with one) that it joined or left
+    /// the scope.
+    void NotifyIdTargetObservers(Node &node, DocumentOrShadowRoot &scope) noexcept
     {
+      auto *element = DynamicDowncast<Element>(node);
+      if (!element)
+      {
+        return;
+      }
+      auto id = element->GetAttribute(u8"id");
+      if (id && !id->empty())
+      {
+        scope.IdTargetObserverRegistry().NotifyObservers(*element, DOMStringAtom(*id));
+      }
+    }
+
+    /// @brief Forgets the directionality @p element kept from the parent it left.
+    void ResetEffectiveTextDirectionAfterRemoval(Element &element) noexcept
+    {
+      if (element.UsesEffectiveTextDirection()) KRYS_UNLIKELY
+      {
+        if (!element.HasValidTextDirectionState())
+        {
+          if (auto *parent = TreeQueries::ParentOrShadowHostElement(element);
+              !(parent && parent->UsesEffectiveTextDirection()))
+          {
+            element.SetUsesEffectiveTextDirection(false);
+          }
+        }
+      }
+    }
+
+    /// @brief Updates the directionality of @p element as it joins its parent.
+    void UpdateEffectiveTextDirectionAfterInsertion(Element &element) noexcept
+    {
+      // A slot's directionality is updated once it's inserted, from its assigned nodes.
+      if (!Is<html::HTMLSlotElement>(element))
+      {
+        element.UpdateEffectiveTextDirectionIfNeeded();
+      }
+    }
+
+    void UpdateSlotEffectiveTextDirectionAfterInsertion(Node &node) noexcept
+    {
+      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(node);
+          slot && slot->SelfOrPrecedingNodesAffectDirAuto())
+      {
+        slot->UpdateEffectiveTextDirection();
+      }
+    }
+  }
+
+  void ExtensibilityHooks::NodeInserted(Node &insertedNode, bool isSubtreeRoot) noexcept
+  {
+    // NOTE: a shadow root has no parent: it's connected when its host is, and it's always in a shadow tree
+    // (its own). Its host owns it, so it holds no tree reference.
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(insertedNode))
+    {
+      if (shadowRoot->Host()->IsConnected())
+      {
+        shadowRoot->SetNodeFlag(NodeFlags::IsConnected);
+      }
+
+      insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
+                                   style::InvalidationMode::InsertedIntoAncestor);
+      insertedNode.OnInsert();
       return;
     }
 
-    insertedNode.AddRef();
+    auto *parent = insertedNode.ParentNode();
+    krys_debug_assert(parent);
+
+    // The parent owns its children: the inserted node gains one tree reference. Its descendants keep the ones
+    // they already hold.
+    if (isSubtreeRoot)
+    {
+      insertedNode.AddRef();
+    }
 
     if (parent->IsConnected())
     {
@@ -29,7 +106,18 @@ namespace krys::boo::dom
       insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
     }
 
+    insertedNode.InvalidateStyle(style::Validity::SubtreeInvalid,
+                                 style::InvalidationMode::InsertedIntoAncestor);
+    if (parent->IsConnected() || parent->IsInShadowTree())
+    {
+      NotifyIdTargetObservers(insertedNode, insertedNode.TreeScope());
+    }
+    if (auto *element = DynamicDowncast<Element>(insertedNode))
+    {
+      UpdateEffectiveTextDirectionAfterInsertion(*element);
+    }
     insertedNode.OnInsert();
+    UpdateSlotEffectiveTextDirectionAfterInsertion(insertedNode);
   }
 
   void ExtensibilityHooks::NodePostConnection(Node &connectedNode) noexcept
@@ -37,15 +125,33 @@ namespace krys::boo::dom
     connectedNode.OnPostConnection();
   }
 
-  void ExtensibilityHooks::NodeChildrenChanged(ContainerNode &node) noexcept
+  void ExtensibilityHooks::NodeChildrenChanged(ContainerNode &node,
+                                               bool onlyReplacedElementsInserted) noexcept
   {
     node.OnChildrenChanged();
+
+    if (node.NodeDocument().IsDirAttributeDirty()) KRYS_UNLIKELY
+    {
+      // Inserting a replaced Element (image, canvas, input, etc) should be treated as a neutral character.
+      if (auto *element = DynamicDowncast<Element>(node);
+          element && element->SelfOrPrecedingNodesAffectDirAuto() && !onlyReplacedElementsInserted)
+      {
+        element->UpdateEffectiveTextDirection();
+      }
+    }
   }
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
+    if (Is<ShadowRoot>(movedNode))
+    {
+      movedNode.OnMove(isSubtreeRoot, oldAncestor);
+      return;
+    }
+
     auto *parent = movedNode.ParentNode();
-    assert(parent != nullptr);
+    krys_debug_assert(parent);
+    auto &oldScope = oldAncestor.TreeScope();
 
     // NOTE: a node can be moved from a shadow tree to a light tree and vice versa but only as long as
     // they share the same shadow-including root (i.e. they're in the same document). This means that
@@ -61,18 +167,93 @@ namespace krys::boo::dom
       movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
     }
 
+    movedNode.InvalidateStyle(style::Validity::SubtreeInvalid, style::InvalidationMode::InsertedIntoAncestor);
+    if (auto &newScope = movedNode.TreeScope(); &newScope != &oldScope)
+    {
+      NotifyIdTargetObservers(movedNode, oldScope);
+      NotifyIdTargetObservers(movedNode, newScope);
+    }
+    if (auto *element = DynamicDowncast<Element>(movedNode))
+    {
+      ResetEffectiveTextDirectionAfterRemoval(*element);
+      UpdateEffectiveTextDirectionAfterInsertion(*element);
+    }
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
+    UpdateSlotEffectiveTextDirectionAfterInsertion(movedNode);
+  }
+
+  void ExtensibilityHooks::DestroyRenderTreeIfNeeded(Node &child) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(child))
+    {
+      RenderTreeUpdater::TearDownRenderers(*element);
+    }
+    else if (auto *text = DynamicDowncast<Text>(child))
+    {
+      RenderTreeUpdater::TearDownRenderer(*text);
+    }
   }
 
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
+    bool wasConnected = removedNode.IsConnected();
+    bool wasInTreeScope = wasConnected || removedNode.IsInShadowTree();
     removedNode.ClearNodeFlag(NodeFlags::IsConnected);
-    removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+
+    if (auto *element = DynamicDowncast<Element>(removedNode))
+    {
+      if (auto *page = element->NodeDocument().GetPage())
+      {
+        page->GetPointerLockController().ElementWasRemoved(*element);
+        page->GetPointerCaptureController().ElementWasRemoved(*element);
+      }
+      style::Styleable::FromElement(*element).ElementWasRemoved();
+      element->NodeDocument().UserActionElements().ClearAllForElement(*element);
+      element->SetSavedLayerScrollPosition({});
+      element->ClearBeforePseudoElement();
+      element->ClearAfterPseudoElement();
+      ResetEffectiveTextDirectionAfterRemoval(*element);
+
+      if (wasConnected)
+      {
+        if (element->IsInTopLayer()) KRYS_UNLIKELY
+        {
+          element->RemoveFromTopLayer();
+        }
+
+        auto &oldDocument = element->NodeDocument();
+        if (element->LastRememberedLogicalWidth() || element->LastRememberedLogicalHeight())
+        {
+          // The disconnected element could be unobserved because of other properties, here we need to make
+          // sure it is observed, so that deliver could be triggered and it would clear lastRememberedSize.
+          oldDocument.ObserveForContainIntrinsicSize(*element);
+          oldDocument.ResetObservationSizeForContainIntrinsicSize(*element);
+        }
+        if (oldDocument.CSSTarget() == element)
+        {
+          oldDocument.SetCSSTarget(nullptr);
+        }
+      }
+    }
+
+    // Shadow roots and the nodes in their trees stay in their shadow trees; the removed node and the rest of
+    // its light tree leave the shadow tree they were in, if any.
+    if (!Is<ShadowRoot>(TreeQueries::Root(removedNode)))
+    {
+      removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
+    }
+
+    // Nodes in the shadow trees of the removed nodes stay in their trees.
+    if (wasInTreeScope && !Is<ShadowRoot>(TreeQueries::Root(removedNode)))
+    {
+      NotifyIdTargetObservers(removedNode, oldAncestor.TreeScope());
+    }
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 
-    if (removedNode.ParentNode() == nullptr)
+    // The removed node loses its parent's tree reference (which may delete it).
+    if (isSubtreeRoot)
     {
       removedNode.SubRef();
     }
@@ -92,106 +273,6 @@ namespace krys::boo::dom
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
-    // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
-    // attribute. This will be particularly important for a faster implementation of GetElementById.
-    // if (localName == u8"id")
-    //{
-    //   if (namespaceURI == DOMStringAtom::Null())
-    //   {
-    //     if (value.has_value() && !value->empty())
-    //     {
-    //       element.Id(DOMString(*value));
-    //     }
-    //     else
-    //     {
-    //       element.Id(u8"");
-    //     }
-    //   }
-    // }
-
-    // TODO(fix): the below logic needs reviewing and a better way of doing this needs to be found.
-
-    if (localName == Attributes::Class)
-    {
-      if (namespaceURI == DOMStringAtom::Null())
-      {
-        auto &domTokenList = element.ClassList();
-        domTokenList._tokens.clear();
-        if (value.has_value())
-        {
-          auto tokens = OrderedSet::Parser(*value);
-          domTokenList._tokens.append(tokens.begin(), tokens.end());
-        }
-      }
-    }
-    else if (localName == Attributes::Name)
-    {
-      if (Is<html::HTMLSlotElement>(element) && namespaceURI == DOMStringAtom::Null())
-      {
-        if (value == oldValue)
-        {
-          return;
-        }
-
-        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
-        {
-          return;
-        }
-
-        if (value.has_value() && value->empty() && !oldValue.has_value())
-        {
-          return;
-        }
-
-        auto &slotElement = Downcast<html::HTMLSlotElement>(element);
-        if (!value.has_value() || value->empty())
-        {
-          slotElement.Name(u8"");
-        }
-        else
-        {
-          slotElement.Name(DOMString(*value));
-        }
-
-        SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
-      }
-    }
-    else if (localName == Attributes::Slot)
-    {
-      if (namespaceURI == DOMStringAtom::Null())
-      {
-        if (value == oldValue)
-        {
-          return;
-        }
-
-        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
-        {
-          return;
-        }
-
-        if (value.has_value() && value->empty() && !oldValue.has_value())
-        {
-          return;
-        }
-
-        if (!value.has_value() || value->empty())
-        {
-          element._slottableName = u8"";
-        }
-        else
-        {
-          element._slottableName = DOMString(*value);
-        }
-
-        if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(element))
-        {
-          SlotAlgorithms::AssignSlottables(*assignedSlot);
-        }
-
-        SlotAlgorithms::AssignSlot(element);
-      }
-    }
+    element.OnAttributeChanged(localName, oldValue, value, namespaceURI);
   }
 }

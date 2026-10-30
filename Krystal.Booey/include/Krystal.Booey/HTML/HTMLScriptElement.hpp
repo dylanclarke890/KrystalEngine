@@ -30,10 +30,10 @@ namespace krys::boo::html
     void Type(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-script-nomodule
     KRYS_NODISCARD bool NoModule() const noexcept;
@@ -86,7 +86,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-script-text
     void Text(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLSCRIPTELEMENT, HTML): Implement Supports().
+    // FIXME: Implement Supports().
     // static boolean supports(dom::DOMString type);
 
 #pragma endregion

@@ -11,6 +11,7 @@ namespace krys::boo::html
     Area,
     Audio,
     Base,
+    BDI,
     Body,
     BR,
     Button,
@@ -22,8 +23,10 @@ namespace krys::boo::html
     Div,
     DList,
     Embed,
+    Font,
     Form,
     FieldSet,
+    FrameSet,
     Head,
     Heading,
     HR,
@@ -36,6 +39,8 @@ namespace krys::boo::html
     Legend,
     LI,
     Map,
+    Marquee,
+    MaybeFormAssociatedCustom,
     Media,
     Menu,
     Meta,
@@ -58,6 +63,7 @@ namespace krys::boo::html
     Source,
     Span,
     Style,
+    Summary,
     Table,
     TableCaption,
     TableCell,
@@ -72,7 +78,8 @@ namespace krys::boo::html
     UList,
     Unknown,
     Video,
+    WBR,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 66u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::HTMLElementInterface, 73u);

@@ -1,0 +1,18 @@
+#define KRYS_NODISCARD
+#define KRYS_MAYBE_UNUSED
+
+#define KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Target)                                                       \
+  namespace krys                                                                                             \
+  {                                                                                                          \
+    template <typename Source>                                                                               \
+    class TypeCastTraits<const Target, Source>                                                               \
+    {                                                                                                        \
+    public:                                                                                                  \
+      KRYS_NODISCARD constexpr static bool IsOfType(Source &source) noexcept                                 \
+      {                                                                                                      \
+        return IsType(source);                                                                               \
+      }                                                                                                      \
+                                                                                                             \
+    private:
+
+#define KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END() };}

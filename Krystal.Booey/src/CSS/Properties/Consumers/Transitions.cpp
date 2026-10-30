@@ -9,7 +9,7 @@ namespace krys::boo::css::PropertyParserHelpers
   namespace
   {
     KRYS_NODISCARD RefPtr<Value> ConsumeSingleTransitionPropertyIdent(TokenRange &tokens,
-                                                                         const Token &token) noexcept
+                                                                      const Token &token) noexcept
     {
       if (token.ValueId() == ValueId::All)
       {
@@ -28,8 +28,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
   }
 
-  RefPtr<Value> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens,
-                                                         PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleTransitionPropertyOrNone(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // This variant of ConsumeSingleTransitionProperty is used for the slightly different
     // parse rules used for the 'transition' shorthand which allows 'none':
@@ -51,8 +50,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeSingleTransitionPropertyIdent(tokens, token);
   }
 
-  RefPtr<Value> ConsumeSingleTransitionProperty(TokenRange &tokens,
-                                                   PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeSingleTransitionProperty(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // "The <custom-ident> production in <single-transition-property> also excludes the keyword
     // none, in addition to the keywords always excluded from <custom-ident>."

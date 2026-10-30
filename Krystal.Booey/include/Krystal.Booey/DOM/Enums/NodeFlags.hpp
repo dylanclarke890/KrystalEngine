@@ -5,20 +5,56 @@
 namespace krys::boo::dom
 {
   /// @brief Various flags for optimizing certain node checks.
-  enum class NodeFlags : uint16
+  enum class NodeFlags : uint32
   {
     None = 0,
-    IsConnected = 1 << 1,
-    IsInShadowTree = 1 << 2,
-    IsCharacterData = 1 << 3,
-    IsContainerNode = 1 << 4,
-    IsShadowRoot = 1 << 5,
-    IsUnknownElement = 1 << 6,
-    IsHTMLElement = 1 << 7,
-    IsSVGElement = 1 << 8,
-    IsMathMLElement = 1 << 9,
-    IsHTMLSlotElement = 1 << 10,
+    IsConnected = 1 << 0,
+    IsInShadowTree = 1 << 1,
+    IsCharacterData = 1 << 2,
+    IsContainerNode = 1 << 3,
+    IsShadowRoot = 1 << 4,
+    IsUnknownElement = 1 << 5,
+    IsHTMLElement = 1 << 6,
+    IsSVGElement = 1 << 7,
+    IsMathMLElement = 1 << 8,
+    IsHTMLSlotElement = 1 << 9,
+    /// @brief Set while the parser is inserting the element's children; see `Element::FinishParsingChildren`.
+    IsParsingChildren = 1 << 10,
+    /// @brief Set when the inline style has changed since the `style` attribute was last written; see
+    /// `Element::SynchronizeAllAttributes`.
+    StyleAttributeIsDirty = 1 << 11,
+    /// @brief Set when the element's computed style (`Element::ComputedStyle`) may be out of date.
+    IsComputedStyleInvalid = 1 << 12,
+    HasInvalidRenderer = 1 << 13,
+    StyleResolutionShouldRecompositeLayer = 1 << 14,
+    NeedsUpdateQueryContainerDependentStyle = 1 << 15,
+    /// @brief Set while the element has user action state (hover, active or focus) in its document's
+    /// `UserActionElementSet`.
+    IsUserActionElement = 1 << 16,
+    /// @brief Set on the `PseudoElement`s generated for `::before` and `::after`.
+    IsPseudoElement = 1 << 17,
+    /// @brief Set on a node an end point of the frame's selection is anchored in, and on its ancestors.
+    ContainsSelectionEndPoint = 1 << 18,
+    /// @brief Set on elements whose style is resolved by `Element::ResolveCustomStyle`.
+    HasCustomStyleResolveCallbacks = 1 << 19,
+    /// @brief Set on an SVG element when one of its properties has changed since the attribute it reflects
+    /// was last written; see `Element::SynchronizeAllAttributes`.
+    AnimatedSVGAttributesAreDirty = 1 << 20,
+    /// @brief Set on an SVG element whose renderer needs laying out again after a change to the element; see
+    /// `style::Update::AddSVGRendererUpdate`.
+    NeedsSVGRendererUpdate = 1 << 21,
+    /// @brief Set on an SVG element waiting for an id as a pending resource of its tree scope; see
+    /// `DocumentOrShadowRoot::AddPendingSVGResource`.
+    HasPendingResources = 1 << 22,
+    /// @brief Set on a node whose text may decide the auto directionality of an ancestor (an element whose
+    /// `dir` is `auto`, or a `<bdi>`), and on that element; see `ElementTextDirection.hpp`.
+    SelfOrPrecedingNodesAffectDirAuto = 1 << 23,
+    /// @brief Set on a node whose directionality is kept (`EffectiveTextDirectionIsRTL`) rather than the
+    /// document element's.
+    UsesEffectiveTextDirection = 1 << 24,
+    /// @brief The kept directionality, set when it's right to left.
+    EffectiveTextDirectionIsRTL = 1 << 25,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 10u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::NodeFlags, 26u);

@@ -379,9 +379,11 @@ namespace krys::boo::html
   case TokenizerState::stateName:                                                                            \
   stateName:                                                                                                 \
   {                                                                                                          \
-    constexpr auto currentState = TokenizerState::stateName;
+    constexpr auto currentState = TokenizerState::stateName;                                                 \
+    (void)currentState;
+
 #define END_STATE()                                                                                          \
-  assert(false);                                                                                             \
+  krys_unreachable();                                                                                        \
   break;                                                                                                     \
   }
 
@@ -500,10 +502,13 @@ namespace krys::boo::html
 
 #pragma endregion
 
+#pragma warning(push)
+#pragma warning(disable : 4'702) // Disable unreachable code warning
+
     /// @see https://html.spec.whatwg.org/#tokenization
     KRYS_NODISCARD bool StepTokenizationStateMachine() noexcept
     {
-      constexpr char32 null = U'\000';
+      constexpr char32 Null = U'\000';
       constexpr char32 Ampersand = U'&';
       constexpr char32 LessThanSign = U'<';
       constexpr char32 GreaterThanSign = U'>';
@@ -540,10 +545,10 @@ namespace krys::boo::html
             RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
             return EmitEOFToken();
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            BufferCharacter(null); // parser error but we still emit the null as per the spec.
+            BufferCharacter(Null); // parser error but we still emit the null as per the spec.
             ADVANCE_PAST_NON_NEWLINE_TO(Data);
           }
 
@@ -565,7 +570,7 @@ namespace krys::boo::html
           {
             RECONSUME_IN(Data);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -585,7 +590,7 @@ namespace krys::boo::html
           {
             RECONSUME_IN(Data);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -605,7 +610,7 @@ namespace krys::boo::html
           {
             RECONSUME_IN(Data);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -621,7 +626,7 @@ namespace krys::boo::html
           {
             RECONSUME_IN(Data);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -705,7 +710,7 @@ namespace krys::boo::html
             _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
-          if (character == null)
+          if (character == Null)
           {
             _token.AppendToName(Replacement);
             ParserError(HTMLParseError::UnexpectedNullCharacter);
@@ -961,7 +966,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -987,7 +992,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedLessThanSign);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -1018,7 +1023,7 @@ namespace krys::boo::html
             BufferCharacter(GreaterThanSign);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -1142,7 +1147,7 @@ namespace krys::boo::html
             BufferCharacter(LessThanSign);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -1169,7 +1174,7 @@ namespace krys::boo::html
             BufferCharacter(LessThanSign);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapedLessThanSign);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -1201,7 +1206,7 @@ namespace krys::boo::html
             BufferCharacter(GreaterThanSign);
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
@@ -1288,7 +1293,7 @@ namespace krys::boo::html
             _token.AppendToCurrentAttributeName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(AttributeName);
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeName(Replacement);
@@ -1367,7 +1372,7 @@ namespace krys::boo::html
             _characterReferenceReturnState = TokenizerState::AttributeValueDoubleQuoted;
             ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
@@ -1394,7 +1399,7 @@ namespace krys::boo::html
             _characterReferenceReturnState = TokenizerState::AttributeValueSingleQuoted;
             ADVANCE_PAST_NON_NEWLINE_TO(CharacterReference);
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
@@ -1427,7 +1432,7 @@ namespace krys::boo::html
             EndAttribute();
             return EmitTagToken();
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
@@ -1482,7 +1487,7 @@ namespace krys::boo::html
         BEGIN_STATE(SelfClosingStartTag)
           if (character == GreaterThanSign)
           {
-            // TODO: check that checking this token is a start tag is correct.
+            // FIXME: Check that checking this token is a start tag is correct.
             if (_token.Type() == HTMLTokenType::StartTag)
             {
               _token.SetSelfClosingFlag();
@@ -1513,7 +1518,7 @@ namespace krys::boo::html
           {
             return EmitCommentToken(false);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToComment(Replacement);
@@ -1622,7 +1627,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(CommentEndDash);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToComment(Replacement);
@@ -1773,7 +1778,7 @@ namespace krys::boo::html
             _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.BeginDOCTYPE();
@@ -1814,7 +1819,7 @@ namespace krys::boo::html
             _token.AppendToName(krys::text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
-          if (character == null)
+          if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToName(Replacement);
@@ -1949,7 +1954,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToPublicIdentifier(Replacement);
@@ -1977,7 +1982,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicIdentifier);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToPublicIdentifier(Replacement);
@@ -2137,7 +2142,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToSystemIdentifier(Replacement);
@@ -2165,7 +2170,7 @@ namespace krys::boo::html
           {
             ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToSystemIdentifier(Replacement);
@@ -2213,7 +2218,7 @@ namespace krys::boo::html
           {
             return EmitDOCTYPEToken(true);
           }
-          if (character == null) KRYS_UNLIKELY
+          if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             ADVANCE_PAST_NON_NEWLINE_TO(BogusDOCTYPE);
@@ -2443,7 +2448,7 @@ namespace krys::boo::html
         END_STATE()
 
         BEGIN_STATE(NumericCharacterReferenceEnd)
-          if (_characterReferenceCode == null)
+          if (_characterReferenceCode == Null)
           {
             ParserError(HTMLParseError::NullCharacterReference);
             _characterReferenceCode = Replacement;
@@ -2492,6 +2497,8 @@ namespace krys::boo::html
       std::unreachable();
       return false;
     }
+
+#pragma warning(pop)
 
 #undef BEGIN_STATE
 #undef END_STATE

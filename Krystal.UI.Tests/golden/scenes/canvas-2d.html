@@ -1,0 +1,78 @@
+﻿<!doctype html>
+<!-- The "canvas-2d" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, drawing into the
+     canvas with the 2D context's calls the script below makes for Chrome, in two rendering updates: the
+     state carries over from one to the next. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  canvas { display: block; margin: 10px; background: #e6eef5; }
+</style>
+</head>
+<body>
+  <canvas id="canvas" width="340" height="180"></canvas>
+  <script>
+    const context = document.getElementById("canvas").getContext("2d");
+
+    // Rects, a translucent overlap and a stroke.
+    context.fillStyle = "#336699";
+    context.fillRect(10, 10, 60, 40);
+    context.fillStyle = "rgba(238, 119, 51, 0.6)";
+    context.fillRect(40, 30, 60, 40);
+    context.lineWidth = 4;
+    context.strokeStyle = "#224422";
+    context.strokeRect(10, 90, 90, 40);
+
+    // A linear gradient, and a circle filled with a radial one.
+    const linear = context.createLinearGradient(120, 0, 220, 0);
+    linear.addColorStop(0, "#ff0000");
+    linear.addColorStop(1, "#0000ff");
+    context.fillStyle = linear;
+    context.fillRect(120, 10, 100, 40);
+    const radial = context.createRadialGradient(170, 110, 5, 170, 110, 40);
+    radial.addColorStop(0, "#ffffff");
+    radial.addColorStop(1, "#008800");
+    context.fillStyle = radial;
+    context.beginPath();
+    context.arc(170, 110, 40, 0, 2 * Math.PI);
+    context.fill();
+
+    // A rotated clip, left in place for what's drawn next.
+    context.save();
+    context.translate(280, 50);
+    context.rotate(Math.PI / 8);
+    context.beginPath();
+    context.rect(-30, -30, 60, 60);
+    context.clip();
+    context.lineWidth = 8;
+    context.lineJoin = "round";
+    context.strokeStyle = "#880088";
+
+    // The next rendering update.
+    context.beginPath();
+    context.moveTo(-40, 20);
+    context.lineTo(0, -20);
+    context.lineTo(40, 20);
+    context.stroke();
+    context.restore();
+
+    // A dashed line with round caps, a rounded rect at half alpha, and a hole cleared through it.
+    context.lineWidth = 6;
+    context.lineCap = "round";
+    context.setLineDash([12, 10]);
+    context.strokeStyle = "#cc3333";
+    context.beginPath();
+    context.moveTo(240, 110);
+    context.lineTo(330, 110);
+    context.stroke();
+    context.globalAlpha = 0.5;
+    context.fillStyle = "#000000";
+    context.beginPath();
+    context.roundRect(240, 125, 90, 45, 12);
+    context.fill();
+    context.clearRect(270, 140, 30, 15);
+  </script>
+</body>
+</html>

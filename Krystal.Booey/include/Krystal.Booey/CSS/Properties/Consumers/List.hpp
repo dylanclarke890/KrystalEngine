@@ -4,8 +4,8 @@
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include <limits>
 
 namespace krys::boo::css
@@ -22,8 +22,8 @@ namespace krys::boo::css
 
     struct ListBounds
     {
-      size_t min;
-      size_t max;
+      size_t Min;
+      size_t Max;
 
       KRYS_NODISCARD constexpr static ListBounds MinimumOf(size_t min) noexcept
       {
@@ -40,8 +40,8 @@ namespace krys::boo::css
     constexpr auto OneOrMore = ListBounds::MinimumOf(1);
 
     template <char Separator, ListBounds Bounds, typename SubConsumer, typename... Args>
-    auto ConsumeListSeparatedByIntoBuilder(TokenRange &tokens, SubConsumer &&subConsumer,
-                                           Args &&...args) noexcept -> Maybe<ValueListBuilder>
+    KRYS_NODISCARD auto ConsumeListSeparatedByIntoBuilder(TokenRange &tokens, SubConsumer &&subConsumer,
+                                                          Args &&...args) noexcept -> Maybe<ValueListBuilder>
     {
       auto consumeSeparator = [](auto &tokens)
       {
@@ -82,16 +82,16 @@ namespace krys::boo::css
         list.push_back(krys::move(value));
       } while (consumeSeparator(tokens));
 
-      if constexpr (Bounds.min > 0)
+      if constexpr (Bounds.Min > 0)
       {
-        if (list.size() < Bounds.min)
+        if (list.size() < Bounds.Min)
         {
           return {};
         }
       }
-      if constexpr (Bounds.max < std::numeric_limits<size_t>::max())
+      if constexpr (Bounds.Max < std::numeric_limits<size_t>::max())
       {
-        if (list.size() > Bounds.max)
+        if (list.size() > Bounds.Max)
         {
           return {};
         }
@@ -102,13 +102,16 @@ namespace krys::boo::css
 
     template <char Separator, ListBounds Bounds, ListOptimization Optimization = ListOptimization::None,
               typename ListType = ValueList, typename SubConsumer, typename... Args>
-    auto ConsumeListSeparatedBy(TokenRange &tokens, SubConsumer &&subConsumer, Args &&...args)
+    KRYS_NODISCARD auto ConsumeListSeparatedBy(TokenRange &tokens, SubConsumer &&subConsumer,
+                                               Args &&...args) noexcept
       -> std::conditional_t<Optimization == ListOptimization::None, RefPtr<ListType>, RefPtr<Value>>
     {
       auto list = ConsumeListSeparatedByIntoBuilder<Separator, Bounds>(
         tokens, std::forward<SubConsumer>(subConsumer), std::forward<Args>(args)...);
       if (!list)
+      {
         return nullptr;
+      }
 
       if constexpr (Optimization == ListOptimization::SingleValue)
       {

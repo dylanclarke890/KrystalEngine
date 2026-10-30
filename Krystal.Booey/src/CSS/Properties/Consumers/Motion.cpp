@@ -17,27 +17,50 @@
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD static RefPtr<Value> ConsumeRayFunction(TokenRange &range,
+  KRYS_NODISCARD static Maybe<RaySize> RaySizeFromValueId(ValueId id) noexcept
+  {
+    switch (id)
+    {
+      case ValueId::ClosestSide:
+      {
+        return RaySize {keywords::ClosestSide {}};
+      }
+      case ValueId::ClosestCorner:
+      {
+        return RaySize {keywords::ClosestCorner {}};
+      }
+      case ValueId::FarthestSide:
+      {
+        return RaySize {keywords::FarthestSide {}};
+      }
+      case ValueId::FarthestCorner:
+      {
+        return RaySize {keywords::FarthestCorner {}};
+      }
+      case ValueId::Sides:
+      {
+        return RaySize {keywords::Sides {}};
+      }
+      default:
+      {
+        return null;
+      }
+    }
+  }
+
+  KRYS_NODISCARD static RefPtr<Value> ConsumeRayFunction(TokenRange &tokens,
                                                          PropertyParserState &state) noexcept
   {
     // ray( <angle> && <ray-size>? && contain? && [at <position>]? )
     // <ray-size> = closest-side | closest-corner | farthest-side | farthest-corner | sides
     // https://drafts.fxtf.org/motion-1/#ray-function
 
-    constexpr static auto sizeMappings = std::to_array<std::pair<ValueId, RaySize>>({
-      {ValueId::ClosestSide, RaySize {keywords::ClosestSide {}}},
-      {ValueId::ClosestCorner, RaySize {keywords::ClosestCorner {}}},
-      {ValueId::FarthestSide, RaySize {keywords::FarthestSide {}}},
-      {ValueId::FarthestCorner, RaySize {keywords::FarthestCorner {}}},
-      {ValueId::Sides, RaySize {keywords::Sides {}}},
-    });
-
-    if (range.Peek().Type() != TokenType::Function || range.Peek().FunctionId() != ValueId::Ray)
+    if (tokens.Peek().Type() != TokenType::Function || tokens.Peek().FunctionId() != ValueId::Ray)
     {
       return {};
     }
 
-    auto args = ConsumeFunction(range);
+    auto args = ConsumeFunction(tokens);
 
     Maybe<Angle<>> angle;
     Maybe<RaySize> size;
@@ -62,15 +85,8 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      auto sizeValue = std::ranges::find_if(sizeMappings, [&](const auto &pair)
-                                            { return pair.first == range.Peek().ValueId(); });
-      if (sizeValue == sizeMappings.end())
-      {
-        return false;
-      }
-
-      size = sizeValue->second;
-      return true;
+      size = ConsumeIdentUsingMapping(args, RaySizeFromValueId);
+      return size.has_value();
     };
 
     auto ConsumeContain = [&] -> bool
@@ -112,11 +128,11 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return RayValue::Create(
-      RayFunction {.parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
+      RayFunction {.Parameters = Ray {krys::move(*angle), size.value_or(RaySize {keywords::ClosestSide {}}),
                                       krys::move(contain), krys::move(position)}});
   }
 
-  RefPtr<Value> ConsumeOffsetPath(TokenRange &range, PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeOffsetPath(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'offset-path'> = none | <offset-path> || <coord-box>
     //
@@ -135,13 +151,13 @@ namespace krys::boo::css::PropertyParserHelpers
     //
     // https://drafts.fxtf.org/motion-1/#propdef-offset-path
 
-    if (range.Peek().ValueId() == ValueId::None)
+    if (tokens.Peek().ValueId() == ValueId::None)
     {
-      return ConsumeIdent(range);
+      return ConsumeIdent(tokens);
     }
 
     // FIXME: It should be possible to consume both a <url> and <coord-box>.
-    if (auto url = ConsumeURL(range, state, {}))
+    if (auto url = ConsumeURL(tokens, state, {}))
     {
       return url;
     }
@@ -156,7 +172,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      shapeOrRay = ConsumeRayFunction(range, state);
+      shapeOrRay = ConsumeRayFunction(tokens, state);
       return !!shapeOrRay;
     };
 
@@ -167,7 +183,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      shapeOrRay = ConsumeBasicShape(range, state, PathParsingOption::RejectPathFillRule);
+      shapeOrRay = ConsumeBasicShape(tokens, state, PathParsingOption::RejectPathFillRule);
       return !!shapeOrRay;
     };
 
@@ -182,11 +198,11 @@ namespace krys::boo::css::PropertyParserHelpers
       // being that the former does not contain "margin-box" as a valid term. However, the spec also has a few
       // examples using "margin-box", so there seems to be some abiguity to be resolved. See:
       // https://github.com/w3c/fxtf-drafts/issues/481.
-      box = PropertyParsing::ConsumeGeometryBox(range);
+      box = PropertyParsing::ConsumeGeometryBox(tokens);
       return !!box;
     };
 
-    while (!range.IsAtEnd())
+    while (!tokens.IsAtEnd())
     {
       if (ConsumeRay() || ConsumeShape() || ConsumeBox())
       {

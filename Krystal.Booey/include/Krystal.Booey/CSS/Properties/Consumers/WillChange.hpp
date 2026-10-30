@@ -12,7 +12,6 @@ namespace krys::boo::css
   {
     // MARK: <'will-change'> consuming
     // https://drafts.csswg.org/css-will-change/#propdef-will-change
-    KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens,
-                                                      PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

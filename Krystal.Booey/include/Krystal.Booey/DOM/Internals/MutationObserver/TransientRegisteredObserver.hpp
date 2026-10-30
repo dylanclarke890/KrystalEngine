@@ -4,6 +4,9 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A registered observer added to a node removed from under an observed subtree, so its observer
+  /// sees what happens to the node until the observer is next notified.
+  /// @see https://dom.spec.whatwg.org/#transient-registered-observer
   class TransientRegisteredObserver : public RegisteredObserver
   {
   private:
@@ -14,16 +17,6 @@ namespace krys::boo::dom
                                 Ref<RegisteredObserver> &&source) noexcept
         : RegisteredObserver(krys::move(observer), options), _source(krys::move(source))
     {
-    }
-
-    KRYS_NODISCARD Ref<MutationObserver> Observer() const noexcept
-    {
-      return _source->Observer();
-    }
-
-    KRYS_NODISCARD MutationObserverInit Options() const noexcept
-    {
-      return _source->Options();
     }
 
     KRYS_NODISCARD Ref<RegisteredObserver> Source() const noexcept

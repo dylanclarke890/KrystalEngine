@@ -10,7 +10,7 @@ namespace krys::boo::css
   /// have a relationship to any selector in both cases).
   enum class SelectorRelation : uint8
   {
-    // @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
+    /// @brief The selector forms a compound selector with the preceding selector. (e.g. `div.class`).
     Compounding,
     /// @brief The selector is a direct child of the preceding selector. (e.g. `div > p`).
     Child,
@@ -20,7 +20,14 @@ namespace krys::boo::css
     NextSibling,
     /// @brief The selector is one of the following siblings of the preceding selector. (e.g. `div ~ p`).
     SubsequentSibling,
+    /// @brief The selector is in the shadow tree of the preceding selector's element.
+    ShadowDescendant,
+    /// @brief The selector is a part (`::part()`) exposed by the shadow tree of the preceding selector's
+    /// element.
+    ShadowPartDescendant,
+    /// @brief The selector is slotted (`::slotted()`) into the preceding selector's element.
+    ShadowSlotted,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorRelation, 5uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorRelation, 8uz);

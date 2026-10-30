@@ -7,9 +7,14 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLTokenType.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
@@ -171,7 +176,7 @@ namespace krys::boo::html
     {
       _openElementStack.Pop();
 
-      // TODO(HTMLTREEBUILDER, SVG): Implement the following steps from the HTML specification:
+      // FIXME: Implement the following steps from the HTML specification:
       // Let the old insertion point have the same value as the current insertion point. Let the insertion
       // point be just before the next input character.
       //
@@ -432,7 +437,7 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Implement parse error handling/logging.
+    // FIXME: Implement parse error handling/logging.
     (void)token;
   }
 
@@ -615,11 +620,11 @@ namespace krys::boo::html
         {
           if (IsQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = dom::QuirksMode::Quirks;
+            _document.SetQuirksMode(dom::QuirksMode::Quirks);
           }
           else if (IsLimitedQuirksModeDOCTYPE(token))
           {
-            _document._quirksMode = dom::QuirksMode::LimitedQuirks;
+            _document.SetQuirksMode(dom::QuirksMode::LimitedQuirks);
           }
         }
 
@@ -635,7 +640,7 @@ namespace krys::boo::html
 
     if (!_document._parserCannotChangeTheMode)
     {
-      _document._quirksMode = dom::QuirksMode::Quirks;
+      _document.SetQuirksMode(dom::QuirksMode::Quirks);
     }
 
     _insertionMode = InsertionMode::BeforeHTML;
@@ -818,7 +823,7 @@ namespace krys::boo::html
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
 
-            // TODO(HTMLTREEBUILDER, HTML): If the active speculative HTML parser is null:
+            // FIXME: If the active speculative HTML parser is null:
             // If the element has a charset attribute, and getting an encoding from its value results in an
             // encoding, and the confidence is currently tentative, then change the encoding to the resulting
             // encoding.
@@ -920,7 +925,7 @@ namespace krys::boo::html
               return;
             }
 
-            // TODO(HTMLTREEBUILDER): InHeadMode - Rest of logic for <template> start tags.
+            // FIXME: InHeadMode - Rest of logic for <template> start tags.
 
             return;
           }
@@ -2239,7 +2244,7 @@ namespace krys::boo::html
       {
         if (token.Name().View() == u8"script")
         {
-          // TODO(HTMLTREEBUILDER): TextMode - HTMLScriptElement end tag handling
+          // FIXME: TextMode - HTMLScriptElement end tag handling
         }
 
         _openElementStack.Pop();
@@ -2486,8 +2491,9 @@ namespace krys::boo::html
     bool hasNonWhitespace = false;
     for (const auto &chars : _pendingTableCharacterTokens)
     {
-      if (hasNonWhitespace = std::ranges::any_of(chars, [](char8 ch)
-                                                 { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); }))
+      hasNonWhitespace =
+        std::ranges::any_of(chars, [](char8 ch) { return !infra::StringAlgorithms::IsASCIIWhitespace(ch); });
+      if (hasNonWhitespace)
       {
         break;
       }
@@ -3541,8 +3547,13 @@ namespace krys::boo::html
 
   void HTMLTreeBuilder::StopParsing() noexcept
   {
-    // TODO(HTMLTREEBUILDER): StopParsing - implement required steps.
+    // FIXME: StopParsing - implement required steps.
     _openElementStack.PopAll();
+
+    if (!_context.has_value())
+    {
+      _document.FinishedParsing();
+    }
   }
 
 #pragma endregion
@@ -3691,7 +3702,7 @@ namespace krys::boo::html
     }
 
     auto &htmlTarget = Downcast<HTMLElement>(target);
-    // TODO(HTMLTREEBUILDER): AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
+    // FIXME: AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
     // way to get it from the element.
     auto tagName = ParseTagName(htmlTarget.LocalName().View());
 
@@ -3809,7 +3820,7 @@ namespace krys::boo::html
     if (!_openElementStack.IsEmpty()
         && adjustedInsertionLocation.Parent == &_openElementStack.Top().Element())
     {
-      // TODO(HTMLTREEBUILDER): Implement root insertion target.
+      // FIXME: Implement root insertion target.
     }
 
     // SPEC(4): Return the adjustedInsertionLocation.
@@ -3831,10 +3842,10 @@ namespace krys::boo::html
 
     // SPEC(3): If the parser was not created as part of the HTML fragment parsing algorithm, then push a new
     // element queue onto element's relevant agent's custom element reactions stack.
+    Maybe<CustomElementReactionStack> reactionStack;
     if (!_context.has_value())
     {
-      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - push a new element queue onto
-      // element's relevant agent's custom element reactions stack.
+      reactionStack.emplace();
     }
 
     // SPEC(4): Insert element at insertionLocation.
@@ -3844,11 +3855,7 @@ namespace krys::boo::html
     // SPEC(5): If the parser was not created as part of the HTML fragment parsing algorithm, then pop the
     // element queue from element's relevant agent's custom element reactions stack, and invoke custom element
     // reactions in that queue.
-    if (!_context.has_value())
-    {
-      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - pop the element queue from element's
-      // relevant agent's custom element reactions stack, and invoke custom element reactions in that queue.
-    }
+    reactionStack.reset();
   }
 
   Ref<dom::Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token,
@@ -3857,6 +3864,11 @@ namespace krys::boo::html
   {
     auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
+
+    // NOTE: the element is about to be pushed onto the stack of open elements, which begins parsing its
+    // children; begin before inserting it, so that its insertion steps see that its children are still to
+    // come.
+    element->BeginParsingChildren();
 
     if (!onlyAddToElementStack)
     {
@@ -3919,29 +3931,39 @@ namespace krys::boo::html
       auto it = std::ranges::find_if(attributes,
                                      [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
 
-      return it != std::ranges::end(attributes) ? it->NameView() : dom::DOMStringAtom::Null();
+      return it != std::ranges::end(attributes) ? dom::DOMStringAtom(it->ValueView())
+                                                : dom::DOMStringAtom::Null();
     }();
 
-    RefPtr<CustomElementRegistry> registry = nullptr;
-    bool willExecuteScript = false;
+    // SPEC: Let registry be the result of looking up a custom element registry given intendedParent.
+    RefPtr<CustomElementRegistry> registry =
+      ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(intendedParent));
 
-    // TODO(CUSTOMELEMENTS): CreateElement - Let registry be the result of looking up a custom element
-    // registry given intendedParent.
-    // Let definition be the result of looking up a custom element definition given registry, namespace,
-    // localName, and is.
-    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
-    // HTML fragment parsing algorithm; otherwise false.
+    // SPEC: Let definition be the result of looking up a custom element definition given registry,
+    // namespace, localName, and is.
+    auto *definition =
+      CustomElementAlgorithms::LookupCustomElementDefinition(registry.get(), namespaceURI, name);
 
+    // SPEC: Let willExecuteScript be true if definition is non-null and the parser was not created as part
+    // of the HTML fragment parsing algorithm; otherwise false.
+    bool willExecuteScript = definition != nullptr && !_context.has_value();
+
+    Maybe<CustomElementReactionStack> reactionStack;
     if (willExecuteScript)
     {
-      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
-      // Increment document's throw-on-dynamic-markup-insertion counter.
-      // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
-      // Push a new element queue onto document's relevant agent's custom element reactions stack.
+      // FIXME: Increment document's throw-on-dynamic-markup-insertion counter, once there's document.write().
+      // SPEC: If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+      EventLoop::Current().PerformMicrotaskCheckpoint();
+      // SPEC: Push a new element queue onto document's relevant agent's custom element reactions stack.
+      reactionStack.emplace();
     }
 
     auto element = dom::ElementFactory::Create(document, {namespaceURI, dom::DOMStringAtom::Null(), name}, is,
                                                willExecuteScript, registry);
+    if (auto *input = DynamicDowncast<HTMLInputElement>(element.get()))
+    {
+      input->SetCreatedByParser();
+    }
     for (auto &attr : attributes)
     {
       if (attr.Flags == ParsedAttributeFlags::None)
@@ -3986,25 +4008,20 @@ namespace krys::boo::html
       }
     }
 
-    if (willExecuteScript)
-    {
-      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
-      // Let queue be the result of popping from document's relevant agent's custom element reactions stack.
-      // (This will be the same element queue as was pushed above.)
-      // Invoke custom element reactions in queue.
-      // Decrement document's throw-on-dynamic-markup-insertion counter.
-    }
+    // SPEC: If willExecuteScript is true: let queue be the result of popping from document's relevant
+    // agent's custom element reactions stack, and invoke custom element reactions in queue.
+    reactionStack.reset();
 
-    // TODO(HTMLTREEBUILDER): CreateElement - xmlns attribute parse error
+    // FIXME: CreateElement - xmlns attribute parse error
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
     // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
     //
-    // TODO(HTMLTREEBUILDER): CreateElement - resettable element
+    // FIXME: CreateElement - resettable element
     // If element is a resettable element and not a form-associated custom element, then invoke its reset
     // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
     //
-    // TODO(HTMLTREEBUILDER): CreateElement - form-associated element
+    // FIXME: CreateElement - form-associated element
     // If element is a form-associated element and not a form-associated custom element, the form element
     // pointer is not null, there is no template element on the stack of open elements, element is either not
     // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element

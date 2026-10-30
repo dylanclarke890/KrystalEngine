@@ -46,12 +46,38 @@ target_precompile_headers(Krystal.Core.Tests
     <variant>
     <vector>
 
-    catch2/catch_test_macros.hpp
-    catch2/matchers/catch_matchers_floating_point.hpp
+    <catch2/catch_test_macros.hpp>
+    <catch2/matchers/catch_matchers_floating_point.hpp>
 )
 
 target_sources(Krystal.Core.Tests
+	PRIVATE tests/Hash.cpp
 	PRIVATE tests/RefCounted.cpp
+
+  # Colour
+	PRIVATE tests/Colour/ColourConversion.cpp
+	PRIVATE tests/Colour/ColourInterpolation.cpp
+	PRIVATE tests/Colour/ColourUtilities.cpp
+
+  # Text
+	PRIVATE tests/Text/Base64.cpp
+	PRIVATE tests/Text/CodePointIterator.cpp
+	PRIVATE tests/Text/StringBuilder.cpp
+	PRIVATE tests/Text/StringToIntegerConversion.cpp
+	PRIVATE tests/Text/ParsingUtilities.cpp
+	PRIVATE tests/Text/TextStream.cpp
+
+  # Types
+	PRIVATE tests/Types/BloomFilter.cpp
+	PRIVATE tests/Types/CompactVariant.cpp
+	PRIVATE tests/Types/DataRef.cpp
+	PRIVATE tests/Types/FixedVector.cpp
+	PRIVATE tests/Types/IntervalTree.cpp
+	PRIVATE tests/Types/ListHashSet.cpp
+	PRIVATE tests/Types/Packed.cpp
+
+  # Utils
+	PRIVATE tests/Utils/NeverDestroyed.cpp
 
   # Commands
 	PRIVATE tests/Commands/Command.cpp

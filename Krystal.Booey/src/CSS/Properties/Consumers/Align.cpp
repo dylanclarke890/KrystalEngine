@@ -8,10 +8,9 @@ namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentBaseline(TokenRange &tokens, PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Baseline);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Baseline);
 
       // FIXME: The spec states that <baseline-position> is defined as `<baseline-position> = [ first | last
       // ]? && baseline`, allowing any ordering, but tests expect `[ first | last ]` to always be precede
@@ -24,9 +23,9 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentFirstBaseline(TokenRange &tokens,
-                                                                  PropertyParserState &state) noexcept
+                                                               PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::First);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::First);
 
       auto copy = tokens;
       copy.Discard();
@@ -45,9 +44,9 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentLastBaseline(TokenRange &tokens,
-                                                                 PropertyParserState &state) noexcept
+                                                              PropertyParserState &) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Last);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Last);
 
       auto copy = tokens;
       copy.Discard();
@@ -63,15 +62,16 @@ namespace krys::boo::css::PropertyParserHelpers
       tokens.DiscardWhitespace();
 
       return ValuePair::Create(PrimitiveValue::Create(ValueId::Last),
-                                  PrimitiveValue::Create(ValueId::Baseline));
+                               PrimitiveValue::Create(ValueId::Baseline));
     }
 
     template <typename F>
-    KRYS_NODISCARD RefPtr<Value>
-      ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
-                                       ValueId overflowSafety, F &&predicate) noexcept
+    KRYS_NODISCARD RefPtr<Value> ConsumeAlignmentOverflowPosition(TokenRange &tokens, PropertyParserState &,
+                                                                  ValueId overflowSafety,
+                                                                  F &&predicate) noexcept
     {
-      assert(tokens.Peek().ValueId() == ValueId::Safe || tokens.Peek().ValueId() == ValueId::Unsafe);
+      krys_debug_assert(tokens.Peek().ValueId() == ValueId::Safe
+                        || tokens.Peek().ValueId() == ValueId::Unsafe);
 
       auto copy = tokens;
       copy.Discard();
@@ -83,8 +83,7 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
 
-        return ValuePair::Create(PrimitiveValue::Create(overflowSafety),
-                                    PrimitiveValue::Create(position));
+        return ValuePair::Create(PrimitiveValue::Create(overflowSafety), PrimitiveValue::Create(position));
       }
 
       return nullptr;
@@ -246,11 +245,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // <self-position>
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -283,37 +277,31 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
       default:
       {
@@ -344,11 +332,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // [ <self-position> | left | right ]
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -383,38 +366,33 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              case ValueId::Left:
-              case ValueId::Right:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    case ValueId::Left:
+                                                    case ValueId::Right:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
       default:
       {
@@ -443,11 +421,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // <self-position>
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -480,37 +453,31 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
 
       default: return nullptr;
@@ -539,11 +506,6 @@ namespace krys::boo::css::PropertyParserHelpers
       // account for additional `legacy` keyword.
       case ValueId::AnchorCenter:
       {
-        if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-        {
-          return nullptr;
-        }
-
         KRYS_FALLTHROUGH;
       }
       case ValueId::Start:
@@ -574,39 +536,33 @@ namespace krys::boo::css::PropertyParserHelpers
       case ValueId::Unsafe:
       case ValueId::Safe:
       {
-        return ConsumeAlignmentOverflowPosition(
-          tokens, state, initial,
-          [&](auto second)
-          {
-            switch (second)
-            {
-              case ValueId::AnchorCenter:
-              {
-                if (!state.Context.PropertySettings.cssAnchorPositioningEnabled)
-                {
-                  return false;
-                }
-
-                KRYS_FALLTHROUGH;
-              }
-              case ValueId::Start:
-              case ValueId::End:
-              case ValueId::Center:
-              case ValueId::SelfStart:
-              case ValueId::SelfEnd:
-              case ValueId::FlexStart:
-              case ValueId::FlexEnd:
-              case ValueId::Left:
-              case ValueId::Right:
-              {
-                return true;
-              }
-              default:
-              {
-                return false;
-              }
-            }
-          });
+        return ConsumeAlignmentOverflowPosition(tokens, state, initial,
+                                                [&](auto second)
+                                                {
+                                                  switch (second)
+                                                  {
+                                                    case ValueId::AnchorCenter:
+                                                    {
+                                                      KRYS_FALLTHROUGH;
+                                                    }
+                                                    case ValueId::Start:
+                                                    case ValueId::End:
+                                                    case ValueId::Center:
+                                                    case ValueId::SelfStart:
+                                                    case ValueId::SelfEnd:
+                                                    case ValueId::FlexStart:
+                                                    case ValueId::FlexEnd:
+                                                    case ValueId::Left:
+                                                    case ValueId::Right:
+                                                    {
+                                                      return true;
+                                                    }
+                                                    default:
+                                                    {
+                                                      return false;
+                                                    }
+                                                  }
+                                                });
       }
 
       // legacy | legacy && [ left | right | center ]
@@ -624,8 +580,7 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.Discard();
             tokens.DiscardWhitespace();
 
-            return ValuePair::Create(PrimitiveValue::Create(initial),
-                                        PrimitiveValue::Create(second));
+            return ValuePair::Create(PrimitiveValue::Create(initial), PrimitiveValue::Create(second));
           }
           default:
           {
@@ -648,8 +603,7 @@ namespace krys::boo::css::PropertyParserHelpers
             tokens.DiscardWhitespace();
 
             // NOTE: Order is flipped to canonicalize to 'legacy *foo*' for serialization.
-            return ValuePair::Create(PrimitiveValue::Create(second),
-                                        PrimitiveValue::Create(initial));
+            return ValuePair::Create(PrimitiveValue::Create(second), PrimitiveValue::Create(initial));
           }
           default:
           {

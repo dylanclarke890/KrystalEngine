@@ -14,6 +14,9 @@
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Graphics/GeometryUtilities.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
@@ -21,7 +24,16 @@ namespace krys::boo::dom
 {
   Range::~Range() noexcept
   {
+    krys_debug_assert(!_isAssociatedWithSelection);
     LiveRangeUpdater::Destroyed(*this);
+  }
+
+  void Range::UpdateAssociatedSelection() noexcept
+  {
+    if (_isAssociatedWithSelection)
+    {
+      _start.Container->NodeDocument().Selection().UpdateFromAssociatedLiveRange();
+    }
   }
 
 #pragma region Range
@@ -125,6 +137,7 @@ namespace krys::boo::dom
     {
       _start = _end;
     }
+    UpdateAssociatedSelection();
   }
 
   ExceptionOr<void> Range::SelectNode(Node &node) noexcept
@@ -189,6 +202,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::DeleteContents() noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Collapsed())
     {
       return {};
@@ -289,6 +303,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<DocumentFragment>> Range::ExtractContents() noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
 
     if (Collapsed())
@@ -584,6 +599,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::InsertNode(Node &node) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<ProcessingInstruction>(_start.Container.get()) || Is<Comment>(_start.Container.get())
         || (Is<Text>(_start.Container.get()) && _start.Container->ParentNode() == nullptr)
         || _start.Container == &node)
@@ -654,6 +670,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Range::SurroundContents(ContainerNode &newParent) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto IsPartiallyContainedNonTextNode = [&](const Node &node)
     {
       return !Is<Text>(node) && IsPartiallyContained(node);
@@ -791,6 +808,24 @@ namespace krys::boo::dom
     return true;
   }
 
+  Ref<DOMRectList> Range::GetClientRects() const noexcept
+  {
+    (void)_start.Container->NodeDocument().UpdateLayout();
+    return DOMRectList::Create(RenderObject::ClientBorderAndTextRects(MakeSimpleRange(*this)));
+  }
+
+  Ref<DOMRect> Range::GetBoundingClientRect() const noexcept
+  {
+    return BoundingClientRect(MakeSimpleRange(*this));
+  }
+
+  Ref<DOMRect> Range::BoundingClientRect(const SimpleRange &range) noexcept
+  {
+    (void)range.Start.GetDocument().UpdateLayout();
+    auto rects = RenderObject::ClientBorderAndTextRects(range);
+    return DOMRect::Create(UnionRectIgnoringZeroRects(Span<const FloatRect>(rects)));
+  }
+
   ExceptionOr<DOMString> Range::ToString() const noexcept
   {
     if (_start.Container == _end.Container)
@@ -867,6 +902,7 @@ namespace krys::boo::dom
     }
 
     _start = krys::move(boundaryPoint);
+    UpdateAssociatedSelection();
     return {};
   }
 
@@ -896,6 +932,7 @@ namespace krys::boo::dom
     }
 
     _end = krys::move(boundaryPoint);
+    UpdateAssociatedSelection();
     return {};
   }
 

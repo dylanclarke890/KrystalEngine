@@ -10,6 +10,12 @@ namespace krys::boo::svg
 
   public:
     SVGUnknownElement(dom::Document &document) noexcept;
+
+  private:
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
+    {
+      return false;
+    }
   };
 }
 

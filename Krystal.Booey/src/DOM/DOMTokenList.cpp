@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -23,6 +24,7 @@ namespace krys::boo::dom
 
   void DOMTokenList::Value(DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     ElementAlgorithms::SetAttributeValue(*_element, _attributeName, krys::move(value));
   }
 
@@ -46,10 +48,10 @@ namespace krys::boo::dom
       return;
     }
 
-    ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serializer(_tokens));
+    ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serialiser(_tokens));
   }
 
-  DOMString DOMTokenList::SerializeSteps() const noexcept
+  DOMString DOMTokenList::SerialiseSteps() const noexcept
   {
     return ElementAlgorithms::GetAttributeValue(*_element, _attributeName);
   }

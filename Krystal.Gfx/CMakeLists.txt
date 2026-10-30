@@ -1,15 +1,12 @@
-add_library(Krystal.Gfx)
+﻿add_library(Krystal.Gfx)
 
 target_link_libraries(Krystal.Gfx 
   PUBLIC
     Krystal.Core
-    Krystal.PAL
+    Krystal.Text
 
   PRIVATE
     stb
-    msdf-atlas-gen::msdf-atlas-gen
-    msdfgen::msdfgen
-    msdfgen::msdfgen-ext
     Freetype::Freetype
 )
 
@@ -30,17 +27,8 @@ target_compile_options(Krystal.Gfx
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
 )
 
+# Third-party - FreeType (glyph rasterisation, on Krystal.Text's faces)
 find_package(Freetype REQUIRED)
-find_package(msdfgen CONFIG REQUIRED)
-
-set(MSDF_ATLAS_USE_VCPKG        OFF CACHE BOOL "" FORCE)  # we already have msdfgen/freetype from vcpkg
-set(MSDF_ATLAS_USE_SKIA         OFF CACHE BOOL "" FORCE)  # no skia
-set(MSDF_ATLAS_MSDFGEN_EXTERNAL ON  CACHE BOOL "" FORCE)  # use find_package(msdfgen)
-set(MSDF_ATLAS_BUILD_STANDALONE OFF CACHE BOOL "" FORCE)  # no CLI
-set(MSDF_ATLAS_INSTALL          OFF CACHE BOOL "" FORCE)  # source consumption
-set(MSDF_ATLAS_NO_ARTERY_FONT   ON  CACHE BOOL "" FORCE)  # drops artery-font-format submodule
-set(MSDF_ATLAS_DYNAMIC_RUNTIME  ON  CACHE BOOL "" FORCE)  # use dynamic runtime for msdf-atlas-gen
-add_subdirectory(third-party/msdf-atlas-gen)
 
 target_sources(Krystal.Gfx
   PUBLIC
@@ -48,55 +36,82 @@ target_sources(Krystal.Gfx
     BASE_DIRS
       include
     FILES
-      include/Krystal.Gfx/Cameras/FirstPersonCamera.hpp
-      include/Krystal.Gfx/Enums/BufferBitFlags.hpp
-      include/Krystal.Gfx/Enums/BufferType.hpp
-      include/Krystal.Gfx/Enums/BufferUsage.hpp
-      include/Krystal.Gfx/Enums/FilterMode.hpp
-      include/Krystal.Gfx/Enums/ImageType.hpp
-      include/Krystal.Gfx/Enums/MeshType.hpp
-      include/Krystal.Gfx/Enums/PixelFormat.hpp
-      include/Krystal.Gfx/Enums/PrimitiveType.hpp
-      include/Krystal.Gfx/Enums/VertexAttributeType.hpp
-      include/Krystal.Gfx/Enums/VertexInputRate.hpp
-      include/Krystal.Gfx/Enums/WrapMode.hpp
-      include/Krystal.Gfx/Registries/IBufferRegistry.hpp
-      include/Krystal.Gfx/Registries/IFontRegistry.hpp
-      include/Krystal.Gfx/Registries/IImageRegistry.hpp
-      include/Krystal.Gfx/Registries/IImageViewRegistry.hpp
-      include/Krystal.Gfx/Registries/IMaterialRegistry.hpp
-      include/Krystal.Gfx/Registries/IMeshRegistry.hpp
-      include/Krystal.Gfx/Registries/IRenderTargetRegistry.hpp
-      include/Krystal.Gfx/Registries/ISamplerRegistry.hpp
-      include/Krystal.Gfx/Registries/IShaderRegistry.hpp
-      include/Krystal.Gfx/Registries/ITextureRegistry.hpp
-      include/Krystal.Gfx/Resources/Buffer.hpp
-      include/Krystal.Gfx/Resources/Font.hpp
-      include/Krystal.Gfx/Resources/Image.hpp
-      include/Krystal.Gfx/Resources/ImageView.hpp
-      include/Krystal.Gfx/Resources/Material.hpp
-      include/Krystal.Gfx/Resources/Mesh.hpp
-      include/Krystal.Gfx/Resources/RenderTarget.hpp
-      include/Krystal.Gfx/Resources/Sampler.hpp
-      include/Krystal.Gfx/Resources/Shader.hpp
-      include/Krystal.Gfx/Resources/Texture.hpp
-      include/Krystal.Gfx/Utils/MeshDataUtils.hpp
-      include/Krystal.Gfx/Colour.hpp
-      include/Krystal.Gfx/ColourFormatter.hpp
-      include/Krystal.Gfx/ColourHasher.hpp
+      include/Krystal.Gfx/Buffer.hpp
+      include/Krystal.Gfx/CommandBuffer.hpp
       include/Krystal.Gfx/Commands.hpp
-      include/Krystal.Gfx/FontAtlasLoader.hpp
-      include/Krystal.Gfx/Handle.hpp
-      include/Krystal.Gfx/ICamera.hpp
-      include/Krystal.Gfx/IContext.hpp
-      include/Krystal.Gfx/InstanceData.hpp
-      include/Krystal.Gfx/IRenderer.hpp
-      include/Krystal.Gfx/Light.hpp
-      include/Krystal.Gfx/ResourceHandleCache.hpp
-      include/Krystal.Gfx/ResourceManager.hpp
-      include/Krystal.Gfx/Vertex.hpp
+      include/Krystal.Gfx/CompareOp.hpp
+      include/Krystal.Gfx/Device.hpp
+      include/Krystal.Gfx/Formats.hpp
+      include/Krystal.Gfx/Handles.hpp
+      include/Krystal.Gfx/Pipeline.hpp
+      include/Krystal.Gfx/Pool.hpp
+      include/Krystal.Gfx/RenderPass.hpp
+      include/Krystal.Gfx/Sampler.hpp
+      include/Krystal.Gfx/Shader.hpp
+      include/Krystal.Gfx/Swapchain.hpp
+      include/Krystal.Gfx/Texture.hpp
 
-  PRIVATE 
-    src/Cameras/FirstPersonCamera.cpp
-    src/FontAtlasLoader.cpp
+      # OpenGL
+      include/Krystal.Gfx/OpenGL/gl.hpp
+      include/Krystal.Gfx/OpenGL/GLContext.hpp
+      include/Krystal.Gfx/OpenGL/GLDevice.hpp
+      include/Krystal.Gfx/OpenGL/GLMappings.hpp
+      include/Krystal.Gfx/OpenGL/ShaderReflector.hpp
+      include/Krystal.Gfx/OpenGL/Hooks/gl.hpp
+      include/Krystal.Gfx/OpenGL/Official/glcorearb.h
+      include/Krystal.Gfx/OpenGL/Official/glext.h
+      include/Krystal.Gfx/OpenGL/Official/khrplatform.h
+
+      # Render2D
+      include/Krystal.Gfx/Render2D/AtlasPages.hpp
+      include/Krystal.Gfx/Render2D/CoverageBlur.hpp
+      include/Krystal.Gfx/Render2D/Dashing.hpp
+      include/Krystal.Gfx/Render2D/FilterGraph2D.hpp
+      include/Krystal.Gfx/Render2D/FilterRenderer2D.hpp
+      include/Krystal.Gfx/Render2D/Flattening.hpp
+      include/Krystal.Gfx/Render2D/FontFace2D.hpp
+      include/Krystal.Gfx/Render2D/GlyphAtlas.hpp
+      include/Krystal.Gfx/Render2D/Gradient2D.hpp
+      include/Krystal.Gfx/Render2D/MaskAtlas.hpp
+      include/Krystal.Gfx/Render2D/Paint2D.hpp
+      include/Krystal.Gfx/Render2D/Path2D.hpp
+      include/Krystal.Gfx/Render2D/PathRasteriser.hpp
+      include/Krystal.Gfx/Render2D/PathStroker.hpp
+      include/Krystal.Gfx/Render2D/Rect2D.hpp
+      include/Krystal.Gfx/Render2D/Renderer2D.hpp
+      include/Krystal.Gfx/Render2D/RoundedRect2D.hpp
+      include/Krystal.Gfx/Render2D/StrokeStyle.hpp
+      include/Krystal.Gfx/Render2D/Transform2D.hpp
+
+  PRIVATE
+    src/CommandBuffer.cpp
+    src/Device.cpp
+
+    # OpenGL
+    src/OpenGL/GLDevice.cpp
+    src/OpenGL/Hooks/gl.cpp
+
+    # Render2D
+    src/Render2D/AtlasPages.cpp
+    src/Render2D/CoverageBlur.cpp
+    src/Render2D/FilterRenderer2D.cpp
+    src/Render2D/FontFace2D.cpp
+    src/Render2D/GlyphAtlas.cpp
+    src/Render2D/Gradient2D.cpp
+    src/Render2D/MaskAtlas.cpp
+    src/Render2D/Path2D.cpp
+    src/Render2D/PathRasteriser.cpp
+    src/Render2D/PathStroker.cpp
+    src/Render2D/Renderer2D.cpp
 )
+
+if(WIN32)
+  target_sources(Krystal.Gfx
+    PRIVATE
+      include/Krystal.Gfx/OpenGL/Hooks/wgl.hpp
+      include/Krystal.Gfx/OpenGL/Official/wglext.h
+
+      src/OpenGL/GLContextWin32.cpp
+      src/OpenGL/Hooks/wgl.cpp
+  )
+endif()

@@ -17,6 +17,8 @@ namespace krys::boo::css
     PseudoClass,
     /// @brief Matches a pseudo-element of the element.
     PseudoElement,
+    /// @brief Matches a page pseudo-class (`:first`, `:left`, `:right`) in an `@page` selector.
+    PagePseudoClass,
     /// @brief Matches an element when it has a specific attribute, regardless of the value of that attribute.
     AttributeExists,
     /// @brief Matches an element when it has a specific attribute with a specific value.
@@ -47,4 +49,4 @@ namespace krys::boo::css
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 14uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::SelectorMatch, 18uz);

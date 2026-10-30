@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html
 {
@@ -16,10 +16,10 @@ namespace krys::boo::html
 #pragma region HTMLModElement - https://html.spec.whatwg.org/#htmlmodelement
 
     /// @see https://html.spec.whatwg.org/#dom-mod-cite
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Cite() const noexcept;
+    KRYS_NODISCARD dom::USVString Cite() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-cite
-    dom::ExceptionOr<void> Cite(dom::USVString &&value) noexcept;
+    void Cite(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-mod-datetime
     KRYS_NODISCARD dom::DOMString DateTime() const noexcept;

@@ -11,7 +11,7 @@ namespace krys::boo::html::Tests
 {
   namespace
   {
-    void SerializeHTMLToken(HTMLToken &token, dom::DOMString &output) noexcept
+    void SerialiseHTMLToken(HTMLToken &token, dom::DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -164,8 +164,8 @@ namespace krys::boo::html::Tests
             auto text = stringview(line);
             // NOTE: errors are in the form "line:column ErrorName"
 
-            uint32 line = 0u;
-            auto [ptr1, ec1] = std::from_chars(text.data(), text.data() + text.size(), line);
+            uint32 lineNo = 0u;
+            auto [ptr1, ec1] = std::from_chars(text.data(), text.data() + text.size(), lineNo);
             text.remove_prefix(ptr1 - text.data());
 
             text.remove_prefix(1uz); // skip ':'
@@ -183,7 +183,7 @@ namespace krys::boo::html::Tests
                 .Error = *error,
                 .Location =
                   {
-                    .Line = line,
+                    .Line = lineNo,
                     .Column = column,
                   },
               });
@@ -223,7 +223,7 @@ namespace krys::boo::html::Tests
         {
           break;
         }
-        SerializeHTMLToken(*token, tokens);
+        SerialiseHTMLToken(*token, tokens);
       }
 
       tests::NormaliseData(tokens);

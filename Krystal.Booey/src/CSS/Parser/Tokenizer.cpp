@@ -37,8 +37,12 @@ namespace krys::boo::css
 
     if (IsWhitespace(current))
     {
+      auto start = _inputStream.ReadPosition() - 1uz;
       ConsumeWhitespace();
-      return Token {TokenType::Whitespace};
+
+      auto token = Token {TokenType::Whitespace};
+      token.OriginalText(_inputStream.Slice(start, _inputStream.ReadPosition()));
+      return token;
     }
 
     if (current == U'"')
@@ -262,13 +266,16 @@ namespace krys::boo::css
 
   Token Tokenizer::ConsumeNumericToken() noexcept
   {
+    auto start = _inputStream.ReadPosition();
     auto number = ConsumeNumber();
+    auto numberText = _inputStream.Slice(start, _inputStream.ReadPosition());
 
     if (StartsWithIdentifier(_inputStream.NextInputCharacter(), _inputStream.Peek(1uz),
                              _inputStream.Peek(2uz)))
     {
       auto token = Token {TokenType::Dimension};
       token.Unit(ConsumeIdentSequence());
+      token.OriginalText(_inputStream.Slice(start, _inputStream.ReadPosition()));
       token.NumericValue(number);
 
       return token;
@@ -279,12 +286,14 @@ namespace krys::boo::css
       _inputStream.Consume();
 
       auto token = Token {TokenType::Percentage};
+      token.OriginalText(numberText);
       token.NumericValue(number);
 
       return token;
     }
 
     auto token = Token {TokenType::Number};
+    token.OriginalText(numberText);
     token.NumericValue(number);
 
     return token;
@@ -308,7 +317,7 @@ namespace krys::boo::css
       if (next == U'"' || next == U'\''
           || (IsWhitespace(next) && (_inputStream.Peek(1uz) == U'"' || _inputStream.Peek(1uz) == U'\'')))
       {
-        return Token {TokenType::Function, string};
+        return BlockStart(TokenType::OpenParen, TokenType::Function, string);
       }
 
       return ConsumeUrlToken();
@@ -317,7 +326,7 @@ namespace krys::boo::css
     if (_inputStream.NextInputCharacter() == U'(')
     {
       _inputStream.Consume();
-      return Token {TokenType::Function, string};
+      return BlockStart(TokenType::OpenParen, TokenType::Function, string);
     }
 
     return Token {TokenType::Ident, string};
@@ -680,13 +689,14 @@ namespace krys::boo::css
     }
 
     double value;
-    auto [nptr, nec] = std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
+    KRYS_MAYBE_UNUSED auto [nptr, nec] =
+      std::from_chars(numberPart.data(), numberPart.data() + numberPart.size(), value);
     assert(nec == std::errc());
 
     if (!exponentPart.empty())
     {
       int64 exponent;
-      auto [eptr, eec] =
+      KRYS_MAYBE_UNUSED auto [eptr, eec] =
         std::from_chars(exponentPart.data(), exponentPart.data() + exponentPart.size(), exponent);
       assert(eec == std::errc());
 
@@ -704,7 +714,7 @@ namespace krys::boo::css
     auto ConvertHexStrToInt = [](const string &str) noexcept -> int32
     {
       int32 value = 0;
-      auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
+      KRYS_MAYBE_UNUSED auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16);
       assert(ec == std::errc());
       return value;
     };
@@ -819,6 +829,14 @@ namespace krys::boo::css
 
     _blockStack.push_back(type);
     return Token(type, BlockTokenType::Start);
+  }
+
+  Token Tokenizer::BlockStart(TokenType blockType, TokenType type, utf32_stringview name) noexcept
+  {
+    krys_debug_assert(blockType == TokenType::OpenParen && type == TokenType::Function);
+
+    _blockStack.push_back(blockType);
+    return Token(type, name, BlockTokenType::Start);
   }
 
   Token Tokenizer::BlockEnd(TokenType type) noexcept

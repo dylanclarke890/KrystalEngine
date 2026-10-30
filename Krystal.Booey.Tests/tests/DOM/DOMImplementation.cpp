@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/DOMImplementation.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -8,7 +9,6 @@
 #include "Krystal.Booey/DOM/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -24,5 +24,5 @@ namespace krys::boo::dom::tests
             == ExceptionCode::InvalidCharacterError);
   }
 
-  // TODO(test): add tests for CreateDocument and CreateHTMLDocument
+  // FIXME: Add tests for CreateDocument and CreateHTMLDocument
 }

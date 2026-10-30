@@ -2,6 +2,7 @@
 
 #include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Maths/Base.hpp"
 
 namespace krys::boo::css
 {
@@ -14,15 +15,15 @@ namespace krys::boo::css
   // Non-standard
   struct SpringEasingParameters
   {
-    constexpr static auto NextAfterZero = std::numeric_limits<double>::denorm_min();
+    constexpr static auto NextAfterZero = Limits<double>::denorm_min();
     constexpr static auto Positive = Range {NextAfterZero, Range::Inf};
 
-    Number<Positive> mass;
-    Number<Positive> stiffness;
-    Number<NonNegative> damping;
-    Number<> initialVelocity;
+    Number<Positive> Mass;
+    Number<Positive> Stiffness;
+    Number<NonNegative> Damping;
+    Number<> InitialVelocity;
 
-    constexpr bool operator==(const SpringEasingParameters &) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const SpringEasingParameters &) const noexcept = default;
   };
 
   using SpringEasingFunction = FunctionNotation<ValueId::Spring, SpringEasingParameters>;
@@ -32,19 +33,19 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.mass;
+      return value.Mass;
     }
     else if constexpr (I == 1)
     {
-      return value.stiffness;
+      return value.Stiffness;
     }
     else if constexpr (I == 2)
     {
-      return value.damping;
+      return value.Damping;
     }
     else if constexpr (I == 3)
     {
-      return value.initialVelocity;
+      return value.InitialVelocity;
     }
   }
 }

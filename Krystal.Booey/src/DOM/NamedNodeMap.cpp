@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include <ranges>
 
@@ -10,11 +11,13 @@ namespace krys::boo::dom
 {
   size_t NamedNodeMap::Length() const noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     return _associatedElement->_attributes.size();
   }
 
   RefPtr<Attr> NamedNodeMap::Item(size_t index) noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     if (index < _associatedElement->_attributes.size())
     {
       return _associatedElement->_attributes[index];
@@ -52,16 +55,19 @@ namespace krys::boo::dom
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *_associatedElement);
     if (attr == nullptr)
     {
@@ -74,6 +80,7 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
                                                          DOMStringAtom localName) noexcept
   {
+    html::CEReactionsScope ceReactions;
     auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *_associatedElement);
     if (attr == nullptr)
     {
@@ -105,6 +112,7 @@ namespace krys::boo::dom
 
   List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept
   {
+    _associatedElement->SynchronizeAllAttributes();
     auto names = std::ranges::views::transform(_associatedElement->_attributes,
                                                [](const Ref<Attr> &attr) { return attr->Name(); })
                  | std::ranges::to<List<DOMString>>();

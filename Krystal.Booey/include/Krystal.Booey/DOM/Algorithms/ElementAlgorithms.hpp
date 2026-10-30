@@ -12,6 +12,10 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class Element;
+  class Attr;
+  class Node;
+
   class ElementAlgorithms
   {
   public:
@@ -26,8 +30,8 @@ namespace krys::boo::dom
                                                              Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#handle-attribute-changes
-    static void HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
-                                       DOMStringView newValue) noexcept;
+    static void HandleAttributeChanges(Attr &attribute, Element &element, Maybe<DOMStringView> oldValue,
+                                       Maybe<DOMStringView> newValue) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change
     static void ChangeAttribute(Attr &attribute, DOMString &&value) noexcept;
@@ -71,15 +75,21 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#concept-attach-a-shadow-root
     KRYS_NODISCARD static ExceptionOr<void> AttachShadowRoot(Element &element, ShadowRootMode mode,
-                                                             Clonable clonable, Serializable serializable,
+                                                             Clonable clonable, Serialisable serializable,
                                                              DelegatesFocus delegatesFocus,
                                                              SlotAssignmentMode slotAssignment,
                                                              html::CustomElementRegistry *registry) noexcept;
+
+    /// @brief Attaches a user agent shadow root to @p element, which must have no shadow root.
+    static ShadowRoot &AttachUserAgentShadowRoot(Element &element) noexcept;
 
     /// @brief Helper method for creating a new DOMTokenList bound to an element and attribute, optionally
     /// with a function to filter new values to only supported values.
     KRYS_NODISCARD static UniquePtr<DOMTokenList> CreateDOMTokenList(
       Element &element, DOMStringAtom attributeName,
       IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+
+  private:
+    static void AddShadowRoot(Element &element, const Ref<ShadowRoot> &shadow) noexcept;
   };
 }

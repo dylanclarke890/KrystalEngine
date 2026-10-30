@@ -1,18 +1,26 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/CSS/Values/Grid/GridTemplateAreas.hpp"
-#include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
-  class SubgridValue final : public ValueWithSmallList
+  /// @brief A `subgrid` track list, with optional line names, e.g. `subgrid [a] [b]`.
+  class SubgridValue final : public ValueContainingList
   {
+  private:
+    explicit SubgridValue(ValueListBuilder builder) noexcept;
+
   public:
     KRYS_NODISCARD static Ref<SubgridValue> Create(ValueListBuilder builder) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const SubgridValue &other) const noexcept
+    {
+      return ItemsEqual(other);
+    }
   };
 }
 

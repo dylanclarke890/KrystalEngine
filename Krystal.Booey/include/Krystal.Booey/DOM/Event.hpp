@@ -6,8 +6,8 @@
 #include "Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -16,10 +16,12 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#event
   class Event : public RefCounted<Event>
   {
+    friend class Document;
     friend class EventDispatcher;
     friend class EventFactory;
     friend class ShadowRoot;
     friend class EventTarget;
+    friend class MutationObserverAlgorithms;
 
     using dictionary_type = EventInit;
 
@@ -43,6 +45,9 @@ namespace krys::boo::dom
     bool _composed : 1 {false};
     bool _initialized : 1 {false};
     bool _dispatched : 1 {false};
+    bool _defaultHandled : 1 {false};
+    bool _isDefaultEventHandlerIgnored : 1 {false};
+    RefPtr<Event> _underlyingEvent;
 
   public:
     virtual ~Event() noexcept = default;
@@ -179,6 +184,50 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-initevent
     void InitEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false) noexcept;
 
+#pragma endregion
+
+    /// @brief A trusted event of type @p type, for the user agent to dispatch.
+    KRYS_NODISCARD static Ref<Event> Create(DOMStringAtom type, bool canBubble, bool isCancelable,
+                                            bool isComposed = false) noexcept;
+
+    /// @brief Whether the event is being dispatched (its dispatch flag).
+    KRYS_NODISCARD bool IsBeingDispatched() const noexcept
+    {
+      return _dispatched;
+    }
+
+    /// @brief Whether a node's default event handler has handled the event, so no more of them run.
+    KRYS_NODISCARD bool DefaultHandled() const noexcept
+    {
+      return _defaultHandled;
+    }
+
+    void SetDefaultHandled() noexcept
+    {
+      _defaultHandled = true;
+    }
+
+    /// @brief Whether no default event handler runs for the event (a key an input method handled).
+    KRYS_NODISCARD bool IsDefaultEventHandlerIgnored() const noexcept
+    {
+      return _isDefaultEventHandlerIgnored;
+    }
+
+    void SetIsDefaultEventHandlerIgnored() noexcept
+    {
+      _isDefaultEventHandlerIgnored = true;
+    }
+
+    /// @brief The event this one was made for, such as the keypress a simulated click stands in for.
+    KRYS_NODISCARD Event *UnderlyingEvent() const noexcept
+    {
+      return _underlyingEvent.get();
+    }
+
+    void SetUnderlyingEvent(Event *underlyingEvent) noexcept;
+
+#pragma region Event - https://dom.spec.whatwg.org/#event
+
   protected:
     /// @see https://dom.spec.whatwg.org/#event-relatedtarget
     virtual RefPtr<EventTarget> RelatedTarget() const noexcept
@@ -204,17 +253,157 @@ namespace krys::boo::dom
       (void)touchTargets;
     }
 
+    /// @brief Called when the event's target changes to another target (not when it's cleared).
+    virtual void ReceivedTarget() noexcept
+    {
+    }
+
 #pragma endregion
+
+  public:
+    /// @brief Sets the event's target, telling the event if it's a new one.
+    void SetTarget(RefPtr<EventTarget> target) noexcept;
 
 #pragma region Type Checks
 
-    KRYS_NODISCARD bool IsMouseEvent() const noexcept
+    KRYS_NODISCARD virtual bool IsMouseEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsKeyboardEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsFocusEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsWheelEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPointerEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsTouchEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsClipboardEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsDragEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsInputEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsTextEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCompositionEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSubmitEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsFormDataEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsHashChangeEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsMessageEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsErrorEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsStorageEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPageTransitionEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsPopStateEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsNavigateEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsNavigationCurrentEntryChangeEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsBeforeUnloadEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsBeforeTextInsertedEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsToggleEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsCommandEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsContentVisibilityAutoStateChangeEvent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsGamepadEvent() const noexcept
     {
       return false;
     }
 
 #pragma endregion
 
+  protected:
     /// @see https://dom.spec.whatwg.org/#concept-event-initialize
     static void Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept;
 

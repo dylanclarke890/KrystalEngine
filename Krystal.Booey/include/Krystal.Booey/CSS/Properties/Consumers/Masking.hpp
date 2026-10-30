@@ -13,11 +13,10 @@ namespace krys::boo::css
     // rect() = rect( [ <length> | auto ]#{4} | [ <length> | auto ]{4} )
     // https://drafts.fxtf.org/css-masking/#funcdef-clip-rect
     KRYS_NODISCARD RefPtr<Value> ConsumeClipRectFunction(TokenRange &tokens,
-                                                            PropertyParserState &state) noexcept;
+                                                         PropertyParserState &state) noexcept;
 
     // <'clip-path'> = none | <clip-source> | [ <basic-shape> || <geometry-box> ]
     // https://drafts.fxtf.org/css-masking/#propdef-clip-path
-    KRYS_NODISCARD RefPtr<Value> ConsumeClipPath(TokenRange &tokens,
-                                                    PropertyParserState &state) noexcept;
+    KRYS_NODISCARD RefPtr<Value> ConsumeClipPath(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

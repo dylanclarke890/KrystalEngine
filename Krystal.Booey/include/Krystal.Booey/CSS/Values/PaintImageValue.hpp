@@ -1,12 +1,48 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo
+{
+  class StyleImage;
+}
+
+namespace krys::boo::style
+{
+  class BuilderState;
+}
 
 namespace krys::boo::css
 {
-  class PaintImageValue : public Value
+  /// @brief The value of a `paint()` function.
+  /// @note https://drafts.css-houdini.org/css-paint-api/#paint-notation
+  class PaintImageValue final : public Value
   {
+  private:
+    CSSOMString _name;
+    const Ref<VariableData> _arguments;
+
+    PaintImageValue(CSSOMString &&name, Ref<VariableData> &&arguments) noexcept;
+
   public:
+    KRYS_NODISCARD static Ref<PaintImageValue> Create(CSSOMString name, Ref<VariableData> arguments) noexcept;
+
+    KRYS_NODISCARD const CSSOMString &Name() const noexcept
+    {
+      return _name;
+    }
+
+    KRYS_NODISCARD bool Equals(const PaintImageValue &other) const noexcept
+    {
+      return _name == other._name;
+    }
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD RefPtr<StyleImage> CreateStyleImage(const style::BuilderState &state) const noexcept;
   };
 }
 

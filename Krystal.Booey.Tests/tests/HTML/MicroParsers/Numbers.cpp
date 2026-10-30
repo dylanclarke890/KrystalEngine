@@ -116,4 +116,36 @@ namespace krys::boo::html::tests
       TestParse<double>(u8"  .", MicroParserError::InvalidCharacter);
     }
   }
+  TEST_CASE("Numbers: valid non-negative integers and floating-point numbers",
+            "[HTML][MicroParsers][Numbers]")
+  {
+    CHECK(Numbers::ParseValidNonNegativeInteger(u8"0").Value == 0u);
+    CHECK(Numbers::ParseValidNonNegativeInteger(u8"480").Value == 480u);
+    CHECK_FALSE(Numbers::ParseValidNonNegativeInteger(u8"").Success());
+    CHECK_FALSE(Numbers::ParseValidNonNegativeInteger(u8" 1").Success());
+    CHECK_FALSE(Numbers::ParseValidNonNegativeInteger(u8"+1").Success());
+    CHECK_FALSE(Numbers::ParseValidNonNegativeInteger(u8"1.5").Success());
+
+    CHECK(Numbers::ParseValidFloatingPoint(u8"1.5").Value == 1.5);
+    CHECK(Numbers::ParseValidFloatingPoint(u8"-2").Value == -2);
+    CHECK(Numbers::ParseValidFloatingPoint(u8".5").Value == 0.5);
+    CHECK(Numbers::ParseValidFloatingPoint(u8"1e2").Value == 100);
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"").Success());
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"+1").Success());
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"1.").Success());
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"1x").Success());
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8" 1").Success());
+    CHECK_FALSE(Numbers::ParseValidFloatingPoint(u8"inf").Success());
+  }
+
+  TEST_CASE("Numbers::ParseListOfFloatingPointNumbers", "[HTML][MicroParsers][Numbers]")
+  {
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"1, 2;3  4") == List<double> {1, 2, 3, 4});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8" ,;1.5,-.5,1e1, ") == List<double> {1.5, -0.5, 10});
+    // Anything after a number is ignored, and a part that isn't a number is zero.
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"10px,x,20") == List<double> {10, 0, 20});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"a1,-") == List<double> {1, 0});
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8"").empty());
+    CHECK(Numbers::ParseListOfFloatingPointNumbers(u8" ;, ").empty());
+  }
 }

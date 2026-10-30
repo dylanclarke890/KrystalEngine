@@ -81,9 +81,28 @@ target_sources(Krystal.Core
       include/Krystal.Core/MagicEnum.hpp
       include/Krystal.Core/Numeric.hpp
       include/Krystal.Core/RefCounted.hpp
+      include/Krystal.Core/TriState.hpp
       include/Krystal.Core/TypeCast.hpp
       include/Krystal.Core/TypeTraits.hpp
       include/Krystal.Core/Visitor.hpp
+
+      # Colour
+      include/Krystal.Core/Colour/AlphaPremultiplication.hpp
+      include/Krystal.Core/Colour/BlendMode.hpp
+      include/Krystal.Core/Colour/ColourComponents.hpp
+      include/Krystal.Core/Colour/ColourConversion.hpp
+      include/Krystal.Core/Colour/ColourInterpolation.hpp
+      include/Krystal.Core/Colour/ColourInterpolationMethod.hpp
+      include/Krystal.Core/Colour/ColourLuminance.hpp
+      include/Krystal.Core/Colour/ColourMatrix.hpp
+      include/Krystal.Core/Colour/ColourModels.hpp
+      include/Krystal.Core/Colour/ColourNormalization.hpp
+      include/Krystal.Core/Colour/ColourSpace.hpp
+      include/Krystal.Core/Colour/ColourTextStream.hpp
+      include/Krystal.Core/Colour/ColourTransferFunctions.hpp
+      include/Krystal.Core/Colour/ColourTypes.hpp
+      include/Krystal.Core/Colour/ColourUtilities.hpp
+      include/Krystal.Core/Colour/GradientSpreadMethod.hpp
 
       # Commands
       include/Krystal.Core/Commands/CommandArena.hpp
@@ -185,8 +204,15 @@ target_sources(Krystal.Core
       include/Krystal.Core/Text/Encodings/UTF.hpp
       include/Krystal.Core/Text/Encodings/Windows.hpp
       include/Krystal.Core/Text/ASCII.hpp
+      include/Krystal.Core/Text/Base64.hpp
+      include/Krystal.Core/Text/CodePointIterator.hpp
       include/Krystal.Core/Text/EncodingRegistry.hpp
+      include/Krystal.Core/Text/HexNumber.hpp
       include/Krystal.Core/Text/ICodec.hpp
+      include/Krystal.Core/Text/ParsingUtilities.hpp
+      include/Krystal.Core/Text/StringBuilder.hpp
+      include/Krystal.Core/Text/StringToIntegerConversion.hpp
+      include/Krystal.Core/Text/TextStream.hpp
       include/Krystal.Core/Text/Unicode.hpp
 
       # Time
@@ -201,19 +227,29 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/CompactPtrTuple.hpp
       include/Krystal.Core/Types/CompactRefPtrTuple.hpp
       include/Krystal.Core/Types/CompactUniquePtrTuple.hpp
+      include/Krystal.Core/Types/BloomFilter.hpp
+      include/Krystal.Core/Types/CompactVariant.hpp
+      include/Krystal.Core/Types/DataRef.hpp
       include/Krystal.Core/Types/Expected.hpp
+      include/Krystal.Core/Types/FixedVector.hpp
+      include/Krystal.Core/Types/FlatteningVariant.hpp
       include/Krystal.Core/Types/Func.hpp
       include/Krystal.Core/Types/HashMap.hpp
       include/Krystal.Core/Types/HashSet.hpp
       include/Krystal.Core/Types/InlineWeakPtr.hpp
       include/Krystal.Core/Types/IntrusivePtr.hpp
       include/Krystal.Core/Types/List.hpp
+      include/Krystal.Core/Types/ListHashSet.hpp
+      include/Krystal.Core/Types/RedBlackTree.hpp
+      include/Krystal.Core/Types/IntervalTree.hpp
       include/Krystal.Core/Types/Markable.hpp
       include/Krystal.Core/Types/Maybe.hpp
       include/Krystal.Core/Types/NTTPMaybe.hpp
       include/Krystal.Core/Types/NTTPString.hpp
+      include/Krystal.Core/Types/Packed.hpp
       include/Krystal.Core/Types/Pair.hpp
       include/Krystal.Core/Types/Queue.hpp
+      include/Krystal.Core/Types/RefCountedFixedVector.hpp
       include/Krystal.Core/Types/RefPtr.hpp
       include/Krystal.Core/Types/SmallList.hpp
       include/Krystal.Core/Types/Span.hpp
@@ -222,6 +258,7 @@ target_sources(Krystal.Core
       include/Krystal.Core/Types/StringAtom.hpp
       include/Krystal.Core/Types/StronglyTypedValue.hpp
       include/Krystal.Core/Types/TaggedPtr.hpp
+      include/Krystal.Core/Types/TinyLRUCache.hpp
       include/Krystal.Core/Types/ThreadSafeWeakPtr.hpp
       include/Krystal.Core/Types/UniqueArray.hpp
       include/Krystal.Core/Types/UniquePtr.hpp
@@ -232,22 +269,32 @@ target_sources(Krystal.Core
 
       # Utils
       include/Krystal.Core/Utils/AlignedStorage.hpp
+      include/Krystal.Core/Utils/AllowCompactPointers.hpp
       include/Krystal.Core/Utils/Apply.hpp
       include/Krystal.Core/Utils/ByteUtils.hpp
       include/Krystal.Core/Utils/ForbidHeapAllocation.hpp
-      include/Krystal.Core/Utils/Handle.hpp
+      include/Krystal.Core/Utils/GetPtrHelper.hpp
       include/Krystal.Core/Utils/IndexedRange.hpp
       include/Krystal.Core/Utils/Move.hpp
       include/Krystal.Core/Utils/NativeHandle.hpp
       include/Krystal.Core/Utils/NeverDestroyed.hpp
+      include/Krystal.Core/Utils/PointerComparison.hpp
+      include/Krystal.Core/Utils/ScopeExit.hpp
       include/Krystal.Core/Utils/ScopedProfiler.hpp
       include/Krystal.Core/Utils/SetForScope.hpp
       include/Krystal.Core/Utils/StringId.hpp
       include/Krystal.Core/Utils/StrongOrder.hpp
       include/Krystal.Core/Utils/Tags.hpp
+      include/Krystal.Core/Utils/UnalignedAccess.hpp
       include/Krystal.Core/Utils/ZippedRange.hpp
+      include/Krystal.Core/Utils/ZipTuple.hpp
 
   PRIVATE
+    # Colour
+    src/Colour/ColourConversion.cpp
+    src/Colour/ColourInterpolation.cpp
+    src/Colour/ColourTextStream.cpp
+
     # Detection
     src/Detection/NumberOfCores.cpp
     
@@ -266,4 +313,9 @@ target_sources(Krystal.Core
     
     # Utils
     src/Utils/ScopedProfiler.cpp
+
+    # Text
+    src/Text/StringBuilder.cpp
+    src/Text/Base64.cpp
+    src/Text/TextStream.cpp
 )

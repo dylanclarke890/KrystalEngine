@@ -11,7 +11,13 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
+#include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -47,6 +53,98 @@ namespace krys::boo::dom
       }
 
       return nodes;
+    }
+
+    using ChildChange = ContainerNode::ChildChange;
+
+    /// @brief The parser appends to the elements whose children it's still parsing.
+    KRYS_NODISCARD ChildChange::Source ChildChangeSource(const ContainerNode &parent) noexcept
+    {
+      auto *element = DynamicDowncast<Element>(parent);
+      return element && !element->IsFinishedParsingChildren() ? ChildChange::Source::Parser
+                                                              : ChildChange::Source::API;
+    }
+
+    KRYS_NODISCARD ChildChange MakeChildChangeForInsertion(ContainerNode &parent, Node &child,
+                                                           Node *beforeChild) noexcept
+    {
+      auto changeType = [&]
+      {
+        if (Is<Element>(child))
+        {
+          return ChildChange::Type::ElementInserted;
+        }
+        if (Is<Text>(child))
+        {
+          return ChildChange::Type::TextInserted;
+        }
+        return ChildChange::Type::NonContentsChildInserted;
+      }();
+
+      auto *beforeChildElement = DynamicDowncast<Element>(beforeChild);
+      return {changeType,
+              DynamicDowncast<Element>(child),
+              beforeChild ? TreeQueries::PreviousElementSibling(*beforeChild)
+                          : TreeQueries::LastElementChild(parent),
+              !beforeChild || beforeChildElement ? beforeChildElement
+                                                 : TreeQueries::NextElementSibling(*beforeChild),
+              ChildChangeSource(parent),
+              changeType == ChildChange::Type::ElementInserted ? ChildChange::AffectsElements::Yes
+                                                               : ChildChange::AffectsElements::No};
+    }
+
+    KRYS_NODISCARD ChildChange MakeChildChangeForRemoval(ContainerNode &parent, Node &childToRemove) noexcept
+    {
+      auto changeType = [&]
+      {
+        if (Is<Element>(childToRemove))
+        {
+          return ChildChange::Type::ElementRemoved;
+        }
+        if (Is<Text>(childToRemove))
+        {
+          return ChildChange::Type::TextRemoved;
+        }
+        return ChildChange::Type::NonContentsChildRemoved;
+      }();
+
+      return {changeType,
+              DynamicDowncast<Element>(childToRemove),
+              TreeQueries::PreviousElementSibling(childToRemove),
+              TreeQueries::NextElementSibling(childToRemove),
+              ChildChangeSource(parent),
+              changeType == ChildChange::Type::ElementRemoved ? ChildChange::AffectsElements::Yes
+                                                              : ChildChange::AffectsElements::No};
+    }
+
+    /// @brief Invalidates the style that inserting or removing @p child affects, before the change (when
+    /// constructed) and after it (when destroyed).
+    class ChildChangeStyleInvalidation
+    {
+      KRYS_NON_COPY_MOVABLE(ChildChangeStyleInvalidation);
+
+    private:
+      const ChildChange _childChange;
+      style::ChildChangeInvalidation _invalidation;
+
+    public:
+      ChildChangeStyleInvalidation(ContainerNode &parent, const ChildChange &childChange) noexcept
+          : _childChange(childChange), _invalidation(parent, _childChange)
+      {
+      }
+    };
+  }
+
+  namespace
+  {
+    void RebuildSVGExtensionsElementsIfNecessary(ContainerNode &parent) noexcept
+    {
+      auto *extensions = parent.NodeDocument().SVGExtensionsIfExists();
+      auto *svgHost = DynamicDowncast<svg::SVGElement>(TreeQueries::ShadowHost(parent));
+      if (extensions && !(svgHost && Is<svg::SVGUseElement>(*svgHost)))
+      {
+        extensions->RebuildElements();
+      }
     }
   }
 
@@ -174,9 +272,9 @@ namespace krys::boo::dom
 
     if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
     {
-      while (auto *child = documentFragment->FirstChild())
+      while (auto *fragmentChild = documentFragment->FirstChild())
       {
-        auto result = Remove(*child, SuppressObservers(true));
+        auto result = Remove(*fragmentChild, SuppressObservers(true));
         if (result.HasException())
         {
           return result.ReleaseException();
@@ -197,10 +295,9 @@ namespace krys::boo::dom
 
     bool isParentNamedShadowHost =
       TreeQueries::IsShadowHost(parent)
-      && Downcast<Element>(parent).ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named;
+      && TreeQueries::GetShadowRoot(Downcast<Element>(parent))->SlotAssignment() == SlotAssignmentMode::Named;
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
-    auto &parentRoot = TreeQueries::Root(parent);
     auto *slotParent = DynamicDowncast<html::HTMLSlotElement>(parent);
     for (auto &target : nodes)
     {
@@ -208,6 +305,9 @@ namespace krys::boo::dom
       {
         return result.ReleaseException();
       }
+
+      ChildChangeStyleInvalidation styleInvalidation(parent,
+                                                     MakeChildChangeForInsertion(parent, *target, child));
 
       target->SetParentNode(&parent);
       if (child == nullptr)
@@ -226,17 +326,17 @@ namespace krys::boo::dom
       }
       else
       {
-        if (auto *previousSibling = child->PreviousSibling())
+        if (auto *childPreviousSibling = child->PreviousSibling())
         {
-          previousSibling->SetNextSibling(target.get());
-          target->SetPreviousSibling(previousSibling);
+          childPreviousSibling->SetNextSibling(target.get());
+          target->SetPreviousSibling(childPreviousSibling);
 
           child->SetPreviousSibling(target.get());
           target->SetNextSibling(child);
         }
         else
         {
-          assert(parent.FirstChild() == child);
+          krys_debug_assert(parent.FirstChild() == child);
           parent.SetFirstChild(target.get());
 
           child->SetPreviousSibling(target.get());
@@ -258,7 +358,7 @@ namespace krys::boo::dom
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
-        ExtensibilityHooks::NodeInserted(inclusiveDescendant);
+        ExtensibilityHooks::NodeInserted(inclusiveDescendant, &inclusiveDescendant == target.get());
 
         if (!inclusiveDescendant.IsConnected())
         {
@@ -267,23 +367,29 @@ namespace krys::boo::dom
 
         if (auto *element = DynamicDowncast<Element>(inclusiveDescendant))
         {
-          // TODO(impl): CUSTOM-ELEMENTS
-          // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
-          // non-null:
-          // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
-          // inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped
-          // document set.
-          // If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
-          // inclusiveDescendant, callback name "connectedCallback", and « ».
-          // Otherwise, try to upgrade inclusiveDescendant.
+          if (auto registry = element->CustomElementRegistry())
+          {
+            if (registry->IsScoped())
+            {
+              registry->AppendToScopedDocumentSet(element->NodeDocument());
+            }
+
+            if (element->IsDefinedCustomElement())
+            {
+              html::CustomElementReactionQueue::EnqueueConnectedCallbackIfNeeded(*element);
+            }
+            else if (element->IsCustomElementUpgradeCandidate())
+            {
+              html::CustomElementReactionQueue::TryToUpgradeElement(*element);
+            }
+          }
         }
         else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
         {
-          // TODO(impl): CUSTOM-ELEMENTS
-          // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
-          // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
-          // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
-          // registry’s scoped document set.
+          if (auto registry = shadowRoot->CustomElementRegistry(); registry && registry->IsScoped())
+          {
+            registry->AppendToScopedDocumentSet(shadowRoot->NodeDocument());
+          }
         }
       }
     }
@@ -295,7 +401,15 @@ namespace krys::boo::dom
                                                           ShareRefPtr(previousSibling), ShareRefPtr(child));
     }
 
-    ExtensibilityHooks::NodeChildrenChanged(parent);
+    bool onlyReplacedElementsInserted = std::ranges::all_of(nodes,
+                                                            [](const Ref<Node> &node)
+                                                            {
+                                                              auto *element = DynamicDowncast<Element>(*node);
+                                                              return element && element->IsReplaced();
+                                                            });
+    ExtensibilityHooks::NodeChildrenChanged(parent, onlyReplacedElementsInserted);
+
+    RebuildSVGExtensionsElementsIfNecessary(parent);
 
     SmallNodeList staticNodeList;
     for (auto &target : nodes)
@@ -378,50 +492,60 @@ namespace krys::boo::dom
     auto *oldPreviousSibling = node.PreviousSibling();
     auto *oldNextSibling = node.NextSibling();
 
-    if (auto previousSibling = node.PreviousSibling())
-    {
-      previousSibling->SetNextSibling(node.NextSibling());
-    }
-    else
-    {
-      assert(oldParent.FirstChild() == &node);
-      oldParent.SetFirstChild(node.NextSibling());
-    }
+    node.NodeDocument().NodeWillBeRemoved(node);
 
-    if (auto nextSibling = node.NextSibling())
     {
-      nextSibling->SetPreviousSibling(node.PreviousSibling());
-    }
-    else
-    {
-      assert(oldParent.LastChild() == &node);
-      oldParent.SetLastChild(node.PreviousSibling());
-    }
-    assert(oldParent.FirstChild() != &node);
-    assert(oldParent.LastChild() != &node);
-    node.SetParentNode(nullptr);
-    node.SetPreviousSibling(nullptr);
-    node.SetNextSibling(nullptr);
+      ChildChangeStyleInvalidation removalStyleInvalidation(oldParent,
+                                                            MakeChildChangeForRemoval(oldParent, node));
 
-    if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
-    {
-      SlotAlgorithms::AssignSlottables(*assignedSlot);
-    }
+      // A moved subtree is styled again in its new place.
+      ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
 
-    auto &oldParentRoot = TreeQueries::Root(oldParent);
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(oldParentRoot))
-    {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(oldParent);
-          slot && slot->_assignedNodes.empty())
+      if (auto previousSibling = node.PreviousSibling())
       {
-        SlotAlgorithms::SignalSlotChange(*slot);
+        previousSibling->SetNextSibling(node.NextSibling());
       }
-    }
+      else
+      {
+        assert(oldParent.FirstChild() == &node);
+        oldParent.SetFirstChild(node.NextSibling());
+      }
 
-    if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
-    {
-      SlotAlgorithms::AssignSlottablesForTree(oldParentRoot);
-      SlotAlgorithms::AssignSlottablesForTree(node);
+      if (auto nextSibling = node.NextSibling())
+      {
+        nextSibling->SetPreviousSibling(node.PreviousSibling());
+      }
+      else
+      {
+        assert(oldParent.LastChild() == &node);
+        oldParent.SetLastChild(node.PreviousSibling());
+      }
+      assert(oldParent.FirstChild() != &node);
+      assert(oldParent.LastChild() != &node);
+      node.SetParentNode(nullptr);
+      node.SetPreviousSibling(nullptr);
+      node.SetNextSibling(nullptr);
+
+      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
+      {
+        SlotAlgorithms::AssignSlottables(*assignedSlot);
+      }
+
+      auto &oldParentRoot = TreeQueries::Root(oldParent);
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(oldParentRoot))
+      {
+        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(oldParent);
+            slot && slot->_assignedNodes.empty())
+        {
+          SlotAlgorithms::SignalSlotChange(*slot);
+        }
+      }
+
+      if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+      {
+        SlotAlgorithms::AssignSlottablesForTree(oldParentRoot);
+        SlotAlgorithms::AssignSlottablesForTree(node);
+      }
     }
 
     if (child != nullptr)
@@ -431,57 +555,64 @@ namespace krys::boo::dom
 
     auto *newPreviousSibling = child != nullptr ? child->PreviousSibling() : newParent.LastChild();
 
-    if (child == nullptr)
     {
-      if (auto *lastChild = newParent.LastChild())
+      ChildChangeStyleInvalidation insertionStyleInvalidation(
+        newParent, MakeChildChangeForInsertion(newParent, node, child));
+
+      if (child == nullptr)
       {
-        node.SetPreviousSibling(lastChild);
-        lastChild->SetNextSibling(&node);
+        if (auto *lastChild = newParent.LastChild())
+        {
+          node.SetPreviousSibling(lastChild);
+          lastChild->SetNextSibling(&node);
+        }
+        else
+        {
+          newParent.SetFirstChild(&node);
+        }
+
+        newParent.SetLastChild(&node);
       }
       else
       {
-        newParent.SetFirstChild(&node);
-      }
+        if (auto *previousSibling = child->PreviousSibling())
+        {
+          previousSibling->SetNextSibling(&node);
+          node.SetPreviousSibling(previousSibling);
 
-      newParent.SetLastChild(&node);
-    }
-    else
-    {
-      if (auto *previousSibling = child->PreviousSibling())
+          child->SetPreviousSibling(&node);
+          node.SetNextSibling(child);
+        }
+        else
+        {
+          assert(newParent.FirstChild() == child);
+          newParent.SetFirstChild(&node);
+
+          child->SetPreviousSibling(&node);
+          node.SetNextSibling(child);
+        }
+      }
+      node.SetParentNode(&newParent);
+
+      // FIXME: Slot assignment on insertion:
+      // If newParent is a shadow host whose shadow root’s slot assignment is "named" and node is a slottable,
+      // then assign a slot for node.
+      // If newParent’s root is a shadow root, and newParent is a slot whose assigned nodes is empty, then run
+      // signal a slot change for newParent.
+
+      SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
+
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
-        previousSibling->SetNextSibling(&node);
-        node.SetPreviousSibling(previousSibling);
+        auto isSubtreeRoot = &inclusiveDescendant == &node;
+        ExtensibilityHooks::NodeMoved(inclusiveDescendant, isSubtreeRoot, oldParent);
 
-        child->SetPreviousSibling(&node);
-        node.SetNextSibling(child);
+        if (auto *element = DynamicDowncast<Element>(inclusiveDescendant);
+            element && element->IsDefinedCustomElement() && newParent.IsConnected())
+        {
+          html::CustomElementReactionQueue::EnqueueConnectedMoveCallbackIfNeeded(*element);
+        }
       }
-      else
-      {
-        assert(newParent.FirstChild() == child);
-        newParent.SetFirstChild(&node);
-
-        child->SetPreviousSibling(&node);
-        node.SetNextSibling(child);
-      }
-    }
-    node.SetParentNode(&newParent);
-
-    // TODO(impl): SLOTTABLES
-    // If newParent is a shadow host whose shadow root’s slot assignment is "named" and node is a slottable,
-    // then assign a slot for node.
-    // If newParent’s root is a shadow root, and newParent is a slot whose assigned nodes is empty, then run
-    // signal a slot change for newParent.
-
-    SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
-
-    for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
-    {
-      auto isSubtreeRoot = &inclusiveDescendant == &node;
-      ExtensibilityHooks::NodeMoved(inclusiveDescendant, isSubtreeRoot, oldParent);
-
-      // TODO(impl): CUSTOM-ELEMENTS
-      // If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
-      // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
     }
 
     MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(oldParent), {}, {ShareRef(node)},
@@ -690,71 +821,83 @@ namespace krys::boo::dom
     auto oldPreviousSibling = node.PreviousSibling();
     auto oldNextSibling = node.NextSibling();
 
-    if (auto previousSibling = node.PreviousSibling())
-    {
-      previousSibling->SetNextSibling(node.NextSibling());
-    }
-    else
-    {
-      assert(parent.FirstChild() == &node);
-      parent.SetFirstChild(node.NextSibling());
-    }
+    node.NodeDocument().NodeWillBeRemoved(node);
 
-    if (auto nextSibling = node.NextSibling())
     {
-      nextSibling->SetPreviousSibling(node.PreviousSibling());
-    }
-    else
-    {
-      assert(parent.LastChild() == &node);
-      parent.SetLastChild(node.PreviousSibling());
-    }
-    assert(parent.FirstChild() != &node);
-    assert(parent.LastChild() != &node);
-    node.SetParentNode(nullptr);
-    node.SetPreviousSibling(nullptr);
-    node.SetNextSibling(nullptr);
+      ChildChangeStyleInvalidation styleInvalidation(parent, MakeChildChangeForRemoval(parent, node));
 
-    if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
-    {
-      SlotAlgorithms::AssignSlottables(*assignedSlot);
-    }
+      ExtensibilityHooks::DestroyRenderTreeIfNeeded(node);
 
-    auto &parentRoot = TreeQueries::Root(parent);
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
-    {
-      if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(parent); slot && slot->_assignedNodes.empty())
+      if (auto previousSibling = node.PreviousSibling())
       {
-        SlotAlgorithms::SignalSlotChange(*slot);
+        previousSibling->SetNextSibling(node.NextSibling());
+      }
+      else
+      {
+        assert(parent.FirstChild() == &node);
+        parent.SetFirstChild(node.NextSibling());
+      }
+
+      if (auto nextSibling = node.NextSibling())
+      {
+        nextSibling->SetPreviousSibling(node.PreviousSibling());
+      }
+      else
+      {
+        assert(parent.LastChild() == &node);
+        parent.SetLastChild(node.PreviousSibling());
+      }
+      assert(parent.FirstChild() != &node);
+      assert(parent.LastChild() != &node);
+      node.SetParentNode(nullptr);
+      node.SetPreviousSibling(nullptr);
+      node.SetNextSibling(nullptr);
+
+      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
+      {
+        SlotAlgorithms::AssignSlottables(*assignedSlot);
+      }
+
+      auto &parentRoot = TreeQueries::Root(parent);
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
+      {
+        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(parent); slot && slot->_assignedNodes.empty())
+        {
+          SlotAlgorithms::SignalSlotChange(*slot);
+        }
+      }
+
+      if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+      {
+        SlotAlgorithms::AssignSlottablesForTree(parentRoot);
+        SlotAlgorithms::AssignSlottablesForTree(node);
+      }
+
+      ExtensibilityHooks::NodeRemoved(node, true, parent);
+
+      bool isParentConnected = parent.IsConnected();
+      if (auto *element = DynamicDowncast<Element>(node);
+          element && element->IsDefinedCustomElement() && isParentConnected)
+      {
+        html::CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(*element);
+      }
+
+      for (auto &descendant : ShadowIncludingDescendantRange(node))
+      {
+        ExtensibilityHooks::NodeRemoved(descendant, false, parent);
+        if (auto *element = DynamicDowncast<Element>(descendant);
+            element && element->IsDefinedCustomElement() && isParentConnected)
+        {
+          html::CustomElementReactionQueue::EnqueueDisconnectedCallbackIfNeeded(*element);
+        }
       }
     }
 
-    if (HasNodeOfType<html::HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
-    {
-      SlotAlgorithms::AssignSlottablesForTree(parentRoot);
-      SlotAlgorithms::AssignSlottablesForTree(node);
-    }
-
-    ExtensibilityHooks::NodeRemoved(node, true, parent);
-
-    // TODO(impl): CUSTOM-ELEMENTS
-    // bool isParentConnected = parent.IsConnected();
-    // if node is custom and isParentConnected is true, then enqueue a custom element callback
-    // reaction with node, callback name "disconnectedCallback", and « ».
-
-    for (auto &descendant : ShadowIncludingDescendantRange(node))
-    {
-      ExtensibilityHooks::NodeRemoved(descendant, false, parent);
-      // TODO(impl): CUSTOM-ELEMENTS
-      // If descendant is custom and isParentConnected is true, then enqueue a custom element callback
-      // reaction with descendant, callback name "disconnectedCallback", and « ».
-    }
-
-    // TODO(impl): MUTATION-OBSERVERS
     // For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
-    // inclusiveAncestor’s registered observer list, if registered’s options["subtree"] is true, then append a
-    // new transient registered observer whose observer is registered’s observer, options is registered’s
-    // options, and source is registered to node’s registered observer list.
+    // inclusiveAncestor's registered observer list, if registered's options["subtree"] is true, then append a
+    // new transient registered observer whose observer is registered's observer, options is registered's
+    // options, and source is registered to node's registered observer list.
+    MutationObserverAlgorithms::AddTransientRegisteredObservers(node, parent);
 
     if (!suppressObservers)
     {
@@ -764,6 +907,8 @@ namespace krys::boo::dom
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);
+
+    RebuildSVGExtensionsElementsIfNecessary(parent);
 
     return {};
   }

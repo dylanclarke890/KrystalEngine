@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -19,16 +20,15 @@
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Pair.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
-#include "catch2/catch_test_macros.hpp"
 #include <filesystem>
 
 namespace krys::boo::html::tests
 {
   namespace
   {
-#pragma region Serialize
+#pragma region Serialise
 
-    void SerializeNode(dom::Node &node, dom::DOMString &output, size_t depth) noexcept
+    void SerialiseNode(dom::Node &node, dom::DOMString &output, size_t depth) noexcept
     {
       switch (node.NodeType())
       {
@@ -65,8 +65,8 @@ namespace krys::boo::html::tests
           for (size_t i = 0; i < element.Attributes().Length(); ++i)
           {
             auto attr = element.Attributes().Item(i);
-            auto localName = dom::DOMString(attr->LocalName().View());
-            auto namespaceName = [&] -> dom::DOMString
+            auto attrLocalName = dom::DOMString(attr->LocalName().View());
+            auto attrNamespaceName = [&] -> dom::DOMString
             {
               if (attr->NamespaceURI() == infra::Namespaces::HTML)
               {
@@ -92,7 +92,7 @@ namespace krys::boo::html::tests
 
             auto &value = attr->Value();
 
-            attributes.push_back({namespaceName + localName, value});
+            attributes.push_back({attrNamespaceName + attrLocalName, value});
           }
 
           std::sort(attributes.begin(), attributes.end(),
@@ -111,7 +111,7 @@ namespace krys::boo::html::tests
 
             for (auto &child : dom::ChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
             {
-              SerializeNode(child, output, depth + 2uz);
+              SerialiseNode(child, output, depth + 2uz);
             }
           }
           break;
@@ -155,18 +155,18 @@ namespace krys::boo::html::tests
       {
         for (auto &child : dom::ChildNodeRange(*containerNode))
         {
-          SerializeNode(child, output, depth + 1uz);
+          SerialiseNode(child, output, depth + 1uz);
         }
       }
     }
 
-    KRYS_NODISCARD static dom::DOMString SerializeDocument(dom::Document &document) noexcept
+    KRYS_NODISCARD static dom::DOMString SerialiseDocument(dom::Document &document) noexcept
     {
       dom::DOMString output = u8"#document\n";
 
       for (auto &child : dom::ChildNodeRange(document))
       {
-        SerializeNode(child, output, 0uz);
+        SerialiseNode(child, output, 0uz);
       }
 
       krys::boo::tests::NormaliseData(output);
@@ -263,7 +263,7 @@ namespace krys::boo::html::tests
         output = u8"#document\n";
         for (auto &child : result)
         {
-          SerializeNode(*child, output, 0uz);
+          SerialiseNode(*child, output, 0uz);
         }
         krys::boo::tests::NormaliseData(output);
       }
@@ -279,7 +279,7 @@ namespace krys::boo::html::tests
 
         (void)parser->PumpTokenizer();
 
-        output = SerializeDocument(*document);
+        output = SerialiseDocument(*document);
       }
 
       utf8_string str = u8"--- TEST " + krys::boo::tests::ToUTF8(number + 1uz) + u8" OF "
@@ -385,7 +385,7 @@ namespace krys::boo::html::tests
     auto svg = CreateSVGElement(*document, u8"svg");
     REQUIRE_FALSE(body->AppendChild(*svg).HasException());
 
-    dom::DOMString output = SerializeDocument(*document);
+    dom::DOMString output = SerialiseDocument(*document);
 
     dom::DOMString expectedOutput = u8R"(#document
 | <!DOCTYPE html>

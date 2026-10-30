@@ -13,7 +13,8 @@ namespace krys::boo::dom
     HasActivationBehavior = 1 << 2,
     HasLegacyPreActivationBehavior = 1 << 3,
     HasLegacyCanceledActivationBehavior = 1 << 4,
+    IsInTopLayer = 1 << 5,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::EventTargetFlags, 6u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(krys::boo::dom::EventTargetFlags, 7u)

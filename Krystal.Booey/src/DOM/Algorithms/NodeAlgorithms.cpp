@@ -22,6 +22,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
 #include <ranges>
 
@@ -80,10 +81,11 @@ namespace krys::boo::dom
 
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      if (auto shadowRoot = element->ShadowRoot(); shadowRoot != nullptr && shadowRoot->Clonable())
+      if (auto shadowRoot = ShareRefPtr(TreeQueries::GetShadowRoot(*element));
+          shadowRoot != nullptr && shadowRoot->Clonable())
       {
         auto *elementCopy = Downcast<Element>(copy.get());
-        assert(elementCopy->ShadowRoot() == nullptr);
+        assert(TreeQueries::GetShadowRoot(*elementCopy) == nullptr);
 
         auto shadowRootRegistry = shadowRoot->CustomElementRegistry();
         if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadowRootRegistry.get()))
@@ -93,7 +95,7 @@ namespace krys::boo::dom
         }
 
         if (auto attach = ElementAlgorithms::AttachShadowRoot(
-              *elementCopy, shadowRoot->Mode(), Clonable(true), Serializable(shadowRoot->Serializable()),
+              *elementCopy, shadowRoot->Mode(), Clonable(true), Serialisable(shadowRoot->Serialisable()),
               DelegatesFocus(shadowRoot->DelegatesFocus()), shadowRoot->SlotAssignment(),
               shadowRootRegistry.get());
             attach.HasException())
@@ -101,13 +103,13 @@ namespace krys::boo::dom
           return attach.ReleaseException();
         }
 
-        auto shadowRootCopy = elementCopy->ShadowRoot();
+        auto *shadowRootCopy = TreeQueries::GetShadowRoot(*elementCopy);
         shadowRootCopy->_declarative = shadowRoot->_declarative;
         shadowRootCopy->_keepCustomElementRegistryNull = shadowRoot->_keepCustomElementRegistryNull;
 
         for (auto &child : ChildNodeRange(*shadowRoot))
         {
-          if (auto clone = CloneNode(child, document, subtree, shadowRootCopy.get()); clone.HasException())
+          if (auto clone = CloneNode(child, document, subtree, shadowRootCopy); clone.HasException())
           {
             return clone.ReleaseException();
           }
@@ -138,10 +140,11 @@ namespace krys::boo::dom
 
       copy = ElementFactory::Create(document, element->_qualifiedName, element->_is, false, registry);
 
+      element->SynchronizeAllAttributes();
       for (auto &attr : element->_attributes)
       {
         auto attrCopy = AdoptRef<Attr>(*new Attr(document, attr->_name, DOMString(attr->Value())));
-        ElementAlgorithms::AppendAttribute(*attr, Downcast<Element>(*copy));
+        ElementAlgorithms::AppendAttribute(*attrCopy, Downcast<Element>(*copy));
       }
     }
     else if (Is<Document>(node))
@@ -171,17 +174,18 @@ namespace krys::boo::dom
       auto &docCopy = Downcast<Document>(*copy);
       docCopy._flags = doc._flags;
       docCopy._contentType = doc._contentType;
-      docCopy._quirksMode = doc._quirksMode;
+      docCopy.SetQuirksMode(doc._quirksMode);
+      docCopy.SetURL(url::URL(doc._url));
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
+      docCopy.SetSettings(ShareRef(doc.GetSettings()));
 
-      if (doc._customElementRegistry->IsScoped())
+      if (doc._customElementRegistry != nullptr && doc._customElementRegistry->IsScoped())
       {
         docCopy._customElementRegistry = doc._customElementRegistry;
       }
 
-      // TODO(feat): DOM - Set copy's encoding
+      // FIXME: Set copy's encoding
       // SPEC-VIOLATION(URL): Set the origin on the cloned document to the origin of the original document.
-      // SPEC-VIOLATION(URL): Set the url on the cloned document to the url of the original document.
     }
     else if (Is<DocumentType>(node))
     {
@@ -263,6 +267,8 @@ namespace krys::boo::dom
           return false;
         }
 
+        thisElement.SynchronizeAllAttributes();
+        otherElement.SynchronizeAllAttributes();
         for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
         {
           if (i >= otherElement._attributes.size())
@@ -520,7 +526,7 @@ namespace krys::boo::dom
 
     if (namespaceUri == u8"*" && localName == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(root, [](const Element &node) { return true; });
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &) { return true; });
     }
 
     if (namespaceUri == u8"*")
@@ -555,7 +561,7 @@ namespace krys::boo::dom
       classes = OrderedSet::Parser(classNames.View());
     }
 
-    if (classes.empty()) // TODO(perf): MINOR - return an empty collection instead.
+    if (classes.empty()) // FIXME: Performance: return an empty collection instead.
     {
       return CreateRef<StaticHTMLCollection>(SmallElementList {});
     }
@@ -571,7 +577,7 @@ namespace krys::boo::dom
             return false;
           }
 
-          // TODO(perf): MINOR - this is terrible for performance but eh, it's quirks mode.
+          // FIXME: This is terrible for performance but eh, it's quirks mode.
           auto elementClasses =
             OrderedSet::Parser(krys::text::ToASCIILower(*element.GetAttribute(u8"class")));
           return std::ranges::all_of(classesQuery,

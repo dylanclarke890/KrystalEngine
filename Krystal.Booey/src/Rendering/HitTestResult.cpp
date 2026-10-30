@@ -1,0 +1,410 @@
+﻿#include "Krystal.Booey/Rendering/HitTestResult.hpp"
+#include "Krystal.Booey/CSS/Selectors/SelectorCheckerTestFunctions.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Editing/Editing.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/Scrollbar.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/SVG/SVGImageElement.hpp"
+#include <algorithm>
+
+namespace krys::boo
+{
+  static inline void AppendToNodeSet(const HitTestResult::NodeSet &source,
+                                     HitTestResult::NodeSet &destination) noexcept
+  {
+    for (auto &node : source)
+    {
+      if (std::ranges::find(destination, node) == destination.end())
+      {
+        destination.push_back(node);
+      }
+    }
+  }
+
+  HitTestResult::HitTestResult() noexcept = default;
+
+  HitTestResult::HitTestResult(const LayoutPoint &point) noexcept
+      : _hitTestLocation(point), _doublePointInInnerNodeFrame(point)
+  {
+  }
+
+  HitTestResult::HitTestResult(const LayoutRect &rect) noexcept
+      : _hitTestLocation {rect}, _doublePointInInnerNodeFrame {rect.Center()}
+  {
+  }
+
+  HitTestResult::HitTestResult(const HitTestLocation &other) noexcept
+      : _hitTestLocation(other), _doublePointInInnerNodeFrame(_hitTestLocation.Point())
+  {
+  }
+
+  HitTestResult::HitTestResult(const HitTestResult &other) noexcept
+      : _hitTestLocation(other._hitTestLocation), _innerNode(ShareRefPtr(other.InnerNode())),
+        _innerNonSharedNode(ShareRefPtr(other.InnerNonSharedNode())),
+        _doublePointInInnerNodeFrame(other._doublePointInInnerNodeFrame), _localPoint(other.LocalPoint()),
+        _innerURLElement(ShareRefPtr(other.URLElement())), _scrollbar(ShareRefPtr(other.GetScrollbar())),
+        _isOverWidget(other.IsOverWidget()), _pseudoElementIdentifier(other.GetPseudoElementIdentifier())
+  {
+    // Only copy the NodeSet in case of list hit test.
+    if (other._listBasedTestResult)
+    {
+      _listBasedTestResult = CreateUnique<NodeSet>();
+      AppendToNodeSet(*other._listBasedTestResult, *_listBasedTestResult);
+    }
+  }
+
+  HitTestResult::~HitTestResult() noexcept = default;
+
+  HitTestResult &HitTestResult::operator=(const HitTestResult &other) noexcept
+  {
+    if (this == &other)
+    {
+      return *this;
+    }
+    _hitTestLocation = other._hitTestLocation;
+    _innerNode = other._innerNode;
+    _innerNonSharedNode = other._innerNonSharedNode;
+    _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
+    _localPoint = other.LocalPoint();
+    _innerURLElement = other._innerURLElement;
+    _scrollbar = other._scrollbar;
+    _isOverWidget = other.IsOverWidget();
+    _pseudoElementIdentifier = other.GetPseudoElementIdentifier();
+
+    // Only copy the NodeSet in case of list hit test.
+    _listBasedTestResult = nullptr;
+    if (other._listBasedTestResult)
+    {
+      _listBasedTestResult = CreateUnique<NodeSet>();
+      AppendToNodeSet(*other._listBasedTestResult, *_listBasedTestResult);
+    }
+
+    return *this;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD dom::Node *MoveOutOfUserAgentShadowTree(dom::Node &node) noexcept
+    {
+      if (node.IsInShadowTree())
+      {
+        if (auto *root = dom::TreeQueries::ContainingShadowRoot(node))
+        {
+          if (root->Mode() == dom::ShadowRootMode::UserAgent)
+          {
+            return root->Host();
+          }
+        }
+      }
+      return &node;
+    }
+  }
+
+  void HitTestResult::SetToNonUserAgentShadowAncestor() noexcept
+  {
+    if (auto *node = InnerNode())
+    {
+      SetInnerNode(MoveOutOfUserAgentShadowTree(*node));
+    }
+    if (auto *node = InnerNonSharedNode())
+    {
+      SetInnerNonSharedNode(MoveOutOfUserAgentShadowTree(*node));
+    }
+  }
+
+  void HitTestResult::SetInnerNode(dom::Node *node) noexcept
+  {
+    auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(node);
+    _innerNode = ShareRefPtr(pseudoElement ? static_cast<dom::Node *>(pseudoElement->HostElement()) : node);
+  }
+
+  void HitTestResult::SetInnerNonSharedNode(dom::Node *node) noexcept
+  {
+    auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(node);
+    _innerNonSharedNode =
+      ShareRefPtr(pseudoElement ? static_cast<dom::Node *>(pseudoElement->HostElement()) : node);
+  }
+
+  void HitTestResult::SetURLElement(dom::Element *element) noexcept
+  {
+    _innerURLElement = ShareRefPtr(element);
+  }
+
+  LocalFrame *HitTestResult::InnerNodeFrame() const noexcept
+  {
+    if (_innerNonSharedNode)
+    {
+      return _innerNonSharedNode->NodeDocument().Frame();
+    }
+    if (_innerNode)
+    {
+      return _innerNode->NodeDocument().Frame();
+    }
+    return nullptr;
+  }
+
+  void HitTestResult::SetLocalPoint(const LayoutPoint &point) noexcept
+  {
+    _localPoint = _pseudoElementIdentifier ? LayoutPoint() : point;
+  }
+
+  LocalFrame *HitTestResult::Frame() const noexcept
+  {
+    if (_innerNonSharedNode)
+    {
+      return _innerNonSharedNode->NodeDocument().Frame();
+    }
+
+    return nullptr;
+  }
+
+  bool HitTestResult::IsOverLink() const noexcept
+  {
+    return _innerURLElement && css::IsLink(*_innerURLElement);
+  }
+
+  bool HitTestResult::IsSelected() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return false;
+    }
+
+    auto *frame = _innerNonSharedNode->NodeDocument().Frame();
+    if (!frame)
+    {
+      return false;
+    }
+
+    return _innerNonSharedNode->NodeDocument().Selection().Contains(_hitTestLocation.Point());
+  }
+
+  // FIXME: The document's encoding's display string (displayStringModifiedByEncoding), with text encodings.
+  utf8_string HitTestResult::AltDisplayString() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return {};
+    }
+
+    if (auto *image = DynamicDowncast<html::HTMLImageElement>(*_innerNonSharedNode))
+    {
+      return image->GetAttribute(u8"alt").value_or(dom::DOMString());
+    }
+
+    if (auto *input = DynamicDowncast<html::HTMLInputElement>(*_innerNonSharedNode))
+    {
+      return input->GetAttribute(u8"alt").value_or(dom::DOMString());
+    }
+
+    return {};
+  }
+
+  // FIXME: Image overlays' hosts (nodeForImageData), once there are image overlays.
+  Image *HitTestResult::GetImage() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return nullptr;
+    }
+
+    if (auto *image = DynamicDowncast<RenderImage>(_innerNonSharedNode->Renderer()))
+    {
+      if (image->GetCachedImage() && !image->GetCachedImage()->ErrorOccurred())
+      {
+        return image->GetCachedImage()->ImageForRenderer(image);
+      }
+    }
+
+    return nullptr;
+  }
+
+  IntRect HitTestResult::ImageRect() const noexcept
+  {
+    if (!GetImage())
+    {
+      return {};
+    }
+
+    return _innerNonSharedNode->GetRenderBox()->AbsoluteContentQuad().EnclosingBoundingBox();
+  }
+
+  // FIXME: Link decoration filtering (applyLinkDecorationFiltering), which is Cocoa's.
+  url::URL HitTestResult::AbsoluteImageURL() const noexcept
+  {
+    if (!_innerNonSharedNode)
+    {
+      return {};
+    }
+
+    auto *renderer = _innerNonSharedNode->Renderer();
+    if (!renderer || !renderer->IsRenderImage())
+    {
+      return {};
+    }
+
+    auto *element = DynamicDowncast<dom::Element>(*_innerNonSharedNode);
+    auto *htmlElement = DynamicDowncast<html::HTMLElement>(_innerNonSharedNode.get());
+    if ((htmlElement
+         && (Is<html::HTMLEmbedElement>(*htmlElement) || Is<html::HTMLImageElement>(*htmlElement)
+             || Is<html::HTMLInputElement>(*htmlElement) || Is<html::HTMLObjectElement>(*htmlElement)))
+        || Is<svg::SVGImageElement>(DynamicDowncast<svg::SVGElement>(element)))
+    {
+      return _innerNonSharedNode->NodeDocument().CompleteURL(
+        element->ImageSourceURL().value_or(dom::DOMString()));
+    }
+
+    return {};
+  }
+
+  url::URL HitTestResult::AbsoluteLinkURL() const noexcept
+  {
+    if (!_innerURLElement)
+    {
+      return {};
+    }
+
+    return _innerURLElement->AbsoluteLinkURL();
+  }
+
+  utf8_string HitTestResult::TextContent() const noexcept
+  {
+    if (!_innerURLElement)
+    {
+      return {};
+    }
+    return _innerURLElement->TextContent().value_or(dom::DOMString());
+  }
+
+  template <typename TRect>
+  inline HitTestProgress
+    HitTestResult::AddNodeToListBasedTestResultCommon(dom::Node *node, const HitTestRequest &request,
+                                                      const HitTestLocation &locationInContainer,
+                                                      const TRect &rect) noexcept
+  {
+    // If it is not a list-based hit test, this method has to be no-op.
+    if (!request.ResultIsElementList())
+    {
+      krys_debug_assert(!IsRectBasedTest());
+      return HitTestProgress::Stop;
+    }
+
+    if (!node)
+    {
+      return HitTestProgress::Continue;
+    }
+
+    if ((request.DisallowsUserAgentShadowContent() && node->IsInUserAgentShadowTree())
+        || (request.DisallowsUserAgentShadowContentExceptForImageOverlays()
+            && node->IsInUserAgentShadowTree()))
+    {
+      // FIXME: Image overlays aren't exempt from the second check, with image overlays.
+      node = AncestorNodeInThisScope(node->NodeDocument(), node);
+    }
+
+    auto &nodes = MutableListBasedTestResult();
+    if (std::ranges::find_if(nodes, [&](const Ref<dom::Node> &existing) { return existing.get() == node; })
+        == nodes.end())
+    {
+      nodes.push_back(ShareRef(*node));
+    }
+
+    if (request.IncludesAllElementsUnderPoint())
+    {
+      return HitTestProgress::Continue;
+    }
+
+    bool regionFilled = rect.Contains(TRect(locationInContainer.BoundingBox()));
+    return regionFilled ? HitTestProgress::Stop : HitTestProgress::Continue;
+  }
+
+  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+                                                              const HitTestLocation &locationInContainer,
+                                                              const LayoutRect &rect) noexcept
+  {
+    return AddNodeToListBasedTestResultCommon(node, request, locationInContainer, rect);
+  }
+
+  HitTestProgress HitTestResult::AddNodeToListBasedTestResult(dom::Node *node, const HitTestRequest &request,
+                                                              const HitTestLocation &locationInContainer,
+                                                              const FloatRect &rect) noexcept
+  {
+    return AddNodeToListBasedTestResultCommon(node, request, locationInContainer, rect);
+  }
+
+  void HitTestResult::Append(const HitTestResult &other, const HitTestRequest &request) noexcept
+  {
+    krys_debug_assert(request.ResultIsElementList());
+    (void)request;
+
+    if (!_innerNode && other.InnerNode())
+    {
+      _innerNode = other._innerNode;
+      _innerNonSharedNode = other._innerNonSharedNode;
+      _localPoint = other.LocalPoint();
+      _doublePointInInnerNodeFrame = other._doublePointInInnerNodeFrame;
+      _innerURLElement = other._innerURLElement;
+      _scrollbar = other._scrollbar;
+      _isOverWidget = other.IsOverWidget();
+    }
+
+    if (other._listBasedTestResult)
+    {
+      AppendToNodeSet(*other._listBasedTestResult, MutableListBasedTestResult());
+    }
+  }
+
+  const HitTestResult::NodeSet &HitTestResult::ListBasedTestResult() const noexcept
+  {
+    if (!_listBasedTestResult)
+    {
+      _listBasedTestResult = CreateUnique<NodeSet>();
+    }
+    return *_listBasedTestResult;
+  }
+
+  HitTestResult::NodeSet &HitTestResult::MutableListBasedTestResult() noexcept
+  {
+    if (!_listBasedTestResult)
+    {
+      _listBasedTestResult = CreateUnique<NodeSet>();
+    }
+    return *_listBasedTestResult;
+  }
+
+  dom::Element *HitTestResult::TargetElement() const noexcept
+  {
+    for (dom::Node *node = _innerNode.get(); node; node = node->ParentInComposedTree())
+    {
+      if (auto *element = DynamicDowncast<dom::Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  dom::Element *HitTestResult::InnerNonSharedElement() const noexcept
+  {
+    auto *node = _innerNonSharedNode.get();
+    if (!node)
+    {
+      return nullptr;
+    }
+    if (auto *element = DynamicDowncast<dom::Element>(*node))
+    {
+      return element;
+    }
+    return node->ParentElement();
+  }
+}

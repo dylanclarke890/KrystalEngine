@@ -3765,7 +3765,7 @@ namespace krys::text
         return DecodeOneInvalidSequenceError<Big5_HKSCS_2001>(CodeUnitsConsumed(2u));
       }
 
-      auto SerializeDoubleBytes = [](size_t index)
+      auto SerialiseDoubleBytes = [](size_t index)
       {
         krys_debug_assert_msg(index < 4, "Out of range index passed for static array");
 
@@ -3784,10 +3784,10 @@ namespace krys::text
       size_t lookupIndex = ((first - 0x81uz) * 157uz) + (static_cast<size_t>(second) - secondByteOffset);
       switch (lookupIndex)
       {
-        case 1'133uz: return SerializeDoubleBytes(0uz);
-        case 1'135uz: return SerializeDoubleBytes(1uz);
-        case 1'164uz: return SerializeDoubleBytes(2uz);
-        case 1'166uz: return SerializeDoubleBytes(3uz);
+        case 1'133uz: return SerialiseDoubleBytes(0uz);
+        case 1'135uz: return SerialiseDoubleBytes(1uz);
+        case 1'164uz: return SerialiseDoubleBytes(2uz);
+        case 1'166uz: return SerialiseDoubleBytes(3uz);
         default:      break;
       }
 

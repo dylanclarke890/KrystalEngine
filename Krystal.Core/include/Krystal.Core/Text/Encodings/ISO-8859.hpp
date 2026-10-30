@@ -362,7 +362,7 @@ namespace krys::text
       u8"csisolatinarabic", u8"ecma-114", u8"iso-8859-6-e", u8"iso-8859-6-i",   u8"iso-ir-127",
       u8"iso8859-6",        u8"iso88596", u8"iso_8859-6",   u8"iso_8859-6:1987"};
 
-    // TODO(possible-optimisation): Is padding the array to 128 entries better than using a sparse array of 83
+    // FIXME: Is padding the array to 128 entries better than using a sparse array of 83
     // entries? The latter would save memory but will be slower to search.
     constexpr static Array<EncodingLookupEntry, 128uz> LookupMap = {
       {{0, 0x0080},       {1, 0x0081},       {2, 0x0082},       {3, 0x0083},       {4, 0x0084},
@@ -476,7 +476,7 @@ namespace krys::text
       u8"iso-ir-138", u8"iso8859-8",   u8"iso88598",         u8"iso_8859-8", u8"iso_8859-8:1988",
       u8"visual"};
 
-    // TODO(possible-optimisation): Is padding the array to 128 entries better than using a sparse array of 92
+    // FIXME: Is padding the array to 128 entries better than using a sparse array of 92
     // entries? The latter would save memory but will be slower to search.
     constexpr static Array<EncodingLookupEntry, 128uz> LookupMap = {
       {{0, 0x0080},      {1, 0x0081},      {2, 0x0082},      {3, 0x0083},       {4, 0x0084},

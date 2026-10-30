@@ -4,9 +4,24 @@
 
 namespace krys::boo::css
 {
+  /// @note The order matters: Value::IsImageGeneratorValue() and Value::ContainsValueList() check ranges.
   enum class ValueType : uint8
   {
-    Invalid = 0,
+    Primitive,
+
+    // Image classes.
+    Image,
+    ImageSetOption,
+    CursorImage,
+    // Image generator classes.
+    Canvas,
+    PaintImage,
+    NamedImage,
+    CrossFade,
+    FilterImage,
+    Gradient,
+
+    // Other non-list classes.
     AppleColorFilter,
     Attr,
     BackgroundRepeat,
@@ -14,55 +29,52 @@ namespace krys::boo::css
     BorderImageSlice,
     BorderImageWidth,
     BoxShadowProperty,
-    Canvas,
     Color,
     ColorScheme,
     Counter,
-    CrossFade,
-    CursorImage,
     CustomProperty,
     DynamicRangeLimit,
-    Gradient,
-    GridAutoRepeat,
-    GridIntegerRepeat,
-    GridLine,
-    GridLineNames,
-    GridTemplateAreas,
     EasingFunction,
     Filter,
-    FilterImage,
+    Font,
+    FontFaceSrcLocal,
+    FontFaceSrcResource,
     FontFeature,
     FontStyleRange,
     FontStyleWithAngle,
     FontVariation,
-    Function,
-    Image,
-    ImageSet,
-    NamedImage,
+    GridLineNames,
+    GridLine,
+    GridTemplateAreas,
     OffsetRotate,
-    PaintImage,
     Path,
     PendingSubstitution,
     Position,
     PositionX,
     PositionY,
-    Primitive,
     Quad,
     Ratio,
     Ray,
     Rect,
     Reflect,
     Scroll,
-    Subgrid,
     TextShadowProperty,
-    TransformList,
-    UnicodeRange,
     Url,
-    ValueList,
+    UnicodeRange,
     ValuePair,
     VariableReference,
     View,
+
+    // Classes that contain lists, which derive from ValueContainingList.
+    ValueList,
+    Function,
+    GridAutoRepeat,
+    GridIntegerRepeat,
+    ImageSet,
+    Subgrid,
+    TransformList,
+    // Do not append classes here unless they derive from ValueContainingList.
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 56uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::css::ValueType, 59uz);

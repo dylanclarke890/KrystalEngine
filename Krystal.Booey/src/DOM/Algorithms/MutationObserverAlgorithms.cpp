@@ -1,11 +1,18 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
+#include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Internals/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/Internals/MutationRecord/AttributesMutationRecord.hpp"
 #include "Krystal.Booey/DOM/Internals/MutationRecord/CharacterDataMutationRecord.hpp"
 #include "Krystal.Booey/DOM/Internals/MutationRecord/ChildListMutationRecord.hpp"
 #include "Krystal.Booey/DOM/Internals/NodeList/StaticNodeList.hpp"
 #include "Krystal.Booey/DOM/MutationObserver.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Core/Utils/NeverDestroyed.hpp"
 #include <cassert>
+#include <ranges>
 
 namespace krys::boo::dom
 {
@@ -16,33 +23,171 @@ namespace krys::boo::dom
       Ref<MutationObserver> Observer;
       DOMStringAtom OldValue;
     };
+
+    /// @brief The surrounding agent's mutation observer state.
+    /// @see https://dom.spec.whatwg.org/#mutation-observers
+    // FIXME: Process-wide until there are agents.
+    struct MutationObserverAgent
+    {
+      /// @see https://dom.spec.whatwg.org/#mutation-observer-compound-microtask-queued-flag
+      bool MutationObserverMicrotaskQueued {false};
+      /// @see https://dom.spec.whatwg.org/#mutation-observer-list
+      List<Ref<MutationObserver>> PendingMutationObservers;
+      /// @see https://dom.spec.whatwg.org/#signal-slot-list
+      List<Ref<html::HTMLSlotElement>> SignalSlots;
+    };
+
+    KRYS_NODISCARD MutationObserverAgent &SurroundingAgent() noexcept
+    {
+      static NeverDestroyed<MutationObserverAgent> agent;
+      return agent;
+    }
+
+    template <typename T>
+    void AppendToSet(List<Ref<T>> &set, T &item) noexcept
+    {
+      if (std::ranges::none_of(set, [&](const Ref<T> &existing) { return existing.get() == &item; }))
+      {
+        set.push_back(ShareRef(item));
+      }
+    }
   }
 
   void MutationObserverAlgorithms::QueueMutationObserverMicrotask() noexcept
   {
-    // TODO(impl): MUTATION-OBSERVERS - Queue a mutation observer microtask
-    // If the surrounding agent’s mutation observer microtask queued is true, then return.
-    // Set the surrounding agent’s mutation observer microtask queued to true.
-    // Queue a microtask to notify mutation observers.
+    auto &agent = SurroundingAgent();
+
+    // 1. If the surrounding agent's mutation observer microtask queued is true, then return.
+    if (agent.MutationObserverMicrotaskQueued)
+    {
+      return;
+    }
+
+    // 2. Set the surrounding agent's mutation observer microtask queued to true.
+    agent.MutationObserverMicrotaskQueued = true;
+
+    // 3. Queue a microtask to notify mutation observers.
+    html::EventLoop::Current().QueueMicrotask([] { NotifyMutationObservers(); });
   }
 
   void MutationObserverAlgorithms::NotifyMutationObservers() noexcept
   {
-    // TODO(impl): MUTATION-OBSERVERS - notify mutation observers
-    // Set the surrounding agent’s mutation observer microtask queued to false.
-    // Let notifySet be a clone of the surrounding agent’s pending mutation observers.
-    // Empty the surrounding agent’s pending mutation observers.
-    // Let signalSet be a clone of the surrounding agent’s signal slots.
-    // Empty the surrounding agent’s signal slots.
-    // For each mo of notifySet:
-    //     Let records be a clone of mo’s record queue.
-    //     Empty mo’s record queue.
-    //     For each node of mo’s node list: remove all transient registered observers whose observer is mo
-    //     from node’s registered observer list.
-    //     If records is not empty, then invoke mo’s callback with « records, mo » and "report", and with
-    //     callback this value mo.
-    // For each slot of signalSet: fire an event named slotchange, with its bubbles attribute set to true, at
-    // slot.
+    auto &agent = SurroundingAgent();
+
+    // 1. Set the surrounding agent's mutation observer microtask queued to false.
+    agent.MutationObserverMicrotaskQueued = false;
+
+    // 2. Let notifySet be a clone of the surrounding agent's pending mutation observers.
+    // 3. Empty the surrounding agent's pending mutation observers.
+    auto notifySet = std::exchange(agent.PendingMutationObservers, {});
+
+    // 4. Let signalSet be a clone of the surrounding agent's signal slots.
+    // 5. Empty the surrounding agent's signal slots.
+    auto signalSet = std::exchange(agent.SignalSlots, {});
+
+    // 6. For each mo of notifySet:
+    for (auto &mo : notifySet)
+    {
+      // 6.1. Let records be a clone of mo's record queue.
+      // 6.2. Empty mo's record queue.
+      auto records = std::exchange(mo->_recordQueue, {});
+
+      // 6.3. For each node of mo's node list, remove all transient registered observers whose observer is mo
+      // from node's registered observer list.
+      for (auto &weakNode : mo->_nodes)
+      {
+        if (auto node = weakNode.lock())
+        {
+          std::erase_if(node->TransientRegisteredObservers(),
+                        [&](const Ref<TransientRegisteredObserver> &transient)
+                        { return transient->Observer().get() == mo.get(); });
+        }
+      }
+
+      // 6.4. If records is not empty, then invoke mo's callback with « records, mo » and "report", and with
+      // callback this value mo.
+      // NOTE: there's no script, so nothing to report.
+      if (!records.empty())
+      {
+        mo->_callback(records, *mo);
+      }
+    }
+
+    // 7. For each slot of signalSet, fire an event named slotchange, with its bubbles attribute set to true,
+    // at slot.
+    for (auto &slot : signalSet)
+    {
+      (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::SlotChange), *slot,
+                                              [](Event &event) { event._bubbles = true; });
+    }
+  }
+
+  void MutationObserverAlgorithms::AppendSignalSlot(html::HTMLSlotElement &slot) noexcept
+  {
+    AppendToSet(SurroundingAgent().SignalSlots, slot);
+  }
+
+  void MutationObserverAlgorithms::AddTransientRegisteredObservers(Node &node, Node &parent) noexcept
+  {
+    // For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
+    // inclusiveAncestor's registered observer list, if registered's options["subtree"] is true, then append a
+    // new transient registered observer whose observer is registered's observer, options is registered's
+    // options, and source is registered to node's registered observer list.
+    for (auto &inclusiveAncestor : InclusiveAncestorRange(parent))
+    {
+      for (auto &registered : inclusiveAncestor.RegisteredObservers())
+      {
+        if (!registered->Options().Subtree)
+        {
+          continue;
+        }
+        Ref<MutationObserver> observer = registered->Observer();
+        node.TransientRegisteredObservers().push_back(
+          CreateRef<TransientRegisteredObserver>(Ref {observer}, registered->Options(), Ref {registered}));
+
+        // NOTE: the observer forgets its transient observers when it's notified, through its node list, so
+        // the node joins the list (the specification doesn't say).
+        if (std::ranges::none_of(observer->_nodes, [&](const WeakRef<Node> &existing)
+                                 { return existing.lock().get() == &node; }))
+        {
+          observer->_nodes.emplace_back(CreateWeakRef(node));
+        }
+      }
+    }
+  }
+
+  bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept
+  {
+    // The interested observers of "queue a mutation record" (steps 2 and 3) for an attribute in the null
+    // namespace.
+    for (auto &node : InclusiveAncestorRange(target))
+    {
+      for (auto &registered : node.RegisteredObservers())
+      {
+        auto options = registered->Options();
+        if (&node != &target && !options.Subtree)
+        {
+          continue;
+        }
+
+        if (!options.Attributes.value_or(false))
+        {
+          continue;
+        }
+
+        if (options.AttributeFilter.has_value() && !std::ranges::contains(*options.AttributeFilter, name))
+        {
+          continue;
+        }
+
+        if (options.AttributeOldValue == true)
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   void MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType type, Ref<Node> &&target,
@@ -52,15 +197,34 @@ namespace krys::boo::dom
                                                        RefPtr<Node> &&previousSibling,
                                                        RefPtr<Node> &&nextSibling) noexcept
   {
+    // 1. Let interestedObservers be an empty map.
     List<InterestedObserver> interestedObservers;
 
+    // 2. Let nodes be the inclusive ancestors of target.
     auto nodes = InclusiveAncestorRange(*target);
+
+    // 3. For each node in nodes, and then for each registered of node's registered observer list:
+    // NOTE: a node keeps its transient registered observers in a list of their own.
     for (auto &node : nodes)
     {
-      for (auto &registered : node.RegisteredObservers())
+      List<Ref<RegisteredObserver>> registeredObservers = node.RegisteredObservers();
+      for (auto &transient : node.TransientRegisteredObservers())
       {
+        registeredObservers.push_back(Ref<RegisteredObserver>(transient));
+      }
+      for (auto &registered : registeredObservers)
+      {
+        // 3.1. Let options be registered's options.
         auto options = registered->Options();
 
+        // 3.2. If none of the following are true, then:
+        //   - node is not target and options["subtree"] is false
+        //   - type is "attributes" and options["attributes"] either does not exist or is false
+        //   - type is "attributes", options["attributeFilter"] exists, and options["attributeFilter"] does
+        //   not
+        //     contain name or namespace is non-null
+        //   - type is "characterData" and options["characterData"] either does not exist or is false
+        //   - type is "childList" and options["childList"] is false
         if (&node != target.get() && !options.Subtree)
         {
           continue;
@@ -73,12 +237,9 @@ namespace krys::boo::dom
             continue;
           }
 
-          if (namespaceURI == DOMStringAtom::Null())
-          {
-            continue;
-          }
-
-          if (!options.AttributeFilter.has_value() || !std::ranges::contains(*options.AttributeFilter, name))
+          if (options.AttributeFilter.has_value()
+              && (!std::ranges::contains(*options.AttributeFilter, name)
+                  || namespaceURI != DOMStringAtom::Null()))
           {
             continue;
           }
@@ -92,41 +253,54 @@ namespace krys::boo::dom
           continue;
         }
 
-        InterestedObserver interestedObserver {registered->Observer(), DOMStringAtom::Null()};
+        // 3.2.1. Let mo be registered's observer.
+        Ref<MutationObserver> observer = registered->Observer();
 
-        bool isAttrChange = type == MutationRecordType::Attributes && options.Attributes == true;
-        bool isCharDataChange =
-          type == MutationRecordType::CharacterData && options.CharacterDataOldValue == true;
-        if (isAttrChange || isCharDataChange)
+        // 3.2.2. If interestedObservers[mo] does not exist, then set interestedObservers[mo] to null.
+        auto it = std::ranges::find_if(interestedObservers, [&](const InterestedObserver &interested)
+                                       { return interested.Observer.get() == observer.get(); });
+        if (it == interestedObservers.end())
         {
-          interestedObserver.OldValue = oldValue;
+          interestedObservers.push_back({krys::move(observer), DOMStringAtom::Null()});
+          it = std::prev(interestedObservers.end());
         }
 
-        interestedObservers.push_back(std::move(interestedObserver));
+        // 3.2.3. If either type is "attributes" and options["attributeOldValue"] is true, or type is
+        // "characterData" and options["characterDataOldValue"] is true, then set interestedObservers[mo] to
+        // oldValue.
+        if ((type == MutationRecordType::Attributes && options.AttributeOldValue == true)
+            || (type == MutationRecordType::CharacterData && options.CharacterDataOldValue == true))
+        {
+          it->OldValue = oldValue;
+        }
       }
     }
 
+    // 4. For each observer -> mappedOldValue of interestedObservers:
     for (auto &[observer, mappedOldValue] : interestedObservers)
     {
+      // 4.1. Let record be a new MutationRecord object whose type is type, target is target, attributeName is
+      // name, attributeNamespace is namespace, oldValue is mappedOldValue, addedNodes is addedNodes,
+      // removedNodes is removedNodes, previousSibling is previousSibling, and nextSibling is nextSibling.
       RefPtr<MutationRecord> record = nullptr;
       switch (type)
       {
         case MutationRecordType::Attributes:
         {
-          record = CreateRef<AttributesMutationRecord>(krys::move(target), name, namespaceURI, oldValue);
+          record = CreateRef<AttributesMutationRecord>(Ref<Node>(target), name, namespaceURI, mappedOldValue);
           break;
         }
         case MutationRecordType::CharacterData:
         {
-          record = CreateRef<CharacterDataMutationRecord>(krys::move(target), oldValue);
+          record = CreateRef<CharacterDataMutationRecord>(Ref<Node>(target), mappedOldValue);
           break;
         }
         case MutationRecordType::ChildList:
         {
-          record = CreateRef<ChildListMutationRecord>(krys::move(target),
-                                                      CreateRef<StaticNodeList>(krys::move(addedNodes)),
-                                                      CreateRef<StaticNodeList>(krys::move(removedNodes)),
-                                                      krys::move(previousSibling), krys::move(nextSibling));
+          record = CreateRef<ChildListMutationRecord>(
+            Ref<Node>(target), CreateRef<StaticNodeList>(SmallNodeList(addedNodes)),
+            CreateRef<StaticNodeList>(SmallNodeList(removedNodes)), RefPtr<Node>(previousSibling),
+            RefPtr<Node>(nextSibling));
           break;
         }
         default:
@@ -136,11 +310,14 @@ namespace krys::boo::dom
         }
       }
 
+      // 4.2. Enqueue record to observer's record queue.
       observer->_recordQueue.push_back(krys::move(record));
-      // TODO(impl): MUTATION-OBSERVERS - Append observer to the surrounding agent’s pending mutation
-      // observers.
+
+      // 4.3. Append observer to the surrounding agent's pending mutation observers.
+      AppendToSet(SurroundingAgent().PendingMutationObservers, *observer);
     }
 
+    // 5. Queue a mutation observer microtask.
     QueueMutationObserverMicrotask();
   }
 

@@ -1,12 +1,72 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/Value.hpp"
+#include "Krystal.Booey/CSS/Values/VariableData.hpp"
+#include "Krystal.Booey/CSS/Values/VariableReferenceValue.hpp"
+#include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
 
 namespace krys::boo::css
 {
-  class CustomPropertyValue : public Value
+  /// @brief The value of a custom property (`--name`): unresolved references, tokens, or a CSS-wide keyword.
+  class CustomPropertyValue final : public Value
   {
   public:
+    using VariantValue = Variant<Ref<VariableReferenceValue>, Ref<VariableData>, GlobalKeyword>;
+
+  private:
+    const CSSOMStringAtom _name;
+    const VariantValue _value;
+    mutable CSSOMString _cachedCSSText;
+
+    CustomPropertyValue(const CSSOMStringAtom &name, VariantValue &&value) noexcept
+        : css::Value(ValueType::CustomProperty), _name(name), _value(krys::move(value))
+    {
+    }
+
+  public:
+    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateEmpty(const CSSOMStringAtom &name) noexcept;
+
+    KRYS_NODISCARD static Ref<CustomPropertyValue>
+      CreateUnresolved(const CSSOMStringAtom &name, Ref<VariableReferenceValue> &&value) noexcept;
+
+    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateSyntaxAll(const CSSOMStringAtom &name,
+                                                                   Ref<VariableData> &&value) noexcept;
+
+    KRYS_NODISCARD static Ref<CustomPropertyValue> CreateWithGlobalKeyword(const CSSOMStringAtom &name,
+                                                                           GlobalKeyword keyword) noexcept;
+
+    KRYS_NODISCARD const CSSOMStringAtom &Name() const noexcept
+    {
+      return _name;
+    }
+
+    KRYS_NODISCARD const VariantValue &Value() const noexcept
+    {
+      return _value;
+    }
+
+    KRYS_NODISCARD Ref<const VariableData> AsVariableData() const noexcept;
+
+    KRYS_NODISCARD bool IsCurrentColor() const noexcept;
+
+    KRYS_NODISCARD bool IsVariableReference() const noexcept;
+    KRYS_NODISCARD bool IsVariableData() const noexcept;
+    KRYS_NODISCARD bool IsGlobalKeyword() const noexcept;
+
+    KRYS_NODISCARD Maybe<GlobalKeyword> TryGlobalKeyword() const noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept;
+
+    KRYS_NODISCARD bool Equals(const CustomPropertyValue &other) const noexcept;
+
+    KRYS_NODISCARD IterationStatus
+      CustomVisitChildren(KRYS_NOESCAPE const Func<IterationStatus(css::Value &)> &func) const noexcept;
+
+  private:
+    KRYS_NODISCARD const List<Token> &Tokens() const noexcept;
   };
 }
 

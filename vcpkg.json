@@ -5,12 +5,17 @@
     "rapidjson",
     "rapidxml",
     "spdlog",
-    "freetype",
-    "vulkan-headers",
+    "brigand",
+    "harfbuzz",
+    "icu",
+    "libjpeg-turbo",
     {
-      "name": "msdfgen",
-      "default-features": false,
-      "features": [ "extensions" ]
-    }
+      "name": "libxml2",
+      "default-features": false
+    },
+    "libpng",
+    "libwebp",
+    "woff2",
+    "zlib"
   ]
 }

@@ -1,0 +1,17 @@
+﻿<!doctype html>
+<!-- The "bidi-color-picker" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, with the
+     right-to-left colour input's picker open: mirrored, lined up with the input's right edge, the swatches
+     running from the right. Chrome draws its pickers in a window of their own, so there's no Chrome golden. -->
+<html dir="rtl" data-width="240" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px "Liberation Sans", sans-serif; }
+</style>
+</head>
+<body>
+  <input type="color" id="color" value="#ff0000">
+  <p>טקסט מתחת לבורר.</p>
+</body>
+</html>

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
+#include "Krystal.Core/Assert.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -20,7 +21,7 @@ namespace krys::boo::css::PropertyParserHelpers
   bool ConsumeSlash(TokenRange &tokens) noexcept
   {
     Token value = tokens.Peek();
-    if (value.Type() != TokenType::Delim || value.IdentCodePoints() != u8"/")
+    if (value.Type() != TokenType::Delim || value.Delimiter() != U'/')
     {
       return false;
     }
@@ -33,7 +34,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   TokenRange ConsumeFunction(TokenRange &tokens) noexcept
   {
-    assert(tokens.Peek().Type() == TokenType::Function);
+    krys_debug_assert(tokens.Peek().Type() == TokenType::Function);
 
     TokenRange contents = tokens.ConsumeBlock();
     tokens.DiscardWhitespace();
@@ -51,7 +52,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (index)
     {
-      assert(tokens.Peek().Type() == TokenType::Comma);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Comma);
       tokens.Discard();
     }
 

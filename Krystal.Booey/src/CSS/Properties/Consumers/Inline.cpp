@@ -13,20 +13,21 @@ namespace krys::boo::css::PropertyParserHelpers
     //               [ text | alphabetic | ideographic | ideographic-ink ]?
     // https://drafts.csswg.org/css-inline-3/#typedef-text-edge
 
-    auto firstValue = ConsumeIdent<ValueId::Text, ValueId::Cap, ValueId::Ex, ValueId::Ideographic,
-                                   ValueId::IdeographicInk>(range);
+    auto firstValue =
+      ConsumeIdent<ValueId::Text, ValueId::Cap, ValueId::Ex, ValueId::Ideographic, ValueId::IdeographicInk>(
+        range);
     if (!firstValue)
     {
       return nullptr;
     }
 
-    auto secondValue = ConsumeIdent<ValueId::Text, ValueId::Alphabetic, ValueId::Ideographic,
-                                    ValueId::IdeographicInk>(range);
+    auto secondValue =
+      ConsumeIdent<ValueId::Text, ValueId::Alphabetic, ValueId::Ideographic, ValueId::IdeographicInk>(range);
 
     // https://drafts.csswg.org/css-inline-3/#text-edges
     // "If only one value is specified, both edges are assigned that same keyword if possible; else text is
     // assumed as the missing value."
-    auto shouldSerializeSecondValue = [&]()
+    auto shouldSerialiseSecondValue = [&]()
     {
       if (!secondValue)
       {
@@ -41,7 +42,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return firstValue->ValueId() != secondValue->ValueId();
     }();
 
-    if (!shouldSerializeSecondValue)
+    if (!shouldSerialiseSecondValue)
     {
       return firstValue;
     }

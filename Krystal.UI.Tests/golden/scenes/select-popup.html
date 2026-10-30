@@ -1,0 +1,22 @@
+﻿<!doctype html>
+<!-- The "select-popup" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, with the
+     drop-down's popup open. Chrome draws its popups in a window of their own, so there's no Chrome golden. -->
+<html data-width="240" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px sans-serif; }
+</style>
+</head>
+<body>
+  <select id="fruit">
+    <option>Apple</option>
+    <option disabled>Banana</option>
+    <optgroup label="Stone fruit"><option selected>Cherry</option><option>Plum</option></optgroup>
+    <hr>
+    <option>Date</option>
+  </select>
+  <p>Text under the popup.</p>
+</body>
+</html>

@@ -9,6 +9,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
 
+namespace krys::boo
+{
+  class LocalDOMWindow;
+}
+
 namespace krys::boo::dom
 {
   class EventTarget;
@@ -41,6 +46,10 @@ namespace krys::boo::dom
     static bool InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners, EventPhaseType phase,
                             bool invocationTargetInShadowTree,
                             bool *legacyOutputDidListenersThrowFlag) noexcept;
+
+    /// @brief The window whose current event a listener on @p target sets: the target, if it's a window, or
+    /// its node document's window.
+    KRYS_NODISCARD static LocalDOMWindow *RelevantWindow(EventTarget &target) noexcept;
 
     /// @brief Fires an event named `e` at `target`. Returns false if the event is
     /// cancelable and at least one of the event handlers which received the event called `PreventDefault()`,

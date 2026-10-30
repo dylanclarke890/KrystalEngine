@@ -4,7 +4,7 @@
 
 namespace krys::boo::html
 {
-  // TODO(HTMLTemplateElement): Implement the HTMLTemplateElement constructor in a spec compliant way.
+  // FIXME: Implement the HTMLTemplateElement constructor in a spec compliant way.
 
   HTMLTemplateElement::HTMLTemplateElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Template),
@@ -60,20 +60,19 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
   }
 
-  bool HTMLTemplateElement::ShadowRootSerializable() const noexcept
+  bool HTMLTemplateElement::ShadowRootSerialisable() const noexcept
   {
     return Reflection::Reflect<bool>(*this, u8"shadowrootserializable");
   }
 
-  void HTMLTemplateElement::ShadowRootSerializable(bool value) noexcept
+  void HTMLTemplateElement::ShadowRootSerialisable(bool value) noexcept
   {
     Reflection::Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
   }
 
   dom::DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry")
-      .value_or(u8"");
+    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
   }
 
   void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept

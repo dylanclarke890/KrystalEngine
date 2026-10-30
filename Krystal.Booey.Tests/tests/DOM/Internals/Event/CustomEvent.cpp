@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/CustomEvent.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {

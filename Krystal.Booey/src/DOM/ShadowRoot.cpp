@@ -1,10 +1,15 @@
 ﻿#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/Animation/WebAnimation.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Style/Scope.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
 namespace krys::boo::dom
@@ -12,10 +17,38 @@ namespace krys::boo::dom
   ShadowRoot::ShadowRoot(Document &document, RefPtr<html::CustomElementRegistry> &&registry,
                          NodeFlags flags) noexcept
       : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
-        _customElementRegistry(krys::move(registry))
+        DocumentOrShadowRoot(*this, krys::move(registry))
   {
     SetNodeFlag(NodeFlags::IsInShadowTree);
+    _styleScope = CreateUnique<style::Scope>(*this);
   }
+
+  ShadowRoot::~ShadowRoot() noexcept
+  {
+    if (_styleSheetList)
+    {
+      _styleSheetList->Detach();
+    }
+  }
+
+#pragma region DocumentOrShadowRoot Mixin (CSSOM)
+
+  css::StyleSheetList &ShadowRoot::StyleSheets() noexcept
+  {
+    if (!_styleSheetList)
+    {
+      _styleSheetList = css::StyleSheetList::Create(*this);
+    }
+    return *_styleSheetList;
+  }
+
+  List<RefPtr<WebAnimation>> ShadowRoot::GetAnimations() noexcept
+  {
+    return NodeDocument().MatchingAnimations([&](Element &target) -> bool
+                                             { return TreeQueries::ContainingShadowRoot(target) == this; });
+  }
+
+#pragma endregion
 
   Element *ShadowRoot::Host() const noexcept
   {
@@ -27,11 +60,36 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
+#pragma region Extension Hooks
 
-  RefPtr<html::CustomElementRegistry> ShadowRoot::CustomElementRegistry() const noexcept
+  void ShadowRoot::OnInsert() noexcept
   {
-    return _customElementRegistry;
+    DocumentFragment::OnInsert();
+    if (IsConnected())
+    {
+      NodeDocument().DidInsertInDocumentShadowRoot(*this);
+    }
+    if (!GetAdoptedStyleSheets().empty())
+    {
+      StyleScope().DidChangeActiveStyleSheetCandidates();
+    }
+  }
+
+  void ShadowRoot::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    DocumentFragment::OnRemove(isSubtreeRoot, oldAncestor);
+    NodeDocument().DidRemoveInDocumentShadowRoot(*this);
+  }
+
+  void ShadowRoot::OnAdopt(Document &oldDocument) noexcept
+  {
+    DocumentFragment::OnAdopt(oldDocument);
+
+    // Adopted sheets were constructed for the old document.
+    (void)SetAdoptedStyleSheets({});
+
+    // Style scopes are document specific.
+    _styleScope = CreateUnique<style::Scope>(*this);
   }
 
 #pragma endregion
@@ -59,5 +117,18 @@ namespace krys::boo::dom
     }
 
     return nullptr;
+  }
+
+  List<Ref<ShadowRoot>> AssignedShadowRootsIfSlotted(const Node &node) noexcept
+  {
+    List<Ref<ShadowRoot>> result;
+    for (auto *slot = SlotAlgorithms::GetAssignedSlot(node); slot;
+         slot = SlotAlgorithms::GetAssignedSlot(*slot))
+    {
+      auto *shadowRoot = TreeQueries::ContainingShadowRoot(*slot);
+      krys_debug_assert(shadowRoot);
+      result.push_back(ShareRef(*shadowRoot));
+    }
+    return result;
   }
 }

@@ -242,7 +242,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "settings-flag": "accentColorEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::AccentColor",
@@ -262,7 +261,6 @@
           "block-step-align",
           "block-step-round"
         ],
-        "settings-flag": "cssRhythmicSizingEnabled",
         "parser-function": "ConsumeBlockStepShorthand",
         "parser-grammar": "<'block-step-size'> || <'block-step-insert'> || <'block-step-align'> || <'block-step-round'>",
         "parser-grammar-unused": true,
@@ -279,7 +277,6 @@
       "initial": "auto",
       "values": ["auto", "center", "start", "end"],
       "codegen-properties": {
-        "settings-flag": "cssRhythmicSizingEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BlockStepAlign",
@@ -297,7 +294,6 @@
       "initial": "margin-box",
       "values": ["margin-box", "padding-box", "content-box"],
       "codegen-properties": {
-        "settings-flag": "cssRhythmicSizingEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BlockStepInsert",
@@ -315,7 +311,6 @@
       "initial": "up",
       "values": ["up", "down", "nearest"],
       "codegen-properties": {
-        "settings-flag": "cssRhythmicSizingEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "BlockStepRound",
@@ -332,7 +327,6 @@
       "animation-type": "by computed value",
       "initial": "none",
       "codegen-properties": {
-        "settings-flag": "cssRhythmicSizingEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BlockStepSize",
@@ -405,7 +399,6 @@
       "initial": "auto",
       "values": ["auto", "discard"],
       "codegen-properties": {
-        "settings-flag": "cssLineClampEnabled",
         "render-style-name-for-methods": "OverflowContinue",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
@@ -471,14 +464,8 @@
         "inline-flex",
         "grid",
         "inline-grid",
-        {
-          "value": "grid-lanes",
-          "settings-flag": "gridLanesEnabled"
-        },
-        {
-          "value": "inline-grid-lanes",
-          "settings-flag": "gridLanesEnabled"
-        },
+        "grid-lanes",
+        "inline-grid-lanes",
         {
           "value": "ruby",
           "status": "unimplemented"
@@ -561,8 +548,7 @@
         "parser-grammar": "<<values>>",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
-        "render-style-type": "FieldSizing",
-        "settings-flag": "cssFieldSizingEnabled"
+        "render-style-type": "FieldSizing"
       },
       "specification": {
         "module": "css-ui",
@@ -652,10 +638,7 @@
         "xxx-large",
         "smaller",
         "larger",
-        {
-          "value": "math",
-          "settings-flag": "cssMathDepthEnabled"
-        },
+        "math",
         {
           "value": "-webkit-xxx-large",
           "status": "non-standard"
@@ -681,7 +664,7 @@
           "fontCascade"
         ],
         "render-style-type": "float",
-        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math@(settings-flag=cssMathDepthEnabled) | <-webkit-absolute-size> | <-webkit-relative-size>",
+        "parser-grammar": "<absolute-size> | <relative-size> | <length-percentage [0,inf]> | math | <-webkit-absolute-size> | <-webkit-relative-size>",
         "parser-exported": true
       },
       "specification": {
@@ -836,7 +819,6 @@
       "initial": "normal",
       "codegen-properties": {
         "longhands": ["text-box-trim", "text-box-edge"],
-        "settings-flag": "cssTextBoxTrimEnabled",
         "parser-function": "ConsumeTextBoxShorthand",
         "parser-grammar": "normal | [ <'text-box-trim'> || <'text-box-edge'> ]",
         "parser-grammar-unused": true,
@@ -861,7 +843,6 @@
         "cap"
       ],
       "codegen-properties": {
-        "settings-flag": "cssTextBoxTrimEnabled",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
@@ -882,7 +863,6 @@
       "initial": "none",
       "values": ["none", "trim-start", "trim-end", "trim-both"],
       "codegen-properties": {
-        "settings-flag": "cssTextBoxTrimEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextBoxTrim",
@@ -1241,7 +1221,6 @@
       "initial": "normal",
       "values": ["normal", "text", "emoji", "unicode"],
       "codegen-properties": {
-        "settings-flag": "cssFontVariantEmojiEnabled",
         "font-description-name-for-methods": "VariantEmoji",
         "font-property": true,
         "high-priority": true,
@@ -1509,7 +1488,6 @@
         "auto"
       ],
       "codegen-properties": {
-        "settings-flag": "cssTextSpacingTrimEnabled",
         "font-property": true,
         "high-priority": true,
         "sink-priority": true,
@@ -1544,7 +1522,6 @@
         "ideograph-numeric"
       ],
       "codegen-properties": {
-        "settings-flag": "cssTextAutospaceEnabled",
         "font-property": true,
         "high-priority": true,
         "sink-priority": true,
@@ -1574,14 +1551,8 @@
         "horizontal-tb",
         "vertical-lr",
         "vertical-rl",
-        {
-          "value": "sideways-lr",
-          "settings-flag": "sidewaysWritingModesEnabled"
-        },
-        {
-          "value": "sideways-rl",
-          "settings-flag": "sidewaysWritingModesEnabled"
-        },
+        "sideways-lr",
+        "sideways-rl",
         {
           "value": "lr-tb",
           "status": "deprecated"
@@ -1993,7 +1964,6 @@
         "longhands": ["animation-range-start", "animation-range-end"],
         "coordinated-value-list-property": true,
         "separator": ",",
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "parser-function": "ConsumeAnimationRangeShorthand",
         "parser-grammar": "[ <'animation-range-start'> <'animation-range-end'>? ]#",
         "parser-grammar-unused": true,
@@ -2027,8 +1997,7 @@
           "animations"
         ],
         "separator": ",",
-        "parser-grammar": "<single-animation-range-start>#",
-        "settings-flag": "scrollDrivenAnimationsEnabled"
+        "parser-grammar": "<single-animation-range-start>#"
       },
       "specification": {
         "module": "scroll-animations",
@@ -2058,8 +2027,7 @@
           "animations"
         ],
         "separator": ",",
-        "parser-grammar": "<single-animation-range-end>#",
-        "settings-flag": "scrollDrivenAnimationsEnabled"
+        "parser-grammar": "<single-animation-range-end>#"
       },
       "specification": {
         "module": "scroll-animations",
@@ -2071,7 +2039,6 @@
       "initial": "auto",
       "values": ["auto", "none"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "coordinated-value-list-property": true,
         "coordinated-value-list-property-name-for-methods": "Timeline",
         "coordinated-value-list-property-item-type": "Style::SingleAnimationTimeline",
@@ -2226,7 +2193,6 @@
         },
         {
           "value": "border-area",
-          "settings-flag": "cssBackgroundClipBorderAreaEnabled",
           "status": "experimental",
           "url": "https://drafts.csswg.org/css-backgrounds-4/#background-clip"
         },
@@ -2478,7 +2444,6 @@
       "initial": "none",
       "values": ["none", "auto"],
       "codegen-properties": {
-        "settings-flag": "cssLineClampEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::BlockEllipsis",
@@ -3080,6 +3045,7 @@
       "initial": "0",
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3103,6 +3069,7 @@
       "values": ["stretch", "repeat", "round", "space"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3126,6 +3093,7 @@
       "values": ["fill"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3153,6 +3121,7 @@
       "values": ["none"],
       "codegen-properties": {
         "disables-native-appearance": true,
+        "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -3176,6 +3145,7 @@
       "codegen-properties": {
         "style-extractor-custom": true,
         "disables-native-appearance": true,
+        "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
           "surroundData",
@@ -4328,7 +4298,6 @@
       "animation-type": "discrete",
       "initial": "round",
       "codegen-properties": {
-        "settings-flag": "cssCornerShapeEnabled",
         "longhands": [
           "corner-top-left-shape",
           "corner-top-right-shape",
@@ -4354,7 +4323,6 @@
           "name": "corner-shape",
           "resolver": "top-left"
         },
-        "settings-flag": "cssCornerShapeEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
@@ -4380,7 +4348,6 @@
           "name": "corner-shape",
           "resolver": "top-right"
         },
-        "settings-flag": "cssCornerShapeEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
@@ -4406,7 +4373,6 @@
           "name": "corner-shape",
           "resolver": "bottom-left"
         },
-        "settings-flag": "cssCornerShapeEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
@@ -4432,7 +4398,6 @@
           "name": "corner-shape",
           "resolver": "bottom-right"
         },
-        "settings-flag": "cssCornerShapeEnabled",
         "disables-native-appearance": true,
         "render-style-initial-constexpr": true,
         "render-style-storage-path": [
@@ -4460,8 +4425,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "parser-grammar": "<corner-shape-value>"
       },
       "specification": {
         "module": "css-borders",
@@ -4479,8 +4443,7 @@
         "skip-style-builder": true,
         "disables-native-appearance": true,
         "parser-grammar": "<corner-shape-value>",
-        "parser-exported": true,
-        "settings-flag": "cssCornerShapeEnabled"
+        "parser-exported": true
       },
       "specification": {
         "module": "css-borders",
@@ -4497,8 +4460,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "parser-grammar": "<corner-shape-value>"
       },
       "specification": {
         "module": "css-borders",
@@ -4515,8 +4477,7 @@
         },
         "skip-style-builder": true,
         "disables-native-appearance": true,
-        "parser-grammar": "<corner-shape-value>",
-        "settings-flag": "cssCornerShapeEnabled"
+        "parser-grammar": "<corner-shape-value>"
       },
       "specification": {
         "module": "css-borders",
@@ -4530,7 +4491,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterIncrement"
+          "css::PropertyId::CounterIncrement"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4560,7 +4521,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterReset"
+          "css::PropertyId::CounterReset"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4591,7 +4552,7 @@
       "codegen-properties": {
         "animation-wrapper": "CounterWrapper",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyCounterSet"
+          "css::PropertyId::CounterSet"
         ],
         "style-builder-custom": "All",
         "style-extractor-custom": true,
@@ -4740,8 +4701,7 @@
         "render-style-storage-path": ["m_svgStyle", "layoutData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::SVGPathData",
-        "parser-grammar": "none | <path()>",
-        "settings-flag": "cssDPropertyEnabled"
+        "parser-grammar": "none | <path()>"
       },
       "specification": {
         "module": "svg",
@@ -4784,7 +4744,6 @@
       "initial": "no-limit",
       "values": ["standard", "constrained", "no-limit"],
       "codegen-properties": {
-        "settings-flag": "supportHDRDisplayEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::DynamicRangeLimit",
@@ -4833,11 +4792,11 @@
       "codegen-properties": {
         "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyFill",
-          "&RenderStyle::fill",
-          "&RenderStyle::setFill",
-          "&RenderStyle::visitedLinkFill",
-          "&RenderStyle::setVisitedLinkFill"
+          "css::PropertyId::Fill",
+          "&RenderStyle::Fill",
+          "&RenderStyle::SetFill",
+          "&RenderStyle::VisitedLinkFill",
+          "&RenderStyle::SetVisitedLinkFill"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "fillData"],
@@ -5180,7 +5139,6 @@
       "initial": "auto",
       "values": ["auto", "none"],
       "codegen-properties": {
-        "settings-flag": "cssInputSecurityEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "InputSecurity",
@@ -5338,8 +5296,8 @@
       "values": ["normal"],
       "codegen-properties": {
         "accepts-quirky-length": true,
-        "animation-wrapper-requires-getter": "computedLetterSpacing",
-        "animation-wrapper-requires-setter": "setLetterSpacingFromAnimation",
+        "animation-wrapper-requires-getter": "ComputedLetterSpacing",
+        "animation-wrapper-requires-setter": "SetLetterSpacingFromAnimation",
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "font-property": true,
@@ -5386,7 +5344,6 @@
         "cap"
       ],
       "codegen-properties": {
-        "settings-flag": "cssLineFitEdgeEnabled",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "value",
@@ -5410,7 +5367,7 @@
       "codegen-properties": [
         {
           "enable-if": "ENABLE_TEXT_AUTOSIZING",
-          "animation-wrapper-requires-getter": "specifiedLineHeight",
+          "animation-wrapper-requires-getter": "SpecifiedLineHeight",
           "style-builder-custom": "All",
           "style-extractor-custom": true,
           "render-style-storage-path": ["_inheritedData"],
@@ -5959,6 +5916,7 @@
       "initial": "0",
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-outset"],
+        "render-style-storage-name": "outset",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -5981,6 +5939,7 @@
       "values": ["stretch", "repeat", "space", "round"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-repeat"],
+        "render-style-storage-name": "repeat",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6003,6 +5962,7 @@
       "values": ["fill"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-slice"],
+        "render-style-storage-name": "slice",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6029,6 +5989,7 @@
       "values": ["none"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-source"],
+        "render-style-storage-name": "source",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6051,6 +6012,7 @@
       "values": ["auto"],
       "codegen-properties": {
         "aliases": ["-webkit-mask-box-image-width"],
+        "render-style-storage-name": "width",
         "render-style-storage-path": [
           "_nonInheritedData",
           "rareData",
@@ -6339,7 +6301,6 @@
       "initial": "0",
       "values": ["auto-add"],
       "codegen-properties": {
-        "settings-flag": "cssMathDepthEnabled",
         "top-priority": true,
         "top-priority-reason": "This is top priority since it affects 'font-size', which is 'high-priority'",
         "render-style-initial-constexpr": true,
@@ -6559,7 +6520,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "cssLineClampEnabled",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "value",
@@ -7165,7 +7125,6 @@
       "initial": "auto",
       "values": ["none", "auto"],
       "codegen-properties": {
-        "settings-flag": "cssScrollAnchoringEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "OverflowAnchor",
@@ -7299,7 +7258,6 @@
     "overscroll-behavior": {
       "codegen-properties": {
         "longhands": ["overscroll-behavior-x", "overscroll-behavior-y"],
-        "settings-flag": "overscrollBehaviorEnabled",
         "parser-function": "ConsumeOverscrollBehaviorShorthand",
         "parser-function-comment": "FIXME: Can probably use shorthand-pattern Values2",
         "parser-grammar": "[ contain | none | auto ]{1,2}",
@@ -7317,7 +7275,6 @@
       "initial": "auto",
       "values": ["contain", "none", "auto"],
       "codegen-properties": {
-        "settings-flag": "overscrollBehaviorEnabled",
         "logical-property-group": {
           "name": "overscroll-behavior",
           "resolver": "horizontal"
@@ -7339,7 +7296,6 @@
       "initial": "auto",
       "values": ["contain", "none", "auto"],
       "codegen-properties": {
-        "settings-flag": "overscrollBehaviorEnabled",
         "logical-property-group": {
           "name": "overscroll-behavior",
           "resolver": "vertical"
@@ -7361,7 +7317,6 @@
       "initial": "auto",
       "values": ["contain", "none", "auto"],
       "codegen-properties": {
-        "settings-flag": "overscrollBehaviorEnabled",
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "overscroll-behavior",
@@ -7380,7 +7335,6 @@
       "initial": "auto",
       "values": ["contain", "none", "auto"],
       "codegen-properties": {
-        "settings-flag": "overscrollBehaviorEnabled",
         "skip-style-builder": true,
         "logical-property-group": {
           "name": "overscroll-behavior",
@@ -7852,7 +7806,6 @@
       "initial": "space-around",
       "values": ["start", "center", "space-between", "space-around"],
       "codegen-properties": {
-        "settings-flag": "cssRubyAlignEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "RubyAlign",
@@ -7871,7 +7824,6 @@
       "initial": "auto",
       "values": ["auto", "none"],
       "codegen-properties": {
-        "settings-flag": "cssRubyOverhangEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "RubyOverhang",
@@ -7978,11 +7930,11 @@
       "codegen-properties": {
         "animation-wrapper": "VisitedAffectedStyleTypeWrapper<SVGPaint>",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyStroke",
-          "&RenderStyle::stroke",
-          "&RenderStyle::setStroke",
-          "&RenderStyle::visitedLinkStroke",
-          "&RenderStyle::setVisitedLinkStroke"
+          "css::PropertyId::Stroke",
+          "&RenderStyle::Stroke",
+          "&RenderStyle::SetStroke",
+          "&RenderStyle::VisitedLinkStroke",
+          "&RenderStyle::SetVisitedLinkStroke"
         ],
         "style-builder-custom": "All",
         "render-style-storage-path": ["m_svgStyle", "strokeData"],
@@ -8118,9 +8070,9 @@
         "animation-wrapper": "StyleTypeWrapper",
         "animation-wrapper-comment": "FIXME: Why doesn't this use VisitedAffectedStyleTypeWrapper?",
         "animation-wrapper-requires-override-parameters": [
-          "CSSPropertyID::CSSPropertyStrokeColor",
-          "&RenderStyle::strokeColor",
-          "&RenderStyle::setStrokeColor"
+          "css::PropertyId::StrokeColor",
+          "&RenderStyle::StrokeColor",
+          "&RenderStyle::SetStrokeColor"
         ],
         "style-builder-custom": "Value",
         "render-style-has-explicitly-set-storage-path": ["m_rareInheritedData"],
@@ -8314,7 +8266,6 @@
       "initial": "none",
       "values": ["none", "start", "end", "left", "right", "center"],
       "codegen-properties": {
-        "settings-flag": "cssTextGroupAlignEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextGroupAlign",
@@ -8360,7 +8311,6 @@
         }
       ],
       "codegen-properties": {
-        "settings-flag": "cssTextJustifyEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "TextJustify",
@@ -8419,7 +8369,6 @@
         "full-width",
         {
           "value": "math-auto",
-          "settings-flag": "cssTextTransformMathAutoEnabled",
           "url": "https://w3c.github.io/mathml-core/#math-auto-transform"
         }
       ],
@@ -8429,7 +8378,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextTransform",
-        "parser-grammar": "none | [ [ capitalize | uppercase | lowercase ] || full-width || full-size-kana ]@(no-single-item-opt) | math-auto@(settings-flag=cssTextTransformMathAutoEnabled)"
+        "parser-grammar": "none | [ [ capitalize | uppercase | lowercase ] || full-width || full-size-kana ]@(no-single-item-opt) | math-auto"
       },
       "specification": {
         "module": "css-text",
@@ -8476,10 +8425,7 @@
         "auto",
         "balance",
         "stable",
-        {
-          "value": "pretty",
-          "settings-flag": "cssTextWrapPrettyEnabled"
-        },
+        "pretty",
         {
           "value": "avoid-orphans",
           "status": "unimplemented"
@@ -8931,10 +8877,7 @@
           "value": "manual",
           "status": "unimplemented"
         },
-        {
-          "value": "auto-phrase",
-          "settings-flag": "cssWordBreakAutoPhraseEnabled"
-        },
+        "auto-phrase",
         "break-word"
       ],
       "codegen-properties": {
@@ -8956,8 +8899,8 @@
       "values": ["normal"],
       "codegen-properties": {
         "accepts-quirky-length": true,
-        "animation-wrapper-requires-getter": "computedWordSpacing",
-        "animation-wrapper-requires-setter": "setWordSpacingFromAnimation",
+        "animation-wrapper-requires-getter": "ComputedWordSpacing",
+        "animation-wrapper-requires-setter": "SetWordSpacingFromAnimation",
         "style-builder-custom": "All",
         "style-extractor-custom": true,
         "font-property": true,
@@ -9042,10 +8985,7 @@
         "searchfield",
         "textfield",
         "textarea",
-        {
-          "value": "base",
-          "settings-flag": "cssAppearanceBaseEnabled"
-        },
+        "base",
         "auto",
         "none",
         {
@@ -9263,6 +9203,23 @@
       "specification": {
         "module": "css-content-visibility",
         "url": "https://www.w3.org/TR/css-contain-2/#content-visibility"
+      }
+    },
+    "overlay": {
+      "animation-type": "see prose",
+      "initial": "none",
+      "values": ["none", "auto"],
+      "codegen-properties": {
+        "animation-wrapper": "NonNormalizedDiscreteWrapper<Overlay>",
+        "animation-wrapper-requires-non-normalized-discrete-interpolation": true,
+        "render-style-storage-path": ["_nonInheritedData", "rareData"],
+        "render-style-storage-kind": "enum",
+        "render-style-type": "Overlay",
+        "parser-grammar": "<<values>>"
+      },
+      "specification": {
+        "module": "css-position-4",
+        "url": "https://drafts.csswg.org/css-position-4/#overlay"
       }
     },
     "backface-visibility": {
@@ -9553,7 +9510,7 @@
         "url": "https://www.w3.org/TR/css3-multicol/#columns"
       }
     },
-    "-webkit-box-decoration-break": {
+    "box-decoration-break": {
       "animation-type": "discrete",
       "initial": "slice",
       "values": ["clone", "slice"],
@@ -9997,8 +9954,7 @@
         "parser-function": "ConsumeFilter",
         "parser-grammar": "none | <filter-value-list>",
         "parser-grammar-unused": true,
-        "parser-grammar-unused-reason": "Needs support for the strong value representation.",
-        "settings-flag": "cssUnprefixedBackdropFilterEnabled"
+        "parser-grammar-unused-reason": "Needs support for the strong value representation."
       },
       "status": {
         "status": "experimental"
@@ -10551,7 +10507,6 @@
     "line-clamp": {
       "codegen-properties": {
         "longhands": ["max-lines", "block-ellipsis", "continue"],
-        "settings-flag": "cssLineClampEnabled",
         "parser-function": "ConsumeLineClampShorthand",
         "parser-grammar": "none | [ <integer [1,inf]> <'block-ellipsis'>? ]",
         "parser-grammar-unused": true,
@@ -10795,7 +10750,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextDecorationLine",
-        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error@(settings-flag=cssTextDecorationLineErrorValues) | grammar-error@(settings-flag=cssTextDecorationLineErrorValues)",
+        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error | grammar-error",
         "parser-exported": true
       },
       "specification": {
@@ -10930,7 +10885,7 @@
         "render-style-storage-container": "struct",
         "render-style-storage-kind": "raw",
         "render-style-type": "Style::TextDecorationLine",
-        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error@(settings-flag=cssTextDecorationLineErrorValues)",
+        "parser-grammar": "none | [ underline || overline || line-through || blink ]@(no-single-item-opt) | spelling-error",
         "comment": "FIXME: Should this be an alias of text-decoration-line?"
       },
       "status": "non-standard"
@@ -11831,7 +11786,6 @@
     "scroll-timeline": {
       "codegen-properties": {
         "longhands": ["scroll-timeline-name", "scroll-timeline-axis"],
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "parser-function": "ConsumeScrollTimelineShorthand",
         "parser-grammar": "[ <'scroll-timeline-name'> <'scroll-timeline-axis'>? ]#",
         "parser-grammar-unused": true,
@@ -11847,7 +11801,6 @@
       "initial": "block",
       "values": ["block", "inline", "x", "y"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "render-style-name-for-methods": "ScrollTimelineAxes",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -11865,7 +11818,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "render-style-name-for-methods": "ScrollTimelineNames",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -11884,7 +11836,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "settings-flag": "cssScrollbarColorEnabled",
         "render-style-storage-path": ["m_rareInheritedData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ScrollbarColor",
@@ -11904,7 +11855,6 @@
       "initial": "auto",
       "values": ["auto", "stable", "both-edges"],
       "codegen-properties": {
-        "settings-flag": "cssScrollbarGutterEnabled",
         "render-style-initial-constexpr": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -11924,7 +11874,6 @@
       "initial": "auto",
       "values": ["auto", "thin", "none"],
       "codegen-properties": {
-        "settings-flag": "cssScrollbarWidthEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "Style::ScrollbarWidth",
@@ -11997,8 +11946,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::NameScope",
-        "parser-grammar": "none | all | <dashed-ident>#",
-        "settings-flag": "scrollDrivenAnimationsEnabled"
+        "parser-grammar": "none | all | <dashed-ident>#"
       },
       "specification": {
         "module": "scroll-animations",
@@ -12012,7 +11960,6 @@
           "view-timeline-axis",
           "view-timeline-inset"
         ],
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "parser-function": "ConsumeViewTimelineShorthand",
         "parser-grammar": "[ <'view-timeline-name'> [ <'view-timeline-axis'> || <'view-timeline-inset'> ]? ]#",
         "parser-grammar-unused": true,
@@ -12028,7 +11975,6 @@
       "initial": "block",
       "values": ["block", "inline", "x", "y"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "render-style-name-for-methods": "ViewTimelineAxes",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -12047,7 +11993,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "render-style-name-for-methods": "ViewTimelineInsets",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -12064,7 +12009,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "scrollDrivenAnimationsEnabled",
         "render-style-name-for-methods": "ViewTimelineNames",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -12082,7 +12026,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "viewTransitionsEnabled",
         "render-style-name-for-methods": "ViewTransitionClasses",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -12099,7 +12042,6 @@
       "initial": "none",
       "values": ["none", "auto", "match-element"],
       "codegen-properties": {
-        "settings-flag": "viewTransitionsEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::ViewTransitionName",
@@ -12115,7 +12057,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-name-for-methods": "AnchorNames",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
@@ -12134,8 +12075,7 @@
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::NameScope",
-        "parser-grammar": "none | all | <dashed-ident>#",
-        "settings-flag": "cssAnchorPositioningEnabled"
+        "parser-grammar": "none | all | <dashed-ident>#"
       },
       "specification": {
         "module": "css-anchor-position",
@@ -12147,7 +12087,6 @@
       "initial": "auto",
       "values": ["auto"],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::PositionAnchor",
@@ -12164,7 +12103,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "value",
         "render-style-type": "Style::PositionArea",
@@ -12181,7 +12119,6 @@
     "position-try": {
       "codegen-properties": {
         "longhands": ["position-try-order", "position-try-fallbacks"],
-        "settings-flag": "cssAnchorPositioningEnabled",
         "parser-function": "ConsumePositionTryShorthand",
         "parser-grammar": "<'position-try-order'>? <'position-try-fallbacks'>",
         "parser-grammar-unused": true,
@@ -12203,7 +12140,6 @@
         "most-inline-size"
       ],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "enum",
         "render-style-type": "Style::PositionTryOrder",
@@ -12219,7 +12155,6 @@
       "initial": "none",
       "values": ["none"],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "reference",
         "render-style-type": "Style::PositionTryFallbacks",
@@ -12238,7 +12173,6 @@
       "initial": "anchors-visible",
       "values": ["always", "anchors-valid", "anchors-visible", "no-overflow"],
       "codegen-properties": {
-        "settings-flag": "cssAnchorPositioningEnabled",
         "render-style-initial-custom": true,
         "render-style-storage-path": ["_nonInheritedData", "rareData"],
         "render-style-storage-kind": "raw",
@@ -12795,7 +12729,6 @@
     "@function": {
       "result": {
         "codegen-properties": {
-          "settings-flag": "cssFunctionAtRuleEnabled",
           "parser-grammar": "<declaration-value>?"
         },
         "specification": {
@@ -12808,7 +12741,6 @@
       "navigation": {
         "values": ["none", "auto"],
         "codegen-properties": {
-          "settings-flag": "crossDocumentViewTransitionsEnabled",
           "parser-grammar": "<<values>>",
           "parser-exported": true
         },
@@ -12820,7 +12752,6 @@
       "types": {
         "values": ["none"],
         "codegen-properties": {
-          "settings-flag": "crossDocumentViewTransitionsEnabled",
           "parser-function": "ConsumeViewTransitionTypes",
           "parser-grammar": "none | <custom-ident excluding=none>+",
           "parser-grammar-unused": true,
@@ -13440,7 +13371,7 @@
       }
     },
     "<single-background-clip>": {
-      "grammar": "<box> | border-area@(settings-flag=cssBackgroundClipBorderAreaEnabled) | text | -webkit-text",
+      "grammar": "<box> | border-area | text | -webkit-text",
       "exported": true,
       "specification": {
         "module": "css-backgrounds",
@@ -14022,7 +13953,7 @@
       }
     },
     "<symbol>": {
-      "grammar": "<string> | <image allowed-types=url,generated>@(settings-flag=counterStyleAtRuleImageSymbolsEnabled) | <custom-ident>",
+      "grammar": "<string> | <image allowed-types=url,generated> | <custom-ident>",
       "grammar-comment": "There are inherent difficulties in supporting <image> symbols in @counter-styles, so gate them behind a flag for now - https://bugs.webkit.org/show_bug.cgi?id=167645.",
       "exported": true,
       "specification": {

@@ -13,6 +13,6 @@ namespace krys::boo::css
     // MARK: <'scroll-snap-type'> consuming
     // https://drafts.csswg.org/css-scroll-snap-1/#scroll-snap-type
     KRYS_NODISCARD RefPtr<Value> ConsumeScrollSnapType(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept;
+                                                       PropertyParserState &state) noexcept;
   }
 }

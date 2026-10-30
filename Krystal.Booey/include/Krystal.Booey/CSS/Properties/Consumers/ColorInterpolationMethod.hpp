@@ -1,20 +1,22 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Values/Value.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
+
+namespace krys
+{
+  struct ColourInterpolationMethod;
+}
 
 namespace krys::boo::css
 {
   class TokenRange;
-  class CSSRatio;
   struct PropertyParserState;
-  struct ColorInterpolationMethod;
 
   namespace PropertyParserHelpers
   {
     // MARK: <color-interpolation-method> consuming (raw)
-    KRYS_NODISCARD Maybe<ColorInterpolationMethod>
+    KRYS_NODISCARD Maybe<ColourInterpolationMethod>
       ConsumeColorInterpolationMethod(TokenRange &tokens, PropertyParserState &state) noexcept;
   }
 }

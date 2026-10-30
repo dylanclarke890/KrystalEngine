@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Text.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -8,7 +9,6 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -103,7 +103,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*text).HasException());
   }
 
-  // TODO(test): check that mutation records are queued for the text nodes whose data is changed by SplitText.
+  // FIXME: Check that mutation records are queued for the text nodes whose data is changed by SplitText.
 
   TEST_CASE("Text::WholeText", "[HTML][Text]")
   {

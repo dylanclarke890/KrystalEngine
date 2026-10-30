@@ -217,7 +217,7 @@ namespace krys::boo::css::PropertyParserHelpers
         }
       }
 
-      assert(false);
+      krys_debug_assert(false);
       return false;
     }
 
@@ -243,7 +243,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     // Check if a keyword type refers to the X or block axis.
-    KRYS_NODISCARD bool IsTypeBlockOrXAxis(KeywordType type)
+    KRYS_NODISCARD bool IsTypeBlockOrXAxis(KeywordType type) noexcept
     {
       switch (type)
       {
@@ -306,7 +306,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
         default:
         {
-          assert(false);
+          krys_debug_assert(false);
           return dim;
         }
       }

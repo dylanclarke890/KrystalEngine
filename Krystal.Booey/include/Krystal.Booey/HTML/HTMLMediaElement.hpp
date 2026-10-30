@@ -13,9 +13,19 @@ namespace krys::boo::html
     HTMLMediaElement(dom::Document &document, HTMLElementInterface interface) noexcept;
 
   public:
+    KRYS_NODISCARD bool CanStartSelection() const noexcept override
+    {
+      return false;
+    }
+
     HTMLMediaElement(dom::Document &document) noexcept;
 
-    // TODO(HTMLMediaElement, HTML): Implement the media element API.
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      return true;
+    }
+
+    // FIXME: Implement the media element API.
   };
 }
 

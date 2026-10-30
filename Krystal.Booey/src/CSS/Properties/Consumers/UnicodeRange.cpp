@@ -4,19 +4,16 @@
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/UnicodeRangeValue.hpp"
 #include "Krystal.Core/Text/Encodings/Decode.hpp"
-#include "Krystal.Core/Text/Encodings/Encode.hpp"
 #include "Krystal.Core/Text/Encodings/UTF.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   namespace
   {
-    KRYS_NODISCARD bool ConsumeOptionalDelimiter(TokenRange &tokens, char32 delim) noexcept
+    KRYS_NODISCARD bool ConsumeOptionalDelimiter(TokenRange &tokens, char32 value) noexcept
     {
-      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<const char32>(&delim, 1));
-      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      if (!(tokens.Peek().Type() == TokenType::Delim
-            && tokens.Peek().IdentCodePoints() == encodeResult.Output))
+      if (!(tokens.Peek().Type() == TokenType::Delim && tokens.Peek().Delimiter() == value))
       {
         return false;
       }
@@ -35,7 +32,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return tokens.Consume().IdentCodePoints();
     }
 
-    KRYS_NODISCARD bool ConsumeAndAppendOptionalNumber(CSSOMString &str, TokenRange &tokens,
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalNumber(StringBuilder &str, TokenRange &tokens,
                                                        TokenType type = TokenType::Number) noexcept
     {
       if (tokens.Peek().Type() != type)
@@ -43,31 +40,23 @@ namespace krys::boo::css::PropertyParserHelpers
         return false;
       }
 
-      auto originalText = tokens.Consume().IdentCodePoints();
-      if (originalText.empty())
-      {
-        return false;
-      }
-
-      str.append_range(originalText);
+      str.Append(tokens.Consume().OriginalText());
       return true;
     }
 
-    KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(CSSOMString &str, TokenRange &tokens,
-                                                          char32 value) noexcept
+    KRYS_NODISCARD bool ConsumeAndAppendOptionalDelimiter(StringBuilder &str, TokenRange &tokens,
+                                                          char8_t value) noexcept
     {
       if (!ConsumeOptionalDelimiter(tokens, value))
       {
         return false;
       }
 
-      auto encodeResult = krys::text::Encode<krys::text::UTF8>(Span<const char32>(&value, 1));
-      krys_debug_assert(encodeResult.Error == krys::text::EncodeError::None);
-      str.append_range(encodeResult.Output);
+      str.Append(value);
       return true;
     }
 
-    static void ConsumeAndAppendOptionalQuestionMarks(CSSOMString &str, TokenRange &tokens) noexcept
+    void ConsumeAndAppendOptionalQuestionMarks(StringBuilder &str, TokenRange &tokens) noexcept
     {
       while (ConsumeAndAppendOptionalDelimiter(str, tokens, '?'))
       {
@@ -81,7 +70,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      CSSOMString builder;
+      StringBuilder builder;
       if (ConsumeAndAppendOptionalNumber(builder, tokens, TokenType::Dimension))
       {
         ConsumeAndAppendOptionalQuestionMarks(builder, tokens);
@@ -96,10 +85,10 @@ namespace krys::boo::css::PropertyParserHelpers
       }
       else if (ConsumeOptionalDelimiter(tokens, '+'))
       {
-        builder.push_back(u8'+');
+        builder.Append(u8'+');
         if (auto identifier = ConsumeIdentifier(tokens); !identifier.empty())
         {
-          builder.append(identifier);
+          builder.Append(identifier);
         }
         else if (!ConsumeAndAppendOptionalDelimiter(builder, tokens, '?'))
         {
@@ -113,7 +102,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      return builder;
+      return krys::move(builder).ToString();
     }
 
     struct UnicodeRange
@@ -169,6 +158,7 @@ namespace krys::boo::css::PropertyParserHelpers
       start <<= 4;
       end <<= 4;
       end |= 0xF;
+      buffer = buffer.substr(1uz);
     }
 
     if (!hexDigitCount)
@@ -217,7 +207,6 @@ namespace krys::boo::css::PropertyParserHelpers
     auto rangeCopy = tokens;
 
     auto unicodeRange = ConsumeUnicodeRangeTokenUnresolved(rangeCopy);
-    rangeCopy.Discard();
     rangeCopy.DiscardWhitespace();
 
     if (!unicodeRange || unicodeRange->end > krys::text::MaxUnicodeChar

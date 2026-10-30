@@ -1,0 +1,68 @@
+﻿<!doctype html>
+<!-- The "mathml" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "STIX Two Math"; src: url("../../../third-party/stix-two-fonts/STIXTwoMath-Regular.otf"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; font: 14px "Liberation Sans"; color: #073b4c; }
+  math { font-family: "STIX Two Math"; font-size: 18px; }
+  .cell { position: absolute; width: 168px; height: 104px; }
+</style>
+</head>
+<body>
+  <!-- A fraction over a radical, with scripts and an operator stretched by nothing. -->
+  <div class="cell" style="left: 8px; top: 8px">
+    <math display="block">
+      <mi>x</mi><mo>=</mo>
+      <mfrac>
+        <mrow><mo>&#x2212;</mo><mi>b</mi><mo>&#x00B1;</mo>
+          <msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>a</mi><mi>c</mi></msqrt></mrow>
+        <mrow><mn>2</mn><mi>a</mi></mrow>
+      </mfrac>
+    </math>
+  </div>
+
+  <!-- Large operators with limits under and over them, in display style. -->
+  <div class="cell" style="left: 184px; top: 8px">
+    <math display="block">
+      <munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover>
+      <msup><mi>k</mi><mn>2</mn></msup>
+      <mo>+</mo>
+      <msubsup><mo>&#x222B;</mo><mn>0</mn><mn>1</mn></msubsup>
+      <msup><mi>e</mi><mi>x</mi></msup><mi>d</mi><mi>x</mi>
+    </math>
+  </div>
+
+  <!-- A matrix in brackets stretched to its height, and a brace stretched over a sum. -->
+  <div class="cell" style="left: 8px; top: 128px">
+    <math display="block">
+      <mrow>
+        <mo>(</mo>
+        <mtable>
+          <mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mi>a</mi></mtd></mtr>
+          <mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mi>b</mi></mtd></mtr>
+          <mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>
+        </mtable>
+        <mo>)</mo>
+      </mrow>
+      <mo>=</mo>
+      <mover><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow><mo>&#x23DE;</mo></mover>
+    </math>
+  </div>
+
+  <!-- Nested radicals, multiscripts and an accent; then math inline in text. -->
+  <div class="cell" style="left: 184px; top: 128px">
+    <math display="block">
+      <mroot><mrow><mn>1</mn><mo>+</mo><msqrt><mn>1</mn><mo>+</mo><mi>x</mi></msqrt></mrow><mn>3</mn></mroot>
+      <mo>,</mo>
+      <mmultiscripts><mi>C</mi><mi>k</mi><none></none><mprescripts></mprescripts><mi>n</mi><none></none></mmultiscripts>
+      <mo>,</mo>
+      <mover accent="true"><mi>v</mi><mo>&#x2192;</mo></mover>
+    </math>
+    <p style="margin: 0">Inline, <math><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>x</mi><mn>2</mn></msup></math> sits in the line.</p>
+  </div>
+</body>
+</html>

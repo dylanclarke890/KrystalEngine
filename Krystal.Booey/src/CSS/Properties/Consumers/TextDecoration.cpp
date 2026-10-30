@@ -7,7 +7,7 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumer.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadow.hpp"
+#include "Krystal.Booey/CSS/Values/TextDecoration/TextShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/TextShadowPropertyValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
@@ -88,7 +88,7 @@ namespace krys::boo::css::PropertyParserHelpers
     tokens = rangeCopy;
 
     return TextShadow {
-      .color = krys::move(color), .location = {krys::move(*x), krys::move(*y)}, .blur = krys::move(blur)};
+      .Color = krys::move(color), .Location = {krys::move(*x), krys::move(*y)}, .Blur = krys::move(blur)};
   }
 
   KRYS_NODISCARD static Maybe<TextShadowProperty::List>
@@ -106,7 +106,7 @@ namespace krys::boo::css::PropertyParserHelpers
         return {};
       }
 
-      list.value.push_back(krys::move(*shadow));
+      list.Value.push_back(krys::move(*shadow));
     } while (ConsumeComma(rangeCopy));
 
     tokens = rangeCopy;
@@ -133,11 +133,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return {};
   }
 
-  // NOTE: we're explicitly qualifying the function name here just to satisfy intellisense, which is having
-  // trouble resolving the function name in this context for some reason.
-  KRYS_NODISCARD RefPtr<Value>
-    krys::boo::css::PropertyParserHelpers::ConsumeTextShadow(TokenRange &tokens,
-                                                             PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeTextShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'text-shadow'> = none | [ <color>? && <length>{2,3} ]#
     // https://drafts.csswg.org/css-text-decor-3/#propdef-text-shadow

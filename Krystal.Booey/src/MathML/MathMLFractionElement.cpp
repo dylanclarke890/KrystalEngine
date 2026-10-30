@@ -1,0 +1,35 @@
+﻿#include "Krystal.Booey/MathML/MathMLFractionElement.hpp"
+#include "Krystal.Booey/MathML/MathMLNames.hpp"
+#include "Krystal.Booey/Rendering/MathML/RenderMathMLFraction.hpp"
+#include "Krystal.Booey/Rendering/RenderElement.hpp"
+#include "Krystal.Booey/Rendering/RenderPtr.hpp"
+
+namespace krys::boo::mathml
+{
+  const MathMLElement::Length &MathMLFractionElement::LineThickness() noexcept
+  {
+    return CachedMathMLLength(MathMLNames::LinethicknessAttr(), _lineThickness);
+  }
+
+  void MathMLFractionElement::AttributeChanged(const dom::QualifiedName &name,
+                                               Maybe<dom::DOMStringView> oldValue,
+                                               Maybe<dom::DOMStringView> value) noexcept
+  {
+    if (name == MathMLNames::LinethicknessAttr())
+    {
+      _lineThickness.reset();
+      if (auto *renderer = Renderer())
+      {
+        renderer->SetNeedsLayoutAndPreferredWidthsUpdate();
+      }
+    }
+
+    MathMLRowElement::AttributeChanged(name, oldValue, value);
+  }
+
+  RenderPtr<RenderElement> MathMLFractionElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    krys_debug_assert(HasTagName(html::TagName::mfrac));
+    return CreateRenderer<RenderMathMLFraction>(*this, krys::move(style));
+  }
+}

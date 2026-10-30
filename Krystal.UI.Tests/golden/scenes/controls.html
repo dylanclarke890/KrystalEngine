@@ -1,0 +1,44 @@
+﻿<!doctype html>
+<!-- The "controls" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, after setting the
+     indeterminate checkbox as the script below does for Chrome. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px "Liberation Sans"; color: #222222; }
+  div { height: 28px; margin-bottom: 8px; }
+  input, button, textarea { font: inherit; vertical-align: middle; margin: 0 8px 0 0; }
+  .dark { color-scheme: dark; background: #1e1e1e; padding: 4px; }
+</style>
+</head>
+<body>
+  <!-- Checkboxes and radios: off, on, indeterminate and disabled, in the accent colour or the page's. -->
+  <div>
+    <input type="checkbox"><input type="checkbox" checked><input type="checkbox" id="mixed">
+    <input type="checkbox" checked disabled><input type="checkbox" checked style="accent-color: #ef476f">
+    <input type="radio" name="r"><input type="radio" name="r" checked><input type="radio" disabled>
+  </div>
+  <!-- Buttons: a button element, the button input types and a disabled one. -->
+  <div>
+    <button>Button</button><input type="submit"><input type="reset"><button disabled>Disabled</button>
+  </div>
+  <!-- Fields drawn by the theme: a text field, a search field and a number field with its spin button. -->
+  <div>
+    <input value="Text" size="8"><input type="search" value="Search" size="8"><input type="number" value="3" style="width: 60px">
+  </div>
+  <!-- A text area. -->
+  <div style="height: 48px">
+    <textarea rows="2" cols="16">Two lines
+of text</textarea>
+  </div>
+  <!-- The dark appearance. -->
+  <div class="dark">
+    <input type="checkbox"><input type="checkbox" checked><input type="radio" checked><button>Dark</button><input value="Field" size="6">
+  </div>
+
+  <!-- Chrome's capture makes the third checkbox indeterminate as the test does. -->
+  <script>document.getElementById("mixed").indeterminate = true;</script>
+</body>
+</html>

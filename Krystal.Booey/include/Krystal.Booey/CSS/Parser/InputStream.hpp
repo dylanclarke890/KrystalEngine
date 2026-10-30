@@ -14,7 +14,7 @@ namespace krys::boo::css
   class InputStream
   {
   private:
-    // TODO(perf): a lot of text is just plain ASCII, we should optimize for that case.
+    // FIXME: A lot of text is just plain ASCII, we should optimize for that case.
     utf32_string _data;
     size_t _readPosition {0uz};
     SourceLocation _currentLocation;
@@ -22,7 +22,7 @@ namespace krys::boo::css
   public:
     InputStream(CSSOMString &&input) noexcept : _data(FilterCodePoints(krys::move(input)))
     {
-      krys_debug_assert(!_data.empty() && _data.back() != EOFMarker);
+      krys_debug_assert(_data.empty() || _data.back() != EOFMarker);
     }
 
     /// @brief Gets the size of the input stream. This is the number of characters in the input stream, not
@@ -75,7 +75,6 @@ namespace krys::boo::css
     {
       for (size_t i = 0uz; i < n; ++i)
       {
-        auto ch = Peek(i);
         if (Peek(i) == U'\n')
         {
           _currentLocation.Line++;
@@ -91,10 +90,17 @@ namespace krys::boo::css
     }
 
     /// @brief Reconsume the last input character. This is used when the parser needs to "unread" a character.
-    void Reconsume(char32 ch) noexcept
+    void Reconsume(KRYS_MAYBE_UNUSED char32 ch) noexcept
     {
       _readPosition--;
       krys_debug_assert(NextInputCharacter() == ch);
+    }
+
+    /// @brief The (filtered) input between the read positions @p start and @p end.
+    KRYS_NODISCARD utf32_stringview Slice(size_t start, size_t end) const noexcept
+    {
+      krys_debug_assert(start <= end && end <= _data.size());
+      return utf32_stringview(_data).substr(start, end - start);
     }
 
     KRYS_NODISCARD size_t ReadPosition() const noexcept
@@ -154,6 +160,12 @@ namespace krys::boo::css
         // finally, we can just append the text character to the output
         output.push_back(ch);
         continue;
+      }
+
+      // An empty input stream is valid; it only produces an EOF token.
+      if (output.empty())
+      {
+        return {};
       }
 
       auto decodeResult = krys::text::Decode<krys::text::UTF8>(utf8_stringview(output));

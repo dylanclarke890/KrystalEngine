@@ -64,7 +64,7 @@ namespace krys::boo::html
     }
 
     /// @see https://encoding.spec.whatwg.org/#utf-8-decode
-    KRYS_NODISCARD static utf32_string TextFromUTF8(krys::Text::CodecRegistry &registry,
+    KRYS_NODISCARD static utf32_string TextFromUTF8(krys::text::CodecRegistry &registry,
                                                     Span<const byte> data)
     {
       constexpr Array<byte, 3> byteOrderMarkUTF8 = {byte {0xEF}, byte {0xBB}, byte {0xBF}};

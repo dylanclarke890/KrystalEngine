@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Concepts.hpp"
+#include <type_traits>
 
 namespace krys::boo::css
 {
@@ -35,7 +36,7 @@ namespace krys::boo::css
   template <typename T>
   concept TupleLike = TreatAsTupleLike<T>;
 
-  // Types can specialize this and set the value to true to be treated as "tokens-like"
+  // Types can specialize this and set the value to true to be treated as "range-like"
   // for CSS value type algorithms.
   // Requirements: Types must have valid begin()/end() functions.
   template <typename>
@@ -45,6 +46,7 @@ namespace krys::boo::css
   template <typename T>
   concept RangeLike = TreatAsRangeLike<T>;
 
+  // Types can specialize this and set the value to true to be treated as "variant-like"
   // for CSS value type algorithms.
   // Requirements: Types must be able to be passed to krys::SwitchOn().
   template <typename>
@@ -53,4 +55,47 @@ namespace krys::boo::css
   // The `VariantLike` concept can be used to filter to types that specialize `TreatAsVariantLike`.
   template <typename T>
   concept VariantLike = TreatAsVariantLike<T>;
+
+  // Types can specialize this and set the value to true to be treated as "enum with
+  // value representation" for CSS value type algorithms.
+  // Requirements: Types must be an enum and specialize ValueRepresentation.
+  // FIXME: This exists as a transitionary mechanism while not all enums specialize ValueRepresentation. Once
+  // they all do, this can be removed and IsEnum<> can be used instead. All enums that still need to be
+  // converted can be found listed in Style/Values/Primitives/KeywordValueRepresentationNeeded.hpp.
+  template <typename>
+  constexpr bool EnumHasValueRepresentation = true;
+
+  // The `EnumWithValueRepresentation` concept can be used to filter to enums that specialize
+  // `EnumHasValueRepresentation`.
+  template <typename T>
+  concept EnumWithValueRepresentation = IsEnum<T> && EnumHasValueRepresentation<T>;
+
+  // The `EnumWithoutValueRepresentation` concept can be used to filter to enums that do NOT specialize
+  // `EnumHasValueRepresentation`.
+  template <typename T>
+  concept EnumWithoutValueRepresentation = IsEnum<T> && !EnumHasValueRepresentation<T>;
+
+  // The `HasIsZero` concept can be used to filter to types that have an `IsZero` member function.
+  template <typename T>
+  concept HasIsZero = requires(T t) {
+    { t.IsZero() } -> ConvertibleTo<bool>;
+  };
+
+  // The `HasIsKnownZero` concept can be used to filter to types that have an `IsKnownZero` member function.
+  template <typename T>
+  concept HasIsKnownZero = requires(T t) {
+    { t.IsKnownZero() } -> ConvertibleTo<bool>;
+  };
+
+  // The `HasIsEmpty` concept can be used to filter to types that have an `IsEmpty` member function.
+  template <typename T>
+  concept HasIsEmpty = requires(T t) {
+    { t.IsEmpty() } -> ConvertibleTo<bool>;
+  };
+
+  // The `HasIsKnownEmpty` concept can be used to filter to types that have an `IsKnownEmpty` member function.
+  template <typename T>
+  concept HasIsKnownEmpty = requires(T t) {
+    { t.IsKnownEmpty() } -> ConvertibleTo<bool>;
+  };
 }

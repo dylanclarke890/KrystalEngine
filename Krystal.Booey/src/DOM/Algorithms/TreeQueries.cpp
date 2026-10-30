@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include <ranges>
@@ -207,9 +208,10 @@ namespace krys::boo::dom
 
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(a)))
     {
+      // A's root is a shadow root and A's root's host is a shadow-including inclusive descendant of B.
       if (auto *host = shadowRoot->Host())
       {
-        return IsShadowIncludingDescendant(*host, b);
+        return IsShadowIncludingInclusiveDescendant(*host, b);
       }
     }
 
@@ -250,7 +252,7 @@ namespace krys::boo::dom
       return false;
     }
 
-    if (aShadowRoot->Mode() == ShadowRootMode::Closed)
+    if (aShadowRoot->Mode() != ShadowRootMode::Open)
     {
       return true;
     }
@@ -276,6 +278,35 @@ namespace krys::boo::dom
   bool TreeQueries::IsShadowHost(const Element &node) noexcept
   {
     return node._shadowRoot != nullptr;
+  }
+
+  ShadowRoot *TreeQueries::GetShadowRoot(const Element &element) noexcept
+  {
+    return element._shadowRoot.get();
+  }
+
+  ShadowRoot *TreeQueries::ContainingShadowRoot(const Node &node) noexcept
+  {
+    return DynamicDowncast<ShadowRoot>(const_cast<Node &>(Root(node)));
+  }
+
+  Element *TreeQueries::ShadowHost(const Node &node) noexcept
+  {
+    auto *shadowRoot = ContainingShadowRoot(node);
+    return shadowRoot ? shadowRoot->Host() : nullptr;
+  }
+
+  Element *TreeQueries::ParentOrShadowHostElement(const Node &node) noexcept
+  {
+    if (auto *parent = node.ParentElement())
+    {
+      return parent;
+    }
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(node.ParentNode()))
+    {
+      return shadowRoot->Host();
+    }
+    return nullptr;
   }
 
 #pragma endregion
@@ -360,56 +391,26 @@ namespace krys::boo::dom
 
   Node *TreeQueries::NextShadowIncluding(const Node &current) noexcept
   {
-    if (auto *child = current.FirstChild())
-    {
-      return child;
-    }
-
-    if (auto *host = DynamicDowncast<Element>(current))
-    {
-      if (auto *shadowRoot = host->ShadowRoot().get())
-      {
-        return shadowRoot;
-      }
-    }
-
-    for (const Node *node = &current; node; node = node->ParentNode())
-    {
-      if (auto *sibling = node->NextSibling())
-      {
-        return sibling;
-      }
-
-      // If climbing out of a shadow tree, continue from the host.
-      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
-      {
-        node = shadowRoot->Host();
-        if (auto *sibling = node->NextSibling())
-        {
-          return sibling;
-        }
-      }
-    }
-
-    return nullptr;
+    return NextShadowIncluding(current, nullptr);
   }
 
   Node *TreeQueries::NextShadowIncluding(const Node &current, const Node *stayWithin) noexcept
   {
-    if (auto *child = current.FirstChild())
-    {
-      return child;
-    }
-
+    // A shadow host's shadow tree comes just after it, before its children.
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->ShadowRoot().get())
+      if (auto *shadowRoot = GetShadowRoot(*host))
       {
         return shadowRoot;
       }
     }
 
-    for (const Node *node = &current; node; node = node->ParentNode())
+    if (auto *child = current.FirstChild())
+    {
+      return child;
+    }
+
+    for (const Node *node = &current; node;)
     {
       if (node == stayWithin)
       {
@@ -421,22 +422,21 @@ namespace krys::boo::dom
         return sibling;
       }
 
-      // If climbing out of a shadow tree, continue from the host.
+      // Climbing out of a shadow tree continues with the host's children, then what follows the host.
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
       {
-        node = shadowRoot->Host();
-
-        if (node == stayWithin)
+        auto *host = shadowRoot->Host();
+        if (auto *child = host->FirstChild())
         {
-          return nullptr;
+          return child;
         }
-
-        if (auto *sibling = node->NextSibling())
-        {
-          return sibling;
-        }
+        node = host;
+        continue;
       }
+
+      node = node->ParentNode();
     }
+
     return nullptr;
   }
 
@@ -546,8 +546,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  Node *TreeQueries::PreviousSkippingChildren(const Node &current,
-                                                     const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousSkippingChildren(const Node &current, const Node *stayWithin) noexcept
   {
     if (&current == stayWithin)
     {
@@ -572,6 +571,202 @@ namespace krys::boo::dom
       }
     }
 
+    return nullptr;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Element *ParentOrHostOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? pseudoElement->HostElement() : node.ParentElement();
+    }
+
+    KRYS_NODISCARD bool IsPseudoElementOfType(const Node &node, PseudoElementType type) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement && pseudoElement->GetPseudoElementType() == type;
+    }
+
+    KRYS_NODISCARD const Node *ParentOrHostNodeOfPseudo(const Node &node) noexcept
+    {
+      auto *pseudoElement = DynamicDowncast<PseudoElement>(node);
+      return pseudoElement ? static_cast<const Node *>(pseudoElement->HostElement()) : node.ParentNode();
+    }
+  }
+
+  Node *TreeQueries::PseudoAwarePreviousSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.PreviousSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::After) && parentOrHost->LastChild())
+      {
+        return parentOrHost->LastChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::Before))
+      {
+        return parentOrHost->BeforePseudoElement();
+      }
+    }
+    return node.PreviousSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareNextSibling(const Node &node) noexcept
+  {
+    auto *parentOrHost = ParentOrHostOfPseudo(node);
+    if (parentOrHost && !node.NextSibling())
+    {
+      if (IsPseudoElementOfType(node, PseudoElementType::Before) && parentOrHost->FirstChild())
+      {
+        return parentOrHost->FirstChild();
+      }
+      if (!IsPseudoElementOfType(node, PseudoElementType::After))
+      {
+        return parentOrHost->AfterPseudoElement();
+      }
+    }
+    return node.NextSibling();
+  }
+
+  Node *TreeQueries::PseudoAwareFirstChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *first = currentElement->BeforePseudoElement();
+      if (first)
+      {
+        return first;
+      }
+      first = currentElement->FirstChild();
+      if (!first)
+      {
+        first = currentElement->AfterPseudoElement();
+      }
+      return first;
+    }
+    return node.FirstChild();
+  }
+
+  Node *TreeQueries::PseudoAwareLastChild(const Node &node) noexcept
+  {
+    if (auto *currentElement = DynamicDowncast<Element>(node))
+    {
+      Node *last = currentElement->AfterPseudoElement();
+      if (last)
+      {
+        return last;
+      }
+      last = currentElement->LastChild();
+      if (!last)
+      {
+        last = currentElement->BeforePseudoElement();
+      }
+      return last;
+    }
+    return node.LastChild();
+  }
+
+  Node *TreeQueries::PreviousIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *previous = PseudoAwarePreviousSibling(current))
+    {
+      while (auto *lastChild = PseudoAwareLastChild(*previous))
+      {
+        previous = lastChild;
+      }
+      return previous;
+    }
+    return const_cast<Node *>(ParentOrHostNodeOfPseudo(current));
+  }
+
+  Node *TreeQueries::NextIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (auto *next = PseudoAwareFirstChild(current))
+    {
+      return next;
+    }
+    return NextIncludingPseudoSkippingChildren(current, stayWithin);
+  }
+
+  Node *TreeQueries::NextIncludingPseudoSkippingChildren(const Node &current, const Node *stayWithin) noexcept
+  {
+    if (&current == stayWithin)
+    {
+      return nullptr;
+    }
+    if (auto *next = PseudoAwareNextSibling(current))
+    {
+      return next;
+    }
+    for (auto *ancestor = ParentOrHostNodeOfPseudo(current); ancestor; ancestor = ancestor->ParentNode())
+    {
+      if (ancestor == stayWithin)
+      {
+        return nullptr;
+      }
+      if (auto *next = PseudoAwareNextSibling(*ancestor))
+      {
+        return next;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PreviousElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = PreviousIncludingPseudo(current, stayWithin); node;
+         node = PreviousIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudo(const Node &current, const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudo(current, stayWithin); node;
+         node = NextIncludingPseudo(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::NextElementIncludingPseudoSkippingChildren(const Node &current,
+                                                                   const Node *stayWithin) noexcept
+  {
+    for (auto *node = NextIncludingPseudoSkippingChildren(current, stayWithin); node;
+         node = NextIncludingPseudoSkippingChildren(*node, stayWithin))
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  Element *TreeQueries::PseudoAwarePreviousElementSibling(const Node &node) noexcept
+  {
+    for (auto *sibling = PseudoAwarePreviousSibling(node); sibling;
+         sibling = PseudoAwarePreviousSibling(*sibling))
+    {
+      if (auto *element = DynamicDowncast<Element>(*sibling))
+      {
+        return element;
+      }
+    }
     return nullptr;
   }
 
@@ -657,7 +852,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
+  const html::HTMLElement *TreeQueries::NextHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstNextSiblingRange(current);
     auto it = FirstOfType<html::HTMLElement>(siblings);
@@ -671,7 +866,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
+  const html::HTMLElement *TreeQueries::PreviousHTMLElementSibling(const Node &current) noexcept
   {
     auto siblings = ConstPreviousSiblingRange(current);
     auto it = FirstOfType<html::HTMLElement>(siblings);
@@ -685,7 +880,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(siblings) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
+  const html::HTMLElement *TreeQueries::FirstHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
     auto it = FirstOfType<html::HTMLElement>(children);
@@ -699,7 +894,7 @@ namespace krys::boo::dom
     return it == std::ranges::end(children) ? nullptr : Downcast<html::HTMLElement>(&*it);
   }
 
-  const html::HTMLElement * TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
+  const html::HTMLElement *TreeQueries::LastHTMLElementChild(const ContainerNode &node) noexcept
   {
     auto children = ConstChildNodeRange(node);
     auto it = LastOfType<html::HTMLElement>(children);
@@ -799,8 +994,7 @@ namespace krys::boo::dom
     return PreviousAncestorSiblingPostOrder(current);
   }
 
-  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current,
-                                                              const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousSkippingChildrenPostOrder(const Node &current, const Node *stayWithin) noexcept
   {
     if (&current == stayWithin)
     {
@@ -830,8 +1024,7 @@ namespace krys::boo::dom
     return nullptr;
   }
 
-  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current,
-                                                             const Node *stayWithin) noexcept
+  Node *TreeQueries::PreviousAncestorSiblingPostOrder(const Node &current, const Node *stayWithin) noexcept
   {
     assert(!current.PreviousSibling());
 

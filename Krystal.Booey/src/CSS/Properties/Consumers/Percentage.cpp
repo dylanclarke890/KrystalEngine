@@ -1,15 +1,15 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/NumberDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   RefPtr<PrimitiveValue> ConsumePercentageDividedBy100OrNumber(TokenRange &tokens,
-                                                                  PropertyParserState &state) noexcept
+                                                               PropertyParserState &state) noexcept
   {
     using NumberConsumer = ConsumerDefinition<Number<>>;
     using PercentageConsumer = ConsumerDefinition<Percentage<>>;

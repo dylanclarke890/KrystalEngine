@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/SelectorQuery.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 
@@ -135,14 +136,22 @@ namespace krys::boo::dom::mixins
   ExceptionOr<RefPtr<Element>> ParentNode::QuerySelector(ContainerNode &parent,
                                                          DOMStringView selectors) noexcept
   {
-    // TODO(impl): CSS-SELECTORS
-    return Exception {ExceptionCode::NotSupportedError};
+    auto query = parent.NodeDocument().SelectorQueryForString(selectors);
+    if (query.HasException())
+    {
+      return query.ReleaseException();
+    }
+    return ShareRefPtr(query.Value().QueryFirst(parent));
   }
 
   ExceptionOr<Ref<NodeList>> ParentNode::QuerySelectorAll(ContainerNode &parent,
                                                           DOMStringView selectors) noexcept
   {
-    // TODO(impl): CSS-SELECTORS
-    return Exception {ExceptionCode::NotSupportedError};
+    auto query = parent.NodeDocument().SelectorQueryForString(selectors);
+    if (query.HasException())
+    {
+      return query.ReleaseException();
+    }
+    return query.Value().QueryAll(parent);
   }
 }

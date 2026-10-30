@@ -1,6 +1,11 @@
 ﻿#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Mixins/Slottable.hpp"
+#include "Krystal.Booey/Rendering/RenderText.hpp"
+#include "Krystal.Booey/Rendering/SVG/RenderSVGInlineText.hpp"
+#include "Krystal.Booey/SVG/SVGElement.hpp"
+#include "Krystal.Booey/SVG/SVGForeignObjectElement.hpp"
 
 namespace krys::boo::dom
 {
@@ -52,4 +57,47 @@ namespace krys::boo::dom
   }
 
 #pragma endregion
+
+  RenderText *Text::Renderer() const noexcept
+  {
+    return Downcast<RenderText>(Node::Renderer());
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD bool IsSVGText(const Text &text) noexcept
+    {
+      krys_debug_assert(text.ParentNode());
+      auto *parentElement = DynamicDowncast<svg::SVGElement>(*text.ParentNode());
+      return parentElement && !Is<svg::SVGForeignObjectElement>(*parentElement);
+    }
+  }
+
+  RenderPtr<RenderText> Text::CreateTextRenderer(const RenderStyle &) noexcept
+  {
+    if (IsSVGText(*this))
+    {
+      return CreateRenderer<RenderSVGInlineText>(*this, Data());
+    }
+
+    // FIXME: text-combine-upright (RenderCombineText), once there's that renderer.
+    return CreateRenderer<RenderText>(RenderObject::Type::Text, *this, Data());
+  }
+
+  void Text::UpdateRendererAfterContentChange(size_t offsetOfReplacedData,
+                                              size_t lengthOfReplacedData) noexcept
+  {
+    if (!IsConnected())
+    {
+      return;
+    }
+
+    if (HasInvalidRenderer())
+    {
+      return;
+    }
+
+    NodeDocument().UpdateTextRenderer(*this, static_cast<uint32>(offsetOfReplacedData),
+                                      static_cast<uint32>(lengthOfReplacedData));
+  }
 }

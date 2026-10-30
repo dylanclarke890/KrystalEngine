@@ -6,6 +6,9 @@ set_target_properties(llvm
   CXX_STANDARD_REQUIRED ON
   CXX_EXTENSIONS OFF
   COMPILE_WARNING_AS_ERROR ON
+  # Consumers include its headers as system headers: their warnings (unused parameters once asserts compile
+  # out) aren't the consumers' to fix.
+  SYSTEM ON
 )
 
 target_compile_features(llvm

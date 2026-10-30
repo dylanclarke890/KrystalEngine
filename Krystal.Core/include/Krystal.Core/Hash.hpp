@@ -4,6 +4,7 @@
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
+#include "Krystal.Core/Utils/GetPtrHelper.hpp"
 #include "Krystal.Core/Utils/Tags.hpp"
 #include <bit>
 #include <xhash>
@@ -144,50 +145,6 @@ namespace krys
       return std::bit_cast<Bits>(a) == std::bit_cast<Bits>(b);
     }
   };
-
-  template <typename T, bool IsSmartPtr>
-  struct GetPtrHelperBase;
-
-  template <typename T>
-  struct GetPtrHelperBase<T, false /* IsSmartPtr */>
-  {
-    using PtrType = T *;
-    using UnderlyingType = T;
-
-    KRYS_NODISCARD constexpr static PtrType get(T &value) noexcept
-    {
-      return std::addressof(value);
-    }
-  };
-
-  template <typename T>
-  struct GetPtrHelperBase<T, true /* IsSmartPtr */>
-  {
-    using PtrType = decltype(std::declval<T>().get());
-    using UnderlyingType = remove_ptr_t<PtrType>;
-
-    KRYS_NODISCARD constexpr static PtrType get(const T &value) noexcept
-    {
-      return value.get();
-    }
-  };
-
-  template <typename T>
-  struct GetPtrHelper : public GetPtrHelperBase<T, IsSmartPtr<T>>
-  {
-  };
-
-  template <typename T>
-  KRYS_NODISCARD constexpr typename GetPtrHelper<T>::PtrType GetPtr(T &p) noexcept
-  {
-    return GetPtrHelper<T>::get(p);
-  }
-
-  template <typename T>
-  KRYS_NODISCARD constexpr typename GetPtrHelper<T>::PtrType GetPtr(const T &p) noexcept
-  {
-    return GetPtrHelper<T>::get(p);
-  }
 
   template <typename T, bool IsSmartPointer>
   struct PtrHashBase;
@@ -767,17 +724,17 @@ namespace krys
     KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept
     {
       size_t seed = 0u;
-      Combine(seed, args...);
+      CombineInto(seed, args...);
       return seed;
     }
 
   private:
     template <typename Head, typename... Tail>
-    constexpr static void Combine(size_t &seed, const Head &head, Tail... tail) noexcept
+    constexpr static void CombineInto(size_t &seed, const Head &head, Tail... tail) noexcept
     {
       // this algorithm is based on boost::combine_hash and is designed to mix/smear around values
       seed ^= DefaultHash<Head>::Hash(head) + 0x9e'37'79'b9'7f'4a'7c'55 + (seed << 6) + (seed >> 2);
-      (Combine(seed, tail), ...);
+      (CombineInto(seed, tail), ...);
     }
   };
 }

@@ -12,7 +12,7 @@ namespace krys::boo::html
     return _items.front();
   }
 
-  HTMLStackItem * HTMLElementStack::OneBelowTop() noexcept
+  HTMLStackItem *HTMLElementStack::OneBelowTop() noexcept
   {
     if (_items.size() < 2uz)
     {
@@ -48,15 +48,17 @@ namespace krys::boo::html
   {
     assert(!_items.empty());
 
-    // TODO(HTMLTREEBUILDER, HTML): When the current node is removed from the stack of open elements,
+    // FIXME: When the current node is removed from the stack of open elements,
     // process internal resource links given the current node's node document.
 
-    auto &back = Bottom().Element();
+    Ref<dom::Element> back = ShareRef(Bottom().Element());
     _items.pop_back();
+
+    back->FinishParsingChildren();
 
     // When an option element is popped off the stack of open elements of an HTML parser or XML parser, the
     // user agent must run maybe clone an option into selectedcontent given the option element.
-    if (auto *option = DynamicDowncast<HTMLOptionElement>(back))
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(back.get()))
     {
       FormControlAlgorithms::MaybeCloneOptionIntoSelectedContent(*option);
     }

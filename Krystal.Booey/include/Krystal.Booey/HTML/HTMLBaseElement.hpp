@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLElement.hpp"
 
 namespace krys::boo::html
 {
@@ -16,10 +16,10 @@ namespace krys::boo::html
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Href() const noexcept;
+    KRYS_NODISCARD dom::USVString Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    dom::ExceptionOr<void> Href(dom::USVString &&value) noexcept;
+    void Href(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-target
     KRYS_NODISCARD dom::DOMString Target() const noexcept;
@@ -28,6 +28,17 @@ namespace krys::boo::html
     void Target(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void OnInsert() noexcept override;
+
+    void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
   };
 }
 

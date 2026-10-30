@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 
 namespace krys::boo::dom
 {
@@ -7,6 +8,16 @@ namespace krys::boo::dom
       : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlags::None), _name {qualifiedName},
         _value {krys::move(value)}
   {
+  }
+
+  const DOMString &Attr::Value() const noexcept
+  {
+    if (auto *element = _ownerElement.get())
+    {
+      element->SynchronizeAllAttributes();
+    }
+
+    return _value;
   }
 
   void Attr::SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept

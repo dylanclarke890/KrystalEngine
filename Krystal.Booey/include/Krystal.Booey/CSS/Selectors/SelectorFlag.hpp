@@ -23,6 +23,8 @@ namespace krys::boo::css
     /// @brief Set when a selector is implicit (it isn't written by a UA or author but is implied by the
     /// CSSOM, e.g. `:root`).
     IsImplicit = 1 << 6,
+    /// @brief Set when the selector is an `@page` selector.
+    IsForPage = 1 << 7,
   };
 }
 

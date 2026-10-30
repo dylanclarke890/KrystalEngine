@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<!-- The "images" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, its images loaded
+     from images/ by relative file URLs. -->
+<html data-width="360" data-height="320">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #e9ecf2; overflow: hidden; }
+  body { margin: 0; }
+  div, ul { position: absolute; box-sizing: border-box; margin: 0; }
+</style>
+</head>
+<body>
+  <!-- PNG tiles, a JPEG centred on a colour, and a JPEG covering its box. -->
+  <div style="left: 16px; top: 16px; width: 96px; height: 64px; background: url(images/checker.png)"></div>
+  <div style="left: 128px; top: 16px; width: 96px; height: 64px; background: #ffd166 url(images/photo.jpg) no-repeat center"></div>
+  <div style="left: 240px; top: 16px; width: 104px; height: 64px; background: url(images/photo.jpg) center / cover"></div>
+
+  <!-- A JPEG contained, translucent WebP tiles over a colour, and GIF tiles along a row. -->
+  <div style="left: 16px; top: 96px; width: 96px; height: 64px; background: #073b4c url(images/photo.jpg) no-repeat center / contain"></div>
+  <div style="left: 128px; top: 96px; width: 96px; height: 64px; background: url(images/disc.webp), #118ab2"></div>
+  <div style="left: 240px; top: 96px; width: 104px; height: 64px; background: #ffd166 url(images/diamond.gif) repeat-x 0 50%"></div>
+
+  <!-- A data URL scaled down, a JPEG turned by its EXIF orientation, and a missing image over its colour. -->
+  <div style="left: 16px; top: 176px; width: 96px; height: 64px; background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAMElEQVR4nGNkt/ZhwAZ+TJPCKs7EQCJgGtVABGDBFd4cWc+wijMRYyoyGNXAQAQAAENSBVjzEgi/AAAAAElFTkSuQmCC) 0 0 / 8px 8px"></div>
+  <div style="left: 128px; top: 176px; width: 96px; height: 64px; background: #ffffff url(images/turned.jpg) no-repeat 8px 8px"></div>
+  <div style="left: 240px; top: 176px; width: 104px; height: 64px; background: #ef476f url(images/missing.png)"></div>
+
+  <!-- A border image, and BMP list markers. -->
+  <div style="left: 16px; top: 256px; width: 208px; height: 48px; border: 10px solid; border-image: url(images/frame.png) 10 / 10px stretch; background: #ffffff"></div>
+  <ul style="left: 240px; top: 256px; width: 104px; height: 48px; padding: 0 0 0 32px; list-style: url(images/marker.bmp) inside; background: #ffffff">
+    <li style="height: 24px"></li>
+    <li style="height: 24px"></li>
+  </ul>
+</body>
+</html>

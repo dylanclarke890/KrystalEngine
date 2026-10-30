@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Core/IO/Streams/NativeFileStream.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 #include "Krystal.Core/IO/Common.hpp"
 #include "Krystal.Core/IO/Path.hpp"
 #include "Krystal.Core/Types/Array.hpp"
-#include "catch2/catch_test_macros.hpp"
-#include "catch2/catch_tostring.hpp"
 
 namespace krys::io::tests
 {

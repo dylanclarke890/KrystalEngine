@@ -1,20 +1,21 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
-#include "Krystal.Core/Types/Span.hpp"
 
 namespace krys::boo::css
 {
   class TokenRange;
 
+  /// @brief The syntax of a registered custom property or a custom function parameter.
+  /// @see https://drafts.css-houdini.org/css-properties-values-api/#syntax-strings
   struct CustomPropertySyntax
   {
     enum class Type : uint8
     {
-      Unknown,
       Length,
       LengthPercentage,
       Percentage,
@@ -30,6 +31,7 @@ namespace krys::boo::css
       String,
       TransformFunction,
       TransformList,
+      Unknown
     };
 
     enum class Multiplier : uint8
@@ -41,35 +43,32 @@ namespace krys::boo::css
 
     struct Component
     {
-      Type type;
-      Multiplier multiplier {Multiplier::Single};
-      CSSOMStringAtom ident {CSSOMStringAtom::Null()};
+      CustomPropertySyntax::Type Type;
+      CustomPropertySyntax::Multiplier Multiplier {CustomPropertySyntax::Multiplier::Single};
+      CSSOMStringAtom Ident {CSSOMStringAtom::Null()};
     };
 
-    using CustomDefinition = SmallList<Component>;
+    using DefinitionType = List<Component>;
 
-    CustomDefinition Definition;
-
-    KRYS_NODISCARD CustomDefinition Universal() const noexcept
-    {
-      return {};
-    }
+    DefinitionType Definition;
 
     KRYS_NODISCARD bool IsUniversal() const noexcept
     {
       return Definition.empty();
     }
 
-    KRYS_NODISCARD Maybe<CustomPropertySyntax> Parse(CSSOMStringView value) noexcept;
+    KRYS_NODISCARD static Maybe<CustomPropertySyntax> Parse(CSSOMStringView syntax) noexcept;
+    KRYS_NODISCARD static Maybe<CustomPropertySyntax> ConsumeType(TokenRange &tokens) noexcept;
 
-    KRYS_NODISCARD Maybe<CustomPropertySyntax> ConsumeType(TokenRange &tokens) noexcept;
+    KRYS_NODISCARD static CustomPropertySyntax Universal() noexcept
+    {
+      return {};
+    }
 
     KRYS_NODISCARD bool ContainsUnknownType() const noexcept;
 
   private:
-    template <typename CharacterType>
-    KRYS_NODISCARD static Maybe<Component> ParseComponent(Span<const CharacterType> component) noexcept;
-
-    KRYS_NODISCARD static Type TypeForTypeName(CSSOMStringView typeName) noexcept;
+    KRYS_NODISCARD static Maybe<Component> ParseComponent(CSSOMStringView component) noexcept;
+    KRYS_NODISCARD static Type TypeForTypeName(CSSOMStringView dataTypeName) noexcept;
   };
 }

@@ -1,0 +1,24 @@
+﻿<!doctype html>
+<!-- The "bidi-select-popup" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, with the
+     right-to-left drop-down's popup open: mirrored, lined up with the select's right edge, its items on the
+     right, and an item in the other direction on the left. Chrome draws its popups in a window of their own, so
+     there's no Chrome golden. -->
+<html dir="rtl" data-width="240" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 13px "Liberation Sans", sans-serif; }
+</style>
+</head>
+<body>
+  <select id="fruit">
+    <option>תפוח</option>
+    <option disabled>בננה</option>
+    <optgroup label="פירות גלעין"><option selected>דובדבן</option><option>שזיף</option></optgroup>
+    <hr>
+    <option dir="ltr">Date (English)</option>
+  </select>
+  <p>טקסט מתחת לתפריט.</p>
+</body>
+</html>

@@ -1,6 +1,21 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveNumeric.hpp"
+#include "Krystal.Core/Types/Markable.hpp"
+#include "Krystal.Core/Types/Variant.hpp"
+#include "Krystal.Core/Visitor.hpp"
+
+namespace krys::boo::css
+{
+  template <Numeric, PrimitiveKeyword...>
+  struct PrimitiveNumericOrKeyword;
+}
+
+namespace krys
+{
+  template <typename N, typename... Ks>
+  struct MarkableTraits<krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...>>;
+}
 
 namespace krys::boo::css
 {
@@ -9,6 +24,8 @@ namespace krys::boo::css
   template <Numeric NumericType, PrimitiveKeyword... Ks>
   struct PrimitiveNumericOrKeyword
   {
+    friend struct krys::MarkableTraits<PrimitiveNumericOrKeyword>;
+
     using Raw = typename NumericType::Raw;
     using Calc = typename NumericType::Calc;
     using UnitType = typename NumericType::UnitType;
@@ -17,153 +34,156 @@ namespace krys::boo::css
     using Data = PrimitiveData<NumericType, Ks...>;
     using Index = typename Data::Index;
     using Keywords = typename Data::Keywords;
-    constexpr static auto tokens = NumericType::tokens;
-    constexpr static auto category = NumericType::category;
+    constexpr static auto Range = NumericType::Range;
+    constexpr static auto Category = NumericType::Category;
 
+  private:
+    Data _data;
+
+  public:
     // MARK: Constructors
 
-    PrimitiveNumericOrKeyword(Raw raw) : m_data {raw}
+    PrimitiveNumericOrKeyword(Raw raw) noexcept : _data {raw}
     {
     }
 
-    PrimitiveNumericOrKeyword(Calc calc) : m_data {krys::move(calc)}
-    {
-    }
-
-    template <typename T>
-    requires std::integral<T>
-             || std::floating_point<T>
-             PrimitiveNumericOrKeyword(T value)
-             requires(requires {
-               { Raw(value) };
-             })
-        : m_data {Raw {value}}
+    PrimitiveNumericOrKeyword(Calc calc) noexcept : _data {krys::move(calc)}
     {
     }
 
     template <typename T>
-    requires std::integral<T>
-             || std::floating_point<T>
-             PrimitiveNumericOrKeyword(UnitEnum auto unit, T value)
-             requires(requires {
-               { Raw(unit, value) };
-             })
-        : m_data {Raw {unit, value}}
-    {
-    }
-
-    template <UnitEnum E, E unitValue>
-    constexpr PrimitiveNumericOrKeyword(ValueLiteral<unitValue> value)
+    requires(Integral<T> || FloatingPoint<T>)
+    PrimitiveNumericOrKeyword(T value) noexcept
     requires(requires {
       { Raw(value) };
     })
-        : m_data {Raw {value}}
+        : _data {Raw {value}}
+    {
+    }
+
+    template <typename T>
+    requires(Integral<T> || FloatingPoint<T>)
+    PrimitiveNumericOrKeyword(UnitEnum auto unit, T value) noexcept
+    requires(requires {
+      { Raw(unit, value) };
+    })
+        : _data {Raw {unit, value}}
+    {
+    }
+
+    template <UnitEnum E, E UnitValue>
+    PrimitiveNumericOrKeyword(ValueLiteral<UnitValue> value) noexcept
+    requires(requires {
+      { Raw(value) };
+    })
+        : _data {Raw {value}}
     {
     }
 
     template <typename... U>
-    constexpr PrimitiveNumericOrKeyword(Variant<U...> &&variant)
-        : m_data {WTF::switchOn(
-            krys::move(variant), [](NumericType &&numeric) { return Data {krys::move(numeric.m_data)}; },
+    PrimitiveNumericOrKeyword(Variant<U...> &&variant) noexcept
+        : _data {krys::SwitchOn(
+            krys::move(variant), [](NumericType &&numeric) { return Data {krys::move(numeric._data)}; },
             [](ValidKeywordForList<Keywords> auto keyword) { return Data {keyword}; })}
     {
     }
 
     // MARK: Copy/Move Construction/Assignment
 
-    PrimitiveNumericOrKeyword(const PrimitiveNumericOrKeyword &other) : m_data {other.m_data}
+    PrimitiveNumericOrKeyword(const PrimitiveNumericOrKeyword &other) noexcept : _data {other._data}
     {
     }
 
-    PrimitiveNumericOrKeyword(PrimitiveNumericOrKeyword &&other) : m_data {krys::move(other.m_data)}
+    PrimitiveNumericOrKeyword(PrimitiveNumericOrKeyword &&other) noexcept : _data {krys::move(other._data)}
     {
     }
 
-    PrimitiveNumericOrKeyword &operator=(const PrimitiveNumericOrKeyword &other)
+    PrimitiveNumericOrKeyword &operator=(const PrimitiveNumericOrKeyword &other) noexcept
     {
-      m_data = other.m_data;
+      _data = other._data;
       return *this;
     }
 
-    PrimitiveNumericOrKeyword &operator=(PrimitiveNumericOrKeyword &&other)
+    PrimitiveNumericOrKeyword &operator=(PrimitiveNumericOrKeyword &&other) noexcept
     {
-      m_data = krys::move(other.m_data);
+      _data = krys::move(other._data);
       return *this;
     }
 
     // MARK: Construction/Assignment from `NumericType`
 
-    PrimitiveNumericOrKeyword(const NumericType &other) : m_data {other.m_data}
+    PrimitiveNumericOrKeyword(const NumericType &other) noexcept : _data {other._data}
     {
     }
 
-    PrimitiveNumericOrKeyword(NumericType &&other) : m_data {krys::move(other.m_data)}
+    PrimitiveNumericOrKeyword(NumericType &&other) noexcept : _data {krys::move(other._data)}
     {
     }
 
-    PrimitiveNumericOrKeyword &operator=(const NumericType &other)
+    PrimitiveNumericOrKeyword &operator=(const NumericType &other) noexcept
     {
-      m_data = other;
+      _data = other._data;
       return *this;
     }
 
-    PrimitiveNumericOrKeyword &operator=(NumericType &&other)
+    PrimitiveNumericOrKeyword &operator=(NumericType &&other) noexcept
     {
-      m_data = krys::move(other);
+      _data = krys::move(other._data);
       return *this;
     }
 
     // MARK: Construction/Assignment from `Keywords...`
 
-    PrimitiveNumericOrKeyword(ValidKeywordForList<Keywords> auto keyword) : m_data {keyword}
+    PrimitiveNumericOrKeyword(ValidKeywordForList<Keywords> auto keyword) noexcept : _data {keyword}
     {
     }
 
     // MARK: Equality
 
-    bool operator==(const PrimitiveNumericOrKeyword &other) const
+    KRYS_NODISCARD bool operator==(const PrimitiveNumericOrKeyword &other) const noexcept
     {
-      return m_data == other.m_data;
+      return _data == other._data;
     }
 
-    bool operator==(ValidKeywordForList<Keywords> auto const &other) const
+    KRYS_NODISCARD bool operator==(ValidKeywordForList<Keywords> auto const &other) const noexcept
     {
-      return m_data == other;
+      return _data == other;
     }
 
-    bool operator==(const Raw &other) const
+    KRYS_NODISCARD bool operator==(const Raw &other) const noexcept
     {
-      return m_data == other;
+      return _data == other;
     }
 
     template <typename T>
     requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
-    constexpr bool operator==(const T &other) const
+    KRYS_NODISCARD constexpr bool operator==(const T &other) const noexcept
     {
-      return m_data == other;
+      return _data == other;
     }
 
-    template <UnitType unitValue>
-    bool operator==(const ValueLiteral<unitValue> &other) const
+    template <UnitType UnitValue>
+    KRYS_NODISCARD bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
     {
-      return m_data == other;
+      return _data == other;
     }
 
-    template <NestedUnitEnumOf<UnitType> E, E unitValue>
-    bool operator==(const ValueLiteral<unitValue> &other) const
+    template <NestedUnitEnumOf<UnitType> E, E UnitValue>
+    KRYS_NODISCARD bool operator==(const ValueLiteral<UnitValue> &other) const noexcept
     {
-      return m_data == other;
+      return _data == other;
     }
 
     // MARK: Conditional Accessors
 
-    std::optional<Raw> raw() const
+    KRYS_NODISCARD Maybe<Raw> GetRaw() const noexcept
     {
-      return m_data.raw();
+      return _data.GetRaw();
     }
-    std::optional<Calc> calc() const
+
+    KRYS_NODISCARD Maybe<Calc> GetCalc() const noexcept
     {
-      return m_data.calc();
+      return _data.GetCalc();
     }
 
     // MARK: Variant-Like Conformance
@@ -171,73 +191,79 @@ namespace krys::boo::css
     template <typename T>
     KRYS_NODISCARD bool HoldsAlternative() const noexcept
     {
-      if constexpr (std::same_as<T, NumericType>)
+      if constexpr (SameType<T, NumericType>)
       {
-        return isCalc() || isRaw();
+        return IsCalc() || IsRaw();
       }
-      else if constexpr (std::same_as<T, Calc>)
+      else if constexpr (SameType<T, Calc>)
       {
-        return isCalc();
+        return IsCalc();
       }
-      else if constexpr (std::same_as<T, Raw>)
+      else if constexpr (SameType<T, Raw>)
       {
-        return isRaw();
+        return IsRaw();
       }
       else if constexpr (ValidKeywordForList<T, Keywords>)
       {
-        return isKeyword<T>();
+        return IsKeyword<T>();
       }
     }
 
     template <typename... F>
     KRYS_NODISCARD decltype(auto) SwitchOn(F &&...f) const noexcept
     {
-      return m_data.Visit(krys::CreateVisitor(std::forward<F>(f)...));
+      return _data.Visit(krys::CreateVisitor(std::forward<F>(f)...));
     }
 
-    bool isKnownZero() const
+    KRYS_NODISCARD bool IsKnownZero() const noexcept
     {
-      return isRaw() && m_data.payload.number == 0;
-    }
-    bool isKnownNotZero() const
-    {
-      return isRaw() && m_data.payload.number != 0;
+      return IsRaw() && _data._payload.Number == 0;
     }
 
-    bool isRaw() const
+    KRYS_NODISCARD bool IsKnownNotZero() const noexcept
     {
-      return m_data.isRaw();
+      return IsRaw() && _data._payload.Number != 0;
     }
-    bool isCalc() const
+
+    KRYS_NODISCARD bool IsRaw() const noexcept
     {
-      return m_data.isCalc();
+      return _data.IsRaw();
     }
+
+    KRYS_NODISCARD bool IsCalc() const noexcept
+    {
+      return _data.IsCalc();
+    }
+
     template <ValidKeywordForList<Keywords> Keyword>
-    bool isKeyword() const
+    KRYS_NODISCARD bool IsKeyword() const noexcept
     {
-      return m_data.template isKeyword<Keyword>();
+      return _data.IsKeyword(Keyword {});
     }
-    bool isEmpty() const
+
+    KRYS_NODISCARD bool IsEmpty() const noexcept
     {
-      return m_data.isEmpty();
+      return _data.IsEmpty();
     }
 
   private:
-    PrimitiveNumericOrKeyword(PrimitiveDataEmptyToken token) : m_data {token}
+    PrimitiveNumericOrKeyword(PrimitiveDataEmptyToken token) noexcept : _data {token}
     {
     }
 
-    Raw asRaw() const
+    KRYS_NODISCARD Raw AsRaw() const noexcept
     {
-      return m_data.asRaw();
-    }
-    Calc asCalc() const
-    {
-      return m_data.asCalc();
+      return _data.AsRaw();
     }
 
-    Data m_data;
+    KRYS_NODISCARD Calc AsCalc() const noexcept
+    {
+      return _data.AsCalc();
+    }
   };
+
+  template <typename N, typename... Ks>
+  constexpr auto TreatAsVariantLike<PrimitiveNumericOrKeyword<N, Ks...>> = true;
 }
 
 namespace krys
@@ -245,14 +271,15 @@ namespace krys
   template <typename N, typename... Ks>
   struct MarkableTraits<krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...>>
   {
-    static bool IsEmptyValue(const krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...> &value)
+    KRYS_NODISCARD static bool
+      IsEmptyValue(const krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...> &value) noexcept
     {
-      return value.isEmpty();
+      return value.IsEmpty();
     }
 
-    static krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...> EmptyValue()
+    KRYS_NODISCARD static krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...> EmptyValue() noexcept
     {
-      return {krys::boo::css::PrimitiveDataEmptyToken {}};
+      return krys::boo::css::PrimitiveNumericOrKeyword<N, Ks...> {krys::boo::css::PrimitiveDataEmptyToken {}};
     }
   };
 }

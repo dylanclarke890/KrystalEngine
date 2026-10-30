@@ -1,0 +1,27 @@
+﻿<!doctype html>
+<!-- The "text" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Italic.ttf"); font-weight: normal; font-style: italic; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-BoldItalic.ttf"); font-weight: bold; font-style: italic; }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 14px/18px "Liberation Sans"; color: #222222; }
+  h1 { margin: 0 0 6px; font-size: 24px; line-height: 28px; font-weight: normal; color: #4f6df5; }
+  p { margin: 0 0 8px; width: 300px; }
+  .tag { background: #ffd166; border: 1px solid #ef476f; padding: 0 3px; }
+  .shadow { font-size: 20px; text-shadow: 2px 2px 0 #06d6a0, 0 0 4px #118ab2; }
+  .box { display: inline-block; width: 12px; height: 12px; background: #118ab2; }
+</style>
+</head>
+<body>
+  <h1>Booey paints text</h1>
+  <p>Glyphs are shaped by Booey and drawn by Render2D, with <span class="tag">inline boxes that wrap across
+    lines</span> and <span style="color: #ef476f">coloured</span>, <b>bold</b> and <i>italic</i> words.</p>
+  <p class="shadow">Shadows and <span class="box"></span> blocks</p>
+  <p dir="rtl">right to left</p>
+</body>
+</html>

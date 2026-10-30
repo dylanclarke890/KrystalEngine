@@ -1,0 +1,49 @@
+﻿<!doctype html>
+<!-- The "animations" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. Each animation is
+     paused partway through by a negative delay, so the capture doesn't depend on when it's taken. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; }
+  .row { display: flex; gap: 24px; margin-bottom: 32px; }
+  .box { width: 48px; height: 48px; background: #4f6df5; }
+
+  @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes recolour { from { background-color: #ef476f } to { background-color: #06d6a0 } }
+  @keyframes grow { from { width: 16px } to { width: 112px } }
+  @keyframes round { 50% { border-radius: 24px } }
+  @keyframes lift { to { box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5); transform: translateY(-8px) } }
+
+  /* A quarter of the way through. */
+  .fade { animation: fade 2s linear -0.5s paused; }
+  /* An eighth of a turn. */
+  .spin { animation: spin 4s linear -0.5s paused; }
+  /* Halfway, in the second iteration, alternating: the colours run backwards. */
+  .recolour { animation: recolour 1s linear -1.5s 2 alternate paused; }
+  /* steps(4) at 60%: the second step. */
+  .grow { animation: grow 1s steps(4) -0.6s paused; }
+  /* An implicit 0% and 100% keyframe from the element's style around the explicit 50%. */
+  .round { animation: round 2s ease-in-out -0.5s paused; }
+  /* Shadow and transform together, three quarters through. */
+  .lift { animation: lift 1s linear -0.75s paused; }
+  /* Forwards fill holds the last keyframe: the animation ended long ago. */
+  .done { animation: recolour 1s linear -5s forwards paused; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="box fade"></div>
+    <div class="box spin"></div>
+    <div class="box recolour"></div>
+    <div class="box round"></div>
+  </div>
+  <div class="row">
+    <div class="box grow"></div>
+    <div class="box lift"></div>
+    <div class="box done"></div>
+  </div>
+</body>
+</html>

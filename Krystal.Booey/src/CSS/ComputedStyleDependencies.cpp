@@ -1,10 +1,10 @@
 ﻿#include "Krystal.Booey/CSS/ComputedStyleDependencies.hpp"
 #include "Krystal.Booey/CSS/ToLengthConversionData.hpp"
-#include "Krystal.Booey/Style/BuilderState.hpp"
 
 namespace krys::boo::css
 {
-  bool ComputedStyleDependencies::CanResolveWith(const ToLengthConversionData &conversionData) const noexcept
+  bool ComputedStyleDependencies::CanResolveDependenciesWithConversionData(
+    const ToLengthConversionData &conversionData) const noexcept
   {
     if (!RootProperties.empty() && !conversionData.RootStyle())
     {
@@ -21,7 +21,7 @@ namespace krys::boo::css
       return false;
     }
 
-    if (ViewportDimensions && !conversionData.RenderView())
+    if (ViewportDimensions && !conversionData.GetRenderView())
     {
       return false;
     }

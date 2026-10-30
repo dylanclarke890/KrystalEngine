@@ -1,15 +1,31 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
+#include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
-  class TransformListValue final : public ValueWithSmallList
+  /// @brief A space-separated list of transform functions, e.g. `translateX(10px) rotate(45deg)`.
+  class TransformListValue final : public ValueContainingList
   {
-  public:
-    KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder) noexcept;
+  private:
+    explicit TransformListValue(ValueListBuilder builder) noexcept;
+    explicit TransformListValue(Ref<Value> value) noexcept;
 
-    KRYS_NODISCARD static Ref<TransformListValue> Create(Ref<Value>) noexcept;
+  public:
+    KRYS_NODISCARD static Ref<TransformListValue> Create(ValueListBuilder builder) noexcept;
+    KRYS_NODISCARD static Ref<TransformListValue> Create(Ref<Value> value) noexcept;
+
+    KRYS_NODISCARD CSSOMString CustomCSSText(const SerialisationContext &context) const noexcept
+    {
+      return SerialiseItems(context);
+    }
+
+    KRYS_NODISCARD bool Equals(const TransformListValue &other) const noexcept
+    {
+      return ItemsEqual(other);
+    }
   };
 }
 

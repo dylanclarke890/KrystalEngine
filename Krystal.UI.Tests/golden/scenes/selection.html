@@ -1,0 +1,31 @@
+﻿<!doctype html>
+<!-- The "selection" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, after selecting from
+     #start to #end as the script below does for Chrome. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 12px; font: 14px/18px "Liberation Sans"; color: #222222; }
+  p { margin: 0 0 8px; width: 300px; }
+  ul { margin: 0 0 8px; padding-left: 24px; }
+  .custom::selection, .custom *::selection { background: #ef476f; color: #ffffff; }
+  .tinted { background: #ffd166; }
+  img { width: 24px; height: 16px; vertical-align: middle; }
+</style>
+</head>
+<body>
+  <p id="start">The selection starts partway through this paragraph, and wraps onto the next line.</p>
+  <p class="custom">This paragraph has its own <b>selection colours</b>.</p>
+  <p>An image <img src="images/checker.png"> is tinted, and <span class="tinted">a background</span> shows.</p>
+  <ul><li>A list item</li></ul>
+  <p id="end">It ends partway through this one.</p>
+  <script>
+    var start = document.getElementById("start").firstChild;
+    var end = document.getElementById("end").firstChild;
+    getSelection().setBaseAndExtent(start, 14, end, 8);
+  </script>
+</body>
+</html>

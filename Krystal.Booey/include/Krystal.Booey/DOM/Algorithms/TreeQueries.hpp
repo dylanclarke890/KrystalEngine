@@ -13,6 +13,7 @@ namespace krys::boo::dom
   class Document;
   class Element;
   class Node;
+  class ShadowRoot;
   class Text;
 
   /// @brief Implementations of the various tree concepts/algorithms defined in the DOM spec, grouped together
@@ -131,6 +132,18 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#element-shadow-host
     KRYS_NODISCARD static bool IsShadowHost(const Element &node) noexcept;
 
+    /// @return @p element's shadow root, open or closed, or null if @p element isn't a shadow host.
+    KRYS_NODISCARD static ShadowRoot *GetShadowRoot(const Element &element) noexcept;
+
+    /// @return The shadow root whose shadow tree contains @p node, or null if @p node isn't in a shadow tree.
+    KRYS_NODISCARD static ShadowRoot *ContainingShadowRoot(const Node &node) noexcept;
+
+    /// @return The host of the shadow tree that contains @p node, or null if @p node isn't in a shadow tree.
+    KRYS_NODISCARD static Element *ShadowHost(const Node &node) noexcept;
+
+    /// @return @p node's parent element or, if @p node is the child of a shadow root, its host.
+    KRYS_NODISCARD static Element *ParentOrShadowHostElement(const Node &node) noexcept;
+
 #pragma endregion
 
 #pragma region Tree Order Traversal
@@ -198,6 +211,50 @@ namespace krys::boo::dom
     /// the current node, and only if it is a descendant of `stayWithin`.
     KRYS_NODISCARD static Node *PreviousSkippingChildren(const Node &current,
                                                          const Node *stayWithin) noexcept;
+
+    /// @brief The previous sibling of @p node, counting an element's `::before` as its first child and its
+    /// `::after` as its last.
+    KRYS_NODISCARD static Node *PseudoAwarePreviousSibling(const Node &node) noexcept;
+
+    /// @brief The next sibling of @p node, counting an element's `::before` as its first child and its
+    /// `::after` as its last.
+    KRYS_NODISCARD static Node *PseudoAwareNextSibling(const Node &node) noexcept;
+
+    /// @brief The first child of @p node, counting an element's `::before` as its first child.
+    KRYS_NODISCARD static Node *PseudoAwareFirstChild(const Node &node) noexcept;
+
+    /// @brief The last child of @p node, counting an element's `::after` as its last child.
+    KRYS_NODISCARD static Node *PseudoAwareLastChild(const Node &node) noexcept;
+
+    /// @brief The previous node in tree order, including `::before` and `::after`, within @p stayWithin.
+    KRYS_NODISCARD static Node *PreviousIncludingPseudo(const Node &current,
+                                                        const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The next node in tree order, including `::before` and `::after`, within @p stayWithin.
+    KRYS_NODISCARD static Node *NextIncludingPseudo(const Node &current,
+                                                    const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The next node in tree order after @p current's descendants, including `::before` and `::after`,
+    /// within @p stayWithin.
+    KRYS_NODISCARD static Node *
+      NextIncludingPseudoSkippingChildren(const Node &current, const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The previous element in tree order, including `::before` and `::after`, within @p stayWithin.
+    KRYS_NODISCARD static Element *PreviousElementIncludingPseudo(const Node &current,
+                                                                  const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The next element in tree order, including `::before` and `::after`, within @p stayWithin.
+    KRYS_NODISCARD static Element *NextElementIncludingPseudo(const Node &current,
+                                                              const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The next element in tree order after @p current's descendants, including `::before` and
+    /// `::after`, within @p stayWithin.
+    KRYS_NODISCARD static Element *
+      NextElementIncludingPseudoSkippingChildren(const Node &current,
+                                                 const Node *stayWithin = nullptr) noexcept;
+
+    /// @brief The previous element sibling of @p node, counting `::before` and `::after` as children.
+    KRYS_NODISCARD static Element *PseudoAwarePreviousElementSibling(const Node &node) noexcept;
 
     /// @brief Helper function for getting the last descendant of a node in tree order.
     KRYS_NODISCARD static Node *Last(const ContainerNode &current) noexcept;

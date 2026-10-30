@@ -78,7 +78,7 @@ def extract_values_from_file(parsing_context, parsed_values, values_file):
 class ParsingContext:
     def __init__(self, *, defines_string: str, parsing_for_codegen: bool, verbose: bool):
         if defines_string:
-            self.conditionals = frozenset(defines_string.split(" "))
+            self.conditionals = frozenset(define for define in re.split(r"[,\s]+", defines_string) if define)
         else:
             self.conditionals = frozenset()
         self.parsing_for_codegen = parsing_for_codegen
@@ -175,9 +175,20 @@ class GenerationContext:
 
             with writer.namespace(namespace="krys"):
                 writer.write_block("""\
-                    template<> 
-                    struct DefaultHash<::krys::boo::css::ValueId> : IntegerHash<uint16>
+                    template<>
+                    struct DefaultHash<::krys::boo::css::ValueId>
                     {
+                      constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
+
+                      KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::ValueId id) noexcept
+                      {
+                        return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
+                      }
+
+                      KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::ValueId a, ::krys::boo::css::ValueId b) noexcept
+                      {
+                        return a == b;
+                      }
                     };
 
                     template<>
@@ -267,9 +278,9 @@ class GenerationContext:
 
     def _generate_hpp_constant_aliases(self, *, to: Writer):
         with to.template_struct_block(template_signature="ValueId C", name="KeywordValueConstant"):
-            to.write(f"constexpr static auto value = C;")
+            to.write(f"constexpr static auto Value = C;")
             to.write(f"constexpr bool operator==(const KeywordValueConstant &) const noexcept = default;")
-            to.write(f"constexpr bool operator==(ValueId other) const noexcept {{ return value == other; }}")
+            to.write(f"constexpr bool operator==(ValueId other) const noexcept {{ return Value == other; }}")
         to.newline()
 
         with to.namespace(namespace="keywords"):
@@ -293,8 +304,6 @@ class GenerationContext:
                 for_header="Krystal.Booey/CSS/Values/ValueId.hpp",
                 generator_name=GENERATOR_NAME,
                 headers=[
-                    "Krystal.Booey/CSS/Parser/ParserContext.hpp",
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",
                 ],

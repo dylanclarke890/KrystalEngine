@@ -1,0 +1,30 @@
+﻿<!doctype html>
+<!-- The "textfields" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Ahem; src: url("fonts/Ahem.woff2") format("woff2"); }
+  html { background: #f4f6fa; overflow: hidden; }
+  body { margin: 16px; font: 10px/10px Ahem; color: #073b4c; }
+  /* Authors' borders and backgrounds turn off the platform's appearance in both. */
+  input, textarea { display: block; margin: 0 0 12px; border: 2px solid #118ab2; background: #ffffff; padding: 4px;
+                    font: inherit; color: inherit; }
+  input { width: 200px; }
+  textarea { width: 200px; height: 40px; resize: none; }
+  .wide { width: 320px; text-align: right; }
+  ::placeholder { color: #ef476f; }
+</style>
+</head>
+<body>
+  <!-- A field's value, vertically centred in its box. -->
+  <input value="Krystal">
+  <!-- An empty field draws its placeholder in the inner text's place. -->
+  <input placeholder="Placeholder">
+  <!-- The alignment applies to the inner text. -->
+  <input class="wide" value="right aligned">
+  <!-- A text area's value, wrapped at its width and keeping its line breaks. -->
+  <textarea>First line
+second line that wraps around</textarea>
+</body>
+</html>

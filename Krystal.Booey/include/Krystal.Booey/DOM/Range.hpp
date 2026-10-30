@@ -2,6 +2,8 @@
 
 #include "Krystal.Booey/DOM/AbstractRange.hpp"
 #include "Krystal.Booey/DOM/BoundaryPoint.hpp"
+#include "Krystal.Booey/DOM/DOMRect.hpp"
+#include "Krystal.Booey/DOM/DOMRectList.hpp"
 #include "Krystal.Booey/DOM/Enums/BoundaryPointComparator.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Core/Enum.hpp"
@@ -24,6 +26,11 @@ namespace krys::boo::dom
 
   public:
     ~Range() noexcept override;
+
+    KRYS_NODISCARD bool IsLiveRange() const noexcept final
+    {
+      return true;
+    }
 
 #pragma region Range - https://dom.spec.whatwg.org/#range
 
@@ -97,9 +104,37 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-range-stringifier
     KRYS_NODISCARD ExceptionOr<DOMString> ToString() const noexcept;
 
+    /// @see https://drafts.csswg.org/cssom-view/#dom-range-getclientrects
+    KRYS_NODISCARD Ref<DOMRectList> GetClientRects() const noexcept;
+
+    /// @see https://drafts.csswg.org/cssom-view/#dom-range-getboundingclientrect
+    KRYS_NODISCARD Ref<DOMRect> GetBoundingClientRect() const noexcept;
+
+    /// @brief The union of @p range's client rects, ignoring empty ones.
+    KRYS_NODISCARD static Ref<DOMRect> BoundingClientRect(const SimpleRange &range) noexcept;
+
 #pragma endregion
 
+    /// @brief Whether the document's selection is this range, so setting its boundary points sets the
+    /// selection.
+    KRYS_NODISCARD bool IsAssociatedWithSelection() const noexcept
+    {
+      return _isAssociatedWithSelection;
+    }
+    void DidAssociateWithSelection() noexcept
+    {
+      _isAssociatedWithSelection = true;
+    }
+    void DidDisassociateFromSelection() noexcept
+    {
+      _isAssociatedWithSelection = false;
+    }
+
   private:
+    bool _isAssociatedWithSelection {false};
+
+    void UpdateAssociatedSelection() noexcept;
+
     KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 

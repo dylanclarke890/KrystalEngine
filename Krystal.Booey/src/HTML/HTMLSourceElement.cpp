@@ -1,5 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
+#include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
 
 namespace krys::boo::html
 {
@@ -9,12 +14,12 @@ namespace krys::boo::html
   }
 #pragma region HTMLSourceElement
 
-  dom::ExceptionOr<dom::USVString> HTMLSourceElement::Src() const noexcept
+  dom::USVString HTMLSourceElement::Src() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLSourceElement::Src(dom::USVString &&value) noexcept
+  void HTMLSourceElement::Src(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
@@ -29,14 +34,14 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLSourceElement::SrcSet() const noexcept
+  dom::USVString HTMLSourceElement::SrcSet() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset");
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  dom::ExceptionOr<void> HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
   dom::DOMString HTMLSourceElement::Sizes() const noexcept
@@ -80,4 +85,91 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  const css::mq::MediaQueryList &
+    HTMLSourceElement::ParsedMediaAttribute(dom::Document &document) const noexcept
+  {
+    if (!_cachedParsedMediaAttribute)
+    {
+      _cachedParsedMediaAttribute =
+        css::mq::MediaQueryParser::Parse(AttributeOrEmpty(u8"media"), css::ParserContext(document));
+    }
+    return *_cachedParsedMediaAttribute;
+  }
+
+  void HTMLSourceElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+    // Only an insertion into a <picture> is a relevant mutation, not the insertion of a subtree whose
+    // <picture> already holds the source.
+    auto *pictureElement = DynamicDowncast<HTMLPictureElement>(ParentElement());
+    if (!pictureElement || pictureElement == _insertedIntoPicture)
+    {
+      return;
+    }
+    _insertedIntoPicture = pictureElement;
+
+    // The new source element only is a relevant mutation if it precedes any img element.
+    _shouldCallSourcesChanged = true;
+    for (const auto *node = PreviousSibling(); node; node = node->PreviousSibling())
+    {
+      if (Is<HTMLImageElement>(*node))
+      {
+        _shouldCallSourcesChanged = false;
+      }
+    }
+    if (_shouldCallSourcesChanged)
+    {
+      pictureElement->SourcesChanged();
+    }
+  }
+
+  void HTMLSourceElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+    if (!isSubtreeRoot)
+    {
+      return;
+    }
+    _insertedIntoPicture = nullptr;
+    if (_shouldCallSourcesChanged)
+    {
+      if (auto *pictureElement = DynamicDowncast<HTMLPictureElement>(oldAncestor))
+      {
+        pictureElement->SourcesChanged();
+      }
+      _shouldCallSourcesChanged = false;
+    }
+  }
+
+  void HTMLSourceElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    if (localName == u8"type" || localName == u8"srcset" || localName == u8"sizes" || localName == u8"media")
+    {
+      if (localName == u8"media")
+      {
+        _cachedParsedMediaAttribute = null;
+      }
+      auto *pictureElement = DynamicDowncast<HTMLPictureElement>(ParentElement());
+      if (_shouldCallSourcesChanged && pictureElement)
+      {
+        pictureElement->SourcesChanged();
+      }
+    }
+    else if (localName == u8"width" || localName == u8"height")
+    {
+      if (auto *pictureElement = DynamicDowncast<HTMLPictureElement>(ParentElement()))
+      {
+        pictureElement->SourceDimensionAttributesChanged(*this);
+      }
+    }
+  }
 }

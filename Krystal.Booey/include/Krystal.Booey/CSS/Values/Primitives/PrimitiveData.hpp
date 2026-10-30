@@ -1,13 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Calc/Value.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Concepts.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/NumericRaw.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/PrimitiveKeywordList.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/UnevaluatedCalc.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Concepts.hpp"
+#include "Krystal.Core/Maths/Base.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/TypeTraits.hpp"
-#include <limits>
 
 namespace krys::boo::css
 {
@@ -16,6 +17,12 @@ namespace krys::boo::css
   // (e.g. <length>, <angle>, etc.) to utilize multiple indices for a single smaller payload.
   //
   // FIXME: Generalize this concept to support arbitrary types through traits.
+
+  template <NumericRaw>
+  struct PrimitiveNumeric;
+
+  template <Numeric, PrimitiveKeyword...>
+  struct PrimitiveNumericOrKeyword;
 
   // MARK: - Concepts
 
@@ -28,22 +35,22 @@ namespace krys::boo::css
     && (SameType<typename ChildPrimitiveData::Index,
                  typename ParentPrimitiveData::Index::NumericType::Base::Index>);
 
-  // MARK: - Markable
+  // MARK: - Markable Support
 
   struct PrimitiveDataEmptyToken
   {
-    constexpr bool operator==(const PrimitiveDataEmptyToken &) const = default;
+    constexpr bool operator==(const PrimitiveDataEmptyToken &) const noexcept = default;
   };
 
   template <typename T>
   struct PrimitiveDataMarkableTraits
   {
-    KRYS_NODISCARD constexpr static bool IsEmptyValue(const T &value) noexcept
+    KRYS_NODISCARD static bool IsEmptyValue(const T &value) noexcept
     {
       return value.IsEmpty();
     }
 
-    KRYS_NODISCARD constexpr static T EmptyValue() noexcept
+    KRYS_NODISCARD static T EmptyValue() noexcept
     {
       return T(PrimitiveDataEmptyToken {});
     }
@@ -54,6 +61,9 @@ namespace krys::boo::css
   template <Numeric N, PrimitiveKeyword... Ks>
   struct PrimitiveDataIndex
   {
+    template <Numeric, PrimitiveKeyword...>
+    friend struct PrimitiveDataIndex;
+
     using NumericType = N;
     using Keywords = PrimitiveKeywordList<Ks...>;
 
@@ -61,6 +71,7 @@ namespace krys::boo::css
     using Calc = typename N::Calc;
     using UnitType = typename N::UnitType;
     using UnitTraits = typename N::UnitTraits;
+
     using Storage = underlying_t<typename N::UnitType>;
 
     // The potential values for the `index` are:
@@ -73,83 +84,88 @@ namespace krys::boo::css
     //  - max(index_type) - 1                               -> Empty (for Markable)
     //  - max(index_type)                                   -> Moved from
 
-    constexpr static Storage IndexStorageForFirstRaw = 0uz;
-    constexpr static Storage IndexStorageForLastRaw = UnitTraits::Count - 1uz;
-    constexpr static Storage IndexStorageForCalc = UnitTraits::Count;
-    constexpr static Storage IndexStorageForFirstKeyword = UnitTraits::Count + 1uz;
-    constexpr static Storage IndexStorageForLastKeyword = UnitTraits::Count + Keywords::Count;
+    constexpr static Storage IndexStorageForFirstRaw = 0;
+    constexpr static Storage IndexStorageForLastRaw = static_cast<Storage>(UnitTraits::Count - 1);
+    constexpr static Storage IndexStorageForCalc = static_cast<Storage>(UnitTraits::Count);
+    constexpr static Storage IndexStorageForFirstKeyword = static_cast<Storage>(UnitTraits::Count + 1);
+    constexpr static Storage IndexStorageForLastKeyword =
+      static_cast<Storage>(UnitTraits::Count + Keywords::Count);
     // (... gap ...)
-    constexpr static Storage IndexStorageForEmpty = std::numeric_limits<Storage>::max() - 1uz;
-    constexpr static Storage IndexStorageForMovedFrom = std::numeric_limits<Storage>::max();
+    constexpr static Storage IndexStorageForEmpty = Limits<Storage>::max() - 1;
+    constexpr static Storage IndexStorageForMovedFrom = Limits<Storage>::max();
 
     KRYS_NODISCARD constexpr static Storage IndexStorageForUnit(UnitType unit) noexcept
     {
-      return IndexStorageForFirstRaw + ToUnderlying(unit);
+      return static_cast<Storage>(IndexStorageForFirstRaw + ToUnderlying(unit));
     }
 
-    KRYS_NODISCARD static consteval Storage
+    KRYS_NODISCARD consteval static Storage
       IndexStorageForKeyword(ValidKeywordForList<Keywords> auto keyword) noexcept
     {
-      return IndexStorageForFirstKeyword + Keywords::OffsetForKeyword(keyword);
+      return static_cast<Storage>(IndexStorageForFirstKeyword + Keywords::OffsetForKeyword(keyword));
     }
 
-    static_assert(UnitTraits::Count + Keywords::Count + 2uz <= std::numeric_limits<Storage>::max());
+    static_assert(UnitTraits::Count + Keywords::Count + 2 <= Limits<Storage>::max());
 
+  private:
+    Storage _storage;
+
+  public:
     // MARK: Construction
 
-    PrimitiveDataIndex(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
+    constexpr PrimitiveDataIndex(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
 
     template <typename T>
-    requires(Keywords::Count != 0uz)
+    requires(Keywords::Count != 0)
             && (requires { requires SameType<T, PrimitiveDataIndex<typename N::Base>>; })
-    PrimitiveDataIndex(const T &other) : storage {other.storage}
+    constexpr PrimitiveDataIndex(const T &other) noexcept : _storage {other._storage}
     {
     }
 
     template <typename T>
-    requires(Keywords::Count != 0uz)
+    requires(Keywords::Count != 0)
             && (requires { requires SameType<T, PrimitiveDataIndex<typename N::Base>>; })
-    PrimitiveDataIndex &operator=(const T &other)
+    constexpr PrimitiveDataIndex &operator=(const T &other) noexcept
     {
-      storage = other.storage;
+      _storage = other._storage;
       return *this;
     }
 
-    constexpr explicit PrimitiveDataIndex(Storage storage) noexcept : storage {storage}
+    constexpr explicit PrimitiveDataIndex(Storage storage) noexcept : _storage {storage}
     {
     }
 
-    constexpr PrimitiveDataIndex(UnitType unit) noexcept : storage {IndexStorageForUnit(unit)}
+    constexpr PrimitiveDataIndex(UnitType unit) noexcept : _storage {IndexStorageForUnit(unit)}
     {
     }
 
-    constexpr PrimitiveDataIndex(const Raw &raw) noexcept : storage {IndexStorageForUnit(raw.Unit)}
+    constexpr PrimitiveDataIndex(const Raw &raw) noexcept : _storage {IndexStorageForUnit(raw.Unit)}
     {
     }
 
-    constexpr PrimitiveDataIndex(const Calc &) noexcept : storage {IndexStorageForCalc}
+    constexpr PrimitiveDataIndex(const Calc &) noexcept : _storage {IndexStorageForCalc}
     {
     }
 
     constexpr PrimitiveDataIndex(ValidKeywordForList<Keywords> auto keyword) noexcept
-        : storage {IndexStorageForKeyword(keyword)}
+        : _storage {IndexStorageForKeyword(keyword)}
     {
     }
 
-    constexpr PrimitiveDataIndex(PrimitiveDataEmptyToken) noexcept : storage {IndexStorageForEmpty}
+    constexpr PrimitiveDataIndex(PrimitiveDataEmptyToken) noexcept : _storage {IndexStorageForEmpty}
     {
     }
 
     // MARK: Assignment
 
-    PrimitiveDataIndex &operator=(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
+    constexpr PrimitiveDataIndex &operator=(const PrimitiveDataIndex<N, Ks...> &) noexcept = default;
 
     // MARK: Raw Unit
 
-    constexpr typename NumericType::Raw::UnitType Unit() const noexcept
+    KRYS_NODISCARD constexpr typename NumericType::Raw::UnitType Unit() const noexcept
     {
-      assert(IsRaw());
-      return static_cast<UnitType>(storage);
+      krys_debug_assert(IsRaw());
+      return static_cast<UnitType>(_storage);
     }
 
     // MARK: Keyword
@@ -157,63 +173,62 @@ namespace krys::boo::css
     template <typename F>
     constexpr decltype(auto) VisitKeyword(F &&f) const noexcept
     {
-      assert(storage <= IndexStorageForLastKeyword);
-      return Keywords::VisitKeywordAtOffset(storage - IndexStorageForFirstKeyword, std::forward<F>(f));
+      krys_debug_assert(_storage <= IndexStorageForLastKeyword);
+      return Keywords::VisitKeywordAtOffset(_storage - IndexStorageForFirstKeyword, std::forward<F>(f));
     }
 
     // MARK: Predicates
 
-    constexpr bool IsRaw() const noexcept
+    KRYS_NODISCARD constexpr bool IsRaw() const noexcept
     {
-      return storage >= IndexStorageForFirstRaw && storage <= IndexStorageForLastRaw;
+      return _storage >= IndexStorageForFirstRaw && _storage <= IndexStorageForLastRaw;
     }
 
-    constexpr bool IsCalc() const noexcept
+    KRYS_NODISCARD constexpr bool IsCalc() const noexcept
     {
-      return storage == IndexStorageForCalc;
+      return _storage == IndexStorageForCalc;
     }
 
-    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
+    KRYS_NODISCARD constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
     {
-      return storage == IndexStorageForKeyword(keyword);
+      return _storage == IndexStorageForKeyword(keyword);
     }
 
-    constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
-      return storage == IndexStorageForEmpty;
+      return _storage == IndexStorageForEmpty;
     }
 
-    constexpr bool IsMovedFrom() const noexcept
+    KRYS_NODISCARD constexpr bool IsMovedFrom() const noexcept
     {
-      return storage == IndexStorageForMovedFrom;
+      return _storage == IndexStorageForMovedFrom;
     }
 
-    void SetAsMovedFrom() noexcept
+    constexpr void SetAsMovedFrom() noexcept
     {
-      storage = IndexStorageForMovedFrom;
+      _storage = IndexStorageForMovedFrom;
     }
 
-    constexpr bool operator==(const PrimitiveDataIndex &) const noexcept = default;
-    constexpr bool operator==(Storage other) const noexcept
-    {
-      return storage == other;
-    }
+    KRYS_NODISCARD constexpr bool operator==(const PrimitiveDataIndex &) const noexcept = default;
 
-    Storage storage;
+    KRYS_NODISCARD constexpr bool operator==(Storage other) const noexcept
+    {
+      return _storage == other;
+    }
   };
 
   // MARK: - Payload
 
   union PrimitiveDataPayload
   {
-    double number;
-    calc::Value *calc;
+    double Number;
+    calc::Value *Calc;
 
-    PrimitiveDataPayload(double number) noexcept : number {number}
+    constexpr PrimitiveDataPayload(double number) noexcept : Number {number}
     {
     }
 
-    PrimitiveDataPayload(calc::Value *calc) noexcept : calc {calc}
+    constexpr PrimitiveDataPayload(calc::Value *calc) noexcept : Calc {calc}
     {
     }
   };
@@ -223,6 +238,15 @@ namespace krys::boo::css
   template <Numeric N, PrimitiveKeyword... Ks>
   struct PrimitiveData
   {
+    template <Numeric, PrimitiveKeyword...>
+    friend struct PrimitiveData;
+
+    template <NumericRaw>
+    friend struct PrimitiveNumeric;
+
+    template <Numeric, PrimitiveKeyword...>
+    friend struct PrimitiveNumericOrKeyword;
+
     using Index = PrimitiveDataIndex<N, Ks...>;
     using Payload = PrimitiveDataPayload;
 
@@ -232,65 +256,73 @@ namespace krys::boo::css
     using UnitType = typename N::UnitType;
     using UnitTraits = typename N::UnitTraits;
 
-    Payload payload;
-    Index index;
+  private:
+    Payload _payload;
+    Index _index;
 
-    PrimitiveData(Raw raw) noexcept : payload {raw.Value}, index {raw}
+  public:
+    PrimitiveData(Raw raw) noexcept : _payload {raw.Value}, _index {raw}
     {
     }
 
-    // TODO: fix this constructor
-    PrimitiveData(Calc calc) noexcept : payload {nullptr}, index {calc}
+    PrimitiveData(Calc calc) noexcept : _payload {calc.ProtectedCalc().release()}, _index {calc}
     {
     }
 
-    PrimitiveData(ValidKeywordForList<Keywords> auto keyword) noexcept : payload {0.0}, index {keyword}
+    PrimitiveData(ValidKeywordForList<Keywords> auto keyword) noexcept : _payload {0.0}, _index {keyword}
     {
     }
 
-    PrimitiveData(PrimitiveDataEmptyToken token) noexcept : payload {0.0}, index {token}
+    PrimitiveData(PrimitiveDataEmptyToken token) noexcept : _payload {0.0}, _index {token}
     {
     }
 
-    PrimitiveData(const PrimitiveData &other) noexcept : payload {other.payload}, index {other.index}
+    PrimitiveData(const PrimitiveData &other) noexcept : _payload {other._payload}, _index {other._index}
     {
       if (IsCalc())
       {
-        UnevaluatedCalcAddRef(payload.calc);
+        UnevaluatedCalcRef(_payload.Calc);
       }
     }
 
-    PrimitiveData(PrimitiveData &&other) noexcept : payload {other.payload}, index {other.index}
+    PrimitiveData(PrimitiveData &&other) noexcept : _payload {other._payload}, _index {other._index}
     {
       other.SetAsMovedFrom();
     }
 
     PrimitiveData &operator=(const PrimitiveData &other) noexcept
     {
-      if (IsCalc())
-      {
-        UnevaluatedCalcSubRef(payload.calc);
-      }
+      // Take the new reference first, so self-assignment can't free the value.
       if (other.IsCalc())
       {
-        UnevaluatedCalcAddRef(other.payload.calc);
+        UnevaluatedCalcRef(other._payload.Calc);
       }
 
-      index = other.index;
-      payload = other.payload;
+      if (IsCalc())
+      {
+        UnevaluatedCalcDeref(_payload.Calc);
+      }
+
+      _index = other._index;
+      _payload = other._payload;
 
       return *this;
     }
 
     PrimitiveData &operator=(PrimitiveData &&other) noexcept
     {
-      if (IsCalc())
+      if (this == &other)
       {
-        UnevaluatedCalcSubRef(payload.calc);
+        return *this;
       }
 
-      index = other.index;
-      payload = other.payload;
+      if (IsCalc())
+      {
+        UnevaluatedCalcDeref(_payload.Calc);
+      }
+
+      _index = other._index;
+      _payload = other._payload;
 
       other.SetAsMovedFrom();
 
@@ -301,16 +333,16 @@ namespace krys::boo::css
     // Allows PrimitiveNumeric<T> to be efficiently assigned to PrimitiveNumericOrKeyword<T, Ks...>.
 
     template <SubsumesChildPrimitiveData<PrimitiveData> T>
-    PrimitiveData(const T &other) noexcept : payload {other.payload}, index {other.index}
+    PrimitiveData(const T &other) noexcept : _payload {other._payload}, _index {other._index}
     {
       if (other.IsCalc())
       {
-        UnevaluatedCalcAddRef(other.payload.calc);
+        UnevaluatedCalcRef(other._payload.Calc);
       }
     }
 
     template <SubsumesChildPrimitiveData<PrimitiveData> T>
-    PrimitiveData(T &&other) noexcept : payload {other.payload}, index {other.index}
+    PrimitiveData(T &&other) noexcept : _payload {other._payload}, _index {other._index}
     {
       other.SetAsMovedFrom();
     }
@@ -318,17 +350,18 @@ namespace krys::boo::css
     template <SubsumesChildPrimitiveData<PrimitiveData> T>
     PrimitiveData &operator=(const T &other) noexcept
     {
-      if (IsCalc())
-      {
-        UnevaluatedCalcSubRef(payload.calc);
-      }
       if (other.IsCalc())
       {
-        UnevaluatedCalcAddRef(other.payload.calc);
+        UnevaluatedCalcRef(other._payload.Calc);
       }
 
-      index = other.index;
-      payload = other.payload;
+      if (IsCalc())
+      {
+        UnevaluatedCalcDeref(_payload.Calc);
+      }
+
+      _index = other._index;
+      _payload = other._payload;
 
       return *this;
     }
@@ -338,11 +371,11 @@ namespace krys::boo::css
     {
       if (IsCalc())
       {
-        UnevaluatedCalcSubRef(payload.calc);
+        UnevaluatedCalcDeref(_payload.Calc);
       }
 
-      index = other.index;
-      payload = other.payload;
+      _index = other._index;
+      _payload = other._payload;
 
       other.SetAsMovedFrom();
 
@@ -353,13 +386,13 @@ namespace krys::boo::css
     {
       if (IsCalc())
       {
-        UnevaluatedCalcSubRef(payload.calc);
+        UnevaluatedCalcDeref(_payload.Calc);
       }
     }
 
-    bool operator==(const PrimitiveData &other) const noexcept
+    KRYS_NODISCARD bool operator==(const PrimitiveData &other) const noexcept
     {
-      if (index != other.index)
+      if (_index != other._index)
       {
         return false;
       }
@@ -369,26 +402,26 @@ namespace krys::boo::css
         return AsCalc() == other.AsCalc();
       }
 
-      return payload.number == other.payload.number;
+      return _payload.Number == other._payload.Number;
     }
 
-    bool operator==(ValidKeywordForList<Keywords> auto other) const noexcept
+    KRYS_NODISCARD bool operator==(ValidKeywordForList<Keywords> auto other) const noexcept
     {
-      return index == Index(other);
+      return _index == Index(other);
     }
 
-    bool operator==(const Raw &raw) const
+    KRYS_NODISCARD bool operator==(const Raw &raw) const noexcept
     {
-      if (index != Index(raw))
+      if (_index != Index(raw))
       {
         return false;
       }
 
       krys_debug_assert(IsRaw());
-      return payload.number == raw.value;
+      return _payload.Number == raw.Value;
     }
 
-    bool operator==(const Calc &calc) const noexcept
+    KRYS_NODISCARD bool operator==(const Calc &calc) const noexcept
     {
       if (!IsCalc())
       {
@@ -400,44 +433,44 @@ namespace krys::boo::css
 
     template <typename T>
     requires NumericRaw<T> && NestedUnitEnumOf<typename T::UnitType, UnitType>
-    constexpr bool operator==(const T &raw) const noexcept
+    KRYS_NODISCARD constexpr bool operator==(const T &raw) const noexcept
     {
-      if (index != Index(UnitUpcast<UnitType>(raw.Unit)))
+      if (_index != Index(UnitUpcast<UnitType>(raw.Unit)))
       {
         return false;
       }
 
       krys_debug_assert(IsRaw());
-      return payload.number == raw.value;
+      return _payload.Number == raw.Value;
     }
 
-    template <UnitType unitValue>
-    bool operator==(const ValueLiteral<unitValue> &literal) const noexcept
+    template <UnitType UnitValue>
+    KRYS_NODISCARD bool operator==(const ValueLiteral<UnitValue> &literal) const noexcept
     {
-      if (index != Index(literal.Unit))
+      if (_index != Index(literal.Unit))
       {
         return false;
       }
 
       krys_debug_assert(IsRaw());
-      return payload.number == literal.value;
+      return _payload.Number == literal.Value;
     }
 
-    template <NestedUnitEnumOf<UnitType> E, E unitValue>
-    bool operator==(const ValueLiteral<unitValue> &literal) const noexcept
+    template <NestedUnitEnumOf<UnitType> E, E UnitValue>
+    KRYS_NODISCARD bool operator==(const ValueLiteral<UnitValue> &literal) const noexcept
     {
-      if (index != Index(UnitUpcast<UnitType>(literal.Unit)))
+      if (_index != Index(UnitUpcast<UnitType>(literal.Unit)))
       {
         return false;
       }
 
       krys_debug_assert(IsRaw());
-      return payload.number == literal.value;
+      return _payload.Number == literal.Value;
     }
 
     // MARK: Conditional Accessors
 
-    Maybe<Raw> raw() const noexcept
+    KRYS_NODISCARD Maybe<Raw> GetRaw() const noexcept
     {
       if (IsRaw())
       {
@@ -447,7 +480,7 @@ namespace krys::boo::css
       return null;
     }
 
-    Maybe<Calc> calc() const noexcept
+    KRYS_NODISCARD Maybe<Calc> GetCalc() const noexcept
     {
       if (IsCalc())
       {
@@ -459,57 +492,57 @@ namespace krys::boo::css
 
     // MARK: Accessors
 
-    Raw AsRaw() const noexcept
+    KRYS_NODISCARD Raw AsRaw() const noexcept
     {
-      assert(IsRaw());
-      return Raw {index.Unit(), payload.number};
+      krys_debug_assert(IsRaw());
+      return Raw {_index.Unit(), _payload.Number};
     }
 
-    Calc AsCalc() const noexcept
+    KRYS_NODISCARD Calc AsCalc() const noexcept
     {
-      assert(IsCalc());
-      return Calc {*payload.calc};
+      krys_debug_assert(IsCalc());
+      return Calc {*_payload.Calc};
     }
 
-    constexpr bool IsRaw() const noexcept
+    KRYS_NODISCARD constexpr bool IsRaw() const noexcept
     {
-      return index.IsRaw();
+      return _index.IsRaw();
     }
 
-    constexpr bool IsCalc() const noexcept
+    KRYS_NODISCARD constexpr bool IsCalc() const noexcept
     {
-      return index.IsCalc();
+      return _index.IsCalc();
     }
 
-    constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
+    KRYS_NODISCARD constexpr bool IsKeyword(ValidKeywordForList<Keywords> auto keyword) const noexcept
     {
-      return index.IsKeyword(keyword);
+      return _index.IsKeyword(keyword);
     }
 
-    constexpr bool IsEmpty() const noexcept
+    KRYS_NODISCARD constexpr bool IsEmpty() const noexcept
     {
-      return index.IsEmpty();
+      return _index.IsEmpty();
     }
 
-    constexpr bool IsMovedFrom() const noexcept
+    KRYS_NODISCARD constexpr bool IsMovedFrom() const noexcept
     {
-      return index.IsMovedFrom();
+      return _index.IsMovedFrom();
     }
 
     template <typename T>
-    bool HoldsAlternative() const noexcept
+    KRYS_NODISCARD bool HoldsAlternative() const noexcept
     {
       if constexpr (SameType<T, Calc>)
       {
-        return index.IsCalc();
+        return _index.IsCalc();
       }
       else if constexpr (SameType<T, Raw>)
       {
-        return index.IsRaw();
+        return _index.IsRaw();
       }
       else if constexpr (ValidKeywordForList<T, Keywords>)
       {
-        return index.IsKeyword(T {});
+        return _index.IsKeyword(T {});
       }
     }
 
@@ -520,17 +553,19 @@ namespace krys::boo::css
       {
         return f(AsRaw());
       }
+
       if (IsCalc())
       {
         return f(AsCalc());
       }
-      return index.VisitKeyword(std::forward<F>(f));
+
+      return _index.VisitKeyword(std::forward<F>(f));
     }
 
     void SetAsMovedFrom() noexcept
     {
-      index.SetAsMovedFrom();
-      payload.number = 0;
+      _index.SetAsMovedFrom();
+      _payload.Number = 0;
     }
   };
 }

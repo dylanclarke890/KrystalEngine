@@ -147,6 +147,17 @@ namespace krys
     {
       using type = uint64_t;
     };
+
+    template <template <typename...> class Base, typename Derived>
+    struct IsBaseOfTemplateImpl
+    {
+      template <typename... Args>
+      static std::true_type Test(Base<Args...> *);
+      static std::false_type Test(void *);
+
+      constexpr static const bool value =
+        decltype(Test(std::declval<typename std::remove_cv<Derived>::type *>()))::value;
+    };
   }
 
   template <typename T>
@@ -180,10 +191,17 @@ namespace krys
   template <typename T>
   using sized_unsigned_t = detail_traits::SizedUnsignedTrait<sizeof(T)>::type;
 
+  /// @brief The unsigned integer type that is `Bytes` bytes wide (1, 2, 4 or 8).
+  template <size_t Bytes>
+  using unsigned_of_size_t = detail_traits::SizedUnsignedTrait<Bytes>::type;
+
   /// @brief Returns T with the same constness as TRef.
   template <typename TRef, typename T>
   using match_constness_t =
     conditional_t<std::is_const_v<remove_ref_t<TRef>>, add_const_t<T>, remove_const_t<T>>;
+
+  template <template <typename...> class Base, typename Derived>
+  concept IsBaseOfTemplate = detail_traits::IsBaseOfTemplateImpl<Base, Derived>::value;
 
 #pragma endregion
 }

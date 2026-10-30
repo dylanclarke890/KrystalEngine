@@ -1,0 +1,42 @@
+﻿<!doctype html>
+<!-- The "engine-textures" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, giving each
+     canvas an engine texture of the pattern the script below draws for Chrome: blue on the left, orange on
+     the right, half transparent at the bottom right. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  .cell { position: absolute; width: 100px; height: 80px; background: #e6eef5; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+  <!-- At its natural size. -->
+  <div class="cell" style="left: 10px; top: 10px"><canvas id="natural" width="40" height="20"></canvas></div>
+  <!-- Stretched, and fitted with object-fit: contain and cover, cover rounded. -->
+  <div class="cell" style="left: 130px; top: 10px"><canvas id="stretched" width="40" height="20"
+    style="width: 100px; height: 80px"></canvas></div>
+  <div class="cell" style="left: 250px; top: 10px"><canvas id="contain" width="40" height="20"
+    style="width: 100px; height: 80px; object-fit: contain"></canvas></div>
+  <div class="cell" style="left: 10px; top: 110px"><canvas id="cover" width="40" height="20"
+    style="width: 100px; height: 80px; object-fit: cover; border-radius: 16px"></canvas></div>
+  <!-- Turned and faded. -->
+  <div class="cell" style="left: 130px; top: 110px"><canvas id="turned" width="40" height="20"
+    style="width: 80px; height: 40px; margin: 20px 10px; transform: rotate(20deg)"></canvas></div>
+  <div class="cell" style="left: 250px; top: 110px"><canvas id="faded" width="40" height="20"
+    style="width: 80px; height: 40px; margin: 20px 10px; opacity: 0.5"></canvas></div>
+  <script>
+    for (const canvas of document.querySelectorAll("canvas")) {
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#336699";
+      context.fillRect(0, 0, 20, 20);
+      context.fillStyle = "#ee7733";
+      context.fillRect(20, 0, 20, 10);
+      context.fillStyle = "rgba(238, 119, 51, 0.5)";
+      context.fillRect(20, 10, 20, 10);
+    }
+  </script>
+</body>
+</html>

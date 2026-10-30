@@ -10,8 +10,7 @@
 #include "Krystal.Core/Types/Expected.hpp"
 #include "Krystal.Core/Types/String.hpp"
 #include "Krystal.Core/Types/UniquePtr.hpp"
-#include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Gfx/IRenderer.hpp"
+#include "Krystal.Gfx/Device.hpp"
 #include "Krystal.PAL/Events.hpp"
 #include "Krystal.PAL/Input.hpp"
 #include "Krystal.PAL/IWindow.hpp"
@@ -68,8 +67,8 @@ namespace krys
     UniquePtr<pal::IWindow> Window {};
     UniquePtr<pal::Input> Input {};
     UniquePtr<io::VirtualFileSystem> VFS {};
-    UniquePtr<Gfx::IContext> GraphicsContext {};
-    UniquePtr<Gfx::IRenderer> Renderer {};
+    UniquePtr<gfx::Device> Device {};
+    gfx::SwapchainHandle Swapchain {};
   };
 
   /// @brief Base class for a Krystal application.
@@ -105,8 +104,8 @@ namespace krys
     /// @param dt The fixed time step, in seconds. Does not change unless explicitly set.
     virtual void OnFixedUpdate(seconds dt) noexcept;
 
-    /// @brief Per-frame render method.
-    virtual void OnRender() noexcept;
+    /// @brief Per-frame render method: records the frame into the device's command buffer.
+    virtual void OnRender(gfx::CommandBuffer &commands) noexcept;
 
     /// @brief Called once after the application stops running, before all services are shut down.
     virtual void OnShutdown() noexcept;

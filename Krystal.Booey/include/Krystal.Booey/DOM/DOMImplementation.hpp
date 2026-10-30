@@ -7,6 +7,11 @@
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::boo::url
+{
+  class URL;
+}
+
 namespace krys::boo::dom
 {
   class Document;
@@ -55,5 +60,11 @@ namespace krys::boo::dom
     }
 
 #pragma endregion
+
+    /// @brief Makes the document a load of @p contentType at @p url shows: XHTML, SVG and other XML
+    /// documents for their types, and an HTML document for the rest.
+    // FIXME: Text, image, media and plug-in documents, once there are those.
+    KRYS_NODISCARD static Ref<Document> CreateDocument(utf8_stringview contentType,
+                                                       const url::URL &url) noexcept;
   };
 }

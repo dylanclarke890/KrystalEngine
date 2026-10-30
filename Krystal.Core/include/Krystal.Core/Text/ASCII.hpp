@@ -221,7 +221,7 @@ namespace krys::text
     auto ch = static_cast<sized_unsigned_t<TChar>>(c);
     krys_debug_assert(IsASCIIHexDigit<TChar>(ch));
 
-    return ch < 'A' ? ch - '0' : (ch - 'A' + 10u) & 0xFu;
+    return static_cast<uint8>(ch < 'A' ? ch - '0' : (ch - 'A' + 10u) & 0xFu);
   }
 
   template <IsCharOrByte TChar>
@@ -318,7 +318,15 @@ namespace krys::text
 
 #pragma region Comparison
 
-  // TODO: this is a bit clunky to use with string literals as they don't have .length etc., rework slightly
+  /// @brief Whether the character `c` equals `expected`, ignoring ASCII case. Unlike `IsASCIICaselessEqual`,
+  /// compares single characters.
+  template <typename TChar, typename UChar>
+  KRYS_NODISCARD constexpr bool IsASCIIAlphaCaselessEqual(TChar c, UChar expected) noexcept
+  {
+    return ToASCIILower(static_cast<char32>(c)) == ToASCIILower(static_cast<char32>(expected));
+  }
+
+  // FIXME: This is a bit clunky to use with string literals as they don't have .length etc., rework slightly
   // to account for this
   template <typename A, typename B>
   KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(A &&a, B &&b) noexcept
@@ -344,7 +352,7 @@ namespace krys::text
   template <IsCharOrByte TChar>
   KRYS_NODISCARD constexpr bool IsASCIICaselessEqual(TChar character, char expected) noexcept
   {
-    krys_debug_assert(ToASCIILowerUnchecked<TChar>(expected) == expected);
+    krys_debug_assert(ToASCIILowerUnchecked<TChar>(expected) == static_cast<TChar>(expected));
 
     auto ch = static_cast<comparable_char_t<TChar>>(character);
     return ToASCIILowerUnchecked(ch) == static_cast<TChar>(expected);

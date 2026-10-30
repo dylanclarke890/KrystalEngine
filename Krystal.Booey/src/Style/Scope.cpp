@@ -1,0 +1,1395 @@
+﻿#include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/CSS/Counter/CounterStyleRegistry.hpp"
+#include "Krystal.Booey/CSS/CSSFontSelector.hpp"
+#include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheet.hpp"
+#include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
+#include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Style/CustomPropertyRegistry.hpp"
+#include "Krystal.Booey/Style/Invalidator.hpp"
+#include "Krystal.Booey/Style/MatchResultCache.hpp"
+#include "Krystal.Booey/Style/Resolver.hpp"
+#include "Krystal.Booey/Style/RuleSet.hpp"
+#include "Krystal.Booey/Style/Styleable.hpp"
+#include "Krystal.Booey/SVG/SVGStyleElement.hpp"
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Hash.hpp"
+#include <algorithm>
+#include <utility>
+
+namespace krys::boo::style
+{
+  namespace
+  {
+    template <typename T, typename U>
+    KRYS_NODISCARD bool Contains(const List<WeakPtr<T>> &list, const U &value) noexcept
+    {
+      return std::ranges::any_of(list, [&](const WeakPtr<T> &item) { return item.get() == &value; });
+    }
+
+    template <typename T, typename U>
+    bool Remove(List<WeakPtr<T>> &list, const U &value) noexcept
+    {
+      auto it = std::ranges::find_if(list, [&](const WeakPtr<T> &item) { return item.get() == &value; });
+      if (it == list.end())
+      {
+        return false;
+      }
+      list.erase(it);
+      return true;
+    }
+
+    template <typename T>
+    KRYS_NODISCARD bool IsEmptyIgnoringNullReferences(const List<WeakPtr<T>> &list) noexcept
+    {
+      return std::ranges::none_of(list, [](const WeakPtr<T> &item) { return item.get() != nullptr; });
+    }
+
+    KRYS_NODISCARD bool ContainsAlternate(const Maybe<dom::DOMString> &rel) noexcept
+    {
+      return rel && rel->find(u8"alternate") != dom::DOMString::npos;
+    }
+
+    void FilterEnabledNonemptyCSSStyleSheets(List<RefPtr<css::CSSStyleSheet>> &result,
+                                             const List<RefPtr<css::StyleSheet>> &sheets) noexcept
+    {
+      for (auto &sheet : sheets)
+      {
+        auto *styleSheet = DynamicDowncast<css::CSSStyleSheet>(*sheet);
+        if (!styleSheet)
+        {
+          continue;
+        }
+        if (styleSheet->IsLoading())
+        {
+          continue;
+        }
+        if (styleSheet->Disabled())
+        {
+          continue;
+        }
+        if (!styleSheet->Length())
+        {
+          continue;
+        }
+        result.push_back(ShareRefPtr(styleSheet));
+      }
+    }
+  }
+
+  ScopeIdentifier ScopeIdentifier::Generate() noexcept
+  {
+    static uint64 next = 0;
+    return ScopeIdentifier {++next};
+  }
+
+  Scope::Scope(dom::Document &document) noexcept
+      : _document(&document), _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
+        _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
+  {
+  }
+
+  Scope::Scope(dom::ShadowRoot &shadowRoot) noexcept
+      : _document(&shadowRoot.NodeDocument()), _shadowRoot(&shadowRoot),
+        _customPropertyRegistry(CreateUnique<CustomPropertyRegistry>(*this)),
+        _counterStyleRegistry(CreateUnique<css::CounterStyleRegistry>())
+  {
+  }
+
+  Scope::~Scope() noexcept
+  {
+    krys_debug_assert(!HasPendingSheets());
+  }
+
+  size_t Scope::ResolverSharingKeyHash::operator()(const ResolverSharingKey &key) const noexcept
+  {
+    size_t seed = Hash::Combine(std::get<1>(key), std::get<2>(key));
+    for (auto &contents : std::get<0>(key))
+    {
+      seed = Hash::Combine(seed, contents.get());
+    }
+    return seed;
+  }
+
+  Resolver &Scope::GetResolver() noexcept
+  {
+    if (!_resolver)
+    {
+      if (_shadowRoot)
+      {
+        CreateOrFindSharedShadowTreeResolver();
+      }
+      else
+      {
+        CreateDocumentResolver();
+      }
+
+      if (_resolver->RuleSets().Features().UsesHasPseudoClass())
+      {
+        _usesHasPseudoClass = true;
+      }
+    }
+    return *_resolver;
+  }
+
+  Resolver *Scope::ResolverIfExists() noexcept
+  {
+    return _resolver.get();
+  }
+
+  const Resolver *Scope::ResolverIfExists() const noexcept
+  {
+    return _resolver.get();
+  }
+
+  void Scope::CreateDocumentResolver() noexcept
+  {
+    krys_debug_assert(!_resolver);
+    krys_debug_assert(!_shadowRoot);
+
+    auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+    _resolver = Resolver::Create(*_document, Resolver::ScopeType::Document);
+
+    if (!_dynamicViewTransitionsStyle)
+    {
+      _dynamicViewTransitionsStyle = RuleSet::Create();
+    }
+
+    _resolver->RuleSets().SetDynamicViewTransitionsStyle(_dynamicViewTransitionsStyle.get());
+
+    _document->GetFontSelector().BuildStarted();
+
+    _resolver->RuleSets().InitializeUserStyle();
+    _resolver->AppendAuthorStyleSheets(_activeStyleSheets);
+
+    _document->GetFontSelector().BuildCompleted();
+
+    _isUpdatingStyleResolver = isUpdatingStyleResolver;
+  }
+
+  void Scope::CreateOrFindSharedShadowTreeResolver() noexcept
+  {
+    krys_debug_assert(!_resolver);
+    krys_debug_assert(_shadowRoot);
+
+    krys_assert(!_isUpdatingStyleResolver);
+
+    auto key = MakeResolverSharingKey();
+
+    auto &sharedShadowTreeResolvers = DocumentScope()._sharedShadowTreeResolvers;
+    if (auto it = sharedShadowTreeResolvers.find(key); it != sharedShadowTreeResolvers.end())
+    {
+      _resolver = it->second;
+      _resolver->SetSharedBetweenShadowTrees();
+      return;
+    }
+
+    {
+      auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+      _resolver = Resolver::Create(*_document, Resolver::ScopeType::ShadowTree);
+
+      _resolver->RuleSets().SetUsesSharedUserStyle(!IsForUserAgentShadowTree());
+      _resolver->AppendAuthorStyleSheets(_activeStyleSheets);
+
+      _isUpdatingStyleResolver = isUpdatingStyleResolver;
+    }
+
+    Ref<Resolver> sharedResolver = _resolver;
+    sharedShadowTreeResolvers.emplace(krys::move(key), krys::move(sharedResolver));
+
+    static constexpr auto maximimumSharedResolverCount = 256;
+    if (sharedShadowTreeResolvers.size() > maximimumSharedResolverCount)
+    {
+      sharedShadowTreeResolvers.erase(sharedShadowTreeResolvers.begin());
+    }
+  }
+
+  void Scope::UnshareShadowTreeResolverBeforeMutation() noexcept
+  {
+    krys_debug_assert(_shadowRoot);
+
+    DocumentScope()._sharedShadowTreeResolvers.erase(MakeResolverSharingKey());
+  }
+
+  Scope::ResolverSharingKey Scope::MakeResolverSharingKey() noexcept
+  {
+    constexpr bool isNonEmptyHashTableValue = true;
+    List<RefPtr<css::StyleSheetContents>> contents;
+    contents.reserve(_activeStyleSheets.size());
+    for (auto &sheet : _activeStyleSheets)
+    {
+      contents.push_back(ShareRefPtr(&sheet->Contents()));
+    }
+    return {krys::move(contents), IsForUserAgentShadowTree(), isNonEmptyHashTableValue};
+  }
+
+  bool Scope::IsForUserAgentShadowTree() const noexcept
+  {
+    return _shadowRoot && _shadowRoot->Mode() == dom::ShadowRootMode::UserAgent;
+  }
+
+  void Scope::ClearResolver() noexcept
+  {
+    krys_assert(!_isUpdatingStyleResolver);
+    krys_assert(!_document->IsResolvingTreeStyle());
+
+    _resolver = nullptr;
+    GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();
+    GetCounterStyleRegistry().ClearAuthorCounterStyles();
+  }
+
+  void Scope::ClearViewTransitionStyles() noexcept
+  {
+    ClearResolver();
+    _dynamicViewTransitionsStyle = nullptr;
+  }
+
+  void Scope::InvalidateMatchedDeclarationsCache() noexcept
+  {
+    if (!_shadowRoot)
+    {
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().InvalidateMatchedDeclarationsCache();
+        }
+      }
+    }
+
+    if (auto *resolver = ResolverIfExists())
+    {
+      resolver->InvalidateMatchedDeclarationsCache();
+    }
+  }
+
+  MatchResultCache &Scope::GetMatchResultCache() noexcept
+  {
+    if (!_matchResultCache)
+    {
+      _matchResultCache = CreateUnique<MatchResultCache>();
+    }
+    return *_matchResultCache;
+  }
+
+  void Scope::ReleaseMemory() noexcept
+  {
+    if (!_shadowRoot)
+    {
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().ReleaseMemory();
+        }
+      }
+    }
+
+    ClearResolver();
+
+    _sharedShadowTreeResolvers.clear();
+    _matchResultCache = nullptr;
+  }
+
+  Scope *Scope::ForOrdinal(dom::Element &element, ScopeOrdinal ordinal) noexcept
+  {
+    if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+    {
+      return pseudoElement->HostElement() ? ForOrdinal(*pseudoElement->HostElement(), ordinal) : nullptr;
+    }
+
+    if (ordinal == ScopeOrdinal::Element)
+    {
+      return &ForNode(element);
+    }
+    if (ordinal == ScopeOrdinal::Shadow)
+    {
+      auto *shadowRoot = dom::TreeQueries::GetShadowRoot(element);
+      return shadowRoot ? &shadowRoot->StyleScope() : nullptr;
+    }
+    if (ordinal <= ScopeOrdinal::ContainingHost)
+    {
+      auto *host = HostForScopeOrdinal(element, ordinal);
+      return host ? &ForNode(*host) : nullptr;
+    }
+    auto *slot = AssignedSlotForScopeOrdinal(element, ordinal);
+    return slot ? &ForNode(*slot) : nullptr;
+  }
+
+  const Scope *Scope::ForOrdinal(const dom::Element &element, ScopeOrdinal ordinal) noexcept
+  {
+    return ForOrdinal(const_cast<dom::Element &>(element), ordinal);
+  }
+
+  Scope &Scope::ForNode(dom::Node &node) noexcept
+  {
+    if (auto *shadowRoot = DynamicDowncast<dom::ShadowRoot>(dom::TreeQueries::Root(node)))
+    {
+      return shadowRoot->StyleScope();
+    }
+    return node.NodeDocument().StyleScope();
+  }
+
+  const Scope &Scope::ForNode(const dom::Node &node) noexcept
+  {
+    return ForNode(const_cast<dom::Node &>(node));
+  }
+
+  void Scope::SetPreferredStylesheetSetName(const dom::DOMString &name) noexcept
+  {
+    if (_preferredStylesheetSetName == name)
+    {
+      return;
+    }
+    _preferredStylesheetSetName = name;
+    DidChangeActiveStyleSheetCandidates();
+  }
+
+  void Scope::AddPendingSheet(const dom::Element &element) noexcept
+  {
+    krys_debug_assert(!HasPendingSheet(element));
+
+    bool isInHead = false;
+    for (auto *ancestor = element.ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+    {
+      if (Is<html::HTMLHeadElement>(*ancestor))
+      {
+        isInHead = true;
+        break;
+      }
+    }
+
+    if (isInHead)
+    {
+      _elementsInHeadWithPendingSheets.push_back(CreateWeakPtr(&element));
+    }
+    else
+    {
+      _elementsInBodyWithPendingSheets.push_back(CreateWeakPtr(&element));
+    }
+  }
+
+  // This method is called whenever a top-level stylesheet has finished loading.
+  void Scope::RemovePendingSheet(const dom::Element &element) noexcept
+  {
+    krys_debug_assert(HasPendingSheet(element));
+
+    if (!Remove(_elementsInHeadWithPendingSheets, element))
+    {
+      Remove(_elementsInBodyWithPendingSheets, element);
+    }
+
+    DidRemovePendingStylesheet();
+  }
+
+  void Scope::AddPendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  {
+    krys_debug_assert(!HasPendingSheet(processingInstruction));
+
+    _processingInstructionsWithPendingSheets.push_back(CreateWeakPtr(&processingInstruction));
+  }
+
+  void Scope::RemovePendingSheet(const dom::ProcessingInstruction &processingInstruction) noexcept
+  {
+    krys_debug_assert(HasPendingSheet(processingInstruction));
+
+    Remove(_processingInstructionsWithPendingSheets, processingInstruction);
+
+    DidRemovePendingStylesheet();
+  }
+
+  bool Scope::HasPendingSheets() const noexcept
+  {
+    return HasPendingSheetsBeforeBody() || !IsEmptyIgnoringNullReferences(_elementsInBodyWithPendingSheets);
+  }
+
+  bool Scope::HasPendingSheetsBeforeBody() const noexcept
+  {
+    return !IsEmptyIgnoringNullReferences(_elementsInHeadWithPendingSheets)
+           || !IsEmptyIgnoringNullReferences(_processingInstructionsWithPendingSheets);
+  }
+
+  bool Scope::HasPendingSheetsInBody() const noexcept
+  {
+    return !IsEmptyIgnoringNullReferences(_elementsInBodyWithPendingSheets);
+  }
+
+  void Scope::DidRemovePendingStylesheet() noexcept
+  {
+    if (HasPendingSheets())
+    {
+      return;
+    }
+
+    DidChangeActiveStyleSheetCandidates();
+
+    if (!_shadowRoot)
+    {
+      _document->DidRemoveAllPendingStylesheet();
+    }
+  }
+
+  bool Scope::HasPendingSheet(const dom::Element &element) const noexcept
+  {
+    return Contains(_elementsInHeadWithPendingSheets, element) || HasPendingSheetInBody(element);
+  }
+
+  bool Scope::HasPendingSheetInBody(const dom::Element &element) const noexcept
+  {
+    return Contains(_elementsInBodyWithPendingSheets, element);
+  }
+
+  bool Scope::HasPendingSheet(const dom::ProcessingInstruction &processingInstruction) const noexcept
+  {
+    return Contains(_processingInstructionsWithPendingSheets, processingInstruction);
+  }
+
+  void Scope::AddStyleSheetCandidateNode(dom::Node &node, bool createdByParser) noexcept
+  {
+    if (!node.IsConnected())
+    {
+      return;
+    }
+
+    std::erase_if(_styleSheetCandidateNodes, [](const WeakPtr<dom::Node> &candidate) { return !candidate; });
+
+    // Until the <body> exists, we have no choice but to compare document positions,
+    // since styles outside of the body and head continue to be shunted into the head
+    // (and thus can shift to end up before dynamically added DOM content that is also
+    // outside the body).
+    if ((createdByParser && _document->Body()) || _styleSheetCandidateNodes.empty())
+    {
+      _styleSheetCandidateNodes.push_back(CreateWeakPtr(&node));
+      return;
+    }
+
+    // Determine an appropriate insertion point.
+    for (auto it = _styleSheetCandidateNodes.end(); it != _styleSheetCandidateNodes.begin();)
+    {
+      --it;
+      if ((*it)->CompareDocumentPosition(node) == dom::DocumentPosition::DOCUMENT_POSITION_FOLLOWING)
+      {
+        _styleSheetCandidateNodes.insert(it + 1, CreateWeakPtr(&node));
+        return;
+      }
+    }
+
+    _styleSheetCandidateNodes.insert(_styleSheetCandidateNodes.begin(), CreateWeakPtr(&node));
+  }
+
+  void Scope::RemoveStyleSheetCandidateNode(dom::Node &node) noexcept
+  {
+    if (Remove(_styleSheetCandidateNodes, node))
+    {
+      DidChangeActiveStyleSheetCandidates();
+    }
+  }
+
+  auto Scope::CollectActiveStyleSheets() noexcept -> ActiveStyleSheetCollection
+  {
+    List<RefPtr<css::StyleSheet>> sheets;
+    List<RefPtr<css::StyleSheet>> styleSheetsForStyleSheetsList;
+
+    for (auto &candidate : _styleSheetCandidateNodes)
+    {
+      if (!candidate)
+      {
+        continue;
+      }
+      auto &node = *candidate;
+
+      RefPtr<css::StyleSheet> sheet;
+      if (auto *processingInstruction = DynamicDowncast<dom::ProcessingInstruction>(node))
+      {
+        if (!processingInstruction->IsCSS())
+        {
+          continue;
+        }
+        // We don't support linking to embedded CSS stylesheets, see
+        // <https://bugs.webkit.org/show_bug.cgi?id=49281> for discussion.
+        sheet = ShareRefPtr(processingInstruction->Sheet());
+        if (sheet)
+        {
+          styleSheetsForStyleSheetsList.push_back(sheet);
+          sheets.push_back(krys::move(sheet));
+        }
+        continue;
+      }
+
+      auto *element = DynamicDowncast<dom::Element>(node);
+      if (!element)
+      {
+        continue;
+      }
+
+      auto *htmlElement = DynamicDowncast<html::HTMLElement>(*element);
+      auto *linkElement = htmlElement ? DynamicDowncast<html::HTMLLinkElement>(*htmlElement) : nullptr;
+      auto *styleElement = htmlElement ? DynamicDowncast<html::HTMLStyleElement>(*htmlElement) : nullptr;
+      auto *svgElement = DynamicDowncast<svg::SVGElement>(*element);
+      auto *svgStyleElement = svgElement ? DynamicDowncast<svg::SVGStyleElement>(*svgElement) : nullptr;
+      if (!linkElement && !styleElement && !svgStyleElement)
+      {
+        continue;
+      }
+
+      auto title = dom::TreeQueries::IsInShadowTree(*element)
+                     ? dom::DOMString()
+                     : element->GetAttribute(u8"title").value_or(u8"");
+      bool enabledViaScript = false;
+      if (linkElement)
+      {
+        // <LINK> element
+        if (linkElement->IsDisabled())
+        {
+          continue;
+        }
+        enabledViaScript = linkElement->IsEnabledViaScript();
+        if (linkElement->StyleSheetIsLoading())
+        {
+          // it is loading but we should still decide which style sheet set to use
+          if (!enabledViaScript && !title.empty() && _preferredStylesheetSetName.empty())
+          {
+            if (!ContainsAlternate(element->GetAttribute(u8"rel")))
+            {
+              _preferredStylesheetSetName = title;
+            }
+          }
+          continue;
+        }
+        if (!linkElement->Sheet())
+        {
+          title = {};
+        }
+      }
+      // Get the current preferred styleset. This is the
+      // set of sheets that will be enabled.
+      if (svgStyleElement)
+      {
+        sheet = ShareRefPtr(svgStyleElement->Sheet());
+      }
+      else if (linkElement)
+      {
+        sheet = ShareRefPtr(linkElement->Sheet());
+      }
+      else
+      {
+        sheet = ShareRefPtr(styleElement->Sheet());
+      }
+
+      if (sheet)
+      {
+        styleSheetsForStyleSheetsList.push_back(sheet);
+      }
+
+      // Check to see if this sheet belongs to a styleset
+      // (thus making it PREFERRED or ALTERNATE rather than
+      // PERSISTENT).
+      auto rel = element->GetAttribute(u8"rel");
+      if (!enabledViaScript && sheet && !title.empty())
+      {
+        // Yes, we have a title.
+        if (_preferredStylesheetSetName.empty())
+        {
+          // No preferred set has been established. If
+          // we are NOT an alternate sheet, then establish
+          // us as the preferred set. Otherwise, just ignore
+          // this sheet.
+          if (styleElement || !ContainsAlternate(rel))
+          {
+            _preferredStylesheetSetName = title;
+          }
+        }
+        if (title != _preferredStylesheetSetName)
+        {
+          sheet = nullptr;
+        }
+      }
+
+      if (ContainsAlternate(rel) && title.empty())
+      {
+        sheet = nullptr;
+      }
+
+      if (sheet)
+      {
+        sheets.push_back(krys::move(sheet));
+      }
+    }
+
+    auto canActivateAdoptedStyleSheet = [&](const css::CSSStyleSheet &sheet)
+    {
+      if (sheet.Disabled())
+      {
+        return false;
+      }
+      return sheet.Title().empty() || sheet.Title() == _preferredStylesheetSetName;
+    };
+
+    for (auto &adoptedStyleSheet : TreeScope().GetAdoptedStyleSheets())
+    {
+      if (!canActivateAdoptedStyleSheet(*adoptedStyleSheet))
+      {
+        continue;
+      }
+      styleSheetsForStyleSheetsList.push_back(adoptedStyleSheet);
+      sheets.push_back(adoptedStyleSheet);
+    }
+
+    return {krys::move(sheets), krys::move(styleSheetsForStyleSheetsList)};
+  }
+
+  void Scope::UpdateActiveStyleSheets(UpdateType updateType) noexcept
+  {
+    krys_debug_assert(!_pendingUpdate);
+
+    // FIXME: Wait for a living render tree, and defer the update while style is being resolved.
+
+    auto collection = CollectActiveStyleSheets();
+
+    List<RefPtr<css::CSSStyleSheet>> activeCSSStyleSheets;
+
+    // FIXME: The injected author style sheets, once there are extension style sheets.
+
+    FilterEnabledNonemptyCSSStyleSheets(activeCSSStyleSheets, collection.ActiveStyleSheets);
+
+    auto styleSheetChange = StyleSheetChange {ResolverUpdateType::Reconstruct};
+    if (updateType == UpdateType::ActiveSet)
+    {
+      styleSheetChange = AnalyzeStyleSheetChange(activeCSSStyleSheets);
+    }
+
+    UpdateResolver(activeCSSStyleSheets, styleSheetChange.UpdateType);
+
+    _activeStyleSheets.swap(activeCSSStyleSheets);
+    _styleSheetsForStyleSheetList.swap(collection.StyleSheetsForStyleSheetList);
+
+    if (_resolver && _resolver->RuleSets().Features().UsesHasPseudoClass())
+    {
+      _usesHasPseudoClass = true;
+    }
+
+    InvalidateStyleAfterStyleSheetChange(styleSheetChange);
+  }
+
+  void Scope::InvalidateStyleAfterStyleSheetChange(const StyleSheetChange &styleSheetChange) noexcept
+  {
+    if (_shadowRoot && !_shadowRoot->IsConnected())
+    {
+      return;
+    }
+
+    // The first body or frameset child of the html element.
+    auto hasBodyOrFrameset = [&]
+    {
+      auto isHTMLElement = [](const dom::Element &element, html::TagName tagName)
+      {
+        return Is<html::HTMLElement>(element) && element.TagQualifiedName().TagName() == tagName;
+      };
+      auto *documentElement = dom::TreeQueries::DocumentElement(*_document);
+      if (!documentElement || !isHTMLElement(*documentElement, html::TagName::html))
+      {
+        return false;
+      }
+      for (auto *child = dom::TreeQueries::FirstElementChild(*documentElement); child;
+           child = dom::TreeQueries::NextElementSibling(*child))
+      {
+        if (isHTMLElement(*child, html::TagName::body) || isHTMLElement(*child, html::TagName::frameset))
+        {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // If we are already parsing the body and so may have significant amount of elements, put some effort into
+    // trying to avoid style recalcs.
+    bool invalidateAll = !hasBodyOrFrameset() || _document->HasNodesWithMissingStyle();
+
+    if (styleSheetChange.UpdateType == ResolverUpdateType::Reconstruct || invalidateAll)
+    {
+      Invalidator::InvalidateAllStyle(*this);
+      return;
+    }
+
+    Invalidator invalidator(styleSheetChange.AddedSheets, _resolver->MediaQueryEvaluator());
+    invalidator.InvalidateStyle(*this);
+  }
+
+  Scope::StyleSheetChange
+    Scope::AnalyzeStyleSheetChange(const List<RefPtr<css::CSSStyleSheet>> &newStylesheets) noexcept
+  {
+    size_t newStylesheetCount = newStylesheets.size();
+
+    auto *resolver = ResolverIfExists();
+    if (!resolver)
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    if (resolver->IsSharedBetweenShadowTrees())
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    // Find out which stylesheets are new.
+    size_t oldStylesheetCount = _activeStyleSheets.size();
+    if (newStylesheetCount < oldStylesheetCount)
+    {
+      return {ResolverUpdateType::Reconstruct};
+    }
+
+    List<Ref<css::StyleSheetContents>> addedSheets;
+    size_t newIndex = 0;
+    for (size_t oldIndex = 0; oldIndex < oldStylesheetCount; ++oldIndex)
+    {
+      if (newIndex >= newStylesheetCount)
+      {
+        return {ResolverUpdateType::Reconstruct};
+      }
+
+      while (_activeStyleSheets[oldIndex] != newStylesheets[newIndex])
+      {
+        addedSheets.push_back(ShareRef(newStylesheets[newIndex]->Contents()));
+        ++newIndex;
+        if (newIndex == newStylesheetCount)
+        {
+          return {ResolverUpdateType::Reconstruct};
+        }
+      }
+      ++newIndex;
+    }
+    bool hasInsertions = !addedSheets.empty();
+    while (newIndex < newStylesheetCount)
+    {
+      addedSheets.push_back(ShareRef(newStylesheets[newIndex]->Contents()));
+      ++newIndex;
+    }
+
+    // If all new sheets were added at the end of the list we can just add them to existing Resolver.
+    // If there were insertions we need to re-add all the stylesheets so rules are ordered correctly.
+    return {hasInsertions ? ResolverUpdateType::Reset : ResolverUpdateType::Additive,
+            krys::move(addedSheets)};
+  }
+
+  void Scope::UpdateResolver(Span<const RefPtr<css::CSSStyleSheet>> activeStyleSheets,
+                             ResolverUpdateType updateType) noexcept
+  {
+    if (updateType == ResolverUpdateType::Reconstruct)
+    {
+      ClearResolver();
+      return;
+    }
+
+    if (_shadowRoot)
+    {
+      UnshareShadowTreeResolverBeforeMutation();
+    }
+
+    auto isUpdatingStyleResolver = std::exchange(_isUpdatingStyleResolver, true);
+
+    if (updateType == ResolverUpdateType::Reset)
+    {
+      GetCustomPropertyRegistry().ClearRegisteredFromStylesheets();
+      GetCounterStyleRegistry().ClearAuthorCounterStyles();
+      _resolver->RuleSets().ResetAuthorStyle();
+      _resolver->AppendAuthorStyleSheets(activeStyleSheets);
+    }
+    else
+    {
+      krys_debug_assert(updateType == ResolverUpdateType::Additive);
+      krys_debug_assert(activeStyleSheets.size() >= _activeStyleSheets.size());
+
+      auto firstNewIndex = _activeStyleSheets.size();
+      _resolver->AppendAuthorStyleSheets(activeStyleSheets.subspan(firstNewIndex));
+    }
+
+    _isUpdatingStyleResolver = isUpdatingStyleResolver;
+  }
+
+  bool Scope::ActiveStyleSheetsContains(const css::CSSStyleSheet &sheet) const noexcept
+  {
+    return std::ranges::any_of(_activeStyleSheets, [&](const RefPtr<css::CSSStyleSheet> &active)
+                               { return active.get() == &sheet; });
+  }
+
+  void Scope::FlushPendingUpdate() noexcept
+  {
+    if (_hasDescendantWithPendingUpdate)
+    {
+      FlushPendingDescendantUpdates();
+    }
+    if (_pendingUpdate)
+    {
+      FlushPendingSelfUpdate();
+    }
+  }
+
+  void Scope::FlushPendingSelfUpdate() noexcept
+  {
+    krys_debug_assert(_pendingUpdate);
+
+    auto updateType = *_pendingUpdate;
+
+    ClearPendingUpdate();
+
+    UpdateActiveStyleSheets(updateType);
+  }
+
+  void Scope::FlushPendingDescendantUpdates() noexcept
+  {
+    krys_debug_assert(_hasDescendantWithPendingUpdate);
+    krys_debug_assert(!_shadowRoot);
+    for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+    {
+      if (descendantShadowRoot)
+      {
+        descendantShadowRoot->StyleScope().FlushPendingUpdate();
+      }
+    }
+    _hasDescendantWithPendingUpdate = false;
+  }
+
+  void Scope::ClearPendingUpdate() noexcept
+  {
+    _pendingUpdate = null;
+  }
+
+  void Scope::ScheduleUpdate(UpdateType update) noexcept
+  {
+    if (update == UpdateType::ContentsOrInterpretation)
+    {
+      // :host and ::slotted rules might go away.
+      if (_shadowRoot)
+      {
+        Invalidator::InvalidateHostAndSlottedStyleIfNeeded(*_shadowRoot);
+        UnshareShadowTreeResolverBeforeMutation();
+      }
+
+      ClearResolver();
+
+      _matchResultCache = nullptr;
+    }
+
+    if (!_pendingUpdate || *_pendingUpdate < update)
+    {
+      _pendingUpdate = update;
+      if (_shadowRoot)
+      {
+        DocumentScope()._hasDescendantWithPendingUpdate = true;
+      }
+    }
+
+    if (_isPendingUpdateTaskQueued)
+    {
+      return;
+    }
+    _isPendingUpdateTaskQueued = true;
+    html::EventLoop::Current().QueueTask(html::TaskSource::DOMManipulation, Document(),
+                                         [scope = CreateWeakPtr(this)]
+                                         {
+                                           if (scope)
+                                           {
+                                             scope->_isPendingUpdateTaskQueued = false;
+                                             scope->FlushPendingUpdate();
+                                           }
+                                         });
+  }
+
+  void Scope::DidChangeActiveStyleSheetCandidates() noexcept
+  {
+    ScheduleUpdate(UpdateType::ActiveSet);
+  }
+
+  void Scope::DidChangeStyleSheetContents() noexcept
+  {
+    ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+  }
+
+  void Scope::DidChangeStyleSheetEnvironment() noexcept
+  {
+    if (!_shadowRoot)
+    {
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot)
+        {
+          descendantShadowRoot->StyleScope().ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+        }
+      }
+
+      _document->InvalidateCachedCSSParserContext();
+    }
+
+    ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+  }
+
+  auto Scope::MediaQueryViewportStateForDocument(const dom::Document &document) noexcept
+    -> MediaQueryViewportState
+  {
+    // These things affect evaluation of viewport dependent media queries.
+    return {document.View()->GetLayoutSize(), document.Frame()->PageZoomFactor(), document.Printing()};
+  }
+
+  void Scope::EvaluateMediaQueriesForViewportChange() noexcept
+  {
+    auto viewportState = MediaQueryViewportStateForDocument(*_document);
+
+    if (_viewportStateOnPreviousMediaQueryEvaluation
+        && *_viewportStateOnPreviousMediaQueryEvaluation == viewportState)
+    {
+      return;
+    }
+    // This doesn't need to be invalidated as any changes to the rules will compute their media queries to
+    // correct values.
+    _viewportStateOnPreviousMediaQueryEvaluation = viewportState;
+
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  void Scope::EvaluateMediaQueriesForAccessibilitySettingsChange() noexcept
+  {
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  void Scope::EvaluateMediaQueriesForAppearanceChange() noexcept
+  {
+    EvaluateMediaQueries([](Resolver &resolver) { return resolver.EvaluateDynamicMediaQueries(); });
+  }
+
+  auto Scope::CollectResolverScopes() noexcept -> ResolverScopes
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    ResolverScopes resolverScopes;
+
+    auto add = [&](Resolver &resolver, Scope &scope)
+    {
+      auto it =
+        std::ranges::find_if(resolverScopes, [&](auto &entry) { return entry.first.get() == &resolver; });
+      if (it == resolverScopes.end())
+      {
+        resolverScopes.emplace_back(ShareRef(resolver), List<WeakPtr<Scope>> {});
+        it = std::prev(resolverScopes.end());
+      }
+      it->second.push_back(WeakPtr<Scope>::WithRef(scope));
+    };
+
+    if (auto *resolver = ResolverIfExists())
+    {
+      add(*resolver, *this);
+    }
+
+    for (auto &shadowRoot : _document->InDocumentShadowRoots())
+    {
+      if (!shadowRoot)
+      {
+        continue;
+      }
+      auto &scope = shadowRoot->StyleScope();
+
+      if (auto *resolver = scope.ResolverIfExists())
+      {
+        add(*resolver, scope);
+      }
+    }
+    return resolverScopes;
+  }
+
+  template <typename TFunction>
+  void Scope::EvaluateMediaQueries(TFunction &&testFunction) noexcept
+  {
+    auto resolverScopes = CollectResolverScopes();
+    for (auto &[resolver, scopes] : resolverScopes)
+    {
+      auto evaluationChanges = testFunction(*resolver);
+      if (!evaluationChanges)
+      {
+        continue;
+      }
+
+      for (auto &scope : scopes)
+      {
+        if (!scope)
+        {
+          continue;
+        }
+        switch (evaluationChanges->ChangeType)
+        {
+          case DynamicMediaQueryEvaluationChanges::Type::InvalidateStyle:
+          {
+            Invalidator invalidator(evaluationChanges->InvalidationRuleSets);
+            invalidator.InvalidateStyle(*scope);
+            break;
+          }
+          case DynamicMediaQueryEvaluationChanges::Type::ResetStyle:
+            scope->ScheduleUpdate(UpdateType::ContentsOrInterpretation);
+            break;
+        }
+      }
+    }
+  }
+
+  void Scope::DidChangeViewportSize() noexcept
+  {
+    dom::ContainerNode *rootNode = _document;
+    if (_shadowRoot)
+    {
+      rootNode = _shadowRoot;
+    }
+    else
+    {
+      if (!_document->HasStyleWithViewportUnits())
+      {
+        return;
+      }
+
+      for (auto &descendantShadowRoot : _document->InDocumentShadowRoots())
+      {
+        if (descendantShadowRoot && descendantShadowRoot->Mode() != dom::ShadowRootMode::UserAgent)
+        {
+          descendantShadowRoot->StyleScope().DidChangeViewportSize();
+        }
+      }
+    }
+
+    auto *resolver = ResolverIfExists();
+    if (!resolver)
+    {
+      return;
+    }
+    resolver->ClearCachedDeclarationsAffectedByViewportUnits();
+
+    if (GetCustomPropertyRegistry().InvalidatePropertiesWithViewportUnits(*_document))
+    {
+      if (!_shadowRoot)
+      {
+        if (auto element = _document->DocumentElement())
+        {
+          element->InvalidateStyleForSubtree();
+        }
+      }
+      return;
+    }
+
+    // FIXME: Ideally, we should save the list of elements that have viewport units and only iterate over
+    // those.
+    // FIXME: Pseudo-elements (nextIncludingPseudo), once they're nodes; their styles are in their element's
+    // pseudo-style cache.
+    for (auto *node = rootNode->FirstChild(); node; node = dom::TreeQueries::Next(*node, rootNode))
+    {
+      auto *element = DynamicDowncast<dom::Element>(node);
+      if (!element)
+      {
+        continue;
+      }
+      auto *style = element->GetRenderStyle();
+      if (style && style->UsesViewportUnits())
+      {
+        element->InvalidateStyle();
+      }
+    }
+  }
+
+  const List<RefPtr<css::StyleSheet>> &Scope::StyleSheetsForStyleSheetList() noexcept
+  {
+    // FIXME: StyleSheetList content should be updated separately from style resolver updates.
+    FlushPendingUpdate();
+    return _styleSheetsForStyleSheetList;
+  }
+
+  Scope &Scope::DocumentScope() noexcept
+  {
+    return _document->StyleScope();
+  }
+
+  dom::DocumentOrShadowRoot &Scope::TreeScope() noexcept
+  {
+    if (_shadowRoot)
+    {
+      return *_shadowRoot;
+    }
+    return *_document;
+  }
+
+  const Scope *Scope::HostScope() const noexcept
+  {
+    if (!_shadowRoot || !_shadowRoot->Host())
+    {
+      return nullptr;
+    }
+    return &ForNode(*_shadowRoot->Host());
+  }
+
+  html::HTMLSlotElement *AssignedSlotForScopeOrdinal(const dom::Element &element,
+                                                     ScopeOrdinal scopeOrdinal) noexcept
+  {
+    krys_debug_assert(scopeOrdinal >= ScopeOrdinal::FirstSlot);
+    auto *slot = dom::SlotAlgorithms::GetAssignedSlot(element);
+    for (auto scopeDepth = ScopeOrdinal::FirstSlot; slot && scopeDepth != scopeOrdinal; ++scopeDepth)
+    {
+      slot = dom::SlotAlgorithms::GetAssignedSlot(*slot);
+    }
+    return slot;
+  }
+
+  dom::Element *HostForScopeOrdinal(const dom::Element &element, ScopeOrdinal scopeOrdinal) noexcept
+  {
+    krys_debug_assert(scopeOrdinal <= ScopeOrdinal::ContainingHost);
+    auto *host = dom::TreeQueries::ShadowHost(element);
+    for (auto scopeDepth = ScopeOrdinal::ContainingHost; host && scopeDepth != scopeOrdinal; --scopeDepth)
+    {
+      host = dom::TreeQueries::ShadowHost(*host);
+    }
+    return host;
+  }
+
+  bool Scope::InvalidateForLayoutDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    auto didInvalidate = false;
+    didInvalidate |= InvalidateForContainerDependencies(context);
+    didInvalidate |= InvalidateForAnchorDependencies(context);
+    didInvalidate |= InvalidateForPositionTryFallbacks(context);
+    return didInvalidate;
+  }
+
+  bool Scope::InvalidateForContainerDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    auto previousQueryContainerDimensions = krys::move(_queryContainerDimensionsOnLastUpdate);
+    _queryContainerDimensionsOnLastUpdate.clear();
+
+    List<dom::Element *> containersToInvalidate;
+
+    for (const auto *containerRenderer : renderView->ContainerQueryBoxes())
+    {
+      auto *containerElement = containerRenderer->GetElement();
+
+      // Invalidation uses real elements, replace ::before/::after with its host.
+      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(containerElement))
+      {
+        containerElement = pseudoElement->HostElement();
+      }
+
+      if (!containerElement)
+      {
+        continue;
+      }
+
+      auto size = containerRenderer->LogicalSize();
+
+      auto sizeChanged = [&](LayoutSize oldSize)
+      {
+        switch (containerRenderer->Style().GetContainerType())
+        {
+          case ContainerType::InlineSize: return size.Width() != oldSize.Width();
+          case ContainerType::Size:       return size != oldSize;
+          case ContainerType::Normal:     break;
+        }
+        krys_unreachable();
+      };
+
+      auto it = previousQueryContainerDimensions.find(containerElement);
+      bool changed =
+        it == previousQueryContainerDimensions.end() || !it->second.first || sizeChanged(it->second.second);
+      // Protect against unstable layout by invalidating only once per container.
+      if (changed && context.InvalidatedContainers.insert(containerElement).second)
+      {
+        containersToInvalidate.push_back(containerElement);
+      }
+      _queryContainerDimensionsOnLastUpdate.insert_or_assign(
+        containerElement, Pair<WeakPtr<const dom::Element>, LayoutSize> {
+                            CreateWeakPtr<const dom::Element>(containerElement), size});
+    }
+
+    for (auto *toInvalidate : containersToInvalidate)
+    {
+      toInvalidate->InvalidateForQueryContainerSizeChange();
+    }
+
+    return !containersToInvalidate.empty();
+  }
+
+  bool Scope::InvalidateForAnchorDependencies(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    auto previousAnchorPositions = krys::move(_anchorPositionsOnLastUpdate);
+    _anchorPositionsOnLastUpdate.clear();
+
+    List<Ref<dom::Element>> anchoredElementsToInvalidate;
+
+    if (renderView->Anchors().empty())
+    {
+      return false;
+    }
+
+    auto anchorMap = AnchorPositionEvaluator::MakeAnchorPositionedForAnchorMap(_anchorPositionedToAnchorMap);
+
+    auto makeAnchorPosition = [&](const RenderBoxModelObject &anchorRenderer)
+    {
+      AnchorPosition result;
+      result.AbsoluteRect = LayoutRect(anchorRenderer.AbsoluteBoundingBoxRectIgnoringTransforms());
+      // Include containing block sizes as anchor function insets may be computed against any side and if they
+      // change we need to invalidate.
+      for (auto *containingBlock = anchorRenderer.ContainingBlock(); containingBlock;
+           containingBlock = containingBlock->ContainingBlock())
+      {
+        if (containingBlock->CanContainAbsolutelyPositionedObjects())
+        {
+          result.ContainingBlockSizes.push_back(containingBlock->ContentBoxSize());
+        }
+      }
+      return result;
+    };
+
+    for (const auto *anchorRenderer : renderView->Anchors())
+    {
+      auto anchorPosition = makeAnchorPosition(*anchorRenderer);
+      _anchorPositionsOnLastUpdate.insert_or_assign(
+        anchorRenderer, Pair<WeakPtr<const RenderObject>, AnchorPosition> {
+                          CreateWeakPtr<const RenderObject>(anchorRenderer), anchorPosition});
+
+      auto it = previousAnchorPositions.find(anchorRenderer);
+      bool changed =
+        it == previousAnchorPositions.end() || !it->second.first || it->second.second != anchorPosition;
+      if (!changed)
+      {
+        continue;
+      }
+
+      auto anchoredElements = anchorMap.find(anchorRenderer);
+      if (anchoredElements == anchorMap.end())
+      {
+        continue;
+      }
+
+      for (auto &anchoredElement : anchoredElements->second)
+      {
+        if (!context.InvalidatedAnchorPositioned.insert(anchoredElement.get()).second)
+        {
+          continue;
+        }
+        anchoredElementsToInvalidate.push_back(anchoredElement);
+      }
+    }
+
+    for (auto &toInvalidate : anchoredElementsToInvalidate)
+    {
+      auto *renderer = toInvalidate->Renderer();
+      if (renderer && AnchorPositionEvaluator::IsLayoutTimeAnchorPositioned(renderer->Style()))
+      {
+        renderer->SetNeedsLayout();
+      }
+      toInvalidate->InvalidateForAnchorRectChange();
+    }
+
+    return !anchoredElementsToInvalidate.empty();
+  }
+
+  bool Scope::InvalidateForPositionTryFallbacks(LayoutDependencyUpdateContext &context) noexcept
+  {
+    krys_debug_assert(!_shadowRoot);
+
+    auto *renderView = _document->GetRenderView();
+    if (!renderView)
+    {
+      return false;
+    }
+
+    bool invalidated = false;
+
+    for (const auto *box : renderView->PositionTryBoxes())
+    {
+      if (!AnchorPositionEvaluator::OverflowsInsetModifiedContainingBlock(*box))
+      {
+        continue;
+      }
+
+      auto *element = box->GetElement();
+      if (auto *pseudoElement = DynamicDowncast<dom::PseudoElement>(element))
+      {
+        element = pseudoElement->HostElement();
+      }
+
+      if (element)
+      {
+        if (!context.InvalidatedAnchorPositioned.insert(element).second)
+        {
+          continue;
+        }
+        element->InvalidateForAnchorRectChange();
+        invalidated = true;
+      }
+    }
+
+    return invalidated;
+  }
+
+  void Scope::UpdateAnchorPositioningStateAfterStyleResolution() noexcept
+  {
+    if (auto *renderView = _document->GetRenderView())
+    {
+      // Is this necessary? Or will the combination of layout and scroll invalidation handle it sufficiently?
+      AnchorPositionEvaluator::UpdateScrollAdjustments(*renderView);
+    }
+
+    std::erase_if(_anchorPositionedToAnchorMap, [](const auto &elementAndState)
+                  { return !elementAndState.second.Element || elementAndState.second.Anchors.empty(); });
+  }
+
+  Maybe<size_t> Scope::LastSuccessfulPositionOptionIndexFor(const Styleable &styleable) const noexcept
+  {
+    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+                             styleable.PseudoElementIdentifier};
+    auto it = _lastSuccessfulPositionOptionIndexes.find(key);
+    if (it == _lastSuccessfulPositionOptionIndexes.end())
+    {
+      return null;
+    }
+    return it->second;
+  }
+
+  void Scope::SetLastSuccessfulPositionOptionIndexMap(
+    HashMap<AnchorPositionedKey, size_t, AnchorPositionedKeyHash> &&map) noexcept
+  {
+    _lastSuccessfulPositionOptionIndexes = krys::move(map);
+  }
+
+  void Scope::ForgetLastSuccessfulPositionOptionIndex(const Styleable &styleable) noexcept
+  {
+    AnchorPositionedKey key {ShareRefPtr<const dom::Element>(&styleable.Element),
+                             styleable.PseudoElementIdentifier};
+    _lastSuccessfulPositionOptionIndexes.erase(key);
+  }
+}

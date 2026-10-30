@@ -15,8 +15,8 @@ namespace krys::boo::dom
   using SmallNodeList = SmallList<Ref<Node>, OptimalSmallNodeListSize>;
   using SmallElementList = SmallList<Ref<Element>, OptimalSmallNodeListSize>;
 
-  // TODO(check): OptimalSmallNodeListSize is for the generic node case, not text nodes specifically. Might need to tweak
-  // this constant.
+  // FIXME: OptimalSmallNodeListSize is for the generic node case, not text nodes specifically. Might
+  // need to tweak this constant.
   using SmallTextNodeList = SmallList<Ref<Text>, OptimalSmallNodeListSize>;
   using SmallConstTextNodeList = SmallList<Ref<const Text>, OptimalSmallNodeListSize>;
 }

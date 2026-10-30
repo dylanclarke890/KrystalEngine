@@ -1,7 +1,8 @@
 ﻿#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -60,7 +61,7 @@ namespace krys::boo::html::tests
 
       SECTION("USVString")
       {
-        // TODO(USVString) - implement when USVString is implemented.
+        // FIXME: Implement when USVString is implemented.
       }
 
       SECTION("bool")
@@ -222,7 +223,7 @@ namespace krys::boo::html::tests
   {
     SECTION("USVString")
     {
-      // TODO(USVString) - implement when USVString is implemented.
+      // FIXME: Implement when USVString is implemented.
     }
   }
 

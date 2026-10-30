@@ -1,7 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Primitives/Position.hpp"
-#include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -13,10 +14,10 @@ namespace krys::boo::css
   // https://drafts.fxtf.org/motion-1/#ray-function
   struct Ray
   {
-    Angle<> angle;
-    RaySize size;
-    Maybe<keywords::Contain> contain;
-    Maybe<Position> position;
+    boo::css::Angle<> Angle;
+    RaySize Size;
+    Maybe<keywords::Contain> Contain;
+    Maybe<boo::css::Position> Position;
 
     KRYS_NODISCARD bool operator==(const Ray &) const noexcept = default;
   };
@@ -28,21 +29,27 @@ namespace krys::boo::css
   {
     if constexpr (!I)
     {
-      return value.angle;
+      return value.Angle;
     }
     else if constexpr (I == 1)
     {
-      return value.size;
+      return value.Size;
     }
     else if constexpr (I == 2)
     {
-      return value.contain;
+      return value.Contain;
     }
     else if constexpr (I == 3)
     {
-      return value.position;
+      return value.Position;
     }
   }
+
+  template <>
+  struct Serialiser<Ray>
+  {
+    void operator()(StringBuilder &builder, const SerialisationContext &context, const Ray &value) noexcept;
+  };
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::Ray, 4)

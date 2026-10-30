@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::dom
 {
@@ -28,6 +29,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> DocumentFragment::TextContent(DOMString &&value) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
   }
 
@@ -37,6 +39,10 @@ namespace krys::boo::dom
 
   Ref<HTMLCollection> DocumentFragment::Children() noexcept
   {
+    if (!_documentFragmentRareData)
+    {
+      _documentFragmentRareData = CreateUnique<DocumentFragmentRareData>();
+    }
     return _documentFragmentRareData->Children(*this);
   }
 
@@ -67,21 +73,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> DocumentFragment::Prepend(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::Append(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::MoveBefore(Node &node, Node *refChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 

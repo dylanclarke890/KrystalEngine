@@ -11,14 +11,14 @@ namespace krys::boo::css
   {
     using Coordinate = CommaSeparatedTuple<Number<ClosedUnitRange>, Number<>>;
 
-    CommaSeparatedPair<Coordinate> value;
+    CommaSeparatedPair<Coordinate> Value;
 
-    constexpr bool operator==(const CubicBezierEasingParameters &) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const CubicBezierEasingParameters &) const noexcept = default;
   };
 
   using CubicBezierEasingFunction = FunctionNotation<ValueId::CubicBezier, CubicBezierEasingParameters>;
 
-  DEFINE_TYPE_WRAPPER_GET(CubicBezierEasingParameters, value);
+  DEFINE_TYPE_WRAPPER_GET(CubicBezierEasingParameters, Value)
 }
 
 DEFINE_TUPLE_LIKE_CONFORMANCE(krys::boo::css::CubicBezierEasingParameters, 1)

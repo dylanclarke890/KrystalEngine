@@ -3,7 +3,7 @@
 namespace krys::boo::svg
 {
   SVGPolygonElement::SVGPolygonElement(dom::Document &document) noexcept
-      : SVGElement(document, SVGElementInterface::Polygon)
+      : SVGPolyElement(document, SVGElementInterface::Polygon)
   {
   }
 }

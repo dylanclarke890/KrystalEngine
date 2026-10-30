@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Transform.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/AngleDefinitions.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthPercentageDefinitions.hpp"
@@ -9,11 +9,16 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Percentage.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/PercentageDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
 #include "Krystal.Booey/CSS/Values/FunctionValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValueListBuilder.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/BuilderState.hpp"
+#include "Krystal.Booey/Style/Values/Transforms/Transform.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -256,7 +261,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    tokens.Discard();
+    tokens.DiscardWhitespace();
 
     // If we have a calc() or non-zero y value, we can directly add it to the list. We only
     // want to add a zero y value if a non-zero z value is specified.
@@ -389,7 +394,7 @@ namespace krys::boo::css::PropertyParserHelpers
       // The first valid case is if we have 3 items in the list, meaning we parsed three consecutive number
       // values to specify the rotation axis. In that case, we must not also have encountered an axis
       // identifier.
-      assert(!axisIdentifier);
+      krys_debug_assert(!axisIdentifier);
 
       // Now we must check the values since if we have a vector in the x, y or z axis alone we must serialize
       // to the matching identifier.
@@ -504,5 +509,41 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return ValueList::CreateSpaceSeparated(krys::move(x));
+  }
+
+  Maybe<style::Transform> ParseTransformRaw(const CSSOMString &string, const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto parsedValue = PropertyParsing::ConsumeTransform(range, state);
+    if (!parsedValue)
+    {
+      return null;
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return null;
+    }
+
+    auto dummyStyle = RenderStyle::Create();
+    auto dummyState = CreateUnique<style::BuilderState>(dummyStyle);
+
+    if (!parsedValue->CanResolveDependenciesWith(dummyState->CssToLengthConversionData()))
+    {
+      return null;
+    }
+
+    return style::ConvertCSSValueToStyle<style::Transform>(*dummyState, *parsedValue);
   }
 }

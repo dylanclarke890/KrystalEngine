@@ -1,24 +1,25 @@
 ﻿#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/TestParserUtils.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParseError.hpp"
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::css::tests
 {
   namespace
   {
 
-#pragma region Serialize
+#pragma region Serialise
 
-    void SerializeNumericValue(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseNumericValue(const Token &token, dom::DOMString &output) noexcept
     {
       output += krys::boo::tests::ToUTF8(token.NumericValue());
     }
 
-    void SerializeCSSToken(const Token &token, dom::DOMString &output) noexcept
+    void SerialiseCSSToken(const Token &token, dom::DOMString &output) noexcept
     {
       switch (token.Type())
       {
@@ -86,21 +87,21 @@ namespace krys::boo::css::tests
         case TokenType::Number:
         {
           output += u8"Number(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8")\n";
           break;
         }
         case TokenType::Percentage:
         {
           output += u8"Percentage(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8")\n";
           break;
         }
         case TokenType::Dimension:
         {
           output += u8"Dimension(";
-          SerializeNumericValue(token, output);
+          SerialiseNumericValue(token, output);
           output += u8", ";
           output += token.Unit();
           output += u8")\n";
@@ -169,13 +170,13 @@ namespace krys::boo::css::tests
       }
     }
 
-    KRYS_NODISCARD dom::DOMString SerializeCSSTokens(TokenRange tokens) noexcept
+    KRYS_NODISCARD dom::DOMString SerialiseCSSTokens(TokenRange tokens) noexcept
     {
       dom::DOMString output;
 
       for (auto &token : tokens)
       {
-        SerializeCSSToken(token, output);
+        SerialiseCSSToken(token, output);
       }
 
       krys::boo::tests::NormaliseData(output);
@@ -240,7 +241,7 @@ namespace krys::boo::css::tests
       Tokenizer tokenizer(inputStream);
       REQUIRE(tokenizer.PumpTokenizer());
 
-      auto actual = SerializeCSSTokens(tokenizer.Tokens());
+      auto actual = SerialiseCSSTokens(tokenizer.Tokens());
       str = u8"\n--- ACTUAL TOKENS ---\n" + actual;
       UTF8_INFO(str);
 
@@ -330,4 +331,16 @@ namespace krys::boo::css::tests
   EXECUTE_CSS_TOKENIZER_TEST_CASE("string-01.dat");
 
   EXECUTE_CSS_TOKENIZER_TEST_CASE("url-01.dat");
+
+  TEST_CASE("Tokenizer(empty input)", "[CSS][Tokenizer]")
+  {
+    InputStream input {CSSOMString()};
+    CHECK(input.Size() == 0);
+    CHECK(input.NextInputCharacter() == EOFMarker);
+
+    Tokenizer tokenizer {input};
+    CHECK_FALSE(tokenizer.PumpTokenizer());
+    CHECK(tokenizer.Tokens().IsAtEnd());
+    CHECK(tokenizer.Tokens().Peek().Type() == TokenType::EndOfFile);
+  }
 }

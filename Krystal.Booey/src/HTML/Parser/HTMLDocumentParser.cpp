@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::html
 {
@@ -13,29 +14,31 @@ namespace krys::boo::html
   }
 
   dom::SmallNodeList HTMLDocumentParser::ParseFragment(dom::Element &context, utf8_string &&input,
-                                                  bool allowDeclarativeShadowRoots,
-                                                  ParserScriptingMode scriptingMode) noexcept
+                                                       bool allowDeclarativeShadowRoots,
+                                                       ParserScriptingMode scriptingMode) noexcept
   {
     // FPA(1): Assert: scriptingMode is either Inert or Fragment.
-    krys_debug_assert(scriptingMode == ParserScriptingMode::Inert || scriptingMode == ParserScriptingMode::Fragment);
+    krys_debug_assert(scriptingMode == ParserScriptingMode::Inert
+                      || scriptingMode == ParserScriptingMode::Fragment);
 
     // FPA(2): Let document be a Document node whose type is "html".
     auto document = CreateRef<dom::HTMLDocument>();
 
     // FPA(3): Let contextDocument be context's node document.
     auto &contextDocument = context.NodeDocument();
+    document->SetSettings(ShareRef(contextDocument.GetSettings()));
 
     // FPA(4): If contextDocument is in quirks mode, then set document's mode to "quirks".
     if (contextDocument._quirksMode == dom::QuirksMode::Quirks)
     {
-      document->_quirksMode = dom::QuirksMode::Quirks;
+      document->SetQuirksMode(dom::QuirksMode::Quirks);
     }
 
     // FPA(5): Otherwise, if context's node document is in limited-quirks mode, then set document's mode to
     // "limited-quirks".
     else if (contextDocument._quirksMode == dom::QuirksMode::LimitedQuirks)
     {
-      document->_quirksMode = dom::QuirksMode::LimitedQuirks;
+      document->SetQuirksMode(dom::QuirksMode::LimitedQuirks);
     }
 
     // FPA(6): If allowDeclarativeShadowRoots is true, then set document's allow declarative shadow roots to
@@ -123,9 +126,10 @@ namespace krys::boo::html
 
     // FPA(11): Let root be the result of creating an element given document, "html", the HTML namespace,
     // null, null, false, and context's custom element registry.
-    dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html, Namespace::HTML};
+    dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html,
+                             Namespace::HTML};
     auto root = dom::ElementFactory::Create(*document, name, dom::DOMStringAtom::Null(), false,
-                                       contextDocument.CustomElementRegistry());
+                                            contextDocument.CustomElementRegistry());
 
     // FPA(12): Append root to document.
     (void)dom::MutationAlgorithms::Append(*root, *document);

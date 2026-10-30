@@ -1,7 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Numeric.hpp"
-#include "Krystal.Core/Types/SmallList.hpp"
+#include "Krystal.Core/Types/List.hpp"
 
 namespace krys::boo::css
 {
@@ -11,8 +12,8 @@ namespace krys::boo::css
 
   struct ComputedStyleDependencies
   {
-    SmallList<PropertyId> Properties;
-    SmallList<PropertyId> RootProperties;
+    List<PropertyId> Properties;
+    List<PropertyId> RootProperties;
     bool ContainerDimensions {false};
     bool ViewportDimensions {false};
     bool Anchors {false};
@@ -24,6 +25,7 @@ namespace krys::boo::css
 
     /// @brief Checks to see if the provided conversion data is sufficient to resolve the provided
     /// dependencies.
-    KRYS_NODISCARD bool CanResolveWith(const ToLengthConversionData &conversionData) const noexcept;
+    KRYS_NODISCARD bool
+      CanResolveDependenciesWithConversionData(const ToLengthConversionData &conversionData) const noexcept;
   };
 }

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/ColorAdjust.hpp"
+#include "Krystal.Booey/CSS/Parser/InputStream.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserIdioms.hpp"
 #include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
@@ -7,9 +8,9 @@
 #include "Krystal.Booey/CSS/Values/ColorAdjust/ColorScheme.hpp"
 #include "Krystal.Booey/CSS/Values/ColorSchemeValue.hpp"
 
-namespace krys::boo::css
+namespace krys::boo::css::PropertyParserHelpers
 {
-  Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens, PropertyParserState &state) noexcept
+  Maybe<ColorScheme> ConsumeUnresolvedColorScheme(TokenRange &tokens, PropertyParserState &) noexcept
   {
     // <'color-scheme'> = normal | [ light | dark | <custom-ident> ]+ && only?
     // https://drafts.csswg.org/css-color-adjust/#propdef-color-scheme
@@ -19,53 +20,52 @@ namespace krys::boo::css
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      // NOTE: `normal` is represented in CSS::ColorScheme as an empty list of schemes.
-      return ColorScheme {.schemes = {}, .only = {}};
+      // NOTE: `normal` is represented in ColorScheme as an empty list of schemes.
+      return ColorScheme {.Schemes = {}, .Only = {}};
     }
 
-    Maybe<ColorScheme> result = ColorScheme {.schemes = {}, .only = {}};
+    Maybe<ColorScheme> result = ColorScheme {.Schemes = {}, .Only = {}};
 
     if (tokens.Peek().ValueId() == ValueId::Only)
     {
       tokens.Discard();
       tokens.DiscardWhitespace();
 
-      result->only = keywords::Only {};
+      result->Only = keywords::Only {};
     }
 
     while (!tokens.IsAtEnd())
     {
       if (tokens.Peek().Type() != TokenType::Ident)
       {
-        return {};
+        return null;
       }
 
-      ValueId id = tokens.Peek().ValueId();
-
+      auto id = tokens.Peek().ValueId();
       switch (id)
       {
         case ValueId::Normal:
         {
           // `normal` is only allowed as a single value, and was handled earlier.
           // Don't allow it in the list.
-          return {};
+          return null;
         }
         case ValueId::Only:
         {
           // `only` can either appear first, handled before the loop, or last,
           // handled here.
-          if (result->only)
+          if (result->Only)
           {
-            return {};
+            return null;
           }
 
           tokens.Discard();
           tokens.DiscardWhitespace();
-          result->only = keywords::Only {};
+          result->Only = keywords::Only {};
 
           if (!tokens.IsAtEnd())
           {
-            return {};
+            return null;
           }
 
           break;
@@ -74,31 +74,31 @@ namespace krys::boo::css
         {
           if (!IsValidCustomIdentifier(id))
           {
-            return {};
+            return null;
           }
 
-          auto value = tokens.Consume().IdentCodePoints();
+          auto value = CSSOMStringAtom {tokens.Consume().IdentCodePoints()};
           tokens.DiscardWhitespace();
 
-          result->schemes.value.push_back(CustomIdentifier {value});
+          result->Schemes.Value.push_back(CustomIdentifier {krys::move(value)});
           break;
         }
       }
     }
 
-    if (result->schemes.empty())
+    if (result->Schemes.empty())
     {
-      return {};
+      return null;
     }
 
     return result;
   }
 
-  Maybe<ColorScheme> ParseUnresolvedColorScheme(const CSSOMString &scheme,
-                                                const ParserContext &context) noexcept
+  Maybe<ColorScheme> ParseUnresolvedColorScheme(CSSOMStringView string, const ParserContext &context) noexcept
   {
-    InputStream inputStream {CSSOMString(scheme)};
-    auto tokenizer = Tokenizer(inputStream);
+    InputStream input {CSSOMString(string)};
+    Tokenizer tokenizer {input};
+    tokenizer.PumpTokenizer();
     auto tokens = tokenizer.Tokens();
 
     // Handle leading whitespace.
@@ -112,7 +112,7 @@ namespace krys::boo::css
 
     if (!tokens.IsAtEnd())
     {
-      return {};
+      return null;
     }
 
     return result;

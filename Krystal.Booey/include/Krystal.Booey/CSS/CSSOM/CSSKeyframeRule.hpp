@@ -1,134 +1,51 @@
-/*
- * Copyright (C) 2007-2025 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include "CSSRule.h"
-#include "StyleRule.h"
+#include "Krystal.Booey/CSS/CSSOM/CSSRule.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/TypeCast.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::css
 {
-
-  class CSSStyleProperties;
   class CSSKeyframesRule;
-  class StyleProperties;
+  class CSSStyleProperties;
+  class KeyframeRule;
   class StyleRuleCSSStyleProperties;
 
-  class StyleRuleKeyframe final : public StyleRuleBase
-  {
-  public:
-    static Ref<StyleRuleKeyframe> create(Ref<StyleProperties> &&);
-    static Ref<StyleRuleKeyframe> create(Vector<std::pair<CSSValueID, double>> &&keys,
-                                         Ref<StyleProperties> &&);
-    ~StyleRuleKeyframe();
-
-    Ref<StyleRuleKeyframe> copy() const
-    {
-      RELEASE_ASSERT_NOT_REACHED();
-    }
-
-    struct Key
-    {
-      CSSValueID rangeName;
-      double offset;
-
-      void writeToString(StringBuilder &) const;
-      bool operator==(const Key &) const = default;
-    };
-
-    String keyText() const;
-    bool setKeyText(const String &);
-    void setKey(Key key)
-    {
-      ASSERT(m_keys.isEmpty());
-      m_keys.clear();
-      m_keys.append(key);
-    }
-
-    const Vector<Key> &keys() const
-    {
-      return m_keys;
-    };
-
-    const StyleProperties &properties() const
-    {
-      return m_properties;
-    }
-    MutableStyleProperties &mutableProperties();
-
-    String cssText() const;
-
-  private:
-    explicit StyleRuleKeyframe(Ref<StyleProperties> &&);
-    StyleRuleKeyframe(Vector<Key> &&, Ref<StyleProperties> &&);
-
-    Ref<StyleProperties> m_properties;
-    Vector<Key> m_keys;
-  };
-
+  /// @brief A keyframe of an `@keyframes` rule, exposed to scripts.
+  /// @see https://drafts.csswg.org/css-animations/#interface-csskeyframerule
   class CSSKeyframeRule final : public CSSRule
   {
-  public:
-    virtual ~CSSKeyframeRule();
-
-    String cssText() const final
-    {
-      return m_keyframe->cssText();
-    }
-    void reattach(StyleRuleBase &) final;
-
-    String keyText() const
-    {
-      return m_keyframe->keyText();
-    }
-    void setKeyText(const String &text)
-    {
-      m_keyframe->setKeyText(text);
-    }
-
-    CSSStyleProperties &style();
+    friend class CSSKeyframesRule;
 
   private:
-    CSSKeyframeRule(StyleRuleKeyframe &, CSSKeyframesRule *parent);
+    const Ref<KeyframeRule> _keyframe;
+    mutable RefPtr<StyleRuleCSSStyleProperties> _propertiesCSSOMWrapper;
 
-    StyleRuleType styleRuleType() const final
+    CSSKeyframeRule(KeyframeRule &keyframe, CSSKeyframesRule *parent) noexcept;
+
+  public:
+    ~CSSKeyframeRule() noexcept;
+
+    KRYS_NODISCARD CSSOMString CssText() const noexcept final;
+    void Reattach(Rule &rule) noexcept final;
+
+    KRYS_NODISCARD CSSOMString KeyText() const noexcept;
+    void SetKeyText(const CSSOMString &text) noexcept;
+
+    KRYS_NODISCARD CSSStyleProperties &Style() noexcept;
+
+  private:
+    KRYS_NODISCARD RuleType StyleRuleType() const noexcept final
     {
-      return StyleRuleType::Keyframe;
+      return RuleType::Keyframe;
     }
-
-    const Ref<StyleRuleKeyframe> m_keyframe;
-    mutable RefPtr<StyleRuleCSSStyleProperties> m_propertiesCSSOMWrapper;
-
-    friend class CSSKeyframesRule;
   };
-
-} // namespace krys::boo::css
-
-SPECIALIZE_TYPE_TRAITS_BEGIN(WebCore::CSSKeyframeRule)
-static bool isType(const WebCore::CSSRule &rule)
-{
-  return rule.styleRuleType() == WebCore::StyleRuleType::Keyframe;
 }
-SPECIALIZE_TYPE_TRAITS_END()
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::css::CSSKeyframeRule)
+  KRYS_NODISCARD static bool IsType(const krys::boo::css::CSSRule &rule) noexcept
+  {
+    return rule.StyleRuleType() == krys::boo::css::RuleType::Keyframe;
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

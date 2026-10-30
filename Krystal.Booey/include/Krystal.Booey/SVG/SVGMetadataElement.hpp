@@ -4,12 +4,20 @@
 
 namespace krys::boo::svg
 {
-  class SVGMetadataElement : public SVGElement
+  /// @brief The `<metadata>` element: metadata about the document, never rendered.
+  /// @see https://svgwg.org/svg2-draft/struct.html#InterfaceSVGMetadataElement
+  class SVGMetadataElement final : public SVGElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGMetadataElement);
 
   public:
-    SVGMetadataElement(dom::Document &document) noexcept;
+    explicit SVGMetadataElement(dom::Document &document) noexcept;
+
+  private:
+    KRYS_NODISCARD bool RendererIsNeeded(const RenderStyle &) noexcept final
+    {
+      return false;
+    }
   };
 }
 

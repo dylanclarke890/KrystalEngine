@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -67,5 +67,18 @@ namespace krys::boo::dom::tests
 
       REQUIRE_FALSE(fragment->RemoveChild(*parent.Value()).HasException());
     }
+  }
+
+  // FIXME: An element without an id is found for the empty string: Element::Id() is empty for a missing
+  // attribute, so the comparison matches it. No element has the empty string as its ID.
+  TEST_CASE("NonElementParentNode::GetElementById finds nothing for the empty string",
+            "[NonElementParentNode][!shouldfail]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto element = document->CreateElement(u8"div");
+    REQUIRE_FALSE(element.HasException());
+    REQUIRE_FALSE(document->AppendChild(*element.Value()).HasException());
+
+    CHECK(document->GetElementById(u8"") == nullptr);
   }
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/ParsedPropertyList.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyId.hpp"
 #include "Krystal.Booey/CSS/Properties/Types/IsImportant.hpp"
@@ -34,8 +35,8 @@ namespace krys::boo::css
   {
   public:
     // Parses any CSS property or descriptor. If successful, the result will be appended to the `result`
-    // Vector and the function will return true, otherwise, the function will return false and the `result`
-    // Vector will be unmodified.
+    // SmallList and the function will return true, otherwise, the function will return false and the `result`
+    // SmallList will be unmodified.
     KRYS_NODISCARD static bool ParseValue(PropertyId id, IsImportant isImportant, TokenRange tokens,
                                           const ParserContext &context, ParsedPropertyList &result,
                                           RuleType ruleType) noexcept;
@@ -70,6 +71,4 @@ namespace krys::boo::css
 
     KRYS_NODISCARD static Maybe<GlobalKeyword> ParseGlobalKeyword(TokenRange tokens) noexcept;
   };
-
-  KRYS_NODISCARD bool IsCustomPropertyName(CSSOMStringView id) noexcept;
 }

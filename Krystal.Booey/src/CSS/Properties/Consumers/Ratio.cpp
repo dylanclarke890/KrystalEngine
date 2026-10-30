@@ -78,7 +78,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeRatioWithBothNumeratorAndDenominator(TokenRange &tokens,
-                                                               PropertyParserState &state) noexcept
+                                                            PropertyParserState &state) noexcept
   {
     if (auto ratio = ConsumeUnresolvedRatioWithBothNumeratorAndDenominator(tokens, state))
     {

@@ -1,0 +1,27 @@
+﻿<!doctype html>
+<!-- The "focus" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through View, after a Tab. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #f4f6fa; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; width: 80px; height: 48px; background: #ffffff; }
+</style>
+</head>
+<body>
+  <!-- The first area in the navigation order: Tab focuses it, and the user agent's :focus-visible style draws
+       its focus ring, following its corners. -->
+  <div id="first" tabindex="1" style="left: 24px; top: 24px; border-radius: 8px"></div>
+  <div tabindex="0" style="left: 136px; top: 24px"></div>
+  <div tabindex="-1" style="left: 248px; top: 24px"></div>
+
+  <!-- Focus rings drawn by authors: outline-style: auto with colours, widths, offsets and radii. -->
+  <div style="left: 24px; top: 120px; outline: auto 2px #ef476f"></div>
+  <div style="left: 136px; top: 120px; border-radius: 16px; outline: auto 3px #118ab2; outline-offset: 4px"></div>
+  <div style="left: 248px; top: 120px; border-radius: 24px 4px; outline: auto 1px #073b4c; outline-offset: -6px"></div>
+
+  <!-- Chrome's capture focuses the first area as the Tab does. -->
+  <script>document.getElementById("first").focus({ focusVisible: true });</script>
+</body>
+</html>

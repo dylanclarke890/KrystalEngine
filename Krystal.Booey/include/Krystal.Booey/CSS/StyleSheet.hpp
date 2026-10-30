@@ -1,72 +1,63 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
-#include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/Maybe.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class Node;
+}
 
 namespace krys::boo::css
 {
-  class CSSStyleSheet;
+  class CSSImportRule;
   class MediaList;
 
+  /// @brief The base of the style sheets exposed to scripts.
   /// @see https://drafts.csswg.org/cssom/#the-stylesheet-interface
   class StyleSheet : public RefCounted<StyleSheet>
   {
-    KRYS_TYPE_CAST_TRAITS_ACCESS();
-
   public:
     virtual ~StyleSheet() noexcept = default;
 
-#pragma region StyleSheet - https://drafts.csswg.org/cssom/#stylesheet
+    KRYS_NODISCARD virtual bool Disabled() const noexcept = 0;
+    virtual void SetDisabled(bool disabled) noexcept = 0;
+    KRYS_NODISCARD virtual dom::Node *OwnerNode() const noexcept = 0;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-type
+    KRYS_NODISCARD virtual StyleSheet *ParentStyleSheet() const noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual CSSOMString Href() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString Title() const noexcept = 0;
+
+    KRYS_NODISCARD virtual MediaList *Media() const noexcept
+    {
+      return nullptr;
+    }
+
     KRYS_NODISCARD virtual CSSOMString Type() const noexcept = 0;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-href
-    KRYS_NODISCARD virtual Maybe<dom::USVString> Href() const noexcept = 0;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-ownernode
-    KRYS_NODISCARD virtual RefPtr<dom::Node> OwnerNode() const noexcept = 0;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-parentstylesheet
-    KRYS_NODISCARD virtual RefPtr<StyleSheet> ParentStyleSheet() const noexcept
+    KRYS_NODISCARD virtual CSSImportRule *OwnerRule() const noexcept
     {
       return nullptr;
     }
 
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-title
-    KRYS_NODISCARD virtual Maybe<dom::DOMString> Title() const noexcept = 0;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-media
-    KRYS_NODISCARD virtual RefPtr<MediaList> Media() const noexcept
-    {
-      return nullptr;
-    }
-
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
-    KRYS_NODISCARD virtual bool Disabled() const noexcept = 0;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-stylesheet-disabled
-    virtual void Disabled(bool value) noexcept = 0;
-
-#pragma endregion
-
-  protected:
-#pragma region Type Checks
+    virtual void ClearOwnerNode() noexcept = 0;
+    KRYS_NODISCARD virtual url::URL BaseURL() const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsLoading() const noexcept = 0;
 
     KRYS_NODISCARD virtual bool IsCSSStyleSheet() const noexcept
     {
       return false;
     }
+
     KRYS_NODISCARD virtual bool IsXSLStyleSheet() const noexcept
     {
       return false;
     }
-
-#pragma endregion
   };
 }

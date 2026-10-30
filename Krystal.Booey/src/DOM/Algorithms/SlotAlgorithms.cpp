@@ -1,12 +1,16 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/Updating/RenderTreeUpdater.hpp"
+#include <algorithm>
 
 namespace krys::boo::dom
 {
@@ -17,19 +21,19 @@ namespace krys::boo::dom
     return Is<Element>(node) || Is<Text>(node);
   }
 
-  bool SlotAlgorithms::IsSlottable(const Text &node) noexcept
+  bool SlotAlgorithms::IsSlottable(const Text &) noexcept
   {
     return true;
   }
 
-  bool SlotAlgorithms::IsSlottable(const Element &node) noexcept
+  bool SlotAlgorithms::IsSlottable(const Element &) noexcept
   {
     return true;
   }
 
   html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(Node &node) noexcept
   {
-    assert(Is<ShadowRoot>(TreeQueries::Root(node)));
+    krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : DescendantRange(TreeQueries::Root(node)))
     {
@@ -47,7 +51,7 @@ namespace krys::boo::dom
 
   const html::HTMLSlotElement *SlotAlgorithms::DefaultSlot(const Node &node) noexcept
   {
-    assert(Is<ShadowRoot>(TreeQueries::Root(node)));
+    krys_debug_assert(Is<ShadowRoot>(TreeQueries::Root(node)));
 
     for (auto &descendant : ConstDescendantRange(TreeQueries::Root(node)))
     {
@@ -119,7 +123,7 @@ namespace krys::boo::dom
 
   html::HTMLSlotElement *SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
-    assert(IsSlottable(slottable));
+    krys_debug_assert(IsSlottable(slottable));
 
     Element *parent = slottable.ParentElement();
 
@@ -128,7 +132,7 @@ namespace krys::boo::dom
       return nullptr;
     }
 
-    RefPtr<ShadowRoot> shadow = parent->ShadowRoot();
+    RefPtr<ShadowRoot> shadow = ShareRefPtr(TreeQueries::GetShadowRoot(*parent));
 
     if (shadow == nullptr)
     {
@@ -138,6 +142,14 @@ namespace krys::boo::dom
     if (open && shadow->Mode() != ShadowRootMode::Open)
     {
       return nullptr;
+    }
+
+    // A details element's first summary child takes its summary slot, and its other children its content
+    // slot.
+    if (auto *details = DynamicDowncast<html::HTMLDetailsElement>(*parent);
+        details && shadow->Mode() == ShadowRootMode::UserAgent)
+    {
+      return details->SlotForHostChild(slottable);
     }
 
     if (shadow->SlotAssignment() == SlotAssignmentMode::Manual)
@@ -265,22 +277,41 @@ namespace krys::boo::dom
   void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
   {
     auto slottables = FindSlottables(slot);
-    if (slottables != slot._assignedNodes)
+    bool assignedNodesChanged = !std::ranges::equal(
+      slottables, slot._assignedNodes, [](const auto &a, const auto &b) { return a.get() == b.get(); });
+    if (assignedNodesChanged)
     {
       SignalSlotChange(slot);
+
+      // The composed tree changed under the host.
+      if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(slot))
+      {
+        if (auto host = ShareRefPtr(shadowRoot->Host()))
+        {
+          RenderTreeUpdater::TearDownRenderersAfterSlotChange(*host);
+          host->InvalidateStyleForSubtree();
+        }
+      }
     }
 
-    slot._assignedNodes = std::move(slottables);
-    for (auto &slottable : slot._assignedNodes)
+    slot._assignedNodes.clear();
+    slot._assignedNodes.reserve(slottables.size());
+    for (auto &slottable : slottables)
     {
+      slot._assignedNodes.push_back(CreateWeakRef<Node>(*slottable));
       if (auto *element = DynamicDowncast<Element>(*slottable))
       {
-        element->_assignedSlot = ShareRef(slot);
+        element->_assignedSlot = CreateWeakPtr(&slot);
       }
       else if (auto *text = DynamicDowncast<Text>(*slottable))
       {
-        text->_assignedSlot = ShareRef(slot);
+        text->_assignedSlot = CreateWeakPtr(&slot);
       }
+    }
+
+    if (assignedNodesChanged && slot.SelfOrPrecedingNodesAffectDirAuto())
+    {
+      slot.UpdateEffectiveTextDirection();
     }
   }
 
@@ -310,8 +341,11 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::SignalSlotChange(html::HTMLSlotElement &slot) noexcept
   {
-    // TODO(impl): SLOTTABLES - Append slot to slot’s relevant agent’s signal slots
-    // TODO(impl): MUTATION-OBSERVERS - Queue a mutation observer microtask.
+    // 1. Append slot to slot's relevant agent's signal slots.
+    MutationObserverAlgorithms::AppendSignalSlot(slot);
+
+    // 2. Queue a mutation observer microtask.
+    MutationObserverAlgorithms::QueueMutationObserverMicrotask();
   }
 
 #pragma endregion

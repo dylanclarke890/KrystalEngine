@@ -1,15 +1,18 @@
 ﻿#include "Krystal.Booey/DOM/Element.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/MutationObserver.hpp"
+#include "Krystal.Booey/DOM/MutationRecord.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -83,7 +86,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(classList.Contains(u8"bar"));
   }
 
-  // TODO(test): SLOTTABLES
+  // FIXME: Tests for slottables.
   // TEST_CASE("Element::Slot", "[HTML][Element]")
 
   TEST_CASE("Element::HasAttributes", "[HTML][Element]")
@@ -444,14 +447,14 @@ namespace krys::boo::dom::tests
     }
   }
 
-  // TODO(test): SHADOW-ROOT
+  // FIXME: Tests for shadow roots.
   // TEST_CASE("Element::AttachShadow", "[HTML][Element]")
   // TEST_CASE("Element::ShadowRoot", "[HTML][Element]")
 
-  // TODO(test): CUSTOM-ELEMENTS
+  // FIXME: Tests for custom elements.
   // TEST_CASE("Element::CustomElementRegistry", "[HTML][Element]")
 
-  // TODO(test): CSS-SELECTORS:
+  // FIXME: Tests for CSS selectors:
   // TEST_CASE("Element::Matches", "[HTML][Element]")
   // TEST_CASE("Element::Closest", "[HTML][Element]")
   // TEST_CASE("Element::WebkitMatchesSelector", "[HTML][Element]")
@@ -560,5 +563,143 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
     REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
     REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
+  }
+
+  namespace
+  {
+    struct AttributeChange
+    {
+      DOMStringAtom LocalName;
+      Maybe<DOMString> OldValue;
+      Maybe<DOMString> Value;
+    };
+
+    class AttributeRecordingElement : public Element
+    {
+      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(AttributeRecordingElement);
+
+    public:
+      List<AttributeChange> Changes;
+
+      explicit AttributeRecordingElement(dom::Document &document) noexcept
+          : Element(document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"},
+                    NodeFlags::None)
+      {
+      }
+
+    protected:
+      void OnAttributeChanged(DOMStringAtom localName, Maybe<DOMStringView> oldValue,
+                              Maybe<DOMStringView> value, DOMStringAtom namespaceURI) noexcept override
+      {
+        Element::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+
+        auto toString = [](DOMStringView view)
+        {
+          return DOMString(view);
+        };
+        Changes.push_back({localName, oldValue.transform(toString), value.transform(toString)});
+      }
+    };
+  }
+
+  TEST_CASE("Element::OnAttributeChanged", "[HTML][Element]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto element = CreateRef<AttributeRecordingElement>(*document);
+
+    SECTION("Adding an attribute passes a null old value")
+    {
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"a").HasException());
+
+      REQUIRE(element->Changes.size() == 1uz);
+      REQUIRE(element->Changes[0].LocalName == u8"title");
+      REQUIRE_FALSE(element->Changes[0].OldValue.has_value());
+      REQUIRE(element->Changes[0].Value == u8"a");
+    }
+
+    SECTION("Changing an attribute passes the previous value")
+    {
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"a").HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"b").HasException());
+
+      REQUIRE(element->Changes.size() == 2uz);
+      REQUIRE(element->Changes[1].OldValue == u8"a");
+      REQUIRE(element->Changes[1].Value == u8"b");
+    }
+
+    SECTION("Removing an attribute passes a null value")
+    {
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"a").HasException());
+      element->RemoveAttribute(u8"title");
+
+      REQUIRE(element->Changes.size() == 2uz);
+      REQUIRE(element->Changes[1].OldValue == u8"a");
+      REQUIRE_FALSE(element->Changes[1].Value.has_value());
+    }
+
+    SECTION("An empty attribute isn't null")
+    {
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"").HasException());
+      element->RemoveAttribute(u8"title");
+
+      REQUIRE(element->Changes[0].Value == u8"");
+      REQUIRE(element->Changes[1].OldValue == u8"");
+    }
+  }
+
+  TEST_CASE("Element::ClassList follows the class attribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"class", u8"a b").HasException());
+    REQUIRE(data.Node->ClassList().Length() == 2uz);
+
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"class", u8"c").HasException());
+    REQUIRE(data.Node->ClassList().Length() == 1uz);
+    REQUIRE(data.Node->ClassList().Contains(u8"c"));
+
+    data.Node->RemoveAttribute(u8"class");
+    REQUIRE(data.Node->ClassList().Length() == 0uz);
+  }
+
+  TEST_CASE("Element attribute mutation records", "[HTML][Element]")
+  {
+    CommonTestData data;
+    auto observer = CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
+    REQUIRE_FALSE(
+      observer->Observe(*data.Node, MutationObserverInit {.Attributes = true, .AttributeOldValue = true})
+        .HasException());
+
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"title", u8"a").HasException());
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"title", u8"b").HasException());
+    data.Node->RemoveAttribute(u8"title");
+
+    auto records = observer->TakeRecords();
+    REQUIRE(records.size() == 3uz);
+    REQUIRE(records[0]->OldValue() == DOMStringAtom::Null());
+    REQUIRE(records[1]->OldValue() == u8"a");
+    REQUIRE(records[2]->OldValue() == u8"b");
+  }
+
+  TEST_CASE("HTMLSlotElement is a slot", "[HTML][Element]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto slot = CreateRef<html::HTMLSlotElement>(*document);
+
+    REQUIRE(Is<html::HTMLSlotElement>(static_cast<Node &>(*slot)));
+  }
+
+  TEST_CASE("Element::Children", "[DOM][Element]")
+  {
+    // Rare data is created on first use.
+    auto document = CreateRef<HTMLDocument>();
+    auto div = document->CreateElement(u8"div").Value();
+    auto span = document->CreateElement(u8"span").Value();
+    REQUIRE_FALSE(document->AppendChild(*div).HasException());
+    REQUIRE_FALSE(div->AppendChild(*span).HasException());
+    CHECK(document->Children()->Length() == 1u);
+    CHECK(div->Children()->Length() == 1u);
+    CHECK(span->Children()->Length() == 0u);
+    CHECK(document->CreateDocumentFragment()->Children()->Length() == 0u);
   }
 }

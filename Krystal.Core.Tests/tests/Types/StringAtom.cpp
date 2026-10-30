@@ -50,4 +50,11 @@ namespace krys::tests
     StringAtom atomStr2 = std::move(temp);
     REQUIRE(atomStr1 == atomStr2);
   }
+
+  TEST_CASE("StringAtom - the null atom reads as empty", "[StringAtom]")
+  {
+    REQUIRE(StringAtom::Null().View().empty());
+    REQUIRE(StringAtom::Null().Storage() == nullptr);
+    REQUIRE_FALSE(StringAtom::Null() == StringAtom::Empty());
+  }
 }

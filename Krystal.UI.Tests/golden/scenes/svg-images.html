@@ -1,0 +1,31 @@
+﻿<!doctype html>
+<!-- The "svg-images" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, its SVG files loaded
+     from images/ by relative file URLs. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #e9ecf2; overflow: hidden; }
+  body { margin: 0; }
+  img, div, svg { position: absolute; }
+</style>
+</head>
+<body>
+  <!-- SVG images in <img>: at their natural size, scaled by an attribute (laid out again at that size), and one
+       sized only by its view box's aspect ratio. -->
+  <img src="images/badge.svg" style="left: 16px; top: 16px">
+  <img src="images/badge.svg" width="128" style="left: 96px; top: 16px">
+  <img src="images/ratio.svg" style="left: 240px; top: 16px; width: 96px">
+
+  <!-- An SVG image tiled as a background, masking a box, and as a border image. -->
+  <div style="left: 16px; top: 96px; width: 96px; height: 64px; background: #ffffff url(images/tile.svg)"></div>
+  <div style="left: 128px; top: 96px; width: 64px; height: 32px; background: #073b4c; mask-image: url(images/badge.svg)"></div>
+  <div style="left: 128px; top: 144px; width: 48px; height: 32px; border: 8px solid; border-image: url(images/tile.svg) 8 round; background: #ffd166"></div>
+
+  <!-- <use> of an element in another file. -->
+  <svg style="left: 216px; top: 96px" width="128" height="64">
+    <use href="images/defs.svg#shape" />
+    <use href="images/defs.svg#shape" x="56" transform="translate(16 8) scale(0.75)" />
+  </svg>
+</body>
+</html>

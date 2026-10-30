@@ -1,0 +1,28 @@
+﻿<!doctype html>
+<!-- The "bidi-controls" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. Form controls in
+     right-to-left content: the theme isn't Chrome's, so Chrome's golden is only reported. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  html { width: 360px; background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 13px/18px "Liberation Sans"; color: #222222; }
+  main { display: block; direction: rtl; }
+  div { margin-bottom: 6px; }
+  input, select, textarea, button { font: 13px "Liberation Sans"; vertical-align: middle; }
+  input[type=text], textarea { width: 120px; }
+  textarea { resize: both; }
+  input[type=range], progress, meter { width: 100px; }
+</style>
+</head>
+<body><main>
+  <div><input type=text value="שלום world"> <input type=text placeholder="חיפוש"></div>
+  <div><input type=number value=42 style="width: 60px"> <select><option>אפשרות</option></select> <button>כפתור</button></div>
+  <div><label><input type=checkbox checked> בחירה</label> <label><input type=radio checked> אחד</label></div>
+  <div><input type=range value=25> <progress value=30 max=100></progress> <meter value=0.7></meter></div>
+  <div><textarea rows=2>שורה ראשונה
+second line</textarea></div>
+  <div><input type=text value="ltr in rtl" dir=ltr> <input type=text value="אוטומטי" dir=auto></div>
+</main></body>
+</html>

@@ -5,9 +5,16 @@
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::html
 {
+  KRYS_NODISCARD static bool IsNameColorScheme(dom::DOMStringView nameValue) noexcept
+  {
+    return text::IsASCIICaselessEqual(nameValue, utf8_stringview(u8"color-scheme"))
+           || text::IsASCIICaselessEqual(nameValue, utf8_stringview(u8"supported-color-schemes"));
+  }
+
 #pragma region HTMLMetaElement
 
   HTMLMetaElement::HTMLMetaElement(dom::Document &document) noexcept
@@ -27,8 +34,6 @@ namespace krys::boo::html
 
   dom::DOMString HTMLMetaElement::HttpEquiv() const noexcept
   {
-    // TODO(HTMLMETAELEMENT, HTML)" 'http-equiv' is an enumerated attribute, don't think it's limited to known
-    // values though.
     return Reflection::Reflect<dom::DOMString>(*this, u8"http-equiv").value_or(u8"");
   }
 
@@ -72,4 +77,66 @@ namespace krys::boo::html
   }
 
 #pragma endregion
+
+  void HTMLMetaElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+    Process();
+  }
+
+  void HTMLMetaElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                           Maybe<dom::DOMStringView> value,
+                                           dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+    if (localName == u8"name")
+    {
+      Process(oldValue);
+    }
+    else if (localName == u8"http-equiv" || localName == u8"content")
+    {
+      Process();
+    }
+  }
+
+  void HTMLMetaElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+    auto name = GetAttribute(u8"name");
+    if (oldAncestor.IsConnected() && name && IsNameColorScheme(*name))
+    {
+      oldAncestor.NodeDocument().MetaElementColorSchemeChanged();
+    }
+  }
+
+  void HTMLMetaElement::Process(Maybe<dom::DOMStringView> oldName) noexcept
+  {
+    // Changing a meta tag while it's not in the document tree shouldn't have any effect on the document.
+    if (IsInDocumentTree())
+    {
+      auto name = GetAttribute(u8"name");
+      if ((name && IsNameColorScheme(*name)) || (oldName && IsNameColorScheme(*oldName)))
+      {
+        NodeDocument().MetaElementColorSchemeChanged();
+      }
+    }
+
+    // When a meta element is inserted into the document, if its http-equiv attribute is present and
+    // represents one of the pragma directives, run its algorithm.
+    if (!IsConnected())
+    {
+      return;
+    }
+    auto httpEquiv = GetAttribute(u8"http-equiv");
+    auto content = GetAttribute(u8"content");
+    if (!httpEquiv || !content)
+    {
+      return;
+    }
+    NodeDocument().ProcessMetaHttpEquiv(*httpEquiv, *content);
+  }
 }

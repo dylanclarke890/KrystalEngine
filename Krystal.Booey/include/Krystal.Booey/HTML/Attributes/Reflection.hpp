@@ -24,7 +24,7 @@ namespace krys::boo::html
   template <typename T>
   concept ReflectURLType = OneOf<T, dom::USVString>;
 
-  // TODO(CONTENT-ATTRIBUTE-REFLECTION, HTML): FrozenArray<T>? is also one of the possible types.
+  // FIXME: FrozenArray<T>? is also one of the possible types.
   // NOTE: DOMTokenList is also a possible type for reflection but it just consists of returning a
   // DOMTokenList, would be harder to handle here.
   template <typename T>
@@ -38,10 +38,6 @@ namespace krys::boo::html
 
   template <typename T>
   concept ReflectPositiveWithFallbackType = ReflectPositiveType<T>;
-
-  /// @brief Types that unconditionally return exceptions during reflection.
-  template <typename T>
-  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, dom::USVString>;
 
   template <typename T>
   concept ReflectDefaultGetterType = OneOf<T, double, int32, uint32>;
@@ -109,14 +105,11 @@ namespace krys::boo::html
     };
 
     template <typename T>
-    using reflect_get_return_t =
-      conditional_t<SameType<T, dom::DOMString>, Maybe<dom::DOMString>,
-                    conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, dom::ExceptionOr<T>, T>>;
+    using reflect_get_return_t = conditional_t<SameType<T, dom::DOMString>, Maybe<dom::DOMString>, T>;
 
     template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
     using reflect_set_return_t =
-      conditional_t<ReflectAlwaysReturnsExceptionOrT<T> || (SameType<T, int32> && OnlyNonNegative)
-                      || (SameType<T, uint32> && OnlyPositive),
+      conditional_t<(SameType<T, int32> && OnlyNonNegative) || (SameType<T, uint32> && OnlyPositive),
                     dom::ExceptionOr<void>, void>;
 
 #pragma endregion
@@ -646,7 +639,9 @@ namespace krys::boo::html
     KRYS_NODISCARD static Maybe<dom::DOMString> GetContentAttribute(const ElementInternals &internals,
                                                                     dom::DOMStringAtom name) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // FIXME: The internals' ARIA attributes, with accessibility.
+      (void)internals;
+      (void)name;
       return null;
     }
 
@@ -654,13 +649,18 @@ namespace krys::boo::html
     static void SetContentAttribute(ElementInternals &internals, dom::DOMStringAtom name,
                                     dom::DOMString &&value) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // FIXME: The internals' ARIA attributes, with accessibility.
+      (void)internals;
+      (void)name;
+      (void)value;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#delete-the-content-attribute
     static void DeleteContentAttribute(ElementInternals &internals, dom::DOMStringAtom name) noexcept
     {
-      // TODO(impl): ELEMENT-INTERNALS
+      // FIXME: The internals' ARIA attributes, with accessibility.
+      (void)internals;
+      (void)name;
     }
 
 #pragma endregion
@@ -702,22 +702,36 @@ namespace krys::boo::html
 
 #pragma region ReflectUSVString
 
-    /// @brief Helper for getting reflected content attributes with 'dom::USVString' type.
+    /// @brief Helper for getting reflected content attributes with 'dom::USVString' type: the content
+    /// attribute's value, or the empty string if it's absent. A URL is completed against the node document's
+    /// base URL, unless it doesn't parse.
+    /// @see https://html.spec.whatwg.org/#xattr-reflecturl
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    KRYS_NODISCARD static dom::ExceptionOr<dom::USVString> ReflectUSVString(const Target &target,
-                                                                            dom::DOMStringAtom name) noexcept
+    KRYS_NODISCARD static dom::USVString ReflectUSVString(const Target &target,
+                                                          dom::DOMStringAtom name) noexcept
     {
-      // SPEC-VIOLATION(dom::USVString): Not supported.
-      return dom::ExceptionCode::NotSupportedError;
+      auto contentAttributeValue = GetContentAttribute(target, name);
+      if (!contentAttributeValue)
+      {
+        return {};
+      }
+      if constexpr (AsUrl)
+      {
+        // Let urlString be the result of encoding-parsing-and-serializing a URL given contentAttributeValue,
+        // relative to the element's node document. If urlString is not failure, then return urlString.
+        if (auto url = target.NodeDocument().CompleteURL(*contentAttributeValue); url.IsValid())
+        {
+          return dom::USVString(url.String());
+        }
+      }
+      return dom::USVString(krys::move(*contentAttributeValue));
     }
 
     /// @brief Helper for setting reflected content attributes with 'dom::USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
-    KRYS_NODISCARD static dom::ExceptionOr<void> ReflectUSVString(Target &target, dom::DOMStringAtom name,
-                                                                  dom::USVString &&value) noexcept
+    static void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString &&value) noexcept
     {
-      // SPEC-VIOLATION(dom::USVString): Not supported.
-      return dom::ExceptionCode::NotSupportedError;
+      SetContentAttribute(target, name, static_cast<dom::DOMString &&>(value));
     }
 
 #pragma endregion
@@ -866,8 +880,10 @@ namespace krys::boo::html
       {
         return *DefaultValue;
       }
-
-      return static_cast<uint32>(minimum);
+      else
+      {
+        return static_cast<uint32>(minimum);
+      }
     }
 
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.

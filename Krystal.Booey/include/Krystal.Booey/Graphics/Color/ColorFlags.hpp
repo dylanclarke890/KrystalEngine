@@ -8,14 +8,14 @@ namespace krys::boo
   {
     None = 0,
     Semantic = 1 << 0,
-    UseColorFunctionSerialization = 1 << 1,
+    UseColorFunctionSerialisation = 1 << 1,
   };
 
   enum class ColorFlagsIncludingPrivate : uint8
   {
     None = 0,
     Semantic = static_cast<uint8>(ColorFlags::Semantic),
-    UseColorFunctionSerialization = static_cast<uint8>(ColorFlags::UseColorFunctionSerialization),
+    UseColorFunctionSerialisation = static_cast<uint8>(ColorFlags::UseColorFunctionSerialisation),
     Valid = 1 << 2,
     OutOfLine = 1 << 3,
     HashTableEmptyValue = 1 << 4,

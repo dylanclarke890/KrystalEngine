@@ -1,6 +1,7 @@
 ﻿#include "Krystal.PAL/Events.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.Core/Numeric.hpp"
+#include "Krystal.Core/Utils/Move.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
 
@@ -8,8 +9,9 @@ namespace krys::pal
 {
 #pragma region KeyboardEvent
 
-  KeyboardEvent::KeyboardEvent(WindowHandle window, const krys::pal::Key key, const KeyState state) noexcept
-      : Event(), _window(window), _key(key), _state(state)
+  KeyboardEvent::KeyboardEvent(WindowHandle window, const krys::pal::Key key, const KeyState state,
+                               const KeyModifiers modifiers, KeyText text) noexcept
+      : Event(), _window(window), _key(key), _state(state), _modifiers(modifiers), _text(krys::move(text))
   {
   }
 
@@ -23,6 +25,16 @@ namespace krys::pal
     return _state;
   }
 
+  KeyModifiers KeyboardEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
+  }
+
+  const KeyText &KeyboardEvent::Text() const noexcept
+  {
+    return _text;
+  }
+
   WindowHandle KeyboardEvent::GetWindowHandle() const noexcept
   {
     return _window;
@@ -30,11 +42,130 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region TextInputEvent
+
+  TextInputEvent::TextInputEvent(WindowHandle window, utf8_string text) noexcept
+      : Event(), _window(window), _text(krys::move(text))
+  {
+  }
+
+  const utf8_string &TextInputEvent::Text() const noexcept
+  {
+    return _text;
+  }
+
+  WindowHandle TextInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region CompositionInputEvent
+
+  CompositionInputEvent::CompositionInputEvent(WindowHandle window, CompositionInput input) noexcept
+      : Event(), _window(window), _input(krys::move(input))
+  {
+  }
+
+  const CompositionInput &CompositionInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle CompositionInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region PointerInputEvent
+
+  PointerInputEvent::PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept
+      : Event(), _window(window), _input(input)
+  {
+  }
+
+  const PointerInput &PointerInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle PointerInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region DragInputEvent
+
+  DragInputEvent::DragInputEvent(WindowHandle window, DragInput input) noexcept
+      : Event(), _window(window), _input(krys::move(input))
+  {
+  }
+
+  const DragInput &DragInputEvent::Input() const noexcept
+  {
+    return _input;
+  }
+
+  WindowHandle DragInputEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region GamepadConnectionEvent
+
+  GamepadConnectionEvent::GamepadConnectionEvent(uint32 slot, bool connected) noexcept
+      : Event(), _slot(slot), _connected(connected)
+  {
+  }
+
+  uint32 GamepadConnectionEvent::Slot() const noexcept
+  {
+    return _slot;
+  }
+
+  bool GamepadConnectionEvent::Connected() const noexcept
+  {
+    return _connected;
+  }
+
+#pragma endregion
+
+#pragma region GamepadButtonEvent
+
+  GamepadButtonEvent::GamepadButtonEvent(uint32 slot, GamepadButton button, GamepadButtonState state) noexcept
+      : Event(), _slot(slot), _button(button), _state(state)
+  {
+  }
+
+  uint32 GamepadButtonEvent::Slot() const noexcept
+  {
+    return _slot;
+  }
+
+  GamepadButton GamepadButtonEvent::Button() const noexcept
+  {
+    return _button;
+  }
+
+  GamepadButtonState GamepadButtonEvent::State() const noexcept
+  {
+    return _state;
+  }
+
+#pragma endregion
+
 #pragma region MouseButtonEvent
 
   MouseButtonEvent::MouseButtonEvent(WindowHandle window, const MouseButton button,
-                                     const MouseButtonState state) noexcept
-      : Event(), _window(window), _button(button), _state(state)
+                                     const MouseButtonState state, const KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _button(button), _state(state), _modifiers(modifiers)
   {
   }
 
@@ -46,6 +177,11 @@ namespace krys::pal
   MouseButtonState MouseButtonEvent::State() const noexcept
   {
     return _state;
+  }
+
+  KeyModifiers MouseButtonEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
   }
 
   bool MouseButtonEvent::IsPressed() const noexcept
@@ -65,11 +201,54 @@ namespace krys::pal
 
 #pragma endregion
 
+#pragma region LockedMouseMoveEvent
+
+  LockedMouseMoveEvent::LockedMouseMoveEvent(WindowHandle window, float deltaX, float deltaY, float rawDeltaX,
+                                             float rawDeltaY, KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _rawDeltaX(rawDeltaX),
+        _rawDeltaY(rawDeltaY), _modifiers(modifiers)
+  {
+  }
+
+  float LockedMouseMoveEvent::DeltaX() const noexcept
+  {
+    return _deltaX;
+  }
+
+  float LockedMouseMoveEvent::DeltaY() const noexcept
+  {
+    return _deltaY;
+  }
+
+  float LockedMouseMoveEvent::RawDeltaX() const noexcept
+  {
+    return _rawDeltaX;
+  }
+
+  float LockedMouseMoveEvent::RawDeltaY() const noexcept
+  {
+    return _rawDeltaY;
+  }
+
+  KeyModifiers LockedMouseMoveEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
+  }
+
+  WindowHandle LockedMouseMoveEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
 #pragma region MouseMoveEvent
 
   MouseMoveEvent::MouseMoveEvent(WindowHandle window, const float deltaX, const float deltaY,
-                                 const float clientX, const float clientY) noexcept
-      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY)
+                                 const float clientX, const float clientY,
+                                 const KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
+        _modifiers(modifiers)
   {
   }
 
@@ -93,6 +272,11 @@ namespace krys::pal
     return _clientY;
   }
 
+  KeyModifiers MouseMoveEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
+  }
+
   WindowHandle MouseMoveEvent::GetWindowHandle() const noexcept
   {
     return _window;
@@ -102,14 +286,37 @@ namespace krys::pal
 
 #pragma region MouseScrollEvent
 
-  MouseScrollEvent::MouseScrollEvent(WindowHandle window, const float delta) noexcept
-      : Event(), _window(window), _delta(delta)
+  MouseScrollEvent::MouseScrollEvent(WindowHandle window, const float deltaX, const float deltaY,
+                                     const float clientX, const float clientY,
+                                     const KeyModifiers modifiers) noexcept
+      : Event(), _window(window), _deltaX(deltaX), _deltaY(deltaY), _clientX(clientX), _clientY(clientY),
+        _modifiers(modifiers)
   {
   }
 
-  float MouseScrollEvent::Delta() const noexcept
+  float MouseScrollEvent::DeltaX() const noexcept
   {
-    return _delta;
+    return _deltaX;
+  }
+
+  float MouseScrollEvent::DeltaY() const noexcept
+  {
+    return _deltaY;
+  }
+
+  float MouseScrollEvent::ClientX() const noexcept
+  {
+    return _clientX;
+  }
+
+  float MouseScrollEvent::ClientY() const noexcept
+  {
+    return _clientY;
+  }
+
+  KeyModifiers MouseScrollEvent::Modifiers() const noexcept
+  {
+    return _modifiers;
   }
 
   WindowHandle MouseScrollEvent::GetWindowHandle() const noexcept
@@ -195,6 +402,25 @@ namespace krys::pal
   }
 
   WindowHandle WindowDPIChangeEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region WindowFocusEvent
+
+  WindowFocusEvent::WindowFocusEvent(WindowHandle window, const bool focused) noexcept
+      : _window(window), _focused(focused)
+  {
+  }
+
+  bool WindowFocusEvent::Focused() const noexcept
+  {
+    return _focused;
+  }
+
+  WindowHandle WindowFocusEvent::GetWindowHandle() const noexcept
   {
     return _window;
   }

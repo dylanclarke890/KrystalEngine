@@ -133,6 +133,9 @@ namespace krys
   concept NoThrowCopyAssignable = std::is_nothrow_copy_assignable_v<T>;
 
   template <typename T>
+  concept TriviallyCopyable = std::is_trivially_copyable_v<T>;
+
+  template <typename T>
   concept MoveConstructible = std::is_move_constructible_v<T>;
 
   template <typename T>
@@ -149,6 +152,9 @@ namespace krys
 
   template <typename T>
   concept NoThrowMoveAssignable = std::is_nothrow_move_assignable_v<T>;
+
+  template <typename T>
+  concept TriviallyMovable = TriviallyMoveAssignable<T> && TriviallyMoveConstructible<T>;
 
   template <typename T, typename... Args>
   concept ConstructibleFrom = std::constructible_from<T, Args...>;

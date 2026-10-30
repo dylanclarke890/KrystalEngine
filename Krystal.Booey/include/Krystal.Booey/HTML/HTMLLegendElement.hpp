@@ -4,6 +4,8 @@
 
 namespace krys::boo::html
 {
+  class HTMLFormElement;
+
   /// @see https://html.spec.whatwg.org/#htmllegendelement
   class HTMLLegendElement : public HTMLElement
   {
@@ -14,8 +16,12 @@ namespace krys::boo::html
 
 #pragma region HTMLLegendElement - https://html.spec.whatwg.org/#htmllegendelement
 
-    // TODO(HTMLLegendElement): Form().
-    // readonly attribute HTMLFormElement? form;
+    /// @brief The form of the fieldset the legend is a child of, if any.
+    /// @see https://html.spec.whatwg.org/#dom-legend-form
+    KRYS_NODISCARD HTMLFormElement *Form() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-legend-form
+    KRYS_NODISCARD RefPtr<HTMLFormElement> FormForBindings() const noexcept;
 
 #pragma endregion
 
@@ -32,6 +38,11 @@ namespace krys::boo::html
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLLegendElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLLegendElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLLegendElement();

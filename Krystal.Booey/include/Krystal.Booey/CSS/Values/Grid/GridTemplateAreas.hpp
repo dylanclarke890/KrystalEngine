@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Values/Grid/GridNamedAreaMap.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/NumericTypes.hpp"
 #include "Krystal.Booey/CSS/Values/Types.hpp"
+#include "Krystal.Booey/CSS/Values/ValueId.hpp"
+#include "Krystal.Core/Visitor.hpp"
 
 namespace krys::boo::css
 {
@@ -10,23 +11,23 @@ namespace krys::boo::css
   // https://drafts.csswg.org/css-grid/#propdef-grid-template-areas
   struct GridTemplateAreas
   {
-    GridNamedAreaMap map;
+    GridNamedAreaMap Map;
 
-    GridTemplateAreas(keywords::None) noexcept : map {}
+    GridTemplateAreas(keywords::None) noexcept : Map {}
     {
     }
 
-    GridTemplateAreas(const GridNamedAreaMap &map) noexcept : map {map}
+    GridTemplateAreas(const GridNamedAreaMap &map) noexcept : Map {map}
     {
     }
 
-    GridTemplateAreas(GridNamedAreaMap &&map) noexcept : map {krys::move(map)}
+    GridTemplateAreas(GridNamedAreaMap &&map) noexcept : Map {krys::move(map)}
     {
     }
 
     KRYS_NODISCARD bool IsNone() const noexcept
     {
-      return !map.rowCount;
+      return !Map.RowCount;
     }
 
     template <typename... F>
@@ -39,11 +40,11 @@ namespace krys::boo::css
         return visitor(keywords::None {});
       }
 
-      return visitor(map);
+      return visitor(Map);
     }
 
     KRYS_NODISCARD bool operator==(const GridTemplateAreas &) const noexcept = default;
   };
 }
 
-DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::GridTemplateAreas);
+DEFINE_VARIANT_LIKE_CONFORMANCE(krys::boo::css::GridTemplateAreas)

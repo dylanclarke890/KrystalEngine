@@ -12,6 +12,6 @@ namespace krys::boo::css
   {
     // For @view-transition descriptor
     KRYS_NODISCARD RefPtr<Value> ConsumeViewTransitionTypes(TokenRange &tokens,
-                                                               PropertyParserState &state) noexcept;
+                                                            PropertyParserState &state) noexcept;
   }
 }

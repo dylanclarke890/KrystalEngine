@@ -1,14 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/CSS/Calc/CalcAllowedSymbols.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
 
 namespace krys::boo::css
 {
   struct IntegerValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<IntegerUnit>
-      Validate(UnitType unitType, PropertyParserState &, PropertyParserOptions) noexcept
+    KRYS_NODISCARD constexpr static Maybe<IntegerUnit> Validate(UnitType unitType, PropertyParserState &,
+                                                                PropertyParserOptions) noexcept
     {
       return UnitTraits<IntegerUnit>::Validate(unitType);
     }
@@ -25,12 +24,11 @@ namespace krys::boo::css
   {
     constexpr static TokenType TokenType = TokenType::Number;
 
-    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens,
-                                                                 PropertyParserState &,
-                                                                 CalcAllowedSymbols,
+    KRYS_NODISCARD static Maybe<typename Primitive::Raw> Consume(TokenRange &tokens, PropertyParserState &,
+                                                                 AllowedSymbols,
                                                                  PropertyParserOptions options) noexcept
     {
-      assert(tokens.Peek().Type() == TokenType::Number);
+      krys_debug_assert(tokens.Peek().Type() == TokenType::Number);
 
       if (tokens.Peek().NumericValueType() != NumericValueType::Integer)
       {

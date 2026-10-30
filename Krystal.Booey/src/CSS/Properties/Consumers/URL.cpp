@@ -6,9 +6,9 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/String.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
+#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Values/UrlValue.hpp"
-#include "Krystal.Booey/CSS/Values/Primitives/URL.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -53,11 +53,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
         auto args = ConsumeFunction(tokens);
 
-        auto string = ConsumeStringRaw(args);
-        if (string.empty())
+        // An empty string is a valid URL, so check for the token rather than an empty result.
+        if (args.Peek().Type() != TokenType::String)
         {
           return {};
         }
+
+        auto string = ConsumeStringRaw(args);
 
         auto result = CompleteURL(CSSOMString(string), state.Context);
         if (!result)
@@ -65,13 +67,6 @@ namespace krys::boo::css::PropertyParserHelpers
           return {};
         }
 
-        if (!state.Context.cssURLModifiersEnabled)
-        {
-          if (!args.IsAtEnd())
-          {
-            return {};
-          }
-        }
         else
         {
           while (!args.IsAtEnd())
@@ -85,7 +80,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                if (result->modifiers.crossOrigin)
+                if (result->Modifiers.CrossOrigin)
                 {
                   return {};
                 }
@@ -99,36 +94,36 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                result->modifiers.crossOrigin = URLCrossOriginFunction {.parameters = {*crossOriginValue}};
+                result->Modifiers.CrossOrigin = URLCrossOriginFunction {.Parameters = {*crossOriginValue}};
                 break;
               }
               case ValueId::Integrity:
               {
-                if (!state.Context.cssURLIntegrityModifierEnabled)
-                {
-                  return {};
-                }
-
                 if (!HasFlag(allowedURLModifiers, AllowedURLModifiers::Integrity))
                 {
                   return {};
                 }
 
-                if (result->modifiers.integrity)
+                if (result->Modifiers.Integrity)
                 {
                   return {};
                 }
 
                 auto integrityArgs = ConsumeFunction(args);
-                auto integrityValue = ConsumeStringRaw(integrityArgs);
-
-                if (integrityValue.empty() || !integrityArgs.IsAtEnd())
+                if (integrityArgs.Peek().Type() != TokenType::String)
                 {
                   return {};
                 }
 
-                result->modifiers.integrity =
-                  URLIntegrityFunction {.parameters = {CSSOMString(integrityValue)}};
+                auto integrityValue = ConsumeStringRaw(integrityArgs);
+
+                if (!integrityArgs.IsAtEnd())
+                {
+                  return {};
+                }
+
+                result->Modifiers.Integrity =
+                  URLIntegrityFunction {.Parameters = {CSSOMString(integrityValue)}};
 
                 break;
               }
@@ -139,7 +134,7 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                if (result->modifiers.referrerPolicy)
+                if (result->Modifiers.ReferrerPolicy)
                 {
                   return {};
                 }
@@ -156,8 +151,8 @@ namespace krys::boo::css::PropertyParserHelpers
                   return {};
                 }
 
-                result->modifiers.referrerPolicy =
-                  URLReferrerPolicyFunction {.parameters = {*referrerPolicyValue}};
+                result->Modifiers.ReferrerPolicy =
+                  URLReferrerPolicyFunction {.Parameters = {*referrerPolicyValue}};
 
                 break;
               }
@@ -181,7 +176,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   RefPtr<Value> ConsumeURL(TokenRange &tokens, PropertyParserState &state,
-                              AllowedURLModifiers allowedURLModifiers) noexcept
+                           AllowedURLModifiers allowedURLModifiers) noexcept
   {
     if (auto rawURL = ConsumeURLRaw(tokens, state, allowedURLModifiers))
     {

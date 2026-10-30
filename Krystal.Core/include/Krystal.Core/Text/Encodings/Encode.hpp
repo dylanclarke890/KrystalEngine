@@ -117,7 +117,8 @@ namespace krys::text
       }
       else
       {
-        WriteToOutput(result.Output, Span<const typename TEncoding::code_unit>(output.data(), codeUnitsProduced));
+        WriteToOutput(result.Output,
+                      Span<const typename TEncoding::code_unit>(output.data(), codeUnitsProduced));
       }
     }
 

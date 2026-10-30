@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Core/Assert.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/Utils/AlignedStorage.hpp"
 #include "Krystal.Core/Utils/ForbidHeapAllocation.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
@@ -17,7 +19,7 @@ namespace krys
   {
     static void AssertAccess() noexcept
     {
-      // TODO: Implement a proper main thread check for the target platform.
+      // FIXME: Implement a proper main thread check for the target platform.
       // krys_assert(isMainThread());
     }
   };
@@ -26,7 +28,7 @@ namespace krys
   {
     static void AssertAccess() noexcept
     {
-      // TODO: Implement a proper main run loop check for the target platform.
+      // FIXME: Implement a proper main run loop check for the target platform.
       // krys_assert(isMainRunLoop());
     }
   };
@@ -96,14 +98,24 @@ namespace krys
   class LazyNeverDestroyed
   {
     KRYS_FORBID_HEAP_ALLOCATION;
+    KRYS_NON_COPYABLE(LazyNeverDestroyed);
 
   private:
+#if KRYS_DEBUG
+    // LazyNeverDestroyed objects are always static, so this is zero-initialised to false. It must not be
+    // initialised dynamically: a dynamic initialiser could run after another translation unit's
+    // initialiser has already called Construct().
+    bool _isConstructed;
+#endif
     AlignedStorage<T> _storage;
 
     using PointerType = remove_const_t<T> *;
 
     PointerType StoragePointerWithoutAccessCheck() const noexcept
     {
+#if KRYS_DEBUG
+      krys_assert(_isConstructed);
+#endif
       return const_cast<PointerType>(_storage.get());
     }
 
@@ -126,8 +138,19 @@ namespace krys
     template <typename... Args>
     void ConstructWithoutAccessCheck(Args &&...args) noexcept
     {
+#if KRYS_DEBUG
+      krys_assert(!_isConstructed);
+      _isConstructed = true;
+#endif
       new (StoragePointerWithoutAccessCheck()) T(std::forward<Args>(args)...);
     }
+
+#if KRYS_DEBUG
+    KRYS_NODISCARD bool IsConstructed() const noexcept
+    {
+      return _isConstructed;
+    }
+#endif
 
     KRYS_NODISCARD operator T &() noexcept
     {

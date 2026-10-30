@@ -31,6 +31,11 @@ namespace krys::boo::dom
     DocumentFragment(Document &document, NodeFlags flags) noexcept;
 
   public:
+    KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
+    {
+      return true;
+    }
+
     DocumentFragment(Document &document) noexcept;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Node.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -12,7 +13,6 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -56,7 +56,7 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
   }
 
-  // TODO(test): URL - requires implementing URL and base URL support in Document.
+  // FIXME: Requires implementing URL and base URL support in Document.
   // TEST_CASE("Node::BaseURI", "[HTML][Node]")
   // {
   //   CommonTestData data {};
@@ -96,7 +96,7 @@ namespace krys::boo::dom::tests
     REQUIRE(&data.Node->GetRootNode({.Composed = false}) == data.Document.get());
     REQUIRE(&data.Node->GetRootNode({.Composed = true}) == data.Document.get());
 
-    // TODO(test): Shadow DOM - test that GetRootNode({.Composed = true}) returns the shadow root when the
+    // FIXME: Shadow DOM - test that GetRootNode({.Composed = true}) returns the shadow root when the
     // node is in a shadow tree.
   }
 
@@ -267,8 +267,6 @@ namespace krys::boo::dom::tests
 
     SECTION("with children")
     {
-      CommonTestData data {};
-
       auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
       auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
 
@@ -295,12 +293,12 @@ namespace krys::boo::dom::tests
 
     SECTION("Element")
     {
-      // TODO(test): cloning an element
+      // FIXME: Cloning an element
     }
 
     SECTION("Document")
     {
-      // TODO(test): cloning a document
+      // FIXME: Cloning a document
     }
 
     SECTION("DocumentType")
@@ -377,7 +375,7 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Node->IsEqualNode(data.Node.get()));
     REQUIRE(data.Node->IsEqualNode(equalNode.get()));
 
-    // TODO(test): other test cases for equality.
+    // FIXME: Other test cases for equality.
   }
 
   TEST_CASE("Node::IsSameNode", "[HTML][Node]")
@@ -466,7 +464,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(removeResult.HasException());
     }
 
-    // TODO(test): comparing attribute nodes, both with each other and with other node types.
+    // FIXME: Comparing attribute nodes, both with each other and with other node types.
   }
 
   TEST_CASE("Node::Contains", "[HTML][Node]")
@@ -610,7 +608,7 @@ namespace krys::boo::dom::tests
         REQUIRE(element->LookupNamespaceURI(u8"testprefix") == u8"http://a");
       }
 
-      // TODO(test): If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is
+      // FIXME: If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is
       // "xmlns", and local name is prefix, or if prefix is null and it has an attribute whose namespace is
       // the XMLNS namespace, namespace prefix is null, and local name is "xmlns", then return its value if it
       // is not the empty string, and null otherwise.

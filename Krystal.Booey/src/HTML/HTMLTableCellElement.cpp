@@ -1,14 +1,37 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 
 namespace krys::boo::html
 {
   HTMLTableCellElement::HTMLTableCellElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::TableCell)
+      : HTMLTablePartElement(document, HTMLElementInterface::TableCell)
   {
   }
 
 #pragma region HTMLTableCellElement
+
+  void HTMLTableCellElement::OnAttributeChanged(dom::DOMStringAtom localName,
+                                                Maybe<dom::DOMStringView> oldValue,
+                                                Maybe<dom::DOMStringView> value,
+                                                dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLTablePartElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    if (localName == u8"rowspan" || localName == u8"colspan")
+    {
+      if (auto *tableCell = DynamicDowncast<RenderTableCell>(Renderer()))
+      {
+        tableCell->ColSpanOrRowSpanChanged();
+      }
+    }
+  }
 
   uint32 HTMLTableCellElement::ColSpan() const noexcept
   {
@@ -23,7 +46,7 @@ namespace krys::boo::html
 
   uint32 HTMLTableCellElement::RowSpan() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1, 65'534}>(
+    return Reflection::Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {0, 65'534}>(
       *this, u8"rowspan");
   }
 
@@ -154,6 +177,63 @@ namespace krys::boo::html
   void HTMLTableCellElement::BgColor(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool
+    HTMLTableCellElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"nowrap" || localName == u8"width" || localName == u8"height"))
+    {
+      return true;
+    }
+    return HTMLTablePartElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLTableCellElement::CollectPresentationalHintsForAttribute(
+    dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI, dom::DOMStringView value,
+    css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"nowrap")
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::WhiteSpaceCollapse,
+                                           css::ValueId::Collapse);
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::TextWrapMode, css::ValueId::Nowrap);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      // width="0" is not allowed for compatibility with WinIE.
+      AddHTMLLengthToStyle(style, css::PropertyId::Width, value, AllowZeroValue::No);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      // width="0" is not allowed for compatibility with WinIE.
+      AddHTMLLengthToStyle(style, css::PropertyId::Height, value, AllowZeroValue::No);
+      return;
+    }
+    HTMLTablePartElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+
+  const css::MutableStyleProperties *HTMLTableCellElement::AdditionalPresentationalHintStyle() const noexcept
+  {
+    if (const auto *table = FindParentTable())
+    {
+      return table->AdditionalCellStyle();
+    }
+    return nullptr;
   }
 
 #pragma endregion

@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/Base.hpp"
 #include "Krystal.Core/Types/CheckedPtr.hpp"
@@ -26,8 +27,8 @@ namespace krys::boo::dom
   /// @see https://dom.spec.whatwg.org/#interface-domtokenlist
   class DOMTokenList
   {
+    friend class Element;
     friend class ElementAlgorithms;
-    friend class ExtensibilityHooks;
     friend class HTMLCollectionAlgorithms;
 
     using TokenList = SmallList<DOMString, 1>;
@@ -80,6 +81,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-add
     ExceptionOr<void> Add(const List<DOMString> &tokens) noexcept
     {
+      html::CEReactionsScope ceReactions;
       for (auto &token : tokens)
       {
         if (auto result = ValidateToken(token); result.HasException())
@@ -110,6 +112,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-remove
     ExceptionOr<void> Remove(const List<DOMString> &tokens) noexcept
     {
+      html::CEReactionsScope ceReactions;
       for (auto &token : tokens)
       {
         if (auto result = ValidateToken(token); result.HasException())
@@ -136,6 +139,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-toggle
     ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = null) noexcept
     {
+      html::CEReactionsScope ceReactions;
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();
@@ -168,6 +172,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-replace
     ExceptionOr<bool> Replace(const DOMString &token, const DOMString &newToken) noexcept
     {
+      html::CEReactionsScope ceReactions;
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();
@@ -198,7 +203,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
     KRYS_NODISCARD DOMString Value() const noexcept
     {
-      return SerializeSteps();
+      return SerialiseSteps();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
@@ -244,7 +249,7 @@ namespace krys::boo::dom
     void UpdateSteps() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
-    KRYS_NODISCARD DOMString SerializeSteps() const noexcept;
+    KRYS_NODISCARD DOMString SerialiseSteps() const noexcept;
 
     KRYS_NODISCARD ExceptionOr<void> ValidateToken(DOMStringView token) const noexcept
     {

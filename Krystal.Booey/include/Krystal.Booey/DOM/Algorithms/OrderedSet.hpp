@@ -16,6 +16,6 @@ namespace krys::boo::dom
     KRYS_NODISCARD static List<DOMString> Parser(DOMStringView input) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-ordered-set-serializer
-    KRYS_NODISCARD static DOMString Serializer(Span<DOMString> tokens) noexcept;
+    KRYS_NODISCARD static DOMString Serialiser(Span<DOMString> tokens) noexcept;
   };
 }

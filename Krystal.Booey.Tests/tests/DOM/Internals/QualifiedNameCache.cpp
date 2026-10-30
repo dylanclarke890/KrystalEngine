@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Internals/QualifiedNameCache.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -154,5 +154,21 @@ namespace krys::boo::dom::tests
                             dom::DOMStringAtom(u8"element"));
 
     REQUIRE(qn.Name() == u8"element");
+  }
+
+  TEST_CASE("AnyQualifiedName: no prefix, any namespace and any local name", "[HTML][QualifiedNameCache]")
+  {
+    auto any = AnyQualifiedName();
+    CHECK(any.NamespacePrefix() == DOMStringAtom::Null());
+    CHECK(any.NamespaceURI() == StarAtom());
+    CHECK(any.LocalName() == StarAtom());
+    CHECK(any == AnyQualifiedName());
+  }
+
+  TEST_CASE("QualifiedName: an empty namespace is no namespace", "[HTML][QualifiedNameCache]")
+  {
+    auto empty = QualifiedName(DOMStringAtom::Empty(), DOMStringAtom::Null(), u8"p");
+    CHECK(empty.NamespaceURI() == DOMStringAtom::Null());
+    CHECK(empty == QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), u8"p"));
   }
 }

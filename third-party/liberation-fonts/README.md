@@ -1,0 +1,12 @@
+# Liberation Sans
+
+The Liberation Sans faces from Liberation Fonts 2.1.5 (https://github.com/liberationfonts/liberation-fonts, release `liberation-fonts-ttf-2.1.5.tar.gz`), unmodified. SHA-256:
+
+- `LiberationSans-Regular.ttf`: `76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8`
+- `LiberationSans-Bold.ttf`: `788abee4c806d660e8aee46689dd8540cd4bb98da03dcc9d171ce3efd99a9173`
+- `LiberationSans-Italic.ttf`: `e5bae5c4cde31f22142753855f4f8fb86da6ff39955ed3c0a11248b0d16948b0`
+- `LiberationSans-BoldItalic.ttf`: `698da70fc191cc5f33ad4d6d3fe830fe4624b898ea2e3169955928b7c491f1ee`
+
+Licensed under the SIL Open Font License 1.1 (`LICENSE`); authors in `AUTHORS`.
+
+Krystal.Booey embeds the regular face as its default and last-resort font (`codegen/bundled_fonts.py`).

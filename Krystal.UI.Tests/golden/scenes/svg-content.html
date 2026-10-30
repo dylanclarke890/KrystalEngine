@@ -1,0 +1,65 @@
+﻿<!doctype html>
+<!-- The "svg-content" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  svg { position: absolute; }
+  .box { width: 60px; height: 30px; background: #ffd166; border: 3px solid #073b4c; border-radius: 8px; }
+  .bar { width: 40px; height: 8px; margin: 4px 0 0 6px; background: #ef476f; }
+</style>
+</head>
+<body>
+  <!-- <use>: instances of a group (inheriting the use's fill), of a symbol sized by the use, and a use of a use. -->
+  <svg style="left: 8px; top: 8px" width="344" height="72">
+    <defs>
+      <g id="pair">
+        <rect width="20" height="20" />
+        <rect x="24" width="20" height="20" fill="#073b4c" />
+      </g>
+      <symbol id="star" viewBox="0 0 20 20">
+        <path d="M 10 1 L 13 8 L 20 8 L 14 12 L 16 19 L 10 15 L 4 19 L 6 12 L 0 8 L 7 8 Z" fill="#ffd166" stroke="#073b4c" />
+      </symbol>
+    </defs>
+    <use href="#pair" x="6" y="6" fill="#ef476f" />
+    <use href="#pair" x="6" y="36" fill="#06d6a0" transform="translate(4 0)" />
+    <use href="#star" x="70" y="6" width="60" height="60" />
+    <use href="#star" x="140" y="6" width="30" height="30" />
+    <use id="small" href="#star" x="140" y="40" width="24" height="24" />
+    <use href="#small" x="40" />
+    <g id="row" fill="#118ab2">
+      <circle cx="230" cy="20" r="10" />
+      <circle cx="256" cy="20" r="10" opacity="0.5" />
+    </g>
+    <use href="#row" y="30" fill="#ef476f" />
+  </svg>
+
+  <!-- <image>: natural size, fitted (meet, slice and none), and transformed. -->
+  <svg style="left: 8px; top: 88px" width="344" height="72">
+    <image href="images/checker.png" x="6" y="6" />
+    <image href="images/landscape.png" x="30" y="6" width="48" height="48" />
+    <rect x="30" y="6" width="48" height="48" fill="none" stroke="#073b4c" />
+    <image href="images/landscape.png" x="90" y="6" width="48" height="48" preserveAspectRatio="xMinYMin slice" />
+    <image href="images/landscape.png" x="150" y="6" width="48" height="48" preserveAspectRatio="none" />
+    <image href="images/frame.png" x="210" y="6" width="60" height="60" transform="rotate(10 240 36)" />
+    <image href="images/lores.png" x="284" y="6" height="16" />
+  </svg>
+
+  <!-- <foreignObject>: HTML blocks laid out in SVG, translated and scaled with their SVG ancestors. -->
+  <svg style="left: 8px; top: 168px" width="344" height="64">
+    <foreignObject x="6" y="6" width="90" height="52">
+      <div class="box"><div class="bar"></div></div>
+    </foreignObject>
+    <g transform="translate(110 4) scale(1.5)">
+      <foreignObject width="80" height="40">
+        <div class="box"></div>
+      </foreignObject>
+    </g>
+    <foreignObject x="240" y="6" width="90" height="52" opacity="0.5">
+      <div class="box" style="background: #06d6a0"></div>
+    </foreignObject>
+  </svg>
+</body>
+</html>

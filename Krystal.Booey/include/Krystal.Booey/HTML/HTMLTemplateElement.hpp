@@ -46,10 +46,10 @@ namespace krys::boo::html
     void ShadowRootClonable(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootserializable
-    KRYS_NODISCARD bool ShadowRootSerializable() const noexcept;
+    KRYS_NODISCARD bool ShadowRootSerialisable() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootserializable
-    void ShadowRootSerializable(bool value) noexcept;
+    void ShadowRootSerialisable(bool value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootcustomelementregistry
     KRYS_NODISCARD dom::DOMString ShadowRootCustomElementRegistry() const noexcept;

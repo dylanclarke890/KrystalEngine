@@ -1,0 +1,64 @@
+﻿<!doctype html>
+<!-- The "canvas-images" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, drawing into
+     the canvas with the 2D context's calls the script below makes for Chrome once the photo has loaded. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  canvas { display: block; margin: 10px; background: #e6eef5; }
+  #tile, #photo { display: none; }
+</style>
+</head>
+<body>
+  <canvas id="canvas" width="340" height="180"></canvas>
+  <canvas id="tile" width="16" height="16"></canvas>
+  <img id="photo" src="images/photo.jpg">
+  <script>
+    window.addEventListener("load", () => {
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      const photo = document.getElementById("photo");
+      const tileCanvas = document.getElementById("tile");
+      const tile = tileCanvas.getContext("2d");
+
+      // A photo at its size, scaled, and part of it scaled.
+      context.drawImage(photo, 10, 10);
+      context.drawImage(photo, 70, 10, 96, 64);
+      context.drawImage(photo, 12, 8, 24, 16, 180, 10, 48, 32);
+
+      // A pattern of a canvas, which keeps the canvas as it was when it was made.
+      tile.fillStyle = "#336699";
+      tile.fillRect(0, 0, 16, 16);
+      tile.fillStyle = "#ee7733";
+      tile.fillRect(0, 0, 8, 8);
+      tile.fillRect(8, 8, 8, 8);
+      context.fillStyle = context.createPattern(tileCanvas, "repeat");
+      context.fillRect(240, 10, 90, 64);
+
+      // The canvas drawn after it changes, and the canvas drawn into itself.
+      tile.fillStyle = "#22aa55";
+      tile.fillRect(0, 0, 16, 16);
+      context.drawImage(tileCanvas, 10, 90, 32, 32);
+      context.drawImage(canvas, 70, 10, 96, 64, 60, 90, 48, 32);
+
+      // Pixels put: opaque on the left, half transparent on the right.
+      const pixels = context.createImageData(64, 40);
+      for (let y = 0; y < 40; ++y) {
+        for (let x = 0; x < 64; ++x) {
+          const i = (y * 64 + x) * 4;
+          pixels.data[i] = x * 4;
+          pixels.data[i + 1] = y * 6;
+          pixels.data[i + 2] = 160;
+          pixels.data[i + 3] = x < 32 ? 255 : 128;
+        }
+      }
+      context.putImageData(pixels, 130, 90);
+
+      // The photo read back and put again.
+      context.putImageData(context.getImageData(10, 10, 48, 32), 210, 90);
+    });
+  </script>
+</body>
+</html>

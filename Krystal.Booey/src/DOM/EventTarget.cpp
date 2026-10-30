@@ -19,7 +19,21 @@ namespace krys::boo::dom
   {
     AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
     auto listener = CreateRef<EventListener>(type, krys::move(callback), krys::move(options));
-    EventTargetAlgorithms::AddEventListener(*this, *listener.get());
+    (void)EventTargetAlgorithms::AddEventListener(*this, *listener.get());
+  }
+
+  EventListenerHandle
+    EventTarget::AddEventListener(DOMStringAtom type, Func<void(Event &)> &&callback,
+                                  const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
+  {
+    AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
+    auto listener = CreateRef<EventListener>(
+      type, CreateRef<FunctionEventListenerCallback>(krys::move(callback)), krys::move(options));
+    if (!EventTargetAlgorithms::AddEventListener(*this, *listener.get()))
+    {
+      return {};
+    }
+    return EventListenerHandle(*this, *listener);
   }
 
   void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
@@ -38,6 +52,75 @@ namespace krys::boo::dom
     {
       EventTargetAlgorithms::RemoveEventListener(*this, *existing->get());
     }
+  }
+
+  const Func<void(Event &)> *EventTarget::EventHandlerValue(DOMStringAtom name) const noexcept
+  {
+    if (!_eventHandlers)
+    {
+      return nullptr;
+    }
+    auto it = std::ranges::find_if(*_eventHandlers,
+                                   [&](const EventHandler &handler) { return handler.Name == name; });
+    return it != _eventHandlers->end() ? &it->Value : nullptr;
+  }
+
+  void EventTarget::SetEventHandlerValue(DOMStringAtom name, Func<void(Event &)> &&value) noexcept
+  {
+    if (!_eventHandlers)
+    {
+      if (!value)
+      {
+        return;
+      }
+      _eventHandlers = CreateUnique<List<EventHandler>>();
+    }
+
+    auto it = std::ranges::find_if(*_eventHandlers,
+                                   [&](const EventHandler &handler) { return handler.Name == name; });
+
+    // Deactivate: remove the event handler's listener from the target, and set its value to null.
+    if (!value)
+    {
+      if (it != _eventHandlers->end())
+      {
+        RefPtr<EventListener> listener = it->Listener;
+        _eventHandlers->erase(it);
+        if (listener)
+        {
+          EventTargetAlgorithms::RemoveEventListener(*this, *listener);
+        }
+      }
+      return;
+    }
+
+    // A handler that's already active keeps its listener, and so its place among the target's listeners.
+    if (it != _eventHandlers->end())
+    {
+      it->Value = krys::move(value);
+      return;
+    }
+
+    // Activate: a listener whose callback runs the event handler processing algorithm, which calls the
+    // handler's current value.
+    auto callback = CreateRef<FunctionEventListenerCallback>(
+      [weakThis = CreateWeakPtr(this), name](Event &event)
+      {
+        RefPtr<EventTarget> target = ShareRefPtr(weakThis.get());
+        if (!target)
+        {
+          return;
+        }
+        // https://html.spec.whatwg.org/#the-event-handler-processing-algorithm
+        if (auto *handler = target->EventHandlerValue(name))
+        {
+          auto current = *handler;
+          current(event);
+        }
+      });
+    auto listener = CreateRef<EventListener>(name, krys::move(callback), AddEventListenerOptions {});
+    _eventHandlers->push_back({name, krys::move(value), listener});
+    (void)EventTargetAlgorithms::AddEventListener(*this, *listener);
   }
 
   ExceptionOr<bool> EventTarget::DispatchEvent(Event &event) noexcept

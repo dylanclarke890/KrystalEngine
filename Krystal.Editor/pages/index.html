@@ -1,0 +1,1061 @@
+﻿<!doctype html>
+<!-- The editor's page view; edit and press F5 to reload. -->
+<html>
+<head>
+<meta charset="utf-8">
+<!-- The page's styles load from editor.css (which imports widgets.css), through the host's loader. -->
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <!-- Reading progress: a bar across the top of the window that fills as the page scrolls, by a scroll timeline
+       on the page's scroller (animation-timeline: scroll(root)). -->
+  <div class="reading-progress" id="reading-progress"></div>
+
+  <!-- The page's header: its menu button opens an auto popover (popovertarget), anchored below the button
+       (its implicit anchor is its invoker) and flipped above it when there's no room below. "Go to" opens a
+       nested menu to its right, which keeps the first open; Escape or a click outside closes both. Both fade
+       in and out, as the dialogs do. -->
+  <header class="page-header">
+    <h1>Krystal's café</h1>
+    <button id="menu-button" popovertarget="page-menu">Menu</button>
+    <div id="page-menu" class="menu" popover>
+      <a href="#order">Order a drink</a>
+      <a href="#faq">Questions</a>
+      <button id="goto-button" popovertarget="page-menu-goto">Go to</button>
+      <div id="page-menu-goto" class="menu" popover>
+        <a href="settings.html">The settings</a>
+        <a href="#guide">The guide</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="row">
+    <!-- Links: the contents list's links scroll to their cards, which :target highlights; the header's back
+         button (or the mouse's, or Alt+Left) goes back to the card before. Tab to a link and press Enter to
+         follow it too. -->
+    <nav class="card links" tabindex="0">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#order">Order a drink</a></li>
+        <li><a href="#text">Text</a></li>
+        <li><a href="#images">Images</a></li>
+        <li><a href="#selection">Selection and editing</a></li>
+      </ol>
+    </nav>
+
+    <!-- A text fragment link finds its text in the page, highlights it with ::target-text and scrolls to it.
+         The settings link loads the editor's second page in place of this one; going back brings this one
+         back from the back/forward cache, as it was left. Links off the editor's pages aren't followed: the
+         editor logs them and shows where they lead below the order form, as it does for submissions (a target
+         or Ctrl opens a new window, Shift too; a middle click follows them as well). -->
+    <div class="card links" tabindex="0">
+      <h2>Links</h2>
+      <p><a href="#:~:text=Booey%20lays%20out,glyphs">A text fragment</a> marks a sentence in the text card;
+        <a href="settings.html">the settings</a> are another page.</p>
+      <p><a href="https://example.com/krystal">Krystal's site</a>, the <a href="https://example.com/docs"
+          target="_blank">docs in a new window</a>, and <a href="images/photo.jpg" download="photo.jpg">a
+          download</a>.</p>
+    </div>
+
+    <!-- An image map: the yellow square, the blue half and the pink half are areas, each a link. Hovering one
+         shows the hand; Tab focuses them in turn, each drawing its focus ring in its shape. -->
+    <div class="card links" tabindex="0">
+      <h2>Image map</h2>
+      <img src="images/landscape.png" width="192" height="96" alt="A blue and pink landscape with a sun"
+        usemap="#landscape">
+      <map name="landscape">
+        <area shape="circle" coords="96,48,30" href="#images" alt="The sun: images">
+        <area shape="rect" coords="0,0,96,96" href="#text" alt="The blue half: text">
+        <area shape="rect" coords="96,0,192,96" href="https://example.com/pink" alt="The pink half: away">
+      </map>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Forms: the form is :invalid until the name is filled in and the required box is ticked (click its
+         label), so the drink buttons fade and clicking one fires invalid instead of submitting. Once it's valid,
+         a drink button (or Enter in the name field) submits: the editor logs the submission and shows its URL
+         below. The fields edit like the editable block; the notes keep their line breaks. The checkbox, radios
+         and number field are drawn by the theme (Adwaita); the number field's spin button steps the cups, as do
+         the arrow keys. Drag the strength slider's thumb, click its track, or use the arrow keys; the progress
+         bar and the meter below it are drawn by the theme and by the meter's shadow tree. The beans drop-down
+         opens its popup on a click or Space (arrow keys and Enter choose, Escape closes, as does a click
+         outside it), or changes with the arrow keys and typing while closed; the extras list box selects with
+         clicks (Ctrl and Shift for more) and the keys, and scrolls. The pickup date and time edit field by field
+         (type digits, or step with Up and Down; Left, Right and Tab move between fields); a click or Space in
+         the date opens its calendar (the arrow keys, Page Up and Page Down move, Enter chooses). The cup colour
+         opens a palette on a click. The beans under it are <bean-rating>, a custom element defined in C++
+         (Krystal.Editor's BeanRating): click a bean, or focus it and use the arrow keys or a digit; it's
+         required, so the form stays invalid until it's rated, it submits its rating as "rating", and the page
+         styles it through :state(rated). Reset empties the fields, unticks the box and clears the rating. -->
+    <form class="card order" id="order" action="https://example.com/order">
+      <input type="hidden" name="from" value="editor">
+      <input name="name" placeholder="Your name" required maxlength="24">
+      <textarea name="notes" placeholder="Notes for the barista" rows="2"></textarea>
+      <label><input type="checkbox" name="milk" required><span>With milk (required)</span></label>
+      <p class="choices"><label><input type="radio" name="size" value="small" checked><span>Small</span></label><label><input
+          type="radio" name="size" value="large"><span>Large</span></label><label>Cups <input type="number" name="cups"
+          value="1" min="1" max="9"></label></p>
+      <p class="gauges"><label>Strength <input type="range" name="strength" min="1" max="5" value="3"></label><label>Brewing
+          <progress value="0.6"></progress></label><label>Beans left <meter value="0.3" low="0.25" high="0.75"
+          optimum="1"></meter></label></p>
+      <p class="selects"><label>Beans <select name="beans"><option value="house">House blend</option><optgroup
+          label="Single origin"><option value="ethiopia">Ethiopia Yirgacheffe</option><option value="colombia"
+          selected>Colombia Huila</option><option value="sumatra" disabled>Sumatra (sold out)</option></optgroup>
+          <hr><option value="decaf">Decaf</option></select></label><label>Extras <select name="extras" multiple
+          size="3"><option>Cinnamon</option><option selected>Vanilla</option><option>Caramel</option>
+          <option>Hazelnut</option><option>Cocoa</option></select></label></p>
+      <p class="pickup"><label>Pickup <input type="date" name="day" value="2026-10-23"> <input type="time"
+          name="time" value="08:30"></label><label>Cup <input type="color" name="cup" value="#4f6df5"></label></p>
+      <p class="rating"><label>Last cup <bean-rating name="rating" required></bean-rating><span
+          class="unrated">Rate it to order</span><span class="rated">Thanks!</span></label></p>
+      <p><button name="drink" value="tea">Tea</button><button name="drink" value="coffee">Coffee</button><button
+          type="reset">Reset</button></p>
+      <p id="last-submission">Nothing submitted or followed yet.</p>
+      <p id="load-events">No loads yet.</p>
+    </form>
+  </div>
+
+  <div class="row">
+    <!-- A guide routed within the page: its links go to this page with a ?guide= query, and the editor's
+         router (C++, listening to the window's navigation) intercepts them, so the URL and the session history
+         change without a load and the router shows the topic. Back and forward move between the topics the
+         same way, and reloading opens the page at its topic. -->
+    <nav class="card guide" id="guide" tabindex="0">
+      <h2>Guide</h2>
+      <p class="topics"><a id="topic-pages" href="?guide=pages">Pages</a><a id="topic-history"
+          href="?guide=history">History</a><a id="topic-routing" href="?guide=routing">Routing</a></p>
+      <p id="guide-view">Pick a topic.</p>
+    </nav>
+  </div>
+
+  <div class="row">
+    <!-- Dialogs, opened by command buttons (commandfor and command). Refill's show-modal command shows the first
+         modally: it goes in the top layer over a ::backdrop, takes focus, makes the rest of the page inert and
+         traps Tab. Its form's buttons close it with their values (method="dialog"), Escape closes it, and so
+         does a click outside it (closedby="any"); the editor shows how it closed below. The tip's command is a
+         custom one, which the editor carries out in C++ (it listens for the command event): it shows the
+         second without making it modal, so the page stays usable; its button's close command closes it. -->
+    <div class="card overlays" tabindex="0">
+      <h2>Dialogs</h2>
+      <p><button commandfor="refill" command="show-modal">Refill</button><button commandfor="tip"
+          command="--show">Barista's tip</button></p>
+      <p id="dialog-result">No dialog closed yet.</p>
+      <dialog id="refill" closedby="any">
+        <form method="dialog">
+          <h2>Refill your cup?</h2>
+          <p>Escape, or a click outside, closes this without an answer.</p>
+          <p><button value="yes" autofocus>Yes please</button><button value="no">No thanks</button></p>
+        </form>
+      </dialog>
+      <dialog id="tip">
+        <p>Warm the cup before you pour.</p>
+        <p><button commandfor="tip" command="close" value="tip read">Got it</button></p>
+      </dialog>
+    </div>
+
+    <!-- Popovers, opened declaratively by their buttons (popovertarget). The menu is an auto popover: Escape, a
+         click outside it or opening another auto popover hides it, and its nested popover keeps it open. The
+         hint is a hint popover: it hides other hints, but leaves the menu open. The toast is manual: only its
+         show and hide buttons change it. -->
+    <div class="card overlays" tabindex="0">
+      <h2>Popovers</h2>
+      <p><button popovertarget="menu">Menu</button><button popovertarget="hint">Hint</button><button
+          popovertarget="toast" popovertargetaction="show">Show toast</button><button popovertarget="toast"
+          popovertargetaction="hide">Hide toast</button></p>
+      <div id="menu" popover>
+        <p>Today's specials</p>
+        <p><button popovertarget="menu-more">More</button><button popovertarget="menu"
+            popovertargetaction="hide">Close</button></p>
+        <div id="menu-more" popover>Pastries arrive at nine.</div>
+      </div>
+      <div id="hint" popover="hint">Hints don't close the menu.</div>
+      <div id="toast" popover="manual">Your order is ready.</div>
+    </div>
+
+    <!-- Details: clicking a summary (or Space or Enter on it) opens or closes its details, and the two
+         questions are an accordion (they share a name), so opening one closes the other. The last has no
+         summary, so it shows the default one; following the link to its hidden text opens it, and the text
+         fragment link opens the second question to mark its answer (closing the first). -->
+    <div class="card overlays" id="faq" tabindex="0">
+      <h2>Details</h2>
+      <details name="faq" open><summary>Is it fresh?</summary>Roasted this week.</details>
+      <details name="faq"><summary>Is it local?</summary><span>From down the road.</span></details>
+      <details><span id="secret">The house blend is half Colombia Huila.</span></details>
+      <p><a href="#secret">The secret</a> opens the last; <a href="#:~:text=From%20down%20the%20road">where
+          it's from</a> opens the second.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Text: headings, paragraphs and inline boxes. -->
+    <div class="card" id="text" tabindex="0" style="flex: 2">
+      <h2>Pages in Krystal</h2>
+      <p>Booey lays out and shapes this text, and Render2D draws its glyphs. <span class="tag">Inline boxes
+        keep their backgrounds and borders</span> as they wrap from one line to the next, and words can be
+        <span style="color: #ef476f">coloured</span>, <b>bold</b>, <i>italic</i> or <span style="font-size: 18px">sized</span> on their own.</p>
+    </div>
+
+    <!-- Text shadows. -->
+    <div class="card" tabindex="0">
+      <p style="font-size: 26px; line-height: 34px; color: #073b4c; text-shadow: 0 2px 4px rgba(7, 59, 76, 0.6)">Soft shadow</p>
+      <p style="font-size: 26px; line-height: 34px; text-shadow: 2px 2px 0 #ffd166, 4px 4px 0 #ef476f">Layered</p>
+      <p style="font-size: 26px; line-height: 34px; color: #06d6a0; text-shadow: 0 0 6px #118ab2">Glow</p>
+    </div>
+
+    <!-- Decorations, list markers, an ellipsis and an outlined inline box. -->
+    <div class="card" tabindex="0">
+      <p><span style="text-decoration: underline #ef476f">Underlines skip descenders</span></p>
+      <p><span style="text-decoration: underline wavy #118ab2">wavy</span>, <span style="text-decoration: line-through">struck</span> and <span style="text-decoration: overline double #06d6a0">over</span></p>
+      <ul style="margin: 2px 0; padding-left: 22px"><li>A list item</li><li style="list-style-type: square">Another</li></ul>
+      <p style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis">This line is much too long to fit in its card, so it is cut short and ends in an ellipsis</p>
+      <p>Some <span style="outline: 2px solid #8338ec; outline-offset: 1px">outlined</span> text</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Colours on a grid. -->
+    <div class="card" tabindex="0">
+      <div class="swatches">
+        <div style="background: #ef476f"></div>
+        <div style="background: #ffd166"></div>
+        <div style="background: #06d6a0"></div>
+        <div style="background: #118ab2"></div>
+        <div style="background: #073b4c"></div>
+        <div style="background: rgba(239, 71, 111, 0.5)"></div>
+        <div style="background: rgba(17, 138, 178, 0.5)"></div>
+        <div style="background: #8338ec; border-radius: 50%"></div>
+      </div>
+    </div>
+
+    <!-- Linear, radial and conic gradients. -->
+    <div class="card" tabindex="0">
+      <div class="gradient" style="background: linear-gradient(120deg, #4f6df5, #b04ff5 60%, #ef476f)"></div>
+    </div>
+    <div class="card" tabindex="0">
+      <div class="gradient" style="background: radial-gradient(circle at 35% 35%, #ffffff, #ffd166 30%, #ef476f 70%, #073b4c)"></div>
+    </div>
+    <div class="card" tabindex="0">
+      <div class="gradient" style="border-radius: 50%; background: conic-gradient(#ef476f, #ffd166, #06d6a0, #118ab2, #8338ec, #ef476f)"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Tiled backgrounds. -->
+    <div class="card" tabindex="0">
+      <div class="gradient" style="background: linear-gradient(45deg, #118ab2 25%, transparent 25%, transparent 75%, #118ab2 75%) 0 0 / 24px 24px, linear-gradient(45deg, #118ab2 25%, transparent 25%, transparent 75%, #118ab2 75%) 12px 12px / 24px 24px, #e9f5fb"></div>
+    </div>
+
+    <!-- Opacity, transforms and stacking. -->
+    <div class="card" tabindex="0">
+      <div class="stage">
+        <div tabindex="-1" style="left: 24px; top: 24px; background: #073b4c"></div>
+        <div tabindex="-1" style="left: 56px; top: 48px; background: #ef476f; opacity: 0.7"></div>
+        <div tabindex="-1" style="left: 150px; top: 30px; background: #ffd166; transform: rotate(25deg)"></div>
+        <div tabindex="-1" style="left: 210px; top: 60px; background: #06d6a0; transform: scale(0.75) rotate(-15deg); z-index: 1"></div>
+        <div tabindex="-1" style="left: 240px; top: 30px; background: #118ab2; z-index: -1"></div>
+      </div>
+    </div>
+
+    <!-- Clips: clip-path shapes and a rounded overflow clip. -->
+    <div class="card" tabindex="0">
+      <div class="stage">
+        <div style="left: 20px; top: 34px; background: linear-gradient(#ef476f, #8338ec); clip-path: circle(32px)"></div>
+        <div style="left: 100px; top: 34px; background: #ffd166; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"></div>
+        <div style="left: 180px; top: 34px; overflow: hidden; border-radius: 32px; background: #06d6a0">
+          <div style="position: static; width: 96px; height: 32px; background: #073b4c"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blend modes over a gradient. -->
+    <div class="card" tabindex="0">
+      <div class="stage" style="background: linear-gradient(90deg, #ffd166, #118ab2)">
+        <div style="left: 24px; top: 40px; background: #ef476f; mix-blend-mode: multiply"></div>
+        <div style="left: 104px; top: 40px; background: #ef476f; mix-blend-mode: screen"></div>
+        <div style="left: 184px; top: 40px; background: #ef476f; mix-blend-mode: difference"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Border styles. -->
+    <div class="card" tabindex="0">
+      <div class="boxes">
+        <div style="border: 3px solid #073b4c"></div>
+        <div style="border: 3px dashed #ef476f"></div>
+        <div style="border: 4px dotted #118ab2"></div>
+        <div style="border: 6px double #073b4c"></div>
+        <div style="border: 6px groove #9aa5b1"></div>
+        <div style="border: 6px ridge #9aa5b1"></div>
+        <div style="border: 6px inset #9aa5b1"></div>
+        <div style="border: 6px outset #9aa5b1"></div>
+      </div>
+    </div>
+
+    <!-- Rounded and multi-coloured borders. -->
+    <div class="card" tabindex="0">
+      <div class="boxes" style="grid-template-columns: repeat(2, 1fr)">
+        <div style="border: 4px solid #ef476f; border-radius: 14px"></div>
+        <div style="border: 6px solid; border-color: #ef476f #ffd166 #06d6a0 #118ab2; border-radius: 50%"></div>
+        <div style="border: 3px dashed #8338ec; border-radius: 14px"></div>
+        <div style="border: 8px solid rgba(17, 138, 178, 0.4); border-radius: 30px / 14px"></div>
+      </div>
+    </div>
+
+    <!-- Shadows. -->
+    <div class="card" tabindex="0">
+      <div class="boxes" style="grid-template-columns: repeat(3, 1fr); gap: 20px">
+        <div style="border-radius: 12px; background: #ffffff; box-shadow: 0 8px 16px rgba(7, 59, 76, 0.35)"></div>
+        <div style="border-radius: 12px; box-shadow: inset 0 4px 10px rgba(7, 59, 76, 0.5)"></div>
+        <div style="border-radius: 12px; background: #ffffff; box-shadow: 0 0 0 4px #ffd166, 0 0 0 8px #ef476f"></div>
+      </div>
+    </div>
+
+    <!-- Outlines, including a focus ring (outline-style: auto). -->
+    <div class="card" tabindex="0">
+      <div class="boxes" style="grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 6px">
+        <div style="outline: 3px solid #118ab2; outline-offset: 3px"></div>
+        <div style="border-radius: 10px; outline: 3px dashed #ef476f"></div>
+        <div style="outline: 6px double #073b4c"></div>
+        <div style="outline: 3px auto #8338ec"></div>
+      </div>
+    </div>
+
+    <!-- A table: collapsed coloured borders, striped rows and a spanning cell. -->
+    <div class="card" tabindex="0">
+      <table style="border-collapse: collapse; width: 100%; font-size: 13px; line-height: 18px">
+        <tr style="background: #073b4c; color: #ffffff"><th style="border: 2px solid #073b4c">Part</th><th style="border: 2px solid #073b4c">Status</th></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Hover</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Clicks</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Focus</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Keys</td><td id="last-key" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #ffd166">Press a key</td></tr>
+        <tr><td style="border: 1px solid #9aa5b1; padding: 0 6px">Timers</td><td id="clock" style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Open for 0:00</td></tr>
+        <tr style="background: #eef1f6"><td style="border: 1px solid #9aa5b1; padding: 0 6px">Images</td><td style="border: 1px solid #9aa5b1; padding: 0 6px; background: #06d6a0">Done</td></tr>
+        <tr><td colspan="2" style="border: 3px double #ef476f; padding: 0 6px; text-align: center">Tab through the cards</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Scrolling: the wheel scrolls the box under the mouse, then the page once the box reaches its end
+         (Shift turns the wheel sideways); the arrows, Page Up and Page Down, Home, End and Space scroll the
+         focused box, or else the page; the scrollbars' thumbs drag and their tracks page. The items are
+         grouped under sticky headers, which composite and stay at the box's top as it scrolls. -->
+    <div class="card" tabindex="0">
+      <div class="list" tabindex="0">
+        <h4>1 to 10</h4>
+        <p>Item 1</p>
+        <p>Item 2</p>
+        <p>Item 3</p>
+        <p>Item 4</p>
+        <p>Item 5</p>
+        <p>Item 6</p>
+        <p>Item 7</p>
+        <p>Item 8</p>
+        <p>Item 9</p>
+        <p>Item 10</p>
+        <h4>11 to 20</h4>
+        <p>Item 11</p>
+        <p>Item 12</p>
+        <p>Item 13</p>
+        <p>Item 14</p>
+        <p>Item 15</p>
+        <p>Item 16</p>
+        <p>Item 17</p>
+        <p>Item 18</p>
+        <p>Item 19</p>
+        <p>Item 20</p>
+      </div>
+    </div>
+
+    <!-- overscroll-behavior: contain keeps the wheel in the box at its ends. -->
+    <div class="card" tabindex="0">
+      <div class="list" tabindex="0" style="overscroll-behavior: contain">
+        <p>Contained 1</p>
+        <p>Contained 2</p>
+        <p>Contained 3</p>
+        <p>Contained 4</p>
+        <p>Contained 5</p>
+        <p>Contained 6</p>
+        <p>Contained 7</p>
+        <p>Contained 8</p>
+        <p>Contained 9</p>
+        <p>Contained 10</p>
+        <p>Contained 11</p>
+        <p>Contained 12</p>
+      </div>
+    </div>
+
+    <!-- A strip that scrolls sideways. -->
+    <div class="card" tabindex="0" style="flex: 2">
+      <div class="strip" tabindex="0">
+        <div style="background: #ef476f"></div>
+        <div style="background: #ffd166"></div>
+        <div style="background: #06d6a0"></div>
+        <div style="background: #118ab2"></div>
+        <div style="background: #073b4c"></div>
+        <div style="background: #8338ec"></div>
+        <div style="background: #ef476f"></div>
+        <div style="background: #ffd166"></div>
+        <div style="background: #06d6a0"></div>
+        <div style="background: #118ab2"></div>
+        <div style="background: #073b4c"></div>
+        <div style="background: #8338ec"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- CSS images, loaded from images/ beside this page: PNG tiles, a JPEG covering its box, translucent WebP
+         tiles over a colour, and GIF tiles along a row. -->
+    <div class="card" tabindex="0" style="flex: 2">
+      <div class="boxes">
+        <div style="background: url(images/checker.png)"></div>
+        <div style="background: url(images/photo.jpg) center / cover"></div>
+        <div style="background: url(images/disc.webp), #118ab2"></div>
+        <div style="background: #ffd166 url(images/diamond.gif) repeat-x 0 50%"></div>
+      </div>
+    </div>
+
+    <!-- A border image, and image list markers. -->
+    <div class="card" tabindex="0">
+      <div style="height: 100%; box-sizing: border-box; border: 10px solid; border-image: url(images/frame.png) 10 / 10px stretch">
+        <ul style="margin: 4px 0; padding-left: 24px; list-style: url(images/marker.bmp)">
+          <li>Loaded from files</li>
+          <li>As networking tasks</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Images: a PNG given a width, a JPEG scaled by its attributes, translucent WebP over a colour, a
+         broken one showing its alt text, and an animated GIF, which pauses while it's scrolled out of view. -->
+    <div class="card" id="images" tabindex="0">
+      <img src="images/landscape.png" width="96" style="margin: 0 8px 8px 0">
+      <img src="images/photo.jpg" width="72" height="48" style="margin: 0 0 8px 0">
+      <img src="images/disc.webp" style="width: 48px; height: 48px; margin-right: 8px; background: #118ab2; border-radius: 8px">
+      <img src="images/missing.png" alt="Broken" style="width: 96px; height: 40px">
+      <img src="images/spinner.gif">
+    </div>
+
+    <!-- Web fonts, from @font-face rules: they load once text uses them. -->
+    <div class="card" tabindex="0">
+      <p class="display">Web fonts</p>
+      <p>Faces load from TrueType, OpenType, WOFF and WOFF 2 files.</p>
+      <p class="blocks">Files 1 and 2 of 2</p>
+    </div>
+
+    <!-- Transitions: hovering the card changes the bars' width, colour and corners, which transition; the second
+         bar's transition is slower and delayed. -->
+    <div class="card" tabindex="0">
+      <p>Hover to transition</p>
+      <div class="bar"></div>
+      <div class="bar slow"></div>
+    </div>
+
+    <!-- Animations from @keyframes: a spinner turns, and dots pulse one after another. -->
+    <div class="card" tabindex="0">
+      <p>Animations</p>
+      <div class="spinner"></div>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Filters on images: colour matrices, a blur and a drop shadow; hovering the card transitions the first
+         image's grayscale away and sharpens the blurred one. -->
+    <div class="card filters" tabindex="0" style="flex: 2">
+      <p>Filters: hover to colour and sharpen</p>
+      <img src="images/photo.jpg" class="fade">
+      <img src="images/photo.jpg" style="filter: sepia(1)">
+      <img src="images/photo.jpg" style="filter: hue-rotate(150deg) saturate(2)">
+      <img src="images/photo.jpg" class="soft">
+      <img src="images/photo.jpg" style="filter: invert(1) contrast(1.4)">
+      <img src="images/disc.webp" style="filter: drop-shadow(4px 6px 4px rgba(26, 34, 64, 0.5))">
+    </div>
+
+    <!-- Compositing: the blurred tile gets a layer of its own for its filter, and the badge gets one because it
+         overlaps the tile; hovering the card slides the badge across, animating its layer. -->
+    <div class="card layers" tabindex="0">
+      <p>Layers: hover to slide</p>
+      <div class="layer-stage"><div class="blurred"></div><div class="badge">Layer</div></div>
+    </div>
+
+    <!-- Masks: an image that fades out to the right, one masked to a circle by a luminance gradient, and a frame
+         cut by a mask border. -->
+    <div class="card masks" tabindex="0">
+      <p>Masks</p>
+      <img src="images/photo.jpg" class="fade-out">
+      <img src="images/photo.jpg" class="spotlight">
+      <div class="frame"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Selection: drag to select (past the card's bottom edge the page scrolls along), double-click a word,
+         triple-click a paragraph, Shift-click to extend, and click in the selection to clear it. From the
+         keyboard, Shift with the arrows (and Ctrl, by word), Home and End extends a selection, Ctrl+A selects
+         everything and Ctrl+C copies the selection as plain text. The quote has its own
+         selection colours, the label can't be selected, and the image is tinted when it's selected. -->
+    <div class="card selection" id="selection" tabindex="0">
+      <p>Selecting text paints it highlighted, and the gaps beside and between its lines and blocks are filled
+        as well, so a selection reads as one region.</p>
+      <p class="quote">This quote paints its selection in its own colours.</p>
+      <p><span class="label">Not selectable</span> but this part is, with an image <img src="images/checker.png">
+        in the middle of it.</p>
+    </div>
+    <!-- Editing: click in the editable block, or Tab to it, for a blinking caret in its own colour. The arrows
+         move it (Ctrl by word, Home and End to the line's ends, Ctrl+Home and Ctrl+End to the block's), and
+         Shift with them selects. Type to insert text; Backspace and Delete (Ctrl by word) delete, Enter starts a
+         new paragraph, Ctrl+X, Ctrl+C and Ctrl+V cut, copy and paste plain text, and Ctrl+Z and Ctrl+Shift+Z undo
+         and redo. -->
+    <div class="card caret" contenteditable>
+      <p>This block is editable: type into it, and its caret blinks in purple.</p>
+      <p>A second paragraph, to move the caret up and down into, or to cut and paste.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Right to left: the paragraphs are editable. The arrows move the caret by the paragraph's direction
+         (in the Hebrew one, right goes back), through the runs of the other direction, and a double click
+         selects a word and the space after it. -->
+    <div class="card bidi" id="bidi-text" contenteditable>
+      <p>Arabic in English: <span lang="ar">مرحبا بالعالم</span> means "hello, world".</p>
+      <p dir="rtl" lang="he">עברית מימין לשמאל, עם English בפנים ומספרים כמו 2026.</p>
+    </div>
+    <!-- Direction: the fields take their direction from what's typed (dir=auto), turning right to left at a
+         first Hebrew or Arabic letter. Ctrl with the right Shift makes the focused field right to left, and with
+         the left Shift left to right. -->
+    <div class="card bidi-fields" tabindex="0">
+      <h2>Direction</h2>
+      <input id="bidi-field" dir="auto" placeholder="Type in Hebrew or Arabic">
+      <textarea id="bidi-area" dir="auto">שלום, and hello.</textarea>
+    </div>
+    <!-- Scores: each name is isolated in a <bdi>, so a right-to-left name doesn't pull the score after it into
+         its run. -->
+    <div class="card scores" tabindex="0">
+      <h2>Scores</h2>
+      <ol>
+        <li><bdi>Alex</bdi>: 90 points</li>
+        <li><bdi id="bidi-name">יעל</bdi>: 85 points</li>
+        <li><bdi>إيمان</bdi>: 80 points</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Resize observer: the editor observes this card's content box, which grows and shrinks with the window,
+         and shows its size. -->
+    <div class="card observed" id="resize-card" tabindex="0">
+      <h2>Resize observer</h2>
+      <p>Resize the window: the editor's resize observer reports this card's size.</p>
+      <p class="size" id="resize-size">Not observed yet</p>
+    </div>
+    <!-- Lazy images: the list's images load only once they come within a list's height of its view
+         (loading=lazy), as it scrolls; the editor counts their loads. -->
+    <div class="card lazy" tabindex="0" style="flex: 2">
+      <div class="list" id="lazy-list">
+        <p><img loading="lazy" src="images/photo.jpg?item=1" alt=""> Photo 1</p>
+        <p><img loading="lazy" src="images/landscape.png?item=2" alt=""> Landscape 1</p>
+        <p><img loading="lazy" src="images/disc.webp?item=3" alt=""> Disc 1</p>
+        <p><img loading="lazy" src="images/checker.png?item=4" alt=""> Checker 1</p>
+        <p><img loading="lazy" src="images/frame.png?item=5" alt=""> Frame 1</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=6" alt=""> Marker 1</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=7" alt=""> Diamond 1</p>
+        <p><img loading="lazy" src="images/photo.jpg?item=8" alt=""> Photo 2</p>
+        <p><img loading="lazy" src="images/landscape.png?item=9" alt=""> Landscape 2</p>
+        <p><img loading="lazy" src="images/disc.webp?item=10" alt=""> Disc 2</p>
+        <p><img loading="lazy" src="images/checker.png?item=11" alt=""> Checker 2</p>
+        <p><img loading="lazy" src="images/frame.png?item=12" alt=""> Frame 2</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=13" alt=""> Marker 2</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=14" alt=""> Diamond 2</p>
+        <p><img loading="lazy" src="images/photo.jpg?item=15" alt=""> Photo 3</p>
+        <p><img loading="lazy" src="images/landscape.png?item=16" alt=""> Landscape 3</p>
+        <p><img loading="lazy" src="images/disc.webp?item=17" alt=""> Disc 3</p>
+        <p><img loading="lazy" src="images/checker.png?item=18" alt=""> Checker 3</p>
+        <p><img loading="lazy" src="images/frame.png?item=19" alt=""> Frame 3</p>
+        <p><img loading="lazy" src="images/marker.bmp?item=20" alt=""> Marker 3</p>
+        <p><img loading="lazy" src="images/diamond.gif?item=21" alt=""> Diamond 3</p>
+      </div>
+      <p id="lazy-count">No images loaded yet</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Web animations: the editor animates the ball from C++ (Element::Animate), and its buttons play, pause
+         and reverse it; the range seeks it, and the readout shows its time on each animation frame. -->
+    <div class="card animated" id="animation-card" tabindex="0" style="flex: 2">
+      <h2>Web animations</h2>
+      <div class="track"><div class="ball" id="anim-ball"></div></div>
+      <p class="controls">
+        <button id="anim-play">Play</button>
+        <button id="anim-pause">Pause</button>
+        <button id="anim-reverse">Reverse</button>
+        <input type="range" id="anim-seek" min="0" max="100" step="any" value="0" aria-label="Seek">
+      </p>
+      <p class="time" id="anim-time">Not animated yet</p>
+    </div>
+    <!-- Scroll-driven animations: the cards below fade and rise in as they scroll into view, each on a view
+         timeline of its own (animation-timeline: view()) over its entry into the scrollport. -->
+    <div class="card" tabindex="0">
+      <h2>Scroll-driven</h2>
+      <p>Scroll down: the bar at the top fills as you read, and the cards below come in as they enter the view.</p>
+    </div>
+  </div>
+
+  <div class="row reveals">
+    <div class="card reveal" id="reveal-1"><h2>Espresso</h2><p>Nine bars, twenty-five seconds.</p></div>
+    <div class="card reveal" id="reveal-2"><h2>Filter</h2><p>A slow drip through paper.</p></div>
+    <div class="card reveal" id="reveal-3"><h2>Cold brew</h2><p>Overnight, in cold water.</p></div>
+  </div>
+
+  <div class="row pointers">
+    <!-- Pointers: the pad shows each pointer over it (its type, id, pressure and tilt) and the touches it holds;
+         it keeps its touches to itself (touch-action: none), so they don't pan or pinch. -->
+    <div class="card" tabindex="0">
+      <h2>Pointers</h2>
+      <div class="pad" id="pointer-pad"><pre id="pointer-readout"></pre></div>
+    </div>
+    <!-- Pointer capture: the chip captures the pointer that presses it (setPointerCapture), which drags it about
+         its area until it lets go, wherever it goes. -->
+    <div class="card" tabindex="0">
+      <h2>Pointer capture</h2>
+      <div class="drag-area" id="drag-area"><div class="chip" id="drag-chip">Drag me</div></div>
+    </div>
+    <!-- Pointer lock: a click on the box locks the pointer to it (requestPointerLock); the window hides the cursor
+         and the box gets the mouse's movement until Escape unlocks it. -->
+    <div class="card" tabindex="0">
+      <h2>Pointer lock</h2>
+      <div class="lock-box" id="lock-box"><p id="lock-readout"></p></div>
+    </div>
+  </div>
+
+  <div class="row gestures">
+    <!-- Touch gestures: the tiles pan with a finger and fling on when flicked; a tap clicks, two double click,
+         and a long press asks for a context menu, as the readout shows. Two fingers pinch the page. -->
+    <div class="card" tabindex="0">
+      <h2>Touch gestures</h2>
+      <p>Pan the tiles with a finger, or flick them; tap, double tap or long press one. Pinch to zoom the page.</p>
+      <div class="pan-area" id="pan-area"><div class="tiles"></div></div>
+      <p class="log" id="gesture-log">Nothing yet</p>
+    </div>
+  </div>
+
+  <div class="row gamepads">
+    <!-- Spatial navigation: a pad's D-pad or left stick moves the focus to the nearest control that way, here
+         or anywhere on the page; so do the arrow keys within this card. A presses (and opens the drop-down),
+         B closes (a dialog, a popover or the drop-down), the bumpers tab and the right stick scrolls, as the
+         list shows. -->
+    <div class="card" id="nav-grid">
+      <h2>Spatial navigation</h2>
+      <p>Move with a pad's D-pad or left stick, or the arrow keys here. A presses, B closes, the bumpers tab and
+        the right stick scrolls.</p>
+      <div class="nav-grid">
+        <button>Espresso</button>
+        <button>Filter</button>
+        <div class="nav-list" id="nav-list">
+          <button>Cinnamon</button><button>Cocoa</button><button>Nutmeg</button><button>Vanilla</button>
+          <button>Caramel</button><button>Hazelnut</button><button>Maple</button><button>Honey</button>
+        </div>
+        <select id="nav-size"><option>Small</option><option selected>Medium</option><option>Large</option></select>
+        <button>Cold brew</button>
+        <label><input type="radio" name="nav-milk" value="Oat" checked> Oat</label>
+        <label><input type="radio" name="nav-milk" value="Almond"> Almond</label>
+      </div>
+      <p class="log" id="nav-log">Nothing pressed yet</p>
+    </div>
+    <!-- Gamepads: the pads the page can see (navigator.getGamepads(); a page sees them once a button is pressed),
+         with their buttons and axes in the standard layout, shown each frame; the button rumbles them
+         (vibrationActuator.playEffect("dual-rumble")). -->
+    <div class="card" id="gamepad-card">
+      <h2>Gamepads</h2>
+      <pre class="pad-readout" id="gamepad-readout"></pre>
+      <button id="rumble">Rumble</button>
+      <span class="log" id="rumble-log"></span>
+    </div>
+  </div>
+
+  <div class="row text-input">
+    <!-- Input methods: type into the fields with one (Japanese, Chinese or Korean, say); the text being
+         composed is underlined, the clause being converted thickly, and the input method's candidates show by
+         it. The log shows the composition events and the beforeinput and input events, with whether each is
+         part of a composition (isComposing). -->
+    <div class="card" id="ime-fields">
+      <h2>Input methods</h2>
+      <p>Switch to an input method (Win+Space) and type here; Win+. opens the emoji panel.</p>
+      <input class="ime-field" id="ime-input" placeholder="A text field">
+      <textarea class="ime-field" id="ime-textarea" placeholder="A text area"></textarea>
+      <div class="ime-field" id="ime-editable" contenteditable>Editable content</div>
+    </div>
+    <div class="card">
+      <h2>Composition events</h2>
+      <pre class="ime-log" id="ime-log"></pre>
+      <button id="ime-clear">Clear</button>
+    </div>
+  </div>
+
+  <div id="drag-and-drop">
+    <div class="row drag-drop">
+      <!-- Drag and drop: the cards are draggable (draggable=true); a card's drag carries its text and only
+           moves it, and the lists take it, before or after the card it's dropped on. -->
+      <div class="card" id="drag-lists">
+        <h2>Drag and drop</h2>
+        <p>Drag the cards to reorder them, or move them to the other list.</p>
+        <div class="drag-lists">
+          <div class="drag-list" id="drag-todo">
+            <div class="drag-card" id="card-grind" draggable="true">Grind the beans</div>
+            <div class="drag-card" id="card-heat" draggable="true">Heat the water</div>
+            <div class="drag-card" id="card-bloom" draggable="true">Let it bloom</div>
+          </div>
+          <div class="drag-list" id="drag-done">
+            <div class="drag-card" id="card-weigh" draggable="true">Weigh the coffee</div>
+          </div>
+        </div>
+      </div>
+      <!-- The log shows each drag event (but drag and dragover, which come with every move) with the types of its
+           data and the operations its source allows and its target chose (effectAllowed/dropEffect). -->
+      <div class="card">
+        <h2>Drag events</h2>
+        <pre class="drag-log" id="drag-log"></pre>
+        <button id="drag-clear">Clear</button>
+      </div>
+    </div>
+    <div class="row drag-drop">
+      <!-- The drop zone takes anything dragged onto it, from the page or from another application, and lists its
+           text, URLs and files. A file input takes files dropped on it, as a choice of them. -->
+      <div class="card">
+        <h2>Drops</h2>
+        <div class="drop-zone" id="drop-zone"><pre id="drop-readout"></pre></div>
+        <input type="file" multiple id="drop-files">
+      </div>
+      <!-- Text: select some and drag it; dropped into the other field it's moved, or copied with Ctrl. -->
+      <div class="card">
+        <h2>Dragging text</h2>
+        <p>Select some text and drag it into the other field; hold Ctrl to copy it.</p>
+        <input class="drag-field" id="drag-field" value="Select a word and drag it">
+        <div class="drag-field" id="drag-editable" contenteditable>Drop text here, or drag it back.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="svg">
+    <div class="row svg-sample">
+      <!-- Icons and shapes, inline: the icons are <symbol>s drawn by <use>, in the colour of their text
+           (currentColor), at any size; the shapes are the basic ones, filled, stroked and dashed. -->
+      <div class="card">
+        <h2>Icons and shapes</h2>
+        <svg width="0" height="0" class="svg-defs">
+          <symbol id="icon-bean" viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="8" ry="11" transform="rotate(30 12 12)" fill="currentColor"/>
+            <path d="M 8 4 q 6 8 8 16" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+          </symbol>
+          <symbol id="icon-leaf" viewBox="0 0 24 24">
+            <path d="M 4 20 C 4 8 12 4 21 3 C 20 12 16 20 4 20 Z" fill="currentColor"/>
+            <path d="M 4 20 L 14 10" stroke="#ffffff" stroke-width="1.5"/>
+          </symbol>
+        </svg>
+        <p class="icons">
+          <svg class="icon" id="icon-small"><use href="#icon-bean"/></svg>
+          <svg class="icon large"><use href="#icon-bean"/></svg>
+          <svg class="icon leaf"><use href="#icon-leaf"/></svg>
+          <svg class="icon large leaf"><use href="#icon-leaf"/></svg>
+        </p>
+        <svg class="shapes" id="svg-shapes" width="300" height="70" viewBox="0 0 300 70">
+          <rect x="2" y="5" width="60" height="60" rx="12" fill="#ffd166" stroke="#ef476f" stroke-width="3"/>
+          <circle cx="105" cy="35" r="30" fill="#06d6a0"/>
+          <polygon points="175,5 184,26 206,26 188,40 195,62 175,48 155,62 162,40 144,26 166,26" fill="#118ab2"/>
+          <polyline points="220,60 235,15 250,50 265,10 280,45 295,20" fill="none" stroke="#073b4c"
+            stroke-width="3" stroke-linejoin="round" stroke-dasharray="8 4"/>
+        </svg>
+      </div>
+      <!-- SVG files as images: in <img>s, at their own size and scaled, and repeated as a CSS background. -->
+      <div class="card">
+        <h2>SVG images</h2>
+        <p class="svg-images"><img id="svg-cup" src="images/cup.svg" alt="A cup"><img src="images/cup.svg"
+            width="96" alt="A larger cup"><span class="svg-tiles" id="svg-tiles"></span></p>
+      </div>
+      <!-- Paint servers: linear and radial gradients, a reflected one, a gradient on a stroke and a pattern of
+           dots. -->
+      <div class="card">
+        <h2>Gradients and patterns</h2>
+        <svg id="svg-paint" width="300" height="110" viewBox="0 0 300 110">
+          <defs>
+            <linearGradient id="sunrise" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffd166"/>
+              <stop offset="1" stop-color="#ef476f"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="0.35" cy="0.35" r="0.65">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset="1" stop-color="#118ab2"/>
+            </radialGradient>
+            <linearGradient id="stripes" x2="0.25" spreadMethod="reflect">
+              <stop offset="0" stop-color="#06d6a0"/>
+              <stop offset="1" stop-color="#073b4c"/>
+            </linearGradient>
+            <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="#fff4d1"/>
+              <circle cx="6" cy="6" r="3" fill="#ef476f"/>
+            </pattern>
+          </defs>
+          <rect x="2" y="2" width="64" height="64" rx="10" fill="url(#sunrise)"/>
+          <circle cx="110" cy="34" r="32" fill="url(#glow)"/>
+          <rect x="152" y="2" width="64" height="64" rx="10" fill="url(#stripes)"/>
+          <rect x="232" y="2" width="64" height="64" rx="10" fill="url(#dots)"/>
+          <path d="M 10 92 C 60 72 100 112 150 92 S 240 72 290 92" fill="none" stroke="url(#sunrise)"
+            stroke-width="8" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="row svg-sample">
+      <!-- Clipping and masking: an SVG image (<image>) clipped to a circle and a pattern faded out by a gradient
+           mask, in SVG; and an HTML box clipped to an SVG star (clip-path: url()). -->
+      <div class="card">
+        <h2>Clipping and masking</h2>
+        <svg id="svg-clipping" width="200" height="90" viewBox="0 0 200 90">
+          <defs>
+            <clipPath id="round">
+              <circle cx="45" cy="45" r="42"/>
+            </clipPath>
+            <linearGradient id="fade">
+              <stop offset="0.3" stop-color="#ffffff"/>
+              <stop offset="1" stop-color="#000000"/>
+            </linearGradient>
+            <mask id="fade-out">
+              <rect x="100" width="100" height="90" fill="url(#fade)"/>
+            </mask>
+            <clipPath id="star" clipPathUnits="objectBoundingBox">
+              <polygon points="0.5,0 0.62,0.35 1,0.38 0.7,0.6 0.8,1 0.5,0.77 0.2,1 0.3,0.6 0,0.38 0.38,0.35"/>
+            </clipPath>
+          </defs>
+          <g clip-path="url(#round)">
+            <rect width="90" height="90" fill="#fff4d1"/>
+            <image href="images/beans.svg" width="90" height="90"/>
+          </g>
+          <rect x="100" width="100" height="90" fill="url(#dots)" mask="url(#fade-out)"/>
+        </svg>
+        <div class="clipped" id="svg-clipped"></div>
+      </div>
+      <!-- Text: along a curve (<textPath>), and in runs of their own colour and weight (<tspan>). -->
+      <div class="card">
+        <h2>Text on a path</h2>
+        <svg id="svg-text" width="300" height="110" viewBox="0 0 300 110">
+          <path id="text-curve" d="M 10 80 Q 150 0 290 80" fill="none" stroke="#e3e7ef" stroke-width="2"/>
+          <text class="curved"><textPath href="#text-curve" startOffset="50%" text-anchor="middle">Freshly roasted,
+              ground and brewed</textPath></text>
+          <text x="150" y="104" text-anchor="middle">Single <tspan class="accent">origin</tspan>
+            beans</text>
+        </svg>
+      </div>
+      <!-- A filter and animations: a cup with a soft drop shadow (a <filter> of a blur, an offset and a merge),
+           whose steam rises and fades (<animate>), a bean turning (<animateTransform>) and a bean riding along a
+           path (<animateMotion>), all repeating forever. -->
+      <div class="card">
+        <h2>Filters and animation</h2>
+        <svg id="svg-animated" width="300" height="110" viewBox="0 0 300 110">
+          <defs>
+            <filter id="soft-shadow" x="-20%" y="-20%" width="150%" height="150%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="3" dy="4" result="shadow"/>
+              <feFlood flood-color="#1a2240" flood-opacity="0.35"/>
+              <feComposite in2="shadow" operator="in"/>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="svg-cup-filtered" filter="url(#soft-shadow)">
+            <path d="M 52 50 h 6 a 9 9 0 0 1 0 18 h -8" fill="none" stroke="#2b3fa8" stroke-width="4"/>
+            <path d="M 12 44 h 42 v 14 a 21 18 0 0 1 -42 0 Z" fill="#4f6df5"/>
+            <ellipse cx="33" cy="44" rx="21" ry="4" fill="#6f4e37"/>
+          </g>
+          <g fill="none" stroke="#8d99ae" stroke-width="3" stroke-linecap="round">
+            <path id="svg-steam" d="M 26 36 q -6 -8 0 -16 q 6 -8 0 -16">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+              <animateTransform attributeName="transform" type="translate" values="0 6;0 -2" dur="2s"
+                repeatCount="indefinite"/>
+            </path>
+            <path d="M 40 36 q -6 -8 0 -16 q 6 -8 0 -16">
+              <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+              <animateTransform attributeName="transform" type="translate" values="0 6;0 -2" dur="2s" begin="1s"
+                repeatCount="indefinite"/>
+            </path>
+          </g>
+          <use id="svg-spinning" href="#icon-bean" x="110" y="35" width="40" height="40" color="#6f4e37">
+            <animateTransform attributeName="transform" type="rotate" from="0 130 55" to="360 130 55" dur="3s"
+              repeatCount="indefinite"/>
+          </use>
+          <path id="bean-track" d="M 180 80 C 200 10 270 10 290 80" fill="none" stroke="#e3e7ef" stroke-width="2"
+            stroke-dasharray="4 4"/>
+          <use id="svg-riding" href="#icon-bean" x="-10" y="-10" width="20" height="20" color="#ef476f">
+            <animateMotion dur="4s" repeatCount="indefinite" rotate="auto" keyPoints="0;1;0" keyTimes="0;0.5;1"
+              calcMode="linear">
+              <mpath href="#bean-track"/>
+            </animateMotion>
+          </use>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="mathml">
+    <div class="row math-sample">
+      <!-- Formulas, in the math font: the quadratic formula in display style, a fraction over a radical with
+           scripts, and the same formula inline in a sentence, where it's set smaller to sit in the line. -->
+      <div class="card">
+        <h2>Formulas</h2>
+        <math display="block" id="math-quadratic">
+          <mi>x</mi><mo>=</mo>
+          <mfrac id="math-fraction">
+            <mrow><mo>&#x2212;</mo><mi>b</mi><mo>&#x00B1;</mo>
+              <msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>a</mi><mi>c</mi></msqrt></mrow>
+            <mrow><mn>2</mn><mi>a</mi></mrow>
+          </mfrac>
+        </math>
+        <p>Inline, <math><mi>x</mi><mo>=</mo><mfrac id="math-inline-fraction"><mrow><mo>&#x2212;</mo><mi>b</mi>
+          <mo>&#x00B1;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>a</mi><mi>c</mi>
+          </msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></math> sits in its line.</p>
+      </div>
+      <!-- Large operators: in display style a sum and an integral are drawn large, with limits under and over the
+           sum; inline, they stay small and the limits move to their side. -->
+      <div class="card">
+        <h2>Sums and integrals</h2>
+        <math display="block" id="math-sum">
+          <munderover><mo id="math-sigma">&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow>
+            <mi id="math-upper">n</mi></munderover>
+          <msup><mi>k</mi><mn>2</mn></msup><mo>=</mo>
+          <mfrac><mrow><mi>n</mi><mo>(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo>)</mo><mo>(</mo><mn>2</mn><mi>n</mi><mo>+</mo>
+            <mn>1</mn><mo>)</mo></mrow><mn>6</mn></mfrac>
+        </math>
+        <math display="block">
+          <msubsup><mo id="math-integral">&#x222B;</mo><mn>0</mn><mi>&#x03C0;</mi></msubsup>
+          <mi>sin</mi><mo>&#x2061;</mo><mspace width="0.1667em"></mspace><mi>x</mi><mspace width="0.1667em"></mspace><mi>d</mi><mi>x</mi>
+          <mo>=</mo><mn>2</mn>
+        </math>
+        <p>Inline, <math><munderover><mo id="math-inline-sigma">&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn>
+          </mrow><mi id="math-inline-upper">n</mi></munderover><mi>k</mi></math> and <math><msubsup>
+          <mo id="math-inline-integral">&#x222B;</mo><mn>0</mn><mn>1</mn></msubsup><mi>f</mi></math> stay small.</p>
+      </div>
+      <!-- Brackets stretched around a matrix (<mtable>), radicals nested in radicals with an index (<mroot>),
+           and identifiers with scripts before and after them (<mmultiscripts>), and an accent over a vector. -->
+      <div class="card">
+        <h2>Matrices, roots and scripts</h2>
+        <math display="block">
+          <mi>A</mi><mo>=</mo>
+          <mrow>
+            <mo id="math-bracket">[</mo>
+            <mtable id="math-matrix">
+              <mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><msub><mi>a</mi><mn>1</mn></msub></mtd></mtr>
+              <mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><msub><mi>a</mi><mn>2</mn></msub></mtd></mtr>
+              <mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>
+            </mtable>
+            <mo>]</mo>
+          </mrow>
+        </math>
+        <math display="block">
+          <mroot id="math-root"><mrow><mn>1</mn><mo>+</mo><msqrt id="math-nested"><mn>1</mn><mo>+</mo>
+            <msqrt id="math-innermost"><mi>x</mi></msqrt></msqrt></mrow><mn>3</mn></mroot>
+          <mo>,</mo>
+          <mmultiscripts><mi id="math-c">C</mi><mi id="math-k">k</mi><none></none><mprescripts></mprescripts>
+            <mi id="math-n">n</mi><none></none></mmultiscripts>
+          <mo>,</mo>
+          <msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup>
+          <mo>,</mo>
+          <mover accent="true"><mi>v</mi><mo>&#x2192;</mo></mover>
+        </math>
+      </div>
+    </div>
+  </div>
+
+  <div id="engine-texture">
+    <div class="row engine-texture-sample">
+      <!-- A live 3D view: the editor draws a cube into a texture each frame and hands it to the canvas's
+           "krystal-texture" context, so the compositor shows it as the canvas's layer, clipped to its rounded
+           corners like an image. Dragging it turns the cube. -->
+      <div class="card">
+        <h2>A live 3D view</h2>
+        <canvas id="cube" width="480" height="480"></canvas>
+        <p id="cube-angle">Drag the cube to turn it.</p>
+      </div>
+      <!-- The same texture, fitted into a wide box and faded: the canvas places it like an image. -->
+      <div class="card">
+        <h2>Placed like an image</h2>
+        <canvas id="cube-strip" width="480" height="480"></canvas>
+        <p>The same texture in a wide box, with object-fit: cover and opacity.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="canvas-2d">
+    <div class="row canvas-2d-sample">
+      <!-- A chart drawn with the canvas 2D context from the editor's data: dashed grid lines, a gradient filled
+           under a line, labels in the page's font and a bar filled with a pattern drawn into another canvas.
+           The editor redraws it each second as a new value comes in. -->
+      <div class="card">
+        <h2>A live chart</h2>
+        <canvas id="chart" width="640" height="320"></canvas>
+        <canvas id="chart-tile" width="12" height="12"></canvas>
+        <p id="chart-caption">Cups an hour.</p>
+      </div>
+      <!-- A drawing pad that keeps the strokes pointers draw on it. The palette's colours are read back from
+           its pixels (getImageData) as they're picked. -->
+      <div class="card">
+        <h2>A drawing pad</h2>
+        <canvas id="pad" width="320" height="200"></canvas>
+        <div class="pad-tools">
+          <canvas id="pad-palette" width="200" height="28"></canvas>
+          <span id="pad-colour"></span>
+          <button id="pad-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chapters: each skips laying out and painting its contents while it's off screen (content-visibility:
+       auto), at the size it last had (contain-intrinsic-size: auto), so the page doesn't jump as they come and
+       go; the editor's header shows the chapter most in view, which an intersection observer finds. -->
+  <div class="chapters">
+    <section class="chapter" id="chapter-1">
+      <h2>The beans</h2>
+      <p>Every cup starts as the seed of a cherry. Arabica grows high and slow, and tastes of fruit and flowers; robusta grows low and fast, and tastes of chocolate and earth, with twice the caffeine.</p>
+      <p>The cherries are picked by hand when they ripen, then washed, dried in the sun or fermented, and hulled down to the green beans that travel the world.</p>
+      <p>A green bean keeps for a year. Roasted, it keeps for weeks; ground, for minutes.</p>
+    </section>
+    <section class="chapter" id="chapter-2">
+      <h2>Roasting</h2>
+      <p>Roasting turns the green bean brown and sweet. At first it dries and yellows; then it cracks, as the steam inside breaks it open, and its sugars caramelise.</p>
+      <p>A light roast stops soon after the first crack and keeps the bean’s own flavours. A dark roast runs on to the second crack, and tastes more of the roast than of the bean.</p>
+      <p>Roasted beans rest for a few days, giving off the gas they made, before they’re at their best.</p>
+    </section>
+    <section class="chapter" id="chapter-3">
+      <h2>Grinding</h2>
+      <p>Grinding opens the bean to the water. The finer the grind, the faster the water draws the flavour out, so each way of brewing has a grind of its own.</p>
+      <p>Espresso wants a powder as fine as flour; a filter, coarse sand; a press, breadcrumbs.</p>
+      <p>Burr grinders crush the beans evenly between two plates; blade grinders chop them unevenly, so some grounds give too much and others too little.</p>
+    </section>
+    <section class="chapter" id="chapter-4">
+      <h2>Brewing</h2>
+      <p>Brewing is water, time and heat. Water just off the boil draws out the flavour; too hot, it scalds the grounds, and too cool, it leaves them sour.</p>
+      <p>An espresso pushes water through a puck of grounds in under half a minute, at nine times the air’s pressure. A filter lets it drip through in a few minutes; a press steeps it for four.</p>
+      <p>Cold brew steeps overnight in cold water, and comes out smooth and low in acid.</p>
+    </section>
+    <section class="chapter" id="chapter-5">
+      <h2>Milk</h2>
+      <p>Steamed milk is sweeter than cold: heat breaks its sugars down. Steam it to the warmth of a bath, no hotter, or it tastes cooked.</p>
+      <p>Air folded in at the start makes the foam; the rest of the steaming makes it fine. A flat white has a thin layer of it, a latte a little more, and a cappuccino a third of the cup.</p>
+      <p>Oat milk foams nearly as well as cow’s milk, and almond milk hardly at all.</p>
+    </section>
+    <section class="chapter" id="chapter-6">
+      <h2>Tasting</h2>
+      <p>Tasters slurp: the spray carries the coffee across the tongue and up to the nose, where most of the flavour is.</p>
+      <p>They look for sweetness, acidity and body, and for the notes that set a coffee apart: berries, citrus, nuts, caramel or spice.</p>
+      <p>The same beans taste different hot and cooling, so a cupping goes on until the cups are cold.</p>
+    </section>
+  </div>
+
+  <!-- A frosted, fixed pill: it composites for its position, so scrolling the page moves its layer rather than
+       repainting it, and its backdrop filter blurs what scrolls beneath it. The list and strip cards scroll on
+       layers of their own. -->
+  <div class="pill">Frosted and fixed</div>
+</body>
+</html>

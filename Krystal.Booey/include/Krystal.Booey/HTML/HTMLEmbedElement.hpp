@@ -1,25 +1,31 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLPlugInElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlembedelement
-  class HTMLEmbedElement : public HTMLElement
+  class HTMLEmbedElement : public HTMLPlugInElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLEmbedElement);
 
   public:
     HTMLEmbedElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
+    {
+      // FIXME: A plug-in replacement that creates a renderer makes the element not replaced.
+      return true;
+    }
+
 #pragma region HTMLEmbedElement - https://html.spec.whatwg.org/#htmlembedelement
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Src() const noexcept;
+    KRYS_NODISCARD dom::USVString Src() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-src
-    dom::ExceptionOr<void> Src(dom::USVString &&value) noexcept;
+    void Src(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-embed-type
     KRYS_NODISCARD dom::DOMString Type() const noexcept;
@@ -39,7 +45,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-embed-height
     void Height(dom::DOMString value) noexcept;
 
-    // TODO(HTMLEmbedElement, HTML): Document? getSVGDocument();
+    // FIXME: Document? getSVGDocument();
 
 #pragma endregion
 
@@ -58,6 +64,11 @@ namespace krys::boo::html
     void Name(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

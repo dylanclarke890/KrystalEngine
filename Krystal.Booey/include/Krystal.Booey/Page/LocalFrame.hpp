@@ -1,0 +1,176 @@
+﻿#pragma once
+
+#include "Krystal.Booey/CSS/Queries/MediaEnvironment.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/IntSize.hpp"
+#include "Krystal.Booey/Loader/Cache/CachePolicy.hpp"
+#include "Krystal.Booey/Loader/FrameLoader.hpp"
+#include "Krystal.Booey/Loader/NavigationScheduler.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Macros.hpp"
+#include "Krystal.Core/RefCounted.hpp"
+#include "Krystal.Core/Types/RefPtr.hpp"
+#include "Krystal.Core/Types/UniquePtr.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
+
+namespace krys::boo
+{
+  class Page;
+  class VisiblePosition;
+
+  /// @brief Shows a document in a view: the host creates a frame, gives it a view (`CreateView`) and a
+  /// document (`SetDocument`), and sets the zoom factors and the media environment.
+  /// @note FIXME: Only what layout, style and navigation within a document need: no document loading, frame
+  /// tree, scripting or printing. The media environment stands in for the page's chrome client and the
+  /// screen.
+  class LocalFrame final : public RefCounted<LocalFrame>, public CanMakeWeakPtr<LocalFrame>
+  {
+    KRYS_NON_COPY_MOVABLE(LocalFrame);
+
+  private:
+    WeakPtr<Page> _page;
+    RefPtr<dom::Document> _document;
+    RefPtr<LocalFrameView> _view;
+    UniquePtr<EventHandler> _eventHandler;
+    UniquePtr<FrameLoader> _loader;
+    UniquePtr<NavigationScheduler> _navigationScheduler;
+    css::mq::MediaEnvironment _mediaEnvironment;
+    /// @see https://html.spec.whatwg.org/#nav-target
+    dom::DOMString _specifiedName;
+    float _pageZoomFactor {1};
+    float _textZoomFactor {1};
+    CachePolicy _subresourceCachePolicy {CachePolicy::Verify};
+    bool _documentIsBeingReplaced {false};
+
+    LocalFrame(Page *page, UniquePtr<LocalFrameLoaderClient> &&loaderClient) noexcept;
+
+  public:
+    ~LocalFrame() noexcept;
+
+    /// @brief A frame, the main frame of @p page if given.
+    /// @param loaderClient The host's side of the frame's loader; without one, the frame ignores navigations.
+    KRYS_NODISCARD static Ref<LocalFrame>
+      Create(Page *page = nullptr, UniquePtr<LocalFrameLoaderClient> loaderClient = nullptr) noexcept;
+
+    /// @brief Navigates the frame: links and form submissions go through it.
+    KRYS_NODISCARD FrameLoader &Loader() const noexcept
+    {
+      return *_loader;
+    }
+
+    /// @brief The frame's navigations to come (redirects, location changes, form submissions).
+    KRYS_NODISCARD NavigationScheduler &GetNavigationScheduler() const noexcept
+    {
+      return *_navigationScheduler;
+    }
+
+    /// @brief How the document's subresources use the memory cache, unless the load type has a policy (a
+    /// reload, or going back and forward): the host sets `Revalidate` when it loads a page again, so edited
+    /// files load again.
+    KRYS_NODISCARD CachePolicy SubresourceCachePolicy() const noexcept
+    {
+      return _subresourceCachePolicy;
+    }
+    void SetSubresourceCachePolicy(CachePolicy policy) noexcept
+    {
+      _subresourceCachePolicy = policy;
+    }
+
+    /// @brief The page the frame is in, if any.
+    KRYS_NODISCARD Page *GetPage() const noexcept
+    {
+      return _page.get();
+    }
+
+    /// @brief The document the frame shows, if any.
+    KRYS_NODISCARD dom::Document *Document() const noexcept
+    {
+      return _document.get();
+    }
+
+    /// @brief The window of the frame's document, if any.
+    KRYS_NODISCARD LocalDOMWindow *Window() const noexcept
+    {
+      return _document ? _document->Window() : nullptr;
+    }
+
+    /// @brief The frame's name (its navigable's target name), which links and forms can target.
+    /// @see https://html.spec.whatwg.org/#nav-target
+    KRYS_NODISCARD const dom::DOMString &SpecifiedName() const noexcept
+    {
+      return _specifiedName;
+    }
+
+    void SetSpecifiedName(dom::DOMString &&name) noexcept
+    {
+      _specifiedName = krys::move(name);
+    }
+
+    /// @brief The view the frame's document is laid out in, if any.
+    KRYS_NODISCARD LocalFrameView *View() const noexcept
+    {
+      return _view.get();
+    }
+
+    /// @brief Replaces the frame's view. The document's render tree is destroyed with the old view and
+    /// created with the new one.
+    /// @brief Turns the host's mouse input into DOM events for this frame.
+    KRYS_NODISCARD EventHandler &GetEventHandler() const noexcept
+    {
+      return *_eventHandler;
+    }
+
+    void SetView(RefPtr<LocalFrameView> &&view) noexcept;
+
+    /// @brief Gives the frame a new view of @p viewportSize, laid out at @p fixedLayoutSize if
+    /// @p useFixedLayout.
+    void CreateView(const IntSize &viewportSize, const IntSize &fixedLayoutSize = {},
+                    bool useFixedLayout = false) noexcept;
+
+    /// @brief Shows @p newDocument in the frame, in place of its current document. @p newDocument must not be
+    /// in a frame already.
+    void SetDocument(RefPtr<dom::Document> &&newDocument) noexcept;
+
+    /// @brief The caret position nearest @p framePoint (in the frame's contents).
+    KRYS_NODISCARD VisiblePosition VisiblePositionForPoint(const IntPoint &framePoint) const noexcept;
+    /// @brief The document under @p point (in the window).
+    // FIXME: A subframe's document, once there are subframes.
+    KRYS_NODISCARD dom::Document *DocumentAtPoint(const IntPoint &point) noexcept;
+
+    /// @brief The zoom applied to the whole document (the root style's `zoom`).
+    KRYS_NODISCARD float PageZoomFactor() const noexcept
+    {
+      return _pageZoomFactor;
+    }
+
+    /// @brief The zoom applied to font sizes, on top of the page zoom.
+    KRYS_NODISCARD float TextZoomFactor() const noexcept
+    {
+      return _textZoomFactor;
+    }
+
+    void SetPageZoomFactor(float factor) noexcept;
+    void SetTextZoomFactor(float factor) noexcept;
+    void SetPageAndTextZoomFactors(float pageZoomFactor, float textZoomFactor) noexcept;
+
+    /// @brief How much the frame's content is scaled: the page's scale.
+    // FIXME: A subframe's is its owner's zoom relative to the root frame's, once there are subframes.
+    KRYS_NODISCARD float FrameScaleFactor() const noexcept;
+    /// @brief Tells the frame's compositor the device or page scale changed.
+    // FIXME: And the child frames, once there are subframes.
+    void DeviceOrPageScaleFactorChanged() noexcept;
+
+    /// @brief The device and user state the frame's document is presented with.
+    KRYS_NODISCARD const css::mq::MediaEnvironment &GetMediaEnvironment() const noexcept
+    {
+      return _mediaEnvironment;
+    }
+
+    /// @brief Changes the media environment, and re-evaluates the document's style sheets if it changed. The
+    /// host then reports the changes to `MediaQueryList`s (`Document::EvaluateMediaQueriesAndReportChanges`).
+    void SetMediaEnvironment(const css::mq::MediaEnvironment &environment) noexcept;
+  };
+}

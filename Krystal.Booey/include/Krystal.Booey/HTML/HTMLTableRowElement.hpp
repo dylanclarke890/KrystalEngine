@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmltablerowelement
-  class HTMLTableRowElement : public HTMLElement
+  class HTMLTableRowElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableRowElement);
 
@@ -14,7 +14,7 @@ namespace krys::boo::html
 
 #pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
 
-    // TODO(HTMLTableRowElement, HTML): Implement api.
+    // FIXME: Implement api.
 
 #pragma endregion
 

@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -44,6 +45,11 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-localname
+    KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
+    {
+      return _name;
+    }
+
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
       return _name.LocalName();
@@ -56,14 +62,12 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
-    KRYS_NODISCARD const DOMString &Value() const noexcept
-    {
-      return _value;
-    }
+    KRYS_NODISCARD const DOMString &Value() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-value
     void Value(DOMString &&value) noexcept
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
     }
 
@@ -98,6 +102,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
       return {};
     }
@@ -111,6 +116,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
+      html::CEReactionsScope ceReactions;
       SetExistingAttributeValue(*this, krys::move(value));
       return {};
     }

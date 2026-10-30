@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/DOM/Node.hpp"
+#include "Krystal.Booey/Core/WritingMode.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -11,30 +12,133 @@
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Iterators/ComposedTreeAncestorIterator.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/RenderObject.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle.hpp"
+#include "Krystal.Booey/Style/PseudoElementIdentifier.hpp"
+#include "Krystal.Booey/SVG/SVGUseElement.hpp"
+#include <tuple>
 
 namespace krys::boo::dom
 {
   Node::Node(Document &document, dom::NodeType type, NodeFlags flags) noexcept
-      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(ShareRefPtr(&document)),
+      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(&document),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
+    if (type != NodeType::DOCUMENT_NODE)
+    {
+      document.IncrementReferencingNodeCount();
+    }
+  }
+
+  Node::~Node() noexcept
+  {
+    // Last, since it may delete the document.
+    if (!IsDocumentNode())
+    {
+      _nodeDocument->DecrementReferencingNodeCount();
+    }
+  }
+
+  void Node::SetNodeDocument(Document &document) noexcept
+  {
+    krys_debug_assert(!IsDocumentNode());
+    if (_nodeDocument == &document)
+    {
+      return;
+    }
+    // The new document is counted first: dropping the old one's count may delete it.
+    document.IncrementReferencingNodeCount();
+    std::exchange(_nodeDocument, &document)->DecrementReferencingNodeCount();
+  }
+
+  DocumentOrShadowRoot &Node::TreeScope() const noexcept
+  {
+    if (IsInShadowTree())
+    {
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(const_cast<Node &>(*this))))
+      {
+        return *shadowRoot;
+      }
+    }
+    return NodeDocument();
+  }
+
+  DocumentOrShadowRoot &Node::TreeScopeForSVGReferences() const noexcept
+  {
+    if (auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
+        shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent)
+    {
+      if (auto *host = DynamicDowncast<svg::SVGElement>(shadowRoot->Host());
+          host && Is<svg::SVGUseElement>(*host))
+      {
+        return host->TreeScope();
+      }
+    }
+    return TreeScope();
+  }
+
+  boo::RenderBox *Node::GetRenderBox() const noexcept
+  {
+    return DynamicDowncast<boo::RenderBox>(_renderer);
+  }
+
+  bool Node::IsInUserAgentShadowTree() const noexcept
+  {
+    if (!IsInShadowTree())
+    {
+      return false;
+    }
+    auto *shadowRoot = TreeQueries::ContainingShadowRoot(*this);
+    return shadowRoot && shadowRoot->Mode() == ShadowRootMode::UserAgent;
+  }
+
+  TextDirection Node::EffectiveTextDirection() const noexcept
+  {
+    if (UsesEffectiveTextDirection())
+    {
+      return HasNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL) ? TextDirection::RTL : TextDirection::LTR;
+    }
+
+    // The document element's directionality, if it's an HTML element that keeps one.
+    auto documentElement = NodeDocument().DocumentElement();
+    if (documentElement && documentElement.get() != this && documentElement->IsHTMLElement()
+        && documentElement->UsesEffectiveTextDirection())
+    {
+      return documentElement->EffectiveTextDirection();
+    }
+    return TextDirection::LTR;
+  }
+
+  void Node::SetEffectiveTextDirection(TextDirection direction) noexcept
+  {
+    if (direction == TextDirection::RTL)
+    {
+      SetNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+    }
+    else
+    {
+      ClearNodeFlag(NodeFlags::EffectiveTextDirectionIsRTL);
+    }
   }
 
 #pragma region Node
 
   DOMString Node::BaseURI() const noexcept
   {
-    // TODO(impl): URL - The baseURI getter steps are to return this’s node document’s document base URL,
-    // serialized.
-    // @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
-    return {};
+    return NodeDocument().BaseURL().String();
   }
 
   Document *Node::OwnerDocument() const noexcept
@@ -90,6 +194,7 @@ namespace krys::boo::dom
 
   ExceptionOr<void> Node::Normalize() noexcept
   {
+    html::CEReactionsScope ceReactions;
     for (auto *node = TreeQueries::NextExclusiveTextNode(*this, this); node != nullptr;
          node = TreeQueries::NextExclusiveTextNode(*node, this))
     {
@@ -142,6 +247,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (Is<ShadowRoot>(this))
     {
       return Exception {ExceptionCode::NotSupportedError};
@@ -208,6 +314,9 @@ namespace krys::boo::dom
                    | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
           }
         }
+
+        (void)element1;
+        // FIXME: Are we missing part of the implementation here? element1 is not referenced
       }
     }
 
@@ -323,6 +432,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::InsertBefore(Node &newChild, Node *refChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
@@ -333,6 +443,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
@@ -343,6 +454,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::PreRemove(oldChild, *containerNode);
@@ -353,6 +465,7 @@ namespace krys::boo::dom
 
   ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
   {
+    html::CEReactionsScope ceReactions;
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return MutationAlgorithms::Append(newChild, *containerNode);
@@ -363,8 +476,419 @@ namespace krys::boo::dom
 
 #pragma endregion
 
+#pragma region Style
+
+  const RenderStyle *Node::GetRenderStyle() const noexcept
+  {
+    auto *renderer = Renderer();
+    if (!renderer)
+    {
+      return nullptr;
+    }
+    return &renderer->Style();
+  }
+
+  const RenderStyle *Node::ComputedStyle() noexcept
+  {
+    return ComputedStyle(null);
+  }
+
+  const RenderStyle *
+    Node::ComputedStyle(const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier) noexcept
+  {
+    auto composedParent = ShareRefPtr(ParentElementInComposedTree());
+    return composedParent ? composedParent->ComputedStyle(pseudoElementIdentifier) : nullptr;
+  }
+
+  ContainerNode *Node::ParentInComposedTree() const noexcept
+  {
+    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    {
+      return slot;
+    }
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*this))
+    {
+      return shadowRoot->Host();
+    }
+    return ParentNode();
+  }
+
+  Element *Node::ParentElementInComposedTree() const noexcept
+  {
+    if (auto *slot = SlotAlgorithms::GetAssignedSlot(*this))
+    {
+      return slot;
+    }
+    if (auto *pseudoElement = DynamicDowncast<PseudoElement>(*this))
+    {
+      return pseudoElement->HostElement();
+    }
+    if (auto *parent = ParentNode())
+    {
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*parent))
+      {
+        return shadowRoot->Host();
+      }
+      if (auto *element = DynamicDowncast<Element>(*parent))
+      {
+        return element;
+      }
+    }
+    return nullptr;
+  }
+
+  bool Node::IsComposedTreeDescendantOf(const Node &node) const noexcept
+  {
+    for (auto *currentAncestor = ParentElementInComposedTree(); currentAncestor;
+         currentAncestor = currentAncestor->ParentElementInComposedTree())
+    {
+      if (currentAncestor == &node)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+#pragma region Tree Helpers
+
+  uint32 Node::CountChildNodes() const noexcept
+  {
+    uint32 count = 0;
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      ++count;
+    }
+    return count;
+  }
+
+  Node *Node::TraverseToChildAt(uint32 index) const noexcept
+  {
+    auto *child = FirstChild();
+    for (; child && index; --index)
+    {
+      child = child->NextSibling();
+    }
+    return child;
+  }
+
+  uint32 Node::ComputeNodeIndex() const noexcept
+  {
+    return static_cast<uint32>(TreeQueries::Index(*this));
+  }
+
+  uint32 Node::Length() const noexcept
+  {
+    return static_cast<uint32>(TreeQueries::Length(*this));
+  }
+
+  ContainerNode *Node::ParentOrShadowHostNode() const noexcept
+  {
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*this))
+    {
+      return shadowRoot->Host();
+    }
+    return ParentNode();
+  }
+
+  ContainerNode *Node::NonShadowBoundaryParentNode() const noexcept
+  {
+    auto *parent = ParentNode();
+    return parent && !parent->IsShadowRootNode() ? parent : nullptr;
+  }
+
+  Node *Node::NonBoundaryShadowTreeRootNode() noexcept
+  {
+    krys_debug_assert(!IsShadowRootNode());
+    Node *root = this;
+    while (root)
+    {
+      if (root->IsShadowRootNode())
+      {
+        return root;
+      }
+      Node *parent = root->ParentNode();
+      if (parent && parent->IsShadowRootNode())
+      {
+        return root;
+      }
+      root = parent;
+    }
+    return nullptr;
+  }
+
+  bool Node::IsDescendantOf(const Node *other) const noexcept
+  {
+    return other && TreeQueries::IsDescendant(*this, *other);
+  }
+
+  bool Node::IsShadowIncludingDescendantOf(const Node *other) const noexcept
+  {
+    return other && TreeQueries::IsShadowIncludingDescendant(*this, *other);
+  }
+
+  Node *Node::LastDescendant() const noexcept
+  {
+    auto *node = const_cast<Node *>(this);
+    while (auto *lastChild = node->LastChild())
+    {
+      node = lastChild;
+    }
+    return node;
+  }
+
+#pragma endregion
+
+#pragma region Editing
+
+  bool Node::IsContentEditable() const noexcept
+  {
+    return ComputeEditability(UserSelectAllTreatment::Editable, ShouldUpdateStyle::Update)
+           != Editability::ReadOnly;
+  }
+
+  bool Node::IsContentRichlyEditable() const noexcept
+  {
+    return ComputeEditability(UserSelectAllTreatment::NotEditable, ShouldUpdateStyle::Update)
+           == Editability::CanEditRichly;
+  }
+
+  namespace
+  {
+    KRYS_NODISCARD Node::Editability
+      ComputeEditabilityFromComputedStyle(const RenderStyle &style,
+                                          Node::UserSelectAllTreatment treatment) noexcept
+    {
+      // Ideally we'd call ASSERT(!needsStyleRecalc()) here, but
+      // ContainerNode::setFocus() calls invalidateStyleForSubtree(), so the assertion
+      // would fire in the middle of Document::setFocusedElement().
+
+      // Elements with user-select: all style are considered atomic
+      // therefore non editable.
+      if (treatment == Node::UserSelectAllTreatment::NotEditable && style.UsedUserSelect() == UserSelect::All)
+      {
+        return Node::Editability::ReadOnly;
+      }
+
+      // FIXME: A page that's editable as a whole (`Page::isEditable`).
+      switch (style.UsedUserModify())
+      {
+        case UserModify::ReadOnly:               return Node::Editability::ReadOnly;
+        case UserModify::ReadWrite:              return Node::Editability::CanEditRichly;
+        case UserModify::ReadWritePlaintextOnly: return Node::Editability::CanEditPlainText;
+      }
+      krys_unreachable();
+    }
+  }
+
+  Node::Editability Node::ComputeEditabilityWithStyle(const RenderStyle *incomingStyle,
+                                                      UserSelectAllTreatment treatment,
+                                                      ShouldUpdateStyle shouldUpdateStyle) const noexcept
+  {
+    if (!NodeDocument().HasLivingRenderTree() || IsPseudoElement())
+    {
+      return Editability::ReadOnly;
+    }
+
+    Ref document = ShareRef(NodeDocument());
+
+    if (IsInShadowTree())
+    {
+      return html::HTMLElement::EditabilityFromContentEditableAttr(*this);
+    }
+
+    // Style-based editability is always possible (no style sheet records whether it uses
+    // `-webkit-user-modify`), so style is brought up to date.
+    if (shouldUpdateStyle == ShouldUpdateStyle::Update && document->NeedsStyleRecalc())
+    {
+      document->UpdateStyleIfNeeded();
+    }
+
+    auto *style = [&]() -> const RenderStyle *
+    {
+      if (incomingStyle)
+      {
+        return incomingStyle;
+      }
+      if (IsDocumentNode())
+      {
+        return GetRenderStyle();
+      }
+      auto *element = DynamicDowncast<Element>(*this);
+      if (!element)
+      {
+        element = ParentElementInComposedTree();
+      }
+      if (!element || !element->IsConnected())
+      {
+        return nullptr;
+      }
+      return const_cast<Element &>(*element).ResolveComputedStyle(
+        Element::ResolveComputedStyleMode::Editability);
+    }();
+
+    if (!style)
+    {
+      return Editability::ReadOnly;
+    }
+
+    return ComputeEditabilityFromComputedStyle(*style, treatment);
+  }
+
+  Node::Editability Node::ComputeEditability(UserSelectAllTreatment treatment,
+                                             ShouldUpdateStyle shouldUpdateStyle) const noexcept
+  {
+    return ComputeEditabilityWithStyle(nullptr, treatment, shouldUpdateStyle);
+  }
+
+  bool Node::IsRootEditableElement() const noexcept
+  {
+    return HasEditableStyle() && IsElementNode()
+           && (!ParentNode() || !ParentNode()->HasEditableStyle() || !ParentNode()->IsElementNode()
+               || NodeDocument().Body().get() == this);
+  }
+
+  Element *Node::RootEditableElement() const noexcept
+  {
+    Element *result = nullptr;
+    auto body = NodeDocument().Body();
+    for (auto *node = const_cast<Node *>(this); node && node->HasEditableStyle(); node = node->ParentNode())
+    {
+      if (auto *element = DynamicDowncast<Element>(*node))
+      {
+        result = element;
+      }
+      if (body.get() == node)
+      {
+        break;
+      }
+    }
+    return result;
+  }
+
+  bool Node::CanStartSelection() const noexcept
+  {
+    if (HasEditableStyle())
+    {
+      return true;
+    }
+
+    if (auto *renderer = Renderer())
+    {
+      const RenderStyle &style = renderer->Style();
+
+      // We allow selections to begin within an element that has user-select: none set,
+      // but if the element is draggable then dragging should take priority over selection.
+      if (style.GetUserDrag() == UserDrag::Element && style.UsedUserSelect() == UserSelect::None)
+      {
+        return false;
+      }
+    }
+    auto *parent = ParentOrShadowHostNode();
+    return parent ? parent->CanStartSelection() : true;
+  }
+
+#pragma endregion
+
+  void Node::AdjustStyleValidity(style::Validity validity, style::InvalidationMode mode) noexcept
+  {
+    if (validity > StyleValidity())
+    {
+      _styleValidity = validity;
+    }
+
+    switch (mode)
+    {
+      case style::InvalidationMode::Normal: break;
+      case style::InvalidationMode::RecompositeLayer:
+        SetNodeFlag(NodeFlags::StyleResolutionShouldRecompositeLayer);
+        break;
+      case style::InvalidationMode::RebuildRenderer:
+      case style::InvalidationMode::InsertedIntoAncestor: SetNodeFlag(NodeFlags::HasInvalidRenderer); break;
+    }
+  }
+
+  void Node::UpdateAncestorsForStyleRecalc() noexcept
+  {
+    MarkAncestorsForInvalidatedStyle();
+
+    auto documentElement = NodeDocument().DocumentElement();
+    if (!documentElement)
+    {
+      return;
+    }
+    if (!documentElement->ChildNeedsStyleRecalc() && !documentElement->NeedsStyleRecalc())
+    {
+      return;
+    }
+
+    auto document = ShareRef(NodeDocument());
+    document->SetChildNeedsStyleRecalc();
+    document->ScheduleStyleRecalc();
+  }
+
+  void Node::MarkAncestorsForInvalidatedStyle() noexcept
+  {
+    auto composedAncestors = ComposedTreeAncestors(*this);
+    auto it = composedAncestors.begin();
+    auto end = composedAncestors.end();
+    if (it != end)
+    {
+      it->SetDirectChildNeedsStyleRecalc();
+
+      for (; it != end; ++it)
+      {
+        // Iterator skips over shadow roots.
+        if (auto *shadowRoot = TreeQueries::GetShadowRoot(*it))
+        {
+          shadowRoot->SetChildNeedsStyleRecalc();
+        }
+        if (it->ChildNeedsStyleRecalc())
+        {
+          break;
+        }
+        it->SetChildNeedsStyleRecalc();
+      }
+    }
+  }
+
+  void Node::InvalidateStyle(style::Validity validity, style::InvalidationMode mode) noexcept
+  {
+    // FIXME: Every connected node is in a rendered document; documents without a browsing context are styled
+    // too.
+    if (!IsConnected())
+    {
+      return;
+    }
+
+    // FIXME: This should eventually be an ASSERT.
+    if (NodeDocument().InRenderTreeUpdate())
+    {
+      return;
+    }
+
+    if (validity != style::Validity::Valid)
+    {
+      SetNodeFlag(NodeFlags::IsComputedStyleInvalid);
+    }
+
+    bool markAncestors =
+      StyleValidity() == style::Validity::Valid || mode == style::InvalidationMode::InsertedIntoAncestor;
+
+    AdjustStyleValidity(validity, mode);
+
+    if (markAncestors)
+    {
+      UpdateAncestorsForStyleRecalc();
+    }
+  }
+
+#pragma endregion
+
   EventTarget *Node::GetParent(Event &event) const noexcept
   {
+    (void)event;
+
     if (SlotAlgorithms::IsAssigned(*this))
     {
       return SlotAlgorithms::GetAssignedSlot(*this);
@@ -392,4 +916,151 @@ namespace krys::boo::dom
 
     return _nodeRareData->TransientRegisteredObservers();
   }
+
+  template <>
+  ContainerNode *Parent<TreeType::Tree>(const Node &node) noexcept
+  {
+    return node.ParentNode();
+  }
+
+  template <>
+  ContainerNode *Parent<TreeType::ShadowIncludingTree>(const Node &node) noexcept
+  {
+    return node.ParentOrShadowHostNode();
+  }
+
+  template <>
+  ContainerNode *Parent<TreeType::ComposedTree>(const Node &node) noexcept
+  {
+    return node.ParentInComposedTree();
+  }
+
+  namespace
+  {
+    template <TreeType treeType>
+    KRYS_NODISCARD size_t Depth(const Node &node) noexcept
+    {
+      size_t depth = 0;
+      const Node *ancestor = &node;
+      while ((ancestor = Parent<treeType>(*ancestor)))
+      {
+        ++depth;
+      }
+      return depth;
+    }
+
+    struct AncestorAndChildren
+    {
+      const Node *CommonAncestor;
+      const Node *DistinctAncestorA;
+      const Node *DistinctAncestorB;
+    };
+
+    template <TreeType treeType>
+    KRYS_NODISCARD AncestorAndChildren CommonInclusiveAncestorAndChildren(const Node &a,
+                                                                          const Node &b) noexcept
+    {
+      // This check isn't needed for correctness, but it is cheap and likely to be
+      // common enough to be worth optimizing so we don't have to walk to the root.
+      if (&a == &b)
+      {
+        return {&a, nullptr, nullptr};
+      }
+      // FIXME: Could optimize cases where nodes are both in the same shadow tree.
+      // FIXME: Could optimize cases where nodes are in different documents to quickly return false.
+      // FIXME: Could optimize cases where one node is connected and the other is not to quickly return false.
+      auto [depthA, depthB] = std::make_tuple(Depth<treeType>(a), Depth<treeType>(b));
+      auto [x, y, difference] = depthA >= depthB ? std::make_tuple(&a, &b, depthA - depthB)
+                                                 : std::make_tuple(&b, &a, depthB - depthA);
+      const Node *distinctAncestorA = nullptr;
+      for (size_t i = 0; i < difference; ++i)
+      {
+        distinctAncestorA = x;
+        x = Parent<treeType>(*x);
+      }
+      const Node *distinctAncestorB = nullptr;
+      while (x != y)
+      {
+        distinctAncestorA = x;
+        distinctAncestorB = y;
+        x = Parent<treeType>(*x);
+        y = Parent<treeType>(*y);
+      }
+      if (depthA < depthB)
+      {
+        std::swap(distinctAncestorA, distinctAncestorB);
+      }
+      return {x, distinctAncestorA, distinctAncestorB};
+    }
+
+    KRYS_NODISCARD bool IsSiblingSubsequent(const Node &siblingA, const Node &siblingB) noexcept
+    {
+      krys_debug_assert(siblingA.ParentNode());
+      krys_debug_assert(siblingA.ParentNode() == siblingB.ParentNode());
+      krys_debug_assert(&siblingA != &siblingB);
+      for (auto *sibling = &siblingA; sibling; sibling = sibling->NextSibling())
+      {
+        if (sibling == &siblingB)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
+  template <TreeType treeType>
+  Node *CommonInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    return const_cast<Node *>(CommonInclusiveAncestorAndChildren<treeType>(a, b).CommonAncestor);
+  }
+
+  template Node *CommonInclusiveAncestor<TreeType::Tree>(const Node &, const Node &) noexcept;
+  template Node *CommonInclusiveAncestor<TreeType::ShadowIncludingTree>(const Node &, const Node &) noexcept;
+  template Node *CommonInclusiveAncestor<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
+
+  template <TreeType treeType>
+  std::partial_ordering TreeOrder(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return std::partial_ordering::equivalent;
+    }
+    auto result = CommonInclusiveAncestorAndChildren<treeType>(a, b);
+    if (!result.CommonAncestor)
+    {
+      return std::partial_ordering::unordered;
+    }
+    if (!result.DistinctAncestorA)
+    {
+      return std::partial_ordering::less;
+    }
+    if (!result.DistinctAncestorB)
+    {
+      return std::partial_ordering::greater;
+    }
+    bool isShadowRootA = Is<ShadowRoot>(*result.DistinctAncestorA);
+    bool isShadowRootB = Is<ShadowRoot>(*result.DistinctAncestorB);
+    if (isShadowRootA || isShadowRootB)
+    {
+      if (!isShadowRootB)
+      {
+        return std::partial_ordering::less;
+      }
+      if (!isShadowRootA)
+      {
+        return std::partial_ordering::greater;
+      }
+      krys_debug_assert(false);
+      return std::partial_ordering::unordered;
+    }
+    return IsSiblingSubsequent(*result.DistinctAncestorA, *result.DistinctAncestorB)
+             ? std::partial_ordering::less
+             : std::partial_ordering::greater;
+  }
+
+  template std::partial_ordering TreeOrder<TreeType::Tree>(const Node &, const Node &) noexcept;
+  template std::partial_ordering TreeOrder<TreeType::ShadowIncludingTree>(const Node &,
+                                                                          const Node &) noexcept;
+  template std::partial_ordering TreeOrder<TreeType::ComposedTree>(const Node &, const Node &) noexcept;
 }

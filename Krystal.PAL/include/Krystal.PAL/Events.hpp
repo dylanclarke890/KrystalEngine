@@ -2,9 +2,14 @@
 
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.PAL/DragAndDrop.hpp"
+#include "Krystal.PAL/Gamepad.hpp"
 #include "Krystal.PAL/IWindow.hpp"
+#include "Krystal.PAL/KeyModifiers.hpp"
 #include "Krystal.PAL/Keys.hpp"
 #include "Krystal.PAL/MouseButtons.hpp"
+#include "Krystal.PAL/Pointer.hpp"
+#include "Krystal.PAL/TextInput.hpp"
 
 namespace krys::pal
 {
@@ -15,20 +20,70 @@ namespace krys::pal
     WindowHandle _window;
     Key _key;
     KeyState _state;
+    KeyModifiers _modifiers;
+    KeyText _text;
 
   public:
     KRYS_EVENT_CLASS_TYPE("keyboard-event")
 
     /// @brief Constructs a `KeyboardEvent`.
-    /// @param button The key involved in the interaction.
+    /// @param key The key involved in the interaction.
     /// @param state The key's state during the interaction.
-    KeyboardEvent(WindowHandle window, const Key key, const KeyState state) noexcept;
+    /// @param modifiers The modifier keys held.
+    /// @param text The text the key types, for presses.
+    KeyboardEvent(WindowHandle window, const Key key, const KeyState state, const KeyModifiers modifiers = {},
+                  KeyText text = {}) noexcept;
 
     /// @brief Gets the key involved in the interaction.
     KRYS_NODISCARD Key Key() const noexcept;
 
     /// @brief Gets the state of the key.
     KRYS_NODISCARD KeyState State() const noexcept;
+
+    /// @brief Gets the modifier keys held during the interaction.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
+    /// @brief Gets the text the key types (empty for releases).
+    KRYS_NODISCARD const KeyText &Text() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief Characters typed without a key press (the emoji panel, Alt and a keypad code, an input method's
+  /// result outside a composition).
+  class TextInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    utf8_string _text;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("text-input-event")
+
+    /// @brief Constructs a `TextInputEvent`.
+    /// @param text The characters typed.
+    TextInputEvent(WindowHandle window, utf8_string text) noexcept;
+
+    KRYS_NODISCARD const utf8_string &Text() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A change to the text an input method composes.
+  class CompositionInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    CompositionInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("composition-input-event")
+
+    /// @brief Constructs a `CompositionInputEvent`.
+    /// @param input The change to the composition.
+    CompositionInputEvent(WindowHandle window, CompositionInput input) noexcept;
+
+    KRYS_NODISCARD const CompositionInput &Input() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
@@ -40,6 +95,7 @@ namespace krys::pal
     WindowHandle _window;
     MouseButton _button;
     MouseButtonState _state;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-button-event")
@@ -47,13 +103,18 @@ namespace krys::pal
     /// @brief Constructs a `MouseButtonEvent`.
     /// @param button The mouse button involved in the interaction.
     /// @param state The button's state during the interaction.
-    MouseButtonEvent(WindowHandle window, const MouseButton button, const MouseButtonState state) noexcept;
+    /// @param modifiers The modifier keys held.
+    MouseButtonEvent(WindowHandle window, const MouseButton button, const MouseButtonState state,
+                     const KeyModifiers modifiers = {}) noexcept;
 
     /// @brief Gets the mouse button involved in the interaction.
     KRYS_NODISCARD MouseButton Button() const noexcept;
 
     /// @brief Gets the state of the mouse button.
     KRYS_NODISCARD MouseButtonState State() const noexcept;
+
+    /// @brief Gets the modifier keys held during the interaction.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
 
     /// @brief Checks if the button is pressed.
     /// @returns `true` if the button is in the state `MouseButtonState::Pressed`.
@@ -73,6 +134,7 @@ namespace krys::pal
     WindowHandle _window;
     float _deltaX, _deltaY;
     float _clientX, _clientY;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-move-event")
@@ -82,8 +144,9 @@ namespace krys::pal
     /// @param deltaY The amount the cursor moved along the y-axis since the last event.
     /// @param clientX The x-coordinate of the cursor in client space.
     /// @param clientY The y-coordinate of the cursor in client space.
+    /// @param modifiers The modifier keys held.
     MouseMoveEvent(WindowHandle window, const float deltaX, const float deltaY, const float clientX,
-                   const float clientY) noexcept;
+                   const float clientY, const KeyModifiers modifiers = {}) noexcept;
 
     /// @brief Gets the amount the cursor has moved along the x-axis since the last event.
     KRYS_NODISCARD float DeltaX() const noexcept;
@@ -99,29 +162,170 @@ namespace krys::pal
     /// @note The origin is the top-left corner of the window, minus the title bar.
     KRYS_NODISCARD float ClientY() const noexcept;
 
+    /// @brief Gets the modifier keys held during the movement.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };
 
-  /// @brief Represents a user interaction with a mouse scroll wheel.
+  /// @brief Represents a mouse movement while the pointer is locked.
+  class LockedMouseMoveEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    float _deltaX, _deltaY;
+    float _rawDeltaX, _rawDeltaY;
+    KeyModifiers _modifiers;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("locked-mouse-move-event")
+
+    /// @brief Constructs a `LockedMouseMoveEvent`.
+    /// @param deltaX The cursor's movement along the x-axis since the last event, with the system's
+    /// acceleration.
+    /// @param deltaY The cursor's movement along the y-axis since the last event, with the system's
+    /// acceleration.
+    /// @param rawDeltaX The device's movement along the x-axis since the last event, without it.
+    /// @param rawDeltaY The device's movement along the y-axis since the last event, without it.
+    /// @param modifiers The modifier keys held.
+    LockedMouseMoveEvent(WindowHandle window, float deltaX, float deltaY, float rawDeltaX, float rawDeltaY,
+                         KeyModifiers modifiers = {}) noexcept;
+
+    KRYS_NODISCARD float DeltaX() const noexcept;
+
+    KRYS_NODISCARD float DeltaY() const noexcept;
+
+    KRYS_NODISCARD float RawDeltaX() const noexcept;
+
+    KRYS_NODISCARD float RawDeltaY() const noexcept;
+
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief Represents a user interaction with a mouse scroll wheel (or a touchpad's scrolling).
   class MouseScrollEvent : public Event
   {
   private:
     WindowHandle _window;
-    float _delta;
+    float _deltaX, _deltaY;
+    float _clientX, _clientY;
+    KeyModifiers _modifiers;
 
   public:
     KRYS_EVENT_CLASS_TYPE("mouse-scroll-event")
 
-    /// @brief Constructs a `ScrollWheelEvent`.
-    /// @param delta The amount the scroll wheel has moved since the last event. Positive values MUST indicate
+    /// @brief Constructs a `MouseScrollEvent`.
+    /// @param deltaX How far the wheel turned sideways since the last event, in notches. Positive values MUST
+    /// indicate scrolling right.
+    /// @param deltaY How far the wheel turned since the last event, in notches. Positive values MUST indicate
     /// scrolling forward and negative values MUST indicate scrolling backwards.
-    MouseScrollEvent(WindowHandle window, const float delta) noexcept;
+    /// @param clientX The x-coordinate of the cursor in client space.
+    /// @param clientY The y-coordinate of the cursor in client space.
+    /// @param modifiers The modifier keys held.
+    MouseScrollEvent(WindowHandle window, const float deltaX, const float deltaY, const float clientX,
+                     const float clientY, const KeyModifiers modifiers = {}) noexcept;
 
-    /// @brief Gets the scroll delta since the last event. Positive values indicate scrolling forward (away
-    /// from the user), and negative values indicate scrolling backward (toward the user).
-    KRYS_NODISCARD float Delta() const noexcept;
+    /// @brief Gets the sideways turn since the last event, in notches. Positive values indicate scrolling
+    /// right.
+    KRYS_NODISCARD float DeltaX() const noexcept;
+
+    /// @brief Gets the turn since the last event, in notches. Positive values indicate scrolling forward
+    /// (away from the user), and negative values indicate scrolling backward (toward the user).
+    /// @note A notch is usually a whole step; touchpads and smooth wheels report fractions of one.
+    KRYS_NODISCARD float DeltaY() const noexcept;
+
+    /// @brief Gets the x-coordinate of the cursor in client space.
+    KRYS_NODISCARD float ClientX() const noexcept;
+
+    /// @brief Gets the y-coordinate of the cursor in client space.
+    KRYS_NODISCARD float ClientY() const noexcept;
+
+    /// @brief Gets the modifier keys held during the scroll.
+    KRYS_NODISCARD KeyModifiers Modifiers() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief Represents a pen's or a touch's input.
+  class PointerInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    PointerInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("pointer-input-event")
+
+    /// @brief Constructs a `PointerInputEvent`.
+    /// @param input The pen's or the touch's input.
+    PointerInputEvent(WindowHandle window, const PointerInput &input) noexcept;
+
+    KRYS_NODISCARD const PointerInput &Input() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A drag from another application over a window.
+  class DragInputEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    DragInput _input;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("drag-input-event")
+
+    /// @brief Constructs a `DragInputEvent`.
+    /// @param input The drag's input.
+    DragInputEvent(WindowHandle window, DragInput input) noexcept;
+
+    KRYS_NODISCARD const DragInput &Input() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A gamepad connected or disconnected.
+  class GamepadConnectionEvent : public Event
+  {
+  private:
+    uint32 _slot;
+    bool _connected;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("gamepad-connection-event")
+
+    /// @brief Constructs a `GamepadConnectionEvent`.
+    /// @param slot The pad's slot.
+    /// @param connected Whether it connected (or disconnected).
+    GamepadConnectionEvent(uint32 slot, bool connected) noexcept;
+
+    KRYS_NODISCARD uint32 Slot() const noexcept;
+
+    KRYS_NODISCARD bool Connected() const noexcept;
+  };
+
+  /// @brief A gamepad's button was pressed or released.
+  class GamepadButtonEvent : public Event
+  {
+  private:
+    uint32 _slot;
+    GamepadButton _button;
+    GamepadButtonState _state;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("gamepad-button-event")
+
+    /// @brief Constructs a `GamepadButtonEvent`.
+    /// @param slot The pad's slot.
+    GamepadButtonEvent(uint32 slot, GamepadButton button, GamepadButtonState state) noexcept;
+
+    KRYS_NODISCARD uint32 Slot() const noexcept;
+
+    KRYS_NODISCARD GamepadButton Button() const noexcept;
+
+    KRYS_NODISCARD GamepadButtonState State() const noexcept;
   };
 
   class WindowResizeEvent : public Event
@@ -208,6 +412,25 @@ namespace krys::pal
     WindowDPIChangeEvent(WindowHandle window, const int dpi) noexcept;
 
     KRYS_NODISCARD int DPI() const noexcept;
+
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
+  };
+
+  /// @brief A window gained or lost keyboard focus.
+  class WindowFocusEvent : public Event
+  {
+  private:
+    WindowHandle _window;
+    bool _focused;
+
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-focus-event")
+
+    /// @brief Constructs a `WindowFocusEvent`.
+    /// @param focused Whether the window gained focus (rather than lost it).
+    WindowFocusEvent(WindowHandle window, const bool focused) noexcept;
+
+    KRYS_NODISCARD bool Focused() const noexcept;
 
     KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept;
   };

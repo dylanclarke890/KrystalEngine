@@ -13,20 +13,13 @@ namespace
   {
     switch (level)
     {
-    case krys::log::Level::Trace:
-      return spdlog::level::trace;
-    case krys::log::Level::Debug:
-      return spdlog::level::debug;
-    case krys::log::Level::Info:
-      return spdlog::level::info;
-    case krys::log::Level::Warn:
-      return spdlog::level::warn;
-    case krys::log::Level::Error:
-      return spdlog::level::err;
-    case krys::log::Level::Critical:
-      return spdlog::level::critical;
-    case krys::log::Level::Off:
-      return spdlog::level::off;
+      case krys::log::Level::Trace:    return spdlog::level::trace;
+      case krys::log::Level::Debug:    return spdlog::level::debug;
+      case krys::log::Level::Info:     return spdlog::level::info;
+      case krys::log::Level::Warn:     return spdlog::level::warn;
+      case krys::log::Level::Error:    return spdlog::level::err;
+      case krys::log::Level::Critical: return spdlog::level::critical;
+      case krys::log::Level::Off:      return spdlog::level::off;
     }
 
     krys_unreachable();
@@ -92,7 +85,7 @@ namespace krys::log
       }
 
       // source_loc spdlogLoc(loc.file_name(), loc.line(), loc.function_name());
-      _logger.log(std::chrono::system_clock::now(), spdlog::source_loc{}, ToSpdLogLevel(level), message);
+      _logger.log(std::chrono::system_clock::now(), spdlog::source_loc {}, ToSpdLogLevel(level), message);
     }
   };
 

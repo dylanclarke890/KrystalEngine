@@ -21,7 +21,3 @@ $expect-invalid
 $input
 :not(:unknownpseudo, .a)
 $expect-invalid
-
-$input
-:host(:not(.a .b))
-$expect-invalid

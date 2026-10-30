@@ -1,9 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
+#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -607,10 +612,161 @@ namespace krys::boo::dom::tests
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
 
-    // TODO(test): Test with ShadowRoot when implemented
+    // FIXME: Test with ShadowRoot when implemented
 
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+  }
+
+  TEST_CASE("TreeQueries::GetShadowRoot", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    REQUIRE(TreeQueries::GetShadowRoot(*host) == nullptr);
+
+    auto mode = GENERATE(ShadowRootMode::Open, ShadowRootMode::Closed);
+    auto shadow = host->AttachShadow({.Mode = mode}).ReleaseValue();
+    REQUIRE(shadow->Mode() == mode);
+    REQUIRE(TreeQueries::GetShadowRoot(*host) == shadow.get());
+    // The web-exposed getter hides closed shadow roots.
+    REQUIRE((host->ShadowRoot().get() == shadow.get()) == (mode == ShadowRootMode::Open));
+  }
+
+  TEST_CASE("TreeQueries::NextShadowIncluding", "[HTML][TreeQueries]")
+  {
+    // <div host>[shadow: <b inside>] <span light/></div> <i after/>, with the host in a container.
+    auto doc = CreateRef<HTMLDocument>();
+    auto container = doc->CreateElement(u8"div").ReleaseValue();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto inside = doc->CreateElement(u8"b").ReleaseValue();
+    auto light = doc->CreateElement(u8"span").ReleaseValue();
+    auto after = doc->CreateElement(u8"i").ReleaseValue();
+    REQUIRE_FALSE(container->AppendChild(*host).HasException());
+    REQUIRE_FALSE(container->AppendChild(*after).HasException());
+    REQUIRE_FALSE(host->AppendChild(*light).HasException());
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inside).HasException());
+
+    // The shadow tree comes just after its host, before the host's children.
+    List<Node *> order;
+    for (Node *node = container.get(); node; node = TreeQueries::NextShadowIncluding(*node))
+    {
+      order.push_back(node);
+    }
+    CHECK(
+      order
+      == List<Node *> {container.get(), host.get(), shadow.get(), inside.get(), light.get(), after.get()});
+
+    // Staying within the host: its shadow tree and children.
+    order.clear();
+    for (Node *node = host.get(); node; node = TreeQueries::NextShadowIncluding(*node, host.get()))
+    {
+      order.push_back(node);
+    }
+    CHECK(order == List<Node *> {host.get(), shadow.get(), inside.get(), light.get()});
+
+    // Staying within the shadow root.
+    CHECK(TreeQueries::NextShadowIncluding(*inside, shadow.get()) == nullptr);
+  }
+
+  TEST_CASE("TreeQueries::ParentOrShadowHostElement", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto child = doc->CreateElement(u8"span").ReleaseValue();
+    auto inner = doc->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    REQUIRE_FALSE(host->AppendChild(*child).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*child) == host.get());
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*inner) == host.get());
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*host) == nullptr);
+    REQUIRE(TreeQueries::ParentOrShadowHostElement(*shadow) == nullptr);
+  }
+
+  TEST_CASE("TreeQueries shadow-including ancestry and retargeting", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    auto inner = doc->CreateElement(u8"span").ReleaseValue();
+    auto deep = doc->CreateElement(u8"b").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+    REQUIRE_FALSE(inner->AppendChild(*deep).HasException());
+
+    // Elements in a host's shadow tree are its shadow-including descendants.
+    CHECK(TreeQueries::IsShadowIncludingDescendant(*inner, *host));
+    CHECK(TreeQueries::IsShadowIncludingDescendant(*deep, *host));
+    CHECK(TreeQueries::IsShadowIncludingInclusiveAncestor(*host, *deep));
+    CHECK(TreeQueries::IsShadowIncludingAncestor(*doc, *deep));
+    CHECK_FALSE(TreeQueries::IsShadowIncludingDescendant(*host, *inner));
+
+    // Retargeting a node in a shadow tree against a node outside it gives the host.
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *doc) == host.get());
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *host) == host.get());
+    // Against a node in the same shadow tree, the node itself.
+    CHECK(EventTargetAlgorithms::Retarget(deep.get(), *inner) == deep.get());
+    // Nodes outside shadow trees are returned as they are.
+    CHECK(EventTargetAlgorithms::Retarget(host.get(), *inner) == host.get());
+  }
+
+#pragma endregion
+
+#pragma region Pseudo-element aware traversal
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "TreeQueries: traversal including pseudo-elements",
+                   "[DOM][TreeQueries]")
+  {
+    style::tests::ResolverFixture fixture {u8R"(<!DOCTYPE html><style>
+      #p::before, #p::after, #empty::before { content: "x" }
+    </style><div id=root><p id=p><b id=b></b></p><i id=empty></i><s id=s></s></div>)"};
+    fixture.Document->UpdateStyleIfNeeded();
+
+    auto &root = fixture.ById(u8"root");
+    auto &p = fixture.ById(u8"p");
+    auto &b = fixture.ById(u8"b");
+    auto &empty = fixture.ById(u8"empty");
+    auto *before = p.BeforePseudoElement();
+    auto *after = p.AfterPseudoElement();
+    auto *emptyBefore = empty.BeforePseudoElement();
+    REQUIRE(before);
+    REQUIRE(after);
+    REQUIRE(emptyBefore);
+
+    CHECK(TreeQueries::PseudoAwareFirstChild(p) == before);
+    CHECK(TreeQueries::PseudoAwareLastChild(p) == after);
+    CHECK(TreeQueries::PseudoAwareNextSibling(*before) == &b);
+    CHECK(TreeQueries::PseudoAwareNextSibling(b) == after);
+    CHECK(TreeQueries::PseudoAwarePreviousSibling(b) == before);
+    CHECK(TreeQueries::PseudoAwarePreviousSibling(*after) == &b);
+    CHECK_FALSE(TreeQueries::PseudoAwarePreviousSibling(*before));
+    // An element with only a ::before.
+    CHECK(TreeQueries::PseudoAwareFirstChild(empty) == emptyBefore);
+    CHECK(TreeQueries::PseudoAwareLastChild(empty) == emptyBefore);
+
+    // Tree order: root, p, ::before, b, ::after, empty, ::before, s.
+    List<Element *> order;
+    for (Element *element = &root; element;
+         element = TreeQueries::NextElementIncludingPseudo(*element, &root))
+    {
+      order.push_back(element);
+    }
+    CHECK(order == List<Element *> {&root, &p, before, &b, after, &empty, emptyBefore, &fixture.ById(u8"s")});
+
+    List<Element *> reversed;
+    for (Element *element = &fixture.ById(u8"s"); element;
+         element = TreeQueries::PreviousElementIncludingPseudo(*element, &root))
+    {
+      reversed.push_back(element);
+    }
+    CHECK(reversed
+          == List<Element *> {&fixture.ById(u8"s"), emptyBefore, &empty, after, &b, before, &p, &root});
+
+    CHECK(TreeQueries::NextElementIncludingPseudoSkippingChildren(p, &root) == &empty);
+    CHECK(TreeQueries::PseudoAwarePreviousElementSibling(empty) == &p);
   }
 
 #pragma endregion

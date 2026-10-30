@@ -4,6 +4,7 @@
 #include "Krystal.Booey/CSS/Parser/Token.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
+#include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include <ranges>
@@ -25,15 +26,7 @@ namespace krys::boo::css::PropertyParserHelpers
     return token.ValueId();
   }
 
-  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept
-  {
-    if (auto result = ConsumeIdentRaw(tokens))
-    {
-      return PrimitiveValue::Create(*result);
-    }
-
-    return nullptr;
-  }
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens) noexcept;
 
   inline void DiscardIdent(TokenRange &tokens) noexcept
   {
@@ -55,21 +48,13 @@ namespace krys::boo::css::PropertyParserHelpers
     return ConsumeIdentRaw(tokens);
   }
 
-  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeIdentRange(TokenRange &tokens, ValueId lower,
-                                                                    ValueId upper) noexcept
-  {
-    auto value = ConsumeIdentRangeRaw(tokens, lower, upper);
-    if (!value)
-    {
-      return nullptr;
-    }
-
-    return PrimitiveValue::Create(*value);
-  }
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdentRange(TokenRange &tokens, ValueId lower,
+                                                          ValueId upper) noexcept;
 
   template <typename... EmptyBaseCase>
   KRYS_NODISCARD bool IdentMatches(ValueId valueId) noexcept
   {
+    (void)valueId;
     return false;
   }
 
@@ -124,7 +109,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   template <typename Predicate, typename... Args>
   KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeIdent(TokenRange &tokens, Predicate &&predicate,
-                                                        Args &&...args) noexcept
+                                                     Args &&...args) noexcept
   {
     if (auto keyword = tokens.Peek().ValueId(); predicate(keyword, std::forward<Args>(args)...))
     {
@@ -135,6 +120,28 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return nullptr;
+  }
+
+  /// @brief Maps the next token's identifier with `mapping`, without consuming it.
+  /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
+  template <Callable<ValueId> TMapping>
+  KRYS_NODISCARD auto PeekIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  {
+    return mapping(tokens.Peek().ValueId());
+  }
+
+  /// @brief Consumes the next token if `mapping` maps its identifier to a value.
+  /// @param mapping Takes a `ValueId` and returns a `Maybe` of the mapped value (`null` if unmapped).
+  template <Callable<ValueId> TMapping>
+  KRYS_NODISCARD auto ConsumeIdentUsingMapping(TokenRange &tokens, TMapping &&mapping) noexcept
+  {
+    auto value = mapping(tokens.Peek().ValueId());
+    if (value)
+    {
+      tokens.Discard();
+      tokens.DiscardWhitespace();
+    }
+    return value;
   }
 
 #pragma endregion
@@ -157,17 +164,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return shouldLowercase ? krys::text::ToASCIILower(identifier) : CSSOMString(identifier);
   }
 
-  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeCustomIdent(TokenRange &tokens,
-                                                                     bool shouldLowercase = false) noexcept
-  {
-    auto identifier = ConsumeCustomIdentRaw(tokens, shouldLowercase);
-    if (!identifier.has_value())
-    {
-      return nullptr;
-    }
-
-    return PrimitiveValue::Create(krys::move(*identifier));
-  }
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeCustomIdent(TokenRange &tokens,
+                                                           bool shouldLowercase = false) noexcept;
 
   KRYS_NODISCARD inline RefPtr<PrimitiveValue>
     ConsumeCustomIdentExcluding(TokenRange &tokens, std::initializer_list<const ValueId> excluding,
@@ -191,7 +189,7 @@ namespace krys::boo::css::PropertyParserHelpers
     auto tokensCopy = tokens;
 
     auto identifier = ConsumeCustomIdentRaw(tokens, shouldLowercase);
-    if (!identifier->starts_with(u8"--"))
+    if (!identifier || !identifier->starts_with(u8"--"))
     {
       tokens = tokensCopy;
       return null;
@@ -200,17 +198,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return identifier;
   }
 
-  KRYS_NODISCARD inline RefPtr<PrimitiveValue> ConsumeDashedIdent(TokenRange &tokens,
-                                                                     bool shouldLowercase = false) noexcept
-  {
-    auto identifier = ConsumeDashedIdentRaw(tokens, shouldLowercase);
-    if (!identifier.has_value())
-    {
-      return nullptr;
-    }
-
-    return PrimitiveValue::Create(krys::move(*identifier));
-  }
+  KRYS_NODISCARD RefPtr<PrimitiveValue> ConsumeDashedIdent(TokenRange &tokens,
+                                                           bool shouldLowercase = false) noexcept;
 
 #pragma endregion
 }

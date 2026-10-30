@@ -1,0 +1,969 @@
+﻿/*
+ * The default style sheet used to render HTML.
+ *
+ * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
+ * Copyright (C) 2003-2025 Apple Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public License
+ * along with this library; see the file COPYING.LIB.  If not, write to
+ * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ *
+ */
+
+@namespace "http://www.w3.org/1999/xhtml";
+
+html {
+    display: block;
+    color: CanvasText;
+}
+
+/* children of the <head> element all have display:none as below */
+area, base, basefont, datalist, head, link, meta, noembed, noframes,
+param, rp, script, style, template, title {
+    display: none;
+}
+
+/* generic block-level elements */
+
+body {
+    display: block;
+    margin: 8px;
+}
+
+p {
+    display: block;
+    margin-block: 1__qem;
+    margin-inline: 0;
+}
+
+address, article, aside, div, footer, header, hgroup, main, nav, search, section {
+    display: block;
+}
+
+marquee {
+    display: inline-block;
+    text-align: initial;
+    overflow: hidden !important;
+}
+
+blockquote {
+    display: block;
+    margin-block: 1__qem 1em;
+    margin-inline: 40px;
+}
+
+figcaption {
+    display: block;
+}
+
+figure {
+    display: block;
+    margin-block: 1em;
+    margin-inline: 40px;
+}
+
+q {
+    display: inline;
+}
+
+q::before {
+    content: open-quote;
+}
+
+q::after {
+    content: close-quote;
+}
+
+center {
+    display: block;
+    /* special centering to be able to emulate the html4/netscape behaviour */
+    text-align: -webkit-center;
+}
+
+hr {
+    display: block;
+    overflow: hidden;
+    color: gray;
+    margin-block: 0.5em;
+    margin-inline: auto;
+    border-style: inset;
+    border-width: 1px;
+}
+
+abbr[title], acronym[title] {
+    text-decoration: dotted underline;
+}
+
+/* ::backdrop */
+
+::backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+}
+
+/* dialog */
+
+dialog {
+    position: absolute;
+    inset-inline: 0;
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    border: solid;
+    padding: 1em;
+    background-color: Canvas;
+    color: CanvasText;
+    display: none;
+}
+
+dialog[open] {
+    display: block;
+}
+
+dialog:modal {
+    position: fixed;
+    overflow: auto;
+    inset-block: 0;
+    max-width: calc(100% - 6px - 2em);
+    max-height: calc(100% - 6px - 2em);
+    visibility: visible;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* media elements */
+
+video {
+    object-fit: contain;
+    content: normal !important;
+}
+
+audio {
+    width: 200px;
+    height: 25px;
+}
+
+audio:not([controls]) {
+    display: none !important;
+}
+
+/* heading elements */
+
+h1 {
+    display: block;
+    font-size: 2em;
+    margin-block: 0.67__qem 0.67em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block: 0.83__qem 0.83em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+h3 {
+    display: block;
+    font-size: 1.17em;
+    margin-block: 1__qem 1em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+h4 {
+    display: block;
+    margin-block: 1.33__qem 1.33em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+h5 {
+    display: block;
+    font-size: .83em;
+    margin-block: 1.67__qem 1.67em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+h6 {
+    display: block;
+    font-size: .67em;
+    margin-block: 2.33__qem 2.33em;
+    margin-inline: 0;
+    font-weight: bold;
+}
+
+/* tables */
+
+table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 2px;
+    text-indent: initial;
+    box-sizing: border-box;
+}
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+tfoot {
+    display: table-footer-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+
+/* for tables without table section elements (can happen with XHTML or dynamically created tables) */
+table > tr {
+    vertical-align: middle;
+}
+
+col {
+    display: table-column;
+}
+
+colgroup {
+    display: table-column-group;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+td, th {
+    display: table-cell;
+    vertical-align: inherit;
+}
+
+th {
+    font-weight: bold;
+    text-align: -internal-th-center;
+}
+
+caption {
+    display: table-caption;
+    text-align: -webkit-center;
+}
+
+/* for table elements with form inside following rules should apply */
+
+/* lists */
+
+ul, menu, dir {
+    display: block;
+    list-style-type: disc;
+    margin-block: 1__qem 1em;
+    padding-inline-start: 40px;
+}
+
+ol {
+    display: block;
+    list-style-type: decimal;
+    margin-block: 1__qem 1em;
+    padding-inline-start: 40px;
+}
+
+li {
+    display: list-item;
+    text-align: match-parent;
+}
+
+:is(dir, dl, menu, ol, ul) :is(dir, dl, menu, ol, ul) {
+    margin-block: 0;
+}
+
+:is(dir, menu, ol, ul) :is(dir, menu, ul) {
+    list-style-type: circle;
+}
+
+:is(dir, menu, ol, ul) :is(dir, menu, ol, ul) :is(dir, menu, ul) {
+    list-style-type: square;
+}
+
+dd {
+    display: block;
+    margin-inline-start: 40px;
+}
+
+dl {
+    display: block;
+    margin-block: 1__qem 1em;
+}
+
+dt {
+    display: block;
+}
+
+/* FIXME: this should also match ::before::marker and ::after::marker but we don't support
+   this yet. When we do, we can remove the code specific to ::before and ::after in
+   RenderListItem::computeMarkerStyle(), see bugs.webkit.org/b/218897. */
+::marker {
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+    text-transform: none;
+    text-indent: 0px !important;
+}
+
+/* form elements */
+
+form {
+    display: block;
+    margin-top: 0__qem;
+}
+
+label {
+    cursor: default;
+}
+
+legend {
+    padding-inline: 2px;
+    border: none;
+}
+
+fieldset {
+    display: block;
+    margin-inline: 2px;
+    padding-block: 0.35em 0.625em;
+    padding-inline: 0.75em;
+    border: 2px groove ThreeDFace;
+    min-inline-size: min-content;
+}
+
+button {
+    appearance: auto;
+}
+
+input, textarea, select, button {
+    margin: 0__qem;
+    font: -webkit-small-control;
+    color: initial;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0;
+    text-shadow: none;
+    display: inline-block;
+    text-align: start;
+}
+
+input[type="hidden"] {
+    display: none;
+}
+
+input {
+    appearance: auto;
+    color: CanvasText;
+    background-color: Canvas;
+    border: 2px inset gray;
+    padding: 1px;
+    -webkit-rtl-ordering: logical;
+    -webkit-user-select: text;
+    cursor: auto;
+}
+
+@media (prefers-dark-interface) {
+    input {
+        background-color: transparent;
+    }
+}
+
+input[type="search"] {
+    box-sizing: border-box;
+}
+
+input::-webkit-textfield-decoration-container {
+    display: flex;
+    align-items: center;
+    content: none !important;
+    writing-mode: inherit !important;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-decoration {
+    appearance: auto;
+    display: block;
+    flex: none;
+    align-self: flex-start;
+    margin-block: auto;
+    margin-inline: 0;
+}
+
+input[type="search"]::-webkit-search-results-button {
+    appearance: auto;
+    display: block;
+    flex: none;
+}
+
+input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
+    align-items: center;
+    display: inline-flex;
+    overflow: hidden;
+    outline: none;
+    font-variant-numeric: tabular-nums;
+    /* FIXME: Font features should be defined in a @font-feature-values rule, so that the feature setting is only applied to the system font. */
+    /* "ss03" enables the raised colon separator on the system font. */
+    font-feature-settings: "ss03";
+}
+
+/* FIXME: Styling inner elements of the date control should be specific to input[type="date"]. */
+
+input::-webkit-datetime-edit {
+    display: inline-block;
+    overflow: hidden;
+    padding: 1px;
+}
+
+input::-webkit-datetime-edit-fields-wrapper {
+    display: inline-block;
+    white-space: pre;
+}
+
+input::-webkit-datetime-edit-year-field,
+input::-webkit-datetime-edit-month-field,
+input::-webkit-datetime-edit-week-field,
+input::-webkit-datetime-edit-day-field,
+input::-webkit-datetime-edit-hour-field,
+input::-webkit-datetime-edit-minute-field,
+input::-webkit-datetime-edit-second-field,
+input::-webkit-datetime-edit-millisecond-field,
+input::-webkit-datetime-edit-meridiem-field {
+    display: inline-block;
+    font: inherit !important;
+    padding: 1px;
+    text-align: center;
+}
+
+input::-webkit-datetime-edit-year-field:focus,
+input::-webkit-datetime-edit-month-field:focus,
+input::-webkit-datetime-edit-week-field:focus,
+input::-webkit-datetime-edit-day-field:focus,
+input::-webkit-datetime-edit-hour-field:focus,
+input::-webkit-datetime-edit-minute-field:focus,
+input::-webkit-datetime-edit-second-field:focus,
+input::-webkit-datetime-edit-millisecond-field:focus,
+input::-webkit-datetime-edit-meridiem-field:focus {
+    background-color: highlight;
+    color: highlighttext;
+    outline: none;
+}
+
+input[disabled]::-webkit-datetime-edit-year-field,
+input[disabled]::-webkit-datetime-edit-month-field,
+input[disabled]::-webkit-datetime-edit-week-field,
+input[disabled]::-webkit-datetime-edit-day-field,
+input[disabled]::-webkit-datetime-edit-hour-field,
+input[disabled]::-webkit-datetime-edit-minute-field,
+input[disabled]::-webkit-datetime-edit-second-field,
+input[disabled]::-webkit-datetime-edit-millisecond-field,
+input[disabled]::-webkit-datetime-edit-meridiem-field,
+input[disabled]::-webkit-datetime-edit-text {
+    color: GrayText;
+}
+
+input::-webkit-datetime-edit-text {
+    display: inline;
+}
+
+input::-webkit-inner-spin-button {
+    appearance: auto;
+    display: block;
+    position: relative;
+    cursor: default;
+    /* This height property is ignored for input type "number" and others which
+     * use RenderTextControlSingleLine as renderer which sets height of spin
+     * button in layout(). */
+    height: 1.5em;
+    flex: none;
+    -webkit-user-select: none;
+}
+
+textarea {
+    appearance: auto;
+    color: CanvasText;
+    background-color: Canvas;
+    border: 1px solid;
+    -webkit-rtl-ordering: logical;
+    -webkit-user-select: text;
+    padding: 2px;
+    resize: -internal-textarea-auto;
+    cursor: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+::placeholder {
+    -webkit-text-security: none;
+    color: darkGray;
+    direction: inherit !important;
+    pointer-events: none !important;
+    text-orientation: inherit !important;
+    writing-mode: inherit !important;
+    position: static !important;
+}
+
+input::placeholder {
+    white-space: pre;
+    word-wrap: normal;
+    overflow: hidden;
+    line-height: initial !important;
+}
+
+input:disabled, textarea:disabled {
+    color: color-mix(in hsl, CanvasText 66%, Canvas);
+}
+
+input:is([type="hidden"], [type="image"], [type="file"]) {
+    appearance: initial;
+    padding: initial;
+    background-color: initial;
+    border: initial;
+}
+
+input[type="file"] {
+    align-items: baseline;
+    color: inherit;
+    text-align: start !important;
+}
+
+:autofill {
+    field-sizing: fixed !important;
+}
+
+input:is([type="radio"], [type="checkbox"]) {
+    margin: 3px 2px;
+    box-sizing: border-box;
+    border: initial;
+    padding: initial;
+    background-color: initial;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]) {
+    white-space: pre;
+}
+
+input[type="file"]::file-selector-button {
+    white-space: nowrap;
+    margin: 0;
+    font-size: inherit;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]), input[type="file"]::file-selector-button, button {
+    text-align: center;
+    cursor: default;
+    padding-inline: 6px;
+    color: ButtonText;
+    padding-block: 2px 3px;
+    border: 2px outset ButtonFace;
+    background-color: ButtonFace;
+    box-sizing: border-box;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]):active, input[type="file"]::file-selector-button:active, button:active {
+    color: ActiveButtonText;
+}
+
+input[type="range"] {
+    padding: initial;
+    border: initial;
+    margin: 2px;
+    color: #909090;
+}
+
+input[type="range"]::-webkit-slider-container {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    flex: 1;
+    align-self: center;
+
+    box-sizing: border-box;
+    display: block;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: auto;
+    box-sizing: border-box;
+    display: block;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]):disabled,
+input[type="file"]:disabled::file-selector-button, button:disabled,
+select:disabled, optgroup:disabled, option:disabled,
+select[disabled]>option {
+    color: GrayText;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]):active, input[type="file"]:active::file-selector-button, button:active {
+    border-style: inset;
+}
+
+input:is([type="button"], [type="submit"], [type="reset"]):active:disabled,
+input[type="file"]:active:disabled::file-selector-button, button:active:disabled {
+    border-style: outset;
+}
+
+input[type="color"] {
+    appearance: auto;
+    box-sizing: border-box;
+    outline: none;
+    inline-size: 44px;
+    block-size: 23px;
+}
+
+input[type="color"]::-internal-color-swatch-overlay {
+    appearance: auto;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    appearance: auto;
+    display: flex;
+    padding-inline: 2px;
+    padding-block: 4px 5px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    appearance: auto;
+    background-color: #000000;
+    border-radius: 2px;
+    flex: 1;
+}
+
+select {
+    box-sizing: border-box;
+    appearance: auto;
+    border-radius: 5px;
+    border: 1px solid;
+    color: CanvasText;
+    background-color: Canvas;
+    align-items: center;
+    white-space: pre;
+    -webkit-rtl-ordering: logical;
+    cursor: default;
+}
+
+select:is([size], [multiple]), select[size][multiple] {
+    align-items: normal;
+    cursor: auto;
+    border: 1px inset gray;
+    border-radius: initial;
+    white-space: initial;
+}
+
+select:is([size=""], [size="0"], [size="1"]) {
+    align-items: center;
+    border: 1px solid;
+    border-radius: 5px;
+    white-space: pre;
+}
+
+optgroup {
+    font-weight: bolder;
+}
+
+option {
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+output {
+    display: inline;
+}
+
+/* form validation message bubble */
+
+/* meter */
+
+meter {
+    appearance: auto;
+    box-sizing: border-box;
+    display: inline-block;
+    block-size: 1em;
+    inline-size: 5em;
+    vertical-align: -0.2em;
+}
+
+/* progress */
+
+progress {
+    appearance: auto;
+    box-sizing: border-box;
+    display: inline-block;
+    block-size: 1em;
+    inline-size: 10em;
+    vertical-align: -0.2em;
+}
+
+progress::-webkit-progress-inner-element {
+    box-sizing: inherit;
+    height: 100%;
+    width: 100%;
+}
+
+progress::-webkit-progress-bar {
+    background-color: gray;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+progress::-webkit-progress-value {
+    background-color: green;
+    block-size: 100%;
+    inline-size: 50%; /* should be removed later */
+    box-sizing: border-box;
+}
+
+/* inline elements */
+
+u, ins {
+    text-decoration: underline;
+}
+
+strong, b {
+    font-weight: bolder;
+}
+
+i, cite, em, var, address, dfn {
+    font-style: italic;
+}
+
+tt, code, kbd, samp {
+    font-family: monospace;
+}
+
+pre, xmp, plaintext, listing {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin-block: 1__qem;
+    margin-inline: 0;
+}
+
+mark {
+    background-color: Mark;
+    color: MarkText;
+}
+
+big {
+    font-size: larger;
+}
+
+small {
+    font-size: smaller;
+}
+
+s, strike, del {
+    text-decoration: line-through;
+}
+
+sub {
+    vertical-align: sub;
+    font-size: smaller;
+}
+
+sup {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+nobr {
+    white-space: nowrap;
+}
+
+/* states */
+
+:focus-visible {
+    outline: auto 5px -webkit-focus-ring-color;
+}
+
+/* Read-only text fields do not show a focus ring but do still receive focus */
+html:focus-visible, body:focus-visible, input[readonly]:focus, embed:focus-visible, iframe:focus-visible, object:focus-visible {
+    outline: none;
+}
+
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline-offset: -2px;
+}
+
+input:is([type="button"], [type="checkbox"], [type="file"], [type="hidden"], [type="image"], [type="radio"], [type="reset"], [type="search"], [type="submit"]):focus-visible,
+input[type="file"]:focus-visible::file-selector-button {
+    outline-offset: 0;
+}
+
+a:any-link {
+    color: -webkit-link;
+    text-decoration: underline;
+    cursor: auto;
+}
+
+a:any-link:active {
+    color: -webkit-activelink;
+}
+
+area:any-link {
+    cursor: pointer;
+}
+
+/* HTML5 ruby elements */
+/* Note that text-tracks.css contains a subset of this ruby styling for WebVTT elements. It should be kept in sync. */
+ruby {
+    display: ruby;
+}
+
+ruby, rt {
+    text-indent: 0;
+}
+
+ruby > rt {
+    display: ruby-text;
+    font-size: -webkit-ruby-text;
+    text-align: start;
+    line-height: normal;
+    text-emphasis: none;
+}
+
+ruby > rp {
+    display: none;
+}
+
+/* Avoid wrapping children of implicit ruby bases. We don't support <rb> or <rbc>, avoid giving them any behaviors. */
+ruby > :not(rb, rbc, ruby) {
+    white-space: nowrap;
+}
+
+/* https://html.spec.whatwg.org/#the-details-and-summary-elements */
+
+details, summary {
+    display: block;
+}
+
+details > summary:first-of-type {
+    display: list-item;
+    counter-increment: list-item 0;
+    list-style: disclosure-closed inside;
+}
+
+details[open] > summary:first-of-type {
+    list-style-type: disclosure-open;
+}
+
+/* other elements */
+
+frameset, frame {
+    display: block;
+}
+
+frameset {
+    border-color: inherit;
+}
+
+iframe {
+    border: 2px inset;
+}
+
+hr, bdi, output {
+    unicode-bidi: isolate;
+}
+
+input[type=tel i]:dir(ltr) { direction: ltr; }
+
+bdo, bdo[dir] {
+    unicode-bidi: isolate-override;
+}
+
+slot {
+    display: contents;
+}
+
+/* page */
+
+@page {
+    /* FIXME: Define the right default values for page properties. */
+    size: auto;
+    margin: auto;
+    padding: 0px;
+    border-width: 0px;
+}
+
+/* noscript support */
+
+@media (scripting) {
+    noscript {
+        display: none !important;
+    }
+}
+
+/* Default support for "Smart Invert" where all content color except media is inverted. */
+/* https://drafts.csswg.org/mediaqueries-5/#inverted */
+@media (inverted-colors) {
+    img:not(picture>img), picture, video { filter: invert(100%); } /* Images and videos double-inverted. */
+}
+
+/* https://drafts.csswg.org/css-text-decor-4/#text-decoration-skipping */
+ins, del {
+    text-decoration-skip: none;
+}
+
+/* https://drafts.csswg.org/css-text-decor-4/#default-stylesheet */
+/* set language-appropriate default emphasis mark position */
+:root:lang(zh), [lang|=zh] {
+    text-emphasis-position: under right;
+}
+[lang|=ja], [lang|=ko] {
+    text-emphasis-position: over right;
+}
+
+/* set language-appropriate default underline position */
+:root:lang(ja), [lang|=ja],
+:root:lang(mn), [lang|=mn],
+:root:lang(ko), [lang|=ko] {
+    text-underline-position: right;
+}
+:root:lang(zh), [lang|=zh] {
+    text-underline-position: left;
+}
+
+:root::spelling-error {
+    text-decoration-line: spelling-error;
+}
+
+:root::grammar-error {
+    text-decoration-line: grammar-error;
+}

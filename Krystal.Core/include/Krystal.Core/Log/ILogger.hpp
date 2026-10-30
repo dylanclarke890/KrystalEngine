@@ -98,7 +98,7 @@ namespace krys::log
 
 #else
 
-  #define KRYS_LOG_TRACE(...)                                                                                    \
+  #define KRYS_LOG_TRACE(...)                                                                                \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \
@@ -107,7 +107,7 @@ namespace krys::log
       }                                                                                                      \
     } while (0)
 
-  #define KRYS_LOG_DEBUG(...)                                                                                    \
+  #define KRYS_LOG_DEBUG(...)                                                                                \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \
@@ -116,7 +116,7 @@ namespace krys::log
       }                                                                                                      \
     } while (0)
 
-  #define KRYS_LOG_INFO(...)                                                                                     \
+  #define KRYS_LOG_INFO(...)                                                                                 \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \
@@ -125,7 +125,7 @@ namespace krys::log
       }                                                                                                      \
     } while (0)
 
-  #define KRYS_LOG_WARN(...)                                                                                     \
+  #define KRYS_LOG_WARN(...)                                                                                 \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \
@@ -134,7 +134,7 @@ namespace krys::log
       }                                                                                                      \
     } while (0)
 
-  #define KRYS_LOG_ERROR(...)                                                                                    \
+  #define KRYS_LOG_ERROR(...)                                                                                \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \
@@ -143,7 +143,7 @@ namespace krys::log
       }                                                                                                      \
     } while (0)
 
-  #define KRYS_LOG_CRITICAL(...)                                                                                 \
+  #define KRYS_LOG_CRITICAL(...)                                                                             \
     do                                                                                                       \
     {                                                                                                        \
       if (auto logger = krys::log::GetGlobalLogger(); logger != nullptr)                                     \

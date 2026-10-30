@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmltablesectionelement
-  class HTMLTableSectionElement : public HTMLElement
+  class HTMLTableSectionElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableSectionElement);
 
@@ -14,7 +14,7 @@ namespace krys::boo::html
 
 #pragma region HTMLTableSectionElement - https://html.spec.whatwg.org/#htmltablesectionelement
 
-    // TODO(HTMLTableSectionElement, HTML): Implement api.
+    // FIXME: Implement api.
 
 #pragma endregion
 
@@ -45,6 +45,10 @@ namespace krys::boo::html
     void VAlign(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  public:
+    KRYS_NODISCARD const css::MutableStyleProperties *
+      AdditionalPresentationalHintStyle() const noexcept override;
   };
 }
 

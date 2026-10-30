@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Easing.hpp"
+#include "Krystal.Booey/CSS/Parser/Tokenizer.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/IntegerDefinitions.hpp"
@@ -9,6 +10,8 @@
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Values/Easing/EasingFunction.hpp"
 #include "Krystal.Booey/CSS/Values/EasingFunctionValue.hpp"
+#include "Krystal.Booey/Graphics/Animation/TimingFunction.hpp"
+#include "Krystal.Booey/Style/Values/Easing/EasingFunction.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
@@ -20,7 +23,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <steps-easing-function> = steps( <integer>, <steps-easing-function-position>? )
     // <steps-easing-function-position> = jump-start | jump-end | jump-none | jump-both | start | end
     //
-    // with tokens constraints, this is:
+    // with range constraints, this is:
     //
     // <steps-easing-function> = steps( <integer [1,∞]>, jump-start )
     //                         | steps( <integer [1,∞]>, jump-end )
@@ -30,7 +33,7 @@ namespace krys::boo::css::PropertyParserHelpers
     //                         | steps( <integer [2,∞]>, jump-none )
     // https://drafts.csswg.org/css-easing-2/#funcdef-steps
 
-    assert(tokens.Peek().FunctionId() == ValueId::Steps);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Steps);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -109,7 +112,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {StepsEasingFunction {.parameters = krys::move(*parameters)}};
+    return EasingFunction {StepsEasingFunction {.Parameters = krys::move(*parameters)}};
   }
 
   // MARK: - <linear()>
@@ -121,10 +124,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto input = MetaConsumer<Percentage<>>::Consume(args, state);
     if (!input)
+    {
       return {};
+    }
+
     auto extra = MetaConsumer<Percentage<>>::Consume(args, state);
 
-    return LinearEasingParameters::Stop::Length {.input = krys::move(*input), .extra = krys::move(extra)};
+    return LinearEasingParameters::Stop::Length {.Input = krys::move(*input), .Extra = krys::move(extra)};
   }
 
   KRYS_NODISCARD static Maybe<LinearEasingParameters::Stop>
@@ -139,7 +145,7 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     auto input = ConsumeUnresolvedLinearEasingFunctionStopLength(args, state);
-    return LinearEasingParameters::Stop {.output = krys::move(*output), .input = krys::move(input)};
+    return LinearEasingParameters::Stop {.Output = krys::move(*output), .Input = krys::move(input)};
   }
 
   KRYS_NODISCARD static Maybe<EasingFunction>
@@ -148,7 +154,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <linear()> = linear( [ <number> && <percentage>{0,2} ]# )
     // https://drafts.csswg.org/css-easing-2/#funcdef-linear
 
-    assert(tokens.Peek().FunctionId() == ValueId::Linear);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Linear);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -159,6 +165,12 @@ namespace krys::boo::css::PropertyParserHelpers
       auto stop = ConsumeUnresolvedLinearEasingFunctionStop(args, state);
       if (!stop)
       {
+        // A comma must be followed by another stop.
+        if (!stops.empty())
+        {
+          return {};
+        }
+
         break;
       }
 
@@ -177,7 +189,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {LinearEasingFunction {.parameters = {.stops = {krys::move(stops)}}}};
+    return EasingFunction {LinearEasingFunction {.Parameters = {.Stops = {krys::move(stops)}}}};
   }
 
   // MARK: - <cubic-bezier()>
@@ -188,7 +200,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <cubic-bezier()> = cubic-bezier( [ <number [0,1]>, <number> ]#{2} )
     // https://drafts.csswg.org/css-easing-2/#funcdef-cubic-bezier
 
-    assert(tokens.Peek().FunctionId() == ValueId::CubicBezier);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::CubicBezier);
     auto rangeCopy = tokens;
     auto args = ConsumeFunction(rangeCopy);
 
@@ -239,7 +251,7 @@ namespace krys::boo::css::PropertyParserHelpers
     tokens = rangeCopy;
 
     return EasingFunction {CubicBezierEasingFunction {
-      .parameters = {.value = {
+      .Parameters = {.Value = {
                        CubicBezierEasingParameters::Coordinate {krys::move(*x1), krys::move(*y1)},
                        CubicBezierEasingParameters::Coordinate {krys::move(*x2), krys::move(*y2)},
                      }}}};
@@ -253,7 +265,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // <spring()> = spring( <number [>0,∞]> <number [>0,∞]> <number [0,∞]> <number> )
     // Non-standard
 
-    assert(tokens.Peek().FunctionId() == ValueId::Spring);
+    krys_debug_assert(tokens.Peek().FunctionId() == ValueId::Spring);
 
     if (!state.Context.springTimingFunctionEnabled)
     {
@@ -294,11 +306,11 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return EasingFunction {SpringEasingFunction {.parameters = {
-                                                   .mass = krys::move(*mass),
-                                                   .stiffness = krys::move(*stiffness),
-                                                   .damping = krys::move(*damping),
-                                                   .initialVelocity = krys::move(*initialVelocity),
+    return EasingFunction {SpringEasingFunction {.Parameters = {
+                                                   .Mass = krys::move(*mass),
+                                                   .Stiffness = krys::move(*stiffness),
+                                                   .Damping = krys::move(*damping),
+                                                   .InitialVelocity = krys::move(*initialVelocity),
                                                  }}};
   }
 
@@ -348,14 +360,14 @@ namespace krys::boo::css::PropertyParserHelpers
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::Start {Integer<Range {1, Range::Inf}> {1}}}}};
+          .Parameters = {StepsEasingParameters::Start {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       case ValueId::StepEnd:
       {
         tokens.Discard();
         tokens.DiscardWhitespace();
         return EasingFunction {StepsEasingFunction {
-          .parameters = {StepsEasingParameters::End {Integer<Range {1, Range::Inf}> {1}}}}};
+          .Parameters = {StepsEasingParameters::End {Integer<Range {1, Range::Inf}> {1}}}}};
       }
       default:
       {
@@ -415,5 +427,34 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     return {};
+  }
+
+  RefPtr<TimingFunction> ParseEasingFunctionDeprecated(const CSSOMString &string,
+                                                       const ParserContext &context) noexcept
+  {
+    InputStream inputStream {CSSOMString(string)};
+    Tokenizer tokenizer(inputStream);
+    std::ignore = tokenizer.PumpTokenizer();
+    auto range = tokenizer.Tokens();
+
+    // Handle leading whitespace.
+    range.DiscardWhitespace();
+
+    auto state = PropertyParserState {.Context = context};
+    auto result = ConsumeUnresolvedEasingFunction(range, state);
+    if (!result)
+    {
+      return {};
+    }
+
+    // Handle trailing whitespace.
+    range.DiscardWhitespace();
+
+    if (!range.IsAtEnd())
+    {
+      return {};
+    }
+
+    return style::CreateTimingFunctionDeprecated(*result);
   }
 }

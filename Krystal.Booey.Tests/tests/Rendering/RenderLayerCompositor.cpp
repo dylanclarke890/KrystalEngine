@@ -1,0 +1,544 @@
+﻿#include "Krystal.Booey/Rendering/RenderLayerCompositor.hpp"
+#include "catch2/catch_approx.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/HTML/FakeEngineTexture.hpp"
+#include "Krystal.Booey.Tests/Rendering/PaintTestUtils.hpp"
+#include "Krystal.Booey/Animation/CSSAnimation.hpp"
+#include "Krystal.Booey/Animation/KeyframeEffect.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerFactory.hpp"
+#include "Krystal.Booey/Graphics/GraphicsLayerKeyframeValueList.hpp"
+#include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
+#include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
+#include "Krystal.Booey/Page/ChromeClient.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Page/LocalFrameView.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Rendering/RenderLayer.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerBacking.hpp"
+#include "Krystal.Booey/Rendering/RenderLayerModelObject.hpp"
+#include "Krystal.Booey/Rendering/RenderView.hpp"
+
+namespace krys::boo::tests
+{
+  namespace
+  {
+    using namespace std::chrono_literals;
+
+    /// @brief An animation a layer runs.
+    struct LayerAnimation
+    {
+      utf8_string Name;
+      AnimatedProperty Property;
+      bool Paused {false};
+    };
+
+    /// @brief A layer that records what it's asked to display and the animations it runs: transform and
+    /// opacity animations, as Krystal.UI's layers run.
+    class CompositingTestLayer final : public GraphicsLayer
+    {
+    public:
+      List<FloatRect> NeedsDisplayRects;
+      List<FloatRect> ContentsNeedsDisplayRects;
+      List<LayerAnimation> Animations;
+      RefPtr<GraphicsLayerContentsDisplayDelegate> Delegate;
+      ContentsLayerPurpose Purpose {ContentsLayerPurpose::None};
+
+      CompositingTestLayer(Type type, GraphicsLayerClient &client) noexcept : GraphicsLayer(type, client)
+      {
+      }
+
+      ~CompositingTestLayer() noexcept final
+      {
+        WillBeDestroyed();
+      }
+
+      void SetNeedsDisplay() noexcept final
+      {
+        NeedsDisplayRects.push_back(FloatRect(FloatPoint(), Size()));
+      }
+
+      void SetNeedsDisplayInRect(const FloatRect &rect, ShouldClipToLayer) noexcept final
+      {
+        NeedsDisplayRects.push_back(rect);
+      }
+
+      void SetContentsNeedsDisplay() noexcept final
+      {
+        ContentsNeedsDisplayRects.push_back(ContentsRect());
+      }
+
+      void SetContentsNeedsDisplayInRect(const FloatRect &rect) noexcept final
+      {
+        ContentsNeedsDisplayRects.push_back(rect);
+      }
+
+      void SetContentsDisplayDelegate(RefPtr<GraphicsLayerContentsDisplayDelegate> &&delegate,
+                                      ContentsLayerPurpose purpose) noexcept final
+      {
+        Delegate = krys::move(delegate);
+        Purpose = Delegate ? purpose : ContentsLayerPurpose::None;
+      }
+
+      KRYS_NODISCARD bool UsesContentsLayer() const noexcept final
+      {
+        return Delegate != nullptr;
+      }
+
+      bool AddAnimation(const GraphicsLayerKeyframeValueList &values, const GraphicsLayerAnimation *,
+                        const utf8_string &name, double) noexcept final
+      {
+        if (values.Property() != AnimatedProperty::Transform
+            && values.Property() != AnimatedProperty::Opacity)
+        {
+          return false;
+        }
+        std::erase_if(Animations, [&](const auto &animation)
+                      { return animation.Name == name && animation.Property == values.Property(); });
+        Animations.push_back({name, values.Property()});
+        return true;
+      }
+
+      void PauseAnimation(const utf8_string &name, double) noexcept final
+      {
+        for (auto &animation : Animations)
+        {
+          if (animation.Name == name)
+          {
+            animation.Paused = true;
+          }
+        }
+      }
+
+      void RemoveAnimation(const utf8_string &name, Maybe<AnimatedProperty>) noexcept final
+      {
+        std::erase_if(Animations, [&](const auto &animation) { return animation.Name == name; });
+      }
+    };
+
+    class CompositingTestFactory final : public GraphicsLayerFactory
+    {
+    public:
+      KRYS_NODISCARD Ref<GraphicsLayer> CreateGraphicsLayer(GraphicsLayerType type,
+                                                            GraphicsLayerClient &client) noexcept final
+      {
+        return AdoptRef(*new CompositingTestLayer(type, client));
+      }
+    };
+
+    class CompositingChromeClient final : public ChromeClient
+    {
+    public:
+      CompositingTestFactory Factory;
+      GraphicsLayer *RootLayer {nullptr};
+
+      void AttachRootGraphicsLayer(LocalFrame &, GraphicsLayer *layer) noexcept final
+      {
+        RootLayer = layer;
+      }
+
+      KRYS_NODISCARD GraphicsLayerFactory *GetGraphicsLayerFactory() const noexcept final
+      {
+        return const_cast<CompositingTestFactory *>(&Factory);
+      }
+    };
+
+    /// @brief A document in a 200x100 view of a page whose host composites it.
+    struct CompositingFixture : style::tests::ResolverFixture
+    {
+      CompositingChromeClient *Chrome {nullptr};
+      RefPtr<Page> TestPage;
+
+      explicit CompositingFixture(utf8_stringview markup) noexcept
+          : ResolverFixture(u8"<!DOCTYPE html><style>body{margin:0}</style>" + utf8_string(markup),
+                            style::tests::WithView::No)
+      {
+        auto chrome = CreateUnique<CompositingChromeClient>();
+        Chrome = chrome.get();
+        TestPage = Page::Create(krys::move(chrome));
+        Frame = ShareRefPtr(&TestPage->MainFrame());
+        Frame->CreateView({200, 100});
+        Frame->SetDocument(ShareRefPtr<dom::Document>(Document.get()));
+        TestPage->UpdateRendering();
+      }
+
+      KRYS_NODISCARD RenderLayerCompositor &Compositor() noexcept
+      {
+        return Frame->View()->GetRenderViewForUpdate()->Compositor();
+      }
+
+      KRYS_NODISCARD RenderLayer &LayerOf(utf8_stringview id) noexcept
+      {
+        auto *layer = Downcast<RenderLayerModelObject>(*ById(id).Renderer()).Layer();
+        krys_assert(layer);
+        return *layer;
+      }
+
+      KRYS_NODISCARD utf8_string LayerTree() noexcept
+      {
+        return Compositor().LayerTreeAsText();
+      }
+
+      KRYS_NODISCARD CompositingTestLayer &GraphicsLayerOf(utf8_stringview id) noexcept
+      {
+        auto &layer = LayerOf(id);
+        REQUIRE(layer.Backing());
+        return static_cast<CompositingTestLayer &>(*layer.Backing()->GetGraphicsLayer());
+      }
+
+      KRYS_NODISCARD KeyframeEffect &OnlyEffect(utf8_stringview id) noexcept
+      {
+        auto &animations = ById(id).AnimationsCreatedByMarkup(null);
+        REQUIRE(animations.size() == 1);
+        auto *effect = animations.first()->GetKeyframeEffect();
+        REQUIRE(effect);
+        return *effect;
+      }
+
+      /// @brief Runs the event loop @p delta after its last run, then the rendering update if one is
+      /// scheduled.
+      /// @return Whether there was a rendering update.
+      bool RunFrame(MonotonicTime::duration delta = {}) noexcept
+      {
+        auto &loop = html::EventLoop::Current();
+        loop.Run(loop.Now() + delta);
+        if (!TestPage->IsRenderingUpdateScheduled())
+        {
+          return false;
+        }
+        TestPage->UpdateRendering();
+        return true;
+      }
+
+      /// @brief Runs frames until the animations created by the markup are ready and started on layers.
+      void StartAnimations() noexcept
+      {
+        (void)RunFrame();
+        (void)RunFrame();
+        (void)RunFrame();
+      }
+    };
+
+    /// @brief `#box`, 20px square, with @p animation as its `animation`: `fade` (opacity), `spin` (transform)
+    /// or `grow` (width).
+    KRYS_NODISCARD utf8_string AnimatedBox(utf8_stringview animation) noexcept
+    {
+      utf8_string markup = u8"<style>@keyframes fade{from{opacity:0}to{opacity:1}}"
+                           u8"@keyframes spin{from{transform:rotate(0)}to{transform:rotate(90deg)}}"
+                           u8"@keyframes grow{from{width:20px}to{width:40px}}"
+                           u8"#box{width:20px;height:20px;background:green;animation:";
+      markup += animation;
+      markup += u8"}</style><div id=box></div>";
+      return markup;
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: the root is composited when the host composites",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<div style='width:50px;height:50px;background:green'></div>");
+    CHECK(fixture.Compositor().UsesCompositing());
+    CHECK(fixture.Chrome->RootLayer);
+    CHECK(fixture.Frame->View()->GetRenderView()->Layer()->IsComposited());
+    CHECK(fixture.LayerTree()
+          == u8"(GraphicsLayer\n  (anchor 0.00 0.00)\n  (bounds 200.00 100.00)\n  (children 1\n    "
+             u8"(GraphicsLayer\n"
+             u8"      (bounds 200.00 100.00)\n      (contentsOpaque 1)\n    )\n  )\n)\n");
+  }
+
+  TEST_CASE("RenderLayerCompositor: filters and 3D transforms composite",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(u8"<style>div{width:30px;height:30px;margin-bottom:30px}</style>"
+                               u8"<div id=blurred style='background:green;filter:blur(2px)'></div>"
+                               u8"<div id=flat style='background:red;transform:rotate(10deg)'></div>"
+                               u8"<div id=turned style='background:blue;transform:rotateY(10deg)'></div>");
+    CHECK(fixture.LayerOf(u8"blurred").IsComposited());
+    CHECK_FALSE(fixture.LayerOf(u8"flat").IsComposited());
+    CHECK(fixture.LayerOf(u8"turned").IsComposited());
+  }
+
+  TEST_CASE("RenderLayerCompositor: layers above a composited layer composite for overlap",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(
+      u8"<div id=blurred "
+      u8"style='position:absolute;left:0;top:0;width:50px;height:50px;filter:blur(2px)'></div>"
+      u8"<div id=above "
+      u8"style='position:absolute;left:20px;top:20px;width:50px;height:50px;background:red'></div>"
+      u8"<div id=apart "
+      u8"style='position:absolute;left:120px;top:0;width:50px;height:50px;background:blue'></div>");
+    CHECK(fixture.LayerOf(u8"blurred").IsComposited());
+    CHECK(fixture.LayerOf(u8"above").IsComposited());
+    CHECK(fixture.LayerOf(u8"above").GetIndirectCompositingReason() == IndirectCompositingReason::Overlap);
+    CHECK_FALSE(fixture.LayerOf(u8"apart").IsComposited());
+  }
+
+  TEST_CASE("RenderLayerCompositor: transform and opacity animations run on layers",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    SECTION("opacity")
+    {
+      CompositingFixture fixture(AnimatedBox(u8"fade 1s linear infinite"));
+      fixture.StartAnimations();
+      CHECK(fixture.LayerOf(u8"box").IsComposited());
+      CHECK(fixture.OnlyEffect(u8"box").IsRunningAccelerated());
+      auto &layer = fixture.GraphicsLayerOf(u8"box");
+      REQUIRE(layer.Animations.size() == 1);
+      CHECK(layer.Animations[0].Name == u8"fade");
+      CHECK(layer.Animations[0].Property == AnimatedProperty::Opacity);
+
+      // The layer animates: the page's style isn't updated each frame, but its animated style is.
+      auto opacity = fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value;
+      CHECK_FALSE(fixture.RunFrame(250ms));
+      CHECK(fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value == opacity);
+      CHECK(fixture.ById(u8"box").Renderer()->AnimatedStyle()->GetOpacity().Value.Value
+            == Catch::Approx(opacity + 0.25f).margin(0.02f));
+    }
+
+    SECTION("transform")
+    {
+      CompositingFixture fixture(AnimatedBox(u8"spin 1s linear infinite"));
+      fixture.StartAnimations();
+      CHECK(fixture.LayerOf(u8"box").IsComposited());
+      auto &layer = fixture.GraphicsLayerOf(u8"box");
+      REQUIRE(layer.Animations.size() == 1);
+      CHECK(layer.Animations[0].Property == AnimatedProperty::Transform);
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: pausing and ending an animation reach its layer",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(AnimatedBox(u8"fade 1s linear infinite"));
+    fixture.StartAnimations();
+    auto &layer = fixture.GraphicsLayerOf(u8"box");
+    REQUIRE(layer.Animations.size() == 1);
+
+    fixture.ById(u8"box").SetAttribute(u8"style", u8"animation-play-state: paused");
+    (void)fixture.RunFrame(16ms);
+    (void)fixture.RunFrame(16ms);
+    REQUIRE(layer.Animations.size() == 1);
+    CHECK(layer.Animations[0].Paused);
+
+    fixture.ById(u8"box").SetAttribute(u8"style", u8"animation: none");
+    (void)fixture.RunFrame(16ms);
+    (void)fixture.RunFrame(16ms);
+    CHECK(layer.Animations.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: animations that can't run on layers run on the page",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    SECTION("a steps() timing function")
+    {
+      CompositingFixture fixture(AnimatedBox(u8"fade 1s steps(4) infinite"));
+      fixture.StartAnimations();
+      CHECK_FALSE(fixture.OnlyEffect(u8"box").IsRunningAccelerated());
+      CHECK(fixture.RunFrame(300ms));
+      CHECK(fixture.ById(u8"box").Renderer()->Style().GetOpacity().Value.Value > 0);
+    }
+
+    SECTION("a property layers don't animate")
+    {
+      CompositingFixture fixture(AnimatedBox(u8"grow 1s linear infinite"));
+      fixture.StartAnimations();
+      CHECK_FALSE(fixture.OnlyEffect(u8"box").IsRunningAccelerated());
+      CHECK_FALSE(fixture.ById(u8"box").Renderer()->IsComposited());
+      CHECK(fixture.RunFrame(500ms));
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: boxes that scroll their overflow scroll on layers",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(
+      u8"<style>.box{width:100px;height:40px}.tall{height:200px;background:green}</style>"
+      u8"<div id=scroller class=box style='overflow:auto'><div class=tall></div></div>"
+      u8"<div id=short class=box style='overflow:auto'><div style='height:10px'></div></div>"
+      u8"<div id=hidden class=box style='overflow:hidden'><div class=tall></div></div>");
+    auto &scroller = fixture.LayerOf(u8"scroller");
+    REQUIRE(scroller.IsComposited());
+    CHECK(
+      fixture.Compositor().ReasonsForCompositing(scroller).Contains(CompositingReason::OverflowScrolling));
+    CHECK(scroller.UsesCompositedScrolling());
+    auto &backing = *scroller.Backing();
+    REQUIRE(backing.HasScrollingLayer());
+    REQUIRE(backing.ScrolledContentsLayer());
+    // The scrollbar paints into a layer of its own, above the scrolled contents.
+    CHECK(backing.LayerForVerticalScrollbar());
+    // Boxes without scrollable overflow, or that don't scroll it, don't.
+    CHECK_FALSE(fixture.LayerOf(u8"short").IsComposited());
+    CHECK_FALSE(fixture.LayerOf(u8"hidden").IsComposited());
+
+    // Scrolling moves the scrolled contents by the scroll container's bounds origin and repaints nothing.
+    auto &contents = static_cast<CompositingTestLayer &>(*backing.ScrolledContentsLayer());
+    auto &graphicsLayer = static_cast<CompositingTestLayer &>(*backing.GetGraphicsLayer());
+    contents.NeedsDisplayRects.clear();
+    graphicsLayer.NeedsDisplayRects.clear();
+    fixture.ById(u8"scroller").SetScrollTop(30);
+    fixture.TestPage->UpdateRendering();
+    CHECK(backing.ScrollContainerLayer()->BoundsOrigin() == FloatPoint(0, 30));
+    CHECK(contents.NeedsDisplayRects.empty());
+    CHECK(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: fixed elements composite for their position",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    SECTION("a fixed header stays put as the view scrolls")
+    {
+      CompositingFixture fixture(
+        u8"<div id=header style='position:fixed;top:0;left:0;width:200px;height:20px;background:green'></div>"
+        u8"<div style='height:400px'></div>");
+      auto &header = fixture.LayerOf(u8"header");
+      REQUIRE(header.IsComposited());
+      CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionFixed));
+      auto &backing = *header.Backing();
+      REQUIRE(backing.ViewportAnchorLayer());
+
+      // Scrolling the view moves the header's anchor layer to keep it in place, and repaints nothing.
+      auto &graphicsLayer = static_cast<CompositingTestLayer &>(*backing.GetGraphicsLayer());
+      auto &viewLayer = static_cast<CompositingTestLayer &>(
+        *fixture.Frame->View()->GetRenderViewForUpdate()->Layer()->Backing()->GetGraphicsLayer());
+      graphicsLayer.NeedsDisplayRects.clear();
+      viewLayer.NeedsDisplayRects.clear();
+      fixture.Frame->View()->SetScrollPosition({0, 50});
+      fixture.TestPage->UpdateRendering();
+      CHECK(backing.ViewportAnchorLayer()->Position() == FloatPoint(0, 50));
+      CHECK(graphicsLayer.NeedsDisplayRects.empty());
+      CHECK(viewLayer.NeedsDisplayRects.empty());
+    }
+
+    SECTION("fixed elements with nothing to paint, or fixed to a transformed box, don't")
+    {
+      CompositingFixture fixture(
+        u8"<div id=empty style='position:fixed;top:30px;left:0'></div>"
+        u8"<div style='transform:translateX(1px)'>"
+        u8"<div id=inside style='position:fixed;top:40px;left:0;width:20px;height:20px;background:blue'>"
+        u8"</div></div><div style='height:400px'></div>");
+      CHECK_FALSE(fixture.LayerOf(u8"empty").IsComposited());
+      CHECK(fixture.LayerOf(u8"empty").GetViewportConstrainedNotCompositedReason()
+            == RenderLayer::NotCompositedForNoVisibleContent);
+      CHECK_FALSE(fixture.LayerOf(u8"inside").IsComposited());
+      CHECK(fixture.LayerOf(u8"inside").GetViewportConstrainedNotCompositedReason()
+            == RenderLayer::NotCompositedForNonViewContainer);
+    }
+  }
+
+  TEST_CASE("RenderLayerCompositor: sticky boxes in a box that scrolls on layers composite",
+            "[Rendering][RenderLayerCompositor][Sticky]")
+  {
+    CompositingFixture fixture(
+      u8"<div id=scroller style='width:100px;height:50px;overflow:auto'>"
+      u8"<div id=header style='position:sticky;top:0;height:10px;background:green'></div>"
+      u8"<div style=height:200px></div></div>"
+      u8"<div id=page-header style='position:sticky;top:0;height:10px;background:blue'></div>"
+      u8"<div style=height:400px></div>");
+    auto &header = fixture.LayerOf(u8"header");
+    REQUIRE(header.IsComposited());
+    CHECK(fixture.Compositor().ReasonsForCompositing(header).Contains(CompositingReason::PositionSticky));
+    REQUIRE(header.Backing()->ViewportAnchorLayer());
+
+    // Stuck to the view, with no scrolling coordinator: it repaints as the view scrolls instead.
+    CHECK_FALSE(fixture.Compositor()
+                  .ReasonsForCompositing(fixture.LayerOf(u8"page-header"))
+                  .Contains(CompositingReason::PositionSticky));
+
+    // Scrolling the box keeps the header at its top, without repainting it.
+    auto &graphicsLayer = static_cast<CompositingTestLayer &>(*header.Backing()->GetGraphicsLayer());
+    graphicsLayer.NeedsDisplayRects.clear();
+    fixture.ById(u8"scroller").SetScrollTop(40);
+    fixture.TestPage->UpdateRendering();
+    CHECK(header.Backing()->ViewportAnchorLayer()->Position().Y() == 40);
+    CHECK(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: repaints go to the composited layer's backing",
+            "[Rendering][RenderLayerCompositor]")
+  {
+    CompositingFixture fixture(
+      u8"<div id=blurred "
+      u8"style='position:absolute;left:10px;top:10px;width:50px;height:50px;filter:blur(2px)'>"
+      u8"<div id=inner style='width:10px;height:10px;background:red'></div></div>");
+    auto &backing = *fixture.LayerOf(u8"blurred").Backing();
+    auto &graphicsLayer = static_cast<CompositingTestLayer &>(*backing.GetGraphicsLayer());
+    graphicsLayer.NeedsDisplayRects.clear();
+
+    fixture.ById(u8"inner").SetAttribute(u8"style", u8"width:10px;height:10px;background:green");
+    fixture.TestPage->UpdateRendering();
+    CHECK_FALSE(graphicsLayer.NeedsDisplayRects.empty());
+  }
+
+  TEST_CASE("RenderLayerCompositor: a texture canvas's layer shows its texture",
+            "[Rendering][RenderLayerCompositor][Canvas]")
+  {
+    CompositingFixture fixture(u8"<canvas id=canvas width=40 height=20 style='width:80px;height:80px;"
+                               u8"object-fit:contain'></canvas><canvas id=plain></canvas>");
+    auto &canvas = Downcast<html::HTMLCanvasElement>(fixture.ById(u8"canvas"));
+
+    // A canvas without a context has no layer of its own.
+    CHECK(Downcast<RenderLayerModelObject>(*fixture.ById(u8"plain").Renderer()).Layer() == nullptr);
+
+    auto context = canvas.GetContext(html::EngineTextureRenderingContext::ContextType);
+    REQUIRE(context);
+    CHECK(canvas.GetContext(html::EngineTextureRenderingContext::ContextType) == context);
+    CHECK(canvas.GetContext(u8"2d") == nullptr);
+    auto &textureContext = Downcast<html::EngineTextureRenderingContext>(*context);
+    CHECK(GetCanvasCompositingStrategy(*canvas.Renderer())
+          == CanvasCompositingStrategy::CanvasAsLayerContents);
+
+    // The context composites the canvas, before it has a texture.
+    fixture.TestPage->UpdateRendering();
+    auto &layer = fixture.LayerOf(u8"canvas");
+    REQUIRE(layer.IsComposited());
+    CHECK(fixture.Compositor().ReasonsForCompositing(layer).Contains(CompositingReason::Canvas));
+    CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
+
+    // Its texture's delegate is the layer's contents, placed by object-fit, and nothing else is painted.
+    auto texture = AdoptRef(*new FakeEngineTexture({40, 20}));
+    textureContext.SetTexture(texture);
+    fixture.TestPage->UpdateRendering();
+    auto &graphicsLayer = fixture.GraphicsLayerOf(u8"canvas");
+    CHECK(graphicsLayer.Delegate == texture->Delegate.get());
+    CHECK(graphicsLayer.Purpose == GraphicsLayer::ContentsLayerPurpose::Canvas);
+    CHECK(graphicsLayer.ContentsRect() == FloatRect(0, 20, 80, 40));
+    CHECK_FALSE(graphicsLayer.DrawsContent());
+    CHECK(graphicsLayer.ContentsMagnificationFilter() == GraphicsLayer::ScalingFilter::Linear);
+
+    SECTION("a change to the texture redisplays the contents, not the layer")
+    {
+      graphicsLayer.NeedsDisplayRects.clear();
+      graphicsLayer.ContentsNeedsDisplayRects.clear();
+      textureContext.TextureChanged(IntRect(10, 0, 20, 10));
+      textureContext.TextureChanged();
+      CHECK(graphicsLayer.ContentsNeedsDisplayRects.size() == 2);
+      CHECK(graphicsLayer.NeedsDisplayRects.empty());
+    }
+
+    SECTION("pixelated canvases are scaled without interpolation")
+    {
+      REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"image-rendering:pixelated").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMagnificationFilter()
+            == GraphicsLayer::ScalingFilter::Nearest);
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsMinificationFilter()
+            == GraphicsLayer::ScalingFilter::Nearest);
+    }
+
+    SECTION("a border is painted beneath the texture")
+    {
+      REQUIRE_FALSE(canvas.SetAttribute(u8"style", u8"border:2px solid").HasException());
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").DrawsContent());
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").ContentsRect() == FloatRect(2, 2, 40, 20));
+    }
+
+    SECTION("removing the texture removes the contents")
+    {
+      textureContext.SetTexture(nullptr);
+      fixture.TestPage->UpdateRendering();
+      CHECK(fixture.GraphicsLayerOf(u8"canvas").Delegate == nullptr);
+    }
+  }
+}

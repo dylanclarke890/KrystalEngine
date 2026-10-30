@@ -5,6 +5,7 @@
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include <algorithm>
 #include <cassert>
 
 namespace krys::boo::infra
@@ -14,6 +15,12 @@ namespace krys::boo::infra
   {
   public:
     using position_variable = dom::DOMStringView::const_iterator;
+
+    /// @see https://infra.spec.whatwg.org/#ascii-string
+    KRYS_NODISCARD static bool IsASCIIString(dom::DOMStringView input) noexcept
+    {
+      return std::ranges::all_of(input, [](char8 c) { return ::krys::text::IsASCII(c); });
+    }
 
     /// @see https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
     KRYS_NODISCARD static dom::DOMStringView
@@ -33,6 +40,28 @@ namespace krys::boo::infra
       }
 
       return dom::DOMStringView(start, end);
+    }
+
+    /// @brief @p input with each CR LF pair, then each remaining CR, replaced by an LF.
+    /// @see https://infra.spec.whatwg.org/#normalize-newlines
+    KRYS_NODISCARD static dom::DOMString NormalizeNewlines(dom::DOMStringView input) noexcept
+    {
+      dom::DOMString result;
+      result.reserve(input.size());
+      for (size_t i = 0; i < input.size(); ++i)
+      {
+        if (input[i] == u8'\r')
+        {
+          result.push_back(u8'\n');
+          if (i + 1 < input.size() && input[i + 1] == u8'\n')
+          {
+            ++i;
+          }
+          continue;
+        }
+        result.push_back(input[i]);
+      }
+      return result;
     }
 
     /// @see https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
@@ -78,8 +107,8 @@ namespace krys::boo::infra
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
     KRYS_NODISCARD static dom::DOMStringView CollectCodePointSequence(dom::DOMStringView input,
-                                                                 position_variable &position,
-                                                                 TFunc &&condition) noexcept
+                                                                      position_variable &position,
+                                                                      TFunc &&condition) noexcept
     {
       position_variable start = position;
       AdvancePositionWhile(input, position, condition);
@@ -91,7 +120,7 @@ namespace krys::boo::infra
     static void AdvancePositionWhile(dom::DOMStringView input, position_variable &position,
                                      TFunc &&condition) noexcept
     {
-      // TODO(fix): STRINGS - we're not iterating over code points properly here. we need a way of just
+      // FIXME: We're not iterating over code points properly here. we need a way of just
       // iterating over code points in a UTF-8 string instead of having to
       while (position != input.end() && condition(*position))
       {
@@ -112,7 +141,8 @@ namespace krys::boo::infra
     }
 
     /// @see https://infra.spec.whatwg.org/#strictly-split
-    KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input, char32 delimiter) noexcept
+    KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input,
+                                                             char32 delimiter) noexcept
     {
       List<dom::DOMString> tokens;
       auto position = input.begin();

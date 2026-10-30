@@ -12,7 +12,9 @@
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLAudioElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBDIElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDataElement.hpp"
@@ -24,7 +26,9 @@
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFontElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
@@ -37,6 +41,7 @@
 #include "Krystal.Booey/HTML/HTMLLIElement.hpp"
 #include "Krystal.Booey/HTML/HTMLLinkElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMenuElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMetaElement.hpp"
@@ -59,6 +64,7 @@
 #include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSpanElement.hpp"
 #include "Krystal.Booey/HTML/HTMLStyleElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCaptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
@@ -73,6 +79,7 @@
 #include "Krystal.Booey/HTML/HTMLUListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
+#include "Krystal.Booey/HTML/HTMLWBRElement.hpp"
 
 namespace krys::boo::html
 {
@@ -85,7 +92,6 @@ namespace krys::boo::html
       case TagName::article:
       case TagName::aside:
       case TagName::b:
-      case TagName::bdi:
       case TagName::bdo:
       case TagName::cite:
       case TagName::code:
@@ -114,13 +120,19 @@ namespace krys::boo::html
       case TagName::small:
       case TagName::strong:
       case TagName::sub:
-      case TagName::summary:
       case TagName::sup:
       case TagName::u:
       case TagName::var:
-      case TagName::wbr:
       {
         return CreateRefPtr<HTMLElement>(document);
+      }
+      case TagName::bdi:
+      {
+        return CreateRefPtr<HTMLBDIElement>(document);
+      }
+      case TagName::wbr:
+      {
+        return CreateRefPtr<HTMLWBRElement>(document);
       }
       case TagName::a:
       {
@@ -179,11 +191,27 @@ namespace krys::boo::html
       }
       case TagName::details:
       {
-        return CreateRefPtr<HTMLDetailsElement>(document);
+        return HTMLDetailsElement::Create(document);
       }
       case TagName::dialog:
       {
         return CreateRefPtr<HTMLDialogElement>(document);
+      }
+      case TagName::br:
+      {
+        return CreateRefPtr<HTMLBRElement>(document);
+      }
+      case TagName::font:
+      {
+        return CreateRefPtr<HTMLFontElement>(document);
+      }
+      case TagName::frameset:
+      {
+        return CreateRefPtr<HTMLFrameSetElement>(document);
+      }
+      case TagName::marquee:
+      {
+        return CreateRefPtr<HTMLMarqueeElement>(document);
       }
       case TagName::div:
       {
@@ -268,7 +296,7 @@ namespace krys::boo::html
       }
       case TagName::meter:
       {
-        return CreateRefPtr<HTMLMeterElement>(document);
+        return HTMLMeterElement::Create(document);
       }
       case TagName::object:
       {
@@ -304,7 +332,7 @@ namespace krys::boo::html
       }
       case TagName::progress:
       {
-        return CreateRefPtr<HTMLProgressElement>(document);
+        return HTMLProgressElement::Create(document);
       }
       case TagName::script:
       {
@@ -334,6 +362,10 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLStyleElement>(document);
       }
+      case TagName::summary:
+      {
+        return CreateRefPtr<HTMLSummaryElement>(document);
+      }
       case TagName::table:
       {
         return CreateRefPtr<HTMLTableElement>(document);
@@ -359,7 +391,7 @@ namespace krys::boo::html
       }
       case TagName::textarea:
       {
-        return CreateRefPtr<HTMLTextAreaElement>(document);
+        return HTMLTextAreaElement::Create(document);
       }
       case TagName::title:
       {

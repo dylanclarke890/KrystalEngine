@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLMediaElement.hpp"
 
 namespace krys::boo::html
 {
@@ -34,10 +34,10 @@ namespace krys::boo::html
     KRYS_NODISCARD uint32 VideoHeight() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> Poster() const noexcept;
+    KRYS_NODISCARD dom::USVString Poster() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-poster
-    dom::ExceptionOr<void> Poster(dom::USVString &&value) noexcept;
+    void Poster(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-video-playsinline
     KRYS_NODISCARD bool PlaysInline() const noexcept;
@@ -46,6 +46,14 @@ namespace krys::boo::html
     void PlaysInline(bool value) noexcept;
 
 #pragma endregion
+
+  protected:
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
   };
 }
 

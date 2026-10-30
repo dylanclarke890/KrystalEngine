@@ -1,48 +1,77 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
-#include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Core/Attributes.hpp"
+#include "Krystal.Core/CanMakeWeakPtr.hpp"
+#include "Krystal.Core/Macros.hpp"
 #include "Krystal.Core/RefCounted.hpp"
-#include "Krystal.Core/Types/RefPtr.hpp"
+
+namespace krys::boo::dom
+{
+  class Element;
+
+  template <typename>
+  class ExceptionOr;
+}
 
 namespace krys::boo::css
 {
   class CSSRule;
+  class CSSStyleSheet;
 
-  /// @see https://www.w3.org/TR/cssom-1/#cssstyledeclaration
-  class CSSStyleDeclaration : public RefCounted<CSSStyleDeclaration>
+  enum class StyleDeclarationType : uint8
   {
+    Style,
+    FontFace,
+    Page,
+    PositionTry,
+    Function
+  };
+
+  /// @brief A declaration block exposed to scripts.
+  /// @see https://drafts.csswg.org/cssom/#the-cssstyledeclaration-interface
+  // FIXME: Settings() comes with Settings.
+  class CSSStyleDeclaration : public AbstractRefCountedAndCanMakeWeakPtr<CSSStyleDeclaration>
+  {
+    KRYS_NON_COPYABLE(CSSStyleDeclaration);
+
+  protected:
+    CSSStyleDeclaration() noexcept = default;
+
   public:
-#pragma region CSSStyleDeclaration - https://www.w3.org/TR/cssom-1/#cssstyledeclaration
+    virtual ~CSSStyleDeclaration() noexcept;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-csstext
-    KRYS_NODISCARD CSSOMString CssText() const noexcept;
+    KRYS_NODISCARD virtual StyleDeclarationType GetStyleDeclarationType() const noexcept = 0;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-csstext
-    dom::ExceptionOr<void> CssText(const CSSOMString &text) noexcept;
+    /// @brief The element whose `style` attribute this is, if any.
+    KRYS_NODISCARD virtual dom::Element *ParentElement() const noexcept
+    {
+      return nullptr;
+    }
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-length
-    KRYS_NODISCARD size_t Length() const noexcept;
+    KRYS_NODISCARD virtual CSSRule *ParentRule() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSRule *CssRules() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString CssText() const noexcept = 0;
+    virtual dom::ExceptionOr<void> SetCssText(const CSSOMString &text) noexcept = 0;
+    KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString Item(uint32 index) const noexcept = 0;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-item
-    KRYS_NODISCARD const CSSOMString &Item(size_t index) const noexcept;
+    KRYS_NODISCARD bool IsSupportedPropertyIndex(uint32 index) const noexcept
+    {
+      return index < Length();
+    }
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-getpropertyvalue
-    KRYS_NODISCARD CSSOMString GetPropertyValue(const CSSOMString &property) const noexcept;
+    KRYS_NODISCARD virtual CSSOMString GetPropertyValue(const CSSOMString &propertyName) noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString GetPropertyPriority(const CSSOMString &propertyName) noexcept = 0;
+    KRYS_NODISCARD virtual CSSOMString GetPropertyShorthand(const CSSOMString &propertyName) noexcept = 0;
+    KRYS_NODISCARD virtual bool IsPropertyImplicit(const CSSOMString &propertyName) noexcept = 0;
+    virtual dom::ExceptionOr<void> SetProperty(const CSSOMString &propertyName, const CSSOMString &value,
+                                               const CSSOMString &priority) noexcept = 0;
+    virtual dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &propertyName) noexcept = 0;
 
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-getpropertypriority
-    KRYS_NODISCARD CSSOMString GetPropertyPriority(const CSSOMString &property) const noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-setproperty
-    dom::ExceptionOr<void> SetProperty(const CSSOMString &property, const CSSOMString &value,
-                                  const CSSOMString &priority = u8"") noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-removeproperty
-    dom::ExceptionOr<CSSOMString> RemoveProperty(const CSSOMString &property) noexcept;
-
-    /// @see https://drafts.csswg.org/cssom/#dom-cssstyledeclaration-parentrule
-    KRYS_NODISCARD RefPtr<CSSRule> ParentRule() const noexcept;
-
-#pragma endregion
+    KRYS_NODISCARD virtual CSSStyleSheet *ParentStyleSheet() const noexcept
+    {
+      return nullptr;
+    }
   };
 }

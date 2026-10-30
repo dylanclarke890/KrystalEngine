@@ -1,12 +1,79 @@
 ﻿#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/CSS/Parser/SizesAttributeParser.hpp"
+#include "Krystal.Booey/CSS/Queries/MediaQueryEvaluator.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/Graphics/Image.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/HTMLImageLoader.hpp"
+#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
+#include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
+#include "Krystal.Booey/HTML/HTMLSourceElement.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Parser/HTMLSrcsetParser.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Booey/Loader/Cache/CachedImage.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
+#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
+#include "Krystal.Booey/Rendering/RenderImage.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
+#include <limits>
 
 namespace krys::boo::html
 {
+  template <>
+  struct EnumeratedAttributeTraits<"loading", HTMLImageElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {
+      KeywordStateMapping {u8"lazy", AttributeState::Lazy},
+      KeywordStateMapping {u8"eager", AttributeState::Eager}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Eager;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
+  };
+
+  namespace
+  {
+    KRYS_NODISCARD dom::DOMStringView
+      ExtractMIMETypeFromTypeAttributeForLookup(dom::DOMStringView typeAttribute) noexcept
+    {
+      auto semicolonIndex = typeAttribute.find(u8';');
+      if (semicolonIndex == dom::DOMStringView::npos)
+      {
+        return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(typeAttribute);
+      }
+      return infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(
+        typeAttribute.substr(0, semicolonIndex));
+    }
+
+    KRYS_NODISCARD const css::CSSOMStringAtom &ScreenAtom() noexcept
+    {
+      static const css::CSSOMStringAtom screen {u8"screen"};
+      return screen;
+    }
+
+    KRYS_NODISCARD const css::CSSOMStringAtom &PrintAtom() noexcept
+    {
+      static const css::CSSOMStringAtom print {u8"print"};
+      return print;
+    }
+
+    KRYS_NODISCARD uint32 ClampedAttributeLength(uint64 value) noexcept
+    {
+      return static_cast<uint32>(std::min<uint64>(value, std::numeric_limits<int32>::max()));
+    }
+  }
+
   HTMLImageElement::HTMLImageElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Image)
+      : HTMLElement(document, HTMLElementInterface::Image), _imageLoader(CreateUnique<HTMLImageLoader>(*this))
   {
   }
+
+  HTMLImageElement::~HTMLImageElement() noexcept = default;
 
 #pragma region HTMLImageElement
 
@@ -20,24 +87,24 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::Src() const noexcept
+  dom::USVString HTMLImageElement::Src() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::Src(dom::USVString &&value) noexcept
+  void HTMLImageElement::Src(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::SrcSet() const noexcept
+  dom::USVString HTMLImageElement::SrcSet() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset");
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::SrcSet(dom::USVString &&value) noexcept
+  void HTMLImageElement::SrcSet(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return Reflection::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
   dom::DOMString HTMLImageElement::Sizes() const noexcept
@@ -52,13 +119,46 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLImageElement::CrossOrigin() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): CrossOrigin() is limited to known values.
+    // FIXME: CrossOrigin() is limited to known values.
     return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin");
   }
 
   void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
   {
     Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
+  }
+
+  HTMLMapElement *HTMLImageElement::AssociatedMapElement() const noexcept
+  {
+    // https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference
+    auto usemap = GetAttribute(u8"usemap");
+    if (!usemap)
+    {
+      return nullptr;
+    }
+    auto numberSign = dom::DOMStringView(*usemap).find(u8'#');
+    if (numberSign == dom::DOMStringView::npos)
+    {
+      return nullptr;
+    }
+    auto name = dom::DOMStringView(*usemap).substr(numberSign + 1);
+
+    auto &root = dom::TreeQueries::Root(const_cast<HTMLImageElement &>(*this));
+    for (auto &node : dom::DescendantRange(root))
+    {
+      auto *map = DynamicDowncast<HTMLMapElement>(node);
+      if (!map)
+      {
+        continue;
+      }
+      auto id = map->GetAttribute(u8"id");
+      auto mapName = map->GetAttribute(u8"name");
+      if ((id && *id == name) || (mapName && *mapName == name))
+      {
+        return map;
+      }
+    }
+    return nullptr;
   }
 
   dom::DOMString HTMLImageElement::UseMap() const noexcept
@@ -81,6 +181,27 @@ namespace krys::boo::html
     Reflection::Reflect<bool>(*this, u8"ismap", krys::move(value));
   }
 
+  bool HTMLImageElement::IsServerMap() const noexcept
+  {
+    if (!HasAttribute(u8"ismap"))
+    {
+      return false;
+    }
+
+    auto usemap = GetAttribute(u8"usemap");
+    if (!usemap)
+    {
+      return true;
+    }
+    // If the usemap attribute starts with '#', it refers to a map element in the document.
+    if (usemap->starts_with(u8'#'))
+    {
+      return false;
+    }
+
+    return NodeDocument().CompleteURL(*usemap).IsEmpty();
+  }
+
   bool HTMLImageElement::Controls() const noexcept
   {
     return Reflection::Reflect<bool>(*this, u8"controls");
@@ -93,7 +214,36 @@ namespace krys::boo::html
 
   uint32 HTMLImageElement::Width() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"width");
+    if (IsConnected())
+    {
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+        {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+         dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+        this);
+    }
+
+    if (!Renderer())
+    {
+      // check the attribute first for an explicit pixel value
+      if (auto width = Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"width")); width.Success())
+      {
+        return ClampedAttributeLength(width.Value);
+      }
+
+      // if the image is available, use its width
+      if (auto *image = _imageLoader->Image())
+      {
+        return image->ImageSizeForRenderer(nullptr, 1.0f).Width().ToUnsigned();
+      }
+    }
+
+    auto *box = DynamicDowncast<RenderBox>(Renderer());
+    if (!box)
+    {
+      return 0;
+    }
+    LayoutRect contentRect = box->ContentBoxRect();
+    return static_cast<uint32>(AdjustLayoutUnitForAbsoluteZoom(contentRect.Width(), box->Style()).Round());
   }
 
   void HTMLImageElement::Width(uint32 value) noexcept
@@ -103,7 +253,36 @@ namespace krys::boo::html
 
   uint32 HTMLImageElement::Height() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"height");
+    if (IsConnected())
+    {
+      (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+        {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+         dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+        this);
+    }
+
+    if (!Renderer())
+    {
+      // check the attribute first for an explicit pixel value
+      if (auto height = Numbers::ParseNonNegativeInteger(AttributeOrEmpty(u8"height")); height.Success())
+      {
+        return ClampedAttributeLength(height.Value);
+      }
+
+      // if the image is available, use its height
+      if (auto *image = _imageLoader->Image())
+      {
+        return image->ImageSizeForRenderer(nullptr, 1.0f).Height().ToUnsigned();
+      }
+    }
+
+    auto *box = DynamicDowncast<RenderBox>(Renderer());
+    if (!box)
+    {
+      return 0;
+    }
+    LayoutRect contentRect = box->ContentBoxRect();
+    return static_cast<uint32>(AdjustLayoutUnitForAbsoluteZoom(contentRect.Height(), box->Style()).Round());
   }
 
   void HTMLImageElement::Height(uint32 value) noexcept
@@ -113,31 +292,44 @@ namespace krys::boo::html
 
   uint32 HTMLImageElement::NaturalWidth() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): NaturalWidth().
-    return 0u;
+    auto *image = _imageLoader->Image();
+    if (!image)
+    {
+      return 0u;
+    }
+
+    return image->UnclampedImageSizeForRenderer(Renderer(), EffectiveImageDevicePixelRatio())
+      .Width()
+      .ToUnsigned();
   }
 
   uint32 HTMLImageElement::NaturalHeight() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): NaturalHeight().
-    return 0u;
+    auto *image = _imageLoader->Image();
+    if (!image)
+    {
+      return 0u;
+    }
+
+    return image->UnclampedImageSizeForRenderer(Renderer(), EffectiveImageDevicePixelRatio())
+      .Height()
+      .ToUnsigned();
   }
 
   bool HTMLImageElement::Complete() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): Complete().
-    return false;
+    return _imageLoader->ImageComplete();
   }
 
   dom::USVString HTMLImageElement::CurrentSrc() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): CurrentSrc().
-    return {};
+    // The currentSrc IDL attribute must return the img element's current request's current URL.
+    return dom::USVString(CurrentURL().String());
   }
 
   dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): ReferrerPolicy() is limited to known values.
+    // FIXME: ReferrerPolicy() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
   }
 
@@ -148,7 +340,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Decoding() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): Decoding() is limited to known values.
+    // FIXME: Decoding() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"decoding").value_or(u8"");
   }
 
@@ -159,8 +351,9 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): Loading() is limited to known values.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"loading").value_or(u8"");
+    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"loading");
+    return EnumeratedAttribute<"loading", HTMLImageElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      krys::move(value));
   }
 
   void HTMLImageElement::Loading(dom::DOMString &&value) noexcept
@@ -170,7 +363,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::FetchPriority() const noexcept
   {
-    // TODO(HTMLIMAGEELEMENT, HTML): FetchPriority() is limited to known values.
+    // FIXME: FetchPriority() is limited to known values.
     return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
   }
 
@@ -193,12 +386,12 @@ namespace krys::boo::html
     Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::LowSrc() const noexcept
+  dom::USVString HTMLImageElement::LowSrc() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"lowsrc");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::LowSrc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LowSrc(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"lowsrc", krys::move(value));
   }
@@ -233,12 +426,12 @@ namespace krys::boo::html
     Reflection::Reflect<uint32>(*this, u8"vspace", krys::move(value));
   }
 
-  dom::ExceptionOr<dom::USVString> HTMLImageElement::LongDesc() const noexcept
+  dom::USVString HTMLImageElement::LongDesc() const noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"longdesc");
   }
 
-  dom::ExceptionOr<void> HTMLImageElement::LongDesc(dom::USVString &&value) noexcept
+  void HTMLImageElement::LongDesc(dom::USVString &&value) noexcept
   {
     return Reflection::ReflectURL<dom::USVString>(*this, u8"longdesc", krys::move(value));
   }
@@ -251,6 +444,492 @@ namespace krys::boo::html
   void HTMLImageElement::Border(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+  }
+
+#pragma endregion
+
+  bool HTMLImageElement::IsReplaced(const RenderStyle *style) const noexcept
+  {
+    return !style || !style->HasContent();
+  }
+
+#pragma region Loading
+
+  Maybe<dom::DOMString> HTMLImageElement::ImageSourceURL() const noexcept
+  {
+    if (_bestFitImageURL.empty())
+    {
+      return GetAttribute(u8"src");
+    }
+    return _bestFitImageURL;
+  }
+
+  Maybe<dom::DOMString> HTMLImageElement::AltText() const noexcept
+  {
+    // lets figure out the alt text.. magic stuff
+    // http://www.w3.org/TR/1998/REC-html40-19980424/appendix/notes.html#altgen
+    // also heavily discussed by Hixie on bugzilla
+    if (auto alt = GetAttribute(u8"alt"))
+    {
+      return alt;
+    }
+    // fall back to title attribute
+    return GetAttribute(u8"title");
+  }
+
+  CachedImage *HTMLImageElement::GetCachedImage() const noexcept
+  {
+    return _imageLoader->Image();
+  }
+
+  Image *HTMLImageElement::GetImage() const noexcept
+  {
+    if (auto *cachedImage = GetCachedImage())
+    {
+      return cachedImage->GetImage();
+    }
+    return nullptr;
+  }
+
+  ImageLoader &HTMLImageElement::GetImageLoader() const noexcept
+  {
+    return *_imageLoader;
+  }
+
+  void HTMLImageElement::LoadDeferredImage() noexcept
+  {
+    _imageLoader->LoadDeferredImage();
+  }
+
+  bool HTMLImageElement::IsDeferred() const noexcept
+  {
+    return _imageLoader->IsDeferred();
+  }
+
+  bool HTMLImageElement::IsLazyLoadable() const noexcept
+  {
+    auto *frame = NodeDocument().Frame();
+    if (!frame || !frame->GetMediaEnvironment().CanExecuteScripts)
+    {
+      return false;
+    }
+    return HasLazyLoadableAttributeValue(GetAttribute(u8"loading"));
+  }
+
+  bool HTMLImageElement::HasLazyLoadableAttributeValue(Maybe<dom::DOMStringView> attributeValue) noexcept
+  {
+    return attributeValue && infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*attributeValue, u8"lazy");
+  }
+
+  HTMLPictureElement *HTMLImageElement::PictureElement() const noexcept
+  {
+    return _pictureElement.get();
+  }
+
+  void HTMLImageElement::SetPictureElement(HTMLPictureElement *pictureElement) noexcept
+  {
+    _pictureElement =
+      pictureElement ? WeakPtr<HTMLPictureElement>::WithRef(*pictureElement) : WeakPtr<HTMLPictureElement>();
+  }
+
+  HTMLSourceElement *HTMLImageElement::SourceElement() const noexcept
+  {
+    return _sourceElement.get();
+  }
+
+  void HTMLImageElement::SetSourceElement(HTMLSourceElement *sourceElement) noexcept
+  {
+    if (_sourceElement.get() == sourceElement)
+    {
+      return;
+    }
+    _sourceElement =
+      sourceElement ? WeakPtr<HTMLSourceElement>::WithRef(*sourceElement) : WeakPtr<HTMLSourceElement>();
+    InvalidateAttributeMapping();
+  }
+
+  void HTMLImageElement::InvalidateAttributeMapping() noexcept
+  {
+    InvalidatePresentationalHintStyle();
+    InvalidateStyle();
+  }
+
+  bool HTMLImageElement::UsesSrcsetOrPicture() const noexcept
+  {
+    return HasAttribute(u8"srcset") || PictureElement();
+  }
+
+  float HTMLImageElement::EffectiveImageDevicePixelRatio() const noexcept
+  {
+    if (!_imageLoader->Image())
+    {
+      return 1.0f;
+    }
+
+    RefPtr<Image> image = ShareRefPtr(_imageLoader->Image()->GetImage());
+    if (image && image->DrawsSVGImage())
+    {
+      return 1.0f;
+    }
+
+    return _imageDevicePixelRatio;
+  }
+
+  void HTMLImageElement::SetBestFitURLAndDPRFromImageCandidate(const ImageCandidate &candidate) noexcept
+  {
+    _bestFitImageURL = candidate.String;
+    auto source = ImageSourceURL();
+    _currentURL = source ? NodeDocument().CompleteURL(*source) : url::URL();
+    if (candidate.Density >= 0)
+    {
+      _imageDevicePixelRatio = 1 / candidate.Density;
+    }
+    if (auto *renderImage = DynamicDowncast<RenderImage>(Renderer()))
+    {
+      renderImage->SetImageDevicePixelRatio(_imageDevicePixelRatio);
+    }
+  }
+
+  ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
+  {
+    auto *picture = PictureElement();
+    if (!picture)
+    {
+      return {};
+    }
+
+    ImageCandidate candidate;
+
+    for (auto *child = picture->FirstChild(); child && child != this; child = child->NextSibling())
+    {
+      auto *source = DynamicDowncast<HTMLSourceElement>(*child);
+      if (!source)
+      {
+        continue;
+      }
+
+      auto srcset = source->GetAttribute(u8"srcset");
+      if (!srcset || srcset->empty())
+      {
+        continue;
+      }
+
+      if (auto typeAttribute = source->GetAttribute(u8"type"))
+      {
+        auto type = ExtractMIMETypeFromTypeAttributeForLookup(*typeAttribute);
+        if (!type.empty() && !MIMETypeRegistry::IsSupportedImageVideoOrSVGMIMEType(type))
+        {
+          continue;
+        }
+      }
+
+      auto &document = NodeDocument();
+      auto documentElement = document.DocumentElement();
+      css::mq::MediaQueryEvaluator evaluator(document.Printing() ? PrintAtom() : ScreenAtom(), document,
+                                             documentElement ? documentElement->ComputedStyle() : nullptr);
+      auto &queries = source->ParsedMediaAttribute(document);
+
+      // FIXME: Remember the queries that depend on the viewport, to select again when they change.
+      if (!evaluator.Evaluate(queries))
+      {
+        continue;
+      }
+
+      css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(dom::DOMString()),
+                                            document);
+      auto sourceSize = sizesParser.Length();
+
+      candidate = BestFitSourceForImageAttributes(document.DeviceScaleFactor(), null,
+                                                  dom::DOMStringView(*srcset), sourceSize);
+
+      if (!candidate.IsEmpty())
+      {
+        SetSourceElement(source);
+        break;
+      }
+    }
+
+    return candidate;
+  }
+
+  void HTMLImageElement::SelectImageSource(RelevantMutation relevantMutation) noexcept
+  {
+    // First look for the best fit source from our <picture> parent if we have one.
+    ImageCandidate candidate = BestFitSourceFromPictureElement();
+    if (candidate.IsEmpty())
+    {
+      SetSourceElement(nullptr);
+      auto srcAttribute = GetAttribute(u8"src");
+      auto srcsetAttribute = GetAttribute(u8"srcset");
+      // This is extremely common case. We should not invoke SizesAttributeParser at all.
+      if (!srcsetAttribute)
+      {
+        if (srcAttribute)
+        {
+          candidate =
+            ImageCandidate(*srcAttribute, DescriptorParsingResult(), ImageCandidate::OriginAttribute::Src);
+        }
+      }
+      else
+      {
+        // If we don't have a <picture> or didn't find a source, then we use our own attributes.
+        auto &document = NodeDocument();
+        css::SizesAttributeParser sizesParser(AttributeOrEmpty(u8"sizes"), document);
+        auto sourceSize = sizesParser.Length();
+        candidate = BestFitSourceForImageAttributes(
+          document.DeviceScaleFactor(), srcAttribute ? Maybe<dom::DOMStringView>(*srcAttribute) : null,
+          dom::DOMStringView(*srcsetAttribute), sourceSize);
+      }
+    }
+    SetBestFitURLAndDPRFromImageCandidate(candidate);
+    _imageLoader->UpdateFromElementIgnoringPreviousError(relevantMutation);
+  }
+
+  void HTMLImageElement::UpdatePictureElement() noexcept
+  {
+    auto *parentPicture = DynamicDowncast<HTMLPictureElement>(ParentElement());
+    if (parentPicture == PictureElement())
+    {
+      return;
+    }
+    SetPictureElement(parentPicture);
+    SelectImageSource(RelevantMutation::Yes);
+  }
+
+  void HTMLImageElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                            Maybe<dom::DOMStringView> value,
+                                            dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      return;
+    }
+
+    if (localName == u8"alt")
+    {
+      if (auto *renderImage = DynamicDowncast<RenderImage>(Renderer()))
+      {
+        renderImage->UpdateAltText();
+      }
+    }
+    else if (localName == u8"src" || localName == u8"srcset" || localName == u8"sizes")
+    {
+      if (oldValue != value)
+      {
+        SelectImageSource(RelevantMutation::Yes);
+      }
+      else
+      {
+        _imageLoader->UpdateFromElementIgnoringPreviousErrorToSameValue();
+      }
+    }
+    else if (localName == u8"loading")
+    {
+      // No action needed for eager to lazy transition.
+      if (!HasLazyLoadableAttributeValue(value))
+      {
+        LoadDeferredImage();
+      }
+    }
+    // FIXME: referrerpolicy and crossorigin, once there are network loads.
+  }
+
+  void HTMLImageElement::OnInsert() noexcept
+  {
+    // Insert needs to complete first, before we start updating the loader. Loader dispatches events which
+    // could result in callbacks back to this node.
+    HTMLElement::OnInsert();
+
+    if (DynamicDowncast<HTMLPictureElement>(ParentElement()) != PictureElement())
+    {
+      UpdatePictureElement();
+      return;
+    }
+
+    // If we have been inserted from a renderer-less document,
+    // our loader may have not fetched the image, so do it now.
+    if (IsConnected() && !_imageLoader->Image())
+    {
+      _imageLoader->UpdateFromElement();
+    }
+  }
+
+  void HTMLImageElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    if (isSubtreeRoot && Is<HTMLPictureElement>(oldAncestor))
+    {
+      krys_debug_assert(PictureElement() == &oldAncestor);
+      SetPictureElement(nullptr);
+      SelectImageSource(RelevantMutation::Yes);
+    }
+
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+  }
+
+  void HTMLImageElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+    UpdatePictureElement();
+  }
+
+  void HTMLImageElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLElement::OnAdopt(oldDocument);
+    SelectImageSource(RelevantMutation::No);
+    _imageLoader->ElementDidMoveToNewDocument(oldDocument);
+    if (auto *picture = PictureElement())
+    {
+      picture->SourcesChanged();
+    }
+  }
+
+  RenderPtr<RenderElement> HTMLImageElement::CreateElementRenderer(RenderStyle &&style) noexcept
+  {
+    if (style.HasContent())
+    {
+      return RenderElement::CreateFor(*this, krys::move(style));
+    }
+
+    return CreateRenderer<RenderImage>(RenderObject::Type::Image, *this, krys::move(style), nullptr,
+                                       _imageDevicePixelRatio);
+  }
+
+  void HTMLImageElement::DidAttachRenderers() noexcept
+  {
+    auto *renderImage = DynamicDowncast<RenderImage>(Renderer());
+    if (!renderImage)
+    {
+      return;
+    }
+
+    auto &renderImageResource = renderImage->ImageResource();
+    if (renderImageResource.GetCachedImage())
+    {
+      return;
+    }
+    renderImageResource.SetCachedImage(CachedResourceHandle<CachedImage>(_imageLoader->Image()));
+
+    // If we have no image at all because we have no src attribute, set
+    // image height and width for the alt text instead.
+    if (!_imageLoader->Image() && !renderImageResource.GetCachedImage())
+    {
+      (void)renderImage->SetImageSizeForAltText();
+    }
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLImageElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                            dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null()
+        && (localName == u8"width" || localName == u8"height" || localName == u8"border"
+            || localName == u8"vspace" || localName == u8"hspace" || localName == u8"valign"))
+    {
+      return true;
+    }
+    return HTMLElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLImageElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                dom::DOMStringAtom namespaceURI,
+                                                                dom::DOMStringView value,
+                                                                css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"width")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Width, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(value, AttributeOrEmpty(u8"height"), style);
+      return;
+    }
+    if (localName == u8"height")
+    {
+      AddHTMLMultiLengthToStyle(style, css::PropertyId::Height, value);
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(AttributeOrEmpty(u8"width"), value, style);
+      return;
+    }
+    if (localName == u8"border")
+    {
+      ApplyBorderAttributeToStyle(value, style);
+      return;
+    }
+    if (localName == u8"vspace")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginTop, value);
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginBottom, value);
+      return;
+    }
+    if (localName == u8"hspace")
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginLeft, value);
+      AddHTMLLengthToStyle(style, css::PropertyId::MarginRight, value);
+      return;
+    }
+    if (localName == u8"align")
+    {
+      ApplyAlignmentAttributeToStyle(value, style);
+      return;
+    }
+    if (localName == u8"valign")
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::VerticalAlign, ToCSSOMString(value));
+      return;
+    }
+    HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+
+  void HTMLImageElement::CollectExtraStyleForPresentationalHints(css::MutableStyleProperties &style) noexcept
+  {
+    auto *sourceElement = SourceElement();
+    if (!sourceElement)
+    {
+      return;
+    }
+    auto widthAttrFromSource = sourceElement->GetAttribute(u8"width");
+    auto heightAttrFromSource = sourceElement->GetAttribute(u8"height");
+    // If both width and height attributes of <source> is undefined, the style's value should not
+    // be overwritten. Otherwise, <souce> will overwrite it. I.e., if <source> only has one attribute
+    // defined, the other one and aspect-ratio shouldn't be set to auto.
+    if (!widthAttrFromSource && !heightAttrFromSource)
+    {
+      return;
+    }
+
+    if (widthAttrFromSource)
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Width, *widthAttrFromSource);
+    }
+    else
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::Width, css::ValueId::Auto);
+    }
+
+    if (heightAttrFromSource)
+    {
+      AddHTMLLengthToStyle(style, css::PropertyId::Height, *heightAttrFromSource);
+    }
+    else
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::Height, css::ValueId::Auto);
+    }
+
+    if (widthAttrFromSource && heightAttrFromSource)
+    {
+      ApplyAspectRatioFromWidthAndHeightAttributesToStyle(*widthAttrFromSource, *heightAttrFromSource, style);
+    }
+    else
+    {
+      AddPropertyToPresentationalHintStyle(style, css::PropertyId::AspectRatio, css::ValueId::Auto);
+    }
   }
 
 #pragma endregion

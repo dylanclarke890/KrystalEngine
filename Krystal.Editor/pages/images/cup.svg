@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- A cup on its saucer, with a gradient on its body; the editor page shows it in <img>s. -->
+  <defs>
+    <linearGradient id="body" x1="0" x2="1">
+      <stop offset="0" stop-color="#4f6df5"/>
+      <stop offset="1" stop-color="#2b3fa8"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="22" cy="41" rx="18" ry="4" fill="#c3cad8"/>
+  <path d="M 34 20 h 4 a 6 6 0 0 1 0 12 h -5" fill="none" stroke="#2b3fa8" stroke-width="3"/>
+  <path d="M 8 16 h 28 v 10 a 14 12 0 0 1 -28 0 Z" fill="url(#body)"/>
+  <ellipse cx="22" cy="16" rx="14" ry="3" fill="#6f4e37"/>
+</svg>

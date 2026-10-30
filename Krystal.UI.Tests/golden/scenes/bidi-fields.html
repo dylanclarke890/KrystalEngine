@@ -1,0 +1,71 @@
+﻿<!doctype html>
+<!-- The "bidi-fields" scene: as "bidi-input", for text fields. Krystal.UI.Tests/tests/BidiEditing.cpp sends the
+     actions to a View as real input and compares the state after each with Chrome's
+     (bidi-fields.chrome-input.txt). In a field, the state is its id with selectionStart and selectionEnd (in UTF-16
+     code units), then "- -" (a field's caret and rects aren't script's to see), and its value. The fields' boxes
+     are set so their text sits where it does in Chrome's theme. -->
+<html data-width="360" data-height="200">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Noto Sans Arabic"; src: url("../../../third-party/noto-sans-arabic/NotoSansArabic-Regular.ttf"); }
+  html { width: 360px; background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 16px/24px "Liberation Sans", "Noto Sans Arabic"; color: #222222; }
+  input, textarea { display: block; box-sizing: border-box; width: 300px; margin: 0 0 4px; padding: 0 2px; border: 1px solid #888888; font: inherit; color: inherit; background: #ffffff; outline: none; resize: none; }
+  input { height: 26px; }
+  textarea { height: 50px; overflow: hidden; }
+</style>
+</head>
+<body>
+  <input id=i1 dir=rtl value="אבג abc דהו">
+  <input id=i2 value="abc אבג def">
+  <textarea id=x1 dir=rtl>אבג abc
+דהו 123</textarea>
+  <script type="text/x-actions">
+    click 300 21
+    click 279 21
+    click 262 21
+    click 240 21
+    click 100 21
+    key ArrowLeft
+    key ArrowLeft
+    key ArrowRight
+    key Home
+    key End
+    key ArrowRight shift
+    key ArrowRight shift
+    dblclick 264 21
+    click 296 21
+    type x
+    type ש
+    key Backspace
+    key Backspace
+    click 40 51
+    click 62 51
+    key ArrowRight
+    key ArrowRight
+    key ArrowLeft shift
+    drag 20 51 50 51
+    click 200 51
+    type ה
+    key Backspace
+    click 300 77
+    click 262 77
+    click 100 77
+    click 300 101
+    key ArrowLeft
+    key End
+    type 4
+    key Backspace
+  </script>
+  <script>
+    function recordState() {
+      const field = document.activeElement;
+      if (!field || (field.nodeName !== "INPUT" && field.nodeName !== "TEXTAREA"))
+        return "none none - - text=";
+      return `${field.id}:${field.selectionStart} ${field.id}:${field.selectionEnd} - - text=${field.value.replace(/\n/g, "\\n")}`;
+    }
+  </script>
+</body>
+</html>

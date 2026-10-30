@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Selectors/SelectorList.hpp"
-#include "Krystal.Booey/CSS/Selectors/MutableSelector.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -9,7 +9,9 @@ namespace krys::boo::css
   {
     size_t otherComponentCount = other.ComponentCount();
     if (!otherComponentCount)
+    {
       return;
+    }
 
     _selectors = CreateUniqueArray<Selector>(otherComponentCount);
     for (size_t i = 0uz; i < otherComponentCount; ++i)
@@ -20,7 +22,7 @@ namespace krys::boo::css
 
   SelectorList::SelectorList(MutableSelectorList &&selectors) noexcept
   {
-    assert(!selectors.empty());
+    krys_debug_assert(!selectors.empty());
 
     size_t flattenedSize = 0uz;
     for (size_t i = 0uz; i < selectors.size(); ++i)
@@ -32,7 +34,7 @@ namespace krys::boo::css
       }
     }
 
-    assert(flattenedSize);
+    krys_debug_assert(flattenedSize);
 
     _selectors = CreateUniqueArray<Selector>(flattenedSize);
     size_t arrayIndex = 0uz;
@@ -46,7 +48,7 @@ namespace krys::boo::css
       {
         {
           // Move item from the parser selector vector into _selectors without invoking destructor (Ugh.)
-          auto *currentSelector = current->release().release();
+          auto *currentSelector = current->ReleaseSelector().release();
           std::memcpy(static_cast<void *>(&_selectors[arrayIndex]), static_cast<void *>(currentSelector),
                       sizeof(Selector));
 
@@ -56,29 +58,26 @@ namespace krys::boo::css
 
         if (current != last)
         {
-          _selectors[arrayIndex].SetIsLastInComplexSelector(false);
+          _selectors[arrayIndex].SetFlag(SelectorFlag::IsLastInComplexSelector, false);
         }
 
         current = current->PrecedingComplexSelectorComponent();
-        assert(!_selectors[arrayIndex].IsLastInSelectorList() || (flattenedSize == arrayIndex + 1uz));
+        krys_debug_assert(!_selectors[arrayIndex].IsLastInSelectorList()
+                          || (flattenedSize == arrayIndex + 1uz));
 
         if (current)
         {
-          _selectors[arrayIndex].SetIsFirstInComplexSelector(false);
+          _selectors[arrayIndex].SetFlag(SelectorFlag::IsFirstInComplexSelector, false);
         }
 
         ++arrayIndex;
       }
 
-      assert(_selectors[arrayIndex - 1uz].IsFirstInComplexSelector());
+      krys_debug_assert(_selectors[arrayIndex - 1uz].IsFirstInComplexSelector());
     }
 
-    assert(flattenedSize == arrayIndex);
-    _selectors[arrayIndex - 1uz].SetIsLastInSelectorList(true);
-  }
-
-  SelectorList::SelectorList(UniqueArray<Selector> &&array) noexcept : _selectors(krys::move(array))
-  {
+    krys_debug_assert(flattenedSize == arrayIndex);
+    _selectors[arrayIndex - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, true);
   }
 
   bool SelectorList::operator==(const SelectorList &other) const noexcept
@@ -112,7 +111,7 @@ namespace krys::boo::css
       ++current;
     }
 
-    return std::distance(_selectors.get(), current) + 1uz;
+    return static_cast<size_t>(current - _selectors.get()) + 1uz;
   }
 
   size_t SelectorList::SelectorCount() const noexcept
@@ -137,10 +136,57 @@ namespace krys::boo::css
     return size;
   }
 
+  namespace
+  {
+    template <typename TFunctor>
+    KRYS_NODISCARD bool ForEachTagSelector(TFunctor &functor, const Selector *selector) noexcept
+    {
+      krys_debug_assert(selector);
+
+      do
+      {
+        if (functor(selector))
+        {
+          return true;
+        }
+        if (const auto *selectorList = selector->SubSelectors())
+        {
+          for (const auto &subSelector : *selectorList)
+          {
+            if (ForEachTagSelector(functor, &subSelector))
+            {
+              return true;
+            }
+          }
+        }
+      } while ((selector = selector->PrecedingComplexSelectorComponent()));
+
+      return false;
+    }
+
+    template <typename TFunctor>
+    KRYS_NODISCARD bool ForEachSelector(TFunctor &functor, const SelectorList &selectorList) noexcept
+    {
+      for (const auto &selector : selectorList)
+      {
+        if (ForEachTagSelector(functor, &selector))
+        {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  }
+
   bool SelectorList::HasExplicitNestingParent() const noexcept
   {
-    return ForEachSelector([](const Selector *selector) noexcept -> bool
-                           { return selector->HasExplicitNestingParent(); });
+    auto functor = [](const Selector *selector)
+    {
+      return selector->HasExplicitNestingParent();
+    };
+
+    return ForEachSelector(functor, *this);
   }
 
   bool SelectorList::HasOnlyNestingSelector() const noexcept
@@ -150,7 +196,12 @@ namespace krys::boo::css
       return false;
     }
 
-    auto singleSelector = _selectors.get();
+    auto singleSelector = FirstSelectorComponent();
+    if (!singleSelector)
+    {
+      return false;
+    }
+
     // Selector should be a single selector
     if (singleSelector->PrecedingComplexSelectorComponent())
     {
@@ -160,20 +211,25 @@ namespace krys::boo::css
     return singleSelector->Match() == SelectorMatch::NestingParent;
   }
 
-  CSSOMString SelectorList::SelectorText() const noexcept
+  CSSOMString SelectorList::SelectorsText() const noexcept
   {
-    CSSOMString output;
+    StringBuilder result;
+    BuildSelectorsText(result);
+    return krys::move(result).ToString();
+  }
 
+  void SelectorList::BuildSelectorsText(StringBuilder &builder) const noexcept
+  {
+    bool first = true;
     for (const auto &selector : *this)
     {
-      output += selector.SelectorText();
-      output += u8", ";
+      if (!first)
+      {
+        builder.Append(u8", ");
+      }
+      first = false;
+      builder.Append(selector.SelectorText());
     }
-
-    output.pop_back(); // Remove the last comma
-    output.pop_back(); // Remove the last space
-
-    return output;
   }
 
 #pragma region Static utility functions
@@ -205,13 +261,13 @@ namespace krys::boo::css
       new (NotNullTag {}, &selectors[aComponentCount + i]) Selector(b._selectors[i]);
     }
 
-    selectors[aComponentCount - 1uz].SetIsLastInSelectorList(false);
-    selectors[aComponentCount + bComponentCount - 1uz].SetIsLastInSelectorList(true);
+    selectors[aComponentCount - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, false);
+    selectors[aComponentCount + bComponentCount - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, true);
 
     return SelectorList {krys::move(selectors)};
   }
 
-  SelectorList SelectorList::Join(const SmallList<const SelectorList *> &lists) noexcept
+  SelectorList SelectorList::Join(const List<const SelectorList *> &lists) noexcept
   {
     size_t totalComponentCount = 0uz;
     for (auto list : lists)
@@ -235,11 +291,11 @@ namespace krys::boo::css
         new (NotNullTag {}, &selectors[componentIndex++]) Selector(list->_selectors[i]);
       }
 
-      selectors[componentIndex - 1uz].SetIsLastInSelectorList(false);
+      selectors[componentIndex - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, false);
     }
 
-    assert(componentIndex == totalComponentCount);
-    selectors[componentIndex - 1uz].SetIsLastInSelectorList(true);
+    krys_debug_assert(componentIndex == totalComponentCount);
+    selectors[componentIndex - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, true);
 
     return SelectorList {krys::move(selectors)};
   }
@@ -249,9 +305,9 @@ namespace krys::boo::css
     auto selectors = CreateUniqueArray<Selector>(1uz);
 
     new (NotNullTag {}, &selectors[0uz]) Selector(simpleSelector);
-    selectors[0].SetIsFirstInComplexSelector(true);
-    selectors[0].SetIsLastInComplexSelector(true);
-    selectors[0].SetIsLastInSelectorList(true);
+    selectors[0uz].SetFlag(SelectorFlag::IsFirstInComplexSelector, true);
+    selectors[0uz].SetFlag(SelectorFlag::IsLastInComplexSelector, true);
+    selectors[0uz].SetFlag(SelectorFlag::IsLastInSelectorList, true);
 
     return SelectorList {krys::move(selectors)};
   }
@@ -273,7 +329,7 @@ namespace krys::boo::css
     {
       new (NotNullTag {}, &selectors[i]) Selector(*selector);
     }
-    selectors[length - 1uz].SetIsLastInSelectorList(true);
+    selectors[length - 1uz].SetFlag(SelectorFlag::IsLastInSelectorList, true);
 
     return SelectorList {krys::move(selectors)};
   }

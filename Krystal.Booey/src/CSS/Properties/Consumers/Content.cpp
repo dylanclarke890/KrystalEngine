@@ -47,7 +47,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return nullptr;
   }
 
-  static RefPtr<Value> ConsumeCounterContent(TokenRange args, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeCounterContent(TokenRange args,
+                                                            PropertyParserState &state) noexcept
   {
     // counter()  =  counter( <counter-name>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counter
@@ -84,7 +85,7 @@ namespace krys::boo::css::PropertyParserHelpers
   }
 
   KRYS_NODISCARD static RefPtr<Value> ConsumeCountersContent(TokenRange args,
-                                                                PropertyParserState &state) noexcept
+                                                             PropertyParserState &state) noexcept
   {
     // counters() = counters( <counter-name>, <string>, <counter-style>? )
     // https://www.w3.org/TR/css-lists-3/#funcdef-counters
@@ -193,7 +194,7 @@ namespace krys::boo::css::PropertyParserHelpers
         if (type == ContentListType::VisibleContent && !tokens.IsAtEnd())
         {
           auto &value = tokens.Peek();
-          if (value.Type() == TokenType::Delim && value.IdentCodePoints() == u8"/")
+          if (value.Type() == TokenType::Delim && value.Delimiter() == U'/')
           {
             shouldEnd = true;
           }
@@ -219,9 +220,8 @@ namespace krys::boo::css::PropertyParserHelpers
         return nullptr;
       }
 
-      return ValuePair::CreateSlashSeparated(
-        ValueList::CreateSpaceSeparated(krys::move(visibleContent)),
-        ValueList::CreateSpaceSeparated(krys::move(altText)));
+      return ValuePair::CreateSlashSeparated(ValueList::CreateSpaceSeparated(krys::move(visibleContent)),
+                                             ValueList::CreateSpaceSeparated(krys::move(altText)));
     }
 
     return ValueList::CreateSpaceSeparated(krys::move(visibleContent));

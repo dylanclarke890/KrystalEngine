@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
+#include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
 namespace krys::boo::style
@@ -10,27 +12,24 @@ namespace krys::boo::style
 
 namespace krys::boo::css
 {
-  class Property;
+  class CustomPropertyValue;
   class Token;
-  class TokenRange;
-  class Value;
 
-  struct PropertyParserState;
-  struct ComputedStyleDependencies;
-  struct CustomPropertySyntax;
   struct ParserContext;
 
+  /// @brief Validates and parses custom property values and values containing `var()`/`env()`.
   class VariableParser
   {
   public:
     KRYS_NODISCARD static bool ContainsValidVariableReferences(TokenRange tokens,
                                                                const ParserContext &context) noexcept;
 
-    KRYS_NODISCARD static RefPtr<Value> ParseDeclarationValue(const CSSOMStringAtom &atom, TokenRange tokens,
-                                                              const ParserContext &context) noexcept;
+    KRYS_NODISCARD static RefPtr<CustomPropertyValue>
+      ParseDeclarationValue(const CSSOMStringAtom &variableName, TokenRange tokens,
+                            const ParserContext &context) noexcept;
 
     KRYS_NODISCARD static RefPtr<const style::CustomProperty>
-      ParseInitialValueForUniversalSyntax(const CSSOMStringAtom &atom, TokenRange tokens) noexcept;
+      ParseInitialValueForUniversalSyntax(const CSSOMStringAtom &variableName, TokenRange tokens) noexcept;
 
     KRYS_NODISCARD static bool IsValidVariableName(const Token &token) noexcept;
   };

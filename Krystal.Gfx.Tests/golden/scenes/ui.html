@@ -1,0 +1,29 @@
+﻿<!doctype html>
+<!-- The "ui" golden scene; Krystal.Gfx.Tests/tests/Render2D/Golden.cpp draws the same. -->
+<html data-width="360" data-height="260">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #ffffff; overflow: hidden; }
+  div, svg { position: absolute; box-sizing: border-box; }
+</style>
+</head>
+<body>
+  <div style="left: 0; top: 0; width: 360px; height: 40px; background: linear-gradient(to right, #4f6df5, #b04ff5)"></div>
+  <div style="left: 16px; top: 56px; width: 140px; height: 100px; border-radius: 10px; border: 3px solid #33aa77; background: radial-gradient(circle 50px at 40px 40px, #ffffff, #99cccc)"></div>
+  <div style="left: 176px; top: 56px; width: 100px; height: 100px; border-radius: 50px; background: conic-gradient(from 45deg, red, yellow, lime, aqua, blue, magenta, red)"></div>
+  <div style="left: 296px; top: 86px; width: 40px; height: 40px; background: #ee0044; transform: rotate(20deg)"></div>
+  <div style="left: 16px; top: 172px; width: 140px; height: 72px; border-radius: 14px; overflow: hidden; background: #222233">
+    <div style="left: 60px; top: 28px; width: 120px; height: 60px; background: #f5a623"></div>
+  </div>
+  <div style="left: 176px; top: 166px; width: 60px; height: 50px; opacity: 0.5">
+    <div style="left: 0; top: 0; width: 40px; height: 40px; border-radius: 20px; background: #ff0000"></div>
+    <div style="left: 20px; top: 10px; width: 40px; height: 40px; border-radius: 20px; background: #0000ff"></div>
+  </div>
+  <div style="left: 250px; top: 176px; width: 90px; height: 40px; background: #3366ff"></div>
+  <div style="left: 270px; top: 166px; width: 50px; height: 50px; border-radius: 25px; background: #33cc66; mix-blend-mode: multiply"></div>
+  <svg style="left: 0; top: 0" width="360" height="260" viewBox="0 0 360 260">
+    <path d="M181 252 L221 228 L261 252 L301 228 L341 252" fill="none" stroke="#333333" stroke-width="3" stroke-linejoin="round"></path>
+  </svg>
+</body>
+</html>

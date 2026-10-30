@@ -1,22 +1,81 @@
 ﻿#include "Krystal.Booey/HTML/HTMLObjectElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
 {
   HTMLObjectElement::HTMLObjectElement(dom::Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Object)
+      : HTMLPlugInElement(document, HTMLElementInterface::Object)
   {
+  }
+
+  HTMLObjectElement::~HTMLObjectElement() noexcept
+  {
+    ClearForm();
+  }
+
+  bool HTMLObjectElement::AppendFormData(DOMFormData &) noexcept
+  {
+    // FIXME: A plug-in's form value (PluginViewBase::getFormValue), once there are plug-ins.
+    return false;
+  }
+
+  void HTMLObjectElement::OnInsert() noexcept
+  {
+    HTMLPlugInElement::OnInsert();
+    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    if (!IsConnected())
+    {
+      ResetFormOwner();
+    }
+  }
+
+  void HTMLObjectElement::OnPostConnection() noexcept
+  {
+    HTMLPlugInElement::OnPostConnection();
+    ResetFormOwner();
+  }
+
+  void HTMLObjectElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLPlugInElement::OnRemove(isSubtreeRoot, oldAncestor);
+    FormListedElement::ElementRemovedFromAncestor(*this, oldAncestor.IsConnected());
+  }
+
+  void HTMLObjectElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLPlugInElement::OnMove(isSubtreeRoot, oldAncestor);
+    FormListedElement::ElementRemovedFromAncestor(*this, false);
+    FormListedElement::ElementInsertedIntoAncestor(*this, IsConnected());
+    ResetFormOwner();
+  }
+
+  void HTMLObjectElement::OnAdopt(dom::Document &oldDocument) noexcept
+  {
+    HTMLPlugInElement::OnAdopt(oldDocument);
+    FormListedElement::DidMoveToNewDocument();
+  }
+
+  void HTMLObjectElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLPlugInElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI == dom::DOMStringAtom::Null())
+    {
+      FormListedElement::ParseAttribute(localName, value);
+    }
   }
 #pragma region HTMLObjectElement
 
-  dom::ExceptionOr<dom::USVString> HTMLObjectElement::Data() const noexcept
+  dom::USVString HTMLObjectElement::Data() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"data");
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"data");
   }
 
-  dom::ExceptionOr<void> HTMLObjectElement::Data(dom::USVString &&value) noexcept
+  void HTMLObjectElement::Data(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"data", krys::move(value));
+    return Reflection::ReflectURL<dom::USVString>(*this, u8"data", krys::move(value));
   }
 
   dom::DOMString HTMLObjectElement::Type() const noexcept
@@ -171,6 +230,39 @@ namespace krys::boo::html
   void HTMLObjectElement::Border(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"border", krys::move(value));
+  }
+
+#pragma endregion
+
+#pragma region Presentational hints
+
+  bool HTMLObjectElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                             dom::DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == dom::DOMStringAtom::Null() && (localName == u8"border"))
+    {
+      return true;
+    }
+    return HTMLPlugInElement::HasPresentationalHintsForAttribute(localName, namespaceURI);
+  }
+
+  void HTMLObjectElement::CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                                                 dom::DOMStringAtom namespaceURI,
+                                                                 dom::DOMStringView value,
+                                                                 css::MutableStyleProperties &style) noexcept
+  {
+    using namespace presentational_hints;
+    if (namespaceURI != dom::DOMStringAtom::Null())
+    {
+      HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+      return;
+    }
+    if (localName == u8"border")
+    {
+      ApplyBorderAttributeToStyle(value, style);
+      return;
+    }
+    HTMLPlugInElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
   }
 
 #pragma endregion

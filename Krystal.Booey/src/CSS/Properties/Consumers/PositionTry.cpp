@@ -42,9 +42,8 @@ namespace krys::boo::css::PropertyParserHelpers
       auto tryRuleIdent = ConsumeDashedIdentRaw(tokens);
 
       SmallList<ValueId, 5uz> tryTactics;
-      while (auto tactic =
-               ConsumeIdentRaw<ValueId::FlipBlock, ValueId::FlipInline, ValueId::FlipStart,
-                               ValueId::FlipX, ValueId::FlipY>(tokens))
+      while (auto tactic = ConsumeIdentRaw<ValueId::FlipBlock, ValueId::FlipInline, ValueId::FlipStart,
+                                           ValueId::FlipX, ValueId::FlipY>(tokens))
       {
         if (std::ranges::contains(tryTactics, *tactic))
         {

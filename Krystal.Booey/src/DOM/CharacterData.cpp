@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
 namespace krys::boo::dom
@@ -53,21 +54,25 @@ namespace krys::boo::dom
 
   ExceptionOr<void> CharacterData::Before(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::After(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
+    html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Remove(*this);
   }
 

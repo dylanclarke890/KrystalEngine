@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/String.hpp"
+#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Array.hpp"
 #include "Krystal.Core/Types/HashMap.hpp"
-#include "Krystal.Core/Numeric.hpp"
 #include "Krystal.Core/Types/Span.hpp"
+#include "Krystal.Core/Types/String.hpp"
 #include <algorithm>
 
 namespace krys::boo::html

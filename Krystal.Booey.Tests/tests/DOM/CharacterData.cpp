@@ -1,4 +1,5 @@
-﻿#include "Krystal.Booey/DOM/AbortSignal.hpp"
+﻿#include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -273,5 +273,5 @@ namespace krys::boo::dom::tests
     REQUIRE(data.PartialRange->EndOffset() == 0uz);
   }
 
-  // TODO(test): none of the above tests check that mutation records are queued
+  // FIXME: None of the above tests check that mutation records are queued
 }

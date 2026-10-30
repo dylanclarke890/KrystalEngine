@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Values/Types.hpp"
 #include "Krystal.Booey/Graphics/Color/Color.hpp"
-#include "Krystal.Booey/Graphics/Color/ColorTypes.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
+#include "Krystal.Core/Text/StringBuilder.hpp"
 
 namespace krys::boo::css
 {
@@ -9,15 +11,15 @@ namespace krys::boo::css
 
   struct HexColor
   {
-    SRGBA<uint8> value;
+    SRGBA<uint8> Value;
 
-    bool operator==(const HexColor &) const = default;
+    KRYS_NODISCARD constexpr bool operator==(const HexColor &) const noexcept = default;
   };
 
   KRYS_NODISCARD inline boo::Color CreateColor(const HexColor &unresolved,
                                                PlatformColorResolutionState &) noexcept
   {
-    return boo::Color {unresolved.value};
+    return boo::Color {unresolved.Value};
   }
 
   KRYS_NODISCARD constexpr bool ContainsCurrentColor(const HexColor &) noexcept
@@ -29,4 +31,29 @@ namespace krys::boo::css
   {
     return false;
   }
+
+  template <>
+  struct Serialiser<HexColor>
+  {
+    void operator()(StringBuilder &builder, const SerialisationContext &context,
+                    const HexColor &value) noexcept;
+  };
+
+  template <>
+  struct ComputedStyleDependenciesCollector<HexColor>
+  {
+    constexpr void operator()(ComputedStyleDependencies &, const HexColor &) noexcept
+    {
+    }
+  };
+
+  template <>
+  struct ValueChildrenVisitor<HexColor>
+  {
+    constexpr IterationStatus operator()(KRYS_NOESCAPE const Func<IterationStatus(Value &)> &,
+                                         const HexColor &) noexcept
+    {
+      return IterationStatus::Continue;
+    }
+  };
 }

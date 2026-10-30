@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<!-- The "filters" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page. -->
+<html data-width="360" data-height="240">
+<head>
+<meta charset="utf-8">
+<style>
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 0; }
+  div { position: absolute; box-sizing: border-box; }
+  .tile { width: 40px; height: 40px; background: linear-gradient(135deg, #ef476f, #ffd166 50%, #118ab2); }
+  .tile > div { left: 8px; top: 8px; width: 24px; height: 24px; border-radius: 6px; background: #06d6a0; }
+</style>
+</head>
+<body>
+  <!-- Colour matrices, a tile each. -->
+  <div class="tile" style="left: 16px; top: 16px; filter: grayscale(1)"><div></div></div>
+  <div class="tile" style="left: 72px; top: 16px; filter: sepia(1)"><div></div></div>
+  <div class="tile" style="left: 128px; top: 16px; filter: saturate(3)"><div></div></div>
+  <div class="tile" style="left: 184px; top: 16px; filter: hue-rotate(90deg)"><div></div></div>
+  <div class="tile" style="left: 240px; top: 16px; filter: invert(1)"><div></div></div>
+  <div class="tile" style="left: 296px; top: 16px; filter: invert(0.6)"><div></div></div>
+
+  <!-- Component transfers and opacity, as colour matrices. -->
+  <div class="tile" style="left: 16px; top: 88px; filter: brightness(1.5)"><div></div></div>
+  <div class="tile" style="left: 72px; top: 88px; filter: contrast(2)"><div></div></div>
+  <div class="tile" style="left: 128px; top: 88px; filter: opacity(0.5)"><div></div></div>
+
+  <!-- Blur and drop shadows, which reach past the box. -->
+  <div class="tile" style="left: 184px; top: 88px; filter: blur(3px)"><div></div></div>
+  <div class="tile" style="left: 240px; top: 88px; filter: drop-shadow(4px 4px 3px rgba(0, 0, 0, 0.6))"><div></div></div>
+  <div style="left: 296px; top: 88px; width: 40px; height: 40px; border-radius: 50%; border: 6px solid #118ab2; filter: drop-shadow(0 0 4px #ef476f)"></div>
+
+  <!-- Chains: a blurred grayscale, and a shadow of a translucent sepia. -->
+  <div class="tile" style="left: 16px; top: 168px; filter: grayscale(1) blur(2px)"><div></div></div>
+  <div class="tile" style="left: 72px; top: 168px; filter: sepia(1) opacity(0.7) drop-shadow(3px 3px 0 #073b4c)"><div></div></div>
+
+  <!-- A filtered group whose child overflows it, and a filter inside opacity. -->
+  <div style="left: 136px; top: 168px; width: 40px; height: 40px; background: #073b4c; filter: blur(1px)">
+    <div style="left: 24px; top: 16px; width: 32px; height: 32px; background: #ffd166"></div>
+  </div>
+  <div style="left: 216px; top: 168px; width: 48px; height: 48px; opacity: 0.5">
+    <div class="tile" style="left: 4px; top: 4px; filter: hue-rotate(180deg) drop-shadow(2px 2px 2px black)"><div></div></div>
+  </div>
+
+  <!-- filter: none and an identity filter paint as normal. -->
+  <div class="tile" style="left: 296px; top: 168px; filter: saturate(1) blur(0)"><div></div></div>
+</body>
+</html>

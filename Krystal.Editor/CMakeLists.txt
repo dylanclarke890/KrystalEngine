@@ -3,7 +3,8 @@ add_executable(Krystal.Editor)
 target_link_libraries(Krystal.Editor
 	PUBLIC Krystal.Core
 	PUBLIC Krystal.Gfx
-	PUBLIC Krystal.Gfx.OpenGL
+	PUBLIC Krystal.PAL
+	PUBLIC Krystal.UI
 )
 
 set_target_properties(Krystal.Editor
@@ -20,7 +21,15 @@ target_compile_features(Krystal.Editor
 
 target_compile_options(Krystal.Editor
   PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /MP /utf-8 /bigobj>
+)
+
+# The editor draws its labels in Liberation Sans, from the repository, and loads its page from the source tree
+# so edits show on reload.
+target_compile_definitions(Krystal.Editor
+  PRIVATE
+    KRYS_EDITOR_FONTS_DIR="${CMAKE_SOURCE_DIR}/third-party/liberation-fonts"
+    KRYS_EDITOR_PAGES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/pages"
 )
 
 target_sources(Krystal.Editor
@@ -30,6 +39,7 @@ target_sources(Krystal.Editor
 			include
 		FILES
 			include/Krystal.Editor/Application.hpp
+			include/Krystal.Editor/BooeyScene.hpp
 			include/Krystal.Editor/Editor.hpp
 		
 	PRIVATE

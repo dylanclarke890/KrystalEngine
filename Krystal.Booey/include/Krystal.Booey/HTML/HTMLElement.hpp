@@ -1,10 +1,16 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/Enums/PopoverState.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
+#include "Krystal.Booey/DOM/ToggleEventTask.hpp"
+#include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementFlags.hpp"
 #include "Krystal.Booey/HTML/Enums/HTMLElementInterface.hpp"
+#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
+#include "Krystal.Booey/HTML/Mixins/HTMLOrSVGOrMathMLElement.hpp"
+#include "Krystal.Core/Colour/ColourTypes.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
@@ -12,12 +18,20 @@ namespace krys::boo::dom
   class Document;
 }
 
+namespace krys::boo::dom
+{
+  class NodeList;
+}
+
 namespace krys::boo::html
 {
   class ElementInternals;
+  class FormAssociatedElement;
+  class FormListedElement;
+  class ValidatedFormListedElement;
 
   /// @see https://html.spec.whatwg.org/#htmlelement
-  class HTMLElement : public dom::Element
+  class HTMLElement : public dom::StyledElement
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
@@ -30,6 +44,10 @@ namespace krys::boo::html
     HTMLElement(dom::Document &document, HTMLElementInterface interface,
                 HTMLElementFlags flags = HTMLElementFlags::None,
                 dom::NodeFlags nodeFlags = dom::NodeFlags::None) noexcept;
+    /// @brief Constructs an element with its tag name, for elements made outside the element factory (the
+    /// elements of user agent shadow trees), which otherwise gives elements their names.
+    HTMLElement(dom::Document &document, HTMLElementInterface interface, dom::DOMStringAtom localName,
+                HTMLElementFlags flags, dom::NodeFlags nodeFlags) noexcept;
 
   public:
     HTMLElement(dom::Document &document) noexcept;
@@ -71,6 +89,9 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-hidden
     void Hidden(double value) noexcept;
+
+    /// @brief Whether the `hidden` attribute is in the hidden until found state.
+    KRYS_NODISCARD bool IsHiddenUntilFound() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-inert
     KRYS_NODISCARD bool Inert() const noexcept;
@@ -135,12 +156,29 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
     KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;
 
-    // TODO(HTMLELEMENT, POPOVER, HTML): Implement the popover API.
-    // The popover API - https://html.spec.whatwg.org/#dom-showpopover
-    // undefined showPopover(optional ShowPopoverOptions options = {});
-    // undefined hidePopover();
-    // boolean togglePopover(optional (TogglePopoverOptions or boolean) options = {});
-    // [CEReactions] attribute dom::DOMString? popover;
+    /// @brief Shows the popover, invoked by @p options' source.
+    /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it isn't
+    /// connected, its document isn't fully active, it's a modal dialog, another popover is being shown or
+    /// hidden, or its `popover` attribute changes as other popovers hide.
+    /// @see https://html.spec.whatwg.org/#dom-showpopover
+    dom::ExceptionOr<void> ShowPopover(const ShowPopoverOptions &options = {}) noexcept;
+
+    /// @return A `NotSupportedError` if the element isn't a popover; an `InvalidStateError` if it's a modal
+    /// dialog.
+    /// @see https://html.spec.whatwg.org/#dom-hidepopover
+    dom::ExceptionOr<void> HidePopover() noexcept;
+
+    /// @brief Hides the popover if it's showing, else shows it, unless @p options forces one or the other.
+    /// @return Whether the popover is showing, or the exceptions of `ShowPopover` and `HidePopover`.
+    /// @see https://html.spec.whatwg.org/#dom-togglepopover
+    dom::ExceptionOr<bool>
+      TogglePopover(const TogglePopoverOptionsOrBool &options = TogglePopoverOptions {}) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-popover
+    KRYS_NODISCARD Maybe<dom::DOMString> Popover() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-popover
+    void Popover(Maybe<dom::DOMString> &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
@@ -156,12 +194,116 @@ namespace krys::boo::html
 
 #pragma endregion
 
-    // TODO(HTMLELEMENT, HTML): HTMLElement mixins:
-    // HTMLElement includes GlobalEventHandlers;
+    /// @brief The colour a presentational attribute (`bgcolor`, `color`, `text`, ...) specifies, if any.
+    /// @see https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value
+    KRYS_NODISCARD static Maybe<SRGBA<uint8>> ParseLegacyColorValue(dom::DOMStringView string) noexcept;
+
+#pragma region HTMLOrSVGOrMathMLElement Mixin - https://html.spec.whatwg.org/#htmlorsvgormathmlelement
+
+    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    KRYS_NODISCARD int32 TabIndex() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-tabindex
+    void TabIndex(int32 value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::TabIndex(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    KRYS_NODISCARD bool Autofocus() const noexcept
+    {
+      return html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-fe-autofocus
+    void Autofocus(bool value) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Autofocus(*this, value);
+    }
+
+    /// @see https://html.spec.whatwg.org/#dom-focus
+    void Focus(const dom::FocusOptions &options = {}) noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Focus(*this, options);
+    }
+
+    /// @brief Runs the element's access key action: focuses it if it's focusable, then clicks it.
+    /// @return Whether the click was dispatched.
+    virtual bool AccessKeyAction(bool sendMouseEvents) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-blur
+    void Blur() noexcept
+    {
+      html::mixins::HTMLOrSVGOrMathMLElement::Blur(*this);
+    }
+
+#pragma endregion
+
+#pragma region GlobalEventHandlers, DocumentAndElementEventHandlers - https://html.spec.whatwg.org/#event-handler-attributes
+
+    KRYS_GLOBAL_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+    KRYS_DOCUMENT_AND_ELEMENT_EVENT_HANDLERS(KRYS_DECLARE_EVENT_HANDLER)
+
+#pragma endregion
+
+    // FIXME: HTMLElement mixins:
     // HTMLElement includes ElementContentEditable;
-    // HTMLElement includes HTMLOrSVGOrMathMLElement;
+
+    /// @brief The editability of @p node from the `contenteditable` attributes of it and its ancestors, for
+    /// nodes in shadow trees (whose style isn't used for editability).
+    KRYS_NODISCARD static dom::Node::Editability
+      EditabilityFromContentEditableAttr(const dom::Node &node) noexcept;
 
   protected:
+#pragma region Presentational hints - https://html.spec.whatwg.org/#presentational-hints
+
+    enum class AllowZeroValue : bool
+    {
+      No,
+      Yes
+    };
+
+    KRYS_NODISCARD bool
+      HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,
+                                         dom::DOMStringAtom namespaceURI) const noexcept override;
+    void CollectPresentationalHintsForAttribute(dom::DOMStringAtom localName, dom::DOMStringAtom namespaceURI,
+                                                dom::DOMStringView value,
+                                                css::MutableStyleProperties &style) noexcept override;
+
+    /// @param value The `border` attribute's value, or null if there isn't one.
+    KRYS_NODISCARD uint32 ParseBorderWidthAttribute(Maybe<dom::DOMStringView> value) const noexcept;
+    void ApplyBorderAttributeToStyle(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+    void ApplyAlignmentAttributeToStyle(dom::DOMStringView alignment,
+                                        css::MutableStyleProperties &style) noexcept;
+    void ApplyAspectRatioFromWidthAndHeightAttributesToStyle(dom::DOMStringView widthAttribute,
+                                                             dom::DOMStringView heightAttribute,
+                                                             css::MutableStyleProperties &style) noexcept;
+    void ApplyAspectRatioWithoutDimensionalRulesFromWidthAndHeightAttributesToStyle(
+      dom::DOMStringView widthAttribute, dom::DOMStringView heightAttribute,
+      css::MutableStyleProperties &style) noexcept;
+
+    // https://www.w3.org/TR/html4/sgml/dtd.html#Length, including pixel and percentage values.
+    void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value,
+                              AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+    // https://www.w3.org/TR/html4/sgml/dtd.html#MultiLength, including pixel, percentage, and relative
+    // values.
+    void AddHTMLMultiLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                                   dom::DOMStringView value) noexcept;
+    // https://www.w3.org/TR/html4/sgml/dtd.html#Pixels, including pixel value.
+    void AddHTMLPixelsToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value) noexcept;
+    void AddHTMLColorToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                             dom::DOMStringView attributeValue) noexcept;
+
+    /// @brief The value of the attribute in the null namespace, or an empty view if there isn't one.
+    KRYS_NODISCARD dom::DOMString AttributeOrEmpty(dom::DOMStringView localName) const noexcept;
+
+#pragma endregion
+
 #pragma region HTMLElement Flags
 
     void SetHTMLElementFlag(HTMLElementFlags flag) noexcept
@@ -181,11 +323,41 @@ namespace krys::boo::html
 
 #pragma endregion
 
+#pragma region Popovers
+
+  public:
+    /// @brief Shows the popover, invoked by @p source; the exceptions of `ShowPopover` are returned only if
+    /// @p throwExceptions.
+    /// @see https://html.spec.whatwg.org/#show-popover
+    dom::ExceptionOr<void> ShowPopoverInternal(HTMLElement *source, bool throwExceptions = true) noexcept;
+
+    /// @brief Hides the popover, and the popovers above it in its stack; the exceptions of `HidePopover` are
+    /// returned only if @p throwExceptions.
+    /// @param source The element that hid it, which `beforetoggle` and `toggle` carry.
+    /// @see https://html.spec.whatwg.org/#hide-popover-algorithm
+    dom::ExceptionOr<void> HidePopoverInternal(dom::FocusPreviousElement focusPreviousElement,
+                                               dom::FireEvents fireEvents, bool throwExceptions,
+                                               HTMLElement *source) noexcept;
+
+    /// @brief The popover commands, for a popover.
+    KRYS_NODISCARD bool IsValidCommandType(dom::CommandType command) const noexcept override;
+    /// @brief Shows or hides the element, if it's a popover, for the popover commands.
+    bool HandleCommandInternal(HTMLButtonElement &invoker, dom::CommandType command) noexcept override;
+
+  protected:
+#pragma endregion
+
 #pragma region Extensibility Hooks
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
 
     void OnInsert() noexcept override
     {
-      // TODO(HTMLELEMENT): Implement the insertion steps for an HTMLElement.
+      FocusAlgorithms::AutofocusInsertionSteps(*this);
+
+      // FIXME: Implement the insertion steps for an HTMLElement.
       // If insertedNode is a form-associated element or the ancestor of a form-associated element:
       // - If the form-associated element's parser inserted flag is set, then return.
       // - Reset the form owner of the form-associated element.
@@ -196,7 +368,9 @@ namespace krys::boo::html
 
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
-      // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
+      // FIXME: Implement the removal steps for an HTMLElement.
 
       // Let document be removedNode's node document.
 
@@ -214,13 +388,20 @@ namespace krys::boo::html
       // If removedNode is a form-associated element with a non-null form owner and removedNode and its form
       // owner are no longer in the same tree, then reset the form owner of removedNode.
       //
+
       // If removedNode's popover attribute is not in the No Popover state, then run the hide popover
       // algorithm given removedNode, false, false, false, and null.
+      if (GetPopoverData())
+      {
+        (void)HidePopoverInternal(dom::FocusPreviousElement::No, dom::FireEvents::No, false, nullptr);
+      }
     }
 
     void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override
     {
-      // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
+      // FIXME: Implement the move steps for an HTMLElement.
 
       // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
       // element moving steps for movedNode's local name, then run the corresponding HTML element moving steps
@@ -232,7 +413,114 @@ namespace krys::boo::html
 
 #pragma endregion
 
+  public:
+    /// @brief Whether the element is a text control's inner text element, which holds its editable text.
+    KRYS_NODISCARD virtual bool IsTextControlInnerTextElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSearchFieldResultsButtonElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSpinButtonElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSliderThumbElement() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD virtual bool IsSliderContainerElement() const noexcept
+    {
+      return false;
+    }
+
+#pragma region Form Controls
+
+    KRYS_NODISCARD virtual FormAssociatedElement *AsFormAssociatedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual FormListedElement *AsFormListedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    KRYS_NODISCARD virtual ValidatedFormListedElement *AsValidatedFormListedElement() noexcept
+    {
+      return nullptr;
+    }
+
+    /// @see https://html.spec.whatwg.org/#category-label
+    KRYS_NODISCARD virtual bool IsLabelable() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Whether the element can be actually disabled: a form control, an optgroup or an option.
+    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    KRYS_NODISCARD bool CanBeActuallyDisabled() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#concept-element-disabled
+    KRYS_NODISCARD virtual bool IsActuallyDisabled() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#interactive-content
+    KRYS_NODISCARD virtual bool IsInteractiveContent() const noexcept
+    {
+      return false;
+    }
+
+    KRYS_NODISCARD bool MatchesReadWritePseudoClass() const noexcept override;
+
+    /// @brief The labels of a labelable element, in tree order; null for other elements.
+    /// @see https://html.spec.whatwg.org/#dom-lfe-labels
+    KRYS_NODISCARD RefPtr<dom::NodeList> Labels() noexcept;
+
+#pragma endregion
+
+  protected:
 #pragma region Type Checks
+
+    /// @brief Whether the element is a form control: a button, fieldset, input, output, select or textarea.
+    KRYS_NODISCARD bool IsFormControlElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Button || _interface == HTMLElementInterface::FieldSet
+             || _interface == HTMLElementInterface::Input || _interface == HTMLElementInterface::Output
+             || _interface == HTMLElementInterface::Select || _interface == HTMLElementInterface::TextArea;
+    }
+
+    KRYS_NODISCARD bool IsHTMLFontElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Font;
+    }
+
+    KRYS_NODISCARD bool IsHTMLFrameSetElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::FrameSet;
+    }
+
+    KRYS_NODISCARD bool IsHTMLMarqueeElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Marquee;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTablePartElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::TableCell || _interface == HTMLElementInterface::TableCol
+             || _interface == HTMLElementInterface::TableRow
+             || _interface == HTMLElementInterface::TableSection;
+    }
+
+    KRYS_NODISCARD bool IsHTMLPlugInElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Embed || _interface == HTMLElementInterface::Object;
+    }
 
     KRYS_NODISCARD bool IsHTMLAreaElement() const noexcept
     {
@@ -436,7 +724,7 @@ namespace krys::boo::html
 
     KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept
     {
-      return _interface == HTMLElementInterface::Pre;
+      return _interface == HTMLElementInterface::Picture;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
@@ -484,6 +772,11 @@ namespace krys::boo::html
     KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
     {
       return _interface == HTMLElementInterface::Style;
+    }
+
+    KRYS_NODISCARD bool IsHTMLSummaryElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::Summary;
     }
 
     KRYS_NODISCARD bool IsHTMLTableElement() const noexcept
@@ -546,6 +839,11 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::UList;
     }
 
+    KRYS_NODISCARD bool IsHTMLMaybeFormAssociatedCustomElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::MaybeFormAssociatedCustom;
+    }
+
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLVideoElement() const noexcept
@@ -553,7 +851,60 @@ namespace krys::boo::html
       return _interface == HTMLElementInterface::Video;
     }
 
+    KRYS_NODISCARD bool IsHTMLBDIElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::BDI;
+    }
+
+    KRYS_NODISCARD bool IsHTMLWBRElement() const noexcept
+    {
+      return _interface == HTMLElementInterface::WBR;
+    }
+
 #pragma endregion
+  private:
+    enum class AllowPercentage : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class UseCSSPXAsUnitType : bool
+    {
+      No,
+      Yes
+    };
+
+    enum class IsMultiLength : bool
+    {
+      No,
+      Yes
+    };
+
+    void AddHTMLLengthToStyle(css::MutableStyleProperties &style, css::PropertyId property,
+                              dom::DOMStringView value, AllowPercentage allowPercentage,
+                              UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
+                              AllowZeroValue allowZeroValue = AllowZeroValue::Yes) noexcept;
+    void AddParsedWidthAndHeightToAspectRatioList(double width, double height,
+                                                  css::MutableStyleProperties &style) noexcept;
+    void MapLanguageAttributeToLocale(dom::DOMStringView value, css::MutableStyleProperties &style) noexcept;
+
+    /// @brief Whether the popover can be shown (@p expectedToBeShowing false) or hidden: false if it already
+    /// is.
+    /// @see https://html.spec.whatwg.org/#check-popover-validity
+    KRYS_NODISCARD dom::ExceptionOr<bool>
+      CheckPopoverValidity(bool expectedToBeShowing, dom::Document *expectedDocument) const noexcept;
+    /// @see https://html.spec.whatwg.org/#popover-focusing-steps
+    void RunPopoverFocusingSteps() noexcept;
+    /// @see https://html.spec.whatwg.org/#queue-a-popover-toggle-event-task
+    void QueuePopoverToggleEventTask(dom::ToggleState oldState, dom::ToggleState newState,
+                                     HTMLElement *source) noexcept;
+    /// @return Whether the event wasn't canceled.
+    bool FirePopoverBeforeToggleEvent(dom::ToggleState oldState, dom::ToggleState newState, bool cancelable,
+                                      HTMLElement *source) noexcept;
+    /// @brief Sets the popover's trigger, which becomes its invoked popover's invoker.
+    void SetInvoker(HTMLElement *invoker) noexcept;
+    void PopoverAttributeChanged(Maybe<dom::DOMStringView> value) noexcept;
   };
 }
 

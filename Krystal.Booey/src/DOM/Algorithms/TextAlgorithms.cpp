@@ -5,8 +5,13 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/CDATASection.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
+#include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Style/ChildChangeInvalidation.hpp"
+#include "Krystal.Core/Types/Maybe.hpp"
 
 namespace krys::boo::dom
 {
@@ -27,11 +32,36 @@ namespace krys::boo::dom
     MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(node),
                                                     DOMStringAtom::Null(), DOMStringAtom::Null(), node._data,
                                                     {}, {}, nullptr, nullptr);
-    node._data.insert(offset, data);
-    auto deleteOffset = offset + data.size();
-    node._data.erase(deleteOffset, count);
+    {
+      // The change to the parent's children that style invalidation sees.
+      auto *parent = node.ParentNode();
+      ContainerNode::ChildChange childChange {
+        ContainerNode::ChildChange::Type::TextChanged, nullptr,
+        TreeQueries::PreviousElementSibling(node),     TreeQueries::NextElementSibling(node),
+        ContainerNode::ChildChange::Source::API,       ContainerNode::ChildChange::AffectsElements::No};
+      Maybe<style::ChildChangeInvalidation> styleInvalidation;
+      if (parent)
+      {
+        styleInvalidation.emplace(*parent, childChange);
+      }
+
+      node._data.insert(offset, data);
+      auto deleteOffset = offset + data.size();
+      node._data.erase(deleteOffset, count);
+    }
 
     LiveRangeUpdater::CharacterDataReplaced(node, offset, count, data.size());
+    node.NodeDocument().Selection().TextWasReplaced(
+      node, static_cast<uint32>(offset), static_cast<uint32>(count), static_cast<uint32>(data.size()));
+
+    if (auto *text = DynamicDowncast<Text>(node))
+    {
+      text->UpdateRendererAfterContentChange(offset, count);
+    }
+    else if (auto *processingInstruction = DynamicDowncast<ProcessingInstruction>(node))
+    {
+      processingInstruction->CheckStyleSheet();
+    }
 
     if (auto parent = node.ParentNode())
     {

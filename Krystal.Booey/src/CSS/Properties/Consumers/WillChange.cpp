@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/WillChange.hpp"
+#include "Krystal.Booey/CSS/Parser/KeywordLookup.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
@@ -8,8 +9,7 @@
 
 namespace krys::boo::css::PropertyParserHelpers
 {
-  KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens,
-                                                    PropertyParserState &state) noexcept
+  KRYS_NODISCARD RefPtr<Value> ConsumeWillChange(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'will-change'> = auto | <animateable-feature>#
     // https://drafts.csswg.org/css-will-change/#propdef-will-change
@@ -45,7 +45,7 @@ namespace krys::boo::css::PropertyParserHelpers
             return nullptr;
           }
 
-          PropertyId propertyId = FindProperty(tokens.Peek().IdentCodePoints());
+          PropertyId propertyId = PropertyIdFromName(tokens.Peek().IdentCodePoints());
           if (propertyId == PropertyId::WillChange)
           {
             return nullptr;

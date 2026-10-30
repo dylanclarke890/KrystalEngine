@@ -1,0 +1,42 @@
+﻿<!doctype html>
+<!-- The editor's second page, linked from index.html. -->
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <div class="row">
+    <!-- Going back (the header's back button, the mouse's back button or Alt+Left) shows the first page again
+         from the back/forward cache, as it was left: its form filled in, its cards picked, its scroll position
+         and its guide's topic. Going forward comes back here the same way, with these fields as they were. -->
+    <nav class="card links" tabindex="0">
+      <h2>Settings</h2>
+      <p>The editor's second page. <a href="index.html">Back to the first page</a> loads it again, as a new
+        entry; the header's back button returns to it as it was.</p>
+      <p><a href="index.html?guide=history">The first page's history topic</a> loads it at that topic.</p>
+    </nav>
+
+    <!-- A form whose fields are kept with the page: fill them in, go back and forward, and they're still
+         there. Save asks first in a modal dialog (its command button shows it, over a ::backdrop); the
+         dialog's form closes it with its buttons' values (method="dialog"), and Escape closes it without one.
+         When it closes with "save", the editor submits the form in C++, and shows where it would go below. -->
+    <form class="card settings" id="settings" action="https://example.com/settings">
+      <label>Display name <input name="name" placeholder="Barista"></label>
+      <label>Theme <select name="theme"><option>Light</option><option>Dark</option><option>Follow the
+          system</option></select></label>
+      <label><input type="checkbox" name="clock" checked><span>Show the clock</span></label>
+      <p><button type="button" commandfor="confirm-save" command="show-modal">Save</button></p>
+      <p id="last-submission">Nothing submitted yet.</p>
+      <p id="load-events">No loads yet.</p>
+    </form>
+    <dialog id="confirm-save">
+      <form method="dialog">
+        <h2>Save your settings?</h2>
+        <p>Escape cancels too.</p>
+        <p><button value="save" autofocus>Save</button><button value="cancel">Cancel</button></p>
+      </form>
+    </dialog>
+  </div>
+</body>
+</html>

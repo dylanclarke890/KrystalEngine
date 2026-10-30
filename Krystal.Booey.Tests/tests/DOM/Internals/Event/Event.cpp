@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Booey/DOM/Event.hpp"
+#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
-#include "catch2/catch_test_macros.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -27,7 +27,7 @@ namespace krys::boo::dom::tests
       REQUIRE(event->SrcElement() == nullptr);
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::CurrentTarget", "[HTML][Event]")
@@ -38,7 +38,7 @@ namespace krys::boo::dom::tests
       REQUIRE(event->CurrentTarget() == nullptr);
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::ComposedPath", "[HTML][Event]")
@@ -50,7 +50,7 @@ namespace krys::boo::dom::tests
       REQUIRE(composedPath.empty());
     }
 
-    // TODO(test): more unit test coverage
+    // FIXME: More unit test coverage
   }
 
   TEST_CASE("Event::EventPhase", "[HTML][Event]")

@@ -1,9 +1,9 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Masking.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
-#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/LengthDefinitions.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Primitives.hpp"
+#include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Shapes.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/URL.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
@@ -69,13 +69,10 @@ namespace krys::boo::css::PropertyParserHelpers
       return nullptr;
     }
 
-    return RectValue::Create(
-      Rect {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
+    return RectValue::Create(Rect {krys::move(top), krys::move(right), krys::move(bottom), krys::move(left)});
   }
 
-  RefPtr<Value>
-    krys::boo::css::PropertyParserHelpers::ConsumeClipPath(TokenRange &tokens,
-                                                              PropertyParserState &state) noexcept
+  RefPtr<Value> ConsumeClipPath(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'clip-path'> = none | <clip-source> | [ <basic-shape> || <geometry-box> ]
     // <clip-source> = <url>

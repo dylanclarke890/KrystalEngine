@@ -141,14 +141,14 @@ namespace krys::boo::css
 
     // MARK: Conditional Accessors
 
-    KRYS_NODISCARD constexpr Maybe<Raw> raw() const noexcept
+    KRYS_NODISCARD Maybe<Raw> GetRaw() const noexcept
     {
-      return _data.raw();
+      return _data.GetRaw();
     }
 
-    KRYS_NODISCARD constexpr Maybe<Calc> calc() const noexcept
+    KRYS_NODISCARD Maybe<Calc> GetCalc() const noexcept
     {
-      return _data.calc();
+      return _data.GetCalc();
     }
 
     // MARK: Variant-Like Conformance
@@ -181,12 +181,12 @@ namespace krys::boo::css
 
     KRYS_NODISCARD constexpr bool IsKnownZero() const noexcept
     {
-      return IsRaw() && _data.payload.number == 0;
+      return IsRaw() && _data._payload.Number == 0;
     }
 
     KRYS_NODISCARD constexpr bool IsKnownNotZero() const noexcept
     {
-      return IsRaw() && _data.payload.number != 0;
+      return IsRaw() && _data._payload.Number != 0;
     }
 
     KRYS_NODISCARD constexpr bool IsRaw() const noexcept

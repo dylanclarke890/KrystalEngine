@@ -26,7 +26,7 @@ namespace krys::boo::css::PropertyParserHelpers
     // Parse single keyword values
     auto singleKeyword = [&]()
     {
-      if (state.Context.gridLanesEnabled && range.Peek().ValueId() == ValueId::InlineGridLanes)
+      if (range.Peek().ValueId() == ValueId::InlineGridLanes)
       {
         return ConsumeIdent(range);
       }
@@ -35,9 +35,9 @@ namespace krys::boo::css::PropertyParserHelpers
         // <display-box>
         ValueId::Contents, ValueId::None,
         // <display-internal>
-        ValueId::TableCaption, ValueId::TableCell, ValueId::TableColumnGroup,
-        ValueId::TableColumn, ValueId::TableHeaderGroup, ValueId::TableFooterGroup,
-        ValueId::TableRow, ValueId::TableRowGroup, ValueId::RubyBase, ValueId::RubyText,
+        ValueId::TableCaption, ValueId::TableCell, ValueId::TableColumnGroup, ValueId::TableColumn,
+        ValueId::TableHeaderGroup, ValueId::TableFooterGroup, ValueId::TableRow, ValueId::TableRowGroup,
+        ValueId::RubyBase, ValueId::RubyText,
         // <display-legacy>
         ValueId::InlineBlock, ValueId::InlineFlex, ValueId::InlineGrid, ValueId::InlineTable,
         // Prefixed values
@@ -48,8 +48,8 @@ namespace krys::boo::css::PropertyParserHelpers
 
     auto AllowsValue = [&](ValueId value)
     {
-      bool isRuby = value == ValueId::RubyBase || value == ValueId::RubyText
-                    || value == ValueId::BlockRuby || value == ValueId::Ruby;
+      bool isRuby = value == ValueId::RubyBase || value == ValueId::RubyText || value == ValueId::BlockRuby
+                    || value == ValueId::Ruby;
       return !isRuby || IsUASheetBehavior(state.Context.Mode);
     };
 
@@ -75,7 +75,7 @@ namespace krys::boo::css::PropertyParserHelpers
     {
       DiscardIdent(range);
       return PrimitiveValue::Create(nextValueId == ValueId::WebkitInlineFlex ? ValueId::InlineFlex
-                                                                                   : ValueId::Flex);
+                                                                             : ValueId::Flex);
     }
 
     // Parse [ <display-outside> || <display-inside> ]
@@ -83,7 +83,7 @@ namespace krys::boo::css::PropertyParserHelpers
     Maybe<ValueId> parsedDisplayInside;
     while (!range.IsAtEnd())
     {
-      auto nextValueId = range.Peek().ValueId();
+      nextValueId = range.Peek().ValueId();
       switch (nextValueId)
       {
         // <display-outside>
@@ -101,11 +101,6 @@ namespace krys::boo::css::PropertyParserHelpers
         // <display-inside>
         case ValueId::GridLanes:
         {
-          if (!state.Context.gridLanesEnabled)
-          {
-            return nullptr;
-          }
-
           KRYS_FALLTHROUGH;
         }
         case ValueId::Flex:
@@ -190,7 +185,7 @@ namespace krys::boo::css::PropertyParserHelpers
         }
         default:
         {
-          assert(false);
+          krys_debug_assert(false);
           return ValueId::Inline;
         }
       }

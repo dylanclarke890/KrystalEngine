@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Types/CSSOMString.hpp"
 #include "Krystal.Booey/CSS/Values/GlobalKeyword.hpp"
 #include "Krystal.Booey/CSS/Values/ValueId.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -7,6 +8,18 @@
 /// @see https://drafts.csswg.org/cssom/#common-parsing-idioms
 namespace krys::boo::css
 {
+  /// @brief Removes @p character from the front of @p string if it's there.
+  /// @return Whether it was there.
+  KRYS_NODISCARD inline bool SkipExactly(CSSOMStringView &string, char8 character) noexcept
+  {
+    if (!string.empty() && string.front() == character)
+    {
+      string.remove_prefix(1);
+      return true;
+    }
+    return false;
+  }
+
   /// @brief Space characters as defined by the CSS specification.
   /// @see http://www.w3.org/TR/css3-syntax/#whitespace
   template <typename CharacterType>

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/CSS/Properties/Consumers/Background.hpp"
-#include "Krystal.Booey/CSS/Calc/CalcTreeParser.hpp"
+#include "Krystal.Booey/CSS/Calc/TreeParser.hpp"
 #include "Krystal.Booey/CSS/Parser/TokenRange.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Color.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/Ident.hpp"
@@ -13,23 +13,22 @@
 #include "Krystal.Booey/CSS/Properties/Consumers/PrimitiveValue.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParserState.hpp"
 #include "Krystal.Booey/CSS/Properties/PropertyParsing.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BoxShadow.hpp"
-#include "Krystal.Booey/CSS/Values/Background/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/BackgroundRepeatValue.hpp"
 #include "Krystal.Booey/CSS/Values/BorderImageSliceValue.hpp"
 #include "Krystal.Booey/CSS/Values/BorderImageWidthValue.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderImage.hpp"
 #include "Krystal.Booey/CSS/Values/Borders/BorderRadius.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BoxShadow.hpp"
+#include "Krystal.Booey/CSS/Values/Borders/BoxShadowProperty.hpp"
 #include "Krystal.Booey/CSS/Values/BoxShadowPropertyValue.hpp"
 #include "Krystal.Booey/CSS/Values/PrimitiveValue.hpp"
-#include "Krystal.Booey/CSS/Values/ReflectValue.hpp"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
 #include "Krystal.Booey/CSS/Values/ValuePair.hpp"
 
 namespace krys::boo::css::PropertyParserHelpers
 {
   template <typename ElementType>
-  static void Complete4Sides(Array<ElementType, 4> &sides) noexcept
+  static void Complete4Sides(Array<ElementType, 4uz> &sides) noexcept
   {
     if (!sides[1])
     {
@@ -49,15 +48,7 @@ namespace krys::boo::css::PropertyParserHelpers
 
   // MARK: - Border Radius
 
-  enum class SupportWebKitBorderRadiusQuirk : bool
-  {
-    No,
-    Yes
-  };
-
-  template <SupportWebKitBorderRadiusQuirk supportQuirk>
-  KRYS_NODISCARD static Maybe<BorderRadius> ConsumeBorderRadius(TokenRange &tokens,
-                                                                PropertyParserState &state) noexcept
+  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
     // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
@@ -82,21 +73,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
     if (tokens.IsAtEnd())
     {
-      if constexpr (supportQuirk == SupportWebKitBorderRadiusQuirk::Yes)
-      {
-        // Legacy syntax: `-webkit-border-radius: l1 l2` is equivalent to border-radius: `l1 / l2`.
-        if (i == 2uz)
-        {
-          OptionalRadiiForAxis verticalRadii;
-          verticalRadii[0] = horizontalRadii[1];
-          horizontalRadii[1] = null;
-
-          return BorderRadius {
-            .Horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii)),
-            .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
-        }
-      }
-
       auto horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii));
       auto vertical = horizontal; // Copy `horizontal` radii to `vertical`.
 
@@ -109,14 +85,15 @@ namespace krys::boo::css::PropertyParserHelpers
     }
 
     OptionalRadiiForAxis verticalRadii;
-    for (size_t i = 0uz; i < 4uz && !tokens.IsAtEnd(); ++i)
+    for (size_t j = 0uz; j < 4uz && !tokens.IsAtEnd(); ++j)
     {
-      verticalRadii[i] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
-      if (!verticalRadii[i])
+      verticalRadii[j] = MetaConsumer<LengthPercentage<NonNegative>>::Consume(tokens, state);
+      if (!verticalRadii[j])
       {
         return {};
       }
     }
+
     if (!verticalRadii[0] || !tokens.IsAtEnd())
     {
       return {};
@@ -124,25 +101,6 @@ namespace krys::boo::css::PropertyParserHelpers
 
     return BorderRadius {.Horizontal = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(horizontalRadii)),
                          .Vertical = CompleteQuadFromArray<BorderRadius::Axis>(krys::move(verticalRadii))};
-  }
-
-  Maybe<BorderRadius> ConsumeUnresolvedBorderRadius(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
-    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
-
-    return ConsumeBorderRadius<SupportWebKitBorderRadiusQuirk::No>(tokens, state);
-  }
-
-  Maybe<BorderRadius> ConsumeUnresolvedWebKitBorderRadius(TokenRange &tokens,
-                                                          PropertyParserState &state) noexcept
-  {
-    // <'border-radius'> = <length-percentage [0,∞]>{1,4} [ / <length-percentage [0,∞]>{1,4} ]?
-    // https://drafts.csswg.org/css-backgrounds/#propdef-border-radius
-
-    // Includes the legacy syntax quirk where `-webkit-border-radius: l1 l2` is equivalent to border-radius:
-    // `l1 / l2`.
-    return ConsumeBorderRadius<SupportWebKitBorderRadiusQuirk::Yes>(tokens, state);
   }
 
   // MARK: - Border Image
@@ -284,7 +242,7 @@ namespace krys::boo::css::PropertyParserHelpers
         components.Slice = ConsumeBorderImageSlice(tokens, state, defaultFill);
         if (components.Slice)
         {
-          assert(!components.Width && !components.Outset);
+          krys_debug_assert(!components.Width && !components.Outset);
           if (ConsumeSlash(tokens))
           {
             components.Width = ConsumeBorderImageWidth(tokens, state, overridesWidth);
@@ -319,7 +277,8 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Background Size
 
   template <PropertyId property>
-  static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens, PropertyParserState &state) noexcept
+  KRYS_NODISCARD static RefPtr<Value> ConsumeBackgroundSize(TokenRange &tokens,
+                                                            PropertyParserState &state) noexcept
   {
     // <bg-size> = [ <length-percentage [0,∞]> | auto ]{1,2} | cover | contain
     // https://drafts.csswg.org/css-backgrounds/#propdef-background-size
@@ -433,8 +392,7 @@ namespace krys::boo::css::PropertyParserHelpers
   // MARK: - Box Shadows
 
   KRYS_NODISCARD static Maybe<BoxShadow> ConsumeSingleUnresolvedBoxShadow(TokenRange &tokens,
-                                                                          PropertyParserState &state,
-                                                                          bool isWebkitBoxShadow) noexcept
+                                                                          PropertyParserState &state) noexcept
   {
     // <box-shadow> = <color>? && [<length>{2} <length [0,∞]>? <length>?] && inset?
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
@@ -456,7 +414,7 @@ namespace krys::boo::css::PropertyParserHelpers
       }
 
       const Token &nextToken = rangeCopy.Peek();
-      // If we have come to a comma (e.g. if this tokens represents a comma-separated list of <shadow>s), we
+      // If we have come to a comma (e.g. if this range represents a comma-separated list of <shadow>s), we
       // are done parsing this <shadow>.
       if (nextToken.Type() == TokenType::Comma)
       {
@@ -479,7 +437,7 @@ namespace krys::boo::css::PropertyParserHelpers
       auto maybeColor = ConsumeUnresolvedColor(rangeCopy, state);
       if (maybeColor)
       {
-        // If we just parsed a color but already had one, the given token tokens is
+        // If we just parsed a color but already had one, the given token range is
         // not a valid <shadow>.
         if (color)
         {
@@ -514,9 +472,9 @@ namespace krys::boo::css::PropertyParserHelpers
       const auto &token = rangeCopy.Peek();
 
       // The explicit check for calc() is unfortunate. This is ensuring that we only fail
-      // parsing if there is a length, but it fails the tokens check.
+      // parsing if there is a length, but it fails the range check.
       if (token.Type() == TokenType::Dimension || token.Type() == TokenType::Number
-          || (token.Type() == TokenType::Function && IsCalcFunction(token.FunctionId())))
+          || (token.Type() == TokenType::Function && calc::IsCalcFunction(token.FunctionId())))
       {
         blur = MetaConsumer<Length<NonNegativeUnzoomed>>::Consume(rangeCopy, state);
         if (!blur)
@@ -538,17 +496,15 @@ namespace krys::boo::css::PropertyParserHelpers
 
     tokens = rangeCopy;
 
-    return BoxShadow {.color = krys::move(color),
-                      .location = {krys::move(*x), krys::move(*y)},
-                      .blur = krys::move(blur),
-                      .spread = krys::move(spread),
-                      .inset = krys::move(inset),
-                      .isWebkitBoxShadow = isWebkitBoxShadow};
+    return BoxShadow {.Color = krys::move(color),
+                      .Location = {krys::move(*x), krys::move(*y)},
+                      .Blur = krys::move(blur),
+                      .Spread = krys::move(spread),
+                      .Inset = krys::move(inset)};
   }
 
   KRYS_NODISCARD static Maybe<BoxShadowProperty::List>
-    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state,
-                                   bool isWebkitBoxShadow) noexcept
+    ConsumeUnresolvedBoxShadowList(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     auto rangeCopy = tokens;
 
@@ -556,13 +512,13 @@ namespace krys::boo::css::PropertyParserHelpers
 
     do
     {
-      auto shadow = ConsumeSingleUnresolvedBoxShadow(rangeCopy, state, isWebkitBoxShadow);
+      auto shadow = ConsumeSingleUnresolvedBoxShadow(rangeCopy, state);
       if (!shadow)
       {
         return {};
       }
 
-      list.value.push_back(krys::move(*shadow));
+      list.Value.push_back(krys::move(*shadow));
     } while (ConsumeComma(rangeCopy));
 
     tokens = rangeCopy;
@@ -570,9 +526,8 @@ namespace krys::boo::css::PropertyParserHelpers
     return list;
   }
 
-  KRYS_NODISCARD static Maybe<BoxShadowProperty> ConsumeUnresolvedBoxShadow(TokenRange &tokens,
-                                                                            PropertyParserState &state,
-                                                                            bool isWebkitBoxShadow) noexcept
+  KRYS_NODISCARD static Maybe<BoxShadowProperty>
+    ConsumeUnresolvedBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
   {
     if (tokens.Peek().ValueId() == ValueId::None)
     {
@@ -581,7 +536,7 @@ namespace krys::boo::css::PropertyParserHelpers
       return BoxShadowProperty {keywords::None {}};
     }
 
-    if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state, isWebkitBoxShadow))
+    if (auto boxShadowList = ConsumeUnresolvedBoxShadowList(tokens, state))
     {
       return BoxShadowProperty {krys::move(*boxShadowList)};
     }
@@ -594,63 +549,11 @@ namespace krys::boo::css::PropertyParserHelpers
     // <'box-shadow'> = none | <shadow>#
     // https://drafts.csswg.org/css-backgrounds/#propdef-box-shadow
 
-    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, false))
-      return BoxShadowPropertyValue::Create({krys::move(*property)});
-    return nullptr;
-  }
-
-  RefPtr<Value> ConsumeWebkitBoxShadow(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state, true))
+    if (auto property = ConsumeUnresolvedBoxShadow(tokens, state))
     {
       return BoxShadowPropertyValue::Create({krys::move(*property)});
     }
 
     return nullptr;
-  }
-
-  // MARK: - Reflect (non-standard)
-
-  RefPtr<Value> ConsumeWebkitBoxReflect(TokenRange &tokens, PropertyParserState &state) noexcept
-  {
-    if (tokens.Peek().ValueId() == ValueId::None)
-    {
-      return ConsumeIdent(tokens);
-    }
-
-    auto direction = ConsumeIdentRaw<ValueId::Above, ValueId::Below, ValueId::Left, ValueId::Right>(tokens);
-    if (!direction)
-    {
-      return nullptr;
-    }
-
-    // FIXME: Does not seem right to create "0px" here. We'd like to omit "0px" when serializing if there is
-    // also no image.
-    RefPtr<PrimitiveValue> offset;
-    if (tokens.IsAtEnd())
-    {
-      offset = PrimitiveValue::Create(0, UnitType::px);
-    }
-    else
-    {
-      offset = PrimitiveValueResolver<LengthPercentage<>>::ConsumeAndResolve(tokens, state);
-      if (!offset)
-      {
-        return nullptr;
-      }
-    }
-
-    RefPtr<Value> mask;
-    if (!tokens.IsAtEnd())
-    {
-      auto components = ConsumeBorderImageComponents(tokens, state, BorderImageSliceFillDefault::Yes);
-      if (!components)
-      {
-        return nullptr;
-      }
-      mask = CreateBorderImageValue(krys::move(*components));
-    }
-
-    return ReflectValue::Create(*direction, krys::move(offset), krys::move(mask));
   }
 }

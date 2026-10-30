@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<!-- The "bidi-text" page golden; Krystal.UI.Tests/tests/Golden.cpp paints it through Page, and compares the
+     client rects of its elements with ids against Chrome's (bidi-text.chrome-rects.txt, which the script
+     below writes when Chrome loads the scene with "?record"). -->
+<html data-width="360" data-height="340">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Regular.ttf"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: "Liberation Sans"; src: url("../../../third-party/liberation-fonts/LiberationSans-Bold.ttf"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: "Noto Sans Arabic"; src: url("../../../third-party/noto-sans-arabic/NotoSansArabic-Regular.ttf"); }
+  html { background: #ffffff; overflow: hidden; }
+  body { margin: 8px; font: 14px/20px "Liberation Sans", "Noto Sans Arabic"; color: #222222; }
+  p { margin: 0 0 2px; width: 340px; background: #f2f4f8; }
+  .tag { background: #ffd166; border: 1px solid #ef476f; padding: 0 3px; }
+  .rtl-embed { unicode-bidi: embed; direction: rtl; color: #118ab2; }
+  .rtl-isolate { unicode-bidi: isolate; direction: rtl; color: #118ab2; }
+  .rtl-override { unicode-bidi: bidi-override; direction: rtl; color: #ef476f; }
+  .rtl-isolate-override { unicode-bidi: isolate-override; direction: rtl; color: #ef476f; }
+  .clip { width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+  <p id=ltr-hebrew>English <span id=a1>עברית</span> text <span id=a2>123</span>.</p>
+  <p id=rtl-latin dir=rtl><span id=b1>שלום</span> world <span id=b2>עולם</span> 2026!</p>
+  <p id=rtl-brackets dir=rtl>(<span id=c1>abc</span>) [<span id=c2>שלום</span>] -<span id=c3>12</span>-</p>
+  <p>a <span id=d1 class=rtl-embed>b <i id=d2>c</i></span> d <span id=d3 class=rtl-isolate>e <i id=d4>f</i></span> g</p>
+  <p>h <span id=d5 class=rtl-override>ijk</span> <bdo id=d6 dir=rtl>lmn</bdo> <span id=d7 class=rtl-isolate-override>opq</span> r</p>
+  <p dir=rtl id=plain style="unicode-bidi: plaintext"><span id=e1>first</span> strong <span id=e2>שלום</span></p>
+  <p>User <span id=f1>إيان</span>: <span id=f2>90</span> points; user <bdi id=f3>إيان</bdi>: <span id=f4>90</span> points</p>
+  <p dir=auto id=auto><span id=g1>שלום</span> world</p>
+  <p dir=auto id=auto-neutral><span id=g2>123</span> abc</p>
+  <p id=tags>x <span id=h1 class=tag>ab <span id=h2>שלום</span> cd</span> y</p>
+  <p dir=rtl id=arabic lang=ar><span id=i1>مرحبا</span> بالعالم <span id=i2>123</span> <b id=i3>نص</b></p>
+  <p dir=rtl style="text-align: start"><span id=j1>start</span></p>
+  <p dir=rtl style="text-align: end"><span id=j2>end</span></p>
+  <p dir=rtl style="text-align: left"><span id=j3>left</span></p>
+  <p dir=rtl class=clip id=clip>שלום עולם ומלואו ועוד</p>
+  <script>
+    if (location.search === "?record") {
+      window.addEventListener("load", () => document.fonts.ready.then(() => {
+        const lines = [];
+        for (const element of document.querySelectorAll("body [id]")) {
+          for (const rect of element.getClientRects())
+            lines.push(`${element.id} ${rect.x} ${rect.y} ${rect.width} ${rect.height}`);
+        }
+        document.documentElement.setAttribute("data-record-rects", lines.join("\n"));
+      }));
+    }
+  </script>
+</body>
+</html>

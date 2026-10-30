@@ -1,17 +1,35 @@
 ﻿#pragma once
 
-#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/DOM/Types/USVString.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 
 namespace krys::boo::html
 {
   /// @see https://html.spec.whatwg.org/#htmlbuttonelement
-  class HTMLButtonElement : public HTMLElement
+  class HTMLButtonElement : public HTMLFormControlElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLButtonElement);
 
+  private:
+    enum class ButtonType : uint8
+    {
+      Submit,
+      Reset,
+      Button
+    };
+
+    ButtonType _type {ButtonType::Submit};
+    bool _isActivatedSubmit {false};
+
   public:
+    KRYS_NODISCARD bool CanStartSelection() const noexcept final
+    {
+      return false;
+    }
+
     HTMLButtonElement(dom::Document &document) noexcept;
+
+    KRYS_NODISCARD RenderPtr<RenderElement> CreateElementRenderer(RenderStyle &&style) noexcept override;
 
 #pragma region HTMLButtonElement - https://html.spec.whatwg.org/#htmlbuttonelement
 
@@ -22,8 +40,10 @@ namespace krys::boo::html
     void Command(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
-    // TODO(HTMLBUTTON, HTML): Implement the command API.
-    // [CEReactions] attribute Element? commandForElement;
+    KRYS_NODISCARD RefPtr<dom::Element> CommandForElementForBindings() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-button-commandforelement
+    void CommandForElementForBindings(dom::Element *element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;
@@ -31,14 +51,11 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-button-disabled
     void Disabled(bool value) noexcept;
 
-    // TODO(HTMLBUTTON, HTML): Implement Form().
-    // readonly attribute HTMLFormElement? form;
+    /// @see https://html.spec.whatwg.org/#dom-button-formaction
+    KRYS_NODISCARD dom::USVString FormAction() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    KRYS_NODISCARD dom::ExceptionOr<dom::USVString> FormAction() const noexcept;
-
-    /// @see https://html.spec.whatwg.org/#dom-button-formaction
-    dom::ExceptionOr<void> FormAction(dom::USVString &&value) noexcept;
+    void FormAction(dom::USVString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formenctype
     KRYS_NODISCARD dom::DOMString EncType() const noexcept;
@@ -52,8 +69,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-button-formmethod
     void FormMethod(dom::DOMString &&value) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-button-formnovalidate
-    KRYS_NODISCARD bool FormNoValidate() const noexcept;
+    using HTMLFormControlElement::FormNoValidate;
 
     /// @see https://html.spec.whatwg.org/#dom-button-formnovalidate
     void FormNoValidate(bool value) noexcept;
@@ -65,7 +81,7 @@ namespace krys::boo::html
     void FormTarget(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
-    KRYS_NODISCARD dom::DOMString Name() const noexcept;
+    KRYS_NODISCARD dom::DOMString Name() const noexcept override;
 
     /// @see https://html.spec.whatwg.org/#dom-button-name
     void Name(dom::DOMString &&value) noexcept;
@@ -82,21 +98,69 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-button-value
     void Value(dom::DOMString &&value) noexcept;
 
-    // TODO(HTMLBUTTON, HTML): Validity API.
-    // readonly attribute boolean willValidate;
-    // readonly attribute ValidityState validity;
-    // readonly attribute dom::DOMString validationMessage;
-    // boolean checkValidity();
-    // boolean reportValidity();
-    // undefined setCustomValidity(dom::DOMString error);
-    //
-    // readonly attribute NodeList labels;
-
 #pragma endregion
+
+    KRYS_NODISCARD dom::DOMString FormControlType() const noexcept final;
+
+    KRYS_NODISCARD bool IsEnumeratable() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsLabelable() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
+    {
+      return true;
+    }
+
+    KRYS_NODISCARD bool IsSuccessfulSubmitButton() const noexcept final;
+    KRYS_NODISCARD bool MatchesDefaultPseudoClass() const noexcept final;
+    KRYS_NODISCARD bool IsActivatedSubmit() const noexcept final;
+    void SetActivatedSubmit(bool flag) noexcept final;
+    KRYS_NODISCARD bool IsSubmitButton() const noexcept final;
+
+    /// @brief Whether the button is a submit button because its `type` says so.
+    KRYS_NODISCARD bool IsExplicitlySetSubmitButton() const noexcept;
+
+    /// @brief The element the button sends its command: its `commandfor` element.
+    /// @see https://html.spec.whatwg.org/#attr-button-commandfor
+    KRYS_NODISCARD RefPtr<dom::Element> CommandForElement() const noexcept;
+
+    /// @brief The state of the button's `command` attribute.
+    KRYS_NODISCARD dom::CommandType GetCommandType() const noexcept;
+
+    bool AppendFormData(DOMFormData &formData) noexcept final;
+
+    /// @see https://html.spec.whatwg.org/#the-button-element:activation-behaviour
+    void ActivationBehavior(dom::Event &event) noexcept final;
+
+    void DefaultEventHandler(dom::Event &event) noexcept final;
+
+  protected:
+    KRYS_NODISCARD bool ComputeWillValidate() const noexcept final;
+
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
+
+  private:
+    void ComputeType(dom::DOMStringView typeAttributeValue) noexcept;
+
+    /// @brief Fires `command` at the button's `commandfor` element, which then carries out a built-in command
+    /// unless a listener canceled it.
+    void HandleCommand() noexcept;
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLButtonElement)
+  KRYS_NODISCARD static bool IsType(const krys::boo::dom::Node &target) noexcept
+  {
+    return target.IsHTMLElement() && Downcast<krys::boo::html::HTMLElement>(target).IsHTMLButtonElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept
   {
     return target.IsHTMLButtonElement();

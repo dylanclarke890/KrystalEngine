@@ -10,6 +10,8 @@ namespace krys::boo::dom
       : _type(type), _timeStamp(MonotonicTime::Now().count()), _bubbles(eventInitDict.Bubbles),
         _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
   {
+    // The inner event creation steps set the initialized flag.
+    _initialized = true;
   }
 
   List<Ref<EventTarget>> Event::ComposedPath() const noexcept
@@ -115,6 +117,27 @@ namespace krys::boo::dom
     return composedPath;
   }
 
+  Ref<Event> Event::Create(DOMStringAtom type, bool canBubble, bool isCancelable, bool isComposed) noexcept
+  {
+    auto event = CreateRef<Event>(
+      type, EventInit {.Bubbles = canBubble, .Cancelable = isCancelable, .Composed = isComposed});
+    event->_isTrusted = true;
+    return event;
+  }
+
+  void Event::SetUnderlyingEvent(Event *underlyingEvent) noexcept
+  {
+    // Prohibit creation of a cycle by doing nothing if a cycle would be created.
+    for (auto *event = underlyingEvent; event; event = event->UnderlyingEvent())
+    {
+      if (event == this)
+      {
+        return;
+      }
+    }
+    _underlyingEvent = ShareRefPtr(underlyingEvent);
+  }
+
   void Event::InitEvent(DOMStringAtom type, bool bubbles, bool cancelable) noexcept
   {
     if (_dispatched)
@@ -123,6 +146,20 @@ namespace krys::boo::dom
     }
 
     Initialize(*this, type, bubbles, cancelable);
+  }
+
+  void Event::SetTarget(RefPtr<EventTarget> target) noexcept
+  {
+    if (_target == target)
+    {
+      return;
+    }
+
+    _target = krys::move(target);
+    if (_target)
+    {
+      ReceivedTarget();
+    }
   }
 
   void Event::Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept

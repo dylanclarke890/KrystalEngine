@@ -63,8 +63,8 @@ namespace krys::boo::dom
     }
 
     Node *prev = !toBeRemovedNode.PreviousSibling()
-                          ? toBeRemovedNode.ParentNode()
-                          : TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling());
+                   ? toBeRemovedNode.ParentNode()
+                   : TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling());
     assert(prev);
     nodeIterator.ReferenceNode(ShareRef(*prev));
   }
@@ -122,7 +122,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<Node *> IteratorAlgorithms::TraverseChildren(TreeWalker &walker,
-                                                                 TraverseFirstOrLast type) noexcept
+                                                           TraverseFirstOrLast type) noexcept
   {
     Node *node = &walker.CurrentNode();
     node = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
@@ -173,7 +173,7 @@ namespace krys::boo::dom
   }
 
   ExceptionOr<Node *> IteratorAlgorithms::TraverseSiblings(TreeWalker &walker,
-                                                                 TraversalNextOrPrev type) noexcept
+                                                           TraversalNextOrPrev type) noexcept
   {
     Node *node = &walker.CurrentNode();
     if (node == &walker.Root())

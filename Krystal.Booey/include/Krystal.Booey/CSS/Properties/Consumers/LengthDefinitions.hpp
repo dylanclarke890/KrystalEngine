@@ -1,14 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/CSS/Parser/ParserMode.hpp"
 #include "Krystal.Booey/CSS/Properties/Consumers/MetaConsumerDefinitions.hpp"
+#include "Krystal.Booey/CSS/Properties/Property.hpp"
 
 namespace krys::boo::css
 {
   struct LengthValidator
   {
-    KRYS_NODISCARD constexpr static Maybe<LengthUnit>
-      Validate(UnitType unitType, PropertyParserState &state, PropertyParserOptions options) noexcept
+    KRYS_NODISCARD constexpr static Maybe<LengthUnit> Validate(UnitType unitType, PropertyParserState &state,
+                                                               PropertyParserOptions options) noexcept
     {
+      if (unitType == UnitType::QuirkyEm
+          && !IsUASheetBehavior(options.OverrideParserMode.value_or(state.Context.Mode)))
+      {
+        return null;
+      }
+
       return UnitTraits<LengthUnit>::Validate(unitType);
     }
 
@@ -33,7 +41,7 @@ namespace krys::boo::css
         return true;
       }
 
-      return false;
+      return mode == ParserMode::HTMLQuirks && Property::AcceptsQuirkyLength(state.CurrentProperty);
     }
   };
 

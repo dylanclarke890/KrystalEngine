@@ -12,6 +12,11 @@ namespace krys::boo::css
     UASheet,
   };
 
+  KRYS_NODISCARD constexpr ParserMode StrictToParserMode(bool inStrictMode) noexcept
+  {
+    return inStrictMode ? ParserMode::HTMLStandard : ParserMode::HTMLQuirks;
+  }
+
   KRYS_NODISCARD constexpr bool IsQuirksModeBehavior(ParserMode mode) noexcept
   {
     return mode == ParserMode::HTMLQuirks;

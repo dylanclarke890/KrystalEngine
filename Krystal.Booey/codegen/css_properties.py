@@ -8,8 +8,6 @@ import itertools
 import json
 import os
 import re
-import shutil
-import subprocess
 from typing import Any, NamedTuple
 from utils import Writer, run_gperf
 
@@ -67,16 +65,81 @@ def generate(args: argparse.Namespace):
             GeneratePropertyId,
             GeneratePropertyParsing,
             GeneratePropertyShorthandFunctions,
-            # TODO: Uncomment these generators when they are supported.
-            # GenerateStyleBuilderGenerated,
-            # GenerateStyleChangedAnimatablePropertiesGenerated,
-            # GenerateStyleComputedStyleProperties,
-            # GenerateStyleExtractorGenerated,
-            # GenerateStyleInterpolationWrapperMap,
-            # GenerateRenderStyleProperties,
+            GenerateStyleBuilderGenerated,
+            GenerateStyleChangedAnimatablePropertiesGenerated,
+            GenerateStyleComputedStyleProperties,
+            GenerateStyleExtractorGenerated,
+            GenerateStyleInterpolationWrapperMap,
+            GenerateRenderStyleProperties,
         ]
     ]
 
+
+
+# region Krystal names
+
+
+@functools.cache
+def krystal_type_names() -> frozenset[str]:
+    """The names of the types declared directly in `krys::boo` and `krys::boo::style`."""
+    include_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "include", "Krystal.Booey")
+    names = set()
+    for dirpath, _, files in os.walk(include_dir):
+        for file in files:
+            if not file.endswith(".hpp"):
+                continue
+            with open(os.path.join(dirpath, file), encoding="utf-8-sig") as f:
+                text = f.read()
+            top = None
+            nested = None
+            for line in text.splitlines():
+                if line.startswith("namespace "):
+                    top = line[len("namespace "):].strip()
+                    nested = None
+                    continue
+                if line.startswith("  namespace "):
+                    nested = line[len("  namespace "):].strip()
+                    continue
+                if top not in ("krys::boo", "krys::boo::style"):
+                    continue
+                # A using-declaration (`using krys::BlendMode;`) names its last part.
+                match = re.match(r"^  (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
+                if match:
+                    names.add(match.group(1))
+                    continue
+                match = re.match(r"^    (?:struct|class|enum class|enum|using) (?:\w+::)*(\w+)\b", line)
+                if match and top == "krys::boo" and nested == "style":
+                    names.add(match.group(1))
+    return frozenset(names)
+
+
+def krystal_member_name(name: str) -> str:
+    """`m_name` -> `_name`, `_name` -> `_name`, `name` -> `Name`, keeping a trailing call."""
+    if name.startswith("m_"):
+        return "_" + name[2:]
+    if name.startswith("_"):
+        return name
+    return name[0].upper() + name[1:]
+
+
+def krystal_member_path(component: str) -> str:
+    """Converts each member access of a storage path component (`border.colors()` -> `Border.Colors()`)."""
+    return ".".join(krystal_member_name(part) for part in component.split("."))
+
+
+def krystal_type(type_name: str) -> str:
+    """`Style::X` -> `style::X`, `WebCore::X` and unqualified types -> `boo::X`."""
+    builtins = {"bool", "float", "double", "int", "unsigned", "uint8", "uint16", "uint32", "int32"}
+    if type_name.startswith("Style::"):
+        return "style::" + type_name[len("Style::"):]
+    if type_name.startswith("WebCore::"):
+        return "boo::" + type_name[len("WebCore::"):]
+    if type_name in builtins or "::" in type_name:
+        return type_name
+    return "boo::" + type_name
+
+
+# endregion
 
 # region Schema
 
@@ -702,6 +765,13 @@ class StylePropertyCodeGenProperties:
     def _complete_name_family(json_value: dict, family_name: str, property_name: PropertyName):
         if f"{family_name}-name-for-methods" not in json_value:
             json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods
+            if family_name in ("render-style", "font-description"):
+                # Non-standard properties keep their `-webkit-` prefix but not in their accessor names.
+                json_value[f"{family_name}-name-for-methods"] = property_name.name_for_methods.replace("Webkit", "")
+
+        if family_name == "render-style":
+            StylePropertyCodeGenProperties._complete_render_style_name_family(json_value)
+            return
 
         if f"{family_name}-getter" not in json_value:
             json_value[f"{family_name}-getter"] = (
@@ -714,6 +784,44 @@ class StylePropertyCodeGenProperties:
 
         if f"{family_name}-initial" not in json_value:
             json_value[f"{family_name}-initial"] = f"initial" + json_value[f"{family_name}-name-for-methods"]
+
+    @staticmethod
+    def _complete_render_style_name_family(json_value: dict):
+        # The render style accessors are PascalCase (`Width()`, `SetWidth()`, `InitialWidth()`). A getter whose name
+        # is also the name of a type in `krys::boo` or `krys::boo::style` takes a `Get` prefix, since the member
+        # function would otherwise hide the type inside the style classes (`GetColor()`).
+        name = json_value["render-style-name-for-methods"]
+        upstream_getter = json_value.get("render-style-getter", name[0].lower() + name[1:])
+        getter = upstream_getter[0].upper() + upstream_getter[1:]
+
+        if "render-style-storage-name" not in json_value:
+            json_value["render-style-storage-name"] = getter
+        else:
+            json_value["render-style-storage-name"] = krystal_member_name(json_value["render-style-storage-name"])
+
+        json_value["render-style-getter"] = ("Get" + getter) if getter in krystal_type_names() else getter
+
+        if "render-style-setter" not in json_value:
+            json_value["render-style-setter"] = "Set" + name
+        else:
+            json_value["render-style-setter"] = krystal_member_name(json_value["render-style-setter"])
+
+        if "render-style-initial" not in json_value:
+            json_value["render-style-initial"] = "Initial" + name
+        else:
+            json_value["render-style-initial"] = krystal_member_name(json_value["render-style-initial"])
+
+        for key in ("render-style-storage-path", "render-style-visited-link-storage-path",
+                    "render-style-has-explicitly-set-storage-path"):
+            if key in json_value:
+                json_value[key] = [krystal_member_path(component) for component in json_value[key]]
+
+        for key in ("render-style-visited-link-storage-name", "render-style-has-explicitly-set-storage-name"):
+            if key in json_value:
+                json_value[key] = krystal_member_name(json_value[key])
+
+        if "render-style-type" in json_value:
+            json_value["render-style-type"] = krystal_type(json_value["render-style-type"])
 
     @staticmethod
     def from_json(parsing_context: ParsingContext, key_path: str, name: str, json_value: dict):
@@ -863,7 +971,7 @@ class StylePropertyCodeGenProperties:
                 raise Exception(f"{key_path} must be one of {valid_kinds}.")
 
             # Default the `render-style-initial` function to constexpr if the values is an 'enum' or 'raw'.
-            # TODO: This should eventually be replaced by inspecting the grammar in inferring 'constexpr' as long as the grammar does
+            # FIXME: This should eventually be replaced by inspecting the grammar in inferring 'constexpr' as long as the grammar does
             # not rely on storing a variable number of elements or use <length-percentage>, <custom-ident>, <dashed-ident>, <string>.
             if "render-style-initial-constexpr" not in json_value:
                 if json_value["render-style-storage-kind"] in ["enum", "raw"]:
@@ -896,17 +1004,14 @@ class StylePropertyCodeGenProperties:
                 json_value["render-style-has-explicitly-set-getter-custom"] = True
                 json_value["render-style-has-explicitly-set-setter-custom"] = True
 
-        if "render-style-storage-name" not in json_value:
-            json_value["render-style-storage-name"] = json_value["render-style-getter"]
-
         if "render-style-visited-link-storage-name" not in json_value:
             json_value["render-style-visited-link-storage-name"] = (
-                f"visitedLink{json_value['render-style-name-for-methods']}"
+                f"VisitedLink{json_value['render-style-name-for-methods']}"
             )
 
         if "render-style-has-explicitly-set-storage-name" not in json_value:
             json_value["render-style-has-explicitly-set-storage-name"] = (
-                f"hasExplicitlySet{json_value['render-style-name-for-methods']}"
+                f"HasExplicitlySet{json_value['render-style-name-for-methods']}"
             )
 
         if "style-builder-custom" not in json_value:
@@ -1187,13 +1292,13 @@ class StyleProperty:
     @property
     def method_name_for_get_coordinated_value_list(self):
         if "animation-" in self.name:
-            return "Animations"
+            return "GetAnimations"
         if "transition-" in self.name:
-            return "Transitions"
+            return "GetTransitions"
         if "background-" in self.name:
-            return "BackgroundLayers"
+            return "GetBackgroundLayers"
         if "mask-" in self.name:
-            return "MaskLayers"
+            return "GetMaskLayers"
         raise Exception(f"Unrecognized coordinated list value property name: '{self.name}")
 
     @property
@@ -1267,7 +1372,7 @@ class StyleProperty:
         elif self.codegen_properties.render_style_getter_inline:
             annotations += ["inline"]
         elif self.codegen_properties.render_style_getter_exported:
-            annotations += ["KRYS_EXPORT"]
+            pass  # Exported functions need no annotation: Booey is a static library.
         return " ".join(annotations) + " " if annotations else ""
 
     # Computes the annotations, if any, of the getter's definition.
@@ -1289,7 +1394,7 @@ class StyleProperty:
         elif self.codegen_properties.render_style_setter_inline:
             annotations += ["inline"]
         elif self.codegen_properties.render_style_setter_exported:
-            annotations += ["KRYS_EXPORT"]
+            pass  # Exported functions need no annotation: Booey is a static library.
         return " ".join(annotations) + " " if annotations else ""
 
     # Computes the annotations, if any, of the setter's definition.
@@ -1311,7 +1416,7 @@ class StyleProperty:
         elif self.codegen_properties.render_style_initial_inline:
             annotations += ["inline"]
         elif self.codegen_properties.render_style_initial_exported:
-            annotations += ["KRYS_EXPORT"]
+            pass  # Exported functions need no annotation: Booey is a static library.
         return " ".join(annotations) + " " if annotations else ""
 
     # Computes the annotations, if any, of the initial's definition.
@@ -2206,14 +2311,14 @@ class ValueKeywordName(Name):
         return f"ValueId::{self.id_without_prefix}"
 
     def cpp_enum_literal(self, base: str):
-        override_id = ValueKeywordName.special_case_name_to_enum.get(base, {}).get(self.id_without_prefix)
+        override_id = ValueKeywordName.special_case_name_to_enum.get(base.split("::")[-1], {}).get(self.id_without_prefix)
         if override_id:
             return f"{base}::{override_id}"
         return f"{base}::{self.id_without_prefix}"
 
     @property
     def cpp_literal(self):
-        return f"CSS::Keyword::{self.id_without_prefix} {{ }}"
+        return f"css::keywords::{self.id_without_prefix} {{}}"
 
     @property
     def requires_using_namespace_css_literals(self):
@@ -4778,12 +4883,12 @@ class TermGeneratorReferenceTerm(TermGenerator):
                 return f"ConsumePosition({range_string}, {state_string})"
             elif isinstance(builtin, BuiltinColorConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # TODO: temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
+                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
                     return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{{builtin.allowed_types.replace(",", " |")}}}}})"
                 return f"ConsumeColor({range_string}, {state_string}, {{.AllowedColorTypes = {{}}}})"
             elif isinstance(builtin, BuiltinImageConsumer):  # type: ignore
                 if builtin.allowed_types:
-                    # TODO: temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
+                    # FIXME: Temp workaround - refactor allowed types to be a list of strings instead of a single string with commas
                     return f"ConsumeImage({range_string}, {state_string}, {builtin.allowed_types.replace(",", " |")})"
                 return f"ConsumeImage({range_string}, {state_string}, AllowedImageType::None)"
             elif isinstance(builtin, BuiltinCustomIdentConsumer):  # type: ignore
@@ -5295,7 +5400,7 @@ class GeneratedSharedGrammarRuleConsumer(SharedGrammarRuleConsumer):
         return True
 
     def generate_export_declaration(self, *, to: Writer):
-        to.write(f"static {self.signature.declaration_string};")
+        to.write(f"KRYS_NODISCARD static {self.signature.declaration_string};")
 
     def generate_definition(self, *, to: Writer):
         with to.function_block(signature=self.signature.definition_string):
@@ -7220,7 +7325,7 @@ class ParsingContext:
         ParsingContext.TopLevelObject.schema.validate_dictionary(self, "$", json_value, label="top level object")
 
         self.json_value = json_value
-        self.conditionals = frozenset((defines_string or "").split(" "))
+        self.conditionals = frozenset(define for define in re.split(r"[,\s]+", defines_string or "") if define)
         self.check_unused_grammars_values = check_unused_grammars_values
         self.verbose = verbose
         self.parsed_shared_grammar_rules = None
@@ -7275,11 +7380,17 @@ class GenerationContext:
         self.output_cpp_dir = output_cpp_dir
 
     # Shared generation constants.
+    # Generated files mirror the layout of the hand-written ones (`Krystal.Booey/Style/Computed/...` in the generated
+    # headers directory is included as `"Krystal.Booey/Style/Computed/..."`), so these create the directories.
     def output_hpp_path(self, relative_path: str) -> str:
-        return os.path.join(self.output_hpp_dir, relative_path)
+        path = os.path.join(self.output_hpp_dir, relative_path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        return path
 
     def output_cpp_path(self, relative_path: str) -> str:
-        return os.path.join(self.output_cpp_dir, relative_path)
+        path = os.path.join(self.output_cpp_dir, relative_path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        return path
 
     number_of_predefined_properties = 2
 
@@ -7451,6 +7562,10 @@ class GeneratePropertyId:
                 ],
             )
 
+            with writer.namespace(namespace="krys::boo"):
+                writer.write("struct Settings;")
+            writer.newline()
+
             with writer.namespace(namespace="krys::boo::css"):
                 self._generate_property_id_hpp_property_constants(to=writer)
                 self._generate_property_id_hpp_property_settings(to=writer)
@@ -7460,8 +7575,19 @@ class GeneratePropertyId:
             with writer.namespace(namespace="krys"):
                 writer.write_block("""\
                   template<>
-                  struct DefaultHash<::krys::boo::css::PropertyId> : IntegerHash<uint16>
+                  struct DefaultHash<::krys::boo::css::PropertyId>
                   {
+                    constexpr static bool IsSafeToCompareToEmptyOrDeleted = true;
+
+                    KRYS_NODISCARD constexpr static size_t Hash(::krys::boo::css::PropertyId id) noexcept
+                    {
+                      return IntegerHash<uint16>::Hash(static_cast<uint16>(id));
+                    }
+
+                    KRYS_NODISCARD constexpr static bool Equal(::krys::boo::css::PropertyId a, ::krys::boo::css::PropertyId b) noexcept
+                    {
+                      return a == b;
+                    }
                   };""")
             writer.newline()
 
@@ -7618,6 +7744,9 @@ class GeneratePropertyId:
             to.write_lines(settings_variable_declarations)
             to.newline()
             to.write(f"PropertySettings() noexcept = default;")
+            to.write(f"explicit PropertySettings(const Settings &settings) noexcept;")
+            to.newline()
+            to.write(f"KRYS_NODISCARD size_t Hash() const noexcept;")
         to.newline()
 
         to.write(f"KRYS_NODISCARD bool operator==(const PropertySettings &, const PropertySettings &) noexcept;")
@@ -7634,6 +7763,10 @@ class GeneratePropertyId:
             KRYS_NODISCARD PropertyId FindProperty(CSSOMStringView characters) noexcept;
 
             KRYS_NODISCARD CSSOMStringView ToString(PropertyId id) noexcept;
+
+            /// @brief The property's name as an IDL attribute: camel-cased (`backgroundColor`), with a leading
+            /// dash dropped (`webkitLineClamp`).
+            KRYS_NODISCARD CSSOMString NameForIDL(PropertyId id) noexcept;
 
             KRYS_NODISCARD PropertyId CascadeAliasProperty(PropertyId id) noexcept;
 
@@ -7735,12 +7868,18 @@ class GeneratePropertyId:
 
             self.generation_context.generate_property_id_switch_function_bool(
                 to=writer,
-                signature="bool IsInternal(PropertyId id) noexcept",
+                signature="bool IsInternal(KRYS_MAYBE_UNUSED PropertyId id) noexcept",
                 iterable=(p for p in self.properties_and_descriptors.all_unique if p.codegen_properties.internal_only),
             )
 
             self._generate_is_exposed_functions(to=writer)
             self._generate_is_inherited_property(to=writer)
+
+            self.generation_context.generate_property_id_switch_function_bool(
+                to=writer,
+                signature="bool Property::IsColorProperty(PropertyId id) noexcept",
+                iterable=(p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property),
+            )
 
             self.generation_context.generate_property_id_switch_function(
                 to=writer,
@@ -7890,11 +8029,11 @@ class GeneratePropertyId:
                 ),
             )
 
-            # TODO: Re-enable this once we support animation properties.
-            # self._generate_animation_property_functions(to=writer)
-            # TODO: Re-enable this once we support global settings.
-            # self._generate_css_property_settings_constructor(to=writer)
+            self._generate_animation_property_functions(to=writer)
+            self._generate_property_lists(to=writer)
+            self._generate_css_property_settings_constructor(to=writer)
             self._generate_css_property_settings_operator_equal(to=writer)
+            self._generate_css_property_settings_hash(to=writer)
             self._generate_valid_keywords_for_property(to=writer)
 
             writer.write("}")  # closes namespace krys::boo
@@ -7908,6 +8047,8 @@ class GeneratePropertyId:
                     "Krystal.Booey/CSS/Parser/ParserContext.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
                     "Krystal.Booey/CSS/Values/ValueId.hpp",
+                    "Krystal.Booey/Page/Settings.hpp",
+                    "Krystal.Core/Text/ASCII.hpp",
                     "Krystal.Core/Types/SmallList.hpp",
                     "Krystal.Core/Types/String.hpp",
                 ],
@@ -7937,7 +8078,7 @@ class GeneratePropertyId:
 
                 to.write("constexpr CSSOMStringView PropertyNameStrings[TotalProperties] = {")
                 with to.indent():
-                    to.write_lines(f'u8"{property.name}"' for property in self.properties_and_descriptors.all_unique)
+                    to.write_lines(f'u8"{property.name}",' for property in self.properties_and_descriptors.all_unique)
                 to.write("};")
                 to.newline()
 
@@ -8002,6 +8143,27 @@ class GeneratePropertyId:
 
               return PropertyNameStrings[index];
             }
+
+            CSSOMString NameForIDL(PropertyId id) noexcept
+            {
+              auto nameForCSS = ToString(id);
+              CSSOMString characters;
+              characters.reserve(nameForCSS.size());
+              for (size_t i = 0; i < nameForCSS.size(); ++i)
+              {
+                auto character = nameForCSS[i];
+                if (character == u8'-')
+                {
+                  if (++i == nameForCSS.size())
+                  {
+                    break;
+                  }
+                  character = i != 1 ? text::ToASCIIUpper(nameForCSS[i]) : nameForCSS[i];
+                }
+                characters.push_back(character);
+              }
+              return characters;
+            }
           """)
 
     def _generate_physical_logical_conversion_function(
@@ -8047,9 +8209,8 @@ class GeneratePropertyId:
                 mapping=lambda p: f"return settings.{p.codegen_properties.settings_flag};",
                 default="return true;",
             )
-            to.newline()
 
-            to.write_block("""\
+        to.write_block("""\
                 KRYS_NODISCARD bool IsExposed(PropertyId id, const PropertySettings *settings) noexcept
                 {
                   if (id == PropertyId::Invalid || IsInternal(id))
@@ -8074,7 +8235,7 @@ class GeneratePropertyId:
 
                   return IsExposedNotInvalidAndNotInternal(id, settings);
                 }""")
-            to.newline()
+        to.newline()
 
     def _generate_is_inherited_property(self, *, to: Writer):
         all_inherited_and_ids = (
@@ -8093,8 +8254,8 @@ class GeneratePropertyId:
         to.write_block("""\
             bool Property::IsInheritedProperty(PropertyId id) noexcept
             {
-              assert(static_cast<size_t>(id) < TotalPropertyIdValues);
-              assert(id != PropertyId::Invalid);
+              krys_debug_assert(static_cast<size_t>(id) < TotalPropertyIdValues);
+              krys_debug_assert(id != PropertyId::Invalid);
               return IsInheritedPropertyTable[static_cast<size_t>(id)];
             }""")
         to.newline()
@@ -8164,6 +8325,38 @@ class GeneratePropertyId:
             default="return false;",
         )
 
+    def _generate_property_lists(self, *, to: Writer):
+        def write_list(signature, properties):
+            with to.function_block(signature=signature):
+                to.write("static constexpr PropertyId properties[] {")
+                with to.indent():
+                    for property in properties:
+                        to.write(f"{property.id},")
+                to.write("};")
+                to.write("return properties;")
+
+        write_list(
+            "Span<const PropertyId> Property::ColorProperties() noexcept",
+            [p for p in self.properties_and_descriptors.style_properties.all if p.codegen_properties.color_property],
+        )
+
+        physical_properties = []
+        for _, property_group in sorted(
+            self.generation_context.properties_and_descriptors.style_properties.logical_property_groups.items(),
+            key=lambda x: x[0],
+        ):
+            kind = property_group["kind"]
+            destinations = LogicalPropertyGroup.logical_property_group_resolvers["physical"][kind]
+            for property in [property_group["physical"][a_destination] for a_destination in destinations]:
+                physical_properties.append(property)
+
+        write_list(
+            "Span<const PropertyId> Property::PhysicalProperties() noexcept",
+            sorted(list(set(physical_properties)), key=lambda x: x.id),
+        )
+
+    def _unused_all_accelerated_animation_properties(self, *, to: Writer):
+        # FIXME: The accelerated animation properties, once there are accelerated animations.
         with to.function_block(
             signature="Span<const PropertyId> Property::AllAcceleratedAnimationProperties([[maybe_unused]] const Settings &settings) noexcept",
         ):
@@ -8199,27 +8392,52 @@ class GeneratePropertyId:
             to.write("return Span<const PropertyId> {PropertiesExcludingThreadedOnly};")
 
     def _generate_css_property_settings_constructor(self, *, to: Writer):
-        first_settings_initializer, *remaining_settings_initializers = [
-            f"{flag} {{ settings.{flag}() }}" for flag in self.properties_and_descriptors.settings_flags
+        # `Settings` names its members in PascalCase: `colorFilterEnabled` is `Settings::ColorFilterEnabled`.
+        settings_initializers = [
+            f"{flag}(settings.{flag[0].upper()}{flag[1:]})" for flag in self.properties_and_descriptors.settings_flags
         ]
 
         to.write(f"PropertySettings::PropertySettings(const Settings &settings) noexcept")
         with to.indent():
-            to.write(f": {first_settings_initializer}")
-            to.write_lines((f", {initializer}" for initializer in remaining_settings_initializers))
+            if settings_initializers:
+                first_settings_initializer, *remaining_settings_initializers = settings_initializers
+                to.write(f": {first_settings_initializer}")
+                to.write_lines((f", {initializer}" for initializer in remaining_settings_initializers))
 
         to.write("{")
         to.write("}")
         to.newline()
 
     def _generate_css_property_settings_operator_equal(self, *, to: Writer):
-        first, *middle, last = (f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags)
+        expressions = [f"a.{flag} == b.{flag}" for flag in self.properties_and_descriptors.settings_flags]
 
         with to.function_block(signature="bool operator==(const PropertySettings &a, const PropertySettings &b) noexcept"):
-            to.write(f"return {first}")
-            with to.indent():
-                to.write_lines((f"&& {expression}" for expression in middle))
-                to.write(f"&& {last};")
+            if not expressions:
+                to.write("return true;")
+            else:
+                first, *rest = expressions
+                to.write(f"return {first}" + ("" if rest else ";"))
+                with to.indent():
+                    for i, expression in enumerate(rest):
+                        to.write(f"&& {expression}" + (";" if i == len(rest) - 1 else ""))
+        to.newline()
+
+    def _generate_css_property_settings_hash(self, *, to: Writer):
+        expressions = [
+            f"static_cast<uint64>({flag}) << {i}"
+            for (i, flag) in enumerate(self.properties_and_descriptors.settings_flags)
+        ]
+
+        with to.function_block(signature="size_t PropertySettings::Hash() const noexcept"):
+            if not expressions:
+                to.write("return 0;")
+            else:
+                first, *rest = expressions
+                to.write(f"uint64 bits = {first}" + ("" if rest else ";"))
+                with to.indent():
+                    for i, expression in enumerate(rest):
+                        to.write(f"| {expression}" + (";" if i == len(rest) - 1 else ""))
+                to.write(f"return DefaultHash<uint64>::Hash(bits);")
         to.newline()
 
     def _generate_valid_keywords_for_property(self, *, to: Writer):
@@ -8599,7 +8817,7 @@ class GeneratePropertyParsing:
     ):
         if not keyword_fast_path_eligible_property_consumers:
             with to.function_block(
-                signature=f"bool PropertyParsing::IsKeywordValidFor{parsing_collection.id}(PropertyId id, ValueId keyword, PropertyParserState &state) noexcept"
+                signature=f"bool PropertyParsing::IsKeywordValidFor{parsing_collection.id}(PropertyId, ValueId, PropertyParserState &) noexcept"
             ):
                 to.write(f"return false;")
             to.newline()
@@ -8629,7 +8847,7 @@ class GeneratePropertyParsing:
     ):
         if not keyword_fast_path_eligible_property_consumers:
             with to.function_block(
-                signature=f"bool PropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(PropertyId id) noexcept"
+                signature=f"bool PropertyParsing::IsKeywordFastPathEligible{parsing_collection.id}(PropertyId) noexcept"
             ):
                 to.write(f"return false;")
             to.newline()
@@ -8675,7 +8893,7 @@ class GeneratePropertyParsing:
                 to.write(
                     f"// and to handle certain DOM-exposed values (e.g. -webkit-font-size-delta from execCommand('FontSizeDelta'))."
                 )
-                to.write(f"krys_unreachable();")
+                to.write(f"krys_debug_assert(false);")
                 to.write("return {};")
 
             # Build up a list of pairs of (property, return-expression-to-use-for-property).
@@ -8920,7 +9138,7 @@ class GeneratePropertyShorthandFunctions:
                     to.write("return {};")
 
 
-# Generates `StyleBuilderGenerated.cpp`.
+# Generates `Style/BuilderGenerated.cpp`.
 class GenerateStyleBuilderGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -8936,138 +9154,116 @@ class GenerateStyleBuilderGenerated:
     def generate(self):
         self.generate_style_builder_generated_cpp()
 
-    # MARK: - Helper generator functions for StyleBuilderGenerated.cpp
+    # MARK: - Helper generator functions for BuilderGenerated.cpp
 
     def _converted_value(self, property, additional_parameters=[]):
         parameters = ["builderState", "value"] + additional_parameters
-        return f"toStyleFromCSSValue<{property.codegen_properties.render_style_type}>({', '.join(parameters)})"
+        return f"ConvertCSSValueToStyle<{property.codegen_properties.render_style_type}>({', '.join(parameters)})"
+
+    def _inherited_value(self, property):
+        return f"ForwardInheritedValue(builderState.ParentStyle().{property.codegen_properties.render_style_getter}())"
+
+    def _initial_value(self, property):
+        return f"style::ComputedStyle::{property.codegen_properties.render_style_initial}()"
+
+    def _font_description_setter(self, property):
+        return property.codegen_properties.font_description_setter.replace("set", "SetFontDescription", 1)
+
+    def _write_if(self, to: Writer, condition: str, statement: str):
+        to.write(f"if ({condition})")
+        to.write("{")
+        with to.indent():
+            to.write(statement)
+        to.write("}")
 
     # Color property setters.
 
-    def _generate_visited_link_color_supporting_property_initial_value_setter(self, to: Writer, property):
-        initial_function = "Style::ComputedStyle::" + property.codegen_properties.render_style_initial
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(f"    builderState.style().{property.codegen_properties.render_style_setter}({initial_function}());")
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}({initial_function}());"
+    def _generate_visited_link_color_supporting_property_setter(self, to: Writer, property, value, visited_value):
+        name = property.codegen_properties.render_style_name_for_methods
+        self._write_if(
+            to,
+            "builderState.ApplyPropertyToRegularStyle()",
+            f"builderState.Style().{property.codegen_properties.render_style_setter}({value});",
         )
-
-    def _generate_visited_link_color_supporting_property_inherit_value_setter(self, to: Writer, property):
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(
-            f"    builderState.style().{property.codegen_properties.render_style_setter}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-
-    def _generate_visited_link_color_supporting_property_value_setter(self, to: Writer, property):
-        to.write(f"if (builderState.applyPropertyToRegularStyle())")
-        to.write(
-            f"    builderState.style().{property.codegen_properties.render_style_setter}({self._converted_value(property, ['ForVisitedLink::No'])});"
-        )
-        to.write(f"if (builderState.applyPropertyToVisitedLinkStyle())")
-        to.write(
-            f"    builderState.style().setVisitedLink{property.codegen_properties.render_style_name_for_methods}({self._converted_value(property, ['ForVisitedLink::Yes'])});"
+        self._write_if(
+            to,
+            "builderState.ApplyPropertyToVisitedLinkStyle()",
+            f"builderState.Style().SetVisitedLink{name}({visited_value});",
         )
 
     # CoordinatedValueList property setters.
 
     def _generate_coordinated_value_list_property_initial_value_setter(self, to: Writer, property):
         to.write(
-            f"applyInitialCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
+            f"ApplyInitialCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
         )
 
     def _generate_coordinated_value_list_property_inherit_value_setter(self, to: Writer, property):
         to.write(
-            f"applyInheritCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, &RenderStyle::{property.method_name_for_get_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
+            f"ApplyInheritCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, &RenderStyle::{property.method_name_for_get_coordinated_value_list}, {property.type_name_for_coordinated_value_list}>(builderState);"
         )
 
     def _generate_coordinated_value_list_property_value_setter(self, to: Writer, property):
         to.write(
-            f"applyValueCoordinatedValueListProperty<{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, WebCore::{property.codegen_properties.coordinated_value_list_property_item_type}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
+            f"ApplyValueCoordinatedValueListProperty<css::{property.id_or_cascade_alias_id}, &RenderStyle::{property.method_name_for_ensure_coordinated_value_list}, {krystal_type(property.codegen_properties.coordinated_value_list_property_item_type)}, {property.type_name_for_coordinated_value_list}>(builderState, value);"
         )
-
-    # Font property setters.
-
-    def _generate_font_property_initial_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(Style::ComputedStyle::{property.codegen_properties.render_style_initial}());"
-        )
-
-    def _generate_font_property_inherit_value_setter(self, to: Writer, property):
-        to.write(
-            f"auto inheritedValue = builderState.parentStyle().{property.codegen_properties.render_style_getter}();"
-        )
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}(krys::move(inheritedValue));"
-        )
-
-    def _generate_font_property_value_setter(self, to: Writer, property, value):
-        to.write(
-            f"builderState.{property.codegen_properties.font_description_setter.replace('set', 'setFontDescription', 1)}({value});"
-        )
-
-    # All other property setters.
-
-    def _generate_property_initial_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.style().{property.codegen_properties.render_style_setter}(Style::ComputedStyle::{property.codegen_properties.render_style_initial}());"
-        )
-
-    def _generate_property_inherit_value_setter(self, to: Writer, property):
-        to.write(
-            f"builderState.style().{property.codegen_properties.render_style_setter}(forwardInheritedValue(builderState.parentStyle().{property.codegen_properties.render_style_getter}()));"
-        )
-
-    def _generate_property_value_setter(self, to: Writer, property, value):
-        to.write(f"builderState.style().{property.codegen_properties.render_style_setter}({value});")
 
     # Property setter dispatch.
 
     def _generate_style_builder_generated_cpp_initial_value_setter(self, to: Writer, property):
-        to.write(f"static void applyInitial{property.id_without_prefix}(BuilderState& builderState)")
-        to.write(f"{{")
+        to.write(f"static void ApplyInitial{property.id_without_prefix}(BuilderState &builderState) noexcept")
+        to.write("{")
 
         with to.indent():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_initial_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to, property, self._initial_value(property), self._initial_value(property)
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_initial_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_initial_value_setter(to, property)
+                to.write(f"builderState.{self._font_description_setter(property)}({self._initial_value(property)});")
             else:
-                self._generate_property_initial_value_setter(to, property)
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._initial_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_inherit_value_setter(self, to: Writer, property):
-        to.write(f"static void applyInherit{property.id_without_prefix}(BuilderState& builderState)")
-        to.write(f"{{")
+        to.write(f"static void ApplyInherit{property.id_without_prefix}(BuilderState &builderState) noexcept")
+        to.write("{")
 
         with to.indent():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_inherit_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to, property, self._inherited_value(property), self._inherited_value(property)
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_inherit_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_inherit_value_setter(to, property)
+                to.write(
+                    f"auto inheritedValue = builderState.ParentStyle().{property.codegen_properties.render_style_getter}();"
+                )
+                to.write(f"builderState.{self._font_description_setter(property)}(krys::move(inheritedValue));")
             else:
-                self._generate_property_inherit_value_setter(to, property)
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._inherited_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_value_setter(self, to: Writer, property):
-        to.write(f"static void applyValue{property.id_without_prefix}(BuilderState& builderState, Value& value)")
-        to.write(f"{{")
+        to.write(
+            f"static void ApplyValue{property.id_without_prefix}(BuilderState &builderState, css::Value &value) noexcept"
+        )
+        to.write("{")
 
         with to.indent():
             if (
@@ -9075,29 +9271,37 @@ class GenerateStyleBuilderGenerated:
                 and "Initial" not in property.codegen_properties.style_builder_custom
                 and property.codegen_properties.style_builder_needs_system_font_shorthand_check
             ):
-                to.write(f"if (PropertyParserHelpers::isSystemFontShorthand(value.valueID())) {{")
+                to.write("if (css::PropertyParserHelpers::IsSystemFontShorthand(value.ValueId()))")
+                to.write("{")
                 with to.indent():
-                    to.write(f"applyInitial{property.id_without_prefix}(builderState);")
-                    to.write(f"return;")
-                to.write(f"}}")
+                    to.write(f"ApplyInitial{property.id_without_prefix}(builderState);")
+                    to.write("return;")
+                to.write("}")
 
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_setter(to, property)
+                self._generate_visited_link_color_supporting_property_setter(
+                    to,
+                    property,
+                    self._converted_value(property, ["ForVisitedLink::No"]),
+                    self._converted_value(property, ["ForVisitedLink::Yes"]),
+                )
             elif property.codegen_properties.coordinated_value_list_property:
                 self._generate_coordinated_value_list_property_value_setter(to, property)
             elif property.codegen_properties.font_property:
-                self._generate_font_property_value_setter(to, property, self._converted_value(property))
+                to.write(f"builderState.{self._font_description_setter(property)}({self._converted_value(property)});")
             else:
-                self._generate_property_value_setter(to, property, self._converted_value(property))
+                to.write(
+                    f"builderState.Style().{property.codegen_properties.render_style_setter}({self._converted_value(property)});"
+                )
 
             if property.codegen_properties.fast_path_inherited:
-                to.write(f"builderState.style().setDisallowsFastPathInheritance();")
+                to.write("builderState.Style().SetDisallowsFastPathInheritance();")
 
-        to.write(f"}}")
+        to.write("}")
 
     def _generate_style_builder_generated_cpp_builder_functions_class(self, *, to: Writer):
         with to.class_block(name="BuilderFunctions"):
-            to.write(f"public:")
+            to.write("public:")
 
             with to.indent():
                 for property in self.style_properties.all:
@@ -9124,97 +9328,94 @@ class GenerateStyleBuilderGenerated:
                         and "Value" not in property.codegen_properties.style_builder_custom
                     ):
                         self._generate_style_builder_generated_cpp_value_setter(to, property)
-
-    def _generate_style_builder_generated_cpp_builder_generated_apply(self, *, to: Writer):
-        to.write_block("""
-            void BuilderGenerated::applyProperty(PropertyId id, BuilderState& builderState, Value& value, ApplyValueType valueType)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
-
-        with to.indent():
-
-            def scope_for_function(property, function):
-                if function in property.codegen_properties.style_builder_custom:
-                    return "BuilderCustom"
-                return "BuilderFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                if not isinstance(property, StyleProperty):
-                    to.write(f"case {property.id}:")
-                    with to.indent():
-                        to.write(f"break;")
-                    continue
-
-                to.write(f"case {property.id}:")
-
-                with to.indent():
-                    if property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(f"ASSERT_NOT_REACHED();")
-                    elif not property.codegen_properties.skip_style_builder:
-                        apply_initial_arguments = ["builderState"]
-                        apply_inherit_arguments = ["builderState"]
-                        apply_value_arguments = ["builderState", "value"]
-
-                        to.write(f"switch (valueType) {{")
-                        to.write(f"case ApplyValueType::Initial:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Initial')}::applyInitial{property.id_without_prefix}({', '.join(apply_initial_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write(f"case ApplyValueType::Inherit:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Inherit')}::applyInherit{property.id_without_prefix}({', '.join(apply_inherit_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write("case ApplyValueType::Value:")
-                        with to.indent():
-                            to.write(
-                                f"{scope_for_function(property, 'Value')}::applyValue{property.id_without_prefix}({', '.join(apply_value_arguments)});"
-                            )
-                            to.write(f"break;")
-                        to.write(f"}}")
-
-                    to.write(f"break;")
-
-            to.write(f"}}")
-        to.write(f"}}")
         to.newline()
 
+    def _generate_style_builder_generated_cpp_builder_generated_apply(self, *, to: Writer):
+        to.write(
+            "void BuilderGenerated::ApplyProperty(css::PropertyId id, BuilderState &builderState, css::Value &value, ApplyValueType valueType) noexcept"
+        )
+        to.write("{")
+
+        with to.indent():
+            to.write("switch (id)")
+            to.write("{")
+            with to.indent():
+                to.write("case css::PropertyId::Invalid:")
+                with to.indent():
+                    to.write("break;")
+                to.write("case css::PropertyId::Custom:")
+                with to.indent():
+                    to.write('krys_debug_assert_msg(false, "custom properties are applied by the builder");')
+                    to.write("break;")
+
+                def scope_for_function(property, function):
+                    if function in property.codegen_properties.style_builder_custom:
+                        return "BuilderCustom"
+                    return "BuilderFunctions"
+
+                for property in self.properties_and_descriptors.all_unique:
+                    to.write(f"case css::{property.id}:")
+
+                    with to.indent():
+                        if not isinstance(property, StyleProperty):
+                            to.write("break;")
+                            continue
+
+                        if property.codegen_properties.longhands:
+                            to.write("krys_debug_assert(css::IsShorthand(id));")
+                            to.write('krys_debug_assert_msg(false, "shorthands are expanded before they are applied");')
+                        elif not property.codegen_properties.skip_style_builder:
+                            to.write("switch (valueType)")
+                            to.write("{")
+                            with to.indent():
+                                to.write("case ApplyValueType::Initial:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Initial')}::ApplyInitial{property.id_without_prefix}(builderState);"
+                                    )
+                                    to.write("break;")
+                                to.write("case ApplyValueType::Inherit:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Inherit')}::ApplyInherit{property.id_without_prefix}(builderState);"
+                                    )
+                                    to.write("break;")
+                                to.write("case ApplyValueType::Value:")
+                                with to.indent():
+                                    to.write(
+                                        f"{scope_for_function(property, 'Value')}::ApplyValue{property.id_without_prefix}(builderState, value);"
+                                    )
+                                    to.write("break;")
+                            to.write("}")
+
+                        to.write("break;")
+            to.write("}")
+        to.write("}")
+
     def generate_style_builder_generated_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Style/StyleBuilderGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/BuilderGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Style/StyleBuilderGenerated.hpp",
-            )
-            writer.includes(
+                for_header="Krystal.Booey/Style/BuilderGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp",
-                    "Krystal.Booey/CSS/Properties/Property.hpp",
-                    "Krystal.Booey/CSS/Style/RenderStyle+GettersInlines.hpp",
-                    "Krystal.Booey/CSS/Style/RenderStyle+SettersInlines.hpp",
-                    "Krystal.Booey/CSS/Style/StyleBuilderCustom.hpp",
-                    "Krystal.Booey/CSS/Style/StyleBuilderState.hpp",
-                    "Krystal.Booey/CSS/Style/StyleComputedStyle+InitialInlines.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
-                ]
+                    "Krystal.Booey/CSS/Properties/Consumers/Font.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyle+SettersInlines.hpp",
+                    "Krystal.Booey/Style/BuilderCustom.hpp",
+                    "Krystal.Booey/Style/BuilderState.hpp",
+                    "Krystal.Booey/Style/BuilderStateInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyle+InitialInlines.hpp",
+                ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_builder_generated_cpp_builder_functions_class(to=writer)
-
                 self._generate_style_builder_generated_cpp_builder_generated_apply(to=writer)
 
 
-# Generates `StyleExtractorGenerated.cpp`.
+# Generates `Style/ExtractorGenerated.cpp`.
 class GenerateStyleExtractorGenerated:
     def __init__(self, generation_context: GenerationContext):
         self.generation_context = generation_context
@@ -9230,94 +9431,120 @@ class GenerateStyleExtractorGenerated:
     def style_properties(self):
         return self.generation_context.properties_and_descriptors.style_properties
 
-    # MARK: - Helper generator functions for StyleExtractorGenerated.cpp
+    # MARK: - Helper generator functions for ExtractorGenerated.cpp
 
     @staticmethod
     def wrap_in_converter(property, value):
-        return f"createCSSValue(extractorState.pool, extractorState.style, {value})"
+        return f"CreateCSSValue(extractorState.Pool, extractorState.Style, {value})"
 
     @staticmethod
-    def wrap_in_serializer(property, value):
-        return f"serializationForCSS(builder, context, extractorState.style, {value})"
+    def wrap_in_serialiser(property, value):
+        return f"Serialise(builder, context, extractorState.Style, {value})"
+
+    def _write_if(self, to: Writer, condition: str, statements: list[str]):
+        to.write(f"if ({condition})")
+        to.write("{")
+        with to.indent():
+            for statement in statements:
+                to.write(statement)
+        to.write("}")
+
+    def _write_function(self, to: Writer, signature: str, write_body):
+        to.write(signature)
+        to.write("{")
+        with to.indent():
+            write_body()
+        to.write("}")
 
     # Color property getters.
 
     def _generate_visited_link_color_supporting_property_value_getter(self, to: Writer, property):
-        to.write(f"if (extractorState.allowVisitedStyle)")
-        with to.block():
-            to.write(
-                f"return extractorState.pool.createColorValue(extractorState.style.visitedDependentColor({property.id}));"
-            )
+        self._write_if(
+            to,
+            "extractorState.AllowVisitedStyle",
+            [
+                f"return extractorState.Pool.CreateColorValue(extractorState.Style.VisitedDependentColor(css::{property.id}));"
+            ],
+        )
         self._generate_property_value_getter(to, property)
 
-    def _generate_visited_link_color_supporting_property_value_serialization_getter(self, to: Writer, property):
-        to.write(f"if (extractorState.allowVisitedStyle)")
-        with to.block():
-            to.write(
-                f"builder.append(WebCore::serializationForCSS(extractorState.style.visitedDependentColor({property.id})));"
-            )
-            to.write(f"return;")
-        self._generate_property_value_serialization_getter(to, property)
+    def _generate_visited_link_color_supporting_property_value_serialisation_getter(self, to: Writer, property):
+        self._write_if(
+            to,
+            "extractorState.AllowVisitedStyle",
+            [
+                f"builder.Append(SerialisationForCSS(extractorState.Style.VisitedDependentColor(css::{property.id})));",
+                "return;",
+            ],
+        )
+        self._generate_property_value_serialisation_getter(to, property)
 
     # Animation property getters.
 
     def _generate_coordinated_value_list_property_value_getter(self, to: Writer, property):
-        with to.lambda_block(
-            signature=f"auto mapper = [](auto& extractorState, const auto& value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type>&, const auto&) -> Ref<Value>"
-        ):
-            to.write(f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, 'value')};")
         to.write(
-            f"return extractCoordinatedValueListValue<{property.id_or_cascade_alias_id}>(extractorState, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
+            f"auto mapper = [](auto &extractorState, const auto &value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type> &, const auto &) -> Ref<css::Value>"
+        )
+        to.write("{")
+        with to.indent():
+            to.write(f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, 'value')};")
+        to.write("};")
+        to.write(
+            f"return ExtractCoordinatedValueListValue<css::{property.id_or_cascade_alias_id}>(extractorState, extractorState.Style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
         )
 
-    def _generate_coordinated_value_list_property_value_serialization_getter(self, to: Writer, property):
-        with to.lambda_block(
-            signature=f"auto mapper = [](auto& extractorState, auto& builder, const auto& context, const auto& value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type>&, const auto&)"
-        ):
-            to.write(f"{GenerateStyleExtractorGenerated.wrap_in_serializer(property, 'value')};")
+    def _generate_coordinated_value_list_property_value_serialisation_getter(self, to: Writer, property):
         to.write(
-            f"extractCoordinatedValueListSerialization<{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
+            f"auto mapper = [](auto &extractorState, auto &builder, const auto &context, const auto &value, const Maybe<{property.type_name_for_coordinated_value_list}::value_type> &, const auto &)"
+        )
+        to.write("{")
+        with to.indent():
+            to.write(f"{GenerateStyleExtractorGenerated.wrap_in_serialiser(property, 'value')};")
+        to.write("};")
+        to.write(
+            f"ExtractCoordinatedValueListSerialisation<css::{property.id_or_cascade_alias_id}>(extractorState, builder, context, extractorState.Style.{property.method_name_for_get_coordinated_value_list}(), mapper);"
         )
 
     # All other property value getters.
 
     def _generate_property_value_getter(self, to: Writer, property):
         to.write(
-            f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, f'extractorState.style.{property.codegen_properties.render_style_getter}()')};"
+            f"return {GenerateStyleExtractorGenerated.wrap_in_converter(property, f'extractorState.Style.{property.codegen_properties.render_style_getter}()')};"
         )
 
-    def _generate_property_value_serialization_getter(self, to: Writer, property):
+    def _generate_property_value_serialisation_getter(self, to: Writer, property):
         to.write(
-            f"{GenerateStyleExtractorGenerated.wrap_in_serializer(property, f'extractorState.style.{property.codegen_properties.render_style_getter}()')};"
+            f"{GenerateStyleExtractorGenerated.wrap_in_serialiser(property, f'extractorState.Style.{property.codegen_properties.render_style_getter}()')};"
         )
 
     # Shorthand property value getter.
 
     def _generate_style_extractor_generated_cpp_shorthand_value_extractor(self, to: Writer, property: StyleProperty):
-        with to.function_block(
-            signature=f"static RefPtr<Value> extract{property.id_without_prefix}Shorthand(ExtractorState& extractorState) noexcept"
-        ):
-            to.write(
-                f"return extract{property.codegen_properties.shorthand_style_extractor_pattern}Shorthand(extractorState, {property.id_without_prefix}Shorthand());"
-            )
+        pattern = property.codegen_properties.shorthand_style_extractor_pattern
+        self._write_function(
+            to,
+            f"KRYS_NODISCARD static RefPtr<css::Value> Extract{property.id_without_prefix}Shorthand(ExtractorState &extractorState) noexcept",
+            lambda: to.write(
+                f"return Extract{pattern}Shorthand(extractorState, css::{property.id_without_prefix}Shorthand());"
+            ),
+        )
 
-    def _generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(
+    def _generate_style_extractor_generated_cpp_shorthand_value_serialisation_extractor(
         self, to: Writer, property: StyleProperty
     ):
-        with to.function_block(
-            signature=f"static void extract{property.id_without_prefix}ShorthandSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context) noexcept"
-        ):
-            to.write(
-                f"extract{property.codegen_properties.shorthand_style_extractor_pattern}ShorthandSerialization(extractorState, builder, context, {property.id_without_prefix}Shorthand());"
-            )
+        pattern = property.codegen_properties.shorthand_style_extractor_pattern
+        self._write_function(
+            to,
+            f"static void Extract{property.id_without_prefix}ShorthandSerialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context) noexcept",
+            lambda: to.write(
+                f"Extract{pattern}ShorthandSerialisation(extractorState, builder, context, css::{property.id_without_prefix}Shorthand());"
+            ),
+        )
 
     # Longhand property value getter.
 
     def _generate_style_extractor_generated_cpp_value_extractor(self, to: Writer, property: StyleProperty):
-        to.write(f"static RefPtr<Value> extract{property.id_without_prefix}(ExtractorState& extractorState)")
-        to.write(f"{{")
-
-        with to.indent():
+        def body():
             if property.codegen_properties.visited_link_color_support:
                 self._generate_visited_link_color_supporting_property_value_getter(to, property)
             elif property.codegen_properties.coordinated_value_list_property:
@@ -9325,29 +9552,33 @@ class GenerateStyleExtractorGenerated:
             else:
                 self._generate_property_value_getter(to, property)
 
-        to.write(f"}}")
+        self._write_function(
+            to,
+            f"KRYS_NODISCARD static RefPtr<css::Value> Extract{property.id_without_prefix}(ExtractorState &extractorState) noexcept",
+            body,
+        )
 
-    def _generate_style_extractor_generated_cpp_value_serialization_extractor(
+    def _generate_style_extractor_generated_cpp_value_serialisation_extractor(
         self, to: Writer, property: StyleProperty
     ):
-        to.write(
-            f"static void extract{property.id_without_prefix}Serialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context)"
-        )
-        to.write(f"{{")
-
-        with to.indent():
+        def body():
             if property.codegen_properties.visited_link_color_support:
-                self._generate_visited_link_color_supporting_property_value_serialization_getter(to, property)
+                self._generate_visited_link_color_supporting_property_value_serialisation_getter(to, property)
             elif property.codegen_properties.coordinated_value_list_property:
-                self._generate_coordinated_value_list_property_value_serialization_getter(to, property)
+                self._generate_coordinated_value_list_property_value_serialisation_getter(to, property)
             else:
-                self._generate_property_value_serialization_getter(to, property)
+                self._generate_property_value_serialisation_getter(to, property)
 
-        to.write(f"}}")
+        self._write_function(
+            to,
+            f"static void Extract{property.id_without_prefix}Serialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context) noexcept",
+            body,
+        )
 
     def _generate_style_extractor_generated_cpp_extractor_functions_class(self, *, to: Writer):
-        to.write(f"class ExtractorFunctions {{")
-        to.write(f"public:")
+        to.write("class ExtractorFunctions")
+        to.write("{")
+        to.write("public:")
 
         with to.indent():
             for property in self.properties_and_descriptors.all_unique:
@@ -9365,163 +9596,128 @@ class GenerateStyleExtractorGenerated:
                     if not property.codegen_properties.shorthand_style_extractor_pattern:
                         continue
                     self._generate_style_extractor_generated_cpp_shorthand_value_extractor(to, property)
-                    self._generate_style_extractor_generated_cpp_shorthand_value_serialization_extractor(to, property)
+                    self._generate_style_extractor_generated_cpp_shorthand_value_serialisation_extractor(to, property)
                 else:
                     self._generate_style_extractor_generated_cpp_value_extractor(to, property)
-                    self._generate_style_extractor_generated_cpp_value_serialization_extractor(to, property)
+                    self._generate_style_extractor_generated_cpp_value_serialisation_extractor(to, property)
 
-        to.write(f"}};")
+        to.write("};")
+
+    @staticmethod
+    def _scope_for_function(property):
+        if property.codegen_properties.style_extractor_custom:
+            return "ExtractorCustom"
+        if property.codegen_properties.longhands and not property.codegen_properties.shorthand_style_extractor_pattern:
+            return "ExtractorCustom"
+        return "ExtractorFunctions"
+
+    def _generate_dispatch(self, *, to: Writer, signature: str, skipped: str, logical: list[str], shorthand, longhand, after: list[str]):
+        to.write(signature)
+        to.write("{")
+        with to.indent():
+            to.write("switch (id)")
+            to.write("{")
+            with to.indent():
+                to.write("case css::PropertyId::Invalid:")
+                with to.indent():
+                    to.write("break;")
+                to.write("case css::PropertyId::Custom:")
+                with to.indent():
+                    to.write('krys_debug_assert_msg(false, "custom properties are extracted by name");')
+                    to.write("break;")
+
+                for property in self.properties_and_descriptors.all_unique:
+                    to.write(f"case css::{property.id}:")
+                    with to.indent():
+                        if not isinstance(property, StyleProperty):
+                            to.write("// Skipped - Descriptor-only property")
+                            to.write(skipped)
+                        elif property.codegen_properties.internal_only:
+                            to.write("// Skipped - Internal only")
+                            to.write(skipped)
+                        elif property.codegen_properties.skip_style_extractor:
+                            to.write("// Skipped - Not computable")
+                            to.write(skipped)
+                        elif (
+                            property.codegen_properties.is_logical
+                            and not property.codegen_properties.style_extractor_custom
+                        ):
+                            to.write("// Logical properties are handled by recursing using the direction resolved property.")
+                            for line in logical:
+                                to.write(line)
+                        elif property.codegen_properties.longhands:
+                            to.write("krys_debug_assert(css::IsShorthand(id));")
+                            for line in shorthand(self._scope_for_function(property), property):
+                                to.write(line)
+                        else:
+                            for line in longhand(self._scope_for_function(property), property):
+                                to.write(line)
+            to.write("}")
+            to.write('krys_debug_assert_msg(false, "unknown property");')
+            for line in after:
+                to.write(line)
+        to.write("}")
+        to.newline()
 
     # Property getter dispatch.
 
     def _generate_style_extractor_generated_cpp_extractor_generated_extract_value(self, *, to: Writer):
-        to.write_block("""
-            RefPtr<Value> ExtractorGenerated::extractValue(ExtractorState& extractorState, PropertyId id)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
+        self._generate_dispatch(
+            to=to,
+            signature="RefPtr<css::Value> ExtractorGenerated::ExtractValue(ExtractorState &extractorState, css::PropertyId id) noexcept",
+            skipped="return nullptr;",
+            logical=[
+                "return ExtractValue(extractorState, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));"
+            ],
+            shorthand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}Shorthand(extractorState);"],
+            longhand=lambda scope, property: [f"return {scope}::Extract{property.id_without_prefix}(extractorState);"],
+            after=["return nullptr;"],
+        )
 
-        with to.indent():
+    # Property serialisation dispatch.
 
-            def scope_for_function(property):
-                if property.codegen_properties.style_extractor_custom:
-                    return "ExtractorCustom"
-                if (
-                    property.codegen_properties.longhands
-                    and not property.codegen_properties.shorthand_style_extractor_pattern
-                ):
-                    return "ExtractorCustom"
-                return "ExtractorFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                to.write(f"case {property.id}:")
-                with to.indent():
-                    if not isinstance(property, StyleProperty):
-                        to.write(f"// Skipped - Descriptor-only property")
-                        to.write(f"return nullptr;")
-                    elif property.codegen_properties.internal_only:
-                        to.write(f"// Skipped - Internal only")
-                        to.write(f"return nullptr;")
-                    elif property.codegen_properties.skip_style_extractor:
-                        to.write(f"// Skipped - Not computable")
-                        to.write(f"return nullptr;")
-                    elif (
-                        property.codegen_properties.is_logical
-                        and not property.codegen_properties.style_extractor_custom
-                    ):
-                        to.write(
-                            f"// Logical properties are handled by recursing using the direction resolved property."
-                        )
-                        to.write(
-                            f"return extractValue(extractorState, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
-                        )
-                    elif property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(
-                            f"return {scope_for_function(property)}::extract{property.id_without_prefix}Shorthand(extractorState);"
-                        )
-                    else:
-                        to.write(
-                            f"return {scope_for_function(property)}::extract{property.id_without_prefix}(extractorState);"
-                        )
-
-            to.write(f"}}")
-            to.write(f"ASSERT_NOT_REACHED();")
-            to.write(f"return nullptr;")
-        to.write(f"}}")
-        to.newline()
-
-    # Property serialization dispatch.
-
-    def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(self, *, to):
-        to.write_block("""
-            void ExtractorGenerated::extractValueSerialization(ExtractorState& extractorState, StringBuilder& builder, const CSS::SerializationContext& context, PropertyId id)
-            {
-                switch (id) {
-                case PropertyId::CSSPropertyInvalid:
-                    break;
-                case PropertyId::CSSPropertyCustom:
-                    ASSERT_NOT_REACHED();
-                    break;""")
-
-        with to.indent():
-
-            def scope_for_function(property):
-                if property.codegen_properties.style_extractor_custom:
-                    return "ExtractorCustom"
-                if (
-                    property.codegen_properties.longhands
-                    and not property.codegen_properties.shorthand_style_extractor_pattern
-                ):
-                    return "ExtractorCustom"
-                return "ExtractorFunctions"
-
-            for property in self.properties_and_descriptors.all_unique:
-                to.write(f"case {property.id}:")
-                with to.indent():
-                    if not isinstance(property, StyleProperty):
-                        to.write(f"// Skipped - Descriptor-only property")
-                        to.write(f"return;")
-                    elif property.codegen_properties.internal_only:
-                        to.write(f"// Skipped - Internal only")
-                        to.write(f"return;")
-                    elif property.codegen_properties.skip_style_extractor:
-                        to.write(f"// Skipped - Not computable")
-                        to.write(f"return;")
-                    elif (
-                        property.codegen_properties.is_logical
-                        and not property.codegen_properties.style_extractor_custom
-                    ):
-                        to.write(
-                            f"// Logical properties are handled by recursing using the direction resolved property."
-                        )
-                        to.write(
-                            f"extractValueSerialization(extractorState, builder, context, Property::resolveDirectionAwareProperty(id, extractorState.style.writingMode()));"
-                        )
-                        to.write(f"return;")
-                    elif property.codegen_properties.longhands:
-                        to.write(f"ASSERT(isShorthand(id));")
-                        to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}ShorthandSerialization(extractorState, builder, context);"
-                        )
-                        to.write(f"return;")
-                    else:
-                        to.write(
-                            f"{scope_for_function(property)}::extract{property.id_without_prefix}Serialization(extractorState, builder, context);"
-                        )
-                        to.write(f"return;")
-
-            to.write(f"}}")
-            to.write(f"ASSERT_NOT_REACHED();")
-        to.write(f"}}")
-        to.newline()
+    def _generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(self, *, to: Writer):
+        self._generate_dispatch(
+            to=to,
+            signature="void ExtractorGenerated::ExtractValueSerialisation(ExtractorState &extractorState, StringBuilder &builder, const css::SerialisationContext &context, css::PropertyId id) noexcept",
+            skipped="return;",
+            logical=[
+                "ExtractValueSerialisation(extractorState, builder, context, css::Property::ResolveDirectionAwareProperty(id, extractorState.Style.GetWritingMode()));",
+                "return;",
+            ],
+            shorthand=lambda scope, property: [
+                f"{scope}::Extract{property.id_without_prefix}ShorthandSerialisation(extractorState, builder, context);",
+                "return;",
+            ],
+            longhand=lambda scope, property: [
+                f"{scope}::Extract{property.id_without_prefix}Serialisation(extractorState, builder, context);",
+                "return;",
+            ],
+            after=[],
+        )
 
     def generate_style_extractor_generated_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Style/StyleExtractorGenerated.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/ExtractorGenerated.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Style/StyleExtractorGenerated.hpp",
+                for_header="Krystal.Booey/Style/ExtractorGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Values/PrimitiveValueMappings.hpp",
                     "Krystal.Booey/CSS/Properties/Property.hpp",
-                    "Krystal.Booey/CSS/Serialization/ColorSerialization.hpp",
-                    "Krystal.Booey/CSS/Style/RenderStyle.hpp",
-                    "Krystal.Booey/CSS/Style/StyleExtractorCustom.hpp",
-                    "Krystal.Booey/CSS/Style/StyleExtractorState.hpp",
-                    "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyId.hpp",
+                    "Krystal.Booey/CSS/Properties/PropertyShorthandFunctions.hpp",
+                    "Krystal.Booey/Graphics/Color/ColorSerialisation.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp",
+                    "Krystal.Booey/Style/ExtractorCustom.hpp",
+                    "Krystal.Booey/Style/ExtractorState.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_style_extractor_generated_cpp_extractor_functions_class(to=writer)
                 self._generate_style_extractor_generated_cpp_extractor_generated_extract_value(to=writer)
-                self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialization(to=writer)
+                self._generate_style_extractor_generated_cpp_extractor_generated_extract_serialisation(to=writer)
 
 
 # Generates `StyleInterpolationWrapperMap.h` and `StyleInterpolationWrapperMap.cpp`.
@@ -9543,7 +9739,7 @@ class GenerateStyleInterpolationWrapperMap:
 
     def generate_css_property_animation_wrapper_map_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleInterpolationWrapperMap.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/InterpolationWrapperMap.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -9553,58 +9749,65 @@ class GenerateStyleInterpolationWrapperMap:
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyId.hpp",
                     "Krystal.Core/Types/Array.hpp",
+                    "Krystal.Core/Utils/NeverDestroyed.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo::css"):
+            with writer.namespace(namespace="krys::boo::style::interpolation"):
                 writer.forward_declarations(classes=["WrapperBase"])
                 self._generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(to=writer)
 
     def generate_css_property_animation_wrapper_map_cpp(self):
-        with open(self.generation_context.output_cpp_path("CSS/Style/StyleInterpolationWrapperMap.cpp"), "w") as output_file:
+        with open(self.generation_context.output_cpp_path("Style/InterpolationWrapperMap.cpp"), "w") as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Style/StyleInterpolationWrapperMap.hpp",
+                for_header="Krystal.Booey/Style/InterpolationWrapperMap.hpp",
                 headers=[
                     "Krystal.Booey/CSS/Properties/PropertyShorthand.hpp",
+                    "Krystal.Core/Types/List.hpp",
                 ],
             )
 
             writer.write("#define STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP 1")
-            writer.write('#include "Krystal.Booey/CSS/Style/StyleInterpolationWrappers.hpp"')
+            writer.write('#include "Krystal.Booey/Style/InterpolationWrappers.hpp"')
             writer.write("#undef STYLE_INTERPOLATION_GENERATED_INCLUDE_TRAP")
 
-            with writer.namespace(namespace="krys::boo::css"):
+            with writer.namespace(namespace="krys::boo::style::interpolation"):
                 self._generate_css_property_animation_wrapper_map_cpp_constructor(to=writer)
 
     # MARK: - Helper generator functions for StyleInterpolationWrapperMap.h
 
     def _generate_css_property_animation_wrapper_map_h_wrapper_map_declaration(self, *, to):
         to.write_block("""\
-            class WrapperMap final {
-            public:
-                static WrapperMap& singleton()
-                {
-                    static NeverDestroyed<WrapperMap> map;
-                    return map;
-                }
-
-                WrapperBase* wrapper(PropertyId id)
-                {
-                    if (id >= TotalPropertyIdValues)
-                        return nullptr;
-                    return m_wrappers[id];
-                }
+            /// @brief The interpolation wrapper of each animatable property.
+            class WrapperMap final
+            {
+              friend class NeverDestroyed<WrapperMap>;
 
             private:
-                friend class WTF::NeverDestroyed<WrapperMap>;
+              Array<WrapperBase *, css::TotalPropertyIdValues> _wrappers;
 
-                WrapperMap();
-                ~WrapperMap() = delete;
+              WrapperMap() noexcept;
 
-                std::array<WrapperBase*, TotalPropertyIdValues> m_wrappers;
+            public:
+              KRYS_NODISCARD static WrapperMap &Singleton() noexcept
+              {
+                static NeverDestroyed<WrapperMap> map;
+                return map.get();
+              }
+
+              /// @brief The wrapper of @p id, or null if it isn't animatable.
+              KRYS_NODISCARD WrapperBase *GetWrapper(css::PropertyId id) const noexcept
+              {
+                auto index = static_cast<size_t>(id);
+                if (index >= css::TotalPropertyIdValues)
+                {
+                  return nullptr;
+                }
+                return _wrappers[index];
+              }
             };""")
 
         to.newline()
@@ -9639,7 +9842,7 @@ class GenerateStyleInterpolationWrapperMap:
             property_wrapper_parameters = property.codegen_properties.animation_wrapper_requires_override_parameters
         else:
             # Add PropertyId
-            property_wrapper_parameters = [property.id]
+            property_wrapper_parameters = [f"css::{property.id}"]
 
             # Compute style class.
             style_type = "RenderStyle"
@@ -9648,11 +9851,13 @@ class GenerateStyleInterpolationWrapperMap:
             setter = property.codegen_properties.render_style_setter
 
             if property.codegen_properties.coordinated_value_list_property and property_wrapper_type is not None:
+                list_name = property.codegen_properties.coordinated_value_list_property_name_for_methods
+                list_value_type = f"style::{property.type_name_for_coordinated_value_list}::value_type"
                 property_wrapper_parameters += [
                     f"&{style_type}::{property.method_name_for_get_coordinated_value_list}",
                     f"&{style_type}::{property.method_name_for_ensure_coordinated_value_list}",
                     f"&{style_type}::{property.method_name_for_set_coordinated_value_list}",
-                    f"{property_wrapper_type}({property.id}, &{property.type_name_for_coordinated_value_list}::value_type::{property.codegen_properties.coordinated_value_list_property_getter}, &{property.type_name_for_coordinated_value_list}::value_type::{property.codegen_properties.coordinated_value_list_property_setter})",
+                    f"{property_wrapper_type}(css::{property.id}, &{list_value_type}::Get{list_name}, &{list_value_type}::Set{list_name})",
                 ]
                 property_wrapper_type = "CoordinatedValueListPropertyWrapper"
             else:
@@ -9675,8 +9880,8 @@ class GenerateStyleInterpolationWrapperMap:
                 # Add property type specific parameters
                 if property.codegen_properties.visited_link_color_support:
                     property_wrapper_parameters += [
-                        f"&{style_type}::visitedLink{name_for_methods}",
-                        f"&{style_type}::setVisitedLink{name_for_methods}",
+                        f"&{style_type}::VisitedLink{name_for_methods}",
+                        f"&{style_type}::SetVisitedLink{name_for_methods}",
                     ]
 
                 # Add additional specified parameters
@@ -9701,33 +9906,39 @@ class GenerateStyleInterpolationWrapperMap:
 
     def _generate_css_property_animation_wrapper_map_cpp_constructor(self, *, to):
         to.write_block("""\
-            static WrapperBase* makeShorthandWrapper(PropertyId id, const std::array<WrapperBase*, TotalPropertyIdValues>& wrappers)
+            namespace
             {
-                auto shorthand = shorthandForProperty(id);
-                ASSERT(shorthand.length());
+              KRYS_NODISCARD WrapperBase *MakeShorthandWrapper(css::PropertyId id,
+                                                               const Array<WrapperBase *, css::TotalPropertyIdValues> &wrappers) noexcept
+              {
+                auto shorthand = css::ShorthandForProperty(id);
+                krys_debug_assert(!shorthand.Properties().empty());
 
-                auto longhandWrappers = WTF::compactMap(shorthand, [&](auto longhand) -> std::optional<WrapperBase*> {
-                    auto wrapper = wrappers[longhand];
-                    if (!wrapper)
-                        return std::nullopt;
-                    return wrapper;
-                });
+                List<WrapperBase *> longhandWrappers;
+                for (auto longhand : shorthand)
+                {
+                  if (auto *wrapper = wrappers[static_cast<size_t>(longhand)])
+                  {
+                    longhandWrappers.push_back(wrapper);
+                  }
+                }
 
                 return new ShorthandWrapper(id, krys::move(longhandWrappers));
+              }
             }
             """)
 
-        to.write("WrapperMap::WrapperMap()")
+        to.write("WrapperMap::WrapperMap() noexcept")
 
         with to.indent():
             animatable_longhands = set()
             animatable_shorthands = set()
 
-            to.write(": m_wrappers {")
+            to.write(": _wrappers {")
 
             with to.indent():
-                to.write(f"nullptr, // PropertyId::CSSPropertyInvalid")
-                to.write(f"nullptr, // PropertyId::CSSPropertyCustom")
+                to.write(f"nullptr, // PropertyId::Invalid")
+                to.write(f"nullptr, // PropertyId::Custom")
 
                 for property in self.properties_and_descriptors.all_unique:
                     if not property.codegen_properties.longhands:
@@ -9770,7 +9981,9 @@ class GenerateStyleInterpolationWrapperMap:
             to.newline()
             for property in self.properties_and_descriptors.all_unique:
                 if property in animatable_shorthands:
-                    to.write(f"m_wrappers[{property.id}] = makeShorthandWrapper({property.id}, m_wrappers);")
+                    to.write(
+                        f"_wrappers[static_cast<size_t>(css::{property.id})] = MakeShorthandWrapper(css::{property.id}, _wrappers);"
+                    )
 
         to.write("}")
         to.newline()
@@ -9824,7 +10037,7 @@ class GenerateStyleComputedStyleProperties:
         if storage_kind == "enum":
             expression = f"static_cast<{storage_type}>({expression})"
         elif storage_kind == "raw":
-            expression = f"{storage_type}::fromRaw({expression})"
+            expression = f"{storage_type}::FromRaw({expression})"
         return expression
 
     # Computes the expression of loads and assignments needed to set the member variable used to store the property.
@@ -9842,22 +10055,22 @@ class GenerateStyleComputedStyleProperties:
         if storage_kind == "reference":
             rhs = f"krys::move({argument_name})"
         elif storage_kind == "enum":
-            rhs = f"static_cast<unsigned>({argument_name})"
+            rhs = f"ToUnderlying({argument_name})"
         elif storage_kind == "raw":
-            rhs = f"{argument_name}.toRaw()"
+            rhs = f"{argument_name}.ToRaw()"
         else:
             rhs = f"{argument_name}"
 
         # Compute setter expression, starting with the base set of loads to access the storage container.
-        container = ".access().".join(container_path)
+        container = ".Access().".join(container_path)
 
         expression = None
         if container_kind == "data":
-            expression = f"{container}.access().{storage_name} = {rhs}"
+            expression = f"{container}.Access().{storage_name} = {rhs}"
         elif container_kind == "struct":
             expression = f"{container}.{storage_name} = {rhs}"
         elif container_kind == "physical-group":
-            expression = f"{container}.set{Name(property.codegen_properties.logical_property_group.resolver).id_without_prefix}({rhs})"
+            expression = f"{container}.Set{Name(property.codegen_properties.logical_property_group.resolver).id_without_prefix}({rhs})"
         assert type(expression) is str, f"Expected expression to be a string, got {type(expression)}"
 
         return expression
@@ -9879,15 +10092,16 @@ class GenerateStyleComputedStyleProperties:
     # Generate StyleComputedStyleProperties.h
 
     def _generate_getter_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"{annotations}{return_type} {function_name}() const;")
+        to.write(f"KRYS_NODISCARD {annotations}{return_type} {function_name}() const noexcept;")
 
     def _generate_setter_function_declaration(
         self, *, to: Writer, function_name, annotations, return_type, argument_type
     ):
-        to.write(f"{annotations}{return_type} {function_name}({argument_type});")
+        to.write(f"{annotations}{return_type} {function_name}({argument_type}) noexcept;")
 
     def _generate_initial_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"static {annotations}{return_type} {function_name}();")
+        specifiers = "constexpr static " if annotations.startswith("constexpr") else "static " + annotations
+        to.write(f"KRYS_NODISCARD {specifiers}{return_type} {function_name}() noexcept;")
 
     def _generate_property_function_declarations(self, *, to: Writer):
         for property in self.style_properties.all:
@@ -9943,8 +10157,8 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                getter_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = property.getter_return_type
                 setter_annotations = f"inline "
@@ -9966,8 +10180,8 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                getter_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = "bool"
                 setter_annotations = f"inline "
@@ -10006,11 +10220,11 @@ class GenerateStyleComputedStyleProperties:
                 setter_argument_type = horizontal_property.setter_argument_type
 
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}(WritingMode) const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}() const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline void setLogical{property.id_without_prefix}({setter_argument_type});")
+                    to.write(f"inline void SetLogical{property.id_without_prefix}({setter_argument_type}) noexcept;")
             elif property_group["kind"] == "side":
                 property = property_group["physical"]["bottom"]
                 # NOTE: Choice of which property we use here is arbitrary, they must always have the same types.
@@ -10027,7 +10241,7 @@ class GenerateStyleComputedStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -10036,7 +10250,7 @@ class GenerateStyleComputedStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}() const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -10045,7 +10259,7 @@ class GenerateStyleComputedStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline void set{prefix.id_without_prefix}{edge}({setter_argument_type});")
+                    to.write(f"inline void Set{prefix.id_without_prefix}{edge}({setter_argument_type}) noexcept;")
             else:
                 # FIXME: Add logical getters / setters for other group kinds (like 'corner') if it would be useful.
                 to.write(f"// FIXME: Add support for logical getter/setters of kind '{property_group['kind']}'.")
@@ -10053,16 +10267,16 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/Computed/ComputedStyleProperties.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
 
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
-                headers=["Krystal.Booey/CSS/Properties/ComputedStyleBase.hpp"],
+                headers=["Krystal.Booey/Style/Computed/ComputedStyleBase.hpp"],
             )
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 writer.write(f"class ComputedStyleProperties : public ComputedStyleBase {{")
                 writer.write(f"public:")
 
@@ -10097,7 +10311,7 @@ class GenerateStyleComputedStyleProperties:
     def _generate_getters_inlines_property_function_definition(
         self, *, to: Writer, function_name, annotations, return_type, get_expression
     ):
-        to.write(f"{annotations}{return_type} ComputedStyleProperties::{function_name}() const")
+        to.write(f"{annotations}{return_type} ComputedStyleProperties::{function_name}() const noexcept")
         to.write(f"{{")
         with to.indent():
             to.write(f"return {get_expression};")
@@ -10148,7 +10362,7 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = property.getter_return_type
                 storage_type = property.codegen_properties.render_style_type
@@ -10175,7 +10389,7 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "bool"
                 storage_type = "bool"
@@ -10203,20 +10417,20 @@ class GenerateStyleComputedStyleProperties:
         self, *, to: Writer, axis, getter_return_type, horizontal, vertical
     ):
         to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::logical{axis.id_without_prefix}(WritingMode writingMode) const"
+            f"inline {getter_return_type} ComputedStyleProperties::Logical{axis.id_without_prefix}(WritingMode writingMode) const noexcept"
         )
         to.write(f"{{")
         with to.indent():
             to.write(
-                f"return writingMode.isHorizontal() ? {horizontal.codegen_properties.render_style_getter}() : {vertical.codegen_properties.render_style_getter}();"
+                f"return writingMode.IsHorizontal() ? {horizontal.codegen_properties.render_style_getter}() : {vertical.codegen_properties.render_style_getter}();"
             )
         to.write(f"}}")
         to.newline()
 
-        to.write(f"inline {getter_return_type} ComputedStyleProperties::logical{axis.id_without_prefix}() const")
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::Logical{axis.id_without_prefix}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return logical{axis.id_without_prefix}(writingMode());")
+            to.write(f"return Logical{axis.id_without_prefix}(GetWritingMode());")
         to.write(f"}}")
         to.newline()
 
@@ -10224,27 +10438,25 @@ class GenerateStyleComputedStyleProperties:
         self, *, to: Writer, prefix, edge, getter_return_type, left, right, top, bottom
     ):
         to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const"
+            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const noexcept"
         )
         to.write(f"{{")
         with to.indent():
-            to.write(f"if (writingMode.isHorizontal())")
-            with to.indent():
+            to.write(f"if (writingMode.IsHorizontal())")
+            with to.block():
                 to.write(
-                    f"return writingMode.isInlineLeftToRight() ? {left.codegen_properties.render_style_getter}() : {right.codegen_properties.render_style_getter}();"
+                    f"return writingMode.IsInlineLeftToRight() ? {left.codegen_properties.render_style_getter}() : {right.codegen_properties.render_style_getter}();"
                 )
-            to.write(f"else")
-            with to.indent():
-                to.write(
-                    f"return writingMode.isInlineTopToBottom() ? {top.codegen_properties.render_style_getter}() : {bottom.codegen_properties.render_style_getter}();"
-                )
+            to.write(
+                f"return writingMode.IsInlineTopToBottom() ? {top.codegen_properties.render_style_getter}() : {bottom.codegen_properties.render_style_getter}();"
+            )
         to.write(f"}}")
         to.newline()
 
-        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
+            to.write(f"return {prefix.id_without_prefix}{edge}(GetWritingMode());")
         to.write(f"}}")
         to.newline()
 
@@ -10252,11 +10464,12 @@ class GenerateStyleComputedStyleProperties:
         self, *, to: Writer, prefix, edge, getter_return_type, left, right, top, bottom
     ):
         to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const"
+            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const noexcept"
         )
         to.write(f"{{")
         with to.indent():
-            to.write(f"switch (writingMode.blockDirection()) {{")
+            to.write(f"switch (writingMode.BlockDirection())")
+            to.write(f"{{")
             to.write(f"case FlowDirection::LeftToRight:")
             with to.indent():
                 to.write(f"return {left.codegen_properties.render_style_getter}();")
@@ -10270,15 +10483,15 @@ class GenerateStyleComputedStyleProperties:
             with to.indent():
                 to.write(f"return {bottom.codegen_properties.render_style_getter}();")
             to.write(f"}}")
-            to.write(f"ASSERT_NOT_REACHED();")
+            to.write(f"krys_debug_assert_msg(false, \"Unexpected block direction\");")
             to.write(f"return {bottom.codegen_properties.render_style_getter}();")
         to.write(f"}}")
         to.newline()
 
-        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
+            to.write(f"return {prefix.id_without_prefix}{edge}(GetWritingMode());")
         to.write(f"}}")
         to.newline()
 
@@ -10286,23 +10499,21 @@ class GenerateStyleComputedStyleProperties:
         self, *, to: Writer, prefix, edge, getter_return_type, left, right
     ):
         to.write(
-            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const"
+            f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}(WritingMode writingMode) const noexcept"
         )
         to.write(f"{{")
         with to.indent():
-            to.write(f"if (writingMode.isHorizontal())")
-            with to.indent():
+            to.write(f"if (writingMode.IsHorizontal())")
+            with to.block():
                 to.write(f"return {left.codegen_properties.render_style_getter}();")
-            to.write(f"else")
-            with to.indent():
-                to.write(f"return {right.codegen_properties.render_style_getter}();")
+            to.write(f"return {right.codegen_properties.render_style_getter}();")
         to.write(f"}}")
         to.newline()
 
-        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const")
+        to.write(f"inline {getter_return_type} ComputedStyleProperties::{prefix.id_without_prefix}{edge}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return {prefix.id_without_prefix}{edge}(writingMode());")
+            to.write(f"return {prefix.id_without_prefix}{edge}(GetWritingMode());")
         to.write(f"}}")
         to.newline()
 
@@ -10402,7 +10613,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_getters_inlines_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+GettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -10411,15 +10622,15 @@ class GenerateStyleComputedStyleProperties:
 
             writer.write_block("""\
             #ifndef COMPUTED_STYLE_PROPERTIES_GETTERS_INLINES_INCLUDE_TRAP
-            #error "Please do not include this file anywhere except from StyleComputedStyle+GettersInlines.hpp."
+            #error "Please do not include this file anywhere except from ComputedStyle+GettersInlines.hpp."
             #endif
             """)
 
             writer.includes(
-                headers=["Krystal.Booey/CSS/Properties/StyleComputedStyleProperties+GettersCustomInlines.hpp"],
+                headers=["Krystal.Booey/Style/Computed/ComputedStyleProperties+GettersCustomInlines.hpp"],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_getters_inlines_property_function_definitions(to=writer)
                 self._generate_getters_inlines_logical_property_function_definitions(to=writer)
 
@@ -10438,20 +10649,16 @@ class GenerateStyleComputedStyleProperties:
         set_expression,
     ):
         to.write(
-            f"{annotations}{return_type} ComputedStyleProperties::{function_name}({argument_type} {argument_name})"
+            f"{annotations}{return_type} ComputedStyleProperties::{function_name}({argument_type} {argument_name}) noexcept"
         )
         to.write(f"{{")
         with to.indent():
-            if return_type == "void":
-                to.write(f"if ({argument_name} != {get_expression})")
-                with to.block():
-                    to.write(f"{set_expression};")
-            elif return_type == "bool":
-                to.write(f"if ({argument_name} != {get_expression}) {{")
-                with to.block():
-                    to.write(f"{set_expression};")
+            to.write(f"if ({argument_name} != {get_expression})")
+            with to.block():
+                to.write(f"{set_expression};")
+                if return_type == "bool":
                     to.write(f"return true;")
-                to.write(f"}}")
+            if return_type == "bool":
                 to.write(f"return false;")
         to.write(f"}}")
         to.newline()
@@ -10513,7 +10720,7 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = property.setter_argument_type
@@ -10553,7 +10760,7 @@ class GenerateStyleComputedStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = "bool"
@@ -10594,15 +10801,15 @@ class GenerateStyleComputedStyleProperties:
         self, *, to: Writer, axis, setter_argument_type, horizontal, vertical
     ):
         to.write(
-            f"inline void ComputedStyleProperties::setLogical{axis.id_without_prefix}({setter_argument_type} value)"
+            f"inline void ComputedStyleProperties::SetLogical{axis.id_without_prefix}({setter_argument_type} value) noexcept"
         )
         to.write(f"{{")
         with to.indent():
-            to.write(f"if (writingMode().isHorizontal())")
-            with to.indent():
+            to.write(f"if (GetWritingMode().IsHorizontal())")
+            with to.block():
                 to.write(f"{horizontal.codegen_properties.render_style_setter}(krys::move(value));")
             to.write(f"else")
-            with to.indent():
+            with to.block():
                 to.write(f"{vertical.codegen_properties.render_style_setter}(krys::move(value));")
         to.write(f"}}")
         to.newline()
@@ -10619,26 +10826,25 @@ class GenerateStyleComputedStyleProperties:
         top,
         bottom,
     ):
-        to.write(f"void ComputedStyleProperties::set{prefix.id_without_prefix}{edge}({setter_argument_type} value)")
+        to.write(f"inline void ComputedStyleProperties::Set{prefix.id_without_prefix}{edge}({setter_argument_type} value) noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"if (writingMode().isHorizontal()) {{")
-            with to.indent():
-                to.write(f"if (writingMode().isInlineLeftToRight())")
-                with to.indent():
+            to.write(f"if (GetWritingMode().IsHorizontal())")
+            with to.block():
+                to.write(f"if (GetWritingMode().IsInlineLeftToRight())")
+                with to.block():
                     to.write(f"{left.codegen_properties.render_style_setter}(krys::move(value));")
                 to.write(f"else")
-                with to.indent():
+                with to.block():
                     to.write(f"{right.codegen_properties.render_style_setter}(krys::move(value));")
-            to.write(f"}} else {{")
-            with to.indent():
-                to.write(f"if (writingMode().isInlineTopToBottom())")
-                with to.indent():
+            to.write(f"else")
+            with to.block():
+                to.write(f"if (GetWritingMode().IsInlineTopToBottom())")
+                with to.block():
                     to.write(f"{top.codegen_properties.render_style_setter}(krys::move(value));")
                 to.write(f"else")
-                with to.indent():
+                with to.block():
                     to.write(f"{bottom.codegen_properties.render_style_setter}(krys::move(value));")
-            to.write(f"}}")
         to.write(f"}}")
         to.newline()
 
@@ -10654,10 +10860,11 @@ class GenerateStyleComputedStyleProperties:
         top,
         bottom,
     ):
-        to.write(f"void ComputedStyleProperties::set{prefix.id_without_prefix}{edge}({setter_argument_type} value)")
+        to.write(f"inline void ComputedStyleProperties::Set{prefix.id_without_prefix}{edge}({setter_argument_type} value) noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"switch (writingMode().blockDirection()) {{")
+            to.write(f"switch (GetWritingMode().BlockDirection())")
+            to.write(f"{{")
             to.write(f"case FlowDirection::LeftToRight:")
             with to.indent():
                 to.write(f"return {left.codegen_properties.render_style_setter}(krys::move(value));")
@@ -10677,14 +10884,14 @@ class GenerateStyleComputedStyleProperties:
     def _generate_setters_inlines_function_definition_logical_side_left_right(
         self, *, to: Writer, prefix, edge, setter_argument_type, left, right
     ):
-        to.write(f"void ComputedStyleProperties::set{prefix.id_without_prefix}{edge}({setter_argument_type} value)")
+        to.write(f"inline void ComputedStyleProperties::Set{prefix.id_without_prefix}{edge}({setter_argument_type} value) noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"if (writingMode().isHorizontal())")
-            with to.indent():
+            to.write(f"if (GetWritingMode().IsHorizontal())")
+            with to.block():
                 to.write(f"{left.codegen_properties.render_style_setter}(krys::move(value));")
             to.write(f"else")
-            with to.indent():
+            with to.block():
                 to.write(f"{right.codegen_properties.render_style_setter}(krys::move(value));")
         to.write(f"}}")
         to.newline()
@@ -10786,7 +10993,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_setters_inlines_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+SettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/Computed/ComputedStyleProperties+SettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -10795,17 +11002,17 @@ class GenerateStyleComputedStyleProperties:
 
             writer.write_block("""\
                 #ifndef COMPUTED_STYLE_PROPERTIES_SETTERS_INLINES_INCLUDE_TRAP
-                #error "Please do not include this file anywhere except from StyleComputedStyle+SettersInlines.hpp."
+                #error "Please do not include this file anywhere except from ComputedStyle+SettersInlines.hpp."
                 #endif
             """)
 
             writer.includes(
                 headers=[
-                    "Krystal.Booey/CSS/Properties/StyleComputedStyleProperties+SettersCustomInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyleProperties+SettersCustomInlines.hpp",
                 ],
             )
 
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_setters_inlines_property_function_definitions(to=writer)
                 self._generate_setters_inlines_logical_property_function_definitions(to=writer)
 
@@ -10821,11 +11028,11 @@ class GenerateStyleComputedStyleProperties:
         initial_expression,
         requires_using_namespace_css_literals,
     ):
-        to.write(f"{annotations}{return_type} ComputedStyleProperties::{function_name}()")
+        to.write(f"{annotations}{return_type} ComputedStyleProperties::{function_name}() noexcept")
         to.write(f"{{")
         with to.indent():
             if requires_using_namespace_css_literals:
-                to.write(f"using namespace CSS::Literals;")
+                to.write(f"using namespace css::Literals;")
             to.write(f"return {initial_expression};")
         to.write(f"}}")
         to.newline()
@@ -10863,7 +11070,7 @@ class GenerateStyleComputedStyleProperties:
 
     def generate_style_computed_style_properties_initial_inlines_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/StyleComputedStyleProperties+InitialInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Style/Computed/ComputedStyleProperties+InitialInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -10872,18 +11079,18 @@ class GenerateStyleComputedStyleProperties:
 
             writer.write_block("""\
             #ifndef COMPUTED_STYLE_PROPERTIES_INITIAL_INLINES_INCLUDE_TRAP
-                #error "Please do not include this file anywhere except from StyleComputedStyle+InitialInlines.hpp."
+                #error "Please do not include this file anywhere except from ComputedStyle+InitialInlines.hpp."
             #endif
             """)
 
             writer.includes(
                 headers=[
-                    "Krystal.Booey/CSS/Properties/StyleComputedStyleProperties+InitialCustomInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyleProperties+InitialCustomInlines.hpp",
                 ],
             )
 
             with writer.namespace(
-                namespace="krys::boo",
+                namespace="krys::boo::style",
             ):
                 self._generate_initial_inlines_property_function_definitions(to=writer)
 
@@ -10914,41 +11121,29 @@ class GenerateRenderStyleProperties:
 
     # Computes the annotations, if any, of the getter's declaration.
     def _compute_getter_declaration_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_getter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the getter's definition.
     def _compute_getter_definition_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_getter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the setter's declaration.
     def _compute_setter_declaration_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_setter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Computes the annotations, if any, of the setter's definition.
     def _compute_setter_definition_annotations(self, property):
-        annotations = ["inline"]
-        if property.codegen_properties.render_style_setter_constexpr:
-            annotations += ["constexpr"]
-        return " ".join(annotations) + " " if annotations else ""
+        return "inline "
 
     # Generate RenderStyleProperties.h
 
     def _generate_getter_function_declaration(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"{annotations}{return_type} {function_name}() const;")
+        to.write(f"KRYS_NODISCARD {annotations}{return_type} {function_name}() const noexcept;")
 
     def _generate_setter_function_declaration(
         self, *, to: Writer, function_name, annotations, return_type, argument_type
     ):
-        to.write(f"{annotations}{return_type} {function_name}({argument_type});")
+        to.write(f"{annotations}{return_type} {function_name}({argument_type}) noexcept;")
 
     def _generate_property_function_declarations(self, *, to: Writer):
         for property in self.style_properties.all:
@@ -10992,8 +11187,8 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                getter_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = property.getter_return_type
                 setter_annotations = f"inline "
@@ -11015,8 +11210,8 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                getter_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
-                setter_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                getter_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                setter_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 getter_annotations = "inline "
                 getter_return_type = "bool"
                 setter_annotations = f"inline "
@@ -11055,11 +11250,11 @@ class GenerateRenderStyleProperties:
                 setter_argument_type = horizontal_property.setter_argument_type
 
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}(WritingMode) const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline {getter_return_type} logical{property.id_without_prefix}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} Logical{property.id_without_prefix}() const noexcept;")
                 for property in [horizontal_property, vertical_property]:
-                    to.write(f"inline void setLogical{property.id_without_prefix}({setter_argument_type});")
+                    to.write(f"inline void SetLogical{property.id_without_prefix}({setter_argument_type}) noexcept;")
             elif property_group["kind"] == "side":
                 property = property_group["physical"]["bottom"]
                 # NOTE: Choice of which property we use here is arbitrary, they must always have the same types.
@@ -11076,7 +11271,7 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}(WritingMode) const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -11085,7 +11280,7 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline {getter_return_type} {prefix.id_without_prefix}{edge}() const;")
+                    to.write(f"KRYS_NODISCARD inline {getter_return_type} {prefix.id_without_prefix}{edge}() const noexcept;")
                 for edge in [
                     "Start",
                     "End",
@@ -11094,23 +11289,26 @@ class GenerateRenderStyleProperties:
                     "LogicalLeft",
                     "LogicalRight",
                 ]:
-                    to.write(f"inline void set{prefix.id_without_prefix}{edge}({setter_argument_type});")
+                    to.write(f"inline void Set{prefix.id_without_prefix}{edge}({setter_argument_type}) noexcept;")
             else:
                 # FIXME: Add logical getters / setters for other group kinds (like 'corner') if it would be useful.
                 to.write(f"// FIXME: Add support for logical getter/setters of kind '{property_group['kind']}'.")
             to.newline()
 
     def generate_render_style_properties_h(self):
-        with open(self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties.hpp"), "w") as output_file:
+        with open(
+            self.generation_context.output_hpp_path("Krystal.Booey/Rendering/Style/RenderStyleProperties.hpp"), "w"
+        ) as output_file:
             writer = Writer(output_file)
 
             writer.hpp_prelude(
                 generator_name=GENERATOR_NAME,
-                headers=["Krystal.Booey/CSS/Style/RenderStyleBase.hpp"],
+                headers=["Krystal.Booey/Rendering/Style/RenderStyleBase.hpp"],
             )
 
             with writer.namespace(namespace="krys::boo"):
-                writer.write(f"class RenderStyleProperties : public RenderStyleBase {{")
+                writer.write(f"class RenderStyleProperties : public RenderStyleBase")
+                writer.write(f"{{")
                 writer.write(f"public:")
 
                 with writer.indent():
@@ -11124,7 +11322,7 @@ class GenerateRenderStyleProperties:
                     writer.write(f"RenderStyleProperties& operator=(RenderStyleProperties&&) noexcept = default;")
                     writer.newline()
 
-                    writer.write(f"RenderStyleProperties(CreateDefaultStyleTag tag) noexcept : RenderStyleBase {{ tag }} {{ }}")
+                    writer.write(f"explicit RenderStyleProperties(CreateDefaultStyleTag tag) noexcept : RenderStyleBase {{ tag }} {{ }}")
                     writer.write(
                         f"RenderStyleProperties(const RenderStyleProperties& other, CloneTag tag) noexcept : RenderStyleBase {{ other, tag }} {{ }}"
                     )
@@ -11140,10 +11338,10 @@ class GenerateRenderStyleProperties:
     # Generate RenderStyleProperties+GettersInlines.h
 
     def _generate_getters_inlines_function_definition(self, *, to: Writer, function_name, annotations, return_type):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}() const")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}() const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return m_computedStyle.{function_name}();")
+            to.write(f"return _computedStyle.{function_name}();")
         to.write(f"}}")
         to.newline()
 
@@ -11177,7 +11375,7 @@ class GenerateRenderStyleProperties:
             )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"visitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"VisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = property.getter_return_type
 
@@ -11189,7 +11387,7 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"hasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"HasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "bool"
 
@@ -11203,10 +11401,10 @@ class GenerateRenderStyleProperties:
     def _generate_getters_inlines_function_definition_taking_writing_mode(
         self, *, to: Writer, function_name, annotations, return_type
     ):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}(WritingMode writingMode) const")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}(WritingMode writingMode) const noexcept")
         to.write(f"{{")
         with to.indent():
-            to.write(f"return m_computedStyle.{function_name}(writingMode);")
+            to.write(f"return _computedStyle.{function_name}(writingMode);")
         to.write(f"}}")
         to.newline()
 
@@ -11226,14 +11424,14 @@ class GenerateRenderStyleProperties:
                 for property in [horizontal_property, vertical_property]:
                     self._generate_getters_inlines_function_definition_taking_writing_mode(
                         to=to,
-                        function_name=f"logical{property.id_without_prefix}",
+                        function_name=f"Logical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type=return_type,
                     )
                 for property in [horizontal_property, vertical_property]:
                     self._generate_getters_inlines_function_definition(
                         to=to,
-                        function_name=f"logical{property.id_without_prefix}",
+                        function_name=f"Logical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type=return_type,
                     )
@@ -11277,7 +11475,7 @@ class GenerateRenderStyleProperties:
 
     def generate_render_style_properties_getters_inlines_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+GettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Rendering/Style/RenderStyleProperties+GettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11293,8 +11491,8 @@ class GenerateRenderStyleProperties:
 
             writer.includes(
                 headers=[
-                    "Krystal/HTML/CSS/Style/RenderStyleBase+GettersInlines.hpp",
-                    "Krystal/HTML/CSS/Style/StyleComputedStyle+GettersInlines.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyleBase+GettersInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyle+GettersInlines.hpp",
                 ],
             )
 
@@ -11315,13 +11513,13 @@ class GenerateRenderStyleProperties:
         argument_name,
         forwarding_expression,
     ):
-        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}({argument_type} {argument_name})")
+        to.write(f"{annotations}{return_type} RenderStyleProperties::{function_name}({argument_type} {argument_name}) noexcept")
         to.write(f"{{")
         with to.indent():
             if return_type == "void":
-                to.write(f"m_computedStyle.{function_name}({forwarding_expression});")
+                to.write(f"_computedStyle.{function_name}({forwarding_expression});")
             else:
-                to.write(f"return m_computedStyle.{function_name}({forwarding_expression});")
+                to.write(f"return _computedStyle.{function_name}({forwarding_expression});")
         to.write(f"}}")
         to.newline()
 
@@ -11361,7 +11559,7 @@ class GenerateRenderStyleProperties:
             )
 
             if property.codegen_properties.render_style_visited_link_storage_path:
-                function_name = f"setVisitedLink{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetVisitedLink{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = property.setter_argument_type
@@ -11381,7 +11579,7 @@ class GenerateRenderStyleProperties:
                 )
 
             if property.codegen_properties.render_style_has_explicitly_set_storage_path:
-                function_name = f"setHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
+                function_name = f"SetHasExplicitlySet{property.codegen_properties.render_style_name_for_methods}"
                 annotations = "inline "
                 return_type = "void"
                 argument_type = "bool"
@@ -11416,7 +11614,7 @@ class GenerateRenderStyleProperties:
                 for property in [horizontal_property, vertical_property]:
                     self._generate_setters_inlines_function_definition(
                         to=to,
-                        function_name=f"setLogical{property.id_without_prefix}",
+                        function_name=f"SetLogical{property.id_without_prefix}",
                         annotations=annotations,
                         return_type="void",
                         argument_type=argument_type,
@@ -11444,7 +11642,7 @@ class GenerateRenderStyleProperties:
                 ]:
                     self._generate_setters_inlines_function_definition(
                         to=to,
-                        function_name=f"set{prefix.id_without_prefix}{edge}",
+                        function_name=f"Set{prefix.id_without_prefix}{edge}",
                         annotations=annotations,
                         return_type="void",
                         argument_type=argument_type,
@@ -11454,7 +11652,7 @@ class GenerateRenderStyleProperties:
 
     def generate_render_style_properties_setters_inlines_h(self):
         with open(
-            self.generation_context.output_hpp_path("Krystal.Booey/CSS/Style/RenderStyleProperties+SettersInlines.hpp"),
+            self.generation_context.output_hpp_path("Krystal.Booey/Rendering/Style/RenderStyleProperties+SettersInlines.hpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
@@ -11469,8 +11667,8 @@ class GenerateRenderStyleProperties:
 
             writer.includes(
                 headers=[
-                    "Krystal.Booey/CSS/Style/RenderStyleBase+SettersInlines.hpp",
-                    "Krystal.Booey/CSS/Style/StyleComputedStyle+SettersInlines.hpp",
+                    "Krystal.Booey/Rendering/Style/RenderStyleBase+SettersInlines.hpp",
+                    "Krystal.Booey/Style/Computed/ComputedStyle+SettersInlines.hpp",
                 ],
             )
 
@@ -11501,7 +11699,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         assert tree_node.kind == "opaque"
         assert not tree_node.children
 
-        to.write(f"static void {function_name}(const auto&, const auto&, CSSPropertiesBitSet& changingProperties)")
+        to.write(f"static void {function_name}(const auto &, const auto &, CSSPropertiesBitSet &changingProperties) noexcept")
         to.write(f"{{")
 
         with to.indent():
@@ -11515,7 +11713,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                     animatable_properties.add(property)
 
             for property in sorted(animatable_properties, key=lambda x: x.id):
-                to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                to.write(f"changingProperties.Set(css::{property.id});")
 
             if non_animatable_properties:
                 to.newline()
@@ -11539,7 +11737,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             )
             return
 
-        to.write(f"static void {function_name}(const auto& a, const auto& b, CSSPropertiesBitSet& changingProperties)")
+        to.write(f"static void {function_name}(const auto &a, const auto &b, CSSPropertiesBitSet &changingProperties) noexcept")
         to.write(f"{{")
 
         with to.indent():
@@ -11581,7 +11779,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
                 child_value_getter = f"{child.name}"
 
                 # For "data" nodes, first check if both point to the same object.
-                to.write(f"if (a.{child_value_getter}.ptr() != b.{child_value_getter}.ptr())")
+                to.write(f"if (a.{child_value_getter}.Ptr() != b.{child_value_getter}.Ptr())")
                 with to.indent():
                     to.write(
                         f"{child_function_name}(*a.{child_value_getter}, *b.{child_value_getter}, changingProperties);"
@@ -11618,7 +11816,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             for property in animatable_properties:
                 if property.codegen_properties.render_style_changed_for_animation_custom:
                     to.write(
-                        f"ChangedAnimatablePropertiesCustom::conservativelyCollectChangedAnimatablePropertiesFor{property.id_without_prefix}(a, b, changingProperties);"
+                        f"ChangedAnimatablePropertiesCustom::ConservativelyCollectChangedAnimatablePropertiesFor{property.id_without_prefix}(a, b, changingProperties);"
                     )
                     continue
 
@@ -11635,7 +11833,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
                 to.write(f"if (a.{expression} != b.{expression})")
                 with to.indent():
-                    to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                    to.write(f"changingProperties.Set(css::{property.id});")
 
             if (
                 data_children or opaque_children or struct_children or animatable_properties
@@ -11646,7 +11844,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
             for property in animatable_visited_link_properties:
                 if property.codegen_properties.render_style_changed_for_animation_custom:
                     to.write(
-                        f"ChangedAnimatablePropertiesCustom::conservativelyCollectChangedAnimatablePropertiesForVisitedLink{property.id_without_prefix}(a, b, changingProperties);"
+                        f"ChangedAnimatablePropertiesCustom::ConservativelyCollectChangedAnimatablePropertiesForVisitedLink{property.id_without_prefix}(a, b, changingProperties);"
                     )
                     continue
 
@@ -11663,7 +11861,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
 
                 to.write(f"if (a.{expression} != b.{expression})")
                 with to.indent():
-                    to.write(f"changingProperties.m_properties.set({property.id_without_scope});")
+                    to.write(f"changingProperties.Set(css::{property.id});")
 
             # Print out comments detailing the non-animatable properties that were skipped.
             if non_animatable_properties:
@@ -11720,7 +11918,7 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.write(f"public:")
 
         with to.indent():
-            function_name = "collect"
+            function_name = "Collect"
             root = self.properties_and_descriptors.render_style_storage_model
 
             self._generate_conservatively_collect_changed_animatable_properties_recursive(
@@ -11731,31 +11929,31 @@ class GenerateStyleChangedAnimatablePropertiesGenerated:
         to.newline()
 
         to.write(
-            f"void ChangedAnimatablePropertiesGenerated::conservativelyCollectChangedAnimatableProperties(const ComputedStyle& a, const ComputedStyle& b, CSSPropertiesBitSet& changingProperties)"
+            f"void ChangedAnimatablePropertiesGenerated::ConservativelyCollectChangedAnimatableProperties(const ComputedStyle &a, const ComputedStyle &b, CSSPropertiesBitSet &changingProperties) noexcept"
         )
         to.write(f"{{")
 
         with to.indent():
-            to.write(f"ChangedAnimatablePropertiesFunctions::collect(a, b, changingProperties);")
+            to.write(f"ChangedAnimatablePropertiesFunctions::Collect(a, b, changingProperties);")
 
         to.write(f"}}")
         to.newline()
 
     def generate_style_changed_animatable_properties_generated_cpp(self):
         with open(
-            self.generation_context.output_cpp_path("CSS/Properties/StyleChangedAnimatablePropertiesGenerated.cpp"),
+            self.generation_context.output_cpp_path("Style/ChangedAnimatablePropertiesGenerated.cpp"),
             "w",
         ) as output_file:
             writer = Writer(output_file)
 
             writer.cpp_prelude(
                 generator_name=GENERATOR_NAME,
-                for_header="Krystal.Booey/CSS/Properties/StyleChangedAnimatablePropertiesGenerated.hpp",
+                for_header="Krystal.Booey/Style/ChangedAnimatablePropertiesGenerated.hpp",
                 headers=[
-                    "Krystal.Booey/CSS/Properties/StyleChangedAnimatablePropertiesCustom.hpp",
+                    "Krystal.Booey/Style/ChangedAnimatablePropertiesCustom.hpp",
                 ],
             )
-            with writer.namespace(namespace="krys::boo"):
+            with writer.namespace(namespace="krys::boo::style"):
                 self._generate_conservatively_collect_changed_animatable_properties(to=writer)
 
 

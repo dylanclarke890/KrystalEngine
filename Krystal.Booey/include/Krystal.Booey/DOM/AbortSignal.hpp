@@ -3,9 +3,9 @@
 #include "Krystal.Booey/DOM/Callbacks/AbortAlgorithmCallback.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Core/Attributes.hpp"
-#include "Krystal.Core/Types/WeakPtr.hpp"
 #include "Krystal.Core/Types/Any.hpp"
 #include "Krystal.Core/Types/List.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::dom
 {
@@ -55,7 +55,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-onabort
-    // TODO(impl): ABORT - attribute EventHandler onabort;
+    // FIXME: attribute EventHandler onabort;
 
 #pragma endregion
   };

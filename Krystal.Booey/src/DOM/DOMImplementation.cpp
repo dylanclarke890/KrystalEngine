@@ -9,7 +9,11 @@
 #include "Krystal.Booey/DOM/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
+#include "Krystal.Booey/Platform/MIMETypeRegistry.hpp"
 #include "Krystal.Booey/SVG/SVGDocument.hpp"
+#include "Krystal.Booey/URL/URL.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 
 namespace krys::boo::dom
 {
@@ -55,6 +59,7 @@ namespace krys::boo::dom
 
       return AdoptRef<XMLDocument>(*doc.release());
     }();
+    document->SetSettings(ShareRef(_document->GetSettings()));
 
     RefPtr<Element> element = nullptr;
     if (qualifiedName != DOMStringAtom::Empty())
@@ -94,6 +99,7 @@ namespace krys::boo::dom
   {
     Ref<HTMLDocument> document = CreateRef<HTMLDocument>();
     document->_contentType = u8"text/html";
+    document->SetSettings(ShareRef(_document->GetSettings()));
 
     auto documentType = AdoptRef(*new DocumentType(*document, u8"html", u8"", u8""));
     if (auto appendResult = document->AppendChild(*documentType); appendResult.HasException())
@@ -110,7 +116,7 @@ namespace krys::boo::dom
 
     auto headElement =
       ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
-    if (auto appendResult = document->AppendChild(*headElement); appendResult.HasException())
+    if (auto appendResult = htmlElement->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
@@ -134,13 +140,51 @@ namespace krys::boo::dom
 
     auto bodyElement =
       ElementFactory::Create(*document, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
-    if (auto appendResult = document->AppendChild(*bodyElement); appendResult.HasException())
+    if (auto appendResult = htmlElement->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
 
-    // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
+    // FIXME: Doc’s origin is this’s associated document’s origin.
 
     return AdoptRef<Document>(*document.release());
+  }
+
+  Ref<Document> DOMImplementation::CreateDocument(utf8_stringview contentType, const url::URL &url) noexcept
+  {
+    auto create = [&]() -> Ref<Document>
+    {
+      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"text/html")))
+      {
+        return CreateRef<HTMLDocument>();
+      }
+      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"application/xhtml+xml")))
+      {
+        auto document = CreateRef<XHTMLDocument>();
+        document->_contentType = u8"application/xhtml+xml";
+        return document;
+      }
+      if (text::IsASCIICaselessEqual(contentType, utf8_stringview(u8"image/svg+xml")))
+      {
+        auto document = CreateRef<svg::SVGDocument>();
+        document->_contentType = u8"image/svg+xml";
+        return document;
+      }
+      if (MIMETypeRegistry::IsXMLMIMEType(contentType))
+      {
+        auto document = CreateRef<XMLDocument>();
+        document->_contentType = DOMString(contentType);
+        return document;
+      }
+
+      return CreateRef<HTMLDocument>();
+    };
+
+    auto document = create();
+    if (!url.IsNull())
+    {
+      document->SetURL(url::URL(url));
+    }
+    return document;
   }
 }

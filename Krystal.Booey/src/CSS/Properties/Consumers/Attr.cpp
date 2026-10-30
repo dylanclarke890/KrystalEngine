@@ -27,14 +27,14 @@ namespace krys::boo::css::PropertyParserHelpers
     auto &token = tokens.Consume();
     tokens.DiscardWhitespace();
 
-    CSSOMStringAtom attrName = CSSOMStringAtom::Null();
+    CSSOMString attrName;
     if (state.Context.IsHTMLDocument)
     {
       attrName = krys::text::ToASCIILower(token.IdentCodePoints());
     }
     else
     {
-      attrName = token.IdentCodePoints();
+      attrName = CSSOMString(token.IdentCodePoints());
     }
 
     if (!tokens.IsAtEnd() && !ConsumeComma(tokens))
@@ -45,7 +45,7 @@ namespace krys::boo::css::PropertyParserHelpers
     RefPtr<Value> fallback;
     if (tokens.Peek().Type() == TokenType::String)
     {
-      fallback = PrimitiveValue::Create(tokens.Consume().IdentCodePoints());
+      fallback = PrimitiveValue::Create(CSSOMString(tokens.Consume().IdentCodePoints()));
       tokens.DiscardWhitespace();
     }
 
