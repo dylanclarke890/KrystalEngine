@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `ElementFactory` lowercases HTML local names, so `createElementNS` in the HTML namespace makes `DIV` a div instead of an unknown element. Test: `ElementFactory: HTML's local names are case-sensitive` (`[!shouldfail]`, `tests/DOM/Internals/ElementFactory.cpp`).
 - `NonElementParentNode::GetElementById("")` finds the first element that has no id. Test: `NonElementParentNode::GetElementById finds nothing for the empty string` (`[!shouldfail]`, `tests/DOM/Mixins/NonElementParentNode.cpp`).
 - `Document::CreateEvent` makes a plain `Event` whose type is the interface name, for any name: it doesn't create the named interface, throw `NotSupportedError` for an unknown one, or set the initialized flag (FIXMEs in `Document.cpp`).
 - Only `classList` follows its attribute (`Element::OnAttributeChanged`). The `DOMTokenList`s for `rel`, `sandbox`, `sizes`, `blocking` and `for` (`htmlFor`) parse the attribute once at creation and miss later attribute changes.
