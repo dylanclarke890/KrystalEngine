@@ -59,6 +59,11 @@ namespace krys::boo::dom
 
   RefPtr<Element> LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
+    if (name.empty())
+    {
+      return nullptr;
+    }
+
     for (Node &node : DescendantRange(*_root))
     {
       if (!Is<Element>(node))

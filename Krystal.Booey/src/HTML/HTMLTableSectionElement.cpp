@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
+#include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -9,6 +12,71 @@ namespace krys::boo::html
       : HTMLTablePartElement(document, HTMLElementInterface::TableSection)
   {
   }
+
+#pragma region HTMLTableSectionElement
+
+  Ref<dom::HTMLCollection> HTMLTableSectionElement::Rows() noexcept
+  {
+    if (auto *rows = _rows.get())
+    {
+      return ShareRef(*rows);
+    }
+
+    Ref<dom::HTMLCollection> rows = CreateRef<dom::LiveHTMLCollection>(
+      *this, [this](const dom::Element &element)
+      { return element.ParentNode() == this && AsTableElement<HTMLTableRowElement>(&element); });
+    _rows = CreateWeakPtr(rows.get());
+    return rows;
+  }
+
+  dom::ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableSectionElement::InsertRow(int32 index) noexcept
+  {
+    if (index < -1)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+    auto children = Rows();
+    auto numRows = static_cast<int32>(children->Length());
+    if (index > numRows)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+
+    auto row = CreateTableElement<HTMLTableRowElement>(NodeDocument(), u8"tr");
+    auto result =
+      numRows == index || index == -1 ? AppendChild(*row) : InsertBefore(*row, children->Item(index).get());
+    if (result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return row;
+  }
+
+  dom::ExceptionOr<void> HTMLTableSectionElement::DeleteRow(int32 index) noexcept
+  {
+    CEReactionsScope ceReactions;
+    auto children = Rows();
+    auto numRows = static_cast<int32>(children->Length());
+    if (index == -1)
+    {
+      if (!numRows)
+      {
+        return {};
+      }
+      index = numRows - 1;
+    }
+    if (index < 0 || index >= numRows)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+    if (auto result = RemoveChild(*children->Item(index)); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return {};
+  }
+
+#pragma endregion
 
 #pragma region HTMLTableSectionElement Obsolete members
 

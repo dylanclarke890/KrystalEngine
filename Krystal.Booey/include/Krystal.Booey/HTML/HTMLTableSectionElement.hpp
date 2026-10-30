@@ -1,20 +1,39 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::html
 {
+  class HTMLTableRowElement;
+
   /// @see https://html.spec.whatwg.org/#htmltablesectionelement
   class HTMLTableSectionElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableSectionElement);
+
+  private:
+    WeakPtr<dom::HTMLCollection> _rows;
 
   public:
     HTMLTableSectionElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTableSectionElement - https://html.spec.whatwg.org/#htmltablesectionelement
 
-    // FIXME: Implement api.
+    /// @brief The section's `tr` children.
+    /// @see https://html.spec.whatwg.org/#dom-tbody-rows
+    KRYS_NODISCARD Ref<dom::HTMLCollection> Rows() noexcept;
+
+    /// @brief A new row at @p index in the section's rows (-1 for the end): an `IndexSizeError` if @p index
+    /// is less than -1 or more than the number of rows.
+    /// @see https://html.spec.whatwg.org/#dom-tbody-insertrow
+    dom::ExceptionOr<Ref<HTMLTableRowElement>> InsertRow(int32 index = -1) noexcept;
+
+    /// @brief Removes the row at @p index in the section's rows (-1 for the last, if any): an
+    /// `IndexSizeError` if there's no such row.
+    /// @see https://html.spec.whatwg.org/#dom-tbody-deleterow
+    dom::ExceptionOr<void> DeleteRow(int32 index) noexcept;
 
 #pragma endregion
 

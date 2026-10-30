@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Core/TypeCast.hpp"
 
@@ -121,5 +122,16 @@ namespace krys::boo::html
       return;
     }
     HTMLElement::CollectPresentationalHintsForAttribute(localName, namespaceURI, value, style);
+  }
+}
+
+namespace krys::boo::html::detail
+{
+  Ref<HTMLElement> CreateTableElement(dom::Document &document, dom::DOMStringView localName) noexcept
+  {
+    auto element =
+      document.CreateElementNS(dom::DOMStringAtom(infra::Namespaces::HTML), dom::DOMStringAtom(localName));
+    krys_debug_assert(!element.HasException());
+    return ShareRef(Downcast<HTMLElement>(*element.ReleaseValue()));
   }
 }

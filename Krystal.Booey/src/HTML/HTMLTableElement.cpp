@@ -2,7 +2,13 @@
 #include "algorithm"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
+#include "Krystal.Booey/HTML/HTMLTableCaptionElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableRowsCollection.hpp"
+#include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -18,6 +24,317 @@ namespace krys::boo::html
   HTMLTableElement::~HTMLTableElement() noexcept = default;
 
 #pragma region HTMLTableElement
+
+  namespace
+  {
+    KRYS_NODISCARD bool IsTableChildWithTagName(const dom::Node &node, TagName tagName) noexcept
+    {
+      auto *element = DynamicDowncast<HTMLElement>(node);
+      return element && element->HasTagName(tagName);
+    }
+
+    // The first child of the table that is a section with the tag name.
+    KRYS_NODISCARD RefPtr<HTMLTableSectionElement> FirstTableSection(const HTMLTableElement &table,
+                                                                     TagName tagName) noexcept
+    {
+      for (auto *child = table.FirstChild(); child; child = child->NextSibling())
+      {
+        auto *section = AsTableElement<HTMLTableSectionElement>(child);
+        if (section && section->HasTagName(tagName))
+        {
+          return ShareRefPtr(const_cast<HTMLTableSectionElement *>(section));
+        }
+      }
+      return nullptr;
+    }
+  }
+
+  RefPtr<HTMLTableCaptionElement> HTMLTableElement::Caption() const noexcept
+  {
+    for (auto *child = FirstChild(); child; child = child->NextSibling())
+    {
+      if (auto *caption = AsTableElement<HTMLTableCaptionElement>(child))
+      {
+        return ShareRefPtr(const_cast<HTMLTableCaptionElement *>(caption));
+      }
+    }
+    return nullptr;
+  }
+
+  dom::ExceptionOr<void> HTMLTableElement::Caption(RefPtr<HTMLTableCaptionElement> &&caption) noexcept
+  {
+    CEReactionsScope ceReactions;
+    DeleteCaption();
+    if (!caption)
+    {
+      return {};
+    }
+    if (auto result = InsertBefore(*caption, FirstChild()); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return {};
+  }
+
+  Ref<HTMLTableCaptionElement> HTMLTableElement::CreateCaption() noexcept
+  {
+    if (auto existingCaption = Caption())
+    {
+      return Ref<HTMLTableCaptionElement>(krys::move(existingCaption));
+    }
+    auto caption = CreateTableElement<HTMLTableCaptionElement>(NodeDocument(), u8"caption");
+    (void)Caption(RefPtr<HTMLTableCaptionElement>(caption));
+    return caption;
+  }
+
+  void HTMLTableElement::DeleteCaption() noexcept
+  {
+    CEReactionsScope ceReactions;
+    if (auto caption = Caption())
+    {
+      (void)RemoveChild(*caption);
+    }
+  }
+
+  RefPtr<HTMLTableSectionElement> HTMLTableElement::THead() const noexcept
+  {
+    return FirstTableSection(*this, TagName::thead);
+  }
+
+  dom::ExceptionOr<void> HTMLTableElement::THead(RefPtr<HTMLTableSectionElement> &&head) noexcept
+  {
+    CEReactionsScope ceReactions;
+    if (head && !head->HasTagName(TagName::thead)) KRYS_UNLIKELY
+    {
+      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    }
+
+    DeleteTHead();
+    if (!head)
+    {
+      return {};
+    }
+
+    dom::Node *child = FirstChild();
+    for (; child; child = child->NextSibling())
+    {
+      if (Is<dom::Element>(*child) && !IsTableChildWithTagName(*child, TagName::caption)
+          && !IsTableChildWithTagName(*child, TagName::colgroup))
+      {
+        break;
+      }
+    }
+
+    if (auto result = InsertBefore(*head, child); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return {};
+  }
+
+  Ref<HTMLTableSectionElement> HTMLTableElement::CreateTHead() noexcept
+  {
+    if (auto existingHead = THead())
+    {
+      return Ref<HTMLTableSectionElement>(krys::move(existingHead));
+    }
+    auto head = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"thead");
+    (void)THead(RefPtr<HTMLTableSectionElement>(head));
+    return head;
+  }
+
+  void HTMLTableElement::DeleteTHead() noexcept
+  {
+    CEReactionsScope ceReactions;
+    if (auto head = THead())
+    {
+      (void)RemoveChild(*head);
+    }
+  }
+
+  RefPtr<HTMLTableSectionElement> HTMLTableElement::TFoot() const noexcept
+  {
+    return FirstTableSection(*this, TagName::tfoot);
+  }
+
+  dom::ExceptionOr<void> HTMLTableElement::TFoot(RefPtr<HTMLTableSectionElement> &&foot) noexcept
+  {
+    CEReactionsScope ceReactions;
+    if (foot && !foot->HasTagName(TagName::tfoot)) KRYS_UNLIKELY
+    {
+      return dom::Exception {dom::ExceptionCode::HierarchyRequestError};
+    }
+
+    DeleteTFoot();
+    if (!foot)
+    {
+      return {};
+    }
+
+    if (auto result = AppendChild(*foot); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return {};
+  }
+
+  Ref<HTMLTableSectionElement> HTMLTableElement::CreateTFoot() noexcept
+  {
+    if (auto existingFoot = TFoot())
+    {
+      return Ref<HTMLTableSectionElement>(krys::move(existingFoot));
+    }
+    auto foot = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tfoot");
+    (void)TFoot(RefPtr<HTMLTableSectionElement>(foot));
+    return foot;
+  }
+
+  void HTMLTableElement::DeleteTFoot() noexcept
+  {
+    CEReactionsScope ceReactions;
+    if (auto foot = TFoot())
+    {
+      (void)RemoveChild(*foot);
+    }
+  }
+
+  Ref<dom::HTMLCollection> HTMLTableElement::TBodies() noexcept
+  {
+    if (auto *tBodies = _tBodies.get())
+    {
+      return ShareRef(*tBodies);
+    }
+
+    Ref<dom::HTMLCollection> tBodies = CreateRef<dom::LiveHTMLCollection>(
+      *this, [this](const dom::Element &element)
+      { return element.ParentNode() == this && IsTableChildWithTagName(element, TagName::tbody); });
+    _tBodies = CreateWeakPtr(tBodies.get());
+    return tBodies;
+  }
+
+  Ref<HTMLTableSectionElement> HTMLTableElement::CreateTBody() noexcept
+  {
+    auto body = CreateTableElement<HTMLTableSectionElement>(NodeDocument(), u8"tbody");
+    auto *lastBody = LastBody();
+    (void)InsertBefore(*body, lastBody ? lastBody->NextSibling() : nullptr);
+    return body;
+  }
+
+  HTMLTableSectionElement *HTMLTableElement::LastBody() const noexcept
+  {
+    for (auto *child = LastChild(); child; child = child->PreviousSibling())
+    {
+      if (IsTableChildWithTagName(*child, TagName::tbody))
+      {
+        return const_cast<HTMLTableSectionElement *>(AsTableElement<HTMLTableSectionElement>(child));
+      }
+    }
+    return nullptr;
+  }
+
+  Ref<dom::HTMLCollection> HTMLTableElement::Rows() noexcept
+  {
+    if (auto *rows = _rows.get())
+    {
+      return ShareRef(*rows);
+    }
+
+    Ref<dom::HTMLCollection> rows = CreateRef<HTMLTableRowsCollection>(*this);
+    _rows = CreateWeakPtr(rows.get());
+    return rows;
+  }
+
+  dom::ExceptionOr<Ref<HTMLTableRowElement>> HTMLTableElement::InsertRow(int32 index) noexcept
+  {
+    if (index < -1)
+    {
+      return dom::Exception {dom::ExceptionCode::IndexSizeError};
+    }
+
+    Ref<HTMLTableElement> protectedThis = ShareRef(*this);
+
+    RefPtr<HTMLTableRowElement> lastRow;
+    RefPtr<HTMLTableRowElement> row;
+    if (index == -1)
+    {
+      lastRow = ShareRefPtr(HTMLTableRowsCollection::LastRow(*this));
+    }
+    else
+    {
+      for (int32 i = 0; i <= index; ++i)
+      {
+        row = ShareRefPtr(HTMLTableRowsCollection::RowAfter(*this, lastRow.get()));
+        if (!row)
+        {
+          if (i != index)
+          {
+            return dom::Exception {dom::ExceptionCode::IndexSizeError};
+          }
+          break;
+        }
+        lastRow = row;
+      }
+    }
+
+    RefPtr<dom::ContainerNode> parent;
+    auto &document = NodeDocument();
+    if (lastRow)
+    {
+      parent = ShareRefPtr(row ? row->ParentNode() : lastRow->ParentNode());
+    }
+    else
+    {
+      parent = ShareRefPtr<dom::ContainerNode>(LastBody());
+      if (!parent)
+      {
+        auto newBody = CreateTableElement<HTMLTableSectionElement>(document, u8"tbody");
+        auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
+        (void)newBody->AppendChild(*newRow);
+        if (auto result = AppendChild(*newBody); result.HasException())
+        {
+          return result.ReleaseException();
+        }
+        return newRow;
+      }
+    }
+
+    auto newRow = CreateTableElement<HTMLTableRowElement>(document, u8"tr");
+    if (auto result = parent->InsertBefore(*newRow, row.get()); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return newRow;
+  }
+
+  dom::ExceptionOr<void> HTMLTableElement::DeleteRow(int32 index) noexcept
+  {
+    CEReactionsScope ceReactions;
+    RefPtr<HTMLTableRowElement> row;
+    if (index == -1)
+    {
+      row = ShareRefPtr(HTMLTableRowsCollection::LastRow(*this));
+      if (!row)
+      {
+        return {};
+      }
+    }
+    else
+    {
+      for (int32 i = 0; i <= index; ++i)
+      {
+        row = ShareRefPtr(HTMLTableRowsCollection::RowAfter(*this, row.get()));
+        if (!row)
+        {
+          break;
+        }
+      }
+      if (!row)
+      {
+        return dom::Exception {dom::ExceptionCode::IndexSizeError};
+      }
+    }
+    return row->Remove();
+  }
 
 #pragma endregion
 
