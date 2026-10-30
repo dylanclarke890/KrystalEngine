@@ -98,6 +98,7 @@
 #include "Krystal.Booey/HTML/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Refresh.hpp"
 #include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
+#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/HTML/PopStateEvent.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -723,10 +724,22 @@ namespace krys::boo::dom
 
 #pragma region Document (HTML)
 
-  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(DOMStringView html) noexcept
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
   {
-    (void)html;
-    krys_not_implemented();
+    // 2. Let document be a new Document, whose type is "html" and content type is "text/html".
+    auto document = CreateRef<HTMLDocument>();
+    document->SetSettings(ShareRef(context.GetSettings()));
+
+    // 3. Set document's allow declarative shadow roots to true.
+    document->_allowDeclarativeShadowRoots = true;
+
+    // 4. Parse HTML from a string given document and compliantHTML.
+    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+    parser->InputStream().Append(DOMString(markup), IsEOF(true));
+    parser->PumpTokenizer();
+
+    // 5. Return document.
+    return Ref<Document>(krys::move(document));
   }
 
   ExceptionOr<Ref<Document>> Document::ParseHTML(DOMStringView &html) noexcept

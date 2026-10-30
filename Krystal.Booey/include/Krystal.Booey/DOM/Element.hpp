@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Core/LayoutUnit.hpp"
 #include "Krystal.Booey/Core/ScrollTypes.hpp"
 #include "Krystal.Booey/DOM/ContainerNode.hpp"
+#include "Krystal.Booey/DOM/Dicts/GetHTMLOptions.hpp"
 #include "Krystal.Booey/DOM/Dicts/PointerLockOptions.hpp"
 #include "Krystal.Booey/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
@@ -20,6 +21,7 @@
 #include "Krystal.Booey/DOM/Enums/SelectionRestorationMode.hpp"
 #include "Krystal.Booey/DOM/FocusOptions.hpp"
 #include "Krystal.Booey/DOM/NamedNodeMap.hpp"
+#include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
 #include "Krystal.Booey/DOM/SimulatedClick.hpp"
 #include "Krystal.Booey/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
@@ -313,6 +315,31 @@ namespace krys::boo::dom
 
     /// @see https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
     ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept;
+
+#pragma endregion
+
+#pragma region Element (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
+
+    /// @brief Replaces the element's children with @p markup parsed as HTML, with declarative shadow roots.
+    /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView markup) noexcept;
+
+    /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
+    /// @see https://html.spec.whatwg.org/#dom-element-gethtml
+    KRYS_NODISCARD DOMString GetHTML(GetHTMLOptions &&options = {}) const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
+    KRYS_NODISCARD DOMString InnerHTML() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-element-innerhtml
+    ExceptionOr<void> InnerHTML(DOMStringView markup) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
+    KRYS_NODISCARD DOMString OuterHTML() const noexcept;
+    /// @see https://html.spec.whatwg.org/#dom-element-outerhtml
+    ExceptionOr<void> OuterHTML(DOMStringView markup) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-element-insertadjacenthtml
+    ExceptionOr<void> InsertAdjacentHTML(InsertAdjacentWhere where, DOMStringView markup) noexcept;
 
 #pragma endregion
 
@@ -1437,6 +1464,10 @@ namespace krys::boo::dom
   private:
     void SynchronizeStyleAttribute() const noexcept;
     void SynchronizeAnimatedSVGAttributes() const noexcept;
+
+    /// @brief Replaces the element's children (a template's content's) with @p markup parsed in its context.
+    ExceptionOr<void> ReplaceChildrenWithMarkup(DOMStringView markup,
+                                                EnumSet<ParserContentPolicy> parserContentPolicy) noexcept;
   };
 
   /// @brief Invalidates the style of @p sibling and its following siblings that sibling combinators make

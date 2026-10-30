@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Core/UnicodeHelpers.hpp"
 #include "Krystal.Booey/CSS/Properties/MutableStyleProperties.hpp"
 #include "Krystal.Booey/CSS/Values/SerialisationContext.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
@@ -1369,15 +1370,38 @@ namespace krys::boo
       (void)fragment.RemoveChild(element);
     }
 
-    KRYS_NODISCARD Ref<dom::DocumentFragment> ParseHTMLIntoFragment(dom::Document &document,
-                                                                    utf8_stringview markup,
-                                                                    dom::Element &contextElement) noexcept
+    KRYS_NODISCARD Ref<dom::DocumentFragment>
+      ParseHTMLIntoFragment(dom::Document &document, utf8_stringview markup, dom::Element &contextElement,
+                            bool allowDeclarativeShadowRoots = false) noexcept
     {
       auto fragment = document.CreateDocumentFragment();
-      auto nodes = html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup));
+      auto nodes = html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup),
+                                                           allowDeclarativeShadowRoots);
       for (auto &node : nodes)
       {
         (void)fragment->AppendChild(*node);
+      }
+      return fragment;
+    }
+
+    // FIXME: The template document for contexts that are templates.
+    KRYS_NODISCARD dom::ExceptionOr<Ref<dom::DocumentFragment>>
+      CreateFragmentForMarkup(dom::Element &contextElement, utf8_stringview markup,
+                              EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+    {
+      auto &document = contextElement.NodeDocument();
+      if (Is<dom::HTMLDocument>(document)
+          || parserContentPolicy.Contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
+      {
+        return ParseHTMLIntoFragment(
+          document, markup, contextElement,
+          parserContentPolicy.Contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
+      }
+
+      Ref<dom::DocumentFragment> fragment = document.CreateDocumentFragment();
+      if (!xml::XMLDocumentParser::ParseDocumentFragment(markup, *fragment, &contextElement))
+      {
+        return dom::Exception {dom::ExceptionCode::SyntaxError};
       }
       return fragment;
     }
@@ -1766,20 +1790,22 @@ namespace krys::boo
     return markup;
   }
 
-  // FIXME: The template document for contexts that are templates.
+  dom::ExceptionOr<Ref<dom::DocumentFragment>>
+    CreateFragmentForInnerOuterHTML(dom::Element &contextElement, utf8_stringview markup,
+                                    EnumSet<dom::ParserContentPolicy> parserContentPolicy) noexcept
+  {
+    return CreateFragmentForMarkup(contextElement, markup, parserContentPolicy);
+  }
+
   dom::ExceptionOr<Ref<dom::DocumentFragment>> CreateContextualFragment(dom::Element &element,
                                                                         utf8_stringview markup) noexcept
   {
-    auto &document = element.NodeDocument();
-    Ref<dom::DocumentFragment> fragment = document.CreateDocumentFragment();
-    if (Is<dom::HTMLDocument>(document))
+    auto result = CreateFragmentForMarkup(element, markup, {});
+    if (result.HasException())
     {
-      fragment = ParseHTMLIntoFragment(document, markup, element);
+      return result.ReleaseException();
     }
-    else if (!xml::XMLDocumentParser::ParseDocumentFragment(markup, *fragment, &element))
-    {
-      return dom::Exception {dom::ExceptionCode::SyntaxError};
-    }
+    Ref<dom::DocumentFragment> fragment = result.ReleaseValue();
 
     // We need to pop <html> and <body> elements and remove <head> to
     // accommodate folks passing complete HTML documents to make the
@@ -1800,23 +1826,7 @@ namespace krys::boo
   {
     Ref<dom::ContainerNode> containerNode = ShareRef(container);
 
-    while (auto *child = containerNode->FirstChild())
-    {
-      if (auto result = containerNode->RemoveChild(*child); result.HasException())
-      {
-        return result.ReleaseException();
-      }
-    }
-
-    if (!fragment->FirstChild())
-    {
-      return {};
-    }
-
-    if (auto result = containerNode->AppendChild(*fragment); result.HasException())
-    {
-      return result.ReleaseException();
-    }
-    return {};
+    // Replacing them all at once queues a single mutation record.
+    return dom::MutationAlgorithms::ReplaceAll(fragment.get(), *containerNode);
   }
 }

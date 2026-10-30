@@ -536,8 +536,11 @@ namespace krys::boo::dom
 
 #pragma region Document (HTML) - https://html.spec.whatwg.org/multipage/dom.html#the-document-object
 
+    /// @brief A new HTML document parsed from @p markup, with declarative shadow roots and the settings of
+    /// @p context, the document of the caller.
     /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
-    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTMLUnsafe(DOMStringView html) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTMLUnsafe(Document &context,
+                                                                     DOMStringView markup) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-parsehtml
     KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(DOMStringView &html) noexcept;

@@ -160,6 +160,7 @@ namespace krys::boo::html
       {
         attribute.Value.assign(attrValue->begin(), attrValue->end());
       }
+      attributes.emplace_back(krys::move(attribute));
     }
     parser->_fragmentParsingContext.emplace(contextTagName, contextNamespace, context,
                                             krys::move(attributes));

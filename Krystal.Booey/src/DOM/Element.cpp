@@ -41,6 +41,7 @@
 #include "Krystal.Booey/DOM/WheelEvent.hpp"
 #include "Krystal.Booey/Editing/Editing.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
+#include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -51,7 +52,9 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Page/EventHandler.hpp"
@@ -2221,12 +2224,14 @@ namespace krys::boo::dom
   ExceptionOr<Element *> Element::InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept
   {
     html::CEReactionsScope ceReactions;
-    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, element); result.HasException())
+    auto result = ElementAlgorithms::InsertAdjacent(*this, where, element);
+    if (result.HasException())
     {
       return result.ReleaseException();
     }
 
-    return &element;
+    // Null if the element has no parent to insert it before or after.
+    return result.Value() ? &element : nullptr;
   }
 
   ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
@@ -2238,6 +2243,191 @@ namespace krys::boo::dom
       return result.ReleaseException();
     }
 
+    return {};
+  }
+
+#pragma endregion
+
+#pragma region Element (DOM Parsing)
+
+  namespace
+  {
+    // The element whose children insertAdjacentHTML() parses the markup as: the element, or its parent for
+    // beforebegin and afterend, with a body element in place of a context that isn't an element or is an
+    // html element in an HTML document.
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
+      ContextElementForInsertAdjacentHTML(Element &element, InsertAdjacentWhere where) noexcept
+    {
+      Ref<ContainerNode> contextNode = ShareRef<ContainerNode>(element);
+      if (where == InsertAdjacentWhere::BeforeBegin || where == InsertAdjacentWhere::AfterEnd)
+      {
+        auto *parent = element.ParentNode();
+        if (!parent || Is<Document>(*parent))
+        {
+          return Exception {ExceptionCode::NoModificationAllowedError};
+        }
+        contextNode = ShareRef(*parent);
+      }
+
+      auto *contextElement = DynamicDowncast<Element>(contextNode.get());
+      if (!contextElement
+          || (Is<HTMLDocument>(contextNode->NodeDocument()) && Is<html::HTMLHtmlElement>(*contextElement)))
+      {
+        return CreateHTMLElement(contextNode->NodeDocument(), u8"body");
+      }
+      return ShareRef(*contextElement);
+    }
+
+    // Appends the data of the text node after node, if there is one, to node's, and removes it.
+    KRYS_NODISCARD ExceptionOr<void> MergeWithNextTextNode(Text &node) noexcept
+    {
+      auto *next = DynamicDowncast<Text>(node.NextSibling());
+      if (!next)
+      {
+        return {};
+      }
+      Ref<Text> protectedNext = ShareRef(*next);
+      if (auto result = node.AppendData(DOMString(protectedNext->Data())); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      return protectedNext->Remove();
+    }
+  }
+
+  ExceptionOr<void>
+    Element::ReplaceChildrenWithMarkup(DOMStringView markup,
+                                       EnumSet<ParserContentPolicy> parserContentPolicy) noexcept
+  {
+    Ref<ContainerNode> container = ShareRef<ContainerNode>(*this);
+    if (auto *templateElement = DynamicDowncast<html::HTMLTemplateElement>(*this))
+    {
+      container = ShareRef<ContainerNode>(*templateElement->Content());
+    }
+
+    // Parsing empty string creates additional elements only inside <html> container
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml
+    if (markup.empty() && !Is<html::HTMLHtmlElement>(*container))
+    {
+      return MutationAlgorithms::ReplaceAll(nullptr, *container);
+    }
+
+    auto fragment = CreateFragmentForInnerOuterHTML(*this, markup, parserContentPolicy);
+    if (fragment.HasException())
+    {
+      return fragment.ReleaseException();
+    }
+    return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
+  }
+
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return ReplaceChildrenWithMarkup(
+      markup, {ParserContentPolicy::AllowDeclarativeShadowRoots, ParserContentPolicy::AlwaysParseAsHTML});
+  }
+
+  DOMString Element::GetHTML(GetHTMLOptions &&options) const noexcept
+  {
+    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
+                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
+                                                             : SerializeShadowRoots::Explicit,
+                             krys::move(options.ShadowRoots));
+  }
+
+  DOMString Element::InnerHTML() const noexcept
+  {
+    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
+                             ResolveURLs::NoExcludingURLsForPrivacy);
+  }
+
+  ExceptionOr<void> Element::InnerHTML(DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return ReplaceChildrenWithMarkup(markup, {});
+  }
+
+  DOMString Element::OuterHTML() const noexcept
+  {
+    return SerializeFragment(*this, SerializedNodes::SubtreeIncludingNode, nullptr,
+                             ResolveURLs::NoExcludingURLsForPrivacy);
+  }
+
+  ExceptionOr<void> Element::OuterHTML(DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    // The specification allows setting outerHTML on an Element whose parent is a DocumentFragment and Gecko
+    // supports this.
+    // https://w3c.github.io/DOM-Parsing/#dom-element-outerhtml
+    RefPtr<Element> parent = ShareRefPtr(ParentElement());
+    if (!parent) KRYS_UNLIKELY
+    {
+      if (!ParentNode())
+      {
+        return {};
+      }
+      return Exception {ExceptionCode::NoModificationAllowedError};
+    }
+
+    RefPtr<Node> previous = ShareRefPtr(PreviousSibling());
+    RefPtr<Node> next = ShareRefPtr(NextSibling());
+
+    auto fragment = CreateFragmentForInnerOuterHTML(*parent, markup);
+    if (fragment.HasException())
+    {
+      return fragment.ReleaseException();
+    }
+
+    Ref<DocumentFragment> newChildren = fragment.ReleaseValue();
+    if (auto result = parent->ReplaceChild(*newChildren, *this); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    // The following is not part of the specification but matches Blink's behavior as of June 2021.
+    if (auto *nodeText = next ? DynamicDowncast<Text>(next->PreviousSibling()) : nullptr)
+    {
+      if (auto result = MergeWithNextTextNode(*nodeText); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+    if (auto *previousText = DynamicDowncast<Text>(previous.get()))
+    {
+      if (auto result = MergeWithNextTextNode(*previousText); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+    return {};
+  }
+
+  ExceptionOr<void> Element::InsertAdjacentHTML(InsertAdjacentWhere where, DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+
+    // Steps 1 and 2.
+    auto contextElement = ContextElementForInsertAdjacentHTML(*this, where);
+    if (contextElement.HasException())
+    {
+      return contextElement.ReleaseException();
+    }
+
+    // Step 3.
+    auto fragment = CreateFragmentForInnerOuterHTML(*contextElement.Value(), markup);
+    if (fragment.HasException())
+    {
+      return fragment.ReleaseException();
+    }
+
+    // Step 4.
+    Ref<DocumentFragment> newChildren = fragment.ReleaseValue();
+    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *newChildren); result.HasException())
+    {
+      return result.ReleaseException();
+    }
     return {};
   }
 

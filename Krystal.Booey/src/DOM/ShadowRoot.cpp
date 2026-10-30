@@ -3,10 +3,15 @@
 #include "Krystal.Booey/CSS/CSSStyleSheet.hpp"
 #include "Krystal.Booey/CSS/StyleSheetList.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
@@ -58,6 +63,57 @@ namespace krys::boo::dom
     }
 
     return nullptr;
+  }
+
+#pragma region ShadowRoot (DOM Parsing)
+
+  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return ReplaceChildrenWithMarkup(
+      markup, {ParserContentPolicy::AllowDeclarativeShadowRoots, ParserContentPolicy::AlwaysParseAsHTML});
+  }
+
+  DOMString ShadowRoot::GetHTML(GetHTMLOptions &&options) const noexcept
+  {
+    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
+                             ResolveURLs::NoExcludingURLsForPrivacy, SerializationSyntax::HTML,
+                             options.SerializableShadowRoots ? SerializeShadowRoots::Serializable
+                                                             : SerializeShadowRoots::Explicit,
+                             krys::move(options.ShadowRoots));
+  }
+
+  DOMString ShadowRoot::InnerHTML() const noexcept
+  {
+    return SerializeFragment(*this, SerializedNodes::SubtreesOfChildren, nullptr,
+                             ResolveURLs::NoExcludingURLsForPrivacy);
+  }
+
+  ExceptionOr<void> ShadowRoot::InnerHTML(DOMStringView markup) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return ReplaceChildrenWithMarkup(markup, {});
+  }
+
+#pragma endregion
+
+  ExceptionOr<void>
+    ShadowRoot::ReplaceChildrenWithMarkup(DOMStringView markup,
+                                          EnumSet<ParserContentPolicy> parserContentPolicy) noexcept
+  {
+    if (markup.empty())
+    {
+      return MutationAlgorithms::ReplaceAll(nullptr, *this);
+    }
+
+    RefPtr<Element> host = ShareRefPtr(Host());
+    krys_assert(host);
+    auto fragment = CreateFragmentForInnerOuterHTML(*host, markup, parserContentPolicy);
+    if (fragment.HasException())
+    {
+      return fragment.ReleaseException();
+    }
+    return ReplaceChildrenWithFragment(*this, fragment.ReleaseValue());
   }
 
 #pragma region Extension Hooks
