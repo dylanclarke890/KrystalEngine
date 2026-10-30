@@ -53,6 +53,8 @@ namespace krys::boo
     bool CaretBrowsingEnabled {false};
     /// @brief Whether a drag and drop held near the edge of a box that scrolls scrolls it.
     bool AutoscrollForDragAndDropEnabled {true};
+    /// @brief Whether a hidden page suspends its CSS animations, transitions and Web Animations.
+    bool HiddenPageCSSAnimationSuspensionEnabled {true};
     /// @brief Arrow keys moving the focus to the nearest focusable element in their direction, rather than
     /// scrolling.
     bool SpatialNavigationEnabled {false};

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/ExceptionOr.hpp"
+#include "Krystal.Booey/DOM/VisibilityChangeClient.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadHapticEffectType.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Macros.hpp"
@@ -36,7 +37,8 @@ namespace krys::boo
   /// @brief A gamepad's haptic motors, which play effects (`playEffect()`) until they end, another effect
   /// takes their place, or they're reset (`reset()`).
   /// @see https://w3c.github.io/gamepad/#gamepadhapticactuator-interface
-  class GamepadHapticActuator final : public RefCounted<GamepadHapticActuator>
+  class GamepadHapticActuator final : public RefCounted<GamepadHapticActuator>,
+                                      public dom::VisibilityChangeClient
   {
     KRYS_NON_COPY_MOVABLE(GamepadHapticActuator);
 
@@ -99,7 +101,23 @@ namespace krys::boo
     /// @brief Stops the effect playing, as the document is suspended or goes away.
     void Stop() noexcept;
 
+    void AddRef() const noexcept final
+    {
+      RefCounted::AddRef();
+    }
+    void SubRef() const noexcept final
+    {
+      RefCounted::SubRef();
+    }
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept final
+    {
+      return RefCounted::GetRefCount();
+    }
+
   private:
+    /// @brief Stops the effect playing as the document is hidden.
+    void VisibilityStateChanged() noexcept final;
+
     void StopEffects(Func<void()> &&completionHandler) noexcept;
     KRYS_NODISCARD RefPtr<PendingPromise> &PromiseForEffectType(EffectType effectType) noexcept;
     /// @brief Calls @p promise with @p result in a task of the document's.

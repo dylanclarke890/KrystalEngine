@@ -244,6 +244,10 @@ namespace krys
           if (event.Key() == pal::Key::F2 && event.State() == pal::KeyState::Pressed)
           {
             _view = static_cast<EditorView>((static_cast<uint8>(_view) + 1u) % 3u);
+            if (_pageView)
+            {
+              _pageView->SetVisible(_view == EditorView::Page);
+            }
           }
 
           if (event.Key() == pal::Key::F5 && event.State() == pal::KeyState::Pressed)
@@ -320,6 +324,27 @@ namespace krys
           if (_pageView)
           {
             _pageView->Resize(PageSize());
+          }
+          return true;
+        });
+
+      // The page is hidden while the window is minimised or another of the editor's views is shown.
+      _context->Events->On<WindowMinimiseEvent>(
+        [&](const auto &)
+        {
+          if (_pageView)
+          {
+            _pageView->SetVisible(false);
+          }
+          return true;
+        });
+
+      _context->Events->On<WindowRestoreEvent>(
+        [&](const auto &)
+        {
+          if (_pageView)
+          {
+            _pageView->SetVisible(_view == EditorView::Page);
           }
           return true;
         });

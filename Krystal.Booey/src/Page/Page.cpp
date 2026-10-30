@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Animation/AnimationTimelinesController.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
@@ -18,10 +19,12 @@
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
 #include "Krystal.Booey/Page/PointerCaptureController.hpp"
 #include "Krystal.Booey/Page/PointerLockController.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include "Krystal.Booey/Rendering/RenderView.hpp"
 #include "Krystal.Booey/Style/AnchorPositionEvaluator.hpp"
 #include "Krystal.Booey/Style/Resolver.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
+#include "Krystal.Booey/SVG/SVGDocumentExtensions.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
 
@@ -445,6 +448,72 @@ namespace krys::boo
     {
       functor(*document);
     }
+  }
+
+  void Page::SetIsVisible(bool isVisible) noexcept
+  {
+    if (_isVisible == isVisible)
+    {
+      return;
+    }
+    _isVisible = isVisible;
+
+    if (isVisible)
+    {
+      ResumeScriptedAnimations();
+
+      // FIXME: Showing the main frame's view and resuming animated images, once views can be hidden.
+      ForEachDocument(
+        [](dom::Document &document)
+        {
+          if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
+          {
+            if (auto *timelines = document.TimelinesController())
+            {
+              timelines->ResumeAnimations();
+            }
+          }
+          if (auto *svgExtensions = document.SVGExtensionsIfExists())
+          {
+            svgExtensions->UnpauseAnimations();
+          }
+        });
+    }
+    else
+    {
+      ForEachDocument(
+        [](dom::Document &document)
+        {
+          if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled)
+          {
+            if (auto *timelines = document.TimelinesController())
+            {
+              timelines->SuspendAnimations();
+            }
+          }
+          if (auto *svgExtensions = document.SVGExtensionsIfExists())
+          {
+            svgExtensions->PauseAnimations();
+          }
+        });
+
+      SuspendScriptedAnimations();
+      // FIXME: Hiding the main frame's view, once views can be hidden.
+    }
+
+    ForEachDocument([](dom::Document &document) { document.VisibilityStateChanged(); });
+  }
+
+  void Page::SuspendScriptedAnimations() noexcept
+  {
+    _scriptedAnimationsSuspended = true;
+    ForEachDocument([](dom::Document &document) { document.SuspendScriptedAnimationControllerCallbacks(); });
+  }
+
+  void Page::ResumeScriptedAnimations() noexcept
+  {
+    _scriptedAnimationsSuspended = false;
+    ForEachDocument([](dom::Document &document) { document.ResumeScriptedAnimationControllerCallbacks(); });
   }
 
   void Page::ForEachRenderableDocument(const Func<void(dom::Document &)> &functor) const noexcept

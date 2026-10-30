@@ -46,10 +46,19 @@ namespace krys::boo
   GamepadHapticActuator::GamepadHapticActuator(dom::Document *document, Type type, Gamepad &gamepad) noexcept
       : _document(CreateWeakPtr(document)), _type(type), _gamepad(CreateWeakPtr(&gamepad))
   {
-    // FIXME: Stopping the effects when the document is hidden, once documents can be.
+    if (document)
+    {
+      document->RegisterForVisibilityStateChangedCallbacks(*this);
+    }
   }
 
-  GamepadHapticActuator::~GamepadHapticActuator() noexcept = default;
+  GamepadHapticActuator::~GamepadHapticActuator() noexcept
+  {
+    if (auto *document = _document.get())
+    {
+      document->UnregisterForVisibilityStateChangedCallbacks(*this);
+    }
+  }
 
   bool GamepadHapticActuator::CanPlayEffectType(EffectType effectType) const noexcept
   {
@@ -125,6 +134,16 @@ namespace krys::boo
 
   void GamepadHapticActuator::Stop() noexcept
   {
+    StopEffects([] {});
+  }
+
+  void GamepadHapticActuator::VisibilityStateChanged() noexcept
+  {
+    RefPtr<dom::Document> document = ShareRefPtr(_document.get());
+    if (!document || !document->Hidden())
+    {
+      return;
+    }
     StopEffects([] {});
   }
 

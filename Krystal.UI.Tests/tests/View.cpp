@@ -8,6 +8,8 @@
 #include "Krystal.Booey/DOM/CommandEvent.hpp"
 #include "Krystal.Booey/DOM/DOMRect.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
@@ -2941,5 +2943,28 @@ namespace krys::ui::tests
       CHECK(shows(u8"second"));
       CHECK(view.GetBackForwardList().Entries().size() == 2);
     }
+  }
+
+  TEST_CASE("View: shows and hides its page", "[UI]")
+  {
+    View view({400, 300});
+    view.LoadHTML(u8"<!DOCTYPE html><p>text</p>");
+    WaitForLoad(view);
+    CHECK(view.IsVisible());
+    CHECK_FALSE(view.Document().Hidden());
+
+    uint32 changes = 0;
+    auto handle = view.Document().AddEventListener(boo::dom::DOMStringAtom(boo::EventNames::VisibilityChange),
+                                                   [&](boo::dom::Event &) { ++changes; });
+    view.SetVisible(false);
+    CHECK_FALSE(view.IsVisible());
+    CHECK(view.Document().Hidden());
+    boo::html::EventLoop::Current().RunUntilIdle();
+    CHECK(changes == 1);
+
+    view.SetVisible(true);
+    CHECK_FALSE(view.Document().Hidden());
+    boo::html::EventLoop::Current().RunUntilIdle();
+    CHECK(changes == 2);
   }
 }

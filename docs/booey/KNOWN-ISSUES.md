@@ -8,7 +8,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- `Document::VisibilityState()` is hidden only without a page and visible otherwise, until hosts report visibility (FIXME in `Document.cpp`). Gamepad haptics therefore never stop on hide (FIXME in `GamepadHapticActuator.cpp`).
+- A hidden page doesn't hide its main frame's view, and a shown one doesn't resume its animated images, as upstream's do (FIXMEs in `Page.cpp`): views have no shown state and animated images pause only out of view.
 - `Document::characterSet` is always UTF-8: the document's encoding isn't passed in at creation (FIXME in `Document.cpp`).
 - `AbortSignal` keeps its source and dependent signals as weak pointers rather than following the specification's garbage collection rule.
 - Event listener callbacks that capture their own target keep it alive (there is no garbage collector); noted on `AddEventListener`.
@@ -26,7 +26,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `ElementInternals` has no ARIA reflection members (`Reflection::GetContentAttribute` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
-- No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `AbortSignal.onabort`, `document.onreadystatechange` or `document.onvisibilitychange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
+- No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `AbortSignal.onabort`, `document.onreadystatechange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not ported; `Touch` has no constructor and `TouchInit` is not ported.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).
@@ -143,7 +143,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Bugs
 
 - `DOMHighResTimeStamp` is an integer, so `DocumentTimeline` origin times lose their fractions (see *DOM*).
-- SMIL animations pause only for a document without a page; the page's visibility and the image-animation setting don't pause them (FIXME in `SVGDocumentExtensions.cpp`).
+- SMIL animations don't pause for the image-animation setting (FIXME in `SVGDocumentExtensions.cpp`).
 - `SMILTimeContainer` runs on a fixed 1/60 s timer (`SMILAnimationFrameDelay`, no throttled delay) and mutates the DOM while updating animations, as there is no `EventQueueScope` (FIXMEs in `SMILTimeContainer.cpp`).
 - `KeyframeEffect::TimeToNextTick` wakes for the next iteration whether or not the document has `animationiteration` listeners (FIXME).
 - `DocumentTimeline::AnimationInterval` is always 15 ms (`FullSpeedAnimationInterval`), as there is no frame rate alignment (FIXME: the host's display refresh).

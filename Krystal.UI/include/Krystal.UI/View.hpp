@@ -618,6 +618,14 @@ namespace krys::ui
     /// while it's focused, and the focused element gets `focus` or `blur`. A page starts focused.
     void SetFocused(bool focused) noexcept;
 
+    /// @brief The page is shown (true) or hidden (false): hidden while its window is minimised or another
+    /// view is drawn in its place. Hidden, the page fires `visibilitychange`, suspends its animation frame
+    /// callbacks and animations, and stops its gamepad effects. A page starts shown.
+    void SetVisible(bool visible) noexcept;
+
+    /// @brief Whether the page is shown (`SetVisible`).
+    KRYS_NODISCARD bool IsVisible() const noexcept;
+
     /// @brief Asks @p handler about each navigation the page starts (links followed and forms submitted). A
     /// view without a handler allows every navigation, so only navigations within the page happen.
     void SetNavigationHandler(Func<NavigationPolicy(const NavigationRequest &)> &&handler) noexcept;

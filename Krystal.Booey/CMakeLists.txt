@@ -3883,6 +3883,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/StyledElement.hpp
       include/Krystal.Booey/DOM/Text.hpp
       include/Krystal.Booey/DOM/TreeWalker.hpp
+      include/Krystal.Booey/DOM/VisibilityChangeClient.hpp
       include/Krystal.Booey/DOM/VisitedLinkState.hpp
       include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
       include/Krystal.Booey/DOM/Types/DOMString.hpp

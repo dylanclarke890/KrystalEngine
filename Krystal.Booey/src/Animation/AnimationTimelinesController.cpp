@@ -10,6 +10,8 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Booey/Page/Page.hpp"
+#include "Krystal.Booey/Page/Settings.hpp"
 #include <algorithm>
 
 namespace krys::boo
@@ -18,7 +20,13 @@ namespace krys::boo
       : _cachedCurrentTimeClearanceTimer(*this, &AnimationTimelinesController::ClearCachedCurrentTime),
         _document(document)
   {
-    // FIXME: Suspending animations in hidden pages, once pages have a visibility.
+    if (auto *page = document.GetPage())
+    {
+      if (document.GetSettings().HiddenPageCSSAnimationSuspensionEnabled && !page->IsVisible())
+      {
+        SuspendAnimations();
+      }
+    }
   }
 
   AnimationTimelinesController::~AnimationTimelinesController() noexcept = default;
