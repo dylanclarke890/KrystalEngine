@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.Booey/Animation/ElementAnimationRareData.hpp"
+#include "Krystal.Booey/DOM/DOMTokenList.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
@@ -27,6 +28,11 @@ namespace krys::boo::dom
   void ElementRareData::SetResizeObserverData(UniquePtr<ResizeObserverData> &&data) noexcept
   {
     _resizeObserverData = krys::move(data);
+  }
+
+  void ElementRareData::SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept
+  {
+    _partList = krys::move(partList);
   }
 
   void ElementRareData::SetCustomElementReactionQueue(

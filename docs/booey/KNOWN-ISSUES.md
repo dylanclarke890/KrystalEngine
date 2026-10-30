@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Bugs
 
-- Only `classList` follows its attribute (`Element::OnAttributeChanged`). The `DOMTokenList`s for `rel`, `sandbox`, `sizes`, `blocking` and `for` (`htmlFor`) parse the attribute once at creation and miss later attribute changes.
 - `NodeAlgorithms::Equals` compares two elements' attributes by position, so the same attributes in a different order make nodes unequal; the specification compares them as an unordered set.
 - `Document::UpdateAnimationsAndSendEvents` passes the page's last rendering update timestamp rather than the window's frozen one (FIXME in `Document.cpp`); the animation timelines run on the event loop's time rather than the window's.
 - `Document::EnsurePendingRenderTreeUpdate` doesn't schedule a rendering update, as upstream's does. A change to a text node's data that invalidates no style may therefore wait for something else to schedule an update; no test confirms it yet.

@@ -119,6 +119,17 @@ namespace krys::boo::html
     return *_relList;
   }
 
+  void HTMLAnchorElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"rel" && _relList)
+    {
+      _relList->AssociatedAttributeValueChanged();
+    }
+  }
+
   dom::DOMString HTMLAnchorElement::HrefLang() const noexcept
   {
     return Reflection::Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");

@@ -63,6 +63,17 @@ namespace krys::boo::html
     return *_sandbox;
   }
 
+  void HTMLIFrameElement::OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                                             Maybe<dom::DOMStringView> value,
+                                             dom::DOMStringAtom namespaceURI) noexcept
+  {
+    HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
+    if (namespaceURI == dom::DOMStringAtom::Null() && localName == u8"sandbox" && _sandbox)
+    {
+      _sandbox->AssociatedAttributeValueChanged();
+    }
+  }
+
   dom::DOMString HTMLIFrameElement::Allow() const noexcept
   {
     return Reflection::Reflect<dom::DOMString>(*this, u8"allow").value_or(u8"");

@@ -639,6 +639,12 @@ namespace krys::boo::html
       return;
     }
 
+    // The token lists follow their attributes.
+    if (localName == u8"rel" && _relList)
+    {
+      _relList->AssociatedAttributeValueChanged();
+    }
+
     auto newValue = value.value_or(dom::DOMStringView());
     if (localName == u8"action")
     {

@@ -31,6 +31,7 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class DOMTokenList;
   class Element;
   class PopoverData;
   class PseudoElement;
@@ -70,6 +71,7 @@ namespace krys::boo::dom
     ExplicitlySetAttrElementsMap _explicitlySetAttrElementsMap;
     UniquePtr<IntersectionObserverData> _intersectionObserverData;
     UniquePtr<ResizeObserverData> _resizeObserverData;
+    UniquePtr<DOMTokenList> _partList;
     Maybe<LayoutUnit> _lastRememberedLogicalWidth;
     Maybe<LayoutUnit> _lastRememberedLogicalHeight;
     Maybe<EnumSet<ContentRelevancy>> _contentRelevancy;
@@ -132,6 +134,13 @@ namespace krys::boo::dom
       return _resizeObserverData.get();
     }
     void SetResizeObserverData(UniquePtr<ResizeObserverData> &&data) noexcept;
+
+    /// @brief The element's `part` list, once it's been asked for.
+    KRYS_NODISCARD DOMTokenList *PartList() const noexcept
+    {
+      return _partList.get();
+    }
+    void SetPartList(UniquePtr<DOMTokenList> &&partList) noexcept;
 
     KRYS_NODISCARD Maybe<LayoutUnit> LastRememberedLogicalWidth() const noexcept
     {

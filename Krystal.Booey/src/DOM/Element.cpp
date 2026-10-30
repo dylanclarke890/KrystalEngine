@@ -11,7 +11,6 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Booey/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
@@ -1881,6 +1880,16 @@ namespace krys::boo::dom
     return *_domTokenList;
   }
 
+  DOMTokenList &Element::Part() noexcept
+  {
+    auto &rareData = EnsureElementRareData();
+    if (!rareData.PartList())
+    {
+      rareData.SetPartList(ElementAlgorithms::CreateDOMTokenList(*this, u8"part"));
+    }
+    return *rareData.PartList();
+  }
+
   void Element::Slot(DOMString &&slot) noexcept
   {
     html::CEReactionsScope ceReactions;
@@ -2512,12 +2521,9 @@ namespace krys::boo::dom
     }
     else if (localName == Attributes::Class)
     {
-      auto &domTokenList = ClassList();
-      domTokenList._tokens.clear();
-      if (value.has_value())
+      if (_domTokenList)
       {
-        auto tokens = OrderedSet::Parser(*value);
-        domTokenList._tokens.append(tokens.begin(), tokens.end());
+        _domTokenList->AssociatedAttributeValueChanged();
       }
     }
     else if (localName == Attributes::Slot)
@@ -2559,6 +2565,11 @@ namespace krys::boo::dom
     }
     else if (localName.View() == u8"part")
     {
+      if (auto *partList = _elementRareData ? _elementRareData->PartList() : nullptr)
+      {
+        partList->AssociatedAttributeValueChanged();
+      }
+
       if (NeedsStyleInvalidation() && IsInShadowTree())
       {
         InvalidateStyleInternal();

@@ -9,6 +9,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
+#include "Krystal.Core/Utils/SetForScope.hpp"
 
 namespace krys::boo::dom
 {
@@ -17,9 +18,16 @@ namespace krys::boo::dom
       : _attributeName {attributeName}, _element {ShareCheckedRef(element)},
         _isSupportedToken {krys::move(isSupportedToken)}
   {
-    auto value = ElementAlgorithms::GetAttributeValue(*_element, _attributeName);
-    auto tokens = OrderedSet::Parser(value);
+    UpdateTokensFromAttributeValue();
+  }
+
+  void DOMTokenList::UpdateTokensFromAttributeValue() const noexcept
+  {
+    // A missing attribute's value is the empty string, which has no tokens.
+    auto tokens = OrderedSet::Parser(ElementAlgorithms::GetAttributeValue(*_element, _attributeName));
+    _tokens.clear();
     _tokens.append(tokens.begin(), tokens.end());
+    _tokensNeedUpdating = false;
   }
 
   void DOMTokenList::Value(DOMString &&value) noexcept
@@ -48,6 +56,7 @@ namespace krys::boo::dom
       return;
     }
 
+    SetForScope inAttributeUpdate(_inUpdateAssociatedAttributeFromTokens, true);
     ElementAlgorithms::SetAttributeValue(*_element, _attributeName, OrderedSet::Serialiser(_tokens));
   }
 

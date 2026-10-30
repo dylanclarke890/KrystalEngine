@@ -95,6 +95,12 @@ namespace krys::boo::html
       return;
     }
 
+    // The token lists follow their attributes.
+    if (localName == u8"blocking" && _blocking)
+    {
+      _blocking->AssociatedAttributeValueChanged();
+    }
+
     auto newValue = value ? dom::DOMStringAtom(*value) : dom::DOMStringAtom::Null();
     if (localName == u8"title")
     {

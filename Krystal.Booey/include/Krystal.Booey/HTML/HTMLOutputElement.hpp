@@ -71,6 +71,9 @@ namespace krys::boo::html
     void Reset() noexcept final;
 
   protected:
+    void OnAttributeChanged(dom::DOMStringAtom localName, Maybe<dom::DOMStringView> oldValue,
+                            Maybe<dom::DOMStringView> value,
+                            dom::DOMStringAtom namespaceURI) noexcept override;
     KRYS_NODISCARD bool ComputeWillValidate() const noexcept final
     {
       return false;

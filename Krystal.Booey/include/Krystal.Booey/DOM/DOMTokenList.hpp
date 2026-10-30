@@ -35,9 +35,13 @@ namespace krys::boo::dom
 
   private:
     DOMStringAtom _attributeName;
-    TokenList _tokens;
+    mutable TokenList _tokens;
     CheckedRef<Element> _element;
     IsSupportedTokenFunction _isSupportedToken;
+    /// @brief Whether the attribute changed since the tokens were last parsed from it.
+    mutable bool _tokensNeedUpdating {false};
+    /// @brief Whether the list is setting its own attribute, whose tokens it already has.
+    bool _inUpdateAssociatedAttributeFromTokens {false};
 
   protected:
     DOMTokenList(Element &element, DOMStringAtom attributeName,
@@ -47,23 +51,35 @@ namespace krys::boo::dom
     using iterator = TokenList::iterator;
     using const_iterator = TokenList::const_iterator;
 
+    /// @brief Marks the tokens to be parsed again from the attribute, which changed; the owner of the list
+    /// calls this from its attribute change steps.
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its attribute change steps)
+    void AssociatedAttributeValueChanged() noexcept
+    {
+      if (_inUpdateAssociatedAttributeFromTokens)
+      {
+        return;
+      }
+      _tokensNeedUpdating = true;
+    }
+
 #pragma region DOMTokenList - https://dom.spec.whatwg.org/#domtokenlist
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-length
     KRYS_NODISCARD size_t Length() const noexcept
     {
-      return _tokens.size();
+      return Tokens().size();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
     KRYS_NODISCARD Maybe<DOMString> Item(size_t index) const noexcept
     {
-      if (index >= _tokens.size())
+      if (index >= Tokens().size())
       {
         return null;
       }
 
-      return _tokens[index];
+      return Tokens()[index];
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
@@ -75,7 +91,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-contains
     KRYS_NODISCARD bool Contains(const DOMString &token) const noexcept
     {
-      return std::ranges::contains(_tokens, token);
+      return std::ranges::contains(Tokens(), token);
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-add
@@ -92,9 +108,9 @@ namespace krys::boo::dom
 
       for (auto &token : tokens)
       {
-        if (!std::ranges::contains(_tokens, token))
+        if (!std::ranges::contains(Tokens(), token))
         {
-          _tokens.emplace_back(token);
+          Tokens().emplace_back(token);
         }
       }
 
@@ -121,9 +137,9 @@ namespace krys::boo::dom
         }
       }
 
-      auto it = std::ranges::remove_if(_tokens, [&](const DOMString &current)
+      auto it = std::ranges::remove_if(Tokens(), [&](const DOMString &current)
                                        { return std::ranges::contains(tokens, current); });
-      _tokens.erase(it.begin(), it.end());
+      Tokens().erase(it.begin(), it.end());
 
       UpdateSteps();
 
@@ -145,13 +161,13 @@ namespace krys::boo::dom
         return result.ReleaseException();
       }
 
-      if (std::ranges::contains(_tokens, token))
+      if (std::ranges::contains(Tokens(), token))
       {
         if (!force.value_or(false))
         {
           auto it =
-            std::ranges::remove_if(_tokens, [&](const DOMString &current) { return current == token; });
-          _tokens.erase(it.begin(), it.end());
+            std::ranges::remove_if(Tokens(), [&](const DOMString &current) { return current == token; });
+          Tokens().erase(it.begin(), it.end());
 
           UpdateSteps();
           return false;
@@ -161,7 +177,7 @@ namespace krys::boo::dom
 
       if (force.value_or(true))
       {
-        _tokens.emplace_back(token);
+        Tokens().emplace_back(token);
         UpdateSteps();
         return true;
       }
@@ -183,12 +199,12 @@ namespace krys::boo::dom
         return result.ReleaseException();
       }
 
-      if (!std::ranges::contains(_tokens, token))
+      if (!std::ranges::contains(Tokens(), token))
       {
         return false;
       }
 
-      std::ranges::replace(_tokens, token, newToken);
+      std::ranges::replace(Tokens(), token, newToken);
       UpdateSteps();
 
       return true;
@@ -212,30 +228,43 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD iterator begin() noexcept
     {
-      return _tokens.begin();
+      return Tokens().begin();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD iterator end() noexcept
     {
-      return _tokens.end();
+      return Tokens().end();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD const_iterator begin() const noexcept
     {
-      return _tokens.begin();
+      return Tokens().begin();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD const_iterator end() const noexcept
     {
-      return _tokens.end();
+      return Tokens().end();
     }
 
 #pragma endregion
 
   private:
+    /// @brief The token set, parsed again from the attribute if it changed.
+    KRYS_NODISCARD TokenList &Tokens() const noexcept
+    {
+      if (_tokensNeedUpdating)
+      {
+        UpdateTokensFromAttributeValue();
+      }
+      return _tokens;
+    }
+
+    /// @brief Sets the token set to the attribute's value, parsed.
+    void UpdateTokensFromAttributeValue() const noexcept;
+
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
     {
