@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCell.hpp"
 
@@ -83,6 +84,24 @@ namespace krys::boo::html
   void HTMLTableCellElement::Abbr(dom::DOMString &&value) noexcept
   {
     Reflection::Reflect<dom::DOMString>(*this, u8"abbr", krys::move(value));
+  }
+
+  int32 HTMLTableCellElement::CellIndex() const noexcept
+  {
+    if (!AsTableElement<HTMLTableRowElement>(ParentNode()))
+    {
+      return -1;
+    }
+
+    int32 index = 0;
+    for (auto *sibling = PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
+    {
+      if (AsTableElement<HTMLTableCellElement>(sibling))
+      {
+        ++index;
+      }
+    }
+    return index;
   }
 
 #pragma endregion

@@ -4071,6 +4071,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/HTMLTablePartElement.hpp
       include/Krystal.Booey/HTML/HTMLTableRowElement.hpp
       include/Krystal.Booey/HTML/HTMLTableSectionElement.hpp
+      include/Krystal.Booey/HTML/HTMLTableRowsCollection.hpp
       include/Krystal.Booey/HTML/HTMLTemplateElement.hpp
       include/Krystal.Booey/HTML/HTMLTextAreaElement.hpp
       include/Krystal.Booey/HTML/HTMLTimeElement.hpp
@@ -4602,6 +4603,7 @@ target_sources(Krystal.Booey
     src/HTML/HTMLTablePartElement.cpp
     src/HTML/HTMLTableRowElement.cpp
     src/HTML/HTMLTableSectionElement.cpp
+    src/HTML/HTMLTableRowsCollection.cpp
     src/HTML/HTMLTemplateElement.cpp
     src/HTML/HTMLTextAreaElement.cpp
     src/HTML/HTMLTimeElement.cpp

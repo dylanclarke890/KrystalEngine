@@ -28,6 +28,33 @@ namespace krys::boo::html
                                                 css::MutableStyleProperties &style) noexcept override;
   };
 }
+namespace krys::boo::html::detail
+{
+  /// @brief A new HTML element named @p localName in @p document, for the table members that create rows,
+  /// cells, sections and captions.
+  KRYS_NODISCARD Ref<HTMLElement> CreateTableElement(dom::Document &document,
+                                                     dom::DOMStringView localName) noexcept;
+}
+
+namespace krys::boo::html
+{
+  /// @brief @p node as a @p TElement, if it's one.
+  template <typename TElement, typename TNode>
+  KRYS_NODISCARD match_constness_t<TNode, TElement> *AsTableElement(TNode *node) noexcept
+  {
+    auto *element = node ? DynamicDowncast<HTMLElement>(*node) : nullptr;
+    return element ? DynamicDowncast<TElement>(*element) : nullptr;
+  }
+
+  /// @brief A new HTML element named @p localName in @p document, as a @p TElement.
+  template <typename TElement>
+  KRYS_NODISCARD Ref<TElement> CreateTableElement(dom::Document &document,
+                                                  dom::DOMStringView localName) noexcept
+  {
+    auto element = detail::CreateTableElement(document, localName);
+    return ShareRef(Downcast<TElement>(*element));
+  }
+}
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(krys::boo::html::HTMLTablePartElement)
   KRYS_NODISCARD static bool IsType(const krys::boo::html::HTMLElement &target) noexcept

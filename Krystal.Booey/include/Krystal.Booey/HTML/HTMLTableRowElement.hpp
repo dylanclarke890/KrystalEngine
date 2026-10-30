@@ -1,20 +1,47 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLTablePartElement.hpp"
+#include "Krystal.Core/Types/WeakPtr.hpp"
 
 namespace krys::boo::html
 {
+  class HTMLTableCellElement;
+
   /// @see https://html.spec.whatwg.org/#htmltablerowelement
   class HTMLTableRowElement : public HTMLTablePartElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTableRowElement);
+
+  private:
+    WeakPtr<dom::HTMLCollection> _cells;
 
   public:
     HTMLTableRowElement(dom::Document &document) noexcept;
 
 #pragma region HTMLTableRowElement - https://html.spec.whatwg.org/#htmltablerowelement
 
-    // FIXME: Implement api.
+    /// @brief The row's index in its table's rows, or -1 if it isn't in a table.
+    /// @see https://html.spec.whatwg.org/#dom-tr-rowindex
+    KRYS_NODISCARD int32 RowIndex() const noexcept;
+
+    /// @brief The row's index in its section's rows (or its table's, if it's a child of the table), or -1.
+    /// @see https://html.spec.whatwg.org/#dom-tr-sectionrowindex
+    KRYS_NODISCARD int32 SectionRowIndex() const noexcept;
+
+    /// @brief The row's `td` and `th` children.
+    /// @see https://html.spec.whatwg.org/#dom-tr-cells
+    KRYS_NODISCARD Ref<dom::HTMLCollection> Cells() noexcept;
+
+    /// @brief A new `td` at @p index in the row's cells (-1 for the end): an `IndexSizeError` if @p index is
+    /// less than -1 or more than the number of cells.
+    /// @see https://html.spec.whatwg.org/#dom-tr-insertcell
+    dom::ExceptionOr<Ref<HTMLTableCellElement>> InsertCell(int32 index = -1) noexcept;
+
+    /// @brief Removes the cell at @p index in the row's cells (-1 for the last, if any): an `IndexSizeError`
+    /// if there's no such cell.
+    /// @see https://html.spec.whatwg.org/#dom-tr-deletecell
+    dom::ExceptionOr<void> DeleteCell(int32 index) noexcept;
 
 #pragma endregion
 

@@ -32,9 +32,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-tdth-headers
     void Headers(dom::DOMString &&value) noexcept;
 
-    // FIXME: Implement CellIndex().
+    /// @brief The cell's index in its row's cells, or -1 if its parent isn't a row.
     /// @see https://html.spec.whatwg.org/#dom-tdth-cellindex
-    // KRYS_NODISCARD int32 CellIndex() const noexcept;
+    KRYS_NODISCARD int32 CellIndex() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-tdth-scope
     KRYS_NODISCARD dom::DOMString Scope() const noexcept;

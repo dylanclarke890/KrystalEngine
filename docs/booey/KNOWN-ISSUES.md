@@ -15,12 +15,11 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - No Sanitizer API: no `setHTML()`, and `Document::ParseHTML` is a stub.
 - Responses (`ResourceResponse`) have no HTTP headers, so there's no `document.lastModified` (it needs `Last-Modified`, or a file's modification date for file loads) and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
 - `title` is never shown: there's no `HitTestResult::Title`, no tooltip hook on the chrome client (upstream's `Chrome::getToolTip` and `mouseDidMoveOverElement`), and Krystal.UI draws no tooltips.
-- The table APIs (`caption`, `createCaption()`, `rows`, `insertRow()`, ...) are FIXMEs in `HTMLTableElement.hpp`.
 - No Fullscreen API (`:fullscreen`).
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (no console; FIXMEs in `CustomElementInterface.cpp`).
-- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, `<table>` members, the `ElementContentEditable` members `contentEditable`, `enterKeyHint` and `inputMode`, `nonce`).
+- `[CEReactions]` scopes are missing on members that aren't implemented yet (`designMode`, `execCommand`, `document.open()`/`write()`, the `ElementContentEditable` members `contentEditable`, `enterKeyHint` and `inputMode`, `nonce`).
 - `ElementInternals` has no ARIA reflection members (`Reflection::GetContentAttribute` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.

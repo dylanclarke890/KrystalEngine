@@ -414,6 +414,12 @@ namespace krys::boo::html
 #pragma endregion
 
   public:
+    /// @brief Whether the element is the HTML element named by @p name.
+    KRYS_NODISCARD bool HasTagName(html::TagName name) const noexcept
+    {
+      return TagQualifiedName().TagName() == name;
+    }
+
     /// @brief Whether the element is a text control's inner text element, which holds its editable text.
     KRYS_NODISCARD virtual bool IsTextControlInnerTextElement() const noexcept
     {

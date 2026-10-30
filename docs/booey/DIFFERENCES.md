@@ -25,6 +25,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `AbortSignal.timeout()`'s task always holds the signal strongly; the specification holds it only while the signal has `abort` listeners.
 - Customized built-in elements aren't supported, as upstream: `is` is ignored, so an element created with an `is` value and no matching autonomous definition is uncustomized where the specification makes it `undefined` (an upgrade candidate).
 - `Document::Body()` returns only `<body>`; the specification's body element can also be a `<frameset>`. `BodyOrFrameset()` includes both.
+- The tables' `[SameObject]` collections (`rows`, `tBodies`, a section's `rows`, a row's `cells`) are held weakly by their element, as upstream caches collections, since a collection holds its element: they're the same object while something holds them, and a new one after.
 - Markup is given as strings: there are no Trusted Types, so `innerHTML`, `outerHTML`, `insertAdjacentHTML()`, `setHTMLUnsafe()` and `parseHTMLUnsafe()` take no `TrustedHTML`. `Document::ParseHTMLUnsafe` takes the document whose settings the new one gets, which the specification finds from the current global object.
 - Setting `outerHTML` on an element whose parent is a `DocumentFragment` throws `NoModificationAllowedError`, as upstream and Chrome do; the specification parses the markup as if in a `<body>`. Setting it also merges the text nodes that end up next to each other where the element was, which the specification doesn't, as upstream and Chrome do.
 
