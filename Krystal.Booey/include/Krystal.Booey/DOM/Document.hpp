@@ -47,6 +47,11 @@
 #include "Krystal.Core/Types/UniquePtr.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
 
+namespace krys::text
+{
+  class ICodec;
+}
+
 namespace krys::boo
 {
   class AnimationTimelinesController;
@@ -210,6 +215,8 @@ namespace krys::boo::dom
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
     DOMString _contentType {u8"application/xml"};
+    /// @brief The document's encoding; null for UTF-8.
+    const krys::text::ICodec *_encoding {nullptr};
     DOMString _xmlEncoding;
     DOMString _xmlVersion {u8"1.0"};
     StandaloneStatus _xmlStandalone {StandaloneStatus::Unspecified};
@@ -437,6 +444,14 @@ namespace krys::boo::dom
     /// @note legacy alias of .characterSet
     /// @see https://dom.spec.whatwg.org/#dom-document-inputencoding
     KRYS_NODISCARD DOMString InputEncoding() const noexcept;
+
+    /// @brief The encoding the document's bytes were decoded with: UTF-8 unless its loader decoded it with
+    /// another.
+    /// @see https://dom.spec.whatwg.org/#concept-document-encoding
+    KRYS_NODISCARD const krys::text::ICodec &Encoding() const noexcept;
+
+    /// @brief Records the encoding the document's loader decodes it with.
+    void SetEncoding(const krys::text::ICodec &encoding) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-contenttype
     KRYS_NODISCARD DOMString ContentType() const noexcept;

@@ -6,6 +6,7 @@
 #include "Krystal.Booey/Animation/StyleOriginatedTimelinesController.hpp"
 #include "Krystal.Booey/Animation/WebAnimationUtilities.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/Core/PlatformLocale.hpp"
 #include "Krystal.Booey/CSS/Calc/RandomCachingKeyMap.hpp"
 #include "Krystal.Booey/CSS/CSSFontSelector.hpp"
@@ -355,10 +356,25 @@ namespace krys::boo::dom
     return _quirksMode == QuirksMode::Quirks ? u8"BackCompat" : u8"CSS1Compat";
   }
 
+  const krys::text::ICodec &Document::Encoding() const noexcept
+  {
+    if (_encoding)
+    {
+      return *_encoding;
+    }
+    static const krys::text::ICodec *utf8 = EncodingRegistry().Find(u8"utf-8");
+    krys_debug_assert(utf8);
+    return *utf8;
+  }
+
+  void Document::SetEncoding(const krys::text::ICodec &encoding) noexcept
+  {
+    _encoding = &encoding;
+  }
+
   DOMString Document::CharacterSet() const noexcept
   {
-    // FIXME: Pass encoding to document on creation
-    return u8"UTF-8";
+    return DOMString(Encoding().Name());
   }
 
   DOMString Document::Charset() const noexcept

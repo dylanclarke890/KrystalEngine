@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Document.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey/Core/EncodingRegistry.hpp"
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParserContext.hpp"
 #include "Krystal.Booey/CSS/Selectors/SelectorParserContext.hpp"
@@ -332,6 +333,31 @@ namespace krys::boo::dom::tests
                                                 { dispatched.InitStorageEvent(DOMStringAtom(u8"other")); });
       CHECK_FALSE(element->DispatchEvent(storage).HasException());
       CHECK(storage.Type() == u8"storage");
+    }
+  }
+
+  TEST_CASE("Document's encoding", "[DOM][Document]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+
+    SECTION("A new document's is UTF-8")
+    {
+      CHECK(document->CharacterSet() == u8"UTF-8");
+      CHECK(document->Charset() == u8"UTF-8");
+      CHECK(document->InputEncoding() == u8"UTF-8");
+    }
+
+    SECTION("The one its loader gives it, which a clone keeps")
+    {
+      auto *windows1252 = EncodingRegistry().Find(u8"windows-1252");
+      REQUIRE(windows1252);
+      document->SetEncoding(*windows1252);
+      CHECK(document->CharacterSet() == u8"windows-1252");
+      CHECK(document->InputEncoding() == u8"windows-1252");
+
+      auto clone = document->CloneNode();
+      REQUIRE_FALSE(clone.HasException());
+      CHECK(Downcast<Document>(*clone.Value()).CharacterSet() == u8"windows-1252");
     }
   }
 }
