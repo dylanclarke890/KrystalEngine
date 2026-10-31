@@ -786,7 +786,8 @@ namespace krys::boo::dom::tests
 
 #pragma region Shadow Roots
 
-  TEST_CASE("TreeQueries::ShadowIncludingRoot", "[HTML][TreeQueries]")
+  TEST_CASE("Shadow-including root: the root, or its host's shadow-including root for a shadow root",
+            "[DOM][TreeQueries][dom:concept-shadow-including-root]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -808,9 +809,14 @@ namespace krys::boo::dom::tests
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
 
-    // FIXME: Test with ShadowRoot when implemented
+    auto shadow = child->AttachShadow({}).ReleaseValue();
+    auto inShadow = CreateRef<TestElement>(*doc);
+    REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*shadow) == doc.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*inShadow) == doc.get());
 
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*inShadow) == child.get());
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
@@ -828,7 +834,9 @@ namespace krys::boo::dom::tests
     REQUIRE((host->ShadowRoot().get() == shadow.get()) == (mode == ShadowRootMode::Open));
   }
 
-  TEST_CASE("TreeQueries::NextShadowIncluding", "[HTML][TreeQueries]")
+  TEST_CASE("Shadow-including tree order: a host's shadow tree comes just after it, before its children",
+            "[DOM][TreeQueries][dom:concept-shadow-including-tree-order]"
+            "[dom:shadow-including-preorder-depth-first-traversal]")
   {
     // <div host>[shadow: <b inside>] <span light/></div> <i after/>, with the host in a container.
     auto doc = CreateRef<HTMLDocument>();
@@ -882,7 +890,10 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::ParentOrShadowHostElement(*shadow) == nullptr);
   }
 
-  TEST_CASE("TreeQueries shadow-including ancestry and retargeting", "[HTML][TreeQueries]")
+  TEST_CASE("Shadow-including descendants and ancestors, and retargeting",
+            "[DOM][TreeQueries][dom:concept-shadow-including-descendant]"
+            "[dom:concept-shadow-including-inclusive-descendant][dom:concept-shadow-including-ancestor]"
+            "[dom:concept-shadow-including-inclusive-ancestor][dom:retarget]")
   {
     auto doc = CreateRef<HTMLDocument>();
     auto host = doc->CreateElement(u8"div").ReleaseValue();
@@ -907,6 +918,40 @@ namespace krys::boo::dom::tests
     CHECK(EventTargetAlgorithms::Retarget(deep.get(), *inner) == deep.get());
     // Nodes outside shadow trees are returned as they are.
     CHECK(EventTargetAlgorithms::Retarget(host.get(), *inner) == host.get());
+    // Through nested shadow trees, out to the outermost host.
+    auto innerShadow = inner->AttachShadow({}).ReleaseValue();
+    auto deeper = doc->CreateElement(u8"i").ReleaseValue();
+    REQUIRE_FALSE(innerShadow->AppendChild(*deeper).HasException());
+    CHECK(EventTargetAlgorithms::Retarget(deeper.get(), *doc) == host.get());
+    CHECK(EventTargetAlgorithms::Retarget(deeper.get(), *deep) == inner.get());
+
+    CHECK(TreeQueries::IsShadowIncludingInclusiveDescendant(*host, *host));
+    CHECK_FALSE(TreeQueries::IsShadowIncludingDescendant(*host, *host));
+    CHECK(TreeQueries::IsShadowIncludingInclusiveAncestor(*deep, *deep));
+    CHECK_FALSE(TreeQueries::IsShadowIncludingAncestor(*deep, *deep));
+  }
+
+  TEST_CASE("Closed-shadow-hidden: in a closed shadow tree that doesn't contain the other node",
+            "[DOM][TreeQueries][dom:concept-closed-shadow-hidden]")
+  {
+    auto doc = CreateRef<HTMLDocument>();
+    auto host = doc->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+    auto closed = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
+    auto inClosed = doc->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(closed->AppendChild(*inClosed).HasException());
+    auto openHost = doc->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(closed->AppendChild(*openHost).HasException());
+    auto open = openHost->AttachShadow({}).ReleaseValue();
+    auto inOpen = doc->CreateElement(u8"b").ReleaseValue();
+    REQUIRE_FALSE(open->AppendChild(*inOpen).HasException());
+
+    CHECK(TreeQueries::IsClosedShadowHidden(*inClosed, *doc));
+    CHECK_FALSE(TreeQueries::IsClosedShadowHidden(*inClosed, *openHost));
+    CHECK_FALSE(TreeQueries::IsClosedShadowHidden(*host, *doc));
+    // In an open shadow tree inside a closed one: hidden through its host.
+    CHECK(TreeQueries::IsClosedShadowHidden(*inOpen, *doc));
+    CHECK_FALSE(TreeQueries::IsClosedShadowHidden(*inOpen, *inClosed));
   }
 
 #pragma endregion

@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
 #include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
 #include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
+#include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::css
@@ -21,7 +22,9 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  /// @brief The root of a shadow tree, attached to its host element.
   /// @see https://dom.spec.whatwg.org/#interface-shadowroot
+  /// @see https://dom.spec.whatwg.org/#concept-shadow-root
   class ShadowRoot : public DocumentFragment, public DocumentOrShadowRoot
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
@@ -32,13 +35,22 @@ namespace krys::boo::dom
     friend class html::HTMLTreeBuilder;
 
   private:
+    /// @brief Open, closed, or the user agent's own (treated as closed).
+    /// @see https://dom.spec.whatwg.org/#shadowroot-mode
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-delegates-focus
     bool _delegatesFocus : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-available-to-element-internals
     bool _availableToElementInternals : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-declarative
     bool _declarative : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-slot-assignment
     SlotAssignmentMode _slotAssignment : BitCount<SlotAssignmentMode>() {SlotAssignmentMode::Manual};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-clonable
     bool _clonable : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-serializable
     bool _serializable : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#shadowroot-keep-custom-element-registry-null
     bool _keepCustomElementRegistryNull : 1 {false};
     bool _containsFocusedElement : 1 {false};
     RefPtr<css::StyleSheetList> _styleSheetList;
@@ -99,8 +111,9 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD Element *Host() const noexcept;
 
-    // FIXME: The onslotchange attribute is an event handler IDL attribute for the
-    // onslotchange event handler, whose event handler event type is slotchange.
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-onslotchange
+    /// @see https://dom.spec.whatwg.org/#shadowroot-onslotchange
+    KRYS_DECLARE_EVENT_HANDLER(SlotChange, u8"slotchange")
 
 #pragma endregion
 

@@ -651,6 +651,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/PseudoElement.cpp
 		tests/DOM/Range.cpp
 		tests/DOM/SelectorQuery.cpp
+		tests/DOM/ShadowRoot.cpp
 		tests/DOM/StaticRange.cpp
 		tests/DOM/StyledElement.cpp
 		tests/DOM/Text.cpp

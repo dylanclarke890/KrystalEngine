@@ -189,7 +189,9 @@ namespace krys::boo::dom
     /// current node, and only if it is a descendant of `stayWithin`.
     KRYS_NODISCARD static Node *NextSkippingChildren(const Node &current, const Node *stayWithin) noexcept;
 
-    /// @brief Helper function for getting the next node in tree order, but including nodes in shadow trees.
+    /// @brief The next node in shadow-including tree order: a host's shadow root comes just after it.
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-tree-order
+    /// @see https://dom.spec.whatwg.org/#shadow-including-preorder-depth-first-traversal
     KRYS_NODISCARD static Node *NextShadowIncluding(const Node &current) noexcept;
 
     /// @brief Helper function for getting the next node in tree order, but including nodes in shadow trees,

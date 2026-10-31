@@ -207,12 +207,16 @@ namespace krys::boo::dom
         return nullptr;
       }
 
+      // 1. If one of the following is true
+      //    - A is not a node;
+      //    - A's root is not a shadow root;
+      //    - B is a node and A's root is a shadow-including inclusive ancestor of B
+      //    then return A.
       if (!Is<Node>(current))
       {
         return current;
       }
 
-      // Return A if its root is not a shadow root, or is a shadow-including inclusive ancestor of B.
       auto *currentNode = Downcast<Node>(current);
       auto &currentRoot = TreeQueries::Root(*currentNode);
       if (!Is<ShadowRoot>(currentRoot))
@@ -225,6 +229,7 @@ namespace krys::boo::dom
         return current;
       }
 
+      // 2. Set A to A's root's host.
       auto *host = Downcast<ShadowRoot>(&currentRoot)->Host();
       current = host;
     }

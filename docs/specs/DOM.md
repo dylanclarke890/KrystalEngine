@@ -1533,22 +1533,23 @@ Status: reviewed (2026-10-31)
 
 ### [4.8. Interface ShadowRoot](https://dom.spec.whatwg.org/#interface-shadowroot)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `ShadowRoot` (`ShadowRoot.hpp`/`.cpp`) holds its mode (with a `UserAgent` mode for elements' own shadow roots, treated as closed; see `DIFFERENCES.md`) and flags, and its registry through `DocumentOrShadowRoot`. The shadow-including definitions are in `TreeQueries`, retarget in `EventTargetAlgorithms`.
 <!-- definitions: concept-shadow-root shadowroot-mode shadowroot-delegates-focus shadowroot-available-to-element-internals shadowroot-declarative shadowroot-serializable shadowroot-slot-assignment shadowroot-clonable shadowroot-custom-element-registry shadowroot-keep-custom-element-registry-null dom-shadowroot-onslotchange shadowroot-onslotchange concept-shadow-including-tree-order shadow-including-preorder-depth-first-traversal concept-shadow-including-root concept-shadow-including-descendant concept-shadow-including-inclusive-descendant concept-shadow-including-ancestor concept-shadow-including-inclusive-ancestor concept-closed-shadow-hidden -->
 
-- [ ] [ShadowRoot.mode](https://dom.spec.whatwg.org/#dom-shadowroot-mode) — The mode getter steps are to return this’s mode.
+- [x] [ShadowRoot.mode](https://dom.spec.whatwg.org/#dom-shadowroot-mode) — The mode getter steps are to return this’s mode.
 
-- [ ] [ShadowRoot.delegatesFocus](https://dom.spec.whatwg.org/#dom-shadowroot-delegatesfocus) — The delegatesFocus getter steps are to return this’s delegates focus.
+- [x] [ShadowRoot.delegatesFocus](https://dom.spec.whatwg.org/#dom-shadowroot-delegatesfocus) — The delegatesFocus getter steps are to return this’s delegates focus.
 
-- [ ] [ShadowRoot.serializable](https://dom.spec.whatwg.org/#dom-shadowroot-serializable) — The serializable getter steps are to return this’s serializable.
+- [x] [ShadowRoot.serializable](https://dom.spec.whatwg.org/#dom-shadowroot-serializable) — The serializable getter steps are to return this’s serializable.
 
-- [ ] [ShadowRoot.slotAssignment](https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment) — The slotAssignment getter steps are to return this’s slot assignment.
+- [x] [ShadowRoot.slotAssignment](https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment) — The slotAssignment getter steps are to return this’s slot assignment.
 
-- [ ] [ShadowRoot.clonable](https://dom.spec.whatwg.org/#dom-shadowroot-clonable) — The clonable getter steps are to return this’s clonable.
+- [x] [ShadowRoot.clonable](https://dom.spec.whatwg.org/#dom-shadowroot-clonable) — The clonable getter steps are to return this’s clonable.
 
-- [ ] [ShadowRoot.host](https://dom.spec.whatwg.org/#dom-shadowroot-host) — The host getter steps are to return this’s host.
+- [x] [ShadowRoot.host](https://dom.spec.whatwg.org/#dom-shadowroot-host) — The host getter steps are to return this’s host.
 
-- [ ] [retarget](https://dom.spec.whatwg.org/#retarget) — To retarget an object A against an object B, repeat these steps until they return an object:
+- [x] [retarget](https://dom.spec.whatwg.org/#retarget) — To retarget an object A against an object B, repeat these steps until they return an object:
   - 1. If one of the following is true A is not a node; A’s root is not a shadow root; B is a node and A’s root is a shadow-including inclusive ancestor of B then return A.
   - 2. Set A to A’s root’s host.
 
