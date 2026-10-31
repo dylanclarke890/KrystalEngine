@@ -525,7 +525,8 @@ Status: reviewed (2026-10-31)
 
 ### [3.3. Using AbortController and AbortSignal objects in APIs](https://dom.spec.whatwg.org/#abortcontroller-api-integration)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Guidance for APIs that take a signal; none of Booey's promise-like APIs takes one. The APIs that take a signal follow it: `addEventListener()` adds nothing for an aborted signal and otherwise removes the listener from an abort algorithm (`EventTargetAlgorithms::AddEventListener`), and `CloseWatcher` starts inactive for an aborted signal and is destroyed from an abort algorithm (`CloseWatcher::Create`). Each adds its own algorithm, so observers don't clash. Tests: `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`, `tests/HTML/CloseWatcher/CloseWatcher.cpp`.
 
 ## [4. Nodes](https://dom.spec.whatwg.org/#nodes)
 

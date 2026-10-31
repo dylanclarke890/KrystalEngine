@@ -50,7 +50,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "CloseWatcher: closing and destroying", "[HTML][CloseWatcher]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "CloseWatcher: closing and destroying",
+                   "[HTML][CloseWatcher][dom:abortcontroller-api-integration]")
   {
     NavigationFixture fixture(u8"<p>");
     auto &document = *fixture.Document;

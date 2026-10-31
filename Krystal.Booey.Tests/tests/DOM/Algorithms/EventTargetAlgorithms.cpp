@@ -105,7 +105,7 @@ namespace krys::boo::dom::tests
 
   TEST_CASE(
     "Add an event listener: once per type, callback and capture, unless aborted, removed when aborted",
-    "[DOM][EventTargetAlgorithms][dom:add-an-event-listener]")
+    "[DOM][EventTargetAlgorithms][dom:add-an-event-listener][dom:abortcontroller-api-integration]")
   {
     auto document = CreateRef<Document>();
     auto target = document->CreateElement(u8"div").ReleaseValue();
