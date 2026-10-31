@@ -822,11 +822,12 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.4. Mixin NonElementParentNode](https://dom.spec.whatwg.org/#interface-nonelementparentnode)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `mixins::NonElementParentNode::GetElementById` (get an element by ID), which `Document` and `DocumentFragment` forward to. It walks the descendants rather than keeping an ID map. Tests: `tests/DOM/Mixins/NonElementParentNode.cpp`.
 
-- [ ] [get an element by ID](https://dom.spec.whatwg.org/#get-an-element-by-id) — To get an element by ID, given a node node and a string elementId, return the first element, in tree order, within node’s descendants, whose ID is elementId; otherwise, if there is no such element, null.
+- [x] [get an element by ID](https://dom.spec.whatwg.org/#get-an-element-by-id) — To get an element by ID, given a node node and a string elementId, return the first element, in tree order, within node’s descendants, whose ID is elementId; otherwise, if there is no such element, null.
 
-- [ ] [NonElementParentNode.getElementById(elementId)](https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid) — The getElementById(elementId) method steps are to return the result of getting an element by ID given this and elementId.
+- [x] [NonElementParentNode.getElementById(elementId)](https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid) — The getElementById(elementId) method steps are to return the result of getting an element by ID given this and elementId.
 
 #### [4.2.5. Mixin DocumentOrShadowRoot](https://dom.spec.whatwg.org/#mixin-documentorshadowroot)
 

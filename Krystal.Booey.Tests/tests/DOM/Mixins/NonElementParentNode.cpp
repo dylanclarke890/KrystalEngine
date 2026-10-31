@@ -11,9 +11,9 @@
 
 namespace krys::boo::dom::tests
 {
-  TEST_CASE("NonElementParentNode::GetElementById returns the element with the given id if it exists in the "
-            "descendants of the node",
-            "[NonElementParentNode]")
+  TEST_CASE("getElementById(): the first descendant in tree order whose ID matches",
+            "[DOM][NonElementParentNode][dom:interface-nonelementparentnode][dom:get-an-element-by-id]"
+            "[dom:dom-nonelementparentnode-getelementbyid]")
   {
     auto document = CreateRef<HTMLDocument>();
 
@@ -69,8 +69,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("NonElementParentNode::GetElementById finds nothing for the empty string",
-            "[NonElementParentNode]")
+  TEST_CASE(
+    "getElementById(): nothing for the empty string, as no element has it as its ID",
+    "[DOM][NonElementParentNode][dom:get-an-element-by-id][dom:dom-nonelementparentnode-getelementbyid]")
   {
     auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(u8"div");
@@ -94,6 +95,31 @@ namespace krys::boo::dom::tests
       auto fragment = document->CreateDocumentFragment();
       REQUIRE_FALSE(fragment->AppendChild(*element.Value()).HasException());
       CHECK(fragment->GetElementById(u8"") == nullptr);
+    }
+  }
+
+  TEST_CASE("getElementById(): descendants only, not shadow trees, and only the id attribute in no namespace",
+            "[DOM][NonElementParentNode][dom:get-an-element-by-id]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*host).HasException());
+
+    SECTION("An element in a shadow tree")
+    {
+      auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto inShadow = document->CreateElement(u8"span").ReleaseValue();
+      inShadow->Id(u8"a");
+      REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+      CHECK(document->GetElementById(u8"a") == nullptr);
+    }
+
+    SECTION("An id attribute in a namespace")
+    {
+      auto element = document->CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(element->SetAttributeNS(u8"http://example.com/", u8"id", u8"a").HasException());
+      REQUIRE_FALSE(host->AppendChild(*element).HasException());
+      CHECK(document->GetElementById(u8"a") == nullptr);
     }
   }
 }
