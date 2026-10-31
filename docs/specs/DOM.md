@@ -302,9 +302,10 @@ Status: n/a (service workers)
 
 ### [2.9. Dispatching events](https://dom.spec.whatwg.org/#dispatching-events)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `EventDispatcher` (`DispatchToTarget`, `AppendToEventPath`, `Invoke`, `InnerInvoke`); listeners are host code, so their global is the current target's window (`RelevantWindow`, `DIFFERENCES.md`). Default event handlers run after dispatch, as upstream (`DIFFERENCES.md`). Known issue: no Event Timing (inner invoke step 2l). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`, with the path's effects in `tests/DOM/Event.cpp` and the window in `tests/Page/LocalDOMWindow.cpp`.
 
-- [ ] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
+- [x] [dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) — To dispatch an event event to an EventTarget object target, with an optional legacy target override flag and an optional legacyOutputDidListenersThrowFlag:
   - 1. Set event’s dispatch flag.
   - 2. Let targetOverride be target, if legacy target override flag is not given, and target’s associated Document otherwise. [HTML]
   - 3. Let activationTarget be null.
@@ -364,14 +365,14 @@ Status: unreviewed
     - 12b. Otherwise, if activationTarget has legacy-canceled-activation behavior, then run activationTarget’s legacy-canceled-activation behavior.
   - 13. Return false if event’s canceled flag is set; otherwise true.
 
-- [ ] [append to an event path](https://dom.spec.whatwg.org/#concept-event-path-append) — To append to an event path, given an event event, an EventTarget object invocationTarget, a potential event target shadowAdjustedTarget, a potential event target relatedTarget, a list of potential event targets touchTargets, and a boolean slotInClosedTree:
+- [x] [append to an event path](https://dom.spec.whatwg.org/#concept-event-path-append) — To append to an event path, given an event event, an EventTarget object invocationTarget, a potential event target shadowAdjustedTarget, a potential event target relatedTarget, a list of potential event targets touchTargets, and a boolean slotInClosedTree:
   - 1. Let invocationTargetInShadowTree be false.
   - 2. If invocationTarget is a node and its root is a shadow root, then set invocationTargetInShadowTree to true.
   - 3. Let rootOfClosedTree be false.
   - 4. If invocationTarget is a shadow root whose mode is "closed", then set rootOfClosedTree to true.
   - 5. Append a new event path item to event’s path whose invocation target is invocationTarget, invocation-target-in-shadow-tree is invocationTargetInShadowTree, shadow-adjusted target is shadowAdjustedTarget, relatedTarget is relatedTarget, touch target list is touchTargets, root-of-closed-tree is rootOfClosedTree, and slot-in-closed-tree is slotInClosedTree.
 
-- [ ] [invoke](https://dom.spec.whatwg.org/#concept-event-listener-invoke) — To invoke, given an event path item pathItem, an event event, a string phase, and an optional legacyOutputDidListenersThrowFlag:
+- [x] [invoke](https://dom.spec.whatwg.org/#concept-event-listener-invoke) — To invoke, given an event path item pathItem, an event event, a string phase, and an optional legacyOutputDidListenersThrowFlag:
   - 1. Let targetItem be pathItem.
   - 2. While targetItem’s shadow-adjusted target is null: set targetItem to the event path item preceding targetItem in event’s path.
   - 3. Set event’s target to targetItem’s shadow-adjusted target.
@@ -388,7 +389,7 @@ Status: unreviewed
     - 11c. Inner invoke with event, listeners, phase, invocationTargetInShadowTree, and legacyOutputDidListenersThrowFlag if given.
     - 11d. Set event’s type attribute value to originalEventType.
 
-- [ ] [inner invoke](https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke) — To inner invoke, given an event event, a list of event listeners listeners, a string phase, a boolean invocationTargetInShadowTree, and an optional legacyOutputDidListenersThrowFlag:
+- [x] [inner invoke](https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke) — To inner invoke, given an event event, a list of event listeners listeners, a string phase, a boolean invocationTargetInShadowTree, and an optional legacyOutputDidListenersThrowFlag:
   - 1. Let found be false.
   - 2. For each listener of listeners, whose removed is false:
     - 2a. If event’s type attribute value is not listener’s type, then continue.

@@ -39,7 +39,7 @@ namespace krys::boo::dom
 
     /// @note: The legacyOutputDidListenersThrowFlag is only used by Indexed Database API.
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-invoke
-    static void Invoke(EventPathItem &pathStruct, Event &event, EventPhaseType phase,
+    static void Invoke(EventPathItem &pathItem, Event &event, EventPhaseType phase,
                        bool *legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke

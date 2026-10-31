@@ -103,7 +103,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Event.composedPath(): the path seen from the current target, hiding closed shadow trees",
-            "[HTML][Event][dom:dom-event-composedpath]")
+            "[HTML][Event][dom:dom-event-composedpath][dom:concept-event-path-append]")
   {
     auto document = CreateRef<HTMLDocument>();
     auto host = NewElement(*document, u8"div");

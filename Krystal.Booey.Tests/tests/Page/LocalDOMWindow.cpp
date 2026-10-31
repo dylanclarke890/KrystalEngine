@@ -290,6 +290,7 @@ namespace krys::boo::tests
       CHECK_FALSE(windowHeard);
     }
 
+    // The legacy target override flag of dispatch.
     SECTION("load at the window with the legacy target override targets the document")
     {
       bool windowHeard = false;
@@ -305,13 +306,14 @@ namespace krys::boo::tests
       CHECK(windowHeard);
     }
 
-    SECTION("a document without a browsing context doesn't reach its window")
+    SECTION("a document without a browsing context doesn't reach its window, nor run its own listeners")
     {
+      // Its window's document isn't fully active, so inner invoke skips the listeners.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       order.clear();
       auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Click), true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
-      CHECK(order == List<std::string> {"document capture", "document"});
+      CHECK(order.empty());
     }
   }
 
