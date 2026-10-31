@@ -2107,20 +2107,21 @@ Status: reviewed (2026-10-31)
 
 ### [5.3. Interface AbstractRange](https://dom.spec.whatwg.org/#interface-abstractrange)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `AbstractRange` (`AbstractRange.hpp`) holds the start and end boundary points, shared by `StaticRange` and `Range`; `Collapsed()` is both the getter and the definition.
 <!-- definitions: concept-range concept-range-start concept-range-end concept-range-start-node concept-range-start-offset concept-range-end-node concept-range-end-offset -->
 
-- [ ] [collapsed (range)](https://dom.spec.whatwg.org/#range-collapsed) — A range is collapsed if its start node is its end node and its start offset is its end offset.
+- [x] [collapsed (range)](https://dom.spec.whatwg.org/#range-collapsed) — A range is collapsed if its start node is its end node and its start offset is its end offset.
 
-- [ ] [AbstractRange.startContainer](https://dom.spec.whatwg.org/#dom-range-startcontainer) — The startContainer getter steps are to return this’s start node.
+- [x] [AbstractRange.startContainer](https://dom.spec.whatwg.org/#dom-range-startcontainer) — The startContainer getter steps are to return this’s start node.
 
-- [ ] [AbstractRange.startOffset](https://dom.spec.whatwg.org/#dom-range-startoffset) — The startOffset getter steps are to return this’s start offset.
+- [x] [AbstractRange.startOffset](https://dom.spec.whatwg.org/#dom-range-startoffset) — The startOffset getter steps are to return this’s start offset.
 
-- [ ] [AbstractRange.endContainer](https://dom.spec.whatwg.org/#dom-range-endcontainer) — The endContainer getter steps are to return this’s end node.
+- [x] [AbstractRange.endContainer](https://dom.spec.whatwg.org/#dom-range-endcontainer) — The endContainer getter steps are to return this’s end node.
 
-- [ ] [AbstractRange.endOffset](https://dom.spec.whatwg.org/#dom-range-endoffset) — The endOffset getter steps are to return this’s end offset.
+- [x] [AbstractRange.endOffset](https://dom.spec.whatwg.org/#dom-range-endoffset) — The endOffset getter steps are to return this’s end offset.
 
-- [ ] [AbstractRange.collapsed](https://dom.spec.whatwg.org/#dom-range-collapsed) — The collapsed getter steps are to return true if this is collapsed; otherwise false.
+- [x] [AbstractRange.collapsed](https://dom.spec.whatwg.org/#dom-range-collapsed) — The collapsed getter steps are to return true if this is collapsed; otherwise false.
 
 ### [5.4. Interface StaticRange](https://dom.spec.whatwg.org/#interface-staticrange)
 

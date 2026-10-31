@@ -9,11 +9,21 @@ namespace krys::boo::dom
 {
   class Node;
 
+  /// @brief A range: a start and an end boundary point, static or live.
   /// @see https://dom.spec.whatwg.org/#interface-abstractrange
+  /// @see https://dom.spec.whatwg.org/#concept-range
   class AbstractRange : public RefCounted<AbstractRange>
   {
   protected:
+    /// @brief The start node and start offset.
+    /// @see https://dom.spec.whatwg.org/#concept-range-start
+    /// @see https://dom.spec.whatwg.org/#concept-range-start-node
+    /// @see https://dom.spec.whatwg.org/#concept-range-start-offset
     BoundaryPoint _start;
+    /// @brief The end node and end offset.
+    /// @see https://dom.spec.whatwg.org/#concept-range-end
+    /// @see https://dom.spec.whatwg.org/#concept-range-end-node
+    /// @see https://dom.spec.whatwg.org/#concept-range-end-offset
     BoundaryPoint _end;
 
   protected:
@@ -66,7 +76,9 @@ namespace krys::boo::dom
       return _end.Offset;
     }
 
+    /// @brief Whether its start node is its end node and its start offset is its end offset.
     /// @see https://dom.spec.whatwg.org/#dom-range-collapsed
+    /// @see https://dom.spec.whatwg.org/#range-collapsed
     KRYS_NODISCARD bool Collapsed() const noexcept
     {
       return _start.Container == _end.Container && _start.Offset == _end.Offset;
