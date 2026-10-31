@@ -46,6 +46,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 ### From WebKit
 
 - Directionality (`dir`) is kept in three node flags (`SelfOrPrecedingNodesAffectDirAuto`, `UsesEffectiveTextDirection`, `EffectiveTextDirectionIsRTL`) rather than in rare data. A node with no directionality of its own reads the document element's current direction; upstream caches it in `documentElementTextDirection` when the document element changes. Children changes are reported once for everything inserted, so an insertion counts as replaced-elements-only (`onlyReplacedElementsInserted`) only when every inserted node is a replaced element. A slot updates its directionality in its insertion steps.
+- `NamedNodeMap`'s supported property names leave out duplicate qualified names, as the specification says; upstream keeps them.
 - `moveBefore()`, which upstream doesn't have, resets and then updates a moved element's directionality, as a removal plus an insertion would.
 - `MutationObserver::Observe` implies `attributes` (or `characterData`) when `attributeOldValue` (or `characterDataOldValue`) is given at all, as the specification has it, so `{attributeOldValue: false}` observes attributes; upstream implies them only when the old value option is true, and throws a `TypeError` for it.
 - A `ResizeObserver` or `IntersectionObserver` belongs to whoever created it, since there's no garbage collector, and disconnects when it's destroyed.

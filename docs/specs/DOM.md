@@ -1834,34 +1834,35 @@ Status: reviewed (2026-10-31)
 
 #### [4.9.1. Interface NamedNodeMap](https://dom.spec.whatwg.org/#interface-namednodemap)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `NamedNodeMap` (`NamedNodeMap.hpp`/`.cpp`) is a view of its element's attribute list, through the attribute algorithms in `ElementAlgorithms`. Its supported property names leave out duplicates, where upstream keeps them (see `DIFFERENCES.md`).
 <!-- definitions: concept-namednodemap-element concept-namednodemap-attribute dom-namednodemap-setnameditemns -->
 
-- [ ] [NamedNodeMap.length](https://dom.spec.whatwg.org/#dom-namednodemap-length) — The length getter steps are to return the attribute list’s size.
+- [x] [NamedNodeMap.length](https://dom.spec.whatwg.org/#dom-namednodemap-length) — The length getter steps are to return the attribute list’s size.
 
-- [ ] [NamedNodeMap.item(index)](https://dom.spec.whatwg.org/#dom-namednodemap-item) — The item(index) method steps are:
+- [x] [NamedNodeMap.item(index)](https://dom.spec.whatwg.org/#dom-namednodemap-item) — The item(index) method steps are:
   - 1. If index is equal to or greater than this’s attribute list’s size, then return null.
   - 2. Otherwise, return this’s attribute list[index].
 
-- [ ] [A NamedNodeMap object’s supported property names are the return value of runnin…](https://dom.spec.whatwg.org/#dom-namednodemap-item) — A NamedNodeMap object’s supported property names are the return value of running these steps:
+- [x] [A NamedNodeMap object’s supported property names are the return value of runnin…](https://dom.spec.whatwg.org/#dom-namednodemap-item) — A NamedNodeMap object’s supported property names are the return value of running these steps:
   - 1. Let names be the qualified names of the attributes in this NamedNodeMap object’s attribute list, with duplicates omitted, in order.
   - 2. If this NamedNodeMap object’s element is in the HTML namespace and its node document is an HTML document, then for each name of names:
     - 2a. Let lowercaseName be name, in ASCII lowercase.
     - 2b. If lowercaseName is not equal to name, remove name from names.
   - 3. Return names.
 
-- [ ] [NamedNodeMap.getNamedItem(qualifiedName)](https://dom.spec.whatwg.org/#dom-namednodemap-getnameditem) — The getNamedItem(qualifiedName) method steps are to return the result of getting an attribute given qualifiedName and element.
+- [x] [NamedNodeMap.getNamedItem(qualifiedName)](https://dom.spec.whatwg.org/#dom-namednodemap-getnameditem) — The getNamedItem(qualifiedName) method steps are to return the result of getting an attribute given qualifiedName and element.
 
-- [ ] [NamedNodeMap.getNamedItemNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-namednodemap-getnameditemns) — The getNamedItemNS(namespace, localName) method steps are to return the result of getting an attribute given namespace, localName, and element.
+- [x] [NamedNodeMap.getNamedItemNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-namednodemap-getnameditemns) — The getNamedItemNS(namespace, localName) method steps are to return the result of getting an attribute given namespace, localName, and element.
 
-- [ ] [NamedNodeMap.setNamedItem(attr)](https://dom.spec.whatwg.org/#dom-namednodemap-setnameditem) — The setNamedItem(attr) and setNamedItemNS(attr) method steps are to return the result of setting an attribute given attr and element.
+- [x] [NamedNodeMap.setNamedItem(attr)](https://dom.spec.whatwg.org/#dom-namednodemap-setnameditem) — The setNamedItem(attr) and setNamedItemNS(attr) method steps are to return the result of setting an attribute given attr and element.
 
-- [ ] [NamedNodeMap.removeNamedItem(qualifiedName)](https://dom.spec.whatwg.org/#dom-namednodemap-removenameditem) — The removeNamedItem(qualifiedName) method steps are:
+- [x] [NamedNodeMap.removeNamedItem(qualifiedName)](https://dom.spec.whatwg.org/#dom-namednodemap-removenameditem) — The removeNamedItem(qualifiedName) method steps are:
   - 1. Let attr be the result of removing an attribute given qualifiedName and element.
   - 2. If attr is null, then throw a "NotFoundError" DOMException.
   - 3. Return attr.
 
-- [ ] [NamedNodeMap.removeNamedItemNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-namednodemap-removenameditemns) — The removeNamedItemNS(namespace, localName) method steps are:
+- [x] [NamedNodeMap.removeNamedItemNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-namednodemap-removenameditemns) — The removeNamedItemNS(namespace, localName) method steps are:
   - 1. Let attr be the result of removing an attribute given namespace, localName, and element.
   - 2. If attr is null, then throw a "NotFoundError" DOMException.
   - 3. Return attr.

@@ -5,12 +5,14 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include <ranges>
 
 namespace krys::boo::dom
 {
   size_t NamedNodeMap::Length() const noexcept
   {
+    // Return the attribute list's size.
     _associatedElement->SynchronizeAllAttributes();
     return _associatedElement->_attributes.size();
   }
@@ -18,6 +20,8 @@ namespace krys::boo::dom
   RefPtr<Attr> NamedNodeMap::Item(size_t index) noexcept
   {
     _associatedElement->SynchronizeAllAttributes();
+    // 1. If index is equal to or greater than this's attribute list's size, then return null.
+    // 2. Otherwise, return this's attribute list[index].
     if (index < _associatedElement->_attributes.size())
     {
       return _associatedElement->_attributes[index];
@@ -68,12 +72,15 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. Let attr be the result of removing an attribute given qualifiedName and element.
     auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *_associatedElement);
+    // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
+    // 3. Return attr.
     return ShareRef(*attr);
   }
 
@@ -81,12 +88,15 @@ namespace krys::boo::dom
                                                          DOMStringAtom localName) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. Let attr be the result of removing an attribute given namespace, localName, and element.
     auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *_associatedElement);
+    // 2. If attr is null, then throw a "NotFoundError" DOMException.
     if (attr == nullptr)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
+    // 3. Return attr.
     return ShareRef(*attr);
   }
 
@@ -112,26 +122,30 @@ namespace krys::boo::dom
 
   List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept
   {
+    // 1. Let names be the qualified names of the attributes in this NamedNodeMap object's attribute list,
+    //    with duplicates omitted, in order.
     _associatedElement->SynchronizeAllAttributes();
-    auto names = std::ranges::views::transform(_associatedElement->_attributes,
-                                               [](const Ref<Attr> &attr) { return attr->Name(); })
-                 | std::ranges::to<List<DOMString>>();
+    List<DOMString> names;
+    for (auto &attr : _associatedElement->_attributes)
+    {
+      auto name = attr->Name();
+      if (std::ranges::find(names, name) == names.end())
+      {
+        names.push_back(krys::move(name));
+      }
+    }
 
+    // 2. If this NamedNodeMap object's element is in the HTML namespace and its node document is an HTML
+    //    document, then for each name of names:
     if (_associatedElement->NamespaceURI() == infra::Namespaces::HTML
         && Is<HTMLDocument>(_associatedElement->NodeDocument()))
     {
-      List<DOMString> newNames;
-      for (auto &name : names)
-      {
-        if (name == krys::text::ToASCIILower(name))
-        {
-          newNames.push_back(name);
-        }
-      }
-
-      return newNames;
+      // 2a. Let lowercaseName be name, in ASCII lowercase.
+      // 2b. If lowercaseName is not equal to name, remove name from names.
+      std::erase_if(names, [](const DOMString &name) { return name != krys::text::ToASCIILower(name); });
     }
 
+    // 3. Return names.
     return names;
   }
 }

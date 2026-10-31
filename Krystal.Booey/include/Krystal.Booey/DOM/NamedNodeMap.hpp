@@ -15,12 +15,15 @@ namespace krys::boo::dom
   class Attr;
   class Element;
 
+  /// @brief A live view of an element's attribute list.
   /// @see https://dom.spec.whatwg.org/#interface-namednodemap
+  /// @see https://dom.spec.whatwg.org/#concept-namednodemap-attribute
   class NamedNodeMap
   {
     friend class Element;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#concept-namednodemap-element
     CheckedRef<Element> _associatedElement;
 
     explicit NamedNodeMap(Element &associatedElement) noexcept
@@ -77,9 +80,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-namednodemap-getnameditem
     KRYS_NODISCARD RefPtr<const Attr> operator[](DOMStringAtom qualifiedName) const noexcept;
 
-  protected:
+    /// @brief The attributes' qualified names, without duplicates, leaving out those with uppercase ASCII
+    /// letters for an HTML element in an HTML document.
+    /// @see https://dom.spec.whatwg.org/#dom-namednodemap-item
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-names
-    KRYS_NODISCARD virtual List<DOMString> SupportedPropertyNames() const noexcept;
+    KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept;
 
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
