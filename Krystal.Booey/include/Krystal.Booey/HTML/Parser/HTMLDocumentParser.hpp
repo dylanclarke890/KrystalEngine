@@ -29,11 +29,20 @@ namespace krys::boo::html
   public:
     HTMLDocumentParser(dom::HTMLDocument &document) noexcept;
 
+    /// @brief Parses @p input as the children of @p target, an element or a shadow root (whose host is then
+    /// the context).
     /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
-    KRYS_NODISCARD static dom::SmallNodeList
-      ParseFragment(dom::Element &contextElement, utf8_string &&input,
-                    bool allowDeclarativeShadowRoots = false,
-                    ParserScriptingMode scriptingMode = ParserScriptingMode::Inert) noexcept;
+    KRYS_NODISCARD static Ref<dom::DocumentFragment>
+      ParseFragment(dom::ContainerNode &target, utf8_string &&input, bool allowDeclarativeShadowRoots = false,
+                    ParserScriptingMode scriptingMode = ParserScriptingMode::Inert,
+                    Maybe<SanitizerConfig> &&configuration = null) noexcept;
+
+    /// @brief Sets the parser sanitizer configuration; null for none.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-sanitizer-configuration
+    void SanitizerConfiguration(Maybe<SanitizerConfig> &&configuration) noexcept
+    {
+      _treeBuilder.SanitizerConfiguration(krys::move(configuration));
+    }
 
     void PumpTokenizer() noexcept;
 

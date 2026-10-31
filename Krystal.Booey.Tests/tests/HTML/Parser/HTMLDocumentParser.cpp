@@ -261,9 +261,9 @@ namespace krys::boo::html::tests
           *element, utf8_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
         output = u8"#document\n";
-        for (auto &child : result)
+        for (dom::Node &child : dom::ChildNodeRange(*result))
         {
-          SerialiseNode(*child, output, 0uz);
+          SerialiseNode(child, output, 0uz);
         }
         krys::boo::tests::NormaliseData(output);
       }

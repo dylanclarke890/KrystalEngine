@@ -607,6 +607,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DocumentFragment.cpp
 		tests/DOM/DocumentType.cpp
 		tests/DOM/DOMParsing.cpp
+		tests/DOM/HTMLInsertionMethods.cpp
 		tests/DOM/DOMImplementation.cpp
 		tests/DOM/DOMTokenList.cpp
 		tests/DOM/Element.cpp
@@ -656,6 +657,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLAnchorElement.cpp
+		tests/HTML/Sanitizer.cpp
 		tests/HTML/HTMLButtonElement.cpp
 		tests/HTML/HTMLDetailsElement.cpp
 		tests/HTML/HTMLDialogElement.cpp

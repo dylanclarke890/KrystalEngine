@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonDocumentTypeChildNode.hpp"
+#include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Core/Utils/Move.hpp"
 
@@ -74,6 +75,52 @@ namespace krys::boo::dom
   {
     html::CEReactionsScope ceReactions;
     return mixins::ChildNode::Remove(*this);
+  }
+
+  ExceptionOr<void> CharacterData::BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
+                                                     html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> CharacterData::AfterHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
+                                                    html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> CharacterData::ReplaceWithHTML(DOMStringView html,
+                                                   html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
+                                                          html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> CharacterData::BeforeHTMLUnsafe(DOMStringView html,
+                                                    html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::BeforeHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> CharacterData::AfterHTMLUnsafe(DOMStringView html,
+                                                   html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::AfterHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> CharacterData::ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                         html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
 #pragma endregion

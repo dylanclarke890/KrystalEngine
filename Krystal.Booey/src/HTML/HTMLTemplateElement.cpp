@@ -10,6 +10,8 @@ namespace krys::boo::html
       : HTMLElement(document, HTMLElementInterface::Template),
         _content(CreateRef<dom::DocumentFragment>(document))
   {
+    // The template contents' host is the template element.
+    _content->SetHost(*this);
   }
 
 #pragma region HTMLTemplateElement
@@ -18,6 +20,11 @@ namespace krys::boo::html
   {
     assert(!Is<dom::ShadowRoot>(_content.get()));
     return _content;
+  }
+
+  void HTMLTemplateElement::SetTemplateContents(dom::ShadowRoot &shadow) noexcept
+  {
+    _content = ShareRef<dom::DocumentFragment>(shadow);
   }
 
   dom::DOMString HTMLTemplateElement::ShadowRootMode() const noexcept

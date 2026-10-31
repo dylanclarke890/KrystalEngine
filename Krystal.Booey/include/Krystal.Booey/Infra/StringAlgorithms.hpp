@@ -241,5 +241,47 @@ namespace krys::boo::infra
 
       return true;
     }
+
+    /// @brief Whether @p a sorts before @p b by their UTF-16 code units, given their UTF-8 forms.
+    /// @see https://infra.spec.whatwg.org/#code-unit-less-than
+    KRYS_NODISCARD static bool CodeUnitLessThan(dom::DOMStringView a, dom::DOMStringView b) noexcept
+    {
+      auto [aIt, bIt] = std::ranges::mismatch(a, b);
+      if (bIt == b.end())
+      {
+        return false;
+      }
+      if (aIt == a.end())
+      {
+        return true;
+      }
+
+      // UTF-8 sorts by code point, which matches UTF-16 except that supplementary code points (surrogate
+      // pairs in UTF-16) sort before U+E000 to U+FFFF.
+      auto i = static_cast<size_t>(aIt - a.begin());
+      while (i > 0 && (static_cast<uint8>(a[i]) & 0xC0) == 0x80)
+      {
+        --i;
+      }
+      auto aLead = static_cast<uint8>(a[i]);
+      auto bLead = static_cast<uint8>(b[i]);
+      auto isSupplementary = [](uint8 lead)
+      {
+        return lead >= 0xF0;
+      };
+      auto isUpperBMP = [](uint8 lead)
+      {
+        return lead == 0xEE || lead == 0xEF;
+      };
+      if (isSupplementary(aLead) && isUpperBMP(bLead))
+      {
+        return true;
+      }
+      if (isUpperBMP(aLead) && isSupplementary(bLead))
+      {
+        return false;
+      }
+      return static_cast<uint8>(*aIt) < static_cast<uint8>(*bIt);
+    }
   };
 }

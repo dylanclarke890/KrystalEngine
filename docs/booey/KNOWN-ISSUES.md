@@ -8,7 +8,6 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 ### Missing
 
-- No Sanitizer API: no `setHTML()`, and `Document::ParseHTML` is a stub.
 - Responses (`ResourceResponse`) have no HTTP headers, so there's no `document.lastModified` (it needs `Last-Modified`, or a file's modification date for file loads) and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
 - `title` is never shown: there's no `HitTestResult::Title`, no tooltip hook on the chrome client (upstream's `Chrome::getToolTip` and `mouseDidMoveOverElement`), and Krystal.UI draws no tooltips.
 - No Fullscreen API (`:fullscreen`).
@@ -34,7 +33,8 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 ### Missing
 
 - Parse errors aren't reported (no console, FIXME in `HTMLTreeBuilder.cpp`).
-- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: the rest of `<template>` start-tag handling in "in head" (so no declarative shadow roots are attached, even by `setHTMLUnsafe()` and `parseHTMLUnsafe()`; test: `setHTMLUnsafe and parseHTMLUnsafe attach declarative shadow roots`, `[!shouldfail]`), script end tags in "text", the stop-parsing steps, the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
+- Unimplemented tree builder steps, all FIXMEs in `HTMLTreeBuilder.cpp`: content patching (a `<template for>` is inserted as a plain template, and there are no template insertion targets), script end tags in "text", the stop-parsing steps, the `xmlns` attribute parse error, the throw-on-dynamic-markup-insertion counter, and resetting resettable elements on creation.
+- The tokenizer has no processing instruction tokens (`<?target data?>` is still a bogus comment, as before the specification added them), so the parser never creates processing instructions and a sanitizer configuration's processing instruction lists only affect its own methods.
 - The tree builder does not give form-associated elements their parser form owner on creation: `FormAssociatedElement::SetFormSetByParser` exists but nothing calls it (FIXME in `HTMLTreeBuilder.cpp`).
 
 ## HTML elements and forms

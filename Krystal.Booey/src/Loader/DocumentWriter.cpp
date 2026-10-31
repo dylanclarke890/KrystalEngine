@@ -77,6 +77,8 @@ namespace krys::boo
     // FIXME: Reusing the initial empty document's window for a document of the same origin
     // (takeDOMWindowFrom), once there are origins.
     auto document = dom::DOMImplementation::CreateDocument(_mimeType, url);
+    // A document created by navigation allows declarative shadow roots.
+    document->SetAllowDeclarativeShadowRoots(true);
     // The writer decodes UTF-8 only.
     document->SetEncoding(*EncodingRegistry().Find(u8"utf-8"));
 
