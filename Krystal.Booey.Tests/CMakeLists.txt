@@ -589,6 +589,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
 		tests/DOM/Algorithms/MutationObserverAlgorithms.cpp
 		tests/DOM/Algorithms/NameValidation.cpp
+		tests/DOM/Algorithms/NodeAlgorithms.cpp
 		tests/DOM/Algorithms/OrderedSet.cpp
 		tests/DOM/Algorithms/SlotAlgorithms.cpp
 		tests/DOM/Algorithms/TreeQueries.cpp
@@ -680,6 +681,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLSelectElement.cpp
 		tests/HTML/HTMLSlotElement.cpp
 		tests/HTML/HTMLTableElement.cpp
+		tests/HTML/HTMLTemplateElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp

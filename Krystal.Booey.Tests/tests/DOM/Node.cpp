@@ -3,14 +3,18 @@
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -51,20 +55,78 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Node::NodeType", "[HTML][Node][dom:concept-node]")
+  TEST_CASE("Create a node: a new node belongs to the document it's created with",
+            "[DOM][Node][dom:interface-node][dom:create-a-node][dom:concept-node-document]")
   {
-    CommonTestData data {};
-    REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
+    auto document = CreateRef<HTMLDocument>();
+    CHECK(&document->NodeDocument() == document.get());
+    CHECK(&document->CreateElement(u8"div").ReleaseValue()->NodeDocument() == document.get());
+    CHECK(&document->CreateTextNode(u8"text")->NodeDocument() == document.get());
+    CHECK(&document->CreateAttribute(u8"a").ReleaseValue()->NodeDocument() == document.get());
+    CHECK(&document->CreateDocumentFragment()->NodeDocument() == document.get());
   }
 
-  // FIXME: Requires implementing URL and base URL support in Document.
-  // TEST_CASE("Node::BaseURI", "[HTML][Node]")
-  // {
-  //   CommonTestData data {};
-  //   REQUIRE(data.Node->BaseURI() == u8"about:blank");
-  // }
+  TEST_CASE(
+    "Node.nodeType: each interface's constant",
+    "[DOM][Node][dom:dom-node-nodetype][dom:dom-node-element_node][dom:dom-node-attribute_node]"
+    "[dom:dom-node-text_node][dom:dom-node-cdata_section_node][dom:dom-node-processing_instruction_node]"
+    "[dom:dom-node-comment_node][dom:dom-node-document_node][dom:dom-node-document_type_node]"
+    "[dom:dom-node-document_fragment_node]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    CHECK(document->CreateElement(u8"a").ReleaseValue()->NodeType() == NodeType::ELEMENT_NODE);
+    CHECK(document->CreateAttribute(u8"a").ReleaseValue()->NodeType() == NodeType::ATTRIBUTE_NODE);
+    CHECK(document->CreateTextNode(u8"a")->NodeType() == NodeType::TEXT_NODE);
+    CHECK(document->CreateCDATASection(u8"a").ReleaseValue()->NodeType() == NodeType::CDATA_SECTION_NODE);
+    CHECK(document->CreateProcessingInstruction(u8"a", u8"b").ReleaseValue()->NodeType()
+          == NodeType::PROCESSING_INSTRUCTION_NODE);
+    CHECK(document->CreateComment(u8"a")->NodeType() == NodeType::COMMENT_NODE);
+    CHECK(document->NodeType() == NodeType::DOCUMENT_NODE);
+    CHECK(document->Implementation().CreateDocumentType(u8"a", u8"", u8"").ReleaseValue()->NodeType()
+          == NodeType::DOCUMENT_TYPE_NODE);
+    CHECK(document->CreateDocumentFragment()->NodeType() == NodeType::DOCUMENT_FRAGMENT_NODE);
 
-  TEST_CASE("Connected: a node whose shadow-including root is a document", "[DOM][Node][dom:connected]")
+    CHECK(std::to_underlying(NodeType::ELEMENT_NODE) == 1);
+    CHECK(std::to_underlying(NodeType::ATTRIBUTE_NODE) == 2);
+    CHECK(std::to_underlying(NodeType::TEXT_NODE) == 3);
+    CHECK(std::to_underlying(NodeType::CDATA_SECTION_NODE) == 4);
+    CHECK(std::to_underlying(NodeType::PROCESSING_INSTRUCTION_NODE) == 7);
+    CHECK(std::to_underlying(NodeType::COMMENT_NODE) == 8);
+    CHECK(std::to_underlying(NodeType::DOCUMENT_NODE) == 9);
+    CHECK(std::to_underlying(NodeType::DOCUMENT_TYPE_NODE) == 10);
+    CHECK(std::to_underlying(NodeType::DOCUMENT_FRAGMENT_NODE) == 11);
+  }
+
+  TEST_CASE("Node.nodeName: a Document's is #document", "[DOM][Node][dom:dom-node-nodename]")
+  {
+    CHECK(CreateRef<Document>()->NodeName() == u8"#document");
+    CHECK(CreateRef<HTMLDocument>()->NodeName() == u8"#document");
+  }
+
+  TEST_CASE("Node.baseURI: the node document's base URL, serialised", "[DOM][Node][dom:dom-node-baseuri]")
+  {
+    SECTION("the document's URL without a base element")
+    {
+      auto document = CreateRef<Document>();
+      auto element = CreateRef<TestElement>(*document);
+      CHECK(element->BaseURI() == u8"about:blank");
+      document->SetURL(url::URL(u8"https://example.test/a/b?c"));
+      CHECK(element->BaseURI() == u8"https://example.test/a/b?c");
+      CHECK(document->BaseURI() == u8"https://example.test/a/b?c");
+    }
+
+    SECTION("a base element's URL")
+    {
+      auto context = CreateRef<HTMLDocument>();
+      auto document =
+        Document::ParseHTMLUnsafe(*context, u8"<!DOCTYPE html><base href='https://example.test/dir/'><p>")
+          .ReleaseValue();
+      CHECK(document->BaseURI() == u8"https://example.test/dir/");
+    }
+  }
+
+  TEST_CASE("Connected: a node whose shadow-including root is a document",
+            "[DOM][Node][dom:connected][dom:dom-node-isconnected]")
   {
     SECTION("A document and its descendants")
     {
@@ -102,7 +164,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Node::OwnerDocument", "[HTML][Node]")
+  TEST_CASE("Node.ownerDocument: the node document, or null for a document",
+            "[DOM][Node][dom:dom-node-ownerdocument]")
   {
     CommonTestData data {};
 
@@ -110,7 +173,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Document->OwnerDocument() == nullptr);
   }
 
-  TEST_CASE("Node::GetRootNode", "[HTML][Node]")
+  TEST_CASE("Node.getRootNode(): the root, or the shadow-including root when composed",
+            "[DOM][Node][dom:dom-node-getrootnode]")
   {
     CommonTestData data {};
 
@@ -122,11 +186,14 @@ namespace krys::boo::dom::tests
     REQUIRE(&data.Node->GetRootNode({.Composed = false}) == data.Document.get());
     REQUIRE(&data.Node->GetRootNode({.Composed = true}) == data.Document.get());
 
-    // FIXME: Shadow DOM - test that GetRootNode({.Composed = true}) returns the shadow root when the
-    // node is in a shadow tree.
+    auto shadow = data.Node->AttachShadow({}).ReleaseValue();
+    auto inShadow = CreateRef<TestElement>(*data.Document);
+    REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+    CHECK(&inShadow->GetRootNode({.Composed = false}) == shadow.get());
+    CHECK(&inShadow->GetRootNode({.Composed = true}) == data.Document.get());
   }
 
-  TEST_CASE("Node::ParentNode", "[HTML][Node]")
+  TEST_CASE("Node.parentNode: the parent", "[DOM][Node][dom:dom-node-parentnode]")
   {
     CommonTestData data {};
 
@@ -142,7 +209,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(div->Remove().HasException());
   }
 
-  TEST_CASE("Node::ParentElement", "[HTML][Node]")
+  TEST_CASE("Node.parentElement: the parent if it's an element", "[DOM][Node][dom:dom-node-parentelement]")
   {
     CommonTestData data {};
     REQUIRE(data.Node->ParentElement() == nullptr);
@@ -157,7 +224,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(div->Remove().HasException());
   }
 
-  TEST_CASE("Node::HasChildNodes", "[HTML][Node]")
+  TEST_CASE("Node.hasChildNodes(): whether there are children", "[DOM][Node][dom:dom-node-haschildnodes]")
   {
     CommonTestData data {true};
     REQUIRE_FALSE(data.Node->HasChildNodes());
@@ -172,7 +239,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(child->Remove().HasException());
   }
 
-  TEST_CASE("Node::ChildNodes", "[HTML][Node]")
+  TEST_CASE("Node.childNodes: a live list of the children, the same each time",
+            "[DOM][Node][dom:dom-node-childnodes]")
   {
     CommonTestData data {true};
     auto childA = CreateRef<TestElement>(*data.Document);
@@ -180,6 +248,7 @@ namespace krys::boo::dom::tests
     auto childC = CreateRef<TestElement>(*data.Document);
 
     Ref<NodeList> childNodes = data.Node->ChildNodes();
+    CHECK(data.Node->ChildNodes().get() == childNodes.get());
 
     REQUIRE(childNodes->Length() == 0uz);
     REQUIRE(childNodes->Item(0uz) == nullptr);
@@ -210,7 +279,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("FirstChild: the first child, or null without children",
-            "[HTML][Node][dom:concept-tree-first-child][dom:dom-node-firstchild]")
+            "[DOM][Node][dom:concept-tree-first-child][dom:dom-node-firstchild]")
   {
     CommonTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
@@ -230,7 +299,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("LastChild: the last child, or null without children",
-            "[HTML][Node][dom:concept-tree-last-child][dom:dom-node-lastchild]")
+            "[DOM][Node][dom:concept-tree-last-child][dom:dom-node-lastchild]")
   {
     CommonTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
@@ -250,7 +319,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("NextSibling and PreviousSibling: the adjacent siblings, or null at either end",
-            "[HTML][Node][dom:concept-tree-next-sibling][dom:concept-tree-previous-sibling]"
+            "[DOM][Node][dom:concept-tree-next-sibling][dom:concept-tree-previous-sibling]"
             "[dom:dom-node-nextsibling][dom:dom-node-previoussibling]")
   {
     CommonTestData data {true};
@@ -282,141 +351,169 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*sibling3).HasException());
   }
 
-  TEST_CASE("Node::NodeValue", "[HTML][Node]")
+  TEST_CASE("Node.nodeValue and textContent: null for a document or doctype, and setting them does nothing",
+            "[DOM][Node][dom:dom-node-nodevalue][dom:dom-node-textcontent][dom:get-text-content]"
+            "[dom:set-text-content]")
   {
-    // Does nothing for base nodes.
+    auto document = CreateRef<HTMLDocument>();
+    auto doctype = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*doctype).HasException());
+    REQUIRE_FALSE(document->AppendChild(*document->CreateElement(u8"html").ReleaseValue()).HasException());
 
-    CommonTestData data {};
-    REQUIRE(data.Node->NodeValue() == null);
-
-    REQUIRE_FALSE(data.Node->NodeValue(u8"test value").HasException());
-
-    REQUIRE(data.Node->NodeValue() == null);
+    for (Node *node : {static_cast<Node *>(document.get()), static_cast<Node *>(doctype.get())})
+    {
+      CHECK(node->NodeValue() == null);
+      CHECK(node->TextContent() == null);
+      REQUIRE_FALSE(node->NodeValue(u8"value").HasException());
+      REQUIRE_FALSE(node->TextContent(u8"value").HasException());
+      CHECK(node->NodeValue() == null);
+      CHECK(node->TextContent() == null);
+    }
+    CHECK(document->ChildNodes()->Length() == 2u);
   }
 
-  // NOTE: TextContent is tested in the tests for the derived classes that override it, so we don't need to
-  // test it here.
-
-  TEST_CASE("Node::Normalize", "[HTML][Node]")
+  TEST_CASE("Node.nodeValue: null for an element or fragment, and setting it does nothing",
+            "[DOM][Node][dom:dom-node-nodevalue]")
   {
     CommonTestData data {};
+    auto fragment = data.Document->CreateDocumentFragment();
+
+    for (Node *node : {static_cast<Node *>(data.Node.get()), static_cast<Node *>(fragment.get())})
+    {
+      REQUIRE(node->NodeValue() == null);
+      REQUIRE_FALSE(node->NodeValue(u8"test value").HasException());
+      REQUIRE(node->NodeValue() == null);
+      CHECK_FALSE(node->HasChildNodes());
+    }
+  }
+
+  TEST_CASE("Node.normalize(): empty exclusive Text nodes go, and contiguous ones merge into the first",
+            "[DOM][Node][dom:dom-node-normalize]")
+  {
+    CommonTestData data {};
+    auto text = [&](DOMString &&value)
+    {
+      return CreateRef<dom::Text>(*data.Document, krys::move(value));
+    };
+    auto childData = [](Node &parent)
+    {
+      List<DOMString> values;
+      for (auto *child = parent.FirstChild(); child; child = child->NextSibling())
+      {
+        values.push_back(child->NodeValue().value_or(child->NodeName()));
+      }
+      return values;
+    };
 
     SECTION("no children")
     {
       REQUIRE_FALSE(data.Node->Normalize().HasException());
+      CHECK_FALSE(data.Node->HasChildNodes());
     }
 
-    SECTION("With only an empty text node")
+    SECTION("an empty text node is removed")
     {
-      auto emptyTextNode = CreateRef<dom::Text>(*data.Document);
-      REQUIRE_FALSE(data.Node->AppendChild(*emptyTextNode).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"")).HasException());
+      REQUIRE_FALSE(data.Node->Normalize().HasException());
+      CHECK_FALSE(data.Node->HasChildNodes());
+    }
+
+    SECTION("contiguous text nodes merge into the first")
+    {
+      auto first = text(u8"Hello");
+      REQUIRE_FALSE(data.Node->AppendChild(*first).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8" ")).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"world")).HasException());
 
       REQUIRE_FALSE(data.Node->Normalize().HasException());
-      REQUIRE(data.Node->FirstChild() == nullptr); // was removed by normalization since it was empty.
+      CHECK(data.Node->FirstChild() == first.get());
+      CHECK(childData(*data.Node) == List<DOMString> {u8"Hello world"});
     }
 
-    SECTION("with children")
+    SECTION("an empty text node doesn't end the walk")
     {
-      auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");
-      auto textNode2 = CreateRef<dom::Text>(*data.Document, u8" world!");
-
-      REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
-
-      REQUIRE_FALSE(data.Node->AppendChild(*textNode2).HasException());
-
-      REQUIRE_FALSE(textNode1->NodeValue(u8"test").HasException());
-      REQUIRE_FALSE(textNode2->NodeValue(u8" value").HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"")).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"a")).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"b")).HasException());
+      auto inner = CreateRef<TestElement>(*data.Document);
+      REQUIRE_FALSE(inner->AppendChild(*text(u8"")).HasException());
+      REQUIRE_FALSE(inner->AppendChild(*text(u8"c")).HasException());
+      REQUIRE_FALSE(inner->AppendChild(*text(u8"d")).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*inner).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"e")).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*text(u8"")).HasException());
 
       REQUIRE_FALSE(data.Node->Normalize().HasException());
-
-      REQUIRE(data.Node->FirstChild() == textNode1.get());
-      REQUIRE(data.Node->LastChild() == textNode1.get());
-      REQUIRE(data.Node->FirstChild()->NodeValue() == u8"test value");
-
-      REQUIRE_FALSE(textNode1->Remove().HasException());
+      CHECK(childData(*data.Node) == List<DOMString> {u8"ab", u8"test-element", u8"e"});
+      CHECK(childData(*inner) == List<DOMString> {u8"cd"});
     }
+
+    SECTION("CDATA sections aren't exclusive Text nodes")
+    {
+      auto document = CreateRef<XMLDocument>();
+      auto element = document->CreateElement(u8"e").ReleaseValue();
+      REQUIRE_FALSE(element->AppendChild(*document->CreateTextNode(u8"a")).HasException());
+      REQUIRE_FALSE(element->AppendChild(*document->CreateCDATASection(u8"b").ReleaseValue()).HasException());
+      REQUIRE_FALSE(element->AppendChild(*document->CreateTextNode(u8"c")).HasException());
+      REQUIRE_FALSE(element->Normalize().HasException());
+      CHECK(element->ChildNodes()->Length() == 3u);
+    }
+
+    SECTION("live ranges in the merged nodes move into the first")
+    {
+      auto first = text(u8"ab");
+      auto second = text(u8"cd");
+      auto third = text(u8"ef");
+      REQUIRE_FALSE(data.Node->AppendChild(*first).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*second).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*third).HasException());
+
+      // 6a. and 6b. Boundary points in a merged node.
+      auto inText = data.Document->CreateRange();
+      REQUIRE_FALSE(inText->SetStart(*second, 1).HasException());
+      REQUIRE_FALSE(inText->SetEnd(*third, 2).HasException());
+
+      // 6c. and 6d. Boundary points in the parent, before a merged node.
+      auto inParent = data.Document->CreateRange();
+      REQUIRE_FALSE(inParent->SetStart(*data.Node, 1).HasException());
+      REQUIRE_FALSE(inParent->SetEnd(*data.Node, 2).HasException());
+
+      REQUIRE_FALSE(data.Node->Normalize().HasException());
+      CHECK(inText->StartContainer() == first.get());
+      CHECK(inText->StartOffset() == 3u);
+      CHECK(inText->EndContainer() == first.get());
+      CHECK(inText->EndOffset() == 6u);
+      CHECK(inParent->StartContainer() == first.get());
+      CHECK(inParent->StartOffset() == 2u);
+      CHECK(inParent->EndContainer() == first.get());
+      CHECK(inParent->EndOffset() == 4u);
+    }
+
+    REQUIRE_FALSE(data.Node->TextContent(u8"").HasException());
   }
 
-  TEST_CASE("Node::CloneNode", "[HTML][Node]")
+  TEST_CASE("Node.cloneNode(): a clone of the node, and of its subtree if asked, but never of a shadow root",
+            "[DOM][Node][dom:dom-node-clonenode]")
   {
-    auto document = CreateRef<Document>();
+    auto document = CreateRef<HTMLDocument>();
+    auto element = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(element->AppendChild(*document->CreateTextNode(u8"text")).HasException());
 
-    SECTION("Element")
-    {
-      // FIXME: Cloning an element
-    }
+    auto shallow = element->CloneNode().ReleaseValue();
+    CHECK(shallow.get() != element.get());
+    CHECK_FALSE(shallow->HasChildNodes());
 
-    SECTION("Document")
-    {
-      // FIXME: Cloning a document
-    }
+    auto deep = element->CloneNode(true).ReleaseValue();
+    CHECK(deep->IsEqualNode(element.get()));
 
-    SECTION("DocumentType")
-    {
-      auto doctype = *document->Implementation().CreateDocumentType(u8"html", u8"public-id", u8"system-id");
-
-      auto clone = doctype->CloneNode();
-      REQUIRE(clone.HasValue());
-
-      auto &doctypeClone = Downcast<DocumentType>(*clone.Value());
-      REQUIRE(doctypeClone.Name() == u8"html");
-      REQUIRE(doctypeClone.PublicId() == u8"public-id");
-      REQUIRE(doctypeClone.SystemId() == u8"system-id");
-    }
-
-    SECTION("Attr")
-    {
-      auto attribute = document->CreateAttributeNS(infra::Namespaces::XML, u8"xml:name");
-      REQUIRE_FALSE(attribute.HasException());
-      attribute->Value(u8"value");
-
-      auto clone = attribute->CloneNode();
-
-      auto &attributeClone = Downcast<Attr>(*clone.Value());
-      REQUIRE(attributeClone.NamespaceURI() == infra::Namespaces::XML);
-      REQUIRE(attributeClone.LocalName() == u8"name");
-      REQUIRE(attributeClone.Prefix() == u8"xml");
-      REQUIRE(attributeClone.Value() == u8"value");
-    }
-
-    SECTION("Text")
-    {
-      auto textNode = CreateRef<dom::Text>(*document, u8"text");
-
-      auto clone = textNode->CloneNode();
-      REQUIRE(clone.HasValue());
-
-      auto &textNodeClone = Downcast<dom::Text>(*clone.Value());
-      REQUIRE(textNodeClone.Data() == u8"text");
-    }
-
-    SECTION("Comment")
-    {
-      auto comment = CreateRef<dom::Comment>(*document, u8"text");
-
-      auto clone = comment->CloneNode();
-      REQUIRE(clone.HasValue());
-
-      auto &commentClone = Downcast<dom::Comment>(*clone.Value());
-      REQUIRE(commentClone.Data() == u8"text");
-    }
-
-    SECTION("ProcessingInstruction")
-    {
-      auto processingInstruction = document->CreateProcessingInstruction(u8"target", u8"data");
-
-      auto clone = processingInstruction->CloneNode();
-      REQUIRE(clone.HasValue());
-
-      REQUIRE(clone->NodeType() == NodeType::PROCESSING_INSTRUCTION_NODE);
-      auto &processingInstructionClone = Downcast<dom::ProcessingInstruction>(*clone.Value());
-
-      REQUIRE(processingInstructionClone.Target() == u8"target");
-      REQUIRE(processingInstructionClone.Data() == u8"data");
-    }
+    auto shadow = element->AttachShadow({.Clonable = Clonable(true)}).ReleaseValue();
+    auto result = shadow->CloneNode(true);
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
   }
 
-  TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
+  TEST_CASE("Node.isEqualNode(): false for null, else whether the nodes are equal",
+            "[DOM][Node][dom:dom-node-isequalnode]")
   {
     CommonTestData data {};
     auto equalNode = CreateRef<TestElement>(*data.Document);
@@ -424,103 +521,31 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->IsEqualNode(nullptr));
     REQUIRE(data.Node->IsEqualNode(data.Node.get()));
     REQUIRE(data.Node->IsEqualNode(equalNode.get()));
-
-    auto create = [&data]
-    {
-      auto element = data.Document->CreateElement(u8"div");
-      REQUIRE_FALSE(element.HasException());
-      return element.ReleaseValue();
-    };
-    auto setAttribute = [](Element &element, DOMStringAtom name, DOMString &&value)
-    {
-      REQUIRE_FALSE(element.SetAttribute(name, krys::move(value)).HasException());
-    };
-
-    SECTION("Attributes in a different order")
-    {
-      auto a = create();
-      auto b = create();
-      setAttribute(*a, u8"x", u8"1");
-      setAttribute(*a, u8"y", u8"2");
-      setAttribute(*b, u8"y", u8"2");
-      setAttribute(*b, u8"x", u8"1");
-      CHECK(a->IsEqualNode(b.get()));
-      CHECK(b->IsEqualNode(a.get()));
-    }
-
-    SECTION("An attribute with a different value")
-    {
-      auto a = create();
-      auto b = create();
-      setAttribute(*a, u8"x", u8"1");
-      setAttribute(*b, u8"x", u8"2");
-      CHECK_FALSE(a->IsEqualNode(b.get()));
-    }
-
-    SECTION("An extra attribute")
-    {
-      auto a = create();
-      auto b = create();
-      setAttribute(*a, u8"x", u8"1");
-      setAttribute(*b, u8"x", u8"1");
-      setAttribute(*b, u8"y", u8"2");
-      CHECK_FALSE(a->IsEqualNode(b.get()));
-      CHECK_FALSE(b->IsEqualNode(a.get()));
-    }
-
-    SECTION("An attribute in another namespace")
-    {
-      auto a = create();
-      auto b = create();
-      setAttribute(*a, u8"x", u8"1");
-      REQUIRE_FALSE(b->SetAttributeNS(DOMStringAtom(u8"urn:x"), u8"p:x", u8"1").HasException());
-      CHECK_FALSE(a->IsEqualNode(b.get()));
-      CHECK_FALSE(b->IsEqualNode(a.get()));
-    }
-
-    SECTION("An extra child")
-    {
-      auto a = create();
-      auto b = create();
-      REQUIRE_FALSE(a->AppendChild(*create()).HasException());
-      REQUIRE_FALSE(b->AppendChild(*create()).HasException());
-      REQUIRE_FALSE(a->AppendChild(*data.Document->CreateTextNode(u8"t")).HasException());
-      CHECK_FALSE(a->IsEqualNode(b.get()));
-      CHECK_FALSE(b->IsEqualNode(a.get()));
-    }
-
-    SECTION("Children's attributes")
-    {
-      auto a = create();
-      auto b = create();
-      auto aChild = create();
-      auto bChild = create();
-      setAttribute(*aChild, u8"x", u8"1");
-      setAttribute(*bChild, u8"x", u8"1");
-      REQUIRE_FALSE(a->AppendChild(*aChild).HasException());
-      REQUIRE_FALSE(b->AppendChild(*bChild).HasException());
-      CHECK(a->IsEqualNode(b.get()));
-      setAttribute(*bChild, u8"x", u8"2");
-      CHECK_FALSE(a->IsEqualNode(b.get()));
-    }
+    REQUIRE_FALSE(data.Node->IsEqualNode(data.Document.get()));
   }
 
-  TEST_CASE("Node::IsSameNode", "[HTML][Node]")
+  TEST_CASE("Node.isSameNode(): whether the other node is this one", "[DOM][Node][dom:dom-node-issamenode]")
   {
     CommonTestData data {};
 
     REQUIRE_FALSE(data.Node->IsSameNode(nullptr));
     REQUIRE(data.Node->IsSameNode(data.Node.get()));
     REQUIRE_FALSE(data.Node->IsSameNode(data.Document.get()));
+    REQUIRE_FALSE(data.Node->IsSameNode(CreateRef<TestElement>(*data.Document).get()));
   }
 
-  TEST_CASE("Node::CompareDocumentPosition", "[HTML][Node]")
+  TEST_CASE("Node.compareDocumentPosition(): where the other node is relative to this one",
+            "[DOM][Node][dom:dom-node-comparedocumentposition][dom:dom-node-document_position_disconnected]"
+            "[dom:dom-node-document_position_preceding][dom:dom-node-document_position_following]"
+            "[dom:dom-node-document_position_contains][dom:dom-node-document_position_contained_by]"
+            "[dom:dom-node-document_position_implementation_specific]")
   {
+    using enum DocumentPosition;
+
     SECTION("same node returns equivalent")
     {
       CommonTestData data {};
-      REQUIRE(data.Node->CompareDocumentPosition(*data.Node)
-              == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
+      REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DOCUMENT_POSITION_EQUIVALENT);
     }
 
     SECTION("disconnected node")
@@ -530,26 +555,24 @@ namespace krys::boo::dom::tests
       auto disconnectedNode = CreateRef<TestElement>(*data.Document);
       auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
 
-      REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
-      REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(HasFlag(position, DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(HasFlag(position, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-      auto nodePrecedesDisconnected = HasFlag(position, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+      auto nodePrecedesDisconnected = HasFlag(position, DOCUMENT_POSITION_PRECEDING);
       // Should be either preceding or following, but not both.
-      REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DOCUMENT_POSITION_FOLLOWING));
 
       auto reversePosition = disconnectedNode->CompareDocumentPosition(*data.Node);
 
-      REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
-      REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(HasFlag(reversePosition, DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(HasFlag(reversePosition, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-      auto reverseNodePrecedesDisconnected =
-        HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+      auto reverseNodePrecedesDisconnected = HasFlag(reversePosition, DOCUMENT_POSITION_PRECEDING);
       // Should be either preceding or following, but not both.
-      REQUIRE(reverseNodePrecedesDisconnected
-              ^ HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      REQUIRE(reverseNodePrecedesDisconnected ^ HasFlag(reversePosition, DOCUMENT_POSITION_FOLLOWING));
 
-      REQUIRE(reverseNodePrecedesDisconnected
-              != nodePrecedesDisconnected); // if it was following one way, it should be preceding the other.
+      // If it was following one way, it should be preceding the other.
+      REQUIRE(reverseNodePrecedesDisconnected != nodePrecedesDisconnected);
     }
 
     SECTION("nodes in same document")
@@ -558,57 +581,85 @@ namespace krys::boo::dom::tests
       auto sibling1 = CreateRef<TestElement>(*data.Document);
       auto sibling2 = CreateRef<TestElement>(*data.Document);
 
-      auto appendResult = data.Node->AppendChild(*sibling1);
-      REQUIRE_FALSE(appendResult.HasException());
-      appendResult = data.Node->AppendChild(*sibling2);
-      REQUIRE_FALSE(appendResult.HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*sibling1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
 
-      auto nodePositionToSibling1 = data.Node->CompareDocumentPosition(*sibling1);
-      REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
-      REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      CHECK(data.Node->CompareDocumentPosition(*sibling1)
+            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+      CHECK(sibling1->CompareDocumentPosition(*data.Node)
+            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+      CHECK(data.Node->CompareDocumentPosition(*sibling2)
+            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+      CHECK(sibling2->CompareDocumentPosition(*data.Node)
+            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+      CHECK(sibling1->CompareDocumentPosition(*sibling2) == DOCUMENT_POSITION_FOLLOWING);
+      CHECK(sibling2->CompareDocumentPosition(*sibling1) == DOCUMENT_POSITION_PRECEDING);
 
-      auto sibling1PositionToNode = sibling1->CompareDocumentPosition(*data.Node);
-      REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
-      REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
-
-      auto nodePositionToSibling2 = data.Node->CompareDocumentPosition(*sibling2);
-      REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
-      REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
-
-      auto sibling2PositionToNode = sibling2->CompareDocumentPosition(*data.Node);
-      REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
-      REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
-
-      auto sibling1PositionToSibling2 = sibling1->CompareDocumentPosition(*sibling2);
-      REQUIRE(HasFlag(sibling1PositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
-
-      auto sibling2PositionToSibling1 = sibling2->CompareDocumentPosition(*sibling1);
-      REQUIRE(HasFlag(sibling2PositionToSibling1, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
-
-      auto removeResult = data.Node->RemoveChild(*sibling1);
-      REQUIRE_FALSE(removeResult.HasException());
-      removeResult = data.Node->RemoveChild(*sibling2);
-      REQUIRE_FALSE(removeResult.HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*sibling1).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*sibling2).HasException());
     }
 
-    // FIXME: Comparing attribute nodes, both with each other and with other node types.
+    SECTION("attributes")
+    {
+      auto document = CreateRef<HTMLDocument>();
+      auto element = document->CreateElement(u8"div").ReleaseValue();
+      auto child = document->CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(element->AppendChild(*child).HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"a", u8"1").HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"b", u8"2").HasException());
+      auto a = element->GetAttributeNode(u8"a");
+      auto b = element->GetAttributeNode(u8"b");
+
+      // 5b. Two attributes of the same element: by their order in its attribute list.
+      CHECK(b->CompareDocumentPosition(*a)
+            == (DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_PRECEDING));
+      CHECK(a->CompareDocumentPosition(*b)
+            == (DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_FOLLOWING));
+
+      // 7. and 8. An attribute is inside its element, and before its element's children.
+      CHECK(a->CompareDocumentPosition(*element)
+            == (DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING));
+      CHECK(element->CompareDocumentPosition(*a)
+            == (DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING));
+      CHECK(a->CompareDocumentPosition(*child) == DOCUMENT_POSITION_FOLLOWING);
+      CHECK(child->CompareDocumentPosition(*a) == DOCUMENT_POSITION_PRECEDING);
+    }
+
+    SECTION("attributes without an element are disconnected, consistently")
+    {
+      auto document = CreateRef<HTMLDocument>();
+      auto a = document->CreateAttribute(u8"a").ReleaseValue();
+      auto b = document->CreateAttribute(u8"b").ReleaseValue();
+      auto element = document->CreateElement(u8"div").ReleaseValue();
+
+      for (auto [first, second] : {std::pair<Node *, Node *> {a.get(), b.get()}, {a.get(), element.get()}})
+      {
+        auto forward = first->CompareDocumentPosition(*second);
+        auto backward = second->CompareDocumentPosition(*first);
+        CHECK(HasFlag(forward, DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+        CHECK(HasFlag(backward, DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+        CHECK(HasFlag(forward, DOCUMENT_POSITION_PRECEDING)
+              == HasFlag(backward, DOCUMENT_POSITION_FOLLOWING));
+        CHECK(HasFlag(forward, DOCUMENT_POSITION_PRECEDING) != HasFlag(forward, DOCUMENT_POSITION_FOLLOWING));
+      }
+    }
   }
 
-  TEST_CASE("Node::Contains", "[HTML][Node]")
+  TEST_CASE("Node.contains(): whether the other node is an inclusive descendant",
+            "[DOM][Node][dom:dom-node-contains]")
   {
     CommonTestData data {};
     auto grandchild = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->Contains(nullptr));
+    REQUIRE(data.Node->Contains(data.Node.get()));
     REQUIRE_FALSE(data.Node->Contains(data.Document.get()));
     REQUIRE_FALSE(data.Document->Contains(data.Node.get()));
     REQUIRE_FALSE(data.Node->Contains(grandchild.get()));
     REQUIRE_FALSE(data.Document->Contains(grandchild.get()));
 
-    auto appendResult = data.Document->AppendChild(*data.Node);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = data.Node->AppendChild(*grandchild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*grandchild).HasException());
 
     REQUIRE(data.Document->Contains(data.Node.get()));
     REQUIRE(data.Node->Contains(grandchild.get()));
@@ -617,13 +668,20 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(grandchild->Contains(data.Document.get()));
     REQUIRE_FALSE(data.Node->Contains(data.Document.get()));
 
-    auto removeResult = data.Node->RemoveChild(*grandchild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*grandchild).HasException());
   }
 
-  TEST_CASE("Node::LookupPrefix", "[HTML][Node]")
+  TEST_CASE("Node.lookupPrefix(): null for no namespace, else located from the relevant element",
+            "[DOM][Node][dom:dom-node-lookupprefix]")
   {
     CommonTestData data {};
+
+    SECTION("a null or empty namespace has no prefix")
+    {
+      auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+      CHECK(element->LookupPrefix(DOMStringAtom::Null()) == DOMStringAtom::Null());
+      CHECK(element->LookupPrefix(DOMStringAtom::Empty()) == DOMStringAtom::Null());
+    }
 
     SECTION("node is an Element")
     {
@@ -712,209 +770,120 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Node::LookupNamespaceURI", "[HTML][Node]")
+  TEST_CASE("Node.lookupNamespaceURI(): the empty prefix is null",
+            "[DOM][Node][dom:dom-node-lookupnamespaceuri]")
   {
     CommonTestData data {};
-
-    SECTION("node is an Element")
-    {
-      auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-
-      SECTION("returns XML namespace if prefix is 'xml'")
-      {
-        REQUIRE(element->LookupNamespaceURI(u8"xml") == infra::Namespaces::XML);
-      }
-
-      SECTION("returns XMLNS namespace if prefix is 'xmlns'")
-      {
-        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == infra::Namespaces::XMLNS);
-      }
-
-      SECTION("returns it's namespace when non null and it's prefix matches")
-      {
-        REQUIRE(element->LookupNamespaceURI(u8"testprefix") == u8"http://a");
-      }
-
-      // FIXME: If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is
-      // "xmlns", and local name is prefix, or if prefix is null and it has an attribute whose namespace is
-      // the XMLNS namespace, namespace prefix is null, and local name is "xmlns", then return its value if it
-      // is not the empty string, and null otherwise.
-
-      SECTION("returns null if prefix doesn't match and parent is null")
-      {
-        REQUIRE(element->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-      }
-
-      SECTION("returns it's parent's namespace if prefix doesn't match and parent is not null")
-      {
-        auto parentElement = CreateRef<NamespaceTestElement>(*data.Document, u8"foo");
-        REQUIRE_FALSE(parentElement->AppendChild(*element).HasException());
-
-        REQUIRE(element->LookupNamespaceURI(u8"foo") == u8"http://a");
-
-        REQUIRE_FALSE(parentElement->RemoveChild(*element).HasException());
-      }
-    }
-
-    SECTION("Node is a Document")
-    {
-      SECTION("returns null if it's documentElement is null")
-      {
-        REQUIRE(data.Document->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-      }
-
-      SECTION("returns it's documentElement's namespace if it's documentElement is not null")
-      {
-        auto child = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-        REQUIRE_FALSE(data.Document->AppendChild(*child).HasException());
-
-        REQUIRE(data.Document->LookupNamespaceURI(u8"testprefix") == u8"http://a");
-
-        REQUIRE_FALSE(data.Document->RemoveChild(*child).HasException());
-      }
-    }
-
-    SECTION("returns null if Node is a DocumentFragment")
-    {
-      auto fragment = CreateRef<DocumentFragment>(*data.Document);
-      REQUIRE(fragment->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-    }
-
-    SECTION("returns null if Node is a DocumentType")
-    {
-      auto doctype = data.Document->Implementation().CreateDocumentType(u8"test", u8"", u8"");
-      REQUIRE(doctype->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-    }
-
-    SECTION("Node is an Attr")
-    {
-      SECTION("returns null if it doesn't have an element owner")
-      {
-        auto attr = data.Document->CreateAttribute(u8"test");
-        REQUIRE_FALSE(attr.HasException());
-
-        REQUIRE(attr->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-      }
-
-      SECTION("returns it's element owner's namespace if it has an element owner")
-      {
-        auto attr = data.Document->CreateAttribute(u8"test");
-        REQUIRE_FALSE(attr.HasException());
-
-        auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-        REQUIRE_FALSE(element->SetAttributeNode(*attr.Value()).HasException());
-
-        REQUIRE(attr->LookupNamespaceURI(u8"testprefix") == u8"http://a");
-      }
-    }
-
-    SECTION("Node that is none of the above returns it's parent element's namespace")
-    {
-      auto textNode = CreateRef<dom::Text>(*data.Document, u8"");
-
-      SECTION("returns null if parent element is null")
-      {
-        REQUIRE(textNode->LookupNamespaceURI(u8"foo") == dom::DOMStringAtom::Null());
-      }
-
-      SECTION("returns parent element's namespace if parent element is not null")
-      {
-        auto parentElement = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
-        REQUIRE_FALSE(parentElement->AppendChild(*textNode).HasException());
-
-        REQUIRE(textNode->LookupNamespaceURI(u8"testprefix") == u8"http://a");
-
-        REQUIRE_FALSE(parentElement->RemoveChild(*textNode).HasException());
-      }
-    }
+    auto element = CreateRef<NamespaceTestElement>(*data.Document, DOMStringAtom::Null());
+    CHECK(element->LookupNamespaceURI(DOMStringAtom::Empty()) == u8"http://a");
+    CHECK(element->LookupNamespaceURI(DOMStringAtom::Null()) == u8"http://a");
+    CHECK(element->LookupNamespaceURI(u8"other") == DOMStringAtom::Null());
   }
 
-  TEST_CASE("Node::IsDefaultNamespace", "[HTML][Node]")
+  TEST_CASE(
+    "Node.isDefaultNamespace(): whether the namespace is the default one, the empty string being null",
+    "[DOM][Node][dom:dom-node-isdefaultnamespace]")
   {
     CommonTestData data {};
     auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"foo"));
     REQUIRE_FALSE(element->IsDefaultNamespace(u8"http://a"));
     REQUIRE(element->IsDefaultNamespace(dom::DOMStringAtom::Null()));
+    REQUIRE(element->IsDefaultNamespace(dom::DOMStringAtom::Empty()));
+
+    auto unprefixed = CreateRef<NamespaceTestElement>(*data.Document, DOMStringAtom::Null());
+    REQUIRE(unprefixed->IsDefaultNamespace(u8"http://a"));
+    REQUIRE_FALSE(unprefixed->IsDefaultNamespace(DOMStringAtom::Empty()));
   }
 
-  TEST_CASE("Node::InsertBefore", "[HTML][Node]")
+  TEST_CASE("Node.insertBefore(): pre-inserts the node before the child",
+            "[DOM][Node][dom:dom-node-insertbefore]")
+  {
+    CommonTestData data {true};
+    auto child = CreateRef<TestElement>(*data.Document);
+    auto first = CreateRef<TestElement>(*data.Document);
+
+    auto insertResult = data.Node->InsertBefore(*child, nullptr);
+    REQUIRE_FALSE(insertResult.HasException());
+    REQUIRE(&insertResult.Value() == child.get());
+    REQUIRE(data.Node->FirstChild() == child.get());
+
+    REQUIRE_FALSE(data.Node->InsertBefore(*first, child.get()).HasException());
+    REQUIRE(data.Node->FirstChild() == first.get());
+    REQUIRE(data.Node->LastChild() == child.get());
+
+    // A node that can't have children throws as pre-insert's validity check does.
+    auto text = data.Document->CreateTextNode(u8"text");
+    auto result = text->InsertBefore(*CreateRef<TestElement>(*data.Document), nullptr);
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*first).HasException());
+  }
+
+  TEST_CASE("Node.appendChild(): appends the node", "[DOM][Node][dom:dom-node-appendchild]")
   {
     CommonTestData data {true};
     auto child = CreateRef<TestElement>(*data.Document);
 
-    REQUIRE(data.Node->FirstChild() == nullptr);
-    REQUIRE(data.Node->LastChild() == nullptr);
-
-    auto insertResult = data.Node->InsertBefore(*child, nullptr);
-    REQUIRE_FALSE(insertResult.HasException());
-
-    REQUIRE(&insertResult.Value() == child.get());
+    auto appendResult = data.Node->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE(&appendResult.Value() == child.get());
     REQUIRE(data.Node->FirstChild() == child.get());
     REQUIRE(data.Node->LastChild() == child.get());
 
-    auto removeResult = data.Node->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
+    auto text = data.Document->CreateTextNode(u8"text");
+    auto result = text->AppendChild(*CreateRef<TestElement>(*data.Document));
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child).HasException());
   }
 
-  TEST_CASE("Node::ReplaceChild", "[HTML][Node]")
+  TEST_CASE("Node.replaceChild(): replaces the child with the node, returning the child",
+            "[DOM][Node][dom:dom-node-replacechild]")
   {
     CommonTestData data {true};
     auto child1 = CreateRef<TestElement>(*data.Document);
     auto child2 = CreateRef<TestElement>(*data.Document);
 
-    auto appendResult = data.Node->AppendChild(*child1);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(data.Node->FirstChild() == child1.get());
-    REQUIRE(data.Node->LastChild() == child1.get());
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
 
     auto replaceResult = data.Node->ReplaceChild(*child2, *child1);
     REQUIRE_FALSE(replaceResult.HasException());
-
     REQUIRE(&replaceResult.Value() == child1.get());
     REQUIRE(data.Node->FirstChild() == child2.get());
     REQUIRE(data.Node->LastChild() == child2.get());
 
-    auto removeResult = data.Node->RemoveChild(*child2);
-    REQUIRE_FALSE(removeResult.HasException());
+    auto text = data.Document->CreateTextNode(u8"text");
+    auto result = text->ReplaceChild(*child1, *child2);
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
   }
 
-  TEST_CASE("Node::RemoveChild", "[HTML][Node]")
+  TEST_CASE("Node.removeChild(): pre-removes the child", "[DOM][Node][dom:dom-node-removechild]")
   {
     CommonTestData data {true};
     auto child = CreateRef<TestElement>(*data.Document);
 
-    auto appendResult = data.Node->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(data.Node->FirstChild() == child.get());
-    REQUIRE(data.Node->LastChild() == child.get());
+    REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
 
     auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
-
+    REQUIRE(&removeResult.Value() == child.get());
     REQUIRE(data.Node->FirstChild() == nullptr);
-    REQUIRE(data.Node->LastChild() == nullptr);
-  }
 
-  TEST_CASE("Node::AppendChild", "[HTML][Node]")
-  {
-    CommonTestData data {true};
-    auto child = CreateRef<TestElement>(*data.Document);
-
-    REQUIRE(data.Node->FirstChild() == nullptr);
-    REQUIRE(data.Node->LastChild() == nullptr);
-
-    auto appendResult = data.Node->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(&appendResult.Value() == child.get());
-    REQUIRE(data.Node->FirstChild() == child.get());
-    REQUIRE(data.Node->LastChild() == child.get());
-
-    auto removeResult = data.Node->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
+    // Not a child.
+    auto again = data.Node->RemoveChild(*child);
+    REQUIRE(again.HasException());
+    CHECK(again.GetException().Code() == ExceptionCode::NotFoundError);
+    auto text = data.Document->CreateTextNode(u8"text");
+    auto fromText = text->RemoveChild(*child);
+    REQUIRE(fromText.HasException());
+    CHECK(fromText.GetException().Code() == ExceptionCode::NotFoundError);
   }
 
   TEST_CASE("Introduction to the DOM: markup goes in, a tree of nodes comes out",

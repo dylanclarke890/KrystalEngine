@@ -69,6 +69,8 @@ namespace krys::boo::dom
     RenderObject *_renderer {nullptr};
 
   protected:
+    /// @brief Creates a node whose node document is @p document (a document passes itself).
+    /// @see https://dom.spec.whatwg.org/#create-a-node
     Node(Document &document, NodeType type, NodeFlags flags) noexcept;
 
     /// @brief Moves the node to @p document, which then counts it rather than its old document.
@@ -155,13 +157,18 @@ namespace krys::boo::dom
       return {};
     }
 
+    /// @brief Gets text content: null here, for documents and doctypes; overridden by the other interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
+    /// @see https://dom.spec.whatwg.org/#get-text-content
     KRYS_NODISCARD virtual Maybe<DOMString> TextContent() const noexcept
     {
       return null;
     }
 
+    /// @brief Sets text content: nothing here, for documents and doctypes; overridden by the other
+    /// interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
+    /// @see https://dom.spec.whatwg.org/#set-text-content
     virtual ExceptionOr<void> TextContent(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature

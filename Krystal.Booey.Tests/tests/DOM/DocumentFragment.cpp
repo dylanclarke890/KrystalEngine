@@ -33,19 +33,23 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("DocumentFragment::NodeType", "[HTML][DocumentFragment]")
+  TEST_CASE("Node.nodeType: a DocumentFragment is a DOCUMENT_FRAGMENT_NODE",
+            "[DOM][DocumentFragment][dom:dom-node-nodetype][dom:dom-node-document_fragment_node]")
   {
     CommonTestData data;
     REQUIRE(data.Node->NodeType() == NodeType::DOCUMENT_FRAGMENT_NODE);
   }
 
-  TEST_CASE("DocumentFragment::NodeName", "[HTML][DocumentFragment]")
+  TEST_CASE("Node.nodeName: a DocumentFragment's is #document-fragment",
+            "[DOM][DocumentFragment][dom:dom-node-nodename]")
   {
     CommonTestData data;
     REQUIRE(data.Node->NodeName() == u8"#document-fragment");
   }
 
-  TEST_CASE("DocumentFragment::TextContent", "[HTML][DocumentFragment]")
+  TEST_CASE("Node.textContent: a DocumentFragment's is its descendant text, which setting it replaces",
+            "[DOM][DocumentFragment][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]["
+            "dom:string-replace-all]")
   {
     CommonTestData data;
     auto textNode1 = CreateRef<dom::Text>(*data.Document, u8"Hello");

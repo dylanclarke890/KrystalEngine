@@ -26,13 +26,14 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("CDATASection::NodeName", "[HTML][CDATASection]")
+  TEST_CASE("Node.nodeName: a CDATASection's is #cdata-section", "[DOM][CDATASection][dom:dom-node-nodename]")
   {
     CommonTestData data(u8"Hello, world!");
     REQUIRE(data.Node->NodeName() == u8"#cdata-section");
   }
 
-  TEST_CASE("CDATASection::NodeType", "[HTML][CDATASection]")
+  TEST_CASE("Node.nodeType: a CDATASection is a CDATA_SECTION_NODE",
+            "[DOM][CDATASection][dom:dom-node-nodetype][dom:dom-node-cdata_section_node]")
   {
     CommonTestData data(u8"Hello, world!");
     REQUIRE(data.Node->NodeType() == NodeType::CDATA_SECTION_NODE);

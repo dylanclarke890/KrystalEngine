@@ -138,6 +138,10 @@ namespace krys::boo::dom
 
   DOMString Node::BaseURI() const noexcept
   {
+    // 1. Let baseURL be the result of running this's node document's get the base URL algorithm.
+    // 2. If baseURL is null, then set baseURL to this's node document's URL.
+    // (A document's base URL is never null: it falls back to its URL.)
+    // 3. Return baseURL, serialized.
     return NodeDocument().BaseURL().String();
   }
 
@@ -195,12 +199,19 @@ namespace krys::boo::dom
   ExceptionOr<void> Node::Normalize() noexcept
   {
     html::CEReactionsScope ceReactions;
-    for (auto *node = TreeQueries::NextExclusiveTextNode(*this, this); node != nullptr;
-         node = TreeQueries::NextExclusiveTextNode(*node, this))
+    // Run these steps for each descendant exclusive Text node node of this:
+    RefPtr<Text> next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*this, this));
+    while (next != nullptr)
     {
-      auto length = node->Data().size();
+      Ref<Text> node = next;
+
+      // 1. Let length be node's length.
+      auto length = node->Length();
+
+      // 2. If length is zero, then remove node and continue with the next exclusive Text node, if any.
       if (length == 0uz)
       {
+        next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*node, this));
         if (auto removeResult = MutationAlgorithms::Remove(*node); removeResult.HasException())
         {
           return removeResult.ReleaseException();
@@ -209,30 +220,49 @@ namespace krys::boo::dom
         continue;
       }
 
+      // 3. Let data be the concatenation of the data of node's contiguous exclusive Text nodes (excluding
+      //    itself), in tree order.
       DOMString data {};
-
       const Node *current = node->NextSibling();
       while (TreeQueries::IsExclusiveTextNode(current))
       {
-        data += *Downcast<Text>(current)->TextContent();
+        data += Downcast<Text>(current)->Data();
         current = current->NextSibling();
       }
 
+      // 4. Replace data of node with length, 0, and data.
       if (auto replaceResult = node->ReplaceData(length, 0uz, krys::move(data)); replaceResult.HasException())
       {
         return replaceResult.ReleaseException();
       }
 
+      // 5. Let currentNode be node's next sibling.
       Node *currentNode = node->NextSibling();
+
+      // 6. While currentNode is an exclusive Text node:
       while (TreeQueries::IsExclusiveTextNode(currentNode))
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
-        LiveRangeUpdater::NodeNormalized(*this, currentTextNode, length);
 
-        length += currentTextNode.Data().size();
+        // 6a. For each live range whose start node is currentNode: add length to its start offset and set its
+        //     start node to node.
+        // 6b. For each live range whose end node is currentNode: add length to its end offset and set its end
+        //     node to node.
+        // 6c. For each live range whose start node is currentNode's parent and start offset is currentNode's
+        //     index: set its start node to node and its start offset to length.
+        // 6d. For each live range whose end node is currentNode's parent and end offset is currentNode's
+        // index:
+        //     set its end node to node and its end offset to length.
+        LiveRangeUpdater::NodeNormalized(*node, currentTextNode, length);
+
+        // 6e. Add currentNode's length to length.
+        length += currentTextNode.Length();
+
+        // 6f. Set currentNode to its next sibling.
         currentNode = currentTextNode.NextSibling();
       }
 
+      // 7. Remove node's contiguous exclusive Text nodes (excluding itself), in tree order.
       while (TreeQueries::IsExclusiveTextNode(node->NextSibling()))
       {
         if (auto removeResult = MutationAlgorithms::Remove(*node->NextSibling()); removeResult.HasException())
@@ -240,6 +270,8 @@ namespace krys::boo::dom
           return removeResult.ReleaseException();
         }
       }
+
+      next = ShareRefPtr(TreeQueries::NextExclusiveTextNode(*node, this));
     }
 
     return {};
@@ -248,11 +280,13 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If this is a shadow root, then throw a "NotSupportedError" DOMException.
     if (Is<ShadowRoot>(this))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
+    // 2. Return the result of cloning a node given this with subtree set to subtree.
     return NodeAlgorithms::CloneNode(*this, nullptr, subtree);
   }
 
@@ -273,78 +307,98 @@ namespace krys::boo::dom
 
   DocumentPosition Node::CompareDocumentPosition(const Node &other) const noexcept
   {
+    // 1. If this is other, then return zero.
     if (this == &other)
     {
       return DocumentPosition::DOCUMENT_POSITION_EQUIVALENT;
     }
 
+    // 2. Let node1 be other and node2 be this.
     const Node *node1 = &other;
     const Node *node2 = this;
 
+    // 3. Let attr1 and attr2 be null.
     const Attr *attr1 = nullptr;
     const Attr *attr2 = nullptr;
 
+    // 4. If node1 is an attribute, then set attr1 to node1 and node1 to attr1's element.
     if (Is<Attr>(node1))
     {
       attr1 = Downcast<Attr>(node1);
       node1 = attr1->OwnerElement();
     }
 
+    // 5. If node2 is an attribute:
     if (Is<Attr>(node2))
     {
+      // 5a. Set attr2 to node2 and node2 to attr2's element.
       attr2 = Downcast<Attr>(node2);
       node2 = attr2->OwnerElement();
 
-      if (attr1 != nullptr && node2 == node1)
+      // 5b. If attr1 and node1 are non-null, and node2 is node1:
+      if (attr1 != nullptr && node1 != nullptr && node2 == node1)
       {
-        auto &element1 = Downcast<Element>(*node1);
-        auto &element2 = Downcast<Element>(*node2);
-
-        for (auto &attribute : element2._attributes)
+        // 5b.i. For each attr of node2's attribute list:
+        for (auto &attr : Downcast<Element>(*node2)._attributes)
         {
-          if (NodeAlgorithms::Equals(*attribute, *attr1))
+          // 5b.i.A. If attr equals attr1, then return the result of adding
+          // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+          //         and DOCUMENT_POSITION_PRECEDING.
+          if (NodeAlgorithms::Equals(*attr, *attr1))
           {
             return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
                    | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
           }
 
-          if (NodeAlgorithms::Equals(*attribute, *attr2))
+          // 5b.i.B. If attr equals attr2, then return the result of adding
+          // DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+          //         and DOCUMENT_POSITION_FOLLOWING.
+          if (NodeAlgorithms::Equals(*attr, *attr2))
           {
             return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
                    | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
           }
         }
-
-        (void)element1;
-        // FIXME: Are we missing part of the implementation here? element1 is not referenced
       }
     }
 
+    // 6. If node1 or node2 is null, or node1's root is not node2's root, then return the result of adding
+    //    DOCUMENT_POSITION_DISCONNECTED, DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, and either
+    //    DOCUMENT_POSITION_PRECEDING or DOCUMENT_POSITION_FOLLOWING, with the constraint that this is to be
+    //    consistent, together.
     if (node1 == nullptr || node2 == nullptr || !TreeQueries::SameRoot(*node1, *node2))
     {
-      auto orderingFlag = node1 < node2 ? DocumentPosition::DOCUMENT_POSITION_PRECEDING
+      // The nodes' addresses order them consistently, whichever is asked about the other.
+      auto orderingFlag = &other < this ? DocumentPosition::DOCUMENT_POSITION_PRECEDING
                                         : DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
 
       return DocumentPosition::DOCUMENT_POSITION_DISCONNECTED
              | DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | orderingFlag;
     }
 
+    // 7. If node1 is an ancestor of node2 and attr1 is null, or node1 is node2 and attr2 is non-null, then
+    // return
+    //    the result of adding DOCUMENT_POSITION_CONTAINS to DOCUMENT_POSITION_PRECEDING.
     if ((TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr) || (node1 == node2 && attr2 != nullptr))
     {
       return DocumentPosition::DOCUMENT_POSITION_CONTAINS | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
     }
 
+    // 8. If node1 is a descendant of node2 and attr2 is null, or node1 is node2 and attr1 is non-null, then
+    //    return the result of adding DOCUMENT_POSITION_CONTAINED_BY to DOCUMENT_POSITION_FOLLOWING.
     if ((TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
         || (node1 == node2 && attr1 != nullptr))
     {
       return DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
     }
 
+    // 9. If node1 is preceding node2, then return DOCUMENT_POSITION_PRECEDING.
     if (TreeQueries::IsPreceding(*node1, *node2))
     {
       return DocumentPosition::DOCUMENT_POSITION_PRECEDING;
     }
 
+    // 10. Return DOCUMENT_POSITION_FOLLOWING.
     return DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
   }
 
@@ -360,50 +414,63 @@ namespace krys::boo::dom
 
   DOMStringAtom Node::LookupPrefix(DOMStringAtom namespaceURI) const noexcept
   {
+    // 1. If namespace is null or the empty string, then return null.
     if (namespaceURI == DOMStringAtom::Null() || namespaceURI == DOMStringAtom::Empty())
     {
       return DOMStringAtom::Null();
     }
 
+    // 2. Switch on the interface this implements:
     switch (NodeType())
     {
+      // Element: Return the result of locating a namespace prefix for this using namespace.
       case NodeType::ELEMENT_NODE:
       {
         return NodeAlgorithms::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
       }
+      // Document:
       case NodeType::DOCUMENT_NODE:
       {
+        // 2a. If this's document element is null, then return null.
         auto *documentElement = TreeQueries::DocumentElement(Downcast<Document>(*this));
         if (documentElement == nullptr)
         {
           return DOMStringAtom::Null();
         }
 
+        // 2b. Return the result of locating a namespace prefix for this's document element using namespace.
         return NodeAlgorithms::LocateNamespacePrefix(*documentElement, namespaceURI);
       }
+      // DocumentType, DocumentFragment: Return null.
       case NodeType::DOCUMENT_TYPE_NODE:
       case NodeType::DOCUMENT_FRAGMENT_NODE:
       {
         return DOMStringAtom::Null();
       }
+      // Attr:
       case NodeType::ATTRIBUTE_NODE:
       {
+        // 2a. If this's element is null, then return null.
         const Element *ownerElement = Downcast<Attr>(*this).OwnerElement();
         if (ownerElement == nullptr)
         {
           return DOMStringAtom::Null();
         }
 
+        // 2b. Return the result of locating a namespace prefix for this's element using namespace.
         return NodeAlgorithms::LocateNamespacePrefix(*ownerElement, namespaceURI);
       }
+      // Otherwise:
       default:
       {
+        // 2a. If this's parent element is null, then return null.
         const Element *parentElement = ParentElement();
         if (parentElement == nullptr)
         {
           return DOMStringAtom::Null();
         }
 
+        // 2b. Return the result of locating a namespace prefix for this's parent element using namespace.
         return NodeAlgorithms::LocateNamespacePrefix(*parentElement, namespaceURI);
       }
     }
@@ -411,22 +478,28 @@ namespace krys::boo::dom
 
   DOMStringAtom Node::LookupNamespaceURI(DOMStringAtom prefix) const noexcept
   {
+    // 1. If prefix is the empty string, then set it to null.
     if (prefix == DOMStringAtom::Empty())
     {
       prefix = DOMStringAtom::Null();
     }
 
+    // 2. Return the result of running locate a namespace for this using prefix.
     return NodeAlgorithms::LocateNamespace(*this, prefix);
   }
 
   bool Node::IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept
   {
+    // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
       namespaceURI = DOMStringAtom::Null();
     }
 
+    // 2. Let defaultNamespace be the result of running locate a namespace for this using null.
     auto defaultNamespace = NodeAlgorithms::LocateNamespace(*this, DOMStringAtom::Null());
+
+    // 3. Return true if defaultNamespace is the same as namespace; otherwise false.
     return namespaceURI == defaultNamespace;
   }
 

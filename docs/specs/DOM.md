@@ -1078,14 +1078,17 @@ Status: reviewed (2026-10-31)
 
 ### [4.4. Interface Node](https://dom.spec.whatwg.org/#interface-node)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Node` (`Node.hpp`/`Node.cpp`); clone, equals, locate a namespace (prefix), string replace all and the element lists are in `NodeAlgorithms`. Create a node is each interface's constructor, which takes the node document.
+> `nodeName`, `nodeValue` and `textContent` are virtual, overridden per interface (`Element`, `Attr`, `CharacterData`, `Text`, `DocumentFragment` and so on); the base returns null and ignores setting, for documents and doctypes.
+> Equals compares node types rather than interfaces, and cloning a document skips its origin and base URL override (see `DIFFERENCES.md`).
 <!-- definitions: concept-node-document dom-node-element_node dom-node-attribute_node dom-node-text_node dom-node-cdata_section_node dom-node-processing_instruction_node dom-node-comment_node dom-node-document_node dom-node-document_type_node dom-node-document_fragment_node concept-node-clone-ext clone-a-node-document clone-a-node-subtree clone-a-node-parent clone-a-node-fallbackregistry dom-node-document_position_disconnected dom-node-document_position_preceding dom-node-document_position_following dom-node-document_position_contains dom-node-document_position_contained_by dom-node-document_position_implementation_specific -->
 
-- [ ] [create a node](https://dom.spec.whatwg.org/#create-a-node) — To create a node that implements an interface interface, given a document document:
+- [x] [create a node](https://dom.spec.whatwg.org/#create-a-node) — To create a node that implements an interface interface, given a document document:
   - 1. Assert: interface is neither Document nor an interface that inherits from Document.
   - 2. Return a new node that implements interface, in document’s relevant realm, with its node document set to document.
 
-- [ ] [Node.nodeType](https://dom.spec.whatwg.org/#dom-node-nodetype) — The nodeType getter steps are to return the first matching statement, switching on the interface this implements:
+- [x] [Node.nodeType](https://dom.spec.whatwg.org/#dom-node-nodetype) — The nodeType getter steps are to return the first matching statement, switching on the interface this implements:
   - • Element: ELEMENT_NODE (1)
   - • Attr: ATTRIBUTE_NODE (2);
   - • An exclusive Text node: TEXT_NODE (3);
@@ -1096,7 +1099,7 @@ Status: unreviewed
   - • DocumentType: DOCUMENT_TYPE_NODE (10);
   - • DocumentFragment: DOCUMENT_FRAGMENT_NODE (11).
 
-- [ ] [Node.nodeName](https://dom.spec.whatwg.org/#dom-node-nodename) — The nodeName getter steps are to return the first matching statement, switching on the interface this implements:
+- [x] [Node.nodeName](https://dom.spec.whatwg.org/#dom-node-nodename) — The nodeName getter steps are to return the first matching statement, switching on the interface this implements:
   - • Element: Its HTML-uppercased qualified name.
   - • Attr: Its qualified name.
   - • An exclusive Text node: "#text".
@@ -1107,62 +1110,62 @@ Status: unreviewed
   - • DocumentType: Its name.
   - • DocumentFragment: "#document-fragment".
 
-- [ ] [Node.baseURI](https://dom.spec.whatwg.org/#dom-node-baseuri) — The baseURI getter steps are:
+- [x] [Node.baseURI](https://dom.spec.whatwg.org/#dom-node-baseuri) — The baseURI getter steps are:
   - 1. Let baseURL be the result of running this’s node document’s get the base URL algorithm.
   - 2. If baseURL is null, then set baseURL to this’s node document’s URL.
   - 3. Return baseURL, serialized.
 
-- [ ] [Node.isConnected](https://dom.spec.whatwg.org/#dom-node-isconnected) — The isConnected getter steps are to return true, if this is connected; otherwise false.
+- [x] [Node.isConnected](https://dom.spec.whatwg.org/#dom-node-isconnected) — The isConnected getter steps are to return true, if this is connected; otherwise false.
 
-- [ ] [Node.ownerDocument](https://dom.spec.whatwg.org/#dom-node-ownerdocument) — The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
+- [x] [Node.ownerDocument](https://dom.spec.whatwg.org/#dom-node-ownerdocument) — The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
 
-- [ ] [Node.getRootNode(options)](https://dom.spec.whatwg.org/#dom-node-getrootnode) — The getRootNode(options) method steps are to return this’s shadow-including root if options["composed"] is true; otherwise this’s root.
+- [x] [Node.getRootNode(options)](https://dom.spec.whatwg.org/#dom-node-getrootnode) — The getRootNode(options) method steps are to return this’s shadow-including root if options["composed"] is true; otherwise this’s root.
 
-- [ ] [Node.parentNode](https://dom.spec.whatwg.org/#dom-node-parentnode) — The parentNode getter steps are to return this’s parent.
+- [x] [Node.parentNode](https://dom.spec.whatwg.org/#dom-node-parentnode) — The parentNode getter steps are to return this’s parent.
 
-- [ ] [Node.parentElement](https://dom.spec.whatwg.org/#dom-node-parentelement) — The parentElement getter steps are to return this’s parent element.
+- [x] [Node.parentElement](https://dom.spec.whatwg.org/#dom-node-parentelement) — The parentElement getter steps are to return this’s parent element.
 
-- [ ] [Node.hasChildNodes()](https://dom.spec.whatwg.org/#dom-node-haschildnodes) — The hasChildNodes() method steps are to return true if this has children; otherwise false.
+- [x] [Node.hasChildNodes()](https://dom.spec.whatwg.org/#dom-node-haschildnodes) — The hasChildNodes() method steps are to return true if this has children; otherwise false.
 
-- [ ] [Node.childNodes](https://dom.spec.whatwg.org/#dom-node-childnodes) — The childNodes getter steps are to return a NodeList rooted at this matching only children.
+- [x] [Node.childNodes](https://dom.spec.whatwg.org/#dom-node-childnodes) — The childNodes getter steps are to return a NodeList rooted at this matching only children.
 
-- [ ] [Node.firstChild](https://dom.spec.whatwg.org/#dom-node-firstchild) — The firstChild getter steps are to return this’s first child.
+- [x] [Node.firstChild](https://dom.spec.whatwg.org/#dom-node-firstchild) — The firstChild getter steps are to return this’s first child.
 
-- [ ] [Node.lastChild](https://dom.spec.whatwg.org/#dom-node-lastchild) — The lastChild getter steps are to return this’s last child.
+- [x] [Node.lastChild](https://dom.spec.whatwg.org/#dom-node-lastchild) — The lastChild getter steps are to return this’s last child.
 
-- [ ] [Node.previousSibling](https://dom.spec.whatwg.org/#dom-node-previoussibling) — The previousSibling getter steps are to return this’s previous sibling.
+- [x] [Node.previousSibling](https://dom.spec.whatwg.org/#dom-node-previoussibling) — The previousSibling getter steps are to return this’s previous sibling.
 
-- [ ] [Node.nextSibling](https://dom.spec.whatwg.org/#dom-node-nextsibling) — The nextSibling getter steps are to return this’s next sibling.
+- [x] [Node.nextSibling](https://dom.spec.whatwg.org/#dom-node-nextsibling) — The nextSibling getter steps are to return this’s next sibling.
 
-- [ ] [Node.nodeValue](https://dom.spec.whatwg.org/#dom-node-nodevalue) — The nodeValue getter steps are to return the following, switching on the interface this implements:
+- [x] [Node.nodeValue](https://dom.spec.whatwg.org/#dom-node-nodevalue) — The nodeValue getter steps are to return the following, switching on the interface this implements:
   - • Attr: this’s value.
   - • CharacterData: this’s data.
   - • Otherwise: Null.
 
-- [ ] [The nodeValue setter steps](https://dom.spec.whatwg.org/#dom-node-nodevalue) — The nodeValue setter steps are to, if the given value is null, act as if it was the empty string instead, and then do as described below, switching on the interface this implements:
+- [x] [The nodeValue setter steps](https://dom.spec.whatwg.org/#dom-node-nodevalue) — The nodeValue setter steps are to, if the given value is null, act as if it was the empty string instead, and then do as described below, switching on the interface this implements:
 
-- [ ] [get text content](https://dom.spec.whatwg.org/#get-text-content) — To get text content with a node node, return the following, switching on the interface node implements:
+- [x] [get text content](https://dom.spec.whatwg.org/#get-text-content) — To get text content with a node node, return the following, switching on the interface node implements:
   - • DocumentFragment / Element: The descendant text content of node.
   - • Attr: node’s value.
   - • CharacterData: node’s data.
   - • Otherwise: Null.
 
-- [ ] [Node.textContent](https://dom.spec.whatwg.org/#dom-node-textcontent) — The textContent getter steps are to return the result of running get text content with this.
+- [x] [Node.textContent](https://dom.spec.whatwg.org/#dom-node-textcontent) — The textContent getter steps are to return the result of running get text content with this.
 
-- [ ] [string replace all](https://dom.spec.whatwg.org/#string-replace-all) — To string replace all with a string string within a node parent, run these steps:
+- [x] [string replace all](https://dom.spec.whatwg.org/#string-replace-all) — To string replace all with a string string within a node parent, run these steps:
   - 1. Let node be null.
   - 2. If string is not the empty string, then set node to the result of creating a text node given parent’s node document and string.
   - 3. Replace all with node within parent.
 
-- [ ] [set text content](https://dom.spec.whatwg.org/#set-text-content) — To set text content with a node node and a string value, do as defined below, switching on the interface node implements:
+- [x] [set text content](https://dom.spec.whatwg.org/#set-text-content) — To set text content with a node node and a string value, do as defined below, switching on the interface node implements:
   - • DocumentFragment / Element: String replace all with value within node.
   - • Attr: Set an existing attribute value with node and value.
   - • CharacterData: Replace data of node with 0, node’s length, and value.
   - • Otherwise: Do nothing.
 
-- [ ] [The textContent setter steps](https://dom.spec.whatwg.org/#dom-node-textcontent) — The textContent setter steps are to, if the given value is null, act as if it was the empty string instead, and then run set text content with this and the given value.
+- [x] [The textContent setter steps](https://dom.spec.whatwg.org/#dom-node-textcontent) — The textContent setter steps are to, if the given value is null, act as if it was the empty string instead, and then run set text content with this and the given value.
 
-- [ ] [Node.normalize()](https://dom.spec.whatwg.org/#dom-node-normalize) — The normalize() method steps are to run these steps for each descendant exclusive Text node node of this:
+- [x] [Node.normalize()](https://dom.spec.whatwg.org/#dom-node-normalize) — The normalize() method steps are to run these steps for each descendant exclusive Text node node of this:
   - 1. Let length be node’s length.
   - 2. If length is zero, then remove node and continue with the next exclusive Text node, if any.
   - 3. Let data be the concatenation of the data of node’s contiguous exclusive Text nodes (excluding itself), in tree order.
@@ -1177,7 +1180,7 @@ Status: unreviewed
     - 6f. Set currentNode to its next sibling.
   - 7. Remove node’s contiguous exclusive Text nodes (excluding itself), in tree order.
 
-- [ ] [clone a node](https://dom.spec.whatwg.org/#concept-node-clone) — To clone a node given a node node and an optional document document (default node’s node document), boolean subtree (default false), node-or-null parent (default null), and null or a CustomElementRegistry object fallbackRegistry (default null):
+- [x] [clone a node](https://dom.spec.whatwg.org/#concept-node-clone) — To clone a node given a node node and an optional document document (default node’s node document), boolean subtree (default false), node-or-null parent (default null), and null or a CustomElementRegistry object fallbackRegistry (default null):
   - 1. Assert: node is not a document or node is document.
   - 2. Let copy be the result of cloning a single node given node, document, and fallbackRegistry.
   - 3. Run any cloning steps defined for node in other applicable specifications and pass node, copy, and subtree as parameters.
@@ -1193,7 +1196,7 @@ Status: unreviewed
     - 6g. For each child of node’s shadow root’s children, in tree order: clone a node given child with document set to document, subtree set to true, and parent set to copy’s shadow root.
   - 7. Return copy.
 
-- [ ] [clone a single node](https://dom.spec.whatwg.org/#clone-a-single-node) — To clone a single node given a node node, document document, and null or a CustomElementRegistry object fallbackRegistry:
+- [x] [clone a single node](https://dom.spec.whatwg.org/#clone-a-single-node) — To clone a single node given a node node, document document, and null or a CustomElementRegistry object fallbackRegistry:
   - 1. Let copy be null.
   - 2. If node is an element:
     - 2a. Let registry be node’s custom element registry.
@@ -1214,17 +1217,17 @@ Status: unreviewed
   - 8. Set copy’s node document to document.
   - 9. Return copy.
 
-- [ ] [Node.cloneNode(subtree)](https://dom.spec.whatwg.org/#dom-node-clonenode) — The cloneNode(subtree) method steps are:
+- [x] [Node.cloneNode(subtree)](https://dom.spec.whatwg.org/#dom-node-clonenode) — The cloneNode(subtree) method steps are:
   - 1. If this is a shadow root, then throw a "NotSupportedError" DOMException.
   - 2. Return the result of cloning a node given this with subtree set to subtree.
 
-- [ ] [equals (Node)](https://dom.spec.whatwg.org/#concept-node-equals) — A node A equals a node B if all of the following conditions are true:
+- [x] [equals (Node)](https://dom.spec.whatwg.org/#concept-node-equals) — A node A equals a node B if all of the following conditions are true:
 
-- [ ] [Node.isEqualNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-isequalnode) — The isEqualNode(otherNode) method steps are to return true if otherNode is non-null and this equals otherNode; otherwise false.
+- [x] [Node.isEqualNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-isequalnode) — The isEqualNode(otherNode) method steps are to return true if otherNode is non-null and this equals otherNode; otherwise false.
 
-- [ ] [Node.isSameNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-issamenode) — The isSameNode(otherNode) method steps are to return true if otherNode is this; otherwise false.
+- [x] [Node.isSameNode(otherNode)](https://dom.spec.whatwg.org/#dom-node-issamenode) — The isSameNode(otherNode) method steps are to return true if otherNode is this; otherwise false.
 
-- [ ] [Node.compareDocumentPosition(other)](https://dom.spec.whatwg.org/#dom-node-comparedocumentposition) — The compareDocumentPosition(other) method steps are:
+- [x] [Node.compareDocumentPosition(other)](https://dom.spec.whatwg.org/#dom-node-comparedocumentposition) — The compareDocumentPosition(other) method steps are:
   - 1. If this is other, then return zero.
   - 2. Let node1 be other and node2 be this.
   - 3. Let attr1 and attr2 be null.
@@ -1241,15 +1244,15 @@ Status: unreviewed
   - 9. If node1 is preceding node2, then return DOCUMENT_POSITION_PRECEDING.
   - 10. Return DOCUMENT_POSITION_FOLLOWING.
 
-- [ ] [Node.contains(other)](https://dom.spec.whatwg.org/#dom-node-contains) — The contains(other) method steps are to return true if other is an inclusive descendant of this; otherwise false (including when other is null).
+- [x] [Node.contains(other)](https://dom.spec.whatwg.org/#dom-node-contains) — The contains(other) method steps are to return true if other is an inclusive descendant of this; otherwise false (including when other is null).
 
-- [ ] [locate a namespace prefix](https://dom.spec.whatwg.org/#locate-a-namespace-prefix) — To locate a namespace prefix for an element using namespace, run these steps:
+- [x] [locate a namespace prefix](https://dom.spec.whatwg.org/#locate-a-namespace-prefix) — To locate a namespace prefix for an element using namespace, run these steps:
   - 1. If element’s namespace is namespace and its namespace prefix is non-null, then return its namespace prefix.
   - 2. If element has an attribute whose namespace prefix is "xmlns" and value is namespace, then return element’s first such attribute’s local name.
   - 3. If element’s parent element is non-null, then return the result of running locate a namespace prefix on that element using namespace.
   - 4. Return null.
 
-- [ ] [locate a namespace](https://dom.spec.whatwg.org/#locate-a-namespace) — To locate a namespace for a node using prefix, switch on the interface node implements:
+- [x] [locate a namespace](https://dom.spec.whatwg.org/#locate-a-namespace) — To locate a namespace for a node using prefix, switch on the interface node implements:
   - • Element:
     - 1. If prefix is "xml", then return the XML namespace.
     - 2. If prefix is "xmlns", then return the XMLNS namespace.
@@ -1268,7 +1271,7 @@ Status: unreviewed
     - 1. If its parent element is null, then return null.
     - 2. Return the result of running locate a namespace on its parent element using prefix.
 
-- [ ] [Node.lookupPrefix(namespace)](https://dom.spec.whatwg.org/#dom-node-lookupprefix) — The lookupPrefix(namespace) method steps are:
+- [x] [Node.lookupPrefix(namespace)](https://dom.spec.whatwg.org/#dom-node-lookupprefix) — The lookupPrefix(namespace) method steps are:
   - 1. If namespace is null or the empty string, then return null.
   - 2. Switch on the interface this implements: Element Return the result of locating a namespace prefix for this using namespace. Document DocumentType DocumentFragment Return null. Attr Otherwise
     - 2a. If this’s document element is null, then return null.
@@ -1278,36 +1281,36 @@ Status: unreviewed
     - 2a. If this’s parent element is null, then return null.
     - 2b. Return the result of locating a namespace prefix for this’s parent element using namespace.
 
-- [ ] [Node.lookupNamespaceURI(prefix)](https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri) — The lookupNamespaceURI(prefix) method steps are:
+- [x] [Node.lookupNamespaceURI(prefix)](https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri) — The lookupNamespaceURI(prefix) method steps are:
   - 1. If prefix is the empty string, then set it to null.
   - 2. Return the result of running locate a namespace for this using prefix.
 
-- [ ] [Node.isDefaultNamespace(namespace)](https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace) — The isDefaultNamespace(namespace) method steps are:
+- [x] [Node.isDefaultNamespace(namespace)](https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace) — The isDefaultNamespace(namespace) method steps are:
   - 1. If namespace is the empty string, then set it to null.
   - 2. Let defaultNamespace be the result of running locate a namespace for this using null.
   - 3. Return true if defaultNamespace is the same as namespace; otherwise false.
 
-- [ ] [Node.insertBefore(node, child)](https://dom.spec.whatwg.org/#dom-node-insertbefore) — The insertBefore(node, child) method steps are to return the result of pre-inserting node into this before child.
+- [x] [Node.insertBefore(node, child)](https://dom.spec.whatwg.org/#dom-node-insertbefore) — The insertBefore(node, child) method steps are to return the result of pre-inserting node into this before child.
 
-- [ ] [Node.appendChild(node)](https://dom.spec.whatwg.org/#dom-node-appendchild) — The appendChild(node) method steps are to return the result of appending node to this.
+- [x] [Node.appendChild(node)](https://dom.spec.whatwg.org/#dom-node-appendchild) — The appendChild(node) method steps are to return the result of appending node to this.
 
-- [ ] [Node.replaceChild(node, child)](https://dom.spec.whatwg.org/#dom-node-replacechild) — The replaceChild(node, child) method steps are to return the result of replacing child with node within this.
+- [x] [Node.replaceChild(node, child)](https://dom.spec.whatwg.org/#dom-node-replacechild) — The replaceChild(node, child) method steps are to return the result of replacing child with node within this.
 
-- [ ] [Node.removeChild(child)](https://dom.spec.whatwg.org/#dom-node-removechild) — The removeChild(child) method steps are to return the result of pre-removing child from this.
+- [x] [Node.removeChild(child)](https://dom.spec.whatwg.org/#dom-node-removechild) — The removeChild(child) method steps are to return the result of pre-removing child from this.
 
-- [ ] [list of elements with qualified name qualifiedName](https://dom.spec.whatwg.org/#concept-getelementsbytagname) — The list of elements with qualified name qualifiedName for a node root is the HTMLCollection returned by the following algorithm:
+- [x] [list of elements with qualified name qualifiedName](https://dom.spec.whatwg.org/#concept-getelementsbytagname) — The list of elements with qualified name qualifiedName for a node root is the HTMLCollection returned by the following algorithm:
   - 1. If qualifiedName is U+002A (*), then return an HTMLCollection rooted at root, whose filter matches only descendant elements.
   - 2. Otherwise, if root’s node document is an HTML document, return an HTMLCollection rooted at root, whose filter matches the following descendant elements: Whose namespace is the HTML namespace and whose qualified name is qualifiedName, in ASCII lowercase.; Whose namespace is not the HTML namespace and whose qualified name is qualifiedName.
   - 3. Otherwise, return an HTMLCollection rooted at root, whose filter matches descendant elements whose qualified name is qualifiedName.
 
-- [ ] [list of elements with namespace namespace and local name localName](https://dom.spec.whatwg.org/#concept-getelementsbytagnamens) — The list of elements with namespace namespace and local name localName for a node root is the HTMLCollection returned by the following algorithm:
+- [x] [list of elements with namespace namespace and local name localName](https://dom.spec.whatwg.org/#concept-getelementsbytagnamens) — The list of elements with namespace namespace and local name localName for a node root is the HTMLCollection returned by the following algorithm:
   - 1. If namespace is the empty string, then set it to null.
   - 2. If both namespace and localName are U+002A (*), then return an HTMLCollection rooted at root, whose filter matches descendant elements.
   - 3. If namespace is U+002A (*), then return an HTMLCollection rooted at root, whose filter matches descendant elements whose local name is localName.
   - 4. If localName is U+002A (*), then return an HTMLCollection rooted at root, whose filter matches descendant elements whose namespace is namespace.
   - 5. Return an HTMLCollection rooted at root, whose filter matches descendant elements whose namespace is namespace and local name is localName.
 
-- [ ] [list of elements with class names classNames](https://dom.spec.whatwg.org/#concept-getelementsbyclassname) — The list of elements with class names classNames for a node root is the HTMLCollection returned by the following algorithm:
+- [x] [list of elements with class names classNames](https://dom.spec.whatwg.org/#concept-getelementsbyclassname) — The list of elements with class names classNames for a node root is the HTMLCollection returned by the following algorithm:
   - 1. Let classes be the result of running the ordered set parser on classNames.
   - 2. If classes is the empty set, return an empty HTMLCollection.
   - 3. Return an HTMLCollection rooted at root, whose filter matches descendant elements that have all their classes in classes. The comparisons for the classes must be done in an ASCII case-insensitive manner if root’s node document’s mode is "quirks"; otherwise in an identical to manner.

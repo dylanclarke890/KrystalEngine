@@ -16,6 +16,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `DOMContentLoaded` fires synchronously at the end of parsing (`FinishedParsing`), as upstream, where the specification queues a task. `load` fires from a later task (`CheckCompleted`, then `ImplicitClose`), and `hashchange` is queued on the window.
 - Event handler content attributes (`onclick="..."`) are scripts and stay inert: setting one doesn't replace a C++ handler as the specification's would. Handlers are set from C++ with `On<Name>()`/`SetOn<Name>()`. They're `Func<void(dom::Event &)>` and cancel with `PreventDefault()`, so `onerror`'s arguments and `onbeforeunload`'s return value don't exist.
 - A listener's global, whose current event `event` is, is the current target's window (`EventDispatcher::RelevantWindow`), since listeners are host code without realms. Other targets, such as signals and media query lists, set no current event (FIXME).
+- Nodes are equal when their node types match, as upstream, where the specification asks for the same interfaces: an `HTMLDocument` equals an `XMLDocument` with equal children.
+- Documents have no origin and no base URL override, so cloning a document copies neither: the copy's base URL comes from its own URL and `<base>` element.
 - There are no global objects, so `DocumentFragment` is constructed with a document. `Document()` takes no arguments.
 - The fallback base URL is always the document's URL: there are no browsing contexts, so there are no `srcdoc` documents (`SPEC-VIOLATION` in `FallbackBaseURL`).
 - There's no Content Security Policy: every `<base>` is allowed, and inline `<style>` sheets and `style` attributes are parsed unchecked (`SPEC-VIOLATION(CSP)`).

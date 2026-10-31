@@ -93,7 +93,7 @@ namespace krys::boo::dom::tests
     REQUIRE(attr->LocalName() == u8"test-attr");
   }
 
-  TEST_CASE("Attr::NodeName", "[HTML][Attr]")
+  TEST_CASE("Node.nodeName: an Attr's is its qualified name", "[DOM][Attr][dom:dom-node-nodename]")
   {
     CommonTestData data;
 
@@ -103,7 +103,8 @@ namespace krys::boo::dom::tests
     REQUIRE(attr->NodeName() == u8"test-attr");
   }
 
-  TEST_CASE("Attr::NodeValue", "[HTML][Attr]")
+  TEST_CASE("Node.nodeValue: an Attr's is its value, which setting it sets",
+            "[DOM][Attr][dom:dom-node-nodevalue]")
   {
     CommonTestData data;
 
@@ -115,7 +116,8 @@ namespace krys::boo::dom::tests
     REQUIRE(attr->NodeValue() == u8"test-value");
   }
 
-  TEST_CASE("Attr::TextContent", "[HTML][Attr]")
+  TEST_CASE("Node.textContent: an Attr's is its value, which setting it sets",
+            "[DOM][Attr][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
     CommonTestData data;
 

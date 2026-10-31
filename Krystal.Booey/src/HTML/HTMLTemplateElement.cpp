@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
@@ -25,6 +27,26 @@ namespace krys::boo::html
   void HTMLTemplateElement::SetTemplateContents(dom::ShadowRoot &shadow) noexcept
   {
     _content = ShareRef<dom::DocumentFragment>(shadow);
+  }
+
+  void HTMLTemplateElement::OnClone(dom::Node &copy, bool subtree) noexcept
+  {
+    HTMLElement::OnClone(copy, subtree);
+
+    // 1. If subtree is false, then return.
+    if (!subtree)
+    {
+      return;
+    }
+
+    // 2. For each child of node's template contents's children, in tree order: clone a node given child with
+    //    document set to copy's template contents's node document, subtree set to true, and parent set to
+    //    copy's template contents.
+    auto &copyContents = Downcast<HTMLTemplateElement>(copy).TemplateContents();
+    for (auto &child : dom::ChildNodeRange(TemplateContents()))
+    {
+      (void)dom::NodeAlgorithms::CloneNode(child, &copyContents.NodeDocument(), true, &copyContents);
+    }
   }
 
   dom::DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
