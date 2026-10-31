@@ -7,8 +7,6 @@
 
 namespace krys::boo::css
 {
-  class MediaQueryList;
-
   /// @see https://drafts.csswg.org/cssom-view/#dictdef-mediaquerylisteventinit
   struct MediaQueryListEventInit : public dom::EventInit
   {
@@ -20,8 +18,6 @@ namespace krys::boo::css
   /// @see https://drafts.csswg.org/cssom-view/#mediaquerylistevent
   class MediaQueryListEvent final : public dom::Event
   {
-    friend class MediaQueryList;
-
   private:
     CSSOMString _media;
     bool _matches {false};

@@ -301,7 +301,7 @@ namespace krys::boo::tests
                                                   CHECK(event.CurrentTarget().get() == &window);
                                                   CHECK(event.Target().get() == fixture.Document.get());
                                                 });
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, nullptr,
+      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, {},
                                                         true);
       CHECK(windowHeard);
     }

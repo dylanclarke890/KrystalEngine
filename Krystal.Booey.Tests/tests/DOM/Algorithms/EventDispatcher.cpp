@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/EventTarget.hpp"
+#include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -355,7 +356,67 @@ namespace krys::boo::dom::tests
     REQUIRE(calls == 1);
   }
 
-  TEST_CASE("EventDispatcher::FireEvent", "[EventDispatcher]")
+  TEST_CASE("Fire an event: a trusted event of the type, with the attributes it's given",
+            "[EventDispatcher][dom:concept-event-fire]")
+  {
+    PathFixture fixture;
+
+    SECTION("An Event by default")
+    {
+      bool trusted = false;
+      bool bubbles = false;
+      bool cancelable = false;
+      DOMStringAtom type = DOMStringAtom::Null();
+      auto listener = fixture.Parent->AddEventListener(EventNames::Click,
+                                                       [&](Event &e)
+                                                       {
+                                                         trusted = e.IsTrusted();
+                                                         bubbles = e.Bubbles();
+                                                         cancelable = e.Cancelable();
+                                                         type = e.Type();
+                                                         e.PreventDefault();
+                                                       });
+      bool result = EventDispatcher::FireEvent(EventNames::Click, *fixture.Child,
+                                               EventInit {.Bubbles = true, .Cancelable = true});
+      REQUIRE(trusted);
+      REQUIRE(bubbles);
+      REQUIRE(cancelable);
+      REQUIRE(type == EventNames::Click);
+      REQUIRE_FALSE(result);
+    }
+
+    SECTION("Another interface, with its own attributes")
+    {
+      EventTarget *relatedTarget = nullptr;
+      auto listener = fixture.Child->AddEventListener<FocusEvent>(
+        DOMStringAtom(u8"focus"), [&](FocusEvent &e) { relatedTarget = e.RelatedTarget().get(); });
+      FocusEventInit attributes;
+      attributes.RelatedTarget = fixture.Parent;
+      REQUIRE(EventDispatcher::FireEvent<FocusEvent>(DOMStringAtom(u8"focus"), *fixture.Child, attributes));
+      REQUIRE(relatedTarget == fixture.Parent.get());
+    }
+
+    SECTION("Events the user agent fires with attributes are trusted (invalid)")
+    {
+      auto element = NewElement(*fixture.Document, u8"input");
+      auto &input = Downcast<html::HTMLInputElement>(*element);
+      REQUIRE_FALSE(input.SetAttribute(u8"required", u8"").HasException());
+      REQUIRE_FALSE(fixture.Root->AppendChild(input).HasException());
+      bool trusted = false;
+      bool cancelable = false;
+      auto listener = input.AddEventListener(DOMStringAtom(EventNames::Invalid),
+                                             [&](Event &e)
+                                             {
+                                               trusted = e.IsTrusted();
+                                               cancelable = e.Cancelable();
+                                             });
+      REQUIRE_FALSE(input.CheckValidity());
+      REQUIRE(trusted);
+      REQUIRE(cancelable);
+    }
+  }
+
+  TEST_CASE("Fire an event at a custom target", "[EventDispatcher][dom:concept-event-fire]")
   {
     struct TestEvent : public Event
     {

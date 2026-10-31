@@ -107,8 +107,8 @@ namespace krys::boo::html
     Ref<HTMLElement> protectedThis = ShareRef(element);
     Ref<dom::Document> originalDocument = ShareRef(element.NodeDocument());
     auto type = dom::DOMStringAtom(EventNames::Invalid);
-    bool notCanceled = dom::EventDispatcher::FireEvent<dom::Event>(type, element, [&](dom::Event &event)
-                                                                   { event.InitEvent(type, false, true); });
+    bool notCanceled =
+      dom::EventDispatcher::FireEvent<dom::Event>(type, element, dom::EventInit {.Cancelable = true});
     if (notCanceled && unhandledInvalidControls && element.IsConnected()
         && originalDocument.get() == &element.NodeDocument())
     {

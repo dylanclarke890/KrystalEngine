@@ -24,7 +24,6 @@ namespace krys::boo::dom
     friend class EventFactory;
     friend class ShadowRoot;
     friend class EventTarget;
-    friend class MutationObserverAlgorithms;
 
   protected:
     Event() noexcept = default;

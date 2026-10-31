@@ -1839,8 +1839,8 @@ namespace krys::boo
     }
 
     auto type = dom::DOMStringAtom(EventNames::SelectStart);
-    return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget, [&](dom::Event &event)
-                                                       { event.InitEvent(type, true, true); });
+    return dom::EventDispatcher::FireEvent<dom::Event>(type, *selectStartTarget,
+                                                       dom::EventInit {.Bubbles = true, .Cancelable = true});
   }
 
   void FrameSelection::SetStart(const VisiblePosition &position, UserTriggered trigger) noexcept
@@ -1982,7 +1982,7 @@ namespace krys::boo
     {
       auto type = dom::DOMStringAtom(EventNames::SelectStart);
       bool notCanceled = dom::EventDispatcher::FireEvent<dom::Event>(
-        type, *selectStartTarget, [&](dom::Event &event) { event.InitEvent(type, true, true); });
+        type, *selectStartTarget, dom::EventInit {.Bubbles = true, .Cancelable = true});
       if (!notCanceled)
       {
         return;

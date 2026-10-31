@@ -118,7 +118,7 @@ namespace krys::boo::dom
     for (auto &slot : signalSet)
     {
       (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::SlotChange), *slot,
-                                              [](Event &event) { event._bubbles = true; });
+                                              EventInit {.Bubbles = true});
     }
   }
 

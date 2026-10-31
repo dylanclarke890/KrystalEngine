@@ -2188,13 +2188,9 @@ namespace krys::boo::dom
     auto currentTargets = std::exchange(_pendingScrollEventTargets, {});
     for (auto &[target, type] : currentTargets)
     {
-      bool bubbles = Is<Document>(*target);
       auto eventName = type == ScrollEventType::Scroll ? EventNames::Scroll : EventNames::ScrollEnd;
-      EventIDLInitializer<Event> initialize = [bubbles](Event &event)
-      {
-        event._bubbles = bubbles;
-      };
-      (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target, krys::move(initialize));
+      (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(eventName), *target,
+                                              EventInit {.Bubbles = Is<Document>(*target)});
     }
 
     if (_needsVisualViewportScrollEvent)
@@ -3321,7 +3317,7 @@ namespace krys::boo::dom
     {
       _loadTiming.LoadEventStartTime = window->NowTimestamp();
     }
-    (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::Load), *window, nullptr, true);
+    (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::Load), *window, {}, true);
     if (!_loadTiming.LoadEventEndTime)
     {
       _loadTiming.LoadEventEndTime = window->NowTimestamp();

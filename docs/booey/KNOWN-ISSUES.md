@@ -15,7 +15,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - Responses (`ResourceResponse`) have no HTTP headers, so there's no `document.lastModified` (it needs `Last-Modified`, or a file's modification date for file loads) and a language from a `Content-Language` header is not read (only the `<meta>` pragma is; FIXME in `SelectorCheckerTestFunctions.cpp`).
 - `title` is never shown: there's no `HitTestResult::Title`, no tooltip hook on the chrome client (upstream's `Chrome::getToolTip` and `mouseDidMoveOverElement`), and Krystal.UI draws no tooltips.
 - No Fullscreen API (`:fullscreen`).
-- No Event Timing: inner invoke doesn't record timing info for event listeners (FIXME in `EventDispatcher.cpp`).
+- No Event Timing or Long Animation Frames timing: inner invoke doesn't record timing info for event listeners, and firing an event doesn't record task time (FIXMEs in `EventDispatcher.cpp` and `EventDispatcher.hpp`).
 - `Element` doesn't run the rest of `didMoveToNewDocument` (FIXME in `Element.cpp`): nodes aren't told they have moved. Observer data does move (`Element::OnAdopt`), but a canvas moved to another document doesn't move its context's preparation (FIXME in `HTMLCanvasElement.hpp`), and lazy-image moves are untested.
 - No customized built-in elements: definitions have no `extends`, and an element's `is` value is kept (cloned, serialised) but never looks up a definition. Elements created with an `is` value are uncustomized.
 - Failed custom element constructions and upgrades, exceptions thrown by listeners and parse errors are not reported anywhere (no console; FIXMEs in `CustomElementInterface.cpp`).

@@ -416,9 +416,10 @@ Status: reviewed (2026-10-30)
 
 ### [2.10. Firing events](https://dom.spec.whatwg.org/#firing-events)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `EventDispatcher::FireEvent<TEvent>`, which takes the event's other IDL attributes as the dictionary its constructor takes and gives it to `EventFactory::Create`. Known issue: no task timing (steps 1 and 7). Tests: `tests/DOM/Algorithms/EventDispatcher.cpp`.
 
-- [ ] [fire an event](https://dom.spec.whatwg.org/#concept-event-fire) — To fire an event named e at target, optionally using an eventConstructor, with a description of how IDL attributes are to be initialized, and a legacy target override flag, run these steps:
+- [x] [fire an event](https://dom.spec.whatwg.org/#concept-event-fire) — To fire an event named e at target, optionally using an eventConstructor, with a description of how IDL attributes are to be initialized, and a legacy target override flag, run these steps:
   - 1. Let recordingTimingAsTask be the result of calling start recording task time if needed given target’s relevant settings object.
   - 2. If eventConstructor is not given, then let eventConstructor be Event.
   - 3. Let event be the result of creating an event given eventConstructor, in the relevant realm of target.

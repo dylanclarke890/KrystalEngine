@@ -575,25 +575,20 @@ namespace krys::boo::html
   void FocusAlgorithms::FireFocusEvent(dom::DOMStringAtom e, dom::Element &target,
                                        dom::EventTarget *relatedTarget) noexcept
   {
-    auto initialize = [&](dom::FocusEvent &event)
-    {
-      event._relatedTarget = ShareRefPtr(relatedTarget);
-      event._composed = true;
-      // FIXME: The view (the Window).
-    };
-    (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, initialize);
+    dom::FocusEventInit attributes;
+    attributes.RelatedTarget = ShareRefPtr(relatedTarget);
+    attributes.Composed = true;
+    // FIXME: The view (the Window).
+    (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(e, target, attributes);
 
     // The bubbling `focusin` and `focusout` events follow `focus` and `blur`.
     // https://w3c.github.io/uievents/#events-focusevent-event-order
     auto bubblingType = e.View() == u8"focus" ? u8"focusin" : e.View() == u8"blur" ? u8"focusout" : nullptr;
     if (bubblingType)
     {
+      attributes.Bubbles = true;
       (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(dom::DOMStringAtom(bubblingType), target,
-                                                             [&](dom::FocusEvent &event)
-                                                             {
-                                                               initialize(event);
-                                                               event._bubbles = true;
-                                                             });
+                                                             attributes);
     }
   }
 
@@ -1248,8 +1243,9 @@ namespace krys::boo::html
     // The focused element gets `blur` before the window, and `focus` after it.
     auto fire = [](dom::DOMStringAtom type, dom::Element &target)
     {
-      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, [](dom::FocusEvent &event)
-                                                             { event._composed = true; });
+      dom::FocusEventInit attributes;
+      attributes.Composed = true;
+      (void)dom::EventDispatcher::FireEvent<dom::FocusEvent>(type, target, attributes);
     };
     RefPtr<dom::Element> focusedElement = ShareRefPtr(document.FocusedElement());
     if (!focused && focusedElement)

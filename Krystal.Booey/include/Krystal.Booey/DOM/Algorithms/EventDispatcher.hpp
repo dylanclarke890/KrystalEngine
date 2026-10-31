@@ -4,7 +4,6 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/Internals/EventFactory.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
-#include "Krystal.Core/Types/Func.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 #include "Krystal.Core/Types/SmallList.hpp"
@@ -19,9 +18,6 @@ namespace krys::boo::dom
   class EventTarget;
   class EventPathItem;
   class EventListener;
-
-  template <DerivedFrom<Event> TEvent>
-  using EventIDLInitializer = Func<void(TEvent &)>;
 
   /// @see https://dom.spec.whatwg.org/#dispatching-events
   class EventDispatcher
@@ -51,34 +47,45 @@ namespace krys::boo::dom
     /// its node document's window.
     KRYS_NODISCARD static LocalDOMWindow *RelevantWindow(EventTarget &target) noexcept;
 
-    /// @brief Fires an event named `e` at `target`. Returns false if the event is
-    /// cancelable and at least one of the event handlers which received the event called `PreventDefault()`,
-    /// otherwise returns true.
-    /// @tparam TEvent The type of event to fire, must derive from `Event`. Defaults to `Event`.
-    /// @param e The type of the event to fire.
-    /// @param target The target to fire the event on.
-    /// @param idlAttributeInitializer An optional callback which initializes the event's IDL attributes. The
-    /// event is passed as an argument to the callback, and the callback is expected to modify the event's
-    /// attributes directly.
-    /// @param legacyTargetOverrideFlag If true, the event will be dispatched with the legacy target override
-    /// flag set.
-    /// @note `legacyTargetOverrideFlag` is only used by HTML when firing events on Window objects, and causes
-    /// the event to be dispatched to the Document associated with the Window instead of the Window itself.
+    /// @brief Fires a trusted @p TEvent named @p e at @p target.
+    /// @param attributes The event's other IDL attributes, as the dictionary its constructor takes.
+    /// @param legacyTargetOverrideFlag Whether the event is dispatched with the legacy target override flag,
+    /// which HTML sets when it fires an event at a window to give it the window's document as its target.
+    /// @return False if the event was canceled; otherwise true.
     /// @see https://dom.spec.whatwg.org/#concept-event-fire
     template <DerivedFrom<Event> TEvent = Event>
     static bool FireEvent(DOMStringAtom e, EventTarget &target,
-                          EventIDLInitializer<TEvent> idlAttributeInitializer = nullptr,
+                          const typename TEvent::dictionary_type &attributes = {},
                           bool legacyTargetOverrideFlag = false) noexcept
     {
-      Ref<TEvent> event = EventFactory::Create<TEvent>();
+      // 1. Let recordingTimingAsTask be the result of calling start recording task time if needed given
+      // target's relevant settings object.
+      // FIXME: Record task timing, once there's Long Animation Frames timing.
+
+      // 2. If eventConstructor is not given, then let eventConstructor be Event. (TEvent defaults to Event.)
+
+      // 3. Let event be the result of creating an event given eventConstructor, in the relevant realm of
+      // target.
+      // 5. Initialize any other IDL attributes of event as described in the invocation of this algorithm.
+      // (The invocation describes them as @p attributes, which create an event takes in place of the default
+      // dictionary.)
+      Ref<TEvent> event = EventFactory::Create<TEvent>(attributes);
+
+      // 4. Initialize event's type attribute to e.
       event->_type = e;
 
-      if (idlAttributeInitializer)
-      {
-        idlAttributeInitializer(*event);
-      }
+      // 6. Let result be the result of dispatching event at target, with legacy target override flag set if
+      // set.
+      bool result = DispatchToTarget(*event, &target, legacyTargetOverrideFlag);
 
-      return DispatchToTarget(*event, &target, legacyTargetOverrideFlag);
+      // 7. If recordingTimingAsTask is true:
+      //   7a. Assert: target's relevant settings object is a Document.
+      //   7b. Record task end time given the unsafe shared current time and target's relevant settings
+      //   object.
+      // (See step 1.)
+
+      // 8. Return result.
+      return result;
     }
   };
 }
