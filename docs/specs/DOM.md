@@ -937,11 +937,12 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.10.1. Interface NodeList](https://dom.spec.whatwg.org/#interface-nodelist)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `NodeList`, with `LiveNodeList` and `StaticNodeList` (`LabelsNodeList` and `RadioNodeList` are HTML's). Its supported property indices are `IsSupportedPropertyIndex`, and `begin()`/`end()` make it iterable. Tests: `tests/DOM/NodeList.cpp`.
 
-- [ ] [NodeList.length](https://dom.spec.whatwg.org/#dom-nodelist-length) — The length attribute must return the number of nodes represented by the collection.
+- [x] [NodeList.length](https://dom.spec.whatwg.org/#dom-nodelist-length) — The length attribute must return the number of nodes represented by the collection.
 
-- [ ] [NodeList.item(index)](https://dom.spec.whatwg.org/#dom-nodelist-item) — The item(index) method must return the indexth node in the collection. If there is no indexth node in the collection, then the method must return null.
+- [x] [NodeList.item(index)](https://dom.spec.whatwg.org/#dom-nodelist-item) — The item(index) method must return the indexth node in the collection. If there is no indexth node in the collection, then the method must return null.
 
 ##### [4.2.10.2. Interface HTMLCollection](https://dom.spec.whatwg.org/#interface-htmlcollection)
 

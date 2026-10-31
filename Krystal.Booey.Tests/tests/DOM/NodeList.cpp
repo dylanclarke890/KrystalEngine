@@ -41,4 +41,51 @@ namespace krys::boo::dom::tests
     // A static one doesn't.
     CHECK(selected->Length() == 2u);
   }
+
+  TEST_CASE("NodeList: length is the number of nodes, item() the indexth or null, and it iterates them",
+            "[DOM][NodeList][dom:interface-nodelist][dom:dom-nodelist-length][dom:dom-nodelist-item]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto root = document->CreateElement(u8"div").ReleaseValue();
+    auto first = document->CreateElement(u8"p").ReleaseValue();
+    auto second = document->CreateTextNode(u8"text");
+    REQUIRE_FALSE(root->AppendChild(*first).HasException());
+    REQUIRE_FALSE(root->AppendChild(*second).HasException());
+
+    auto check = [&](NodeList &list, std::initializer_list<const Node *> nodes)
+    {
+      REQUIRE(list.Length() == nodes.size());
+      size_t index = 0;
+      for (auto *node : nodes)
+      {
+        CHECK(list.Item(index).get() == node);
+        CHECK(list[index].get() == node);
+        ++index;
+      }
+      CHECK(list.Item(nodes.size()) == nullptr);
+      CHECK(list[nodes.size() + 1] == nullptr);
+
+      List<const Node *> iterated;
+      for (auto node : list)
+      {
+        iterated.push_back(node.get());
+      }
+      CHECK(iterated == List<const Node *>(nodes));
+    };
+
+    SECTION("Live")
+    {
+      check(*root->ChildNodes(), {first.get(), second.get()});
+    }
+
+    SECTION("Static")
+    {
+      check(*root->QuerySelectorAll(u8"p").ReleaseValue(), {first.get()});
+    }
+
+    SECTION("Empty")
+    {
+      check(*document->CreateElement(u8"span").ReleaseValue()->ChildNodes(), {});
+    }
+  }
 }
