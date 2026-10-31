@@ -47,9 +47,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-htmlcollection-length
     KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
 
-  protected:
+    /// @brief The IDs and HTML `name` values of the elements, once each, in tree order.
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-names
     KRYS_NODISCARD virtual List<DOMString> SupportedPropertyNames() const noexcept = 0;
+
+  protected:
 
     /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
     KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept

@@ -946,20 +946,21 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.10.2. Interface HTMLCollection](https://dom.spec.whatwg.org/#interface-htmlcollection)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `HTMLCollection`, with `LiveHTMLCollection` and `StaticHTMLCollection` (`HTMLFormControlsCollection` and `HTMLTableRowsCollection` are HTML's). Tests: `tests/DOM/HTMLCollection.cpp`.
 
-- [ ] [HTMLCollection.length](https://dom.spec.whatwg.org/#dom-htmlcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
+- [x] [HTMLCollection.length](https://dom.spec.whatwg.org/#dom-htmlcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
 
-- [ ] [HTMLCollection.item(index)](https://dom.spec.whatwg.org/#dom-htmlcollection-item) — The item(index) method steps are to return the indexth element in the collection. If there is no indexth element in the collection, then the method must return null.
+- [x] [HTMLCollection.item(index)](https://dom.spec.whatwg.org/#dom-htmlcollection-item) — The item(index) method steps are to return the indexth element in the collection. If there is no indexth element in the collection, then the method must return null.
 
-- [ ] [The supported property names are the values from the list returned by these ste…](https://dom.spec.whatwg.org/#dom-htmlcollection-item) — The supported property names are the values from the list returned by these steps:
+- [x] [The supported property names are the values from the list returned by these ste…](https://dom.spec.whatwg.org/#dom-htmlcollection-item) — The supported property names are the values from the list returned by these steps:
   - 1. Let result be an empty list.
   - 2. For each element represented by the collection, in tree order:
     - 2a. If element has an ID which is not in result, append element’s ID to result.
     - 2b. If element is in the HTML namespace and has a name attribute whose value is neither the empty string nor is in result, append element’s name attribute value to result.
   - 3. Return result.
 
-- [ ] [HTMLCollection.namedItem(key)](https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key) — The namedItem(key) method steps are:
+- [x] [HTMLCollection.namedItem(key)](https://dom.spec.whatwg.org/#dom-htmlcollection-nameditem-key) — The namedItem(key) method steps are:
   - 1. If key is the empty string, return null.
   - 2. Return the first element in the collection for which at least one of the following is true: it has an ID which is key;; it is in the HTML namespace and has a name attribute whose value is key; or null if there is no such element.
 
