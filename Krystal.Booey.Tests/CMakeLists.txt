@@ -587,7 +587,6 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Algorithms/NameValidation.cpp
 		tests/DOM/Algorithms/OrderedSet.cpp
 		tests/DOM/Algorithms/TreeQueries.cpp
-		tests/DOM/Internals/Event/Event.cpp
 		tests/DOM/Internals/Event/CustomEvent.cpp
 		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp
@@ -613,6 +612,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Element.cpp
 		tests/DOM/ElementCSSOMView.cpp
 		tests/DOM/ElementTextDirection.cpp
+		tests/DOM/Event.cpp
 		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp

@@ -92,18 +92,19 @@ Status: unreviewed
 
 ### [2.2. Interface Event](https://dom.spec.whatwg.org/#interface-event)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `Event` (`Event.hpp`/`Event.cpp`), with the path in `EventPathItem` and the phases in `EventPhaseType`. The flags are `Event`'s data members. Tests: `tests/DOM/Event.cpp`.
 <!-- definitions: concept-event potential-event-target event-target event-relatedtarget event-touch-target-list event-path event-path-item event-path-invocation-target event-path-invocation-target-in-shadow-tree event-path-shadow-adjusted-target event-path-relatedtarget event-path-touch-target-list event-path-root-of-closed-tree event-path-slot-in-closed-tree dom-event-none dom-event-capturing_phase dom-event-at_target dom-event-bubbling_phase stop-propagation-flag stop-immediate-propagation-flag canceled-flag in-passive-listener-flag composed-flag initialized-flag dispatch-flag dom-event-cancelable -->
 
-- [ ] [Event.type](https://dom.spec.whatwg.org/#dom-event-type) — The type attribute must return the value it was initialized to. When an event is created the attribute must be initialized to the empty string.
+- [x] [Event.type](https://dom.spec.whatwg.org/#dom-event-type) — The type attribute must return the value it was initialized to. When an event is created the attribute must be initialized to the empty string.
 
-- [ ] [Event.target](https://dom.spec.whatwg.org/#dom-event-target) — The target getter steps are to return this’s target.
+- [x] [Event.target](https://dom.spec.whatwg.org/#dom-event-target) — The target getter steps are to return this’s target.
 
-- [ ] [Event.srcElement](https://dom.spec.whatwg.org/#dom-event-srcelement) — The srcElement getter steps are to return this’s target.
+- [x] [Event.srcElement](https://dom.spec.whatwg.org/#dom-event-srcelement) — The srcElement getter steps are to return this’s target.
 
-- [ ] [Event.currentTarget](https://dom.spec.whatwg.org/#dom-event-currenttarget) — The currentTarget attribute must return the value it was initialized to. When an event is created the attribute must be initialized to null.
+- [x] [Event.currentTarget](https://dom.spec.whatwg.org/#dom-event-currenttarget) — The currentTarget attribute must return the value it was initialized to. When an event is created the attribute must be initialized to null.
 
-- [ ] [Event.composedPath()](https://dom.spec.whatwg.org/#dom-event-composedpath) — The composedPath() method steps are:
+- [x] [Event.composedPath()](https://dom.spec.whatwg.org/#dom-event-composedpath) — The composedPath() method steps are:
   - 1. Let composedPath be an empty list.
   - 2. Let path be this’s path.
   - 3. If path is empty, then return composedPath.
@@ -138,39 +139,39 @@ Status: unreviewed
     - 16d. Increase index by 1.
   - 17. Return composedPath.
 
-- [ ] [Event.eventPhase](https://dom.spec.whatwg.org/#dom-event-eventphase) — The eventPhase attribute must return the value it was initialized to, which must be one of the following:
+- [x] [Event.eventPhase](https://dom.spec.whatwg.org/#dom-event-eventphase) — The eventPhase attribute must return the value it was initialized to, which must be one of the following:
   - • NONE (numeric value 0): Events not currently dispatched are in this phase.
   - • CAPTURING_PHASE (numeric value 1): When an event is dispatched to an object that participates in a tree it will be in this phase before it reaches its target.
   - • AT_TARGET (numeric value 2): When an event is dispatched it will be in this phase on its target.
   - • BUBBLING_PHASE (numeric value 3): When an event is dispatched to an object that participates in a tree it will be in this phase after it reaches its target.
 
-- [ ] [Event.stopPropagation()](https://dom.spec.whatwg.org/#dom-event-stoppropagation) — The stopPropagation() method steps are to set this’s stop propagation flag.
+- [x] [Event.stopPropagation()](https://dom.spec.whatwg.org/#dom-event-stoppropagation) — The stopPropagation() method steps are to set this’s stop propagation flag.
 
-- [ ] [Event.cancelBubble](https://dom.spec.whatwg.org/#dom-event-cancelbubble) — The cancelBubble getter steps are to return true if this’s stop propagation flag is set; otherwise false.
+- [x] [Event.cancelBubble](https://dom.spec.whatwg.org/#dom-event-cancelbubble) — The cancelBubble getter steps are to return true if this’s stop propagation flag is set; otherwise false.
 
-- [ ] [The cancelBubble setter steps](https://dom.spec.whatwg.org/#dom-event-cancelbubble) — The cancelBubble setter steps are to set this’s stop propagation flag if the given value is true; otherwise do nothing.
+- [x] [The cancelBubble setter steps](https://dom.spec.whatwg.org/#dom-event-cancelbubble) — The cancelBubble setter steps are to set this’s stop propagation flag if the given value is true; otherwise do nothing.
 
-- [ ] [Event.stopImmediatePropagation()](https://dom.spec.whatwg.org/#dom-event-stopimmediatepropagation) — The stopImmediatePropagation() method steps are to set this’s stop propagation flag and this’s stop immediate propagation flag.
+- [x] [Event.stopImmediatePropagation()](https://dom.spec.whatwg.org/#dom-event-stopimmediatepropagation) — The stopImmediatePropagation() method steps are to set this’s stop propagation flag and this’s stop immediate propagation flag.
 
-- [ ] [Event.bubbles](https://dom.spec.whatwg.org/#dom-event-bubbles) — The bubbles and cancelable attributes must return the values they were initialized to.
+- [x] [Event.bubbles](https://dom.spec.whatwg.org/#dom-event-bubbles) — The bubbles and cancelable attributes must return the values they were initialized to.
 
-- [ ] [set the canceled flag](https://dom.spec.whatwg.org/#set-the-canceled-flag) — To set the canceled flag, given an event event, if event’s cancelable attribute value is true and event’s in passive listener flag is unset, then set event’s canceled flag, and do nothing otherwise.
+- [x] [set the canceled flag](https://dom.spec.whatwg.org/#set-the-canceled-flag) — To set the canceled flag, given an event event, if event’s cancelable attribute value is true and event’s in passive listener flag is unset, then set event’s canceled flag, and do nothing otherwise.
 
-- [ ] [Event.returnValue](https://dom.spec.whatwg.org/#dom-event-returnvalue) — The returnValue getter steps are to return false if this’s canceled flag is set; otherwise true.
+- [x] [Event.returnValue](https://dom.spec.whatwg.org/#dom-event-returnvalue) — The returnValue getter steps are to return false if this’s canceled flag is set; otherwise true.
 
-- [ ] [The returnValue setter steps](https://dom.spec.whatwg.org/#dom-event-returnvalue) — The returnValue setter steps are to set the canceled flag with this if the given value is false; otherwise do nothing.
+- [x] [The returnValue setter steps](https://dom.spec.whatwg.org/#dom-event-returnvalue) — The returnValue setter steps are to set the canceled flag with this if the given value is false; otherwise do nothing.
 
-- [ ] [Event.preventDefault()](https://dom.spec.whatwg.org/#dom-event-preventdefault) — The preventDefault() method steps are to set the canceled flag with this.
+- [x] [Event.preventDefault()](https://dom.spec.whatwg.org/#dom-event-preventdefault) — The preventDefault() method steps are to set the canceled flag with this.
 
-- [ ] [Event.defaultPrevented](https://dom.spec.whatwg.org/#dom-event-defaultprevented) — The defaultPrevented getter steps are to return true if this’s canceled flag is set; otherwise false.
+- [x] [Event.defaultPrevented](https://dom.spec.whatwg.org/#dom-event-defaultprevented) — The defaultPrevented getter steps are to return true if this’s canceled flag is set; otherwise false.
 
-- [ ] [Event.composed](https://dom.spec.whatwg.org/#dom-event-composed) — The composed getter steps are to return true if this’s composed flag is set; otherwise false.
+- [x] [Event.composed](https://dom.spec.whatwg.org/#dom-event-composed) — The composed getter steps are to return true if this’s composed flag is set; otherwise false.
 
-- [ ] [Event.isTrusted](https://dom.spec.whatwg.org/#dom-event-istrusted) — The isTrusted attribute must return the value it was initialized to. When an event is created the attribute must be initialized to false.
+- [x] [Event.isTrusted](https://dom.spec.whatwg.org/#dom-event-istrusted) — The isTrusted attribute must return the value it was initialized to. When an event is created the attribute must be initialized to false.
 
-- [ ] [Event.timeStamp](https://dom.spec.whatwg.org/#dom-event-timestamp) — The timeStamp attribute must return the value it was initialized to.
+- [x] [Event.timeStamp](https://dom.spec.whatwg.org/#dom-event-timestamp) — The timeStamp attribute must return the value it was initialized to.
 
-- [ ] [initialize (Event)](https://dom.spec.whatwg.org/#concept-event-initialize) — To initialize an event, with type, bubbles, and cancelable, run these steps:
+- [x] [initialize (Event)](https://dom.spec.whatwg.org/#concept-event-initialize) — To initialize an event, with type, bubbles, and cancelable, run these steps:
   - 1. Set event’s initialized flag.
   - 2. Unset event’s stop propagation flag, stop immediate propagation flag, and canceled flag.
   - 3. Set event’s isTrusted attribute to false.
@@ -179,7 +180,7 @@ Status: unreviewed
   - 6. Set event’s bubbles attribute to bubbles.
   - 7. Set event’s cancelable attribute to cancelable.
 
-- [ ] [Event.initEvent(type, bubbles, cancelable)](https://dom.spec.whatwg.org/#dom-event-initevent) — The initEvent(type, bubbles, cancelable) method steps are:
+- [x] [Event.initEvent(type, bubbles, cancelable)](https://dom.spec.whatwg.org/#dom-event-initevent) — The initEvent(type, bubbles, cancelable) method steps are:
   - 1. If this’s dispatch flag is set, then return.
   - 2. Initialize this with type, bubbles, and cancelable.
 

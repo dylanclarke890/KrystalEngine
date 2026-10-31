@@ -15,6 +15,7 @@ namespace krys::boo::dom
   class Document;
   class EventTarget;
 
+  /// @see https://dom.spec.whatwg.org/#concept-event
   /// @see https://dom.spec.whatwg.org/#event
   class Event : public RefCounted<Event>
   {
@@ -32,20 +33,29 @@ namespace krys::boo::dom
 
   protected:
     DOMStringAtom _type;
+    /// @see https://dom.spec.whatwg.org/#event-target
     RefPtr<EventTarget> _target {nullptr};
     RefPtr<EventTarget> _currentTarget {nullptr};
     MonotonicTime::duration _createTime {};
+    /// @see https://dom.spec.whatwg.org/#event-path
     List<EventPathItem> _path;
     EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
     bool _isTrusted : 1 {false};
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#stop-propagation-flag
     bool _stopPropagation : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#stop-immediate-propagation-flag
     bool _stopImmediatePropagation : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#canceled-flag
     bool _canceled : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#in-passive-listener-flag
     bool _inPassiveListener : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#composed-flag
     bool _composed : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#initialized-flag
     bool _initialized : 1 {false};
+    /// @see https://dom.spec.whatwg.org/#dispatch-flag
     bool _dispatched : 1 {false};
     bool _defaultHandled : 1 {false};
     bool _isDefaultEventHandlerIgnored : 1 {false};
@@ -139,7 +149,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-event-returnvalue
     KRYS_NODISCARD bool ReturnValue() const noexcept
     {
-      return DefaultPrevented();
+      return !_canceled;
     }
 
     /// @note Legacy.

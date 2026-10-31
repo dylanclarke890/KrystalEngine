@@ -4,9 +4,9 @@
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Page/LocalDOMWindow.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Time/MonotonicTime.hpp"
 #include <algorithm>
-#include <cassert>
 
 namespace krys::boo::dom
 {
@@ -31,104 +31,154 @@ namespace krys::boo::dom
 
   List<Ref<EventTarget>> Event::ComposedPath() const noexcept
   {
+    // 1. Let composedPath be an empty list.
     List<Ref<EventTarget>> composedPath {};
 
-    if (_path.empty())
+    // 2. Let path be this's path.
+    auto &path = _path;
+
+    // 3. If path is empty, then return composedPath.
+    if (path.empty())
     {
       return composedPath;
     }
 
+    // 4. Let currentTarget be this's currentTarget attribute value.
     EventTarget *currentTarget = _currentTarget.get();
-    assert(currentTarget != nullptr);
+
+    // 5. Assert: currentTarget is an EventTarget object.
+    krys_debug_assert(currentTarget != nullptr);
+
+    // 6. Append currentTarget to composedPath.
     composedPath.emplace_back(ShareRef(*currentTarget));
 
+    // 7. Let currentTargetIndex be 0.
     int32 currentTargetIndex = 0;
-    int32 currentTargetHiddenSubtreeLevel = 0;
-    int32 index = static_cast<int32>(_path.size()) - 1;
 
+    // 8. Let currentTargetHiddenSubtreeLevel be 0.
+    int32 currentTargetHiddenSubtreeLevel = 0;
+
+    // 9. Let index be path's size - 1.
+    int32 index = static_cast<int32>(path.size()) - 1;
+
+    // 10. While index is greater than or equal to 0:
     while (index >= 0)
     {
-      auto &item = _path[index];
+      auto &item = path[index];
 
+      // 10a. If path[index]'s root-of-closed-tree is true, then increase currentTargetHiddenSubtreeLevel
+      // by 1.
       if (item.RootOfClosedTree())
       {
         currentTargetHiddenSubtreeLevel++;
       }
 
+      // 10b. If path[index]'s invocation target is currentTarget, then set currentTargetIndex to index and
+      // break.
       if (item.InvocationTarget() == currentTarget)
       {
         currentTargetIndex = index;
         break;
       }
 
+      // 10c. If path[index]'s slot-in-closed-tree is true, then decrease currentTargetHiddenSubtreeLevel
+      // by 1.
       if (item.SlotInClosedTree())
       {
         currentTargetHiddenSubtreeLevel--;
       }
 
+      // 10d. Decrease index by 1.
       --index;
     }
 
+    // 11. Let currentHiddenLevel and maxHiddenLevel be currentTargetHiddenSubtreeLevel.
     int32 currentHiddenLevel = currentTargetHiddenSubtreeLevel;
     int32 maxHiddenLevel = currentTargetHiddenSubtreeLevel;
 
+    // 12. Set index to currentTargetIndex - 1.
     index = currentTargetIndex - 1;
+
+    // 13. While index is greater than or equal to 0:
     while (index >= 0)
     {
-      auto &item = _path[index];
+      auto &item = path[index];
 
+      // 13a. If path[index]'s root-of-closed-tree is true, then increase currentHiddenLevel by 1.
       if (item.RootOfClosedTree())
       {
         currentHiddenLevel++;
       }
 
+      // 13b. If currentHiddenLevel is less than or equal to maxHiddenLevel, then prepend path[index]'s
+      // invocation target to composedPath.
       if (currentHiddenLevel <= maxHiddenLevel)
       {
         composedPath.insert(composedPath.begin(), ShareRef(*item.InvocationTarget()));
       }
 
+      // 13c. If path[index]'s slot-in-closed-tree is true:
       if (item.SlotInClosedTree())
       {
+        // 13c.i. Decrease currentHiddenLevel by 1.
         currentHiddenLevel--;
+
+        // 13c.ii. If currentHiddenLevel is less than maxHiddenLevel, then set maxHiddenLevel to
+        // currentHiddenLevel.
         if (currentHiddenLevel < maxHiddenLevel)
         {
           maxHiddenLevel = currentHiddenLevel;
         }
       }
 
+      // 13d. Decrease index by 1.
       --index;
     }
 
+    // 14. Set currentHiddenLevel and maxHiddenLevel to currentTargetHiddenSubtreeLevel.
     currentHiddenLevel = currentTargetHiddenSubtreeLevel;
     maxHiddenLevel = currentTargetHiddenSubtreeLevel;
 
+    // 15. Set index to currentTargetIndex + 1.
     index = currentTargetIndex + 1;
 
-    while (index < static_cast<int32>(_path.size()))
+    // 16. While index is less than path's size:
+    while (index < static_cast<int32>(path.size()))
     {
-      auto &item = _path[index];
+      auto &item = path[index];
 
+      // 16a. If path[index]'s slot-in-closed-tree is true, then increase currentHiddenLevel by 1.
       if (item.SlotInClosedTree())
       {
         currentHiddenLevel++;
       }
 
+      // 16b. If currentHiddenLevel is less than or equal to maxHiddenLevel, then append path[index]'s
+      // invocation target to composedPath.
       if (currentHiddenLevel <= maxHiddenLevel)
       {
         composedPath.emplace_back(ShareRef(*item.InvocationTarget()));
       }
 
+      // 16c. If path[index]'s root-of-closed-tree is true:
       if (item.RootOfClosedTree())
       {
+        // 16c.i. Decrease currentHiddenLevel by 1.
         currentHiddenLevel--;
+
+        // 16c.ii. If currentHiddenLevel is less than maxHiddenLevel, then set maxHiddenLevel to
+        // currentHiddenLevel.
         if (currentHiddenLevel < maxHiddenLevel)
         {
           maxHiddenLevel = currentHiddenLevel;
         }
       }
+
+      // 16d. Increase index by 1.
       ++index;
     }
 
+    // 17. Return composedPath.
     return composedPath;
   }
 
@@ -155,11 +205,13 @@ namespace krys::boo::dom
 
   void Event::InitEvent(DOMStringAtom type, bool bubbles, bool cancelable) noexcept
   {
+    // 1. If this's dispatch flag is set, then return.
     if (_dispatched)
     {
       return;
     }
 
+    // 2. Initialize this with type, bubbles, and cancelable.
     Initialize(*this, type, bubbles, cancelable);
   }
 
@@ -179,14 +231,27 @@ namespace krys::boo::dom
 
   void Event::Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept
   {
+    // 1. Set event's initialized flag.
     event._initialized = true;
+
+    // 2. Unset event's stop propagation flag, stop immediate propagation flag, and canceled flag.
     event._stopPropagation = false;
     event._stopImmediatePropagation = false;
     event._canceled = false;
+
+    // 3. Set event's isTrusted attribute to false.
     event._isTrusted = false;
+
+    // 4. Set event's target to null.
     event._target = nullptr;
+
+    // 5. Set event's type attribute to type.
     event._type = type;
+
+    // 6. Set event's bubbles attribute to bubbles.
     event._bubbles = bubbles;
+
+    // 7. Set event's cancelable attribute to cancelable.
     event._cancellable = cancelable;
   }
 }
