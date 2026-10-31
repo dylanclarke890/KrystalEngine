@@ -966,15 +966,17 @@ Status: reviewed (2026-10-31)
 
 ### [4.3. Mutation observers](https://dom.spec.whatwg.org/#mutation-observers)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> The surrounding agent's state (microtask queued flag, counter, pending observers, signal slots) is one per process in `MutationObserverAlgorithms.cpp` (see `DIFFERENCES.md`).
+> A node's transient registered observers are kept in a list beside its registered observer list (`Node::TransientRegisteredObservers()`); add transient registered observers walks both.
 <!-- definitions: mutation-observer-compound-microtask-queued-flag mutation-observer-list mutation-observer-counter eventdef-htmlslotelement-slotchange registered-observer-list registered-observer registered-observer-observer registered-observer-options transient-registered-observer transient-registered-observer-source -->
 
-- [ ] [queue a mutation observer microtask](https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask) — To queue a mutation observer microtask:
+- [x] [queue a mutation observer microtask](https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask) — To queue a mutation observer microtask:
   - 1. If the surrounding agent’s mutation observer microtask queued is true, then return.
   - 2. Set the surrounding agent’s mutation observer microtask queued to true.
   - 3. Queue a microtask to notify mutation observers.
 
-- [ ] [notify mutation observers](https://dom.spec.whatwg.org/#notify-mutation-observers) — To notify mutation observers:
+- [x] [notify mutation observers](https://dom.spec.whatwg.org/#notify-mutation-observers) — To notify mutation observers:
   - 1. Set the surrounding agent’s mutation observer microtask queued to false.
   - 2. Let notifyList be the result of sorting the surrounding agent’s pending mutation observers in ascending order, with a being less than b if a’s creation index is less than b’s creation index.
   - 3. Empty the surrounding agent’s pending mutation observers.
@@ -987,7 +989,7 @@ Status: unreviewed
     - 6d. If records is not empty, then invoke mo’s callback with « records, mo » and "report", and with callback this value mo.
   - 7. For each slot of signalSet: fire an event named slotchange, with its bubbles attribute set to true, at slot.
 
-- [ ] [add transient registered observers](https://dom.spec.whatwg.org/#add-transient-registered-observers) — To add transient registered observers given a node node and a node parent:
+- [x] [add transient registered observers](https://dom.spec.whatwg.org/#add-transient-registered-observers) — To add transient registered observers given a node node and a node parent:
   - 1. For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of inclusiveAncestor’s registered observer list:
     - 1a. If registered’s options["subtree"] is false, then continue.
     - 1b. Let observer be registered’s observer.
@@ -998,7 +1000,7 @@ Status: unreviewed
     - 1g. Append observer to the surrounding agent’s pending mutation observers.
     - 1h. Queue a mutation observer microtask.
 
-- [ ] [remove transient registered observers](https://dom.spec.whatwg.org/#remove-transient-registered-observers) — To remove transient registered observers for a MutationObserver object observer:
+- [x] [remove transient registered observers](https://dom.spec.whatwg.org/#remove-transient-registered-observers) — To remove transient registered observers for a MutationObserver object observer:
   - 1. For each node of observer’s transient node set: remove all transient registered observers whose observer is observer from node’s registered observer list.
   - 2. Empty observer’s transient node set.
 

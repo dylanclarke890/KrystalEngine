@@ -13,6 +13,7 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class MutationObserver;
   class Node;
 
   /// @see https://dom.spec.whatwg.org/#mutation-observers
@@ -20,6 +21,11 @@ namespace krys::boo::dom
   class MutationObserverAlgorithms
   {
   public:
+    /// @brief Returns the surrounding agent's mutation observer counter and increases it by 1, for a new
+    /// observer's creation index.
+    /// @see https://dom.spec.whatwg.org/#mutation-observer-counter
+    KRYS_NODISCARD static uint64 TakeMutationObserverCounter() noexcept;
+
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask
     static void QueueMutationObserverMicrotask() noexcept;
 
@@ -31,10 +37,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#signal-slot-list
     static void AppendSignalSlot(html::HTMLSlotElement &slot) noexcept;
 
-    /// @brief Adds a transient registered observer to @p node for each registered observer of @p parent's
-    /// inclusive ancestors that observes the subtree, as @p node is removed from @p parent.
-    /// @see https://dom.spec.whatwg.org/#concept-node-remove
+    /// @see https://dom.spec.whatwg.org/#add-transient-registered-observers
     static void AddTransientRegisteredObservers(Node &node, Node &parent) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#remove-transient-registered-observers
+    static void RemoveTransientRegisteredObservers(MutationObserver &observer) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-record
     static void QueueMutationRecord(MutationRecordType type, Ref<Node> &&target, DOMStringAtom name,

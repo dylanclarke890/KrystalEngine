@@ -587,6 +587,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Iterators/ComposedTreeIterator.cpp
 		tests/DOM/Algorithms/Mixins.cpp
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
+		tests/DOM/Algorithms/MutationObserverAlgorithms.cpp
 		tests/DOM/Algorithms/NameValidation.cpp
 		tests/DOM/Algorithms/OrderedSet.cpp
 		tests/DOM/Algorithms/SlotAlgorithms.cpp

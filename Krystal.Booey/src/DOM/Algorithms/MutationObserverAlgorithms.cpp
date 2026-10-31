@@ -35,6 +35,8 @@ namespace krys::boo::dom
       List<Ref<MutationObserver>> PendingMutationObservers;
       /// @see https://dom.spec.whatwg.org/#signal-slot-list
       List<Ref<html::HTMLSlotElement>> SignalSlots;
+      /// @see https://dom.spec.whatwg.org/#mutation-observer-counter
+      uint64 MutationObserverCounter {0};
     };
 
     KRYS_NODISCARD MutationObserverAgent &SurroundingAgent() noexcept
@@ -51,6 +53,11 @@ namespace krys::boo::dom
         set.push_back(ShareRef(item));
       }
     }
+  }
+
+  uint64 MutationObserverAlgorithms::TakeMutationObserverCounter() noexcept
+  {
+    return SurroundingAgent().MutationObserverCounter++;
   }
 
   void MutationObserverAlgorithms::QueueMutationObserverMicrotask() noexcept
@@ -77,44 +84,41 @@ namespace krys::boo::dom
     // 1. Set the surrounding agent's mutation observer microtask queued to false.
     agent.MutationObserverMicrotaskQueued = false;
 
-    // 2. Let notifySet be a clone of the surrounding agent's pending mutation observers.
+    // 2. Let notifyList be the result of sorting the surrounding agent's pending mutation observers in
+    // ascending
+    //    order, with a being less than b if a's creation index is less than b's creation index.
     // 3. Empty the surrounding agent's pending mutation observers.
-    auto notifySet = std::exchange(agent.PendingMutationObservers, {});
+    auto notifyList = std::exchange(agent.PendingMutationObservers, {});
+    std::ranges::sort(notifyList, {},
+                      [](const Ref<MutationObserver> &observer) { return observer->_creationIndex; });
 
     // 4. Let signalSet be a clone of the surrounding agent's signal slots.
     // 5. Empty the surrounding agent's signal slots.
     auto signalSet = std::exchange(agent.SignalSlots, {});
 
-    // 6. For each mo of notifySet:
-    for (auto &mo : notifySet)
+    // 6. For each mo of notifyList:
+    for (auto &mo : notifyList)
     {
-      // 6.1. Let records be a clone of mo's record queue.
-      // 6.2. Empty mo's record queue.
+      // 6a. Let records be a clone of mo's record queue.
+      // 6b. Empty mo's record queue.
       auto records = std::exchange(mo->_recordQueue, {});
 
-      // 6.3. For each node of mo's node list, remove all transient registered observers whose observer is mo
-      // from node's registered observer list.
-      for (auto &weakNode : mo->_nodes)
-      {
-        if (auto node = weakNode.lock())
-        {
-          std::erase_if(node->TransientRegisteredObservers(),
-                        [&](const Ref<TransientRegisteredObserver> &transient)
-                        { return transient->Observer().get() == mo.get(); });
-        }
-      }
+      // 6c. Remove transient registered observers for mo.
+      RemoveTransientRegisteredObservers(*mo);
 
-      // 6.4. If records is not empty, then invoke mo's callback with « records, mo » and "report", and with
-      // callback this value mo.
-      // NOTE: there's no script, so nothing to report.
+      // 6d. If records is not empty, then invoke mo's callback with « records, mo » and "report", and with
+      //     callback this value mo.
+      // There's no script, so nothing to report.
       if (!records.empty())
       {
         mo->_callback(records, *mo);
       }
     }
 
-    // 7. For each slot of signalSet, fire an event named slotchange, with its bubbles attribute set to true,
-    // at slot.
+    // https://dom.spec.whatwg.org/#eventdef-htmlslotelement-slotchange
+    // 7. For each slot of signalSet: fire an event named slotchange, with its bubbles attribute set to true,
+    // at
+    //    slot.
     for (auto &slot : signalSet)
     {
       (void)EventDispatcher::FireEvent<Event>(DOMStringAtom(EventNames::SlotChange), *slot,
@@ -129,31 +133,82 @@ namespace krys::boo::dom
 
   void MutationObserverAlgorithms::AddTransientRegisteredObservers(Node &node, Node &parent) noexcept
   {
-    // For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
-    // inclusiveAncestor's registered observer list, if registered's options["subtree"] is true, then append a
-    // new transient registered observer whose observer is registered's observer, options is registered's
-    // options, and source is registered to node's registered observer list.
+    auto add = [&](RegisteredObserver &registered, RegisteredObserver &source)
+    {
+      // 1a. If registered's options["subtree"] is false, then continue.
+      if (!registered.Options().Subtree)
+      {
+        return;
+      }
+
+      // 1b. Let observer be registered's observer.
+      Ref<MutationObserver> observer = registered.Observer();
+
+      // 1c. Let source be registered's source if registered is a transient registered observer; otherwise
+      //     registered.
+      // 1d. If node's registered observer list contains a transient registered observer whose source is
+      // source,
+      //     then continue.
+      auto &transients = node.TransientRegisteredObservers();
+      if (std::ranges::any_of(transients, [&](const Ref<TransientRegisteredObserver> &transient)
+                              { return transient->Source().get() == &source; }))
+      {
+        return;
+      }
+
+      // 1e. Append a new transient registered observer whose observer is observer, options is source's
+      // options,
+      //     and source is source to node's registered observer list.
+      transients.push_back(
+        CreateRef<TransientRegisteredObserver>(Ref {observer}, source.Options(), ShareRef(source)));
+
+      // 1f. Append a weak reference to node to observer's transient node set.
+      if (std::ranges::none_of(observer->_transientNodes,
+                               [&](const WeakRef<Node> &existing) { return existing.get() == &node; }))
+      {
+        observer->_transientNodes.emplace_back(CreateWeakRef(node));
+      }
+
+      // 1g. Append observer to the surrounding agent's pending mutation observers.
+      AppendToSet(SurroundingAgent().PendingMutationObservers, *observer);
+
+      // 1h. Queue a mutation observer microtask.
+      QueueMutationObserverMicrotask();
+    };
+
+    // 1. For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
+    //    inclusiveAncestor's registered observer list:
+    // Registered observers and transient ones are kept in separate lists.
     for (auto &inclusiveAncestor : InclusiveAncestorRange(parent))
     {
-      for (auto &registered : inclusiveAncestor.RegisteredObservers())
+      for (auto &registered : List<Ref<RegisteredObserver>>(inclusiveAncestor.RegisteredObservers()))
       {
-        if (!registered->Options().Subtree)
-        {
-          continue;
-        }
-        Ref<MutationObserver> observer = registered->Observer();
-        node.TransientRegisteredObservers().push_back(
-          CreateRef<TransientRegisteredObserver>(Ref {observer}, registered->Options(), Ref {registered}));
-
-        // NOTE: the observer forgets its transient observers when it's notified, through its node list, so
-        // the node joins the list (the specification doesn't say).
-        if (std::ranges::none_of(observer->_nodes, [&](const WeakRef<Node> &existing)
-                                 { return existing.lock().get() == &node; }))
-        {
-          observer->_nodes.emplace_back(CreateWeakRef(node));
-        }
+        add(*registered, *registered);
+      }
+      for (auto &transient :
+           List<Ref<TransientRegisteredObserver>>(inclusiveAncestor.TransientRegisteredObservers()))
+      {
+        add(*transient, *transient->Source());
       }
     }
+  }
+
+  void MutationObserverAlgorithms::RemoveTransientRegisteredObservers(MutationObserver &observer) noexcept
+  {
+    // 1. For each node of observer's transient node set: remove all transient registered observers whose
+    //    observer is observer from node's registered observer list.
+    for (auto &weakNode : observer._transientNodes)
+    {
+      if (auto node = weakNode.lock())
+      {
+        std::erase_if(node->TransientRegisteredObservers(),
+                      [&](const Ref<TransientRegisteredObserver> &transient)
+                      { return transient->Observer().get() == &observer; });
+      }
+    }
+
+    // 2. Empty observer's transient node set.
+    observer._transientNodes.clear();
   }
 
   bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept

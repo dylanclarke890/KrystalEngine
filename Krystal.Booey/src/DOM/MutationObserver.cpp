@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/DOM/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Internals/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -9,7 +10,12 @@
 
 namespace krys::boo::dom
 {
-  MutationObserver::MutationObserver(MutationCallback &&callback) noexcept : _callback(krys::move(callback))
+  MutationObserver::MutationObserver(MutationCallback &&callback) noexcept
+      // 1. Set this's callback to callback.
+      : _callback(krys::move(callback)),
+        // 2. Set this's creation index to this's relevant agent's mutation observer counter.
+        // 3. Increase this's relevant agent's mutation observer counter by 1.
+        _creationIndex(MutationObserverAlgorithms::TakeMutationObserverCounter())
   {
   }
 
@@ -52,7 +58,7 @@ namespace krys::boo::dom
     {
       if (registered->Observer() == this)
       {
-        for (auto &n : _nodes)
+        for (auto &n : _transientNodes)
         {
           if (auto node = n.lock())
           {
@@ -75,17 +81,25 @@ namespace krys::boo::dom
 
   void MutationObserver::Disconnect() noexcept
   {
+    // 1. For each node of this's node list: remove any registered observer from node's registered observer
+    // list
+    //    for which this is the observer.
     for (auto &n : _nodes)
     {
       if (auto node = n.lock())
       {
         std::erase_if(node->RegisteredObservers(), [self = this](Ref<RegisteredObserver> &observer)
                       { return observer->Observer() == self; });
-        std::erase_if(node->TransientRegisteredObservers(),
-                      [self = this](Ref<TransientRegisteredObserver> &observer)
-                      { return observer->Observer() == self; });
       }
     }
+
+    // 2. Remove transient registered observers for this.
+    MutationObserverAlgorithms::RemoveTransientRegisteredObservers(*this);
+
+    // 3. Empty this's node list.
+    _nodes.clear();
+
+    // 4. Empty this's record queue.
     _recordQueue.clear();
   }
 
