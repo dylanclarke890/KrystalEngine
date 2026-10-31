@@ -433,7 +433,8 @@ Status: reviewed (2026-10-30)
 
 ### [2.11. Action versus occurrence](https://dom.spec.whatwg.org/#action-versus-occurrence)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Booey's default event handlers (`DIFFERENCES.md`, from upstream) are the "default actions" model the section warns against, but they only act on the events the user agent dispatches for an ongoing action: keyboard events a script dispatches don't type or move focus, as in Chrome. Test: `tests/DOM/Algorithms/EventDispatcher.cpp` (`[dom:action-versus-occurrence]`).
 
 ## [3. Aborting ongoing activities](https://dom.spec.whatwg.org/#aborting-ongoing-activities)
 

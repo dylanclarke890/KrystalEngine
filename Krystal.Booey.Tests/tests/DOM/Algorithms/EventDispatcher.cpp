@@ -9,6 +9,7 @@
 #include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "Krystal.Booey/DOM/FocusEvent.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -450,5 +451,32 @@ namespace krys::boo::dom::tests
     target->AddEventListener(u8"test", CreateRef<TestEventListener>(*target), true);
     REQUIRE(EventDispatcher::FireEvent<TestEvent>(u8"test", *target));
     REQUIRE(target->value == 1);
+  }
+
+  TEST_CASE("Action versus occurrence: keyboard events a script dispatches don't type or move focus",
+            "[EventDispatcher][dom:action-versus-occurrence]")
+  {
+    boo::tests::PaintFixture fixture(u8"<!DOCTYPE html><input id=a><input id=b>", {200, 100}, true);
+    auto &a = Downcast<html::HTMLInputElement>(*fixture.Document->GetElementById(u8"a"));
+    a.Focus();
+    REQUIRE(fixture.Document->FocusedElement() == &a);
+
+    auto dispatch = [&](DOMStringView type, DOMStringView key, uint32 charCode, uint32 keyCode)
+    {
+      KeyboardEventInit init;
+      init.Bubbles = true;
+      init.Cancelable = true;
+      init.Key = DOMString(key);
+      init.CharCode = charCode;
+      init.KeyCode = keyCode;
+      auto event = CreateRef<KeyboardEvent>(DOMStringAtom(type), init);
+      REQUIRE_FALSE(a.DispatchEvent(*event).HasException());
+    };
+    dispatch(u8"keydown", u8"x", 'x', 'X');
+    dispatch(u8"keypress", u8"x", 'x', 'X');
+    dispatch(u8"keydown", u8"Tab", 0, 9);
+
+    CHECK(a.Value().empty());
+    CHECK(fixture.Document->FocusedElement() == &a);
   }
 }
