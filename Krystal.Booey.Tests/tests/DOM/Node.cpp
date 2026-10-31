@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -889,5 +890,49 @@ namespace krys::boo::dom::tests
 
     auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
+  }
+
+  TEST_CASE("Introduction to the DOM: markup goes in, a tree of nodes comes out",
+            "[DOM][Node][dom:introduction-to-the-dom]")
+  {
+    auto context = CreateRef<HTMLDocument>();
+    auto result = Document::ParseHTMLUnsafe(*context, u8"<!DOCTYPE html>\n"
+                                                      u8"<html class=e>\n"
+                                                      u8" <head><title>Aliens?</title></head>\n"
+                                                      u8" <body>Why yes.</body>\n"
+                                                      u8"</html>");
+    REQUIRE_FALSE(result.HasException());
+
+    // Each node on a line, indented by its depth: its name, then an element's class or a text's data.
+    DOMString tree;
+    Func<void(const Node &, uint32)> dump = [&](const Node &node, uint32 depth)
+    {
+      tree += DOMString(depth * 2, u8' ') + node.NodeName();
+      if (auto *element = DynamicDowncast<Element>(node); element && element->HasAttribute(u8"class"))
+      {
+        tree += u8" class=\"" + *element->GetAttribute(u8"class") + u8"\"";
+      }
+      if (auto value = node.NodeValue())
+      {
+        tree += u8" " + *value;
+      }
+      tree += u8"|";
+      for (auto *child = node.FirstChild(); child; child = child->NextSibling())
+      {
+        dump(*child, depth + 1);
+      }
+    };
+    dump(*result.Value(), 0);
+
+    CHECK(tree
+          == u8"#document|"
+             u8"  html|"
+             u8"  HTML class=\"e\"|"
+             u8"    HEAD|"
+             u8"      TITLE|"
+             u8"        #text Aliens?|"
+             u8"    #text \n |"
+             u8"    BODY|"
+             u8"      #text Why yes.\n|");
   }
 }

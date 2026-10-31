@@ -534,7 +534,8 @@ Status: unreviewed
 
 ### [4.1. Introduction to "The DOM"](https://dom.spec.whatwg.org/#introduction-to-the-dom)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Informative. The example document parses to the tree shown. Test: `tests/DOM/Node.cpp`.
 
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
