@@ -316,7 +316,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("A window's current event is the event its listeners handle", "[Page][LocalDOMWindow]")
+  TEST_CASE("Window.event: the window's current event, the event its listeners handle",
+            "[Page][LocalDOMWindow][dom:dom-window-event][dom:window-current-event]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><div id=host></div><p id=text>Text</p>");
     auto &window = fixture.Window();
@@ -354,6 +355,28 @@ namespace krys::boo::tests
       CHECK(shadowHeard);
       CHECK(inShadow == nullptr);
       CHECK(inWindow != nullptr);
+    }
+
+    SECTION("and an event dispatched from a listener is current only while its own listeners run")
+    {
+      auto nested = dom::Event::Create(dom::DOMStringAtom(u8"nested"), false, false);
+      dom::Event *inNested = nullptr;
+      dom::Event *afterNested = nullptr;
+      auto nestedListener = fixture.ById(u8"text").AddEventListener(u8"nested", [&](dom::Event &)
+                                                                    { inNested = window.CurrentEvent(); });
+      auto outerListener =
+        fixture.ById(u8"host").AddEventListener(u8"click",
+                                                [&](dom::Event &)
+                                                {
+                                                  (void)fixture.ById(u8"text").DispatchEvent(*nested);
+                                                  afterNested = window.CurrentEvent();
+                                                });
+
+      fixture.ById(u8"host").DispatchSimulatedClick(nullptr);
+      CHECK(inNested == nested.get());
+      CHECK(afterNested != nullptr);
+      CHECK(afterNested != nested.get());
+      CHECK(window.CurrentEvent() == nullptr);
     }
   }
 

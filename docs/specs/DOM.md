@@ -186,10 +186,11 @@ Status: reviewed (2026-10-30)
 
 ### [2.3. Legacy extensions to the Window interface](https://dom.spec.whatwg.org/#interface-window-extensions)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `LocalDOMWindow::CurrentEvent` and its `_currentEvent`, which the dispatcher's inner invoke sets (reviewed with 2.9). Tests: `tests/Page/LocalDOMWindow.cpp`.
 <!-- definitions: window-current-event -->
 
-- [ ] [Window.event](https://dom.spec.whatwg.org/#dom-window-event) — The event getter steps are to return this’s current event.
+- [x] [Window.event](https://dom.spec.whatwg.org/#dom-window-event) — The event getter steps are to return this’s current event.
 
 ### [2.4. Interface CustomEvent](https://dom.spec.whatwg.org/#interface-customevent)
 
