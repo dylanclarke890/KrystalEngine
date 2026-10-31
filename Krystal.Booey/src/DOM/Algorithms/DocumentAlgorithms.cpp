@@ -30,31 +30,45 @@ namespace krys::boo::dom
     DocumentAlgorithms::FlattenElementCreationOptions(const ElementCreationOptionsOrString &options,
                                                       Document &document) noexcept
   {
+    // 1. Let registry be the result of looking up a custom element registry given document.
+    // 2. Let is be null.
+    ElementCreationOptions result {.CustomElementRegistry = document.CustomElementRegistry(),
+                                   .Is = DOMStringAtom::Null()};
+
+    // 3. If options is a dictionary:
     if (std::holds_alternative<ElementCreationOptions>(options))
     {
-      auto dict = std::get<ElementCreationOptions>(options);
-      if (dict.CustomElementRegistry != nullptr && dict.Is != DOMStringAtom::Null())
+      auto &dict = std::get<ElementCreationOptions>(options);
+
+      // 3a. If options["is"] exists, then set is to it.
+      result.Is = dict.Is;
+
+      // 3b. If options["customElementRegistry"] exists:
+      // (A null registry is taken as one not given.)
+      if (dict.CustomElementRegistry != nullptr)
+      {
+        // 3b.i. If is is non-null, then throw a "NotSupportedError" DOMException.
+        if (result.Is != DOMStringAtom::Null())
+        {
+          return Exception {ExceptionCode::NotSupportedError};
+        }
+
+        // 3b.ii. Set registry to options["customElementRegistry"].
+        result.CustomElementRegistry = dict.CustomElementRegistry;
+      }
+
+      // 3c. If registry is non-null, registry's is scoped is false, and registry is not document's custom
+      // element
+      //     registry, then throw a "NotSupportedError" DOMException.
+      if (result.CustomElementRegistry != nullptr && !result.CustomElementRegistry->IsScoped()
+          && result.CustomElementRegistry != document.CustomElementRegistry())
       {
         return Exception {ExceptionCode::NotSupportedError};
       }
-
-      if (dict.CustomElementRegistry != nullptr && !dict.CustomElementRegistry->IsScoped()
-          && dict.CustomElementRegistry != document.CustomElementRegistry())
-      {
-        return Exception {ExceptionCode::NotSupportedError};
-      }
-
-      // NOTE: a null registry is taken as one not given, which leaves the document's.
-      if (dict.CustomElementRegistry == nullptr)
-      {
-        dict.CustomElementRegistry = document.CustomElementRegistry();
-      }
-
-      return dict;
     }
 
-    return ElementCreationOptions {.CustomElementRegistry = document.CustomElementRegistry(),
-                                   .Is = DOMStringAtom::Null()};
+    // 4. Return registry and is.
+    return result;
   }
 
   ExceptionOr<Ref<Element>>
@@ -62,6 +76,8 @@ namespace krys::boo::dom
                                                 DOMStringAtom qualifiedName,
                                                 const ElementCreationOptionsOrString &options) noexcept
   {
+    // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
+    //    qualifiedName given "element".
     auto nameResult =
       NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Element);
     if (nameResult.HasException())
@@ -69,12 +85,15 @@ namespace krys::boo::dom
       return nameResult.ReleaseException();
     }
 
+    // 2. Let registry and is be the result of flattening element creation options given options and this.
     auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, document);
     if (creationOptions.HasException())
     {
       return creationOptions.ReleaseException();
     }
 
+    // 3. Return the result of creating an element given document, localName, namespace, prefix, is, true, and
+    //    registry.
     auto &qName = *nameResult;
     return ElementFactory::Create(
       document, {qName.NamespaceURI(), qName.NamespacePrefix(), qName.LocalName()},
@@ -83,7 +102,10 @@ namespace krys::boo::dom
 
   ExceptionOr<void> DocumentAlgorithms::AdoptNode(Node &node, Document &document) noexcept
   {
+    // 1. Let oldDocument be node's node document.
     auto &oldDocument = node.NodeDocument();
+
+    // 2. If node's parent is non-null, then remove node.
     if (node.ParentNode() != nullptr)
     {
       if (auto result = MutationAlgorithms::Remove(node); result.HasException())
@@ -92,6 +114,11 @@ namespace krys::boo::dom
       }
     }
 
+    // 3. If document is not oldDocument, then for each inclusiveDescendant of node's shadow-including
+    // inclusive
+    //    descendants, in shadow-including tree order:
+    // (Steps 3a to 3c run for every node first, then 3c.iii, then 3d, so the adopting steps see the whole
+    // subtree moved.)
     if (&document != &oldDocument)
     {
       // The old document may have only the moving nodes to keep it.
@@ -101,32 +128,67 @@ namespace krys::boo::dom
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
+        // 3a. Set inclusiveDescendant's node document to document.
         inclusiveDescendant.SetNodeDocument(document);
+
+        // 3b. If inclusiveDescendant is a shadow root and if any of the following are true:
+        //     - inclusiveDescendant's custom element registry is null and inclusiveDescendant's keep custom
+        //       element registry null is false; or
+        //     - inclusiveDescendant's custom element registry is a global custom element registry,
+        //     then set inclusiveDescendant's custom element registry to document's custom element registry's
+        //     effective global custom element registry.
         if (Is<ShadowRoot>(inclusiveDescendant))
         {
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
           auto registry = shadowRootInclusiveDescendant.CustomElementRegistry();
-          if (registry == nullptr && !shadowRootInclusiveDescendant._keepCustomElementRegistryNull)
-          {
-            shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
-          }
-          else if (html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
+          if ((registry == nullptr && !shadowRootInclusiveDescendant._keepCustomElementRegistryNull)
+              || html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
           {
             shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
           }
         }
+        // 3c. Otherwise, if inclusiveDescendant is an element:
         else if (Is<Element>(inclusiveDescendant))
         {
           auto &elementInclusiveDescendant = Downcast<Element>(inclusiveDescendant);
+
+          // 3c.i. Set the node document of each attribute in inclusiveDescendant's attribute list to
+          // document.
           for (auto &attr : elementInclusiveDescendant._attributes)
           {
             attr->SetNodeDocument(document);
           }
 
+          // 3c.ii. If inclusiveDescendant's custom element registry is null or inclusiveDescendant's custom
+          //        element registry's is scoped is false:
           auto registry = elementInclusiveDescendant.CustomElementRegistry();
           if (registry == nullptr || !registry->IsScoped())
           {
-            elementInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
+            // 3c.ii.A. Let registry be null.
+            html::CustomElementRegistry *newRegistry = nullptr;
+
+            // 3c.ii.B. If inclusiveDescendant's custom element registry is non-null, inclusiveDescendant's
+            // parent
+            //          is null, or inclusiveDescendant's parent is an exclusive DocumentFragment node, then
+            //          set registry to document's custom element registry.
+            auto *parent = elementInclusiveDescendant.ParentNode();
+            if (registry != nullptr || parent == nullptr
+                || (Is<DocumentFragment>(*parent) && !Is<ShadowRoot>(*parent)))
+            {
+              newRegistry = document.CustomElementRegistry().get();
+            }
+            // 3c.ii.C. Otherwise, set registry to the result of looking up a custom element registry given
+            //          inclusiveDescendant's parent.
+            else
+            {
+              newRegistry = html::CustomElementAlgorithms::LookUpCustomElementRegistry(*parent);
+            }
+
+            // 3c.ii.D. Set inclusiveDescendant's custom element registry to registry's effective global
+            // custom
+            //          element registry.
+            elementInclusiveDescendant._customElementRegistry =
+              ShareRefPtr(html::CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(newRegistry));
           }
         }
       }
@@ -143,6 +205,8 @@ namespace krys::boo::dom
                       return true;
                     });
 
+      // 3c.iii. If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
+      //         inclusiveDescendant, callback name "adoptedCallback", and « oldDocument, document ».
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
         if (auto *element = DynamicDowncast<Element>(inclusiveDescendant);
@@ -152,6 +216,7 @@ namespace krys::boo::dom
         }
       }
 
+      // 3d. Run the adopting steps with inclusiveDescendant and oldDocument.
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
         ExtensibilityHooks::NodeAdopted(inclusiveDescendant, oldDocument);

@@ -13,14 +13,22 @@ namespace krys::boo::html
   }
 
   CustomElementRegistry *
-    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(dom::Document &document) noexcept
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(CustomElementRegistry *registry) noexcept
   {
-    if (IsGlobalCustomElementRegistry(document._customElementRegistry.get()))
+    // 1. If registry is a global custom element registry, then return registry.
+    if (IsGlobalCustomElementRegistry(registry))
     {
-      return document._customElementRegistry.get();
+      return registry;
     }
 
+    // 2. Return null.
     return nullptr;
+  }
+
+  CustomElementRegistry *
+    CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(dom::Document &document) noexcept
+  {
+    return EffectiveGlobalCustomElementRegistry(document._customElementRegistry.get());
   }
 
   CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(

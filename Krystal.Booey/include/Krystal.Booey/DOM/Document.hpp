@@ -182,6 +182,8 @@ namespace krys::boo::dom
     double LoadEventEndTime {0};
   };
 
+  /// @brief A document: the root of a node tree. It's an XML document unless it's an `HTMLDocument`.
+  /// @see https://dom.spec.whatwg.org/#concept-document
   class Document : public ContainerNode, public DocumentOrShadowRoot, public FontSelectorClient
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
@@ -216,6 +218,7 @@ namespace krys::boo::dom
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
+    /// @see https://dom.spec.whatwg.org/#concept-document-content-type
     DOMString _contentType {u8"application/xml"};
     /// @brief The document's encoding; null for UTF-8.
     const krys::text::ICodec *_encoding {nullptr};
@@ -422,6 +425,7 @@ namespace krys::boo::dom
 #pragma region Document (DOM) - https://dom.spec.whatwg.org/#interface-document
 
     /// @see https://dom.spec.whatwg.org/#dom-document-document
+    /// @see https://dom.spec.whatwg.org/#create-a-document
     Document() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-document-implementation
@@ -728,7 +732,9 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#fallback-base-url
     KRYS_NODISCARD const url::URL &FallbackBaseURL() const noexcept;
 
+    /// @brief The document base URL, which getting the base URL returns: there's no base URL override.
     /// @see https://html.spec.whatwg.org/#document-base-url
+    /// @see https://dom.spec.whatwg.org/#get-the-base-url
     KRYS_NODISCARD const url::URL &BaseURL() const noexcept
     {
       return _baseURL;

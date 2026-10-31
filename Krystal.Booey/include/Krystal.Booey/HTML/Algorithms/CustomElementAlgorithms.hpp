@@ -17,10 +17,15 @@ namespace krys::boo::html
   class CustomElementAlgorithms
   {
   public:
-    /// @see https://html.spec.whatwg.org/#is-a-global-custom-element-registry
+    /// @see https://dom.spec.whatwg.org/#is-a-global-custom-element-registry
     KRYS_NODISCARD static bool IsGlobalCustomElementRegistry(const CustomElementRegistry *registry) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#effective-global-custom-element-registry
+    /// @see https://dom.spec.whatwg.org/#effective-global-custom-element-registry
+    KRYS_NODISCARD static CustomElementRegistry *
+      EffectiveGlobalCustomElementRegistry(CustomElementRegistry *registry) noexcept;
+
+    /// @brief @p document's custom element registry's effective global custom element registry.
+    /// @see https://dom.spec.whatwg.org/#effective-global-custom-element-registry
     KRYS_NODISCARD static CustomElementRegistry *
       EffectiveGlobalCustomElementRegistry(dom::Document &document) noexcept;
 

@@ -213,6 +213,12 @@ namespace krys::boo::dom
   Document::Document(DocumentFlags flags) noexcept : Document()
   {
     SetDocumentFlag(flags);
+
+    // An HTML document is a text/html one, however it's made.
+    if (HasDocumentFlag(DocumentFlags::IsHTMLDocument))
+    {
+      _contentType = u8"text/html";
+    }
   }
 
 #pragma region Document (DOM)
@@ -226,6 +232,8 @@ namespace krys::boo::dom
         _intersectionObserversInitialUpdateTimer(
           [this] { ScheduleRenderingUpdate({RenderingUpdateStep::IntersectionObservations}); })
   {
+    // Set this's origin to the origin of current global object's associated Document. (Skipped: documents
+    // have no origin.)
     SetNodeFlag(NodeFlags::IsConnected);
     _styleScope = CreateUnique<style::Scope>(*this);
     _selection = CreateUnique<FrameSelection>(this);
@@ -437,28 +445,35 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,
                                                     const ElementCreationOptionsOrString &options) noexcept
   {
+    // 1. If localName is not a valid element local name, then throw an "InvalidCharacterError" DOMException.
     if (!NameValidation::IsValidElementLocalName(localName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
+    // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
       localName = ::krys::text::ToASCIILower(localName.View());
     }
 
+    // 3. Let registry and is be the result of flattening element creation options given options and this.
     auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, *this);
     if (creationOptions.HasException())
     {
       return creationOptions.ReleaseException();
     }
 
+    // 4. Let namespace be the HTML namespace, if this is an HTML document or this's content type is
+    //    "application/xhtml+xml"; otherwise null.
     DOMStringAtom namespaceURI = DOMStringAtom::Null();
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
       namespaceURI = infra::Namespaces::HTML;
     }
 
+    // 5. Return the result of creating an element given this, localName, namespace, null, is, true, and
+    // registry.
     return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
                                   creationOptions.Value().Is, true,
                                   creationOptions.Value().CustomElementRegistry);
@@ -482,16 +497,19 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<CDATASection>> Document::CreateCDATASection(DOMString &&data) noexcept
   {
+    // 1. If this is an HTML document, then throw a "NotSupportedError" DOMException.
     if (Is<HTMLDocument>(*this))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
+    // 2. If data contains the string "]]>", then throw an "InvalidCharacterError" DOMException.
     if (data.contains(u8"]]>"))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
+    // 3. Return the result of creating a CDATA section node given this and data.
     return CreateRef<CDATASection>(*this, krys::move(data));
   }
 
@@ -520,65 +538,76 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Node>> Document::ImportNode(Node &node, const BoolOrImportNodeOptions &options) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If node is a document or shadow root, then throw a "NotSupportedError" DOMException.
     if (Is<Document>(node) || Is<ShadowRoot>(node))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
+    // 2. Let subtree be false.
     bool subtree = false;
+
+    // 3. Let registry be null.
     RefPtr<html::CustomElementRegistry> registry = nullptr;
+
+    // 4. If options is a boolean, then set subtree to options.
     if (std::holds_alternative<bool>(options))
     {
       subtree = std::get<bool>(options);
     }
+    // 5. Otherwise:
     else
     {
+      // 5a. Set subtree to the negation of options["selfOnly"].
       auto &dict = std::get<ImportNodeOptions>(options);
       subtree = !dict.SelfOnly;
+
+      // 5b. If options["customElementRegistry"] exists, then set registry to it.
       registry = dict.CustomElementRegistry;
 
+      // 5c. If registry's is scoped is false and registry is not this's custom element registry, then throw a
+      //     "NotSupportedError" DOMException.
       if (registry != nullptr && !registry->IsScoped() && registry != CustomElementRegistry())
       {
         return Exception {ExceptionCode::NotSupportedError};
       }
     }
 
+    // 6. If registry is null, then set registry to the result of looking up a custom element registry given
+    // this.
     if (registry == nullptr)
     {
       registry = CustomElementRegistry();
     }
 
+    // 7. Return the result of cloning a node given node with document set to this, subtree set to subtree,
+    // and
+    //    fallbackRegistry set to registry.
     return NodeAlgorithms::CloneNode(node, this, subtree, nullptr, registry.get());
   }
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If node is a document, then throw a "NotSupportedError" DOMException.
     if (Is<Document>(node))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    if (Is<ShadowRoot>(node)) // ShadowRoot cannot disconnect itself from the host node.
+    // 2. If node is a shadow root, then throw a "HierarchyRequestError" DOMException.
+    if (Is<ShadowRoot>(node))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (Is<DocumentFragment>(node))
-    {
-      auto &documentFragment = Downcast<DocumentFragment>(node);
-      // If node is a DocumentFragment node whose host is non-null, then return.
-      if (auto host = documentFragment._host.lock())
-      {
-        return ShareRef(node);
-      }
-    }
-
+    // 3. Adopt node into this.
     if (auto adoptResult = DocumentAlgorithms::AdoptNode(node, *this); adoptResult.HasException())
     {
       return adoptResult.ReleaseException();
     }
 
+    // 4. Return node.
     return ShareRef(node);
   }
 
@@ -586,16 +615,20 @@ namespace krys::boo::dom
   // reference and we can't make it const without breaking that.
   ExceptionOr<Ref<Attr>> Document::CreateAttribute(DOMStringAtom localName) noexcept
   {
+    // 1. If localName is not a valid attribute local name, then throw an "InvalidCharacterError"
+    // DOMException.
     if (!NameValidation::IsValidAttributeLocalName(localName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
+    // 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
     if (Is<HTMLDocument>(*this))
     {
       localName = krys::text::ToASCIILower(localName.View());
     }
 
+    // 3. Return the result of creating an attribute given this and localName.
     QualifiedName qualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName};
     return AdoptRef<Attr>(*new Attr(*this, qualifiedName));
   }
@@ -603,6 +636,8 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Attr>> Document::CreateAttributeNS(DOMStringAtom namespaceUri,
                                                      DOMStringAtom qualifiedName) noexcept
   {
+    // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
+    //    qualifiedName given "attribute".
     auto nameResult =
       NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Attribute);
     if (nameResult.HasException())
@@ -610,6 +645,7 @@ namespace krys::boo::dom
       return nameResult.ReleaseException();
     }
 
+    // 2. Return the result of creating an attribute given this, localName, namespace, and prefix.
     return AdoptRef<Attr>(*new Attr(*this, *nameResult));
   }
 
@@ -687,20 +723,38 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Event>> Document::CreateEvent(DOMStringView interface) noexcept
   {
+    // 1. Let constructor be null.
+    // 2. If interface is an ASCII case-insensitive match for any of the strings in the first column in the
+    //    following table, then set constructor to the interface in the second column on the same row as the
+    //    matching string.
+    // 4. If the interface indicated by constructor is not exposed on the relevant global object of this, then
+    //    throw a "NotSupportedError" DOMException. (The table leaves out the interfaces that aren't.)
+    // 5. Let event be the result of creating an event given constructor.
     RefPtr<Event> event = CreateEventOfInterface(interface);
+
+    // 3. If constructor is null, then throw a "NotSupportedError" DOMException.
     if (!event)
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    // Its type is the empty string, its time now, and it's untrusted and uninitialized until an init method
-    // is called.
+    // 6. Initialize event's type attribute to the empty string.
     event->_type = DOMStringAtom(u8"");
     event->_bubbles = false;
     event->_cancellable = false;
     event->_composed = false;
+
+    // 7. Initialize event's timeStamp attribute to the result of calling current high resolution time with
+    // this's
+    //    relevant global object. (The event's constructor records its creation time.)
+
+    // 8. Initialize event's isTrusted attribute to false.
     event->_isTrusted = false;
+
+    // 9. Unset event's initialized flag.
     event->_initialized = false;
+
+    // 10. Return event.
     return ShareRef(*event);
   }
 
@@ -712,12 +766,23 @@ namespace krys::boo::dom
   Ref<NodeIterator> Document::CreateNodeIterator(Node &root, WhatToShow whatToShow,
                                                  RefPtr<NodeFilter> &&filter) noexcept
   {
+    // 1. Let iterator be a new NodeIterator object.
+    // 2. Set iterator's root to root.
+    // 3. Set iterator's reference to (root, true).
+    // 4. Set iterator's whatToShow to whatToShow.
+    // 5. Set iterator's filter to filter.
+    // 6. Return iterator.
     return AdoptRef(*new NodeIterator(root, whatToShow, krys::move(filter)));
   }
 
   Ref<TreeWalker> Document::CreateTreeWalker(Node &root, WhatToShow whatToShow,
                                              RefPtr<NodeFilter> &&filter) noexcept
   {
+    // 1. Let walker be a new TreeWalker object.
+    // 2. Set walker's root and walker's current to root.
+    // 3. Set walker's whatToShow to whatToShow.
+    // 4. Set walker's filter to filter.
+    // 5. Return walker.
     return AdoptRef(*new TreeWalker(root, whatToShow, krys::move(filter)));
   }
 

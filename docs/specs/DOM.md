@@ -1317,50 +1317,52 @@ Status: reviewed (2026-10-31)
 
 ### [4.5. Interface Document](https://dom.spec.whatwg.org/#interface-document)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Document` (`Document.hpp`/`Document.cpp`); flatten element creation options, the internal createElementNS steps and adopt are in `DocumentAlgorithms`, the effective global registry in `CustomElementAlgorithms`. Create a document is the document constructors; an `HTMLDocument` is an HTML document (content type text/html), any other an XML document.
+> Documents have no origin and no base URL override, and adopt runs its per-node steps in three passes (see `DIFFERENCES.md`).
 <!-- definitions: concept-document concept-document-encoding concept-document-content-type concept-document-url concept-document-origin concept-document-type concept-document-mode document-allow-declarative-shadow-roots document-custom-element-registry xml-document html-document get-the-base-url document-base-url-override concept-document-no-quirks concept-document-quirks concept-document-limited-quirks dom-document-documenturi dom-document-charset dom-document-inputencoding concept-element-interface is-a-global-custom-element-registry -->
 
-- [ ] [create a document](https://dom.spec.whatwg.org/#create-a-document) — To create a document that implements an interface interface, given a realm realm:
+- [x] [create a document](https://dom.spec.whatwg.org/#create-a-document) — To create a document that implements an interface interface, given a realm realm:
   - 1. Assert: interface is Document or an interface that inherits from Document.
   - 2. Return a new node that implements interface, in realm.
 
-- [ ] [Document.new Document()](https://dom.spec.whatwg.org/#dom-document-document) — The new Document() constructor steps are to set this’s origin to the origin of current global object’s associated Document. [HTML]
+- [x] [Document.new Document()](https://dom.spec.whatwg.org/#dom-document-document) — The new Document() constructor steps are to set this’s origin to the origin of current global object’s associated Document. [HTML]
 
-- [ ] [Document.implementation](https://dom.spec.whatwg.org/#dom-document-implementation) — The implementation getter steps are to return the DOMImplementation object that is associated with this.
+- [x] [Document.implementation](https://dom.spec.whatwg.org/#dom-document-implementation) — The implementation getter steps are to return the DOMImplementation object that is associated with this.
 
-- [ ] [Document.URL](https://dom.spec.whatwg.org/#dom-document-url) — The URL and documentURI getter steps are to return this’s URL, serialized.
+- [x] [Document.URL](https://dom.spec.whatwg.org/#dom-document-url) — The URL and documentURI getter steps are to return this’s URL, serialized.
 
-- [ ] [Document.compatMode](https://dom.spec.whatwg.org/#dom-document-compatmode) — The compatMode getter steps are to return "BackCompat" if this’s mode is "quirks"; otherwise "CSS1Compat".
+- [x] [Document.compatMode](https://dom.spec.whatwg.org/#dom-document-compatmode) — The compatMode getter steps are to return "BackCompat" if this’s mode is "quirks"; otherwise "CSS1Compat".
 
-- [ ] [Document.characterSet](https://dom.spec.whatwg.org/#dom-document-characterset) — The characterSet, charset, and inputEncoding getter steps are to return this’s encoding’s name.
+- [x] [Document.characterSet](https://dom.spec.whatwg.org/#dom-document-characterset) — The characterSet, charset, and inputEncoding getter steps are to return this’s encoding’s name.
 
-- [ ] [Document.contentType](https://dom.spec.whatwg.org/#dom-document-contenttype) — The contentType getter steps are to return this’s content type.
+- [x] [Document.contentType](https://dom.spec.whatwg.org/#dom-document-contenttype) — The contentType getter steps are to return this’s content type.
 
-- [ ] [Document.doctype](https://dom.spec.whatwg.org/#dom-document-doctype) — The doctype getter steps are to return the child of this that is a doctype; otherwise null.
+- [x] [Document.doctype](https://dom.spec.whatwg.org/#dom-document-doctype) — The doctype getter steps are to return the child of this that is a doctype; otherwise null.
 
-- [ ] [Document.documentElement](https://dom.spec.whatwg.org/#dom-document-documentelement) — The documentElement getter steps are to return this’s document element.
+- [x] [Document.documentElement](https://dom.spec.whatwg.org/#dom-document-documentelement) — The documentElement getter steps are to return this’s document element.
 
-- [ ] [Document.getElementsByTagName(qualifiedName)](https://dom.spec.whatwg.org/#dom-document-getelementsbytagname) — The getElementsByTagName(qualifiedName) method steps are to return the list of elements with qualified name qualifiedName for this.
+- [x] [Document.getElementsByTagName(qualifiedName)](https://dom.spec.whatwg.org/#dom-document-getelementsbytagname) — The getElementsByTagName(qualifiedName) method steps are to return the list of elements with qualified name qualifiedName for this.
 
-- [ ] [Document.getElementsByTagNameNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-document-getelementsbytagnamens) — The getElementsByTagNameNS(namespace, localName) method steps are to return the list of elements with namespace namespace and local name localName for this.
+- [x] [Document.getElementsByTagNameNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-document-getelementsbytagnamens) — The getElementsByTagNameNS(namespace, localName) method steps are to return the list of elements with namespace namespace and local name localName for this.
 
-- [ ] [Document.getElementsByClassName(classNames)](https://dom.spec.whatwg.org/#dom-document-getelementsbyclassname) — The getElementsByClassName(classNames) method steps are to return the list of elements with class names classNames for this.
+- [x] [Document.getElementsByClassName(classNames)](https://dom.spec.whatwg.org/#dom-document-getelementsbyclassname) — The getElementsByClassName(classNames) method steps are to return the list of elements with class names classNames for this.
 
-- [ ] [Document.createElement(localName, options)](https://dom.spec.whatwg.org/#dom-document-createelement) — The createElement(localName, options) method steps are:
+- [x] [Document.createElement(localName, options)](https://dom.spec.whatwg.org/#dom-document-createelement) — The createElement(localName, options) method steps are:
   - 1. If localName is not a valid element local name, then throw an "InvalidCharacterError" DOMException.
   - 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
   - 3. Let registry and is be the result of flattening element creation options given options and this.
   - 4. Let namespace be the HTML namespace, if this is an HTML document or this’s content type is "application/xhtml+xml"; otherwise null.
   - 5. Return the result of creating an element given this, localName, namespace, null, is, true, and registry.
 
-- [ ] [internal createElementNS steps](https://dom.spec.whatwg.org/#internal-createelementns-steps) — The internal createElementNS steps, given document, namespace, qualifiedName, and options, are as follows:
+- [x] [internal createElementNS steps](https://dom.spec.whatwg.org/#internal-createelementns-steps) — The internal createElementNS steps, given document, namespace, qualifiedName, and options, are as follows:
   - 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and qualifiedName given "element".
   - 2. Let registry and is be the result of flattening element creation options given options and this.
   - 3. Return the result of creating an element given document, localName, namespace, prefix, is, true, and registry.
 
-- [ ] [Document.createElementNS(namespace, qualifiedName, options)](https://dom.spec.whatwg.org/#dom-document-createelementns) — The createElementNS(namespace, qualifiedName, options) method steps are to return the result of running the internal createElementNS steps, given this, namespace, qualifiedName, and options.
+- [x] [Document.createElementNS(namespace, qualifiedName, options)](https://dom.spec.whatwg.org/#dom-document-createelementns) — The createElementNS(namespace, qualifiedName, options) method steps are to return the result of running the internal createElementNS steps, given this, namespace, qualifiedName, and options.
 
-- [ ] [flatten element creation options](https://dom.spec.whatwg.org/#flatten-element-creation-options) — To flatten element creation options, given a string or ElementCreationOptions dictionary options and a document document:
+- [x] [flatten element creation options](https://dom.spec.whatwg.org/#flatten-element-creation-options) — To flatten element creation options, given a string or ElementCreationOptions dictionary options and a document document:
   - 1. Let registry be the result of looking up a custom element registry given document.
   - 2. Let is be null.
   - 3. If options is a dictionary:
@@ -1371,20 +1373,20 @@ Status: unreviewed
     - 3c. If registry is non-null, registry’s is scoped is false, and registry is not document’s custom element registry, then throw a "NotSupportedError" DOMException.
   - 4. Return registry and is.
 
-- [ ] [Document.createDocumentFragment()](https://dom.spec.whatwg.org/#dom-document-createdocumentfragment) — The createDocumentFragment() method steps are to return the result of creating a document fragment given this.
+- [x] [Document.createDocumentFragment()](https://dom.spec.whatwg.org/#dom-document-createdocumentfragment) — The createDocumentFragment() method steps are to return the result of creating a document fragment given this.
 
-- [ ] [Document.createTextNode(data)](https://dom.spec.whatwg.org/#dom-document-createtextnode) — The createTextNode(data) method steps are to return the result of creating a text node given this and data.
+- [x] [Document.createTextNode(data)](https://dom.spec.whatwg.org/#dom-document-createtextnode) — The createTextNode(data) method steps are to return the result of creating a text node given this and data.
 
-- [ ] [Document.createCDATASection(data)](https://dom.spec.whatwg.org/#dom-document-createcdatasection) — The createCDATASection(data) method steps are:
+- [x] [Document.createCDATASection(data)](https://dom.spec.whatwg.org/#dom-document-createcdatasection) — The createCDATASection(data) method steps are:
   - 1. If this is an HTML document, then throw a "NotSupportedError" DOMException.
   - 2. If data contains the string "]]>", then throw an "InvalidCharacterError" DOMException.
   - 3. Return the result of creating a CDATA section node given this and data.
 
-- [ ] [Document.createComment(data)](https://dom.spec.whatwg.org/#dom-document-createcomment) — The createComment(data) method steps are to return the result of creating a comment node given this and data.
+- [x] [Document.createComment(data)](https://dom.spec.whatwg.org/#dom-document-createcomment) — The createComment(data) method steps are to return the result of creating a comment node given this and data.
 
-- [ ] [Document.createProcessingInstruction(target, data)](https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction) — The createProcessingInstruction(target, data) method steps are to return the result of creating a processing instruction node given this, target, and data.
+- [x] [Document.createProcessingInstruction(target, data)](https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction) — The createProcessingInstruction(target, data) method steps are to return the result of creating a processing instruction node given this, target, and data.
 
-- [ ] [Document.importNode(node, options)](https://dom.spec.whatwg.org/#dom-document-importnode) — The importNode(node, options) method steps are:
+- [x] [Document.importNode(node, options)](https://dom.spec.whatwg.org/#dom-document-importnode) — The importNode(node, options) method steps are:
   - 1. If node is a document or shadow root, then throw a "NotSupportedError" DOMException.
   - 2. Let subtree be false.
   - 3. Let registry be null.
@@ -1396,9 +1398,9 @@ Status: unreviewed
   - 6. If registry is null, then set registry to the result of looking up a custom element registry given this.
   - 7. Return the result of cloning a node given node with document set to this, subtree set to subtree, and fallbackRegistry set to registry.
 
-- [ ] [adopting steps](https://dom.spec.whatwg.org/#concept-node-adopt-ext) — Specifications may define adopting steps for all or some nodes. The algorithm is passed node and oldDocument, as indicated in the adopt algorithm.
+- [x] [adopting steps](https://dom.spec.whatwg.org/#concept-node-adopt-ext) — Specifications may define adopting steps for all or some nodes. The algorithm is passed node and oldDocument, as indicated in the adopt algorithm.
 
-- [ ] [adopt](https://dom.spec.whatwg.org/#concept-node-adopt) — To adopt a node node into a document document:
+- [x] [adopt](https://dom.spec.whatwg.org/#concept-node-adopt) — To adopt a node node into a document document:
   - 1. Let oldDocument be node’s node document.
   - 2. If node’s parent is non-null, then remove node.
   - 3. If document is not oldDocument, then for each inclusiveDescendant of node’s shadow-including inclusive descendants, in shadow-including tree order:
@@ -1414,26 +1416,26 @@ Status: unreviewed
       - 3c.iii. If inclusiveDescendant is custom, then enqueue a custom element callback reaction with inclusiveDescendant, callback name "adoptedCallback", and « oldDocument, document ».
     - 3d. Run the adopting steps with inclusiveDescendant and oldDocument.
 
-- [ ] [Document.adoptNode(node)](https://dom.spec.whatwg.org/#dom-document-adoptnode) — The adoptNode(node) method steps are:
+- [x] [Document.adoptNode(node)](https://dom.spec.whatwg.org/#dom-document-adoptnode) — The adoptNode(node) method steps are:
   - 1. If node is a document, then throw a "NotSupportedError" DOMException.
   - 2. If node is a shadow root, then throw a "HierarchyRequestError" DOMException.
   - 3. Adopt node into this.
   - 4. Return node.
 
-- [ ] [effective global custom element registry](https://dom.spec.whatwg.org/#effective-global-custom-element-registry) — Null or a CustomElementRegistry object registry’s effective global custom element registry is:
+- [x] [effective global custom element registry](https://dom.spec.whatwg.org/#effective-global-custom-element-registry) — Null or a CustomElementRegistry object registry’s effective global custom element registry is:
   - 1. If registry is a global custom element registry, then return registry.
   - 2. Return null.
 
-- [ ] [Document.createAttribute(localName)](https://dom.spec.whatwg.org/#dom-document-createattribute) — The createAttribute(localName) method steps are:
+- [x] [Document.createAttribute(localName)](https://dom.spec.whatwg.org/#dom-document-createattribute) — The createAttribute(localName) method steps are:
   - 1. If localName is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 2. If this is an HTML document, then set localName to localName in ASCII lowercase.
   - 3. Return the result of creating an attribute given this and localName.
 
-- [ ] [Document.createAttributeNS(namespace, qualifiedName)](https://dom.spec.whatwg.org/#dom-document-createattributens) — The createAttributeNS(namespace, qualifiedName) method steps are:
+- [x] [Document.createAttributeNS(namespace, qualifiedName)](https://dom.spec.whatwg.org/#dom-document-createattributens) — The createAttributeNS(namespace, qualifiedName) method steps are:
   - 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and qualifiedName given "attribute".
   - 2. Return the result of creating an attribute given this, localName, namespace, and prefix.
 
-- [ ] [Document.createEvent(interface)](https://dom.spec.whatwg.org/#dom-document-createevent) — The createEvent(interface) method steps are:
+- [x] [Document.createEvent(interface)](https://dom.spec.whatwg.org/#dom-document-createevent) — The createEvent(interface) method steps are:
   - 1. Let constructor be null.
   - 2. If interface is an ASCII case-insensitive match for any of the strings in the first column in the following table, then set constructor to the interface in the second column on the same row as the matching string:
   - 3. If constructor is null, then throw a "NotSupportedError" DOMException.
@@ -1445,9 +1447,9 @@ Status: unreviewed
   - 9. Unset event’s initialized flag.
   - 10. Return event.
 
-- [ ] [Document.createRange()](https://dom.spec.whatwg.org/#dom-document-createrange) — The createRange() method steps are to return a new live range with (this, 0) as its start an end.
+- [x] [Document.createRange()](https://dom.spec.whatwg.org/#dom-document-createrange) — The createRange() method steps are to return a new live range with (this, 0) as its start an end.
 
-- [ ] [Document.createNodeIterator(root, whatToShow, filter)](https://dom.spec.whatwg.org/#dom-document-createnodeiterator) — The createNodeIterator(root, whatToShow, filter) method steps are:
+- [x] [Document.createNodeIterator(root, whatToShow, filter)](https://dom.spec.whatwg.org/#dom-document-createnodeiterator) — The createNodeIterator(root, whatToShow, filter) method steps are:
   - 1. Let iterator be a new NodeIterator object.
   - 2. Set iterator’s root to root.
   - 3. Set iterator’s reference to (root, true).
@@ -1455,7 +1457,7 @@ Status: unreviewed
   - 5. Set iterator’s filter to filter.
   - 6. Return iterator.
 
-- [ ] [Document.createTreeWalker(root, whatToShow, filter)](https://dom.spec.whatwg.org/#dom-document-createtreewalker) — The createTreeWalker(root, whatToShow, filter) method steps are:
+- [x] [Document.createTreeWalker(root, whatToShow, filter)](https://dom.spec.whatwg.org/#dom-document-createtreewalker) — The createTreeWalker(root, whatToShow, filter) method steps are:
   - 1. Let walker be a new TreeWalker object.
   - 2. Set walker’s root and walker’s current to root.
   - 3. Set walker’s whatToShow to whatToShow.

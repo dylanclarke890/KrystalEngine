@@ -4,6 +4,8 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A document whose type is "html", with the content type text/html.
+  /// @see https://dom.spec.whatwg.org/#html-document
   class HTMLDocument : public Document
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDocument);
