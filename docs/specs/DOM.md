@@ -556,7 +556,8 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> In a shadow tree and connected are node flags kept up to date on insertion and removal (`Node::IsInShadowTree`, `Node::IsConnected`; `TreeQueries::IsInShadowTree` forwards). The light tree has no code of its own: it's the host's tree. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Node.cpp`.
 <!-- definitions: concept-shadow-tree concept-light-tree connected -->
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)

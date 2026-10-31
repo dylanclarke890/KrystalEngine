@@ -184,28 +184,69 @@ namespace krys::boo::dom::tests
 
 #pragma region Shadow Trees
 
-  TEST_CASE("TreeQueries::IsInShadowTree", "[HTML][TreeQueries]")
+  TEST_CASE("Shadow tree: a node whose root is a shadow root",
+            "[DOM][TreeQueries][dom:shadow-trees][dom:concept-shadow-tree][dom:concept-light-tree]")
   {
-    auto doc = CreateRef<Document>();
-    auto docChild = CreateRef<TestElement>(*doc);
+    SECTION("The shadow root itself and its descendants, until removed")
+    {
+      auto doc = CreateRef<HTMLDocument>();
+      auto host = doc->CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto child = doc->CreateElement(u8"span").ReleaseValue();
+      auto grandchild = doc->CreateElement(u8"b").ReleaseValue();
+      REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*child).HasException());
 
-    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
+      CHECK(TreeQueries::IsInShadowTree(*shadow));
+      CHECK(TreeQueries::IsInShadowTree(*child));
+      CHECK(TreeQueries::IsInShadowTree(*grandchild));
+      // The host is in its light tree.
+      CHECK_FALSE(TreeQueries::IsInShadowTree(*host));
 
-    REQUIRE_FALSE(doc->AppendChild(*docChild).HasException());
+      REQUIRE_FALSE(child->Remove().HasException());
+      CHECK_FALSE(TreeQueries::IsInShadowTree(*child));
+      CHECK_FALSE(TreeQueries::IsInShadowTree(*grandchild));
+    }
 
-    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
+    SECTION("A light tree can be a shadow tree itself")
+    {
+      auto doc = CreateRef<HTMLDocument>();
+      auto outerHost = doc->CreateElement(u8"div").ReleaseValue();
+      auto outer = outerHost->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto innerHost = doc->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(outer->AppendChild(*innerHost).HasException());
+      auto inner = innerHost->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto child = doc->CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(inner->AppendChild(*child).HasException());
 
-    auto shadowRoot = CreateRef<ShadowRoot>(*doc, nullptr);
-    auto shadowChild = CreateRef<TestElement>(*doc);
+      CHECK(TreeQueries::IsInShadowTree(*innerHost));
+      CHECK(TreeQueries::IsInShadowTree(*child));
+      CHECK(&TreeQueries::Root(*child) == inner.get());
+    }
 
-    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*shadowChild));
+    SECTION("Without a host")
+    {
+      auto doc = CreateRef<Document>();
+      auto docChild = CreateRef<TestElement>(*doc);
 
-    REQUIRE_FALSE(shadowRoot->AppendChild(*shadowChild).HasException());
+      REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
 
-    REQUIRE(TreeQueries::IsInShadowTree(*shadowChild));
+      REQUIRE_FALSE(doc->AppendChild(*docChild).HasException());
 
-    REQUIRE_FALSE(doc->RemoveChild(*docChild).HasException());
-    REQUIRE_FALSE(shadowRoot->RemoveChild(*shadowChild).HasException());
+      REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
+
+      auto shadowRoot = CreateRef<ShadowRoot>(*doc, nullptr);
+      auto shadowChild = CreateRef<TestElement>(*doc);
+
+      REQUIRE_FALSE(TreeQueries::IsInShadowTree(*shadowChild));
+
+      REQUIRE_FALSE(shadowRoot->AppendChild(*shadowChild).HasException());
+
+      REQUIRE(TreeQueries::IsInShadowTree(*shadowChild));
+
+      REQUIRE_FALSE(doc->RemoveChild(*docChild).HasException());
+      REQUIRE_FALSE(shadowRoot->RemoveChild(*shadowChild).HasException());
+    }
   }
 
 #pragma endregion

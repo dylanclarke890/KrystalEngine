@@ -64,17 +64,42 @@ namespace krys::boo::dom::tests
   //   REQUIRE(data.Node->BaseURI() == u8"about:blank");
   // }
 
-  TEST_CASE("Node::IsConnected", "[HTML][Node]")
+  TEST_CASE("Connected: a node whose shadow-including root is a document", "[DOM][Node][dom:connected]")
   {
-    CommonTestData data {};
+    SECTION("A document and its descendants")
+    {
+      CommonTestData data {};
 
-    REQUIRE(data.Document->IsConnected());
-    REQUIRE_FALSE(data.Node->IsConnected());
+      REQUIRE(data.Document->IsConnected());
+      REQUIRE_FALSE(data.Node->IsConnected());
 
-    REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
+      REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
 
-    REQUIRE(data.Document->IsConnected());
-    REQUIRE(data.Node->IsConnected());
+      REQUIRE(data.Document->IsConnected());
+      REQUIRE(data.Node->IsConnected());
+    }
+
+    SECTION("Through nested shadow hosts, until the outermost host is removed")
+    {
+      auto doc = CreateRef<HTMLDocument>();
+      auto outerHost = doc->CreateElement(u8"div").ReleaseValue();
+      auto outer = outerHost->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto innerHost = doc->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(outer->AppendChild(*innerHost).HasException());
+      auto inner = innerHost->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto child = doc->CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(inner->AppendChild(*child).HasException());
+      CHECK_FALSE(child->IsConnected());
+
+      REQUIRE_FALSE(doc->AppendChild(*outerHost).HasException());
+      CHECK(outer->IsConnected());
+      CHECK(inner->IsConnected());
+      CHECK(child->IsConnected());
+
+      REQUIRE_FALSE(outerHost->Remove().HasException());
+      CHECK_FALSE(inner->IsConnected());
+      CHECK_FALSE(child->IsConnected());
+    }
   }
 
   TEST_CASE("Node::OwnerDocument", "[HTML][Node]")

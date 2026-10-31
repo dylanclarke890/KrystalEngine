@@ -92,6 +92,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString BaseURI() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-isconnected
+    /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
       return HasNodeFlag(NodeFlags::IsConnected);
@@ -542,7 +543,10 @@ namespace krys::boo::dom
     /// element's shadow tree, the `<use>` element's.
     KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
+    /// @brief Whether the node's root is a shadow root (the node is in a shadow tree). The node tree of the
+    /// shadow root's host is its light tree.
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
+    /// @see https://dom.spec.whatwg.org/#concept-light-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
       return HasNodeFlag(NodeFlags::IsInShadowTree);
