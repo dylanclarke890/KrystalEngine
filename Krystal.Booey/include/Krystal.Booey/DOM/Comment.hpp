@@ -6,6 +6,7 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A comment (`<!-- data -->`).
   /// @see https://dom.spec.whatwg.org/#interface-comment
   class Comment : public CharacterData
   {
@@ -14,13 +15,16 @@ namespace krys::boo::dom
   public:
 #pragma region Comment - https://dom.spec.whatwg.org/#comment
 
+    /// @brief Creates a comment node in @p document with the data.
     /// @see https://dom.spec.whatwg.org/#dom-comment-comment
+    /// @see https://dom.spec.whatwg.org/#create-a-comment-node
     Comment(Document &document, DOMString &&data = u8"") noexcept;
 
 #pragma endregion
 
 #pragma region Node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#comment";

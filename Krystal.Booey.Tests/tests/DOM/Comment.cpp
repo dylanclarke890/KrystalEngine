@@ -26,6 +26,24 @@ namespace krys::boo::dom::tests
     };
 
   }
+  TEST_CASE("Comment: constructed, or created as a comment node, with the data in the document",
+            "[DOM][Comment][dom:interface-comment][dom:dom-comment-comment][dom:create-a-comment-node]")
+  {
+    auto document = CreateRef<dom::Document>();
+
+    auto constructed = CreateRef<Comment>(*document, u8"data");
+    CHECK(constructed->Data() == u8"data");
+    CHECK(&constructed->NodeDocument() == document.get());
+    CHECK(constructed->ParentNode() == nullptr);
+    CHECK(CreateRef<Comment>(*document)->Data() == u8"");
+
+    auto created = document->CreateComment(u8"created");
+    CHECK(created->Data() == u8"created");
+    CHECK(&created->NodeDocument() == document.get());
+    // Any data is allowed, even what would end the comment in markup.
+    CHECK(document->CreateComment(u8"a --> b")->Data() == u8"a --> b");
+  }
+
   TEST_CASE("Node.nodeName: a Comment's is #comment", "[DOM][Comment][dom:dom-node-nodename]")
   {
     CommonTestData data(u8"Hello, world!");

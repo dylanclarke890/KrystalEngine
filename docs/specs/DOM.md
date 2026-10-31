@@ -2069,14 +2069,15 @@ Status: reviewed (2026-10-31)
 
 ### [4.14. Interface Comment](https://dom.spec.whatwg.org/#interface-comment)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Comment` (`Comment.hpp`/`.cpp`) is constructed with its document (no global objects; see `DIFFERENCES.md`), which is also create a comment node.
 
-- [ ] [create a comment node](https://dom.spec.whatwg.org/#create-a-comment-node) — To create a comment node given a document document and a string data:
+- [x] [create a comment node](https://dom.spec.whatwg.org/#create-a-comment-node) — To create a comment node given a document document and a string data:
   - 1. Let comment be the result of creating a node that implements Comment, given document.
   - 2. Set comment’s data to data.
   - 3. Return comment.
 
-- [ ] [Comment.new Comment(data)](https://dom.spec.whatwg.org/#dom-comment-comment) — The new Comment(data) constructor steps are to set this’s data to data and this’s node document to current global object’s associated Document.
+- [x] [Comment.new Comment(data)](https://dom.spec.whatwg.org/#dom-comment-comment) — The new Comment(data) constructor steps are to set this’s data to data and this’s node document to current global object’s associated Document.
 
 ## [5. Ranges](https://dom.spec.whatwg.org/#ranges)
 
