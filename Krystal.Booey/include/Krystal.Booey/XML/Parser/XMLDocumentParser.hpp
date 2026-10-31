@@ -166,8 +166,4 @@ namespace krys::boo::xml
 
   _xmlParserInput *ExternalEntityLoader(const char *url, const char *id, _xmlParserCtxt *) noexcept;
   void InitializeXMLParser() noexcept;
-
-  /// @brief Parses @p string as the attributes of an element (a processing instruction's pseudo-attributes).
-  KRYS_NODISCARD Maybe<HashMap<dom::DOMString, dom::DOMString>>
-    ParseAttributes(dom::DOMStringView string) noexcept;
 }

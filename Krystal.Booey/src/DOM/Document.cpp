@@ -521,18 +521,7 @@ namespace krys::boo::dom
   ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString &&target,
                                                                                 DOMString &&data) noexcept
   {
-    if (!NameValidation::IsValidXMLName(target))
-    {
-      return ExceptionCode::InvalidCharacterError;
-    }
-
-    if (data.contains(u8"?>"))
-    {
-      return ExceptionCode::InvalidCharacterError;
-    }
-
-    return AdoptRef<ProcessingInstruction>(
-      *new ProcessingInstruction(*this, krys::move(target), krys::move(data)));
+    return ProcessingInstruction::Create(*this, krys::move(target), krys::move(data));
   }
 
   ExceptionOr<Ref<Node>> Document::ImportNode(Node &node, const BoolOrImportNodeOptions &options) noexcept

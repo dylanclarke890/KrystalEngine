@@ -1904,7 +1904,7 @@ Status: reviewed (2026-10-31)
 ### [4.10. Interface CharacterData](https://dom.spec.whatwg.org/#interface-characterdata)
 
 Status: reviewed (2026-10-31)
-> `CharacterData` (`CharacterData.hpp`/`.cpp`) holds the data; replace data and substring data are in `TextAlgorithms`, with the live range steps in `LiveRangeUpdater::CharacterDataReplaced`. Lengths and offsets count UTF-8 code units (see `DIFFERENCES.md`). Replace data's step 12 is missing, as `ProcessingInstruction` has no attribute map (see `KNOWN-ISSUES.md`).
+> `CharacterData` (`CharacterData.hpp`/`.cpp`) holds the data; replace data and substring data are in `TextAlgorithms`, with the live range steps in `LiveRangeUpdater::CharacterDataReplaced`. Lengths and offsets count UTF-8 code units (see `DIFFERENCES.md`). Replace data's step 12 updates a `ProcessingInstruction`'s attribute map.
 <!-- definitions: concept-cd-data -->
 
 - [x] [replace data](https://dom.spec.whatwg.org/#concept-cd-replace) — To replace data of a node node with an integer offset, integer count, string data, and an optional boolean piAttributesAlreadyUpdated (default false):
@@ -1996,28 +1996,29 @@ Status: reviewed (2026-10-31)
 
 ### [4.13. Interface ProcessingInstruction](https://dom.spec.whatwg.org/#interface-processinginstruction)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `ProcessingInstruction` (`ProcessingInstruction.hpp`/`.cpp`) holds its target and attribute map; `ProcessingInstruction::Create` is create a processing instruction node and initialize, and stands in for the constructor (no global objects). The pseudo-attributes are parsed by `xml::ParsePseudoAttributes`. A clone also updates its attributes from its data (see `DIFFERENCES.md`).
 <!-- definitions: concept-pi-target concept-pi-attribute-map -->
 
-- [ ] [create a processing instruction node](https://dom.spec.whatwg.org/#create-a-processing-instruction-node) — To create a processing instruction node given a document document, a string target, and a string data:
+- [x] [create a processing instruction node](https://dom.spec.whatwg.org/#create-a-processing-instruction-node) — To create a processing instruction node given a document document, a string target, and a string data:
   - 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
   - 2. Initialize pi with target and data.
   - 3. Return pi.
 
-- [ ] [initialize (ProcessingInstruction)](https://dom.spec.whatwg.org/#processinginstruction-initialize) — To initialize a ProcessingInstruction node pi, with target and data:
+- [x] [initialize (ProcessingInstruction)](https://dom.spec.whatwg.org/#processinginstruction-initialize) — To initialize a ProcessingInstruction node pi, with target and data:
   - 1. If target does not match the Name production, then throw an "InvalidCharacterError" DOMException.
   - 2. If data contains the string "?>", then throw an "InvalidCharacterError" DOMException.
   - 3. Set pi’s target to target.
   - 4. Set pi’s data to data.
   - 5. Update attributes from data given pi.
 
-- [ ] [update attributes from data](https://dom.spec.whatwg.org/#update-attributes-from-data) — To update attributes from data, given a ProcessingInstruction node pi:
+- [x] [update attributes from data](https://dom.spec.whatwg.org/#update-attributes-from-data) — To update attributes from data, given a ProcessingInstruction node pi:
   - 1. Clear pi’s attribute map.
   - 2. Let result be the parsing result of invoking the rules for parsing pseudo-attributes from a string given pi’s data.
   - 3. If result is an error, then return.
   - 4. For each pseudo-attribute pseudoAttr of result: set pi’s attribute map[pseudoAttr’s name] to pseudoAttr’s value.
 
-- [ ] [update data from attributes](https://dom.spec.whatwg.org/#update-data-from-attributes) — To update data from attributes, given a ProcessingInstruction node pi:
+- [x] [update data from attributes](https://dom.spec.whatwg.org/#update-data-from-attributes) — To update data from attributes, given a ProcessingInstruction node pi:
   - 1. Let data be the empty string.
   - 2. For each name → value of pi’s attribute map:
     - 2a. If data is not the empty string, then append U+0020 SPACE to data.
@@ -2032,30 +2033,30 @@ Status: unreviewed
     - 2j. Append U+0022 (") to data.
   - 3. Replace data of pi with 0, pi’s length, data, and true.
 
-- [ ] [get a processing instruction attribute](https://dom.spec.whatwg.org/#get-a-processing-instruction-attribute) — To get a processing instruction attribute, given a ProcessingInstruction node pi and a string name: return pi’s attribute map[name] with default null.
+- [x] [get a processing instruction attribute](https://dom.spec.whatwg.org/#get-a-processing-instruction-attribute) — To get a processing instruction attribute, given a ProcessingInstruction node pi and a string name: return pi’s attribute map[name] with default null.
 
-- [ ] [ProcessingInstruction.new ProcessingInstruction(target, data)](https://dom.spec.whatwg.org/#dom-processinginstruction-processinginstruction) — The new ProcessingInstruction(target, data) constructor steps are:
+- [x] [ProcessingInstruction.new ProcessingInstruction(target, data)](https://dom.spec.whatwg.org/#dom-processinginstruction-processinginstruction) — The new ProcessingInstruction(target, data) constructor steps are:
   - 1. Set this’s node document to current global object’s associated Document.
   - 2. Initialize this with target and data.
 
-- [ ] [ProcessingInstruction.target](https://dom.spec.whatwg.org/#dom-processinginstruction-target) — The target getter steps are to return this’s target.
+- [x] [ProcessingInstruction.target](https://dom.spec.whatwg.org/#dom-processinginstruction-target) — The target getter steps are to return this’s target.
 
-- [ ] [ProcessingInstruction.hasAttributes()](https://dom.spec.whatwg.org/#dom-processinginstruction-hasattributes) — The hasAttributes() method steps are to return false if this’s attribute map is empty; otherwise true.
+- [x] [ProcessingInstruction.hasAttributes()](https://dom.spec.whatwg.org/#dom-processinginstruction-hasattributes) — The hasAttributes() method steps are to return false if this’s attribute map is empty; otherwise true.
 
-- [ ] [ProcessingInstruction.getAttributeNames()](https://dom.spec.whatwg.org/#dom-processinginstruction-getattributenames) — The getAttributeNames() method steps are to return the result of getting the keys of this’s attribute map.
+- [x] [ProcessingInstruction.getAttributeNames()](https://dom.spec.whatwg.org/#dom-processinginstruction-getattributenames) — The getAttributeNames() method steps are to return the result of getting the keys of this’s attribute map.
 
-- [ ] [ProcessingInstruction.getAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-getattribute) — The getAttribute(name) method steps are to return the result of getting a processing instruction attribute given this and name.
+- [x] [ProcessingInstruction.getAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-getattribute) — The getAttribute(name) method steps are to return the result of getting a processing instruction attribute given this and name.
 
-- [ ] [ProcessingInstruction.setAttribute(name, value)](https://dom.spec.whatwg.org/#dom-processinginstruction-setattribute) — The setAttribute(name, value) method steps are:
+- [x] [ProcessingInstruction.setAttribute(name, value)](https://dom.spec.whatwg.org/#dom-processinginstruction-setattribute) — The setAttribute(name, value) method steps are:
   - 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 2. Set this’s attribute map[name] to value.
   - 3. Update data from attributes given this.
 
-- [ ] [ProcessingInstruction.removeAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-removeattribute) — The removeAttribute(name) method steps are:
+- [x] [ProcessingInstruction.removeAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-removeattribute) — The removeAttribute(name) method steps are:
   - 1. Remove this’s attribute map[name].
   - 2. Update data from attributes given this.
 
-- [ ] [ProcessingInstruction.toggleAttribute(name, force)](https://dom.spec.whatwg.org/#dom-processinginstruction-toggleattribute) — The toggleAttribute(name, force) method steps are:
+- [x] [ProcessingInstruction.toggleAttribute(name, force)](https://dom.spec.whatwg.org/#dom-processinginstruction-toggleattribute) — The toggleAttribute(name, force) method steps are:
   - 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 2. Let attributes be this’s attribute map.
   - 3. If attributes[name] does not exist:
@@ -2064,7 +2065,7 @@ Status: unreviewed
   - 4. If force is not given or is false, remove attributes[name], update data from attributes given this, and then return false.
   - 5. Return true.
 
-- [ ] [ProcessingInstruction.hasAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-hasattribute) — The hasAttribute(name) method steps are to return true if this’s attribute map[name] exists; otherwise false.
+- [x] [ProcessingInstruction.hasAttribute(name)](https://dom.spec.whatwg.org/#dom-processinginstruction-hasattribute) — The hasAttribute(name) method steps are to return true if this’s attribute map[name] exists; otherwise false.
 
 ### [4.14. Interface Comment](https://dom.spec.whatwg.org/#interface-comment)
 

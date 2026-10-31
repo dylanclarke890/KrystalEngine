@@ -16,7 +16,7 @@
 namespace krys::boo::dom
 {
   ExceptionOr<void> TextAlgorithms::Replace(CharacterData &node, size_t offset, size_t count,
-                                            DOMString &&data) noexcept
+                                            DOMString &&data, bool piAttributesAlreadyUpdated) noexcept
   {
     // 1. Let length be node's length.
     auto length = node.Length();
@@ -68,12 +68,15 @@ namespace krys::boo::dom
     {
       text->UpdateRendererAfterContentChange(offset, count);
     }
-    // 12. If node is a ProcessingInstruction node and piAttributesAlreadyUpdated is false, then update
-    //     attributes from data given node.
-    // FIXME: ProcessingInstruction has no attribute map, so there's nothing to update (and no
-    // piAttributesAlreadyUpdated); an xml-stylesheet's sheet is checked again from its data.
     else if (auto *processingInstruction = DynamicDowncast<ProcessingInstruction>(node))
     {
+      // 12. If node is a ProcessingInstruction node and piAttributesAlreadyUpdated is false, then update
+      //     attributes from data given node.
+      if (!piAttributesAlreadyUpdated)
+      {
+        processingInstruction->UpdateAttributesFromData();
+      }
+      // An xml-stylesheet's sheet is checked again from its pseudo-attributes.
       processingInstruction->CheckStyleSheet();
     }
 

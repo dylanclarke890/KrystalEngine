@@ -257,16 +257,4 @@ namespace krys::boo::tests
     auto &svg = Downcast<svg::SVGSvgElement>(Downcast<svg::SVGElement>(*root));
     CHECK(svg.CurrentViewBoxRect() == FloatRect(0, 0, 10, 5));
   }
-
-  TEST_CASE("Processing instructions' pseudo-attributes are parsed as XML attributes",
-            "[XML][XMLDocumentParser]")
-  {
-    auto attributes = xml::ParseAttributes(u8"href=\"a.css\" type='text/css' x:y=\"z\"");
-    REQUIRE(attributes);
-    CHECK(attributes->at(u8"href") == u8"a.css");
-    CHECK(attributes->at(u8"type") == u8"text/css");
-    CHECK(attributes->size() == 3);
-
-    CHECK_FALSE(xml::ParseAttributes(u8"href=unquoted"));
-  }
 }

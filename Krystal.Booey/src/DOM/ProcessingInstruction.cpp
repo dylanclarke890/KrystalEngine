@@ -3,6 +3,8 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/CSS/StyleSheetContents.hpp"
+#include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedCSSStyleSheet.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
@@ -17,6 +19,203 @@ namespace krys::boo::dom
       : CharacterData(document, krys::move(data), NodeType::PROCESSING_INSTRUCTION_NODE),
         _target(krys::move(target))
   {
+    // Initialize:
+    // 3. Set pi's target to target.
+    // 4. Set pi's data to data.
+    // 5. Update attributes from data given pi.
+    UpdateAttributesFromData();
+  }
+
+  ExceptionOr<Ref<ProcessingInstruction>>
+    ProcessingInstruction::Create(Document &document, DOMString &&target, DOMString &&data) noexcept
+  {
+    // Create a processing instruction node:
+    // 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
+    // 2. Initialize pi with target and data:
+    //    1. If target does not match the Name production, then throw an "InvalidCharacterError" DOMException.
+    if (!NameValidation::IsValidXMLName(target))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
+
+    // 2. If data contains the string "?>", then throw an "InvalidCharacterError" DOMException.
+    if (data.contains(u8"?>"))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
+
+    // 3.-5. In the constructor.
+    // 3. Return pi.
+    return AdoptRef<ProcessingInstruction>(
+      *new ProcessingInstruction(document, krys::move(target), krys::move(data)));
+  }
+
+  List<DOMString> ProcessingInstruction::GetAttributeNames() const noexcept
+  {
+    // Return the result of getting the keys of this's attribute map.
+    List<DOMString> names;
+    names.reserve(_attributeMap.size());
+    for (auto &attribute : _attributeMap)
+    {
+      names.push_back(attribute.Name);
+    }
+    return names;
+  }
+
+  Maybe<DOMString> ProcessingInstruction::GetAttribute(DOMStringView name) const noexcept
+  {
+    // Return pi's attribute map[name] with default null.
+    auto it = std::ranges::find(_attributeMap, name, &xml::PseudoAttribute::Name);
+    if (it == _attributeMap.end())
+    {
+      return null;
+    }
+    return it->Value;
+  }
+
+  ExceptionOr<void> ProcessingInstruction::SetAttribute(DOMStringView name, DOMString &&value) noexcept
+  {
+    // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
+    if (!NameValidation::IsValidAttributeLocalName(name))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
+
+    // 2. Set this's attribute map[name] to value.
+    auto it = std::ranges::find(_attributeMap, name, &xml::PseudoAttribute::Name);
+    if (it != _attributeMap.end())
+    {
+      it->Value = krys::move(value);
+    }
+    else
+    {
+      _attributeMap.push_back({DOMString(name), krys::move(value)});
+    }
+
+    // 3. Update data from attributes given this.
+    UpdateDataFromAttributes();
+    return {};
+  }
+
+  void ProcessingInstruction::RemoveAttribute(DOMStringView name) noexcept
+  {
+    // 1. Remove this's attribute map[name].
+    std::erase_if(_attributeMap,
+                  [&](const xml::PseudoAttribute &attribute) { return attribute.Name == name; });
+    // 2. Update data from attributes given this.
+    UpdateDataFromAttributes();
+  }
+
+  ExceptionOr<bool> ProcessingInstruction::ToggleAttribute(DOMStringView name, Maybe<bool> force) noexcept
+  {
+    // 1. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
+    if (!NameValidation::IsValidAttributeLocalName(name))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
+
+    // 2. Let attributes be this's attribute map.
+    auto it = std::ranges::find(_attributeMap, name, &xml::PseudoAttribute::Name);
+    // 3. If attributes[name] does not exist:
+    if (it == _attributeMap.end())
+    {
+      // 3a. If force is not given or is true, set attributes[name] to the empty string, update data from
+      //     attributes given this, and then return true.
+      if (!force.has_value() || *force)
+      {
+        _attributeMap.push_back({DOMString(name), DOMString()});
+        UpdateDataFromAttributes();
+        return true;
+      }
+
+      // 3b. Return false.
+      return false;
+    }
+
+    // 4. If force is not given or is false, remove attributes[name], update data from attributes given this,
+    // and
+    //    then return false.
+    if (!force.has_value() || !*force)
+    {
+      _attributeMap.erase(it);
+      UpdateDataFromAttributes();
+      return false;
+    }
+
+    // 5. Return true.
+    return true;
+  }
+
+  bool ProcessingInstruction::HasAttribute(DOMStringView name) const noexcept
+  {
+    // Return true if this's attribute map[name] exists; otherwise false.
+    return std::ranges::find(_attributeMap, name, &xml::PseudoAttribute::Name) != _attributeMap.end();
+  }
+
+  void ProcessingInstruction::UpdateAttributesFromData() noexcept
+  {
+    // 1. Clear pi's attribute map.
+    _attributeMap.clear();
+
+    // 2. Let result be the parsing result of invoking the rules for parsing pseudo-attributes from a string
+    // given
+    //    pi's data.
+    auto result = xml::ParsePseudoAttributes(Data());
+
+    // 3. If result is an error, then return.
+    if (!result)
+    {
+      return;
+    }
+
+    // 4. For each pseudo-attribute pseudoAttr of result: set pi's attribute map[pseudoAttr's name] to
+    //    pseudoAttr's value.
+    _attributeMap = krys::move(*result);
+  }
+
+  void ProcessingInstruction::UpdateDataFromAttributes() noexcept
+  {
+    // 1. Let data be the empty string.
+    DOMString data;
+
+    // 2. For each name -> value of pi's attribute map:
+    for (auto &[name, value] : _attributeMap)
+    {
+      // 2a. If data is not the empty string, then append U+0020 SPACE to data.
+      if (!data.empty())
+      {
+        data += u8' ';
+      }
+
+      // 2b. Append name to data.
+      // 2c. Append U+003D (=) to data.
+      // 2d. Append U+0022 (") to data.
+      data += name;
+      data += u8"=\"";
+
+      // 2e. Replace any U+0026 (&) in value with "&amp;".
+      // 2f. Replace any U+003C (<) in value with "&lt;".
+      // 2g. Replace any U+003E (>) in value with "&gt;".
+      // 2h. Replace any U+0022 (") in value with "&quot;".
+      // 2i. Append value to data.
+      for (auto ch : value)
+      {
+        switch (ch)
+        {
+          case u8'&': data += u8"&amp;"; break;
+          case u8'<': data += u8"&lt;"; break;
+          case u8'>': data += u8"&gt;"; break;
+          case u8'"': data += u8"&quot;"; break;
+          default:    data += ch; break;
+        }
+      }
+
+      // 2j. Append U+0022 (") to data.
+      data += u8'"';
+    }
+
+    // 3. Replace data of pi with 0, pi's length, data, and true.
+    (void)TextAlgorithms::Replace(*this, 0uz, Length(), krys::move(data), true);
   }
 
   ProcessingInstruction::~ProcessingInstruction() noexcept
@@ -49,15 +248,14 @@ namespace krys::boo::dom
     {
       // see http://www.w3.org/TR/xml-stylesheet/
       // ### support stylesheet included in a fragment of this (or another) document
-      auto attributes = xml::ParseAttributes(Data());
-      if (!attributes)
+      // The pseudo-attributes are the attribute map; it's empty if the data didn't parse.
+      if (!HasAttributes())
       {
         return;
       }
       auto get = [&](utf8_stringview name)
       {
-        auto it = attributes->find(DOMString(name));
-        return it != attributes->end() ? it->second : DOMString();
+        return GetAttribute(name).value_or(DOMString());
       };
       auto type = get(u8"type");
 

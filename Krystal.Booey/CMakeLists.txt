@@ -4326,6 +4326,7 @@ target_sources(Krystal.Booey
       # XML
       include/Krystal.Booey/XML/Parser/XMLDocumentParser.hpp
       include/Krystal.Booey/XML/Parser/XMLDocumentParserScope.hpp
+      include/Krystal.Booey/XML/PseudoAttributes.hpp
       include/Krystal.Booey/XML/XMLErrors.hpp
 
   PRIVATE
@@ -4751,5 +4752,6 @@ target_sources(Krystal.Booey
     src/XML/Parser/XMLDocumentParser.cpp
     src/XML/Parser/XMLDocumentParserLibxml2.cpp
     src/XML/Parser/XMLDocumentParserScope.cpp
+    src/XML/PseudoAttributes.cpp
     src/XML/XMLErrors.cpp
 )
