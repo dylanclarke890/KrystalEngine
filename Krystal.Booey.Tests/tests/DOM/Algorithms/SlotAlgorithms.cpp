@@ -290,4 +290,33 @@ namespace krys::boo::dom::tests
     CHECK(SlotAlgorithms::GetAssignedSlot(*named) == slot.get());
     CHECK(SlotAlgorithms::GetAssignedSlot(*unnamed) == nullptr);
   }
+
+  TEST_CASE(
+    "Signal a slot change: the slot joins the signal slots once, and slotchange fires at the microtask",
+    "[DOM][SlotAlgorithms][dom:signaling-slot-change][dom:signal-a-slot-change][dom:signal-slot-list]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<HTMLDocument>();
+    auto first = NewSlotNamed(*document, u8"");
+    auto second = NewSlotNamed(*document, u8"");
+
+    List<html::HTMLSlotElement *> fired;
+    auto firstListener =
+      first->AddEventListener(DOMStringAtom(u8"slotchange"), [&](Event &) { fired.push_back(first.get()); });
+    auto secondListener = second->AddEventListener(DOMStringAtom(u8"slotchange"),
+                                                   [&](Event &) { fired.push_back(second.get()); });
+
+    SlotAlgorithms::SignalSlotChange(*second);
+    SlotAlgorithms::SignalSlotChange(*first);
+    SlotAlgorithms::SignalSlotChange(*second);
+    CHECK(fired.empty());
+
+    loop.PerformMicrotaskCheckpoint();
+    CHECK(fired == List<html::HTMLSlotElement *> {second.get(), first.get()});
+
+    // The signal slots were emptied.
+    loop.PerformMicrotaskCheckpoint();
+    CHECK(fired.size() == 2);
+  }
 }

@@ -647,10 +647,11 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.2.5. Signaling slot change](https://dom.spec.whatwg.org/#signaling-slot-change)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `SlotAlgorithms::SignalSlotChange`; the signal slots are a set in `MutationObserverAlgorithms`, process-wide rather than per agent (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`.
 <!-- definitions: signal-slot-list -->
 
-- [ ] [signal a slot change](https://dom.spec.whatwg.org/#signal-a-slot-change) — To signal a slot change, for a slot slot:
+- [x] [signal a slot change](https://dom.spec.whatwg.org/#signal-a-slot-change) — To signal a slot change, for a slot slot:
   - 1. Append slot to slot’s relevant agent’s signal slots.
   - 2. Queue a mutation observer microtask.
 
