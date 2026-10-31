@@ -9,14 +9,23 @@ namespace krys::boo::dom
 {
   class Node;
 
+  /// @brief A node and an offset into it.
   /// @see https://dom.spec.whatwg.org/#boundary-points
+  /// @see https://dom.spec.whatwg.org/#concept-range-bp
   struct BoundaryPoint
   {
+    /// @see https://dom.spec.whatwg.org/#boundary-point-node
     Ref<Node> Container;
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-offset
     uint64 Offset;
 
+    /// @brief The position of this boundary point relative to @p other, which must have the same root: less
+    /// is before, equal is equal, and greater is after.
     /// @see https://dom.spec.whatwg.org/#concept-range-bp-position
-    std::strong_ordering ComparePositionTo(const BoundaryPoint &other) const noexcept;
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-before
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-equal
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-after
+    KRYS_NODISCARD std::strong_ordering ComparePositionTo(const BoundaryPoint &other) const noexcept;
 
     KRYS_NODISCARD Document &GetDocument() const noexcept
     {

@@ -12,38 +12,47 @@ namespace krys::boo::dom
 {
   std::strong_ordering BoundaryPoint::ComparePositionTo(const BoundaryPoint &other) const noexcept
   {
+    const Node &a = *Container;
+    const Node &b = *other.Container;
+
+    // 1. Assert: nodeA and nodeB have the same root.
+    krys_debug_assert(&TreeQueries::Root(a) == &TreeQueries::Root(b));
+
+    // 2. If nodeA is nodeB, then return equal if offsetA is offsetB, before if offsetA is less than offsetB,
+    //    and after if offsetA is greater than offsetB.
+    if (&a == &b)
     {
-      const Node &a = *Container;
-      const Node &b = *other.Container;
-
-      assert(&TreeQueries::Root(a) == &TreeQueries::Root(b));
-
-      if (&a == &b)
-      {
-        return Offset <=> other.Offset;
-      }
-
-      if (TreeQueries::IsFollowing(a, b))
-      {
-        return StrongOrder::Reverse(other.ComparePositionTo(*this));
-      }
-
-      if (TreeQueries::IsAncestor(a, b))
-      {
-        const Node *child = &b;
-        while (!TreeQueries::IsChild(*child, a))
-        {
-          child = child->ParentNode();
-        }
-
-        if (TreeQueries::Index(*child) < Offset)
-        {
-          return std::strong_ordering::greater;
-        }
-      }
-
-      return std::strong_ordering::less;
+      return Offset <=> other.Offset;
     }
+
+    // 3. If nodeA is following nodeB, then if the position of (nodeB, offsetB) relative to (nodeA, offsetA)
+    // is
+    //    before, return after, and if it is after, return before.
+    if (TreeQueries::IsFollowing(a, b))
+    {
+      return StrongOrder::Reverse(other.ComparePositionTo(*this));
+    }
+
+    // 4. If nodeA is an ancestor of nodeB:
+    if (TreeQueries::IsAncestor(a, b))
+    {
+      // 4a. Let child be nodeB.
+      const Node *child = &b;
+      // 4b. While child is not a child of nodeA, set child to its parent.
+      while (!TreeQueries::IsChild(*child, a))
+      {
+        child = child->ParentNode();
+      }
+
+      // 4c. If child's index is less than offsetA, then return after.
+      if (TreeQueries::Index(*child) < Offset)
+      {
+        return std::strong_ordering::greater;
+      }
+    }
+
+    // 5. Return before.
+    return std::strong_ordering::less;
   }
 
   Maybe<BoundaryPoint> MakeBoundaryPointBeforeNode(Node &node) noexcept

@@ -2091,10 +2091,11 @@ Status: reviewed (2026-10-31)
 
 ### [5.2. Boundary points](https://dom.spec.whatwg.org/#boundary-points)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `BoundaryPoint` (`BoundaryPoint.hpp`/`.cpp`) is a node (`Container`) and an offset; `ComparePositionTo` gives the position as a `std::strong_ordering` (less is before, equal is equal, greater is after).
 <!-- definitions: concept-range-bp boundary-point-node concept-range-bp-offset concept-range-bp-before concept-range-bp-equal concept-range-bp-after -->
 
-- [ ] [position (boundary point)](https://dom.spec.whatwg.org/#concept-range-bp-position) — The position of a boundary point (nodeA, offsetA) relative to a boundary point (nodeB, offsetB) is before, equal, or after, as returned by these steps:
+- [x] [position (boundary point)](https://dom.spec.whatwg.org/#concept-range-bp-position) — The position of a boundary point (nodeA, offsetA) relative to a boundary point (nodeB, offsetB) is before, equal, or after, as returned by these steps:
   - 1. Assert: nodeA and nodeB have the same root.
   - 2. If nodeA is nodeB, then return equal if offsetA is offsetB, before if offsetA is less than offsetB, and after if offsetA is greater than offsetB.
   - 3. If nodeA is following nodeB, then if the position of (nodeB, offsetB) relative to (nodeA, offsetA) is before, return after, and if it is after, return before.
