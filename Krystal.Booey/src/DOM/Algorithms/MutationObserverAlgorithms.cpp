@@ -11,7 +11,6 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Core/Utils/NeverDestroyed.hpp"
-#include <cassert>
 #include <ranges>
 
 namespace krys::boo::dom
@@ -211,13 +210,23 @@ namespace krys::boo::dom
     observer._transientNodes.clear();
   }
 
+  List<Ref<RegisteredObserver>> MutationObserverAlgorithms::RegisteredObserverList(Node &node) noexcept
+  {
+    List<Ref<RegisteredObserver>> registeredObservers = node.RegisteredObservers();
+    for (auto &transient : node.TransientRegisteredObservers())
+    {
+      registeredObservers.push_back(Ref<RegisteredObserver>(transient));
+    }
+    return registeredObservers;
+  }
+
   bool MutationObserverAlgorithms::IsAttributeOldValueRequested(Node &target, DOMStringAtom name) noexcept
   {
     // The interested observers of "queue a mutation record" (steps 2 and 3) for an attribute in the null
     // namespace.
     for (auto &node : InclusiveAncestorRange(target))
     {
-      for (auto &registered : node.RegisteredObservers())
+      for (auto &registered : RegisteredObserverList(node))
       {
         auto options = registered->Options();
         if (&node != &target && !options.Subtree)
@@ -258,28 +267,22 @@ namespace krys::boo::dom
     // 2. Let nodes be the inclusive ancestors of target.
     auto nodes = InclusiveAncestorRange(*target);
 
-    // 3. For each node in nodes, and then for each registered of node's registered observer list:
-    // NOTE: a node keeps its transient registered observers in a list of their own.
+    // 3. For each node of nodes, and then for each registered of node's registered observer list:
     for (auto &node : nodes)
     {
-      List<Ref<RegisteredObserver>> registeredObservers = node.RegisteredObservers();
-      for (auto &transient : node.TransientRegisteredObservers())
+      for (auto &registered : RegisteredObserverList(node))
       {
-        registeredObservers.push_back(Ref<RegisteredObserver>(transient));
-      }
-      for (auto &registered : registeredObservers)
-      {
-        // 3.1. Let options be registered's options.
+        // 3a. Let options be registered's options.
         auto options = registered->Options();
 
-        // 3.2. If none of the following are true, then:
-        //   - node is not target and options["subtree"] is false
-        //   - type is "attributes" and options["attributes"] either does not exist or is false
-        //   - type is "attributes", options["attributeFilter"] exists, and options["attributeFilter"] does
-        //   not
-        //     contain name or namespace is non-null
-        //   - type is "characterData" and options["characterData"] either does not exist or is false
-        //   - type is "childList" and options["childList"] is false
+        // 3b. If none of the following are true
+        //     - node is not target and options["subtree"] is false
+        //     - type is "attributes" and options["attributes"] either does not exist or is false
+        //     - type is "attributes", options["attributeFilter"] exists, and options["attributeFilter"] does
+        //       not contain name or namespace is non-null
+        //     - type is "characterData" and options["characterData"] either does not exist or is false
+        //     - type is "childList" and options["childList"] is false
+        //     then:
         if (&node != target.get() && !options.Subtree)
         {
           continue;
@@ -308,10 +311,10 @@ namespace krys::boo::dom
           continue;
         }
 
-        // 3.2.1. Let mo be registered's observer.
+        // 3b.i. Let mo be registered's observer.
         Ref<MutationObserver> observer = registered->Observer();
 
-        // 3.2.2. If interestedObservers[mo] does not exist, then set interestedObservers[mo] to null.
+        // 3b.ii. If interestedObservers[mo] does not exist, then set interestedObservers[mo] to null.
         auto it = std::ranges::find_if(interestedObservers, [&](const InterestedObserver &interested)
                                        { return interested.Observer.get() == observer.get(); });
         if (it == interestedObservers.end())
@@ -320,9 +323,9 @@ namespace krys::boo::dom
           it = std::prev(interestedObservers.end());
         }
 
-        // 3.2.3. If either type is "attributes" and options["attributeOldValue"] is true, or type is
-        // "characterData" and options["characterDataOldValue"] is true, then set interestedObservers[mo] to
-        // oldValue.
+        // 3b.iii. If either type is "attributes" and options["attributeOldValue"] is true, or type is
+        //        "characterData" and options["characterDataOldValue"] is true, then set
+        //        interestedObservers[mo] to oldValue.
         if ((type == MutationRecordType::Attributes && options.AttributeOldValue == true)
             || (type == MutationRecordType::CharacterData && options.CharacterDataOldValue == true))
         {
@@ -331,12 +334,19 @@ namespace krys::boo::dom
       }
     }
 
-    // 4. For each observer -> mappedOldValue of interestedObservers:
+    // 4. If interestedObservers is empty, then return.
+    if (interestedObservers.empty())
+    {
+      return;
+    }
+
+    // 5. For each observer -> mappedOldValue of interestedObservers:
     for (auto &[observer, mappedOldValue] : interestedObservers)
     {
-      // 4.1. Let record be a new MutationRecord object whose type is type, target is target, attributeName is
-      // name, attributeNamespace is namespace, oldValue is mappedOldValue, addedNodes is addedNodes,
-      // removedNodes is removedNodes, previousSibling is previousSibling, and nextSibling is nextSibling.
+      // 5a. Let record be a new MutationRecord object with its type set to type, target set to target,
+      //     attributeName set to name, attributeNamespace set to namespace, oldValue set to mappedOldValue,
+      //     addedNodes set to addedNodes, removedNodes set to removedNodes, previousSibling set to
+      //     previousSibling, and nextSibling set to nextSibling.
       RefPtr<MutationRecord> record = nullptr;
       switch (type)
       {
@@ -360,19 +370,19 @@ namespace krys::boo::dom
         }
         default:
         {
-          assert(false && "Unknown MutationRecordType");
+          krys_debug_assert_msg(false, "Unknown MutationRecordType");
           break;
         }
       }
 
-      // 4.2. Enqueue record to observer's record queue.
+      // 5b. Enqueue record to observer's record queue.
       observer->_recordQueue.push_back(krys::move(record));
 
-      // 4.3. Append observer to the surrounding agent's pending mutation observers.
+      // 5c. Append observer to the surrounding agent's pending mutation observers.
       AppendToSet(SurroundingAgent().PendingMutationObservers, *observer);
     }
 
-    // 5. Queue a mutation observer microtask.
+    // 6. Queue a mutation observer microtask.
     QueueMutationObserverMicrotask();
   }
 
@@ -381,7 +391,11 @@ namespace krys::boo::dom
                                                            RefPtr<Node> &&previousSibling,
                                                            RefPtr<Node> &&nextSibling) noexcept
   {
-    assert(addedNodes.size() > 0 || removedNodes.size() > 0);
+    // 1. Assert: either addedNodes or removedNodes is not empty.
+    krys_debug_assert(!addedNodes.empty() || !removedNodes.empty());
+
+    // 2. Queue a mutation record of "childList" for target with null, null, null, addedNodes, removedNodes,
+    //    previousSibling, and nextSibling.
     QueueMutationRecord(MutationRecordType::ChildList, krys::move(target), DOMStringAtom::Null(),
                         DOMStringAtom::Null(), DOMStringAtom::Null(), krys::move(addedNodes),
                         krys::move(removedNodes), krys::move(previousSibling), krys::move(nextSibling));

@@ -1,5 +1,7 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/CSS/ValueTestUtils.hpp"
+#include "Krystal.Booey/CSS/CSSStyleProperties.hpp"
 #include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.Booey/DOM/CharacterData.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
@@ -8,7 +10,9 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/MutationObserver.hpp"
 #include "Krystal.Booey/DOM/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/DOM/StyledElement.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -219,5 +223,124 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(grandchild->AppendChild(*NewElement(*document, u8"span")).HasException());
     loop.PerformMicrotaskCheckpoint();
     CHECK(recorder.Deliveries == List<std::string> {"childList,childList,childList"});
+  }
+
+  TEST_CASE(
+    "Queue a mutation record: each interested observer gets one record, with the old value if it asked",
+    "[DOM][MutationObserverAlgorithms][dom:queueing-a-mutation-record][dom:queue-a-mutation-record]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<Document>();
+    auto parent = NewElement(*document, u8"div");
+    auto child = NewElement(*document, u8"div");
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+    REQUIRE_FALSE(child->SetAttribute(u8"title", u8"a").HasException());
+
+    auto empty = [](const List<Ref<MutationRecord>> &, MutationObserver &) {};
+    // Registered twice, once asking for old values.
+    auto both = CreateRef<MutationObserver>(empty);
+    REQUIRE_FALSE(both->Observe(*parent, {.Attributes = true, .Subtree = true, .AttributeOldValue = true})
+                    .HasException());
+    REQUIRE_FALSE(both->Observe(*child, {.Attributes = true}).HasException());
+    // Not observing the subtree.
+    auto parentOnly = CreateRef<MutationObserver>(empty);
+    REQUIRE_FALSE(parentOnly->Observe(*parent, {.Attributes = true}).HasException());
+    // Filtered to title.
+    auto filtered = CreateRef<MutationObserver>(empty);
+    REQUIRE_FALSE(
+      filtered->Observe(*child, {.AttributeFilter = List<DOMStringAtom> {u8"title"}}).HasException());
+
+    SECTION("an attribute in the null namespace")
+    {
+      REQUIRE_FALSE(child->SetAttribute(u8"title", u8"b").HasException());
+
+      auto bothRecords = both->TakeRecords();
+      REQUIRE(bothRecords.size() == 1);
+      CHECK(bothRecords[0]->Target().get() == child.get());
+      CHECK(bothRecords[0]->AttributeName() == u8"title");
+      CHECK(bothRecords[0]->OldValue() == u8"a");
+      CHECK(parentOnly->TakeRecords().empty());
+      auto filteredRecords = filtered->TakeRecords();
+      REQUIRE(filteredRecords.size() == 1);
+      CHECK(filteredRecords[0]->OldValue() == DOMStringAtom::Null());
+    }
+
+    SECTION("an attribute in a namespace isn't in any attribute filter")
+    {
+      REQUIRE_FALSE(child->SetAttributeNS(u8"urn:x", u8"title", u8"b").HasException());
+
+      auto bothRecords = both->TakeRecords();
+      REQUIRE(bothRecords.size() == 1);
+      CHECK(bothRecords[0]->AttributeNamespace() == u8"urn:x");
+      CHECK(filtered->TakeRecords().empty());
+    }
+
+    SECTION("other types go to no observer of attributes")
+    {
+      REQUIRE_FALSE(child->AppendChild(*document->CreateTextNode(u8"text")).HasException());
+      CHECK(both->TakeRecords().empty());
+      CHECK(parentOnly->TakeRecords().empty());
+      CHECK(filtered->TakeRecords().empty());
+    }
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture,
+    "Queue a mutation record: a style change on a transiently observed node keeps its old value",
+    "[DOM][MutationObserverAlgorithms][dom:queue-a-mutation-record]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<HTMLDocument>();
+    auto parent = NewElement(*document, u8"div");
+    auto child = NewElement(*document, u8"div");
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+    REQUIRE_FALSE(child->SetAttribute(u8"style", u8"color: red").HasException());
+
+    auto observer = CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
+    REQUIRE_FALSE(observer->Observe(*parent, {.Attributes = true, .Subtree = true, .AttributeOldValue = true})
+                    .HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+
+    // The child is observed through its transient registered observer only.
+    REQUIRE_FALSE(
+      Downcast<StyledElement>(*child).Style().SetProperty(u8"color", u8"blue", u8"").HasException());
+    auto records = observer->TakeRecords();
+    REQUIRE(records.size() == 1);
+    CHECK(records[0]->AttributeName() == u8"style");
+    CHECK(records[0]->OldValue() == u8"color: red");
+  }
+
+  TEST_CASE("Queue a tree mutation record: a childList record with the nodes and siblings",
+            "[DOM][MutationObserverAlgorithms][dom:queue-a-tree-mutation-record]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<Document>();
+    auto parent = NewElement(*document, u8"div");
+    auto first = NewElement(*document, u8"a");
+    auto middle = NewElement(*document, u8"b");
+    auto last = NewElement(*document, u8"c");
+    REQUIRE_FALSE(parent->AppendChild(*first).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*last).HasException());
+
+    auto observer = CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
+    REQUIRE_FALSE(observer->Observe(*parent, {.ChildList = true}).HasException());
+    REQUIRE_FALSE(parent->InsertBefore(*middle, last.get()).HasException());
+
+    auto records = observer->TakeRecords();
+    REQUIRE(records.size() == 1);
+    auto &record = *records[0];
+    CHECK(record.Type() == u8"childList");
+    CHECK(record.Target().get() == parent.get());
+    REQUIRE(record.AddedNodes()->Length() == 1u);
+    CHECK(record.AddedNodes()->Item(0).get() == middle.get());
+    CHECK(record.RemovedNodes()->Length() == 0u);
+    CHECK(record.PreviousSibling().get() == first.get());
+    CHECK(record.NextSibling().get() == last.get());
+    CHECK(record.AttributeName() == DOMStringAtom::Null());
+    CHECK(record.AttributeNamespace() == DOMStringAtom::Null());
+    CHECK(record.OldValue() == DOMStringAtom::Null());
   }
 }

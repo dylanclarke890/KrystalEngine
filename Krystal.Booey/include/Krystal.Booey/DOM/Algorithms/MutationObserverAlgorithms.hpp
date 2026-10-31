@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -15,6 +16,7 @@ namespace krys::boo::dom
 {
   class MutationObserver;
   class Node;
+  class RegisteredObserver;
 
   /// @see https://dom.spec.whatwg.org/#mutation-observers
   /// @see https://dom.spec.whatwg.org/#queueing-a-mutation-record
@@ -58,5 +60,11 @@ namespace krys::boo::dom
     static void QueueTreeMutationRecord(Ref<Node> &&target, SmallNodeList &&addedNodes,
                                         SmallNodeList &&removedNodes, RefPtr<Node> &&previousSibling,
                                         RefPtr<Node> &&nextSibling) noexcept;
+
+  private:
+    /// @brief @p node's registered observer list: its registered observers, then its transient registered
+    /// observers, which a node keeps in a list of their own.
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    KRYS_NODISCARD static List<Ref<RegisteredObserver>> RegisteredObserverList(Node &node) noexcept;
   };
 }

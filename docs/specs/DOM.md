@@ -1044,9 +1044,11 @@ Status: reviewed (2026-10-31)
 
 #### [4.3.2. Queuing a mutation record](https://dom.spec.whatwg.org/#queueing-a-mutation-record)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `MutationObserverAlgorithms::QueueMutationRecord` and `QueueTreeMutationRecord`; interestedObservers is a list of observer and old value pairs, in insertion order.
+> `IsAttributeOldValueRequested` runs steps 2 and 3 for an attribute in the null namespace, so the CSSOM reads the style attribute's old value only when an observer will get it.
 
-- [ ] [queue a mutation record](https://dom.spec.whatwg.org/#queue-a-mutation-record) — To queue a mutation record of type for target with name, namespace, oldValue, addedNodes, removedNodes, previousSibling, and nextSibling:
+- [x] [queue a mutation record](https://dom.spec.whatwg.org/#queue-a-mutation-record) — To queue a mutation record of type for target with name, namespace, oldValue, addedNodes, removedNodes, previousSibling, and nextSibling:
   - 1. Let interestedObservers be an empty map.
   - 2. Let nodes be the inclusive ancestors of target.
   - 3. For each node of nodes, and then for each registered of node’s registered observer list:
@@ -1062,7 +1064,7 @@ Status: unreviewed
     - 5c. Append observer to the surrounding agent’s pending mutation observers.
   - 6. Queue a mutation observer microtask.
 
-- [ ] [queue a tree mutation record](https://dom.spec.whatwg.org/#queue-a-tree-mutation-record) — To queue a tree mutation record for target with addedNodes, removedNodes, previousSibling, and nextSibling:
+- [x] [queue a tree mutation record](https://dom.spec.whatwg.org/#queue-a-tree-mutation-record) — To queue a tree mutation record for target with addedNodes, removedNodes, previousSibling, and nextSibling:
   - 1. Assert: either addedNodes or removedNodes is not empty.
   - 2. Queue a mutation record of "childList" for target with null, null, null, addedNodes, removedNodes, previousSibling, and nextSibling.
 
