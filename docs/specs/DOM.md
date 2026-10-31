@@ -520,7 +520,8 @@ Status: reviewed (2026-10-30)
 
 #### [3.2.1. Garbage collection](https://dom.spec.whatwg.org/#abort-signal-garbage-collection)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Kept with references (`DIFFERENCES.md`): each source holds its dependents weakly, and strongly while one isn't aborted and has `abort` listeners (handlers included) or abort algorithms (`AbortSignal::UpdateHeldBySources`). A source that's freed lets go of its dependents. Tests: `tests/DOM/AbortSignal.cpp`.
 
 ### [3.3. Using AbortController and AbortSignal objects in APIs](https://dom.spec.whatwg.org/#abortcontroller-api-integration)
 

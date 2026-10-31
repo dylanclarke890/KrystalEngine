@@ -18,7 +18,7 @@ namespace krys::boo::dom
   private:
     /// @brief A signal that depends on this one: held strongly while it has to stay alive for this signal to
     /// abort it (while it has abort event listeners or abort algorithms).
-    /// @see https://dom.spec.whatwg.org/#abortsignal-garbage-collection
+    /// @see https://dom.spec.whatwg.org/#abort-signal-garbage-collection
     struct DependentSignal
     {
       WeakPtr<AbortSignal> Weak;
@@ -90,6 +90,7 @@ namespace krys::boo::dom
 
     /// @brief Has the signal's sources hold it strongly while it must stay alive for them to abort it, and
     /// weakly otherwise.
+    /// @see https://dom.spec.whatwg.org/#abort-signal-garbage-collection
     void UpdateHeldBySources() noexcept;
   };
 }

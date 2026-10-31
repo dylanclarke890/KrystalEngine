@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/DOM/AbortController.hpp"
+#include "Krystal.Booey/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/Types/Exception.hpp"
@@ -186,7 +187,68 @@ namespace krys::boo::dom::tests
       REQUIRE(weakDependent);
       controller.Abort();
       CHECK(aborted);
+
+      // Once aborted, it's let go.
       html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(weakDependent);
+    }
+
+    SECTION("An abort event handler keeps it alive too")
+    {
+      bool aborted = false;
+      WeakPtr<AbortSignal> weakDependent;
+      {
+        auto dependent = AbortSignal::Any({ShareRef(source)});
+        weakDependent = CreateWeakPtr(dependent.get());
+        dependent->SetOnAbort([&](Event &) { aborted = true; });
+      }
+      REQUIRE(weakDependent);
+      controller.Abort();
+      CHECK(aborted);
+      html::EventLoop::Current().RunUntilIdle();
+    }
+
+    SECTION("An abort algorithm keeps it alive, until it's removed")
+    {
+      bool aborted = false;
+      AbortAlgorithmCallback algorithm = [&](const Any &)
+      {
+        aborted = true;
+      };
+      WeakPtr<AbortSignal> weakDependent;
+      {
+        auto dependent = AbortSignal::Any({ShareRef(source)});
+        weakDependent = CreateWeakPtr(dependent.get());
+        AbortAlgorithms::Add(algorithm, *dependent);
+      }
+      REQUIRE(weakDependent);
+
+      SECTION("Aborting runs it")
+      {
+        controller.Abort();
+        CHECK(aborted);
+      }
+
+      SECTION("Removing it lets the signal be freed")
+      {
+        AbortAlgorithms::Remove(algorithm, *weakDependent);
+        html::EventLoop::Current().RunUntilIdle();
+        CHECK_FALSE(weakDependent);
+      }
+    }
+
+    SECTION("A listener doesn't keep it alive once its sources are gone")
+    {
+      WeakPtr<AbortSignal> weakDependent;
+      EventListenerHandle handle;
+      {
+        AbortController other;
+        auto dependent = AbortSignal::Any({ShareRef(*other.Signal())});
+        weakDependent = CreateWeakPtr(dependent.get());
+        handle = dependent->AddEventListener(DOMStringAtom(EventNames::Abort), [](Event &) {});
+      }
+      html::EventLoop::Current().RunUntilIdle();
+      CHECK_FALSE(weakDependent);
     }
 
     SECTION("A dependent with nothing to run is freed once dropped")
