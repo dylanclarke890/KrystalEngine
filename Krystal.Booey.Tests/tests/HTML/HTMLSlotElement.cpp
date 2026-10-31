@@ -117,7 +117,8 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE("HTMLSlotElement.assignedNodes() and assignedElements(): the assigned nodes, or flattened",
-            "[HTML][HTMLSlotElement][html:dom-slot-assignednodes][html:dom-slot-assignedelements]")
+            "[HTML][HTMLSlotElement][html:dom-slot-assignednodes][html:dom-slot-assignedelements]"
+            "[dom:find-flattened-slotables]")
   {
     SlotTestData data;
     auto outer = data.NewSlot();

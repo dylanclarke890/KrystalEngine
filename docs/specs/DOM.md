@@ -593,9 +593,10 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.2.3. Finding slots and slottables](https://dom.spec.whatwg.org/#finding-slots-and-slotables)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `SlotAlgorithms::FindSlot`, `FindSlottables` and `FindFlattenedSlottables`. A `<details>` element's user agent shadow root assigns by HTML's rendering rules (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
 
-- [ ] [find a slot](https://dom.spec.whatwg.org/#find-a-slot) — To find a slot for a given slottable slottable and an optional boolean open (default false):
+- [x] [find a slot](https://dom.spec.whatwg.org/#find-a-slot) — To find a slot for a given slottable slottable and an optional boolean open (default false):
   - 1. If slottable’s parent is null, then return null.
   - 2. Let shadow be slottable’s parent’s shadow root.
   - 3. If shadow is null, then return null.
@@ -603,7 +604,7 @@ Status: unreviewed
   - 5. If shadow’s slot assignment is "manual", then return the slot in shadow’s descendants whose manually assigned nodes contains slottable, if any; otherwise null.
   - 6. Return the first slot in tree order in shadow’s descendants whose name is slottable’s name, if any; otherwise null.
 
-- [ ] [find slottables](https://dom.spec.whatwg.org/#find-slotables) — To find slottables for a given slot slot:
+- [x] [find slottables](https://dom.spec.whatwg.org/#find-slotables) — To find slottables for a given slot slot:
   - 1. Let result be « ».
   - 2. Let root be slot’s root.
   - 3. If root is not a shadow root, then return result.
@@ -615,7 +616,7 @@ Status: unreviewed
     - 6b. If foundSlot is slot, then append slottable to result.
   - 7. Return result.
 
-- [ ] [find flattened slottables](https://dom.spec.whatwg.org/#find-flattened-slotables) — To find flattened slottables for a given slot slot:
+- [x] [find flattened slottables](https://dom.spec.whatwg.org/#find-flattened-slotables) — To find flattened slottables for a given slot slot:
   - 1. Let result be « ».
   - 2. If slot’s root is not a shadow root, then return result.
   - 3. Let slottables be the result of finding slottables given slot.

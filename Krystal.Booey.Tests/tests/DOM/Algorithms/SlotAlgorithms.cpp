@@ -74,4 +74,126 @@ namespace krys::boo::dom::tests
     CHECK(SlotAlgorithms::GetManualSlotAssignment(*text) == nullptr);
     CHECK(SlotAlgorithms::GetManualSlotAssignment(*element) == second.get());
   }
+
+  namespace
+  {
+    KRYS_NODISCARD Ref<html::HTMLSlotElement> NewSlotNamed(Document &document, DOMString &&name) noexcept
+    {
+      auto slot = ShareRef(Downcast<html::HTMLSlotElement>(*document.CreateElement(u8"slot").ReleaseValue()));
+      if (!name.empty())
+      {
+        (void)slot->SetAttribute(u8"name", krys::move(name));
+      }
+      return slot;
+    }
+  }
+
+  TEST_CASE("Find a slot: the first slot in the parent's shadow root with the slottable's name",
+            "[DOM][SlotAlgorithms][dom:finding-slots-and-slotables][dom:find-a-slot]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+
+    SECTION("Without a parent, or a parent without a shadow root, none")
+    {
+      CHECK(SlotAlgorithms::FindSlot(*span) == nullptr);
+      auto parent = document->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(parent->AppendChild(*span).HasException());
+      CHECK(SlotAlgorithms::FindSlot(*span) == nullptr);
+    }
+
+    SECTION("Named: the first matching slot in tree order, or none")
+    {
+      auto host = document->CreateElement(u8"div").ReleaseValue();
+      auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Closed}).ReleaseValue();
+      auto wrapper = document->CreateElement(u8"div").ReleaseValue();
+      auto nestedA = NewSlotNamed(*document, u8"a");
+      auto laterA = NewSlotNamed(*document, u8"a");
+      REQUIRE_FALSE(wrapper->AppendChild(*nestedA).HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*wrapper).HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*laterA).HasException());
+      REQUIRE_FALSE(host->AppendChild(*span).HasException());
+
+      // No slot is named the empty string.
+      CHECK(SlotAlgorithms::FindSlot(*span) == nullptr);
+
+      REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"a").HasException());
+      CHECK(SlotAlgorithms::FindSlot(*span) == nestedA.get());
+
+      // With open, a closed shadow root gives none.
+      CHECK(SlotAlgorithms::FindSlot(*span, true) == nullptr);
+    }
+
+    SECTION("Manual: the slot whose manually assigned nodes contain it, whatever its name")
+    {
+      auto host = document->CreateElement(u8"div").ReleaseValue();
+      auto shadow =
+        host->AttachShadow({.Mode = ShadowRootMode::Open, .SlotAssignment = SlotAssignmentMode::Manual})
+          .ReleaseValue();
+      auto first = NewSlotNamed(*document, u8"");
+      auto second = NewSlotNamed(*document, u8"");
+      REQUIRE_FALSE(shadow->AppendChild(*first).HasException());
+      REQUIRE_FALSE(shadow->AppendChild(*second).HasException());
+      REQUIRE_FALSE(host->AppendChild(*span).HasException());
+      CHECK(SlotAlgorithms::FindSlot(*span) == nullptr);
+
+      second->Assign({Ref<Element>(span)});
+      CHECK(SlotAlgorithms::FindSlot(*span) == second.get());
+      CHECK(SlotAlgorithms::FindSlot(*span, true) == second.get());
+    }
+  }
+
+  TEST_CASE(
+    "Find slottables: the host's slottable children that find the slot, or its manually assigned nodes",
+    "[DOM][SlotAlgorithms][dom:find-slotables]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    auto text = document->CreateTextNode(u8"text");
+    auto comment = document->CreateComment(u8"comment");
+    auto named = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(named->SetAttribute(u8"slot", u8"a").HasException());
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+
+    SECTION("A slot outside a shadow tree, none")
+    {
+      auto slot = NewSlotNamed(*document, u8"");
+      REQUIRE_FALSE(host->AppendChild(*slot).HasException());
+      CHECK(SlotAlgorithms::FindSlottables(*slot).empty());
+    }
+
+    SECTION("Named: the slottable children whose slot it is, in tree order")
+    {
+      auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto slot = NewSlotNamed(*document, u8"");
+      REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+      for (Node *child : {static_cast<Node *>(text.get()), static_cast<Node *>(comment.get()),
+                          static_cast<Node *>(named.get()), static_cast<Node *>(span.get())})
+      {
+        REQUIRE_FALSE(host->AppendChild(*child).HasException());
+      }
+
+      auto slottables = SlotAlgorithms::FindSlottables(*slot);
+      REQUIRE(slottables.size() == 2);
+      CHECK(slottables[0].get() == text.get());
+      CHECK(slottables[1].get() == span.get());
+    }
+
+    SECTION("Manual: the manually assigned nodes that are the host's children, in their order")
+    {
+      auto shadow =
+        host->AttachShadow({.Mode = ShadowRootMode::Open, .SlotAssignment = SlotAssignmentMode::Manual})
+          .ReleaseValue();
+      auto slot = NewSlotNamed(*document, u8"");
+      REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+      REQUIRE_FALSE(host->AppendChild(*text).HasException());
+      REQUIRE_FALSE(host->AppendChild(*named).HasException());
+
+      slot->Assign({Ref<Element>(named), Ref<Element>(span), Ref<Text>(text)});
+      auto slottables = SlotAlgorithms::FindSlottables(*slot);
+      REQUIRE(slottables.size() == 2);
+      CHECK(slottables[0].get() == named.get());
+      CHECK(slottables[1].get() == text.get());
+    }
+  }
 }
