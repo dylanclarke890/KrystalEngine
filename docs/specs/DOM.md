@@ -48,14 +48,15 @@ Status: reviewed (2026-10-30)
 
 ### [1.4. Name validation](https://dom.spec.whatwg.org/#namespaces)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `NameValidation` (`IsValidNamespacePrefix`, `IsValidAttributeLocalName`, `IsValidElementLocalName`, `IsValidDocTypeName`, `ValidateAndExtract`). Tests: `tests/DOM/Algorithms/NameValidation.cpp`.
 <!-- definitions: valid-doctype-name -->
 
-- [ ] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
+- [x] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
 
-- [ ] [valid attribute local name](https://dom.spec.whatwg.org/#valid-attribute-local-name) — A string is a valid attribute local name if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), U+003D (=), or U+003E (>).
+- [x] [valid attribute local name](https://dom.spec.whatwg.org/#valid-attribute-local-name) — A string is a valid attribute local name if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), U+003D (=), or U+003E (>).
 
-- [ ] [valid element local name](https://dom.spec.whatwg.org/#valid-element-local-name) — A string name is a valid element local name if the following steps return true:
+- [x] [valid element local name](https://dom.spec.whatwg.org/#valid-element-local-name) — A string name is a valid element local name if the following steps return true:
   - 1. If name’s length is 0, then return false.
   - 2. If name’s 0th code point is an ASCII alpha:
     - 2a. If name contains ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>), then return false.
@@ -64,7 +65,7 @@ Status: unreviewed
   - 4. If name’s subsequent code points, if any, are not ASCII alphas, ASCII digits, U+002D (-), U+002E (.), U+003A (:), U+005F (_), or in the range U+0080 to U+10FFFF, inclusive, then return false.
   - 5. Return true.
 
-- [ ] [validate and extract](https://dom.spec.whatwg.org/#validate-and-extract) — To validate and extract a namespace and qualifiedName, given a context:
+- [x] [validate and extract](https://dom.spec.whatwg.org/#validate-and-extract) — To validate and extract a namespace and qualifiedName, given a context:
   - 1. If namespace is the empty string, then set it to null.
   - 2. Let prefix be null.
   - 3. Let localName be qualifiedName.
