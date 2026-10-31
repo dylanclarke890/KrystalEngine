@@ -1,9 +1,12 @@
 ﻿#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
+#include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom::tests
@@ -195,5 +198,96 @@ namespace krys::boo::dom::tests
       CHECK(slottables[0].get() == named.get());
       CHECK(slottables[1].get() == text.get());
     }
+  }
+
+  TEST_CASE(
+    "Assign slottables: sets the assigned nodes and their assigned slot, signalling a change only if any",
+    "[DOM][SlotAlgorithms][dom:assigning-slotables-and-slots][dom:assign-slotables]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto slot = NewSlotNamed(*document, u8"");
+    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+
+    int changes = 0;
+    auto listener = slot->AddEventListener(DOMStringAtom(u8"slotchange"), [&](Event &) { ++changes; });
+
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(host->AppendChild(*span).HasException());
+    loop.PerformMicrotaskCheckpoint();
+    REQUIRE(changes == 1);
+
+    // Nothing changed, so no slot change.
+    SlotAlgorithms::AssignSlottables(*slot);
+    loop.PerformMicrotaskCheckpoint();
+    CHECK(changes == 1);
+    REQUIRE(slot->AssignedNodes());
+    CHECK(slot->AssignedNodes()->size() == 1);
+    CHECK(SlotAlgorithms::GetAssignedSlot(*span) == slot.get());
+
+    REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"elsewhere").HasException());
+    loop.PerformMicrotaskCheckpoint();
+    CHECK(changes == 2);
+    CHECK(slot->AssignedNodes() == nullptr);
+    CHECK(SlotAlgorithms::GetAssignedSlot(*span) == nullptr);
+  }
+
+  TEST_CASE("Assign slottables for a tree: every slot among the root's inclusive descendants",
+            "[DOM][SlotAlgorithms][dom:assign-slotables-for-a-tree]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto a = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(a->SetAttribute(u8"slot", u8"a").HasException());
+    auto b = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(b->SetAttribute(u8"slot", u8"b").HasException());
+    REQUIRE_FALSE(host->AppendChild(*a).HasException());
+    REQUIRE_FALSE(host->AppendChild(*b).HasException());
+
+    // Inserting a subtree holding two slots assigns both, through its root.
+    auto wrapper = document->CreateElement(u8"div").ReleaseValue();
+    auto slotA = NewSlotNamed(*document, u8"a");
+    auto slotB = NewSlotNamed(*document, u8"b");
+    REQUIRE_FALSE(wrapper->AppendChild(*slotA).HasException());
+    REQUIRE_FALSE(wrapper->AppendChild(*slotB).HasException());
+    CHECK(slotA->AssignedNodes() == nullptr);
+    REQUIRE_FALSE(shadow->AppendChild(*wrapper).HasException());
+
+    CHECK(SlotAlgorithms::GetAssignedSlot(*a) == slotA.get());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*b) == slotB.get());
+
+    // Removing the subtree reassigns the slots it holds, which find nothing outside a shadow tree.
+    REQUIRE_FALSE(wrapper->Remove().HasException());
+    CHECK(slotA->AssignedNodes() == nullptr);
+    CHECK(SlotAlgorithms::GetAssignedSlot(*a) == nullptr);
+  }
+
+  TEST_CASE("Assign a slot: assigns the slottables of the slot the slottable finds, if any",
+            "[DOM][SlotAlgorithms][dom:assign-a-slot]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto slot = NewSlotNamed(*document, u8"a");
+    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+
+    auto unnamed = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(host->AppendChild(*unnamed).HasException());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*unnamed) == nullptr);
+
+    auto named = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(named->SetAttribute(u8"slot", u8"a").HasException());
+    REQUIRE_FALSE(host->AppendChild(*named).HasException());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*named) == slot.get());
+
+    // Called directly, it leaves things as they are.
+    SlotAlgorithms::AssignSlot(*named);
+    SlotAlgorithms::AssignSlot(*unnamed);
+    CHECK(SlotAlgorithms::GetAssignedSlot(*named) == slot.get());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*unnamed) == nullptr);
   }
 }

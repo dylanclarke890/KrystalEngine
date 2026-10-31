@@ -630,17 +630,18 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.2.4. Assigning slottables and slots](https://dom.spec.whatwg.org/#assigning-slotables-and-slots)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `SlotAlgorithms::AssignSlottables`, `AssignSlottablesForTree` and `AssignSlot`. Assign slottables also clears the assigned slot of a slottable the slot no longer finds (`DIFFERENCES.md`), and when the assigned nodes change it rebuilds the host's renderers and updates the slot's directionality. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`.
 
-- [ ] [assign slottables](https://dom.spec.whatwg.org/#assign-slotables) — To assign slottables for a slot slot:
+- [x] [assign slottables](https://dom.spec.whatwg.org/#assign-slotables) — To assign slottables for a slot slot:
   - 1. Let slottables be the result of finding slottables for slot.
   - 2. If slottables and slot’s assigned nodes are not identical, then run signal a slot change for slot.
   - 3. Set slot’s assigned nodes to slottables.
   - 4. For each slottable of slottables: set slottable’s assigned slot to slot.
 
-- [ ] [assign slottables for a tree](https://dom.spec.whatwg.org/#assign-slotables-for-a-tree) — To assign slottables for a tree, given a node root, run assign slottables for each slot of root’s inclusive descendants, in tree order.
+- [x] [assign slottables for a tree](https://dom.spec.whatwg.org/#assign-slotables-for-a-tree) — To assign slottables for a tree, given a node root, run assign slottables for each slot of root’s inclusive descendants, in tree order.
 
-- [ ] [assign a slot](https://dom.spec.whatwg.org/#assign-a-slot) — To assign a slot, given a slottable slottable:
+- [x] [assign a slot](https://dom.spec.whatwg.org/#assign-a-slot) — To assign a slot, given a slottable slottable:
   - 1. Let slot be the result of finding a slot with slottable.
   - 2. If slot is non-null, then run assign slottables for slot.
 

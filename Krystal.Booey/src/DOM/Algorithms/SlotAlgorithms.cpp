@@ -336,7 +336,10 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
   {
+    // 1. Let slottables be the result of finding slottables for slot.
     auto slottables = FindSlottables(slot);
+
+    // 2. If slottables and slot's assigned nodes are not identical, then run signal a slot change for slot.
     bool assignedNodesChanged = !std::ranges::equal(
       slottables, slot._assignedNodes, [](const auto &a, const auto &b) { return a.get() == b.get(); });
     if (assignedNodesChanged)
@@ -372,6 +375,8 @@ namespace krys::boo::dom
       }
     }
 
+    // 3. Set slot's assigned nodes to slottables.
+    // 4. For each slottable of slottables: set slottable's assigned slot to slot.
     slot._assignedNodes.clear();
     slot._assignedNodes.reserve(slottables.size());
     for (auto &slottable : slottables)
@@ -406,7 +411,10 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::AssignSlot(Node &slottable) noexcept
   {
+    // 1. Let slot be the result of finding a slot with slottable.
     html::HTMLSlotElement *slot = FindSlot(slottable);
+
+    // 2. If slot is non-null, then run assign slottables for slot.
     if (slot != nullptr)
     {
       AssignSlottables(*slot);
