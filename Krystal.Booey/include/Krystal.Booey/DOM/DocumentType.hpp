@@ -7,7 +7,9 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A doctype: a node with a name, a public ID and a system ID.
   /// @see https://dom.spec.whatwg.org/#interface-documenttype
+  /// @see https://dom.spec.whatwg.org/#concept-doctype
   class DocumentType final : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentType);
@@ -16,13 +18,17 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#concept-doctype-name
     DOMString _name;
+    /// @see https://dom.spec.whatwg.org/#concept-doctype-publicid
     DOMString _publicId;
+    /// @see https://dom.spec.whatwg.org/#concept-doctype-systemid
     DOMString _systemId;
 
   protected:
-    DocumentType(Document &document, const DOMString &name, const DOMString &publicId,
-                 const DOMString &systemId) noexcept;
+    /// @see https://dom.spec.whatwg.org/#create-a-doctype
+    DocumentType(Document &document, const DOMString &name, const DOMString &publicId = {},
+                 const DOMString &systemId = {}) noexcept;
 
   public:
 #pragma region DocumentType

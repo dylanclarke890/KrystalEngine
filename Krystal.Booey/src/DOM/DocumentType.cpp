@@ -11,9 +11,12 @@ namespace krys::boo::dom
 {
   DocumentType::DocumentType(Document &document, const DOMString &name, const DOMString &publicId,
                              const DOMString &systemId) noexcept
-      : Node(document, NodeType::DOCUMENT_TYPE_NODE, NodeFlags::None), _name(name), _publicId(publicId),
-        _systemId(systemId)
+      // 1. Let doctype be the result of creating a node that implements DocumentType, given document.
+      : Node(document, NodeType::DOCUMENT_TYPE_NODE, NodeFlags::None),
+        // 2. Set doctype's name to name, public ID to publicId, and system ID to systemId.
+        _name(name), _publicId(publicId), _systemId(systemId)
   {
+    // 3. Return doctype.
   }
 
 #pragma region ChildNode

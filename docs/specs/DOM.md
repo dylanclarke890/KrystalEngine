@@ -1502,19 +1502,20 @@ Status: reviewed (2026-10-31)
 
 ### [4.6. Interface DocumentType](https://dom.spec.whatwg.org/#interface-documenttype)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `DocumentType` (`DocumentType.hpp`/`.cpp`); create a doctype is its constructor.
 <!-- definitions: concept-doctype concept-doctype-name concept-doctype-publicid concept-doctype-systemid -->
 
-- [ ] [create a doctype](https://dom.spec.whatwg.org/#create-a-doctype) — To create a doctype given a document document, a string name, and optionally a string publicId (default the empty string) and a string systemId (default the empty string):
+- [x] [create a doctype](https://dom.spec.whatwg.org/#create-a-doctype) — To create a doctype given a document document, a string name, and optionally a string publicId (default the empty string) and a string systemId (default the empty string):
   - 1. Let doctype be the result of creating a node that implements DocumentType, given document.
   - 2. Set doctype’s name to name, public ID to publicId, and system ID to systemId.
   - 3. Return doctype.
 
-- [ ] [DocumentType.name](https://dom.spec.whatwg.org/#dom-documenttype-name) — The name getter steps are to return this’s name.
+- [x] [DocumentType.name](https://dom.spec.whatwg.org/#dom-documenttype-name) — The name getter steps are to return this’s name.
 
-- [ ] [DocumentType.publicId](https://dom.spec.whatwg.org/#dom-documenttype-publicid) — The publicId getter steps are to return this’s public ID.
+- [x] [DocumentType.publicId](https://dom.spec.whatwg.org/#dom-documenttype-publicid) — The publicId getter steps are to return this’s public ID.
 
-- [ ] [DocumentType.systemId](https://dom.spec.whatwg.org/#dom-documenttype-systemid) — The systemId getter steps are to return this’s system ID.
+- [x] [DocumentType.systemId](https://dom.spec.whatwg.org/#dom-documenttype-systemid) — The systemId getter steps are to return this’s system ID.
 
 ### [4.7. Interface DocumentFragment](https://dom.spec.whatwg.org/#interface-documentfragment)
 
