@@ -831,9 +831,10 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.5. Mixin DocumentOrShadowRoot](https://dom.spec.whatwg.org/#mixin-documentorshadowroot)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `DocumentOrShadowRoot`, a base of `Document` and `ShadowRoot` that keeps either's custom element registry. Tests: `tests/DOM/DocumentOrShadowRoot.cpp`.
 
-- [ ] [DocumentOrShadowRoot.customElementRegistry](https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry) — The customElementRegistry getter steps are:
+- [x] [DocumentOrShadowRoot.customElementRegistry](https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry) — The customElementRegistry getter steps are:
   - 1. If this is a document, then return this’s custom element registry.
   - 2. Assert: this is a ShadowRoot node.
   - 3. Return this’s custom element registry.

@@ -607,6 +607,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DatasetDOMStringMap.cpp
 		tests/DOM/Document.cpp
 		tests/DOM/DocumentFragment.cpp
+		tests/DOM/DocumentOrShadowRoot.cpp
 		tests/DOM/DocumentType.cpp
 		tests/DOM/DOMParsing.cpp
 		tests/DOM/HTMLInsertionMethods.cpp

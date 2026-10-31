@@ -288,6 +288,10 @@ namespace krys::boo::dom
 
   RefPtr<html::CustomElementRegistry> DocumentOrShadowRoot::CustomElementRegistry() const noexcept
   {
+    // 1. If this is a document, then return this's custom element registry.
+    // 2. Assert: this is a ShadowRoot node.
+    // 3. Return this's custom element registry.
+    // Documents and shadow roots keep their registry here alike.
     return _customElementRegistry;
   }
 
