@@ -931,7 +931,8 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.10. Old-style collections: NodeList and HTMLCollection](https://dom.spec.whatwg.org/#old-style-collections)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Live collections are `LiveNodeList` and `LiveHTMLCollection`, which walk the root's descendants with their filter on each access; static ones are `StaticNodeList` and `StaticHTMLCollection`. Tests: `tests/DOM/NodeList.cpp`.
 <!-- definitions: concept-collection concept-collection-live concept-collection-static represented-by-the-collection -->
 
 ##### [4.2.10.1. Interface NodeList](https://dom.spec.whatwg.org/#interface-nodelist)

@@ -9,6 +9,11 @@ namespace krys::boo::dom
 
   using LiveHTMLCollectionFilterFunc = Func<bool(const Element &)>;
 
+  /// @brief A live element collection: a view of the root's descendant elements that match the filter, in
+  /// tree order, worked out again on each access.
+  /// @see https://dom.spec.whatwg.org/#concept-collection
+  /// @see https://dom.spec.whatwg.org/#concept-collection-live
+  /// @see https://dom.spec.whatwg.org/#represented-by-the-collection
   class LiveHTMLCollection : public HTMLCollection
   {
   private:

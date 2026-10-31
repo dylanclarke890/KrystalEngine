@@ -7,6 +7,8 @@ namespace krys::boo::dom
 {
   class Element;
 
+  /// @brief A static element collection: the elements it was made with.
+  /// @see https://dom.spec.whatwg.org/#concept-collection-static
   class StaticHTMLCollection : public HTMLCollection
   {
   private:
