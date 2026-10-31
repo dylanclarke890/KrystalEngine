@@ -2081,11 +2081,13 @@ Status: reviewed (2026-10-31)
 
 ## [5. Ranges](https://dom.spec.whatwg.org/#ranges)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Heading only; ranges are `AbstractRange` (`AbstractRange.hpp`), with `StaticRange` and the live `Range`.
 
 ### [5.1. Introduction to "DOM Ranges"](https://dom.spec.whatwg.org/#introduction-to-dom-ranges)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Non-normative. Its example is a test in `tests/DOM/Range.cpp`; live ranges are updated by insert, remove, `normalize()`, replace data and split (reviewed in 4.2.3, 4.4, 4.10 and 4.11), static ranges are not.
 
 ### [5.2. Boundary points](https://dom.spec.whatwg.org/#boundary-points)
 

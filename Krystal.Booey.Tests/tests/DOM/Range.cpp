@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
+#include "Krystal.Booey/DOM/StaticRange.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 
 namespace krys::boo::dom::tests
@@ -1574,5 +1575,37 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->RemoveChild(*element.Value()).HasException());
       REQUIRE_FALSE(data.Node->RemoveChild(*textNode).HasException());
     }
+  }
+  TEST_CASE(
+    "Ranges: the introduction's example, and a live range follows mutations where a static one doesn't",
+    "[DOM][Range][dom:ranges][dom:introduction-to-dom-ranges]")
+  {
+    auto context = CreateRef<HTMLDocument>();
+    auto document = Document::ParseHTMLUnsafe(*context, u8"<!DOCTYPE html><p id=p><img src=insanity-wolf "
+                                                        u8"alt=\"Little-endian BOM\"> CSS 2.1 syndata is "
+                                                        u8"<em id=em>awesome</em>!</p>")
+                      .ReleaseValue();
+    auto p = document->GetElementById(u8"p");
+    auto em = document->GetElementById(u8"em");
+    REQUIRE(p != nullptr);
+    REQUIRE(em != nullptr);
+
+    auto &firstText = Downcast<Text>(*p->ChildNodes()->Item(1));
+    auto &secondText = Downcast<Text>(*em->FirstChild());
+    auto range = document->CreateRange();
+    REQUIRE_FALSE(range->SetStart(firstText, 9).HasException()); // do not forget the leading space
+    REQUIRE_FALSE(range->SetEnd(secondText, 4).HasException());
+    CHECK(range->ToString().ReleaseValue() == u8"syndata is awes");
+
+    auto staticRange = CreateRef<StaticRange>(
+      StaticRangeInit::Create(BoundaryPoint {ShareRef(firstText), 9}, BoundaryPoint {ShareRef(secondText), 4})
+        .ReleaseValue());
+    CHECK(range->IsLiveRange());
+    CHECK_FALSE(staticRange->IsLiveRange());
+
+    REQUIRE_FALSE(firstText.InsertData(0, u8"<<").HasException());
+    CHECK(range->StartOffset() == 11uz);
+    CHECK(range->ToString().ReleaseValue() == u8"syndata is awes");
+    CHECK(staticRange->StartOffset() == 9uz);
   }
 }
