@@ -88,7 +88,7 @@ namespace krys::boo::dom::tests
     { node.Remove() } -> SameType<dom::ExceptionOr<void>>;
   };
 
-  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins][dom:interface-childnode]")
   {
     STATIC_REQUIRE(ChildNodeMixin<DocumentType>);
     STATIC_REQUIRE(ChildNodeMixin<Element>);

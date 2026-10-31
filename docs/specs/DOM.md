@@ -892,9 +892,10 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.8. Mixin ChildNode](https://dom.spec.whatwg.org/#interface-childnode)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `mixins::ChildNode`, which `CharacterData`, `DocumentType` and `Element` forward to. Tests: `tests/DOM/Mixins/ChildNode.cpp`.
 
-- [ ] [ChildNode.before(nodes)](https://dom.spec.whatwg.org/#dom-childnode-before) — The before(nodes) method steps are:
+- [x] [ChildNode.before(nodes)](https://dom.spec.whatwg.org/#dom-childnode-before) — The before(nodes) method steps are:
   - 1. Let parent be this’s parent.
   - 2. If parent is null, then return.
   - 3. Let viablePreviousSibling be this’s first preceding sibling not in nodes; otherwise null.
@@ -902,14 +903,14 @@ Status: unreviewed
   - 5. If viablePreviousSibling is null, then set it to parent’s first child; otherwise to viablePreviousSibling’s next sibling.
   - 6. Pre-insert node into parent before viablePreviousSibling.
 
-- [ ] [ChildNode.after(nodes)](https://dom.spec.whatwg.org/#dom-childnode-after) — The after(nodes) method steps are:
+- [x] [ChildNode.after(nodes)](https://dom.spec.whatwg.org/#dom-childnode-after) — The after(nodes) method steps are:
   - 1. Let parent be this’s parent.
   - 2. If parent is null, then return.
   - 3. Let viableNextSibling be this’s first following sibling not in nodes; otherwise null.
   - 4. Let node be the result of converting nodes into a node, given nodes and this’s node document.
   - 5. Pre-insert node into parent before viableNextSibling.
 
-- [ ] [ChildNode.replaceWith(nodes)](https://dom.spec.whatwg.org/#dom-childnode-replacewith) — The replaceWith(nodes) method steps are:
+- [x] [ChildNode.replaceWith(nodes)](https://dom.spec.whatwg.org/#dom-childnode-replacewith) — The replaceWith(nodes) method steps are:
   - 1. Let parent be this’s parent.
   - 2. If parent is null, then return.
   - 3. Let viableNextSibling be this’s first following sibling not in nodes; otherwise null.
@@ -917,7 +918,7 @@ Status: unreviewed
   - 5. If this’s parent is parent, replace this with node within parent.
   - 6. Otherwise, pre-insert node into parent before viableNextSibling.
 
-- [ ] [ChildNode.remove()](https://dom.spec.whatwg.org/#dom-childnode-remove) — The remove() method steps are:
+- [x] [ChildNode.remove()](https://dom.spec.whatwg.org/#dom-childnode-remove) — The remove() method steps are:
   - 1. If this’s parent is null, then return.
   - 2. Remove this.
 
