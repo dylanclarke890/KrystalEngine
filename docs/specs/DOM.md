@@ -291,9 +291,11 @@ Status: reviewed (2026-10-30)
 
 ### [2.8. Observing event listeners](https://dom.spec.whatwg.org/#observing-event-listeners)
 
-Status: unreviewed
+Status: n/a (service workers)
+> Checked 2026-10-30: nothing observes listeners to make an event uncancelable; wheel and touch events are dispatched synchronously and stay cancelable, which the section allows.
 
-- [ ] [legacy-obtain service worker fetch event listener callbacks](https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks) — To legacy-obtain service worker fetch event listener callbacks given a ServiceWorkerGlobalScope global, run these steps. They return a list of EventListener objects.
+- [x] [legacy-obtain service worker fetch event listener callbacks](https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks) — To legacy-obtain service worker fetch event listener callbacks given a ServiceWorkerGlobalScope global, run these steps. They return a list of EventListener objects.
+  > n/a: no service workers (OVERVIEW.md).
   - 1. Let callbacks be « ».
   - 2. For each listener of global’s event listener list: if listener’s type is "fetch" and listener’s callback is non-null, then append listener’s callback to callbacks.
   - 3. Return callbacks.
