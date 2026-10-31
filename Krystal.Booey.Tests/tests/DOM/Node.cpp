@@ -51,7 +51,7 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Node::NodeType", "[HTML][Node]")
+  TEST_CASE("Node::NodeType", "[HTML][Node][dom:concept-node]")
   {
     CommonTestData data {};
     REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);

@@ -37,6 +37,8 @@ namespace krys::boo::dom
   class NodeList;
 
   /// @see https://dom.spec.whatwg.org/#interface-node
+  /// @see https://dom.spec.whatwg.org/#concept-node
+  /// @see https://dom.spec.whatwg.org/#concept-node-tree
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();

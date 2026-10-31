@@ -17,7 +17,8 @@ namespace krys::boo::dom::tests
   // FIXME: No test coverage for these parts of the algorithms since we don't have slot
   // elements yet, but should be added once they are implemented.
 
-  TEST_CASE("MutationAlgorithms::EnsurePreInsertValidity", "[HTML][MutationAlgorithms]")
+  TEST_CASE("MutationAlgorithms::EnsurePreInsertValidity",
+            "[HTML][MutationAlgorithms][dom:node-trees][dom:concept-node-tree]")
   {
     auto document = CreateRef<Document>();
     auto element = CreateRef<TestElement>(*document);

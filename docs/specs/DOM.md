@@ -539,10 +539,11 @@ Status: reviewed (2026-10-31)
 
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Nodes are `Node`, with the same interfaces beneath it; `Attr` derives from `Node` rather than `ContainerNode`, so it never has children. The node tree's constraints are kept by ensure pre-insert validity and replace (`MutationAlgorithms`). Length and empty are `TreeQueries::Length`/`IsEmpty` (`Node::Length` forwards); character data's length counts UTF-8 code units (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/TreeQueries.cpp`, `tests/DOM/Algorithms/MutationAlgorithms.cpp`.
 <!-- definitions: concept-node concept-node-tree concept-node-empty -->
 
-- [ ] [length (Node)](https://dom.spec.whatwg.org/#concept-node-length) — To determine the length of a node node, run these steps:
+- [x] [length (Node)](https://dom.spec.whatwg.org/#concept-node-length) — To determine the length of a node node, run these steps:
   - 1. If node is a DocumentType or Attr node, then return 0.
   - 2. If node is a CharacterData node, then return node’s data’s length.
   - 3. Return the number of node’s children.

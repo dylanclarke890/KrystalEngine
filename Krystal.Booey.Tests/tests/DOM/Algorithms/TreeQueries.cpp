@@ -4,7 +4,10 @@
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/DOMImplementation.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -14,33 +17,61 @@ namespace krys::boo::dom::tests
 {
 #pragma region Node Trees
 
-  TEST_CASE("TreeQueries::Length", "[HTML][TreeQueries]")
+  TEST_CASE("Length: 0 for doctypes and attributes, the data's length for character data, else the children",
+            "[DOM][TreeQueries][dom:concept-node-length]")
   {
-    auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestElement>(*doc);
-    auto child = CreateRef<TestElement>(*doc);
-    auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
+    SECTION("Doctypes, attributes and documents")
+    {
+      auto doc = CreateRef<Document>();
+      auto doctype = doc->Implementation().CreateDocumentType(u8"html", u8"", u8"");
+      REQUIRE_FALSE(doctype.HasException());
+      auto attr = doc->CreateAttribute(u8"a");
+      REQUIRE_FALSE(attr.HasException());
+      attr.Value()->Value(u8"value");
 
-    REQUIRE(TreeQueries::Length(*parent) == 0);
-    REQUIRE(TreeQueries::Length(*child) == 0);
-    REQUIRE(TreeQueries::Length(*textNode) == 13);
+      CHECK(TreeQueries::Length(*doctype.Value()) == 0);
+      CHECK(TreeQueries::Length(*attr.Value()) == 0);
+      CHECK(TreeQueries::Length(*doc) == 0);
+      REQUIRE_FALSE(doc->AppendChild(*doctype.Value()).HasException());
+      CHECK(TreeQueries::Length(*doc) == 1);
+      CHECK(doc->Length() == 1);
+    }
 
-    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+    SECTION("Character data counts UTF-8 code units")
+    {
+      auto doc = CreateRef<Document>();
+      CHECK(TreeQueries::Length(*CreateRef<krys::boo::dom::Text>(*doc, u8"")) == 0);
+      CHECK(TreeQueries::Length(*CreateRef<krys::boo::dom::Text>(*doc, u8"\u00e9")) == 2);
+    }
 
-    REQUIRE(TreeQueries::Length(*parent) == 1);
-    REQUIRE(TreeQueries::Length(*child) == 0);
+    SECTION("Elements count their children")
+    {
+      auto doc = CreateRef<Document>();
+      auto parent = CreateRef<TestElement>(*doc);
+      auto child = CreateRef<TestElement>(*doc);
+      auto textNode = CreateRef<krys::boo::dom::Text>(*doc, u8"Hello, world!");
 
-    REQUIRE_FALSE(child->AppendChild(*textNode).HasException());
+      REQUIRE(TreeQueries::Length(*parent) == 0);
+      REQUIRE(TreeQueries::Length(*child) == 0);
+      REQUIRE(TreeQueries::Length(*textNode) == 13);
 
-    REQUIRE(TreeQueries::Length(*parent) == 1);
-    REQUIRE(TreeQueries::Length(*child) == 1);
-    REQUIRE(TreeQueries::Length(*textNode) == 13);
+      REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
-    REQUIRE_FALSE(child->RemoveChild(*textNode).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+      REQUIRE(TreeQueries::Length(*parent) == 1);
+      REQUIRE(TreeQueries::Length(*child) == 0);
+
+      REQUIRE_FALSE(child->AppendChild(*textNode).HasException());
+
+      REQUIRE(TreeQueries::Length(*parent) == 1);
+      REQUIRE(TreeQueries::Length(*child) == 1);
+      REQUIRE(TreeQueries::Length(*textNode) == 13);
+
+      REQUIRE_FALSE(child->RemoveChild(*textNode).HasException());
+      REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    }
   }
 
-  TEST_CASE("TreeQueries::IsEmpty", "[HTML][TreeQueries]")
+  TEST_CASE("Empty: a node whose length is 0", "[DOM][TreeQueries][dom:concept-node-empty]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
