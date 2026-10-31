@@ -33,29 +33,35 @@ namespace krys::boo::html
     HTMLElement::OnAttributeChanged(localName, oldValue, value, namespaceURI);
 
     // https://dom.spec.whatwg.org/#slot-name
+    // 1. If element is a slot, localName is name, and namespace is null:
     if (localName != Attributes::Name || namespaceURI != dom::DOMStringAtom::Null())
     {
       return;
     }
 
+    // 1a. If value is oldValue, then return.
     if (value == oldValue)
     {
       return;
     }
 
+    // 1b. If value is null and oldValue is the empty string, then return.
     if (!value.has_value() && oldValue.has_value() && oldValue->empty())
     {
       return;
     }
 
+    // 1c. If value is the empty string and oldValue is null, then return.
     if (value.has_value() && value->empty() && !oldValue.has_value())
     {
       return;
     }
 
-    // NOTE: the slot's name is read from the `name` attribute (see `Name()`), which already holds the new
-    // value, so there's nothing to store.
+    // 1d. If value is null or the empty string, then set element's name to the empty string.
+    // 1e. Otherwise, set element's name to value.
+    // The name is read from the attribute (Name()), which already holds value.
 
+    // 1f. Run assign slottables for a tree with element's root.
     dom::SlotAlgorithms::AssignSlottablesForTree(dom::TreeQueries::Root(*this));
   }
 }

@@ -672,6 +672,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
+		tests/HTML/HTMLSlotElement.cpp
 		tests/HTML/HTMLTableElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp

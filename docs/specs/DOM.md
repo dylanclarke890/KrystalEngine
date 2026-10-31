@@ -562,10 +562,11 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Slots are `HTMLSlotElement`. A slot's name isn't stored: `HTMLSlotElement::Name()` reads the `name` attribute in no namespace, which gives the same value the attribute change steps would set. The default slot has no code of its own: find a slot takes the first slot named the empty string. Assigned nodes are `HTMLSlotElement::AssignedNodes()`. Tests: `tests/HTML/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slot slot-assigned-nodes -->
 
-- [ ] [Use these attribute change steps to update a slot’s name](https://dom.spec.whatwg.org/#slot-name) — Use these attribute change steps to update a slot’s name:
+- [x] [Use these attribute change steps to update a slot’s name](https://dom.spec.whatwg.org/#slot-name) — Use these attribute change steps to update a slot’s name:
   - 1. If element is a slot, localName is name, and namespace is null:
     - 1a. If value is oldValue, then return.
     - 1b. If value is null and oldValue is the empty string, then return.

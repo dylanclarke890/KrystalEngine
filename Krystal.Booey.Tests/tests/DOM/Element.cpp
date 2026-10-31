@@ -11,7 +11,6 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests
@@ -679,14 +678,6 @@ namespace krys::boo::dom::tests
     REQUIRE(records[0]->OldValue() == DOMStringAtom::Null());
     REQUIRE(records[1]->OldValue() == u8"a");
     REQUIRE(records[2]->OldValue() == u8"b");
-  }
-
-  TEST_CASE("HTMLSlotElement is a slot", "[HTML][Element]")
-  {
-    auto document = CreateRef<HTMLDocument>();
-    auto slot = CreateRef<html::HTMLSlotElement>(*document);
-
-    REQUIRE(Is<html::HTMLSlotElement>(static_cast<Node &>(*slot)));
   }
 
   TEST_CASE("Element::Children", "[DOM][Element]")
