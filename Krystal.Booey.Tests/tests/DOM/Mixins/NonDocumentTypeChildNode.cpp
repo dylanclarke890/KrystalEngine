@@ -41,22 +41,35 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("NonDocumentTypeChildNode::PreviousElementSibling returns the first preceding sibling that is an "
-            "element; otherwise null",
-            "[Mixins][NonDocumentTypeChildNode]")
+  TEST_CASE("previousElementSibling: the first preceding sibling that is an element; otherwise null",
+            "[DOM][NonDocumentTypeChildNode][dom:interface-nondocumenttypechildnode]"
+            "[dom:dom-nondocumenttypechildnode-previouselementsibling]")
   {
     CommonTestData data;
+
+    // The nearest one, and none without a parent.
+    auto nearest = data.Document->CreateElement(u8"b").Value();
+    REQUIRE_FALSE(data.Parent->InsertBefore(*nearest, data.Child2.get()).HasException());
+    CHECK(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child3) == nearest);
+    REQUIRE_FALSE(nearest->Remove().HasException());
+    CHECK(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*nearest) == nullptr);
 
     REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child1) == nullptr);
     REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child2) == data.Child1);
     REQUIRE(mixins::NonDocumentTypeChildNode::PreviousElementSibling(*data.Child3) == data.Child1);
   }
 
-  TEST_CASE("NonDocumentTypeChildNode::NextElementSibling returns the first following sibling that is an "
-            "element; otherwise null",
-            "[Mixins][NonDocumentTypeChildNode]")
+  TEST_CASE("nextElementSibling: the first following sibling that is an element; otherwise null",
+            "[DOM][NonDocumentTypeChildNode][dom:dom-nondocumenttypechildnode-nextelementsibling]")
   {
     CommonTestData data;
+
+    // The nearest one, and none without a parent.
+    auto nearest = data.Document->CreateElement(u8"b").Value();
+    REQUIRE_FALSE(data.Parent->InsertBefore(*nearest, data.Child2.get()).HasException());
+    CHECK(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child1) == nearest);
+    REQUIRE_FALSE(nearest->Remove().HasException());
+    CHECK(mixins::NonDocumentTypeChildNode::NextElementSibling(*nearest) == nullptr);
 
     REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child1) == data.Child3);
     REQUIRE(mixins::NonDocumentTypeChildNode::NextElementSibling(*data.Child2) == data.Child3);

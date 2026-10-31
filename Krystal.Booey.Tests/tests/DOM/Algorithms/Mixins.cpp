@@ -72,10 +72,12 @@ namespace krys::boo::dom::tests
     { node.NextElementSibling() } -> SameType<RefPtr<Element>>;
   };
 
-  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins][dom:interface-nondocumenttypechildnode]")
   {
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
+    // Not doctypes, for web compatibility.
+    STATIC_REQUIRE_FALSE(NonDocumentTypeChildNodeMixin<DocumentType>);
   }
 
   template <typename T>

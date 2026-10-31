@@ -883,11 +883,12 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.7. Mixin NonDocumentTypeChildNode](https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `mixins::NonDocumentTypeChildNode` over `TreeQueries::PreviousElementSibling`/`NextElementSibling`, which `Element` and `CharacterData` forward to; `DocumentType` doesn't have them. Tests: `tests/DOM/Mixins/NonDocumentTypeChildNode.cpp`.
 
-- [ ] [NonDocumentTypeChildNode.previousElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-previouselementsibling) — The previousElementSibling getter steps are to return the first preceding sibling that is an element; otherwise null.
+- [x] [NonDocumentTypeChildNode.previousElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-previouselementsibling) — The previousElementSibling getter steps are to return the first preceding sibling that is an element; otherwise null.
 
-- [ ] [NonDocumentTypeChildNode.nextElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-nextelementsibling) — The nextElementSibling getter steps are to return the first following sibling that is an element; otherwise null.
+- [x] [NonDocumentTypeChildNode.nextElementSibling](https://dom.spec.whatwg.org/#dom-nondocumenttypechildnode-nextelementsibling) — The nextElementSibling getter steps are to return the first following sibling that is an element; otherwise null.
 
 #### [4.2.8. Mixin ChildNode](https://dom.spec.whatwg.org/#interface-childnode)
 
