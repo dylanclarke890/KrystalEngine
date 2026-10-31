@@ -4,7 +4,10 @@
 
 namespace krys::boo::dom
 {
-  AbortController::AbortController() noexcept : _signal(CreateRef<AbortSignal>())
+  AbortController::AbortController() noexcept
+      // 1. Let signal be a new AbortSignal object.
+      // 2. Set this's signal to signal.
+      : _signal(CreateRef<AbortSignal>())
   {
   }
 

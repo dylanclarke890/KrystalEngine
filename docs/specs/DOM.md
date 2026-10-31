@@ -442,18 +442,19 @@ Status: unreviewed
 
 ### [3.1. Interface AbortController](https://dom.spec.whatwg.org/#interface-abortcontroller)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `AbortController`, with signal abort on a controller in `AbortAlgorithms::SignalAbort`. Tests: `tests/DOM/AbortController.cpp`.
 <!-- definitions: abortcontroller-signal -->
 
-- [ ] [AbortController.new AbortController()](https://dom.spec.whatwg.org/#dom-abortcontroller-abortcontroller) — The new AbortController() constructor steps are:
+- [x] [AbortController.new AbortController()](https://dom.spec.whatwg.org/#dom-abortcontroller-abortcontroller) — The new AbortController() constructor steps are:
   - 1. Let signal be a new AbortSignal object.
   - 2. Set this’s signal to signal.
 
-- [ ] [AbortController.signal](https://dom.spec.whatwg.org/#dom-abortcontroller-signal) — The signal getter steps are to return this’s signal.
+- [x] [AbortController.signal](https://dom.spec.whatwg.org/#dom-abortcontroller-signal) — The signal getter steps are to return this’s signal.
 
-- [ ] [AbortController.abort(reason)](https://dom.spec.whatwg.org/#dom-abortcontroller-abort) — The abort(reason) method steps are to signal abort on this with reason if it is given.
+- [x] [AbortController.abort(reason)](https://dom.spec.whatwg.org/#dom-abortcontroller-abort) — The abort(reason) method steps are to signal abort on this with reason if it is given.
 
-- [ ] [signal abort (AbortController)](https://dom.spec.whatwg.org/#abortcontroller-signal-abort) — To signal abort on an AbortController controller with an optional reason, signal abort on controller’s signal with reason if it is given.
+- [x] [signal abort (AbortController)](https://dom.spec.whatwg.org/#abortcontroller-signal-abort) — To signal abort on an AbortController controller with an optional reason, signal abort on controller’s signal with reason if it is given.
 
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
