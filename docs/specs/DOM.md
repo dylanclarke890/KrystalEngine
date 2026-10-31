@@ -1466,13 +1466,14 @@ Status: reviewed (2026-10-31)
 
 #### [4.5.1. Interface DOMImplementation](https://dom.spec.whatwg.org/#interface-domimplementation)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `DOMImplementation` (`DOMImplementation.hpp`/`.cpp`); the documents it creates have no origin (see `DIFFERENCES.md`), and a null qualified name is the empty string, as the IDL's `[LegacyNullToEmptyString]` makes it.
 
-- [ ] [DOMImplementation.createDocumentType(name, publicId, systemId)](https://dom.spec.whatwg.org/#dom-domimplementation-createdocumenttype) — The createDocumentType(name, publicId, systemId) method steps are:
+- [x] [DOMImplementation.createDocumentType(name, publicId, systemId)](https://dom.spec.whatwg.org/#dom-domimplementation-createdocumenttype) — The createDocumentType(name, publicId, systemId) method steps are:
   - 1. If name is not a valid doctype name, then throw an "InvalidCharacterError" DOMException.
   - 2. Return the result of creating a doctype given the associated document of this, name, publicId, and systemId.
 
-- [ ] [DOMImplementation.createDocument(namespace, qualifiedName, doctype)](https://dom.spec.whatwg.org/#dom-domimplementation-createdocument) — The createDocument(namespace, qualifiedName, doctype) method steps are:
+- [x] [DOMImplementation.createDocument(namespace, qualifiedName, doctype)](https://dom.spec.whatwg.org/#dom-domimplementation-createdocument) — The createDocument(namespace, qualifiedName, doctype) method steps are:
   - 1. Let document be the result of creating a document that implements XMLDocument, given this’s relevant realm.
   - 2. Let element be null.
   - 3. If qualifiedName is not the empty string, then set element to the result of running the internal createElementNS steps, given document, namespace, qualifiedName, and an empty dictionary.
@@ -1482,7 +1483,7 @@ Status: unreviewed
   - 7. document’s content type is determined by namespace: HTML namespace application/xhtml+xml SVG namespace image/svg+xml Any other namespace application/xml
   - 8. Return document.
 
-- [ ] [DOMImplementation.createHTMLDocument(title)](https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument) — The createHTMLDocument(title) method steps are:
+- [x] [DOMImplementation.createHTMLDocument(title)](https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument) — The createHTMLDocument(title) method steps are:
   - 1. Let doc be the result of creating a document that implements Document, given this’s relevant realm.
   - 2. Set doc’s type to "html" and content type to "text/html".
   - 3. Let doctype be the result of creating a doctype given doc and "html".
@@ -1497,7 +1498,7 @@ Status: unreviewed
   - 9. doc’s origin is this’s associated document’s origin.
   - 10. Return doc.
 
-- [ ] [DOMImplementation.hasFeature()](https://dom.spec.whatwg.org/#dom-domimplementation-hasfeature) — The hasFeature() method steps are to return true.
+- [x] [DOMImplementation.hasFeature()](https://dom.spec.whatwg.org/#dom-domimplementation-hasfeature) — The hasFeature() method steps are to return true.
 
 ### [4.6. Interface DocumentType](https://dom.spec.whatwg.org/#interface-documenttype)
 

@@ -36,6 +36,7 @@ namespace krys::boo::dom
 
     /// @brief Returns a doctype, with the given `name`, `publicId`, and `systemId`.
     /// @throws InvalidCharacterError if `name` is not a valid doctype name.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createdocumenttype
     KRYS_NODISCARD ExceptionOr<Ref<DocumentType>> CreateDocumentType(const DOMString &name,
                                                                      const DOMString &publicId,
                                                                      const DOMString &systemId) noexcept;
@@ -44,16 +45,20 @@ namespace krys::boo::dom
     /// namespace is `namespaceUri` (unless `qualifiedName` is the empty string), and with `doctype`, if it is
     /// given, as its doctype.
     /// @throws This method throws the same exceptions as the createElementNS() method, when invoked with
-    /// `namespaceUri` and `qualifiedName`.
+    /// `namespaceUri` and `qualifiedName`. A null `qualifiedName` is the empty string.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createdocument
     KRYS_NODISCARD ExceptionOr<Ref<XMLDocument>>
-      CreateDocument(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName = DOMStringAtom::Null(),
+      CreateDocument(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName = DOMStringAtom::Empty(),
                      DocumentType *doctype = nullptr) noexcept;
 
     /// @brief Returns a document, with a basic tree already constructed including a title element, unless the
     /// `title` is omitted.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument
     KRYS_NODISCARD ExceptionOr<Ref<Document>>
       CreateHTMLDocument(const Maybe<DOMString> &title = null) noexcept;
 
+    /// @note Useless; always returns true.
+    /// @see https://dom.spec.whatwg.org/#dom-domimplementation-hasfeature
     KRYS_NODISCARD bool HasFeature() const noexcept
     {
       return true;
