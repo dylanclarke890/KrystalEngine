@@ -1006,15 +1006,17 @@ Status: reviewed (2026-10-31)
 
 #### [4.3.1. Interface MutationObserver](https://dom.spec.whatwg.org/#interface-mutationobserver)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `MutationObserver` (`MutationObserver.hpp`) holds the callback, creation index, node list, transient node set and record queue.
+> A node's registered observer list holds no transient registered observers (they're in `Node::TransientRegisteredObservers()`), so observe's step 7 looks at every entry.
 <!-- definitions: concept-mo-callback mutationobserver-creation-index mutationobserver-node-list mutationobserver-transient-node-set concept-mo-queue -->
 
-- [ ] [MutationObserver.new MutationObserver(callback)](https://dom.spec.whatwg.org/#dom-mutationobserver-mutationobserver) — The new MutationObserver(callback) constructor steps are:
+- [x] [MutationObserver.new MutationObserver(callback)](https://dom.spec.whatwg.org/#dom-mutationobserver-mutationobserver) — The new MutationObserver(callback) constructor steps are:
   - 1. Set this’s callback to callback.
   - 2. Set this’s creation index to this’s relevant agent’s mutation observer counter.
   - 3. Increase this’s relevant agent’s mutation observer counter by 1.
 
-- [ ] [MutationObserver.observe(target, options)](https://dom.spec.whatwg.org/#dom-mutationobserver-observe) — The observe(target, options) method steps are:
+- [x] [MutationObserver.observe(target, options)](https://dom.spec.whatwg.org/#dom-mutationobserver-observe) — The observe(target, options) method steps are:
   - 1. If either options["attributeOldValue"] or options["attributeFilter"] exists, and options["attributes"] does not exist, then set options["attributes"] to true.
   - 2. If options["characterDataOldValue"] exists and options["characterData"] does not exist, then set options["characterData"] to true.
   - 3. If none of options["childList"], options["attributes"], and options["characterData"] is true, then throw a TypeError.
@@ -1029,13 +1031,13 @@ Status: unreviewed
     - 9a. Append a new registered observer whose observer is this and options is options to target’s registered observer list.
     - 9b. Append a weak reference to target to this’s node list.
 
-- [ ] [MutationObserver.disconnect()](https://dom.spec.whatwg.org/#dom-mutationobserver-disconnect) — The disconnect() method steps are:
+- [x] [MutationObserver.disconnect()](https://dom.spec.whatwg.org/#dom-mutationobserver-disconnect) — The disconnect() method steps are:
   - 1. For each node of this’s node list: remove any registered observer from node’s registered observer list for which this is the observer.
   - 2. Remove transient registered observers for this.
   - 3. Empty this’s node list.
   - 4. Empty this’s record queue.
 
-- [ ] [MutationObserver.takeRecords()](https://dom.spec.whatwg.org/#dom-mutationobserver-takerecords) — The takeRecords() method steps are:
+- [x] [MutationObserver.takeRecords()](https://dom.spec.whatwg.org/#dom-mutationobserver-takerecords) — The takeRecords() method steps are:
   - 1. Let records be a clone of this’s record queue.
   - 2. Empty this’s record queue.
   - 3. Return records.
