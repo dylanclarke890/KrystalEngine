@@ -26,9 +26,6 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#errorevent
   class ErrorEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = ErrorEventInit;
-
   private:
     dom::DOMString _message;
     dom::USVString _filename;
@@ -37,6 +34,9 @@ namespace krys::boo::html
     RefPtr<SerializedScriptValue> _error;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = ErrorEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-errorevent-errorevent
     ErrorEvent(dom::DOMStringAtom type, const ErrorEventInit &eventInitDict = {}) noexcept;
 

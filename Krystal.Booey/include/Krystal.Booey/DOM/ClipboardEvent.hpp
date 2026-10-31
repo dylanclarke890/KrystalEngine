@@ -12,14 +12,13 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/clipboard-apis/#clipboard-event-interfaces
   class ClipboardEvent final : public Event
   {
-    friend class EventFactory;
-
-    using dictionary_type = ClipboardEventInit;
-
   private:
     RefPtr<DataTransfer> _clipboardData;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = ClipboardEventInit;
+
     /// @see https://w3c.github.io/clipboard-apis/#dom-clipboardevent-clipboardevent
     ClipboardEvent(DOMStringAtom type, const ClipboardEventInit &eventInitDict = {}) noexcept;
     ~ClipboardEvent() noexcept;

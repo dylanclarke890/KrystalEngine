@@ -13,13 +13,13 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/uievents/#interface-compositionevent
   class CompositionEvent final : public UIEvent
   {
-    friend class EventFactory;
-    using dictionary_type = CompositionEventInit;
-
   private:
     DOMString _data;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CompositionEventInit;
+
     /// @see https://w3c.github.io/uievents/#dom-compositionevent-compositionevent
     CompositionEvent(DOMStringAtom type, const CompositionEventInit &initializer = {}) noexcept;
     ~CompositionEvent() noexcept override;

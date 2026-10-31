@@ -11,14 +11,13 @@ namespace krys::boo::dom
   // FIXME: The view (a Window).
   class UIEvent : public Event
   {
-    friend class EventFactory;
-
-    using dictionary_type = UIEventInit;
-
   private:
     int32 _detail {0};
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = UIEventInit;
+
     UIEvent(DOMStringAtom type, const UIEventInit &eventInitDict = {}) noexcept
         : Event(type, eventInitDict), _detail(eventInitDict.Detail)
     {

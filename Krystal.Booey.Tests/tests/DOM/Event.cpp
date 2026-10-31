@@ -40,6 +40,26 @@ namespace krys::boo::dom::tests
     }
   }
 
+  TEST_CASE("Event constructor: an untrusted, initialized event with the type and dictionary's values",
+            "[HTML][Event][dom:concept-event-constructor][dom:inner-event-creation-steps]")
+  {
+    auto event =
+      CreateRef<Event>(EventNames::Click, EventInit {.Bubbles = true, .Cancelable = true, .Composed = true});
+    REQUIRE(event->Type() == EventNames::Click);
+    REQUIRE(event->Bubbles());
+    REQUIRE(event->Cancelable());
+    REQUIRE(event->Composed());
+    REQUIRE_FALSE(event->IsTrusted());
+    REQUIRE(event->TimeStamp() == html::EventLoop::Current().Now());
+    REQUIRE(event->Target() == nullptr);
+    REQUIRE(event->EventPhase() == EventPhaseType::NONE);
+
+    // Initialized, so dispatching it doesn't throw an InvalidStateError.
+    auto document = CreateRef<Document>();
+    auto element = NewElement(*document, u8"div");
+    REQUIRE_FALSE(element->DispatchEvent(*event).HasException());
+  }
+
   TEST_CASE("Event.type: the type it was initialized to", "[HTML][Event][dom:dom-event-type]")
   {
     auto event = CreateRef<Event>(EventNames::Click);
@@ -321,7 +341,8 @@ namespace krys::boo::dom::tests
     REQUIRE(Event::Create(EventNames::Click, false, false)->IsTrusted());
   }
 
-  TEST_CASE("Event::TimeStamp is the host's time at creation", "[HTML][Event]")
+  TEST_CASE("Event::TimeStamp is the host's time at creation",
+            "[HTML][Event][dom:inner-event-creation-steps]")
   {
     auto &loop = html::EventLoop::Current();
     loop.Run(loop.Now() + 7ms);

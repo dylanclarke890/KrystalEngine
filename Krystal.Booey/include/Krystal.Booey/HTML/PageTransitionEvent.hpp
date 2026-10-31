@@ -17,13 +17,13 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#pagetransitionevent
   class PageTransitionEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = PageTransitionEventInit;
-
   private:
     bool _persisted {false};
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = PageTransitionEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-pagetransitionevent-pagetransitionevent
     PageTransitionEvent(dom::DOMStringAtom type, const PageTransitionEventInit &eventInitDict = {}) noexcept;
 

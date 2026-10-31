@@ -21,14 +21,14 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#navigationcurrententrychangeevent
   class NavigationCurrentEntryChangeEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = NavigationCurrentEntryChangeEventInit;
-
   private:
     Maybe<NavigationNavigationType> _navigationType;
     RefPtr<NavigationHistoryEntry> _from;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = NavigationCurrentEntryChangeEventInit;
+
     /// @see
     /// https://html.spec.whatwg.org/#dom-navigationcurrententrychangeevent-navigationcurrententrychangeevent
     NavigationCurrentEntryChangeEvent(

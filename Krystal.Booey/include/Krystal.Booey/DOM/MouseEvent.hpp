@@ -27,10 +27,6 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/uievents/#interface-mouseevent
   class MouseEvent : public MouseRelatedEvent
   {
-    friend class EventFactory;
-
-    using dictionary_type = MouseEventInit;
-
   private:
     int16 _button {static_cast<int16>(MouseButton::Left)};
     uint16 _buttons {0};
@@ -43,6 +39,9 @@ namespace krys::boo::dom
     List<Ref<MouseEvent>> _predictedEvents;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = MouseEventInit;
+
     /// @see https://w3c.github.io/uievents/#dom-mouseevent-mouseevent
     MouseEvent(DOMStringAtom type, const MouseEventInit &initializer = {}) noexcept;
 

@@ -12,14 +12,13 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/multipage/dnd.html#the-dragevent-interface
   class DragEvent final : public MouseEvent
   {
-    friend class EventFactory;
-
-    using dictionary_type = DragEventInit;
-
   private:
     RefPtr<DataTransfer> _dataTransfer;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = DragEventInit;
+
     /// @see https://html.spec.whatwg.org/multipage/dnd.html#dom-dragevent-dragevent
     DragEvent(DOMStringAtom type, const DragEventInit &eventInitDict = {}) noexcept;
     ~DragEvent() noexcept;

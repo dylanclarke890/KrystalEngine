@@ -23,15 +23,15 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#the-toggleevent-interface
   class ToggleEvent final : public Event
   {
-    friend class EventFactory;
-    using dictionary_type = ToggleEventInit;
-
   private:
     DOMString _oldState;
     DOMString _newState;
     RefPtr<Element> _source;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = ToggleEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-toggleevent-toggleevent
     ToggleEvent(DOMStringAtom type, const ToggleEventInit &eventInitDict = {}) noexcept;
 

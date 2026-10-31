@@ -10,34 +10,29 @@ namespace krys::boo::dom
   class EventFactory
   {
   public:
+    /// @brief A trusted event of interface @p TEvent, created by the user agent rather than its constructor,
+    /// with every attribute at its default and a null type for the caller to set.
     /// @see https://dom.spec.whatwg.org/#concept-event-create
     template <DerivedFrom<Event> TEvent = Event>
+    requires Constructible<TEvent, DOMStringAtom, const typename TEvent::dictionary_type &>
     KRYS_NODISCARD static Ref<TEvent> Create() noexcept
     {
-      using dictionary_type = typename TEvent::dictionary_type;
-      dictionary_type dictionary {};
+      // 1. If realm is not given, then set it to null. (Skipped: there are no realms.)
 
-      if constexpr (Constructible<TEvent, const dictionary_type &>)
-      {
-        auto event = CreateRef<TEvent>(dictionary);
-        event->_isTrusted = true;
-        event->_initialized = true;
-        return event;
-      }
-      else if constexpr (Constructible<TEvent, DOMStringAtom, const dictionary_type &>)
-      {
-        // Later steps of the algorithm will set the event's type, so we can pass a null atom here.
-        auto event = CreateRef<TEvent>(DOMStringAtom::Null(), dictionary);
-        event->_isTrusted = true;
-        event->_initialized = true;
+      // 2. Let dictionary be the result of converting the JavaScript value undefined to the dictionary type
+      // accepted by eventInterface's constructor.
+      typename TEvent::dictionary_type dictionary {};
 
-        return event;
-      }
-      else
-      {
-        static_assert(false, "TEvent must be constructible with either (DOMStringAtom, const dictionary_type "
-                             "&) or (const dictionary_type &).");
-      }
+      // 3. Let event be the result of running the inner event creation steps with eventInterface, realm, the
+      // time of the occurrence that the event is signaling, and dictionary.
+      // The constructor runs the inner event creation steps, with the time now.
+      Ref<TEvent> event = CreateRef<TEvent>(DOMStringAtom::Null(), dictionary);
+
+      // 4. Initialize event's isTrusted attribute to true.
+      static_cast<Event &>(*event)._isTrusted = true;
+
+      // 5. Return event.
+      return event;
     }
   };
 }

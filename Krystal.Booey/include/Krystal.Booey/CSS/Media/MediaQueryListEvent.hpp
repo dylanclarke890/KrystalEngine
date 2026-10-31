@@ -5,11 +5,6 @@
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::dom
-{
-  class EventFactory;
-}
-
 namespace krys::boo::css
 {
   class MediaQueryList;
@@ -25,16 +20,16 @@ namespace krys::boo::css
   /// @see https://drafts.csswg.org/cssom-view/#mediaquerylistevent
   class MediaQueryListEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
     friend class MediaQueryList;
-
-    using dictionary_type = MediaQueryListEventInit;
 
   private:
     CSSOMString _media;
     bool _matches {false};
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = MediaQueryListEventInit;
+
     /// @see https://drafts.csswg.org/cssom-view/#dom-mediaquerylistevent-mediaquerylistevent
     explicit MediaQueryListEvent(CSSOMStringAtom type,
                                  const MediaQueryListEventInit &eventInitDict = {}) noexcept;

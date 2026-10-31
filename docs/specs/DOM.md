@@ -206,22 +206,23 @@ Status: reviewed (2026-10-30)
 
 ### [2.5. Constructing events](https://dom.spec.whatwg.org/#constructing-events)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: the constructor and the inner event creation steps are `Event`'s constructor, with each derived interface's constructor initializing its own dictionary members and running its event constructing steps; create an event is `EventFactory::Create<TEvent>()`. `Event::Create` and the derived interfaces' `Create` functions make trusted events directly, as create an event followed by initializing their attributes. Tests: `tests/DOM/Event.cpp`, `tests/DOM/Internals/EventFactory.cpp`.
 <!-- definitions: concept-event-constructor-ext -->
 
-- [ ] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:
+- [x] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:
   - 1. Let event be the result of running the inner event creation steps with this interface, null, now, and eventInitDict.
   - 2. Initialize event’s type attribute to type.
   - 3. Return event.
 
-- [ ] [create an event](https://dom.spec.whatwg.org/#concept-event-create) — To create an event using eventInterface, which must be either Event or an interface that inherits from it, and optionally given a realm realm, run these steps:
+- [x] [create an event](https://dom.spec.whatwg.org/#concept-event-create) — To create an event using eventInterface, which must be either Event or an interface that inherits from it, and optionally given a realm realm, run these steps:
   - 1. If realm is not given, then set it to null.
   - 2. Let dictionary be the result of converting the JavaScript value undefined to the dictionary type accepted by eventInterface’s constructor. (This dictionary type will either be EventInit or a dictionary that inherits from it.)
   - 3. Let event be the result of running the inner event creation steps with eventInterface, realm, the time of the occurrence that the event is signaling, and dictionary.
   - 4. Initialize event’s isTrusted attribute to true.
   - 5. Return event.
 
-- [ ] [inner event creation steps](https://dom.spec.whatwg.org/#inner-event-creation-steps) — The inner event creation steps, given an eventInterface, realm, time, and dictionary, are as follows:
+- [x] [inner event creation steps](https://dom.spec.whatwg.org/#inner-event-creation-steps) — The inner event creation steps, given an eventInterface, realm, time, and dictionary, are as follows:
   - 1. Let event be the result of creating a new object using eventInterface. If realm is non-null, then use that realm; otherwise, use the default behavior defined in Web IDL.
   - 2. Set event’s initialized flag.
   - 3. Initialize event’s timeStamp attribute to the relative high resolution coarse time given time and event’s relevant global object.

@@ -14,8 +14,22 @@ namespace krys::boo::dom
       : _type(type), _createTime(html::EventLoop::Current().Now()), _bubbles(eventInitDict.Bubbles),
         _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
   {
-    // The inner event creation steps set the initialized flag.
+    // 1. Let event be the result of running the inner event creation steps with this interface, null, now,
+    // and eventInitDict.
+    // The inner event creation steps:
+    //   1. Let event be the result of creating a new object using eventInterface. (This object.)
+    //   2. Set event's initialized flag.
+    //   3. Initialize event's timeStamp attribute to the relative high resolution coarse time given time and
+    //   event's relevant global object. (_createTime is the time; TimeStampForBindings makes it relative.)
+    //   4. For each member -> value of dictionary: if event has an attribute whose identifier is member,
+    //   then initialize that attribute to value. (Here for EventInit's members, and in each derived
+    //   interface's constructor for its own.)
+    //   5. Run the event constructing steps with event and dictionary. (The derived constructors' bodies.)
+    //   6. Return event.
     _initialized = true;
+
+    // 2. Initialize event's type attribute to type. (_type above.)
+    // 3. Return event.
   }
 
   DOMHighResTimeStamp Event::TimeStampForBindings(const Document &document) const noexcept

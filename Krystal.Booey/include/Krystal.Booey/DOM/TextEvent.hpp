@@ -35,8 +35,6 @@ namespace krys::boo::dom
   // FIXME: Dictation's alternatives (dictationAlternatives), with dictation.
   class TextEvent final : public UIEvent
   {
-    friend class EventFactory;
-
   private:
     TextEventInputType _inputType {TextEventInputType::Keyboard};
     DOMString _data;

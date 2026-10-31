@@ -11,14 +11,13 @@ namespace krys::boo::dom
   template <typename T>
   class CustomEvent : public Event
   {
-    friend class EventFactory;
-
-    using dictionary_type = CustomEventInit<T>;
-
   private:
     Maybe<T> _detail;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CustomEventInit<T>;
+
 #pragma region CustomEvent - https://dom.spec.whatwg.org/#customevent
 
     /// @see https://dom.spec.whatwg.org/#dom-customevent-customevent

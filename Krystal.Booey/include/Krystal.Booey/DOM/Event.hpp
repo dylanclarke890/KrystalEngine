@@ -26,8 +26,6 @@ namespace krys::boo::dom
     friend class EventTarget;
     friend class MutationObserverAlgorithms;
 
-    using dictionary_type = EventInit;
-
   protected:
     Event() noexcept = default;
 
@@ -62,11 +60,19 @@ namespace krys::boo::dom
     RefPtr<Event> _underlyingEvent;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = EventInit;
+
     virtual ~Event() noexcept = default;
 
 #pragma region Event - https://dom.spec.whatwg.org/#event
 
+    /// @note A derived interface's constructor initializes its own dictionary members and runs its event
+    /// constructing steps.
     /// @see https://dom.spec.whatwg.org/#dom-event-event
+    /// @see https://dom.spec.whatwg.org/#concept-event-constructor
+    /// @see https://dom.spec.whatwg.org/#inner-event-creation-steps
+    /// @see https://dom.spec.whatwg.org/#concept-event-constructor-ext
     Event(DOMStringAtom type, const EventInit &eventInitDict = {}) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-event-type

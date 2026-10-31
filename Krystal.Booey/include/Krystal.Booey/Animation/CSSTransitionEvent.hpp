@@ -16,12 +16,13 @@ namespace krys::boo
   /// @see https://drafts.csswg.org/css-transitions-1/#interface-transitionevent
   class CSSTransitionEvent final : public StyleOriginatedAnimationEvent
   {
-    using dictionary_type = CSSTransitionEventInit;
-
   private:
     css::CSSOMString _propertyName;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CSSTransitionEventInit;
+
     CSSTransitionEvent(dom::DOMStringAtom type, WebAnimation *animation, Maybe<Seconds> scheduledTime,
                        double elapsedTime,
                        const Maybe<style::PseudoElementIdentifier> &pseudoElementIdentifier,

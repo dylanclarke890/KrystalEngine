@@ -26,9 +26,6 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#the-storageevent-interface
   class StorageEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = StorageEventInit;
-
   private:
     Maybe<dom::DOMString> _key;
     Maybe<dom::DOMString> _oldValue;
@@ -37,6 +34,9 @@ namespace krys::boo
     RefPtr<Storage> _storageArea;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = StorageEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-storageevent-storageevent
     StorageEvent(dom::DOMStringAtom type, const StorageEventInit &eventInitDict = {}) noexcept;
     ~StorageEvent() noexcept override;

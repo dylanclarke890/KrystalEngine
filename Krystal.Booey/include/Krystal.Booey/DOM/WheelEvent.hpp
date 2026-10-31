@@ -12,11 +12,10 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/uievents/#interface-wheelevent
   class WheelEvent final : public MouseEvent
   {
-    friend class EventFactory;
-
+  public:
+    /// @brief The dictionary its constructor takes.
     using dictionary_type = WheelEventInit;
 
-  public:
     enum class IsCancelable : bool
     {
       No,
