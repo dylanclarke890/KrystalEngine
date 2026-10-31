@@ -229,6 +229,17 @@ namespace krys::boo::html
       return nullptr;
     }
 
+    /// @brief The entry for the element immediately below @p node in the stack (pushed after it), or null.
+    KRYS_NODISCARD HTMLStackItem *EntryAfter(dom::Element &node) noexcept
+    {
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
+      if (it == _items.end() || std::next(it) == _items.end())
+      {
+        return nullptr;
+      }
+      return &*std::next(it);
+    }
+
     KRYS_NODISCARD bool ContainsTemplateElement() const noexcept
     {
       return std::ranges::any_of(_items,

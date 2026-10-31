@@ -13,6 +13,9 @@
 #include "Krystal.Booey/HTML/Parser/HTMLStackItem.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLTokenizer.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp"
+#include "Krystal.Core/Types/HashMap.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 
@@ -236,6 +239,17 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#pending-table-character-tokens
     List<dom::DOMString> _pendingTableCharacterTokens;
+    /// @brief Redirects insertions into the fragment case's root `html` element to the fragment, and
+    /// insertions into elements replaced with their children by the sanitizer to where those elements would
+    /// have been.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#insertion-target-redirection-map
+    HashMap<const dom::Node *, InsertionLocation> _insertionTargetRedirectionMap;
+    /// @brief Keeps the redirection map's keys alive.
+    List<Ref<dom::Element>> _redirectedElements;
+    /// @brief When there is one, the parser sanitizes the markup as it's parsed: elements, attributes and
+    /// comments that it doesn't allow aren't inserted.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-sanitizer-configuration
+    Maybe<SanitizerConfig> _sanitizerConfig;
 
     bool _ignoreNextNewline : 1 {false};
 
@@ -253,6 +267,15 @@ namespace krys::boo::html
     ParserScriptingMode ScriptingMode() const noexcept
     {
       return _scriptingMode;
+    }
+
+    /// @brief Sets the parser's insertion target redirection map[@p element] to @p location.
+    void RedirectInsertions(dom::Element &element, InsertionLocation location) noexcept;
+
+    /// @brief Sets the parser sanitizer configuration; null for none.
+    void SanitizerConfiguration(Maybe<SanitizerConfig> &&configuration) noexcept
+    {
+      _sanitizerConfig = krys::move(configuration);
     }
 
     void FormElement(HTMLFormElement &form) noexcept
@@ -403,15 +426,31 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#adjusted-insertion-location
     KRYS_NODISCARD InsertionLocation
-      AdjustedInsertionLocation(Maybe<InsertionLocation> location = null) noexcept;
+      AdjustedInsertionLocation(Maybe<InsertionLocation> insertionLocation = null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
     void InsertElementAtAdjustedInsertionLocation(dom::Element &element,
-                                                  Maybe<InsertionLocation> location = null) noexcept;
+                                                  Maybe<InsertionLocation> location = null,
+                                                  bool alreadySanitized = false) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
     Ref<dom::Element> InsertForeignElement(HTMLTokenAtom &&token, dom::DOMStringAtom namespaceURI,
                                            bool onlyAddToElementStack) noexcept;
+
+    /// @brief The sanitizer action for an element named @p localName in @p namespaceURI: "Keep" when the
+    /// parser isn't sanitizing.
+    /// @see https://html.spec.whatwg.org/#get-the-sanitizer-action-for-an-element-name
+    KRYS_NODISCARD SanitizerAction SanitizerActionFor(dom::DOMStringView localName,
+                                                      dom::DOMStringAtom namespaceURI) const noexcept;
+
+    /// @brief Adds the attributes of an `html` or `body` start tag that @p element doesn't have and the
+    /// parser's sanitizer configuration allows.
+    void MergeAttributes(dom::Element &element, const ParsedAttributeList &attributes) noexcept;
+
+    /// @brief The "in head" insertion mode's steps for a template start tag, which may attach a declarative
+    /// shadow root.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
+    void InsertTemplateElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
     Ref<dom::Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;

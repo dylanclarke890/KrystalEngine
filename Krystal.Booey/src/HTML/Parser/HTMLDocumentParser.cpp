@@ -1,7 +1,10 @@
 ﻿#include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
+#include "Krystal.Booey/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
+#include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/Page/Settings.hpp"
 
 namespace krys::boo::html
@@ -13,13 +16,24 @@ namespace krys::boo::html
   {
   }
 
-  dom::SmallNodeList HTMLDocumentParser::ParseFragment(dom::Element &context, utf8_string &&input,
-                                                       bool allowDeclarativeShadowRoots,
-                                                       ParserScriptingMode scriptingMode) noexcept
+  Ref<dom::DocumentFragment>
+    HTMLDocumentParser::ParseFragment(dom::ContainerNode &target, utf8_string &&input,
+                                      bool allowDeclarativeShadowRoots, ParserScriptingMode scriptingMode,
+                                      Maybe<SanitizerConfig> &&configuration) noexcept
   {
     // FPA(1): Assert: scriptingMode is either Inert or Fragment.
     krys_debug_assert(scriptingMode == ParserScriptingMode::Inert
                       || scriptingMode == ParserScriptingMode::Fragment);
+
+    // FPA: Let context be target if target is an Element; otherwise target's host.
+    // FPA: Assert: context is non-null.
+    auto *contextElement = DynamicDowncast<dom::Element>(target);
+    if (!contextElement)
+    {
+      contextElement = Downcast<dom::DocumentFragment>(target).Host();
+    }
+    krys_assert(contextElement);
+    auto &context = *contextElement;
 
     // FPA(2): Let document be a Document node whose type is "html".
     auto document = CreateRef<dom::HTMLDocument>();
@@ -48,8 +62,11 @@ namespace krys::boo::html
       document->_allowDeclarativeShadowRoots = true;
     }
 
-    // FPA(7): Create a new HTML parser, and associate it with document.
+    // FPA(7): Create a new HTML parser whose parser sanitizer configuration is configuration [...], and
+    // associate it with document.
     auto parser = CreateRef<HTMLDocumentParser>(*document);
+    bool sanitizing = configuration.has_value();
+    parser->SanitizerConfiguration(krys::move(configuration));
 
     // FPA(8): If contextDocument's scripting is disabled, then set scriptingMode to Disabled.
     if (contextDocument.IsScriptingDisabled())
@@ -125,11 +142,12 @@ namespace krys::boo::html
     }
 
     // FPA(11): Let root be the result of creating an element given document, "html", the HTML namespace,
-    // null, null, false, and context's custom element registry.
+    // null, null, false, and the result of looking up a custom element registry given target.
     dom::QualifiedName name {infra::Namespaces::HTML, dom::DOMStringAtom::Null(), u8"html", TagName::html,
                              Namespace::HTML};
-    auto root = dom::ElementFactory::Create(*document, name, dom::DOMStringAtom::Null(), false,
-                                            contextDocument.CustomElementRegistry());
+    auto root =
+      dom::ElementFactory::Create(*document, name, dom::DOMStringAtom::Null(), false,
+                                  ShareRefPtr(CustomElementAlgorithms::LookUpCustomElementRegistry(target)));
 
     // FPA(12): Append root to document.
     (void)dom::MutationAlgorithms::Append(*root, *document);
@@ -137,6 +155,17 @@ namespace krys::boo::html
     // FPA(13): Set up the HTML parser's stack of open elements so that it contains just the single element
     // root.
     parser->OpenElementStack().Push(HTMLStackItem(TagName::html, Namespace::HTML, *root, {}));
+
+    // FPA: Let fragment be the result of creating a document fragment given document if configuration is
+    // non-null; otherwise target's node document.
+    // NOTE: When sanitizing, the DocumentFragment is created as part of the inert document, so that elements
+    // that the sanitizer removes are never created in target's node document. It is adopted into target's
+    // node document after parsing completes.
+    auto fragment =
+      sanitizing ? document->CreateDocumentFragment() : target.NodeDocument().CreateDocumentFragment();
+
+    // FPA: Set the parser's insertion target redirection map[root] to (fragment, null).
+    parser->_treeBuilder.RedirectInsertions(*root, {.Parent = fragment.get()});
 
     // FPA(14): If context is a template element, then push "in template" onto the stack of template insertion
     // modes so that it is the new current template insertion mode.
@@ -187,13 +216,14 @@ namespace krys::boo::html
     // into the input stream.
     parser->PumpTokenizer();
 
-    // FPA(20): Return root's children, in tree order.
-    dom::SmallNodeList result;
-    for (dom::Node &child : dom::ChildNodeRange(*root))
+    // FPA: Adopt fragment into target's node document.
+    if (&fragment->NodeDocument() != &target.NodeDocument())
     {
-      result.emplace_back(ShareRef(child));
+      (void)dom::DocumentAlgorithms::AdoptNode(*fragment, target.NodeDocument());
     }
-    return result;
+
+    // FPA: Return fragment.
+    return fragment;
   }
 
   void HTMLDocumentParser::PumpTokenizer() noexcept

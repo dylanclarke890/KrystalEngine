@@ -1,5 +1,6 @@
 ﻿#include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/HTML/CustomElementTestUtils.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
@@ -325,10 +326,8 @@ namespace krys::boo::dom::tests
     CHECK(document.GetElementById(u8"d") != nullptr);
   }
 
-  // FIXME: The tree builder doesn't attach declarative shadow roots (the rest of its template start tag
-  // steps), so setHTMLUnsafe() and parseHTMLUnsafe() leave the template elements in the tree.
   TEST_CASE("setHTMLUnsafe and parseHTMLUnsafe attach declarative shadow roots",
-            "[DOM][Element][Document][DOMParsing][!shouldfail]")
+            "[DOM][Element][Document][DOMParsing]")
   {
     MarkupDocument data;
     auto &div = *data.Div;
@@ -347,6 +346,87 @@ namespace krys::boo::dom::tests
     auto host = result.Value()->GetElementById(u8"d");
     REQUIRE(host);
     CHECK_FALSE(host->HasChildNodes());
+    auto *closedShadow = TreeQueries::GetShadowRoot(*host);
+    REQUIRE(closedShadow);
+    CHECK(closedShadow->Mode() == ShadowRootMode::Closed);
+  }
+
+  TEST_CASE("Declarative shadow roots", "[DOM][Element][DOMParsing]")
+  {
+    MarkupDocument data;
+    auto &div = *data.Div;
+
+    SECTION("take their options from the template")
+    {
+      REQUIRE_FALSE(div
+                      .SetHTMLUnsafe(u8"<p><template shadowrootmode=OPEN shadowrootdelegatesfocus "
+                                     u8"shadowrootclonable shadowrootserializable "
+                                     u8"shadowrootslotassignment=manual></template></p>")
+                      .HasException());
+      auto shadow = div.FirstElementChild()->ShadowRoot();
+      REQUIRE(shadow);
+      CHECK(shadow->Mode() == ShadowRootMode::Open);
+      CHECK(shadow->DelegatesFocus());
+      CHECK(shadow->Clonable());
+      CHECK(shadow->Serialisable());
+      CHECK(shadow->SlotAssignment() == SlotAssignmentMode::Manual);
+      CHECK(shadow->IsAvailableToElementInternals());
+    }
+
+    SECTION("a host's second template stays a template")
+    {
+      REQUIRE_FALSE(div
+                      .SetHTMLUnsafe(u8"<p><template shadowrootmode=open><b></b></template>"
+                                     u8"<template shadowrootmode=open><i></i></template></p>")
+                      .HasException());
+      auto p = div.FirstElementChild();
+      REQUIRE(p->ShadowRoot());
+      CHECK(MarkupText(p->ShadowRoot()->InnerHTML()) == "<b></b>");
+      auto *second = DynamicDowncast<html::HTMLTemplateElement>(p->FirstElementChild().get());
+      REQUIRE(second);
+      CHECK(MarkupText(second->InnerHTML()) == "<i></i>");
+    }
+
+    SECTION("an invalid mode leaves a template")
+    {
+      REQUIRE_FALSE(
+        div.SetHTMLUnsafe(u8"<p><template shadowrootmode=none><b></b></template></p>").HasException());
+      auto p = div.FirstElementChild();
+      CHECK_FALSE(p->ShadowRoot());
+      CHECK(Is<html::HTMLTemplateElement>(p->FirstElementChild().get()));
+    }
+
+    SECTION("a top-level template doesn't attach to the context element")
+    {
+      REQUIRE_FALSE(div.SetHTMLUnsafe(u8"<template shadowrootmode=open><b></b></template>").HasException());
+      CHECK_FALSE(div.ShadowRoot());
+      CHECK(Is<html::HTMLTemplateElement>(div.FirstElementChild().get()));
+    }
+
+    SECTION("nest")
+    {
+      REQUIRE_FALSE(div
+                      .SetHTMLUnsafe(u8"<p><template shadowrootmode=open><span><template "
+                                     u8"shadowrootmode=open><b></b></template></span></template></p>")
+                      .HasException());
+      auto outer = div.FirstElementChild()->ShadowRoot();
+      REQUIRE(outer);
+      auto span = outer->FirstElementChild();
+      REQUIRE(span);
+      REQUIRE(span->ShadowRoot());
+      CHECK(MarkupText(span->ShadowRoot()->InnerHTML()) == "<b></b>");
+    }
+
+    SECTION("attach in a document's head and body")
+    {
+      auto result = Document::ParseHTMLUnsafe(
+        *data.Document, u8"<body><div id=d><template shadowrootmode=open>text</template></div>");
+      REQUIRE_FALSE(result.HasException());
+      auto host = result.Value()->GetElementById(u8"d");
+      REQUIRE(host);
+      REQUIRE(host->ShadowRoot());
+      CHECK(MarkupText(host->ShadowRoot()->InnerHTML()) == "text");
+    }
   }
 }
 
@@ -361,5 +441,21 @@ namespace krys::boo::html::tests
 
     REQUIRE_FALSE(Body().InnerHTML(u8"").HasException());
     CHECK(TakeCalls() == Log {u8"disconnected a"});
+  }
+
+  TEST_CASE_METHOD(CustomElementFixture, "setHTML doesn't construct custom elements it removes",
+                   "[DOM][Element][DOMParsing][CustomElement][Sanitizer]")
+  {
+    Define(u8"x-widget", {u8"value"});
+    REQUIRE_FALSE(Body().SetHTML(u8"<x-widget id=a value=1></x-widget>").HasException());
+    CHECK_FALSE(Body().HasChildNodes());
+    CHECK(TakeCalls().empty());
+
+    html::SanitizerConfig config;
+    config.Elements = List<html::SanitizerElementNamespaceWithAttributes> {u8"x-widget"};
+    REQUIRE_FALSE(Body()
+                    .SetHTML(u8"<x-widget id=a value=1></x-widget>", {.Sanitizer = krys::move(config)})
+                    .HasException());
+    CHECK(TakeCalls() == Log {u8"constructed", u8"attribute value null 1", u8"connected a"});
   }
 }

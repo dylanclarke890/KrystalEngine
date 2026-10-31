@@ -27,6 +27,7 @@
 #include "Krystal.Booey/DOM/Types/QualifiedName.hpp"
 #include "Krystal.Booey/Graphics/FloatRect.hpp"
 #include "Krystal.Booey/Graphics/IntPoint.hpp"
+#include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
 #include "Krystal.Booey/Page/ScrollOptions.hpp"
 #include "Krystal.Booey/Platform/PlatformWheelEvent.hpp"
 #include "Krystal.Booey/Rendering/HitTestRequest.hpp"
@@ -325,9 +326,70 @@ namespace krys::boo::dom
 
 #pragma region Element (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
 
-    /// @brief Replaces the element's children with @p markup parsed as HTML, with declarative shadow roots.
+    /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
+    /// context, sanitized by @p options (the default configuration if it gives none) with unsafe content
+    /// removed.
+    /// @see https://html.spec.whatwg.org/#dom-element-sethtml
+    ExceptionOr<void> SetHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Appends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
+    /// configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-element-appendhtml
+    ExceptionOr<void> AppendHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Prepends @p html, parsed as HTML in the element's context, sanitized by @p options (the default
+    /// configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-element-prependhtml
+    ExceptionOr<void> PrependHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Replaces the element's children (a template's contents) with @p html, parsed as HTML in its
+    /// context; sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-element-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView markup) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Appends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
+    /// sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-element-appendhtmlunsafe
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
+                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Prepends @p html, parsed as HTML in the element's context; sanitized only if @p options gives a
+    /// sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-element-prependhtmlunsafe
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
+                                        html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Inserts before the element @p html, parsed as HTML in its parent's context, sanitized by @p
+    /// options (the default configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtml
+    ExceptionOr<void> BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Inserts after the element @p html, parsed as HTML in its parent's context, sanitized by @p
+    /// options (the default configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtml
+    ExceptionOr<void> AfterHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Replaces the element with @p html, parsed as HTML in its parent's context, sanitized by @p
+    /// options (the default configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtml
+    ExceptionOr<void> ReplaceWithHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Inserts before the element @p html, parsed as HTML in its parent's context; sanitized only if
+    /// @p options gives a sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-beforehtmlunsafe
+    ExceptionOr<void> BeforeHTMLUnsafe(DOMStringView html,
+                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Inserts after the element @p html, parsed as HTML in its parent's context; sanitized only if @p
+    /// options gives a sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-afterhtmlunsafe
+    ExceptionOr<void> AfterHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Replaces the element with @p html, parsed as HTML in its parent's context; sanitized only if @p
+    /// options gives a sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-nondocumenttypechildnode-replacewithhtmlunsafe
+    ExceptionOr<void> ReplaceWithHTMLUnsafe(DOMStringView html,
+                                            html::SetHTMLUnsafeOptions &&options = {}) noexcept;
 
     /// @brief The element's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-element-gethtml

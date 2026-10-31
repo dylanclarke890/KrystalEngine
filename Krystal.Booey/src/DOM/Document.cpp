@@ -100,6 +100,7 @@
 #include "Krystal.Booey/HTML/PageTransitionEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/HTML/PopStateEvent.hpp"
+#include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/SerializedScriptValue.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -724,28 +725,62 @@ namespace krys::boo::dom
 
 #pragma region Document (HTML)
 
-  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup) noexcept
+  namespace
   {
-    // 2. Let document be a new Document, whose type is "html" and content type is "text/html".
-    auto document = CreateRef<HTMLDocument>();
-    document->SetSettings(ShareRef(context.GetSettings()));
+    // https://html.spec.whatwg.org/#parse-html-from-a-string, into a new document with declarative shadow
+    // roots and @p context's settings.
+    KRYS_NODISCARD Ref<Document>
+      ParseHTMLIntoNewDocument(Document &context, DOMStringView html,
+                               Maybe<html::SanitizerConfig> &&configuration) noexcept
+    {
+      // SPEC: Let document be a new Document, whose content type is "text/html" [...].
+      auto document = CreateRef<HTMLDocument>();
+      document->SetSettings(ShareRef(context.GetSettings()));
 
-    // 3. Set document's allow declarative shadow roots to true.
-    document->_allowDeclarativeShadowRoots = true;
+      // SPEC: Set document's allow declarative shadow roots to true.
+      document->SetAllowDeclarativeShadowRoots(true);
 
-    // 4. Parse HTML from a string given document and compliantHTML.
-    auto parser = CreateRef<html::HTMLDocumentParser>(*document);
-    parser->InputStream().Append(DOMString(markup), IsEOF(true));
-    parser->PumpTokenizer();
-
-    // 5. Return document.
-    return Ref<Document>(krys::move(document));
+      // SPEC: Parse HTML from a string given document, html, and sanitizerConfig.
+      auto parser = CreateRef<html::HTMLDocumentParser>(*document);
+      parser->SanitizerConfiguration(krys::move(configuration));
+      parser->InputStream().Append(DOMString(html), IsEOF(true));
+      parser->PumpTokenizer();
+      return document;
+    }
   }
 
-  ExceptionOr<Ref<Document>> Document::ParseHTML(DOMStringView &html) noexcept
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(Document &context, DOMStringView markup,
+                                                       html::ParseHTMLUnsafeOptions &&options) noexcept
   {
-    (void)html;
-    krys_not_implemented();
+    // SPEC: Let sanitizerConfig be the result of getting a sanitizer config from options given
+    // compliantOptions and false.
+    auto sanitizerConfig = html::SanitizerAlgorithms::GetSanitizerConfigFromOptions(
+      options.Sanitizer ? &*options.Sanitizer : nullptr, false);
+    if (sanitizerConfig.HasException())
+    {
+      return sanitizerConfig.ReleaseException();
+    }
+
+    // SPEC: Return document.
+    return ParseHTMLIntoNewDocument(context, markup, sanitizerConfig.ReleaseValue());
+  }
+
+  ExceptionOr<Ref<Document>> Document::ParseHTML(Document &context, DOMStringView html,
+                                                 html::SetHTMLOptions &&options) noexcept
+  {
+    // SPEC: Let sanitizerConfig be the result of getting a sanitizer config from options given options and
+    // true.
+    auto sanitizerConfig = html::SanitizerAlgorithms::GetSanitizerConfigFromOptions(&options.Sanitizer, true);
+    if (sanitizerConfig.HasException())
+    {
+      return sanitizerConfig.ReleaseException();
+    }
+
+    // SPEC: Assert: sanitizerConfig is non-null.
+    krys_debug_assert(sanitizerConfig.Value().has_value());
+
+    // SPEC: Return document.
+    return ParseHTMLIntoNewDocument(context, html, sanitizerConfig.ReleaseValue());
   }
 
   namespace

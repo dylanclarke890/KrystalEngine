@@ -6,11 +6,17 @@
 #include "Krystal.Booey/DOM/Enums/ShadowRootMode.hpp"
 #include "Krystal.Booey/DOM/Enums/SlotAssignmentMode.hpp"
 #include "Krystal.Booey/DOM/ParserContentPolicy.hpp"
+#include "Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp"
 #include "Krystal.Core/Types/EnumSet.hpp"
 
 namespace krys::boo::css
 {
   class StyleSheetList;
+}
+
+namespace krys::boo::html
+{
+  class HTMLTreeBuilder;
 }
 
 namespace krys::boo::dom
@@ -23,6 +29,7 @@ namespace krys::boo::dom
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class NodeAlgorithms;
+    friend class html::HTMLTreeBuilder;
 
   private:
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
@@ -99,10 +106,37 @@ namespace krys::boo::dom
 
 #pragma region ShadowRoot (DOM Parsing) - https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-parsing-and-serialization
 
-    /// @brief Replaces the shadow root's children with @p markup parsed as HTML, with declarative shadow
-    /// roots.
+    /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context,
+    /// sanitized by @p options (the default configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtml
+    ExceptionOr<void> SetHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Appends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
+    /// configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtml
+    ExceptionOr<void> AppendHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Prepends @p html, parsed as HTML in the host's context, sanitized by @p options (the default
+    /// configuration if it gives none) with unsafe content removed.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtml
+    ExceptionOr<void> PrependHTML(DOMStringView html, html::SetHTMLOptions &&options = {}) noexcept;
+
+    /// @brief Replaces the shadow root's children with @p html, parsed as HTML in its host's context;
+    /// sanitized only if @p options gives a sanitizer.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-sethtmlunsafe
-    ExceptionOr<void> SetHTMLUnsafe(DOMStringView markup) noexcept;
+    ExceptionOr<void> SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Appends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
+    /// sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-appendhtmlunsafe
+    ExceptionOr<void> AppendHTMLUnsafe(DOMStringView html,
+                                       html::SetHTMLUnsafeOptions &&options = {}) noexcept;
+
+    /// @brief Prepends @p html, parsed as HTML in the host's context; sanitized only if @p options gives a
+    /// sanitizer.
+    /// @see https://html.spec.whatwg.org/#dom-shadowroot-prependhtmlunsafe
+    ExceptionOr<void> PrependHTMLUnsafe(DOMStringView html,
+                                        html::SetHTMLUnsafeOptions &&options = {}) noexcept;
 
     /// @brief The shadow root's children serialised as HTML, with the shadow roots @p options asks for.
     /// @see https://html.spec.whatwg.org/#dom-shadowroot-gethtml

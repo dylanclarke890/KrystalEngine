@@ -21,6 +21,17 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-template-content
     RefPtr<dom::DocumentFragment> Content() const noexcept;
 
+    /// @brief The template contents: a document fragment, or the shadow root of the host a declarative shadow
+    /// root was attached to (the template element is then never inserted).
+    /// @see https://html.spec.whatwg.org/#template-contents
+    KRYS_NODISCARD dom::DocumentFragment &TemplateContents() const noexcept
+    {
+      return *_content;
+    }
+
+    /// @brief Sets the template contents to the declarative shadow root @p shadow.
+    void SetTemplateContents(dom::ShadowRoot &shadow) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
     KRYS_NODISCARD dom::DOMString ShadowRootMode() const noexcept;
 
