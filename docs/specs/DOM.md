@@ -237,14 +237,15 @@ Status: n/a (guidance for specification authors)
 
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `EventTarget` (the methods, the event listener list, get the parent and the activation behaviours), `EventTargetAlgorithms` (flatten, flatten more, default passive value, add, remove and remove all event listeners) and `EventListener`. Tests: `tests/DOM/EventTarget.cpp`, `tests/DOM/Algorithms/EventTargetAlgorithms.cpp`.
 <!-- definitions: eventtarget-event-listener-list concept-event-listener event-listener-type event-listener-callback event-listener-capture event-listener-passive event-listener-once event-listener-signal event-listener-removed get-the-parent eventtarget-activation-behavior eventtarget-legacy-pre-activation-behavior eventtarget-legacy-canceled-activation-behavior -->
 
-- [ ] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
+- [x] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
   - 1. If options is a boolean, then return options.
   - 2. Return options["capture"].
 
-- [ ] [flatten more (Event)](https://dom.spec.whatwg.org/#event-flatten-more) — To flatten more options, run these steps:
+- [x] [flatten more (Event)](https://dom.spec.whatwg.org/#event-flatten-more) — To flatten more options, run these steps:
   - 1. Let capture be the result of flattening options.
   - 2. Let once be false.
   - 3. Let passive and signal be null.
@@ -254,13 +255,13 @@ Status: unreviewed
     - 4c. If options["signal"] exists, then set signal to options["signal"].
   - 5. Return capture, passive, once, and signal.
 
-- [ ] [EventTarget.new EventTarget()](https://dom.spec.whatwg.org/#dom-eventtarget-eventtarget) — The new EventTarget() constructor steps are to do nothing.
+- [x] [EventTarget.new EventTarget()](https://dom.spec.whatwg.org/#dom-eventtarget-eventtarget) — The new EventTarget() constructor steps are to do nothing.
 
-- [ ] [default passive value](https://dom.spec.whatwg.org/#default-passive-value) — The default passive value, given an event type type and an EventTarget eventTarget, is determined as follows:
+- [x] [default passive value](https://dom.spec.whatwg.org/#default-passive-value) — The default passive value, given an event type type and an EventTarget eventTarget, is determined as follows:
   - 1. Return true if all of the following are true: type is one of "touchstart", "touchmove", "wheel", or "mousewheel". [TOUCH-EVENTS] [UIEVENTS]; eventTarget is a Window object, or is a node whose node document is eventTarget, or is a node whose node document’s document element is eventTarget, or is a node whose node document’s body element is eventTarget. [HTML]
   - 2. Return false.
 
-- [ ] [add an event listener](https://dom.spec.whatwg.org/#add-an-event-listener) — To add an event listener, given an EventTarget object eventTarget and an event listener listener, run these steps:
+- [x] [add an event listener](https://dom.spec.whatwg.org/#add-an-event-listener) — To add an event listener, given an EventTarget object eventTarget and an event listener listener, run these steps:
   - 1. If eventTarget is a ServiceWorkerGlobalScope object, its service worker’s script resource’s has ever been evaluated flag is set, and listener’s type matches the type attribute value of any of the service worker events, then report a warning to the console that this might not give the expected results. [SERVICE-WORKERS]
   - 2. If listener’s signal is non-null and is aborted, then return.
   - 3. If listener’s callback is null, then return.
@@ -269,21 +270,21 @@ Status: unreviewed
   - 6. If listener’s signal is non-null, then add the following abort steps to it:
     - 6a. Remove an event listener with eventTarget and listener.
 
-- [ ] [EventTarget.addEventListener(type, callback, options)](https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener) — The addEventListener(type, callback, options) method steps are:
+- [x] [EventTarget.addEventListener(type, callback, options)](https://dom.spec.whatwg.org/#dom-eventtarget-addeventlistener) — The addEventListener(type, callback, options) method steps are:
   - 1. Let capture, passive, once, and signal be the result of flattening more options.
   - 2. Add an event listener with this and an event listener whose type is type, callback is callback, capture is capture, passive is passive, once is once, and signal is signal.
 
-- [ ] [remove an event listener](https://dom.spec.whatwg.org/#remove-an-event-listener) — To remove an event listener, given an EventTarget object eventTarget and an event listener listener, run these steps:
+- [x] [remove an event listener](https://dom.spec.whatwg.org/#remove-an-event-listener) — To remove an event listener, given an EventTarget object eventTarget and an event listener listener, run these steps:
   - 1. If eventTarget is a ServiceWorkerGlobalScope object and its service worker’s set of event types to handle contains listener’s type, then report a warning to the console that this might not give the expected results. [SERVICE-WORKERS]
   - 2. Set listener’s removed to true and remove listener from eventTarget’s event listener list.
 
-- [ ] [remove all event listeners](https://dom.spec.whatwg.org/#remove-all-event-listeners) — To remove all event listeners, given an EventTarget object eventTarget: for each listener of eventTarget’s event listener list: remove an event listener with eventTarget and listener.
+- [x] [remove all event listeners](https://dom.spec.whatwg.org/#remove-all-event-listeners) — To remove all event listeners, given an EventTarget object eventTarget: for each listener of eventTarget’s event listener list: remove an event listener with eventTarget and listener.
 
-- [ ] [EventTarget.removeEventListener(type, callback, options)](https://dom.spec.whatwg.org/#dom-eventtarget-removeeventlistener) — The removeEventListener(type, callback, options) method steps are:
+- [x] [EventTarget.removeEventListener(type, callback, options)](https://dom.spec.whatwg.org/#dom-eventtarget-removeeventlistener) — The removeEventListener(type, callback, options) method steps are:
   - 1. Let capture be the result of flattening options.
   - 2. If this’s event listener list contains an event listener whose type is type, callback is callback, and capture is capture, then remove an event listener with this and that event listener.
 
-- [ ] [EventTarget.dispatchEvent(event)](https://dom.spec.whatwg.org/#dom-eventtarget-dispatchevent) — The dispatchEvent(event) method steps are:
+- [x] [EventTarget.dispatchEvent(event)](https://dom.spec.whatwg.org/#dom-eventtarget-dispatchevent) — The dispatchEvent(event) method steps are:
   - 1. If event’s dispatch flag is set, or if its initialized flag is not set, then throw an "InvalidStateError" DOMException.
   - 2. Initialize event’s isTrusted attribute to false.
   - 3. Return the result of dispatching event to this.

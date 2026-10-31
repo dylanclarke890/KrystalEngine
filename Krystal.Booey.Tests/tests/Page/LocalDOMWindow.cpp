@@ -4,7 +4,6 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
@@ -477,24 +476,6 @@ namespace krys::boo::tests
 
     CHECK(window.SupportedPropertyNames()
           == List<dom::DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
-  }
-
-  TEST_CASE("The window, the document, its element and its body are passive for wheel and touch listeners",
-            "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture(u8"<!DOCTYPE html><body><div id=box></div></body>");
-    auto &window = fixture.Window();
-    auto wheel = dom::DOMStringAtom(EventNames::Wheel);
-
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, window));
-    CHECK(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::TouchStart), window));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->DocumentElement()));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->Body()));
-    CHECK_FALSE(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, fixture.ById(u8"box")));
-    CHECK_FALSE(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::Click), window));
   }
 
   TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")

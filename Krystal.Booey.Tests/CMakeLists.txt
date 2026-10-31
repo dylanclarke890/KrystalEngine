@@ -581,6 +581,7 @@ target_sources(Krystal.Booey.Tests
 
 		# DOM
 		tests/DOM/Algorithms/EventDispatcher.cpp
+		tests/DOM/Algorithms/EventTargetAlgorithms.cpp
 		tests/DOM/Iterators/ComposedTreeIterator.cpp
 		tests/DOM/Algorithms/Mixins.cpp
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
@@ -613,6 +614,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/ElementCSSOMView.cpp
 		tests/DOM/ElementTextDirection.cpp
 		tests/DOM/Event.cpp
+		tests/DOM/EventTarget.cpp
 		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp
