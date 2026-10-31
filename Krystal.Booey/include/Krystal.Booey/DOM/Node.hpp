@@ -551,6 +551,9 @@ namespace krys::boo::dom
     /// @brief Whether the node is in a user agent shadow tree.
     KRYS_NODISCARD bool IsInUserAgentShadowTree() const noexcept;
 
+    /// @brief Whether the node's root is a document: its shadow-including root is, and it isn't in a shadow
+    /// tree.
+    /// @see https://dom.spec.whatwg.org/#in-a-document-tree
     /// @see https://dom.spec.whatwg.org/#concept-document-tree
     KRYS_NODISCARD bool IsInDocumentTree() const noexcept
     {

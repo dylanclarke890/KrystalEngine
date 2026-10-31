@@ -550,7 +550,8 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.1. Document tree](https://dom.spec.whatwg.org/#document-trees)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> In a document tree is `Node::IsInDocumentTree` (connected and not in a shadow tree, which together mean the root is a document), with `TreeQueries::IsInDocumentTree` forwarding. The document element is the document's first element child (`Document::DocumentElement`, `TreeQueries::DocumentElement`). The deprecated "in a document" has no code of its own. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`.
 <!-- definitions: concept-document-tree document-element in-a-document-tree in-a-document -->
 
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)

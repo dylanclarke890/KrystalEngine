@@ -5,6 +5,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
 #include "Krystal.Booey/DOM/DOMImplementation.hpp"
@@ -101,45 +102,82 @@ namespace krys::boo::dom::tests
 
 #pragma region Document Trees
 
-  TEST_CASE("TreeQueries::IsInDocumentTree", "[HTML][TreeQueries]")
+  TEST_CASE("In a document tree: a node whose root is a document",
+            "[DOM][TreeQueries][dom:document-trees][dom:in-a-document-tree][dom:in-a-document]"
+            "[dom:concept-document-tree]")
   {
-    auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestElement>(*doc);
-    auto child = CreateRef<TestElement>(*doc);
+    SECTION("A document, and a connected node in a shadow tree")
+    {
+      auto doc = CreateRef<HTMLDocument>();
+      CHECK(TreeQueries::IsInDocumentTree(*doc));
 
-    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
-    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
+      auto host = doc->CreateElement(u8"div").ReleaseValue();
+      REQUIRE_FALSE(doc->AppendChild(*host).HasException());
+      auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+      auto inShadow = doc->CreateElement(u8"span").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
 
-    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+      CHECK(TreeQueries::IsInDocumentTree(*host));
+      CHECK(inShadow->IsConnected());
+      CHECK_FALSE(TreeQueries::IsInDocumentTree(*shadow));
+      CHECK_FALSE(TreeQueries::IsInDocumentTree(*inShadow));
+    }
 
-    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
-    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
+    SECTION("Elements in and out of a document")
+    {
+      auto doc = CreateRef<Document>();
+      auto parent = CreateRef<TestElement>(*doc);
+      auto child = CreateRef<TestElement>(*doc);
 
-    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
+      REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
+      REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
 
-    REQUIRE(TreeQueries::IsInDocumentTree(*parent));
-    REQUIRE(TreeQueries::IsInDocumentTree(*child));
+      REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
-    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
-    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+      REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
+      REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
+
+      REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
+
+      REQUIRE(TreeQueries::IsInDocumentTree(*parent));
+      REQUIRE(TreeQueries::IsInDocumentTree(*child));
+
+      REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+      REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+    }
   }
 
-  TEST_CASE("TreeQueries::DocumentElement", "[HTML][TreeQueries]")
+  TEST_CASE("Document element: the element whose parent is the document, if any",
+            "[DOM][TreeQueries][dom:document-element]")
   {
-    auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestElement>(*doc);
-    auto child = CreateRef<TestElement>(*doc);
+    SECTION("Between comments")
+    {
+      auto doc = CreateRef<Document>();
+      REQUIRE_FALSE(doc->AppendChild(*doc->CreateComment(u8"c")).HasException());
+      auto element = CreateRef<TestElement>(*doc);
+      REQUIRE_FALSE(doc->AppendChild(*element).HasException());
+      REQUIRE_FALSE(doc->AppendChild(*doc->CreateComment(u8"d")).HasException());
+      CHECK(TreeQueries::DocumentElement(*doc) == element.get());
+      CHECK(doc->DocumentElement() == element);
+    }
 
-    REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
+    SECTION("Elements in and out of a document")
+    {
+      auto doc = CreateRef<Document>();
+      auto parent = CreateRef<TestElement>(*doc);
+      auto child = CreateRef<TestElement>(*doc);
 
-    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
-    REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
+      REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
 
-    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
-    REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
+      REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+      REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
 
-    REQUIRE_FALSE(child->Remove().HasException());
-    REQUIRE_FALSE(parent->Remove().HasException());
+      REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
+      REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
+
+      REQUIRE_FALSE(child->Remove().HasException());
+      REQUIRE_FALSE(parent->Remove().HasException());
+    }
   }
 
 #pragma endregion
