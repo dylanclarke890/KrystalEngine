@@ -841,44 +841,45 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.6. Mixin ParentNode](https://dom.spec.whatwg.org/#interface-parentnode)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `mixins::ParentNode`, which `Document`, `DocumentFragment` and `Element` forward to; `children` is each one's cached `HTMLCollection`. Tests: `tests/DOM/Mixins/ParentNode.cpp`.
 
-- [ ] [convert nodes into a node](https://dom.spec.whatwg.org/#convert-nodes-into-a-node) — To convert nodes into a node, given a list of nodes and strings nodes, and document document:
+- [x] [convert nodes into a node](https://dom.spec.whatwg.org/#convert-nodes-into-a-node) — To convert nodes into a node, given a list of nodes and strings nodes, and document document:
   - 1. Replace each string in nodes with the result of creating a text node given document and the string.
   - 2. If nodes’s size is 1, then return nodes[0].
   - 3. Let fragment be the result of creating a document fragment given document.
   - 4. For each node of nodes: append node to fragment.
   - 5. Return fragment.
 
-- [ ] [ParentNode.children](https://dom.spec.whatwg.org/#dom-parentnode-children) — The children getter steps are to return an HTMLCollection collection rooted at this matching only element children.
+- [x] [ParentNode.children](https://dom.spec.whatwg.org/#dom-parentnode-children) — The children getter steps are to return an HTMLCollection collection rooted at this matching only element children.
 
-- [ ] [ParentNode.firstElementChild](https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild) — The firstElementChild getter steps are to return the first child that is an element; otherwise null.
+- [x] [ParentNode.firstElementChild](https://dom.spec.whatwg.org/#dom-parentnode-firstelementchild) — The firstElementChild getter steps are to return the first child that is an element; otherwise null.
 
-- [ ] [ParentNode.lastElementChild](https://dom.spec.whatwg.org/#dom-parentnode-lastelementchild) — The lastElementChild getter steps are to return the last child that is an element; otherwise null.
+- [x] [ParentNode.lastElementChild](https://dom.spec.whatwg.org/#dom-parentnode-lastelementchild) — The lastElementChild getter steps are to return the last child that is an element; otherwise null.
 
-- [ ] [ParentNode.childElementCount](https://dom.spec.whatwg.org/#dom-parentnode-childelementcount) — The childElementCount getter steps are to return the number of children of this that are elements.
+- [x] [ParentNode.childElementCount](https://dom.spec.whatwg.org/#dom-parentnode-childelementcount) — The childElementCount getter steps are to return the number of children of this that are elements.
 
-- [ ] [ParentNode.prepend(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-prepend) — The prepend(nodes) method steps are:
+- [x] [ParentNode.prepend(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-prepend) — The prepend(nodes) method steps are:
   - 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
   - 2. Pre-insert node into this before this’s first child.
 
-- [ ] [ParentNode.append(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-append) — The append(nodes) method steps are:
+- [x] [ParentNode.append(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-append) — The append(nodes) method steps are:
   - 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
   - 2. Append node to this.
 
-- [ ] [ParentNode.replaceChildren(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-replacechildren) — The replaceChildren(nodes) method steps are:
+- [x] [ParentNode.replaceChildren(nodes)](https://dom.spec.whatwg.org/#dom-parentnode-replacechildren) — The replaceChildren(nodes) method steps are:
   - 1. Let node be the result of converting nodes into a node given nodes and this’s node document.
   - 2. Ensure pre-insert validity given node, this, null, and this’s children.
   - 3. Replace all with node within this.
 
-- [ ] [ParentNode.moveBefore(node, child)](https://dom.spec.whatwg.org/#dom-parentnode-movebefore) — The moveBefore(node, child) method steps are:
+- [x] [ParentNode.moveBefore(node, child)](https://dom.spec.whatwg.org/#dom-parentnode-movebefore) — The moveBefore(node, child) method steps are:
   - 1. Let referenceChild be child.
   - 2. If referenceChild is node, then set referenceChild to node’s next sibling.
   - 3. Move node into this before referenceChild.
 
-- [ ] [ParentNode.querySelector(selectors)](https://dom.spec.whatwg.org/#dom-parentnode-queryselector) — The querySelector(selectors) method steps are to return the first result of running scope-match a selectors string selectors against this, if the result is not an empty list; otherwise null.
+- [x] [ParentNode.querySelector(selectors)](https://dom.spec.whatwg.org/#dom-parentnode-queryselector) — The querySelector(selectors) method steps are to return the first result of running scope-match a selectors string selectors against this, if the result is not an empty list; otherwise null.
 
-- [ ] [ParentNode.querySelectorAll(selectors)](https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall) — The querySelectorAll(selectors) method steps are to return the static result of running scope-match a selectors string selectors against this.
+- [x] [ParentNode.querySelectorAll(selectors)](https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall) — The querySelectorAll(selectors) method steps are to return the static result of running scope-match a selectors string selectors against this.
 
 #### [4.2.7. Mixin NonDocumentTypeChildNode](https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode)
 

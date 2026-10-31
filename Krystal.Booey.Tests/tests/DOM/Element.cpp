@@ -681,20 +681,6 @@ namespace krys::boo::dom::tests
     REQUIRE(records[2]->OldValue() == u8"b");
   }
 
-  TEST_CASE("Element::Children", "[DOM][Element]")
-  {
-    // Rare data is created on first use.
-    auto document = CreateRef<HTMLDocument>();
-    auto div = document->CreateElement(u8"div").Value();
-    auto span = document->CreateElement(u8"span").Value();
-    REQUIRE_FALSE(document->AppendChild(*div).HasException());
-    REQUIRE_FALSE(div->AppendChild(*span).HasException());
-    CHECK(document->Children()->Length() == 1u);
-    CHECK(div->Children()->Length() == 1u);
-    CHECK(span->Children()->Length() == 0u);
-    CHECK(document->CreateDocumentFragment()->Children()->Length() == 0u);
-  }
-
   TEST_CASE("Update a slottable's name: a change to the slot attribute moves it to the matching slot",
             "[DOM][Element][dom:slotable-name]")
   {

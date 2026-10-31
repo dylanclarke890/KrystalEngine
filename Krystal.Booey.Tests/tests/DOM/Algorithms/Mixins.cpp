@@ -20,7 +20,7 @@ namespace krys::boo::dom::tests
     { constNode.GetElementById(id) } -> SameType<RefPtr<const Element>>;
   };
 
-  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins][dom:interface-nonelementparentnode]")
   {
     STATIC_REQUIRE(NonElementParentNodeMixin<Document>);
     STATIC_REQUIRE(NonElementParentNodeMixin<DocumentFragment>);
@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
     { node.CustomElementRegistry() } -> SameType<RefPtr<html::CustomElementRegistry>>;
   };
 
-  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins]")
+  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins][dom:mixin-documentorshadowroot]")
   {
     STATIC_REQUIRE(DocumentOrShadowRootMixin<Document>);
     STATIC_REQUIRE(DocumentOrShadowRootMixin<ShadowRoot>);
@@ -57,7 +57,7 @@ namespace krys::boo::dom::tests
     { node.QuerySelectorAll(selectors) } -> SameType<dom::ExceptionOr<Ref<NodeList>>>;
   };
 
-  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins][dom:interface-parentnode]")
   {
     STATIC_REQUIRE(ParentNodeMixin<Element>);
     STATIC_REQUIRE(ParentNodeMixin<Document>);
