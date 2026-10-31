@@ -624,6 +624,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp
+		tests/DOM/MutationRecord.cpp
 		tests/DOM/NamedNodeMap.cpp
 		tests/DOM/Node.cpp
 		tests/DOM/NodeLifetime.cpp
