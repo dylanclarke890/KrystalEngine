@@ -1903,10 +1903,11 @@ Status: reviewed (2026-10-31)
 
 ### [4.10. Interface CharacterData](https://dom.spec.whatwg.org/#interface-characterdata)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `CharacterData` (`CharacterData.hpp`/`.cpp`) holds the data; replace data and substring data are in `TextAlgorithms`, with the live range steps in `LiveRangeUpdater::CharacterDataReplaced`. Lengths and offsets count UTF-8 code units (see `DIFFERENCES.md`). Replace data's step 12 is missing, as `ProcessingInstruction` has no attribute map (see `KNOWN-ISSUES.md`).
 <!-- definitions: concept-cd-data -->
 
-- [ ] [replace data](https://dom.spec.whatwg.org/#concept-cd-replace) — To replace data of a node node with an integer offset, integer count, string data, and an optional boolean piAttributesAlreadyUpdated (default false):
+- [x] [replace data](https://dom.spec.whatwg.org/#concept-cd-replace) — To replace data of a node node with an integer offset, integer count, string data, and an optional boolean piAttributesAlreadyUpdated (default false):
   - 1. Let length be node’s length.
   - 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
   - 3. If offset + count is greater than length, then set count to length − offset.
@@ -1921,25 +1922,25 @@ Status: unreviewed
   - 12. If node is a ProcessingInstruction node and piAttributesAlreadyUpdated is false, then update attributes from data given node.
   - 13. If node’s parent is non-null, then run the children changed steps for node’s parent.
 
-- [ ] [substring data (CharacterData, Text, Comment, ProcessingInstruction)](https://dom.spec.whatwg.org/#concept-cd-substring) — To substring data of a node node with an integer offset and integer count:
+- [x] [substring data (CharacterData, Text, Comment, ProcessingInstruction)](https://dom.spec.whatwg.org/#concept-cd-substring) — To substring data of a node node with an integer offset and integer count:
   - 1. Let length be node’s length.
   - 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
   - 3. If offset + count is greater than length, then return a string whose value is the code units from the offsetth code unit to the end of node’s data.
   - 4. Return a string whose value is the code units from the offsetth code unit to the offset+countth code unit in node’s data.
 
-- [ ] [CharacterData.data](https://dom.spec.whatwg.org/#dom-characterdata-data) — The data getter steps are to return this’s data. Its setter steps are to replace data of this with 0, this’s length, and the given value.
+- [x] [CharacterData.data](https://dom.spec.whatwg.org/#dom-characterdata-data) — The data getter steps are to return this’s data. Its setter steps are to replace data of this with 0, this’s length, and the given value.
 
-- [ ] [CharacterData.length](https://dom.spec.whatwg.org/#dom-characterdata-length) — The length getter steps are to return this’s length.
+- [x] [CharacterData.length](https://dom.spec.whatwg.org/#dom-characterdata-length) — The length getter steps are to return this’s length.
 
-- [ ] [CharacterData.substringData(offset, count)](https://dom.spec.whatwg.org/#dom-characterdata-substringdata) — The substringData(offset, count) method steps are to return the result of substringing data of this with offset and count.
+- [x] [CharacterData.substringData(offset, count)](https://dom.spec.whatwg.org/#dom-characterdata-substringdata) — The substringData(offset, count) method steps are to return the result of substringing data of this with offset and count.
 
-- [ ] [CharacterData.appendData(data)](https://dom.spec.whatwg.org/#dom-characterdata-appenddata) — The appendData(data) method steps are to replace data of this with this’s length, 0, and data.
+- [x] [CharacterData.appendData(data)](https://dom.spec.whatwg.org/#dom-characterdata-appenddata) — The appendData(data) method steps are to replace data of this with this’s length, 0, and data.
 
-- [ ] [CharacterData.insertData(offset, data)](https://dom.spec.whatwg.org/#dom-characterdata-insertdata) — The insertData(offset, data) method steps are to replace data of this with offset, 0, and data.
+- [x] [CharacterData.insertData(offset, data)](https://dom.spec.whatwg.org/#dom-characterdata-insertdata) — The insertData(offset, data) method steps are to replace data of this with offset, 0, and data.
 
-- [ ] [CharacterData.deleteData(offset, count)](https://dom.spec.whatwg.org/#dom-characterdata-deletedata) — The deleteData(offset, count) method steps are to replace data of this with offset, count, and the empty string.
+- [x] [CharacterData.deleteData(offset, count)](https://dom.spec.whatwg.org/#dom-characterdata-deletedata) — The deleteData(offset, count) method steps are to replace data of this with offset, count, and the empty string.
 
-- [ ] [CharacterData.replaceData(offset, count, data)](https://dom.spec.whatwg.org/#dom-characterdata-replacedata) — The replaceData(offset, count, data) method steps are to replace data of this with offset, count, and data.
+- [x] [CharacterData.replaceData(offset, count, data)](https://dom.spec.whatwg.org/#dom-characterdata-replacedata) — The replaceData(offset, count, data) method steps are to replace data of this with offset, count, and data.
 
 ### [4.11. Interface Text](https://dom.spec.whatwg.org/#interface-text)
 

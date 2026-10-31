@@ -18,17 +18,23 @@ namespace krys::boo::dom
   ExceptionOr<void> TextAlgorithms::Replace(CharacterData &node, size_t offset, size_t count,
                                             DOMString &&data) noexcept
   {
+    // 1. Let length be node's length.
     auto length = node.Length();
+    // 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
     if (offset > length)
     {
       return ExceptionCode::IndexSizeError;
     }
 
-    if (offset + count > length)
+    // 3. If offset + count is greater than length, then set count to length - offset.
+    //    (Compared as count > length - offset, which can't overflow.)
+    if (count > length - offset)
     {
       count = length - offset;
     }
 
+    // 4. Queue a mutation record of "characterData" for node with null, null, node's data, « », « », null,
+    //    and null.
     MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(node),
                                                     DOMStringAtom::Null(), DOMStringAtom::Null(), node._data,
                                                     {}, {}, nullptr, nullptr);
@@ -45,11 +51,15 @@ namespace krys::boo::dom
         styleInvalidation.emplace(*parent, childChange);
       }
 
+      // 5. Insert data into node's data after offset code units.
       node._data.insert(offset, data);
+      // 6. Let deleteOffset be offset + data's length.
       auto deleteOffset = offset + data.size();
+      // 7. Starting from deleteOffset code units, remove count code units from node's data.
       node._data.erase(deleteOffset, count);
     }
 
+    // 8.-11. Update the live ranges whose start or end node is node.
     LiveRangeUpdater::CharacterDataReplaced(node, offset, count, data.size());
     node.NodeDocument().Selection().TextWasReplaced(
       node, static_cast<uint32>(offset), static_cast<uint32>(count), static_cast<uint32>(data.size()));
@@ -58,11 +68,16 @@ namespace krys::boo::dom
     {
       text->UpdateRendererAfterContentChange(offset, count);
     }
+    // 12. If node is a ProcessingInstruction node and piAttributesAlreadyUpdated is false, then update
+    //     attributes from data given node.
+    // FIXME: ProcessingInstruction has no attribute map, so there's nothing to update (and no
+    // piAttributesAlreadyUpdated); an xml-stylesheet's sheet is checked again from its data.
     else if (auto *processingInstruction = DynamicDowncast<ProcessingInstruction>(node))
     {
       processingInstruction->CheckStyleSheet();
     }
 
+    // 13. If node's parent is non-null, then run the children changed steps for node's parent.
     if (auto parent = node.ParentNode())
     {
       ExtensibilityHooks::NodeChildrenChanged(*parent);
@@ -74,17 +89,23 @@ namespace krys::boo::dom
   ExceptionOr<DOMString> TextAlgorithms::Substring(const CharacterData &node, size_t offset,
                                                    size_t count) noexcept
   {
+    // 1. Let length be node's length.
     auto length = node.Length();
+    // 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
     if (offset > length)
     {
       return ExceptionCode::IndexSizeError;
     }
 
-    if (offset + count > length)
+    // 3. If offset + count is greater than length, then return a string whose value is the code units from
+    //    the offsetth code unit to the end of node's data.
+    if (count > length - offset)
     {
       return node._data.substr(offset);
     }
 
+    // 4. Return a string whose value is the code units from the offsetth code unit to the offset+countth code
+    //    unit in node's data.
     return node._data.substr(offset, count);
   }
 

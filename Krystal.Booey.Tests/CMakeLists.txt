@@ -594,6 +594,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Algorithms/NodeAlgorithms.cpp
 		tests/DOM/Algorithms/OrderedSet.cpp
 		tests/DOM/Algorithms/SlotAlgorithms.cpp
+		tests/DOM/Algorithms/TextAlgorithms.cpp
 		tests/DOM/Algorithms/TreeQueries.cpp
 		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp

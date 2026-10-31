@@ -86,10 +86,14 @@ namespace krys::boo::dom
 
       if (originalStartContainer == &characterData)
       {
+        // 8. For each live range whose start node is node and start offset is greater than offset but less
+        //    than or equal to offset + count: set its start offset to offset.
         if (originalStartOffset > offset && originalStartOffset <= offset + count)
         {
           range->_start.Offset = offset;
         }
+        // 10. For each live range whose start node is node and start offset is greater than offset + count:
+        //     increase its start offset by data's length and decrease it by count.
         else if (originalStartOffset > offset + count)
         {
           range->_start.Offset += newDataSize;
@@ -99,10 +103,15 @@ namespace krys::boo::dom
 
       if (originalEndContainer == &characterData)
       {
+        // 9. For each live range whose end node is node and end offset is greater than offset but less than
+        // or
+        //    equal to offset + count: set its end offset to offset.
         if (originalEndOffset > offset && originalEndOffset <= offset + count)
         {
           range->_end.Offset = offset;
         }
+        // 11. For each live range whose end node is node and end offset is greater than offset + count:
+        //     increase its end offset by data's length and decrease it by count.
         else if (originalEndOffset > offset + count)
         {
           range->_end.Offset += newDataSize;

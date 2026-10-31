@@ -12,6 +12,7 @@ namespace krys::boo::dom
 {
   class Document;
 
+  /// @brief A node with data: a Text, Comment or ProcessingInstruction node.
   /// @see https://dom.spec.whatwg.org/#interface-characterdata
   class CharacterData : public Node
   {
@@ -20,6 +21,7 @@ namespace krys::boo::dom
     friend class TextAlgorithms;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#concept-cd-data
     DOMString _data;
 
   protected:
@@ -51,7 +53,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-substringdata
-    ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
+    KRYS_NODISCARD ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-characterdata-appenddata
     ExceptionOr<void> AppendData(DOMString &&data) noexcept;
