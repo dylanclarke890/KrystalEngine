@@ -10,6 +10,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 - With no garbage collector, `AbortSignal`'s garbage collection rule is kept with references: a source holds a dependent signal strongly while that signal has `abort` listeners or abort algorithms, and weakly otherwise, and an aborted signal lets go of its sources and dependents. `AbortSignal.timeout()`'s task keeps its signal alive whether or not it has listeners.
 - Callbacks are C++ `Func`s rather than callback interfaces, so there's no `this` value and no exceptions to report: `ResizeObserver` and `IntersectionObserver` take the entries and the observer. Promises are replaced the same way: `CustomElementRegistry::WhenDefined` takes a callback and `Element::RequestPointerLock` returns its result through one. Animation `ready`/`finished` are `AnimationPromise`s and Navigation API results are `NavigationPromise`s, settled once, with their callbacks run as microtasks.
+- `CustomEvent`'s `detail` is typed by the host rather than `any`: `CustomEvent<T>` holds a `Maybe<T>`, empty for null.
 - JavaScript values (`any`) are `SerializedScriptValue`, a reference-counted base class the host derives from.
 - `IntersectionObserver` is notified directly in the rendering update, as upstream, where the specification queues a task.
 - `DOMContentLoaded` fires synchronously at the end of parsing (`FinishedParsing`), as upstream, where the specification queues a task. `load` fires from a later task (`CheckCompleted`, then `ImplicitClose`), and `hashchange` is queued on the window.

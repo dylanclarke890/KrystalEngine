@@ -194,11 +194,12 @@ Status: reviewed (2026-10-30)
 
 ### [2.4. Interface CustomEvent](https://dom.spec.whatwg.org/#interface-customevent)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `CustomEvent<T>` (`CustomEvent.hpp`); its `any` detail is a `Maybe<T>` (`DIFFERENCES.md`). Tests: `tests/DOM/CustomEvent.cpp`.
 
-- [ ] [CustomEvent.detail](https://dom.spec.whatwg.org/#dom-customevent-detail) — The detail attribute must return the value it was initialized to.
+- [x] [CustomEvent.detail](https://dom.spec.whatwg.org/#dom-customevent-detail) — The detail attribute must return the value it was initialized to.
 
-- [ ] [CustomEvent.initCustomEvent(type, bubbles, cancelable, detail)](https://dom.spec.whatwg.org/#dom-customevent-initcustomevent) — The initCustomEvent(type, bubbles, cancelable, detail) method steps are:
+- [x] [CustomEvent.initCustomEvent(type, bubbles, cancelable, detail)](https://dom.spec.whatwg.org/#dom-customevent-initcustomevent) — The initCustomEvent(type, bubbles, cancelable, detail) method steps are:
   - 1. If this’s dispatch flag is set, then return.
   - 2. Initialize this with type, bubbles, and cancelable.
   - 3. Set this’s detail attribute to detail.

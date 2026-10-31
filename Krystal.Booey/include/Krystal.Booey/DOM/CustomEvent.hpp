@@ -43,13 +43,16 @@ namespace krys::boo::dom
     void InitCustomEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
                          Maybe<T> detail = std::nullopt) noexcept
     {
+      // 1. If this's dispatch flag is set, then return.
       if (_dispatched)
       {
         return;
       }
 
+      // 2. Initialize this with type, bubbles, and cancelable.
       Initialize(*this, type, bubbles, cancelable);
 
+      // 3. Set this's detail attribute to detail.
       _detail = detail;
     }
 
