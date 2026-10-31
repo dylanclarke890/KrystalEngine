@@ -1555,15 +1555,16 @@ Status: reviewed (2026-10-31)
 
 ### [4.9. Interface Element](https://dom.spec.whatwg.org/#interface-element)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Element` (`Element.hpp`/`.cpp`) holds the qualified name (namespace, prefix and local name), attribute list, shadow root, registry, is value and custom element state; its definition is in its reaction queue. The attribute algorithms, attach a shadow root and insert adjacent are in `ElementAlgorithms`; create an element (with create an element internal folded in) is `ElementFactory::Create`. The ID is read from the `id` attribute, so its attribute change steps only notify the ID's observers. Customized built-in elements and Trusted Types aren't supported (see `DIFFERENCES.md`).
 <!-- definitions: concept-element concept-element-namespace concept-element-namespace-prefix concept-element-local-name element-custom-element-registry concept-element-custom-element-state concept-element-custom-element-definition concept-element-is-value concept-element-defined concept-element-custom concept-element-shadow-root element-shadow-host concept-element-qualified-name concept-element-attribute concept-element-attribute-has concept-element-attributes-change-ext parent-element concept-reflect concept-class dom-element-setattributenodens valid-shadow-host-name dom-element-webkitmatchesselector -->
 
-- [ ] [HTML-uppercased qualified name (Element)](https://dom.spec.whatwg.org/#element-html-uppercased-qualified-name) — An element’s HTML-uppercased qualified name is the return value of these steps:
+- [x] [HTML-uppercased qualified name (Element)](https://dom.spec.whatwg.org/#element-html-uppercased-qualified-name) — An element’s HTML-uppercased qualified name is the return value of these steps:
   - 1. Let qualifiedName be this’s qualified name.
   - 2. If this is in the HTML namespace and its node document is an HTML document, then return qualifiedName in ASCII uppercase.
   - 3. Return qualifiedName.
 
-- [ ] [create an element](https://dom.spec.whatwg.org/#concept-create-element) — To create an element, given a document document, string localName, string-or-null namespace, and optionally a string-or-null prefix (default null), string-or-null is (default null), boolean synchronousCustomElements (default false), and "default", null, or a CustomElementRegistry object registry (d…
+- [x] [create an element](https://dom.spec.whatwg.org/#concept-create-element) — To create an element, given a document document, string localName, string-or-null namespace, and optionally a string-or-null prefix (default null), string-or-null is (default null), boolean synchronousCustomElements (default false), and "default", null, or a CustomElementRegistry object registry (d…
   - 1. Let result be null.
   - 2. If registry is "default", then set registry to the result of looking up a custom element registry given document.
   - 3. Let definition be the result of looking up a custom element definition given registry, namespace, localName, and is.
@@ -1605,35 +1606,35 @@ Status: unreviewed
     - 6c. If namespace is the HTML namespace, and either localName is a valid custom element name or is is non-null, then set result’s custom element state to "undefined".
   - 7. Return result.
 
-- [ ] [create an element internal](https://dom.spec.whatwg.org/#create-an-element-internal) — To create an element internal given a document document, an interface interface a string localName, a string-or-null namespace, a string-or-null prefix, a string state, a string-or-null is, and null or a CustomElementRegistry object registry:
+- [x] [create an element internal](https://dom.spec.whatwg.org/#create-an-element-internal) — To create an element internal given a document document, an interface interface a string localName, a string-or-null namespace, a string-or-null prefix, a string state, a string-or-null is, and null or a CustomElementRegistry object registry:
   - 1. Let element be the result of creating a node that implements interface, given document.
   - 2. Set element’s namespace to namespace, namespace prefix to prefix, local name to localName, custom element registry to registry, custom element state to state, custom element definition to null, and is value to is.
   - 3. Assert: element’s attribute list is empty.
   - 4. Return element.
 
-- [ ] [handle attribute changes](https://dom.spec.whatwg.org/#handle-attribute-changes) — To handle attribute changes for an attribute attribute with element, oldValue, and newValue, run these steps:
+- [x] [handle attribute changes](https://dom.spec.whatwg.org/#handle-attribute-changes) — To handle attribute changes for an attribute attribute with element, oldValue, and newValue, run these steps:
   - 1. Queue a mutation record of "attributes" for element with attribute’s local name, attribute’s namespace, oldValue, « », « », null, and null.
   - 2. If element is custom, then enqueue a custom element callback reaction with element, callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s namespace ».
   - 3. Run the attribute change steps with element, attribute’s local name, oldValue, newValue, and attribute’s namespace.
 
-- [ ] [change](https://dom.spec.whatwg.org/#concept-element-attributes-change) — To change an attribute attribute to value:
+- [x] [change](https://dom.spec.whatwg.org/#concept-element-attributes-change) — To change an attribute attribute to value:
   - 1. Let oldValue be attribute’s value.
   - 2. Set attribute’s value to value.
   - 3. Handle attribute changes for attribute with attribute’s element, oldValue, and value.
 
-- [ ] [append](https://dom.spec.whatwg.org/#concept-element-attributes-append) — To append an attribute attribute to an element element:
+- [x] [append](https://dom.spec.whatwg.org/#concept-element-attributes-append) — To append an attribute attribute to an element element:
   - 1. Append attribute to element’s attribute list.
   - 2. Set attribute’s element to element.
   - 3. Set attribute’s node document to element’s node document.
   - 4. Handle attribute changes for attribute with element, null, and attribute’s value.
 
-- [ ] [remove](https://dom.spec.whatwg.org/#concept-element-attributes-remove) — To remove an attribute attribute:
+- [x] [remove](https://dom.spec.whatwg.org/#concept-element-attributes-remove) — To remove an attribute attribute:
   - 1. Let element be attribute’s element.
   - 2. Remove attribute from element’s attribute list.
   - 3. Set attribute’s element to null.
   - 4. Handle attribute changes for attribute with element, attribute’s value, and null.
 
-- [ ] [replace](https://dom.spec.whatwg.org/#concept-element-attributes-replace) — To replace an attribute oldAttribute with an attribute newAttribute:
+- [x] [replace](https://dom.spec.whatwg.org/#concept-element-attributes-replace) — To replace an attribute oldAttribute with an attribute newAttribute:
   - 1. Let element be oldAttribute’s element.
   - 2. Replace oldAttribute by newAttribute in element’s attribute list.
   - 3. Set newAttribute’s element to element.
@@ -1641,20 +1642,20 @@ Status: unreviewed
   - 5. Set oldAttribute’s element to null.
   - 6. Handle attribute changes for oldAttribute with element, oldAttribute’s value, and newAttribute’s value.
 
-- [ ] [get an attribute by name](https://dom.spec.whatwg.org/#concept-element-attributes-get-by-name) — To get an attribute by name given a string qualifiedName and an element element:
+- [x] [get an attribute by name](https://dom.spec.whatwg.org/#concept-element-attributes-get-by-name) — To get an attribute by name given a string qualifiedName and an element element:
   - 1. If element is in the HTML namespace and its node document is an HTML document, then set qualifiedName to qualifiedName in ASCII lowercase.
   - 2. Return the first attribute in element’s attribute list whose qualified name is qualifiedName; otherwise null.
 
-- [ ] [get an attribute by namespace and local name](https://dom.spec.whatwg.org/#concept-element-attributes-get-by-namespace) — To get an attribute by namespace and local name given null or a string namespace, a string localName, and an element element:
+- [x] [get an attribute by namespace and local name](https://dom.spec.whatwg.org/#concept-element-attributes-get-by-namespace) — To get an attribute by namespace and local name given null or a string namespace, a string localName, and an element element:
   - 1. If namespace is the empty string, then set it to null.
   - 2. Return the attribute in element’s attribute list whose namespace is namespace and local name is localName, if any; otherwise null.
 
-- [ ] [get an attribute value](https://dom.spec.whatwg.org/#concept-element-attributes-get-value) — To get an attribute value given an element element, a string localName, and an optional null or string namespace (default null):
+- [x] [get an attribute value](https://dom.spec.whatwg.org/#concept-element-attributes-get-value) — To get an attribute value given an element element, a string localName, and an optional null or string namespace (default null):
   - 1. Let attr be the result of getting an attribute given namespace, localName, and element.
   - 2. If attr is null, then return the empty string.
   - 3. Return attr’s value.
 
-- [ ] [set an attribute](https://dom.spec.whatwg.org/#concept-element-attributes-set) — To set an attribute given an attribute attr and an element element:
+- [x] [set an attribute](https://dom.spec.whatwg.org/#concept-element-attributes-set) — To set an attribute given an attribute attr and an element element:
   - 1. Let verifiedValue be the result of calling get trusted type compliant attribute value with attr’s local name, attr’s namespace, element, and attr’s value. [TRUSTED-TYPES]
   - 2. If attr’s element is neither null nor element, throw an "InUseAttributeError" DOMException.
   - 3. Let oldAttr be the result of getting an attribute given attr’s namespace, attr’s local name, and element.
@@ -1664,58 +1665,58 @@ Status: unreviewed
   - 7. Otherwise, append attr to element.
   - 8. Return oldAttr.
 
-- [ ] [set an attribute value](https://dom.spec.whatwg.org/#concept-element-attributes-set-value) — To set an attribute value given an element element, a string localName, a string value, an optional null or string prefix (default null), and an optional null or string namespace (default null):
+- [x] [set an attribute value](https://dom.spec.whatwg.org/#concept-element-attributes-set-value) — To set an attribute value given an element element, a string localName, a string value, an optional null or string prefix (default null), and an optional null or string namespace (default null):
   - 1. Let attribute be the result of getting an attribute given namespace, localName, and element.
   - 2. If attribute is null, then append the result of creating an attribute given element’s node document, localName, namespace, prefix, and value to element, and then return.
   - 3. Change attribute to value.
 
-- [ ] [remove an attribute by name](https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-name) — To remove an attribute by name given a string qualifiedName and an element element:
+- [x] [remove an attribute by name](https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-name) — To remove an attribute by name given a string qualifiedName and an element element:
   - 1. Let attr be the result of getting an attribute given qualifiedName and element.
   - 2. If attr is non-null, then remove attr.
   - 3. Return attr.
 
-- [ ] [remove an attribute by namespace and local name](https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-namespace) — To remove an attribute by namespace and local name given null or a string namespace, a string localName, and an element element:
+- [x] [remove an attribute by namespace and local name](https://dom.spec.whatwg.org/#concept-element-attributes-remove-by-namespace) — To remove an attribute by namespace and local name given null or a string namespace, a string localName, and an element element:
   - 1. Let attr be the result of getting an attribute given namespace, localName, and element.
   - 2. If attr is non-null, then remove attr.
   - 3. Return attr.
 
-- [ ] [Use these attribute change steps to update an element’s ID](https://dom.spec.whatwg.org/#concept-id) — Use these attribute change steps to update an element’s ID:
+- [x] [Use these attribute change steps to update an element’s ID](https://dom.spec.whatwg.org/#concept-id) — Use these attribute change steps to update an element’s ID:
   - 1. If localName is id, namespace is null, and value is null or the empty string, then unset element’s ID.
   - 2. Otherwise, if localName is id, namespace is null, then set element’s ID to value.
 
-- [ ] [Element.namespaceURI](https://dom.spec.whatwg.org/#dom-element-namespaceuri) — The namespaceURI getter steps are to return this’s namespace.
+- [x] [Element.namespaceURI](https://dom.spec.whatwg.org/#dom-element-namespaceuri) — The namespaceURI getter steps are to return this’s namespace.
 
-- [ ] [Element.prefix](https://dom.spec.whatwg.org/#dom-element-prefix) — The prefix getter steps are to return this’s namespace prefix.
+- [x] [Element.prefix](https://dom.spec.whatwg.org/#dom-element-prefix) — The prefix getter steps are to return this’s namespace prefix.
 
-- [ ] [Element.localName](https://dom.spec.whatwg.org/#dom-element-localname) — The localName getter steps are to return this’s local name.
+- [x] [Element.localName](https://dom.spec.whatwg.org/#dom-element-localname) — The localName getter steps are to return this’s local name.
 
-- [ ] [Element.tagName](https://dom.spec.whatwg.org/#dom-element-tagname) — The tagName getter steps are to return this’s HTML-uppercased qualified name.
+- [x] [Element.tagName](https://dom.spec.whatwg.org/#dom-element-tagname) — The tagName getter steps are to return this’s HTML-uppercased qualified name.
 
-- [ ] [Element.id](https://dom.spec.whatwg.org/#dom-element-id) — The id attribute must reflect "id".
+- [x] [Element.id](https://dom.spec.whatwg.org/#dom-element-id) — The id attribute must reflect "id".
 
-- [ ] [Element.className](https://dom.spec.whatwg.org/#dom-element-classname) — The className attribute must reflect "class".
+- [x] [Element.className](https://dom.spec.whatwg.org/#dom-element-classname) — The className attribute must reflect "class".
 
-- [ ] [Element.classList](https://dom.spec.whatwg.org/#dom-element-classlist) — The classList getter steps are to return a DOMTokenList object whose associated element is this and whose associated attribute’s local name is class. The token set of this particular DOMTokenList object are also known as the element’s classes.
+- [x] [Element.classList](https://dom.spec.whatwg.org/#dom-element-classlist) — The classList getter steps are to return a DOMTokenList object whose associated element is this and whose associated attribute’s local name is class. The token set of this particular DOMTokenList object are also known as the element’s classes.
 
-- [ ] [Element.slot](https://dom.spec.whatwg.org/#dom-element-slot) — The slot attribute must reflect "slot".
+- [x] [Element.slot](https://dom.spec.whatwg.org/#dom-element-slot) — The slot attribute must reflect "slot".
 
-- [ ] [Element.hasAttributes()](https://dom.spec.whatwg.org/#dom-element-hasattributes) — The hasAttributes() method steps are to return false if this’s attribute list is empty; otherwise true.
+- [x] [Element.hasAttributes()](https://dom.spec.whatwg.org/#dom-element-hasattributes) — The hasAttributes() method steps are to return false if this’s attribute list is empty; otherwise true.
 
-- [ ] [Element.attributes](https://dom.spec.whatwg.org/#dom-element-attributes) — The attributes getter steps are to return the associated NamedNodeMap.
+- [x] [Element.attributes](https://dom.spec.whatwg.org/#dom-element-attributes) — The attributes getter steps are to return the associated NamedNodeMap.
 
-- [ ] [Element.getAttributeNames()](https://dom.spec.whatwg.org/#dom-element-getattributenames) — The getAttributeNames() method steps are to return the qualified names of the attributes in this’s attribute list, in order; otherwise a new list.
+- [x] [Element.getAttributeNames()](https://dom.spec.whatwg.org/#dom-element-getattributenames) — The getAttributeNames() method steps are to return the qualified names of the attributes in this’s attribute list, in order; otherwise a new list.
 
-- [ ] [Element.getAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getattribute) — The getAttribute(qualifiedName) method steps are:
+- [x] [Element.getAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getattribute) — The getAttribute(qualifiedName) method steps are:
   - 1. Let attr be the result of getting an attribute given qualifiedName and this.
   - 2. If attr is null, return null.
   - 3. Return attr’s value.
 
-- [ ] [Element.getAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getattributens) — The getAttributeNS(namespace, localName) method steps are:
+- [x] [Element.getAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getattributens) — The getAttributeNS(namespace, localName) method steps are:
   - 1. Let attr be the result of getting an attribute given namespace, localName, and this.
   - 2. If attr is null, return null.
   - 3. Return attr’s value.
 
-- [ ] [Element.setAttribute(qualifiedName, value)](https://dom.spec.whatwg.org/#dom-element-setattribute) — The setAttribute(qualifiedName, value) method steps are:
+- [x] [Element.setAttribute(qualifiedName, value)](https://dom.spec.whatwg.org/#dom-element-setattribute) — The setAttribute(qualifiedName, value) method steps are:
   - 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to qualifiedName in ASCII lowercase.
   - 3. Let verifiedValue be the result of calling get trusted type compliant attribute value with qualifiedName, null, this, and value. [TRUSTED-TYPES]
@@ -1724,20 +1725,20 @@ Status: unreviewed
   - 6. Set attribute to the result of creating an attribute given this’s node document, qualifiedName, null, null, and verifiedValue.
   - 7. Append attribute to this.
 
-- [ ] [Element.setAttributeNS(namespace, qualifiedName, value)](https://dom.spec.whatwg.org/#dom-element-setattributens) — The setAttributeNS(namespace, qualifiedName, value) method steps are:
+- [x] [Element.setAttributeNS(namespace, qualifiedName, value)](https://dom.spec.whatwg.org/#dom-element-setattributens) — The setAttributeNS(namespace, qualifiedName, value) method steps are:
   - 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and qualifiedName given "attribute".
   - 2. Let verifiedValue be the result of calling get trusted type compliant attribute value with localName, namespace, this, and value. [TRUSTED-TYPES]
   - 3. Set an attribute value for this using localName, verifiedValue, prefix, and namespace.
 
-- [ ] [Element.removeAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-removeattribute) — The removeAttribute(qualifiedName) method steps are to remove an attribute given qualifiedName and this, and then return undefined.
+- [x] [Element.removeAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-removeattribute) — The removeAttribute(qualifiedName) method steps are to remove an attribute given qualifiedName and this, and then return undefined.
 
-- [ ] [Element.removeAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-removeattributens) — The removeAttributeNS(namespace, localName) method steps are to remove an attribute given namespace, localName, and this, and then return undefined.
+- [x] [Element.removeAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-removeattributens) — The removeAttributeNS(namespace, localName) method steps are to remove an attribute given namespace, localName, and this, and then return undefined.
 
-- [ ] [Element.hasAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-hasattribute) — The hasAttribute(qualifiedName) method steps are:
+- [x] [Element.hasAttribute(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-hasattribute) — The hasAttribute(qualifiedName) method steps are:
   - 1. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to qualifiedName in ASCII lowercase.
   - 2. Return true if this has an attribute whose qualified name is qualifiedName; otherwise false.
 
-- [ ] [Element.toggleAttribute(qualifiedName, force)](https://dom.spec.whatwg.org/#dom-element-toggleattribute) — The toggleAttribute(qualifiedName, force) method steps are:
+- [x] [Element.toggleAttribute(qualifiedName, force)](https://dom.spec.whatwg.org/#dom-element-toggleattribute) — The toggleAttribute(qualifiedName, force) method steps are:
   - 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to qualifiedName in ASCII lowercase.
   - 3. Let attribute be the first attribute in this’s attribute list whose qualified name is qualifiedName, and null otherwise.
@@ -1747,29 +1748,29 @@ Status: unreviewed
   - 5. If force is not given or is false, remove an attribute given qualifiedName and this, and then return false.
   - 6. Return true.
 
-- [ ] [Element.hasAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-hasattributens) — The hasAttributeNS(namespace, localName) method steps are:
+- [x] [Element.hasAttributeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-hasattributens) — The hasAttributeNS(namespace, localName) method steps are:
   - 1. If namespace is the empty string, then set it to null.
   - 2. Return true if this has an attribute whose namespace is namespace and local name is localName; otherwise false.
 
-- [ ] [Element.getAttributeNode(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getattributenode) — The getAttributeNode(qualifiedName) method steps are to return the result of getting an attribute given qualifiedName and this.
+- [x] [Element.getAttributeNode(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getattributenode) — The getAttributeNode(qualifiedName) method steps are to return the result of getting an attribute given qualifiedName and this.
 
-- [ ] [Element.getAttributeNodeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getattributenodens) — The getAttributeNodeNS(namespace, localName) method steps are to return the result of getting an attribute given namespace, localName, and this.
+- [x] [Element.getAttributeNodeNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getattributenodens) — The getAttributeNodeNS(namespace, localName) method steps are to return the result of getting an attribute given namespace, localName, and this.
 
-- [ ] [Element.setAttributeNode(attr)](https://dom.spec.whatwg.org/#dom-element-setattributenode) — The setAttributeNode(attr) and setAttributeNodeNS(attr) methods steps are to return the result of setting an attribute given attr and this.
+- [x] [Element.setAttributeNode(attr)](https://dom.spec.whatwg.org/#dom-element-setattributenode) — The setAttributeNode(attr) and setAttributeNodeNS(attr) methods steps are to return the result of setting an attribute given attr and this.
 
-- [ ] [Element.removeAttributeNode(attr)](https://dom.spec.whatwg.org/#dom-element-removeattributenode) — The removeAttributeNode(attr) method steps are:
+- [x] [Element.removeAttributeNode(attr)](https://dom.spec.whatwg.org/#dom-element-removeattributenode) — The removeAttributeNode(attr) method steps are:
   - 1. If this’s attribute list does not contain attr, then throw a "NotFoundError" DOMException.
   - 2. Remove attr.
   - 3. Return attr.
 
-- [ ] [Element.attachShadow(init)](https://dom.spec.whatwg.org/#dom-element-attachshadow) — The attachShadow(init) method steps are:
+- [x] [Element.attachShadow(init)](https://dom.spec.whatwg.org/#dom-element-attachshadow) — The attachShadow(init) method steps are:
   - 1. Let registry be this’s node document’s custom element registry.
   - 2. If init["customElementRegistry"] exists, then set registry to it.
   - 3. If registry is non-null, registry’s is scoped is false, and registry is not this’s node document’s custom element registry, then throw a "NotSupportedError" DOMException.
   - 4. Run attach a shadow root with this, init["mode"], init["delegatesFocus"], init["serializable"], init["slotAssignment"], init["clonable"], and registry.
   - 5. Return this’s shadow root.
 
-- [ ] [attach a shadow root](https://dom.spec.whatwg.org/#concept-attach-a-shadow-root) — To attach a shadow root, given an element element, a string mode, a boolean delegatesFocus, a boolean serializable, a string slotAssignment, a boolean clonable, and null or a CustomElementRegistry object registry:
+- [x] [attach a shadow root](https://dom.spec.whatwg.org/#concept-attach-a-shadow-root) — To attach a shadow root, given an element element, a string mode, a boolean delegatesFocus, a boolean serializable, a string slotAssignment, a boolean clonable, and null or a CustomElementRegistry object registry:
   - 1. If element’s namespace is not the HTML namespace, then throw a "NotSupportedError" DOMException.
   - 2. If element’s local name is not a valid shadow host name, then throw a "NotSupportedError" DOMException.
   - 3. If element’s local name is a valid custom element name, or element’s is value is non-null:
@@ -1793,41 +1794,41 @@ Status: unreviewed
   - 14. Set shadow’s custom element registry to registry.
   - 15. Set element’s shadow root to shadow.
 
-- [ ] [Element.shadowRoot](https://dom.spec.whatwg.org/#dom-element-shadowroot) — The shadowRoot getter steps are:
+- [x] [Element.shadowRoot](https://dom.spec.whatwg.org/#dom-element-shadowroot) — The shadowRoot getter steps are:
   - 1. Let shadow be this’s shadow root.
   - 2. If shadow is null or its mode is "closed", then return null.
   - 3. Return shadow.
 
-- [ ] [Element.customElementRegistry](https://dom.spec.whatwg.org/#dom-element-customelementregistry) — The customElementRegistry getter steps are to return this’s custom element registry.
+- [x] [Element.customElementRegistry](https://dom.spec.whatwg.org/#dom-element-customelementregistry) — The customElementRegistry getter steps are to return this’s custom element registry.
 
-- [ ] [Element.closest(selectors)](https://dom.spec.whatwg.org/#dom-element-closest) — The closest(selectors) method steps are:
+- [x] [Element.closest(selectors)](https://dom.spec.whatwg.org/#dom-element-closest) — The closest(selectors) method steps are:
   - 1. Let selector be the result of parse a selector from selectors. [SELECTORS4]
   - 2. If selector is failure, then throw a "SyntaxError" DOMException.
   - 3. Let elements be this’s inclusive ancestors that are elements, in reverse tree order.
   - 4. For each element of elements: if match a selector against an element, using selector, element, and scoping root this, returns success, return element. [SELECTORS4]
   - 5. Return null.
 
-- [ ] [Element.matches(selectors)](https://dom.spec.whatwg.org/#dom-element-matches) — The matches(selectors) and webkitMatchesSelector(selectors) method steps are:
+- [x] [Element.matches(selectors)](https://dom.spec.whatwg.org/#dom-element-matches) — The matches(selectors) and webkitMatchesSelector(selectors) method steps are:
   - 1. Let selector be the result of parse a selector from selectors. [SELECTORS4]
   - 2. If selector is failure, then throw a "SyntaxError" DOMException.
   - 3. If the result of match a selector against an element, using selector, this, and scoping root this, returns success, then return true; otherwise, return false. [SELECTORS4]
 
-- [ ] [Element.getElementsByTagName(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getelementsbytagname) — The getElementsByTagName(qualifiedName) method steps are to return the list of elements with qualified name qualifiedName for this.
+- [x] [Element.getElementsByTagName(qualifiedName)](https://dom.spec.whatwg.org/#dom-element-getelementsbytagname) — The getElementsByTagName(qualifiedName) method steps are to return the list of elements with qualified name qualifiedName for this.
 
-- [ ] [Element.getElementsByTagNameNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens) — The getElementsByTagNameNS(namespace, localName) method steps are to return the list of elements with namespace namespace and local name localName for this.
+- [x] [Element.getElementsByTagNameNS(namespace, localName)](https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens) — The getElementsByTagNameNS(namespace, localName) method steps are to return the list of elements with namespace namespace and local name localName for this.
 
-- [ ] [Element.getElementsByClassName(classNames)](https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname) — The getElementsByClassName(classNames) method steps are to return the list of elements with class names classNames for this.
+- [x] [Element.getElementsByClassName(classNames)](https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname) — The getElementsByClassName(classNames) method steps are to return the list of elements with class names classNames for this.
 
-- [ ] [insert adjacent](https://dom.spec.whatwg.org/#insert-adjacent) — To insert adjacent, given an element element, string where, and a node node, run the steps associated with the first ASCII case-insensitive match for where:
+- [x] [insert adjacent](https://dom.spec.whatwg.org/#insert-adjacent) — To insert adjacent, given an element element, string where, and a node node, run the steps associated with the first ASCII case-insensitive match for where:
   - • "beforebegin": If element’s parent is null, return null. Return the result of pre-inserting node into element’s parent before element.
   - • "afterbegin": Return the result of pre-inserting node into element before element’s first child.
   - • "beforeend": Return the result of pre-inserting node into element before null.
   - • "afterend": If element’s parent is null, return null. Return the result of pre-inserting node into element’s parent before element’s next sibling.
   - • Otherwise: Throw a "SyntaxError" DOMException.
 
-- [ ] [Element.insertAdjacentElement(where, element)](https://dom.spec.whatwg.org/#dom-element-insertadjacentelement) — The insertAdjacentElement(where, element) method steps are to return the result of running insert adjacent, give this, where, and element.
+- [x] [Element.insertAdjacentElement(where, element)](https://dom.spec.whatwg.org/#dom-element-insertadjacentelement) — The insertAdjacentElement(where, element) method steps are to return the result of running insert adjacent, give this, where, and element.
 
-- [ ] [Element.insertAdjacentText(where, data)](https://dom.spec.whatwg.org/#dom-element-insertadjacenttext) — The insertAdjacentText(where, data) method steps are:
+- [x] [Element.insertAdjacentText(where, data)](https://dom.spec.whatwg.org/#dom-element-insertadjacenttext) — The insertAdjacentText(where, data) method steps are:
   - 1. Let text be the result of creating a text node given this’s node document and data.
   - 2. Run insert adjacent, given this, where, and text.
 

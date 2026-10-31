@@ -103,7 +103,9 @@ namespace krys::boo::dom
   class PseudoElement;
   class ShadowRoot;
 
+  /// @brief A node with a qualified name and attributes.
   /// @see https://dom.spec.whatwg.org/#interface-element
+  /// @see https://dom.spec.whatwg.org/#concept-element
   class Element : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
@@ -127,14 +129,27 @@ namespace krys::boo::dom
     friend class ::krys::boo::RenderTreeUpdater;
 
   private:
+    /// @brief The element's namespace, namespace prefix and local name.
+    /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
+    /// @see https://dom.spec.whatwg.org/#concept-element-namespace
+    /// @see https://dom.spec.whatwg.org/#concept-element-namespace-prefix
+    /// @see https://dom.spec.whatwg.org/#concept-element-local-name
     QualifiedName _qualifiedName;
+    /// @see https://dom.spec.whatwg.org/#concept-element-shadow-root
     RefPtr<ShadowRoot> _shadowRoot;
+    /// @see https://dom.spec.whatwg.org/#element-custom-element-registry
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<ElementRareData> _elementRareData;
+    /// @brief The associated `NamedNodeMap`, created on first use.
     UniquePtr<NamedNodeMap> _namedNodeMap;
+    /// @brief The `classList`, created on first use.
     UniquePtr<DOMTokenList> _domTokenList;
+    /// @see https://dom.spec.whatwg.org/#concept-element-attribute
     List<Ref<Attr>> _attributes;
+    /// @brief Kept as given, but ignored: customized built-in elements aren't supported.
+    /// @see https://dom.spec.whatwg.org/#concept-element-is-value
     DOMStringAtom _is {DOMStringAtom::Null()};
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-state
     CustomElementState _customElementState {CustomElementState::Uncustomized};
 
     /// @see https://dom.spec.whatwg.org/#slotable-name
@@ -163,22 +178,26 @@ namespace krys::boo::dom
       return _qualifiedName.NamespaceURI();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
+    /// @see https://dom.spec.whatwg.org/#dom-element-prefix
     KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
     {
       return _qualifiedName.NamespacePrefix();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
+    /// @see https://dom.spec.whatwg.org/#dom-element-localname
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
       return _qualifiedName.LocalName();
     }
 
+    /// @brief The element's HTML-uppercased qualified name.
     /// @see https://dom.spec.whatwg.org/#dom-element-tagname
+    /// @see https://dom.spec.whatwg.org/#element-html-uppercased-qualified-name
     KRYS_NODISCARD DOMString TagName() const noexcept;
 
+    /// @brief Reflects the `id` attribute, as `className` and `slot` reflect theirs.
     /// @see https://dom.spec.whatwg.org/#dom-element-id
+    /// @see https://dom.spec.whatwg.org/#concept-reflect
     void Id(DOMString &&id) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-id
@@ -239,6 +258,7 @@ namespace krys::boo::dom
     ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-hasattribute
+    /// @see https://dom.spec.whatwg.org/#concept-element-attribute-has
     KRYS_NODISCARD bool HasAttribute(DOMStringAtom qualifiedName) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-element-hasattributens
@@ -634,6 +654,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD bool HasClassName(DOMStringView className) const noexcept;
 
     /// @brief The element's classes in order, without duplicates, ASCII-lowercased in quirks mode.
+    /// @see https://dom.spec.whatwg.org/#concept-class
     KRYS_NODISCARD List<DOMStringAtom> ClassNames() const noexcept;
 
     /// @brief The classes a `class` attribute with @p value would give the element (none for null), as
@@ -676,6 +697,7 @@ namespace krys::boo::dom
     /// @brief The element's custom element reaction queue, which holds the definition it's defined by or is
     /// to be upgraded to; null if it has neither.
     /// @see https://html.spec.whatwg.org/#custom-element-reaction-queue
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom-element-definition
     KRYS_NODISCARD html::CustomElementReactionQueue *ReactionQueue() const noexcept;
 
     void SetIsDefinedCustomElement(html::CustomElementInterface &elementInterface) noexcept;

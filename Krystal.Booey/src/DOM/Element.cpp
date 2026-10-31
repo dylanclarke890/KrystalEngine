@@ -1772,13 +1772,17 @@ namespace krys::boo::dom
 
   DOMString Element::TagName() const noexcept
   {
+    // 1. Let qualifiedName be this's qualified name.
     auto qualifiedName = _qualifiedName.Name();
 
+    // 2. If this is in the HTML namespace and its node document is an HTML document, then return
+    //    qualifiedName in ASCII uppercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIIUpper(qualifiedName);
     }
 
+    // 3. Return qualifiedName.
     return qualifiedName;
   }
 
@@ -1941,51 +1945,66 @@ namespace krys::boo::dom
 
   Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
   {
+    // 1. Let attr be the result of getting an attribute given qualifiedName and this.
     Attr *attr = ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
+    // 2. If attr is null, return null.
     if (attr == nullptr)
     {
       return null;
     }
 
+    // 3. Return attr's value.
     return attr->Value();
   }
 
   Maybe<DOMString> Element::GetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
+    // 1. Let attr be the result of getting an attribute given namespace, localName, and this.
     Attr *attr = ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    // 2. If attr is null, return null.
     if (attr == nullptr)
     {
-      return std::nullopt;
+      return null;
     }
 
+    // 3. Return attr's value.
     return attr->Value();
   }
 
   ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
+    //    DOMException.
     if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
+    // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
+    //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
-    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
-    // attribute value with qualifiedName, null, this, and value.
+    // 3. (Skipped: Trusted Types aren't supported, so value is used as it is.)
 
+    // 4. Let attribute be the first attribute in this's attribute list whose qualified name is qualifiedName,
+    //    and null otherwise.
     SynchronizeAllAttributes();
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
+    // 5. If attribute is non-null, then change attribute to verifiedValue and return.
     if (it != _attributes.end())
     {
       ElementAlgorithms::ChangeAttribute(**it, krys::move(value));
     }
     else
     {
+      // 6. Set attribute to the result of creating an attribute given this's node document, qualifiedName,
+      //    null, null, and verifiedValue.
+      // 7. Append attribute to this.
       auto attr = AdoptRef<Attr>(
         *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName},
                   krys::move(value)));
@@ -1999,6 +2018,8 @@ namespace krys::boo::dom
                                             DOMString &&value) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. Let (namespace, prefix, localName) be the result of validating and extracting namespace and
+    //    qualifiedName given "attribute".
     auto validateAndExtractResult =
       NameValidation::ValidateAndExtract(namespaceURI, qualifiedName, ValidateAndExtractContext::Attribute);
 
@@ -2007,9 +2028,9 @@ namespace krys::boo::dom
       return validateAndExtractResult.ReleaseException();
     }
 
-    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
-    // attribute value with localName, namespace, this, and value.
+    // 2. (Skipped: Trusted Types aren't supported, so value is used as it is.)
 
+    // 3. Set an attribute value for this using localName, verifiedValue, prefix, and namespace.
     const auto &qName = validateAndExtractResult.Value();
     ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), std::move(value), qName.NamespacePrefix(),
                                          qName.NamespaceURI());
@@ -2032,22 +2053,31 @@ namespace krys::boo::dom
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If qualifiedName is not a valid attribute local name, then throw an "InvalidCharacterError"
+    //    DOMException.
     if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
+    // 2. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
+    //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
+    // 3. Let attribute be the first attribute in this's attribute list whose qualified name is qualifiedName,
+    //    and null otherwise.
     SynchronizeAllAttributes();
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
 
+    // 4. If attribute is null:
     if (it == _attributes.end())
     {
+      // 4a. If force is not given or is true, then append the result of creating an attribute given this's
+      //     node document and qualifiedName to this, and then return true.
       if (!force.has_value() || force.value())
       {
         auto attr = AdoptRef<Attr>(*new Attr(
@@ -2056,36 +2086,46 @@ namespace krys::boo::dom
         return true;
       }
 
+      // 4b. Return false.
       return false;
     }
 
+    // 5. If force is not given or is false, remove an attribute given qualifiedName and this, and then return
+    //    false.
     if (!force.has_value() || !force.value())
     {
       ElementAlgorithms::RemoveAttribute(**it);
       return false;
     }
 
+    // 6. Return true.
     return true;
   }
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
+    // 1. If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName
+    //    to qualifiedName in ASCII lowercase.
     if (NamespaceURI() == infra::Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = krys::text::ToASCIILower(qualifiedName.View());
     }
 
+    // 2. Return true if this has an attribute whose qualified name is qualifiedName; otherwise false.
     SynchronizeAllAttributes();
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a->Name() == qualifiedName; });
   }
 
   bool Element::HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
+    // 1. If namespace is the empty string, then set it to null.
     if (namespaceURI == DOMStringAtom::Empty())
     {
       namespaceURI = DOMStringAtom::Null();
     }
 
+    // 2. Return true if this has an attribute whose namespace is namespace and local name is localName;
+    //    otherwise false.
     SynchronizeAllAttributes();
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a)
                                { return a->NamespaceURI() == namespaceURI && a->LocalName() == localName; });
@@ -2116,13 +2156,16 @@ namespace krys::boo::dom
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. If this's attribute list does not contain attr, then throw a "NotFoundError" DOMException.
     if (!std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a.get() == &attr; }))
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
+    // 2. Remove attr.
     ElementAlgorithms::RemoveAttribute(attr);
 
+    // 3. Return attr.
     return ShareRef(attr);
   }
 
@@ -2133,14 +2176,20 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const ShadowRootInit &init) noexcept
   {
+    // 1. Let registry be this's node document's custom element registry.
+    // 2. If init["customElementRegistry"] exists, then set registry to it.
     auto registry =
       init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry().get();
 
+    // 3. If registry is non-null, registry's is scoped is false, and registry is not this's node document's
+    //    custom element registry, then throw a "NotSupportedError" DOMException.
     if (registry != nullptr && !registry->IsScoped() && registry != NodeDocument().CustomElementRegistry())
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
+    // 4. Run attach a shadow root with this, init["mode"], init["delegatesFocus"], init["serializable"],
+    //    init["slotAssignment"], init["clonable"], and registry.
     if (auto attachResult =
           ElementAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serialisable,
                                               init.DelegatesFocus, init.SlotAssignment, registry);
@@ -2149,16 +2198,21 @@ namespace krys::boo::dom
       return attachResult.ReleaseException();
     }
 
+    // 5. Return this's shadow root.
     return ShareRef(*_shadowRoot);
   }
 
   RefPtr<ShadowRoot> Element::ShadowRoot() const noexcept
   {
+    // 1. Let shadow be this's shadow root.
+    // 2. If shadow is null or its mode is "closed", then return null. (A user agent shadow root counts as
+    //    closed.)
     if (!_shadowRoot || _shadowRoot->Mode() != ShadowRootMode::Open)
     {
       return nullptr;
     }
 
+    // 3. Return shadow.
     return _shadowRoot;
   }
 
@@ -2249,7 +2303,9 @@ namespace krys::boo::dom
   ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
   {
     html::CEReactionsScope ceReactions;
+    // 1. Let text be the result of creating a text node given this's node document and data.
     auto textNode = CreateRef<Text>(NodeDocument(), krys::move(data));
+    // 2. Run insert adjacent, given this, where, and text.
     if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
     {
       return result.ReleaseException();
@@ -2806,7 +2862,11 @@ namespace krys::boo::dom
       _elementRareData->GetExplicitlySetAttrElementsMap().erase(localName);
     }
 
-    // NOTE: the ID is read from the attribute, so only the ID's observers need telling about it.
+    // https://dom.spec.whatwg.org/#concept-id
+    // 1. If localName is id, namespace is null, and value is null or the empty string, then unset element's
+    //    ID.
+    // 2. Otherwise, if localName is id, namespace is null, then set element's ID to value.
+    // The ID is read from the attribute (an empty one is no ID), so only the ID's observers need telling.
     if (localName == Attributes::Id)
     {
       if (oldValue != value && (IsConnected() || IsInShadowTree()))

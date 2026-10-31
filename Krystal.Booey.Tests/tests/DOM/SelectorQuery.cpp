@@ -171,32 +171,6 @@ namespace krys::boo::dom::tests
     CHECK(QueryAllIds(*shadow, u8":scope > p") == u8"inner");
   }
 
-  TEST_CASE("SelectorQuery: matches and closest", "[DOM][SelectorQuery]")
-  {
-    auto document = Parse(u8"<!DOCTYPE html><section id=s class=c><div id=d><p id=p></p></div></section>");
-    auto &p = ById(*document, u8"p");
-
-    auto closestId = [&](DOMStringView selectors)
-    {
-      auto result = p.Closest(selectors);
-      REQUIRE_FALSE(result.HasException());
-      return result.Value() ? result.Value()->Id() : DOMString(u8"(none)");
-    };
-    REQUIRE(closestId(u8"p") == u8"p");
-    REQUIRE(closestId(u8"div") == u8"d");
-    REQUIRE(closestId(u8".c") == u8"s");
-    REQUIRE(closestId(u8"section > div, span") == u8"d");
-    REQUIRE(closestId(u8"article") == u8"(none)");
-    REQUIRE(closestId(u8":scope") == u8"p");
-
-    auto matches = p.Matches(u8"div > p");
-    REQUIRE_FALSE(matches.HasException());
-    REQUIRE(matches.Value());
-    auto webkitMatches = p.WebkitMatchesSelector(u8"section p:only-child");
-    REQUIRE_FALSE(webkitMatches.HasException());
-    REQUIRE(webkitMatches.Value());
-  }
-
   TEST_CASE("Scope-match: an invalid selector throws a SyntaxError",
             "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {

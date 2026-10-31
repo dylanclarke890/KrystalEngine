@@ -209,7 +209,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(div->Remove().HasException());
   }
 
-  TEST_CASE("Node.parentElement: the parent if it's an element", "[DOM][Node][dom:dom-node-parentelement]")
+  TEST_CASE("Node.parentElement: the parent if it's an element",
+            "[DOM][Node][dom:dom-node-parentelement][dom:parent-element]")
   {
     CommonTestData data {};
     REQUIRE(data.Node->ParentElement() == nullptr);

@@ -114,6 +114,7 @@ namespace krys::boo::dom
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-parentelement
+    /// @see https://dom.spec.whatwg.org/#parent-element
     KRYS_NODISCARD Element *ParentElement() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-haschildnodes

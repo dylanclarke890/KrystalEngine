@@ -71,8 +71,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(CustomElementFixture, "Custom elements are created by the parser and createElement",
-                   "[HTML][CustomElement]")
+  TEST_CASE_METHOD(
+    CustomElementFixture, "Custom elements are created by the parser and createElement",
+    "[HTML][CustomElement][dom:concept-create-element][dom:concept-element-custom-element-definition]")
   {
     Define(u8"x-widget", {u8"value"});
 
@@ -167,7 +168,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom elements fail when their factory gives no behaviour",
-                   "[HTML][CustomElement]")
+                   "[HTML][CustomElement][dom:concept-create-element]")
   {
     REQUIRE_FALSE(Registry()
                     .Define(u8"x-broken", [](HTMLElement &) { return UniquePtr<CustomElement> {}; })
@@ -196,7 +197,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(CustomElementFixture, "Custom element callbacks", "[HTML][CustomElement]")
+  TEST_CASE_METHOD(CustomElementFixture, "Custom element callbacks",
+                   "[HTML][CustomElement][dom:handle-attribute-changes]")
   {
     Define(u8"x-widget", {u8"value", u8"style"});
     Parse(u8"<div id=parent><x-widget id=a></x-widget><p id=p></p></div>");
@@ -280,7 +282,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom element definitions can disable shadow roots",
-                   "[HTML][CustomElement]")
+                   "[HTML][CustomElement][dom:concept-attach-a-shadow-root]")
   {
     REQUIRE_FALSE(Registry()
                     .Define(u8"x-closed", [this](HTMLElement &element)

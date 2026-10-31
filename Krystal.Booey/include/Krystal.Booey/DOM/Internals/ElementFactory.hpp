@@ -24,6 +24,7 @@ namespace krys::boo::dom
   public:
     /// @brief Creates an element of the interface its namespace and local name give it.
     /// @see https://dom.spec.whatwg.org/#concept-create-element
+    /// @see https://dom.spec.whatwg.org/#create-an-element-internal
     /// @see https://dom.spec.whatwg.org/#concept-element-interface
     KRYS_NODISCARD static Ref<Element>
       Create(Document &document, const QualifiedName &name, DOMStringAtom is = DOMStringAtom::Null(),
