@@ -20,10 +20,6 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/uievents/#interface-inputevent
   class InputEvent final : public UIEvent
   {
-    friend class EventFactory;
-
-    using dictionary_type = InputEventInit;
-
   private:
     DOMString _inputType;
     Maybe<DOMString> _data;
@@ -32,6 +28,9 @@ namespace krys::boo::dom
     bool _isInputMethodComposing {false};
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = InputEventInit;
+
     /// @see https://w3c.github.io/uievents/#dom-inputevent-inputevent
     InputEvent(DOMStringAtom type, const InputEventInit &eventInitDict = {}) noexcept;
     ~InputEvent() noexcept;

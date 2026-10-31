@@ -8,6 +8,11 @@ namespace krys::boo::dom
 {
   using LiveNodeListFilterFunc = Func<bool(const Node &node)>;
 
+  /// @brief A live node list: a view of the root's descendants that match the filter, in tree order, worked
+  /// out again on each access.
+  /// @see https://dom.spec.whatwg.org/#concept-collection
+  /// @see https://dom.spec.whatwg.org/#concept-collection-live
+  /// @see https://dom.spec.whatwg.org/#represented-by-the-collection
   class LiveNodeList final : public NodeList
   {
   private:

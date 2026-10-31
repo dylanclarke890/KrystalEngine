@@ -4,7 +4,6 @@
 #include "Krystal.Booey/Constants/EventNames.hpp"
 #include "Krystal.Booey/CSS/CSSStyleDeclaration.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
-#include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
@@ -291,6 +290,7 @@ namespace krys::boo::tests
       CHECK_FALSE(windowHeard);
     }
 
+    // The legacy target override flag of dispatch.
     SECTION("load at the window with the legacy target override targets the document")
     {
       bool windowHeard = false;
@@ -301,22 +301,24 @@ namespace krys::boo::tests
                                                   CHECK(event.CurrentTarget().get() == &window);
                                                   CHECK(event.Target().get() == fixture.Document.get());
                                                 });
-      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, nullptr,
+      (void)dom::EventDispatcher::FireEvent<dom::Event>(dom::DOMStringAtom(EventNames::Load), window, {},
                                                         true);
       CHECK(windowHeard);
     }
 
-    SECTION("a document without a browsing context doesn't reach its window")
+    SECTION("a document without a browsing context doesn't reach its window, nor run its own listeners")
     {
+      // Its window's document isn't fully active, so inner invoke skips the listeners.
       fixture.TestPage->MainFrame().SetDocument(nullptr);
       order.clear();
       auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Click), true, false);
       (void)dom::EventDispatcher::DispatchToTarget(*event, &button);
-      CHECK(order == List<std::string> {"document capture", "document"});
+      CHECK(order.empty());
     }
   }
 
-  TEST_CASE("A window's current event is the event its listeners handle", "[Page][LocalDOMWindow]")
+  TEST_CASE("Window.event: the window's current event, the event its listeners handle",
+            "[Page][LocalDOMWindow][dom:dom-window-event][dom:window-current-event]")
   {
     WindowFixture fixture(u8"<!DOCTYPE html><div id=host></div><p id=text>Text</p>");
     auto &window = fixture.Window();
@@ -354,6 +356,28 @@ namespace krys::boo::tests
       CHECK(shadowHeard);
       CHECK(inShadow == nullptr);
       CHECK(inWindow != nullptr);
+    }
+
+    SECTION("and an event dispatched from a listener is current only while its own listeners run")
+    {
+      auto nested = dom::Event::Create(dom::DOMStringAtom(u8"nested"), false, false);
+      dom::Event *inNested = nullptr;
+      dom::Event *afterNested = nullptr;
+      auto nestedListener = fixture.ById(u8"text").AddEventListener(u8"nested", [&](dom::Event &)
+                                                                    { inNested = window.CurrentEvent(); });
+      auto outerListener =
+        fixture.ById(u8"host").AddEventListener(u8"click",
+                                                [&](dom::Event &)
+                                                {
+                                                  (void)fixture.ById(u8"text").DispatchEvent(*nested);
+                                                  afterNested = window.CurrentEvent();
+                                                });
+
+      fixture.ById(u8"host").DispatchSimulatedClick(nullptr);
+      CHECK(inNested == nested.get());
+      CHECK(afterNested != nullptr);
+      CHECK(afterNested != nested.get());
+      CHECK(window.CurrentEvent() == nullptr);
     }
   }
 
@@ -454,24 +478,6 @@ namespace krys::boo::tests
 
     CHECK(window.SupportedPropertyNames()
           == List<dom::DOMString> {u8"picture", u8"twice", u8"order", u8"orderform"});
-  }
-
-  TEST_CASE("The window, the document, its element and its body are passive for wheel and touch listeners",
-            "[Page][LocalDOMWindow]")
-  {
-    WindowFixture fixture(u8"<!DOCTYPE html><body><div id=box></div></body>");
-    auto &window = fixture.Window();
-    auto wheel = dom::DOMStringAtom(EventNames::Wheel);
-
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, window));
-    CHECK(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::TouchStart), window));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->DocumentElement()));
-    CHECK(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, *fixture.Document->Body()));
-    CHECK_FALSE(dom::EventTargetAlgorithms::DefaultPassiveValue(wheel, fixture.ById(u8"box")));
-    CHECK_FALSE(
-      dom::EventTargetAlgorithms::DefaultPassiveValue(dom::DOMStringAtom(EventNames::Click), window));
   }
 
   TEST_CASE("A window's viewport, scrolling and zoom", "[Page][LocalDOMWindow]")

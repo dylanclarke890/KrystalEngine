@@ -6,10 +6,12 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Internals/HTMLCollection/StaticHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -80,7 +82,8 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("HTMLCollection::Length", "[HTML][Node][HTMLCollection]")
+  TEST_CASE("HTMLCollection.length: the number of elements",
+            "[DOM][HTMLCollection][dom:interface-htmlcollection][dom:dom-htmlcollection-length]")
   {
     CommonTestData data;
 
@@ -89,7 +92,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Collection->Length() == 1uz);
   }
 
-  TEST_CASE("HTMLCollection::Item", "[HTML][Node][HTMLCollection]")
+  TEST_CASE("HTMLCollection.item(): the indexth element, or null",
+            "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
   {
     CommonTestData data;
 
@@ -105,7 +109,7 @@ namespace krys::boo::dom::tests
     REQUIRE(result == nullptr);
   }
 
-  TEST_CASE("HTMLCollection::operator[](size_t index)", "[HTML][Node][HTMLCollection]")
+  TEST_CASE("HTMLCollection[index]: as item()", "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
   {
     CommonTestData data;
     auto &collection = *data.Collection;
@@ -122,7 +126,8 @@ namespace krys::boo::dom::tests
     REQUIRE(result == nullptr);
   }
 
-  TEST_CASE("HTMLCollection::NamedItem", "[HTML][Node][HTMLCollection]")
+  TEST_CASE("HTMLCollection.namedItem(): the first element with the key as its ID or name",
+            "[DOM][HTMLCollection][dom:dom-htmlcollection-nameditem-key]")
   {
     CommonTestData data;
 
@@ -155,7 +160,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("HTMLCollection::operator[](dom::DOMStringView name)", "[HTML][Node][HTMLCollection]")
+  TEST_CASE("HTMLCollection[name]: as namedItem()",
+            "[DOM][HTMLCollection][dom:dom-htmlcollection-nameditem-key]")
   {
     CommonTestData data;
     auto &collection = *data.Collection;
@@ -187,5 +193,55 @@ namespace krys::boo::dom::tests
       result = collection[u8"non-existent-id"];
       REQUIRE(result == nullptr);
     }
+  }
+
+  TEST_CASE("HTMLCollection.namedItem(): null for the empty string, and name only in the HTML namespace",
+            "[DOM][HTMLCollection][dom:dom-htmlcollection-nameditem-key]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto root = document->CreateElement(u8"div").ReleaseValue();
+    auto unnamed = document->CreateElement(u8"span").ReleaseValue();
+    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    REQUIRE_FALSE(svg->SetAttribute(u8"name", u8"n").HasException());
+    REQUIRE_FALSE(svg->SetAttribute(u8"id", u8"i").HasException());
+    REQUIRE_FALSE(root->AppendChild(*unnamed).HasException());
+    REQUIRE_FALSE(root->AppendChild(*svg).HasException());
+
+    auto live = CreateRef<LiveHTMLCollection>(*root, DefaultFilter);
+    auto staticCollection = CreateRef<StaticHTMLCollection>(SmallElementList {unnamed, svg});
+    for (HTMLCollection *collection :
+         {static_cast<HTMLCollection *>(live.get()), static_cast<HTMLCollection *>(staticCollection.get())})
+    {
+      CHECK(collection->NamedItem(u8"") == nullptr);
+      CHECK(collection->NamedItem(u8"n") == nullptr);
+      CHECK(collection->NamedItem(u8"i") == svg);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLCollection: the supported property names are the IDs and HTML names, once each, in tree order",
+    "[DOM][HTMLCollection][dom:dom-htmlcollection-item]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto root = document->CreateElement(u8"div").ReleaseValue();
+    auto newElement = [&](DOMStringView id, DOMStringView name)
+    {
+      auto element = document->CreateElement(u8"span").ReleaseValue();
+      if (!id.empty())
+      {
+        REQUIRE_FALSE(element->SetAttribute(u8"id", DOMString(id)).HasException());
+      }
+      REQUIRE_FALSE(element->SetAttribute(u8"name", DOMString(name)).HasException());
+      REQUIRE_FALSE(root->AppendChild(*element).HasException());
+      return element;
+    };
+    auto first = newElement(u8"a", u8"b");
+    auto second = newElement(u8"b", u8"c");
+    auto third = newElement(u8"", u8"");
+
+    auto live = CreateRef<LiveHTMLCollection>(*root, DefaultFilter);
+    auto staticCollection = CreateRef<StaticHTMLCollection>(SmallElementList {first, second, third});
+    CHECK(live->SupportedPropertyNames() == List<DOMString> {u8"a", u8"b", u8"c"});
+    CHECK(staticCollection->SupportedPropertyNames() == List<DOMString> {u8"a", u8"b", u8"c"});
   }
 }

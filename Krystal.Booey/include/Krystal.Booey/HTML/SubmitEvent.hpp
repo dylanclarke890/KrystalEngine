@@ -19,13 +19,13 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#submitevent
   class SubmitEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = SubmitEventInit;
-
   private:
     RefPtr<HTMLElement> _submitter;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = SubmitEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-submitevent-submitevent
     SubmitEvent(dom::DOMStringAtom type, const SubmitEventInit &eventInitDict = {}) noexcept;
 

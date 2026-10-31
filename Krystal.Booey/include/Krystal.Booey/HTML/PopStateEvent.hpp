@@ -25,15 +25,15 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#popstateevent
   class PopStateEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = PopStateEventInit;
-
   private:
     RefPtr<SerializedScriptValue> _state;
     RefPtr<boo::History> _history;
     bool _hasUAVisualTransition {false};
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = PopStateEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-popstateevent-popstateevent
     PopStateEvent(dom::DOMStringAtom type, const PopStateEventInit &eventInitDict = {}) noexcept;
     ~PopStateEvent() noexcept override;

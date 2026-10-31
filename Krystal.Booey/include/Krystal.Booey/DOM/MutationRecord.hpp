@@ -10,6 +10,7 @@ namespace krys::boo::dom
   class Node;
   class NodeList;
 
+  /// @brief A change to a node, as delivered to a mutation observer.
   /// @see https://dom.spec.whatwg.org/#interface-mutationrecord
   class MutationRecord : public RefCounted<MutationRecord>
   {
@@ -18,43 +19,43 @@ namespace krys::boo::dom
 
 #pragma region MutationRecord - https://dom.spec.whatwg.org/#mutationrecord
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-type
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-type
     KRYS_NODISCARD virtual DOMStringAtom Type() const noexcept = 0;
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-target
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-target
     KRYS_NODISCARD virtual Ref<Node> Target() const noexcept = 0;
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-addednodes
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-addednodes
     KRYS_NODISCARD virtual RefPtr<NodeList> AddedNodes() const noexcept = 0;
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-removednodes
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-removednodes
     KRYS_NODISCARD virtual RefPtr<NodeList> RemovedNodes() const noexcept = 0;
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
     KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept
     {
       return nullptr;
     }
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
     KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept
     {
       return nullptr;
     }
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
     KRYS_NODISCARD virtual DOMStringAtom AttributeName() const noexcept
     {
       return DOMStringAtom::Null();
     }
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
     KRYS_NODISCARD virtual DOMStringAtom AttributeNamespace() const noexcept
     {
       return DOMStringAtom::Null();
     }
 
-    /// https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
+    /// @see https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
     KRYS_NODISCARD virtual DOMStringAtom OldValue() const noexcept
     {
       return DOMStringAtom::Null();

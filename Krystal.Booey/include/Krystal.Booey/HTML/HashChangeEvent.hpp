@@ -19,14 +19,14 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#hashchangeevent
   class HashChangeEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = HashChangeEventInit;
-
   private:
     dom::USVString _oldURL;
     dom::USVString _newURL;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = HashChangeEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-hashchangeevent-hashchangeevent
     HashChangeEvent(dom::DOMStringAtom type, const HashChangeEventInit &eventInitDict = {}) noexcept;
 

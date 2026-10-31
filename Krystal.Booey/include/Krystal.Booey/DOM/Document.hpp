@@ -194,6 +194,7 @@ namespace krys::boo::dom
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
+    friend class NodeIterator;
 
     friend class html::CustomElementAlgorithms;
     friend class html::FocusAlgorithms;
@@ -1747,6 +1748,7 @@ namespace krys::boo::dom
     /// @brief The (cached) query for @p selectorString, as used by `querySelector()`, `matches()` and
     /// `closest()`.
     /// @return A `SyntaxError` if @p selectorString isn't a valid selector list.
+    /// @see https://dom.spec.whatwg.org/#scope-match-a-selectors-string (steps 1 and 2)
     KRYS_NODISCARD ExceptionOr<SelectorQuery &>
       SelectorQueryForString(DOMStringView selectorString) const noexcept;
 

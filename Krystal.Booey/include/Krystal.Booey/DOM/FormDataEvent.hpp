@@ -19,13 +19,13 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#the-formdataevent-interface
   class FormDataEvent final : public Event
   {
-    friend class EventFactory;
-    using dictionary_type = FormDataEventInit;
-
   private:
     Ref<html::DOMFormData> _formData;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = FormDataEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-formdataevent-formdataevent
     FormDataEvent(DOMStringAtom type, const FormDataEventInit &eventInitDict) noexcept;
 

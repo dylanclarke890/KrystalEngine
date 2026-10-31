@@ -20,8 +20,12 @@ namespace krys::boo::dom
   private:
     /// @see https://dom.spec.whatwg.org/#concept-mo-callback
     MutationCallback _callback;
+    /// @see https://dom.spec.whatwg.org/#mutationobserver-creation-index
+    uint64 _creationIndex {0};
     /// @see https://dom.spec.whatwg.org/#mutationobserver-node-list
     List<WeakRef<Node>> _nodes;
+    /// @see https://dom.spec.whatwg.org/#mutationobserver-transient-node-set
+    List<WeakRef<Node>> _transientNodes;
     /// @see https://dom.spec.whatwg.org/#concept-mo-queue
     List<Ref<MutationRecord>> _recordQueue;
 

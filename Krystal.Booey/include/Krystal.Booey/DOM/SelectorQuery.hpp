@@ -98,11 +98,14 @@ namespace krys::boo::dom
       return _selectors.Closest(element);
     }
 
+    /// @see https://dom.spec.whatwg.org/#scope-match-a-selectors-string (step 3)
     KRYS_NODISCARD Ref<NodeList> QueryAll(ContainerNode &rootNode) const noexcept
     {
       return _selectors.QueryAll(rootNode);
     }
 
+    /// @brief The first element QueryAll() would return.
+    /// @see https://dom.spec.whatwg.org/#scope-match-a-selectors-string (step 3)
     KRYS_NODISCARD Element *QueryFirst(ContainerNode &rootNode) const noexcept
     {
       return _selectors.QueryFirst(rootNode);

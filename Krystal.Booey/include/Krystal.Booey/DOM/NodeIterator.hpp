@@ -21,6 +21,8 @@ namespace krys::boo::dom
     NodeIterator(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept;
 
   public:
+    ~NodeIterator() noexcept;
+
 #pragma region NodeIterator - https://dom.spec.whatwg.org/#nodeiterator
 
     /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-referencenode

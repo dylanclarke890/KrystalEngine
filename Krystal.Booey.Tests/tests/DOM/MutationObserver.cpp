@@ -1,229 +1,236 @@
 ﻿#include "Krystal.Booey/DOM/MutationObserver.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/Callbacks/EventListenerCallback.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
+#include "catch2/generators/catch_generators.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Element.hpp"
-#include "Krystal.Booey/DOM/Event.hpp"
-#include "Krystal.Booey/DOM/HTMLDocument.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.Booey/DOM/MutationRecord.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 
 namespace krys::boo::dom::tests
 {
   namespace
   {
-    auto CreateEmptyObserver = []()
+    KRYS_NODISCARD Ref<MutationObserver> CreateEmptyObserver() noexcept
     {
-      return CreateRef<MutationObserver>(
-        [](const List<Ref<MutationRecord>> &records, MutationObserver &observer)
-        {
-          (void)records;
-          (void)observer;
-        });
+      return CreateRef<MutationObserver>([](const List<Ref<MutationRecord>> &, MutationObserver &) {});
+    }
+
+    KRYS_NODISCARD Ref<Element> CreateDiv(Document &document) noexcept
+    {
+      return document.CreateElement(u8"div").ReleaseValue();
+    }
+
+    KRYS_NODISCARD bool ThrowsTypeError(const ExceptionOr<void> &result) noexcept
+    {
+      return result.HasException() && result.GetException().Code() == ExceptionCode::TypeError;
+    }
+  }
+
+  TEST_CASE(
+    "new MutationObserver(callback): the callback gets the records and the observer, in creation order",
+    "[DOM][MutationObserver][dom:interface-mutationobserver][dom:dom-mutationobserver-mutationobserver]"
+    "[dom:concept-mo-callback][dom:mutationobserver-creation-index]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<Document>();
+    auto target = CreateDiv(*document);
+
+    List<const MutationObserver *> calls;
+    size_t recordCount = 0;
+    auto callback = [&](const List<Ref<MutationRecord>> &records, MutationObserver &observer)
+    {
+      recordCount += records.size();
+      calls.push_back(&observer);
     };
+    auto first = CreateRef<MutationObserver>(callback);
+    auto second = CreateRef<MutationObserver>(callback);
+
+    // The later observer observes, and so is pending, first.
+    REQUIRE_FALSE(second->Observe(*target, {.Attributes = true}).HasException());
+    REQUIRE_FALSE(first->Observe(*target, {.Attributes = true}).HasException());
+    REQUIRE_FALSE(target->SetAttribute(u8"title", u8"x").HasException());
+    loop.PerformMicrotaskCheckpoint();
+
+    CHECK(calls == List<const MutationObserver *> {first.get(), second.get()});
+    CHECK(recordCount == 2);
   }
 
-  TEST_CASE("MutationObserver::Observe", "[HTML][MutationObserver]")
+  TEST_CASE("MutationObserver.observe(): invalid options throw a TypeError",
+            "[DOM][MutationObserver][dom:dom-mutationobserver-observe]")
   {
     auto document = CreateRef<Document>();
+    auto observer = CreateEmptyObserver();
 
-    SECTION("Should return TypeError when childList, attributes and characterData is false or not set")
-    {
-      auto observer = CreateEmptyObserver();
+    // 3. Nothing to observe.
+    CHECK(ThrowsTypeError(observer->Observe(*document, {})));
+    CHECK(ThrowsTypeError(observer->Observe(*document, {.Attributes = false, .CharacterData = false})));
+    CHECK(ThrowsTypeError(observer->Observe(*document, {.Subtree = true})));
 
-      MutationObserverInit invalidOptions {};
-      auto result = observer->Observe(*document, invalidOptions);
+    // 4. to 6. An old value or filter for what isn't observed.
+    CHECK(ThrowsTypeError(
+      observer->Observe(*document, {.ChildList = true, .Attributes = false, .AttributeOldValue = true})));
+    CHECK(ThrowsTypeError(observer->Observe(
+      *document, {.ChildList = true, .Attributes = false, .AttributeFilter = List<DOMStringAtom> {u8"id"}})));
+    CHECK(ThrowsTypeError(observer->Observe(
+      *document, {.ChildList = true, .CharacterData = false, .CharacterDataOldValue = true})));
 
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::TypeError);
-    }
-
-    SECTION("Should return TypeError when attributeOldValue is true but attributes is false")
-    {
-      auto observer = CreateEmptyObserver();
-
-      MutationObserverInit invalidOptions {.Attributes = false, .AttributeOldValue = true};
-      auto result = observer->Observe(*document, invalidOptions);
-
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::TypeError);
-    }
-
-    SECTION("Should return TypeError when attributeFilter is set but attributes is false")
-    {
-      auto observer = CreateEmptyObserver();
-
-      MutationObserverInit invalidOptions {.Attributes = false,
-                                           .AttributeFilter = List<dom::DOMStringAtom> {u8"data-test"}};
-      auto result = observer->Observe(*document, invalidOptions);
-
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::TypeError);
-    }
-
-    SECTION("Should return TypeError when characterDataOldValue is true but characterData is false")
-    {
-      auto observer = CreateEmptyObserver();
-
-      MutationObserverInit invalidOptions {.CharacterData = false, .CharacterDataOldValue = true};
-      auto result = observer->Observe(*document, invalidOptions);
-
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::TypeError);
-    }
-
-    SECTION("Should succeed when valid options are provided")
-    {
-      auto observer = CreateEmptyObserver();
-
-      MutationObserverInit validOptions {.ChildList = true};
-
-      auto result = observer->Observe(*document, validOptions);
-      REQUIRE_FALSE(result.HasException());
-    }
+    // A false old value with its type turned off is fine.
+    CHECK_FALSE(
+      observer->Observe(*document, {.ChildList = true, .Attributes = false, .AttributeOldValue = false})
+        .HasException());
   }
 
-  TEST_CASE("MutationObserver::TakeRecords", "[HTML][MutationObserver]")
+  TEST_CASE("MutationObserver.observe(): an old value or filter option implies its type, even when false",
+            "[DOM][MutationObserver][dom:dom-mutationobserver-observe]")
   {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
     auto document = CreateRef<Document>();
+    auto element = CreateDiv(*document);
+    auto text = document->CreateTextNode(u8"a");
+    auto observer = CreateEmptyObserver();
 
-    SECTION("Returns empty list when queue is empty")
+    SECTION("attributeOldValue")
     {
-      auto observer = CreateEmptyObserver();
-
-      MutationObserverInit options {.ChildList = true};
-      REQUIRE_FALSE(observer->Observe(*document, options).HasException());
-
+      auto option = GENERATE(true, false);
+      REQUIRE_FALSE(observer->Observe(*element, {.AttributeOldValue = option}).HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"x").HasException());
       auto records = observer->TakeRecords();
-      REQUIRE(records.empty());
+      REQUIRE(records.size() == 1);
+      CHECK(records[0]->Type() == u8"attributes");
+    }
+
+    SECTION("attributeFilter")
+    {
+      REQUIRE_FALSE(
+        observer->Observe(*element, {.AttributeFilter = List<DOMStringAtom> {u8"title"}}).HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"id", u8"x").HasException());
+      REQUIRE_FALSE(element->SetAttribute(u8"title", u8"x").HasException());
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 1);
+      CHECK(records[0]->AttributeName() == u8"title");
+    }
+
+    SECTION("characterDataOldValue")
+    {
+      auto option = GENERATE(true, false);
+      REQUIRE_FALSE(observer->Observe(*text, {.CharacterDataOldValue = option}).HasException());
+      REQUIRE_FALSE(text->AppendData(u8"b").HasException());
+      auto records = observer->TakeRecords();
+      REQUIRE(records.size() == 1);
+      CHECK(records[0]->Type() == u8"characterData");
+      CHECK(records[0]->OldValue() == (option ? DOMStringAtom(u8"a") : DOMStringAtom::Null()));
     }
   }
 
-  namespace
-  {
-    /// @brief An observer that keeps each delivery's record types (one string a delivery, `childList` and so
-    /// on, comma-separated).
-    struct RecordingObserver
-    {
-      List<std::string> Deliveries;
-      Ref<MutationObserver> Observer;
-
-      RecordingObserver() noexcept
-          : Observer(CreateRef<MutationObserver>(
-              [this](const List<Ref<MutationRecord>> &records, MutationObserver &)
-              {
-                std::string delivery;
-                for (auto &record : records)
-                {
-                  auto type = record->Type().View();
-                  delivery += (delivery.empty() ? "" : ",") + std::string(type.begin(), type.end());
-                }
-                Deliveries.push_back(delivery);
-              }))
-      {
-      }
-    };
-
-    KRYS_NODISCARD Ref<Element> NewElement(Document &document, DOMStringView name) noexcept
-    {
-      return document.CreateElement(DOMStringAtom(name)).ReleaseValue();
-    }
-  }
-
-  TEST_CASE("MutationObserver: records are delivered at the microtask checkpoint", "[DOM][MutationObserver]")
+  TEST_CASE("MutationObserver.observe(): observing a node again replaces the options",
+            "[DOM][MutationObserver][dom:dom-mutationobserver-observe][dom:mutationobserver-node-list]")
   {
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    REQUIRE_FALSE(document->AppendChild(*parent).HasException());
-    RecordingObserver recorder;
-    REQUIRE_FALSE(
-      recorder.Observer->Observe(*parent, {.ChildList = true, .Attributes = true}).HasException());
+    auto element = CreateDiv(*document);
+    auto observer = CreateEmptyObserver();
 
-    SECTION("in one delivery for every mutation since the last")
-    {
-      REQUIRE_FALSE(parent->AppendChild(*NewElement(*document, u8"span")).HasException());
-      REQUIRE_FALSE(parent->SetAttribute(u8"title", u8"x").HasException());
-      CHECK(recorder.Deliveries.empty());
-      loop.PerformMicrotaskCheckpoint();
-      CHECK(recorder.Deliveries == List<std::string> {"childList,attributes"});
+    REQUIRE_FALSE(observer->Observe(*element, {.Attributes = true}).HasException());
+    REQUIRE_FALSE(observer->Observe(*element, {.ChildList = true}).HasException());
 
-      // Nothing new, nothing delivered.
-      loop.PerformMicrotaskCheckpoint();
-      CHECK(recorder.Deliveries.size() == 1);
-    }
-
-    SECTION("takeRecords() and disconnect() leave nothing to deliver")
-    {
-      REQUIRE_FALSE(parent->SetAttribute(u8"title", u8"x").HasException());
-      CHECK(recorder.Observer->TakeRecords().size() == 1);
-      REQUIRE_FALSE(parent->SetAttribute(u8"title", u8"y").HasException());
-      recorder.Observer->Disconnect();
-      REQUIRE_FALSE(parent->SetAttribute(u8"title", u8"z").HasException());
-      loop.PerformMicrotaskCheckpoint();
-      CHECK(recorder.Deliveries.empty());
-    }
+    // One registration, with the new options.
+    REQUIRE_FALSE(element->SetAttribute(u8"title", u8"x").HasException());
+    REQUIRE_FALSE(element->AppendChild(*CreateDiv(*document)).HasException());
+    auto records = observer->TakeRecords();
+    REQUIRE(records.size() == 1);
+    CHECK(records[0]->Type() == u8"childList");
   }
 
-  TEST_CASE("MutationObserver: transient registered observers", "[DOM][MutationObserver]")
+  TEST_CASE(
+    "MutationObserver.observe(): observing a node again drops the transient observers it was the source of",
+    "[DOM][MutationObserver][dom:dom-mutationobserver-observe][dom:mutationobserver-transient-node-set]")
   {
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
     auto document = CreateRef<Document>();
-    auto parent = NewElement(*document, u8"div");
-    auto child = NewElement(*document, u8"div");
+    auto parent = CreateDiv(*document);
+    auto child = CreateDiv(*document);
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
-    RecordingObserver recorder;
-    REQUIRE_FALSE(recorder.Observer->Observe(*parent, {.ChildList = true, .Subtree = true}).HasException());
+    auto observer = CreateEmptyObserver();
+    REQUIRE_FALSE(observer->Observe(*parent, {.ChildList = true, .Subtree = true}).HasException());
 
-    // The removed child is still observed until the observer is notified.
+    // The removed child is observed through a transient observer...
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
-    REQUIRE_FALSE(child->AppendChild(*NewElement(*document, u8"span")).HasException());
-    loop.PerformMicrotaskCheckpoint();
-    CHECK(recorder.Deliveries == List<std::string> {"childList,childList"});
+    REQUIRE_FALSE(child->AppendChild(*CreateDiv(*document)).HasException());
+    CHECK(observer->TakeRecords().size() == 2);
 
-    // Then it isn't.
-    REQUIRE_FALSE(child->AppendChild(*NewElement(*document, u8"span")).HasException());
-    loop.PerformMicrotaskCheckpoint();
-    CHECK(recorder.Deliveries.size() == 1);
+    // ...until the parent is observed again.
+    REQUIRE_FALSE(observer->Observe(*parent, {.ChildList = true, .Subtree = true}).HasException());
+    REQUIRE_FALSE(child->AppendChild(*CreateDiv(*document)).HasException());
+    CHECK(observer->TakeRecords().empty());
   }
 
-  TEST_CASE("MutationObserver: slotchange", "[DOM][MutationObserver][Slot]")
+  TEST_CASE("MutationObserver.disconnect(): stops observing every node and drops the queued records",
+            "[DOM][MutationObserver][dom:dom-mutationobserver-disconnect][dom:mutationobserver-node-list]"
+            "[dom:concept-mo-queue]")
   {
     auto &loop = html::EventLoop::Current();
     loop.RunUntilIdle();
-    auto document = CreateRef<HTMLDocument>();
-    auto host = NewElement(*document, u8"div");
-    REQUIRE_FALSE(document->AppendChild(*host).HasException());
-    auto shadow = host->AttachShadow({}).ReleaseValue();
-    auto slot = NewElement(*document, u8"slot");
-    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+    auto document = CreateRef<Document>();
+    auto parent = CreateDiv(*document);
+    auto child = CreateDiv(*document);
+    auto other = CreateDiv(*document);
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
-    struct Counter : EventListenerCallback
-    {
-      int32 Count {0};
-      bool Bubbles {false};
+    size_t calls = 0;
+    auto observer =
+      CreateRef<MutationObserver>([&](const List<Ref<MutationRecord>> &, MutationObserver &) { ++calls; });
+    REQUIRE_FALSE(observer->Observe(*parent, {.ChildList = true, .Subtree = true}).HasException());
+    REQUIRE_FALSE(observer->Observe(*other, {.Attributes = true}).HasException());
 
-      void HandleEvent(Event &event) noexcept override
-      {
-        ++Count;
-        Bubbles = event.Bubbles();
-      }
-    };
-    auto counter = CreateRef<Counter>();
-    slot->AddEventListener(DOMStringAtom(u8"slotchange"), Ref<EventListenerCallback> {counter}, false);
+    // A queued record, and a transient observer on the removed child.
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    observer->Disconnect();
 
-    // A slottable joining the slot signals a slot change, which fires at the next notification.
-    REQUIRE_FALSE(host->AppendChild(*NewElement(*document, u8"span")).HasException());
-    CHECK(counter->Count == 0);
+    CHECK(observer->TakeRecords().empty());
+    REQUIRE_FALSE(parent->AppendChild(*CreateDiv(*document)).HasException());
+    REQUIRE_FALSE(child->AppendChild(*CreateDiv(*document)).HasException());
+    REQUIRE_FALSE(other->SetAttribute(u8"title", u8"x").HasException());
+    CHECK(observer->TakeRecords().empty());
     loop.PerformMicrotaskCheckpoint();
-    CHECK(counter->Count == 1);
-    CHECK(counter->Bubbles);
+    CHECK(calls == 0);
+
+    // It can observe again.
+    REQUIRE_FALSE(observer->Observe(*other, {.Attributes = true}).HasException());
+    REQUIRE_FALSE(other->SetAttribute(u8"title", u8"y").HasException());
+    CHECK(observer->TakeRecords().size() == 1);
+  }
+
+  TEST_CASE("MutationObserver.takeRecords(): returns the queued records and empties the queue",
+            "[DOM][MutationObserver][dom:dom-mutationobserver-takerecords][dom:concept-mo-queue]")
+  {
+    auto &loop = html::EventLoop::Current();
+    loop.RunUntilIdle();
+    auto document = CreateRef<Document>();
+    auto element = CreateDiv(*document);
+
+    size_t calls = 0;
+    auto observer =
+      CreateRef<MutationObserver>([&](const List<Ref<MutationRecord>> &, MutationObserver &) { ++calls; });
+    REQUIRE_FALSE(observer->Observe(*element, {.ChildList = true, .Attributes = true}).HasException());
+
+    CHECK(observer->TakeRecords().empty());
+
+    REQUIRE_FALSE(element->SetAttribute(u8"title", u8"x").HasException());
+    REQUIRE_FALSE(element->AppendChild(*CreateDiv(*document)).HasException());
+    auto records = observer->TakeRecords();
+    REQUIRE(records.size() == 2);
+    CHECK(records[0]->Type() == u8"attributes");
+    CHECK(records[1]->Type() == u8"childList");
+    CHECK(records[0]->Target().get() == element.get());
+
+    // Nothing is left to take or deliver.
+    CHECK(observer->TakeRecords().empty());
+    loop.PerformMicrotaskCheckpoint();
+    CHECK(calls == 0);
   }
 }

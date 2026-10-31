@@ -23,11 +23,10 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/pointerevents/#pointerevent-interface
   class PointerEvent : public MouseEvent
   {
-    friend class EventFactory;
-
+  public:
+    /// @brief The dictionary its constructor takes.
     using dictionary_type = PointerEventInit;
 
-  public:
     enum class IsPrimary : bool
     {
       No,

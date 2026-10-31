@@ -2829,37 +2829,46 @@ namespace krys::boo::dom
         _domTokenList->AssociatedAttributeValueChanged();
       }
     }
+    // https://dom.spec.whatwg.org/#slotable-name
+    // 1. If localName is slot and namespace is null:
     else if (localName == Attributes::Slot)
     {
+      // 1a. If value is oldValue, then return.
       if (value == oldValue)
       {
         return;
       }
 
+      // 1b. If value is null and oldValue is the empty string, then return.
       if (!value.has_value() && oldValue.has_value() && oldValue->empty())
       {
         return;
       }
 
+      // 1c. If value is the empty string and oldValue is null, then return.
       if (value.has_value() && value->empty() && !oldValue.has_value())
       {
         return;
       }
 
+      // 1d. If value is null or the empty string, then set element's name to the empty string.
       if (!value.has_value() || value->empty())
       {
         _slottableName = u8"";
       }
+      // 1e. Otherwise, set element's name to value.
       else
       {
         _slottableName = DOMString(*value);
       }
 
+      // 1f. If element is assigned, then run assign slottables for element's assigned slot.
       if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(*this))
       {
         SlotAlgorithms::AssignSlottables(*assignedSlot);
       }
 
+      // 1g. Run assign a slot for element.
       SlotAlgorithms::AssignSlot(*this);
     }
     else if (localName == Attributes::Dir)

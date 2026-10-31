@@ -5,26 +5,19 @@
 #include "Krystal.Booey/DOM/UIEvent.hpp"
 #include "Krystal.Core/Attributes.hpp"
 
-namespace krys::boo::html
-{
-  class FocusAlgorithms;
-}
-
 namespace krys::boo::dom
 {
   /// @brief A focus event: `focus`, `blur`, `focusin` and `focusout`.
   /// @see https://w3c.github.io/uievents/#interface-focusevent
   class FocusEvent : public UIEvent
   {
-    friend class EventFactory;
-    friend class html::FocusAlgorithms;
-
-    using dictionary_type = FocusEventInit;
-
   private:
     RefPtr<EventTarget> _relatedTarget;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = FocusEventInit;
+
     FocusEvent(DOMStringAtom type, const FocusEventInit &eventInitDict = {}) noexcept
         : UIEvent(type, eventInitDict), _relatedTarget(eventInitDict.RelatedTarget)
     {

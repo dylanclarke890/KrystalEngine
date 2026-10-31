@@ -15,6 +15,7 @@ namespace krys::boo::dom
     friend class AbortAlgorithms;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#abortcontroller-signal
     Ref<AbortSignal> _signal;
 
   public:

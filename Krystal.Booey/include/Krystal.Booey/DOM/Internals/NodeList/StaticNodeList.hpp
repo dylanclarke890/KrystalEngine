@@ -6,6 +6,8 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A static node list: the nodes it was made with.
+  /// @see https://dom.spec.whatwg.org/#concept-collection-static
   class StaticNodeList final : public NodeList
   {
   private:

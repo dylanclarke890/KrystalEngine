@@ -69,6 +69,10 @@ namespace krys::boo::html
     void ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept;
 
 #pragma endregion
+
+  protected:
+    /// @see https://html.spec.whatwg.org/#template-clone
+    void OnClone(dom::Node &copy, bool subtree) noexcept override;
   };
 }
 

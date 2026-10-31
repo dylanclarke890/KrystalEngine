@@ -30,9 +30,6 @@ namespace krys::boo::html
   /// @see https://html.spec.whatwg.org/#messageevent
   class MessageEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
-    using dictionary_type = MessageEventInit;
-
   private:
     RefPtr<SerializedScriptValue> _data;
     dom::USVString _origin;
@@ -40,6 +37,9 @@ namespace krys::boo::html
     RefPtr<LocalDOMWindow> _source;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = MessageEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-messageevent-messageevent
     MessageEvent(dom::DOMStringAtom type, const MessageEventInit &eventInitDict = {}) noexcept;
     ~MessageEvent() noexcept override;

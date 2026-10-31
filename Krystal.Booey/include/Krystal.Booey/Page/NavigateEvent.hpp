@@ -76,10 +76,10 @@ namespace krys::boo
   /// @see https://html.spec.whatwg.org/#navigateevent
   class NavigateEvent final : public dom::Event
   {
-    friend class dom::EventFactory;
+  public:
+    /// @brief The dictionary its constructor takes.
     using dictionary_type = NavigateEventInit;
 
-  public:
     /// @see https://html.spec.whatwg.org/#navigationfocusreset
     enum class NavigationFocusReset : bool
     {

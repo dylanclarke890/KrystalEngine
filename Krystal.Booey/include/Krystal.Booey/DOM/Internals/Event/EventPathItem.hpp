@@ -7,7 +7,8 @@ namespace krys::boo::dom
 {
   class EventTarget;
 
-  /// @see https://dom.spec.whatwg.org/#event-path
+  /// @brief An item of an event's path.
+  /// @see https://dom.spec.whatwg.org/#event-path-item
   class EventPathItem
   {
   private:
@@ -37,7 +38,7 @@ namespace krys::boo::dom
       return _shadowAdjustedTarget.get();
     }
 
-    /// @see https://dom.spec.whatwg.org/#event-path-related-target
+    /// @see https://dom.spec.whatwg.org/#event-path-relatedtarget
     KRYS_NODISCARD EventTarget *RelatedTarget() const noexcept
     {
       return _relatedTarget.get();

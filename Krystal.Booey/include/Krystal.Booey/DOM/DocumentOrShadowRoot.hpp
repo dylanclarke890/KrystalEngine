@@ -65,6 +65,8 @@ namespace krys::boo::dom
 
   private:
     ContainerNode &_rootNode;
+    /// @see https://dom.spec.whatwg.org/#document-custom-element-registry
+    /// @see https://dom.spec.whatwg.org/#shadowroot-custom-element-registry
     RefPtr<html::CustomElementRegistry> _customElementRegistry;
     UniquePtr<css::CSSStyleSheetObservableArray> _adoptedStyleSheets;
     UniquePtr<dom::IdTargetObserverRegistry> _idTargetObserverRegistry;

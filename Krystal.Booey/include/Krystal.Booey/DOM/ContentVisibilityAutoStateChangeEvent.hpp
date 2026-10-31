@@ -18,13 +18,13 @@ namespace krys::boo::dom
   /// @see https://drafts.csswg.org/css-contain/#content-visibility-auto-state-change
   class ContentVisibilityAutoStateChangeEvent final : public Event
   {
-    friend class EventFactory;
-    using dictionary_type = ContentVisibilityAutoStateChangeEventInit;
-
   private:
     bool _skipped;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = ContentVisibilityAutoStateChangeEventInit;
+
     /// @see
     /// https://drafts.csswg.org/css-contain/#dom-contentvisibilityautostatechangeevent-contentvisibilityautostatechangeevent
     ContentVisibilityAutoStateChangeEvent(

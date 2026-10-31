@@ -239,7 +239,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Node->Data() == u8"Hello, universe!");
   }
 
-  TEST_CASE("CharacterData::NodeValue", "[HTML][CharacterData]")
+  TEST_CASE("Node.nodeValue: character data's is its data, which setting it replaces",
+            "[DOM][CharacterData][dom:dom-node-nodevalue]")
   {
     CommonTestData data {};
 
@@ -251,7 +252,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Node->NodeValue() == u8"New value");
   }
 
-  TEST_CASE("CharacterData::TextContent", "[HTML][CharacterData]")
+  TEST_CASE("Node.textContent: character data's is its data, which setting it replaces",
+            "[DOM][CharacterData][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
     CommonTestData data {};
 

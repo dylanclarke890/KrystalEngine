@@ -117,6 +117,31 @@ namespace krys::boo::dom
     return node._assignedSlot.get();
   }
 
+  html::HTMLSlotElement *SlotAlgorithms::GetManualSlotAssignment(const Node &slottable) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(slottable))
+    {
+      return element->_manuallyAssignedSlot.get();
+    }
+    if (auto *text = DynamicDowncast<Text>(slottable))
+    {
+      return text->_manuallyAssignedSlot.get();
+    }
+    return nullptr;
+  }
+
+  void SlotAlgorithms::SetManualSlotAssignment(Node &slottable, html::HTMLSlotElement *slot) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(slottable))
+    {
+      element->_manuallyAssignedSlot = CreateWeakPtr(slot);
+    }
+    else if (auto *text = DynamicDowncast<Text>(slottable))
+    {
+      text->_manuallyAssignedSlot = CreateWeakPtr(slot);
+    }
+  }
+
 #pragma endregion
 
 #pragma region Finding slots and slotted elements
@@ -125,20 +150,24 @@ namespace krys::boo::dom
   {
     krys_debug_assert(IsSlottable(slottable));
 
+    // 1. If slottable's parent is null, then return null.
+    // Only an element parent can have a shadow root.
     Element *parent = slottable.ParentElement();
-
     if (parent == nullptr)
     {
       return nullptr;
     }
 
+    // 2. Let shadow be slottable's parent's shadow root.
     RefPtr<ShadowRoot> shadow = ShareRefPtr(TreeQueries::GetShadowRoot(*parent));
 
+    // 3. If shadow is null, then return null.
     if (shadow == nullptr)
     {
       return nullptr;
     }
 
+    // 4. If open is true and shadow's mode is not "open", then return null.
     if (open && shadow->Mode() != ShadowRootMode::Open)
     {
       return nullptr;
@@ -152,6 +181,8 @@ namespace krys::boo::dom
       return details->SlotForHostChild(slottable);
     }
 
+    // 5. If shadow's slot assignment is "manual", then return the slot in shadow's descendants whose manually
+    //    assigned nodes contains slottable, if any; otherwise null.
     if (shadow->SlotAssignment() == SlotAssignmentMode::Manual)
     {
       for (auto &descendant : DescendantRange(*shadow))
@@ -174,6 +205,8 @@ namespace krys::boo::dom
       return nullptr;
     }
 
+    // 6. Return the first slot in tree order in shadow's descendants whose name is slottable's name, if any;
+    //    otherwise null.
     auto &slottableName = Is<Element>(slottable) ? Downcast<Element>(slottable)._slottableName
                                                  : Downcast<Text>(slottable)._slottableName;
 
@@ -193,17 +226,26 @@ namespace krys::boo::dom
 
   List<Ref<Node>> SlotAlgorithms::FindSlottables(html::HTMLSlotElement &slot) noexcept
   {
+    // 1. Let result be « ».
     List<Ref<Node>> result;
+
+    // 2. Let root be slot's root.
     ShadowRoot *root = DynamicDowncast<ShadowRoot>(TreeQueries::Root(slot));
 
+    // 3. If root is not a shadow root, then return result.
     if (root == nullptr)
     {
       return result;
     }
 
+    // 4. Let host be root's host.
     Element *host = root->Host();
+
+    // 5. If root's slot assignment is "manual":
     if (root->SlotAssignment() == SlotAssignmentMode::Manual)
     {
+      // 5a. For each slottable slottable of slot's manually assigned nodes, if slottable's parent is host,
+      //     append slottable to result.
       for (auto &manuallyAssignedNode : slot._manuallyAssignedNodes)
       {
         if (auto slottable = manuallyAssignedNode.lock())
@@ -215,13 +257,17 @@ namespace krys::boo::dom
         }
       }
     }
+    // 6. Otherwise, for each slottable child slottable of host, in tree order:
     else
     {
       for (auto &slottable : ChildNodeRange(host))
       {
         if (IsSlottable(slottable))
         {
+          // 6a. Let foundSlot be the result of finding a slot given slottable.
           auto *foundSlot = FindSlot(slottable);
+
+          // 6b. If foundSlot is slot, then append slottable to result.
           if (foundSlot == &slot)
           {
             result.push_back(ShareRef(slottable));
@@ -230,19 +276,26 @@ namespace krys::boo::dom
       }
     }
 
+    // 7. Return result.
     return result;
   }
 
   List<Ref<Node>> SlotAlgorithms::FindFlattenedSlottables(html::HTMLSlotElement &slot) noexcept
   {
+    // 1. Let result be « ».
     List<Ref<Node>> result;
 
+    // 2. If slot's root is not a shadow root, then return result.
     if (!TreeQueries::IsInShadowTree(slot))
     {
       return result;
     }
 
+    // 3. Let slottables be the result of finding slottables given slot.
     auto slottables = FindSlottables(slot);
+
+    // 4. If slottables is the empty list, then append each slottable child of slot, in tree order, to
+    //    slottables.
     if (slottables.empty())
     {
       for (auto &child : ChildNodeRange(slot))
@@ -254,19 +307,26 @@ namespace krys::boo::dom
       }
     }
 
+    // 5. For each node of slottables:
     for (auto &node : slottables)
     {
+      // 5a. If node is a slot whose root is a shadow root:
       if (Is<html::HTMLSlotElement>(node) && TreeQueries::IsInShadowTree(*node))
       {
+        // 5a.i. Let temporaryResult be the result of finding flattened slottables given node.
         auto temporaryResult = FindFlattenedSlottables(Downcast<html::HTMLSlotElement>(*node));
+
+        // 5a.ii. Append each slottable in temporaryResult, in order, to result.
         result.append_range(std::move(temporaryResult));
       }
+      // 5b. Otherwise, append node to result.
       else
       {
         result.push_back(node);
       }
     }
 
+    // 6. Return result.
     return result;
   }
 
@@ -276,7 +336,10 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::AssignSlottables(html::HTMLSlotElement &slot) noexcept
   {
+    // 1. Let slottables be the result of finding slottables for slot.
     auto slottables = FindSlottables(slot);
+
+    // 2. If slottables and slot's assigned nodes are not identical, then run signal a slot change for slot.
     bool assignedNodesChanged = !std::ranges::equal(
       slottables, slot._assignedNodes, [](const auto &a, const auto &b) { return a.get() == b.get(); });
     if (assignedNodesChanged)
@@ -294,6 +357,26 @@ namespace krys::boo::dom
       }
     }
 
+    // A slottable that's no longer assigned to the slot no longer has it as its assigned slot.
+    for (auto &weakNode : slot._assignedNodes)
+    {
+      auto *node = weakNode.get();
+      if (node && GetAssignedSlot(*node) == &slot
+          && !std::ranges::any_of(slottables, [&](const auto &slottable) { return slottable.get() == node; }))
+      {
+        if (auto *element = DynamicDowncast<Element>(*node))
+        {
+          element->_assignedSlot = nullptr;
+        }
+        else if (auto *text = DynamicDowncast<Text>(*node))
+        {
+          text->_assignedSlot = nullptr;
+        }
+      }
+    }
+
+    // 3. Set slot's assigned nodes to slottables.
+    // 4. For each slottable of slottables: set slottable's assigned slot to slot.
     slot._assignedNodes.clear();
     slot._assignedNodes.reserve(slottables.size());
     for (auto &slottable : slottables)
@@ -328,7 +411,10 @@ namespace krys::boo::dom
 
   void SlotAlgorithms::AssignSlot(Node &slottable) noexcept
   {
+    // 1. Let slot be the result of finding a slot with slottable.
     html::HTMLSlotElement *slot = FindSlot(slottable);
+
+    // 2. If slot is non-null, then run assign slottables for slot.
     if (slot != nullptr)
     {
       AssignSlottables(*slot);

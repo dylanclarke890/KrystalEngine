@@ -10,6 +10,7 @@ namespace krys::boo::dom
   class TransientRegisteredObserver : public RegisteredObserver
   {
   private:
+    /// @see https://dom.spec.whatwg.org/#transient-registered-observer-source
     Ref<RegisteredObserver> _source;
 
   public:

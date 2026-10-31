@@ -22,7 +22,8 @@ namespace krys::boo::dom::tests
     }
   };
 
-  TEST_CASE("DocumentType::NodeType", "[HTML][DocumentType]")
+  TEST_CASE("Node.nodeType: a DocumentType is a DOCUMENT_TYPE_NODE",
+            "[DOM][DocumentType][dom:dom-node-nodetype][dom:dom-node-document_type_node]")
   {
     CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->NodeType() == NodeType::DOCUMENT_TYPE_NODE);
@@ -46,7 +47,7 @@ namespace krys::boo::dom::tests
     REQUIRE(data.DocType->SystemId() == u8"http://www.w3.org/TR/html4/strict.dtd");
   }
 
-  TEST_CASE("DocumentType::NodeName", "[HTML][DocumentType]")
+  TEST_CASE("Node.nodeName: a DocumentType's is its name", "[DOM][DocumentType][dom:dom-node-nodename]")
   {
     CommonTestData data(u8"html", u8"-//W3C//DTD HTML 4.01//EN", u8"http://www.w3.org/TR/html4/strict.dtd");
     REQUIRE(data.DocType->NodeName() == u8"html");

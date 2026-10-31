@@ -8,10 +8,14 @@ namespace krys::boo::dom
 {
   class MutationObserver;
 
+  /// @brief An observer and the options it observes a node with, kept in the node's registered observer list.
+  /// @see https://dom.spec.whatwg.org/#registered-observer
   class RegisteredObserver : public RefCounted<RegisteredObserver>
   {
   protected:
+    /// @see https://dom.spec.whatwg.org/#registered-observer-observer
     Ref<MutationObserver> _observer;
+    /// @see https://dom.spec.whatwg.org/#registered-observer-options
     MutationObserverInit _options;
 
   public:

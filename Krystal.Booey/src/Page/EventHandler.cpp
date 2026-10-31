@@ -2031,8 +2031,8 @@ namespace krys::boo
       }
 
       auto type = dom::DOMStringAtom(EventNames::SelectStart);
-      return dom::EventDispatcher::FireEvent<dom::Event>(type, *node, [&](dom::Event &event)
-                                                         { event.InitEvent(type, true, true); });
+      return dom::EventDispatcher::FireEvent<dom::Event>(
+        type, *node, dom::EventInit {.Bubbles = true, .Cancelable = true});
     }
 
     // FIXME: Image overlays (ImageOverlay::isInsideOverlay) and nodes that select on mouse down

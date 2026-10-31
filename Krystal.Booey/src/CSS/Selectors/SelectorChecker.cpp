@@ -1428,6 +1428,8 @@ namespace krys::boo::css
             return !context.IsNegation;
           }
 
+          // FIXME: A virtual scoping root (a document fragment or shadow root) should act as the parent of
+          // its top-level elements, so that `:scope > p` matches them; no element is ever equal to one.
           const dom::Node *contextualReferenceNode =
             !checkingContext.Scope ? dom::TreeQueries::DocumentElement(element.NodeDocument())
                                    : static_cast<const dom::Node *>(checkingContext.Scope.get());

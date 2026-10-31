@@ -385,6 +385,10 @@ namespace krys::boo::dom
   template <typename TOutput>
   void SelectorDataList::Execute(ContainerNode &rootNode, TOutput &output) const noexcept
   {
+    // 3. Return the result of match a selector against a tree with selector and node's root using scoping
+    // root node.
+    // The candidates are the scoping root's descendants, in tree order; the selectors are matched against the
+    // whole tree, with :scope as the scoping root.
     switch (_matchType)
     {
       case MatchType::SingleSelector:

@@ -37,6 +37,8 @@ namespace krys::boo::dom
   class NodeList;
 
   /// @see https://dom.spec.whatwg.org/#interface-node
+  /// @see https://dom.spec.whatwg.org/#concept-node
+  /// @see https://dom.spec.whatwg.org/#concept-node-tree
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -67,6 +69,8 @@ namespace krys::boo::dom
     RenderObject *_renderer {nullptr};
 
   protected:
+    /// @brief Creates a node whose node document is @p document (a document passes itself).
+    /// @see https://dom.spec.whatwg.org/#create-a-node
     Node(Document &document, NodeType type, NodeFlags flags) noexcept;
 
     /// @brief Moves the node to @p document, which then counts it rather than its old document.
@@ -90,6 +94,7 @@ namespace krys::boo::dom
     KRYS_NODISCARD DOMString BaseURI() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-node-isconnected
+    /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
       return HasNodeFlag(NodeFlags::IsConnected);
@@ -101,6 +106,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-getrootnode
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-parent
     /// @see https://dom.spec.whatwg.org/#dom-node-parentnode
     KRYS_NODISCARD ContainerNode *ParentNode() const noexcept
     {
@@ -116,18 +122,22 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-childnodes
     KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-first-child
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild
     KRYS_NODISCARD Node *FirstChild() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-last-child
     /// @see https://dom.spec.whatwg.org/#dom-node-lastchild
     KRYS_NODISCARD Node *LastChild() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-previous-sibling
     /// @see https://dom.spec.whatwg.org/#dom-node-previoussibling
     KRYS_NODISCARD Node *PreviousSibling() const noexcept
     {
       return _previousSibling.get();
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-next-sibling
     /// @see https://dom.spec.whatwg.org/#dom-node-nextsibling
     KRYS_NODISCARD Node *NextSibling() const noexcept
     {
@@ -147,13 +157,18 @@ namespace krys::boo::dom
       return {};
     }
 
+    /// @brief Gets text content: null here, for documents and doctypes; overridden by the other interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
+    /// @see https://dom.spec.whatwg.org/#get-text-content
     KRYS_NODISCARD virtual Maybe<DOMString> TextContent() const noexcept
     {
       return null;
     }
 
+    /// @brief Sets text content: nothing here, for documents and doctypes; overridden by the other
+    /// interfaces.
     /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
+    /// @see https://dom.spec.whatwg.org/#set-text-content
     virtual ExceptionOr<void> TextContent(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
@@ -535,7 +550,10 @@ namespace krys::boo::dom
     /// element's shadow tree, the `<use>` element's.
     KRYS_NODISCARD DocumentOrShadowRoot &TreeScopeForSVGReferences() const noexcept;
 
+    /// @brief Whether the node's root is a shadow root (the node is in a shadow tree). The node tree of the
+    /// shadow root's host is its light tree.
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
+    /// @see https://dom.spec.whatwg.org/#concept-light-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
       return HasNodeFlag(NodeFlags::IsInShadowTree);
@@ -544,6 +562,9 @@ namespace krys::boo::dom
     /// @brief Whether the node is in a user agent shadow tree.
     KRYS_NODISCARD bool IsInUserAgentShadowTree() const noexcept;
 
+    /// @brief Whether the node's root is a document: its shadow-including root is, and it isn't in a shadow
+    /// tree.
+    /// @see https://dom.spec.whatwg.org/#in-a-document-tree
     /// @see https://dom.spec.whatwg.org/#concept-document-tree
     KRYS_NODISCARD bool IsInDocumentTree() const noexcept
     {

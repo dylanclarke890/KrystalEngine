@@ -20,7 +20,7 @@ namespace krys::boo::dom::tests
     { constNode.GetElementById(id) } -> SameType<RefPtr<const Element>>;
   };
 
-  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins][dom:interface-nonelementparentnode]")
   {
     STATIC_REQUIRE(NonElementParentNodeMixin<Document>);
     STATIC_REQUIRE(NonElementParentNodeMixin<DocumentFragment>);
@@ -31,7 +31,7 @@ namespace krys::boo::dom::tests
     { node.CustomElementRegistry() } -> SameType<RefPtr<html::CustomElementRegistry>>;
   };
 
-  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins]")
+  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins][dom:mixin-documentorshadowroot]")
   {
     STATIC_REQUIRE(DocumentOrShadowRootMixin<Document>);
     STATIC_REQUIRE(DocumentOrShadowRootMixin<ShadowRoot>);
@@ -57,7 +57,7 @@ namespace krys::boo::dom::tests
     { node.QuerySelectorAll(selectors) } -> SameType<dom::ExceptionOr<Ref<NodeList>>>;
   };
 
-  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins][dom:interface-parentnode]")
   {
     STATIC_REQUIRE(ParentNodeMixin<Element>);
     STATIC_REQUIRE(ParentNodeMixin<Document>);
@@ -72,10 +72,12 @@ namespace krys::boo::dom::tests
     { node.NextElementSibling() } -> SameType<RefPtr<Element>>;
   };
 
-  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins][dom:interface-nondocumenttypechildnode]")
   {
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
+    // Not doctypes, for web compatibility.
+    STATIC_REQUIRE_FALSE(NonDocumentTypeChildNodeMixin<DocumentType>);
   }
 
   template <typename T>
@@ -86,7 +88,7 @@ namespace krys::boo::dom::tests
     { node.Remove() } -> SameType<dom::ExceptionOr<void>>;
   };
 
-  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins][dom:interface-childnode]")
   {
     STATIC_REQUIRE(ChildNodeMixin<DocumentType>);
     STATIC_REQUIRE(ChildNodeMixin<Element>);
@@ -98,7 +100,7 @@ namespace krys::boo::dom::tests
     { node.AssignedSlot() } -> SameType<RefPtr<html::HTMLSlotElement>>;
   };
 
-  TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")
+  TEST_CASE("Mixin::Slottable", "[HTML][Mixins][dom:mixin-slotable]")
   {
     STATIC_REQUIRE(SlottableMixin<Element>);
     STATIC_REQUIRE(SlottableMixin<krys::boo::dom::Text>);

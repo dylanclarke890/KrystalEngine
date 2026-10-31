@@ -62,7 +62,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("SelectorQuery: querySelector and querySelectorAll", "[DOM][SelectorQuery]")
+  TEST_CASE("Scope-match: querySelector and querySelectorAll match descendants of the node against its tree",
+            "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
     auto document = Parse(u8"<!DOCTYPE html><div id=a class=x><p id=b class=x></p><span id=c title=t></span>"
                           u8"<p id=d><em id=e class='y x'></em></p></div><p id=f></p>");
@@ -105,6 +106,21 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(first->AppendChild(*second).HasException());
       REQUIRE(QueryAllIds(*fragment, u8"i") == u8"i1 i2");
       REQUIRE(QueryAllIds(*fragment, u8"i > i") == u8"i2");
+      REQUIRE(QueryAllIds(*fragment, u8":scope") == u8"");
+    }
+
+    SECTION("The node itself is never a result")
+    {
+      REQUIRE(QueryAllIds(a, u8"div, p") == u8"b d");
+      REQUIRE(QueryAllIds(a, u8":scope") == u8"");
+    }
+
+    SECTION("A document's :scope is its document element")
+    {
+      REQUIRE(QueryAllIds(*document, u8":scope > body > div") == u8"a");
+      auto html = document->QuerySelector(u8":scope");
+      REQUIRE_FALSE(html.HasException());
+      REQUIRE(html.Value() == document->DocumentElement());
     }
 
     SECTION("Shadow trees are queried from their shadow root only")
@@ -130,6 +146,29 @@ namespace krys::boo::dom::tests
       REQUIRE(QueryAllIds(*document, u8"|*") == u8"nons");
       REQUIRE(QueryAllIds(*document, u8"|*, |p") == u8"nons");
     }
+  }
+
+  // FIXME: A virtual scoping root doesn't act as the parent of its top-level elements (SelectorChecker.cpp).
+  TEST_CASE("Scope-match: a fragment or shadow root is the parent of its top-level elements for :scope",
+            "[DOM][SelectorQuery][dom:scope-match-a-selectors-string][!shouldfail]")
+  {
+    auto document = Parse(u8"<!DOCTYPE html><div id=host></div>");
+    auto fragment = document->CreateDocumentFragment();
+    auto first = document->CreateElement(u8"i").ReleaseValue();
+    REQUIRE_FALSE(first->SetAttribute(u8"id", u8"i1").HasException());
+    auto second = document->CreateElement(u8"i").ReleaseValue();
+    REQUIRE_FALSE(second->SetAttribute(u8"id", u8"i2").HasException());
+    REQUIRE_FALSE(fragment->AppendChild(*first).HasException());
+    REQUIRE_FALSE(first->AppendChild(*second).HasException());
+
+    auto shadow = ById(*document, u8"host").AttachShadow({}).ReleaseValue();
+    auto inner = document->CreateElement(u8"p").ReleaseValue();
+    REQUIRE_FALSE(inner->SetAttribute(u8"id", u8"inner").HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*inner).HasException());
+
+    CHECK(QueryAllIds(*fragment, u8":scope > i") == u8"i1");
+    CHECK(QueryAllIds(*fragment, u8":scope i") == u8"i1 i2");
+    CHECK(QueryAllIds(*shadow, u8":scope > p") == u8"inner");
   }
 
   TEST_CASE("SelectorQuery: matches and closest", "[DOM][SelectorQuery]")
@@ -158,7 +197,8 @@ namespace krys::boo::dom::tests
     REQUIRE(webkitMatches.Value());
   }
 
-  TEST_CASE("SelectorQuery: invalid selectors throw", "[DOM][SelectorQuery]")
+  TEST_CASE("Scope-match: an invalid selector throws a SyntaxError",
+            "[DOM][SelectorQuery][dom:scope-match-a-selectors-string]")
   {
     auto document = Parse(u8"<!DOCTYPE html><p id=p></p>");
     auto &p = ById(*document, u8"p");

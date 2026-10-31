@@ -17,7 +17,11 @@ namespace krys::boo::dom
   void EventTarget::AddEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
                                      const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
+    // 1. Let capture, passive, once, and signal be the result of flattening more options.
     AddEventListenerOptions options = EventTargetAlgorithms::FlattenMoreOptions(optionsOrBool);
+
+    // 2. Add an event listener with this and an event listener whose type is type, callback is callback,
+    // capture is capture, passive is passive, once is once, and signal is signal.
     auto listener = CreateRef<EventListener>(type, krys::move(callback), krys::move(options));
     (void)EventTargetAlgorithms::AddEventListener(*this, *listener.get());
   }
@@ -39,8 +43,11 @@ namespace krys::boo::dom
   void EventTarget::RemoveEventListener(DOMStringAtom type, Ref<EventListenerCallback> &&callback,
                                         const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {
+    // 1. Let capture be the result of flattening options.
     EventListenerOptions options = EventTargetAlgorithms::FlattenOptions(optionsOrBool);
 
+    // 2. If this's event listener list contains an event listener whose type is type, callback is callback,
+    // and capture is capture, then remove an event listener with this and that event listener.
     auto AlreadyExists = [&](const Ref<EventListener> &listener)
     {
       return (listener->Type() == type && listener->Callback() == callback.get()
@@ -125,12 +132,17 @@ namespace krys::boo::dom
 
   ExceptionOr<bool> EventTarget::DispatchEvent(Event &event) noexcept
   {
+    // 1. If event's dispatch flag is set, or if its initialized flag is not set, then throw an
+    // "InvalidStateError" DOMException.
     if (event._dispatched || !event._initialized)
     {
       return Exception(ExceptionCode::InvalidStateError);
     }
 
+    // 2. Initialize event's isTrusted attribute to false.
     event._isTrusted = false;
+
+    // 3. Return the result of dispatching event to this.
     return EventDispatcher::DispatchToTarget(event, this);
   }
 }

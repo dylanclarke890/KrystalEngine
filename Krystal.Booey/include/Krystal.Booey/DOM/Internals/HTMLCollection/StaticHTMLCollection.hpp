@@ -7,6 +7,8 @@ namespace krys::boo::dom
 {
   class Element;
 
+  /// @brief A static element collection: the elements it was made with.
+  /// @see https://dom.spec.whatwg.org/#concept-collection-static
   class StaticHTMLCollection : public HTMLCollection
   {
   private:
@@ -29,7 +31,6 @@ namespace krys::boo::dom
 
     KRYS_NODISCARD size_t Length() const noexcept override;
 
-  protected:
     KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept override;
   };
 }

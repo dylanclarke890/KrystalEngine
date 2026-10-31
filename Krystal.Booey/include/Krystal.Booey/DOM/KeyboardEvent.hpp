@@ -19,10 +19,10 @@ namespace krys::boo::dom
   // FIXME: The view, once events have views, and key commands.
   class KeyboardEvent final : public UIEventWithKeyState
   {
-    friend class EventFactory;
+  public:
+    /// @brief The dictionary its constructor takes.
     using dictionary_type = KeyboardEventInit;
 
-  public:
     enum KeyLocationCode : uint32
     {
       DOM_KEY_LOCATION_STANDARD = 0x00,

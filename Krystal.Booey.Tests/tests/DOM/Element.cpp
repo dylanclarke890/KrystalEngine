@@ -2,7 +2,9 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/MutationObserver.hpp"
@@ -11,7 +13,6 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests
@@ -29,13 +30,15 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Element::NodeName", "[HTML][Element]")
+  TEST_CASE("Node.nodeName: an Element's is its HTML-uppercased qualified name",
+            "[DOM][Element][dom:dom-node-nodename]")
   {
     CommonTestData data;
     REQUIRE(data.Node->NodeName() == u8"TEST-ELEMENT");
   }
 
-  TEST_CASE("Element::NodeType", "[HTML][Element]")
+  TEST_CASE("Node.nodeType: an Element is an ELEMENT_NODE",
+            "[DOM][Element][dom:dom-node-nodetype][dom:dom-node-element_node]")
   {
     CommonTestData data;
     REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
@@ -459,110 +462,26 @@ namespace krys::boo::dom::tests
   // TEST_CASE("Element::Closest", "[HTML][Element]")
   // TEST_CASE("Element::WebkitMatchesSelector", "[HTML][Element]")
 
-  TEST_CASE("Element::GetElementsByTagName", "[HTML][Element]")
+  TEST_CASE("Node.textContent: an Element's is its descendant text, which setting it replaces",
+            "[DOM][Element][dom:dom-node-textcontent][dom:get-text-content][dom:set-text-content]")
   {
     CommonTestData data;
+    auto child = data.Document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(child->AppendChild(*data.Document->CreateTextNode(u8"b")).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*data.Document->CreateTextNode(u8"a")).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*data.Document->CreateComment(u8"not text")).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
 
-    auto element1 = data.Document->CreateElement(u8"test-element");
-    REQUIRE_FALSE(element1.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
+    CHECK(data.Node->TextContent() == u8"ab");
 
-    auto element2 = data.Document->CreateElement(u8"test-element");
-    REQUIRE_FALSE(element2.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
+    REQUIRE_FALSE(data.Node->TextContent(u8"new").HasException());
+    REQUIRE(data.Node->FirstChild() != nullptr);
+    CHECK(data.Node->FirstChild() == data.Node->LastChild());
+    CHECK(data.Node->FirstChild()->NodeValue() == u8"new");
 
-    auto element3 = data.Document->CreateElement(u8"another-element");
-    REQUIRE_FALSE(element3.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
-
-    auto elements = data.Node->GetElementsByTagName(u8"test-element");
-    REQUIRE(elements->Length() == 2uz);
-
-    REQUIRE(elements->Item(0)->TagName() == u8"TEST-ELEMENT");
-    REQUIRE(elements->Item(0) == element1.Value());
-
-    REQUIRE(elements->Item(1)->TagName() == u8"TEST-ELEMENT");
-    REQUIRE(elements->Item(1) == element2.Value());
-
-    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
-
-    REQUIRE(elements->Length() == 1uz);
-    REQUIRE(elements->Item(0)->TagName() == u8"TEST-ELEMENT");
-    REQUIRE(elements->Item(0) == element2.Value());
-
-    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
-    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
-  }
-
-  TEST_CASE("Element::GetElementsByTagNameNS", "[HTML][Element]")
-  {
-    CommonTestData data;
-    auto element1 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"test-element");
-    REQUIRE_FALSE(element1.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
-
-    auto element2 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"test-element");
-    REQUIRE_FALSE(element2.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
-
-    auto element3 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"another-element");
-    REQUIRE_FALSE(element3.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
-
-    auto elements = data.Node->GetElementsByTagNameNS(u8"http://example.com/ns", u8"test-element");
-    REQUIRE(elements->Length() == 2uz);
-    REQUIRE(elements->Item(0)->NamespaceURI() == u8"http://example.com/ns");
-    REQUIRE(elements->Item(0)->LocalName() == u8"test-element");
-    REQUIRE(elements->Item(0) == element1.Value());
-    REQUIRE(elements->Item(1)->NamespaceURI() == u8"http://example.com/ns");
-    REQUIRE(elements->Item(1)->LocalName() == u8"test-element");
-    REQUIRE(elements->Item(1) == element2.Value());
-
-    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
-    REQUIRE(elements->Length() == 1uz);
-    REQUIRE(elements->Item(0)->NamespaceURI() == u8"http://example.com/ns");
-    REQUIRE(elements->Item(0)->LocalName() == u8"test-element");
-    REQUIRE(elements->Item(0) == element2.Value());
-
-    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
-    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
-  }
-
-  TEST_CASE("Element::GetElementsByClassName", "[HTML][Element]")
-  {
-    CommonTestData data;
-
-    auto element1 = data.Document->CreateElement(u8"test-element");
-    REQUIRE_FALSE(element1.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
-    element1.Value()->ClassName(u8"foo");
-
-    auto element2 = data.Document->CreateElement(u8"test-element");
-    REQUIRE_FALSE(element2.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
-    element2.Value()->ClassName(u8"foo bar");
-
-    auto element3 = data.Document->CreateElement(u8"test-element");
-    REQUIRE_FALSE(element3.HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
-    element3.Value()->ClassName(u8"bar");
-
-    auto elements = data.Node->GetElementsByClassName(u8"foo");
-    REQUIRE(elements->Length() == 2uz);
-    REQUIRE(elements->Item(0) == element1.Value());
-    REQUIRE(elements->Item(1) == element2.Value());
-
-    elements = data.Node->GetElementsByClassName(u8"bar");
-    REQUIRE(elements->Length() == 2uz);
-    REQUIRE(elements->Item(0) == element2.Value());
-    REQUIRE(elements->Item(1) == element3.Value());
-
-    elements = data.Node->GetElementsByClassName(u8"baz");
-    REQUIRE(elements->Length() == 0uz);
-
-    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
-    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
-    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
+    REQUIRE_FALSE(data.Node->TextContent(u8"").HasException());
+    CHECK_FALSE(data.Node->HasChildNodes());
+    CHECK(data.Node->TextContent() == u8"");
   }
 
   namespace
@@ -681,25 +600,50 @@ namespace krys::boo::dom::tests
     REQUIRE(records[2]->OldValue() == u8"b");
   }
 
-  TEST_CASE("HTMLSlotElement is a slot", "[HTML][Element]")
+  TEST_CASE("Update a slottable's name: a change to the slot attribute moves it to the matching slot",
+            "[DOM][Element][dom:slotable-name]")
   {
     auto document = CreateRef<HTMLDocument>();
-    auto slot = CreateRef<html::HTMLSlotElement>(*document);
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*host).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto defaultSlot = document->CreateElement(u8"slot").ReleaseValue();
+    auto namedSlot = document->CreateElement(u8"slot").ReleaseValue();
+    REQUIRE_FALSE(namedSlot->SetAttribute(u8"name", u8"a").HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*defaultSlot).HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*namedSlot).HasException());
 
-    REQUIRE(Is<html::HTMLSlotElement>(static_cast<Node &>(*slot)));
-  }
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(host->AppendChild(*span).HasException());
+    REQUIRE(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
 
-  TEST_CASE("Element::Children", "[DOM][Element]")
-  {
-    // Rare data is created on first use.
-    auto document = CreateRef<HTMLDocument>();
-    auto div = document->CreateElement(u8"div").Value();
-    auto span = document->CreateElement(u8"span").Value();
-    REQUIRE_FALSE(document->AppendChild(*div).HasException());
-    REQUIRE_FALSE(div->AppendChild(*span).HasException());
-    CHECK(document->Children()->Length() == 1u);
-    CHECK(div->Children()->Length() == 1u);
-    CHECK(span->Children()->Length() == 0u);
-    CHECK(document->CreateDocumentFragment()->Children()->Length() == 0u);
+    REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"a").HasException());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*span) == namedSlot.get());
+
+    SECTION("A name with no slot unassigns it")
+    {
+      REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"b").HasException());
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == nullptr);
+    }
+
+    SECTION("Removed or emptied, it goes back to the default slot")
+    {
+      SECTION("Removed")
+      {
+        span->RemoveAttribute(u8"slot");
+      }
+      SECTION("Emptied")
+      {
+        REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"").HasException());
+      }
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
+    }
+
+    SECTION("A slot attribute in a namespace doesn't change it")
+    {
+      span->RemoveAttribute(u8"slot");
+      REQUIRE_FALSE(span->SetAttributeNS(u8"http://example.com/", u8"slot", u8"a").HasException());
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
+    }
   }
 }

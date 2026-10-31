@@ -141,7 +141,7 @@ namespace krys::boo::dom
     DOMString _slottableName;
     /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     WeakPtr<html::HTMLSlotElement> _assignedSlot;
-    /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
+    /// @see https://dom.spec.whatwg.org/#slottable-manual-slot-assignment
     WeakPtr<html::HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:

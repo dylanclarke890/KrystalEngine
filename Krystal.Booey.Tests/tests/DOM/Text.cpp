@@ -129,7 +129,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*childNode).HasException());
   }
 
-  TEST_CASE("Text::NodeName", "[HTML][Text]")
+  TEST_CASE("Node.nodeName: a Text's is #text", "[DOM][Text][dom:dom-node-nodename]")
   {
     auto doc = CreateRef<dom::Document>();
     auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");
@@ -137,7 +137,8 @@ namespace krys::boo::dom::tests
     REQUIRE(textNode->NodeName() == u8"#text");
   }
 
-  TEST_CASE("Text::NodeType", "[HTML][Text]")
+  TEST_CASE("Node.nodeType: a Text is a TEXT_NODE",
+            "[DOM][Text][dom:dom-node-nodetype][dom:dom-node-text_node]")
   {
     auto doc = CreateRef<dom::Document>();
     auto textNode = CreateRef<dom::Text>(*doc, u8"Hello, world!");

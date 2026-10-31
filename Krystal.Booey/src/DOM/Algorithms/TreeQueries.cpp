@@ -515,14 +515,15 @@ namespace krys::boo::dom
 
   Node *TreeQueries::Previous(const Node &current, const Node *stayWithin) noexcept
   {
-    if (Node *previous = current.PreviousSibling())
-    {
-      return DeepLastChild(*previous);
-    }
-
+    // Nothing within stayWithin comes before it, so its previous sibling's descendants are out of bounds.
     if (&current == stayWithin)
     {
       return nullptr;
+    }
+
+    if (Node *previous = current.PreviousSibling())
+    {
+      return DeepLastChild(*previous);
     }
 
     return current.ParentNode();

@@ -84,12 +84,11 @@ namespace krys::boo::css
     krys_debug_assert(eventMode == MediaQueryMatcher::EventMode::DispatchNow);
 
     // https://drafts.csswg.org/cssom-view/#evaluate-media-queries-and-report-changes
+    MediaQueryListEventInit attributes;
+    attributes.Media = Media();
+    attributes.Matches = Matches();
     dom::EventDispatcher::FireEvent<MediaQueryListEvent>(CSSOMStringAtom(EventNames::Change), *this,
-                                                         [&](MediaQueryListEvent &event)
-                                                         {
-                                                           event._media = Media();
-                                                           event._matches = Matches();
-                                                         });
+                                                         attributes);
     _needsNotification = false;
   }
 

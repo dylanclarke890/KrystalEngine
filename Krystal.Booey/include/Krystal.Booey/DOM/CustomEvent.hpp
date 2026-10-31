@@ -11,14 +11,13 @@ namespace krys::boo::dom
   template <typename T>
   class CustomEvent : public Event
   {
-    friend class EventFactory;
-
-    using dictionary_type = CustomEventInit<T>;
-
   private:
     Maybe<T> _detail;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CustomEventInit<T>;
+
 #pragma region CustomEvent - https://dom.spec.whatwg.org/#customevent
 
     /// @see https://dom.spec.whatwg.org/#dom-customevent-customevent
@@ -43,13 +42,16 @@ namespace krys::boo::dom
     void InitCustomEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
                          Maybe<T> detail = std::nullopt) noexcept
     {
+      // 1. If this's dispatch flag is set, then return.
       if (_dispatched)
       {
         return;
       }
 
+      // 2. Initialize this with type, bubbles, and cancelable.
       Initialize(*this, type, bubbles, cancelable);
 
+      // 3. Set this's detail attribute to detail.
       _detail = detail;
     }
 

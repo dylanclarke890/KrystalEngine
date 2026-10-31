@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
 #include "Krystal.Booey/DOM/Types/SmallNodeList.hpp"
+#include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/RefPtr.hpp"
 
@@ -13,13 +14,20 @@ namespace krys::boo::html
 
 namespace krys::boo::dom
 {
+  class MutationObserver;
   class Node;
+  class RegisteredObserver;
 
   /// @see https://dom.spec.whatwg.org/#mutation-observers
   /// @see https://dom.spec.whatwg.org/#queueing-a-mutation-record
   class MutationObserverAlgorithms
   {
   public:
+    /// @brief Returns the surrounding agent's mutation observer counter and increases it by 1, for a new
+    /// observer's creation index.
+    /// @see https://dom.spec.whatwg.org/#mutation-observer-counter
+    KRYS_NODISCARD static uint64 TakeMutationObserverCounter() noexcept;
+
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask
     static void QueueMutationObserverMicrotask() noexcept;
 
@@ -31,10 +39,11 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#signal-slot-list
     static void AppendSignalSlot(html::HTMLSlotElement &slot) noexcept;
 
-    /// @brief Adds a transient registered observer to @p node for each registered observer of @p parent's
-    /// inclusive ancestors that observes the subtree, as @p node is removed from @p parent.
-    /// @see https://dom.spec.whatwg.org/#concept-node-remove
+    /// @see https://dom.spec.whatwg.org/#add-transient-registered-observers
     static void AddTransientRegisteredObservers(Node &node, Node &parent) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#remove-transient-registered-observers
+    static void RemoveTransientRegisteredObservers(MutationObserver &observer) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-record
     static void QueueMutationRecord(MutationRecordType type, Ref<Node> &&target, DOMStringAtom name,
@@ -51,5 +60,11 @@ namespace krys::boo::dom
     static void QueueTreeMutationRecord(Ref<Node> &&target, SmallNodeList &&addedNodes,
                                         SmallNodeList &&removedNodes, RefPtr<Node> &&previousSibling,
                                         RefPtr<Node> &&nextSibling) noexcept;
+
+  private:
+    /// @brief @p node's registered observer list: its registered observers, then its transient registered
+    /// observers, which a node keeps in a list of their own.
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    KRYS_NODISCARD static List<Ref<RegisteredObserver>> RegisteredObserverList(Node &node) noexcept;
   };
 }

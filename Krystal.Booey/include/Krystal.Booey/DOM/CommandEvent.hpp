@@ -22,14 +22,14 @@ namespace krys::boo::dom
   /// @see https://html.spec.whatwg.org/#the-commandevent-interface
   class CommandEvent final : public Event
   {
-    friend class EventFactory;
-    using dictionary_type = CommandEventInit;
-
   private:
     RefPtr<Element> _source;
     DOMString _command;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = CommandEventInit;
+
     /// @see https://html.spec.whatwg.org/#dom-commandevent-commandevent
     CommandEvent(DOMStringAtom type, const CommandEventInit &eventInitDict = {}) noexcept;
 

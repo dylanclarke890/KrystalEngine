@@ -11,16 +11,15 @@ namespace krys::boo::dom
   /// @see https://w3c.github.io/touch-events/#touchevent-interface
   class TouchEvent final : public MouseRelatedEvent
   {
-    friend class EventFactory;
-
-    using dictionary_type = TouchEventInit;
-
   private:
     RefPtr<TouchList> _touches;
     RefPtr<TouchList> _targetTouches;
     RefPtr<TouchList> _changedTouches;
 
   public:
+    /// @brief The dictionary its constructor takes.
+    using dictionary_type = TouchEventInit;
+
     /// @see https://w3c.github.io/touch-events/#dom-touchevent-touchevent
     TouchEvent(DOMStringAtom type, const TouchEventInit &initializer = {}) noexcept;
 

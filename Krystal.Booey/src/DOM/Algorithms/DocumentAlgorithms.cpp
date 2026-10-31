@@ -8,6 +8,7 @@
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/DOM/NodeIterator.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -129,6 +130,18 @@ namespace krys::boo::dom
           }
         }
       }
+
+      // Node iterators whose root moved go with it.
+      std::erase_if(oldDocument.NodeIterators(),
+                    [&](NodeIterator *iterator)
+                    {
+                      if (&iterator->Root().NodeDocument() != &document)
+                      {
+                        return false;
+                      }
+                      document.NodeIterators().push_back(iterator);
+                      return true;
+                    });
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {

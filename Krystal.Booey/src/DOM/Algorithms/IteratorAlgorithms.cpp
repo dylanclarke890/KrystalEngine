@@ -57,6 +57,7 @@ namespace krys::boo::dom
       if (next != nullptr)
       {
         nodeIterator.ReferenceNode(ShareRef(*next));
+        return;
       }
 
       nodeIterator.PointerBeforeReferenceNode(false);

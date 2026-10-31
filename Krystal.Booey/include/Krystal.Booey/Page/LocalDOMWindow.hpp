@@ -95,7 +95,7 @@ namespace krys::boo
     mutable RefPtr<Screen> _screen;
     mutable RefPtr<VisualViewport> _visualViewport;
     dom::DOMString _status;
-    /// @see https://html.spec.whatwg.org/#window-current-event
+    /// @see https://dom.spec.whatwg.org/#window-current-event
     RefPtr<dom::Event> _currentEvent;
     /// @brief The host's time as the window was made, which timestamps count from.
     /// @see https://w3c.github.io/hr-time/#dfn-get-time-origin-timestamp

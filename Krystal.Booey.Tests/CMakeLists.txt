@@ -409,6 +409,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/MouseEvent.cpp
 		tests/DOM/PointerEvent.cpp
 		tests/DOM/WheelEvent.cpp
+		tests/DOM/AbortController.cpp
 		tests/DOM/AbortSignal.cpp
 		tests/Page/EventHandler.cpp
 		tests/Page/PenAndTouch.cpp
@@ -580,15 +581,18 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Types.cpp
 
 		# DOM
+		tests/DOM/Algorithms/AbortAlgorithms.cpp
 		tests/DOM/Algorithms/EventDispatcher.cpp
+		tests/DOM/Algorithms/EventTargetAlgorithms.cpp
 		tests/DOM/Iterators/ComposedTreeIterator.cpp
 		tests/DOM/Algorithms/Mixins.cpp
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
+		tests/DOM/Algorithms/MutationObserverAlgorithms.cpp
 		tests/DOM/Algorithms/NameValidation.cpp
+		tests/DOM/Algorithms/NodeAlgorithms.cpp
 		tests/DOM/Algorithms/OrderedSet.cpp
+		tests/DOM/Algorithms/SlotAlgorithms.cpp
 		tests/DOM/Algorithms/TreeQueries.cpp
-		tests/DOM/Internals/Event/Event.cpp
-		tests/DOM/Internals/Event/CustomEvent.cpp
 		tests/DOM/Internals/ElementFactory.cpp
 		tests/DOM/Internals/EventFactory.cpp
 		tests/DOM/Internals/QualifiedNameCache.cpp
@@ -596,6 +600,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Mixins/NonDocumentTypeChildNode.cpp
 		tests/DOM/Mixins/NonElementParentNode.cpp
 		tests/DOM/Mixins/ParentNode.cpp
+		tests/DOM/Mixins/Slottable.cpp
 		tests/DOM/Attr.cpp
 		tests/DOM/BoundaryPoint.cpp
 		tests/DOM/CDATASection.cpp
@@ -605,17 +610,22 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/DatasetDOMStringMap.cpp
 		tests/DOM/Document.cpp
 		tests/DOM/DocumentFragment.cpp
+		tests/DOM/DocumentOrShadowRoot.cpp
 		tests/DOM/DocumentType.cpp
 		tests/DOM/DOMParsing.cpp
 		tests/DOM/HTMLInsertionMethods.cpp
 		tests/DOM/DOMImplementation.cpp
 		tests/DOM/DOMTokenList.cpp
+		tests/DOM/CustomEvent.cpp
 		tests/DOM/Element.cpp
 		tests/DOM/ElementCSSOMView.cpp
 		tests/DOM/ElementTextDirection.cpp
+		tests/DOM/Event.cpp
+		tests/DOM/EventTarget.cpp
 		tests/DOM/DOMRectList.cpp
 		tests/DOM/HTMLCollection.cpp
 		tests/DOM/MutationObserver.cpp
+		tests/DOM/MutationRecord.cpp
 		tests/DOM/NamedNodeMap.cpp
 		tests/DOM/Node.cpp
 		tests/DOM/NodeLifetime.cpp
@@ -635,6 +645,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Rendering/RenderSelection.cpp
 		tests/Editing/VisibleUnits.cpp
 		tests/DOM/NodeIterator.cpp
+		tests/DOM/NodeList.cpp
 		tests/DOM/ProcessingInstruction.cpp
 		tests/DOM/PseudoElement.cpp
 		tests/DOM/Range.cpp
@@ -668,7 +679,9 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
 		tests/HTML/HTMLSelectElement.cpp
+		tests/HTML/HTMLSlotElement.cpp
 		tests/HTML/HTMLTableElement.cpp
+		tests/HTML/HTMLTemplateElement.cpp
 		tests/HTML/HTMLTextFormControlElement.cpp
 		tests/HTML/Shadow/SpinButtonElement.cpp
 		tests/HTML/HTMLLinkElement.cpp
