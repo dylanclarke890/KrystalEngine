@@ -924,9 +924,10 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.9. Mixin Slottable](https://dom.spec.whatwg.org/#mixin-slotable)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `mixins::Slottable::AssignedSlot` (find a slot with open true), which `Element` and `Text` forward to. Tests: `tests/DOM/Mixins/Slottable.cpp`.
 
-- [ ] [Slottable.assignedSlot](https://dom.spec.whatwg.org/#dom-slotable-assignedslot) — The assignedSlot getter steps are to return the result of find a slot given this and true.
+- [x] [Slottable.assignedSlot](https://dom.spec.whatwg.org/#dom-slotable-assignedslot) — The assignedSlot getter steps are to return the result of find a slot given this and true.
 
 #### [4.2.10. Old-style collections: NodeList and HTMLCollection](https://dom.spec.whatwg.org/#old-style-collections)
 

@@ -598,6 +598,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Mixins/NonDocumentTypeChildNode.cpp
 		tests/DOM/Mixins/NonElementParentNode.cpp
 		tests/DOM/Mixins/ParentNode.cpp
+		tests/DOM/Mixins/Slottable.cpp
 		tests/DOM/Attr.cpp
 		tests/DOM/BoundaryPoint.cpp
 		tests/DOM/CDATASection.cpp

@@ -100,7 +100,7 @@ namespace krys::boo::dom::tests
     { node.AssignedSlot() } -> SameType<RefPtr<html::HTMLSlotElement>>;
   };
 
-  TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")
+  TEST_CASE("Mixin::Slottable", "[HTML][Mixins][dom:mixin-slotable]")
   {
     STATIC_REQUIRE(SlottableMixin<Element>);
     STATIC_REQUIRE(SlottableMixin<krys::boo::dom::Text>);
