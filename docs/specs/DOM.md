@@ -232,7 +232,8 @@ Status: reviewed (2026-10-30)
 
 ### [2.6. Defining event interfaces](https://dom.spec.whatwg.org/#defining-event-interfaces)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
+> Checked 2026-10-30: Booey's only `init*Event()` methods are the legacy ones specifications define (`initEvent`, `initCustomEvent`, UI Events' `initUIEvent`, `initMouseEvent`, `initKeyboardEvent`, `initCompositionEvent` and `initTextEvent`, and HTML's `initMessageEvent` and `initStorageEvent`).
 
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
