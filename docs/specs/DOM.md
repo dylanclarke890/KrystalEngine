@@ -37,9 +37,11 @@ Status: reviewed (2026-10-30)
 
 ### [1.3. Selectors](https://dom.spec.whatwg.org/#selectors)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: steps 1 and 2 in `Document::SelectorQueryForString` (shared with `matches()` and `closest()`, which parse the same way), step 3 in `SelectorDataList::Execute` behind `SelectorQuery::QueryAll`/`QueryFirst`. Tests: `tests/DOM/SelectorQuery.cpp`.
+> Known issue: `:scope` with a fragment or shadow root as the scoping root. Difference: a document's `:scope` is its document element.
 
-- [ ] [scope-match a selectors string](https://dom.spec.whatwg.org/#scope-match-a-selectors-string) — To scope-match a selectors string given a string selectors against a node node:
+- [x] [scope-match a selectors string](https://dom.spec.whatwg.org/#scope-match-a-selectors-string) — To scope-match a selectors string given a string selectors against a node node:
   - 1. Let selector be the result of parse a selector selectors. [SELECTORS4]
   - 2. If selector is failure, then throw a "SyntaxError" DOMException.
   - 3. Return the result of match a selector against a tree with selector and node’s root using scoping root node. [SELECTORS4].

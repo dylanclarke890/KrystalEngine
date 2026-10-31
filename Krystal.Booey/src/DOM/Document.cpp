@@ -4726,7 +4726,10 @@ namespace krys::boo::dom
       return invalid();
     }
 
+    // 1. Let selector be the result of parse a selector selectors.
     auto *query = SelectorQueryCache::Singleton().Add(selectorString, *this);
+
+    // 2. If selector is failure, then throw a "SyntaxError" DOMException.
     if (!query)
     {
       return invalid();
