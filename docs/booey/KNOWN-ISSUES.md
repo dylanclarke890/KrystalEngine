@@ -23,7 +23,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `ElementInternals` has no ARIA reflection members (`Reflection::GetContentAttribute` returns null for them) and no `CustomElementDefaultARIA`. Form-associated custom elements' state is restored only in the restore mode, never `FormStateRestoreMode::Autocomplete` (no autofill).
 - `RadioNodeList`/`HTMLFormControlsCollection` and select collections are not cached: `options` and `selectedOptions` make a new collection each call and `InvalidateSelectedItems` does nothing.
 - The backup custom element queue is global rather than one per agent.
-- No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `AbortSignal.onabort`, `document.onreadystatechange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
+- No `onpointer*`, `ontouch*`, `onpointerlockchange` or `onpointerlockerror` handlers, no `document.onreadystatechange`, and no outermost-`<svg>` window event handlers (`onunload`, `onresize`, `onscroll`, ...).
 - `DocumentTouch` (`createTouch`, `createTouchList`) is not ported; `Touch` has no constructor and `TouchInit` is not ported.
 - `DataTransferItem` has no `getAsEntry` (no file system API).
 - No `FileReader`, streams, blob URLs or blob registry. A `Blob` holds its data itself (`BlobData`), and `Blob::Bytes()`/`Text()` read synchronously, returning the exception a failed read rejects with (`NotFoundError` for a missing file, `NotReadableError` otherwise).

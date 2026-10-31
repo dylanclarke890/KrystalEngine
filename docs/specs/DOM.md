@@ -458,36 +458,37 @@ Status: reviewed (2026-10-30)
 
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `AbortSignal`, with the algorithms in `AbortAlgorithms`. Tests: `tests/DOM/AbortSignal.cpp` and `tests/DOM/Algorithms/AbortAlgorithms.cpp`.
 <!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
-- [ ] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
+- [x] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
   - 1. Let signal be a new AbortSignal object.
   - 2. Set signal’s abort reason to reason if it is given; otherwise to a new "AbortError" DOMException.
   - 3. Return signal.
 
-- [ ] [AbortSignal.timeout(milliseconds)](https://dom.spec.whatwg.org/#dom-abortsignal-timeout) — The static timeout(milliseconds) method steps are:
+- [x] [AbortSignal.timeout(milliseconds)](https://dom.spec.whatwg.org/#dom-abortsignal-timeout) — The static timeout(milliseconds) method steps are:
   - 1. Let signal be a new AbortSignal object.
   - 2. Let global be signal’s relevant global object.
   - 3. Run steps after a timeout given global, "AbortSignal-timeout", milliseconds, and the following step: For the duration of this timeout, if signal has any event listeners registered for its abort event, there must be a strong reference from global to signal.
     - 3a. Queue a global task on the timer task source given global to signal abort given signal and a new "TimeoutError" DOMException.
   - 4. Return signal.
 
-- [ ] [AbortSignal.any(signals)](https://dom.spec.whatwg.org/#dom-abortsignal-any) — The static any(signals) method steps are to return the result of creating a dependent abort signal from signals using AbortSignal and the current realm.
+- [x] [AbortSignal.any(signals)](https://dom.spec.whatwg.org/#dom-abortsignal-any) — The static any(signals) method steps are to return the result of creating a dependent abort signal from signals using AbortSignal and the current realm.
 
-- [ ] [AbortSignal.aborted](https://dom.spec.whatwg.org/#dom-abortsignal-aborted) — The aborted getter steps are to return true if this is aborted; otherwise false.
+- [x] [AbortSignal.aborted](https://dom.spec.whatwg.org/#dom-abortsignal-aborted) — The aborted getter steps are to return true if this is aborted; otherwise false.
 
-- [ ] [AbortSignal.reason](https://dom.spec.whatwg.org/#dom-abortsignal-reason) — The reason getter steps are to return this’s abort reason.
+- [x] [AbortSignal.reason](https://dom.spec.whatwg.org/#dom-abortsignal-reason) — The reason getter steps are to return this’s abort reason.
 
-- [ ] [AbortSignal.throwIfAborted()](https://dom.spec.whatwg.org/#dom-abortsignal-throwifaborted) — The throwIfAborted() method steps are to throw this’s abort reason, if this is aborted.
+- [x] [AbortSignal.throwIfAborted()](https://dom.spec.whatwg.org/#dom-abortsignal-throwifaborted) — The throwIfAborted() method steps are to throw this’s abort reason, if this is aborted.
 
-- [ ] [add (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-add) — To add an algorithm algorithm to an AbortSignal object signal:
+- [x] [add (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-add) — To add an algorithm algorithm to an AbortSignal object signal:
   - 1. If signal is aborted, then return.
   - 2. Append algorithm to signal’s abort algorithms.
 
-- [ ] [remove (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-remove) — To remove an algorithm algorithm from an AbortSignal signal, remove algorithm from signal’s abort algorithms.
+- [x] [remove (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-remove) — To remove an algorithm algorithm from an AbortSignal signal, remove algorithm from signal’s abort algorithms.
 
-- [ ] [signal abort (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-signal-abort) — To signal abort, given an AbortSignal object signal and an optional reason:
+- [x] [signal abort (AbortSignal)](https://dom.spec.whatwg.org/#abortsignal-signal-abort) — To signal abort, given an AbortSignal object signal and an optional reason:
   - 1. If signal is aborted, then return.
   - 2. Set signal’s abort reason to reason if it is given; otherwise to a new "AbortError" DOMException.
   - 3. Let dependentSignalsToAbort be a new list.
@@ -498,12 +499,12 @@ Status: unreviewed
   - 5. Run the abort steps for signal.
   - 6. For each dependentSignal of dependentSignalsToAbort, run the abort steps for dependentSignal.
 
-- [ ] [run the abort steps](https://dom.spec.whatwg.org/#run-the-abort-steps) — To run the abort steps for an AbortSignal signal:
+- [x] [run the abort steps](https://dom.spec.whatwg.org/#run-the-abort-steps) — To run the abort steps for an AbortSignal signal:
   - 1. For each algorithm of signal’s abort algorithms: run algorithm.
   - 2. Empty signal’s abort algorithms.
   - 3. Fire an event named abort at signal.
 
-- [ ] [create a dependent abort signal](https://dom.spec.whatwg.org/#create-a-dependent-abort-signal) — To create a dependent abort signal from a list of AbortSignal objects signals, using signalInterface, which must be either AbortSignal or an interface that inherits from it, and a realm:
+- [x] [create a dependent abort signal](https://dom.spec.whatwg.org/#create-a-dependent-abort-signal) — To create a dependent abort signal from a list of AbortSignal objects signals, using signalInterface, which must be either AbortSignal or an interface that inherits from it, and a realm:
   - 1. Let resultSignal be a new object implementing signalInterface using realm.
   - 2. For each signal of signals: if signal is aborted, then set resultSignal’s abort reason to signal’s abort reason and return resultSignal.
   - 3. Set resultSignal’s dependent to true.

@@ -581,6 +581,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Style/Values/Types.cpp
 
 		# DOM
+		tests/DOM/Algorithms/AbortAlgorithms.cpp
 		tests/DOM/Algorithms/EventDispatcher.cpp
 		tests/DOM/Algorithms/EventTargetAlgorithms.cpp
 		tests/DOM/Iterators/ComposedTreeIterator.cpp
