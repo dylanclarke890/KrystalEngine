@@ -231,4 +231,41 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*sibling1.Value()).HasException());
     REQUIRE_FALSE(data.Node->RemoveChild(*sibling2).HasException());
   }
+
+  TEST_CASE("NodeIterator pre-remove steps: run for every iterator of the document, following its root",
+            "[DOM][NodeIterator][dom:nodeiterator-pre-removing-steps]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto root = document->CreateElement(u8"div").ReleaseValue();
+    auto first = document->CreateElement(u8"span").ReleaseValue();
+    auto second = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(root->AppendChild(*first).HasException());
+    REQUIRE_FALSE(root->AppendChild(*second).HasException());
+    auto iterator = document->CreateNodeIterator(*root);
+
+    SECTION("With the pointer before the reference, it moves to the next node that isn't removed")
+    {
+      REQUIRE(iterator->NextNode().Value().get() == root.get());
+      REQUIRE(iterator->NextNode().Value().get() == first.get());
+      REQUIRE(iterator->PreviousNode().Value().get() == first.get());
+      REQUIRE(iterator->PointerBeforeReferenceNode());
+
+      REQUIRE_FALSE(first->Remove().HasException());
+      CHECK(&iterator->ReferenceNode() == second.get());
+      CHECK(iterator->PointerBeforeReferenceNode());
+      CHECK(iterator->NextNode().Value().get() == second.get());
+    }
+
+    SECTION("After its root is adopted into another document")
+    {
+      auto other = CreateRef<HTMLDocument>();
+      REQUIRE_FALSE(other->AdoptNode(*root).HasException());
+      REQUIRE(iterator->NextNode().Value().get() == root.get());
+      REQUIRE(iterator->NextNode().Value().get() == first.get());
+
+      REQUIRE_FALSE(first->Remove().HasException());
+      CHECK(&iterator->ReferenceNode() == root.get());
+      CHECK(iterator->NextNode().Value().get() == second.get());
+    }
+  }
 }

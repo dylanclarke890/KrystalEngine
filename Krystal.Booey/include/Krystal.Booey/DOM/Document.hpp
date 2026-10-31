@@ -194,6 +194,7 @@ namespace krys::boo::dom
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
+    friend class NodeIterator;
 
     friend class html::CustomElementAlgorithms;
     friend class html::FocusAlgorithms;

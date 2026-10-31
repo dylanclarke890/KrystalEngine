@@ -657,10 +657,11 @@ Status: reviewed (2026-10-31)
 
 #### [4.2.3. Mutation algorithms](https://dom.spec.whatwg.org/#mutation-algorithms)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `MutationAlgorithms`. The hooks other specifications define (insertion, post-connection, children changed, moving and removing steps) are dispatched from `ExtensibilityHooks`. Inserting or moving into a manual shadow root's host assigns a slot (`DIFFERENCES.md`). Tests: `tests/DOM/Algorithms/MutationAlgorithms.cpp`, `tests/DOM/NodeIterator.cpp`.
 <!-- definitions: insert-suppressobservers remove-suppressobservers -->
 
-- [ ] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:
+- [x] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:
   - 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
   - 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException.
   - 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
@@ -679,20 +680,20 @@ Status: unreviewed
   - 10. Assert: node is a doctype.
   - 11. If any of the following are true: parent has a doctype child that childrenToExclude does not contain;; child is non-null and an element is preceding child; or; child is null and parent has an element child that childrenToExclude does not contain, then throw a "HierarchyRequestError" DOMException.
 
-- [ ] [pre-insert](https://dom.spec.whatwg.org/#concept-node-pre-insert) — To pre-insert a node node into a node parent before null or node child:
+- [x] [pre-insert](https://dom.spec.whatwg.org/#concept-node-pre-insert) — To pre-insert a node node into a node parent before null or node child:
   - 1. Ensure pre-insert validity given node, parent, child, and « ».
   - 2. Let referenceChild be child.
   - 3. If referenceChild is node, then set referenceChild to node’s next sibling.
   - 4. Insert node into parent before referenceChild.
   - 5. Return node.
 
-- [ ] [insertion steps](https://dom.spec.whatwg.org/#concept-node-insert-ext) — Specifications may define insertion steps for all or some nodes. The algorithm is passed insertedNode, as indicated in the insert algorithm below. These steps must not modify the node tree that insertedNode participates in, create browsing contexts, fire events, or otherwise execute JavaScript. These steps may queue tasks to do these things asynchronously, however.
+- [x] [insertion steps](https://dom.spec.whatwg.org/#concept-node-insert-ext) — Specifications may define insertion steps for all or some nodes. The algorithm is passed insertedNode, as indicated in the insert algorithm below. These steps must not modify the node tree that insertedNode participates in, create browsing contexts, fire events, or otherwise execute JavaScript. These steps may queue tasks to do these things asynchronously, however.
 
-- [ ] [post-connection steps](https://dom.spec.whatwg.org/#concept-node-post-connection-ext) — Specifications may also define post-connection steps for all or some nodes. The algorithm is passed connectedNode, as indicated in the insert algorithm below.
+- [x] [post-connection steps](https://dom.spec.whatwg.org/#concept-node-post-connection-ext) — Specifications may also define post-connection steps for all or some nodes. The algorithm is passed connectedNode, as indicated in the insert algorithm below.
 
-- [ ] [children changed steps](https://dom.spec.whatwg.org/#concept-node-children-changed-ext) — Specifications may define children changed steps for all or some nodes. The algorithm is passed no argument and is called from insert, remove, and replace data.
+- [x] [children changed steps](https://dom.spec.whatwg.org/#concept-node-children-changed-ext) — Specifications may define children changed steps for all or some nodes. The algorithm is passed no argument and is called from insert, remove, and replace data.
 
-- [ ] [insert](https://dom.spec.whatwg.org/#concept-node-insert) — To insert a node node into a node parent before null or a node child, with an optional boolean suppressObservers (default false):
+- [x] [insert](https://dom.spec.whatwg.org/#concept-node-insert) — To insert a node node into a node parent before null or a node child, with an optional boolean suppressObservers (default false):
   - 1. Let nodes be node’s children, if node is a DocumentFragment node; otherwise « node ».
   - 2. Let count be nodes’s size.
   - 3. If count is 0, then return.
@@ -725,11 +726,11 @@ Status: unreviewed
     - 11a. For each shadow-including inclusive descendant inclusiveDescendant of node, in shadow-including tree order: append inclusiveDescendant to staticNodeList.
   - 12. For each node of staticNodeList: if node is connected, then run the post-connection steps with node.
 
-- [ ] [append](https://dom.spec.whatwg.org/#concept-node-append) — To append a node node to a node parent: pre-insert node into parent before null.
+- [x] [append](https://dom.spec.whatwg.org/#concept-node-append) — To append a node node to a node parent: pre-insert node into parent before null.
 
-- [ ] [moving steps](https://dom.spec.whatwg.org/#concept-node-move-ext) — Specifications may define moving steps for all or some nodes. The algorithm is passed a node movedNode, a boolean isSubtreeRoot, and a node oldAncestor as indicated in the move algorithm below. Like the insertion steps, these steps must not modify the node tree that movedNode participates in, create browsing contexts, fire events, or otherwise execute JavaScript. These steps may queue tasks to do these things asynchronously, however.
+- [x] [moving steps](https://dom.spec.whatwg.org/#concept-node-move-ext) — Specifications may define moving steps for all or some nodes. The algorithm is passed a node movedNode, a boolean isSubtreeRoot, and a node oldAncestor as indicated in the move algorithm below. Like the insertion steps, these steps must not modify the node tree that movedNode participates in, create browsing contexts, fire events, or otherwise execute JavaScript. These steps may queue tasks to do these things asynchronously, however.
 
-- [ ] [move](https://dom.spec.whatwg.org/#move) — To move a node node into a node newParent before null or a node child:
+- [x] [move](https://dom.spec.whatwg.org/#move) — To move a node node into a node newParent before null or a node child:
   - 1. If newParent’s shadow-including root is not the same as node’s shadow-including root, then throw a "HierarchyRequestError" DOMException.
   - 2. If node is a host-including inclusive ancestor of newParent, then throw a "HierarchyRequestError" DOMException.
   - 3. If child is non-null and its parent is not newParent, then throw a "NotFoundError" DOMException.
@@ -765,7 +766,7 @@ Status: unreviewed
   - 26. Queue a tree mutation record for oldParent with « », « node », oldPreviousSibling, and oldNextSibling.
   - 27. Queue a tree mutation record for newParent with « node », « », newPreviousSibling, and child.
 
-- [ ] [replace](https://dom.spec.whatwg.org/#concept-node-replace) — To replace a node child with a node node within a node parent:
+- [x] [replace](https://dom.spec.whatwg.org/#concept-node-replace) — To replace a node child with a node node within a node parent:
   - 1. Ensure pre-insert validity given node, parent, child, and « child ».
   - 2. Let referenceChild be child’s next sibling.
   - 3. If referenceChild is node, then set referenceChild to node’s next sibling.
@@ -780,7 +781,7 @@ Status: unreviewed
   - 10. Queue a tree mutation record for parent with nodes, removedNodes, previousSibling, and referenceChild.
   - 11. Return child.
 
-- [ ] [replace all (Node)](https://dom.spec.whatwg.org/#concept-node-replace-all) — To replace all with a node or null node within a node parent:
+- [x] [replace all (Node)](https://dom.spec.whatwg.org/#concept-node-replace-all) — To replace all with a node or null node within a node parent:
   - 1. Let removedNodes be parent’s children.
   - 2. Let addedNodes be the empty set.
   - 3. If node is a DocumentFragment node, then set addedNodes to node’s children.
@@ -789,14 +790,14 @@ Status: unreviewed
   - 6. If node is non-null, then insert node into parent before null with suppressObservers set to true.
   - 7. If either addedNodes or removedNodes is not empty, then queue a tree mutation record for parent with addedNodes, removedNodes, null, and null.
 
-- [ ] [pre-remove](https://dom.spec.whatwg.org/#concept-node-pre-remove) — To pre-remove a node child from a node parent:
+- [x] [pre-remove](https://dom.spec.whatwg.org/#concept-node-pre-remove) — To pre-remove a node child from a node parent:
   - 1. If child’s parent is not parent, then throw a "NotFoundError" DOMException.
   - 2. Remove child.
   - 3. Return child.
 
-- [ ] [removing steps](https://dom.spec.whatwg.org/#concept-node-remove-ext) — Specifications may define removing steps for all or some nodes. The algorithm is passed a node removedNode, a boolean isSubtreeRoot, and a node oldAncestor as indicated in the remove algorithm below.
+- [x] [removing steps](https://dom.spec.whatwg.org/#concept-node-remove-ext) — Specifications may define removing steps for all or some nodes. The algorithm is passed a node removedNode, a boolean isSubtreeRoot, and a node oldAncestor as indicated in the remove algorithm below.
 
-- [ ] [remove](https://dom.spec.whatwg.org/#concept-node-remove) — To remove a node node, with an optional boolean suppressObservers (default false):
+- [x] [remove](https://dom.spec.whatwg.org/#concept-node-remove) — To remove a node node, with an optional boolean suppressObservers (default false):
   - 1. Let parent be node’s parent.
   - 2. Assert: parent is non-null.
   - 3. Run the live range pre-remove steps, given node.
