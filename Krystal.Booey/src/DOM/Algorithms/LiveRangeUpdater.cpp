@@ -220,21 +220,29 @@ namespace krys::boo::dom
       auto originalStartOffset = range->StartOffset();
       auto originalEndOffset = range->EndOffset();
 
+      // 7b. For each live range whose start node is node and start offset is greater than offset, set its
+      //     start node to newNode and decrease its start offset by offset.
       if (originalStartContainer == &original && originalStartOffset > offset)
       {
         range->_start = BoundaryPoint {ShareRef(newNode), originalStartOffset - offset};
       }
 
+      // 7c. For each live range whose end node is node and end offset is greater than offset, set its end
+      //     node to newNode and decrease its end offset by offset.
       if (originalEndContainer == &original && originalEndOffset > offset)
       {
         range->_end = BoundaryPoint {ShareRef(newNode), originalEndOffset - offset};
       }
 
+      // 7d. For each live range whose start node is parent and start offset is equal to the index of node
+      //     plus 1, increase its start offset by 1.
       if (originalStartContainer == original.ParentNode() && originalStartOffset == index + 1uz)
       {
         range->_start.Offset += 1;
       }
 
+      // 7e. For each live range whose end node is parent and end offset is equal to the index of node plus
+      //     1, increase its end offset by 1.
       if (originalEndContainer == original.ParentNode() && originalEndOffset == index + 1uz)
       {
         range->_end.Offset += 1;

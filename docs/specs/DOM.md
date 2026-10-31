@@ -1944,26 +1944,27 @@ Status: reviewed (2026-10-31)
 
 ### [4.11. Interface Text](https://dom.spec.whatwg.org/#interface-text)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Text` (`Text.hpp`/`.cpp`) is constructed with its document (no global objects; see `DIFFERENCES.md`), which is also create a text node. Split, the contiguous Text nodes and child and descendant text content are in `TextAlgorithms`, with split's live range steps in `LiveRangeUpdater::SplitTextNode`; exclusive Text node is `TreeQueries::IsExclusiveTextNode`.
 
-- [ ] [exclusive Text node](https://dom.spec.whatwg.org/#exclusive-text-node) — An exclusive Text node is a Text node that is not a CDATASection node.
+- [x] [exclusive Text node](https://dom.spec.whatwg.org/#exclusive-text-node) — An exclusive Text node is a Text node that is not a CDATASection node.
 
-- [ ] [contiguous Text nodes](https://dom.spec.whatwg.org/#contiguous-text-nodes) — The contiguous Text nodes of a node node are node, node’s previous sibling Text node, if any, and its contiguous Text nodes, and node’s next sibling Text node, if any, and its contiguous Text nodes, avoiding any duplicates.
+- [x] [contiguous Text nodes](https://dom.spec.whatwg.org/#contiguous-text-nodes) — The contiguous Text nodes of a node node are node, node’s previous sibling Text node, if any, and its contiguous Text nodes, and node’s next sibling Text node, if any, and its contiguous Text nodes, avoiding any duplicates.
 
-- [ ] [contiguous exclusive Text nodes](https://dom.spec.whatwg.org/#contiguous-exclusive-text-nodes) — The contiguous exclusive Text nodes of a node node are node, node’s previous sibling exclusive Text node, if any, and its contiguous exclusive Text nodes, and node’s next sibling exclusive Text node, if any, and its contiguous exclusive Text nodes, avoiding any duplicates.
+- [x] [contiguous exclusive Text nodes](https://dom.spec.whatwg.org/#contiguous-exclusive-text-nodes) — The contiguous exclusive Text nodes of a node node are node, node’s previous sibling exclusive Text node, if any, and its contiguous exclusive Text nodes, and node’s next sibling exclusive Text node, if any, and its contiguous exclusive Text nodes, avoiding any duplicates.
 
-- [ ] [child text content](https://dom.spec.whatwg.org/#concept-child-text-content) — The child text content of a node node is the concatenation of the data of all the Text node children of node, in tree order.
+- [x] [child text content](https://dom.spec.whatwg.org/#concept-child-text-content) — The child text content of a node node is the concatenation of the data of all the Text node children of node, in tree order.
 
-- [ ] [descendant text content](https://dom.spec.whatwg.org/#concept-descendant-text-content) — The descendant text content of a node node is the concatenation of the data of all the Text node descendants of node, in tree order.
+- [x] [descendant text content](https://dom.spec.whatwg.org/#concept-descendant-text-content) — The descendant text content of a node node is the concatenation of the data of all the Text node descendants of node, in tree order.
 
-- [ ] [create a text node](https://dom.spec.whatwg.org/#create-a-text-node) — To create a text node given a document document and a string data:
+- [x] [create a text node](https://dom.spec.whatwg.org/#create-a-text-node) — To create a text node given a document document and a string data:
   - 1. Let text be the result of creating a node that implements Text, given document.
   - 2. Set text’s data to data.
   - 3. Return text.
 
-- [ ] [Text.new Text(data)](https://dom.spec.whatwg.org/#dom-text-text) — The new Text(data) constructor steps are to set this’s data to data and this’s node document to current global object’s associated Document.
+- [x] [Text.new Text(data)](https://dom.spec.whatwg.org/#dom-text-text) — The new Text(data) constructor steps are to set this’s data to data and this’s node document to current global object’s associated Document.
 
-- [ ] [split](https://dom.spec.whatwg.org/#concept-text-split) — To split a Text node node with integer offset:
+- [x] [split](https://dom.spec.whatwg.org/#concept-text-split) — To split a Text node node with integer offset:
   - 1. Let length be node’s length.
   - 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
   - 3. Let count be length − offset.
@@ -1979,9 +1980,9 @@ Status: unreviewed
   - 8. Replace data of node with offset, count, and the empty string.
   - 9. Return newNode.
 
-- [ ] [Text.splitText(offset)](https://dom.spec.whatwg.org/#dom-text-splittext) — The splitText(offset) method steps are to split this with offset offset.
+- [x] [Text.splitText(offset)](https://dom.spec.whatwg.org/#dom-text-splittext) — The splitText(offset) method steps are to split this with offset offset.
 
-- [ ] [Text.wholeText](https://dom.spec.whatwg.org/#dom-text-wholetext) — The wholeText getter steps are to return the concatenation of the data of the contiguous Text nodes of this, in tree order.
+- [x] [Text.wholeText](https://dom.spec.whatwg.org/#dom-text-wholetext) — The wholeText getter steps are to return the concatenation of the data of the contiguous Text nodes of this, in tree order.
 
 ### [4.12. Interface CDATASection](https://dom.spec.whatwg.org/#interface-cdatasection)
 

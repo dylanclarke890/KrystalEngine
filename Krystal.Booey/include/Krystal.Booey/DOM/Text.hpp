@@ -23,6 +23,7 @@ namespace krys::boo::dom
 {
   class Document;
 
+  /// @brief A node of text: an exclusive Text node, or the CDATASection that derives from it.
   /// @see https://dom.spec.whatwg.org/#interface-text
   class Text : public CharacterData
   {
@@ -53,7 +54,9 @@ namespace krys::boo::dom
 
 #pragma region Text - https://dom.spec.whatwg.org/#text
 
+    /// @brief Creates a text node in @p document with the data.
     /// @see https://dom.spec.whatwg.org/#dom-text-text
+    /// @see https://dom.spec.whatwg.org/#create-a-text-node
     Text(Document &document, DOMString &&data = u8"") noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-text-splittext

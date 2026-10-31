@@ -19,6 +19,10 @@ namespace krys::boo::dom
   Text::Text(Document &document, DOMString &&data) noexcept
       : CharacterData(document, krys::move(data), dom::NodeType::TEXT_NODE)
   {
+    // Create a text node:
+    // 1. Let text be the result of creating a node that implements Text, given document.
+    // 2. Set text's data to data.
+    // 3. Return text.
   }
 
   ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
@@ -28,6 +32,7 @@ namespace krys::boo::dom
 
   DOMString Text::WholeText() const noexcept
   {
+    // Return the concatenation of the data of the contiguous Text nodes of this, in tree order.
     auto contiguousTextNodes = TextAlgorithms::ContiguousTextNodes(*this);
 
     size_t capacity = 0uz;

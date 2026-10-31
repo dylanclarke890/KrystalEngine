@@ -1,132 +1,69 @@
 ﻿#include "Krystal.Booey/DOM/Text.hpp"
 #include "catch2/catch_test_macros.hpp"
-#include "Krystal.Booey.Tests/DOM/TestElement.hpp"
-#include "Krystal.Booey/DOM/AbortSignal.hpp"
-#include "Krystal.Booey/DOM/Attr.hpp"
-#include "Krystal.Booey/DOM/ContainerNode.hpp"
-#include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/DOM/Node.hpp"
-#include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/DOM/CDATASection.hpp"
+#include "Krystal.Booey/DOM/Comment.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
+#include "Krystal.Booey/DOM/XMLDocument.hpp"
 
 namespace krys::boo::dom::tests
 {
-  namespace
+  TEST_CASE("Text: constructed, or created as a text node, with the data in the document",
+            "[DOM][Text][dom:interface-text][dom:dom-text-text][dom:create-a-text-node]")
   {
-    struct CommonTestData
-    {
-      Ref<Document> Document;
-      Ref<dom::Text> Node;
+    auto document = CreateRef<XMLDocument>();
 
-      CommonTestData()
-          : Document(CreateRef<dom::Document>()), Node(CreateRef<dom::Text>(*Document, u8"Hello, world!"))
-      {
-      }
-    };
+    auto constructed = CreateRef<Text>(*document, u8"data");
+    CHECK(constructed->Data() == u8"data");
+    CHECK(&constructed->NodeDocument() == document.get());
+    CHECK(constructed->ParentNode() == nullptr);
+    CHECK(CreateRef<Text>(*document)->Data() == u8"");
+
+    auto created = document->CreateTextNode(u8"created");
+    CHECK(created->Data() == u8"created");
+    CHECK(&created->NodeDocument() == document.get());
   }
 
-  TEST_CASE("Text::SplitText", "[HTML][Text]")
+  TEST_CASE("Text.splitText(): splits it at the offset, returning the new node",
+            "[DOM][Text][dom:dom-text-splittext]")
   {
-    CommonTestData data;
-
-    auto splitResult = data.Node->SplitText(2);
-    REQUIRE_FALSE(splitResult.HasException());
-
-    REQUIRE(data.Node->Data() == u8"He");
-    REQUIRE(splitResult.Value()->Data() == u8"llo, world!");
-  }
-
-  TEST_CASE("Text::SplitText updates live ranges", "[HTML][Text]")
-  {
-    auto document = CreateRef<dom::Document>();
-    auto parent = CreateRef<TestElement>(*document);
-    auto text = CreateRef<dom::Text>(*document, u8"Hello, world!");
-
+    auto document = CreateRef<XMLDocument>();
+    auto parent = document->CreateElementNS(u8"urn:x", u8"p").ReleaseValue();
+    auto text = document->CreateTextNode(u8"Hello, world!");
     REQUIRE_FALSE(parent->AppendChild(*text).HasException());
 
-    auto beforeRange = document->CreateRange();
-    beforeRange->SetStart(*text, 1uz);
-    beforeRange->SetEnd(*text, 2uz);
+    auto result = text->SplitText(7);
+    REQUIRE_FALSE(result.HasException());
+    CHECK(text->Data() == u8"Hello, ");
+    CHECK(result.Value()->Data() == u8"world!");
+    CHECK(text->NextSibling() == result.Value().get());
 
-    auto movedStartRange = document->CreateRange();
-    movedStartRange->SetStart(*text, 5uz);
-    movedStartRange->SetEnd(*text, 6uz);
-
-    auto movedEndRange = document->CreateRange();
-    movedEndRange->SetStart(*text, 1uz);
-    movedEndRange->SetEnd(*text, 8uz);
-
-    auto exactOffsetRange = document->CreateRange();
-    exactOffsetRange->SetStart(*text, 2uz);
-    exactOffsetRange->SetEnd(*text, 2uz);
-
-    auto parentRange = document->CreateRange();
-
-    parentRange->SetStart(*parent, 1uz);
-    parentRange->SetEnd(*parent, 1uz);
-
-    auto splitResult = text->SplitText(2);
-    REQUIRE_FALSE(splitResult.HasException());
-
-    auto &newNode = splitResult.Value();
-
-    REQUIRE(text->Data() == u8"He");
-    REQUIRE(newNode->Data() == u8"llo, world!");
-
-    REQUIRE(beforeRange->StartContainer() == text.get());
-    REQUIRE(beforeRange->EndContainer() == text.get());
-    REQUIRE(beforeRange->StartOffset() == 1uz);
-    REQUIRE(beforeRange->EndOffset() == 2uz);
-
-    REQUIRE(movedStartRange->StartContainer() == newNode.get());
-    REQUIRE(movedStartRange->EndContainer() == newNode.get());
-    REQUIRE(movedStartRange->StartOffset() == 3uz);
-    REQUIRE(movedStartRange->EndOffset() == 4uz);
-
-    REQUIRE(movedEndRange->StartContainer() == text.get());
-    REQUIRE(movedEndRange->EndContainer() == newNode.get());
-    REQUIRE(movedEndRange->StartOffset() == 1uz);
-    REQUIRE(movedEndRange->EndOffset() == 6uz);
-
-    REQUIRE(exactOffsetRange->StartContainer() == text.get());
-    REQUIRE(exactOffsetRange->EndContainer() == text.get());
-    REQUIRE(exactOffsetRange->StartOffset() == 2uz);
-    REQUIRE(exactOffsetRange->EndOffset() == 2uz);
-
-    REQUIRE(parentRange->StartContainer() == parent.get());
-    REQUIRE(parentRange->EndContainer() == parent.get());
-    REQUIRE(parentRange->StartOffset() == 2uz);
-    REQUIRE(parentRange->EndOffset() == 2uz);
-
-    REQUIRE_FALSE(parent->RemoveChild(*newNode).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*text).HasException());
+    auto outOfBounds = text->SplitText(8);
+    REQUIRE(outOfBounds.HasException());
+    CHECK(outOfBounds.GetException().Code() == ExceptionCode::IndexSizeError);
   }
 
-  // FIXME: Check that mutation records are queued for the text nodes whose data is changed by SplitText.
-
-  TEST_CASE("Text::WholeText", "[HTML][Text]")
+  TEST_CASE("Text.wholeText: the data of its contiguous Text nodes, CDATA sections included, in tree order",
+            "[DOM][Text][dom:dom-text-wholetext]")
   {
-    auto doc = CreateRef<dom::Document>();
-    auto parent = CreateRef<TestElement>(*doc);
-    auto textNodeA = CreateRef<dom::Text>(*doc, u8"Hello,");
-    auto textNodeB = CreateRef<dom::Text>(*doc, u8" ");
-    auto textNodeC = CreateRef<dom::Text>(*doc, u8"world!");
-    auto childNode = CreateRef<TestElement>(*doc);
+    auto document = CreateRef<XMLDocument>();
+    auto parent = document->CreateElementNS(u8"urn:x", u8"p").ReleaseValue();
+    auto append = [&](Ref<Node> node)
+    {
+      REQUIRE_FALSE(parent->AppendChild(*node).HasException());
+      return node;
+    };
+    append(document->CreateTextNode(u8"before"));
+    append(document->CreateComment(u8"stop"));
+    auto first = append(document->CreateTextNode(u8"Hello,"));
+    auto cdata = append(document->CreateCDATASection(u8" ").ReleaseValue());
+    auto last = append(document->CreateTextNode(u8"world!"));
+    append(document->CreateElementNS(u8"urn:x", u8"stop").ReleaseValue());
+    append(document->CreateTextNode(u8"after"));
 
-    REQUIRE_FALSE(parent->AppendChild(*textNodeA).HasException());
-    REQUIRE_FALSE(parent->AppendChild(*textNodeB).HasException());
-    REQUIRE_FALSE(parent->AppendChild(*textNodeC).HasException());
-    REQUIRE_FALSE(parent->AppendChild(*childNode).HasException());
-
-    REQUIRE(textNodeA->WholeText() == u8"Hello, world!");
-    REQUIRE(textNodeB->WholeText() == u8"Hello, world!");
-    REQUIRE(textNodeC->WholeText() == u8"Hello, world!");
-
-    REQUIRE_FALSE(parent->RemoveChild(*textNodeA).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*textNodeB).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*textNodeC).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*childNode).HasException());
+    CHECK(Downcast<Text>(*first).WholeText() == u8"Hello, world!");
+    CHECK(Downcast<Text>(*cdata).WholeText() == u8"Hello, world!");
+    CHECK(Downcast<Text>(*last).WholeText() == u8"Hello, world!");
+    CHECK(document->CreateTextNode(u8"alone")->WholeText() == u8"alone");
   }
 
   TEST_CASE("Node.nodeName: a Text's is #text", "[DOM][Text][dom:dom-node-nodename]")

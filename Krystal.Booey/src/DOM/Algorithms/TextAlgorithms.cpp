@@ -227,33 +227,47 @@ namespace krys::boo::dom
 
   ExceptionOr<Ref<Text>> TextAlgorithms::Split(Text &node, size_t offset) noexcept
   {
+    // 1. Let length be node's length.
     auto length = node.Length();
+    // 2. If offset is greater than length, then throw an "IndexSizeError" DOMException.
     if (offset > length)
     {
       return ExceptionCode::IndexSizeError;
     }
 
+    // 3. Let count be length - offset.
     auto count = length - offset;
+    // 4. Let newData be the result of substringing data of node with offset and count.
     auto newData = Substring(node, offset, count);
-
     if (newData.HasException())
     {
       return newData.ReleaseException();
     }
 
+    // 5. Let newNode be the result of creating a text node given node's node document and newData.
     auto newNode = CreateRef<Text>(node.NodeDocument(), newData.ReleaseValue());
+    // 6. Let parent be node's parent.
+    // 7. If parent is non-null:
     if (auto parent = ShareRefPtr(node.ParentNode()))
     {
+      // 7a. Insert newNode into parent before node's next sibling. (Pre-inserted, which can't throw for a
+      //     Text node's parent.)
       if (auto insertResult = parent->InsertBefore(*newNode, node.NextSibling()); insertResult.HasException())
       {
         return insertResult.ReleaseException();
       }
 
+      // 7b.-7e. Update the live ranges in node, and those at the gap after it in parent.
       LiveRangeUpdater::SplitTextNode(node, *newNode, offset);
     }
 
-    node.ReplaceData(offset, count, u8"");
+    // 8. Replace data of node with offset, count, and the empty string.
+    if (auto replaceResult = Replace(node, offset, count, u8""); replaceResult.HasException())
+    {
+      return replaceResult.ReleaseException();
+    }
 
+    // 9. Return newNode.
     return newNode;
   }
 }

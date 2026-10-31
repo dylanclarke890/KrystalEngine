@@ -5,6 +5,7 @@
 #include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
+#include "Krystal.Booey/DOM/CDATASection.hpp"
 #include "Krystal.Booey/DOM/Comment.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
@@ -13,6 +14,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/DOM/XMLDocument.hpp"
 #include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 
 namespace krys::boo::dom::tests
@@ -1079,6 +1081,16 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*shadow));
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*host));
     CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*document));
+  }
+
+  TEST_CASE("Exclusive Text node: a Text node that isn't a CDATASection node",
+            "[DOM][TreeQueries][dom:exclusive-text-node]")
+  {
+    auto document = CreateRef<XMLDocument>();
+    CHECK(TreeQueries::IsExclusiveTextNode(*document->CreateTextNode(u8"a")));
+    CHECK_FALSE(TreeQueries::IsExclusiveTextNode(*document->CreateCDATASection(u8"a").ReleaseValue()));
+    CHECK_FALSE(TreeQueries::IsExclusiveTextNode(*document->CreateComment(u8"a")));
+    CHECK_FALSE(TreeQueries::IsExclusiveTextNode(nullptr));
   }
 
 #pragma endregion

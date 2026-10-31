@@ -19,7 +19,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Nodes are equal when their node types match, as upstream, where the specification asks for the same interfaces: an `HTMLDocument` equals an `XMLDocument` with equal children.
 - Documents have no origin and no base URL override, so cloning a document copies neither: the copy's base URL comes from its own URL and `<base>` element. `new Document()` skips setting its origin, and getting the base URL is the document base URL.
 - Adopt sets the node document and registry of every node in the subtree first, then enqueues the `adoptedCallback` reactions, then runs the adopting steps, where the specification does all three for each node in turn; so a node's adopting steps see the whole subtree moved, as upstream's (which moves the tree before notifying it).
-- There are no global objects, so `DocumentFragment` is constructed with a document. `Document()` takes no arguments.
+- There are no global objects, so `DocumentFragment`, `Text` and `Comment` are constructed with a document. `Document()` takes no arguments.
 - The fallback base URL is always the document's URL: there are no browsing contexts, so there are no `srcdoc` documents (`SPEC-VIOLATION` in `FallbackBaseURL`).
 - There's no Content Security Policy: every `<base>` is allowed, and inline `<style>` sheets and `style` attributes are parsed unchecked (`SPEC-VIOLATION(CSP)`).
 - A `<base>` whose URL fails to parse falls back to the fallback base URL, as the specification says; upstream sets the document's base URL to null. `data:` and `javascript:` bases are always refused (upstream refuses them only with the `ShouldRestrictBaseURLSchemes` setting).
