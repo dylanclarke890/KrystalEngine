@@ -1986,9 +1986,10 @@ Status: reviewed (2026-10-31)
 
 ### [4.12. Interface CDATASection](https://dom.spec.whatwg.org/#interface-cdatasection)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `CDATASection` (`CDATASection.hpp`/`.cpp`) derives from `Text`; its constructor is create a CDATA section node.
 
-- [ ] [create a CDATA section node](https://dom.spec.whatwg.org/#create-a-cdata-section-node) — To create a CDATA section node given a document document and a string data:
+- [x] [create a CDATA section node](https://dom.spec.whatwg.org/#create-a-cdata-section-node) — To create a CDATA section node given a document document and a string data:
   - 1. Let node be the result of creating a node that implements CDATASection, given document.
   - 2. Set node’s data to data.
   - 3. Return node.

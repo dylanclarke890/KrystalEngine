@@ -6,18 +6,16 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A CDATA section in an XML document: a Text node that isn't exclusive.
   /// @see https://dom.spec.whatwg.org/#interface-cdatasection
   class CDATASection : public Text
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CDATASection);
 
   public:
-#pragma region Text - https://dom.spec.whatwg.org/#text
-
-    /// @see https://dom.spec.whatwg.org/#dom-text-text
+    /// @brief Creates a CDATA section node in @p document with the data.
+    /// @see https://dom.spec.whatwg.org/#create-a-cdata-section-node
     CDATASection(Document &document, DOMString &&data = u8"") noexcept;
-
-#pragma endregion
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
