@@ -45,6 +45,7 @@
 #include "Krystal.Booey/Editing/Markup.hpp"
 #include "Krystal.Booey/Graphics/FloatQuad.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElement.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -2331,11 +2332,112 @@ namespace krys::boo::dom
     return ReplaceChildrenWithFragment(*container, fragment.ReleaseValue());
   }
 
-  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView markup) noexcept
+  ExceptionOr<void> Element::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ReplaceChildrenWithMarkup(
-      markup, {ParserContentPolicy::AllowDeclarativeShadowRoots, ParserContentPolicy::AlwaysParseAsHTML});
+    // SPEC: Let target be the target for HTML insertion given this. Filter and set HTML given target, html,
+    // options, and Safe.
+    return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
+      html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html, &options.Sanitizer,
+      html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
+    // null, html, options, and Safe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html, &options.Sanitizer,
+      html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
+    // target's first child, html, options, and Safe.
+    auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      target, target.FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::SetHTMLUnsafe(DOMStringView html, html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Let target be the target for HTML insertion given this. Filter and set HTML given target, html,
+    // options, and Unsafe.
+    return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
+      html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), html,
+      options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::AppendHTMLUnsafe(DOMStringView html,
+                                              html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
+    // null, html, options, and Unsafe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this), nullptr, html,
+      options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::PrependHTMLUnsafe(DOMStringView html,
+                                               html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Let target be the target for HTML insertion given this. Filter and pre-insert HTML given target,
+    // target's first child, html, options, and Unsafe.
+    auto &target = html::HTMLInsertionAlgorithms::TargetForHTMLInsertion(*this);
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      target, target.FirstChild(), html, options.Sanitizer ? &*options.Sanitizer : nullptr,
+      html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::BeforeHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::BeforeHTML(*this, html, &options.Sanitizer,
+                                                     html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::AfterHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::AfterHTML(*this, html, &options.Sanitizer,
+                                                    html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::ReplaceWithHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::ReplaceWithHTML(*this, html, &options.Sanitizer,
+                                                          html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> Element::BeforeHTMLUnsafe(DOMStringView html,
+                                              html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::BeforeHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::AfterHTMLUnsafe(DOMStringView html,
+                                             html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::AfterHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> Element::ReplaceWithHTMLUnsafe(DOMStringView html,
+                                                   html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    return html::HTMLInsertionAlgorithms::ReplaceWithHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
   }
 
   DOMString Element::GetHTML(GetHTMLOptions &&options) const noexcept

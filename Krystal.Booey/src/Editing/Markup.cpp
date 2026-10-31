@@ -1371,17 +1371,11 @@ namespace krys::boo
     }
 
     KRYS_NODISCARD Ref<dom::DocumentFragment>
-      ParseHTMLIntoFragment(dom::Document &document, utf8_stringview markup, dom::Element &contextElement,
+      ParseHTMLIntoFragment(utf8_stringview markup, dom::Element &contextElement,
                             bool allowDeclarativeShadowRoots = false) noexcept
     {
-      auto fragment = document.CreateDocumentFragment();
-      auto nodes = html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup),
-                                                           allowDeclarativeShadowRoots);
-      for (auto &node : nodes)
-      {
-        (void)fragment->AppendChild(*node);
-      }
-      return fragment;
+      return html::HTMLDocumentParser::ParseFragment(contextElement, utf8_string(markup),
+                                                     allowDeclarativeShadowRoots);
     }
 
     // FIXME: The template document for contexts that are templates.
@@ -1394,7 +1388,7 @@ namespace krys::boo
           || parserContentPolicy.Contains(dom::ParserContentPolicy::AlwaysParseAsHTML))
       {
         return ParseHTMLIntoFragment(
-          document, markup, contextElement,
+          markup, contextElement,
           parserContentPolicy.Contains(dom::ParserContentPolicy::AllowDeclarativeShadowRoots));
       }
 
@@ -1629,7 +1623,7 @@ namespace krys::boo
     (void)baseURL;
     // We use a fake body element here to trick the HTML parser into using the InBody insertion mode.
     auto fakeBody = CreateHTMLElement(document, u8"body");
-    return ParseHTMLIntoFragment(document, markup, *fakeBody);
+    return ParseHTMLIntoFragment(markup, *fakeBody);
   }
 
   utf8_string SerializeFragment(const dom::Node &node, SerializedNodes root, List<Ref<dom::Node>> *nodes,

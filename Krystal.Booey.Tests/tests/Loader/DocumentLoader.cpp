@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/BeforeUnloadEvent.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
@@ -65,6 +66,22 @@ namespace krys::boo::tests
     CHECK_FALSE(loader.IsDisplayingInitialEmptyDocument());
     CHECK(fixture.Events
           == List<std::string> {"policy (host)", "start", "window", "commit", "document loaded", "finish"});
+  }
+
+  TEST_CASE("A loaded document attaches declarative shadow roots", "[Loader][DocumentLoader]")
+  {
+    LoadFixture fixture;
+    fixture.LoadMarkup(
+      u8"<!DOCTYPE html><div id=host><template shadowrootmode=open><b>s</b></template></div>",
+      u8"https://example.com/page.html");
+    html::EventLoop::Current().RunUntilIdle();
+
+    auto host = fixture.Document().GetElementById(u8"host");
+    REQUIRE(host);
+    CHECK_FALSE(host->HasChildNodes());
+    auto shadow = host->ShadowRoot();
+    REQUIRE(shadow);
+    CHECK(shadow->InnerHTML() == u8"<b>s</b>");
   }
 
   TEST_CASE("Documents load from the loader strategy and data: URLs", "[Loader][DocumentLoader]")

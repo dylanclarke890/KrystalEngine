@@ -1078,6 +1078,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/FocusEvent.hpp
   include/Krystal.Booey/DOM/UIEvent.hpp
   include/Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp
+  include/Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp
   include/Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp
   include/Krystal.Booey/DOM/Highlight.hpp
   include/Krystal.Booey/DOM/HighlightRegistry.hpp
@@ -3069,6 +3070,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/CSS/DOMMatrixReadOnly.cpp
   src/CSS/DOMMatrix.cpp
   src/HTML/Algorithms/FocusAlgorithms.cpp
+  src/HTML/Algorithms/HTMLInsertionAlgorithms.cpp
   src/HTML/Algorithms/HyperlinkAlgorithms.cpp
   src/DOM/Highlight.cpp
   src/DOM/HighlightRegistry.cpp
@@ -3949,6 +3951,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/CloseWatcher/CloseWatcherManager.hpp
       include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
+      include/Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp
       include/Krystal.Booey/HTML/CustomElementFormValue.hpp
       include/Krystal.Booey/HTML/CustomStateSet.hpp
       include/Krystal.Booey/HTML/ElementInternals.hpp
@@ -4099,6 +4102,10 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Parser/HTMLTreeBuilder.hpp
       include/Krystal.Booey/HTML/Parser/InputStream.hpp
       # include/Krystal.Booey/HTML/Parser/TextResourceDecoder.hpp
+      include/Krystal.Booey/HTML/Sanitizer/Sanitizer.hpp
+      include/Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp
+      include/Krystal.Booey/HTML/Sanitizer/SanitizerConfig.hpp
+      include/Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp
       include/Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp
 
       # Infra
@@ -4617,6 +4624,9 @@ target_sources(Krystal.Booey
     src/HTML/Parser/HTMLElementStack.cpp
     src/HTML/Parser/HTMLFormattingElementList.cpp
     src/HTML/Parser/HTMLTreeBuilder.cpp
+    src/HTML/Sanitizer/Sanitizer.cpp
+    src/HTML/Sanitizer/SanitizerAlgorithms.cpp
+    src/HTML/Sanitizer/SanitizerConstants.cpp
 
     # MathML
     src/MathML/Internals/MathMLElementFactory.cpp

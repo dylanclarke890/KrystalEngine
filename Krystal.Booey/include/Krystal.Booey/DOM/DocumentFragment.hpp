@@ -31,6 +31,13 @@ namespace krys::boo::dom
     DocumentFragment(Document &document, NodeFlags flags) noexcept;
 
   public:
+    /// @brief The host of a shadow root or a template's template contents; null otherwise.
+    /// @see https://dom.spec.whatwg.org/#concept-documentfragment-host
+    KRYS_NODISCARD Element *Host() const noexcept;
+
+    /// @brief Sets the host of a template's template contents.
+    void SetHost(Element &host) noexcept;
+
     KRYS_NODISCARD bool CanContainRangeEndPoint() const noexcept final
     {
       return true;

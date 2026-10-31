@@ -15,6 +15,21 @@ namespace krys::boo::dom
   {
   }
 
+  Element *DocumentFragment::Host() const noexcept
+  {
+    if (auto host = _host.lock())
+    {
+      return host.get();
+    }
+
+    return nullptr;
+  }
+
+  void DocumentFragment::SetHost(Element &host) noexcept
+  {
+    _host = CreateWeakPtr(&host);
+  }
+
   DocumentFragment::DocumentFragment(Document &document) noexcept
       : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, NodeFlags::None)
   {

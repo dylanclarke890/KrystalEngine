@@ -11,6 +11,7 @@
 #include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/Editing/Markup.hpp"
+#include "Krystal.Booey/HTML/Algorithms/HTMLInsertionAlgorithms.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
@@ -67,11 +68,57 @@ namespace krys::boo::dom
 
 #pragma region ShadowRoot (DOM Parsing)
 
-  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView markup) noexcept
+  ExceptionOr<void> ShadowRoot::SetHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
   {
     html::CEReactionsScope ceReactions;
-    return ReplaceChildrenWithMarkup(
-      markup, {ParserContentPolicy::AllowDeclarativeShadowRoots, ParserContentPolicy::AlwaysParseAsHTML});
+    // SPEC: Filter and set HTML given this, html, options, and Safe.
+    return html::HTMLInsertionAlgorithms::FilterAndSetHTML(*this, html, &options.Sanitizer,
+                                                           html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> ShadowRoot::AppendHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Filter and pre-insert HTML given this, null, html, options, and Safe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(*this, nullptr, html, &options.Sanitizer,
+                                                                 html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> ShadowRoot::PrependHTML(DOMStringView html, html::SetHTMLOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Filter and pre-insert HTML given this, this's first child, html, options, and Safe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      *this, FirstChild(), html, &options.Sanitizer, html::FragmentParserMode::Safe);
+  }
+
+  ExceptionOr<void> ShadowRoot::SetHTMLUnsafe(DOMStringView html,
+                                              html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Filter and set HTML given this, html, options, and Unsafe.
+    return html::HTMLInsertionAlgorithms::FilterAndSetHTML(
+      *this, html, options.Sanitizer ? &*options.Sanitizer : nullptr, html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> ShadowRoot::AppendHTMLUnsafe(DOMStringView html,
+                                                 html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Filter and pre-insert HTML given this, null, html, options, and Unsafe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      *this, nullptr, html, options.Sanitizer ? &*options.Sanitizer : nullptr,
+      html::FragmentParserMode::Unsafe);
+  }
+
+  ExceptionOr<void> ShadowRoot::PrependHTMLUnsafe(DOMStringView html,
+                                                  html::SetHTMLUnsafeOptions &&options) noexcept
+  {
+    html::CEReactionsScope ceReactions;
+    // SPEC: Filter and pre-insert HTML given this, this's first child, html, options, and Unsafe.
+    return html::HTMLInsertionAlgorithms::FilterAndPreInsertHTML(
+      *this, FirstChild(), html, options.Sanitizer ? &*options.Sanitizer : nullptr,
+      html::FragmentParserMode::Unsafe);
   }
 
   DOMString ShadowRoot::GetHTML(GetHTMLOptions &&options) const noexcept
