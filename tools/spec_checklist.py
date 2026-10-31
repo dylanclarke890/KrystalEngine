@@ -234,6 +234,7 @@ class Section:
     title: str
     depth: int
     algorithms: list[Algorithm]
+    definitions: list[str] = dataclasses.field(default_factory=list)
 
 
 def Steps(ol: Node, prefix: str = "", depth: int = 0) -> list[Step]:
@@ -315,6 +316,7 @@ def Extract(root: Node) -> list[Section]:
                 algorithm_div = None
         if node.tag == "dfn" and node.attrs.get("id"):
             last_definition = node.attrs["id"]
+            sections[-1].definitions.append(node.attrs["id"])
         is_div = node.tag == "div" and ("algorithm" in node.Classes() or "data-algorithm" in node.attrs)
         outer_div = algorithm_div
         if is_div:
@@ -414,6 +416,7 @@ def Keys(anchors):
 
 ALGORITHM_LINE = re.compile(r"^- \[([ xX])\] \[.*?\]\(.*?#([^)\s]+)\)")
 DEFAULT_STATUS = "Status: unreviewed"
+DEFINITIONS_PREFIX = "<!-- definitions:"
 
 
 @dataclasses.dataclass
@@ -473,7 +476,7 @@ def Render(spec: Spec, sections: list[Section], kept: Kept) -> str:
         "algorithms still has definitions and requirements to check against the code: note where they live in `>` "
         "lines under its status, and tag their tests with the definition's or the section's anchor.",
         "",
-        "Statuses: `unreviewed`, `in review`, `reviewed (<date>, <commit>)`, `n/a (<reason>)`. An algorithm is "
+        "Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is "
         "ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.",
     ]
     sections = [section for section in sections if section.anchor]
@@ -482,6 +485,10 @@ def Render(spec: Spec, sections: list[Section], kept: Kept) -> str:
         lines += ["", f"{'#' * section.depth} [{section.title}]({spec.url}#{section.anchor})", ""]
         lines.append(kept.statuses.get(section.anchor, DEFAULT_STATUS))
         lines += kept.section_notes.get(section.anchor, [])
+        algorithm_anchors = {algorithm.anchor for algorithm in section.algorithms}
+        definitions = [anchor for anchor in section.definitions if anchor not in algorithm_anchors]
+        if definitions:
+            lines.append(f"{DEFINITIONS_PREFIX} {' '.join(definitions)} -->")
         for algorithm in section.algorithms:
             key = next(keys)
             box = "x" if kept.checked.get(key) else " "

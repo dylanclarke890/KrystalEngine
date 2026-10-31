@@ -42,6 +42,7 @@ class ChecklistSection:
     title: str
     status: str
     algorithms: list[ChecklistAlgorithm]
+    definitions: list[str] = dataclasses.field(default_factory=list)
 
 
 def ReadChecklist(spec: spec_checklist.Spec) -> list[ChecklistSection]:
@@ -54,6 +55,8 @@ def ReadChecklist(spec: spec_checklist.Spec) -> list[ChecklistSection]:
             sections.append(ChecklistSection(match.group(1), title, "", []))
         elif line.startswith("Status:") and sections:
             sections[-1].status = line.removeprefix("Status:").strip()
+        elif line.startswith(spec_checklist.DEFINITIONS_PREFIX) and sections:
+            sections[-1].definitions = line.removeprefix(spec_checklist.DEFINITIONS_PREFIX).split()[:-1]
         elif (match := spec_checklist.ALGORITHM_LINE.match(line)) and sections:
             name = re.match(r"^- \[.\] \[(.*?)\]\(", line).group(1)
             sections[-1].algorithms.append(ChecklistAlgorithm(match.group(2), name, match.group(1) != " "))
@@ -114,6 +117,10 @@ def ReportSections(spec) -> None:
     links, tags = FindLinks(spec), FindTags(spec)
     for section in ReadChecklist(spec):
         counts = Counts(section.algorithms, links, tags) if section.algorithms else "no algorithms"
+        if section.definitions:
+            linked = sum(1 for anchor in section.definitions if anchor in links)
+            tested = sum(1 for anchor in section.definitions if anchor in tags)
+            counts += f"; {len(section.definitions)} definitions, {linked} linked, {tested} tested"
         print(f"{section.title} [{section.anchor}] — {section.status}: {counts}")
 
 
@@ -124,9 +131,12 @@ def ReportSection(spec, anchor: str) -> None:
     section = sections[0]
     links, tags = FindLinks(spec), FindTags(spec)
     print(f"{section.title} [{section.anchor}] — {section.status}")
-    if section.anchor in links or section.anchor in tags or not section.algorithms:
-        print(f"    code:  {', '.join(links.get(section.anchor, [])) or 'none'}")
-        print(f"    tests: {', '.join(tags.get(section.anchor, [])) or 'none'}")
+    for anchor in [section.anchor] + section.definitions:
+        if anchor == section.anchor and anchor not in links and anchor not in tags:
+            continue
+        print(f"  {'section' if anchor == section.anchor else 'definition'} [{spec.tag}:{anchor}]")
+        print(f"    code:  {', '.join(links.get(anchor, [])) or 'none'}")
+        print(f"    tests: {', '.join(tags.get(anchor, [])) or 'none'}")
     for algorithm in section.algorithms:
         box = "x" if algorithm.checked else " "
         print(f"[{box}] {algorithm.name} [{spec.tag}:{algorithm.anchor}]")

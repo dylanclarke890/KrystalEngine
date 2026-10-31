@@ -143,7 +143,7 @@ namespace krys::boo::dom::tests
 
 #pragma region Trees
 
-  TEST_CASE("TreeQueries::IsParent", "[TreeQueries]")
+  TEST_CASE("IsParent: a node is the parent of its children only", "[TreeQueries][dom:concept-tree-parent]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -160,7 +160,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
-  TEST_CASE("TreeQueries::IsChild", "[TreeQueries]")
+  TEST_CASE("IsChild: a node is a child of its parent only", "[TreeQueries][dom:concept-tree-child]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -177,7 +177,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
-  TEST_CASE("TreeQueries::Root", "[TreeQueries]")
+  TEST_CASE("Root: a node without a parent is its own root, others share their parent's",
+            "[TreeQueries][dom:concept-tree-root]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -203,7 +204,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
-  TEST_CASE("TreeQueries::IsDescendant", "[TreeQueries]")
+  TEST_CASE("IsDescendant: children and their descendants, never the node itself",
+            "[TreeQueries][dom:concept-tree-descendant]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -238,7 +240,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(TreeQueries::IsDescendant(*grandchild, *grandchild));
   }
 
-  TEST_CASE("TreeQueries::IsInclusiveDescendant", "[TreeQueries]")
+  TEST_CASE("IsInclusiveDescendant: the node itself and its descendants",
+            "[TreeQueries][dom:concept-tree-inclusive-descendant]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -273,7 +276,8 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::IsInclusiveDescendant(*grandchild, *grandchild));
   }
 
-  TEST_CASE("TreeQueries::IsAncestor", "[TreeQueries]")
+  TEST_CASE("IsAncestor: a node is an ancestor of its descendants, never of itself",
+            "[TreeQueries][dom:concept-tree-ancestor]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -308,7 +312,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(TreeQueries::IsAncestor(*grandchild, *grandchild));
   }
 
-  TEST_CASE("TreeQueries::IsInclusiveAncestor", "[TreeQueries]")
+  TEST_CASE("IsInclusiveAncestor: the node itself and its ancestors",
+            "[TreeQueries][dom:concept-tree-inclusive-ancestor]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -343,7 +348,8 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::IsInclusiveAncestor(*grandchild, *grandchild));
   }
 
-  TEST_CASE("TreeQueries::IsSibling", "[TreeQueries]")
+  TEST_CASE("IsSibling: different nodes with the same non-null parent",
+            "[TreeQueries][dom:concept-tree-sibling]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -382,7 +388,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(TreeQueries::IsSibling(*childC, *childC));
   }
 
-  TEST_CASE("TreeQueries::IsInclusiveSibling", "[TreeQueries]")
+  TEST_CASE("IsInclusiveSibling: the node itself and its siblings",
+            "[TreeQueries][dom:concept-tree-inclusive-sibling]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -421,7 +428,8 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::IsInclusiveSibling(*childC, *childC));
   }
 
-  TEST_CASE("TreeQueries::IsPreceding", "[TreeQueries]")
+  TEST_CASE("IsPreceding: earlier in tree order in the same tree",
+            "[TreeQueries][dom:concept-tree-preceding]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -461,7 +469,13 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::IsPreceding(*childB, *grandchildB));
     REQUIRE(TreeQueries::IsPreceding(*childB, *grandchildC));
     REQUIRE(TreeQueries::IsPreceding(*childC, *grandchildC));
+    REQUIRE(TreeQueries::IsPreceding(*grandchildA, *childB));
+    REQUIRE(TreeQueries::IsPreceding(*grandchildB, *grandchildC));
+    REQUIRE(TreeQueries::IsPreceding(*parent, *grandchildC));
 
+    REQUIRE_FALSE(TreeQueries::IsPreceding(*childB, *grandchildA));
+    REQUIRE_FALSE(TreeQueries::IsPreceding(*childA, *childA));
+    REQUIRE_FALSE(TreeQueries::IsPreceding(*doc, *parent));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childB, *childA));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childC, *childA));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childC, *childB));
@@ -477,7 +491,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
   }
 
-  TEST_CASE("TreeQueries::IsFollowing", "[TreeQueries]")
+  TEST_CASE("IsFollowing: later in tree order in the same tree", "[TreeQueries][dom:concept-tree-following]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -514,7 +528,13 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::IsFollowing(*grandchildA, *childA));
     REQUIRE(TreeQueries::IsFollowing(*grandchildB, *childB));
     REQUIRE(TreeQueries::IsFollowing(*grandchildC, *childC));
+    REQUIRE(TreeQueries::IsFollowing(*childB, *grandchildA));
+    REQUIRE(TreeQueries::IsFollowing(*grandchildC, *grandchildB));
+    REQUIRE(TreeQueries::IsFollowing(*grandchildC, *parent));
 
+    REQUIRE_FALSE(TreeQueries::IsFollowing(*grandchildA, *childB));
+    REQUIRE_FALSE(TreeQueries::IsFollowing(*childA, *childA));
+    REQUIRE_FALSE(TreeQueries::IsFollowing(*parent, *doc));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childA, *childB));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childA, *childC));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childB, *childC));
@@ -533,7 +553,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
   }
 
-  TEST_CASE("TreeQueries::Index", "[TreeQueries]")
+  TEST_CASE("Index: the number of preceding siblings", "[TreeQueries][dom:concept-tree-index]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestElement>(*doc);
@@ -584,6 +604,71 @@ namespace krys::boo::dom::tests
     REQUIRE(TreeQueries::Index(*grandchildA) == 0);
     REQUIRE(TreeQueries::Index(*grandchildB) == 0);
     REQUIRE(TreeQueries::Index(*grandchildC) == 0);
+  }
+
+  TEST_CASE("Next and Previous: preorder, depth-first traversal", "[TreeQueries][dom:concept-tree-order]")
+  {
+    // root
+    // +-- a
+    // |   +-- a1
+    // |   +-- a2
+    // +-- b
+    auto doc = CreateRef<Document>();
+    auto before = CreateRef<TestElement>(*doc);
+    auto root = CreateRef<TestElement>(*doc);
+    auto a = CreateRef<TestElement>(*doc);
+    auto a1 = CreateRef<TestElement>(*doc);
+    auto a2 = CreateRef<TestElement>(*doc);
+    auto b = CreateRef<TestElement>(*doc);
+    auto after = CreateRef<TestElement>(*doc);
+    REQUIRE_FALSE(doc->AppendChild(*before).HasException());
+    REQUIRE_FALSE(before->AppendChild(*root).HasException());
+    REQUIRE_FALSE(root->AppendChild(*a).HasException());
+    REQUIRE_FALSE(a->AppendChild(*a1).HasException());
+    REQUIRE_FALSE(a->AppendChild(*a2).HasException());
+    REQUIRE_FALSE(root->AppendChild(*b).HasException());
+    REQUIRE_FALSE(before->AppendChild(*after).HasException());
+
+    SECTION("Next visits a node, then its children, then its following siblings")
+    {
+      CHECK(TreeQueries::Next(*root) == a.get());
+      CHECK(TreeQueries::Next(*a) == a1.get());
+      CHECK(TreeQueries::Next(*a1) == a2.get());
+      CHECK(TreeQueries::Next(*a2) == b.get());
+      CHECK(TreeQueries::Next(*b) == after.get());
+      CHECK(TreeQueries::Next(*after) == nullptr);
+    }
+
+    SECTION("Previous is the reverse of Next")
+    {
+      CHECK(TreeQueries::Previous(*after) == b.get());
+      CHECK(TreeQueries::Previous(*b) == a2.get());
+      CHECK(TreeQueries::Previous(*a2) == a1.get());
+      CHECK(TreeQueries::Previous(*a1) == a.get());
+      CHECK(TreeQueries::Previous(*a) == root.get());
+      CHECK(TreeQueries::Previous(*root) == before.get());
+      CHECK(TreeQueries::Previous(*doc) == nullptr);
+    }
+
+    SECTION("Within a node, Next stops after its last descendant")
+    {
+      CHECK(TreeQueries::Next(*a2, root.get()) == b.get());
+      CHECK(TreeQueries::Next(*b, root.get()) == nullptr);
+      CHECK(TreeQueries::Next(*root, root.get()) == a.get());
+    }
+
+    SECTION("Within a node, Previous stops at the node")
+    {
+      CHECK(TreeQueries::Previous(*a, root.get()) == root.get());
+      CHECK(TreeQueries::Previous(*root, root.get()) == nullptr);
+    }
+
+    SECTION("Within a node with a previous sibling, Previous doesn't leave it")
+    {
+      REQUIRE_FALSE(before->InsertBefore(*after, root.get()).HasException());
+      CHECK(TreeQueries::Previous(*root) == after.get());
+      CHECK(TreeQueries::Previous(*root, root.get()) == nullptr);
+    }
   }
 
 #pragma endregion

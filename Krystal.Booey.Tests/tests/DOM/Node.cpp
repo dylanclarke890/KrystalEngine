@@ -183,53 +183,77 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(childC->Remove().HasException());
   }
 
-  TEST_CASE("Node::FirstChild", "[HTML][Node]")
+  TEST_CASE("FirstChild: the first child, or null without children",
+            "[HTML][Node][dom:concept-tree-first-child][dom:dom-node-firstchild]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestElement>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->FirstChild() == nullptr);
 
-    REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
-    REQUIRE(data.Node->FirstChild() == child.get());
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+    REQUIRE(data.Node->FirstChild() == child1.get());
 
-    REQUIRE_FALSE(data.Node->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
+    REQUIRE(data.Node->FirstChild() == child2.get());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
     REQUIRE(data.Node->FirstChild() == nullptr);
   }
 
-  TEST_CASE("Node::LastChild", "[HTML][Node]")
+  TEST_CASE("LastChild: the last child, or null without children",
+            "[HTML][Node][dom:concept-tree-last-child][dom:dom-node-lastchild]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestElement>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->LastChild() == nullptr);
 
-    REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
-    REQUIRE(data.Node->LastChild() == child.get());
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+    REQUIRE(data.Node->LastChild() == child2.get());
 
-    REQUIRE_FALSE(data.Node->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
+    REQUIRE(data.Node->LastChild() == child1.get());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
     REQUIRE(data.Node->LastChild() == nullptr);
   }
 
-  TEST_CASE("Node::NextSibling/PreviousSibling", "[HTML][Node]")
+  TEST_CASE("NextSibling and PreviousSibling: the adjacent siblings, or null at either end",
+            "[HTML][Node][dom:concept-tree-next-sibling][dom:concept-tree-previous-sibling]"
+            "[dom:dom-node-nextsibling][dom:dom-node-previoussibling]")
   {
     CommonTestData data {true};
     auto sibling1 = CreateRef<TestElement>(*data.Document);
     auto sibling2 = CreateRef<TestElement>(*data.Document);
+    auto sibling3 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(sibling1->NextSibling() == nullptr);
     REQUIRE(sibling1->PreviousSibling() == nullptr);
 
+    REQUIRE_FALSE(data.Node->AppendChild(*sibling1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*sibling3).HasException());
+
+    REQUIRE(sibling1->PreviousSibling() == nullptr);
+    REQUIRE(sibling1->NextSibling() == sibling2.get());
+    REQUIRE(sibling2->PreviousSibling() == sibling1.get());
+    REQUIRE(sibling2->NextSibling() == sibling3.get());
+    REQUIRE(sibling3->PreviousSibling() == sibling2.get());
+    REQUIRE(sibling3->NextSibling() == nullptr);
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*sibling2).HasException());
+    REQUIRE(sibling1->NextSibling() == sibling3.get());
+    REQUIRE(sibling3->PreviousSibling() == sibling1.get());
     REQUIRE(sibling2->NextSibling() == nullptr);
     REQUIRE(sibling2->PreviousSibling() == nullptr);
 
-    REQUIRE_FALSE(data.Node->AppendChild(*sibling1).HasException());
-    REQUIRE_FALSE(data.Node->AppendChild(*sibling2).HasException());
-
-    REQUIRE(sibling2->PreviousSibling() == sibling1.get());
-
     REQUIRE_FALSE(data.Node->RemoveChild(*sibling1).HasException());
-    REQUIRE_FALSE(data.Node->RemoveChild(*sibling2).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*sibling3).HasException());
   }
 
   TEST_CASE("Node::NodeValue", "[HTML][Node]")

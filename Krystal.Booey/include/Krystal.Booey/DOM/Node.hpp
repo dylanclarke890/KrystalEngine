@@ -101,6 +101,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-getrootnode
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-parent
     /// @see https://dom.spec.whatwg.org/#dom-node-parentnode
     KRYS_NODISCARD ContainerNode *ParentNode() const noexcept
     {
@@ -116,18 +117,22 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-node-childnodes
     KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-first-child
     /// @see https://dom.spec.whatwg.org/#dom-node-firstchild
     KRYS_NODISCARD Node *FirstChild() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-last-child
     /// @see https://dom.spec.whatwg.org/#dom-node-lastchild
     KRYS_NODISCARD Node *LastChild() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-previous-sibling
     /// @see https://dom.spec.whatwg.org/#dom-node-previoussibling
     KRYS_NODISCARD Node *PreviousSibling() const noexcept
     {
       return _previousSibling.get();
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-tree-next-sibling
     /// @see https://dom.spec.whatwg.org/#dom-node-nextsibling
     KRYS_NODISCARD Node *NextSibling() const noexcept
     {

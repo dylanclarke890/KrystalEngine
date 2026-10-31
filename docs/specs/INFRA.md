@@ -4,7 +4,7 @@ Generated from <https://infra.spec.whatwg.org/> on 2026-10-30 by `tools/spec_che
 
 Reviewing a section: find each algorithm's implementation (its `@see` link), label its steps as below (`// 1.`, `// 1a.`, `// 1a.i.` with the step's text), fix or record divergences (a step left out on purpose as `// 3. (Skipped: <reason>.)` with a `DIFFERENCES.md` entry, a bug as a `// FIXME:`, a `[!shouldfail]` test and a `KNOWN-ISSUES.md` entry), tag the tests that cover it (`[infra:<anchor>]`), tick it, and set the section's status. A section without algorithms still has definitions and requirements to check against the code: note where they live in `>` lines under its status, and tag their tests with the definition's or the section's anchor.
 
-Statuses: `unreviewed`, `in review`, `reviewed (<date>, <commit>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.
+Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.
 
 ## [Abstract](https://infra.spec.whatwg.org/#abstract)
 
@@ -29,14 +29,17 @@ Status: unreviewed
 ### [2.2. Compliance with other specifications](https://infra.spec.whatwg.org/#other-specs)
 
 Status: unreviewed
+<!-- definitions: willful-violation -->
 
 ### [2.3. Terminology](https://infra.spec.whatwg.org/#terminology)
 
 Status: unreviewed
+<!-- definitions: user-agent implementation implementation-defined -->
 
 ### [2.4. Privacy concerns](https://infra.spec.whatwg.org/#privacy)
 
 Status: unreviewed
+<!-- definitions: tracking-vector -->
 
 ## [3. Algorithms](https://infra.spec.whatwg.org/#algorithms)
 
@@ -69,6 +72,7 @@ Status: unreviewed
 ### [3.7. Conditional abort](https://infra.spec.whatwg.org/#algorithm-conditional-abort)
 
 Status: unreviewed
+<!-- definitions: abort-when if-aborted -->
 
 ### [3.8. Conditional statements](https://infra.spec.whatwg.org/#algorithm-conditional-statements)
 
@@ -77,14 +81,17 @@ Status: unreviewed
 ### [3.9. Iteration](https://infra.spec.whatwg.org/#algorithm-iteration)
 
 Status: unreviewed
+<!-- definitions: iteration-while iteration-continue iteration-break -->
 
 ### [3.10. Assertions](https://infra.spec.whatwg.org/#assertions)
 
 Status: unreviewed
+<!-- definitions: assert -->
 
 ### [3.11. Identity and equality](https://infra.spec.whatwg.org/#identity-and-equality)
 
 Status: unreviewed
+<!-- definitions: is equality equal -->
 
 ## [4. Primitive data types](https://infra.spec.whatwg.org/#primitive-data-types)
 
@@ -97,18 +104,22 @@ Status: unreviewed
 ### [4.2. Booleans](https://infra.spec.whatwg.org/#booleans)
 
 Status: unreviewed
+<!-- definitions: boolean -->
 
 ### [4.3. Numbers](https://infra.spec.whatwg.org/#numbers)
 
 Status: unreviewed
+<!-- definitions: 8-bit-unsigned-integer 16-bit-unsigned-integer 32-bit-unsigned-integer 64-bit-unsigned-integer 128-bit-unsigned-integer 8-bit-signed-integer 16-bit-signed-integer 32-bit-signed-integer 64-bit-signed-integer -->
 
 ### [4.4. Bytes](https://infra.spec.whatwg.org/#bytes)
 
 Status: unreviewed
+<!-- definitions: byte byte-value ascii-byte -->
 
 ### [4.5. Byte sequences](https://infra.spec.whatwg.org/#byte-sequences)
 
 Status: unreviewed
+<!-- definitions: byte-sequence byte-sequence-length byte-case-insensitive byte-sequence-starts-with -->
 
 - [ ] [byte-lowercase](https://infra.spec.whatwg.org/#byte-lowercase) — To byte-lowercase a byte sequence, increase each byte it contains, in the range 0x41 (A) to 0x5A (Z), inclusive, by 0x20.
 
@@ -136,10 +147,12 @@ Status: unreviewed
 ### [4.6. Code points](https://infra.spec.whatwg.org/#code-points)
 
 Status: unreviewed
+<!-- definitions: code-point code-point-value leading-surrogate trailing-surrogate surrogate scalar-value noncharacter ascii-code-point ascii-tab-or-newline ascii-whitespace c0-control c0-control-or-space control ascii-digit ascii-upper-hex-digit ascii-lower-hex-digit ascii-hex-digit ascii-upper-alpha ascii-lower-alpha ascii-alpha ascii-alphanumeric -->
 
 ### [4.7. Strings](https://infra.spec.whatwg.org/#strings)
 
 Status: unreviewed
+<!-- definitions: string code-unit string-length string-code-point-length ascii-string isomorphic-string scalar-value-string string-is string-starts-with string-ends-with code-unit-substring-by-positions code-unit-substring-to-the-end-of-the-string code-point-substring-by-positions code-point-substring-to-the-end-of-the-string ascii-case-insensitive string-position-variable -->
 
 - [ ] [convert (string,JavaScript string)](https://infra.spec.whatwg.org/#javascript-string-convert) — To convert a string into a scalar value string, replace any surrogates with U+FFFD (�).
 
@@ -261,6 +274,7 @@ Status: unreviewed
 ### [4.9. Singletons](https://infra.spec.whatwg.org/#singleton)
 
 Status: unreviewed
+<!-- definitions: allowed blocked failure success -->
 
 ## [5. Data structures](https://infra.spec.whatwg.org/#data-structures)
 
@@ -269,6 +283,7 @@ Status: unreviewed
 ### [5.1. Lists](https://infra.spec.whatwg.org/#lists)
 
 Status: unreviewed
+<!-- definitions: list list-item list-contain list-size list-is-empty list-slice-from list-slice-to -->
 
 - [ ] [append (list)](https://infra.spec.whatwg.org/#list-append) — To append to a list that is not an ordered set is to add the given item to the end of the list.
 
@@ -317,6 +332,7 @@ Status: unreviewed
 #### [5.1.1. Stacks](https://infra.spec.whatwg.org/#stacks)
 
 Status: unreviewed
+<!-- definitions: stack -->
 
 - [ ] [push (stack)](https://infra.spec.whatwg.org/#stack-push) — To push onto a stack is to append to it.
 
@@ -327,6 +343,7 @@ Status: unreviewed
 #### [5.1.2. Queues](https://infra.spec.whatwg.org/#queues)
 
 Status: unreviewed
+<!-- definitions: queue -->
 
 - [ ] [enqueue (queue)](https://infra.spec.whatwg.org/#queue-enqueue) — To enqueue in a queue is to append to it.
 
@@ -335,6 +352,7 @@ Status: unreviewed
 #### [5.1.3. Sets](https://infra.spec.whatwg.org/#sets)
 
 Status: unreviewed
+<!-- definitions: ordered-set set-subset set-superset set-unordered-equal -->
 
 - [ ] [create (set)](https://infra.spec.whatwg.org/#set-create) — To create a set, given a list input:
   - 1. Let result be an empty set.
@@ -362,6 +380,7 @@ Status: unreviewed
 ### [5.2. Maps](https://infra.spec.whatwg.org/#maps)
 
 Status: unreviewed
+<!-- definitions: ordered-map map-key map-value map-entry map-with-default map-exists map-size map-is-empty -->
 
 - [ ] [get the value of an entry (map)](https://infra.spec.whatwg.org/#map-get) — To get the value of an entry in an ordered map map given a key key and an optional default:
   - 1. If map does not contain key and default is given, then return default.
@@ -389,12 +408,14 @@ Status: unreviewed
 ### [5.3. Structs](https://infra.spec.whatwg.org/#structs)
 
 Status: unreviewed
+<!-- definitions: struct struct-item struct-name -->
 
 - [ ] [itemwise equality (struct)](https://infra.spec.whatwg.org/#struct-itemwise-equality) — The itemwise equality, given structs a and b, returns true if each item of a equals the item of b with the same name; otherwise false. A struct’s definition can specify that its equality is itemwise equality.
 
 #### [5.3.1. Tuples](https://infra.spec.whatwg.org/#tuples)
 
 Status: unreviewed
+<!-- definitions: tuple -->
 
 ## [6. JSON](https://infra.spec.whatwg.org/#json)
 
@@ -495,6 +516,7 @@ Status: unreviewed
 ## [8. Namespaces](https://infra.spec.whatwg.org/#namespaces)
 
 Status: unreviewed
+<!-- definitions: html-namespace mathml-namespace svg-namespace xlink-namespace xml-namespace xmlns-namespace -->
 
 ## [Acknowledgments](https://infra.spec.whatwg.org/#acknowledgments)
 

@@ -4,7 +4,7 @@ Generated from <https://dom.spec.whatwg.org/> on 2026-10-30 by `tools/spec_check
 
 Reviewing a section: find each algorithm's implementation (its `@see` link), label its steps as below (`// 1.`, `// 1a.`, `// 1a.i.` with the step's text), fix or record divergences (a step left out on purpose as `// 3. (Skipped: <reason>.)` with a `DIFFERENCES.md` entry, a bug as a `// FIXME:`, a `[!shouldfail]` test and a `KNOWN-ISSUES.md` entry), tag the tests that cover it (`[dom:<anchor>]`), tick it, and set the section's status. A section without algorithms still has definitions and requirements to check against the code: note where they live in `>` lines under its status, and tag their tests with the definition's or the section's anchor.
 
-Statuses: `unreviewed`, `in review`, `reviewed (<date>, <commit>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.
+Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.
 
 ## [Abstract](https://dom.spec.whatwg.org/#abstract)
 
@@ -13,10 +13,14 @@ Status: unreviewed
 ## [1. Infrastructure](https://dom.spec.whatwg.org/#infrastructure)
 
 Status: unreviewed
+<!-- definitions: other-applicable-specifications -->
 
 ### [1.1. Trees](https://dom.spec.whatwg.org/#trees)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `TreeQueries`'s Trees region (`IsParent`, `IsChild`, `Root`, `IsDescendant` and the rest, `Index`), `TreeQueries::Next`/`Previous` for tree order, and `Node::ParentNode`, `FirstChild`, `LastChild`, `PreviousSibling` and `NextSibling`. Tests: `tests/DOM/Algorithms/TreeQueries.cpp`.
+> `IsSibling` excludes the node itself, as "inclusive sibling" implies, though the definition alone doesn't.
+<!-- definitions: concept-tree concept-tree-order concept-tree-participate concept-tree-parent concept-tree-child concept-tree-root concept-tree-descendant concept-tree-inclusive-descendant concept-tree-ancestor concept-tree-inclusive-ancestor concept-tree-sibling concept-tree-inclusive-sibling concept-tree-preceding concept-tree-following concept-tree-first-child concept-tree-last-child concept-tree-previous-sibling concept-tree-next-sibling concept-tree-index -->
 
 ### [1.2. Ordered sets](https://dom.spec.whatwg.org/#ordered-sets)
 
@@ -42,6 +46,7 @@ Status: unreviewed
 ### [1.4. Name validation](https://dom.spec.whatwg.org/#namespaces)
 
 Status: unreviewed
+<!-- definitions: valid-doctype-name -->
 
 - [ ] [valid namespace prefix](https://dom.spec.whatwg.org/#valid-namespace-prefix) — A string is a valid namespace prefix if its length is at least 1 and it does not contain ASCII whitespace, U+0000 NULL, U+002F (/), or U+003E (>).
 
@@ -84,6 +89,7 @@ Status: unreviewed
 ### [2.2. Interface Event](https://dom.spec.whatwg.org/#interface-event)
 
 Status: unreviewed
+<!-- definitions: concept-event potential-event-target event-target event-relatedtarget event-touch-target-list event-path event-path-item event-path-invocation-target event-path-invocation-target-in-shadow-tree event-path-shadow-adjusted-target event-path-relatedtarget event-path-touch-target-list event-path-root-of-closed-tree event-path-slot-in-closed-tree dom-event-none dom-event-capturing_phase dom-event-at_target dom-event-bubbling_phase stop-propagation-flag stop-immediate-propagation-flag canceled-flag in-passive-listener-flag composed-flag initialized-flag dispatch-flag dom-event-cancelable -->
 
 - [ ] [Event.type](https://dom.spec.whatwg.org/#dom-event-type) — The type attribute must return the value it was initialized to. When an event is created the attribute must be initialized to the empty string.
 
@@ -176,6 +182,7 @@ Status: unreviewed
 ### [2.3. Legacy extensions to the Window interface](https://dom.spec.whatwg.org/#interface-window-extensions)
 
 Status: unreviewed
+<!-- definitions: window-current-event -->
 
 - [ ] [Window.event](https://dom.spec.whatwg.org/#dom-window-event) — The event getter steps are to return this’s current event.
 
@@ -193,6 +200,7 @@ Status: unreviewed
 ### [2.5. Constructing events](https://dom.spec.whatwg.org/#constructing-events)
 
 Status: unreviewed
+<!-- definitions: concept-event-constructor-ext -->
 
 - [ ] [constructor (Event)](https://dom.spec.whatwg.org/#concept-event-constructor) — When a constructor of the Event interface, or of an interface that inherits from the Event interface, is invoked, these steps must be run, given the arguments type and eventInitDict:
   - 1. Let event be the result of running the inner event creation steps with this interface, null, now, and eventInitDict.
@@ -221,6 +229,7 @@ Status: unreviewed
 ### [2.7. Interface EventTarget](https://dom.spec.whatwg.org/#interface-eventtarget)
 
 Status: unreviewed
+<!-- definitions: eventtarget-event-listener-list concept-event-listener event-listener-type event-listener-callback event-listener-capture event-listener-passive event-listener-once event-listener-signal event-listener-removed get-the-parent eventtarget-activation-behavior eventtarget-legacy-pre-activation-behavior eventtarget-legacy-canceled-activation-behavior -->
 
 - [ ] [flatten (Event)](https://dom.spec.whatwg.org/#concept-flatten-options) — To flatten options, run these steps:
   - 1. If options is a boolean, then return options.
@@ -419,6 +428,7 @@ Status: unreviewed
 ### [3.1. Interface AbortController](https://dom.spec.whatwg.org/#interface-abortcontroller)
 
 Status: unreviewed
+<!-- definitions: abortcontroller-signal -->
 
 - [ ] [AbortController.new AbortController()](https://dom.spec.whatwg.org/#dom-abortcontroller-abortcontroller) — The new AbortController() constructor steps are:
   - 1. Let signal be a new AbortSignal object.
@@ -433,6 +443,7 @@ Status: unreviewed
 ### [3.2. Interface AbortSignal](https://dom.spec.whatwg.org/#interface-AbortSignal)
 
 Status: unreviewed
+<!-- definitions: abortsignal-abort-reason abortsignal-abort-algorithms abortsignal-dependent abortsignal-source-signals abortsignal-dependent-signals dom-abortsignal-onabort abortsignal-onabort eventdef-abortsignal-abort abortsignal-aborted -->
 
 - [ ] [AbortSignal.abort(reason)](https://dom.spec.whatwg.org/#dom-abortsignal-abort) — The static abort(reason) method steps are:
   - 1. Let signal be a new AbortSignal object.
@@ -509,6 +520,7 @@ Status: unreviewed
 ### [4.2. Node tree](https://dom.spec.whatwg.org/#node-trees)
 
 Status: unreviewed
+<!-- definitions: concept-node concept-node-tree concept-node-empty -->
 
 - [ ] [length (Node)](https://dom.spec.whatwg.org/#concept-node-length) — To determine the length of a node node, run these steps:
   - 1. If node is a DocumentType or Attr node, then return 0.
@@ -518,14 +530,17 @@ Status: unreviewed
 #### [4.2.1. Document tree](https://dom.spec.whatwg.org/#document-trees)
 
 Status: unreviewed
+<!-- definitions: concept-document-tree document-element in-a-document-tree in-a-document -->
 
 #### [4.2.2. Shadow tree](https://dom.spec.whatwg.org/#shadow-trees)
 
 Status: unreviewed
+<!-- definitions: concept-shadow-tree concept-light-tree connected -->
 
 ##### [4.2.2.1. Slots](https://dom.spec.whatwg.org/#shadow-tree-slots)
 
 Status: unreviewed
+<!-- definitions: concept-slot slot-assigned-nodes -->
 
 - [ ] [Use these attribute change steps to update a slot’s name](https://dom.spec.whatwg.org/#slot-name) — Use these attribute change steps to update a slot’s name:
   - 1. If element is a slot, localName is name, and namespace is null:
@@ -539,6 +554,7 @@ Status: unreviewed
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
 Status: unreviewed
+<!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
 - [ ] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
   - 1. If localName is slot and namespace is null:
@@ -605,6 +621,7 @@ Status: unreviewed
 ##### [4.2.2.5. Signaling slot change](https://dom.spec.whatwg.org/#signaling-slot-change)
 
 Status: unreviewed
+<!-- definitions: signal-slot-list -->
 
 - [ ] [signal a slot change](https://dom.spec.whatwg.org/#signal-a-slot-change) — To signal a slot change, for a slot slot:
   - 1. Append slot to slot’s relevant agent’s signal slots.
@@ -613,6 +630,7 @@ Status: unreviewed
 #### [4.2.3. Mutation algorithms](https://dom.spec.whatwg.org/#mutation-algorithms)
 
 Status: unreviewed
+<!-- definitions: insert-suppressobservers remove-suppressobservers -->
 
 - [ ] [ensure pre-insert validity](https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity) — To ensure pre-insert validity given a node node, a node parent, null or a node child, and a list of nodes childrenToExclude:
   - 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
@@ -879,6 +897,7 @@ Status: unreviewed
 #### [4.2.10. Old-style collections: NodeList and HTMLCollection](https://dom.spec.whatwg.org/#old-style-collections)
 
 Status: unreviewed
+<!-- definitions: concept-collection concept-collection-live concept-collection-static represented-by-the-collection -->
 
 ##### [4.2.10.1. Interface NodeList](https://dom.spec.whatwg.org/#interface-nodelist)
 
@@ -910,6 +929,7 @@ Status: unreviewed
 ### [4.3. Mutation observers](https://dom.spec.whatwg.org/#mutation-observers)
 
 Status: unreviewed
+<!-- definitions: mutation-observer-compound-microtask-queued-flag mutation-observer-list mutation-observer-counter eventdef-htmlslotelement-slotchange registered-observer-list registered-observer registered-observer-observer registered-observer-options transient-registered-observer transient-registered-observer-source -->
 
 - [ ] [queue a mutation observer microtask](https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask) — To queue a mutation observer microtask:
   - 1. If the surrounding agent’s mutation observer microtask queued is true, then return.
@@ -947,6 +967,7 @@ Status: unreviewed
 #### [4.3.1. Interface MutationObserver](https://dom.spec.whatwg.org/#interface-mutationobserver)
 
 Status: unreviewed
+<!-- definitions: concept-mo-callback mutationobserver-creation-index mutationobserver-node-list mutationobserver-transient-node-set concept-mo-queue -->
 
 - [ ] [MutationObserver.new MutationObserver(callback)](https://dom.spec.whatwg.org/#dom-mutationobserver-mutationobserver) — The new MutationObserver(callback) constructor steps are:
   - 1. Set this’s callback to callback.
@@ -1006,12 +1027,14 @@ Status: unreviewed
 #### [4.3.3. Interface MutationRecord](https://dom.spec.whatwg.org/#interface-mutationrecord)
 
 Status: unreviewed
+<!-- definitions: dom-mutationrecord-target dom-mutationrecord-addednodes dom-mutationrecord-removednodes dom-mutationrecord-previoussibling dom-mutationrecord-nextsibling dom-mutationrecord-attributename dom-mutationrecord-attributenamespace dom-mutationrecord-oldvalue -->
 
 - [ ] [MutationRecord.type](https://dom.spec.whatwg.org/#dom-mutationrecord-type) — The type, target, addedNodes, removedNodes, previousSibling, nextSibling, attributeName, attributeNamespace, and oldValue attributes must return the values they were initialized to.
 
 ### [4.4. Interface Node](https://dom.spec.whatwg.org/#interface-node)
 
 Status: unreviewed
+<!-- definitions: concept-node-document dom-node-element_node dom-node-attribute_node dom-node-text_node dom-node-cdata_section_node dom-node-processing_instruction_node dom-node-comment_node dom-node-document_node dom-node-document_type_node dom-node-document_fragment_node concept-node-clone-ext clone-a-node-document clone-a-node-subtree clone-a-node-parent clone-a-node-fallbackregistry dom-node-document_position_disconnected dom-node-document_position_preceding dom-node-document_position_following dom-node-document_position_contains dom-node-document_position_contained_by dom-node-document_position_implementation_specific -->
 
 - [ ] [create a node](https://dom.spec.whatwg.org/#create-a-node) — To create a node that implements an interface interface, given a document document:
   - 1. Assert: interface is neither Document nor an interface that inherits from Document.
@@ -1247,6 +1270,7 @@ Status: unreviewed
 ### [4.5. Interface Document](https://dom.spec.whatwg.org/#interface-document)
 
 Status: unreviewed
+<!-- definitions: concept-document concept-document-encoding concept-document-content-type concept-document-url concept-document-origin concept-document-type concept-document-mode document-allow-declarative-shadow-roots document-custom-element-registry xml-document html-document get-the-base-url document-base-url-override concept-document-no-quirks concept-document-quirks concept-document-limited-quirks dom-document-documenturi dom-document-charset dom-document-inputencoding concept-element-interface is-a-global-custom-element-registry -->
 
 - [ ] [create a document](https://dom.spec.whatwg.org/#create-a-document) — To create a document that implements an interface interface, given a realm realm:
   - 1. Assert: interface is Document or an interface that inherits from Document.
@@ -1428,6 +1452,7 @@ Status: unreviewed
 ### [4.6. Interface DocumentType](https://dom.spec.whatwg.org/#interface-documenttype)
 
 Status: unreviewed
+<!-- definitions: concept-doctype concept-doctype-name concept-doctype-publicid concept-doctype-systemid -->
 
 - [ ] [create a doctype](https://dom.spec.whatwg.org/#create-a-doctype) — To create a doctype given a document document, a string name, and optionally a string publicId (default the empty string) and a string systemId (default the empty string):
   - 1. Let doctype be the result of creating a node that implements DocumentType, given document.
@@ -1443,6 +1468,7 @@ Status: unreviewed
 ### [4.7. Interface DocumentFragment](https://dom.spec.whatwg.org/#interface-documentfragment)
 
 Status: unreviewed
+<!-- definitions: concept-documentfragment-host -->
 
 - [ ] [exclusive DocumentFragment node](https://dom.spec.whatwg.org/#exclusive-documentfragment-node) — An exclusive DocumentFragment node is a DocumentFragment node that is not a ShadowRoot node.
 
@@ -1455,6 +1481,7 @@ Status: unreviewed
 ### [4.8. Interface ShadowRoot](https://dom.spec.whatwg.org/#interface-shadowroot)
 
 Status: unreviewed
+<!-- definitions: concept-shadow-root shadowroot-mode shadowroot-delegates-focus shadowroot-available-to-element-internals shadowroot-declarative shadowroot-serializable shadowroot-slot-assignment shadowroot-clonable shadowroot-custom-element-registry shadowroot-keep-custom-element-registry-null dom-shadowroot-onslotchange shadowroot-onslotchange concept-shadow-including-tree-order shadow-including-preorder-depth-first-traversal concept-shadow-including-root concept-shadow-including-descendant concept-shadow-including-inclusive-descendant concept-shadow-including-ancestor concept-shadow-including-inclusive-ancestor concept-closed-shadow-hidden -->
 
 - [ ] [ShadowRoot.mode](https://dom.spec.whatwg.org/#dom-shadowroot-mode) — The mode getter steps are to return this’s mode.
 
@@ -1475,6 +1502,7 @@ Status: unreviewed
 ### [4.9. Interface Element](https://dom.spec.whatwg.org/#interface-element)
 
 Status: unreviewed
+<!-- definitions: concept-element concept-element-namespace concept-element-namespace-prefix concept-element-local-name element-custom-element-registry concept-element-custom-element-state concept-element-custom-element-definition concept-element-is-value concept-element-defined concept-element-custom concept-element-shadow-root element-shadow-host concept-element-qualified-name concept-element-attribute concept-element-attribute-has concept-element-attributes-change-ext parent-element concept-reflect concept-class dom-element-setattributenodens valid-shadow-host-name dom-element-webkitmatchesselector -->
 
 - [ ] [HTML-uppercased qualified name (Element)](https://dom.spec.whatwg.org/#element-html-uppercased-qualified-name) — An element’s HTML-uppercased qualified name is the return value of these steps:
   - 1. Let qualifiedName be this’s qualified name.
@@ -1752,6 +1780,7 @@ Status: unreviewed
 #### [4.9.1. Interface NamedNodeMap](https://dom.spec.whatwg.org/#interface-namednodemap)
 
 Status: unreviewed
+<!-- definitions: concept-namednodemap-element concept-namednodemap-attribute dom-namednodemap-setnameditemns -->
 
 - [ ] [NamedNodeMap.length](https://dom.spec.whatwg.org/#dom-namednodemap-length) — The length getter steps are to return the attribute list’s size.
 
@@ -1785,6 +1814,7 @@ Status: unreviewed
 #### [4.9.2. Interface Attr](https://dom.spec.whatwg.org/#interface-attr)
 
 Status: unreviewed
+<!-- definitions: concept-attribute concept-attribute-namespace concept-attribute-namespace-prefix concept-attribute-local-name concept-attribute-value concept-attribute-element concept-attribute-qualified-name concept-named-attribute -->
 
 - [ ] [create an attribute](https://dom.spec.whatwg.org/#create-an-attribute) — To create an attribute given a document document, a string localName, and optionally a string-or-null namespace (default null), a string-or-null prefix (default null), and a string value (default the empty string):
   - 1. Let attribute be the result of creating a node that implements Attr, given document.
@@ -1817,6 +1847,7 @@ Status: unreviewed
 ### [4.10. Interface CharacterData](https://dom.spec.whatwg.org/#interface-characterdata)
 
 Status: unreviewed
+<!-- definitions: concept-cd-data -->
 
 - [ ] [replace data](https://dom.spec.whatwg.org/#concept-cd-replace) — To replace data of a node node with an integer offset, integer count, string data, and an optional boolean piAttributesAlreadyUpdated (default false):
   - 1. Let length be node’s length.
@@ -1906,6 +1937,7 @@ Status: unreviewed
 ### [4.13. Interface ProcessingInstruction](https://dom.spec.whatwg.org/#interface-processinginstruction)
 
 Status: unreviewed
+<!-- definitions: concept-pi-target concept-pi-attribute-map -->
 
 - [ ] [create a processing instruction node](https://dom.spec.whatwg.org/#create-a-processing-instruction-node) — To create a processing instruction node given a document document, a string target, and a string data:
   - 1. Let pi be the result of creating a node that implements ProcessingInstruction, given document.
@@ -1996,6 +2028,7 @@ Status: unreviewed
 ### [5.2. Boundary points](https://dom.spec.whatwg.org/#boundary-points)
 
 Status: unreviewed
+<!-- definitions: concept-range-bp boundary-point-node concept-range-bp-offset concept-range-bp-before concept-range-bp-equal concept-range-bp-after -->
 
 - [ ] [position (boundary point)](https://dom.spec.whatwg.org/#concept-range-bp-position) — The position of a boundary point (nodeA, offsetA) relative to a boundary point (nodeB, offsetB) is before, equal, or after, as returned by these steps:
   - 1. Assert: nodeA and nodeB have the same root.
@@ -2010,6 +2043,7 @@ Status: unreviewed
 ### [5.3. Interface AbstractRange](https://dom.spec.whatwg.org/#interface-abstractrange)
 
 Status: unreviewed
+<!-- definitions: concept-range concept-range-start concept-range-end concept-range-start-node concept-range-start-offset concept-range-end-node concept-range-end-offset -->
 
 - [ ] [collapsed (range)](https://dom.spec.whatwg.org/#range-collapsed) — A range is collapsed if its start node is its end node and its start offset is its end offset.
 
@@ -2036,6 +2070,7 @@ Status: unreviewed
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
 Status: unreviewed
+<!-- definitions: concept-live-range concept-range-root contained partially-contained -->
 
 - [ ] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
   - 1. Let parent be node’s parent.
@@ -2289,6 +2324,7 @@ Status: unreviewed
 ## [6. Traversal](https://dom.spec.whatwg.org/#traversal)
 
 Status: unreviewed
+<!-- definitions: concept-traversal-active concept-traversal-root concept-traversal-whattoshow concept-traversal-filter -->
 
 - [ ] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
   - 1. If traverser’s is active is true, then throw an "InvalidStateError" DOMException.
@@ -2303,6 +2339,7 @@ Status: unreviewed
 ### [6.1. Interface NodeIterator](https://dom.spec.whatwg.org/#interface-nodeiterator)
 
 Status: unreviewed
+<!-- definitions: iterator-collection node-pointer node-pointer-node node-pointer-pointer-before nodeiterator-reference nodeiterator-candidate-reference -->
 
 - [ ] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
   - 1. Set nodeIterator’s reference to the result of adjusting a node pointer given nodeIterator’s reference, nodeIterator, and toBeRemovedNode.
@@ -2358,6 +2395,7 @@ Status: unreviewed
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 
 Status: unreviewed
+<!-- definitions: treewalker-current -->
 
 - [ ] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.
 
@@ -2456,6 +2494,7 @@ Status: unreviewed
 ### [6.3. Interface NodeFilter](https://dom.spec.whatwg.org/#interface-nodefilter)
 
 Status: unreviewed
+<!-- definitions: dom-nodefilter-filter_accept dom-nodefilter-filter_reject dom-nodefilter-filter_skip dom-nodefilter-show_all dom-nodefilter-show_element dom-nodefilter-show_attribute dom-nodefilter-show_text dom-nodefilter-show_cdata_section dom-nodefilter-show_processing_instruction dom-nodefilter-show_comment dom-nodefilter-show_document dom-nodefilter-show_document_type dom-nodefilter-show_document_fragment -->
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)
 
@@ -2464,6 +2503,7 @@ Status: unreviewed
 ### [7.1. Interface DOMTokenList](https://dom.spec.whatwg.org/#interface-domtokenlist)
 
 Status: unreviewed
+<!-- definitions: concept-dtl-tokens domtokenlist-element domtokenlist-attribute-name concept-supported-tokens -->
 
 - [ ] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:
   - 1. If set’s element and attribute name does not define supported tokens, then throw a TypeError.
@@ -2571,6 +2611,7 @@ Status: unreviewed
 ## [11. Historical](https://dom.spec.whatwg.org/#historical)
 
 Status: unreviewed
+<!-- definitions: domconfiguration domerror domerrorhandler domimplementationlist domimplementationsource domlocator domobject domuserdata entity entityreference mutationevent mutationnameevent namelist notation rangeexception typeinfo userdatahandler dom-attr-schematypeinfo dom-attr-isid dom-document-createentityreference dom-document-xmlencoding dom-document-xmlstandalone dom-document-xmlversion dom-document-stricterrorchecking dom-document-domconfig dom-document-normalizedocument dom-document-renamenode dom-documenttype-entities dom-documenttype-notations dom-documenttype-internalsubset dom-domimplementation-getfeature dom-element-schematypeinfo dom-element-setidattribute dom-element-setidattributens dom-element-setidattributenode dom-node-issupported dom-node-getfeature dom-node-getuserdata dom-node-setuserdata dom-nodeiterator-expandentityreferences dom-text-iselementcontentwhitespace dom-text-replacewholetext dom-treewalker-expandentityreferences -->
 
 ## [Acknowledgments](https://dom.spec.whatwg.org/#acks)
 

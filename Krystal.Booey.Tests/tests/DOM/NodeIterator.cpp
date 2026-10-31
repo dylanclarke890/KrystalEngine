@@ -143,6 +143,22 @@ namespace krys::boo::dom::tests
     }
   }
 
+  TEST_CASE("NodeIterator traversal: nothing precedes the root, even when it has a previous sibling",
+            "[HTML][NodeIterator][dom:concept-nodeiterator-traverse]")
+  {
+    CommonTestData data;
+    auto parent = CreateRef<TestElement>(*data.Document);
+    auto sibling = CreateRef<TestElement>(*data.Document);
+    REQUIRE_FALSE(parent->AppendChild(*sibling).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*data.Node).HasException());
+
+    auto nodeIterator = data.Document->CreateNodeIterator(*data.Node, WhatToShow::SHOW_ALL, nullptr);
+    auto previousNodeResult = nodeIterator->PreviousNode();
+    REQUIRE_FALSE(previousNodeResult.HasException());
+    CHECK(previousNodeResult.Value() == nullptr);
+    CHECK(&nodeIterator->ReferenceNode() == data.Node.get());
+  }
+
   TEST_CASE("NodeIterator::Filter", "[HTML][NodeIterator]")
   {
     CommonTestData data;
