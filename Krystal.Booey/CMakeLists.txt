@@ -3892,6 +3892,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/DOM/VisitedLinkState.hpp
       include/Krystal.Booey/DOM/Types/DOMHighResTimeStamp.hpp
       include/Krystal.Booey/DOM/Types/DOMString.hpp
+      include/Krystal.Booey/DOM/Types/ElementOrText.hpp
       include/Krystal.Booey/DOM/Types/Exception.hpp
       include/Krystal.Booey/DOM/Types/ExceptionOr.hpp
       include/Krystal.Booey/DOM/Types/NodeOrString.hpp
@@ -3952,6 +3953,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Dicts/ShowPopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/TogglePopoverOptions.hpp
       include/Krystal.Booey/HTML/Dicts/SetHTMLOptions.hpp
+      include/Krystal.Booey/HTML/Dicts/AssignedNodesOptions.hpp
       include/Krystal.Booey/HTML/CustomElementFormValue.hpp
       include/Krystal.Booey/HTML/CustomStateSet.hpp
       include/Krystal.Booey/HTML/ElementInternals.hpp

@@ -2,6 +2,7 @@
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
@@ -692,5 +693,52 @@ namespace krys::boo::dom::tests
     CHECK(div->Children()->Length() == 1u);
     CHECK(span->Children()->Length() == 0u);
     CHECK(document->CreateDocumentFragment()->Children()->Length() == 0u);
+  }
+
+  TEST_CASE("Update a slottable's name: a change to the slot attribute moves it to the matching slot",
+            "[DOM][Element][dom:slotable-name]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*host).HasException());
+    auto shadow = host->AttachShadow({.Mode = ShadowRootMode::Open}).ReleaseValue();
+    auto defaultSlot = document->CreateElement(u8"slot").ReleaseValue();
+    auto namedSlot = document->CreateElement(u8"slot").ReleaseValue();
+    REQUIRE_FALSE(namedSlot->SetAttribute(u8"name", u8"a").HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*defaultSlot).HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*namedSlot).HasException());
+
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(host->AppendChild(*span).HasException());
+    REQUIRE(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
+
+    REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"a").HasException());
+    CHECK(SlotAlgorithms::GetAssignedSlot(*span) == namedSlot.get());
+
+    SECTION("A name with no slot unassigns it")
+    {
+      REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"b").HasException());
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == nullptr);
+    }
+
+    SECTION("Removed or emptied, it goes back to the default slot")
+    {
+      SECTION("Removed")
+      {
+        span->RemoveAttribute(u8"slot");
+      }
+      SECTION("Emptied")
+      {
+        REQUIRE_FALSE(span->SetAttribute(u8"slot", u8"").HasException());
+      }
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
+    }
+
+    SECTION("A slot attribute in a namespace doesn't change it")
+    {
+      span->RemoveAttribute(u8"slot");
+      REQUIRE_FALSE(span->SetAttributeNS(u8"http://example.com/", u8"slot", u8"a").HasException());
+      CHECK(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
+    }
   }
 }

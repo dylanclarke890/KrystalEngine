@@ -47,11 +47,22 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#slotable-assigned
     KRYS_NODISCARD static bool IsAssigned(const Element &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     KRYS_NODISCARD static html::HTMLSlotElement *GetAssignedSlot(const Node &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     KRYS_NODISCARD static html::HTMLSlotElement *GetAssignedSlot(const Text &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     KRYS_NODISCARD static html::HTMLSlotElement *GetAssignedSlot(const Element &node) noexcept;
+
+    /// @brief The slot @p slottable is manually assigned to, if any.
+    /// @see https://dom.spec.whatwg.org/#slottable-manual-slot-assignment
+    KRYS_NODISCARD static html::HTMLSlotElement *GetManualSlotAssignment(const Node &slottable) noexcept;
+
+    /// @brief Sets @p slottable's manual slot assignment to @p slot.
+    /// @see https://dom.spec.whatwg.org/#slottable-manual-slot-assignment
+    static void SetManualSlotAssignment(Node &slottable, html::HTMLSlotElement *slot) noexcept;
 
 #pragma endregion
 

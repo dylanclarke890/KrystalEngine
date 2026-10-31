@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Booey/DOM/Types/ElementOrText.hpp"
+#include "Krystal.Booey/HTML/Dicts/AssignedNodesOptions.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/WeakPtr.hpp"
@@ -22,7 +24,9 @@ namespace krys::boo::html
     friend class ::krys::boo::dom::SlotAlgorithms;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#slot-assigned-nodes
     List<WeakRef<dom::Node>> _assignedNodes;
+    /// @see https://html.spec.whatwg.org/#manually-assigned-nodes
     List<WeakRef<dom::Node>> _manuallyAssignedNodes;
 
   public:
@@ -37,6 +41,19 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/#dom-slot-name
     void Name(dom::DOMString &&name) noexcept;
+
+    /// @brief The slot's assigned nodes, or with @p options' `Flatten`, its flattened slottables.
+    /// @see https://html.spec.whatwg.org/#dom-slot-assignednodes
+    KRYS_NODISCARD List<Ref<dom::Node>> AssignedNodes(const AssignedNodesOptions &options) noexcept;
+
+    /// @brief `AssignedNodes(options)`, filtered to contain only elements.
+    /// @see https://html.spec.whatwg.org/#dom-slot-assignedelements
+    KRYS_NODISCARD List<Ref<dom::Element>>
+      AssignedElements(const AssignedNodesOptions &options = {}) noexcept;
+
+    /// @brief Sets the slot's manually assigned nodes to @p nodes.
+    /// @see https://html.spec.whatwg.org/#dom-slot-assign
+    void Assign(const List<dom::ElementOrText> &nodes) noexcept;
 
 #pragma endregion
 

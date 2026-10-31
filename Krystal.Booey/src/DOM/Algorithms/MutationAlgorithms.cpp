@@ -293,9 +293,9 @@ namespace krys::boo::dom
 
     auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
 
-    bool isParentNamedShadowHost =
-      TreeQueries::IsShadowHost(parent)
-      && TreeQueries::GetShadowRoot(Downcast<Element>(parent))->SlotAssignment() == SlotAssignmentMode::Named;
+    // A manual shadow root's host assigns a slot too, so that a node assign() gave a slot before it was the
+    // host's child is assigned once it is.
+    bool isParentShadowHost = TreeQueries::IsShadowHost(parent);
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
     auto *slotParent = DynamicDowncast<html::HTMLSlotElement>(parent);
@@ -344,7 +344,7 @@ namespace krys::boo::dom
         }
       }
 
-      if (isParentNamedShadowHost && SlotAlgorithms::IsSlottable(*target))
+      if (isParentShadowHost && SlotAlgorithms::IsSlottable(*target))
       {
         SlotAlgorithms::AssignSlot(*target);
       }

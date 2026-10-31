@@ -577,10 +577,11 @@ Status: reviewed (2026-10-31)
 
 ##### [4.2.2.2. Slottables](https://dom.spec.whatwg.org/#light-tree-slotables)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Slottables are `Element` and `Text` (`SlotAlgorithms::IsSlottable`), each with a name, an assigned slot and a manual slot assignment; `SlotAlgorithms::IsAssigned`/`GetAssignedSlot` read them. Text's name is always the empty string. HTML's `assign()` (`HTMLSlotElement::Assign`) sets the manual slot assignment. Tests: `tests/DOM/Algorithms/SlotAlgorithms.cpp`, `tests/DOM/Element.cpp`, `tests/HTML/HTMLSlotElement.cpp`.
 <!-- definitions: concept-slotable slotable-assigned-slot slotable-assigned slottable-manual-slot-assignment -->
 
-- [ ] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
+- [x] [Use these attribute change steps to update a slottable’s name](https://dom.spec.whatwg.org/#slotable-name) — Use these attribute change steps to update a slottable’s name:
   - 1. If localName is slot and namespace is null:
     - 1a. If value is oldValue, then return.
     - 1b. If value is null and oldValue is the empty string, then return.

@@ -117,6 +117,31 @@ namespace krys::boo::dom
     return node._assignedSlot.get();
   }
 
+  html::HTMLSlotElement *SlotAlgorithms::GetManualSlotAssignment(const Node &slottable) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(slottable))
+    {
+      return element->_manuallyAssignedSlot.get();
+    }
+    if (auto *text = DynamicDowncast<Text>(slottable))
+    {
+      return text->_manuallyAssignedSlot.get();
+    }
+    return nullptr;
+  }
+
+  void SlotAlgorithms::SetManualSlotAssignment(Node &slottable, html::HTMLSlotElement *slot) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(slottable))
+    {
+      element->_manuallyAssignedSlot = CreateWeakPtr(slot);
+    }
+    else if (auto *text = DynamicDowncast<Text>(slottable))
+    {
+      text->_manuallyAssignedSlot = CreateWeakPtr(slot);
+    }
+  }
+
 #pragma endregion
 
 #pragma region Finding slots and slotted elements
@@ -290,6 +315,24 @@ namespace krys::boo::dom
         {
           RenderTreeUpdater::TearDownRenderersAfterSlotChange(*host);
           host->InvalidateStyleForSubtree();
+        }
+      }
+    }
+
+    // A slottable that's no longer assigned to the slot no longer has it as its assigned slot.
+    for (auto &weakNode : slot._assignedNodes)
+    {
+      auto *node = weakNode.get();
+      if (node && GetAssignedSlot(*node) == &slot
+          && !std::ranges::any_of(slottables, [&](const auto &slottable) { return slottable.get() == node; }))
+      {
+        if (auto *element = DynamicDowncast<Element>(*node))
+        {
+          element->_assignedSlot = nullptr;
+        }
+        else if (auto *text = DynamicDowncast<Text>(*node))
+        {
+          text->_assignedSlot = nullptr;
         }
       }
     }
