@@ -9,6 +9,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -31,6 +33,26 @@ namespace krys::boo::dom::tests
         }
       }
     };
+  }
+
+  TEST_CASE("Create a document fragment: an empty fragment in the document, without a host",
+            "[DOM][DocumentFragment][dom:interface-documentfragment][dom:create-a-document-fragment]"
+            "[dom:dom-documentfragment-documentfragment][dom:concept-documentfragment-host]")
+  {
+    CommonTestData data;
+    CHECK(&data.Node->NodeDocument() == data.Document.get());
+    CHECK_FALSE(data.Node->HasChildNodes());
+    CHECK(data.Node->Host() == nullptr);
+    CHECK(&data.Document->CreateDocumentFragment()->NodeDocument() == data.Document.get());
+
+    // A shadow root's host is its element, as is a template's contents'.
+    auto host = CreateRef<TestElement>(*data.Document);
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    CHECK(shadow->Host() == host.get());
+    auto templateElement =
+      data.Document->CreateElementNS(infra::Namespaces::HTML, u8"template").ReleaseValue();
+    CHECK(Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents().Host()
+          == templateElement.get());
   }
 
   TEST_CASE("Node.nodeType: a DocumentFragment is a DOCUMENT_FRAGMENT_NODE",

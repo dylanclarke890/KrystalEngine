@@ -43,7 +43,11 @@ namespace krys::boo::dom
       return true;
     }
 
-    DocumentFragment(Document &document) noexcept;
+    /// @brief Creates a document fragment in @p document. There are no global objects, so new
+    /// DocumentFragment() takes the document it would have had.
+    /// @see https://dom.spec.whatwg.org/#create-a-document-fragment
+    /// @see https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
+    explicit DocumentFragment(Document &document) noexcept;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 

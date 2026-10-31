@@ -13,6 +13,7 @@
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
+#include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -962,6 +963,77 @@ namespace krys::boo::dom::tests
 
     CHECK(TreeQueries::NextElementIncludingPseudoSkippingChildren(p, &root) == &empty);
     CHECK(TreeQueries::PseudoAwarePreviousElementSibling(empty) == &p);
+  }
+
+  TEST_CASE("Host-including inclusive ancestor: an inclusive ancestor, or one of a root's host",
+            "[DOM][TreeQueries][dom:concept-tree-host-including-inclusive-ancestor]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto outer = document->CreateElement(u8"div").ReleaseValue();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(outer->AppendChild(*host).HasException());
+
+    SECTION("through a shadow root's host")
+    {
+      auto shadow = host->AttachShadow({}).ReleaseValue();
+      auto inShadow = document->CreateElement(u8"p").ReleaseValue();
+      REQUIRE_FALSE(shadow->AppendChild(*inShadow).HasException());
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*inShadow, *inShadow));
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*shadow, *inShadow));
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*host, *inShadow));
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*outer, *inShadow));
+      CHECK_FALSE(TreeQueries::IsHostIncludingInclusiveAncestorOf(*inShadow, *host));
+
+      // So a host can't be inserted into its own shadow tree.
+      auto result = inShadow->AppendChild(*outer);
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("through a template's contents' template element")
+    {
+      auto templateElement = document->CreateElement(u8"template").ReleaseValue();
+      REQUIRE_FALSE(host->AppendChild(*templateElement).HasException());
+      auto &content = Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents();
+      auto inContent = document->CreateElement(u8"p").ReleaseValue();
+      REQUIRE_FALSE(content.AppendChild(*inContent).HasException());
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(content, *inContent));
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*templateElement, *inContent));
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*outer, *inContent));
+
+      // So a template, or its ancestor, can't be inserted into its own contents.
+      auto intoContent = content.AppendChild(*templateElement);
+      REQUIRE(intoContent.HasException());
+      CHECK(intoContent.GetException().Code() == ExceptionCode::HierarchyRequestError);
+      auto intoDescendant = inContent->AppendChild(*outer);
+      REQUIRE(intoDescendant.HasException());
+      CHECK(intoDescendant.GetException().Code() == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("not through a fragment without a host")
+    {
+      auto fragment = document->CreateDocumentFragment();
+      auto child = document->CreateElement(u8"p").ReleaseValue();
+      REQUIRE_FALSE(fragment->AppendChild(*child).HasException());
+      CHECK(TreeQueries::IsHostIncludingInclusiveAncestorOf(*fragment, *child));
+      CHECK_FALSE(TreeQueries::IsHostIncludingInclusiveAncestorOf(*outer, *child));
+    }
+  }
+
+  TEST_CASE("Exclusive DocumentFragment node: a DocumentFragment node that isn't a ShadowRoot node",
+            "[DOM][TreeQueries][dom:exclusive-documentfragment-node]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto host = document->CreateElement(u8"div").ReleaseValue();
+    auto shadow = host->AttachShadow({}).ReleaseValue();
+    auto templateElement = document->CreateElement(u8"template").ReleaseValue();
+
+    CHECK(TreeQueries::IsExclusiveDocumentFragmentNode(*document->CreateDocumentFragment()));
+    CHECK(TreeQueries::IsExclusiveDocumentFragmentNode(
+      Downcast<html::HTMLTemplateElement>(*templateElement).TemplateContents()));
+    CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*shadow));
+    CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*host));
+    CHECK_FALSE(TreeQueries::IsExclusiveDocumentFragmentNode(*document));
   }
 
 #pragma endregion

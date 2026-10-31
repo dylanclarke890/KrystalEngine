@@ -1519,16 +1519,17 @@ Status: reviewed (2026-10-31)
 
 ### [4.7. Interface DocumentFragment](https://dom.spec.whatwg.org/#interface-documentfragment)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `DocumentFragment` (`DocumentFragment.hpp`/`.cpp`) holds the host, set for shadow roots and template contents; exclusive DocumentFragment node and host-including inclusive ancestor are in `TreeQueries`. Create a document fragment and `new DocumentFragment()` are its constructor, which takes the document (see `DIFFERENCES.md`).
 <!-- definitions: concept-documentfragment-host -->
 
-- [ ] [exclusive DocumentFragment node](https://dom.spec.whatwg.org/#exclusive-documentfragment-node) — An exclusive DocumentFragment node is a DocumentFragment node that is not a ShadowRoot node.
+- [x] [exclusive DocumentFragment node](https://dom.spec.whatwg.org/#exclusive-documentfragment-node) — An exclusive DocumentFragment node is a DocumentFragment node that is not a ShadowRoot node.
 
-- [ ] [host-including inclusive ancestor](https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor) — An object A is a host-including inclusive ancestor of an object B, if either A is an inclusive ancestor of B, or if B’s root has a non-null host and A is a host-including inclusive ancestor of B’s root’s host.
+- [x] [host-including inclusive ancestor](https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor) — An object A is a host-including inclusive ancestor of an object B, if either A is an inclusive ancestor of B, or if B’s root has a non-null host and A is a host-including inclusive ancestor of B’s root’s host.
 
-- [ ] [create a document fragment](https://dom.spec.whatwg.org/#create-a-document-fragment) — To create a document fragment given a document document: return the result of creating a node that implements DocumentFragment, given document.
+- [x] [create a document fragment](https://dom.spec.whatwg.org/#create-a-document-fragment) — To create a document fragment given a document document: return the result of creating a node that implements DocumentFragment, given document.
 
-- [ ] [DocumentFragment.new DocumentFragment()](https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment) — The new DocumentFragment() constructor steps are to set this’s node document to current global object’s associated Document.
+- [x] [DocumentFragment.new DocumentFragment()](https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment) — The new DocumentFragment() constructor steps are to set this’s node document to current global object’s associated Document.
 
 ### [4.8. Interface ShadowRoot](https://dom.spec.whatwg.org/#interface-shadowroot)
 

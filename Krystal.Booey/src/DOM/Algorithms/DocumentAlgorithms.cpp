@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
@@ -173,7 +174,7 @@ namespace krys::boo::dom
             //          set registry to document's custom element registry.
             auto *parent = elementInclusiveDescendant.ParentNode();
             if (registry != nullptr || parent == nullptr
-                || (Is<DocumentFragment>(*parent) && !Is<ShadowRoot>(*parent)))
+                || TreeQueries::IsExclusiveDocumentFragmentNode(*parent))
             {
               newRegistry = document.CustomElementRegistry().get();
             }

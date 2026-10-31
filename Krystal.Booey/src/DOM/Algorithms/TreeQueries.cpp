@@ -155,20 +155,28 @@ namespace krys::boo::dom
 
   bool TreeQueries::IsHostIncludingInclusiveAncestorOf(const Node &a, const Node &b) noexcept
   {
+    // A is an inclusive ancestor of B,
     if (IsInclusiveAncestor(a, b))
     {
       return true;
     }
 
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(Root(b)))
+    // or B's root has a non-null host and A is a host-including inclusive ancestor of B's root's host.
+    // (A shadow root's host, or a template's contents' template element.)
+    if (auto *fragment = DynamicDowncast<DocumentFragment>(Root(b)))
     {
-      if (auto *host = shadowRoot->Host())
+      if (auto *host = fragment->Host())
       {
         return IsHostIncludingInclusiveAncestorOf(a, *host);
       }
     }
 
     return false;
+  }
+
+  bool TreeQueries::IsExclusiveDocumentFragmentNode(const Node &node) noexcept
+  {
+    return Is<DocumentFragment>(node) && !Is<ShadowRoot>(node);
   }
 
 #pragma endregion

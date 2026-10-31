@@ -114,6 +114,10 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
     KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(const Node &a, const Node &b) noexcept;
 
+    /// @brief Whether @p node is a DocumentFragment node that isn't a ShadowRoot node.
+    /// @see https://dom.spec.whatwg.org/#exclusive-documentfragment-node
+    KRYS_NODISCARD static bool IsExclusiveDocumentFragmentNode(const Node &node) noexcept;
+
 #pragma endregion
 
 #pragma region Shadow Roots
