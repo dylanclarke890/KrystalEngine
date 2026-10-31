@@ -1869,36 +1869,37 @@ Status: reviewed (2026-10-31)
 
 #### [4.9.2. Interface Attr](https://dom.spec.whatwg.org/#interface-attr)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Attr` (`Attr.hpp`/`.cpp`) holds its qualified name (namespace, prefix and local name), value and element; its constructor is create an attribute. Set an existing attribute value skips Trusted Types (see `DIFFERENCES.md`).
 <!-- definitions: concept-attribute concept-attribute-namespace concept-attribute-namespace-prefix concept-attribute-local-name concept-attribute-value concept-attribute-element concept-attribute-qualified-name concept-named-attribute -->
 
-- [ ] [create an attribute](https://dom.spec.whatwg.org/#create-an-attribute) — To create an attribute given a document document, a string localName, and optionally a string-or-null namespace (default null), a string-or-null prefix (default null), and a string value (default the empty string):
+- [x] [create an attribute](https://dom.spec.whatwg.org/#create-an-attribute) — To create an attribute given a document document, a string localName, and optionally a string-or-null namespace (default null), a string-or-null prefix (default null), and a string value (default the empty string):
   - 1. Let attribute be the result of creating a node that implements Attr, given document.
   - 2. Set attribute’s namespace to namespace, namespace prefix to prefix, local name to localName, and value to value.
   - 3. Return attribute.
 
-- [ ] [Attr.namespaceURI](https://dom.spec.whatwg.org/#dom-attr-namespaceuri) — The namespaceURI getter steps are to return this’s namespace.
+- [x] [Attr.namespaceURI](https://dom.spec.whatwg.org/#dom-attr-namespaceuri) — The namespaceURI getter steps are to return this’s namespace.
 
-- [ ] [Attr.prefix](https://dom.spec.whatwg.org/#dom-attr-prefix) — The prefix getter steps are to return this’s namespace prefix.
+- [x] [Attr.prefix](https://dom.spec.whatwg.org/#dom-attr-prefix) — The prefix getter steps are to return this’s namespace prefix.
 
-- [ ] [Attr.localName](https://dom.spec.whatwg.org/#dom-attr-localname) — The localName getter steps are to return this’s local name.
+- [x] [Attr.localName](https://dom.spec.whatwg.org/#dom-attr-localname) — The localName getter steps are to return this’s local name.
 
-- [ ] [Attr.name](https://dom.spec.whatwg.org/#dom-attr-name) — The name getter steps are to return this’s qualified name.
+- [x] [Attr.name](https://dom.spec.whatwg.org/#dom-attr-name) — The name getter steps are to return this’s qualified name.
 
-- [ ] [Attr.value](https://dom.spec.whatwg.org/#dom-attr-value) — The value getter steps are to return this’s value.
+- [x] [Attr.value](https://dom.spec.whatwg.org/#dom-attr-value) — The value getter steps are to return this’s value.
 
-- [ ] [set an existing attribute value](https://dom.spec.whatwg.org/#set-an-existing-attribute-value) — To set an existing attribute value, given an attribute attribute and string value, run these steps:
+- [x] [set an existing attribute value](https://dom.spec.whatwg.org/#set-an-existing-attribute-value) — To set an existing attribute value, given an attribute attribute and string value, run these steps:
   - 1. If attribute’s element is null, then set attribute’s value to value and return.
   - 2. Let element be attribute’s element.
   - 3. Let verifiedValue be the result of calling get trusted type compliant attribute value with attribute’s local name, attribute’s namespace, element, and value. [TRUSTED-TYPES]
   - 4. If attribute’s element is null, then set attribute’s value to verifiedValue and return.
   - 5. Change attribute to verifiedValue.
 
-- [ ] [The value setter steps](https://dom.spec.whatwg.org/#dom-attr-value) — The value setter steps are to set an existing attribute value with this and the given value.
+- [x] [The value setter steps](https://dom.spec.whatwg.org/#dom-attr-value) — The value setter steps are to set an existing attribute value with this and the given value.
 
-- [ ] [Attr.ownerElement](https://dom.spec.whatwg.org/#dom-attr-ownerelement) — The ownerElement getter steps are to return this’s element.
+- [x] [Attr.ownerElement](https://dom.spec.whatwg.org/#dom-attr-ownerelement) — The ownerElement getter steps are to return this’s element.
 
-- [ ] [Attr.specified](https://dom.spec.whatwg.org/#dom-attr-specified) — The specified getter steps are to return true.
+- [x] [Attr.specified](https://dom.spec.whatwg.org/#dom-attr-specified) — The specified getter steps are to return true.
 
 ### [4.10. Interface CharacterData](https://dom.spec.whatwg.org/#interface-characterdata)
 

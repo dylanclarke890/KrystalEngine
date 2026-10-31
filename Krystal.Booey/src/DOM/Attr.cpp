@@ -8,6 +8,10 @@ namespace krys::boo::dom
       : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlags::None), _name {qualifiedName},
         _value {krys::move(value)}
   {
+    // 1. Let attribute be the result of creating a node that implements Attr, given document.
+    // 2. Set attribute's namespace to namespace, namespace prefix to prefix, local name to localName, and
+    //    value to value.
+    // 3. Return attribute.
   }
 
   const DOMString &Attr::Value() const noexcept
@@ -22,6 +26,8 @@ namespace krys::boo::dom
 
   void Attr::SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
   {
+    // 1. If attribute's element is null, then set attribute's value to value and return.
+    // 2. Let element be attribute's element.
     RefPtr<Element> element = attribute._ownerElement ? attribute._ownerElement.lock() : nullptr;
     if (element == nullptr)
     {
@@ -29,9 +35,10 @@ namespace krys::boo::dom
     }
     else
     {
-      // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
-      // attribute value with attribute’s local name, attribute’s namespace, element, and value.
+      // 3. (Skipped: Trusted Types aren't supported, so value is used as it is.)
+      // 4. (Skipped: without step 3, attribute's element can't have changed.)
 
+      // 5. Change attribute to verifiedValue.
       ElementAlgorithms::ChangeAttribute(attribute, krys::move(value));
     }
   }

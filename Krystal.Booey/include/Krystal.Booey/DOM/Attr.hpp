@@ -11,7 +11,9 @@ namespace krys::boo::dom
   class Document;
   class Element;
 
+  /// @brief An element's attribute: a qualified name and a value.
   /// @see https://dom.spec.whatwg.org/#interface-attr
+  /// @see https://dom.spec.whatwg.org/#concept-attribute
   class Attr : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Attr);
@@ -22,11 +24,20 @@ namespace krys::boo::dom
     friend class NodeAlgorithms;
 
   private:
+    /// @brief The attribute's namespace, namespace prefix and local name.
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-namespace
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-namespace-prefix
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-local-name
     QualifiedName _name;
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-element
     WeakPtr<Element> _ownerElement;
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-value
     DOMString _value;
 
   protected:
+    /// @brief Creates an attribute with the qualified name and value, and no element.
+    /// @see https://dom.spec.whatwg.org/#create-an-attribute
     Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value = {}) noexcept;
 
   public:
@@ -44,18 +55,20 @@ namespace krys::boo::dom
       return _name.NamespacePrefix();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-attr-localname
+    /// @brief The attribute's namespace, namespace prefix and local name.
     KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
     {
       return _name;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-attr-localname
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
       return _name.LocalName();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-name
+    /// @see https://dom.spec.whatwg.org/#concept-named-attribute
     KRYS_NODISCARD DOMString Name() const noexcept
     {
       return _name.Name();
