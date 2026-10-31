@@ -24,15 +24,16 @@ Status: reviewed (2026-10-30)
 
 ### [1.2. Ordered sets](https://dom.spec.whatwg.org/#ordered-sets)
 
-Status: unreviewed
+Status: reviewed (2026-10-30)
+> Code: `OrderedSet::Parser` and `OrderedSet::Serialiser`, over Infra's `StringAlgorithms::SplitOnWhitespace` and `Concatenate`. Tests: `tests/DOM/Algorithms/OrderedSet.cpp`.
 
-- [ ] [ordered set parser](https://dom.spec.whatwg.org/#concept-ordered-set-parser) — The ordered set parser takes a string input and then runs these steps:
+- [x] [ordered set parser](https://dom.spec.whatwg.org/#concept-ordered-set-parser) — The ordered set parser takes a string input and then runs these steps:
   - 1. Let inputTokens be the result of splitting input on ASCII whitespace.
   - 2. Let tokens be a new ordered set.
   - 3. For each token of inputTokens: append token to tokens.
   - 4. Return tokens.
 
-- [ ] [ordered set serializer](https://dom.spec.whatwg.org/#concept-ordered-set-serializer) — The ordered set serializer takes a set and returns the concatenation of set using U+0020 SPACE.
+- [x] [ordered set serializer](https://dom.spec.whatwg.org/#concept-ordered-set-serializer) — The ordered set serializer takes a set and returns the concatenation of set using U+0020 SPACE.
 
 ### [1.3. Selectors](https://dom.spec.whatwg.org/#selectors)
 
