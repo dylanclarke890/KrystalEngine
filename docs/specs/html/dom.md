@@ -182,18 +182,20 @@ Status: reviewed (2026-11-01)
 
 ### [3.2 Elements](https://html.spec.whatwg.org/#elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [3.2.1 Semantics](https://html.spec.whatwg.org/#semantics-2)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [3.2.2 Elements in the DOM](https://html.spec.whatwg.org/#elements-in-the-dom)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElementFactory::TryCreate` (steps 1 to 5) and `ElementFactory::Create` (steps 6 and 7). `<frame>` has no interface, so it's an `HTMLUnknownElement` (DIFFERENCES.md). What an element represents is author conformance.
 <!-- definitions: represents -->
 
-- [ ] [The element interface for an element with name name in the HTML namespace is de…](https://html.spec.whatwg.org/#referenced) — The element interface for an element with name name in the HTML namespace is determined as follows:
+- [x] [The element interface for an element with name name in the HTML namespace is de…](https://html.spec.whatwg.org/#referenced) — The element interface for an element with name name in the HTML namespace is determined as follows:
   - 1. If name is applet, bgsound, blink, isindex, keygen, multicol, nextid, or spacer, then return HTMLUnknownElement.
   - 2. If name is acronym, basefont, big, center, nobr, noembed, noframes, plaintext, rb, rtc, strike, or tt, then return HTMLElement.
   - 3. If name is listing or xmp, then return HTMLPreElement.
@@ -204,9 +206,9 @@ Status: unreviewed
 
 #### [3.2.3 HTML element constructors](https://html.spec.whatwg.org/#html-element-constructors)
 
-Status: unreviewed
+Status: n/a (no scripting: custom elements are defined in C++)
 
-- [ ] [Interfaces declared with constructor operations that are annotated with the [HT…](https://html.spec.whatwg.org/#htmlconstructor) — Interfaces declared with constructor operations that are annotated with the [HTMLConstructor] extended attribute have the following overridden constructor steps:
+- [x] [Interfaces declared with constructor operations that are annotated with the [HT…](https://html.spec.whatwg.org/#htmlconstructor) — Interfaces declared with constructor operations that are annotated with the [HTMLConstructor] extended attribute have the following overridden constructor steps:
   - 1. If NewTarget is equal to the active function object, then throw a TypeError.
   - 2. Let registry be null.
   - 3. If the surrounding agent's active custom element constructor map[NewTarget] exists, then set registry to the surrounding agent's active custom element constructor map[NewTarget].
@@ -242,81 +244,83 @@ Status: unreviewed
 
 #### [3.2.4 Element definitions](https://html.spec.whatwg.org/#element-definitions)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: concept-element-categories concept-element-contexts concept-element-content-model concept-element-tag-omission concept-element-attributes concept-element-accessibility-considerations concept-element-sanitization concept-element-dom -->
 
 ##### [3.2.4.1 Attributes](https://html.spec.whatwg.org/#attributes)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [3.2.5 Content models](https://html.spec.whatwg.org/#content-models)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: concept-html-contents inter-element-whitespace -->
 
 ##### [3.2.5.1 The "nothing" content model](https://html.spec.whatwg.org/#the-nothing-content-model)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: concept-content-nothing -->
 
 ##### [3.2.5.2 Kinds of content](https://html.spec.whatwg.org/#kinds-of-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: content-categories -->
 
 ###### [3.2.5.2.1 Metadata content](https://html.spec.whatwg.org/#metadata-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: metadata-content-2 -->
 
 ###### [3.2.5.2.2 Flow content](https://html.spec.whatwg.org/#flow-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: flow-content-2 -->
 
 ###### [3.2.5.2.3 Sectioning content](https://html.spec.whatwg.org/#sectioning-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: sectioning-content-2 -->
 
 ###### [3.2.5.2.4 Heading content](https://html.spec.whatwg.org/#heading-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: heading-content-2 -->
 
 ###### [3.2.5.2.5 Phrasing content](https://html.spec.whatwg.org/#phrasing-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: phrasing-content-2 text-content -->
 
 ###### [3.2.5.2.6 Embedded content](https://html.spec.whatwg.org/#embedded-content-2)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Author conformance; fallback content is reviewed with `<canvas>` and `<object>`.
 <!-- definitions: embedded-content-category fallback-content -->
 
 ###### [3.2.5.2.7 Interactive content](https://html.spec.whatwg.org/#interactive-content)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::IsInteractiveContent`, which label activation and `<summary>` use. Fixed: `<embed>`, `<iframe>` and `<img usemap>` weren't interactive content. `<audio controls>` and `<video controls>` wait on media playback.
 <!-- definitions: interactive-content-2 -->
 
 ###### [3.2.5.2.8 Palpable content](https://html.spec.whatwg.org/#palpable-content)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: palpable-content-2 -->
 
 ###### [3.2.5.2.9 Script-supporting elements](https://html.spec.whatwg.org/#script-supporting-elements)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: script-supporting-elements-2 -->
 
 ##### [3.2.5.3 Transparent content models](https://html.spec.whatwg.org/#transparent-content-models)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: transparent -->
 
 ##### [3.2.5.4 Paragraphs](https://html.spec.whatwg.org/#paragraphs)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: paragraph -->
 
 #### [3.2.6 Global attributes](https://html.spec.whatwg.org/#global-attributes)

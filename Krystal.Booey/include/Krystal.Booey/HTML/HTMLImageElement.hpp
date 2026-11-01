@@ -54,6 +54,12 @@ namespace krys::boo::html
     HTMLImageElement(dom::Document &document) noexcept;
     ~HTMLImageElement() noexcept override;
 
+    /// @brief An image is interactive content when it has a `usemap` attribute.
+    KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
+    {
+      return HasAttribute(u8"usemap");
+    }
+
     /// @brief The image map `usemap` names: the first `map` in the image's tree whose `id` or `name` is the
     /// name after its `#`.
     /// @see https://html.spec.whatwg.org/#image-map

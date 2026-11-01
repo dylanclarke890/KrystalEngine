@@ -22,6 +22,11 @@ namespace krys::boo::html
 
     HTMLIFrameElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
+    {
+      return true;
+    }
+
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
     {
       return true;

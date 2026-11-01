@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -46,5 +47,34 @@ namespace krys::boo::html::tests
     value.append(127, u8'0');
     value += u8'f';
     CHECK(Legacy(value) == SRGBA<uint8> {0, 0, 0xf0});
+  }
+
+  TEST_CASE("HTMLElement::IsInteractiveContent: the interactive content elements",
+            "[HTML][HTMLElement][html:interactive-content-2]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto isInteractive =
+      [&](utf8_stringview localName, utf8_stringview attribute = {}, utf8_stringview value = {})
+    {
+      auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
+      if (!attribute.empty())
+      {
+        REQUIRE_FALSE(element->SetAttribute(dom::DOMStringAtom(attribute), dom::DOMString(value)).HasException());
+      }
+      return Downcast<HTMLElement>(*element).IsInteractiveContent();
+    };
+
+    for (auto name : {u8"button", u8"details", u8"embed", u8"iframe", u8"label", u8"select", u8"textarea"})
+    {
+      INFO(reinterpret_cast<const char *>(name));
+      CHECK(isInteractive(name));
+    }
+    CHECK(isInteractive(u8"a", u8"href", u8"x"));
+    CHECK_FALSE(isInteractive(u8"a"));
+    CHECK(isInteractive(u8"img", u8"usemap", u8"#m"));
+    CHECK_FALSE(isInteractive(u8"img"));
+    CHECK(isInteractive(u8"input"));
+    CHECK_FALSE(isInteractive(u8"input", u8"type", u8"hidden"));
+    CHECK_FALSE(isInteractive(u8"div"));
   }
 }

@@ -13,6 +13,11 @@ namespace krys::boo::html
   public:
     HTMLEmbedElement(dom::Document &document) noexcept;
 
+    KRYS_NODISCARD bool IsInteractiveContent() const noexcept final
+    {
+      return true;
+    }
+
     KRYS_NODISCARD bool IsReplaced(const RenderStyle * = nullptr) const noexcept override
     {
       // FIXME: A plug-in replacement that creates a renderer makes the element not replaced.

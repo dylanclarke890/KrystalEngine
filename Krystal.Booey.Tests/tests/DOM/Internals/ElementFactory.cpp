@@ -5,6 +5,7 @@
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLPreElement.hpp"
 #include "Krystal.Booey/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 #include "Krystal.Booey/MathML/MathMLElement.hpp"
@@ -121,5 +122,35 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(Is<html::HTMLElement>(*element));
       CHECK(element->NamespaceURI() == u8"urn:x");
     }
+  }
+
+  TEST_CASE("The element interface for an HTML element: obsolete names are unknown, HTMLElement or "
+            "HTMLPreElement",
+            "[DOM][ElementFactory][html:referenced]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto create = [&](utf8_stringview localName)
+    {
+      return ElementFactory::Create(
+        *document, QualifiedName {infra::Namespaces::HTML, DOMStringAtom::Null(), DOMStringAtom(localName)});
+    };
+
+    for (auto name :
+         {u8"applet", u8"bgsound", u8"blink", u8"isindex", u8"keygen", u8"multicol", u8"nextid", u8"spacer"})
+    {
+      INFO(reinterpret_cast<const char *>(name));
+      CHECK(ElementIs<html::HTMLUnknownElement, html::HTMLElement>(*create(name)));
+    }
+    for (auto name : {u8"acronym", u8"basefont", u8"big", u8"center", u8"nobr", u8"noembed", u8"noframes",
+                      u8"plaintext", u8"rb", u8"rtc", u8"strike", u8"tt"})
+    {
+      INFO(reinterpret_cast<const char *>(name));
+      auto element = create(name);
+      CHECK(Is<html::HTMLElement>(*element));
+      CHECK_FALSE(ElementIs<html::HTMLUnknownElement, html::HTMLElement>(*element));
+    }
+    CHECK(ElementIs<html::HTMLPreElement, html::HTMLElement>(*create(u8"listing")));
+    CHECK(ElementIs<html::HTMLPreElement, html::HTMLElement>(*create(u8"xmp")));
+    CHECK(ElementIs<html::HTMLDivElement, html::HTMLElement>(*create(u8"div")));
   }
 }

@@ -19,6 +19,9 @@ namespace krys::boo::html
   class HTMLElementFactory
   {
   public:
+    /// @brief An element of the element interface for @p elementName in the HTML namespace, or null if it
+    /// has none (a custom element name, or an unknown element).
+    /// @see https://html.spec.whatwg.org/#referenced
     KRYS_NODISCARD static RefPtr<HTMLElement> TryCreate(dom::Document &document,
                                                         TagName elementName) noexcept;
   };

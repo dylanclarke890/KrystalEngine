@@ -85,6 +85,12 @@ namespace krys::boo::html
 {
   RefPtr<HTMLElement> HTMLElementFactory::TryCreate(dom::Document &document, TagName elementName) noexcept
   {
+    // 4. Otherwise, if this specification defines an interface appropriate for the element type corresponding
+    //    to the local name name, then return that interface.
+    // 5. If other applicable specifications define an appropriate interface for name, then return the
+    //    interface they define.
+    // (Steps 1 to 3 are the obsolete elements at the end; 6 and 7 are the caller's, for names with no
+    // interface here.)
     switch (elementName)
     {
       case TagName::abbr:
@@ -414,6 +420,8 @@ namespace krys::boo::html
         return CreateRefPtr<HTMLVideoElement>(document);
       }
 #pragma region Obsolete elements
+      // 1. If name is applet, bgsound, blink, isindex, keygen, multicol, nextid, or spacer, then return
+      //    HTMLUnknownElement.
       case TagName::applet:
       case TagName::bgsound:
       case TagName::blink:
@@ -425,6 +433,8 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLUnknownElement>(document);
       }
+      // 2. If name is acronym, basefont, big, center, nobr, noembed, noframes, plaintext, rb, rtc, strike, or
+      //    tt, then return HTMLElement.
       case TagName::acronym:
       case TagName::basefont:
       case TagName::big:
@@ -440,6 +450,7 @@ namespace krys::boo::html
       {
         return CreateRefPtr<HTMLElement>(document);
       }
+      // 3. If name is listing or xmp, then return HTMLPreElement.
       case TagName::listing:
       case TagName::xmp:
       {

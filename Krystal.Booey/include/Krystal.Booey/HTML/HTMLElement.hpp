@@ -476,7 +476,7 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#concept-element-disabled
     KRYS_NODISCARD virtual bool IsActuallyDisabled() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#interactive-content
+    /// @see https://html.spec.whatwg.org/#interactive-content-2
     KRYS_NODISCARD virtual bool IsInteractiveContent() const noexcept
     {
       return false;
