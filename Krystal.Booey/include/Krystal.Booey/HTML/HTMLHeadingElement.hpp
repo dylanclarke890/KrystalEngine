@@ -12,6 +12,17 @@ namespace krys::boo::html
   public:
     HTMLHeadingElement(dom::Document &document) noexcept;
 
+    /// @brief The heading's level: its number (1 for `h1`), increased by its computed heading offset, up
+    /// to 9.
+    /// @see https://html.spec.whatwg.org/#get-an-element's-computed-heading-level
+    /// @see https://html.spec.whatwg.org/#heading-level
+    KRYS_NODISCARD uint32 ComputedHeadingLevel() const noexcept;
+
+    /// @brief The sum of the `headingoffset` values of @p element and its ancestors (crossing shadow
+    /// boundaries), up to and including the nearest with `headingreset`.
+    /// @see https://html.spec.whatwg.org/#get-an-element's-computed-heading-offset
+    KRYS_NODISCARD static uint64 ComputedHeadingOffset(const dom::Element &element) noexcept;
+
 #pragma region HTMLHeadingElement Obsolete members - https://html.spec.whatwg.org/#HTMLHeadingElement-partial
 
     /// @see https://html.spec.whatwg.org/#dom-hx-align
