@@ -36,6 +36,19 @@ namespace krys::boo::html
     constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
   };
 
+  /// @see https://html.spec.whatwg.org/#attr-img-decoding
+  template <>
+  struct EnumeratedAttributeTraits<"decoding", HTMLImageElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"sync", AttributeState::Sync},
+      KeywordStateMapping {u8"async", AttributeState::Async},
+      KeywordStateMapping {u8"auto", AttributeState::Auto}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
+
   namespace
   {
     KRYS_NODISCARD dom::DOMStringView
@@ -352,8 +365,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::Decoding() const noexcept
   {
-    // FIXME: Decoding() is limited to known values.
-    return Reflect<dom::DOMString>(*this, u8"decoding").value_or(u8"");
+    return EnumeratedAttribute<"decoding", HTMLImageElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"decoding"));
   }
 
   void HTMLImageElement::Decoding(dom::DOMString &&value) noexcept
@@ -751,12 +764,15 @@ namespace krys::boo::html
     // FIXME: referrerpolicy and crossorigin, once there are network loads.
   }
 
+  // https://html.spec.whatwg.org/#the-img-element:html-element-insertion-steps
   void HTMLImageElement::OnInsert() noexcept
   {
     // Insert needs to complete first, before we start updating the loader. Loader dispatches events which
     // could result in callbacks back to this node.
     HTMLElement::OnInsert();
 
+    // 1. If insertedNode's parent is a picture element, then, count this as a relevant mutation for
+    //    insertedNode.
     if (DynamicDowncast<HTMLPictureElement>(ParentElement()) != PictureElement())
     {
       UpdatePictureElement();
@@ -771,8 +787,13 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#the-img-element:html-element-removing-steps
   void HTMLImageElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
+    // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
+    //    mutation for removedNode.
+    // 2. Set removedNode's last auto-sizes width to null.
+    // (There are no auto sizes.)
     if (isSubtreeRoot && Is<HTMLPictureElement>(oldAncestor))
     {
       krys_debug_assert(PictureElement() == &oldAncestor);
@@ -783,9 +804,14 @@ namespace krys::boo::html
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
   }
 
+  // https://html.spec.whatwg.org/#the-img-element:html-element-moving-steps
   void HTMLImageElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then count this as a relevant
+    //    mutation for movedNode.
+    // (And moving into a picture, as inserting does.)
     UpdatePictureElement();
   }
 

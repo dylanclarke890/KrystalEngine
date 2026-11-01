@@ -70,7 +70,7 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("LazyLoadImageObserver: loading reflects its known values",
-            "[HTML][LazyLoadImageObserver][html:lazy-loading-attribute]")
+            "[HTML][LazyLoadImageObserver][html:lazy-loading-attribute][html:dom-img-loading]")
   {
     LazyImageFixture fixture(u8"<img id=missing><img id=lazy loading=LAZY><img id=invalid loading=soon>");
     CHECK(css::tests::ToNarrow(fixture.Image(u8"missing").Loading()) == "eager");

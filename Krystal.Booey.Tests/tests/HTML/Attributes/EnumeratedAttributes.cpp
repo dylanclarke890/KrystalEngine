@@ -121,7 +121,7 @@ namespace krys::boo::html::tests
   TEST_CASE(
     "CORS settings and fetch priority attributes: crossOrigin and fetchPriority reflect their known values",
     "[HTML][Attributes][html:cors-settings-attribute][html:attr-crossorigin-none]"
-    "[html:fetch-priority-attribute]")
+    "[html:fetch-priority-attribute][html:dom-img-crossorigin][html:dom-img-fetchpriority]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     CheckCrossOriginAndFetchPriority<HTMLImageElement>(*document, u8"img");
@@ -134,7 +134,8 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE("Referrer policy attributes: referrerPolicy reflects its known values",
-            "[HTML][Attributes][html:referrer-policy-attribute][html:dom-a-referrerpolicy]")
+            "[HTML][Attributes][html:referrer-policy-attribute][html:dom-a-referrerpolicy]"
+            "[html:dom-img-referrerpolicy]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     CheckReferrerPolicy<HTMLAnchorElement>(*document, u8"a");

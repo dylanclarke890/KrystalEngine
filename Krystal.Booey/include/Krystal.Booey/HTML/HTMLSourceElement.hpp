@@ -81,6 +81,12 @@ namespace krys::boo::html
                             dom::DOMStringAtom namespaceURI) noexcept override;
     void OnInsert() noexcept override;
     void OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+    void OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept override;
+
+  private:
+    /// @brief Records that the source is in @p pictureElement, and whether it's one of its image's sources
+    /// (whether it precedes an img).
+    void UpdateInsertedIntoPicture(HTMLPictureElement &pictureElement) noexcept;
   };
 }
 

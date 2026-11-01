@@ -57,7 +57,9 @@ namespace krys::boo::tests
     CHECK(fixture.Image(u8"none").AssociatedMapElement() == nullptr);
   }
 
-  TEST_CASE("HTMLImageElement: an image loads its source, fires load and paints", "[HTML][HTMLImageElement]")
+  TEST_CASE("HTMLImageElement: an image loads its source, fires load and paints",
+            "[HTML][HTMLImageElement][html:dom-img-complete][html:dom-img-naturalwidth][html:dom-img-width]"
+            "[html:img-dimensions]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
@@ -180,7 +182,8 @@ namespace krys::boo::tests
     CHECK(widths.CurrentURL().String() == u8"file:///small.png");
   }
 
-  TEST_CASE("HTMLImageElement: a picture's sources, by type and media", "[HTML][HTMLImageElement]")
+  TEST_CASE("HTMLImageElement: a picture's sources, by type and media",
+            "[HTML][HTMLImageElement][html:dom-img-currentsrc][html:the-source-element]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;
@@ -212,6 +215,62 @@ namespace krys::boo::tests
           == loader.Strategy.Requests.end());
     CHECK(std::ranges::find(loader.Strategy.Requests, u8"file:///wide.png")
           == loader.Strategy.Requests.end());
+  }
+
+  TEST_CASE("HTMLImageElement: moving a picture's source or image selects the image's source again",
+            "[HTML][HTMLImageElement][html:the-source-element][html:the-img-element]")
+  {
+    LoaderFixture loader;
+    loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;
+    loader.Strategy.Resources[u8"file:///fallback.png"] = images::PNG;
+
+    ImageFixture fixture(u8"<div id=outside></div><picture id=picture>"
+                         u8"<source id=jpeg srcset='file:///photo.jpg' type=image/jpeg>"
+                         u8"<img id=img src='file:///fallback.png' style='display: block'>"
+                         u8"</picture>");
+    auto &image = fixture.Image(u8"img");
+    RunNetworkingTasks();
+    REQUIRE(image.CurrentURL().String() == u8"file:///photo.jpg");
+
+    auto &outside = fixture.ById(u8"outside");
+    auto &picture = fixture.ById(u8"picture");
+    SECTION("the source")
+    {
+      REQUIRE_FALSE(outside.MoveBefore(fixture.ById(u8"jpeg"), nullptr).HasException());
+      RunNetworkingTasks();
+      CHECK(image.CurrentURL().String() == u8"file:///fallback.png");
+
+      REQUIRE_FALSE(picture.MoveBefore(fixture.ById(u8"jpeg"), &image).HasException());
+      RunNetworkingTasks();
+      CHECK(image.CurrentURL().String() == u8"file:///photo.jpg");
+    }
+
+    SECTION("the image")
+    {
+      REQUIRE_FALSE(outside.MoveBefore(image, nullptr).HasException());
+      RunNetworkingTasks();
+      CHECK(image.CurrentURL().String() == u8"file:///fallback.png");
+
+      REQUIRE_FALSE(picture.MoveBefore(image, nullptr).HasException());
+      RunNetworkingTasks();
+      CHECK(image.CurrentURL().String() == u8"file:///photo.jpg");
+    }
+  }
+
+  TEST_CASE("HTMLImageElement.decoding: reflects its known values, auto by default",
+            "[HTML][HTMLImageElement][html:dom-img-decoding][html:attr-img-decoding]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto element = document->CreateElement(u8"img").ReleaseValue();
+    auto &image = Downcast<html::HTMLImageElement>(Downcast<html::HTMLElement>(*element));
+    CHECK(css::tests::ToNarrow(image.Decoding()) == "auto");
+    image.Decoding(u8"ASYNC");
+    CHECK(css::tests::ToNarrow(image.Decoding()) == "async");
+    image.Decoding(u8"sync");
+    CHECK(css::tests::ToNarrow(image.Decoding()) == "sync");
+    image.Decoding(u8"later");
+    CHECK(css::tests::ToNarrow(image.Decoding()) == "auto");
+    CHECK(element->GetAttribute(u8"decoding") == u8"later");
   }
 
   TEST_CASE("HTMLImageElement: changing the source loads it", "[HTML][HTMLImageElement]")

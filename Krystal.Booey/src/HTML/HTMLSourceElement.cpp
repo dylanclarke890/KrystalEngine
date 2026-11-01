@@ -97,9 +97,17 @@ namespace krys::boo::html
     return *_cachedParsedMediaAttribute;
   }
 
+  // https://html.spec.whatwg.org/#the-source-element:html-element-insertion-steps
   void HTMLSourceElement::OnInsert() noexcept
   {
     HTMLElement::OnInsert();
+
+    // 1. Let parent be insertedNode's parent.
+    // 2. If parent is a media element that has no src attribute and whose networkState has the value
+    //    NETWORK_EMPTY, then invoke that media element's resource selection algorithm.
+    // (Media elements don't select resources.)
+    // 3. If parent is a picture element, then for each child of parent's children, if child is an img
+    //    element, then count this as a relevant mutation for child.
     // Only an insertion into a <picture> is a relevant mutation, not the insertion of a subtree whose
     // <picture> already holds the source.
     auto *pictureElement = DynamicDowncast<HTMLPictureElement>(ParentElement());
@@ -107,26 +115,20 @@ namespace krys::boo::html
     {
       return;
     }
-    _insertedIntoPicture = pictureElement;
-
-    // The new source element only is a relevant mutation if it precedes any img element.
-    _shouldCallSourcesChanged = true;
-    for (const auto *node = PreviousSibling(); node; node = node->PreviousSibling())
-    {
-      if (Is<HTMLImageElement>(*node))
-      {
-        _shouldCallSourcesChanged = false;
-      }
-    }
+    UpdateInsertedIntoPicture(*pictureElement);
     if (_shouldCallSourcesChanged)
     {
       pictureElement->SourcesChanged();
     }
   }
 
+  // https://html.spec.whatwg.org/#the-source-element:html-element-removing-steps
   void HTMLSourceElement::OnRemove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
   {
     HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+
+    // 1. If isSubtreeRoot is true and oldAncestor is a picture element, then for each child of oldAncestor's
+    //    children: if child is an img element, then count this as a relevant mutation for child.
     if (!isSubtreeRoot)
     {
       return;
@@ -139,6 +141,53 @@ namespace krys::boo::html
         pictureElement->SourcesChanged();
       }
       _shouldCallSourcesChanged = false;
+    }
+  }
+
+  // https://html.spec.whatwg.org/#the-source-element:html-element-moving-steps
+  void HTMLSourceElement::OnMove(bool isSubtreeRoot, dom::ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+
+    // 1. If movedNode's parent is a media element that has no src attribute and whose networkState has the
+    //    value NETWORK_EMPTY, then invoke that media element's resource selection algorithm.
+    // (Media elements don't select resources.)
+
+    // 2. If isSubtreeRoot is true and oldAncestor is a picture element, then for each child of oldAncestor's
+    //    children: if child is an img element, then count this as a relevant mutation for child.
+    bool wasSource = _shouldCallSourcesChanged;
+    _insertedIntoPicture = nullptr;
+    _shouldCallSourcesChanged = false;
+    auto *newPicture = DynamicDowncast<HTMLPictureElement>(ParentElement());
+    if (newPicture)
+    {
+      UpdateInsertedIntoPicture(*newPicture);
+    }
+    auto *oldPicture = isSubtreeRoot ? DynamicDowncast<HTMLPictureElement>(oldAncestor) : nullptr;
+    if (oldPicture && (wasSource || _shouldCallSourcesChanged))
+    {
+      oldPicture->SourcesChanged();
+    }
+
+    // Moving into another picture counts for its images too, as inserting does.
+    if (newPicture && newPicture != oldPicture && _shouldCallSourcesChanged)
+    {
+      newPicture->SourcesChanged();
+    }
+  }
+
+  void HTMLSourceElement::UpdateInsertedIntoPicture(HTMLPictureElement &pictureElement) noexcept
+  {
+    _insertedIntoPicture = &pictureElement;
+
+    // The new source element only is a relevant mutation if it precedes any img element.
+    _shouldCallSourcesChanged = true;
+    for (const auto *node = PreviousSibling(); node; node = node->PreviousSibling())
+    {
+      if (Is<HTMLImageElement>(*node))
+      {
+        _shouldCallSourcesChanged = false;
+      }
     }
   }
 

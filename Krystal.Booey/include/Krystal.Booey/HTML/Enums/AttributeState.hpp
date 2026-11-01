@@ -51,7 +51,9 @@ namespace krys::boo::html
     OriginWhenCrossOrigin,
     StrictOriginWhenCrossOrigin,
     UnsafeURL,
+    Sync,
+    Async,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 41uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 43uz);
