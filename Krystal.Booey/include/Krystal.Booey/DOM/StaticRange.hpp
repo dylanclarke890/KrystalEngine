@@ -6,15 +6,21 @@
 
 namespace krys::boo::dom
 {
+  /// @brief A range that doesn't follow changes to the tree.
   /// @see https://dom.spec.whatwg.org/#interface-staticrange
   class StaticRange : public AbstractRange
   {
   public:
-    /// @see https://dom.spec.whatwg.org/#staticrange-staticrange
-    StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start(), init.End())
+    /// @brief Creates a static range from @p init, whose nodes `StaticRangeInit::Create` has checked.
+    /// @see https://dom.spec.whatwg.org/#dom-staticrange-staticrange
+    explicit StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start(), init.End())
     {
+      // 2. Set this's start to (init["startContainer"], init["startOffset"]) and end to
+      // (init["endContainer"],
+      //    init["endOffset"]).
     }
 
+    /// @brief Whether its start and end are in the same tree, within their nodes, and in order.
     /// @see https://dom.spec.whatwg.org/#staticrange-valid
     KRYS_NODISCARD bool IsValid() const noexcept;
   };

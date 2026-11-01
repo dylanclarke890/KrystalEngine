@@ -12,29 +12,28 @@ namespace krys::boo::dom
 {
   bool StaticRange::IsValid() const noexcept
   {
-    Node &startContainer = *this->StartContainer();
-    Node &endContainer = *this->EndContainer();
+    Node &startContainer = *StartContainer();
+    Node &endContainer = *EndContainer();
 
-    if (!TreeQueries::SameRoot(*this->StartContainer(), *this->EndContainer()))
+    // Its start and end are in the same node tree.
+    if (!TreeQueries::SameRoot(startContainer, endContainer))
     {
       return false;
     }
 
+    // Its start offset is between 0 and its start node's length, inclusive.
     if (StartOffset() > TreeQueries::Length(startContainer))
     {
       return false;
     }
 
+    // Its end offset is between 0 and its end node's length, inclusive.
     if (EndOffset() > TreeQueries::Length(endContainer))
     {
       return false;
     }
 
-    if (&startContainer == &endContainer)
-    {
-      return EndOffset() > StartOffset();
-    }
-
+    // Its start is before or equal to its end.
     return !StrongOrder::IsGreaterThan(_start.ComparePositionTo(_end));
   }
 }

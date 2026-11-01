@@ -1,89 +1,106 @@
 ﻿#include "Krystal.Booey/DOM/StaticRange.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey.Tests/DOM/TestElement.hpp"
+#include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentType.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 
 namespace krys::boo::dom::tests
 {
-  TEST_CASE("StaticRangeInit::Create", "[HTML][StaticRange]")
+  namespace
   {
-    auto document = CreateRef<Document>();
-    auto parent = CreateRef<TestElement>(*document);
+    /// @brief parent > (childA, text "abc").
+    struct StaticRangeTestData
+    {
+      Ref<Document> Document;
+      Ref<TestElement> Parent;
+      Ref<TestElement> ChildA;
+      Ref<Text> Text;
 
-    auto doctype = document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
-    auto attr = document->CreateAttribute(u8"test");
-    REQUIRE_FALSE(doctype.HasException());
-    REQUIRE_FALSE(attr.HasException());
+      StaticRangeTestData()
+          : Document(CreateRef<dom::Document>()), Parent(CreateRef<TestElement>(*Document)),
+            ChildA(CreateRef<TestElement>(*Document)), Text(CreateRef<dom::Text>(*Document, u8"abc"))
+      {
+        REQUIRE_FALSE(Parent->AppendChild(*ChildA).HasException());
+        REQUIRE_FALSE(Parent->AppendChild(*Text).HasException());
+      }
 
-    auto childA = CreateRef<TestElement>(*document);
-    auto childB = CreateRef<TestElement>(*document);
-
-    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
-    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
-
-    auto validRangeInit = StaticRangeInit::Create({childA, 0}, {childB, 0});
-    REQUIRE_FALSE(validRangeInit.HasException());
-
-    auto invalidRangeAttrLeft = StaticRangeInit::Create({attr.Value(), 0}, {childB, 0});
-    REQUIRE(invalidRangeAttrLeft.HasException());
-
-    auto invalidRangeAttrRight = StaticRangeInit::Create({childA, 0}, {attr.Value(), 0});
-    REQUIRE(invalidRangeAttrRight.HasException());
-
-    auto invalidRangeDocTypeLeft = StaticRangeInit::Create({doctype.Value(), 0}, {childB, 0});
-    REQUIRE(invalidRangeDocTypeLeft.HasException());
-
-    auto invalidRangeDocTypeRight = StaticRangeInit::Create({childA, 0}, {doctype.Value(), 0});
-    REQUIRE(invalidRangeDocTypeRight.HasException());
-
-    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+      Ref<StaticRange> MakeRange(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset)
+      {
+        return CreateRef<StaticRange>(
+          StaticRangeInit::Create(BoundaryPoint {ShareRef(startNode), startOffset},
+                                  BoundaryPoint {ShareRef(endNode), endOffset})
+            .ReleaseValue());
+      }
+    };
   }
 
-  TEST_CASE("StaticRange::IsValid", "[HTML][StaticRange]")
+  TEST_CASE("new StaticRange(init): the init's start and end, which can't be in a DocumentType or Attr",
+            "[DOM][StaticRange][dom:interface-staticrange][dom:dom-staticrange-staticrange]")
   {
-    auto document = CreateRef<Document>();
-    auto parent = CreateRef<TestElement>(*document);
-    auto childA = CreateRef<TestElement>(*document);
-    auto childB = CreateRef<TestElement>(*document);
+    StaticRangeTestData data;
 
-    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
-    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    // Any offsets and order are allowed; they aren't checked until the range is.
+    auto range = data.MakeRange(*data.Text, 5, *data.ChildA, 0);
+    CHECK(range->StartContainer() == data.Text.get());
+    CHECK(range->StartOffset() == 5uz);
+    CHECK(range->EndContainer() == data.ChildA.get());
+    CHECK(range->EndOffset() == 0uz);
 
-    SECTION("valid range")
+    auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"").ReleaseValue();
+    auto attr = data.Document->CreateAttribute(u8"test").ReleaseValue();
+    for (Ref<Node> node : {Ref<Node>(doctype), Ref<Node>(attr)})
     {
-      auto validRangeInit = StaticRangeInit::Create({childA, 0}, {childB, 0});
-      REQUIRE_FALSE(validRangeInit.HasException());
+      for (bool atStart : {true, false})
+      {
+        auto init = atStart ? StaticRangeInit::Create({node, 0}, {data.Text, 0})
+                            : StaticRangeInit::Create({data.Text, 0}, {node, 0});
+        REQUIRE(init.HasException());
+        CHECK(init.GetException().Code() == ExceptionCode::InvalidNodeTypeError);
+      }
+    }
+  }
 
-      auto range = CreateRef<StaticRange>(validRangeInit.Value());
+  TEST_CASE("Valid StaticRange: in one tree, within its nodes, with its start before or equal to its end",
+            "[DOM][StaticRange][dom:staticrange-valid]")
+  {
+    StaticRangeTestData data;
+
+    CHECK(data.MakeRange(*data.ChildA, 0, *data.Text, 3)->IsValid());
+    CHECK(data.MakeRange(*data.Parent, 0, *data.Parent, 2)->IsValid());
+
+    SECTION("A collapsed range is valid")
+    {
+      CHECK(data.MakeRange(*data.Text, 1, *data.Text, 1)->IsValid());
+      CHECK(data.MakeRange(*data.Parent, 2, *data.Parent, 2)->IsValid());
+    }
+
+    SECTION("Its start after its end isn't")
+    {
+      CHECK_FALSE(data.MakeRange(*data.Text, 2, *data.Text, 1)->IsValid());
+      CHECK_FALSE(data.MakeRange(*data.Text, 0, *data.ChildA, 0)->IsValid());
+    }
+
+    SECTION("An offset past its node's length isn't")
+    {
+      CHECK_FALSE(data.MakeRange(*data.Text, 4, *data.Text, 4)->IsValid());
+      CHECK_FALSE(data.MakeRange(*data.ChildA, 0, *data.ChildA, 1)->IsValid());
+      CHECK_FALSE(data.MakeRange(*data.Parent, 3, *data.Parent, 3)->IsValid());
+    }
+
+    SECTION("Nodes in different trees aren't")
+    {
+      auto other = CreateRef<TestElement>(*data.Document);
+      CHECK_FALSE(data.MakeRange(*data.ChildA, 0, *other, 0)->IsValid());
+    }
+
+    SECTION("A range made invalid by a change to the tree")
+    {
+      auto range = data.MakeRange(*data.Text, 1, *data.Text, 3);
       REQUIRE(range->IsValid());
+      REQUIRE_FALSE(data.Text->DeleteData(0, 2).HasException());
+      CHECK_FALSE(range->IsValid());
     }
-
-    SECTION("invalid range - different trees")
-    {
-      auto otherParent = CreateRef<TestElement>(*document);
-      auto otherChild = CreateRef<TestElement>(*document);
-
-      REQUIRE_FALSE(otherParent->AppendChild(*otherChild).HasException());
-
-      auto invalidRangeInit = StaticRangeInit::Create({childA, 0}, {otherChild, 0});
-      REQUIRE_FALSE(invalidRangeInit.HasException());
-
-      auto range = CreateRef<StaticRange>(invalidRangeInit.Value());
-      REQUIRE_FALSE(range->IsValid());
-    }
-
-    SECTION("invalid range - offset out of bounds")
-    {
-      auto invalidRangeInit = StaticRangeInit::Create({childA, 0}, {childB, 1});
-      REQUIRE_FALSE(invalidRangeInit.HasException());
-
-      auto range = CreateRef<StaticRange>(invalidRangeInit.Value());
-      REQUIRE_FALSE(range->IsValid());
-    }
-
-    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
   }
 }

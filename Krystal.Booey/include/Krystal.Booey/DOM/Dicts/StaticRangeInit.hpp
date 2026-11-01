@@ -17,7 +17,11 @@ namespace krys::boo::dom
     }
 
   public:
-    static ExceptionOr<StaticRangeInit> Create(BoundaryPoint start, BoundaryPoint end) noexcept;
+    /// @brief The start and end of a static range; throws an "InvalidNodeTypeError" if either is in a
+    /// DocumentType or Attr node.
+    /// @see https://dom.spec.whatwg.org/#dom-staticrange-staticrange
+    KRYS_NODISCARD static ExceptionOr<StaticRangeInit> Create(BoundaryPoint start,
+                                                              BoundaryPoint end) noexcept;
 
     KRYS_NODISCARD const BoundaryPoint &Start() const noexcept
     {

@@ -2125,13 +2125,14 @@ Status: reviewed (2026-10-31)
 
 ### [5.4. Interface StaticRange](https://dom.spec.whatwg.org/#interface-staticrange)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `StaticRange` (`StaticRange.hpp`/`.cpp`) is constructed from a `StaticRangeInit`, whose `Create` throws for a DocumentType or Attr node (step 1); `IsValid()` is valid.
 
-- [ ] [StaticRange.new StaticRange(init)](https://dom.spec.whatwg.org/#dom-staticrange-staticrange) — The new StaticRange(init) constructor steps are:
+- [x] [StaticRange.new StaticRange(init)](https://dom.spec.whatwg.org/#dom-staticrange-staticrange) — The new StaticRange(init) constructor steps are:
   - 1. If init["startContainer"] or init["endContainer"] is a DocumentType or Attr node, then throw an "InvalidNodeTypeError" DOMException.
   - 2. Set this’s start to (init["startContainer"], init["startOffset"]) and end to (init["endContainer"], init["endOffset"]).
 
-- [ ] [valid (StaticRange)](https://dom.spec.whatwg.org/#staticrange-valid) — A StaticRange is valid if all of the following are true:
+- [x] [valid (StaticRange)](https://dom.spec.whatwg.org/#staticrange-valid) — A StaticRange is valid if all of the following are true:
 
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
