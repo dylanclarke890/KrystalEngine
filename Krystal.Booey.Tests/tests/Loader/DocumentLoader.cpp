@@ -409,7 +409,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("Meta refresh redirects once the document has loaded", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "Meta refresh redirects once the document has loaded",
+    "[Loader][DocumentLoader][html:will-declaratively-refresh][html:shared-declarative-refresh-steps]")
   {
     LoadFixture fixture;
     fixture.Strategy.AddText(u8"https://example.com/next.html", u8"<!DOCTYPE html><p id=next>Next</p>",
@@ -437,6 +439,16 @@ namespace krys::boo::tests
       CHECK(fixture.Document().GetElementById(u8"next"));
     }
 
+    SECTION("a javascript: URL is ignored, so a later refresh still counts")
+    {
+      fixture.LoadMarkup(u8"<!DOCTYPE html><meta http-equiv=refresh content='0; url=javascript:void(0)'>"
+                         u8"<meta http-equiv=refresh content='0; url=next.html'>",
+                         u8"https://example.com/page.html");
+      html::EventLoop::Current().RunUntilIdle();
+      AdvanceTime(0s);
+      CHECK(fixture.Document().GetElementById(u8"next"));
+    }
+
     SECTION("a new document cancels the old one's")
     {
       fixture.LoadMarkup(u8"<!DOCTYPE html><meta http-equiv=refresh content='1; url=next.html'>",
@@ -449,7 +461,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("The content-language and default-style pragmas", "[Loader][DocumentLoader]")
+  TEST_CASE(
+    "The content-language and default-style pragmas",
+    "[Loader][DocumentLoader][html:pragma-set-default-language][html:attr-meta-http-equiv-default-style]")
   {
     LoadFixture fixture;
     fixture.LoadMarkup(

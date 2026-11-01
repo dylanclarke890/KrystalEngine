@@ -695,8 +695,27 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::As() const noexcept
   {
-    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
-    return Reflect<dom::DOMString>(*this, u8"as").value_or(u8"");
+    // The as IDL attribute must reflect the as content attribute, limited to only known values: a keyword for
+    // each potential destination ("fetch", or a destination other than the empty string), with no missing or
+    // invalid value default.
+    constexpr dom::DOMStringView potentialDestinations[] = {
+      u8"fetch",        u8"audio",  u8"audioworklet", u8"document",      u8"embed",        u8"font",
+      u8"frame",        u8"iframe", u8"image",        u8"json",          u8"manifest",     u8"object",
+      u8"paintworklet", u8"report", u8"script",       u8"serviceworker", u8"sharedworker", u8"style",
+      u8"track",        u8"video",  u8"webidentity",  u8"worker",        u8"xslt"};
+    auto value = GetAttribute(u8"as");
+    if (!value)
+    {
+      return {};
+    }
+    for (auto keyword : potentialDestinations)
+    {
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(*value, keyword))
+      {
+        return dom::DOMString(keyword);
+      }
+    }
+    return {};
   }
 
   void HTMLLinkElement::As(dom::DOMString &&value) noexcept

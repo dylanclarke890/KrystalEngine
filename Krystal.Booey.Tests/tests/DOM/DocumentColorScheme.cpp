@@ -90,7 +90,8 @@ namespace krys::boo::tests
     CHECK(fixture.ColorOf(u8"both") == Red);
   }
 
-  TEST_CASE("<meta name=color-scheme> sets the document's colour scheme", "[DOM][Document][ColorScheme]")
+  TEST_CASE("<meta name=color-scheme> sets the document's colour scheme",
+            "[DOM][Document][ColorScheme][html:meta-color-scheme]")
   {
     ColorSchemeFixture fixture;
     auto &document = fixture.Document();
@@ -116,7 +117,10 @@ namespace krys::boo::tests
       REQUIRE_FALSE(meta->SetAttribute(u8"name", u8"description").HasException());
       CHECK(document.ResolvedColorScheme(nullptr).IsEmpty());
       CHECK(fixture.ColorOf(u8"normal") == Red);
+      // The legacy name supported-color-schemes isn't the standard's.
       REQUIRE_FALSE(meta->SetAttribute(u8"name", u8"supported-color-schemes").HasException());
+      CHECK(fixture.ColorOf(u8"normal") == Red);
+      REQUIRE_FALSE(meta->SetAttribute(u8"name", u8"color-scheme").HasException());
       CHECK(fixture.ColorOf(u8"normal") == Blue);
       REQUIRE_FALSE(fixture.ById(u8"head").RemoveChild(*meta).HasException());
       CHECK(fixture.ColorOf(u8"normal") == Red);

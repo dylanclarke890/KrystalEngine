@@ -11,8 +11,7 @@ namespace krys::boo::html
 {
   KRYS_NODISCARD static bool IsNameColorScheme(dom::DOMStringView nameValue) noexcept
   {
-    return text::IsASCIICaselessEqual(nameValue, utf8_stringview(u8"color-scheme"))
-           || text::IsASCIICaselessEqual(nameValue, utf8_stringview(u8"supported-color-schemes"));
+    return text::IsASCIICaselessEqual(nameValue, utf8_stringview(u8"color-scheme"));
   }
 
 #pragma region HTMLMetaElement

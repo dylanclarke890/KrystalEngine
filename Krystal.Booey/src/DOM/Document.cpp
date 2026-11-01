@@ -3505,24 +3505,33 @@ namespace krys::boo::dom
   {
     if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"content-language")))
     {
-      // https://html.spec.whatwg.org/#attr-meta-http-equiv-content-language
-      // If the element's content attribute contains a U+002C COMMA character (,) then return. Collect a
-      // sequence of code points that are not ASCII whitespace, after skipping ASCII whitespace; if it's
-      // empty, return; otherwise it's the pragma-set default language.
+      // https://html.spec.whatwg.org/#pragma-set-default-language
+      // 1. If the meta element has no content attribute, then return.
+      // 2. If the element's content attribute contains a U+002C COMMA character (,), then return.
       if (content.find(u8',') != DOMStringView::npos)
       {
         return;
       }
+
+      // 3. Let input be the value of the element's content attribute.
+      // 4. Let position point at the first character of input.
+      // 5. Skip ASCII whitespace within input given position.
       size_t start = 0;
       while (start < content.size() && text::IsASCIIWhitespace(content[start]))
       {
         ++start;
       }
+
+      // 6. Collect a sequence of code points that are not ASCII whitespace from input given position.
+      // 7. Let candidate be the string that resulted from the previous step.
       size_t end = start;
       while (end < content.size() && !text::IsASCIIWhitespace(content[end]))
       {
         ++end;
       }
+
+      // 8. If candidate is the empty string, return.
+      // 9. Set the pragma-set default language to candidate.
       if (end > start)
       {
         SetContentLanguage(DOMString(content.substr(start, end - start)));
@@ -3533,6 +3542,10 @@ namespace krys::boo::dom
     if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"default-style")))
     {
       // https://html.spec.whatwg.org/#attr-meta-http-equiv-default-style
+      // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
+      //    then return.
+      // 2. Change the preferred CSS style sheet set name with the name being the value of the element's
+      //    content attribute.
       if (!content.empty())
       {
         StyleScope().SetPreferredStylesheetSetName(DOMString(content));
@@ -3542,24 +3555,46 @@ namespace krys::boo::dom
 
     if (text::IsASCIICaselessEqual(equiv, utf8_stringview(u8"refresh")))
     {
+      // https://html.spec.whatwg.org/#attr-meta-http-equiv-refresh
+      // 1. If the meta element has no content attribute, or if that attribute's value is the empty string,
+      //    then return.
+      // 2. Let input be the value of the element's content attribute.
+      // 3. Run the shared declarative refresh steps with the meta element's node document, input, and the
+      //    meta element.
       // https://html.spec.whatwg.org/#shared-declarative-refresh-steps
-      // If document's will declaratively refresh is true, then return.
+      // 1. If document's will declaratively refresh is true, then return.
       auto *frame = Frame();
-      if (_willDeclarativelyRefresh || !frame)
+      if (_willDeclarativelyRefresh || !frame || content.empty())
       {
         return;
       }
+
+      // 2. to 11j. are ParseRefresh.
       auto directive = html::ParseRefresh(content);
       if (!directive)
       {
         return;
       }
+
+      // 11k. Parse: Set urlRecord to the result of encoding-parsing a URL given urlString, relative to
+      //      document.
       auto url = directive->URL.empty() ? GetURL() : CompleteURL(directive->URL);
-      if (!url.IsValid())
+
+      // 11l. If urlRecord is failure, then return.
+      // 11m. If urlRecord's scheme is "javascript", then return.
+      if (!url.IsValid() || url.ProtocolIsJavaScript())
       {
         return;
       }
+
+      // 12. Set document's will declaratively refresh to true.
       _willDeclarativelyRefresh = true;
+
+      // 13. Perform one or more of the following steps: After the refresh has come due, if the user has not
+      //     canceled the redirect and, if meta is given, document's active sandboxing flag set does not have
+      //     the sandboxed automatic features browsing context flag set, then navigate document's node
+      //     navigable to urlRecord using document, with historyHandling set to "replace".
+      // (There's no sandboxing, and nothing to cancel the redirect with.)
       frame->GetNavigationScheduler().ScheduleRedirect(*this, directive->Delay, url, IsMetaRefresh::Yes);
       return;
     }
@@ -4822,21 +4857,31 @@ namespace krys::boo::dom
 
   void Document::MetaElementColorSchemeChanged() noexcept
   {
+    // To obtain a page's supported color-schemes:
+    // https://html.spec.whatwg.org/#meta-color-scheme
     auto &context = CssParserContext();
 
+    // 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree
+    //    order: the element is in a document tree; the element has a name attribute, whose value is an ASCII
+    //    case-insensitive match for color-scheme; and the element has a content attribute.
+    // 2. For each element in candidate elements:
+    // 2a. Let parsed be the result of parsing a list of component values given the value of element's
+    //     content attribute.
+    // 2b. If parsed is a valid CSS 'color-scheme' property value, then return parsed.
     auto parseColorScheme = [&](const html::HTMLMetaElement &metaElement) -> Maybe<css::ColorScheme>
     {
       auto nameValue = metaElement.GetAttribute(u8"name");
-      if (!nameValue
-          || (!text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"color-scheme"))
-              && !text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"supported-color-schemes"))))
+      auto content = metaElement.GetAttribute(u8"content");
+      if (!nameValue || !content
+          || !text::IsASCIICaselessEqual(*nameValue, utf8_stringview(u8"color-scheme")))
       {
         return null;
       }
-      return css::PropertyParserHelpers::ParseUnresolvedColorScheme(
-        metaElement.GetAttribute(u8"content").value_or(u8""), context);
+      return css::PropertyParserHelpers::ParseUnresolvedColorScheme(*content, context);
     };
 
+    // 3. Return null.
+    // (The empty string, which leaves the page's color scheme unset.)
     DOMString colorSchemeString;
     for (auto &node : DescendantRange(*this))
     {

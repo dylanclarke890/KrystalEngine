@@ -92,7 +92,9 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-link-rel
     void Rel(dom::DOMString &&value) noexcept;
 
+    /// @brief The `as` attribute's potential destination keyword, in its canonical case, or the empty string.
     /// @see https://html.spec.whatwg.org/#dom-link-as
+    /// @see https://html.spec.whatwg.org/#attr-link-as
     KRYS_NODISCARD dom::DOMString As() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-as

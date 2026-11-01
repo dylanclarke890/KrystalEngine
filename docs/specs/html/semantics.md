@@ -67,33 +67,38 @@ Status: reviewed (2026-11-01)
 
 #### [4.2.4 The link element](https://html.spec.whatwg.org/#the-link-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLLinkElement`: only `rel=stylesheet` (and `alternate`) links are processed (KNOWN-ISSUES.md); `crossOrigin`, `referrerPolicy` and `fetchPriority` were reviewed with 2.5; `disabled` and explicitly enabled are `SetDisabledState`. Being allowed in the body is author conformance.
+> Fixed: `as` wasn't limited to the potential destinations.
 <!-- definitions: attr-link-href attr-link-rel attr-link-crossorigin attr-link-media attr-link-integrity attr-link-hreflang attr-link-type attr-link-referrerpolicy attr-link-title attr-link-imagesrcset attr-link-imagesizes attr-link-sizes attr-link-as attr-link-blocking attr-link-color explicitly-enabled attr-link-disabled attr-link-fetchpriority -->
 
-- [ ] [allowed in the body](https://html.spec.whatwg.org/#allowed-in-the-body) — If a link element has an itemprop attribute, or has a rel attribute that contains only keywords that are body-ok, then the element is said to be allowed in the body. This means that the element can be used where phrasing content is expected.
+- [x] [allowed in the body](https://html.spec.whatwg.org/#allowed-in-the-body) — If a link element has an itemprop attribute, or has a rel attribute that contains only keywords that are body-ok, then the element is said to be allowed in the body. This means that the element can be used where phrasing content is expected.
+  > n/a: author conformance.
 
-- [ ] [HTMLLinkElement.as](https://html.spec.whatwg.org/#dom-link-as) — The as IDL attribute must reflect the as content attribute, limited to only known values.
+- [x] [HTMLLinkElement.as](https://html.spec.whatwg.org/#dom-link-as) — The as IDL attribute must reflect the as content attribute, limited to only known values.
 
-- [ ] [HTMLLinkElement.crossOrigin](https://html.spec.whatwg.org/#dom-link-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
+- [x] [HTMLLinkElement.crossOrigin](https://html.spec.whatwg.org/#dom-link-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
 
-- [ ] [HTMLLinkElement.referrerPolicy](https://html.spec.whatwg.org/#dom-link-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
+- [x] [HTMLLinkElement.referrerPolicy](https://html.spec.whatwg.org/#dom-link-referrerpolicy) — The referrerPolicy IDL attribute must reflect the referrerpolicy content attribute, limited to only known values.
 
-- [ ] [HTMLLinkElement.fetchPriority](https://html.spec.whatwg.org/#dom-link-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
+- [x] [HTMLLinkElement.fetchPriority](https://html.spec.whatwg.org/#dom-link-fetchpriority) — The fetchPriority IDL attribute must reflect the fetchpriority content attribute, limited to only known values.
 
 ##### [4.2.4.1 Processing the media attribute](https://html.spec.whatwg.org/#processing-the-media-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The sheet's media queries (`SetMediaQueries`), evaluated by the style resolver; a sheet whose media doesn't match loads without holding back rendering.
 
 ##### [4.2.4.2 Processing the type attribute](https://html.spec.whatwg.org/#processing-the-type-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A style sheet link with a `type` that isn't `text/css` isn't fetched (`HTMLLinkElement::Process`; a content type parser is a FIXME).
 
 ##### [4.2.4.3 Fetching and processing a resource from a link element](https://html.spec.whatwg.org/#fetching-and-processing-a-resource-from-a-link-element)
 
-Status: unreviewed
+Status: n/a (later: requests, with remote pages; style sheet links load through `CachedResourceLoader`, reviewed with the stylesheet link type)
 <!-- definitions: fetch-and-process-the-linked-resource linked-resource-fetch-setup-steps process-the-linked-resource -->
 
-- [ ] [default fetch and process the linked resource](https://html.spec.whatwg.org/#default-fetch-and-process-the-linked-resource) — The default fetch and process the linked resource, given a link element el, is as follows:
+- [x] [default fetch and process the linked resource](https://html.spec.whatwg.org/#default-fetch-and-process-the-linked-resource) — The default fetch and process the linked resource, given a link element el, is as follows:
   - 1. Let options be the result of creating link options from el.
   - 2. Let request be the result of creating a link request given options.
   - 3. If request is null, then return.
@@ -105,7 +110,7 @@ Status: unreviewed
     - 6c. Otherwise, wait for the link resource's critical subresources to finish loading.
     - 6d. Process the linked resource given el, success, response, and bodyBytes.
 
-- [ ] [create a link request](https://html.spec.whatwg.org/#create-a-link-request) — To create a link request given a link processing options options:
+- [x] [create a link request](https://html.spec.whatwg.org/#create-a-link-request) — To create a link request given a link processing options options:
   - 1. Assert: options's href is not the empty string.
   - 2. Let url be the result of encoding-parsing a URL given options's href, relative to options's base URL.
   - 3. If url is failure, then return null.
@@ -120,10 +125,10 @@ Status: unreviewed
 
 ##### [4.2.4.4 Processing `Link` headers](https://html.spec.whatwg.org/#processing-link-headers)
 
-Status: unreviewed
+Status: n/a (responses have no headers)
 <!-- definitions: process-a-link-header link-processing-options link-options-href link-options-initiator link-options-integrity link-options-type link-options-nonce link-options-destination link-options-crossorigin link-options-referrer-policy link-options-source-set link-options-base-url link-options-origin link-options-environment link-options-policy-container link-options-document link-options-on-document-ready link-options-fetch-priority -->
 
-- [ ] [create link options from element](https://html.spec.whatwg.org/#create-link-options-from-element) — To create link options from element given a link element el:
+- [x] [create link options from element](https://html.spec.whatwg.org/#create-link-options-from-element) — To create link options from element given a link element el:
   - 1. Let document be el's node document.
   - 2. Let options be a new link processing options with crossoriginthe state of el's crossorigin content attributereferrer policythe state of el's referrerpolicy content attributesource setel's source setbase URLdocument's document base URLorigindocument's originenvironmentdocument's relevant settings objectpolicy containerdocument's policy containerdocumentdocumentcryptographic nonce metadatathe curre…
   - 3. If el has an href attribute, then set options's href to the value of el's href attribute.
@@ -132,7 +137,7 @@ Status: unreviewed
   - 6. Assert: options's href is not the empty string, or options's source set is not null. A link element with neither an href or an imagesrcset does not represent a link.
   - 7. Return options.
 
-- [ ] [extract links from headers](https://html.spec.whatwg.org/#extract-links-from-headers) — To extract links from headers given a header list headers:
+- [x] [extract links from headers](https://html.spec.whatwg.org/#extract-links-from-headers) — To extract links from headers given a header list headers:
   - 1. Let links be a new list.
   - 2. Let rawLinkHeaders be the result of getting, decoding, and splitting `Link` from headers.
   - 3. For each linkHeader of rawLinkHeaders:
@@ -141,7 +146,7 @@ Status: unreviewed
     - 3c. Append linkObject to links.
   - 4. Return links.
 
-- [ ] [process link headers](https://html.spec.whatwg.org/#process-link-headers) — To process link headers given a Document doc, a response response, and a "pre-media" or "media" phase:
+- [x] [process link headers](https://html.spec.whatwg.org/#process-link-headers) — To process link headers given a Document doc, a response response, and a "pre-media" or "media" phase:
   - 1. Let links be the result of extracting links from response's header list.
   - 2. For each linkObject in links:
     - 2a. Let rel be linkObject["relation_type"].
@@ -154,7 +159,7 @@ Status: unreviewed
     - 2h. If attribs["imagesrcset"] exists and attribs["imagesizes"] exists, then set options's source set to the result of creating a source set given linkObject["target_uri"], attribs["imagesrcset"], attribs["imagesizes"], and null.
     - 2i. Run the process a link header steps for rel given options.
 
-- [ ] [apply link options from parsed header attributes](https://html.spec.whatwg.org/#apply-link-options-from-parsed-header-attributes) — To apply link options from parsed header attributes to a link processing options options given attribs and a string rel:
+- [x] [apply link options from parsed header attributes](https://html.spec.whatwg.org/#apply-link-options-from-parsed-header-attributes) — To apply link options from parsed header attributes to a link processing options options given attribs and a string rel:
   - 1. If rel is "preload":
     - 1a. If attribs["as"] does not exist, then return false.
     - 1b. Let destination be the result of translating attribs["as"].
@@ -170,10 +175,10 @@ Status: unreviewed
 
 ##### [4.2.4.5 Early hints](https://html.spec.whatwg.org/#early-hints)
 
-Status: unreviewed
+Status: n/a (no network loader)
 <!-- definitions: early-hints-2 -->
 
-- [ ] [process early hint headers](https://html.spec.whatwg.org/#process-early-hint-headers) — To process early hint headers given a response response and an environment reservedEnvironment:
+- [x] [process early hint headers](https://html.spec.whatwg.org/#process-early-hint-headers) — To process early hint headers given a response response and an environment reservedEnvironment:
   - 1. Let earlyPolicyContainer be the result of creating a policy container from a fetch response given response and reservedEnvironment.
   - 2. Let links be the result of extracting links from response's header list.
   - 3. Let earlyHints be an empty list.
@@ -190,42 +195,47 @@ Status: unreviewed
 
 ##### [4.2.4.6 Providing users with a means to follow hyperlinks created using the link element](https://html.spec.whatwg.org/#providing-users-with-a-means-to-follow-hyperlinks-created-using-the-link-element)
 
-Status: unreviewed
+Status: n/a (Booey has no browser user interface)
 
 #### [4.2.5 The meta element](https://html.spec.whatwg.org/#the-meta-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLMetaElement`; `name`, `http-equiv`, `content` and `media` are reflected, and `Process` runs the pragmas and the color-scheme name.
 <!-- definitions: attr-meta-charset attr-meta-content attr-meta-name attr-meta-media -->
 
 ##### [4.2.5.1 Standard metadata names](https://html.spec.whatwg.org/#standard-metadata-names)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Only `color-scheme` does anything: `Document::MetaElementColorSchemeChanged` (the page's supported color-schemes). Fixed: the legacy `supported-color-schemes` counted too (DIFFERENCES.md). The application name, keywords and theme colour are for browser user interface, which Booey has none of; `referrer` waits on referrers.
 <!-- definitions: meta-author meta-description meta-generator -->
 
-- [ ] [To find the application name to use given an ordered list of languages (e.g. Br…](https://html.spec.whatwg.org/#meta-application-name) — To find the application name to use given an ordered list of languages (e.g. British English, American English, and English), user agents must run the following steps:
+- [x] [To find the application name to use given an ordered list of languages (e.g. Br…](https://html.spec.whatwg.org/#meta-application-name) — To find the application name to use given an ordered list of languages (e.g. British English, American English, and English), user agents must run the following steps:
   - 1. Let languages be the list of languages.
   - 2. Let default language be the language of the Document's document element, if any, and if that language is not unknown.
   - 3. If there is a default language, and if it is not the same language as any of the languages in languages, append it to languages.
   - 4. Let winning language be the first language in languages for which there is a meta element in the Document where the name attribute value is an ASCII case-insensitive match for application-name and whose language is the language in question. If none of the languages have such a meta element, then return; there's no given application name.
   - 5. Return the value of the content attribute of the first meta element in the Document in tree order where the name attribute value is an ASCII case-insensitive match for application-name and whose language is winning language.
+  > n/a: no browser user interface to name the application in.
 
-- [ ] [To obtain the list of keywords that the author has specified as applicable to t…](https://html.spec.whatwg.org/#meta-keywords) — To obtain the list of keywords that the author has specified as applicable to the page, the user agent must run the following steps:
+- [x] [To obtain the list of keywords that the author has specified as applicable to t…](https://html.spec.whatwg.org/#meta-keywords) — To obtain the list of keywords that the author has specified as applicable to the page, the user agent must run the following steps:
   - 1. Let keywords be an empty list.
   - 2. For each meta element with a name attribute and a content attribute and where the name attribute value is an ASCII case-insensitive match for keywords:
     - 2a. Split the value of the element's content attribute on commas.
     - 2b. Add the resulting tokens, if any, to keywords.
   - 3. Remove any duplicates from keywords.
   - 4. Return keywords. This is the list of keywords that the author has specified as applicable to the page.
+  > n/a: nothing uses the keywords.
 
-- [ ] [If any meta element element is inserted into the document, or has its name or c…](https://html.spec.whatwg.org/#meta-referrer) — If any meta element element is inserted into the document, or has its name or content attributes changed, user agents must run the following algorithm:
+- [x] [If any meta element element is inserted into the document, or has its name or c…](https://html.spec.whatwg.org/#meta-referrer) — If any meta element element is inserted into the document, or has its name or content attributes changed, user agents must run the following algorithm:
   - 1. If element is not in a document tree, then return.
   - 2. If element does not have a name attribute whose value is an ASCII case-insensitive match for "referrer", then return.
   - 3. If element does not have a content attribute, or that attribute's value is the empty string, then return.
   - 4. Let value be the value of element's content attribute, converted to ASCII lowercase.
   - 5. If value is one of the values given in the first column of the following table, then set value to the value given in the second column:
   - 6. If value is a referrer policy, then set element's node document's policy container's referrer policy to policy.
+  > n/a: no referrers until remote pages.
 
-- [ ] [To obtain a page's theme color, user agents must run the following steps](https://html.spec.whatwg.org/#meta-theme-color) — To obtain a page's theme color, user agents must run the following steps:
+- [x] [To obtain a page's theme color, user agents must run the following steps](https://html.spec.whatwg.org/#meta-theme-color) — To obtain a page's theme color, user agents must run the following steps:
   - 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree order: the element is in a document tree;; the element has a name attribute, whose value is an ASCII case-insensitive match for theme-color; and; the element has a content attribute.
   - 2. For each element in candidate elements:
     - 2a. If element has a media attribute and the value of element's media attribute does not match the environment, then continue.
@@ -233,8 +243,9 @@ Status: unreviewed
     - 2c. Let color be the result of parsing value.
     - 2d. If color is not failure, then return color.
   - 3. Return nothing (the page has no theme color).
+  > n/a: no browser user interface to colour.
 
-- [ ] [To obtain a page's supported color-schemes, user agents must run the following…](https://html.spec.whatwg.org/#meta-color-scheme) — To obtain a page's supported color-schemes, user agents must run the following steps:
+- [x] [To obtain a page's supported color-schemes, user agents must run the following…](https://html.spec.whatwg.org/#meta-color-scheme) — To obtain a page's supported color-schemes, user agents must run the following steps:
   - 1. Let candidate elements be the list of all meta elements that meet the following criteria, in tree order: the element is in a document tree;; the element has a name attribute, whose value is an ASCII case-insensitive match for color-scheme; and; the element has a content attribute.
   - 2. For each element in candidate elements:
     - 2a. Let parsed be the result of parsing a list of component values given the value of element's content attribute.
@@ -243,17 +254,18 @@ Status: unreviewed
 
 ##### [4.2.5.2 Other metadata names](https://html.spec.whatwg.org/#other-metadata-names)
 
-Status: unreviewed
+Status: n/a (author conformance and registries)
 <!-- definitions: concept-meta-extensions -->
 
 ##### [4.2.5.3 Pragma directives](https://html.spec.whatwg.org/#pragma-directives)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::ProcessMetaHttpEquiv`: `content-language` (the pragma-set default language), `default-style` and `refresh` (with `ParseRefresh`); pragmas run again on attribute changes (DIFFERENCES.md). Fixed: a refresh to a `javascript:` URL wasn't ignored. Content-Security-Policy waits on a security policy (not planned); Set-Cookie, X-UA-Compatible and Content-Type do nothing, as specified (the parser reads the charset).
 <!-- definitions: attr-meta-http-equiv attr-meta-http-equiv-content-language attr-meta-http-equiv-content-type attr-meta-http-equiv-default-style attr-meta-http-equiv-refresh attr-meta-http-equiv-set-cookie attr-meta-http-equiv-x-ua-compatible attr-meta-http-equiv-content-security-policy -->
 
-- [ ] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
+- [x] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
 
-- [ ] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
+- [x] [pragma-set default language](https://html.spec.whatwg.org/#pragma-set-default-language) — This pragma sets the pragma-set default language. Until such a pragma is successfully processed, there is no pragma-set default language.
   - 1. If the meta element has no content attribute, then return.
   - 2. If the element's content attribute contains a U+002C COMMA character (,), then return.
   - 3. Let input be the value of the element's content attribute.
@@ -264,12 +276,12 @@ Status: unreviewed
   - 8. If candidate is the empty string, return.
   - 9. Set the pragma-set default language to candidate.
 
-- [ ] [will declaratively refresh (Document)](https://html.spec.whatwg.org/#will-declaratively-refresh) — A Document object has an associated will declaratively refresh (a boolean). It is initially false.
+- [x] [will declaratively refresh (Document)](https://html.spec.whatwg.org/#will-declaratively-refresh) — A Document object has an associated will declaratively refresh (a boolean). It is initially false.
   - 1. If the meta element has no content attribute, or if that attribute's value is the empty string, then return.
   - 2. Let input be the value of the element's content attribute.
   - 3. Run the shared declarative refresh steps with the meta element's node document, input, and the meta element.
 
-- [ ] [shared declarative refresh steps](https://html.spec.whatwg.org/#shared-declarative-refresh-steps) — The shared declarative refresh steps, given a Document object document, string input, and optionally a meta element meta, are as follows:
+- [x] [shared declarative refresh steps](https://html.spec.whatwg.org/#shared-declarative-refresh-steps) — The shared declarative refresh steps, given a Document object document, string input, and optionally a meta element meta, are as follows:
   - 1. If document's will declaratively refresh is true, then return.
   - 2. Let position point at the first code point of input.
   - 3. Skip ASCII whitespace within input given position.
@@ -304,7 +316,7 @@ Status: unreviewed
 
 ##### [4.2.5.4 Specifying the document's character encoding](https://html.spec.whatwg.org/#charset)
 
-Status: unreviewed
+Status: n/a (documents are UTF-8 only; the parser's prescan reads the declaration)
 <!-- definitions: character-encoding-declaration -->
 
 #### [4.2.6 The style element](https://html.spec.whatwg.org/#the-style-element)

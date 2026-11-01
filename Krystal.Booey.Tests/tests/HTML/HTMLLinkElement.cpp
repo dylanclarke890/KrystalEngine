@@ -11,15 +11,34 @@ namespace krys::boo::html::tests
   TEST_CASE("HTMLLinkElement::RelList", "[HTML][HTMLLinkElement]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
-    auto link = CreateRef<HTMLLinkElement>(*document);
+    auto link = document->CreateElement(u8"link").ReleaseValue();
     REQUIRE_FALSE(link->SetAttribute(u8"rel", u8"stylesheet icon").HasException());
 
-    auto &relList = link->RelList();
+    auto &relList = Downcast<HTMLLinkElement>(Downcast<HTMLElement>(*link)).RelList();
     REQUIRE(relList.Length() == 2uz);
     REQUIRE(relList.Contains(u8"icon"));
 
     REQUIRE_FALSE(relList.Remove(dom::DOMString(u8"icon")).HasException());
     REQUIRE(link->GetAttribute(u8"rel") == u8"stylesheet");
+  }
+
+  TEST_CASE("HTMLLinkElement.as: limited to the potential destinations",
+            "[HTML][HTMLLinkElement][html:dom-link-as]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto element = document->CreateElement(u8"link").ReleaseValue();
+    auto &link = Downcast<HTMLLinkElement>(Downcast<HTMLElement>(*element));
+    CHECK(link.As() == u8"");
+
+    for (auto [value, expected] :
+         {Pair {u8"FETCH", u8"fetch"}, Pair {u8"Style", u8"style"}, Pair {u8"json", u8"json"},
+          Pair {u8"sharedworker", u8"sharedworker"}, Pair {u8"", u8""}, Pair {u8"stylesheet", u8""}})
+    {
+      INFO(reinterpret_cast<const char *>(value));
+      link.As(dom::DOMString(value));
+      CHECK(link.As() == expected);
+    }
+    CHECK(link.GetAttribute(u8"as") == dom::DOMString(u8"stylesheet"));
   }
 
   namespace
@@ -123,7 +142,8 @@ namespace krys::boo::html::tests
     CHECK(fixture.RendererSize(u8"box") == IntSize(10, 10));
   }
 
-  TEST_CASE("HTMLLinkElement: failed sheets and sheets that aren't CSS fire error", "[HTML][HTMLLinkElement]")
+  TEST_CASE("HTMLLinkElement: failed sheets and sheets that aren't CSS fire error",
+            "[HTML][HTMLLinkElement][html:processing-the-type-attribute]")
   {
     LoaderFixture loader;
     loader.Strategy.AddText(u8"file:///text.css", u8"#box { width: 10px }", u8"text/plain");
@@ -146,7 +166,8 @@ namespace krys::boo::html::tests
     CHECK(fixture.RendererSize(u8"box") == IntSize(5, 10));
   }
 
-  TEST_CASE("HTMLLinkElement: media, disabled sheets, and links added and removed", "[HTML][HTMLLinkElement]")
+  TEST_CASE("HTMLLinkElement: media, disabled sheets, and links added and removed",
+            "[HTML][HTMLLinkElement][html:processing-the-media-attribute][html:attr-link-disabled]")
   {
     LoaderFixture loader;
     loader.Strategy.AddText(u8"file:///print.css", u8"#box { width: 99px }");
