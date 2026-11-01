@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
 #include "Krystal.Booey/Style/PseudoClassChangeInvalidation.hpp"
+#include "Krystal.Core/Text/ASCII.hpp"
 #include <algorithm>
 #include <numeric>
 
@@ -194,7 +195,14 @@ namespace krys::boo::html
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel");
+      _relList = dom::ElementAlgorithms::CreateDOMTokenList(
+        *this, u8"rel",
+        [](dom::Document &, dom::DOMStringView token)
+        {
+          return text::IsASCIICaselessEqual(token, utf8_stringview(u8"noreferrer"))
+                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"noopener"))
+                 || text::IsASCIICaselessEqual(token, utf8_stringview(u8"opener"));
+        });
     }
 
     return *_relList;

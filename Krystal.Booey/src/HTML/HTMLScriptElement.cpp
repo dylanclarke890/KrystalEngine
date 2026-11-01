@@ -2,6 +2,8 @@
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
+#include "Krystal.Core/Text/ASCII.hpp"
+
 namespace krys::boo::html
 {
   HTMLScriptElement::HTMLScriptElement(dom::Document &document) noexcept
@@ -65,7 +67,9 @@ namespace krys::boo::html
   {
     if (!_blocking)
     {
-      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking");
+      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
+        *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
+        { return text::IsASCIICaselessEqual(token, utf8_stringview(u8"render")); });
     }
 
     return *_blocking;

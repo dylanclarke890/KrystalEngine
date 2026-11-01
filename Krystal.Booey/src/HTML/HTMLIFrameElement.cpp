@@ -57,7 +57,12 @@ namespace krys::boo::html
   {
     if (!_sandbox)
     {
-      _sandbox = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"sandbox");
+      _sandbox = dom::ElementAlgorithms::CreateDOMTokenList(
+        *this, u8"sandbox",
+        // FIXME: The supported tokens are the sandboxing keywords Booey implements
+        // (SecurityContext::isSupportedSandboxPolicy upstream), which aren't ported; every token is supported
+        // until they are.
+        [](dom::Document &, dom::DOMStringView) { return true; });
     }
 
     return *_sandbox;

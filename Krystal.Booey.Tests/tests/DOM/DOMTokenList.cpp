@@ -41,7 +41,9 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("DOMTokenList::Length", "[HTML][DOMTokenList]")
+  TEST_CASE(
+    "DOMTokenList.length: the size of its token set",
+    "[DOM][DOMTokenList][dom:interface-domtokenlist][dom:dom-domtokenlist-length][dom:concept-dtl-tokens]")
   {
     CommonTestData data;
     REQUIRE(data.TokenList.Length() == 0uz);
@@ -59,7 +61,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.TokenList.Length() == 0uz);
   }
 
-  TEST_CASE("DOMTokenList::Item", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.item(): the token at the index, or null past the end",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-item]")
   {
     CommonTestData data;
 
@@ -75,7 +78,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.TokenList.Item(2).has_value());
   }
 
-  TEST_CASE("DOMTokenList::operator[size_t index]", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList: its indexed getter is item()", "[DOM][DOMTokenList][dom:dom-domtokenlist-item]")
   {
     CommonTestData data;
 
@@ -91,7 +94,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.TokenList.Item(2).has_value());
   }
 
-  TEST_CASE("DOMTokenList::Contains", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.contains(): whether the token is in its token set",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-contains]")
   {
     CommonTestData data;
 
@@ -107,7 +111,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.TokenList.Contains(u8"baz"));
   }
 
-  TEST_CASE("DOMTokenList::Add", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.add(): appends each token not already in it, then updates the attribute",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-add][dom:concept-dtl-update]")
   {
     CommonTestData data;
 
@@ -146,7 +151,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList::Remove", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.remove(): removes each token, then updates the attribute",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-remove][dom:concept-dtl-update]")
   {
     CommonTestData data;
 
@@ -179,7 +185,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList::Toggle", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.toggle(): removes or appends the token, or as force says",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-toggle]")
   {
     CommonTestData data;
 
@@ -228,7 +235,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList::Replace", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.replace(): replaces the token with the new one",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-replace]")
   {
     CommonTestData data;
 
@@ -272,7 +280,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList::Value", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.value: gets and sets its attribute value",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-value][dom:concept-dtl-serialize]")
   {
     CommonTestData data;
     REQUIRE(data.TokenList.Value() == u8"");
@@ -285,14 +294,14 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Element->GetAttribute(u8"class") == u8"baz qux");
   }
 
-  TEST_CASE("DOMTokenList::Supports", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList.supports(): throws a TypeError when its attribute defines no supported tokens",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-supports][dom:concept-domtokenlist-validation]"
+            "[dom:concept-supported-tokens]")
   {
-    SECTION("Default function always returns true")
-    {
-      CommonTestData data;
-      auto supports = data.TokenList.Supports(u8"foo");
-      REQUIRE((supports.HasValue() && supports.Value() == true));
-    }
+    CommonTestData data;
+    auto supports = data.TokenList.Supports(u8"foo");
+    REQUIRE(supports.HasException());
+    CHECK(supports.GetException().Code() == ExceptionCode::TypeError);
   }
 
   namespace
@@ -344,7 +353,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList follows its attribute", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList: its token set follows its attribute",
+            "[DOM][DOMTokenList][dom:concept-dtl-serialize][dom:domtokenlist-element]"
+            "[dom:domtokenlist-attribute-name]")
   {
     auto document = CreateRef<HTMLDocument>();
 
@@ -409,7 +420,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DOMTokenList and its attribute", "[HTML][DOMTokenList]")
+  TEST_CASE("DOMTokenList: its token set when it's created and as it updates its attribute",
+            "[DOM][DOMTokenList][dom:sets][dom:concept-dtl-serialize][dom:concept-dtl-update]")
   {
     auto document = CreateRef<HTMLDocument>();
     auto &element = CreateHTML<Element>(*document, u8"div");
@@ -438,5 +450,144 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(element.SetAttributeNS(DOMStringAtom(u8"urn:x"), u8"x:class", u8"b").HasException());
       CHECK(Joined(list) == u8"a");
     }
+  }
+
+  TEST_CASE("DOMTokenList.replace(): a new token already in the set takes the place of the first of the two",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-replace]")
+  {
+    CommonTestData data;
+    data.TokenList.Value(u8"a b c");
+
+    SECTION("After the token: the token's place")
+    {
+      CHECK(data.TokenList.Replace(u8"a", u8"c").ReleaseValue());
+      CHECK(data.TokenList.Value() == u8"c b");
+      CHECK(data.TokenList.Length() == 2uz);
+    }
+
+    SECTION("Before the token: its own place")
+    {
+      CHECK(data.TokenList.Replace(u8"c", u8"a").ReleaseValue());
+      CHECK(data.TokenList.Value() == u8"a b");
+    }
+
+    SECTION("The token itself")
+    {
+      CHECK(data.TokenList.Replace(u8"b", u8"b").ReleaseValue());
+      CHECK(data.TokenList.Value() == u8"a b c");
+    }
+
+    SECTION("A token not in the set changes nothing")
+    {
+      CHECK_FALSE(data.TokenList.Replace(u8"d", u8"a").ReleaseValue());
+      CHECK(data.TokenList.Value() == u8"a b c");
+    }
+
+    SECTION("An empty token is checked for before whitespace in either")
+    {
+      auto result = data.TokenList.Replace(u8"a b", u8"");
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::SyntaxError);
+    }
+  }
+
+  TEST_CASE("DOMTokenList update steps: an absent attribute stays absent while the token set is empty",
+            "[DOM][DOMTokenList][dom:concept-dtl-update]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.TokenList.Remove(u8"a").HasException());
+    CHECK_FALSE(data.Element->HasAttribute(u8"class"));
+    CHECK_FALSE(data.TokenList.Toggle(u8"a", false).ReleaseValue());
+    CHECK_FALSE(data.Element->HasAttribute(u8"class"));
+
+    // Once it's there, it's set to the serialized set, even when that's empty.
+    REQUIRE_FALSE(data.Element->SetAttribute(u8"class", u8" a  a ").HasException());
+    REQUIRE_FALSE(data.TokenList.Remove(u8"b").HasException());
+    CHECK(data.Element->GetAttribute(u8"class") == u8"a");
+    REQUIRE_FALSE(data.TokenList.Remove(u8"a").HasException());
+    CHECK(data.Element->GetAttribute(u8"class") == u8"");
+  }
+
+  TEST_CASE("DOMTokenList.value: its serialize steps give the attribute value, unparsed",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-value][dom:concept-dtl-serialize]")
+  {
+    CommonTestData data;
+    data.TokenList.Value(u8" b  a b ");
+    CHECK(data.TokenList.Value() == u8" b  a b ");
+    CHECK(data.TokenList.Length() == 2uz);
+  }
+
+  TEST_CASE("DOMTokenList.supports(): an element's supported tokens, compared ASCII case-insensitively",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-supports][dom:concept-domtokenlist-validation]"
+            "[dom:concept-supported-tokens]")
+  {
+    // A document can have only one element child, so each element gets its own.
+    auto newDocument = []
+    {
+      return CreateRef<HTMLDocument>();
+    };
+
+    SECTION("a's relList")
+    {
+      auto document = newDocument();
+      auto &anchor = CreateHTML<html::HTMLAnchorElement>(*document, u8"a");
+      CHECK(anchor.RelList().Supports(u8"NoOpener").ReleaseValue());
+      CHECK(anchor.RelList().Supports(u8"noreferrer").ReleaseValue());
+      CHECK_FALSE(anchor.RelList().Supports(u8"stylesheet").ReleaseValue());
+    }
+
+    SECTION("area's and form's relList")
+    {
+      auto areaDocument = newDocument();
+      auto &area = CreateHTML<html::HTMLAreaElement>(*areaDocument, u8"area");
+      CHECK(area.RelList().Supports(u8"opener").ReleaseValue());
+
+      auto formDocument = newDocument();
+      auto &form = CreateHTML<html::HTMLFormElement>(*formDocument, u8"form");
+      CHECK_FALSE(form.RelList().Supports(u8"icon").ReleaseValue());
+    }
+
+    SECTION("blocking")
+    {
+      auto styleDocument = newDocument();
+      auto &style = CreateHTML<html::HTMLStyleElement>(*styleDocument, u8"style");
+      CHECK(style.Blocking().Supports(u8"RENDER").ReleaseValue());
+      CHECK_FALSE(style.Blocking().Supports(u8"paint").ReleaseValue());
+
+      auto scriptDocument = newDocument();
+      auto &script = CreateHTML<html::HTMLScriptElement>(*scriptDocument, u8"script");
+      CHECK(script.Blocking().Supports(u8"render").ReleaseValue());
+
+      auto linkDocument = newDocument();
+      auto &link = CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link");
+      CHECK(link.Blocking().Supports(u8"render").ReleaseValue());
+    }
+
+    SECTION("No supported tokens: part, link's sizes and output's htmlFor")
+    {
+      auto divDocument = newDocument();
+      CHECK(CreateHTML<Element>(*divDocument, u8"div").Part().Supports(u8"a").HasException());
+
+      auto linkDocument = newDocument();
+      CHECK(
+        CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link").Sizes().Supports(u8"any").HasException());
+
+      auto outputDocument = newDocument();
+      auto &output = CreateHTML<html::HTMLOutputElement>(*outputDocument, u8"output");
+      CHECK(output.HtmlFor().Supports(u8"a").HasException());
+    }
+  }
+
+  TEST_CASE("DOMTokenList.supports(): link's relList and iframe's sandbox support only their keywords",
+            "[DOM][DOMTokenList][dom:dom-domtokenlist-supports][!shouldfail]")
+  {
+    // FIXME: Every token is supported until their supported tokens are implemented. See KNOWN-ISSUES.md.
+    auto linkDocument = CreateRef<HTMLDocument>();
+    auto &link = CreateHTML<html::HTMLLinkElement>(*linkDocument, u8"link");
+    CHECK_FALSE(link.RelList().Supports(u8"nonsense").ReleaseValue());
+
+    auto iframeDocument = CreateRef<HTMLDocument>();
+    auto &iframe = CreateHTML<html::HTMLIFrameElement>(*iframeDocument, u8"iframe");
+    CHECK_FALSE(iframe.Sandbox().Supports(u8"nonsense").ReleaseValue());
   }
 }

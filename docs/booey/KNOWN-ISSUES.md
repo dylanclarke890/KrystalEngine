@@ -50,6 +50,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `LocalDOMWindow::Stop` doesn't stop the navigable's loading (FIXME).
 - `close()` closes any page: it does not check that the page is script-closable (FIXME).
 - `HTMLTableColElement::OnAttributeChanged` does not lay a column out again when its `width` attribute changes (FIXME); `Numbers::ParseInteger` can parse it.
+- `<link>`'s `relList.supports()` and `<iframe>`'s `sandbox.supports()` return true for every token (FIXME in `HTMLLinkElement.cpp` and `HTMLIFrameElement.cpp`): their supported tokens, the link types and sandboxing keywords Booey implements, aren't defined yet. Test: "DOMTokenList.supports(): link's relList and iframe's sandbox support only their keywords" (`[!shouldfail]`, `Krystal.Booey.Tests/tests/DOM/DOMTokenList.cpp`).
 
 ### Missing
 

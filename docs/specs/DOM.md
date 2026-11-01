@@ -2570,58 +2570,60 @@ Status: reviewed (2026-10-31)
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> The section is a remark on the name `DOMTokenList`, the one set interface (7.1).
 
 ### [7.1. Interface DOMTokenList](https://dom.spec.whatwg.org/#interface-domtokenlist)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> DOMTokenList is `DOM/DOMTokenList.hpp`. Its token set is parsed from the attribute when next read after the attribute changes (`AssociatedAttributeValueChanged`, called from the owner's attribute change steps). An element's supported tokens are the `IsSupportedTokenFunction` given to `ElementAlgorithms::CreateDOMTokenList`, empty when its attribute defines none.
 <!-- definitions: concept-dtl-tokens domtokenlist-element domtokenlist-attribute-name concept-supported-tokens -->
 
-- [ ] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:
+- [x] [validation steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-domtokenlist-validation) — A DOMTokenList object set’s validation steps for a given token are:
   - 1. If set’s element and attribute name does not define supported tokens, then throw a TypeError.
   - 2. Let lowercaseToken be token, in ASCII lowercase.
   - 3. If lowercaseToken is present in the supported tokens of set’s element and attribute name, then return true.
   - 4. Return false.
 
-- [ ] [update steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-dtl-update) — A DOMTokenList object set’s update steps are:
+- [x] [update steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-dtl-update) — A DOMTokenList object set’s update steps are:
   - 1. If get an attribute by namespace and local name given null, set’s attribute name, and set’s element returns null and set’s token set is empty, then return.
   - 2. Set an attribute value given set’s element, set’s attribute name, and the result of running the ordered set serializer for set’s token set.
 
-- [ ] [serialize steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-dtl-serialize) — A DOMTokenList object set’s serialize steps are to return the result of running get an attribute value given set’s element and set’s attribute name.
+- [x] [serialize steps (DOMTokenList)](https://dom.spec.whatwg.org/#concept-dtl-serialize) — A DOMTokenList object set’s serialize steps are to return the result of running get an attribute value given set’s element and set’s attribute name.
 
-- [ ] [A DOMTokenList object set has these attribute change steps for set’s element](https://dom.spec.whatwg.org/#concept-dtl-serialize) — A DOMTokenList object set has these attribute change steps for set’s element:
+- [x] [A DOMTokenList object set has these attribute change steps for set’s element](https://dom.spec.whatwg.org/#concept-dtl-serialize) — A DOMTokenList object set has these attribute change steps for set’s element:
   - 1. If localName is set’s attribute name, namespace is null, and value is null, then empty token set.
   - 2. Otherwise, if localName is set’s attribute name and namespace is null, then set set’s token set to value, parsed.
 
-- [ ] [When a DOMTokenList object set is created](https://dom.spec.whatwg.org/#concept-dtl-serialize) — When a DOMTokenList object set is created:
+- [x] [When a DOMTokenList object set is created](https://dom.spec.whatwg.org/#concept-dtl-serialize) — When a DOMTokenList object set is created:
   - 1. Let element be set’s element.
   - 2. Let attributeName be set’s attribute name.
   - 3. Let value be the result of getting an attribute value given element and attributeName.
   - 4. Run the attribute change steps for element, attributeName, value, value, and null.
 
-- [ ] [DOMTokenList.length](https://dom.spec.whatwg.org/#dom-domtokenlist-length) — The length getter steps are to return this’s token set’s size.
+- [x] [DOMTokenList.length](https://dom.spec.whatwg.org/#dom-domtokenlist-length) — The length getter steps are to return this’s token set’s size.
 
-- [ ] [DOMTokenList.item(index)](https://dom.spec.whatwg.org/#dom-domtokenlist-item) — The item(index) method steps are:
+- [x] [DOMTokenList.item(index)](https://dom.spec.whatwg.org/#dom-domtokenlist-item) — The item(index) method steps are:
   - 1. If index is equal to or greater than this’s token set’s size, then return null.
   - 2. Return this’s token set[index].
 
-- [ ] [DOMTokenList.contains(token)](https://dom.spec.whatwg.org/#dom-domtokenlist-contains) — The contains(token) method steps are to return true if this’s token set[token] exists; otherwise false.
+- [x] [DOMTokenList.contains(token)](https://dom.spec.whatwg.org/#dom-domtokenlist-contains) — The contains(token) method steps are to return true if this’s token set[token] exists; otherwise false.
 
-- [ ] [DOMTokenList.add(tokens…)](https://dom.spec.whatwg.org/#dom-domtokenlist-add) — The add(tokens…) method steps are:
+- [x] [DOMTokenList.add(tokens…)](https://dom.spec.whatwg.org/#dom-domtokenlist-add) — The add(tokens…) method steps are:
   - 1. For each token of tokens:
     - 1a. If token is the empty string, then throw a "SyntaxError" DOMException.
     - 1b. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
   - 2. For each token of tokens: append token to this’s token set.
   - 3. Run the update steps.
 
-- [ ] [DOMTokenList.remove(tokens…)](https://dom.spec.whatwg.org/#dom-domtokenlist-remove) — The remove(tokens…) method steps are:
+- [x] [DOMTokenList.remove(tokens…)](https://dom.spec.whatwg.org/#dom-domtokenlist-remove) — The remove(tokens…) method steps are:
   - 1. For each token of tokens:
     - 1a. If token is the empty string, then throw a "SyntaxError" DOMException.
     - 1b. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
   - 2. For each token of tokens: remove token from this’s token set.
   - 3. Run the update steps.
 
-- [ ] [DOMTokenList.toggle(token, force)](https://dom.spec.whatwg.org/#dom-domtokenlist-toggle) — The toggle(token, force) method steps are:
+- [x] [DOMTokenList.toggle(token, force)](https://dom.spec.whatwg.org/#dom-domtokenlist-toggle) — The toggle(token, force) method steps are:
   - 1. If token is the empty string, then throw a "SyntaxError" DOMException.
   - 2. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
   - 3. If this’s token set[token] exists:
@@ -2630,7 +2632,7 @@ Status: unreviewed
   - 4. Otherwise, if force not given or is true, append token to this’s token set, run the update steps, and return true.
   - 5. Return false.
 
-- [ ] [DOMTokenList.replace(token, newToken)](https://dom.spec.whatwg.org/#dom-domtokenlist-replace) — The replace(token, newToken) method steps are:
+- [x] [DOMTokenList.replace(token, newToken)](https://dom.spec.whatwg.org/#dom-domtokenlist-replace) — The replace(token, newToken) method steps are:
   - 1. If either token or newToken is the empty string, then throw a "SyntaxError" DOMException.
   - 2. If either token or newToken contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
   - 3. If this’s token set does not contain token, then return false.
@@ -2638,13 +2640,13 @@ Status: unreviewed
   - 5. Run the update steps.
   - 6. Return true.
 
-- [ ] [DOMTokenList.supports(token)](https://dom.spec.whatwg.org/#dom-domtokenlist-supports) — The supports(token) method steps are:
+- [x] [DOMTokenList.supports(token)](https://dom.spec.whatwg.org/#dom-domtokenlist-supports) — The supports(token) method steps are:
   - 1. Let result be the return value of validation steps called with token.
   - 2. Return result.
 
-- [ ] [DOMTokenList.value](https://dom.spec.whatwg.org/#dom-domtokenlist-value) — The value getter steps are to return the result of running this’s serialize steps.
+- [x] [DOMTokenList.value](https://dom.spec.whatwg.org/#dom-domtokenlist-value) — The value getter steps are to return the result of running this’s serialize steps.
 
-- [ ] [The value setter steps](https://dom.spec.whatwg.org/#dom-domtokenlist-value) — The value setter steps are to set an attribute value for this’s element using this’s attribute name and the given value.
+- [x] [The value setter steps](https://dom.spec.whatwg.org/#dom-domtokenlist-value) — The value setter steps are to set an attribute value for this’s element using this’s attribute name and the given value.
 
 ## [8. XPath](https://dom.spec.whatwg.org/#xpath)
 

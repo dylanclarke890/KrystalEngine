@@ -17,13 +17,14 @@ namespace krys::boo::dom
   class Element;
   class Document;
 
+  /// @brief Whether a token, in ASCII lowercase, is one of the supported tokens of a list's element and
+  /// attribute name. Empty when they define no supported tokens.
+  /// @see https://dom.spec.whatwg.org/#concept-supported-tokens
   using IsSupportedTokenFunction = Func<bool(Document &, DOMStringView)>;
 
-  constexpr auto DefaultIsSupportedTokenFunction = [](Document &, DOMStringView) -> bool
-  {
-    return true;
-  };
-
+  /// @brief An element's attribute value as an ordered set of tokens, which it keeps in step with the
+  /// attribute.
+  /// @see https://dom.spec.whatwg.org/#sets
   /// @see https://dom.spec.whatwg.org/#interface-domtokenlist
   class DOMTokenList
   {
@@ -34,9 +35,13 @@ namespace krys::boo::dom
     using TokenList = SmallList<DOMString, 1>;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#domtokenlist-attribute-name
     DOMStringAtom _attributeName;
+    /// @see https://dom.spec.whatwg.org/#concept-dtl-tokens
     mutable TokenList _tokens;
+    /// @see https://dom.spec.whatwg.org/#domtokenlist-element
     CheckedRef<Element> _element;
+    /// @see https://dom.spec.whatwg.org/#concept-supported-tokens
     IsSupportedTokenFunction _isSupportedToken;
     /// @brief Whether the attribute changed since the tokens were last parsed from it.
     mutable bool _tokensNeedUpdating {false};
@@ -44,8 +49,9 @@ namespace krys::boo::dom
     bool _inUpdateAssociatedAttributeFromTokens {false};
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (when a DOMTokenList object set is created)
     DOMTokenList(Element &element, DOMStringAtom attributeName,
-                 IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+                 IsSupportedTokenFunction &&isSupportedToken = {}) noexcept;
 
   public:
     using iterator = TokenList::iterator;
@@ -56,6 +62,12 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its attribute change steps)
     void AssociatedAttributeValueChanged() noexcept
     {
+      // 1. If localName is set’s attribute name, namespace is null, and value is null, then empty token set.
+      // 2. Otherwise, if localName is set’s attribute name and namespace is null, then set set’s token set to
+      // value,
+      //    parsed.
+      // The token set is parsed from the attribute when it's next read (Tokens()), unless the list is setting
+      // the attribute to its own token set. A null value parses as the empty string, to the empty set.
       if (_inUpdateAssociatedAttributeFromTokens)
       {
         return;
@@ -74,11 +86,13 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
     KRYS_NODISCARD Maybe<DOMString> Item(size_t index) const noexcept
     {
+      // 1. If index is equal to or greater than this’s token set’s size, then return null.
       if (index >= Tokens().size())
       {
         return null;
       }
 
+      // 2. Return this’s token set[index].
       return Tokens()[index];
     }
 
@@ -98,14 +112,18 @@ namespace krys::boo::dom
     ExceptionOr<void> Add(const List<DOMString> &tokens) noexcept
     {
       html::CEReactionsScope ceReactions;
+      // 1. For each token of tokens:
       for (auto &token : tokens)
       {
+        // 1a. If token is the empty string, then throw a "SyntaxError" DOMException.
+        // 1b. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
         if (auto result = ValidateToken(token); result.HasException())
         {
           return result.ReleaseException();
         }
       }
 
+      // 2. For each token of tokens: append token to this’s token set.
       for (auto &token : tokens)
       {
         if (!std::ranges::contains(Tokens(), token))
@@ -114,6 +132,7 @@ namespace krys::boo::dom
         }
       }
 
+      // 3. Run the update steps.
       UpdateSteps();
 
       return {};
@@ -129,18 +148,23 @@ namespace krys::boo::dom
     ExceptionOr<void> Remove(const List<DOMString> &tokens) noexcept
     {
       html::CEReactionsScope ceReactions;
+      // 1. For each token of tokens:
       for (auto &token : tokens)
       {
+        // 1a. If token is the empty string, then throw a "SyntaxError" DOMException.
+        // 1b. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
         if (auto result = ValidateToken(token); result.HasException())
         {
           return result.ReleaseException();
         }
       }
 
+      // 2. For each token of tokens: remove token from this’s token set.
       auto it = std::ranges::remove_if(Tokens(), [&](const DOMString &current)
                                        { return std::ranges::contains(tokens, current); });
       Tokens().erase(it.begin(), it.end());
 
+      // 3. Run the update steps.
       UpdateSteps();
 
       return {};
@@ -156,13 +180,19 @@ namespace krys::boo::dom
     ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = null) noexcept
     {
       html::CEReactionsScope ceReactions;
+      // 1. If token is the empty string, then throw a "SyntaxError" DOMException.
+      // 2. If token contains any ASCII whitespace, then throw an "InvalidCharacterError" DOMException.
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();
       }
 
+      // 3. If this’s token set[token] exists:
       if (std::ranges::contains(Tokens(), token))
       {
+        // 3a. If force is either not given or is false, then remove token from this’s token set, run the
+        // update
+        //     steps and return false.
         if (!force.value_or(false))
         {
           auto it =
@@ -172,9 +202,14 @@ namespace krys::boo::dom
           UpdateSteps();
           return false;
         }
+
+        // 3b. Return true.
         return true;
       }
 
+      // 4. Otherwise, if force not given or is true, append token to this’s token set, run the update steps,
+      // and
+      //    return true.
       if (force.value_or(true))
       {
         Tokens().emplace_back(token);
@@ -182,6 +217,7 @@ namespace krys::boo::dom
         return true;
       }
 
+      // 5. Return false.
       return false;
     }
 
@@ -189,6 +225,14 @@ namespace krys::boo::dom
     ExceptionOr<bool> Replace(const DOMString &token, const DOMString &newToken) noexcept
     {
       html::CEReactionsScope ceReactions;
+      // 1. If either token or newToken is the empty string, then throw a "SyntaxError" DOMException.
+      // 2. If either token or newToken contains any ASCII whitespace, then throw an "InvalidCharacterError"
+      //    DOMException.
+      if (token.empty() || newToken.empty())
+      {
+        return Exception {ExceptionCode::SyntaxError};
+      }
+
       if (auto result = ValidateToken(token); result.HasException())
       {
         return result.ReleaseException();
@@ -199,20 +243,43 @@ namespace krys::boo::dom
         return result.ReleaseException();
       }
 
-      if (!std::ranges::contains(Tokens(), token))
+      // 3. If this’s token set does not contain token, then return false.
+      auto &tokens = Tokens();
+      auto tokenIt = std::ranges::find(tokens, token);
+      if (tokenIt == tokens.end())
       {
         return false;
       }
 
-      std::ranges::replace(Tokens(), token, newToken);
+      // 4. Replace token in this’s token set with newToken.
+      // The first of token and newToken becomes newToken, and the other is removed.
+      auto newTokenIt = std::ranges::find(tokens, newToken);
+      if (newTokenIt == tokens.end())
+      {
+        *tokenIt = newToken;
+      }
+      else if (newTokenIt > tokenIt)
+      {
+        *tokenIt = newToken;
+        tokens.erase(newTokenIt);
+      }
+      else if (newTokenIt < tokenIt)
+      {
+        tokens.erase(tokenIt);
+      }
+
+      // 5. Run the update steps.
       UpdateSteps();
 
+      // 6. Return true.
       return true;
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-supports
     KRYS_NODISCARD ExceptionOr<bool> Supports(DOMStringView token) const noexcept
     {
+      // 1. Let result be the return value of validation steps called with token.
+      // 2. Return result.
       return ValidationSteps(token);
     }
 

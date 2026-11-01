@@ -85,9 +85,9 @@ namespace krys::boo::dom
 
     /// @brief Helper method for creating a new DOMTokenList bound to an element and attribute, optionally
     /// with a function to filter new values to only supported values.
-    KRYS_NODISCARD static UniquePtr<DOMTokenList> CreateDOMTokenList(
-      Element &element, DOMStringAtom attributeName,
-      IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+    KRYS_NODISCARD static UniquePtr<DOMTokenList>
+      CreateDOMTokenList(Element &element, DOMStringAtom attributeName,
+                         IsSupportedTokenFunction &&isSupportedToken = {}) noexcept;
 
   private:
     static void AddShadowRoot(Element &element, const Ref<ShadowRoot> &shadow) noexcept;

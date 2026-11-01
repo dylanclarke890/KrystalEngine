@@ -706,7 +706,11 @@ namespace krys::boo::html
   {
     if (!_relList)
     {
-      _relList = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"rel");
+      _relList = dom::ElementAlgorithms::CreateDOMTokenList(
+        *this, u8"rel",
+        // FIXME: The supported tokens are the link types Booey processes (LinkRelAttribute::isSupported
+        // upstream), which aren't ported; every token is supported until they are.
+        [](dom::Document &, dom::DOMStringView) { return true; });
     }
 
     return *_relList;
@@ -797,7 +801,9 @@ namespace krys::boo::html
   {
     if (!_blocking)
     {
-      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking");
+      _blocking = dom::ElementAlgorithms::CreateDOMTokenList(
+        *this, u8"blocking", [](dom::Document &, dom::DOMStringView token)
+        { return text::IsASCIICaselessEqual(token, utf8_stringview(u8"render")); });
     }
 
     return *_blocking;
