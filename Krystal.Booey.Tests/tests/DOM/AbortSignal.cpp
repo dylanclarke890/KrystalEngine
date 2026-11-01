@@ -276,4 +276,34 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(weakDependent);
     }
   }
+
+  TEST_CASE("Aborting ongoing activities: the introduction's example",
+            "[DOM][AbortSignal][dom:aborting-ongoing-activities]")
+  {
+    // An API that takes a signal checks it before it starts, and stops with its reason when it's aborted.
+    struct Amazingness
+    {
+      Maybe<int> RejectedWith;
+      EventListenerHandle Listener;
+
+      void Start(AbortSignal &signal)
+      {
+        signal.ThrowIfAborted();
+        Listener = signal.AddEventListener(EventNames::Abort, [this, &signal](Event &)
+                                           { RejectedWith = std::any_cast<int>(signal.Reason()); });
+      }
+    };
+
+    AbortController controller;
+    Amazingness amazingness;
+    REQUIRE_NOTHROW(amazingness.Start(*controller.Signal()));
+    CHECK_FALSE(amazingness.RejectedWith.has_value());
+
+    controller.Abort(Any {42});
+    CHECK(amazingness.RejectedWith == 42);
+
+    // Started after the abort, it throws the reason straight away.
+    Amazingness late;
+    CHECK_THROWS_AS(late.Start(*controller.Signal()), Any);
+  }
 }

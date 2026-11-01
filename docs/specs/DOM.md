@@ -8,11 +8,12 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [Abstract](https://dom.spec.whatwg.org/#abstract)
 
-Status: unreviewed
+Status: n/a (front matter)
 
 ## [1. Infrastructure](https://dom.spec.whatwg.org/#infrastructure)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Other applicable specifications hook in through `ExtensibilityHooks` (`DOM/Algorithms/ExtensibilityHooks.hpp`), whose hooks the DOM algorithms call; each hook is reviewed with its algorithm.
 <!-- definitions: other-applicable-specifications -->
 
 ### [1.1. Trees](https://dom.spec.whatwg.org/#trees)
@@ -84,11 +85,12 @@ Status: reviewed (2026-10-30)
 
 ## [2. Events](https://dom.spec.whatwg.org/#events)
 
-Status: unreviewed
+Status: n/a (heading only)
 
 ### [2.1. Introduction to "DOM Events"](https://dom.spec.whatwg.org/#introduction-to-dom-events)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> The examples are tested in `tests/DOM/EventTarget.cpp`: adding and removing listeners, removing them with a signal, a synthetic `CustomEvent`, `dispatchEvent()`'s return value and the capture and bubble order.
 
 ### [2.2. Interface Event](https://dom.spec.whatwg.org/#interface-event)
 
@@ -438,7 +440,8 @@ Status: reviewed (2026-10-30)
 
 ## [3. Aborting ongoing activities](https://dom.spec.whatwg.org/#aborting-ongoing-activities)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> The example API is tested in `tests/DOM/AbortSignal.cpp`. Without promises, an API reacts to the abort event and the signal's reason, and `ThrowIfAborted` throws the reason as a C++ exception.
 
 ### [3.1. Interface AbortController](https://dom.spec.whatwg.org/#interface-abortcontroller)
 
@@ -530,7 +533,7 @@ Status: reviewed (2026-10-31)
 
 ## [4. Nodes](https://dom.spec.whatwg.org/#nodes)
 
-Status: unreviewed
+Status: n/a (heading only)
 
 ### [4.1. Introduction to "The DOM"](https://dom.spec.whatwg.org/#introduction-to-the-dom)
 
@@ -2650,75 +2653,80 @@ Status: reviewed (2026-10-31)
 
 ## [8. XPath](https://dom.spec.whatwg.org/#xpath)
 
-Status: unreviewed
+Status: n/a (no XPath)
+> Checked 2026-10-31: there's no XPath, as `DIFFERENCES.md` records: no `XPathResult`, `XPathExpression`, `XPathEvaluator` or `Document.evaluate()`.
 
 ### [8.1. Interface XPathResult](https://dom.spec.whatwg.org/#interface-xpathresult)
 
-Status: unreviewed
+Status: n/a (no XPath)
 
 ### [8.2. Interface XPathExpression](https://dom.spec.whatwg.org/#interface-xpathexpression)
 
-Status: unreviewed
+Status: n/a (no XPath)
 
 ### [8.3. Mixin XPathEvaluatorBase](https://dom.spec.whatwg.org/#mixin-xpathevaluatorbase)
 
-Status: unreviewed
+Status: n/a (no XPath)
 
-- [ ] [XPathEvaluatorBase.createNSResolver(nodeResolver)](https://dom.spec.whatwg.org/#dom-xpathevaluatorbase-creatensresolver) — The createNSResolver(nodeResolver) method steps are to return nodeResolver.
+- [x] [XPathEvaluatorBase.createNSResolver(nodeResolver)](https://dom.spec.whatwg.org/#dom-xpathevaluatorbase-creatensresolver) — The createNSResolver(nodeResolver) method steps are to return nodeResolver.
+  > n/a: no XPath.
 
 ### [8.4. Interface XPathEvaluator](https://dom.spec.whatwg.org/#interface-xpathevaluator)
 
-Status: unreviewed
+Status: n/a (no XPath)
 
 ## [9. XSLT](https://dom.spec.whatwg.org/#xslt)
 
-Status: unreviewed
+Status: n/a (no XSLT)
+> Checked 2026-10-31: there's no `XSLTProcessor`, as `DIFFERENCES.md` records, and `<?xml-stylesheet?>` loads only CSS sheets.
 
 ### [9.1. Interface XSLTProcessor](https://dom.spec.whatwg.org/#interface-xsltprocessor)
 
-Status: unreviewed
+Status: n/a (no XSLT)
 
 ## [10. Security and privacy considerations](https://dom.spec.whatwg.org/#security-and-privacy)
 
-Status: unreviewed
+Status: n/a (none)
+> The standard has no known security or privacy considerations.
 
 ## [11. Historical](https://dom.spec.whatwg.org/#historical)
 
-Status: unreviewed
+Status: n/a (removed features)
+> Checked 2026-10-31: none of the removed interfaces or members are in Booey: no `Entity`, `EntityReference`, `Notation`, `MutationEvent` (nor the legacy mutation events), `DOMError`, `RangeException` or the rest, and none of the removed `Attr`, `Document`, `DocumentType`, `DOMImplementation`, `Element`, `Node`, `NodeIterator`, `Text` or `TreeWalker` members. (`data/EventInterfaces.in`, which lists `MutationEvent`, is an unused copy of the upstream data file.)
 <!-- definitions: domconfiguration domerror domerrorhandler domimplementationlist domimplementationsource domlocator domobject domuserdata entity entityreference mutationevent mutationnameevent namelist notation rangeexception typeinfo userdatahandler dom-attr-schematypeinfo dom-attr-isid dom-document-createentityreference dom-document-xmlencoding dom-document-xmlstandalone dom-document-xmlversion dom-document-stricterrorchecking dom-document-domconfig dom-document-normalizedocument dom-document-renamenode dom-documenttype-entities dom-documenttype-notations dom-documenttype-internalsubset dom-domimplementation-getfeature dom-element-schematypeinfo dom-element-setidattribute dom-element-setidattributens dom-element-setidattributenode dom-node-issupported dom-node-getfeature dom-node-getuserdata dom-node-setuserdata dom-nodeiterator-expandentityreferences dom-text-iselementcontentwhitespace dom-text-replacewholetext dom-treewalker-expandentityreferences -->
 
 ## [Acknowledgments](https://dom.spec.whatwg.org/#acks)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [Intellectual property rights](https://dom.spec.whatwg.org/#ipr)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [Index](https://dom.spec.whatwg.org/#index)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Terms defined by this specification](https://dom.spec.whatwg.org/#index-defined-here)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Terms defined by reference](https://dom.spec.whatwg.org/#index-defined-elsewhere)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [References](https://dom.spec.whatwg.org/#references)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Normative References](https://dom.spec.whatwg.org/#normative)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Non-Normative References](https://dom.spec.whatwg.org/#informative)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [IDL Index](https://dom.spec.whatwg.org/#idl-index)
 
-Status: unreviewed
+Status: n/a (back matter)

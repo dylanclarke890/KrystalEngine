@@ -1,9 +1,14 @@
 ﻿#include "Krystal.Booey/DOM/EventTarget.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/Constants/EventNames.hpp"
+#include "Krystal.Booey/DOM/AbortController.hpp"
 #include "Krystal.Booey/DOM/AbortSignal.hpp"
+#include "Krystal.Booey/DOM/CustomEvent.hpp"
+#include "Krystal.Booey/DOM/Dicts/AddEventListenerOptions.hpp"
+#include "Krystal.Booey/DOM/Element.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
+#include "Krystal.Booey/DOM/HTMLDocument.hpp"
 
 namespace krys::boo::dom::tests
 {
@@ -122,6 +127,89 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(result.HasException());
       REQUIRE_FALSE(result.Value());
       REQUIRE_FALSE(event->IsTrusted());
+    }
+  }
+
+  TEST_CASE("Events: the introduction's examples",
+            "[DOM][EventTarget][dom:events][dom:introduction-to-dom-events]")
+  {
+    SECTION("A listener is added, removed with the same arguments, or removed by aborting its signal")
+    {
+      auto target = CreateRef<EventTarget>();
+      int calls = 0;
+      Ref<EventListenerCallback> imgFetched = CreateRef<FunctionEventListenerCallback>(
+        [&](Event &event)
+        {
+          ++calls;
+          CHECK(event.Type() == EventNames::Load);
+          CHECK(event.Target() == target.get());
+        });
+
+      target->AddEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, false);
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      CHECK(calls == 1);
+
+      target->RemoveEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, false);
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      CHECK(calls == 1);
+
+      AbortController controller;
+      AddEventListenerOptions options;
+      options.Signal = ShareRefPtr(controller.Signal());
+      target->AddEventListener(EventNames::Load, Ref<EventListenerCallback> {imgFetched}, options);
+      controller.Abort();
+      REQUIRE_FALSE(target->DispatchEvent(*CreateRef<Event>(EventNames::Load)).HasException());
+      CHECK(calls == 1);
+    }
+
+    SECTION("A synthetic event carries its detail, and dispatchEvent() says whether it was canceled")
+    {
+      auto target = CreateRef<EventTarget>();
+      Maybe<uint32> detail;
+      auto listener =
+        target->AddEventListener(EventNames::Click, [&](Event &event)
+                                 { detail = static_cast<CustomEvent<uint32> &>(event).Detail(); });
+      auto event =
+        CreateRef<CustomEvent<uint32>>(EventNames::Click, CustomEventInit<uint32> {{.Cancelable = true}, 7u});
+      CHECK(target->DispatchEvent(*event).ReleaseValue());
+      CHECK(detail == 7u);
+
+      auto canceler =
+        target->AddEventListener(EventNames::Click, [](Event &event) { event.PreventDefault(); });
+      auto canceled =
+        CreateRef<CustomEvent<uint32>>(EventNames::Click, CustomEventInit<uint32> {{.Cancelable = true}, 8u});
+      CHECK_FALSE(target->DispatchEvent(*canceled).ReleaseValue());
+    }
+
+    SECTION(
+      "In a tree, capturing listeners on the inclusive ancestors run first in tree order, then bubbling ones")
+    {
+      auto document = Document::ParseHTMLUnsafe(*CreateRef<HTMLDocument>(),
+                                                u8"<!DOCTYPE html><body><div id=d><b id=b></b></div>")
+                        .ReleaseValue();
+      Ref<Element> div = ShareRef(*document->GetElementById(u8"d"));
+      Ref<Element> b = ShareRef(*document->GetElementById(u8"b"));
+      List<DOMString> order;
+      List<EventListenerHandle> listeners;
+      for (auto *node : List<EventTarget *> {document.get(), div.get(), b.get()})
+      {
+        DOMString name = node == document.get() ? u8"document" : node == div.get() ? u8"div" : u8"b";
+        listeners.push_back(node->AddEventListener(
+          EventNames::Click, [&order, name](Event &) { order.push_back(name + u8" capture"); },
+          AddEventListenerOptions {{.Capture = true}}));
+        listeners.push_back(node->AddEventListener(EventNames::Click, [&order, name](Event &)
+                                                   { order.push_back(name + u8" bubble"); }));
+      }
+
+      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(EventNames::Click, true, false)).HasException());
+      CHECK(order
+            == List<DOMString> {u8"document capture", u8"div capture", u8"b capture", u8"b bubble",
+                                u8"div bubble", u8"document bubble"});
+
+      // Without bubbles, only the capturing listeners and the target's.
+      order.clear();
+      REQUIRE_FALSE(b->DispatchEvent(*Event::Create(EventNames::Click, false, false)).HasException());
+      CHECK(order == List<DOMString> {u8"document capture", u8"div capture", u8"b capture", u8"b bubble"});
     }
   }
 }

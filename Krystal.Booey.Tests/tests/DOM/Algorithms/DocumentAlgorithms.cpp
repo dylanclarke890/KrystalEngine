@@ -109,7 +109,8 @@ namespace krys::boo::dom::tests
 
   TEST_CASE(
     "Adopt: the node leaves its parent, and its shadow-including subtree and attributes move document",
-    "[DOM][DocumentAlgorithms][dom:concept-node-adopt][dom:concept-node-adopt-ext]")
+    "[DOM][DocumentAlgorithms][dom:concept-node-adopt][dom:concept-node-adopt-ext]"
+    "[dom:infrastructure][dom:other-applicable-specifications]")
   {
     auto oldDocument = CreateRef<HTMLDocument>();
     auto document = CreateRef<HTMLDocument>();
