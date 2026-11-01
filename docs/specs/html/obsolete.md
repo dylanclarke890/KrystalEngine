@@ -54,13 +54,14 @@ Status: unreviewed
 
 #### [16.3.2 Frames](https://html.spec.whatwg.org/#frames)
 
-Status: n/a (no frame tree)
+Status: unreviewed
 <!-- definitions: frameset process-frame-initial-insertion -->
 
 - [x] [The frame HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#frame) — The frame HTML element post-connection steps, given insertedNode, are:
   - 1. If insertedNode's node document's browsing context is null, then return.
   - 2. Create a new child navigable for insertedNode.
   - 3. Process the frame attributes for insertedNode, with initialInsertion set to true.
+  > n/a: no frame tree; `<frame>` is an `HTMLUnknownElement`
 
 - [x] [process the frame attributes](https://html.spec.whatwg.org/#process-the-frame-attributes) — To process the frame attributes for an element element, with an optional boolean initialInsertion (default false):
   - 1. Let url be the result of running the shared attribute processing steps for iframe and frame elements given element and initialInsertion.
@@ -69,10 +70,13 @@ Status: n/a (no frame tree)
     - 3a. Fire an event named load at element.
     - 3b. Return.
   - 4. Navigate an iframe or frame given element, url, the empty string, null, and initialInsertion.
+  > n/a: no frame tree; `<frame>` is an `HTMLUnknownElement`
 
 - [x] [HTMLFrameElement.contentDocument](https://html.spec.whatwg.org/#dom-frame-contentdocument) — The contentDocument getter steps are to return this's content document.
+  > n/a: no frame tree; `<frame>` is an `HTMLUnknownElement`
 
 - [x] [HTMLFrameElement.contentWindow](https://html.spec.whatwg.org/#dom-frame-contentwindow) — The contentWindow getter steps are to return this's content window.
+  > n/a: no frame tree; `<frame>` is an `HTMLUnknownElement`
 
 #### [16.3.3 Other elements, attributes and APIs](https://html.spec.whatwg.org/#other-elements,-attributes-and-apis)
 

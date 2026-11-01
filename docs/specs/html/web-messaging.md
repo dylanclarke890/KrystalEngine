@@ -57,59 +57,59 @@ Status: unreviewed
 
 ### [9.4 Channel messaging](https://html.spec.whatwg.org/#channel-messaging)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 #### [9.4.1 Introduction](https://html.spec.whatwg.org/#introduction-14)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 ##### [9.4.1.1 Examples](https://html.spec.whatwg.org/#examples-5)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 ##### [9.4.1.2 Ports as the basis of an object-capability model on the web](https://html.spec.whatwg.org/#ports-as-the-basis-of-an-object-capability-model-on-the-web)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 ##### [9.4.1.3 Ports as the basis of abstracting out service implementations](https://html.spec.whatwg.org/#ports-as-the-basis-of-abstracting-out-service-implementations)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 #### [9.4.2 Message channels](https://html.spec.whatwg.org/#message-channels)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 <!-- definitions: port-1 port-2 -->
 
-- [ ] [new MessageChannel()](https://html.spec.whatwg.org/#dom-messagechannel) — The new MessageChannel() constructor steps are:
+- [x] [new MessageChannel()](https://html.spec.whatwg.org/#dom-messagechannel) — The new MessageChannel() constructor steps are:
   - 1. Set this's port 1 to a new MessagePort in this's relevant realm.
   - 2. Set this's port 2 to a new MessagePort in this's relevant realm.
   - 3. Entangle this's port 1 and this's port 2.
 
-- [ ] [MessageChannel.port1](https://html.spec.whatwg.org/#dom-messagechannel-port1) — The port1 getter steps are to return this's port 1.
+- [x] [MessageChannel.port1](https://html.spec.whatwg.org/#dom-messagechannel-port1) — The port1 getter steps are to return this's port 1.
 
-- [ ] [MessageChannel.port2](https://html.spec.whatwg.org/#dom-messagechannel-port2) — The port2 getter steps are to return this's port 2.
+- [x] [MessageChannel.port2](https://html.spec.whatwg.org/#dom-messagechannel-port2) — The port2 getter steps are to return this's port 2.
 
 #### [9.4.3 The MessageEventTarget mixin](https://html.spec.whatwg.org/#the-messageeventtarget-mixin)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 #### [9.4.4 Message ports](https://html.spec.whatwg.org/#message-ports)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 <!-- definitions: message-event-target port-message-queue has-been-shipped -->
 
-- [ ] [unshipped port message queue](https://html.spec.whatwg.org/#unshipped-port-message-queue) — Each event loop has a task source called the unshipped port message queue. This is a virtual task source: it must act as if it contained the tasks of each port message queue of each MessagePort whose has been shipped flag is false, whose port message queue is enabled, and whose relevant agent's event loop is that event loop, in the order in which they were added to their respective task source. When a task would be removed from the unshipped port message queue, it must instead be removed from its port message queue.
+- [x] [unshipped port message queue](https://html.spec.whatwg.org/#unshipped-port-message-queue) — Each event loop has a task source called the unshipped port message queue. This is a virtual task source: it must act as if it contained the tasks of each port message queue of each MessagePort whose has been shipped flag is false, whose port message queue is enabled, and whose relevant agent's event loop is that event loop, in the order in which they were added to their respective task source. When a task would be removed from the unshipped port message queue, it must instead be removed from its port message queue.
 
-- [ ] [entangle](https://html.spec.whatwg.org/#entangle) — When the user agent is to entangle two MessagePort objects, it must run the following steps:
+- [x] [entangle](https://html.spec.whatwg.org/#entangle) — When the user agent is to entangle two MessagePort objects, it must run the following steps:
   - 1. If one of the ports is already entangled, then disentangle it and the port that it was entangled with.
   - 2. Associate the two ports to be entangled, so that they form the two parts of a new channel. (There is no MessageChannel object that represents this channel.) Two ports A and B that have gone through this step are now said to be entangled; one is entangled to the other, and vice versa.
 
-- [ ] [disentangle](https://html.spec.whatwg.org/#disentangle) — The disentangle steps, given a MessagePort initiatorPort which initiates disentangling, are as follows:
+- [x] [disentangle](https://html.spec.whatwg.org/#disentangle) — The disentangle steps, given a MessagePort initiatorPort which initiates disentangling, are as follows:
   - 1. Let otherPort be the MessagePort which initiatorPort was entangled with.
   - 2. Assert: otherPort exists.
   - 3. Disentangle initiatorPort and otherPort, so that they are no longer entangled or associated with each other.
 
-- [ ] [MessagePort objects are transferable objects. Their transfer steps, given value…](https://html.spec.whatwg.org/#disentangle) — MessagePort objects are transferable objects. Their transfer steps, given value and dataHolder, are:
+- [x] [MessagePort objects are transferable objects. Their transfer steps, given value…](https://html.spec.whatwg.org/#disentangle) — MessagePort objects are transferable objects. Their transfer steps, given value and dataHolder, are:
   - 1. Set value's has been shipped flag to true.
   - 2. Set dataHolder.[[PortMessageQueue]] to value's port message queue.
   - 3. If value is entangled with another port remotePort:
@@ -117,12 +117,12 @@ Status: unreviewed
     - 3b. Set dataHolder.[[RemotePort]] to remotePort.
   - 4. Otherwise, set dataHolder.[[RemotePort]] to null.
 
-- [ ] [Their transfer-receiving steps, given dataHolder and value,](https://html.spec.whatwg.org/#disentangle) — Their transfer-receiving steps, given dataHolder and value, are:
+- [x] [Their transfer-receiving steps, given dataHolder and value,](https://html.spec.whatwg.org/#disentangle) — Their transfer-receiving steps, given dataHolder and value, are:
   - 1. Set value's has been shipped flag to true.
   - 2. Move all the tasks that are to fire message events in dataHolder.[[PortMessageQueue]] to the port message queue of value, if any, leaving value's port message queue in its initial disabled state, and, if value's relevant global object is a Window, associating the moved tasks with value's relevant global object's associated Document.
   - 3. If dataHolder.[[RemotePort]] is not null, then entangle dataHolder.[[RemotePort]] and value. (This will disentangle dataHolder.[[RemotePort]] from the original port that was transferred.)
 
-- [ ] [message port post message steps](https://html.spec.whatwg.org/#message-port-post-message-steps) — The message port post message steps, given sourcePort, targetPort, message, and options are as follows:
+- [x] [message port post message steps](https://html.spec.whatwg.org/#message-port-post-message-steps) — The message port post message steps, given sourcePort, targetPort, message, and options are as follows:
   - 1. Let transfer be options["transfer"].
   - 2. If transfer contains sourcePort, then throw a "DataCloneError" DOMException.
   - 3. Let doomed be false.
@@ -138,43 +138,43 @@ Status: unreviewed
     - 7f. Let newPorts be a new frozen array consisting of all MessagePort objects in deserializeRecord.[[TransferredValues]], if any, maintaining their relative order.
     - 7g. Fire an event named message at messageEventTarget, using MessageEvent, with the data attribute initialized to messageClone and the ports attribute initialized to newPorts.
 
-- [ ] [MessagePort.postMessage(message, options)](https://html.spec.whatwg.org/#dom-messageport-postmessage-options) — The postMessage(message, options) method steps are:
+- [x] [MessagePort.postMessage(message, options)](https://html.spec.whatwg.org/#dom-messageport-postmessage-options) — The postMessage(message, options) method steps are:
   - 1. Let targetPort be the port with which this is entangled, if any; otherwise let it be null.
   - 2. Run the message port post message steps providing this, targetPort, message and options.
 
-- [ ] [MessagePort.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-messageport-postmessage) — The postMessage(message, transfer) method steps are:
+- [x] [MessagePort.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-messageport-postmessage) — The postMessage(message, transfer) method steps are:
   - 1. Let targetPort be the port with which this is entangled, if any; otherwise let it be null.
   - 2. Let options be «[ "transfer" → transfer ]».
   - 3. Run the message port post message steps providing this, targetPort, message and options.
 
-- [ ] [MessagePort.start()](https://html.spec.whatwg.org/#dom-messageport-start) — The start() method steps are to enable this's port message queue, if it is not already enabled.
+- [x] [MessagePort.start()](https://html.spec.whatwg.org/#dom-messageport-start) — The start() method steps are to enable this's port message queue, if it is not already enabled.
 
-- [ ] [MessagePort.close()](https://html.spec.whatwg.org/#dom-messageport-close) — The close() method steps are:
+- [x] [MessagePort.close()](https://html.spec.whatwg.org/#dom-messageport-close) — The close() method steps are:
   - 1. Set this's [[Detached]] internal slot value to true.
   - 2. If this is entangled, disentangle it.
 
 #### [9.4.5 Broadcasting to many ports](https://html.spec.whatwg.org/#broadcasting-to-many-ports)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 #### [9.4.6 Ports and garbage collection](https://html.spec.whatwg.org/#ports-and-garbage-collection)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 
 ### [9.5 Broadcasting to other browsing contexts](https://html.spec.whatwg.org/#broadcasting-to-other-browsing-contexts)
 
-Status: unreviewed
+Status: n/a (not planned: no message channels or broadcast channels)
 <!-- definitions: channel-name concept-broadcastchannel-closed -->
 
-- [ ] [new BroadcastChannel(name)](https://html.spec.whatwg.org/#dom-broadcastchannel) — The new BroadcastChannel(name) constructor steps are:
+- [x] [new BroadcastChannel(name)](https://html.spec.whatwg.org/#dom-broadcastchannel) — The new BroadcastChannel(name) constructor steps are:
   - 1. Set this's channel name to name.
   - 2. Set this's closed flag to false.
 
-- [ ] [BroadcastChannel.name](https://html.spec.whatwg.org/#dom-broadcastchannel-name) — The name getter steps are to return this's channel name.
+- [x] [BroadcastChannel.name](https://html.spec.whatwg.org/#dom-broadcastchannel-name) — The name getter steps are to return this's channel name.
 
-- [ ] [eligible for messaging](https://html.spec.whatwg.org/#eligible-for-messaging) — A BroadcastChannel object is said to be eligible for messaging when its relevant global object is either:
+- [x] [eligible for messaging](https://html.spec.whatwg.org/#eligible-for-messaging) — A BroadcastChannel object is said to be eligible for messaging when its relevant global object is either:
 
-- [ ] [BroadcastChannel.postMessage(message)](https://html.spec.whatwg.org/#dom-broadcastchannel-postmessage) — The postMessage(message) method steps are:
+- [x] [BroadcastChannel.postMessage(message)](https://html.spec.whatwg.org/#dom-broadcastchannel-postmessage) — The postMessage(message) method steps are:
   - 1. If this is not eligible for messaging, then return.
   - 2. If this's closed flag is true, then throw an "InvalidStateError" DOMException.
   - 3. Let serialized be StructuredSerialize(message). Rethrow any exceptions.
@@ -189,4 +189,4 @@ Status: unreviewed
     - 9c. Let data be StructuredDeserialize(serialized, targetRealm). If this throws an exception, catch it, fire an event named messageerror at destination, using MessageEvent, with its origin initialized to sourceOrigin, and then abort these steps.
     - 9d. Fire an event named message at destination, using MessageEvent, with the data attribute initialized to data and its origin initialized to sourceOrigin.
 
-- [ ] [BroadcastChannel.close()](https://html.spec.whatwg.org/#dom-broadcastchannel-close) — The close() method steps are to set this's closed flag to true.
+- [x] [BroadcastChannel.close()](https://html.spec.whatwg.org/#dom-broadcastchannel-close) — The close() method steps are to set this's closed flag to true.
