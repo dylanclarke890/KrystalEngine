@@ -133,7 +133,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLIFrameElement::Loading() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"loading").value_or(u8"");
+    return EnumeratedAttribute<"loading", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"loading"));
   }
 
   void HTMLIFrameElement::Loading(dom::DOMString &&value) noexcept

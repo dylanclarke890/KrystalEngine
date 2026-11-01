@@ -374,6 +374,18 @@ namespace krys::boo::html
     constexpr static AttributeState EmptyValueDefault = AttributeState::On;
   };
 
+  /// @see https://html.spec.whatwg.org/#lazy-loading-attribute
+  template <>
+  struct EnumeratedAttributeTraits<"loading", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {
+      KeywordStateMapping {u8"lazy", AttributeState::Lazy},
+      KeywordStateMapping {u8"eager", AttributeState::Eager}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Eager;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
+  };
+
   /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
   template <>
   struct EnumeratedAttributeTraits<"fetchpriority", HTMLElement>

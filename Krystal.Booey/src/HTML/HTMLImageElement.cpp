@@ -25,17 +25,6 @@
 
 namespace krys::boo::html
 {
-  template <>
-  struct EnumeratedAttributeTraits<"loading", HTMLImageElement>
-  {
-    static inline KeywordStateMappingArray<2> StateMappings = {
-      KeywordStateMapping {u8"lazy", AttributeState::Lazy},
-      KeywordStateMapping {u8"eager", AttributeState::Eager}};
-
-    constexpr static AttributeState MissingValueDefault = AttributeState::Eager;
-    constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
-  };
-
   /// @see https://html.spec.whatwg.org/#attr-img-decoding
   template <>
   struct EnumeratedAttributeTraits<"decoding", HTMLImageElement>
@@ -377,7 +366,7 @@ namespace krys::boo::html
   dom::DOMString HTMLImageElement::Loading() const noexcept
   {
     auto value = Reflect<dom::DOMString>(*this, u8"loading");
-    return EnumeratedAttribute<"loading", HTMLImageElement>::ResolveCanonicalKeyword<dom::DOMString>(
+    return EnumeratedAttribute<"loading", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
       krys::move(value));
   }
 
