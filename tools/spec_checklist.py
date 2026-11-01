@@ -4,11 +4,15 @@ Each section of the specification becomes a heading with a status line, and each
 its steps beneath, labelled as the code's step comments are (`1.`, `1a.`, `1a.i.`, `1a.i.A.`). Regenerating
 keeps each section's status line, each algorithm's checkbox and the `>` note lines under it, matched by anchor.
 
+HTML is too large for one checklist, so it gets one per page of its multipage edition (docs/specs/html/<page>.md,
+paged by the specification's fragment-links.json), with an index in docs/specs/HTML.md.
+
 Usage, from the repository root:
   python tools/spec_checklist.py dom              # docs/specs/DOM.md from https://dom.spec.whatwg.org/
   python tools/spec_checklist.py infra html
   python tools/spec_checklist.py css-cascade-5    # docs/specs/css/css-cascade-5.md from the editor's draft
   python tools/spec_checklist.py dom --html saved.html   # from a saved copy instead of fetching
+  python tools/spec_checklist.py html --html saved.html --fragment-links fragment-links.json
 """
 
 import argparse
@@ -16,9 +20,11 @@ import dataclasses
 import datetime
 import html
 import html.parser
+import json
 import pathlib
 import re
 import sys
+import urllib.parse
 import urllib.request
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -33,11 +39,27 @@ class Spec:
     url: str
     output: pathlib.Path
     link_prefixes: tuple[str, ...]
+    # Whether it has a checklist per page of its multipage edition, under page_dir, with an index in output.
+    paged: bool = False
 
     @property
     def tag(self) -> str:
         """The prefix of the Catch tags that name its algorithms, as in `[dom:concept-node-pre-insert]`."""
         return self.name
+
+    @property
+    def page_dir(self) -> pathlib.Path:
+        """Where a paged specification's checklists go: docs/specs/<name>/."""
+        return self.output.parent / self.name
+
+    def Checklists(self) -> list[pathlib.Path]:
+        """Its checklists, in the specification's order: the pages listed in its index, or its one checklist."""
+        if not self.paged:
+            return [self.output]
+        if not self.output.exists():
+            return []
+        index = self.output.read_text(encoding="utf-8-sig")
+        return [self.page_dir / f"{page}.md" for page in re.findall(rf"\]\({self.name}/([^)]+)\.md\)", index)]
 
 
 WHATWG_SPECS = {
@@ -46,7 +68,7 @@ WHATWG_SPECS = {
     "infra": Spec("infra", "Infra", "https://infra.spec.whatwg.org/", REPO_ROOT / "docs/specs/INFRA.md",
                   ("https://infra.spec.whatwg.org/",)),
     "html": Spec("html", "HTML", "https://html.spec.whatwg.org/", REPO_ROOT / "docs/specs/HTML.md",
-                 ("https://html.spec.whatwg.org/",)),
+                 ("https://html.spec.whatwg.org/",), paged=True),
 }
 
 
@@ -281,7 +303,7 @@ def NextElement(node: Node) -> Node | None:
 
 def AlgorithmName(dfn: Node) -> str:
     name = Collapse(Text(dfn, exclude=()))
-    owner = dfn.attrs.get("data-dfn-for", "")
+    owner = Collapse(dfn.attrs.get("data-dfn-for", ""))
     if owner and " " not in owner and dfn.attrs.get("data-dfn-type") in ("method", "attribute", "constructor"):
         return f"{owner}.{name}"
     if owner and "/" not in owner:
@@ -405,6 +427,17 @@ def StepsWithoutDefinition(paragraph: Node, in_algorithm_div: bool, anchor: str)
 
 # Output, keeping what reviewers wrote.
 
+
+def EncodeAnchor(anchor: str) -> str:
+    """@p anchor for a Markdown link's URL: `%`, spaces and parentheses (as in `hidden-state-(type=hidden)`)
+    escaped, so the link ends at its own closing parenthesis."""
+    return anchor.replace("%", "%25").replace(" ", "%20").replace("(", "%28").replace(")", "%29")
+
+
+def DecodeAnchor(anchor: str) -> str:
+    return urllib.parse.unquote(anchor)
+
+
 SECTION_HEADING = re.compile(r"^#{2,6} \[.*\]\(.*#([^)]+)\)\s*$")
 def Keys(anchors):
     """Each algorithm's key: its anchor, with `~2`, `~3` and so on for further algorithms under the same anchor."""
@@ -434,10 +467,10 @@ def ReadKept(path: pathlib.Path) -> Kept:
     section = None
     algorithm = None
     lines = path.read_text(encoding="utf-8-sig").splitlines()
-    keys = Keys(match.group(2) for line in lines if (match := ALGORITHM_LINE.match(line)))
+    keys = Keys(DecodeAnchor(match.group(2)) for line in lines if (match := ALGORITHM_LINE.match(line)))
     for line in lines:
         if match := SECTION_HEADING.match(line):
-            section, algorithm = match.group(1), None
+            section, algorithm = DecodeAnchor(match.group(1)), None
         elif line.startswith("Status:") and section is not None:
             kept.statuses[section] = line.strip()
         elif match := ALGORITHM_LINE.match(line):
@@ -458,15 +491,17 @@ def WriteSteps(lines: list[str], steps: list[Step], indent: int):
         WriteSteps(lines, step.children, indent + 1)
 
 
-def Render(spec: Spec, sections: list[Section], kept: Kept) -> str:
+def Render(spec: Spec, sections: list[Section], kept: Kept, page: str | None = None) -> str:
     total = sum(len(section.algorithms) for section in sections)
+    title = f"{spec.title} review checklist" + (f": {sections[0].title}" if page else "")
+    status = f"`python tools/spec_status.py {spec.name}{' ' + page if page else ''}`"
     lines = [
-        f"# {spec.title} review checklist",
+        f"# {title}",
         "",
         f"Generated from <{spec.url}> on {datetime.date.today().isoformat()} by `tools/spec_checklist.py`: "
         f"{total} algorithms. Regenerating keeps each section's status line and the `>` notes under it, and each "
-        "algorithm's checkbox and the `>` notes under it. `python tools/spec_status.py` reports where each algorithm "
-        "is implemented and tested.",
+        f"algorithm's checkbox and the `>` notes under it. {status} reports where each algorithm is implemented and "
+        "tested.",
         "",
         "Reviewing a section: find each algorithm's implementation (its `@see` link), label its steps as below "
         f"(`// 1.`, `// 1a.`, `// 1a.i.` with the step's text), fix or record divergences (a step left out on "
@@ -477,12 +512,14 @@ def Render(spec: Spec, sections: list[Section], kept: Kept) -> str:
         "lines under its status, and tag their tests with the definition's or the section's anchor.",
         "",
         "Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An algorithm is "
-        "ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note.",
+        "ticked once it's reviewed; one that doesn't apply is ticked with a `> n/a: <reason>` note. "
+        f"`python tools/spec_status.py {spec.name} --tick <section anchor>` ticks a section's algorithms and sets its "
+        "status.",
     ]
     sections = [section for section in sections if section.anchor]
     keys = Keys(algorithm.anchor for section in sections for algorithm in section.algorithms)
     for section in sections:
-        lines += ["", f"{'#' * section.depth} [{section.title}]({spec.url}#{section.anchor})", ""]
+        lines += ["", f"{'#' * section.depth} [{section.title}]({spec.url}#{EncodeAnchor(section.anchor)})", ""]
         lines.append(kept.statuses.get(section.anchor, DEFAULT_STATUS))
         lines += kept.section_notes.get(section.anchor, [])
         algorithm_anchors = {algorithm.anchor for algorithm in section.algorithms}
@@ -492,7 +529,8 @@ def Render(spec: Spec, sections: list[Section], kept: Kept) -> str:
         for algorithm in section.algorithms:
             key = next(keys)
             box = "x" if kept.checked.get(key) else " "
-            lines += ["", f"- [{box}] [{algorithm.name}]({spec.url}#{algorithm.anchor}) — {algorithm.intro}"]
+            lines += ["", f"- [{box}] [{algorithm.name}]({spec.url}#{EncodeAnchor(algorithm.anchor)}) — "
+                          f"{algorithm.intro}"]
             lines += kept.notes.get(key, [])
             WriteSteps(lines, algorithm.steps, 1)
     return "\n".join(lines) + "\n"
@@ -504,28 +542,99 @@ def Fetch(url: str) -> str:
         return response.read().decode("utf-8")
 
 
-def Generate(spec: Spec, source: str | None) -> None:
+def Relative(path: pathlib.Path) -> str:
+    try:
+        return path.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def MergeKept(paths) -> Kept:
+    """What reviewers wrote in all of @p paths, so a section keeps it when it moves to another page."""
+    merged = Kept({}, {}, {}, {})
+    for path in paths:
+        kept = ReadKept(path)
+        merged.statuses.update(kept.statuses)
+        merged.checked.update(kept.checked)
+        merged.notes.update(kept.notes)
+        merged.section_notes.update(kept.section_notes)
+    return merged
+
+
+def Pages(sections: list[Section], fragment_links: dict[str, str]) -> dict[str, list[Section]]:
+    """@p sections by the page of the multipage edition each is on, in order. A section whose anchor
+    fragment-links.json doesn't list is on the page of the section before it."""
+    pages: dict[str, list[Section]] = {}
+    page = "index"
+    for section in sections:
+        # The multipage edition's first page, index.html, is listed as "".
+        page = fragment_links.get(section.anchor, page) or "index"
+        pages.setdefault(page, []).append(section)
+    return pages
+
+
+def GeneratePaged(spec: Spec, sections: list[Section], fragment_links_source: str | None) -> None:
+    if fragment_links_source:
+        links = json.loads(pathlib.Path(fragment_links_source).read_text(encoding="utf-8"))
+    else:
+        links = json.loads(Fetch(spec.url + "multipage/fragment-links.json"))
+    existing = sorted(spec.page_dir.glob("*.md")) if spec.page_dir.is_dir() else []
+    kept = MergeKept(existing)
+    sections = [section for section in sections if section.anchor]
+    pages = Pages(sections, links)
+    spec.page_dir.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for page, page_sections in pages.items():
+        path = spec.page_dir / f"{page}.md"
+        path.write_text(Render(spec, page_sections, kept, page), encoding="utf-8-sig", newline="\r\n")
+        count = sum(len(section.algorithms) for section in page_sections)
+        rows.append(f"| [{page_sections[0].title}]({spec.name}/{page}.md) | {len(page_sections)} | {count} |")
+    for path in existing:
+        if path.stem not in pages:
+            print(f"warning: {Relative(path)} is no longer a page of the specification; move its notes and remove it")
+    total = sum(len(section.algorithms) for section in sections)
+    lines = [
+        f"# {spec.title} review checklists",
+        "",
+        f"Generated from <{spec.url}> on {datetime.date.today().isoformat()} by `tools/spec_checklist.py`: "
+        f"{total} algorithms in {len(pages)} checklists, one per page of the multipage edition. Each is reviewed as "
+        f"the DOM checklist is. `python tools/spec_status.py {spec.name}` reports each page's progress, and "
+        f"`python tools/spec_status.py {spec.name} <page>` each of its sections'.",
+        "",
+        "| Page | Sections | Algorithms |",
+        "| --- | --- | --- |",
+        *rows,
+    ]
+    spec.output.write_text("\n".join(lines) + "\n", encoding="utf-8-sig", newline="\r\n")
+    print(f"{Relative(spec.output)}: {len(pages)} pages, {len(sections)} sections, {total} algorithms")
+
+
+def Generate(spec: Spec, source: str | None, fragment_links: str | None = None) -> None:
     markup = pathlib.Path(source).read_text(encoding="utf-8") if source else Fetch(spec.url)
     builder = TreeBuilder()
     builder.feed(markup)
     builder.close()
     sections = Extract(builder.root)
+    if spec.paged:
+        GeneratePaged(spec, sections, fragment_links)
+        return
     kept = ReadKept(spec.output)
     spec.output.parent.mkdir(parents=True, exist_ok=True)
     spec.output.write_text(Render(spec, sections, kept), encoding="utf-8-sig", newline="\r\n")
     total = sum(len(section.algorithms) for section in sections)
-    print(f"{spec.output.relative_to(REPO_ROOT)}: {len(sections)} sections, {total} algorithms")
+    print(f"{Relative(spec.output)}: {len(sections)} sections, {total} algorithms")
 
 
 def Main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("specs", nargs="+", help="dom, infra, html, or a CSS module's short name")
     parser.add_argument("--html", help="a saved copy of the specification to read instead of fetching it")
+    parser.add_argument("--fragment-links", help="a saved copy of HTML's multipage/fragment-links.json")
     args = parser.parse_args()
     if args.html and len(args.specs) != 1:
         raise SystemExit("--html takes one specification")
     for name in args.specs:
-        Generate(GetSpec(name), args.html)
+        Generate(GetSpec(name), args.html, args.fragment_links)
 
 
 if __name__ == "__main__":

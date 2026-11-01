@@ -32,7 +32,7 @@ namespace krys::boo::dom
     }
 
   public:
-#pragma region DOMImplementation - https://dom.spec.whatwg.org/#dom-domimplementation
+#pragma region DOMImplementation - https://dom.spec.whatwg.org/#interface-domimplementation
 
     /// @brief Returns a doctype, with the given `name`, `publicId`, and `systemId`.
     /// @throws InvalidCharacterError if `name` is not a valid doctype name.

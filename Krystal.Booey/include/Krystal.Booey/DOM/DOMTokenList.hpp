@@ -292,25 +292,25 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
     void Value(DOMString &&value) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its iterable<DOMString>)
     KRYS_NODISCARD iterator begin() noexcept
     {
       return Tokens().begin();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its iterable<DOMString>)
     KRYS_NODISCARD iterator end() noexcept
     {
       return Tokens().end();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its iterable<DOMString>)
     KRYS_NODISCARD const_iterator begin() const noexcept
     {
       return Tokens().begin();
     }
 
-    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
+    /// @see https://dom.spec.whatwg.org/#interface-domtokenlist (its iterable<DOMString>)
     KRYS_NODISCARD const_iterator end() const noexcept
     {
       return Tokens().end();

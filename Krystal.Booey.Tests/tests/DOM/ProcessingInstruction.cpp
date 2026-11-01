@@ -179,7 +179,7 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Clone a single node: a processing instruction's copy has its target, data and attributes",
-            "[DOM][ProcessingInstruction][dom:concept-node-clone-single]")
+            "[DOM][ProcessingInstruction][dom:clone-a-single-node]")
   {
     CommonTestData data(u8"x", u8"a='1'");
     auto clone = data.Node->CloneNode(false).ReleaseValue();

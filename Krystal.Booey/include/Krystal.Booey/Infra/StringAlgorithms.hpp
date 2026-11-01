@@ -10,7 +10,7 @@
 
 namespace krys::boo::infra
 {
-  /// @see https://infra.spec.whatwg.org/#string-algorithms
+  /// @see https://infra.spec.whatwg.org/#strings
   class StringAlgorithms
   {
   public:
