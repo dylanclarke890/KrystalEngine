@@ -31,7 +31,161 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLInputElement: type", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: the value and checked attributes, before the user changes them",
+            "[HTML][Forms][Input][html:attr-input-value][html:attr-input-checked]"
+            "[html:concept-input-checked-dirty-flag][html:dom-input-checked]")
+  {
+    FormFixture fixture(u8"<input id=t value=a><input id=c type=checkbox>");
+    auto &t = fixture.Get<HTMLInputElement>(u8"t");
+    REQUIRE_FALSE(t.SetAttribute(u8"value", u8"b").HasException());
+    CHECK(Str(t.Value()) == "b");
+    // A dirty value keeps its value.
+    REQUIRE_FALSE(t.SetValue(u8"typed").HasException());
+    REQUIRE_FALSE(t.SetAttribute(u8"value", u8"c").HasException());
+    CHECK(Str(t.Value()) == "typed");
+
+    auto &c = fixture.Get<HTMLInputElement>(u8"c");
+    REQUIRE_FALSE(c.SetAttribute(u8"checked", u8"").HasException());
+    CHECK(c.Checked());
+    c.RemoveAttribute(u8"checked");
+    CHECK_FALSE(c.Checked());
+    // Dirty checkedness keeps its checkedness.
+    c.Checked(true);
+    REQUIRE_FALSE(c.SetAttribute(u8"checked", u8"").HasException());
+    c.RemoveAttribute(u8"checked");
+    CHECK(c.Checked());
+  }
+
+  TEST_CASE("HTMLInputElement: changing the type carries the value between the value modes",
+            "[HTML][Forms][Input][html:input-activation-behavior][html:signal-a-type-change]")
+  {
+    FormFixture fixture(u8"<input id=t value=a>");
+    auto &t = fixture.Get<HTMLInputElement>(u8"t");
+    REQUIRE_FALSE(t.SetValue(u8"typed").HasException());
+    // From the value mode to the default/on mode, the value becomes the value attribute.
+    t.Type(u8"checkbox");
+    CHECK(Str(t.GetAttribute(u8"value").value_or(u8"")) == "typed");
+    // And back, the value attribute is the value.
+    t.Type(u8"text");
+    CHECK(Str(t.Value()) == "typed");
+    // To the filename mode, the value is empty.
+    REQUIRE_FALSE(t.SetValue(u8"x").HasException());
+    t.Type(u8"file");
+    CHECK(Str(t.Value()) == "");
+  }
+
+  TEST_CASE("HTMLInputElement: clicking a checkbox or radio button, and canceling the click",
+            "[HTML][Forms][Input][html:input-activation-behavior][html:input-support-picker]"
+            "[html:dom-input-indeterminate]")
+  {
+    FormFixture fixture(u8"<input id=c type=checkbox><input id=rad1 type=radio name=g checked>"
+                        u8"<input id=rad2 type=radio name=g>");
+    auto &c = fixture.Get<HTMLInputElement>(u8"c");
+    c.Indeterminate(true);
+    CHECK(c.Indeterminate());
+    auto events = EventLog::ListenTo(c, {u8"input", u8"change", u8"click"});
+    c.Click();
+    CHECK(events->Joined() == "click input change");
+    CHECK(c.Checked());
+    CHECK_FALSE(c.Indeterminate());
+
+    // A canceled click restores the checkedness and indeterminateness.
+    c.Indeterminate(true);
+    events->PreventDefault = true;
+    c.Click();
+    CHECK(c.Checked());
+    CHECK(c.Indeterminate());
+
+    // And the radio button group's checked button.
+    auto &rad1 = fixture.Get<HTMLInputElement>(u8"rad1");
+    auto &rad2 = fixture.Get<HTMLInputElement>(u8"rad2");
+    auto radioEvents = EventLog::ListenTo(rad2, {u8"click"});
+    radioEvents->PreventDefault = true;
+    rad2.Click();
+    CHECK(rad1.Checked());
+    CHECK_FALSE(rad2.Checked());
+  }
+
+  TEST_CASE("HTMLInputElement: email values are sanitized, and a range's default value is its middle",
+            "[HTML][Forms][Input][html:value-sanitization-algorithm][html:concept-input-value-default-range]")
+  {
+    FormFixture fixture(u8"<input id=e type=email multiple><input id=e1 type=email>"
+                        u8"<input id=r type=range min=0 max=100><input id=r2 type=range min=50 max=10>");
+    auto &e = fixture.Get<HTMLInputElement>(u8"e");
+    REQUIRE_FALSE(e.SetValue(u8" a@b.c , d@e.f ,").HasException());
+    CHECK(Str(e.Value()) == "a@b.c,d@e.f,");
+    auto &e1 = fixture.Get<HTMLInputElement>(u8"e1");
+    REQUIRE_FALSE(e1.SetValue(u8" a@b\n.c ").HasException());
+    CHECK(Str(e1.Value()) == "a@b.c");
+
+    CHECK(Str(fixture.Get<HTMLInputElement>(u8"r").Value()) == "50");
+    // When the maximum is less than the minimum, the minimum.
+    CHECK(Str(fixture.Get<HTMLInputElement>(u8"r2").Value()) == "50");
+  }
+
+  TEST_CASE(
+    "HTMLInputElement: step, stepUp, pattern and reversed ranges",
+    "[HTML][Forms][Input][html:concept-input-step][html:concept-input-min-zero][html:dom-input-stepdown]"
+    "[html:compiled-pattern-regular-expression][html:regexp-match-a-string][html:has-a-reversed-range]"
+    "[html:concept-input-min][html:concept-input-max]")
+  {
+    FormFixture fixture(
+      u8"<input id=n type=number step=any value=5><input id=n2 type=number min=10 max=5 value=7>"
+      u8"<input id=n3 type=number value=1.5 step=1><input id=p pattern='a|b'><input id=p2 pattern='['>"
+      u8"<input id=tm type=time min=22:00 max=02:00 value=23:00>");
+    // No allowed value step.
+    auto stepped = fixture.Get<HTMLInputElement>(u8"n").StepUp(1);
+    REQUIRE(stepped.HasException());
+    CHECK(stepped.GetException().Code() == dom::ExceptionCode::InvalidStateError);
+
+    // A minimum greater than the maximum: nothing.
+    auto &n2 = fixture.Get<HTMLInputElement>(u8"n2");
+    CHECK_FALSE(n2.StepUp(1).HasException());
+    CHECK(Str(n2.Value()) == "7");
+
+    // The step base is the value attribute.
+    auto &n3 = fixture.Get<HTMLInputElement>(u8"n3");
+    CHECK_FALSE(n3.StepUp(1).HasException());
+    CHECK(Str(n3.Value()) == "2.5");
+
+    // The pattern matches the whole value, and one that doesn't compile is no constraint.
+    auto &p = fixture.Get<HTMLInputElement>(u8"p");
+    REQUIRE_FALSE(p.SetValue(u8"ab").HasException());
+    CHECK(p.PatternMismatch());
+    REQUIRE_FALSE(p.SetValue(u8"b").HasException());
+    CHECK_FALSE(p.PatternMismatch());
+    auto &p2 = fixture.Get<HTMLInputElement>(u8"p2");
+    REQUIRE_FALSE(p2.SetValue(u8"zz").HasException());
+    CHECK_FALSE(p2.PatternMismatch());
+
+    // A value within a reversed range is fine; one outside both underflows and overflows.
+    auto &tm = fixture.Get<HTMLInputElement>(u8"tm");
+    CHECK_FALSE(tm.RangeOverflow());
+    CHECK_FALSE(tm.RangeUnderflow());
+    REQUIRE_FALSE(tm.SetValue(u8"12:00").HasException());
+    CHECK(tm.RangeOverflow());
+    CHECK(tm.RangeUnderflow());
+  }
+
+  TEST_CASE("HTMLInputElement: colorSpace, buttons without a form, and showPicker without activation",
+            "[HTML][Forms][Input][html:dom-input-colorspace][html:submit-button-state-(type=submit)]"
+            "[html:dom-input-showpicker]")
+  {
+    FormFixture fixture(u8"<input id=c type=color><input id=sub type=submit><input id=e type=email>");
+    auto &c = fixture.Get<HTMLInputElement>(u8"c");
+    CHECK(Str(c.ColourSpace()) == "limited-srgb");
+    c.ColourSpace(u8"DISPLAY-P3");
+    CHECK(Str(c.ColourSpace()) == "display-p3");
+
+    fixture.Get<HTMLInputElement>(u8"sub").Click();
+    CHECK(fixture.Submissions().empty());
+
+    auto picker = fixture.Get<HTMLInputElement>(u8"e").ShowPicker();
+    REQUIRE(picker.HasException());
+    CHECK(picker.GetException().Code() == dom::ExceptionCode::NotAllowedError);
+  }
+
+  TEST_CASE("HTMLInputElement: type", "[HTML][Forms][Input][html:dom-input-type][html:attr-input-type]")
   {
     FormFixture fixture(u8"<input id=i>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
@@ -65,7 +219,7 @@ namespace krys::boo::html::tests
     CHECK(fixture.Get<HTMLInputElement>(u8"shown").Height() == 30u);
   }
 
-  TEST_CASE("HTMLInputElement: value sanitisation", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: value sanitisation", "[HTML][Forms][Input][html:value-sanitization-algorithm]")
   {
     CHECK(Sanitized(u8"text", u8"a\r\nb\nc") == "abc");
     CHECK(Sanitized(u8"search", u8"  s  ") == "  s  ");
@@ -90,7 +244,7 @@ namespace krys::boo::html::tests
     CHECK(Sanitized(u8"datetime-local", u8"2026-10-22T09:30:00") == "2026-10-22T09:30");
   }
 
-  TEST_CASE("HTMLInputElement: value modes", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: value modes", "[HTML][Forms][Input][html:dom-input-value-value]")
   {
     FormFixture fixture(u8"<input id=i value=initial>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
@@ -137,7 +291,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLInputElement: validity", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: validity",
+            "[HTML][Forms][Input][html:the-maxlength-and-minlength-attributes][html:the-required-attribute]"
+            "[html:the-pattern-attribute][html:the-min-and-max-attributes][html:the-step-attribute]")
   {
     FormFixture fixture(u8"<input id=i>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
@@ -198,7 +354,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLInputElement: numbers and dates", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: numbers and dates", "[HTML][Forms][Input][html:dom-input-stepdown]")
   {
     FormFixture fixture(u8"<input id=i type=number value=5 step=2 min=1>");
     auto &input = fixture.Get<HTMLInputElement>(u8"i");
@@ -225,7 +381,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLInputElement: checkboxes", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: checkboxes", "[HTML][Forms][Input][html:checkbox-state-(type=checkbox)]")
   {
     FormFixture fixture(u8"<input id=c type=checkbox checked>");
     auto &input = fixture.Get<HTMLInputElement>(u8"c");
@@ -265,7 +421,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("HTMLInputElement: radio buttons", "[HTML][Forms][Input]")
+  TEST_CASE("HTMLInputElement: radio buttons", "[HTML][Forms][Input][html:radio-button-group]")
   {
     FormFixture fixture(u8R"(<form id=f><input id=a type=radio name=g checked><input id=b type=radio name=g>
       <input id=c type=radio name=other></form><input id=d type=radio name=g>)");

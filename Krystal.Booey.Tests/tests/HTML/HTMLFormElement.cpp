@@ -239,7 +239,8 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     CHECK(fixture.Submissions()[0].URL == "https://example.com/?t=v&go=Go");
   }
 
-  TEST_CASE("HTMLFormElement: reset", "[HTML][Forms][html:dom-form-reset]")
+  TEST_CASE("HTMLFormElement: reset",
+            "[HTML][Forms][html:dom-form-reset][html:reset-button-state-(type=reset)]")
   {
     FormFixture fixture(u8R"(<form id=f><input id=t value=a><input id=c type=checkbox checked>
       <textarea id=ta>default</textarea><select id=s><option>one</option><option id=two>two</option></select>

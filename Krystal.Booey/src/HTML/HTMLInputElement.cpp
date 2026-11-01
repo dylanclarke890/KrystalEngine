@@ -1616,6 +1616,11 @@ namespace krys::boo::html
     bool wasImageButton = _inputType->IsImageButton();
     bool wasSuccessfulSubmitButtonCandidate = _inputType->CanBeSuccessfulSubmitButton();
 
+    // https://html.spec.whatwg.org/#input-type-change
+    // 1. If the previous state of the element's type attribute put the value IDL attribute in the value mode,
+    //    and the element's value is not the empty string, and the new state of the element's type attribute
+    //    puts the value IDL attribute in either the default mode or the default/on mode, then set the
+    //    element's value content attribute to the element's value.
     if (didStoreValue && !willStoreValue)
     {
       if (auto dirtyValue = std::exchange(_valueIfDirty, std::nullopt); dirtyValue && !dirtyValue->empty())
@@ -1629,9 +1634,24 @@ namespace krys::boo::html
     auto oldType = _inputType->GetType();
 
     bool didDirAutoUseValue = _inputType->DirAutoUsesValue();
+
+    // 7. Let previouslySelectable be true if setRangeText() previously applied to the element, and false
+    //    otherwise.
     bool previouslySelectable = _inputType->SupportsSelectionAPI();
 
+    // 4. Update the element's rendering and behavior to the new state's.
     _inputType = krys::move(newType);
+
+    // 2. Otherwise, if the previous state of the element's type attribute put the value IDL attribute in any
+    //    mode other than the value mode, and the new state of the element's type attribute puts the value IDL
+    //    attribute in the value mode, then set the value of the element to the value of the value content
+    //    attribute, if there is one, or the empty string otherwise, and then set the control's dirty value
+    //    flag to false.
+    // 6. Invoke the value sanitization algorithm, if one is defined for the type attribute's new state.
+    // (Both at once, and the filename mode's value of step 3 is its own.)
+    // 3. Otherwise, if the previous state of the element's type attribute put the value IDL attribute in any
+    //    mode other than the filename mode, and the new state of the element's type attribute puts the value
+    //    IDL attribute in the filename mode, then set the value of the element to the empty string.
     if (!didStoreValue && willStoreValue)
     {
       auto valueAttribute = GetAttribute(u8"value");
@@ -1680,9 +1700,10 @@ namespace krys::boo::html
       form->ResetDefaultButton();
     }
 
+    // 5. Signal a type change for the element.
+    // (Removing it from its radio button group above, and adding it again in RunPostTypeUpdateTasks.)
     RunPostTypeUpdateTasks();
 
-    // https://html.spec.whatwg.org/#input-type-change
     // 8. Let nowSelectable be true if setRangeText() now applies to the element, and false otherwise.
     bool nowSelectable = _inputType->SupportsSelectionAPI();
     // 9. If previouslySelectable is false and nowSelectable is true, set the element's text entry cursor
@@ -1966,8 +1987,18 @@ namespace krys::boo::html
 
 #pragma region Events
 
+  // https://html.spec.whatwg.org/#the-input-element:legacy-pre-activation-behavior
   void HTMLInputElement::LegacyPreActivationBehavior(dom::Event &event) noexcept
   {
+    // 1. If this element's type attribute is in the Checkbox state, then set this element's checkedness to
+    // its
+    //    opposite value (i.e. true if it is false, false if it is true) and set this element's
+    //    indeterminateness to false.
+    // 2. If this element's type attribute is in the Radio Button state, then get a reference to the element
+    // in
+    //    this element's radio button group that has its checkedness set to true, if any, and then set this
+    //    element's checkedness to true.
+    // (The checkbox and radio input types' WillDispatchClick, which remember the state to restore.)
     _clickHandlingState = {};
     _clickHandlingState.Trusted = event.IsTrusted();
     auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
@@ -1978,9 +2009,16 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#the-input-element:activation-behaviour
   void HTMLInputElement::ActivationBehavior(dom::Event &event) noexcept
   {
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
+
+    // 1. If element is not mutable, and element's type attribute is neither in the Checkbox nor in the Radio
+    //    state, then return.
+    // (Each type's activation behavior checks whether it's disabled, the only immutability for buttons.)
+    // 2. Run element's input activation behavior, if any, and do nothing otherwise.
+    // (A checkbox's or radio button's fires input and change in DidDispatchClick.)
     if (std::exchange(_clickHandlingState.Stateful, false))
     {
       _inputType->DidDispatchClick(event, _clickHandlingState);
@@ -1990,16 +2028,29 @@ namespace krys::boo::html
     // Image and submit inputs submit their form, and reset inputs reset it.
     _inputType->HandleActivationBehavior(event);
 
-    // Buttons with a form owner submit or reset it, other than plain buttons.
+    // 3. If element has a form owner and element's type attribute is not in the Button state, then return.
     if (Form() && _inputType->GetType() != InputType::Type::Button)
     {
       return;
     }
+
+    // 4. Run the popover target attribute activation behavior given element and event's target.
     HandlePopoverTargetAction(event.Target().get());
   }
 
+  // https://html.spec.whatwg.org/#the-input-element:legacy-canceled-activation-behavior
   void HTMLInputElement::LegacyCanceledActivationBehavior(dom::Event &event) noexcept
   {
+    // 1. If the element's type attribute is in the Checkbox state, then set the element's checkedness and the
+    //    element's indeterminateness back to the values they had before the legacy-pre-activation behavior
+    //    was run.
+    // 2. If this element's type attribute is in the Radio Button state, then if the element to which a
+    // reference
+    //    was obtained in the legacy-pre-activation behavior, if any, is still in what is now this element's
+    //    radio button group, if it still has one, and if so, set that element's checkedness to true; or else,
+    //    if there was no such element, or that element is no longer in this element's radio button group, or
+    //    if this element no longer has a radio button group, set this element's checkedness to false.
+    // (The checkbox and radio input types' DidDispatchClick, for a canceled click.)
     Ref<InputType> protectedInputType = ShareRef(*_inputType);
     if (std::exchange(_clickHandlingState.Stateful, false))
     {

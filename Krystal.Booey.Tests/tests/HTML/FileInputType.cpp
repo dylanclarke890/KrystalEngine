@@ -47,7 +47,8 @@ namespace krys::boo::html::tests
     };
   }
 
-  TEST_CASE("FileInputType: files", "[HTML][Forms][Input]")
+  TEST_CASE("FileInputType: files",
+            "[HTML][Forms][Input][html:update-the-file-selection][html:dom-input-files]")
   {
     FormFixture fixture(u8"<input id=text><input id=f type=file required>");
     auto &input = fixture.Get<HTMLInputElement>(u8"f");
