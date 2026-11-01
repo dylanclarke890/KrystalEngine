@@ -31,24 +31,37 @@ namespace krys::boo::html
     return EffectiveGlobalCustomElementRegistry(document._customElementRegistry.get());
   }
 
+  // https://html.spec.whatwg.org/#look-up-a-custom-element-definition
   CustomElementInterface *CustomElementAlgorithms::LookupCustomElementDefinition(
     CustomElementRegistry *registry, dom::DOMStringAtom namespaceURI, dom::DOMStringAtom localName) noexcept
   {
+    // 1. If registry is null, then return null.
     if (registry == nullptr)
     {
       return nullptr;
     }
 
+    // 2. If namespace is not the HTML namespace, then return null.
     if (namespaceURI != infra::Namespaces::HTML)
     {
       return nullptr;
     }
 
+    // 3. If registry's custom element definition set contains an item with name and local name both equal to
+    //    localName, then return that item.
+    // 4. If registry's custom element definition set contains an item with name equal to is and local name
+    //    equal to localName, then return that item. (Skipped: there are no customized built-in elements.)
+    // 5. Return null.
     return registry->FindInterface(localName);
   }
 
+  // https://html.spec.whatwg.org/#look-up-a-custom-element-registry
   CustomElementRegistry *CustomElementAlgorithms::LookUpCustomElementRegistry(dom::Node &node) noexcept
   {
+    // 1. If node is an Element object, then return node's custom element registry.
+    // 2. If node is a ShadowRoot object, then return node's custom element registry.
+    // 3. If node is a Document object, then return node's custom element registry.
+    // 4. Return null.
     if (auto *element = DynamicDowncast<dom::Element>(node))
     {
       return element->CustomElementRegistry().get();

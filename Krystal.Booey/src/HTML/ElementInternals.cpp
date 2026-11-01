@@ -15,18 +15,26 @@ namespace krys::boo::html
 
   ElementInternals::~ElementInternals() noexcept = default;
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-shadowroot
   RefPtr<dom::ShadowRoot> ElementInternals::ShadowRoot() const noexcept
   {
+    // 1. Let target be this's target element.
     auto *element = _target.get();
     if (!element)
     {
       return nullptr;
     }
+
+    // 2. If target is not a shadow host, then return null.
+    // 3. Let shadow be target's shadow root.
+    // 4. If shadow's available to element internals is false, then return null.
     auto *shadowRoot = dom::TreeQueries::GetShadowRoot(*element);
     if (!shadowRoot || !shadowRoot->IsAvailableToElementInternals())
     {
       return nullptr;
     }
+
+    // 5. Return shadow.
     return ShareRefPtr(shadowRoot);
   }
 
@@ -39,6 +47,10 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::NotSupportedError};
   }
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
+  // 1. Let element be this's target element.
+  // 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
+  // (And so for the other form members.)
   dom::ExceptionOr<void> ElementInternals::SetFormValue(CustomElementFormValue &&value,
                                                         Maybe<CustomElementFormValue> &&state) noexcept
   {
@@ -114,6 +126,8 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::NotSupportedError};
   }
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-states
+  // (The states getter steps are to return this's target element's states set.)
   CustomStateSet &ElementInternals::States() noexcept
   {
     return _target->EnsureCustomStateSet();

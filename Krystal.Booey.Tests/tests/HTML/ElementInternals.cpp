@@ -78,7 +78,9 @@ namespace krys::boo::html::tests
     };
   }
 
-  TEST_CASE_METHOD(InternalsFixture, "attachInternals", "[HTML][CustomElement][ElementInternals]")
+  TEST_CASE_METHOD(InternalsFixture, "attachInternals",
+                   "[HTML][CustomElement][ElementInternals][html:dom-attachinternals]"
+                   "[html:dom-elementinternals-shadowroot]")
   {
     DefineInternals(u8"x-plain");
     DefineInternals(u8"x-sealed", {.DisableInternals = true});
@@ -93,6 +95,17 @@ namespace krys::boo::html::tests
       auto again = Downcast<HTMLElement>(ById(u8"plain")).AttachInternals();
       REQUIRE(again.HasException());
       CHECK(again.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+    }
+
+    SECTION("an element with an is value has none")
+    {
+      auto element = Document->CreateElement(
+        u8"x-plain", dom::ElementCreationOptions {.Is = dom::DOMStringAtom(u8"x-other")});
+      REQUIRE_FALSE(element.HasException());
+      REQUIRE(element.Value()->IsDefinedCustomElement());
+      auto internals = Downcast<HTMLElement>(*element.Value()).AttachInternals();
+      REQUIRE(internals.HasException());
+      CHECK(internals.GetException().Code() == dom::ExceptionCode::NotSupportedError);
     }
 
     SECTION("a definition can disable them")
@@ -121,7 +134,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(InternalsFixture, "Custom states and :state()", "[HTML][CustomElement][ElementInternals]")
+  TEST_CASE_METHOD(InternalsFixture, "Custom states and :state()",
+                   "[HTML][CustomElement][ElementInternals][html:dom-elementinternals-states]")
   {
     DefineInternals(u8"x-toggle");
     Parse(u8"<style>x-toggle:state(off) { visibility: hidden }</style><x-toggle id=t>text</x-toggle>");
@@ -153,7 +167,10 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(InternalsFixture, "Form-associated custom elements",
-                   "[HTML][CustomElement][ElementInternals][html:dom-elementinternals-labels]")
+                   "[HTML][CustomElement][ElementInternals][html:dom-elementinternals-labels]"
+                   "[html:form-associated-custom-element][html:dom-elementinternals-setformvalue]"
+                   "[html:dom-elementinternals-setvalidity][html:dom-elementinternals-validationmessage]"
+                   "[html:face-entry-construction]")
   {
     DefineInternals(u8"x-rating", {.FormAssociated = true});
     Parse(u8"<form id=f><label id=l for=a>Rating</label><x-rating id=a name=rating></x-rating>"
@@ -236,6 +253,10 @@ namespace krys::boo::html::tests
       REQUIRE_FALSE(internals.SetValidity().HasException());
       CHECK(internals.CheckValidity().Value());
       CHECK(internals.ValidationMessage().Value().empty());
+
+      // The message's newlines are normalized.
+      REQUIRE_FALSE(internals.SetValidity({.CustomError = true}, u8"one\r\ntwo\rthree").HasException());
+      CHECK(internals.ValidationMessage().Value() == u8"one\ntwo\nthree");
     }
 
     SECTION("a disabled fieldset disables them")

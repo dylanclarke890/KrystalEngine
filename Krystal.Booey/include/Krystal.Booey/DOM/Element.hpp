@@ -670,6 +670,12 @@ namespace krys::boo::dom
       return _customElementState;
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-element-is-value
+    KRYS_NODISCARD DOMStringAtom IsValue() const noexcept
+    {
+      return _is;
+    }
+
 #pragma region Custom elements
 
     /// @see https://dom.spec.whatwg.org/#concept-element-custom

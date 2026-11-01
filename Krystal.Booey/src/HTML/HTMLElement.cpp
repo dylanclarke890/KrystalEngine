@@ -585,30 +585,46 @@ namespace krys::boo::html
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-attachinternals
   dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept
   {
-    // NOTE: customized built-in elements aren't supported, so an element's is value doesn't matter.
+    // 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
+    if (IsValue() != dom::DOMStringAtom::Null())
+    {
+      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+    }
+
+    // 2. Let definition be the result of looking up a custom element definition given this's custom element
+    //    registry, this's namespace, this's local name, and null.
+    // 3. If definition is null, then throw a "NotSupportedError" DOMException.
+    // (The definition is the reaction queue's, which only an element with one has.)
     auto *queue = ReactionQueue();
     if (!queue)
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
 
+    // 4. If definition's disable internals is true, then throw a "NotSupportedError" DOMException.
     if (queue->IsElementInternalsDisabled())
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
 
+    // 5. If this's attached internals is non-null, then throw a "NotSupportedError" DOMException.
     if (queue->IsElementInternalsAttached())
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
 
+    // 6. If this's custom element state is not "precustomized" or "custom", then throw a "NotSupportedError"
+    //    DOMException.
     if (!IsPrecustomizedOrDefinedCustomElement())
     {
       return dom::Exception {dom::ExceptionCode::NotSupportedError};
     }
 
+    // 7. Set this's attached internals to a new ElementInternals instance whose target element is this.
+    // 8. Return this's attached internals.
     queue->SetElementInternalsAttached();
     return ElementInternals::Create(*this);
   }

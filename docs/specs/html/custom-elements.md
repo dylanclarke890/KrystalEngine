@@ -8,62 +8,64 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.13 Custom elements](https://html.spec.whatwg.org/#custom-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.13.1 Introduction](https://html.spec.whatwg.org/#custom-elements-intro)
 
-Status: unreviewed
+Status: n/a (introduction)
 
 ##### [4.13.1.1 Creating an autonomous custom element](https://html.spec.whatwg.org/#custom-elements-autonomous-example)
 
-Status: unreviewed
+Status: n/a (example)
 
 ##### [4.13.1.2 Creating a form-associated custom element](https://html.spec.whatwg.org/#custom-elements-face-example)
 
-Status: unreviewed
+Status: n/a (example)
 
 ##### [4.13.1.3 Creating a custom element with default accessible roles, states, and properties](https://html.spec.whatwg.org/#custom-elements-accessibility-example)
 
-Status: unreviewed
+Status: n/a (example)
 
 ##### [4.13.1.4 Creating a customized built-in element](https://html.spec.whatwg.org/#custom-elements-customized-builtin-example)
 
-Status: unreviewed
+Status: n/a (example; no customized built-in elements)
 
 ##### [4.13.1.5 Drawbacks of autonomous custom elements](https://html.spec.whatwg.org/#custom-elements-autonomous-drawbacks)
 
-Status: unreviewed
+Status: n/a (advice)
 
 ##### [4.13.1.6 Upgrading elements after their creation](https://html.spec.whatwg.org/#custom-elements-upgrades-examples)
 
-Status: unreviewed
+Status: n/a (example)
 
 ##### [4.13.1.7 Scoped custom element registries](https://html.spec.whatwg.org/#scoped-custom-element-registries)
 
-Status: unreviewed
+Status: n/a (example)
 
 ##### [4.13.1.8 Exposing custom element states](https://html.spec.whatwg.org/#exposing-custom-element-states)
 
-Status: unreviewed
+Status: n/a (example)
 
 #### [4.13.2 Requirements for custom element constructors and reactions](https://html.spec.whatwg.org/#custom-element-conformance)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.13.2.1 Preserving custom element state when moved](https://html.spec.whatwg.org/#preserving-custom-element-state-when-moved)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [4.13.3 Core concepts](https://html.spec.whatwg.org/#custom-elements-core-concepts)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Definitions are `CustomElementInterface`s made from a factory and `CustomElementOptions` (see `OVERVIEW.md`); `CustomElementAlgorithms` looks up definitions and registries. There are no customized built-in elements (see `DIFFERENCES.md`).
 <!-- definitions: custom-element custom-element-constructor autonomous-custom-element customized-built-in-element attr-is attr-face-readonly custom-element-definition concept-custom-element-definition-name concept-custom-element-definition-local-name concept-custom-element-definition-constructor concept-custom-element-definition-observed-attributes concept-custom-element-definition-lifecycle-callbacks concept-custom-element-definition-construction-stack concept-already-constructed-marker concept-custom-element-definition-form-associated concept-custom-element-definition-disable-internals concept-custom-element-definition-disable-shadow -->
 
-- [ ] [form-associated custom element](https://html.spec.whatwg.org/#form-associated-custom-element) — An autonomous custom element is called a form-associated custom element if the element is associated with a custom element definition whose form-associated field is set to true.
+- [x] [form-associated custom element](https://html.spec.whatwg.org/#form-associated-custom-element) — An autonomous custom element is called a form-associated custom element if the element is associated with a custom element definition whose form-associated field is set to true.
 
-- [ ] [valid custom element name](https://html.spec.whatwg.org/#valid-custom-element-name) — A string name is a valid custom element name if all of the following are true:
+- [x] [valid custom element name](https://html.spec.whatwg.org/#valid-custom-element-name) — A string name is a valid custom element name if all of the following are true:
 
-- [ ] [look up a custom element definition](https://html.spec.whatwg.org/#look-up-a-custom-element-definition) — To look up a custom element definition, given null or a CustomElementRegistry object registry, string-or-null namespace, string localName, and string-or-null is, perform the following steps. They will return either a custom element definition or null:
+- [x] [look up a custom element definition](https://html.spec.whatwg.org/#look-up-a-custom-element-definition) — To look up a custom element definition, given null or a CustomElementRegistry object registry, string-or-null namespace, string localName, and string-or-null is, perform the following steps. They will return either a custom element definition or null:
   - 1. If registry is null, then return null.
   - 2. If namespace is not the HTML namespace, then return null.
   - 3. If registry's custom element definition set contains an item with name and local name both equal to localName, then return that item.
@@ -72,22 +74,24 @@ Status: unreviewed
 
 #### [4.13.4 The CustomElementRegistry interface](https://html.spec.whatwg.org/#custom-elements-api)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `CustomElementRegistry`; `define()` takes a factory rather than a constructor, and `whenDefined()` a callback rather than returning a promise. `Window.customElements` is `LocalDOMWindow::CustomElements`.
+> Fixed: `upgrade()` upgraded elements of other registries.
 <!-- definitions: active-custom-element-constructor-map is-scoped scoped-document-set custom-element-definition-set element-definition-is-running when-defined-promise-map element-definition -->
 
-- [ ] [Window.customElements](https://html.spec.whatwg.org/#dom-window-customelements) — The Window customElements getter steps are:
+- [x] [Window.customElements](https://html.spec.whatwg.org/#dom-window-customelements) — The Window customElements getter steps are:
   - 1. Assert: this's associated Document's custom element registry is a CustomElementRegistry object.
   - 2. Return this's associated Document's custom element registry.
 
-- [ ] [look up a custom element registry](https://html.spec.whatwg.org/#look-up-a-custom-element-registry) — To look up a custom element registry, given a Node object node:
+- [x] [look up a custom element registry](https://html.spec.whatwg.org/#look-up-a-custom-element-registry) — To look up a custom element registry, given a Node object node:
   - 1. If node is an Element object, then return node's custom element registry.
   - 2. If node is a ShadowRoot object, then return node's custom element registry.
   - 3. If node is a Document object, then return node's custom element registry.
   - 4. Return null.
 
-- [ ] [new CustomElementRegistry()](https://html.spec.whatwg.org/#dom-customelementregistry) — The new CustomElementRegistry() constructor steps are to set this's is scoped to true.
+- [x] [new CustomElementRegistry()](https://html.spec.whatwg.org/#dom-customelementregistry) — The new CustomElementRegistry() constructor steps are to set this's is scoped to true.
 
-- [ ] [CustomElementRegistry.define(name, constructor, options)](https://html.spec.whatwg.org/#dom-customelementregistry-define) — The define(name, constructor, options) method steps are:
+- [x] [CustomElementRegistry.define(name, constructor, options)](https://html.spec.whatwg.org/#dom-customelementregistry-define) — The define(name, constructor, options) method steps are:
   - 1. If IsConstructor(constructor) is false, then throw a TypeError.
   - 2. If name is not a valid custom element name, then throw a "SyntaxError" DOMException.
   - 3. If this's custom element definition set contains an item with name name, then throw a "NotSupportedError" DOMException.
@@ -133,31 +137,31 @@ Status: unreviewed
     - 19a. Resolve this's when-defined promise map[name] with constructor.
     - 19b. Remove this's when-defined promise map[name].
 
-- [ ] [upgrade particular elements within a document](https://html.spec.whatwg.org/#upgrade-particular-elements-within-a-document) — To upgrade particular elements within a document given a CustomElementRegistry object registry, a Document object document, a custom element definition definition, a string localName, and optionally a string name (default localName):
+- [x] [upgrade particular elements within a document](https://html.spec.whatwg.org/#upgrade-particular-elements-within-a-document) — To upgrade particular elements within a document given a CustomElementRegistry object registry, a Document object document, a custom element definition definition, a string localName, and optionally a string name (default localName):
   - 1. Let upgradeCandidates be all elements that are shadow-including descendants of document, whose custom element registry is registry, whose namespace is the HTML namespace, and whose local name is localName, in shadow-including tree order. Additionally, if name is not localName, only include elements whose is value is equal to name.
   - 2. For each element element of upgradeCandidates: enqueue a custom element upgrade reaction given element and definition.
 
-- [ ] [CustomElementRegistry.get(name)](https://html.spec.whatwg.org/#dom-customelementregistry-get) — The get(name) method steps are:
+- [x] [CustomElementRegistry.get(name)](https://html.spec.whatwg.org/#dom-customelementregistry-get) — The get(name) method steps are:
   - 1. If this's custom element definition set contains an item with name name, then return that item's constructor.
   - 2. Return undefined.
 
-- [ ] [CustomElementRegistry.getName(constructor)](https://html.spec.whatwg.org/#dom-customelementregistry-getname) — The getName(constructor) method steps are:
+- [x] [CustomElementRegistry.getName(constructor)](https://html.spec.whatwg.org/#dom-customelementregistry-getname) — The getName(constructor) method steps are:
   - 1. If this's custom element definition set contains an item with constructor constructor, then return that item's name.
   - 2. Return null.
 
-- [ ] [CustomElementRegistry.whenDefined(name)](https://html.spec.whatwg.org/#dom-customelementregistry-whendefined) — The whenDefined(name) method steps are:
+- [x] [CustomElementRegistry.whenDefined(name)](https://html.spec.whatwg.org/#dom-customelementregistry-whendefined) — The whenDefined(name) method steps are:
   - 1. If name is not a valid custom element name, then return a promise rejected with a "SyntaxError" DOMException.
   - 2. If this's custom element definition set contains an item with name name, then return a promise resolved with that item's constructor.
   - 3. If this's when-defined promise map[name] does not exist, then set this's when-defined promise map[name] to a new promise.
   - 4. Return this's when-defined promise map[name].
 
-- [ ] [CustomElementRegistry.upgrade(root)](https://html.spec.whatwg.org/#dom-customelementregistry-upgrade) — The upgrade(root) method steps are:
+- [x] [CustomElementRegistry.upgrade(root)](https://html.spec.whatwg.org/#dom-customelementregistry-upgrade) — The upgrade(root) method steps are:
   - 1. For each shadow-including inclusive descendant candidate of root, in shadow-including tree order:
     - 1a. If candidate is not an Element node, then continue.
     - 1b. If candidate's custom element registry is not this, then continue.
     - 1c. Try to upgrade candidate.
 
-- [ ] [CustomElementRegistry.initialize(root)](https://html.spec.whatwg.org/#dom-customelementregistry-initialize) — The initialize(root) method steps are:
+- [x] [CustomElementRegistry.initialize(root)](https://html.spec.whatwg.org/#dom-customelementregistry-initialize) — The initialize(root) method steps are:
   - 1. If this's is scoped is false and either root is a Document node or root's node document's custom element registry is not this, then throw a "NotSupportedError" DOMException.
   - 2. If root is a Document node whose custom element registry is null, then set root's custom element registry to this.
   - 3. Otherwise, if root is a ShadowRoot node whose custom element registry is null, then set root's custom element registry to this.
@@ -171,9 +175,10 @@ Status: unreviewed
 
 #### [4.13.5 Upgrades](https://html.spec.whatwg.org/#upgrades)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `CustomElementInterface::UpgradeElement` and `CustomElementReactionQueue::TryToUpgradeElement`; there's no construction stack or active constructor map, as the factory is given the element.
 
-- [ ] [upgrade an element](https://html.spec.whatwg.org/#concept-upgrade-an-element) — To upgrade an element, given as input a custom element definition definition and an element element, run the following steps:
+- [x] [upgrade an element](https://html.spec.whatwg.org/#concept-upgrade-an-element) — To upgrade an element, given as input a custom element definition definition and an element element, run the following steps:
   - 1. If element's custom element state is not "undefined" or "uncustomized", then return.
   - 2. Set element's custom element definition to definition.
   - 3. Set element's custom element state to "failed".
@@ -199,18 +204,19 @@ Status: unreviewed
     - 11b. If element is disabled, then enqueue a custom element callback reaction with element, callback name "formDisabledCallback", and « true ».
   - 12. Set element's custom element state to "custom".
 
-- [ ] [try to upgrade an element](https://html.spec.whatwg.org/#concept-try-upgrade) — To try to upgrade an element given an element element:
+- [x] [try to upgrade an element](https://html.spec.whatwg.org/#concept-try-upgrade) — To try to upgrade an element given an element element:
   - 1. Let definition be the result of looking up a custom element definition given element's custom element registry, element's namespace, element's local name, and element's is value.
   - 2. If definition is not null, then enqueue a custom element upgrade reaction given element and definition.
 
 #### [4.13.6 Custom element reactions](https://html.spec.whatwg.org/#custom-element-reactions)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `CustomElementReactionQueue`, `CustomElementQueue` and `CEReactionsScope`; every callback is enqueued, as behaviours are C++ classes (see `DIFFERENCES.md`), and the backup element queue is global (see `KNOWN-ISSUES.md`).
 <!-- definitions: custom-element-reactions-stack current-element-queue element-queue backup-element-queue processing-the-backup-element-queue custom-element-reaction-queue upgrade-reaction callback-reaction -->
 
-- [ ] [custom element reactions](https://html.spec.whatwg.org/#concept-custom-element-reaction) — We call these reactions collectively custom element reactions.
+- [x] [custom element reactions](https://html.spec.whatwg.org/#concept-custom-element-reaction) — We call these reactions collectively custom element reactions.
 
-- [ ] [enqueue an element on the appropriate element queue](https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue) — To enqueue an element on the appropriate element queue, given an element element, run the following steps:
+- [x] [enqueue an element on the appropriate element queue](https://html.spec.whatwg.org/#enqueue-an-element-on-the-appropriate-element-queue) — To enqueue an element on the appropriate element queue, given an element element, run the following steps:
   - 1. Let reactionsStack be element's relevant agent's custom element reactions stack.
   - 2. If reactionsStack is empty:
     - 2a. Add element to reactionsStack's backup element queue.
@@ -221,7 +227,7 @@ Status: unreviewed
       - 2d.ii. Unset reactionsStack's processing the backup element queue flag.
   - 3. Otherwise, add element to element's relevant agent's current element queue.
 
-- [ ] [enqueue a custom element callback reaction](https://html.spec.whatwg.org/#enqueue-a-custom-element-callback-reaction) — To enqueue a custom element callback reaction, given a custom element element, a callback name callbackName, and a list of arguments args, run the following steps:
+- [x] [enqueue a custom element callback reaction](https://html.spec.whatwg.org/#enqueue-a-custom-element-callback-reaction) — To enqueue a custom element callback reaction, given a custom element element, a callback name callbackName, and a list of arguments args, run the following steps:
   - 1. Let definition be element's custom element definition.
   - 2. Let callback be the value of the entry in definition's lifecycle callbacks with key callbackName.
   - 3. If callbackName is "connectedMoveCallback" and callback is null:
@@ -238,18 +244,18 @@ Status: unreviewed
   - 6. Add a new callback reaction to element's custom element reaction queue, with callback function callback and arguments args.
   - 7. Enqueue an element on the appropriate element queue given element.
 
-- [ ] [enqueue a custom element upgrade reaction](https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction) — To enqueue a custom element upgrade reaction, given an element element and custom element definition definition, run the following steps:
+- [x] [enqueue a custom element upgrade reaction](https://html.spec.whatwg.org/#enqueue-a-custom-element-upgrade-reaction) — To enqueue a custom element upgrade reaction, given an element element and custom element definition definition, run the following steps:
   - 1. Add a new upgrade reaction to element's custom element reaction queue, with custom element definition definition.
   - 2. Enqueue an element on the appropriate element queue given element.
 
-- [ ] [invoke custom element reactions](https://html.spec.whatwg.org/#invoke-custom-element-reactions) — To invoke custom element reactions in an element queue queue, run the following steps:
+- [x] [invoke custom element reactions](https://html.spec.whatwg.org/#invoke-custom-element-reactions) — To invoke custom element reactions in an element queue queue, run the following steps:
   - 1. While queue is not empty:
     - 1a. Let element be the result of dequeuing from queue.
     - 1b. Let reactions be element's custom element reaction queue.
     - 1c. Repeat until reactions is empty:
       - 1c.i. Remove the first element of reactions, and let reaction be that element. Switch on reaction's type: upgrade reaction Upgrade element using reaction's custom element definition. If this throws an exception, catch it, and report it for reaction's custom element definition's constructor's corresponding JavaScript object's associated realm's global object. callback reaction Invoke reaction's callback…
 
-- [ ] [Operations, attributes, setters, or deleters annotated with the [CEReactions] e…](https://html.spec.whatwg.org/#cereactions) — Operations, attributes, setters, or deleters annotated with the [CEReactions] extended attribute must run the following steps in place of the ones specified in their description:
+- [x] [Operations, attributes, setters, or deleters annotated with the [CEReactions] e…](https://html.spec.whatwg.org/#cereactions) — Operations, attributes, setters, or deleters annotated with the [CEReactions] extended attribute must run the following steps in place of the ones specified in their description:
   - 1. Push a new element queue onto this object's relevant agent's custom element reactions stack.
   - 2. Run the originally-specified steps for this construct, catching any exceptions. If the steps return a value, let value be the returned value. If they throw an exception, let exception be the thrown exception.
   - 3. Let queue be the result of popping from this object's relevant agent's custom element reactions stack.
@@ -259,10 +265,12 @@ Status: unreviewed
 
 #### [4.13.7 Element internals](https://html.spec.whatwg.org/#element-internals)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::AttachInternals`.
+> Fixed: an element with an `is` value could attach internals.
 <!-- definitions: attached-internals -->
 
-- [ ] [HTMLElement.attachInternals()](https://html.spec.whatwg.org/#dom-attachinternals) — The attachInternals() method steps are:
+- [x] [HTMLElement.attachInternals()](https://html.spec.whatwg.org/#dom-attachinternals) — The attachInternals() method steps are:
   - 1. If this's is value is not null, then throw a "NotSupportedError" DOMException.
   - 2. Let definition be the result of looking up a custom element definition given this's custom element registry, this's namespace, this's local name, and null.
   - 3. If definition is null, then throw a "NotSupportedError" DOMException.
@@ -274,14 +282,16 @@ Status: unreviewed
 
 ##### [4.13.7.1 The ElementInternals interface](https://html.spec.whatwg.org/#the-elementinternals-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `ElementInternals`.
 <!-- definitions: internals-target -->
 
 ##### [4.13.7.2 Shadow root access](https://html.spec.whatwg.org/#shadow-root-access)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `ElementInternals::ShadowRoot`.
 
-- [ ] [ElementInternals.shadowRoot](https://html.spec.whatwg.org/#dom-elementinternals-shadowroot) — The shadowRoot getter steps are:
+- [x] [ElementInternals.shadowRoot](https://html.spec.whatwg.org/#dom-elementinternals-shadowroot) — The shadowRoot getter steps are:
   - 1. Let target be this's target element.
   - 2. If target is not a shadow host, then return null.
   - 3. Let shadow be target's shadow root.
@@ -290,10 +300,12 @@ Status: unreviewed
 
 ##### [4.13.7.3 Form-associated custom elements](https://html.spec.whatwg.org/#form-associated-custom-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `FormAssociatedCustomElement`; state is restored only in the restore mode (see `KNOWN-ISSUES.md`).
+> Fixed: `setValidity()` didn't normalize the message's newlines.
 <!-- definitions: face-submission-value face-state face-validation-message face-validation-anchor -->
 
-- [ ] [ElementInternals.setFormValue(value, state)](https://html.spec.whatwg.org/#dom-elementinternals-setformvalue) — The setFormValue(value, state) method steps are:
+- [x] [ElementInternals.setFormValue(value, state)](https://html.spec.whatwg.org/#dom-elementinternals-setformvalue) — The setFormValue(value, state) method steps are:
   - 1. Let element be this's target element.
   - 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
   - 3. Set element's submission value to value if value is not a FormData object, or to a clone of value's entry list otherwise.
@@ -301,7 +313,7 @@ Status: unreviewed
   - 5. Otherwise, if state is a FormData object, set element's state to a clone of state's entry list.
   - 6. Otherwise, set element's state to state.
 
-- [ ] [ElementInternals.setValidity(flags, message, anchor)](https://html.spec.whatwg.org/#dom-elementinternals-setvalidity) — The setValidity(flags, message, anchor) method steps are:
+- [x] [ElementInternals.setValidity(flags, message, anchor)](https://html.spec.whatwg.org/#dom-elementinternals-setvalidity) — The setValidity(flags, message, anchor) method steps are:
   - 1. Let element be this's target element.
   - 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
   - 3. If message is not given, then set it to the empty string.
@@ -314,24 +326,26 @@ Status: unreviewed
   - 10. Otherwise, if anchor is not a shadow-including inclusive descendant of element, then throw a "NotFoundError" DOMException.
   - 11. Set element's validation anchor to anchor.
 
-- [ ] [ElementInternals.validationMessage](https://html.spec.whatwg.org/#dom-elementinternals-validationmessage) — The validationMessage getter steps are:
+- [x] [ElementInternals.validationMessage](https://html.spec.whatwg.org/#dom-elementinternals-validationmessage) — The validationMessage getter steps are:
   - 1. Let element be this's target element.
   - 2. If element is not a form-associated custom element, then throw a "NotSupportedError" DOMException.
   - 3. Return element's validation message.
 
-- [ ] [entry construction algorithm](https://html.spec.whatwg.org/#face-entry-construction) — The entry construction algorithm for a form-associated custom element, given an element element and an entry list entry list, consists of the following steps:
+- [x] [entry construction algorithm](https://html.spec.whatwg.org/#face-entry-construction) — The entry construction algorithm for a form-associated custom element, given an element element and an entry list entry list, consists of the following steps:
   - 1. If element's submission value is a list of entries, then append each item of element's submission value to entry list, and return.
   - 2. If the element does not have a name attribute specified, or its name attribute's value is the empty string, then return.
   - 3. If the element's submission value is not null, create an entry with the name attribute value and the submission value, and append it to entry list.
 
 ##### [4.13.7.4 Accessibility semantics](https://html.spec.whatwg.org/#accessibility-semantics)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> There's no ARIA reflection on `ElementInternals` (see `KNOWN-ISSUES.md`).
 <!-- definitions: internal-content-attribute-map -->
 
 ##### [4.13.7.5 Custom state pseudo-class](https://html.spec.whatwg.org/#custom-state-pseudo-class)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `CustomStateSet` and `:state()`.
 <!-- definitions: states-set -->
 
-- [ ] [HTMLElement.states](https://html.spec.whatwg.org/#dom-elementinternals-states) — The states getter steps are to return this's target element's states set.
+- [x] [HTMLElement.states](https://html.spec.whatwg.org/#dom-elementinternals-states) — The states getter steps are to return this's target element's states set.

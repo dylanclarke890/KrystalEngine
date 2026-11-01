@@ -4,6 +4,7 @@
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMaybeFormAssociatedCustomElement.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -40,43 +41,70 @@ namespace krys::boo::html
     return _element;
   }
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-setvalidity
   dom::ExceptionOr<void> FormAssociatedCustomElement::SetValidity(ValidityStateFlags flags,
                                                                   dom::DOMString &&message,
                                                                   HTMLElement *validationAnchor) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 
+    // 3. If message is not given, then set it to the empty string.
+    // 4. If flags contains one or more true values and message is the empty string, then throw a TypeError.
     if (!flags.IsValid() && message.empty())
     {
       return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
+    // 5. Set message to the result of normalizing newlines given message.
+    // 6. For each entry flag → value of flags, set element's validity flag with the name flag to value.
+    // 7. Set element's validation message to the empty string if all of element's validity flags are false;
+    //    otherwise to message.
+    // 8. If element's customError validity flag is true, then set element's custom validity error message to
+    //    element's validation message. Otherwise, set element's custom validity error message to the empty
+    //    string.
+    // (The validation message is the custom validity error message, and customError is a flag.)
     _validityStateFlags = flags;
-    SetCustomValidationMessage(flags.IsValid() ? dom::DOMStringView() : dom::DOMStringView(message));
+    SetCustomValidationMessage(flags.IsValid() ? dom::DOMString()
+                                               : infra::StringAlgorithms::NormalizeNewlines(message));
 
+    // 9. If anchor is not given, then set it to element.
+    // 10. Otherwise, if anchor is not a shadow-including inclusive descendant of element, then throw a
+    //     "NotFoundError" DOMException.
     if (validationAnchor
         && !dom::TreeQueries::IsShadowIncludingInclusiveAncestor(_element, *validationAnchor))
     {
       return dom::Exception {dom::ExceptionCode::NotFoundError};
     }
 
+    // 11. Set element's validation anchor to anchor.
+    // (Null for the element, as ValidationAnchorElement gives.)
     _validationAnchor = CreateWeakPtr(validationAnchor);
 
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-validationmessage
   dom::DOMString FormAssociatedCustomElement::ValidationMessage() const noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
+
+    // 3. Return element's validation message.
     return CustomValidationMessage();
   }
 
+  // https://html.spec.whatwg.org/#dom-elementinternals-setformvalue
   void FormAssociatedCustomElement::SetFormValue(CustomElementFormValue &&submissionValue,
                                                  Maybe<CustomElementFormValue> &&state) noexcept
   {
     krys_debug_assert(_element.IsPrecustomizedOrDefinedCustomElement());
 
+    // 3. Set element's submission value to value if value is not a FormData object, or to a clone of value's
+    //    entry list otherwise.
     _submissionValue = CloneIfIsFormData(krys::move(submissionValue));
+
+    // 4. If the state argument of the function is omitted, set element's state to its submission value.
+    // 5. Otherwise, if state is a FormData object, set element's state to a clone of state's entry list.
+    // 6. Otherwise, set element's state to state.
     _state = state.has_value() ? CloneIfIsFormData(krys::move(*state)) : _submissionValue;
   }
 
@@ -93,10 +121,17 @@ namespace krys::boo::html
     return _validityStateFlags.IsValid();
   }
 
+  // https://html.spec.whatwg.org/#face-entry-construction
   bool FormAssociatedCustomElement::AppendFormData(DOMFormData &formData) noexcept
   {
     krys_debug_assert(_element.IsDefinedCustomElement());
 
+    // 1. If element's submission value is a list of entries, then append each item of element's submission
+    //    value to entry list, and return.
+    // 2. If the element does not have a name attribute specified, or its name attribute's value is the empty
+    //    string, then return.
+    // 3. If the element's submission value is not null, create an entry with the name attribute value and the
+    //    submission value, and append it to entry list.
     if (auto *entries = std::get_if<RefPtr<DOMFormData>>(&_submissionValue))
     {
       if (*entries)

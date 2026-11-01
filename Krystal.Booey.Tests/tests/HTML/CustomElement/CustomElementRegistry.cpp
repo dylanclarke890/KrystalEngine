@@ -20,7 +20,10 @@
 namespace krys::boo::html::tests
 {
 
-  TEST_CASE_METHOD(CustomElementFixture, "CustomElementRegistry defines elements", "[HTML][CustomElement]")
+  TEST_CASE_METHOD(CustomElementFixture, "CustomElementRegistry defines elements",
+                   "[HTML][CustomElement][html:valid-custom-element-name]"
+                   "[html:dom-customelementregistry-define][html:dom-customelementregistry-get]"
+                   "[html:dom-customelementregistry-getname][html:dom-customelementregistry-whendefined]")
   {
     SECTION("names must be valid custom element names")
     {
@@ -73,7 +76,8 @@ namespace krys::boo::html::tests
 
   TEST_CASE_METHOD(
     CustomElementFixture, "Custom elements are created by the parser and createElement",
-    "[HTML][CustomElement][dom:concept-create-element][dom:concept-element-custom-element-definition]")
+    "[HTML][CustomElement][dom:concept-create-element][dom:concept-element-custom-element-definition]"
+    "[html:look-up-a-custom-element-definition]")
   {
     Define(u8"x-widget", {u8"value"});
 
@@ -127,7 +131,9 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom elements are upgraded when they're defined late",
-                   "[HTML][CustomElement]")
+                   "[HTML][CustomElement][html:upgrade-particular-elements-within-a-document]"
+                   "[html:dom-customelementregistry-upgrade][html:concept-upgrade-an-element]"
+                   "[html:concept-try-upgrade][html:enqueue-a-custom-element-upgrade-reaction]")
   {
     SECTION("defining a name upgrades the document's elements in tree order")
     {
@@ -165,10 +171,20 @@ namespace krys::boo::html::tests
       CHECK(element->IsDefinedCustomElement());
       CHECK(TakeCalls() == Log {u8"constructed"});
     }
+
+    SECTION("upgrade() only upgrades the elements of its own registry")
+    {
+      auto element = Create(u8"x-late");
+      Define(u8"x-late");
+      auto scoped = CustomElementRegistry::CreateScoped();
+      scoped->Upgrade(*element);
+      CHECK(element->IsCustomElementUpgradeCandidate());
+      CHECK(TakeCalls().empty());
+    }
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom elements fail when their factory gives no behaviour",
-                   "[HTML][CustomElement][dom:concept-create-element]")
+                   "[HTML][CustomElement][dom:concept-create-element][html:concept-upgrade-an-element]")
   {
     REQUIRE_FALSE(Registry()
                     .Define(u8"x-broken", [](HTMLElement &) { return UniquePtr<CustomElement> {}; })
@@ -198,7 +214,11 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom element callbacks",
-                   "[HTML][CustomElement][dom:handle-attribute-changes]")
+                   "[HTML][CustomElement][dom:handle-attribute-changes]"
+                   "[html:enqueue-a-custom-element-callback-reaction]"
+                   "[html:enqueue-an-element-on-the-appropriate-element-queue]"
+                   "[html:invoke-custom-element-reactions][html:cereactions]"
+                   "[html:concept-custom-element-reaction]")
   {
     Define(u8"x-widget", {u8"value", u8"style"});
     Parse(u8"<div id=parent><x-widget id=a></x-widget><p id=p></p></div>");
@@ -282,7 +302,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(CustomElementFixture, "Custom element definitions can disable shadow roots",
-                   "[HTML][CustomElement][dom:concept-attach-a-shadow-root]")
+                   "[HTML][CustomElement][dom:concept-attach-a-shadow-root][html:concept-upgrade-an-element]")
   {
     REQUIRE_FALSE(Registry()
                     .Define(u8"x-closed", [this](HTMLElement &element)
@@ -310,7 +330,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(CustomElementFixture, "Scoped custom element registries", "[HTML][CustomElement]")
+  TEST_CASE_METHOD(CustomElementFixture, "Scoped custom element registries",
+                   "[HTML][CustomElement][html:dom-customelementregistry]"
+                   "[html:look-up-a-custom-element-registry][html:dom-customelementregistry-initialize]")
   {
     auto scoped = CustomElementRegistry::CreateScoped();
     REQUIRE_FALSE(scoped
@@ -325,6 +347,17 @@ namespace krys::boo::html::tests
 
     auto global = Create(u8"x-scoped");
     CHECK(global->IsCustomElementUpgradeCandidate());
+
+    SECTION("initialize() sets only the registries that are null, and a global registry only in its document")
+    {
+      auto initializeDocument = Registry().Initialize(*Document);
+      REQUIRE(initializeDocument.HasException());
+      CHECK(initializeDocument.GetException().Code() == dom::ExceptionCode::NotSupportedError);
+
+      REQUIRE_FALSE(scoped->Initialize(*global).HasException());
+      CHECK(global->CustomElementRegistry().get() == &Registry());
+      CHECK(global->IsCustomElementUpgradeCandidate());
+    }
 
     SECTION("a definition added later upgrades the scope's connected elements")
     {
