@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFontElement.hpp"
 #include "charconv"
 #include "Krystal.Booey/CSS/Values/ValueList.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -14,32 +14,32 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFontElement::Color() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"color").value_or(u8"");
   }
 
   void HTMLFontElement::Color(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"color", krys::move(value));
   }
 
   dom::DOMString HTMLFontElement::Face() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"face").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"face").value_or(u8"");
   }
 
   void HTMLFontElement::Face(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"face", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"face", krys::move(value));
   }
 
   dom::DOMString HTMLFontElement::Size() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"size").value_or(u8"");
   }
 
   void HTMLFontElement::Size(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"size", krys::move(value));
   }
 
   namespace

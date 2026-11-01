@@ -9,7 +9,7 @@
 #include "Krystal.Booey/DOM/RadioButtonGroups.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/FileInputType.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
@@ -77,52 +77,52 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::Accept() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"accept").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"accept").value_or(u8"");
   }
 
   void HTMLInputElement::Accept(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"accept", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"accept", krys::move(value));
   }
 
   bool HTMLInputElement::Alpha() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"alpha");
+    return Reflect<bool>(*this, u8"alpha");
   }
 
   void HTMLInputElement::Alpha(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"alpha", krys::move(value));
+    Reflect<bool>(*this, u8"alpha", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Alt() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"alt").value_or(u8"");
   }
 
   void HTMLInputElement::Alt(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Autocomplete() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
   }
 
   void HTMLInputElement::Autocomplete(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
   bool HTMLInputElement::DefaultChecked() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"checked");
+    return Reflect<bool>(*this, u8"checked");
   }
 
   void HTMLInputElement::DefaultChecked(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"checked", krys::move(value));
+    Reflect<bool>(*this, u8"checked", krys::move(value));
   }
 
   void HTMLInputElement::SetChecked(bool isChecked, WasSetByJavaScript wasCheckedByJavaScript) noexcept
@@ -169,22 +169,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::DirName() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
   }
 
   void HTMLInputElement::DirName(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
   }
 
   bool HTMLInputElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLInputElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::USVString HTMLInputElement::FormAction() const noexcept
@@ -209,53 +209,53 @@ namespace krys::boo::html
 
   void HTMLInputElement::FormAction(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
+    return ReflectSetter<dom::USVString>(*this, u8"formaction", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::FormEnctype() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"formenctype").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"formenctype").value_or(u8"");
   }
 
   void HTMLInputElement::FormEnctype(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"formenctype", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::FormMethod() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"formmethod").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"formmethod").value_or(u8"");
   }
 
   void HTMLInputElement::FormMethod(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"formmethod", krys::move(value));
   }
 
   void HTMLInputElement::FormNoValidate(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
+    Reflect<bool>(*this, u8"formnovalidate", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::FormTarget() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"formtarget").value_or(u8"");
   }
 
   void HTMLInputElement::FormTarget(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"formtarget", krys::move(value));
   }
 
   uint32 HTMLInputElement::Height() const noexcept
   {
     // FIXME: An image button's rendered height (or its image's), with the image input type's renderer.
-    return Reflection::Reflect<uint32>(*this, u8"height");
+    return Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLInputElement::Height(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
+    Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   void HTMLInputElement::SetIndeterminate(bool newValue) noexcept
@@ -278,32 +278,32 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::Max() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"max").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"max").value_or(u8"");
   }
 
   void HTMLInputElement::Max(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"max", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"max", krys::move(value));
   }
 
   void HTMLInputElement::MaxLength(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"maxlength", krys::move(value));
+    Reflect<int32>(*this, u8"maxlength", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Min() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"min").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"min").value_or(u8"");
   }
 
   void HTMLInputElement::Min(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"min", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"min", krys::move(value));
   }
 
   void HTMLInputElement::MinLength(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"minlength", krys::move(value));
+    Reflect<int32>(*this, u8"minlength", krys::move(value));
   }
 
   bool HTMLInputElement::Multiple() const noexcept
@@ -313,7 +313,7 @@ namespace krys::boo::html
 
   void HTMLInputElement::Multiple(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"multiple", krys::move(value));
+    Reflect<bool>(*this, u8"multiple", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Name() const noexcept
@@ -323,17 +323,17 @@ namespace krys::boo::html
 
   void HTMLInputElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Pattern() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"pattern").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"pattern").value_or(u8"");
   }
 
   void HTMLInputElement::Pattern(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"pattern", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"pattern", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Placeholder() const noexcept
@@ -351,27 +351,27 @@ namespace krys::boo::html
 
   void HTMLInputElement::Placeholder(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
   }
 
   bool HTMLInputElement::ReadOnly() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"readonly");
+    return Reflect<bool>(*this, u8"readonly");
   }
 
   void HTMLInputElement::ReadOnly(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"readonly", krys::move(value));
+    Reflect<bool>(*this, u8"readonly", krys::move(value));
   }
 
   bool HTMLInputElement::Required() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"required");
+    return Reflect<bool>(*this, u8"required");
   }
 
   void HTMLInputElement::Required(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"required", krys::move(value));
+    Reflect<bool>(*this, u8"required", krys::move(value));
   }
 
   uint32 HTMLInputElement::Size() const noexcept
@@ -394,22 +394,22 @@ namespace krys::boo::html
 
   dom::USVString HTMLInputElement::Src() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
+    return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLInputElement::Src(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::Step() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"step").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"step").value_or(u8"");
   }
 
   void HTMLInputElement::Step(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"step", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"step", krys::move(value));
   }
 
   void HTMLInputElement::Type(dom::DOMString &&value) noexcept
@@ -531,12 +531,12 @@ namespace krys::boo::html
   uint32 HTMLInputElement::Width() const noexcept
   {
     // FIXME: An image button's rendered width (or its image's), with the image input type's renderer.
-    return Reflection::Reflect<uint32>(*this, u8"width");
+    return Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLInputElement::Width(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+    Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   dom::ExceptionOr<void> HTMLInputElement::StepUp(int n) noexcept
@@ -2118,22 +2118,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::Align() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLInputElement::Align(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
   dom::DOMString HTMLInputElement::UseMap() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"usemap").value_or(u8"");
   }
 
   void HTMLInputElement::UseMap(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"usemap", krys::move(value));
   }
 
 #pragma endregion

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTableRowElement.hpp"
@@ -82,42 +82,42 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTableSectionElement::Align() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLTableSectionElement::Align(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
   dom::DOMString HTMLTableSectionElement::Char() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
   }
 
   void HTMLTableSectionElement::Char(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
   }
 
   dom::DOMString HTMLTableSectionElement::CharOff() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
   void HTMLTableSectionElement::CharOff(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
   }
 
   dom::DOMString HTMLTableSectionElement::VAlign() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
   }
 
   void HTMLTableSectionElement::VAlign(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
   }
 
 #pragma endregion

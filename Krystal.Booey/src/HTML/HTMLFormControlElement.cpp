@@ -4,7 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
@@ -262,7 +262,7 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormControlElement::PopoverTargetAction() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"popovertargetaction");
+    auto value = Reflect<dom::DOMString>(*this, u8"popovertargetaction");
     return EnumeratedAttribute<"popovertargetaction", HTMLFormControlElement>::ResolveCanonicalKeyword<
       dom::DOMString>(krys::move(value));
   }
@@ -270,7 +270,7 @@ namespace krys::boo::html
   void HTMLFormControlElement::PopoverTargetAction(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"popovertargetaction", krys::move(value));
   }
 
   void HTMLFormControlElement::HandlePopoverTargetAction(dom::EventTarget *eventTarget) noexcept

@@ -3942,7 +3942,7 @@ target_sources(Krystal.Booey
       include/Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp
       include/Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp
       include/Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp
-      include/Krystal.Booey/HTML/Attributes/Reflection.hpp
+      include/Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp
       include/Krystal.Booey/HTML/Attributes/States/CORSSettingsState.hpp
       include/Krystal.Booey/HTML/Attributes/States/TranslateState.hpp
       include/Krystal.Booey/HTML/CustomElement/CustomElement.hpp

@@ -25,7 +25,7 @@
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementRegistry.hpp"
@@ -72,29 +72,29 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::Title() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"title").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"title").value_or(u8"");
   }
 
   void HTMLElement::Title(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"title", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"title", krys::move(value));
   }
 
   dom::DOMString HTMLElement::Lang() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"lang").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"lang").value_or(u8"");
   }
 
   void HTMLElement::Lang(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"lang", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"lang", krys::move(value));
   }
 
   bool HTMLElement::Translate() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"translate");
+    auto value = Reflect<dom::DOMString>(*this, u8"translate");
     auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(value);
     return state == AttributeState::Yes;
   }
@@ -102,12 +102,12 @@ namespace krys::boo::html
   void HTMLElement::Translate(bool value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
+    Reflect<dom::DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
   }
 
   dom::DOMString HTMLElement::Dir() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"dir");
+    auto value = Reflect<dom::DOMString>(*this, u8"dir");
     return EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
       krys::move(value));
   }
@@ -115,12 +115,12 @@ namespace krys::boo::html
   void HTMLElement::Dir(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"dir", krys::move(value));
   }
 
   BoolOr<dom::DOMString> HTMLElement::Hidden() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"hidden");
+    auto value = Reflect<dom::DOMString>(*this, u8"hidden");
 
     auto state = EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
     if (state == AttributeState::UntilFound)
@@ -186,13 +186,13 @@ namespace krys::boo::html
 
   bool HTMLElement::Inert() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"inert");
+    return Reflect<bool>(*this, u8"inert");
   }
 
   void HTMLElement::Inert(bool value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<bool>(*this, u8"inert", krys::move(value));
+    Reflect<bool>(*this, u8"inert", krys::move(value));
   }
 
   bool HTMLElement::CanBeActuallyDisabled() const noexcept
@@ -235,13 +235,13 @@ namespace krys::boo::html
 
   dom::DOMString HTMLElement::AccessKey() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"accesskey").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"accesskey").value_or(u8"");
   }
 
   void HTMLElement::AccessKey(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"accesskey", krys::move(value));
   }
 
   bool HTMLElement::AccessKeyAction(bool sendMouseEvents) noexcept
@@ -263,7 +263,7 @@ namespace krys::boo::html
 
   bool HTMLElement::Draggable() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"draggable");
+    auto value = Reflect<dom::DOMString>(*this, u8"draggable");
     switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
     {
       case AttributeState::True:  return true;
@@ -289,7 +289,7 @@ namespace krys::boo::html
 
   bool HTMLElement::SpellCheck() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"spellcheck");
+    auto value = Reflect<dom::DOMString>(*this, u8"spellcheck");
     switch (EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(value))
     {
       case AttributeState::True:  return true;
@@ -325,7 +325,7 @@ namespace krys::boo::html
   void HTMLElement::WritingSuggestions(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
+    ReflectSetter(*this, u8"writingsuggestions", krys::move(value));
   }
 
   dom::DOMString HTMLElement::Autocapitalize() const noexcept
@@ -342,7 +342,7 @@ namespace krys::boo::html
   void HTMLElement::Autocapitalize(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::ReflectSetter(*this, u8"autocapitalize", krys::move(value));
+    ReflectSetter(*this, u8"autocapitalize", krys::move(value));
   }
 
   bool HTMLElement::Autocorrect() const noexcept
@@ -533,7 +533,7 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLElement::Popover() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"popover");
+    auto value = Reflect<dom::DOMString>(*this, u8"popover");
     return EnumeratedAttribute<"popover", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
       krys::move(value));
   }
@@ -541,27 +541,27 @@ namespace krys::boo::html
   void HTMLElement::Popover(Maybe<dom::DOMString> &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"popover", krys::move(value));
+    Reflect<Maybe<dom::DOMString>>(*this, u8"popover", krys::move(value));
   }
 
   uint32 HTMLElement::HeadingOffset() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
+    return Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
   }
 
   void HTMLElement::HeadingOffset(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"headingoffset", krys::move(value));
+    Reflect<uint32>(*this, u8"headingoffset", krys::move(value));
   }
 
   bool HTMLElement::HeadingReset() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"headingreset");
+    return Reflect<bool>(*this, u8"headingreset");
   }
 
   void HTMLElement::HeadingReset(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"headingreset", krys::move(value));
+    Reflect<bool>(*this, u8"headingreset", krys::move(value));
   }
 
 #pragma endregion

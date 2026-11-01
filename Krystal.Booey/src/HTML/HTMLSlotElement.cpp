@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -17,12 +17,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLSlotElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLSlotElement::Name(dom::DOMString &&name) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(name));
   }
 
   List<Ref<dom::Node>> HTMLSlotElement::AssignedNodes(const AssignedNodesOptions &options) noexcept

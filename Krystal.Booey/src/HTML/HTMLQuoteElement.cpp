@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLQuoteElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -12,12 +12,12 @@ namespace krys::boo::html
 
   dom::USVString HTMLQuoteElement::Cite() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite");
+    return ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
   void HTMLQuoteElement::Cite(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }
 
 #pragma endregion

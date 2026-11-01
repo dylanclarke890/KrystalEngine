@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLPreElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -13,12 +13,12 @@ namespace krys::boo::html
 
   int32 HTMLPreElement::Width() const noexcept
   {
-    return Reflection::Reflect<int32>(*this, u8"width");
+    return Reflect<int32>(*this, u8"width");
   }
 
   void HTMLPreElement::Width(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"width", krys::move(value));
+    Reflect<int32>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion

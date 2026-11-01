@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOutputElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 namespace krys::boo::html
@@ -45,12 +45,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLOutputElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLOutputElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect(*this, u8"name", krys::move(value));
+    Reflect(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLOutputElement::Value() const noexcept

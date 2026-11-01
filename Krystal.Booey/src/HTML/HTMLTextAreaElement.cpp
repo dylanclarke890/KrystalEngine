@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
@@ -520,116 +520,112 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTextAreaElement::Autocomplete() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
   }
 
   void HTMLTextAreaElement::Autocomplete(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
   uint32 HTMLTextAreaElement::Cols() const noexcept
   {
-    return Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(*this,
-                                                                                                 u8"cols");
+    return ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(*this, u8"cols");
   }
 
   void HTMLTextAreaElement::Cols(uint32 value) noexcept
   {
-    (void)Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(
-      *this, u8"cols", value);
+    ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultCols}>(*this, u8"cols", value);
   }
 
   dom::DOMString HTMLTextAreaElement::DirName() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"dirname").value_or(u8"");
   }
 
   void HTMLTextAreaElement::DirName(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"dirname", krys::move(value));
   }
 
   bool HTMLTextAreaElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLTextAreaElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   void HTMLTextAreaElement::MaxLength(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"maxlength", krys::move(value));
+    Reflect<int32>(*this, u8"maxlength", krys::move(value));
   }
 
   void HTMLTextAreaElement::MinLength(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"minlength", krys::move(value));
+    Reflect<int32>(*this, u8"minlength", krys::move(value));
   }
 
   dom::DOMString HTMLTextAreaElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLTextAreaElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLTextAreaElement::Placeholder() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"placeholder").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"placeholder").value_or(u8"");
   }
 
   void HTMLTextAreaElement::Placeholder(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"placeholder", krys::move(value));
   }
 
   bool HTMLTextAreaElement::ReadOnly() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"readonly");
+    return Reflect<bool>(*this, u8"readonly");
   }
 
   void HTMLTextAreaElement::ReadOnly(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"readonly", krys::move(value));
+    Reflect<bool>(*this, u8"readonly", krys::move(value));
   }
 
   bool HTMLTextAreaElement::Required() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"required");
+    return Reflect<bool>(*this, u8"required");
   }
 
   void HTMLTextAreaElement::Required(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"required", krys::move(value));
+    Reflect<bool>(*this, u8"required", krys::move(value));
   }
 
   uint32 HTMLTextAreaElement::Rows() const noexcept
   {
-    return Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(*this,
-                                                                                                 u8"rows");
+    return ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(*this, u8"rows");
   }
 
   void HTMLTextAreaElement::Rows(uint32 value) noexcept
   {
-    (void)Reflection::ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(
-      *this, u8"rows", value);
+    ReflectPositiveWithFallback<uint32, ReflectDefault<uint32> {DefaultRows}>(*this, u8"rows", value);
   }
 
   dom::DOMString HTMLTextAreaElement::Wrap() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"wrap").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"wrap").value_or(u8"");
   }
 
   void HTMLTextAreaElement::Wrap(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"wrap", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"wrap", krys::move(value));
   }
 
 #pragma endregion

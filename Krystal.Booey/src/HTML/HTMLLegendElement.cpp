@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 
@@ -33,12 +33,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLegendElement::Align() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLLegendElement::Align(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
 #pragma endregion

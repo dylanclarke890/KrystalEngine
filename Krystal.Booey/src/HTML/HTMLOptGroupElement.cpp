@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
@@ -18,22 +18,22 @@ namespace krys::boo::html
 
   bool HTMLOptGroupElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLOptGroupElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::DOMString HTMLOptGroupElement::Label() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"label").value_or(u8"");
   }
 
   void HTMLOptGroupElement::Label(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
   }
 
 #pragma endregion
@@ -66,7 +66,8 @@ namespace krys::boo::html
       return;
     }
 
-    if (RefPtr<HTMLSelectElement> select = ShareRefPtr(HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::Yes)))
+    if (RefPtr<HTMLSelectElement> select = ShareRefPtr(
+          HTMLSelectElement::FindOwnerSelect(ParentNode(), HTMLSelectElement::ExcludeOptGroup::Yes)))
     {
       _ownerSelect = select;
       select->SetRecalcListItems();

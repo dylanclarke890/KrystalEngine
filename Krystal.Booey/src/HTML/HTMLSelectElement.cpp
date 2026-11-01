@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
@@ -2134,52 +2134,52 @@ namespace krys::boo::html
 
   dom::DOMString HTMLSelectElement::Autocomplete() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
   }
 
   void HTMLSelectElement::Autocomplete(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"autocomplete", krys::move(value));
   }
 
   bool HTMLSelectElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLSelectElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   void HTMLSelectElement::Multiple(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"multiple", krys::move(value));
+    Reflect<bool>(*this, u8"multiple", krys::move(value));
   }
 
   dom::DOMString HTMLSelectElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLSelectElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   bool HTMLSelectElement::Required() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"required");
+    return Reflect<bool>(*this, u8"required");
   }
 
   void HTMLSelectElement::Required(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"required", krys::move(value));
+    Reflect<bool>(*this, u8"required", krys::move(value));
   }
 
   void HTMLSelectElement::Size(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"size", krys::move(value));
+    Reflect<uint32>(*this, u8"size", krys::move(value));
   }
 
 #pragma endregion

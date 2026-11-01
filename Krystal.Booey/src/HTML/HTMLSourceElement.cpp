@@ -2,7 +2,7 @@
 #include "Krystal.Booey/CSS/Parser/ParserContext.hpp"
 #include "Krystal.Booey/CSS/Queries/MediaQueryParser.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLPictureElement.hpp"
 
@@ -16,72 +16,72 @@ namespace krys::boo::html
 
   dom::USVString HTMLSourceElement::Src() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
+    return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLSourceElement::Src(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::DOMString HTMLSourceElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLSourceElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::USVString HTMLSourceElement::SrcSet() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"srcset");
+    return Reflect<dom::USVString>(*this, u8"srcset");
   }
 
   void HTMLSourceElement::SrcSet(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
+    return Reflect<dom::USVString>(*this, u8"srcset", krys::move(value));
   }
 
   dom::DOMString HTMLSourceElement::Sizes() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"sizes").value_or(u8"");
   }
 
   void HTMLSourceElement::Sizes(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"sizes", krys::move(value));
   }
 
   dom::DOMString HTMLSourceElement::Media() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
   void HTMLSourceElement::Media(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
 
   uint32 HTMLSourceElement::Width() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"width");
+    return Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLSourceElement::Width(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+    Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLSourceElement::Height() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"height");
+    return Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLSourceElement::Height(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
+    Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion

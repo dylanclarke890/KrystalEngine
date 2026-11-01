@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTableColElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLTableElement.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Rendering/RenderTableCol.hpp"
@@ -37,13 +37,12 @@ namespace krys::boo::html
 
   uint32 HTMLTableColElement::Span() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1u, 1'000u}>(
-      *this, u8"span");
+    return Reflect<uint32, ReflectDefault<uint32> {1}, ReflectRange<uint32> {1u, 1'000u}>(*this, u8"span");
   }
 
   void HTMLTableColElement::Span(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32, ReflectDefault<uint32> {1}>(*this, u8"span", krys::move(value));
+    Reflect<uint32, ReflectDefault<uint32> {1}>(*this, u8"span", krys::move(value));
   }
 
 #pragma endregion
@@ -52,52 +51,52 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTableColElement::Align() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLTableColElement::Align(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
   dom::DOMString HTMLTableColElement::Char() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"char").value_or(u8"");
   }
 
   void HTMLTableColElement::Char(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"char", krys::move(value));
   }
 
   dom::DOMString HTMLTableColElement::CharOff() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"charoff").value_or(u8"");
   }
 
   void HTMLTableColElement::CharOff(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"charoff", krys::move(value));
   }
 
   dom::DOMString HTMLTableColElement::VAlign() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"valign").value_or(u8"");
   }
 
   void HTMLTableColElement::VAlign(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"valign", krys::move(value));
   }
 
   dom::DOMString HTMLTableColElement::Width() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
   void HTMLTableColElement::Width(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
 
 #pragma endregion

@@ -3,7 +3,7 @@
 #include "Krystal.Booey/CSS/UserAgentStyleSheets.hpp"
 #include "Krystal.Booey/CSS/Values/UnitType.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLDivElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
@@ -74,7 +74,7 @@ namespace krys::boo::html
 
     void SetDoubleAttribute(HTMLMeterElement &element, dom::DOMStringAtom name, double value) noexcept
     {
-      Reflection::Reflect<double>(element, name, krys::move(value));
+      Reflect<double>(element, name, krys::move(value));
     }
   }
 

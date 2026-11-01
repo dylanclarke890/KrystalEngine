@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLProgressElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Booey/HTML/Shadow/ProgressShadowElement.hpp"
 #include "Krystal.Booey/Rendering/RenderProgress.hpp"
@@ -88,7 +88,7 @@ namespace krys::boo::html
 
   void HTMLProgressElement::Value(double value) noexcept
   {
-    Reflection::Reflect<double>(*this, u8"value", krys::move(value));
+    Reflect<double>(*this, u8"value", krys::move(value));
   }
 
   double HTMLProgressElement::Max() const noexcept
@@ -101,7 +101,7 @@ namespace krys::boo::html
   {
     if (max > 0)
     {
-      Reflection::Reflect<double>(*this, u8"max", krys::move(max));
+      Reflect<double>(*this, u8"max", krys::move(max));
     }
   }
 

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLModElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -12,22 +12,22 @@ namespace krys::boo::html
 
   dom::USVString HTMLModElement::Cite() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite");
+    return ReflectURL<dom::USVString>(*this, u8"cite");
   }
 
   void HTMLModElement::Cite(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"cite", krys::move(value));
   }
 
   dom::DOMString HTMLModElement::DateTime() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
   void HTMLModElement::DateTime(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
   }
 
 #pragma endregion

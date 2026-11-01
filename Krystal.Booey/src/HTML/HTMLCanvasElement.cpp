@@ -6,7 +6,7 @@
 #include "Krystal.Booey/Graphics/GraphicsContext.hpp"
 #include "Krystal.Booey/Graphics/ImageBuffer.hpp"
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Canvas/CanvasRenderingContext2D.hpp"
 #include "Krystal.Booey/HTML/Canvas/EngineTextureRenderingContext.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -33,22 +33,22 @@ namespace krys::boo::html
 
   uint32 HTMLCanvasElement::Width() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
+    return Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
   }
 
   void HTMLCanvasElement::Width(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width", value);
+    Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width", value);
   }
 
   uint32 HTMLCanvasElement::Height() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height");
+    return Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height");
   }
 
   void HTMLCanvasElement::Height(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
+    Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
   }
 
   RefPtr<CanvasRenderingContext> HTMLCanvasElement::GetContext(dom::DOMStringView contextId) noexcept

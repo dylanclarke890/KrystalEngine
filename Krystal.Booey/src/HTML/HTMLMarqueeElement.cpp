@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLMarqueeElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -11,52 +11,52 @@ namespace krys::boo::html
 
   dom::DOMString HTMLMarqueeElement::Behavior() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"behavior").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"behavior").value_or(u8"");
   }
 
   void HTMLMarqueeElement::Behavior(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"behavior", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"behavior", krys::move(value));
   }
 
   dom::DOMString HTMLMarqueeElement::BgColor() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
   void HTMLMarqueeElement::BgColor(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
   dom::DOMString HTMLMarqueeElement::Direction() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"direction").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"direction").value_or(u8"");
   }
 
   void HTMLMarqueeElement::Direction(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"direction", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"direction", krys::move(value));
   }
 
   dom::DOMString HTMLMarqueeElement::Height() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
   }
 
   void HTMLMarqueeElement::Height(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
   }
 
   dom::DOMString HTMLMarqueeElement::Width() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
   void HTMLMarqueeElement::Width(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
 
   bool HTMLMarqueeElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/CSS/Values/ImageValue.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -15,62 +15,62 @@ namespace krys::boo::html
 
   dom::DOMString HTMLBodyElement::Text() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"text").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"text").value_or(u8"");
   }
 
   void HTMLBodyElement::Text(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"text", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"text", krys::move(value));
   }
 
   dom::DOMString HTMLBodyElement::Link() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"link").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"link").value_or(u8"");
   }
 
   void HTMLBodyElement::Link(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"link", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"link", krys::move(value));
   }
 
   dom::DOMString HTMLBodyElement::VLink() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"vlink").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"vlink").value_or(u8"");
   }
 
   void HTMLBodyElement::VLink(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"vlink", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"vlink", krys::move(value));
   }
 
   dom::DOMString HTMLBodyElement::ALink() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"alink").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"alink").value_or(u8"");
   }
 
   void HTMLBodyElement::ALink(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"alink", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"alink", krys::move(value));
   }
 
   dom::DOMString HTMLBodyElement::BgColor() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"bgcolor").value_or(u8"");
   }
 
   void HTMLBodyElement::BgColor(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"bgcolor", krys::move(value));
   }
 
   dom::DOMString HTMLBodyElement::Background() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"background").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"background").value_or(u8"");
   }
 
   void HTMLBodyElement::Background(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"background", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"background", krys::move(value));
   }
 
 #pragma endregion

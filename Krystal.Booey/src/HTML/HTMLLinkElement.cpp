@@ -11,7 +11,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceRequest.hpp"
@@ -664,44 +664,44 @@ namespace krys::boo::html
 
   dom::USVString HTMLLinkElement::Href() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"href");
+    return ReflectURL<dom::USVString>(*this, u8"href");
   }
 
   void HTMLLinkElement::Href(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   Maybe<dom::DOMString> HTMLLinkElement::CrossOrigin() const noexcept
   {
     return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
-      Reflection::Reflect<dom::DOMString>(*this, u8"crossorigin"));
+      Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
   void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
   {
-    Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
+    Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::Rel() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
   void HTMLLinkElement::Rel(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::As() const noexcept
   {
     // FIXME: This is an enumerated attribute but I don't know the states/keywords.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"as").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"as").value_or(u8"");
   }
 
   void HTMLLinkElement::As(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"as", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"as", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::RelList() noexcept
@@ -720,42 +720,42 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::Media() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
   void HTMLLinkElement::Media(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::Integrity() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"integrity").value_or(u8"");
   }
 
   void HTMLLinkElement::Integrity(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"integrity", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::HrefLang() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
   }
 
   void HTMLLinkElement::HrefLang(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLLinkElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Sizes() noexcept
@@ -770,33 +770,33 @@ namespace krys::boo::html
 
   dom::USVString HTMLLinkElement::ImageSrcset() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"imagesrcset");
+    return Reflect<dom::USVString>(*this, u8"imagesrcset");
   }
 
   void HTMLLinkElement::ImageSrcset(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
+    return Reflect<dom::USVString>(*this, u8"imagesrcset", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::ImageSizes() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"imagesizes").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"imagesizes").value_or(u8"");
   }
 
   void HTMLLinkElement::ImageSizes(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"imagesizes", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"imagesizes", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
   {
     return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLLinkElement::ReferrerPolicy(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
   KRYS_NODISCARD dom::DOMTokenList &HTMLLinkElement::Blocking() noexcept
@@ -816,23 +816,23 @@ namespace krys::boo::html
     // FIXME: Whenever the disabled attribute is removed, set the link element's
     // explicitly enabled attribute to true. This is more than just changing this method because the attribute
     // can be set in other ways.
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLLinkElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::FetchPriority() const noexcept
   {
     return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority"));
+      Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
   void HTMLLinkElement::FetchPriority(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"fetchpriority", krys::move(value));
   }
 
 #pragma endregion
@@ -841,32 +841,32 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::Charset() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
   }
 
   void HTMLLinkElement::Charset(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::Rev() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
   }
 
   void HTMLLinkElement::Rev(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
   }
 
   dom::DOMString HTMLLinkElement::Target() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
   void HTMLLinkElement::Target(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }
 
 #pragma endregion

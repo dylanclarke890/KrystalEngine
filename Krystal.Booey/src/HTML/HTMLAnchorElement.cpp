@@ -8,7 +8,7 @@
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -74,42 +74,42 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAnchorElement::Target() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"target").value_or(u8"");
   }
 
   void HTMLAnchorElement::Target(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"target", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Download() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"download").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"download").value_or(u8"");
   }
 
   void HTMLAnchorElement::Download(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"download", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"download", krys::move(value));
   }
 
   dom::USVString HTMLAnchorElement::Ping() const noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"ping");
+    return Reflect<dom::USVString>(*this, u8"ping");
   }
 
   void HTMLAnchorElement::Ping(dom::USVString &&value) noexcept
   {
-    return Reflection::Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
+    return Reflect<dom::USVString>(*this, u8"ping", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Rel() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"rel").value_or(u8"");
   }
 
   void HTMLAnchorElement::Rel(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"rel", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLAnchorElement::RelList() noexcept
@@ -142,22 +142,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAnchorElement::HrefLang() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"hreflang").value_or(u8"");
   }
 
   void HTMLAnchorElement::HrefLang(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"hreflang", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLAnchorElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Text() const noexcept
@@ -174,12 +174,12 @@ namespace krys::boo::html
   dom::DOMString HTMLAnchorElement::ReferrerPolicy() const noexcept
   {
     return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
-      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
+      Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLAnchorElement::ReferrerPolicy(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"referrerpolicy", krys::move(value));
   }
 
 #pragma endregion
@@ -188,12 +188,12 @@ namespace krys::boo::html
 
   dom::USVString HTMLAnchorElement::Href() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"href");
+    return ReflectURL<dom::USVString>(*this, u8"href");
   }
 
   void HTMLAnchorElement::Href(dom::USVString &&value) noexcept
   {
-    Reflection::ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
+    ReflectURL<dom::USVString>(*this, u8"href", krys::move(value));
   }
 
   dom::USVString HTMLAnchorElement::ToString() const noexcept
@@ -227,52 +227,52 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAnchorElement::Coords() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"coords").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"coords").value_or(u8"");
   }
 
   void HTMLAnchorElement::Coords(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"coords", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"coords", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Charset() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"charset").value_or(u8"");
   }
 
   void HTMLAnchorElement::Charset(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"charset", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLAnchorElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Rev() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"rev").value_or(u8"");
   }
 
   void HTMLAnchorElement::Rev(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"rev", krys::move(value));
   }
 
   dom::DOMString HTMLAnchorElement::Shape() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shape").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"shape").value_or(u8"");
   }
 
   void HTMLAnchorElement::Shape(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"shape", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"shape", krys::move(value));
   }
 
 #pragma endregion

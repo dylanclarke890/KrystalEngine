@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLLIElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -16,12 +16,12 @@ namespace krys::boo::html
 
   int32 HTMLLIElement::Value() const noexcept
   {
-    return Reflection::Reflect<int32>(*this, u8"value");
+    return Reflect<int32>(*this, u8"value");
   }
 
   void HTMLLIElement::Value(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"value", krys::move(value));
+    Reflect<int32>(*this, u8"value", krys::move(value));
   }
 
 #pragma endregion
@@ -30,12 +30,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLIElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLLIElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion

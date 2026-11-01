@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLMenuElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -12,12 +12,12 @@ namespace krys::boo::html
 
   bool HTMLMenuElement::Compact() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLMenuElement::Compact(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
 #pragma endregion

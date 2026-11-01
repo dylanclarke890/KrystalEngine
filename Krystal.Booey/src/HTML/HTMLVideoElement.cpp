@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLVideoElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -13,22 +13,22 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::Width() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"width");
+    return Reflect<uint32>(*this, u8"width");
   }
 
   void HTMLVideoElement::Width(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"width", krys::move(value));
+    Reflect<uint32>(*this, u8"width", krys::move(value));
   }
 
   uint32 HTMLVideoElement::Height() const noexcept
   {
-    return Reflection::Reflect<uint32>(*this, u8"height");
+    return Reflect<uint32>(*this, u8"height");
   }
 
   void HTMLVideoElement::Height(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"height", krys::move(value));
+    Reflect<uint32>(*this, u8"height", krys::move(value));
   }
 
   uint32 HTMLVideoElement::VideoWidth() const noexcept
@@ -45,22 +45,22 @@ namespace krys::boo::html
 
   dom::USVString HTMLVideoElement::Poster() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster");
+    return ReflectURL<dom::USVString>(*this, u8"poster");
   }
 
   void HTMLVideoElement::Poster(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"poster", krys::move(value));
   }
 
   bool HTMLVideoElement::PlaysInline() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"playsinline");
+    return Reflect<bool>(*this, u8"playsinline");
   }
 
   void HTMLVideoElement::PlaysInline(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"playsinline", krys::move(value));
+    Reflect<bool>(*this, u8"playsinline", krys::move(value));
   }
 
 #pragma endregion

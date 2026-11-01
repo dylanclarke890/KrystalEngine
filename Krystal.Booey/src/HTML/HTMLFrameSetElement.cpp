@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -11,22 +11,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFrameSetElement::Cols() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"cols").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"cols").value_or(u8"");
   }
 
   void HTMLFrameSetElement::Cols(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"cols", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"cols", krys::move(value));
   }
 
   dom::DOMString HTMLFrameSetElement::Rows() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"rows").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"rows").value_or(u8"");
   }
 
   void HTMLFrameSetElement::Rows(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"rows", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"rows", krys::move(value));
   }
 
   bool HTMLFrameSetElement::HasPresentationalHintsForAttribute(dom::DOMStringAtom localName,

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLLegendElement.hpp"
 #include "Krystal.Booey/Rendering/RenderElement.hpp"
@@ -212,23 +212,23 @@ namespace krys::boo::html
 
   bool HTMLFieldSetElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLFieldSetElement::Disabled(bool value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   dom::DOMString HTMLFieldSetElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLFieldSetElement::Name(dom::DOMString &&value) noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    return Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion

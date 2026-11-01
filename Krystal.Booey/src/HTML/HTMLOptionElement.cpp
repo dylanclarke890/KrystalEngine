@@ -3,7 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHRElement.hpp"
@@ -88,12 +88,12 @@ namespace krys::boo::html
 
   bool HTMLOptionElement::Disabled() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"disabled");
+    return Reflect<bool>(*this, u8"disabled");
   }
 
   void HTMLOptionElement::Disabled(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"disabled", krys::move(value));
+    Reflect<bool>(*this, u8"disabled", krys::move(value));
   }
 
   HTMLFormElement *HTMLOptionElement::Form() const noexcept
@@ -116,17 +116,17 @@ namespace krys::boo::html
 
   void HTMLOptionElement::Label(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"label", krys::move(value));
   }
 
   bool HTMLOptionElement::DefaultSelected() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"selected");
+    return Reflect<bool>(*this, u8"selected");
   }
 
   void HTMLOptionElement::DefaultSelected(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"selected", krys::move(value));
+    Reflect<bool>(*this, u8"selected", krys::move(value));
   }
 
   bool HTMLOptionElement::Selected(AllowStyleInvalidation allowStyleInvalidation) const noexcept
@@ -165,7 +165,7 @@ namespace krys::boo::html
 
   void HTMLOptionElement::Value(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }
 
   dom::DOMString HTMLOptionElement::Text() const noexcept

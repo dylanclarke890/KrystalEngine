@@ -22,14 +22,19 @@ namespace krys::boo::html
   class FormAssociatedCustomElement;
   class HTMLElement;
   class HTMLFormElement;
-  class Reflection;
+  class ElementInternals;
+
+  namespace detail
+  {
+    KRYS_NODISCARD inline HTMLElement *GetElement(ElementInternals &internals) noexcept;
+  }
 
   /// @brief What a custom element's behaviour reaches its element through: its closed shadow root, its
   /// custom states, and, for a form-associated custom element, its form value, validity and labels.
   /// @see https://html.spec.whatwg.org/#elementinternals
   class ElementInternals : public RefCounted<ElementInternals>
   {
-    friend class Reflection;
+    friend HTMLElement *detail::GetElement(ElementInternals &internals) noexcept;
 
   private:
     WeakPtr<HTMLElement> _target;

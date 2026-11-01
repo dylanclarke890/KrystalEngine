@@ -6,7 +6,7 @@
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/Style/Scope.hpp"
 
@@ -51,12 +51,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLStyleElement::Media() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"media").value_or(u8"");
   }
 
   void HTMLStyleElement::Media(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"media", krys::move(value));
   }
 
   dom::DOMTokenList &HTMLStyleElement::Blocking() noexcept
@@ -77,12 +77,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLStyleElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLStyleElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion

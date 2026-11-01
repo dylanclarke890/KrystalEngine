@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLDataElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -12,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLDataElement::Value() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"value").value_or(u8"");
   }
 
   void HTMLDataElement::Value(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"value", krys::move(value));
   }
 
 #pragma endregion

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLUListElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 
@@ -14,22 +14,22 @@ namespace krys::boo::html
 
   bool HTMLUListElement::Compact() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLUListElement::Compact(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
   dom::DOMString HTMLUListElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLUListElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion

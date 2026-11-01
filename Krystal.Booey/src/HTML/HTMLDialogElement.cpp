@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/ToggleEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FocusAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CloseWatcher/CloseWatcher.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
@@ -39,18 +39,18 @@ namespace krys::boo::html
 
   bool HTMLDialogElement::Open() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"open");
+    return Reflect<bool>(*this, u8"open");
   }
 
   void HTMLDialogElement::Open(bool value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<bool>(*this, u8"open", krys::move(value));
+    Reflect<bool>(*this, u8"open", krys::move(value));
   }
 
   dom::DOMString HTMLDialogElement::ClosedBy() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"closedby");
+    auto value = Reflect<dom::DOMString>(*this, u8"closedby");
     return EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveCanonicalKeyword<dom::DOMString>(
       krys::move(value));
   }
@@ -58,7 +58,7 @@ namespace krys::boo::html
   void HTMLDialogElement::ClosedBy(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    Reflection::Reflect<dom::DOMString>(*this, u8"closedby", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"closedby", krys::move(value));
   }
 
   dom::ExceptionOr<void> HTMLDialogElement::Show() noexcept
@@ -126,7 +126,7 @@ namespace krys::boo::html
 
   HTMLDialogElement::ClosedByState HTMLDialogElement::ComputedClosedByState() const noexcept
   {
-    auto value = Reflection::Reflect<dom::DOMString>(*this, u8"closedby");
+    auto value = Reflect<dom::DOMString>(*this, u8"closedby");
     switch (EnumeratedAttribute<"closedby", HTMLDialogElement>::ResolveState(value))
     {
       case AttributeState::Any:          return ClosedByState::Any;

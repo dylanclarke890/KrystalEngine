@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTimeElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -12,12 +12,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTimeElement::DateTime() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"datetime").value_or(u8"");
   }
 
   void HTMLTimeElement::DateTime(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"datetime", krys::move(value));
   }
 
 #pragma endregion

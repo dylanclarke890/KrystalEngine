@@ -7,7 +7,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSummaryElement.hpp"
 #include "Krystal.Booey/Platform/LocalizedStrings.hpp"
@@ -37,22 +37,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLDetailsElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLDetailsElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
   bool HTMLDetailsElement::Open() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"open");
+    return Reflect<bool>(*this, u8"open");
   }
 
   void HTMLDetailsElement::Open(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"open", krys::move(value));
+    Reflect<bool>(*this, u8"open", krys::move(value));
   }
 
 #pragma endregion

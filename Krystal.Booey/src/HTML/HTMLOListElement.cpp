@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLOListElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
 #include "Krystal.Booey/Rendering/RenderListItem.hpp"
@@ -62,33 +62,33 @@ namespace krys::boo::html
 
   bool HTMLOListElement::Reversed() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"reversed");
+    return Reflect<bool>(*this, u8"reversed");
   }
 
   void HTMLOListElement::Reversed(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"reversed", krys::move(value));
+    Reflect<bool>(*this, u8"reversed", krys::move(value));
   }
 
   int32 HTMLOListElement::Start() const noexcept
   {
-    return Reflection::Reflect<int32, ReflectDefault<int32>(1)>(*this, u8"start");
+    return Reflect<int32, ReflectDefault<int32>(1)>(*this, u8"start");
   }
 
   void HTMLOListElement::Start(int32 value) noexcept
   {
-    Reflection::Reflect<int32>(*this, u8"start", krys::move(value));
+    Reflect<int32>(*this, u8"start", krys::move(value));
   }
 
   dom::DOMString HTMLOListElement::Type() const noexcept
   {
     // FIXME: Type is an enumerated attribute.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLOListElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
 #pragma endregion
@@ -97,12 +97,12 @@ namespace krys::boo::html
 
   bool HTMLOListElement::Compact() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"compact");
+    return Reflect<bool>(*this, u8"compact");
   }
 
   void HTMLOListElement::Compact(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"compact", krys::move(value));
+    Reflect<bool>(*this, u8"compact", krys::move(value));
   }
 
 #pragma endregion

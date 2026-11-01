@@ -19,7 +19,7 @@ Status: reviewed (2026-11-01)
 #### [2.3.2 Boolean attributes](https://html.spec.whatwg.org/#boolean-attributes)
 
 Status: reviewed (2026-11-01)
-> `Reflection::ReflectBool`: present is true whatever the value, and setting true sets the empty string.
+> `detail::ReflectBool` (`ReflectAttribute.hpp`): present is true whatever the value, and setting true sets the empty string.
 <!-- definitions: boolean-attribute -->
 
 #### [2.3.3 Keywords and enumerated attributes](https://html.spec.whatwg.org/#keywords-and-enumerated-attributes)

@@ -2,7 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
@@ -51,62 +51,62 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootmode").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"shadowrootmode").value_or(u8"");
   }
 
   void HTMLTemplateElement::ShadowRootMode(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootmode", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"shadowrootmode", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootDelegatesFocus() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"shadowrootdelegatesfocus");
+    return Reflect<bool>(*this, u8"shadowrootdelegatesfocus");
   }
 
   void HTMLTemplateElement::ShadowRootDelegatesFocus(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"shadowrootdelegatesfocus", krys::move(value));
+    Reflect<bool>(*this, u8"shadowrootdelegatesfocus", krys::move(value));
   }
 
   dom::DOMString HTMLTemplateElement::ShadowRootSlotAssignment() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment").value_or(u8"");
   }
 
   void HTMLTemplateElement::ShadowRootSlotAssignment(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"shadowrootslotassignment", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootClonable() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"shadowrootclonable");
+    return Reflect<bool>(*this, u8"shadowrootclonable");
   }
 
   void HTMLTemplateElement::ShadowRootClonable(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
+    Reflect<bool>(*this, u8"shadowrootclonable", krys::move(value));
   }
 
   bool HTMLTemplateElement::ShadowRootSerialisable() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"shadowrootserializable");
+    return Reflect<bool>(*this, u8"shadowrootserializable");
   }
 
   void HTMLTemplateElement::ShadowRootSerialisable(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
+    Reflect<bool>(*this, u8"shadowrootserializable", krys::move(value));
   }
 
   dom::DOMString HTMLTemplateElement::ShadowRootCustomElementRegistry() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry").value_or(u8"");
   }
 
   void HTMLTemplateElement::ShadowRootCustomElementRegistry(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"shadowrootcustomelementregistry", krys::move(value));
   }
 
 #pragma endregion

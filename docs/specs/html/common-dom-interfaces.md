@@ -8,12 +8,13 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [2.6 Common DOM interfaces](https://html.spec.whatwg.org/#common-dom-interfaces)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [2.6.1 Reflecting content attributes in IDL attributes](https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes)
 
 Status: reviewed (2026-11-01)
-> `HTML/Attributes/Reflection.hpp`: the getters and setters are its private helpers (`ReflectDOMString`, `ReflectUSVString`, `ReflectBool`, `ReflectLong`, `ReflectUnsignedLong`, `ReflectDouble`); enumerated attributes limited to only known values are `EnumeratedAttribute::ResolveCanonicalKeyword`; `DOMTokenList` attributes are the elements' own (DOM 7.1). Element reflection is `Element::ElementForAttributeInternal` and `SetElementAttribute`.
+> `HTML/Attributes/ReflectAttribute.hpp`: the getters and setters are its `detail` helpers (`ReflectDOMString`, `ReflectUSVString`, `ReflectBool`, `ReflectLong`, `ReflectUnsignedLong`, `ReflectDouble`); enumerated attributes limited to only known values are `EnumeratedAttribute::ResolveCanonicalKeyword`; `DOMTokenList` attributes are the elements' own (DOM 7.1). Element reflection is `Element::ElementForAttributeInternal` and `SetElementAttribute`.
 > Fixed: the `long` getter didn't check the bottom of the range, the `unsigned long` setter wrote the given value rather than the clamped one, the `double` setter didn't write the best representation of the number (`1e-06` for 0.000001), and a clamped range didn't clamp integers too large for `int64` to its maximum.
 > `ElementInternals` targets and `FrozenArray<T>?` attributes (attr-associated elements) are only for ARIA, which waits on accessibility (not planned).
 <!-- definitions: reflected-target reflected-idl-attribute reflected-content-attribute-name reflect get-the-element get-the-content-attribute set-the-content-attribute delete-the-content-attribute limited-to-only-non-negative-numbers limited-to-only-non-negative-numbers-greater-than-zero limited-to-only-non-negative-numbers-greater-than-zero-with-fallback explicitly-set-attr-element explicitly-set-attr-elements cached-attr-associated-elements cached-attr-associated-elements-object -->
@@ -186,7 +187,7 @@ Status: reviewed (2026-11-01)
 #### [2.6.2 Using reflect via IDL extended attributes](https://html.spec.whatwg.org/#using-reflect-via-idl-extended-attributes)
 
 Status: reviewed (2026-11-01)
-> `Reflection::Reflect`, `ReflectSetter`, `ReflectURL`, `ReflectNonNegative`, `ReflectPositive`, `ReflectPositiveWithFallback`, and the `ReflectDefault`/`ReflectRange` template arguments.
+> `Reflect`, `ReflectSetter`, `ReflectURL`, `ReflectNonNegative`, `ReflectPositive`, `ReflectPositiveWithFallback`, and the `ReflectDefault`/`ReflectRange` template arguments.
 <!-- definitions: xattr-reflect xattr-reflectsetter xattr-reflecturl xattr-reflectnonnegative xattr-reflectpositive xattr-reflectpositivewithfallback xattr-reflectrange xattr-reflectdefault -->
 
 #### [2.6.3 Using reflect in specifications](https://html.spec.whatwg.org/#using-reflect-in-specifications)
@@ -201,34 +202,34 @@ Status: reviewed (2026-11-01)
 
 ##### [2.6.4.1 The HTMLAllCollection interface](https://html.spec.whatwg.org/#the-htmlallcollection-interface)
 
-Status: unreviewed
+Status: n/a (document.all is a legacy feature only useful to scripts)
 
-- [ ] [HTMLAllCollection.length](https://html.spec.whatwg.org/#dom-htmlallcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
+- [x] [HTMLAllCollection.length](https://html.spec.whatwg.org/#dom-htmlallcollection-length) — The length getter steps are to return the number of nodes represented by the collection.
 
-- [ ] [HTMLAllCollection.namedItem(name)](https://html.spec.whatwg.org/#dom-htmlallcollection-nameditem) — The namedItem(name) method steps are to return the result of getting the "all"-named element(s) from this given name.
+- [x] [HTMLAllCollection.namedItem(name)](https://html.spec.whatwg.org/#dom-htmlallcollection-nameditem) — The namedItem(name) method steps are to return the result of getting the "all"-named element(s) from this given name.
 
-- [ ] [HTMLAllCollection.item(nameOrIndex)](https://html.spec.whatwg.org/#dom-htmlallcollection-item) — The item(nameOrIndex) method steps are:
+- [x] [HTMLAllCollection.item(nameOrIndex)](https://html.spec.whatwg.org/#dom-htmlallcollection-item) — The item(nameOrIndex) method steps are:
   - 1. If nameOrIndex was not provided, return null.
   - 2. Return the result of getting the "all"-indexed or named element(s) from this, given nameOrIndex.
 
-- [ ] ["all"-named elements](https://html.spec.whatwg.org/#all-named-elements) — The following elements are "all"-named elements: a, button, embed, form, frame, frameset, iframe, img, input, map, meta, object, select, and textarea
+- [x] ["all"-named elements](https://html.spec.whatwg.org/#all-named-elements) — The following elements are "all"-named elements: a, button, embed, form, frame, frameset, iframe, img, input, map, meta, object, select, and textarea
 
-- [ ] [get the "all"-indexed element](https://html.spec.whatwg.org/#concept-get-all-indexed) — To get the "all"-indexed element from an HTMLAllCollection collection given an index index, return the indexth element in collection, or null if there is no such indexth element.
+- [x] [get the "all"-indexed element](https://html.spec.whatwg.org/#concept-get-all-indexed) — To get the "all"-indexed element from an HTMLAllCollection collection given an index index, return the indexth element in collection, or null if there is no such indexth element.
 
-- [ ] [get the "all"-named element(s)](https://html.spec.whatwg.org/#concept-get-all-named) — To get the "all"-named element(s) from an HTMLAllCollection collection given a name name, perform the following steps:
+- [x] [get the "all"-named element(s)](https://html.spec.whatwg.org/#concept-get-all-named) — To get the "all"-named element(s) from an HTMLAllCollection collection given a name name, perform the following steps:
   - 1. If name is the empty string, return null.
   - 2. Let subCollection be an HTMLCollection object rooted at the same Document as collection, whose filter matches only elements that are either: "all"-named elements with a name attribute equal to name, or; elements with an ID equal to name.
   - 3. If there is exactly one element in subCollection, then return that element.
   - 4. Otherwise, if subCollection is empty, return null.
   - 5. Otherwise, return subCollection.
 
-- [ ] [get the "all"-indexed or named element(s)](https://html.spec.whatwg.org/#concept-get-all-indexed-or-named) — To get the "all"-indexed or named element(s) from an HTMLAllCollection collection given nameOrIndex:
+- [x] [get the "all"-indexed or named element(s)](https://html.spec.whatwg.org/#concept-get-all-indexed-or-named) — To get the "all"-indexed or named element(s) from an HTMLAllCollection collection given nameOrIndex:
   - 1. If nameOrIndex, converted to a JavaScript String value, is an array index property name, return the result of getting the "all"-indexed element from collection given the number represented by nameOrIndex.
   - 2. Return the result of getting the "all"-named element(s) from collection given nameOrIndex.
 
 ###### [2.6.4.1.1 [[Call]] ( thisArgument, argumentsList )](https://html.spec.whatwg.org/#HTMLAllCollection-call)
 
-Status: unreviewed
+Status: n/a (document.all is a legacy feature only useful to scripts)
 
 ##### [2.6.4.2 The HTMLFormControlsCollection interface](https://html.spec.whatwg.org/#the-htmlformcontrolscollection-interface)
 

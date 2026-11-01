@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLBRElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Rendering/RenderLineBreak.hpp"
@@ -26,12 +26,12 @@ namespace krys::boo::html
 
   dom::DOMString HTMLBRElement::Clear() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"clear").value_or(u8"");
   }
 
   void HTMLBRElement::Clear(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"clear", krys::move(value));
   }
 
 #pragma endregion

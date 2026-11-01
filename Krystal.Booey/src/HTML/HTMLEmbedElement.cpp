@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
-#include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
+#include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 
 namespace krys::boo::html
@@ -13,42 +13,42 @@ namespace krys::boo::html
 
   dom::USVString HTMLEmbedElement::Src() const noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src");
+    return ReflectURL<dom::USVString>(*this, u8"src");
   }
 
   void HTMLEmbedElement::Src(dom::USVString &&value) noexcept
   {
-    return Reflection::ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
+    return ReflectURL<dom::USVString>(*this, u8"src", krys::move(value));
   }
 
   dom::DOMString HTMLEmbedElement::Type() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"type").value_or(u8"");
   }
 
   void HTMLEmbedElement::Type(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"type", krys::move(value));
   }
 
   dom::DOMString HTMLEmbedElement::Width() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"width").value_or(u8"");
   }
 
   void HTMLEmbedElement::Width(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"width", krys::move(value));
   }
 
   dom::DOMString HTMLEmbedElement::Height() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"height").value_or(u8"");
   }
 
   void HTMLEmbedElement::Height(dom::DOMString value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"height", krys::move(value));
   }
 
 #pragma endregion
@@ -57,22 +57,22 @@ namespace krys::boo::html
 
   dom::DOMString HTMLEmbedElement::Align() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"align").value_or(u8"");
   }
 
   void HTMLEmbedElement::Align(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"align", krys::move(value));
   }
 
   dom::DOMString HTMLEmbedElement::Name() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
+    return Reflect<dom::DOMString>(*this, u8"name").value_or(u8"");
   }
 
   void HTMLEmbedElement::Name(dom::DOMString &&value) noexcept
   {
-    Reflection::Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"name", krys::move(value));
   }
 
 #pragma endregion
