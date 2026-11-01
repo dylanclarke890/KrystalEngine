@@ -2137,7 +2137,7 @@ Status: reviewed (2026-10-31)
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
 Status: reviewed (2026-10-31)
-> > Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
+> Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
 <!-- definitions: concept-live-range concept-range-root contained partially-contained -->
 
 - [x] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
@@ -2391,10 +2391,11 @@ Status: reviewed (2026-10-31)
 
 ## [6. Traversal](https://dom.spec.whatwg.org/#traversal)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> NodeIterator and TreeWalker share `TraversalBase` (`DOM/Internals/TraversalBase.hpp`), which holds the root, whatToShow, filter and is active; filtering is `IteratorAlgorithms::FilterNode`. Without script, a filter is a `NodeFilter` subclass, and its results are the `FilterResult` enumeration.
 <!-- definitions: concept-traversal-active concept-traversal-root concept-traversal-whattoshow concept-traversal-filter -->
 
-- [ ] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
+- [x] [filter](https://dom.spec.whatwg.org/#concept-node-filter) — To filter a node node within a NodeIterator or TreeWalker object traverser:
   - 1. If traverser’s is active is true, then throw an "InvalidStateError" DOMException.
   - 2. Let n be node’s nodeType attribute value − 1.
   - 3. If the nth bit (where 0 is the least significant bit) of traverser’s whatToShow is not set, then return FILTER_SKIP.

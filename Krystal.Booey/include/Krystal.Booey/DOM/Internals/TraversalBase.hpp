@@ -9,6 +9,7 @@ namespace krys::boo::dom
 {
   class Node;
 
+  /// @brief A NodeIterator or TreeWalker: a root, the node types it shows and a filter.
   /// @see https://dom.spec.whatwg.org/#traversal
   class TraversalBase
   {
@@ -18,6 +19,7 @@ namespace krys::boo::dom
     Ref<Node> _root;
     RefPtr<NodeFilter> _filter;
     WhatToShow _whatToShow {WhatToShow::SHOW_ALL};
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-active
     bool _isActive {false};
 
   protected:
@@ -52,6 +54,7 @@ namespace krys::boo::dom
     }
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-active
     KRYS_NODISCARD bool IsActive() const noexcept
     {
       return _isActive;

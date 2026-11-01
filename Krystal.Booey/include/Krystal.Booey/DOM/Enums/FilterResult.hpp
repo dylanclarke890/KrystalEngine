@@ -4,7 +4,8 @@
 
 namespace krys::boo::dom
 {
-  /// @see https://dom.spec.whatwg.org/#concept-traversal-filter
+  /// @brief What a filter returns for a node.
+  /// @see https://dom.spec.whatwg.org/#interface-nodefilter
   enum class FilterResult : uint8
   {
     FILTER_ACCEPT = 1,

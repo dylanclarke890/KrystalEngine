@@ -14,27 +14,43 @@ namespace krys::boo::dom
   ExceptionOr<FilterResult> IteratorAlgorithms::FilterNode(TraversalBase &traverser,
                                                            const Node &node) noexcept
   {
+    // 1. If traverser’s is active is true, then throw an "InvalidStateError" DOMException.
     if (traverser.IsActive())
     {
       return Exception {ExceptionCode::InvalidStateError};
     }
 
-    auto n = 1u << (static_cast<underlying_t<NodeType>>(node.NodeType()) - 1u);
+    // 2. Let n be node’s nodeType attribute value − 1.
+    auto n = static_cast<underlying_t<NodeType>>(node.NodeType()) - 1u;
+
+    // 3. If the nth bit (where 0 is the least significant bit) of traverser’s whatToShow is not set, then
+    // return
+    //    FILTER_SKIP.
     auto whatToShow = static_cast<underlying_t<WhatToShow>>(traverser.WhatToShow());
-    if ((whatToShow & n) == 0u)
+    if ((whatToShow & (1u << n)) == 0u)
     {
       return FilterResult::FILTER_SKIP;
     }
 
+    // 4. If traverser’s filter is null, then return FILTER_ACCEPT.
     if (!traverser.Filter())
     {
       return FilterResult::FILTER_ACCEPT;
     }
 
+    // 5. Set traverser’s is active to true.
     traverser.IsActive(true);
+
+    // 6. Let result be the return value of call a user object’s operation with traverser’s filter,
+    // "acceptNode",
+    //    and « node ». If this throws an exception, then set traverser’s is active to false and rethrow the
+    //    exception.
     auto result = traverser.Filter()->AcceptNode(node);
+
+    // 7. Set traverser’s is active to false.
     traverser.IsActive(false);
 
+    // 8. Return result.
     return result;
   }
 
