@@ -894,11 +894,11 @@ namespace krys::ui::tests
             bytes->Set(i + 3, x < 32u ? 255 : 128);
           }
         }
-        context->PutImageData(*pixels.Value(), 130, 90);
+        REQUIRE_FALSE(context->PutImageData(*pixels.Value(), 130, 90).HasException());
 
         auto read = context->GetImageData(10, 10, 48, 32, {});
         REQUIRE_FALSE(read.HasException());
-        context->PutImageData(*read.Value(), 210, 90);
+        REQUIRE_FALSE(context->PutImageData(*read.Value(), 210, 90).HasException());
         view.UpdateRendering();
       });
   }

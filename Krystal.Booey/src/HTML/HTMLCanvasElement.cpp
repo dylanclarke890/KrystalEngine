@@ -31,6 +31,7 @@ namespace krys::boo::html
 
 #pragma region HTMLCanvasElement
 
+  // https://html.spec.whatwg.org/#dom-canvas-width
   uint32 HTMLCanvasElement::Width() const noexcept
   {
     return Reflect<uint32, ReflectDefault<uint32> {DefaultWidth}>(*this, u8"width");
@@ -51,8 +52,15 @@ namespace krys::boo::html
     Reflect<uint32, ReflectDefault<uint32> {DefaultHeight}>(*this, u8"height", value);
   }
 
+  // https://html.spec.whatwg.org/#dom-canvas-getcontext
   RefPtr<CanvasRenderingContext> HTMLCanvasElement::GetContext(dom::DOMStringView contextId) noexcept
   {
+    // 1. If options is not an object, then set options to null. (Skipped: GetContext2d takes the options.)
+    // 2. Set options to the result of converting options to a JavaScript value. (Skipped: as above.)
+    // 3. Run the steps in the cell of the following table whose column header matches this canvas element's
+    //    canvas context mode and whose row header matches contextId:
+    // (The context mode is the context's type. There's no placeholder mode, as there's no OffscreenCanvas,
+    // and an unsupported value is null in every mode.)
     if (Is2dType(contextId))
     {
       return GetContext2d();
@@ -76,17 +84,32 @@ namespace krys::boo::html
   RefPtr<CanvasRenderingContext2D>
     HTMLCanvasElement::GetContext2d(CanvasRenderingContext2DSettings &&settings) noexcept
   {
+    // none: Let context be the result of running the 2D context creation algorithm given this and options.
+    // Set this's context mode to 2d. Return context.
     if (!_context)
     {
       return ShareRefPtr(CreateContext2d(krys::move(settings)));
     }
+    // 2d: Return the same object as was returned the last time the method was invoked with this same first
+    // argument. Any other mode: Return null.
     return ShareRefPtr(DynamicDowncast<CanvasRenderingContext2D>(_context.get()));
   }
 
+  // https://html.spec.whatwg.org/#2d-context-creation-algorithm
   CanvasRenderingContext2D *
     HTMLCanvasElement::CreateContext2d(CanvasRenderingContext2DSettings &&settings) noexcept
   {
     krys_debug_assert(!_context);
+
+    // 1. Let settings be the result of converting options to the dictionary type
+    //    CanvasRenderingContext2DSettings.
+    // 2. Let context be a new CanvasRenderingContext2D object.
+    // 3. Initialize context's canvas attribute to point to target.
+    // 4. Set context's output bitmap to the same bitmap as target's bitmap (so that they are shared).
+    // 5. Set bitmap dimensions to the numeric values of target's width and height content attributes.
+    // (The bitmap is already that size.)
+    // 6. Run the canvas settings output bitmap initialization algorithm, given context and settings.
+    // 7. Return context.
 
     auto context =
       CanvasRenderingContext2D::Create(*this, krys::move(settings), NodeDocument().InQuirksMode());
@@ -170,10 +193,12 @@ namespace krys::boo::html
     CanvasBase::DidDraw(rect);
   }
 
+  // https://html.spec.whatwg.org/#concept-canvas-set-bitmap-dimensions
   void HTMLCanvasElement::DidUpdateSizeProperties() noexcept
   {
     const bool hadImageBuffer = HasCreatedImageBuffer();
 
+    // 1. Reset the rendering context to its default state.
     if (auto *context = DynamicDowncast<CanvasRenderingContext2D>(_context.get()))
     {
       context->Reset();
@@ -183,6 +208,15 @@ namespace krys::boo::html
       ResetGraphicsContextState();
     }
 
+    // 2. Resize the output bitmap to the new width and height.
+    // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
+    // 4. If the numeric value of canvas's width content attribute differs from width, then set canvas's width
+    //    content attribute to the shortest possible string representing width as a valid non-negative
+    //    integer.
+    // 5. If the numeric value of canvas's height content attribute differs from height, then set canvas's
+    //    height content attribute to the shortest possible string representing height as a valid non-negative
+    //    integer.
+    // (The new size is the attributes', so they don't differ.)
     IntSize oldSize = Size();
     IntSize newSize(static_cast<int32>(Width()), static_cast<int32>(Height()));
     // If the size of an existing buffer matches, we can just clear it instead of reallocating.
@@ -453,25 +487,45 @@ namespace krys::boo::html
     return quality;
   }
 
+  // https://html.spec.whatwg.org/#dom-canvas-todataurl
   dom::DOMString HTMLCanvasElement::ToDataURL(dom::DOMStringView mimeType, Maybe<double> quality) noexcept
   {
+    // 1. FIXME: If this canvas element's bitmap's origin-clean flag is set to false, then throw a
+    //    "SecurityError" DOMException, once there are origins.
+
+    // 2. If this canvas element's bitmap has no pixels (i.e. either its horizontal dimension or its vertical
+    //    dimension is zero), then return the string "data:,".
     if (Size().IsEmpty())
     {
       return u8"data:,";
     }
 
+    // 3. Let file be a serialization of this canvas element's bitmap as a file, passing type and quality if
+    //    given.
     auto encodingMIMEType = ToEncodingMimeType(mimeType);
     auto buffer = MakeRenderingResultsAvailable();
+
+    // 4. If file is null, then return "data:,".
     if (!buffer)
     {
       return u8"data:,";
     }
+
+    // 5. Return a data: URL representing file.
     return buffer->ToDataURL(encodingMIMEType, QualityInRange(quality));
   }
 
+  // https://html.spec.whatwg.org/#dom-canvas-toblob
   void HTMLCanvasElement::ToBlob(Func<void(RefPtr<Blob> &&)> &&callback, dom::DOMStringView mimeType,
                                  Maybe<double> quality) noexcept
   {
+    // 1. FIXME: If this canvas element's bitmap's origin-clean flag is set to false, then throw a
+    //    "SecurityError" DOMException, once there are origins.
+
+    // 4. Run these steps in parallel:
+    // 4b. Queue an element task on the canvas blob serialization task source given the canvas element to run
+    //     these steps: [...] Invoke callback with « result » and "report".
+    // (The serialisation isn't in parallel.)
     auto &document = NodeDocument();
     auto scheduleCallback = [&](RefPtr<Blob> &&blob)
     {
@@ -480,6 +534,9 @@ namespace krys::boo::html
                                      { callback(krys::move(blob)); });
     };
 
+    // 2. Let result be null.
+    // 3. If this canvas element's bitmap has pixels (i.e., neither its horizontal dimension nor its vertical
+    //    dimension is zero), then set result to a copy of this canvas element's bitmap.
     if (Size().IsEmpty())
     {
       scheduleCallback(nullptr);
@@ -494,6 +551,11 @@ namespace krys::boo::html
       return;
     }
 
+    // 4a. If result is non-null, then set result to a serialization of result as a file with type and quality
+    //     if given.
+    // 4b.i. If result is non-null, then set result to a new Blob object, created in the relevant realm of
+    // this
+    //       canvas element, representing result.
     auto blobData = buffer->ToData(encodingMIMEType, QualityInRange(quality));
     RefPtr<Blob> blob;
     if (!blobData.empty())

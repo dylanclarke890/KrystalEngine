@@ -253,17 +253,23 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#reset-the-rendering-context-to-its-default-state
   void CanvasRenderingContext2DBase::Reset() noexcept
   {
+    // 3. Clear the context's drawing state stack.
     UnwindStateStack();
 
+    // 4. Reset everything that drawing state consists of to their initial values.
     krys_debug_assert(_stateStack.size() == 1);
     _stateStack.front() = State();
 
+    // 2. Empty the list of subpaths in context's current default path.
     _path.Clear();
+    _hasInvertibleTransform = true;
     _unrealizedSaveCount = 0;
     _hasDeferredOperations = false;
     ClearAccumulatedDirtyRect();
+    // 1. Clear canvas's bitmap to transparent black.
     if (auto *c = ExistingDrawingContext())
     {
       GetCanvasBase().ResetGraphicsContextState();
@@ -348,6 +354,9 @@ namespace krys::boo::html
     } while (--_unrealizedSaveCount);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-restore
+  // (Pops the top entry in the drawing state stack, and resets the drawing state it describes; nothing if
+  // there is none.)
   void CanvasRenderingContext2DBase::Restore() noexcept
   {
     if (_unrealizedSaveCount)
@@ -413,8 +422,10 @@ namespace krys::boo::html
     state.UnparsedFillColor = krys::move(unparsedColor);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-linewidth
   void CanvasRenderingContext2DBase::SetLineWidth(double width) noexcept
   {
+    // On setting, zero, negative, infinite, and NaN values must be ignored, leaving the value unchanged.
     if (!(std::isfinite(width) && width > 0))
     {
       return;
@@ -467,8 +478,10 @@ namespace krys::boo::html
     c->SetLineJoin(lineJoin);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-miterlimit
   void CanvasRenderingContext2DBase::SetMiterLimit(double limit) noexcept
   {
+    // On setting, zero, negative, infinite, and NaN values must be ignored, leaving the value unchanged.
     if (!(std::isfinite(limit) && limit > 0))
     {
       return;
@@ -487,6 +500,8 @@ namespace krys::boo::html
     c->SetMiterLimit(static_cast<float>(limit));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-shadowoffsetx
+  // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowOffsetX(float x) noexcept
   {
     if (!std::isfinite(x))
@@ -502,6 +517,8 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-shadowoffsety
+  // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowOffsetY(float y) noexcept
   {
     if (!std::isfinite(y))
@@ -517,6 +534,8 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-shadowblur
+  // (On setting, negative, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetShadowBlur(float blur) noexcept
   {
     if (!(std::isfinite(blur) && blur >= 0))
@@ -532,9 +551,14 @@ namespace krys::boo::html
     ApplyShadow();
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-shadowcolor
   void CanvasRenderingContext2DBase::SetShadowColor(dom::DOMStringView colorString) noexcept
   {
+    // 1. Let context be this's canvas attribute's value, if that is an element; otherwise null.
+    // 2. Let parsedValue be the result of parsing the given value with context if non-null.
     Color color = ParseColor(colorString, GetCanvasBase());
+
+    // 3. If parsedValue is failure, then return.
     if (!color.IsValid())
     {
       return;
@@ -543,6 +567,8 @@ namespace krys::boo::html
     {
       return;
     }
+
+    // 4. Set this's shadow color to parsedValue.
     RealizeSaves();
     ModifiableState().ShadowColor = color;
     ApplyShadow();
@@ -560,17 +586,25 @@ namespace krys::boo::html
     return true;
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-setlinedash
   void CanvasRenderingContext2DBase::SetLineDash(const List<double> &dash) noexcept
   {
+    // 1. If any value in segments is not finite (e.g. an Infinity or a NaN value), or if any value is
+    // negative
+    //    (less than zero), then return (without throwing an exception; user agents could show a message on a
+    //    developer console, as that would be helpful for debugging).
     if (!LineDashSequenceIsValid(dash))
     {
       return;
     }
 
+    // 3. Let the object's dash list be segments.
     RealizeSaves();
     ModifiableState().LineDash = dash;
-    // Spec requires the concatenation of two copies the dash list when the
-    // number of elements is odd
+
+    // 2. If the number of elements in segments is odd, then let segments be the concatenation of two copies
+    // of
+    //    segments.
     if (dash.size() % 2)
     {
       auto &lineDash = ModifiableState().LineDash;
@@ -580,6 +614,8 @@ namespace krys::boo::html
     ApplyLineDash();
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-linedashoffset
+  // (On setting, infinite and NaN values are ignored.)
   void CanvasRenderingContext2DBase::SetLineDashOffset(double offset) noexcept
   {
     if (!std::isfinite(offset) || GetState().LineDashOffset == offset)
@@ -607,12 +643,16 @@ namespace krys::boo::html
     c->SetLineDash(convertedLineDash, static_cast<float>(GetState().LineDashOffset));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-globalalpha
   void CanvasRenderingContext2DBase::SetGlobalAlpha(double alpha) noexcept
   {
+    // 1. If the given value is either infinite, NaN, or not in the range 0.0 to 1.0, then return.
     if (!(alpha >= 0 && alpha <= 1))
     {
       return;
     }
+
+    // 2. Otherwise, set this's global alpha to the given value.
     if (GetState().GlobalAlpha == alpha)
     {
       return;
@@ -627,14 +667,19 @@ namespace krys::boo::html
     c->SetAlpha(static_cast<float>(alpha));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-globalcompositeoperation
   void CanvasRenderingContext2DBase::SetGlobalCompositeOperation(dom::DOMStringView operation) noexcept
   {
+    // 1. If the given value is not identical to any of the values that the <blend-mode> or the
+    //    <composite-mode> properties are defined to take, then return.
     CompositeOperator op = CompositeOperator::SourceOver;
     BlendMode blendMode = BlendMode::Normal;
     if (!ParseCompositeAndBlendOperator(operation, op, blendMode))
     {
       return;
     }
+
+    // 2. Otherwise, set this's current compositing and blending operator to the given value.
     if ((GetState().GlobalComposite == op) && (GetState().GlobalBlend == blendMode))
     {
       return;
@@ -650,6 +695,8 @@ namespace krys::boo::html
     c->SetCompositeOperation(op, blendMode);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-scale
+  // (Like the other transforms, nothing while the transform can't be inverted.)
   void CanvasRenderingContext2DBase::Scale(double sx, double sy) noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -662,10 +709,13 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If either of the arguments are infinite or NaN, then return.
     if (!std::isfinite(sx) || !std::isfinite(sy))
     {
       return;
     }
+
+    // 2. Add the scaling transformation described by the arguments to the current transformation matrix.
     float floatX = ClampTo<float>(sx);
     float floatY = ClampTo<float>(sy);
     AffineTransform newTransform = GetState().Transform;
@@ -686,6 +736,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().ScaleNonUniform(1.0 / floatX, 1.0 / floatY));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-rotate
   void CanvasRenderingContext2DBase::Rotate(double angleInRadians) noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -698,11 +749,13 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If angle is infinite or NaN, then return.
     if (!std::isfinite(angleInRadians))
     {
       return;
     }
 
+    // 2. Add the rotation transformation described by the argument to the current transformation matrix.
     AffineTransform newTransform = GetState().Transform;
     newTransform.RotateRadians(angleInRadians);
     if (GetState().Transform == newTransform)
@@ -716,6 +769,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().RotateRadians(-angleInRadians));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-translate
   void CanvasRenderingContext2DBase::Translate(double tx, double ty) noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -728,11 +782,13 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If either of the arguments are infinite or NaN, then return.
     if (!std::isfinite(tx) || !std::isfinite(ty))
     {
       return;
     }
 
+    // 2. Add the translation transformation described by the arguments to the current transformation matrix.
     AffineTransform newTransform = GetState().Transform;
     newTransform.Translate(tx, ty);
     if (GetState().Transform == newTransform)
@@ -751,6 +807,7 @@ namespace krys::boo::html
     _path.Transform(AffineTransform().Translate(-tx, -ty));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-transform
   void CanvasRenderingContext2DBase::Transform(double m11, double m12, double m21, double m22, double dx,
                                                double dy) noexcept
   {
@@ -764,12 +821,15 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(m11) || !std::isfinite(m21) || !std::isfinite(dx) || !std::isfinite(m12)
         || !std::isfinite(m22) || !std::isfinite(dy))
     {
       return;
     }
 
+    // 2. Replace the current transformation matrix with the result of multiplying the current transformation
+    //    matrix with the matrix described by: a c e / b d f / 0 0 1.
     AffineTransform transform(m11, m12, m21, m22, dx, dy);
     AffineTransform newTransform = GetState().Transform * transform;
     if (GetState().Transform == newTransform)
@@ -793,6 +853,8 @@ namespace krys::boo::html
     }
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-gettransform
+  // (A newly created DOMMatrix representing a copy of the current transformation matrix.)
   Ref<css::DOMMatrix> CanvasRenderingContext2DBase::GetTransform() const noexcept
   {
     return css::DOMMatrix::Create(GetState().Transform.ToTransformationMatrix(),
@@ -808,12 +870,15 @@ namespace krys::boo::html
       return;
     }
 
+    // https://html.spec.whatwg.org/#dom-context-2d-settransform
+    // 1. If any of the arguments are infinite or NaN, then return.
     if (!std::isfinite(m11) || !std::isfinite(m21) || !std::isfinite(dx) || !std::isfinite(m12)
         || !std::isfinite(m22) || !std::isfinite(dy))
     {
       return;
     }
 
+    // 2. Reset the current transformation matrix to the matrix described by: a c e / b d f / 0 0 1.
     ResetTransform();
     Transform(m11, m12, m21, m22, dx, dy);
   }
@@ -821,17 +886,25 @@ namespace krys::boo::html
   dom::ExceptionOr<void>
     CanvasRenderingContext2DBase::SetTransform(css::DOMMatrix2DInit &&matrixInit) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-context-2d-settransform-matrix
+    // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();
     }
 
+    // 2. If one or more of matrix's m11 element, m12 element, m21 element, m22 element, m41 element, or m42
+    //    element are infinite or NaN, then return.
+    // 3. Reset the current transformation matrix to matrix.
+
     SetTransform(matrixInit.M11.value(), matrixInit.M12.value(), matrixInit.M21.value(),
                  matrixInit.M22.value(), matrixInit.M41.value(), matrixInit.M42.value());
     return {};
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-resettransform
+  // (Resets the current transformation matrix to the identity matrix.)
   void CanvasRenderingContext2DBase::ResetTransform() noexcept
   {
     GraphicsContext *c = EffectiveDrawingContext();
@@ -851,6 +924,8 @@ namespace krys::boo::html
     UpdateStateTransform({});
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-beginpath
+  // (Empties the list of subpaths in this's current default path.)
   void CanvasRenderingContext2DBase::BeginPath() noexcept
   {
     _path.Clear();
@@ -928,6 +1003,9 @@ namespace krys::boo::html
     ClipInternal(path.GetPath(), windingRule);
   }
 
+  // https://html.spec.whatwg.org/#fill-steps
+  // (Fill all the subpaths of the intended path, using this's fill style, and using the fill rule. Open
+  // subpaths are implicitly closed.)
   void CanvasRenderingContext2DBase::FillInternal(const Path &path, CanvasFillRule windingRule) noexcept
   {
     UniquePtr<CanvasFilterContextSwitcher> targetSwitcher;
@@ -986,6 +1064,8 @@ namespace krys::boo::html
     c->SetFillRule(savedFillRule);
   }
 
+  // https://html.spec.whatwg.org/#stroke-steps
+  // (Trace the intended path, using this's line styles, and fill the result with this's stroke style.)
   void CanvasRenderingContext2DBase::StrokeInternal(const Path &path) noexcept
   {
     UniquePtr<CanvasFilterContextSwitcher> targetSwitcher;
@@ -1044,6 +1124,9 @@ namespace krys::boo::html
             });
   }
 
+  // https://html.spec.whatwg.org/#clip-steps
+  // (Create a new clipping region by calculating the intersection of the current clipping region and the area
+  // described by the intended path, using the fill rule.)
   void CanvasRenderingContext2DBase::ClipInternal(const Path &path, CanvasFillRule windingRule) noexcept
   {
     auto *c = EffectiveDrawingContext();
@@ -1093,13 +1176,21 @@ namespace krys::boo::html
     return IsPointInStrokeInternal(path.GetPath(), x, y);
   }
 
+  // https://html.spec.whatwg.org/#is-point-in-path-steps
   bool CanvasRenderingContext2DBase::IsPointInPathInternal(const Path &path, double x, double y,
                                                            CanvasFillRule windingRule) noexcept
   {
+    // 1. If x or y are infinite or NaN, then return false.
     if (!std::isfinite(x) || !std::isfinite(y))
     {
       return false;
     }
+
+    // 2. If the point given by the x and y coordinates, when treated as coordinates in the canvas coordinate
+    //    space unaffected by the current transformation, is inside the intended path for path as determined
+    //    by the fill rule indicated by fillRule, then return true.
+    // 3. Return false.
+    // (The point is mapped into the path's space instead.)
 
     if (!EffectiveDrawingContext())
     {
@@ -1119,12 +1210,20 @@ namespace krys::boo::html
     return path.Contains(transformedPoint, ToWindRule(windingRule));
   }
 
+  // https://html.spec.whatwg.org/#is-point-in-stroke-steps
   bool CanvasRenderingContext2DBase::IsPointInStrokeInternal(const Path &path, double x, double y) noexcept
   {
+    // 1. If x or y are infinite or NaN, then return false.
     if (!std::isfinite(x) || !std::isfinite(y))
     {
       return false;
     }
+
+    // 2. If the point given by the x and y coordinates, when treated as coordinates in the canvas coordinate
+    //    space unaffected by the current transformation, is inside the path that results from tracing the
+    //    intended path for path, using the nonzero winding rule, and using the CanvasPathDrawingStyles
+    //    interface's line styles, then return true.
+    // 3. Return false.
 
     if (!EffectiveDrawingContext())
     {
@@ -1159,8 +1258,11 @@ namespace krys::boo::html
                                });
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-clearrect
   void CanvasRenderingContext2DBase::ClearRect(double x, double y, double width, double height) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
+    // (Nor when both the width and height are zero, which clears nothing.)
     if (!ValidateRectForCanvas(x, y, width, height))
     {
       return;
@@ -1202,6 +1304,9 @@ namespace krys::boo::html
       }
       context->SetCompositeOperation(CompositeOperator::SourceOver);
     }
+    // 2. Let pixels be the set of pixels in the specified rectangle that also intersect the current clipping
+    //    region.
+    // 3. Clear the pixels in pixels to a transparent black, erasing any previous image.
     context->ClearRect(rect);
     if (saved)
     {
@@ -1210,12 +1315,17 @@ namespace krys::boo::html
     DidDraw(rect, DefaultDidDrawOptionsWithoutPostProcessing());
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-fillrect
   void CanvasRenderingContext2DBase::FillRect(double x, double y, double width, double height) noexcept
   {
-    if (!ValidateRectForCanvas(x, y, width, height))
+    // 1. If any of the arguments are infinite or NaN, then return.
+    // 2. If either w or h are zero, then return.
+    if (!width || !height || !ValidateRectForCanvas(x, y, width, height))
     {
       return;
     }
+
+    // 3. Paint the specified rectangular area using this's fill style.
 
     FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
                    static_cast<float>(height));
@@ -1278,12 +1388,18 @@ namespace krys::boo::html
     DidDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->ExpandedBounds() : rect);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-strokerect
   void CanvasRenderingContext2DBase::StrokeRect(double x, double y, double width, double height) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
+    // (Nor when both the width and height are zero, whose path traces to nothing.)
     if (!ValidateRectForCanvas(x, y, width, height))
     {
       return;
     }
+
+    // 2. Take the result of tracing the path described below, using the CanvasPathDrawingStyles interface's
+    //    line styles, and fill it with this's stroke style.
 
     FloatRect rect(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width),
                    static_cast<float>(height));
@@ -1419,6 +1535,7 @@ namespace krys::boo::html
     return ToStyleVariant(GetState().StrokeStyle);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-strokestyle
   void CanvasRenderingContext2DBase::SetStrokeStyle(dom::DOMString &&colorString) noexcept
   {
     if (colorString == GetState().UnparsedStrokeColor)
@@ -1426,15 +1543,26 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If the given value is a string, then:
+    // 1a. Let context be this's canvas attribute's value, if that is an element; otherwise null.
+    // 1b. Let parsedValue be the result of parsing the given value with context if non-null.
     auto color = ParseColor(colorString, GetCanvasBase());
+
+    // 1c. If parsedValue is failure, then return.
     if (!color.IsValid())
     {
       return;
     }
 
+    // 1d. Set this's stroke style to parsedValue.
+    // 1e. Return.
+
     SetStrokeColorImpl(krys::move(color), krys::move(colorString));
   }
 
+  // 2. If the given value is a CanvasPattern object that is marked as not origin-clean, then set this's
+  //    origin-clean flag to false. (Skipped: patterns are always origin-clean.)
+  // 3. Set this's stroke style to the given value.
   void CanvasRenderingContext2DBase::SetStrokeStyle(Ref<CanvasGradient> &&gradient) noexcept
   {
     RealizeSaves();
@@ -1464,6 +1592,7 @@ namespace krys::boo::html
     return ToStyleVariant(GetState().FillStyle);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-fillstyle
   void CanvasRenderingContext2DBase::SetFillStyle(dom::DOMString &&colorString) noexcept
   {
     if (colorString == GetState().UnparsedFillColor)
@@ -1471,15 +1600,26 @@ namespace krys::boo::html
       return;
     }
 
+    // 1. If the given value is a string, then:
+    // 1a. Let context be this's canvas attribute's value, if that is an element; otherwise null.
+    // 1b. Let parsedValue be the result of parsing the given value with context if non-null.
     auto color = ParseColor(colorString, GetCanvasBase());
+
+    // 1c. If parsedValue is failure, then return.
     if (!color.IsValid())
     {
       return;
     }
 
+    // 1d. Set this's fill style to parsedValue.
+    // 1e. Return.
+
     SetFillColorImpl(krys::move(color), krys::move(colorString));
   }
 
+  // 2. If the given value is a CanvasPattern object that is marked as not origin-clean, then set this's
+  //    origin-clean flag to false. (Skipped: patterns are always origin-clean.)
+  // 3. Set this's fill style to the given value.
   void CanvasRenderingContext2DBase::SetFillStyle(Ref<CanvasGradient> &&gradient) noexcept
   {
     RealizeSaves();
@@ -1504,28 +1644,33 @@ namespace krys::boo::html
     state.UnparsedFillColor = {};
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createlineargradient
   dom::ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateLinearGradient(float x0, float y0, float x1, float y1) noexcept
   {
+    // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(x0) || !std::isfinite(y0) || !std::isfinite(x1) || !std::isfinite(y1))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
     return CanvasGradient::Create(FloatPoint(x0, y0), FloatPoint(x1, y1));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createradialgradient
   dom::ExceptionOr<Ref<CanvasGradient>> CanvasRenderingContext2DBase::CreateRadialGradient(float x0, float y0,
                                                                                            float r0, float x1,
                                                                                            float y1,
                                                                                            float r1) noexcept
   {
+    // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(x0) || !std::isfinite(y0) || !std::isfinite(r0) || !std::isfinite(x1)
         || !std::isfinite(y1) || !std::isfinite(r1))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
+    // 1. If r0 or r1 are negative, then throw an "IndexSizeError" DOMException.
     if (r0 < 0 || r1 < 0)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
@@ -1534,12 +1679,14 @@ namespace krys::boo::html
     return CanvasGradient::Create(FloatPoint(x0, y0), r0, FloatPoint(x1, y1), r1);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createconicgradient
   dom::ExceptionOr<Ref<CanvasGradient>>
     CanvasRenderingContext2DBase::CreateConicGradient(float angleInRadians, float x, float y) noexcept
   {
+    // (The arguments are doubles, so a non-finite one is a TypeError.)
     if (!std::isfinite(angleInRadians) || !std::isfinite(x) || !std::isfinite(y))
     {
-      return dom::Exception {dom::ExceptionCode::NotSupportedError};
+      return dom::Exception {dom::ExceptionCode::TypeError};
     }
 
     // Angle starts from x-axis for consistency within canvas methods. See
@@ -1548,10 +1695,16 @@ namespace krys::boo::html
     return CanvasGradient::Create(FloatPoint(x, y), angleInRadians);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createpattern
   dom::ExceptionOr<RefPtr<CanvasPattern>>
     CanvasRenderingContext2DBase::CreatePattern(CanvasImageSource &&image,
                                                 dom::DOMStringView repetition) noexcept
   {
+    // 4. If repetition is the empty string, then set it to "repeat".
+    // 5. If repetition is not identical to one of "repeat", "repeat-x", "repeat-y", or "no-repeat", then
+    // throw
+    //    a "SyntaxError" DOMException.
+    // (Before steps 1 to 3, which check the usability of image.)
     bool repeatX, repeatY;
     if (!CanvasPattern::ParseRepetitionType(repetition, repeatX, repeatY))
     {
@@ -1719,9 +1872,19 @@ namespace krys::boo::html
     return FloatSize(canvas.Size());
   }
 
+  KRYS_NODISCARD static bool AreDrawImageRectsFinite(const FloatRect &srcRect,
+                                                     const FloatRect &dstRect) noexcept
+  {
+    return std::isfinite(srcRect.X()) && std::isfinite(srcRect.Y()) && std::isfinite(srcRect.Width())
+           && std::isfinite(srcRect.Height()) && std::isfinite(dstRect.X()) && std::isfinite(dstRect.Y())
+           && std::isfinite(dstRect.Width()) && std::isfinite(dstRect.Height());
+  }
+
+  // https://html.spec.whatwg.org/#dom-context-2d-drawimage
   dom::ExceptionOr<void> CanvasRenderingContext2DBase::DrawImage(CanvasImageSource &&image, float dx,
                                                                  float dy) noexcept
   {
+    // (The source and destination rectangles default to the image's size; see below.)
     return SwitchOn(
       image,
       [&](RefPtr<HTMLImageElement> &imageElement) -> dom::ExceptionOr<void>
@@ -1783,21 +1946,28 @@ namespace krys::boo::html
                                                                  const CompositeOperator &op,
                                                                  const BlendMode &blendMode) noexcept
   {
-    if (!imageElement.Complete())
+    // 1. If any of the arguments are infinite or NaN, then return.
+    if (!AreDrawImageRectsFinite(srcRect, dstRect))
     {
       return {};
     }
 
+    // 2. Let usability be the result of checking the usability of image.
+    // 3. If usability is bad, then return (without drawing anything).
+    // https://html.spec.whatwg.org/#check-the-usability-of-the-image-argument
+    // 1. If image's current request's state is broken, then throw an "InvalidStateError" DOMException.
+    // 2. If image is not fully decodable, then return bad.
+    // 3. If image has a natural width or natural height (or both) equal to zero, then return bad.
+    // (A zero natural size is an empty source rectangle, which draws nothing.)
     auto *cachedImage = imageElement.GetCachedImage();
-    if (!cachedImage)
-    {
-      return {};
-    }
-
-    if (cachedImage->GetStatus() == CachedResource::DecodeError)
+    if (cachedImage && cachedImage->ErrorOccurred())
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError,
                              u8"The HTMLImageElement provided is in the 'broken' state."};
+    }
+    if (!imageElement.Complete() || !cachedImage)
+    {
+      return {};
     }
 
     auto imageRect =
@@ -1827,13 +1997,21 @@ namespace krys::boo::html
                                                                  const CompositeOperator &op,
                                                                  const BlendMode &blendMode) noexcept
   {
+    // 1. If any of the arguments are infinite or NaN, then return.
+    if (!AreDrawImageRectsFinite(srcRect, dstRect))
+    {
+      return {};
+    }
+
+    // 2. Let usability be the result of checking the usability of image.
+    // 3. If usability is bad, then return (without drawing anything).
     auto *cachedImage = imageElement.GetCachedImage();
     if (!cachedImage)
     {
       return {};
     }
 
-    if (cachedImage->GetStatus() == CachedResource::DecodeError)
+    if (cachedImage->ErrorOccurred())
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError,
                              u8"The SVGImageElement provided is in the 'broken' state."};
@@ -1963,13 +2141,22 @@ namespace krys::boo::html
                                                                  const FloatRect &srcRect,
                                                                  const FloatRect &dstRect) noexcept
   {
-    FloatRect srcCanvasRect = FloatRect(FloatPoint(), FloatSize(sourceCanvas.Size()));
+    // 1. If any of the arguments are infinite or NaN, then return.
+    if (!AreDrawImageRectsFinite(srcRect, dstRect))
+    {
+      return {};
+    }
 
+    // 2. Let usability be the result of checking the usability of image.
+    // (If image has either a horizontal dimension or a vertical dimension equal to zero, then throw an
+    // "InvalidStateError" DOMException.)
+    FloatRect srcCanvasRect = FloatRect(FloatPoint(), FloatSize(sourceCanvas.Size()));
     if (!srcCanvasRect.Width() || !srcCanvasRect.Height())
     {
       return dom::Exception {dom::ExceptionCode::InvalidStateError};
     }
 
+    // 5. If one of the sw or sh arguments is zero, then return. Nothing is painted.
     if (!srcRect.Width() || !srcRect.Height())
     {
       return {};
@@ -2170,22 +2357,45 @@ namespace krys::boo::html
   // buffer.
   static constexpr uint32 PutImageDataCacheAreaLimit = 60 * 60;
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createimagedata-imagedata
   dom::ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(ImageData &existingImageData) const noexcept
   {
+    // 1. Let newImageData be a new ImageData object.
+    // 2. Let settings be the ImageDataSettings object «[ "colorSpace" → this's colorSpace, "pixelFormat" →
+    //    this's pixelFormat ]».
+    // (The pixel format is the context's color type's.)
+    auto settings = ImageDataSettings {
+      .ColorSpace = _settings.ColorSpace,
+      .Format = _settings.ColourType == CanvasRenderingContext2DSettings::ColorType::Float16
+                  ? ImageDataPixelFormat::RgbaFloat16
+                  : ImageDataPixelFormat::RgbaUnorm8,
+    };
+
+    // 3. Initialize newImageData given the value of imageData's width attribute, the value of imageData's
+    //    height attribute, and settings.
+    // 4. Initialize the image data of newImageData to transparent black.
+    // 5. Return newImageData.
     return ImageData::Create(static_cast<uint32>(existingImageData.Width()),
-                             static_cast<uint32>(existingImageData.Height()), existingImageData.ColorSpace());
+                             static_cast<uint32>(existingImageData.Height()), _settings.ColorSpace, settings);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-createimagedata
   dom::ExceptionOr<Ref<ImageData>>
     CanvasRenderingContext2DBase::CreateImageData(int32 sw, int32 sh,
                                                   Maybe<ImageDataSettings> settings) const noexcept
   {
+    // 1. If one or both of sw and sh are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
 
+    // 2. Let newImageData be a new ImageData object.
+    // 3. Initialize newImageData given the absolute magnitude of sw, the absolute magnitude of sh, settings,
+    //    and defaultColorSpace set to this's color space.
+    // 4. Initialize the image data of newImageData to transparent black.
+    // 5. Return newImageData.
     return ImageData::Create(static_cast<uint32>(std::abs(static_cast<int64>(sw))),
                              static_cast<uint32>(std::abs(static_cast<int64>(sh))), _settings.ColorSpace,
                              settings);
@@ -2315,12 +2525,26 @@ namespace krys::boo::html
     CanvasRenderingContext2DBase::GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
                                                Maybe<ImageDataSettings> settings) const noexcept
   {
+    // https://html.spec.whatwg.org/#dom-context-2d-getimagedata
+    // 1. If either the sw or sh arguments are zero, then throw an "IndexSizeError" DOMException.
     if (!sw || !sh)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
     }
 
-    // FIXME: A canvas tainted by cross-origin data throws a SecurityError, once there are origins.
+    // 2. FIXME: If the CanvasRenderingContext2D's origin-clean flag is set to false, then throw a
+    //    "SecurityError" DOMException, once there are origins.
+
+    // 3. Let imageData be a new ImageData object.
+    // 4. Initialize imageData given sw, sh, settings, and defaultColorSpace set to this's color space.
+    // 5. Let the source rectangle be the rectangle whose corners are the four points (sx, sy), (sx+sw, sy),
+    //    (sx+sw, sy+sh), (sx, sy+sh).
+    // 6. Set the pixel values of imageData to be the pixels of this's output bitmap in the area specified by
+    //    the source rectangle in the bitmap's coordinate space units, converted from this's color space to
+    //    imageData's colorSpace using 'relative-colorimetric' rendering intent.
+    // 7. Set the pixels values of imageData for areas of the source rectangle that are outside of the output
+    //    bitmap to transparent black.
+    // 8. Return imageData.
 
     if (sw < 0)
     {
@@ -2374,9 +2598,11 @@ namespace krys::boo::html
     return dom::Exception {dom::ExceptionCode::InvalidStateError};
   }
 
-  void CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy) noexcept
+  // https://html.spec.whatwg.org/#dom-context-2d-putimagedata-short
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx,
+                                                                    int32 dy) noexcept
   {
-    PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
+    return PutImageData(data, dx, dy, 0, 0, data.Width(), data.Height());
   }
 
   KRYS_NODISCARD static IntRect ComputeImageDataRect(const ImageBuffer &buffer, IntSize sourceSize,
@@ -2395,20 +2621,29 @@ namespace krys::boo::html
     return sourceRect;
   }
 
-  void CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy, int32 dirtyX,
-                                                  int32 dirtyY, int32 dirtyWidth, int32 dirtyHeight) noexcept
+  // https://html.spec.whatwg.org/#dom-context-2d-putimagedata
+  dom::ExceptionOr<void> CanvasRenderingContext2DBase::PutImageData(ImageData &data, int32 dx, int32 dy,
+                                                                    int32 dirtyX, int32 dirtyY,
+                                                                    int32 dirtyWidth,
+                                                                    int32 dirtyHeight) noexcept
   {
+    // https://html.spec.whatwg.org/#dom-context2d-putimagedata-common
+    // 1. Let buffer be imageData's data attribute value's [[ViewedArrayBuffer]] internal slot.
+    // 2. If IsDetachedBuffer(buffer) is true, then throw an "InvalidStateError" DOMException.
+    if (data.Data().IsDetached())
+    {
+      return dom::Exception {dom::ExceptionCode::InvalidStateError};
+    }
+
     RefPtr<ImageBuffer> buffer = ShareRefPtr(GetCanvasBase().Buffer());
     if (!buffer)
     {
-      return;
+      return {};
     }
 
-    if (data.Data().IsDetached())
-    {
-      return;
-    }
-
+    // 3. If dirtyWidth is negative, then let dirtyX be dirtyX+dirtyWidth, and let dirtyWidth be equal to the
+    //    absolute magnitude of dirtyWidth. [...]
+    // (The rest of the dirty rectangle's clamping is ComputeImageDataRect's.)
     if (dirtyWidth < 0)
     {
       dirtyX += dirtyWidth;
@@ -2441,6 +2676,8 @@ namespace krys::boo::html
     }
 
     DidDraw(FloatRect {destRect}, options);
+
+    return {};
   }
 
   void CanvasRenderingContext2DBase::DidDrawEntireCanvas(EnumSet<DidDrawOption> options) noexcept
@@ -2594,6 +2831,7 @@ namespace krys::boo::html
     return nullptr;
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-filter
   void CanvasRenderingContext2DBase::SetFilterString(dom::DOMStringView filterString) noexcept
   {
     if (GetState().FilterString == filterString)
@@ -2601,22 +2839,26 @@ namespace krys::boo::html
       return;
     }
 
-    // Spec: context.filter = "" should leave the current filter unchanged.
+    // ("" is unparseable, and leaves the current filter unchanged.)
     if (filterString.empty())
     {
       return;
     }
 
+    // 1. If the given value is "none", then set this's current filter to "none" and return.
+    // 2. Let parsedValue be the result of parsing the given values as a <filter-value-list>. If any
+    //    property-independent style sheet syntax like 'inherit' or 'initial' is present, then this parsing
+    //    must return failure.
     auto filter = SetFilterStringWithoutUpdatingStyle(filterString);
+
+    // 3. If parsedValue is failure, then return.
     if (!filter)
     {
       return;
     }
 
+    // 4. Set this's current filter to the given value.
     RealizeSaves();
-
-    // Spec: context.filter = "none" filters will be disabled for the context.
-    // Spec: Only parseable inputs should change the current filter.
     ModifiableState().FilterString = dom::DOMString(filterString);
     ModifiableState().Filter = krys::move(*filter);
   }
@@ -3006,6 +3248,7 @@ namespace krys::boo::html
     return ParsedSpacing {.Serialised = krys::move(serialised).ToString(), .Pixels = pixels};
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-letterspacing
   void CanvasRenderingContext2DBase::SetLetterSpacing(dom::DOMStringView letterSpacing) noexcept
   {
     if (GetState().LetterSpacing == letterSpacing)
@@ -3014,17 +3257,23 @@ namespace krys::boo::html
     }
     RealizeSaves();
 
+    // 1. Let parsed be the result of parsing the given value as a CSS <length>.
+    // (Without the units ParseSpacing doesn't allow.)
     auto spacing =
       ParseSpacing(letterSpacing, css::PropertyId::LetterSpacing, GetFontProxy()->GetFontCascade());
+
+    // 2. If parsed is failure, then return.
     if (!spacing)
     {
       return;
     }
 
+    // 3. Set this's letter spacing to parsed.
     ModifiableState().LetterSpacing = krys::move(spacing->Serialised);
     ModifiableState().Font.SetLetterSpacing(static_cast<float>(spacing->Pixels));
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-wordspacing
   void CanvasRenderingContext2DBase::SetWordSpacing(dom::DOMStringView wordSpacing) noexcept
   {
     if (GetState().WordSpacing == wordSpacing)
@@ -3033,12 +3282,16 @@ namespace krys::boo::html
     }
     RealizeSaves();
 
+    // 1. Let parsed be the result of parsing the given value as a CSS <length>.
     auto spacing = ParseSpacing(wordSpacing, css::PropertyId::WordSpacing, GetFontProxy()->GetFontCascade());
+
+    // 2. If parsed is failure, then return.
     if (!spacing)
     {
       return;
     }
 
+    // 3. Set this's word spacing to parsed.
     ModifiableState().WordSpacing = krys::move(spacing->Serialised);
     ModifiableState().Font.SetWordSpacing(static_cast<float>(spacing->Pixels));
   }
@@ -3179,6 +3432,8 @@ namespace krys::boo::html
     font.Initialize(fontSelector, fontCascade);
   }
 
+  // https://html.spec.whatwg.org/#dom-context-2d-lang
+  // (The lang setter steps are to set this's language to the given value.)
   void CanvasRenderingContext2DBase::SetLang(dom::DOMStringView lang) noexcept
   {
     if (GetState().Lang == lang)

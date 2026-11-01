@@ -360,6 +360,11 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The specification's `fontKerning`, `fontStretch`, `fontVariantCaps`, `textRendering` and `lang` exist; upstream lacks them.
 - `toDataURL` and `toBlob` encode the pixels read back from the buffer (PNG, JPEG and WebP, with libpng, libjpeg-turbo and libwebp). A quality outside 0 to 1, or none, encodes at the encoders' best (100); Chrome's default JPEG quality is 0.92.
 - A filter needs the canvas's computed style (`SetFilterStringWithoutUpdatingStyle`); `"null"` and `"undefined"` aren't special, where upstream leaves the filter unchanged for them.
+- While the current transform can't be inverted, the transform methods, the path methods and drawing do nothing, as in upstream and Chrome; the specification multiplies the matrix and adds the points regardless, so `scale(0, 1)` then `scale(1, 2)` leaves the vertical scale at 1 here, where the specification's is 2.
+- `letterSpacing` and `wordSpacing` reject the units whose resolution the specification leaves undefined (`lh`, `rlh`, the viewport units and the container query units; whatwg/html#10893), as upstream does.
+- The text preparation algorithm replaces vertical tabs with spaces too, as upstream does; the specification replaces only ASCII whitespace.
+- `arcTo()` with a negative radius throws before it ensures there's a subpath, so the path is unchanged, and `createPattern()` checks its repetition before the image's usability, so an unusable image with a bad repetition throws rather than returning null; both as upstream.
+- `toBlob()` serialises the bitmap before it queues the callback's task, rather than in parallel.
 
 ### From WebKit
 

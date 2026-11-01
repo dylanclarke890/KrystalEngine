@@ -253,6 +253,13 @@ namespace krys::boo::html
   public:
     ~CanvasRenderingContext2DBase() noexcept override;
 
+    /// @brief Whether the context has been lost; never, as there are no context loss events.
+    /// @see https://html.spec.whatwg.org/#dom-context-2d-iscontextlost
+    KRYS_NODISCARD constexpr bool IsContextLost() const noexcept
+    {
+      return false;
+    }
+
     KRYS_NODISCARD const CanvasRenderingContext2DSettings &GetContextAttributes() const noexcept
     {
       return _settings;
@@ -361,6 +368,8 @@ namespace krys::boo::html
 #pragma region CanvasState
 
     /// @see https://html.spec.whatwg.org/#dom-context-2d-save
+    /// @brief Pushes a copy of the current drawing state onto the drawing state stack (once something
+    /// changes it).
     void Save() noexcept
     {
       ++_unrealizedSaveCount;
@@ -454,9 +463,9 @@ namespace krys::boo::html
                                                                     Maybe<ImageDataSettings>) const noexcept;
     KRYS_NODISCARD dom::ExceptionOr<Ref<ImageData>> GetImageData(int32 sx, int32 sy, int32 sw, int32 sh,
                                                                  Maybe<ImageDataSettings>) const noexcept;
-    void PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
-    void PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY, int32 dirtyWidth,
-                      int32 dirtyHeight) noexcept;
+    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy) noexcept;
+    dom::ExceptionOr<void> PutImageData(ImageData &, int32 dx, int32 dy, int32 dirtyX, int32 dirtyY,
+                                        int32 dirtyWidth, int32 dirtyHeight) noexcept;
 
 #pragma endregion
 

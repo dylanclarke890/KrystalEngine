@@ -301,7 +301,7 @@ namespace krys::ui::tests
     context.Translate(30, 30);
     context.SetGlobalAlpha(0.5);
     context.SetGlobalCompositeOperation(u8"lighter");
-    context.PutImageData(*green.Value(), 20, 20);
+    REQUIRE_FALSE(context.PutImageData(*green.Value(), 20, 20).HasException());
     context.ResetTransform();
     context.SetGlobalAlpha(1);
     context.SetGlobalCompositeOperation(u8"source-over");
@@ -315,9 +315,9 @@ namespace krys::ui::tests
     {
       whiteBytes->Set(channel, channel % 4 == 3 ? 128 : 255);
     }
-    context.PutImageData(*white.Value(), 60, 20);
+    REQUIRE_FALSE(context.PutImageData(*white.Value(), 60, 20).HasException());
     // Only the dirty rectangle of it is put.
-    context.PutImageData(*green.Value(), 80, 20, 0, 0, 5, 5);
+    REQUIRE_FALSE(context.PutImageData(*green.Value(), 80, 20, 0, 0, 5, 5).HasException());
 
     CheckRead(ReadPixel(context, 22, 22), Lime);
     CheckRead(ReadPixel(context, 30, 30), Blue);

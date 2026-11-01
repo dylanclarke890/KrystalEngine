@@ -3,6 +3,7 @@
 #include "Krystal.Booey/Graphics/NativeImage.hpp"
 #include "Krystal.Booey/Graphics/Pattern.hpp"
 #include "Krystal.Booey/Graphics/SourceImage.hpp"
+#include <cmath>
 
 namespace krys::boo::html
 {
@@ -47,14 +48,28 @@ namespace krys::boo::html
     return false;
   }
 
+  // https://html.spec.whatwg.org/#dom-canvaspattern-settransform
   dom::ExceptionOr<void> CanvasPattern::SetTransform(css::DOMMatrix2DInit &&matrixInit) noexcept
   {
+    // 1. Let matrix be the result of creating a DOMMatrix from the 2D dictionary transform.
     auto checkValid = css::DOMMatrixReadOnly::ValidateAndFixup(matrixInit);
     if (checkValid.HasException())
     {
       return checkValid.ReleaseException();
     }
 
+    // 2. If one or more of matrix's m11 element, m12 element, m21 element, m22 element, m41 element, or m42
+    //    element are infinite or NaN, then return.
+    for (auto value : {*matrixInit.M11, *matrixInit.M12, *matrixInit.M21, *matrixInit.M22, *matrixInit.M41,
+                       *matrixInit.M42})
+    {
+      if (!std::isfinite(value))
+      {
+        return {};
+      }
+    }
+
+    // 3. Reset the pattern's transformation matrix to matrix.
     _pattern->SetPatternSpaceTransform(
       {*matrixInit.M11, *matrixInit.M12, *matrixInit.M21, *matrixInit.M22, *matrixInit.M41, *matrixInit.M42});
     return {};

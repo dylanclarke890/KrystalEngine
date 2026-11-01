@@ -35,7 +35,9 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("HTMLCanvasElement: the width and height and the canvas's size", "[HTML][HTMLCanvasElement]")
+  TEST_CASE("HTMLCanvasElement: the width and height and the canvas's size",
+            "[HTML][HTMLCanvasElement][html:dom-canvas-width]"
+            "[html:concept-canvas-set-bitmap-dimensions]")
   {
     CanvasFixture fixture(u8"<canvas id=plain></canvas><canvas id=sized width=40 height=20></canvas>"
                           u8"<canvas id=invalid width=abc height=-5></canvas>");
@@ -77,7 +79,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("HTMLCanvasElement: contexts", "[HTML][HTMLCanvasElement]")
+  TEST_CASE("HTMLCanvasElement: contexts", "[HTML][HTMLCanvasElement][html:dom-canvas-getcontext]"
+                                           "[html:2d-context-creation-algorithm]")
   {
     CanvasFixture fixture(u8"<canvas id=canvas></canvas>");
     auto &canvas = fixture.Canvas(u8"canvas");
@@ -123,7 +126,8 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"(dest-rect at (8,8) size 80x40)") == 1u);
   }
 
-  TEST_CASE("HTMLCanvasElement: always replaced, its children fallback content", "[HTML][HTMLCanvasElement]")
+  TEST_CASE("HTMLCanvasElement: always replaced, its children fallback content",
+            "[HTML][HTMLCanvasElement][html:being-used-as-relevant-canvas-fallback-content]")
   {
     CanvasFixture fixture(
       u8"<canvas id=canvas><p id=fallback>Fallback <button id=button>Go</button></p></canvas>"
@@ -159,7 +163,8 @@ namespace krys::boo::tests
     }
   }
 
-  TEST_CASE("HTMLCanvasElement: serialised as a file", "[HTML][HTMLCanvasElement]")
+  TEST_CASE("HTMLCanvasElement: serialised as a file",
+            "[HTML][HTMLCanvasElement][html:dom-canvas-todataurl][html:dom-canvas-toblob]")
   {
     CanvasFixture fixture(u8"<canvas id=canvas width=4 height=3></canvas><canvas id=empty width=0></canvas>");
     auto &canvas = fixture.Canvas(u8"canvas");
