@@ -1899,6 +1899,7 @@ set(KRYSTAL_BOOEY_CSS_HEADERS
   include/Krystal.Booey/DOM/FormDataEvent.hpp
   include/Krystal.Booey/DOM/RadioButtonGroups.hpp
   include/Krystal.Booey/DOM/SimulatedClick.hpp
+  include/Krystal.Booey/HTML/Autofill.hpp
   include/Krystal.Booey/HTML/BaseButtonInputType.hpp
   include/Krystal.Booey/HTML/BaseCheckableInputType.hpp
   include/Krystal.Booey/HTML/BaseClickableWithKeyInputType.hpp
@@ -3395,6 +3396,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/DOM/FormDataEvent.cpp
   src/DOM/RadioButtonGroups.cpp
   src/DOM/SimulatedClick.cpp
+  src/HTML/Autofill.cpp
   src/HTML/BaseButtonInputType.cpp
   src/HTML/BaseCheckableInputType.cpp
   src/HTML/BaseClickableWithKeyInputType.cpp

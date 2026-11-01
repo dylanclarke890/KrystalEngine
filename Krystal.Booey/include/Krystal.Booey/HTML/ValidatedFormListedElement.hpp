@@ -60,7 +60,7 @@ namespace krys::boo::html
     /// @brief Must be called when a validation constraint or the control's value changes.
     void UpdateValidity() noexcept;
 
-    void SetCustomValidity(dom::DOMStringView error) noexcept override;
+    void SetCustomValidationMessage(dom::DOMStringView message) noexcept override;
 
     void SetDisabledByAncestorFieldset(bool isDisabled) noexcept;
 

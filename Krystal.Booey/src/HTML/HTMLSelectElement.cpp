@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Autofill.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
@@ -2234,9 +2235,11 @@ namespace krys::boo::html
 
 #pragma region HTMLSelectElement
 
+  // https://html.spec.whatwg.org/#dom-fe-autocomplete
   dom::DOMString HTMLSelectElement::Autocomplete() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    // Return the element's IDL-exposed autofill value.
+    return AutofillData::Create(*this).IDLExposedValue;
   }
 
   void HTMLSelectElement::Autocomplete(dom::DOMString &&value) noexcept

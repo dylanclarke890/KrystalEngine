@@ -265,7 +265,11 @@ namespace krys::boo::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLTextFormControlElement: the selection APIs",
-                   "[HTML][HTMLTextFormControlElement]")
+                   "[HTML][HTMLTextFormControlElement][html:textFieldSelection][html:set-the-selection-range]"
+                   "[html:dom-textarea/input-select][html:dom-textarea/input-selectionstart]"
+                   "[html:dom-textarea/input-selectionend][html:dom-textarea/input-selectiondirection]"
+                   "[html:dom-textarea/input-setselectionrange][html:dom-textarea/input-setrangetext]"
+                   "[html:concept-textarea/input-relevant-value][html:set-the-selection-direction]")
   {
     EditorFixture fixture(u8"<input id=field value=hello><input id=other><input id=box type=checkbox>");
     auto &field = InputById(fixture, u8"field");
@@ -338,7 +342,26 @@ namespace krys::boo::tests
       CHECK(Narrow(field.Value()) == "XYllo!");
       CHECK(field.SelectionStart() == 6);
 
-      CHECK(field.SetRangeText(u8"?", 3, 1, u8"preserve").HasException());
+      auto error = field.SetRangeText(u8"?", 3, 1, u8"preserve");
+      REQUIRE(error.HasException());
+      CHECK(error.GetException().Code() == dom::ExceptionCode::IndexSizeError);
+    }
+
+    SECTION("setRangeText() with preserve keeps a selection around the replaced text")
+    {
+      field.SetSelectionRange(1, 4);
+      CHECK_FALSE(field.SetRangeText(u8"XY", 2, 3, u8"preserve").HasException());
+      CHECK(Narrow(field.Value()) == "heXYlo");
+      CHECK(field.SelectionStart() == 1);
+      CHECK(field.SelectionEnd() == 5);
+    }
+
+    SECTION("Setting the start past the end moves the end")
+    {
+      field.SetSelectionRange(1, 2);
+      field.SetSelectionStart(4);
+      CHECK(field.SelectionStart() == 4);
+      CHECK(field.SelectionEnd() == 4);
     }
 
     SECTION("Types without a selection have none")

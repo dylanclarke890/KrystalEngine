@@ -25,7 +25,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Constraint validation: value missing", "[HTML][Forms]")
+  TEST_CASE("Constraint validation: value missing", "[HTML][Forms][html:suffering-from-being-missing]")
   {
     FormFixture fixture(u8R"(<form id=f><fieldset id=fs><input id=t required></fieldset>
       <textarea id=ta required></textarea><select id=s required><option value="">-</option><option id=x>x</option>
@@ -61,9 +61,13 @@ namespace krys::boo::html::tests
     CHECK(form.CheckValidity());
   }
 
-  TEST_CASE("Constraint validation: barred controls", "[HTML][Forms]")
+  TEST_CASE(
+    "Constraint validation: barred controls",
+    "[HTML][Forms][html:barred-from-constraint-validation][html:concept-fe-disabled][html:concept-fe-mutable]"
+    "[html:dom-cva-willvalidate]")
   {
-    FormFixture fixture(u8R"(<form><input id=hidden type=hidden required><input id=disabled disabled required>
+    FormFixture fixture(
+      u8R"(<form><input id=hidden type=hidden required><input id=disabled disabled required>
       <input id=readonly readonly required><button id=button type=button></button><button id=submit></button>
       <fieldset disabled><legend><input id=inlegend></legend><input id=infieldset></fieldset></form>)");
     CHECK_FALSE(fixture.Get<HTMLInputElement>(u8"hidden").WillValidate());
@@ -83,13 +87,18 @@ namespace krys::boo::html::tests
     CHECK(Matches(inLegend, u8":read-write"));
   }
 
-  TEST_CASE("Constraint validation: custom validity", "[HTML][Forms]")
+  TEST_CASE("Constraint validation: custom validity",
+            "[HTML][Forms][html:dom-cva-setcustomvalidity][html:custom-validity-error-message]")
   {
     FormFixture fixture(u8R"(<input id=t>)");
     auto &t = fixture.Get<HTMLInputElement>(u8"t");
     t.SetCustomValidity(u8"Not like that");
     CHECK(t.CustomError());
     CHECK(Str(t.ValidationMessage()) == "Not like that");
+
+    // Its newlines are normalized.
+    t.SetCustomValidity(u8"a\r\nb\rc");
+    CHECK(t.ValidationMessage() == u8"a\nb\nc");
     CHECK(Matches(t, u8":invalid"));
     t.SetCustomValidity(u8"");
     CHECK_FALSE(t.CustomError());

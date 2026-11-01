@@ -95,8 +95,11 @@ namespace krys::boo::html
     // FIXME: The validation message bubble (ValidationMessage), shown by the host.
   }
 
+  // https://html.spec.whatwg.org/#check-validity-steps
   bool ValidatedFormListedElement::CheckValidity(List<Ref<HTMLElement>> *unhandledInvalidControls) noexcept
   {
+    // 1. If element is a candidate for constraint validation and does not satisfy its constraints:
+    // 2. Return true.
     if (!WillValidate() || IsValidFormControlElement())
     {
       return true;
@@ -106,29 +109,44 @@ namespace krys::boo::html
     auto &element = AsHTMLElement();
     Ref<HTMLElement> protectedThis = ShareRef(element);
     Ref<dom::Document> originalDocument = ShareRef(element.NodeDocument());
+    // 1a. Fire an event named invalid at element, with the cancelable attribute initialized to true (though
+    //     canceling has no effect).
     auto type = dom::DOMStringAtom(EventNames::Invalid);
     bool notCanceled =
       dom::EventDispatcher::FireEvent<dom::Event>(type, element, dom::EventInit {.Cancelable = true});
+
+    // (For the report validity steps and statically validating a form, an element whose event isn't canceled
+    // is unhandled.)
     if (notCanceled && unhandledInvalidControls && element.IsConnected()
         && originalDocument.get() == &element.NodeDocument())
     {
       unhandledInvalidControls->push_back(protectedThis);
     }
+
+    // 1b. Return false.
     return false;
   }
 
+  // https://html.spec.whatwg.org/#report-validity-steps
   bool ValidatedFormListedElement::ReportValidity() noexcept
   {
+    // 1. If element is a candidate for constraint validation and does not satisfy its constraints:
+    // 1a. Let report be the result of firing an event named invalid at element, with the cancelable attribute
+    //     initialized to true.
+    // 2. Return true.
     List<Ref<HTMLElement>> elements;
     if (CheckValidity(&elements))
     {
       return true;
     }
 
+    // 1c. Return false.
     if (elements.empty())
     {
       return false;
     }
+
+    // 1b. If report is true, then report the problems with the constraints of this element to the user.
 
     // Lay out now, as whether the anchor is focusable depends on its renderer.
     (void)AsHTMLElement().NodeDocument().UpdateLayoutIgnorePendingStylesheets();
@@ -479,9 +497,9 @@ namespace krys::boo::html
     ResetFormOwner();
   }
 
-  void ValidatedFormListedElement::SetCustomValidity(dom::DOMStringView error) noexcept
+  void ValidatedFormListedElement::SetCustomValidationMessage(dom::DOMStringView message) noexcept
   {
-    FormListedElement::SetCustomValidity(error);
+    FormListedElement::SetCustomValidationMessage(message);
     UpdateValidity();
   }
 

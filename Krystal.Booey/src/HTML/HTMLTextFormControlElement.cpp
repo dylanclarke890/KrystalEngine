@@ -246,24 +246,42 @@ namespace krys::boo::html
     UpdatePlaceholderVisibility();
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea/input-selectionstart
   void HTMLTextFormControlElement::SetSelectionStart(uint32 start) noexcept
   {
+    // 2. Let end be the value of this element's selectionEnd attribute.
+    // 3. If end is less than the given value, set end to the given value.
+    // 4. Set the selection range with the given value, end, and the value of this element's
+    // selectionDirection
+    //    attribute.
     SetSelectionRange(start, std::max(start, SelectionEnd()), SelectionDirection());
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea/input-selectionend
   void HTMLTextFormControlElement::SetSelectionEnd(uint32 end) noexcept
   {
+    // 2. Set the selection range with the value of this element's selectionStart attribute, the given value,
+    // and
+    //    the value of this element's selectionDirection attribute.
+    // (A start past the end is the end, as setting the selection range makes it.)
     SetSelectionRange(std::min(end, SelectionStart()), end, SelectionDirection());
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea/input-selectiondirection
   void HTMLTextFormControlElement::SetSelectionDirection(dom::DOMStringView direction) noexcept
   {
+    // 2. Set the selection range with the value of this element's selectionStart attribute, the value of this
+    //    element's selectionEnd attribute, and the given value.
     SetSelectionRange(SelectionStart(), SelectionEnd(), direction);
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea/input-select
   void HTMLTextFormControlElement::Select(SelectionRevealMode revealMode) noexcept
   {
+    // (It's focused too, as in browsers.)
     Focus({.PreventScroll = true});
+
+    // 2. Set the selection range with 0 and infinity.
     if (SetSelectionRange(0, std::numeric_limits<uint32>::max(),
                           TextFieldSelectionDirection::SelectionHasNoDirection, revealMode))
     {
@@ -297,13 +315,17 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(dom::DOMStringView replacement) noexcept
   {
+    // 3. If the method has only one argument, then let start and end have the values of the selectionStart
+    //    attribute and the selectionEnd attribute respectively.
     return SetRangeText(replacement, SelectionStart(), SelectionEnd(), {});
   }
 
+  // https://html.spec.whatwg.org/#dom-textarea/input-setrangetext
   dom::ExceptionOr<void> HTMLTextFormControlElement::SetRangeText(dom::DOMStringView replacement,
                                                                   uint32 start, uint32 end,
                                                                   dom::DOMStringView selectionMode) noexcept
   {
+    // 4. If start is greater than end, then throw an "IndexSizeError" DOMException.
     if (start > end)
     {
       return dom::Exception {dom::ExceptionCode::IndexSizeError};
@@ -312,12 +334,25 @@ namespace krys::boo::html
     auto text = InnerTextValue();
     auto textLength = static_cast<uint32>(text.size());
     auto replacementLength = static_cast<uint32>(replacement.size());
+
+    // 7. Let selection start be the current value of the selectionStart attribute.
+    // 8. Let selection end be the current value of the selectionEnd attribute.
     uint32 newSelectionStart = SelectionStart();
     uint32 newSelectionEnd = SelectionEnd();
 
+    // 5. If start is greater than the length of the relevant value of the text control, then set it to the
+    //    length of the relevant value of the text control.
+    // 6. If end is greater than the length of the relevant value of the text control, then set it to the
+    // length
+    //    of the relevant value of the text control.
     start = SnapToCharacterStart(text, std::min(start, textLength));
     end = SnapToCharacterStart(text, std::min(end, textLength));
 
+    // 9. If start is less than end, delete the sequence of code units within the element's relevant value
+    //    starting with the code unit at the startth position and ending with the code unit at the (end-1)th
+    //    position.
+    // 10. Insert the value of the first argument into the text of the relevant value of the text control,
+    //     immediately before the startth code unit.
     if (start < end)
     {
       text.replace(start, end - start, replacement);
@@ -327,8 +362,12 @@ namespace krys::boo::html
       text.insert(start, replacement);
     }
 
+    // 2. Set this element's dirty value flag to true.
     (void)SetValue(text, TextFieldEventBehavior::DispatchNoEvent, TextControlSetValueSelection::DoNotSet);
 
+    // 11. Let new length be the length of the value of the first argument.
+    // 12. Let new end be the sum of start and new length.
+    // 13. Run the appropriate set of substeps from the following list:
     using infra::StringAlgorithms;
     if (StringAlgorithms::ASCIICaseInsensitiveMatch(selectionMode, u8"select"))
     {
@@ -367,6 +406,7 @@ namespace krys::boo::html
       }
     }
 
+    // 14. Set the selection range with selection start and selection end.
     if (SetSelectionRange(newSelectionStart, newSelectionEnd,
                           TextFieldSelectionDirection::SelectionHasNoDirection))
     {
@@ -376,10 +416,14 @@ namespace krys::boo::html
     return {};
   }
 
+  // https://html.spec.whatwg.org/#set-the-selection-range
   void HTMLTextFormControlElement::SetSelectionRange(uint32 start, uint32 end,
                                                      dom::DOMStringView directionString,
                                                      ForBindings forBindings) noexcept
   {
+    // 4. If direction is not identical to either "backward" or "forward", or if the direction argument was
+    // not
+    //    given, set direction to "none".
     auto direction = TextFieldSelectionDirection::SelectionHasNoDirection;
     if (directionString == u8"forward")
     {
@@ -390,6 +434,14 @@ namespace krys::boo::html
       direction = TextFieldSelectionDirection::SelectionHasBackwardDirection;
     }
 
+    // 3. Set the selection of the text control to the sequence of code units within the relevant value
+    // starting
+    //    with the code unit at the startth position (in logical order) and ending with the code unit at the
+    //    (end-1)th position.
+    // 5. Set the selection direction of the text control to direction.
+    // 6. If the previous steps caused the selection of the text control to be modified (in either extent or
+    //    direction), then queue an element task on the user interaction task source given the element to fire
+    //    an event named select at the element, with the bubbles attribute initialized to true.
     if (SetSelectionRange(start, end, direction, SelectionRevealMode::DoNotReveal, forBindings))
     {
       ScheduleSelectEvent();

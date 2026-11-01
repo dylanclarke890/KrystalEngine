@@ -10,6 +10,7 @@
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
+#include "Krystal.Booey/HTML/HTMLDataListElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlsCollection.hpp"
@@ -34,6 +35,34 @@ namespace krys::boo::html
 
     constexpr static AttributeState MissingValueDefault = AttributeState::On;
     constexpr static AttributeState InvalidValueDefault = AttributeState::On;
+  };
+
+  /// @see https://html.spec.whatwg.org/#attr-fs-method
+  template <>
+  struct EnumeratedAttributeTraits<"method", HTMLFormElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"get", AttributeState::Get},
+      KeywordStateMapping {u8"post", AttributeState::Post},
+      KeywordStateMapping {u8"dialog", AttributeState::Dialog},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Get;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Get;
+  };
+
+  /// @see https://html.spec.whatwg.org/#attr-fs-enctype
+  template <>
+  struct EnumeratedAttributeTraits<"enctype", HTMLFormElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"application/x-www-form-urlencoded", AttributeState::URLEncoded},
+      KeywordStateMapping {u8"multipart/form-data", AttributeState::FormData},
+      KeywordStateMapping {u8"text/plain", AttributeState::TextPlain},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::URLEncoded;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::URLEncoded;
   };
 
   namespace
@@ -136,7 +165,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormElement::EncType() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"enctype").value_or(u8"");
+    return EnumeratedAttribute<"enctype", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"enctype"));
   }
 
   void HTMLFormElement::EncType(dom::DOMString &&value) noexcept
@@ -144,19 +174,22 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-fs-encoding
   dom::DOMString HTMLFormElement::Encoding() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"encoding").value_or(u8"");
+    // The encoding IDL attribute must reflect the enctype content attribute, limited to only known values.
+    return EncType();
   }
 
   void HTMLFormElement::Encoding(dom::DOMString &&value) noexcept
   {
-    Reflect<dom::DOMString>(*this, u8"encoding", krys::move(value));
+    Reflect<dom::DOMString>(*this, u8"enctype", krys::move(value));
   }
 
   dom::DOMString HTMLFormElement::Method() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"method").value_or(u8"");
+    return EnumeratedAttribute<"method", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"method"));
   }
 
   void HTMLFormElement::Method(dom::DOMString &&value) noexcept
@@ -318,32 +351,28 @@ namespace krys::boo::html
   {
     CEReactionsScope ceReactions;
 
-    // 1. If the form element is marked as locked for reset, then return.
-    if (_isInResetFunction)
-    {
-      return;
-    }
-
-    // (And in a document without a frame.)
-    if (!NodeDocument().Frame())
+    // A reset during a reset (from its event) does nothing, nor does one in a document without a frame.
+    if (_isInResetFunction || !NodeDocument().Frame())
     {
       return;
     }
 
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
-
-    // 2. Mark the form element as locked for reset.
     bool wasInResetFunction = std::exchange(_isInResetFunction, true);
 
-    // 3. Reset the form element.
+    // https://html.spec.whatwg.org/#concept-form-reset
+    // 1. Let reset be the result of firing an event named reset at form, with the bubbles and cancelable
+    //    attributes initialized to true.
     auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Reset), true, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
+
+    // 2. If reset is true, then invoke the reset algorithm of each resettable element whose form owner is
+    // form.
     if (!event->DefaultPrevented())
     {
       ResetListedFormControlElements();
     }
 
-    // 4. Unmark the form element as locked for reset.
     _isInResetFunction = wasInResetFunction;
   }
 
@@ -363,9 +392,15 @@ namespace krys::boo::html
     return !CheckInvalidControlsAndCollectUnhandled(controls);
   }
 
+  // https://html.spec.whatwg.org/#statically-validate-the-constraints
   bool HTMLFormElement::CheckInvalidControlsAndCollectUnhandled(
     List<Ref<HTMLElement>> &unhandledInvalidControls) noexcept
   {
+    // 1. Let controls be a list of all the submittable elements whose form owner is form, in tree order.
+    // 2. Let invalid controls be an initially empty list of elements.
+    // 3. For each element field in controls, in tree order: ...
+    // 6. For each element field in invalid controls, if any, in tree order: ...
+    // (Firing invalid at each invalid control in tree order as it's found.)
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
     // The listed elements are copied, as the `invalid` event handlers can change them.
     bool hasInvalidControls = false;
@@ -393,6 +428,7 @@ namespace krys::boo::html
     return ValidateInteractively();
   }
 
+  // https://html.spec.whatwg.org/#interactively-validate-the-constraints
   bool HTMLFormElement::ValidateInteractively() noexcept
   {
     for (auto &element : CopyValidatedListedElementsVector())
@@ -400,11 +436,18 @@ namespace krys::boo::html
       element->AsValidatedFormListedElement()->HideVisibleValidationMessage();
     }
 
+    // 1. Statically validate the constraints of form, and let unhandled invalid controls be the list of
+    // elements
+    //    returned if the result was negative.
+    // 2. If the result was positive, then return that result.
     List<Ref<HTMLElement>> unhandledInvalidControls;
     if (!CheckInvalidControlsAndCollectUnhandled(unhandledInvalidControls))
     {
       return true;
     }
+
+    // 3. Report the problems with the constraints of at least one of the elements given in unhandled invalid
+    //    controls to the user.
 
     // The form has invalid controls, so the submission is aborted and a validation message is shown on a
     // focusable control.
@@ -429,6 +472,7 @@ namespace krys::boo::html
       }
     }
 
+    // 4. Return a negative result.
     return false;
   }
 
@@ -1149,21 +1193,39 @@ namespace krys::boo::html
                                         List<Pair<dom::DOMString, dom::DOMString>> *formValues) noexcept
   {
     // https://html.spec.whatwg.org/#constructing-the-form-data-set
+    // 1. If form's constructing entry list is true, then return null.
     if (_isConstructingEntryList)
     {
       return nullptr;
     }
 
+    // 2. Set form's constructing entry list to true.
     bool wasConstructingEntryList = std::exchange(_isConstructingEntryList, true);
 
+    // (The submitter is the only button that appends an entry.)
     if (submitter)
     {
       submitter->SetActivatedSubmit(true);
     }
 
+    // 3. Let controls be a list of all the submittable elements whose form owner is form, in tree order.
+    // 4. Let entry list be a new empty entry list.
+    // 5. For each element field in controls, in tree order:
     for (auto &element : CopyListedElementsVector())
     {
-      if (!element->IsDisabledFormControl())
+      // 5a. If any of the following are true: field has a datalist element ancestor; field is disabled; ...
+      //     then continue.
+      // 5b. to 5k. (Each control's AppendFormData.)
+      bool hasDataListAncestor = false;
+      for (auto *ancestor = element->ParentElement(); ancestor; ancestor = ancestor->ParentElement())
+      {
+        if (Is<HTMLDataListElement>(*ancestor))
+        {
+          hasDataListAncestor = true;
+          break;
+        }
+      }
+      if (!hasDataListAncestor && !element->IsDisabledFormControl())
       {
         element->AsFormListedElement()->AppendFormData(*domFormData);
       }
@@ -1178,6 +1240,9 @@ namespace krys::boo::html
       }
     }
 
+    // 6. Let form data be a new FormData object associated with entry list.
+    // 7. Fire an event named formdata at form using FormDataEvent, with the formData attribute initialized to
+    //    form data and the bubbles attribute initialized to true.
     auto event = dom::FormDataEvent::Create(dom::DOMStringAtom(EventNames::FormData), true, false, false,
                                             Ref<DOMFormData>(domFormData));
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
@@ -1187,8 +1252,10 @@ namespace krys::boo::html
       submitter->SetActivatedSubmit(false);
     }
 
+    // 8. Set form's constructing entry list to false.
     _isConstructingEntryList = wasConstructingEntryList;
 
+    // 9. Return a clone of entry list.
     return domFormData->Clone();
   }
 

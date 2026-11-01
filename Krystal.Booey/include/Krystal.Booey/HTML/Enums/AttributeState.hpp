@@ -62,7 +62,13 @@ namespace krys::boo::html
     Col,
     RowGroup,
     ColGroup,
+    Get,
+    Post,
+    Dialog,
+    URLEncoded,
+    FormData,
+    TextPlain,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 52uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 58uz);

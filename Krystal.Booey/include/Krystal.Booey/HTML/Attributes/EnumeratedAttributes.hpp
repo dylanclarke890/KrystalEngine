@@ -386,6 +386,34 @@ namespace krys::boo::html
     constexpr static AttributeState InvalidValueDefault = AttributeState::Eager;
   };
 
+  /// @brief A submit button's `formmethod`, which has no missing value default.
+  /// @see https://html.spec.whatwg.org/#attr-fs-formmethod
+  template <>
+  struct EnumeratedAttributeTraits<"formmethod", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"get", AttributeState::Get},
+      KeywordStateMapping {u8"post", AttributeState::Post},
+      KeywordStateMapping {u8"dialog", AttributeState::Dialog},
+    };
+
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Get;
+  };
+
+  /// @brief A submit button's `formenctype`, which has no missing value default.
+  /// @see https://html.spec.whatwg.org/#attr-fs-formenctype
+  template <>
+  struct EnumeratedAttributeTraits<"formenctype", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"application/x-www-form-urlencoded", AttributeState::URLEncoded},
+      KeywordStateMapping {u8"multipart/form-data", AttributeState::FormData},
+      KeywordStateMapping {u8"text/plain", AttributeState::TextPlain},
+    };
+
+    constexpr static AttributeState InvalidValueDefault = AttributeState::URLEncoded;
+  };
+
   /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
   template <>
   struct EnumeratedAttributeTraits<"fetchpriority", HTMLElement>

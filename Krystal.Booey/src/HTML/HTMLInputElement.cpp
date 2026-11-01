@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/Editing/Editor.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Autofill.hpp"
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/FileInputType.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
@@ -105,9 +106,11 @@ namespace krys::boo::html
     Reflect<dom::DOMString>(*this, u8"alt", krys::move(value));
   }
 
+  // https://html.spec.whatwg.org/#dom-fe-autocomplete
   dom::DOMString HTMLInputElement::Autocomplete() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    // Return the element's IDL-exposed autofill value.
+    return AutofillData::Create(*this).IDLExposedValue;
   }
 
   void HTMLInputElement::Autocomplete(dom::DOMString &&value) noexcept
@@ -214,7 +217,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::FormEnctype() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"formenctype").value_or(u8"");
+    return EnumeratedAttribute<"formenctype", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"formenctype"));
   }
 
   void HTMLInputElement::FormEnctype(dom::DOMString &&value) noexcept
@@ -224,7 +228,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLInputElement::FormMethod() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"formmethod").value_or(u8"");
+    return EnumeratedAttribute<"formmethod", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"formmethod"));
   }
 
   void HTMLInputElement::FormMethod(dom::DOMString &&value) noexcept

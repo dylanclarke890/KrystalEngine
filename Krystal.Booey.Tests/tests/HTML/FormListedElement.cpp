@@ -14,7 +14,8 @@ namespace krys::boo::html::tests
 {
   using boo::tests::FormFixture;
 
-  TEST_CASE("Form owners: the nearest ancestor form", "[HTML][Forms]")
+  TEST_CASE("Form owners: the nearest ancestor form", "[HTML][Forms][html:reset-the-form-owner][html:concept-"
+                                                      "form-association][html:form-owner][html:dom-fae-form]")
   {
     FormFixture fixture(u8R"(<form id=f><input id=a><fieldset id=fs><select id=s></select></fieldset></form>
       <input id=b><form id=g></form>)");
@@ -45,7 +46,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Form owners: the form attribute", "[HTML][Forms]")
+  TEST_CASE("Form owners: the form attribute", "[HTML][Forms][html:reset-the-form-owner][html:attr-fae-form]")
   {
     FormFixture fixture(
       u8R"(<form id=f></form><form id=g><input id=a form=f><button id=b form=nothing></button></form>

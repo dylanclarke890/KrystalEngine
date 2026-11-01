@@ -52,7 +52,7 @@ namespace krys::boo::html
     }
 
     _validityStateFlags = flags;
-    SetCustomValidity(flags.IsValid() ? dom::DOMStringView() : dom::DOMStringView(message));
+    SetCustomValidationMessage(flags.IsValid() ? dom::DOMStringView() : dom::DOMStringView(message));
 
     if (validationAnchor
         && !dom::TreeQueries::IsShadowIncludingInclusiveAncestor(_element, *validationAnchor))

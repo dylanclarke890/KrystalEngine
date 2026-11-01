@@ -700,6 +700,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/RadioNodeList.cpp
 		tests/HTML/HTMLMapElement.cpp
 		tests/HTML/HTMLMeterElement.cpp
+		tests/HTML/Autofill.cpp
 		tests/HTML/HTMLDataListElement.cpp
 		tests/HTML/HTMLOptGroupElement.cpp
 		tests/HTML/HTMLOptionElement.cpp

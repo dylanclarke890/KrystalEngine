@@ -7,6 +7,7 @@
 #include "Krystal.Booey/Editing/FrameSelection.hpp"
 #include "Krystal.Booey/Editing/TextIterator.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
+#include "Krystal.Booey/HTML/Autofill.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/Internals/PresentationalHints.hpp"
 #include "Krystal.Booey/HTML/Shadow/TextControlInnerElements.hpp"
@@ -534,9 +535,11 @@ namespace krys::boo::html
 
 #pragma region HTMLTextAreaElement
 
+  // https://html.spec.whatwg.org/#dom-fe-autocomplete
   dom::DOMString HTMLTextAreaElement::Autocomplete() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    // Return the element's IDL-exposed autofill value.
+    return AutofillData::Create(*this).IDLExposedValue;
   }
 
   void HTMLTextAreaElement::Autocomplete(dom::DOMString &&value) noexcept

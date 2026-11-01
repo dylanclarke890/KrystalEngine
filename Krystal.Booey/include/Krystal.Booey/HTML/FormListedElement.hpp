@@ -88,6 +88,9 @@ namespace krys::boo::html
   protected:
     FormListedElement() noexcept;
 
+    /// @brief Sets the custom validity error message as it is.
+    virtual void SetCustomValidationMessage(dom::DOMStringView message) noexcept;
+
     void ClearForm() noexcept
     {
       SetForm(nullptr);

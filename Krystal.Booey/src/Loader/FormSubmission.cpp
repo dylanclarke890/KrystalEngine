@@ -227,7 +227,7 @@ namespace krys::boo
       }
       else
       {
-        formData = FormData::Create(*entryList, attributes.GetMethod() == Method::Get
+        formData = FormData::Create(*entryList, copiedAttributes.GetMethod() == Method::Get
                                                   ? FormData::EncodingType::FormURLEncoded
                                                   : FormData::ParseEncodingType(encodingType));
         if (copiedAttributes.GetMethod() == Method::Post && isMailtoForm)

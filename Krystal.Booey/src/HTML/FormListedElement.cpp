@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/IdTargetObserver.hpp"
 #include "Krystal.Booey/DOM/IdTargetObserverRegistry.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html
 {
@@ -282,9 +283,17 @@ namespace krys::boo::html
     return WillValidate() ? _customValidationMessage : dom::DOMString();
   }
 
+  // https://html.spec.whatwg.org/#dom-cva-setcustomvalidity
   void FormListedElement::SetCustomValidity(dom::DOMStringView error) noexcept
   {
-    _customValidationMessage = dom::DOMString(error);
+    // 1. Set error to the result of normalizing newlines given error.
+    // 2. Set the custom validity error message to error.
+    SetCustomValidationMessage(infra::StringAlgorithms::NormalizeNewlines(error));
+  }
+
+  void FormListedElement::SetCustomValidationMessage(dom::DOMStringView message) noexcept
+  {
+    _customValidationMessage = dom::DOMString(message);
   }
 
   void FormListedElement::ResetFormAttributeTargetObserver() noexcept
