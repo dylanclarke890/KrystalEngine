@@ -1085,16 +1085,6 @@ namespace krys::boo::tests
       CHECK(fixture.Chrome->ConsoleMessages == List<std::string> {"error:Unhandled"});
     }
 
-    SECTION("structuredClone() clones the value")
-    {
-      auto value = CreateRef<TestValue>("value");
-      auto clone = window.StructuredClone(value.get());
-      REQUIRE(clone);
-      CHECK(clone.get() != value.get());
-      CHECK(static_cast<TestValue &>(*clone).IsClone);
-      CHECK(window.StructuredClone(nullptr) == nullptr);
-    }
-
     SECTION("postMessage() queues a message from the window")
     {
       fixture.Document->SetURL(url::URL(u8"https://example.com/page.html"));
@@ -1394,5 +1384,19 @@ namespace krys::boo::tests
       body.SetOnLoad([](dom::Event &) {});
       CHECK(window.OnLoad() == nullptr);
     }
+  }
+
+  TEST_CASE("LocalDOMWindow::StructuredClone: clones the value, and null is null",
+            "[Page][LocalDOMWindow][html:dom-structuredclone]")
+  {
+    WindowFixture fixture;
+    auto &window = fixture.Window();
+
+    auto value = CreateRef<TestValue>("value");
+    auto clone = window.StructuredClone(value.get());
+    REQUIRE(clone);
+    CHECK(clone.get() != value.get());
+    CHECK(static_cast<TestValue &>(*clone).IsClone);
+    CHECK(window.StructuredClone(nullptr) == nullptr);
   }
 }
