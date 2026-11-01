@@ -93,8 +93,11 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: showing and closing",
-                   "[HTML][HTMLDialogElement]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLDialogElement: showing and closing",
+    "[HTML][HTMLDialogElement][html:dom-dialog-show][html:dom-dialog-close]"
+    "[html:dom-dialog-returnvalue][html:close-the-dialog][html:queue-a-dialog-toggle-event-task]"
+    "[html:is-modal][html:dialog-setup-steps][html:dialog-cleanup-steps]")
   {
     NavigationFixture fixture(u8"<dialog id=d><form method=dialog><button id=ok value=yes>OK</button>"
                               u8"<button id=plain>X</button></form></dialog>");
@@ -171,7 +174,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: modal dialogs", "[HTML][HTMLDialogElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: modal dialogs",
+                   "[HTML][HTMLDialogElement][html:dom-dialog-showmodal][html:show-a-modal-dialog]"
+                   "[html:the-dialog-element][html:dialog-focusing-steps]")
   {
     NavigationFixture fixture(u8"<button id=before>B</button><dialog id=d><p>Hi<input id=field></dialog>");
     auto &document = *fixture.Document;
@@ -238,7 +243,79 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: close requests", "[HTML][HTMLDialogElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: the dialog focusing steps",
+                   "[HTML][HTMLDialogElement][html:dialog-focusing-steps]")
+  {
+    NavigationFixture fixture(u8"<button id=before>B</button>"
+                              u8"<dialog id=delegate><input id=first><input id=auto autofocus></dialog>"
+                              u8"<dialog id=self autofocus><input id=inner></dialog>"
+                              u8"<dialog id=empty><p>Nothing to focus</p></dialog>");
+    auto &document = *fixture.Document;
+    auto &before = Downcast<HTMLElement>(fixture.ById(u8"before"));
+    before.Focus();
+    REQUIRE(document.FocusedElement() == &before);
+
+    SECTION("An autofocus descendant is the focus delegate")
+    {
+      REQUIRE_FALSE(fixture.Get<HTMLDialogElement>(u8"delegate").Show().HasException());
+      CHECK(document.FocusedElement() == &fixture.ById(u8"auto"));
+    }
+
+    SECTION("A dialog with autofocus focuses itself")
+    {
+      auto &dialog = fixture.Get<HTMLDialogElement>(u8"self");
+      REQUIRE_FALSE(dialog.ShowModal().HasException());
+      CHECK(document.FocusedElement() == &dialog);
+    }
+
+    SECTION("A dialog with nothing to focus focuses itself, as dialogs are focusable")
+    {
+      auto &dialog = fixture.Get<HTMLDialogElement>(u8"empty");
+      REQUIRE_FALSE(dialog.Show().HasException());
+      CHECK(document.FocusedElement() == &dialog);
+      dialog.Close();
+      CHECK(document.FocusedElement() == &before);
+      REQUIRE_FALSE(dialog.ShowModal().HasException());
+      CHECK(document.FocusedElement() == &dialog);
+    }
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: closing a closed dialog",
+                   "[HTML][HTMLDialogElement][html:close-the-dialog][html:dialog-request-close]")
+  {
+    NavigationFixture fixture(u8"<dialog id=d></dialog>");
+    auto &dialog = fixture.Get<HTMLDialogElement>(u8"d");
+    DialogEventLog log(dialog);
+
+    dialog.Close(dom::DOMString(u8"x"));
+    dialog.RequestClose(dom::DOMString(u8"y"));
+    CHECK(Narrow(dialog.ReturnValue()).empty());
+    CHECK(log.Take().empty());
+  }
+
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDialogElement: the close event",
+                   "[HTML][HTMLDialogElement][html:close-the-dialog]")
+  {
+    NavigationFixture fixture(u8"<div id=parent><dialog id=d open></dialog></div>");
+    auto &dialog = fixture.Get<HTMLDialogElement>(u8"d");
+    bool bubbled = false;
+    bool cancelable = true;
+    auto handle =
+      dialog.AddEventListener(u8"close", [&](dom::Event &event) { cancelable = event.Cancelable(); });
+    auto parentHandle =
+      fixture.ById(u8"parent").AddEventListener(u8"close", [&](dom::Event &) { bubbled = true; });
+
+    dialog.Close();
+    html::EventLoop::Current().RunUntilIdle();
+    CHECK_FALSE(cancelable);
+    CHECK_FALSE(bubbled);
+  }
+
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLDialogElement: close requests",
+    "[HTML][HTMLDialogElement][html:dom-dialog-requestclose][html:dialog-request-close]"
+    "[html:dom-dialog-closedby][html:computed-closed-by-state][html:set-the-dialog-close-watcher]"
+    "[html:run-light-dismiss-activities][html:light-dismiss-open-dialogs][html:nearest-clicked-dialog]")
   {
     NavigationFixture fixture(
       u8"<style>body { margin: 0 } #d { inset: auto; left: 100px; top: 100px; margin: 0;"

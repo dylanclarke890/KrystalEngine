@@ -2517,12 +2517,14 @@ namespace krys::boo::dom
     _openDialogs.remove(ShareRef(dialog));
   }
 
+  // https://html.spec.whatwg.org/#run-light-dismiss-activities
   void Document::HandleLightDismiss(const PointerEvent &event, Node &target) noexcept
   {
     krys_debug_assert(event.IsTrusted());
 
-    // Light dismiss open popovers: a release on the popover (or on an invoker of a popover) the press was on
-    // hides the popovers above it.
+    // 1. Run light dismiss open popovers with event.
+    // (A release on the popover, or on an invoker of a popover, that the press was on hides the popovers
+    // above it.)
     if (TopmostAutoOrHintPopover())
     {
       RefPtr<html::HTMLElement> ancestor = TopmostClickedPopover(target);
@@ -2541,15 +2543,23 @@ namespace krys::boo::dom
       }
     }
 
-    // Light dismiss open dialogs.
+    // 2. Run light dismiss open dialogs with event.
+    // https://html.spec.whatwg.org/#light-dismiss-open-dialogs
+    // 1. Assert: event's isTrusted attribute is true.
+    // 2. Let document be event's target's node document.
+    // 3. If document's open dialogs list is empty, then return.
     if (_openDialogs.empty())
     {
       return;
     }
 
-    // The nearest clicked dialog: none for a press on a modal dialog's backdrop (outside its bounds).
+    // https://html.spec.whatwg.org/#nearest-clicked-dialog
     auto nearestClickedDialog = [&]() -> html::HTMLDialogElement *
     {
+      // 1. Let target be event's target.
+      // 2. If target is a dialog element, target has an open attribute, target's is modal is true, and
+      // event's
+      //    clientX and clientY are outside the bounds of target, then return null.
       if (auto *dialog = DynamicDowncast<html::HTMLDialogElement>(target);
           dialog && dialog->Open() && dialog->IsModal())
       {
@@ -2561,6 +2571,11 @@ namespace krys::boo::dom
           return nullptr;
         }
       }
+      // 3. Let currentNode be target.
+      // 4. While currentNode is not null:
+      // 4a. If currentNode is a dialog element and currentNode has an open attribute, then return
+      // currentNode. 4b. Set currentNode to currentNode's parent in the flat tree. (Only elements can be
+      // dialogs, so a non-element target starts from its parent.)
       auto *element = DynamicDowncast<Element>(target);
       for (element = element ? element : target.ParentElementInComposedTree(); element;
            element = element->ParentElementInComposedTree())
@@ -2570,33 +2585,54 @@ namespace krys::boo::dom
           return dialog;
         }
       }
+
+      // 5. Return null.
       return nullptr;
     };
+
+    // 4. Let ancestor be the result of running nearest clicked dialog given event.
     RefPtr<html::HTMLDialogElement> ancestor = ShareRefPtr(nearestClickedDialog());
 
+    // 5. If event's type is "pointerdown", then set document's dialog pointerdown target to ancestor.
     if (event.Type() == EventNames::PointerDown)
     {
       _dialogPointerDownTarget = CreateWeakPtr(ancestor.get());
       return;
     }
 
+    // 6. If event's type is "pointerup":
     if (event.Type() == EventNames::PointerUp)
     {
+      // 6a. Let sameTarget be true if ancestor is document's dialog pointerdown target.
       bool sameTarget = ancestor.get() == _dialogPointerDownTarget.get();
+
+      // 6b. Set document's dialog pointerdown target to null.
       _dialogPointerDownTarget = nullptr;
+
+      // 6c. If sameTarget is false, then return.
       if (!sameTarget)
       {
         return;
       }
+
+      // 6d. Let topmostDialog be the last element of document's open dialogs list.
       Ref<html::HTMLDialogElement> topmostDialog = _openDialogs.last();
+
+      // 6e. If ancestor is topmostDialog, then return.
       if (ancestor.get() == topmostDialog.get())
       {
         return;
       }
+
+      // 6f. If topmostDialog's computed closed-by state is not Any, then return.
       if (topmostDialog->ComputedClosedByState() != html::HTMLDialogElement::ClosedByState::Any)
       {
         return;
       }
+
+      // 6g. Assert: topmostDialog's close watcher is not null.
+      // (Null in a document without a window.)
+      // 6h. Request to close topmostDialog's close watcher with false.
       if (auto *closeWatcher = topmostDialog->GetCloseWatcher())
       {
         (void)closeWatcher->RequestToClose(false);

@@ -8,16 +8,19 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.11 Interactive elements](https://html.spec.whatwg.org/#interactive-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.11.1 The details element](https://html.spec.whatwg.org/#the-details-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLDetailsElement`; the summary slot is `SlotForHostChild`, and the attribute change steps are `OnAttributeChanged`.
+> The insertion steps run once it's connected (see `DIFFERENCES.md`).
 <!-- definitions: attr-details-name attr-details-open details-notification-task-steps -->
 
-- [ ] [details name group](https://html.spec.whatwg.org/#details-name-group) — The details name group that contains a details element a also contains all the other details elements b that fulfill all of the following conditions:
+- [x] [details name group](https://html.spec.whatwg.org/#details-name-group) — The details name group that contains a details element a also contains all the other details elements b that fulfill all of the following conditions:
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#details-toggle-task-tracker) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all details elements:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#details-toggle-task-tracker) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all details elements:
   - 1. If namespace is not null, then return.
   - 2. If localName is name, then ensure details exclusivity by closing the given element if needed given element.
   - 3. If localName is open:
@@ -26,10 +29,10 @@ Status: unreviewed
       - 3a.ii. Otherwise, queue a details toggle event task given the details element, "open", and "closed".
     - 3b. If oldValue is null and value is not null, then ensure details exclusivity by closing other elements if needed given element.
 
-- [ ] [The details HTML element insertion steps, given insertedNode,](https://html.spec.whatwg.org/#the-details-element) — The details HTML element insertion steps, given insertedNode, are:
+- [x] [The details HTML element insertion steps, given insertedNode,](https://html.spec.whatwg.org/#the-details-element) — The details HTML element insertion steps, given insertedNode, are:
   - 1. Ensure details exclusivity by closing the given element if needed given insertedNode.
 
-- [ ] [queue a details toggle event task](https://html.spec.whatwg.org/#queue-a-details-toggle-event-task) — To queue a details toggle event task given a details element element, a string oldState, and a string newState:
+- [x] [queue a details toggle event task](https://html.spec.whatwg.org/#queue-a-details-toggle-event-task) — To queue a details toggle event task given a details element element, a string oldState, and a string newState:
   - 1. If element's details toggle task tracker is not null:
     - 1a. Set oldState to element's details toggle task tracker's old state.
     - 1b. Remove element's details toggle task tracker's task from its task queue.
@@ -39,7 +42,7 @@ Status: unreviewed
     - 2b. Set element's details toggle task tracker to null.
   - 3. Set element's details toggle task tracker to a struct with task set to the just-queued task and old state set to oldState.
 
-- [ ] [ensure details exclusivity by closing other elements if needed](https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-other-elements-if-needed) — To ensure details exclusivity by closing other elements if needed given a details element element:
+- [x] [ensure details exclusivity by closing other elements if needed](https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-other-elements-if-needed) — To ensure details exclusivity by closing other elements if needed given a details element element:
   - 1. Assert: element has an open attribute.
   - 2. If element does not have a name attribute, or its name attribute is the empty string, then return.
   - 3. Let groupMembers be a list of elements, containing all elements in element's details name group except for element, in tree order.
@@ -49,7 +52,7 @@ Status: unreviewed
       - 4a.ii. Remove the open attribute on otherElement.
       - 4a.iii. Break.
 
-- [ ] [ensure details exclusivity by closing the given element if needed](https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-the-given-element-if-needed) — To ensure details exclusivity by closing the given element if needed given a details element element:
+- [x] [ensure details exclusivity by closing the given element if needed](https://html.spec.whatwg.org/#ensure-details-exclusivity-by-closing-the-given-element-if-needed) — To ensure details exclusivity by closing the given element if needed given a details element element:
   - 1. If element does not have an open attribute, then return.
   - 2. If element does not have a name attribute, or its name attribute is the empty string, then return.
   - 3. Let groupMembers be a list of elements, containing all elements in element's details name group except for element, in tree order.
@@ -60,42 +63,48 @@ Status: unreviewed
 
 #### [4.11.2 The summary element](https://html.spec.whatwg.org/#the-summary-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLSummaryElement::ActivationBehavior` and `HTMLDetailsElement::IsActiveSummary`; activating interactive content in it doesn't toggle (see `DIFFERENCES.md`).
 
-- [ ] [summary for its parent details](https://html.spec.whatwg.org/#summary-for-its-parent-details) — A summary element is a summary for its parent details if the following algorithm returns true:
+- [x] [summary for its parent details](https://html.spec.whatwg.org/#summary-for-its-parent-details) — A summary element is a summary for its parent details if the following algorithm returns true:
   - 1. If this summary element has no parent, then return false.
   - 2. Let parent be this summary element's parent.
   - 3. If parent is not a details element, then return false.
   - 4. If parent's first summary element child is not this summary element, then return false.
   - 5. Return true.
 
-- [ ] [The activation behavior of summary elements](https://html.spec.whatwg.org/#summary-for-its-parent-details) — The activation behavior of summary elements is to run the following steps:
+- [x] [The activation behavior of summary elements](https://html.spec.whatwg.org/#summary-for-its-parent-details) — The activation behavior of summary elements is to run the following steps:
   - 1. If this summary element is not the summary for its parent details, then return.
   - 2. Let parent be this summary element's parent.
   - 3. If the open attribute is present on parent, then remove it. Otherwise, set parent's open attribute to the empty string.
 
 #### [4.11.3 Commands](https://html.spec.whatwg.org/#commands)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ##### [4.11.3.1 Facets](https://html.spec.whatwg.org/#facets-2)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 <!-- definitions: concept-command concept-facet command-facet-label command-facet-accesskey command-facet-hiddenstate command-facet-disabledstate command-facet-action -->
 
 ##### [4.11.3.2 Using the a element to define a command](https://html.spec.whatwg.org/#using-the-a-element-to-define-a-command)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
 ##### [4.11.3.3 Using the button element to define a command](https://html.spec.whatwg.org/#using-the-button-element-to-define-a-command)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
 ##### [4.11.3.4 Using the input element to define a command](https://html.spec.whatwg.org/#using-the-input-element-to-define-a-command)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
-- [ ] [The Label of the command is determined as follows](https://html.spec.whatwg.org/#command-facet-label) — The Label of the command is determined as follows:
+- [x] [The Label of the command is determined as follows](https://html.spec.whatwg.org/#command-facet-label) — The Label of the command is determined as follows:
   - 1. If the type attribute is in one of the Submit Button, Reset Button, Image Button, or Button states, then the Label is the string given by the value attribute, if any, and a UA-dependent, locale-dependent value that the UA uses to label the button itself if the attribute is absent.
   - 2. Otherwise, if the element is a labeled control, then the Label is the descendant text content of the first label element in tree order whose labeled control is the element in question. (In JavaScript terms, this is given by element.labels[0].textContent.)
   - 3. Otherwise, if the value attribute is present, then the Label is the value of that attribute.
@@ -103,28 +112,33 @@ Status: unreviewed
 
 ##### [4.11.3.5 Using the option element to define a command](https://html.spec.whatwg.org/#using-the-option-element-to-define-a-command)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
 ##### [4.11.3.6 Using the accesskey attribute on a legend element to define a command](https://html.spec.whatwg.org/#using-the-accesskey-attribute-on-a-legend-element-to-define-a-command)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
-- [ ] [the legend element's accesskey delegatee](https://html.spec.whatwg.org/#the-legend-element's-accesskey-delegatee) — Its parent has a descendant that defines a command that is neither a label element nor a legend element. This element, if it exists, is the legend element's accesskey delegatee.
+- [x] [the legend element's accesskey delegatee](https://html.spec.whatwg.org/#the-legend-element's-accesskey-delegatee) — Its parent has a descendant that defines a command that is neither a label element nor a legend element. This element, if it exists, is the legend element's accesskey delegatee.
 
 ##### [4.11.3.7 Using the accesskey attribute to define a command on other elements](https://html.spec.whatwg.org/#using-the-accesskey-attribute-to-define-a-command-on-other-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Access keys aren't handled, so there are no commands (see `KNOWN-ISSUES.md`); `HTMLElement::AccessKeyAction` is the Action.
 
-- [ ] [The Action of the command](https://html.spec.whatwg.org/#command-facet-action) — The Action of the command is to run the following steps:
+- [x] [The Action of the command](https://html.spec.whatwg.org/#command-facet-action) — The Action of the command is to run the following steps:
   - 1. Run the focusing steps for the element.
   - 2. Fire a click event at the element.
 
 #### [4.11.4 The dialog element](https://html.spec.whatwg.org/#the-dialog-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLDialogElement`; the open dialogs list and active modal dialog are on `Document`.
+> Dialogs are focusable, so a dialog with no focus delegate focuses itself.
 <!-- definitions: attr-dialog-open attr-dialog-closedby attr-dialog-closedby-auto-state dialog-pointerdown-target previously-focused-element dialog-toggle-task-tracker dialog-close-watcher request-close-return-value request-close-source-element enable-close-watcher-for-requestclose() -->
 
-- [ ] [HTMLDialogElement.show()](https://html.spec.whatwg.org/#dom-dialog-show) — The show() method steps are:
+- [x] [HTMLDialogElement.show()](https://html.spec.whatwg.org/#dom-dialog-show) — The show() method steps are:
   - 1. If this has an open attribute and is modal of this is false, then return.
   - 2. If this has an open attribute, then throw an "InvalidStateError" DOMException.
   - 3. If the result of firing an event named beforetoggle, using ToggleEvent, with the cancelable attribute initialized to true, the oldState attribute initialized to "closed", and the newState attribute initialized to "open" at this is false, then return.
@@ -137,30 +151,30 @@ Status: unreviewed
   - 10. Run hide popovers until given document, hideUntil, false, and true.
   - 11. Run the dialog focusing steps given this.
 
-- [ ] [HTMLDialogElement.showModal()](https://html.spec.whatwg.org/#dom-dialog-showmodal) — The showModal() method steps are to show a modal dialog given this and null.
+- [x] [HTMLDialogElement.showModal()](https://html.spec.whatwg.org/#dom-dialog-showmodal) — The showModal() method steps are to show a modal dialog given this and null.
 
-- [ ] [HTMLDialogElement.close(returnValue)](https://html.spec.whatwg.org/#dom-dialog-close) — The close(returnValue) method steps are:
+- [x] [HTMLDialogElement.close(returnValue)](https://html.spec.whatwg.org/#dom-dialog-close) — The close(returnValue) method steps are:
   - 1. If returnValue is not given, then set it to null.
   - 2. Close the dialog this with returnValue and null.
 
-- [ ] [HTMLDialogElement.requestClose(returnValue)](https://html.spec.whatwg.org/#dom-dialog-requestclose) — The requestClose(returnValue) method steps are:
+- [x] [HTMLDialogElement.requestClose(returnValue)](https://html.spec.whatwg.org/#dom-dialog-requestclose) — The requestClose(returnValue) method steps are:
   - 1. If returnValue is not given, then set it to null.
   - 2. Request to close the dialog this with returnValue and null.
 
-- [ ] [HTMLDialogElement.returnValue](https://html.spec.whatwg.org/#dom-dialog-returnvalue) — The returnValue IDL attribute, on getting, must return the last value to which it was set. On setting, it must be set to the new value. When the element is created, it must be set to the empty string.
+- [x] [HTMLDialogElement.returnValue](https://html.spec.whatwg.org/#dom-dialog-returnvalue) — The returnValue IDL attribute, on getting, must return the last value to which it was set. On setting, it must be set to the new value. When the element is created, it must be set to the empty string.
 
-- [ ] [HTMLDialogElement.closedBy](https://html.spec.whatwg.org/#dom-dialog-closedby) — The closedBy getter steps are to return the keyword corresponding to the computed closed-by state given this.
+- [x] [HTMLDialogElement.closedBy](https://html.spec.whatwg.org/#dom-dialog-closedby) — The closedBy getter steps are to return the keyword corresponding to the computed closed-by state given this.
 
-- [ ] [The dialog HTML element insertion steps, given insertedNode,](https://html.spec.whatwg.org/#the-dialog-element) — The dialog HTML element insertion steps, given insertedNode, are:
+- [x] [The dialog HTML element insertion steps, given insertedNode,](https://html.spec.whatwg.org/#the-dialog-element) — The dialog HTML element insertion steps, given insertedNode, are:
   - 1. If insertedNode's node document is not fully active, then return.
   - 2. If insertedNode has an open attribute and is connected, then run the dialog setup steps given insertedNode.
 
-- [ ] [The dialog HTML element removing steps, given removedNode, isSubtreeRoot, and o…](https://html.spec.whatwg.org/#the-dialog-element) — The dialog HTML element removing steps, given removedNode, isSubtreeRoot, and oldAncestor are:
+- [x] [The dialog HTML element removing steps, given removedNode, isSubtreeRoot, and o…](https://html.spec.whatwg.org/#the-dialog-element) — The dialog HTML element removing steps, given removedNode, isSubtreeRoot, and oldAncestor are:
   - 1. If removedNode has an open attribute, then run the dialog cleanup steps given removedNode.
   - 2. If removedNode's node document's top layer contains removedNode, then remove an element from the top layer immediately given removedNode.
   - 3. Set is modal of removedNode to false.
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#is-modal) — The following attribute change steps, given element, localName, oldValue, value, and namespace are used for dialog elements:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#is-modal) — The following attribute change steps, given element, localName, oldValue, value, and namespace are used for dialog elements:
   - 1. If namespace is not null, then return.
   - 2. If localName is not open, then return.
   - 3. If value is null and oldValue is not null, then run the dialog cleanup steps given element.
@@ -168,7 +182,7 @@ Status: unreviewed
   - 5. If element is not connected, then return.
   - 6. If value is not null and oldValue is null, then run the dialog setup steps given element.
 
-- [ ] [show a modal dialog](https://html.spec.whatwg.org/#show-a-modal-dialog) — To show a modal dialog given a dialog element subject and an Element or null source:
+- [x] [show a modal dialog](https://html.spec.whatwg.org/#show-a-modal-dialog) — To show a modal dialog given a dialog element subject and an Element or null source:
   - 1. If subject has an open attribute and is modal of subject is true, then return.
   - 2. If subject has an open attribute, then throw an "InvalidStateError" DOMException.
   - 3. If subject's node document is not fully active, then throw an "InvalidStateError" DOMException.
@@ -190,22 +204,22 @@ Status: unreviewed
   - 19. Run hide popovers until given document, hideUntil, false, and true.
   - 20. Run the dialog focusing steps given subject.
 
-- [ ] [set the dialog close watcher](https://html.spec.whatwg.org/#set-the-dialog-close-watcher) — To set the dialog close watcher, given a dialog element dialog:
+- [x] [set the dialog close watcher](https://html.spec.whatwg.org/#set-the-dialog-close-watcher) — To set the dialog close watcher, given a dialog element dialog:
   - 1. Assert: dialog's close watcher is null.
   - 2. Assert: dialog has an open attribute and dialog's node document is fully active.
   - 3. Set dialog's close watcher to the result of establishing a close watcher given dialog's relevant global object, with: cancelAction given canPreventClose being to return the result of firing an event named cancel at dialog, with the cancelable attribute initialized to canPreventClose.; closeAction being to close the dialog given dialog, dialog's request close return value, and dialog's request clo…
 
-- [ ] [The is valid command steps for dialog elements, given a command attribute comma…](https://html.spec.whatwg.org/#is-valid-command-steps) — The is valid command steps for dialog elements, given a command attribute command, are:
+- [x] [The is valid command steps for dialog elements, given a command attribute comma…](https://html.spec.whatwg.org/#is-valid-command-steps) — The is valid command steps for dialog elements, given a command attribute command, are:
   - 1. If command is in the Close state, the Request Close state, or the Show Modal state, then return true.
   - 2. Return false.
 
-- [ ] [The command steps for dialog elements, given an element element, an element sou…](https://html.spec.whatwg.org/#command-steps) — The command steps for dialog elements, given an element element, an element source, and a command attribute command, are:
+- [x] [The command steps for dialog elements, given an element element, an element sou…](https://html.spec.whatwg.org/#command-steps) — The command steps for dialog elements, given an element element, an element source, and a command attribute command, are:
   - 1. If element is in the popover showing state, then return.
   - 2. If command is in the Close state and element has an open attribute, then close the dialog element with source's optional value and source.
   - 3. If command is in the Request Close state and element has an open attribute, then request to close the dialog element with source's optional value and source.
   - 4. If command is the Show Modal state and element does not have an open attribute, then show a modal dialog given element and source.
 
-- [ ] [closed](https://html.spec.whatwg.org/#close-the-dialog) — When a dialog element subject is to be closed, with null or a string result and an Element or null source, run these steps:
+- [x] [closed](https://html.spec.whatwg.org/#close-the-dialog) — When a dialog element subject is to be closed, with null or a string result and an Element or null source, run these steps:
   - 1. If subject does not have an open attribute, then return.
   - 2. Fire an event named beforetoggle, using ToggleEvent, with the oldState attribute initialized to "open", the newState attribute initialized to "closed", and the source attribute initialized to source at subject.
   - 3. If subject does not have an open attribute, then return.
@@ -223,7 +237,7 @@ Status: unreviewed
     - 12c. If subject's node document's focused area of the document's DOM anchor is a shadow-including inclusive descendant of subject, or wasModal is true, then run the focusing steps for element; the viewport should not be scrolled by doing this step.
   - 13. Queue an element task on the user interaction task source given the subject element to fire an event named close at subject.
 
-- [ ] [request to close](https://html.spec.whatwg.org/#dialog-request-close) — To request to close dialog element subject, given null or a string returnValue and null or an Element source:
+- [x] [request to close](https://html.spec.whatwg.org/#dialog-request-close) — To request to close dialog element subject, given null or a string returnValue and null or an Element source:
   - 1. If subject does not have an open attribute, then return.
   - 2. If subject is not connected or subject's node document is not fully active, then return.
   - 3. Assert: subject's close watcher is not null.
@@ -233,7 +247,7 @@ Status: unreviewed
   - 7. Request to close subject's close watcher with false.
   - 8. Set subject's enable close watcher for request close to false.
 
-- [ ] [queue a dialog toggle event task](https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task) — To queue a dialog toggle event task given a dialog element element, a string oldState, a string newState, and an Element or null source:
+- [x] [queue a dialog toggle event task](https://html.spec.whatwg.org/#queue-a-dialog-toggle-event-task) — To queue a dialog toggle event task given a dialog element element, a string oldState, a string newState, and an Element or null source:
   - 1. If element's dialog toggle task tracker is not null:
     - 1a. Set oldState to element's dialog toggle task tracker's old state.
     - 1b. Remove element's dialog toggle task tracker's task from its task queue.
@@ -243,13 +257,13 @@ Status: unreviewed
     - 2b. Set element's dialog toggle task tracker to null.
   - 3. Set element's dialog toggle task tracker to a struct with task set to the just-queued task and old state set to oldState.
 
-- [ ] [computed closed-by state](https://html.spec.whatwg.org/#computed-closed-by-state) — To retrieve a dialog's computed closed-by state, given a dialog dialog:
+- [x] [computed closed-by state](https://html.spec.whatwg.org/#computed-closed-by-state) — To retrieve a dialog's computed closed-by state, given a dialog dialog:
   - 1. If the state of dialog's closedby attribute is Auto:
     - 1a. If dialog's is modal is true, then return Close Request.
     - 1b. Return None.
   - 2. Return the state of dialog's closedby attribute.
 
-- [ ] [dialog focusing steps](https://html.spec.whatwg.org/#dialog-focusing-steps) — The dialog focusing steps, given a dialog element subject, are as follows:
+- [x] [dialog focusing steps](https://html.spec.whatwg.org/#dialog-focusing-steps) — The dialog focusing steps, given a dialog element subject, are as follows:
   - 1. If the allow focus steps given subject's node document return false, then return.
   - 2. Let control be null.
   - 3. If subject has the autofocus attribute, then set control to subject.
@@ -261,14 +275,14 @@ Status: unreviewed
   - 9. Empty topDocument's autofocus candidates.
   - 10. Set topDocument's autofocus processed flag to true.
 
-- [ ] [dialog setup steps](https://html.spec.whatwg.org/#dialog-setup-steps) — The dialog setup steps, given a dialog element subject, are as follows:
+- [x] [dialog setup steps](https://html.spec.whatwg.org/#dialog-setup-steps) — The dialog setup steps, given a dialog element subject, are as follows:
   - 1. Assert: subject has an open attribute.
   - 2. Assert: subject is connected.
   - 3. Assert: subject's node document's open dialogs list does not contain subject.
   - 4. Add subject to subject's node document's open dialogs list.
   - 5. Set the dialog close watcher with subject.
 
-- [ ] [dialog cleanup steps](https://html.spec.whatwg.org/#dialog-cleanup-steps) — The dialog cleanup steps, given a dialog element subject, are as follows:
+- [x] [dialog cleanup steps](https://html.spec.whatwg.org/#dialog-cleanup-steps) — The dialog cleanup steps, given a dialog element subject, are as follows:
   - 1. Remove subject from subject's node document's open dialogs list.
   - 2. If subject's close watcher is not null:
     - 2a. Destroy subject's close watcher.
@@ -276,9 +290,10 @@ Status: unreviewed
 
 #### [4.11.5 Dialog light dismiss](https://html.spec.whatwg.org/#dialog-light-dismiss)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::HandleLightDismiss`, called by `PointerCaptureController`.
 
-- [ ] [light dismiss open dialogs](https://html.spec.whatwg.org/#light-dismiss-open-dialogs) — To light dismiss open dialogs, given a PointerEvent event:
+- [x] [light dismiss open dialogs](https://html.spec.whatwg.org/#light-dismiss-open-dialogs) — To light dismiss open dialogs, given a PointerEvent event:
   - 1. Assert: event's isTrusted attribute is true.
   - 2. Let document be event's target's node document.
   - 3. If document's open dialogs list is empty, then return.
@@ -294,11 +309,11 @@ Status: unreviewed
     - 6g. Assert: topmostDialog's close watcher is not null.
     - 6h. Request to close topmostDialog's close watcher with false.
 
-- [ ] [run light dismiss activities](https://html.spec.whatwg.org/#run-light-dismiss-activities) — To run light dismiss activities, given a PointerEvent event:
+- [x] [run light dismiss activities](https://html.spec.whatwg.org/#run-light-dismiss-activities) — To run light dismiss activities, given a PointerEvent event:
   - 1. Run light dismiss open popovers with event.
   - 2. Run light dismiss open dialogs with event.
 
-- [ ] [nearest clicked dialog](https://html.spec.whatwg.org/#nearest-clicked-dialog) — To find the nearest clicked dialog, given a PointerEvent event:
+- [x] [nearest clicked dialog](https://html.spec.whatwg.org/#nearest-clicked-dialog) — To find the nearest clicked dialog, given a PointerEvent event:
   - 1. Let target be event's target.
   - 2. If target is a dialog element, target has an open attribute, target's is modal is true, and event's clientX and clientY are outside the bounds of target, then return null.
   - 3. Let currentNode be target.

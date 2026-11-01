@@ -64,12 +64,20 @@ namespace krys::boo::html
     return details->IsActiveSummary(*this);
   }
 
+  // https://html.spec.whatwg.org/#the-summary-element:activation-behaviour
   void HTMLSummaryElement::ActivationBehavior(dom::Event &event) noexcept
   {
+    // 1. If this summary element is not the summary for its parent details, then return.
+    // (Nor when the event targets interactive content within it, as in browsers.)
     if (!IsActiveSummary() || IsInSummaryInteractiveContent(event.Target().get()))
     {
       return;
     }
+
+    // 2. Let parent be this summary element's parent.
+    // 3. If the open attribute is present on parent, then remove it. Otherwise, set parent's open attribute
+    // to
+    //    the empty string.
     if (auto details = DetailsElement())
     {
       details->ToggleOpen();

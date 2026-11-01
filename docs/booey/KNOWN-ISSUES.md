@@ -345,7 +345,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 
 - The window gets no `focus`/`blur` events: `FocusAlgorithms` has FIXMEs for firing them at a document's `Window`, and `FocusEvent`/`UIEvent` have no `view`. `FocusOptions` has no selection restoration mode or focus direction.
 - Keys the platform layer has no code for: Insert, Print Screen, Pause, Scroll Lock, Num Lock and the context menu key (FIXME in `Win32Window.cpp`). There is no keyboard route to `contextmenu` (`sendContextMenuEventForKey`), and no menu controller beyond the `contextmenu` event.
-- Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`).
+- Access keys: `HTMLElement::AccessKeyAction` exists but nothing calls it (FIXME in `EventHandler.cpp`), `accessKeyLabel` is empty, and a legend has no accesskey delegatee; with no menus either, commands and their facets aren't exposed.
 - `screenX`/`screenY` on mouse, pen and touch events are not meaningful: the host does not report where the page is on the screen (FIXMEs in `View.cpp` and `Input.cpp`).
 - The window size ignores DPI (`Win32Window.cpp`, "Account for dpi?").
 - Click counting (500 ms, 2 px) and the touch gesture thresholds (tap, pan, long press, fling, pinch) are fixed constants in `View` rather than the system's double click time and distance and touch settings (FIXMEs in `View.hpp`).

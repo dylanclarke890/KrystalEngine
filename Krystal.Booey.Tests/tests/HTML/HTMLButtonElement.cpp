@@ -271,7 +271,8 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLButtonElement: dialog commands",
-                   "[HTML][HTMLButtonElement][html:determine-if-command-is-valid][html:the-button-element]")
+                   "[HTML][HTMLButtonElement][html:determine-if-command-is-valid][html:the-button-element]"
+                   "[html:is-valid-command-steps][html:command-steps]")
   {
     NavigationFixture fixture(
       u8"<button id=open commandfor=d command=show-modal>O</button>"

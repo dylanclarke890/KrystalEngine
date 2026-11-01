@@ -76,7 +76,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: the shadow tree",
-                   "[HTML][HTMLDetailsElement]")
+                   "[HTML][HTMLDetailsElement][html:the-details-element]")
   {
     NavigationFixture fixture(
       u8"<style>body { margin: 0 } details::details-content { margin-left: 30px }</style>"
@@ -160,7 +160,9 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: toggling", "[HTML][HTMLDetailsElement]")
+  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: toggling",
+                   "[HTML][HTMLDetailsElement][html:details-toggle-task-tracker]"
+                   "[html:queue-a-details-toggle-event-task][html:summary-for-its-parent-details]")
   {
     NavigationFixture fixture(u8"<details id=d><summary id=s>Caption <span id=span>text</span> "
                               u8"<a id=link href=#x>link</a> <input id=field></summary>"
@@ -207,7 +209,9 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLDetailsElement: exclusive accordions",
-                   "[HTML][HTMLDetailsElement]")
+                   "[HTML][HTMLDetailsElement][html:details-name-group][html:the-details-element]"
+                   "[html:ensure-details-exclusivity-by-closing-other-elements-if-needed]"
+                   "[html:ensure-details-exclusivity-by-closing-the-given-element-if-needed]")
   {
     NavigationFixture fixture(u8"<details id=a name=faq open>A</details><details id=b name=faq>B</details>"
                               u8"<details id=c name=FAQ open>C</details><details id=d open>D</details>"
@@ -236,6 +240,26 @@ namespace krys::boo::html::tests
       d.Name(dom::DOMString(u8"faq"));
       CHECK_FALSE(d.Open());
       CHECK(a.Open());
+    }
+
+    SECTION("Exclusivity on insertion waits until the elements are connected")
+    {
+      // Both stay open in a disconnected tree; once connected, the first finds the second open and closes.
+      auto container = document.CreateElement(u8"div").ReleaseValue();
+      Ref<dom::Element> first = document.CreateElement(u8"details").ReleaseValue();
+      Ref<dom::Element> second = document.CreateElement(u8"details").ReleaseValue();
+      for (auto *details : {first.get(), second.get()})
+      {
+        (void)details->SetAttribute(u8"name", u8"other");
+        (void)details->SetAttribute(u8"open", u8"");
+        REQUIRE_FALSE(container->AppendChild(*details).HasException());
+      }
+      CHECK(first->HasAttribute(u8"open"));
+      CHECK(second->HasAttribute(u8"open"));
+
+      REQUIRE_FALSE(document.Body()->AppendChild(*container).HasException());
+      CHECK_FALSE(first->HasAttribute(u8"open"));
+      CHECK(second->HasAttribute(u8"open"));
     }
 
     SECTION("Inserting an open element into a group with an open one closes it")
