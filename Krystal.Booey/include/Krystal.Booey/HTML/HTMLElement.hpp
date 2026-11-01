@@ -147,17 +147,26 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-autocorrect
     void Autocorrect(bool value) noexcept;
 
+    /// @brief The element's rendered text: its text as laid out, with line breaks and tabs for its boxes, or
+    /// its descendant text content if it isn't being rendered.
     /// @see https://html.spec.whatwg.org/#dom-innertext
+    /// @see https://html.spec.whatwg.org/#get-the-text-steps
+    /// @see https://html.spec.whatwg.org/#rendered-text-collection-steps
     KRYS_NODISCARD dom::DOMString InnerText() const noexcept;
 
+    /// @brief Replaces the element's children with @p value's text, with a `<br>` for each line break.
     /// @see https://html.spec.whatwg.org/#dom-innertext
+    /// @see https://html.spec.whatwg.org/#set-the-inner-text-steps
     void InnerText(dom::DOMString &&value) noexcept;
 
+    /// @brief The same as `InnerText()`.
     /// @see https://html.spec.whatwg.org/#dom-outertext
     KRYS_NODISCARD dom::DOMString OuterText() const noexcept;
 
+    /// @brief Replaces the element itself with @p value's text, with a `<br>` for each line break, merged
+    /// with the text around it; `NoModificationAllowedError` if the element has no parent.
     /// @see https://html.spec.whatwg.org/#dom-outertext
-    void OuterText(dom::DOMString &&value) noexcept;
+    dom::ExceptionOr<void> OuterText(dom::DOMString &&value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-attachinternals
     KRYS_NODISCARD dom::ExceptionOr<Ref<ElementInternals>> AttachInternals() noexcept;

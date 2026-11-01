@@ -129,6 +129,8 @@ namespace krys::boo::html::tests
       auto *summarySlot = Downcast<HTMLSlotElement>(bare.UserAgentShadowRoot()->FirstChild());
       CHECK_FALSE(summarySlot->AssignedNodes());
       auto &defaultSummary = Downcast<HTMLSummaryElement>(*summarySlot->FirstChild());
+      CHECK(summarySlot->LocalName() == u8"slot");
+      CHECK(defaultSummary.LocalName() == u8"summary");
       CHECK(defaultSummary.IsActiveSummary());
       CHECK(defaultSummary.TextContent() == u8"Details");
       CHECK(FocusAlgorithms::IsFocusableArea(defaultSummary));

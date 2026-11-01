@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
@@ -661,7 +662,8 @@ namespace krys::boo::html
     // 2. Append count new option elements to fragment.
     for (uint32 i = 0; i < count; ++i)
     {
-      auto result = fragment->AppendChild(*CreateRef<HTMLOptionElement>(NodeDocument()));
+      auto result = fragment->AppendChild(
+        *dom::ElementFactory::CreateHTMLElement<HTMLOptionElement>(NodeDocument(), u8"option"));
       if (result.HasException())
       {
         return result.ReleaseException();

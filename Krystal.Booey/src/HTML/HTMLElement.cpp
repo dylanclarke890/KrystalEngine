@@ -16,6 +16,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/PopoverData.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/SimpleRange.hpp"
@@ -390,97 +391,192 @@ namespace krys::boo::html
     dom::ElementAlgorithms::SetAttributeValue(*this, u8"autocorrect", value ? u8"on" : u8"off");
   }
 
+  namespace
+  {
+    /// @see https://html.spec.whatwg.org/#rendered-text-fragment
+    KRYS_NODISCARD Ref<dom::DocumentFragment> RenderedTextFragment(dom::DOMStringView input,
+                                                                   dom::Document &document) noexcept
+    {
+      // 1. Let fragment be the result of creating a document fragment given document.
+      auto fragment = document.CreateDocumentFragment();
+
+      // 2. Let position be a position variable for input, initially pointing at the start of input.
+      size_t position = 0;
+
+      // 3. Let text be the empty string.
+      // 4. While position is not past the end of input:
+      while (position < input.size())
+      {
+        // 4a. Collect a sequence of code points that are not U+000A LF or U+000D CR from input given
+        // position,
+        //     and set text to the result.
+        auto end = std::min(input.find_first_of(u8"\r\n", position), input.size());
+        auto text = input.substr(position, end - position);
+        position = end;
+
+        // 4b. If text is not the empty string, then append a new Text node whose data is text and node
+        // document
+        //     is document to fragment.
+        if (!text.empty())
+        {
+          (void)fragment->AppendChild(*document.CreateTextNode(dom::DOMString(text)));
+        }
+
+        // 4c. While position is not past the end of input, and the code point at position is either U+000A LF
+        //     or U+000D CR:
+        while (position < input.size() && (input[position] == u8'\n' || input[position] == u8'\r'))
+        {
+          // 4c.i. If the code point at position is U+000D CR and the next code point is U+000A LF, then
+          // advance
+          //       position to the next code point in input.
+          if (input[position] == u8'\r' && position + 1 < input.size() && input[position + 1] == u8'\n')
+          {
+            ++position;
+          }
+
+          // 4c.ii. Advance position to the next code point in input.
+          ++position;
+
+          // 4c.iii. Append the result of creating an element given document, "br", and the HTML namespace to
+          //         fragment.
+          (void)fragment->AppendChild(
+            *dom::ElementFactory::CreateHTMLElement<HTMLBRElement>(document, u8"br"));
+        }
+      }
+
+      // 5. Return fragment.
+      return fragment;
+    }
+
+    /// @see https://html.spec.whatwg.org/#merge-with-the-next-text-node
+    void MergeWithNextTextNode(dom::Text &node) noexcept
+    {
+      // 1. Let next be node's next sibling.
+      // 2. If next is not a Text node, then return.
+      RefPtr<dom::Text> next = ShareRefPtr(DynamicDowncast<dom::Text>(node.NextSibling()));
+      if (!next)
+      {
+        return;
+      }
+
+      // 3. Replace data with node, node's data's length, 0, and next's data.
+      (void)node.ReplaceData(node.Length(), 0, dom::DOMString(next->Data()));
+
+      // 4. Remove next.
+      (void)next->Remove();
+    }
+  }
+
   dom::DOMString HTMLElement::InnerText() const noexcept
   {
+    // The innerText and outerText getter steps are to return the result of running get the text steps with
+    // this.
     auto &self = const_cast<HTMLElement &>(*this);
 
-    // We need to update layout, since plainText uses line boxes in the render tree.
+    // The rendered text comes from the line boxes, so layout must be up to date.
     self.NodeDocument().UpdateLayoutIgnorePendingStylesheets();
 
+    // 1. If element is not being rendered or if the user agent is a non-CSS user agent, then return element's
+    //    descendant text content.
     if (!Renderer())
     {
       return TextContent().value_or(dom::DOMString {});
     }
 
+    // Skipped content (content-visibility) isn't rendered, but it isn't the descendant text content either.
     if (Renderer()->IsSkippedContent())
     {
       return {};
     }
 
+    // 2. Let results be a new empty list.
+    // 3. For each child node node of element:
+    // 3a. Let current be the list resulting from running the rendered text collection steps with node.
+    // 3b. For each item item in current, append item to results.
+    // 4. Remove any items from results that are the empty string.
+    // 5. Remove any runs of consecutive required line break count items at the start or end of results.
+    // 6. Replace each remaining run of consecutive required line break count items with a string consisting
+    // of
+    //    as many U+000A LF code points as the maximum of the values in the required line break count items.
+    // 7. Return the concatenation of the string items in results.
+    // (The text iterator walks the rendered text, approximating the rendered text collection steps.)
     return PlainText(dom::MakeRangeSelectingNodeContents(self));
   }
 
   void HTMLElement::InnerText(dom::DOMString &&value) noexcept
   {
+    // The innerText setter steps are to run set the inner text steps with this and the given value.
     CEReactionsScope ceReactions;
-    // FIXME: This doesn't take whitespace collapsing into account at all.
 
-    if (value.find_first_of(u8"\r\n") == dom::DOMString::npos)
-    {
-      (void)dom::NodeAlgorithms::StringReplaceAll(krys::move(value), *this);
-      return;
-    }
-
+    // A text control's inner element holds its value as one text node, with its line breaks normalised.
     if (IsConnected() && IsTextControlInnerTextElement())
     {
       (void)dom::NodeAlgorithms::StringReplaceAll(infra::StringAlgorithms::NormalizeNewlines(value), *this);
       return;
     }
 
-    // Add text nodes and <br> elements.
-    auto &document = NodeDocument();
-    auto fragment = document.CreateDocumentFragment();
-    for (size_t start = 0, length = value.size(); start < length;)
-    {
-      // Find next line break.
-      char8 c = 0;
-      size_t i;
-      for (i = start; i < length; i++)
-      {
-        c = value[i];
-        if (c == u8'\r' || c == u8'\n')
-        {
-          break;
-        }
-      }
+    // 1. Let fragment be the rendered text fragment for value given element's node document.
+    auto fragment = RenderedTextFragment(value, NodeDocument());
 
-      // If text is not the empty string, then append a new Text node whose data is text and node document is
-      // document to fragment.
-      if (i > start)
-      {
-        (void)fragment->AppendChild(*document.CreateTextNode(value.substr(start, i - start)));
-      }
-
-      if (i == length)
-      {
-        break;
-      }
-
-      (void)fragment->AppendChild(*CreateRef<HTMLBRElement>(document));
-      // Make sure \r\n doesn't result in two line breaks.
-      if (c == u8'\r' && i + 1 < length && value[i + 1] == u8'\n')
-      {
-        ++i;
-      }
-
-      start = i + 1; // Character after line break.
-    }
-
+    // 2. Replace all with fragment within element.
     (void)dom::MutationAlgorithms::ReplaceAll(fragment.get(), *this);
   }
 
   dom::DOMString HTMLElement::OuterText() const noexcept
   {
-    // FIXME: Implement OuterText() method.
-    krys_not_implemented();
+    return InnerText();
   }
 
-  void HTMLElement::OuterText(dom::DOMString &&value) noexcept
+  dom::ExceptionOr<void> HTMLElement::OuterText(dom::DOMString &&value) noexcept
   {
     CEReactionsScope ceReactions;
-    // FIXME: Implement OuterText() getter method.
-    (void)value;
-    krys_not_implemented();
+
+    // 1. If this's parent is null, then throw a "NoModificationAllowedError" DOMException.
+    RefPtr<dom::ContainerNode> parent = ShareRefPtr(ParentNode());
+    if (!parent)
+    {
+      return dom::ExceptionCode::NoModificationAllowedError;
+    }
+
+    // 2. Let next be this's next sibling.
+    RefPtr<dom::Node> next = ShareRefPtr(NextSibling());
+
+    // 3. Let previous be this's previous sibling.
+    RefPtr<dom::Node> previous = ShareRefPtr(PreviousSibling());
+
+    // 4. Let fragment be the rendered text fragment for the given value given this's node document.
+    auto fragment = RenderedTextFragment(value, NodeDocument());
+
+    // 5. If fragment has no children, then append a new Text node whose data is the empty string and node
+    //    document is this's node document to fragment.
+    if (!fragment->HasChildNodes())
+    {
+      (void)fragment->AppendChild(*NodeDocument().CreateTextNode(dom::DOMString()));
+    }
+
+    // 6. Replace this with fragment within this's parent.
+    if (auto replace = dom::MutationAlgorithms::Replace(*this, *fragment, *parent); replace.HasException())
+    {
+      return replace.ReleaseException();
+    }
+
+    // 7. If next is non-null and next's previous sibling is a Text node, then merge with the next text node
+    //    given next's previous sibling.
+    if (next)
+    {
+      if (auto *text = DynamicDowncast<dom::Text>(next->PreviousSibling()))
+      {
+        MergeWithNextTextNode(*text);
+      }
+    }
+
+    // 8. If previous is a Text node, then merge with the next text node given previous.
+    if (auto *text = DynamicDowncast<dom::Text>(previous.get()))
+    {
+      MergeWithNextTextNode(*text);
+    }
+
+    return {};
   }
 
   dom::ExceptionOr<Ref<ElementInternals>> HTMLElement::AttachInternals() noexcept

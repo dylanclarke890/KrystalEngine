@@ -1,6 +1,9 @@
 ﻿#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "Krystal.Booey.Tests/Style/ResolverTestUtils.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::html::tests
@@ -126,6 +129,85 @@ namespace krys::boo::html::tests
     CHECK(invalid->Translate());
     inherit->Translate(false);
     CHECK(inherit->GetAttribute(u8"translate") == dom::DOMString(u8"no"));
+  }
+
+  TEST_CASE(
+    "HTMLElement.innerText: the rendered text, or the text content when not rendered",
+    "[HTML][HTMLElement][html:dom-innertext][html:get-the-text-steps][html:rendered-text-collection-steps]"
+    "[html:dom-outertext]")
+  {
+    style::tests::ResolverFixture fixture {
+      u8"<!DOCTYPE html><div id=d>a<br>b<span style=display:none>hidden</span>   c</div>"
+      u8"<div id=p><p>One</p><p>Two</p></div><div id=n style=display:none>x  <b>y</b></div>"};
+
+    auto &d = Downcast<HTMLElement>(fixture.ById(u8"d"));
+    CHECK(d.InnerText() == u8"a\nb c");
+    CHECK(d.OuterText() == d.InnerText());
+    CHECK(Downcast<HTMLElement>(fixture.ById(u8"p")).InnerText() == u8"One\n\nTwo");
+
+    // Not being rendered: the descendant text content.
+    CHECK(Downcast<HTMLElement>(fixture.ById(u8"n")).InnerText() == u8"x  y");
+  }
+
+  TEST_CASE(
+    "HTMLElement.innerText: setting it replaces the children with text and a br per line break",
+    "[HTML][HTMLElement][html:dom-innertext][html:set-the-inner-text-steps][html:rendered-text-fragment]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    auto &element = Downcast<HTMLElement>(*div);
+    REQUIRE_FALSE(div->AppendChild(*document->CreateElement(u8"b").ReleaseValue()).HasException());
+
+    element.InnerText(dom::DOMString(u8"a\r\nb\n\nc\r"));
+    List<std::string> children;
+    for (auto *child = div->FirstChild(); child; child = child->NextSibling())
+    {
+      auto *text = DynamicDowncast<dom::Text>(*child);
+      children.push_back(
+        text ? std::string(reinterpret_cast<const char *>(text->Data().data()), text->Data().size())
+             : std::string("<")
+                 + reinterpret_cast<const char *>(Downcast<dom::Element>(*child).LocalName().View().data())
+                 + ">");
+    }
+    CHECK(children == List<std::string> {"a", "<br>", "b", "<br>", "<br>", "c", "<br>"});
+
+    element.InnerText(dom::DOMString());
+    CHECK_FALSE(div->HasChildNodes());
+  }
+
+  TEST_CASE("HTMLElement.outerText: setting it replaces the element with text, merged with its neighbours",
+            "[HTML][HTMLElement][html:dom-outertext][html:merge-with-the-next-text-node][html:rendered-text-"
+            "fragment]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto check = [](const auto &result, dom::ExceptionCode code)
+    {
+      return result.HasException() && result.GetException().Code() == code;
+    };
+
+    // Without a parent, it throws.
+    auto orphan = document->CreateElement(u8"span").ReleaseValue();
+    CHECK(check(Downcast<HTMLElement>(*orphan).OuterText(dom::DOMString(u8"x")),
+                dom::ExceptionCode::NoModificationAllowedError));
+
+    auto p = document->CreateElement(u8"p").ReleaseValue();
+    auto span = document->CreateElement(u8"span").ReleaseValue();
+    REQUIRE_FALSE(p->AppendChild(*document->CreateTextNode(u8"x")).HasException());
+    REQUIRE_FALSE(p->AppendChild(*span).HasException());
+    REQUIRE_FALSE(p->AppendChild(*document->CreateTextNode(u8"z")).HasException());
+
+    REQUIRE_FALSE(Downcast<HTMLElement>(*span).OuterText(dom::DOMString(u8"1\n2")).HasException());
+    REQUIRE(p->ChildNodes()->Length() == 3);
+    CHECK(Downcast<dom::Text>(*p->FirstChild()).Data() == u8"x1");
+    CHECK(Downcast<dom::Element>(*p->FirstChild()->NextSibling()).LocalName() == u8"br");
+    CHECK(Downcast<dom::Text>(*p->LastChild()).Data() == u8"2z");
+
+    // An empty value leaves an empty text node, merged away.
+    auto b = document->CreateElement(u8"b").ReleaseValue();
+    REQUIRE_FALSE(p->InsertBefore(*b, p->LastChild()).HasException());
+    REQUIRE_FALSE(Downcast<HTMLElement>(*b).OuterText(dom::DOMString()).HasException());
+    REQUIRE(p->ChildNodes()->Length() == 3);
+    CHECK(Downcast<dom::Text>(*p->LastChild()).Data() == u8"2z");
   }
 
   TEST_CASE("HTMLElement.dir: limited to ltr, rtl and auto", "[HTML][HTMLElement][html:dom-dir]")

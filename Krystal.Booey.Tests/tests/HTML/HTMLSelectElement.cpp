@@ -212,6 +212,7 @@ namespace krys::boo::tests
       REQUIRE_FALSE(select.Length(5u).HasException());
       CHECK(select.Length() == 5u);
       CHECK(select.Item(4u)->ParentNode() == &select);
+      CHECK(select.Item(4u)->LocalName() == u8"option");
       REQUIRE_FALSE(select.Length(100'001u).HasException());
       CHECK(select.Length() == 5u);
     }
@@ -318,6 +319,7 @@ namespace krys::boo::tests
                                                                      dom::DOMString(u8"n"), true, false);
     REQUIRE_FALSE(created.HasException());
     auto option = created.ReleaseValue();
+    CHECK(option->LocalName() == u8"option");
     CHECK(option->Text() == u8"New");
     CHECK(option->Value() == u8"n");
     CHECK(option->DefaultSelected());

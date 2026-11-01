@@ -3,6 +3,7 @@
 #include "Krystal.Booey/CSS/Selectors/UserAgentParts.hpp"
 #include "Krystal.Booey/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
@@ -136,7 +137,8 @@ namespace krys::boo::html
     krys_debug_assert(Element()->UserAgentShadowRoot());
 
     Ref<HTMLInputElement> element = ShareRef(*Element());
-    auto button = CreateRef<HTMLInputElement>(element->NodeDocument());
+    auto button =
+      dom::ElementFactory::CreateHTMLElement<HTMLInputElement>(element->NodeDocument(), u8"input");
     (void)button->SetAttribute(dom::DOMStringAtom(u8"type"), dom::DOMString(InputTypeNames::Button));
     button->SetUserAgentPart(css::UserAgentParts::FileSelectorButton());
     (void)button->SetValue(element->Multiple() ? FileButtonChooseMultipleFilesLabel()

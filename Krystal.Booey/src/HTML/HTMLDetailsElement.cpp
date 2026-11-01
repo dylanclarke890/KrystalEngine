@@ -5,6 +5,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
@@ -61,10 +62,10 @@ namespace krys::boo::html
   {
     auto &document = NodeDocument();
 
-    auto summarySlot = CreateRef<HTMLSlotElement>(document);
+    auto summarySlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     summarySlot->Name(dom::DOMString(SummarySlotName));
 
-    auto defaultSummary = CreateRef<HTMLSummaryElement>(document);
+    auto defaultSummary = dom::ElementFactory::CreateHTMLElement<HTMLSummaryElement>(document, u8"summary");
     (void)defaultSummary->AppendChild(
       *CreateRef<dom::Text>(document, dom::DOMString(DefaultDetailsSummaryText())));
     _defaultSummary = WeakPtr<HTMLSummaryElement>::WithRef(*defaultSummary);
@@ -73,7 +74,7 @@ namespace krys::boo::html
     (void)root.AppendChild(*summarySlot);
     _summarySlot = WeakPtr<HTMLSlotElement>::WithRef(*summarySlot);
 
-    auto defaultSlot = CreateRef<HTMLSlotElement>(document);
+    auto defaultSlot = dom::ElementFactory::CreateHTMLElement<HTMLSlotElement>(document, u8"slot");
     defaultSlot->SetUserAgentPart(css::UserAgentParts::DetailsContent());
     krys_debug_assert(!HasAttribute(u8"open"));
     (void)defaultSlot->SetInlineStyleProperty(css::PropertyId::ContentVisibility, css::ValueId::Hidden);

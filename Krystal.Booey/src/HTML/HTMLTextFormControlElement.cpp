@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/ElementTextDirection.hpp"
 #include "Krystal.Booey/DOM/Event.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Position.hpp"
 #include "Krystal.Booey/DOM/PseudoElement.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -810,7 +811,8 @@ namespace krys::boo::html
 
       if (endsWithNewLine)
       {
-        (void)innerText->AppendChild(*CreateRef<HTMLBRElement>(NodeDocument()));
+        (void)innerText->AppendChild(
+          *dom::ElementFactory::CreateHTMLElement<HTMLBRElement>(NodeDocument(), u8"br"));
       }
     }
 

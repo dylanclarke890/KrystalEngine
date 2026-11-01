@@ -8,7 +8,8 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [3 Semantics, structure, and APIs of HTML documents](https://html.spec.whatwg.org/#dom)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ### [3.1 Documents](https://html.spec.whatwg.org/#documents)
 
@@ -477,9 +478,11 @@ Status: reviewed (2026-11-01)
 
 #### [3.2.7 The innerText and outerText properties](https://html.spec.whatwg.org/#the-innertext-idl-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::InnerText`/`OuterText` (getters: the text iterator's plain text, DIFFERENCES.md), `RenderedTextFragment` and `MergeWithNextTextNode` in `HTMLElement.cpp`.
+> New: `outerText` wasn't implemented. Fixed: the `<br>` elements innerText made, and those of `new Option()`, the options collection's length setter, `<details>`' default summary and slots, a text control's trailing `<br>` and the file input's button, had no local name, as they were constructed rather than created (`ElementFactory::CreateHTMLElement`).
 
-- [ ] [get the text steps](https://html.spec.whatwg.org/#get-the-text-steps) — The get the text steps, given an HTMLElement element, are:
+- [x] [get the text steps](https://html.spec.whatwg.org/#get-the-text-steps) — The get the text steps, given an HTMLElement element, are:
   - 1. If element is not being rendered or if the user agent is a non-CSS user agent, then return element's descendant text content.
   - 2. Let results be a new empty list.
   - 3. For each child node node of element:
@@ -490,9 +493,9 @@ Status: unreviewed
   - 6. Replace each remaining run of consecutive required line break count items with a string consisting of as many U+000A LF code points as the maximum of the values in the required line break count items.
   - 7. Return the concatenation of the string items in results.
 
-- [ ] [HTMLElement.innerText](https://html.spec.whatwg.org/#dom-innertext) — The innerText and outerText getter steps are to return the result of running get the text steps with this.
+- [x] [HTMLElement.innerText](https://html.spec.whatwg.org/#dom-innertext) — The innerText and outerText getter steps are to return the result of running get the text steps with this.
 
-- [ ] [rendered text collection steps](https://html.spec.whatwg.org/#rendered-text-collection-steps) — The rendered text collection steps, given a node node, are as follows:
+- [x] [rendered text collection steps](https://html.spec.whatwg.org/#rendered-text-collection-steps) — The rendered text collection steps, given a node node, are as follows:
   - 1. Let items be the result of running the rendered text collection steps with each child node of node in tree order, and then concatenating the results to a single list.
   - 2. If node's computed value of 'visibility' is not 'visible', then return items.
   - 3. If node is not being rendered, then return items. For the purpose of this step, the following elements must act as described if the computed value of the 'display' property is not 'none': select elements have an associated non-replaced inline CSS box whose child boxes include only those of optgroup and option element descendant nodes;; optgroup elements have an associated non-replaced block-level…
@@ -504,13 +507,13 @@ Status: unreviewed
   - 9. If node's used value of 'display' is block-level or 'table-caption', then append 1 (a required line break count) at the beginning and end of items. [CSSDISPLAY]
   - 10. Return items.
 
-- [ ] [set the inner text steps](https://html.spec.whatwg.org/#set-the-inner-text-steps) — The set the inner text steps, given an HTMLElement element, and a string value are:
+- [x] [set the inner text steps](https://html.spec.whatwg.org/#set-the-inner-text-steps) — The set the inner text steps, given an HTMLElement element, and a string value are:
   - 1. Let fragment be the rendered text fragment for value given element's node document.
   - 2. Replace all with fragment within element.
 
-- [ ] [The innerText setter steps](https://html.spec.whatwg.org/#dom-innertext) — The innerText setter steps are to run set the inner text steps with this and the given value.
+- [x] [The innerText setter steps](https://html.spec.whatwg.org/#dom-innertext) — The innerText setter steps are to run set the inner text steps with this and the given value.
 
-- [ ] [The outerText setter steps](https://html.spec.whatwg.org/#dom-outertext) — The outerText setter steps are:
+- [x] [The outerText setter steps](https://html.spec.whatwg.org/#dom-outertext) — The outerText setter steps are:
   - 1. If this's parent is null, then throw a "NoModificationAllowedError" DOMException.
   - 2. Let next be this's next sibling.
   - 3. Let previous be this's previous sibling.
@@ -520,7 +523,7 @@ Status: unreviewed
   - 7. If next is non-null and next's previous sibling is a Text node, then merge with the next text node given next's previous sibling.
   - 8. If previous is a Text node, then merge with the next text node given previous.
 
-- [ ] [rendered text fragment](https://html.spec.whatwg.org/#rendered-text-fragment) — The rendered text fragment for a string input given a Document document is the result of running the following steps:
+- [x] [rendered text fragment](https://html.spec.whatwg.org/#rendered-text-fragment) — The rendered text fragment for a string input given a Document document is the result of running the following steps:
   - 1. Let fragment be the result of creating a document fragment given document.
   - 2. Let position be a position variable for input, initially pointing at the start of input.
   - 3. Let text be the empty string.
@@ -533,7 +536,7 @@ Status: unreviewed
       - 4c.iii. Append the result of creating an element given document, "br", and the HTML namespace to fragment.
   - 5. Return fragment.
 
-- [ ] [merge with the next text node](https://html.spec.whatwg.org/#merge-with-the-next-text-node) — To merge with the next text node given a Text node node:
+- [x] [merge with the next text node](https://html.spec.whatwg.org/#merge-with-the-next-text-node) — To merge with the next text node given a Text node node:
   - 1. Let next be node's next sibling.
   - 2. If next is not a Text node, then return.
   - 3. Replace data with node, node's data's length, 0, and next's data.
@@ -541,21 +544,23 @@ Status: unreviewed
 
 #### [3.2.8 Requirements relating to the bidirectional algorithm](https://html.spec.whatwg.org/#requirements-relating-to-the-bidirectional-algorithm)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ##### [3.2.8.1 Authoring conformance criteria for bidirectional-algorithm formatting characters](https://html.spec.whatwg.org/#authoring-conformance-criteria-for-bidirectional-algorithm-formatting-characters)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [3.2.8.2 User agent conformance criteria](https://html.spec.whatwg.org/#user-agent-conformance-criteria)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Layout runs the Unicode bidirectional algorithm (ICU's, in the inline formatting context); `dir`, `<bdi>` and `<bdo>` map to `direction` and `unicode-bidi` in the UA style sheet (reviewed with 15 Rendering).
 
 #### [3.2.9 Requirements related to ARIA and to platform accessibility APIs](https://html.spec.whatwg.org/#wai-aria)
 
-Status: unreviewed
+Status: n/a (accessibility isn't planned)
 
-- [ ] [Similarly, for a custom element element, the default ARIA state and property se…](https://html.spec.whatwg.org/#wai-aria) — Similarly, for a custom element element, the default ARIA state and property semantics, for a state or property named stateOrProperty, are determined as follows:
+- [x] [Similarly, for a custom element element, the default ARIA state and property se…](https://html.spec.whatwg.org/#wai-aria) — Similarly, for a custom element element, the default ARIA state and property semantics, for a state or property named stateOrProperty, are determined as follows:
   - 1. If element's attached internals is non-null:
     - 1a. If element's attached internals's get the stateOrProperty-associated element exists, then return the result of running it.
     - 1b. If element's attached internals's get the stateOrProperty-associated elements exists, then return the result of running it.

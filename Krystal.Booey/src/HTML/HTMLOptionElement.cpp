@@ -2,6 +2,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
@@ -38,7 +39,7 @@ namespace krys::boo::html
                                                       Maybe<dom::DOMString> value, bool defaultSelected,
                                                       bool selected) noexcept
   {
-    auto element = CreateRef<HTMLOptionElement>(document);
+    auto element = dom::ElementFactory::CreateHTMLElement<HTMLOptionElement>(document, u8"option");
 
     if (!text.empty())
     {
