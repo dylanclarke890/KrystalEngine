@@ -571,11 +571,6 @@ namespace krys::boo
     /// @see https://html.spec.whatwg.org/#dom-atob
     KRYS_NODISCARD dom::ExceptionOr<dom::DOMString> Atob(dom::DOMStringView data) const noexcept;
 
-    /// @brief A clone of @p value (its `Clone()`).
-    /// @see https://html.spec.whatwg.org/#dom-structuredclone
-    KRYS_NODISCARD RefPtr<html::SerializedScriptValue>
-      StructuredClone(html::SerializedScriptValue *value) const noexcept;
-
 #pragma endregion
 
 #pragma region Posting messages - https://html.spec.whatwg.org/#posting-messages

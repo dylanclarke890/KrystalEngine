@@ -855,16 +855,9 @@ namespace krys::boo::tests
     struct TestValue final : html::SerializedScriptValue
     {
       std::string Text;
-      bool IsClone {false};
 
-      explicit TestValue(std::string text, bool isClone = false) noexcept
-          : Text(krys::move(text)), IsClone(isClone)
+      explicit TestValue(std::string text) noexcept : Text(krys::move(text))
       {
-      }
-
-      KRYS_NODISCARD Ref<html::SerializedScriptValue> Clone() noexcept override
-      {
-        return CreateRef<TestValue>(Text, true);
       }
     };
   }
@@ -1384,19 +1377,5 @@ namespace krys::boo::tests
       body.SetOnLoad([](dom::Event &) {});
       CHECK(window.OnLoad() == nullptr);
     }
-  }
-
-  TEST_CASE("LocalDOMWindow::StructuredClone: clones the value, and null is null",
-            "[Page][LocalDOMWindow][html:dom-structuredclone]")
-  {
-    WindowFixture fixture;
-    auto &window = fixture.Window();
-
-    auto value = CreateRef<TestValue>("value");
-    auto clone = window.StructuredClone(value.get());
-    REQUIRE(clone);
-    CHECK(clone.get() != value.get());
-    CHECK(static_cast<TestValue &>(*clone).IsClone);
-    CHECK(window.StructuredClone(nullptr) == nullptr);
   }
 }

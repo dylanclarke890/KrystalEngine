@@ -59,8 +59,7 @@ Status: n/a (no JavaScript values)
 
 #### [2.7.11 Structured cloning API](https://html.spec.whatwg.org/#structured-cloning)
 
-Status: reviewed (2026-11-01)
-> `LocalDOMWindow::StructuredClone`: a value clones itself (`SerializedScriptValue::Clone`), and with no transferable objects there are no `options` (DIFFERENCES.md).
+Status: n/a (no structured serialization, and no use for cloning host values)
 
 - [x] [WindowOrWorkerGlobalScope.structuredClone(value, options)](https://html.spec.whatwg.org/#dom-structuredclone) — The structuredClone(value, options) method steps are:
   - 1. Let serialized be ? StructuredSerializeWithTransfer(value, options["transfer"]).

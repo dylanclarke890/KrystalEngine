@@ -1201,16 +1201,6 @@ namespace krys::boo
     return dom::DOMString(builder.ToString());
   }
 
-  RefPtr<html::SerializedScriptValue>
-    LocalDOMWindow::StructuredClone(html::SerializedScriptValue *value) const noexcept
-  {
-    // 1. Let serialized be ? StructuredSerializeWithTransfer(value, options["transfer"]).
-    // 2. Let deserializeRecord be ? StructuredDeserializeWithTransfer(serialized, this's relevant realm).
-    // 3. Return deserializeRecord.[[Deserialized]].
-    // (The value clones itself, and there's nothing to transfer.)
-    return value ? RefPtr<html::SerializedScriptValue>(value->Clone()) : nullptr;
-  }
-
   dom::ExceptionOr<void> LocalDOMWindow::PostMessage(RefPtr<html::SerializedScriptValue> &&message,
                                                      utf8_stringview targetOrigin) noexcept
   {
