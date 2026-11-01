@@ -76,6 +76,10 @@ namespace krys::boo::html
 
   HTMLFormElement *HTMLLabelElement::Form() const noexcept
   {
+    // 1. If the label element has no labeled control, then return null.
+    // 2. If the label element's labeled control is not a form-associated element, then return null.
+    // 3. Return the label element's labeled control's form owner (which can still be null).
+    // (Every labelable form-associated element is a validated listed element.)
     if (auto element = Control())
     {
       if (auto *listedElement = element->AsValidatedFormListedElement())

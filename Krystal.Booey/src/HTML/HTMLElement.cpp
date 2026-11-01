@@ -254,8 +254,14 @@ namespace krys::boo::html
       return nullptr;
     }
 
-    // FIXME: The same list each time ([SameObject]), once nodes cache their lists.
-    return CreateRef<LabelsNodeList>(*this);
+    auto &cachedLabels = EnsureNodeRareData().LabelsNodeList();
+    if (auto labels = cachedLabels.lock())
+    {
+      return labels;
+    }
+    Ref<dom::NodeList> labels = CreateRef<LabelsNodeList>(*this);
+    cachedLabels = CreateWeakPtr<dom::NodeList>(labels.get());
+    return labels;
   }
 
   void HTMLElement::Click() noexcept

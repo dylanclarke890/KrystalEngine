@@ -575,6 +575,9 @@ namespace krys::boo::dom
 #pragma endregion
 
   protected:
+    /// @brief The node's rare data, created if it has none.
+    KRYS_NODISCARD NodeRareData &EnsureNodeRareData() noexcept;
+
 #pragma region Registered Observers
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list

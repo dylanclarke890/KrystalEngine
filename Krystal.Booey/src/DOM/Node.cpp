@@ -168,12 +168,16 @@ namespace krys::boo::dom
 
   Ref<NodeList> Node::ChildNodes() noexcept
   {
+    return EnsureNodeRareData().ChildNodes(*this);
+  }
+
+  NodeRareData &Node::EnsureNodeRareData() noexcept
+  {
     if (_nodeRareData == nullptr)
     {
       _nodeRareData = CreateUnique<NodeRareData>();
     }
-
-    return _nodeRareData->ChildNodes(*this);
+    return *_nodeRareData;
   }
 
   Node *Node::FirstChild() const noexcept
@@ -972,22 +976,12 @@ namespace krys::boo::dom
 
   List<Ref<RegisteredObserver>> &Node::RegisteredObservers() noexcept
   {
-    if (_nodeRareData == nullptr)
-    {
-      _nodeRareData = CreateUnique<NodeRareData>();
-    }
-
-    return _nodeRareData->RegisteredObservers();
+    return EnsureNodeRareData().RegisteredObservers();
   }
 
   List<Ref<TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept
   {
-    if (_nodeRareData == nullptr)
-    {
-      _nodeRareData = CreateUnique<NodeRareData>();
-    }
-
-    return _nodeRareData->TransientRegisteredObservers();
+    return EnsureNodeRareData().TransientRegisteredObservers();
   }
 
   template <>

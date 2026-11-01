@@ -17,6 +17,7 @@ namespace krys::boo::dom
   {
   private:
     WeakPtr<NodeList> _childNodeList;
+    WeakPtr<NodeList> _labelsNodeList;
 
     /// @see https://dom.spec.whatwg.org/#registered-observer-list
     List<Ref<RegisteredObserver>> _registeredObservers;
@@ -28,6 +29,9 @@ namespace krys::boo::dom
 
   public:
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
+
+    /// @brief The node's labels list, if it has made one; held weakly, as the list holds the node.
+    KRYS_NODISCARD WeakPtr<NodeList> &LabelsNodeList() noexcept;
 
     KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
 

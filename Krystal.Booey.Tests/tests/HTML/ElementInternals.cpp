@@ -153,7 +153,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(InternalsFixture, "Form-associated custom elements",
-                   "[HTML][CustomElement][ElementInternals]")
+                   "[HTML][CustomElement][ElementInternals][html:dom-elementinternals-labels]")
   {
     DefineInternals(u8"x-rating", {.FormAssociated = true});
     Parse(u8"<form id=f><label id=l for=a>Rating</label><x-rating id=a name=rating></x-rating>"

@@ -5,10 +5,12 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOptionElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTextAreaElement.hpp"
+#include "Krystal.Booey/HTML/RadioNodeList.hpp"
 #include "Krystal.Booey/HTML/SubmitEvent.hpp"
 
 namespace krys::boo::html::tests
@@ -49,7 +51,46 @@ namespace krys::boo::html::tests
     };
   }
 
-  TEST_CASE("HTMLFormElement: submission", "[HTML][Forms]")
+  TEST_CASE(
+    "HTMLFormElement: autocomplete, elements, length, named items and validity",
+    "[HTML][Forms][html:dom-form-autocomplete][html:attr-form-autocomplete][html:dom-form-elements]"
+    "[html:dom-form-length][html:past-names-map][html:dom-form-checkvalidity][html:dom-form-reportvalidity]")
+  {
+    FormFixture fixture(u8R"(<form id=f><input id=a name=a required><input type=image id=img name=i>
+      <output id=o></output><fieldset id=fs></fieldset></form>)");
+    auto &form = fixture.Get<HTMLFormElement>(u8"f");
+    auto &a = fixture.Get<HTMLInputElement>(u8"a");
+
+    CHECK(Str(form.Autocomplete()) == "on");
+    form.Autocomplete(u8"OFF");
+    CHECK(Str(form.Autocomplete()) == "off");
+    form.Autocomplete(u8"maybe");
+    CHECK(Str(form.Autocomplete()) == "on");
+
+    // The same collection each time, without image buttons.
+    auto elements = form.Elements();
+    CHECK(form.Elements().get() == elements.get());
+    CHECK(elements->Length() == 3);
+    CHECK(form.Length() == 3);
+
+    // A named item found once is still found by that name when renamed.
+    auto item = form.NamedItem(u8"a");
+    REQUIRE(item);
+    CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &a);
+    REQUIRE_FALSE(a.SetAttribute(u8"name", u8"b").HasException());
+    item = form.NamedItem(u8"a");
+    REQUIRE(item);
+    CHECK(std::get<RefPtr<dom::Element>>(*item).get() == &a);
+
+    auto invalid = EventLog::ListenTo(a, {u8"invalid"});
+    CHECK_FALSE(form.CheckValidity());
+    CHECK(invalid->Joined() == "invalid");
+    (void)a.SetValue(u8"x");
+    CHECK(form.CheckValidity());
+    CHECK(form.ReportValidity());
+  }
+
+  TEST_CASE("HTMLFormElement: submission", "[HTML][Forms][html:dom-form-submit][html:dom-form-requestsubmit]")
   {
     FormFixture fixture(u8R"(<form id=f action="https://example.com/search" target=results>
       <input name=q value="a b&c"><input name=n type=number value=3><input type=checkbox name=on checked>
@@ -145,7 +186,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     CHECK(fixture.Submissions()[1].URL == "https://example.com/?a=1&x=0&y=0");
   }
 
-  TEST_CASE("HTMLFormElement: interactive validation", "[HTML][Forms]")
+  TEST_CASE("HTMLFormElement: interactive validation", "[HTML][Forms][html:dom-form-requestsubmit]")
   {
     FormFixture fixture(u8R"(<form id=f action="https://example.com/"><input id=t name=t required>
       <input type=submit id=go></form>)");
@@ -198,7 +239,7 @@ line2</textarea><input id=disabled name=disabled disabled value=no><input value=
     CHECK(fixture.Submissions()[0].URL == "https://example.com/?t=v&go=Go");
   }
 
-  TEST_CASE("HTMLFormElement: reset", "[HTML][Forms]")
+  TEST_CASE("HTMLFormElement: reset", "[HTML][Forms][html:dom-form-reset]")
   {
     FormFixture fixture(u8R"(<form id=f><input id=t value=a><input id=c type=checkbox checked>
       <textarea id=ta>default</textarea><select id=s><option>one</option><option id=two>two</option></select>

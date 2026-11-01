@@ -29,6 +29,7 @@ namespace krys::boo::html
 
   private:
     UniquePtr<dom::DOMTokenList> _relList;
+    WeakPtr<dom::HTMLCollection> _elements;
     FormSubmission::Attributes _attributes;
     HashMap<dom::DOMStringAtom, WeakPtr<HTMLElement>> _pastNamesMap;
     dom::RadioButtonGroups _radioButtonGroups;

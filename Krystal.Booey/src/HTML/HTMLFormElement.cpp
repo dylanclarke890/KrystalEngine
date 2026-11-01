@@ -6,6 +6,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/FormDataEvent.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
@@ -24,6 +25,17 @@
 
 namespace krys::boo::html
 {
+  /// @see https://html.spec.whatwg.org/#attr-form-autocomplete
+  template <>
+  struct EnumeratedAttributeTraits<"autocomplete", HTMLFormElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {
+      KeywordStateMapping {u8"on", AttributeState::On}, KeywordStateMapping {u8"off", AttributeState::Off}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::On;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::On;
+  };
+
   namespace
   {
     /// @brief `_blank` in place of a target that looks like the start of dangling markup.
@@ -113,7 +125,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLFormElement::Autocomplete() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"autocomplete").value_or(u8"");
+    return EnumeratedAttribute<"autocomplete", HTMLFormElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"autocomplete"));
   }
 
   void HTMLFormElement::Autocomplete(dom::DOMString &&value) noexcept
@@ -210,7 +223,14 @@ namespace krys::boo::html
 
   Ref<HTMLFormControlsCollection> HTMLFormElement::Elements() noexcept
   {
-    return CreateRef<HTMLFormControlsCollection>(*this);
+    if (auto *elements = _elements.get())
+    {
+      // Only ever an HTMLFormControlsCollection.
+      return ShareRef(static_cast<HTMLFormControlsCollection &>(*elements));
+    }
+    auto elements = CreateRef<HTMLFormControlsCollection>(*this);
+    _elements = CreateWeakPtr<dom::HTMLCollection>(elements.get());
+    return elements;
   }
 
   size_t HTMLFormElement::Length() const noexcept
@@ -267,16 +287,19 @@ namespace krys::boo::html
     // relationships.
     (void)NodeDocument().UpdateLayoutIgnorePendingStylesheets();
 
+    // 1. If submitter is not null:
     RefPtr<HTMLFormControlElement> control;
     if (submitter)
     {
-      // https://html.spec.whatwg.org/#dom-form-requestsubmit
+      // 1a. If submitter is not a submit button, then throw a TypeError.
       control = ShareRefPtr(DynamicDowncast<HTMLFormControlElement>(*submitter));
       if (!control || !control->IsSubmitButton())
       {
         return dom::Exception {dom::ExceptionCode::TypeError,
                                u8"The specified element is not a submit button."};
       }
+
+      // 1b. If submitter's form owner is not this form element, then throw a "NotFoundError" DOMException.
       if (control->Form() != this)
       {
         return dom::Exception {dom::ExceptionCode::NotFoundError,
@@ -284,6 +307,9 @@ namespace krys::boo::html
       }
     }
 
+    // 2. Otherwise, set submitter to this form element.
+    // (A null submitter is the form.)
+    // 3. Submit this form element, from submitter.
     SubmitIfPossible(nullptr, control.get(), FormSubmissionTrigger::SubmittedByJavaScript);
     return {};
   }
@@ -291,11 +317,14 @@ namespace krys::boo::html
   void HTMLFormElement::Reset() noexcept
   {
     CEReactionsScope ceReactions;
+
+    // 1. If the form element is marked as locked for reset, then return.
     if (_isInResetFunction)
     {
       return;
     }
 
+    // (And in a document without a frame.)
     if (!NodeDocument().Frame())
     {
       return;
@@ -303,8 +332,10 @@ namespace krys::boo::html
 
     Ref<HTMLFormElement> protectedThis = ShareRef(*this);
 
+    // 2. Mark the form element as locked for reset.
     bool wasInResetFunction = std::exchange(_isInResetFunction, true);
 
+    // 3. Reset the form element.
     auto event = dom::Event::Create(dom::DOMStringAtom(EventNames::Reset), true, true);
     (void)dom::EventDispatcher::DispatchToTarget(*event, this);
     if (!event->DefaultPrevented())
@@ -312,6 +343,7 @@ namespace krys::boo::html
       ResetListedFormControlElements();
     }
 
+    // 4. Unmark the form element as locked for reset.
     _isInResetFunction = wasInResetFunction;
   }
 

@@ -7,7 +7,6 @@
 #include "Krystal.Booey/HTML/HTMLFormControlsCollection.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
-#include "Krystal.Booey/HTML/HTMLLabelElement.hpp"
 #include "Krystal.Booey/HTML/HTMLOutputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSelectElement.hpp"
 
@@ -76,27 +75,6 @@ namespace krys::boo::html::tests
     {
       a.RemoveAttribute(u8"form");
       CHECK(a.Form() == &fixture.Get<HTMLFormElement>(u8"g"));
-    }
-  }
-
-  TEST_CASE("Form owners: labels", "[HTML][Forms]")
-  {
-    FormFixture fixture(u8R"(<form id=f><label id=l1>Name <input id=a></label><label id=l2 for=b>B</label>
-      <output id=b></output></form>)");
-    auto &a = fixture.Get<HTMLInputElement>(u8"a");
-    auto &l1 = fixture.Get<HTMLLabelElement>(u8"l1");
-    auto &l2 = fixture.Get<HTMLLabelElement>(u8"l2");
-    CHECK(l1.Control().get() == &a);
-    CHECK(l2.Control().get() == &fixture.Get<HTMLOutputElement>(u8"b"));
-    CHECK(l1.Form() == &fixture.Get<HTMLFormElement>(u8"f"));
-    auto labels = a.Labels();
-    REQUIRE(labels);
-    CHECK(labels->Length() == 1);
-
-    SECTION("Hidden inputs aren't labelable")
-    {
-      REQUIRE_FALSE(a.SetAttribute(u8"type", u8"hidden").HasException());
-      CHECK_FALSE(a.Labels());
     }
   }
 }

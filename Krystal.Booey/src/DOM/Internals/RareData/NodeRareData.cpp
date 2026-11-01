@@ -27,6 +27,11 @@ namespace krys::boo::dom
     return childNodes;
   }
 
+  WeakPtr<NodeList> &NodeRareData::LabelsNodeList() noexcept
+  {
+    return _labelsNodeList;
+  }
+
   List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObservers() noexcept
   {
     return _registeredObservers;
