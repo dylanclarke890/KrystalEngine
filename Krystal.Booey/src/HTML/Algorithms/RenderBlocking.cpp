@@ -35,26 +35,38 @@ namespace krys::boo::html
 
   bool RenderBlocking::AllowsAddingRenderBlockingElements(const dom::Document &document) noexcept
   {
-    return document.ContentType() == u8"text/html" && document.Body() == nullptr;
+    return document.ContentType() == u8"text/html" && document.BodyOrFrameset() == nullptr;
   }
 
   bool RenderBlocking::IsRenderBlocked(const dom::Document &document) noexcept
   {
+    // A Document document is render-blocked if both of the following are true:
+    // - document's render-blocking element set is not empty, or document allows adding render-blocking
+    //   elements.
+    // - The current high resolution time given document's relevant global object has not exceeded an
+    //   implementation-defined timeout value.
+    // FIXME: The timeout, once the rendering update skips render-blocked documents.
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
-    // FIXME: And if the current high resolution time given document's relevant
-    // global object has not exceeded an implementation-defined timeout value. -
-    // https://html.spec.whatwg.org/#render-blocked
   }
 
-  bool RenderBlocking::IsRenderBlocking(const dom::Element &element, const dom::Document &document) noexcept
+  bool RenderBlocking::IsRenderBlocking(const dom::Element &element) noexcept
   {
-    return std::ranges::any_of(document._renderBlockingElements, [&element](const auto &renderBlockingElement)
-                               { return renderBlockingElement.get() == &element; });
+    // An element el is render-blocking if el's node document document is render-blocked, and el is in
+    // document's render-blocking element set.
+    auto &document = element.NodeDocument();
+    return IsRenderBlocked(document)
+           && std::ranges::any_of(document._renderBlockingElements,
+                                  [&element](const auto &renderBlockingElement)
+                                  { return renderBlockingElement.get() == &element; });
   }
 
   void RenderBlocking::BlockRendering(dom::Element &element) noexcept
   {
+    // 1. Let document be el's node document.
     auto &document = element.NodeDocument();
+
+    // 2. If document allows adding render-blocking elements, then append el to document's render-blocking
+    //    element set.
     if (AllowsAddingRenderBlockingElements(document))
     {
       auto existing =
@@ -70,8 +82,10 @@ namespace krys::boo::html
 
   void RenderBlocking::UnblockRendering(dom::Element &element) noexcept
   {
+    // 1. Let document be el's node document.
     auto &document = element.NodeDocument();
 
+    // 2. Remove el from document's render-blocking element set.
     std::erase_if(document._renderBlockingElements, [&element](const auto &renderBlockingElement)
                   { return renderBlockingElement.get() == &element; });
   }

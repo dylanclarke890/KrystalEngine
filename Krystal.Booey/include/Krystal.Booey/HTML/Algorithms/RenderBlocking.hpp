@@ -21,14 +21,13 @@ namespace krys::boo::html
     KRYS_NODISCARD static bool IsRenderBlocked(const dom::Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#render-blocking
-    KRYS_NODISCARD static bool IsRenderBlocking(const dom::Element &element,
-                                                const dom::Document &document) noexcept;
+    KRYS_NODISCARD static bool IsRenderBlocking(const dom::Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#block-rendering
-    KRYS_NODISCARD static void BlockRendering(dom::Element &element) noexcept;
+    static void BlockRendering(dom::Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#unblock-rendering
-    KRYS_NODISCARD static void UnblockRendering(dom::Element &element) noexcept;
+    static void UnblockRendering(dom::Element &element) noexcept;
 
     /// @brief Whether @p element's blocking tokens set contains "render", the only possible blocking token:
     /// an element whose blocking tokens set contains it is potentially render-blocking.

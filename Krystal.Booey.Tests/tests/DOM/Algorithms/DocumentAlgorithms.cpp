@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Attr.hpp"
 #include "Krystal.Booey/DOM/DocumentFragment.hpp"
+#include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
 #include "Krystal.Booey/DOM/Text.hpp"
@@ -225,5 +226,27 @@ namespace krys::boo::dom::tests
       CHECK_FALSE(html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(scoped.get()));
       CHECK_FALSE(html::CustomElementAlgorithms::IsGlobalCustomElementRegistry(nullptr));
     }
+  }
+
+  TEST_CASE("Update the current document readiness: sets it and fires readystatechange, once per change",
+            "[DOM][DocumentAlgorithms][html:update-the-current-document-readiness]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    List<html::DocumentReadyState> seen;
+    auto listener = document->AddEventListener(u8"readystatechange",
+                                               [&](Event &) { seen.push_back(document->ReadyState()); });
+
+    DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Complete);
+    CHECK(seen.empty());
+
+    DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Loading);
+    DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Interactive);
+    DocumentAlgorithms::UpdateCurrentDocumentReadiness(*document, html::DocumentReadyState::Interactive);
+    CHECK(seen
+          == List<html::DocumentReadyState> {html::DocumentReadyState::Loading,
+                                             html::DocumentReadyState::Interactive});
+
+    // Not parsed in a frame, so no load timing is recorded.
+    CHECK(document->LoadTiming().DOMInteractiveTime == 0);
   }
 }

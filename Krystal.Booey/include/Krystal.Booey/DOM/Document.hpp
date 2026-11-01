@@ -32,7 +32,6 @@
 #include "Krystal.Booey/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.Booey/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.Booey/HTML/EventHandlerAttributes.hpp"
-#include "Krystal.Booey/HTML/Types/HTMLOrSVGScriptElement.hpp"
 #include "Krystal.Booey/Loader/LoadedFromOpaqueSource.hpp"
 #include "Krystal.Booey/Page/DOMTimer.hpp"
 #include "Krystal.Booey/Page/Page.hpp"
@@ -362,6 +361,12 @@ namespace krys::boo::dom
     UniquePtr<ScriptedAnimationController> _scriptedAnimationController;
     UniquePtr<IdleCallbackController> _idleCallbackController;
     DocumentLoadTimingInfo _loadTiming;
+    // The [SameObject] collections of the DOM tree accessors, while something holds them.
+    WeakPtr<HTMLCollection> _images;
+    WeakPtr<HTMLCollection> _embeds;
+    WeakPtr<HTMLCollection> _links;
+    WeakPtr<HTMLCollection> _forms;
+    WeakPtr<HTMLCollection> _scripts;
     // The root of the render tree: a document has one while it's shown in a frame with a view.
     RenderPtr<boo::RenderView> _renderView;
     bool _renderTreeBeingDestroyed {false};
@@ -578,8 +583,10 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-document-cookie
     // attribute USVString cookie;
 
+    /// @brief When the document's source was last modified, in the user's local time zone, as
+    /// `MM/DD/YYYY hh:mm:ss`.
     /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
-    // readonly attribute DOMString lastModified;
+    KRYS_NODISCARD DOMString LastModified() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-readystate
     KRYS_NODISCARD html::DocumentReadyState ReadyState() const noexcept
@@ -588,9 +595,6 @@ namespace krys::boo::dom
     }
 
     // DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
-
-    // FIXME: Implement this getter:
-    // getter object (DOMString name);
 
     /// @see https://html.spec.whatwg.org/#document.title
     KRYS_NODISCARD DOMString Title() const noexcept;
@@ -604,18 +608,18 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-document-dir
     void Dir(DOMString &&value) noexcept;
 
-    // NOTE: the HTML spec says that body returns a HTMLElement but that's because it can also return a
-    // HTMLFrameSetElement which is a legacy element that we don't support. In our case, body will always
-    // return an HTMLBodyElement if it exists.
-
-    /// @see https://html.spec.whatwg.org/#dom-document-body
+    /// @brief The first body element child of the html element. The body element, which can also be a
+    /// frameset element, is `BodyOrFrameset()`.
     KRYS_NODISCARD RefPtr<html::HTMLBodyElement> Body() noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-document-body
+    /// @brief The first body element child of the html element. The body element, which can also be a
+    /// frameset element, is `BodyOrFrameset()`.
     KRYS_NODISCARD RefPtr<const html::HTMLBodyElement> Body() const noexcept;
 
+    /// @brief Sets the body element to @p body; `HierarchyRequestError` if it isn't a body or frameset
+    /// element, or if there's no body element and no document element to append it to.
     /// @see https://html.spec.whatwg.org/#dom-document-body
-    ExceptionOr<void> Body(html::HTMLBodyElement &body) noexcept;
+    ExceptionOr<void> SetBodyOrFrameset(html::HTMLElement &body) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-document-head
     KRYS_NODISCARD RefPtr<html::HTMLHeadElement> Head() noexcept;
@@ -641,11 +645,9 @@ namespace krys::boo::dom
     /// @see https://html.spec.whatwg.org/#dom-document-scripts
     KRYS_NODISCARD Ref<HTMLCollection> Scripts() noexcept;
 
+    /// @brief The HTML elements whose `name` attribute is @p elementName, live, in tree order.
     /// @see https://html.spec.whatwg.org/#dom-document-getelementsbyname
     KRYS_NODISCARD Ref<NodeList> GetElementsByName(DOMStringView elementName) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#dom-document-currentscript
-    KRYS_NODISCARD html::HTMLOrSVGScriptElement CurrentScript() noexcept;
 
     // dynamic markup insertion
     // [CEReactions] Document open(optional DOMString unused1, optional DOMString unused2);
@@ -1297,6 +1299,7 @@ namespace krys::boo::dom
     }
 
     /// @brief Whether the document's parser is running: it's being loaded into a frame.
+    /// @see https://html.spec.whatwg.org/#active-parser
     KRYS_NODISCARD bool Parsing() const noexcept
     {
       return _parsing;
@@ -1616,7 +1619,9 @@ namespace krys::boo::dom
     KRYS_NODISCARD RefPtr<Element> ScrollingElement() noexcept;
     /// @brief The scrolling element, after updating layout in quirks mode.
     KRYS_NODISCARD RefPtr<Element> ScrollingElementForAPI() noexcept;
-    /// @brief The first body or frameset child of the html element.
+    /// @brief The body element: the first body or frameset child of the html element.
+    /// @see https://html.spec.whatwg.org/#the-body-element-2
+    /// @see https://html.spec.whatwg.org/#dom-document-body
     KRYS_NODISCARD html::HTMLElement *BodyOrFrameset() const noexcept;
 
     /// @brief Converts absolute quads (or rects) to the client coordinates of the CSSOM View APIs.

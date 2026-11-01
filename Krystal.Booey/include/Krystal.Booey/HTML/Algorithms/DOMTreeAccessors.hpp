@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTitleElement.hpp"
@@ -17,8 +18,9 @@ namespace krys::boo::html
   class DOMTreeAccessors
   {
   public:
+    /// @brief The document element, if it's an html element.
     /// @see https://html.spec.whatwg.org/#the-html-element-2
-    KRYS_NODISCARD static RefPtr<HTMLHtmlElement> GetHtmlElement(dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLHtmlElement *GetHtmlElement(const dom::Document &document) noexcept
     {
       auto documentElement = document.DocumentElement();
       if (!Is<HTMLHtmlElement>(documentElement))
@@ -26,104 +28,52 @@ namespace krys::boo::html
         return nullptr;
       }
 
-      return ShareRefPtr(&Downcast<HTMLHtmlElement>(*documentElement));
+      return const_cast<HTMLHtmlElement *>(&Downcast<HTMLHtmlElement>(*documentElement));
     }
 
-    /// @see https://html.spec.whatwg.org/#the-html-element-2
-    KRYS_NODISCARD static RefPtr<const HTMLHtmlElement> GetHtmlElement(const dom::Document &document) noexcept
-    {
-      auto documentElement = document.DocumentElement();
-      if (!Is<HTMLHtmlElement>(documentElement))
-      {
-        return nullptr;
-      }
-
-      return ShareRefPtr(&Downcast<HTMLHtmlElement>(*documentElement));
-    }
-
+    /// @brief The first head element that is a child of the html element.
     /// @see https://html.spec.whatwg.org/#the-head-element-2
-    KRYS_NODISCARD static RefPtr<HTMLHeadElement> GetHeadElement(dom::Document &document) noexcept
+    KRYS_NODISCARD static HTMLHeadElement *GetHeadElement(const dom::Document &document) noexcept
     {
-      auto html = GetHtmlElement(document);
-      if (html == nullptr)
-      {
-        return nullptr;
-      }
-
-      auto children = dom::ChildHTMLElementRange(*html);
-      auto body = dom::FirstOfType<HTMLHeadElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-head-element-2
-    KRYS_NODISCARD static RefPtr<const HTMLHeadElement> GetHeadElement(const dom::Document &document) noexcept
-    {
-      auto html = GetHtmlElement(document);
-      if (html == nullptr)
-      {
-        return nullptr;
-      }
-
-      auto children = dom::ConstChildNodeRange(*html);
-      auto body = dom::FirstOfType<HTMLHeadElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-title-element-2
-    KRYS_NODISCARD static RefPtr<HTMLTitleElement> GetTitleElement(dom::Document &document) noexcept
-    {
-      auto head = GetHeadElement(document);
-      if (head == nullptr)
-      {
-        return nullptr;
-      }
-
-      auto children = dom::ChildHTMLElementRange(*head);
-      auto body = dom::FirstOfType<HTMLTitleElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLTitleElement>(&*body));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-title-element-2
-    KRYS_NODISCARD static RefPtr<const HTMLTitleElement>
-      GetTitleElement(const dom::Document &document) noexcept
-    {
-      auto head = GetHeadElement(document);
-      if (head == nullptr)
-      {
-        return nullptr;
-      }
-
-      auto children = dom::ConstChildNodeRange(*head);
-      auto body = dom::FirstOfType<HTMLTitleElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLTitleElement>(&*body));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-body-element-2
-    KRYS_NODISCARD static RefPtr<HTMLBodyElement> GetBodyElement(dom::Document &document) noexcept
-    {
-      auto html = GetHtmlElement(document);
+      auto *html = GetHtmlElement(document);
       if (html == nullptr)
       {
         return nullptr;
       }
 
       auto children = dom::ChildNodeRange(*html);
-      auto body = dom::FirstOfType<HTMLBodyElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
+      auto head = dom::FirstOfType<HTMLHeadElement>(children);
+      return head == std::ranges::end(children) ? nullptr : &Downcast<HTMLHeadElement>(*head);
     }
 
-    /// @see https://html.spec.whatwg.org/#the-body-element-2
-    KRYS_NODISCARD static RefPtr<const HTMLBodyElement> GetBodyElement(const dom::Document &document) noexcept
+    /// @brief The first title element in the document, in tree order.
+    /// @see https://html.spec.whatwg.org/#the-title-element-2
+    KRYS_NODISCARD static HTMLTitleElement *GetTitleElement(const dom::Document &document) noexcept
     {
-      auto html = GetHtmlElement(document);
+      auto descendants = dom::DescendantRange(const_cast<dom::Document &>(document));
+      auto title = dom::FirstOfType<HTMLTitleElement>(descendants);
+      return title == std::ranges::end(descendants) ? nullptr : &Downcast<HTMLTitleElement>(*title);
+    }
+
+    /// @brief The first of the html element's children that is a body or frameset element.
+    /// @see https://html.spec.whatwg.org/#the-body-element-2
+    KRYS_NODISCARD static HTMLElement *GetBodyElement(const dom::Document &document) noexcept
+    {
+      auto *html = GetHtmlElement(document);
       if (html == nullptr)
       {
         return nullptr;
       }
 
-      auto children = dom::ConstChildNodeRange(*html);
-      auto body = dom::FirstOfType<HTMLBodyElement>(children);
-      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
+      for (auto &child : dom::ChildNodeRange(*html))
+      {
+        auto *element = DynamicDowncast<HTMLElement>(child);
+        if (element && (Is<HTMLBodyElement>(*element) || Is<HTMLFrameSetElement>(*element)))
+        {
+          return element;
+        }
+      }
+      return nullptr;
     }
   };
 }

@@ -21,6 +21,7 @@
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/DOM/NodeIterator.hpp"
+#include "Krystal.Booey/DOM/NodeList.hpp"
 #include "Krystal.Booey/DOM/ProcessingInstruction.hpp"
 #include "Krystal.Booey/DOM/Range.hpp"
 #include "Krystal.Booey/DOM/ShadowRoot.hpp"
@@ -35,6 +36,7 @@
 #include "Krystal.Booey/HTML/EventLoop.hpp"
 #include "Krystal.Booey/HTML/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
+#include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.Booey/HTML/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
@@ -59,10 +61,9 @@ namespace krys::boo::dom::tests
       return document;
     }
 
-    // NOTE: `Document::Head()` returns null for a parsed document, so the head is found by position.
     RefPtr<Element> HeadOf(Document &document) noexcept
     {
-      return document.DocumentElement()->FirstElementChild();
+      return document.Head();
     }
 
     Ref<Element> CreateBase(Document &document, DOMString &&href) noexcept
@@ -771,5 +772,176 @@ namespace krys::boo::dom::tests
     CHECK(walker->WhatToShow() == WhatToShow::SHOW_TEXT);
 
     CHECK(document->CreateNodeIterator(*root)->WhatToShow() == WhatToShow::SHOW_ALL);
+  }
+
+  TEST_CASE("Document.readyState: complete for a document that isn't loading",
+            "[DOM][Document][html:dom-document-readystate][html:current-document-readiness]")
+  {
+    CHECK(CreateRef<HTMLDocument>()->ReadyState() == html::DocumentReadyState::Complete);
+  }
+
+  TEST_CASE("Document.lastModified: the current local date and time, as MM/DD/YYYY hh:mm:ss",
+            "[DOM][Document][html:dom-document-lastmodified]")
+  {
+    auto value = CreateRef<HTMLDocument>()->LastModified();
+    REQUIRE(value.size() == 19);
+    for (size_t i = 0; i < value.size(); ++i)
+    {
+      INFO(i);
+      char8 expected = i == 2 || i == 5 ? u8'/' : i == 10 ? u8' ' : i == 13 || i == 16 ? u8':' : u8'0';
+      if (expected == u8'0')
+      {
+        CHECK((value[i] >= u8'0' && value[i] <= u8'9'));
+      }
+      else
+      {
+        CHECK(value[i] == expected);
+      }
+    }
+  }
+
+  TEST_CASE("Document.head: the first head child of the html element",
+            "[DOM][Document][html:dom-document-head][html:the-head-element-2][html:the-html-element-2]")
+  {
+    auto document = Parse(u8"<title>T</title>");
+    REQUIRE(document->Head());
+    CHECK(document->Head()->LocalName() == u8"head");
+
+    // Not when the document element isn't an html element.
+    auto xml = CreateRef<XMLDocument>();
+    auto root = xml->CreateElementNS(infra::Namespaces::SVG, u8"svg").ReleaseValue();
+    REQUIRE_FALSE(root->AppendChild(*xml->CreateElementNS(infra::Namespaces::HTML, u8"head").ReleaseValue())
+                    .HasException());
+    REQUIRE_FALSE(xml->AppendChild(*root).HasException());
+    CHECK(xml->Head() == nullptr);
+  }
+
+  TEST_CASE("Document.title: the first title element's text, anywhere, stripped and collapsed",
+            "[DOM][Document][html:document.title][html:the-title-element-2]")
+  {
+    CHECK(Parse(u8"<p>No title</p>")->Title() == u8"");
+    CHECK(Parse(u8"<title>  A \n  title </title>")->Title() == u8"A title");
+
+    // The first title element in tree order, even outside the head.
+    auto document = Parse(u8"<body><title>In body</title>");
+    CHECK(document->Title() == u8"In body");
+  }
+
+  TEST_CASE("Document.title: setting it replaces the title's text, or adds a title to the head",
+            "[DOM][Document][html:document.title]")
+  {
+    auto document = Parse(u8"<p>No title</p>");
+    REQUIRE_FALSE(document->Title(DOMString(u8"New")).HasException());
+    CHECK(document->Title() == u8"New");
+    REQUIRE(document->Head()->FirstElementChild());
+    CHECK(document->Head()->FirstElementChild()->LocalName() == u8"title");
+
+    REQUIRE_FALSE(document->Title(DOMString(u8"Again")).HasException());
+    CHECK(document->Title() == u8"Again");
+    CHECK(document->Head()->ChildElementCount() == 1);
+
+    // Without a head or a title, nothing is added.
+    REQUIRE_FALSE(document->Head()->Remove().HasException());
+    REQUIRE_FALSE(document->Title(DOMString(u8"None")).HasException());
+    CHECK(document->Title() == u8"");
+  }
+
+  TEST_CASE("Document.body: the first body or frameset child of the html element",
+            "[DOM][Document][html:dom-document-body][html:the-body-element-2]")
+  {
+    auto document = Parse(u8"<p>Text</p>");
+    REQUIRE(document->BodyOrFrameset());
+    CHECK(document->BodyOrFrameset()->LocalName() == u8"body");
+
+    auto frameset = Parse(u8"<frameset></frameset>");
+    REQUIRE(frameset->BodyOrFrameset());
+    CHECK(frameset->BodyOrFrameset()->LocalName() == u8"frameset");
+    CHECK(frameset->Body() == nullptr);
+  }
+
+  TEST_CASE("Document.body: setting it replaces the body element, or appends to the document element",
+            "[DOM][Document][html:dom-document-body]")
+  {
+    auto document = Parse(u8"<p>Text</p>");
+    auto check = [](const auto &result, ExceptionCode code)
+    {
+      return result.HasException() && result.GetException().Code() == code;
+    };
+
+    // Only a body or frameset element.
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    CHECK(check(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*div)),
+                ExceptionCode::HierarchyRequestError));
+
+    // The same body does nothing.
+    RefPtr<html::HTMLElement> body = ShareRefPtr(document->BodyOrFrameset());
+    REQUIRE_FALSE(document->SetBodyOrFrameset(*body).HasException());
+    CHECK(document->BodyOrFrameset() == body.get());
+
+    // A new body, not yet in the document, replaces the body element.
+    auto newBody = document->CreateElement(u8"body").ReleaseValue();
+    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*newBody)).HasException());
+    CHECK(document->BodyOrFrameset() == newBody.get());
+    CHECK(body->ParentNode() == nullptr);
+
+    // Without a body element, a frameset is appended to the document element.
+    REQUIRE_FALSE(newBody->Remove().HasException());
+    auto frameset = document->CreateElement(u8"frameset").ReleaseValue();
+    REQUIRE_FALSE(document->SetBodyOrFrameset(Downcast<html::HTMLElement>(*frameset)).HasException());
+    CHECK(document->BodyOrFrameset() == frameset.get());
+    CHECK(document->DocumentElement()->LastChild() == frameset.get());
+
+    // Without a document element either, it throws.
+    auto empty = CreateRef<HTMLDocument>();
+    auto emptyBody = empty->CreateElement(u8"body").ReleaseValue();
+    CHECK(check(empty->SetBodyOrFrameset(Downcast<html::HTMLElement>(*emptyBody)),
+                ExceptionCode::HierarchyRequestError));
+  }
+
+  TEST_CASE(
+    "Document.images, embeds, plugins, links, forms and scripts: live collections, the same each time",
+    "[DOM][Document][html:dom-document-images][html:dom-document-embeds][html:dom-document-plugins]"
+    "[html:dom-document-links][html:dom-document-forms][html:dom-document-scripts]")
+  {
+    auto document = Parse(u8"<img><embed><a href=x></a><a></a><map><area href=y><area></map><form></form>"
+                          u8"<script></script><svg><script></script></svg>");
+
+    auto images = document->Images();
+    CHECK(images->Length() == 1);
+    CHECK(&*document->Images() == &*images);
+
+    auto embeds = document->Embeds();
+    CHECK(embeds->Length() == 1);
+    CHECK(&*document->Plugins() == &*embeds);
+
+    auto links = document->Links();
+    REQUIRE(links->Length() == 2);
+    CHECK(links->Item(0)->LocalName() == u8"a");
+    CHECK(links->Item(1)->LocalName() == u8"area");
+
+    CHECK(document->Forms()->Length() == 1);
+    CHECK(document->Scripts()->Length() == 1);
+
+    // They're live.
+    REQUIRE_FALSE(document->BodyOrFrameset()
+                    ->AppendChild(*document->CreateElement(u8"img").ReleaseValue())
+                    .HasException());
+    CHECK(images->Length() == 2);
+  }
+
+  TEST_CASE("Document.getElementsByName(): the HTML elements with that name, live, in tree order",
+            "[DOM][Document][html:dom-document-getelementsbyname]")
+  {
+    auto document = Parse(u8"<input name=a id=first><p name=a></p><input name=A><input name=b>"
+                          u8"<svg><g name=a></g></svg>");
+    auto list = document->GetElementsByName(u8"a");
+    REQUIRE(list->Length() == 2);
+    CHECK(Downcast<Element>(*list->Item(0)).GetAttribute(u8"id") == DOMString(u8"first"));
+    CHECK(Downcast<Element>(*list->Item(1)).LocalName() == u8"p");
+
+    auto added = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(added->SetAttribute(u8"name", u8"a").HasException());
+    REQUIRE_FALSE(document->BodyOrFrameset()->AppendChild(*added).HasException());
+    CHECK(list->Length() == 3);
   }
 }

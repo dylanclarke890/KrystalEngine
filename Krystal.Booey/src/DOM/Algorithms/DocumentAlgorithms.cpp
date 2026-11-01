@@ -230,22 +230,26 @@ namespace krys::boo::dom
   void DocumentAlgorithms::UpdateCurrentDocumentReadiness(Document &document,
                                                           html::DocumentReadyState readiness) noexcept
   {
+    // 1. If document's current document readiness equals readinessValue, then return.
     if (document._currentDocumentReadiness == readiness)
     {
       return;
     }
 
+    // 2. Set document's current document readiness to readinessValue.
     document._currentDocumentReadiness = readiness;
 
-    // If document is associated with an HTML parser (a document a frame loads, with a window):
+    // 3. If document is associated with an HTML parser:
+    // (Documents that a frame loads, with a window, are the ones parsed.)
     if (auto *window = document.Window(); window && document.Frame())
     {
-      // Let now be the current high resolution time given document's relevant global object.
+      // 3a. Let now be the current high resolution time given document's relevant global object.
       auto now = window->NowTimestamp();
-      // If readinessValue is "complete", and document's load timing info's DOM complete time is 0, then set
-      // document's load timing info's DOM complete time to now.
-      // Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive time
-      // is 0, then set document's load timing info's DOM interactive time to now.
+
+      // 3b. If readinessValue is "complete", and document's load timing info's DOM complete time is 0, then
+      //     set document's load timing info's DOM complete time to now.
+      // 3c. Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive
+      //     time is 0, then set document's load timing info's DOM interactive time to now.
       if (readiness == html::DocumentReadyState::Complete && !document._loadTiming.DOMCompleteTime)
       {
         document._loadTiming.DOMCompleteTime = now;
@@ -256,6 +260,7 @@ namespace krys::boo::dom
       }
     }
 
+    // 4. Fire an event named readystatechange at document.
     EventDispatcher::FireEvent(EventNames::ReadyStateChange, document);
   }
 

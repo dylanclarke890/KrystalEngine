@@ -12,25 +12,28 @@ Status: unreviewed
 
 ### [3.1 Documents](https://html.spec.whatwg.org/#documents)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> A document's address is its URL (`Document::GetURL`, DOM). There are no origins (not planned), and no referrer until remote pages.
 <!-- definitions: the-document's-address concept-document-origin the-document's-referrer -->
 
 #### [3.1.1 The Document object](https://html.spec.whatwg.org/#the-document-object)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> The open dialogs list is `Document::OpenDialogs`; being the initial about:blank is `FrameLoader::IsDisplayingInitialEmptyDocument`. There's no policy container, permissions policy, module map, cross-origin opener policy, navigation ID or bfcache blocking details (no origins, policies or scripting), and no about base URL (DIFFERENCES.md).
 <!-- definitions: concept-document-policy-container concept-document-permissions-policy concept-document-module-map concept-document-coop is-initial-about:blank concept-document-navigation-id concept-document-about-base-url concept-document-bfcache-blocking-details open-dialogs-list -->
 
 #### [3.1.2 The DocumentOrShadowRoot interface](https://html.spec.whatwg.org/#the-documentorshadowroot-interface)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DocumentOrShadowRoot`; its `activeElement` is reviewed with focus.
 
 #### [3.1.3 Ancestor origins](https://html.spec.whatwg.org/#ancestor-origins)
 
-Status: unreviewed
+Status: n/a (no origins or frame tree: `Location::AncestorOrigins` is empty)
 
-- [ ] [internal ancestor origin objects list (Document)](https://html.spec.whatwg.org/#concept-document-internal-ancestor-origin-objects-list) — A Document object has an associated internal ancestor origin objects list, initially null.
+- [x] [internal ancestor origin objects list (Document)](https://html.spec.whatwg.org/#concept-document-internal-ancestor-origin-objects-list) — A Document object has an associated internal ancestor origin objects list, initially null.
 
-- [ ] [internal ancestor origin objects list creation steps](https://html.spec.whatwg.org/#internal-ancestor-origin-objects-list-creation-steps) — The internal ancestor origin objects list creation steps given a Document object document and a referrer policy referrerPolicy are:
+- [x] [internal ancestor origin objects list creation steps](https://html.spec.whatwg.org/#internal-ancestor-origin-objects-list-creation-steps) — The internal ancestor origin objects list creation steps given a Document object document and a referrer policy referrerPolicy are:
   - 1. Let output be « ».
   - 2. Let parentDoc be document's container document.
   - 3. If parentDoc is null, then return output.
@@ -47,9 +50,9 @@ Status: unreviewed
     - 12b. Append ancestorOrigin to output and set masked to false.
   - 13. Return output.
 
-- [ ] [ancestor origins list (Document)](https://html.spec.whatwg.org/#concept-document-ancestor-origins-list) — A Document object has an associated ancestor origins list, initially null.
+- [x] [ancestor origins list (Document)](https://html.spec.whatwg.org/#concept-document-ancestor-origins-list) — A Document object has an associated ancestor origins list, initially null.
 
-- [ ] [ancestor origins list creation steps](https://html.spec.whatwg.org/#ancestor-origins-list-creation-steps) — The ancestor origins list creation steps given a Document object document are:
+- [x] [ancestor origins list creation steps](https://html.spec.whatwg.org/#ancestor-origins-list-creation-steps) — The ancestor origins list creation steps given a Document object document are:
   - 1. Let ancestorOrigins be document's internal ancestor origin objects list.
   - 2. Assert: ancestorOrigins is not null.
   - 3. Let output be « ».
@@ -59,14 +62,17 @@ Status: unreviewed
 
 #### [3.1.4 Resource metadata management](https://html.spec.whatwg.org/#resource-metadata-management)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::LastModified` is the current time, the fallback for an unknown date, as responses have no headers (KNOWN-ISSUES.md). New: it wasn't implemented.
 <!-- definitions: dom-document-cookie -->
 
-- [ ] [Document.referrer](https://html.spec.whatwg.org/#dom-document-referrer) — The referrer attribute must return the document's referrer.
+- [x] [Document.referrer](https://html.spec.whatwg.org/#dom-document-referrer) — The referrer attribute must return the document's referrer.
+  > n/a: no referrers until remote pages.
 
-- [ ] [cookie-averse Document object](https://html.spec.whatwg.org/#cookie-averse-document-object) — A Document object that falls into one of the following conditions is a cookie-averse Document object:
+- [x] [cookie-averse Document object](https://html.spec.whatwg.org/#cookie-averse-document-object) — A Document object that falls into one of the following conditions is a cookie-averse Document object:
+  > n/a: no cookies.
 
-- [ ] [Document.lastModified](https://html.spec.whatwg.org/#dom-document-lastmodified) — The lastModified attribute, on getting, must return the date and time of the Document's source file's last modification, in the user's local time zone, in the following format:
+- [x] [Document.lastModified](https://html.spec.whatwg.org/#dom-document-lastmodified) — The lastModified attribute, on getting, must return the date and time of the Document's source file's last modification, in the user's local time zone, in the following format:
   - 1. The month component of the date.
   - 2. A U+002F SOLIDUS character (/).
   - 3. The day component of the date.
@@ -81,12 +87,13 @@ Status: unreviewed
 
 #### [3.1.5 Reporting document loading status](https://html.spec.whatwg.org/#reporting-document-loading-status)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::ReadyState`, `DocumentAlgorithms::UpdateCurrentDocumentReadiness` (a document a frame loads, with a window, is the one associated with an HTML parser), and `Document::Parsing` (has an active parser). The load timing info is `DocumentLoadTimingInfo`.
 <!-- definitions: current-document-readiness load-timing-info previous-document-unload-timing was-created-via-cross-origin-redirects document-load-timing-info navigation-start-time dom-interactive-time dom-content-loaded-event-start-time dom-content-loaded-event-end-time dom-complete-time load-event-start-time load-event-end-time document-unload-timing-info unload-event-start-time unload-event-end-time -->
 
-- [ ] [Document.readyState](https://html.spec.whatwg.org/#dom-document-readystate) — The readyState getter steps are to return this's current document readiness.
+- [x] [Document.readyState](https://html.spec.whatwg.org/#dom-document-readystate) — The readyState getter steps are to return this's current document readiness.
 
-- [ ] [update the current document readiness](https://html.spec.whatwg.org/#update-the-current-document-readiness) — To update the current document readiness for Document document to readinessValue:
+- [x] [update the current document readiness](https://html.spec.whatwg.org/#update-the-current-document-readiness) — To update the current document readiness for Document document to readinessValue:
   - 1. If document's current document readiness equals readinessValue, then return.
   - 2. Set document's current document readiness to readinessValue.
   - 3. If document is associated with an HTML parser:
@@ -95,77 +102,83 @@ Status: unreviewed
     - 3c. Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive time is 0, then set document's load timing info's DOM interactive time to now.
   - 4. Fire an event named readystatechange at document.
 
-- [ ] [active parser](https://html.spec.whatwg.org/#active-parser) — A Document is said to have an active parser if it is associated with an HTML parser or an XML parser that has not yet been stopped or aborted.
+- [x] [active parser](https://html.spec.whatwg.org/#active-parser) — A Document is said to have an active parser if it is associated with an HTML parser or an XML parser that has not yet been stopped or aborted.
 
 #### [3.1.6 Render-blocking mechanism](https://html.spec.whatwg.org/#render-blocking-mechanism)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `RenderBlocking`, with the render-blocking element set on the document. Fixed: render-blocking didn't check the document is render-blocked, and a frameset didn't count as the body element. The timeout and skipping render-blocked documents in the rendering update are FIXMEs (KNOWN-ISSUES.md).
 <!-- definitions: render-blocking-element-set -->
 
-- [ ] [allows adding render-blocking elements](https://html.spec.whatwg.org/#allows-adding-render-blocking-elements) — A Document document allows adding render-blocking elements if document's content type is "text/html" and the body element of document is null.
+- [x] [allows adding render-blocking elements](https://html.spec.whatwg.org/#allows-adding-render-blocking-elements) — A Document document allows adding render-blocking elements if document's content type is "text/html" and the body element of document is null.
 
-- [ ] [render-blocked](https://html.spec.whatwg.org/#render-blocked) — A Document document is render-blocked if both of the following are true:
+- [x] [render-blocked](https://html.spec.whatwg.org/#render-blocked) — A Document document is render-blocked if both of the following are true:
 
-- [ ] [render-blocking](https://html.spec.whatwg.org/#render-blocking) — An element el is render-blocking if el's node document document is render-blocked, and el is in document's render-blocking element set.
+- [x] [render-blocking](https://html.spec.whatwg.org/#render-blocking) — An element el is render-blocking if el's node document document is render-blocked, and el is in document's render-blocking element set.
 
-- [ ] [block rendering](https://html.spec.whatwg.org/#block-rendering) — To block rendering on an element el:
+- [x] [block rendering](https://html.spec.whatwg.org/#block-rendering) — To block rendering on an element el:
   - 1. Let document be el's node document.
   - 2. If document allows adding render-blocking elements, then append el to document's render-blocking element set.
 
-- [ ] [unblock rendering](https://html.spec.whatwg.org/#unblock-rendering) — To unblock rendering on an element el:
+- [x] [unblock rendering](https://html.spec.whatwg.org/#unblock-rendering) — To unblock rendering on an element el:
   - 1. Let document be el's node document.
   - 2. Remove el from document's render-blocking element set.
 
 #### [3.1.7 DOM tree accessors](https://html.spec.whatwg.org/#dom-tree-accessors)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DOMTreeAccessors` (the html, head, title and body elements) and the `Document` accessors; the IDL `body` is `BodyOrFrameset`/`SetBodyOrFrameset`, and `Body()` is the first body child.
+> Fixed: the title element was only looked for among the head's children, setting the title appended a new title to the document element rather than the head, the body element left out framesets, setting it replaced within the new value's parent (crashing for a new body), and `document.dir` set the head's `dir`. New: `images`, `embeds`, `plugins`, `links`, `forms`, `scripts` and `getElementsByName()` weren't implemented.
 
-- [ ] [The html element](https://html.spec.whatwg.org/#the-html-element-2) — The html element of a document is its document element, if it's an html element, and null otherwise.
+- [x] [The html element](https://html.spec.whatwg.org/#the-html-element-2) — The html element of a document is its document element, if it's an html element, and null otherwise.
 
-- [ ] [The head element](https://html.spec.whatwg.org/#the-head-element-2) — The head element of a document is the first head element that is a child of the html element, if there is one, or null otherwise.
+- [x] [The head element](https://html.spec.whatwg.org/#the-head-element-2) — The head element of a document is the first head element that is a child of the html element, if there is one, or null otherwise.
 
-- [ ] [Document.head](https://html.spec.whatwg.org/#dom-document-head) — The head attribute, on getting, must return the head element of the document (a head element or null).
+- [x] [Document.head](https://html.spec.whatwg.org/#dom-document-head) — The head attribute, on getting, must return the head element of the document (a head element or null).
 
-- [ ] [The title element](https://html.spec.whatwg.org/#the-title-element-2) — The title element of a document is the first title element in the document (in tree order), if there is one, or null otherwise.
+- [x] [The title element](https://html.spec.whatwg.org/#the-title-element-2) — The title element of a document is the first title element in the document (in tree order), if there is one, or null otherwise.
 
-- [ ] [Document.title](https://html.spec.whatwg.org/#document.title) — The title attribute must, on getting, run the following algorithm:
+- [x] [Document.title](https://html.spec.whatwg.org/#document.title) — The title attribute must, on getting, run the following algorithm:
   - 1. If the document element is an SVG svg element, then let value be the child text content of the first SVG title element that is a child of the document element.
   - 2. Otherwise, let value be the child text content of the title element, or the empty string if the title element is null.
   - 3. Strip and collapse ASCII whitespace in value.
   - 4. Return value.
 
-- [ ] [The body element](https://html.spec.whatwg.org/#the-body-element-2) — The body element of a document is the first of the html element's children that is either a body element or a frameset element, or null if there is no such element.
+- [x] [The body element](https://html.spec.whatwg.org/#the-body-element-2) — The body element of a document is the first of the html element's children that is either a body element or a frameset element, or null if there is no such element.
 
-- [ ] [Document.body](https://html.spec.whatwg.org/#dom-document-body) — The body attribute, on getting, must return the body element of the document (either a body element, a frameset element, or null). On setting, the following algorithm must be run:
+- [x] [Document.body](https://html.spec.whatwg.org/#dom-document-body) — The body attribute, on getting, must return the body element of the document (either a body element, a frameset element, or null). On setting, the following algorithm must be run:
   - 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError" DOMException.
   - 2. Otherwise, if the new value is the same as the body element, return.
   - 3. Otherwise, if the body element is not null, then replace the body element with the new value within the body element's parent and return.
   - 4. Otherwise, if there is no document element, throw a "HierarchyRequestError" DOMException.
   - 5. Otherwise, the body element is null, but there's a document element. Append the new value to the document element.
 
-- [ ] [Document.images](https://html.spec.whatwg.org/#dom-document-images) — The images attribute must return an HTMLCollection rooted at the Document node, whose filter matches only img elements.
+- [x] [Document.images](https://html.spec.whatwg.org/#dom-document-images) — The images attribute must return an HTMLCollection rooted at the Document node, whose filter matches only img elements.
 
-- [ ] [Document.embeds](https://html.spec.whatwg.org/#dom-document-embeds) — The embeds attribute must return an HTMLCollection rooted at the Document node, whose filter matches only embed elements.
+- [x] [Document.embeds](https://html.spec.whatwg.org/#dom-document-embeds) — The embeds attribute must return an HTMLCollection rooted at the Document node, whose filter matches only embed elements.
 
-- [ ] [Document.plugins](https://html.spec.whatwg.org/#dom-document-plugins) — The plugins attribute must return the same object as that returned by the embeds attribute.
+- [x] [Document.plugins](https://html.spec.whatwg.org/#dom-document-plugins) — The plugins attribute must return the same object as that returned by the embeds attribute.
 
-- [ ] [Document.links](https://html.spec.whatwg.org/#dom-document-links) — The links attribute must return an HTMLCollection rooted at the Document node, whose filter matches only a elements with href attributes and area elements with href attributes.
+- [x] [Document.links](https://html.spec.whatwg.org/#dom-document-links) — The links attribute must return an HTMLCollection rooted at the Document node, whose filter matches only a elements with href attributes and area elements with href attributes.
 
-- [ ] [Document.forms](https://html.spec.whatwg.org/#dom-document-forms) — The forms attribute must return an HTMLCollection rooted at the Document node, whose filter matches only form elements.
+- [x] [Document.forms](https://html.spec.whatwg.org/#dom-document-forms) — The forms attribute must return an HTMLCollection rooted at the Document node, whose filter matches only form elements.
 
-- [ ] [Document.scripts](https://html.spec.whatwg.org/#dom-document-scripts) — The scripts attribute must return an HTMLCollection rooted at the Document node, whose filter matches only script elements.
+- [x] [Document.scripts](https://html.spec.whatwg.org/#dom-document-scripts) — The scripts attribute must return an HTMLCollection rooted at the Document node, whose filter matches only script elements.
 
-- [ ] [Document.getElementsByName(elementName)](https://html.spec.whatwg.org/#dom-document-getelementsbyname) — The getElementsByName(elementName) method steps are to return a live NodeList containing all the HTML elements in that document that have a name attribute whose value is identical to the elementName argument, in tree order. When the method is invoked on a Document object again with the same argument, the user agent may return the same as the object returned by the earlier call. In other cases, a new NodeList object must be returned.
+- [x] [Document.getElementsByName(elementName)](https://html.spec.whatwg.org/#dom-document-getelementsbyname) — The getElementsByName(elementName) method steps are to return a live NodeList containing all the HTML elements in that document that have a name attribute whose value is identical to the elementName argument, in tree order. When the method is invoked on a Document object again with the same argument, the user agent may return the same as the object returned by the earlier call. In other cases, a new NodeList object must be returned.
 
-- [ ] [Document.currentScript](https://html.spec.whatwg.org/#dom-document-currentscript) — The currentScript attribute, on getting, must return the value to which it was most recently set. When the Document is created, the currentScript must be initialized to null.
+- [x] [Document.currentScript](https://html.spec.whatwg.org/#dom-document-currentscript) — The currentScript attribute, on getting, must return the value to which it was most recently set. When the Document is created, the currentScript must be initialized to null.
+  > n/a: no scripting, so there is never a current script (removed).
 
-- [ ] [To determine the value of a named property name for a Document, the user agent…](https://html.spec.whatwg.org/#dom-document-currentscript) — To determine the value of a named property name for a Document, the user agent must return the value obtained using the following steps:
+- [x] [To determine the value of a named property name for a Document, the user agent…](https://html.spec.whatwg.org/#dom-document-currentscript) — To determine the value of a named property name for a Document, the user agent must return the value obtained using the following steps:
   - 1. Let elements be the list of named elements with the name name that are in a document tree with the Document as their root.
   - 2. If elements has only one element, and that element is an iframe element, and that iframe element's content navigable is not null, then return the active WindowProxy of the element's content navigable.
   - 3. Otherwise, if elements has only one element, return that element.
   - 4. Otherwise, return an HTMLCollection rooted at the Document node, whose filter matches only named elements with the name name.
+  > n/a: the named properties (`document[name]`) are only reachable from script.
 
-- [ ] [named element](https://html.spec.whatwg.org/#dom-document-nameditem-filter) — An element is a named element with the name name if name is not the empty string and any of the following are true:
+- [x] [named element](https://html.spec.whatwg.org/#dom-document-nameditem-filter) — An element is a named element with the name name if name is not the empty string and any of the following are true:
+  > n/a: only for the named properties, which are only reachable from script.
 
 ### [3.2 Elements](https://html.spec.whatwg.org/#elements)
 

@@ -31,7 +31,7 @@ namespace krys::boo::dom
     /// @see https://dom.spec.whatwg.org/#concept-node-adopt
     KRYS_NODISCARD static ExceptionOr<void> AdoptNode(Node &node, Document &document) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/dom.html#update-the-current-document-readiness
+    /// @see https://html.spec.whatwg.org/#update-the-current-document-readiness
     static void UpdateCurrentDocumentReadiness(Document &document,
                                                html::DocumentReadyState readiness) noexcept;
 

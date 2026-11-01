@@ -44,6 +44,8 @@
 #include "Krystal.Booey/DOM/HTMLCollection.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
+#include "Krystal.Booey/DOM/Internals/NodeList/LiveNodeList.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.Booey/DOM/Mixins/ParentNode.hpp"
@@ -80,15 +82,19 @@
 #include "Krystal.Booey/HTML/FormController.hpp"
 #include "Krystal.Booey/HTML/HashChangeEvent.hpp"
 #include "Krystal.Booey/HTML/HTMLAnchorElement.hpp"
+#include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBaseElement.hpp"
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLButtonElement.hpp"
 #include "Krystal.Booey/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.Booey/HTML/HTMLDialogElement.hpp"
+#include "Krystal.Booey/HTML/HTMLEmbedElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFormControlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLFrameSetElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHeadElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
 #include "Krystal.Booey/HTML/HTMLMetaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
@@ -162,6 +168,8 @@
 #include "Krystal.Core/Utils/ScopeExit.hpp"
 #include "Krystal.Core/Utils/SetForScope.hpp"
 #include <algorithm>
+#include <chrono>
+#include <format>
 
 namespace krys::boo::dom
 {
@@ -923,31 +931,41 @@ namespace krys::boo::dom
         return replace.ReleaseException();
       }
     }
+    // If the document element is in the HTML namespace:
     else if (documentElement && documentElement->NamespaceURI() == infra::Namespaces::HTML)
     {
-      auto head = Head();
-      auto title = html::DOMTreeAccessors::GetTitleElement(*this);
+      RefPtr<html::HTMLHeadElement> head = Head();
+      RefPtr<Element> element = ShareRefPtr(html::DOMTreeAccessors::GetTitleElement(*this));
 
-      if (head == nullptr && title == nullptr)
+      // 1. If the title element is null and the head element is null, then return.
+      if (head == nullptr && element == nullptr)
       {
         return {};
       }
 
-      if (title == nullptr)
+      // 2. If the title element is non-null, let element be the title element.
+      // 3. Otherwise:
+      if (element == nullptr)
       {
-        title = ElementFactory::Create(*this, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        // 3a. Let element be the result of creating an element given the document element's node document,
+        //     "title", and the HTML namespace.
+        element = ElementFactory::Create(*this, {infra::Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
 
-        if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
+        // 3b. Append element to the head element.
+        if (auto append = MutationAlgorithms::Append(*element, *head); append.HasException())
         {
           return append.ReleaseException();
         }
       }
 
-      if (auto replace = NodeAlgorithms::StringReplaceAll(krys::move(value), *title); replace.HasException())
+      // 4. String replace all with the given value within element.
+      if (auto replace = NodeAlgorithms::StringReplaceAll(krys::move(value), *element);
+          replace.HasException())
       {
         return replace.ReleaseException();
       }
     }
+    // Otherwise: Do nothing.
 
     return {};
   }
@@ -966,7 +984,7 @@ namespace krys::boo::dom
   void Document::Dir(DOMString &&value) noexcept
   {
     html::CEReactionsScope ceReactions;
-    auto html = html::DOMTreeAccessors::GetHeadElement(*this);
+    auto html = html::DOMTreeAccessors::GetHtmlElement(*this);
     if (html == nullptr)
     {
       return;
@@ -975,99 +993,168 @@ namespace krys::boo::dom
     html->Dir(krys::move(value));
   }
 
+  namespace
+  {
+    KRYS_NODISCARD html::HTMLBodyElement *FirstBodyElementChild(const Document &document) noexcept
+    {
+      auto *html = html::DOMTreeAccessors::GetHtmlElement(document);
+      if (html == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ChildNodeRange(*html);
+      auto body = FirstOfType<html::HTMLBodyElement>(children);
+      return body == std::ranges::end(children) ? nullptr : &Downcast<html::HTMLBodyElement>(*body);
+    }
+
+    template <DerivedFrom<html::HTMLElement> T>
+    KRYS_NODISCARD bool IsHTMLElementOfType(const Element &element) noexcept
+    {
+      auto *htmlElement = DynamicDowncast<html::HTMLElement>(element);
+      return htmlElement && Is<T>(*htmlElement);
+    }
+
+    /// @brief The document's collection that @p cache holds, or a new one that it holds from now on.
+    KRYS_NODISCARD Ref<HTMLCollection>
+      CachedDocumentCollection(WeakPtr<HTMLCollection> &cache, Document &document,
+                               LiveHTMLCollectionFilterFunc &&filter) noexcept
+    {
+      if (auto collection = cache.lock())
+      {
+        return ShareRef(*collection.get());
+      }
+
+      auto collection = CreateRef<LiveHTMLCollection>(document, krys::move(filter));
+      cache = CreateWeakPtr(collection.get());
+      return collection;
+    }
+  }
+
   RefPtr<html::HTMLBodyElement> Document::Body() noexcept
   {
-    return html::DOMTreeAccessors::GetBodyElement(*this);
+    return ShareRefPtr(FirstBodyElementChild(*this));
   }
 
   RefPtr<const html::HTMLBodyElement> Document::Body() const noexcept
   {
-    return html::DOMTreeAccessors::GetBodyElement(*this);
+    return ShareRefPtr(FirstBodyElementChild(*this));
   }
 
-  ExceptionOr<void> Document::Body(html::HTMLBodyElement &body) noexcept
+  ExceptionOr<void> Document::SetBodyOrFrameset(html::HTMLElement &body) noexcept
   {
     html::CEReactionsScope ceReactions;
-    auto currentBody = Body();
+
+    // 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError"
+    //    DOMException.
+    if (!Is<html::HTMLBodyElement>(body) && !Is<html::HTMLFrameSetElement>(body))
+    {
+      return ExceptionCode::HierarchyRequestError;
+    }
+
+    // 2. Otherwise, if the new value is the same as the body element, return.
+    RefPtr<html::HTMLElement> currentBody = ShareRefPtr(BodyOrFrameset());
     if (currentBody == &body)
     {
       return {};
     }
 
+    // 3. Otherwise, if the body element is not null, then replace the body element with the new value within
+    //    the body element's parent and return.
     if (currentBody != nullptr)
     {
-      if (auto replace = MutationAlgorithms::Replace(*currentBody, body, *body.ParentNode());
+      if (auto replace = MutationAlgorithms::Replace(*currentBody, body, *currentBody->ParentNode());
           replace.HasException())
       {
         return replace.ReleaseException();
       }
+      return {};
     }
-    else
+
+    // 4. Otherwise, if there is no document element, throw a "HierarchyRequestError" DOMException.
+    auto documentElement = DocumentElement();
+    if (documentElement == nullptr)
     {
-      auto documentElement = DocumentElement();
-      if (documentElement == nullptr)
-      {
-        return ExceptionCode::HierarchyRequestError;
-      }
-
-      if (auto append = MutationAlgorithms::Append(body, *documentElement); append.HasException())
-      {
-        return append.ReleaseException();
-      }
+      return ExceptionCode::HierarchyRequestError;
     }
 
+    // 5. Otherwise, the body element is null, but there's a document element. Append the new value to the
+    //    document element.
+    if (auto append = MutationAlgorithms::Append(body, *documentElement); append.HasException())
+    {
+      return append.ReleaseException();
+    }
     return {};
   }
 
   RefPtr<html::HTMLHeadElement> Document::Head() noexcept
   {
-    return html::DOMTreeAccessors::GetHeadElement(*this);
+    return ShareRefPtr(html::DOMTreeAccessors::GetHeadElement(*this));
   }
 
   RefPtr<const html::HTMLHeadElement> Document::Head() const noexcept
   {
-    return html::DOMTreeAccessors::GetHeadElement(*this);
+    return ShareRefPtr(html::DOMTreeAccessors::GetHeadElement(*this));
   }
 
-  // FIXME: Document::Images
-  // Ref<HTMLCollection> Document::Images() noexcept
-  // {
-  // }
-
-  // FIXME: Document::Embeds
-  // Ref<HTMLCollection> Document::Embeds() noexcept
-  // {
-  // }
-
-  // FIXME: Document::Plugins
-  // Ref<HTMLCollection> Document::Plugins() noexcept
-  // {
-  // }
-
-  // FIXME: Document::Links
-  // Ref<HTMLCollection> Document::Links() noexcept
-  // {
-  // }
-
-  // FIXME: Document::Forms
-  // Ref<HTMLCollection> Document::Forms() noexcept
-  // {
-  // }
-
-  // FIXME: Document::Scripts
-  // Ref<HTMLCollection> Document::Scripts() noexcept
-  // {
-  // }
-
-  // FIXME: GetElementsByName
-  // Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
-  //{
-  //}
-
-  html::HTMLOrSVGScriptElement Document::CurrentScript() noexcept
+  Ref<HTMLCollection> Document::Images() noexcept
   {
-    // FIXME: Current running script (will we even support this?)
-    return {};
+    return CachedDocumentCollection(_images, *this, [](const Element &element)
+                                    { return IsHTMLElementOfType<html::HTMLImageElement>(element); });
+  }
+
+  Ref<HTMLCollection> Document::Embeds() noexcept
+  {
+    return CachedDocumentCollection(_embeds, *this, [](const Element &element)
+                                    { return IsHTMLElementOfType<html::HTMLEmbedElement>(element); });
+  }
+
+  Ref<HTMLCollection> Document::Plugins() noexcept
+  {
+    return Embeds();
+  }
+
+  Ref<HTMLCollection> Document::Links() noexcept
+  {
+    return CachedDocumentCollection(_links, *this,
+                                    [](const Element &element)
+                                    {
+                                      return (IsHTMLElementOfType<html::HTMLAnchorElement>(element)
+                                              || IsHTMLElementOfType<html::HTMLAreaElement>(element))
+                                             && element.HasAttribute(u8"href");
+                                    });
+  }
+
+  Ref<HTMLCollection> Document::Forms() noexcept
+  {
+    return CachedDocumentCollection(_forms, *this, [](const Element &element)
+                                    { return IsHTMLElementOfType<html::HTMLFormElement>(element); });
+  }
+
+  Ref<HTMLCollection> Document::Scripts() noexcept
+  {
+    return CachedDocumentCollection(_scripts, *this, [](const Element &element)
+                                    { return IsHTMLElementOfType<html::HTMLScriptElement>(element); });
+  }
+
+  Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
+  {
+    return CreateRef<LiveNodeList>(*this,
+                                   [name = DOMString(elementName)](const Node &node)
+                                   {
+                                     auto *element = DynamicDowncast<html::HTMLElement>(node);
+                                     return element && element->GetAttribute(u8"name") == name;
+                                   });
+  }
+
+  DOMString Document::LastModified() const noexcept
+  {
+    // FIXME: The response's Last-Modified header, or the file's modification date for a file, once responses
+    // have headers.
+    // When the last modification date and time aren't known, the attribute returns the current date and time.
+    auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
+    auto text = std::format("{:%m/%d/%Y %H:%M:%S}", std::chrono::current_zone()->to_local(now));
+    return DOMString(DOMStringView(reinterpret_cast<const char8 *>(text.data()), text.size()));
   }
 
 #pragma endregion
@@ -4915,22 +5002,7 @@ namespace krys::boo::dom
 
   html::HTMLElement *Document::BodyOrFrameset() const noexcept
   {
-    // Return the first body or frameset child of the html element.
-    auto element = DocumentElement();
-    if (!element || !Is<html::HTMLHtmlElement>(*element))
-    {
-      return nullptr;
-    }
-    for (auto *child = element->FirstChild(); child; child = child->NextSibling())
-    {
-      auto *childElement = DynamicDowncast<html::HTMLElement>(child);
-      if (childElement
-          && (Is<html::HTMLBodyElement>(*childElement) || Is<html::HTMLFrameSetElement>(*childElement)))
-      {
-        return const_cast<html::HTMLElement *>(childElement);
-      }
-    }
-    return nullptr;
+    return html::DOMTreeAccessors::GetBodyElement(*this);
   }
 
   void Document::ConvertAbsoluteToClientQuads(List<FloatQuad> &quads, const RenderStyle &style) const noexcept
