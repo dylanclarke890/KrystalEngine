@@ -90,6 +90,10 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - `isSecureContext` checks the document's URL, since there are no origins: `https:`, `wss:`, `file:`, the local host, `about:` and a null URL are trustworthy, `data:` isn't. `crossOriginIsolated` and `originAgentCluster` are always false.
 - `<frame>` is an `HTMLUnknownElement`, as there's no frame tree; the specification gives it `HTMLFrameElement`. `<frameset>` is an `HTMLFrameSetElement` (it can be the body element, and forwards window event handlers) but isn't laid out as frames.
 - Microdata (`itemscope`, `itemprop`, `itemtype`, `itemid` and `itemref`) isn't processed, as in browsers: there's no way to read a document's items, and no conversion to vCard, iCalendar or JSON.
+- The rules for parsing integers give an error outside `int64`'s range (`Numbers::ParseInteger`); the specification's have no limit.
+- Dates and times later than 275760-09-13T00:00, the latest a script `Date` can be, aren't parsed, and nor are times with more than three digits after the seconds' full stop, since `DateComponents` keeps seconds to the millisecond; the specification parses both. Upstream and Chrome do the same.
+- The machine-readable values of `<time>` (its `datetime` attribute or contents) and of `<ins>` and `<del>`'s `datetime` attribute aren't parsed, as in browsers: nothing reads them. So there are no parsers for yearless dates, time-zone offsets, global dates and times, durations or dates with optional times.
+- A legacy colour value that starts with `#` keeps the 128 code points after it (`HTMLElement::ParseLegacyColorValue`), as upstream and Chrome do; the specification truncates to 128 code points before removing the `#`.
 
 ### From WebKit
 
@@ -112,6 +116,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The `-webkit-` user agent parts (`-webkit-inner-spin-button`, `-webkit-search-cancel-button`, the slider, progress, meter and date field parts and so on) parse only in user agent sheets (`user-agent-sheet-only`), so pages can't style them; upstream lets pages style them.
 - The resizer grip is drawn by `RenderTheme::PaintPlatformResizer` rather than from a platform image. Textareas aren't resizable by default (`Settings::TextAreasAreResizable` is false, as upstream's WebCore default; WebKit's own default is true off iOS).
 - `RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar` is a fixed 16 ms; upstream uses the page's preferred rendering update interval (FIXME).
+- The `width` and `height` of `<img>`, `<col>` and `<colgroup>` ignore a relative length (`5*`, `Dimensions::ParseHTMLMultiLength`), as upstream; the specification's rules for parsing dimension values read it as 5 pixels.
+- The number-like input types' values (`ParseToDoubleForNumberType`, `ParseToDecimalForNumberType`) accept a full stop followed directly by an exponent (`1.e5`), which isn't a valid floating-point number, as upstream.
 
 ### From Chrome
 

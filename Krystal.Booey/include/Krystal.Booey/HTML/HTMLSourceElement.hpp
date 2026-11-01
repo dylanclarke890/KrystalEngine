@@ -70,7 +70,9 @@ namespace krys::boo::html
 
 #pragma endregion
 
-    /// @brief The `media` attribute, parsed.
+    /// @brief The `media` attribute, parsed: an empty or all-whitespace one is an empty list, which matches
+    /// the environment.
+    /// @see https://html.spec.whatwg.org/#matches-the-environment
     KRYS_NODISCARD const css::mq::MediaQueryList &
       ParsedMediaAttribute(dom::Document &document) const noexcept;
 

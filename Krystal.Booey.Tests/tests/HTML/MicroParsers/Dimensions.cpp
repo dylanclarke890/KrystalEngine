@@ -3,7 +3,8 @@
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("Dimensions::ParseHTMLDimension", "[HTML][MicroParsers]")
+  TEST_CASE("Dimensions::ParseHTMLDimension: a length or a percentage, ignoring what follows",
+            "[HTML][MicroParsers][html:rules-for-parsing-dimension-values][html:current-dimension-value]")
   {
     auto pixels = Dimensions::ParseHTMLDimension(u8"50");
     REQUIRE(pixels);
@@ -24,11 +25,26 @@ namespace krys::boo::html::tests
     auto fraction = Dimensions::ParseHTMLDimension(u8"3.");
     REQUIRE(fraction);
     CHECK(fraction->Number == 3);
+    CHECK(fraction->DimensionType == HTMLDimension::Type::Pixel);
+
+    // A full stop without digits is skipped before looking for a percent sign; anything else isn't.
+    auto fullStopPercentage = Dimensions::ParseHTMLDimension(u8"3.%");
+    REQUIRE(fullStopPercentage);
+    CHECK(fullStopPercentage->Number == 3);
+    CHECK(fullStopPercentage->DimensionType == HTMLDimension::Type::Percentage);
+    auto spacedPercentage = Dimensions::ParseHTMLDimension(u8"3 %");
+    REQUIRE(spacedPercentage);
+    CHECK(spacedPercentage->DimensionType == HTMLDimension::Type::Pixel);
+
+    auto precise = Dimensions::ParseHTMLDimension(u8"0.1");
+    REQUIRE(precise);
+    CHECK(precise->Number == 0.1);
 
     CHECK_FALSE(Dimensions::ParseHTMLDimension(u8""));
     CHECK_FALSE(Dimensions::ParseHTMLDimension(u8"   "));
     CHECK_FALSE(Dimensions::ParseHTMLDimension(u8".5"));
     CHECK_FALSE(Dimensions::ParseHTMLDimension(u8"-5"));
+    CHECK_FALSE(Dimensions::ParseHTMLDimension(u8"+5"));
     CHECK_FALSE(Dimensions::ParseHTMLDimension(u8"abc"));
 
     auto relative = Dimensions::ParseHTMLDimension(u8"5*");
@@ -36,7 +52,7 @@ namespace krys::boo::html::tests
     CHECK(relative->Number == 5);
   }
 
-  TEST_CASE("Dimensions::ParseHTMLMultiLength", "[HTML][MicroParsers]")
+  TEST_CASE("Dimensions::ParseHTMLMultiLength: rejects relative lengths", "[HTML][MicroParsers]")
   {
     // Relative lengths aren't supported.
     CHECK_FALSE(Dimensions::ParseHTMLMultiLength(u8"5*"));

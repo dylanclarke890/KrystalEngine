@@ -3483,6 +3483,7 @@ set(KRYSTAL_BOOEY_CSS_SOURCES
   src/HTML/PageTransitionEvent.cpp
   src/HTML/BeforeUnloadEvent.cpp
   src/HTML/MicroParsers/Refresh.cpp
+  src/HTML/MicroParsers/Numbers.cpp
   src/Loader/NavigationScheduler.cpp
   src/Page/Location.cpp
   src/History/HistoryItem.cpp

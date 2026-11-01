@@ -76,6 +76,21 @@ namespace krys::boo::css::tests
     };
   }
 
+  TEST_CASE("MediaQueryEvaluator: an empty or all-whitespace media attribute matches the environment",
+            "[CSS][Queries][MediaQueryEvaluator][html:matches-the-environment]")
+  {
+    ValueFixture fixture;
+    mq::MediaQueryEvaluator screen {Screen()};
+    mq::MediaQueryEvaluator print {Print()};
+
+    for (auto media : {u8"", u8" \t\n\f\r"})
+    {
+      CHECK(screen.Evaluate(Parse(media)));
+      CHECK(print.Evaluate(Parse(media)));
+    }
+    CHECK_FALSE(print.Evaluate(Parse(u8" screen ")));
+  }
+
   TEST_CASE("MediaQueryEvaluator: media types without a document", "[CSS][Queries][MediaQueryEvaluator]")
   {
     ValueFixture fixture;

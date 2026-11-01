@@ -1440,6 +1440,8 @@ namespace krys::boo::html
                                          UseCSSPXAsUnitType useCSSPX, IsMultiLength isMultiLength,
                                          AllowZeroValue allowZeroValue) noexcept
   {
+    // Without a zero value, these are the rules for parsing nonzero dimension values.
+    // @see https://html.spec.whatwg.org/#rules-for-parsing-non-zero-dimension-values
     auto dimensionValue = isMultiLength == IsMultiLength::No ? Dimensions::ParseHTMLDimension(value)
                                                              : Dimensions::ParseHTMLMultiLength(value);
     if (!dimensionValue || (!dimensionValue->Number && allowZeroValue == AllowZeroValue::No))
@@ -1486,32 +1488,45 @@ namespace krys::boo::html
                          IsMultiLength::No);
   }
 
-  // Color parsing that matches HTML's "rules for parsing a legacy color value"
   Maybe<SRGBA<uint8>> HTMLElement::ParseLegacyColorValue(dom::DOMStringView string) noexcept
   {
-    // An empty string doesn't apply a color.
+    // 1. If input is the empty string, then return failure.
     if (string.empty())
     {
       return {};
     }
 
+    // 2. Strip leading and trailing ASCII whitespace from input.
     string = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(string);
+    // Steps 6 to 19 give black for what's left.
     if (string.empty())
     {
       return boo::Color::black;
     }
 
-    // "transparent" doesn't apply a color either.
+    // 3. If input is an ASCII case-insensitive match for "transparent", then return failure.
     if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(string, u8"transparent"))
     {
       return {};
     }
 
+    // 4. If input is an ASCII case-insensitive match for one of the named colors, then return the CSS color
+    //    corresponding to that keyword.
     if (auto namedColor = css::ParserFastPaths::ParseNamedColor(string))
     {
       return namedColor;
     }
 
+    // 5. If input's code point length is four, and the first character in input is U+0023 (#), and the last
+    //    three characters of input are all ASCII hex digits:
+    // 5a. Let result be a CSS color.
+    // 5b. Interpret the second character of input as a hexadecimal digit; let the red component of result be
+    //     the resulting number multiplied by 17.
+    // 5c. Interpret the third character of input as a hexadecimal digit; let the green component of result be
+    //     the resulting number multiplied by 17.
+    // 5d. Interpret the fourth character of input as a hexadecimal digit; let the blue component of result be
+    //     the resulting number multiplied by 17.
+    // 5e. Return result.
     if (string.size() == 4 && string[0] == '#' && text::IsASCIIHexDigit(string[1])
         && text::IsASCIIHexDigit(string[2]) && text::IsASCIIHexDigit(string[3]))
     {
@@ -1520,16 +1535,20 @@ namespace krys::boo::html
                            static_cast<uint8>(text::ToASCIIHexValue(string[3]) * 0x11)};
     }
 
-    // Per spec, only look at the first 128 digits of the string.
+    // 6. Replace any code points greater than U+FFFF in input (i.e., any characters that are not in the basic
+    //    multilingual plane) with "00".
+    // 7. If input's code point length is greater than 128, truncate input, leaving only the first 128
+    //    characters.
+    // 8. If the first character in input is U+0023 (#), then remove it.
+    // 9. Replace any character in input that is not an ASCII hex digit with U+0030 (0).
+    // The "#" is removed before truncating, so 128 digits follow it, as in other browsers.
     constexpr size_t maxColorLength = 128;
 
     // We'll pad the buffer with two extra 0s later, so reserve two more than the max.
     SmallList<char8, maxColorLength + 2> digitBuffer;
 
-    // Grab the first 128 code points, replacing non-hex characters with 0. Code points outside the BMP become
-    // "00", as they're two code units in UTF-16.
     size_t i = 0;
-    if (string[0] == '#') // Skip a leading #.
+    if (string[0] == '#')
     {
       i = 1;
     }
@@ -1557,24 +1576,40 @@ namespace krys::boo::html
       return boo::Color::black;
     }
 
-    // Pad the buffer out to at least the next multiple of three in size.
+    // 10. While input's code point length is zero or not a multiple of three, append U+0030 (0) to input.
+    // Two zeros pad it at least that far; the components' length below leaves out any more.
     digitBuffer.push_back('0');
     digitBuffer.push_back('0');
 
+    // 11. Split input into three strings of equal code point length, to obtain three components. Let length
+    // be
+    //     the code point length that all of those components have (one third the code point length of input).
+    // 15. Let result be a CSS color.
+    // 16. Interpret the first component as a hexadecimal number; let the red component of result be the
+    //     resulting number.
+    // 17. Interpret the second component as a hexadecimal number; let the green component of result be the
+    //     resulting number.
+    // 18. Interpret the third component as a hexadecimal number; let the blue component of result be the
+    //     resulting number.
+    // 19. Return result.
     if (digitBuffer.size() < 6)
     {
       return SRGBA<uint8> {text::ToASCIIHexValue(digitBuffer[0]), text::ToASCIIHexValue(digitBuffer[1]),
                            text::ToASCIIHexValue(digitBuffer[2])};
     }
 
-    // Split the digits into three components, then search the last 8 digits of each component.
     krys_debug_assert(digitBuffer.size() >= 6);
     size_t componentLength = digitBuffer.size() / 3;
+
+    // 12. If length is greater than 8, then remove the leading length-8 characters in each component, and let
+    //     length be 8.
     size_t componentSearchWindowLength = std::min<size_t>(componentLength, 8);
     size_t redIndex = componentLength - componentSearchWindowLength;
     size_t greenIndex = componentLength * 2 - componentSearchWindowLength;
     size_t blueIndex = componentLength * 3 - componentSearchWindowLength;
-    // Skip digits until one of them is non-zero, or we've only got two digits left in the component.
+
+    // 13. While length is greater than two and the first character in each component is U+0030 (0), remove
+    //     that character and reduce length by one.
     while (digitBuffer[redIndex] == '0' && digitBuffer[greenIndex] == '0' && digitBuffer[blueIndex] == '0'
            && (componentLength - redIndex) > 2)
     {
@@ -1582,6 +1617,10 @@ namespace krys::boo::html
       greenIndex++;
       blueIndex++;
     }
+
+    // 14. If length is still greater than two, truncate each component, leaving only the first two characters
+    //     in each.
+    // 15.-19. (As above, with each component's first two characters.)
     krys_debug_assert(redIndex + 1 < componentLength);
     krys_debug_assert(greenIndex >= componentLength);
     krys_debug_assert(greenIndex + 1 < componentLength * 2);

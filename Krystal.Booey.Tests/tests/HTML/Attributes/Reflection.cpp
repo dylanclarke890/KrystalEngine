@@ -219,6 +219,21 @@ namespace krys::boo::html::tests
     }
   }
 
+  TEST_CASE("Reflection::Reflect<bool>: a boolean attribute is true when present, whatever its value",
+            "[HTML][Attributes][html:boolean-attribute]")
+  {
+    for (auto value : {u8"", u8"false", u8"test-attr", u8"no"})
+    {
+      TestData data {dom::DOMString(value)};
+      CHECK(Reflection::Reflect<bool>(*data.Element, TestAttribute));
+    }
+
+    // Setting it to true sets it to the empty string.
+    TestData data;
+    Reflection::Reflect<bool>(*data.Element, TestAttribute, true);
+    CHECK(data.Element->GetAttribute(TestAttribute) == u8"");
+  }
+
   TEST_CASE("Reflection::ReflectURL", "[Attributes]")
   {
     SECTION("USVString")

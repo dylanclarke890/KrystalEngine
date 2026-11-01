@@ -8,23 +8,28 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [2.3 Common microsyntaxes](https://html.spec.whatwg.org/#common-microsyntaxes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only. The parsers are `HTML/MicroParsers/` (`Numbers`, `Dimensions`), `Platform/DateComponents` and `HTMLElement::ParseLegacyColorValue`.
 
 #### [2.3.1 Common parser idioms](https://html.spec.whatwg.org/#common-parser-idioms)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Infra's string idioms (`infra::StringAlgorithms`: `position_variable`, `SkipWhitespace`, `CollectCodePointSequence`), which the parsers here use.
 
 #### [2.3.2 Boolean attributes](https://html.spec.whatwg.org/#boolean-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Reflection::ReflectBool`: present is true whatever the value, and setting true sets the empty string.
 <!-- definitions: boolean-attribute -->
 
 #### [2.3.3 Keywords and enumerated attributes](https://html.spec.whatwg.org/#keywords-and-enumerated-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `EnumeratedAttribute`, with `EnumeratedAttributeTraits` per attribute (`HTML/Attributes/EnumeratedAttributes.hpp`). An empty keyword is written as an empty value default, which gives the same states and canonical keywords.
+> Fixed: the `crossorigin` traits had a third, empty keyword that matched the empty string, and an attribute with a missing value default and an empty value default but no invalid value default couldn't be in no state.
 <!-- definitions: enumerated-attribute invalid-value-default missing-value-default -->
 
-- [ ] [To determine the state of an attribute, use the following steps](https://html.spec.whatwg.org/#empty-value-default) — To determine the state of an attribute, use the following steps:
+- [x] [To determine the state of an attribute, use the following steps](https://html.spec.whatwg.org/#empty-value-default) — To determine the state of an attribute, use the following steps:
   - 1. If the attribute is not specified:
     - 1a. If the attribute has a missing value default state defined, then return that missing value default state.
     - 1b. Otherwise, return no state.
@@ -33,7 +38,7 @@ Status: unreviewed
   - 4. If the attribute has an invalid value default state defined, then return that invalid value default state.
   - 5. Return no state.
 
-- [ ] [canonical keyword](https://html.spec.whatwg.org/#canonical-keyword) — For reflection purposes, states which have any keywords mapping to them are said to have a canonical keyword. This is determined as follows:
+- [x] [canonical keyword](https://html.spec.whatwg.org/#canonical-keyword) — For reflection purposes, states which have any keywords mapping to them are said to have a canonical keyword. This is determined as follows:
   - 1. If there is only one keyword mapping to the given state, then it is that keyword.
   - 2. If there is only one conforming keyword mapping to the given state, then it is that conforming keyword.
   - 3. If there are two conforming keywords mapping to the given state, and one is the empty string, then the canonical keyword will be the conforming keyword that is not the empty string.
@@ -41,15 +46,18 @@ Status: unreviewed
 
 #### [2.3.4 Numbers](https://html.spec.whatwg.org/#numbers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ##### [2.3.4.1 Signed integers](https://html.spec.whatwg.org/#signed-integers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Numbers::ParseInteger` (moved to `Numbers.cpp` and rewritten to the steps), an error outside `int64` (DIFFERENCES.md). Fixed: the int64 minimum was an error.
+> Valid integers are author conformance, and the reflection setters' serialisation (2.6.1).
 
-- [ ] [valid integer](https://html.spec.whatwg.org/#valid-integer) — A string is a valid integer if it consists of one or more ASCII digits, optionally prefixed with a U+002D HYPHEN-MINUS character (-).
+- [x] [valid integer](https://html.spec.whatwg.org/#valid-integer) — A string is a valid integer if it consists of one or more ASCII digits, optionally prefixed with a U+002D HYPHEN-MINUS character (-).
 
-- [ ] [rules for parsing integers](https://html.spec.whatwg.org/#rules-for-parsing-integers) — The rules for parsing integers are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either an integer or an error.
+- [x] [rules for parsing integers](https://html.spec.whatwg.org/#rules-for-parsing-integers) — The rules for parsing integers are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either an integer or an error.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Let sign have the value "positive".
@@ -67,11 +75,12 @@ Status: unreviewed
 
 ##### [2.3.4.2 Non-negative integers](https://html.spec.whatwg.org/#non-negative-integers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Numbers::ParseNonNegativeInteger` (now through `ParseInteger`, as the steps say) and `ParseValidNonNegativeInteger`. Fixed: `-0` was an error rather than 0.
 
-- [ ] [valid non-negative integer](https://html.spec.whatwg.org/#valid-non-negative-integer) — A string is a valid non-negative integer if it consists of one or more ASCII digits.
+- [x] [valid non-negative integer](https://html.spec.whatwg.org/#valid-non-negative-integer) — A string is a valid non-negative integer if it consists of one or more ASCII digits.
 
-- [ ] [rules for parsing non-negative integers](https://html.spec.whatwg.org/#rules-for-parsing-non-negative-integers) — The rules for parsing non-negative integers are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either zero, a positive integer, or an error.
+- [x] [rules for parsing non-negative integers](https://html.spec.whatwg.org/#rules-for-parsing-non-negative-integers) — The rules for parsing non-negative integers are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either zero, a positive integer, or an error.
   - 1. Let input be the string being parsed.
   - 2. Let value be the result of parsing input using the rules for parsing integers.
   - 3. If value is an error, return an error.
@@ -80,9 +89,11 @@ Status: unreviewed
 
 ##### [2.3.4.3 Floating-point numbers](https://html.spec.whatwg.org/#floating-point-numbers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Numbers::ParseFloatingPoint`, rewritten to the steps: it keeps the digits and rounds the exact value once in conversion (`std::from_chars`). `IsValidFloatingPointNumber` and `ParseValidFloatingPoint`; the best representation is `SerializeForNumberType(double)` (`HTML/Parser/HTMLParserIdioms`).
+> Fixed: `+-1` and `--1` parsed, values too small for a double were errors rather than zero, negative zero was returned, and `1.e5` was valid. The number input types' own parsers are upstream's (DIFFERENCES.md).
 
-- [ ] [valid floating-point number](https://html.spec.whatwg.org/#valid-floating-point-number) — A string is a valid floating-point number if it consists of:
+- [x] [valid floating-point number](https://html.spec.whatwg.org/#valid-floating-point-number) — A string is a valid floating-point number if it consists of:
   - 1. Optionally, a U+002D HYPHEN-MINUS character (-).
   - 2. One or both of the following, in the given order:
     - 2a. A series of one or more ASCII digits.
@@ -94,9 +105,9 @@ Status: unreviewed
     - 3b. Optionally, a U+002D HYPHEN-MINUS character (-) or U+002B PLUS SIGN character (+).
     - 3c. A series of one or more ASCII digits.
 
-- [ ] [best representation of the number n as a floating-point number](https://html.spec.whatwg.org/#best-representation-of-the-number-as-a-floating-point-number) — The best representation of the number n as a floating-point number is the string obtained from running ToString(n). The abstract operation ToString is not uniquely determined. When there are multiple possible strings that could be obtained from ToString for a particular value, the user agent must always return the same string for that value (though it may differ from the value used by other user agents).
+- [x] [best representation of the number n as a floating-point number](https://html.spec.whatwg.org/#best-representation-of-the-number-as-a-floating-point-number) — The best representation of the number n as a floating-point number is the string obtained from running ToString(n). The abstract operation ToString is not uniquely determined. When there are multiple possible strings that could be obtained from ToString for a particular value, the user agent must always return the same string for that value (though it may differ from the value used by other user agents).
 
-- [ ] [rules for parsing floating-point number values](https://html.spec.whatwg.org/#rules-for-parsing-floating-point-number-values) — The rules for parsing floating-point number values are as given in the following algorithm. This algorithm must be aborted at the first step that returns something. This algorithm will return either a number or an error.
+- [x] [rules for parsing floating-point number values](https://html.spec.whatwg.org/#rules-for-parsing-floating-point-number-values) — The rules for parsing floating-point number values are as given in the following algorithm. This algorithm must be aborted at the first step that returns something. This algorithm will return either a number or an error.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Let value have the value 1.
@@ -142,9 +153,10 @@ Status: unreviewed
 
 ##### [2.3.4.4 Percentages and lengths](https://html.spec.whatwg.org/#percentages-and-dimensions)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Dimensions::ParseHTMLDimension`: steps 1 to 7 in `ParseHTMLDimensionNumber`, the current dimension value in `ParseHTMLDimensionInternal`. `ParseHTMLMultiLength` also rejects relative lengths (DIFFERENCES.md).
 
-- [ ] [rules for parsing dimension values](https://html.spec.whatwg.org/#rules-for-parsing-dimension-values) — The rules for parsing dimension values are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either a number greater than or equal to 0.0, or failure; if a number is returned,…
+- [x] [rules for parsing dimension values](https://html.spec.whatwg.org/#rules-for-parsing-dimension-values) — The rules for parsing dimension values are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either a number greater than or equal to 0.0, or failure; if a number is returned,…
   - 1. Let input be the string being parsed.
   - 2. Let position be a position variable for input, initially pointing at the start of input.
   - 3. Skip ASCII whitespace within input given position.
@@ -163,16 +175,17 @@ Status: unreviewed
       - 7d.v. If the code point at position within input is not an ASCII digit, then break.
   - 8. Return the current dimension value with value, input, and position.
 
-- [ ] [current dimension value](https://html.spec.whatwg.org/#current-dimension-value) — The current dimension value, given value, input, and position, is determined as follows:
+- [x] [current dimension value](https://html.spec.whatwg.org/#current-dimension-value) — The current dimension value, given value, input, and position, is determined as follows:
   - 1. If position is past the end of input, then return value as a length.
   - 2. If the code point at position within input is U+0025 (%), then return value as a percentage.
   - 3. Return value as a length.
 
 ##### [2.3.4.5 Nonzero percentages and lengths](https://html.spec.whatwg.org/#nonzero-percentages-and-lengths)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::AddHTMLLengthToStyle` with `AllowZeroValue::No` (table and cell `width` and `height`) drops zero.
 
-- [ ] [rules for parsing nonzero dimension values](https://html.spec.whatwg.org/#rules-for-parsing-non-zero-dimension-values) — The rules for parsing nonzero dimension values are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either a number greater than 0.0, or an error; if a number is returned, th…
+- [x] [rules for parsing nonzero dimension values](https://html.spec.whatwg.org/#rules-for-parsing-non-zero-dimension-values) — The rules for parsing nonzero dimension values are as given in the following algorithm. When invoked, the steps must be followed in the order given, aborting at the first step that returns a value. This algorithm will return either a number greater than 0.0, or an error; if a number is returned, th…
   - 1. Let input be the string being parsed.
   - 2. Let value be the result of parsing input using the rules for parsing dimension values.
   - 3. If value is an error, return an error.
@@ -182,11 +195,13 @@ Status: unreviewed
 
 ##### [2.3.4.6 Lists of floating-point numbers](https://html.spec.whatwg.org/#lists-of-floating-point-numbers)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Numbers::ParseListOfFloatingPointNumbers` (area `coords`), which now parses each number with `ParseFloatingPoint`.
 
-- [ ] [valid list of floating-point numbers](https://html.spec.whatwg.org/#valid-list-of-floating-point-numbers) — A valid list of floating-point numbers is a number of valid floating-point numbers separated by U+002C COMMA characters, with no other characters (e.g. no ASCII whitespace). In addition, there might be restrictions on the number of floating-point numbers that can be given, or on the range of values allowed.
+- [x] [valid list of floating-point numbers](https://html.spec.whatwg.org/#valid-list-of-floating-point-numbers) — A valid list of floating-point numbers is a number of valid floating-point numbers separated by U+002C COMMA characters, with no other characters (e.g. no ASCII whitespace). In addition, there might be restrictions on the number of floating-point numbers that can be given, or on the range of values allowed.
+  > n/a: author conformance.
 
-- [ ] [rules for parsing a list of floating-point numbers](https://html.spec.whatwg.org/#rules-for-parsing-a-list-of-floating-point-numbers) — The rules for parsing a list of floating-point numbers are as follows:
+- [x] [rules for parsing a list of floating-point numbers](https://html.spec.whatwg.org/#rules-for-parsing-a-list-of-floating-point-numbers) — The rules for parsing a list of floating-point numbers are as follows:
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Let numbers be an initially empty list of floating-point numbers. This list will be the result of this algorithm.
@@ -202,9 +217,9 @@ Status: unreviewed
 
 ##### [2.3.4.7 Lists of dimensions](https://html.spec.whatwg.org/#lists-of-dimensions)
 
-Status: unreviewed
+Status: n/a (only frameset layout uses it, 15.6, which is n/a)
 
-- [ ] [rules for parsing a list of dimensions](https://html.spec.whatwg.org/#rules-for-parsing-a-list-of-dimensions) — The rules for parsing a list of dimensions are as follows. These rules return a list of zero or more pairs consisting of a number and a unit, the unit being one of percentage, relative, and absolute.
+- [x] [rules for parsing a list of dimensions](https://html.spec.whatwg.org/#rules-for-parsing-a-list-of-dimensions) — The rules for parsing a list of dimensions are as follows. These rules return a list of zero or more pairs consisting of a number and a unit, the unit being one of percentage, relative, and absolute.
   - 1. Let raw input be the string being parsed.
   - 2. If the last character in raw input is a U+002C COMMA character (,), then remove that character from raw input.
   - 3. Split the string raw input on commas. Let raw tokens be the resulting list of tokens.
@@ -230,29 +245,31 @@ Status: unreviewed
 
 #### [2.3.5 Dates and times](https://html.spec.whatwg.org/#dates-and-times)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Platform/DateComponents`, upstream's; its limits are in DIFFERENCES.md. The number of days in a month is `MaxDayOfMonth`.
 <!-- definitions: proleptic-gregorian-calendar proleptic-gregorian-date -->
 
-- [ ] [number of days in month month of year year](https://html.spec.whatwg.org/#number-of-days-in-month-month-of-year-year) — In the algorithms below, the number of days in month month of year year is: 31 if month is 1, 3, 5, 7, 8, 10, or 12; 30 if month is 4, 6, 9, or 11; 29 if month is 2 and year is a number divisible by 400, or if year is a number divisible by 4 but not by 100; and 28 otherwise. This takes into account leap years in the Gregorian calendar. [GREGORIAN]
+- [x] [number of days in month month of year year](https://html.spec.whatwg.org/#number-of-days-in-month-month-of-year-year) — In the algorithms below, the number of days in month month of year year is: 31 if month is 1, 3, 5, 7, 8, 10, or 12; 30 if month is 4, 6, 9, or 11; 29 if month is 2 and year is a number divisible by 400, or if year is a number divisible by 4 but not by 100; and 28 otherwise. This takes into account leap years in the Gregorian calendar. [GREGORIAN]
 
 ##### [2.3.5.1 Months](https://html.spec.whatwg.org/#months)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DateComponents::FromParsingMonth`, `ParseMonth` and `ParseYear`; serialised by `ToString`.
 <!-- definitions: concept-month -->
 
-- [ ] [valid month string](https://html.spec.whatwg.org/#valid-month-string) — A string is a valid month string representing a year year and month month if it consists of the following components in the given order:
+- [x] [valid month string](https://html.spec.whatwg.org/#valid-month-string) — A string is a valid month string representing a year year and month month if it consists of the following components in the given order:
   - 1. Four or more ASCII digits, representing year, where year > 0
   - 2. A U+002D HYPHEN-MINUS character (-)
   - 3. Two ASCII digits, representing the month month, in the range 1 ≤ month ≤ 12
 
-- [ ] [parse a month string](https://html.spec.whatwg.org/#parse-a-month-string) — The rules to parse a month string are as follows. This will return either a year and month, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a month string](https://html.spec.whatwg.org/#parse-a-month-string) — The rules to parse a month string are as follows. This will return either a year and month, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a month component to obtain year and month. If this returns nothing, then fail.
   - 4. If position is not beyond the end of input, then fail.
   - 5. Return year and month.
 
-- [ ] [parse a month component](https://html.spec.whatwg.org/#parse-a-month-component) — The rules to parse a month component, given an input string and a position, are as follows. This will return either a year and a month, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a month component](https://html.spec.whatwg.org/#parse-a-month-component) — The rules to parse a month component, given an input string and a position, are as follows. This will return either a year and a month, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Collect a sequence of code points that are ASCII digits from input given position. If the collected sequence is not at least four characters long, then fail. Otherwise, interpret the resulting sequence as a base-ten integer. Let year be that number.
   - 2. If year is not a number greater than zero, then fail.
   - 3. If position is beyond the end of input or if the character at position is not a U+002D HYPHEN-MINUS character, then fail. Otherwise, move position forwards one character.
@@ -262,15 +279,16 @@ Status: unreviewed
 
 ##### [2.3.5.2 Dates](https://html.spec.whatwg.org/#dates)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DateComponents::FromParsingDate` and `ParseDate`; serialised by `ToString`.
 <!-- definitions: concept-date -->
 
-- [ ] [valid date string](https://html.spec.whatwg.org/#valid-date-string) — A string is a valid date string representing a year year, month month, and day day if it consists of the following components in the given order:
+- [x] [valid date string](https://html.spec.whatwg.org/#valid-date-string) — A string is a valid date string representing a year year, month month, and day day if it consists of the following components in the given order:
   - 1. A valid month string, representing year and month
   - 2. A U+002D HYPHEN-MINUS character (-)
   - 3. Two ASCII digits, representing day, in the range 1 ≤ day ≤ maxday where maxday is the number of days in the month month and year year
 
-- [ ] [parse a date string](https://html.spec.whatwg.org/#parse-a-date-string) — The rules to parse a date string are as follows. This will return either a date, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a date string](https://html.spec.whatwg.org/#parse-a-date-string) — The rules to parse a date string are as follows. This will return either a date, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a date component to obtain year, month, and day. If this returns nothing, then fail.
@@ -278,7 +296,7 @@ Status: unreviewed
   - 5. Let date be the date with year year, month month, and day day.
   - 6. Return date.
 
-- [ ] [parse a date component](https://html.spec.whatwg.org/#parse-a-date-component) — The rules to parse a date component, given an input string and a position, are as follows. This will return either a year, a month, and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a date component](https://html.spec.whatwg.org/#parse-a-date-component) — The rules to parse a date component, given an input string and a position, are as follows. This will return either a year, a month, and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Parse a month component to obtain year and month. If this returns nothing, then fail.
   - 2. Let maxday be the number of days in month month of year year.
   - 3. If position is beyond the end of input or if the character at position is not a U+002D HYPHEN-MINUS character, then fail. Otherwise, move position forwards one character.
@@ -288,23 +306,23 @@ Status: unreviewed
 
 ##### [2.3.5.3 Yearless dates](https://html.spec.whatwg.org/#yearless-dates)
 
-Status: unreviewed
+Status: n/a (only the machine-readable values of time, ins and del use it, which nothing reads; see DIFFERENCES.md)
 <!-- definitions: concept-yearless-date -->
 
-- [ ] [valid yearless date string](https://html.spec.whatwg.org/#valid-yearless-date-string) — A string is a valid yearless date string representing a month month and a day day if it consists of the following components in the given order:
+- [x] [valid yearless date string](https://html.spec.whatwg.org/#valid-yearless-date-string) — A string is a valid yearless date string representing a month month and a day day if it consists of the following components in the given order:
   - 1. Optionally, two U+002D HYPHEN-MINUS characters (-)
   - 2. Two ASCII digits, representing the month month, in the range 1 ≤ month ≤ 12
   - 3. A U+002D HYPHEN-MINUS character (-)
   - 4. Two ASCII digits, representing day, in the range 1 ≤ day ≤ maxday where maxday is the number of days in the month month and any arbitrary leap year (e.g. 4 or 2000)
 
-- [ ] [parse a yearless date string](https://html.spec.whatwg.org/#parse-a-yearless-date-string) — The rules to parse a yearless date string are as follows. This will return either a month and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a yearless date string](https://html.spec.whatwg.org/#parse-a-yearless-date-string) — The rules to parse a yearless date string are as follows. This will return either a month and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a yearless date component to obtain month and day. If this returns nothing, then fail.
   - 4. If position is not beyond the end of input, then fail.
   - 5. Return month and day.
 
-- [ ] [parse a yearless date component](https://html.spec.whatwg.org/#parse-a-yearless-date-component) — The rules to parse a yearless date component, given an input string and a position, are as follows. This will return either a month and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a yearless date component](https://html.spec.whatwg.org/#parse-a-yearless-date-component) — The rules to parse a yearless date component, given an input string and a position, are as follows. This will return either a month and a day, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Collect a sequence of code points that are U+002D HYPHEN-MINUS characters (-) from input given position. If the collected sequence is not exactly zero or two characters long, then fail.
   - 2. Collect a sequence of code points that are ASCII digits from input given position. If the collected sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence as a base-ten integer. Let month be that number.
   - 3. If month is not a number in the range 1 ≤ month ≤ 12, then fail.
@@ -316,10 +334,11 @@ Status: unreviewed
 
 ##### [2.3.5.4 Times](https://html.spec.whatwg.org/#times)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DateComponents::FromParsingTime` and `ParseTime`, which keeps seconds to the millisecond (DIFFERENCES.md); serialised by `ToString`.
 <!-- definitions: concept-time -->
 
-- [ ] [valid time string](https://html.spec.whatwg.org/#valid-time-string) — A string is a valid time string representing an hour hour, a minute minute, and a second second if it consists of the following components in the given order:
+- [x] [valid time string](https://html.spec.whatwg.org/#valid-time-string) — A string is a valid time string representing an hour hour, a minute minute, and a second second if it consists of the following components in the given order:
   - 1. Two ASCII digits, representing hour, in the range 0 ≤ hour ≤ 23
   - 2. A U+003A COLON character (:)
   - 3. Two ASCII digits, representing minute, in the range 0 ≤ minute ≤ 59
@@ -330,7 +349,7 @@ Status: unreviewed
       - 4c.i. A U+002E FULL STOP character (.)
       - 4c.ii. One, two, or three ASCII digits, representing the fractional part of second
 
-- [ ] [parse a time string](https://html.spec.whatwg.org/#parse-a-time-string) — The rules to parse a time string are as follows. This will return either a time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a time string](https://html.spec.whatwg.org/#parse-a-time-string) — The rules to parse a time string are as follows. This will return either a time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a time component to obtain hour, minute, and second. If this returns nothing, then fail.
@@ -338,7 +357,7 @@ Status: unreviewed
   - 5. Let time be the time with hour hour, minute minute, and second second.
   - 6. Return time.
 
-- [ ] [parse a time component](https://html.spec.whatwg.org/#parse-a-time-component) — The rules to parse a time component, given an input string and a position, are as follows. This will return either an hour, a minute, and a second, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a time component](https://html.spec.whatwg.org/#parse-a-time-component) — The rules to parse a time component, given an input string and a position, are as follows. This will return either an hour, a minute, and a second, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Collect a sequence of code points that are ASCII digits from input given position. If the collected sequence is not exactly two characters long, then fail. Otherwise, interpret the resulting sequence as a base-ten integer. Let hour be that number.
   - 2. If hour is not a number in the range 0 ≤ hour ≤ 23, then fail.
   - 3. If position is beyond the end of input or if the character at position is not a U+003A COLON character, then fail. Otherwise, move position forwards one character.
@@ -354,20 +373,21 @@ Status: unreviewed
 
 ##### [2.3.5.5 Local dates and times](https://html.spec.whatwg.org/#local-dates-and-times)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DateComponents::FromParsingDateTimeLocal` and `ParseDateTimeLocal`; `ToString` gives a normalized string.
 <!-- definitions: concept-datetime-local -->
 
-- [ ] [valid local date and time string](https://html.spec.whatwg.org/#valid-local-date-and-time-string) — A string is a valid local date and time string representing a date and time if it consists of the following components in the given order:
+- [x] [valid local date and time string](https://html.spec.whatwg.org/#valid-local-date-and-time-string) — A string is a valid local date and time string representing a date and time if it consists of the following components in the given order:
   - 1. A valid date string representing the date
   - 2. A U+0054 LATIN CAPITAL LETTER T character (T) or a U+0020 SPACE character
   - 3. A valid time string representing the time
 
-- [ ] [valid normalized local date and time string](https://html.spec.whatwg.org/#valid-normalised-local-date-and-time-string) — A string is a valid normalized local date and time string representing a date and time if it consists of the following components in the given order:
+- [x] [valid normalized local date and time string](https://html.spec.whatwg.org/#valid-normalised-local-date-and-time-string) — A string is a valid normalized local date and time string representing a date and time if it consists of the following components in the given order:
   - 1. A valid date string representing the date
   - 2. A U+0054 LATIN CAPITAL LETTER T character (T)
   - 3. A valid time string representing the time, expressed as the shortest possible string for the given time (e.g. omitting the seconds component entirely if the given time is zero seconds past the minute)
 
-- [ ] [parse a local date and time string](https://html.spec.whatwg.org/#parse-a-local-date-and-time-string) — The rules to parse a local date and time string are as follows. This will return either a date and time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a local date and time string](https://html.spec.whatwg.org/#parse-a-local-date-and-time-string) — The rules to parse a local date and time string are as follows. This will return either a date and time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a date component to obtain year, month, and day. If this returns nothing, then fail.
@@ -380,19 +400,19 @@ Status: unreviewed
 
 ##### [2.3.5.6 Time zones](https://html.spec.whatwg.org/#time-zones)
 
-Status: unreviewed
+Status: n/a (only the machine-readable values of time, ins and del use it, which nothing reads; see DIFFERENCES.md)
 <!-- definitions: concept-timezone -->
 
-- [ ] [valid time-zone offset string](https://html.spec.whatwg.org/#valid-time-zone-offset-string) — A string is a valid time-zone offset string representing a time-zone offset if it consists of either:
+- [x] [valid time-zone offset string](https://html.spec.whatwg.org/#valid-time-zone-offset-string) — A string is a valid time-zone offset string representing a time-zone offset if it consists of either:
 
-- [ ] [parse a time-zone offset string](https://html.spec.whatwg.org/#parse-a-time-zone-offset-string) — The rules to parse a time-zone offset string are as follows. This will return either a time-zone offset, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a time-zone offset string](https://html.spec.whatwg.org/#parse-a-time-zone-offset-string) — The rules to parse a time-zone offset string are as follows. This will return either a time-zone offset, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a time-zone offset component to obtain timezonehours and timezoneminutes. If this returns nothing, then fail.
   - 4. If position is not beyond the end of input, then fail.
   - 5. Return the time-zone offset that is timezonehours hours and timezoneminutes minutes from UTC.
 
-- [ ] [parse a time-zone offset component](https://html.spec.whatwg.org/#parse-a-time-zone-offset-component) — The rules to parse a time-zone offset component, given an input string and a position, are as follows. This will return either time-zone hours and time-zone minutes, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a time-zone offset component](https://html.spec.whatwg.org/#parse-a-time-zone-offset-component) — The rules to parse a time-zone offset component, given an input string and a position, are as follows. This will return either time-zone hours and time-zone minutes, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. If the character at position is a U+005A LATIN CAPITAL LETTER Z character (Z): Otherwise, if the character at position is either a U+002B PLUS SIGN (+) or a U+002D HYPHEN-MINUS (-): Otherwise, fail.
     - 1a. Let timezonehours be 0.
     - 1b. Let timezoneminutes be 0.
@@ -414,16 +434,16 @@ Status: unreviewed
 
 ##### [2.3.5.7 Global dates and times](https://html.spec.whatwg.org/#global-dates-and-times)
 
-Status: unreviewed
+Status: n/a (only the machine-readable values of time, ins and del use it, which nothing reads; see DIFFERENCES.md)
 <!-- definitions: concept-datetime -->
 
-- [ ] [valid global date and time string](https://html.spec.whatwg.org/#valid-global-date-and-time-string) — A string is a valid global date and time string representing a date, time, and a time-zone offset if it consists of the following components in the given order:
+- [x] [valid global date and time string](https://html.spec.whatwg.org/#valid-global-date-and-time-string) — A string is a valid global date and time string representing a date, time, and a time-zone offset if it consists of the following components in the given order:
   - 1. A valid date string representing the date
   - 2. A U+0054 LATIN CAPITAL LETTER T character (T) or a U+0020 SPACE character
   - 3. A valid time string representing the time
   - 4. A valid time-zone offset string representing the time-zone offset
 
-- [ ] [parse a global date and time string](https://html.spec.whatwg.org/#parse-a-global-date-and-time-string) — The rules to parse a global date and time string are as follows. This will return either a time in UTC, with associated time-zone offset information for roundtripping or display purposes, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and…
+- [x] [parse a global date and time string](https://html.spec.whatwg.org/#parse-a-global-date-and-time-string) — The rules to parse a global date and time string are as follows. This will return either a time in UTC, with associated time-zone offset information for roundtripping or display purposes, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and…
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Parse a date component to obtain year, month, and day. If this returns nothing, then fail.
@@ -438,18 +458,19 @@ Status: unreviewed
 
 ##### [2.3.5.8 Weeks](https://html.spec.whatwg.org/#weeks)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `DateComponents::FromParsingWeek` and `ParseWeek`; the week number of the last day is `MaxWeekNumberInYear`.
 <!-- definitions: concept-week -->
 
-- [ ] [week number of the last day](https://html.spec.whatwg.org/#week-number-of-the-last-day) — The week number of the last day of a week-year with 53 weeks is 53; the week number of the last day of a week-year with 52 weeks is 52.
+- [x] [week number of the last day](https://html.spec.whatwg.org/#week-number-of-the-last-day) — The week number of the last day of a week-year with 53 weeks is 53; the week number of the last day of a week-year with 52 weeks is 52.
 
-- [ ] [valid week string](https://html.spec.whatwg.org/#valid-week-string) — A string is a valid week string representing a week-year year and week week if it consists of the following components in the given order:
+- [x] [valid week string](https://html.spec.whatwg.org/#valid-week-string) — A string is a valid week string representing a week-year year and week week if it consists of the following components in the given order:
   - 1. Four or more ASCII digits, representing year, where year > 0
   - 2. A U+002D HYPHEN-MINUS character (-)
   - 3. A U+0057 LATIN CAPITAL LETTER W character (W)
   - 4. Two ASCII digits, representing the week week, in the range 1 ≤ week ≤ maxweek, where maxweek is the week number of the last day of week-year year
 
-- [ ] [parse a week string](https://html.spec.whatwg.org/#parse-a-week-string) — The rules to parse a week string are as follows. This will return either a week-year number and week number, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a week string](https://html.spec.whatwg.org/#parse-a-week-string) — The rules to parse a week string are as follows. This will return either a week-year number and week number, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Collect a sequence of code points that are ASCII digits from input given position. If the collected sequence is not at least four characters long, then fail. Otherwise, interpret the resulting sequence as a base-ten integer. Let year be that number.
@@ -464,12 +485,12 @@ Status: unreviewed
 
 ##### [2.3.5.9 Durations](https://html.spec.whatwg.org/#durations)
 
-Status: unreviewed
+Status: n/a (only the machine-readable values of time, ins and del use it, which nothing reads; see DIFFERENCES.md)
 <!-- definitions: concept-duration duration-time-component-scale -->
 
-- [ ] [valid duration string](https://html.spec.whatwg.org/#valid-duration-string) — A string is a valid duration string representing a duration t if it consists of either of the following:
+- [x] [valid duration string](https://html.spec.whatwg.org/#valid-duration-string) — A string is a valid duration string representing a duration t if it consists of either of the following:
 
-- [ ] [duration time component](https://html.spec.whatwg.org/#duration-time-component) — A duration time component is a string consisting of the following components:
+- [x] [duration time component](https://html.spec.whatwg.org/#duration-time-component) — A duration time component is a string consisting of the following components:
   - 1. Zero or more ASCII whitespace.
   - 2. One or more ASCII digits, representing a number of time units, scaled by the duration time component scale specified (see below) to represent a number of seconds.
   - 3. If the duration time component scale specified is 1 (i.e. the units are seconds), then, optionally, a U+002E FULL STOP character (.) followed by one, two, or three ASCII digits, representing a fraction of a second.
@@ -477,7 +498,7 @@ Status: unreviewed
   - 5. One of the following characters, representing the duration time component scale of the time unit used in the numeric part of the duration time component: U+0057 LATIN CAPITAL LETTER W characterU+0077 LATIN SMALL LETTER W characterWeeks. The scale is 604800.U+0044 LATIN CAPITAL LETTER D characterU+0064 LATIN SMALL LETTER D characterDays. The scale is 86400.U+0048 LATIN CAPITAL LETTER H characterU+…
   - 6. Zero or more ASCII whitespace.
 
-- [ ] [parse a duration string](https://html.spec.whatwg.org/#parse-a-duration-string) — The rules to parse a duration string are as follows. This will return either a duration or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a duration string](https://html.spec.whatwg.org/#parse-a-duration-string) — The rules to parse a duration string are as follows. This will return either a duration or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Let months, seconds, and component count all be zero.
@@ -523,11 +544,11 @@ Status: unreviewed
 
 ##### [2.3.5.10 Vaguer moments in time](https://html.spec.whatwg.org/#vaguer-moments-in-time)
 
-Status: unreviewed
+Status: n/a (only the machine-readable values of time, ins and del use it, which nothing reads; see DIFFERENCES.md)
 
-- [ ] [valid date string with optional time](https://html.spec.whatwg.org/#valid-date-string-with-optional-time) — A string is a valid date string with optional time if it is also one of the following:
+- [x] [valid date string with optional time](https://html.spec.whatwg.org/#valid-date-string-with-optional-time) — A string is a valid date string with optional time if it is also one of the following:
 
-- [ ] [parse a date or time string](https://html.spec.whatwg.org/#parse-a-date-or-time-string) — The rules to parse a date or time string are as follows. The algorithm will return either a date, a time, a global date and time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
+- [x] [parse a date or time string](https://html.spec.whatwg.org/#parse-a-date-or-time-string) — The rules to parse a date or time string are as follows. The algorithm will return either a date, a time, a global date and time, or nothing. If at any point the algorithm says that it "fails", this means that it is aborted at that point and returns nothing.
   - 1. Let input be the string being parsed.
   - 2. Let position be a pointer into input, initially pointing at the start of the string.
   - 3. Set start position to the same position as position.
@@ -542,9 +563,10 @@ Status: unreviewed
 
 #### [2.3.6 Legacy colors](https://html.spec.whatwg.org/#colours)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::ParseLegacyColorValue`, which keeps 128 code points after a `#` (DIFFERENCES.md).
 
-- [ ] [rules for parsing a legacy color value](https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value) — Some obsolete legacy attributes parse colors using the rules for parsing a legacy color value, given a string input. They will return either a CSS color or failure.
+- [x] [rules for parsing a legacy color value](https://html.spec.whatwg.org/#rules-for-parsing-a-legacy-colour-value) — Some obsolete legacy attributes parse colors using the rules for parsing a legacy color value, given a string input. They will return either a CSS color or failure.
   - 1. If input is the empty string, then return failure.
   - 2. Strip leading and trailing ASCII whitespace from input.
   - 3. If input is an ASCII case-insensitive match for "transparent", then return failure.
@@ -572,42 +594,48 @@ Status: unreviewed
 
 #### [2.3.7 Space-separated tokens](https://html.spec.whatwg.org/#space-separated-tokens)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Split with Infra's `SplitOnWhitespace`; ordered sets of unique tokens are `DOMTokenList`'s (DOM 7.1). Otherwise author conformance.
 
-- [ ] [set of space-separated tokens](https://html.spec.whatwg.org/#set-of-space-separated-tokens) — A set of space-separated tokens is a string containing zero or more words (known as tokens) separated by one or more ASCII whitespace, where words consist of any string of one or more characters, none of which are ASCII whitespace.
+- [x] [set of space-separated tokens](https://html.spec.whatwg.org/#set-of-space-separated-tokens) — A set of space-separated tokens is a string containing zero or more words (known as tokens) separated by one or more ASCII whitespace, where words consist of any string of one or more characters, none of which are ASCII whitespace.
 
-- [ ] [unordered set of unique space-separated tokens](https://html.spec.whatwg.org/#unordered-set-of-unique-space-separated-tokens) — An unordered set of unique space-separated tokens is a set of space-separated tokens where none of the tokens are duplicated.
+- [x] [unordered set of unique space-separated tokens](https://html.spec.whatwg.org/#unordered-set-of-unique-space-separated-tokens) — An unordered set of unique space-separated tokens is a set of space-separated tokens where none of the tokens are duplicated.
 
-- [ ] [ordered set of unique space-separated tokens](https://html.spec.whatwg.org/#ordered-set-of-unique-space-separated-tokens) — An ordered set of unique space-separated tokens is a set of space-separated tokens where none of the tokens are duplicated but where the order of the tokens is meaningful.
+- [x] [ordered set of unique space-separated tokens](https://html.spec.whatwg.org/#ordered-set-of-unique-space-separated-tokens) — An ordered set of unique space-separated tokens is a set of space-separated tokens where none of the tokens are duplicated but where the order of the tokens is meaningful.
 
 #### [2.3.8 Comma-separated tokens](https://html.spec.whatwg.org/#comma-separated-tokens)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Split with Infra's strictly split where an attribute takes them (e-mail addresses). Otherwise author conformance.
 
-- [ ] [set of comma-separated tokens](https://html.spec.whatwg.org/#set-of-comma-separated-tokens) — A set of comma-separated tokens is a string containing zero or more tokens each separated from the next by a single U+002C COMMA character (,), where tokens consist of any string of zero or more characters, neither beginning nor ending with ASCII whitespace, nor containing any U+002C COMMA characters (,), and optionally surrounded by ASCII whitespace.
+- [x] [set of comma-separated tokens](https://html.spec.whatwg.org/#set-of-comma-separated-tokens) — A set of comma-separated tokens is a string containing zero or more tokens each separated from the next by a single U+002C COMMA character (,), where tokens consist of any string of zero or more characters, neither beginning nor ending with ASCII whitespace, nor containing any U+002C COMMA characters (,), and optionally surrounded by ASCII whitespace.
 
 #### [2.3.9 References](https://html.spec.whatwg.org/#syntax-references)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLImageElement::AssociatedMapElement`, for `usemap`, the only hash-name reference. Fixed: `usemap=#` found a map with an empty `id` or `name`.
 
-- [ ] [valid hash-name reference](https://html.spec.whatwg.org/#valid-hash-name-reference) — A valid hash-name reference to an element of type type is a string consisting of a U+0023 NUMBER SIGN character (#) followed by a string which exactly matches the value of the name attribute of an element with type type in the same tree.
+- [x] [valid hash-name reference](https://html.spec.whatwg.org/#valid-hash-name-reference) — A valid hash-name reference to an element of type type is a string consisting of a U+0023 NUMBER SIGN character (#) followed by a string which exactly matches the value of the name attribute of an element with type type in the same tree.
+  > n/a: author conformance.
 
-- [ ] [rules for parsing a hash-name reference](https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference) — The rules for parsing a hash-name reference to an element of type type, given a context node scope, are as follows:
+- [x] [rules for parsing a hash-name reference](https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference) — The rules for parsing a hash-name reference to an element of type type, given a context node scope, are as follows:
   - 1. If the string being parsed does not contain a U+0023 NUMBER SIGN character, or if the first such character in the string is the last character in the string, then return null.
   - 2. Let s be the string from the character immediately after the first U+0023 NUMBER SIGN character in the string being parsed up to the end of that string.
   - 3. Return the first element of type type in scope's tree, in tree order, that has an id or name attribute whose value is s, or null if there is no such element.
 
 #### [2.3.10 Media queries](https://html.spec.whatwg.org/#mq)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Media query lists are parsed by `css::mq::MediaQueryParser` and evaluated by `MediaQueryEvaluator`; an empty or all-whitespace one parses to no queries, which match (`HTMLLinkElement::MediaAttributeMatches`, `HTMLSourceElement::ParsedMediaAttribute`).
 
-- [ ] [valid media query list](https://html.spec.whatwg.org/#valid-media-query-list) — A string is a valid media query list if it matches the <media-query-list> production of Media Queries. [MQ]
+- [x] [valid media query list](https://html.spec.whatwg.org/#valid-media-query-list) — A string is a valid media query list if it matches the <media-query-list> production of Media Queries. [MQ]
+  > n/a: author conformance.
 
-- [ ] [matches the environment](https://html.spec.whatwg.org/#matches-the-environment) — A string matches the environment of the user if it is the empty string, a string consisting of only ASCII whitespace, or is a media query list that matches the user's environment according to the definitions given in Media Queries. [MQ]
+- [x] [matches the environment](https://html.spec.whatwg.org/#matches-the-environment) — A string matches the environment of the user if it is the empty string, a string consisting of only ASCII whitespace, or is a media query list that matches the user's environment according to the definitions given in Media Queries. [MQ]
 
 #### [2.3.11 Unique internal values](https://html.spec.whatwg.org/#unique-values)
 
-Status: unreviewed
+Status: n/a (Booey gives timers, document states and navigables their own identifiers, reviewed with them)
 <!-- definitions: unique-internal-value -->
 
-- [ ] [new unique internal value](https://html.spec.whatwg.org/#new-unique-internal-value) — To create a new unique internal value, return a unique internal value that has never previously been returned by this algorithm.
+- [x] [new unique internal value](https://html.spec.whatwg.org/#new-unique-internal-value) — To create a new unique internal value, return a unique internal value that has never previously been returned by this algorithm.

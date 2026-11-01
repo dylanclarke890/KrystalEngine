@@ -14,4 +14,4 @@ namespace krys::boo::html
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::MicroParserError, 3uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::MicroParserError, 5uz);

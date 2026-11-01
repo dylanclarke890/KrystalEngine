@@ -130,19 +130,31 @@ namespace krys::boo::html
 
   HTMLMapElement *HTMLImageElement::AssociatedMapElement() const noexcept
   {
+    // The rules for parsing a hash-name reference to a map element, given the image:
     // https://html.spec.whatwg.org/#rules-for-parsing-a-hash-name-reference
     auto usemap = GetAttribute(u8"usemap");
     if (!usemap)
     {
       return nullptr;
     }
-    auto numberSign = dom::DOMStringView(*usemap).find(u8'#');
-    if (numberSign == dom::DOMStringView::npos)
+
+    // 1. If the string being parsed does not contain a U+0023 NUMBER SIGN character, or if the first such
+    //    character in the string is the last character in the string, then return null.
+    dom::DOMStringView value = *usemap;
+    auto numberSign = value.find(u8'#');
+    if (numberSign == dom::DOMStringView::npos || numberSign == value.size() - 1)
     {
       return nullptr;
     }
-    auto name = dom::DOMStringView(*usemap).substr(numberSign + 1);
 
+    // 2. Let s be the string from the character immediately after the first U+0023 NUMBER SIGN character in
+    // the
+    //    string being parsed up to the end of that string.
+    auto name = value.substr(numberSign + 1);
+
+    // 3. Return the first element of type type in scope's tree, in tree order, that has an id or name
+    // attribute
+    //    whose value is s, or null if there is no such element.
     auto &root = dom::TreeQueries::Root(const_cast<HTMLImageElement &>(*this));
     for (auto &node : dom::DescendantRange(root))
     {

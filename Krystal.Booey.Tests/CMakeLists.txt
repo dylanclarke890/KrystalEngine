@@ -666,6 +666,7 @@ target_sources(Krystal.Booey.Tests
 
 		# HTML
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
+		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/Attributes/ReflectURL.cpp
 		tests/HTML/BaseDateAndTimeInputType.cpp
@@ -680,6 +681,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/HTMLButtonElement.cpp
 		tests/HTML/HTMLDetailsElement.cpp
 		tests/HTML/HTMLDialogElement.cpp
+		tests/HTML/HTMLElement.cpp
 		tests/HTML/HTMLFormElement.cpp
 		tests/HTML/HTMLInputElement.cpp
 		tests/HTML/FileInputType.cpp

@@ -738,7 +738,9 @@ namespace krys::boo::html
 
 #pragma region ReflectBool
 
-    /// @brief Helper for getting reflected content attributes with 'bool' type.
+    /// @brief Helper for getting reflected content attributes with 'bool' type: a boolean attribute is true
+    /// when it's present, whatever its value.
+    /// @see https://html.spec.whatwg.org/#boolean-attribute
     template <ReflectTarget Target>
     KRYS_NODISCARD static bool ReflectBool(const Target &target, dom::DOMStringAtom name) noexcept
     {

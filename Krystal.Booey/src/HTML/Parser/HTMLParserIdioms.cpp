@@ -137,13 +137,7 @@ namespace krys::boo::html
   double ParseHTMLFloatingPointNumberValue(dom::DOMStringView input, double fallbackValue) noexcept
   {
     auto result = Numbers::ParseFloatingPoint(input);
-    if (!result.Success())
-    {
-      return fallbackValue;
-    }
-
-    // The following expression converts -0 to +0.
-    return result.Value ? result.Value : 0;
+    return result.Success() ? result.Value : fallbackValue;
   }
 
   double ParseToDoubleForNumberType(dom::DOMStringView string, double fallbackValue) noexcept

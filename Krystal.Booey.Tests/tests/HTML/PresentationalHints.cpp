@@ -42,30 +42,6 @@ namespace krys::boo::html::tests
         return Text(Element(krys::move(markup), id).PresentationalHintStyle());
       }
     };
-
-    KRYS_NODISCARD Maybe<SRGBA<uint8>> Legacy(dom::DOMStringView value) noexcept
-    {
-      return HTMLElement::ParseLegacyColorValue(value);
-    }
-  }
-
-  TEST_CASE("HTMLElement::ParseLegacyColorValue", "[HTML][PresentationalHints]")
-  {
-    CHECK_FALSE(Legacy(u8""));
-    CHECK_FALSE(Legacy(u8"transparent"));
-    CHECK_FALSE(Legacy(u8" TransParent "));
-    CHECK(Legacy(u8"   ") == SRGBA<uint8> {0, 0, 0});
-    CHECK(Legacy(u8"red") == SRGBA<uint8> {255, 0, 0});
-    CHECK(Legacy(u8"#abc") == SRGBA<uint8> {0xaa, 0xbb, 0xcc});
-    CHECK(Legacy(u8"#00ff00") == SRGBA<uint8> {0, 255, 0});
-    // The legacy rules: non-hex digits become 0, components are taken from thirds of the string.
-    CHECK(Legacy(u8"chucknorris") == SRGBA<uint8> {0xc0, 0, 0});
-    CHECK(Legacy(u8"sick") == SRGBA<uint8> {0, 0xc0, 0});
-    CHECK(Legacy(u8"#1") == SRGBA<uint8> {0x01, 0, 0});
-    CHECK(Legacy(u8"#") == SRGBA<uint8> {0, 0, 0});
-    // A non-ASCII code point is one digit, or two outside the BMP.
-    CHECK(Legacy(u8"éff") == SRGBA<uint8> {0, 0x0f, 0x0f});
-    CHECK(Legacy(u8"\U0001F600ff") == SRGBA<uint8> {0, 0xff, 0});
   }
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: HTMLElement", "[HTML][PresentationalHints]")
@@ -113,8 +89,7 @@ namespace krys::boo::html::tests
     CHECK(Hints(u8"<br id=e clear>").empty());
     // white-space-collapse and text-wrap-mode serialise as the white-space shorthand.
     CHECK(Hints(u8"<pre id=e wrap></pre>") == "white-space: pre-wrap;");
-    CHECK(Hints(u8"<textarea id=e wrap=off></textarea>")
-          == "white-space: pre; overflow-wrap: normal;");
+    CHECK(Hints(u8"<textarea id=e wrap=off></textarea>") == "white-space: pre; overflow-wrap: normal;");
     CHECK(Hints(u8"<textarea id=e wrap=hard></textarea>")
           == "white-space: pre-wrap; overflow-wrap: break-word;");
     CHECK(Hints(u8"<font id=e size=1 color=red face=serif></font>")
@@ -191,13 +166,13 @@ namespace krys::boo::html::tests
           == "border-color: rgb(0, 255, 0);");
   }
 
-  TEST_CASE_METHOD(HintFixture, "Presentational hints: tables", "[HTML][PresentationalHints]")
+  TEST_CASE_METHOD(HintFixture, "Presentational hints: tables",
+                   "[HTML][PresentationalHints][html:rules-for-parsing-non-zero-dimension-values]")
   {
     CHECK(Hints(u8"<table id=e width=0 height=10 cellspacing=2 bgcolor=#fff align=center></table>")
           == "height: 10px; border-spacing: 2px; background-color: rgb(255, 255, 255); margin-inline: auto;");
     CHECK(Hints(u8"<table id=e align=right valign=top></table>") == "float: right; vertical-align: top;");
-    CHECK(Hints(u8"<table id=e frame=hsides></table>")
-          == "border-width: thin; border-style: solid hidden;");
+    CHECK(Hints(u8"<table id=e frame=hsides></table>") == "border-width: thin; border-style: solid hidden;");
     CHECK(Hints(u8"<table id=e rules=bogus></table>").empty());
     CHECK(Hints(u8"<table id=e rules=all></table>") == "border-collapse: collapse;");
     CHECK(Hints(u8"<table id=e border></table>") == "border-width: 1px;");
@@ -217,8 +192,7 @@ namespace krys::boo::html::tests
       auto &section = Downcast<dom::StyledElement>(*document->GetElementById(u8"tb"));
       auto &colgroup = Downcast<dom::StyledElement>(*document->GetElementById(u8"cg"));
 
-      CHECK(Text(table.AdditionalPresentationalHintStyle())
-            == "border-style: outset;");
+      CHECK(Text(table.AdditionalPresentationalHintStyle()) == "border-style: outset;");
       CHECK(Text(cell.AdditionalPresentationalHintStyle())
             == "border-width: 1px; border-style: inset; border-color: inherit; padding: 3px;");
       CHECK_FALSE(section.AdditionalPresentationalHintStyle());
@@ -247,9 +221,8 @@ namespace krys::boo::html::tests
 
   TEST_CASE_METHOD(HintFixture, "Presentational hints: <body>", "[HTML][PresentationalHints]")
   {
-    CHECK(
-      Hints(u8"<body id=e bgcolor=black text=white marginwidth=4 topmargin=2>")
-      == "background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); margin: 2px 4px;");
+    CHECK(Hints(u8"<body id=e bgcolor=black text=white marginwidth=4 topmargin=2>")
+          == "background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); margin: 2px 4px;");
     CHECK(Hints(u8"<body id=e background=' a.png '>") == "background-image: url(\"a.png\");");
 
     SECTION("Link colours")

@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
 #include "Krystal.Booey/Graphics/BitmapImage.hpp"
 #include "Krystal.Booey/Graphics/DisplayLists/DisplayListRecorderImpl.hpp"
+#include "Krystal.Booey/HTML/HTMLMapElement.hpp"
 #include "Krystal.Booey/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.Booey/Page/LocalFrame.hpp"
 #include "Krystal.Booey/Page/LocalFrameView.hpp"
@@ -41,6 +42,19 @@ namespace krys::boo::tests
       }
       return count;
     }
+  }
+
+  TEST_CASE("HTMLImageElement::AssociatedMapElement: the first map whose id or name follows the first #",
+            "[HTML][HTMLImageElement][html:rules-for-parsing-a-hash-name-reference]")
+  {
+    ImageFixture fixture(u8"<img id=empty usemap=#><img id=hashes usemap='a#b#c'><img id=none usemap=b>"
+                         u8"<map id=blank name=''></map><map id=byname name='b#c'></map>");
+    // Nothing after the #.
+    CHECK(fixture.Image(u8"empty").AssociatedMapElement() == nullptr);
+    // Everything after the first #.
+    CHECK(fixture.Image(u8"hashes").AssociatedMapElement() == &fixture.ById(u8"byname"));
+    // No #.
+    CHECK(fixture.Image(u8"none").AssociatedMapElement() == nullptr);
   }
 
   TEST_CASE("HTMLImageElement: an image loads its source, fires load and paints", "[HTML][HTMLImageElement]")

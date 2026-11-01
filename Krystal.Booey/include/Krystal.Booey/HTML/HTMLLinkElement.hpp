@@ -233,6 +233,8 @@ namespace krys::boo::html
     void SetDisabledState(bool disabled) noexcept;
     void ParseRel(dom::DOMStringView value) noexcept;
     KRYS_NODISCARD url::URL NonEmptyHrefURL() const noexcept;
+    /// @brief Whether the `media` attribute matches the environment (an empty list does).
+    /// @see https://html.spec.whatwg.org/#matches-the-environment
     KRYS_NODISCARD bool MediaAttributeMatches() const noexcept;
     void InitializeStyleSheet(Ref<css::StyleSheetContents> &&styleSheet,
                               const css::ParserContext &context) noexcept;

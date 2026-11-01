@@ -119,10 +119,12 @@ namespace krys::boo::html
   template <typename Traits>
   concept HasEmptyValueDefault = requires { Traits::EmptyValueDefault; };
 
+  /// @brief Whether an attribute can be in no state: when it's missing without a missing value default, or
+  /// invalid without an invalid value default.
   template <typename Traits>
-  concept CanReturnNullResolvedState =
-    !HasMissingValueDefault<Traits> || (!HasInvalidValueDefault<Traits> && !HasEmptyValueDefault<Traits>);
+  concept CanReturnNullResolvedState = !HasMissingValueDefault<Traits> || !HasInvalidValueDefault<Traits>;
 
+  /// @see https://html.spec.whatwg.org/#enumerated-attribute
   template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement>
   class EnumeratedAttribute
   {
@@ -180,18 +182,24 @@ namespace krys::boo::html
       }
     }
 
+    /// @brief The state of an attribute whose value is @p contentAttributeValue (null when it's not
+    /// specified); no state is null.
+    /// @see https://html.spec.whatwg.org/#empty-value-default
     KRYS_NODISCARD static conditional_t<CanReturnNullResolvedState<Traits>, Maybe<AttributeState>,
                                         AttributeState>
       ResolveState(const Maybe<dom::DOMString> &contentAttributeValue) noexcept
     {
+      // 1. If the attribute is not specified:
       if (contentAttributeValue == null)
       {
+        // 1a. If the attribute has a missing value default state defined, then return that missing value
+        //     default state.
         if constexpr (HasMissingValueDefault<Traits>)
         {
           return Traits::MissingValueDefault;
         }
-
-        if constexpr (CanReturnNullResolvedState<Traits>)
+        // 1b. Otherwise, return no state.
+        else
         {
           return null;
         }
@@ -199,17 +207,20 @@ namespace krys::boo::html
 
       auto &value = *contentAttributeValue;
 
-      auto keywordMappings = Traits::StateMappings;
-
+      // 2. If the attribute's value is an ASCII case-insensitive match for one of the keywords defined for
+      // the
+      //    attribute, then return the state represented by that keyword.
+      auto &keywordMappings = Traits::StateMappings;
       auto it = std::find_if(
         keywordMappings.begin(), keywordMappings.end(), [&](auto &mapping)
         { return infra::StringAlgorithms::ASCIICaseInsensitiveMatch(value, mapping.Keyword.View()); });
-
       if (it != keywordMappings.end())
       {
         return it->State;
       }
 
+      // 3. If the attribute has an empty value default state defined and the attribute's value is the empty
+      //    string, then return that empty value default state.
       if constexpr (HasEmptyValueDefault<Traits>)
       {
         if (value.empty())
@@ -218,16 +229,26 @@ namespace krys::boo::html
         }
       }
 
+      // 4. If the attribute has an invalid value default state defined, then return that invalid value
+      // default
+      //    state.
       if constexpr (HasInvalidValueDefault<Traits>)
       {
         return Traits::InvalidValueDefault;
       }
-      else if constexpr (CanReturnNullResolvedState<Traits>)
+      // 5. Return no state.
+      else
       {
         return null;
       }
     }
 
+    /// @brief The canonical keyword for @p state: the attribute's `CanonicalMappings` when it gives them (the
+    /// keywords the specification gives explicitly), otherwise the first keyword mapping to @p state.
+    /// @note The first keyword is the canonical one when it's the only keyword for the state, the only
+    /// conforming one, or the conforming one that isn't empty (where an empty keyword is an empty value
+    /// default here), so `StateMappings` lists those first.
+    /// @see https://html.spec.whatwg.org/#canonical-keyword
     KRYS_NODISCARD static dom::DOMStringAtom ResolveCanonicalKeywordForState(AttributeState state) noexcept
     {
       if constexpr (HasCanonicalMappings<Traits>)
@@ -381,7 +402,7 @@ namespace krys::boo::html
   template <>
   struct EnumeratedAttributeTraits<"crossorigin", HTMLElement>
   {
-    static inline KeywordStateMappingArray<3> StateMappings = {
+    static inline KeywordStateMappingArray<2> StateMappings = {
       KeywordStateMapping {u8"anonymous", AttributeState::Anonymous},
       KeywordStateMapping {u8"use-credentials", AttributeState::UseCredentials},
     };
