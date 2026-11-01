@@ -13,21 +13,24 @@ namespace krys::boo::html
 
   dom::USVString HTMLBaseElement::Href() const noexcept
   {
-    // The href IDL attribute, on getting, must return the result of running the following algorithm:
-    // Let document be element's node document.
-    // Let url be the value of the href attribute of this element, if it has one, and the empty string
-    // otherwise.
-    // Let urlRecord be the result of parsing url with document's fallback base URL, and document's character
-    // encoding. (Thus, the base element isn't affected by other base elements or itself.)
-    // If urlRecord is failure, return url.
-    // Return the serialization of urlRecord.
+    // 1. Let document be element's node document.
     auto &document = NodeDocument();
+
+    // 2. Let url be the value of the href attribute of this element, if it has one, and the empty string
+    //    otherwise.
     auto url = GetAttribute(u8"href").value_or(dom::DOMString());
+
+    // 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's
+    //    character encoding. (Thus, the base element isn't affected by other base elements or itself.)
     auto urlRecord = document.CompleteURL(url, document.FallbackBaseURL());
+
+    // 4. If urlRecord is failure, return url.
     if (!urlRecord.IsValid())
     {
       return dom::USVString(krys::move(url));
     }
+
+    // 5. Return the serialization of urlRecord.
     return dom::USVString(urlRecord.String());
   }
 

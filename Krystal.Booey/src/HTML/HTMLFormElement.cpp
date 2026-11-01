@@ -880,6 +880,15 @@ namespace krys::boo::html
   dom::DOMString HTMLFormElement::EffectiveTarget(const dom::Event *event,
                                                   HTMLFormControlElement *overrideSubmitter) const noexcept
   {
+    // The submitter's formtarget is the target given to get an element's target:
+    // https://html.spec.whatwg.org/#get-an-element's-target
+    // 1. If target is null:
+    // 1a. If element has a target attribute, then set target to that attribute's value.
+    // 1b. Otherwise, if element's node document contains a base element with a target attribute, set target
+    //     to the value of the target attribute of the first such base element.
+    // 2. If target is not null, and contains an ASCII tab or newline and a U+003C (<), then set target to
+    //    "_blank".
+    // 3. Return target.
     if (auto *submitter = overrideSubmitter ? overrideSubmitter : FindSubmitter(event))
     {
       if (auto targetValue = submitter->GetAttribute(u8"formtarget"))
@@ -893,7 +902,7 @@ namespace krys::boo::html
       return MakeTargetBlankIfHasDanglingMarkup(*targetValue);
     }
 
-    return NodeDocument().BaseTarget();
+    return MakeTargetBlankIfHasDanglingMarkup(NodeDocument().BaseTarget());
   }
 
   bool HTMLFormElement::WasUserSubmitted() const noexcept

@@ -122,7 +122,8 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Document base URL from base elements",
-            "[DOM][Document][dom:get-the-base-url][html:document-base-url][html:respond-to-base-url-changes]")
+            "[DOM][Document][dom:get-the-base-url][html:document-base-url][html:respond-to-base-url-changes]["
+            "html:set-the-frozen-base-url][html:frozen-base-url]")
   {
     SECTION("The first base element with an href sets the base URL, relative to the document's URL")
     {

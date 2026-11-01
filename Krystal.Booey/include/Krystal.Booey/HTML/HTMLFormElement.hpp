@@ -175,7 +175,8 @@ namespace krys::boo::html
     }
 
     /// @brief The browsing context name the form submits to: the submitter's `formtarget`, the form's
-    /// `target`, or the document's base target.
+    /// `target`, or the document's base target, with `_blank` for a target with dangling markup.
+    /// @see https://html.spec.whatwg.org/#get-an-element's-target
     KRYS_NODISCARD dom::DOMString EffectiveTarget(const dom::Event *event,
                                                   HTMLFormControlElement *submitter) const noexcept;
 

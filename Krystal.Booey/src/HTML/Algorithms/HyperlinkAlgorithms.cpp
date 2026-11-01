@@ -80,10 +80,17 @@ namespace krys::boo::html
 
   dom::DOMStringAtom HyperlinkAlgorithms::EffectiveTarget(const HTMLElement &element) noexcept
   {
+    // 1. If target is null:
+    // 1a. If element has a target attribute, then set target to that attribute's value.
+    // 1b. Otherwise, if element's node document contains a base element with a target attribute, set target
+    //     to the value of the target attribute of the first such base element.
     auto target = element.GetAttribute(u8"target");
-    auto effectiveTarget = target && !target->empty()
-                             ? dom::DOMStringAtom(*target)
-                             : dom::DOMStringAtom(element.NodeDocument().BaseTarget());
+    auto effectiveTarget =
+      target ? dom::DOMStringAtom(*target) : dom::DOMStringAtom(element.NodeDocument().BaseTarget());
+
+    // 2. If target is not null, and contains an ASCII tab or newline and a U+003C (<), then set target to
+    //    "_blank".
+    // 3. Return target.
     return MakeTargetBlankIfHasDanglingMarkup(effectiveTarget);
   }
 

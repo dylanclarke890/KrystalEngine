@@ -1325,15 +1325,23 @@ namespace krys::boo::dom
 
     _baseTarget = target.value_or(DOMString());
 
+    // The frozen base URL of the first base element with an href; only that one's matters.
     url::URL baseElementURL;
     if (href.has_value())
     {
+      // To set the frozen base URL for an element element:
       // https://html.spec.whatwg.org/#set-the-frozen-base-url
-      // 3. If urlRecord is failure, its scheme is "data" or "javascript", or "Is base allowed for Document?"
-      // returns "Blocked", then set element's frozen base URL to document's fallback base URL; otherwise to
-      // urlRecord.
-      // SPEC-VIOLATION(CSP): there's no content security policy, so every base is allowed.
+      // 1. Let document be element's node document.
+      // 2. Let urlRecord be the result of parsing the value of element's href content attribute with
+      //    document's fallback base URL, and document's character encoding. (Thus, the base element isn't
+      //    affected by itself.)
       baseElementURL = CompleteURL(*href, FallbackBaseURL());
+
+      // 3. If any of the following are true: urlRecord is failure; urlRecord's scheme is "data" or
+      //    "javascript"; or running Is base allowed for Document? on urlRecord and document returns
+      //    "Blocked", then set element's frozen base URL to document's fallback base URL and return.
+      // SPEC-VIOLATION(CSP): there's no content security policy, so every base is allowed.
+      // 4. Set element's frozen base URL to urlRecord.
       if (!baseElementURL.IsValid() || baseElementURL.ProtocolIsData()
           || baseElementURL.ProtocolIsJavaScript())
       {
@@ -1346,6 +1354,8 @@ namespace krys::boo::dom
       return;
     }
 
+    // 5. Respond to base URL changes given document.
+    // (Also when step 3 returns, which only matters while the fallback base URL is the base URL already.)
     _baseElementURL = krys::move(baseElementURL);
     UpdateBaseURL();
   }

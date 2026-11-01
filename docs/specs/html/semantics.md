@@ -12,46 +12,53 @@ Status: unreviewed
 
 ### [4.1 The document element](https://html.spec.whatwg.org/#the-root-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.1.1 The html element](https://html.spec.whatwg.org/#the-html-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLHtmlElement`; the rest is author conformance.
 
 ### [4.2 Document metadata](https://html.spec.whatwg.org/#document-metadata)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.2.1 The head element](https://html.spec.whatwg.org/#the-head-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLHeadElement`; the rest is author conformance.
 
 #### [4.2.2 The title element](https://html.spec.whatwg.org/#the-title-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTitleElement::Text`. The document's title is `Document::Title` (3.1.7).
 
-- [ ] [HTMLTitleElement.text](https://html.spec.whatwg.org/#dom-title-text) — The text attribute's getter must return this title element's child text content.
+- [x] [HTMLTitleElement.text](https://html.spec.whatwg.org/#dom-title-text) — The text attribute's getter must return this title element's child text content.
 
 #### [4.2.3 The base element](https://html.spec.whatwg.org/#the-base-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Document::ProcessBaseElement` (the frozen base URL of the first base element with an href, and the first base target), `HTMLBaseElement::Href`; getting an element's target is `HyperlinkAlgorithms::EffectiveTarget` and `HTMLFormElement::EffectiveTarget`.
+> Fixed: an empty `target` fell back to the base target, and a form's base target wasn't checked for dangling markup (DIFFERENCES.md, from upstream).
 <!-- definitions: attr-base-href attr-base-target frozen-base-url -->
 
-- [ ] [get an element's target](https://html.spec.whatwg.org/#get-an-element's-target) — To get an element's target, given an a, area, or form element element, and an optional string-or-null target (default null), run these steps:
+- [x] [get an element's target](https://html.spec.whatwg.org/#get-an-element's-target) — To get an element's target, given an a, area, or form element element, and an optional string-or-null target (default null), run these steps:
   - 1. If target is null:
     - 1a. If element has a target attribute, then set target to that attribute's value.
     - 1b. Otherwise, if element's node document contains a base element with a target attribute, set target to the value of the target attribute of the first such base element.
   - 2. If target is not null, and contains an ASCII tab or newline and a U+003C (<), then set target to "_blank".
   - 3. Return target.
 
-- [ ] [set the frozen base URL](https://html.spec.whatwg.org/#set-the-frozen-base-url) — To set the frozen base URL for an element element:
+- [x] [set the frozen base URL](https://html.spec.whatwg.org/#set-the-frozen-base-url) — To set the frozen base URL for an element element:
   - 1. Let document be element's node document.
   - 2. Let urlRecord be the result of parsing the value of element's href content attribute with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by itself.)
   - 3. If any of the following are true: urlRecord is failure;; urlRecord's scheme is "data" or "javascript"; or; running Is base allowed for Document? on urlRecord and document returns "Blocked", then set element's frozen base URL to document's fallback base URL and return.
   - 4. Set element's frozen base URL to urlRecord.
   - 5. Respond to base URL changes given document.
 
-- [ ] [HTMLBaseElement.href](https://html.spec.whatwg.org/#dom-base-href) — The href IDL attribute, on getting, must return the result of running the following algorithm:
+- [x] [HTMLBaseElement.href](https://html.spec.whatwg.org/#dom-base-href) — The href IDL attribute, on getting, must return the result of running the following algorithm:
   - 1. Let document be element's node document.
   - 2. Let url be the value of the href attribute of this element, if it has one, and the empty string otherwise.
   - 3. Let urlRecord be the result of parsing url with document's fallback base URL, and document's character encoding. (Thus, the base element isn't affected by other base elements or itself.)

@@ -667,6 +667,7 @@ target_sources(Krystal.Booey.Tests
 
 		# HTML
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
+		tests/HTML/Algorithms/HyperlinkAlgorithms.cpp
 		tests/HTML/Algorithms/RenderBlocking.cpp
 		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/ReflectAttribute.cpp
@@ -679,6 +680,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/EventLoop.cpp
 		tests/HTML/FormListedElement.cpp
 		tests/HTML/HTMLAnchorElement.cpp
+		tests/HTML/HTMLBaseElement.cpp
 		tests/HTML/Sanitizer.cpp
 		tests/HTML/HTMLButtonElement.cpp
 		tests/HTML/HTMLDetailsElement.cpp

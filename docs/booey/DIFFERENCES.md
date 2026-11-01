@@ -101,6 +101,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 
 ### From WebKit
 
+- An element's target is its `target` attribute even when it's empty; upstream's links fall back to the base element's target for an empty one. A form's target from the base element is checked for dangling markup (a tab or newline and a `<` make it `_blank`) like its own; upstream returned it as it is.
 - Focus on click follows the specification (focusable areas that are click focusable, `FocusAlgorithms::ClickFocusableInclusiveAncestor`), not upstream's `isMouseFocusable`.
 - Selects always use the current specification's parsing (customizable selects): list items are found among all of a select's descendants. Upstream does this only with the `HTMLEnhancedSelectParsingEnabled` setting, and has no `<selectedcontent>`. An option is cloned into `<selectedcontent>` only when the parser pops it (`HTMLElementStack::Pop`). An inserted selected option is selected from its own insertion steps (`OptionInserted`, `OptGroupInserted`) wherever it is in the select; upstream works it out from the select's children change.
 - The date and time fields' user agent shadow root delegates focus, so focusing the input focuses its first field and sequential navigation moves between the fields. `<input type=week>` has editable fields (a week field and the layout `'Week' ww, yyyy`), as Chrome does; upstream's week inputs have none.
