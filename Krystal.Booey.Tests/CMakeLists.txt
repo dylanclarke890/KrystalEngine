@@ -587,6 +587,7 @@ target_sources(Krystal.Booey.Tests
 		tests/DOM/Algorithms/EventDispatcher.cpp
 		tests/DOM/Algorithms/EventTargetAlgorithms.cpp
 		tests/DOM/Iterators/ComposedTreeIterator.cpp
+		tests/DOM/Algorithms/LiveRangeUpdater.cpp
 		tests/DOM/Algorithms/Mixins.cpp
 		tests/DOM/Algorithms/MutationAlgorithms.cpp
 		tests/DOM/Algorithms/MutationObserverAlgorithms.cpp

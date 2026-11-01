@@ -18,6 +18,7 @@ namespace krys::boo::dom
 
     static void RootChanged(Document &oldDocument, Document &newDocument, Range &range) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#live-range-pre-remove-steps
     static void PreRemove(const Node &node) noexcept;
 
     static void CharacterDataReplaced(CharacterData &characterData, size_t offset, size_t count,

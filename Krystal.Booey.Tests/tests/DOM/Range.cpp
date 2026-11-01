@@ -28,7 +28,8 @@ namespace krys::boo::dom::tests
     };
   }
 
-  TEST_CASE("Range::CommonAncestorContainer", "[HMTL][Range]")
+  TEST_CASE("Range.commonAncestorContainer: the common ancestor of its start and end nodes",
+            "[DOM][Range][dom:dom-range-commonancestorcontainer][dom:get-the-common-ancestor]")
   {
     CommonTestData data;
 
@@ -47,7 +48,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*textNode2).HasException());
   }
 
-  TEST_CASE("Range::SetStart", "[HMTL][Range]")
+  TEST_CASE("Range.setStart(): sets the start, and the end too if the start would be after it",
+            "[DOM][Range][dom:dom-range-setstart][dom:concept-range-bp-set]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -117,7 +119,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SetEnd", "[HMTL][Range]")
+  TEST_CASE("Range.setEnd(): sets the end, and the start too if the end would be before it",
+            "[DOM][Range][dom:dom-range-setend][dom:concept-range-bp-set]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -188,7 +191,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SetStartBefore", "[HMTL][Range]")
+  TEST_CASE("Range.setStartBefore(): sets the start to before the node in its parent",
+            "[DOM][Range][dom:dom-range-setstartbefore]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -282,7 +286,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SetEndBefore", "[HMTL][Range]")
+  TEST_CASE("Range.setEndBefore(): sets the end to before the node in its parent",
+            "[DOM][Range][dom:dom-range-setendbefore]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -380,7 +385,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SetStartAfter", "[HMTL][Range]")
+  TEST_CASE("Range.setStartAfter(): sets the start to after the node in its parent",
+            "[DOM][Range][dom:dom-range-setstartafter]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -476,7 +482,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SetEndAfter", "[HMTL][Range]")
+  TEST_CASE("Range.setEndAfter(): sets the end to after the node in its parent",
+            "[DOM][Range][dom:dom-range-setendafter]")
   {
     SECTION("InvalidNodeTypeError if node is a DocumentType")
     {
@@ -574,7 +581,7 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::Collapsed", "[HMTL][Range]")
+  TEST_CASE("Range.collapsed: whether its start is its end", "[DOM][Range][dom:dom-range-collapsed]")
   {
     CommonTestData data;
 
@@ -600,7 +607,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::Collapse", "[HMTL][Range]")
+  TEST_CASE("Range.collapse(): sets the end to the start, or the start to the end",
+            "[DOM][Range][dom:dom-range-collapse]")
   {
     CommonTestData data;
 
@@ -637,7 +645,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
   }
 
-  TEST_CASE("Range::SelectNode", "[HMTL][Range]")
+  TEST_CASE("Range.selectNode(): selects the node within it",
+            "[DOM][Range][dom:dom-range-selectnode][dom:concept-range-select]")
   {
     CommonTestData data;
 
@@ -676,7 +685,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SelectNodeContents", "[HMTL][Range]")
+  TEST_CASE("Range.selectNodeContents(): from the start to the end of the node",
+            "[DOM][Range][dom:dom-range-selectnodecontents]")
   {
     CommonTestData data;
 
@@ -711,7 +721,9 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::CompareBoundaryPoints", "[HMTL][Range]")
+  TEST_CASE(
+    "Range.compareBoundaryPoints(): the position of one of its boundary points relative to another range's",
+    "[DOM][Range][dom:dom-range-compareboundarypoints]")
   {
     CommonTestData data;
 
@@ -898,7 +910,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
   }
 
-  TEST_CASE("Range::DeleteContents", "[HMTL][Range]")
+  TEST_CASE("Range.deleteContents(): removes what it contains, collapsing it",
+            "[DOM][Range][dom:dom-range-deletecontents]")
   {
     CommonTestData data;
 
@@ -944,7 +957,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::ExtractContents", "[HMTL][Range]")
+  TEST_CASE("Range.extractContents(): moves what it contains into a fragment",
+            "[DOM][Range][dom:dom-range-extractcontents][dom:concept-range-extract]")
   {
     CommonTestData data;
 
@@ -1021,7 +1035,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::CloneContents", "[HMTL][Range]")
+  TEST_CASE("Range.cloneContents(): copies what it contains into a fragment",
+            "[DOM][Range][dom:dom-range-clonecontents][dom:concept-range-clone]")
   {
     CommonTestData data;
 
@@ -1095,7 +1110,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::InsertNode", "[HMTL][Range]")
+  TEST_CASE("Range.insertNode(): inserts the node at its start",
+            "[DOM][Range][dom:dom-range-insertnode][dom:concept-range-insert]")
   {
     CommonTestData data;
     auto newNode = CreateRef<TestElement>(*data.Document);
@@ -1144,7 +1160,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::SurroundContents", "[HMTL][Range]")
+  TEST_CASE("Range.surroundContents(): moves what it contains into the new parent, which it then selects",
+            "[DOM][Range][dom:dom-range-surroundcontents]")
   {
     CommonTestData data;
     auto newNode = CreateRef<TestElement>(*data.Document);
@@ -1247,7 +1264,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Range::CloneRange", "[HMTL][Range]")
+  TEST_CASE("Range.cloneRange(): a new live range with its start and end",
+            "[DOM][Range][dom:dom-range-clonerange]")
   {
     CommonTestData data;
 
@@ -1274,7 +1292,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
   }
 
-  TEST_CASE("Range::Detach", "[HMTL][Range]")
+  TEST_CASE("Range.detach(): does nothing", "[DOM][Range][dom:dom-range-detach]")
   {
     // Does nothing and is kept for legacy reasons, so just test that it doesn't throw an exception or modify
     // the range
@@ -1288,7 +1306,8 @@ namespace krys::boo::dom::tests
     REQUIRE(data.Range->EndOffset() == 0uz);
   }
 
-  TEST_CASE("Range::IsPointInRange", "[HMTL][Range]")
+  TEST_CASE("Range.isPointInRange(): whether the point is between its start and end, inclusive",
+            "[DOM][Range][dom:dom-range-ispointinrange]")
   {
     CommonTestData data;
 
@@ -1305,13 +1324,21 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->AppendChild(*child4).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child5).HasException());
 
-    SECTION("WrongDocumentError if node is from a different document")
+    SECTION("False if node is in another tree, before checking the node and offset")
     {
       auto otherDocument = CreateRef<HTMLDocument>();
       auto otherNode = CreateRef<TestElement>(*otherDocument);
       auto result = data.Range->IsPointInRange(*otherNode, 0uz);
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::WrongDocumentError);
+      REQUIRE_FALSE(result.HasException());
+      CHECK_FALSE(result.Value());
+
+      auto doctype = otherDocument->Implementation().CreateDocumentType(u8"html", u8"", u8"").ReleaseValue();
+      result = data.Range->IsPointInRange(*doctype, 0uz);
+      REQUIRE_FALSE(result.HasException());
+      CHECK_FALSE(result.Value());
+      result = data.Range->IsPointInRange(*otherNode, 99uz);
+      REQUIRE_FALSE(result.HasException());
+      CHECK_FALSE(result.Value());
     }
 
     SECTION("InvalidNodeTypeError if node is a DocumentType")
@@ -1367,7 +1394,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child5).HasException());
   }
 
-  TEST_CASE("Range::ComparePoint", "[HMTL][Range]")
+  TEST_CASE("Range.comparePoint(): whether the point is before, in or after it",
+            "[DOM][Range][dom:dom-range-comparepoint]")
   {
     CommonTestData data;
 
@@ -1447,7 +1475,8 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child5).HasException());
   }
 
-  TEST_CASE("Range::IntersectsNode", "[HMTL][Range]")
+  TEST_CASE("Range.intersectsNode(): whether any of the node is in it",
+            "[DOM][Range][dom:dom-range-intersectsnode]")
   {
     CommonTestData data;
 
@@ -1476,7 +1505,7 @@ namespace krys::boo::dom::tests
     REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
   }
 
-  TEST_CASE("Range::ToString", "[HMTL][Range]")
+  TEST_CASE("Range: its stringification is the text it contains", "[DOM][Range][dom:dom-range-stringifier]")
   {
     CommonTestData data;
 
@@ -1576,6 +1605,7 @@ namespace krys::boo::dom::tests
       REQUIRE_FALSE(data.Node->RemoveChild(*textNode).HasException());
     }
   }
+
   TEST_CASE(
     "Ranges: the introduction's example, and a live range follows mutations where a static one doesn't",
     "[DOM][Range][dom:ranges][dom:introduction-to-dom-ranges]")
@@ -1607,5 +1637,209 @@ namespace krys::boo::dom::tests
     CHECK(range->StartOffset() == 11uz);
     CHECK(range->ToString().ReleaseValue() == u8"syndata is awes");
     CHECK(staticRange->StartOffset() == 9uz);
+  }
+
+  namespace
+  {
+    /// @brief A connected tree: body > div#d > (b#b > "bb", i#i > "ii", u#u).
+    struct ConnectedTestData
+    {
+      Ref<dom::Document> Document;
+      Ref<Element> Div;
+      Ref<Element> B;
+      Ref<Text> BText;
+      Ref<Element> I;
+      Ref<Text> IText;
+      Ref<Element> U;
+
+      ConnectedTestData()
+          : Document(dom::Document::ParseHTMLUnsafe(*CreateRef<HTMLDocument>(),
+                                                    u8"<!DOCTYPE html><body><div id=d><b id=b>bb</b>"
+                                                    u8"<i id=i>ii</i><u id=u></u></div>")
+                       .ReleaseValue()),
+            Div(ShareRef(*Document->GetElementById(u8"d"))), B(ShareRef(*Document->GetElementById(u8"b"))),
+            BText(ShareRef(Downcast<Text>(*B->FirstChild()))), I(ShareRef(*Document->GetElementById(u8"i"))),
+            IText(ShareRef(Downcast<Text>(*I->FirstChild()))), U(ShareRef(*Document->GetElementById(u8"u")))
+      {
+      }
+
+      Ref<dom::Range> RangeOf(Node &startNode, uint64 startOffset, Node &endNode, uint64 endOffset)
+      {
+        auto range = Document->CreateRange();
+        REQUIRE_FALSE(range->SetStart(startNode, startOffset).HasException());
+        REQUIRE_FALSE(range->SetEnd(endNode, endOffset).HasException());
+        return range;
+      }
+    };
+  }
+
+  TEST_CASE("Range: new Range() is a live range collapsed at the start of the document",
+            "[DOM][Range][dom:interface-range][dom:dom-range-range][dom:concept-live-range][dom:concept-range-root]")
+  {
+    ConnectedTestData data;
+    auto range = data.Document->CreateRange();
+    CHECK(range->IsLiveRange());
+    CHECK(range->StartContainer() == data.Document.get());
+    CHECK(range->StartOffset() == 0uz);
+    CHECK(range->Collapsed());
+
+    // Its root is its start node's root: setting its start in another tree moves its end there too.
+    auto detached = data.Document->CreateElement(u8"p").ReleaseValue();
+    REQUIRE_FALSE(range->SetEnd(*data.U, 0).HasException());
+    REQUIRE_FALSE(range->SetStart(*detached, 0).HasException());
+    CHECK(range->EndContainer() == detached.get());
+  }
+
+  TEST_CASE("Contained and partially contained: by a range's start and end",
+            "[DOM][Range][dom:contained][dom:partially-contained]")
+  {
+    ConnectedTestData data;
+    // From inside <b> to inside <i>: <b> and <i> are partially contained, nothing between them is contained.
+    auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
+    CHECK(range->IntersectsNode(*data.B));
+    CHECK(range->ToString().ReleaseValue() == u8"bi");
+    // Cloning keeps the partially contained elements, with only their contained parts.
+    auto fragment = range->CloneContents().ReleaseValue();
+    CHECK(fragment->ChildNodes()->Length() == 2u);
+    CHECK(Downcast<Element>(*fragment->FirstChild()).OuterHTML() == u8"<b id=\"b\">b</b>");
+    CHECK(Downcast<Element>(*fragment->LastChild()).OuterHTML() == u8"<i id=\"i\">i</i>");
+
+    // (div, 1) to (div, 2) contains <i> and its text.
+    auto around = data.RangeOf(*data.Div, 1, *data.Div, 2);
+    CHECK(around->ToString().ReleaseValue() == u8"ii");
+    CHECK(around->CloneContents().ReleaseValue()->ChildNodes()->Length() == 1u);
+  }
+
+  TEST_CASE("Range.compareBoundaryPoints(): START_TO_END compares its end with the other's start",
+            "[DOM][Range][dom:dom-range-compareboundarypoints]")
+  {
+    ConnectedTestData data;
+    auto first = data.RangeOf(*data.Div, 0, *data.Div, 1);  // <b>
+    auto second = data.RangeOf(*data.Div, 1, *data.Div, 2); // <i>
+    auto third = data.RangeOf(*data.Div, 2, *data.Div, 3);  // <u>
+
+    auto compare = [](dom::Range &a, BoundaryPointComparator how, dom::Range &b)
+    {
+      return a.CompareBoundaryPoints(how, b).ReleaseValue();
+    };
+    // START_TO_END: this's end against sourceRange's start.
+    CHECK(compare(*first, BoundaryPointComparator::StartToEnd, *second) == std::strong_ordering::equal);
+    CHECK(compare(*first, BoundaryPointComparator::StartToEnd, *third) == std::strong_ordering::less);
+    CHECK(compare(*third, BoundaryPointComparator::StartToEnd, *first) == std::strong_ordering::greater);
+    // END_TO_START: this's start against sourceRange's end.
+    CHECK(compare(*second, BoundaryPointComparator::EndToStart, *first) == std::strong_ordering::equal);
+    CHECK(compare(*first, BoundaryPointComparator::EndToStart, *third) == std::strong_ordering::less);
+    CHECK(compare(*third, BoundaryPointComparator::EndToStart, *first) == std::strong_ordering::greater);
+    CHECK(compare(*first, BoundaryPointComparator::StartToStart, *second) == std::strong_ordering::less);
+    CHECK(compare(*first, BoundaryPointComparator::EndToEnd, *second) == std::strong_ordering::less);
+
+    SECTION("An invalid how throws a NotSupportedError, even for a range in another tree")
+    {
+      auto other = CreateRef<HTMLDocument>()->CreateRange();
+      auto result = first->CompareBoundaryPoints(static_cast<BoundaryPointComparator>(4), *other);
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::NotSupportedError);
+      result = first->CompareBoundaryPoints(BoundaryPointComparator::StartToStart, *other);
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::WrongDocumentError);
+    }
+  }
+
+  TEST_CASE("Range.deleteContents() and extractContents(): collapse to after the start's highest partially "
+            "contained ancestor",
+            "[DOM][Range][dom:dom-range-deletecontents][dom:concept-range-extract]")
+  {
+    ConnectedTestData data;
+
+    SECTION("deleteContents()")
+    {
+      auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
+      REQUIRE_FALSE(range->DeleteContents().HasException());
+      CHECK(data.Div->InnerHTML() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
+      // After <b> in the common ancestor <div>, not after the <div> in <body>.
+      CHECK(range->StartContainer() == data.Div.get());
+      CHECK(range->StartOffset() == 1uz);
+      CHECK(range->Collapsed());
+    }
+
+    SECTION("extractContents()")
+    {
+      auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
+      auto fragment = range->ExtractContents().ReleaseValue();
+      CHECK(data.Div->InnerHTML() == u8"<b id=\"b\">b</b><i id=\"i\">i</i><u id=\"u\"></u>");
+      CHECK(fragment->ChildNodes()->Length() == 2u);
+      CHECK(range->StartContainer() == data.Div.get());
+      CHECK(range->StartOffset() == 1uz);
+      CHECK(range->Collapsed());
+    }
+
+    SECTION("A start that's an inclusive ancestor of the end keeps its start")
+    {
+      auto range = data.RangeOf(*data.Div, 0, *data.IText, 1);
+      REQUIRE_FALSE(range->DeleteContents().HasException());
+      CHECK(data.Div->InnerHTML() == u8"<i id=\"i\">i</i><u id=\"u\"></u>");
+      CHECK(range->StartContainer() == data.Div.get());
+      CHECK(range->StartOffset() == 0uz);
+    }
+
+    SECTION("A doctype among the contained children throws a HierarchyRequestError, changing nothing")
+    {
+      auto range = data.RangeOf(*data.Document, 0, *data.Document, 1);
+      auto fragment = range->ExtractContents();
+      REQUIRE(fragment.HasException());
+      CHECK(fragment.GetException().Code() == ExceptionCode::HierarchyRequestError);
+      CHECK(data.Document->DocType() != nullptr);
+    }
+  }
+
+  TEST_CASE("Range.insertNode(): into a Text node it splits it; a collapsed range grows to include the node",
+            "[DOM][Range][dom:concept-range-insert]")
+  {
+    ConnectedTestData data;
+    auto range = data.RangeOf(*data.BText, 1, *data.BText, 1);
+    auto em = data.Document->CreateElement(u8"em").ReleaseValue();
+    REQUIRE_FALSE(range->InsertNode(*em).HasException());
+    CHECK(data.B->InnerHTML() == u8"b<em></em>b");
+    CHECK(range->StartContainer() == data.BText.get());
+    CHECK(range->StartOffset() == 1uz);
+    CHECK(range->EndContainer() == data.B.get());
+    CHECK(range->EndOffset() == 2uz);
+
+    SECTION("A comment, or the node itself, as the start throws a HierarchyRequestError")
+    {
+      auto comment = data.Document->CreateComment(u8"c");
+      REQUIRE_FALSE(data.U->AppendChild(*comment).HasException());
+      auto inComment = data.RangeOf(*comment, 0, *comment, 0);
+      auto result = inComment->InsertNode(*data.Document->CreateElement(u8"s").ReleaseValue());
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+
+      auto inU = data.RangeOf(*data.U, 0, *data.U, 0);
+      result = inU->InsertNode(*data.U);
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
+    }
+  }
+
+  TEST_CASE("Range.surroundContents(): a partially contained element throws an InvalidStateError",
+            "[DOM][Range][dom:dom-range-surroundcontents]")
+  {
+    ConnectedTestData data;
+    auto range = data.RangeOf(*data.BText, 1, *data.IText, 1);
+    auto result = range->SurroundContents(*data.Document->CreateElement(u8"s").ReleaseValue());
+    REQUIRE(result.HasException());
+    CHECK(result.GetException().Code() == ExceptionCode::InvalidStateError);
+
+    // Partially contained Text nodes are fine.
+    auto inText = data.RangeOf(*data.BText, 0, *data.BText, 1);
+    auto s = data.Document->CreateElement(u8"s").ReleaseValue();
+    REQUIRE_FALSE(s->AppendChild(*data.Document->CreateTextNode(u8"old")).HasException());
+    REQUIRE_FALSE(inText->SurroundContents(*s).HasException());
+    // Inserting <s> split the text at the start, leaving an empty Text node before it.
+    CHECK(data.B->InnerHTML() == u8"<s>b</s>b");
+    CHECK(data.B->ChildNodes()->Length() == 3u);
+    CHECK(inText->StartContainer() == data.B.get());
+    CHECK(inText->StartOffset() == 1uz);
+    CHECK(inText->EndOffset() == 2uz);
   }
 }

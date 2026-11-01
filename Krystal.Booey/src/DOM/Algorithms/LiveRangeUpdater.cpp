@@ -32,9 +32,12 @@ namespace krys::boo::dom
 
   void LiveRangeUpdater::PreRemove(const Node &node) noexcept
   {
+    // 1. Let parent be node's parent.
     auto *parent = node.ParentNode();
-    assert(parent != nullptr);
+    // 2. Assert: parent is non-null.
+    krys_debug_assert(parent != nullptr);
 
+    // 3. Let index be node's index.
     auto index = TreeQueries::Index(node);
 
     for (auto &range : node.NodeDocument().LiveRanges())
@@ -45,27 +48,29 @@ namespace krys::boo::dom
       auto originalStartOffset = range->StartOffset();
       auto originalEndOffset = range->EndOffset();
 
-      if (auto *startContainer = DynamicDowncast<ContainerNode>(*originalStartContainer))
+      // 4. For each live range whose start node is an inclusive descendant of node, set its start to (parent,
+      //    index).
+      if (TreeQueries::IsInclusiveDescendant(*originalStartContainer, node))
       {
-        if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
-        {
-          range->_start = BoundaryPoint {ShareRef(*parent), index};
-        }
+        range->_start = BoundaryPoint {ShareRef(*parent), index};
       }
 
-      if (auto *endContainer = DynamicDowncast<ContainerNode>(*originalEndContainer))
+      // 5. For each live range whose end node is an inclusive descendant of node, set its end to (parent,
+      //    index).
+      if (TreeQueries::IsInclusiveDescendant(*originalEndContainer, node))
       {
-        if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
-        {
-          range->_end = BoundaryPoint {ShareRef(*parent), index};
-        }
+        range->_end = BoundaryPoint {ShareRef(*parent), index};
       }
 
+      // 6. For each live range whose start node is parent and start offset is greater than index, decrease
+      //    its start offset by 1.
       if (originalStartContainer == parent && originalStartOffset > index)
       {
         range->_start.Offset -= 1;
       }
 
+      // 7. For each live range whose end node is parent and end offset is greater than index, decrease its
+      //    end offset by 1.
       if (originalEndContainer == parent && originalEndOffset > index)
       {
         range->_end.Offset -= 1;
@@ -160,7 +165,7 @@ namespace krys::boo::dom
   {
     auto childIndex = TreeQueries::Index(movedBefore);
     auto *newParent = movedBefore.ParentNode();
-    assert(newParent != nullptr);
+    krys_debug_assert(newParent != nullptr);
 
     for (auto range : movedBefore.NodeDocument().LiveRanges())
     {
@@ -185,7 +190,7 @@ namespace krys::boo::dom
   void LiveRangeUpdater::InsertedBeforeNode(Node &insertedBefore, size_t nodesInserted) noexcept
   {
     auto *newParent = insertedBefore.ParentNode();
-    assert(newParent != nullptr);
+    krys_debug_assert(newParent != nullptr);
 
     auto childIndex = TreeQueries::Index(insertedBefore);
     for (auto &range : newParent->NodeDocument().LiveRanges())

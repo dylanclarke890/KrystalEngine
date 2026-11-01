@@ -14,7 +14,10 @@ namespace krys::boo::dom
 {
   class DocumentFragment;
 
+  /// @brief A live range, which follows changes to the tree. Its root is its start node's root.
   /// @see https://dom.spec.whatwg.org/#interface-range
+  /// @see https://dom.spec.whatwg.org/#concept-live-range
+  /// @see https://dom.spec.whatwg.org/#concept-range-root
   class Range : public AbstractRange
   {
     friend class LiveRangeUpdater;
@@ -34,10 +37,12 @@ namespace krys::boo::dom
 
 #pragma region Range - https://dom.spec.whatwg.org/#range
 
+    /// @brief A live range from @p start to @p end; `Document::CreateRange` is `new Range()`.
     /// @see https://dom.spec.whatwg.org/#dom-range-range
     Range(BoundaryPoint start, BoundaryPoint end) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#dom-range-startcontainer
+    /// @see https://dom.spec.whatwg.org/#dom-range-commonancestorcontainer
+    /// @see https://dom.spec.whatwg.org/#get-the-common-ancestor
     KRYS_NODISCARD Node *CommonAncestorContainer() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-setstart
@@ -62,6 +67,7 @@ namespace krys::boo::dom
     void Collapse(bool toStart = false) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-selectnode
+    /// @see https://dom.spec.whatwg.org/#concept-range-select
     ExceptionOr<void> SelectNode(Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-selectnodecontents
@@ -75,12 +81,15 @@ namespace krys::boo::dom
     ExceptionOr<void> DeleteContents() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-extractcontents
+    /// @see https://dom.spec.whatwg.org/#concept-range-extract
     KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> ExtractContents() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-clonecontents
+    /// @see https://dom.spec.whatwg.org/#concept-range-clone
     KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> CloneContents() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-insertnode
+    /// @see https://dom.spec.whatwg.org/#concept-range-insert
     ExceptionOr<void> InsertNode(Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-range-surroundcontents
@@ -135,10 +144,14 @@ namespace krys::boo::dom
 
     void UpdateAssociatedSelection() noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-set
     KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
+    /// @see https://dom.spec.whatwg.org/#concept-range-bp-set
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#contained
     KRYS_NODISCARD bool IsContained(Node &node) const noexcept;
+    /// @see https://dom.spec.whatwg.org/#partially-contained
     KRYS_NODISCARD bool IsPartiallyContained(const Node &node) const noexcept;
 
     KRYS_NODISCARD Node *FirstPartiallyContainedChild(Node &commonAncestor, Node &startContainer,

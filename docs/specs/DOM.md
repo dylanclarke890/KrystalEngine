@@ -2136,10 +2136,11 @@ Status: reviewed (2026-10-31)
 
 ### [5.5. Interface Range](https://dom.spec.whatwg.org/#interface-range)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> > Live ranges, their root, contained/partially contained and the select, extract, clone and insert algorithms are in `DOM/Range.hpp`/`.cpp`; the live range pre-remove steps are `LiveRangeUpdater::PreRemove`; `new Range()` is `Document::CreateRange`.
 <!-- definitions: concept-live-range concept-range-root contained partially-contained -->
 
-- [ ] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
+- [x] [live range pre-remove steps](https://dom.spec.whatwg.org/#live-range-pre-remove-steps) — The live range pre-remove steps given a node node, are:
   - 1. Let parent be node’s parent.
   - 2. Assert: parent is non-null.
   - 3. Let index be node’s index.
@@ -2148,16 +2149,16 @@ Status: unreviewed
   - 6. For each live range whose start node is parent and start offset is greater than index, decrease its start offset by 1.
   - 7. For each live range whose end node is parent and end offset is greater than index, decrease its end offset by 1.
 
-- [ ] [Range.new Range()](https://dom.spec.whatwg.org/#dom-range-range) — The new Range() constructor steps are to set this’s start and end to (current global object’s associated Document, 0).
+- [x] [Range.new Range()](https://dom.spec.whatwg.org/#dom-range-range) — The new Range() constructor steps are to set this’s start and end to (current global object’s associated Document, 0).
 
-- [ ] [get the common ancestor](https://dom.spec.whatwg.org/#get-the-common-ancestor) — To get the common ancestor of a live range range:
+- [x] [get the common ancestor](https://dom.spec.whatwg.org/#get-the-common-ancestor) — To get the common ancestor of a live range range:
   - 1. Let container be range’s start node.
   - 2. While container is not an inclusive ancestor of range’s end node: set container to container’s parent.
   - 3. Return container.
 
-- [ ] [Range.commonAncestorContainer](https://dom.spec.whatwg.org/#dom-range-commonancestorcontainer) — The commonAncestorContainer getter steps are to return the result of getting the common ancestor of this.
+- [x] [Range.commonAncestorContainer](https://dom.spec.whatwg.org/#dom-range-commonancestorcontainer) — The commonAncestorContainer getter steps are to return the result of getting the common ancestor of this.
 
-- [ ] [set the start or end (Range)](https://dom.spec.whatwg.org/#concept-range-bp-set) — To set the start or end of a range to a boundary point (node, offset):
+- [x] [set the start or end (Range)](https://dom.spec.whatwg.org/#concept-range-bp-set) — To set the start or end of a range to a boundary point (node, offset):
   - 1. If node is a doctype, then throw an "InvalidNodeTypeError" DOMException.
   - 2. If offset is greater than node’s length, then throw an "IndexSizeError" DOMException.
   - 3. Let boundaryPoint be the boundary point (node, offset).
@@ -2167,55 +2168,55 @@ Status: unreviewed
     - 4a. If range’s root is not node’s root or boundaryPoint is before range’s start, then set range’s start to boundaryPoint.
     - 4b. Set range’s end to boundaryPoint.
 
-- [ ] [Range.setStart(node, offset)](https://dom.spec.whatwg.org/#dom-range-setstart) — The setStart(node, offset) method steps are to set the start of this to boundary point (node, offset).
+- [x] [Range.setStart(node, offset)](https://dom.spec.whatwg.org/#dom-range-setstart) — The setStart(node, offset) method steps are to set the start of this to boundary point (node, offset).
 
-- [ ] [Range.setEnd(node, offset)](https://dom.spec.whatwg.org/#dom-range-setend) — The setEnd(node, offset) method steps are to set the end of this to boundary point (node, offset).
+- [x] [Range.setEnd(node, offset)](https://dom.spec.whatwg.org/#dom-range-setend) — The setEnd(node, offset) method steps are to set the end of this to boundary point (node, offset).
 
-- [ ] [Range.setStartBefore(node)](https://dom.spec.whatwg.org/#dom-range-setstartbefore) — The setStartBefore(node) method steps are:
+- [x] [Range.setStartBefore(node)](https://dom.spec.whatwg.org/#dom-range-setstartbefore) — The setStartBefore(node) method steps are:
   - 1. Let parent be node’s parent.
   - 2. If parent is null, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Set the start of this to boundary point (parent, node’s index).
 
-- [ ] [Range.setStartAfter(node)](https://dom.spec.whatwg.org/#dom-range-setstartafter) — The setStartAfter(node) method steps are:
+- [x] [Range.setStartAfter(node)](https://dom.spec.whatwg.org/#dom-range-setstartafter) — The setStartAfter(node) method steps are:
   - 1. Let parent be node’s parent.
   - 2. If parent is null, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Set the start of this to boundary point (parent, node’s index plus 1).
 
-- [ ] [Range.setEndBefore(node)](https://dom.spec.whatwg.org/#dom-range-setendbefore) — The setEndBefore(node) method steps are:
+- [x] [Range.setEndBefore(node)](https://dom.spec.whatwg.org/#dom-range-setendbefore) — The setEndBefore(node) method steps are:
   - 1. Let parent be node’s parent.
   - 2. If parent is null, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Set the end of this to boundary point (parent, node’s index).
 
-- [ ] [Range.setEndAfter(node)](https://dom.spec.whatwg.org/#dom-range-setendafter) — The setEndAfter(node) method steps are:
+- [x] [Range.setEndAfter(node)](https://dom.spec.whatwg.org/#dom-range-setendafter) — The setEndAfter(node) method steps are:
   - 1. Let parent be node’s parent.
   - 2. If parent is null, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Set the end of this to boundary point (parent, node’s index plus 1).
 
-- [ ] [Range.collapse(toStart)](https://dom.spec.whatwg.org/#dom-range-collapse) — The collapse(toStart) method steps are to, if toStart is true, set end to start; otherwise set start to end.
+- [x] [Range.collapse(toStart)](https://dom.spec.whatwg.org/#dom-range-collapse) — The collapse(toStart) method steps are to, if toStart is true, set end to start; otherwise set start to end.
 
-- [ ] [select (range)](https://dom.spec.whatwg.org/#concept-range-select) — To select a node node within a range range:
+- [x] [select (range)](https://dom.spec.whatwg.org/#concept-range-select) — To select a node node within a range range:
   - 1. Let parent be node’s parent.
   - 2. If parent is null, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Let index be node’s index.
   - 4. Set range’s start to boundary point (parent, index).
   - 5. Set range’s end to boundary point (parent, index plus 1).
 
-- [ ] [Range.selectNode(node)](https://dom.spec.whatwg.org/#dom-range-selectnode) — The selectNode(node) method steps are to select node within this.
+- [x] [Range.selectNode(node)](https://dom.spec.whatwg.org/#dom-range-selectnode) — The selectNode(node) method steps are to select node within this.
 
-- [ ] [Range.selectNodeContents(node)](https://dom.spec.whatwg.org/#dom-range-selectnodecontents) — The selectNodeContents(node) method steps are:
+- [x] [Range.selectNodeContents(node)](https://dom.spec.whatwg.org/#dom-range-selectnodecontents) — The selectNodeContents(node) method steps are:
   - 1. If node is a doctype, then throw an "InvalidNodeTypeError" DOMException.
   - 2. Let length be the length of node.
   - 3. Set start to the boundary point (node, 0).
   - 4. Set end to the boundary point (node, length).
 
-- [ ] [Range.compareBoundaryPoints(how, sourceRange)](https://dom.spec.whatwg.org/#dom-range-compareboundarypoints) — The compareBoundaryPoints(how, sourceRange) method steps are:
+- [x] [Range.compareBoundaryPoints(how, sourceRange)](https://dom.spec.whatwg.org/#dom-range-compareboundarypoints) — The compareBoundaryPoints(how, sourceRange) method steps are:
   - 1. If how is not one of START_TO_START,; START_TO_END,; END_TO_END, and; END_TO_START, then throw a "NotSupportedError" DOMException.
   - 2. If this’s root is not sourceRange’s root, then throw a "WrongDocumentError" DOMException.
   - 3. Let thisPoint and sourcePoint be null.
   - 4. Switch on how: START_TO_START: Set thisPoint to this’s start and sourcePoint to sourceRange’s start. START_TO_END: Set thisPoint to this’s end and sourcePoint to sourceRange’s start. END_TO_END: Set thisPoint to this’s end and sourcePoint to sourceRange’s end. END_TO_START: Set thisPoint to this’s start and sourcePoint to sourceRange’s end.
   - 5. Switch on the position of thisPoint relative to sourcePoint: before Return −1. equal Return 0. after Return 1.
 
-- [ ] [Range.deleteContents()](https://dom.spec.whatwg.org/#dom-range-deletecontents) — The deleteContents() method steps are:
+- [x] [Range.deleteContents()](https://dom.spec.whatwg.org/#dom-range-deletecontents) — The deleteContents() method steps are:
   - 1. If this is collapsed, then return.
   - 2. Let originalStartNode, originalStartOffset, originalEndNode, and originalEndOffset be this’s start node, start offset, end node, and end offset, respectively.
   - 3. If originalStartNode is originalEndNode and it is a CharacterData node:
@@ -2233,7 +2234,7 @@ Status: unreviewed
   - 10. For each node of nodesToRemove, in tree order: remove node.
   - 11. If originalEndNode is a CharacterData node, then replace data of originalEndNode with 0, originalEndOffset, and the empty string.
 
-- [ ] [extract (live range)](https://dom.spec.whatwg.org/#concept-range-extract) — To extract a live range range:
+- [x] [extract (live range)](https://dom.spec.whatwg.org/#concept-range-extract) — To extract a live range range:
   - 1. Let fragment be the result of creating a document fragment given range’s start node’s node document.
   - 2. If range is collapsed, then return fragment.
   - 3. Let originalStartNode, originalStartOffset, originalEndNode, and originalEndOffset be range’s start node, start offset, end node, and end offset, respectively.
@@ -2282,9 +2283,9 @@ Status: unreviewed
     - 20e. Append subfragment to clone.
   - 21. Return fragment.
 
-- [ ] [Range.extractContents()](https://dom.spec.whatwg.org/#dom-range-extractcontents) — The extractContents() method steps are to return the result of extracting this.
+- [x] [Range.extractContents()](https://dom.spec.whatwg.org/#dom-range-extractcontents) — The extractContents() method steps are to return the result of extracting this.
 
-- [ ] [clone the contents (live range)](https://dom.spec.whatwg.org/#concept-range-clone) — To clone the contents of a live range range:
+- [x] [clone the contents (live range)](https://dom.spec.whatwg.org/#concept-range-clone) — To clone the contents of a live range range:
   - 1. Let fragment be the result of creating a document fragment given range’s start node’s node document.
   - 2. If range is collapsed, then return fragment.
   - 3. Let originalStartNode, originalStartOffset, originalEndNode, and originalEndOffset be range’s start node, start offset, end node, and end offset, respectively.
@@ -2325,9 +2326,9 @@ Status: unreviewed
     - 16e. Append subfragment to clone.
   - 17. Return fragment.
 
-- [ ] [Range.cloneContents()](https://dom.spec.whatwg.org/#dom-range-clonecontents) — The cloneContents() method steps are to return the result of cloning the contents of this.
+- [x] [Range.cloneContents()](https://dom.spec.whatwg.org/#dom-range-clonecontents) — The cloneContents() method steps are to return the result of cloning the contents of this.
 
-- [ ] [insert (live range)](https://dom.spec.whatwg.org/#concept-range-insert) — To insert a node node into a live range range:
+- [x] [insert (live range)](https://dom.spec.whatwg.org/#concept-range-insert) — To insert a node node into a live range range:
   - 1. If range’s start node is a ProcessingInstruction or Comment node, is a Text node whose parent is null, or is node, then throw a "HierarchyRequestError" DOMException.
   - 2. Let referenceNode be null.
   - 3. If range’s start node is a Text node, then set referenceNode to that Text node.
@@ -2342,9 +2343,9 @@ Status: unreviewed
   - 12. Pre-insert node into parent before referenceNode.
   - 13. If range is collapsed, then set range’s end to (parent, newOffset).
 
-- [ ] [Range.insertNode(node)](https://dom.spec.whatwg.org/#dom-range-insertnode) — The insertNode(node) method steps are to insert node into this.
+- [x] [Range.insertNode(node)](https://dom.spec.whatwg.org/#dom-range-insertnode) — The insertNode(node) method steps are to insert node into this.
 
-- [ ] [Range.surroundContents(newParent)](https://dom.spec.whatwg.org/#dom-range-surroundcontents) — The surroundContents(newParent) method steps are:
+- [x] [Range.surroundContents(newParent)](https://dom.spec.whatwg.org/#dom-range-surroundcontents) — The surroundContents(newParent) method steps are:
   - 1. If a non-Text node is partially contained in this, then throw an "InvalidStateError" DOMException.
   - 2. If newParent is a Document, DocumentType, or DocumentFragment node, then throw an "InvalidNodeTypeError" DOMException.
   - 3. Let fragment be the result of extracting this.
@@ -2353,18 +2354,18 @@ Status: unreviewed
   - 6. Append fragment to newParent.
   - 7. Select newParent within this.
 
-- [ ] [Range.cloneRange()](https://dom.spec.whatwg.org/#dom-range-clonerange) — The cloneRange() method steps are to return a new live range with the same start and end as this.
+- [x] [Range.cloneRange()](https://dom.spec.whatwg.org/#dom-range-clonerange) — The cloneRange() method steps are to return a new live range with the same start and end as this.
 
-- [ ] [Range.detach()](https://dom.spec.whatwg.org/#dom-range-detach) — The detach() method steps are to do nothing.
+- [x] [Range.detach()](https://dom.spec.whatwg.org/#dom-range-detach) — The detach() method steps are to do nothing.
 
-- [ ] [Range.isPointInRange(node, offset)](https://dom.spec.whatwg.org/#dom-range-ispointinrange) — The isPointInRange(node, offset) method steps are:
+- [x] [Range.isPointInRange(node, offset)](https://dom.spec.whatwg.org/#dom-range-ispointinrange) — The isPointInRange(node, offset) method steps are:
   - 1. If node’s root is not this’s root, then return false.
   - 2. If node is a doctype, then throw an "InvalidNodeTypeError" DOMException.
   - 3. If offset is greater than node’s length, then throw an "IndexSizeError" DOMException.
   - 4. If (node, offset) is before start or after end, then return false.
   - 5. Return true.
 
-- [ ] [Range.comparePoint(node, offset)](https://dom.spec.whatwg.org/#dom-range-comparepoint) — The comparePoint(node, offset) method steps are:
+- [x] [Range.comparePoint(node, offset)](https://dom.spec.whatwg.org/#dom-range-comparepoint) — The comparePoint(node, offset) method steps are:
   - 1. If node’s root is not this’s root, then throw a "WrongDocumentError" DOMException.
   - 2. If node is a doctype, then throw an "InvalidNodeTypeError" DOMException.
   - 3. If offset is greater than node’s length, then throw an "IndexSizeError" DOMException.
@@ -2372,7 +2373,7 @@ Status: unreviewed
   - 5. If (node, offset) is after end, then return 1.
   - 6. Return 0.
 
-- [ ] [Range.intersectsNode(node)](https://dom.spec.whatwg.org/#dom-range-intersectsnode) — The intersectsNode(node) method steps are:
+- [x] [Range.intersectsNode(node)](https://dom.spec.whatwg.org/#dom-range-intersectsnode) — The intersectsNode(node) method steps are:
   - 1. If node’s root is not this’s root, then return false.
   - 2. Let parent be node’s parent.
   - 3. If parent is null, then return true.
@@ -2380,7 +2381,7 @@ Status: unreviewed
   - 5. If (parent, offset) is before end and (parent, offset + 1) is after start, then return true.
   - 6. Return false.
 
-- [ ] [stringification behavior (Range)](https://dom.spec.whatwg.org/#dom-range-stringifier) — The stringification behavior must run these steps:
+- [x] [stringification behavior (Range)](https://dom.spec.whatwg.org/#dom-range-stringifier) — The stringification behavior must run these steps:
   - 1. Let string be the empty string.
   - 2. If this’s start node is this’s end node and it is a Text node, then return the substring of that Text node’s data beginning at this’s start offset and ending at this’s end offset.
   - 3. If this’s start node is a Text node, then append the substring of that node’s data from this’s start offset until the end to string.
