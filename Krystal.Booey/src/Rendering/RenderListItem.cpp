@@ -27,6 +27,7 @@ namespace krys::boo
     }
 
     // Returns the enclosing list with respect to the DOM order.
+    // See https://html.spec.whatwg.org/#list-owner.
     KRYS_NODISCARD dom::Element *EnclosingList(const RenderListItem &listItem) noexcept
     {
       auto *element = listItem.GetElement();
@@ -215,6 +216,7 @@ namespace krys::boo
     return itemCount;
   }
 
+  // See https://html.spec.whatwg.org/#ordinal-value.
   void RenderListItem::UpdateValueNow() const noexcept
   {
     auto *list = EnclosingList(*this);

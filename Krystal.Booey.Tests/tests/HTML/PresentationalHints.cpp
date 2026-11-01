@@ -108,7 +108,8 @@ namespace krys::boo::html::tests
           == "border-style: solid; border-color: rgb(128, 128, 128); background-color: rgb(128, 128, 128);");
   }
 
-  TEST_CASE_METHOD(HintFixture, "Presentational hints: lists", "[HTML][PresentationalHints]")
+  TEST_CASE_METHOD(HintFixture, "Presentational hints: lists",
+                   "[HTML][PresentationalHints][html:attr-ol-type]")
   {
     CHECK(Hints(u8"<ol id=e type=a></ol>") == "list-style-type: lower-alpha;");
     CHECK(Hints(u8"<ol id=e type=I></ol>") == "list-style-type: upper-roman;");

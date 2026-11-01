@@ -52,9 +52,26 @@ namespace krys::boo::html
     /// @brief The value the list's numbering starts from: the start attribute, else the number of items for a
     /// reversed list, else 1.
     /// @note It doesn't trigger layout because it is called from rendering code.
+    /// @see https://html.spec.whatwg.org/#concept-ol-start
     KRYS_NODISCARD int32 StartValue() const noexcept
     {
-      return _start ? *_start : (_isReversed ? static_cast<int32>(ItemCount()) : 1);
+      // 1. If the ol element has a start attribute:
+      // 1a. Let parsed be the result of parsing the value of the attribute as an integer.
+      // 1b. If parsed is not an error, then return parsed.
+      // (Parsed when the attribute changes.)
+      if (_start)
+      {
+        return *_start;
+      }
+
+      // 2. If the ol element has a reversed attribute, then return the number of owned li elements.
+      if (_isReversed)
+      {
+        return static_cast<int32>(ItemCount());
+      }
+
+      // 3. Return 1.
+      return 1;
     }
     KRYS_NODISCARD bool IsReversed() const noexcept
     {
