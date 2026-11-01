@@ -2407,14 +2407,15 @@ Status: reviewed (2026-10-31)
 
 ### [6.1. Interface NodeIterator](https://dom.spec.whatwg.org/#interface-nodeiterator)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> NodeIterator is `DOM/NodeIterator.hpp`; its reference and candidate reference are `NodePointer`s. The pre-remove steps, adjust a node pointer and traverse are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s. Its iterator collection is walked with `TreeQueries::Next` and `Previous` within its root.
 <!-- definitions: iterator-collection node-pointer node-pointer-node node-pointer-pointer-before nodeiterator-reference nodeiterator-candidate-reference -->
 
-- [ ] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
+- [x] [NodeIterator pre-remove steps](https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps) — The NodeIterator pre-remove steps given a NodeIterator object nodeIterator and node toBeRemovedNode, are:
   - 1. Set nodeIterator’s reference to the result of adjusting a node pointer given nodeIterator’s reference, nodeIterator, and toBeRemovedNode.
   - 2. If nodeIterator’s candidate reference is non-null, then set nodeIterator’s candidate reference to the result of adjusting a node pointer given nodeIterator’s candidate reference, nodeIterator, and toBeRemovedNode.
 
-- [ ] [adjust a node pointer (NodeIterator)](https://dom.spec.whatwg.org/#nodeiterator-adjust-a-node-pointer) — To adjust a node pointer given a node pointer nodePointer, a NodeIterator object nodeIterator, and a node toBeRemovedNode, perform the following steps. They return a node pointer.
+- [x] [adjust a node pointer (NodeIterator)](https://dom.spec.whatwg.org/#nodeiterator-adjust-a-node-pointer) — To adjust a node pointer given a node pointer nodePointer, a NodeIterator object nodeIterator, and a node toBeRemovedNode, perform the following steps. They return a node pointer.
   - 1. If toBeRemovedNode is not an inclusive ancestor of nodePointer’s node, or toBeRemovedNode is an inclusive ancestor of nodeIterator’s root, then return nodePointer.
   - 2. If nodePointer’s pointer before is true:
     - 2a. Let next be toBeRemovedNode’s first following node that is an inclusive descendant of nodeIterator’s root and is not an inclusive descendant of toBeRemovedNode, if there is such a node; otherwise null.
@@ -2422,17 +2423,17 @@ Status: unreviewed
   - 3. Let newNode be toBeRemovedNode’s parent, if toBeRemovedNode’s previous sibling is null; otherwise the inclusive descendant of toBeRemovedNode’s previous sibling that appears last in tree order.
   - 4. Return (newNode, false).
 
-- [ ] [NodeIterator.root](https://dom.spec.whatwg.org/#dom-nodeiterator-root) — The root getter steps are to return this’s root.
+- [x] [NodeIterator.root](https://dom.spec.whatwg.org/#dom-nodeiterator-root) — The root getter steps are to return this’s root.
 
-- [ ] [NodeIterator.referenceNode](https://dom.spec.whatwg.org/#dom-nodeiterator-referencenode) — The referenceNode getter steps are to return this’s reference’s node.
+- [x] [NodeIterator.referenceNode](https://dom.spec.whatwg.org/#dom-nodeiterator-referencenode) — The referenceNode getter steps are to return this’s reference’s node.
 
-- [ ] [NodeIterator.pointerBeforeReferenceNode](https://dom.spec.whatwg.org/#dom-nodeiterator-pointerbeforereferencenode) — The pointerBeforeReferenceNode getter steps are to return this’s reference’s pointer before.
+- [x] [NodeIterator.pointerBeforeReferenceNode](https://dom.spec.whatwg.org/#dom-nodeiterator-pointerbeforereferencenode) — The pointerBeforeReferenceNode getter steps are to return this’s reference’s pointer before.
 
-- [ ] [NodeIterator.whatToShow](https://dom.spec.whatwg.org/#dom-nodeiterator-whattoshow) — The whatToShow getter steps are to return this’s whatToShow.
+- [x] [NodeIterator.whatToShow](https://dom.spec.whatwg.org/#dom-nodeiterator-whattoshow) — The whatToShow getter steps are to return this’s whatToShow.
 
-- [ ] [NodeIterator.filter](https://dom.spec.whatwg.org/#dom-nodeiterator-filter) — The filter getter steps are to return this’s filter.
+- [x] [NodeIterator.filter](https://dom.spec.whatwg.org/#dom-nodeiterator-filter) — The filter getter steps are to return this’s filter.
 
-- [ ] [traverse (NodeIterator)](https://dom.spec.whatwg.org/#concept-nodeiterator-traverse) — To traverse, given a NodeIterator object iterator and "next" or "previous" type:
+- [x] [traverse (NodeIterator)](https://dom.spec.whatwg.org/#concept-nodeiterator-traverse) — To traverse, given a NodeIterator object iterator and "next" or "previous" type:
   - 1. Set iterator’s candidate reference to iterator’s reference.
   - 2. Let result be null.
   - 3. While true:
@@ -2455,11 +2456,11 @@ Status: unreviewed
   - 4. Set iterator’s candidate reference to null.
   - 5. Return result.
 
-- [ ] [NodeIterator.nextNode()](https://dom.spec.whatwg.org/#dom-nodeiterator-nextnode) — The nextNode() method steps are to return the result of traversing with this and "next".
+- [x] [NodeIterator.nextNode()](https://dom.spec.whatwg.org/#dom-nodeiterator-nextnode) — The nextNode() method steps are to return the result of traversing with this and "next".
 
-- [ ] [NodeIterator.previousNode()](https://dom.spec.whatwg.org/#dom-nodeiterator-previousnode) — The previousNode() method steps are to return the result of traversing with this and "previous".
+- [x] [NodeIterator.previousNode()](https://dom.spec.whatwg.org/#dom-nodeiterator-previousnode) — The previousNode() method steps are to return the result of traversing with this and "previous".
 
-- [ ] [NodeIterator.detach()](https://dom.spec.whatwg.org/#dom-nodeiterator-detach) — The detach() method steps are to do nothing.
+- [x] [NodeIterator.detach()](https://dom.spec.whatwg.org/#dom-nodeiterator-detach) — The detach() method steps are to do nothing.
 
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 

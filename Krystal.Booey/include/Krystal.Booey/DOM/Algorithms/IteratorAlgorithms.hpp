@@ -10,6 +10,7 @@ namespace krys::boo::dom
   class Node;
   class NodeIterator;
   class TreeWalker;
+  struct NodePointer;
 
   enum class TraversalNextOrPrev
   {
@@ -31,7 +32,12 @@ namespace krys::boo::dom
                                                                const Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps
-    KRYS_NODISCARD static void PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept;
+    static void PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#nodeiterator-adjust-a-node-pointer
+    KRYS_NODISCARD static NodePointer AdjustNodePointer(const NodePointer &nodePointer,
+                                                        const NodeIterator &nodeIterator,
+                                                        const Node &toBeRemovedNode) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-nodeiterator-traverse
     KRYS_NODISCARD static ExceptionOr<RefPtr<Node>> Traverse(NodeIterator &iterator,

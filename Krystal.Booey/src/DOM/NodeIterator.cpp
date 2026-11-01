@@ -5,8 +5,7 @@
 namespace krys::boo::dom
 {
   NodeIterator::NodeIterator(Node &root, dom::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
-      : TraversalBase(root, whatToShow, krys::move(filter)), _referenceNode(ShareRef(root)),
-        _pointerBeforeReferenceNode(true)
+      : TraversalBase(root, whatToShow, krys::move(filter)), _reference {ShareRef(root), true}
   {
     // The document runs the NodeIterator pre-remove steps for the iterators whose root it is the node
     // document of.

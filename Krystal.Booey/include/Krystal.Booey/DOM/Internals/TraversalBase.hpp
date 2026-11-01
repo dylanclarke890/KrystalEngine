@@ -30,24 +30,32 @@ namespace krys::boo::dom
 
   public:
     /// @see https://dom.spec.whatwg.org/#concept-traversal-root
+    /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-root
+    /// @see https://dom.spec.whatwg.org/#dom-treewalker-root
     KRYS_NODISCARD Node &Root() noexcept
     {
       return *_root;
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-traversal-root
+    /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-root
+    /// @see https://dom.spec.whatwg.org/#dom-treewalker-root
     KRYS_NODISCARD const Node &Root() const noexcept
     {
       return *_root;
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-traversal-whattoshow
+    /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-whattoshow
+    /// @see https://dom.spec.whatwg.org/#dom-treewalker-whattoshow
     KRYS_NODISCARD WhatToShow WhatToShow() const noexcept
     {
       return _whatToShow;
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-traversal-filter
+    /// @see https://dom.spec.whatwg.org/#dom-nodeiterator-filter
+    /// @see https://dom.spec.whatwg.org/#dom-treewalker-filter
     KRYS_NODISCARD NodeFilter *Filter() const noexcept
     {
       return _filter.get();

@@ -56,86 +56,168 @@ namespace krys::boo::dom
 
   void IteratorAlgorithms::PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept
   {
-    if (!TreeQueries::IsInclusiveAncestor(toBeRemovedNode, nodeIterator.ReferenceNode())
-        || &toBeRemovedNode == &nodeIterator.Root())
+    // 1. Set nodeIterator’s reference to the result of adjusting a node pointer given nodeIterator’s
+    // reference,
+    //    nodeIterator, and toBeRemovedNode.
+    nodeIterator._reference = AdjustNodePointer(nodeIterator._reference, nodeIterator, toBeRemovedNode);
+
+    // 2. If nodeIterator’s candidate reference is non-null, then set nodeIterator’s candidate reference to
+    // the
+    //    result of adjusting a node pointer given nodeIterator’s candidate reference, nodeIterator, and
+    //    toBeRemovedNode.
+    if (nodeIterator._candidateReference)
     {
-      return;
+      nodeIterator._candidateReference =
+        AdjustNodePointer(*nodeIterator._candidateReference, nodeIterator, toBeRemovedNode);
+    }
+  }
+
+  NodePointer IteratorAlgorithms::AdjustNodePointer(const NodePointer &nodePointer,
+                                                    const NodeIterator &nodeIterator,
+                                                    const Node &toBeRemovedNode) noexcept
+  {
+    // 1. If toBeRemovedNode is not an inclusive ancestor of nodePointer’s node, or toBeRemovedNode is an
+    // inclusive
+    //    ancestor of nodeIterator’s root, then return nodePointer.
+    if (!TreeQueries::IsInclusiveAncestor(toBeRemovedNode, *nodePointer.Node)
+        || TreeQueries::IsInclusiveAncestor(toBeRemovedNode, nodeIterator.Root()))
+    {
+      return nodePointer;
     }
 
-    if (nodeIterator.PointerBeforeReferenceNode())
+    // 2. If nodePointer’s pointer before is true:
+    if (nodePointer.PointerBefore)
     {
-      Node *next = TreeQueries::NextSkippingChildren(toBeRemovedNode);
-      if (!next || !TreeQueries::IsInclusiveDescendant(*next, nodeIterator.Root()))
-      {
-        next = nullptr;
-      }
+      // 2a. Let next be toBeRemovedNode’s first following node that is an inclusive descendant of
+      // nodeIterator’s
+      //     root and is not an inclusive descendant of toBeRemovedNode, if there is such a node; otherwise
+      //     null.
+      Node *next = TreeQueries::NextSkippingChildren(toBeRemovedNode, &nodeIterator.Root());
 
-      if (next != nullptr)
+      // 2b. If next is non-null, then return (next, true).
+      if (next)
       {
-        nodeIterator.ReferenceNode(ShareRef(*next));
-        return;
+        return {ShareRef(*next), true};
       }
-
-      nodeIterator.PointerBeforeReferenceNode(false);
     }
 
-    Node *prev = !toBeRemovedNode.PreviousSibling()
-                   ? toBeRemovedNode.ParentNode()
-                   : TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling());
-    assert(prev);
-    nodeIterator.ReferenceNode(ShareRef(*prev));
+    // 3. Let newNode be toBeRemovedNode’s parent, if toBeRemovedNode’s previous sibling is null; otherwise
+    // the
+    //    inclusive descendant of toBeRemovedNode’s previous sibling that appears last in tree order.
+    Node *newNode = toBeRemovedNode.PreviousSibling()
+                      ? TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling())
+                      : toBeRemovedNode.ParentNode();
+    krys_debug_assert(newNode);
+
+    // 4. Return (newNode, false).
+    return {ShareRef(*newNode), false};
   }
 
   ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator,
                                                          TraversalNextOrPrev type) noexcept
   {
-    Node *node = &iterator.ReferenceNode();
-    bool beforeNode = iterator.PointerBeforeReferenceNode();
+    // A traversal from inside the iterator's filter would replace the candidate reference of the traversal
+    // that called the filter, so it throws before changing anything.
+    if (iterator.IsActive())
+    {
+      return Exception {ExceptionCode::InvalidStateError};
+    }
 
+    // 1. Set iterator’s candidate reference to iterator’s reference.
+    iterator._candidateReference = iterator._reference;
+
+    // 2. Let result be null.
+    RefPtr<Node> result;
+
+    // 3. While true:
     while (true)
     {
+      // The filter can remove nodes, which adjusts the candidate reference, so it's read afresh each time.
+      NodePointer &candidate = *iterator._candidateReference;
+
+      // 3a. If type is "next":
       if (type == TraversalNextOrPrev::Next)
       {
-        if (!beforeNode)
+        // 3a.i. If iterator’s candidate reference’s pointer before is false:
+        if (!candidate.PointerBefore)
         {
-          node = TreeQueries::Next(*node, &iterator.Root());
-          if (node == nullptr)
+          // 3a.i.A. Let following be the first node following iterator’s candidate reference’s node in
+          // iterator’s
+          //         iterator collection. If there is no such node, then break.
+          Node *following = TreeQueries::Next(*candidate.Node, &iterator.Root());
+          if (!following)
           {
-            return nullptr;
+            break;
           }
-        }
 
-        beforeNode = false;
+          // 3a.i.B. Set iterator’s candidate reference to (following, false).
+          candidate = {ShareRef(*following), false};
+        }
+        // 3a.ii. Otherwise, set iterator’s candidate reference to (iterator’s candidate reference’s node,
+        // false).
+        else
+        {
+          candidate.PointerBefore = false;
+        }
       }
+      // 3b. Otherwise:
       else
       {
-        if (beforeNode)
+        // 3b.i. If iterator’s candidate reference’s pointer before is true:
+        if (candidate.PointerBefore)
         {
-          node = TreeQueries::Previous(*node, &iterator.Root());
-          if (node == nullptr)
+          // 3b.i.A. Let preceding be the first node preceding iterator’s candidate reference’s node in
+          // iterator’s
+          //         iterator collection. If there is no such node, then break.
+          Node *preceding = TreeQueries::Previous(*candidate.Node, &iterator.Root());
+          if (!preceding)
           {
-            return nullptr;
+            break;
           }
+
+          // 3b.i.B. Set iterator’s candidate reference to (preceding, true).
+          candidate = {ShareRef(*preceding), true};
         }
-        beforeNode = true;
+        // 3b.ii. Otherwise, set iterator’s candidate reference to (iterator’s candidate reference’s node,
+        // true).
+        else
+        {
+          candidate.PointerBefore = true;
+        }
       }
 
-      auto result = FilterNode(iterator, *node);
-      if (result.HasException())
+      // 3c. Let node be iterator’s candidate reference’s node.
+      Ref<Node> node = candidate.Node;
+
+      // 3d. Let filterResult be the result of filtering node within iterator. If this throws an exception,
+      // then set
+      //     iterator’s candidate reference to null and rethrow that exception.
+      auto filterResult = FilterNode(iterator, *node);
+      if (filterResult.HasException())
       {
-        return result.ReleaseException();
+        iterator._candidateReference = null;
+        return filterResult.ReleaseException();
       }
 
-      if (result.Value() == FilterResult::FILTER_ACCEPT)
+      // 3e. If filterResult is FILTER_ACCEPT:
+      if (filterResult.Value() == FilterResult::FILTER_ACCEPT)
       {
+        // 3e.i. Set iterator’s reference to iterator’s candidate reference.
+        iterator._reference = *iterator._candidateReference;
+
+        // 3e.ii. Set result to node.
+        result = node;
+
+        // 3e.iii. Break.
         break;
       }
     }
 
-    iterator.ReferenceNode(ShareRef(*node));
-    iterator.PointerBeforeReferenceNode(beforeNode);
+    // 4. Set iterator’s candidate reference to null.
+    iterator._candidateReference = null;
 
-    return ShareRefPtr(node);
+    // 5. Return result.
+    return result;
   }
 
   ExceptionOr<Node *> IteratorAlgorithms::TraverseChildren(TreeWalker &walker,
