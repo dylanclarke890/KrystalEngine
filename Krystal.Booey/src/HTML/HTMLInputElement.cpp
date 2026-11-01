@@ -249,8 +249,7 @@ namespace krys::boo::html
 
   uint32 HTMLInputElement::Height() const noexcept
   {
-    // FIXME: An image button's rendered height (or its image's), with the image input type's renderer.
-    return Reflect<uint32>(*this, u8"height");
+    return _inputType->Height();
   }
 
   void HTMLInputElement::Height(uint32 value) noexcept
@@ -530,8 +529,7 @@ namespace krys::boo::html
 
   uint32 HTMLInputElement::Width() const noexcept
   {
-    // FIXME: An image button's rendered width (or its image's), with the image input type's renderer.
-    return Reflect<uint32>(*this, u8"width");
+    return _inputType->Width();
   }
 
   void HTMLInputElement::Width(uint32 value) noexcept

@@ -36,6 +36,8 @@ namespace krys::boo::html
     void HandleActivationBehavior(dom::Event &event) noexcept final;
     KRYS_NODISCARD bool ShouldRespectHeightAndWidthAttributes() noexcept final;
     KRYS_NODISCARD bool CanBeSuccessfulSubmitButton() noexcept final;
+    KRYS_NODISCARD uint32 Height() const noexcept final;
+    KRYS_NODISCARD uint32 Width() const noexcept final;
     KRYS_NODISCARD RenderPtr<RenderElement> CreateInputRenderer(RenderStyle &&style) noexcept final;
   };
 }

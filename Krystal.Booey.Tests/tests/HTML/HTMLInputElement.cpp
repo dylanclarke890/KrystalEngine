@@ -46,6 +46,25 @@ namespace krys::boo::html::tests
     CHECK(Str(input.GetAttribute(u8"type").value_or(u8"")) == "datetime-local");
   }
 
+  TEST_CASE("HTMLInputElement: width and height are an image button's dimensions, and 0 for other types",
+            "[HTML][Forms][Input][html:determine-dimensions][html:dom-input-width][html:dom-input-height]")
+  {
+    FormFixture fixture(u8"<input id=text width=50 height=20>"
+                        u8"<input id=hidden type=image width=50 height=x style='display: none'>"
+                        u8"<input id=shown type=image width=50 height=20 "
+                        u8"style='display: inline-block; width: 40px; height: 30px; padding: 3px'>");
+    CHECK(fixture.Get<HTMLInputElement>(u8"text").Width() == 0u);
+    CHECK(fixture.Get<HTMLInputElement>(u8"text").Height() == 0u);
+
+    // Without a box, the attributes that parse.
+    CHECK(fixture.Get<HTMLInputElement>(u8"hidden").Width() == 50u);
+    CHECK(fixture.Get<HTMLInputElement>(u8"hidden").Height() == 0u);
+
+    // With one, its content box.
+    CHECK(fixture.Get<HTMLInputElement>(u8"shown").Width() == 40u);
+    CHECK(fixture.Get<HTMLInputElement>(u8"shown").Height() == 30u);
+  }
+
   TEST_CASE("HTMLInputElement: value sanitisation", "[HTML][Forms][Input]")
   {
     CHECK(Sanitized(u8"text", u8"a\r\nb\nc") == "abc");

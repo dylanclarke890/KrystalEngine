@@ -4,6 +4,11 @@
 #include "Krystal.Booey/HTML/DOMFormData.hpp"
 #include "Krystal.Booey/HTML/HTMLFormElement.hpp"
 #include "Krystal.Booey/HTML/HTMLInputElement.hpp"
+#include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/Rendering/RenderBox.hpp"
+#include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
+#include <algorithm>
+#include <limits>
 #include <string>
 
 namespace krys::boo::html
@@ -15,6 +20,61 @@ namespace krys::boo::html
       auto string = std::to_string(value);
       return dom::DOMString(reinterpret_cast<const char8 *>(string.data()), string.size());
     }
+
+    /// @brief The width (or height, if @p height) of the dimensions of the image button @p element.
+    /// @see https://html.spec.whatwg.org/#determine-dimensions
+    KRYS_NODISCARD uint32 ImageButtonDimension(HTMLInputElement &element, bool height) noexcept
+    {
+      if (element.IsConnected())
+      {
+        (void)element.NodeDocument().UpdateLayoutIgnorePendingStylesheets(
+          {dom::LayoutOptions::TreatContentVisibilityHiddenAsVisible,
+           dom::LayoutOptions::TreatContentVisibilityAutoAsVisible},
+          &element);
+      }
+
+      // 1. If element is being rendered, then return the width and height of element's content box, in CSS
+      //    pixels.
+      if (auto *box = DynamicDowncast<RenderBox>(element.Renderer()))
+      {
+        auto contentRect = box->ContentBoxRect();
+        return static_cast<uint32>(
+          AdjustLayoutUnitForAbsoluteZoom(height ? contentRect.Height() : contentRect.Width(), box->Style())
+            .Round());
+      }
+
+      // 2. Let width and height be 0.
+      // 3. If naturalDimensions is not null, then set width to naturalDimensions's width and height to
+      //    naturalDimensions's height.
+      // FIXME: The image's natural dimensions, once image buttons load their image.
+      // 4. If element has a width attribute:
+      // 4a. Let attributeWidth be the result of parsing that attribute's value.
+      // 4b. If attributeWidth is not an error, then set width to attributeWidth.
+      // 5. If element has a height attribute:
+      // 5a. Let attributeHeight be the result of parsing that attribute's value.
+      // 5b. If attributeHeight is not an error, then set height to attributeHeight.
+      auto attribute = element.GetAttribute(height ? u8"height" : u8"width");
+      if (auto value = Numbers::ParseNonNegativeInteger(attribute.value_or(dom::DOMString()));
+          value.Success())
+      {
+        return static_cast<uint32>(std::min<uint64>(value.Value, std::numeric_limits<int32>::max()));
+      }
+
+      // 6. Return a width of width and a height of height, in CSS pixels.
+      return 0;
+    }
+  }
+
+  uint32 ImageInputType::Height() const noexcept
+  {
+    krys_debug_assert(Element());
+    return ImageButtonDimension(*Element(), true);
+  }
+
+  uint32 ImageInputType::Width() const noexcept
+  {
+    krys_debug_assert(Element());
+    return ImageButtonDimension(*Element(), false);
   }
 
   bool ImageInputType::IsFormDataAppendable() const noexcept
