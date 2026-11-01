@@ -3,7 +3,8 @@
 
 namespace krys::boo::html::tests
 {
-  TEST_CASE("HTMLSrcsetParser: parses candidates and their descriptors", "[HTML][Parser][HTMLSrcsetParser]")
+  TEST_CASE("HTMLSrcsetParser: parses candidates and their descriptors",
+            "[HTML][Parser][HTMLSrcsetParser][html:parse-a-srcset-attribute][html:image-candidate-string]")
   {
     SECTION("Densities and widths")
     {
@@ -46,7 +47,8 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE("HTMLSrcsetParser: picks the candidate that fits the device scale factor",
-            "[HTML][Parser][HTMLSrcsetParser]")
+            "[HTML][Parser][HTMLSrcsetParser][html:create-a-source-set][html:normalise-the-source-densities]"
+            "[html:select-an-image-source-from-a-source-set]")
   {
     SECTION("No srcset uses src")
     {

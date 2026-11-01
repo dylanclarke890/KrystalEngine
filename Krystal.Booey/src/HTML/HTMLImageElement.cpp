@@ -619,8 +619,13 @@ namespace krys::boo::html
     }
   }
 
+  // Steps 3 and 5b to 5l of updating the source set, for the picture's source elements:
+  // https://html.spec.whatwg.org/#update-the-source-set
   ImageCandidate HTMLImageElement::BestFitSourceFromPictureElement() noexcept
   {
+    // 3. If el is an img element whose parent node is a picture element, then replace the contents of
+    // elements
+    //    with el's parent node's child elements, retaining relative order.
     auto *picture = PictureElement();
     if (!picture)
     {
@@ -629,20 +634,28 @@ namespace krys::boo::html
 
     ImageCandidate candidate;
 
+    // 5. For each child in elements:
+    // 5a. If child is el: (SelectImageSource, with the img's own attributes.)
     for (auto *child = picture->FirstChild(); child && child != this; child = child->NextSibling())
     {
+      // 5b. If child is not a source element, then continue.
       auto *source = DynamicDowncast<HTMLSourceElement>(*child);
       if (!source)
       {
         continue;
       }
 
+      // 5c. If child does not have a srcset attribute, continue to the next child.
+      // 5e. If source set has zero image sources, continue to the next child.
+      // (An empty srcset has none; another without any is skipped below.)
       auto srcset = source->GetAttribute(u8"srcset");
       if (!srcset || srcset->empty())
       {
         continue;
       }
 
+      // 5h. If child has a type attribute, and its value is an unknown or unsupported MIME type, continue to
+      //     the next child.
       if (auto typeAttribute = source->GetAttribute(u8"type"))
       {
         auto type = ExtractMIMETypeFromTypeAttributeForLookup(*typeAttribute);
@@ -658,19 +671,31 @@ namespace krys::boo::html
                                              documentElement ? documentElement->ComputedStyle() : nullptr);
       auto &queries = source->ParsedMediaAttribute(document);
 
+      // 5f. If child has a media attribute, and its value does not match the environment, continue to the
+      // next
+      //     child.
       // FIXME: Remember the queries that depend on the viewport, to select again when they change.
       if (!evaluator.Evaluate(queries))
       {
         continue;
       }
 
+      // 5g. Parse child's sizes attribute with img, and let source set's source size be the returned value.
       css::SizesAttributeParser sizesParser(source->GetAttribute(u8"sizes").value_or(dom::DOMString()),
                                             document);
       auto sourceSize = sizesParser.Length();
 
+      // 5d. Parse child's srcset attribute and let source set be the returned source set.
+      // 5j. Normalize the source densities of source set.
+      // (And select an image from it.)
       candidate = BestFitSourceForImageAttributes(document.DeviceScaleFactor(), null,
                                                   dom::DOMStringView(*srcset), sourceSize);
 
+      // 5i. If child has width or height attributes, set el's dimension attribute source to child. Otherwise,
+      //     set el's dimension attribute source to el.
+      // (The source element is the dimension attribute source when it has them.)
+      // 5k. Set el's source set to source set.
+      // 5l. Return.
       if (!candidate.IsEmpty())
       {
         SetSourceElement(source);
@@ -681,10 +706,14 @@ namespace krys::boo::html
     return candidate;
   }
 
+  // https://html.spec.whatwg.org/#select-an-image-source
   void HTMLImageElement::SelectImageSource(RelevantMutation relevantMutation) noexcept
   {
+    // 1. Update the source set for el.
     // First look for the best fit source from our <picture> parent if we have one.
     ImageCandidate candidate = BestFitSourceFromPictureElement();
+
+    // 5a. If child is el: (Updating the source set, from the img's own attributes.)
     if (candidate.IsEmpty())
     {
       SetSourceElement(nullptr);
@@ -710,7 +739,11 @@ namespace krys::boo::html
           dom::DOMStringView(*srcsetAttribute), sourceSize);
       }
     }
+    // 2. If el's source set is empty, return null as the URL and undefined as the pixel density.
+    // 3. Return the result of selecting an image from el's source set.
     SetBestFitURLAndDPRFromImageCandidate(candidate);
+
+    // Then update the image data.
     _imageLoader->UpdateFromElementIgnoringPreviousError(relevantMutation);
   }
 

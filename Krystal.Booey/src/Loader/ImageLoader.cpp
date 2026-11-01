@@ -207,10 +207,12 @@ namespace krys::boo
         ClearFailedLoadURL();
       }
     }
-    else if (attr)
+    // Fire an error event if the url is empty, or if an image that uses srcset or picture has no source (the
+    // selected source is null and it uses srcset or picture).
+    else if (auto *imageElement = DynamicDowncast<html::HTMLImageElement>(element.get());
+             attr || (imageElement && imageElement->UsesSrcsetOrPicture()))
     {
-      // Fire an error event if the url is empty.
-      _failedLoadURL = *attr;
+      _failedLoadURL = attr.value_or(dom::DOMString());
       _hasPendingErrorEvent = true;
       LoadEventSender().DispatchEventSoon(*this, ErrorEventName());
     }

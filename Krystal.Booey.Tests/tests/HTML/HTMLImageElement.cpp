@@ -126,6 +126,32 @@ namespace krys::boo::tests
     CHECK(Count(painted, u8"draw-native-image") == 0u);
   }
 
+  TEST_CASE("HTMLImageElement: an image without a source fires error if it has src or uses srcset or picture",
+            "[HTML][HTMLImageElement][html:update-the-image-data][html:use-srcset-or-picture]"
+            "[html:dom-img-currentsrc]")
+  {
+    LoaderFixture loader;
+    ImageFixture fixture(u8"<img id=nocand srcset=' , '><img id=bad src='http://[bad'>"
+                         u8"<picture><source srcset=','><img id=picnone></picture><img id=nosrc>");
+    auto nocand = LoadEvents::ListenTo(fixture.ById(u8"nocand"));
+    auto bad = LoadEvents::ListenTo(fixture.ById(u8"bad"));
+    auto picnone = LoadEvents::ListenTo(fixture.ById(u8"picnone"));
+    auto nosrc = LoadEvents::ListenTo(fixture.ById(u8"nosrc"));
+    RunNetworkingTasks();
+
+    // A srcset or picture without image sources selects no source.
+    CHECK(nocand->Errors == 1);
+    CHECK(css::tests::ToNarrow(fixture.Image(u8"nocand").CurrentSrc()) == "");
+    // A URL that doesn't parse is the current URL as written.
+    CHECK(bad->Errors == 1);
+    CHECK(css::tests::ToNarrow(fixture.Image(u8"bad").CurrentSrc()) == "http://[bad");
+    CHECK(picnone->Errors == 1);
+    // Without src, srcset or picture, nothing happens.
+    CHECK(nosrc->Errors == 0);
+    CHECK(fixture.Image(u8"nosrc").Complete());
+    CHECK(fixture.Image(u8"nocand").Complete());
+  }
+
   TEST_CASE("HTMLImageElement: sizes from the width and height attributes, and object-fit",
             "[HTML][HTMLImageElement]")
   {
@@ -151,7 +177,8 @@ namespace krys::boo::tests
     CHECK(Count(fixture.Painted(), u8"(dest-rect at (8,73) size 30x20)") == 1u);
   }
 
-  TEST_CASE("HTMLImageElement: srcset picks by density, and by width with sizes", "[HTML][HTMLImageElement]")
+  TEST_CASE("HTMLImageElement: srcset picks by density, and by width with sizes",
+            "[HTML][HTMLImageElement][html:select-an-image-source][html:density-corrected-intrinsic-width-and-height]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///one.png"] = images::PNG;
@@ -183,7 +210,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("HTMLImageElement: a picture's sources, by type and media",
-            "[HTML][HTMLImageElement][html:dom-img-currentsrc][html:the-source-element]")
+            "[HTML][HTMLImageElement][html:dom-img-currentsrc][html:the-source-element][html:update-the-source-set]"
+            "[html:select-an-image-source]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///photo.jpg"] = images::JPEG;

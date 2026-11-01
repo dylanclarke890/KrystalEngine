@@ -107,9 +107,15 @@ namespace krys::boo::css
 
   bool SizesAttributeParser::Parse(TokenRange range, const ParserContext &context) noexcept
   {
+    // 1. Let unparsed sizes list be the result of parsing a comma-separated list of component values from the
+    //    value of element's sizes attribute (or the empty string, if the attribute is absent).
+    // 2. Let size be null.
+    // 3. For each unparsed size in unparsed sizes list:
     // Split on a comma token and parse the result tokens as (media-condition, length) pairs
     while (!range.IsAtEnd())
     {
+      // 3a. Remove all consecutive <whitespace-token>s from the end of unparsed size. If unparsed size is now
+      //     empty, then that is a parse error; continue.
       auto mediaConditionStart = range;
       // The length is the last component value before the comma which isn't whitespace or a comment
       auto lengthTokenStart = range;
@@ -123,11 +129,26 @@ namespace krys::boo::css
       }
       range.Discard();
 
+      // 3b. If the last component value in unparsed size is a valid non-negative <source-size-value>, then
+      // set
+      //     size to its value and remove the component value from unparsed size. Any CSS function other than
+      //     the math functions is invalid. Otherwise, there is a parse error; continue.
       auto length = CalculateLengthInPixels(lengthTokenStart.RangeUntil(lengthTokenEnd));
       if (!length)
       {
         continue;
       }
+
+      // 3c. If size is auto, and img is not null, and img allows auto-sizes:
+      // (There are no auto sizes: auto isn't a valid size.)
+      // 3d. Remove all consecutive <whitespace-token>s from the end of unparsed size. If unparsed size is now
+      //     empty:
+      // 3d.i. If this was not the last item in unparsed sizes list, that is a parse error.
+      // 3d.ii. If size is not auto, then return size. Otherwise, continue.
+      // (An empty media condition matches.)
+      // 3e. Parse the remaining component values in unparsed size as a <media-condition>. If it does not
+      // parse
+      //     correctly, or it does parse correctly but the <media-condition> evaluates to false, continue.
       auto mediaCondition =
         mq::MediaQueryParser::ParseCondition(mediaConditionStart.RangeUntil(lengthTokenStart), context);
       if (!mediaCondition)
@@ -144,10 +165,14 @@ namespace krys::boo::css
       {
         continue;
       }
+      // 3f. If size is not auto, then return size. Otherwise, continue.
       _length = *length;
       _lengthWasSet = true;
       return true;
     }
+
+    // 4. Return 100vw.
+    // (EffectiveSizeDefaultValue.)
     return false;
   }
 
