@@ -75,7 +75,7 @@ namespace krys::boo::html
     }
   }
 
-  Ref<Sanitizer> Sanitizer::Create(SanitizerPresets configuration) noexcept
+  Ref<Sanitizer> Sanitizer::Create(KRYS_MAYBE_UNUSED SanitizerPresets configuration) noexcept
   {
     // SPEC: If configuration is a SanitizerPresets string: assert: configuration is "default"; set
     // configuration to the built-in safe default configuration.
