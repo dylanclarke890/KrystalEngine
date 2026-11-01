@@ -18,6 +18,7 @@
 #include "Krystal.Booey/Rendering/RenderText.hpp"
 #include "Krystal.Booey/Rendering/Style/RenderStyle+GettersInlines.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
+#include <utility>
 
 namespace krys::boo::html
 {
@@ -71,6 +72,7 @@ namespace krys::boo::html
 
     if (localName == u8"shape")
     {
+      // The rectangle state is the missing and invalid value default, so rect and rectangle are left to it.
       auto shape = value.value_or(dom::DOMStringView());
       if (text::IsASCIICaselessEqual(shape, utf8_stringview(u8"default")))
       {
@@ -168,17 +170,35 @@ namespace krys::boo::html
     return EnclosingLayoutRect(ComputePath(Downcast<RenderElement>(*renderer)).FastBoundingRect());
   }
 
+  // Obtaining the shape an area layers onto its image:
+  // https://html.spec.whatwg.org/#image-map-processing-model
   Path HTMLAreaElement::GetRegion(const LayoutSize &size) const noexcept
   {
+    // 1. Find the state that the element's shape attribute represents.
+    // 2. Use the rules for parsing a list of floating-point numbers to parse the element's coords attribute,
+    // if
+    //    it is present, and let the coords list be the result. If the attribute is absent, let the coords
+    //    list be the empty list.
+    // (Both are kept as the attributes change.)
+    // 3. If the number of items in the coords list is less than the minimum number given for the area
+    // element's
+    //    current state, as per the following table, then the shape is empty; return.
+    // 4. Check for excess items in the coords list as per the entry in the following list corresponding to
+    // the
+    //    shape attribute's state.
+    // (Each shape checks its minimum, and reads only the coordinates it uses.)
     if (_coords.empty() && !IsDefault())
     {
       return Path();
     }
 
+    // 8. Now, the shape represented by the element is the one described for the entry in the list below
+    //    corresponding to the state of the shape attribute.
     Path path;
     switch (_shape)
     {
       case AreaShape::Poly:
+        // (An odd number of coordinates drops the last.)
         if (_coords.size() >= 6)
         {
           auto numPoints = _coords.size() / 2;
@@ -194,6 +214,9 @@ namespace krys::boo::html
       case AreaShape::Circle:
         if (_coords.size() >= 3)
         {
+          // 7. If the shape attribute represents the circle state, and the third number in the list is less
+          // than
+          //    or equal to zero, then the shape is empty; return.
           auto radius = static_cast<float>(_coords[2]);
           if (radius > 0)
           {
@@ -209,6 +232,20 @@ namespace krys::boo::html
           auto y0 = static_cast<float>(_coords[1]);
           auto x1 = static_cast<float>(_coords[2]);
           auto y1 = static_cast<float>(_coords[3]);
+
+          // 5. If the shape attribute represents the rectangle state, and the first number in the list is
+          //    numerically greater than the third number in the list, then swap those two numbers around.
+          if (x0 > x1)
+          {
+            std::swap(x0, x1);
+          }
+
+          // 6. If the shape attribute represents the rectangle state, and the second number in the list is
+          //    numerically greater than the fourth number in the list, then swap those two numbers around.
+          if (y0 > y1)
+          {
+            std::swap(y0, y1);
+          }
           path.AddRect(FloatRect(x0, y0, x1 - x0, y1 - y0));
         }
         break;

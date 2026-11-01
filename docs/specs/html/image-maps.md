@@ -8,42 +8,49 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 #### [4.8.12 The map element](https://html.spec.whatwg.org/#the-map-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLMapElement`: `name` is reflected and `areas` is a live collection of its area descendants.
 <!-- definitions: attr-map-name -->
 
-- [ ] [HTMLMapElement.areas](https://html.spec.whatwg.org/#dom-map-areas) — The areas attribute must return an HTMLCollection rooted at the map element, whose filter matches only area elements.
+- [x] [HTMLMapElement.areas](https://html.spec.whatwg.org/#dom-map-areas) — The areas attribute must return an HTMLCollection rooted at the map element, whose filter matches only area elements.
 
 #### [4.8.13 The area element](https://html.spec.whatwg.org/#the-area-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLAreaElement`: a hyperlink (4.6), whose `shape` and `coords` give its shape (4.8.14.2).
 <!-- definitions: attr-area-alt attr-area-shape attr-area-coords attr-area-shape-circle attr-area-shape-default attr-area-shape-poly attr-area-shape-rect -->
 
-- [ ] [HTMLAreaElement.referrerPolicy](https://html.spec.whatwg.org/#dom-area-referrerpolicy) — The IDL attribute referrerPolicy must reflect the referrerpolicy content attribute, limited to only known values.
+- [x] [HTMLAreaElement.referrerPolicy](https://html.spec.whatwg.org/#dom-area-referrerpolicy) — The IDL attribute referrerPolicy must reflect the referrerpolicy content attribute, limited to only known values.
 
 #### [4.8.14 Image maps](https://html.spec.whatwg.org/#image-maps)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ##### [4.8.14.1 Authoring](https://html.spec.whatwg.org/#authoring)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `usemap` is `HTMLImageElement::AssociatedMapElement`, by the rules for parsing a hash-name reference.
 <!-- definitions: image-map attr-hyperlink-usemap -->
 
 ##### [4.8.14.2 Processing model](https://html.spec.whatwg.org/#image-map-processing-model)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLImageElement::AssociatedMapElement`, `HTMLMapElement::MapMouseEvent` and `HTMLAreaElement::GetRegion`. Shapes are hit before default areas (see `DIFFERENCES.md`).
+> Fixed: a rectangle whose corners were given right to left or bottom to top had no area.
 
-- [ ] [If an img element has a usemap attribute specified, user agents must process it…](https://html.spec.whatwg.org/#image-map-processing-model) — If an img element has a usemap attribute specified, user agents must process it as follows:
+- [x] [If an img element has a usemap attribute specified, user agents must process it…](https://html.spec.whatwg.org/#image-map-processing-model) — If an img element has a usemap attribute specified, user agents must process it as follows:
   - 1. Parse the attribute's value using the rules for parsing a hash-name reference to a map element, with the element as the context node. This will return either an element (the map) or null.
   - 2. If that returned null, then return. The image is not associated with an image map after all.
   - 3. Otherwise, the user agent must collect all the area elements that are descendants of the map. Let areas be that list.
 
-- [ ] [If the user agent intends to show the text that the img element represents, the…](https://html.spec.whatwg.org/#image-map-processing-model) — If the user agent intends to show the text that the img element represents, then it must use the following steps:
+- [x] [If the user agent intends to show the text that the img element represents, the…](https://html.spec.whatwg.org/#image-map-processing-model) — If the user agent intends to show the text that the img element represents, then it must use the following steps:
   - 1. Remove all the area elements in areas that have no href attribute.
   - 2. Remove all the area elements in areas that have no alt attribute, or whose alt attribute's value is the empty string, if there is another area element in areas with the same value in the href attribute and with a non-empty alt attribute.
   - 3. Each remaining area element in areas represents a hyperlink. Those hyperlinks should all be made available to the user in a manner associated with the text of the img. In this context, user agents may represent area and img elements with no specified alt attributes, or whose alt attributes are the empty string or some other non-visible text, in an implementation-defined fashion intended to indica…
+  > n/a: an image's alt text doesn't show its areas' links.
 
-- [ ] [Each area element in areas must be processed as follows to obtain a shape to la…](https://html.spec.whatwg.org/#image-map-processing-model) — Each area element in areas must be processed as follows to obtain a shape to layer onto the image:
+- [x] [Each area element in areas must be processed as follows to obtain a shape to la…](https://html.spec.whatwg.org/#image-map-processing-model) — Each area element in areas must be processed as follows to obtain a shape to layer onto the image:
   - 1. Find the state that the element's shape attribute represents.
   - 2. Use the rules for parsing a list of floating-point numbers to parse the element's coords attribute, if it is present, and let the coords list be the result. If the attribute is absent, let the coords list be the empty list.
   - 3. If the number of items in the coords list is less than the minimum number given for the area element's current state, as per the following table, then the shape is empty; return.

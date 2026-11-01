@@ -84,7 +84,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLMapElement: an image's map and a map's image",
-                   "[HTML][ImageMaps]")
+                   "[HTML][ImageMaps][html:dom-map-areas][html:attr-map-name][html:attr-hyperlink-usemap]")
   {
     MapFixture fixture {u8"<!DOCTYPE html><img id=image usemap=#second><img id=other usemap=second>"
                         u8"<map id=first name=first><area id=area></map><map id=second></map>"
@@ -116,8 +116,9 @@ namespace krys::boo::html::tests
     CHECK(areas->Length() == 2);
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLMapElement: hit testing the areas' shapes",
-                   "[HTML][ImageMaps]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLMapElement: hit testing the areas' shapes",
+    "[HTML][ImageMaps][html:image-map-processing-model][html:attr-area-shape][html:attr-area-coords]")
   {
     MapFixture fixture;
     auto &image = fixture.Image();
@@ -162,6 +163,20 @@ namespace krys::boo::html::tests
       // Too few coordinates for a polygon.
       REQUIRE_FALSE(rect.SetAttribute(u8"shape", u8"polygon").HasException());
       CHECK(hit(20, 60) == &image);
+    }
+
+    SECTION("a rectangle's corners in either order, and odd or excess coordinates")
+    {
+      auto &rect = fixture.Area(u8"rect");
+      REQUIRE_FALSE(rect.SetAttribute(u8"shape", u8"rectangle").HasException());
+      REQUIRE_FALSE(rect.SetAttribute(u8"coords", u8"40,90,20,60,99").HasException());
+      CHECK(hit(30, 80) == &rect);
+      CHECK(hit(10, 10) == &image);
+
+      // The last of an odd number of a polygon's coordinates is dropped.
+      REQUIRE_FALSE(rect.SetAttribute(u8"shape", u8"poly").HasException());
+      REQUIRE_FALSE(rect.SetAttribute(u8"coords", u8"0,60,40,60,0,99,7").HasException());
+      CHECK(hit(5, 70) == &rect);
     }
 
     SECTION("an image without its map")
