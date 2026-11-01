@@ -4,6 +4,7 @@
 #include "Krystal.Booey/DOM/EventListenerHandle.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
+#include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
 
@@ -149,15 +150,16 @@ namespace krys::boo::html::tests
     CHECK(fixture.Navigations().size() == 1);
   }
 
-  TEST_CASE("HTMLAnchorElement: the rest of its interface", "[HTML][HTMLAnchorElement]")
+  TEST_CASE("HTMLAnchorElement: the rest of its interface", "[HTML][HTMLAnchorElement][html:dom-a-text]")
   {
     NavigationFixture fixture(
-      u8R"(<a id=a href="x" target=t hreflang=fr type="text/html" rel="noreferrer">A</a>
+      u8R"(<a id=a href="x" target=t hreflang=fr type="text/html" rel="noreferrer">A<b>a</b></a>
       <a id=b>B</a><img id=img src="i.png">)");
     auto &a = fixture.Get<HTMLAnchorElement>(u8"a");
     CHECK(Str(a.Target()) == "t");
     CHECK(Str(a.HrefLang()) == "fr");
     CHECK(Str(a.Type()) == "text/html");
+    CHECK(Str(a.Text()) == "Aa");
     CHECK(a.IsInteractiveContent());
     CHECK(a.Draggable());
 
@@ -168,6 +170,13 @@ namespace krys::boo::html::tests
 
     b.Target(u8"_top");
     CHECK(b.GetAttribute(u8"target") == u8"_top");
+
+    // Setting text replaces the children with a text node.
+    REQUIRE_FALSE(a.Text(u8"New").HasException());
+    CHECK(Str(a.Text()) == "New");
+    REQUIRE(a.FirstChild());
+    CHECK(a.FirstChild() == a.LastChild());
+    CHECK(Is<dom::Text>(*a.FirstChild()));
   }
 
   TEST_CASE("HTMLImageElement::IsServerMap", "[HTML][HTMLImageElement]")

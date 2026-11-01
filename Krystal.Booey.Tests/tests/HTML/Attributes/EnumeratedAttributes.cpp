@@ -134,7 +134,7 @@ namespace krys::boo::html::tests
   }
 
   TEST_CASE("Referrer policy attributes: referrerPolicy reflects its known values",
-            "[HTML][Attributes][html:referrer-policy-attribute]")
+            "[HTML][Attributes][html:referrer-policy-attribute][html:dom-a-referrerpolicy]")
   {
     auto document = CreateRef<dom::HTMLDocument>();
     CheckReferrerPolicy<HTMLAnchorElement>(*document, u8"a");
