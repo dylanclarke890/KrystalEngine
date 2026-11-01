@@ -27,8 +27,10 @@ namespace krys::boo::html
     LazyLoadImageObserver() noexcept = default;
 
     /// @brief Starts observing @p element, the image of a deferred load, with its document's observer.
+    /// @see https://html.spec.whatwg.org/#start-intersection-observing-a-lazy-loading-element
     static void Observe(dom::Element &element) noexcept;
     /// @brief Stops observing @p element with @p document's observer.
+    /// @see https://html.spec.whatwg.org/#stop-intersection-observing-a-lazy-loading-element
     static void Unobserve(dom::Element &element, dom::Document &document) noexcept;
 
     KRYS_NODISCARD bool IsObserved(dom::Element &element) const noexcept;

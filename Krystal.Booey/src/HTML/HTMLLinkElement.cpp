@@ -10,6 +10,7 @@
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/HTML/Algorithms/RenderBlocking.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/Cache/CachedResourceLoader.hpp"
@@ -256,7 +257,7 @@ namespace krys::boo::html
     }
     else if (localName == u8"blocking")
     {
-      if (Blocking().Contains(u8"render"))
+      if (RenderBlocking::HasRenderBlockingToken(*this))
       {
         if (_loading && MediaAttributeMatches() && !IsAlternate())
         {
@@ -377,8 +378,9 @@ namespace krys::boo::html
 
   void HTMLLinkElement::PotentiallyBlockRendering() noexcept
   {
-    bool explicitRenderBlocking = Blocking().Contains(u8"render");
-    if (explicitRenderBlocking || IsImplicitlyPotentiallyRenderBlocking())
+    // Whether the element is potentially render-blocking:
+    // https://html.spec.whatwg.org/#potentially-render-blocking
+    if (RenderBlocking::HasRenderBlockingToken(*this) || IsImplicitlyPotentiallyRenderBlocking())
     {
       RenderBlocking::BlockRendering(*this);
       _isRenderBlocking = true;
@@ -672,8 +674,8 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLLinkElement::CrossOrigin() const noexcept
   {
-    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
-    return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin");
+    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
   void HTMLLinkElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
@@ -788,8 +790,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::ReferrerPolicy() const noexcept
   {
-    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
+    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLLinkElement::ReferrerPolicy(dom::DOMString &&value) noexcept
@@ -824,8 +826,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLLinkElement::FetchPriority() const noexcept
   {
-    // FIXME: This is an enumerated attribute but I don't know the states/keywords.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
+    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
   void HTMLLinkElement::FetchPriority(dom::DOMString &&value) noexcept

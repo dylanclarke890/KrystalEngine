@@ -1362,7 +1362,7 @@ namespace krys::boo::url
 
   bool URL::IsAboutSrcDoc() const noexcept
   {
-    return ProtocolIsAbout() && Path() == u8"srcdoc";
+    return ProtocolIsAbout() && Path() == u8"srcdoc" && !HasQuery();
   }
 
   bool URL::IsIPv6Address(utf8_stringview string) noexcept

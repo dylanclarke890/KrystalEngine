@@ -74,7 +74,8 @@ namespace krys::boo::dom::tests
   }
 
   TEST_CASE("Document.URL and documentURI: the URL, serialised",
-            "[DOM][Document][dom:dom-document-url][dom:dom-document-documenturi][dom:concept-document-url]")
+            "[DOM][Document][dom:dom-document-url][dom:dom-document-documenturi][dom:concept-document-url]"
+            "[html:set-the-url][html:fallback-base-url][html:encoding-parsing-a-url][html:parse-a-url]")
   {
     auto document = CreateRef<HTMLDocument>();
 
@@ -119,7 +120,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("Document base URL from base elements", "[DOM][Document][dom:get-the-base-url]")
+  TEST_CASE("Document base URL from base elements",
+            "[DOM][Document][dom:get-the-base-url][html:document-base-url][html:respond-to-base-url-changes]")
   {
     SECTION("The first base element with an href sets the base URL, relative to the document's URL")
     {

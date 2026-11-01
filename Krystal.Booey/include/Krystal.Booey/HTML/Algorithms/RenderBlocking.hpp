@@ -29,5 +29,11 @@ namespace krys::boo::html
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#unblock-rendering
     KRYS_NODISCARD static void UnblockRendering(dom::Element &element) noexcept;
+
+    /// @brief Whether @p element's blocking tokens set contains "render", the only possible blocking token:
+    /// an element whose blocking tokens set contains it is potentially render-blocking.
+    /// @see https://html.spec.whatwg.org/#blocking-tokens-set
+    /// @see https://html.spec.whatwg.org/#potentially-render-blocking
+    KRYS_NODISCARD static bool HasRenderBlockingToken(const dom::Element &element) noexcept;
   };
 }

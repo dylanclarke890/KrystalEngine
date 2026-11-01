@@ -374,6 +374,7 @@ namespace krys::boo::html
     constexpr static AttributeState EmptyValueDefault = AttributeState::On;
   };
 
+  /// @see https://html.spec.whatwg.org/#fetch-priority-attribute
   template <>
   struct EnumeratedAttributeTraits<"fetchpriority", HTMLElement>
   {
@@ -399,6 +400,8 @@ namespace krys::boo::html
     constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
   };
 
+  /// @see https://html.spec.whatwg.org/#cors-settings-attribute
+  /// @see https://html.spec.whatwg.org/#attr-crossorigin-none
   template <>
   struct EnumeratedAttributeTraits<"crossorigin", HTMLElement>
   {
@@ -410,5 +413,27 @@ namespace krys::boo::html
     constexpr static AttributeState MissingValueDefault = AttributeState::NoCORS;
     constexpr static AttributeState InvalidValueDefault = AttributeState::Anonymous;
     constexpr static AttributeState EmptyValueDefault = AttributeState::Anonymous;
+  };
+
+  /// @brief A referrer policy attribute: its keywords are the referrer policies, and the empty string (the
+  /// `Default` state here) is its missing and invalid value default.
+  /// @see https://html.spec.whatwg.org/#referrer-policy-attribute
+  template <>
+  struct EnumeratedAttributeTraits<"referrerpolicy", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<9> StateMappings = {
+      KeywordStateMapping {u8"", AttributeState::Default},
+      KeywordStateMapping {u8"no-referrer", AttributeState::NoReferrer},
+      KeywordStateMapping {u8"no-referrer-when-downgrade", AttributeState::NoReferrerWhenDowngrade},
+      KeywordStateMapping {u8"same-origin", AttributeState::SameOrigin},
+      KeywordStateMapping {u8"origin", AttributeState::Origin},
+      KeywordStateMapping {u8"strict-origin", AttributeState::StrictOrigin},
+      KeywordStateMapping {u8"origin-when-cross-origin", AttributeState::OriginWhenCrossOrigin},
+      KeywordStateMapping {u8"strict-origin-when-cross-origin", AttributeState::StrictOriginWhenCrossOrigin},
+      KeywordStateMapping {u8"unsafe-url", AttributeState::UnsafeURL},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Default;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Default;
   };
 }

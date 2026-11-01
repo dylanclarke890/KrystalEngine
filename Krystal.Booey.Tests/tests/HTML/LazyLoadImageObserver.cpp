@@ -69,7 +69,8 @@ namespace krys::boo::tests
     };
   }
 
-  TEST_CASE("LazyLoadImageObserver: loading reflects its known values", "[HTML][LazyLoadImageObserver]")
+  TEST_CASE("LazyLoadImageObserver: loading reflects its known values",
+            "[HTML][LazyLoadImageObserver][html:lazy-loading-attribute]")
   {
     LazyImageFixture fixture(u8"<img id=missing><img id=lazy loading=LAZY><img id=invalid loading=soon>");
     CHECK(css::tests::ToNarrow(fixture.Image(u8"missing").Loading()) == "eager");
@@ -81,7 +82,8 @@ namespace krys::boo::tests
   }
 
   TEST_CASE("LazyLoadImageObserver: a lazy image loads once it intersects the viewport",
-            "[HTML][LazyLoadImageObserver]")
+            "[HTML][LazyLoadImageObserver][html:start-intersection-observing-a-lazy-loading-element]"
+            "[html:stop-intersection-observing-a-lazy-loading-element][html:lazy-load-intersection-observer]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;
@@ -153,7 +155,8 @@ namespace krys::boo::tests
     CHECK(loader.Strategy.Requests == List<utf8_string> {u8"file:///near.png", u8"file:///far.png"});
   }
 
-  TEST_CASE("LazyLoadImageObserver: images that load eagerly", "[HTML][LazyLoadImageObserver]")
+  TEST_CASE("LazyLoadImageObserver: images that load eagerly",
+            "[HTML][LazyLoadImageObserver][html:will-lazy-load-element-steps]")
   {
     LoaderFixture loader;
     loader.Strategy.Resources[u8"file:///a.png"] = images::PNG;

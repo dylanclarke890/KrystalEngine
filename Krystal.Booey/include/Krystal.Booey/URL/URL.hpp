@@ -207,7 +207,12 @@ namespace krys::boo::url
       return _hasOpaquePath;
     }
 
+    /// @brief Whether the URL is `about:blank`, with any query and fragment. Its path being "blank" means it
+    /// has no host, username or password.
+    /// @see https://html.spec.whatwg.org/#matches-about:blank
     KRYS_NODISCARD bool IsAboutBlank() const noexcept;
+    /// @brief Whether the URL is `about:srcdoc`, with any fragment but no query.
+    /// @see https://html.spec.whatwg.org/#matches-about:srcdoc
     KRYS_NODISCARD bool IsAboutSrcDoc() const noexcept;
 
     KRYS_NODISCARD bool IsMatchingDomain(utf8_stringview domain) const noexcept;

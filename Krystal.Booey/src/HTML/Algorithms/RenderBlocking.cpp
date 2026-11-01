@@ -8,10 +8,31 @@
 #include "Krystal.Booey/HTML/HTMLBodyElement.hpp"
 #include "Krystal.Booey/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.Booey/HTML/HTMLSlotElement.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include <ranges>
 
 namespace krys::boo::html
 {
+  bool RenderBlocking::HasRenderBlockingToken(const dom::Element &element) noexcept
+  {
+    // 1. Let value be the value of el's blocking attribute, or the empty string if no such attribute exists.
+    auto value = element.GetAttribute(u8"blocking").value_or(dom::DOMString());
+
+    // 2. Set value to value, converted to ASCII lowercase.
+    // 3. Let rawTokens be the result of splitting value on ASCII whitespace.
+    // 4. Return a set containing the elements of rawTokens that are possible blocking tokens.
+    // The only possible blocking token is "render", so this is whether a token matches it ASCII
+    // case-insensitively.
+    for (auto &token : infra::StringAlgorithms::SplitOnWhitespace(value))
+    {
+      if (infra::StringAlgorithms::ASCIICaseInsensitiveMatch(token, u8"render"))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool RenderBlocking::AllowsAddingRenderBlockingElements(const dom::Document &document) noexcept
   {
     return document.ContentType() == u8"text/html" && document.Body() == nullptr;

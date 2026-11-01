@@ -666,6 +666,7 @@ target_sources(Krystal.Booey.Tests
 
 		# HTML
 		tests/HTML/Algorithms/FocusAlgorithms.cpp
+		tests/HTML/Algorithms/RenderBlocking.cpp
 		tests/HTML/Attributes/EnumeratedAttributes.cpp
 		tests/HTML/Attributes/Reflection.cpp
 		tests/HTML/Attributes/ReflectURL.cpp

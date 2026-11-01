@@ -586,4 +586,26 @@ namespace krys::boo::url::tests
     CHECK(S(URL(base, u8"../d").String()) == "http://example.com/a/d");
     CHECK(S(URL(base, {}).String()) == "http://example.com/a/b/c?q");
   }
+
+  TEST_CASE("URL::IsAboutBlank and IsAboutSrcDoc: about:blank with any query, about:srcdoc without one",
+            "[URL][html:matches-about:blank][html:matches-about:srcdoc]")
+  {
+    for (auto blank : {u8"about:blank", u8"about:blank?x", u8"about:blank#f", u8"ABOUT:blank"})
+    {
+      INFO(reinterpret_cast<const char *>(blank));
+      CHECK(URL {blank}.IsAboutBlank());
+    }
+    for (auto other :
+         {u8"about:BLANK", u8"about:blank/", u8"about://host/blank", u8"about:srcdoc", u8"http://blank/"})
+    {
+      INFO(reinterpret_cast<const char *>(other));
+      CHECK_FALSE(URL {other}.IsAboutBlank());
+    }
+
+    CHECK(URL {u8"about:srcdoc"}.IsAboutSrcDoc());
+    CHECK(URL {u8"about:srcdoc#f"}.IsAboutSrcDoc());
+    CHECK_FALSE(URL {u8"about:srcdoc?x"}.IsAboutSrcDoc());
+    CHECK_FALSE(URL {u8"about:srcdoc?"}.IsAboutSrcDoc());
+    CHECK_FALSE(URL {u8"about:blank"}.IsAboutSrcDoc());
+  }
 }

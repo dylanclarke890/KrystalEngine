@@ -719,7 +719,9 @@ namespace krys::boo::dom
       return _url;
     }
 
-    /// @brief Sets the document's URL. An empty URL becomes `about:blank`.
+    /// @brief Sets the document's URL. An empty URL becomes `about:blank`, and its fragment directive is
+    /// consumed.
+    /// @see https://html.spec.whatwg.org/#set-the-url
     void SetURL(url::URL &&url) noexcept;
 
     /// @brief The target of the first `base` element with a `target` attribute, or the empty string.
@@ -740,8 +742,10 @@ namespace krys::boo::dom
       return _baseURL;
     }
 
-    /// @brief Parses @p url relative to the document base URL.
+    /// @brief Parses @p url relative to the document base URL. As documents are always UTF-8, this is
+    /// both parsing and encoding-parsing a URL.
     /// @see https://html.spec.whatwg.org/#encoding-parsing-a-url
+    /// @see https://html.spec.whatwg.org/#parse-a-url
     KRYS_NODISCARD url::URL CompleteURL(utf8_stringview url) const noexcept;
 
     /// @brief Parses @p url relative to @p baseURL.
@@ -1935,6 +1939,9 @@ namespace krys::boo::dom
     /// removed or moved, or its `href` or `target` changes.
     void ProcessBaseElement() noexcept;
 
+    /// @brief Recomputes the document base URL and responds to base URL changes.
+    /// @see https://html.spec.whatwg.org/#document-base-url
+    /// @see https://html.spec.whatwg.org/#respond-to-base-url-changes
     void UpdateBaseURL() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-document-object:get-the-parent

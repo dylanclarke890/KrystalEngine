@@ -7,6 +7,7 @@
 #include "Krystal.Booey/DOM/Document.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
 #include "Krystal.Booey/HTML/Algorithms/HyperlinkAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 #include "Krystal.Booey/HTML/CustomElement/CustomElementReactionQueue.hpp"
 
@@ -172,8 +173,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLAnchorElement::ReferrerPolicy() const noexcept
   {
-    // FIXME: ReferrerPolicy should be limited to known values
-    return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
+    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLAnchorElement::ReferrerPolicy(dom::DOMString &&value) noexcept

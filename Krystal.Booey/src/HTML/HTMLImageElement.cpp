@@ -119,8 +119,8 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLImageElement::CrossOrigin() const noexcept
   {
-    // FIXME: CrossOrigin() is limited to known values.
-    return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin");
+    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
   void HTMLImageElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
@@ -341,8 +341,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::ReferrerPolicy() const noexcept
   {
-    // FIXME: ReferrerPolicy() is limited to known values.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
+    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLImageElement::ReferrerPolicy(dom::DOMString &&value) noexcept
@@ -375,8 +375,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLImageElement::FetchPriority() const noexcept
   {
-    // FIXME: FetchPriority() is limited to known values.
-    return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
+    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
   void HTMLImageElement::FetchPriority(dom::DOMString &&value) noexcept
@@ -520,11 +520,15 @@ namespace krys::boo::html
 
   bool HTMLImageElement::IsLazyLoadable() const noexcept
   {
+    // 1. If scripting is disabled for element, then return false.
     auto *frame = NodeDocument().Frame();
     if (!frame || !frame->GetMediaEnvironment().CanExecuteScripts)
     {
       return false;
     }
+
+    // 2. If element's lazy loading attribute is in the Lazy state, then return true.
+    // 3. Return false.
     return HasLazyLoadableAttributeValue(GetAttribute(u8"loading"));
   }
 

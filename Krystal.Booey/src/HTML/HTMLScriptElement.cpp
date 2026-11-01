@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Booey/HTML/HTMLScriptElement.hpp"
 #include "Krystal.Booey/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/Reflection.hpp"
 
 #include "Krystal.Core/Text/ASCII.hpp"
@@ -88,17 +89,19 @@ namespace krys::boo::html
 
   Maybe<dom::DOMString> HTMLScriptElement::CrossOrigin() const noexcept
   {
-    return Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"type");
+    return EnumeratedAttribute<"crossorigin", HTMLElement>::ResolveCanonicalKeyword<Maybe<dom::DOMString>>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"crossorigin"));
   }
 
   void HTMLScriptElement::CrossOrigin(Maybe<dom::DOMString> &&value) noexcept
   {
-    Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"type", krys::move(value));
+    Reflection::Reflect<Maybe<dom::DOMString>>(*this, u8"crossorigin", krys::move(value));
   }
 
   dom::DOMString HTMLScriptElement::ReferrerPolicy() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy").value_or(u8"");
+    return EnumeratedAttribute<"referrerpolicy", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"referrerpolicy"));
   }
 
   void HTMLScriptElement::ReferrerPolicy(dom::DOMString &&value) noexcept
@@ -118,7 +121,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLScriptElement::FetchPriority() const noexcept
   {
-    return Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority").value_or(u8"");
+    return EnumeratedAttribute<"fetchpriority", HTMLElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflection::Reflect<dom::DOMString>(*this, u8"fetchpriority"));
   }
 
   void HTMLScriptElement::FetchPriority(dom::DOMString &&value) noexcept

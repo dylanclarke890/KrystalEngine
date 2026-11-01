@@ -1172,25 +1172,37 @@ namespace krys::boo::dom
       return;
     }
 
+    // 1. Set document's URL to url.
     _url = krys::move(newURL);
+
+    // 2. Respond to base URL changes given document.
     UpdateBaseURL();
   }
 
   const url::URL &Document::FallbackBaseURL() const noexcept
   {
-    // SPEC-VIOLATION(HTML): there are no iframes or browsing contexts, so a document is never an iframe
-    // srcdoc document and never has an about base URL; the fallback base URL is always the document's URL.
+    // 1. If document's URL matches about:blank or matches about:srcdoc, and document's about base URL is
+    //    non-null, then return document's about base URL. (Skipped: documents have no about base URL.)
+    // 2. Return document's URL.
     return _url;
   }
 
   url::URL Document::CompleteURL(utf8_stringview url) const noexcept
   {
+    // 1. Let encoding be UTF-8.
+    // 2. If environment is a Document object, then set encoding to environment's character encoding.
+    // 3. Otherwise, if environment's relevant global object is a Window object, set encoding to environment's
+    //    relevant global object's associated Document's character encoding.
+    // Documents are always UTF-8, which the URL parser always uses.
+    // 4. Let baseURL be environment's base URL, if environment is a Document object; otherwise environment's
+    // API
+    //    base URL.
+    // 5. Return the result of applying the URL parser to url, with baseURL and encoding.
     return CompleteURL(url, _baseURL);
   }
 
   url::URL Document::CompleteURL(utf8_stringview url, const url::URL &baseURL) const noexcept
   {
-    // NOTE: the document's encoding is always UTF-8, so the URL is parsed without one.
     return url::URL(baseURL, url);
   }
 
@@ -1253,13 +1265,25 @@ namespace krys::boo::dom
 
   void Document::UpdateBaseURL() noexcept
   {
+    // The document base URL, kept up to date:
     // https://html.spec.whatwg.org/#document-base-url
-    // 1. If there is no base element that has an href attribute in the Document, then return the Document's
-    // fallback base URL.
-    // 2. Otherwise, return the frozen base URL of the first base element in the Document that has an href
-    // attribute, in tree order.
+    // 1. If document has a descendant base element that has an href attribute, then return the frozen base
+    // URL
+    //    of the first such base element in tree order.
+    // 2. If document's base URL override is non-null, then return document's base URL override. (Skipped:
+    //    documents have no base URL override.)
+    // 3. Return document's fallback base URL.
     _baseURL = _baseElementURL.IsNull() ? FallbackBaseURL() : _baseElementURL;
 
+    // Then respond to base URL changes given document:
+    // https://html.spec.whatwg.org/#respond-to-base-url-changes
+    // 1. The user agent should update any user interface elements which are displaying affected URLs, or data
+    //    derived from such URLs, to the user. (Skipped: Booey has no such user interface.)
+    // 2. Ensure that the CSS :link/:visited/etc. pseudo-classes are updated appropriately. (Nothing to do:
+    //    without a visited link store, whether a link is visited doesn't depend on its URL.)
+    // 3. For each descendant of document's shadow-including descendants: (Skipped: no speculation rules.)
+    // 4. Consider speculative loads given document. (Skipped: no speculative loading.)
+    // Style sheets parsed from now on resolve against the new base URL.
     InvalidateCachedCSSParserContext();
   }
 
