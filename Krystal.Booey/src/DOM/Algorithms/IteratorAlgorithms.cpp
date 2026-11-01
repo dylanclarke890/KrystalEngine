@@ -223,96 +223,136 @@ namespace krys::boo::dom
   ExceptionOr<Node *> IteratorAlgorithms::TraverseChildren(TreeWalker &walker,
                                                            TraverseFirstOrLast type) noexcept
   {
-    Node *node = &walker.CurrentNode();
-    node = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
+    // 1. Let node be walker’s current.
+    RefPtr<Node> node = ShareRefPtr(&walker.CurrentNode());
 
-    while (node != nullptr)
+    // 2. Set node to node’s first child if type is "first"; otherwise to node’s last child.
+    node = ShareRefPtr(type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild());
+
+    // 3. While node is non-null:
+    while (node)
     {
+      // 3a. Let result be the result of filtering node within walker.
       auto result = FilterNode(walker, *node);
       if (result.HasException())
       {
         return result.ReleaseException();
       }
 
+      // 3b. If result is FILTER_ACCEPT, then set walker’s current to node and return node.
       if (result.Value() == FilterResult::FILTER_ACCEPT)
       {
         walker.CurrentNode(*node);
-        return node;
+        return node.get();
       }
-      else if (result.Value() == FilterResult::FILTER_SKIP)
+
+      // 3c. If result is FILTER_SKIP:
+      if (result.Value() == FilterResult::FILTER_SKIP)
       {
-        auto child = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
+        // 3c.i. Let child be node’s first child if type is "first"; otherwise node’s last child.
+        Node *child = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
+
+        // 3c.ii. If child is non-null, then set node to child and continue.
         if (child)
         {
-          node = child;
+          node = ShareRefPtr(child);
           continue;
         }
       }
 
-      while (node != nullptr)
+      // 3d. While node is non-null:
+      while (node)
       {
-        auto *sibling = type == TraverseFirstOrLast::First ? node->NextSibling() : node->PreviousSibling();
-        if (sibling != nullptr)
+        // 3d.i. Let sibling be node’s next sibling if type is "first"; otherwise node’s previous sibling.
+        Node *sibling = type == TraverseFirstOrLast::First ? node->NextSibling() : node->PreviousSibling();
+
+        // 3d.ii. If sibling is non-null, then set node to sibling and break.
+        if (sibling)
         {
-          node = sibling;
+          node = ShareRefPtr(sibling);
           break;
         }
 
-        auto *parent = node != nullptr ? node->ParentNode() : nullptr;
-        if (parent == nullptr || parent == &walker.Root() || parent == &walker.CurrentNode())
+        // 3d.iii. Let parent be node’s parent.
+        Node *parent = node->ParentNode();
+
+        // 3d.iv. If parent is null, walker’s root, or walker’s current, then return null.
+        if (!parent || parent == &walker.Root() || parent == &walker.CurrentNode())
         {
           return nullptr;
         }
 
-        node = parent;
+        // 3d.v. Set node to parent.
+        node = ShareRefPtr(parent);
       }
     }
 
+    // 4. Return null.
     return nullptr;
   }
 
   ExceptionOr<Node *> IteratorAlgorithms::TraverseSiblings(TreeWalker &walker,
                                                            TraversalNextOrPrev type) noexcept
   {
-    Node *node = &walker.CurrentNode();
+    // 1. Let node be walker’s current.
+    RefPtr<Node> node = ShareRefPtr(&walker.CurrentNode());
+
+    // 2. If node is root, then return null.
     if (node == &walker.Root())
     {
       return nullptr;
     }
 
+    // 3. While true:
     while (true)
     {
-      auto sibling = type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling();
-      while (sibling != nullptr)
+      // 3a. Let sibling be node’s next sibling if type is "next"; otherwise node’s previous sibling.
+      RefPtr<Node> sibling =
+        ShareRefPtr(type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling());
+
+      // 3b. While sibling is non-null:
+      while (sibling)
       {
+        // 3b.i. Set node to sibling.
         node = sibling;
 
+        // 3b.ii. Let result be the result of filtering node within walker.
         auto result = FilterNode(walker, *node);
         if (result.HasException())
         {
           return result.ReleaseException();
         }
 
+        // 3b.iii. If result is FILTER_ACCEPT, then set walker’s current to node and return node.
         if (result.Value() == FilterResult::FILTER_ACCEPT)
         {
           walker.CurrentNode(*node);
-          return node;
+          return node.get();
         }
 
-        sibling = type == TraversalNextOrPrev::Next ? node->FirstChild() : node->LastChild();
+        // 3b.iv. Set sibling to node’s first child if type is "next"; otherwise to node’s last child.
+        sibling = ShareRefPtr(type == TraversalNextOrPrev::Next ? node->FirstChild() : node->LastChild());
 
-        if (result.Value() == FilterResult::FILTER_REJECT || sibling == nullptr)
+        // 3b.v. If result is FILTER_REJECT or sibling is null, then set sibling to node’s next sibling if
+        // type is
+        //       "next"; otherwise to node’s previous sibling.
+        if (result.Value() == FilterResult::FILTER_REJECT || !sibling)
         {
-          sibling = type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling();
+          sibling =
+            ShareRefPtr(type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling());
         }
       }
 
-      node = node->ParentNode();
-      if (node == nullptr || node == &walker.Root())
+      // 3c. Set node to node’s parent.
+      node = ShareRefPtr(node->ParentNode());
+
+      // 3d. If node is null or walker’s root, then return null.
+      if (!node || node == &walker.Root())
       {
         return nullptr;
       }
 
+      // 3e. If the return value of filtering node within walker is FILTER_ACCEPT, then return null.
       auto result = FilterNode(walker, *node);
       if (result.HasException())
       {

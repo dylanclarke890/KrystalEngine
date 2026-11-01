@@ -7,12 +7,14 @@
 
 namespace krys::boo::dom
 {
+  /// @brief Walks the subtree of its root, moving its current node to the nodes its filter accepts.
   /// @see https://dom.spec.whatwg.org/#interface-treewalker
   class TreeWalker : public TraversalBase, public RefCounted<TreeWalker>
   {
     friend class Document;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#treewalker-current
     Ref<Node> _currentNode;
 
   protected:

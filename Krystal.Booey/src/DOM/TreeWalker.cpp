@@ -10,10 +10,18 @@ namespace krys::boo::dom
 
   ExceptionOr<Node *> TreeWalker::ParentNode() noexcept
   {
-    Node *node = &CurrentNode();
-    while (node != nullptr && node != &Root())
+    // 1. Let node be this’s current.
+    RefPtr<Node> node = _currentNode;
+
+    // 2. While node is non-null and is not this’s root:
+    while (node && node != &Root())
     {
-      node = node->ParentNode();
+      // 2a. Set node to node’s parent.
+      node = ShareRefPtr(node->ParentNode());
+
+      // 2b. If node is non-null and filtering node within this returns FILTER_ACCEPT, then set this’s current
+      // to node
+      //     and return node.
       if (node)
       {
         auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
@@ -25,11 +33,12 @@ namespace krys::boo::dom
         if (filterResult.Value() == FilterResult::FILTER_ACCEPT)
         {
           CurrentNode(*node);
-          return node;
+          return node.get();
         }
       }
     }
 
+    // 3. Return null.
     return nullptr;
   }
 
@@ -55,43 +64,65 @@ namespace krys::boo::dom
 
   ExceptionOr<Node *> TreeWalker::PreviousNode() noexcept
   {
-    Node *node = &CurrentNode();
+    // 1. Let node be this’s current.
+    RefPtr<Node> node = _currentNode;
+
+    // 2. While node is not this’s root:
     while (node != &Root())
     {
-      auto sibling = node->PreviousSibling();
-      while (sibling != nullptr)
+      // 2a. Let sibling be node’s previous sibling.
+      RefPtr<Node> sibling = ShareRefPtr(node->PreviousSibling());
+
+      // 2b. While sibling is non-null:
+      while (sibling)
       {
+        // 2b.i. Set node to sibling.
         node = sibling;
 
+        // 2b.ii. Let result be the result of filtering node within this.
         auto result = IteratorAlgorithms::FilterNode(*this, *node);
-        while (!result.HasException() && result.Value() != FilterResult::FILTER_REJECT
-               && node->LastChild() != nullptr)
-        {
-          node = node->LastChild();
-          result = IteratorAlgorithms::FilterNode(*this, *node);
-        }
-
         if (result.HasException())
         {
           return result.ReleaseException();
         }
 
+        // 2b.iii. While result is not FILTER_REJECT and node has a child:
+        while (result.Value() != FilterResult::FILTER_REJECT && node->LastChild())
+        {
+          // 2b.iii.A. Set node to node’s last child.
+          node = ShareRefPtr(node->LastChild());
+
+          // 2b.iii.B. Set result to the result of filtering node within this.
+          result = IteratorAlgorithms::FilterNode(*this, *node);
+          if (result.HasException())
+          {
+            return result.ReleaseException();
+          }
+        }
+
+        // 2b.iv. If result is FILTER_ACCEPT, then set this’s current to node and return node.
         if (result.Value() == FilterResult::FILTER_ACCEPT)
         {
           CurrentNode(*node);
-          return node;
+          return node.get();
         }
 
-        sibling = node->PreviousSibling();
+        // 2b.v. Set sibling to node’s previous sibling.
+        sibling = ShareRefPtr(node->PreviousSibling());
       }
 
-      if (node == &Root() || node->ParentNode() == nullptr)
+      // 2c. If node is this’s root or node’s parent is null, then return null.
+      if (node == &Root() || !node->ParentNode())
       {
         return nullptr;
       }
 
-      node = node->ParentNode();
+      // 2d. Set node to node’s parent.
+      node = ShareRefPtr(node->ParentNode());
 
+      // 2e. If the return value of filtering node within this is FILTER_ACCEPT, then set this’s current to
+      // node and
+      //     return node.
       auto result = IteratorAlgorithms::FilterNode(*this, *node);
       if (result.HasException())
       {
@@ -101,69 +132,97 @@ namespace krys::boo::dom
       if (result.Value() == FilterResult::FILTER_ACCEPT)
       {
         CurrentNode(*node);
-        return node;
+        return node.get();
       }
     }
 
+    // 3. Return null.
     return nullptr;
   }
 
   ExceptionOr<Node *> TreeWalker::NextNode() noexcept
   {
-    Node *node = &CurrentNode();
+    // 1. Let node be this’s current.
+    RefPtr<Node> node = _currentNode;
 
-    ExceptionOr<FilterResult> result = FilterResult::FILTER_ACCEPT;
+    // 2. Let result be FILTER_ACCEPT.
+    FilterResult result = FilterResult::FILTER_ACCEPT;
 
+    // 3. While true:
     while (true)
     {
-      while (!result.HasException() && result.Value() != FilterResult::FILTER_REJECT && node
-             && node->FirstChild() != nullptr)
+      // 3a. While result is not FILTER_REJECT and node has a child:
+      while (result != FilterResult::FILTER_REJECT && node->FirstChild())
       {
-        node = node->FirstChild();
-        result = IteratorAlgorithms::FilterNode(*this, *node);
+        // 3a.i. Set node to its first child.
+        node = ShareRefPtr(node->FirstChild());
 
-        if (!result.HasException() && result.Value() == FilterResult::FILTER_ACCEPT)
+        // 3a.ii. Set result to the result of filtering node within this.
+        auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
+        if (filterResult.HasException())
+        {
+          return filterResult.ReleaseException();
+        }
+        result = filterResult.Value();
+
+        // 3a.iii. If result is FILTER_ACCEPT, then set this’s current to node and return node.
+        if (result == FilterResult::FILTER_ACCEPT)
         {
           CurrentNode(*node);
-          return node;
+          return node.get();
         }
       }
 
-      if (result.HasException())
-      {
-        return result.ReleaseException();
-      }
-
+      // 3b. Let sibling be null.
       Node *sibling = nullptr;
-      Node *temporary = node;
 
-      while (temporary != nullptr)
+      // 3c. Let temporary be node.
+      Node *temporary = node.get();
+
+      // 3d. While temporary is non-null:
+      while (temporary)
       {
+        // 3d.i. If temporary is this’s root, then return null.
         if (temporary == &Root())
         {
           return nullptr;
         }
 
+        // 3d.ii. Set sibling to temporary’s next sibling.
         sibling = temporary->NextSibling();
-        if (sibling != nullptr)
+
+        // 3d.iii. If sibling is non-null, then break.
+        if (sibling)
         {
-          node = sibling;
           break;
         }
 
+        // 3d.iv. Set temporary to temporary’s parent.
         temporary = temporary->ParentNode();
       }
 
-      result = IteratorAlgorithms::FilterNode(*this, *node);
-      if (result.HasException())
+      // 3e. If sibling is null, then return null.
+      if (!sibling)
       {
-        return result.ReleaseException();
+        return nullptr;
       }
 
-      if (result.Value() == FilterResult::FILTER_ACCEPT)
+      // 3f. Set node to sibling.
+      node = ShareRefPtr(sibling);
+
+      // 3g. Set result to the result of filtering node within this.
+      auto filterResult = IteratorAlgorithms::FilterNode(*this, *node);
+      if (filterResult.HasException())
+      {
+        return filterResult.ReleaseException();
+      }
+      result = filterResult.Value();
+
+      // 3h. If result is FILTER_ACCEPT, then set this’s current to node and return node.
+      if (result == FilterResult::FILTER_ACCEPT)
       {
         CurrentNode(*node);
-        return node;
+        return node.get();
       }
     }
   }

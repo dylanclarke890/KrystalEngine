@@ -2464,27 +2464,28 @@ Status: reviewed (2026-10-31)
 
 ### [6.2. Interface TreeWalker](https://dom.spec.whatwg.org/#interface-treewalker)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> TreeWalker is `DOM/TreeWalker.hpp`, with its current as `_currentNode`; traverse children and traverse siblings are in `IteratorAlgorithms`. The root, whatToShow and filter getters are `TraversalBase`'s.
 <!-- definitions: treewalker-current -->
 
-- [ ] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.
+- [x] [TreeWalker.root](https://dom.spec.whatwg.org/#dom-treewalker-root) — The root getter steps are to return this’s root.
 
-- [ ] [TreeWalker.whatToShow](https://dom.spec.whatwg.org/#dom-treewalker-whattoshow) — The whatToShow getter steps are to return this’s whatToShow.
+- [x] [TreeWalker.whatToShow](https://dom.spec.whatwg.org/#dom-treewalker-whattoshow) — The whatToShow getter steps are to return this’s whatToShow.
 
-- [ ] [TreeWalker.filter](https://dom.spec.whatwg.org/#dom-treewalker-filter) — The filter getter steps are to return this’s filter.
+- [x] [TreeWalker.filter](https://dom.spec.whatwg.org/#dom-treewalker-filter) — The filter getter steps are to return this’s filter.
 
-- [ ] [TreeWalker.currentNode](https://dom.spec.whatwg.org/#dom-treewalker-currentnode) — The currentNode getter steps are to return this’s current.
+- [x] [TreeWalker.currentNode](https://dom.spec.whatwg.org/#dom-treewalker-currentnode) — The currentNode getter steps are to return this’s current.
 
-- [ ] [The currentNode setter steps](https://dom.spec.whatwg.org/#dom-treewalker-currentnode) — The currentNode setter steps are to set this’s current to the given value.
+- [x] [The currentNode setter steps](https://dom.spec.whatwg.org/#dom-treewalker-currentnode) — The currentNode setter steps are to set this’s current to the given value.
 
-- [ ] [TreeWalker.parentNode()](https://dom.spec.whatwg.org/#dom-treewalker-parentnode) — The parentNode() method steps are:
+- [x] [TreeWalker.parentNode()](https://dom.spec.whatwg.org/#dom-treewalker-parentnode) — The parentNode() method steps are:
   - 1. Let node be this’s current.
   - 2. While node is non-null and is not this’s root:
     - 2a. Set node to node’s parent.
     - 2b. If node is non-null and filtering node within this returns FILTER_ACCEPT, then set this’s current to node and return node.
   - 3. Return null.
 
-- [ ] [traverse children (TreeWalker)](https://dom.spec.whatwg.org/#concept-traverse-children) — To traverse children, given a TreeWalker object walker and "first" or "last" type:
+- [x] [traverse children (TreeWalker)](https://dom.spec.whatwg.org/#concept-traverse-children) — To traverse children, given a TreeWalker object walker and "first" or "last" type:
   - 1. Let node be walker’s current.
   - 2. Set node to node’s first child if type is "first"; otherwise to node’s last child.
   - 3. While node is non-null:
@@ -2501,11 +2502,11 @@ Status: unreviewed
       - 3d.v. Set node to parent.
   - 4. Return null.
 
-- [ ] [TreeWalker.firstChild()](https://dom.spec.whatwg.org/#dom-treewalker-firstchild) — The firstChild() method steps are to traverse children with this and "first".
+- [x] [TreeWalker.firstChild()](https://dom.spec.whatwg.org/#dom-treewalker-firstchild) — The firstChild() method steps are to traverse children with this and "first".
 
-- [ ] [TreeWalker.lastChild()](https://dom.spec.whatwg.org/#dom-treewalker-lastchild) — The lastChild() method steps are to traverse children with this and "last".
+- [x] [TreeWalker.lastChild()](https://dom.spec.whatwg.org/#dom-treewalker-lastchild) — The lastChild() method steps are to traverse children with this and "last".
 
-- [ ] [traverse siblings](https://dom.spec.whatwg.org/#concept-traverse-siblings) — To traverse siblings, given a TreeWalker object walker and "next" or "previous" type:
+- [x] [traverse siblings](https://dom.spec.whatwg.org/#concept-traverse-siblings) — To traverse siblings, given a TreeWalker object walker and "next" or "previous" type:
   - 1. Let node be walker’s current.
   - 2. If node is root, then return null.
   - 3. While true:
@@ -2520,11 +2521,11 @@ Status: unreviewed
     - 3d. If node is null or walker’s root, then return null.
     - 3e. If the return value of filtering node within walker is FILTER_ACCEPT, then return null.
 
-- [ ] [TreeWalker.nextSibling()](https://dom.spec.whatwg.org/#dom-treewalker-nextsibling) — The nextSibling() method steps are to traverse siblings with this and "next".
+- [x] [TreeWalker.nextSibling()](https://dom.spec.whatwg.org/#dom-treewalker-nextsibling) — The nextSibling() method steps are to traverse siblings with this and "next".
 
-- [ ] [TreeWalker.previousSibling()](https://dom.spec.whatwg.org/#dom-treewalker-previoussibling) — The previousSibling() method steps are to traverse siblings with this and "previous".
+- [x] [TreeWalker.previousSibling()](https://dom.spec.whatwg.org/#dom-treewalker-previoussibling) — The previousSibling() method steps are to traverse siblings with this and "previous".
 
-- [ ] [TreeWalker.previousNode()](https://dom.spec.whatwg.org/#dom-treewalker-previousnode) — The previousNode() method steps are:
+- [x] [TreeWalker.previousNode()](https://dom.spec.whatwg.org/#dom-treewalker-previousnode) — The previousNode() method steps are:
   - 1. Let node be this’s current.
   - 2. While node is not this’s root:
     - 2a. Let sibling be node’s previous sibling.
@@ -2541,7 +2542,7 @@ Status: unreviewed
     - 2e. If the return value of filtering node within this is FILTER_ACCEPT, then set this’s current to node and return node.
   - 3. Return null.
 
-- [ ] [TreeWalker.nextNode()](https://dom.spec.whatwg.org/#dom-treewalker-nextnode) — The nextNode() method steps are:
+- [x] [TreeWalker.nextNode()](https://dom.spec.whatwg.org/#dom-treewalker-nextnode) — The nextNode() method steps are:
   - 1. Let node be this’s current.
   - 2. Let result be FILTER_ACCEPT.
   - 3. While true:
