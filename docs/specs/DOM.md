@@ -2564,7 +2564,8 @@ Status: reviewed (2026-10-31)
 
 ### [6.3. Interface NodeFilter](https://dom.spec.whatwg.org/#interface-nodefilter)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> NodeFilter is `DOM/Callbacks/NodeFilter.hpp`, a C++ subclass with `AcceptNode`; its constants are the `FilterResult` (`DOM/Enums/FilterResult.hpp`) and `WhatToShow` (`DOM/Enums/WhatToShow.hpp`) enumerations, the legacy `SHOW_ENTITY_REFERENCE`, `SHOW_ENTITY` and `SHOW_NOTATION` included.
 <!-- definitions: dom-nodefilter-filter_accept dom-nodefilter-filter_reject dom-nodefilter-filter_skip dom-nodefilter-show_all dom-nodefilter-show_element dom-nodefilter-show_attribute dom-nodefilter-show_text dom-nodefilter-show_cdata_section dom-nodefilter-show_processing_instruction dom-nodefilter-show_comment dom-nodefilter-show_document dom-nodefilter-show_document_type dom-nodefilter-show_document_fragment -->
 
 ## [7. Sets](https://dom.spec.whatwg.org/#sets)

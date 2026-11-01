@@ -650,6 +650,7 @@ target_sources(Krystal.Booey.Tests
 		tests/Editing/FrameSelection.cpp
 		tests/Rendering/RenderSelection.cpp
 		tests/Editing/VisibleUnits.cpp
+		tests/DOM/NodeFilter.cpp
 		tests/DOM/NodeIterator.cpp
 		tests/DOM/NodeList.cpp
 		tests/DOM/ProcessingInstruction.cpp
