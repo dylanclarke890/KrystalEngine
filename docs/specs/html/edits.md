@@ -8,29 +8,33 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.7 Edits](https://html.spec.whatwg.org/#edits)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.7.1 The ins element](https://html.spec.whatwg.org/#the-ins-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLModElement`, shared with `del`.
 
 #### [4.7.2 The del element](https://html.spec.whatwg.org/#the-del-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLModElement`, shared with `ins`.
 
 #### [4.7.3 Attributes common to ins and del elements](https://html.spec.whatwg.org/#attributes-common-to-ins-and-del-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLModElement`: `cite` is reflected as a URL and `dateTime` as it's written; the date isn't parsed (see `DIFFERENCES.md`).
 <!-- definitions: attr-mod-cite attr-mod-datetime -->
 
 #### [4.7.4 Edits and paragraphs](https://html.spec.whatwg.org/#edits-and-paragraphs)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [4.7.5 Edits and lists](https://html.spec.whatwg.org/#edits-and-lists)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [4.7.6 Edits and tables](https://html.spec.whatwg.org/#edits-and-tables)
 
-Status: unreviewed
+Status: n/a (author conformance)
