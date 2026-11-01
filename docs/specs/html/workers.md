@@ -12,55 +12,55 @@ Status: unreviewed
 
 ### [10.1 Introduction](https://html.spec.whatwg.org/#introduction-15)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 #### [10.1.1 Scope](https://html.spec.whatwg.org/#scope-2)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 #### [10.1.2 Examples](https://html.spec.whatwg.org/#examples-6)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.1 A background number-crunching worker](https://html.spec.whatwg.org/#a-background-number-crunching-worker)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.2 Using a JavaScript module as a worker](https://html.spec.whatwg.org/#module-worker-example)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.3 Shared workers introduction](https://html.spec.whatwg.org/#shared-workers-introduction)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.4 Shared state using a shared worker](https://html.spec.whatwg.org/#shared-state-using-a-shared-worker)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.5 Delegation](https://html.spec.whatwg.org/#delegation)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.2.6 Providing libraries](https://html.spec.whatwg.org/#providing-libraries)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 #### [10.1.3 Tutorials](https://html.spec.whatwg.org/#tutorials)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.3.1 Creating a dedicated worker](https://html.spec.whatwg.org/#creating-a-dedicated-worker)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.3.2 Communicating with a dedicated worker](https://html.spec.whatwg.org/#communicating-with-a-dedicated-worker)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.1.3.3 Shared workers](https://html.spec.whatwg.org/#shared-workers)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ### [10.2 Infrastructure](https://html.spec.whatwg.org/#infrastructure-2)
 
@@ -68,56 +68,56 @@ Status: unreviewed
 
 #### [10.2.1 The global scope](https://html.spec.whatwg.org/#the-global-scope)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.2.1.1 The WorkerGlobalScope common interface](https://html.spec.whatwg.org/#the-workerglobalscope-common-interface)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: concept-WorkerGlobalScope-owner-set concept-workerglobalscope-type concept-workerglobalscope-url concept-workerglobalscope-name concept-workerglobalscope-policy-container concept-workerglobalscope-embedder-policy concept-workerglobalscope-module-map concept-workerglobalscope-cross-origin-isolated-capability -->
 
-- [ ] [WorkerGlobalScope.self](https://html.spec.whatwg.org/#dom-workerglobalscope-self) — The self attribute must return the WorkerGlobalScope object itself.
+- [x] [WorkerGlobalScope.self](https://html.spec.whatwg.org/#dom-workerglobalscope-self) — The self attribute must return the WorkerGlobalScope object itself.
 
-- [ ] [WorkerGlobalScope.location](https://html.spec.whatwg.org/#dom-workerglobalscope-location) — The location attribute must return the WorkerLocation object whose associated WorkerGlobalScope object is the WorkerGlobalScope object.
+- [x] [WorkerGlobalScope.location](https://html.spec.whatwg.org/#dom-workerglobalscope-location) — The location attribute must return the WorkerLocation object whose associated WorkerGlobalScope object is the WorkerGlobalScope object.
 
 ##### [10.2.1.2 Dedicated workers and the DedicatedWorkerGlobalScope interface](https://html.spec.whatwg.org/#dedicated-workers-and-the-dedicatedworkerglobalscope-interface)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: inside-port dom-dedicatedworkerglobalscope-postmessage-options -->
 
-- [ ] [DedicatedWorkerGlobalScope.name](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-name) — The name getter steps are to return this's name. Its value represents the name given to the worker using the Worker constructor, used primarily for debugging purposes.
+- [x] [DedicatedWorkerGlobalScope.name](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-name) — The name getter steps are to return this's name. Its value represents the name given to the worker using the Worker constructor, used primarily for debugging purposes.
 
-- [ ] [DedicatedWorkerGlobalScope.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-postmessage) — The postMessage(message, transfer) and postMessage(message, options) methods on DedicatedWorkerGlobalScope objects act as if, when invoked, it immediately invoked the respective postMessage(message, transfer) and postMessage(message, options) on the port, with the same arguments, and returned the same return value.
+- [x] [DedicatedWorkerGlobalScope.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-postmessage) — The postMessage(message, transfer) and postMessage(message, options) methods on DedicatedWorkerGlobalScope objects act as if, when invoked, it immediately invoked the respective postMessage(message, transfer) and postMessage(message, options) on the port, with the same arguments, and returned the same return value.
 
-- [ ] [close a worker](https://html.spec.whatwg.org/#close-a-worker) — To close a worker, given a workerGlobal, run these steps:
+- [x] [close a worker](https://html.spec.whatwg.org/#close-a-worker) — To close a worker, given a workerGlobal, run these steps:
   - 1. Discard any tasks that have been added to workerGlobal's relevant agent's event loop's task queues.
   - 2. Set workerGlobal's closing flag to true. (This prevents any further tasks from being queued.)
 
-- [ ] [DedicatedWorkerGlobalScope.close()](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-close) — The close() method steps are to close a worker given this.
+- [x] [DedicatedWorkerGlobalScope.close()](https://html.spec.whatwg.org/#dom-dedicatedworkerglobalscope-close) — The close() method steps are to close a worker given this.
 
 ##### [10.2.1.3 Shared workers and the SharedWorkerGlobalScope interface](https://html.spec.whatwg.org/#shared-workers-and-the-sharedworkerglobalscope-interface)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: concept-sharedworkerglobalscope-constructor-storage-key concept-sharedworkerglobalscope-constructor-url concept-sharedworkerglobalscope-credentials concept-sharedworkerglobalscope-extended-lifetime -->
 
-- [ ] [SharedWorkerGlobalScope.name](https://html.spec.whatwg.org/#dom-sharedworkerglobalscope-name) — The name getter steps are to return this's name. Its value represents the name that can be used to obtain a reference to the worker using the SharedWorker constructor.
+- [x] [SharedWorkerGlobalScope.name](https://html.spec.whatwg.org/#dom-sharedworkerglobalscope-name) — The name getter steps are to return this's name. Its value represents the name that can be used to obtain a reference to the worker using the SharedWorker constructor.
 
-- [ ] [SharedWorkerGlobalScope.close()](https://html.spec.whatwg.org/#dom-sharedworkerglobalscope-close) — The close() method steps are to close a worker given this.
+- [x] [SharedWorkerGlobalScope.close()](https://html.spec.whatwg.org/#dom-sharedworkerglobalscope-close) — The close() method steps are to close a worker given this.
 
 #### [10.2.2 The event loop](https://html.spec.whatwg.org/#worker-event-loop)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: dom-workerglobalscope-closing -->
 
 #### [10.2.3 The worker's lifetime](https://html.spec.whatwg.org/#the-worker's-lifetime)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: between-loads-shared-worker-timeout extended-lifetime-shared-worker-timeout -->
 
-- [ ] [the worker's ports](https://html.spec.whatwg.org/#the-worker's-ports) — Each WorkerGlobalScope object worker global scope has a list of the worker's ports, which consists of all the MessagePort objects that are entangled with another port and that have one (but only one) port owned by worker global scope. This list includes the implicit MessagePort in the case of dedicated workers.
+- [x] [the worker's ports](https://html.spec.whatwg.org/#the-worker's-ports) — Each WorkerGlobalScope object worker global scope has a list of the worker's ports, which consists of all the MessagePort objects that are entangled with another port and that have one (but only one) port owned by worker global scope. This list includes the implicit MessagePort in the case of dedicated workers.
 
-- [ ] [relevant owner to add](https://html.spec.whatwg.org/#relevant-owner-to-add) — Given an environment settings object o when creating or obtaining a worker, the relevant owner to add depends on the type of global object specified by o. If o's global object is a WorkerGlobalScope object (i.e., if we are creating a nested dedicated worker), then the relevant owner is that global object. Otherwise, o's global object is a Window object, and the relevant owner is that Window's associated Document.
+- [x] [relevant owner to add](https://html.spec.whatwg.org/#relevant-owner-to-add) — Given an environment settings object o when creating or obtaining a worker, the relevant owner to add depends on the type of global object specified by o. If o's global object is a WorkerGlobalScope object (i.e., if we are creating a nested dedicated worker), then the relevant owner is that global object. Otherwise, o's global object is a Window object, and the relevant owner is that Window's associated Document.
 
-- [ ] [in extended lifetime](https://html.spec.whatwg.org/#in-extended-lifetime-worker) — A WorkerGlobalScope global is in extended lifetime if the following algorithm returns true:
+- [x] [in extended lifetime](https://html.spec.whatwg.org/#in-extended-lifetime-worker) — A WorkerGlobalScope global is in extended lifetime if the following algorithm returns true:
   - 1. If global is not a SharedWorkerGlobalScope, then return false.
   - 2. If global's extended lifetime is false, then return false.
   - 3. If global's owner set is empty, but has been empty for less than the user agent's extended lifetime shared worker timeout, then return true.
@@ -128,14 +128,14 @@ Status: unreviewed
     - 5b. If owner is a WorkerGlobalScope that is in extended lifetime, then return true.
   - 6. Return false.
 
-- [ ] [actively needed](https://html.spec.whatwg.org/#active-needed-worker) — A WorkerGlobalScope global is actively needed if the following algorithm returns true:
+- [x] [actively needed](https://html.spec.whatwg.org/#active-needed-worker) — A WorkerGlobalScope global is actively needed if the following algorithm returns true:
   - 1. If global is in extended lifetime, then return true.
   - 2. For each owner of global's owner set:
     - 2a. If owner is a Document, and owner is fully active, then return true.
     - 2b. If owner is a WorkerGlobalScope that is actively needed, then return true.
   - 3. Return false.
 
-- [ ] [protected](https://html.spec.whatwg.org/#protected-worker) — A WorkerGlobalScope global is protected if the following algorithm returns true:
+- [x] [protected](https://html.spec.whatwg.org/#protected-worker) — A WorkerGlobalScope global is protected if the following algorithm returns true:
   - 1. If global is not actively needed, then return false.
   - 2. If global is in extended lifetime, then return true.
   - 3. If global is a SharedWorkerGlobalScope, then return true.
@@ -143,22 +143,22 @@ Status: unreviewed
   - 5. If global has outstanding timers, database transactions, or network connections, then return true.
   - 6. Return false.
 
-- [ ] [permissible](https://html.spec.whatwg.org/#permissible-worker) — A WorkerGlobalScope global is permissible if the following algorithm returns true:
+- [x] [permissible](https://html.spec.whatwg.org/#permissible-worker) — A WorkerGlobalScope global is permissible if the following algorithm returns true:
   - 1. If global's owner set is not empty, then return true.
   - 2. If global is in extended lifetime, then return true.
   - 3. If all of the following are true: global is a SharedWorkerGlobalScope;; global's owner set has been empty for no more than the user agent's between-loads shared worker timeout; and; the user agent has a navigable whose active document is not completely loaded, then return true.
   - 4. Return false.
 
-- [ ] [suspendable](https://html.spec.whatwg.org/#suspendable-worker) — A WorkerGlobalScope global is suspendable if the following algorithm returns true:
+- [x] [suspendable](https://html.spec.whatwg.org/#suspendable-worker) — A WorkerGlobalScope global is suspendable if the following algorithm returns true:
   - 1. If global is actively needed, then return false.
   - 2. If global is permissible, then return true.
   - 3. Return false.
 
 #### [10.2.4 Processing model](https://html.spec.whatwg.org/#worker-processing-model)
 
-Status: unreviewed
+Status: n/a (no workers)
 
-- [ ] [run a worker](https://html.spec.whatwg.org/#run-a-worker) — When a user agent is to run a worker for a script with Worker or SharedWorker object worker, URL url, environment settings object outside settings, MessagePort outside port, and a WorkerOptions dictionary options, it must run the following steps:
+- [x] [run a worker](https://html.spec.whatwg.org/#run-a-worker) — When a user agent is to run a worker for a script with Worker or SharedWorker object worker, URL url, environment settings object outside settings, MessagePort outside port, and a WorkerOptions dictionary options, it must run the following steps:
   - 1. Let is shared be true if worker is a SharedWorker object, and false otherwise.
   - 2. Let owner be the relevant owner to add given outside settings.
   - 3. Let unsafeWorkerCreationTime be the unsafe shared current time.
@@ -213,7 +213,7 @@ Status: unreviewed
     - 12q. Disentangle all the ports in the list of the worker's ports.
     - 12r. Empty worker global scope's owner set.
 
-- [ ] [terminate a worker](https://html.spec.whatwg.org/#terminate-a-worker) — When a user agent is to terminate a worker, it must run the following steps in parallel with the worker's main loop (the "run a worker" processing model defined above):
+- [x] [terminate a worker](https://html.spec.whatwg.org/#terminate-a-worker) — When a user agent is to terminate a worker, it must run the following steps in parallel with the worker's main loop (the "run a worker" processing model defined above):
   - 1. Set the worker's WorkerGlobalScope object's closing flag to true.
   - 2. If there are any tasks queued in the WorkerGlobalScope object's relevant agent's event loop's task queues, discard them without processing them.
   - 3. Abort the script currently running in the worker.
@@ -221,21 +221,21 @@ Status: unreviewed
 
 #### [10.2.5 Runtime script errors](https://html.spec.whatwg.org/#runtime-script-errors-2)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 #### [10.2.6 Creating workers](https://html.spec.whatwg.org/#creating-workers)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.2.6.1 The AbstractWorker mixin](https://html.spec.whatwg.org/#the-abstractworker-mixin)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 ##### [10.2.6.2 Script settings for workers](https://html.spec.whatwg.org/#script-settings-for-workers)
 
-Status: unreviewed
+Status: n/a (no workers)
 
-- [ ] [set up a worker environment settings object](https://html.spec.whatwg.org/#set-up-a-worker-environment-settings-object) — To set up a worker environment settings object, given a JavaScript execution context execution context, an environment settings object outside settings, and a number unsafeWorkerCreationTime:
+- [x] [set up a worker environment settings object](https://html.spec.whatwg.org/#set-up-a-worker-environment-settings-object) — To set up a worker environment settings object, given a JavaScript execution context execution context, an environment settings object outside settings, and a number unsafeWorkerCreationTime:
   - 1. Let realm be the value of execution context's Realm component.
   - 2. Let worker global scope be realm's global object.
   - 3. Let origin be a unique opaque origin if worker global scope's url's scheme is "data"; otherwise outside settings's origin.
@@ -251,14 +251,14 @@ Status: unreviewed
 
 ##### [10.2.6.3 Dedicated workers and the Worker interface](https://html.spec.whatwg.org/#dedicated-workers-and-the-worker-interface)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: outside-port dom-worker-postmessage-options -->
 
-- [ ] [Worker.terminate()](https://html.spec.whatwg.org/#dom-worker-terminate) — The terminate() method steps are to terminate a worker given this's worker.
+- [x] [Worker.terminate()](https://html.spec.whatwg.org/#dom-worker-terminate) — The terminate() method steps are to terminate a worker given this's worker.
 
-- [ ] [Worker.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-worker-postmessage) — The postMessage(message, transfer) and postMessage(message, options) methods on Worker objects act as if, when invoked, they immediately invoked the respective postMessage(message, transfer) and postMessage(message, options) on this's outside port, with the same arguments, and returned the same return value.
+- [x] [Worker.postMessage(message, transfer)](https://html.spec.whatwg.org/#dom-worker-postmessage) — The postMessage(message, transfer) and postMessage(message, options) methods on Worker objects act as if, when invoked, they immediately invoked the respective postMessage(message, transfer) and postMessage(message, options) on this's outside port, with the same arguments, and returned the same return value.
 
-- [ ] [Worker.new Worker(scriptURL, options)](https://html.spec.whatwg.org/#dom-worker) — The new Worker(scriptURL, options) constructor steps are:
+- [x] [Worker.new Worker(scriptURL, options)](https://html.spec.whatwg.org/#dom-worker) — The new Worker(scriptURL, options) constructor steps are:
   - 1. Let compliantScriptURL be the result of invoking the get trusted type compliant string algorithm with TrustedScriptURL, this's relevant global object, scriptURL, "Worker constructor", and "script".
   - 2. Let outsideSettings be this's relevant settings object.
   - 3. Let workerURL be the result of encoding-parsing a URL given compliantScriptURL, relative to outsideSettings.
@@ -272,12 +272,12 @@ Status: unreviewed
 
 ##### [10.2.6.4 Shared workers and the SharedWorker interface](https://html.spec.whatwg.org/#shared-workers-and-the-sharedworker-interface)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: shared-worker-manager concept-sharedworker-port -->
 
-- [ ] [SharedWorker.port](https://html.spec.whatwg.org/#dom-sharedworker-port) — The port getter steps are to return this's port.
+- [x] [SharedWorker.port](https://html.spec.whatwg.org/#dom-sharedworker-port) — The port getter steps are to return this's port.
 
-- [ ] [SharedWorker.new SharedWorker(scriptURL, options)](https://html.spec.whatwg.org/#dom-sharedworker) — The new SharedWorker(scriptURL, options) constructor steps are:
+- [x] [SharedWorker.new SharedWorker(scriptURL, options)](https://html.spec.whatwg.org/#dom-sharedworker) — The new SharedWorker(scriptURL, options) constructor steps are:
   - 1. Let compliantScriptURL be the result of invoking the get trusted type compliant string algorithm with TrustedScriptURL, this's relevant global object, scriptURL, "SharedWorker constructor", and "script".
   - 2. If options is a DOMString, set options to a new WorkerOptions dictionary whose name member is set to the value of options and whose other members are set to their default values.
   - 3. Let outsideSettings be this's relevant settings object.
@@ -319,19 +319,19 @@ Status: unreviewed
 
 ### [10.3 APIs available to workers](https://html.spec.whatwg.org/#apis-available-to-workers)
 
-Status: unreviewed
+Status: n/a (no workers)
 
 #### [10.3.1 Importing scripts and libraries](https://html.spec.whatwg.org/#importing-scripts-and-libraries)
 
-Status: unreviewed
+Status: n/a (no workers)
 
-- [ ] [WorkerGlobalScope.importScripts(...urls)](https://html.spec.whatwg.org/#dom-workerglobalscope-importscripts) — The importScripts(...urls) method steps are:
+- [x] [WorkerGlobalScope.importScripts(...urls)](https://html.spec.whatwg.org/#dom-workerglobalscope-importscripts) — The importScripts(...urls) method steps are:
   - 1. Let urlStrings be « ».
   - 2. For each url of urls:
     - 2a. Append the result of invoking the get trusted type compliant string algorithm with TrustedScriptURL, this's relevant global object, url, "WorkerGlobalScope importScripts", and "script" to urlStrings.
   - 3. Import scripts into worker global scope given this and urlStrings.
 
-- [ ] [import scripts into worker global scope](https://html.spec.whatwg.org/#import-scripts-into-worker-global-scope) — To import scripts into worker global scope, given a WorkerGlobalScope object worker global scope, a list of scalar value strings urls, and an optional perform the fetch hook performFetch:
+- [x] [import scripts into worker global scope](https://html.spec.whatwg.org/#import-scripts-into-worker-global-scope) — To import scripts into worker global scope, given a WorkerGlobalScope object worker global scope, a list of scalar value strings urls, and an optional perform the fetch hook performFetch:
   - 1. If worker global scope's type is "module", throw a TypeError exception.
   - 2. Let settings object be the current settings object.
   - 3. If urls is empty, return.
@@ -346,45 +346,45 @@ Status: unreviewed
 
 #### [10.3.2 The WorkerNavigator interface](https://html.spec.whatwg.org/#the-workernavigator-object)
 
-Status: unreviewed
+Status: n/a (no workers)
 
-- [ ] [WorkerGlobalScope.navigator](https://html.spec.whatwg.org/#dom-worker-navigator) — The navigator attribute of the WorkerGlobalScope interface must return an instance of the WorkerNavigator interface, which represents the identity and state of the user agent (the client):
+- [x] [WorkerGlobalScope.navigator](https://html.spec.whatwg.org/#dom-worker-navigator) — The navigator attribute of the WorkerGlobalScope interface must return an instance of the WorkerNavigator interface, which represents the identity and state of the user agent (the client):
 
 #### [10.3.3 The WorkerLocation interface](https://html.spec.whatwg.org/#worker-locations)
 
-Status: unreviewed
+Status: n/a (no workers)
 <!-- definitions: concept-workerlocation-workerglobalscope -->
 
-- [ ] [WorkerLocation.href](https://html.spec.whatwg.org/#dom-workerlocation-href) — The href getter steps are to return this's WorkerGlobalScope object's url, serialized.
+- [x] [WorkerLocation.href](https://html.spec.whatwg.org/#dom-workerlocation-href) — The href getter steps are to return this's WorkerGlobalScope object's url, serialized.
 
-- [ ] [WorkerLocation.origin](https://html.spec.whatwg.org/#dom-workerlocation-origin) — The origin getter steps are to return the serialization of this's WorkerGlobalScope object's url's origin.
+- [x] [WorkerLocation.origin](https://html.spec.whatwg.org/#dom-workerlocation-origin) — The origin getter steps are to return the serialization of this's WorkerGlobalScope object's url's origin.
 
-- [ ] [WorkerLocation.protocol](https://html.spec.whatwg.org/#dom-workerlocation-protocol) — The protocol getter steps are to return this's WorkerGlobalScope object's url's scheme, followed by ":".
+- [x] [WorkerLocation.protocol](https://html.spec.whatwg.org/#dom-workerlocation-protocol) — The protocol getter steps are to return this's WorkerGlobalScope object's url's scheme, followed by ":".
 
-- [ ] [WorkerLocation.host](https://html.spec.whatwg.org/#dom-workerlocation-host) — The host getter steps are:
+- [x] [WorkerLocation.host](https://html.spec.whatwg.org/#dom-workerlocation-host) — The host getter steps are:
   - 1. Let url be this's WorkerGlobalScope object's url.
   - 2. If url's host is null, return the empty string.
   - 3. If url's port is null, return url's host, serialized.
   - 4. Return url's host, serialized, followed by ":" and url's port, serialized.
 
-- [ ] [WorkerLocation.hostname](https://html.spec.whatwg.org/#dom-workerlocation-hostname) — The hostname getter steps are:
+- [x] [WorkerLocation.hostname](https://html.spec.whatwg.org/#dom-workerlocation-hostname) — The hostname getter steps are:
   - 1. Let host be this's WorkerGlobalScope object's url's host.
   - 2. If host is null, return the empty string.
   - 3. Return host, serialized.
 
-- [ ] [WorkerLocation.port](https://html.spec.whatwg.org/#dom-workerlocation-port) — The port getter steps are:
+- [x] [WorkerLocation.port](https://html.spec.whatwg.org/#dom-workerlocation-port) — The port getter steps are:
   - 1. Let port be this's WorkerGlobalScope object's url's port.
   - 2. If port is null, return the empty string.
   - 3. Return port, serialized.
 
-- [ ] [WorkerLocation.pathname](https://html.spec.whatwg.org/#dom-workerlocation-pathname) — The pathname getter steps are to return the result of URL path serializing this's WorkerGlobalScope object's url.
+- [x] [WorkerLocation.pathname](https://html.spec.whatwg.org/#dom-workerlocation-pathname) — The pathname getter steps are to return the result of URL path serializing this's WorkerGlobalScope object's url.
 
-- [ ] [WorkerLocation.search](https://html.spec.whatwg.org/#dom-workerlocation-search) — The search getter steps are:
+- [x] [WorkerLocation.search](https://html.spec.whatwg.org/#dom-workerlocation-search) — The search getter steps are:
   - 1. Let query be this's WorkerGlobalScope object's url's query.
   - 2. If query is either null or the empty string, return the empty string.
   - 3. Return "?", followed by query.
 
-- [ ] [WorkerLocation.hash](https://html.spec.whatwg.org/#dom-workerlocation-hash) — The hash getter steps are:
+- [x] [WorkerLocation.hash](https://html.spec.whatwg.org/#dom-workerlocation-hash) — The hash getter steps are:
   - 1. Let fragment be this's WorkerGlobalScope object's url's fragment.
   - 2. If fragment is either null or the empty string, return the empty string.
   - 3. Return "#", followed by fragment.

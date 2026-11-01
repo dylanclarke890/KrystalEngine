@@ -103,28 +103,28 @@ Status: unreviewed
 
 ### [12.3 Privacy](https://html.spec.whatwg.org/#privacy)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 #### [12.3.1 User tracking](https://html.spec.whatwg.org/#user-tracking)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 #### [12.3.2 Sensitivity of data](https://html.spec.whatwg.org/#sensitivity-of-data)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 ### [12.4 Security](https://html.spec.whatwg.org/#security-storage)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 #### [12.4.1 DNS spoofing attacks](https://html.spec.whatwg.org/#dns-spoofing-attacks)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 #### [12.4.2 Cross-directory attacks](https://html.spec.whatwg.org/#cross-directory-attacks)
 
-Status: unreviewed
+Status: n/a (guidance)
 
 #### [12.4.3 Implementation risks](https://html.spec.whatwg.org/#implementation-risks)
 
-Status: unreviewed
+Status: n/a (guidance)

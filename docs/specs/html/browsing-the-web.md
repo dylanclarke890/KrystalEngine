@@ -226,9 +226,9 @@ Status: unreviewed
 
 ###### [7.4.2.3.2 The javascript: URL special case](https://html.spec.whatwg.org/#the-javascript:-url-special-case)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [navigate to a javascript: URL](https://html.spec.whatwg.org/#navigate-to-a-javascript:-url) — To navigate to a javascript: URL, given a navigable targetNavigable, a request request, a history handling behavior historyHandling, an origin initiatorOrigin, a user navigation involvement userInvolvement, a string cspNavigationType, a boolean initialInsertion, and a navigation ID navigationId:
+- [x] [navigate to a javascript: URL](https://html.spec.whatwg.org/#navigate-to-a-javascript:-url) — To navigate to a javascript: URL, given a navigable targetNavigable, a request request, a history handling behavior historyHandling, an origin initiatorOrigin, a user navigation involvement userInvolvement, a string cspNavigationType, a boolean initialInsertion, and a navigation ID navigationId:
   - 1. Assert: historyHandling is "replace".
   - 2. If targetNavigable's ongoing navigation is no longer navigationId, then return.
   - 3. Set the ongoing navigation for targetNavigable to null.
@@ -248,7 +248,7 @@ Status: unreviewed
   - 12. Let historyEntry be a new session history entry, with URLentryToReplace's URLdocument statedocumentState
   - 13. Append session history traversal steps to targetNavigable's traversable navigable to finalize a cross-document navigation with targetNavigable, historyHandling, userInvolvement, and historyEntry.
 
-- [ ] [evaluate a javascript: URL](https://html.spec.whatwg.org/#evaluate-a-javascript:-url) — To evaluate a javascript: URL given a navigable targetNavigable, a URL url, an origin newDocumentOrigin, a user navigation involvement userInvolvement, and a navigation ID navigationId:
+- [x] [evaluate a javascript: URL](https://html.spec.whatwg.org/#evaluate-a-javascript:-url) — To evaluate a javascript: URL given a navigable targetNavigable, a URL url, an origin newDocumentOrigin, a user navigation involvement userInvolvement, and a navigation ID navigationId:
   - 1. Let urlString be the result of running the URL serializer on url.
   - 2. Let encodedScriptSource be the result of removing the leading "javascript:" from urlString.
   - 3. Let scriptSource be the UTF-8 decoding of the percent-decoding of encodedScriptSource.

@@ -8,4 +8,4 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [References](https://html.spec.whatwg.org/#references)
 
-Status: unreviewed
+Status: n/a (back matter)

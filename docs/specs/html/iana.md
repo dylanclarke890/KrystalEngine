@@ -8,36 +8,36 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [17 IANA considerations](https://html.spec.whatwg.org/#iana)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.1 text/html](https://html.spec.whatwg.org/#text/html)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.2 multipart/x-mixed-replace](https://html.spec.whatwg.org/#multipart/x-mixed-replace)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.3 application/xhtml+xml](https://html.spec.whatwg.org/#application/xhtml+xml)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.4 text/ping](https://html.spec.whatwg.org/#text/ping)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.5 application/microdata+json](https://html.spec.whatwg.org/#application/microdata+json)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.6 application/speculationrules+json](https://html.spec.whatwg.org/#application/speculationrules+json)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.7 text/event-stream](https://html.spec.whatwg.org/#text/event-stream)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [17.8 web+ scheme prefix](https://html.spec.whatwg.org/#web+-scheme-prefix)
 
-Status: unreviewed
+Status: n/a (back matter)

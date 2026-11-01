@@ -96,9 +96,9 @@ Status: unreviewed
 
 #### [7.5.5 Loading multipart/x-mixed-replace documents](https://html.spec.whatwg.org/#read-multipart-x-mixed-replace)
 
-Status: unreviewed
+Status: n/a (later: network loader)
 
-- [ ] [load a multipart/x-mixed-replace document](https://html.spec.whatwg.org/#navigate-multipart-x-mixed-replace) — To load a multipart/x-mixed-replace document, given navigation params navigationParams, source snapshot params sourceSnapshotParams, and origin initiatorOrigin:
+- [x] [load a multipart/x-mixed-replace document](https://html.spec.whatwg.org/#navigate-multipart-x-mixed-replace) — To load a multipart/x-mixed-replace document, given navigation params navigationParams, source snapshot params sourceSnapshotParams, and origin initiatorOrigin:
   - 1. Parse navigationParams's response's body using the rules for multipart types. [RFC2046]
   - 2. Let firstPartNavigationParams be a copy of navigationParams.
   - 3. Set firstPartNavigationParams's response to a new response representing the first part of navigationParams's response's body's multipart stream.
@@ -107,9 +107,9 @@ Status: unreviewed
 
 #### [7.5.6 Loading media documents](https://html.spec.whatwg.org/#read-media)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
-- [ ] [load a media document](https://html.spec.whatwg.org/#navigate-media) — To load a media document, given navigationParams and a string type:
+- [x] [load a media document](https://html.spec.whatwg.org/#navigate-media) — To load a media document, given navigationParams and a string type:
   - 1. Let document be the result of creating and initializing a Document object given "html", type, and navigationParams.
   - 2. Set document's mode to "no-quirks".
   - 3. Populate with html/head/body given document.
@@ -122,9 +122,9 @@ Status: unreviewed
 
 #### [7.5.7 Loading a document for inline content that doesn't have a DOM](https://html.spec.whatwg.org/#read-ua-inline)
 
-Status: unreviewed
+Status: n/a (no plugins or inline content handlers)
 
-- [ ] [create a document to display a user agent page or PDF viewer inline](https://html.spec.whatwg.org/#navigate-ua-inline) — When the user agent is to create a document to display a user agent page or PDF viewer inline, provided a navigable navigable, a navigation ID navigationId, a NavigationTimingType navTimingType, and a user navigation involvement userInvolvement, the user agent should:
+- [x] [create a document to display a user agent page or PDF viewer inline](https://html.spec.whatwg.org/#navigate-ua-inline) — When the user agent is to create a document to display a user agent page or PDF viewer inline, provided a navigable navigable, a navigation ID navigationId, a NavigationTimingType navTimingType, and a user navigation involvement userInvolvement, the user agent should:
   - 1. Let origin be a new opaque origin.
   - 2. Let coop be a new opener policy.
   - 3. Let coopEnforcementResult be a new opener policy enforcement result with urlresponse's URLoriginoriginopener policycoop

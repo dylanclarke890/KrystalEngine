@@ -12,15 +12,15 @@ Status: unreviewed
 
 ### [16.1 Obsolete but conforming features](https://html.spec.whatwg.org/#obsolete-but-conforming-features)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 #### [16.1.1 Warnings for obsolete but conforming features](https://html.spec.whatwg.org/#warnings-for-obsolete-but-conforming-features)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ### [16.2 Non-conforming features](https://html.spec.whatwg.org/#non-conforming-features)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: applet acronym bgsound dir noframes isindex keygen listing menuitem nextid noembed param plaintext rb rtc strike xmp basefont big blink center font multicol nobr spacer tt attr-a-charset attr-link-charset attr-script-charset attr-a-coords attr-a-shape attr-a-methods attr-link-methods attr-a-name attr-embed-name attr-img-name attr-option-name attr-a-rev attr-link-rev attr-a-urn attr-link-urn attr-form-accept attr-area-hreflang attr-area-type attr-area-nohref attr-head-profile attr-html-manifest attr-html-version attr-input-ismap attr-input-usemap attr-object-usemap attr-iframe-longdesc attr-img-longdesc attr-img-lowsrc attr-link-target attr-menu-type attr-menu-label attr-contextmenu handler-onshow attr-meta-scheme attr-object-archive attr-object-classid attr-object-code attr-object-codebase attr-object-codetype attr-object-declare attr-object-standby attr-object-typemustmatch attr-script-language attr-script-event attr-script-for attr-style-type attr-table-datapagesize attr-table-summary attr-td-abbr attr-tdth-axis attr-td-scope attr-datasrc attr-datafld attr-dataformatas attr-dropzone attr-body-alink attr-body-bgcolor attr-body-bottommargin attr-body-leftmargin attr-body-link attr-body-marginheight attr-body-marginwidth attr-body-rightmargin attr-body-text attr-body-topmargin attr-body-vlink attr-br-clear attr-caption-align attr-col-align attr-col-char attr-col-charoff attr-col-valign attr-col-width attr-div-align attr-dl-compact attr-embed-align attr-embed-hspace attr-embed-vspace attr-hr-align attr-hr-color attr-hr-noshade attr-hr-size attr-hr-width attr-hx-align attr-iframe-align attr-iframe-allowtransparency attr-iframe-frameborder attr-iframe-framespacing attr-iframe-hspace attr-iframe-marginheight attr-iframe-marginwidth attr-iframe-scrolling attr-iframe-vspace attr-input-align attr-input-border attr-input-hspace attr-input-vspace attr-img-align attr-img-border attr-img-hspace attr-img-vspace attr-legend-align attr-li-type attr-menu-compact attr-object-align attr-object-border attr-object-hspace attr-object-vspace attr-ol-compact attr-p-align attr-pre-width attr-table-align attr-table-bgcolor attr-table-border attr-table-bordercolor attr-table-cellpadding attr-table-cellspacing attr-table-frame attr-table-height attr-table-rules attr-table-width attr-tbody-align attr-tbody-char attr-tbody-charoff attr-tbody-height attr-tbody-valign attr-tdth-align attr-tdth-bgcolor attr-tdth-char attr-tdth-charoff attr-tdth-height attr-tdth-nowrap attr-tdth-valign attr-tdth-width attr-tr-align attr-tr-bgcolor attr-tr-char attr-tr-charoff attr-tr-height attr-tr-valign attr-ul-compact attr-ul-type attr-background -->
 
 ### [16.3 Requirements for implementations](https://html.spec.whatwg.org/#requirements-for-implementations)
@@ -54,15 +54,15 @@ Status: unreviewed
 
 #### [16.3.2 Frames](https://html.spec.whatwg.org/#frames)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 <!-- definitions: frameset process-frame-initial-insertion -->
 
-- [ ] [The frame HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#frame) — The frame HTML element post-connection steps, given insertedNode, are:
+- [x] [The frame HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#frame) — The frame HTML element post-connection steps, given insertedNode, are:
   - 1. If insertedNode's node document's browsing context is null, then return.
   - 2. Create a new child navigable for insertedNode.
   - 3. Process the frame attributes for insertedNode, with initialInsertion set to true.
 
-- [ ] [process the frame attributes](https://html.spec.whatwg.org/#process-the-frame-attributes) — To process the frame attributes for an element element, with an optional boolean initialInsertion (default false):
+- [x] [process the frame attributes](https://html.spec.whatwg.org/#process-the-frame-attributes) — To process the frame attributes for an element element, with an optional boolean initialInsertion (default false):
   - 1. Let url be the result of running the shared attribute processing steps for iframe and frame elements given element and initialInsertion.
   - 2. If url is null, then return.
   - 3. If url matches about:blank and initialInsertion is true:
@@ -70,9 +70,9 @@ Status: unreviewed
     - 3b. Return.
   - 4. Navigate an iframe or frame given element, url, the empty string, null, and initialInsertion.
 
-- [ ] [HTMLFrameElement.contentDocument](https://html.spec.whatwg.org/#dom-frame-contentdocument) — The contentDocument getter steps are to return this's content document.
+- [x] [HTMLFrameElement.contentDocument](https://html.spec.whatwg.org/#dom-frame-contentdocument) — The contentDocument getter steps are to return this's content document.
 
-- [ ] [HTMLFrameElement.contentWindow](https://html.spec.whatwg.org/#dom-frame-contentwindow) — The contentWindow getter steps are to return this's content window.
+- [x] [HTMLFrameElement.contentWindow](https://html.spec.whatwg.org/#dom-frame-contentwindow) — The contentWindow getter steps are to return this's content window.
 
 #### [16.3.3 Other elements, attributes and APIs](https://html.spec.whatwg.org/#other-elements,-attributes-and-apis)
 

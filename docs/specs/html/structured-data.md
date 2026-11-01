@@ -8,54 +8,54 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [2.7 Safe passing of structured data](https://html.spec.whatwg.org/#safe-passing-of-structured-data)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.1 Serializable objects](https://html.spec.whatwg.org/#serializable-objects)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 <!-- definitions: serializable serialization-steps deserialization-steps -->
 
 #### [2.7.2 Transferable objects](https://html.spec.whatwg.org/#transferable-objects)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 <!-- definitions: transferable transfer-steps transfer-receiving-steps detached -->
 
 #### [2.7.3 Restricting to the same agent cluster](https://html.spec.whatwg.org/#restricting-to-the-same-agent-cluster)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 <!-- definitions: sameagentcluster -->
 
-- [ ] [restrict](https://html.spec.whatwg.org/#restrict-to-the-same-agent-cluster) — To restrict a Record record to the same agent cluster, set record.[[AgentCluster]] to the surrounding agent's agent cluster.
+- [x] [restrict](https://html.spec.whatwg.org/#restrict-to-the-same-agent-cluster) — To restrict a Record record to the same agent cluster, set record.[[AgentCluster]] to the surrounding agent's agent cluster.
 
 #### [2.7.4 StructuredSerializeInternal ( value, forStorage [ , memory ] )](https://html.spec.whatwg.org/#structuredserializeinternal)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 <!-- definitions: sub-serialization -->
 
 #### [2.7.5 StructuredSerialize ( value )](https://html.spec.whatwg.org/#structuredserialize)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.6 StructuredSerializeForStorage ( value )](https://html.spec.whatwg.org/#structuredserializeforstorage)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.7 StructuredDeserialize ( serialized, targetRealm [ , memory ] )](https://html.spec.whatwg.org/#structureddeserialize)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 <!-- definitions: sub-deserialization -->
 
 #### [2.7.8 StructuredSerializeWithTransfer ( value, transferList )](https://html.spec.whatwg.org/#structuredserializewithtransfer)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.9 StructuredDeserializeWithTransfer ( serializeWithTransferResult, targetRealm )](https://html.spec.whatwg.org/#structureddeserializewithtransfer)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.10 Performing serialization and transferring from other specifications](https://html.spec.whatwg.org/#performing-structured-clones-from-other-specifications)
 
-Status: unreviewed
+Status: n/a (no JavaScript values)
 
 #### [2.7.11 Structured cloning API](https://html.spec.whatwg.org/#structured-cloning)
 

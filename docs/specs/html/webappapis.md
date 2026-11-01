@@ -16,34 +16,34 @@ Status: unreviewed
 
 #### [8.1.1 Introduction](https://html.spec.whatwg.org/#introduction-11)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 #### [8.1.2 Agents and agent clusters](https://html.spec.whatwg.org/#agents-and-agent-clusters)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.2.1 Integration with the JavaScript agent formalism](https://html.spec.whatwg.org/#integration-with-the-javascript-agent-formalism)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: similar-origin-window-agent dedicated-worker-agent shared-worker-agent service-worker-agent worklet-agent -->
 
-- [ ] [create an agent](https://html.spec.whatwg.org/#create-an-agent) — To create an agent, given a boolean canBlock:
+- [x] [create an agent](https://html.spec.whatwg.org/#create-an-agent) — To create an agent, given a boolean canBlock:
   - 1. Let signifier be a new unique internal value.
   - 2. Let candidateExecution be a new candidate execution.
   - 3. Let agent be a new agent whose [[CanBlock]] is canBlock, [[Signifier]] is signifier, [[CandidateExecution]] is candidateExecution, and [[IsLockFree1]], [[IsLockFree2]], and [[LittleEndian]] are set at the implementation's discretion.
   - 4. Set agent's event loop to a new event loop.
   - 5. Return agent.
 
-- [ ] [the realm's agent (realm)](https://html.spec.whatwg.org/#realm's-agent) — For a realm realm, the agent whose [[Signifier]] is realm.[[AgentSignifier]] is the realm's agent.
+- [x] [the realm's agent (realm)](https://html.spec.whatwg.org/#realm's-agent) — For a realm realm, the agent whose [[Signifier]] is realm.[[AgentSignifier]] is the realm's agent.
 
-- [ ] [relevant agent](https://html.spec.whatwg.org/#relevant-agent) — The relevant agent for a platform object platformObject is platformObject's relevant realm's agent.
+- [x] [relevant agent](https://html.spec.whatwg.org/#relevant-agent) — The relevant agent for a platform object platformObject is platformObject's relevant realm's agent.
 
 ##### [8.1.2.2 Integration with the JavaScript agent cluster formalism](https://html.spec.whatwg.org/#integration-with-the-javascript-agent-cluster-formalism)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: agent-cluster-cross-origin-isolation is-origin-keyed agent-cluster-key -->
 
-- [ ] [obtain a similar-origin window agent](https://html.spec.whatwg.org/#obtain-similar-origin-window-agent) — To obtain a similar-origin window agent, given an origin origin, a browsing context group group, and a boolean requestsOAC, run these steps:
+- [x] [obtain a similar-origin window agent](https://html.spec.whatwg.org/#obtain-similar-origin-window-agent) — To obtain a similar-origin window agent, given an origin origin, a browsing context group group, and a boolean requestsOAC, run these steps:
   - 1. Let site be the result of obtaining a site with origin.
   - 2. Let key be site.
   - 3. If group's cross-origin isolation mode is not "none", then set key to origin.
@@ -61,7 +61,7 @@ Status: unreviewed
     - 6e. Set group's agent cluster map[key] to agentCluster.
   - 7. Return the single similar-origin window agent contained in group's agent cluster map[key].
 
-- [ ] [obtain a worker/worklet agent](https://html.spec.whatwg.org/#obtaining-a-worker/worklet-agent) — To obtain a worker/worklet agent, given an environment settings object or null outside settings, a boolean isTopLevel, and a boolean canBlock, run these steps:
+- [x] [obtain a worker/worklet agent](https://html.spec.whatwg.org/#obtaining-a-worker/worklet-agent) — To obtain a worker/worklet agent, given an environment settings object or null outside settings, a boolean isTopLevel, and a boolean canBlock, run these steps:
   - 1. Let agentCluster be null.
   - 2. If isTopLevel is true:
     - 2a. Set agentCluster to a new agent cluster.
@@ -74,11 +74,11 @@ Status: unreviewed
   - 5. Add agent to agentCluster.
   - 6. Return agent.
 
-- [ ] [obtain a dedicated/shared worker agent](https://html.spec.whatwg.org/#obtain-a-dedicated/shared-worker-agent) — To obtain a dedicated/shared worker agent, given an environment settings object outside settings and a boolean isShared, return the result of obtaining a worker/worklet agent given outside settings, isShared, and true.
+- [x] [obtain a dedicated/shared worker agent](https://html.spec.whatwg.org/#obtain-a-dedicated/shared-worker-agent) — To obtain a dedicated/shared worker agent, given an environment settings object outside settings and a boolean isShared, return the result of obtaining a worker/worklet agent given outside settings, isShared, and true.
 
-- [ ] [obtain a worklet agent](https://html.spec.whatwg.org/#obtain-a-worklet-agent) — To obtain a worklet agent, given an environment settings object outside settings, return the result of obtaining a worker/worklet agent given outside settings, false, and false.
+- [x] [obtain a worklet agent](https://html.spec.whatwg.org/#obtain-a-worklet-agent) — To obtain a worklet agent, given an environment settings object outside settings, return the result of obtaining a worker/worklet agent given outside settings, false, and false.
 
-- [ ] [obtain a service worker agent](https://html.spec.whatwg.org/#obtain-a-service-worker-agent) — To obtain a service worker agent, return the result of obtaining a worker/worklet agent given null, true, and false.
+- [x] [obtain a service worker agent](https://html.spec.whatwg.org/#obtain-a-service-worker-agent) — To obtain a service worker agent, return the result of obtaining a worker/worklet agent given null, true, and false.
 
 #### [8.1.3 Realms and their counterparts](https://html.spec.whatwg.org/#realms-and-their-counterparts)
 
@@ -86,32 +86,32 @@ Status: unreviewed
 
 ##### [8.1.3.1 Environments](https://html.spec.whatwg.org/#environments)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: environment concept-environment-id concept-environment-creation-url concept-environment-top-level-creation-url concept-environment-top-level-origin concept-environment-target-browsing-context concept-environment-active-service-worker concept-environment-execution-ready-flag environment-discarding-steps -->
 
 ##### [8.1.3.2 Environment settings objects](https://html.spec.whatwg.org/#environment-settings-objects)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: environment-settings-object realm-execution-context concept-settings-object-module-map api-base-url concept-settings-object-origin concept-settings-object-has-cross-site-ancestor concept-settings-object-policy-container concept-settings-object-cross-origin-isolated-capability concept-settings-object-time-origin -->
 
-- [ ] [responsible event loop (environment settings object)](https://html.spec.whatwg.org/#responsible-event-loop) — An environment settings object's responsible event loop is its global object's relevant agent's event loop.
+- [x] [responsible event loop (environment settings object)](https://html.spec.whatwg.org/#responsible-event-loop) — An environment settings object's responsible event loop is its global object's relevant agent's event loop.
 
 ##### [8.1.3.3 Realms, settings objects, and global objects](https://html.spec.whatwg.org/#realms-settings-objects-global-objects)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: in-error-reporting-mode outstanding-rejected-promises-weak-set about-to-be-notified-rejected-promises-list concept-global-import-map resolved-module-set concept-global-object-realm concept-entry-everything concept-incumbent-everything concept-current-everything concept-relevant-everything -->
 
-- [ ] [global object](https://html.spec.whatwg.org/#global-object) — A global object is a JavaScript object that is the [[GlobalObject]] field of a realm.
+- [x] [global object](https://html.spec.whatwg.org/#global-object) — A global object is a JavaScript object that is the [[GlobalObject]] field of a realm.
 
-- [ ] [the realm's settings object (realm)](https://html.spec.whatwg.org/#concept-realm-settings-object) — A realm has a [[HostDefined]] field, which contains the realm's settings object.
+- [x] [the realm's settings object (realm)](https://html.spec.whatwg.org/#concept-realm-settings-object) — A realm has a [[HostDefined]] field, which contains the realm's settings object.
 
-- [ ] [the realm's global object (realm)](https://html.spec.whatwg.org/#concept-realm-global) — A realm has a [[GlobalObject]] field, which contains the realm's global object.
+- [x] [the realm's global object (realm)](https://html.spec.whatwg.org/#concept-realm-global) — A realm has a [[GlobalObject]] field, which contains the realm's global object.
 
-- [ ] [the environment settings object's realm (environment settings object)](https://html.spec.whatwg.org/#environment-settings-object's-realm) — An environment settings object's realm execution context's Realm component is the environment settings object's realm.
+- [x] [the environment settings object's realm (environment settings object)](https://html.spec.whatwg.org/#environment-settings-object's-realm) — An environment settings object's realm execution context's Realm component is the environment settings object's realm.
 
-- [ ] [the environment settings object's global object (environment settings object)](https://html.spec.whatwg.org/#concept-settings-object-global) — An environment settings object's realm then has a [[GlobalObject]] field, which contains the environment settings object's global object.
+- [x] [the environment settings object's global object (environment settings object)](https://html.spec.whatwg.org/#concept-settings-object-global) — An environment settings object's realm then has a [[GlobalObject]] field, which contains the environment settings object's global object.
 
-- [ ] [create a new realm](https://html.spec.whatwg.org/#creating-a-new-javascript-realm) — To create a new realm in an agent agent, optionally with instructions to create a global object or a global this binding (or both), the following steps are taken:
+- [x] [create a new realm](https://html.spec.whatwg.org/#creating-a-new-javascript-realm) — To create a new realm in an agent agent, optionally with instructions to create a global object or a global this binding (or both), the following steps are taken:
   - 1. Perform InitializeHostDefinedRealm() with the provided customizations for creating the global object and the global this binding.
   - 2. Let realm execution context be the running JavaScript execution context.
   - 3. Remove realm execution context from the JavaScript execution context stack.
@@ -124,61 +124,61 @@ Status: unreviewed
 
 ###### [8.1.3.3.1 Entry](https://html.spec.whatwg.org/#entry)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: concept-entry-realm -->
 
-- [ ] [entry execution context](https://html.spec.whatwg.org/#entry-execution-context) — With this in hand, we define the entry execution context to be the most recently pushed item in the JavaScript execution context stack that is a realm execution context. The entry realm is the entry execution context's Realm component.
+- [x] [entry execution context](https://html.spec.whatwg.org/#entry-execution-context) — With this in hand, we define the entry execution context to be the most recently pushed item in the JavaScript execution context stack that is a realm execution context. The entry realm is the entry execution context's Realm component.
 
-- [ ] [entry settings object](https://html.spec.whatwg.org/#entry-settings-object) — Then, the entry settings object is the environment settings object of the entry realm.
+- [x] [entry settings object](https://html.spec.whatwg.org/#entry-settings-object) — Then, the entry settings object is the environment settings object of the entry realm.
 
-- [ ] [entry global object](https://html.spec.whatwg.org/#entry-global-object) — Similarly, the entry global object is the global object of the entry realm.
+- [x] [entry global object](https://html.spec.whatwg.org/#entry-global-object) — Similarly, the entry global object is the global object of the entry realm.
 
 ###### [8.1.3.3.2 Incumbent](https://html.spec.whatwg.org/#incumbent)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: skip-when-determining-incumbent-counter backup-incumbent-settings-object-stack -->
 
-- [ ] [prepare to run a callback](https://html.spec.whatwg.org/#prepare-to-run-a-callback) — To prepare to run a callback with an environment settings object settings:
+- [x] [prepare to run a callback](https://html.spec.whatwg.org/#prepare-to-run-a-callback) — To prepare to run a callback with an environment settings object settings:
   - 1. Push settings onto the backup incumbent settings object stack.
   - 2. Let context be the topmost script-having execution context.
   - 3. If context is not null, increment context's skip-when-determining-incumbent counter.
 
-- [ ] [clean up after running a callback](https://html.spec.whatwg.org/#clean-up-after-running-a-callback) — To clean up after running a callback with an environment settings object settings:
+- [x] [clean up after running a callback](https://html.spec.whatwg.org/#clean-up-after-running-a-callback) — To clean up after running a callback with an environment settings object settings:
   - 1. Let context be the topmost script-having execution context.
   - 2. If context is not null, decrement context's skip-when-determining-incumbent counter.
   - 3. Assert: the topmost entry of the backup incumbent settings object stack is settings.
   - 4. Remove settings from the backup incumbent settings object stack.
 
-- [ ] [topmost script-having execution context](https://html.spec.whatwg.org/#topmost-script-having-execution-context) — Here, the topmost script-having execution context is the topmost entry of the JavaScript execution context stack that has a non-null ScriptOrModule component, or null if there is no such entry in the JavaScript execution context stack.
+- [x] [topmost script-having execution context](https://html.spec.whatwg.org/#topmost-script-having-execution-context) — Here, the topmost script-having execution context is the topmost entry of the JavaScript execution context stack that has a non-null ScriptOrModule component, or null if there is no such entry in the JavaScript execution context stack.
 
-- [ ] [incumbent settings object](https://html.spec.whatwg.org/#incumbent-settings-object) — With all this in place, the incumbent settings object is determined as follows:
+- [x] [incumbent settings object](https://html.spec.whatwg.org/#incumbent-settings-object) — With all this in place, the incumbent settings object is determined as follows:
   - 1. Let context be the topmost script-having execution context.
   - 2. If context is null, or if context's skip-when-determining-incumbent counter is greater than zero:
     - 2a. Assert: the backup incumbent settings object stack is not empty.
     - 2b. Return the topmost entry of the backup incumbent settings object stack.
   - 3. Return context's Realm component's settings object.
 
-- [ ] [incumbent realm](https://html.spec.whatwg.org/#concept-incumbent-realm) — Then, the incumbent realm is the realm of the incumbent settings object.
+- [x] [incumbent realm](https://html.spec.whatwg.org/#concept-incumbent-realm) — Then, the incumbent realm is the realm of the incumbent settings object.
 
-- [ ] [incumbent global object](https://html.spec.whatwg.org/#concept-incumbent-global) — Similarly, the incumbent global object is the global object of the incumbent settings object.
+- [x] [incumbent global object](https://html.spec.whatwg.org/#concept-incumbent-global) — Similarly, the incumbent global object is the global object of the incumbent settings object.
 
 ###### [8.1.3.3.3 Current](https://html.spec.whatwg.org/#current)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [current settings object](https://html.spec.whatwg.org/#current-settings-object) — Then, the current settings object is the environment settings object of the current realm.
+- [x] [current settings object](https://html.spec.whatwg.org/#current-settings-object) — Then, the current settings object is the environment settings object of the current realm.
 
-- [ ] [current global object](https://html.spec.whatwg.org/#current-global-object) — Similarly, the current global object is the global object of the current realm.
+- [x] [current global object](https://html.spec.whatwg.org/#current-global-object) — Similarly, the current global object is the global object of the current realm.
 
 ###### [8.1.3.3.4 Relevant](https://html.spec.whatwg.org/#relevant)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [relevant realm](https://html.spec.whatwg.org/#concept-relevant-realm) — The relevant realm for a platform object is the value of its [[Realm]] field.
+- [x] [relevant realm](https://html.spec.whatwg.org/#concept-relevant-realm) — The relevant realm for a platform object is the value of its [[Realm]] field.
 
-- [ ] [relevant settings object](https://html.spec.whatwg.org/#relevant-settings-object) — Then, the relevant settings object for a platform object o is the environment settings object of the relevant realm for o.
+- [x] [relevant settings object](https://html.spec.whatwg.org/#relevant-settings-object) — Then, the relevant settings object for a platform object o is the environment settings object of the relevant realm for o.
 
-- [ ] [relevant global object](https://html.spec.whatwg.org/#concept-relevant-global) — Similarly, the relevant global object for a platform object o is the global object of the relevant realm for o.
+- [x] [relevant global object](https://html.spec.whatwg.org/#concept-relevant-global) — Similarly, the relevant global object for a platform object o is the global object of the relevant realm for o.
 
 ##### [8.1.3.4 Enabling and disabling scripting](https://html.spec.whatwg.org/#enabling-and-disabling-scripting)
 
@@ -215,50 +215,50 @@ Status: unreviewed
 
 ##### [8.1.4.1 Scripts](https://html.spec.whatwg.org/#script-structs)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: concept-script settings-object concept-script-record concept-script-parse-error concept-script-error-to-rethrow concept-script-script-fetch-options concept-script-base-url classic-script muted-errors module-script -->
 
-- [ ] [JavaScript module script](https://html.spec.whatwg.org/#javascript-module-script) — A module script is a JavaScript module script if its record is a Source Text Module Record.
+- [x] [JavaScript module script](https://html.spec.whatwg.org/#javascript-module-script) — A module script is a JavaScript module script if its record is a Source Text Module Record.
 
-- [ ] [CSS module script](https://html.spec.whatwg.org/#css-module-script) — A module script is a CSS module script if its record is a Synthetic Module Record, and it was created via the create a CSS module script algorithm. CSS module scripts represent a parsed CSS style sheet.
+- [x] [CSS module script](https://html.spec.whatwg.org/#css-module-script) — A module script is a CSS module script if its record is a Synthetic Module Record, and it was created via the create a CSS module script algorithm. CSS module scripts represent a parsed CSS style sheet.
 
-- [ ] [JSON module script](https://html.spec.whatwg.org/#json-module-script) — A module script is a JSON module script if its record is a Synthetic Module Record, and it was created via the create a JSON module script algorithm. JSON module scripts represent a parsed JSON document.
+- [x] [JSON module script](https://html.spec.whatwg.org/#json-module-script) — A module script is a JSON module script if its record is a Synthetic Module Record, and it was created via the create a JSON module script algorithm. JSON module scripts represent a parsed JSON document.
 
-- [ ] [text module script](https://html.spec.whatwg.org/#text-module-script) — A module script is a text module script if its record is a Synthetic Module Record, and it was created via the create a text module script algorithm. Text module scripts represent textual data encoded as UTF-8.
+- [x] [text module script](https://html.spec.whatwg.org/#text-module-script) — A module script is a text module script if its record is a Synthetic Module Record, and it was created via the create a text module script algorithm. Text module scripts represent textual data encoded as UTF-8.
 
-- [ ] [WebAssembly module script](https://html.spec.whatwg.org/#webassembly-module-script) — A module script is a WebAssembly module script if its record is a WebAssembly Module Record.
+- [x] [WebAssembly module script](https://html.spec.whatwg.org/#webassembly-module-script) — A module script is a WebAssembly module script if its record is a WebAssembly Module Record.
 
-- [ ] [active script](https://html.spec.whatwg.org/#active-script) — The active script is determined by the following algorithm:
+- [x] [active script](https://html.spec.whatwg.org/#active-script) — The active script is determined by the following algorithm:
   - 1. Let record be GetActiveScriptOrModule().
   - 2. If record is null, return null.
   - 3. Return record.[[HostDefined]].
 
 ##### [8.1.4.2 Fetching scripts](https://html.spec.whatwg.org/#fetching-scripts)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: script-fetch-options concept-script-fetch-options-nonce concept-script-fetch-options-integrity concept-script-fetch-options-parser concept-script-fetch-options-credentials concept-script-fetch-options-referrer-policy concept-script-fetch-options-render-blocking concept-script-fetch-options-fetch-priority fetching-scripts-processcustomfetchresponse fetching-scripts-is-top-level -->
 
-- [ ] [default script fetch options](https://html.spec.whatwg.org/#default-script-fetch-options) — The default script fetch options are a script fetch options whose cryptographic nonce is the empty string, integrity metadata is the empty string, parser metadata is "not-parser-inserted", credentials mode is "same-origin", referrer policy is the empty string, and fetch priority is "auto".
+- [x] [default script fetch options](https://html.spec.whatwg.org/#default-script-fetch-options) — The default script fetch options are a script fetch options whose cryptographic nonce is the empty string, integrity metadata is the empty string, parser metadata is "not-parser-inserted", credentials mode is "same-origin", referrer policy is the empty string, and fetch priority is "auto".
 
-- [ ] [set up the classic script request](https://html.spec.whatwg.org/#set-up-the-classic-script-request) — To set up the classic script request, given a request request and a script fetch options options, set request's cryptographic nonce metadata to options's cryptographic nonce, its integrity metadata to options's integrity metadata, its parser metadata to options's parser metadata, its referrer policy to options's referrer policy, its render-blocking to options's render-blocking, and its priority to options's fetch priority.
+- [x] [set up the classic script request](https://html.spec.whatwg.org/#set-up-the-classic-script-request) — To set up the classic script request, given a request request and a script fetch options options, set request's cryptographic nonce metadata to options's cryptographic nonce, its integrity metadata to options's integrity metadata, its parser metadata to options's parser metadata, its referrer policy to options's referrer policy, its render-blocking to options's render-blocking, and its priority to options's fetch priority.
 
-- [ ] [set up the module script request](https://html.spec.whatwg.org/#set-up-the-module-script-request) — To set up the module script request, given a request request and a script fetch options options, set request's cryptographic nonce metadata to options's cryptographic nonce, its integrity metadata to options's integrity metadata, its parser metadata to options's parser metadata, its credentials mode to options's credentials mode, its referrer policy to options's referrer policy, its render-blocking to options's render-blocking, and its priority to options's fetch priority.
+- [x] [set up the module script request](https://html.spec.whatwg.org/#set-up-the-module-script-request) — To set up the module script request, given a request request and a script fetch options options, set request's cryptographic nonce metadata to options's cryptographic nonce, its integrity metadata to options's integrity metadata, its parser metadata to options's parser metadata, its credentials mode to options's credentials mode, its referrer policy to options's referrer policy, its render-blocking to options's render-blocking, and its priority to options's fetch priority.
 
-- [ ] [get the descendant script fetch options](https://html.spec.whatwg.org/#get-the-descendant-script-fetch-options) — To get the descendant script fetch options given a script fetch options originalOptions, a URL url, and an environment settings object settingsObject:
+- [x] [get the descendant script fetch options](https://html.spec.whatwg.org/#get-the-descendant-script-fetch-options) — To get the descendant script fetch options given a script fetch options originalOptions, a URL url, and an environment settings object settingsObject:
   - 1. Let newOptions be a copy of originalOptions.
   - 2. Let integrity be the result of resolving a module integrity metadata with url and settingsObject.
   - 3. Set newOptions's integrity metadata to integrity.
   - 4. Set newOptions's fetch priority to "auto".
   - 5. Return newOptions.
 
-- [ ] [resolve a module integrity metadata](https://html.spec.whatwg.org/#resolving-a-module-integrity-metadata) — To resolve a module integrity metadata, given a URL url and an environment settings object settingsObject:
+- [x] [resolve a module integrity metadata](https://html.spec.whatwg.org/#resolving-a-module-integrity-metadata) — To resolve a module integrity metadata, given a URL url and an environment settings object settingsObject:
   - 1. Let map be settingsObject's global object's import map.
   - 2. If map's integrity[url] does not exist, then return the empty string.
   - 3. Return map's integrity[url].
 
-- [ ] [perform the fetch hook (fetching scripts)](https://html.spec.whatwg.org/#fetching-scripts-perform-fetch) — Several of the below algorithms can be customized with a perform the fetch hook algorithm, which takes a request, a boolean isTopLevel, and a processCustomFetchResponse algorithm. It runs processCustomFetchResponse with a response and either null (on failure) or a byte sequence containing the response body. isTopLevel will be true for all classic script fetches, and for the initial fetch when fetching an external module script graph or fetching a module worker script graph, but false for the fetches resulting from import statements encountered throughout the graph or from import() expressions.
+- [x] [perform the fetch hook (fetching scripts)](https://html.spec.whatwg.org/#fetching-scripts-perform-fetch) — Several of the below algorithms can be customized with a perform the fetch hook algorithm, which takes a request, a boolean isTopLevel, and a processCustomFetchResponse algorithm. It runs processCustomFetchResponse with a response and either null (on failure) or a byte sequence containing the response body. isTopLevel will be true for all classic script fetches, and for the initial fetch when fetching an external module script graph or fetching a module worker script graph, but false for the fetches resulting from import statements encountered throughout the graph or from import() expressions.
 
-- [ ] [fetch a classic script](https://html.spec.whatwg.org/#fetch-a-classic-script) — To fetch a classic script given a URL url, an environment settings object settingsObject, a script fetch options options, a CORS settings attribute state corsSetting, an encoding encoding, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a…
+- [x] [fetch a classic script](https://html.spec.whatwg.org/#fetch-a-classic-script) — To fetch a classic script given a URL url, an environment settings object settingsObject, a script fetch options options, a CORS settings attribute state corsSetting, an encoding encoding, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a…
   - 1. Let request be the result of creating a potential-CORS request given url, "script", and corsSetting.
   - 2. Set request's client to settingsObject.
   - 3. Set request's initiator type to "script".
@@ -273,7 +273,7 @@ Status: unreviewed
     - 5g. Let script be the result of creating a classic script given sourceText, settingsObject, response's URL, options, mutedErrors, and url.
     - 5h. Run onComplete given script.
 
-- [ ] [fetch a classic worker script](https://html.spec.whatwg.org/#fetch-a-classic-worker-script) — To fetch a classic worker script given a URL url, an environment settings object fetchClient, a destination destination, an environment settings object settingsObject, an algorithm onComplete, and an optional perform the fetch hook performFetch, run these steps. onComplete must be an algorithm acce…
+- [x] [fetch a classic worker script](https://html.spec.whatwg.org/#fetch-a-classic-worker-script) — To fetch a classic worker script given a URL url, an environment settings object fetchClient, a destination destination, an environment settings object settingsObject, an algorithm onComplete, and an optional perform the fetch hook performFetch, run these steps. onComplete must be an algorithm acce…
   - 1. Let request be a new request whose URL is url, client is fetchClient, destination is destination, initiator type is "other", mode is "same-origin", credentials mode is "same-origin", parser metadata is "not parser-inserted", and whose use-URL-credentials flag is set.
   - 2. If performFetch was given, run performFetch with request, true, and with processResponseConsumeBody as defined below. Otherwise, fetch request with processResponseConsumeBody set to processResponseConsumeBody as defined below. In both cases, let processResponseConsumeBody given response response and null, failure, or a byte sequence bodyBytes be the following algorithm:
     - 2a. Set response to response's unsafe response.
@@ -283,7 +283,7 @@ Status: unreviewed
     - 2e. Let script be the result of creating a classic script using sourceText, settingsObject, response's URL, and the default script fetch options.
     - 2f. Run onComplete given script.
 
-- [ ] [fetch a classic worker-imported script](https://html.spec.whatwg.org/#fetch-a-classic-worker-imported-script) — To fetch a classic worker-imported script given a URL url, an environment settings object settingsObject, and an optional perform the fetch hook performFetch, run these steps. The algorithm will return a classic script on success, or throw an exception on failure.
+- [x] [fetch a classic worker-imported script](https://html.spec.whatwg.org/#fetch-a-classic-worker-imported-script) — To fetch a classic worker-imported script given a URL url, an environment settings object settingsObject, and an optional perform the fetch hook performFetch, run these steps. The algorithm will return a classic script on success, or throw an exception on failure.
   - 1. Let response be null.
   - 2. Let bodyBytes be null.
   - 3. Let request be a new request whose URL is url, client is settingsObject, destination is "script", initiator type is "other", parser metadata is "not parser-inserted", and whose use-URL-credentials flag is set.
@@ -298,24 +298,24 @@ Status: unreviewed
   - 10. Let script be the result of creating a classic script given sourceText, settingsObject, response's URL, the default script fetch options, and mutedErrors.
   - 11. Return script.
 
-- [ ] [fetch an external module script graph](https://html.spec.whatwg.org/#fetch-a-module-script-tree) — To fetch an external module script graph given a URL url, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on success).
+- [x] [fetch an external module script graph](https://html.spec.whatwg.org/#fetch-a-module-script-tree) — To fetch an external module script graph given a URL url, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on success).
   - 1. Fetch a single module script given url, settingsObject, "script", options, settingsObject, "client", true, and with the following steps given result:
     - 1a. If result is null, run onComplete given null, and abort these steps.
     - 1b. Fetch the descendants of and link result given settingsObject, "script", and onComplete.
 
-- [ ] [fetch a modulepreload module script graph](https://html.spec.whatwg.org/#fetch-a-modulepreload-module-script-graph) — To fetch a modulepreload module script graph given a URL url, a destination destination, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on su…
+- [x] [fetch a modulepreload module script graph](https://html.spec.whatwg.org/#fetch-a-modulepreload-module-script-graph) — To fetch a modulepreload module script graph given a URL url, a destination destination, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on su…
   - 1. Fetch a single module script given url, settingsObject, destination, options, settingsObject, "client", true, and with the following steps given result:
     - 1a. Run onComplete given result.
     - 1b. Assert: settingsObject's global object implements Window.
     - 1c. If result is not null, optionally fetch the descendants of and link result given settingsObject, destination, and an empty algorithm.
 
-- [ ] [fetch an inline module script graph](https://html.spec.whatwg.org/#fetch-an-inline-module-script-graph) — To fetch an inline module script graph given a string sourceText, a URL baseURL, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on success).
+- [x] [fetch an inline module script graph](https://html.spec.whatwg.org/#fetch-an-inline-module-script-graph) — To fetch an inline module script graph given a string sourceText, a URL baseURL, an environment settings object settingsObject, a script fetch options options, and an algorithm onComplete, run these steps. onComplete must be an algorithm accepting null (on failure) or a module script (on success).
   - 1. Let script be the result of creating a JavaScript module script using sourceText, settingsObject, baseURL, and options.
   - 2. Fetch the descendants of and link script, given settingsObject, "script", and onComplete.
 
-- [ ] [fetch a module worker script graph](https://html.spec.whatwg.org/#fetch-a-module-worker-script-tree) — To fetch a module worker script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, and an algorithm onComplete, fetch a worklet/module worker script graph given url, fetchClient, destination, credentialsMode, settingsObject, and onComplete.
+- [x] [fetch a module worker script graph](https://html.spec.whatwg.org/#fetch-a-module-worker-script-tree) — To fetch a module worker script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, and an algorithm onComplete, fetch a worklet/module worker script graph given url, fetchClient, destination, credentialsMode, settingsObject, and onComplete.
 
-- [ ] [fetch a worklet script graph](https://html.spec.whatwg.org/#fetch-a-worklet-script-graph) — To fetch a worklet script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, a module responses map moduleResponsesMap, and an algorithm onComplete, fetch a worklet/module w…
+- [x] [fetch a worklet script graph](https://html.spec.whatwg.org/#fetch-a-worklet-script-graph) — To fetch a worklet script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, a module responses map moduleResponsesMap, and an algorithm onComplete, fetch a worklet/module w…
   - 1. Let requestURL be request's URL.
   - 2. If moduleResponsesMap[requestURL] is "fetching", wait in parallel until that entry's value changes, then queue a task on the networking task source to proceed with running the following steps.
   - 3. If moduleResponsesMap[requestURL] exists:
@@ -327,13 +327,13 @@ Status: unreviewed
     - 5a. Set moduleResponsesMap[requestURL] to (response, bodyBytes).
     - 5b. Run processCustomFetchResponse with response and bodyBytes.
 
-- [ ] [fetch a worklet/module worker script graph](https://html.spec.whatwg.org/#fetch-a-worklet/module-worker-script-graph) — To fetch a worklet/module worker script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, an algorithm onComplete, and an optional perform the fetch hook performFetch, run…
+- [x] [fetch a worklet/module worker script graph](https://html.spec.whatwg.org/#fetch-a-worklet/module-worker-script-graph) — To fetch a worklet/module worker script graph given a URL url, an environment settings object fetchClient, a destination destination, a credentials mode credentialsMode, an environment settings object settingsObject, an algorithm onComplete, and an optional perform the fetch hook performFetch, run…
   - 1. Let options be a script fetch options whose cryptographic nonce is the empty string, integrity metadata is the empty string, parser metadata is "not-parser-inserted", credentials mode is credentialsMode, referrer policy is the empty string, and fetch priority is "auto".
   - 2. Fetch a single module script given url, fetchClient, destination, options, settingsObject, "client", true, and onSingleFetchComplete as defined below. If performFetch was given, pass it along as well. onSingleFetchComplete given result is the following algorithm:
     - 2a. If result is null, run onComplete given null, and abort these steps.
     - 2b. Fetch the descendants of and link result given fetchClient, destination, and onComplete. If performFetch was given, pass it along as well.
 
-- [ ] [fetch the descendants of and link](https://html.spec.whatwg.org/#fetch-the-descendants-of-and-link-a-module-script) — To fetch the descendants of and link a module script moduleScript, given an environment settings object fetchClient, a destination destination, an algorithm onComplete, and an optional perform the fetch hook performFetch, run these steps. onComplete must be an algorithm accepting null (on failure)…
+- [x] [fetch the descendants of and link](https://html.spec.whatwg.org/#fetch-the-descendants-of-and-link-a-module-script) — To fetch the descendants of and link a module script moduleScript, given an environment settings object fetchClient, a destination destination, an algorithm onComplete, and an optional perform the fetch hook performFetch, run these steps. onComplete must be an algorithm accepting null (on failure)…
   - 1. Let record be moduleScript's record.
   - 2. If record is null:
     - 2a. Set moduleScript's error to rethrow to moduleScript's parse error.
@@ -349,7 +349,7 @@ Status: unreviewed
     - 7a. If state.[[ErrorToRethrow]] is not null, set moduleScript's error to rethrow to state.[[ErrorToRethrow]] and run onComplete given moduleScript.
     - 7b. Otherwise, run onComplete given null.
 
-- [ ] [fetch a single module script](https://html.spec.whatwg.org/#fetch-a-single-module-script) — To fetch a single module script, given a URL url, an environment settings object fetchClient, a destination destination, a script fetch options options, an environment settings object settingsObject, a referrer referrer, an optional ModuleRequest Record moduleRequest, a boolean isTopLevel, an algor…
+- [x] [fetch a single module script](https://html.spec.whatwg.org/#fetch-a-single-module-script) — To fetch a single module script, given a URL url, an environment settings object fetchClient, a destination destination, a script fetch options options, an environment settings object settingsObject, a referrer referrer, an optional ModuleRequest Record moduleRequest, a boolean isTopLevel, an algor…
   - 1. Let moduleType be "javascript-or-wasm".
   - 2. If moduleRequest was given, then set moduleType to the result of running the module type from module request steps given moduleRequest.
   - 3. Assert: the result of running the module type allowed steps given moduleType and settingsObject is true. Otherwise, we would not have reached this point because a failure would have been raised when inspecting moduleRequest.[[Attributes]] in HostLoadImportedModule or fetch a single imported module script.
@@ -383,7 +383,7 @@ Status: unreviewed
     - 13i. If moduleScript is null, then remove moduleMap[(url, moduleType)]; otherwise set moduleMap[(url, moduleType)] to moduleScript.
     - 13j. For each callback of callbacks: run callback given moduleScript.
 
-- [ ] [fetch a single imported module script](https://html.spec.whatwg.org/#fetch-a-single-imported-module-script) — To fetch a single imported module script, given a URL url, an environment settings object fetchClient, a destination destination, a script fetch options options, environment settings object settingsObject, a referrer referrer, a ModuleRequest Record moduleRequest, an algorithm onComplete, and an op…
+- [x] [fetch a single imported module script](https://html.spec.whatwg.org/#fetch-a-single-imported-module-script) — To fetch a single imported module script, given a URL url, an environment settings object fetchClient, a destination destination, a script fetch options options, environment settings object settingsObject, a referrer referrer, a ModuleRequest Record moduleRequest, an algorithm onComplete, and an op…
   - 1. Assert: moduleRequest.[[Attributes]] does not contain any Record entry such that entry.[[Key]] is not "type", because we only asked for "type" attributes in HostGetSupportedImportAttributes.
   - 2. Let moduleType be the result of running the module type from module request steps given moduleRequest.
   - 3. If the result of running the module type allowed steps given moduleType and settingsObject is false, then run onComplete given null, and return.
@@ -391,10 +391,10 @@ Status: unreviewed
 
 ##### [8.1.4.3 Creating scripts](https://html.spec.whatwg.org/#creating-scripts)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: webdriver-bidi-command-script-evaluate -->
 
-- [ ] [create a classic script](https://html.spec.whatwg.org/#creating-a-classic-script) — To create a classic script, given a string source, an environment settings object settings, a URL baseURL, a script fetch options options, an optional boolean mutedErrors (default false), an optional URL-or-null sourceURLForWindowScripts (default null), and an optional boolean bypassDisabledScripti…
+- [x] [create a classic script](https://html.spec.whatwg.org/#creating-a-classic-script) — To create a classic script, given a string source, an environment settings object settings, a URL baseURL, a script fetch options options, an optional boolean mutedErrors (default false), an optional URL-or-null sourceURLForWindowScripts (default null), and an optional boolean bypassDisabledScripti…
   - 1. If mutedErrors is true, then set baseURL to about:blank.
   - 2. If scripting is disabled for settings and bypassDisabledScripting is false, then set source to the empty string.
   - 3. Let script be a new classic script that this algorithm will subsequently initialize.
@@ -411,7 +411,7 @@ Status: unreviewed
   - 12. Set script's record to result.
   - 13. Return script.
 
-- [ ] [create a JavaScript module script](https://html.spec.whatwg.org/#creating-a-javascript-module-script) — To create a JavaScript module script, given a string source, an environment settings object settings, a URL baseURL, and a script fetch options options:
+- [x] [create a JavaScript module script](https://html.spec.whatwg.org/#creating-a-javascript-module-script) — To create a JavaScript module script, given a string source, an environment settings object settings, a URL baseURL, and a script fetch options options:
   - 1. If scripting is disabled for settings, then set source to the empty string.
   - 2. Let script be a new module script that this algorithm will subsequently initialize.
   - 3. Set script's settings object to settings.
@@ -425,7 +425,7 @@ Status: unreviewed
   - 9. Set script's record to result.
   - 10. Return script.
 
-- [ ] [create a WebAssembly module script](https://html.spec.whatwg.org/#creating-a-webassembly-module-script) — To create a WebAssembly module script, given a byte sequence bodyBytes, an environment settings object settings, a URL baseURL, and a script fetch options options:
+- [x] [create a WebAssembly module script](https://html.spec.whatwg.org/#creating-a-webassembly-module-script) — To create a WebAssembly module script, given a byte sequence bodyBytes, an environment settings object settings, a URL baseURL, and a script fetch options options:
   - 1. If scripting is disabled for settings, then set bodyBytes to the byte sequence 0x00 0x61 0x73 0x6D 0x01 0x00 0x00 0x00.
   - 2. Let script be a new module script that this algorithm will subsequently initialize.
   - 3. Set script's settings object to settings.
@@ -439,7 +439,7 @@ Status: unreviewed
   - 9. Set script's record to result.
   - 10. Return script.
 
-- [ ] [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) — To create a CSS module script, given a string source and an environment settings object settings:
+- [x] [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) — To create a CSS module script, given a string source and an environment settings object settings:
   - 1. Let script be a new module script that this algorithm will subsequently initialize.
   - 2. Set script's settings object to settings.
   - 3. Set script's base URL and fetch options to null.
@@ -449,7 +449,7 @@ Status: unreviewed
   - 7. Set script's record to the result of CreateDefaultExportSyntheticModule(sheet).
   - 8. Return script.
 
-- [ ] [create a JSON module script](https://html.spec.whatwg.org/#creating-a-json-module-script) — To create a JSON module script, given a string source and an environment settings object settings:
+- [x] [create a JSON module script](https://html.spec.whatwg.org/#creating-a-json-module-script) — To create a JSON module script, given a string source and an environment settings object settings:
   - 1. Let script be a new module script that this algorithm will subsequently initialize.
   - 2. Set script's settings object to settings.
   - 3. Set script's base URL and fetch options to null.
@@ -458,7 +458,7 @@ Status: unreviewed
   - 6. Set script's record to result.
   - 7. Return script.
 
-- [ ] [create a text module script](https://html.spec.whatwg.org/#creating-a-text-module-script) — To create a text module script, given a string text and an environment settings object settings:
+- [x] [create a text module script](https://html.spec.whatwg.org/#creating-a-text-module-script) — To create a text module script, given a string text and an environment settings object settings:
   - 1. Let script be a new module script that this algorithm will subsequently initialize.
   - 2. Set script's settings object to settings.
   - 3. Set script's base URL and fetch options to null.
@@ -467,19 +467,19 @@ Status: unreviewed
   - 6. Set script's record to result.
   - 7. Return script.
 
-- [ ] [module type from module request](https://html.spec.whatwg.org/#module-type-from-module-request) — The module type from module request steps, given a ModuleRequest Record moduleRequest, are as follows:
+- [x] [module type from module request](https://html.spec.whatwg.org/#module-type-from-module-request) — The module type from module request steps, given a ModuleRequest Record moduleRequest, are as follows:
   - 1. Let moduleType be "javascript-or-wasm".
   - 2. If moduleRequest.[[Attributes]] has a Record entry such that entry.[[Key]] is "type":
     - 2a. If entry.[[Value]] is "javascript-or-wasm", then set moduleType to null.
     - 2b. Otherwise, set moduleType to entry.[[Value]].
   - 3. Return moduleType.
 
-- [ ] [module type allowed](https://html.spec.whatwg.org/#module-type-allowed) — The module type allowed steps, given a string moduleType and an environment settings object settings, are as follows:
+- [x] [module type allowed](https://html.spec.whatwg.org/#module-type-allowed) — The module type allowed steps, given a string moduleType and an environment settings object settings, are as follows:
   - 1. If moduleType is not "javascript-or-wasm", "css", "json", or "text", then return false.
   - 2. If moduleType is "css" and the CSSStyleSheet interface is not exposed in settings's realm, then return false.
   - 3. Return true.
 
-- [ ] [fetch destination from module type](https://html.spec.whatwg.org/#fetch-destination-from-module-type) — The fetch destination from module type steps, given a destination defaultDestination and a string moduleType, are as follows:
+- [x] [fetch destination from module type](https://html.spec.whatwg.org/#fetch-destination-from-module-type) — The fetch destination from module type steps, given a destination defaultDestination and a string moduleType, are as follows:
   - 1. If moduleType is "json", then return "json".
   - 2. If moduleType is "css", then return "style".
   - 3. If moduleType is "text", then return "text".
@@ -487,9 +487,9 @@ Status: unreviewed
 
 ##### [8.1.4.4 Calling scripts](https://html.spec.whatwg.org/#calling-scripts)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [run a classic script](https://html.spec.whatwg.org/#run-a-classic-script) — To run a classic script given a classic script script and an optional boolean rethrow errors (default false):
+- [x] [run a classic script](https://html.spec.whatwg.org/#run-a-classic-script) — To run a classic script given a classic script script and an optional boolean rethrow errors (default false):
   - 1. Let settings be the settings object of script.
   - 2. Check if we can run script with settings. If this returns "do not run", then return NormalCompletion(empty).
   - 3. Record classic script execution start time given script.
@@ -512,7 +512,7 @@ Status: unreviewed
   - 10. If evaluationStatus is a normal completion, then return evaluationStatus.
   - 11. If we've reached this point, evaluationStatus was left as null because the script was aborted prematurely during evaluation. Return ThrowCompletion(a new QuotaExceededError).
 
-- [ ] [run a module script](https://html.spec.whatwg.org/#run-a-module-script) — To run a module script given a module script script and an optional boolean preventErrorReporting (default false):
+- [x] [run a module script](https://html.spec.whatwg.org/#run-a-module-script) — To run a module script given a module script script and an optional boolean preventErrorReporting (default false):
   - 1. Let settings be the settings object of script.
   - 2. Check if we can run script with settings. If this returns "do not run", then return a promise resolved with undefined.
   - 3. Record module script execution start time given script.
@@ -526,25 +526,25 @@ Status: unreviewed
   - 9. Clean up after running script with settings.
   - 10. Return evaluationPromise.
 
-- [ ] [check if we can run script](https://html.spec.whatwg.org/#check-if-we-can-run-script) — The steps to check if we can run script with an environment settings object settings are as follows. They return either "run" or "do not run".
+- [x] [check if we can run script](https://html.spec.whatwg.org/#check-if-we-can-run-script) — The steps to check if we can run script with an environment settings object settings are as follows. They return either "run" or "do not run".
   - 1. If the global object specified by settings is a Window object whose Document object is not fully active, then return "do not run".
   - 2. If scripting is disabled for settings, then return "do not run".
   - 3. Return "run".
 
-- [ ] [prepare to run script](https://html.spec.whatwg.org/#prepare-to-run-script) — The steps to prepare to run script with an environment settings object settings are as follows:
+- [x] [prepare to run script](https://html.spec.whatwg.org/#prepare-to-run-script) — The steps to prepare to run script with an environment settings object settings are as follows:
   - 1. Push settings's realm execution context onto the JavaScript execution context stack; it is now the running JavaScript execution context.
   - 2. Add settings to the surrounding agent's event loop's currently running task's script evaluation environment settings object set.
 
-- [ ] [clean up after running script](https://html.spec.whatwg.org/#clean-up-after-running-script) — The steps to clean up after running script with an environment settings object settings are as follows:
+- [x] [clean up after running script](https://html.spec.whatwg.org/#clean-up-after-running-script) — The steps to clean up after running script with an environment settings object settings are as follows:
   - 1. Assert: settings's realm execution context is the running JavaScript execution context.
   - 2. Remove settings's realm execution context from the JavaScript execution context stack.
   - 3. If the JavaScript execution context stack is now empty, perform a microtask checkpoint. (If this runs scripts, these algorithms will be invoked reentrantly.)
 
-- [ ] [running script](https://html.spec.whatwg.org/#running-script) — The running script is the script in the [[HostDefined]] field in the ScriptOrModule component of the running JavaScript execution context.
+- [x] [running script](https://html.spec.whatwg.org/#running-script) — The running script is the script in the [[HostDefined]] field in the ScriptOrModule component of the running JavaScript execution context.
 
 ##### [8.1.4.5 Killing scripts](https://html.spec.whatwg.org/#killing-scripts)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: abort-a-running-script -->
 
 ##### [8.1.4.6 Runtime script errors](https://html.spec.whatwg.org/#runtime-script-errors)
@@ -590,9 +590,9 @@ Status: unreviewed
 
 ##### [8.1.4.7 Unhandled promise rejections](https://html.spec.whatwg.org/#unhandled-promise-rejections)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [notify about rejected promises](https://html.spec.whatwg.org/#notify-about-rejected-promises) — To notify about rejected promises given a global object global:
+- [x] [notify about rejected promises](https://html.spec.whatwg.org/#notify-about-rejected-promises) — To notify about rejected promises given a global object global:
   - 1. Let list be a clone of global's about-to-be-notified rejected promises list.
   - 2. If list is empty, then return.
   - 3. Empty global's about-to-be-notified rejected promises list.
@@ -603,35 +603,35 @@ Status: unreviewed
       - 4a.iii. If notCanceled is true, then the user agent may report p.[[PromiseResult]] to a developer console.
       - 4a.iv. If p.[[PromiseIsHandled]] is false, then append p to global's outstanding rejected promises weak set.
 
-- [ ] [PromiseRejectionEvent.promise](https://html.spec.whatwg.org/#dom-promiserejectionevent-promise) — The promise attribute must return the value it was initialized to. It represents the promise which this notification is about.
+- [x] [PromiseRejectionEvent.promise](https://html.spec.whatwg.org/#dom-promiserejectionevent-promise) — The promise attribute must return the value it was initialized to. It represents the promise which this notification is about.
 
-- [ ] [PromiseRejectionEvent.reason](https://html.spec.whatwg.org/#dom-promiserejectionevent-reason) — The reason attribute must return the value it was initialized to. It represents the rejection reason for the promise.
+- [x] [PromiseRejectionEvent.reason](https://html.spec.whatwg.org/#dom-promiserejectionevent-reason) — The reason attribute must return the value it was initialized to. It represents the rejection reason for the promise.
 
 ##### [8.1.4.8 Import map parse results](https://html.spec.whatwg.org/#import-map-parse-results)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: import-map-parse-result impr-import-map impr-error-to-rethrow -->
 
-- [ ] [create an import map parse result](https://html.spec.whatwg.org/#create-an-import-map-parse-result) — To create an import map parse result given a string input and a URL baseURL:
+- [x] [create an import map parse result](https://html.spec.whatwg.org/#create-an-import-map-parse-result) — To create an import map parse result given a string input and a URL baseURL:
   - 1. Let result be an import map parse result whose import map is null and whose error to rethrow is null.
   - 2. Parse an import map string given input and baseURL, catching any exceptions. If this threw an exception, then set result's error to rethrow to that exception. Otherwise, set result's import map to the return value.
   - 3. Return result.
 
-- [ ] [register an import map](https://html.spec.whatwg.org/#register-an-import-map) — To register an import map given a Window global and an import map parse result result:
+- [x] [register an import map](https://html.spec.whatwg.org/#register-an-import-map) — To register an import map given a Window global and an import map parse result result:
   - 1. If result's error to rethrow is not null, then report an exception given by result's error to rethrow for global and return.
   - 2. Merge existing and new import maps, given global and result's import map.
 
 ##### [8.1.4.9 Speculation rules parse results](https://html.spec.whatwg.org/#speculation-rules-parse-results)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: speculation-rules-parse-result srpr-sr-set srpr-error-to-rethrow -->
 
-- [ ] [create a speculation rules parse result](https://html.spec.whatwg.org/#create-a-speculation-rules-parse-result) — To create a speculation rules parse result given a string input and a Document document:
+- [x] [create a speculation rules parse result](https://html.spec.whatwg.org/#create-a-speculation-rules-parse-result) — To create a speculation rules parse result given a string input and a Document document:
   - 1. Let result be a speculation rules parse result whose speculation rule set is null and whose error to rethrow is null.
   - 2. Parse a speculation rule set string given input, document, and document's document base URL, catching any exceptions. If this threw an exception, then set result's error to rethrow to that exception. Otherwise, set result's speculation rule set to the return value.
   - 3. Return result.
 
-- [ ] [register speculation rules](https://html.spec.whatwg.org/#register-speculation-rules) — To register speculation rules given a Window global, a speculation rules parse result result, and an optional boolean queueErrors (default false):
+- [x] [register speculation rules](https://html.spec.whatwg.org/#register-speculation-rules) — To register speculation rules given a Window global, a speculation rules parse result result, and an optional boolean queueErrors (default false):
   - 1. If result's error to rethrow is not null:
     - 1a. If queueErrors is true, then queue a global task on the DOM manipulation task source given global to perform the following step:
       - 1a.i. Report an exception given by result's error to rethrow for global.
@@ -640,24 +640,24 @@ Status: unreviewed
   - 2. Append result's speculation rule set to global's associated Document's speculation rule sets.
   - 3. Consider speculative loads for global's associated Document.
 
-- [ ] [unregister speculation rules](https://html.spec.whatwg.org/#unregister-speculation-rules) — To unregister speculation rules given a Window global and a speculation rules parse result result:
+- [x] [unregister speculation rules](https://html.spec.whatwg.org/#unregister-speculation-rules) — To unregister speculation rules given a Window global and a speculation rules parse result result:
   - 1. If result's error to rethrow is not null, then return.
   - 2. Remove result's speculation rule set from global's associated Document's speculation rule sets.
   - 3. Consider speculative loads for global's associated Document.
 
-- [ ] [update speculation rules](https://html.spec.whatwg.org/#update-speculation-rules) — To update speculation rules given a Window global, a speculation rules parse result oldResult, and a speculation rules parse result newResult:
+- [x] [update speculation rules](https://html.spec.whatwg.org/#update-speculation-rules) — To update speculation rules given a Window global, a speculation rules parse result oldResult, and a speculation rules parse result newResult:
   - 1. Remove oldResult's speculation rule set from global's associated Document's speculation rule sets.
   - 2. Register speculation rules given global, newResult, and true.
 
 #### [8.1.5 Module specifier resolution](https://html.spec.whatwg.org/#module-specifier-resolution)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.5.1 The resolution algorithm](https://html.spec.whatwg.org/#the-resolution-algorithm)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [resolve a module specifier](https://html.spec.whatwg.org/#resolve-a-module-specifier) — To resolve a module specifier given a script-or-null referringScript and a string specifier:
+- [x] [resolve a module specifier](https://html.spec.whatwg.org/#resolve-a-module-specifier) — To resolve a module specifier given a script-or-null referringScript and a string specifier:
   - 1. Let settingsObject and baseURL be null.
   - 2. If referringScript is not null:
     - 2a. Set settingsObject to referringScript's settings object.
@@ -683,7 +683,7 @@ Status: unreviewed
     - 13b. Return result.
   - 14. Throw a TypeError indicating that specifier was a bare specifier, but was not remapped to anything by importMap.
 
-- [ ] [resolve an imports match](https://html.spec.whatwg.org/#resolving-an-imports-match) — To resolve an imports match, given a string normalizedSpecifier, a URL-or-null asURL, and a module specifier map specifierMap:
+- [x] [resolve an imports match](https://html.spec.whatwg.org/#resolving-an-imports-match) — To resolve an imports match, given a string normalizedSpecifier, a URL-or-null asURL, and a module specifier map specifierMap:
   - 1. For each specifierKey → resolutionResult of specifierMap:
     - 1a. If specifierKey is normalizedSpecifier:
       - 1a.i. If resolutionResult is null, then throw a TypeError indicating that resolution of specifierKey was blocked by a null entry.
@@ -701,7 +701,7 @@ Status: unreviewed
       - 1b.ix. Return url.
   - 2. Return null.
 
-- [ ] [resolve a URL-like module specifier](https://html.spec.whatwg.org/#resolving-a-url-like-module-specifier) — To resolve a URL-like module specifier, given a string specifier and a URL baseURL:
+- [x] [resolve a URL-like module specifier](https://html.spec.whatwg.org/#resolving-a-url-like-module-specifier) — To resolve a URL-like module specifier, given a string specifier and a URL baseURL:
   - 1. If specifier starts with "/", "./", or "../":
     - 1a. Let url be the result of URL parsing specifier with baseURL.
     - 1b. If url is failure, then return null.
@@ -712,24 +712,24 @@ Status: unreviewed
 
 ##### [8.1.5.2 Import maps](https://html.spec.whatwg.org/#import-maps)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
-- [ ] [import map authoring requirements](https://html.spec.whatwg.org/#import-map-authoring-requirements) — The child text content of a script element representing an import map must match the following import map authoring requirements:
+- [x] [import map authoring requirements](https://html.spec.whatwg.org/#import-map-authoring-requirements) — The child text content of a script element representing an import map must match the following import map authoring requirements:
 
-- [ ] [valid module specifier map](https://html.spec.whatwg.org/#valid-module-specifier-map) — A valid module specifier map is a JSON object that meets the following requirements:
+- [x] [valid module specifier map](https://html.spec.whatwg.org/#valid-module-specifier-map) — A valid module specifier map is a JSON object that meets the following requirements:
 
 ##### [8.1.5.3 Import map processing model](https://html.spec.whatwg.org/#import-map-processing-model)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: import-map concept-import-map-imports concept-import-map-scopes concept-import-map-integrity module-specifier-map module-integrity-map empty-import-map specifier-resolution-record specifier-resolution-record-serialized-base-url specifier-resolution-record-specifier specifier-resolution-record-as-url -->
 
-- [ ] [add module to resolved module set](https://html.spec.whatwg.org/#add-module-to-resolved-module-set) — To add module to resolved module set given an environment settings object settingsObject, a string serializedBaseURL, a string normalizedSpecifier, and a URL-or-null asURL:
+- [x] [add module to resolved module set](https://html.spec.whatwg.org/#add-module-to-resolved-module-set) — To add module to resolved module set given an environment settings object settingsObject, a string serializedBaseURL, a string normalizedSpecifier, and a URL-or-null asURL:
   - 1. Let global be settingsObject's global object.
   - 2. If global does not implement Window, then return.
   - 3. Let record be a new specifier resolution record, with serialized base URL set to serializedBaseURL, specifier set to normalizedSpecifier, and specifier as a URL set to asURL.
   - 4. Append record to global's resolved module set.
 
-- [ ] [parse an import map string](https://html.spec.whatwg.org/#parse-an-import-map-string) — To parse an import map string, given a string input and a URL baseURL:
+- [x] [parse an import map string](https://html.spec.whatwg.org/#parse-an-import-map-string) — To parse an import map string, given a string input and a URL baseURL:
   - 1. Let parsed be the result of parsing a JSON string to an Infra value given input.
   - 2. If parsed is not an ordered map, then throw a TypeError indicating that the top-level value needs to be a JSON object.
   - 3. Let sortedAndNormalizedImports be an empty ordered map.
@@ -747,7 +747,7 @@ Status: unreviewed
   - 9. If parsed's keys contains any items besides "imports", "scopes", or "integrity", then the user agent should report a warning to the console indicating that an invalid top-level key was present in the import map.
   - 10. Return an import map whose imports are sortedAndNormalizedImports, whose scopes are sortedAndNormalizedScopes, and whose integrity are normalizedIntegrity.
 
-- [ ] [merge module specifier maps](https://html.spec.whatwg.org/#merge-module-specifier-maps) — To merge module specifier maps, given a module specifier map newMap and a module specifier map oldMap:
+- [x] [merge module specifier maps](https://html.spec.whatwg.org/#merge-module-specifier-maps) — To merge module specifier maps, given a module specifier map newMap and a module specifier map oldMap:
   - 1. Let mergedMap be a deep copy of oldMap.
   - 2. For each specifier → url of newMap:
     - 2a. If specifier exists in oldMap:
@@ -756,7 +756,7 @@ Status: unreviewed
     - 2b. Set mergedMap[specifier] to url.
   - 3. Return mergedMap.
 
-- [ ] [merge existing and new import maps](https://html.spec.whatwg.org/#merge-existing-and-new-import-maps) — To merge existing and new import maps, given a global object global and an import map newImportMap:
+- [x] [merge existing and new import maps](https://html.spec.whatwg.org/#merge-existing-and-new-import-maps) — To merge existing and new import maps, given a global object global and an import map newImportMap:
   - 1. Let newImportMapScopes be a deep copy of newImportMap's scopes.
   - 2. Let oldImportMap be global's import map.
   - 3. Let newImportMapImports be a deep copy of newImportMap's imports.
@@ -781,7 +781,7 @@ Status: unreviewed
         - 6a.i.B. Remove newImportMapImports[specifier].
   - 7. Set oldImportMap's imports to the result of merge module specifier maps, given newImportMapImports and oldImportMap's imports.
 
-- [ ] [sort and normalize a module specifier map](https://html.spec.whatwg.org/#sorting-and-normalizing-a-module-specifier-map) — To sort and normalize a module specifier map, given an ordered map originalMap and a URL baseURL:
+- [x] [sort and normalize a module specifier map](https://html.spec.whatwg.org/#sorting-and-normalizing-a-module-specifier-map) — To sort and normalize a module specifier map, given an ordered map originalMap and a URL baseURL:
   - 1. Let normalized be an empty ordered map.
   - 2. For each specifierKey → value of originalMap:
     - 2a. Let normalizedSpecifierKey be the result of normalizing a specifier key given specifierKey and baseURL.
@@ -802,7 +802,7 @@ Status: unreviewed
     - 2g. Set normalized[normalizedSpecifierKey] to addressURL.
   - 3. Return the result of sorting in descending order normalized, with an entry a being less than an entry b if a's key is code unit less than b's key.
 
-- [ ] [sort and normalize scopes](https://html.spec.whatwg.org/#sorting-and-normalizing-scopes) — To sort and normalize scopes, given an ordered map originalMap and a URL baseURL:
+- [x] [sort and normalize scopes](https://html.spec.whatwg.org/#sorting-and-normalizing-scopes) — To sort and normalize scopes, given an ordered map originalMap and a URL baseURL:
   - 1. Let normalized be an empty ordered map.
   - 2. For each scopePrefix → potentialSpecifierMap of originalMap:
     - 2a. If potentialSpecifierMap is not an ordered map, then throw a TypeError indicating that the value of the scope with prefix scopePrefix needs to be a JSON object.
@@ -814,7 +814,7 @@ Status: unreviewed
     - 2e. Set normalized[normalizedScopePrefix] to the result of sorting and normalizing a module specifier map given potentialSpecifierMap and baseURL.
   - 3. Return the result of sorting in descending order normalized, with an entry a being less than an entry b if a's key is code unit less than b's key.
 
-- [ ] [normalize a module integrity map](https://html.spec.whatwg.org/#normalizing-a-module-integrity-map) — To normalize a module integrity map, given an ordered map originalMap:
+- [x] [normalize a module integrity map](https://html.spec.whatwg.org/#normalizing-a-module-integrity-map) — To normalize a module integrity map, given an ordered map originalMap:
   - 1. Let normalized be an empty ordered map.
   - 2. For each key → value of originalMap:
     - 2a. Let resolvedURL be the result of resolving a URL-like module specifier given key and baseURL.
@@ -827,7 +827,7 @@ Status: unreviewed
     - 2d. Set normalized[resolvedURL] to value.
   - 3. Return normalized.
 
-- [ ] [normalize a specifier key](https://html.spec.whatwg.org/#normalizing-a-specifier-key) — To normalize a specifier key, given a string specifierKey and a URL baseURL:
+- [x] [normalize a specifier key](https://html.spec.whatwg.org/#normalizing-a-specifier-key) — To normalize a specifier key, given a string specifierKey and a URL baseURL:
   - 1. If specifierKey is the empty string:
     - 1a. The user agent may report a warning to the console indicating that specifier keys may not be the empty string.
     - 1b. Return null.
@@ -837,74 +837,74 @@ Status: unreviewed
 
 #### [8.1.6 JavaScript specification host hooks](https://html.spec.whatwg.org/#javascript-specification-host-hooks)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.1 HostEnsureCanAddPrivateElement(O)](https://html.spec.whatwg.org/#the-hostensurecanaddprivateelement-implementation)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.2 HostEnsureCanCompileStrings(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)](https://html.spec.whatwg.org/#hostensurecancompilestrings%28realm,-parameterstrings,-bodystring,-codestring,-compilationtype,-parameterargs,-bodyarg%29)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.3 HostGetCodeForEval(argument)](https://html.spec.whatwg.org/#hostgetcodeforeval%28argument%29)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.4 HostPromiseRejectionTracker(promise, operation)](https://html.spec.whatwg.org/#the-hostpromiserejectiontracker-implementation)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.5 HostSystemUTCEpochNanoseconds(global)](https://html.spec.whatwg.org/#hostsystemutcepochnanoseconds)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.6 Job-related host hooks](https://html.spec.whatwg.org/#integration-with-javascript-jobs)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.6.1 HostCallJobCallback(callback, V, argumentsList)](https://html.spec.whatwg.org/#hostcalljobcallback)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.6.2 HostEnqueueFinalizationRegistryCleanupJob(finalizationRegistry)](https://html.spec.whatwg.org/#hostenqueuefinalizationregistrycleanupjob)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: javascript-engine-task-source -->
 
 ###### [8.1.6.6.3 HostEnqueueGenericJob(job, realm)](https://html.spec.whatwg.org/#hostenqueuegenericjob)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.6.4 HostEnqueuePromiseJob(job, realm)](https://html.spec.whatwg.org/#hostenqueuepromisejob)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.6.5 HostEnqueueTimeoutJob(job, realm, milliseconds)](https://html.spec.whatwg.org/#hostenqueuetimeoutjob)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.6.6 HostMakeJobCallback(callable)](https://html.spec.whatwg.org/#hostmakejobcallback)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ##### [8.1.6.7 Module-related host hooks](https://html.spec.whatwg.org/#integration-with-the-javascript-module-system)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: module-map -->
 
 ###### [8.1.6.7.1 HostGetImportMetaProperties(moduleRecord)](https://html.spec.whatwg.org/#hostgetimportmetaproperties)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 <!-- definitions: import-meta-url import-meta-resolve -->
 
 ###### [8.1.6.7.2 HostGetSupportedImportAttributes()](https://html.spec.whatwg.org/#hostgetsupportedimportattributes)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 ###### [8.1.6.7.3 HostLoadImportedModule(referrer, moduleRequest, loadState, payload)](https://html.spec.whatwg.org/#hostloadimportedmodule)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
 
 #### [8.1.7 Event loops](https://html.spec.whatwg.org/#event-loops)
 

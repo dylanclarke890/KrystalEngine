@@ -115,10 +115,10 @@ Status: unreviewed
 
 ###### [8.10.1.4.2 User agent automation](https://html.spec.whatwg.org/#user-agent-automation)
 
-Status: unreviewed
+Status: n/a (no WebDriver)
 <!-- definitions: registerprotocolhandler()-automation-mode -->
 
-- [ ] [The remote end steps](https://html.spec.whatwg.org/#set-rph-registration-mode) — The remote end steps are:
+- [x] [The remote end steps](https://html.spec.whatwg.org/#set-rph-registration-mode) — The remote end steps are:
   - 1. If parameters is not a JSON Object, return a WebDriver error with WebDriver error code invalid argument.
   - 2. Let mode be the result of getting a property named "mode" from parameters.
   - 3. If mode is not "autoAccept", "autoReject", or "none", return a WebDriver error with WebDriver error code invalid argument.

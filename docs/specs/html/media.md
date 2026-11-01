@@ -72,10 +72,10 @@ Status: unreviewed
 
 #### [4.8.11 Media elements](https://html.spec.whatwg.org/#media-elements)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: media-element media-element-attributes media-data media-resource media-resource-origin media-element-event-task-source -->
 
-- [ ] [When the loading attribute's state is changed to the Eager state, the user agen…](https://html.spec.whatwg.org/#attr-media-loading) — When the loading attribute's state is changed to the Eager state, the user agent must run these steps:
+- [x] [When the loading attribute's state is changed to the Eager state, the user agen…](https://html.spec.whatwg.org/#attr-media-loading) — When the loading attribute's state is changed to the Eager state, the user agent must run these steps:
   - 1. Let resumptionSteps be the media element's lazy load resumption steps.
   - 2. Let posterResumptionSteps be null.
   - 3. If the media element is a video element, then set posterResumptionSteps to the video element's poster lazy load resumption steps.
@@ -87,65 +87,65 @@ Status: unreviewed
     - 6a. Set the video element's poster lazy load resumption steps to null.
     - 6b. Invoke posterResumptionSteps.
 
-- [ ] [HTMLMediaElement.loading](https://html.spec.whatwg.org/#dom-media-loading) — The loading IDL attribute must reflect the loading content attribute, limited to only known values.
+- [x] [HTMLMediaElement.loading](https://html.spec.whatwg.org/#dom-media-loading) — The loading IDL attribute must reflect the loading content attribute, limited to only known values.
 
-- [ ] [queue a media element task](https://html.spec.whatwg.org/#queue-a-media-element-task) — To queue a media element task with a media element element and a series of steps steps, queue an element task on the media element's media element event task source given element and steps.
+- [x] [queue a media element task](https://html.spec.whatwg.org/#queue-a-media-element-task) — To queue a media element task with a media element element and a series of steps steps, queue an element task on the media element's media element event task source given element and steps.
 
 ##### [4.8.11.1 Error codes](https://html.spec.whatwg.org/#error-codes)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: concept-mediaerror-message concept-mediaerror-code dom-mediaerror-media_err_aborted dom-mediaerror-media_err_network dom-mediaerror-media_err_decode dom-mediaerror-media_err_src_not_supported -->
 
-- [ ] [HTMLMediaElement.error](https://html.spec.whatwg.org/#dom-media-error) — All media elements have an associated error status, which records the last error the element encountered since its resource selection algorithm was last invoked. The error attribute, on getting, must return the MediaError object created for this last error, or null if there has not been an error.
+- [x] [HTMLMediaElement.error](https://html.spec.whatwg.org/#dom-media-error) — All media elements have an associated error status, which records the last error the element encountered since its resource selection algorithm was last invoked. The error attribute, on getting, must return the MediaError object created for this last error, or null if there has not been an error.
 
-- [ ] [create a MediaError](https://html.spec.whatwg.org/#creating-a-mediaerror) — To create a MediaError, given an error code which is one of the above values, return a new MediaError object whose code is the given error code and whose message is a string containing any details the user agent is able to supply about the cause of the error condition, or the empty string if the user agent is unable to supply such details. This message string must not contain only the information already available via the supplied error code; for example, it must not simply be a translation of the code into a string format. If no additional information is available beyond that provided by the error code, the message must be set to the empty string.
+- [x] [create a MediaError](https://html.spec.whatwg.org/#creating-a-mediaerror) — To create a MediaError, given an error code which is one of the above values, return a new MediaError object whose code is the given error code and whose message is a string containing any details the user agent is able to supply about the cause of the error condition, or the empty string if the user agent is unable to supply such details. This message string must not contain only the information already available via the supplied error code; for example, it must not simply be a translation of the code into a string format. If no additional information is available beyond that provided by the error code, the message must be set to the empty string.
 
-- [ ] [MediaError.code](https://html.spec.whatwg.org/#dom-mediaerror-code) — The code getter steps are to return this's code.
+- [x] [MediaError.code](https://html.spec.whatwg.org/#dom-mediaerror-code) — The code getter steps are to return this's code.
 
-- [ ] [MediaError.message](https://html.spec.whatwg.org/#dom-mediaerror-message) — The message getter steps are to return this's message.
+- [x] [MediaError.message](https://html.spec.whatwg.org/#dom-mediaerror-message) — The message getter steps are to return this's message.
 
 ##### [4.8.11.2 Location of the media resource](https://html.spec.whatwg.org/#location-of-the-media-resource)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: attr-media-src attr-media-crossorigin media-provider-object assigned-media-provider-object -->
 
-- [ ] [HTMLMediaElement.crossOrigin](https://html.spec.whatwg.org/#dom-media-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
+- [x] [HTMLMediaElement.crossOrigin](https://html.spec.whatwg.org/#dom-media-crossorigin) — The crossOrigin IDL attribute must reflect the crossorigin content attribute, limited to only known values.
 
-- [ ] [HTMLMediaElement.currentSrc](https://html.spec.whatwg.org/#dom-media-currentsrc) — The currentSrc IDL attribute must initially be set to the empty string. Its value is changed by the resource selection algorithm defined below.
+- [x] [HTMLMediaElement.currentSrc](https://html.spec.whatwg.org/#dom-media-currentsrc) — The currentSrc IDL attribute must initially be set to the empty string. Its value is changed by the resource selection algorithm defined below.
 
-- [ ] [HTMLMediaElement.srcObject](https://html.spec.whatwg.org/#dom-media-srcobject) — The srcObject getter steps are to return this's assigned media provider object.
+- [x] [HTMLMediaElement.srcObject](https://html.spec.whatwg.org/#dom-media-srcobject) — The srcObject getter steps are to return this's assigned media provider object.
 
-- [ ] [The srcObject setter steps](https://html.spec.whatwg.org/#dom-media-srcobject) — The srcObject setter steps are:
+- [x] [The srcObject setter steps](https://html.spec.whatwg.org/#dom-media-srcobject) — The srcObject setter steps are:
   - 1. Set this's assigned media provider object to the given value.
   - 2. Invoke this's media element load algorithm.
 
 ##### [4.8.11.3 MIME types](https://html.spec.whatwg.org/#mime-types)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: a-type-that-the-user-agent-knows-it-cannot-render dom-canplaytyperesult-nil dom-canplaytyperesult-probably dom-canplaytyperesult-maybe -->
 
-- [ ] [HTMLMediaElement.canPlayType(type)](https://html.spec.whatwg.org/#dom-navigator-canplaytype) — The canPlayType(type) method must return the empty string if type is a type that the user agent knows it cannot render or is the type "application/octet-stream"; it must return "probably" if the user agent is confident that the type represents a media resource that it can render if used with this audio or video element; and it must return "maybe" otherwise. Implementers are encouraged to return "maybe" unless the type can be confidently established as being supported or not. Generally, a user agent should never return "probably" for a type that allows the codecs parameter if that parameter is not present.
+- [x] [HTMLMediaElement.canPlayType(type)](https://html.spec.whatwg.org/#dom-navigator-canplaytype) — The canPlayType(type) method must return the empty string if type is a type that the user agent knows it cannot render or is the type "application/octet-stream"; it must return "probably" if the user agent is confident that the type represents a media resource that it can render if used with this audio or video element; and it must return "maybe" otherwise. Implementers are encouraged to return "maybe" unless the type can be confidently established as being supported or not. Generally, a user agent should never return "probably" for a type that allows the codecs parameter if that parameter is not present.
 
 ##### [4.8.11.4 Network states](https://html.spec.whatwg.org/#network-states)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: dom-media-network_empty dom-media-network_idle dom-media-network_loading dom-media-network_no_source -->
 
-- [ ] [HTMLMediaElement.networkState](https://html.spec.whatwg.org/#dom-media-networkstate) — As media elements interact with the network, their current network activity is represented by the networkState attribute. On getting, it must return the current network state of the element, which must be one of the following values:
+- [x] [HTMLMediaElement.networkState](https://html.spec.whatwg.org/#dom-media-networkstate) — As media elements interact with the network, their current network activity is represented by the networkState attribute. On getting, it must return the current network state of the element, which must be one of the following values:
 
 ##### [4.8.11.5 Loading the media resource](https://html.spec.whatwg.org/#loading-the-media-resource)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: can-autoplay-flag delaying-the-load-event-flag is-currently-stalled dedicated-media-source-failure-steps stall-timeout media-data-processing-steps-list attr-media-preload -->
 
-- [ ] [HTMLMediaElement.load()](https://html.spec.whatwg.org/#dom-media-load) — When the load() method on a media element is invoked, the user agent must run the following steps:
+- [x] [HTMLMediaElement.load()](https://html.spec.whatwg.org/#dom-media-load) — When the load() method on a media element is invoked, the user agent must run the following steps:
   - 1. Let resumptionSteps be the media element's lazy load resumption steps.
   - 2. If resumptionSteps is not null:
     - 2a. Set the media element's lazy load resumption steps to null.
     - 2b. Invoke resumptionSteps.
   - 3. Run the media element load algorithm.
 
-- [ ] [media element load algorithm](https://html.spec.whatwg.org/#media-element-load-algorithm) — The media element load algorithm consists of the following steps:
+- [x] [media element load algorithm](https://html.spec.whatwg.org/#media-element-load-algorithm) — The media element load algorithm consists of the following steps:
   - 1. Set this element's is currently stalled to false.
   - 2. Abort any already-running instance of the resource selection algorithm for this element.
   - 3. Let pending tasks be a list of all tasks from the media element's media element event task source in one of the task queues.
@@ -170,7 +170,7 @@ Status: unreviewed
   - 10. Invoke the media element's resource selection algorithm.
   - 11.
 
-- [ ] [resource selection algorithm](https://html.spec.whatwg.org/#concept-media-load-algorithm) — The resource selection algorithm for a media element is as follows. This algorithm is always invoked as part of a task, but one of the first steps in the algorithm is to return and continue running the remaining steps in parallel. In addition, this algorithm interacts closely with the event loop me…
+- [x] [resource selection algorithm](https://html.spec.whatwg.org/#concept-media-load-algorithm) — The resource selection algorithm for a media element is as follows. This algorithm is always invoked as part of a task, but one of the first steps in the algorithm is to return and continue running the remaining steps in parallel. In addition, this algorithm interacts closely with the event loop me…
   - 1. Set the element's networkState attribute to the NETWORK_NO_SOURCE value.
   - 2. Set the element's show poster flag to true.
   - 3. Await a stable state, allowing the task that invoked this algorithm to continue. The synchronous section consists of all the remaining steps of this algorithm until the algorithm says the synchronous section has ended. (Steps in synchronous sections are marked with ⌛.)
@@ -236,7 +236,7 @@ Status: unreviewed
     - 14f. Reject pending play promises with promises and a "NotSupportedError" DOMException.
     - 14g. Set the element's delaying-the-load-event flag to false. This stops delaying the load event.
 
-- [ ] [verify a media response](https://html.spec.whatwg.org/#verify-a-media-response) — To verify a media response given a response response, a media resource resource, and "entire resource" or a (number, number or "until end") tuple byteRange:
+- [x] [verify a media response](https://html.spec.whatwg.org/#verify-a-media-response) — To verify a media response given a response response, a media resource resource, and "entire resource" or a (number, number or "until end") tuple byteRange:
   - 1. If response is a network error, then return false.
   - 2. If byteRange is "entire resource", then return true.
   - 3. Let internalResponse be response's unsafe response.
@@ -248,7 +248,7 @@ Status: unreviewed
   - 9. If any of the following are true: previousOrigin is "none";; origin and previousOrigin are "rewritten"; or; origin and previousOrigin are origins, and origin is same origin with previousOrigin, then set resource's origin to origin. Otherwise, if response is CORS-cross-origin, then return false. Otherwise, set resource's origin to "multiple".
   - 10. Return true.
 
-- [ ] [resource fetch algorithm](https://html.spec.whatwg.org/#concept-media-load-resource) — The resource fetch algorithm for a media element and a given URL record or media provider object is as follows:
+- [x] [resource fetch algorithm](https://html.spec.whatwg.org/#concept-media-load-resource) — The resource fetch algorithm for a media element and a given URL record or media provider object is as follows:
   - 1. If the will lazy load element steps given the media element return true:
     - 1a. Let resumptionSteps be the rest of this algorithm starting with the step labeled Let mode be remote.
     - 1b. Set the media element's lazy load resumption steps to resumptionSteps.
@@ -342,33 +342,33 @@ Status: unreviewed
     - 6f. Abort the overall resource selection algorithm.
   - 7. Final step: If the user agent ever reaches this step (which can only happen if the entire resource gets loaded and kept available): abort the overall resource selection algorithm.
 
-- [ ] [forget the media element's media-resource-specific tracks](https://html.spec.whatwg.org/#forget-the-media-element's-media-resource-specific-tracks) — When a media element is to forget the media element's media-resource-specific tracks, the user agent must remove from the media element's list of text tracks all the media-resource-specific text tracks, then empty the media element's audioTracks attribute's AudioTrackList object, then empty the media element's videoTracks attribute's VideoTrackList object. No events (in particular, no removetrack events) are fired as part of this; the error and emptied events, fired by the algorithms that invoke this one, can be used instead.
+- [x] [forget the media element's media-resource-specific tracks](https://html.spec.whatwg.org/#forget-the-media-element's-media-resource-specific-tracks) — When a media element is to forget the media element's media-resource-specific tracks, the user agent must remove from the media element's list of text tracks all the media-resource-specific text tracks, then empty the media element's audioTracks attribute's AudioTrackList object, then empty the media element's videoTracks attribute's VideoTrackList object. No events (in particular, no removetrack events) are fired as part of this; the error and emptied events, fired by the algorithms that invoke this one, can be used instead.
 
-- [ ] [HTMLMediaElement.preload](https://html.spec.whatwg.org/#dom-media-preload) — The preload IDL attribute must reflect the content attribute of the same name, limited to only known values.
+- [x] [HTMLMediaElement.preload](https://html.spec.whatwg.org/#dom-media-preload) — The preload IDL attribute must reflect the content attribute of the same name, limited to only known values.
 
-- [ ] [HTMLMediaElement.buffered](https://html.spec.whatwg.org/#dom-media-buffered) — The buffered getter steps are to return a new normalized TimeRanges object that represents the ranges of this's media resource, if any, that the user agent has buffered. User agents must accurately determine the ranges available, even for media streams where this can only be determined by tedious inspection.
+- [x] [HTMLMediaElement.buffered](https://html.spec.whatwg.org/#dom-media-buffered) — The buffered getter steps are to return a new normalized TimeRanges object that represents the ranges of this's media resource, if any, that the user agent has buffered. User agents must accurately determine the ranges available, even for media streams where this can only be determined by tedious inspection.
 
 ##### [4.8.11.6 Offsets into the media resource](https://html.spec.whatwg.org/#offsets-into-the-media-resource)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: media-timeline defineTimeline current-playback-position official-playback-position default-playback-start-position show-poster-flag timeline-offset attr-media-loop -->
 
-- [ ] [HTMLMediaElement.currentTime](https://html.spec.whatwg.org/#dom-media-currenttime) — The currentTime attribute must, on getting, return the media element's default playback start position, unless that is zero, in which case it must return the element's official playback position. The returned value must be expressed in seconds. On setting, if the media element's readyState is HAVE_NOTHING, then it must set the media element's default playback start position to the new value; otherwise, it must set the official playback position to the new value and then seek to the new value. The new value must be interpreted as being in seconds.
+- [x] [HTMLMediaElement.currentTime](https://html.spec.whatwg.org/#dom-media-currenttime) — The currentTime attribute must, on getting, return the media element's default playback start position, unless that is zero, in which case it must return the element's official playback position. The returned value must be expressed in seconds. On setting, if the media element's readyState is HAVE_NOTHING, then it must set the media element's default playback start position to the new value; otherwise, it must set the official playback position to the new value and then seek to the new value. The new value must be interpreted as being in seconds.
 
-- [ ] [If at any time the user agent learns that an audio or video track has ended and…](https://html.spec.whatwg.org/#earliest-possible-position) — If at any time the user agent learns that an audio or video track has ended and all media data relating to that track corresponds to parts of the media timeline that are before the earliest possible position, the user agent may queue a media element task given the media element to run these steps:
+- [x] [If at any time the user agent learns that an audio or video track has ended and…](https://html.spec.whatwg.org/#earliest-possible-position) — If at any time the user agent learns that an audio or video track has ended and all media data relating to that track corresponds to parts of the media timeline that are before the earliest possible position, the user agent may queue a media element task given the media element to run these steps:
   - 1. Remove the track from the audioTracks attribute's AudioTrackList object or the videoTracks attribute's VideoTrackList object as appropriate.
   - 2. Fire an event named removetrack at the media element's aforementioned AudioTrackList or VideoTrackList object, using TrackEvent, with the track attribute initialized to the AudioTrack or VideoTrack object representing the track.
 
-- [ ] [HTMLMediaElement.duration](https://html.spec.whatwg.org/#dom-media-duration) — The duration attribute must return the time of the end of the media resource, in seconds, on the media timeline. If no media data is available, then the attributes must return the Not-a-Number (NaN) value. If the media resource is not known to be bounded (e.g. streaming radio, or a live event with no announced end time), then the attribute must return the positive Infinity value.
+- [x] [HTMLMediaElement.duration](https://html.spec.whatwg.org/#dom-media-duration) — The duration attribute must return the time of the end of the media resource, in seconds, on the media timeline. If no media data is available, then the attributes must return the Not-a-Number (NaN) value. If the media resource is not known to be bounded (e.g. streaming radio, or a live event with no announced end time), then the attribute must return the positive Infinity value.
 
-- [ ] [HTMLMediaElement.getStartDate()](https://html.spec.whatwg.org/#dom-media-getstartdate) — The getStartDate() method must return a new Date object representing the current timeline offset.
+- [x] [HTMLMediaElement.getStartDate()](https://html.spec.whatwg.org/#dom-media-getstartdate) — The getStartDate() method must return a new Date object representing the current timeline offset.
 
 ##### [4.8.11.7 Ready states](https://html.spec.whatwg.org/#ready-states)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: dom-media-have_nothing dom-media-have_metadata dom-media-have_current_data dom-media-have_future_data attr-media-autoplay -->
 
-- [ ] [When the ready state of a media element whose networkState is not NETWORK_EMPTY…](https://html.spec.whatwg.org/#dom-media-have_enough_data) — When the ready state of a media element whose networkState is not NETWORK_EMPTY changes, the user agent must follow the steps given below:
+- [x] [When the ready state of a media element whose networkState is not NETWORK_EMPTY…](https://html.spec.whatwg.org/#dom-media-have_enough_data) — When the ready state of a media element whose networkState is not NETWORK_EMPTY changes, the user agent must follow the steps given below:
   - 1. Apply the first applicable set of substeps from the following list: If the previous ready state was HAVE_NOTHING, and the new ready state is HAVE_METADATA Queue a media element task given the media element to fire an event named loadedmetadata at the element. If the previous ready state was HAVE_METADATA and the new ready state is HAVE_CURRENT_DATA or greater If this is the first time this occurs…
     - 1a. Set the paused attribute to false.
     - 1b. If the element's show poster flag is true, set it to false and run the time marches on steps.
@@ -377,34 +377,34 @@ Status: unreviewed
     - 1a. Run the internal pause steps and set the can autoplay flag to true.
     - 1b. Queue a media element task given the element to fire an event named pause at the element.
 
-- [ ] [HTMLMediaElement.readyState](https://html.spec.whatwg.org/#dom-media-readystate) — The readyState IDL attribute must, on getting, return the value described above that describes the current ready state of the media element.
+- [x] [HTMLMediaElement.readyState](https://html.spec.whatwg.org/#dom-media-readystate) — The readyState IDL attribute must, on getting, return the value described above that describes the current ready state of the media element.
 
 ##### [4.8.11.8 Playing the media resource](https://html.spec.whatwg.org/#playing-the-media-resource)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: list-of-pending-play-promises -->
 
-- [ ] [HTMLMediaElement.paused](https://html.spec.whatwg.org/#dom-media-paused) — The paused attribute represents whether the media element is paused or not. The attribute must initially be true.
+- [x] [HTMLMediaElement.paused](https://html.spec.whatwg.org/#dom-media-paused) — The paused attribute represents whether the media element is paused or not. The attribute must initially be true.
 
-- [ ] [blocked media element](https://html.spec.whatwg.org/#blocked-media-element) — A media element is a blocked media element if its readyState attribute is in the HAVE_NOTHING state, the HAVE_METADATA state, or the HAVE_CURRENT_DATA state, or if the element has paused for user interaction or paused for in-band content.
+- [x] [blocked media element](https://html.spec.whatwg.org/#blocked-media-element) — A media element is a blocked media element if its readyState attribute is in the HAVE_NOTHING state, the HAVE_METADATA state, or the HAVE_CURRENT_DATA state, or if the element has paused for user interaction or paused for in-band content.
 
-- [ ] [potentially playing (media element)](https://html.spec.whatwg.org/#potentially-playing) — A media element is said to be potentially playing when its paused attribute is false, the element has not ended playback, playback has not stopped due to errors, and the element is not a blocked media element.
+- [x] [potentially playing (media element)](https://html.spec.whatwg.org/#potentially-playing) — A media element is said to be potentially playing when its paused attribute is false, the element has not ended playback, playback has not stopped due to errors, and the element is not a blocked media element.
 
-- [ ] [eligible for autoplay](https://html.spec.whatwg.org/#eligible-for-autoplay) — A media element is said to be eligible for autoplay when all of the following are true:
+- [x] [eligible for autoplay](https://html.spec.whatwg.org/#eligible-for-autoplay) — A media element is said to be eligible for autoplay when all of the following are true:
 
-- [ ] [allowed to play](https://html.spec.whatwg.org/#allowed-to-play) — A media element is said to be allowed to play if the user agent and the system allow media playback in the current context.
+- [x] [allowed to play](https://html.spec.whatwg.org/#allowed-to-play) — A media element is said to be allowed to play if the user agent and the system allow media playback in the current context.
 
-- [ ] [ended playback](https://html.spec.whatwg.org/#ended-playback) — A media element is said to have ended playback when:
+- [x] [ended playback](https://html.spec.whatwg.org/#ended-playback) — A media element is said to have ended playback when:
 
-- [ ] [HTMLMediaElement.ended](https://html.spec.whatwg.org/#dom-media-ended) — The ended attribute must return true if, the last time the event loop reached step 1, the media element had ended playback and the direction of playback was forwards, and false otherwise.
+- [x] [HTMLMediaElement.ended](https://html.spec.whatwg.org/#dom-media-ended) — The ended attribute must return true if, the last time the event loop reached step 1, the media element had ended playback and the direction of playback was forwards, and false otherwise.
 
-- [ ] [stopped due to errors](https://html.spec.whatwg.org/#stopped-due-to-errors) — A media element is said to have stopped due to errors when the element's readyState attribute is HAVE_METADATA or greater, and the user agent encounters a non-fatal error during the processing of the media data, and due to that error, is not able to play the content at the current playback position.
+- [x] [stopped due to errors](https://html.spec.whatwg.org/#stopped-due-to-errors) — A media element is said to have stopped due to errors when the element's readyState attribute is HAVE_METADATA or greater, and the user agent encounters a non-fatal error during the processing of the media data, and due to that error, is not able to play the content at the current playback position.
 
-- [ ] [paused for user interaction](https://html.spec.whatwg.org/#paused-for-user-interaction) — A media element is said to have paused for user interaction when its paused attribute is false, the readyState attribute is either HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, and the user agent has reached a point in the media resource where the user has to make a selection for the resource to continue.
+- [x] [paused for user interaction](https://html.spec.whatwg.org/#paused-for-user-interaction) — A media element is said to have paused for user interaction when its paused attribute is false, the readyState attribute is either HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, and the user agent has reached a point in the media resource where the user has to make a selection for the resource to continue.
 
-- [ ] [paused for in-band content](https://html.spec.whatwg.org/#paused-for-in-band-content) — A media element is said to have paused for in-band content when its paused attribute is false, the readyState attribute is either HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, and the user agent has suspended playback of the media resource in order to play content that is temporally anchored to the media resource and has a nonzero length, or to play content that is temporally anchored to a segment of the media resource but has a length longer than that segment.
+- [x] [paused for in-band content](https://html.spec.whatwg.org/#paused-for-in-band-content) — A media element is said to have paused for in-band content when its paused attribute is false, the readyState attribute is either HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, and the user agent has suspended playback of the media resource in order to play content that is temporally anchored to the media resource and has a nonzero length, or to play content that is temporally anchored to a segment of the media resource but has a length longer than that segment.
 
-- [ ] [When the current playback position reaches the end of the media resource when t…](https://html.spec.whatwg.org/#paused-for-in-band-content) — When the current playback position reaches the end of the media resource when the direction of playback is forwards, then the user agent must follow these steps:
+- [x] [When the current playback position reaches the end of the media resource when t…](https://html.spec.whatwg.org/#paused-for-in-band-content) — When the current playback position reaches the end of the media resource when the direction of playback is forwards, then the user agent must follow these steps:
   - 1. If the media element has a loop attribute specified, then seek to the earliest possible position of the media resource and return.
   - 2. As defined above, the ended IDL attribute starts returning true once the event loop returns to step 1.
   - 3. Queue a media element task given the media element and the following steps:
@@ -415,33 +415,33 @@ Status: unreviewed
       - 3b.iii. Take pending play promises and reject pending play promises with the result and an "AbortError" DOMException.
     - 3c. Fire an event named ended at the media element.
 
-- [ ] [HTMLMediaElement.defaultPlaybackRate](https://html.spec.whatwg.org/#dom-media-defaultplaybackrate) — The defaultPlaybackRate attribute gives the desired speed at which the media resource is to play, as a multiple of its intrinsic speed. The attribute is mutable: on getting it must return the last value it was set to, or 1.0 if it hasn't yet been set; on setting the attribute must be set to the new value.
+- [x] [HTMLMediaElement.defaultPlaybackRate](https://html.spec.whatwg.org/#dom-media-defaultplaybackrate) — The defaultPlaybackRate attribute gives the desired speed at which the media resource is to play, as a multiple of its intrinsic speed. The attribute is mutable: on getting it must return the last value it was set to, or 1.0 if it hasn't yet been set; on setting the attribute must be set to the new value.
 
-- [ ] [HTMLMediaElement.playbackRate](https://html.spec.whatwg.org/#dom-media-playbackrate) — The playbackRate attribute gives the effective playback rate, which is the speed at which the media resource plays, as a multiple of its intrinsic speed. If it is not equal to the defaultPlaybackRate, then the implication is that the user is using a feature such as fast forward or slow motion playb…
+- [x] [HTMLMediaElement.playbackRate](https://html.spec.whatwg.org/#dom-media-playbackrate) — The playbackRate attribute gives the effective playback rate, which is the speed at which the media resource plays, as a multiple of its intrinsic speed. If it is not equal to the defaultPlaybackRate, then the implication is that the user is using a feature such as fast forward or slow motion playb…
   - 1. If the given value is not supported by the user agent, then throw a "NotSupportedError" DOMException.
   - 2. Set playbackRate to the new value, and if the element is potentially playing, change the playback speed.
 
-- [ ] [HTMLMediaElement.preservesPitch](https://html.spec.whatwg.org/#dom-media-preservespitch) — The preservesPitch getter steps are to return true if a pitch-preserving algorithm is in effect during playback. The setter steps are to correspondingly switch the pitch-preserving algorithm on or off, without any perceivable gaps or muting of playback. By default, such a pitch-preserving algorithm must be in effect (i.e., the getter will initially return true).
+- [x] [HTMLMediaElement.preservesPitch](https://html.spec.whatwg.org/#dom-media-preservespitch) — The preservesPitch getter steps are to return true if a pitch-preserving algorithm is in effect during playback. The setter steps are to correspondingly switch the pitch-preserving algorithm on or off, without any perceivable gaps or muting of playback. By default, such a pitch-preserving algorithm must be in effect (i.e., the getter will initially return true).
 
-- [ ] [HTMLMediaElement.played](https://html.spec.whatwg.org/#dom-media-played) — The played getter steps are to return a new normalized TimeRanges object that represents the ranges of points on the media timeline of this's media resource reached through the usual monotonic increase of this's current playback position during normal playback, if any.
+- [x] [HTMLMediaElement.played](https://html.spec.whatwg.org/#dom-media-played) — The played getter steps are to return a new normalized TimeRanges object that represents the ranges of points on the media timeline of this's media resource reached through the usual monotonic increase of this's current playback position during normal playback, if any.
 
-- [ ] [take pending play promises](https://html.spec.whatwg.org/#take-pending-play-promises) — To take pending play promises for a media element, the user agent must run the following steps:
+- [x] [take pending play promises](https://html.spec.whatwg.org/#take-pending-play-promises) — To take pending play promises for a media element, the user agent must run the following steps:
   - 1. Let promises be an empty list of promises.
   - 2. Copy the media element's list of pending play promises to promises.
   - 3. Clear the media element's list of pending play promises.
   - 4. Return promises.
 
-- [ ] [resolve pending play promises](https://html.spec.whatwg.org/#resolve-pending-play-promises) — To resolve pending play promises for a media element with a list of promises promises, the user agent must resolve each promise in promises with undefined.
+- [x] [resolve pending play promises](https://html.spec.whatwg.org/#resolve-pending-play-promises) — To resolve pending play promises for a media element with a list of promises promises, the user agent must resolve each promise in promises with undefined.
 
-- [ ] [reject pending play promises](https://html.spec.whatwg.org/#reject-pending-play-promises) — To reject pending play promises for a media element with a list of promises promises and an exception name error, the user agent must reject each promise in promises with error.
+- [x] [reject pending play promises](https://html.spec.whatwg.org/#reject-pending-play-promises) — To reject pending play promises for a media element with a list of promises promises and an exception name error, the user agent must reject each promise in promises with error.
 
-- [ ] [notify about playing](https://html.spec.whatwg.org/#notify-about-playing) — To notify about playing for a media element, the user agent must run the following steps:
+- [x] [notify about playing](https://html.spec.whatwg.org/#notify-about-playing) — To notify about playing for a media element, the user agent must run the following steps:
   - 1. Take pending play promises and let promises be the result.
   - 2. Queue a media element task given the element and the following steps:
     - 2a. Fire an event named playing at the element.
     - 2b. Resolve pending play promises with promises.
 
-- [ ] [HTMLMediaElement.play()](https://html.spec.whatwg.org/#dom-media-play) — When the play() method on a media element is invoked, the user agent must run the following steps:
+- [x] [HTMLMediaElement.play()](https://html.spec.whatwg.org/#dom-media-play) — When the play() method on a media element is invoked, the user agent must run the following steps:
   - 1. If the media element is not allowed to play, then return a promise rejected with a "NotAllowedError" DOMException.
   - 2. If the media element's error attribute is not null and its code is MEDIA_ERR_SRC_NOT_SUPPORTED, then return a promise rejected with a "NotSupportedError" DOMException.
   - 3. Let resumptionSteps be the media element's lazy load resumption steps.
@@ -452,7 +452,7 @@ Status: unreviewed
   - 6. Run the internal play steps for the media element.
   - 7. Return promise.
 
-- [ ] [internal play steps](https://html.spec.whatwg.org/#internal-play-steps) — The internal play steps for a media element are as follows:
+- [x] [internal play steps](https://html.spec.whatwg.org/#internal-play-steps) — The internal play steps for a media element are as follows:
   - 1. If the media element's networkState attribute has the value NETWORK_EMPTY, invoke the media element's resource selection algorithm.
   - 2. If the playback has ended and the direction of playback is forwards, seek to the earliest possible position of the media resource.
   - 3. If the media element's paused attribute is true:
@@ -463,11 +463,11 @@ Status: unreviewed
   - 4. Otherwise, if the media element's readyState attribute has the value HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA, take pending play promises and queue a media element task given the media element to resolve pending play promises with the result.
   - 5. Set the media element's can autoplay flag to false.
 
-- [ ] [HTMLMediaElement.pause()](https://html.spec.whatwg.org/#dom-media-pause) — When the pause() method is invoked, and when the user agent is required to pause the media element, the user agent must run the following steps:
+- [x] [HTMLMediaElement.pause()](https://html.spec.whatwg.org/#dom-media-pause) — When the pause() method is invoked, and when the user agent is required to pause the media element, the user agent must run the following steps:
   - 1. If the media element's networkState attribute has the value NETWORK_EMPTY, invoke the media element's resource selection algorithm.
   - 2. Run the internal pause steps for the media element.
 
-- [ ] [internal pause steps](https://html.spec.whatwg.org/#internal-pause-steps) — The internal pause steps for a media element are as follows:
+- [x] [internal pause steps](https://html.spec.whatwg.org/#internal-pause-steps) — The internal pause steps for a media element are as follows:
   - 1. Set the media element's can autoplay flag to false.
   - 2. If the media element's paused attribute is false, run the following steps:
     - 2a. Change the value of paused to true.
@@ -478,11 +478,11 @@ Status: unreviewed
       - 2c.iii. Reject pending play promises with promises and an "AbortError" DOMException.
     - 2d. Set the official playback position to the current playback position.
 
-- [ ] [direction of playback](https://html.spec.whatwg.org/#direction-of-playback) — If the element's playbackRate is positive or zero, then the direction of playback is forwards. Otherwise, it is backwards.
+- [x] [direction of playback](https://html.spec.whatwg.org/#direction-of-playback) — If the element's playbackRate is positive or zero, then the direction of playback is forwards. Otherwise, it is backwards.
 
-- [ ] [list of newly introduced cues](https://html.spec.whatwg.org/#list-of-newly-introduced-cues) — Each media element has a list of newly introduced cues, which must be initially empty. Whenever a text track cue is added to the list of cues of a text track that is in the list of text tracks for a media element, that cue must be added to the media element's list of newly introduced cues. Whenever a text track is added to the list of text tracks for a media element, all of the cues in that text track's list of cues must be added to the media element's list of newly introduced cues. When a media element's list of newly introduced cues has new cues added while the media element's show poster flag is not set, then the user agent must run the time marches on steps.
+- [x] [list of newly introduced cues](https://html.spec.whatwg.org/#list-of-newly-introduced-cues) — Each media element has a list of newly introduced cues, which must be initially empty. Whenever a text track cue is added to the list of cues of a text track that is in the list of text tracks for a media element, that cue must be added to the media element's list of newly introduced cues. Whenever a text track is added to the list of text tracks for a media element, all of the cues in that text track's list of cues must be added to the media element's list of newly introduced cues. When a media element's list of newly introduced cues has new cues added while the media element's show poster flag is not set, then the user agent must run the time marches on steps.
 
-- [ ] [time marches on](https://html.spec.whatwg.org/#time-marches-on) — The time marches on steps are as follows:
+- [x] [time marches on](https://html.spec.whatwg.org/#time-marches-on) — The time marches on steps are as follows:
   - 1. Let current cues be a list of cues, initialized to contain all the cues of all the hidden or showing text tracks of the media element (not the disabled ones) whose start times are less than or equal to the current playback position and whose end times are greater than the current playback position.
   - 2. Let other cues be a list of cues, initialized to contain all the cues of hidden and showing text tracks of the media element that are not present in current cues.
   - 3. Let last time be the current playback position at the time this algorithm was last run for this media element, if this is not the first time it has run.
@@ -506,20 +506,20 @@ Status: unreviewed
   - 17. Set the text track cue active flag of all the cues in the current cues, and unset the text track cue active flag of all the cues in the other cues.
   - 18. Run the rules for updating the text track rendering of each of the text tracks in affected tracks that are showing, providing the text track's text track language as the fallback language if it is not the empty string. For example, for text tracks based on WebVTT, the rules for updating the display of WebVTT text tracks. [WEBVTT]
 
-- [ ] [When a media element is removed from a Document, the user agent must run the fo…](https://html.spec.whatwg.org/#prepare-an-event) — When a media element is removed from a Document, the user agent must run the following steps:
+- [x] [When a media element is removed from a Document, the user agent must run the fo…](https://html.spec.whatwg.org/#prepare-an-event) — When a media element is removed from a Document, the user agent must run the following steps:
   - 1. Await a stable state, allowing the task that removed the media element from the Document to continue. The synchronous section consists of all the remaining steps of this algorithm. (Steps in the synchronous section are marked with ⌛.)
   - 2. ⌛ If the media element is in a document, return.
   - 3. ⌛ Run the internal pause steps for the media element.
 
 ##### [4.8.11.9 Seeking](https://html.spec.whatwg.org/#seeking)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
-- [ ] [HTMLMediaElement.seeking](https://html.spec.whatwg.org/#dom-media-seeking) — The seeking attribute must initially have the value false.
+- [x] [HTMLMediaElement.seeking](https://html.spec.whatwg.org/#dom-media-seeking) — The seeking attribute must initially have the value false.
 
-- [ ] [HTMLMediaElement.fastSeek(time)](https://html.spec.whatwg.org/#dom-media-fastseek) — The fastSeek(time) method must seek to the time given by time, with the approximate-for-speed flag set.
+- [x] [HTMLMediaElement.fastSeek(time)](https://html.spec.whatwg.org/#dom-media-fastseek) — The fastSeek(time) method must seek to the time given by time, with the approximate-for-speed flag set.
 
-- [ ] [seek](https://html.spec.whatwg.org/#dom-media-seek) — When the user agent is required to seek to a particular new playback position in the media resource, optionally with the approximate-for-speed flag set, it means that the user agent must run the following steps. This algorithm interacts closely with the event loop mechanism; in particular, it has a…
+- [x] [seek](https://html.spec.whatwg.org/#dom-media-seek) — When the user agent is required to seek to a particular new playback position in the media resource, optionally with the approximate-for-speed flag set, it means that the user agent must run the following steps. This algorithm interacts closely with the event loop mechanism; in particular, it has a…
   - 1. Set the media element's show poster flag to false.
   - 2. If the media element's readyState is HAVE_NOTHING, return.
   - 3. If the element's seeking IDL attribute is true, then another instance of this algorithm is already running. Abort that other instance of the algorithm without waiting for the step that it is running to complete.
@@ -538,62 +538,62 @@ Status: unreviewed
   - 16. ⌛ Queue a media element task given the media element to fire an event named timeupdate at the element.
   - 17. ⌛ Queue a media element task given the media element to fire an event named seeked at the element.
 
-- [ ] [HTMLMediaElement.seekable](https://html.spec.whatwg.org/#dom-media-seekable) — The seekable getter steps are to return a new normalized TimeRanges object that represents the ranges of this's media resource, if any, that the user agent is able to seek to.
+- [x] [HTMLMediaElement.seekable](https://html.spec.whatwg.org/#dom-media-seekable) — The seekable getter steps are to return a new normalized TimeRanges object that represents the ranges of this's media resource, if any, that the user agent is able to seek to.
 
 ##### [4.8.11.10 Media resources with multiple media tracks](https://html.spec.whatwg.org/#media-resources-with-multiple-media-tracks)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
-- [ ] [HTMLMediaElement.audioTracks](https://html.spec.whatwg.org/#dom-media-audiotracks) — The audioTracks attribute of a media element must return a live AudioTrackList object representing the audio tracks available in the media element's media resource.
+- [x] [HTMLMediaElement.audioTracks](https://html.spec.whatwg.org/#dom-media-audiotracks) — The audioTracks attribute of a media element must return a live AudioTrackList object representing the audio tracks available in the media element's media resource.
 
-- [ ] [HTMLMediaElement.videoTracks](https://html.spec.whatwg.org/#dom-media-videotracks) — The videoTracks attribute of a media element must return a live VideoTrackList object representing the video tracks available in the media element's media resource.
+- [x] [HTMLMediaElement.videoTracks](https://html.spec.whatwg.org/#dom-media-videotracks) — The videoTracks attribute of a media element must return a live VideoTrackList object representing the video tracks available in the media element's media resource.
 
 ###### [4.8.11.10.1 AudioTrackList and VideoTrackList objects](https://html.spec.whatwg.org/#audiotracklist-and-videotracklist-objects)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: dom-videotracklist-length dom-videotracklist-gettrackbyid dom-videotrack-id dom-videotrack-kind dom-videotrack-label dom-videotrack-language -->
 
-- [ ] [AudioTrackList.length](https://html.spec.whatwg.org/#dom-audiotracklist-length) — The AudioTrackList length and VideoTrackList length attribute getters must return the number of tracks represented by their objects at the time of getting.
+- [x] [AudioTrackList.length](https://html.spec.whatwg.org/#dom-audiotracklist-length) — The AudioTrackList length and VideoTrackList length attribute getters must return the number of tracks represented by their objects at the time of getting.
 
-- [ ] [AudioTrackList.getTrackById(id)](https://html.spec.whatwg.org/#dom-audiotracklist-gettrackbyid) — The AudioTrackList getTrackById(id) and VideoTrackList getTrackById(id) methods must return the first AudioTrack or VideoTrack object (respectively) in the AudioTrackList or VideoTrackList object (respectively) whose identifier is equal to the value of the id argument (in the natural order of the list, as defined above). When no tracks match the given argument, the methods must return null.
+- [x] [AudioTrackList.getTrackById(id)](https://html.spec.whatwg.org/#dom-audiotracklist-gettrackbyid) — The AudioTrackList getTrackById(id) and VideoTrackList getTrackById(id) methods must return the first AudioTrack or VideoTrack object (respectively) in the AudioTrackList or VideoTrackList object (respectively) whose identifier is equal to the value of the id argument (in the natural order of the list, as defined above). When no tracks match the given argument, the methods must return null.
 
-- [ ] [AudioTrack.id](https://html.spec.whatwg.org/#dom-audiotrack-id) — The AudioTrack id and VideoTrack id attributes must return the identifier of the track, if it has one, or the empty string otherwise. If the media resource is in a format that supports media fragment syntax, the identifier returned for a particular track must be the same identifier that would enable the track if used as the name of a track in the track dimension of such a fragment. [INBAND]
+- [x] [AudioTrack.id](https://html.spec.whatwg.org/#dom-audiotrack-id) — The AudioTrack id and VideoTrack id attributes must return the identifier of the track, if it has one, or the empty string otherwise. If the media resource is in a format that supports media fragment syntax, the identifier returned for a particular track must be the same identifier that would enable the track if used as the name of a track in the track dimension of such a fragment. [INBAND]
 
-- [ ] [AudioTrack.kind](https://html.spec.whatwg.org/#dom-audiotrack-kind) — The AudioTrack kind and VideoTrack kind attributes must return the category of the track, if it has one, or the empty string otherwise.
+- [x] [AudioTrack.kind](https://html.spec.whatwg.org/#dom-audiotrack-kind) — The AudioTrack kind and VideoTrack kind attributes must return the category of the track, if it has one, or the empty string otherwise.
 
-- [ ] [AudioTrack.label](https://html.spec.whatwg.org/#dom-audiotrack-label) — The AudioTrack label and VideoTrack label attributes must return the label of the track, if it has one, or the empty string otherwise. [INBAND]
+- [x] [AudioTrack.label](https://html.spec.whatwg.org/#dom-audiotrack-label) — The AudioTrack label and VideoTrack label attributes must return the label of the track, if it has one, or the empty string otherwise. [INBAND]
 
-- [ ] [AudioTrack.language](https://html.spec.whatwg.org/#dom-audiotrack-language) — The AudioTrack language and VideoTrack language attributes must return the BCP 47 language tag of the language of the track, if it has one, or the empty string otherwise. If the user agent is not able to express that language as a BCP 47 language tag (for example because the language information in the media resource's format is a free-form string without a defined interpretation), then the method must return the empty string, as if the track had no language. [INBAND]
+- [x] [AudioTrack.language](https://html.spec.whatwg.org/#dom-audiotrack-language) — The AudioTrack language and VideoTrack language attributes must return the BCP 47 language tag of the language of the track, if it has one, or the empty string otherwise. If the user agent is not able to express that language as a BCP 47 language tag (for example because the language information in the media resource's format is a free-form string without a defined interpretation), then the method must return the empty string, as if the track had no language. [INBAND]
 
-- [ ] [AudioTrack.enabled](https://html.spec.whatwg.org/#dom-audiotrack-enabled) — The AudioTrack enabled attribute, on getting, must return true if the track is currently enabled, and false otherwise. On setting, it must enable the track if the new value is true, and disable it otherwise. (If the track is no longer in an AudioTrackList object, then the track being enabled or disabled has no effect beyond changing the value of the attribute on the AudioTrack object.)
+- [x] [AudioTrack.enabled](https://html.spec.whatwg.org/#dom-audiotrack-enabled) — The AudioTrack enabled attribute, on getting, must return true if the track is currently enabled, and false otherwise. On setting, it must enable the track if the new value is true, and disable it otherwise. (If the track is no longer in an AudioTrackList object, then the track being enabled or disabled has no effect beyond changing the value of the attribute on the AudioTrack object.)
 
-- [ ] [VideoTrackList.selectedIndex](https://html.spec.whatwg.org/#dom-videotracklist-selectedindex) — The VideoTrackList selectedIndex attribute must return the index of the currently selected track, if any. If the VideoTrackList object does not currently represent any tracks, or if none of the tracks are selected, it must instead return −1.
+- [x] [VideoTrackList.selectedIndex](https://html.spec.whatwg.org/#dom-videotracklist-selectedindex) — The VideoTrackList selectedIndex attribute must return the index of the currently selected track, if any. If the VideoTrackList object does not currently represent any tracks, or if none of the tracks are selected, it must instead return −1.
 
-- [ ] [VideoTrack.selected](https://html.spec.whatwg.org/#dom-videotrack-selected) — The VideoTrack selected attribute, on getting, must return true if the track is currently selected, and false otherwise. On setting, it must select the track if the new value is true, and unselect it otherwise. If the track is in a VideoTrackList, then all the other VideoTrack objects in that list must be unselected. (If the track is no longer in a VideoTrackList object, then the track being selected or unselected has no effect beyond changing the value of the attribute on the VideoTrack object.)
+- [x] [VideoTrack.selected](https://html.spec.whatwg.org/#dom-videotrack-selected) — The VideoTrack selected attribute, on getting, must return true if the track is currently selected, and false otherwise. On setting, it must select the track if the new value is true, and unselect it otherwise. If the track is in a VideoTrackList, then all the other VideoTrack objects in that list must be unselected. (If the track is no longer in a VideoTrackList object, then the track being selected or unselected has no effect beyond changing the value of the attribute on the VideoTrack object.)
 
 ###### [4.8.11.10.2 Selecting specific audio and video tracks declaratively](https://html.spec.whatwg.org/#selecting-specific-audio-and-video-tracks-declaratively)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.11 Timed text tracks](https://html.spec.whatwg.org/#timed-text-tracks)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ###### [4.8.11.11.1 Text track model](https://html.spec.whatwg.org/#text-track-model)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: list-of-text-tracks text-track-kind dom-texttrack-kind-subtitles dom-texttrack-kind-captions dom-texttrack-kind-descriptions dom-texttrack-kind-chapters dom-texttrack-kind-metadata text-track-label text-track-in-band-metadata-track-dispatch-type text-track-language text-track-identifier text-track-readiness-state text-track-not-loaded text-track-loading text-track-loaded text-track-failed-to-load text-track-mode text-track-disabled text-track-hidden text-track-showing text-track-list-of-cues rules-for-updating-the-text-track-rendering list-of-pending-text-tracks blocked-on-parser did-perform-automatic-track-selection text-track-cue text-track-cue-identifier text-track-cue-start-time text-track-cue-end-time text-track-cue-pause-on-exit-flag text-track-cue-active-flag text-track-cue-display-state text-track-cue-order -->
 
-- [ ] [text tracks](https://html.spec.whatwg.org/#text-track) — A media element can have a group of associated text tracks, known as the media element's list of text tracks. The text tracks are sorted as follows:
+- [x] [text tracks](https://html.spec.whatwg.org/#text-track) — A media element can have a group of associated text tracks, known as the media element's list of text tracks. The text tracks are sorted as follows:
   - 1. The text tracks corresponding to track element children of the media element, in tree order.
   - 2. Any text tracks added using the addTextTrack() method, in the order they were added, oldest first.
   - 3. Any media-resource-specific text tracks (text tracks corresponding to data in the media resource), in the order defined by the media resource's format specification.
 
-- [ ] [populate the list of pending text tracks](https://html.spec.whatwg.org/#populate-the-list-of-pending-text-tracks) — When the user agent is required to populate the list of pending text tracks of a media element, the user agent must add to the element's list of pending text tracks each text track in the element's list of text tracks whose text track mode is not disabled and whose text track readiness state is loading.
+- [x] [populate the list of pending text tracks](https://html.spec.whatwg.org/#populate-the-list-of-pending-text-tracks) — When the user agent is required to populate the list of pending text tracks of a media element, the user agent must add to the element's list of pending text tracks each text track in the element's list of text tracks whose text track mode is not disabled and whose text track readiness state is loading.
 
-- [ ] [ready](https://html.spec.whatwg.org/#the-text-tracks-are-ready) — The text tracks of a media element are ready when both the element's list of pending text tracks is empty and the element's blocked-on-parser flag is false.
+- [x] [ready](https://html.spec.whatwg.org/#the-text-tracks-are-ready) — The text tracks of a media element are ready when both the element's list of pending text tracks is empty and the element's blocked-on-parser flag is false.
 
-- [ ] [Whenever a text track that is in a media element's list of text tracks has its…](https://html.spec.whatwg.org/#pending-text-track-change-notification-flag) — Whenever a text track that is in a media element's list of text tracks has its text track mode change value, the user agent must run the following steps for the media element:
+- [x] [Whenever a text track that is in a media element's list of text tracks has its…](https://html.spec.whatwg.org/#pending-text-track-change-notification-flag) — Whenever a text track that is in a media element's list of text tracks has its text track mode change value, the user agent must run the following steps for the media element:
   - 1. If the media element's pending text track change notification flag is set, return.
   - 2. Set the media element's pending text track change notification flag.
   - 3. Queue a media element task given the media element to run these steps:
@@ -601,14 +601,14 @@ Status: unreviewed
     - 3b. Fire an event named change at the media element's textTracks attribute's TextTrackList object.
   - 4. If the media element's show poster flag is not set, run the time marches on steps.
 
-- [ ] [unbounded text track cue](https://html.spec.whatwg.org/#unbounded-text-track-cue) — An unbounded text track cue is a text track cue with a text track cue end time set to positive Infinity. An active unbounded text track cue cannot become inactive through the usual monotonic increase of the current playback position during normal playback (e.g. a metadata cue for a chapter in a live event with no announced end time.)
+- [x] [unbounded text track cue](https://html.spec.whatwg.org/#unbounded-text-track-cue) — An unbounded text track cue is a text track cue with a text track cue end time set to positive Infinity. An active unbounded text track cue cannot become inactive through the usual monotonic increase of the current playback position during normal playback (e.g. a metadata cue for a chapter in a live event with no announced end time.)
 
 ###### [4.8.11.11.2 Sourcing in-band text tracks](https://html.spec.whatwg.org/#sourcing-in-band-text-tracks)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: media-resource-specific-text-track -->
 
-- [ ] [steps to expose a media-resource-specific text track](https://html.spec.whatwg.org/#steps-to-expose-a-media-resource-specific-text-track) — When a media resource contains data that the user agent recognizes and supports as being equivalent to a text track, the user agent runs the steps to expose a media-resource-specific text track with the relevant data, as follows.
+- [x] [steps to expose a media-resource-specific text track](https://html.spec.whatwg.org/#steps-to-expose-a-media-resource-specific-text-track) — When a media resource contains data that the user agent recognizes and supports as being equivalent to a text track, the user agent runs the steps to expose a media-resource-specific text track with the relevant data, as follows.
   - 1. Associate the relevant data with a new text track. The text track is a media-resource-specific text track.
   - 2. Set the new text track's kind, label, language, and identifier based on the semantics of the relevant data, as defined by the relevant specification. If there is no label in that data, then the label must be set to the empty string. If the media resource is in a format that supports media fragment syntax, then the identifier must be the same identifier that would enable the track if used as the n…
   - 3. Associate the text track list of cues with the rules for updating the text track rendering appropriate for the format in question.
@@ -621,26 +621,26 @@ Status: unreviewed
 
 ###### [4.8.11.11.3 Sourcing out-of-band text tracks](https://html.spec.whatwg.org/#sourcing-out-of-band-text-tracks)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
-- [ ] [When a text track corresponding to a track element is added to a media element'…](https://html.spec.whatwg.org/#sourcing-out-of-band-text-tracks) — When a text track corresponding to a track element is added to a media element's list of text tracks, the user agent must queue a media element task given the media element to run the following steps for the media element:
+- [x] [When a text track corresponding to a track element is added to a media element'…](https://html.spec.whatwg.org/#sourcing-out-of-band-text-tracks) — When a text track corresponding to a track element is added to a media element's list of text tracks, the user agent must queue a media element task given the media element to run the following steps for the media element:
   - 1. If the element's blocked-on-parser flag is true, then return.
   - 2. If the element's did-perform-automatic-track-selection flag is true, then return.
   - 3. Honor user preferences for automatic text track selection for this element.
 
-- [ ] [honor user preferences for automatic text track selection](https://html.spec.whatwg.org/#honor-user-preferences-for-automatic-text-track-selection) — When the user agent is required to honor user preferences for automatic text track selection for a media element, the user agent must run the following steps:
+- [x] [honor user preferences for automatic text track selection](https://html.spec.whatwg.org/#honor-user-preferences-for-automatic-text-track-selection) — When the user agent is required to honor user preferences for automatic text track selection for a media element, the user agent must run the following steps:
   - 1. Perform automatic text track selection for subtitles and captions.
   - 2. Perform automatic text track selection for descriptions.
   - 3. If there are any text tracks in the media element's list of text tracks whose text track kind is chapters or metadata that correspond to track elements with a default attribute set whose text track mode is set to disabled, then set the text track mode of all such tracks to hidden.
   - 4. Set the element's did-perform-automatic-track-selection flag to true.
 
-- [ ] [perform automatic text track selection](https://html.spec.whatwg.org/#perform-automatic-text-track-selection) — When the steps above say to perform automatic text track selection for one or more text track kinds, it means to run the following steps:
+- [x] [perform automatic text track selection](https://html.spec.whatwg.org/#perform-automatic-text-track-selection) — When the steps above say to perform automatic text track selection for one or more text track kinds, it means to run the following steps:
   - 1. Let candidates be a list consisting of the text tracks in the media element's list of text tracks whose text track kind is one of the kinds that were passed to the algorithm, if any, in the order given in the list of text tracks.
   - 2. If candidates is empty, then return.
   - 3. If any of the text tracks in candidates have a text track mode set to showing, return.
   - 4. If the user has expressed an interest in having a track from candidates enabled based on its text track kind, text track language, and text track label, then set its text track mode to showing. Otherwise, if there are any text tracks in candidates that correspond to track elements with a default attribute set whose text track mode is set to disabled, then set the text track mode of the first such…
 
-- [ ] [start the track processing model](https://html.spec.whatwg.org/#start-the-track-processing-model) — When a user agent is to start the track processing model for a text track and its track element, it must run the following algorithm. This algorithm interacts closely with the event loop mechanism; in particular, it has a synchronous section (which is triggered as part of the event loop algorithm).…
+- [x] [start the track processing model](https://html.spec.whatwg.org/#start-the-track-processing-model) — When a user agent is to start the track processing model for a text track and its track element, it must run the following algorithm. This algorithm interacts closely with the event loop mechanism; in particular, it has a synchronous section (which is triggered as part of the event loop algorithm).…
   - 1. If another occurrence of this algorithm is already running for this text track and its track element, return, letting that other algorithm take care of this element.
   - 2. If the text track's text track mode is not set to one of hidden or showing, then return.
   - 3. If the text track's track element does not have a media element as a parent, return.
@@ -661,119 +661,119 @@ Status: unreviewed
 
 ###### [4.8.11.11.4 Guidelines for exposing cues in various formats as text track cues](https://html.spec.whatwg.org/#guidelines-for-exposing-cues-in-various-formats-as-text-track-cues)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ###### [4.8.11.11.5 Text track API](https://html.spec.whatwg.org/#text-track-api)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: dom-texttrack-disabled dom-texttrack-hidden dom-texttrack-showing -->
 
-- [ ] [HTMLMediaElement.textTracks](https://html.spec.whatwg.org/#dom-media-texttracks) — The textTracks attribute of media elements must return a TextTrackList object representing the text tracks in the media element's list of text tracks, in the same order as in the list of text tracks.
+- [x] [HTMLMediaElement.textTracks](https://html.spec.whatwg.org/#dom-media-texttracks) — The textTracks attribute of media elements must return a TextTrackList object representing the text tracks in the media element's list of text tracks, in the same order as in the list of text tracks.
 
-- [ ] [TextTrackList.length](https://html.spec.whatwg.org/#dom-texttracklist-length) — The length attribute of a TextTrackList object must return the number of text tracks in the list represented by the TextTrackList object.
+- [x] [TextTrackList.length](https://html.spec.whatwg.org/#dom-texttracklist-length) — The length attribute of a TextTrackList object must return the number of text tracks in the list represented by the TextTrackList object.
 
-- [ ] [TextTrackList.getTrackById(id)](https://html.spec.whatwg.org/#dom-texttracklist-gettrackbyid) — The getTrackById(id) method must return the first TextTrack in the TextTrackList object whose id IDL attribute would return a value equal to the value of the id argument. When no tracks match the given argument, the method must return null.
+- [x] [TextTrackList.getTrackById(id)](https://html.spec.whatwg.org/#dom-texttracklist-gettrackbyid) — The getTrackById(id) method must return the first TextTrack in the TextTrackList object whose id IDL attribute would return a value equal to the value of the id argument. When no tracks match the given argument, the method must return null.
 
-- [ ] [HTMLMediaElement.addTextTrack(kind, label, language)](https://html.spec.whatwg.org/#dom-media-addtexttrack) — The addTextTrack(kind, label, language) method of media elements, when invoked, must run the following steps:
+- [x] [HTMLMediaElement.addTextTrack(kind, label, language)](https://html.spec.whatwg.org/#dom-media-addtexttrack) — The addTextTrack(kind, label, language) method of media elements, when invoked, must run the following steps:
   - 1. Create a new text track, and set its text track kind to kind, its text track label to label, its text track language to language, its text track readiness state to the text track loaded state, its text track mode to the text track hidden mode, and its text track list of cues to an empty list. Initially, the text track list of cues is not associated with any rules for updating the text track rende…
   - 2. Add the new text track to the media element's list of text tracks.
   - 3. Queue a media element task given the media element to fire an event named addtrack at the media element's textTracks attribute's TextTrackList object, using TrackEvent, with the track attribute initialized to the new text track.
   - 4. Return the new text track.
 
-- [ ] [TextTrack.kind](https://html.spec.whatwg.org/#dom-texttrack-kind) — The kind getter steps are to return this's kind.
+- [x] [TextTrack.kind](https://html.spec.whatwg.org/#dom-texttrack-kind) — The kind getter steps are to return this's kind.
 
-- [ ] [TextTrack.label](https://html.spec.whatwg.org/#dom-texttrack-label) — The label getter steps are to return this's label.
+- [x] [TextTrack.label](https://html.spec.whatwg.org/#dom-texttrack-label) — The label getter steps are to return this's label.
 
-- [ ] [TextTrack.language](https://html.spec.whatwg.org/#dom-texttrack-language) — The language getter steps are to return this's language.
+- [x] [TextTrack.language](https://html.spec.whatwg.org/#dom-texttrack-language) — The language getter steps are to return this's language.
 
-- [ ] [TextTrack.id](https://html.spec.whatwg.org/#dom-texttrack-id) — The id getter steps are to return this's identifier.
+- [x] [TextTrack.id](https://html.spec.whatwg.org/#dom-texttrack-id) — The id getter steps are to return this's identifier.
 
-- [ ] [TextTrack.inBandMetadataTrackDispatchType](https://html.spec.whatwg.org/#dom-texttrack-inbandmetadatatrackdispatchtype) — The inBandMetadataTrackDispatchType getter steps are to return this's in-band metadata track dispatch type.
+- [x] [TextTrack.inBandMetadataTrackDispatchType](https://html.spec.whatwg.org/#dom-texttrack-inbandmetadatatrackdispatchtype) — The inBandMetadataTrackDispatchType getter steps are to return this's in-band metadata track dispatch type.
 
-- [ ] [TextTrack.mode](https://html.spec.whatwg.org/#dom-texttrack-mode) — The mode getter steps are to return the string switching on this's mode:
+- [x] [TextTrack.mode](https://html.spec.whatwg.org/#dom-texttrack-mode) — The mode getter steps are to return the string switching on this's mode:
   - • The text track disabled mode: "disabled"
   - • The text track hidden mode: "hidden"
   - • The text track showing mode: "showing"
 
-- [ ] [The mode setter steps](https://html.spec.whatwg.org/#dom-texttrack-mode) — The mode setter steps are to set this's mode to the mode switching on the given value:
+- [x] [The mode setter steps](https://html.spec.whatwg.org/#dom-texttrack-mode) — The mode setter steps are to set this's mode to the mode switching on the given value:
 
-- [ ] [TextTrack.cues](https://html.spec.whatwg.org/#dom-texttrack-cues) — The cues getter steps are:
+- [x] [TextTrack.cues](https://html.spec.whatwg.org/#dom-texttrack-cues) — The cues getter steps are:
   - 1. If this's mode is the text track disabled mode, then return null.
   - 2. Return a live TextTrackCueList object that represents the subset of this's text track list of cues whose end times occur at or after the earliest possible position when the script started, in text track cue order.
 
-- [ ] [earliest possible position when the script started](https://html.spec.whatwg.org/#earliest-possible-position-when-the-script-started) — The earliest possible position when the script started is whatever the earliest possible position was the last time the event loop reached step 1.
+- [x] [earliest possible position when the script started](https://html.spec.whatwg.org/#earliest-possible-position-when-the-script-started) — The earliest possible position when the script started is whatever the earliest possible position was the last time the event loop reached step 1.
 
-- [ ] [TextTrack.activeCues](https://html.spec.whatwg.org/#dom-texttrack-activecues) — The activeCues getter steps are:
+- [x] [TextTrack.activeCues](https://html.spec.whatwg.org/#dom-texttrack-activecues) — The activeCues getter steps are:
   - 1. If this's mode is the text track disabled mode, then return null.
   - 2. Return a live TextTrackCueList object that represents the subset of this's text track list of cues whose active flag was set when the script started, in text track cue order.
 
-- [ ] [active flag was set when the script started](https://html.spec.whatwg.org/#active-flag-was-set-when-the-script-started) — A text track cue's active flag was set when the script started if its text track cue active flag was set the last time the event loop reached step 1.
+- [x] [active flag was set when the script started](https://html.spec.whatwg.org/#active-flag-was-set-when-the-script-started) — A text track cue's active flag was set when the script started if its text track cue active flag was set the last time the event loop reached step 1.
 
-- [ ] [TextTrack.addCue(cue)](https://html.spec.whatwg.org/#dom-texttrack-addcue) — The addCue(cue) method steps are:
+- [x] [TextTrack.addCue(cue)](https://html.spec.whatwg.org/#dom-texttrack-addcue) — The addCue(cue) method steps are:
   - 1. Let list be this's text track list of cues.
   - 2. If list does not yet have any associated rules for updating the text track rendering, then associate list with the rules for updating the text track rendering appropriate to cue.
   - 3. If list's associated rules for updating the text track rendering are not the same rules for updating the text track rendering as appropriate for cue, then throw an "InvalidStateError" DOMException.
   - 4. If the given cue is in a text track list of cues, then remove cue from that text track list of cues.
   - 5. Add cue to list.
 
-- [ ] [TextTrack.removeCue(cue)](https://html.spec.whatwg.org/#dom-texttrack-removecue) — The removeCue(cue) method steps are:
+- [x] [TextTrack.removeCue(cue)](https://html.spec.whatwg.org/#dom-texttrack-removecue) — The removeCue(cue) method steps are:
   - 1. If the given cue is not in this's text track list of cues, then throw a "NotFoundError" DOMException.
   - 2. Remove cue from this's text track list of cues.
 
-- [ ] [TextTrackCueList.length](https://html.spec.whatwg.org/#dom-texttrackcuelist-length) — The length attribute must return the number of cues in the list represented by the TextTrackCueList object.
+- [x] [TextTrackCueList.length](https://html.spec.whatwg.org/#dom-texttrackcuelist-length) — The length attribute must return the number of cues in the list represented by the TextTrackCueList object.
 
-- [ ] [TextTrackCueList.getCueById(id)](https://html.spec.whatwg.org/#dom-texttrackcuelist-getcuebyid) — The getCueById(id) method, when called with an argument other than the empty string, must return the first text track cue in the list represented by the TextTrackCueList object whose text track cue identifier is id, if any, or null otherwise. If the argument is the empty string, then the method must return null.
+- [x] [TextTrackCueList.getCueById(id)](https://html.spec.whatwg.org/#dom-texttrackcuelist-getcuebyid) — The getCueById(id) method, when called with an argument other than the empty string, must return the first text track cue in the list represented by the TextTrackCueList object whose text track cue identifier is id, if any, or null otherwise. If the argument is the empty string, then the method must return null.
 
-- [ ] [TextTrackCue.track](https://html.spec.whatwg.org/#dom-texttrackcue-track) — The track getter steps are to return the text track in whose list of cues this's text track cue finds itself, if any; or null otherwise.
+- [x] [TextTrackCue.track](https://html.spec.whatwg.org/#dom-texttrackcue-track) — The track getter steps are to return the text track in whose list of cues this's text track cue finds itself, if any; or null otherwise.
 
-- [ ] [TextTrackCue.id](https://html.spec.whatwg.org/#dom-texttrackcue-id) — The id attribute, on getting, must return the text track cue identifier of the text track cue that the TextTrackCue object represents. On setting, the text track cue identifier must be set to the new value.
+- [x] [TextTrackCue.id](https://html.spec.whatwg.org/#dom-texttrackcue-id) — The id attribute, on getting, must return the text track cue identifier of the text track cue that the TextTrackCue object represents. On setting, the text track cue identifier must be set to the new value.
 
-- [ ] [TextTrackCue.startTime](https://html.spec.whatwg.org/#dom-texttrackcue-starttime) — The startTime attribute, on getting, must return the text track cue start time of the text track cue that the TextTrackCue object represents, in seconds. On setting, the text track cue start time must be set to the new value, interpreted in seconds; then, if the TextTrackCue object's text track cue is in a text track's list of cues, and that text track is in a media element's list of text tracks, and the media element's show poster flag is not set, then run the time marches on steps for that media element.
+- [x] [TextTrackCue.startTime](https://html.spec.whatwg.org/#dom-texttrackcue-starttime) — The startTime attribute, on getting, must return the text track cue start time of the text track cue that the TextTrackCue object represents, in seconds. On setting, the text track cue start time must be set to the new value, interpreted in seconds; then, if the TextTrackCue object's text track cue is in a text track's list of cues, and that text track is in a media element's list of text tracks, and the media element's show poster flag is not set, then run the time marches on steps for that media element.
 
-- [ ] [TextTrackCue.endTime](https://html.spec.whatwg.org/#dom-texttrackcue-endtime) — The endTime attribute, on getting, must return the text track cue end time of the text track cue that the TextTrackCue object represents, in seconds or positive Infinity. On setting, if the new value is negative Infinity or a Not-a-Number (NaN) value, then throw a TypeError exception. Otherwise, the text track cue end time must be set to the new value. Then, if the TextTrackCue object's text track cue is in a text track's list of cues, and that text track is in a media element's list of text tracks, and the media element's show poster flag is not set, then run the time marches on steps for that media element.
+- [x] [TextTrackCue.endTime](https://html.spec.whatwg.org/#dom-texttrackcue-endtime) — The endTime attribute, on getting, must return the text track cue end time of the text track cue that the TextTrackCue object represents, in seconds or positive Infinity. On setting, if the new value is negative Infinity or a Not-a-Number (NaN) value, then throw a TypeError exception. Otherwise, the text track cue end time must be set to the new value. Then, if the TextTrackCue object's text track cue is in a text track's list of cues, and that text track is in a media element's list of text tracks, and the media element's show poster flag is not set, then run the time marches on steps for that media element.
 
-- [ ] [TextTrackCue.pauseOnExit](https://html.spec.whatwg.org/#dom-texttrackcue-pauseonexit) — The pauseOnExit attribute, on getting, must return true if the text track cue pause-on-exit flag of the text track cue that the TextTrackCue object represents is set; or false otherwise. On setting, the text track cue pause-on-exit flag must be set if the new value is true, and must be unset otherwise.
+- [x] [TextTrackCue.pauseOnExit](https://html.spec.whatwg.org/#dom-texttrackcue-pauseonexit) — The pauseOnExit attribute, on getting, must return true if the text track cue pause-on-exit flag of the text track cue that the TextTrackCue object represents is set; or false otherwise. On setting, the text track cue pause-on-exit flag must be set if the new value is true, and must be unset otherwise.
 
 ###### [4.8.11.11.6 Event handlers for objects of the text track APIs](https://html.spec.whatwg.org/#cue-events)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ###### [4.8.11.11.7 Best practices for metadata text tracks](https://html.spec.whatwg.org/#best-practices-for-metadata-text-tracks)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.12 Identifying a track kind through a URL](https://html.spec.whatwg.org/#identifying-a-track-kind-through-a-url)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.13 User interface](https://html.spec.whatwg.org/#user-interface)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: attr-media-controls expose-a-user-interface-to-the-user concept-media-volume concept-media-muted concept-media-muted-state volume-locked attr-media-muted -->
 
-- [ ] [set the playback volume](https://html.spec.whatwg.org/#set-the-playback-volume) — To set the playback volume of a media element element to a number value:
+- [x] [set the playback volume](https://html.spec.whatwg.org/#set-the-playback-volume) — To set the playback volume of a media element element to a number value:
   - 1. If element's playback volume equals value, then return.
   - 2. Set element's playback volume to value.
   - 3. If element is not allowed to play, then run the internal pause steps for element.
   - 4. Queue a media element task given element to fire an event named volumechange at element.
 
-- [ ] [HTMLMediaElement.volume](https://html.spec.whatwg.org/#dom-media-volume) — The volume getter steps are to return this's playback volume.
+- [x] [HTMLMediaElement.volume](https://html.spec.whatwg.org/#dom-media-volume) — The volume getter steps are to return this's playback volume.
 
-- [ ] [The volume setter steps](https://html.spec.whatwg.org/#dom-media-volume) — The volume setter steps are:
+- [x] [The volume setter steps](https://html.spec.whatwg.org/#dom-media-volume) — The volume setter steps are:
   - 1. If the given value is not in the range 0.0 to 1.0 inclusive, then throw an "IndexSizeError" DOMException.
   - 2. Set the playback volume of this to the given value.
 
-- [ ] [set the muted state](https://html.spec.whatwg.org/#set-the-muted-state) — To set the muted state of a media element element to a boolean value:
+- [x] [set the muted state](https://html.spec.whatwg.org/#set-the-muted-state) — To set the muted state of a media element element to a boolean value:
   - 1. If element's muted state equals value, then return.
   - 2. Set element's muted state to value.
   - 3. If element is not allowed to play, then run the internal pause steps for element.
   - 4. Queue a media element task given element to fire an event named volumechange at element.
 
-- [ ] [HTMLMediaElement.muted](https://html.spec.whatwg.org/#dom-media-muted) — The muted getter steps are to return true if this is muted; otherwise false.
+- [x] [HTMLMediaElement.muted](https://html.spec.whatwg.org/#dom-media-muted) — The muted getter steps are to return true if this is muted; otherwise false.
 
-- [ ] [The muted setter steps](https://html.spec.whatwg.org/#dom-media-muted) — The muted setter steps are to set the muted state of this to the given value.
+- [x] [The muted setter steps](https://html.spec.whatwg.org/#dom-media-muted) — The muted setter steps are to set the muted state of this to the given value.
 
-- [ ] [effective media volume (HTMLMediaElement)](https://html.spec.whatwg.org/#effective-media-volume) — An element's effective media volume is determined as follows:
+- [x] [effective media volume (HTMLMediaElement)](https://html.spec.whatwg.org/#effective-media-volume) — An element's effective media volume is determined as follows:
   - 1. If the user has indicated that the user agent is to override the volume of the element, then return the volume desired by the user.
   - 2. If the user agent's volume locked is true, then return the system volume.
   - 3. If the element is muted, then return 0.
@@ -782,39 +782,39 @@ Status: unreviewed
 
 ##### [4.8.11.14 Time ranges](https://html.spec.whatwg.org/#time-ranges)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 <!-- definitions: timeranges-ranges timeranges-range timeranges-range-start timeranges-range-end -->
 
-- [ ] [TimeRanges.length](https://html.spec.whatwg.org/#dom-timeranges-length) — The length getter steps are to return this's ranges's size.
+- [x] [TimeRanges.length](https://html.spec.whatwg.org/#dom-timeranges-length) — The length getter steps are to return this's ranges's size.
 
-- [ ] [TimeRanges.start(index)](https://html.spec.whatwg.org/#dom-timeranges-start) — The start(index) method steps are:
+- [x] [TimeRanges.start(index)](https://html.spec.whatwg.org/#dom-timeranges-start) — The start(index) method steps are:
   - 1. If index is greater than or equal to this's ranges's size, then throw an "IndexSizeError" DOMException.
   - 2. Return this's ranges[index]'s start.
 
-- [ ] [TimeRanges.end(index)](https://html.spec.whatwg.org/#dom-timeranges-end) — The end(index) method steps are:
+- [x] [TimeRanges.end(index)](https://html.spec.whatwg.org/#dom-timeranges-end) — The end(index) method steps are:
   - 1. If index is greater than or equal to this's ranges's size, then throw an "IndexSizeError" DOMException.
   - 2. Return this's ranges[index]'s end.
 
-- [ ] [normalized TimeRanges object](https://html.spec.whatwg.org/#normalised-timeranges-object) — A TimeRanges object is a normalized TimeRanges object if the following are true for each time range in its ranges:
+- [x] [normalized TimeRanges object](https://html.spec.whatwg.org/#normalised-timeranges-object) — A TimeRanges object is a normalized TimeRanges object if the following are true for each time range in its ranges:
 
 ##### [4.8.11.15 The TrackEvent interface](https://html.spec.whatwg.org/#the-trackevent-interface)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
-- [ ] [TrackEvent.track](https://html.spec.whatwg.org/#dom-trackevent-track) — The track attribute must return the value it was initialized to. It represents the context information for the event.
+- [x] [TrackEvent.track](https://html.spec.whatwg.org/#dom-trackevent-track) — The track attribute must return the value it was initialized to. It represents the context information for the event.
 
 ##### [4.8.11.16 Events summary](https://html.spec.whatwg.org/#mediaevents)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.17 Security and privacy considerations](https://html.spec.whatwg.org/#security-and-privacy-considerations)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.18 Best practices for authors using media elements](https://html.spec.whatwg.org/#best-practices-for-authors-using-media-elements)
 
-Status: unreviewed
+Status: n/a (later: media playback)
 
 ##### [4.8.11.19 Best practices for implementers of media elements](https://html.spec.whatwg.org/#best-practices-for-implementers-of-media-elements)
 
-Status: unreviewed
+Status: n/a (later: media playback)

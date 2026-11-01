@@ -12,7 +12,7 @@ Status: unreviewed
 
 ### [14.1 Writing documents in the XML syntax](https://html.spec.whatwg.org/#writing-xhtml-documents)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ### [14.2 Parsing XML documents](https://html.spec.whatwg.org/#parsing-xhtml-documents)
 

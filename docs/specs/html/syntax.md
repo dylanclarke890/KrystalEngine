@@ -12,9 +12,9 @@ Status: unreviewed
 
 ### [13.1 Writing HTML documents](https://html.spec.whatwg.org/#writing)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [Documents must consist of the following parts, in the given order](https://html.spec.whatwg.org/#writing) — Documents must consist of the following parts, in the given order:
+- [x] [Documents must consist of the following parts, in the given order](https://html.spec.whatwg.org/#writing) — Documents must consist of the following parts, in the given order:
   - 1. Optionally, a single U+FEFF BYTE ORDER MARK (BOM) character.
   - 2. Any number of comments and ASCII whitespace.
   - 3. A DOCTYPE.
@@ -24,9 +24,9 @@ Status: unreviewed
 
 #### [13.1.1 The DOCTYPE](https://html.spec.whatwg.org/#the-doctype)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [A DOCTYPE must consist of the following components, in this order](https://html.spec.whatwg.org/#syntax-doctype) — A DOCTYPE must consist of the following components, in this order:
+- [x] [A DOCTYPE must consist of the following components, in this order](https://html.spec.whatwg.org/#syntax-doctype) — A DOCTYPE must consist of the following components, in this order:
   - 1. A string that is an ASCII case-insensitive match for the string "<!DOCTYPE".
   - 2. One or more ASCII whitespace.
   - 3. A string that is an ASCII case-insensitive match for the string "html".
@@ -34,7 +34,7 @@ Status: unreviewed
   - 5. Zero or more ASCII whitespace.
   - 6. A U+003E GREATER-THAN SIGN character (>).
 
-- [ ] [DOCTYPE legacy string](https://html.spec.whatwg.org/#doctype-legacy-string) — For the purposes of HTML generators that cannot output HTML markup with the short DOCTYPE "<!DOCTYPE html>", a DOCTYPE legacy string may be inserted into the DOCTYPE (in the position defined above). This string must consist of:
+- [x] [DOCTYPE legacy string](https://html.spec.whatwg.org/#doctype-legacy-string) — For the purposes of HTML generators that cannot output HTML markup with the short DOCTYPE "<!DOCTYPE html>", a DOCTYPE legacy string may be inserted into the DOCTYPE (in the position defined above). This string must consist of:
   - 1. One or more ASCII whitespace.
   - 2. A string that is an ASCII case-insensitive match for the string "SYSTEM".
   - 3. One or more ASCII whitespace.
@@ -49,9 +49,9 @@ Status: unreviewed
 
 ##### [13.1.2.1 Start tags](https://html.spec.whatwg.org/#start-tags)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [Start tags](https://html.spec.whatwg.org/#syntax-start-tag) — Start tags must have the following format:
+- [x] [Start tags](https://html.spec.whatwg.org/#syntax-start-tag) — Start tags must have the following format:
   - 1. The first character of a start tag must be a U+003C LESS-THAN SIGN character (<).
   - 2. The next few characters of a start tag must be the element's tag name.
   - 3. If there are to be any attributes in the next step, there must first be one or more ASCII whitespace.
@@ -62,9 +62,9 @@ Status: unreviewed
 
 ##### [13.1.2.2 End tags](https://html.spec.whatwg.org/#end-tags)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [End tags](https://html.spec.whatwg.org/#syntax-end-tag) — End tags must have the following format:
+- [x] [End tags](https://html.spec.whatwg.org/#syntax-end-tag) — End tags must have the following format:
   - 1. The first character of an end tag must be a U+003C LESS-THAN SIGN character (<).
   - 2. The second character of an end tag must be a U+002F SOLIDUS character (/).
   - 3. The next few characters of an end tag must be the element's tag name.
@@ -73,68 +73,68 @@ Status: unreviewed
 
 ##### [13.1.2.3 Attributes](https://html.spec.whatwg.org/#attributes-2)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 <!-- definitions: syntax-attributes syntax-attribute-name syntax-attribute-value -->
 
 ##### [13.1.2.4 Optional tags](https://html.spec.whatwg.org/#optional-tags)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 <!-- definitions: syntax-tag-omission -->
 
 ##### [13.1.2.5 Restrictions on content models](https://html.spec.whatwg.org/#element-restrictions)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
 ##### [13.1.2.6 Restrictions on the contents of raw text and escapable raw text elements](https://html.spec.whatwg.org/#cdata-rcdata-restrictions)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
 #### [13.1.3 Text](https://html.spec.whatwg.org/#text-2)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 <!-- definitions: syntax-text -->
 
 ##### [13.1.3.1 Newlines](https://html.spec.whatwg.org/#newlines)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 <!-- definitions: syntax-newlines -->
 
 #### [13.1.4 Character references](https://html.spec.whatwg.org/#character-references)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 <!-- definitions: syntax-charref -->
 
-- [ ] [ambiguous ampersand](https://html.spec.whatwg.org/#syntax-ambiguous-ampersand) — An ambiguous ampersand is a U+0026 AMPERSAND character (&) that is followed by one or more ASCII alphanumerics, followed by a U+003B SEMICOLON character (;), where these characters do not match any of the names given in the named character references section.
+- [x] [ambiguous ampersand](https://html.spec.whatwg.org/#syntax-ambiguous-ampersand) — An ambiguous ampersand is a U+0026 AMPERSAND character (&) that is followed by one or more ASCII alphanumerics, followed by a U+003B SEMICOLON character (;), where these characters do not match any of the names given in the named character references section.
 
 #### [13.1.5 CDATA sections](https://html.spec.whatwg.org/#cdata-sections)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [CDATA sections](https://html.spec.whatwg.org/#syntax-cdata) — CDATA sections must consist of the following components, in this order:
+- [x] [CDATA sections](https://html.spec.whatwg.org/#syntax-cdata) — CDATA sections must consist of the following components, in this order:
   - 1. The string "<![CDATA[".
   - 2. Optionally, text, with the additional restriction that the text must not contain the string "]]>".
   - 3. The string "]]>".
 
 #### [13.1.6 Comments](https://html.spec.whatwg.org/#comments)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [Comments](https://html.spec.whatwg.org/#syntax-comments) — Comments must have the following format:
+- [x] [Comments](https://html.spec.whatwg.org/#syntax-comments) — Comments must have the following format:
   - 1. The string "<!--".
   - 2. Optionally, text, with the additional restriction that the text must not start with the string ">", nor start with the string "->", nor contain the strings "<!--", "-->", or "--!>", nor end with the string "<!-".
   - 3. The string "-->".
 
 #### [13.1.7 Processing instructions](https://html.spec.whatwg.org/#processing-instructions)
 
-Status: unreviewed
+Status: n/a (author conformance: the parser is 13.2)
 
-- [ ] [Processing instructions](https://html.spec.whatwg.org/#syntax-processing-instruction) — Processing instructions must have the following format:
+- [x] [Processing instructions](https://html.spec.whatwg.org/#syntax-processing-instruction) — Processing instructions must have the following format:
   - 1. "<?".
   - 2. A target.
   - 3. Either of the following two options: Zero or more ASCII whitespace.; One or more ASCII whitespace, followed by data.
   - 4. Optionally, a U+003F (?).
   - 5. A U+003E (>).
 
-- [ ] [target](https://html.spec.whatwg.org/#syntax-pi-target) — The target consists of ASCII alphanumeric, U+002D (-), and U+005F (_) code points. It must start with an ASCII alpha or U+005F (_) and must not be an ASCII case-insensitive match for "xml" or "xml-stylesheet".
+- [x] [target](https://html.spec.whatwg.org/#syntax-pi-target) — The target consists of ASCII alphanumeric, U+002D (-), and U+005F (_) code points. It must start with an ASCII alpha or U+005F (_) and must not be an ASCII case-insensitive match for "xml" or "xml-stylesheet".
 
-- [ ] [data](https://html.spec.whatwg.org/#syntax-pi-data) — The data is text, with the additional restriction that the text must not contain U+003E (>), nor end with U+003F (?).
+- [x] [data](https://html.spec.whatwg.org/#syntax-pi-data) — The data is text, with the additional restriction that the text must not contain U+003E (>), nor end with U+003F (?).

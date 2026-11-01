@@ -88,6 +88,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - Selection offsets (`selectionStart`, `selectionEnd`, `setSelectionRange()`) are UTF-8 byte offsets, snapped to the start of a character, where the specification counts UTF-16 code units. `maxlength` and `minlength` count UTF-16 code units, as the specification does.
 - `navigator.cookieEnabled` is false (there are no cookies without a network), `platform` is always `Win32` and `vendor` is empty (upstream's is `Apple Computer, Inc.`, Chrome's `Google Inc.`). `languages` has only the most preferred language and `hardwareConcurrency` is 4 or 8, as upstream.
 - `isSecureContext` checks the document's URL, since there are no origins: `https:`, `wss:`, `file:`, the local host, `about:` and a null URL are trustworthy, `data:` isn't. `crossOriginIsolated` and `originAgentCluster` are always false.
+- Microdata (`itemscope`, `itemprop`, `itemtype`, `itemid` and `itemref`) isn't processed, as in browsers: there's no way to read a document's items, and no conversion to vCard, iCalendar or JSON.
 
 ### From WebKit
 

@@ -74,34 +74,34 @@ Status: unreviewed
 
 ##### [4.12.1.1 Processing model](https://html.spec.whatwg.org/#script-processing-model)
 
-Status: unreviewed
+Status: n/a (scripts don't run)
 <!-- definitions: parser-document parser-inserted preparation-time-document script-force-async concept-script-external ready-to-be-parser-executed already-started concept-script-delay-load concept-script-type concept-script-result pending-parsing-blocking-script set-of-scripts-that-will-execute-as-soon-as-possible list-of-scripts-that-will-execute-in-order-as-soon-as-possible list-of-scripts-that-will-execute-when-the-document-has-finished-parsing -->
 
-- [ ] [steps to run when the result is ready](https://html.spec.whatwg.org/#steps-to-run-when-the-result-is-ready) — A script element has steps to run when the result is ready, which are a series of steps or null, initially null. To mark as ready a script element el given a result:
+- [x] [steps to run when the result is ready](https://html.spec.whatwg.org/#steps-to-run-when-the-result-is-ready) — A script element has steps to run when the result is ready, which are a series of steps or null, initially null. To mark as ready a script element el given a result:
   - 1. Set el's result to result.
   - 2. If el's steps to run when the result is ready are not null, then run them.
   - 3. Set el's steps to run when the result is ready to null.
   - 4. Set el's delaying the load event to false.
 
-- [ ] [The script HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#the-script-element) — The script HTML element post-connection steps, given insertedNode, are:
+- [x] [The script HTML element post-connection steps, given insertedNode,](https://html.spec.whatwg.org/#the-script-element) — The script HTML element post-connection steps, given insertedNode, are:
   - 1. If insertedNode is parser-inserted, then return.
   - 2. Prepare the script element given insertedNode.
 
-- [ ] [The script HTML element removing steps given removedNode](https://html.spec.whatwg.org/#the-script-element) — The script HTML element removing steps given removedNode are:
+- [x] [The script HTML element removing steps given removedNode](https://html.spec.whatwg.org/#the-script-element) — The script HTML element removing steps given removedNode are:
   - 1. If removedNode's result is a speculation rules parse result:
     - 1a. Unregister speculation rules given removedNode's relevant global object and removedNode's result.
     - 1b. Set removedNode's already started to false.
     - 1c. Set removedNode's result to null.
 
-- [ ] [The script children changed steps given changedNode](https://html.spec.whatwg.org/#the-script-element) — The script children changed steps given changedNode are:
+- [x] [The script children changed steps given changedNode](https://html.spec.whatwg.org/#the-script-element) — The script children changed steps given changedNode are:
   - 1. If the script element is not connected, then return.
   - 2. Run the script HTML element post-connection steps, given changedNode.
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#mark-as-ready) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all script elements:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#mark-as-ready) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all script elements:
   - 1. If namespace is not null, then return.
   - 2. If localName is src, value is not null, and element is connected, then run the script HTML element post-connection steps, given element.
 
-- [ ] [prepare the script element](https://html.spec.whatwg.org/#prepare-the-script-element) — To prepare the script element given a script element el:
+- [x] [prepare the script element](https://html.spec.whatwg.org/#prepare-the-script-element) — To prepare the script element given a script element el:
   - 1. If el's already started is true, then return.
   - 2. Let parser document be el's parser document.
   - 3. Set el's parser document to null.
@@ -198,7 +198,7 @@ Status: unreviewed
       - 36b.ii. Set el's ready to be parser-executed to true. (The parser will handle executing the script.)
     - 36c. Otherwise, immediately execute the script element el, even if other scripts are already executing.
 
-- [ ] [execute the script element](https://html.spec.whatwg.org/#execute-the-script-element) — To execute the script element given a script element el:
+- [x] [execute the script element](https://html.spec.whatwg.org/#execute-the-script-element) — To execute the script element given a script element el:
   - 1. Let document be el's node document.
   - 2. If el's preparation-time document is not equal to document, then return.
   - 3. Unblock rendering on el.
@@ -218,19 +218,19 @@ Status: unreviewed
 
 ##### [4.12.1.2 Scripting languages](https://html.spec.whatwg.org/#scriptingLanguages)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.12.1.3 Restrictions for contents of script elements](https://html.spec.whatwg.org/#restrictions-for-contents-of-script-elements)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.12.1.4 Inline documentation for external scripts](https://html.spec.whatwg.org/#inline-documentation-for-external-scripts)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.12.1.5 Interaction of script elements and XSLT](https://html.spec.whatwg.org/#scriptTagXSLT)
 
-Status: unreviewed
+Status: n/a (no XPath or XSLT)
 
 #### [4.12.2 The noscript element](https://html.spec.whatwg.org/#the-noscript-element)
 
@@ -312,7 +312,7 @@ Status: unreviewed
 
 ##### [4.12.3.1 Interaction of template elements with XSLT and XPath](https://html.spec.whatwg.org/#template-XSLT-XPath)
 
-Status: unreviewed
+Status: n/a (no XPath or XSLT)
 
 #### [4.12.4 The slot element](https://html.spec.whatwg.org/#the-slot-element)
 

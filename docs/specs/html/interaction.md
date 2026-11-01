@@ -166,9 +166,9 @@ Status: unreviewed
 
 #### [6.4.5 User agent automation](https://html.spec.whatwg.org/#user-activation-user-agent-automation)
 
-Status: unreviewed
+Status: n/a (no WebDriver)
 
-- [ ] [The remote end steps](https://html.spec.whatwg.org/#user-activation-user-agent-automation) — The remote end steps are:
+- [x] [The remote end steps](https://html.spec.whatwg.org/#user-activation-user-agent-automation) — The remote end steps are:
   - 1. Let window be the current browsing context's active window.
   - 2. Let consume be true if window has transient activation; otherwise false.
   - 3. If consume is true, then consume user activation of window.

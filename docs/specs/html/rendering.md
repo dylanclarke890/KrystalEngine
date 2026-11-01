@@ -261,10 +261,10 @@ Status: unreviewed
 
 ### [15.6 Frames and framesets](https://html.spec.whatwg.org/#frames-and-framesets)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 <!-- definitions: has-a-border frame-border-colour -->
 
-- [ ] [User agents are expected to render frameset elements as a box with the height a…](https://html.spec.whatwg.org/#frames-and-framesets) — User agents are expected to render frameset elements as a box with the height and width of the viewport, with a surface rendered according to the following layout algorithm:
+- [x] [User agents are expected to render frameset elements as a box with the height a…](https://html.spec.whatwg.org/#frames-and-framesets) — User agents are expected to render frameset elements as a box with the height and width of the viewport, with a surface rendered according to the following layout algorithm:
   - 1. The cols and rows variables are lists of zero or more pairs consisting of a number and a unit, the unit being one of percentage, relative, and absolute. Use the rules for parsing a list of dimensions to parse the value of the element's cols attribute, if there is one. Let cols be the result, or an empty list if there is no such attribute. Use the rules for parsing a list of dimensions to parse th…
   - 2. For any of the entries in cols or rows that have the number zero and the unit relative, change the entry's number to one.
   - 3. If cols has no entries, then add a single entry consisting of the value 1 and the unit relative to cols. If rows has no entries, then add a single entry consisting of the value 1 and the unit relative to rows.
@@ -284,7 +284,7 @@ Status: unreviewed
     - 8b. Otherwise, if the element has a parent element that is a frameset element, then return the frame border color of that element.
     - 8c. Otherwise, return gray.
 
-- [ ] [convert a list of dimensions to a list of pixel values](https://html.spec.whatwg.org/#convert-a-list-of-dimensions-to-a-list-of-pixel-values) — The algorithm to convert a list of dimensions to a list of pixel values consists of the following steps:
+- [x] [convert a list of dimensions to a list of pixel values](https://html.spec.whatwg.org/#convert-a-list-of-dimensions-to-a-list-of-pixel-values) — The algorithm to convert a list of dimensions to a list of pixel values consists of the following steps:
   - 1. Let input list be the list of numbers and units passed to the algorithm. Let output list be a list of numbers the same length as input list, all zero. Entries in output list correspond to the entries in input list that have the same position.
   - 2. Let input dimension be the size passed to the algorithm.
   - 3. Let total percentage be the sum of all the numbers in input list whose unit is percentage. Let total relative be the sum of all the numbers in input list whose unit is relative. Let total absolute be the sum of all the numbers in input list whose unit is absolute. Let remaining space be the value of input dimension.
@@ -315,7 +315,7 @@ Status: unreviewed
 
 ### [15.8 Print media](https://html.spec.whatwg.org/#print-media)
 
-Status: unreviewed
+Status: n/a (no printing)
 <!-- definitions: obtain-a-physical-form -->
 
 ### [15.9 Unstyled XML documents](https://html.spec.whatwg.org/#unstyled-xml-documents)

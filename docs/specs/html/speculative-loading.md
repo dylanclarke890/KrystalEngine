@@ -8,27 +8,27 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [7.6 Speculative loading](https://html.spec.whatwg.org/#speculative-loading)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 #### [7.6.1 Speculation rules](https://html.spec.whatwg.org/#speculation-rules)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: speculation-rule-set-authoring-requirements valid-speculation-rule valid-document-rule-predicate valid-url-pattern-input -->
 
 ##### [7.6.1.1 Data model](https://html.spec.whatwg.org/#speculation-rules-data-model)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: speculation-rule-set sr-set-prefetch speculation-rule sr-urls sr-predicate sr-eagerness sr-referrer-policy sr-tags sr-requirements sr-nvs-hint document-rule-predicate document-rule-conjunction sr-dr-c-clauses document-rule-disjunction sr-dr-d-clauses document-rule-negation sr-dr-n-clause document-rule-url-pattern-predicate sr-dr-urlpattern-patterns document-rule-selector-predicate sr-dr-cssselector-selectors speculation-rule-eagerness sr-eagerness-immediate sr-eagerness-eager sr-eagerness-moderate sr-eagerness-conservative speculation-rule-tag speculation-rule-requirement -->
 
-- [ ] [less eager](https://html.spec.whatwg.org/#sr-eagerness-less-eager) — A speculation rule eagerness A is less eager than another speculation rule eagerness B if A follows B in the above list.
+- [x] [less eager](https://html.spec.whatwg.org/#sr-eagerness-less-eager) — A speculation rule eagerness A is less eager than another speculation rule eagerness B if A follows B in the above list.
 
-- [ ] [at least as eager](https://html.spec.whatwg.org/#sr-eagerness-at-least-as-eager) — A speculation rule eagerness A is at least as eager as another speculation rule eagerness B if A is not less eager than B.
+- [x] [at least as eager](https://html.spec.whatwg.org/#sr-eagerness-at-least-as-eager) — A speculation rule eagerness A is at least as eager as another speculation rule eagerness B if A is not less eager than B.
 
 ##### [7.6.1.2 Parsing](https://html.spec.whatwg.org/#speculation-rules-parsing)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
-- [ ] [parse a speculation rule set string](https://html.spec.whatwg.org/#parse-a-speculation-rule-set-string) — To parse a speculation rule set string given a string input, a Document document, and a URL baseURL:
+- [x] [parse a speculation rule set string](https://html.spec.whatwg.org/#parse-a-speculation-rule-set-string) — To parse a speculation rule set string given a string input, a Document document, and a URL baseURL:
   - 1. Let parsed be the result of parsing a JSON string to an Infra value given input.
   - 2. If parsed is not a map, then throw a TypeError indicating that the top-level value needs to be a JSON object.
   - 3. Let result be a new speculation rule set.
@@ -47,7 +47,7 @@ Status: unreviewed
       - 8a.ii. Otherwise, the user agent may report a warning to the console indicating that the rules list for type needs to be a JSON array.
   - 9. Return result.
 
-- [ ] [parse a speculation rule](https://html.spec.whatwg.org/#parse-a-speculation-rule) — To parse a speculation rule given a map input, a speculation rule tag rulesetLevelTag, a Document document, and a URL baseURL:
+- [x] [parse a speculation rule](https://html.spec.whatwg.org/#parse-a-speculation-rule) — To parse a speculation rule given a map input, a speculation rule tag rulesetLevelTag, a Document document, and a URL baseURL:
   - 1. If input is not a map:
     - 1a. The user agent may report a warning to the console indicating that the rule needs to be a JSON object.
     - 1b. Return null.
@@ -130,7 +130,7 @@ Status: unreviewed
     - 24b. Set noVarySearchHint to the result of parsing a URL search variance given input["expects_no_vary_search"].
   - 25. Return a speculation rule with: URLsurlspredicatepredicateeagernesseagernessreferrer policyreferrerPolicytagstagsrequirementsrequirementsNo-Vary-Search hintnoVarySearchHint
 
-- [ ] [parse a document rule predicate](https://html.spec.whatwg.org/#parse-a-document-rule-predicate) — To parse a document rule predicate given a value input, a Document document, and a URL baseURL:
+- [x] [parse a document rule predicate](https://html.spec.whatwg.org/#parse-a-document-rule-predicate) — To parse a document rule predicate given a value input, a Document document, and a URL baseURL:
   - 1. If input is not a map:
     - 1a. The user agent may report a warning to the console indicating that the document rule predicate was invalid.
     - 1b. Return null.
@@ -197,15 +197,15 @@ Status: unreviewed
 
 ##### [7.6.1.3 Processing model](https://html.spec.whatwg.org/#speculation-rules-processing-model)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: speculative-load-candidate sl-candidate-url sl-candidate-nvs-hint sl-candidate-eagerness sl-candidate-referrer-policy sl-candidate-tags prefetch-candidate sl-candidate-anonymization-policy prefetch-ip-anonymization-policy cross-origin-prefetch-ip-anonymization-policy copiap-origin document-sr-sets consider-speculative-loads-microtask-queued speculation-rules-task-source -->
 
-- [ ] [redundant with](https://html.spec.whatwg.org/#sl-candidate-redundant-with) — A speculative load candidate candidateA is redundant with another speculative load candidate candidateB if the following steps return true:
+- [x] [redundant with](https://html.spec.whatwg.org/#sl-candidate-redundant-with) — A speculative load candidate candidateA is redundant with another speculative load candidate candidateB if the following steps return true:
   - 1. If candidateA's No-Vary-Search hint is not equal to candidateB's No-Vary-Search hint, then return false.
   - 2. If candidateA's URL is not equivalent modulo search variance to candidateB's URL given candidateA's No-Vary-Search hint, then return false.
   - 3. Return true.
 
-- [ ] [consider speculative loads](https://html.spec.whatwg.org/#consider-speculative-loads) — To consider speculative loads for a Document document:
+- [x] [consider speculative loads](https://html.spec.whatwg.org/#consider-speculative-loads) — To consider speculative loads for a Document document:
   - 1. If document's node navigable is not a top-level traversable, then return.
   - 2. If document's consider speculative loads microtask queued is true, then return.
   - 3. Set document's consider speculative loads microtask queued to true.
@@ -213,7 +213,7 @@ Status: unreviewed
     - 4a. Set document's consider speculative loads microtask queued to false.
     - 4b. Run the inner consider speculative loads steps for document.
 
-- [ ] [inner consider speculative loads steps](https://html.spec.whatwg.org/#inner-consider-speculative-loads-steps) — The inner consider speculative loads steps for a Document document are:
+- [x] [inner consider speculative loads steps](https://html.spec.whatwg.org/#inner-consider-speculative-loads-steps) — The inner consider speculative loads steps for a Document document are:
   - 1. If document is not fully active, then return.
   - 2. Let prefetchCandidates be an empty list.
   - 3. For each ruleSet of document's speculation rule sets:
@@ -245,19 +245,19 @@ Status: unreviewed
       - 7a.iii. Let prefetchRecord be a new prefetch record with source"speculation rules"URLprefetchCandidate's URLNo-Vary-Search hintprefetchCandidate's No-Vary-Search hintreferrer policyprefetchCandidate's referrer policyanonymization policyprefetchCandidate's anonymization policytags tagsToSend
       - 7a.iv. Start a referrer-initiated navigational prefetch given document and prefetchRecord.
 
-- [ ] [compute a speculative load referrer policy](https://html.spec.whatwg.org/#compute-a-speculative-load-referrer-policy) — To compute a speculative load referrer policy given a speculation rule rule and an a element, area element, or null link:
+- [x] [compute a speculative load referrer policy](https://html.spec.whatwg.org/#compute-a-speculative-load-referrer-policy) — To compute a speculative load referrer policy given a speculation rule rule and an a element, area element, or null link:
   - 1. If rule's referrer policy is not the empty string, then return rule's referrer policy.
   - 2. If link is null, then return the empty string.
   - 3. Return link's hyperlink referrer policy.
 
-- [ ] [collect tags from speculative load candidates](https://html.spec.whatwg.org/#collect-tags-from-speculative-load-candidates) — To collect tags from speculative load candidates given a list of speculative load candidates candidates:
+- [x] [collect tags from speculative load candidates](https://html.spec.whatwg.org/#collect-tags-from-speculative-load-candidates) — To collect tags from speculative load candidates given a list of speculative load candidates candidates:
   - 1. Let tags be an empty ordered set.
   - 2. For each candidate of candidates:
     - 2a. For each tag of candidate's tags: append tag to tags.
   - 3. Sort in ascending order tags, with tagA being less than tagB if tagA is null, or if tagA is code unit less than tagB.
   - 4. Return tags.
 
-- [ ] [find matching links](https://html.spec.whatwg.org/#find-matching-links) — To find matching links given a Document document and a document rule predicate predicate:
+- [x] [find matching links](https://html.spec.whatwg.org/#find-matching-links) — To find matching links given a Document document and a document rule predicate predicate:
   - 1. Let links be an empty list.
   - 2. For each shadow-including descendant descendant of document, in shadow-including tree order:
     - 2a. If descendant is not an a or area element with an href attribute, then continue.
@@ -266,7 +266,7 @@ Status: unreviewed
     - 2d. If predicate matches descendant, then append descendant to links.
   - 3. Return links.
 
-- [ ] [matches](https://html.spec.whatwg.org/#dr-predicate-matches) — A document rule predicate predicate matches an a or area element el if the following steps return true, switching on predicate's type:
+- [x] [matches](https://html.spec.whatwg.org/#dr-predicate-matches) — A document rule predicate predicate matches an a or area element el if the following steps return true, switching on predicate's type:
   - • document rule conjunction:
     - 1. For each clause of predicate's clauses:
       - 1a. If clause does not match el, then return false.
@@ -289,15 +289,15 @@ Status: unreviewed
 
 #### [7.6.2 Navigational prefetching](https://html.spec.whatwg.org/#navigational-prefetching)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: prefetch-record prefetch-record-source prefetch-record-url prefetch-record-nvs-hint prefetch-record-referrer-policy prefetch-record-anonymization-policy prefetch-record-tags prefetch-record-state prefetch-record-cancel-and-discard still-being-speculated document-prefetch-records start-a-referrer-initiated-navigational-prefetch -->
 
 #### [7.6.3 The `Speculation-Rules` header](https://html.spec.whatwg.org/#the-speculation-rules-header)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: speculation-rules-2 -->
 
-- [ ] [process the `Speculation-Rules` header](https://html.spec.whatwg.org/#process-the-speculation-rules-header) — To process the `Speculation-Rules` header given a Document document and a response response:
+- [x] [process the `Speculation-Rules` header](https://html.spec.whatwg.org/#process-the-speculation-rules-header) — To process the `Speculation-Rules` header given a Document document and a response response:
   - 1. Let parsedList be the result of getting a structured field value given `Speculation-Rules` and "list" from response's header list.
   - 2. If parsedList is null, then return.
   - 3. For each item of parsedList:
@@ -319,47 +319,47 @@ Status: unreviewed
 
 #### [7.6.4 The `Sec-Speculation-Tags` header](https://html.spec.whatwg.org/#the-sec-speculation-tags-header)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 <!-- definitions: sec-speculation-tags -->
 
 #### [7.6.5 Security considerations](https://html.spec.whatwg.org/#speculative-loading-security)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.5.1 Cross-site requests](https://html.spec.whatwg.org/#speculative-loading-cross-site-requests)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.5.2 Injected content](https://html.spec.whatwg.org/#speculative-loading-injected-content)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.5.3 IP anonymization](https://html.spec.whatwg.org/#speculative-loading-ip-anonymization)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 #### [7.6.6 Privacy considerations](https://html.spec.whatwg.org/#speculative-loading-privacy)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.6.1 Heuristics and optionality](https://html.spec.whatwg.org/#speculative-loading-heuristics)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.6.2 State partitioning](https://html.spec.whatwg.org/#speculative-loading-state-partitioning)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ##### [7.6.6.3 Identity joining](https://html.spec.whatwg.org/#speculative-loading-identity-joining)
 
-Status: unreviewed
+Status: n/a (no speculative loading: later, with the network loader)
 
 ### [7.7 The `X-Frame-Options` header](https://html.spec.whatwg.org/#the-x-frame-options-header)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 <!-- definitions: x-frame-options -->
 
-- [ ] [check a navigation response's adherence to `X-Frame-Options`](https://html.spec.whatwg.org/#check-a-navigation-response's-adherence-to-x-frame-options) — To check a navigation response's adherence to `X-Frame-Options`, given a response response, a navigable navigable, a CSP list cspList, and an origin destinationOrigin:
+- [x] [check a navigation response's adherence to `X-Frame-Options`](https://html.spec.whatwg.org/#check-a-navigation-response's-adherence-to-x-frame-options) — To check a navigation response's adherence to `X-Frame-Options`, given a response response, a navigable navigable, a CSP list cspList, and an origin destinationOrigin:
   - 1. If navigable is not a child navigable, then return true.
   - 2. For each policy of cspList:
     - 2a. If policy's disposition is not "enforce", then continue.
@@ -384,4 +384,4 @@ Status: unreviewed
 
 ### [7.9 Browser user interface considerations](https://html.spec.whatwg.org/#nav-traversal-ui)
 
-Status: unreviewed
+Status: n/a (guidance)

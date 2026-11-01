@@ -79,32 +79,32 @@ Status: unreviewed
 
 ##### [7.3.1.3 Child navigables](https://html.spec.whatwg.org/#child-navigables)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 <!-- definitions: navigable-container content-navigable -->
 
-- [ ] [container (navigable)](https://html.spec.whatwg.org/#nav-container) — The container of a navigable navigable is the navigable container whose content navigable is navigable, or null if there is no such element.
+- [x] [container (navigable)](https://html.spec.whatwg.org/#nav-container) — The container of a navigable navigable is the navigable container whose content navigable is navigable, or null if there is no such element.
 
-- [ ] [container document (navigable)](https://html.spec.whatwg.org/#nav-container-document) — The container document of a navigable navigable is the result of running these steps:
+- [x] [container document (navigable)](https://html.spec.whatwg.org/#nav-container-document) — The container document of a navigable navigable is the result of running these steps:
   - 1. If navigable's container is null, then return null.
   - 2. Return navigable's container's node document.
 
-- [ ] [container document](https://html.spec.whatwg.org/#doc-container-document) — The container document of a Document document is the result of running these steps:
+- [x] [container document](https://html.spec.whatwg.org/#doc-container-document) — The container document of a Document document is the result of running these steps:
   - 1. If document's node navigable is null, then return null.
   - 2. Return document's node navigable's container document.
 
-- [ ] [child navigable](https://html.spec.whatwg.org/#child-navigable) — A navigable navigable is a child navigable of another navigable potentialParent when navigable's parent is potentialParent. We can also just say that a navigable "is a child navigable", which means that its parent is non-null.
+- [x] [child navigable](https://html.spec.whatwg.org/#child-navigable) — A navigable navigable is a child navigable of another navigable potentialParent when navigable's parent is potentialParent. We can also just say that a navigable "is a child navigable", which means that its parent is non-null.
 
-- [ ] [content document](https://html.spec.whatwg.org/#concept-bcc-content-document) — The content document of a navigable container container is the result of running these steps:
+- [x] [content document](https://html.spec.whatwg.org/#concept-bcc-content-document) — The content document of a navigable container container is the result of running these steps:
   - 1. If container's content navigable is null, then return null.
   - 2. Let document be container's content navigable's active document.
   - 3. If document's origin and container's node document's origin are not same origin-domain, then return null.
   - 4. Return document.
 
-- [ ] [content window](https://html.spec.whatwg.org/#content-window) — The content window of a navigable container container is the result of running these steps:
+- [x] [content window](https://html.spec.whatwg.org/#content-window) — The content window of a navigable container container is the result of running these steps:
   - 1. If container's content navigable is null, then return null.
   - 2. Return container's content navigable's active WindowProxy's object.
 
-- [ ] [create a new child navigable](https://html.spec.whatwg.org/#create-a-new-child-navigable) — To create a new child navigable, given an element element:
+- [x] [create a new child navigable](https://html.spec.whatwg.org/#create-a-new-child-navigable) — To create a new child navigable, given an element element:
   - 1. Let parentNavigable be element's node navigable.
   - 2. Let group be element's node document's browsing context's top-level browsing context's group.
   - 3. Let browsingContext and document be the result of creating a new browsing context and document given element's node document, element, and group.
@@ -340,24 +340,24 @@ Status: unreviewed
 
 ##### [7.3.2.2 Related browsing contexts](https://html.spec.whatwg.org/#nested-browsing-contexts)
 
-Status: unreviewed
+Status: n/a (no frame tree)
 
-- [ ] [ancestor](https://html.spec.whatwg.org/#ancestor-browsing-context) — A browsing context potentialDescendant is said to be an ancestor of a browsing context potentialAncestor if the following algorithm returns true:
+- [x] [ancestor](https://html.spec.whatwg.org/#ancestor-browsing-context) — A browsing context potentialDescendant is said to be an ancestor of a browsing context potentialAncestor if the following algorithm returns true:
   - 1. Let potentialDescendantDocument be potentialDescendant's active document.
   - 2. If potentialDescendantDocument is not fully active, then return false.
   - 3. Let ancestorBCs be the list obtained by taking the browsing context of the active document of each member of potentialDescendantDocument's ancestor navigables.
   - 4. If ancestorBCs contains potentialAncestor, then return true.
   - 5. Return false.
 
-- [ ] [top-level browsing context](https://html.spec.whatwg.org/#top-level-browsing-context) — A top-level browsing context is a browsing context whose active document's node navigable is a traversable navigable.
+- [x] [top-level browsing context](https://html.spec.whatwg.org/#top-level-browsing-context) — A top-level browsing context is a browsing context whose active document's node navigable is a traversable navigable.
 
-- [ ] [top-level browsing context](https://html.spec.whatwg.org/#bc-tlbc) — The top-level browsing context of a browsing context start is the result of the following algorithm:
+- [x] [top-level browsing context](https://html.spec.whatwg.org/#bc-tlbc) — The top-level browsing context of a browsing context start is the result of the following algorithm:
   - 1. If start's active document is not fully active, then return null.
   - 2. Let navigable be start's active document's node navigable.
   - 3. While navigable's parent is not null, set navigable to navigable's parent.
   - 4. Return navigable's active browsing context.
 
-- [ ] [familiar with](https://html.spec.whatwg.org/#familiar-with) — A browsing context A is familiar with a second browsing context B if the following algorithm returns true:
+- [x] [familiar with](https://html.spec.whatwg.org/#familiar-with) — A browsing context A is familiar with a second browsing context B if the following algorithm returns true:
   - 1. If A's active document's origin is same origin with B's active document's origin, then return true.
   - 2. If A's top-level browsing context is B, then return true.
   - 3. If B is an auxiliary browsing context and A is familiar with B's opener browsing context, then return true.
@@ -366,21 +366,21 @@ Status: unreviewed
 
 ##### [7.3.2.3 Groupings of browsing contexts](https://html.spec.whatwg.org/#groupings-of-browsing-contexts)
 
-Status: unreviewed
+Status: n/a (no browsing context groups)
 <!-- definitions: tlbc-group browsing-context-group-set browsing-context-group browsing-context-set agent-cluster-map historical-agent-cluster-key-map bcg-cross-origin-isolation cross-origin-isolation-mode cross-origin-isolation-none cross-origin-isolation-logical cross-origin-isolation-concrete -->
 
-- [ ] [create a new browsing context group and document](https://html.spec.whatwg.org/#creating-a-new-browsing-context-group-and-document) — To create a new browsing context group and document:
+- [x] [create a new browsing context group and document](https://html.spec.whatwg.org/#creating-a-new-browsing-context-group-and-document) — To create a new browsing context group and document:
   - 1. Let group be a new browsing context group.
   - 2. Append group to the user agent's browsing context group set.
   - 3. Let browsingContext and document be the result of creating a new browsing context and document with null, null, and group.
   - 4. Append browsingContext to group.
   - 5. Return group and document.
 
-- [ ] [append](https://html.spec.whatwg.org/#bcg-append) — To append a top-level browsing context browsingContext to a browsing context group group:
+- [x] [append](https://html.spec.whatwg.org/#bcg-append) — To append a top-level browsing context browsingContext to a browsing context group group:
   - 1. Append browsingContext to group's browsing context set.
   - 2. Set browsingContext's group to group.
 
-- [ ] [remove](https://html.spec.whatwg.org/#bcg-remove) — To remove a top-level browsing context browsingContext:
+- [x] [remove](https://html.spec.whatwg.org/#bcg-remove) — To remove a top-level browsing context browsingContext:
   - 1. Assert: browsingContext's group is non-null.
   - 2. Let group be browsingContext's group.
   - 3. Set browsingContext's group to null.

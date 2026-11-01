@@ -128,18 +128,18 @@ Status: unreviewed
 
 #### [2.5.6 Nonce attributes](https://html.spec.whatwg.org/#nonce-attributes)
 
-Status: unreviewed
+Status: n/a (no Content Security Policy)
 <!-- definitions: attr-nonce cryptographicnonce -->
 
-- [ ] [HTMLOrSVGOrMathMLElement.nonce](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — The nonce IDL attribute must, on getting, return the value of this element's [[CryptographicNonce]]; and on setting, set this element's [[CryptographicNonce]] to the given value.
+- [x] [HTMLOrSVGOrMathMLElement.nonce](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — The nonce IDL attribute must, on getting, return the value of this element's [[CryptographicNonce]]; and on setting, set this element's [[CryptographicNonce]] to the given value.
 
-- [ ] [The following attribute change steps are used for the nonce content attribute](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — The following attribute change steps are used for the nonce content attribute:
+- [x] [The following attribute change steps are used for the nonce content attribute](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — The following attribute change steps are used for the nonce content attribute:
   - 1. If element does not include HTMLOrSVGOrMathMLElement, then return.
   - 2. If localName is not nonce or namespace is not null, then return.
   - 3. If value is null, then set element's [[CryptographicNonce]] to the empty string.
   - 4. Otherwise, set element's [[CryptographicNonce]] to value.
 
-- [ ] [Whenever an element including HTMLOrSVGOrMathMLElement becomes browsing-context…](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — Whenever an element including HTMLOrSVGOrMathMLElement becomes browsing-context connected, the user agent must execute the following steps on the element:
+- [x] [Whenever an element including HTMLOrSVGOrMathMLElement becomes browsing-context…](https://html.spec.whatwg.org/#dom-noncedelement-nonce) — Whenever an element including HTMLOrSVGOrMathMLElement becomes browsing-context connected, the user agent must execute the following steps on the element:
   - 1. Let CSP list be element's shadow-including root's policy container's CSP list.
   - 2. If CSP list contains a header-delivered Content Security Policy, and element has a nonce content attribute whose value is not the empty string:
     - 2a. Let nonce be element's [[CryptographicNonce]].

@@ -8,8 +8,8 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [Table of contents](https://html.spec.whatwg.org/#table-of-contents)
 
-Status: unreviewed
+Status: n/a (front matter)
 
 ## [Full table of contents](https://html.spec.whatwg.org/#contents)
 
-Status: unreviewed
+Status: n/a (front matter)
