@@ -53,7 +53,12 @@ namespace krys::boo::html
     UnsafeURL,
     Sync,
     Async,
+    Subtitles,
+    Captions,
+    Descriptions,
+    Chapters,
+    Metadata,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 43uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(krys::boo::html::AttributeState, 48uz);

@@ -8,10 +8,11 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 #### [4.8.8 The video element](https://html.spec.whatwg.org/#the-video-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLVideoElement`: its attributes are reflected and `width` and `height` are presentational hints (with the aspect ratio). Media elements don't play media yet (video and audio come later, see `OVERVIEW.md`): no poster frame, and `videoWidth` and `videoHeight` are 0, as for HAVE_NOTHING.
 <!-- definitions: attr-video-poster attr-video-playsinline concept-video-intrinsic-width concept-video-intrinsic-height -->
 
-- [ ] [poster frame](https://html.spec.whatwg.org/#poster-frame) — If the specified resource is to be used, then, when the element is created or when the poster attribute is set, changed, or removed, the user agent must run the following steps to determine the element's poster frame (regardless of the value of the element's show poster flag):
+- [x] [poster frame](https://html.spec.whatwg.org/#poster-frame) — If the specified resource is to be used, then, when the element is created or when the poster attribute is set, changed, or removed, the user agent must run the following steps to determine the element's poster frame (regardless of the value of the element's show poster flag):
   - 1. If there is an existing instance of this algorithm running for this video element, abort that instance of this algorithm without changing the poster frame.
   - 2. If the poster attribute's value is the empty string or if the attribute is absent:
     - 2a. Set the video element's poster lazy load resumption steps to null.
@@ -25,50 +26,62 @@ Status: unreviewed
     - 6c. Return.
   - 7. Fetch request. This must delay the load event of the element's node document.
   - 8. If an image is thus obtained, the poster frame is that image. Otherwise, there is no poster frame.
+  > n/a: media elements don't play media yet.
 
-- [ ] [HTMLVideoElement.videoWidth](https://html.spec.whatwg.org/#dom-video-videowidth) — The videoWidth getter steps are:
+- [x] [HTMLVideoElement.videoWidth](https://html.spec.whatwg.org/#dom-video-videowidth) — The videoWidth getter steps are:
   - 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
   - 2. Return the natural width of the video in CSS pixels.
+  > `HTMLVideoElement::VideoWidth`: 0, as there's no media.
 
-- [ ] [HTMLVideoElement.videoHeight](https://html.spec.whatwg.org/#dom-video-videoheight) — The videoHeight getter steps are:
+- [x] [HTMLVideoElement.videoHeight](https://html.spec.whatwg.org/#dom-video-videoheight) — The videoHeight getter steps are:
   - 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
   - 2. Return the natural height of the video in CSS pixels.
+  > `HTMLVideoElement::VideoHeight`: 0, as there's no media.
 
 #### [4.8.9 The audio element](https://html.spec.whatwg.org/#the-audio-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLAudioElement`. There's no `Audio()` factory function yet: it comes with media playback.
 
-- [ ] [Audio(src)](https://html.spec.whatwg.org/#dom-audio) — A legacy factory function is provided for creating HTMLAudioElement objects (in addition to the factory methods from DOM such as createElement()): Audio(src). When invoked, the legacy factory function must perform the following steps:
+- [x] [Audio(src)](https://html.spec.whatwg.org/#dom-audio) — A legacy factory function is provided for creating HTMLAudioElement objects (in addition to the factory methods from DOM such as createElement()): Audio(src). When invoked, the legacy factory function must perform the following steps:
   - 1. Let document be the current global object's associated Document.
   - 2. Let audio be the result of creating an element given document, "audio", and the HTML namespace.
   - 3. Set an attribute value for audio using "preload" and "auto".
   - 4. If src is given, then set an attribute value for audio using "src" and src. (This will cause the user agent to invoke the object's resource selection algorithm before returning.)
   - 5. Return audio.
+  > n/a: media elements don't play media yet.
 
 #### [4.8.10 The track element](https://html.spec.whatwg.org/#the-track-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLTrackElement`: its attributes are reflected and its readiness is not loaded; there are no text tracks yet (they come with media playback).
+> Fixed: `kind` wasn't limited to its known values.
 <!-- definitions: attr-track-kind attr-track-src attr-track-srclang attr-track-label attr-track-default dom-track-none dom-track-loading dom-track-loaded dom-track-error -->
 
-- [ ] [When the element's src attribute is set, run these steps](https://html.spec.whatwg.org/#track-url) — When the element's src attribute is set, run these steps:
+- [x] [When the element's src attribute is set, run these steps](https://html.spec.whatwg.org/#track-url) — When the element's src attribute is set, run these steps:
   - 1. Let trackURL be failure.
   - 2. Let value be the element's src attribute value.
   - 3. If value is not the empty string, then set trackURL to the result of encoding-parsing-and-serializing a URL given value, relative to the element's node document.
   - 4. Set the element's track URL to trackURL if it is not failure; otherwise to the empty string.
+  > n/a: media elements don't play media yet.
 
-- [ ] [track language](https://html.spec.whatwg.org/#track-language) — If the element has a srclang attribute whose value is not the empty string, then the element's track language is the value of the attribute. Otherwise, the element has no track language.
+- [x] [track language](https://html.spec.whatwg.org/#track-language) — If the element has a srclang attribute whose value is not the empty string, then the element's track language is the value of the attribute. Otherwise, the element has no track language.
+  > n/a: media elements don't play media yet.
 
-- [ ] [track label](https://html.spec.whatwg.org/#track-label) — If the element has a label attribute whose value is not the empty string, then the element's track label is the value of the attribute. Otherwise, the element's track label is an empty string.
+- [x] [track label](https://html.spec.whatwg.org/#track-label) — If the element has a label attribute whose value is not the empty string, then the element's track label is the value of the attribute. Otherwise, the element's track label is an empty string.
+  > n/a: media elements don't play media yet.
 
-- [ ] [HTMLTrackElement.readyState](https://html.spec.whatwg.org/#dom-track-readystate) — The readyState attribute must return the numeric value corresponding to the text track readiness state of the track element's text track, as defined by the following list:
+- [x] [HTMLTrackElement.readyState](https://html.spec.whatwg.org/#dom-track-readystate) — The readyState attribute must return the numeric value corresponding to the text track readiness state of the track element's text track, as defined by the following list:
   - • NONE (numeric value 0): The text track not loaded state.
   - • LOADING (numeric value 1): The text track loading state.
   - • LOADED (numeric value 2): The text track loaded state.
   - • ERROR (numeric value 3): The text track failed to load state.
+  > `HTMLTrackElement::ReadyState`: not loaded.
 
-- [ ] [HTMLTrackElement.track](https://html.spec.whatwg.org/#dom-track-track) — The track getter steps are to return this's text track.
+- [x] [HTMLTrackElement.track](https://html.spec.whatwg.org/#dom-track-track) — The track getter steps are to return this's text track.
+  > n/a: media elements don't play media yet.
 
-- [ ] [HTMLTrackElement.kind](https://html.spec.whatwg.org/#dom-track-kind) — The kind IDL attribute must reflect the content attribute of the same name, limited to only known values.
+- [x] [HTMLTrackElement.kind](https://html.spec.whatwg.org/#dom-track-kind) — The kind IDL attribute must reflect the content attribute of the same name, limited to only known values.
 
 #### [4.8.11 Media elements](https://html.spec.whatwg.org/#media-elements)
 

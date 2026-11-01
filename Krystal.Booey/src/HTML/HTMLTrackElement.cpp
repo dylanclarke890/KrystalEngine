@@ -1,8 +1,24 @@
 ﻿#include "Krystal.Booey/HTML/HTMLTrackElement.hpp"
+#include "Krystal.Booey/HTML/Attributes/EnumeratedAttributes.hpp"
 #include "Krystal.Booey/HTML/Attributes/ReflectAttribute.hpp"
 
 namespace krys::boo::html
 {
+  /// @see https://html.spec.whatwg.org/#attr-track-kind
+  template <>
+  struct EnumeratedAttributeTraits<"kind", HTMLTrackElement>
+  {
+    static inline KeywordStateMappingArray<5> StateMappings = {
+      KeywordStateMapping {u8"subtitles", AttributeState::Subtitles},
+      KeywordStateMapping {u8"captions", AttributeState::Captions},
+      KeywordStateMapping {u8"descriptions", AttributeState::Descriptions},
+      KeywordStateMapping {u8"chapters", AttributeState::Chapters},
+      KeywordStateMapping {u8"metadata", AttributeState::Metadata}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Subtitles;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Metadata;
+  };
+
   HTMLTrackElement::HTMLTrackElement(dom::Document &document) noexcept
       : HTMLElement(document, HTMLElementInterface::Track)
   {
@@ -12,7 +28,8 @@ namespace krys::boo::html
 
   dom::DOMString HTMLTrackElement::Kind() const noexcept
   {
-    return Reflect<dom::DOMString>(*this, u8"kind").value_or(u8"");
+    return EnumeratedAttribute<"kind", HTMLTrackElement>::ResolveCanonicalKeyword<dom::DOMString>(
+      Reflect<dom::DOMString>(*this, u8"kind"));
   }
 
   void HTMLTrackElement::Kind(dom::DOMString &&value) noexcept

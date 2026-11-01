@@ -33,13 +33,17 @@ namespace krys::boo::html
 
   uint32 HTMLVideoElement::VideoWidth() const noexcept
   {
-    // FIXME: Implement VideoWidth()
+    // 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
+    // 2. Return the natural width of the video in CSS pixels.
+    // FIXME: The video's natural width, once media elements play media; until then they have nothing.
     return 0u;
   }
 
   uint32 HTMLVideoElement::VideoHeight() const noexcept
   {
-    // FIXME: Implement VideoHeight()
+    // 1. If this's readyState attribute is HAVE_NOTHING, then return 0.
+    // 2. Return the natural height of the video in CSS pixels.
+    // FIXME: The video's natural height, once media elements play media; until then they have nothing.
     return 0u;
   }
 
