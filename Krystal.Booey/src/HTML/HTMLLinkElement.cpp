@@ -301,6 +301,9 @@ namespace krys::boo::html
       }
     }
 
+    // The linked resource fetch setup steps for a stylesheet:
+    // https://html.spec.whatwg.org/#link-type-stylesheet:linked-resource-fetch-setup-steps
+    // 1. If el's disabled attribute is set, then return false.
     if (_disabledState != DisabledState::Disabled && treatAsStyleSheet && document.Frame() && _url.IsValid())
     {
       // FIXME: The charset attribute's encoding, or else the document's, once sheets decode other encodings.
@@ -314,11 +317,19 @@ namespace krys::boo::html
 
       _loading = true;
 
+      // 2. If el contributes a script-blocking style sheet, append el to its node document's script-blocking
+      //    style sheet set.
+      // (Pending sheets hold up rendering, but there are no scripts to block.)
       // Don't hold up render tree construction and script execution on stylesheets
       // that are not needed for the rendering at the moment.
       bool isActive = MediaAttributeMatches() && !IsAlternate();
       AddPendingSheet(isActive ? PendingSheetType::Active : PendingSheetType::Inactive);
 
+      // 3. If el's media attribute's value matches the environment and el is potentially render-blocking,
+      //    then block rendering on el.
+      // 4. If el is currently render-blocking, then set request's render-blocking to true.
+      // (Requests have no render-blocking flag: the host loads them all.)
+      // 5. Return true.
       if (isActive)
       {
         PotentiallyBlockRendering();
@@ -476,10 +487,15 @@ namespace krys::boo::html
     }
   }
 
+  // Processing the linked resource, for a stylesheet that loaded:
+  // https://html.spec.whatwg.org/#link-type-stylesheet:process-the-linked-resource
+  // (The load or error event is fired once the sheet's imports load, by
+  // NotifyLoadedSheetAndAllCriticalSubresources.)
   void HTMLLinkElement::SetCSSStyleSheet(const utf8_string &href, const url::URL &baseURL,
                                          utf8_stringview charset,
                                          const CachedCSSStyleSheet *cachedStyleSheet) noexcept
   {
+    // 7. Unblock rendering on el.
     UnblockRendering();
     if (!IsConnected())
     {

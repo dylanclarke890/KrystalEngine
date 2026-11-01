@@ -8,19 +8,23 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ### [4.6 Links](https://html.spec.whatwg.org/#links)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 #### [4.6.1 Introduction](https://html.spec.whatwg.org/#introduction-2)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Definitions only: hyperlinks are `<a>`, `<area>` and `<form>`'s (`HyperlinkAlgorithms`), external resource links `HTMLLinkElement`'s stylesheets.
 <!-- definitions: external-resource-link hyperlink internal-resource-link hyperlink-annotation -->
 
 #### [4.6.2 Links created by a and area elements](https://html.spec.whatwg.org/#links-created-by-a-and-area-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HyperlinkAlgorithms::ActivationBehavior`, for `HTMLAnchorElement` and `HTMLAreaElement`; their attributes are reflected (4.5.1 and 4.8).
+> Fixed: the server-side image map suffix was added only without a `usemap`, before the URL was parsed, without clamping or the trusted check (see `DIFFERENCES.md`).
 <!-- definitions: attr-hyperlink-href attr-hyperlink-target attr-hyperlink-download ping attr-hyperlink-rel attr-hyperlink-referrerpolicy -->
 
-- [ ] [The activation behavior of an a or area element element given an event event](https://html.spec.whatwg.org/#the-a-element) — The activation behavior of an a or area element element given an event event is:
+- [x] [The activation behavior of an a or area element element given an event event](https://html.spec.whatwg.org/#the-a-element) — The activation behavior of an a or area element element given an event event is:
   - 1. If element has no href attribute, then return.
   - 2. Let hyperlinkSuffix be null.
   - 3. If element is an a element, and event's target is an img with an ismap attribute specified:
@@ -36,92 +40,96 @@ Status: unreviewed
 
 #### [4.6.3 API for hyperlink elements](https://html.spec.whatwg.org/#api-for-hyperlink-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `URLDecomposition`, shared with `Location`, computes the url again from `href` each time (`FullURL`), and updates `href` through `SetFullURL`. There are no origins to extract.
+> Fixed: the setters wrote an `href` from the document's URL for a link without one, where they should do nothing.
 <!-- definitions: hyperlink-element concept-hyperlink-url-set update-href attr-hyperlink-hreflang attr-hyperlink-type -->
 
-- [ ] [A hyperlink element has the following extract an origin steps](https://html.spec.whatwg.org/#concept-hyperlink-url) — A hyperlink element has the following extract an origin steps:
+- [x] [A hyperlink element has the following extract an origin steps](https://html.spec.whatwg.org/#concept-hyperlink-url) — A hyperlink element has the following extract an origin steps:
   - 1. If this's url is null, then return null.
   - 2. Return this's url's origin.
+  > n/a: there are no origins.
 
-- [ ] [reinitialize url](https://html.spec.whatwg.org/#reinitialise-url) — A hyperlink element has an associated reinitialize url algorithm, which runs these steps:
+- [x] [reinitialize url](https://html.spec.whatwg.org/#reinitialise-url) — A hyperlink element has an associated reinitialize url algorithm, which runs these steps:
   - 1. If the element's url is non-null, its scheme is "blob", and it has an opaque path, then terminate these steps.
   - 2. Set the url.
+  > `FullURL` parses `href` each time; with no blob URL store, a blob URL needs nothing kept.
 
-- [ ] [HyperlinkElementUtils.origin](https://html.spec.whatwg.org/#dom-hyperlink-origin) — The origin getter steps are:
+- [x] [HyperlinkElementUtils.origin](https://html.spec.whatwg.org/#dom-hyperlink-origin) — The origin getter steps are:
   - 1. Reinitialize url.
   - 2. If this's url is null, return the empty string.
   - 3. Return the serialization of this's url's origin.
 
-- [ ] [HyperlinkElementUtils.protocol](https://html.spec.whatwg.org/#dom-hyperlink-protocol) — The protocol getter steps are:
+- [x] [HyperlinkElementUtils.protocol](https://html.spec.whatwg.org/#dom-hyperlink-protocol) — The protocol getter steps are:
   - 1. Reinitialize url.
   - 2. If this's url is null, return ":".
   - 3. Return this's url's scheme, followed by ":".
 
-- [ ] [The protocol setter steps](https://html.spec.whatwg.org/#dom-hyperlink-protocol) — The protocol setter steps are:
+- [x] [The protocol setter steps](https://html.spec.whatwg.org/#dom-hyperlink-protocol) — The protocol setter steps are:
   - 1. Reinitialize url.
   - 2. If this's url is null, then return.
   - 3. Basic URL parse the given value, followed by ":", with this's url as url and scheme start state as state override.
   - 4. Update href.
 
-- [ ] [HyperlinkElementUtils.username](https://html.spec.whatwg.org/#dom-hyperlink-username) — The username getter steps are:
+- [x] [HyperlinkElementUtils.username](https://html.spec.whatwg.org/#dom-hyperlink-username) — The username getter steps are:
   - 1. Reinitialize url.
   - 2. If this's url is null, return the empty string.
   - 3. Return this's url's username.
 
-- [ ] [The username setter steps](https://html.spec.whatwg.org/#dom-hyperlink-username) — The username setter steps are:
+- [x] [The username setter steps](https://html.spec.whatwg.org/#dom-hyperlink-username) — The username setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url cannot have a username/password/port, then return.
   - 4. Set the username, given url and the given value.
   - 5. Update href.
 
-- [ ] [HyperlinkElementUtils.password](https://html.spec.whatwg.org/#dom-hyperlink-password) — The password getter steps are:
+- [x] [HyperlinkElementUtils.password](https://html.spec.whatwg.org/#dom-hyperlink-password) — The password getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, then return the empty string.
   - 4. Return url's password.
 
-- [ ] [The password setter steps](https://html.spec.whatwg.org/#dom-hyperlink-password) — The password setter steps are:
+- [x] [The password setter steps](https://html.spec.whatwg.org/#dom-hyperlink-password) — The password setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url cannot have a username/password/port, then return.
   - 4. Set the password, given url and the given value.
   - 5. Update href.
 
-- [ ] [HyperlinkElementUtils.host](https://html.spec.whatwg.org/#dom-hyperlink-host) — The host getter steps are:
+- [x] [HyperlinkElementUtils.host](https://html.spec.whatwg.org/#dom-hyperlink-host) — The host getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url or url's host is null, return the empty string.
   - 4. If url's port is null, return url's host, serialized.
   - 5. Return url's host, serialized, followed by ":" and url's port, serialized.
 
-- [ ] [The host setter steps](https://html.spec.whatwg.org/#dom-hyperlink-host) — The host setter steps are:
+- [x] [The host setter steps](https://html.spec.whatwg.org/#dom-hyperlink-host) — The host setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url has an opaque path, then return.
   - 4. Basic URL parse the given value, with url as url and host state as state override.
   - 5. Update href.
 
-- [ ] [HyperlinkElementUtils.hostname](https://html.spec.whatwg.org/#dom-hyperlink-hostname) — The hostname getter steps are:
+- [x] [HyperlinkElementUtils.hostname](https://html.spec.whatwg.org/#dom-hyperlink-hostname) — The hostname getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url or url's host is null, return the empty string.
   - 4. Return url's host, serialized.
 
-- [ ] [The hostname setter steps](https://html.spec.whatwg.org/#dom-hyperlink-hostname) — The hostname setter steps are:
+- [x] [The hostname setter steps](https://html.spec.whatwg.org/#dom-hyperlink-hostname) — The hostname setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url has an opaque path, then return.
   - 4. Basic URL parse the given value, with url as url and hostname state as state override.
   - 5. Update href.
 
-- [ ] [HyperlinkElementUtils.port](https://html.spec.whatwg.org/#dom-hyperlink-port) — The port getter steps are:
+- [x] [HyperlinkElementUtils.port](https://html.spec.whatwg.org/#dom-hyperlink-port) — The port getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url or url's port is null, return the empty string.
   - 4. Return url's port, serialized.
 
-- [ ] [The port setter steps](https://html.spec.whatwg.org/#dom-hyperlink-port) — The port setter steps are:
+- [x] [The port setter steps](https://html.spec.whatwg.org/#dom-hyperlink-port) — The port setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url cannot have a username/password/port, then return.
@@ -129,13 +137,13 @@ Status: unreviewed
   - 5. Otherwise, basic URL parse the given value, with url as url and port state as state override.
   - 6. Update href.
 
-- [ ] [HyperlinkElementUtils.pathname](https://html.spec.whatwg.org/#dom-hyperlink-pathname) — The pathname getter steps are:
+- [x] [HyperlinkElementUtils.pathname](https://html.spec.whatwg.org/#dom-hyperlink-pathname) — The pathname getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, then return the empty string.
   - 4. Return the result of URL path serializing url.
 
-- [ ] [The pathname setter steps](https://html.spec.whatwg.org/#dom-hyperlink-pathname) — The pathname setter steps are:
+- [x] [The pathname setter steps](https://html.spec.whatwg.org/#dom-hyperlink-pathname) — The pathname setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null or url has an opaque path, then return.
@@ -143,13 +151,13 @@ Status: unreviewed
   - 5. Basic URL parse the given value, with url as url and path start state as state override.
   - 6. Update href.
 
-- [ ] [HyperlinkElementUtils.search](https://html.spec.whatwg.org/#dom-hyperlink-search) — The search getter steps are:
+- [x] [HyperlinkElementUtils.search](https://html.spec.whatwg.org/#dom-hyperlink-search) — The search getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, or url's query is either null or the empty string, return the empty string.
   - 4. Return "?", followed by url's query.
 
-- [ ] [The search setter steps](https://html.spec.whatwg.org/#dom-hyperlink-search) — The search setter steps are:
+- [x] [The search setter steps](https://html.spec.whatwg.org/#dom-hyperlink-search) — The search setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, terminate these steps.
@@ -160,13 +168,13 @@ Status: unreviewed
     - 5c. Basic URL parse input, with url as url and query state as state override.
   - 6. Update href.
 
-- [ ] [HyperlinkElementUtils.hash](https://html.spec.whatwg.org/#dom-hyperlink-hash) — The hash getter steps are:
+- [x] [HyperlinkElementUtils.hash](https://html.spec.whatwg.org/#dom-hyperlink-hash) — The hash getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, or url's fragment is either null or the empty string, return the empty string.
   - 4. Return "#", followed by url's fragment.
 
-- [ ] [The hash setter steps](https://html.spec.whatwg.org/#dom-hyperlink-hash) — The hash setter steps are:
+- [x] [The hash setter steps](https://html.spec.whatwg.org/#dom-hyperlink-hash) — The hash setter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null, then return.
@@ -179,46 +187,54 @@ Status: unreviewed
 
 #### [4.6.4 API for a and area elements](https://html.spec.whatwg.org/#api-for-a-and-area-elements)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `href` is reflected as a URL (`ReflectURL`), and the url is computed when it's needed. There are no speculative loads.
 
-- [ ] [HTMLHyperlinkElementUtils.href](https://html.spec.whatwg.org/#dom-hyperlink-href) — The href getter steps are:
+- [x] [HTMLHyperlinkElementUtils.href](https://html.spec.whatwg.org/#dom-hyperlink-href) — The href getter steps are:
   - 1. Reinitialize url.
   - 2. Let url be this's url.
   - 3. If url is null and this has no href content attribute, return the empty string.
   - 4. Otherwise, if url is null, return this's href content attribute's value.
   - 5. Return url, serialized.
 
-- [ ] [The HTML element insertion steps for a and area elements, given insertedNode,](https://html.spec.whatwg.org/#html-element-insertion-steps) — The HTML element insertion steps for a and area elements, given insertedNode, are:
+- [x] [The HTML element insertion steps for a and area elements, given insertedNode,](https://html.spec.whatwg.org/#html-element-insertion-steps) — The HTML element insertion steps for a and area elements, given insertedNode, are:
   - 1. If insertedNode is not connected, then return.
   - 2. Consider speculative loads given insertedNode's node document.
+  > n/a: no speculative loads.
 
-- [ ] [The HTML element removing steps for a and area elements, given removedNode, isS…](https://html.spec.whatwg.org/#html-element-removing-steps) — The HTML element removing steps for a and area elements, given removedNode, isSubtreeRoot, and oldAncestor are:
+- [x] [The HTML element removing steps for a and area elements, given removedNode, isS…](https://html.spec.whatwg.org/#html-element-removing-steps) — The HTML element removing steps for a and area elements, given removedNode, isSubtreeRoot, and oldAncestor are:
   - 1. If oldAncestor is not connected, then return.
   - 2. Consider speculative loads given oldAncestor's node document.
+  > n/a: no speculative loads.
 
-- [ ] [The HTML element moving steps for a and area elements, given movedNode,](https://html.spec.whatwg.org/#html-element-moving-steps) — The HTML element moving steps for a and area elements, given movedNode, are:
+- [x] [The HTML element moving steps for a and area elements, given movedNode,](https://html.spec.whatwg.org/#html-element-moving-steps) — The HTML element moving steps for a and area elements, given movedNode, are:
   - 1. Consider speculative loads given movedNode's node document.
+  > n/a: no speculative loads.
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#dom-hyperlink-href) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all a and area elements:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#dom-hyperlink-href) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used for all a and area elements:
   - 1. If namespace is not null, then return.
   - 2. If oldValue equals value, then return.
   - 3. If localName is href, then set the url given element.
   - 4. If localName is href, referrerpolicy, or rel, then consider speculative loads given element's node document.
 
-- [ ] [The set the url algorithm for HTMLAnchorElement and HTMLAreaElement elements](https://html.spec.whatwg.org/#concept-hyperlink-url-set) — The set the url algorithm for HTMLAnchorElement and HTMLAreaElement elements is as follows:
+- [x] [The set the url algorithm for HTMLAnchorElement and HTMLAreaElement elements](https://html.spec.whatwg.org/#concept-hyperlink-url-set) — The set the url algorithm for HTMLAnchorElement and HTMLAreaElement elements is as follows:
   - 1. Set this element's url to null.
   - 2. If this element's href content attribute is absent, then return.
   - 3. Let url be the result of encoding-parsing a URL given this element's href content attribute's value, relative to this element's node document.
   - 4. If url is not failure, then set this element's url to url.
+  > `HyperlinkAlgorithms::Href`, computed when it's needed.
 
 #### [4.6.5 Following hyperlinks](https://html.spec.whatwg.org/#following-hyperlinks)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HyperlinkAlgorithms::FollowTheHyperlink`, `GetNoopener` and `HyperlinkReferrerPolicy`; the loader (`FrameLoader::ChangeLocation`) chooses the navigable.
+> Fixed: a URL that doesn't parse was still navigated to.
 <!-- definitions: following-hyperlinksuffix following-userinvolvement -->
 
-- [ ] [cannot navigate](https://html.spec.whatwg.org/#cannot-navigate) — An element element cannot navigate if any of the following are true:
+- [x] [cannot navigate](https://html.spec.whatwg.org/#cannot-navigate) — An element element cannot navigate if any of the following are true:
+  > Step 1 of `HyperlinkAlgorithms::FollowTheHyperlink`: no frame (not fully active), or an `<area>` that isn't connected.
 
-- [ ] [get an element's noopener](https://html.spec.whatwg.org/#get-an-element's-noopener) — To get an element's noopener, given an a, area, or form element element, a URL record url, and a string target, perform the following steps. They return a boolean.
+- [x] [get an element's noopener](https://html.spec.whatwg.org/#get-an-element's-noopener) — To get an element's noopener, given an a, area, or form element element, a URL record url, and a string target, perform the following steps. They return a boolean.
   - 1. If element's link types include the noopener or noreferrer keyword, then return true.
   - 2. If element's link types do not include the opener keyword and target is an ASCII case-insensitive match for "_blank", then return true.
   - 3. If url's blob URL entry is not null:
@@ -227,7 +243,7 @@ Status: unreviewed
     - 3c. If blobOrigin is not same site with topLevelOrigin, then return true.
   - 4. Return false.
 
-- [ ] [follow the hyperlink](https://html.spec.whatwg.org/#following-hyperlinks-2) — To follow the hyperlink created by an element subject, given an optional hyperlinkSuffix (default null) and an optional userInvolvement (default "none"):
+- [x] [follow the hyperlink](https://html.spec.whatwg.org/#following-hyperlinks-2) — To follow the hyperlink created by an element subject, given an optional hyperlinkSuffix (default null) and an optional userInvolvement (default "none"):
   - 1. If subject cannot navigate, then return.
   - 2. Let targetAttributeValue be the empty string.
   - 3. If subject is an a or area element, then set targetAttributeValue to the result of getting an element's target given subject.
@@ -240,16 +256,16 @@ Status: unreviewed
   - 10. If hyperlinkSuffix is non-null, then append it to urlString.
   - 11. Navigate targetNavigable to urlString using subject's node document, with referrerPolicy set to subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set to subject.
 
-- [ ] [hyperlink referrer policy](https://html.spec.whatwg.org/#hyperlink-referrer-policy) — The hyperlink referrer policy for an element subject is the value returned by the following steps:
+- [x] [hyperlink referrer policy](https://html.spec.whatwg.org/#hyperlink-referrer-policy) — The hyperlink referrer policy for an element subject is the value returned by the following steps:
   - 1. If subject's link types includes the noreferrer keyword, then return "no-referrer".
   - 2. Return the current state of subject's referrerpolicy content attribute.
 
 #### [4.6.6 Downloading resources](https://html.spec.whatwg.org/#downloading-resources)
 
-Status: unreviewed
+Status: n/a (downloads are the host's: the `download` attribute is passed to it; see `KNOWN-ISSUES.md`)
 <!-- definitions: downloading-hyperlinksuffix downloading-userinvolvement concept-extension -->
 
-- [ ] [download the hyperlink](https://html.spec.whatwg.org/#downloading-hyperlinks) — To download the hyperlink created by an element subject, given an optional hyperlinkSuffix (default null) and an optional userInvolvement (default "none"):
+- [x] [download the hyperlink](https://html.spec.whatwg.org/#downloading-hyperlinks) — To download the hyperlink created by an element subject, given an optional hyperlinkSuffix (default null) and an optional userInvolvement (default "none"):
   - 1. If subject cannot navigate, then return.
   - 2. If subject's node document's active sandboxing flag set has the sandboxed downloads browsing context flag set, then return.
   - 3. Let urlString be the result of encoding-parsing-and-serializing a URL given subject's href attribute value, relative to subject's node document.
@@ -266,8 +282,9 @@ Status: unreviewed
   - 8. Let request be a new request whose URL is urlString, client is entry settings object, initiator is "download", destination is the empty string, and whose use-URL-credentials flag is set.
   - 9. Fetch request, with processResponse set to the following steps given response response:
     - 9a. Handle as a download response with subject's node navigable and null.
+  > n/a: the host downloads.
 
-- [ ] [handle as a download](https://html.spec.whatwg.org/#handle-as-a-download) — To handle as a download a response response with a navigable navigable and a navigation ID or null navigationId:
+- [x] [handle as a download](https://html.spec.whatwg.org/#handle-as-a-download) — To handle as a download a response response with a navigable navigable and a navigation ID or null navigationId:
   - 1. Let suggestedFilename be the result of getting the suggested filename for response.
   - 2. Let download behavior be the result of WebDriver BiDi download will begin with navigable and a new WebDriver BiDi navigation status whose id is navigationId, status is "pending", url is response's URL, suggestedFilename is suggestedFilename, and downloadResponse is response.
   - 3. If download behavior is not null and download behavior's allowed is false:
@@ -280,8 +297,9 @@ Status: unreviewed
       - 5b.i. Invoke WebDriver BiDi download end with navigable and a new WebDriver BiDi navigation status whose id is navigationId, status is "canceled", url is response's URL.
       - 5b.ii. Return.
     - 5c. When the download completes successfully, invoke WebDriver BiDi download end with navigable and a new WebDriver BiDi navigation status whose id is navigationId, status is "complete", downloadedFilepath is an absolute path of the downloaded file if available, otherwise null, url is response's URL, and downloadResponse is response.
+  > n/a: the host downloads.
 
-- [ ] [get the suggested filename](https://html.spec.whatwg.org/#getting-the-suggested-filename) — To get the suggested filename for a response response:
+- [x] [get the suggested filename](https://html.spec.whatwg.org/#getting-the-suggested-filename) — To get the suggested filename for a response response:
   - 1. Let filename be the undefined value.
   - 2. If response has a `Content-Disposition` header, that header specifies the attachment disposition type, and the header includes filename information, then let filename have the value specified by the header, and jump to the step labeled sanitize below. [RFC6266]
   - 3. Let interface origin be the origin of the Document in which the download or navigate action resulting in the download was initiated, if any.
@@ -302,12 +320,13 @@ Status: unreviewed
   - 18. If claimed type and named type are the same type (i.e., the type given by response's Content-Type metadata is consistent with the type given by filename's extension), then return filename as the filename.
   - 19. If the claimed type is known, then alter filename to add an extension corresponding to claimed type. Otherwise, if named type is known to be potentially dangerous (e.g. it will be treated by the platform conventions as a native executable, shell script, HTML application, or executable-macro-capable document), then optionally alter filename to add a known-safe extension (e.g. ".txt").
   - 20. Return filename as the filename.
+  > n/a: the host downloads.
 
 #### [4.6.7 Hyperlink auditing](https://html.spec.whatwg.org/#hyperlink-auditing)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 
-- [ ] [If a hyperlink created by an a or area element has a ping attribute, and the us…](https://html.spec.whatwg.org/#hyperlink-auditing) — If a hyperlink created by an a or area element has a ping attribute, and the user follows the hyperlink, and the value of the element's href attribute can be parsed, relative to the element's node document, without failure, then the user agent must take the ping attribute's value, split that string…
+- [x] [If a hyperlink created by an a or area element has a ping attribute, and the us…](https://html.spec.whatwg.org/#hyperlink-auditing) — If a hyperlink created by an a or area element has a ping attribute, and the user follows the hyperlink, and the value of the element's href attribute can be parsed, relative to the element's node document, without failure, then the user agent must take the ping attribute's value, split that string…
   - 1. If ping URL's scheme is not an HTTP(S) scheme, then return.
   - 2. Optionally, return. (For example, the user agent might wish to ignore any or all ping URLs in accordance with the user's expressed preferences.)
   - 3. Let settingsObject be the element's node document's relevant settings object.
@@ -317,35 +336,37 @@ Status: unreviewed
 
 ##### [4.6.7.1 The `Ping-From` and `Ping-To` headers](https://html.spec.whatwg.org/#the-ping-headers)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 <!-- definitions: ping-from ping-to -->
 
 #### [4.6.8 Link types](https://html.spec.whatwg.org/#linkTypes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLLinkElement` recognises only `stylesheet` and `alternate` (see `KNOWN-ISSUES.md`); `<a>` and `<area>` read `noopener`, `noreferrer` and `opener`.
 <!-- definitions: body-ok -->
 
 ##### [4.6.8.1 Link type "alternate"](https://html.spec.whatwg.org/#rel-alternate)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLLinkElement::IsAlternate`: an alternative stylesheet, applied when enabled. Other alternates are only for authors.
 
 ##### [4.6.8.2 Link type "author"](https://html.spec.whatwg.org/#link-type-author)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.3 Link type "bookmark"](https://html.spec.whatwg.org/#link-type-bookmark)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.4 Link type "canonical"](https://html.spec.whatwg.org/#link-type-canonical)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.5 Link type "dns-prefetch"](https://html.spec.whatwg.org/#link-type-dns-prefetch)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 
-- [ ] [The fetch and process the linked resource steps for this type of linked resourc…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource steps for this type of linked resource, given a link element el, are:
+- [x] [The fetch and process the linked resource steps for this type of linked resourc…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource steps for this type of linked resource, given a link element el, are:
   - 1. Let url be the result of encoding-parsing a URL given el's href attribute's value, relative to el's node document.
   - 2. If url is failure, then return.
   - 3. Let partitionKey be the result of determining the network partition key given el's node document's relevant settings object.
@@ -353,9 +374,9 @@ Status: unreviewed
 
 ##### [4.6.8.6 Link type "expect"](https://html.spec.whatwg.org/#link-type-expect)
 
-Status: unreviewed
+Status: n/a (not implemented; see `KNOWN-ISSUES.md`)
 
-- [ ] [process internal resource link](https://html.spec.whatwg.org/#process-internal-resource-link) — To process internal resource link given a link element el, run these steps:
+- [x] [process internal resource link](https://html.spec.whatwg.org/#process-internal-resource-link) — To process internal resource link given a link element el, run these steps:
   - 1. Let doc be el's node document.
   - 2. Let url be the result of encoding-parsing a URL given el's href attribute's value, relative to doc.
   - 3. If this fails, or if url does not equal doc's URL with exclude fragments set to true, then unblock rendering on el and return.
@@ -363,27 +384,27 @@ Status: unreviewed
   - 5. If all of the following are true: doc's current document readiness is "loading";; el creates an internal resource link;; el is browsing-context connected;; el's rel attribute contains expect;; el is potentially render-blocking;; el's media attribute matches the environment; and; indicatedElement is not an element, or is on a stack of open elements of an HTML parser whose associated Document is do…
   - 6. Otherwise, unblock rendering on el.
 
-- [ ] [process internal resource links](https://html.spec.whatwg.org/#process-internal-resource-links) — To process internal resource links given a Document doc:
+- [x] [process internal resource links](https://html.spec.whatwg.org/#process-internal-resource-links) — To process internal resource links given a Document doc:
   - 1. For each expect link element link in doc's render-blocking element set, process link.
 
-- [ ] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#process-internal-resource-links) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used to ensure expect link elements respond to dynamic id and name changes:
+- [x] [The following attribute change steps, given element, localName, oldValue, value…](https://html.spec.whatwg.org/#process-internal-resource-links) — The following attribute change steps, given element, localName, oldValue, value, and namespace, are used to ensure expect link elements respond to dynamic id and name changes:
   - 1. If namespace is not null, then return.
   - 2. If element is in a stack of open elements of an HTML parser, then return.
   - 3. If any of the following is true: localName is id; or; localName is name and element is an a element, then process internal resource links given element's node document.
 
 ##### [4.6.8.7 Link type "external"](https://html.spec.whatwg.org/#link-type-external)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.8 Link type "help"](https://html.spec.whatwg.org/#link-type-help)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.9 Link type "icon"](https://html.spec.whatwg.org/#rel-icon)
 
-Status: unreviewed
+Status: n/a (Booey has no browser user interface)
 
-- [ ] [Other keywords must be further parsed as follows to determine what they represe…](https://html.spec.whatwg.org/#attr-link-sizes-any) — Other keywords must be further parsed as follows to determine what they represent:
+- [x] [Other keywords must be further parsed as follows to determine what they represe…](https://html.spec.whatwg.org/#attr-link-sizes-any) — Other keywords must be further parsed as follows to determine what they represent:
   - 1. If the keyword doesn't contain exactly one U+0078 LATIN SMALL LETTER X or U+0058 LATIN CAPITAL LETTER X character, then this keyword doesn't represent anything. Return for that keyword.
   - 2. Let width string be the string before the "x" or "X".
   - 3. Let height string be the string after the "x" or "X".
@@ -392,24 +413,24 @@ Status: unreviewed
   - 6. Apply the rules for parsing non-negative integers to height string to obtain height.
   - 7. The keyword represents that the resource contains a bitmap icon with a width of width device pixels and a height of height device pixels.
 
-- [ ] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
+- [x] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
   - 1. Set request's destination to "image".
   - 2. Return true.
 
-- [ ] [In the absence of a link with the icon keyword, for Document objects whose URL'…](https://html.spec.whatwg.org/#attr-link-sizes-any) — In the absence of a link with the icon keyword, for Document objects whose URL's scheme is an HTTP(S) scheme, user agents may instead run these steps:
+- [x] [In the absence of a link with the icon keyword, for Document objects whose URL'…](https://html.spec.whatwg.org/#attr-link-sizes-any) — In the absence of a link with the icon keyword, for Document objects whose URL's scheme is an HTTP(S) scheme, user agents may instead run these steps:
   - 1. Let request be a new request whose URL is the URL record obtained by resolving the URL "/favicon.ico" against the Document object's URL, client is the Document object's relevant settings object, destination is "image", credentials mode is "include", and whose use-URL-credentials flag is set.
   - 2. Fetch request, with processResponse set to the following steps given response response:
     - 2a. Use response's unsafe response as an icon as if it had been declared using the icon keyword.
 
 ##### [4.6.8.10 Link type "license"](https://html.spec.whatwg.org/#link-type-license)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.11 Link type "manifest"](https://html.spec.whatwg.org/#link-type-manifest)
 
-Status: unreviewed
+Status: n/a (no application manifests)
 
-- [ ] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
+- [x] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
   - 1. Let navigable be el's node document's node navigable.
   - 2. If navigable is null, then return false.
   - 3. If navigable is not a top-level traversable, then return false.
@@ -419,7 +440,7 @@ Status: unreviewed
   - 7. Set request's credentials mode to the CORS settings attribute credentials mode for el's crossorigin content attribute.
   - 8. Return true.
 
-- [ ] [To process this type of linked resource given a link element el, boolean succes…](https://html.spec.whatwg.org/#link-type-manifest) — To process this type of linked resource given a link element el, boolean success, response response, and byte sequence bodyBytes:
+- [x] [To process this type of linked resource given a link element el, boolean succes…](https://html.spec.whatwg.org/#link-type-manifest) — To process this type of linked resource given a link element el, boolean success, response response, and byte sequence bodyBytes:
   - 1. If response's Content-Type metadata is not a JSON MIME type, then set success to false.
   - 2. If success is true:
     - 2a. Let document URL be el's node document's URL.
@@ -429,10 +450,10 @@ Status: unreviewed
 
 ##### [4.6.8.12 Link type "modulepreload"](https://html.spec.whatwg.org/#link-type-modulepreload)
 
-Status: unreviewed
+Status: n/a (no scripting)
 <!-- definitions: module-preload-destination -->
 
-- [ ] [The fetch and process the linked resource algorithm for modulepreload links, gi…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource algorithm for modulepreload links, given a link element el, is as follows:
+- [x] [The fetch and process the linked resource algorithm for modulepreload links, gi…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource algorithm for modulepreload links, given a link element el, is as follows:
   - 1. If el's href attribute's value is the empty string, then return.
   - 2. Let destination be the current state of el's as attribute (a destination), or "script" if it is in no state.
   - 3. If destination is not a module preload destination, then queue an element task on the networking task source given el to fire an event named error at el, and return.
@@ -452,29 +473,32 @@ Status: unreviewed
 
 ##### [4.6.8.13 Link type "nofollow"](https://html.spec.whatwg.org/#link-type-nofollow)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.14 Link type "noopener"](https://html.spec.whatwg.org/#link-type-noopener)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HyperlinkAlgorithms::GetNoopener`.
 
 ##### [4.6.8.15 Link type "noreferrer"](https://html.spec.whatwg.org/#link-type-noreferrer)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HyperlinkAlgorithms::GetNoopener` and `HyperlinkReferrerPolicy`.
 
 ##### [4.6.8.16 Link type "opener"](https://html.spec.whatwg.org/#link-type-opener)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HyperlinkAlgorithms::GetNoopener`.
 
 ##### [4.6.8.17 Link type "pingback"](https://html.spec.whatwg.org/#link-type-pingback)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.18 Link type "preconnect"](https://html.spec.whatwg.org/#link-type-preconnect)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 
-- [ ] [preconnect](https://html.spec.whatwg.org/#preconnect) — To preconnect given a link processing options options:
+- [x] [preconnect](https://html.spec.whatwg.org/#preconnect) — To preconnect given a link processing options options:
   - 1. If options's href is an empty string, return.
   - 2. Let url be the result of encoding-parsing a URL given options's href, relative to options's base URL.
   - 3. If url is failure, then return.
@@ -486,9 +510,9 @@ Status: unreviewed
 
 ##### [4.6.8.19 Link type "prefetch"](https://html.spec.whatwg.org/#link-type-prefetch)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 
-- [ ] [The fetch and process the linked resource algorithm for prefetch links, given a…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource algorithm for prefetch links, given a link element el, is as follows:
+- [x] [The fetch and process the linked resource algorithm for prefetch links, given a…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource algorithm for prefetch links, given a link element el, is as follows:
   - 1. If el's href attribute's value is the empty string, then return.
   - 2. Let options be the result of creating link options from el.
   - 3. Let request be the result of creating a link request given options.
@@ -501,10 +525,10 @@ Status: unreviewed
 
 ##### [4.6.8.20 Link type "preload"](https://html.spec.whatwg.org/#link-type-preload)
 
-Status: unreviewed
+Status: n/a (no network loads; see `KNOWN-ISSUES.md`)
 <!-- definitions: map-of-preloaded-resources preload-key preload-url preload-key-destination preload-mode preload-credentials-mode preload-entry preload-integrity-metadata preload-response preload-on-response-available preload-destination -->
 
-- [ ] [consume a preloaded resource](https://html.spec.whatwg.org/#consume-a-preloaded-resource) — To consume a preloaded resource for Window window, given a URL url, a string destination, a string mode, a string credentialsMode, a string integrityMetadata, and onResponseAvailable, which is an algorithm accepting a response:
+- [x] [consume a preloaded resource](https://html.spec.whatwg.org/#consume-a-preloaded-resource) — To consume a preloaded resource for Window window, given a URL url, a string destination, a string mode, a string credentialsMode, a string integrityMetadata, and onResponseAvailable, which is an algorithm accepting a response:
   - 1. Let key be a preload key whose URL is url, destination is destination, mode is mode, and credentials mode is credentialsMode.
   - 2. Let preloads be window's associated Document's map of preloaded resources.
   - 3. If key does not exist in preloads, then return false.
@@ -517,7 +541,7 @@ Status: unreviewed
   - 10. Otherwise, call onResponseAvailable with entry's response.
   - 11. Return true.
 
-- [ ] [matches](https://html.spec.whatwg.org/#match-preload-type) — For the purposes of this section, a string type matches a preload destination destination if the following algorithm returns true:
+- [x] [matches](https://html.spec.whatwg.org/#match-preload-type) — For the purposes of this section, a string type matches a preload destination destination if the following algorithm returns true:
   - 1. If type is an empty string, then return true.
   - 2. If destination is "fetch", then return true.
   - 3. Let mimeTypeRecord be the result of parsing type.
@@ -526,13 +550,13 @@ Status: unreviewed
   - 6. If any of the following are true: destination is "script" and mimeTypeRecord is a JavaScript MIME type;; destination is "image" and mimeTypeRecord is an image MIME type;; destination is "font" and mimeTypeRecord is a font MIME type;; destination is "style" and mimeTypeRecord's essence is text/css; or; destination is "track" and mimeTypeRecord's essence is text/vtt, then return true.
   - 7. Return false.
 
-- [ ] [create a preload key](https://html.spec.whatwg.org/#create-a-preload-key) — To create a preload key for a request request, return a new preload key whose URL is request's URL, destination is request's destination, mode is request's mode, and credentials mode is request's credentials mode.
+- [x] [create a preload key](https://html.spec.whatwg.org/#create-a-preload-key) — To create a preload key for a request request, return a new preload key whose URL is request's URL, destination is request's destination, mode is request's mode, and credentials mode is request's credentials mode.
 
-- [ ] [translate a preload destination](https://html.spec.whatwg.org/#translate-a-preload-destination) — To translate a preload destination given a string destination:
+- [x] [translate a preload destination](https://html.spec.whatwg.org/#translate-a-preload-destination) — To translate a preload destination given a string destination:
   - 1. If destination is not a preload destination, then return null.
   - 2. Return the result of translating destination.
 
-- [ ] [preload](https://html.spec.whatwg.org/#preload) — To preload given a link processing options options and an optional processResponse, which is an algorithm accepting a response:
+- [x] [preload](https://html.spec.whatwg.org/#preload) — To preload given a link processing options options and an optional processResponse, which is an algorithm accepting a response:
   - 1. If options's type doesn't match options's destination, then return.
   - 2. If options's destination is "image" and options's source set is not null, then set options's href to the result of selecting an image source from options's source set.
   - 3. Let request be the result of creating a link request given options.
@@ -555,7 +579,7 @@ Status: unreviewed
     - 12b. Set document's map of preloaded resources[key] to entry.
   - 13. If options's document is null, then set options's on document ready to commit. Otherwise, call commit with options's document.
 
-- [ ] [The fetch and process the linked resource steps for this type of linked resourc…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource steps for this type of linked resource, given a link element el, are:
+- [x] [The fetch and process the linked resource steps for this type of linked resourc…](https://html.spec.whatwg.org/#fetch-and-process-the-linked-resource) — The fetch and process the linked resource steps for this type of linked resource, given a link element el, are:
   - 1. Update the source set for el.
   - 2. Let options be the result of creating link options from el.
   - 3. Let destination be the result of translating the keyword representing the state of el's as attribute.
@@ -566,24 +590,25 @@ Status: unreviewed
 
 ##### [4.6.8.21 Link type "privacy-policy"](https://html.spec.whatwg.org/#link-type-privacy-policy)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.22 Link type "search"](https://html.spec.whatwg.org/#link-type-search)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.23 Link type "stylesheet"](https://html.spec.whatwg.org/#link-type-stylesheet)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLLinkElement::Process` (the fetch setup steps) and `SetCSSStyleSheet` with `NotifyLoadedSheetAndAllCriticalSubresources` (processing it). There's no Content-Type to check, and no scripts for script-blocking style sheets to block.
 
-- [ ] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
+- [x] [The linked resource fetch setup steps for this type of linked resource, given a…](https://html.spec.whatwg.org/#linked-resource-fetch-setup-steps) — The linked resource fetch setup steps for this type of linked resource, given a link element el and request request, are:
   - 1. If el's disabled attribute is set, then return false.
   - 2. If el contributes a script-blocking style sheet, append el to its node document's script-blocking style sheet set.
   - 3. If el's media attribute's value matches the environment and el is potentially render-blocking, then block rendering on el.
   - 4. If el is currently render-blocking, then set request's render-blocking to true.
   - 5. Return true.
 
-- [ ] [To process this type of linked resource given a link element el, boolean succes…](https://html.spec.whatwg.org/#the-link-is-an-alternative-stylesheet) — To process this type of linked resource given a link element el, boolean success, response response, and byte sequence bodyBytes:
+- [x] [To process this type of linked resource given a link element el, boolean succes…](https://html.spec.whatwg.org/#the-link-is-an-alternative-stylesheet) — To process this type of linked resource given a link element el, boolean success, response response, and byte sequence bodyBytes:
   - 1. If the resource's Content-Type metadata is not text/css, then set success to false.
   - 2. If el no longer creates an external resource link that contributes to the styling processing model, or if, since the resource in question was fetched, it has become appropriate to fetch it again:
     - 2a. Remove el from el's node document's script-blocking style sheet set.
@@ -602,25 +627,25 @@ Status: unreviewed
 
 ##### [4.6.8.24 Link type "tag"](https://html.spec.whatwg.org/#link-type-tag)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.25 Link Type "terms-of-service"](https://html.spec.whatwg.org/#link-type-terms-of-service)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.26 Sequential link types](https://html.spec.whatwg.org/#sequential-link-types)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ###### [4.6.8.26.1 Link type "next"](https://html.spec.whatwg.org/#link-type-next)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ###### [4.6.8.26.2 Link type "prev"](https://html.spec.whatwg.org/#link-type-prev)
 
-Status: unreviewed
+Status: n/a (author conformance)
 
 ##### [4.6.8.27 Other link types](https://html.spec.whatwg.org/#other-link-types)
 
-Status: unreviewed
+Status: n/a (author conformance)
 <!-- definitions: concept-rel-extensions -->

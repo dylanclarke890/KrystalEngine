@@ -7,6 +7,8 @@
 #include "Krystal.Booey/DOM/Text.hpp"
 #include "Krystal.Booey/HTML/HTMLAreaElement.hpp"
 #include "Krystal.Booey/HTML/HTMLImageElement.hpp"
+#include "Krystal.Booey/Page/EventHandler.hpp"
+#include "Krystal.Booey/Page/LocalFrame.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -148,6 +150,56 @@ namespace krys::boo::html::tests
 
     Click(fixture.ById(u8"nohref"));
     CHECK(fixture.Navigations().size() == 1);
+  }
+
+  TEST_CASE("HTMLAnchorElement: following a link to its URL with a suffix and its opener",
+            "[HTML][HTMLAnchorElement][html:the-a-element][html:following-hyperlinks-2]"
+            "[html:get-an-element's-noopener][html:hyperlink-referrer-policy]")
+  {
+    NavigationFixture fixture(
+      u8R"(<style>body { margin: 0 } img { display: block; width: 100px; height: 50px }</style>
+      <a id=map href="map.html#f"><img id=image ismap></a><a id=bad href="http://[bad">Bad</a>
+      <a id=opener href="o.html" target=_BLANK rel=opener>Opener</a>
+      <a id=noreferrer href="o.html" rel="noreferrer">No referrer</a>)");
+    (void)fixture.Document->UpdateLayoutIgnorePendingStylesheets();
+
+    SECTION("a URL that doesn't parse isn't followed")
+    {
+      Click(fixture.ById(u8"bad"));
+      CHECK(fixture.Navigations().empty());
+    }
+
+    SECTION("a click on a server-side image map adds where it clicked, after the fragment")
+    {
+      auto event = [](PlatformEvent::Type type)
+      {
+        return PlatformMouseEvent(DoublePoint(30, 10), DoublePoint(30, 10), MouseButton::Left, type, 1, {},
+                                  MonotonicTime::Now());
+      };
+      auto &handler = fixture.Frame->GetEventHandler();
+      (void)handler.HandleMousePressEvent(event(PlatformEvent::Type::MousePressed));
+      (void)handler.HandleMouseReleaseEvent(event(PlatformEvent::Type::MouseReleased));
+      REQUIRE(fixture.Navigations().size() == 1);
+      CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/map.html#f?30,10");
+    }
+
+    SECTION("an untrusted click on a server-side image map adds 0,0")
+    {
+      Click(fixture.ById(u8"image"));
+      REQUIRE(fixture.Navigations().size() == 1);
+      CHECK(fixture.Navigations()[0].URL == "https://example.com/dir/map.html#f?0,0");
+    }
+
+    SECTION("rel=opener keeps the opener of a _blank target, and rel=noreferrer drops the referrer")
+    {
+      Click(fixture.ById(u8"opener"));
+      REQUIRE(fixture.Navigations().size() == 1);
+      CHECK(fixture.Navigations()[0].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Allow);
+
+      Click(fixture.ById(u8"noreferrer"));
+      REQUIRE(fixture.Navigations().size() == 2);
+      CHECK(fixture.Navigations()[1].Action.GetNewFrameOpenerPolicy() == NewFrameOpenerPolicy::Suppress);
+    }
   }
 
   TEST_CASE("HTMLAnchorElement: the rest of its interface", "[HTML][HTMLAnchorElement][html:dom-a-text]")

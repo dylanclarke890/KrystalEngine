@@ -144,12 +144,6 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-hyperlink-href
     KRYS_NODISCARD dom::USVString ToString() const noexcept;
 
-    using URLDecomposition::Protocol;
-
-    /// @brief Changes the link's scheme, unless its URL is invalid.
-    /// @see https://html.spec.whatwg.org/#dom-hyperlink-protocol
-    void Protocol(dom::DOMStringView value) noexcept;
-
 #pragma endregion
 
 #pragma region HTMLAreaElement Obsolete members - https://html.spec.whatwg.org/#HTMLAreaElement-partial

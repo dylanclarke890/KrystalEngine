@@ -29,12 +29,7 @@ namespace krys::boo::html
 
   void HTMLAreaElement::ActivationBehavior(dom::Event &event) noexcept
   {
-    // If element has no href attribute, then return.
-    if (!css::IsLink(*this))
-    {
-      return;
-    }
-    HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
+    HyperlinkAlgorithms::ActivationBehavior(*this, event);
   }
 
   void HTMLAreaElement::DefaultEventHandler(dom::Event &event) noexcept
@@ -378,15 +373,6 @@ namespace krys::boo::html
   dom::USVString HTMLAreaElement::ToString() const noexcept
   {
     return Href();
-  }
-
-  void HTMLAreaElement::Protocol(dom::DOMStringView value) noexcept
-  {
-    if (!FullURL().IsValid())
-    {
-      return;
-    }
-    URLDecomposition::Protocol(value);
   }
 
   url::URL HTMLAreaElement::FullURL() const noexcept

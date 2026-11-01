@@ -65,7 +65,7 @@ What's out of scope by choice (scripting, the network, frames, workers, accessib
 - `<select>`: list boxes have no pan scrolling, there is no customizable `<select>` (`appearance: base-select`), and option changes are not reported to the chrome client (FIXME in `HTMLSelectElement.cpp`).
 - Fieldset legends are not placed in the border (see *Layout*).
 - `<img>` lacks form association, `decode()` and the `Image()` constructor (FIXMEs in `HTMLImageElement.hpp`), and doesn't select a source again when media queries change (FIXME in `HTMLImageElement.cpp`). `HTMLImageLoader` fires no events for video posters and has no `<object>` fallback (FIXMEs); `ImageLoader`'s reuse of available images has no preloads or origins (FIXMEs).
-- `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no preloads, icons, manifests, integrity, CORS, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
+- `HTMLLinkElement` recognises only `rel=stylesheet` and `alternate`: no `expect` (internal resource links that block rendering until an element is parsed; FIXME in `HTMLLinkElement.cpp`), preloads, icons, manifests, integrity, CORS, referrer policies or priorities (no `LinkRelAttribute`/`LinkLoader`).
 - `<a ping>`, `opener` and referrers are not implemented; the `download` attribute is only passed to the host. `<object usemap>` is not supported.
 - `<marquee>`'s `hspace`, `vspace`, `loop`, `scrollAmount`, `scrollDelay`, `trueSpeed`, `start()` and `stop()` are not implemented, and marquees don't scroll (FIXME in `HTMLMarqueeElement.hpp`).
 - `autofocus` insertion steps run only for HTML elements, not SVG or MathML elements.

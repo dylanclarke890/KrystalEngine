@@ -10,7 +10,12 @@ namespace krys::boo::html::tests
   using boo::tests::NavigationFixture;
   using boo::tests::Str;
 
-  TEST_CASE("HTMLHyperlinkElementUtils: the parts of a link's URL", "[HTML][URLDecomposition]")
+  TEST_CASE("HTMLHyperlinkElementUtils: the parts of a link's URL",
+            "[HTML][URLDecomposition][html:dom-hyperlink-origin]"
+            "[html:dom-hyperlink-protocol][html:dom-hyperlink-username][html:dom-hyperlink-password]"
+            "[html:dom-hyperlink-host][html:dom-hyperlink-hostname]"
+            "[html:dom-hyperlink-port][html:dom-hyperlink-pathname][html:dom-hyperlink-search]"
+            "[html:dom-hyperlink-hash][html:reinitialise-url][html:update-href]")
   {
     NavigationFixture fixture(u8R"html(<a id=relative href=" ../other/file.html?q=1#frag ">x</a>
       <a id=full href="https://user:pw@host.test:8080/p">y</a><a id=none>z</a><a id=bad href="http://[bad">w</a>
@@ -55,7 +60,12 @@ namespace krys::boo::html::tests
     CHECK(Str(fixture.Get<HTMLAnchorElement>(u8"js").Protocol()) == "javascript:");
   }
 
-  TEST_CASE("HTMLHyperlinkElementUtils: changing the parts of a link's URL", "[HTML][URLDecomposition]")
+  TEST_CASE("HTMLHyperlinkElementUtils: changing the parts of a link's URL",
+            "[HTML][URLDecomposition][html:dom-hyperlink-origin]"
+            "[html:dom-hyperlink-protocol][html:dom-hyperlink-username][html:dom-hyperlink-password]"
+            "[html:dom-hyperlink-host][html:dom-hyperlink-hostname]"
+            "[html:dom-hyperlink-port][html:dom-hyperlink-pathname][html:dom-hyperlink-search]"
+            "[html:dom-hyperlink-hash][html:reinitialise-url][html:update-href]")
   {
     NavigationFixture fixture(
       u8R"(<a id=a href="https://example.com/p?q#h">x</a><a id=bad href="http://[bad">w</a>
@@ -124,6 +134,90 @@ namespace krys::boo::html::tests
     a.Href(dom::USVString(u8"rel/ative"));
     CHECK(href() == "rel/ative");
     CHECK(Str(a.Href()) == "https://example.com/dir/rel/ative");
+  }
+
+  TEST_CASE("HTMLHyperlinkElementUtils: a null URL, and a URL with an opaque path",
+            "[HTML][URLDecomposition][html:dom-hyperlink-origin]"
+            "[html:dom-hyperlink-protocol][html:dom-hyperlink-username][html:dom-hyperlink-password]"
+            "[html:dom-hyperlink-host][html:dom-hyperlink-hostname]"
+            "[html:dom-hyperlink-port][html:dom-hyperlink-pathname][html:dom-hyperlink-search]"
+            "[html:dom-hyperlink-hash][html:reinitialise-url][html:update-href]")
+  {
+    NavigationFixture fixture(
+      u8R"(<a id=none>x</a><a id=bad href="http://[bad">w</a><a id=mail href="mailto:me@x.test">m</a>
+      <a id=foo href="foo://host/p">f</a><a id=empty href="https://example.com/p?#">e</a>)");
+    auto attr = [&](const char8_t *id)
+    {
+      auto &e = fixture.Get<HTMLAnchorElement>(id);
+      auto v = e.GetAttribute(u8"href");
+      return v ? Str(*v) : std::string("(null)");
+    };
+    auto &none = fixture.Get<HTMLAnchorElement>(u8"none");
+    auto &bad = fixture.Get<HTMLAnchorElement>(u8"bad");
+    auto &mail = fixture.Get<HTMLAnchorElement>(u8"mail");
+    auto &foo = fixture.Get<HTMLAnchorElement>(u8"foo");
+
+    // An invalid URL is a null one, with empty parts.
+    CHECK(Str(bad.Protocol()) == ":");
+    CHECK(Str(bad.Username()) == "");
+    CHECK(Str(bad.Host()) == "");
+    CHECK(Str(bad.Hostname()) == "");
+    CHECK(Str(bad.Port()) == "");
+    CHECK(Str(bad.Pathname()) == "");
+    CHECK(Str(bad.Search()) == "");
+    CHECK(Str(bad.Hash()) == "");
+    CHECK(Str(none.Pathname()) == "");
+    CHECK(Str(mail.Pathname()) == "me@x.test");
+    CHECK(Str(mail.Host()) == "");
+
+    // Setting a part of a null URL does nothing, without an href or with one that doesn't parse.
+    none.Hash(u8"x");
+    CHECK(attr(u8"none") == "(null)");
+    none.Search(u8"x");
+    CHECK(attr(u8"none") == "(null)");
+    none.Pathname(u8"x");
+    CHECK(attr(u8"none") == "(null)");
+    bad.Hash(u8"x");
+    CHECK(attr(u8"bad") == "http://[bad");
+    bad.Search(u8"x");
+    CHECK(attr(u8"bad") == "http://[bad");
+    bad.Pathname(u8"x");
+    CHECK(attr(u8"bad") == "http://[bad");
+    bad.Host(u8"x");
+    CHECK(attr(u8"bad") == "http://[bad");
+    // An opaque path has no host to set, but has a fragment.
+    mail.Host(u8"h.test");
+    CHECK(attr(u8"mail") == "mailto:me@x.test");
+    mail.Hostname(u8"h.test");
+    CHECK(attr(u8"mail") == "mailto:me@x.test");
+    mail.Hash(u8"f");
+    CHECK(attr(u8"mail") == "mailto:me@x.test#f");
+    // A URL that isn't special can have an empty host, but no port without one.
+    foo.Hostname(u8"");
+    CHECK(attr(u8"foo") == "foo:///p");
+    foo.Port(u8"");
+    CHECK(attr(u8"foo") == "foo:///p");
+    // An empty query or fragment reads as nothing, and setting one keeps it.
+    auto &empty = fixture.Get<HTMLAnchorElement>(u8"empty");
+    CHECK(Str(empty.Search()) == "");
+    CHECK(Str(empty.Hash()) == "");
+    empty.Search(u8"?");
+    CHECK(attr(u8"empty") == "https://example.com/p?#");
+    empty.Hash(u8"#");
+    CHECK(attr(u8"empty") == "https://example.com/p?#");
+    // The parts are percent-encoded; an invalid port or scheme is ignored, and a host stops at a path.
+    empty.Pathname(u8"a b");
+    CHECK(attr(u8"empty") == "https://example.com/a%20b?#");
+    empty.Search(u8"a b");
+    CHECK(attr(u8"empty") == "https://example.com/a%20b?a%20b#");
+    empty.Hash(u8"a b");
+    CHECK(attr(u8"empty") == "https://example.com/a%20b?a%20b#a%20b");
+    empty.Port(u8"99999");
+    CHECK(attr(u8"empty") == "https://example.com/a%20b?a%20b#a%20b");
+    empty.Protocol(u8"foo");
+    CHECK(attr(u8"empty") == "https://example.com/a%20b?a%20b#a%20b");
+    empty.Host(u8"h.test:5/x");
+    CHECK(attr(u8"empty") == "https://h.test:5/a%20b?a%20b#a%20b");
   }
 
   TEST_CASE("URLDecomposition::SerializedOrigin", "[HTML][URLDecomposition]")

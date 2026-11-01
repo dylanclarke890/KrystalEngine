@@ -17,35 +17,20 @@ namespace krys::boo::html
 {
   namespace
   {
-    /// @brief The `?x,y` a link around a server-side image map is followed with: where @p event clicked in
-    /// the image.
-    void AppendServerMapMousePosition(utf8_string &url, dom::Event &event) noexcept
+    /// @brief Where @p event clicked in @p image, in CSS pixels from its top left corner.
+    KRYS_NODISCARD Maybe<FloatPoint> ServerMapClickPosition(const HTMLImageElement &image,
+                                                            const dom::Event &event) noexcept
     {
       auto *mouseEvent = DynamicDowncast<dom::MouseEvent>(event);
-      if (!mouseEvent)
+      auto *renderer = DynamicDowncast<RenderImage>(image.Renderer());
+      if (!mouseEvent || !renderer)
       {
-        return;
-      }
-
-      auto *node = DynamicDowncast<dom::Node>(mouseEvent->Target().get());
-      auto *imageElement = node ? DynamicDowncast<HTMLImageElement>(*node) : nullptr;
-      if (!imageElement || !imageElement->IsServerMap())
-      {
-        return;
-      }
-
-      auto *renderer = DynamicDowncast<RenderImage>(imageElement->Renderer());
-      if (!renderer)
-      {
-        return;
+        return null;
       }
 
       // FIXME: This should probably pass UseTransforms in the EnumSet<MapCoordinatesMode>.
-      auto absolutePosition = renderer->AbsoluteToLocal(
+      return renderer->AbsoluteToLocal(
         FloatPoint(static_cast<float>(mouseEvent->PageX()), static_cast<float>(mouseEvent->PageY())));
-      auto position =
-        std::format("?{},{}", std::lround(absolutePosition.X()), std::lround(absolutePosition.Y()));
-      url.append(position.begin(), position.end());
     }
 
     /// @brief The target @p target, unless it has dangling markup (a newline and a `<`), which makes it
@@ -127,50 +112,161 @@ namespace krys::boo::html
     return false;
   }
 
-  void HyperlinkAlgorithms::FollowTheHyperlink(HTMLElement &element, dom::Event &event) noexcept
+  bool HyperlinkAlgorithms::GetNoopener(const HTMLElement &element, const url::URL &url,
+                                        dom::DOMStringView target) noexcept
+  {
+    // 1. If element's link types include the noopener or noreferrer keyword, then return true.
+    if (HasRel(element, u8"noopener") || HasRel(element, u8"noreferrer"))
+    {
+      return true;
+    }
+
+    // 2. If element's link types do not include the opener keyword and target is an ASCII case-insensitive
+    //    match for "_blank", then return true.
+    // (Not for a javascript: URL, which opens no document.)
+    if (!HasRel(element, u8"opener") && text::IsASCIICaselessEqual(target, utf8_stringview(u8"_blank"))
+        && !url.ProtocolIsJavaScript())
+    {
+      return true;
+    }
+
+    // 3. (Skipped: there's no blob URL store, so no URL has a blob URL entry.)
+    // 4. Return false.
+    return false;
+  }
+
+  void HyperlinkAlgorithms::ActivationBehavior(HTMLElement &element, dom::Event &event) noexcept
+  {
+    // 1. If element has no href attribute, then return.
+    if (!element.HasAttribute(u8"href"))
+    {
+      return;
+    }
+
+    // 2. Let hyperlinkSuffix be null.
+    Maybe<utf8_string> hyperlinkSuffix;
+
+    // 3. If element is an a element, and event's target is an img with an ismap attribute specified:
+    auto *targetNode = DynamicDowncast<dom::Node>(event.Target().get());
+    auto *image = targetNode ? DynamicDowncast<HTMLImageElement>(*targetNode) : nullptr;
+    if (Is<HTMLAnchorElement>(element) && image && image->HasAttribute(u8"ismap"))
+    {
+      // 3a. Let x and y be 0.
+      long x = 0;
+      long y = 0;
+
+      // 3b. If event's isTrusted attribute is initialized to true, then set x to the distance in CSS pixels
+      // from
+      //     the left edge of the image to the location of the click, and set y to the distance in CSS pixels
+      //     from the top edge of the image to the location of the click.
+      if (event.IsTrusted())
+      {
+        if (auto position = ServerMapClickPosition(*image, event))
+        {
+          x = std::lround(position->X());
+          y = std::lround(position->Y());
+        }
+      }
+
+      // 3c. If x is negative, set x to 0.
+      // 3d. If y is negative, set y to 0.
+      x = std::max(x, 0L);
+      y = std::max(y, 0L);
+
+      // 3e. Set hyperlinkSuffix to the concatenation of U+003F (?), the value of x expressed as a base-ten
+      //     integer using ASCII digits, U+002C (,), and the value of y expressed as a base-ten integer using
+      //     ASCII digits.
+      auto suffix = std::format("?{},{}", x, y);
+      hyperlinkSuffix = utf8_string(suffix.begin(), suffix.end());
+    }
+
+    // 4. Let userInvolvement be event's user navigation involvement.
+    // (The event goes to the loader, which tells the host about it.)
+    // 5. If the user has expressed a preference to download the hyperlink, then set userInvolvement to
+    //    "browser UI".
+    // (There's no browser user interface to express one.)
+    // 6. If element has a download attribute, or if the user has expressed a preference to download the
+    //    hyperlink, then download the hyperlink created by element with hyperlinkSuffix set to
+    //    hyperlinkSuffix and userInvolvement set to userInvolvement.
+    // 7. Otherwise, follow the hyperlink created by element with hyperlinkSuffix set to hyperlinkSuffix and
+    //    userInvolvement set to userInvolvement.
+    // (Both follow it: the loader gives a download to the host.)
+    // FIXME: Links in editable content follow the editable link behaviour setting (Settings::
+    // editableLinkBehavior), once there is one; by default they're live, as here.
+    FollowTheHyperlink(element, event, hyperlinkSuffix);
+  }
+
+  void HyperlinkAlgorithms::FollowTheHyperlink(HTMLElement &subject, dom::Event &event,
+                                               const Maybe<utf8_string> &hyperlinkSuffix) noexcept
   {
     event.SetDefaultHandled();
 
-    Ref<dom::Document> document = ShareRef(element.NodeDocument());
+    // 1. If subject cannot navigate, then return.
+    Ref<dom::Document> document = ShareRef(subject.NodeDocument());
     RefPtr<LocalFrame> frame = ShareRefPtr(document->Frame());
-    if (!frame)
+    if (!frame || (!Is<HTMLAnchorElement>(subject) && !subject.IsConnected()))
     {
       return;
     }
 
-    if (!Is<HTMLAnchorElement>(element) && !element.IsConnected())
+    // 2. Let targetAttributeValue be the empty string.
+    // 3. If subject is an a or area element, then set targetAttributeValue to the result of getting an
+    //    element's target given subject.
+    auto targetAttributeValue = EffectiveTarget(subject);
+
+    // 4. Let urlRecord be the result of encoding-parsing a URL given subject's href attribute value, relative
+    //    to subject's node document.
+    auto href = subject.GetAttribute(u8"href").value_or(dom::DOMString());
+    auto urlRecord = document->CompleteURL(infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href));
+
+    // 5. If urlRecord is failure, then return.
+    if (!urlRecord.IsValid())
     {
       return;
     }
 
-    auto href = element.GetAttribute(u8"href").value_or(dom::DOMString());
-    auto trimmed = infra::StringAlgorithms::StripLeadingAndTrailingWhitespace(href);
-    utf8_string url(trimmed);
-    AppendServerMapMousePosition(url, event);
-    auto completedURL = document->CompleteURL(url);
+    // 6. Let noopener be the result of getting an element's noopener with subject, urlRecord, and
+    //    targetAttributeValue.
+    auto noopener = GetNoopener(subject, urlRecord, targetAttributeValue.View());
 
+    // 7. Let targetNavigable be the first return value of applying the rules for choosing a navigable given
+    //    targetAttributeValue, subject's node navigable, and noopener.
+    // 8. If targetNavigable is null, then return.
+    // (The loader chooses it, or has the host open a window.)
+
+    // 9. Let urlString be the result of applying the URL serializer to urlRecord.
+    // 10. If hyperlinkSuffix is non-null, then append it to urlString.
+    if (hyperlinkSuffix)
+    {
+      utf8_string urlString(urlRecord.String());
+      urlString += *hyperlinkSuffix;
+      urlRecord = document->CompleteURL(urlString);
+    }
+
+    // 11. Navigate targetNavigable to urlString using subject's node document, with referrerPolicy set to
+    //     subject's hyperlink referrer policy, userInvolvement set to userInvolvement, and sourceElement set
+    //     to subject.
     // FIXME: The suggested filename is sanitized (ResourceResponse::sanitizeSuggestedFilename), and ignored
     // for a cross-origin URL, once there are downloads and origins.
-    auto downloadAttribute = element.GetAttribute(u8"download");
+    auto downloadAttribute = subject.GetAttribute(u8"download");
     auto download = downloadAttribute ? dom::DOMStringAtom(*downloadAttribute) : dom::DOMStringAtom::Null();
-
-    // FIXME: The referrerpolicy attribute, once requests have referrers.
-    auto referrerPolicy =
-      HasRel(element, u8"noreferrer") ? ReferrerPolicy::NoReferrer : ReferrerPolicy::EmptyString;
-
-    auto effectiveTarget = EffectiveTarget(element);
-    auto newFrameOpenerPolicy = NewFrameOpenerPolicy::Allow;
-    if (HasRel(element, u8"noopener") || HasRel(element, u8"noreferrer")
-        || (!HasRel(element, u8"opener")
-            && text::IsASCIICaselessEqual(effectiveTarget.View(), utf8_stringview(u8"_blank"))
-            && !completedURL.ProtocolIsJavaScript()))
-    {
-      newFrameOpenerPolicy = NewFrameOpenerPolicy::Suppress;
-    }
-
-    frame->Loader().ChangeLocation(completedURL, effectiveTarget, &event, referrerPolicy,
-                                   newFrameOpenerPolicy, download, NavigationHistoryBehavior::Push, &element);
+    frame->Loader().ChangeLocation(urlRecord, targetAttributeValue, &event, HyperlinkReferrerPolicy(subject),
+                                   noopener ? NewFrameOpenerPolicy::Suppress : NewFrameOpenerPolicy::Allow,
+                                   download, NavigationHistoryBehavior::Push, &subject);
 
     // FIXME: Pings (the ping attribute), once there are network loads.
+  }
+
+  ReferrerPolicy HyperlinkAlgorithms::HyperlinkReferrerPolicy(const HTMLElement &subject) noexcept
+  {
+    // 1. If subject's link types includes the noreferrer keyword, then return "no-referrer".
+    if (HasRel(subject, u8"noreferrer"))
+    {
+      return ReferrerPolicy::NoReferrer;
+    }
+
+    // 2. Return the current state of subject's referrerpolicy content attribute.
+    // FIXME: The referrerpolicy attribute, once requests have referrers.
+    return ReferrerPolicy::EmptyString;
   }
 }

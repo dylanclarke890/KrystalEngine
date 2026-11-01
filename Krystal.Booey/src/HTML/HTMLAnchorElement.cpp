@@ -23,14 +23,7 @@ namespace krys::boo::html
 
   void HTMLAnchorElement::ActivationBehavior(dom::Event &event) noexcept
   {
-    // If element has no href attribute, then return.
-    if (!css::IsLink(*this))
-    {
-      return;
-    }
-    // FIXME: Links in editable content follow the editable link behaviour setting (Settings::
-    // editableLinkBehavior), once there is one; by default they're live, as here.
-    HyperlinkAlgorithms::FollowTheHyperlink(*this, event);
+    HyperlinkAlgorithms::ActivationBehavior(*this, event);
   }
 
   void HTMLAnchorElement::DefaultEventHandler(dom::Event &event) noexcept
@@ -199,15 +192,6 @@ namespace krys::boo::html
   dom::USVString HTMLAnchorElement::ToString() const noexcept
   {
     return Href();
-  }
-
-  void HTMLAnchorElement::Protocol(dom::DOMStringView value) noexcept
-  {
-    if (!FullURL().IsValid())
-    {
-      return;
-    }
-    URLDecomposition::Protocol(value);
   }
 
   url::URL HTMLAnchorElement::FullURL() const noexcept
