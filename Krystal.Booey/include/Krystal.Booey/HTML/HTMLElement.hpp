@@ -69,6 +69,12 @@ namespace krys::boo::html
     /// @see https://html.spec.whatwg.org/#dom-translate
     KRYS_NODISCARD bool Translate() const noexcept;
 
+    /// @brief Whether @p element's translation mode is translate-enabled, rather than no-translate: the
+    /// state of the nearest inclusive ancestor HTML element whose `translate` attribute is `yes` or `no`, or
+    /// translate-enabled if there's none.
+    /// @see https://html.spec.whatwg.org/#translation-mode
+    KRYS_NODISCARD static bool IsTranslateEnabled(const dom::Element &element) noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-translate
     void Translate(bool value) noexcept;
 

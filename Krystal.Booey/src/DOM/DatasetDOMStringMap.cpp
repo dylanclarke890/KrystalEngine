@@ -105,7 +105,18 @@ namespace krys::boo::dom
 
   List<DOMString> DatasetDOMStringMap::SupportedPropertyNames() const noexcept
   {
+    // To get a DOMStringMap's name-value pairs (only the names here):
+    // 1. Let list be an empty list of name-value pairs.
     List<DOMString> names;
+
+    // 2. For each content attribute on the DOMStringMap's associated element whose first five characters are
+    //    the string "data-" and whose remaining characters (if any) do not include any ASCII upper alphas, in
+    //    the order that those attributes are listed in the element's attribute list, add a name-value pair to
+    //    list whose name is the attribute's name with the first five characters removed and whose value is
+    //    the attribute's value.
+    // 3. For each name in list, for each U+002D HYPHEN-MINUS character (-) in the name that is followed by an
+    //    ASCII lower alpha, remove the U+002D HYPHEN-MINUS character (-) and replace the character that
+    //    followed it by the same character converted to ASCII uppercase.
     for (const auto &attribute : _element.AttributeList())
     {
       auto localName = attribute->LocalName().View();
@@ -114,6 +125,8 @@ namespace krys::boo::dom
         names.push_back(DatasetAttributeNameToPropertyName(localName));
       }
     }
+
+    // 4. Return list.
     return names;
   }
 
@@ -129,16 +142,31 @@ namespace krys::boo::dom
   ExceptionOr<void> DatasetDOMStringMap::SetNamedItem(DOMStringView name, DOMString &&value) noexcept
   {
     html::CEReactionsScope ceReactions;
+
+    // 1. If name contains a U+002D HYPHEN-MINUS character (-) followed by an ASCII lower alpha, then throw a
+    //    "SyntaxError" DOMException.
     if (!IsValidDatasetPropertyName(name))
     {
       return Exception {ExceptionCode::SyntaxError};
     }
+
+    // 2. For each ASCII upper alpha in name, insert a U+002D HYPHEN-MINUS character (-) before the character
+    //    and replace the character with the same character converted to ASCII lowercase.
+    // 3. Insert the string data- at the front of name.
+    // 4. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
+    // 5. Set an attribute value for the DOMStringMap's associated element using name and value.
+    // (setAttribute() checks the name; it has no ASCII uppercase letters to lowercase.)
     return _element.SetAttribute(DOMStringAtom(DatasetPropertyNameToAttributeName(name)), krys::move(value));
   }
 
   void DatasetDOMStringMap::DeleteNamedProperty(DOMStringView name) noexcept
   {
     html::CEReactionsScope ceReactions;
+
+    // 1. For each ASCII upper alpha in name, insert a U+002D HYPHEN-MINUS character (-) before the character
+    //    and replace the character with the same character converted to ASCII lowercase.
+    // 2. Insert the string data- at the front of name.
+    // 3. Remove an attribute by name given name and the DOMStringMap's associated element.
     _element.RemoveAttribute(DOMStringAtom(DatasetPropertyNameToAttributeName(name)));
   }
 }

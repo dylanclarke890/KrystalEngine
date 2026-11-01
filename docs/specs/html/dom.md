@@ -325,25 +325,29 @@ Status: n/a (author conformance)
 
 #### [3.2.6 Global attributes](https://html.spec.whatwg.org/#global-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `class`, `id` and `slot` are the DOM's (reviewed with it); the other global attributes are reviewed with their sections and elements.
 <!-- definitions: classes the-id-attribute attr-slot -->
 
 ##### [3.2.6.1 The title attribute](https://html.spec.whatwg.org/#the-title-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Nothing shows advisory information yet (KNOWN-ISSUES.md: titles are never shown); the attribute is reflected by `HTMLElement::Title`.
 <!-- definitions: attr-title -->
 
-- [ ] [advisory information](https://html.spec.whatwg.org/#advisory-information) — The advisory information of an element is the value that the following algorithm returns, with the algorithm being aborted once a value is returned. When the algorithm returns the empty string, then there is no advisory information.
+- [x] [advisory information](https://html.spec.whatwg.org/#advisory-information) — The advisory information of an element is the value that the following algorithm returns, with the algorithm being aborted once a value is returned. When the algorithm returns the empty string, then there is no advisory information.
   - 1. If the element has a title attribute, then return the result of running normalize newlines on its value.
   - 2. If the element has a parent element, then return the parent element's advisory information.
   - 3. Return the empty string.
+  > Missing: nothing shows titles (KNOWN-ISSUES.md).
 
 ##### [3.2.6.2 The lang and xml:lang attributes](https://html.spec.whatwg.org/#the-lang-and-xml:lang-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `css::EffectiveLang` (the language of a node), used by `:lang()`, locales and canvas text. Fixed: `lang` counted on every element rather than only HTML and SVG ones (DIFFERENCES.md, from upstream). The Content-Language header is a FIXME (KNOWN-ISSUES.md).
 <!-- definitions: attr-lang attr-xml-lang concept-explicitly-unknown -->
 
-- [ ] [language (Node)](https://html.spec.whatwg.org/#language) — To determine the language of a node, user agents must use the first appropriate step in the following list:
+- [x] [language (Node)](https://html.spec.whatwg.org/#language) — To determine the language of a node, user agents must use the first appropriate step in the following list:
   - • If the node is an element that has a lang attribute in the XML namespace set: Use the value of that attribute.
   - • If the node is an HTML element or an element in the SVG namespace, and it has a lang in no namespace attribute set: Use the value of that attribute.
   - • If the node's parent is a shadow root: Use the language of that shadow root's host.
@@ -352,25 +356,29 @@ Status: unreviewed
 
 ##### [3.2.6.3 The translate attribute](https://html.spec.whatwg.org/#the-translate-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLElement::Translate` and `IsTranslateEnabled` (translation mode). Fixed: `translate` was false without a `translate=yes` rather than inheriting the parent's translation mode. Translatable attributes are n/a: nothing translates pages. Removed `TranslateState.hpp`, an unused copy of `CORSSettingsState.hpp`.
 <!-- definitions: attr-translate translate-enabled no-translate -->
 
-- [ ] [Inherit](https://html.spec.whatwg.org/#attr-translate-inherit-state) — The attribute's missing value default and invalid value default are both the Inherit state, and its empty value default is the Yes state.
+- [x] [Inherit](https://html.spec.whatwg.org/#attr-translate-inherit-state) — The attribute's missing value default and invalid value default are both the Inherit state, and its empty value default is the Yes state.
 
-- [ ] [translation mode](https://html.spec.whatwg.org/#translation-mode) — Each element (even non-HTML elements) has a translation mode, which is in either the translate-enabled state or the no-translate state. If an HTML element's translate attribute is in the Yes state, then the element's translation mode is in the translate-enabled state; otherwise, if the element's translate attribute is in the No state, then the element's translation mode is in the no-translate state. Otherwise, either the element's translate attribute is in the Inherit state, or the element is not an HTML element and thus does not have a translate attribute; in either case, the element's translation mode is in the same state as its parent element's, if any, or in the translate-enabled state, if the element's parent element is null.
+- [x] [translation mode](https://html.spec.whatwg.org/#translation-mode) — Each element (even non-HTML elements) has a translation mode, which is in either the translate-enabled state or the no-translate state. If an HTML element's translate attribute is in the Yes state, then the element's translation mode is in the translate-enabled state; otherwise, if the element's translate attribute is in the No state, then the element's translation mode is in the no-translate state. Otherwise, either the element's translate attribute is in the Inherit state, or the element is not an HTML element and thus does not have a translate attribute; in either case, the element's translation mode is in the same state as its parent element's, if any, or in the translate-enabled state, if the element's parent element is null.
 
-- [ ] [translatable attributes](https://html.spec.whatwg.org/#translatable-attributes) — The following attributes are translatable attributes:
+- [x] [translatable attributes](https://html.spec.whatwg.org/#translatable-attributes) — The following attributes are translatable attributes:
+  > n/a: nothing translates pages.
 
-- [ ] [HTMLElement.translate](https://html.spec.whatwg.org/#dom-translate) — The translate IDL attribute must, on getting, return true if the element's translation mode is translate-enabled, and false otherwise. On setting, it must set the content attribute's value to "yes" if the new value is true, and set the content attribute's value to "no" otherwise.
+- [x] [HTMLElement.translate](https://html.spec.whatwg.org/#dom-translate) — The translate IDL attribute must, on getting, return true if the element's translation mode is translate-enabled, and false otherwise. On setting, it must set the content attribute's value to "yes" if the new value is true, and set the content attribute's value to "no" otherwise.
 
 ##### [3.2.6.4 The dir attribute](https://html.spec.whatwg.org/#the-dir-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `ElementTextDirection` (the directionality, auto directionality, contained text auto directionality, text node directionality and parent directionality), with `HTMLTextFormControlElement::DirAutoUsesValue` (auto-directionality form-associated elements); `HTMLElement::Dir` and `Document::Dir`.
+> Fixed: a slot's assigned elements used their own auto directionality rather than their contained text with canExcludeRoot (DIFFERENCES.md, from upstream). The directionality of an attribute is used only for alt text, which takes the image's direction (KNOWN-ISSUES.md).
 <!-- definitions: attr-dir concept-ltr concept-rtl auto-directionality-can-exclude-root -->
 
-- [ ] [Undefined](https://html.spec.whatwg.org/#attr-dir-undefined-state) — The attribute's missing value default and invalid value default are both the Undefined state.
+- [x] [Undefined](https://html.spec.whatwg.org/#attr-dir-undefined-state) — The attribute's missing value default and invalid value default are both the Undefined state.
 
-- [ ] [directionality](https://html.spec.whatwg.org/#the-directionality) — The directionality of an element (any element, not just an HTML element) is either 'ltr' or 'rtl'. To compute the directionality given an element element, switch on element's dir attribute state:
+- [x] [directionality](https://html.spec.whatwg.org/#the-directionality) — The directionality of an element (any element, not just an HTML element) is either 'ltr' or 'rtl'. To compute the directionality given an element element, switch on element's dir attribute state:
   - • LTR: Return 'ltr'.
   - • RTL: Return 'rtl'.
   - • Auto:
@@ -382,9 +390,9 @@ Status: unreviewed
     - 2. If result is null, then return 'ltr'.
     - 3. Return result.
 
-- [ ] [auto-directionality form-associated elements](https://html.spec.whatwg.org/#auto-directionality-form-associated-elements) — The auto-directionality form-associated elements are:
+- [x] [auto-directionality form-associated elements](https://html.spec.whatwg.org/#auto-directionality-form-associated-elements) — The auto-directionality form-associated elements are:
 
-- [ ] [auto directionality](https://html.spec.whatwg.org/#auto-directionality) — To compute the auto directionality given an element element:
+- [x] [auto directionality](https://html.spec.whatwg.org/#auto-directionality) — To compute the auto directionality given an element element:
   - 1. If element is an auto-directionality form-associated element:
     - 1a. If element's value contains a character of bidirectional character type AL or R, and there is no character of bidirectional character type L anywhere before it in the element's value, then return 'rtl'. [BIDI]
     - 1b. If element's value is not the empty string, then return 'ltr'.
@@ -400,7 +408,7 @@ Status: unreviewed
     - 2b. Return null.
   - 3. Return the contained text auto directionality of element with canExcludeRoot set to false.
 
-- [ ] [contained text auto directionality](https://html.spec.whatwg.org/#contained-text-auto-directionality) — To compute the contained text auto directionality of an element element with a boolean canExcludeRoot:
+- [x] [contained text auto directionality](https://html.spec.whatwg.org/#contained-text-auto-directionality) — To compute the contained text auto directionality of an element element with a boolean canExcludeRoot:
   - 1. For each node descendant of element's descendants, in tree order:
     - 1a. If any of descendant; any ancestor element of descendant that is a descendant of element; if canExcludeRoot is true, element is one of a bdi element; a script element; a style element; a textarea element; an element whose dir attribute is not in the Undefined state then continue.
     - 1b. If descendant is a slot element whose root is a shadow root, then return the directionality of that shadow root's host.
@@ -409,56 +417,60 @@ Status: unreviewed
     - 1e. If result is not null, then return result.
   - 2. Return null.
 
-- [ ] [text node directionality](https://html.spec.whatwg.org/#text-node-directionality) — To compute the text node directionality given a Text node text:
+- [x] [text node directionality](https://html.spec.whatwg.org/#text-node-directionality) — To compute the text node directionality given a Text node text:
   - 1. If text's data does not contain a code point whose bidirectional character type is L, AL, or R, then return null. [BIDI]
   - 2. Let codePoint be the first code point in text's data whose bidirectional character type is L, AL, or R.
   - 3. If codePoint is of bidirectional character type AL or R, then return 'rtl'.
   - 4. If codePoint is of bidirectional character type L, then return 'ltr'.
 
-- [ ] [parent directionality](https://html.spec.whatwg.org/#parent-directionality) — To compute the parent directionality given an element element:
+- [x] [parent directionality](https://html.spec.whatwg.org/#parent-directionality) — To compute the parent directionality given an element element:
   - 1. Let parentNode be element's parent node.
   - 2. If parentNode is a shadow root, then return the directionality of parentNode's host.
   - 3. If parentNode is an element, then return the directionality of parentNode.
   - 4. Return 'ltr'.
 
-- [ ] [directionality of an attribute](https://html.spec.whatwg.org/#directionality-of-the-attribute) — The directionality of an attribute of an HTML element, which is used when the text of that attribute is to be included in the rendering in some manner, is determined as per the first appropriate set of steps from the following list:
+- [x] [directionality of an attribute](https://html.spec.whatwg.org/#directionality-of-the-attribute) — The directionality of an attribute of an HTML element, which is used when the text of that attribute is to be included in the rendering in some manner, is determined as per the first appropriate set of steps from the following list:
   - • If the attribute is a directionality-capable attribute and the element's dir attribute is in the Auto state: Find the first character (in logical order) of the attribute's value that is of bidirectional character type L, AL, or R. [BIDI] If such a character is found and it is of bidirectional character type AL or R, the directionality of the attribute is 'rtl'. Otherwise, the directionality of th…
   - • Otherwise: The directionality of the attribute is the same as the element's directionality.
+  > Missing for alt text with dir=auto (KNOWN-ISSUES.md); nothing else renders attribute text.
 
-- [ ] [directionality-capable attributes](https://html.spec.whatwg.org/#directionality-capable-attribute) — The following attributes are directionality-capable attributes:
+- [x] [directionality-capable attributes](https://html.spec.whatwg.org/#directionality-capable-attribute) — The following attributes are directionality-capable attributes:
+  > Only alt text is rendered (KNOWN-ISSUES.md).
 
-- [ ] [HTMLElement.dir](https://html.spec.whatwg.org/#dom-dir) — The dir IDL attribute on an element must reflect the dir content attribute of that element, limited to only known values.
+- [x] [HTMLElement.dir](https://html.spec.whatwg.org/#dom-dir) — The dir IDL attribute on an element must reflect the dir content attribute of that element, limited to only known values.
 
-- [ ] [Document.dir](https://html.spec.whatwg.org/#dom-document-dir) — The dir IDL attribute on Document objects must reflect the dir content attribute of the html element, if any, limited to only known values. If there is no such element, then the attribute must return the empty string and do nothing on setting.
+- [x] [Document.dir](https://html.spec.whatwg.org/#dom-document-dir) — The dir IDL attribute on Document objects must reflect the dir content attribute of the html element, if any, limited to only known values. If there is no such element, then the attribute must return the empty string and do nothing on setting.
 
 ##### [3.2.6.5 The style attribute](https://html.spec.whatwg.org/#the-style-attribute)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `StyledElement` parses it as a declaration block, and `style` is its CSSOM (reviewed with CSS Style Attributes and the CSSOM).
 <!-- definitions: attr-style -->
 
 ##### [3.2.6.6 Embedding custom non-visible data with the data-* attributes](https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `Element::Dataset` and `DatasetDOMStringMap`, which looks at attributes' local names, as upstream. A custom data attribute is checked by the sanitizer (`SanitizerAlgorithms`).
 <!-- definitions: attr-data-* concept-domstringmap-element -->
 
-- [ ] [custom data attribute](https://html.spec.whatwg.org/#custom-data-attribute) — A custom data attribute is an attribute in no namespace whose name starts with the string "data-", has at least one character after the hyphen, is a valid attribute local name, and contains no ASCII upper alphas.
+- [x] [custom data attribute](https://html.spec.whatwg.org/#custom-data-attribute) — A custom data attribute is an attribute in no namespace whose name starts with the string "data-", has at least one character after the hyphen, is a valid attribute local name, and contains no ASCII upper alphas.
 
-- [ ] [HTMLOrSVGOrMathMLElement.dataset](https://html.spec.whatwg.org/#dom-dataset) — The dataset IDL attribute provides convenient accessors for all the data-* attributes on an element. On getting, the dataset IDL attribute must return a DOMStringMap whose associated element is this element.
+- [x] [HTMLOrSVGOrMathMLElement.dataset](https://html.spec.whatwg.org/#dom-dataset) — The dataset IDL attribute provides convenient accessors for all the data-* attributes on an element. On getting, the dataset IDL attribute must return a DOMStringMap whose associated element is this element.
 
-- [ ] [get a DOMStringMap's name-value pairs](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To get a DOMStringMap's name-value pairs, run the following algorithm:
+- [x] [get a DOMStringMap's name-value pairs](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To get a DOMStringMap's name-value pairs, run the following algorithm:
   - 1. Let list be an empty list of name-value pairs.
   - 2. For each content attribute on the DOMStringMap's associated element whose first five characters are the string "data-" and whose remaining characters (if any) do not include any ASCII upper alphas, in the order that those attributes are listed in the element's attribute list, add a name-value pair to list whose name is the attribute's name with the first five characters removed and whose value is…
   - 3. For each name in list, for each U+002D HYPHEN-MINUS character (-) in the name that is followed by an ASCII lower alpha, remove the U+002D HYPHEN-MINUS character (-) and replace the character that followed it by the same character converted to ASCII uppercase.
   - 4. Return list.
 
-- [ ] [To set the value of a new named property or set the value of an existing named…](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To set the value of a new named property or set the value of an existing named property for a DOMStringMap, given a property name name and a new value value, run the following steps:
+- [x] [To set the value of a new named property or set the value of an existing named…](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To set the value of a new named property or set the value of an existing named property for a DOMStringMap, given a property name name and a new value value, run the following steps:
   - 1. If name contains a U+002D HYPHEN-MINUS character (-) followed by an ASCII lower alpha, then throw a "SyntaxError" DOMException.
   - 2. For each ASCII upper alpha in name, insert a U+002D HYPHEN-MINUS character (-) before the character and replace the character with the same character converted to ASCII lowercase.
   - 3. Insert the string data- at the front of name.
   - 4. If name is not a valid attribute local name, then throw an "InvalidCharacterError" DOMException.
   - 5. Set an attribute value for the DOMStringMap's associated element using name and value.
 
-- [ ] [To delete an existing named property name for a DOMStringMap, run the following…](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To delete an existing named property name for a DOMStringMap, run the following steps:
+- [x] [To delete an existing named property name for a DOMStringMap, run the following…](https://html.spec.whatwg.org/#concept-domstringmap-pairs) — To delete an existing named property name for a DOMStringMap, run the following steps:
   - 1. For each ASCII upper alpha in name, insert a U+002D HYPHEN-MINUS character (-) before the character and replace the character with the same character converted to ASCII lowercase.
   - 2. Insert the string data- at the front of name.
   - 3. Remove an attribute by name given name and the DOMStringMap's associated element.

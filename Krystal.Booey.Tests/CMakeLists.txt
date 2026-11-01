@@ -296,6 +296,7 @@ target_sources(Krystal.Booey.Tests
 		tests/CSS/Selectors/MutableSelector.cpp
 		tests/CSS/Selectors/Selector.cpp
 		tests/CSS/Selectors/SelectorChecker.cpp
+		tests/CSS/Selectors/SelectorCheckerTestFunctions.cpp
 		tests/CSS/Selectors/SelectorFilter.cpp
 		tests/CSS/Selectors/SelectorList.cpp
 		tests/CSS/Selectors/SelectorParser.cpp

@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "catch2/catch_test_macros.hpp"
 #include "Krystal.Booey/DOM/HTMLDocument.hpp"
+#include "Krystal.Booey/Infra/Namespaces.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -59,7 +60,8 @@ namespace krys::boo::html::tests
       auto element = document->CreateElement(dom::DOMStringAtom(localName)).ReleaseValue();
       if (!attribute.empty())
       {
-        REQUIRE_FALSE(element->SetAttribute(dom::DOMStringAtom(attribute), dom::DOMString(value)).HasException());
+        REQUIRE_FALSE(
+          element->SetAttribute(dom::DOMStringAtom(attribute), dom::DOMString(value)).HasException());
       }
       return Downcast<HTMLElement>(*element).IsInteractiveContent();
     };
@@ -76,5 +78,66 @@ namespace krys::boo::html::tests
     CHECK(isInteractive(u8"input"));
     CHECK_FALSE(isInteractive(u8"input", u8"type", u8"hidden"));
     CHECK_FALSE(isInteractive(u8"div"));
+  }
+
+  TEST_CASE(
+    "HTMLElement.translate: the translation mode, inherited from the nearest yes or no",
+    "[HTML][HTMLElement][html:dom-translate][html:translation-mode][html:attr-translate-inherit-state]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto create = [&](utf8_stringview translate = {})
+    {
+      auto element = document->CreateElement(u8"span").ReleaseValue();
+      if (translate.data())
+      {
+        REQUIRE_FALSE(element->SetAttribute(u8"translate", dom::DOMString(translate)).HasException());
+      }
+      return ShareRef(Downcast<HTMLElement>(*element));
+    };
+
+    // Translate-enabled without a parent, and an empty value is yes.
+    CHECK(create()->Translate());
+    CHECK(create(u8"")->Translate());
+    CHECK(create(u8"YES")->Translate());
+    CHECK_FALSE(create(u8"no")->Translate());
+
+    // Inherit, an invalid value and a non-HTML element take the parent's.
+    auto outer = create(u8"no");
+    auto inherit = create();
+    auto invalid = create(u8"maybe");
+    auto svg = document->CreateElementNS(infra::Namespaces::SVG, u8"g").ReleaseValue();
+    auto insideSvg = create();
+    REQUIRE_FALSE(outer->AppendChild(*inherit).HasException());
+    REQUIRE_FALSE(inherit->AppendChild(*invalid).HasException());
+    REQUIRE_FALSE(invalid->AppendChild(*svg).HasException());
+    REQUIRE_FALSE(svg->AppendChild(*insideSvg).HasException());
+    CHECK_FALSE(inherit->Translate());
+    CHECK_FALSE(invalid->Translate());
+    CHECK_FALSE(HTMLElement::IsTranslateEnabled(*svg));
+    CHECK_FALSE(insideSvg->Translate());
+
+    auto yes = create(u8"yes");
+    REQUIRE_FALSE(invalid->AppendChild(*yes).HasException());
+    CHECK(yes->Translate());
+
+    // Setting it writes yes or no.
+    inherit->Translate(true);
+    CHECK(inherit->GetAttribute(u8"translate") == dom::DOMString(u8"yes"));
+    CHECK(invalid->Translate());
+    inherit->Translate(false);
+    CHECK(inherit->GetAttribute(u8"translate") == dom::DOMString(u8"no"));
+  }
+
+  TEST_CASE("HTMLElement.dir: limited to ltr, rtl and auto", "[HTML][HTMLElement][html:dom-dir]")
+  {
+    auto document = CreateRef<dom::HTMLDocument>();
+    auto div = document->CreateElement(u8"div").ReleaseValue();
+    auto &element = Downcast<HTMLElement>(*div);
+    CHECK(element.Dir() == u8"");
+    element.Dir(dom::DOMString(u8"RTL"));
+    CHECK(element.Dir() == u8"rtl");
+    CHECK(element.GetAttribute(u8"dir") == dom::DOMString(u8"RTL"));
+    element.Dir(dom::DOMString(u8"up"));
+    CHECK(element.Dir() == u8"");
   }
 }

@@ -112,50 +112,69 @@ namespace krys::boo::dom
       }
     }
 
-    // Specs: https://html.spec.whatwg.org/multipage/dom.html#text-node-directionality
+    /// @see https://html.spec.whatwg.org/#text-node-directionality
     KRYS_NODISCARD Maybe<TextDirection> ComputeTextDirectionFromText(DOMStringView text) noexcept
     {
+      // 1. If text's data does not contain a code point whose bidirectional character type is L, AL, or R,
+      //    then return null.
+      // 2. Let codePoint be the first code point in text's data whose bidirectional character type is L, AL,
+      //    or R.
+      // 3. If codePoint is of bidirectional character type AL or R, then return 'rtl'.
+      // 4. If codePoint is of bidirectional character type L, then return 'ltr'.
       return DefaultWritingDirection(text);
     }
 
-    // Specs: https://html.spec.whatwg.org/multipage/dom.html#attr-dir
+    /// @brief The directionality of @p element, whose `dir` attribute is in @p textDirectionState; null for
+    /// an element without a parent whose directionality would be 'ltr'.
+    /// @see https://html.spec.whatwg.org/#the-directionality
+    /// @see https://html.spec.whatwg.org/#parent-directionality
     KRYS_NODISCARD Maybe<TextDirection> ComputeTextDirection(const Element &element,
                                                              TextDirectionState textDirectionState) noexcept
     {
       switch (textDirectionState)
       {
-        case TextDirectionState::LTR: return TextDirection::LTR;
-        case TextDirectionState::RTL: return TextDirection::RTL;
+        // LTR: Return 'ltr'.
+        case TextDirectionState::LTR:  return TextDirection::LTR;
 
-        case TextDirectionState::Auto:
-          // Specs: Return the auto directionality of element.
-          // Specs: If directionality is null, then return 'ltr'.
-          return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
+        // RTL: Return 'rtl'.
+        case TextDirectionState::RTL:  return TextDirection::RTL;
 
+        // Auto:
+        // 1. Let result be the auto directionality of element.
+        // 2. If result is null, then return 'ltr'.
+        // 3. Return result.
+        case TextDirectionState::Auto: return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
+
+        // Undefined:
         case TextDirectionState::Undefined:
         {
-          // Specs: If element is a bdi element, then return the auto directionality of element.
-          // Specs: If directionality is null, then return 'ltr'.
+          // If element is a bdi element:
+          // 1. Let result be the auto directionality of element.
+          // 2. If result is null, then return 'ltr'.
+          // 3. Return result.
           if (Is<html::HTMLBDIElement>(element))
           {
             return ComputeAutoDirectionality(element).value_or(TextDirection::LTR);
           }
 
-          // Specs: If element is an input element whose type attribute is in the Telephone state
-          // then return LTR;
+          // If element is an input element whose type attribute is in the Telephone state: Return 'ltr'.
           if (auto *input = DynamicDowncast<html::HTMLInputElement>(element);
               input && input->IsTelephoneField())
           {
             return TextDirection::LTR;
           }
 
-          // Specs: If the parent is a shadow root, then return the directionality of parent's host.
-          // Specs: If the parent is an element, then return the directionality of parent.
+          // Otherwise: Return the parent directionality of element.
+          // 1. Let parentNode be element's parent node.
+          // 2. If parentNode is a shadow root, then return the directionality of parentNode's host.
+          // 3. If parentNode is an element, then return the directionality of parentNode.
           if (auto *parent = TreeQueries::ParentOrShadowHostElement(element))
           {
             return ComputeTextDirection(*parent, ElementTextDirectionState(*parent));
           }
 
+          // 4. Return 'ltr'.
+          // (Null, which is 'ltr' where it's used.)
           return null;
         }
       }
@@ -163,113 +182,81 @@ namespace krys::boo::dom
       return null;
     }
 
-    // Specs: https://html.spec.whatwg.org/multipage/dom.html#contained-text-auto-directionality
-    KRYS_NODISCARD Maybe<TextDirection> ComputeContainedTextAutoDirection(const Element &element) noexcept
+    /// @brief Whether contained text auto directionality skips @p node and its descendants: a bdi, script,
+    /// style or textarea element, or an element whose dir attribute is not in the Undefined state.
+    KRYS_NODISCARD bool IsExcludedFromContainedTextAutoDirection(const Node &node) noexcept
     {
-      for (auto *child = element.FirstChild(); child;)
+      if (HasHTMLTagName(node, html::TagName::bdi) || HasHTMLTagName(node, html::TagName::script)
+          || HasHTMLTagName(node, html::TagName::style) || HasHTMLTagName(node, html::TagName::textarea))
       {
-        // Specs: Skip bdi, script, style nodes.
-        if (HasHTMLTagName(*child, html::TagName::bdi) || HasHTMLTagName(*child, html::TagName::script)
-            || HasHTMLTagName(*child, html::TagName::style))
+        return true;
+      }
+      auto *element = DynamicDowncast<Element>(node);
+      return element && ElementHasValidTextDirectionState(*element);
+    }
+
+    /// @see https://html.spec.whatwg.org/#contained-text-auto-directionality
+    KRYS_NODISCARD Maybe<TextDirection> ComputeContainedTextAutoDirection(const Element &element,
+                                                                          bool canExcludeRoot) noexcept
+    {
+      // (With canExcludeRoot, an excluded element skips every descendant.)
+      if (canExcludeRoot && IsExcludedFromContainedTextAutoDirection(element))
+      {
+        return null;
+      }
+
+      // 1. For each node descendant of element's descendants, in tree order:
+      for (auto *descendant = element.FirstChild(); descendant;)
+      {
+        // 1a. If any of descendant; any ancestor element of descendant that is a descendant of element; if
+        //     canExcludeRoot is true, element is one of a bdi element; a script element; a style element; a
+        //     textarea element; an element whose dir attribute is not in the Undefined state then continue.
+        if (IsExcludedFromContainedTextAutoDirection(*descendant))
         {
-          child = TreeQueries::NextSkippingChildren(*child, &element);
+          descendant = TreeQueries::NextSkippingChildren(*descendant, &element);
           continue;
         }
 
-        if (auto *childElement = DynamicDowncast<Element>(*child))
+        // 1b. If descendant is a slot element whose root is a shadow root, then return the directionality of
+        //     that shadow root's host.
+        if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(*descendant))
         {
-          // Specs: Skip text form controls
-          // Specs: Skip the element whose dir attribute is not in the undefined state
-          if (childElement->IsTextField() || ElementHasValidTextDirectionState(*childElement))
+          if (auto *host = TreeQueries::ShadowHost(*slot))
           {
-            child = TreeQueries::NextSkippingChildren(*child, &element);
-            continue;
+            return ComputeTextDirection(*host, ElementTextDirectionState(*host));
           }
         }
 
-        // Specs: If child is a slot element whose root is a shadow root,
-        // then return the directionality of that shadow root's host.
-        if (auto *childSlotElement = DynamicDowncast<html::HTMLSlotElement>(*child))
+        // 1c. If descendant is not a Text node, then continue.
+        // 1d. Let result be the text node directionality of descendant.
+        // 1e. If result is not null, then return result.
+        if (auto *text = DynamicDowncast<Text>(*descendant))
         {
-          if (auto *childHost = TreeQueries::ShadowHost(*childSlotElement))
+          if (auto result = ComputeTextDirectionFromText(text->Data()))
           {
-            return ComputeTextDirection(*childHost, ElementTextDirectionState(*childHost));
+            return result;
           }
         }
 
-        // Specs: If descendant is a Text node and its text direction is not null,
-        // then return it.
-        if (auto *text = DynamicDowncast<Text>(*child))
-        {
-          if (auto direction = ComputeTextDirectionFromText(text->Data()))
-          {
-            return direction;
-          }
-        }
-
-        child = TreeQueries::Next(*child, &element);
+        descendant = TreeQueries::Next(*descendant, &element);
       }
 
-      return null;
-    }
-
-    // Specs: https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
-    KRYS_NODISCARD Maybe<TextDirection>
-      ComputeTextDirectionOfSlotElement(const html::HTMLSlotElement &slotElement) noexcept
-    {
-      // Specs: If element is a slot element whose root is a shadow root
-      // and element's assigned nodes are not empty, then return the
-      // directionality of this slot.
-      if (!slotElement.IsInShadowTree())
-      {
-        return ComputeContainedTextAutoDirection(slotElement);
-      }
-
-      auto *nodes = slotElement.AssignedNodes();
-      if (!nodes)
-      {
-        return ComputeContainedTextAutoDirection(slotElement);
-      }
-
-      for (auto &child : *nodes)
-      {
-        // Specs: If child is a Text node and its text direction is
-        // not null, then return it.
-        if (auto *text = DynamicDowncast<Text>(*child))
-        {
-          if (auto direction = ComputeTextDirectionFromText(text->Data()))
-          {
-            return direction;
-          }
-        }
-
-        if (auto *element = DynamicDowncast<Element>(*child))
-        {
-          // Specs: If child direction is not null, then return child direction.
-          if (auto direction = ComputeAutoDirectionality(*element))
-          {
-            return direction;
-          }
-        }
-      }
-
+      // 2. Return null.
       return null;
     }
   }
 
-  // Specs: https://html.spec.whatwg.org/multipage/dom.html#auto-directionality
   Maybe<TextDirection> ComputeAutoDirectionality(const Element &element) noexcept
   {
-    if (auto *textFormControl = DynamicDowncast<html::HTMLTextFormControlElement>(element))
+    // 1. If element is an auto-directionality form-associated element:
+    if (auto *textFormControl = DynamicDowncast<html::HTMLTextFormControlElement>(element);
+        textFormControl && textFormControl->DirAutoUsesValue())
     {
-      if (!textFormControl->DirAutoUsesValue())
-      {
-        return ComputeContainedTextAutoDirection(*textFormControl);
-      }
-
-      // Specs: The directionality of the auto-directionality form-associated
-      // element is calculated from its value() text.
-      // Specs: If element's value is not the empty string, then return 'ltr'.
+      // 1a. If element's value contains a character of bidirectional character type AL or R, and there is no
+      //     character of bidirectional character type L anywhere before it in the element's value, then
+      //     return 'rtl'.
+      // 1b. If element's value is not the empty string, then return 'ltr'.
+      // 1c. Return null.
       if (auto value = textFormControl->Value(); !value.empty())
       {
         return ComputeTextDirectionFromText(value).value_or(TextDirection::LTR);
@@ -277,12 +264,45 @@ namespace krys::boo::dom
       return null;
     }
 
-    if (auto *slotElement = DynamicDowncast<html::HTMLSlotElement>(element))
+    // 2. If element is a slot element whose root is a shadow root and element's assigned nodes are not empty:
+    if (auto *slot = DynamicDowncast<html::HTMLSlotElement>(element))
     {
-      return ComputeTextDirectionOfSlotElement(*slotElement);
+      if (auto *nodes = slot->AssignedNodes(); nodes && slot->IsInShadowTree())
+      {
+        // 2a. For each node child of element's assigned nodes:
+        for (auto &child : *nodes)
+        {
+          // 2a.i. Let childDirection be null.
+          Maybe<TextDirection> childDirection;
+
+          // 2a.ii. If child is a Text node, then set childDirection to the text node directionality of child.
+          if (auto *text = DynamicDowncast<Text>(*child))
+          {
+            childDirection = ComputeTextDirectionFromText(text->Data());
+          }
+          // 2a.iii. Otherwise:
+          // 2a.iii.A. Assert: child is an Element node.
+          // 2a.iii.B. Set childDirection to the contained text auto directionality of child with
+          //           canExcludeRoot set to true.
+          else if (auto *childElement = DynamicDowncast<Element>(*child))
+          {
+            childDirection = ComputeContainedTextAutoDirection(*childElement, true);
+          }
+
+          // 2a.iv. If childDirection is not null, then return childDirection.
+          if (childDirection)
+          {
+            return childDirection;
+          }
+        }
+
+        // 2b. Return null.
+        return null;
+      }
     }
 
-    return ComputeContainedTextAutoDirection(element);
+    // 3. Return the contained text auto directionality of element with canExcludeRoot set to false.
+    return ComputeContainedTextAutoDirection(element, false);
   }
 
   Maybe<TextDirection> ComputeTextDirectionIfDirIsAuto(const Element &element) noexcept

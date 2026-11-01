@@ -50,7 +50,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("ElementTextDirection: the dir attribute's states", "[DOM][ElementTextDirection]")
+  TEST_CASE("ElementTextDirection: the dir attribute's states",
+            "[DOM][ElementTextDirection][html:attr-dir][html:attr-dir-undefined-state]")
   {
     CHECK(ParseTextDirectionState(u8"ltr") == TextDirectionState::LTR);
     CHECK(ParseTextDirectionState(u8"RTL") == TextDirectionState::RTL);
@@ -68,7 +69,9 @@ namespace krys::boo::dom::tests
     CHECK_FALSE(ElementHasValidTextDirectionState(ById(*document, u8"b")));
   }
 
-  TEST_CASE("ElementTextDirection: auto directionality from text", "[DOM][ElementTextDirection]")
+  TEST_CASE("ElementTextDirection: auto directionality from text",
+            "[DOM][ElementTextDirection][html:auto-directionality][html:contained-text-auto-directionality]"
+            "[html:text-node-directionality]")
   {
     auto document = Parse(Markup({
       u8"<p id=rtl dir=auto>",
@@ -116,7 +119,8 @@ namespace krys::boo::dom::tests
     CHECK(Dir(ById(*document, u8"inner")) == "ltr");
   }
 
-  TEST_CASE("ElementTextDirection: inherited directionality", "[DOM][ElementTextDirection]")
+  TEST_CASE("ElementTextDirection: inherited directionality",
+            "[DOM][ElementTextDirection][html:the-directionality][html:parent-directionality]")
   {
     auto document = Parse(Markup({
       u8"<div id=rtl dir=rtl><p id=p></p><bdi id=bdi>abc</bdi><bdi id=bdi-rtl>",
@@ -228,7 +232,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("ElementTextDirection: form controls", "[DOM][ElementTextDirection]")
+  TEST_CASE("ElementTextDirection: form controls",
+            "[DOM][ElementTextDirection][html:auto-directionality-form-associated-elements]")
   {
     auto document = Parse(Markup({
       u8"<input id=i dir=auto value=",
@@ -290,7 +295,7 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("ElementTextDirection: slots", "[DOM][ElementTextDirection]")
+  TEST_CASE("ElementTextDirection: slots", "[DOM][ElementTextDirection][html:auto-directionality]")
   {
     auto document =
       Parse(Markup({u8"<div id=host><span>", Shalom, u8"</span></div><div id=other>abc</div>"}));
@@ -314,6 +319,23 @@ namespace krys::boo::dom::tests
     CHECK(Dir(*slot) == "ltr");
     REQUIRE_FALSE(host.SetAttribute(u8"dir", u8"rtl").HasException());
     CHECK(Dir(*wrapper) == "rtl");
+  }
+
+  TEST_CASE(
+    "ElementTextDirection: a slot skips assigned elements that contained text skips",
+    "[DOM][ElementTextDirection][html:auto-directionality][html:auto-directionality-can-exclude-root]")
+  {
+    auto document =
+      Parse(Markup({u8"<div id=host><span dir=ltr>abc</span><bdi>abc</bdi><b>", Shalom, u8"</b></div>"}));
+    auto &host = ById(*document, u8"host");
+    auto shadow = host.AttachShadow({}).ReleaseValue();
+    auto slot = document->CreateElement(u8"slot").ReleaseValue();
+    REQUIRE_FALSE(slot->SetAttribute(u8"dir", u8"auto").HasException());
+    REQUIRE_FALSE(shadow->AppendChild(*slot).HasException());
+
+    // The span has a dir and the bdi is a bdi, so neither decides: the bold text does.
+    CHECK(ComputeAutoDirectionality(*slot) == TextDirection::RTL);
+    CHECK(Dir(*slot) == "rtl");
   }
 
   TEST_CASE_METHOD(css::tests::ValueFixture, "ElementTextDirection: the direction of dir=auto",

@@ -75,8 +75,9 @@ namespace krys::boo::css
   /// @see https://html.spec.whatwg.org/#selector-indeterminate
   KRYS_NODISCARD bool MatchesIndeterminatePseudoClass(const dom::Element &element) noexcept;
 
-  /// @brief The language of @p element: the nearest `xml:lang` or `lang` attribute on it or an ancestor
-  /// (crossing shadow boundaries); empty if there is none.
+  /// @brief The language of @p element: the nearest `xml:lang` attribute, or `lang` attribute on an HTML or
+  /// SVG element, on it or an ancestor (crossing shadow boundaries), or else the pragma-set default language;
+  /// empty if there is none.
   /// @see https://html.spec.whatwg.org/#language
   KRYS_NODISCARD dom::DOMString EffectiveLang(const dom::Element &element) noexcept;
 }

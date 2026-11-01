@@ -25,7 +25,8 @@ namespace krys::boo::dom::tests
     }
   }
 
-  TEST_CASE("DatasetDOMStringMap", "[DOM][Element][DatasetDOMStringMap]")
+  TEST_CASE("DatasetDOMStringMap", "[DOM][Element][DatasetDOMStringMap][html:dom-dataset]"
+                                   "[html:concept-domstringmap-pairs]")
   {
     auto document = CreateRef<HTMLDocument>();
     auto element = document->CreateElement(DOMStringAtom(u8"div")).ReleaseValue();

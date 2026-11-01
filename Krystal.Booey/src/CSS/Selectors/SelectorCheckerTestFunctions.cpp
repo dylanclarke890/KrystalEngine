@@ -266,20 +266,37 @@ namespace krys::boo::css
 
   dom::DOMString EffectiveLang(const dom::Element &element) noexcept
   {
+    // To determine the language of a node, user agents must use the first appropriate step in the following
+    // list:
     dom::DOMStringAtom xmlNamespace(infra::Namespaces::XML);
     for (auto *ancestor = &element; ancestor;
          ancestor = dom::TreeQueries::ParentOrShadowHostElement(*ancestor))
     {
+      // If the node is an element that has a lang attribute in the XML namespace set: Use the value of that
+      // attribute.
       if (auto lang = ancestor->GetAttributeNS(xmlNamespace, u8"lang"))
       {
         return *lang;
       }
-      if (auto lang = ancestor->GetAttributeNS(dom::DOMStringAtom::Null(), u8"lang"))
+
+      // If the node is an HTML element or an element in the SVG namespace, and it has a lang in no namespace
+      // attribute set: Use the value of that attribute.
+      if (ancestor->NamespaceURI() == infra::Namespaces::HTML
+          || ancestor->NamespaceURI() == infra::Namespaces::SVG)
       {
-        return *lang;
+        if (auto lang = ancestor->GetAttributeNS(dom::DOMStringAtom::Null(), u8"lang"))
+        {
+          return *lang;
+        }
       }
+
+      // If the node's parent is a shadow root: Use the language of that shadow root's host.
+      // If the node's parent element is not null: Use the language of that parent element.
     }
-    // Otherwise, the document's pragma-set default language, if any.
+
+    // Otherwise: If there is a pragma-set default language set, then that is the language of the node. If
+    // there is no pragma-set default language set, then language information from a higher-level protocol
+    // (such as HTTP), if any, must be used as the final fallback language instead.
     // FIXME: The Content-Language header, once responses have headers.
     return element.NodeDocument().ContentLanguage();
   }

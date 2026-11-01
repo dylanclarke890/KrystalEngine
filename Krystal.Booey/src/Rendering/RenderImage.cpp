@@ -592,6 +592,7 @@ namespace krys::boo
           auto &fontMetrics = fontCascade.MetricsOfPrimaryFont();
           auto isHorizontal = GetWritingMode().IsHorizontal();
           // FIXME: The display string modified by the document's encoding.
+          // FIXME: With dir=auto, the directionality of the alt attribute: its first strong character's.
           auto textRun = RenderBlock::ConstructTextRun(
             _altText, style, ExpansionBehavior::DefaultBehavior(),
             {TextRunFlag::RespectDirection, TextRunFlag::RespectDirectionOverride});

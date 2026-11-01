@@ -94,13 +94,44 @@ namespace krys::boo::html
 
   bool HTMLElement::Translate() const noexcept
   {
-    auto value = Reflect<dom::DOMString>(*this, u8"translate");
-    auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(value);
-    return state == AttributeState::Yes;
+    // The translate IDL attribute must, on getting, return true if the element's translation mode is
+    // translate-enabled, and false otherwise.
+    return IsTranslateEnabled(*this);
+  }
+
+  bool HTMLElement::IsTranslateEnabled(const dom::Element &element) noexcept
+  {
+    for (auto *ancestor = &element; ancestor; ancestor = ancestor->ParentElement())
+    {
+      // If an HTML element's translate attribute is in the Yes state, then the element's translation mode is
+      // in the translate-enabled state; otherwise, if the element's translate attribute is in the No state,
+      // then the element's translation mode is in the no-translate state.
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(*ancestor))
+      {
+        auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(
+          Reflect<dom::DOMString>(*htmlElement, u8"translate"));
+        if (state == AttributeState::Yes)
+        {
+          return true;
+        }
+        if (state == AttributeState::No)
+        {
+          return false;
+        }
+      }
+
+      // Otherwise, either the element's translate attribute is in the Inherit state, or the element is not
+      // an HTML element and thus does not have a translate attribute; in either case, the element's
+      // translation mode is in the same state as its parent element's, if any, or in the translate-enabled
+      // state, if the element's parent element is null.
+    }
+    return true;
   }
 
   void HTMLElement::Translate(bool value) noexcept
   {
+    // On setting, it must set the content attribute's value to "yes" if the new value is true, and set the
+    // content attribute's value to "no" otherwise.
     CEReactionsScope ceReactions;
     Reflect<dom::DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
   }

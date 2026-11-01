@@ -898,6 +898,22 @@ namespace krys::boo::dom::tests
                 ExceptionCode::HierarchyRequestError));
   }
 
+  TEST_CASE("Document.dir: the html element's dir", "[DOM][Document][html:dom-document-dir]")
+  {
+    auto document = Parse(u8"<html dir=RTL><head></head><body></body></html>");
+    CHECK(document->Dir() == u8"rtl");
+
+    document->Dir(DOMString(u8"ltr"));
+    CHECK(document->DocumentElement()->GetAttribute(u8"dir") == DOMString(u8"ltr"));
+    CHECK_FALSE(document->Head()->HasAttribute(u8"dir"));
+
+    // Without an html element, nothing.
+    auto empty = CreateRef<HTMLDocument>();
+    CHECK(empty->Dir() == u8"");
+    empty->Dir(DOMString(u8"rtl"));
+    CHECK(empty->Dir() == u8"");
+  }
+
   TEST_CASE(
     "Document.images, embeds, plugins, links, forms and scripts: live collections, the same each time",
     "[DOM][Document][html:dom-document-images][html:dom-document-embeds][html:dom-document-plugins]"
