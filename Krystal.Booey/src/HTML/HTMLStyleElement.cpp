@@ -37,12 +37,18 @@ namespace krys::boo::html
 
   bool HTMLStyleElement::Disabled() const noexcept
   {
+    // 1. If this does not have an associated CSS style sheet, return false.
+    // 2. If this's associated CSS style sheet's disabled flag is set, return true.
+    // 3. Return false.
     auto *sheet = Sheet();
     return sheet && sheet->Disabled();
   }
 
   void HTMLStyleElement::Disabled(bool value) noexcept
   {
+    // 1. If this does not have an associated CSS style sheet, return.
+    // 2. If the given value is true, set this's associated CSS style sheet's disabled flag. Otherwise, unset
+    //    this's associated CSS style sheet's disabled flag.
     if (auto *sheet = Sheet())
     {
       sheet->SetDisabled(value);
@@ -182,10 +188,20 @@ namespace krys::boo::html
 
   void HTMLStyleElement::NotifyLoadedSheetAndAllCriticalSubresources(bool errorOccurred) noexcept
   {
+    // Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the
+    // style sheet has no critical subresources, once the style sheet has been parsed and processed:
+    // https://html.spec.whatwg.org/#update-a-style-block
+    // 1. Let element be the style element associated with the style sheet in question.
+    // 2. Let success be true.
+    // 3. If the attempts to obtain any of the style sheet's critical subresources failed for any reason, set
+    //    success to false.
     _loadedSheet = !errorOccurred;
 
-    // https://html.spec.whatwg.org/#update-a-style-block: once the sheet and its critical subresources have
-    // loaded, queue an element task on the networking task source to fire load (or error) at the element.
+    // 4. Queue an element task on the networking task source given element and the following steps:
+    // 4a. If success is true, fire an event named load at element.
+    // 4b. Otherwise, fire an event named error at element.
+    // 4c. If element contributes a script-blocking style sheet: (Skipped: nothing waits for scripts.)
+    // 4d. Unblock rendering on element. (It doesn't block rendering; see step 8.)
     html::EventLoop::Current().QueueTask(
       TaskSource::Networking, NodeDocument(), [element = ShareRef(*this), loaded = _loadedSheet]
       { dom::EventDispatcher::FireEvent(loaded ? EventNames::Load : EventNames::Error, *element); });

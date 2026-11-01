@@ -68,8 +68,10 @@ namespace krys::boo::html::tests
     };
   }
 
-  TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLStyleElement: the style sheet",
-                   "[HTML][HTMLStyleElement][dom:concept-cd-replace]")
+  TEST_CASE_METHOD(
+    css::tests::ValueFixture, "HTMLStyleElement: the style sheet",
+    "[HTML][HTMLStyleElement][dom:concept-cd-replace][html:update-a-style-block][html:dom-style-disabled]"
+    "[html:attr-style-media][html:attr-style-title]")
   {
     EventLoop::Current().RunUntilIdle();
 

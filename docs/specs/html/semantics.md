@@ -8,7 +8,8 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [4 The elements of HTML](https://html.spec.whatwg.org/#semantics)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> Headings only.
 
 ### [4.1 The document element](https://html.spec.whatwg.org/#the-root-element)
 
@@ -321,19 +322,20 @@ Status: n/a (documents are UTF-8 only; the parser's prescan reads the declaratio
 
 #### [4.2.6 The style element](https://html.spec.whatwg.org/#the-style-element)
 
-Status: unreviewed
+Status: reviewed (2026-11-01)
+> `HTMLStyleElement` (`Disabled`, and the load and error events in `NotifyLoadedSheetAndAllCriticalSubresources`) and `InlineStyleSheetOwner::CreateSheet` (update a style block, run when the element is connected, its text changes or it finishes parsing). A style element doesn't block rendering yet (FIXME, KNOWN-ISSUES.md: render blocking).
 <!-- definitions: attr-style-media attr-style-blocking attr-style-title -->
 
-- [ ] [HTMLStyleElement.disabled](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled getter steps are:
+- [x] [HTMLStyleElement.disabled](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled getter steps are:
   - 1. If this does not have an associated CSS style sheet, return false.
   - 2. If this's associated CSS style sheet's disabled flag is set, return true.
   - 3. Return false.
 
-- [ ] [The disabled setter steps](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled setter steps are:
+- [x] [The disabled setter steps](https://html.spec.whatwg.org/#dom-style-disabled) — The disabled setter steps are:
   - 1. If this does not have an associated CSS style sheet, return.
   - 2. If the given value is true, set this's associated CSS style sheet's disabled flag. Otherwise, unset this's associated CSS style sheet's disabled flag.
 
-- [ ] [update a style block](https://html.spec.whatwg.org/#update-a-style-block) — The update a style block algorithm is as follows:
+- [x] [update a style block](https://html.spec.whatwg.org/#update-a-style-block) — The update a style block algorithm is as follows:
   - 1. Let element be the style element.
   - 2. If element has an associated CSS style sheet, remove the CSS style sheet in question.
   - 3. If element is not connected, then return.
@@ -343,7 +345,7 @@ Status: unreviewed
   - 7. If element contributes a script-blocking style sheet, append element to its node document's script-blocking style sheet set.
   - 8. If element's media attribute's value matches the environment and element is potentially render-blocking, then block rendering on element.
 
-- [ ] [Once the attempts to obtain the style sheet's critical subresources, if any, ar…](https://html.spec.whatwg.org/#update-a-style-block) — Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the style sheet has no critical subresources, once the style sheet has been parsed and processed, the user agent must run these steps:
+- [x] [Once the attempts to obtain the style sheet's critical subresources, if any, ar…](https://html.spec.whatwg.org/#update-a-style-block) — Once the attempts to obtain the style sheet's critical subresources, if any, are complete, or, if the style sheet has no critical subresources, once the style sheet has been parsed and processed, the user agent must run these steps:
   - 1. Let element be the style element associated with the style sheet in question.
   - 2. Let success be true.
   - 3. If the attempts to obtain any of the style sheet's critical subresources failed for any reason (e.g., DNS error, HTTP 404 response, a connection being prematurely closed, unsupported Content-Type), set success to false.
@@ -357,16 +359,16 @@ Status: unreviewed
 
 #### [4.2.7 Interactions of styling and scripting](https://html.spec.whatwg.org/#interactions-of-styling-and-scripting)
 
-Status: unreviewed
+Status: n/a (no scripting: nothing waits for script-blocking style sheets)
 <!-- definitions: script-blocking-style-sheet-set -->
 
-- [ ] [contributes a script-blocking style sheet](https://html.spec.whatwg.org/#contributes-a-script-blocking-style-sheet) — An element el in the context of a Document of an HTML parser or XML parser contributes a script-blocking style sheet if all of the following are true:
+- [x] [contributes a script-blocking style sheet](https://html.spec.whatwg.org/#contributes-a-script-blocking-style-sheet) — An element el in the context of a Document of an HTML parser or XML parser contributes a script-blocking style sheet if all of the following are true:
 
-- [ ] [has a style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-a-style-sheet-that-is-blocking-scripts) — A Document document has a style sheet that is blocking scripts if the following steps return true:
+- [x] [has a style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-a-style-sheet-that-is-blocking-scripts) — A Document document has a style sheet that is blocking scripts if the following steps return true:
   - 1. If document's script-blocking style sheet set is not empty, then return true.
   - 2. If document's node navigable is null, then return false.
   - 3. Let containerDocument be document's node navigable's container document.
   - 4. If containerDocument is non-null and containerDocument's script-blocking style sheet set is not empty, then return true.
   - 5. Return false.
 
-- [ ] [has no style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-no-style-sheet-that-is-blocking-scripts) — A Document has no style sheet that is blocking scripts if it does not have a style sheet that is blocking scripts.
+- [x] [has no style sheet that is blocking scripts](https://html.spec.whatwg.org/#has-no-style-sheet-that-is-blocking-scripts) — A Document has no style sheet that is blocking scripts if it does not have a style sheet that is blocking scripts.
