@@ -102,17 +102,29 @@ namespace krys::boo::html
   Maybe<Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>>>
     HTMLFormControlsCollection::NamedItemOrItems(dom::DOMStringView name) const noexcept
   {
+    // 1. If name is the empty string, return null and stop the algorithm. (NamedItems.)
     auto namedItems = NamedItems(name);
+
+    // 3. Otherwise, if there are no nodes in the collection that have either an id attribute or a name
+    //    attribute equal to name, then return null and stop the algorithm.
     if (namedItems.empty())
     {
       return std::nullopt;
     }
 
+    // 2. If, at the time the method is called, there is exactly one node in the collection that has either an
+    //    id attribute or a name attribute equal to name, then return that node and stop the algorithm.
     if (namedItems.size() == 1)
     {
       return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {RefPtr<dom::Element>(namedItems[0])};
     }
 
+    // 4. Otherwise, create a new RadioNodeList object representing a live view of the
+    //    HTMLFormControlsCollection object, further filtered so that the only nodes in the RadioNodeList
+    //    object are those that have either an id attribute or a name attribute equal to name. The nodes in
+    //    the RadioNodeList object must be sorted in tree order.
+    // 5. Return that RadioNodeList object.
+    // (The form keeps one per name, which is as good as new without script.)
     return Variant<RefPtr<RadioNodeList>, RefPtr<dom::Element>> {
       RefPtr<RadioNodeList>(_ownerNode->RadioNodeListForName(name))};
   }

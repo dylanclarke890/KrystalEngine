@@ -93,6 +93,7 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The rules for parsing integers give an error outside `int64`'s range (`Numbers::ParseInteger`); the specification's have no limit.
 - Dates and times later than 275760-09-13T00:00, the latest a script `Date` can be, aren't parsed, and nor are times with more than three digits after the seconds' full stop, since `DateComponents` keeps seconds to the millisecond; the specification parses both. Upstream and Chrome do the same.
 - The machine-readable values of `<time>` (its `datetime` attribute or contents) and of `<ins>` and `<del>`'s `datetime` attribute aren't parsed, as in browsers: nothing reads them. So there are no parsers for yearless dates, time-zone offsets, global dates and times, durations or dates with optional times.
+- Setting an options collection's indexed property (`HTMLSelectElement::SetItem`) at index 100,000 or more does nothing, as in upstream and Chrome; the specification limits only the length setter.
 - A legacy colour value that starts with `#` keeps the 128 code points after it (`HTMLElement::ParseLegacyColorValue`), as upstream and Chrome do; the specification truncates to 128 code points before removing the `#`.
 
 ### From WebKit
@@ -117,6 +118,8 @@ Record a difference here when you make one, and remove it when Booey comes back 
 - The resizer grip is drawn by `RenderTheme::PaintPlatformResizer` rather than from a platform image. Textareas aren't resizable by default (`Settings::TextAreasAreResizable` is false, as upstream's WebCore default; WebKit's own default is true off iOS).
 - `RenderThemeAdwaita::AnimationRepeatIntervalForProgressBar` is a fixed 16 ms; upstream uses the page's preferred rendering update interval (FIXME).
 - The `width` and `height` of `<img>`, `<col>` and `<colgroup>` ignore a relative length (`5*`, `Dimensions::ParseHTMLMultiLength`), as upstream; the specification's rules for parsing dimension values read it as 5 pixels.
+- `HTMLSelectElement::Add` follows the specification: it throws `NotFoundError` for an element to insert before that isn't in the select, does nothing to insert an option before itself, and inserts into that element's parent (an `<optgroup>`); upstream inserts into its parent only for an index. Setting an options collection's indexed property replaces the option in its parent, and growing the length appends the new options in one fragment; upstream removes and re-inserts, and appends them one at a time.
+- `RadioNodeList`'s `value` follows the specification for radio buttons with an empty `value`: the getter returns a checked one's empty value and the setter can check one; upstream skips them.
 - The number-like input types' values (`ParseToDoubleForNumberType`, `ParseToDecimalForNumberType`) accept a full stop followed directly by an exponent (`1.e5`), which isn't a valid floating-point number, as upstream.
 
 ### From Chrome

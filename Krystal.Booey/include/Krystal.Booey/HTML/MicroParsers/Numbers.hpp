@@ -14,10 +14,12 @@ namespace krys::boo::html
   public:
     using position_variable = infra::StringAlgorithms::position_variable;
 
-    /// @note Integers outside `int64`'s range are an `OutOfRange` error.
+    /// @note Integers outside `int64`'s range are an `OutOfRange` error, whose value is the nearest of
+    /// `int64`'s limits.
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-integers
     KRYS_NODISCARD static MicroParserResult<int64> ParseInteger(dom::DOMStringView input) noexcept;
 
+    /// @note Integers above `int64`'s maximum are an `OutOfRange` error, whose value is that maximum.
     /// @see https://html.spec.whatwg.org/#rules-for-parsing-non-negative-integers
     KRYS_NODISCARD static MicroParserResult<uint64>
       ParseNonNegativeInteger(dom::DOMStringView input) noexcept;

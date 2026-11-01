@@ -7,11 +7,14 @@
 #include "Krystal.Booey/HTML/ElementInternals.hpp"
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/MicroParsers/Numbers.hpp"
+#include "Krystal.Booey/HTML/Parser/HTMLParserIdioms.hpp"
 #include "Krystal.Core/Attributes.hpp"
 #include "Krystal.Core/Concepts.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/NTTPMaybe.hpp"
 #include "Krystal.Core/Types/StronglyTypedValue.hpp"
+#include <charconv>
+#include <limits>
 
 namespace krys::boo::html
 {
@@ -667,12 +670,19 @@ namespace krys::boo::html
 
 #pragma region ReflectDOMString
 
-    /// @brief Helper for getting reflected content attributes for 'DOMString/DOMString?' types. The handling
-    /// for returning an empty string for null attributes is handled by the caller.
+    /// @brief Helper for getting reflected content attributes for 'DOMString/DOMString?' types: steps 1, 2,
+    /// 5 and 6 of the `DOMString` getter, and 1, 2 and 5 of the `DOMString?` one, with null for the empty
+    /// string (the caller's `value_or`). Enumerated attributes limited to only known values (steps 3 and 4)
+    /// are `EnumeratedAttribute::ResolveCanonicalKeyword`.
+    /// @see https://html.spec.whatwg.org/#limited-to-only-known-values
     template <ReflectTarget Target>
     KRYS_NODISCARD static Maybe<dom::DOMString> ReflectDOMString(const Target &target,
                                                                  dom::DOMStringAtom name) noexcept
     {
+      // 1. Let element be the result of running this's get the element.
+      // 2. Let contentAttributeValue be the result of running this's get the content attribute.
+      // 5. If contentAttributeValue is null, then return the empty string. (DOMString only.)
+      // 6. Return contentAttributeValue.
       return GetContentAttribute(target, name);
     }
 
@@ -681,10 +691,12 @@ namespace krys::boo::html
     static void ReflectDOMString(Target &target, dom::DOMStringAtom name,
                                  Maybe<dom::DOMString> &&value) noexcept
     {
+      // 1. If the given value is null, then run this's delete the content attribute.
       if (!value.has_value())
       {
         DeleteContentAttribute(target, name);
       }
+      // 2. Otherwise, run this's set the content attribute with the given value.
       else
       {
         SetContentAttribute(target, name, krys::move(*value));
@@ -695,6 +707,7 @@ namespace krys::boo::html
     template <ReflectTarget Target>
     static void ReflectDOMString(Target &target, dom::DOMStringAtom name, dom::DOMString &&value) noexcept
     {
+      // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, name, krys::move(value));
     }
 
@@ -705,25 +718,35 @@ namespace krys::boo::html
     /// @brief Helper for getting reflected content attributes with 'dom::USVString' type: the content
     /// attribute's value, or the empty string if it's absent. A URL is completed against the node document's
     /// base URL, unless it doesn't parse.
-    /// @see https://html.spec.whatwg.org/#xattr-reflecturl
+    /// @see https://html.spec.whatwg.org/#treated-as-a-url
     template <TreatedAsURL AsUrl, ReflectTarget Target>
     KRYS_NODISCARD static dom::USVString ReflectUSVString(const Target &target,
                                                           dom::DOMStringAtom name) noexcept
     {
+      // 1. Let element be the result of running this's get the element.
+      // 2. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, name);
+
+      // 3. If the reflected IDL attribute is treated as a URL:
+      // 3a. If contentAttributeValue is null, then return the empty string.
+      // (Without a URL, a null value is the empty string too.)
       if (!contentAttributeValue)
       {
         return {};
       }
       if constexpr (AsUrl)
       {
-        // Let urlString be the result of encoding-parsing-and-serializing a URL given contentAttributeValue,
-        // relative to the element's node document. If urlString is not failure, then return urlString.
+        // 3b. Let urlString be the result of encoding-parsing-and-serializing a URL given
+        //     contentAttributeValue, relative to element's node document.
+        // 3c. If urlString is not failure, then return urlString.
         if (auto url = target.NodeDocument().CompleteURL(*contentAttributeValue); url.IsValid())
         {
           return dom::USVString(url.String());
         }
       }
+
+      // 4. Return contentAttributeValue, converted to a scalar value string.
+      // (UTF-8 strings are scalar value strings.)
       return dom::USVString(krys::move(*contentAttributeValue));
     }
 
@@ -731,6 +754,7 @@ namespace krys::boo::html
     template <TreatedAsURL AsUrl, ReflectTarget Target>
     static void ReflectUSVString(Target &target, dom::DOMStringAtom name, dom::USVString &&value) noexcept
     {
+      // The setter steps are to run this's set the content attribute with the given value.
       SetContentAttribute(target, name, static_cast<dom::DOMString &&>(value));
     }
 
@@ -744,18 +768,22 @@ namespace krys::boo::html
     template <ReflectTarget Target>
     KRYS_NODISCARD static bool ReflectBool(const Target &target, dom::DOMStringAtom name) noexcept
     {
-      auto contentAttributeValue = GetContentAttribute(target, name);
-      return contentAttributeValue.has_value();
+      // 1. Let contentAttributeValue be the result of running this's get the content attribute.
+      // 2. If contentAttributeValue is null, then return false.
+      // 3. Return true.
+      return GetContentAttribute(target, name).has_value();
     }
 
     /// @brief Helper for setting reflected content attributes with 'bool' type.
     template <ReflectTarget Target>
     static void ReflectBool(Target &target, dom::DOMStringAtom name, bool value) noexcept
     {
+      // 1. If the given value is false, then run this's delete the content attribute.
       if (!value)
       {
         DeleteContentAttribute(target, name);
       }
+      // 2. If the given value is true, then run this's set the content attribute with the empty string.
       else
       {
         SetContentAttribute(target, name, dom::DOMString {});
@@ -767,40 +795,53 @@ namespace krys::boo::html
 #pragma region ReflectLong
 
     /// @brief Helper for getting reflected content attributes with 'long' type.
+    /// @see https://html.spec.whatwg.org/#default-value
     template <OnlyNonNegativeNumbers OnlyNonNegative, MaybeReflectDefault<int32> DefaultValue,
               ReflectTarget Target>
     KRYS_NODISCARD static int32 ReflectLong(const Target &target, dom::DOMStringAtom name) noexcept
     {
+      // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, name);
+
+      // 2. If contentAttributeValue is not null:
       if (contentAttributeValue.has_value())
       {
-        if constexpr (OnlyNonNegative)
+        // 2a. Let parsedValue be the result of integer parsing contentAttributeValue if the reflected IDL
+        //     attribute is not limited to only non-negative numbers; otherwise the result of non-negative
+        //     integer parsing contentAttributeValue.
+        auto parsedValue = [&]() -> MicroParserResult<int64>
         {
-          auto parsedValue = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
-          if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
+          if constexpr (OnlyNonNegative)
           {
-            return static_cast<int32>(parsedValue.Value);
+            auto nonNegative = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
+            return {.Value = static_cast<int64>(nonNegative.Value), .Error = nonNegative.Error};
           }
-        }
-        else
+          else
+          {
+            return Numbers::ParseInteger(*contentAttributeValue);
+          }
+        }();
+
+        // 2b. If parsedValue is not an error and is within the long range, then return parsedValue.
+        if (parsedValue.Success() && parsedValue.Value >= std::numeric_limits<int32>::min()
+            && parsedValue.Value <= std::numeric_limits<int32>::max())
         {
-          auto parsedValue = Numbers::ParseInteger(*contentAttributeValue);
-          if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
-          {
-            return static_cast<int32>(parsedValue.Value);
-          }
+          return static_cast<int32>(parsedValue.Value);
         }
       }
 
+      // 3. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
         return *DefaultValue;
       }
+      // 4. If the reflected IDL attribute is limited to only non-negative numbers, then return −1.
       else if constexpr (OnlyNonNegative)
       {
         return -1;
       }
 
+      // 5. Return 0.
       return 0;
     }
 
@@ -809,6 +850,8 @@ namespace krys::boo::html
     KRYS_NODISCARD static reflect_set_return_t<int32, OnlyNonNegative, OnlyPositiveNumbers(false)>
       ReflectLong(Target &target, dom::DOMStringAtom name, int32 value) noexcept
     {
+      // 1. If the reflected IDL attribute is limited to only non-negative numbers and the given value is
+      //    negative, then throw an "IndexSizeError" DOMException.
       if constexpr (OnlyNonNegative)
       {
         if (value < 0)
@@ -817,9 +860,10 @@ namespace krys::boo::html
         }
       }
 
-      auto newValueStr = std::to_string(value);
-      dom::DOMStringView u8view(reinterpret_cast<const char8 *>(newValueStr.data()), newValueStr.size());
-      SetContentAttribute(target, name, dom::DOMString(u8view));
+      // 2. Run this's set the content attribute with the given value converted to the shortest possible
+      // string
+      //    representing the number as a valid integer.
+      SetContentAttribute(target, name, IntegerToString(value));
 
       if constexpr (OnlyNonNegative)
       {
@@ -834,6 +878,7 @@ namespace krys::boo::html
     constexpr static int32 MaxUnsignedLongValue {2'147'483'647};
 
     /// @brief Helper for getting reflected content attributes with 'unsigned long' type.
+    /// @see https://html.spec.whatwg.org/#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
               MaybeReflectDefault<uint32> DefaultValue, MaybeReflectRange<uint32> Range, ReflectTarget Target>
     KRYS_NODISCARD static uint32 ReflectUnsignedLong(const Target &target, dom::DOMStringAtom name) noexcept
@@ -841,47 +886,65 @@ namespace krys::boo::html
       static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
                     "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
+      // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, name);
 
+      // 2. Let minimum be 0.
       uint64 minimum = 0u;
 
+      // 3. If the reflected IDL attribute is limited to only positive numbers or limited to only positive
+      //    numbers with fallback, then set minimum to 1.
       if constexpr (OnlyPositive || OnlyPositiveWithFallback)
       {
         minimum = 1u;
       }
 
-      if (Range)
+      // 4. If the reflected IDL attribute is clamped to the range, then set minimum to clampedMin.
+      if constexpr (Range)
       {
         minimum = (*Range).ClampedMin;
       }
 
+      // 5. Let maximum be 2147483647 if the reflected IDL attribute is not clamped to the range; otherwise
+      //    clampedMax.
       uint64 maximum = MaxUnsignedLongValue;
-      if (Range)
+      if constexpr (Range)
       {
         maximum = (*Range).ClampedMax;
       }
 
+      // 6. If contentAttributeValue is not null:
       if (contentAttributeValue.has_value())
       {
+        // 6a. Let parsedValue be the result of non-negative integer parsing contentAttributeValue.
         auto parsedValue = Numbers::ParseNonNegativeInteger(*contentAttributeValue);
-        if (parsedValue.Success())
-        {
-          if (parsedValue >= minimum && parsedValue <= maximum)
-          {
-            return static_cast<uint32>(parsedValue.Value);
-          }
 
-          if (Range)
+        // 6b. If parsedValue is not an error and is in the range minimum to maximum, inclusive, then return
+        //     parsedValue.
+        if (parsedValue.Success() && parsedValue >= minimum && parsedValue <= maximum)
+        {
+          return static_cast<uint32>(parsedValue.Value);
+        }
+
+        // 6c. If parsedValue is not an error and the reflected IDL attribute is clamped to the range:
+        // An integer too large for int64 is past the maximum too.
+        if constexpr (Range)
+        {
+          if (parsedValue.Success() || parsedValue.Error == MicroParserError::OutOfRange)
           {
-            return static_cast<uint32>(std::clamp(parsedValue.Value, minimum, maximum));
+            // 6c.i. If parsedValue is less than minimum, then return minimum.
+            // 6c.ii. Return maximum.
+            return static_cast<uint32>(parsedValue < minimum ? minimum : maximum);
           }
         }
       }
 
+      // 7. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
         return *DefaultValue;
       }
+      // 8. Return minimum.
       else
       {
         return static_cast<uint32>(minimum);
@@ -897,6 +960,8 @@ namespace krys::boo::html
       static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
                     "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
+      // 1. If the reflected IDL attribute is limited to only positive numbers and the given value is 0, then
+      //    throw an "IndexSizeError" DOMException.
       if constexpr (OnlyPositive)
       {
         if (value == 0)
@@ -905,26 +970,34 @@ namespace krys::boo::html
         }
       }
 
+      // 2. Let minimum be 0.
       uint32 minimum = 0u;
+
+      // 3. If the reflected IDL attribute is limited to only positive numbers or limited to only positive
+      //    numbers with fallback, then set minimum to 1.
       if constexpr (OnlyPositive || OnlyPositiveWithFallback)
       {
         minimum = 1u;
       }
 
+      // 4. Let newValue be minimum.
       uint32 newValue = minimum;
+
+      // 5. If the reflected IDL attribute has a default value, then set newValue to defaultValue.
       if constexpr (DefaultValue)
       {
         newValue = *DefaultValue;
       }
 
+      // 6. If the given value is in the range minimum to 2147483647, inclusive, then set newValue to it.
       if (value >= minimum && value <= MaxUnsignedLongValue)
       {
         newValue = value;
       }
 
-      auto newValueStr = std::to_string(value);
-      dom::DOMStringView u8view(reinterpret_cast<const char8 *>(newValueStr.data()), newValueStr.size());
-      SetContentAttribute(target, name, dom::DOMString(u8view));
+      // 7. Run this's set the content attribute with newValue converted to the shortest possible string
+      //    representing the number as a valid non-negative integer.
+      SetContentAttribute(target, name, IntegerToString(newValue));
 
       if constexpr (OnlyPositive)
       {
@@ -937,32 +1010,39 @@ namespace krys::boo::html
 #pragma region ReflectDouble
 
     /// @brief Helper for getting reflected content attributes with 'double' type.
+    /// @see https://html.spec.whatwg.org/#clamped-to-the-range
     template <OnlyPositiveNumbers OnlyPositive, MaybeReflectDefault<double> DefaultValue,
               ReflectTarget Target>
     KRYS_NODISCARD static double ReflectDouble(const Target &target, dom::DOMStringAtom name) noexcept
     {
+      // 1. Let contentAttributeValue be the result of running this's get the content attribute.
       auto contentAttributeValue = GetContentAttribute(target, name);
+
+      // 2. If contentAttributeValue is not null:
       if (contentAttributeValue.has_value())
       {
+        // 2a. Let parsedValue be the result of floating-point number parsing contentAttributeValue.
         auto parsedValue = Numbers::ParseFloatingPoint(*contentAttributeValue);
         if (parsedValue.Success())
         {
-          if constexpr (!OnlyPositive)
-          {
-            return parsedValue.Value;
-          }
-          else if (parsedValue > 0)
+          // 2b. If parsedValue is not an error and is greater than 0, then return parsedValue.
+          // 2c. If parsedValue is not an error and the reflected IDL attribute is not limited to only
+          // positive
+          //     numbers, then return parsedValue.
+          if (!OnlyPositive || parsedValue > 0)
           {
             return parsedValue.Value;
           }
         }
       }
 
+      // 3. If the reflected IDL attribute has a default value, then return defaultValue.
       if constexpr (DefaultValue)
       {
         return *DefaultValue;
       }
 
+      // 4. Return 0.
       return 0;
     }
 
@@ -970,25 +1050,29 @@ namespace krys::boo::html
     template <OnlyPositiveNumbers OnlyPositive, ReflectTarget Target>
     static void ReflectDouble(Target &target, dom::DOMStringAtom name, double value) noexcept
     {
+      // 1. If the reflected IDL attribute is limited to only positive numbers and the given value is not
+      //    greater than 0, then return.
       if constexpr (OnlyPositive)
       {
-        if (value <= 0)
+        if (!(value > 0))
         {
-          return; // Not an exception as per the spec.
+          return;
         }
       }
 
-      char buffer[64] {};
-      auto [ptr, ec] = std::to_chars(buffer, buffer + sizeof(buffer), value);
-      if (ec != std::errc())
-      {
-        return;
-      }
-
-      dom::DOMStringView u8view(reinterpret_cast<const char8 *>(buffer), ptr - buffer);
-      SetContentAttribute(target, name, dom::DOMString(u8view));
+      // 2. Run this's set the content attribute with the given value, converted to the best representation of
+      //    the number as a floating-point number.
+      SetContentAttribute(target, name, SerializeForNumberType(value));
     }
 
 #pragma endregion
+
+    /// @brief @p value as the shortest valid integer.
+    KRYS_NODISCARD static dom::DOMString IntegerToString(int64 value) noexcept
+    {
+      char buffer[24];
+      auto end = std::to_chars(buffer, buffer + sizeof(buffer), value).ptr;
+      return dom::DOMString(dom::DOMStringView(reinterpret_cast<const char8 *>(buffer), end - buffer));
+    }
   };
 }

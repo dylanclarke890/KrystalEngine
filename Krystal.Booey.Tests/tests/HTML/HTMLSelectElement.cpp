@@ -147,6 +147,91 @@ namespace krys::boo::tests
     }
   }
 
+  TEST_CASE_METHOD(css::tests::ValueFixture,
+                   "HTMLSelectElement: the options collection's add(), remove(), length and indexed setter",
+                   "[HTML][HTMLSelectElement][html:dom-htmloptionscollection-add]"
+                   "[html:htmloptionscollection-remove-an-option][html:dom-htmloptionscollection-remove]"
+                   "[html:dom-htmloptionscollection-length][html:append-new-option-elements]")
+  {
+    EditorFixture fixture(
+      u8"<select id=s><option id=a>A</option><optgroup id=g><option id=b>B</option></optgroup>"
+      u8"<option id=c>C</option></select><div id=outside><option id=o></option></div>");
+    auto &select = SelectById(fixture, u8"s");
+    auto newOption = [&](utf8_stringview id)
+    {
+      auto option = CreateRef<HTMLOptionElement>(*fixture.Document);
+      REQUIRE_FALSE(option->SetAttribute(u8"id", dom::DOMString(id)).HasException());
+      return option;
+    };
+    auto before = [&](utf8_stringview id)
+    {
+      return HTMLSelectElement::HTMLElementOrInt {ShareRefPtr<html::HTMLElement>(&OptionById(fixture, id))};
+    };
+
+    SECTION("add() inserts into the parent of the element or indexth option it goes before")
+    {
+      auto n = newOption(u8"n");
+      REQUIRE_FALSE(select.Add(RefPtr<HTMLOptionElement>(n), before(u8"b")).HasException());
+      CHECK(ListItemIds(select) == u8"a g n b c");
+      CHECK(n->ParentNode() == &fixture.ById(u8"g"));
+
+      REQUIRE_FALSE(
+        select.Add(RefPtr<HTMLOptionElement>(newOption(u8"m")), HTMLSelectElement::HTMLElementOrInt {2})
+          .HasException());
+      CHECK(ListItemIds(select) == u8"a g n m b c");
+      REQUIRE_FALSE(
+        select.Add(RefPtr<HTMLOptionElement>(newOption(u8"z")), HTMLSelectElement::HTMLElementOrInt {-1})
+          .HasException());
+      REQUIRE_FALSE(
+        select.Add(RefPtr<HTMLOptionElement>(newOption(u8"y")), HTMLSelectElement::HTMLElementOrInt {99})
+          .HasException());
+      CHECK(ListItemIds(select) == u8"a g n m b c z y");
+    }
+
+    SECTION("add() throws for an element outside the select, and does nothing to add an option before itself")
+    {
+      auto result = select.Add(RefPtr<HTMLOptionElement>(newOption(u8"n")), before(u8"o"));
+      REQUIRE(result.HasException());
+      CHECK(result.GetException().Code() == dom::ExceptionCode::NotFoundError);
+      REQUIRE_FALSE(
+        select.Add(ShareRefPtr(&OptionById(fixture, u8"c")), before(u8"c")).HasException());
+      CHECK(ListItemIds(select) == u8"a g b c");
+    }
+
+    SECTION("remove() removes the indexth option from its parent, and ignores other indices")
+    {
+      select.Remove(-1);
+      select.Remove(3);
+      CHECK(select.Length() == 3u);
+      select.Remove(1);
+      CHECK(ListItemIds(select) == u8"a g c");
+    }
+
+    SECTION("Growing the length appends new options, up to 100,000")
+    {
+      REQUIRE_FALSE(select.Length(5u).HasException());
+      CHECK(select.Length() == 5u);
+      CHECK(select.Item(4u)->ParentNode() == &select);
+      REQUIRE_FALSE(select.Length(100'001u).HasException());
+      CHECK(select.Length() == 5u);
+    }
+
+    SECTION("Setting an indexed option replaces the one there in its parent, or appends past the end")
+    {
+      auto n = newOption(u8"n");
+      REQUIRE_FALSE(select.SetItem(1u, n.get()).HasException());
+      CHECK(ListItemIds(select) == u8"a g n c");
+      CHECK(n->ParentNode() == &fixture.ById(u8"g"));
+
+      REQUIRE_FALSE(select.SetItem(5u, newOption(u8"m").get()).HasException());
+      CHECK(select.Length() == 6u);
+      CHECK(select.Item(5u)->GetAttribute(u8"id") == u8"m");
+
+      REQUIRE_FALSE(select.SetItem(0u, nullptr).HasException());
+      CHECK(select.Length() == 5u);
+    }
+  }
+
   TEST_CASE_METHOD(css::tests::ValueFixture, "HTMLSelectElement: selection", "[HTML][HTMLSelectElement]")
   {
     EditorFixture fixture(u8"<select id=s>"

@@ -140,7 +140,8 @@ namespace krys::boo::html
     constexpr auto MaxPositive = static_cast<uint64>(std::numeric_limits<int64>::max());
     if (result.ec == std::errc::result_out_of_range || value > MaxPositive + (positive ? 0 : 1))
     {
-      return {.Error = MicroParserError::OutOfRange};
+      return {.Value = positive ? std::numeric_limits<int64>::max() : std::numeric_limits<int64>::min(),
+              .Error = MicroParserError::OutOfRange};
     }
 
     // 9. If sign is "positive", return value, otherwise return the result of subtracting value from zero.
@@ -153,16 +154,17 @@ namespace krys::boo::html
     // 2. Let value be the result of parsing input using the rules for parsing integers.
     auto value = ParseInteger(input);
 
-    // 3. If value is an error, return an error.
-    if (!value.Success())
-    {
-      return {.Error = value.Error};
-    }
-
     // 4. If value is less than zero, return an error.
+    // (Before step 3, so that an integer too far below zero is still negative.)
     if (value.Value < 0)
     {
       return {.Error = MicroParserError::InvalidSign};
+    }
+
+    // 3. If value is an error, return an error.
+    if (!value.Success())
+    {
+      return {.Value = static_cast<uint64>(value.Value), .Error = value.Error};
     }
 
     // 5. Return value.

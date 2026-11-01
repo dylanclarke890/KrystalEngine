@@ -15,7 +15,7 @@ namespace krys::boo::html::tests
   using boo::tests::NavigationFixture;
   using boo::tests::Str;
 
-  TEST_CASE("Reflection: USVString attributes", "[HTML][Reflection]")
+  TEST_CASE("Reflection: USVString attributes", "[HTML][Reflection][html:treated-as-a-url]")
   {
     NavigationFixture fixture(u8R"(<img id=img src=" pic.png " srcset="a.png 1x, b.png 2x"><img id=none>
       <img id=bad src="http://[bad"><link id=link href="style.css"><script id=script src="s.js"></script>
@@ -39,7 +39,8 @@ namespace krys::boo::html::tests
     CHECK(Str(img.Src()) == "https://example.com/root.png");
   }
 
-  TEST_CASE("Reflection: action, formAction and the base element's href", "[HTML][Reflection]")
+  TEST_CASE("Reflection: action, formAction and the base element's href",
+            "[HTML][Reflection][html:treated-as-a-url]")
   {
     NavigationFixture fixture(u8R"(<base id=base href="https://base.test/b/"><form id=empty action=""></form>
       <form id=noaction></form><form id=f action="go"><button id=b>B</button><input id=i type=submit>

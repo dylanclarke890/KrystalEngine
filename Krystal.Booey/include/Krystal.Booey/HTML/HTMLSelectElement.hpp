@@ -153,9 +153,11 @@ namespace krys::boo::html
     using Element::Remove;
 
     /// @see https://html.spec.whatwg.org/#dom-select-remove
+    /// @see https://html.spec.whatwg.org/#htmloptionscollection-remove-an-option
     void Remove(int32 optionIndex) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-setter
+    /// @see https://html.spec.whatwg.org/#append-new-option-elements
     dom::ExceptionOr<void> SetItem(uint32 index, HTMLOptionElement *option) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-select-selectedoptions
@@ -281,6 +283,9 @@ namespace krys::boo::html
                             Maybe<dom::DOMStringView> value, dom::DOMStringAtom namespaceURI) noexcept final;
 
   private:
+    /// @see https://html.spec.whatwg.org/#append-new-option-elements
+    dom::ExceptionOr<void> AppendNewOptionElements(uint32 count) noexcept;
+
     /// @see https://html.spec.whatwg.org/#placeholder-label-option
     KRYS_NODISCARD bool HasPlaceholderLabelOption() const noexcept;
 

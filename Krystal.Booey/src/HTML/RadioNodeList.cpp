@@ -7,24 +7,6 @@
 
 namespace krys::boo::html
 {
-  namespace
-  {
-    KRYS_NODISCARD HTMLInputElement *NonEmptyRadioButton(dom::Node &node) noexcept
-    {
-      auto *inputElement = DynamicDowncast<HTMLInputElement>(node);
-      if (!inputElement)
-      {
-        return nullptr;
-      }
-
-      if (!inputElement->IsRadioButton() || inputElement->Value().empty())
-      {
-        return nullptr;
-      }
-      return inputElement;
-    }
-  }
-
   RadioNodeList::RadioNodeList(dom::ContainerNode &ownerNode, dom::DOMStringView name) noexcept
       : _ownerNode(ShareRef(ownerNode)), _name(name), _isRootedAtTreeScope(Is<HTMLFormElement>(ownerNode))
   {
@@ -73,30 +55,46 @@ namespace krys::boo::html
 
   dom::DOMString RadioNodeList::Value() const noexcept
   {
+    // 1. Let element be the first element in tree order represented by the RadioNodeList object that is an
+    //    input element whose type attribute is in the Radio Button state and whose checkedness is true.
+    //    Otherwise, let it be null.
     for (auto &element : Elements())
     {
-      if (auto *button = NonEmptyRadioButton(*element))
+      auto *input = DynamicDowncast<HTMLInputElement>(element.get());
+      if (input && input->IsRadioButton() && input->Checked())
       {
-        if (button->Checked())
-        {
-          return button->Value();
-        }
+        // 3. If element is an element with no value attribute, return the string "on".
+        // 4. Otherwise, return the value of element's value attribute.
+        return input->GetAttribute(u8"value").value_or(dom::DOMString(u8"on"));
       }
     }
+
+    // 2. If element is null, return the empty string.
     return {};
   }
 
   void RadioNodeList::SetValue(dom::DOMStringView value) noexcept
   {
+    // 1. If the new value is the string "on": let element be the first element in tree order represented by
+    //    the RadioNodeList object that is an input element whose type attribute is in the Radio Button state
+    //    and whose value content attribute is either absent, or present and equal to the new value, if any.
+    //    If no such element exists, then instead let element be null. Otherwise: let element be the first
+    //    element in tree order represented by the RadioNodeList object that is an input element whose type
+    //    attribute is in the Radio Button state and whose value content attribute is present and equal to the
+    //    new value, if any. If no such element exists, then instead let element be null.
     for (auto &element : Elements())
     {
-      if (auto *button = NonEmptyRadioButton(*element))
+      auto *input = DynamicDowncast<HTMLInputElement>(element.get());
+      if (!input || !input->IsRadioButton())
       {
-        if (button->Value() == value)
-        {
-          button->SetChecked(true);
-          return;
-        }
+        continue;
+      }
+      auto valueAttribute = input->GetAttribute(u8"value");
+      if (valueAttribute ? *valueAttribute == value : value == u8"on")
+      {
+        // 2. If element is not null, then set its checkedness to true.
+        input->SetChecked(true);
+        return;
       }
     }
   }

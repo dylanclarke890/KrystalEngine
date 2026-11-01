@@ -34,7 +34,10 @@ namespace krys::boo::html::tests
     };
   }
 
-  TEST_CASE("Reflection::Reflect", "[Attributes]")
+  TEST_CASE(
+    "Reflection::Reflect: each type's getter and setter, with defaults and ranges",
+    "[HTML][Attributes][html:xattr-reflect][html:xattr-reflectdefault][html:xattr-reflectrange]"
+    "[html:limited-to-only-known-values][html:default-value][html:clamped-to-the-range][html:reflect]")
   {
     SECTION("[Reflect]")
     {
@@ -219,6 +222,68 @@ namespace krys::boo::html::tests
     }
   }
 
+  TEST_CASE("Reflection::Reflect<int32>: integers outside the long range are the default",
+            "[HTML][Attributes][html:default-value]")
+  {
+    for (auto value : {u8"-2147483649", u8"2147483648", u8"99999999999999999999", u8"x"})
+    {
+      INFO(reinterpret_cast<const char *>(value));
+      TestData data {dom::DOMString(value)};
+      CHECK(Reflection::Reflect<int32>(*data.Element, TestAttribute) == 0);
+      CHECK(Reflection::ReflectNonNegative<int32>(*data.Element, TestAttribute) == -1);
+    }
+    TestData data {dom::DOMString(u8" -2147483648")};
+    CHECK(Reflection::Reflect<int32>(*data.Element, TestAttribute) == -2'147'483'648);
+    // Negative values aren't non-negative, but negative zero is zero.
+    CHECK(Reflection::ReflectNonNegative<int32>(*data.Element, TestAttribute) == -1);
+    TestData zero {dom::DOMString(u8"-0")};
+    CHECK(Reflection::ReflectNonNegative<int32>(*zero.Element, TestAttribute) == 0);
+  }
+
+  TEST_CASE("Reflection::Reflect<uint32>: setting a value past 2147483647 sets the default or minimum",
+            "[HTML][Attributes][html:clamped-to-the-range]")
+  {
+    TestData data;
+    Reflection::Reflect<uint32>(*data.Element, TestAttribute, 2'147'483'648u);
+    CHECK(data.Element->GetAttribute(TestAttribute) == u8"0");
+    Reflection::Reflect<uint32, ReflectDefault<uint32>(10)>(*data.Element, TestAttribute, 4'000'000'000u);
+    CHECK(data.Element->GetAttribute(TestAttribute) == u8"10");
+    Reflection::ReflectPositiveWithFallback<uint32>(*data.Element, TestAttribute, 0u);
+    CHECK(data.Element->GetAttribute(TestAttribute) == u8"1");
+    CHECK(Reflection::ReflectPositive<uint32>(*data.Element, TestAttribute, 0u).HasException());
+  }
+
+  TEST_CASE("Reflection::Reflect<uint32>: a range clamps values past it, however large",
+            "[HTML][Attributes][html:clamped-to-the-range]")
+  {
+    constexpr ReflectRange<uint32> Range {1, 1'000};
+    for (auto [value, expected] : {std::pair {u8"5000", 1'000u}, std::pair {u8"99999999999999999999", 1'000u},
+                                   std::pair {u8"0", 1u}, std::pair {u8"-5", 1u}, std::pair {u8"x", 1u}})
+    {
+      INFO(reinterpret_cast<const char *>(value));
+      TestData data {dom::DOMString(value)};
+      CHECK(Reflection::Reflect<uint32, Range>(*data.Element, TestAttribute) == expected);
+    }
+  }
+
+  TEST_CASE("Reflection::Reflect<double>: setting writes the best representation of the number",
+            "[HTML][Attributes][html:best-representation-of-the-number-as-a-floating-point-number]")
+  {
+    TestData data;
+    for (auto [value, expected] :
+         {std::pair {0.000001, u8"0.000001"}, std::pair {1e21, u8"1e+21"}, std::pair {1.5, u8"1.5"},
+          std::pair {-0.0, u8"0"}, std::pair {123456789012345680000.0, u8"123456789012345680000"},
+          std::pair {1e-7, u8"1e-7"}})
+    {
+      INFO(reinterpret_cast<const char *>(expected));
+      Reflection::Reflect<double>(*data.Element, TestAttribute, double(value));
+      CHECK(data.Element->GetAttribute(TestAttribute) == expected);
+    }
+    // Positive-only values ignore what isn't positive.
+    Reflection::ReflectPositive<double>(*data.Element, TestAttribute, -1.0);
+    CHECK(data.Element->GetAttribute(TestAttribute) == u8"1e-7");
+  }
+
   TEST_CASE("Reflection::Reflect<bool>: a boolean attribute is true when present, whatever its value",
             "[HTML][Attributes][html:boolean-attribute]")
   {
@@ -234,7 +299,7 @@ namespace krys::boo::html::tests
     CHECK(data.Element->GetAttribute(TestAttribute) == u8"");
   }
 
-  TEST_CASE("Reflection::ReflectURL", "[Attributes]")
+  TEST_CASE("Reflection::ReflectURL", "[HTML][Attributes][html:xattr-reflecturl][html:treated-as-a-url]")
   {
     SECTION("USVString")
     {
@@ -242,7 +307,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Reflection::ReflectNonNegative", "[Attributes]")
+  TEST_CASE("Reflection::ReflectNonNegative", "[HTML][Attributes][html:xattr-reflectnonnegative]")
   {
     SECTION("int32")
     {
@@ -276,7 +341,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Reflection::ReflectPositive", "[Attributes]")
+  TEST_CASE("Reflection::ReflectPositive", "[HTML][Attributes][html:xattr-reflectpositive]")
   {
     SECTION("uint32")
     {
@@ -340,7 +405,8 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Reflection::ReflectPositiveWithFallback", "[Attributes]")
+  TEST_CASE("Reflection::ReflectPositiveWithFallback",
+            "[HTML][Attributes][html:xattr-reflectpositivewithfallback]")
   {
     SECTION("uint32")
     {
@@ -371,7 +437,7 @@ namespace krys::boo::html::tests
     }
   }
 
-  TEST_CASE("Reflection::ReflectSetter", "[Attributes]")
+  TEST_CASE("Reflection::ReflectSetter", "[HTML][Attributes][html:xattr-reflectsetter]")
   {
     SECTION("DOMString")
     {

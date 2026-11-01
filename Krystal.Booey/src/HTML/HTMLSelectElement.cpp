@@ -3,6 +3,7 @@
 #include "Krystal.Booey/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Booey/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.Booey/DOM/Document.hpp"
+#include "Krystal.Booey/DOM/DocumentFragment.hpp"
 #include "Krystal.Booey/DOM/Internals/HTMLCollection/LiveHTMLCollection.hpp"
 #include "Krystal.Booey/DOM/KeyboardEvent.hpp"
 #include "Krystal.Booey/DOM/MouseEvent.hpp"
@@ -32,7 +33,7 @@ namespace krys::boo::html
   namespace
   {
     // Upper limit agreed upon with representatives of Opera and Mozilla.
-    constexpr uint32 MaxSelectItems = 10'000u;
+    constexpr uint32 MaxSelectItems = 100'000u;
 
     KRYS_NODISCARD uint32 LimitToOnlyHTMLNonNegative(Maybe<dom::DOMStringView> value) noexcept
     {
@@ -311,34 +312,53 @@ namespace krys::boo::html
   dom::ExceptionOr<void> HTMLSelectElement::Add(const OptionOrOptGroupElement &element,
                                                 const Maybe<HTMLElementOrInt> &before) noexcept
   {
+    // The options collection's add(element, before), which this acts like.
     CEReactionsScope ceReactions;
-    RefPtr<HTMLElement> beforeElement;
-    Ref<dom::ContainerNode> parent = ShareRef<dom::ContainerNode>(*this);
-    if (before)
-    {
-      beforeElement = std::visit(
-        [this]<typename T>(const T &value) -> RefPtr<HTMLElement>
-        {
-          if constexpr (SameType<T, int32>)
-          {
-            return ShareRefPtr<HTMLElement>(Item(static_cast<uint32>(value)));
-          }
-          else
-          {
-            return value;
-          }
-        },
-        *before);
-      if (std::holds_alternative<int32>(*before) && beforeElement && beforeElement->ParentNode())
-      {
-        parent = ShareRef(*beforeElement->ParentNode());
-      }
-    }
-
     Ref<HTMLElement> toInsert = std::visit([](const auto &htmlElement) -> Ref<HTMLElement>
                                            { return ShareRef<HTMLElement>(*htmlElement); }, element);
+    RefPtr<HTMLElement> beforeElement;
+    if (before && std::holds_alternative<RefPtr<HTMLElement>>(*before))
+    {
+      beforeElement = std::get<RefPtr<HTMLElement>>(*before);
+    }
 
-    auto result = parent->InsertBefore(*toInsert, beforeElement.get());
+    // 1. If element is an ancestor of the select element on which this is rooted, then throw a
+    //    "HierarchyRequestError" DOMException.
+    if (dom::TreeQueries::IsAncestor(*toInsert, *this))
+    {
+      return dom::ExceptionCode::HierarchyRequestError;
+    }
+
+    // 2. If before is an element, but that element isn't a descendant of the select element on which this is
+    //    rooted, then throw a "NotFoundError" DOMException.
+    if (beforeElement && !dom::TreeQueries::IsDescendant(*beforeElement, *this))
+    {
+      return dom::ExceptionCode::NotFoundError;
+    }
+
+    // 3. If element and before are the same element, then return.
+    if (beforeElement.get() == toInsert.get())
+    {
+      return {};
+    }
+
+    // 4. Let reference be null.
+    // 5. If before is a node, then set reference to before. Otherwise, if before is an integer and there is a
+    //    beforeth node in this, then set reference to that node.
+    RefPtr<HTMLElement> reference = beforeElement;
+    if (before && std::holds_alternative<int32>(*before) && std::get<int32>(*before) >= 0)
+    {
+      reference = ShareRefPtr<HTMLElement>(Item(static_cast<uint32>(std::get<int32>(*before))));
+    }
+
+    // 6. Let parent be reference's parent node if reference is not null; otherwise the select element on
+    // which
+    //    this is rooted.
+    Ref<dom::ContainerNode> parent =
+      reference ? ShareRef(*reference->ParentNode()) : ShareRef<dom::ContainerNode>(*this);
+
+    // 7. Pre-insert element into parent node before reference.
+    auto result = parent->InsertBefore(*toInsert, reference.get());
     if (result.HasException())
     {
       return result.ReleaseException();
@@ -348,13 +368,21 @@ namespace krys::boo::html
 
   void HTMLSelectElement::Remove(int32 optionIndex) noexcept
   {
+    // To remove an option from the options collection given index:
+    // https://html.spec.whatwg.org/#htmloptionscollection-remove-an-option
     CEReactionsScope ceReactions;
+
+    // 1. If the number of nodes represented by collection is 0, then return.
+    // 2. If index is not a number greater than or equal to 0 and less than the number of nodes represented by
+    //    collection, then return.
     int32 listIndex = OptionToListIndex(optionIndex);
     if (listIndex < 0)
     {
       return;
     }
 
+    // 3. Let element be the indexth element in collection.
+    // 4. Remove element from its parent node.
     Ref<HTMLElement> item = ShareRef(*ListItems()[static_cast<size_t>(listIndex)]);
     (void)item->Remove();
   }
@@ -565,77 +593,115 @@ namespace krys::boo::html
 
   dom::ExceptionOr<void> HTMLSelectElement::SetItem(uint32 index, HTMLOptionElement *option) noexcept
   {
+    // Setting a new or existing indexed property of the options collection.
     CEReactionsScope ceReactions;
+
+    // 1. If value is null, then remove an option from collection given index and return.
     if (!option)
     {
       Remove(static_cast<int32>(index));
       return {};
     }
 
-    // If we are adding options, we should check 'index > MaxSelectItems' first to avoid integer overflow.
-    if (index > Length() && index >= MaxSelectItems)
-    {
-      return {};
-    }
+    // 2. Let length be the number of nodes represented by collection.
+    uint32 length = Length();
 
-    int64 diff = static_cast<int64>(index) - static_cast<int64>(Length());
+    // 3. Let delta be index − length.
+    int64 delta = static_cast<int64>(index) - static_cast<int64>(length);
 
-    RefPtr<HTMLOptionElement> before;
-    // Out of array bounds? First insert empty dummies.
-    if (diff > 0)
+    // 4. If delta is greater than 0, then append new option elements to the select element on which
+    // collection
+    //    is rooted given delta.
+    if (delta > 0)
     {
-      auto result = Length(index);
+      // An index past the limit the length setter has does nothing, as in other browsers.
+      if (index >= MaxSelectItems)
+      {
+        return {};
+      }
+      auto result = AppendNewOptionElements(static_cast<uint32>(delta));
       if (result.HasException())
       {
         return result;
       }
     }
-    // Replace an existing entry?
-    else if (diff < 0)
-    {
-      before = ShareRefPtr(Item(index + 1u));
-      Remove(static_cast<int32>(index));
-    }
 
-    // Finally add the new element.
-    auto result = Add(ShareRefPtr(option), HTMLElementOrInt {RefPtr<HTMLElement>(before)});
-    if (result.HasException())
+    // 5. If delta is greater than or equal to 0, then append value to the select element on which collection
+    //    is rooted. Otherwise, replace the indexth element in collection by value.
+    if (delta >= 0)
     {
-      return result;
+      auto result = AppendChild(*option);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+      if (option->Selected())
+      {
+        OptionSelectionStateChanged(*option, true);
+      }
     }
-
-    if (diff >= 0 && option->Selected())
+    else
     {
-      OptionSelectionStateChanged(*option, true);
+      Ref<HTMLOptionElement> item = ShareRef(*Item(index));
+      auto result = item->ParentNode()->ReplaceChild(*option, *item);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
     }
 
     return {};
   }
 
+  dom::ExceptionOr<void> HTMLSelectElement::AppendNewOptionElements(uint32 count) noexcept
+  {
+    // 1. Let fragment be the result of creating a document fragment given select's node document.
+    auto fragment = CreateRef<dom::DocumentFragment>(NodeDocument());
+
+    // 2. Append count new option elements to fragment.
+    for (uint32 i = 0; i < count; ++i)
+    {
+      auto result = fragment->AppendChild(*CreateRef<HTMLOptionElement>(NodeDocument()));
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    // 3. Append fragment to select.
+    auto result = AppendChild(*fragment);
+    if (result.HasException())
+    {
+      return result.ReleaseException();
+    }
+    return {};
+  }
+
   dom::ExceptionOr<void> HTMLSelectElement::Length(uint32 newLength) noexcept
   {
+    // The options collection's length setter, which this acts like.
     CEReactionsScope ceReactions;
-    // If we are adding options, we should check 'index > MaxSelectItems' first to avoid integer overflow.
-    if (newLength > Length() && newLength > MaxSelectItems)
-    {
-      return {};
-    }
 
-    int64 diff = static_cast<int64>(Length()) - static_cast<int64>(newLength);
+    // 1. Let current be the number of nodes represented by the collection.
+    uint32 current = Length();
 
-    // Add dummy elements.
-    if (diff < 0)
+    // 2. If the given value is greater than current:
+    if (newLength > current)
     {
-      do
+      // 2a. If the given value is greater than 100,000, then return.
+      if (newLength > MaxSelectItems)
       {
-        auto result = Add(RefPtr<HTMLOptionElement>(CreateRef<HTMLOptionElement>(NodeDocument())));
-        if (result.HasException())
-        {
-          return result;
-        }
-      } while (++diff);
+        return {};
+      }
+
+      // 2b. Let n be value − current.
+      // 2c. Append new option elements to the select element on which this is rooted given n.
+      return AppendNewOptionElements(newLength - current);
     }
-    else
+
+    // 3. If the given value is less than current:
+    // 3a. Let n be current − value.
+    // 3b. Remove the last n nodes in the collection from their parent nodes.
     {
       // Removing children fires mutation events, which might mutate the DOM further, so we first copy out a
       // list of elements that we intend to remove then attempt to remove them one at a time.

@@ -80,9 +80,12 @@ namespace krys::boo::html::tests
 
     SECTION("Outside int64's range")
     {
-      TestParse<int64>(u8"9223372036854775808", MicroParserError::OutOfRange);
-      TestParse<int64>(u8"-9223372036854775809", MicroParserError::OutOfRange);
-      TestParse<int64>(u8"99999999999999999999999", MicroParserError::OutOfRange);
+      TestParse<int64>(u8"9223372036854775808",
+                       {.Value = std::numeric_limits<int64>::max(), .Error = MicroParserError::OutOfRange});
+      TestParse<int64>(u8"-9223372036854775809",
+                       {.Value = std::numeric_limits<int64>::min(), .Error = MicroParserError::OutOfRange});
+      TestParse<int64>(u8"99999999999999999999999",
+                       {.Value = std::numeric_limits<int64>::max(), .Error = MicroParserError::OutOfRange});
     }
   }
 
@@ -106,7 +109,10 @@ namespace krys::boo::html::tests
       TestParse<uint64>(u8"  abc", MicroParserError::InvalidCharacter);
       TestParse<uint64>(u8"  ", MicroParserError::UnexpectedEndOfInput);
       TestParse<uint64>(u8"", MicroParserError::UnexpectedEndOfInput);
-      TestParse<uint64>(u8"9223372036854775808", MicroParserError::OutOfRange);
+      TestParse<uint64>(u8"9223372036854775808",
+                        {.Value = 9'223'372'036'854'775'807u, .Error = MicroParserError::OutOfRange});
+      // An integer too far below zero is still negative.
+      TestParse<uint64>(u8"-9223372036854775809", MicroParserError::InvalidSign);
     }
   }
 

@@ -691,4 +691,49 @@ namespace krys::boo::dom::tests
       CHECK(SlotAlgorithms::GetAssignedSlot(*span) == defaultSlot.get());
     }
   }
+
+  TEST_CASE(
+    "Element::ElementForAttributeInternal: the explicitly set element while it's in a shadow-including "
+    "ancestor's tree, else the element with the ID",
+    "[DOM][Element][html:attr-associated-element]")
+  {
+    auto document = CreateRef<HTMLDocument>();
+    auto root = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(document->AppendChild(*root).HasException());
+    auto button = document->CreateElement(u8"button").ReleaseValue();
+    auto target = document->CreateElement(u8"div").ReleaseValue();
+    auto other = document->CreateElement(u8"div").ReleaseValue();
+    REQUIRE_FALSE(target->SetAttribute(u8"id", u8"t").HasException());
+    REQUIRE_FALSE(root->Append({Ref<Node>(button), Ref<Node>(target)}).HasException());
+
+    // By ID, in the element's tree.
+    REQUIRE_FALSE(button->SetAttribute(u8"commandfor", u8"t").HasException());
+    CHECK(button->ElementForAttributeInternal(u8"commandfor").get() == target.get());
+    CHECK_FALSE(button->ElementForAttributeInternal(u8"popovertarget"));
+
+    // Setting the element empties the content attribute; the element counts only in the same tree.
+    button->SetElementAttribute(u8"commandfor", other.get());
+    CHECK(button->GetAttribute(u8"commandfor") == u8"");
+    CHECK_FALSE(button->ElementForAttributeInternal(u8"commandfor"));
+    REQUIRE_FALSE(root->Append({Ref<Node>(other)}).HasException());
+    CHECK(button->ElementForAttributeInternal(u8"commandfor").get() == other.get());
+
+    // An element in a shadow tree can refer to one in its host's tree, but not the other way round.
+    auto shadow = root->AttachShadow({}).ReleaseValue();
+    auto inner = document->CreateElement(u8"button").ReleaseValue();
+    REQUIRE_FALSE(shadow->Append({Ref<Node>(inner)}).HasException());
+    inner->SetElementAttribute(u8"commandfor", other.get());
+    CHECK(inner->ElementForAttributeInternal(u8"commandfor").get() == other.get());
+    button->SetElementAttribute(u8"commandfor", inner.get());
+    CHECK_FALSE(button->ElementForAttributeInternal(u8"commandfor"));
+
+    // Changing the content attribute forgets the explicitly set element.
+    REQUIRE_FALSE(button->SetAttribute(u8"commandfor", u8"t").HasException());
+    CHECK(button->ElementForAttributeInternal(u8"commandfor").get() == target.get());
+
+    // Setting null removes the content attribute.
+    button->SetElementAttribute(u8"commandfor", nullptr);
+    CHECK_FALSE(button->HasAttribute(u8"commandfor"));
+    CHECK_FALSE(button->ElementForAttributeInternal(u8"commandfor"));
+  }
 }
