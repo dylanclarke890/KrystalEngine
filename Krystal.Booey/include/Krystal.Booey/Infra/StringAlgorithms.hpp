@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Booey/DOM/Types/DOMString.hpp"
+#include "Krystal.Core/Assert.hpp"
 #include "Krystal.Core/Text/ASCII.hpp"
 #include "Krystal.Core/Types/List.hpp"
 #include "Krystal.Core/Types/Maybe.hpp"
 #include "Krystal.Core/Types/Span.hpp"
 #include <algorithm>
-#include <cassert>
 
 namespace krys::boo::infra
 {
@@ -104,24 +104,34 @@ namespace krys::boo::infra
       return result;
     }
 
+    /// @note @p condition is given UTF-8 code units, which is the same as being given code points when it
+    /// tests only for ASCII code points (giving the same answer for every non-ASCII code unit).
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
     KRYS_NODISCARD static dom::DOMStringView CollectCodePointSequence(dom::DOMStringView input,
                                                                       position_variable &position,
                                                                       TFunc &&condition) noexcept
     {
+      // 1. Let result be the empty string.
       position_variable start = position;
+
+      // 2. While position doesn’t point past the end of input and the code point at position within input
+      // meets the
+      //    condition condition:
+      // 2a. Append that code point to the end of result.
+      // 2b. Advance position by 1.
       AdvancePositionWhile(input, position, condition);
+
+      // 3. Return result.
       return dom::DOMStringView(start, position);
     }
 
-    /// @brief Advances 'position' until 'condition' returns false for the current code point.
+    /// @brief Advances @p position while @p condition returns true for the code unit at it.
+    /// @note As for CollectCodePointSequence, @p condition should test only for ASCII code points.
     template <typename TFunc>
     static void AdvancePositionWhile(dom::DOMStringView input, position_variable &position,
                                      TFunc &&condition) noexcept
     {
-      // FIXME: We're not iterating over code points properly here. we need a way of just
-      // iterating over code points in a UTF-8 string instead of having to
       while (position != input.end() && condition(*position))
       {
         ++position;
@@ -140,64 +150,111 @@ namespace krys::boo::infra
       AdvancePositionWhile(input, position, IsASCIIWhitespace);
     }
 
+    /// @param delimiter An ASCII code point.
     /// @see https://infra.spec.whatwg.org/#strictly-split
     KRYS_NODISCARD static List<dom::DOMString> StrictlySplit(dom::DOMStringView input,
                                                              char32 delimiter) noexcept
     {
-      List<dom::DOMString> tokens;
+      krys_debug_assert(::krys::text::IsASCII(delimiter));
+
+      // 1. Let position be a position variable for input, initially pointing at the start of input.
       auto position = input.begin();
 
+      // 2. Let tokens be a list of strings, initially empty.
+      List<dom::DOMString> tokens;
+
+      // 3. Let token be the result of collecting a sequence of code points that are not equal to delimiter
+      // from
+      //    input, given position.
+      // 4. Append token to tokens.
       tokens.emplace_back(CollectCodePointSequence(input, position, [delimiter](char32 current)
                                                    { return current != delimiter; }));
 
+      // 5. While position is not past the end of input:
       while (position != input.end())
       {
-        assert(*position == delimiter);
+        // 5a. Assert: the code point at position within input is delimiter.
+        krys_debug_assert(static_cast<char32>(*position) == delimiter);
+
+        // 5b. Advance position by 1.
         ++position;
+
+        // 5c. Let token be the result of collecting a sequence of code points that are not equal to delimiter
+        // from
+        //     input, given position.
+        // 5d. Append token to tokens.
         tokens.emplace_back(CollectCodePointSequence(input, position, [delimiter](char32 current)
                                                      { return current != delimiter; }));
       }
 
+      // 6. Return tokens.
       return tokens;
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-ascii-whitespace
     KRYS_NODISCARD static List<dom::DOMString> SplitOnWhitespace(dom::DOMStringView input)
     {
-      List<dom::DOMString> tokens;
+      // 1. Let position be a position variable for input, initially pointing at the start of input.
       auto position = input.begin();
 
+      // 2. Let tokens be a list of strings, initially empty.
+      List<dom::DOMString> tokens;
+
+      // 3. Skip ASCII whitespace within input given position.
       SkipWhitespace(input, position);
+
+      // 4. While position is not past the end of input:
       while (position != input.end())
       {
+        // 4a. Let token be the result of collecting a sequence of code points that are not ASCII whitespace
+        // from
+        //     input, given position.
+        // 4b. Append token to tokens.
         tokens.emplace_back(CollectCodePointSequence(input, position, [](char32 current)
                                                      { return !IsASCIIWhitespace(current); }));
+
+        // 4c. Skip ASCII whitespace within input given position.
         SkipWhitespace(input, position);
       }
 
+      // 5. Return tokens.
       return tokens;
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-commas
     KRYS_NODISCARD static List<dom::DOMString> SplitOnComma(dom::DOMStringView input)
     {
-      List<dom::DOMString> tokens;
-      const char comma = ',';
+      // 1. Let position be a position variable for input, initially pointing at the start of input.
       auto position = input.begin();
 
+      // 2. Let tokens be a list of strings, initially empty.
+      List<dom::DOMString> tokens;
+
+      // 3. While position is not past the end of input:
       while (position != input.end())
       {
+        // 3a. Let token be the result of collecting a sequence of code points that are not U+002C (,) from
+        // input,
+        //     given position.
         auto token =
-          CollectCodePointSequence(input, position, [comma](char32 current) { return current != comma; });
+          CollectCodePointSequence(input, position, [](char32 current) { return current != u8','; });
+
+        // 3b. Strip leading and trailing ASCII whitespace from token.
+        // 3c. Append token to tokens.
         tokens.emplace_back(StripLeadingAndTrailingWhitespace(token));
 
+        // 3d. If position is not past the end of input:
         if (position != input.end())
         {
-          assert(*position == comma);
+          // 3d.i. Assert: the code point at position within input is U+002C (,).
+          krys_debug_assert(*position == u8',');
+
+          // 3d.ii. Advance position by 1.
           ++position;
         }
       }
 
+      // 4. Return tokens.
       return tokens;
     }
 
@@ -205,12 +262,16 @@ namespace krys::boo::infra
     KRYS_NODISCARD static dom::DOMString Concatenate(Span<dom::DOMString> tokens,
                                                      Maybe<dom::DOMString> separator) noexcept
     {
+      // 1. If list is empty, then return the empty string.
       if (tokens.empty())
       {
         return u8"";
       }
 
+      // 2. If separator is not given, then set separator to the empty string.
       auto sep = separator.value_or(u8"");
+
+      // 3. Return a string whose contents are list’s items, in order, separated from each other by separator.
       dom::DOMString result;
       for (size_t i = 0; i < tokens.size() - 1; i++)
       {
@@ -233,7 +294,7 @@ namespace krys::boo::infra
 
       for (size_t i = 0; i < a.length(); i++)
       {
-        if (krys::text::ToASCIILowerUnchecked(a[i]) != krys::text::ToASCIILowerUnchecked(b[i]))
+        if (krys::text::ToASCIILower(a[i]) != krys::text::ToASCIILower(b[i]))
         {
           return false;
         }
@@ -246,16 +307,25 @@ namespace krys::boo::infra
     /// @see https://infra.spec.whatwg.org/#code-unit-less-than
     KRYS_NODISCARD static bool CodeUnitLessThan(dom::DOMStringView a, dom::DOMStringView b) noexcept
     {
+      // A UTF-8 string is a prefix of another exactly when its UTF-16 form is.
       auto [aIt, bIt] = std::ranges::mismatch(a, b);
+
+      // 1. If b is a code unit prefix of a, then return false.
       if (bIt == b.end())
       {
         return false;
       }
+
+      // 2. If a is a code unit prefix of b, then return true.
       if (aIt == a.end())
       {
         return true;
       }
 
+      // 3. Let n be the smallest index such that the nth code unit of a is different from the nth code unit
+      // of b.
+      // 4. If the nth code unit of a is less than the nth code unit of b, then return true.
+      // 5. Return false.
       // UTF-8 sorts by code point, which matches UTF-16 except that supplementary code points (surrogate
       // pairs in UTF-16) sort before U+E000 to U+FFFF.
       auto i = static_cast<size_t>(aIt - a.begin());

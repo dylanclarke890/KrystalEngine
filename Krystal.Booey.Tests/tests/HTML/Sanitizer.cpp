@@ -3,7 +3,6 @@
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerAlgorithms.hpp"
 #include "Krystal.Booey/HTML/Sanitizer/SanitizerConstants.hpp"
 #include "Krystal.Booey/Infra/Namespaces.hpp"
-#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 
 namespace krys::boo::html::tests
 {
@@ -289,16 +288,5 @@ namespace krys::boo::html::tests
     CHECK_FALSE(Allows(config, u8"href", u8"javascript:x", u8"mrow", MathML));
     CHECK_FALSE(Allows(config, u8"attributeName", u8"href", u8"animate", SVG));
     CHECK(Allows(config, u8"attributeName", u8"fill", u8"animate", SVG));
-  }
-
-  TEST_CASE("Sanitizer: code unit order", "[HTML][Sanitizer]")
-  {
-    using infra::StringAlgorithms;
-    CHECK(StringAlgorithms::CodeUnitLessThan(u8"a", u8"b"));
-    CHECK(StringAlgorithms::CodeUnitLessThan(u8"a", u8"ab"));
-    CHECK_FALSE(StringAlgorithms::CodeUnitLessThan(u8"ab", u8"ab"));
-    // U+1F600 is a surrogate pair in UTF-16, which sorts before U+FF21.
-    CHECK(StringAlgorithms::CodeUnitLessThan(u8"\U0001F600", u8"Ａ"));
-    CHECK_FALSE(StringAlgorithms::CodeUnitLessThan(u8"Ａ", u8"\U0001F600"));
   }
 }

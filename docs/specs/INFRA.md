@@ -8,124 +8,133 @@ Statuses: `unreviewed`, `in review`, `reviewed (<date>)`, `n/a (<reason>)`. An a
 
 ## [Abstract](https://infra.spec.whatwg.org/#abstract)
 
-Status: unreviewed
+Status: n/a (front matter)
 
 ## [Goals](https://infra.spec.whatwg.org/#goals)
 
-Status: unreviewed
+Status: n/a (front matter)
 
 ## [1. Usage](https://infra.spec.whatwg.org/#usage)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ## [2. Conventions](https://infra.spec.whatwg.org/#conventions)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [2.1. Conformance](https://infra.spec.whatwg.org/#conformance)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [2.2. Compliance with other specifications](https://infra.spec.whatwg.org/#other-specs)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: willful-violation -->
 
 ### [2.3. Terminology](https://infra.spec.whatwg.org/#terminology)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: user-agent implementation implementation-defined -->
 
 ### [2.4. Privacy concerns](https://infra.spec.whatwg.org/#privacy)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: tracking-vector -->
 
 ## [3. Algorithms](https://infra.spec.whatwg.org/#algorithms)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
+> Algorithms are labelled with their steps as the checklists say; assertions are `krys_debug_assert`.
 
 ### [3.1. Conformance](https://infra.spec.whatwg.org/#algorithm-conformance)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.2. Avoid limits on algorithm inputs](https://infra.spec.whatwg.org/#algorithm-limits)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.3. Declaration](https://infra.spec.whatwg.org/#algorithm-declaration)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.4. Parameters](https://infra.spec.whatwg.org/#algorithm-params)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.5. Variables](https://infra.spec.whatwg.org/#variables)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.6. Control flow](https://infra.spec.whatwg.org/#algorithm-control-flow)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.7. Conditional abort](https://infra.spec.whatwg.org/#algorithm-conditional-abort)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: abort-when if-aborted -->
 
 ### [3.8. Conditional statements](https://infra.spec.whatwg.org/#algorithm-conditional-statements)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 
 ### [3.9. Iteration](https://infra.spec.whatwg.org/#algorithm-iteration)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: iteration-while iteration-continue iteration-break -->
 
 ### [3.10. Assertions](https://infra.spec.whatwg.org/#assertions)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: assert -->
 
 ### [3.11. Identity and equality](https://infra.spec.whatwg.org/#identity-and-equality)
 
-Status: unreviewed
+Status: n/a (guidance for specification authors)
 <!-- definitions: is equality equal -->
 
 ## [4. Primitive data types](https://infra.spec.whatwg.org/#primitive-data-types)
 
-Status: unreviewed
+Status: n/a (heading only)
 
 ### [4.1. Nulls](https://infra.spec.whatwg.org/#nulls)
 
-Status: unreviewed
+Status: n/a (C++ types)
+> Null is an empty `Maybe` (`null`) or a null pointer.
 
 ### [4.2. Booleans](https://infra.spec.whatwg.org/#booleans)
 
-Status: unreviewed
+Status: n/a (C++ types)
+> `bool`.
 <!-- definitions: boolean -->
 
 ### [4.3. Numbers](https://infra.spec.whatwg.org/#numbers)
 
-Status: unreviewed
+Status: n/a (C++ types)
+> The engine's numeric types (`uint8` to `int64`, `float`, `double`).
 <!-- definitions: 8-bit-unsigned-integer 16-bit-unsigned-integer 32-bit-unsigned-integer 64-bit-unsigned-integer 128-bit-unsigned-integer 8-bit-signed-integer 16-bit-signed-integer 32-bit-signed-integer 64-bit-signed-integer -->
 
 ### [4.4. Bytes](https://infra.spec.whatwg.org/#bytes)
 
-Status: unreviewed
+Status: n/a (C++ types)
+> `uint8` and `byte`; the ASCII classes of `Krystal.Core/Text/ASCII.hpp` take bytes too.
 <!-- definitions: byte byte-value ascii-byte -->
 
 ### [4.5. Byte sequences](https://infra.spec.whatwg.org/#byte-sequences)
 
-Status: unreviewed
+Status: n/a (unused)
+> Byte sequences are `List<uint8>`/`Span<const uint8>`. Nothing in Booey uses the byte sequence algorithms (they serve HTTP, which Booey doesn't parse).
 <!-- definitions: byte-sequence byte-sequence-length byte-case-insensitive byte-sequence-starts-with -->
 
-- [ ] [byte-lowercase](https://infra.spec.whatwg.org/#byte-lowercase) — To byte-lowercase a byte sequence, increase each byte it contains, in the range 0x41 (A) to 0x5A (Z), inclusive, by 0x20.
+- [x] [byte-lowercase](https://infra.spec.whatwg.org/#byte-lowercase) — To byte-lowercase a byte sequence, increase each byte it contains, in the range 0x41 (A) to 0x5A (Z), inclusive, by 0x20.
+  > n/a: nothing uses it.
 
-- [ ] [byte-uppercase](https://infra.spec.whatwg.org/#byte-uppercase) — To byte-uppercase a byte sequence, subtract each byte it contains, in the range 0x61 (a) to 0x7A (z), inclusive, by 0x20.
+- [x] [byte-uppercase](https://infra.spec.whatwg.org/#byte-uppercase) — To byte-uppercase a byte sequence, subtract each byte it contains, in the range 0x61 (a) to 0x7A (z), inclusive, by 0x20.
+  > n/a: nothing uses it.
 
-- [ ] [prefix (byte sequence)](https://infra.spec.whatwg.org/#byte-sequence-prefix) — A byte sequence potentialPrefix is a prefix of a byte sequence input if the following steps return true:
+- [x] [prefix (byte sequence)](https://infra.spec.whatwg.org/#byte-sequence-prefix) — A byte sequence potentialPrefix is a prefix of a byte sequence input if the following steps return true:
+  > n/a: nothing uses it.
   - 1. Let i be 0.
   - 2. While true:
     - 2a. If i is greater than or equal to potentialPrefix’s length, then return true.
@@ -135,28 +144,34 @@ Status: unreviewed
     - 2e. Return false if potentialPrefixByte is not inputByte.
     - 2f. Set i to i + 1.
 
-- [ ] [byte less than](https://infra.spec.whatwg.org/#byte-less-than) — A byte sequence a is byte less than a byte sequence b if the following steps return true:
+- [x] [byte less than](https://infra.spec.whatwg.org/#byte-less-than) — A byte sequence a is byte less than a byte sequence b if the following steps return true:
+  > n/a: nothing uses it.
   - 1. If b is a prefix of a, then return false.
   - 2. If a is a prefix of b, then return true.
   - 3. Let n be the smallest index such that the nth byte of a is different from the nth byte of b. (There has to be such an index, since neither byte sequence is a prefix of the other.)
   - 4. If the nth byte of a is less than the nth byte of b, then return true.
   - 5. Return false.
 
-- [ ] [isomorphic decode](https://infra.spec.whatwg.org/#isomorphic-decode) — To isomorphic decode a byte sequence input, return a string whose code point length is equal to input’s length and whose code points have the same values as the values of input’s bytes, in the same order.
+- [x] [isomorphic decode](https://infra.spec.whatwg.org/#isomorphic-decode) — To isomorphic decode a byte sequence input, return a string whose code point length is equal to input’s length and whose code points have the same values as the values of input’s bytes, in the same order.
+  > n/a: nothing uses it (`LocalDOMWindow::Atob` decodes inline).
 
 ### [4.6. Code points](https://infra.spec.whatwg.org/#code-points)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> The ASCII classes are `Krystal.Core/Text/ASCII.hpp` (`IsASCII`, `IsASCIIUpper`, `IsASCIILower`, `IsASCIIAlpha`, `IsASCIIDigit`, `IsASCIIAlphanumeric`, `IsASCIIHexDigit`, `IsASCIIWhitespace`). Tests: `tests/Infra/StringAlgorithms.cpp`. Strings are UTF-8, so they hold only scalar values: surrogates and noncharacters need no handling of their own.
 <!-- definitions: code-point code-point-value leading-surrogate trailing-surrogate surrogate scalar-value noncharacter ascii-code-point ascii-tab-or-newline ascii-whitespace c0-control c0-control-or-space control ascii-digit ascii-upper-hex-digit ascii-lower-hex-digit ascii-hex-digit ascii-upper-alpha ascii-lower-alpha ascii-alpha ascii-alphanumeric -->
 
 ### [4.7. Strings](https://infra.spec.whatwg.org/#strings)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> Code: `infra::StringAlgorithms` (`Infra/StringAlgorithms.hpp`), and `text::ToASCIILower`/`ToASCIIUpper` for ASCII lowercase and uppercase. Tests: `tests/Infra/StringAlgorithms.cpp`. Strings are UTF-8 (`DOMString`), so lengths and indices count UTF-8 code units (`DIFFERENCES.md`); code unit less than compares as UTF-16 would. Collecting code points goes by code unit, which is the same for the conditions used, which test only for ASCII.
 <!-- definitions: string code-unit string-length string-code-point-length ascii-string isomorphic-string scalar-value-string string-is string-starts-with string-ends-with code-unit-substring-by-positions code-unit-substring-to-the-end-of-the-string code-point-substring-by-positions code-point-substring-to-the-end-of-the-string ascii-case-insensitive string-position-variable -->
 
-- [ ] [convert (string,JavaScript string)](https://infra.spec.whatwg.org/#javascript-string-convert) — To convert a string into a scalar value string, replace any surrogates with U+FFFD (�).
+- [x] [convert (string,JavaScript string)](https://infra.spec.whatwg.org/#javascript-string-convert) — To convert a string into a scalar value string, replace any surrogates with U+FFFD (�).
+  > n/a: strings are UTF-8, so they are always scalar value strings.
 
-- [ ] [code unit prefix](https://infra.spec.whatwg.org/#code-unit-prefix) — A string potentialPrefix is a code unit prefix of a string input if the following steps return true:
+- [x] [code unit prefix](https://infra.spec.whatwg.org/#code-unit-prefix) — A string potentialPrefix is a code unit prefix of a string input if the following steps return true:
+  > n/a: `starts_with` on UTF-8, which gives the same answer as on UTF-16.
   - 1. Let i be 0.
   - 2. While true:
     - 2a. If i is greater than or equal to potentialPrefix’s length, then return true.
@@ -166,7 +181,8 @@ Status: unreviewed
     - 2e. Return false if potentialPrefixCodeUnit is not inputCodeUnit.
     - 2f. Set i to i + 1.
 
-- [ ] [code unit suffix](https://infra.spec.whatwg.org/#code-unit-suffix) — A string potentialSuffix is a code unit suffix of a string input if the following steps return true:
+- [x] [code unit suffix](https://infra.spec.whatwg.org/#code-unit-suffix) — A string potentialSuffix is a code unit suffix of a string input if the following steps return true:
+  > n/a: `ends_with` on UTF-8, which gives the same answer as on UTF-16.
   - 1. Let i be 1.
   - 2. While true:
     - 2a. Let potentialSuffixIndex be potentialSuffix’s length − i.
@@ -178,57 +194,63 @@ Status: unreviewed
     - 2g. Return false if potentialSuffixCodeUnit is not inputCodeUnit.
     - 2h. Set i to i + 1.
 
-- [ ] [code unit less than](https://infra.spec.whatwg.org/#code-unit-less-than) — A string a is code unit less than a string b if the following steps return true:
+- [x] [code unit less than](https://infra.spec.whatwg.org/#code-unit-less-than) — A string a is code unit less than a string b if the following steps return true:
   - 1. If b is a code unit prefix of a, then return false.
   - 2. If a is a code unit prefix of b, then return true.
   - 3. Let n be the smallest index such that the nth code unit of a is different from the nth code unit of b. (There has to be such an index, since neither string is a prefix of the other.)
   - 4. If the nth code unit of a is less than the nth code unit of b, then return true.
   - 5. Return false.
 
-- [ ] [code unit substring](https://infra.spec.whatwg.org/#code-unit-substring) — The code unit substring from start with length length within a string string is determined as follows:
+- [x] [code unit substring](https://infra.spec.whatwg.org/#code-unit-substring) — The code unit substring from start with length length within a string string is determined as follows:
+  > n/a: `substr`, in UTF-8 code units (`DIFFERENCES.md`).
   - 1. Assert: start and length are nonnegative.
   - 2. Assert: start + length is less than or equal to string’s length.
   - 3. Let result be the empty string.
   - 4. For each i of the range from start to start + length, exclusive: append the ith code unit of string to result.
   - 5. Return result.
 
-- [ ] [code point substring](https://infra.spec.whatwg.org/#code-point-substring) — The code point substring within a string string from start with length length is determined as follows:
+- [x] [code point substring](https://infra.spec.whatwg.org/#code-point-substring) — The code point substring within a string string from start with length length is determined as follows:
+  > n/a: nothing uses it.
   - 1. Assert: start and length are nonnegative.
   - 2. Assert: start + length is less than or equal to string’s code point length.
   - 3. Let result be the empty string.
   - 4. For each i of the range from start to start + length, exclusive: append the ith code point of string to result.
   - 5. Return result.
 
-- [ ] [isomorphic encode](https://infra.spec.whatwg.org/#isomorphic-encode) — To isomorphic encode an isomorphic string input: return a byte sequence whose length is equal to input’s code point length and whose bytes have the same values as the values of input’s code points, in the same order.
+- [x] [isomorphic encode](https://infra.spec.whatwg.org/#isomorphic-encode) — To isomorphic encode an isomorphic string input: return a byte sequence whose length is equal to input’s code point length and whose bytes have the same values as the values of input’s code points, in the same order.
+  > n/a: done inline where it's used (`LocalDOMWindow::Btoa`).
 
-- [ ] [ASCII lowercase](https://infra.spec.whatwg.org/#ascii-lowercase) — To ASCII lowercase a string, replace all ASCII upper alphas in the string with their corresponding code point in ASCII lower alpha.
+- [x] [ASCII lowercase](https://infra.spec.whatwg.org/#ascii-lowercase) — To ASCII lowercase a string, replace all ASCII upper alphas in the string with their corresponding code point in ASCII lower alpha.
 
-- [ ] [ASCII uppercase](https://infra.spec.whatwg.org/#ascii-uppercase) — To ASCII uppercase a string, replace all ASCII lower alphas in the string with their corresponding code point in ASCII upper alpha.
+- [x] [ASCII uppercase](https://infra.spec.whatwg.org/#ascii-uppercase) — To ASCII uppercase a string, replace all ASCII lower alphas in the string with their corresponding code point in ASCII upper alpha.
 
-- [ ] [ASCII encode](https://infra.spec.whatwg.org/#ascii-encode) — To ASCII encode an ASCII string input: return the isomorphic encoding of input.
+- [x] [ASCII encode](https://infra.spec.whatwg.org/#ascii-encode) — To ASCII encode an ASCII string input: return the isomorphic encoding of input.
+  > n/a: nothing uses it.
 
-- [ ] [ASCII decode](https://infra.spec.whatwg.org/#ascii-decode) — To ASCII decode a byte sequence input, run these steps:
+- [x] [ASCII decode](https://infra.spec.whatwg.org/#ascii-decode) — To ASCII decode a byte sequence input, run these steps:
+  > n/a: nothing uses it.
   - 1. Assert: all bytes in input are ASCII bytes.
   - 2. Return the isomorphic decoding of input.
 
-- [ ] [strip newlines](https://infra.spec.whatwg.org/#strip-newlines) — To strip newlines from a string, remove any U+000A LF and U+000D CR code points from the string.
+- [x] [strip newlines](https://infra.spec.whatwg.org/#strip-newlines) — To strip newlines from a string, remove any U+000A LF and U+000D CR code points from the string.
+  > n/a: done inline where it's used (such as `EmailInputType`).
 
-- [ ] [normalize newlines](https://infra.spec.whatwg.org/#normalize-newlines) — To normalize newlines in a string, replace every U+000D CR U+000A LF code point pair with a single U+000A LF code point, and then replace every remaining U+000D CR code point with a U+000A LF code point.
+- [x] [normalize newlines](https://infra.spec.whatwg.org/#normalize-newlines) — To normalize newlines in a string, replace every U+000D CR U+000A LF code point pair with a single U+000A LF code point, and then replace every remaining U+000D CR code point with a U+000A LF code point.
 
-- [ ] [strip leading and trailing ASCII whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace) — To strip leading and trailing ASCII whitespace from a string, remove all ASCII whitespace that are at the start or the end of the string.
+- [x] [strip leading and trailing ASCII whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace) — To strip leading and trailing ASCII whitespace from a string, remove all ASCII whitespace that are at the start or the end of the string.
 
-- [ ] [strip and collapse ASCII whitespace](https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace) — To strip and collapse ASCII whitespace in a string, replace any sequence of one or more consecutive code points that are ASCII whitespace in the string with a single U+0020 SPACE code point, and then remove any leading and trailing ASCII whitespace from that string.
+- [x] [strip and collapse ASCII whitespace](https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace) — To strip and collapse ASCII whitespace in a string, replace any sequence of one or more consecutive code points that are ASCII whitespace in the string with a single U+0020 SPACE code point, and then remove any leading and trailing ASCII whitespace from that string.
 
-- [ ] [collect a sequence of code points](https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points) — To collect a sequence of code points meeting a condition condition from a string input, given a position variable position tracking the position of the calling algorithm within input:
+- [x] [collect a sequence of code points](https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points) — To collect a sequence of code points meeting a condition condition from a string input, given a position variable position tracking the position of the calling algorithm within input:
   - 1. Let result be the empty string.
   - 2. While position doesn’t point past the end of input and the code point at position within input meets the condition condition:
     - 2a. Append that code point to the end of result.
     - 2b. Advance position by 1.
   - 3. Return result.
 
-- [ ] [skip ASCII whitespace](https://infra.spec.whatwg.org/#skip-ascii-whitespace) — To skip ASCII whitespace within a string input given a position variable position, collect a sequence of code points that are ASCII whitespace from input given position. The collected code points are not used, but position is still updated.
+- [x] [skip ASCII whitespace](https://infra.spec.whatwg.org/#skip-ascii-whitespace) — To skip ASCII whitespace within a string input given a position variable position, collect a sequence of code points that are ASCII whitespace from input given position. The collected code points are not used, but position is still updated.
 
-- [ ] [strictly split a string](https://infra.spec.whatwg.org/#strictly-split) — To strictly split a string input on a particular delimiter code point delimiter:
+- [x] [strictly split a string](https://infra.spec.whatwg.org/#strictly-split) — To strictly split a string input on a particular delimiter code point delimiter:
   - 1. Let position be a position variable for input, initially pointing at the start of input.
   - 2. Let tokens be a list of strings, initially empty.
   - 3. Let token be the result of collecting a sequence of code points that are not equal to delimiter from input, given position.
@@ -240,7 +262,7 @@ Status: unreviewed
     - 5d. Append token to tokens.
   - 6. Return tokens.
 
-- [ ] [split a string input on ASCII whitespace](https://infra.spec.whatwg.org/#split-on-ascii-whitespace) — To split a string input on ASCII whitespace:
+- [x] [split a string input on ASCII whitespace](https://infra.spec.whatwg.org/#split-on-ascii-whitespace) — To split a string input on ASCII whitespace:
   - 1. Let position be a position variable for input, initially pointing at the start of input.
   - 2. Let tokens be a list of strings, initially empty.
   - 3. Skip ASCII whitespace within input given position.
@@ -250,7 +272,7 @@ Status: unreviewed
     - 4c. Skip ASCII whitespace within input given position.
   - 5. Return tokens.
 
-- [ ] [split a string input on commas](https://infra.spec.whatwg.org/#split-on-commas) — To split a string input on commas:
+- [x] [split a string input on commas](https://infra.spec.whatwg.org/#split-on-commas) — To split a string input on commas:
   - 1. Let position be a position variable for input, initially pointing at the start of input.
   - 2. Let tokens be a list of strings, initially empty.
   - 3. While position is not past the end of input:
@@ -262,51 +284,62 @@ Status: unreviewed
       - 3d.ii. Advance position by 1.
   - 4. Return tokens.
 
-- [ ] [concatenate (string)](https://infra.spec.whatwg.org/#string-concatenate) — To concatenate a list of strings list, using an optional separator string separator, run these steps:
+- [x] [concatenate (string)](https://infra.spec.whatwg.org/#string-concatenate) — To concatenate a list of strings list, using an optional separator string separator, run these steps:
   - 1. If list is empty, then return the empty string.
   - 2. If separator is not given, then set separator to the empty string.
   - 3. Return a string whose contents are list’s items, in order, separated from each other by separator.
 
 ### [4.8. Time](https://infra.spec.whatwg.org/#time)
 
-Status: unreviewed
+Status: n/a (no time types)
 
 ### [4.9. Singletons](https://infra.spec.whatwg.org/#singleton)
 
-Status: unreviewed
+Status: n/a (no singletons)
 <!-- definitions: allowed blocked failure success -->
 
 ## [5. Data structures](https://infra.spec.whatwg.org/#data-structures)
 
-Status: unreviewed
+Status: n/a (C++ containers)
+> Lists are `List`, stacks are `List` used from the back, queues are `Queue` (or `Deque`), ordered sets are `ListHashSet` (or a `List` kept unique), ordered maps are `ListHashMap` (or `HashMap` where order doesn't matter), and structs and tuples are `struct`s.
 
 ### [5.1. Lists](https://infra.spec.whatwg.org/#lists)
 
-Status: unreviewed
+Status: n/a (C++ containers)
 <!-- definitions: list list-item list-contain list-size list-is-empty list-slice-from list-slice-to -->
 
-- [ ] [append (list)](https://infra.spec.whatwg.org/#list-append) — To append to a list that is not an ordered set is to add the given item to the end of the list.
+- [x] [append (list)](https://infra.spec.whatwg.org/#list-append) — To append to a list that is not an ordered set is to add the given item to the end of the list.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [extend (list)](https://infra.spec.whatwg.org/#list-extend) — To extend a list that is not an ordered set A with a list B, for each item of B, append item to A.
+- [x] [extend (list)](https://infra.spec.whatwg.org/#list-extend) — To extend a list that is not an ordered set A with a list B, for each item of B, append item to A.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [prepend (list)](https://infra.spec.whatwg.org/#list-prepend) — To prepend to a list that is not an ordered set is to add the given item to the beginning of the list.
+- [x] [prepend (list)](https://infra.spec.whatwg.org/#list-prepend) — To prepend to a list that is not an ordered set is to add the given item to the beginning of the list.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [replace (list)](https://infra.spec.whatwg.org/#list-replace) — To replace within a list that is not an ordered set is to replace all items from the list that match a given condition with the given item, or do nothing if none do.
+- [x] [replace (list)](https://infra.spec.whatwg.org/#list-replace) — To replace within a list that is not an ordered set is to replace all items from the list that match a given condition with the given item, or do nothing if none do.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [insert (list,set)](https://infra.spec.whatwg.org/#list-insert) — To insert an item into a list before an index is to add the given item to the list between the given index − 1 and the given index. If the given index is 0, then prepend the given item to the list.
+- [x] [insert (list,set)](https://infra.spec.whatwg.org/#list-insert) — To insert an item into a list before an index is to add the given item to the list between the given index − 1 and the given index. If the given index is 0, then prepend the given item to the list.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [remove (list,set)](https://infra.spec.whatwg.org/#list-remove) — To remove zero or more items from a list:
+- [x] [remove (list,set)](https://infra.spec.whatwg.org/#list-remove) — To remove zero or more items from a list:
+  > n/a: the C++ containers (see 5).
   - 1. Let sizeBefore be list’s size.
   - 2. Remove all items from the list that match a given condition, or do nothing if none do.
   - 3. Return true if list’s size is less than sizeBefore; otherwise false.
 
-- [ ] [empty (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-empty) — To empty a list is to remove all of its items.
+- [x] [empty (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-empty) — To empty a list is to remove all of its items.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [get the indices (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-get-the-indices) — To get the indices of a list, return the range from 0 to the list’s size, exclusive.
+- [x] [get the indices (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-get-the-indices) — To get the indices of a list, return the range from 0 to the list’s size, exclusive.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [iterate (list,set)](https://infra.spec.whatwg.org/#list-iterate) — To iterate over a list, performing a set of steps on each item in order, use phrasing of the form "For each item of list", and then operate on item in the subsequent prose.
+- [x] [iterate (list,set)](https://infra.spec.whatwg.org/#list-iterate) — To iterate over a list, performing a set of steps on each item in order, use phrasing of the form "For each item of list", and then operate on item in the subsequent prose.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [slice (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-slice) — To slice a list list, with an optional integer from (default 0) and an optional integer to (default list’s size), perform the following steps. They return a list of the same designation as list.
+- [x] [slice (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-slice) — To slice a list list, with an optional integer from (default 0) and an optional integer to (default list’s size), perform the following steps. They return a list of the same designation as list.
+  > n/a: the C++ containers (see 5).
   - 1. Assert: from is greater than or equal to 0.
   - 2. Assert: to is less than or equal to list’s size.
   - 3. Assert: to is greater than or equal to from.
@@ -314,139 +347,178 @@ Status: unreviewed
   - 5. For each i of the range from to to, exclusive: append list[i] to slice.
   - 6. Return slice.
 
-- [ ] [has duplicates (list)](https://infra.spec.whatwg.org/#list-has-duplicates) — To check if a list list has duplicates:
+- [x] [has duplicates (list)](https://infra.spec.whatwg.org/#list-has-duplicates) — To check if a list list has duplicates:
+  > n/a: the C++ containers (see 5).
   - 1. Let seenItems be « ».
   - 2. For each item of list:
     - 2a. If seenItems contains item, then return true.
     - 2b. Append item to seenItems.
   - 3. Return false.
 
-- [ ] [clone (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-clone) — To clone a list list is to return a slice of list.
+- [x] [clone (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-clone) — To clone a list list is to return a slice of list.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [reverse (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-reverse) — To reverse a list list is to create a new list reversed, of the same designation, and, for each item of list, prepend item to reversed.
+- [x] [reverse (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-reverse) — To reverse a list list is to create a new list reversed, of the same designation, and, for each item of list, prepend item to reversed.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [sort in ascending order (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-sort-in-ascending-order) — To sort in ascending order a list list, with a less than algorithm lessThanAlgo, is to create a new list sorted, containing the same items as list but sorted so that according to lessThanAlgo, each item is less than the one following it, if any. For items that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in list.
+- [x] [sort in ascending order (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-sort-in-ascending-order) — To sort in ascending order a list list, with a less than algorithm lessThanAlgo, is to create a new list sorted, containing the same items as list but sorted so that according to lessThanAlgo, each item is less than the one following it, if any. For items that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in list.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [sort in descending order (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-sort-in-descending-order) — To sort in descending order a list list, with a less than algorithm lessThanAlgo, is to create a new list sorted, containing the same items as list but sorted so that according to lessThanAlgo, each item is less than the one preceding it, if any. For items that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in list.
+- [x] [sort in descending order (list,stack,queue,set)](https://infra.spec.whatwg.org/#list-sort-in-descending-order) — To sort in descending order a list list, with a less than algorithm lessThanAlgo, is to create a new list sorted, containing the same items as list but sorted so that according to lessThanAlgo, each item is less than the one preceding it, if any. For items that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in list.
+  > n/a: the C++ containers (see 5).
 
 #### [5.1.1. Stacks](https://infra.spec.whatwg.org/#stacks)
 
-Status: unreviewed
+Status: n/a (C++ containers)
 <!-- definitions: stack -->
 
-- [ ] [push (stack)](https://infra.spec.whatwg.org/#stack-push) — To push onto a stack is to append to it.
+- [x] [push (stack)](https://infra.spec.whatwg.org/#stack-push) — To push onto a stack is to append to it.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [pop (stack)](https://infra.spec.whatwg.org/#stack-pop) — To pop from a stack: if the stack is not empty, then remove its last item and return it; otherwise, return nothing.
+- [x] [pop (stack)](https://infra.spec.whatwg.org/#stack-pop) — To pop from a stack: if the stack is not empty, then remove its last item and return it; otherwise, return nothing.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [peek (stack)](https://infra.spec.whatwg.org/#stack-peek) — To peek into a stack: if the stack is not empty, then return its last item; otherwise, return nothing.
+- [x] [peek (stack)](https://infra.spec.whatwg.org/#stack-peek) — To peek into a stack: if the stack is not empty, then return its last item; otherwise, return nothing.
+  > n/a: the C++ containers (see 5).
 
 #### [5.1.2. Queues](https://infra.spec.whatwg.org/#queues)
 
-Status: unreviewed
+Status: n/a (C++ containers)
 <!-- definitions: queue -->
 
-- [ ] [enqueue (queue)](https://infra.spec.whatwg.org/#queue-enqueue) — To enqueue in a queue is to append to it.
+- [x] [enqueue (queue)](https://infra.spec.whatwg.org/#queue-enqueue) — To enqueue in a queue is to append to it.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [dequeue (queue)](https://infra.spec.whatwg.org/#queue-dequeue) — To dequeue from a queue is to remove its first item and return it, if the queue is not empty, or to return nothing if it is.
+- [x] [dequeue (queue)](https://infra.spec.whatwg.org/#queue-dequeue) — To dequeue from a queue is to remove its first item and return it, if the queue is not empty, or to return nothing if it is.
+  > n/a: the C++ containers (see 5).
 
 #### [5.1.3. Sets](https://infra.spec.whatwg.org/#sets)
 
-Status: unreviewed
+Status: n/a (C++ containers)
 <!-- definitions: ordered-set set-subset set-superset set-unordered-equal -->
 
-- [ ] [create (set)](https://infra.spec.whatwg.org/#set-create) — To create a set, given a list input:
+- [x] [create (set)](https://infra.spec.whatwg.org/#set-create) — To create a set, given a list input:
+  > n/a: the C++ containers (see 5).
   - 1. Let result be an empty set.
   - 2. For each item of input, append item to result.
   - 3. Return result.
 
-- [ ] [append (set)](https://infra.spec.whatwg.org/#set-append) — To append to an ordered set: if the set contains the given item, then do nothing; otherwise, perform the normal list append operation.
+- [x] [append (set)](https://infra.spec.whatwg.org/#set-append) — To append to an ordered set: if the set contains the given item, then do nothing; otherwise, perform the normal list append operation.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [extend (set)](https://infra.spec.whatwg.org/#set-extend) — To extend an ordered set A with a list B, for each item of B, append item to A.
+- [x] [extend (set)](https://infra.spec.whatwg.org/#set-extend) — To extend an ordered set A with a list B, for each item of B, append item to A.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [prepend (set)](https://infra.spec.whatwg.org/#set-prepend) — To prepend to an ordered set: if the set contains the given item, then do nothing; otherwise, perform the normal list prepend operation.
+- [x] [prepend (set)](https://infra.spec.whatwg.org/#set-prepend) — To prepend to an ordered set: if the set contains the given item, then do nothing; otherwise, perform the normal list prepend operation.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [replace (set)](https://infra.spec.whatwg.org/#set-replace) — To replace within an ordered set set, given item and replacement: if set contains item or replacement, then replace the first instance of either with replacement and remove all other instances.
+- [x] [replace (set)](https://infra.spec.whatwg.org/#set-replace) — To replace within an ordered set set, given item and replacement: if set contains item or replacement, then replace the first instance of either with replacement and remove all other instances.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [intersection (set)](https://infra.spec.whatwg.org/#set-intersection) — The intersection of ordered sets A and B, is the result of creating a new ordered set set and, for each item of A, if B contains item, appending item to set.
+- [x] [intersection (set)](https://infra.spec.whatwg.org/#set-intersection) — The intersection of ordered sets A and B, is the result of creating a new ordered set set and, for each item of A, if B contains item, appending item to set.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [union (set)](https://infra.spec.whatwg.org/#set-union) — The union of ordered sets A and B, is the result of cloning A as set and, for each item of B, appending item to set.
+- [x] [union (set)](https://infra.spec.whatwg.org/#set-union) — The union of ordered sets A and B, is the result of cloning A as set and, for each item of B, appending item to set.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [difference (set)](https://infra.spec.whatwg.org/#set-difference) — The difference of ordered sets A and B, is the result of creating a new ordered set set and, for each item of A, if B does not contain item, appending item to set.
+- [x] [difference (set)](https://infra.spec.whatwg.org/#set-difference) — The difference of ordered sets A and B, is the result of creating a new ordered set set and, for each item of A, if B does not contain item, appending item to set.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [The range](https://infra.spec.whatwg.org/#the-range) — The range n to m, inclusive, creates a new ordered set containing all of the integers from n up to and including m in consecutively increasing order, as long as m is greater than or equal to n.
+- [x] [The range](https://infra.spec.whatwg.org/#the-range) — The range n to m, inclusive, creates a new ordered set containing all of the integers from n up to and including m in consecutively increasing order, as long as m is greater than or equal to n.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [The range](https://infra.spec.whatwg.org/#the-exclusive-range) — The range n to m, exclusive, creates a new ordered set containing all of the integers from n up to and including m − 1 in consecutively increasing order, as long as m is greater than n. If m equals n, then it creates an empty ordered set.
+- [x] [The range](https://infra.spec.whatwg.org/#the-exclusive-range) — The range n to m, exclusive, creates a new ordered set containing all of the integers from n up to and including m − 1 in consecutively increasing order, as long as m is greater than n. If m equals n, then it creates an empty ordered set.
+  > n/a: the C++ containers (see 5).
 
 ### [5.2. Maps](https://infra.spec.whatwg.org/#maps)
 
-Status: unreviewed
+Status: n/a (C++ containers)
 <!-- definitions: ordered-map map-key map-value map-entry map-with-default map-exists map-size map-is-empty -->
 
-- [ ] [get the value of an entry (map)](https://infra.spec.whatwg.org/#map-get) — To get the value of an entry in an ordered map map given a key key and an optional default:
+- [x] [get the value of an entry (map)](https://infra.spec.whatwg.org/#map-get) — To get the value of an entry in an ordered map map given a key key and an optional default:
+  > n/a: the C++ containers (see 5).
   - 1. If map does not contain key and default is given, then return default.
   - 2. Assert: map contains key.
   - 3. Return the value of the entry in map whose key equals key.
 
-- [ ] [set the value of an entry (map)](https://infra.spec.whatwg.org/#map-set) — To set the value of an entry in an ordered map to a given value is to update the value of any existing entry if the map contains an entry with the given key, or if none such exists, to add a new entry with the given key/value to the end of the map. We can also denote this by saying, for an ordered map map, key key, and value value, "set map[key] to value".
+- [x] [set the value of an entry (map)](https://infra.spec.whatwg.org/#map-set) — To set the value of an entry in an ordered map to a given value is to update the value of any existing entry if the map contains an entry with the given key, or if none such exists, to add a new entry with the given key/value to the end of the map. We can also denote this by saying, for an ordered map map, key key, and value value, "set map[key] to value".
+  > n/a: the C++ containers (see 5).
 
-- [ ] [remove an entry (map)](https://infra.spec.whatwg.org/#map-remove) — To remove an entry from an ordered map is to remove all entries from the map that match a given condition, or do nothing if none do. If the condition is having a certain key, then we can also denote this by saying, for an ordered map map and key key, "remove map[key]".
+- [x] [remove an entry (map)](https://infra.spec.whatwg.org/#map-remove) — To remove an entry from an ordered map is to remove all entries from the map that match a given condition, or do nothing if none do. If the condition is having a certain key, then we can also denote this by saying, for an ordered map map and key key, "remove map[key]".
+  > n/a: the C++ containers (see 5).
 
-- [ ] [clear (map)](https://infra.spec.whatwg.org/#map-clear) — To clear an ordered map is to remove all entries from the map.
+- [x] [clear (map)](https://infra.spec.whatwg.org/#map-clear) — To clear an ordered map is to remove all entries from the map.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [get the keys (map)](https://infra.spec.whatwg.org/#map-getting-the-keys) — To get the keys of an ordered map, return a new ordered set whose items are each of the keys in the map’s entries.
+- [x] [get the keys (map)](https://infra.spec.whatwg.org/#map-getting-the-keys) — To get the keys of an ordered map, return a new ordered set whose items are each of the keys in the map’s entries.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [get the values (map)](https://infra.spec.whatwg.org/#map-getting-the-values) — To get the values of an ordered map, return a new list whose items are each of the values in the map’s entries.
+- [x] [get the values (map)](https://infra.spec.whatwg.org/#map-getting-the-values) — To get the values of an ordered map, return a new list whose items are each of the values in the map’s entries.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [iterate (map)](https://infra.spec.whatwg.org/#map-iterate) — To iterate over an ordered map, performing a set of steps on each entry in order, use phrasing of the form "For each key → value of map", and then operate on key and value in the subsequent prose.
+- [x] [iterate (map)](https://infra.spec.whatwg.org/#map-iterate) — To iterate over an ordered map, performing a set of steps on each entry in order, use phrasing of the form "For each key → value of map", and then operate on key and value in the subsequent prose.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [clone (map)](https://infra.spec.whatwg.org/#map-clone) — To clone an ordered map map is to create a new ordered map clone, and, for each key → value of map, set clone[key] to value.
+- [x] [clone (map)](https://infra.spec.whatwg.org/#map-clone) — To clone an ordered map map is to create a new ordered map clone, and, for each key → value of map, set clone[key] to value.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [sort in ascending order (map)](https://infra.spec.whatwg.org/#map-sort-in-ascending-order) — To sort in ascending order a map map, with a less than algorithm lessThanAlgo, is to create a new map sorted, containing the same entries as map but sorted so that according to lessThanAlgo, each entry is less than the one following it, if any. For entries that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in map.
+- [x] [sort in ascending order (map)](https://infra.spec.whatwg.org/#map-sort-in-ascending-order) — To sort in ascending order a map map, with a less than algorithm lessThanAlgo, is to create a new map sorted, containing the same entries as map but sorted so that according to lessThanAlgo, each entry is less than the one following it, if any. For entries that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in map.
+  > n/a: the C++ containers (see 5).
 
-- [ ] [sort in descending order (map)](https://infra.spec.whatwg.org/#map-sort-in-descending-order) — To sort in descending order a map map, with a less than algorithm lessThanAlgo, is to create a new map sorted, containing the same entries as map but sorted so that according to lessThanAlgo, each entry is less than the one preceding it, if any. For entries that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in map.
+- [x] [sort in descending order (map)](https://infra.spec.whatwg.org/#map-sort-in-descending-order) — To sort in descending order a map map, with a less than algorithm lessThanAlgo, is to create a new map sorted, containing the same entries as map but sorted so that according to lessThanAlgo, each entry is less than the one preceding it, if any. For entries that sort the same (i.e., for which lessThanAlgo returns false for both comparisons), their relative order in sorted must be the same as it was in map.
+  > n/a: the C++ containers (see 5).
 
 ### [5.3. Structs](https://infra.spec.whatwg.org/#structs)
 
-Status: unreviewed
+Status: n/a (C++ structs)
 <!-- definitions: struct struct-item struct-name -->
 
-- [ ] [itemwise equality (struct)](https://infra.spec.whatwg.org/#struct-itemwise-equality) — The itemwise equality, given structs a and b, returns true if each item of a equals the item of b with the same name; otherwise false. A struct’s definition can specify that its equality is itemwise equality.
+- [x] [itemwise equality (struct)](https://infra.spec.whatwg.org/#struct-itemwise-equality) — The itemwise equality, given structs a and b, returns true if each item of a equals the item of b with the same name; otherwise false. A struct’s definition can specify that its equality is itemwise equality.
+  > n/a: the C++ containers (see 5).
 
 #### [5.3.1. Tuples](https://infra.spec.whatwg.org/#tuples)
 
-Status: unreviewed
+Status: n/a (C++ structs)
 <!-- definitions: tuple -->
 
 ## [6. JSON](https://infra.spec.whatwg.org/#json)
 
-Status: unreviewed
+Status: n/a (no JavaScript)
+> There are no JavaScript values, and nothing in Booey parses or serializes JSON.
 
-- [ ] [parse a JSON string to a JavaScript value](https://infra.spec.whatwg.org/#parse-a-json-string-to-a-javascript-value) — To parse a JSON string to a JavaScript value, given a string string:
+- [x] [parse a JSON string to a JavaScript value](https://infra.spec.whatwg.org/#parse-a-json-string-to-a-javascript-value) — To parse a JSON string to a JavaScript value, given a string string:
+  > n/a: no JavaScript.
   - 1. Return ? Call(%JSON.parse%, undefined, « string »).
 
-- [ ] [parse JSON bytes to a JavaScript value](https://infra.spec.whatwg.org/#parse-json-bytes-to-a-javascript-value) — To parse JSON bytes to a JavaScript value, given a byte sequence bytes:
+- [x] [parse JSON bytes to a JavaScript value](https://infra.spec.whatwg.org/#parse-json-bytes-to-a-javascript-value) — To parse JSON bytes to a JavaScript value, given a byte sequence bytes:
+  > n/a: no JavaScript.
   - 1. Let string be the result of running UTF-8 decode on bytes. [ENCODING]
   - 2. Return the result of parsing a JSON string to a JavaScript value given string.
 
-- [ ] [serialize a JavaScript value to a JSON string](https://infra.spec.whatwg.org/#serialize-a-javascript-value-to-a-json-string) — To serialize a JavaScript value to a JSON string, given a JavaScript value value:
+- [x] [serialize a JavaScript value to a JSON string](https://infra.spec.whatwg.org/#serialize-a-javascript-value-to-a-json-string) — To serialize a JavaScript value to a JSON string, given a JavaScript value value:
+  > n/a: no JavaScript.
   - 1. Let result be ? Call(%JSON.stringify%, undefined, « value »).
   - 2. If result is undefined, then throw a TypeError.
   - 3. Assert: result is a string.
   - 4. Return result.
 
-- [ ] [serialize a JavaScript value to JSON bytes](https://infra.spec.whatwg.org/#serialize-a-javascript-value-to-json-bytes) — To serialize a JavaScript value to JSON bytes, given a JavaScript value value:
+- [x] [serialize a JavaScript value to JSON bytes](https://infra.spec.whatwg.org/#serialize-a-javascript-value-to-json-bytes) — To serialize a JavaScript value to JSON bytes, given a JavaScript value value:
+  > n/a: no JavaScript.
   - 1. Let string be the result of serializing a JavaScript value to a JSON string given value.
   - 2. Return the result of running UTF-8 encode on string. [ENCODING]
 
-- [ ] [parse a JSON string to an Infra value](https://infra.spec.whatwg.org/#parse-a-json-string-to-an-infra-value) — To parse a JSON string to an Infra value, given a string string:
+- [x] [parse a JSON string to an Infra value](https://infra.spec.whatwg.org/#parse-a-json-string-to-an-infra-value) — To parse a JSON string to an Infra value, given a string string:
+  > n/a: no JavaScript.
   - 1. Let jsValue be ? Call(%JSON.parse%, undefined, « string »).
   - 2. Return the result of converting a JSON-derived JavaScript value to an Infra value, given jsValue.
 
-- [ ] [parse JSON bytes to an Infra value](https://infra.spec.whatwg.org/#parse-json-bytes-to-an-infra-value) — To parse JSON bytes to an Infra value, given a byte sequence bytes:
+- [x] [parse JSON bytes to an Infra value](https://infra.spec.whatwg.org/#parse-json-bytes-to-an-infra-value) — To parse JSON bytes to an Infra value, given a byte sequence bytes:
+  > n/a: no JavaScript.
   - 1. Let string be the result of running UTF-8 decode on bytes. [ENCODING]
   - 2. Return the result of parsing a JSON string to an Infra value given string.
 
-- [ ] [convert a JSON-derived JavaScript value to an Infra value](https://infra.spec.whatwg.org/#convert-a-json-derived-javascript-value-to-an-infra-value) — To convert a JSON-derived JavaScript value to an Infra value, given a JavaScript value jsValue:
+- [x] [convert a JSON-derived JavaScript value to an Infra value](https://infra.spec.whatwg.org/#convert-a-json-derived-javascript-value-to-an-infra-value) — To convert a JSON-derived JavaScript value to an Infra value, given a JavaScript value jsValue:
+  > n/a: no JavaScript.
   - 1. If jsValue is null, jsValue is a Boolean, jsValue is a String, or jsValue is a Number, then return jsValue.
   - 2. If IsArray(jsValue) is true:
     - 2a. Let result be an empty list.
@@ -464,15 +536,18 @@ Status: unreviewed
     - 4c. Set result[key] to infraValueAtKey.
   - 5. Return result.
 
-- [ ] [serialize an Infra value to a JSON string](https://infra.spec.whatwg.org/#serialize-an-infra-value-to-a-json-string) — To serialize an Infra value to a JSON string, given a string, boolean, number, null, list, or string-keyed map value:
+- [x] [serialize an Infra value to a JSON string](https://infra.spec.whatwg.org/#serialize-an-infra-value-to-a-json-string) — To serialize an Infra value to a JSON string, given a string, boolean, number, null, list, or string-keyed map value:
+  > n/a: no JavaScript.
   - 1. Let jsValue be the result of converting an Infra value to a JSON-compatible JavaScript value, given value.
   - 2. Return ! Call(%JSON.stringify%, undefined, « jsValue »).
 
-- [ ] [serialize an Infra value to JSON bytes](https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes) — To serialize an Infra value to JSON bytes, given a string, boolean, number, null, list, or string-keyed map value:
+- [x] [serialize an Infra value to JSON bytes](https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes) — To serialize an Infra value to JSON bytes, given a string, boolean, number, null, list, or string-keyed map value:
+  > n/a: no JavaScript.
   - 1. Let string be the result of serializing an Infra value to a JSON string, given value.
   - 2. Return the result of running UTF-8 encode on string. [ENCODING]
 
-- [ ] [convert an Infra value to a JSON-compatible JavaScript value](https://infra.spec.whatwg.org/#convert-an-infra-value-to-a-json-compatible-javascript-value) — To convert an Infra value to a JSON-compatible JavaScript value, given value:
+- [x] [convert an Infra value to a JSON-compatible JavaScript value](https://infra.spec.whatwg.org/#convert-an-infra-value-to-a-json-compatible-javascript-value) — To convert an Infra value to a JSON-compatible JavaScript value, given value:
+  > n/a: no JavaScript.
   - 1. If value is a string, boolean, number, or null, then return value.
   - 2. If value is a list:
     - 2a. Let jsValue be ! ArrayCreate(0).
@@ -492,11 +567,12 @@ Status: unreviewed
 
 ## [7. Forgiving base64](https://infra.spec.whatwg.org/#forgiving-base64)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `Base64Encode` and `Base64Decode` (`Krystal.Core/Text/Base64.hpp`); with `ValidatePadding` and `IgnoreWhitespace`, decoding is forgiving-base64 decode, as `atob()` uses it. Tests: `tests/Infra/ForgivingBase64.cpp`.
 
-- [ ] [forgiving-base64 encode](https://infra.spec.whatwg.org/#forgiving-base64-encode) — To forgiving-base64 encode given a byte sequence data, apply the base64 algorithm defined in section 4 of RFC 4648 to data and return the result. [RFC4648]
+- [x] [forgiving-base64 encode](https://infra.spec.whatwg.org/#forgiving-base64-encode) — To forgiving-base64 encode given a byte sequence data, apply the base64 algorithm defined in section 4 of RFC 4648 to data and return the result. [RFC4648]
 
-- [ ] [forgiving-base64 decode](https://infra.spec.whatwg.org/#forgiving-base64-decode) — To forgiving-base64 decode given a string data, run these steps:
+- [x] [forgiving-base64 decode](https://infra.spec.whatwg.org/#forgiving-base64-decode) — To forgiving-base64 decode given a string data, run these steps:
   - 1. Remove all ASCII whitespace from data.
   - 2. If data’s code point length divides by 4 leaving no remainder:
     - 2a. If data ends with one or two U+003D (=) code points, then remove them from data.
@@ -515,37 +591,38 @@ Status: unreviewed
 
 ## [8. Namespaces](https://infra.spec.whatwg.org/#namespaces)
 
-Status: unreviewed
+Status: reviewed (2026-10-31)
+> `infra::Namespaces` (`Infra/Namespaces.hpp`). Tests: `tests/Infra/StringAlgorithms.cpp`.
 <!-- definitions: html-namespace mathml-namespace svg-namespace xlink-namespace xml-namespace xmlns-namespace -->
 
 ## [Acknowledgments](https://infra.spec.whatwg.org/#acknowledgments)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [Intellectual property rights](https://infra.spec.whatwg.org/#ipr)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [Index](https://infra.spec.whatwg.org/#index)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Terms defined by this specification](https://infra.spec.whatwg.org/#index-defined-here)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Terms defined by reference](https://infra.spec.whatwg.org/#index-defined-elsewhere)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ## [References](https://infra.spec.whatwg.org/#references)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Normative References](https://infra.spec.whatwg.org/#normative)
 
-Status: unreviewed
+Status: n/a (back matter)
 
 ### [Non-Normative References](https://infra.spec.whatwg.org/#informative)
 
-Status: unreviewed
+Status: n/a (back matter)

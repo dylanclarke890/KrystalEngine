@@ -725,6 +725,7 @@ target_sources(Krystal.Booey.Tests
 		tests/HTML/Parser/Tokenizer.cpp
 
 		# Infra
+		tests/Infra/ForgivingBase64.cpp
 		tests/Infra/StringAlgorithms.cpp
 
 		# URL

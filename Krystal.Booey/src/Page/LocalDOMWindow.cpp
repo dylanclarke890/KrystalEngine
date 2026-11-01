@@ -16,6 +16,7 @@
 #include "Krystal.Booey/HTML/HTMLElement.hpp"
 #include "Krystal.Booey/HTML/MessageEvent.hpp"
 #include "Krystal.Booey/HTML/URLDecomposition.hpp"
+#include "Krystal.Booey/Infra/StringAlgorithms.hpp"
 #include "Krystal.Booey/Loader/FrameLoader.hpp"
 #include "Krystal.Booey/Loader/FrameLoadRequest.hpp"
 #include "Krystal.Booey/Modules/Gamepad/GamepadManager.hpp"
@@ -891,27 +892,6 @@ namespace krys::boo
 
   namespace
   {
-    /// @see https://infra.spec.whatwg.org/#normalize-newlines
-    KRYS_NODISCARD dom::DOMString NormalizeNewlines(const dom::DOMString &message) noexcept
-    {
-      dom::DOMString result;
-      result.reserve(message.size());
-      for (size_t i = 0; i < message.size(); ++i)
-      {
-        if (message[i] == u8'\r')
-        {
-          result += u8'\n';
-          if (i + 1 < message.size() && message[i + 1] == u8'\n')
-          {
-            ++i;
-          }
-          continue;
-        }
-        result += message[i];
-      }
-      return result;
-    }
-
     /// @brief Whether the user agent can't show @p window's simple dialogs now.
     /// @see https://html.spec.whatwg.org/#cannot-show-simple-dialogs
     KRYS_NODISCARD bool CannotShowSimpleDialogs(const LocalDOMWindow &window) noexcept
@@ -961,7 +941,8 @@ namespace krys::boo
     // Set message to the result of normalizing newlines given message, and show it to the user.
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(), NormalizeNewlines(message));
+    GetPage()->GetChromeClient().RunJavaScriptAlert(*Frame(),
+                                                    infra::StringAlgorithms::NormalizeNewlines(message));
   }
 
   bool LocalDOMWindow::Confirm(const dom::DOMString &message) noexcept
@@ -973,7 +954,8 @@ namespace krys::boo
 
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    return GetPage()->GetChromeClient().RunJavaScriptConfirm(*Frame(), NormalizeNewlines(message));
+    return GetPage()->GetChromeClient().RunJavaScriptConfirm(
+      *Frame(), infra::StringAlgorithms::NormalizeNewlines(message));
   }
 
   Maybe<dom::DOMString> LocalDOMWindow::Prompt(const dom::DOMString &message,
@@ -986,8 +968,8 @@ namespace krys::boo
 
     (void)Document()->UpdateStyleIfNeeded();
     GetPage()->GetPointerLockController().RequestPointerUnlock();
-    return GetPage()->GetChromeClient().RunJavaScriptPrompt(*Frame(), NormalizeNewlines(message),
-                                                            defaultValue);
+    return GetPage()->GetChromeClient().RunJavaScriptPrompt(
+      *Frame(), infra::StringAlgorithms::NormalizeNewlines(message), defaultValue);
   }
 
   void LocalDOMWindow::Print() noexcept
